@@ -15,6 +15,7 @@ import os from "node:os";
 import { createServer } from "node:net";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { setTimeout as sleepWithSignal } from "node:timers/promises";
 
 import { safeCdpEndpoint } from "./browser-session.mjs";
 import { hardenWindowsPrivateDirectory } from "./private-file.mjs";
@@ -318,8 +319,8 @@ function isExpectedDebuggerUrl(value, port) {
   }
 }
 
-function delay(milliseconds) {
-  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+function delay(milliseconds, signal) {
+  return sleepWithSignal(milliseconds, undefined, { signal });
 }
 
 export async function waitForCdp({
@@ -329,16 +330,21 @@ export async function waitForCdp({
   fetchFn = globalThis.fetch,
   sleep = delay,
   now = Date.now,
+  signal,
 } = {}) {
   const cdpPort = parseCdpPort(port);
   const startedAt = now();
   const versionUrl = `http://127.0.0.1:${cdpPort}/json/version`;
 
   while (now() - startedAt <= timeoutMs) {
+    signal?.throwIfAborted();
     try {
       const response = await fetchFn(versionUrl, {
         redirect: "error",
-        signal: AbortSignal.timeout(Math.min(1_000, Math.max(timeoutMs, 1))),
+        signal: AbortSignal.any([
+          AbortSignal.timeout(Math.min(1_000, Math.max(timeoutMs, 1))),
+          ...(signal ? [signal] : []),
+        ]),
       });
       if (response.ok) {
         const metadata = await response.json();
@@ -347,8 +353,9 @@ export async function waitForCdp({
     } catch {
       // Chrome is still starting. Never log the endpoint response or debugger token.
     }
+    signal?.throwIfAborted();
     if (now() - startedAt >= timeoutMs) break;
-    await sleep(intervalMs);
+    await sleep(intervalMs, signal);
   }
   throw new Error(`Chrome CDP did not become ready on 127.0.0.1:${cdpPort}`);
 }
@@ -363,6 +370,9 @@ export async function launchDedicatedChrome({
   sleep,
   now,
   timeoutMs,
+  supervised = false,
+  signalSource = process,
+  onReady = () => {},
 } = {}) {
   assertInteractiveEnvironment({ platform, env, getuid });
   const port = resolveLaunchCdpPort(env);
@@ -372,10 +382,46 @@ export async function launchDedicatedChrome({
   const arguments_ = buildChromeArguments({ port, profileDirectory });
   await assertCdpPortAvailable(port);
 
+  return runDedicatedChrome({
+    executable,
+    arguments_,
+    port,
+    spawnFn,
+    fetchFn,
+    sleep,
+    now,
+    timeoutMs,
+    supervised,
+    signalSource,
+    onReady,
+  });
+}
+
+export function parseLaunchArguments(arguments_ = []) {
+  if (arguments_.length === 0) return { supervised: false };
+  if (arguments_.length === 1 && arguments_[0] === "--supervised") {
+    return { supervised: true };
+  }
+  throw new Error("usage: launch-dedicated-chrome.mjs [--supervised]");
+}
+
+export async function runDedicatedChrome({
+  executable,
+  arguments_,
+  port,
+  spawnFn = spawn,
+  fetchFn = globalThis.fetch,
+  sleep,
+  now,
+  timeoutMs,
+  supervised = false,
+  signalSource = process,
+  onReady = () => {},
+} = {}) {
   let child;
   try {
     child = spawnFn(executable, arguments_, {
-      detached: true,
+      detached: !supervised,
       shell: false,
       stdio: "ignore",
       windowsHide: false,
@@ -384,40 +430,111 @@ export async function launchDedicatedChrome({
     throw new Error("failed to start dedicated Chrome");
   }
 
-  const failed = new Promise((_, reject) => {
-    child.once("error", () => reject(new Error("failed to start dedicated Chrome")));
-    child.once("exit", (code, signal) => {
-      reject(
-        new Error(
-          `dedicated Chrome exited before CDP was ready (${signal ? "signal" : `code ${code}`})`,
-        ),
-      );
-    });
-  });
-
-  try {
-    await Promise.race([waitForCdp({ port, timeoutMs, fetchFn, sleep, now }), failed]);
-  } catch (error) {
-    child.kill();
-    throw error;
+  const controller = new AbortController();
+  const { promise: finished, resolve: finish } = Promise.withResolvers();
+  let outcome;
+  let requestedSignal;
+  let shutdownTimer;
+  let ready = false;
+  let processError;
+  const settle = (result) => {
+    if (outcome) return;
+    outcome = result;
+    controller.abort();
+    clearTimeout(shutdownTimer);
+    finish(result);
+  };
+  const onError = () => {
+    processError = new Error("dedicated Chrome process failed");
+    if (child.pid) stop();
+    else settle({ error: processError });
+  };
+  const onExit = (code, signal) => settle({ code, signal, error: processError });
+  const stop = (signal = "SIGTERM") => {
+    if (outcome || requestedSignal) return;
+    requestedSignal = signal;
+    controller.abort();
+    // Bound graceful shutdown while retaining ownership until the child exits.
+    if (supervised) {
+      shutdownTimer = setTimeout(() => {
+        if (!outcome) child.kill("SIGKILL");
+      }, 5_000);
+    }
+    child.kill(signal);
+  };
+  const onTerminate = () => stop("SIGTERM");
+  const onInterrupt = () => stop("SIGINT");
+  child.on("error", onError);
+  child.once("exit", onExit);
+  if (supervised) {
+    signalSource.on("SIGTERM", onTerminate);
+    signalSource.on("SIGINT", onInterrupt);
   }
-  child.removeAllListeners("error");
-  child.removeAllListeners("exit");
-  child.unref();
-  return { port };
+  const readiness = waitForCdp({
+    port,
+    timeoutMs,
+    fetchFn,
+    sleep,
+    now,
+    signal: controller.signal,
+  });
+  try {
+    try {
+      await Promise.race([readiness, finished]);
+    } catch (error) {
+      if (!requestedSignal && !outcome) throw error;
+    }
+    if (!outcome && !requestedSignal) {
+      ready = true;
+      onReady({ port });
+      if (!supervised) {
+        child.unref();
+        return { port };
+      }
+    }
+    const result = await finished;
+    if (result.error) throw result.error;
+    const cleanStop = requestedSignal && (result.code === 0 || result.signal === requestedSignal);
+    if (cleanStop || (ready && result.code === 0)) return { port, exitCode: 0 };
+    const error = new Error(
+      `dedicated Chrome exited ${ready ? "after CDP was ready" : "before CDP was ready"} (${result.signal ? "signal" : `code ${result.code}`})`,
+    );
+    error.exitCode = result.signal
+      ? 128 + (os.constants.signals[result.signal] ?? 1)
+      : Number.isInteger(result.code) && result.code > 0
+        ? result.code
+        : 1;
+    throw error;
+  } catch (error) {
+    stop();
+    if (supervised) await finished;
+    throw error;
+  } finally {
+    controller.abort();
+    await readiness.catch(() => {});
+    clearTimeout(shutdownTimer);
+    child.removeListener("error", onError);
+    child.removeListener("exit", onExit);
+    signalSource.removeListener("SIGTERM", onTerminate);
+    signalSource.removeListener("SIGINT", onInterrupt);
+  }
 }
 
 async function main() {
   try {
-    const { port } = await launchDedicatedChrome();
-    console.log(
-      `Chrome dedicado pronto em http://127.0.0.1:${port}. Conclua o login e o MFA na janela aberta.`,
-    );
+    const options = parseLaunchArguments(process.argv.slice(2));
+    await launchDedicatedChrome({
+      ...options,
+      onReady: ({ port }) =>
+        console.log(
+          `Chrome dedicado pronto em http://127.0.0.1:${port}. Conclua o login e o MFA na janela aberta.`,
+        ),
+    });
   } catch (error) {
     console.error(
       `Falha ao iniciar o Chrome dedicado: ${error instanceof Error ? error.message : "erro desconhecido"}`,
     );
-    process.exitCode = 1;
+    process.exitCode = error?.exitCode ?? 1;
   }
 }
 

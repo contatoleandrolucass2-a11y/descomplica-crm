@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12: Sessao remota Salesforce
+
+- Prepara Chrome dedicado supervisionado na VPS, independente do PC.
+- Adiciona console privado via SSH, login/MFA manual e perfil persistente.
+- Mantem monitor separado das exportacoes, com ativacao por prova real.
+- Documenta instalacao, reautenticacao, limites e rollback sem apagar perfil.
+
 ## 2026-10-12: Rotina em planilha
 
 - Substitui caixas individuais por celulas continuas, linhas autoajustaveis e

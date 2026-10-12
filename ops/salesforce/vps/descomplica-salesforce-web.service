@@ -1,0 +1,27 @@
+[Unit]
+Description=Descomplica Salesforce SSH-only web console
+After=descomplica-salesforce-vnc.service
+PartOf=descomplica-salesforce-console.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-salesforce
+Group=descomplica-salesforce
+UMask=0077
+ExecStart=/usr/bin/websockify --web=/usr/share/novnc 127.0.0.1:6080 127.0.0.1:5909
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=128M
+TasksMax=32
+LimitCORE=0
+StandardOutput=null
+StandardError=null

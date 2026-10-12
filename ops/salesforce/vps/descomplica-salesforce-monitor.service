@@ -1,0 +1,32 @@
+[Unit]
+Description=Descomplica Salesforce connection evidence (no exports)
+Wants=network-online.target
+After=network-online.target descomplica-salesforce-browser.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-salesforce
+Group=descomplica-salesforce
+WorkingDirectory=@RELEASE@
+Environment=HOME=/var/lib/descomplica-salesforce
+EnvironmentFile=/etc/descomplica-salesforce/monitor.env
+ExecStart=/usr/local/bin/node ops/salesforce/connection-monitor.mjs
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=35
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=256M
+TasksMax=64
+LimitCORE=0
+
+[Install]
+WantedBy=multi-user.target
