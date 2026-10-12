@@ -47,7 +47,27 @@ servicos e portas antes de aplicar. Nenhum script altera o CRM/Nginx/Docker.
 3. Executar bash ops/salesforce/vps/install-session.sh SHA nesse checkout.
    O instalador recusa instalacao existente, perfil, usuario ou porta ocupada.
    Cria segredos privados no host e valida units. Nao inicia servicos.
-4. Conferir unidades e iniciar somente o navegador:
+4. Antes de iniciar, conferir acesso ao codigo com a identidade dedicada:
+
+```bash
+runuser -u descomplica-salesforce -- test -r /srv/descomplica-crm-releases/SHA/ops/salesforce/launch-dedicated-chrome.mjs
+runuser -u descomplica-salesforce -- /usr/local/bin/node --input-type=module -e "await import('/srv/descomplica-crm-releases/SHA/ops/salesforce/connection-monitor.mjs')"
+```
+
+Substituir SHA pela revisao instalada. Uma instalacao de dependencias feita
+por root pode produzir arquivos 0600; a validacao como root nao prova que o
+monitor consegue le-los. Nao adicionar o usuario ao grupo root nem ampliar
+permissoes de /root, segredos, perfis ou ambientes.
+
+Se o diretorio pai das releases for 0750 root:root, a travessia pode ser
+concedida exclusivamente a descomplica-salesforce por ACL `--x`, sem leitura
+da listagem nem escrita. Conferir a ACL anterior e registrar a mudanca.
+Para dependencias privadas de root, preparar uma copia independente do
+node_modules desta release, legivel e executavel, mas nao gravavel pelo
+usuario dedicado. Preservar o original fora do checkout. Nao aplicar chmod
+recursivo em arquivos compartilhados por hardlink com o store pnpm.
+
+5. Conferir unidades e iniciar somente o navegador:
 
 ```bash
 systemctl enable --now descomplica-salesforce-browser.service
