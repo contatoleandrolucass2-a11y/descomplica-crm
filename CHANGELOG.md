@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-12: Rotina publicada
+
+- Publica Gestao > Rotina na versao `7c6dce5`, com CI integral aprovada,
+  imagem imutavel verificada, backup e promocao pelo coordenador protegido.
+- Confirma health, container saudavel, acesso anonimo negado e tela autenticada
+  com seis funcoes, 26 linhas e 74 atividades para Gerente regional house.
+- Registra evidencias finais, limites do salvamento local e excecoes operacionais
+  no conhecimento curado. Fechamento documental nao dispara novo deploy.
+
 ## 2026-10-12: Conhecimento e Rotina
 
 - Integra a protecao atual de publicacao com consulta ao vivo, registro de
