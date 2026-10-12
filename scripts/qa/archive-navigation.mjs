@@ -282,7 +282,15 @@ export function archiveNavigationHorizontalFit({
     navigation.scrollWidth <= contentWidth + 1 &&
     rootControls.length > 0 &&
     rootControls.every((control) => fits(control, navigation.left, navigation.right)) &&
-    panels.every((panel) => fits(panel, 0, viewportWidth) && panel.horizontalAncestorsFit === true)
+    panels.every(
+      (panel) =>
+        // Child paint aligned to the panel border box is not a content scrollbar.
+        fits(
+          { ...panel, clientWidth: Math.max(panel.clientWidth, panel.right - panel.left) },
+          0,
+          viewportWidth,
+        ) && panel.horizontalAncestorsFit === true,
+    )
   );
 }
 
@@ -1414,6 +1422,14 @@ export async function checkArchiveNavigation(
           await expect(administration).toHaveAttribute("aria-expanded", "false");
           await expect(page.locator("#authorized-navigation-admin-home")).toBeHidden();
           await expect(management).toHaveAttribute("aria-expanded", "true");
+          assert.equal(
+            await page
+              .locator("#authorized-navigation-crm-management > span")
+              .first()
+              .evaluate((element) => getComputedStyle(element).textTransform),
+            "none",
+            "Management labels must retain sentence case",
+          );
           await assertLinks(page, "authorized-navigation-crm-management", managementLinks, route);
           await assertDisabledItems(page, "authorized-navigation-crm-management", []);
           await assertOpenNavigationGeometry(page);

@@ -157,12 +157,18 @@ describe("archive navigation evidence gate", () => {
           left: 20,
           right: 355,
           scrollWidth: 335,
-          clientWidth: 335,
+          clientWidth: 333,
           horizontalAncestorsFit: true,
         },
       ],
     };
     expect(archiveNavigationHorizontalFit(compact)).toBe(true);
+    expect(
+      archiveNavigationHorizontalFit({
+        ...compact,
+        panels: [{ ...compact.panels[0]!, scrollWidth: 337 }],
+      }),
+    ).toBe(false);
     expect(
       archiveNavigationHorizontalFit({
         ...compact,

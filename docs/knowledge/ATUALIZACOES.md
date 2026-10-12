@@ -1,5 +1,24 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: ScrollWidth de painel pode incluir pintura na borda
+
+- Fonte: CI `38203285914`, artefato `11726659106`, 32 medicoes compactas e
+  captura 320 x 568. Status: correcao local validada; nova CI/publicacao pendentes.
+- A versao `b38a184` aprovou validate, restore, banco/advisors, build, E2E e
+  a QA propria da Rotina (15 combinacoes, edicao, persistencia, teclado e reset).
+  A matriz terminou com 32 falhas na geometria nova dos menus compactos.
+- clientWidth exclui bordas. O painel tinha caixa externa de 296 px,
+  clientWidth 294 e scrollWidth 296, com pintura alinhada a caixa e sem
+  overflow de nav/pagina ou recorte. O limite do painel agora usa sua caixa
+  externa, mantendo 1 px de tolerancia. Controles, container e ancestrais
+  seguem protegidos; conteudo alem da caixa continua sendo rejeitado.
+- O gate corrigido passou nas 32 medicoes originais; 34 testes direcionados
+  passaram com um skip previsto. Reavaliar esta excecao ao mudar bordas,
+  box-sizing, overflow ou posicionamento do menu; nao generalizar para campos
+  de formulario nem aceitar scroll extra sem causa geometrica comprovada.
+- Captura evidenciou titulo Gestao em caixa alta herdada; o novo painel usa
+  capitalizacao normal, conferida pelo estilo computado. Sem baseline promovida.
+
 ## 2026-10-12: Confirmacao de saida nao pode cancelar o commit React
 
 - Fonte: revisao independente, `next/dist/client/components/app-router.js`,

@@ -275,6 +275,11 @@
   text-decoration: none;
 }
 
+.navigationPanel[data-navigation-panel-for="crm.management"] .menuEyebrow {
+  letter-spacing: 0;
+  text-transform: none;
+}
+
 .menuEyebrow {
   display: block;
   padding: 7px 10px 5px;

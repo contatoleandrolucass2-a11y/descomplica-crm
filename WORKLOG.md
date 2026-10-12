@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-12: Geometria de borda no menu compacto
+
+- CI `38203285914` do candidato `b38a184` aprovou validate, restore, banco,
+  advisors, build e E2E. Rotina aprovou edicao, insercao, salvar/recarregar,
+  teclado, restauracao e 15 combinacoes de tema/largura, com zero overflow e Axe.
+- O fechamento da matriz falhou em 32 verificacoes de menus compactos. O painel
+  media 296 px, com clientWidth 294 px e scrollWidth 296 px; nav, pagina,
+  controles e ancestrais cabiam na viewport. A pintura alinhada a borda foi
+  confundida com excesso de conteudo pelo novo teste. O calculo agora considera
+  a caixa externa do painel; controles e container mantem limites anteriores.
+- As 32 medicoes do artefato passaram ao reaplicar o gate; excesso real continua
+  rejeitado pela regressao negativa. Testes direcionados: 34 aprovados e um skip.
+  O titulo do novo menu Gestao tambem recebe capitalizacao normal, com verificacao
+  de estilo computado na QA. Nenhuma referencia visual foi regravada.
+- Nova CI integral exigida no SHA final antes de merge e publicacao.
+
 ## 2026-10-12: Conhecimento atual por chat e fechamento da Rotina
 
 - Pedido do usuario persistido em AGENTS.md, CONTEXTO.md, FERRAMENTAS.md,

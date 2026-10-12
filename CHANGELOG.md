@@ -10,6 +10,8 @@
   a atualizacao do historico em navegacao lenta do App Router.
 - Corrige a verificacao de menus flutuantes no breakpoint de 1181 px, mantendo
   a rejeicao de overflow, recorte e texto excedente sem trocar referencias.
+- Distingue a borda externa do painel compacto de overflow real e preserva
+  capitalizacao normal tambem no titulo do menu Gestao.
 
 ## 2026-10-12
 
