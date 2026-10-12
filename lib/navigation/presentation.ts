@@ -42,7 +42,8 @@ const ROOT_NAVIGATION_ORDER = new Map([
   ["/app/simulacao", 20],
   ["/app/ranking", 30],
   ["/app/canal-de-parcerias", 40],
-  [ADMIN_ROOT_PATH, 50],
+  ["/app/gestao", 50],
+  [ADMIN_ROOT_PATH, 60],
 ]);
 
 function comparePages(left: NavigationItem, right: NavigationItem) {

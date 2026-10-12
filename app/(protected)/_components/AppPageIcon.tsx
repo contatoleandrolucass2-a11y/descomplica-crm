@@ -1,3 +1,5 @@
+import { ClipboardList } from "lucide-react";
+
 function iconCategory(pageKey: string) {
   if (pageKey.startsWith("crm.simulation")) return "calculator";
   if (pageKey.startsWith("crm.settings")) return "settings";
@@ -10,6 +12,9 @@ function iconCategory(pageKey: string) {
 }
 
 export function AppPageIcon({ pageKey }: { pageKey: string }) {
+  if (pageKey.startsWith("crm.management")) {
+    return <ClipboardList aria-hidden="true" />;
+  }
   const category = iconCategory(pageKey);
 
   return (

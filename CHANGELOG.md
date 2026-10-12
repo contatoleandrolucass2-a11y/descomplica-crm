@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-12: Conhecimento e Rotina
+
+- Integra a protecao atual de publicacao com consulta ao vivo, registro de
+  deployment e locks compartilhados, preservando o novo coordenador de main.
+- Exige conferencia atual de site/GitHub e sincronizacao do Obsidian antes de
+  cada novo chat do CRM, com resultados e excecoes documentados no encerramento.
+- Protege edicoes pendentes da Rotina ao sair, recarregar ou voltar no historico
+  e remove o link do hub quando a rotina estiver indisponivel.
+- Vincula a confirmacao de saida ao destino e evita um segundo aviso durante
+  a atualizacao do historico em navegacao lenta do App Router.
+- Corrige a verificacao de menus flutuantes no breakpoint de 1181 px, mantendo
+  a rejeicao de overflow, recorte e texto excedente sem trocar referencias.
+- Distingue a borda externa do painel compacto de overflow real e preserva
+  capitalizacao normal tambem no titulo do menu Gestao.
+
 ## 2026-10-12
 
 - Adiciona promoção protegida com consulta ao vivo de versão/data, CI e `main`
@@ -26,6 +41,19 @@
   inalterados e cobertos.
 
 ## 2026-10-11
+
+- Adiciona o menu Gestão com submenu Rotina, protegido por
+  `crm.settings.manage` e exposto no menu suplementar autorizado.
+- Cria a classificação inicial de Gerente regional house com layout da Tabela
+  Associativo, opções das demais funções nulas, inserção de linhas e salvamento
+  local no navegador.
+- Preserva 26 linhas e 74 atividades da referência. Trata erros de armazenamento,
+  confirma restauração, sinaliza alterações pendentes e oferece abas por teclado.
+- Mantém a capitalização em frase normal também nos estilos herdados do cabeçalho.
+- Exibe as atividades completas em campos com altura automática e preserva a
+  tabela semanal em rolagem horizontal acessível no celular.
+- Atualiza gates, navegação, inventário de recursos, contrato visual e matriz
+  de smoke de rotas protegidas para 27 URLs.
 
 - Recompõe Usuários e acessos conforme o draft aprovado: mestre-detalhe
   compacto, diretório com filtros em chips, quatro abas de acesso, painel

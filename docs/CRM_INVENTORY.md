@@ -5,6 +5,11 @@ Atualização de 08/10/2026: a rota suplementar
 Configurações, após Recurso MKT, mediante `crm.settings.manage`. O inventário
 HTTP passa a 25 rotas; o catálogo de 17 páginas PostgreSQL permanece inalterado.
 
+Atualização de 11/10/2026: o menu suplementar `Gestão` foi criado em
+`/app/gestao`, também com `crm.settings.manage`, e passou a conter o submenu
+`Rotina` em `/app/gestao/rotina`. A rotina saiu de Configurações; o inventário
+HTTP passa a 27 rotas e o catálogo PostgreSQL continua sem nova entrada.
+
 Data de corte: 2026-09-06. Referência visual: `https://descomplicapro.com.br/`.
 
 Este inventário substitui o levantamento de 2026-08-04 baseado apenas no

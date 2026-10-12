@@ -111,6 +111,8 @@
       "routes": [
         "app/(protected)/app/configuracoes/page.tsx",
         "app/(protected)/app/configuracoes/recurso-mkt/page.tsx",
+        "app/(protected)/app/gestao/page.tsx",
+        "app/(protected)/app/gestao/rotina/page.tsx",
         "app/(protected)/app/configuracoes/metas/page.tsx",
         "app/(protected)/app/configuracoes/metas/parcerias/page.tsx",
         "app/(protected)/app/configuracoes/metas/pontos/page.tsx"
@@ -118,6 +120,7 @@
       "evidence": [
         "tests/funnel-goals.test.ts",
         "tests/marketing-resources.test.tsx",
+        "tests/routine-settings.test.tsx",
         "scripts/qa/marketing-resources.mjs",
         "tests/point-settings.test.ts",
         "supabase/tests/funnel_goals.test.sql"

@@ -30,8 +30,8 @@ describe("approved canvas parity contract", () => {
     const repasseReadme = readFileSync(new URL("../repasse/README.md", root), "utf8");
     const systemsReadme = readFileSync(new URL("../connected-systems/README.md", root), "utf8");
 
-    expect(releasedPaths).toHaveLength(25);
-    expect(canvasPaths).toHaveLength(23);
+    expect(releasedPaths).toHaveLength(27);
+    expect(canvasPaths).toHaveLength(25);
     for (const path of canvasPaths) expect(readme).toContain(`\`${path}\``);
     expect(repasseReadme).toContain("`/app/repasse`");
     expect(repasseReadme).toContain("Claro, Médio e Escuro");

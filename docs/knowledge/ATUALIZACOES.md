@@ -1,5 +1,164 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Main pode avancar durante validacao e mudar o procedimento
+
+- Fonte: git fetch/GitHub, PR #186, runbook production-release-guard e registro
+  sanitizado da VPS. Status: integrado; nova CI e publicacao pendentes.
+- O candidato `3bad94e` passou CI `38205980422`, com 40 checks de navegacao e
+  15 combinacoes de Rotina. A conferencia anterior ao merge encontrou main
+  `e162411`, que mudou o processo de publicacao. CI verde da base antiga nao
+  dispensa integracao nem validacao do candidato combinado.
+- Versao ativa permanece `f84867d`, com registro de conclusao real em
+  `2026-10-12T03:26:50.036Z` e nenhuma tentativa pendente. Main recebeu tooling,
+  nao runtime da aplicacao: essa divergencia de SHA nao exige restart por si so.
+- Usar exclusivamente release:production da versao atual, sem bind/Compose
+  antigos nem locks externos. O coordenador consulta registro, runtime e
+  GitHub no mesmo minuto da escrita, preserva exclusao mutua e exige evidencia
+  do historico. Registro ausente, data desconhecida, main/CI divergentes ou
+  tentativa pendente bloqueiam; nunca inferir a data por commit ou container.
+- Reavaliar o procedimento a cada publicacao e repetir a busca de fontes ao
+  detectar mudanca externa. A observacao desta entrada nao substitui a consulta
+  fresca executada dentro da trava no momento do deploy.
+
+## 2026-10-12: ScrollWidth de painel pode incluir pintura na borda
+
+- Fonte: CI `38203285914`, artefato `11726659106`, 32 medicoes compactas e
+  captura 320 x 568. Status: correcao local validada; nova CI/publicacao pendentes.
+- A versao `b38a184` aprovou validate, restore, banco/advisors, build, E2E e
+  a QA propria da Rotina (15 combinacoes, edicao, persistencia, teclado e reset).
+  A matriz terminou com 32 falhas na geometria nova dos menus compactos.
+- clientWidth exclui bordas. O painel tinha caixa externa de 296 px,
+  clientWidth 294 e scrollWidth 296, com pintura alinhada a caixa e sem
+  overflow de nav/pagina ou recorte. O limite do painel agora usa sua caixa
+  externa, mantendo 1 px de tolerancia. Controles, container e ancestrais
+  seguem protegidos; conteudo alem da caixa continua sendo rejeitado.
+- O gate corrigido passou nas 32 medicoes originais; 34 testes direcionados
+  passaram com um skip previsto. Reavaliar esta excecao ao mudar bordas,
+  box-sizing, overflow ou posicionamento do menu; nao generalizar para campos
+  de formulario nem aceitar scroll extra sem causa geometrica comprovada.
+- Captura evidenciou titulo Gestao em caixa alta herdada; o novo painel usa
+  capitalizacao normal, conferida pelo estilo computado. Sem baseline promovida.
+
+## 2026-10-12: Confirmacao de saida nao pode cancelar o commit React
+
+- Fonte: revisao independente, `next/dist/client/components/app-router.js`,
+  RoutineSettings e regressao em Chromium. Status: correcao local validada;
+  novo candidato CI ainda pendente. Suite de navegador/servidor: 17/17.
+- Uma aprovacao expirada apos um segundo permitia repetir o aviso em um
+  history.pushState atrasado por 1,5 s. Recusar o segundo aviso impedia a URL
+  de acompanhar a navegacao. A regressao falhou antes e passou apos a correcao.
+- O HistoryUpdater do App Router atualiza pushState/replaceState durante
+  useInsertionEffect; cancelar esse evento nao desfaz o render React. Proteger
+  o gesto de saida antes desse commit e nunca cancelar push/replace
+  same-document nesse listener. Reload/traverse e beforeunload mantem guards.
+- A aprovacao acompanha o destino, encerra em sucesso/erro ou nova edicao e
+  dispensa prazo arbitrario. Reavaliar ao mudar Next.js, navegacao do shell ou
+  suporte da Navigation API. Essa excecao de fase de navegacao nao autoriza
+  sair de uma edicao sem confirmacao nem enfraquecer a autorizacao do servidor.
+- CI `38202252671` da versao anterior `dbc9e13` aprovou validate/restore na
+  tentativa 2. O HTTP 403 municipal da tentativa 1 foi transitorio: verificador
+  original passou localmente e depois na CI. Nao houve troca de politica,
+  fonte, hash ou gate; aprovacao anterior nao valida o fix novo.
+
+## 2026-10-12: Conferencia atual antes de retomar a demanda
+
+- Fonte: `git fetch origin`, GitHub PR #183/CI `38184457031` e GET observacional
+  de `https://crm.descomplicapro.com.br/api/health`, conferidos nesta data.
+- GitHub main e site publicado convergem em
+  `f84867d0729e5782a0d41a040bf078a4506e7685`; health retorna `status: ok`.
+  Esse fato e um retrato da consulta, nao garantia sobre uma consulta futura.
+- Rotina continua no PR #183, candidato `b08ba26`: validate e restore isolado
+  aprovados; release-gates falhou na matriz de navegacao. Implementacao local
+  nao deve ser apresentada como publicada. Integracao com main e fechamento
+  dos comentarios de revisao ainda pendentes.
+- O usuario determinou consultar site/GitHub e sincronizar o Obsidian antes
+  de tratar cada novo chat, e registrar resultados e excecoes ao encerrar.
+  A regra foi persistida nos documentos do projeto e na orientacao local
+  limitada a este Git comum. Fontes indisponiveis exigem registro explicito;
+  uma excecao documentada nao concede novas permissoes.
+- Esta entrada registra consulta de fontes; nao comprova novos testes.
+
+## 2026-10-12: Excecoes e protecao de edicoes precisam de evidencia propria
+
+- Fonte: AGENTS.md, runbook de Obsidian, perfil crm-memoria e review do PR #183.
+  Status: protocolo e correcoes implementados localmente; CI/publicacao pendentes.
+- Atualizar conhecimento significa confrontar fontes atuais e reutilizar notas
+  verificadas. Nao equivale a treinar o modelo ou validar uma versao publicada.
+  Excecoes duraveis precisam de causa, evidencia, escopo/limites, quando aplicar
+  e criterio de reavaliacao; nunca ampliam permissao ou regra comercial.
+- Aviso de alteracoes pendentes sozinho nao evita perda por navegacao. Rotina
+  usa confirmacao para links, Navigation API/historico e beforeunload, conforme
+  o padrao da Tabela Direta; cancela a saida e preserva a edicao, e libera apos
+  salvar. A API de navegacao requer tipos locais neste componente porque o
+  contrato DOM da versao instalada nao fornece NavigateEvent.
+- Um gate desligado precisa remover a ancora, nao apenas exibir aviso. O hub
+  de Gestao conserva o cartao indisponivel sem href; o servidor continua negando
+  a rota. Testes de servidor e Chromium: 16/16 aprovados; tipos e recursos
+  aprovados. Lint, suite completa, build e nova CI ainda em verificacao.
+- Fechamento local: lint, tipos, recursos e build de 47 rotas aprovados. Suite
+  Windows: 2.462 aprovados, 19 skips previstos e 11 falhas (seis POSIX e cinco
+  timeouts). Reteste isolado de conhecimento/DevTools: 46/46; referencia:
+  15 aprovados e um skip. Nao alterar contratos POSIX para obter verde neste
+  host; a CI Linux e a referencia e permanece gate obrigatorio.
+  Testes Node do Salesforce foram executados separadamente e tambem falharam
+  em contratos POSIX/arquivos privados e executavel deste host Windows.
+
+## 2026-10-12: Menu flutuante nao equivale a overflow da pagina
+
+- Fonte: CI `38184457031`, artefato `11719861187`, JSON de navegacao e reproducao
+  em Chromium com CSS real. Status: causa confirmada e correcao local validada;
+  matriz autenticada do candidato final ainda pendente.
+- As quatro falhas ocorreram em 1181 x 800 nos quatro simuladores. O nav tinha
+  clientWidth 654 e scrollWidth 668; o painel terminava em x=854, dentro dos
+  1181 px da viewport. Documento/body nao excediam a largura e nao havia erro
+  de runtime. A assercao isolada sobre scrollWidth do nav era insuficiente.
+- Aplicar a excecao somente para a extensao medida de um painel flutuante no
+  desktop. Exigir controles dentro do nav, painel dentro da viewport, texto
+  sem overflow e ancestrais sem recorte; mobile continua limitado ao container.
+  Tolerancia permanece 1 px. Dezenove regressoes passaram; nao houve promocao
+  de baseline. Reavaliar quando mudar o posicionamento, o breakpoint ou o CSS
+  de overflow do cabecalho. Esta regra e de geometria QA, nao autorizacao.
+
+## 2026-10-11: Menu Gestao e submenu Rotina
+
+- Fonte: pedido do usuario, print do menu principal e planilha `TESTE1.xlsx`
+  tratada somente como dado. Status: implementado localmente; publicacao
+  pendente de gates Linux/CI.
+- Nova raiz `/app/gestao` e submenu `/app/gestao/rotina` usam
+  `crm.settings.manage`, aparecem no menu suplementar autorizado e reaproveitam
+  os tokens da Tabela Associativo.
+- A rotina inicial cobre apenas Gerente regional house. Gerente regional imob,
+  Gerente house, Coordenador de vendas, Coordenador de parcerias e Corretor
+  ficam nulos ate receberem classificacao propria.
+- Fonte conferida por XML da planilha: 26 linhas preenchidas e 74 atividades,
+  incluindo repeticoes e alinhamento por dia. Textos revisados sem reduzir os
+  detalhes operacionais. A linha Excel 29, totalmente vazia, nao vira atividade.
+- Edicao, insercao de linhas e botao Salvar gravam no `localStorage` do
+  navegador. Nao houve migration, escrita remota, n8n ou nova permissao de banco.
+- Validacoes locais aprovadas: lint, typecheck, build e testes focados de
+  componente, rota, navegacao, inventario e contrato visual. `pnpm test`
+  completo no Windows manteve seis falhas de modo POSIX e symlink; a falha de
+  contador de rotas foi corrigida. A CI Linux e a referencia desses testes.
+- Em 11/10, a publicacao foi retomada no PR #183. Integracao de `main`
+  `7cbca83` preserva Administracao no menu principal e Configuracoes na conta,
+  acrescentando Gestao antes de Administracao. A revisao da planilha encontrou
+  atividades omitidas; recuperacao integral, feedback de armazenamento,
+  teclado e QA autenticada dedicada foram incluidos no fechamento.
+- Validacao do candidato `d72c9cc`: CI Linux `38181426038` aprovou validate,
+  restore isolado, banco/advisors e E2E por perfil. O fechamento remove
+  `text-transform: uppercase` herdado dos cabecalhos de Gestao/Rotina e
+  confere o estilo computado na QA. Nova CI integral exigida no SHA final.
+- Windows com Node 24.19.0: 2.457 testes aprovados, seis falhas POSIX e dois
+  timeouts de conhecimento. Reteste isolado de conhecimento: 22/22 aprovados.
+  Nao houve skips novos para esconder as falhas; testes opcionais do componente
+  em Chromium foram executados localmente, e a jornada autenticada roda na CI.
+- A captura autenticada do candidato anterior aprovou 15 combinacoes de largura
+  e tema, com zero overflow global ou violacao Axe, alem dos controles. A revisao
+  visual identificou texto escondido por scroll interno e uma pagina mobile
+  excessivamente alta. O fechamento usa medidas em lote para altura dos campos,
+  duas colunas nas opcoes mobile e tabela com pan horizontal e coluna de linhas
+  fixa. Nova QA exige texto completo, alcance de todos os dias e foco visivel.
+
 ## 2026-10-12: Caixa de acesso e o proprio rascunho
 
 - Fonte: draft aprovado `modelo-site.html#users`, implementação de

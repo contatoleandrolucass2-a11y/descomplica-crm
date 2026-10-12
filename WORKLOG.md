@@ -1,5 +1,114 @@
 # Worklog
 
+## 2026-10-12: Integracao da protecao de publicacao atual
+
+- CI `38205980422` aprovou todos os gates do candidato `3bad94e`: 40 checks de
+  navegacao, zero falhas, Rotina em 15 combinacoes e controles completos.
+- Antes do merge, a conferencia ao vivo detectou main `e162411` (PR #186),
+  com o novo coordenador de publicacao e locks compartilhados. Integracao
+  preserva esse trabalho e exige nova CI no candidato combinado.
+- Registro privado da VPS corresponde ao runtime `f84867d`, com deployment ID
+  `1061530d-5dfc-4027-b943-5c18a43e0c93`, conclusao verificada em
+  `2026-10-12T03:26:50.036Z` e nenhuma tentativa pendente. A promocao usa
+  exclusivamente release:production, com nova consulta ao vivo no minuto da
+  troca, artefato aprovado, backup e recuperacao pelo mesmo coordenador.
+- Mudanca de tooling em main nao equivale a nova publicacao da aplicacao.
+  Nenhum container foi reiniciado por esta integracao; publicacao de Rotina
+  continua pendente da CI final e da imagem de main.
+
+## 2026-10-12: Geometria de borda no menu compacto
+
+- CI `38203285914` do candidato `b38a184` aprovou validate, restore, banco,
+  advisors, build e E2E. Rotina aprovou edicao, insercao, salvar/recarregar,
+  teclado, restauracao e 15 combinacoes de tema/largura, com zero overflow e Axe.
+- O fechamento da matriz falhou em 32 verificacoes de menus compactos. O painel
+  media 296 px, com clientWidth 294 px e scrollWidth 296 px; nav, pagina,
+  controles e ancestrais cabiam na viewport. A pintura alinhada a borda foi
+  confundida com excesso de conteudo pelo novo teste. O calculo agora considera
+  a caixa externa do painel; controles e container mantem limites anteriores.
+- As 32 medicoes do artefato passaram ao reaplicar o gate; excesso real continua
+  rejeitado pela regressao negativa. Testes direcionados: 34 aprovados e um skip.
+  O titulo do novo menu Gestao tambem recebe capitalizacao normal, com verificacao
+  de estilo computado na QA. Nenhuma referencia visual foi regravada.
+- Nova CI integral exigida no SHA final antes de merge e publicacao.
+
+## 2026-10-12: Conhecimento atual por chat e fechamento da Rotina
+
+- Pedido do usuario persistido em AGENTS.md, CONTEXTO.md, FERRAMENTAS.md,
+  runbook de Obsidian e perfil crm-memoria: consultar GitHub/site, confrontar
+  branch/SHA/CI/versao, registrar contexto curado e sincronizar antes da demanda.
+  Encerramento exige resultado, verificacoes e excecoes com causa, evidencia,
+  limites, aplicacao e criterio de reavaliacao, seguido de nova sincronizacao.
+- A orientacao local limitada ao Git comum e a nota ad_hoc autorizada foram
+  atualizadas para as conversas futuras. O fluxo usa instrucoes ao agente e o
+  runtime existente; nao depende de um hook nativo de abertura de chat.
+- Conferencia inicial de GitHub e health: main/site em `f84867d`, saudavel.
+  Conhecimento sincronizado antes de retomar a demanda. Integracao preservou os
+  PRs #184/#185 de Usuarios e suas evidencias; mudancas dessa area vieram de main.
+- Rotina protege edicoes pendentes nos links, recarregamento e historico, conforme
+  o padrao existente da Tabela Direta. O hub nao oferece link para a rotina com
+  gate desligado. Testes de servidor e navegador: 16/16 aprovados; tipos e
+  inventario aprovados. Gates completos e nova CI ainda em verificacao.
+- O candidato anterior `b08ba26` aprovou validate/restore, mas falhou na matriz
+  autenticada de navegacao. Publicacao permanece pendente enquanto houver gate
+  falho; o fechamento apura a causa sem reduzir os criterios de aceite.
+- Diagnostico do artefato da CI: quatro falhas iguais, nos quatro simuladores
+  em 1181 px. O menu flutuante cabia na viewport e aumentava o scrollWidth do
+  nav; o gate agora distingue essa extensao medida de overflow real, sem
+  alterar tolerancia ou referencias. Dezenove regressoes direcionadas passaram.
+- Revisao final encontrou uma aprovacao de saida com prazo de um segundo.
+  Chromium reproduziu o segundo aviso ao atrasar o pushState por 1,5 s. A
+  aprovacao agora acompanha o destino e termina em sucesso/erro ou nova edicao;
+  o guard nao cancela push/replace same-document durante o commit React.
+  Suite de navegador/servidor passou 17/17, com regressao vermelha antes do fix.
+- CI `38202252671` reexecutada aprovou validate e restore no candidato
+  `dbc9e13`. A primeira tentativa falhou por HTTP 403 transitorio da fonte
+  municipal; o mesmo verificador passou localmente e na tentativa 2, sem
+  trocar politica, fontes ou gates. A correcao final exige novo candidato CI.
+- Lint, tipos, recursos e build de 47 rotas aprovados. Suite Windows: 2.462
+  aprovados, 19 skips previstos e 11 falhas (seis POSIX e cinco timeouts).
+  Retestes de conhecimento/DevTools: 46/46; referencia: 15 aprovados e um skip.
+  Testes Node do Salesforce tambem executados separadamente; falharam nos
+  contratos POSIX/arquivos privados e executavel deste Windows.
+  O gate Linux continua obrigatorio antes de merge/publicacao.
+
+## 2026-10-11: Menu Gestão e submenu Rotina
+
+- Fonte: pedido do usuário, print do menu principal e planilha de referência
+  `TESTE1.xlsx` usada somente como dado de conteúdo.
+- Criada a raiz `/app/gestao` e o submenu `/app/gestao/rotina`, com gate
+  `crm.settings.manage`, mantendo a rotina editável fora de Configurações.
+- A tela reutiliza tokens e composição da Tabela Associativo. Inclui opções
+  Gerente regional house, Gerente regional imob, Gerente house, Coordenador de
+  vendas, Coordenador de parcerias e Corretor.
+- Somente Gerente regional house recebe rotina inicial revisada em português
+  brasileiro. Demais funções permanecem nulas por enquanto.
+- Conferência completa da fonte preserva 26 linhas preenchidas e 74 atividades,
+  com repetições e alinhamento original por dia; revisão não resume os detalhes.
+- A rotina é editável, permite inserir linhas e salvar alterações no
+  `localStorage` do navegador. Sem migration, banco, dados remotos ou n8n.
+- Gates locais aprovados: `pnpm lint`, `pnpm typecheck`, `pnpm build` e testes
+  focados de rota, navegação, inventário, contrato visual e componente.
+- `pnpm test` completo falhou em cenários já incompatíveis com este Windows:
+  seis falhas de permissões POSIX 0600/0700 e symlink de homologação.
+  O contador de rotas do contrato visual foi corrigido e revalidado.
+- Publicação retomada no PR #183; integração com main 7cbca83 preserva temas,
+  administração e configurações da versão atual. Revisão independente detectou
+  atividades omitidas na planilha; fechamento recupera o conteúdo integral,
+  trata falha ao salvar e inclui QA dedicada de edição, teclado e temas.
+- Node 24.19.0/pnpm 11.20.0: lint, tipos, formatação, build de 47 rotas e
+  71 testes focados (incluindo Chromium) passaram. Gitleaks não encontrou segredos.
+  Windows integral: 2.457 aprovados, oito falhas (seis POSIX e dois timeouts de
+  conhecimento); o reteste isolado de conhecimento aprovou 22/22.
+- CI Linux 38181426038 aprovou validate, restore, banco, advisors, build e E2E
+  por perfil. Capitalização herdada em caixa alta foi corrigida no fechamento,
+  com verificação de estilo computado; o SHA final exige nova CI integral.
+- Capturas autenticadas de 1440/1024/720/390/320 nos três temas aprovaram
+  edição, inserção, salvar/recarregar, teclado, restauração e Axe. Revisão visual
+  encontrou textos longos com rolagem interna e empilhamento excessivo no
+  celular; campos passaram a crescer com o conteúdo, as opções ficaram mais
+  compactas e a tabela preserva a semana em rolagem horizontal acessível.
+
 ## 2026-10-12: Consulta ao vivo e exclusão mútua na publicação
 
 - Pedido: conferir a última publicação no próprio minuto do deploy, pois mais

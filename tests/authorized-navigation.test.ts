@@ -194,6 +194,8 @@ describe("authorized hierarchical navigation", () => {
       "/app/configuracoes",
       "/app/configuracoes/recurso-mkt",
       "/app/configuracoes/conectar-sistemas",
+      "/app/gestao",
+      "/app/gestao/rotina",
     ]);
     expect(
       buildBreadcrumbs("/app/configuracoes/recurso-mkt", result).map((page) => page.name),
@@ -220,7 +222,7 @@ describe("authorized hierarchical navigation", () => {
         [settings, { ...settings, key: "crm.settings.marketing", path: "/app/collision" }],
         context,
       ),
-    ).toHaveLength(3);
+    ).toHaveLength(5);
     const collision = extendAuthorizedNavigationWithReleasedPages(
       [settings, { ...settings, key: "crm.settings.connected_systems", path: "/app/collision" }],
       context,
@@ -228,6 +230,46 @@ describe("authorized hierarchical navigation", () => {
     expect(collision.some((page) => page.path === "/app/configuracoes/conectar-sistemas")).toBe(
       false,
     );
+  });
+  it("adds Gestão and its Rotina submenu only with management permission", () => {
+    const settings: AppPage = {
+      ...simulationParent,
+      key: "crm.settings",
+      path: "/app/configuracoes",
+      name: "Configurações",
+      section: "settings",
+      permissionKey: "crm.settings.view",
+    };
+    const context: AuthorizationContext = {
+      ...viewerContext,
+      permissions: ["pages.view", "crm.settings.view", "crm.settings.manage"],
+    };
+    const result = extendAuthorizedNavigationWithReleasedPages([settings], context);
+
+    expect(result.map((page) => page.path)).toEqual([
+      "/app/configuracoes",
+      "/app/configuracoes/recurso-mkt",
+      "/app/configuracoes/conectar-sistemas",
+      "/app/gestao",
+      "/app/gestao/rotina",
+    ]);
+    expect(buildBreadcrumbs("/app/gestao/rotina", result).map((page) => page.name)).toEqual([
+      "Gestão",
+      "Rotina",
+    ]);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages([settings], {
+        ...context,
+        permissions: ["pages.view", "crm.settings.view"],
+      }),
+    ).toEqual([settings]);
+    expect(extendAuthorizedNavigationWithReleasedPages(result, context)).toEqual(result);
+    expect(
+      extendAuthorizedNavigationWithReleasedPages(
+        [settings, { ...settings, key: "crm.management", path: "/app/collision" }],
+        context,
+      ),
+    ).not.toContainEqual(expect.objectContaining({ path: "/app/gestao" }));
   });
   it("keeps the approved root order without creating unauthorized entries", () => {
     const authorizedRoots: NavigationItem[] = [
@@ -237,6 +279,15 @@ describe("authorized hierarchical navigation", () => {
         name: "Configurações",
         description: "Configurações autorizadas",
         section: "settings",
+        parentKey: null,
+        sortOrder: 10,
+      },
+      {
+        key: "crm.management",
+        path: "/app/gestao",
+        name: "Gestão",
+        description: "Gestão autorizada",
+        section: "management",
         parentKey: null,
         sortOrder: 10,
       },
@@ -283,6 +334,7 @@ describe("authorized hierarchical navigation", () => {
       "/app/simulacao",
       "/app/ranking",
       "/app/canal-de-parcerias",
+      "/app/gestao",
       "/app/configuracoes",
     ]);
     expect(buildNavigationGroups(authorizedRoots).flatMap(({ page }) => page)).toHaveLength(

@@ -41,6 +41,10 @@ const dashboardLinks = [
   ["Vendas", "/app/etapas/vendas"],
   ["Repasse", "/app/repasse"],
 ];
+const managementLinks = [
+  ["Visão geral", "/app/gestao"],
+  ["Rotina", "/app/gestao/rotina"],
+];
 const administrationLinks = [
   ["Usuários", "/admin/usuarios"],
   ["Páginas", "/admin/paginas"],
@@ -59,6 +63,7 @@ export const archiveRootNavigationContract = [
   { name: "Simulação", tag: "A", href: "/app/simulacao" },
   { name: "Ranking", tag: "A", href: "/app/ranking" },
   { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
+  { name: "Gestão", tag: "BUTTON", href: null },
   { name: "Administração", tag: "BUTTON", href: null },
 ];
 const navigation = (page) => page.locator("#authorized-navigation");
@@ -95,7 +100,8 @@ async function assertNavigationLinkFocused(link, href) {
   );
 }
 
-async function assertRootAccessibleNames({ administration, dashboard, simulation }) {
+async function assertRootAccessibleNames({ administration, dashboard, management, simulation }) {
+  await expect(management).toHaveAccessibleName("Gestão");
   await expect(dashboard).toHaveAccessibleName("Dashboard");
   await expect(simulation).toHaveAccessibleName("Simulação");
   await expect(administration).toHaveAccessibleName("Administração");
@@ -259,11 +265,70 @@ export async function ensureArchiveNavigationOpen(page) {
   await expect(navigation(page)).toBeVisible();
 }
 
+export function archiveNavigationHorizontalFit({
+  compact,
+  navigation,
+  rootControls,
+  panels,
+  viewportWidth,
+}) {
+  const fits = (box, left, right) =>
+    box.left >= left - 1 && box.right <= right + 1 && box.scrollWidth <= box.clientWidth + 1;
+  // A desktop disclosure contributes to scrollWidth while floating beyond the nav track.
+  const contentWidth = compact
+    ? navigation.clientWidth
+    : Math.max(navigation.clientWidth, ...panels.map((panel) => panel.right - navigation.left));
+  return (
+    navigation.scrollWidth <= contentWidth + 1 &&
+    rootControls.length > 0 &&
+    rootControls.every((control) => fits(control, navigation.left, navigation.right)) &&
+    panels.every(
+      (panel) =>
+        // Child paint aligned to the panel border box is not a content scrollbar.
+        fits(
+          { ...panel, clientWidth: Math.max(panel.clientWidth, panel.right - panel.left) },
+          0,
+          viewportWidth,
+        ) && panel.horizontalAncestorsFit === true,
+    )
+  );
+}
+
 async function assertOpenNavigationGeometry(page) {
   await ensureArchiveNavigationOpen(page);
   const geometry = await navigation(page).evaluate((element) => {
     const rect = element.getBoundingClientRect();
+    const measure = (node) => {
+      const bounds = node.getBoundingClientRect();
+      return {
+        left: bounds.left,
+        right: bounds.right,
+        scrollWidth: node.scrollWidth,
+        clientWidth: node.clientWidth,
+      };
+    };
     return {
+      compact: matchMedia("(max-width: 1180px)").matches,
+      viewportWidth: innerWidth,
+      rootControls: [...element.querySelectorAll("[data-navigation-root-control]")].map(measure),
+      panels: [...element.querySelectorAll("[data-navigation-panel-for]:not([hidden])")].map(
+        (panel) => {
+          const bounds = panel.getBoundingClientRect();
+          let horizontalAncestorsFit = true;
+          let parent = panel.parentElement;
+          while (parent && parent !== document.documentElement) {
+            const style = getComputedStyle(parent);
+            const parentBounds = parent.getBoundingClientRect();
+            if (
+              ["auto", "hidden", "scroll", "clip"].includes(style.overflowX) &&
+              (bounds.left < parentBounds.left - 1 || bounds.right > parentBounds.right + 1)
+            )
+              horizontalAncestorsFit = false;
+            parent = parent.parentElement;
+          }
+          return { ...measure(panel), horizontalAncestorsFit };
+        },
+      ),
       checks: {
         visibleSize: rect.width > 0 && rect.height > 0,
         insideViewport:
@@ -271,16 +336,14 @@ async function assertOpenNavigationGeometry(page) {
           rect.top >= -1 &&
           rect.right <= innerWidth + 1 &&
           rect.bottom <= innerHeight + 1,
-        navigationNoOverflow: element.scrollWidth <= element.clientWidth + 1,
         documentNoOverflow:
           document.documentElement.scrollWidth <= document.documentElement.clientWidth + 1,
         bodyNoOverflow: document.body.scrollWidth <= document.body.clientWidth + 1,
       },
       navigation: {
+        ...measure(element),
         width: rect.width,
         height: rect.height,
-        scrollWidth: element.scrollWidth,
-        clientWidth: element.clientWidth,
       },
       document: {
         scrollWidth: document.documentElement.scrollWidth,
@@ -289,6 +352,7 @@ async function assertOpenNavigationGeometry(page) {
       body: { scrollWidth: document.body.scrollWidth, clientWidth: document.body.clientWidth },
     };
   });
+  geometry.checks.navigationNoOverflow = archiveNavigationHorizontalFit(geometry);
   try {
     assert.equal(
       Object.values(geometry.checks).every(Boolean),
@@ -1056,6 +1120,9 @@ export async function checkArchiveNavigation(
           const partnerships = nav.locator(
             'a[data-navigation-root-control][href="/app/canal-de-parcerias"]',
           );
+          const management = nav.locator(
+            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-management"]',
+          );
           const administration = nav.locator(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-admin-home"]',
           );
@@ -1216,6 +1283,11 @@ export async function checkArchiveNavigation(
               await page.keyboard.press("Tab");
               await assertNavigationLinkFocused(partnerships, "/app/canal-de-parcerias");
               await page.keyboard.press("Tab");
+              await assertNavigationControlFocused(
+                management,
+                "authorized-navigation-crm-management",
+              );
+              await page.keyboard.press("Tab");
               stage = `theme:${theme}:accessible-disclosure:administration-focus`;
               await assertNavigationControlFocused(
                 administration,
@@ -1311,7 +1383,7 @@ export async function checkArchiveNavigation(
             await expect(trigger).toHaveAccessibleName("Fechar navegação");
           }
           await ensureArchiveNavigationOpen(page);
-          await assertRootAccessibleNames({ administration, dashboard, simulation });
+          await assertRootAccessibleNames({ administration, dashboard, management, simulation });
           await assertOpenNavigationGeometry(page);
           await assertExactRootNavigation(page);
           check.exactAuthorizedRootNavigation = true;
@@ -1333,6 +1405,8 @@ export async function checkArchiveNavigation(
           await page.keyboard.press("Tab");
           await assertNavigationLinkFocused(partnerships, "/app/canal-de-parcerias");
           await page.keyboard.press("Tab");
+          await assertNavigationControlFocused(management, "authorized-navigation-crm-management");
+          await page.keyboard.press("Tab");
           await assertNavigationControlFocused(administration, "authorized-navigation-admin-home");
           await page.keyboard.press("ArrowDown");
           await expect(administration).toHaveAttribute("aria-expanded", "true");
@@ -1343,10 +1417,26 @@ export async function checkArchiveNavigation(
           await assertDisabledItems(page, "authorized-navigation-admin-home", []);
           await expect(nav.locator('a[aria-current="page"]')).toHaveCount(0);
           await expect(simulation).toHaveAttribute("data-active", "true");
-          stage = "switch-disclosure-by-pointer";
-          await dashboard.click();
+          stage = "management-disclosure-and-authorized-links";
+          await management.click();
           await expect(administration).toHaveAttribute("aria-expanded", "false");
           await expect(page.locator("#authorized-navigation-admin-home")).toBeHidden();
+          await expect(management).toHaveAttribute("aria-expanded", "true");
+          assert.equal(
+            await page
+              .locator("#authorized-navigation-crm-management > span")
+              .first()
+              .evaluate((element) => getComputedStyle(element).textTransform),
+            "none",
+            "Management labels must retain sentence case",
+          );
+          await assertLinks(page, "authorized-navigation-crm-management", managementLinks, route);
+          await assertDisabledItems(page, "authorized-navigation-crm-management", []);
+          await assertOpenNavigationGeometry(page);
+          stage = "switch-disclosure-by-pointer";
+          await dashboard.click();
+          await expect(management).toHaveAttribute("aria-expanded", "false");
+          await expect(page.locator("#authorized-navigation-crm-management")).toBeHidden();
           await expect(dashboard).toHaveAttribute("aria-expanded", "true");
           await assertLinks(page, "authorized-navigation-crm-dashboard", dashboardLinks, route);
           await assertDisabledItems(page, "authorized-navigation-crm-dashboard", []);
