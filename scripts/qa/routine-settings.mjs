@@ -235,6 +235,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           mask: [page.locator("[data-session-identity], [data-account-identity]")],
         });
         checks.push({ width, theme, mode: "Semana", overflow: false, accessibilityViolations: 0 });
+        checkpoint(`sticky-${width}-${theme}`);
         const weekly = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
         const insert = weekly.getByRole("button", { name: "Inserir linha", exact: true });
         assert.equal(await insert.evaluate((element) => element.closest("table") === null), true);
@@ -248,6 +249,9 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
         });
         const afterInsert = await insert.boundingBox();
         const afterHeader = await weekly.locator("thead th").first().boundingBox();
+        process.stdout.write(
+          `[routine-geometry] ${JSON.stringify({ width, theme, beforeInsert, afterInsert, beforeHeader, afterHeader })}\n`,
+        );
         assert.ok(beforeInsert && afterInsert && beforeHeader && afterHeader);
         assert.ok(
           Math.abs(beforeInsert.y - afterInsert.y) <= 2,
@@ -265,11 +269,15 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           element.scrollLeft = element.scrollWidth;
         });
         const horizontalInsert = await insert.boundingBox();
+        process.stdout.write(
+          `[routine-horizontal] ${JSON.stringify({ width, theme, horizontalInsert })}\n`,
+        );
         assert.ok(horizontalInsert);
         assert.ok(
           Math.abs(horizontalInsert.x - afterInsert.x) <= 2,
           "Routine toolbar must remain fixed during horizontal scroll",
         );
+        checkpoint(`daily-layout-${width}-${theme}`);
         await modes.getByRole("button", { name: "Hoje", exact: true }).click();
         const daily = page.getByRole("region", { name: "Tabela de rotina do dia", exact: true });
         await expect
@@ -281,9 +289,19 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           false,
           "Daily mode must fit without horizontal scroll",
         );
+        checkpoint(`daily-accessibility-${width}-${theme}`);
+        await page.waitForFunction(() =>
+          document.documentElement
+            .getAnimations({ subtree: true })
+            .filter((animation) => animation instanceof CSSTransition)
+            .every((animation) => animation.playState !== "running" && !animation.pending),
+        );
         const dailyAxe = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
+        process.stdout.write(
+          `[routine-accessibility] ${JSON.stringify({ width, theme, violations: dailyAxe.violations.map(({ id }) => id) })}\n`,
+        );
         assert.deepEqual(
           dailyAxe.violations.map(({ id, nodes }) => ({
             id,

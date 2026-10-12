@@ -28,6 +28,13 @@
 - Revisao independente reproduziu foco branco sobre fundo claro no modo Hoje.
   Correcao usa o accent do tema somente nessa visao; Semana conserva branco
   sobre a coluna destacada. Teste de regressao de foco nos tres temas exigido.
+- CI 38267645863: validate e restore aprovados; matriz autenticada falhou
+  em Rotina 720/claro depois da captura semanal. Artefato 11756600780 nao
+  inclui a assercao original (diagnostico sanitizado). Reproducao Chromium
+  com CSS compilado/Geist passou sticky e Axe; sem shell completo e sem a
+  sequencia anterior da CI, nao comprova causa. Instrumentacao adiciona
+  somente etapas fixas/geometria/IDs Axe e espera transicoes antes do Axe
+  diario. Mesmas assercoes e tolerancias; publicacao bloqueada ate CI verde.
 
 ## 2026-10-12: Planilha de Rotina publicada e conferida
 

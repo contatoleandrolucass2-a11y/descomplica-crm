@@ -6,6 +6,7 @@
 - Compacta cabecalho, abas e celulas, com texto centralizado e titulos fixos.
 - Mantem edicao, insercao e salvamento local, sem apagar domingos antigos.
 - Preserva foco de teclado visivel nos tres temas tambem na visao diaria.
+- Detalha evidencias de geometria e acessibilidade da matriz de Rotina.
 
 ## 2026-10-12: Planilha de Rotina em producao
 

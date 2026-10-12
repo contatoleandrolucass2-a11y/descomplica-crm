@@ -18,6 +18,9 @@
 - Revisao corrigiu o foco da visao Hoje nos temas claros; regressao por
   teclado passou nos tres temas. Tipagem do teste ajustada para consultar
   animacoes no elemento raiz, com typecheck e repeticao focal aprovados.
+- CI 38267645863 falhou na matriz Rotina 720/claro, com causa ainda nao
+  comprovada. Adiciona diagnosticos sanitizados e espera do fim de transicoes
+  no QA diario, sem reduzir assercoes. Nova CI obrigatoria antes de publicar.
 
 ## 2026-10-12: Planilha de Rotina publicada
 
