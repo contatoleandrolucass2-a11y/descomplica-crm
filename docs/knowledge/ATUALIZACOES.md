@@ -1,5 +1,54 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Rotina publicada e conhecimento sincronizado
+
+- Status: integrado e publicado. Esta conclusao sucede os estados pendentes
+  registrados abaixo, que permanecem como historico da investigacao.
+- Fontes: PR #183, CI do candidato `38209790612`, CI de main `38213038968`
+  (tentativa 2), recibo de release:production, inspect Docker, health publico e
+  navegador autenticado em leitura. Conferencia final em
+  `2026-10-12T07:31:16Z`: main e site em
+  `7c6dce5c48b9e267586283a273866bf4f87aa6e3`, HTTP 200 e status ok.
+- O coordenador publicou em `2026-10-12T07:22:13.239Z`
+  (`04:22:13.239`, America/Sao_Paulo), deployment ID
+  `8f267ba8-ea32-4d42-9314-dbbc4113e11b`, sem tentativa pendente.
+  Imagem ativa: `sha256:5715bc8c7e9888cd44851b6b86d9d33b45f99f366e8e192dff13b4b029e5a01e`.
+  Container saudavel, sem OOM e com zero reinicios na conferencia.
+- CI aprovou validate, release-gates, isolated-restore e promotable-image no
+  SHA exato. Artefato `11730695750`; SHA-256 do arquivo comprimido:
+  `8bbaedf8c8202786fd3f577a9efb2105cd114aa87cd2e27fe07760452732a0f6`.
+  Configuracao e manifest OCI diferem de identidade; a promocao verificou a
+  cadeia de hashes e as 11 camadas, o ID carregado, label/plataforma e os dois
+  perfis de runtime. Diferenca de ID isolada nao permite ignorar essa prova.
+- Backup privado verificado, manifesto SHA-256
+  `445cb091b85460361086fbd31051d7ba2eb308a9cca6bf3a96644b7485b2601b`.
+  Versao anterior `f84867d`, deployment ID
+  `1061530d-5dfc-4027-b943-5c18a43e0c93`, conclusao real
+  `2026-10-12T03:26:50.036Z`. Nenhum rollback foi necessario ou executado.
+- Checks anonimos: inventory HTTP 401; Gestao e Rotina HTTP 307. Navegador
+  autenticado confirmou menu Gestao > Rotina, seis funcoes, 26 linhas e 74
+  atividades, demais opcoes nulas, e ausencia de edicao pendente. Nenhum dado
+  foi alterado durante o smoke. CI cobriu edicao/insercao/persistencia/teclado,
+  15 combinacoes de tema/largura e 40 checks de navegacao sem falhas.
+- Limite: Salvar grava apenas no navegador atual; nao ha persistencia
+  compartilhada entre usuarios ou dispositivos. Nao houve migration, n8n,
+  alteracao de contas, DNS, cobranca ou politica financeira nesta entrega.
+- Excecao operacional: o helper externo retornou exit 1 depois do recibo
+  deployed bem-sucedido. O predicado exato nao foi emitido, portanto a causa
+  nao esta confirmada. Consultas posteriores de ledger, runtime, health,
+  fronteira anonima e tela afetada passaram. Aplicar essa distincao somente
+  com recibo concluido, pendencia nula e verificacao ao vivo; nao ignorar uma
+  falha com pendencia ou runtime divergente. Reavaliar/logar cada predicado em
+  eventual recorrencia, sem republicar a mesma imagem nem contornar o guard.
+- HTTP 403 municipal da primeira tentativa de CI nao virou excecao de gate:
+  o verificador original passou na tentativa 2. Falhas locais Windows POSIX,
+  caminhos ESM e getuid permanecem documentadas; CI Linux passou sem reducao.
+- Protocolo permanente de inicio/fim foi integrado no PR #183 e na orientacao
+  local deste Git comum. Runtime/referencias do conhecimento foram atualizados
+  no vault existente. O fechamento publica apenas evidencias documentais no
+  Git e sincroniza Obsidian; um SHA documental posterior nao exige novo deploy.
+  A melhora vem do contexto verificavel, nao de treinamento do modelo.
+
 ## 2026-10-12: Main pode avancar durante validacao e mudar o procedimento
 
 - Fonte: git fetch/GitHub, PR #186, runbook production-release-guard e registro

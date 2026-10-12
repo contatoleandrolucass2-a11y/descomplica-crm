@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-12: Publicacao de Gestao > Rotina concluida
+
+- PR #183 integrado; candidato `d679d8e` e main
+  `7c6dce5c48b9e267586283a273866bf4f87aa6e3` aprovados nas CIs
+  `38209790612` e `38213038968` (tentativa 2). Todos os quatro jobs passaram,
+  incluindo matriz autenticada, restore e imagem imutavel.
+- Promocao pelo coordenador release:production concluida em
+  `2026-10-12T07:22:13.239Z` (04:22:13.239 em Sao Paulo), deployment ID
+  `8f267ba8-ea32-4d42-9314-dbbc4113e11b`, sem pendencia. Artefato CI
+  `11730695750` verificado por checksum, cadeia OCI/camadas e perfis de runtime.
+- Backup privado verificado e versao anterior preservada para recuperacao.
+  Container saudavel, sem OOM/reinicio; health HTTP 200 em `7c6dce5`.
+  Inventory anonimo retorna 401 e as duas rotas protegidas retornam 307.
+- Smoke autenticado em producao confirmou Gestao > Rotina, seis funcoes,
+  26 linhas/74 atividades e demais opcoes nulas. Apenas leitura e troca de
+  abas; nenhum salvar, insercao, restauracao ou mutacao de dados de producao.
+  Edicao/insercao/persistencia/teclado foram exercitados na CI isolada.
+- O helper externo terminou com exit 1 depois do coordenador concluir; a causa
+  exata nao foi emitida. Recibo, ledger sem pendencia, container, health e smoke
+  posterior confirmaram sucesso. Nao houve rollback nem segunda promocao.
+- Protocolo de fontes atuais por chat integrado e instalado no runtime local.
+  Fechamento documental preserva historico e limites das excecoes, sincroniza
+  Obsidian e publica evidencias no Git, sem novo restart da aplicacao.
+  Salvamento de Rotina continua restrito ao navegador, nao compartilhado.
+
 ## 2026-10-12: Integracao da protecao de publicacao atual
 
 - CI `38205980422` aprovou todos os gates do candidato `3bad94e`: 40 checks de
