@@ -244,39 +244,24 @@ O QA exige simultaneamente:
 - matriz funcional, visual, segurança, limpeza de contas efêmeras e logs
   sanitizados aprovados.
 
-Somente após QA verde e autorização separada, capturar a tag e o image ID da
-imagem anterior sem imprimir as demais variáveis privadas. O binder exige CAS
-exato, checkout limpo no novo SHA, imagem local com o mesmo image ID homologado
-e label OCI igual ao SHA; ele altera somente a única linha `IMAGE_TAG` e persiste
-arquivo e diretório antes de retornar:
+Somente após QA verde e autorização aplicável, executar a promoção protegida
+conforme [consulta ao vivo e trava compartilhada](production-release-guard.md).
+O coordenador mantém CAS, prova da imagem, consulta de versão/data/CI no mesmo
+minuto, Compose e health sob a mesma exclusão mútua:
 
 ```bash
-production_current_sha="$(
-  sudo sed -n 's/^IMAGE_TAG=//p' /etc/descomplica-crm/production.env
-)"
-test "${#production_current_sha}" -eq 40
-production_previous_image_id="$(
-  sudo docker image inspect \
-    "descomplica-crm:${production_current_sha}" --format '{{.Id}}'
-)"
-test "${#production_previous_image_id}" -eq 71
-
-sudo pnpm release:bind-production-image \
-  --expected-old-sha "${production_current_sha}" \
-  --new-sha "${release_sha}" \
-  --expected-image-id "${homologated_image_id}"
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production config --quiet
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production up -d --no-build --remove-orphans
-curl --fail --silent --show-error \
-  https://crm.descomplicapro.com.br/api/health
+sudo pnpm release:production deploy \
+  --expected-deployment-id "$production_deployment_id" \
+  --expected-sha "$production_current_sha" \
+  --sha "$release_sha" \
+  --image-id "$homologated_image_id" \
+  --ci-run-id "$main_ci_run_id"
 ```
 
 Produção deve continuar em 31 versões/17 páginas e com flags legadas
 `off`/vazio. Não executar nenhuma migration deste runbook em produção. O wrapper
 ignora variáveis do shell e lê somente `/etc/descomplica-crm/production.env`;
-por isso omitir o binder acima não promove a imagem nova.
+o coordenador realiza o bind internamente, dentro da trava de publicação.
 
 ## Rollback e recuperação
 
@@ -290,27 +275,18 @@ falhar, reapontar apenas o app para a imagem anterior comprovadamente compatíve
 com as flags desligadas; preservar histórico, dados e evidências. Corrigir banco
 somente por migration roll-forward allowlisted.
 
-Se `production config`, `production up` ou o health falhar depois do bind, manter
-o checkout limpo no `release_sha` e executar imediatamente o CAS reverso. Ele
-somente aceita a tag nova como estado corrente e comprova o image ID e a label
-OCI da imagem anterior antes de restaurar a linha `IMAGE_TAG`:
+Se a promoção falhar, manter o checkout limpo no `release_sha`, consultar o
+registro e recuperar somente a tentativa pendente:
 
 ```bash
-sudo pnpm release:bind-production-image rollback \
-  --expected-current-sha "${release_sha}" \
-  --rollback-sha "${production_current_sha}" \
-  --expected-image-id "${production_previous_image_id}"
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production config --quiet
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production up -d --no-build --remove-orphans
-curl --fail --silent --show-error \
-  https://crm.descomplicapro.com.br/api/health
+sudo pnpm release:production status
+sudo pnpm release:production recover --deployment-id "$pending_deployment_id"
 ```
 
-Não fazer checkout, rebuild, retag ou rollback de banco nesse procedimento. Se
-o CAS reverso falhar, manter o serviço parado e escalar o incidente; não editar
-`production.env` manualmente.
+O coordenador restaura a imagem anterior registrada por CAS e verifica health.
+Não fazer checkout, rebuild, retag ou rollback de banco. Se a recuperação
+falhar, manter a pendência e escalar; não editar `production.env` nem apagar
+ledger/lock. Depois de release concluída, uma reversão passa por nova CI.
 
 O backup fresco serve para recuperação de desastre da homologação isolada como
 uma unidade completa, mediante decisão explícita de incidente. Não usar seu

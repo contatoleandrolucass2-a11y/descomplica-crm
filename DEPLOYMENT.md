@@ -42,13 +42,17 @@ excluídos do contexto.
 
 ## Rollback
 
-- Aplicação: selecionar a tag imutável anterior e executar `docker compose up -d --no-build`.
+- Aplicação: recuperar a tentativa pendente com `pnpm release:production recover`; depois de release concluída, reverter por PR/CI e nova promoção. Ver [procedimento protegido](docs/runbooks/production-release-guard.md).
 - Banco: preferir migrations aditivas e backward-compatible. Uma migration destrutiva exige backup, janela e rollback específico testado.
 - Segredos: restaurar por gerenciador, nunca por Git.
 
 ## Produção
 
 Produção não será publicada automaticamente. Exige autorização explícita após homologação e relatório de testes.
+
+O procedimento de promoção é [consulta ao vivo e trava compartilhada](docs/runbooks/production-release-guard.md).
+Adotar esse comando em todos os publicadores e importar a evidência real da
+última publicação antes do primeiro uso. Sem data comprovada, o gate bloqueia.
 
 ## VPS com Docker Compose
 
@@ -77,8 +81,12 @@ git pull --ff-only origin main
 export IMAGE_TAG="$(git rev-parse HEAD)"
 pnpm image:build
 pnpm image:prove
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production up -d --no-build --remove-orphans
+sudo pnpm release:production deploy \
+  --expected-deployment-id "$production_deployment_id" \
+  --expected-sha "$production_current_sha" \
+  --sha "$IMAGE_TAG" \
+  --image-id "$homologated_image_id" \
+  --ci-run-id "$main_ci_run_id"
 sudo node scripts/release/compose-with-runtime-secret.mjs production ps
 curl --fail --silent http://127.0.0.1:3000/api/health
 curl --fail --head https://crm.descomplicapro.com.br/app/simulacao/tabela-direta
@@ -88,7 +96,9 @@ Para a publicação da réplica WF14, confirme que o `version` de `/api/health`
 coincide com o SHA implantado, que o acesso anônimo à URL acima redireciona sem
 expor conteúdo comercial e que uma sessão Master com `crm.simulators.view`
 recebe a Tabela Direta completa. O deploy não requer migration, novo segredo ou
-ativação de motor oficial; o rollback continua sendo a imagem imutável anterior.
+ativação de motor oficial. Falha durante a promoção permite recuperar a imagem
+anterior da pendência; falha no smoke posterior à conclusão exige nova release
+validada, conforme o procedimento protegido.
 Confirme também `404` no caminho legado público
 `/data/investor-inventory.json`, `401` nos dois endpoints de estoque sem sessão e
 `200`/`no-store`/3.301 linhas em `/api/inventory/snapshot` com sessão Master.
@@ -209,8 +219,8 @@ compatível (ou outra comprovadamente equivalente e posterior a `d00118f`) com
 todas as flags desligadas; não volte para imagem pré-pilha.
 
 ```bash
-export IMAGE_TAG=<sha-anterior>
-docker compose --env-file /etc/descomplica-crm/production.env up -d --no-build
+sudo pnpm release:production status
+sudo pnpm release:production recover --deployment-id "$pending_deployment_id"
 curl --fail --silent http://127.0.0.1:3000/api/health
 ```
 

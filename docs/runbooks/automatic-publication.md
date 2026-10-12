@@ -28,10 +28,16 @@ Nao disparar deploy em cada salvamento, checkout ou sincronizacao do Obsidian.
    conforme `docs/release-candidate/PROMOTABLE_IMAGE_RUNTIME.md`.
 5. Registrar versao/imagem anterior, verificar backup aplicavel e preparar
    rollback antes da troca. Nao expor segredos em logs ou artefatos.
-6. Promover com compare-and-swap da versao esperada. Se outro deploy ocorreu,
-   parar e reconciliar o estado; nao sobrescrever silenciosamente.
+6. Promover exclusivamente com `pnpm release:production`, conforme
+   [consulta ao vivo e trava compartilhada](production-release-guard.md).
+   Consultar versão, deployment ID e data real do último deploy no próprio
+   minuto da troca, com até 60 s de idade; manter lock até o health final.
+   CAS divergente, CI/main alterados, pendência ou data desconhecida bloqueiam.
+   Candidato já ativo retorna `noop`, sem republicação.
 7. Conferir health e versao publicada, acesso anonimo negado e jornada afetada.
-   Se a nova versao falhar, executar o rollback previsto e verificar recuperacao.
+   Falha do coordenador com pendência exige `release:production recover` e
+   verificação da recuperação. Se o coordenador já concluiu e o smoke posterior
+   falhar, corrigir/reverter por PR, CI completa e nova promoção protegida.
 8. Registrar resultado, evidencia, limites e pendencias; sincronizar Obsidian.
 
 Builds, suites extensas e carga sintetica rodam na CI ou ambiente isolado,

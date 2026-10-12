@@ -87,3 +87,16 @@ This version has breaking changes — APIs, conventions, and file structure may 
 This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
 
 <!-- END:nextjs-agent-rules -->
+
+## Deploy concorrente: consulta no minuto da publicação
+
+Pedido direto do usuário em 12/10/2026: consultar a versão e a data real do
+último deploy imediatamente antes de cada publicação, no próprio minuto e
+com evidência de no máximo 60 segundos. Usar exclusivamente o coordenador
+`pnpm release:production` e cumprir
+`docs/runbooks/production-release-guard.md`. Trava compartilhada, deployment ID,
+CAS e CI concluída no `main` exato são obrigatórios. Candidato já ativo não
+republica. Divergência, pendência, fonte indisponível ou data desconhecida
+bloqueiam. Recuperar apenas a pendência exata; não apagar ledger/lock nem usar
+bind/Compose diretos ou scripts antigos. Esta regra não amplia autorização
+para produção. Manter seu registro também no Obsidian.
