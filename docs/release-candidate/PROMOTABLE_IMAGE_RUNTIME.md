@@ -118,33 +118,26 @@ Homologação usa o wrapper root-only e nunca recompila:
 sudo node scripts/release/compose-with-runtime-secret.mjs homologation up -d --no-build --remove-orphans
 ```
 
-Após QA verde e autorização de produção, a promoção primeiro faz CAS atômico da
-única linha `IMAGE_TAG` no arquivo privado. O wrapper ignora o ambiente do shell;
-sem esse bind ele reutilizaria silenciosamente a tag antiga do arquivo:
+Após QA verde e autorização aplicável, usar o coordenador único descrito em
+[Publicação com consulta ao vivo](../runbooks/production-release-guard.md).
+Ele consulta a última versão/data, `main` e a CI dentro da trava compartilhada,
+faz CAS, inicia Compose e verifica health sem liberar a exclusão mútua:
 
 ```bash
-production_current_sha="$(
-  sudo sed -n 's/^IMAGE_TAG=//p' /etc/descomplica-crm/production.env
-)"
-test "${#production_current_sha}" -eq 40
-production_previous_image_id="$(
-  sudo docker image inspect \
-    "descomplica-crm:${production_current_sha}" --format '{{.Id}}'
-)"
-test "${#production_previous_image_id}" -eq 71
-sudo pnpm release:bind-production-image \
-  --expected-old-sha "${production_current_sha}" \
-  --new-sha "${release_sha}" \
-  --expected-image-id "${homologated_image_id}"
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production config --quiet
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production up -d --no-build --remove-orphans
+sudo pnpm release:production status
+sudo pnpm release:production deploy \
+  --expected-deployment-id "$production_deployment_id" \
+  --expected-sha "$production_current_sha" \
+  --sha "$release_sha" \
+  --image-id "$homologated_image_id" \
+  --ci-run-id "$main_ci_run_id"
 ```
 
-O wrapper aceita somente `config --quiet`, `up -d --no-build
---remove-orphans`, `ps`, `stop` e `down --remove-orphans`; flags adicionais são
-rejeitadas.
+`status` fornece o registro; `deploy` revalida as fontes no minuto da publicação.
+A primeira adoção exige importar a data real da publicação existente; sem
+essa evidência, não prosseguir. O bind separado e o `up` direto de produção
+foram desabilitados. O wrapper continua permitindo inspeção `config --quiet`
+e `ps`; homologação preserva suas invocações allowlisted.
 
 ### Trade-off do mount
 
@@ -162,21 +155,16 @@ interface `_FILE` da aplicação.
 Antes de produção, comparar image ID registrado após homologação. Divergência
 interrompe gate.
 
-Se `config`, `up` ou health de produção falhar, manter o checkout limpo no SHA
-novo e executar o CAS reverso comprovando a tag corrente e o image ID anterior:
+Se a promoção falhar, manter o checkout limpo no SHA candidato e usar a
+recuperação da pendência exata, conforme o mesmo runbook:
 
 ```bash
-sudo pnpm release:bind-production-image rollback \
-  --expected-current-sha "${release_sha}" \
-  --rollback-sha "${production_current_sha}" \
-  --expected-image-id "${production_previous_image_id}"
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production config --quiet
-sudo node scripts/release/compose-with-runtime-secret.mjs \
-  production up -d --no-build --remove-orphans
+sudo pnpm release:production status
+sudo pnpm release:production recover --deployment-id "$pending_deployment_id"
 ```
 
-O rollback reaponta o Compose para a tag e image ID anteriores, preserva secret
-stores e não altera banco. Não fazer checkout, rebuild, retag nem edição manual
-do `production.env`. Migrations aditivas já aplicadas exigem roll-forward; nunca
-rollback destrutivo.
+A recuperação restaura a imagem anterior registrada, preserva secret stores
+e não altera banco. Não fazer checkout, rebuild, retag nem editar o
+`production.env` manualmente. Migrations aditivas já aplicadas exigem
+roll-forward; nunca rollback destrutivo. Depois de uma release concluída,
+reversões passam novamente por PR, CI de `main` e promoção protegida.

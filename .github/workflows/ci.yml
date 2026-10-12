@@ -45,7 +45,7 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
-      - name: Test
+      - name: Test application and production release guard (including Linux flock)
         run: pnpm test
 
       - name: Verify current documentation fee sources

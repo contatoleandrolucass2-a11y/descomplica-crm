@@ -2197,3 +2197,13 @@ e pendencias. Nunca copiar chats completos, segredos, clientes ou estoque bruto.
 - O contrato continua estrutural: canvases nao autorizam numeros, politicas,
   rotas, grants ou motores. Dados e navegacao permanecem derivados dos loaders
   e guards existentes; ausencia de fonte continua fail-closed.
+
+## 2026-10-12 — DEPLOY-001 no fluxo de promoção
+
+Implementado `release:production`: consulta ao vivo de SHA, deployment ID e
+horário real dentro de lock compartilhado, CI completa no main exato,
+validade no próprio minuto/até 60 s, CAS, noop e recuperação de pendência.
+Procedimento: [production-release-guard](../runbooks/production-release-guard.md).
+CI executa testes de política, transação, recuperação e concorrência Linux.
+A adoção operacional exige histórico confiável para inicializar o ledger e
+uso do coordenador por todos os publicadores; esta entrega não publica runtime.
