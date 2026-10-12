@@ -370,7 +370,7 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
 
-    expect(markup).toContain("Buscar usuário");
+    expect(markup).toContain("Buscar pessoa");
     expect(markup).toContain("Permissões herdadas do papel");
     expect(markup).toContain("Exceções individuais");
     expect(markup).toContain("Configurações avançadas");
@@ -505,8 +505,11 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
 
-    expect(markup).toContain("Buscar permissão");
-    expect(markup).toContain("Selecionar todas as filtradas");
+    expect(markup).toContain("Buscar acesso");
+    expect(markup).toContain("Selecionar grupo");
+    expect(markup).toContain('role="tablist"');
+    expect(markup).toContain('aria-selected="true"');
+    expect(markup).toContain('role="tabpanel" tabindex="0"');
     expect(markup).toContain('aria-label="Acesso efetivo: Visualizar dashboard"');
     expect(markup).toMatch(
       /<input(?=[^>]*type="checkbox")(?=[^>]*aria-label="Acesso efetivo: Visualizar dashboard")(?=[^>]*checked="")[^>]*>/,

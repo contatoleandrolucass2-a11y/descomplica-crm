@@ -26,11 +26,11 @@ const reportingScopeSchema = z.object({
 
 export default async function UsersAdminPage() {
   const context = await enforcePermission("users.view");
-  const initialPage = await loadUserDirectoryPage(
-    context,
-    { offset: 0, search: "", status: "all" },
-    { includeSummary: true },
-  );
+  const initialPage = await loadUserDirectoryPage(context, {
+    offset: 0,
+    search: "",
+    status: "all",
+  });
   const supabase = await createClient();
   // The paged loader keeps the pre-foundation fallback fail-closed by mapping
   // legacy rows to `access_status: "legacy_review"`; other database errors fail.
@@ -65,15 +65,14 @@ export default async function UsersAdminPage() {
     <ManagementPage className="admin-canvas admin-users-page">
       <ManagementPageHeader
         title="Usuários e acessos"
-        description="Consulte acessos herdados e exceções separadamente. Alterações respeitam a hierarquia, impedem autoelevação e geram auditoria."
-        status={<ManagementStatusBadge>Acesso protegido</ManagementStatusBadge>}
+        description="Escolha uma pessoa e revise o que ela pode acessar."
+        status={<ManagementStatusBadge>Hierarquia respeitada</ManagementStatusBadge>}
       />
       <UserAccessManager
         users={initialPage.users}
         initialHasMore={initialPage.hasMore}
         initialNextOffset={initialPage.nextOffset}
         initialTotalCount={initialPage.totalCount}
-        summary={initialPage.summary}
         assignableRoles={assignableRoles}
         manageablePermissions={manageablePermissions}
         canManageRoles={canManageRoles}

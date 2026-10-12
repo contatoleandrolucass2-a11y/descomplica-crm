@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Conferencia atual antes de retomar a demanda
+
+- Fonte: `git fetch origin`, GitHub PR #183/CI `38184457031` e GET observacional
+  de `https://crm.descomplicapro.com.br/api/health`, conferidos nesta data.
+- GitHub main e site publicado convergem em
+  `f84867d0729e5782a0d41a040bf078a4506e7685`; health retorna `status: ok`.
+  Esse fato e um retrato da consulta, nao garantia sobre uma consulta futura.
+- Rotina continua no PR #183, candidato `b08ba26`: validate e restore isolado
+  aprovados; release-gates falhou na matriz de navegacao. Implementacao local
+  nao deve ser apresentada como publicada. Integracao com main e fechamento
+  dos comentarios de revisao ainda pendentes.
+- O usuario determinou consultar site/GitHub e sincronizar o Obsidian antes
+  de tratar cada novo chat, e registrar resultados e excecoes ao encerrar.
+  A regra sera persistida nos documentos do projeto e na orientacao local
+  limitada a este Git comum. Fontes indisponiveis exigem registro explicito;
+  uma excecao documentada nao concede novas permissoes.
+- Esta entrada registra consulta de fontes; nao comprova novos testes.
+
 ## 2026-10-11: Menu Gestao e submenu Rotina
 
 - Fonte: pedido do usuario, print do menu principal e planilha `TESTE1.xlsx`
@@ -39,6 +57,28 @@
   excessivamente alta. O fechamento usa medidas em lote para altura dos campos,
   duas colunas nas opcoes mobile e tabela com pan horizontal e coluna de linhas
   fixa. Nova QA exige texto completo, alcance de todos os dias e foco visivel.
+
+## 2026-10-11: Usuarios deve permanecer mestre-detalhe compacto
+
+- Fonte: draft aprovado `modelo-site.html#users`, implementação real de
+  `/admin/usuarios` e matriz visual autenticada. Status: validado localmente;
+  publicação registrada no Worklog quando concluída.
+- Preservar contratos não basta para paridade visual. Quatro cards de resumo e
+  cinco grupos expandidos mudaram a tarefa de escolher uma pessoa e revisar um
+  grupo por vez, produzindo 2.592 px onde o draft usa mestre-detalhe compacto.
+- O contrato estável da tela é: diretório à esquerda, busca e filtros em chips,
+  detalhe à direita, quatro abas (Comercial, Simuladores, Configurações e
+  Administração), uma aba renderizada por vez e ações salvas pelo mesmo fluxo
+  auditável do servidor.
+- Catálogos reais podem ter mais itens que a demonstração. No desktop, limitar
+  a região de permissões e mantê-la rolável/focável preserva todos os acessos e
+  a densidade; no mobile, remover o limite interno mantém o fluxo vertical.
+- O gate desktop de Usuários é 1.200 px. A captura aprovada mediu 1.187 px. Axe
+  deve bloquear qualquer região rolável sem foco; `role=tabpanel`, nome pela
+  aba e `tabIndex=0` compõem o contrato acessível.
+- Dados, nomes e estados do draft continuam demonstrativos. A interface usa
+  somente o diretório e a autorização reais, preservando a administração de
+  contas Administrador exclusivamente pelo Master em todas as camadas.
 
 ## 2026-10-11: Temas sem ilhas escuras e Administrador como classe protegida
 
