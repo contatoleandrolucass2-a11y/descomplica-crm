@@ -2,6 +2,8 @@
 
 ## 2026-10-12: Conhecimento e Rotina
 
+- Integra a protecao atual de publicacao com consulta ao vivo, registro de
+  deployment e locks compartilhados, preservando o novo coordenador de main.
 - Exige conferencia atual de site/GitHub e sincronizacao do Obsidian antes de
   cada novo chat do CRM, com resultados e excecoes documentados no encerramento.
 - Protege edicoes pendentes da Rotina ao sair, recarregar ou voltar no historico

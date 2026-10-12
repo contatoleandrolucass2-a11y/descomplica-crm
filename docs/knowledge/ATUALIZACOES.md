@@ -1,5 +1,25 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Main pode avancar durante validacao e mudar o procedimento
+
+- Fonte: git fetch/GitHub, PR #186, runbook production-release-guard e registro
+  sanitizado da VPS. Status: integrado; nova CI e publicacao pendentes.
+- O candidato `3bad94e` passou CI `38205980422`, com 40 checks de navegacao e
+  15 combinacoes de Rotina. A conferencia anterior ao merge encontrou main
+  `e162411`, que mudou o processo de publicacao. CI verde da base antiga nao
+  dispensa integracao nem validacao do candidato combinado.
+- Versao ativa permanece `f84867d`, com registro de conclusao real em
+  `2026-10-12T03:26:50.036Z` e nenhuma tentativa pendente. Main recebeu tooling,
+  nao runtime da aplicacao: essa divergencia de SHA nao exige restart por si so.
+- Usar exclusivamente release:production da versao atual, sem bind/Compose
+  antigos nem locks externos. O coordenador consulta registro, runtime e
+  GitHub no mesmo minuto da escrita, preserva exclusao mutua e exige evidencia
+  do historico. Registro ausente, data desconhecida, main/CI divergentes ou
+  tentativa pendente bloqueiam; nunca inferir a data por commit ou container.
+- Reavaliar o procedimento a cada publicacao e repetir a busca de fontes ao
+  detectar mudanca externa. A observacao desta entrada nao substitui a consulta
+  fresca executada dentro da trava no momento do deploy.
+
 ## 2026-10-12: ScrollWidth de painel pode incluir pintura na borda
 
 - Fonte: CI `38203285914`, artefato `11726659106`, 32 medicoes compactas e

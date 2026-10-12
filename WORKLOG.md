@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-12: Integracao da protecao de publicacao atual
+
+- CI `38205980422` aprovou todos os gates do candidato `3bad94e`: 40 checks de
+  navegacao, zero falhas, Rotina em 15 combinacoes e controles completos.
+- Antes do merge, a conferencia ao vivo detectou main `e162411` (PR #186),
+  com o novo coordenador de publicacao e locks compartilhados. Integracao
+  preserva esse trabalho e exige nova CI no candidato combinado.
+- Registro privado da VPS corresponde ao runtime `f84867d`, com deployment ID
+  `1061530d-5dfc-4027-b943-5c18a43e0c93`, conclusao verificada em
+  `2026-10-12T03:26:50.036Z` e nenhuma tentativa pendente. A promocao usa
+  exclusivamente release:production, com nova consulta ao vivo no minuto da
+  troca, artefato aprovado, backup e recuperacao pelo mesmo coordenador.
+- Mudanca de tooling em main nao equivale a nova publicacao da aplicacao.
+  Nenhum container foi reiniciado por esta integracao; publicacao de Rotina
+  continua pendente da CI final e da imagem de main.
+
 ## 2026-10-12: Geometria de borda no menu compacto
 
 - CI `38203285914` do candidato `b38a184` aprovou validate, restore, banco,
@@ -92,6 +108,7 @@
   encontrou textos longos com rolagem interna e empilhamento excessivo no
   celular; campos passaram a crescer com o conteúdo, as opções ficaram mais
   compactas e a tabela preserva a semana em rolagem horizontal acessível.
+
 ## 2026-10-12: Consulta ao vivo e exclusão mútua na publicação
 
 - Pedido: conferir a última publicação no próprio minuto do deploy, pois mais
