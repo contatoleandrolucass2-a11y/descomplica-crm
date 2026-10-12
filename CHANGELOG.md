@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-10-12: Rotina semanal e diaria compacta
+
+- Alterna entre planilha de segunda a sabado e atividades do dia atual.
+- Compacta cabecalho, abas e celulas, com texto centralizado e titulos fixos.
+- Mantem edicao, insercao e salvamento local, sem apagar domingos antigos.
+- Preserva foco de teclado visivel nos tres temas tambem na visao diaria.
+- Detalha evidencias de geometria e acessibilidade da matriz de Rotina.
+- Verifica a largura diaria apos a atualizacao do layout, sem relaxar limites.
+- Isola o relogio simulado da Rotina das demais jornadas de QA.
+
+## 2026-10-12: Planilha de Rotina em producao
+
+- Publica a grade continua e o destaque do dia na versao `83592ab`, apos CI
+  integral, verificacao da imagem, backup e promocao protegida.
+- Confirma a interface autenticada, health, container saudavel e preservacao
+  das 26 linhas/74 atividades. Salvamento continua local ao navegador.
+- Registra evidencias e excecoes verificadas no conhecimento do projeto;
+  fechamento documental nao reinicia a aplicacao.
+
 ## 2026-10-12: Validacao visual do console
 
 - Aguarda transicoes de tema na matriz sintetica e detalha falhas de contraste.

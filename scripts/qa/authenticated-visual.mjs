@@ -5830,8 +5830,18 @@ async function run() {
             await marketingPage.close({ runBeforeUnload: false });
           }
           currentStage = "routine-settings";
-          const routinePage = configureQaPage(await context.newPage());
+          // Playwright's clock belongs to the context, not only to its page.
+          const routineContext = await browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            reducedMotion: "reduce",
+            locale: "pt-BR",
+            timezoneId: "America/Sao_Paulo",
+            httpCredentials,
+          });
           try {
+            await hideHomologationBannerForBaseline(routineContext);
+            const routinePage = configureQaPage(await routineContext.newPage());
+            await login(routinePage, origin, email, password);
             const routine = await checkRoutineSettings(
               routinePage,
               origin,
@@ -5842,7 +5852,7 @@ async function run() {
               JSON.stringify(routine, null, 2),
             );
           } finally {
-            await routinePage.close({ runBeforeUnload: false });
+            await routineContext.close();
           }
           currentStage = "connected-systems";
           const systemsPage = configureQaPage(await context.newPage());

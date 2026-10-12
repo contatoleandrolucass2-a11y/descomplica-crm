@@ -1,5 +1,52 @@
 # Worklog
 
+## 2026-10-12: Rotina semanal e diaria compacta
+
+- Centraliza as atividades, remove domingo da exibicao e conserva o schema
+  local de sete dias para nao apagar conteudo previamente salvo.
+- Adiciona Semana/Hoje, com dia de Sao Paulo atualizado automaticamente,
+  linhas vazias editaveis e foco na nova linha. Titulo e dias permanecem
+  fixos dentro da area de rolagem, inclusive com quebra responsiva da barra.
+- Remove breadcrumb somente da Rotina, resumos, status ocioso e restauracao.
+  Preserva seis funcoes, armazenamento local e protecao contra saida sem salvar.
+- Validacao e publicacao em andamento; referencia externa e Associativo intactos.
+- Lint, tipos, build, inventario e nove testes de breadcrumbs aprovados.
+  Suite Windows: 2469 aprovados, 25 skips, seis falhas de modos POSIX;
+  gates Linux permanecem obrigatorios antes de publicar.
+- Chromium isolado: 19/19 aprovados, incluindo modos, domingo legado,
+  navegacao, persistencia, centralizacao e cabecalhos fixos sem sobreposicao.
+- Revisao corrigiu o foco da visao Hoje nos temas claros; regressao por
+  teclado passou nos tres temas. Tipagem do teste ajustada para consultar
+  animacoes no elemento raiz, com typecheck e repeticao focal aprovados.
+- CI 38267645863 falhou na matriz Rotina 720/claro, com causa ainda nao
+  comprovada. Adiciona diagnosticos sanitizados e espera do fim de transicoes
+  no QA diario, sem reduzir assercoes. Nova CI obrigatoria antes de publicar.
+- CI 38271094364 comprovou sticky e localizou a falha na largura ao trocar
+  para Hoje em 720px. QA aguarda o layout com a mesma tolerancia de 1px e
+  registra medidas iniciais/finais; nenhuma regra de overflow foi removida.
+- CI 38273867131 comprovou 30 combinacoes da Rotina e largura transitoria
+  960 -> 694 em 17ms. Falha restante agregava sticky do Tabelao desktop;
+  nao comprovava erro de ordenacao. Revisao reproduziu timers simulados
+  persistentes apos restaurar Date. QA da Rotina agora usa contexto proprio
+  e login sintetico, fechado ao terminar; Tabelao/Associativo intactos.
+- Regressao local final: 22/22 testes Chromium aprovados. Matriz de estilos
+  separada por tema, preservando limite por teste; lint focal e tipos passaram.
+
+## 2026-10-12: Planilha de Rotina publicada
+
+- PR #188 integrado e versao `83592ab` publicada pelo coordenador em
+  `2026-10-12T13:19:10.060Z`, deployment `48a08b2c-d4fe-4331-a710-5fdcb46f6d4c`.
+- CI do PR `38246693168` aprovada; CI final `38250580690`, tentativa 2,
+  aprovou os quatro jobs. Preparacao do pnpm falhou na primeira tentativa do
+  restore; repeticao isolada passou sem alterar os gates.
+- Imagem imutavel, 11 camadas, dois perfis e backup verificados. Health na
+  versao nova, container saudavel e acessos anonimos negados.
+- Smoke autenticado confirmou a grade continua, coluna Hoje, seis funcoes,
+  26 linhas e 74 atividades. Nenhuma mutacao no navegador de producao.
+- Helper externo encontrou Docker ainda starting apos o deploy concluido;
+  releitura confirmou healthy, sem reinicios. Evidencia detalhada no conhecimento.
+- Fechamento apenas documental, com sincronizacao do Obsidian, sem novo deploy.
+
 ## 2026-10-12: Estabilizacao da matriz do console
 
 - CI 38271515539: validate aprovado; release-gates interrompido por contraste
