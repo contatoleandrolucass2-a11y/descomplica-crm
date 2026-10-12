@@ -8,6 +8,7 @@
 - Preserva foco de teclado visivel nos tres temas tambem na visao diaria.
 - Detalha evidencias de geometria e acessibilidade da matriz de Rotina.
 - Verifica a largura diaria apos a atualizacao do layout, sem relaxar limites.
+- Isola o relogio simulado da Rotina das demais jornadas de QA.
 
 ## 2026-10-12: Planilha de Rotina em producao
 

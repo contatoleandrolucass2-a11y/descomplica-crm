@@ -41,6 +41,22 @@
   inicial/final e aguarda a mesma condicao sem overflow por expect.poll,
   mantendo tolerancia de 1px. Causa de eventual largura transitoria ainda
   nao comprovada; uma nova CI aprovada e necessaria.
+- Evidencia 38273867131/artefato 11759768049: Rotina aprovada nas 30
+  combinacoes. Log mostra 960px inicial -> 694px estavel em 17ms ao trocar
+  para Hoje. Todos os checks gerais de rotas, temas, Axe, zoom e comparacao
+  visual passaram; bloqueio final foi tabelaoValidation.groupedProjects,
+  que agrega sticky/layout, nao apenas ordenacao. Log confirmou sticky:false
+  somente em 1440px. Repeticao do job interrompida para corrigir isolamento.
+- Revisao Chromium reproduziu que setSystemTime restaura Date avancando mas
+  nao remove requestAnimationFrame/setTimeout simulados do contexto. Esse
+  vazamento e confirmado; sua causalidade sobre o sticky especifico nao.
+  Rotina agora usa contexto proprio com login sintetico e fechamento finally,
+  sem exportar storageState nem alterar Tabelao/Associativo. Nova CI integral
+  obrigatoria; nenhum gate enfraquecido e nenhuma publicacao realizada.
+- Suite local final 22/22 passou. Teste de estilos dividido por tema apos
+  timeout de 5s ao reunir seis capturas e tres focos; limites e assercoes
+  preservados. Lint focal e typecheck aprovados. Revisao confirmou que Rotina
+  nao depende da fixture de estoque do contexto principal.
 
 ## 2026-10-12: Planilha de Rotina publicada e conferida
 

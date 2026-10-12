@@ -51,6 +51,19 @@ describe("Rotina", () => {
     expect(source).toContain('getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled');
     expect(source).toContain("forbidden()");
   });
+
+  it("isolates the QA clock from the other authenticated journeys", () => {
+    const source = readFileSync("scripts/qa/authenticated-visual.mjs", "utf8");
+    const routineStep = source.slice(
+      source.indexOf('currentStage = "routine-settings"'),
+      source.indexOf('currentStage = "connected-systems"'),
+    );
+    expect(routineStep).toContain("const routineContext = await browser.newContext(");
+    expect(routineStep).toContain("await routineContext.newPage()");
+    expect(routineStep).toContain("await login(routinePage, origin, email, password)");
+    expect(routineStep).toContain("await routineContext.close()");
+    expect(routineStep).not.toContain("await context.newPage()");
+  });
 });
 
 const storageKey = "descomplica.crm.settings.routine.v1";
@@ -209,10 +222,11 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     }
   });
 
-  it("renders continuous spreadsheet cells in every theme without hiding text", async () => {
-    await openRoutine({ clock: "2026-10-12T15:00:00Z" });
-    await mkdir("test-results/routine-preview", { recursive: true });
-    for (const theme of ["light", "balanced", "dark"]) {
+  it.each(["light", "balanced", "dark"])(
+    "renders continuous spreadsheet cells in %s without hiding text",
+    async (theme) => {
+      await openRoutine({ clock: "2026-10-12T15:00:00Z" });
+      await mkdir("test-results/routine-preview", { recursive: true });
       await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme);
       for (const width of [1440, 390]) {
         await page.setViewportSize({ width, height: 1000 });
@@ -299,8 +313,8 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       expect(focus.style).toBe("solid");
       expect(focus.width).toBeGreaterThanOrEqual(2);
       await page.getByRole("button", { name: "Semana", exact: true }).click();
-    }
-  });
+    },
+  );
 
   async function openRoutine(
     options: {

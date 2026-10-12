@@ -24,6 +24,13 @@
 - CI 38271094364 comprovou sticky e localizou a falha na largura ao trocar
   para Hoje em 720px. QA aguarda o layout com a mesma tolerancia de 1px e
   registra medidas iniciais/finais; nenhuma regra de overflow foi removida.
+- CI 38273867131 comprovou 30 combinacoes da Rotina e largura transitoria
+  960 -> 694 em 17ms. Falha restante agregava sticky do Tabelao desktop;
+  nao comprovava erro de ordenacao. Revisao reproduziu timers simulados
+  persistentes apos restaurar Date. QA da Rotina agora usa contexto proprio
+  e login sintetico, fechado ao terminar; Tabelao/Associativo intactos.
+- Regressao local final: 22/22 testes Chromium aprovados. Matriz de estilos
+  separada por tema, preservando limite por teste; lint focal e tipos passaram.
 
 ## 2026-10-12: Planilha de Rotina publicada
 
