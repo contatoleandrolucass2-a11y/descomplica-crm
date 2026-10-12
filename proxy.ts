@@ -186,6 +186,15 @@ export async function proxy(request: NextRequest) {
   const isSecureProduction =
     process.env.NODE_ENV === "production" && request.nextUrl.protocol === "https:";
 
+  // This probe reuses frozen gateway cookies. Its route checks identity, live
+  // session, MFA and Master permission without refreshing tokens or cookies.
+  if (request.nextUrl.pathname === "/api/salesforce/console/authorize") {
+    const response = NextResponse.next({ request });
+    applySecurityHeaders(response.headers, { isProd: isSecureProduction });
+    response.headers.set("Cache-Control", "no-store");
+    return response;
+  }
+
   const unavailableResponse = unavailableSalesforceResponse(request);
   if (unavailableResponse) {
     applySecurityHeaders(unavailableResponse.headers, {

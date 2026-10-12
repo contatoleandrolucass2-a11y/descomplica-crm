@@ -11,9 +11,12 @@ export type RouteAuthorizationResult =
   | { ok: true; context: AuthorizationContext }
   | { ok: false; response: Response };
 
-export async function authorizeRoute(permission: PermissionKey): Promise<RouteAuthorizationResult> {
+export async function authorizeRoute(
+  permission: PermissionKey,
+  allowSessionRefresh = true,
+): Promise<RouteAuthorizationResult> {
   try {
-    return { ok: true, context: await requirePermission(permission) };
+    return { ok: true, context: await requirePermission(permission, allowSessionRefresh) };
   } catch (error) {
     if (!(error instanceof AuthorizationError)) throw error;
     return {

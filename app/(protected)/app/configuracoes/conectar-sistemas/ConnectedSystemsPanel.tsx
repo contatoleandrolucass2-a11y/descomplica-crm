@@ -6,10 +6,11 @@ import {
   CircleHelp,
   CirclePause,
   ExternalLink,
+  Monitor,
   RefreshCw,
   Unplug,
 } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 import { SalesforceRefreshButton } from "@/app/(protected)/app/_components/SalesforceRefreshButton";
 import {
@@ -19,6 +20,7 @@ import {
 } from "@/lib/crm/salesforce/connection-contract";
 
 import styles from "./ConnectedSystemsPanel.module.css";
+import { SalesforceConsoleDialog } from "./SalesforceConsoleDialog";
 
 const REPORTS = [
   { key: "opportunities", name: "Oportunidades", id: "00OU600000DrfDeMAJ" },
@@ -107,12 +109,20 @@ export function ConnectedSystemsPanel({
   refreshAvailable,
   canRefresh,
   statusConfigured,
+  consoleAvailable = false,
 }: {
   ingestLabel: string;
   refreshAvailable: boolean;
   canRefresh: boolean;
   statusConfigured: boolean;
+  consoleAvailable?: boolean;
 }) {
+  const [consoleOpen, setConsoleOpen] = useState(false);
+  const [consoleError, setConsoleError] = useState(false);
+  const closeConsole = useCallback((credentialsFailed = false) => {
+    setConsoleOpen(false);
+    setConsoleError(credentialsFailed);
+  }, []);
   const [snapshot, setSnapshot] = useState<SalesforceConnectionSnapshot>(() =>
     emptySnapshot(statusConfigured ? "waiting" : "unconfigured"),
   );
@@ -218,16 +228,38 @@ export function ConnectedSystemsPanel({
               className={checking ? styles.spinning : undefined}
             />
           </button>
+          <button
+            type="button"
+            className={`${styles.button} ${styles.primaryButton}`}
+            disabled={!consoleAvailable}
+            title={
+              consoleAvailable ? "Conectar Salesforce" : "Console indisponível para este acesso"
+            }
+            aria-haspopup="dialog"
+            onClick={() => {
+              setConsoleError(false);
+              setConsoleOpen(true);
+            }}
+          >
+            <Monitor size={16} aria-hidden="true" /> Conectar Salesforce
+          </button>
           <a
             href="https://direcional.my.salesforce.com/"
             target="_blank"
             rel="noopener noreferrer"
             className={styles.button}
           >
-            Abrir Salesforce <ExternalLink size={16} aria-hidden="true" />
+            Abrir no navegador <ExternalLink size={16} aria-hidden="true" />
           </a>
         </div>
       </header>
+
+      {consoleError ? (
+        <p role="alert" className={styles.consoleAlert}>
+          Não foi possível autorizar o console. Tente novamente.
+        </p>
+      ) : null}
+      {consoleOpen && consoleAvailable ? <SalesforceConsoleDialog onClose={closeConsole} /> : null}
 
       <section className={styles.services} aria-labelledby="services-title">
         <div className={styles.servicesHeading}>
