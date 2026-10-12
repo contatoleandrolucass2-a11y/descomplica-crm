@@ -210,7 +210,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   });
 
   it("renders continuous spreadsheet cells in every theme without hiding text", async () => {
-    await openRoutine();
+    await openRoutine({ clock: "2026-10-12T15:00:00Z" });
     await mkdir("test-results/routine-preview", { recursive: true });
     for (const theme of ["light", "balanced", "dark"]) {
       await page.evaluate((theme) => (document.documentElement.dataset.theme = theme), theme);
@@ -267,6 +267,38 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           path: `test-results/routine-preview/planilha-${theme}-${width}.png`,
         });
       }
+      await page.getByRole("button", { name: "Hoje", exact: true }).click();
+      await page.getByRole("button", { name: "Inserir linha", exact: true }).focus();
+      await page.keyboard.press("Tab");
+      await browserExpect(page.locator("textarea").first()).toBeFocused();
+      await page.waitForFunction(() =>
+        document
+          .getAnimations({ subtree: true })
+          .every((animation) => animation.playState !== "running" && !animation.pending),
+      );
+      const focus = await page.locator("td:focus-within").evaluate((cell) => {
+        const css = getComputedStyle(cell);
+        // Resolve the theme token independently from the outline being checked.
+        const probe = document.createElement("span");
+        probe.style.color = "var(--inv-color-accent)";
+        cell.append(probe);
+        const accent = getComputedStyle(probe).color;
+        probe.remove();
+        return {
+          outline: css.outlineColor,
+          background: css.backgroundColor,
+          style: css.outlineStyle,
+          width: parseFloat(css.outlineWidth),
+          accent,
+        };
+      });
+      expect(focus.outline, `Daily keyboard focus must use the ${theme} accent`).toBe(focus.accent);
+      expect(focus.outline, `Daily keyboard focus must differ from the ${theme} surface`).not.toBe(
+        focus.background,
+      );
+      expect(focus.style).toBe("solid");
+      expect(focus.width).toBeGreaterThanOrEqual(2);
+      await page.getByRole("button", { name: "Semana", exact: true }).click();
     }
   });
 

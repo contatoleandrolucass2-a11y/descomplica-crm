@@ -25,6 +25,9 @@
   preenchida somente no domingo legado aparecendo vazia em Hoje; filtro
   corrigido para preservar o dado e omitir a linha nessa visao. Cobertura
   verifica virada Sao Paulo, geometria sticky, foco, persistencia e navegacao.
+- Revisao independente reproduziu foco branco sobre fundo claro no modo Hoje.
+  Correcao usa o accent do tema somente nessa visao; Semana conserva branco
+  sobre a coluna destacada. Teste de regressao de foco nos tres temas exigido.
 
 ## 2026-10-12: Planilha de Rotina publicada e conferida
 

@@ -458,6 +458,10 @@
   outline-color: #ffffff;
 }
 
+.routineTable[data-view="day"] td[data-today]:focus-within {
+  outline-color: var(--inv-color-accent);
+}
+
 .dayHeading {
   display: block;
 }
