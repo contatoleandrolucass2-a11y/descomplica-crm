@@ -56,6 +56,8 @@ redimensiona a grade. Movimento reduzido desativa brilho e ampliacao. Assinatura
 fica diretamente no fundo do rodape da Rotina, alinhada a direita, sem faixa
 nem borda e sem alterar o rodape global. Entrada e brilho seguem da direita
 para a esquerda; movimento reduzido deixa o texto estatico.
+O credito fica branco no tema escuro e usa texto contrastante nos temas claros;
+a ausencia da faixa exige verificar contraste tambem sem animacao.
 
 O ajuste de altura mede campos invisiveis fora do fluxo da tabela, nunca
 encolhe todos os editores visiveis para medir. Esse encolhimento temporario

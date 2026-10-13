@@ -1153,10 +1153,14 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await expectUnsavedNavigation(false);
   });
 
-  it.each(["light", "balanced", "dark"])(
-    "passes Axe including contrast in weekly and daily %s",
-    async (theme) => {
-      await openRoutine({ clock: "2026-10-12T15:00:00Z" });
+  it.each(
+    ["light", "balanced", "dark"].flatMap((theme) =>
+      (["reduce", "no-preference"] as const).map((reducedMotion) => ({ theme, reducedMotion })),
+    ),
+  )(
+    "passes Axe including contrast in weekly and daily $theme/$reducedMotion",
+    async ({ theme, reducedMotion }) => {
+      await openRoutine({ clock: "2026-10-12T15:00:00Z", reducedMotion });
       await page.evaluate((value) => {
         document.documentElement.dataset.theme = value;
       }, theme);

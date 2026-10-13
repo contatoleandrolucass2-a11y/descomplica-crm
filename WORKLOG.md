@@ -12,6 +12,12 @@
 - Regressao cobre Semana/Hoje, desktop/mobile, leitura/edicao, refresh por
   intervalo/foco, selecao e digitacao. Matriz autenticada inclui o caso de
   ultima linha. Validacao global e publicacao pendentes.
+- Lint/tipos/test/build locais aprovados; suite geral2647, coletor138 e
+  release113 (11 fisicos Linux na CI). Browser87/87 com CSS minificado.
+- CI revelou contraste do credito branco no tema claro com movimento reduzido
+  (1.08:1), reproduzido localmente. Credito agora adapta a cor aos temas claros,
+  mantendo branco no escuro; Axe ampliado para ambas as preferencias de movimento.
+  QA de entrada verifica matriz real para resistir a minificacao CSS.
 
 ## 2026-10-13: Efeitos da Rotina em producao
 

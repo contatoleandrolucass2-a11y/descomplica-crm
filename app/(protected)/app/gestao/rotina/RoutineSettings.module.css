@@ -8,6 +8,8 @@
   --routine-heading-border: #167985;
   --routine-crosshair: linear-gradient(145deg, #d0edf4, #c0dceb);
   --routine-intersection: linear-gradient(145deg, #1c7891, #174a75);
+  --routine-credit-text: #18354f;
+  --routine-credit-shine: #156782;
   min-width: 0;
   color: var(--inv-color-text);
   background: var(--inv-color-page);
@@ -22,6 +24,8 @@
   --routine-heading-text: #e6ffff;
   --routine-heading-border: #52cbd8;
   --routine-crosshair: linear-gradient(145deg, #185367, #163b56);
+  --routine-credit-text: #ffffff;
+  --routine-credit-shine: #7bdfff;
 }
 
 :global(:root[data-theme="balanced"]) .page {
@@ -727,16 +731,20 @@
 .footerCredit {
   display: inline-block;
   max-width: 100%;
-  color: #ffffff;
+  color: var(--routine-credit-text);
   font-size: 12px;
   font-weight: 600;
   line-height: 1.5;
   overflow-wrap: anywhere;
-  background: linear-gradient(110deg, #ffffff 35%, #7bdfff 48%, #ffffff 61%);
+  background: linear-gradient(
+    110deg,
+    var(--routine-credit-text) 35%,
+    var(--routine-credit-shine) 48%,
+    var(--routine-credit-text) 61%
+  );
   background-size: 250% 100%;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 1px 1px #0e2135);
   animation:
     routine-credit-arrive 650ms ease-out both,
     routine-credit-shimmer 4.5s linear infinite;
@@ -789,7 +797,7 @@
   }
   .footerCredit {
     background: none;
-    -webkit-text-fill-color: #ffffff;
+    -webkit-text-fill-color: var(--routine-credit-text);
   }
 }
 

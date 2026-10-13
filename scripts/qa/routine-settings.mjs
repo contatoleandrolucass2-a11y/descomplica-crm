@@ -269,7 +269,11 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
     .filter({ hasText: "Desenvolvido e gerenciado por Leandro Lucas" });
   await expect(footer).toHaveCount(1);
   const credit = footer.getByText("Desenvolvido e gerenciado por Leandro Lucas", { exact: true });
-  await expect(credit).toHaveCSS("color", "rgb(255, 255, 255)");
+  const creditColor =
+    (await page.locator("html").getAttribute("data-theme")) === "dark"
+      ? "rgb(255, 255, 255)"
+      : "rgb(24, 53, 79)";
+  await expect(credit).toHaveCSS("color", creditColor);
   await expect(credit).toHaveCSS("animation-duration", "0.65s, 4.5s");
   await expect(footer).toHaveCSS("text-align", "right");
   await expect(footer).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
@@ -335,8 +339,8 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
         await item.evaluate((element) => getComputedStyle(element, "::before").animationName),
         "none",
       );
-    await expect(credit).toHaveCSS("color", "rgb(255, 255, 255)");
-    await expect(credit).toHaveCSS("-webkit-text-fill-color", "rgb(255, 255, 255)");
+    await expect(credit).toHaveCSS("color", creditColor);
+    await expect(credit).toHaveCSS("-webkit-text-fill-color", creditColor);
   } finally {
     await page.emulateMedia({ reducedMotion: "no-preference" });
   }
@@ -957,9 +961,13 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
           });
           assert.equal(scrolling, true, "Every weekday must remain reachable within the table");
         }
+        checkpoint(`weekly-accessibility-${width}-${theme}`);
         const result = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
+        process.stdout.write(
+          `[routine-accessibility] ${JSON.stringify({ width, theme, mode: "Semana", violations: result.violations.map(({ id }) => id) })}\n`,
+        );
         assert.deepEqual(
           result.violations.map(({ id, nodes }) => ({
             id,

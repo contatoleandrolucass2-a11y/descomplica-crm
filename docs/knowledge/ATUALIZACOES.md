@@ -27,6 +27,18 @@
   repeticao com VITEST_MAX_WORKERS=1 passou2647 casos, coletor138 e release113.
   Os11 testes fisicos POSIX continuam exclusivos Linux. Browser focal inicial:
   80 passaram/7 timeouts sob carga; repeticao e build local pendentes.
+- Retomada as10:53 Sao Paulo: origin/main permanece cdb26fbd; health publico
+  HTTP200/ok/08c3ae4. Checkout limpo37951f4 e PR205 aberto. CI38402470753 tem
+  validate/restore aprovados, mas matriz autenticada bloqueada em visual1440-light,
+  apos aprovar regressao de rolagem e sem repetir erro de keyframe.
+  Fontes: GitHub PR205/actions e /api/health; nenhum deploy desta correcao.
+- Repeticao local com CSS minificado passou87/87 casos de interface/API;
+  pnpm build aprovado. Pendencia restante: diagnosticar e corrigir a divergencia
+  da matriz autenticada, sem remover gates ou assumir sucesso pelo teste local.
+- Causa da segunda falha reproduzida: Axe com movimento reduzido detecta contraste
+  1.08:1 no credito branco sobre fundo claro. Sombra nao substitui contraste.
+  Texto branco preservado no escuro; temas claros usam18354f/156782. Axe passa
+  a testar ambas as preferencias; diagnostico CI registra somente IDs de regras.
 
 ## 2026-10-13: Efeitos e compactacao da Rotina publicados
 
