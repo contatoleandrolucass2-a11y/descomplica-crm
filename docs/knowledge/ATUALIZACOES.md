@@ -33,6 +33,14 @@
   2567 aprovados, seis falhas POSIX conhecidas em quatro arquivos e 53 skips;
   nao suprimir testes, reavaliar na CI Linux do mesmo SHA. QA usa fixtures/RPC
   mockada; nao comprova backend autenticado real. Nenhuma escrita em producao.
+- CI PR #202/38353319930: validate e restore passaram, matriz autenticada
+  falhou no helper novo que pressupunha movimento habilitado. O runner cria
+  contexto reducedMotion=reduce; falha reproduzida localmente. Helpers agora
+  testam ambos os modos e restauram a preferencia original em finally, inclusive
+  apos falha. Nao mudar runtime, thresholds, baseline ou contexto global.
+- Regressao ampliada: 83/83 casos focais aprovados; gates Windows mantem seis
+  falhas POSIX/2567 aprovados/56 skips. Diagnostico futuro limita logs a fase,
+  viewport e tipo de falha, sem DOM ou payload privado. Nova CI obrigatoria.
 
 ## 2026-10-13: Rotina compartilhada publicada
 

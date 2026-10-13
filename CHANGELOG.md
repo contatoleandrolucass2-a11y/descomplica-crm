@@ -1,5 +1,7 @@
 # Changelog
 
+- QA da Rotina testa efeitos com e sem movimento reduzido, restaurando a preferencia do contexto apos sucesso ou falha.
+
 - Rotina: controles compactos no cabecalho, gradientes, realce de linha/coluna e rodape com brilho acessivel.
 
 - Publicado: Rotina compartilhada no banco, edicao autorizada e cabecalho contrastante (PR #200, 7c50f59).

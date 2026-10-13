@@ -134,7 +134,41 @@ export async function checkRoutineScrolling(page, region) {
   }
 }
 
+async function withRoutineMotionModes(page, check, inspect) {
+  const originalMotion = await page.evaluate(() =>
+    matchMedia("(prefers-reduced-motion: reduce)").matches ? "reduce" : "no-preference",
+  );
+  let phase = "initialize-motion";
+  try {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    return await inspect((value) => {
+      phase = value;
+    });
+  } catch (error) {
+    // Fixed labels and viewport only: never log DOM, API payloads or identities.
+    process.stderr.write(
+      `[routine-effects] ${JSON.stringify({
+        check,
+        phase,
+        originalMotion,
+        viewport: page.viewportSize(),
+        kind: error instanceof assert.AssertionError ? "assertion" : "check-failed",
+      })}\n`,
+    );
+    throw error;
+  } finally {
+    await page.emulateMedia({ reducedMotion: originalMotion });
+  }
+}
+
 export async function checkRoutineHeaderEffects(page) {
+  return withRoutineMotionModes(page, "header", (checkpoint) =>
+    checkRoutineHeaderEffectsInMotion(page, checkpoint),
+  );
+}
+
+async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
+  checkpoint("structure");
   const header = page.locator("header").filter({ has: page.locator("h1") });
   const modes = page.getByRole("group", { name: "Visualização da rotina", exact: true });
   const insert = page.getByRole("button", { name: "Inserir linha", exact: true });
@@ -149,6 +183,7 @@ export async function checkRoutineHeaderEffects(page) {
   const controls = [modes, insert, save];
   const boxes = [];
   for (const control of controls) {
+    checkpoint(`control-geometry-${boxes.length}`);
     await expect(control).toBeVisible();
     assert.equal(await control.evaluate((element) => element.closest("header") !== null), true);
     const box = await control.boundingBox();
@@ -165,6 +200,7 @@ export async function checkRoutineHeaderEffects(page) {
     boxes.push(box);
   }
   for (let index = 1; index < controls.length; index++) {
+    checkpoint(`control-order-${index}`);
     const previous = await controls[index - 1].elementHandle();
     assert.equal(
       await controls[index].evaluate(
@@ -179,6 +215,7 @@ export async function checkRoutineHeaderEffects(page) {
     const after = boxes[index];
     assert.ok(after.y >= before.y - 1, "Controls retain visual reading order");
   }
+  checkpoint("control-overlap");
   for (let a = 0; a < boxes.length; a++)
     for (let b = a + 1; b < boxes.length; b++) {
       const first = boxes[a],
@@ -196,7 +233,10 @@ export async function checkRoutineHeaderEffects(page) {
     const style = getComputedStyle(element, "::before");
     return { image: style.backgroundImage, duration: style.animationDuration };
   });
-  for (const heading of await page.locator("thead th:not(:first-child)").all()) {
+  for (const [index, heading] of (
+    await page.locator("thead th:not(:first-child)").all()
+  ).entries()) {
+    checkpoint(`weekday-effect-${index}`);
     const style = await heading.evaluate((element) => {
       const css = getComputedStyle(element),
         border = getComputedStyle(element, "::before");
@@ -223,6 +263,7 @@ export async function checkRoutineHeaderEffects(page) {
     assert.equal(style.duration, saveEffect.duration);
     assert.equal(style.pointer, "none");
   }
+  checkpoint("footer-motion");
   const footer = page
     .locator("footer")
     .filter({ hasText: "Desenvolvido e gerenciado por Leandro Lucas" });
@@ -246,6 +287,7 @@ export async function checkRoutineHeaderEffects(page) {
     (await animations()).some((name) => name !== "none"),
     "Footer credit has shimmer",
   );
+  checkpoint("reduced-motion");
   await page.emulateMedia({ reducedMotion: "reduce" });
   try {
     assert.ok(
@@ -265,6 +307,13 @@ export async function checkRoutineHeaderEffects(page) {
 }
 
 export async function checkRoutineCellEffects(page, outputDirectory) {
+  return withRoutineMotionModes(page, "cells", (checkpoint) =>
+    checkRoutineCellEffectsInMotion(page, outputDirectory, checkpoint),
+  );
+}
+
+async function checkRoutineCellEffectsInMotion(page, outputDirectory, checkpoint) {
+  checkpoint("weekly-setup");
   const capture = async (mode) => {
     if (!outputDirectory) return;
     await mkdir(outputDirectory, { recursive: true });
@@ -320,6 +369,7 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
         ),
       );
   const geometry = await dimensions();
+  checkpoint("weekly-hover");
   await target.hover();
   await settle();
   assert.notDeepEqual(await paint(rowPeer), before[0], "Hover highlights its row");
@@ -343,6 +393,7 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
   assert.ok(scale > 1 && scale <= 1.08, "Hovered intersection scales subtly");
   assert.deepEqual(await dimensions(), geometry, "Hover never changes table layout dimensions");
   await capture("week-hover");
+  checkpoint("cell-reduced-motion");
   await page.emulateMedia({ reducedMotion: "reduce" });
   try {
     await expect(target).toHaveCSS("transform", "none");
@@ -352,6 +403,7 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
     await page.emulateMedia({ reducedMotion: "no-preference" });
   }
   await page.mouse.move(0, 0);
+  checkpoint("weekly-focus");
   await target.locator("textarea").focus();
   await settle();
   assert.notDeepEqual(await paint(rowPeer), before[0], "Keyboard focus highlights its row");
@@ -367,6 +419,7 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
   const hoverRow = cells.nth(3).locator("td").nth(4);
   const hoverColumn = cells.nth(4).locator("td").nth(3);
   const hoverBefore = await Promise.all([hoverRow, hoverColumn].map(paint));
+  checkpoint("hover-over-focus");
   await hovered.hover();
   await settle();
   await expect(target.locator("textarea")).toBeFocused();
@@ -403,6 +456,7 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
   await settle();
   assert.notDeepEqual(await paint(rowPeer), before[0]);
   assert.notDeepEqual(await paint(columnPeer), before[1]);
+  checkpoint("today-focus");
   const todayCell = page.locator("tbody td[data-today]").first();
   await todayCell.locator("textarea").focus();
   await settle();
@@ -416,6 +470,7 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
     ["same-row", cells.first().locator("td").nth(1)],
     ["same-column", page.locator("tbody td[data-today]").nth(2)],
   ]) {
+    checkpoint(`today-focus-${name}`);
     await peer.hover();
     await settle();
     await expect(todayCell.locator("textarea")).toBeFocused();
@@ -468,6 +523,7 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
     await settle();
     await expect(todayCell).toHaveCSS("outline-color", "rgb(255, 255, 255)");
   }
+  checkpoint("daily-effects");
   await page.getByRole("button", { name: "Hoje", exact: true }).click();
   const dailyTarget = page.locator("tbody tr").nth(1).locator("td");
   const dailyOther = page.locator("tbody tr").nth(2).locator("td");

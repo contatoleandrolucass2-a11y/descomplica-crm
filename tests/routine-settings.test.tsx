@@ -394,6 +394,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       clock?: string;
       canEdit?: boolean;
       hasTouch?: boolean;
+      reducedMotion?: "reduce" | "no-preference";
       server?: ServerFixture;
     } = {},
   ) {
@@ -406,7 +407,10 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           resumeLoad = resolve;
         })
       : Promise.resolve();
-    const context = await browser.newContext({ hasTouch: options.hasTouch ?? false });
+    const context = await browser.newContext({
+      hasTouch: options.hasTouch ?? false,
+      reducedMotion: options.reducedMotion ?? null,
+    });
     page = await context.newPage();
     if (options.clock) await page.clock.install({ time: new Date(options.clock) });
     await page.route("http://routine.test/**", async (route) => {
@@ -1001,6 +1005,45 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await expectUnsavedNavigation(false);
     },
     20_000,
+  );
+
+  it("checks both motion modes and restores the authenticated runner's reduced context", async () => {
+    await openRoutine({ clock: "2026-10-12T15:00:00Z", reducedMotion: "reduce" });
+    await page.setViewportSize({ width: 1440, height: 900 });
+    const reduced = () =>
+      page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
+    expect(await reduced()).toBe(true);
+    await checkRoutineHeaderEffects(page);
+    expect(await reduced()).toBe(true);
+    await checkRoutineCellEffects(page);
+    expect(await reduced()).toBe(true);
+    expect(server.puts).toEqual([]);
+    await expectUnsavedNavigation(false);
+  }, 20_000);
+
+  it.each(["header", "cells"] as const)(
+    "restores reduced motion after a %s assertion failure",
+    async (helper) => {
+      await openRoutine({ clock: "2026-10-12T15:00:00Z", reducedMotion: "reduce" });
+      await page.setViewportSize({ width: 1440, height: 900 });
+      // Deliberately break only this synthetic page to exercise failure cleanup.
+      await page.addStyleTag({
+        content:
+          helper === "header"
+            ? "thead th { background-image: none !important; }"
+            : "tbody td, tbody textarea { transform: none !important; scale: none !important; }",
+      });
+      if (helper === "header")
+        await expect(checkRoutineHeaderEffects(page)).rejects.toThrow(/linear-gradient/);
+      else
+        await expect(checkRoutineCellEffects(page)).rejects.toThrow(
+          "Hovered intersection scales subtly",
+        );
+      expect(
+        await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches),
+      ).toBe(true);
+      expect(server.puts).toEqual([]);
+    },
   );
 
   it("keeps touch mode buttons at least 44px with a coarse pointer", async () => {
