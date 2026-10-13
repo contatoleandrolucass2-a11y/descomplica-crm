@@ -50,6 +50,8 @@ nao e necessario enviar novamente senhas ou chaves ao assistente.
 
 ## Limites
 
+- Validacao local desta etapa: lint/typecheck/test/build aprovados, n8n23/23.
+  CI do PR ainda pendente na entrega; nao ha promocao automatica confirmada.
 - N8n antigo nao foi alterado. A candidata nova continua inativa neste registro.
 - Backup offsite esta no mesmo projeto Supabase: exclusao do projeto e risco comum.
 - Nao houve teste completo de boot das aplicacoes restauradas nem de

@@ -2,6 +2,8 @@
 
 ## 2026-10-13: Backup externo e prontidao do restore
 
+- Guia unico de conclusao com acessos e pendencias; suite completa e build
+  revalidados sem ativar a automacao.
 - Corrige espera do PostgreSQL temporario no backup isolado do novo n8n.
 - Registra envio criptografado e recuperacao exata dos dois backups externos.
 - Revisa gate Salesforce sem exigir migrations de outros fluxos ou rotacao

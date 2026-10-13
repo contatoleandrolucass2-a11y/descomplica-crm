@@ -2,6 +2,16 @@
 
 ## 2026-10-13: Retomada do backup externo e gates de ingestao
 
+- Encerramento local: lint (um aviso preexistente), typecheck, test e build
+  aprovados; Vitest2620/43skips, coletor138, release86/10skips Linux, n8n23/23.
+  Fontes documentais e diff check aprovados. Build50rotas. PR198/aa2ec8f
+  publicado; CI38350763371 ainda em validacao na consulta05:22Z.
+- Health05:22Z ok/SHA7c50f59; runtime confirma ingestfalse/refreshfalse e
+  secrets ainda nao injetados. Novo n8n e Postgres running/pausedfalse.
+  Guia unico docs/runbooks/conclusao-salesforce-n8n.md entregue. Sem afirmar
+  carga HTTP real, agenda ativa ou recuperacao de desastre completa.
+- Restam custodia independente da chave, CI/main/imagem, promocao protegida da
+  configuracao e carga201/replay200 reconciliados. Nao dispensar esses gates.
 - Backup externo concluido: bucket privado crm-private-backups, dois objetos
   CMS AES256GCM/OAEP-SHA256, total881567bytes. Upload sem sobrescrita,
   download identico e decrypt local com SHA256 exato. Chave nunca transferida.

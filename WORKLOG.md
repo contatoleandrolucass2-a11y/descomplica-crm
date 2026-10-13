@@ -2,6 +2,11 @@
 
 ## 2026-10-13: Backup externo recuperado e prontidao corrigida
 
+- Validacao final: lint/typecheck/test/build, fontes documentais e diff check
+  aprovados. Vitest2620/43skips, coletor138, release86/10skips e n8n23/23.
+  CI do commit aa2ec8f em andamento; health publico continua7c50f59/ok.
+- Guia de conclusao entregue com acessos, backup, custodia, gates e limites.
+  Sem promocao, injecao de secrets ou ativacao de agenda nesta etapa.
 - Backups Supabase e novo n8n criptografados para bucket privado autorizado.
   Download/checksum e recuperacao local com igualdade SHA256 aprovados.
   Chave privada somente Windows; segunda copia independente ainda pendente.
