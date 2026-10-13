@@ -43,6 +43,58 @@
   novo n8n ativo emdcffaf09, cinco nodes e execucoes sem payloads persistidos.
   N8n antigo intocado. Agenda ainda desligada, monitor atual preservado.
 
+## 2026-10-13: Integracao concorrente durante a correcao da Rotina
+
+- PR203 integrado em1ace82d16ad3cdc117a96d36cd9f935657581bee as13:54:12Z,
+  CI38400603988 aprovada. GitHub/main passou a incluir o instalador de agenda
+  Salesforce. Merge preserva ambos os conjuntos; conflitos somente nas tres
+  notas compartilhadas, resolvidos mantendo o conteudo integral.
+- Browser final90/90 passou com24 combinacoes Axe e CSS minificado. Nova
+  verificacao local foi interrompida durante lint para integrar main; nao vale
+  como validacao do conjunto. Reexecutar gates apos o merge e CI no novo SHA.
+  Nenhum instalador, agenda, n8n, migration ou configuracao remota sera executado
+  por esta tarefa de interface; publicacao normal preserva env vigente.
+
+## 2026-10-13: Abertura da correcao de rolagem da Rotina
+
+- Git comum confirmado; checkout limpo em ad539567, PR #204 documental com
+  CI38369900656 aprovada e integrado em cdb26fbd248c0a42cb7112cdb7674dae5237770a.
+  Nova branch codex/rotina-rolagem-estavel parte desse main.
+- GET observacional de https://crm.descomplicapro.com.br/api/health em
+  2026-10-13T09:22:39-03:00: HTTP200, status ok, version
+  08c3ae453ddfb225c3cb64971b53333c36d8932e. Diferenca do main e documental;
+  nao demonstra a correcao solicitada. Fontes: GitHub PR204/CI e health publico.
+- Escopo: investigar salto ao passar o mouse nas ultimas linhas; preservar
+  posicao/foco e deixar credito sem faixa, a direita, com brilho direita-esquerda.
+  Sem alteracao de dados, permissoes, migrations ou workflows. Validacao e
+  publicacao ainda pendentes; testes anteriores nao cobriram este sintoma.
+- Causa reproduzida no Chromium: focus na linha7 + hover final + GET de30s
+  reduz scrollY4028 para237 ao zerar altura dos editores na medicao. Probes
+  invisiveis fora do fluxo eliminam o encolhimento; regressao focal passou.
+  Rodape passa a fundo transparente/alinhamento direito, entrada650ms e
+  shimmer4.5s direita-esquerda, ambos desligados com movimento reduzido.
+- CI38398973974: validate/restore aprovados; regressao autenticada de rolagem
+  passou. Matriz bloqueada por comparacao textual dos keyframes de entrada.
+  Reproduzido localmente habilitando minificacao CSS: translateX e translate
+  sao serializacoes equivalentes. QA passa a conferir matriz/deslocamento e
+  opacidade reais, sem afrouxar direcao/distancia; fixture usa CSS minificado.
+- Suite geral local: primeira tentativa teve dois timeouts Obsidian sob carga;
+  repeticao com VITEST_MAX_WORKERS=1 passou2647 casos, coletor138 e release113.
+  Os11 testes fisicos POSIX continuam exclusivos Linux. Browser focal inicial:
+  80 passaram/7 timeouts sob carga; repeticao e build local pendentes.
+- Retomada as10:53 Sao Paulo: origin/main permanece cdb26fbd; health publico
+  HTTP200/ok/08c3ae4. Checkout limpo37951f4 e PR205 aberto. CI38402470753 tem
+  validate/restore aprovados, mas matriz autenticada bloqueada em visual1440-light,
+  apos aprovar regressao de rolagem e sem repetir erro de keyframe.
+  Fontes: GitHub PR205/actions e /api/health; nenhum deploy desta correcao.
+- Repeticao local com CSS minificado passou87/87 casos de interface/API;
+  pnpm build aprovado. Pendencia restante: diagnosticar e corrigir a divergencia
+  da matriz autenticada, sem remover gates ou assumir sucesso pelo teste local.
+- Causa da segunda falha reproduzida: Axe com movimento reduzido detecta contraste
+  1.08:1 no credito branco sobre fundo claro. Sombra nao substitui contraste.
+  Texto branco preservado no escuro; temas claros usam18354f/156782. Axe passa
+  a testar ambas as preferencias; diagnostico CI registra somente IDs de regras.
+
 ## 2026-10-13: Retomada para agenda Salesforce na VPS
 
 - Usuario autorizou continuar depois da conexao e carga real. Escopo agora:

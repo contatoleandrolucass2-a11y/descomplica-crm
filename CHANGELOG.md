@@ -9,6 +9,14 @@
 - Falha inicial foi revertida; navegador autenticado, n8n antigo e banco
   preservados. Nova ativacao depende de validacao e prova operacional.
 
+## 2026-10-13: Rolagem estavel na Rotina
+
+- Corrige salto para cima durante a atualizacao automatica e medicao das celulas.
+- Preserva foco e selecao; rodape sem faixa, alinhado a direita, com entrada e
+  brilho da direita para a esquerda e respeito a movimento reduzido.
+- Credito permanece branco no tema escuro e usa contraste adequado nos temas
+  claros, inclusive com animacoes desativadas; QA usa CSS minificado.
+
 ## 2026-10-13: Agenda Salesforce com instalacao reversivel
 
 - Prepara servico dedicado para coleta de 30 minutos e monitor no mesmo processo,

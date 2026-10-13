@@ -269,8 +269,48 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
     .filter({ hasText: "Desenvolvido e gerenciado por Leandro Lucas" });
   await expect(footer).toHaveCount(1);
   const credit = footer.getByText("Desenvolvido e gerenciado por Leandro Lucas", { exact: true });
-  await expect(credit).toHaveCSS("color", "rgb(255, 255, 255)");
-  await expect(credit).toHaveCSS("animation-duration", "4.5s");
+  const creditColor =
+    (await page.locator("html").getAttribute("data-theme")) === "dark"
+      ? "rgb(255, 255, 255)"
+      : "rgb(24, 53, 79)";
+  await expect(credit).toHaveCSS("color", creditColor);
+  await expect(credit).toHaveCSS("animation-duration", "0.65s, 4.5s");
+  await expect(footer).toHaveCSS("text-align", "right");
+  await expect(footer).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(footer).toHaveCSS("border-top-width", "0px");
+  const frames = await credit.evaluate((element) =>
+    element.getAnimations().map((animation) =>
+      animation.effect.getKeyframes().map((frame) => {
+        const matrix = frame.transform ? new DOMMatrixReadOnly(frame.transform) : null;
+        return {
+          x: matrix?.m41,
+          y: matrix?.m42,
+          opacity: Number(frame.opacity),
+          backgroundX: frame.backgroundPositionX,
+        };
+      }),
+    ),
+  );
+  checkpoint("footer-entry-direction");
+  assert.ok(
+    frames.some(
+      (sequence) =>
+        sequence[0].x === 24 &&
+        sequence[0].y === 0 &&
+        sequence[0].opacity === 0 &&
+        sequence.at(-1).x === 0 &&
+        sequence.at(-1).y === 0 &&
+        sequence.at(-1).opacity === 1,
+    ),
+    "Credit arrives from right to left",
+  );
+  checkpoint("footer-shimmer-direction");
+  assert.ok(
+    frames.some(
+      (sequence) => sequence[0].backgroundX === "-150%" && sequence.at(-1).backgroundX === "150%",
+    ),
+    "Oversized shimmer moves from right to left",
+  );
   const today = page.locator('thead [aria-current="date"]');
   await expect(today.getByText("Hoje", { exact: true })).toBeVisible();
   assert.match(
@@ -299,8 +339,8 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
         await item.evaluate((element) => getComputedStyle(element, "::before").animationName),
         "none",
       );
-    await expect(credit).toHaveCSS("color", "rgb(255, 255, 255)");
-    await expect(credit).toHaveCSS("-webkit-text-fill-color", "rgb(255, 255, 255)");
+    await expect(credit).toHaveCSS("color", creditColor);
+    await expect(credit).toHaveCSS("-webkit-text-fill-color", creditColor);
   } finally {
     await page.emulateMedia({ reducedMotion: "no-preference" });
   }
@@ -573,6 +613,38 @@ async function selectTheme(page, theme, width) {
   );
 }
 
+export async function checkRoutineRefreshPosition(page) {
+  const earlier = page.locator('textarea[data-row="6"]').first();
+  await earlier.focus();
+  await earlier.evaluate((field) => field.setSelectionRange(3, 8));
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const position = await page.evaluate(() => window.scrollY);
+  const last = page.locator("tbody tr").last().locator("td").first();
+  const box = await last.boundingBox();
+  assert.ok(box && box.y > 0, "Last row is visible at the bottom of the page");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const response = page.waitForResponse(
+    (item) => item.url().endsWith("/api/routines") && item.request().method() === "GET",
+  );
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  assert.ok((await response).ok(), "Background refresh succeeded");
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  );
+  assert.ok(
+    Math.abs((await page.evaluate(() => window.scrollY)) - position) < 1,
+    "Refresh must not jump away from the last rows",
+  );
+  await expect(earlier).toBeFocused();
+  assert.deepEqual(
+    await earlier.evaluate((field) => [field.selectionStart, field.selectionEnd]),
+    [3, 8],
+  );
+  await earlier.evaluate((field) => field.blur());
+  await page.mouse.move(0, 0);
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 export async function checkRoutineSettings(page, origin, outputDirectory, { readerPage } = {}) {
   const target = new URL(origin);
   const database = new URL(process.env.QA_AUTH_SUPABASE_URL ?? "http://invalid");
@@ -803,6 +875,9 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
       74,
     );
 
+    checkpoint("last-row-background-refresh");
+    await checkRoutineRefreshPosition(page);
+
     for (const width of [1440, 1024, 720, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
       for (const theme of ["light", "balanced", "dark"]) {
@@ -886,9 +961,13 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
           });
           assert.equal(scrolling, true, "Every weekday must remain reachable within the table");
         }
+        checkpoint(`weekly-accessibility-${width}-${theme}`);
         const result = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
           .analyze();
+        process.stdout.write(
+          `[routine-accessibility] ${JSON.stringify({ width, theme, mode: "Semana", violations: result.violations.map(({ id }) => id) })}\n`,
+        );
         assert.deepEqual(
           result.violations.map(({ id, nodes }) => ({
             id,

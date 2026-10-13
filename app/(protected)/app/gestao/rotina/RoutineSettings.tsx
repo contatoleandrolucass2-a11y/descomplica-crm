@@ -368,14 +368,38 @@ function normalizeStoredRoutine(value: unknown): Partial<RoutineState> {
 function fitRoutineFields(table: HTMLTableElement | null) {
   if (!table) return;
   const fields = Array.from(table.querySelectorAll("textarea"));
-  // Batch measurements so typing does not trigger a layout for every cell.
-  fields.forEach((field) => {
-    field.style.height = "auto";
-  });
-  const heights = fields.map((field) => {
+  // Measure outside the flow: collapsing live fields clamps the page scroll on refresh.
+  const measurements = fields.map((field) => {
     const style = getComputedStyle(field);
-    const borders = parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth);
-    return Math.max(32, field.scrollHeight + borders);
+    const probe = field.cloneNode() as HTMLTextAreaElement;
+    probe.removeAttribute("id");
+    probe.removeAttribute("name");
+    probe.removeAttribute("aria-label");
+    probe.removeAttribute("data-row");
+    probe.setAttribute("aria-hidden", "true");
+    probe.tabIndex = -1;
+    probe.value = field.value;
+    Object.assign(probe.style, {
+      position: "absolute",
+      top: "0px",
+      left: "0px",
+      visibility: "hidden",
+      pointerEvents: "none",
+      width: style.width,
+      height: "0px",
+      minHeight: "0px",
+    });
+    return {
+      probe,
+      borders: parseFloat(style.borderTopWidth) + parseFloat(style.borderBottomWidth),
+    };
+  });
+  measurements.forEach(({ probe }, index) => fields[index]!.after(probe));
+  const heights = measurements.map(({ probe, borders }) =>
+    Math.max(32, probe.scrollHeight + borders),
+  );
+  measurements.forEach(({ probe }) => {
+    probe.remove();
   });
   fields.forEach((field, index) => {
     field.style.height = `${heights[index]}px`;
