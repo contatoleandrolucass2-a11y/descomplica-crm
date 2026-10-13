@@ -270,7 +270,29 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
   await expect(footer).toHaveCount(1);
   const credit = footer.getByText("Desenvolvido e gerenciado por Leandro Lucas", { exact: true });
   await expect(credit).toHaveCSS("color", "rgb(255, 255, 255)");
-  await expect(credit).toHaveCSS("animation-duration", "4.5s");
+  await expect(credit).toHaveCSS("animation-duration", "0.65s, 4.5s");
+  await expect(footer).toHaveCSS("text-align", "right");
+  await expect(footer).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
+  await expect(footer).toHaveCSS("border-top-width", "0px");
+  const frames = await credit.evaluate((element) =>
+    element.getAnimations().map((animation) => animation.effect.getKeyframes()),
+  );
+  assert.ok(
+    frames.some(
+      (sequence) =>
+        sequence[0].transform === "translateX(24px)" &&
+        sequence.at(-1).transform === "translateX(0px)",
+    ),
+    "Credit arrives from right to left",
+  );
+  assert.ok(
+    frames.some(
+      (sequence) =>
+        sequence[0].backgroundPositionX === "-150%" &&
+        sequence.at(-1).backgroundPositionX === "150%",
+    ),
+    `Oversized shimmer moves from right to left: ${JSON.stringify(frames)}`,
+  );
   const today = page.locator('thead [aria-current="date"]');
   await expect(today.getByText("Hoje", { exact: true })).toBeVisible();
   assert.match(
@@ -573,6 +595,38 @@ async function selectTheme(page, theme, width) {
   );
 }
 
+export async function checkRoutineRefreshPosition(page) {
+  const earlier = page.locator('textarea[data-row="6"]').first();
+  await earlier.focus();
+  await earlier.evaluate((field) => field.setSelectionRange(3, 8));
+  await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+  const position = await page.evaluate(() => window.scrollY);
+  const last = page.locator("tbody tr").last().locator("td").first();
+  const box = await last.boundingBox();
+  assert.ok(box && box.y > 0, "Last row is visible at the bottom of the page");
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  const response = page.waitForResponse(
+    (item) => item.url().endsWith("/api/routines") && item.request().method() === "GET",
+  );
+  await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+  assert.ok((await response).ok(), "Background refresh succeeded");
+  await page.evaluate(
+    () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+  );
+  assert.ok(
+    Math.abs((await page.evaluate(() => window.scrollY)) - position) < 1,
+    "Refresh must not jump away from the last rows",
+  );
+  await expect(earlier).toBeFocused();
+  assert.deepEqual(
+    await earlier.evaluate((field) => [field.selectionStart, field.selectionEnd]),
+    [3, 8],
+  );
+  await earlier.evaluate((field) => field.blur());
+  await page.mouse.move(0, 0);
+  await page.evaluate(() => window.scrollTo(0, 0));
+}
+
 export async function checkRoutineSettings(page, origin, outputDirectory, { readerPage } = {}) {
   const target = new URL(origin);
   const database = new URL(process.env.QA_AUTH_SUPABASE_URL ?? "http://invalid");
@@ -802,6 +856,9 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
         .evaluateAll((fields) => fields.filter((field) => field.value.trim()).length),
       74,
     );
+
+    checkpoint("last-row-background-refresh");
+    await checkRoutineRefreshPosition(page);
 
     for (const width of [1440, 1024, 720, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });

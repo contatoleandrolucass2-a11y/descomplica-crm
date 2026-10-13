@@ -53,7 +53,16 @@ Apenas os dias da tabela acompanham a rolagem abaixo do menu. Gradientes e
 realce seguem a referencia visual, sem modificar a pagina de metas. Hover/foco
 destacam linha e coluna na semana e somente linha no dia; a ampliacao sutil nao
 redimensiona a grade. Movimento reduzido desativa brilho e ampliacao. Assinatura
-fica no rodape da Rotina, sem alterar o rodape global.
+fica diretamente no fundo do rodape da Rotina, alinhada a direita, sem faixa
+nem borda e sem alterar o rodape global. Entrada e brilho seguem da direita
+para a esquerda; movimento reduzido deixa o texto estatico.
+
+O ajuste de altura mede campos invisiveis fora do fluxo da tabela, nunca
+encolhe todos os editores visiveis para medir. Esse encolhimento temporario
+limitava a rolagem no refresh de 30 segundos, causando salto ao inicio mesmo
+com o mouse nas ultimas linhas. A regressao verifica rolagem, foco e selecao
+com refresh por intervalo/foco, Semana/Hoje e desktop/mobile. Foco solicitado
+explicitamente por teclado ou insercao de linha permanece funcional.
 
 `supabase/tests/crm_shared_routines.test.sql`, `tests/routine-api.test.ts`,
 `tests/routine-settings.test.tsx`, `scripts/qa/routine-settings.mjs` e matriz

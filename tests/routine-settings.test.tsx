@@ -122,9 +122,13 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   let checkRoutineScrolling: (page: Page, region: Locator) => Promise<void>;
   let checkRoutineHeaderEffects: (page: Page) => Promise<void>;
   let checkRoutineCellEffects: (page: Page, outputDirectory?: string) => Promise<void>;
+  let checkRoutineRefreshPosition: (page: Page) => Promise<void>;
 
   beforeAll(async () => {
     ({ checkRoutineScrolling, checkRoutineHeaderEffects, checkRoutineCellEffects } = await import(
+      pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
+    ));
+    ({ checkRoutineRefreshPosition } = await import(
       pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
     ));
     const require = createRequire(import.meta.url);
@@ -778,6 +782,84 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await savedRows();
     expect(server.records["regional-house"]?.rows).toEqual([]);
   });
+
+  it.each([
+    { view: "Semana", width: 1440, canEdit: true },
+    { view: "Semana", width: 390, canEdit: false },
+    { view: "Hoje", width: 1440, canEdit: true },
+    { view: "Hoje", width: 390, canEdit: false },
+  ])(
+    "keeps the last rows and caret stable during hover and refresh: $view/$width",
+    async ({ view, width, canEdit }) => {
+      const rows = Array.from({ length: 26 }, (_, index) => ({
+        "Segunda-feira": `Atividade ${index + 1}: ${"Acompanhar a equipe e conferir os resultados. ".repeat(6)}`,
+      }));
+      await openRoutine({
+        stored: JSON.stringify({ "regional-house": rows }),
+        clock: "2026-10-12T15:00:00Z",
+        canEdit,
+      });
+      await page.setViewportSize({ width, height: 900 });
+      await page.getByRole("button", { name: view, exact: true }).click();
+      if (view === "Semana" && canEdit) await checkRoutineRefreshPosition(page);
+      const earlier = page.getByRole("textbox", { name: "Segunda-feira, linha 7", exact: true });
+      await earlier.focus();
+      await earlier.evaluate((field: HTMLTextAreaElement) => field.setSelectionRange(3, 8));
+      await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
+      const position = await page.evaluate(() => window.scrollY);
+      const last = page.locator("tbody tr").last().locator("td").first();
+      const box = (await last.boundingBox())!;
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.clock.runFor(250);
+      expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(position, 0);
+      const response = page.waitForResponse("**/api/routines");
+      await page.clock.fastForward(30_000);
+      await response;
+      await page.clock.runFor(100);
+      expect(await page.evaluate(() => window.scrollY)).toBeCloseTo(position, 0);
+      await browserExpect(earlier).toBeFocused();
+      expect(
+        await earlier.evaluate((field: HTMLTextAreaElement) => [
+          field.selectionStart,
+          field.selectionEnd,
+        ]),
+      ).toEqual([3, 8]);
+      server.records["regional-house"]!.rows[0]!["Segunda-feira"] += " QA";
+      const refreshed = page.waitForResponse("**/api/routines");
+      await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+      await refreshed;
+      await page.clock.runFor(100);
+      await browserExpect(
+        page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true }),
+      ).toHaveValue(/ QA$/);
+      expect(Math.abs((await page.evaluate(() => window.scrollY)) - position)).toBeLessThan(25);
+      await browserExpect(earlier).toBeFocused();
+      expect(
+        await earlier.evaluate((field: HTMLTextAreaElement) => [
+          field.selectionStart,
+          field.selectionEnd,
+        ]),
+      ).toEqual([3, 8]);
+      if (canEdit) {
+        const editor = last.locator("textarea");
+        await editor.focus();
+        await editor.evaluate((field: HTMLTextAreaElement) => field.setSelectionRange(0, 1));
+        const beforeEdit = await page.evaluate(() => window.scrollY);
+        await page.keyboard.insertText("B");
+        await page.clock.runFor(100);
+        expect(Math.abs((await page.evaluate(() => window.scrollY)) - beforeEdit)).toBeLessThan(25);
+        await browserExpect(editor).toBeFocused();
+        expect(
+          await editor.evaluate((field: HTMLTextAreaElement) => [
+            field.selectionStart,
+            field.selectionEnd,
+          ]),
+        ).toEqual([1, 1]);
+      }
+      expect(await page.locator('textarea[aria-hidden="true"]').count()).toBe(0);
+      expect(server.puts).toEqual([]);
+    },
+  );
 
   it("shares saved content across independent sessions and refreshes clean readers on focus and 30s", async () => {
     await openRoutine();

@@ -1,5 +1,24 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Abertura da correcao de rolagem da Rotina
+
+- Git comum confirmado; checkout limpo em ad539567, PR #204 documental com
+  CI38369900656 aprovada e integrado em cdb26fbd248c0a42cb7112cdb7674dae5237770a.
+  Nova branch codex/rotina-rolagem-estavel parte desse main.
+- GET observacional de https://crm.descomplicapro.com.br/api/health em
+  2026-10-13T09:22:39-03:00: HTTP200, status ok, version
+  08c3ae453ddfb225c3cb64971b53333c36d8932e. Diferenca do main e documental;
+  nao demonstra a correcao solicitada. Fontes: GitHub PR204/CI e health publico.
+- Escopo: investigar salto ao passar o mouse nas ultimas linhas; preservar
+  posicao/foco e deixar credito sem faixa, a direita, com brilho direita-esquerda.
+  Sem alteracao de dados, permissoes, migrations ou workflows. Validacao e
+  publicacao ainda pendentes; testes anteriores nao cobriram este sintoma.
+- Causa reproduzida no Chromium: focus na linha7 + hover final + GET de30s
+  reduz scrollY4028 para237 ao zerar altura dos editores na medicao. Probes
+  invisiveis fora do fluxo eliminam o encolhimento; regressao focal passou.
+  Rodape passa a fundo transparente/alinhamento direito, entrada650ms e
+  shimmer4.5s direita-esquerda, ambos desligados com movimento reduzido.
+
 ## 2026-10-13: Efeitos e compactacao da Rotina publicados
 
 - PR #202 aprovado pela CI38360349190, integrado em08c3ae453ddfb225c3cb64971b53333c36d8932e

@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-13: Correcao de rolagem e rodape da Rotina
+
+- Reproducao Chromium: com foco na linha 7 e mouse na ultima linha, o refresh
+  reduzia scrollY de 4028 para 237. A medicao zerava alturas dos campos reais,
+  reduzindo temporariamente o documento e limitando a rolagem do navegador.
+- Medicao agora usa campos invisiveis fora do fluxo, sem encolher os editores,
+  mudar foco ou redefinir a selecao. Conteudo, hover e persistencia preservados.
+- Credito direto no fundo, sem faixa/borda, a direita; entrada e brilho seguem
+  direita-esquerda. Movimento reduzido desativa ambas as animacoes.
+- Regressao cobre Semana/Hoje, desktop/mobile, leitura/edicao, refresh por
+  intervalo/foco, selecao e digitacao. Matriz autenticada inclui o caso de
+  ultima linha. Validacao global e publicacao pendentes.
+
 ## 2026-10-13: Efeitos da Rotina em producao
 
 - PR202 integrado em08c3ae4; CI main38364326341 com quatro jobs aprovados.

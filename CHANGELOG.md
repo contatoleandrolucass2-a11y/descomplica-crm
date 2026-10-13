@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-13: Rolagem estavel na Rotina
+
+- Corrige salto para cima durante a atualizacao automatica e medicao das celulas.
+- Preserva foco e selecao; rodape sem faixa, alinhado a direita, com entrada e
+  brilho da direita para a esquerda e respeito a movimento reduzido.
+
 ## 2026-10-13: Efeitos da Rotina publicados
 
 - Publicada a versao08c3ae4 com controles compactos, gradientes, destaque de

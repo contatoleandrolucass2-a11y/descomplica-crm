@@ -719,10 +719,9 @@
 
 .footer {
   margin-top: 8px;
-  border-top: 1px solid var(--routine-edge);
-  padding: 8px;
-  background: #123b63;
-  text-align: center;
+  padding: 6px 0 0;
+  overflow: hidden;
+  text-align: right;
 }
 
 .footerCredit {
@@ -737,15 +736,29 @@
   background-size: 250% 100%;
   background-clip: text;
   -webkit-text-fill-color: transparent;
-  animation: routine-credit-shimmer 4.5s linear infinite;
+  filter: drop-shadow(0 1px 1px #0e2135);
+  animation:
+    routine-credit-arrive 650ms ease-out both,
+    routine-credit-shimmer 4.5s linear infinite;
+}
+
+@keyframes routine-credit-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 @keyframes routine-credit-shimmer {
   from {
-    background-position: 150% 0;
+    background-position: -150% 0;
   }
   to {
-    background-position: -150% 0;
+    background-position: 150% 0;
   }
 }
 
