@@ -89,20 +89,25 @@ export async function runCollector(environment = process.env, options = {}) {
                     count: receipt.count,
                   }),
               });
-            } catch {
+            } catch (error) {
               throw Object.assign(new Error("Inventory cycle failed"), {
-                code: "inventory_failed",
+                code:
+                  error?.code === "inventory_publication_uncertain"
+                    ? "inventory_publication_uncertain"
+                    : "inventory_failed",
               });
             }
           }
           progress.succeed(candidate, false);
         } catch (error) {
           progress.fail(
-            error?.code === "inventory_failed"
-              ? "inventory_failed"
-              : error?.code === "publication_failed"
-                ? "publication_failed"
-                : "export_failed",
+            error?.code === "inventory_publication_uncertain"
+              ? "inventory_publication_uncertain"
+              : error?.code === "inventory_failed"
+                ? "inventory_failed"
+                : error?.code === "publication_failed"
+                  ? "publication_failed"
+                  : "export_failed",
           );
           throw error;
         }

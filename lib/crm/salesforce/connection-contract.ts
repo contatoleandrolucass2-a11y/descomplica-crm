@@ -31,6 +31,7 @@ export const salesforceStatusErrorSchema = z.enum([
   "export_failed",
   "publication_failed",
   "inventory_failed",
+  "inventory_publication_uncertain",
   "collector_stopped",
   "collector_unreachable",
 ]);

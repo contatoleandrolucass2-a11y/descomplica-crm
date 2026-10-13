@@ -113,7 +113,7 @@ test("collector distinguishes an unconfirmed publication from an export failure"
   assert.equal(progress.snapshot().reports.length, 7);
 });
 
-for (const failure of [false, true]) {
+for (const failure of [false, true, "uncertain"]) {
   test(`automatic stock follows the seven reports; inventory failure=${failure}`, async () => {
     const controller = new AbortController();
     const progress = createCollectorProgress(() => 2000);
@@ -137,14 +137,24 @@ for (const failure of [false, true]) {
           assert.equal(signal.aborted, false);
           assert.equal(publish, true);
           assert.equal(progress.snapshot().cycle, "running");
-          if (failure) throw new Error("private source details");
+          if (failure)
+            throw Object.assign(new Error("private source details"), {
+              code: failure === "uncertain" ? "inventory_publication_uncertain" : undefined,
+            });
         },
         waitFor: async () => controller.abort(),
       },
     );
     assert.deepEqual(events, ["commercial", "inventory"]);
     assert.equal(progress.snapshot().cycle, failure ? "failed" : "succeeded");
-    assert.equal(progress.snapshot().errorCode, failure ? "inventory_failed" : null);
+    assert.equal(
+      progress.snapshot().errorCode,
+      failure === "uncertain"
+        ? "inventory_publication_uncertain"
+        : failure
+          ? "inventory_failed"
+          : null,
+    );
     assert.equal(progress.snapshot().lastPublishedAt, new Date(2000).toISOString());
   });
 }

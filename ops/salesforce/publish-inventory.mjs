@@ -59,8 +59,18 @@ export async function readPublishedInventory(directory, owner, group = 0) {
   }
 }
 
-async function replace(directory, name, bytes, owner, group) {
+export async function syncInventoryDirectory(directory) {
+  const parent = await open(directory, constants.O_RDONLY);
+  try {
+    await parent.sync();
+  } finally {
+    await parent.close();
+  }
+}
+
+async function replace(directory, name, bytes, owner, group, options = {}) {
   const temporary = path.join(directory, `.${name}-${randomUUID()}.tmp`);
+  let metadata;
   try {
     const handle = await open(
       temporary,
@@ -69,7 +79,7 @@ async function replace(directory, name, bytes, owner, group) {
     );
     try {
       await handle.chmod(0o640);
-      const metadata = await handle.stat();
+      metadata = await handle.stat();
       if (metadata.uid !== owner || metadata.gid !== group || metadata.nlink !== 1)
         throw new Error("Inventory writer ownership invalid");
       await handle.writeFile(bytes);
@@ -78,12 +88,8 @@ async function replace(directory, name, bytes, owner, group) {
       await handle.close();
     }
     await rename(temporary, path.join(directory, name));
-    const parent = await open(directory, constants.O_RDONLY);
-    try {
-      await parent.sync();
-    } finally {
-      await parent.close();
-    }
+    options.onRename?.(metadata);
+    await (options.syncDirectory ?? syncInventoryDirectory)(directory);
   } finally {
     await rm(temporary, { force: true });
   }
@@ -120,9 +126,43 @@ export async function publishInventory(candidate, options = {}) {
       throw new Error("Inventory publication changed concurrently");
   }
   throwIfSalesforceAborted(options.signal);
-  await replace(directory, "current.json", bytes, owner, group);
-  const installed = await readPublishedInventory(directory, owner, group);
-  if (installed.hash !== hash(bytes)) throw new Error("Inventory publication not confirmed");
+  let renamed;
+  let installed;
+  try {
+    await replace(directory, "current.json", bytes, owner, group, {
+      syncDirectory: options.syncDirectory,
+      onRename: (metadata) => {
+        renamed = metadata;
+      },
+    });
+    installed = await (options.confirm ?? readPublishedInventory)(directory, owner, group);
+    if (installed.hash !== hash(bytes)) throw new Error("Inventory publication not confirmed");
+  } catch (error) {
+    if (renamed) {
+      try {
+        // The export lock still belongs to this cycle. Restore only the inode
+        // installed by this attempt; never overwrite an unexpected replacement.
+        const current = await lstat(path.join(directory, "current.json"));
+        if (!current.isFile() || current.ino !== renamed.ino || current.dev !== renamed.dev)
+          throw new Error("Inventory changed before recovery");
+        if (previous) {
+          await replace(directory, "current.json", previous.bytes, owner, group, {
+            syncDirectory: options.syncDirectory,
+          });
+          if ((await readPublishedInventory(directory, owner, group)).hash !== previous.hash)
+            throw new Error("Inventory recovery not confirmed");
+        } else {
+          await rm(path.join(directory, "current.json"));
+          await (options.syncDirectory ?? syncInventoryDirectory)(directory);
+        }
+      } catch {
+        throw Object.assign(new Error("Inventory publication requires reconciliation"), {
+          code: "inventory_publication_uncertain",
+        });
+      }
+    }
+    throw error;
+  }
   return {
     published: true,
     hash: installed.hash,

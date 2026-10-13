@@ -60,14 +60,19 @@ A pasta pertence a `descomplica-salesforce:root`, modo **2710**; `current.json`
 e `previous.json`, ao mesmo usuário/grupo e **0640**. O setgid da pasta permite
 herdar o grupo de leitura do container sem adicionar o coletor ao grupo root.
 Somente essa pasta de dados entra no `ReadWritePaths` do serviço, além do estado
-privado que já existia. O coletor não pode escrever no env, secrets ou código.
+privado que já existia. O coletor não pode escrever no env ou secrets de produção nem no código.
 
 A publicação ocorre dentro da trava de exportação, após coleta completa. Valida
 schema, tamanho, proprietário, data não futura e idade de até dez minutos.
 Rejeita carga anterior ou diferente no mesmo horário. Preserva `previous.json`,
 compara a base anterior, grava temporário exclusivo, fsync e rename atômico,
 e relê o hash instalado. A aplicação renova o cache em até 30 segundos sem
-reinício. Falha mantém a base anterior; o ciclo mostra `inventory_failed`.
+reinício. Falhas antes da troca mantêm a base anterior. Se fsync ou releitura
+falham depois do rename, o publicador restaura a base anterior somente se o inode
+instalado ainda pertence à tentativa, e confirma a restauração antes de indicar
+`inventory_failed`. Se o disco ou uma substituição concorrente impedem essa
+confirmação, indica `inventory_publication_uncertain` e a interface mostra
+**Publicação do estoque não confirmada**, sem afirmar qual base prevaleceu.
 Não versionar candidatos, backups ou linhas comerciais.
 
 A primeira adoção exige release validada pelo fluxo normal de PR, CI e

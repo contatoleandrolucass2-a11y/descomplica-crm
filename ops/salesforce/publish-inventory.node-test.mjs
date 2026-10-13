@@ -1,9 +1,22 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { chmod, mkdtemp, readFile, realpath, rm, symlink } from "node:fs/promises";
+import {
+  chmod,
+  mkdtemp,
+  readFile,
+  realpath,
+  rename,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { publishInventory, readPublishedInventory } from "./publish-inventory.mjs";
+import {
+  publishInventory,
+  readPublishedInventory,
+  syncInventoryDirectory,
+} from "./publish-inventory.mjs";
 
 const now = Date.now();
 function candidate(time = now) {
@@ -138,4 +151,75 @@ test("automatic publication rejects an alternate lock/output before opening the 
     ),
     (error) => error.code === "SALESFORCE_EXPORT_CONFIG",
   );
+});
+
+for (const failure of ["directory-sync", "confirmation-read"]) {
+  test(`restores the previous base after post-rename ${failure} failure`, native, async (t) => {
+    const options = await fixture(t);
+    await publishInventory(candidate(now - 1000), options);
+    const filename = path.join(options.directory, "current.json");
+    const before = await readFile(filename);
+    let syncs = 0;
+    const injected =
+      failure === "confirmation-read"
+        ? {
+            confirm: async () => {
+              throw new Error("read failure");
+            },
+          }
+        : {
+            syncDirectory: async (directory) => {
+              if (++syncs === 1) throw new Error("fsync failure");
+              await syncInventoryDirectory(directory);
+            },
+          };
+    await assert.rejects(publishInventory(candidate(), { ...options, ...injected }));
+    assert.deepEqual(await readFile(filename), before);
+  });
+}
+
+test("reports uncertain publication when recovery cannot be confirmed", native, async (t) => {
+  const options = await fixture(t);
+  await publishInventory(candidate(now - 1000), options);
+  await assert.rejects(
+    publishInventory(candidate(), {
+      ...options,
+      syncDirectory: async () => {
+        throw new Error("persistent fsync failure");
+      },
+    }),
+    (error) => error.code === "inventory_publication_uncertain",
+  );
+});
+
+test("removes an unconfirmed first publication when no earlier file existed", native, async (t) => {
+  const options = await fixture(t);
+  await assert.rejects(
+    publishInventory(candidate(), {
+      ...options,
+      confirm: async () => {
+        throw new Error("read failure");
+      },
+    }),
+  );
+  await assert.rejects(readFile(path.join(options.directory, "current.json")), { code: "ENOENT" });
+});
+
+test("does not roll back over an unexpected concurrent file replacement", native, async (t) => {
+  const options = await fixture(t);
+  await publishInventory(candidate(now - 1000), options);
+  const filename = path.join(options.directory, "current.json");
+  const foreign = Buffer.from(JSON.stringify(candidate(now + 500)));
+  await assert.rejects(
+    publishInventory(candidate(), {
+      ...options,
+      confirm: async () => {
+        await writeFile(filename + ".external", foreign, { mode: 0o640 });
+        await rename(filename + ".external", filename);
+        throw new Error("concurrent replacement");
+      },
+    }),
+    (error) => error.code === "inventory_publication_uncertain",
+  );
+  assert.deepEqual(await readFile(filename), foreign);
 });

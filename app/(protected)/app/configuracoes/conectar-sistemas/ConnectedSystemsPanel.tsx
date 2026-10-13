@@ -221,17 +221,19 @@ export function ConnectedSystemsPanel({
   const hasReports = snapshot.reports !== null;
   const publicationFailed = snapshot.errorCode === "publication_failed";
   const cycleLabel =
-    snapshot.errorCode === "inventory_failed"
-      ? "Falha ao atualizar estoque"
-      : snapshot.errorCode === "export_failed"
-        ? "Coleta não concluída"
-        : publicationFailed
-          ? snapshot.lastExportAt && hasReports
-            ? "Concluída"
-            : "Sem informação"
-          : snapshot.state === "unavailable" || snapshot.state === "unconfigured"
-            ? "Sem informação"
-            : CYCLES[snapshot.cycle];
+    snapshot.errorCode === "inventory_publication_uncertain"
+      ? "Publicação do estoque não confirmada"
+      : snapshot.errorCode === "inventory_failed"
+        ? "Falha ao atualizar estoque"
+        : snapshot.errorCode === "export_failed"
+          ? "Coleta não concluída"
+          : publicationFailed
+            ? snapshot.lastExportAt && hasReports
+              ? "Concluída"
+              : "Sem informação"
+            : snapshot.state === "unavailable" || snapshot.state === "unconfigured"
+              ? "Sem informação"
+              : CYCLES[snapshot.cycle];
 
   return (
     <main className={styles.page} data-connected-systems>
@@ -518,11 +520,13 @@ export function ConnectedSystemsPanel({
                       <td>
                         {collectedAt
                           ? inventory
-                            ? snapshot.errorCode === "inventory_failed"
-                              ? "Falha na atualização · última base válida"
-                              : snapshot.inventory?.automatic
-                                ? "Coletado · automático (30 min)"
-                                : "Base validada · coleta avulsa"
+                            ? snapshot.errorCode === "inventory_publication_uncertain"
+                              ? "Publicação não confirmada"
+                              : snapshot.errorCode === "inventory_failed"
+                                ? "Falha na atualização · última base válida"
+                                : snapshot.inventory?.automatic
+                                  ? "Coletado · automático (30 min)"
+                                  : "Base validada · coleta avulsa"
                             : "Coletado"
                           : "Sem coleta confirmada"}
                       </td>

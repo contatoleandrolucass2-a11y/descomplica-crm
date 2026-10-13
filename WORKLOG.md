@@ -2,6 +2,11 @@
 
 ## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
 
+Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior
+sob a mesma trava e confirma o hash. Inode inesperado ou recuperação não confirmada
+geram status próprio, sem sobrescrever alteração concorrente. Regressões simulam
+falha de fsync, releitura, primeira publicação e substituição externa.
+
 Pedido direto de 13/10/2026 substitui a coleta avulsa: o scheduler coleta e publica ESTOQUE SPC após os sete relatórios, na mesma agenda de 30 minutos. Base única dos quatro simuladores, troca atômica, proteção contra cargas antigas/incompletas e cópia anterior. Coletor escreve somente em diretório dedicado; aplicação mantém mount somente leitura. Falha de estoque aparece no ciclo, sem apagar a última base. Atualização do serviço exige CI, backup, CAS e consulta de release no minuto; n8n e seus contratos permanecem intactos.
 
 Validação local: lint/tipos/build aprovados; Vitest 2.663 aprovados (63 skips);
