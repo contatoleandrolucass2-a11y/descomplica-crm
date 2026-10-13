@@ -10,6 +10,8 @@
 - Cabecalho com faixa teal e Hoje cyan, contraste legivel nos tres temas.
 - Usuario autorizou migration aditiva de producao apos testes e backup.
   Implementacao em validacao; nao confundir com publicacao concluida.
+- CI inicial aprovou aplicativo Linux e detectou fixtures/inventario SQL;
+  corrigidos escopo unico e gate restritivo MFA, aguardando nova execucao.
 
 ## 2026-10-12: Publicacao da rolagem da Rotina
 

@@ -26,6 +26,11 @@
   Reavaliar no Linux do mesmo SHA, sem enfraquecer assertions.
 - pgTAP novo tem 91 casos; restore passa a esperar 1242 no total.
   Execucao SQL, QA autenticado completo e gates de CI ainda pendentes.
+- PR #200, CI 38335624699: validate Linux aprovado; banco/restore reprovaram
+  fixture com escopos de equipe repetidos e inventario/gate MFA da nova tabela.
+  Corrigidos escopo unico por alvo, limpeza de claims administrativos, policy
+  restritiva padrao e allowlists de tabela/RPC. Sem remover assertions.
+  Nova execucao SQL obrigatoria antes de migration; producao inalterada.
 
 ## 2026-10-12: Rolagem da Rotina publicada e verificada
 

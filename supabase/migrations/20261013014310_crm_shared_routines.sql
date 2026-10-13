@@ -22,6 +22,10 @@ create table public.crm_routines (
 
 alter table public.crm_routines enable row level security;
 alter table public.crm_routines force row level security;
+create policy authenticated_session_mfa_gate on public.crm_routines
+  as restrictive for all to authenticated
+  using ((select private.current_session_satisfies_mfa()))
+  with check ((select private.current_session_satisfies_mfa()));
 revoke all privileges on table public.crm_routines
   from public, anon, authenticated, service_role;
 

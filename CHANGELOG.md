@@ -1,5 +1,7 @@
 # Changelog
 
+- Rotina: inclui a tabela compartilhada no gate restritivo de sessao/MFA e nos inventarios SQL de seguranca.
+
 ## 2026-10-12: Persistencia compartilhada da Rotina
 
 - Grava rotinas no CRM, compartilhadas entre dispositivos e usuarios autorizados.

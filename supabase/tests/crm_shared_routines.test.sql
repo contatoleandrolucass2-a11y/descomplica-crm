@@ -3,7 +3,8 @@ select plan(91);
 
 select ok((select relrowsecurity and relforcerowsecurity from pg_class
   where oid = 'public.crm_routines'::regclass), 'routines enable and force RLS');
-select is((select count(*) from pg_policy where polrelid = 'public.crm_routines'::regclass),
+select is((select count(*) from pg_policy
+  where polrelid = 'public.crm_routines'::regclass and polpermissive),
   0::bigint, 'no permissive direct-access policies');
 select ok(not exists (
   select 1 from (values ('anon'), ('authenticated'), ('service_role')) r(name)
@@ -58,17 +59,28 @@ insert into public.crm_team_memberships (team_id, person_id, membership_role)
 select 'ab730000-0000-4000-8000-000000000001', id, 'broker'
 from routine_actors where role_key in ('broker_house', 'broker_imob');
 insert into public.crm_reporting_scopes (id, scope_key, scope_type, organization_id, team_id, person_id)
-select id, 'routine-' || role_key,
-  case when role_key = 'admin' then 'organization'
-    when role_key in ('broker_house', 'broker_imob') then 'person' else 'team' end,
-  case when role_key = 'admin' then 'ab720000-0000-4000-8000-000000000001'::uuid end,
-  case when role_key in ('coordinator', 'manager_house', 'manager_imob')
-    then 'ab730000-0000-4000-8000-000000000001'::uuid end,
-  case when role_key in ('broker_house', 'broker_imob') then id end
-from routine_actors where role_key not in ('master', 'pending');
+values
+  ('ab760000-0000-4000-8000-000000000001', 'routine-organization', 'organization',
+    'ab720000-0000-4000-8000-000000000001', null, null),
+  ('ab760000-0000-4000-8000-000000000002', 'routine-team', 'team',
+    null, 'ab730000-0000-4000-8000-000000000001', null),
+  ('ab760000-0000-4000-8000-000000000003', 'routine-broker-house', 'person',
+    null, null, 'ab710000-0000-4000-8000-000000000006'),
+  ('ab760000-0000-4000-8000-000000000004', 'routine-broker-imob', 'person',
+    null, null, 'ab710000-0000-4000-8000-000000000007')
+on conflict do nothing;
+-- Resolve by target identity, including scopes already created by setup triggers.
+-- Coordinator and both managers share the same unique team scope.
 insert into public.crm_user_reporting_scope_grants (user_id, reporting_scope_id, granted_by, reason)
-select id, id, 'ab710000-0000-4000-8000-000000000001', 'Synthetic routine fixture'
-from routine_actors where role_key not in ('master', 'pending');
+select actor.id, scope.id, 'ab710000-0000-4000-8000-000000000001', 'Synthetic routine fixture'
+from routine_actors actor
+join public.crm_reporting_scopes scope on
+  (actor.role_key = 'admin' and scope.scope_type = 'organization'
+    and scope.organization_id = 'ab720000-0000-4000-8000-000000000001')
+  or (actor.role_key in ('coordinator', 'manager_house', 'manager_imob')
+    and scope.scope_type = 'team' and scope.team_id = 'ab730000-0000-4000-8000-000000000001')
+  or (actor.role_key in ('broker_house', 'broker_imob')
+    and scope.scope_type = 'person' and scope.person_id = actor.id);
 update public.user_roles u set role_key = a.role_key,
   assigned_by = 'ab710000-0000-4000-8000-000000000001'
 from routine_actors a where a.id = u.user_id and a.role_key not in ('master', 'pending');
@@ -191,6 +203,7 @@ select set_config('request.jwt.claim.sub', 'ab710000-0000-4000-8000-000000000006
 select is(jsonb_array_length(public.get_crm_routines() -> 'routines'), 6, 'broker reads all six global routines');
 
 reset role;
+select set_config('request.jwt.claim.sub', '', true);
 select is((select updated_by from public.crm_routines where role_key = 'corretor'),
   'ab710000-0000-4000-8000-000000000002'::uuid, 'actor recorded server-side');
 select is((select count(*) from public.audit_logs where action = 'crm.routine.saved'),
@@ -212,6 +225,7 @@ select set_config('request.jwt.claim.sub', 'ab710000-0000-4000-8000-000000000006
 select throws_ok($$select public.get_crm_routines()$$, '42501',
   'forbidden: missing routine read permission', 'explicit deny blocks reader');
 reset role;
+select set_config('request.jwt.claim.sub', '', true);
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason, granted_by)
 values ('ab710000-0000-4000-8000-000000000002', 'crm.settings.manage', 'deny',
   'Synthetic editor denial', 'ab710000-0000-4000-8000-000000000001');
@@ -253,6 +267,7 @@ select lives_ok($$select public.get_crm_routines()$$, 'live AAL2 read succeeds')
 select lives_ok($$select public.save_crm_routine('corretor','[]',2)$$, 'live AAL2 save succeeds');
 select set_config('request.jwt.claims', '', true);
 reset role;
+select set_config('request.jwt.claim.sub', '', true);
 update public.profiles set is_active = false where user_id = 'ab710000-0000-4000-8000-000000000003';
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'ab710000-0000-4000-8000-000000000003', true);
