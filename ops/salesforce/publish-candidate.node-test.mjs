@@ -1,10 +1,12 @@
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 
 import { publishSalesforceCandidate } from "./publish-candidate.mjs";
+import { hardenPrivateRegularFile } from "./private-file.mjs";
+import { allowOtherReaders } from "./test-helpers/native-private-fixture.mjs";
 
 let directory;
 let secretPath;
@@ -13,6 +15,7 @@ before(async () => {
   directory = await mkdtemp(path.join(tmpdir(), "salesforce-publish-test-"));
   secretPath = path.join(directory, "source-bearer");
   await writeFile(secretPath, `${"s".repeat(64)}\n`, { mode: 0o600 });
+  await hardenPrivateRegularFile(secretPath);
 });
 
 after(async () => {
@@ -100,12 +103,25 @@ test("rejects premature validation responses and unsafe configuration", async ()
     ),
     /credential-free HTTPS/,
   );
-  await chmod(secretPath, 0o640);
+  let fetched = false;
+  const unsafeSecret = path.join(directory, "unsafe-bearer");
+  await writeFile(unsafeSecret, "s".repeat(64), { mode: 0o600 });
+  await hardenPrivateRegularFile(unsafeSecret);
+  await allowOtherReaders(unsafeSecret);
   await assert.rejects(
-    publishSalesforceCandidate(candidate(), environment()),
+    publishSalesforceCandidate(
+      candidate(),
+      environment({ SALESFORCE_N8N_SECRET_FILE: unsafeSecret }),
+      {
+        fetch: async () => {
+          fetched = true;
+          throw new Error("unexpected fetch");
+        },
+      },
+    ),
     /private regular file/,
   );
-  await chmod(secretPath, 0o600);
+  assert.equal(fetched, false);
 });
 
 test("rejects a candidate without the versioned payload identity", async () => {

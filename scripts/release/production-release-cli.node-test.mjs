@@ -5,6 +5,7 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
 import { promisify } from "node:util";
+import { pathToFileURL } from "node:url";
 
 import { parseReleaseArguments } from "./production-release.mjs";
 
@@ -76,17 +77,21 @@ after(async () => {
 
 async function blockedCli(script, arguments_) {
   try {
-    await execFileAsync(process.execPath, ["--import", guardPath, script, ...arguments_], {
-      cwd: temporaryDirectory,
-      timeout: 5_000,
-      maxBuffer: 64 * 1024,
-      env: {
-        PATH: process.env.PATH,
-        TZ: "UTC",
-        PRODUCTION_IMAGE_BINDING_LOCK_HELD: "1",
-        PRODUCTION_RELEASE_LOCK_HELD: "1",
+    await execFileAsync(
+      process.execPath,
+      ["--import", pathToFileURL(guardPath).href, script, ...arguments_],
+      {
+        cwd: temporaryDirectory,
+        timeout: 5_000,
+        maxBuffer: 64 * 1024,
+        env: {
+          PATH: process.env.PATH,
+          TZ: "UTC",
+          PRODUCTION_IMAGE_BINDING_LOCK_HELD: "1",
+          PRODUCTION_RELEASE_LOCK_HELD: "1",
+        },
       },
-    });
+    );
     assert.fail("A legacy production CLI command unexpectedly succeeded.");
   } catch (error) {
     assert.equal(error.code, 1);

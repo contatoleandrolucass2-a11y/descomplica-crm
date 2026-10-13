@@ -1,5 +1,39 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Backup cloud e prova isolada Salesforce
+
+- Fonte: Supabase MCP, CLI 2.115.0 na VPS e restore Postgres 17.6.1.155.
+  Backup privado em /srv/descomplica-backups/supabase-pre-salesforce-20261013-h0umc6;
+  verification.json contem hashes/contagens, sem copiar dados para Git ou chat.
+  Schema/dados separados nao compartilham snapshot; sem objetos Storage/offsite.
+- Restore sem rede e sem portas passou: 65 tabelas COPY com contagens iguais;
+  checksums, arquivos root600 e fsync confirmados. Nao prova boot da aplicacao
+  restaurada ou descriptografia Vault. Nenhuma restauracao no banco cloud.
+- Exportacao real finalizada em 2026-10-13T04:12:59Z, publisher desativado.
+  Request 7fefa339-a000-4fdf-b7b5-7bce3231b1dd: RPC na copia isolada confirmou
+  159 registros (15 metricas/144 participantes), replay idempotente e um run.
+  Isto NAO comprova o caminho HTTP n8n -> CRM -> Supabase de producao.
+- Suite pgTAP secure_ingestion em copia com dados nao e fixture limpa:
+  primeiros 13 checks passaram, mas contagem preexistente e trigger de aceite
+  legal impedem usar essa execucao como gate integral; transacao revertida.
+- MCP remoto mostra somente RPC Salesforce dentre as tres do runbook;
+  service_role pode executa-la, anon/authenticated nao. Auditoria/preparacao
+  de migrations autorizada; sem aplicacao cloud e sem ativacao de agenda.
+- Publicacao externa mudou runtime para 7c50f59 durante a tarefa; ledger
+  bf212f6d-32ae-450c-868f-5ce080359fe9, deployedAt 2026-10-13T03:57:09.142Z,
+  CI38340719697 aprovada e health com nonce conferido. Nao foi deploy desta tarefa.
+
+## 2026-10-13: Inicio da primeira ingestao autorizada
+
+- Usuario autorizou backup do banco, aplicacao da configuracao, teste real
+  antes da agenda e correcao das seis falhas Windows; n8n antigo preservado.
+- Git comum confirmado; trabalho segue no worktree n8n-crm-isolado, HEAD
+  81e31af. Checkout principal tem alteracoes alheias e nao sera modificado.
+- Fontes: git fetch, GitHub PR198 e GET health. Main 7c50f59, PR aberto com
+  conflitos, runtime ok/1160a0e. Nenhuma dessas versoes equivale a outra.
+- MCP Supabase confirma hnncxuerlcsaahdxoswb ACTIVE_HEALTHY/Postgres17.
+  Acesso SQL de backup ainda nao comprovado; nao contornar esse gate.
+
 ## 2026-10-12: Segredos privados preparados, sem aplicar runtime
 
 - Usuario criou crm_salesforce_backend_20261012 no projeto Supabase correto,

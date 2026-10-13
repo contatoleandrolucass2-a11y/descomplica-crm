@@ -1,10 +1,16 @@
 # Changelog
 
+## 2026-10-13: Compatibilidade dos testes Windows
+
+- Corrige fixtures de permissoes e caminhos Windows sem relaxar seguranca Linux.
+- Adiciona verificacao de ACL real e rejeicao de leitor indevido em arquivos
+  temporarios sinteticos; cobre ordem de fsync e metadados inseguros de backup.
+- Registra backup restaurado e ingestao real somente em copia isolada.
+
 ## 2026-10-13: Confirmacao de ingestao no fluxo candidato
 
 - Prepara envio n8n para CRM com credencial distinta e recibo verificado.
 - Mantem fluxo inativo e sem persistencia de payloads; primeira carga pendente.
-
 
 ## 2026-10-12: Preparacao dos segredos de ingestao
 
@@ -32,34 +38,28 @@
 - Confirma processamento de fixture pelo MCP e restauracao da privacidade.
 - Mantem automacao inativa e distingue teste interno de autenticacao HTTP.
 
-
 ## 2026-10-12: Limite MCP registrado
 
 - Registra HTTP 429 anterior a qualquer alteracao para teste sintetico.
 
-
 ## 2026-10-12: Evidencia do primeiro teste MCP
 
 - Documenta teste iniciado e resultado nao recuperavel, sem alegar sucesso.
-
 
 ## 2026-10-12: Entrada autenticada da candidata
 
 - Confirma vinculo da credencial ao webhook Salesforce, sem ativar a automacao.
 - Registra backup atualizado e bloqueio da ferramenta MCP de execucao.
 
-
 ## 2026-10-12: Backup local n8n
 
 - Adiciona backup privado e prova de restauracao PostgreSQL isolada da instancia nova.
 - Nao altera workflows, agenda, n8n antigo ou dados do CRM.
 
-
 ## 2026-10-12: Candidata Salesforce no novo n8n
 
 - Versiona SDK, settings e testes da candidata inativa, sem saida externa.
 - Resposta HTTP 202 com ok false nao confirma publicacao de snapshot.
-
 
 ## 2026-10-12: OAuth MCP confirmado
 

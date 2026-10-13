@@ -281,6 +281,30 @@ ativa. A evidência detalhada sem PII está em
 
 ## Gates antes da primeira escrita
 
+### Evidencia de backup e ensaio em 13/10/2026
+
+O backup do projeto `hnncxuerlcsaahdxoswb` foi restaurado em PostgreSQL
+17.6.1.155 isolado, sem rede, portas ou volume persistente. Local privado na
+VPS: `/srv/descomplica-backups/supabase-pre-salesforce-20261013-h0umc6`.
+`verification.json` registra hashes e comparacao de 65 tabelas COPY, todas
+iguais. Arquivos root600/pasta root700; checksums relidos e fsync confirmado.
+Inclui schema da aplicacao/plataforma, dados, roles e historico de migrations.
+Nao inclui bytes do Storage, nao e offsite e dumps de schema/dados nao sao um
+snapshot compartilhado. Nao houve restauracao no projeto cloud.
+
+Uma nova coleta real dos sete relatorios, sem publisher, foi aplicada somente
+nessa copia via RPC com `service_role`: 15 metricas e 144 participantes. Replay
+do mesmo request confirmou idempotencia e um unico run. O endpoint HTTP real
+e a credencial de saida n8n ainda precisam de prova depois dos gates abaixo.
+
+O catalogo cloud de 13/10/2026 possui a RPC Salesforce, mas nao as outras duas
+RPCs do item 2. Nao executar `db push` para convergir todo o historico: existem
+migrations remotas de contencao Qlik que precisam ser reconciliadas. A auditoria
+e preparacao foram autorizadas; aplicacao de migrations nao esta autorizada
+automaticamente. Manter configuracao/publisher/agenda desligados ate revisao.
+
+### Checklist de liberacao
+
 1. aplicar as migrations de reconciliação em ambiente isolado e obter a contagem
    pgTAP exigida pelo commit: 229 e 1.099 são referências históricas
    desatualizadas, e o HEAD atual exige 1.104; nenhuma dessas contagens é

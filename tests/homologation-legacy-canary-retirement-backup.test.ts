@@ -1,8 +1,42 @@
-import { chmod, mkdir, mkdtemp, readFile, rm, symlink, writeFile } from "node:fs/promises";
+import { constants, type Stats } from "node:fs";
+import {
+  chmod,
+  lstat,
+  mkdir,
+  mkdtemp,
+  open,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { describe, expect, it } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+const durability = vi.hoisted(() => ({ synced: [] as string[] }));
+
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+  const { posixBackupFilesystem } = await import("./helpers/posix-backup-filesystem");
+  const filesystem =
+    globalThis.process.platform === "win32" ? posixBackupFilesystem(actual) : actual;
+  return {
+    ...filesystem,
+    lstat: vi.fn(filesystem.lstat),
+    open: vi.fn(async (...args: Parameters<typeof actual.open>) => {
+      const handle = await filesystem.open(...args);
+      const sync = handle.sync.bind(handle);
+      vi.spyOn(handle, "sync").mockImplementation(async () => {
+        await sync();
+        durability.synced.push(String(args[0]));
+      });
+      return handle;
+    }),
+  };
+});
 
 import { sha256 } from "../scripts/homologation/auth-mfa-upgrade-lib.mjs";
 import {
@@ -39,8 +73,36 @@ async function loadManifest() {
 }
 
 describe("homologation legacy canary retirement backup", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    durability.synced.length = 0;
+  });
+
+  it.each([
+    { uid: ownerBoundary.expectedUid + 1 },
+    { gid: ownerBoundary.expectedGid + 1 },
+    { mode: 0o666 },
+    { mode: 0o620 },
+    { isFile: () => false },
+  ])("rejects unsafe POSIX source metadata %j", async (override) => {
+    vi.mocked(lstat).mockResolvedValueOnce({
+      uid: ownerBoundary.expectedUid,
+      gid: ownerBoundary.expectedGid,
+      mode: 0o640,
+      isFile: () => true,
+      isSymbolicLink: () => false,
+      ...override,
+    } as Stats);
+    await expect(
+      collectRequiredConfigurationSources(
+        [{ file: path.resolve("unsafe-fixture") }],
+        ownerBoundary,
+      ),
+    ).rejects.toThrow(/approved owner-controlled regular file/u);
+  });
+
   it("requires the complete critical source set and safely archives the approved Nginx target", async () => {
-    const root = await mkdtemp(path.join(tmpdir(), "retirement-config-"));
+    const root = await realpath(await mkdtemp(path.join(tmpdir(), "retirement-config-")));
     const available = path.join(root, "available");
     const enabled = path.join(root, "enabled");
     const environment = path.join(root, "homologation.env");
@@ -95,12 +157,16 @@ describe("homologation legacy canary retirement backup", () => {
   });
 
   it("opens only a real owner-controlled 0700 backup parent and rejects aliases or permissive paths", async () => {
-    const root = await mkdtemp(path.join(tmpdir(), "retirement-parent-"));
+    const root = await realpath(await mkdtemp(path.join(tmpdir(), "retirement-parent-")));
     const privateParent = path.join(root, "private");
     const permissiveParent = path.join(root, "permissive");
     const alias = path.join(root, "alias");
     try {
       const handle = await openPrivateBackupParent(privateParent, ownerBoundary);
+      expect(open).toHaveBeenCalledWith(
+        privateParent,
+        constants.O_RDONLY | constants.O_DIRECTORY | constants.O_NOFOLLOW,
+      );
       await handle.close();
 
       await mkdir(permissiveParent, { mode: 0o700 });
@@ -109,7 +175,7 @@ describe("homologation legacy canary retirement backup", () => {
         /real owner-controlled directory with mode 0700/u,
       );
 
-      await symlink(privateParent, alias);
+      await symlink(privateParent, alias, process.platform === "win32" ? "junction" : "dir");
       await expect(openPrivateBackupParent(alias, ownerBoundary)).rejects.toThrow(
         /real owner-controlled directory with mode 0700/u,
       );
@@ -119,7 +185,7 @@ describe("homologation legacy canary retirement backup", () => {
   });
 
   it("fsyncs every final artifact before the backup directory and parent boundary", async () => {
-    const root = await mkdtemp(path.join(tmpdir(), "retirement-durable-"));
+    const root = await realpath(await mkdtemp(path.join(tmpdir(), "retirement-durable-")));
     const backupRoot = path.join(root, "backup");
     const artifact = path.join(backupRoot, "artifact.bin");
     await mkdir(backupRoot, { mode: 0o700 });
@@ -129,10 +195,23 @@ describe("homologation legacy canary retirement backup", () => {
       await expect(
         finalizeBackupDurability([artifact], backupRoot, parentHandle),
       ).resolves.toBeUndefined();
+      expect(durability.synced).toEqual([artifact, backupRoot, root]);
+      durability.synced.length = 0;
+      const actual = await vi.importActual<typeof import("node:fs/promises")>("node:fs/promises");
+      const failedHandle = await actual.open(artifact, "r");
+      vi.spyOn(failedHandle, "sync").mockRejectedValueOnce(new Error("fixture fsync failure"));
+      const close = vi.spyOn(failedHandle, "close");
+      vi.mocked(open).mockResolvedValueOnce(failedHandle);
+      await expect(finalizeBackupDurability([artifact], backupRoot, parentHandle)).rejects.toThrow(
+        "fixture fsync failure",
+      );
+      expect(close).toHaveBeenCalledOnce();
+      expect(durability.synced).toEqual([]);
       await rm(artifact);
       await expect(
         finalizeBackupDurability([artifact], backupRoot, parentHandle),
       ).rejects.toThrow();
+      expect(durability.synced).toEqual([]);
     } finally {
       await parentHandle.close();
       await rm(root, { recursive: true, force: true });

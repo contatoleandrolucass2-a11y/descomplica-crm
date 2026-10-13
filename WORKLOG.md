@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-13: Backup restaurado e ingestao isolada
+
+- Backup oficial do projeto hnncxuerlcsaahdxoswb na VPS, com schema, dados,
+  roles e historico; arquivos privados, checksums relidos e fsync confirmado.
+- Restore em Postgres 17.6.1.155 sem rede/portas/volume persistente: 65 tabelas
+  COPY com contagens identicas. Nao inclui bytes de objetos Storage nem offsite.
+- Exportacao real dos sete relatorios, publisher desligado. Na copia isolada,
+  RPC service_role gravou 15 metricas/144 participantes; replay manteve um run.
+- Corrigidas fixtures Windows de caminhos canonicalizados, modos POSIX e ACLs
+  nativas; sem alterar a protecao de arquivos do codigo de producao.
+- Configuracao e primeira escrita cloud continuam bloqueadas pelo inventario
+  divergente de RPCs do runbook. Usuario autorizou auditoria/preparacao, nao
+  aplicacao automatica de migrations. N8n antigo e agenda preservados.
+
 ## 2026-10-13: Recibo do CRM preparado no n8n
 
 - Credencial de saida salva pelo operador e confirmada/vinculada pelo MCP.
@@ -10,7 +24,6 @@
   e build aprovados. Vitest: 2566 passaram, 27 skips e seis falhas Windows
   de caminhos/permissoes; etapas seguintes de pnpm test nao executadas.
 - PR198 aberto, mergeable false; consulta de runs do head anterior vazia.
-
 
 ## 2026-10-12: Preparacao privada da credencial de saida
 
@@ -47,20 +60,17 @@
 - Fluxo inativo. Autenticacao HTTP da VPS, exportacao e ingestao nao testadas.
 - Somente documentacao local; sem nova suite geral ou deploy do CRM.
 
-
 ## 2026-10-12: Rate limit antes do teste sintetico
 
 - Registro temporario autorizado; validate_workflow recebeu HTTP 429.
 - Nenhuma configuracao alterada. Fluxo inativo e persistencia desativada.
 - Parada sem fallback conforme regra MCP; teste remoto segue pendente.
 
-
 ## 2026-10-12: Teste MCP iniciado, resultado indisponivel
 
 - Execucao manual 1 iniciada com fixture; consulta nao encontrou a execucao.
 - Resultado nao confirmado. Sem ativacao ou contorno REST/UI/banco.
 - Solicitado registro temporario somente sintetico para proxima verificacao.
-
 
 ## 2026-10-12: Credencial vinculada por MCP
 
@@ -69,7 +79,6 @@
 - Backup atualizado e restore de 148 tabelas aprovado. Teste remoto bloqueado
   por ausencia de execute_workflow no chat; necessario recarregar MCP.
 - Mudanca documental; sem nova suite geral, deploy CRM ou ativacao da coleta.
-
 
 ## 2026-10-12: Backup local do novo n8n
 
@@ -82,7 +91,6 @@
 - Onze testes especificos aprovados; lint (aviso anterior), typecheck e build
   passaram; suite geral manteve seis falhas Windows, 2566 aprovados e 27 skips.
 
-
 ## 2026-10-12: Candidata Salesforce criada via MCP
 
 - Workflow L90AYSBEat4vYHLz criado, validado e relido no novo n8n; inativo.
@@ -92,7 +100,6 @@
 - Validacao: oito testes Node passaram; lint (aviso anterior), typecheck e build
   passaram. Suite geral: 2566 passaram, 27 skips, seis falhas Windows preexistentes.
 - Sem merge/deploy CRM; entrega publicada como candidata no PR198.
-
 
 ## 2026-10-12: OAuth MCP conectado
 

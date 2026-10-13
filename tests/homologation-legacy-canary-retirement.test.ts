@@ -1,4 +1,13 @@
-import { copyFile, mkdir, mkdtemp, readFile, rm, writeFile } from "node:fs/promises";
+import {
+  copyFile,
+  mkdir,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, it } from "vitest";
@@ -166,7 +175,7 @@ describe("homologation legacy canary retirement gate", () => {
 
   it("rejects candidate tampering and extra homologation-only SQL", async () => {
     const manifest = await loadManifest();
-    const temporaryRoot = await mkdtemp(path.join(tmpdir(), "legacy-retirement-"));
+    const temporaryRoot = await realpath(await mkdtemp(path.join(tmpdir(), "legacy-retirement-")));
     const migrationRoot = path.join(temporaryRoot, "deploy/homologation/migrations");
     await mkdir(migrationRoot, { recursive: true });
     const source = path.join(
@@ -188,6 +197,27 @@ describe("homologation legacy canary retirement gate", () => {
       );
     } finally {
       await rm(temporaryRoot, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects a migration directory alias even with a canonical temporary root", async () => {
+    const manifest = await loadManifest();
+    const root = await realpath(await mkdtemp(path.join(tmpdir(), "retirement-alias-")));
+    const target = path.join(root, "actual-migrations");
+    const parent = path.join(root, "deploy/homologation");
+    try {
+      await mkdir(target);
+      await mkdir(parent, { recursive: true });
+      await symlink(
+        target,
+        path.join(parent, "migrations"),
+        process.platform === "win32" ? "junction" : "dir",
+      );
+      await expect(loadRetirementCandidate(root, manifest)).rejects.toThrow(
+        /migration directory must not be a symlink/u,
+      );
+    } finally {
+      await rm(root, { recursive: true, force: true });
     }
   });
 
