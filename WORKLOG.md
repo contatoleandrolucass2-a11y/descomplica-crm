@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-13: Aceite operacional de dois ciclos concluido
+
+- Segundo disparo natural17:30Z publicou HTTP201 as17:36:10Z, request
+  3bdb5ff0-ee7a-4a32-974c-5947b50cd77a, run392a3e84-bde8-46ea-afb3-e4fd6fa06484.
+  MCP confirmou as duas runs distintas, cada uma com159 registros e uma auditoria.
+- Snapshots avancaram para17:33:45.009Z, sem acumular filhos:3views/15metricas/
+  15empreendimentos/144participantes. Sete relatorios completos nos dois ciclos.
+- Collector enabled/active, mesmo PID1138878 e zero reinicios, browser preservado.
+  Proximo disparo18:00Z. Pico723681280 bytes abaixo de768MiB. Agenda fica ativa.
+- Probes anonimos sinteticos rejeitados403 no n8n e401 no CRM. Novo workflow
+  dcffaf09 relido via MCP, sem mudanca ou persistencia de payload; antigo intocado.
+- Guia de conclusao atualizado com operacao, MFA, backups e reversao. Evidencias
+  somente agregadas, sem clientes ou segredos. Publicacao desta etapa e documental.
+
+## 2026-10-13: Primeira carga pela agenda e replay sem duplicacao
+
+- CI38431108475 passou quatro jobs; instalador ativou689bf174 as17:04:52Z.
+  Collector enabled/active, zero reinicios, navegador preservado. Monitor
+  independente desabilitado para nao sobrepor as verificacoes.
+- Primeira carga HTTP201 as17:10:59Z, requestcf334046 e run6d4aaa43.
+  Supabase confirmou159 registros normalizados e uma auditoria de sucesso.
+  Replay HTTP200/idempotenttrue manteve uma run/auditoria.
+- CRM mostra sete contagens, ultima publicacao14:10 e proxima execucao14:30.
+  Segundo ciclo natural em observacao; primeiro sucesso nao encerra o aceite.
+- pnpm verify localb825c2e passou lint/tipos/test/build. Nenhum workflow alterado;
+  n8n antigo intocado. App689bf174 publicado por outra tarefa, health/ledger
+  reconferidos17:12Z e coerentes, sem transacao pendente.
+
 ## 2026-10-13: Coleta completa e repeticao da agenda pendente
 
 - Main554a971 passou CI38425049893 quatro jobs. Ativacao16:26Z iniciou sem

@@ -3,8 +3,9 @@
 ## 2026-10-13: Evidencias operacionais da agenda Salesforce
 
 - Registra testes Windows/Linux, credenciais privadas systemd e reversao real.
-- Distingue coleta isolada aprovada de agenda ainda em validacao; ultima carga
-  valida preservada quando o ciclo falhou, sem alterar o n8n antigo.
+- Confirma agenda VPS ativa, dois ciclos reais publicados via novo n8n e
+  reconciliados no Supabase, sem duplicacao no replay da primeira carga.
+- Preserva a ultima carga valida quando um ciclo falha e o n8n antigo intocado.
 
 ## 2026-10-13: Logo Descomplica na aba do navegador
 
