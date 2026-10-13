@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-13: Logo na aba do navegador
+
+- Pedido e referência visual identificam o ícone da aba do navegador.
+- A imagem PNG original de 225 × 225 foi copiada sem transformação para
+  `app/icon.png`; o favicon padrão foi removido. O Next.js gera o link global
+  com tipo, tamanho e URL versionada conforme sua convenção de metadados.
+- SHA-256 do asset e do anexo conferidos como idênticos:
+  `6c5a443be4587aaf22c682c51c798e49a11aa4b9babeb34ccec240282653cdf4`.
+- Escopo restrito à identidade da aba. `pnpm verify` aprovado: lint sem erros
+  (um aviso preexistente), tipos, 136 arquivos Vitest (2.647 aprovados e 63
+  skips), 195 testes Node do coletor, 113 testes de release (11 skips Linux)
+  e build. Nenhum teste novo para esta troca de asset.
+- Preview HTTP confirmou página 200, único link de ícone com URL versionada,
+  `image/png` e `225x225`; resposta do ícone 200 com SHA-256 idêntico ao anexo.
+  CI e publicação ainda pendentes neste registro de preparação.
+
 ## 2026-10-13: Correcao de rolagem e rodape da Rotina
 
 - Reproducao Chromium: com foco na linha 7 e mouse na ultima linha, o refresh
