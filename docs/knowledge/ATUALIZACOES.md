@@ -18,6 +18,15 @@
   invisiveis fora do fluxo eliminam o encolhimento; regressao focal passou.
   Rodape passa a fundo transparente/alinhamento direito, entrada650ms e
   shimmer4.5s direita-esquerda, ambos desligados com movimento reduzido.
+- CI38398973974: validate/restore aprovados; regressao autenticada de rolagem
+  passou. Matriz bloqueada por comparacao textual dos keyframes de entrada.
+  Reproduzido localmente habilitando minificacao CSS: translateX e translate
+  sao serializacoes equivalentes. QA passa a conferir matriz/deslocamento e
+  opacidade reais, sem afrouxar direcao/distancia; fixture usa CSS minificado.
+- Suite geral local: primeira tentativa teve dois timeouts Obsidian sob carga;
+  repeticao com VITEST_MAX_WORKERS=1 passou2647 casos, coletor138 e release113.
+  Os11 testes fisicos POSIX continuam exclusivos Linux. Browser focal inicial:
+  80 passaram/7 timeouts sob carga; repeticao e build local pendentes.
 
 ## 2026-10-13: Efeitos e compactacao da Rotina publicados
 

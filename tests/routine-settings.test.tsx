@@ -165,7 +165,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       build: {
         write: false,
         minify: false,
-        cssMinify: false,
+        cssMinify: true,
         lib: { entry, name: "RoutineSettingsQa", formats: ["iife"] },
       },
     });

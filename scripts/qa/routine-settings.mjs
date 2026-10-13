@@ -275,23 +275,37 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
   await expect(footer).toHaveCSS("background-color", "rgba(0, 0, 0, 0)");
   await expect(footer).toHaveCSS("border-top-width", "0px");
   const frames = await credit.evaluate((element) =>
-    element.getAnimations().map((animation) => animation.effect.getKeyframes()),
+    element.getAnimations().map((animation) =>
+      animation.effect.getKeyframes().map((frame) => {
+        const matrix = frame.transform ? new DOMMatrixReadOnly(frame.transform) : null;
+        return {
+          x: matrix?.m41,
+          y: matrix?.m42,
+          opacity: Number(frame.opacity),
+          backgroundX: frame.backgroundPositionX,
+        };
+      }),
+    ),
   );
+  checkpoint("footer-entry-direction");
   assert.ok(
     frames.some(
       (sequence) =>
-        sequence[0].transform === "translateX(24px)" &&
-        sequence.at(-1).transform === "translateX(0px)",
+        sequence[0].x === 24 &&
+        sequence[0].y === 0 &&
+        sequence[0].opacity === 0 &&
+        sequence.at(-1).x === 0 &&
+        sequence.at(-1).y === 0 &&
+        sequence.at(-1).opacity === 1,
     ),
     "Credit arrives from right to left",
   );
+  checkpoint("footer-shimmer-direction");
   assert.ok(
     frames.some(
-      (sequence) =>
-        sequence[0].backgroundPositionX === "-150%" &&
-        sequence.at(-1).backgroundPositionX === "150%",
+      (sequence) => sequence[0].backgroundX === "-150%" && sequence.at(-1).backgroundX === "150%",
     ),
-    `Oversized shimmer moves from right to left: ${JSON.stringify(frames)}`,
+    "Oversized shimmer moves from right to left",
   );
   const today = page.locator('thead [aria-current="date"]');
   await expect(today.getByText("Hoje", { exact: true })).toBeVisible();
