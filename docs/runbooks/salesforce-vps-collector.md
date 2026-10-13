@@ -17,7 +17,12 @@ nao reinicia navegador, gateway, CRM ou n8n. O n8n antigo fica fora do escopo.
 - Monitor consulta a sessao a cada 45 segundos e envia contagens, horario de
   coleta, publicacao e proxima execucao. Recibo de conexao vence em 120 segundos.
 - Credenciais entram pelo `LoadCredential` do systemd, sem valores em unidade,
-  argumentos ou logs. Destinos sao fixos; nenhum listener novo e aberto.
+  argumentos ou logs. `ExecStartPre` copia somente as duas credenciais para
+  `RuntimeDirectory` privado (0700), com arquivos 0600 do usuario dedicado.
+  Isso preserva a validacao estrita do coletor: no systemd255 a origem montada
+  pode aparecer como 0440/root com ACL. As copias ficam em `/run` e sao
+  removidas pelo systemd ao parar o servico. Destinos sao fixos; nenhum listener
+  novo e aberto. Nao afrouxar a validacao dos arquivos privados.
 - `Conflicts` impede o monitor independente e o coletor de rodarem juntos.
   A ativacao desabilita o monitor antigo tambem no boot, com rollback registrado.
 
@@ -51,6 +56,8 @@ Com SHA completo e ID da CI de main ja conferidos, executar como root na VPS:
 `prepare` consulta GitHub, verifica codigo e captura o estado anterior; nao
 inicia nem para servicos. `activate` repete verificacoes, confirma dependencias
 como usuario dedicado, valida a unidade e troca o monitor pelo coletor.
+Confirma tambem a estabilidade inicial do processo; isso nao substitui os
+dois ciclos reais de aceite.
 O registro em `/var/lib/descomplica-salesforce-collector-install/state.json`
 fica root-only, protegido por lock e comparacao integral antes de escrita.
 
@@ -87,6 +94,9 @@ Para reverter a mesma instalacao, usar o SHA registrado, mesmo se main avancou:
 
 Confirmar monitor no estado anterior e coletor ausente; reexecutar rollback e
 seguro quando a reversao anterior ja terminou e nenhum estado externo mudou.
+Uma unidade parada pode ser descarregada pelo systemd antes de `reset-failed`;
+nesse caso, confirmar estado inativo/desabilitado em vez de tratar ausencia
+de estado de falha como falha de reversao.
 
 MFA, revogacao e expiracao de sessao continuam sob controle do Salesforce.
 Quando exigida, autenticar pelo console remoto no CRM; nao copiar cookies do

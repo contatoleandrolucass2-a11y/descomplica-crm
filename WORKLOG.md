@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-10-13: Ensaio real e correcao de compatibilidade systemd
+
+- CI38408795856 passou nos quatro jobs; suite final do coletor195/195 passou.
+  Ativacao1ace82d iniciada14:36Z e revertida apos falha inicial de configuracao.
+- Prova isolada systemd255: LoadCredential aparece0440/root, recusado pelo
+  contrato de arquivo privado. Copia com install0600 em RuntimeDirectory0700
+  passou nas duas credenciais; bytes identicos, sem rede, diretorio removido.
+- Rollback encontrou unidade ja descarregada em reset-failed. Recuperacao
+  conferiu collector disabled/inactive antes de omitir apenas esse reset;
+  demais CAS/lock/restauracao executados pelo instalador original.
+- Estado rolled-back, monitor enabled/active e navegador com mesmo PID2881480
+  confirmados14:44Z. Nenhuma nova publicacao confirmada. Correcao e reteste em curso.
+
+## 2026-10-13: PR203 integrado e ambiente do coletor preparado
+
+- Merge1ace82d depois de CI38400603988 aprovada. CI push38408795856 em curso;
+  nenhuma ativacao antes dos quatro jobs verdes no SHA exato.
+- Windows: Vitest completo maxWorkers1 passou136arquivos/2647testes/56skips,
+  sem alterar timeouts. Coletor194 e instalador final57 passaram; release113
+  passou/11skips POSIX. Systemd255 aceitou a unidade em verificacao isolada.
+- Dependencias copiadas sem hardlinks compartilhados; leitura corrigida apenas
+  nas copias de codigo. Preflight como usuario dedicado passou. Backup privado
+  de monitor/candidato conferido, com fsync. Nenhum servico reiniciado.
+- Health/ledger08c3ae e novo workflowdcffaf09 reconferidos11:00BRT.
+  Aplicacao e coletor possuem versoes separadas; n8n antigo preservado.
+
 ## 2026-10-13: Preparacao da agenda Salesforce
 
 - Escopo autorizado: ativar rotina de 30 minutos na VPS depois da carga real

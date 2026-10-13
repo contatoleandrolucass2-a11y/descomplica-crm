@@ -1,5 +1,48 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Credenciais systemd e reversao real do coletor
+
+- Fonte: VPS Ubuntu/systemd255, ensaio13/10 entre14:36Z e14:44Z, SHA1ace82d,
+  depois de CI38408795856 aprovada nos quatro jobs. Suite coletor195/195 passou.
+- Coletor saiu na inicializacao; nenhuma publicacao nova confirmada. Prova
+  transiente reproduziu LoadCredential0440/root, recusado pelo contrato privado.
+  Copias0600 em RuntimeDirectory0700 passaram, sem pedidos de rede nem segredos
+  impressos; bytes conferidos e pasta runtime removida ao encerrar a prova.
+- Rollback travou porque reset-failed recebeu unidade ja descarregada.
+  Recuperacao excepcional omitiu somente reset depois de conferir collector
+  inactive/disabled; CAS, lock, remocao da unidade propria e restauracao do
+  monitor foram preservados. Estado final rolled-back e monitor enabled/active.
+- Navegador manteve PID2881480 e inicio12/10; novo n8n e antigo intocados.
+  Corrigir compatibilidade e estabilidade inicial, publicar via PR/CI e repetir
+  dois ciclos antes de afirmar agenda ativa. Excecao nao autoriza pular gates.
+
+## 2026-10-13: Coletor integrado, preparo sem ativacao
+
+- PR203 integrado em `1ace82d16ad3cdc117a96d36cd9f935657581bee`, apos CI38400603988
+  aprovar validate/release-gates/isolated-restore. Imagem no evento PR e pulada
+  por contrato; CI de push38408795856 valida os quatro jobs antes da ativacao.
+- Suite Vitest Windows passou integralmente com maxWorkers1: 136 arquivos,
+  2647 testes,56 skips existentes. As rodadas com concorrencia maior tiveram
+  timeouts devtools/Obsidian; Next MCP isolado passou em2,89s. Contencao de
+  recursos e hipotese, nao causa definitivamente provada. Nenhum timeout,
+  assertion ou codigo de teste foi afrouxado. Criterio de revisao: recorrencia
+  sem carga concorrente exige novo diagnostico; CI Linux tambem passou.
+- Coletor194/194 antes de caso adicional, instalador final57/57 e release113/11
+  skips POSIX no Windows. Lint/typecheck/build e formato passaram. Unidade
+  renderizada foi aceita por systemd255 em pasta temporaria, sem instalar.
+- Checkout1ace82d preparado na VPS, lockfile congelado e lifecycle scripts
+  desabilitados. Copias pnpm independentes tinham23750 arquivos sem leitura
+  pelo usuario dedicado. Conferidos root-owner, ausencia de hardlinks/links
+  externos e inode antes de liberar leitura somente dessas copias de codigo.
+  Cache compartilhado e segredos nao alterados. Imports e preflight passaram.
+- Backup operacional privado com checksums e fsync em
+  `/srv/descomplica-backups/collector-before-1ace82d-m4obyc`: unidade/config do
+  monitor e candidato anterior. Nao substitui o backup de banco ja restaurado.
+- Nova conferencia11:00BRT: health publico200/ok e ledger no SHA08c3ae, sem
+  publicacao pendente. Git main1ace82d e distinto do app08c3ae. MCP confirmou
+  novo n8n ativo emdcffaf09, cinco nodes e execucoes sem payloads persistidos.
+  N8n antigo intocado. Agenda ainda desligada, monitor atual preservado.
+
 ## 2026-10-13: Retomada para agenda Salesforce na VPS
 
 - Usuario autorizou continuar depois da conexao e carga real. Escopo agora:

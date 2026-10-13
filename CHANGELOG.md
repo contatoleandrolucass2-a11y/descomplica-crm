@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-13: Compatibilidade do coletor com credenciais systemd
+
+- Converte credenciais montadas pelo systemd em copias privadas 0600 em `/run`,
+  sem afrouxar validacao de segredos nem expor valores em argumentos/logs.
+- Corrige reversao quando systemd ja descarregou a unidade parada e verifica
+  estabilidade inicial antes de registrar ativacao.
+- Falha inicial foi revertida; navegador autenticado, n8n antigo e banco
+  preservados. Nova ativacao depende de validacao e prova operacional.
+
 ## 2026-10-13: Agenda Salesforce com instalacao reversivel
 
 - Prepara servico dedicado para coleta de 30 minutos e monitor no mesmo processo,

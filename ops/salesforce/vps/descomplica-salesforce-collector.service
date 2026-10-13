@@ -21,8 +21,12 @@ Environment=SALESFORCE_N8N_WEBHOOK_URL=https://n8n-crm.descomplicapro.com.br/web
 Environment=SALESFORCE_CANDIDATE_OUTPUT=/var/lib/descomplica-salesforce/candidate.json
 LoadCredential=n8n-bearer:/srv/descomplica-n8n/salesforce-test.token
 LoadCredential=status-bearer:/var/lib/descomplica-salesforce/status-bearer
-Environment=SALESFORCE_N8N_SECRET_FILE=%d/n8n-bearer
-Environment=SALESFORCE_STATUS_SECRET_FILE=%d/status-bearer
+RuntimeDirectory=descomplica-salesforce-collector
+RuntimeDirectoryMode=0700
+ExecStartPre=/usr/bin/install -m 0600 -- %d/n8n-bearer %t/descomplica-salesforce-collector/n8n-bearer
+ExecStartPre=/usr/bin/install -m 0600 -- %d/status-bearer %t/descomplica-salesforce-collector/status-bearer
+Environment=SALESFORCE_N8N_SECRET_FILE=%t/descomplica-salesforce-collector/n8n-bearer
+Environment=SALESFORCE_STATUS_SECRET_FILE=%t/descomplica-salesforce-collector/status-bearer
 ExecStart=/usr/local/bin/node ops/salesforce/run-every-30-minutes.mjs
 Restart=on-failure
 RestartSec=20
