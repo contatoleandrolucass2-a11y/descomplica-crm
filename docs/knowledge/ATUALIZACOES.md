@@ -1,5 +1,20 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Owner confirmado e HTTPS n8n liberado
+
+- Usuario confirmou cadastro. Navegador mostrou localhost/assistant autenticado,
+  sem leitura de senha. Override HTTPS aplicado somente ao container n8n novo.
+- Nginx validado e recarregado, sem restart CRM. HTTPS painel200, API anonima401,
+  owner/setup403 e pagina signin confirmados. N8n/Postgres saudaveis, runner
+  iniciado e servicos Salesforce ativos. CRM permanece ok/9ff3fd3.
+- Fonte: SSH, CUA, health publico e GitHub PR198 (aberto,0d4c21b antes desta
+  mudanca). CI desse head nao retornou run nesta consulta, sem afirmar aprovado.
+- Nenhum workflow ou credencial legado alterado; MCP e backup/restore pendentes.
+- Validacao final:41 testes focados, lint (um aviso anterior), typecheck e build
+  aprovados. Suite Windows:2566 aprovados,27 skips,6 falhas POSIX/caminhos em
+  arquivos fora do escopo; etapas encadeadas apos Vitest nao executadas.
+  Sem merge ou declaracao de CI aprovada. Login HTTPS entregue ao operador.
+
 ## 2026-10-12: Retomada DNS n8n pela Hostinger
 
 - Fonte: GitHub API e health publico em 2026-10-13T00:27Z. Main e runtime

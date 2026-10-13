@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-12: Liberacao HTTPS apos owner
+
+- Operador concluiu cadastro; painel autenticado confirmado pelo navegador.
+- Override HTTPS aplicado somente ao novo n8n; banco/runner e legado preservados.
+- Nginx validado; painel200, API anonima401, owner/setup403, login HTTPS visivel.
+- Nenhum workflow criado ou ativado. MCP e backup/restore continuam pendentes.
+
 ## 2026-10-12: DNS e HTTPS isolados do n8n
 
 - Novo A n8n-crm criado pela Hostinger, TTL300, para 187.127.249.50.

@@ -15,6 +15,21 @@ const hash = "a".repeat(64);
 const id = `sha256:${"b".repeat(64)}`;
 
 describe("unclaimed owner perimeter", () => {
+  it("keeps HTTPS deployment isolated and authenticates through n8n", () => {
+    const override = load(
+      readFileSync(new URL("../ops/n8n/compose.https.yaml", import.meta.url), "utf8"),
+    );
+    expect(Object.keys(override.services)).toEqual(["n8n"]);
+    expect(override.services.n8n.environment.N8N_PROXY_HOPS).toBe("1");
+    expect(override.services.n8n.environment.N8N_EDITOR_BASE_URL).toBe(
+      "https://n8n-crm.descomplicapro.com.br",
+    );
+    const config = readFileSync(new URL("../ops/n8n/nginx.conf", import.meta.url), "utf8");
+    expect(config).toContain("proxy_pass http://127.0.0.1:5678;");
+    expect(config).toContain("proxy_set_header X-Forwarded-For $remote_addr;");
+    expect(config).toContain("location = /rest/owner/setup { return 403; }");
+    expect(config).not.toContain("default_server");
+  });
   it.each(["nginx-bootstrap.conf", "nginx-pending.conf"])(
     "%s never proxies owner setup",
     (file) => {

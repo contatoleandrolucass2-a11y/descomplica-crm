@@ -56,6 +56,20 @@ destino externo autorizado antes de carregar dados comerciais nesta instancia.
 
 ## Proxima etapa
 
+### Liberado apos cadastro do owner
+
+Operador confirmou cadastro e navegador mostrou painel autenticado. Aplicados
+compose.https.yaml e nginx.conf. Usar sempre os dois arquivos Compose nas
+operacoes seguintes: `docker compose -f compose.yaml -f compose.https.yaml`.
+Somente n8n foi recriado; volumes, banco, runner e chave foram preservados.
+Proxy encaminha ao loopback, sobrescreve forwarded headers e aceita WebSocket.
+Painel200, API sem sessao401 e endpoint owner/setup403 confirmados. Login publico
+HTTPS observado; sessao localhost nao e transferida para o dominio novo.
+Rollback: restaurar nginx-pending-backup.conf e validar/recarregar Nginx antes
+de voltar ao Compose privado; preservar dados e .env. Sem workflow ativado.
+MCP e backup/restore continuam pendentes. WEBHOOK_URL legado mantido com mesmo
+valor de N8N_WEBHOOK_URL para compatibilidade, conforme documentacao oficial.
+
 ### Estado em 12/10/2026, 21:32 Brasilia
 
 DNS A novo e certificado dedicados aplicados. Nginx usa nginx-pending.conf:

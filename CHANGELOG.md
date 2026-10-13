@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Painel n8n em HTTPS
+
+- Libera proxy dedicado apos confirmacao do owner, mantendo bloqueado seu cadastro publico.
+- Configura URLs externas e um salto de proxy sem alterar a instancia antiga.
+
 ## 2026-10-12: HTTPS inicial do n8n
 
 - Configura subdominio exclusivo e TLS sem expor cadastro publico do owner.
