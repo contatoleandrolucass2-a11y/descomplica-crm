@@ -1,5 +1,15 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Inicio da conexao n8n e Supabase ao CRM
+
+- Usuario solicitou conectar o novo n8n e Supabase ao CRM. Main1c36fce contem
+  evidencia documental de outro trabalho; producao continua7c50f59/ok,
+  conferida05:31Z. PR198/head129e707 em conflito documental com main.
+- CI38351116371: validate aprovado; restore/release em andamento. Nenhuma
+  promocao autorizada por checks incompletos. Preservar n8n antigo e agenda.
+- Backup externo e recuperacao estao comprovados; segunda copia da chave
+  segue pendente. Conferir contrato de release/configuracao antes de mutacao.
+
 ## 2026-10-13: Retomada do backup externo e gates de ingestao
 
 - Encerramento local: lint (um aviso preexistente), typecheck, test e build
