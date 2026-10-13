@@ -6,6 +6,8 @@
   --routine-heading: #c5f0ee;
   --routine-heading-text: #123e43;
   --routine-heading-border: #167985;
+  --routine-crosshair: linear-gradient(145deg, #d0edf4, #c0dceb);
+  --routine-intersection: linear-gradient(145deg, #1c7891, #174a75);
   min-width: 0;
   color: var(--inv-color-text);
   background: var(--inv-color-page);
@@ -19,6 +21,7 @@
   --routine-heading: #164c56;
   --routine-heading-text: #e6ffff;
   --routine-heading-border: #52cbd8;
+  --routine-crosshair: linear-gradient(145deg, #185367, #163b56);
 }
 
 :global(:root[data-theme="balanced"]) .page {
@@ -39,6 +42,7 @@
   justify-content: space-between;
   gap: 12px;
   padding-bottom: 8px;
+  flex-wrap: wrap;
 }
 
 .pageHeader h1 {
@@ -81,6 +85,20 @@
   gap: 4px;
   flex-direction: column;
   align-items: flex-end;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+}
+
+.actionRow button {
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .primaryAction,
@@ -108,7 +126,7 @@
 }
 
 /* Match the Associativo guide CTA without changing its shared styles. */
-.pageHeader .primaryAction {
+.actionRow button {
   position: relative;
   isolation: isolate;
   min-height: 36px;
@@ -117,7 +135,8 @@
   font-weight: 700;
 }
 
-.pageHeader .primaryAction:enabled::before {
+.actionRow button:enabled::before,
+.routineTable thead th:not(:first-child)::before {
   position: absolute;
   inset: 0;
   z-index: 2;
@@ -152,7 +171,7 @@
 }
 
 @media (pointer: coarse) {
-  .pageHeader .primaryAction {
+  .actionRow button {
     min-height: 44px;
   }
 }
@@ -382,7 +401,7 @@
 
 .viewToggle {
   display: inline-flex;
-  border: 1px solid var(--inv-color-line);
+  border: 1px solid var(--inv-color-accent);
   border-radius: 6px;
   overflow: hidden;
 }
@@ -392,12 +411,12 @@
   align-items: center;
   justify-content: center;
   gap: 5px;
-  min-height: 38px;
+  min-height: 36px;
   border: 0;
-  padding: 6px 10px;
-  color: var(--inv-color-muted);
-  background: transparent;
-  font-size: 12px;
+  padding: 8px 12px;
+  color: var(--inv-color-text);
+  background: color-mix(in srgb, var(--inv-color-accent) 12%, var(--inv-color-panel));
+  font-size: 13px;
   font-weight: 700;
   cursor: pointer;
 }
@@ -406,6 +425,10 @@
   background: var(--inv-color-accent-soft);
   color: var(--inv-color-text);
   box-shadow: inset 0 -2px var(--inv-color-accent);
+}
+
+.viewToggle button:hover {
+  background: var(--inv-color-accent-soft);
 }
 
 .viewToggle button:focus-visible {
@@ -450,9 +473,9 @@
   z-index: 3;
   height: 52px;
   padding: 6px 8px;
-  color: var(--routine-heading-text);
-  background: var(--routine-heading);
-  border-bottom: 2px solid var(--routine-heading-border);
+  color: #ffffff;
+  background: var(--routine-current);
+  border-bottom: 2px solid var(--routine-edge);
   font-size: 12px;
   font-weight: 850;
   text-align: center;
@@ -508,7 +531,7 @@
 .routineTable thead th:first-child {
   position: relative;
   z-index: 4;
-  background: var(--routine-heading);
+  background: var(--routine-current);
 }
 
 :global(:root)
@@ -524,27 +547,22 @@
   min-width: 0;
 }
 
-.routineTable[data-view="day"] tbody td[data-today] {
-  background: var(--routine-surface);
-  color: var(--inv-color-text);
-  box-shadow: inset 2px 0 var(--routine-edge);
-}
-
 .routineTable td {
+  position: relative;
   color: var(--inv-color-text);
-  transition: background-color 120ms ease;
-}
-
-.routineTable tbody tr:hover td:not([data-today]) {
-  background: color-mix(in srgb, var(--inv-color-accent) 5%, transparent);
+  transition:
+    box-shadow 180ms ease,
+    filter 180ms ease,
+    transform 180ms ease;
 }
 
 .routineTable td:focus-within {
-  outline: 2px solid var(--inv-color-accent);
+  outline: 2px solid var(--routine-focus-edge, var(--inv-color-accent));
   outline-offset: -2px;
 }
 
 .routineTable [data-today] {
+  --routine-focus-edge: #ffffff;
   color: #f4fcff;
   background: var(--routine-current);
   box-shadow:
@@ -553,9 +571,9 @@
 }
 
 .routineTable thead [data-today] {
-  color: #083344;
-  background: #67e8f9;
-  border-bottom-color: #0891b2;
+  color: #ffffff;
+  background: var(--routine-current);
+  border-bottom-color: var(--routine-edge);
   box-shadow:
     inset 2px 0 var(--routine-edge),
     inset -2px 0 var(--routine-edge),
@@ -570,12 +588,165 @@
     inset 0 -2px var(--routine-edge);
 }
 
-.routineTable td[data-today]:focus-within {
-  outline-color: #ffffff;
+/* Pointer takes priority; keyboard crosshair returns when the pointer leaves cells. */
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(2):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(2):focus-within)
+    )
+  )
+  tr
+  > :nth-child(2),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(3):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(3):focus-within)
+    )
+  )
+  tr
+  > :nth-child(3),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(4):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(4):focus-within)
+    )
+  )
+  tr
+  > :nth-child(4),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(5):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(5):focus-within)
+    )
+  )
+  tr
+  > :nth-child(5),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(6):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(6):focus-within)
+    )
+  )
+  tr
+  > :nth-child(6),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(7):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(7):focus-within)
+    )
+  )
+  tr
+  > :nth-child(7),
+.routineTable tbody tr:hover > *,
+.routineTable:where(:not(:has(td:hover, thead th:hover))) tbody tr:focus-within > * {
+  --routine-focus-edge: var(--inv-color-accent);
+  background: var(--routine-crosshair);
+  color: var(--inv-color-text);
+  box-shadow:
+    inset 0 1px var(--routine-edge),
+    inset 0 -1px var(--routine-edge);
 }
 
-.routineTable[data-view="day"] td[data-today]:focus-within {
-  outline-color: var(--inv-color-accent);
+.routineTable thead th:not(:first-child):hover,
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(2):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(2):focus-within)
+    )
+  )
+  thead
+  th:nth-child(2),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(3):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(3):focus-within)
+    )
+  )
+  thead
+  th:nth-child(3),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(4):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(4):focus-within)
+    )
+  )
+  thead
+  th:nth-child(4),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(5):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(5):focus-within)
+    )
+  )
+  thead
+  th:nth-child(5),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(6):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(6):focus-within)
+    )
+  )
+  thead
+  th:nth-child(6),
+.routineTable:where(
+    [data-view="week"]:is(
+      :has(tr > :nth-child(7):hover),
+      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(7):focus-within)
+    )
+  )
+  thead
+  th:nth-child(7),
+.routineTable tbody tr > td:hover,
+.routineTable:where(:not(:has(td:hover, thead th:hover))) tbody tr > td:focus-within {
+  --routine-focus-edge: #ffffff;
+  background: var(--routine-intersection);
+  color: #ffffff;
+  box-shadow:
+    inset 0 0 0 2px var(--routine-edge),
+    0 0 14px #62d8ff30;
+}
+
+.routineTable tbody td:is(:hover, :focus-within) {
+  z-index: 2;
+}
+
+@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
+  .routineTable tbody td:hover {
+    transform: scale(1.012);
+    filter: brightness(1.08);
+  }
+}
+
+.footer {
+  margin-top: 8px;
+  border-top: 1px solid var(--routine-edge);
+  padding: 8px;
+  background: #123b63;
+  text-align: center;
+}
+
+.footerCredit {
+  display: inline-block;
+  max-width: 100%;
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+  background: linear-gradient(110deg, #ffffff 35%, #7bdfff 48%, #ffffff 61%);
+  background-size: 250% 100%;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: routine-credit-shimmer 4.5s linear infinite;
+}
+
+@keyframes routine-credit-shimmer {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -150% 0;
+  }
 }
 
 .dayHeading {
@@ -595,11 +766,17 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .pageHeader .primaryAction:enabled::before {
+  .actionRow button:enabled::before,
+  .routineTable thead th:not(:first-child)::before,
+  .footerCredit {
     animation: none;
   }
   .routineTable td {
-    transition: none;
+    transition: none !important;
+  }
+  .footerCredit {
+    background: none;
+    -webkit-text-fill-color: #ffffff;
   }
 }
 
@@ -636,7 +813,7 @@
   }
 
   .headerActions {
-    flex-shrink: 0;
+    width: 100%;
   }
 
   .pageHeader {
@@ -678,5 +855,35 @@
 
   .viewToggle button {
     padding-inline: 7px;
+  }
+}
+
+@media (max-width: 500px) {
+  .actionRow {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+  }
+
+  .actionRow .viewToggle {
+    grid-column: 1 / -1;
+  }
+
+  .viewToggle button {
+    flex: 1;
+  }
+
+  .actionRow button {
+    min-width: 0;
+    padding-inline: 8px;
+    font-size: 12px;
+    gap: 5px;
+  }
+}
+
+@media (pointer: coarse) {
+  .actionRow button {
+    min-height: 44px;
   }
 }

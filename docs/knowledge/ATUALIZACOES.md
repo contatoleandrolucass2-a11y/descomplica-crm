@@ -1,5 +1,17 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Retomada para agenda Salesforce na VPS
+
+- Usuario autorizou continuar depois da conexao e carga real. Escopo agora:
+  preparar, validar e ativar o agendador de 30 minutos, preservando n8n antigo.
+- Consulta GitHub e health em 09:14 de Brasilia: main e versao publicada
+  `08c3ae453ddfb225c3cb64971b53333c36d8932e`, health 200/ok. PR202 integrado
+  depois da nossa publicacao15ddedd; nao usar o ledger anterior para deploy.
+- PR203 documental continua aberto em a91d30e; CI38363681423 falhou em validate
+  e ignorou os jobs dependentes. Causa ainda em investigacao, sem alegar CI verde.
+- Merge de main preserva integralmente os registros de ambas as frentes.
+  Agenda, monitor e configuracao remota ainda nao alterados nesta retomada.
+
 ## 2026-10-13: Conexao real concluida, agenda ainda desligada
 
 - Fontes atuais: GitHub PR198/main15ddedd e CI38358420498 com quatro jobs verdes;
@@ -29,6 +41,72 @@
   recuperado; segunda copia independente da chave continua recomendada.
 - pnpm verify repetido exit0, CI completa verde e screenshot real inspecionado.
   Documentacao final em branch separada, sem nova mudanca de runtime.
+
+## 2026-10-13: Retomada apos integracao concorrente
+
+- Consulta as 03:58 Sao Paulo: origin/main mudou para15ddedd, PR #198
+  integrado as06:44:24Z com CI38354900341 aprovada. Health publico segue
+  ok/7c50f59. Fontes: GitHub PR198/main e /api/health do CRM.
+- Merge em codex/rotina-efeitos-compactos preserva ambos os historicos; conflitos
+  limitados a CHANGELOG, WORKLOG e este registro, resolvidos mantendo entradas.
+  Revalidar conjunto integrado; nao ativar opcao Salesforce, agenda ou migrations
+  nesta entrega de interface. Coordenador novo deve ser relido antes do deploy.
+- Conjunto integrado: lint/typecheck/test/build aprovados. Vitest2647/56skips,
+  coletor138/0skips, release113/11skips fisicos exclusivos Linux. Fixtures
+  Windows corrigidas pelo PR198 eliminam as seis falhas locais anteriores.
+  VITEST_MAX_WORKERS=2; CI Linux continua obrigatoria no SHA integrado exato.
+
+## 2026-10-13: Abertura dos efeitos e compactacao da Rotina
+
+- Consulta as 02:23 de Sao Paulo: health publico em
+  https://crm.descomplicapro.com.br/api/health confirmou ok/7c50f59.
+  GitHub PR #201 documental tinha CI 38344420076 aprovada e foi integrado em
+  1c36fce187a22cc2527d19839eaa4f620f6673c4; nenhum redeploy documental.
+- Branch codex/rotina-efeitos-compactos parte desse main. Demanda restrita a
+  gradientes, realce linha/coluna, controles compactos e rodape da Rotina.
+  Referencia https://descomplicapro.com.br/configuracoes/metas/parcerias
+  somente leitura; nao alterar sua pagina nem persistencia, permissoes ou dados.
+- Fetch web retornou timeout; navegador leu a referencia sem mutacoes. Estilo
+  observado: current linear-gradient(145deg,#176f8a,#123b63), sombra cyan e
+  transicoes de 180ms. Prints fornecidos definem realce de linha/coluna.
+- Implementacao local restrita a RoutineSettings.tsx/module.css e seus testes:
+  controles movidos, faixa redundante removida, gradientes e borda especular,
+  crosshair CSS sem render React por mouse e rodape com movimento reduzido.
+  API, schema e dados nao alterados. Ainda nao publicado.
+- Revisao independente encontrou conflito de especificidade na intersecao,
+  realces simultaneos de hover/foco e area touch de 36px. Corrigidos com
+  seletores :where, prioridade ao ponteiro com retorno ao foco e minimo de
+  44px em pointer coarse. Novos testes cobrem esses cenarios nos tres temas.
+- Primeira rodada local: lint/tipos/build/formatacao aprovados; suite geral
+  com 2567 aprovados, seis falhas POSIX conhecidas e 52 ignorados. Reexecucao
+  final e CI Linux obrigatorias. Servidor dev em background bloqueado pela
+  politica da ferramenta; nao contornado. Preview/testes usam harness isolado.
+- Rodada final no CSS corrigido: 80/80 testes (48 de interface e 32 de API),
+  sem skips, 73,43s; Axe sem violacoes nas 12 combinacoes. Revisao independente
+  sem achados residuais, incluindo contraste do contorno com hover/foco nos
+  tres temas e toque de 44px em 320/390px. Capturas em test-results/routine-preview.
+- Gates locais finais: lint, typecheck e build aprovados. Suite geral Windows:
+  2567 aprovados, seis falhas POSIX conhecidas em quatro arquivos e 53 skips;
+  nao suprimir testes, reavaliar na CI Linux do mesmo SHA. QA usa fixtures/RPC
+  mockada; nao comprova backend autenticado real. Nenhuma escrita em producao.
+- CI PR #202/38353319930: validate e restore passaram, matriz autenticada
+  falhou no helper novo que pressupunha movimento habilitado. O runner cria
+  contexto reducedMotion=reduce; falha reproduzida localmente. Helpers agora
+  testam ambos os modos e restauram a preferencia original em finally, inclusive
+  apos falha. Nao mudar runtime, thresholds, baseline ou contexto global.
+- Regressao ampliada: 83/83 casos focais aprovados; gates Windows mantem seis
+  falhas POSIX/2567 aprovados/56 skips. Diagnostico futuro limita logs a fase,
+  viewport e tipo de falha, sem DOM ou payload privado. Nova CI obrigatoria.
+- CI 38356113124: primeira tentativa teve 403 da fonte Prefeitura; repeticao
+  sem alterar checker passou validate/restore. O teste de celulas encontrou
+  duracao minima global de 0,01ms com !important, divergente do contrato 0s.
+  CSS reduzido da Rotina agora desliga a transicao com prioridade local;
+  fixture importa globals.css integral. 83/83 testes e typecheck passam com
+  a cascata real, sem reduzir assertions. CI autenticada precisa confirmar.
+- Gates apos CSS global: lint/tipos/build/formatacao aprovados. Suite geral
+  teve 2566 aprovados, seis falhas POSIX e um timeout transitorio do handshake
+  Next DevTools; reexecucao isolada de project-devtools passou 24/24 em 2,32s
+  sem alteracoes. Nao equivale a CI integral; reavaliar se timeout se repetir.
 
 ## 2026-10-13: Preparacao transacional da conexao Salesforce
 

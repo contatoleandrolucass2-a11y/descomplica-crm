@@ -890,16 +890,46 @@ export function RoutineSettings() {
         <header className={styles.pageHeader}>
           <h1>Rotina semanal e diária</h1>
           <div className={styles.headerActions}>
-            <button
-              type="button"
-              className={styles.primaryAction}
-              disabled={!hasLoaded || !canEdit || isSaving || conflict}
-              hidden={hasLoaded && !canEdit}
-              onClick={saveRoutine}
-            >
-              <Save size={17} aria-hidden="true" />
-              {isSaving ? "Salvando..." : "Salva alterações"}
-            </button>
+            <div className={styles.actionRow} aria-label="Ações da rotina">
+              <div className={styles.viewToggle} role="group" aria-label="Visualização da rotina">
+                <button
+                  type="button"
+                  aria-pressed={view === "week"}
+                  onClick={() => changeView("week")}
+                >
+                  <CalendarDays size={16} aria-hidden="true" />
+                  Semana
+                </button>
+                <button
+                  type="button"
+                  aria-pressed={view === "day"}
+                  onClick={() => changeView("day")}
+                >
+                  <ListChecks size={16} aria-hidden="true" />
+                  Hoje
+                </button>
+              </div>
+              <button
+                type="button"
+                className={styles.addButton}
+                disabled={!hasLoaded || !canEdit || isSaving || (view === "day" && !currentDay)}
+                hidden={hasLoaded && !canEdit}
+                onClick={addRow}
+              >
+                <Plus size={17} aria-hidden="true" />
+                Inserir linha
+              </button>
+              <button
+                type="button"
+                className={styles.primaryAction}
+                disabled={!hasLoaded || !canEdit || isSaving || conflict}
+                hidden={hasLoaded && !canEdit}
+                onClick={saveRoutine}
+              >
+                <Save size={17} aria-hidden="true" />
+                {isSaving ? "Salvando..." : "Salva alterações"}
+              </button>
+            </div>
             <span className={styles.saveState} role="status" aria-live="polite">
               {!hasLoaded
                 ? "Carregando rotina."
@@ -987,46 +1017,6 @@ export function RoutineSettings() {
                 }
                 tabIndex={0}
               >
-                <div className={styles.tableToolbar}>
-                  <h2 id="routine-table-title">{activeRoleInfo.label}</h2>
-                  <div className={styles.tableStats} aria-label="Ações da rotina">
-                    <div
-                      className={styles.viewToggle}
-                      role="group"
-                      aria-label="Visualização da rotina"
-                    >
-                      <button
-                        type="button"
-                        aria-pressed={view === "week"}
-                        onClick={() => changeView("week")}
-                      >
-                        <CalendarDays size={16} aria-hidden="true" />
-                        Semana
-                      </button>
-                      <button
-                        type="button"
-                        aria-pressed={view === "day"}
-                        onClick={() => changeView("day")}
-                      >
-                        <ListChecks size={16} aria-hidden="true" />
-                        Hoje
-                      </button>
-                    </div>
-                    <button
-                      type="button"
-                      className={styles.addButton}
-                      disabled={
-                        !hasLoaded || !canEdit || isSaving || (view === "day" && !currentDay)
-                      }
-                      hidden={hasLoaded && !canEdit}
-                      onClick={addRow}
-                    >
-                      <Plus size={17} aria-hidden="true" />
-                      Inserir linha
-                    </button>
-                  </div>
-                </div>
-
                 {visibleRows.length && visibleDays.length ? (
                   <table ref={tableRef} className={styles.routineTable} data-view={view}>
                     <caption>
@@ -1110,6 +1100,9 @@ export function RoutineSettings() {
             ) : null}
           </section>
         ))}
+        <footer className={styles.footer}>
+          <span className={styles.footerCredit}>Desenvolvido e gerenciado por Leandro Lucas</span>
+        </footer>
       </main>
     </div>
   );

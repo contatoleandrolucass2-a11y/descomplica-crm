@@ -48,6 +48,13 @@ a versao antiga volta ao salvamento local e nao atualiza o registro compartilhad
 
 ## Evidencias
 
+Apresentacao: Semana/Hoje e Inserir linha ficam antes de Salvar no cabecalho.
+Apenas os dias da tabela acompanham a rolagem abaixo do menu. Gradientes e
+realce seguem a referencia visual, sem modificar a pagina de metas. Hover/foco
+destacam linha e coluna na semana e somente linha no dia; a ampliacao sutil nao
+redimensiona a grade. Movimento reduzido desativa brilho e ampliacao. Assinatura
+fica no rodape da Rotina, sem alterar o rodape global.
+
 `supabase/tests/crm_shared_routines.test.sql`, `tests/routine-api.test.ts`,
 `tests/routine-settings.test.tsx`, `scripts/qa/routine-settings.mjs` e matriz
 de autorizacao E2E. Evidencias reais de publicacao ficam em ATUALIZACOES.md.

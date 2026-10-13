@@ -17,6 +17,24 @@
 - Validacao local repetida: pnpm verify exit0 (lint/typecheck/test/build),
   Vitest2647/43skips, release113/11skips Linux e coletor138. CI Linux verde.
 
+## 2026-10-13: Efeitos e compactacao da Rotina
+
+- Controles Semana/Hoje/Inserir linha movidos para o cabecalho, antes de Salvar.
+  Removida faixa redundante de funcao e mantidas abas/caption acessiveis.
+- Titulos com gradiente azul-petroleo e contorno especular; realce de linha e
+  coluna na semana, linha no dia e ampliacao sutil sem alterar a grade.
+- Rodape local com assinatura branca e brilho, respeitando movimento reduzido.
+  Persistencia, regras de acesso, API e banco preservados.
+- Validacao local final: 80/80 casos de interface/API, Axe sem violacoes nas
+  12 combinacoes, lint/tipos/build/formatacao aprovados. Suite geral Windows:
+  2567 aprovados, seis falhas POSIX conhecidas; CI Linux ainda obrigatoria.
+- Corrigido helper QA para preservar movimento reduzido do runner autenticado;
+  83/83 casos focais aprovados. Runtime e criterios de aprovacao preservados.
+- Movimento reduzido desliga transicoes da tabela mesmo sob o CSS global;
+  fixture agora importa globals.css. 83/83 testes focais com cascata real passam.
+- Integra main15ddedd/PR198 sem descartar registros. Lint/tipos/test/build
+  aprovados: Vitest2647, coletor138, release113; testes fisicos Linux na CI.
+
 ## 2026-10-13: Aplicacao transacional da configuracao Salesforce
 
 - Cartoes n8n/Supabase deixam o texto fixo e usam consulta autenticada existente,
