@@ -2427,11 +2427,13 @@ function enrichInventory(items: InventoryItem[], reference: InventoryItem[], off
     const projectSource = referenceByProject.get(inventoryProjectKey(item));
     const inferred = inferLocation(item.identifier);
     const finalWithKit = item.finalWithKit ?? source?.finalWithKit ?? null;
-    const unitBonus = item.unitBonus ?? source?.unitBonus ?? 0;
-    const tableSlack = item.tableSlack ?? source?.tableSlack ?? 0;
+    const unitBonus = item.unitBonus ?? source?.unitBonus ?? null;
+    const tableSlack = item.tableSlack ?? source?.tableSlack ?? null;
     const cashBackSlack = item.cashBackSlack ?? source?.cashBackSlack ?? null;
     const finalPrice = finalWithKit != null
-      ? Math.max(0, finalWithKit - (unitBonus + tableSlack))
+      ? unitBonus != null && tableSlack != null
+        ? Math.max(0, Math.round(finalWithKit * 100) - Math.round(unitBonus * 100) - Math.round(tableSlack * 100)) / 100
+        : null
       : item.finalPrice ?? source?.finalPrice ?? null;
     return {
       ...item,

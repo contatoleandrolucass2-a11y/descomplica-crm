@@ -42,7 +42,10 @@ type Unit = {
   project: string;
   identifier: string | null;
   product: string;
-  finalPrice: number;
+  finalPrice: number | null;
+  finalWithKit?: number | null;
+  unitBonus?: number | null;
+  tableSlack?: number | null;
   appraisal: number | null;
   progress: number | null;
   completionDate: string | null;
@@ -83,6 +86,44 @@ const neighbor: Unit = {
 };
 
 describe("actual JSX inventory enrichment", () => {
+  it.each(["finalWithKit", "unitBonus", "tableSlack"] as const)(
+    "keeps an official unit unusable when %s is absent from both endpoints",
+    (missingComponent) => {
+      const incomplete: Unit = {
+        ...current,
+        finalWithKit: 300_000,
+        unitBonus: 5_000,
+        tableSlack: 10_000,
+        finalPrice: null,
+        completionDate: "2028-12-30",
+        [missingComponent]: null,
+      };
+      const enriched = enrichInventory([incomplete], [incomplete])[0];
+      expect(enriched).toBeDefined();
+      if (!enriched) throw new Error("Inventory unit was dropped");
+      expect(enriched[missingComponent]).toBeNull();
+      expect(enriched.finalPrice).toBeNull();
+      expect(Boolean(enriched.finalPrice && enriched.completionDate)).toBe(false);
+    },
+  );
+
+  it("preserves actual zero deductions and calculates complete prices in cents", () => {
+    const complete: Unit = {
+      ...current,
+      finalWithKit: 300_000.29,
+      unitBonus: 5_000.1,
+      tableSlack: 0.19,
+      finalPrice: 295_000,
+    };
+    expect(enrichInventory([complete], [complete])[0]).toMatchObject({ finalPrice: 295_000 });
+    const zero = { ...complete, unitBonus: 0, tableSlack: 0 };
+    expect(enrichInventory([zero], [zero])[0]).toMatchObject({
+      unitBonus: 0,
+      tableSlack: 0,
+      finalPrice: 300_000.29,
+    });
+  });
+
   it("never borrows appraisal, progress or delivery from a neighboring unit in the same literal project", () => {
     expect(enrichInventory([current], [neighbor])[0]).toMatchObject({
       ...current,

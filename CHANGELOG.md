@@ -7,6 +7,8 @@
 - Mostra estoque na lista de relatórios, com contagem/data reais e identificação
   de coleta avulsa; preserva status das unidades e impede fallback para preços
   históricos quando a fonte oficial está configurada.
+- Mantém preços incompletos indisponíveis também no enriquecimento do simulador;
+  descontos ausentes não viram zero, e valores completos são calculados em centavos.
 
 ## 2026-10-13: Logo Descomplica na aba do navegador
 

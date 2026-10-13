@@ -26,6 +26,11 @@
   Ensaio aprovado em nove combinações de tema/largura, zoom de 200%, estados,
   polling e console sintético. A CI inicial do PR foi cancelada para incorporar
   esse ajuste das expectativas de sete para oito linhas; nenhum gate foi removido.
+- Revisão do PR identificou conversão de descontos ausentes para zero no
+  enriquecimento legado da interface. Corrigida para manter preço incompleto
+  indisponível, com regressões para cada componente ausente, zero real e
+  precisão em centavos. Nova execução integral de `pnpm verify` e CI exigida
+  após a correção; a execução anterior da CI foi cancelada sem publicar.
 
 ## 2026-10-13: Logo na aba do navegador
 

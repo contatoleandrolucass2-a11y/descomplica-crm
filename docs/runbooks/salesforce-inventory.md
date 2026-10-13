@@ -31,6 +31,8 @@ Campos ausentes permanecem nulos. Valores monetários com ISO omitido só são
 aceitos quando o rótulo do próprio Salesforce identifica BRL/R$. Outra moeda
 ou ausência dessa indicação bloqueia o candidato. Status é preservado; o
 relatório pode conter estados Mirror e reservados, não apenas disponíveis.
+O enriquecimento da interface também preserva componentes de preço ausentes;
+uma unidade sem preço completo permanece sem opção de seleção para simulação.
 
 ## Consumo e publicação
 
