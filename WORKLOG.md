@@ -19,6 +19,44 @@
   mantendo branco no escuro; Axe ampliado para ambas as preferencias de movimento.
   QA de entrada verifica matriz real para resistir a minificacao CSS.
 
+## 2026-10-13: Preparacao da agenda Salesforce
+
+- Escopo autorizado: ativar rotina de 30 minutos na VPS depois da carga real
+  comprovada, preservando novo workflow e n8n antigo. Primeiro ciclo imediato,
+  seguintes nas fronteiras de 30 minutos, sem exportacoes concorrentes.
+- Revisao independente crm-qa: 57 testes Node e quatro verificacoes sinteticas
+  passaram em Node24.19/Windows. Nenhum bloqueio concreto no runner existente.
+  Limites: encerramento forcado pode deixar lock e reinicio zera progresso em memoria.
+- Preflight observacional: app08c3ae, ingesttrue/refreshfalse e segredos efetivos
+  correspondentes, sessao remota conectada as09:31 de Brasilia. Novo n8n ativo
+  emdcffaf09, cinco nodes, sem agenda interna nem payloads persistidos.
+- CI38363681423 do PR203 falhou por HTTP403 da fonte oficial ITBI/SP.
+  O mesmo verificador, sem alteracoes, passou localmente nesta retomada.
+- Servico e instalador em preparacao; ativacao e dois ciclos reais ainda pendentes.
+- Instalador concluido com 57 testes focados aprovados. Suite do coletor passou
+  194 testes antes do ultimo caso adicional; release113 passou/11 skips POSIX.
+  Lint sem erros (um aviso preexistente), typecheck e build aprovados.
+- pnpm test no Windows falhou em quatro testes por timeout (devtools/Obsidian).
+  Repeticao com dois workers e diagnostico isolado em andamento; nao atribuir
+  aprovacao integral local. Formato dos arquivos alterados e diff-check passaram.
+
+## 2026-10-13: Conexao n8n e Supabase comprovada em producao
+
+- PR198 integrado; CI38358420498 aprovada. Artefato15ddedd teve checksum,
+  cadeia OCI/config/11camadas e dois perfis de runtime comprovados na VPS.
+- Release protegida54fc028d publicada07:27Z, com backup integral privado do
+  env, ingestao habilitada, refresh desligado e nenhum secret em logs.
+- Novo workflow L90AYSBEat4vYHLz publicado exclusivamente via MCP. Nome e
+  descricao atualizados apos validar SDK; releitura confirmou grafo/settings
+  identicos. N8n antigo intocado, nenhuma migration remota aplicada.
+- Exportacao real dos sete relatorios: primeira carga201 e replay200 do mesmo
+  requestId, reconciliados no Supabase. Snapshot13/10, 15metricas/144participantes,
+  uma run e uma auditoria. Interface autenticada confirmou os tres servicos.
+- Agenda30min e refresh ainda desligados; monitor independente ainda nao recebe
+  contagens/recibos da carga pontual. Runbook e auditoria registram o limite.
+- Validacao local repetida: pnpm verify exit0 (lint/typecheck/test/build),
+  Vitest2647/43skips, release113/11skips Linux e coletor138. CI Linux verde.
+
 ## 2026-10-13: Efeitos da Rotina em producao
 
 - PR202 integrado em08c3ae4; CI main38364326341 com quatro jobs aprovados.

@@ -1,0 +1,52 @@
+[Unit]
+Description=Descomplica Salesforce serialized collector and connection monitor
+Wants=network-online.target
+Requisite=descomplica-salesforce-browser.service
+After=network-online.target descomplica-salesforce-browser.service descomplica-salesforce-monitor.service
+Conflicts=descomplica-salesforce-monitor.service
+StartLimitIntervalSec=300
+StartLimitBurst=3
+
+[Service]
+Type=exec
+User=descomplica-salesforce
+Group=descomplica-salesforce
+WorkingDirectory=@RELEASE@
+Environment=HOME=/var/lib/descomplica-salesforce
+Environment=SALESFORCE_CDP_URL=http://127.0.0.1:9222
+Environment=SALESFORCE_CRM_ORIGIN=https://crm.descomplicapro.com.br
+Environment=SALESFORCE_STATUS_ENABLED=true
+Environment=SALESFORCE_N8N_PUBLISH_ENABLED=true
+Environment=SALESFORCE_N8N_WEBHOOK_URL=https://n8n-crm.descomplicapro.com.br/webhook/descomplica-crm-salesforce-candidate
+Environment=SALESFORCE_CANDIDATE_OUTPUT=/var/lib/descomplica-salesforce/candidate.json
+LoadCredential=n8n-bearer:/srv/descomplica-n8n/salesforce-test.token
+LoadCredential=status-bearer:/var/lib/descomplica-salesforce/status-bearer
+Environment=SALESFORCE_N8N_SECRET_FILE=%d/n8n-bearer
+Environment=SALESFORCE_STATUS_SECRET_FILE=%d/status-bearer
+ExecStart=/usr/local/bin/node ops/salesforce/run-every-30-minutes.mjs
+Restart=on-failure
+RestartSec=20
+TimeoutStopSec=90
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+ReadWritePaths=/var/lib/descomplica-salesforce
+MemoryMax=768M
+TasksMax=128
+LimitCORE=0
+StandardOutput=journal
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

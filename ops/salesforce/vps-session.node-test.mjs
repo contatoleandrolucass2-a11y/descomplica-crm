@@ -74,15 +74,20 @@ test("prerequisites verify the official signing key without global upgrades", as
   );
 });
 
-test("installer allowlist matches all versioned units and gateway installation is opt-in", async () => {
+test("session allowlist excludes the separately installed collector and gateway remains opt-in", async () => {
   const installer = await read("install-session.sh");
   const entries = await readdir(new URL("./vps/", import.meta.url));
-  const expected = entries.filter((file) => /\.(service|target)$/.test(file)).sort();
+  const collector = "descomplica-salesforce-collector.service";
+  const expected = entries
+    .filter((file) => /\.(service|target)$/.test(file) && file !== collector)
+    .sort();
   const match = installer.match(/readonly units=\(\s*([^)]+)\)/);
   assert.ok(match, "Explicit unit allowlist required");
   const units = match[1].trim().split(/\s+/).sort();
   assert.deepEqual(units, expected);
   assert.equal(units.length, 6);
+  assert.ok(!units.includes(collector));
+  assert.match(installer, /! -name 'descomplica-salesforce-collector\.service'/);
   assert.equal(new Set(units).size, units.length);
   assert.ok(units.includes("descomplica-salesforce-gateway.service"));
   assert.match(installer, /\[--with-console-gateway\]/);

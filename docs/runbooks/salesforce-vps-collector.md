@@ -1,0 +1,102 @@
+# Coletor Salesforce na VPS
+
+O servico `descomplica-salesforce-collector.service` executa a coleta existente
+e o monitor no mesmo processo. Substitui somente o monitor independente;
+nao reinicia navegador, gateway, CRM ou n8n. O n8n antigo fica fora do escopo.
+
+## Contrato operacional
+
+- Primeiro ciclo imediato; seguintes nas fronteiras de 30 minutos. Se uma
+  coleta atravessar uma fronteira, aguarda a proxima, sem sobreposicao.
+- Lock exclusivo pelo caminho do candidato, limite de coleta de 25 minutos,
+  cancelamento cooperativo e publicacao somente apos os sete relatorios.
+- Arquivo candidato privado e substituido atomicamente. Falha de coleta nao
+  substitui o candidato anterior; falha de publicacao nao apaga o banco.
+- Novo n8n recebe somente o snapshot normalizado. O CRM valida e chama a RPC
+  atomica existente. O coletor confirma HTTP 200/201 e o mesmo requestId.
+- Monitor consulta a sessao a cada 45 segundos e envia contagens, horario de
+  coleta, publicacao e proxima execucao. Recibo de conexao vence em 120 segundos.
+- Credenciais entram pelo `LoadCredential` do systemd, sem valores em unidade,
+  argumentos ou logs. Destinos sao fixos; nenhum listener novo e aberto.
+- `Conflicts` impede o monitor independente e o coletor de rodarem juntos.
+  A ativacao desabilita o monitor antigo tambem no boot, com rollback registrado.
+
+## Antes de ativar
+
+Exige autorizacao para agenda e ingestao real, conexao Salesforce validada,
+primeira carga reconciliada no Supabase e backups privados ja conferidos.
+Nao confundir permissao para preparar o servico com evidencia de ativacao.
+
+1. Validar lint, typecheck, test, build e quatro jobs CI no SHA exato de main.
+2. Preparar checkout limpo/root-owned em `/srv/descomplica-crm-releases/<SHA>`.
+   Node 24.19.x e pnpm 11.20.x, lockfile congelado. Dependencias devem ser
+   legiveis pelo usuario dedicado; nunca alterar permissoes do cache pnpm
+   compartilhado nem de arquivos com hardlinks para fora do checkout.
+3. Conferir navegador ativo, monitor antigo ativo/habilitado, coletor ausente,
+   candidato/segredos privados e ausencia de export em andamento.
+4. Preparar unidade e registro privado de reversao sem iniciar servicos.
+5. Ativar somente depois de conferir que release, CI e estado nao mudaram.
+   Nao usar `EnvironmentFile=monitor.env`: ele desabilita a publicacao.
+
+O instalador e exclusivo da primeira ativacao. Atualizacao posterior exige
+revisao especifica; nao remover registro ou unidade para simular instalacao nova.
+
+Com SHA completo e ID da CI de main ja conferidos, executar como root na VPS:
+
+```bash
+/usr/local/bin/node /srv/descomplica-crm-releases/$SHA/ops/salesforce/vps/install-collector.mjs prepare "$SHA" "$CI_RUN_ID"
+/usr/local/bin/node /srv/descomplica-crm-releases/$SHA/ops/salesforce/vps/install-collector.mjs activate "$SHA"
+```
+
+`prepare` consulta GitHub, verifica codigo e captura o estado anterior; nao
+inicia nem para servicos. `activate` repete verificacoes, confirma dependencias
+como usuario dedicado, valida a unidade e troca o monitor pelo coletor.
+O registro em `/var/lib/descomplica-salesforce-collector-install/state.json`
+fica root-only, protegido por lock e comparacao integral antes de escrita.
+
+## Aceite em producao
+
+- Coletor `enabled/active`, usuario dedicado; monitor independente
+  `disabled/inactive`. Navegador e demais servicos permanecem ativos.
+- Dois ciclos reais distintos: requestId, referencia, contagens de origem,
+  recibo de publicacao e uma run/auditoria por carga no Supabase.
+- Snapshot gerado avanca; replay do mesmo requestId nao duplica dados.
+- CRM mostra evidencia recente do monitor e da ingestao, sem afirmar que
+  um servico esta conectado apenas porque a URL abre.
+- Conferir ausencia de execucoes sobrepostas e de payloads salvos no n8n.
+- Registrar hora em America/Sao_Paulo, SHA do coletor, versao do CRM separada,
+  CI, estado anterior, recibos e caminho privado de rollback, sem segredos.
+
+## Falhas e reversao
+
+Falha de coleta/publicacao marca o ciclo como falho e preserva o ultimo
+snapshot valido no banco. A rotina tenta novamente na proxima fronteira.
+Um SIGTERM cancela e aguarda limpeza; encerramento forcado pode deixar lock.
+Nao remover lock sem confirmar que o processo terminou e nao ha export ativo.
+
+A reversao desabilita/para somente o coletor e restaura o estado anterior do
+monitor. Nao remove candidato, perfil, credenciais, workflow ou dados Supabase.
+Falha intermediaria deve permanecer registrada e recuperavel, nunca tratada
+como ativacao concluida. Conservar backup e registro privado para inspecao.
+
+Para reverter a mesma instalacao, usar o SHA registrado, mesmo se main avancou:
+
+```bash
+/usr/local/bin/node /srv/descomplica-crm-releases/$SHA/ops/salesforce/vps/install-collector.mjs rollback "$SHA"
+```
+
+Confirmar monitor no estado anterior e coletor ausente; reexecutar rollback e
+seguro quando a reversao anterior ja terminou e nenhum estado externo mudou.
+
+MFA, revogacao e expiracao de sessao continuam sob controle do Salesforce.
+Quando exigida, autenticar pelo console remoto no CRM; nao copiar cookies do
+PC nem desativar MFA. Reiniciar o coletor zera progresso em memoria ate nova
+coleta, mas nao apaga snapshots ja publicados. Sem destino de alertas aprovado,
+a evidencia de falha permanece no CRM e nos logs operacionais sem payload.
+
+## Fontes
+
+- [systemd 255: credenciais e ambiente](https://github.com/systemd/systemd/blob/v255/man/systemd.exec.xml).
+- [Sessao da VPS](salesforce-vps-session.md).
+- [Ingestao e contrato n8n](salesforce-n8n-migration.md).
+- [Conclusao e backups](conclusao-salesforce-n8n.md).

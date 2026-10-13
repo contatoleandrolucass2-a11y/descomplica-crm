@@ -20,7 +20,16 @@ Nao compartilhar senhas, tokens, dumps ou chave privada em chats/PRs.
 - Recuperacao local dos arquivos baixados com SHA256 identico aos originais.
 - Chave privada fora da VPS/Supabase, com ACL restrita no Windows.
 - Ensaio de ingestao na copia isolada: 15 metricas e 144 participantes,
-  com replay idempotente. Isso ainda nao e ingestao HTTP em producao.
+  com replay idempotente.
+- PR198 integrado e CI de main38358420498 aprovada nos quatro jobs.
+  Imagem15ddedd publicada pelo coordenador, com backup privado da configuracao.
+- Conexao real VPS -> novo n8n -> CRM -> Supabase comprovada em13/10/2026:
+  primeira carga HTTP201, replay HTTP200/idempotenttrue, sem duplicidade.
+- Supabase atualizado para referencia13/10: 3 views, 15 metricas,
+  15 empreendimentos e 144 participantes. Uma run e um evento de sucesso.
+- Tela autenticada confirma Salesforce conectado, ingestao n8n e leitura
+  Supabase. Evidencias completas no
+  [relatorio da conexao](../audits/n8n-supabase-conexao-2026-10-13.md).
 
 ## O que ainda depende do operador
 
@@ -35,29 +44,35 @@ Nao compartilhar senhas, tokens, dumps ou chave privada em chats/PRs.
 Credenciais tecnicas existentes devem ser reutilizadas sem nova exposicao;
 nao e necessario enviar novamente senhas ou chaves ao assistente.
 
-## Sequencia tecnica obrigatoria
+## Estado da operacao
 
-1. Concluir todos os checks do PR, integrar e validar CI push/main no SHA exato.
-2. Preparar backup/rollback privado da configuracao; promover a imagem imutavel
-   pelo coordenador de release, com `--salesforce-ingestion enable`, injetando
-   os secrets existentes. Essa opcao exige novo SHA e verifica configuracao
-   efetiva; falha deixa recuperacao pendente. Sem restart manual como atalho.
-3. Habilitar apenas ingestao e comprovar runtime; refresh, publisher e agenda
-   continuam desligados. Nao aplicar migrations Qlik/v3 neste cutover.
-4. Validar snapshot completo e sessao da VPS; publicar somente webhook candidato
-   via MCP e fazer uma carga unica. Exigir HTTP201/mesmo requestId, conferir banco
-   e repetir a mesma carga esperando HTTP200/idempotenttrue.
-5. Somente depois habilitar publisher/agenda de 30 minutos com lock, timeout,
-   falha fechada e alerta de reautenticacao. Preservar ultimo snapshot valido
-   quando a coleta falhar. Nunca apagar dados antes de validar a nova carga.
+- Novo workflow ativo: **CRM VPS - Salesforce - Ingestao CRM**, id
+  `L90AYSBEat4vYHLz`. Webhook autenticado; sem agenda e sem salvar payloads.
+- Ingestao do CRM habilitada; atualizacao manual/refresh continuam desligados.
+- A primeira carga foi pontual. **A agenda de30min ainda nao foi ativada.**
+- A tabela operacional do coletor pode continuar sem contagens/publicacao:
+  o monitor independente ainda nao recebe os recibos da carga pontual.
+  Os cartoes n8n/Supabase usam evidencia consultada no banco.
+
+## Proximo passo tecnico
+
+O [runbook do coletor VPS](salesforce-vps-collector.md) descreve a implantacao
+reversivel, os limites e os criterios de aceite. Preparo nao significa ativacao.
+
+1. Versionar a implantacao do agendador, integrando coleta e recibos ao monitor.
+2. Validar lock, timeout, restart, falha de coleta/publicacao e reautenticacao.
+3. Ativar a rotina aprovada de30min e comprovar dois ciclos completos na VPS,
+   sem depender do PC. Conferir horarios e banco a cada ciclo.
+4. Preservar ultimo snapshot valido se a coleta falhar. Nunca apagar os dados
+   antes de validar integralmente a nova carga; manter a RPC atomica existente.
 
 ## Limites
 
 - Validacao local desta etapa: lint/typecheck/test/build aprovados, n8n23/23,
   Vitest2647/43skips, coletor138 e release113/11skips Linux. QA sintetico passou
   nove telas/temas, zoom200%, estados de leitura/ingestao e falha de consulta.
-  CI do PR ainda pendente na entrega; nao ha promocao automatica confirmada.
-- N8n antigo nao foi alterado. A candidata nova continua inativa neste registro.
+  CI do PR e main aprovadas; promocao e carga real confirmadas nesta entrega.
+- N8n antigo nao foi alterado. Somente o webhook do novo n8n esta ativo.
 - Backup offsite esta no mesmo projeto Supabase: exclusao do projeto e risco comum.
 - Nao houve teste completo de boot das aplicacoes restauradas nem de
   descriptografia das credenciais n8n. Nao alegar recuperacao de desastre total.
