@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-12: Credencial vinculada por MCP
+
+- Header Auth salvo pelo operador e ID conferido na UI, sem acesso ao segredo.
+- Validacao SDK, vinculo por MCP e releitura aprovados; candidata inativa.
+- Backup atualizado e restore de 148 tabelas aprovado. Teste remoto bloqueado
+  por ausencia de execute_workflow no chat; necessario recarregar MCP.
+- Mudanca documental; sem nova suite geral, deploy CRM ou ativacao da coleta.
+
+
 ## 2026-10-12: Backup local do novo n8n
 
 - Script limitado ao projeto descomplica-n8n-crm, sem acessar a instancia antiga.

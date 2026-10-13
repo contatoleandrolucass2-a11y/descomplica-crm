@@ -1,5 +1,26 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Credencial vinculada a candidata
+
+- Operador salvou Header Auth. UI Detalhes confirmou ID VtBqo7sf3XOwxzpr;
+  nenhum segredo lido ou copiado. Nome original CRM VPS - Snapshot entrada.
+- validate_workflow aprovou SDK (tres nodes); setNodeCredential via MCP
+  vinculou httpHeaderAuth ao Receber Snapshot Normalizado. Releitura confirmou
+  referencia, active false e settings de privacidade preservados. Versao
+  88270273-9a3b-40e6-9684-6e7ff54204a1. Sem publicacao ou execucao.
+- Inventario e busca de ferramentas ainda nao expoem execute_workflow,
+  apesar de OAuth anterior confirmado pelo CLI. Bloqueio de disponibilidade
+  da ferramenta neste chat; nao contornado por REST, UI ou CLI de workflows.
+  Revisar apos recarregar a conexao MCP no cliente; sucesso de autenticacao
+  nao comprova exposicao da ferramenta nem teste da credencial.
+- Novo backup apos cadastro/vinculo: local-20261013T014724Z-gwfMvc em
+  /srv/descomplica-n8n/backups; 148 tabelas restauradas em banco isolado e
+  checksums aprovados. Permanece local, sem teste de descriptografia ou boot.
+- Apenas documentacao local alterada: gates de codigo da etapa anterior
+  preservados, sem nova execucao da suite geral. Validacao MCP e restore reais
+  feitos nesta etapa. CRM health ok/1160a0e e PR198 aberto em83eba34 antes
+  deste registro. Nenhum deploy/restart CRM ou acesso ao n8n antigo.
+
 ## 2026-10-12: Retomada para backup e credencial
 
 - Preflight: Git comum confirmado, branch codex/n8n-crm-isolado d7173b0;

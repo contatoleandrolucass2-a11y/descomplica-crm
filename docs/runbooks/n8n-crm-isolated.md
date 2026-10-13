@@ -17,15 +17,18 @@ nao usar REST, importacao CLI ou banco como contorno.
   ops/n8n/salesforce-candidate.settings.json, aplicados por setWorkflowSettings.
 - Criacao e atualizacao feitas por MCP, com validacao e releitura. Active false,
   activeVersionId null. Sem agenda, exportacao ou escrita no Supabase.
-- Webhook exige headerAuth, mas a credencial ainda nao foi atribuida. Nao publicar
-  nem enviar dados reais enquanto a credencial e os demais gates estiverem pendentes.
+- Webhook exige headerAuth; credencial CRM VPS - Snapshot entrada, ID
+  VtBqo7sf3XOwxzpr, vinculada via MCP e relida em 12/10/2026. Nao publicar
+  nem enviar dados reais enquanto os testes e os demais gates estiverem pendentes.
 - Resposta 202 com ok false identifica somente a candidata; nao e recibo de ingestao.
 - Armazenamento de execucoes desativado para sucesso, erro, manual e progresso;
   timeout de 600 segundos e timezone America/Sao_Paulo confirmados por releitura.
-- OAuth atual nao oferece ferramenta de execucao nem gerenciamento de credenciais.
+- OAuth renovado com execucao e leitura de metadados de credenciais autorizadas,
+  mas execute_workflow ainda ausente no inventario deste chat. Recarregar MCP
+  no cliente e verificar disponibilidade antes do teste; sem contorno REST/CLI.
   Testes locais e validacao SDK nao comprovam execucao remota ponta a ponta.
-- Antes de ativar: credencial exclusiva, backup/restauracao de dados da instancia,
-  contrato completo e teste ponta a ponta com dados sinteticos. Backup de Nginx
+- Antes de ativar: teste da credencial, contrato completo e teste ponta a ponta
+  com dados sinteticos, mais destino externo autorizado de backup. Backup de Nginx
   nao substitui backup do PostgreSQL e da chave de criptografia.
 
 Teste local: node --test ops/n8n/salesforce-candidate.node-test.mjs

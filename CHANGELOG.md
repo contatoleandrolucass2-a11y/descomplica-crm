@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Entrada autenticada da candidata
+
+- Confirma vinculo da credencial ao webhook Salesforce, sem ativar a automacao.
+- Registra backup atualizado e bloqueio da ferramenta MCP de execucao.
+
+
 ## 2026-10-12: Backup local n8n
 
 - Adiciona backup privado e prova de restauracao PostgreSQL isolada da instancia nova.
