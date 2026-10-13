@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-13: Logo Descomplica na aba do navegador
+
+- Substitui o favicon padrão pela logo fornecida pelo usuário, com as cores
+  e proporções originais, em todas as páginas do CRM.
+
 ## 2026-10-13: Compatibilidade do coletor com credenciais systemd
 
 - Converte credenciais montadas pelo systemd em copias privadas 0600 em `/run`,
