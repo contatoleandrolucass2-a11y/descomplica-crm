@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Limite MCP registrado
+
+- Registra HTTP 429 anterior a qualquer alteracao para teste sintetico.
+
+
 ## 2026-10-12: Evidencia do primeiro teste MCP
 
 - Documenta teste iniciado e resultado nao recuperavel, sem alegar sucesso.

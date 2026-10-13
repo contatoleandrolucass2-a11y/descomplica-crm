@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-12: Rate limit antes do teste sintetico
+
+- Registro temporario autorizado; validate_workflow recebeu HTTP 429.
+- Nenhuma configuracao alterada. Fluxo inativo e persistencia desativada.
+- Parada sem fallback conforme regra MCP; teste remoto segue pendente.
+
+
 ## 2026-10-12: Teste MCP iniciado, resultado indisponivel
 
 - Execucao manual 1 iniciada com fixture; consulta nao encontrou a execucao.

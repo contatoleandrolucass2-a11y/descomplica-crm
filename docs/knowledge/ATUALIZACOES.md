@@ -1,5 +1,17 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Teste temporario autorizado, bloqueado por rate limit
+
+- Operador autorizou persistencia temporaria exclusivamente de execucao
+  sintetica, com restauracao dos settings de privacidade depois.
+- get_workflow_details confirmou candidata inativa e persistencia desativada.
+  validate_workflow falhou no transporte HTTP 429 Too many requests, antes
+  de qualquer update_workflow. Nenhum setting alterado ou teste executado.
+- Aplicada regra de parada em falha MCP: sem repeticao ou fallback REST/UI.
+  Retomar apenas apos liberacao do limite, validando antes de qualquer escrita.
+  Autorizacao especifica registrada; nenhuma autorizacao para dados reais.
+- Etapa apenas documental local; sem nova suite, deploy ou acesso ao legado.
+
 ## 2026-10-12: Primeiro teste manual MCP sem resultado recuperavel
 
 - execute_workflow passou a estar disponivel apos recarregamento. Detalhes
