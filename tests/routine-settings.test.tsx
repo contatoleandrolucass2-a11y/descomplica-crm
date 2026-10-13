@@ -151,6 +151,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
               return `
                 import { createElement } from "react";
                 import { createRoot } from "react-dom/client";
+                import "@/app/globals.css";
                 import { RoutineSettings } from "@/app/(protected)/app/gestao/rotina/RoutineSettings";
                 createRoot(document.getElementById("root")).render(createElement(RoutineSettings));
               `;
@@ -1013,6 +1014,10 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     const reduced = () =>
       page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches);
     expect(await reduced()).toBe(true);
+    // The application's global !important rule must participate in this fixture.
+    expect(
+      await page.evaluate(() => parseFloat(getComputedStyle(document.body).transitionDuration)),
+    ).toBe(0.00001);
     await checkRoutineHeaderEffects(page);
     expect(await reduced()).toBe(true);
     await checkRoutineCellEffects(page);

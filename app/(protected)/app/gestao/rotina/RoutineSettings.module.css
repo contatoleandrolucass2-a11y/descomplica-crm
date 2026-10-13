@@ -772,7 +772,7 @@
     animation: none;
   }
   .routineTable td {
-    transition: none;
+    transition: none !important;
   }
   .footerCredit {
     background: none;

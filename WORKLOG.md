@@ -13,6 +13,8 @@
   2567 aprovados, seis falhas POSIX conhecidas; CI Linux ainda obrigatoria.
 - Corrigido helper QA para preservar movimento reduzido do runner autenticado;
   83/83 casos focais aprovados. Runtime e criterios de aprovacao preservados.
+- Movimento reduzido desliga transicoes da tabela mesmo sob o CSS global;
+  fixture agora importa globals.css. 83/83 testes focais com cascata real passam.
 
 ## 2026-10-13: Publicacao da Rotina compartilhada
 

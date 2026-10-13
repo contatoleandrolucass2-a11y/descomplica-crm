@@ -41,6 +41,16 @@
 - Regressao ampliada: 83/83 casos focais aprovados; gates Windows mantem seis
   falhas POSIX/2567 aprovados/56 skips. Diagnostico futuro limita logs a fase,
   viewport e tipo de falha, sem DOM ou payload privado. Nova CI obrigatoria.
+- CI 38356113124: primeira tentativa teve 403 da fonte Prefeitura; repeticao
+  sem alterar checker passou validate/restore. O teste de celulas encontrou
+  duracao minima global de 0,01ms com !important, divergente do contrato 0s.
+  CSS reduzido da Rotina agora desliga a transicao com prioridade local;
+  fixture importa globals.css integral. 83/83 testes e typecheck passam com
+  a cascata real, sem reduzir assertions. CI autenticada precisa confirmar.
+- Gates apos CSS global: lint/tipos/build/formatacao aprovados. Suite geral
+  teve 2566 aprovados, seis falhas POSIX e um timeout transitorio do handshake
+  Next DevTools; reexecucao isolada de project-devtools passou 24/24 em 2,32s
+  sem alteracoes. Nao equivale a CI integral; reavaliar se timeout se repetir.
 
 ## 2026-10-13: Rotina compartilhada publicada
 
