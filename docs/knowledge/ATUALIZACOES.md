@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Ajuste solicitado de rolagem e referencia Associativo
+
+- Abertura: GitHub main e health publico conferidos em 9ff3fd3, site ok.
+  PR documental #196 ainda aberto, validate/restore aprovados e release-gates
+  em andamento. Registros preservados nesta branch derivada.
+- Novo escopo: Hoje alinhado a esquerda, titulo/botao conforme Associativo,
+  rolagem vertical da pagina e somente cabecalho dos dias fixo abaixo do menu.
+  Titulo principal, abas e toolbar da funcao devem rolar normalmente.
+  Associativo permanece referencia somente leitura.
+- Retomada apos interrupcao do runtime: sessao local de validacao nao existe
+  mais e logs finais nao foram criados. Nenhuma aprovacao presumida; repetir
+  os checks. GitHub main e health continuam 9ff3fd3/ok; edicoes preservadas.
+- Chromium isolado atualizado: 23/23 aprovados. Exercita scroll da janela,
+  ausencia de overflow vertical interno, limite inferior da tabela, alinhamento
+  horizontal do cabecalho real, menu acima da tabela, titulo/abas/toolbar fora
+  da viewport, Hoje a esquerda e animacao do salvar com reduced-motion.
+  Capturas sinteticas inspecionadas; CI autenticada ainda necessaria.
+
 ## 2026-10-12: Rotina compacta publicada e conferida
 
 - CI main 38302711569 aprovada nos quatro jobs: validate, release-gates,

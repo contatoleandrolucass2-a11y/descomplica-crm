@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Rolagem e acabamento da Rotina
+
+- Usa rolagem da pagina, fixando apenas os dias abaixo do menu do CRM.
+- Alinha a visao Hoje a esquerda e aproxima titulo/botao do Associativo.
+- Preserva edicao, modos Semana/Hoje, conteudo e salvamento local.
+
 ## 2026-10-12: Rotina compacta em producao
 
 - Publica Semana/Hoje, seis dias, textos centralizados, linhas compactas e

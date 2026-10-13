@@ -14,6 +14,127 @@ const roleLabels = [
   "Corretor",
 ];
 
+export async function checkRoutineScrolling(page, region) {
+  const topbar = page.locator("[data-protected-topbar]");
+  await expect(topbar).toHaveCount(1);
+  const heading = region.locator("thead th").nth(1);
+  const originalHeading = await heading.elementHandle();
+  const table = region.locator("table");
+  const insert = region.getByRole("button", { name: "Inserir linha", exact: true });
+  assert.equal(await insert.evaluate((element) => element.closest("table") === null), true);
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await region.evaluate((element) => {
+    element.scrollLeft = 0;
+  });
+  const overflow = await region.evaluate((element) => ({
+    maxHeight: getComputedStyle(element).maxHeight,
+    overflowX: getComputedStyle(element).overflowX,
+    excessHeight: element.scrollHeight - element.clientHeight,
+    scrollTop: element.scrollTop,
+  }));
+  assert.equal(overflow.maxHeight, "none");
+  assert.equal(overflow.overflowX, "auto");
+  assert.ok(
+    overflow.excessHeight <= 1,
+    "Routine must have natural height without internal vertical overflow",
+  );
+  assert.equal(overflow.scrollTop, 0);
+  const initial = await heading.boundingBox();
+  assert.ok(initial);
+  await page.evaluate((y) => window.scrollTo(0, y + 400), initial.y);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(0);
+  await expect
+    .poll(async () => {
+      const header = await heading.boundingBox();
+      const menu = await topbar.boundingBox();
+      return header && menu ? Math.abs(header.y - menu.y - menu.height) : Infinity;
+    })
+    .toBeLessThanOrEqual(2);
+  const pinned = await heading.boundingBox();
+  const menu = await topbar.boundingBox();
+  assert.ok(pinned && menu);
+  assert.ok(
+    pinned.y >= menu.y + menu.height - 2,
+    "Day headers must not overlap the protected menu",
+  );
+  assert.equal(
+    await topbar.evaluate((element) => {
+      const box = element.getBoundingClientRect();
+      return element.contains(document.elementFromPoint(box.x + box.width / 2, box.bottom - 1));
+    }),
+    true,
+    "Protected menu must remain above the table",
+  );
+  for (const locator of [page.locator("h1"), page.getByRole("tablist"), insert.locator("../..")]) {
+    const box = await locator.boundingBox();
+    assert.ok(
+      box && box.y + box.height <= 0,
+      "Title, tabs and toolbar must scroll out of the viewport",
+    );
+  }
+  await expect(page.locator("thead")).toHaveCount(1);
+  assert.equal(
+    await heading.evaluate((element, original) => element === original, originalHeading),
+    true,
+  );
+  await region.evaluate((element) => {
+    element.scrollLeft = element.scrollWidth;
+  });
+  const horizontal = await heading.boundingBox();
+  const offset = await region.evaluate((element) => element.scrollLeft);
+  assert.ok(horizontal);
+  assert.ok(
+    Math.abs(horizontal.x - pinned.x + offset) <= 2,
+    "Real day header must follow horizontal table scroll",
+  );
+  assert.ok(Math.abs(horizontal.y - pinned.y) <= 2);
+  const lastHeading = await region.locator("thead th").last().boundingBox();
+  const lastCell = await region.locator("tbody tr").first().locator("td").last().boundingBox();
+  assert.ok(lastHeading && lastCell);
+  assert.ok(
+    Math.abs(lastHeading.x - lastCell.x) <= 2,
+    "Day header must stay aligned with its column",
+  );
+
+  // A synthetic tail lets the table boundary reach the menu even at the end of the page.
+  const tail = await page.evaluateHandle(() => {
+    const element = document.createElement("div");
+    element.setAttribute("aria-hidden", "true");
+    element.style.height = `${innerHeight}px`;
+    document.body.append(element);
+    return element;
+  });
+  try {
+    await table.evaluate((element) =>
+      window.scrollTo(0, window.scrollY + element.getBoundingClientRect().bottom - 80),
+    );
+    await expect
+      .poll(async () => {
+        const header = await heading.boundingBox();
+        const bounds = await table.boundingBox();
+        return header && bounds
+          ? Math.abs(header.y + header.height - bounds.y - bounds.height)
+          : Infinity;
+      })
+      .toBeLessThanOrEqual(2);
+    await page.evaluate(() => window.scrollBy(0, 100));
+    await expect
+      .poll(async () => {
+        const header = await heading.boundingBox();
+        return header ? header.y + header.height : Infinity;
+      })
+      .toBeLessThanOrEqual(0);
+  } finally {
+    await tail.evaluate((element) => element.remove());
+    await tail.dispose();
+    await originalHeading.dispose();
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await region.evaluate((element) => {
+      element.scrollLeft = 0;
+    });
+  }
+}
+
 async function selectTheme(page, theme, width) {
   const labels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
   if (width > 600) {
@@ -169,6 +290,26 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
         await expect(
           page.getByRole("heading", { name: "Rotina semanal e diária", exact: true }),
         ).toBeVisible();
+        await expect(page.locator("h1")).toHaveCSS("font-size", width <= 760 ? "24px" : "32px");
+        await expect(page.locator("h1")).toHaveCSS("font-weight", "400");
+        assert.equal(
+          await page
+            .locator("textarea")
+            .evaluateAll((fields) =>
+              fields.every((field) => getComputedStyle(field).textAlign === "center"),
+            ),
+          true,
+          "Semana editors must remain centered",
+        );
+        assert.equal(
+          await page
+            .locator("tbody td")
+            .evaluateAll((cells) =>
+              cells.every((cell) => getComputedStyle(cell).verticalAlign === "middle"),
+            ),
+          true,
+          "Semana cells must remain vertically centered",
+        );
         await expect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
         await expect(page.locator("tbody td[data-today]")).toHaveCount(initialRows);
         const editorStyle = await page
@@ -235,48 +376,9 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           mask: [page.locator("[data-session-identity], [data-account-identity]")],
         });
         checks.push({ width, theme, mode: "Semana", overflow: false, accessibilityViolations: 0 });
-        checkpoint(`sticky-${width}-${theme}`);
+        checkpoint(`window-scroll-${width}-${theme}`);
         const weekly = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
-        const insert = weekly.getByRole("button", { name: "Inserir linha", exact: true });
-        assert.equal(await insert.evaluate((element) => element.closest("table") === null), true);
-        await weekly.evaluate((element) => {
-          element.scrollTop = 0;
-        });
-        const beforeInsert = await insert.boundingBox();
-        const beforeHeader = await weekly.locator("thead th").first().boundingBox();
-        await weekly.evaluate((element) => {
-          element.scrollTop = 300;
-        });
-        const afterInsert = await insert.boundingBox();
-        const afterHeader = await weekly.locator("thead th").first().boundingBox();
-        process.stdout.write(
-          `[routine-geometry] ${JSON.stringify({ width, theme, beforeInsert, afterInsert, beforeHeader, afterHeader })}\n`,
-        );
-        assert.ok(beforeInsert && afterInsert && beforeHeader && afterHeader);
-        assert.ok(
-          Math.abs(beforeInsert.y - afterInsert.y) <= 2,
-          "Routine toolbar must remain sticky",
-        );
-        assert.ok(
-          Math.abs(beforeHeader.y - afterHeader.y) <= 2,
-          "Routine day header must remain sticky",
-        );
-        assert.ok(
-          afterHeader.y >= afterInsert.y + afterInsert.height,
-          "Day header must stay below toolbar",
-        );
-        await weekly.evaluate((element) => {
-          element.scrollLeft = element.scrollWidth;
-        });
-        const horizontalInsert = await insert.boundingBox();
-        process.stdout.write(
-          `[routine-horizontal] ${JSON.stringify({ width, theme, horizontalInsert })}\n`,
-        );
-        assert.ok(horizontalInsert);
-        assert.ok(
-          Math.abs(horizontalInsert.x - afterInsert.x) <= 2,
-          "Routine toolbar must remain fixed during horizontal scroll",
-        );
+        await checkRoutineScrolling(page, weekly);
         checkpoint(`daily-layout-${width}-${theme}`);
         await modes.getByRole("button", { name: "Hoje", exact: true }).click();
         const daily = page.getByRole("region", { name: "Tabela de rotina do dia", exact: true });
@@ -284,6 +386,15 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
           .poll(() => daily.evaluate((element) => [element.scrollTop, element.scrollLeft]))
           .toEqual([0, 0]);
         await expect(daily.locator("thead th")).toHaveCount(2);
+        await expect
+          .poll(() =>
+            daily
+              .locator("textarea")
+              .evaluateAll((fields) =>
+                fields.every((field) => getComputedStyle(field).textAlign === "left"),
+              ),
+          )
+          .toBe(true);
         const dailySize = () =>
           daily.evaluate((element) => ({
             width: element.clientWidth,

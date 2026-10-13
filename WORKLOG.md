@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-12: Rotina com rolagem de pagina
+
+- Remove limite de altura/rolagem vertical interna. Somente os dias acompanham
+  a pagina abaixo do menu, com o padrao de cabecalho real usado no Tabelao.
+  Titulo, abas e toolbar da funcao rolam normalmente; horizontal preservada.
+- Hoje alinha atividades a esquerda; Semana conserva centro e texto integral.
+- Titulo com peso regular e botao com contorno animado do padrao Associativo,
+  respeitando movimento reduzido e estado desabilitado. Referencia intacta.
+- Testes de geometria e matriz autenticada atualizados para o novo contrato.
+
 ## 2026-10-12: Publicacao concluida da Rotina compacta
 
 - Publicado 9ff3fd3 pelo coordenador apos CI main 38302711569 integralmente
