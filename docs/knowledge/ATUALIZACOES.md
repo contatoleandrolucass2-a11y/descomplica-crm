@@ -1,5 +1,21 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Segredos privados preparados, sem aplicar runtime
+
+- Usuario criou crm_salesforce_backend_20261012 no projeto Supabase correto,
+  preservando a chave antiga, e transferiu o valor via entrada oculta/SSH.
+- /etc/descomplica-crm/secrets/salesforce-supabase-secret confirmado regular,
+  root 600. GET autenticado somente do catalogo OpenAPI retornou HTTP 200;
+  nao houve consulta a linhas comerciais nem ingestao.
+- Criado Bearer separado em salesforce-crm-ingest-bearer no mesmo diretorio,
+  root 600, sem exibir valor. Nao reutilizar segredo de entrada do n8n.
+- Formulario do novo n8n preparado para CRM VPS - Ingestao CRM saida,
+  Authorization, dominio especifico crm.descomplicapro.com.br; Valor e Salvar
+  dependem do handoff ao usuario. Nao afirmar credencial salva ate releitura MCP.
+- production.env nao alterado e app nao reiniciado. Aplicacao passa pelo
+  coordenador release:production; mesmo SHA ativo gera noop, nao autoriza
+  contornar locks com Compose/restart manual. Gates de ingestao permanecem.
+
 ## 2026-10-12: Preflight da saida n8n para CRM
 
 - Inspecao sanitizada do container confirmou ingestao e refresh desligados,

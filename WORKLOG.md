@@ -1,5 +1,11 @@
 # Worklog
 
+## 2026-10-12: Preparacao privada da credencial de saida
+
+- Chave Supabase recebida em arquivo root 600 e aceita no catalogo HTTP 200.
+- Bearer exclusivo n8n para CRM gerado na VPS; formulario restrito ao dominio CRM.
+- Salvamento da credencial aguarda usuario. Sem edicao de workflow ou runtime.
+
 ## 2026-10-12: Configuracao de ingestao auditada
 
 - Projeto Supabase de producao confirmado por URL/MCP; somente catalogos lidos.

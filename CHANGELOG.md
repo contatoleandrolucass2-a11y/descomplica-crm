@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Preparacao dos segredos de ingestao
+
+- Registra chave Supabase validada e preparo de credencial distinta para n8n.
+- Nenhum segredo versionado; runtime e agenda continuam sem alteracao.
+
 ## 2026-10-12: Pendencias de ingestao identificadas
 
 - Registra preflight de configuracao e privilegios sem alterar dados ou permissoes.
