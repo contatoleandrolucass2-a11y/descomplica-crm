@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-12: Teste MCP iniciado, resultado indisponivel
+
+- Execucao manual 1 iniciada com fixture; consulta nao encontrou a execucao.
+- Resultado nao confirmado. Sem ativacao ou contorno REST/UI/banco.
+- Solicitado registro temporario somente sintetico para proxima verificacao.
+
+
 ## 2026-10-12: Credencial vinculada por MCP
 
 - Header Auth salvo pelo operador e ID conferido na UI, sem acesso ao segredo.

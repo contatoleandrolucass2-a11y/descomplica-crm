@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Evidencia do primeiro teste MCP
+
+- Documenta teste iniciado e resultado nao recuperavel, sem alegar sucesso.
+
+
 ## 2026-10-12: Entrada autenticada da candidata
 
 - Confirma vinculo da credencial ao webhook Salesforce, sem ativar a automacao.

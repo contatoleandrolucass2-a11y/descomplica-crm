@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Primeiro teste manual MCP sem resultado recuperavel
+
+- execute_workflow passou a estar disponivel apos recarregamento. Detalhes
+  confirmaram candidata L90AYSBEat4vYHLz inativa, mesma versao 88270273,
+  Header Auth vinculado e saveManualExecutions false.
+- Teste manual com envelope inteiramente sintetico e header explicitamente
+  invalido retornou executionId 1/status started. Nao equivale a sucesso nem
+  a verificacao da autenticacao HTTP; MCP pode injetar dados no trigger.
+- get_workflow_execution retornou execution null e Execution 1 not found.
+  Nenhuma consulta por REST/UI/banco para contornar. Interrompidos os testes
+  remotos conforme regra de falha MCP. Nao afirmar processamento aprovado.
+- Nao persistir execucoes manuais pode explicar a falta de evidencia, mas
+  causa nao comprovada. Solicitada autorizacao para guardar temporariamente
+  uma execucao somente sintetica e restaurar a privacidade ao final.
+- Sem alteracao de codigo/workflow, publicacao, dados reais ou Supabase.
+  Health publico observado ok/1160a0e. Registro documental, sem nova suite.
+
 ## 2026-10-12: Credencial vinculada a candidata
 
 - Operador salvou Header Auth. UI Detalhes confirmou ID VtBqo7sf3XOwxzpr;
