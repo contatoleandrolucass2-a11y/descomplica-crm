@@ -8,6 +8,9 @@
 - HTTPS retorna503 intencionalmente ate cadastro privado do owner. Nenhum proxy
   ao setup publico, nenhum workflow alterado e nenhum restart do CRM.
 - Inclui tres testes de perimetro e templates HTTP/HTTPS pendentes.
+- Lint/tipos/build e40 testes focados aprovados. Suite Windows:2564 passaram,
+  27 skips,7 falhas fora do escopo (POSIX/caminhos e timeout Obsidian).
+  CI do novo head pendente; owner/MCP e automacoes ainda nao liberados.
 
 ## 2026-10-12: Preparacao de n8n exclusivo do CRM
 

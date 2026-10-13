@@ -17,6 +17,14 @@
 - HTTPS externo retorna503 deliberado, sem proxy para owner setup. Cadastro
   privado observado em localhost5678/setup, handoff ao usuario para senha.
   CRM segue ok/9ff3fd3; browser/monitor Salesforce e certbot.timer ativos.
+- Encerramento 21:43 Brasilia: 40 testes focados aprovados; lint (um aviso
+  preexistente), typecheck e build aprovados. Suite Windows: 2564 passaram,
+  27 skips e7 falharam (seis contratos POSIX/caminhos, um timeout Obsidian
+  com timeout adicional de limpeza). Etapas encadeadas apos Vitest nao rodaram.
+- PR198 atualizado em d414e77; CI38328239216 na fila na consulta21:42.
+  Registro final documental requer CI do novo SHA. Sem merge, restart CRM,
+  proxy publico ao n8n ou ativacao de fluxos. Configuracao Codex conserva hash
+  anterior; antigo DNS n8n permanece187.77.226.131. Owner/MCP/backup pendentes.
 
 ## 2026-10-12: Inicio de instancia n8n exclusiva
 
