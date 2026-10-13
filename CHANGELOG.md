@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-13: Estoque Salesforce para todos os simuladores
+
+- Acrescenta coleta completa e validada do ESTOQUE SPC e uma fonte oficial
+  comum para Tabelão, Associativo, Investidor e Tabela Direta.
+- Mostra estoque na lista de relatórios, com contagem/data reais e identificação
+  de coleta avulsa; preserva status das unidades e impede fallback para preços
+  históricos quando a fonte oficial está configurada.
+- Mantém preços incompletos indisponíveis também no enriquecimento do simulador;
+  descontos ausentes não viram zero, e valores completos são calculados em centavos.
+
 ## 2026-10-13: Evidencias operacionais da agenda Salesforce
 
 - Registra testes Windows/Linux, credenciais privadas systemd e reversao real.

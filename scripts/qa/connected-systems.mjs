@@ -47,7 +47,7 @@ export async function checkConnectedSystems(page, origin, outputDirectory) {
     "href",
     "https://direcional.lightning.force.com/lightning",
   );
-  await expect(page.locator('[aria-labelledby="reports-title"] tbody a')).toHaveCount(7);
+  await expect(page.locator('[aria-labelledby="reports-title"] tbody a')).toHaveCount(8);
   await expect(page.locator('input[type="password"]')).toHaveCount(0);
   const checks = [];
   for (const theme of ["light", "balanced", "dark"]) {
@@ -647,7 +647,7 @@ async function runSynthetic() {
     await expect(page.getByText("Sem publicação confirmada", { exact: true })).toBeVisible();
     await expect(page.getByRole("row", { name: /Oportunidades/ })).toContainText("0");
     await expect(page.getByRole("row", { name: /Agendamentos/ })).toContainText("1.234");
-    await expect(page.locator("tbody tr")).toHaveCount(7);
+    await expect(page.locator("tbody tr")).toHaveCount(8);
     await expect(page.locator('input[type="password"]')).toHaveCount(0);
     assert.deepEqual(await page.evaluate(() => window.qaRequests[0]), {
       url: "/api/salesforce/status",
@@ -663,6 +663,20 @@ async function runSynthetic() {
     await page.getByRole("button", { name: "Atualizar Salesforce", exact: true }).click();
     await expect.poll(() => refreshes).toBe(1);
     await expect(page.getByText("Sem publicação confirmada", { exact: true })).toBeVisible();
+
+    const stock = page.getByRole("row", { name: /ESTOQUE SPC/ });
+    await expect(stock).toContainText("Sem coleta confirmada");
+    snapshot = {
+      ...base,
+      inventory: { sourceRows: 36, count: 36, generatedAt: "2026-10-08T14:45:00.000Z" },
+    };
+    await verify.click();
+    await expect(stock).toContainText("36");
+    await expect(stock).toContainText("Base validada · coleta avulsa");
+    await expect(stock.locator("time")).toHaveAttribute("datetime", "2026-10-08T14:45:00.000Z");
+    snapshot = base;
+    await verify.click();
+    await expect(stock).toContainText("Sem coleta confirmada");
 
     const collection = page.locator("dl > div").filter({
       has: page.getByText("Coleta", { exact: true }),
@@ -805,7 +819,7 @@ async function runSynthetic() {
     statusCode = 503;
     await verify.click();
     await expect(status).toHaveText("Não conectado");
-    await expect(page.getByText("Sem dados", { exact: true })).toHaveCount(7);
+    await expect(page.getByText("Sem dados", { exact: true })).toHaveCount(8);
     statusCode = 200;
     for (const invalid of [
       { state: "connected" },

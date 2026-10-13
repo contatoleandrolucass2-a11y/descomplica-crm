@@ -1,5 +1,42 @@
 # Worklog
 
+## 2026-10-13: Base de unidades pelo relatório oficial Salesforce
+
+- Usuário definiu ESTOQUE SPC como fonte oficial. Verificação encontrou feed
+  com 2.243 unidades e data 07/08, além da planilha fixa de 3.301 unidades com
+  referência 05/09. Os sete relatórios comerciais não atualizam esses dados.
+- Coleta completa do relatório `00OU6000007yRpKMAU` por 30 empreendimentos,
+  preservando filtros e validando contagens antes/depois. Em 17:43:49.870Z,
+  candidato privado com 2.976 linhas/unidades, zero duplicatas: 2.891 Disponível
+  e 85 Mirror. Duas sem identificador textual e três sem preço utilizável;
+  IDs Salesforce mantidos e valores ausentes não inventados. Não é publicação.
+- Ambos os endpoints de estoque podem servir a mesma carga oficial privada,
+  incluindo Tabela Direta. Cache renovável, autorização mantida e sem retorno
+  à base histórica quando a fonte oficial falha. Compose valida o arquivo.
+- Conectar Sistemas inclui estoque com evidência do arquivo servido e rótulo
+  de coleta avulsa. Agenda dos sete relatórios e n8n permanecem independentes.
+- `pnpm verify` aprovado: lint sem erros (um aviso preexistente), tipos,
+  137 arquivos Vitest, 2.658 testes aprovados e 63 skips existentes; suite Node
+  do coletor e release aprovadas (11 verificações físicas reservadas à CI Linux),
+  além de build. Audit sem vulnerabilidades conhecidas. CI e publicação ainda
+  pendentes neste registro. Nenhuma linha comercial foi adicionada ao Git.
+- Matriz de navegador atualizada para os oito links, preservando os sete
+  relatórios comerciais. Caso sintético verifica a data própria do estoque e
+  o rótulo de coleta avulsa, sem inventar contagem quando a evidência falta.
+  Ensaio aprovado em nove combinações de tema/largura, zoom de 200%, estados,
+  polling e console sintético. A CI inicial do PR foi cancelada para incorporar
+  esse ajuste das expectativas de sete para oito linhas; nenhum gate foi removido.
+- Revisão do PR identificou conversão de descontos ausentes para zero no
+  enriquecimento legado da interface. Corrigida para manter preço incompleto
+  indisponível, com regressões para cada componente ausente, zero real e
+  precisão em centavos. Nova execução integral de `pnpm verify` e CI exigida
+  após a correção; a execução anterior da CI foi cancelada sem publicar.
+- Verificação integral final aprovada: 2.662 testes Vitest; coletor Node
+  222 aprovados/um skip; release 113 aprovados/11 skips Linux; lint, tipos e
+  build aprovados. Main documental 2a6ca66 integrado, preservando os registros
+  dos dois trabalhos. Runtime permanece idêntico a 23bab1e; CI reiniciada
+  para o merge reconciliado, sem reduzir gates.
+
 ## 2026-10-13: Aceite operacional de dois ciclos concluido
 
 - Segundo disparo natural17:30Z publicou HTTP201 as17:36:10Z, request

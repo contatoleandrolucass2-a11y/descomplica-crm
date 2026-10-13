@@ -1,5 +1,9 @@
 import { noStoreHeaders } from "@/lib/security/api";
 import { authorizeRoute } from "@/lib/security/route-auth";
+import {
+  hasSalesforceInventory,
+  readSalesforceInventory,
+} from "@/lib/crm/salesforce/inventory-snapshot";
 
 const REFERENCE_INVENTORY_URL = "https://descomplicapro.com.br/api/inventory";
 const INVENTORY_TTL_MS = 30_000;
@@ -66,6 +70,14 @@ export async function GET() {
   });
 
   try {
+    if (hasSalesforceInventory()) {
+      return new Response(await readSalesforceInventory(), {
+        headers: noStoreHeaders({
+          ...timingHeaders(),
+          "content-type": "application/json; charset=utf-8",
+        }),
+      });
+    }
     let inventory = cachedInventory;
     let cacheStatus = "HIT";
     if (!inventory || Date.now() - inventory.fetchedAt >= INVENTORY_TTL_MS) {

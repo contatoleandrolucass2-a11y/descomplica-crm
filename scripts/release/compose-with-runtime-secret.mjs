@@ -9,6 +9,7 @@ import {
   inheritedLockDescriptors,
   waitForProcess,
 } from "./production-release-lock.mjs";
+import { salesforceInventorySchema } from "../../lib/crm/salesforce/inventory-contract.ts";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const dockerEnvironment = {
@@ -115,6 +116,26 @@ function declaredSecretSource(contents) {
   return matches.length === 1 ? matches[0].slice(matches[0].indexOf("=") + 1) : null;
 }
 
+async function validateSalesforceInventory() {
+  const directory = "/etc/descomplica-crm/inventory";
+  const filePath = path.join(directory, "current.json");
+  if ((await realpath(directory)) !== directory) fail("Salesforce inventory directory is invalid.");
+  const metadata = await stat(directory);
+  if (
+    !metadata.isDirectory() ||
+    metadata.uid !== 0 ||
+    metadata.gid !== 0 ||
+    (metadata.mode & 0o777) !== 0o710
+  ) {
+    fail("Salesforce inventory directory must be root-owned with mode 0710.");
+  }
+  await validateOwnedFile(filePath, 0o640, 0, "Salesforce inventory");
+  if ((await stat(filePath)).size > 8 * 1024 * 1024) fail("Salesforce inventory is too large.");
+  const payload = salesforceInventorySchema.parse(JSON.parse(await readFile(filePath, "utf8")));
+  if (Date.parse(payload.generatedAt) > Date.now() + 5000)
+    fail("Salesforce inventory timestamp is invalid.");
+}
+
 export async function runtimeCompose(invocation, lock, beforeStart) {
   if (process.getuid?.() !== 0) fail("Runtime Compose wrapper requires root.");
   const [environmentName, command, ...arguments_] = invocation;
@@ -164,6 +185,7 @@ export async function runtimeCompose(invocation, lock, beforeStart) {
   // snapshot to the runtime, so enforce its integrity immediately before up.
   if (command === "up") {
     await validateInventorySnapshot(configuration.inventorySnapshot);
+    if (environmentName === "production") await validateSalesforceInventory();
   }
   const secretBytes = await readFile(configuration.secret);
   const contentLength =

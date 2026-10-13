@@ -124,12 +124,14 @@ describe("connected systems", () => {
     },
   );
 
-  it("renders seven report links without fabricating counts, dates or a schedule", async () => {
+  it("renders seven commercial reports and stock without fabricating counts, dates or a schedule", async () => {
     mocks.status.mockReturnValue({ enabled: false, available: false });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
     expect(markup).toContain("Não conectado");
-    expect(markup.match(/lightning\/r\/Report\//g)).toHaveLength(7);
-    expect(markup.match(/Sem dados/g)).toHaveLength(7);
+    expect(markup.match(/lightning\/r\/Report\//g)).toHaveLength(8);
+    expect(markup.match(/Sem dados/g)).toHaveLength(8);
+    expect(markup).toContain("ESTOQUE SPC · unidades");
+    expect(markup).toContain("00OU6000007yRpKMAU/view");
     expect(markup).toContain("Sem agenda confirmada");
     expect(markup).not.toContain("<time");
     expect(markup).not.toContain("30 minutos");

@@ -32,6 +32,7 @@ type InventoryItem = {
   businessUnit: "Direcional" | "Riva";
   project: string;
   product: string;
+  status?: string | null;
   identifier: string | null;
   plant: string | null;
   classification: string | null;
@@ -2371,6 +2372,7 @@ function PropertySummary({ item, label, associative = false, sectionRef }: { ite
     </header>
     <dl>
       <div tabIndex={0}><dt>Incorporadora</dt><dd>{informationLabel(item.businessUnit)}</dd></div>
+      {item.status ? <div tabIndex={0}><dt>Status no Salesforce</dt><dd>{item.status}</dd></div> : null}
       <div tabIndex={0}><dt>Planta</dt><dd>{informationLabel(item.plant)}</dd></div>
       <div tabIndex={0}><dt>Metragem</dt><dd>{item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "Não informada"}</dd></div>
       <div tabIndex={0}><dt>Andar</dt><dd>{floorLabel(item.floor)}</dd></div>
@@ -2425,11 +2427,13 @@ function enrichInventory(items: InventoryItem[], reference: InventoryItem[], off
     const projectSource = referenceByProject.get(inventoryProjectKey(item));
     const inferred = inferLocation(item.identifier);
     const finalWithKit = item.finalWithKit ?? source?.finalWithKit ?? null;
-    const unitBonus = item.unitBonus ?? source?.unitBonus ?? 0;
-    const tableSlack = item.tableSlack ?? source?.tableSlack ?? 0;
+    const unitBonus = item.unitBonus ?? source?.unitBonus ?? null;
+    const tableSlack = item.tableSlack ?? source?.tableSlack ?? null;
     const cashBackSlack = item.cashBackSlack ?? source?.cashBackSlack ?? null;
     const finalPrice = finalWithKit != null
-      ? Math.max(0, finalWithKit - (unitBonus + tableSlack))
+      ? unitBonus != null && tableSlack != null
+        ? Math.max(0, Math.round(finalWithKit * 100) - Math.round(unitBonus * 100) - Math.round(tableSlack * 100)) / 100
+        : null
       : item.finalPrice ?? source?.finalPrice ?? null;
     return {
       ...item,

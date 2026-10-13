@@ -6,6 +6,10 @@ import path from "node:path";
 
 import { noStoreHeaders } from "@/lib/security/api";
 import { authorizeRoute } from "@/lib/security/route-auth";
+import {
+  hasSalesforceInventory,
+  readSalesforceInventory,
+} from "@/lib/crm/salesforce/inventory-snapshot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -100,7 +104,9 @@ export async function GET() {
   if (!authorization.ok) return authorization.response;
 
   try {
-    const snapshot = await readValidatedSnapshot();
+    const snapshot = hasSalesforceInventory()
+      ? await readSalesforceInventory()
+      : await readValidatedSnapshot();
     return new Response(snapshot, {
       headers: noStoreHeaders({ "content-type": "application/json; charset=utf-8" }),
     });
