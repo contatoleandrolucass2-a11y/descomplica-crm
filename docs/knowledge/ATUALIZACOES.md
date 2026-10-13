@@ -2952,3 +2952,29 @@ Procedimento: [production-release-guard](../runbooks/production-release-guard.md
 CI executa testes de política, transação, recuperação e concorrência Linux.
 A adoção operacional exige histórico confiável para inicializar o ledger e
 uso do coordenador por todos os publicadores; esta entrega não publica runtime.
+
+## 2026-10-13 - Retomada do recibo n8n
+
+- Fonte: git fetch/ls-remote, health publico e MCP get_workflow_details.
+- Branch codex/n8n-crm-isolado em 897e5ad; main remoto em 7c50f59.
+  Health ok, runtime ainda 1160a0e; nao confundir main com publicado.
+- Workflow L90AYSBEat4vYHLz inativo, tres nodes, sem versao publicada.
+  Proxima etapa: preparar envio e recibo verificado, sem agenda/carga real.
+- Credenciais privadas armazenadas nao significam configuracao aplicada ao CRM.
+  Backup/restore do banco e gates de release permanecem pendentes.
+- Credencial de saida anqcQZ0zCBoko0YH confirmada por list_credentials e vinculada
+  ao POST fixo CRM. Nenhum segredo lido ou gravado no repositorio.
+- Validate_node_config e validate_workflow aprovados; update atomico com dez
+  operacoes e releitura: versao dcffaf09-354c-4a82-817c-5e6ca9da1dd5, cinco
+  nodes, active false e activeVersionId null. Sem persistencia success/error.
+- Testes locais: 19 passaram, incluindo recibos 200/201, idempotencia, rejeicao
+  de 202/ID divergente e bloqueio de campo proibido. Nao houve POST ao CRM.
+- PR198 consultado via conector: aberto, mergeable false. Nenhum workflow run
+  retornado para 897e5ad; nao declarar CI verde. N8n antigo nao alterado.
+- Lint aprovado com um aviso preexistente em connected-systems.mjs:18;
+  typecheck/build aprovados. Vitest 2566 passaram, 27 skips, seis falhas em
+  quatro arquivos de caminhos/permissoes Windows; as etapas Node/release
+  posteriores ao Vitest nao rodaram. Os 19 testes n8n foram executados a parte.
+- Validacao SDK final manteve um aviso PLAIN_GENERIC_AUTH pelo placeholder
+  newCredential; update utilizou o ID existente e releitura confirmou o vinculo.
+  Nao criar credencial duplicada a partir do placeholder. Nenhum deploy CRM.

@@ -320,6 +320,30 @@ desligado durante todo esse processo.
 
 ## Rollback
 
+### Candidata no novo n8n em 13/10/2026
+
+`L90AYSBEat4vYHLz` possui cinco nodes: webhook autenticado, pre-filtro,
+POST HTTPS fixo para `/api/ingest/salesforce`, conferencia do recibo e resposta.
+Fonte: `ops/n8n/salesforce-candidate.sdk.js`. Alteracoes somente por MCP,
+com `validate_workflow` autorizado pelo operador antes de `update_workflow`
+e releitura depois. Credenciais de entrada e saida sao distintas e existentes.
+
+O pre-filtro nao substitui o schema Zod completo do CRM. O recibo somente aceita
+HTTP 200/201 com `ok: true`, o mesmo `requestId` e `idempotent` coerente com o
+codigo HTTP. Respostas 202, IDs divergentes e recibos invalidos resultam em 502
+sem repassar corpo/headers do destino. Falha de transporte/JSON interrompe o
+node e nao confirma publicacao. Timeout 60s, redirects e retries desativados.
+Timeout nao prova ausencia de escrita: reconciliar pelo mesmo requestId antes
+de repetir uma carga, nunca gerar outro ID para uma tentativa ambigua.
+
+O fluxo continua inativo, sem agenda ou persistencia de execucoes. Validacao
+estatica MCP e testes locais nao comprovam autenticacao n8n para CRM nem
+escrita no banco. A credencial foi vinculada, mas os segredos privados ainda
+nao foram aplicados ao runtime CRM. Cumprir backup/restore, reconciliacao do
+schema remoto, CI e release:production antes da primeira carga e replay.
+
+### Procedimento
+
 - desativar imediatamente a candidata;
 - definir `SALESFORCE_INGEST_ENABLED=false` e reiniciar somente o container da aplicação;
 - manter o workflow antigo e seus backups sem alterações;

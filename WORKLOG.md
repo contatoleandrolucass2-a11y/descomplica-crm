@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-13: Recibo do CRM preparado no n8n
+
+- Credencial de saida salva pelo operador e confirmada/vinculada pelo MCP.
+- Candidata ampliada para cinco nodes, validada antes do update e relida inativa.
+- Envio HTTPS fixo, sem redirects/retries; sucesso exige 200/201, mesmo requestId
+  e idempotencia coerente. Nenhum dado real enviado e nenhuma agenda ativada.
+- Dezenove testes locais sinteticos passaram; lint (um aviso anterior), tipos
+  e build aprovados. Vitest: 2566 passaram, 27 skips e seis falhas Windows
+  de caminhos/permissoes; etapas seguintes de pnpm test nao executadas.
+- PR198 aberto, mergeable false; consulta de runs do head anterior vazia.
+
+
 ## 2026-10-12: Preparacao privada da credencial de saida
 
 - Chave Supabase recebida em arquivo root 600 e aceita no catalogo HTTP 200.

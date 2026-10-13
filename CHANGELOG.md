@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-13: Confirmacao de ingestao no fluxo candidato
+
+- Prepara envio n8n para CRM com credencial distinta e recibo verificado.
+- Mantem fluxo inativo e sem persistencia de payloads; primeira carga pendente.
+
+
 ## 2026-10-12: Preparacao dos segredos de ingestao
 
 - Registra chave Supabase validada e preparo de credencial distinta para n8n.
