@@ -1,5 +1,11 @@
 # Worklog
 
+## 2026-10-12: Preparacao OAuth do MCP
+
+- MCP novo habilitado apos confirmacao; cliente n8n_crm_vps separado do legado.
+- Secoes de conexao n8n antiga preservadas por hash. OAuth reduzido aguarda login.
+- Somente registro operacional; sem novo codigo de runtime ou workflows.
+
 ## 2026-10-12: Liberacao HTTPS apos owner
 
 - Operador concluiu cadastro; painel autenticado confirmado pelo navegador.

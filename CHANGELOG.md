@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Conexao MCP separada
+
+- Registra habilitacao autorizada do MCP novo, preservando a conexao anterior.
+- Consentimento OAuth ainda pendente de login do operador.
+
 ## 2026-10-12: Painel n8n em HTTPS
 
 - Libera proxy dedicado apos confirmacao do owner, mantendo bloqueado seu cadastro publico.

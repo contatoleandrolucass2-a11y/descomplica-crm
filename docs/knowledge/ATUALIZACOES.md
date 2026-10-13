@@ -1,5 +1,29 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: MCP habilitado com OAuth pendente
+
+- Confirmacao explicita recebida; Enable MCP access aplicado somente na nova
+  instancia. Tela confirmou zero workflows, zero agentes e zero clientes.
+- CLI oficial adicionou entrada separada n8n_crm_vps para URL HTTPS publica.
+  Hashes das secoes n8n e n8n.http_headers antigos permaneceram identicos.
+- OAuth padrao amplo foi cancelado antes do consentimento. Novo fluxo pede
+  workflow:read, workflow:write, execution:read, project:read e tag:read,
+  sem executar workflows, agentes, instalar pacotes ou ler credenciais.
+- Navegador exigiu login no dominio HTTPS; handoff ao operador, sem leitura
+  de senha/token e sem concessao concluida. Nenhum workflow alterado ou ativado.
+
+## 2026-10-12: Preflight da conexao MCP nova
+
+- Observacao CUA: Settings > Instance-level MCP em localhost5678 mostra
+  Enable MCP access, portanto acesso ainda desativado. Usuario autenticado.
+- Inventario de ferramentas sem MCP n8n; busca de plugins n8n retornou vazia.
+  CLI local suporta mcp add/login com OAuth. Nenhuma configuracao alterada.
+- Solicitada confirmacao no momento da habilitacao de acesso. Aguardar antes
+  de clicar ou conceder permissoes. Preservar entrada MCP antiga e nao criar,
+  editar nem ativar workflows sem ferramentas MCP e validacao exigida.
+- GitHub PR198 aberto em b8ed0ef; health publico ok/9ff3fd3 nesta consulta.
+  Somente diagnostico documental; sem testes novos ou restart nesta etapa.
+
 ## 2026-10-12: Owner confirmado e HTTPS n8n liberado
 
 - Usuario confirmou cadastro. Navegador mostrou localhost/assistant autenticado,
