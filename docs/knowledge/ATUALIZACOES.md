@@ -18,6 +18,31 @@
 - Painel Hostinger pelo navegador indisponivel por timeout; solicitado ao
   operador apenas registro A n8n-crm para 187.127.249.50. Sem DNS aplicado
   nesta etapa, nao emitir certificado nem expor setup administrativo publico.
+- Aplicacao privada autorizada, 21:19-21:22 Brasilia: preparador executado apos
+  testes focados e validacao Compose, hashes conferidos no transporte. Criados
+  somente /srv/descomplica-n8n (root0700), .env/compose (root0600), projeto
+  descomplica-n8n-crm e seus dois volumes/tres redes novos. N8n2.42.7 e Postgres
+  saudaveis; runner iniciado (sem healthcheck proprio). Porta127.0.0.1:5678;
+  healthz/readiness e pagina via tunel local retornam200. Nenhum workflow ativo.
+- Configuracao global Codex comparada por SHA256 antes/depois: identica. Nao
+  houve acesso mutante nem backup/exportacao do n8n antigo; nao afirmar backup
+  validado dessa instancia. Health CRM permanece ok/9ff3fd3, browser/monitor
+  Salesforce ativos. Sem restart do CRM ou alteracao de sua sessao.
+- Novo n8n segue privado, sem conta proprietaria confirmada, DNS ou HTTPS.
+  Tunel SSH local PID19368 aberto para cadastro pelo operador em localhost5678.
+  Comando open_in_codex retornou queued; nao comprova tela visual aberta.
+  Controle Chrome/Hostinger falhou por timeout; sem contornar protecoes.
+- Validacao Node24.19/pnpm11.20: 37 testes novos aprovados; lint com aviso
+  preexistente, tipos e build aprovados. Fixture de teste corrigida apos erro
+  inicial de tipos. Suite Windows: 2559 aprovados,27 skips,9 falhas (seis de
+  contratos POSIX/caminhos, dois timeouts Obsidian e um timeout reference-parity).
+  Estagios encadeados apos Vitest nao executados. CI Linux38326592427 do
+  SHA26e29e5: validate aprovado; isolated-restore/release-gates em andamento.
+  PR198 publicado, nao integrado. Registro final documental exige CI do novo SHA.
+- Limite: instalacao privada inicial nao e liberacao de automacao em producao.
+  Gates completos, owner, DNS/HTTPS, MCP e backup/restore sao pendencias antes
+  de carga comercial. Rollback limitado a parar este projeto sem excluir volumes.
+  Nao alterar n8n antigo, conectar Supabase nem ativar agenda ate essas provas.
 
 ## 2026-10-12: Retomada da publicacao da Rotina
 

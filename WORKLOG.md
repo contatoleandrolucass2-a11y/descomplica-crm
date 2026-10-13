@@ -8,6 +8,10 @@
   autorizados somente para n8n-crm.descomplicapro.com.br; painel DNS indisponivel.
 - Nenhum workflow ativado, nenhuma ingestao nem alteracao da sessao Salesforce.
 - Validacoes e estado aplicado registrados em docs/knowledge/ATUALIZACOES.md.
+- Instancia privada inicial instalada: readiness200, n8n2.42.7, Postgres saudavel
+  e runner iniciado. Configuracao Codex antiga identica. Owner/DNS/HTTPS pendentes.
+- 37 testes focados, tipos/build aprovados; suite Windows tem nove falhas fora
+  do escopo. CI Linux validate passou em26e29e5; gates completos ainda pendentes.
 
 ## 2026-10-12: Sincronizacao do teste de timeout do gateway
 
