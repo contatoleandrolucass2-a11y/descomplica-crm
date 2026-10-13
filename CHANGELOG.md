@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-13: Efeitos da Rotina publicados
+
+- Publicada a versao08c3ae4 com controles compactos, gradientes, destaque de
+  linha/coluna e rodape animado; persistencia e permissoes preservadas.
+
 ## 2026-10-13: Efeitos e compactacao da Rotina
 
 - Rotina: garante transicoes desligadas no modo de movimento reduzido mesmo sob as regras globais.
