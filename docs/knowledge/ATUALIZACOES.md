@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Rolagem da Rotina publicada e verificada
+
+- Fonte: PR #197 e CI main 38328297524, quatro jobs aprovados, SHA exato
+  1160a0e92d734414f267249b63f56d70325fc529. Publicacao pelo coordenador
+  release:production, com consulta no minuto, CAS, travas e sem rebuild.
+- Deployment 519064c7-2816-4cb6-88a3-ed3100bd5489, concluido em
+  2026-10-13T01:21:12.886Z (12/10/2026 22:21:12 America/Sao_Paulo).
+  Anterior 9ff3fd3 preservado; nenhuma pendencia no ledger.
+- Imagem sha256:92857837d0e5076b607865651194a78dd4d591c30d2f2e8d28ac67eb69edd97a;
+  configuracao CI sha256:840f99b1dd7c323301d3711526b579eee41abc11acdce6b6f4adf42bc659483e.
+  Checksum, manifesto, 11 camadas e dois perfis de runtime verificados.
+- Backup privado verificado em
+  /var/backups/descomplica-crm/releases/1160a0e92d734414f267249b63f56d70325fc529.GwoIvt;
+  manifest SHA-256 90dde07278e50c6a6a25ee75211a74756baa07a956f4b2d43bbb61760eecec54.
+- Pos-publicacao: health publico com SHA exato, container healthy, zero
+  reinicios e sem OOM. Inventario anonimo 401; Gestao/Rotina anonimas 307.
+- Smoke autenticado somente leitura em /app/gestao/rotina: 156 campos,
+  74 preenchidos, Hoje com 24 atividades alinhadas a esquerda; h1 32px/400.
+  Regiao sem overflow vertical, max-height none. Com window.scrollY 472,
+  menu bottom 58px e cabecalho top 58px; titulo/abas/toolbar fora da viewport,
+  scrollTop interno zero. Capturas locais ignoradas em test-results/routine-preview:
+  rotina-rolagem-publicada.jpg e rotina-cabecalho-publicado.jpg.
+- Nenhum Salvar/Inserir/Reset executado em producao. Persistencia permanece
+  local ao navegador; nenhuma alteracao em Associativo, dados ou financeiro.
+  Limites Windows e validacao Linux registrados abaixo, sem relaxar gates.
+- Este encerramento e documental: nao requer novo deploy ou restart.
+
+## 2026-10-12: Rolagem de pagina aprovada e integrada
+
+- PR #197 aprovado na CI 38325392795 (validate, restore e release-gates),
+  integrado em 1160a0e92d734414f267249b63f56d70325fc529. PR #196 encerrado
+  como substituido com todos os registros preservados.
+- Node 24.19.0/pnpm 11.20.0 local: lint, typecheck e build aprovados.
+  Chromium 23/23. Suite Windows: 2522 aprovados, 28 skips, seis falhas POSIX
+  e tres timeouts de Obsidian. CI Linux integral aprovada, sem alterar gates.
+- Menu e cabecalho real verificados por geometria, inclusive fim de tabela;
+  titulo/abas/toolbar saem da viewport. Sem mudanca em Associativo ou dados.
+  Integracao nao e publicacao: aguardar CI main e promocao protegida.
+
 ## 2026-10-12: Ajuste solicitado de rolagem e referencia Associativo
 
 - Abertura: GitHub main e health publico conferidos em 9ff3fd3, site ok.

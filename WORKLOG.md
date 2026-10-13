@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-12: Publicacao da rolagem da Rotina
+
+- PR #197 integrado em 1160a0e, CI main 38328297524 aprovada integralmente.
+- Imagem imutavel publicada com backup e coordenador, as 22:21:12 de Sao Paulo.
+- Smoke confirmou Hoje a esquerda, titulo regular e cabecalho dos dias a 58px,
+  imediatamente abaixo do menu. Titulo/abas/toolbar rolam; tabela sem scroll
+  vertical interno. Health exato e container saudavel, sem reinicios.
+- Evidencias, hashes e limites em docs/knowledge/ATUALIZACOES.md.
+
 ## 2026-10-12: Rotina com rolagem de pagina
 
 - Remove limite de altura/rolagem vertical interna. Somente os dias acompanham

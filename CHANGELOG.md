@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Rolagem da Rotina em producao
+
+- Publicado 1160a0e com Hoje alinhado a esquerda, rolagem de pagina e somente
+  os dias fixos abaixo do menu. Titulo e salvar seguem o padrao Associativo.
+- CI completa e conferencias operacionais/visuais aprovadas.
+
 ## 2026-10-12: Rolagem e acabamento da Rotina
 
 - Usa rolagem da pagina, fixando apenas os dias abaixo do menu do CRM.
