@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Rotina compartilhada publicada
+
+- PR #200 integrado em 7c50f59b61be3c07b2540f517f01660fce3728e3.
+  CI main 38340719697: validate, release-gates, isolated-restore e imagem
+  aprovados. SQL: 1242 casos totais, 91 novos. QA de navegador e matriz visual
+  aprovados, incluindo persistencia entre sessoes isoladas. PR #199 substituido.
+- Migration autorizada aplicada via MCP somente no projeto hnncxuerlcsaahdxoswb:
+  arquivo 20261013014310_crm_shared_routines.sql registrado remotamente como
+  20261013035612/crm_shared_routines (timestamp gerado pelo conector).
+  Nao reaplicar pelo timestamp local. SHA-256 do arquivo local Windows:
+  c223e5fe38fe9ad7caf49c1f2442e22deb6cb4e26427c3ac8a166211e8ffd63a.
+- Antes do DDL: tabela/RPCs ausentes e nenhum app_pages afetado, reconfirmados
+  as 03:56:03 UTC. Snapshot dos objetos afetados (nao dump completo) em
+  /var/backups/descomplica-crm/routine-20261013/database-before.json,
+  modo 0600/root, hash ec87bf0b709c821dcde58336a19adccd15b3dea73e6e3cbb6dab7fca6f2a1bfd.
+  Nenhum dado de cliente exportado ou alterado.
+- Pos-DDL: RLS ligada/forcada, gate MFA restritivo, zero grants diretos para
+  anon/authenticated/service_role; somente authenticated executa RPCs, que
+  verificam permissao. Fonte: consultas MCP observacionais de 03:56:26 UTC.
+- Deploy pelo coordenador com consulta no minuto e CAS: bf212f6d-32ae-450c-868f-5ce080359fe9,
+  2026-10-13T03:57:09.142Z (00:57:09 Sao Paulo), sem pendencia.
+  Imagem sha256:68667bf3adb837ca641dc36e161a392acd001297eb89b556e29e55d94e361dcf;
+  configuracao CI sha256:eb7460ed99b5c74d1837f658deebd38eb5ce21c74a5ba97a8f477f0cf26f2448.
+  Checksum, manifesto, 11 camadas e dois perfis verificados; sem build na VPS.
+- Backup runtime verificado: /var/backups/descomplica-crm/releases/7c50f59b61be3c07b2540f517f01660fce3728e3.7YE3XX,
+  manifest 6a14ff6c42949ea0c0913e52a28070927d202675eaecad7f6cbfb441727d69b4.
+  Rollback anterior 1160a0e preserva tabela e dados novos; nao desfazer DDL.
+- Health SHA exato, container healthy/zero reinicios/sem OOM, inventario anonimo
+  401 e Gestao/Rotina anonimas 307. Browser autenticado confirmou novo cabecalho,
+  salvamento e recarga. Rotina house aprovada salva pela interface: revisao 1,
+  26 linhas, 2026-10-13T03:58:16.181953Z; metadados conferidos via MCP.
+  Demais funcoes continuam vazias; nenhuma fixture inserida em producao.
+- Limites: nao houve teste manual com conta de terceiro em producao; matriz
+  automatizada e pgTAP cobrem leitores/gestores. Legado local nao e enviado
+  automaticamente: usar importacao explicita no navegador que contem a copia.
+- Excecao de CI: fonte Prefeitura retornou 403 transitorio na primeira tentativa
+  de 38336892318; nova execucao passou sem mudar checker, URL ou regras.
+  Reavaliar se recorrente. Registro documental posterior nao requer redeploy.
+
 ## 2026-10-12: Persistencia compartilhada da Rotina em preparacao
 
 - Retomada: origin/main e health publico confirmam 1160a0e, status ok.
