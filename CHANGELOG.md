@@ -5,6 +5,7 @@
 - Registra bucket privado autorizado e testes sinteticos de acesso/criptografia.
 - Documenta custodia da chave e gates restantes antes do backup real externo.
 - Sem alteracao de runtime, migrations ou agenda do n8n.
+- Revalida lint, tipos, suite completa Windows e build apos a documentacao.
 
 ## 2026-10-13: Compatibilidade dos testes Windows
 

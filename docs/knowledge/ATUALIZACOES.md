@@ -19,6 +19,11 @@
   em andamento na consulta desta etapa. Nenhuma alteracao no n8n antigo,
   configuracao de runtime, migrations ou agenda.
 - Health publico reconferido em 2026-10-13T04:55:18Z: ok, SHA7c50f59.
+- Revalidacao local apos documentar a chave: lint aprovado (um aviso
+  preexistente), typecheck, Vitest2620/43skips, coletor138/0skips,
+  release86/10skips Linux e build50rotas aprovados. Formatacao dos quatro
+  documentos, fontes publicas e git diff --check aprovados. Commit5820879
+  publicado no PR198; nenhuma publicacao de runtime nesta etapa.
 
 ## 2026-10-13: Inicio do destino privado de backup autorizado
 

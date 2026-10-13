@@ -8,6 +8,9 @@
   aprovados. Nenhum backup real enviado, copia offline da chave pendente.
 - Documenta limites e gates em docs/runbooks/crm-backup-storage.md.
 - N8n antigo preservado; ingestao real e agenda continuam desligadas.
+- Revalidacao: lint/typecheck/test/build aprovados, alem de formatacao e
+  fontes documentais. Vitest2620, coletor138 e release86 testes aprovados;
+  43 skips Vitest e 10 testes fisicos exclusivos Linux. Build50rotas.
 
 ## 2026-10-13: Backup restaurado e ingestao isolada
 
