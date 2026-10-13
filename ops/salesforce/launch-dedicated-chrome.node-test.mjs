@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, mkdir, readFile, stat, writeFile } from "node:fs/promises";
+import { chmod, mkdtemp, mkdir, readFile, realpath, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { createServer } from "node:net";
 import path from "node:path";
@@ -7,6 +7,7 @@ import { EventEmitter } from "node:events";
 import { test } from "node:test";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
+import { assertNativePrivatePath } from "./test-helpers/native-private-fixture.mjs";
 
 import {
   SALESFORCE_LIGHTNING_URL,
@@ -388,7 +389,9 @@ test("discovers only fixed absolute Chrome locations and requires an absolute ov
 });
 
 test("accepts an absolute executable override after checking the file", async (context) => {
-  const directory = await mkdtemp(path.join(tmpdir(), "salesforce-chrome-executable-"));
+  const directory = await realpath(
+    await mkdtemp(path.join(tmpdir(), "salesforce-chrome-executable-")),
+  );
   context.after(() =>
     import("node:fs/promises").then(({ rm }) => rm(directory, { recursive: true })),
   );
@@ -396,7 +399,7 @@ test("accepts an absolute executable override after checking the file", async (c
   await writeFile(executable, "synthetic executable");
   await chmod(executable, 0o700);
   assert.equal(
-    await resolveChromeExecutable({ override: executable, platform: "linux", env: {} }),
+    await resolveChromeExecutable({ override: executable, platform: process.platform, env: {} }),
     executable,
   );
 });
@@ -439,15 +442,12 @@ test("uses private platform-specific profile defaults and rejects relative overr
 });
 
 test("marks a dedicated profile privately and refuses an existing unmarked profile", async (context) => {
-  const root = await mkdtemp(path.join(tmpdir(), "salesforce-chrome-profile-"));
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), "salesforce-chrome-profile-")));
   context.after(() => import("node:fs/promises").then(({ rm }) => rm(root, { recursive: true })));
   const dedicated = path.join(root, "dedicated");
   assert.equal(await prepareDedicatedProfile(dedicated), dedicated);
-  assert.equal((await stat(dedicated)).mode & 0o777, 0o700);
-  assert.equal(
-    (await stat(path.join(dedicated, ".descomplica-salesforce-profile"))).mode & 0o777,
-    0o600,
-  );
+  await assertNativePrivatePath(dedicated, 0o700);
+  await assertNativePrivatePath(path.join(dedicated, ".descomplica-salesforce-profile"), 0o600);
   assert.match(
     await readFile(path.join(dedicated, ".descomplica-salesforce-profile"), "utf8"),
     /salesforce chrome profile v1/,
@@ -548,7 +548,7 @@ test("rejects CDP metadata that advertises a non-loopback debugger", async () =>
 });
 
 test("launches with simulated process and CDP dependencies only", async (context) => {
-  const root = await mkdtemp(path.join(tmpdir(), "salesforce-chrome-launch-"));
+  const root = await realpath(await mkdtemp(path.join(tmpdir(), "salesforce-chrome-launch-")));
   context.after(() => import("node:fs/promises").then(({ rm }) => rm(root, { recursive: true })));
   const executable = path.join(root, "chrome");
   const profile = path.join(root, "profile");
@@ -563,7 +563,7 @@ test("launches with simulated process and CDP dependencies only", async (context
     unreferenced = true;
   };
   const result = await launchDedicatedChrome({
-    platform: "linux",
+    platform: process.platform,
     getuid: () => 1000,
     homeDirectory: root,
     env: {

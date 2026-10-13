@@ -14,6 +14,14 @@ import { runtimeCompose } from "./compose-with-runtime-secret.mjs";
 import { assertHeldLock } from "./production-release-lock.mjs";
 import { assertFreshObservation, validateDeploymentState } from "./production-release-policy.mjs";
 import { privateJsonStore } from "./private-json-store.mjs";
+import {
+  assertEnvironmentChangeContents,
+  assertSalesforceContainerDigests,
+  readSalesforceReleaseSecrets,
+  salesforceContainerDigestScript,
+  salesforceEnvironmentBackupStore,
+  transformSalesforceReleaseEnvironment,
+} from "./salesforce-release-environment.mjs";
 
 const exec = promisify(execFile);
 const root = path.resolve(import.meta.dirname, "../..");
@@ -83,7 +91,41 @@ async function containerVersion(includeStopped = false) {
   ).split("\t");
   if (fields.length !== 3 || (!includeStopped && fields[2] !== "true"))
     throw new Error("Production app is not running.");
-  return { containerImageId: fields[0], containerSha: fields[1], running: fields[2] === "true" };
+  return {
+    containerId: ids,
+    containerImageId: fields[0],
+    containerSha: fields[1],
+    running: fields[2] === "true",
+  };
+}
+
+async function assertRuntimeEnvironment(contents, expectedSha, expectedImageId) {
+  const container = await containerVersion();
+  if (container.containerSha !== expectedSha || container.containerImageId !== expectedImageId) {
+    throw new Error("Runtime configuration check requires the exact production image.");
+  }
+  let digests;
+  try {
+    digests = JSON.parse(
+      await docker([
+        "exec",
+        container.containerId,
+        "node",
+        "--input-type=commonjs",
+        "--eval",
+        salesforceContainerDigestScript,
+      ]),
+    );
+  } catch {
+    throw new Error("Effective production configuration is unavailable.");
+  }
+  assertSalesforceContainerDigests(contents, digests);
+  if (
+    !isDeepStrictEqual(await containerVersion(), container) ||
+    (await readValidatedEnvironment()) !== contents
+  ) {
+    throw new Error("Production configuration changed during runtime verification.");
+  }
 }
 
 async function health(url) {
@@ -96,6 +138,7 @@ async function health(url) {
 
 export function productionHost(lock) {
   const store = privateJsonStore(statePath, (state) => validateDeploymentState(state, Date.now()));
+  const environmentBackups = salesforceEnvironmentBackupStore();
   async function runtime() {
     const [sha, container, healthSha, publicHealthSha] = await Promise.all([
       environmentSha(),
@@ -148,7 +191,40 @@ export function productionHost(lock) {
       );
       await verifyPromotableImage(options.targetSha, options.targetImageId);
       await verifyPromotableImage(previous.sha, previous.imageId);
+      if (options.environmentChange) await environmentBackups.read(options.environmentChange);
       await runtimeCompose(["production", "config", "--quiet"], lock);
+    },
+    async prepareEnvironmentChange(options, deploymentId) {
+      await assertHeldLock(lock);
+      if (options.operation !== "deploy" || options.salesforceIngestion !== true) {
+        throw new Error("Salesforce configuration requires an explicit protected deployment.");
+      }
+      const state = await store.read();
+      if (
+        state.inProgress ||
+        state.release.deploymentId !== options.expectedDeploymentId ||
+        state.release.sha !== options.expectedSha
+      ) {
+        throw new Error("Environment preparation requires the exact previous release.");
+      }
+      const before = await readValidatedEnvironment();
+      const after = transformSalesforceReleaseEnvironment(
+        before,
+        options.expectedSha,
+        options.targetSha,
+        await readSalesforceReleaseSecrets(),
+      );
+      await assertRuntimeEnvironment(before, options.expectedSha, state.release.imageId);
+      await assertHeldLock(lock);
+      const change = await environmentBackups.create(deploymentId, before, after);
+      await assertHeldLock(lock);
+      if (
+        (await readValidatedEnvironment()) !== before ||
+        !isDeepStrictEqual(await store.read(), state)
+      ) {
+        throw new Error("Production changed while preparing its environment backup.");
+      }
+      return change;
     },
     async bind(options, beforeWrite) {
       await bindProductionImage(options, lock, beforeWrite);
@@ -192,7 +268,10 @@ export function productionHost(lock) {
         publicHealthSha: checks[1].status === "fulfilled" ? checks[1].value : null,
       };
     },
-    async verify(sha, imageId) {
+    async verify(sha, imageId, environmentCheck) {
+      const backup = environmentCheck
+        ? await environmentBackups.read(environmentCheck.change)
+        : null;
       for (let attempt = 0; attempt < 30; attempt++) {
         await assertHeldLock(lock);
         try {
@@ -203,8 +282,20 @@ export function productionHost(lock) {
             current.containerImageId === imageId &&
             current.healthSha === sha &&
             current.publicHealthSha === sha
-          )
+          ) {
+            if (environmentCheck) {
+              const contents = await readValidatedEnvironment();
+              assertEnvironmentChangeContents(
+                contents,
+                backup,
+                environmentCheck.change,
+                environmentCheck.restore,
+              );
+              await assertRuntimeEnvironment(contents, sha, imageId);
+              await assertHeldLock(lock);
+            }
             return;
+          }
         } catch {
           // Transient startup/HTTP failure is bounded. No response body or
           // runtime environment is written to logs.

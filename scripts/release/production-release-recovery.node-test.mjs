@@ -205,6 +205,61 @@ test("a transient HTTP failure does not republish the previous running container
   }
 });
 
+test("configuration recovery restores the full environment even for an unstarted deployment", async () => {
+  for (const container of ["previous", "target", "missing"]) {
+    const system = harness({ container });
+    const change = {
+      backupId: pendingId,
+      beforeSha256: "1".repeat(64),
+      afterSha256: "2".repeat(64),
+    };
+    system.state.inProgress.environmentChange = change;
+    system.hooks.bind = (binding) => {
+      assert.deepEqual(binding.environmentChange, change);
+      assert.equal(binding.restoreEnvironment, true);
+    };
+    const verify = system.io.verify;
+    system.io.verify = async (sha, image, check) => {
+      assert.deepEqual(check, { change, restore: true });
+      await verify(sha, image);
+    };
+    const result = await recoverRelease(pendingId, system.io);
+    assert.equal(result.status, container === "previous" ? "aborted" : "recovered");
+    assert.equal(system.state.inProgress, null);
+  }
+});
+
+test("invalid environment backup metadata blocks recovery before production access", async () => {
+  for (const change of [
+    { backupId: unrelatedId, beforeSha256: "1".repeat(64), afterSha256: "2".repeat(64) },
+    { backupId: pendingId, beforeSha256: "1".repeat(64), afterSha256: "1".repeat(64) },
+    { backupId: pendingId, beforeSha256: "invalid", afterSha256: "2".repeat(64) },
+    {
+      backupId: pendingId,
+      beforeSha256: "1".repeat(64),
+      afterSha256: "2".repeat(64),
+      path: "/tmp/other",
+    },
+  ]) {
+    const system = harness();
+    system.state.inProgress.environmentChange = change;
+    await assert.rejects(recoverRelease(pendingId, system.io));
+    assert.equal(system.events.includes("prepare"), false);
+  }
+});
+
+test("configuration restore errors keep the original durable recovery metadata", async () => {
+  const system = harness({ container: "previous" });
+  const change = { backupId: pendingId, beforeSha256: "1".repeat(64), afterSha256: "2".repeat(64) };
+  system.state.inProgress.environmentChange = change;
+  system.hooks.bind = () => {
+    throw new Error("Backup checksum mismatch");
+  };
+  await assert.rejects(recoverRelease(pendingId, system.io), /checksum/u);
+  assert.deepEqual(system.state.inProgress.environmentChange, change);
+  assert.equal(system.events.includes("up"), false);
+});
+
 test("a stopped previous container is started and receives a new deployment receipt", async () => {
   const system = harness({ environment: "previous", container: "previous" });
   system.container.running = false;

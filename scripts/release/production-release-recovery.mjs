@@ -18,6 +18,7 @@ export async function recoverRelease(deploymentId, io) {
   // A recovery always runs from the candidate checkout that created this intent.
   // The rollback phase changes neither the candidate nor the recorded previous image.
   const boundarySha = pending.targetSha;
+  const environmentChange = pending.environmentChange;
   await io.prepare(
     {
       operation: "rollback",
@@ -68,6 +69,7 @@ export async function recoverRelease(deploymentId, io) {
       targetSha: previous.sha,
       expectedImageId: previous.imageId,
       boundarySha,
+      ...(environmentChange ? { environmentChange, restoreEnvironment: true } : {}),
     },
     async () => {
       if (beforeWriteCompleted) throw new Error("Recovery before-write validation must run once.");
@@ -78,7 +80,11 @@ export async function recoverRelease(deploymentId, io) {
   );
   if (!beforeWriteCompleted) throw new Error("Recovery before-write validation is required.");
   if (abortUnstartedDeployment) {
-    await io.verify(previous.sha, previous.imageId);
+    await io.verify(
+      previous.sha,
+      previous.imageId,
+      environmentChange ? { change: environmentChange, restore: true } : undefined,
+    );
     await io.writeState(state, { ...state, inProgress: null });
     return { status: "aborted", release: previous };
   }
@@ -92,7 +98,11 @@ export async function recoverRelease(deploymentId, io) {
     });
     if (!beforeStartCompleted) throw new Error("Recovery before-start validation is required.");
   }
-  await io.verify(previous.sha, previous.imageId);
+  await io.verify(
+    previous.sha,
+    previous.imageId,
+    environmentChange ? { change: environmentChange, restore: true } : undefined,
+  );
   const restoredDeploymentId = io.id();
   const completedAt = io.now();
   if (

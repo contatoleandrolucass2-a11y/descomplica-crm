@@ -1,5 +1,122 @@
 # Changelog
 
+## 2026-10-13: Configuracao Salesforce na publicacao protegida
+
+- Cartoes de integracao passam a consultar evidencias pelo endpoint autorizado
+  existente; leitura Supabase e ingestao passada nao afirmam n8n online.
+- Acrescenta opcao explicita para aplicar as credenciais existentes de ingestao
+  junto de nova imagem aprovada, mantendo refresh desligado.
+- Backup privado integral do env, CAS e recuperacao da configuracao anterior;
+  confirmacao exige valores efetivos no container, alem de health e versao.
+- Preserva releases sem a opcao, registros antigos e o n8n antigo. Nao ativa
+  workflow/agenda nem executa migrations por meio do comando de release.
+
+## 2026-10-13: Backup externo e prontidao do restore
+
+- Guia unico de conclusao com acessos e pendencias; suite completa e build
+  revalidados sem ativar a automacao.
+- Corrige espera do PostgreSQL temporario no backup isolado do novo n8n.
+- Registra envio criptografado e recuperacao exata dos dois backups externos.
+- Revisa gate Salesforce sem exigir migrations de outros fluxos ou rotacao
+  automatica de credenciais. Nenhuma agenda ou migration remota ativada.
+
+## 2026-10-13: Preparacao do backup externo privado
+
+- Registra bucket privado autorizado e testes sinteticos de acesso/criptografia.
+- Documenta custodia da chave e gates restantes antes do backup real externo.
+- Sem alteracao de runtime, migrations ou agenda do n8n.
+- Revalida lint, tipos, suite completa Windows e build apos a documentacao.
+
+## 2026-10-13: Compatibilidade dos testes Windows
+
+- Suite completa Windows aprovada; mantem testes fisicos Linux obrigatorios na CI.
+- Publica auditoria e plano de revisao de RPCs, sem aplicar migrations remotas.
+- Corrige fixtures de permissoes e caminhos Windows sem relaxar seguranca Linux.
+- Adiciona verificacao de ACL real e rejeicao de leitor indevido em arquivos
+  temporarios sinteticos; cobre ordem de fsync e metadados inseguros de backup.
+- Registra backup restaurado e ingestao real somente em copia isolada.
+
+## 2026-10-13: Confirmacao de ingestao no fluxo candidato
+
+- Prepara envio n8n para CRM com credencial distinta e recibo verificado.
+- Mantem fluxo inativo e sem persistencia de payloads; primeira carga pendente.
+
+## 2026-10-12: Preparacao dos segredos de ingestao
+
+- Registra chave Supabase validada e preparo de credencial distinta para n8n.
+- Nenhum segredo versionado; runtime e agenda continuam sem alteracao.
+
+## 2026-10-12: Pendencias de ingestao identificadas
+
+- Registra preflight de configuracao e privilegios sem alterar dados ou permissoes.
+- Mantem agenda desligada enquanto faltam segredos, backup e gates de ingestao.
+
+## 2026-10-12: Coleta Salesforce na VPS comprovada
+
+- Sete relatorios coletados com sessao dedicada; candidato privado passou no schema.
+- Confirma somente coleta e transformacao, sem publicacao ou agenda automatica.
+
+## 2026-10-12: Autenticacao HTTP da candidata confirmada
+
+- Teste sintetico VPS para novo n8n comprova rejeicao de token ausente/incorreto
+  e resposta 202 com token salvo. Webhook desativado novamente ao encerrar.
+- Exportacao Salesforce e ingestao permanecem fora da evidencia deste teste.
+
+## 2026-10-12: Teste remoto da candidata aprovado
+
+- Confirma processamento de fixture pelo MCP e restauracao da privacidade.
+- Mantem automacao inativa e distingue teste interno de autenticacao HTTP.
+
+## 2026-10-12: Limite MCP registrado
+
+- Registra HTTP 429 anterior a qualquer alteracao para teste sintetico.
+
+## 2026-10-12: Evidencia do primeiro teste MCP
+
+- Documenta teste iniciado e resultado nao recuperavel, sem alegar sucesso.
+
+## 2026-10-12: Entrada autenticada da candidata
+
+- Confirma vinculo da credencial ao webhook Salesforce, sem ativar a automacao.
+- Registra backup atualizado e bloqueio da ferramenta MCP de execucao.
+
+## 2026-10-12: Backup local n8n
+
+- Adiciona backup privado e prova de restauracao PostgreSQL isolada da instancia nova.
+- Nao altera workflows, agenda, n8n antigo ou dados do CRM.
+
+## 2026-10-12: Candidata Salesforce no novo n8n
+
+- Versiona SDK, settings e testes da candidata inativa, sem saida externa.
+- Resposta HTTP 202 com ok false nao confirma publicacao de snapshot.
+
+## 2026-10-12: OAuth MCP confirmado
+
+- Confirma cliente Codex separado no novo n8n; workflows aguardam ferramentas MCP.
+
+## 2026-10-12: Conexao MCP separada
+
+- Registra habilitacao autorizada do MCP novo, preservando a conexao anterior.
+- Consentimento OAuth ainda pendente de login do operador.
+
+## 2026-10-12: Painel n8n em HTTPS
+
+- Libera proxy dedicado apos confirmacao do owner, mantendo bloqueado seu cadastro publico.
+- Configura URLs externas e um salto de proxy sem alterar a instancia antiga.
+
+## 2026-10-12: HTTPS inicial do n8n
+
+- Configura subdominio exclusivo e TLS sem expor cadastro publico do owner.
+- Preserva instancia anterior, DNS existente e sessao Salesforce.
+
+## 2026-10-12: Base n8n isolada
+
+- Adiciona preparacao de nova instancia n8n com banco e runner exclusivos.
+- Protege recursos existentes e documenta acesso privado, HTTPS e recuperacao.
+- Nao importa nem altera workflows ou credenciais da instancia anterior.
+
+## 2026-10-12: Gate de sessao da Rotina
+
 - Publicado: Rotina compartilhada no banco, edicao autorizada e cabecalho contrastante (PR #200, 7c50f59).
 
 - Rotina: inclui a tabela compartilhada no gate restritivo de sessao/MFA e nos inventarios SQL de seguranca.
