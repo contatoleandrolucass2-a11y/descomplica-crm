@@ -1,5 +1,41 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Efeitos e compactacao da Rotina publicados
+
+- PR #202 aprovado pela CI38360349190, integrado em08c3ae453ddfb225c3cb64971b53333c36d8932e
+  as07:41:55Z. CI main38364326341 concluida com os quatro jobs aprovados.
+- Conferencia do coordenador novo no checkout limpo do candidato: producao
+  mudou por outra entrega para15ddedd, deployment54fc028d-2a07-4b82-9605-7c42421c5a72,
+  deployedAt2026-10-13T07:27:06.373Z (04:27:06 Sao Paulo), imagem
+  sha256:e1770f9bcfd5148a56335027f60c209fb47fb86cf6282489531f92d1bb17855a,
+  sem pendencia. CI main38358420498 aprovada. Proxima expectativa de CAS usa
+  esse estado observado; nao reutilizar a baseline anterior7c50f59.
+- Promocao da Rotina nao solicitou configuracao Salesforce; preservou o env
+  vigente. Nenhum workflow, banco, agenda ou fonte de credenciais alterado.
+- Publicado pelo coordenador: deploymentd045c054-2ad5-4e5c-aff0-c8c100df3a03,
+  deployedAt2026-10-13T08:22:09.455Z (05:22:09 Sao Paulo), SHA08c3ae4 completo
+  acima, sem pendencia. Consulta no mesmo minuto, trava e CAS da baseline15ddedd.
+  Nenhuma opcao de configuracao Salesforce usada.
+- Imagem local sha256:03b6c8594550a0ac61b79b287b0cae8bdb5fbb3fc7001a0b4f484310cd2d268e;
+  config/CI sha256:b56165aa25d622efbb07b41caff60a66e4e489356be07f47df1d759dc387ff17.
+  Artefato dd7723dbdad1ac496d779286eb85d8320a916ce2733dcb8f2e53b5bff40797d4;
+  checksum, manifesto OCI, 11 camadas e dois perfis conferidos, sem rebuild na VPS.
+- Backup privado verificado: /var/backups/descomplica-crm/releases/08c3ae453ddfb225c3cb64971b53333c36d8932e.ivNJ7z,
+  manifestb31926a4a9f6f399cf89f9fe0183fdcd44bc3dc3a22c88e995852f790fba2d7e.
+  Imagem anterior preservada; reversao de release concluida exige novo PR/CI.
+- Pos-publicacao: health publico SHA exato/ok, container healthy, zero reinicios
+  e sem OOM; inventario anonimo401, Gestao e Rotina anonimas307. Navegador
+  autenticado confirmou Semana/Hoje, gradientes, contorno animado, realce,
+  cabecalho sob menu, texto diario a esquerda e rodape com shimmer; console
+  sem erros. Capturas locais em test-results/routine-preview/rotina-efeitos-publicada\*.png.
+- Nenhuma edicao/salvamento de dados reais nesta verificacao; persistencia e
+  permissoes preservadas e cobertas pela matriz autenticada CI. Testes locais
+  focais83/83, Axe12 combinacoes, suite integrada2647/coletor138/release113;
+  testes fisicos Linux aprovados na CI. Registro posterior e apenas documental,
+  sem novo restart. Limites: browser manual desktop; mobile/temas na matriz CI.
+- Encerramento documental: pnpm verify passou novamente no checkout integrado
+  (lint/typecheck/test/build), sem mudanca de runtime apos a publicacao.
+
 ## 2026-10-13: Retomada apos integracao concorrente
 
 - Consulta as 03:58 Sao Paulo: origin/main mudou para15ddedd, PR #198

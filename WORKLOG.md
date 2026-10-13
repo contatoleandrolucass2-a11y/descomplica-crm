@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-13: Efeitos da Rotina em producao
+
+- PR202 integrado em08c3ae4; CI main38364326341 com quatro jobs aprovados.
+- Artefato imutavel e backup verificados; publicacao protegida concluida
+  as05:22:09 Sao Paulo, deploymentd045c054, sem pendencia.
+- Smoke operacional e navegador autenticado aprovados. Gradientes, controles,
+  Semana/Hoje e rodape conferidos; nenhum dado real editado ou salvo.
+- Versao15ddedd concorrente e suas configuracoes preservadas. Nenhuma migration,
+  workflow ou agenda alterada. Evidencias em docs/knowledge/ATUALIZACOES.md.
+
 ## 2026-10-13: Efeitos e compactacao da Rotina
 
 - Controles Semana/Hoje/Inserir linha movidos para o cabecalho, antes de Salvar.
