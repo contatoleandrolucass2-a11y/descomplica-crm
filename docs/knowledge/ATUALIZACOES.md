@@ -1,5 +1,24 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Inicio de instancia n8n exclusiva
+
+- Usuario confirmou preservar integralmente o n8n antigo e seguir com nova
+  instancia; autorizou somente novo subdominio n8n-crm.descomplicapro.com.br
+  e HTTPS. Nenhum workflow antigo, banco, volume ou conexao sera substituido.
+- Fontes em 21:03 Brasilia: GitHub/main e health publico ok em 9ff3fd3,
+  CI push/main 38302711569 aprovada; novo worktree parte desse SHA. PR #194
+  documental continua aberto em 00ff6ac, separado desta implementacao.
+- SSH observacional: nenhum container/volume n8n, porta5678 livre e destino
+  /srv/descomplica-n8n ausente. DNS do novo nome ainda inexistente; NS Hostinger.
+  Configuracao MCP antiga preservada, sem ferramentas n8n disponiveis no chat.
+  Instalacao sera isolada, sem ativar workflows ou ingestao neste estagio.
+- Releases oficiais conferidos: n8n 2.42.7 (GitHub, publicado 12/10/2026),
+  runner 2.42.7 e PostgreSQL 17. Downloads de imagens concluidos sem iniciar
+  containers. Configuracao antiga do Codex nao foi editada nem lida em claro.
+- Painel Hostinger pelo navegador indisponivel por timeout; solicitado ao
+  operador apenas registro A n8n-crm para 187.127.249.50. Sem DNS aplicado
+  nesta etapa, nao emitir certificado nem expor setup administrativo publico.
+
 ## 2026-10-12: Retomada da publicacao da Rotina
 
 - Conferencia de abertura: GitHub main permanece 5bf6213; GET publico

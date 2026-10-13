@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-12: Preparacao de n8n exclusivo do CRM
+
+- Nova infraestrutura isolada em ops/n8n, sem modificar o n8n anterior.
+- Preparacao recusa recursos existentes; segredos privados e imagens por digest.
+- Cadastro inicial privado, runner externo e PostgreSQL exclusivos. DNS/HTTPS
+  autorizados somente para n8n-crm.descomplicapro.com.br; painel DNS indisponivel.
+- Nenhum workflow ativado, nenhuma ingestao nem alteracao da sessao Salesforce.
+- Validacoes e estado aplicado registrados em docs/knowledge/ATUALIZACOES.md.
+
 ## 2026-10-12: Sincronizacao do teste de timeout do gateway
 
 - Aguarda de forma limitada o cancelamento observado no servidor depois do

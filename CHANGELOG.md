@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Base n8n isolada
+
+- Adiciona preparacao de nova instancia n8n com banco e runner exclusivos.
+- Protege recursos existentes e documenta acesso privado, HTTPS e recuperacao.
+- Nao importa nem altera workflows ou credenciais da instancia anterior.
+
 ## 2026-10-12: Teste de cancelamento assincrono
 
 - Sincroniza a verificacao do cancelamento no servidor com espera limitada,
