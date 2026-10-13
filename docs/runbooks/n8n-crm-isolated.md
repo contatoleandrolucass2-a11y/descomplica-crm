@@ -56,6 +56,16 @@ destino externo autorizado antes de carregar dados comerciais nesta instancia.
 
 ## Proxima etapa
 
+### MCP OAuth confirmado
+
+Entrada local n8n_crm_vps separada, endpoint HTTPS /mcp-server/http. OAuth
+concluido e cliente Codex visivel no n8n com leitura/escrita de workflows,
+leitura de execucoes/projetos/tags; sem execucao de fluxos nesta etapa.
+Se ferramentas nao aparecerem no chat, recarregar cliente/sessao e conferir
+inventario. Nao substituir MCP antigo, gerar token ou contornar por REST.
+Antes de qualquer update_workflow, executar validate_workflow_code e reler
+depois. Autenticacao sozinha nao comprova validacao ou ativacao de automacoes.
+
 ### Liberado apos cadastro do owner
 
 Operador confirmou cadastro e navegador mostrou painel autenticado. Aplicados

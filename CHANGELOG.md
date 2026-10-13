@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-12: OAuth MCP confirmado
+
+- Confirma cliente Codex separado no novo n8n; workflows aguardam ferramentas MCP.
+
 ## 2026-10-12: Conexao MCP separada
 
 - Registra habilitacao autorizada do MCP novo, preservando a conexao anterior.

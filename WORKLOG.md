@@ -1,5 +1,11 @@
 # Worklog
 
+## 2026-10-12: OAuth MCP conectado
+
+- CLI e UI confirmaram Codex conectado ao n8n_crm_vps com cinco escopos limitados.
+- Ferramentas ainda ausentes neste chat; recarregamento necessario antes dos fluxos.
+- Sem workflow criado/ativado, sem alteracao de legado ou credenciais em documentos.
+
 ## 2026-10-12: Preparacao OAuth do MCP
 
 - MCP novo habilitado apos confirmacao; cliente n8n_crm_vps separado do legado.

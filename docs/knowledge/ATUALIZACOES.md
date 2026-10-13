@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: OAuth MCP confirmado
+
+- CLI confirmou Successfully logged in to MCP server n8n_crm_vps apos acao
+  do operador. UI Connected clients confirmou Codex e cinco escopos: listar
+  workflows, criar/atualizar workflows, detalhes de execucao, buscar projetos
+  e pastas, listar tags. Sem permissao de execucao ou instalacao de pacotes.
+- codex mcp get confirmou entrada HTTPS habilitada sem bearer/http_headers.
+  Autenticacao OAuth concluida nao prova ferramenta carregada no chat atual:
+  inventario ainda nao expoe n8n nem validate_workflow_code. Necessario recarregar
+  cliente/sessao MCP antes de trabalhar em workflows. Nao contornar via REST.
+- Nenhum workflow criado, alterado ou ativado. Etapa documental/operacional,
+  sem novo teste de codigo; preservar validacoes e limites do ultimo commit.
+
 ## 2026-10-12: MCP habilitado com OAuth pendente
 
 - Confirmacao explicita recebida; Enable MCP access aplicado somente na nova
