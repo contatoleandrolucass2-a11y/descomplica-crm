@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-12: Candidata Salesforce criada via MCP
+
+- Workflow L90AYSBEat4vYHLz criado, validado e relido no novo n8n; inativo.
+- Operador autorizou validate_workflow como substituto do validador antigo.
+- Settings de privacidade aplicados por MCP e relidos; nenhuma escrita no CRM.
+- Credencial de entrada, backup de dados e teste ponta a ponta ainda pendentes.
+- Validacao: oito testes Node passaram; lint (aviso anterior), typecheck e build
+  passaram. Suite geral: 2566 passaram, 27 skips, seis falhas Windows preexistentes.
+- Sem merge/deploy CRM; entrega publicada como candidata no PR198.
+
+
 ## 2026-10-12: OAuth MCP conectado
 
 - CLI e UI confirmaram Codex conectado ao n8n_crm_vps com cinco escopos limitados.

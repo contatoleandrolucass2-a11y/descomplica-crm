@@ -5,9 +5,32 @@
 Instancia nova, sem importar, modificar ou apagar o n8n anterior. A autorizacao
 do usuario em 12/10/2026 inclui o novo nome n8n-crm.descomplicapro.com.br e HTTPS.
 Nao inclui substituir a conexao MCP anterior, credenciais ou volumes existentes.
-Workflows continuam exclusivamente por MCP, com validate_workflow_code antes
-de update_workflow e releitura depois. MCP indisponivel bloqueia essa etapa;
+Workflows continuam exclusivamente por MCP. Em 12/10/2026, o operador autorizou
+validate_workflow (nome exposto pelo MCP atual) antes de update_workflow,
+substituindo validate_workflow_code, com releitura depois. MCP indisponivel bloqueia essa etapa;
 nao usar REST, importacao CLI ou banco como contorno.
+
+## Candidata Salesforce verificada em 12/10/2026
+
+- Workflow: https://n8n-crm.descomplicapro.com.br/workflow/L90AYSBEat4vYHLz.
+- Fonte: ops/n8n/salesforce-candidate.sdk.js; settings complementares em
+  ops/n8n/salesforce-candidate.settings.json, aplicados por setWorkflowSettings.
+- Criacao e atualizacao feitas por MCP, com validacao e releitura. Active false,
+  activeVersionId null. Sem agenda, exportacao ou escrita no Supabase.
+- Webhook exige headerAuth, mas a credencial ainda nao foi atribuida. Nao publicar
+  nem enviar dados reais enquanto a credencial e os demais gates estiverem pendentes.
+- Resposta 202 com ok false identifica somente a candidata; nao e recibo de ingestao.
+- Armazenamento de execucoes desativado para sucesso, erro, manual e progresso;
+  timeout de 600 segundos e timezone America/Sao_Paulo confirmados por releitura.
+- OAuth atual nao oferece ferramenta de execucao nem gerenciamento de credenciais.
+  Testes locais e validacao SDK nao comprovam execucao remota ponta a ponta.
+- Antes de ativar: credencial exclusiva, backup/restauracao de dados da instancia,
+  contrato completo e teste ponta a ponta com dados sinteticos. Backup de Nginx
+  nao substitui backup do PostgreSQL e da chave de criptografia.
+
+Teste local: node --test ops/n8n/salesforce-candidate.node-test.mjs
+ops/salesforce/n8n-candidate.node-test.mjs. O primeiro usa builders de captura
+para comparar o SDK com o validador baseline, sem instalar SDK nem acessar rede.
 
 ## Separacao
 

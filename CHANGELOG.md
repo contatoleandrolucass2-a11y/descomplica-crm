@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Candidata Salesforce no novo n8n
+
+- Versiona SDK, settings e testes da candidata inativa, sem saida externa.
+- Resposta HTTP 202 com ok false nao confirma publicacao de snapshot.
+
+
 ## 2026-10-12: OAuth MCP confirmado
 
 - Confirma cliente Codex separado no novo n8n; workflows aguardam ferramentas MCP.

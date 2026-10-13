@@ -1,0 +1,8 @@
+{
+  "executionTimeout": 600,
+  "timezone": "America/Sao_Paulo",
+  "saveDataErrorExecution": "none",
+  "saveDataSuccessExecution": "none",
+  "saveExecutionProgress": false,
+  "saveManualExecutions": false
+}

@@ -1,5 +1,45 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Candidata criada e privacidade relida
+
+- Fonte: MCP n8n_crm_vps, workflow L90AYSBEat4vYHLz. Criacao e releitura
+  confirmaram tres nodes, active false e activeVersionId null; nenhuma agenda.
+- Operador autorizou expressamente validate_workflow no lugar de
+  validate_workflow_code. Validacao SDK retornou valid true, tres nodes;
+  update_workflow aplicou uma operacao de settings e releitura confirmou
+  persistencia desativada, timeout 600 e timezone America/Sao_Paulo.
+- Webhook headerAuth sem credencial atribuida. Candidata NAO esta pronta para
+  receber dados. Sem execucao remota, publicacao de workflow ou escrita no CRM.
+- Oito testes Node locais aprovados: baseline, paridade SDK, autenticacao
+  requerida, resposta nao final e settings. Nao equivalem a teste ponta a ponta.
+- Pendencias: credencial de entrada, backup/restauracao da instancia, execucao
+  sintetica ponta a ponta e contrato completo antes da agenda de 30 minutos.
+  MCP sem ferramenta de execucao/credenciais: nao contornar por REST ou CLI.
+- Instancia antiga nao acessada nem modificada nesta etapa. Revisar bloqueios
+  apenas com evidencias dos gates e ferramentas autorizadas disponiveis.
+- Verificacao final: Node 24.19.0, pnpm 11.20.0; lint passou com aviso anterior
+  em scripts/qa/connected-systems.mjs:18; typecheck e build passaram.
+  pnpm test: 2566 passaram, 27 skips, seis falhas de caminhos/permissoes Windows
+  em commercial-engine, mapping-import e dois testes de retirement/backup.
+  Etapas posteriores ao Vitest nao rodaram; os oito testes Node acima rodaram
+  separadamente. Falhas impedem alegar todos os gates verdes ou merge aprovado.
+- Fontes finais: GitHub main 1160a0e, PR198 aberto (head anterior 2e95fa6 sem
+  runs encontrados); GET /api/health publico ok/9ff3fd3. Versoes distintas.
+  SSH docker ps confirmou n8n e PostgreSQL healthy, runner Up, n8n apenas em
+  127.0.0.1:5678. Nenhum restart/deploy do aplicativo nesta etapa.
+
+## 2026-10-12: MCP operacional e candidata nova
+
+- search_workflows via MCP novo respondeu count0. Instancia nova vazia;
+  nenhuma consulta ou alteracao no n8n antigo. SDK e tipos obtidos por MCP.
+- GitHub main avancou para1160a0e; runtime publico segue9ff3fd3. PR198 aberto
+  em2e95fa6 antes desta etapa. Consulta CI desse head nao retornou execucoes.
+- Candidata local tem quatro testes Node aprovados. Preparacao nova sera
+  inativa e autenticada, sem destino externo nem credenciais copiadas.
+  validate_workflow e a ferramenta de validacao SDK exposta pelo MCP atual;
+  validate_workflow_code nao existe neste inventario. Nao editar workflow
+  existente sem resolver o requisito nominal exigido pelo operador.
+
 ## 2026-10-12: OAuth MCP confirmado
 
 - CLI confirmou Successfully logged in to MCP server n8n_crm_vps apos acao
