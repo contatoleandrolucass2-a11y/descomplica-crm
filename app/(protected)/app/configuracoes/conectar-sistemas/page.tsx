@@ -25,6 +25,7 @@ export default async function ConnectedSystemsPage() {
       refreshAvailable={refresh.available}
       canRefresh={hasPermission(context, "crm.salesforce.refresh")}
       statusConfigured={status.available}
+      {...(hasPermission(context, "crm.dashboard.view") ? { canReadSyncStatus: true } : {})}
       consoleAvailable={
         context.roleKey === "master" && getSalesforceConsoleConfiguration().available
       }

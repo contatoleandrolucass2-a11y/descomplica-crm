@@ -17,7 +17,11 @@ Par RSA-4096 gerado fora do repositorio, no Windows do operador. Chave privada
 somente local; pasta com heranca desabilitada, ACL exclusiva do usuario e
 SYSTEM. Sem senha propria: ACL nao protege contra administrador, malware
 executado como o usuario ou leitura offline do disco sem criptografia.
-O operador ainda deve confirmar segunda copia offline sob sua custodia.
+Recomenda-se uma segunda copia independente sob custodia do operador.
+Em 13/10/2026, o usuario informou nao dispor de pendrive e pediu continuidade.
+Custodia fora da VPS/Supabase e recuperacao local estao comprovadas; uma segunda
+copia nao e requisito adicional para conectar o CRM. Perder o unico PC com a
+chave pode tornar estes backups irrecuperaveis; esse risco permanece.
 Nao enviar a chave ao chat, Git, VPS ou Supabase. Preservar chaves antigas.
 
 Certificado publico SHA256:
@@ -50,7 +54,8 @@ por falha de inicializacao do agente no Windows; nao houve relaxamento da ACL.
 
 ### Pendencias
 
-- Confirmar custodia independente da chave antes de depender deste destino.
+- Providenciar segunda copia da chave quando houver destino privado disponivel;
+  nao enviar a chave a VPS, Supabase, chat ou repositorio.
 - Testar boot/restauracao completa em ambiente isolado antes de alegar DR total.
 - Em proximos backups, manter nomes unicos, limite por objeto e criptografia;
   nunca enviar dumps em claro nem aceitar decrypt com exit code diferente de zero.

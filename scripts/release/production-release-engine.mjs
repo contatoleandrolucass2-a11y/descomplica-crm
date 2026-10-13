@@ -45,6 +45,8 @@ export async function executeRelease(options, io) {
   if (options === null || typeof options !== "object" || options.operation !== "deploy") {
     fail("Only a CI-approved deploy is allowed; recover restores an exact pending release.");
   }
+  if (options.salesforceIngestion !== undefined && options.salesforceIngestion !== true)
+    fail("Salesforce ingestion requires an explicit enable request.");
   const releaseOptions = {
     operation: options.operation,
     expectedDeploymentId: options.expectedDeploymentId,
@@ -52,6 +54,7 @@ export async function executeRelease(options, io) {
     targetSha: options.targetSha,
     targetImageId: options.targetImageId,
     ciRunId: options.ciRunId,
+    ...(options.salesforceIngestion ? { salesforceIngestion: true } : {}),
   };
   const { operation, expectedDeploymentId, expectedSha, targetSha, targetImageId, ciRunId } =
     releaseOptions;
@@ -59,6 +62,8 @@ export async function executeRelease(options, io) {
   const initial = captureObservation(await io.observe());
   assertLiveDeployment(initial, expected, io.now());
   if (decideRelease(initial, targetSha, targetImageId) === "noop") {
+    if (options.salesforceIngestion)
+      fail("Configuration changes require a new CI-approved release SHA.");
     return { status: "noop", release: initial.state.release };
   }
 
@@ -82,6 +87,9 @@ export async function executeRelease(options, io) {
   if (deploymentId === previousState.release.deploymentId) {
     fail("A new release must have a new deployment ID.");
   }
+  const environmentChange = options.salesforceIngestion
+    ? await io.prepareEnvironmentChange(releaseOptions, deploymentId)
+    : undefined;
   const startedAt = io.now();
   assertFreshObservation(finalObservation, startedAt);
   const transaction = {
@@ -92,7 +100,10 @@ export async function executeRelease(options, io) {
     targetImageId,
     startedAt: new Date(startedAt).toISOString(),
     operation,
+    ...(environmentChange ? { environmentChange } : {}),
   };
+  if (options.salesforceIngestion && !environmentChange)
+    fail("A durable environment backup is required before deployment intent.");
   const intentState = {
     schemaVersion: 1,
     release: structuredClone(previousState.release),
@@ -109,6 +120,7 @@ export async function executeRelease(options, io) {
       targetSha,
       expectedImageId: targetImageId,
       boundarySha: targetSha,
+      ...(environmentChange ? { environmentChange } : {}),
     },
     async () => {
       if (beforeWriteAttempted) {
@@ -144,7 +156,11 @@ export async function executeRelease(options, io) {
   if (!beforeStartCompleted) {
     fail("Production promotion did not complete its mandatory before-start validation.");
   }
-  await io.verify(targetSha, targetImageId);
+  await io.verify(
+    targetSha,
+    targetImageId,
+    environmentChange ? { change: environmentChange, restore: false } : undefined,
+  );
 
   const completedAt = io.now();
   if (completedAt < startedAt) fail("The clock moved backwards during publication.");

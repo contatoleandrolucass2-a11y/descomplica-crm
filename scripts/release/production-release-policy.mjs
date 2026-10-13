@@ -104,6 +104,7 @@ export function validateDeploymentState(state, nowMs) {
         "targetImageId",
         "startedAt",
         "operation",
+        ...(Object.hasOwn(inProgress, "environmentChange") ? ["environmentChange"] : []),
       ],
       "In-progress deployment",
     );
@@ -119,6 +120,16 @@ export function validateDeploymentState(state, nowMs) {
     assertCanonicalTime(inProgress.startedAt, nowMs, "Deployment start time");
     if (!["deploy", "rollback"].includes(inProgress.operation)) {
       fail("In-progress operation must be deploy or rollback.");
+    }
+    if (Object.hasOwn(inProgress, "environmentChange")) {
+      const change = inProgress.environmentChange;
+      assertExactKeys(change, ["backupId", "beforeSha256", "afterSha256"], "Environment change");
+      if (change.backupId !== inProgress.deploymentId)
+        fail("Environment backup ID must match deployment.");
+      for (const field of ["beforeSha256", "afterSha256"])
+        assertStringPattern(change[field], /^[0-9a-f]{64}$/u, "Environment digest");
+      if (change.beforeSha256 === change.afterSha256)
+        fail("Environment change must have distinct digests.");
     }
   }
   return state;

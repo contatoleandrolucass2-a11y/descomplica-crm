@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-13: Aplicacao transacional da configuracao Salesforce
+
+- Cartoes n8n/Supabase deixam o texto fixo e usam consulta autenticada existente,
+  respeitando permissao, falha, timeout e data do recibo. Sem endpoint publico
+  novo, elevacao de privilegio ou alegacao de disponibilidade continua do n8n.
+- Integra main1c36fce preservando os registros de ambas as frentes.
+- Revisao constatou que o coordenador anterior trocava somente IMAGE_TAG;
+  configurador legado ficava fora das travas. Adiciona opcao de ingestao ao
+  deploy existente, sem restart direto, bypass de CI ou segredo em argumentos.
+- Intencao registra apenas UUID/hashes do backup privado. Recuperacao restaura
+  env integral, inclusive quando Compose nao iniciou; verifica runtime antes
+  de concluir. Mesmo SHA nao pode confirmar uma configuracao nao aplicada.
+- Sessao Salesforce conectada em 05:37Z; RPC Salesforce executavel somente
+  pelo papel tecnico, Qlik continua sem acesso direto. Candidata n8n inativa.
+- Backup recuperado ja comprovado; segunda copia independente da chave e
+  recomendacao pendente, nao novo bloqueio a conexao solicitada.
+- Validacao final: pnpm verify aprovado (lint, typecheck, test e build50rotas),
+  Vitest2647/43skips, coletor138, release113/11skips Linux. N8n23/23 e fontes
+  publicas aprovados. Lint mantem um aviso preexistente no helper de tema.
+- QA sintetico aprovado: nove telas/temas, zoom200%, evidencia de ingestao/
+  leitura, falha503, logos e pixels do console. Corrige regressao da verificacao
+  manual quando monitor esta desativado, detectada pelo mesmo QA.
+- Formatacao dos arquivos alterados aprovada. format:check global encontra
+  dois arquivos preexistentes nao versionados em output; preservados. CI nao
+  recebe esses artefatos. Revisao independente sem achados P1/P2; interrupcao
+  fisica do conjunto backup/Compose nao foi ensaiada, somente I/O simulado.
+- CI, promocao e ingestao real ainda precisam de comprovacao.
+
 ## 2026-10-13: Backup externo recuperado e prontidao corrigida
 
 - Validacao final: lint/typecheck/test/build, fontes documentais e diff check

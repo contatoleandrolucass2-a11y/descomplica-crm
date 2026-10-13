@@ -347,8 +347,10 @@ reaplicar a migration. Qualquer SQL faltante exige auditoria, ensaio isolado e
 autorizacao especifica antes da aplicacao remota.
 
 Configuracao deve entrar por promocao efetiva de imagem validada, com backup e
-rollback do env sob o coordenador protegido de release. Mesmo SHA/imagem retorna
-`noop` antes do Compose: alterar o arquivo env sozinho nao injeta secrets no
+rollback do env sob o coordenador protegido de release. Usar a opcao explicita
+`--salesforce-ingestion enable` com um novo SHA aprovado. Sem essa opcao,
+mesmo SHA/imagem retorna `noop`; com ela, o mesmo SHA e recusado. Alterar o
+arquivo env sozinho nao injeta secrets no
 container. Conferir presenca das variaveis sem revelar valores, health/version
 e refresh desabilitado apos a promocao. Nao usar restart manual como atalho.
 
@@ -384,7 +386,11 @@ schema remoto, CI e release:production antes da primeira carga e replay.
 ### Procedimento
 
 - desativar imediatamente a candidata;
-- definir `SALESFORCE_INGEST_ENABLED=false` e reiniciar somente o container da aplicação;
+- em tentativa de release pendente, executar `release:production recover`
+  com o deployment ID exato; o backup privado restaura imagem e env anteriores;
+- depois de uma release concluida, manter candidata/publisher inativos e fazer
+  qualquer desativacao do runtime por nova promocao protegida aprovada;
+  nao alterar env nem reiniciar containers diretamente;
 - manter o workflow antigo e seus backups sem alterações;
 - o snapshot anterior do CRM permanece substituível por uma nova ingestão mais
   recente; não executar SQL manual, reset, seed ou limpeza;

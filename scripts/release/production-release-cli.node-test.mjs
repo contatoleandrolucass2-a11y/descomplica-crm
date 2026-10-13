@@ -197,6 +197,21 @@ test("accepts only a canonical positive safe integer CI run ID", () => {
   }
 });
 
+test("Salesforce configuration is an explicit deploy-only option, never raw credentials", () => {
+  const args = [...deployArguments(), "--salesforce-ingestion", "enable"];
+  assert.equal(parseReleaseArguments(args).values["salesforce-ingestion"], "enable");
+  for (const value of ["true", "false", "disable", "secret-value"]) {
+    assert.throws(() =>
+      parseReleaseArguments([...deployArguments(), "--salesforce-ingestion", value]),
+    );
+  }
+  assert.throws(() => parseReleaseArguments(["status", "--salesforce-ingestion", "enable"]));
+  assert.throws(() => parseReleaseArguments([...args, "--salesforce-ingestion", "enable"]));
+  assert.throws(() =>
+    parseReleaseArguments([...deployArguments().slice(0, -2), "--salesforce-ingestion", "enable"]),
+  );
+});
+
 test("the standalone legacy image binder rejects valid old arguments and a forged lock marker", async () => {
   const script = path.join(import.meta.dirname, "bind-production-image.mjs");
   const args = ["--expected-old-sha", sha, "--new-sha", targetSha, "--expected-image-id", imageId];

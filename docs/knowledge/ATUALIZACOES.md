@@ -1,5 +1,33 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Preparacao transacional da conexao Salesforce
+
+- Encerramento da implementacao local06:06Z: pnpm verify aprovado, Vitest2647/
+  43skips, coletor138, release113/11skips Linux e build50rotas. N8n23/23,
+  fontes e QA sintetico nove telas/temas/zoom200% aprovados. Regressao manual
+  sem monitor corrigida. Revisao independente sem P1/P2; crash fisico do
+  conjunto config/Compose nao ensaiado. Status dos servicos usa endpoint
+  autorizado e distingue leitura/ingestao historica de disponibilidade atual.
+- Preflight VPS05:54Z: arquivos secretos privados/validos, baseline env/container
+  coincide, ingestfalse/refreshfalse e ledger sem pendencia. Nao houve injecao.
+- Formatacao alterada aprovada; comando global encontra dois artefatos output
+  preexistentes nao versionados, preservados e fora da CI. Consulta ao PR por
+  gh pr edit falhou pela API Projects classic; corpo atualizado via GitHub API,
+  sem impacto sobre a regra de MCP exclusivo do n8n.
+- Fonte: revisao do coordenador em c0fc782 e teste local de CLI/engine/policy/
+  recovery, 91 aprovados. Alteracao em preparo no PR198: opcao explicita de
+  configuracao, backup privado completo, CAS, verificacao efetiva e rollback.
+  Nao e evidencia de promocao nem de ingestao real. Validacao completa pendente.
+- Fonte remota 05:37Z: probe da sessao Salesforce conectado; Supabase ativo,
+  ACL da RPC Salesforce service_role-only e tabelas Qlik sem acesso direto.
+  Fonte MCP: candidata L90AYSBEat4vYHLz inativa, cinco nodes, sem agenda/logs.
+- Main1c36fce integrada localmente; publicacao continua7c50f59. Consulta05:44Z
+  PR198/head129e707: validate/restore aprovados, release-gates em andamento.
+- Correcao da orientacao anterior de custodia: backup ja recuperado e chave
+  fora da VPS/Supabase. Segunda copia independente recomendada; usuario nao
+  tem pendrive e solicitou continuidade. Perda do PC continua risco documentado,
+  sem dispensar gates de CI, autenticacao, restore ou reconciliacao de ingestao.
+
 ## 2026-10-13: Inicio da conexao n8n e Supabase ao CRM
 
 - Usuario solicitou conectar o novo n8n e Supabase ao CRM. Main1c36fce contem

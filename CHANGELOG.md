@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-13: Configuracao Salesforce na publicacao protegida
+
+- Cartoes de integracao passam a consultar evidencias pelo endpoint autorizado
+  existente; leitura Supabase e ingestao passada nao afirmam n8n online.
+- Acrescenta opcao explicita para aplicar as credenciais existentes de ingestao
+  junto de nova imagem aprovada, mantendo refresh desligado.
+- Backup privado integral do env, CAS e recuperacao da configuracao anterior;
+  confirmacao exige valores efetivos no container, alem de health e versao.
+- Preserva releases sem a opcao, registros antigos e o n8n antigo. Nao ativa
+  workflow/agenda nem executa migrations por meio do comando de release.
+
 ## 2026-10-13: Backup externo e prontidao do restore
 
 - Guia unico de conclusao com acessos e pendencias; suite completa e build

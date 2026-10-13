@@ -235,6 +235,85 @@ test("returns noop without CI, preparation, state writes, image binding, or prom
   assert.deepEqual(system.state, initialState());
 });
 
+const environmentChange = {
+  backupId: nextId,
+  beforeSha256: "1".repeat(64),
+  afterSha256: "2".repeat(64),
+};
+
+test("configuration deploy binds a durable backup to intent and verifies runtime before receipt", async () => {
+  const system = harness();
+  system.io.prepareEnvironmentChange = async (releaseOptions, id) => {
+    assert.equal(releaseOptions.salesforceIngestion, true);
+    assert.equal(id, nextId);
+    assert.equal(system.candidateCount, 2);
+    assert.equal(system.writeCount, 0);
+    system.events.push("environment-backup");
+    return structuredClone(environmentChange);
+  };
+  system.hooks.bind = (binding) => {
+    assert.deepEqual(binding.environmentChange, environmentChange);
+    assert.deepEqual(system.state.inProgress.environmentChange, environmentChange);
+  };
+  const verify = system.io.verify;
+  system.io.verify = async (sha, image, check) => {
+    assert.deepEqual(check, { change: environmentChange, restore: false });
+    await verify(sha, image);
+  };
+  await executeRelease(options({ salesforceIngestion: true }), system.io);
+  assert.ok(system.events.indexOf("environment-backup") < system.events.indexOf("intent"));
+  assert.equal(system.state.inProgress, null);
+});
+
+test("backup failure, invalid descriptor and stale backup preparation cannot mutate production", async () => {
+  for (const outcome of ["failure", "missing", "invalid", "stale"]) {
+    const system = harness();
+    system.io.prepareEnvironmentChange = async () => {
+      if (outcome === "failure") throw new Error("Backup failed");
+      if (outcome === "missing") return undefined;
+      if (outcome === "invalid") return { ...environmentChange, backupId: currentId };
+      system.clock += 60_000;
+      return structuredClone(environmentChange);
+    };
+    await assert.rejects(executeRelease(options({ salesforceIngestion: true }), system.io));
+    assert.equal(system.writeCount, 0);
+    assert.equal(system.events.includes("bind"), false);
+  }
+});
+
+test("configuration cannot bypass new-release and CI gates", async () => {
+  const system = harness();
+  await assert.rejects(
+    executeRelease(
+      options({ salesforceIngestion: true, targetSha: currentSha, targetImageId: currentImageId }),
+      system.io,
+    ),
+    /new CI-approved/u,
+  );
+  assert.equal(system.writeCount, 0);
+  await assert.rejects(
+    executeRelease(options({ salesforceIngestion: "true" }), system.io),
+    /explicit/u,
+  );
+  system.hooks.candidate = () => ({ ...approvedCandidate(), mainSha: currentSha });
+  await assert.rejects(executeRelease(options({ salesforceIngestion: true }), system.io));
+  assert.equal(system.events.includes("prepare"), false);
+});
+
+test("runtime configuration mismatch retains the environment recovery descriptor", async () => {
+  const system = harness();
+  system.io.prepareEnvironmentChange = async () => structuredClone(environmentChange);
+  system.io.verify = async () => {
+    throw new Error("Runtime environment mismatch");
+  };
+  await assert.rejects(
+    executeRelease(options({ salesforceIngestion: true }), system.io),
+    /environment mismatch/u,
+  );
+  assert.deepEqual(system.state.inProgress.environmentChange, environmentChange);
+  assertIntentRetained(system);
+});
+
 test("rejects the same published SHA with another image before any mutation", async () => {
   const system = harness();
   await assert.rejects(

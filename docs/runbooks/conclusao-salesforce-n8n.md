@@ -24,9 +24,11 @@ Nao compartilhar senhas, tokens, dumps ou chave privada em chats/PRs.
 
 ## O que ainda depende do operador
 
-1. Guardar uma segunda copia independente da chave. A pasta local protegida
+1. Recomenda-se guardar uma segunda copia independente da chave. A pasta local protegida
    tem um LEIA-ME e recibo; nao e preciso comprar pendrive agora. Sem outra
    copia, perda do PC pode impedir recuperacao. Nao enviar a chave pelo chat.
+   A custodia fora da VPS/Supabase e a recuperacao ja foram comprovadas;
+   essa redundancia adicional nao impede a conexao solicitada pelo usuario.
 2. Aprovar MFA no Salesforce se a sessao remota exigir nova autenticacao.
    Acesso local no navegador nao comprova sessao da VPS.
 
@@ -37,8 +39,9 @@ nao e necessario enviar novamente senhas ou chaves ao assistente.
 
 1. Concluir todos os checks do PR, integrar e validar CI push/main no SHA exato.
 2. Preparar backup/rollback privado da configuracao; promover a imagem imutavel
-   pelo coordenador de release, injetando os secrets existentes. Mesmo SHA
-   retorna noop e nao aplica configuracao. Sem restart manual como atalho.
+   pelo coordenador de release, com `--salesforce-ingestion enable`, injetando
+   os secrets existentes. Essa opcao exige novo SHA e verifica configuracao
+   efetiva; falha deixa recuperacao pendente. Sem restart manual como atalho.
 3. Habilitar apenas ingestao e comprovar runtime; refresh, publisher e agenda
    continuam desligados. Nao aplicar migrations Qlik/v3 neste cutover.
 4. Validar snapshot completo e sessao da VPS; publicar somente webhook candidato
@@ -50,7 +53,9 @@ nao e necessario enviar novamente senhas ou chaves ao assistente.
 
 ## Limites
 
-- Validacao local desta etapa: lint/typecheck/test/build aprovados, n8n23/23.
+- Validacao local desta etapa: lint/typecheck/test/build aprovados, n8n23/23,
+  Vitest2647/43skips, coletor138 e release113/11skips Linux. QA sintetico passou
+  nove telas/temas, zoom200%, estados de leitura/ingestao e falha de consulta.
   CI do PR ainda pendente na entrega; nao ha promocao automatica confirmada.
 - N8n antigo nao foi alterado. A candidata nova continua inativa neste registro.
 - Backup offsite esta no mesmo projeto Supabase: exclusao do projeto e risco comum.

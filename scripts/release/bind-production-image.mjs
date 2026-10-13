@@ -1,5 +1,4 @@
 import { execFile } from "node:child_process";
-import { isUtf8 } from "node:buffer";
 import { constants } from "node:fs";
 import { lstat, open, realpath, rename, rm } from "node:fs/promises";
 import path from "node:path";
@@ -7,6 +6,12 @@ import process from "node:process";
 import { pathToFileURL } from "node:url";
 import { assertHeldLock } from "./production-release-lock.mjs";
 import { promisify } from "node:util";
+import {
+  maximumEnvironmentBytes,
+  readBoundedEnvironmentText,
+  salesforceEnvironmentBackupStore,
+  selectEnvironmentChange,
+} from "./salesforce-release-environment.mjs";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
@@ -147,16 +152,29 @@ function validateRootPrivateRegularFile(metadata, label) {
 
 export async function readValidatedEnvironment() {
   await validateConfigurationDirectory();
-  const handle = await open(destination, constants.O_RDONLY | constants.O_NOFOLLOW);
+  const handle = await open(
+    destination,
+    constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+  );
   try {
-    validateRootPrivateRegularFile(await handle.stat(), "Production environment");
-    const bytes = await handle.readFile();
-    const validUtf8 = isUtf8(bytes);
-    const contents = bytes.toString("utf8");
-    bytes.fill(0);
-    if (!validUtf8) {
-      fail("Production environment must contain valid UTF-8 without byte loss.");
-    }
+    const before = await handle.stat();
+    validateRootPrivateRegularFile(before, "Production environment");
+    if (before.size > maximumEnvironmentBytes) fail("Production environment is too large.");
+    const contents = await readBoundedEnvironmentText(handle, maximumEnvironmentBytes);
+    const after = await handle.stat();
+    const current = await lstat(destination);
+    validateRootPrivateRegularFile(after, "Production environment");
+    validateRootPrivateRegularFile(current, "Production environment");
+    if (
+      current.isSymbolicLink() ||
+      before.dev !== current.dev ||
+      before.ino !== current.ino ||
+      before.size !== after.size ||
+      before.mtimeMs !== after.mtimeMs ||
+      before.ctimeMs !== after.ctimeMs ||
+      Buffer.byteLength(contents, "utf8") !== after.size
+    )
+      fail("Production environment changed while reading.");
     return contents;
   } finally {
     await handle.close();
@@ -209,7 +227,7 @@ export async function verifyPromotableImage(newSha, expectedImageId) {
   }
 }
 
-async function writeEnvironmentAtomically(contents) {
+async function writeEnvironmentAtomically(contents, expectedContents) {
   const temporary = `${destination}.tmp-${process.pid}-${process.hrtime.bigint().toString(16)}`;
   let temporaryCreated = false;
   try {
@@ -223,6 +241,7 @@ async function writeEnvironmentAtomically(contents) {
     } finally {
       await handle.close();
     }
+    await assertEnvironmentUnchanged(expectedContents);
     await rename(temporary, destination);
     const directory = await open(destinationDirectory, "r");
     try {
@@ -241,7 +260,7 @@ async function restoreEnvironmentAfterFailedPostcondition(originalContents, tran
   if (currentContents !== transformedContents) {
     fail("Production environment changed while recovering a failed image binding.");
   }
-  await writeEnvironmentAtomically(originalContents);
+  await writeEnvironmentAtomically(originalContents, transformedContents);
   await assertEnvironmentUnchanged(originalContents);
 }
 
@@ -252,11 +271,22 @@ export async function bindProductionImage(options, lock, beforeWrite) {
   const { expectedCurrentSha, targetSha, boundarySha, expectedImageId } = options;
   await verifyReleaseBoundary(boundarySha);
   const originalContents = await readValidatedEnvironment();
-  const transformedContents = transformProductionImageEnvironment(
+  const imageContents = transformProductionImageEnvironment(
     originalContents,
     expectedCurrentSha,
     targetSha,
   );
+  if (options.restoreEnvironment !== undefined && !options.environmentChange) {
+    fail("Environment restore requires a recorded change descriptor.");
+  }
+  const transformedContents = options.environmentChange
+    ? selectEnvironmentChange(
+        originalContents,
+        await salesforceEnvironmentBackupStore().read(options.environmentChange),
+        options.environmentChange,
+        options,
+      )
+    : imageContents;
   await verifyPromotableImage(targetSha, expectedImageId);
 
   await verifyReleaseBoundary(boundarySha);
@@ -265,7 +295,9 @@ export async function bindProductionImage(options, lock, beforeWrite) {
   try {
     await assertHeldLock(lock);
     await beforeWrite();
-    await writeEnvironmentAtomically(transformedContents);
+    await assertHeldLock(lock);
+    await assertEnvironmentUnchanged(originalContents);
+    await writeEnvironmentAtomically(transformedContents, originalContents);
     await verifyReleaseBoundary(boundarySha);
     await verifyPromotableImage(targetSha, expectedImageId);
     await assertEnvironmentUnchanged(transformedContents);
