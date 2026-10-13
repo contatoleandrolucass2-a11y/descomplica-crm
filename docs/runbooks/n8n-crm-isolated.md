@@ -1,5 +1,17 @@
 # N8n exclusivo do CRM
 
+## Evidencia HTTP em 12/10/2026, 23:11 Brasilia
+
+Teste isolado autorizado, com fixture inteiramente sintetica, executado da VPS
+para o webhook candidato HTTPS: sem Authorization retornou 403; token incorreto
+retornou 403; token privado salvo retornou 202 e corpo com ok false e status
+candidate_validated_not_published. Isso nao equivale a publicacao de dados no CRM.
+
+Workflow L90AYSBEat4vYHLz foi despublicado via MCP imediatamente apos o teste.
+Releitura confirmou active false, activeVersionId null e persistencia none/false.
+Token mantido em arquivo privado root 600 na VPS; nunca versionar seu conteudo.
+Nenhuma agenda, coleta Salesforce, escrita Supabase ou mudanca no n8n antigo.
+
 ## Limite desta etapa
 
 Instancia nova, sem importar, modificar ou apagar o n8n anterior. A autorizacao

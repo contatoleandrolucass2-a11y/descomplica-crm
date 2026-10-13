@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Autenticacao HTTP da candidata confirmada
+
+- Teste sintetico VPS para novo n8n comprova rejeicao de token ausente/incorreto
+  e resposta 202 com token salvo. Webhook desativado novamente ao encerrar.
+- Exportacao Salesforce e ingestao permanecem fora da evidencia deste teste.
+
 ## 2026-10-12: Teste remoto da candidata aprovado
 
 - Confirma processamento de fixture pelo MCP e restauracao da privacidade.

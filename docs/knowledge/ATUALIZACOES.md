@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Autenticacao HTTP VPS para n8n confirmada
+
+- Fonte: SSH e MCP oficial, 23:11 Brasilia, branch codex/n8n-crm-isolado.
+- Arquivo privado do token confirmado regular, root e modo 600; valor nao registrado.
+- SDK validado antes da publicacao temporaria autorizada do workflow
+  L90AYSBEat4vYHLz, versao 88270273-9a3b-40e6-9684-6e7ff54204a1.
+- POST sintetico via HTTPS da VPS: sem token 403; token incorreto 403;
+  token salvo 202 com ok false e status candidate_validated_not_published.
+- Despublicacao via MCP concluida e relida: active false, activeVersionId null;
+  persistencia success/error none e manual/progress false preservada.
+- Nenhuma coleta Salesforce, escrita Supabase, agenda ou alteracao do n8n antigo.
+- Health CRM ok, versao 1160a0e92d734414f267249b63f56d70325fc529.
+  Consulta PR/CI indisponivel nesta retomada: gh ausente no PATH. Nao afirmar CI verde.
+- Limite: comprova autenticacao e resposta da candidata, nao exportacao ou ingestao.
+  Suite geral nao repetida: somente evidencia documental, sem mudanca de runtime.
+  Revisar o fluxo antes de habilitar dados reais; token permanece privado na VPS.
+
 ## 2026-10-12: Teste sintetico remoto aprovado
 
 - Limite liberado: validate_workflow retornou valid true/tres nodes. Fonte

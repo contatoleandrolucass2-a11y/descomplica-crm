@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-12: Teste HTTP isolado concluido
+
+- Candidata L90AYSBEat4vYHLz publicada temporariamente por MCP com autorizacao.
+- POST da VPS: sem credencial 403, credencial incorreta 403, credencial salva 202.
+- Resposta candidata conferida; despublicacao e privacidade relidas por MCP.
+- Sem Salesforce, Supabase ou n8n antigo. Sem alteracao de codigo de runtime.
+- Suite geral nao repetida; PR/CI nao consultados por gh ausente no PATH.
+
 ## 2026-10-12: Processamento sintetico confirmado
 
 - Execucao manual MCP 2 passou; accepted true no validador e ultimo node success.
