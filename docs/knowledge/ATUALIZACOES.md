@@ -1,5 +1,35 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Conexao real concluida, agenda ainda desligada
+
+- Fontes atuais: GitHub PR198/main15ddedd e CI38358420498 com quatro jobs verdes;
+  VPS release54fc028d de07:27:06Z; health publico200/ok no SHA15ddedd.
+- Artefato da CI preservado sem rebuild. Diferenca classic/containerd provada
+  pela cadeia index/manifest/config/11camadas e RootFS; image:prove aprovou
+  os dois perfis. Auditoria registra checksums/digests e cronologia completa.
+- Configuracao aplicada pelo coordenador com tres travas, CAS, backup integral
+  root600 e verificacao dos quatro valores efetivos. Ingesttrue/refreshfalse;
+  CRM sem auth401, webhook n8n sem auth403, refresh desabilitado404.
+- MCP publicou L90AYSBEat4vYHLz/dcffaf09 e releu ativo igual ao draft.
+  Nome atual CRM VPS - Salesforce - Ingestao CRM, alterado somente por MCP
+  apos validate_workflow; nodes, credenciais, conexoes e settings identicos.
+- Exportacao real06:56Z, UUID25ec6322-4a01-4838-9b89-55934a9217fe:
+  HTTP201 em07:28Z e replay200/idempotenttrue em07:29Z. Supabase confirma
+  run d5b24cc6-561a-4eef-a427-97086d60c9ec, count159 e uma auditoria.
+  Snapshot13/10: 3views,15metricas,15empreendimentos,144participantes.
+- Navegador autenticado confirmou Salesforce conectado, n8n ingestao confirmada
+  e Supabase leitura confirmada. Sem logs persistentes de payloads no n8n.
+- Excecao operacional explicita: monitor atual nao recebe contagens/recibos
+  do envio pontual. Tabela do coletor ainda pode mostrar Sem dados; cartoes
+  consultam evidencia duravel independente. Revisar ao implantar agendador.
+- Agenda30min sem timer/processo ativo em07:31Z; publisher habilitado somente
+  em dois processos pontuais. Proximo passo exige implantacao versionada,
+  teste de falha/restart e dois ciclos reconciliados. Nao prometer recorrencia.
+- N8n antigo nao acessado/alterado. Sem migrations remotas. Backup offsite ja
+  recuperado; segunda copia independente da chave continua recomendada.
+- pnpm verify repetido exit0, CI completa verde e screenshot real inspecionado.
+  Documentacao final em branch separada, sem nova mudanca de runtime.
+
 ## 2026-10-13: Preparacao transacional da conexao Salesforce
 
 - Encerramento da implementacao local06:06Z: pnpm verify aprovado, Vitest2647/

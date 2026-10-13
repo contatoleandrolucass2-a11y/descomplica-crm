@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-13: Conexao n8n e Supabase comprovada em producao
+
+- PR198 integrado; CI38358420498 aprovada. Artefato15ddedd teve checksum,
+  cadeia OCI/config/11camadas e dois perfis de runtime comprovados na VPS.
+- Release protegida54fc028d publicada07:27Z, com backup integral privado do
+  env, ingestao habilitada, refresh desligado e nenhum secret em logs.
+- Novo workflow L90AYSBEat4vYHLz publicado exclusivamente via MCP. Nome e
+  descricao atualizados apos validar SDK; releitura confirmou grafo/settings
+  identicos. N8n antigo intocado, nenhuma migration remota aplicada.
+- Exportacao real dos sete relatorios: primeira carga201 e replay200 do mesmo
+  requestId, reconciliados no Supabase. Snapshot13/10, 15metricas/144participantes,
+  uma run e uma auditoria. Interface autenticada confirmou os tres servicos.
+- Agenda30min e refresh ainda desligados; monitor independente ainda nao recebe
+  contagens/recibos da carga pontual. Runbook e auditoria registram o limite.
+- Validacao local repetida: pnpm verify exit0 (lint/typecheck/test/build),
+  Vitest2647/43skips, release113/11skips Linux e coletor138. CI Linux verde.
+
 ## 2026-10-13: Aplicacao transacional da configuracao Salesforce
 
 - Cartoes n8n/Supabase deixam o texto fixo e usam consulta autenticada existente,

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-13: Conexao real do novo n8n ao Supabase
+
+- Publica release15ddedd e habilita ingestao protegida no CRM, preservando
+  configuracao anterior em backup privado e verificando runtime efetivo.
+- Novo n8n envia carga real ao CRM/Supabase; replay confirmado sem duplicidade.
+  Tela apresenta evidencia da sessao Salesforce, ingestao e leitura do banco.
+- Documenta contagens, recibos, testes, backup e proximo passo do agendador.
+  N8n antigo preservado; agenda de30min ainda nao ativada.
+
 ## 2026-10-13: Configuracao Salesforce na publicacao protegida
 
 - Cartoes de integracao passam a consultar evidencias pelo endpoint autorizado
