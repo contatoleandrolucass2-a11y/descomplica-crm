@@ -18,6 +18,9 @@
   diagnostico seguro sem enfraquecer integridade; MFA continua manual quando exigida.
 - Guia de conclusao consolida acessos, operacao, backups e reversao. Segunda
   copia independente da chave de recuperacao continua recomendada ao operador.
+- Evidencias e guia publicados no PR209. Escopo final de cinco documentos,
+  sem novo deploy/restart; conferir CI desse PR antes de integrar. Runtime e
+  coletor permanecem no SHA689bf174 ja aprovado, independentemente do SHA documental.
 
 ## 2026-10-13: Agenda ativa com primeiro recibo real confirmado
 

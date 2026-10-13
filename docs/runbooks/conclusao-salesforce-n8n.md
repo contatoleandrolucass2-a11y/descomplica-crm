@@ -11,6 +11,7 @@ Nao compartilhar senhas, tokens, dumps ou chave privada em chats/PRs.
 - Bucket privado: `crm-private-backups`; sem links publicos.
 - PR: <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/198>
 - Agenda e credenciais systemd: PR203 e PR206, integrados e com CI aprovada.
+- Evidencias operacionais: <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/209>.
 
 ## Concluido
 
