@@ -19,7 +19,7 @@ export async function checkRoutineScrolling(page, region) {
   const heading = region.locator("thead th").nth(1);
   const originalHeading = await heading.elementHandle();
   const table = region.locator("table");
-  const insert = region.getByRole("button", { name: "Inserir linha", exact: true });
+  const insert = page.getByRole("button", { name: "Inserir linha", exact: true });
   assert.equal(await insert.evaluate((element) => element.closest("table") === null), true);
   await page.evaluate(() => window.scrollTo(0, 0));
   await region.evaluate((element) => {
@@ -64,11 +64,11 @@ export async function checkRoutineScrolling(page, region) {
     true,
     "Protected menu must remain above the table",
   );
-  for (const locator of [page.locator("h1"), page.getByRole("tablist"), insert.locator("../..")]) {
+  for (const locator of [page.locator("h1"), page.getByRole("tablist"), insert]) {
     const box = await locator.boundingBox();
     assert.ok(
       box && box.y + box.height <= 0,
-      "Title, tabs and toolbar must scroll out of the viewport",
+      "Title, tabs and header controls must scroll out of the viewport",
     );
   }
   await expect(page.locator("thead")).toHaveCount(1);
@@ -132,6 +132,369 @@ export async function checkRoutineScrolling(page, region) {
       element.scrollLeft = 0;
     });
   }
+}
+
+export async function checkRoutineHeaderEffects(page) {
+  const header = page.locator("header").filter({ has: page.locator("h1") });
+  const modes = page.getByRole("group", { name: "Visualização da rotina", exact: true });
+  const insert = page.getByRole("button", { name: "Inserir linha", exact: true });
+  const save = page.getByRole("button", { name: "Salva alterações", exact: true });
+  await expect(
+    header.getByRole("group", { name: "Visualização da rotina", exact: true }),
+  ).toHaveCount(1);
+  await expect(header.getByRole("button", { name: "Inserir linha", exact: true })).toHaveCount(1);
+  await expect(page.locator("#routine-table-title, [class*='tableToolbar']")).toHaveCount(0);
+  await expect(page.getByRole("tabpanel").locator("h2")).toHaveCount(0);
+  await expect(page.locator("caption")).toContainText("gerente regional house");
+  const controls = [modes, insert, save];
+  const boxes = [];
+  for (const control of controls) {
+    await expect(control).toBeVisible();
+    assert.equal(await control.evaluate((element) => element.closest("header") !== null), true);
+    const box = await control.boundingBox();
+    assert.ok(box && box.width > 0 && box.height > 0);
+    const viewport = page.viewportSize();
+    assert.ok(
+      box.x >= -1 && box.x + box.width <= viewport.width + 1,
+      "Header control fits viewport",
+    );
+    assert.equal(
+      await control.evaluate((element) => element.scrollWidth <= element.clientWidth + 1),
+      true,
+    );
+    boxes.push(box);
+  }
+  for (let index = 1; index < controls.length; index++) {
+    const previous = await controls[index - 1].elementHandle();
+    assert.equal(
+      await controls[index].evaluate(
+        (element, before) =>
+          Boolean(before.compareDocumentPosition(element) & Node.DOCUMENT_POSITION_FOLLOWING),
+        previous,
+      ),
+      true,
+    );
+    await previous.dispose();
+    const before = boxes[index - 1];
+    const after = boxes[index];
+    assert.ok(after.y >= before.y - 1, "Controls retain visual reading order");
+  }
+  for (let a = 0; a < boxes.length; a++)
+    for (let b = a + 1; b < boxes.length; b++) {
+      const first = boxes[a],
+        second = boxes[b];
+      assert.ok(
+        Math.min(first.x + first.width, second.x + second.width) - Math.max(first.x, second.x) <=
+          1 ||
+          Math.min(first.y + first.height, second.y + second.height) -
+            Math.max(first.y, second.y) <=
+            1,
+        "Header controls must not overlap",
+      );
+    }
+  const saveEffect = await save.evaluate((element) => {
+    const style = getComputedStyle(element, "::before");
+    return { image: style.backgroundImage, duration: style.animationDuration };
+  });
+  for (const heading of await page.locator("thead th:not(:first-child)").all()) {
+    const style = await heading.evaluate((element) => {
+      const css = getComputedStyle(element),
+        border = getComputedStyle(element, "::before");
+      return {
+        background: css.backgroundImage,
+        color: css.color,
+        image: border.backgroundImage,
+        animation: border.animationName,
+        duration: border.animationDuration,
+        pointer: border.pointerEvents,
+      };
+    });
+    assert.match(
+      style.background,
+      /linear-gradient\(145deg, rgb\(23, 111, 138\), rgb\(18, 59, 99\)\)/,
+    );
+    assert.equal(style.color, "rgb(255, 255, 255)");
+    assert.equal(
+      style.image.replace(/from [^,]+, /, ""),
+      saveEffect.image.replace(/from [^,]+, /, ""),
+    );
+    assert.match(style.image, /conic-gradient/);
+    assert.notEqual(style.animation, "none");
+    assert.equal(style.duration, saveEffect.duration);
+    assert.equal(style.pointer, "none");
+  }
+  const footer = page
+    .locator("footer")
+    .filter({ hasText: "Desenvolvido e gerenciado por Leandro Lucas" });
+  await expect(footer).toHaveCount(1);
+  const credit = footer.getByText("Desenvolvido e gerenciado por Leandro Lucas", { exact: true });
+  await expect(credit).toHaveCSS("color", "rgb(255, 255, 255)");
+  await expect(credit).toHaveCSS("animation-duration", "4.5s");
+  const today = page.locator('thead [aria-current="date"]');
+  await expect(today.getByText("Hoje", { exact: true })).toBeVisible();
+  assert.match(
+    await today.evaluate((element) => getComputedStyle(element).boxShadow),
+    /rgb\(98, 216, 255\)/,
+  );
+  const animations = () =>
+    credit.evaluate((element) =>
+      [null, "::before", "::after"].map(
+        (pseudo) => getComputedStyle(element, pseudo).animationName,
+      ),
+    );
+  assert.ok(
+    (await animations()).some((name) => name !== "none"),
+    "Footer credit has shimmer",
+  );
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  try {
+    assert.ok(
+      (await animations()).every((name) => name === "none"),
+      "Reduced motion stops footer shimmer",
+    );
+    for (const item of [save, ...(await page.locator("thead th:not(:first-child)").all())])
+      assert.equal(
+        await item.evaluate((element) => getComputedStyle(element, "::before").animationName),
+        "none",
+      );
+    await expect(credit).toHaveCSS("color", "rgb(255, 255, 255)");
+    await expect(credit).toHaveCSS("-webkit-text-fill-color", "rgb(255, 255, 255)");
+  } finally {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+  }
+}
+
+export async function checkRoutineCellEffects(page, outputDirectory) {
+  const capture = async (mode) => {
+    if (!outputDirectory) return;
+    await mkdir(outputDirectory, { recursive: true });
+    const theme = await page.locator("html").getAttribute("data-theme");
+    await page.screenshot({
+      path: path.join(
+        outputDirectory,
+        `compact-cell-${mode}-${theme}-${page.viewportSize().width}.png`,
+      ),
+      animations: "disabled",
+      mask: [page.locator("[data-session-identity], [data-account-identity]")],
+    });
+  };
+  await page.getByRole("button", { name: "Semana", exact: true }).click();
+  const cells = page.locator("tbody tr");
+  // Tuesday/Wednesday avoid the independent Monday "today" treatment.
+  const target = cells.nth(1).locator("td").nth(1);
+  const rowPeer = cells.nth(1).locator("td").nth(2);
+  const columnPeer = cells.nth(2).locator("td").nth(1);
+  const outside = cells.nth(2).locator("td").nth(2);
+  const paint = (locator) =>
+    locator.evaluate((element) => {
+      const style = getComputedStyle(element);
+      return [style.backgroundColor, style.backgroundImage, style.boxShadow];
+    });
+  const settle = () =>
+    page.waitForFunction(() =>
+      document
+        .getAnimations()
+        .filter((animation) => animation instanceof CSSTransition)
+        .every((animation) => animation.playState !== "running" && !animation.pending),
+    );
+  await page.mouse.move(0, 0);
+  await page.evaluate(
+    () => document.activeElement instanceof HTMLElement && document.activeElement.blur(),
+  );
+  await settle();
+  const before = await Promise.all([rowPeer, columnPeer, outside].map(paint));
+  const values = () =>
+    page.locator("tbody textarea").evaluateAll((fields) => fields.map((field) => field.value));
+  const initialValues = await values();
+  const dimensions = () =>
+    page
+      .locator("tbody tr")
+      .evaluateAll((rows) =>
+        rows.map((row) =>
+          Array.from(row.children).map((cell) => [
+            cell.offsetWidth,
+            cell.offsetHeight,
+            cell.offsetLeft,
+            cell.offsetTop,
+          ]),
+        ),
+      );
+  const geometry = await dimensions();
+  await target.hover();
+  await settle();
+  assert.notDeepEqual(await paint(rowPeer), before[0], "Hover highlights its row");
+  assert.notDeepEqual(await paint(columnPeer), before[1], "Hover highlights its column");
+  assert.notDeepEqual(
+    (await paint(target)).slice(0, 2),
+    (await paint(columnPeer)).slice(0, 2),
+    "Intersection background must differ from the column background",
+  );
+  await expect(target.locator("textarea")).toHaveCSS("color", "rgb(255, 255, 255)");
+  assert.deepEqual(await paint(outside), before[2], "Unrelated cells keep their styling");
+  const scale = await target.evaluate((element) =>
+    Math.max(
+      ...[element, element.querySelector("textarea")].filter(Boolean).map((node) => {
+        const style = getComputedStyle(node);
+        const transform = style.transform === "none" ? 1 : new DOMMatrixReadOnly(style.transform).a;
+        return Math.max(transform, Number.parseFloat(style.scale) || 1);
+      }),
+    ),
+  );
+  assert.ok(scale > 1 && scale <= 1.08, "Hovered intersection scales subtly");
+  assert.deepEqual(await dimensions(), geometry, "Hover never changes table layout dimensions");
+  await capture("week-hover");
+  await page.emulateMedia({ reducedMotion: "reduce" });
+  try {
+    await expect(target).toHaveCSS("transform", "none");
+    await expect(target).toHaveCSS("transition-duration", "0s");
+    assert.deepEqual(await dimensions(), geometry, "Reduced motion preserves table layout");
+  } finally {
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+  }
+  await page.mouse.move(0, 0);
+  await target.locator("textarea").focus();
+  await settle();
+  assert.notDeepEqual(await paint(rowPeer), before[0], "Keyboard focus highlights its row");
+  assert.notDeepEqual(await paint(columnPeer), before[1], "Keyboard focus highlights its column");
+  assert.deepEqual(await paint(outside), before[2]);
+  assert.notDeepEqual(
+    (await paint(target)).slice(0, 2),
+    (await paint(columnPeer)).slice(0, 2),
+    "Focused intersection background must differ from the column background",
+  );
+  await capture("week-focus");
+  const hovered = cells.nth(3).locator("td").nth(3);
+  const hoverRow = cells.nth(3).locator("td").nth(4);
+  const hoverColumn = cells.nth(4).locator("td").nth(3);
+  const hoverBefore = await Promise.all([hoverRow, hoverColumn].map(paint));
+  await hovered.hover();
+  await settle();
+  await expect(target.locator("textarea")).toBeFocused();
+  assert.deepEqual(await paint(rowPeer), before[0], "Hover suppresses the previously focused row");
+  assert.deepEqual(
+    await paint(columnPeer),
+    before[1],
+    "Hover suppresses the previously focused column",
+  );
+  assert.notDeepEqual(await paint(hoverRow), hoverBefore[0], "Only the hovered row is highlighted");
+  assert.notDeepEqual(
+    await paint(hoverColumn),
+    hoverBefore[1],
+    "Only the hovered column is highlighted",
+  );
+  assert.notDeepEqual((await paint(hovered)).slice(0, 2), (await paint(hoverColumn)).slice(0, 2));
+  await capture("hover-over-focus");
+  await page.mouse.move(0, 0);
+  await settle();
+  assert.notDeepEqual(await paint(rowPeer), before[0], "Mouseout restores focused row");
+  assert.notDeepEqual(await paint(columnPeer), before[1], "Mouseout restores focused column");
+  assert.deepEqual(await paint(hoverRow), hoverBefore[0]);
+  assert.deepEqual(await paint(hoverColumn), hoverBefore[1]);
+  await page.locator("thead th").nth(4).hover();
+  await settle();
+  assert.deepEqual(await paint(rowPeer), before[0], "Header hover also suppresses focused row");
+  assert.deepEqual(
+    await paint(columnPeer),
+    before[1],
+    "Header hover also suppresses focused column",
+  );
+  assert.notDeepEqual(await paint(hoverColumn), hoverBefore[1]);
+  await page.mouse.move(0, 0);
+  await settle();
+  assert.notDeepEqual(await paint(rowPeer), before[0]);
+  assert.notDeepEqual(await paint(columnPeer), before[1]);
+  const todayCell = page.locator("tbody td[data-today]").first();
+  await todayCell.locator("textarea").focus();
+  await settle();
+  await expect(todayCell.locator("textarea")).toHaveCSS("color", "rgb(255, 255, 255)");
+  assert.notDeepEqual(
+    (await paint(todayCell)).slice(0, 2),
+    (await paint(page.locator("tbody td[data-today]").nth(1))).slice(0, 2),
+    "Today's focused intersection keeps its distinct background",
+  );
+  for (const [name, peer] of [
+    ["same-row", cells.first().locator("td").nth(1)],
+    ["same-column", page.locator("tbody td[data-today]").nth(2)],
+  ]) {
+    await peer.hover();
+    await settle();
+    await expect(todayCell.locator("textarea")).toBeFocused();
+    const focus = await todayCell.evaluate((element) => {
+      const style = getComputedStyle(element);
+      const probe = document.createElement("span");
+      probe.style.color = "var(--inv-color-accent)";
+      element.append(probe);
+      const accent = getComputedStyle(probe).color;
+      probe.remove();
+      const luminance = (color) => {
+        const channels = color
+          .match(/[0-9.]+/g)
+          .slice(0, 3)
+          .map(Number)
+          .map((value) => {
+            const channel = value / 255;
+            return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+          });
+        return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+      };
+      const outline = luminance(style.outlineColor);
+      const backgrounds = style.backgroundImage.match(/rgb[a]?[(][^)]+[)]/g) ?? [
+        style.backgroundColor,
+      ];
+      return {
+        color: style.outlineColor,
+        accent,
+        width: parseFloat(style.outlineWidth),
+        style: style.outlineStyle,
+        contrast: backgrounds.map((color) => {
+          const background = luminance(color);
+          return (Math.max(outline, background) + 0.05) / (Math.min(outline, background) + 0.05);
+        }),
+      };
+    });
+    assert.equal(
+      focus.color,
+      focus.accent,
+      `Today focus on ${name} crosshair uses the theme accent`,
+    );
+    assert.equal(focus.style, "solid");
+    assert.ok(focus.width >= 2);
+    assert.ok(
+      focus.contrast.every((ratio) => ratio >= 3),
+      `Today focus contrast against both ${name} gradient endpoints must be >=3: ${JSON.stringify(focus)}`,
+    );
+    await capture(`today-focus-${name}`);
+    await page.mouse.move(0, 0);
+    await settle();
+    await expect(todayCell).toHaveCSS("outline-color", "rgb(255, 255, 255)");
+  }
+  await page.getByRole("button", { name: "Hoje", exact: true }).click();
+  const dailyTarget = page.locator("tbody tr").nth(1).locator("td");
+  const dailyOther = page.locator("tbody tr").nth(2).locator("td");
+  await page.mouse.move(0, 0);
+  await page.evaluate(
+    () => document.activeElement instanceof HTMLElement && document.activeElement.blur(),
+  );
+  await settle();
+  const dailyBefore = await paint(dailyOther);
+  const targetBefore = await paint(dailyTarget);
+  await dailyTarget.hover();
+  await settle();
+  assert.notDeepEqual(await paint(dailyTarget), targetBefore, "Daily hover highlights its row");
+  assert.deepEqual(await paint(dailyOther), dailyBefore, "Daily hover does not highlight a column");
+  await page.mouse.move(0, 0);
+  await dailyTarget.locator("textarea").focus();
+  await settle();
+  await expect(dailyTarget.locator("textarea")).toHaveCSS("color", "rgb(255, 255, 255)");
+  assert.notDeepEqual(await paint(dailyTarget), targetBefore, "Daily focus highlights its row");
+  assert.deepEqual(await paint(dailyOther), dailyBefore, "Daily focus does not highlight a column");
+  await capture("day-focus");
+  await page.getByRole("button", { name: "Semana", exact: true }).click();
+  assert.deepEqual(
+    await values(),
+    initialValues,
+    "Hover, focus and view changes never edit routine data",
+  );
 }
 
 async function selectTheme(page, theme, width) {
@@ -389,6 +752,8 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
       for (const theme of ["light", "balanced", "dark"]) {
         checkpoint(`visual-${width}-${theme}`);
         await selectTheme(page, theme, width);
+        await checkRoutineHeaderEffects(page);
+        if (width === 1440) await checkRoutineCellEffects(page, outputDirectory);
         assert.equal(
           await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),
           false,

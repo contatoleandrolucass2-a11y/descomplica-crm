@@ -1,5 +1,39 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Abertura dos efeitos e compactacao da Rotina
+
+- Consulta as 02:23 de Sao Paulo: health publico em
+  https://crm.descomplicapro.com.br/api/health confirmou ok/7c50f59.
+  GitHub PR #201 documental tinha CI 38344420076 aprovada e foi integrado em
+  1c36fce187a22cc2527d19839eaa4f620f6673c4; nenhum redeploy documental.
+- Branch codex/rotina-efeitos-compactos parte desse main. Demanda restrita a
+  gradientes, realce linha/coluna, controles compactos e rodape da Rotina.
+  Referencia https://descomplicapro.com.br/configuracoes/metas/parcerias
+  somente leitura; nao alterar sua pagina nem persistencia, permissoes ou dados.
+- Fetch web retornou timeout; navegador leu a referencia sem mutacoes. Estilo
+  observado: current linear-gradient(145deg,#176f8a,#123b63), sombra cyan e
+  transicoes de 180ms. Prints fornecidos definem realce de linha/coluna.
+- Implementacao local restrita a RoutineSettings.tsx/module.css e seus testes:
+  controles movidos, faixa redundante removida, gradientes e borda especular,
+  crosshair CSS sem render React por mouse e rodape com movimento reduzido.
+  API, schema e dados nao alterados. Ainda nao publicado.
+- Revisao independente encontrou conflito de especificidade na intersecao,
+  realces simultaneos de hover/foco e area touch de 36px. Corrigidos com
+  seletores :where, prioridade ao ponteiro com retorno ao foco e minimo de
+  44px em pointer coarse. Novos testes cobrem esses cenarios nos tres temas.
+- Primeira rodada local: lint/tipos/build/formatacao aprovados; suite geral
+  com 2567 aprovados, seis falhas POSIX conhecidas e 52 ignorados. Reexecucao
+  final e CI Linux obrigatorias. Servidor dev em background bloqueado pela
+  politica da ferramenta; nao contornado. Preview/testes usam harness isolado.
+- Rodada final no CSS corrigido: 80/80 testes (48 de interface e 32 de API),
+  sem skips, 73,43s; Axe sem violacoes nas 12 combinacoes. Revisao independente
+  sem achados residuais, incluindo contraste do contorno com hover/foco nos
+  tres temas e toque de 44px em 320/390px. Capturas em test-results/routine-preview.
+- Gates locais finais: lint, typecheck e build aprovados. Suite geral Windows:
+  2567 aprovados, seis falhas POSIX conhecidas em quatro arquivos e 53 skips;
+  nao suprimir testes, reavaliar na CI Linux do mesmo SHA. QA usa fixtures/RPC
+  mockada; nao comprova backend autenticado real. Nenhuma escrita em producao.
+
 ## 2026-10-13: Rotina compartilhada publicada
 
 - PR #200 integrado em 7c50f59b61be3c07b2540f517f01660fce3728e3.

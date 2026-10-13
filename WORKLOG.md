@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-13: Efeitos e compactacao da Rotina
+
+- Controles Semana/Hoje/Inserir linha movidos para o cabecalho, antes de Salvar.
+  Removida faixa redundante de funcao e mantidas abas/caption acessiveis.
+- Titulos com gradiente azul-petroleo e contorno especular; realce de linha e
+  coluna na semana, linha no dia e ampliacao sutil sem alterar a grade.
+- Rodape local com assinatura branca e brilho, respeitando movimento reduzido.
+  Persistencia, regras de acesso, API e banco preservados.
+- Validacao local final: 80/80 casos de interface/API, Axe sem violacoes nas
+  12 combinacoes, lint/tipos/build/formatacao aprovados. Suite geral Windows:
+  2567 aprovados, seis falhas POSIX conhecidas; CI Linux ainda obrigatoria.
+
 ## 2026-10-13: Publicacao da Rotina compartilhada
 
 - PR #200/7c50f59, quatro gates main aprovados; migration aditiva autorizada

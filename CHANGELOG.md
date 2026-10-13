@@ -1,5 +1,7 @@
 # Changelog
 
+- Rotina: controles compactos no cabecalho, gradientes, realce de linha/coluna e rodape com brilho acessivel.
+
 - Publicado: Rotina compartilhada no banco, edicao autorizada e cabecalho contrastante (PR #200, 7c50f59).
 
 - Rotina: inclui a tabela compartilhada no gate restritivo de sessao/MFA e nos inventarios SQL de seguranca.

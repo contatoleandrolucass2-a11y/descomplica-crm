@@ -3,6 +3,7 @@ import { mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
+import AxeBuilder from "@axe-core/playwright";
 import {
   chromium,
   expect as browserExpect,
@@ -119,9 +120,11 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   let server: ServerFixture;
   let resumeLoad: () => void;
   let checkRoutineScrolling: (page: Page, region: Locator) => Promise<void>;
+  let checkRoutineHeaderEffects: (page: Page) => Promise<void>;
+  let checkRoutineCellEffects: (page: Page, outputDirectory?: string) => Promise<void>;
 
   beforeAll(async () => {
-    ({ checkRoutineScrolling } = await import(
+    ({ checkRoutineScrolling, checkRoutineHeaderEffects, checkRoutineCellEffects } = await import(
       pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
     ));
     const require = createRequire(import.meta.url);
@@ -185,7 +188,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   }, 60_000);
 
   afterEach(async () => {
-    await page?.close();
+    await page?.context().close();
   });
 
   async function expectUnsavedNavigation(expected: boolean) {
@@ -331,6 +334,20 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       ).toBe(true);
       await page.getByRole("button", { name: "Inserir linha", exact: true }).focus();
       await page.keyboard.press("Tab");
+      await browserExpect(
+        page.getByRole("button", { name: "Salva alterações", exact: true }),
+      ).toBeFocused();
+      await page.keyboard.press("Tab");
+      await browserExpect(
+        page.getByRole("tab", { name: "Gerente regional house", exact: true }),
+      ).toBeFocused();
+      await page.keyboard.press("Tab");
+      await browserExpect(page.getByRole("tabpanel")).toBeFocused();
+      await page.keyboard.press("Tab");
+      await browserExpect(
+        page.getByRole("region", { name: "Tabela de rotina do dia", exact: true }),
+      ).toBeFocused();
+      await page.keyboard.press("Tab");
       await browserExpect(page.locator("textarea").first()).toBeFocused();
       await page.waitForFunction(() =>
         document.documentElement
@@ -354,7 +371,10 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           accent,
         };
       });
-      expect(focus.outline, `Daily keyboard focus must use the ${theme} accent`).toBe(focus.accent);
+      expect(
+        focus.outline,
+        `Daily keyboard focus must contrast with the ${theme} day gradient`,
+      ).toBe("rgb(255, 255, 255)");
       expect(focus.outline, `Daily keyboard focus must differ from the ${theme} surface`).not.toBe(
         focus.background,
       );
@@ -373,6 +393,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       holdLoad?: boolean;
       clock?: string;
       canEdit?: boolean;
+      hasTouch?: boolean;
       server?: ServerFixture;
     } = {},
   ) {
@@ -385,7 +406,8 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           resumeLoad = resolve;
         })
       : Promise.resolve();
-    page = await browser.newPage();
+    const context = await browser.newContext({ hasTouch: options.hasTouch ?? false });
+    page = await context.newPage();
     if (options.clock) await page.clock.install({ time: new Date(options.clock) });
     await page.route("http://routine.test/**", async (route) => {
       const path = new URL(route.request().url()).pathname;
@@ -567,9 +589,12 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
       .fill("Atividade QA");
     await expectUnsavedNavigation(true);
-    await browserExpect(
-      page.getByRole("heading", { name: "Corretor", exact: true }).first(),
-    ).toBeVisible();
+    await browserExpect(page.getByRole("tab", { name: "Corretor", exact: true })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    await browserExpect(page.locator("caption")).toContainText("corretor");
+    await browserExpect(page.getByRole("tabpanel").locator("h2")).toHaveCount(0);
     await browserExpect(page.locator("tbody tr")).toHaveCount(1);
     expect(server.records.corretor?.rows[0]?.["Segunda-feira"]).toBe("");
   });
@@ -589,8 +614,8 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     server.failSave = false;
     await page.getByRole("button", { name: "Salva alterações" }).click();
     await browserExpect(page.getByRole("alert")).toHaveCount(0);
-    await expectUnsavedNavigation(false);
     const retried = await savedRows();
+    await expectUnsavedNavigation(false);
     expect(retried["regional-house"]?.[0]?.["Segunda-feira"]).toBe("Versão ainda não salva QA");
   });
 
@@ -769,7 +794,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await browserExpect(reader.getByRole("textbox", cellName)).toHaveValue("Atualizada QA");
       expect(backend.puts.map((value) => value.expected_revision)).toEqual([0, 1]);
     } finally {
-      await writer.close();
+      await writer.context().close();
     }
   });
 
@@ -807,7 +832,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await browserExpect(page.getByRole("textbox", name)).toHaveValue("Vencedora QA");
       await expectUnsavedNavigation(false);
     } finally {
-      await first.close();
+      await first.context().close();
     }
   });
 
@@ -927,6 +952,111 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBeNull();
   });
 
+  it.each(["light", "balanced", "dark"])(
+    "keeps compact controls, day effects and footer accessible in %s",
+    async (theme) => {
+      await openRoutine({ clock: "2026-10-12T15:00:00Z" });
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      await mkdir("test-results/routine-preview", { recursive: true });
+      for (const width of [1440, 390, 320]) {
+        await page.setViewportSize({ width, height: 900 });
+        await checkRoutineHeaderEffects(page);
+        await browserExpect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
+        await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(26);
+        expect(
+          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+        ).toBe(true);
+        await page.screenshot({
+          path: `test-results/routine-preview/compact-header-${theme}-${width}.png`,
+          fullPage: true,
+          animations: "disabled",
+        });
+        await page
+          .locator("footer")
+          .filter({ hasText: "Desenvolvido e gerenciado por Leandro Lucas" })
+          .scrollIntoViewIfNeeded();
+        await page.screenshot({
+          path: `test-results/routine-preview/compact-footer-${theme}-${width}.png`,
+          animations: "disabled",
+        });
+        await page.evaluate(() => window.scrollTo(0, 0));
+      }
+    },
+    30_000,
+  );
+
+  it.each(["light", "balanced", "dark"])(
+    "highlights rows and weekly columns without moving cells in %s",
+    async (theme) => {
+      await openRoutine({ clock: "2026-10-12T15:00:00Z" });
+      await page.setViewportSize({ width: 1440, height: 1000 });
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      await checkRoutineCellEffects(page, "test-results/routine-preview");
+      expect(server.puts).toEqual([]);
+      await expectUnsavedNavigation(false);
+    },
+    20_000,
+  );
+
+  it("keeps touch mode buttons at least 44px with a coarse pointer", async () => {
+    await openRoutine({ hasTouch: true, clock: "2026-10-12T15:00:00Z" });
+    expect(await page.evaluate(() => matchMedia("(pointer: coarse)").matches)).toBe(true);
+    for (const width of [390, 320]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const name of ["Semana", "Hoje"]) {
+        const button = page
+          .getByRole("group", { name: "Visualização da rotina", exact: true })
+          .getByRole("button", { name, exact: true });
+        const size = await button.boundingBox();
+        expect(size?.height).toBeGreaterThanOrEqual(44);
+        expect(size?.width).toBeGreaterThanOrEqual(44);
+        await button.tap();
+        await browserExpect(button).toHaveAttribute("aria-pressed", "true");
+      }
+    }
+    expect(server.puts).toEqual([]);
+    await expectUnsavedNavigation(false);
+  });
+
+  it.each(["light", "balanced", "dark"])(
+    "passes Axe including contrast in weekly and daily %s",
+    async (theme) => {
+      await openRoutine({ clock: "2026-10-12T15:00:00Z" });
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        for (const mode of ["Semana", "Hoje"]) {
+          await page.getByRole("button", { name: mode, exact: true }).click();
+          await page.mouse.move(0, 0);
+          await page.waitForFunction(() =>
+            document
+              .getAnimations()
+              .filter((animation) => animation instanceof CSSTransition)
+              .every((animation) => animation.playState !== "running" && !animation.pending),
+          );
+          const result = await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+            .analyze();
+          expect(
+            result.violations.map(({ id, nodes }) => ({
+              id,
+              nodes: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })),
+            })),
+            `${theme} / ${width}px / ${mode}`,
+          ).toEqual([]);
+        }
+      }
+    },
+    90_000,
+  );
+
   it("uses a regular responsive title and a gold specular save action respecting reduced motion", async () => {
     await openRoutine();
     const title = page.getByRole("heading", { name: "Rotina semanal e diária", exact: true });
@@ -974,14 +1104,14 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await openRoutine({ clock: "2026-10-12T15:00:00Z" });
     await page.setViewportSize({ width: 390, height: 800 });
     const region = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
-    const insert = region.getByRole("button", { name: "Inserir linha", exact: true });
+    const insert = page.getByRole("button", { name: "Inserir linha", exact: true });
     await browserExpect(insert).toBeVisible();
     expect(await insert.evaluate((element) => element.closest("table") === null)).toBe(true);
     expect(
       await region.locator("table").evaluate((element) => getComputedStyle(element).minWidth),
     ).toBe("960px");
     await checkRoutineScrolling(page, region);
-    await region.getByRole("button", { name: "Hoje", exact: true }).click();
+    await page.getByRole("button", { name: "Hoje", exact: true }).click();
     const daily = page.getByRole("region", { name: "Tabela de rotina do dia", exact: true });
     await browserExpect
       .poll(() => daily.evaluate((element) => [element.scrollTop, element.scrollLeft]))
