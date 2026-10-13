@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-13: Efeitos e compactacao da Rotina
+
+- Rotina: garante transicoes desligadas no modo de movimento reduzido mesmo sob as regras globais.
+
+- QA da Rotina testa efeitos com e sem movimento reduzido, restaurando a preferencia do contexto apos sucesso ou falha.
+
+- Rotina: controles compactos no cabecalho, gradientes, realce de linha/coluna e rodape com brilho acessivel.
+
 ## 2026-10-13: Configuracao Salesforce na publicacao protegida
 
 - Cartoes de integracao passam a consultar evidencias pelo endpoint autorizado
