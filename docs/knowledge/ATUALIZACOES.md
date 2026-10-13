@@ -1,5 +1,47 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Ensaio agendado revertido e coleta isolada completa
+
+- Fonte: journal systemd, instalador privado, exportCandidate e consulta MCP
+  agregada ao Supabase, entre16:26Z e16:39Z. CI38425049893 passou nos quatro
+  jobs antes da ativacao554a971. Credenciais e estabilidade inicial passaram.
+- Primeiro ciclo falhou16:28:55Z antes de publicar, sem diagnostico detalhado
+  no log do scheduler. Nao atribuir a falha a timeout, memoria ou mudanca de
+  dados sem evidencia. Ultima ingestao permaneceu07:28:32Z, request25ec6322.
+- Rollback corrigido concluiu sem excecao, restaurando monitor enabled/active.
+  Navegador manteve PID2881480. Historicos rolled-back foram arquivados sob
+  lock, com verificacao de inode/fase/monitor e fsync; nenhuma credencial apagada.
+- Repeticao isolada, publicacao false, concluiu os sete relatorios16:36:20Z:
+  19973/1091/514/2605/767/36/7 linhas,15 metricas e144 participantes. Esse
+  candidato privado nao foi enviado ao n8n/Supabase e nao prova agenda ativa.
+- Main avancou para689bf174 pelo PR208 de outra tarefa. Instalador bloqueou
+  preparo do SHA anterior, conforme contrato. Nenhuma mudanca em coletor,
+  lockfile ou CI entre554a971 e689bf174. Novo checkout limpo e preflight passaram;
+  aguardar CI38431108475 completa e dois ciclos reais antes de encerrar.
+
+## 2026-10-13: Correcao systemd integrada e nova conferencia externa
+
+- PR206 integrado em554a9715c2f2528dafa08dcc3eccd4d552d783d7 depois de
+  CI38418203102 aprovada. CI de push38425049893 em curso; sem nova ativacao
+  antes dos quatro jobs aprovados. Fonte: GitHub PR206/actions/main.
+- Main recebeu PR205 de outra tarefa; merge preservou os dois conjuntos e
+  todas as notas. Health e ledger as15:20Z confirmaram app7d6341f, publicacao
+  b4e2c6bd-1b5a-4d7f-b324-8a580562eb0b as15:16Z, sem transacao pendente.
+  Coletor e app possuem versoes separadas; esta tarefa nao reiniciou o CRM.
+- Windows no conjunto a7657a1: lint (zero erros/um aviso preexistente), tipos,
+  pnpm test completo e build passaram. Vitest136 arquivos/2647 testes/63skips;
+  suites Node/coletor/release exit0, instalador focado69/69. Uma rodada anterior
+  teve timeout30s Obsidian; repeticao sem build concorrente passou, sem mudar
+  limites ou assertions. Revisao independente estatica sem achados concretos.
+- Prova adicional com arquivo real de unidade systemd: dois ExecStartPre,
+  expansao de caminhos, arquivos0600 e validacao estrita passaram sem rede.
+  Unidade temporaria removida apos conferir seus bytes; runtime limpo pelo
+  systemd. Nao registrar prova isolada como coleta ou publicacao real.
+- Checkout554a971 preparado na VPS com copias locais de dependencias, sem
+  hardlinks externos; leitura ajustada somente nas copias. Codigo imutavel e
+  preflight dedicado passaram. Estado da tentativa anterior continua rolled-back,
+  monitor enabled/active, navegador preservado. Nova ativacao e dois ciclos pendentes.
+
 ## 2026-10-13: Credenciais systemd e reversao real do coletor
 
 - Fonte: VPS Ubuntu/systemd255, ensaio13/10 entre14:36Z e14:44Z, SHA1ace82d,

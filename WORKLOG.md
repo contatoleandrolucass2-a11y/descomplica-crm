@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-10-13: Coleta completa e repeticao da agenda pendente
+
+- Main554a971 passou CI38425049893 quatro jobs. Ativacao16:26Z iniciou sem
+  falha de credenciais; primeiro ciclo falhou16:28:55Z antes de publicar.
+  Causa ainda nao identificada. Dados validos anteriores foram preservados.
+- Rollback normal corrigido restaurou monitor, sem reiniciar o navegador.
+  Coleta isolada sem publicacao terminou16:36:20Z, sete relatorios completos:
+  19973/1091/514/2605/767/36/7. Nenhum envio real nesta repeticao.
+- PR208 externo avancou main para689bf174. Gate impediu reutilizar SHA antigo;
+  checkout e preflight atuais passaram, aguardando CI38431108475 e dois ciclos.
+
+## 2026-10-13: PR206 integrado e correcao validada
+
+- CI38418203102 aprovada; merge554a971. Main CI38425049893 em curso antes da
+  nova ativacao. O teste fisico Linux do bridge passou: coletor208/208,
+  release124/124, aplicativo2647/63skips. Instalador focado69/69.
+- Conjunto integradoa7657a1 no Windows passou lint/tipos/pnpm test/build.
+  Uma rodada teve timeout30s Obsidian; repeticao completa sem build concorrente
+  passou, sem ampliar timeout. Revisao independente sem achados concretos.
+- Unidade isolada real na VPS confirmou expansao dos caminhos e copias0600
+  pelo ExecStartPre, validacao estrita e limpeza automatica, sem acesso de rede.
+- App7d6341f publicado por outra tarefa, health/ledger15:20Z coerentes e sem
+  transacao pendente. Esta entrega nao reiniciou CRM, navegador ou n8n.
+- Checkout554a971 e dependencias preparados; preflight passou. Historico da
+  primeira tentativa preservado, monitor anterior ativo, agenda ainda desligada.
+
 ## 2026-10-13: Ensaio real e correcao de compatibilidade systemd
 
 - CI38408795856 passou nos quatro jobs; suite final do coletor195/195 passou.
