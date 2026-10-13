@@ -3,6 +3,7 @@ import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
 import * as fs from "node:fs/promises";
 import path from "node:path";
+import { setTimeout as wait } from "node:timers/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { isDeepStrictEqual } from "node:util";
 
@@ -207,8 +208,24 @@ export async function installCollector(options, io) {
         stage = "start-collector";
         await io.systemctl("enable", collector);
         await io.systemctl("start", collector);
-        await io.assertService(collector, "enabled", "active");
-        await io.assertService(monitor, "disabled", "inactive");
+        let mainPid;
+        for (let observation = 0; observation < 3; observation++) {
+          if (observation > 0) await io.wait(1000);
+          const view = await io.show(collector);
+          requireCondition(
+            view.LoadState === "loaded" &&
+              view.UnitFileState === "enabled" &&
+              view.ActiveState === "active" &&
+              view.SubState === "running" &&
+              /^[1-9][0-9]*$/u.test(view.MainPID) &&
+              Number.isSafeInteger(Number(view.MainPID)) &&
+              view.NRestarts === "0" &&
+              (mainPid === undefined || mainPid === view.MainPID),
+            "Collector did not remain stable during activation.",
+          );
+          mainPid = view.MainPID;
+          await io.assertService(monitor, "disabled", "inactive");
+        }
         await save({ ...state, phase: "active" });
         return state.phase;
       }
@@ -228,7 +245,20 @@ export async function installCollector(options, io) {
       if (installed !== null) {
         await io.systemctl("disable", collector);
         await io.systemctl("stop", collector);
-        await io.systemctl("reset-failed", collector);
+        const view = await io.show(collector);
+        requireCondition(
+          view.LoadState === "loaded" &&
+            view.UnitFileState === "disabled" &&
+            view.FragmentPath === unitPath &&
+            view.DropInPaths === "" &&
+            view.NeedDaemonReload === "no" &&
+            view.MainPID === "0" &&
+            ((view.ActiveState === "inactive" && view.SubState === "dead") ||
+              (view.ActiveState === "failed" && view.SubState === "failed")),
+          "Collector is not confirmed stopped before failure reset.",
+        );
+        // systemd may unload an inactive unit between show and reset-failed.
+        if (view.ActiveState === "failed") await io.systemctl("reset-failed", collector);
         await io.assertService(collector, "disabled", "inactive");
         await io.compareUnit(state.unit, null);
       } else {
@@ -436,6 +466,7 @@ export async function collectorPreflight(sha, io) {
   );
   const uid = Number((await io.run("/usr/bin/id", ["-u", user])).trim());
   requireCondition(Number.isSafeInteger(uid) && uid > 0, "Dedicated nonroot user is missing.");
+  await io.run("/usr/sbin/runuser", ["-u", user, "--", "/usr/bin/install", "--version"]);
   await io.directory(dataDirectory, uid, true);
   await io.parents(dataDirectory);
   const input = "/srv/descomplica-n8n/salesforce-test.token";
@@ -526,7 +557,7 @@ export function createHostIO() {
         "show",
         name,
         "--no-pager",
-        "--property=LoadState,ActiveState,SubState,UnitFileState,FragmentPath,DropInPaths,NeedDaemonReload,MainPID",
+        "--property=LoadState,ActiveState,SubState,UnitFileState,FragmentPath,DropInPaths,NeedDaemonReload,MainPID,NRestarts",
       ],
       { allowed: [0, 1, 4] },
     );
@@ -594,6 +625,8 @@ export function createHostIO() {
     platform: process.platform,
     uid: process.getuid?.(),
     version: process.versions.node,
+    show,
+    wait,
     async withLock(action) {
       await protectedParents(stateDirectory);
       try {
