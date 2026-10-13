@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { CalendarDays, ListChecks, Plus, Save } from "lucide-react";
+import { routineRecordSchema, routineRowsSchema, routineSnapshotSchema } from "@/lib/crm/routines";
 
 import "@/app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css";
 import "@/app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css";
@@ -353,25 +354,15 @@ const defaultRoutine: RoutineState = {
   corretor: [],
 };
 
-function normalizeStoredRoutine(value: unknown): RoutineState {
-  if (!value || typeof value !== "object") return defaultRoutine;
+function normalizeStoredRoutine(value: unknown): Partial<RoutineState> {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return {};
   const source = value as Partial<Record<RoleKey, unknown>>;
   return roles.reduce((state, role) => {
-    const storedRows = source[role.key];
-    const rows: unknown[] = Array.isArray(storedRows) ? storedRows : defaultRoutine[role.key];
-    state[role.key] = rows
-      .filter((row): row is Partial<Record<Weekday, unknown>> => !!row && typeof row === "object")
-      .map((row) =>
-        weekdays.reduce(
-          (clean, weekday) => ({
-            ...clean,
-            [weekday]: typeof row[weekday] === "string" ? row[weekday] : "",
-          }),
-          {} as RoutineRow,
-        ),
-      );
+    if (!Object.prototype.hasOwnProperty.call(source, role.key)) return state;
+    const rows = routineRowsSchema.safeParse(source[role.key]);
+    if (rows.success) state[role.key] = rows.data;
     return state;
-  }, {} as RoutineState);
+  }, {} as Partial<RoutineState>);
 }
 
 function fitRoutineFields(table: HTMLTableElement | null) {
@@ -409,6 +400,8 @@ type RoutineBrowserNavigation = {
   ) => void;
 };
 
+class RoutineSaveError extends Error {}
+
 export function RoutineSettings() {
   const [activeRole, setActiveRole] = useState<RoleKey>("regional-house");
   const [routine, setRoutine] = useState<RoutineState>(defaultRoutine);
@@ -416,6 +409,15 @@ export function RoutineSettings() {
   const [hasLoaded, setHasLoaded] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [storageError, setStorageError] = useState<string | null>(null);
+  const [canEdit, setCanEdit] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [conflict, setConflict] = useState(false);
+  const [legacy, setLegacy] = useState<Partial<RoutineState> | null>(null);
+  const [loadAttempt, setLoadAttempt] = useState(0);
+  const revisions = useRef<Partial<Record<RoleKey, number>>>({});
+  const dirtyRoles = useRef(new Set<RoleKey>());
+  const saving = useRef(false);
+  const changeVersion = useRef(0);
   const [today, setToday] = useState<string | null>(null);
   const [view, setView] = useState<"week" | "day">("week");
   const [editedCells, setEditedCells] = useState<Set<string>>(() => new Set());
@@ -441,23 +443,70 @@ export function RoutineSettings() {
   }, []);
 
   useEffect(() => {
-    const loadStoredRoutine = window.setTimeout(() => {
+    let disposed = false;
+    let loading = false;
+    const controller = new AbortController();
+    async function loadSharedRoutine() {
+      if (loading || dirtyRoles.current.size || saving.current) return;
+      loading = true;
+      const startedVersion = changeVersion.current;
       try {
-        const stored = window.localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          setRoutine(normalizeStoredRoutine(JSON.parse(stored)));
+        const response = await fetch("/api/routines", {
+          cache: "no-store",
+          signal: AbortSignal.any([controller.signal, AbortSignal.timeout(20_000)]),
+        });
+        if (!response.ok) throw new Error("unavailable");
+        const snapshot = routineSnapshotSchema.parse(await response.json());
+        if (
+          disposed ||
+          dirtyRoles.current.size ||
+          saving.current ||
+          startedVersion !== changeVersion.current
+        )
+          return;
+        const next = { ...defaultRoutine };
+        const nextRevisions: Partial<Record<RoleKey, number>> = {};
+        for (const record of snapshot.routines) {
+          next[record.role_key] = record.rows;
+          nextRevisions[record.role_key] = record.revision;
+        }
+        revisions.current = nextRevisions;
+        setRoutine(next);
+        setCanEdit(snapshot.can_edit);
+        setHasLoaded(true);
+        setConflict(false);
+        setStorageError(null);
+        try {
+          const stored = window.localStorage.getItem(STORAGE_KEY);
+          setLegacy(stored ? normalizeStoredRoutine(JSON.parse(stored)) : null);
+        } catch {
+          // Shared data remains authoritative even if local storage is unavailable.
+          setLegacy(null);
         }
       } catch {
-        setStorageError(
-          "Não foi possível carregar a rotina salva neste navegador. A rotina inicial está sendo exibida.",
-        );
+        if (!disposed && startedVersion === changeVersion.current) {
+          setHasLoaded(false);
+          setStorageError("Não foi possível carregar a rotina do CRM. Tente novamente.");
+        }
       } finally {
-        setHasLoaded(true);
+        loading = false;
       }
-    }, 0);
-
-    return () => window.clearTimeout(loadStoredRoutine);
-  }, []);
+    }
+    void loadSharedRoutine();
+    const refresh = () => {
+      if (document.visibilityState === "visible") void loadSharedRoutine();
+    };
+    const interval = window.setInterval(refresh, 30_000);
+    window.addEventListener("focus", refresh);
+    document.addEventListener("visibilitychange", refresh);
+    return () => {
+      disposed = true;
+      controller.abort();
+      window.clearInterval(interval);
+      window.removeEventListener("focus", refresh);
+      document.removeEventListener("visibilitychange", refresh);
+    };
+  }, [loadAttempt]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -675,7 +724,9 @@ export function RoutineSettings() {
   }, [activeRole, activeRows.length, view, currentDay]);
 
   function updateCell(rowIndex: number, weekday: Weekday, value: string) {
-    if (!hasLoaded) return;
+    if (!hasLoaded || !canEdit || saving.current) return;
+    changeVersion.current += 1;
+    dirtyRoles.current.add(activeRole);
     setEditedCells((current) => new Set(current).add(`${activeRole}:${weekday}:${rowIndex}`));
     setRoutine((current) => ({
       ...current,
@@ -687,7 +738,13 @@ export function RoutineSettings() {
   }
 
   function addRow() {
-    if (!hasLoaded) return;
+    if (!hasLoaded || !canEdit || saving.current) return;
+    if (activeRows.length >= 200) {
+      setStorageError("Limite de 200 linhas por função atingido.");
+      return;
+    }
+    dirtyRoles.current.add(activeRole);
+    changeVersion.current += 1;
     pendingRow.current = activeRows.length;
     setRoutine((current) => ({
       ...current,
@@ -701,25 +758,104 @@ export function RoutineSettings() {
     scrollRef.current?.scrollTo({ top: 0, left: 0 });
   }
 
-  function saveRoutine() {
-    if (!hasLoaded) return;
+  async function saveRoutine() {
+    if (!hasLoaded || !canEdit || saving.current || conflict) return;
+    saving.current = true;
+    changeVersion.current += 1;
+    setIsSaving(true);
+    setStorageError(null);
+    // Each role has its own revision; a failure never discards the remaining draft.
+    const targets = dirtyRoles.current.size ? [...dirtyRoles.current] : [activeRole];
     try {
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(routine));
+      for (const role of targets) {
+        dirtyRoles.current.add(role);
+        if (!routineRowsSchema.safeParse(routine[role]).success) {
+          throw new RoutineSaveError("Use até 200 linhas por função e 4.000 caracteres por campo.");
+        }
+        const response = await fetch("/api/routines", {
+          method: "PUT",
+          signal: AbortSignal.timeout(20_000),
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({
+            role_key: role,
+            rows: routine[role],
+            expected_revision: revisions.current[role] ?? 0,
+          }),
+        });
+        if (response.status === 409) {
+          setConflict(true);
+          throw new RoutineSaveError(
+            "Outra pessoa alterou esta rotina. Suas alterações continuam nesta tela. Recarregue a versão do CRM antes de editar novamente.",
+          );
+        }
+        if (!response.ok)
+          throw new RoutineSaveError(
+            "Não foi possível salvar no CRM. Suas alterações continuam nesta tela.",
+          );
+        const saved = routineRecordSchema.safeParse(await response.json());
+        if (
+          !saved.success ||
+          saved.data.role_key !== role ||
+          saved.data.revision !== (revisions.current[role] ?? 0) + 1
+        )
+          throw new RoutineSaveError("Não foi possível confirmar o salvamento no CRM.");
+        revisions.current[role] = saved.data.revision;
+        dirtyRoles.current.delete(role);
+      }
       setSavedAt(
         new Intl.DateTimeFormat("pt-BR", {
           dateStyle: "short",
           timeStyle: "short",
         }).format(new Date()),
       );
-      setHasUnsavedChanges(false);
-      setStorageError(null);
-    } catch {
+    } catch (error) {
       setSavedAt(null);
-      setHasUnsavedChanges(true);
       setStorageError(
-        "Não foi possível salvar a rotina neste navegador. As alterações continuam não salvas.",
+        error instanceof RoutineSaveError
+          ? error.message
+          : "Não foi possível salvar no CRM. Suas alterações continuam nesta tela.",
       );
+    } finally {
+      setHasUnsavedChanges(dirtyRoles.current.size > 0);
+      saving.current = false;
+      setIsSaving(false);
     }
+  }
+
+  function reloadSharedRoutine() {
+    if (saving.current) return;
+    if (
+      dirtyRoles.current.size &&
+      !window.confirm("Descartar as alterações desta tela e carregar a versão salva no CRM?")
+    )
+      return;
+    dirtyRoles.current.clear();
+    changeVersion.current += 1;
+    setHasUnsavedChanges(false);
+    setEditedCells(new Set());
+    setHasLoaded(false);
+    setLoadAttempt((value) => value + 1);
+  }
+
+  function importLocalRoutine() {
+    const localRows = legacy?.[activeRole];
+    if (!localRows || !canEdit || !hasLoaded || saving.current) return;
+    if (!routineRowsSchema.safeParse(localRows).success) {
+      setStorageError(
+        "A cópia local excede os limites da rotina. Revise o conteúdo antes de importar.",
+      );
+      return;
+    }
+    if (
+      !window.confirm(
+        "Usar a cópia deste navegador nesta função? A versão compartilhada só será alterada ao salvar no CRM.",
+      )
+    )
+      return;
+    dirtyRoles.current.add(activeRole);
+    changeVersion.current += 1;
+    setRoutine((current) => ({ ...current, [activeRole]: localRows }));
+    setHasUnsavedChanges(true);
   }
 
   function handleRoleKeyDown(event: KeyboardEvent<HTMLButtonElement>, roleIndex: number) {
@@ -757,11 +893,12 @@ export function RoutineSettings() {
             <button
               type="button"
               className={styles.primaryAction}
-              disabled={!hasLoaded}
+              disabled={!hasLoaded || !canEdit || isSaving || conflict}
+              hidden={hasLoaded && !canEdit}
               onClick={saveRoutine}
             >
               <Save size={17} aria-hidden="true" />
-              Salva alterações
+              {isSaving ? "Salvando..." : "Salva alterações"}
             </button>
             <span className={styles.saveState} role="status" aria-live="polite">
               {!hasLoaded
@@ -769,16 +906,39 @@ export function RoutineSettings() {
                 : hasUnsavedChanges
                   ? "Alterações não salvas."
                   : savedAt
-                    ? `Último salvamento local em ${savedAt}.`
+                    ? `Salvo no CRM em ${savedAt}.`
                     : ""}
             </span>
           </div>
         </header>
 
         {storageError ? (
-          <p className={styles.storageError} role="alert">
-            {storageError}
-          </p>
+          <div className={styles.storageError} role="alert">
+            <p>{storageError}</p>
+            {(!hasLoaded || conflict) && (
+              <button className={styles.addButton} type="button" onClick={reloadSharedRoutine}>
+                Recarregar do CRM
+              </button>
+            )}
+          </div>
+        ) : null}
+
+        {hasLoaded && !canEdit ? <p className={styles.syncNotice}>Somente visualização</p> : null}
+        {hasLoaded &&
+        canEdit &&
+        legacy?.[activeRole] &&
+        JSON.stringify(legacy[activeRole]) !== JSON.stringify(routine[activeRole]) ? (
+          <div className={styles.syncNotice}>
+            <span>Cópia diferente salva neste navegador.</span>
+            <button
+              className={styles.addButton}
+              type="button"
+              disabled={isSaving}
+              onClick={importLocalRoutine}
+            >
+              Importar cópia local desta função
+            </button>
+          </div>
         ) : null}
 
         <section className={styles.rolesPanel} aria-label="Funções">
@@ -855,7 +1015,10 @@ export function RoutineSettings() {
                     <button
                       type="button"
                       className={styles.addButton}
-                      disabled={!hasLoaded || (view === "day" && !currentDay)}
+                      disabled={
+                        !hasLoaded || !canEdit || isSaving || (view === "day" && !currentDay)
+                      }
+                      hidden={hasLoaded && !canEdit}
                       onClick={addRow}
                     >
                       <Plus size={17} aria-hidden="true" />
@@ -867,7 +1030,8 @@ export function RoutineSettings() {
                 {visibleRows.length && visibleDays.length ? (
                   <table ref={tableRef} className={styles.routineTable} data-view={view}>
                     <caption>
-                      Rotina {view === "week" ? "semanal" : "do dia"} editável para{" "}
+                      Rotina {view === "week" ? "semanal" : "do dia"}{" "}
+                      {canEdit ? "editável" : "compartilhada"} para{" "}
                       {activeRoleInfo.label.toLowerCase()}.
                     </caption>
                     <thead>
@@ -906,6 +1070,8 @@ export function RoutineSettings() {
                                 data-row={rowIndex}
                                 aria-label={`${weekday}, linha ${rowIndex + 1}`}
                                 disabled={!hasLoaded}
+                                readOnly={!canEdit || isSaving}
+                                maxLength={4000}
                                 value={row[weekday]}
                                 onChange={(event) =>
                                   updateCell(rowIndex, weekday, event.target.value)
@@ -927,11 +1093,11 @@ export function RoutineSettings() {
                           : "Carregando rotina."
                         : "Nenhuma atividade cadastrada."}
                     </p>
-                    {view === "week" || currentDay ? (
+                    {canEdit && (view === "week" || currentDay) ? (
                       <button
                         type="button"
                         className={styles.primaryAction}
-                        disabled={!hasLoaded}
+                        disabled={!hasLoaded || isSaving}
                         onClick={addRow}
                       >
                         <Plus size={17} aria-hidden="true" />

@@ -1,5 +1,20 @@
 # Changelog
 
+- Rotina: inclui a tabela compartilhada no gate restritivo de sessao/MFA e nos inventarios SQL de seguranca.
+
+## 2026-10-12: Persistencia compartilhada da Rotina
+
+- Grava rotinas no CRM, compartilhadas entre dispositivos e usuarios autorizados.
+- Restringe edicao a gestores autorizados e detecta conflitos de versao.
+- Permite importar a copia antiga do navegador sem substituir dados automaticamente.
+- Destaca o cabecalho dos dias com cor propria.
+
+## 2026-10-12: Rolagem da Rotina em producao
+
+- Publicado 1160a0e com Hoje alinhado a esquerda, rolagem de pagina e somente
+  os dias fixos abaixo do menu. Titulo e salvar seguem o padrao Associativo.
+- CI completa e conferencias operacionais/visuais aprovadas.
+
 ## 2026-10-12: Rolagem e acabamento da Rotina
 
 - Usa rolagem da pagina, fixando apenas os dias abaixo do menu do CRM.

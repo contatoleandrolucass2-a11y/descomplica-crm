@@ -3,6 +3,9 @@
   --routine-grid: color-mix(in srgb, var(--inv-color-line) 45%, var(--inv-color-panel));
   --routine-current: linear-gradient(145deg, #176f8a, #123b63);
   --routine-edge: #62d8ff;
+  --routine-heading: #c5f0ee;
+  --routine-heading-text: #123e43;
+  --routine-heading-border: #167985;
   min-width: 0;
   color: var(--inv-color-text);
   background: var(--inv-color-page);
@@ -13,6 +16,15 @@
 :global(:root[data-theme="dark"]) .page {
   --routine-surface: #0e2135;
   --routine-grid: #29435b;
+  --routine-heading: #164c56;
+  --routine-heading-text: #e6ffff;
+  --routine-heading-border: #52cbd8;
+}
+
+:global(:root[data-theme="balanced"]) .page {
+  --routine-heading: #a9dfdf;
+  --routine-heading-text: #123e43;
+  --routine-heading-border: #167985;
 }
 
 .main {
@@ -162,9 +174,44 @@
   background: var(--inv-color-accent-soft);
 }
 
-.page :is(button, textarea):disabled {
+.page button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
+}
+
+.page textarea:is([readonly], :disabled) {
+  opacity: 1;
+  -webkit-text-fill-color: currentColor;
+}
+
+.syncNotice {
+  margin: 8px 0;
+  border-left: 3px solid var(--routine-heading-border);
+  padding: 8px 12px;
+  color: var(--routine-heading-text);
+  background: var(--routine-heading);
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.syncNotice p {
+  margin: 0;
+}
+
+.syncActions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.syncActions button {
+  min-height: 44px;
+  max-width: 100%;
+  padding: 6px 10px;
+  white-space: normal;
 }
 
 .page :is(button, textarea, [tabindex]):focus-visible {
@@ -220,6 +267,10 @@
 }
 
 .saveState:empty {
+  display: none;
+}
+
+.page button[hidden] {
   display: none;
 }
 
@@ -399,8 +450,9 @@
   z-index: 3;
   height: 52px;
   padding: 6px 8px;
-  color: var(--inv-color-muted);
-  background: var(--routine-surface);
+  color: var(--routine-heading-text);
+  background: var(--routine-heading);
+  border-bottom: 2px solid var(--routine-heading-border);
   font-size: 12px;
   font-weight: 850;
   text-align: center;
@@ -456,6 +508,7 @@
 .routineTable thead th:first-child {
   position: relative;
   z-index: 4;
+  background: var(--routine-heading);
 }
 
 :global(:root)
@@ -500,6 +553,9 @@
 }
 
 .routineTable thead [data-today] {
+  color: #083344;
+  background: #67e8f9;
+  border-bottom-color: #0891b2;
   box-shadow:
     inset 2px 0 var(--routine-edge),
     inset -2px 0 var(--routine-edge),
@@ -531,7 +587,7 @@
   margin-top: 3px;
   padding: 2px 10px;
   border-radius: 999px;
-  background: #087e8b;
+  background: #155e75;
   color: #ffffff;
   font-size: 11px;
   font-weight: 800;

@@ -43,17 +43,18 @@ describe("Rotina", () => {
     expect(markup).toContain("Realizar uma nova consulta do CPF");
   });
 
-  it("keeps editable controls and local save behavior in the client component", () => {
+  it("keeps editable controls and shared save behavior in the client component", () => {
     const source = readFileSync("app/(protected)/app/gestao/rotina/RoutineSettings.tsx", "utf8");
     expect(source).toContain('"use client"');
-    expect(source).toContain("window.localStorage.setItem");
+    expect(source).toContain('fetch("/api/routines"');
+    expect(source).not.toContain("window.localStorage.setItem");
     expect(source).toContain("function addRow()");
     expect(source).toContain("<textarea");
   });
 
   it("guards the page on the server before rendering the routine workspace", () => {
     const source = readFileSync("app/(protected)/app/gestao/rotina/page.tsx", "utf8");
-    expect(source).toContain('await enforcePermission("crm.settings.manage")');
+    expect(source).toContain('await enforcePermission("crm.dashboard.view")');
     expect(source).toContain('getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled');
     expect(source).toContain("forbidden()");
   });
@@ -73,14 +74,40 @@ describe("Rotina", () => {
 });
 
 const storageKey = "descomplica.crm.settings.routine.v1";
-const saveError = "Não foi possível salvar a rotina neste navegador.";
-const loadError = "Não foi possível carregar a rotina salva neste navegador.";
-
-type FixtureWindow = Window & {
-  routineFailSave: boolean;
-  routineReadCount: number;
-  resumeRoutineLoad: () => void;
-};
+const saveError = "Não foi possível salvar no CRM.";
+const loadError = "Não foi possível carregar a rotina do CRM.";
+type Row = Record<string, string>;
+type RecordFixture = { role_key: string; rows: Row[]; revision: number; updated_at: string };
+function serverFixture(seed: Record<string, Row[]> = {}) {
+  const days = [
+    "Segunda-feira",
+    "Terça-feira",
+    "Quarta-feira",
+    "Quinta-feira",
+    "Sexta-feira",
+    "Sábado",
+    "Domingo",
+  ];
+  return {
+    records: Object.fromEntries(
+      Object.entries(seed).map(([role_key, rows]) => [
+        role_key,
+        {
+          role_key,
+          rows: rows.map((row) => Object.fromEntries(days.map((day) => [day, row[day] ?? ""]))),
+          revision: 1,
+          updated_at: "2026-10-12T15:00:00Z",
+        },
+      ]),
+    ) as Record<string, RecordFixture>,
+    puts: [] as Array<{ role_key: string; rows: Row[]; expected_revision: number }>,
+    reads: 0,
+    failSave: false,
+    failGet: false,
+    invalidGet: false,
+  };
+}
+type ServerFixture = ReturnType<typeof serverFixture>;
 
 // Chromium is opt-in, matching the existing browser fixtures used by the project.
 describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegador", () => {
@@ -89,6 +116,8 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   let fixtureHtml: string;
   let script: string;
   let stylesheet: string;
+  let server: ServerFixture;
+  let resumeLoad: () => void;
   let checkRoutineScrolling: (page: Page, region: Locator) => Promise<void>;
 
   beforeAll(async () => {
@@ -338,18 +367,56 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   async function openRoutine(
     options: {
       stored?: string;
+      legacy?: string;
       getError?: boolean;
-      setError?: boolean;
+      invalidGet?: boolean;
       holdLoad?: boolean;
       clock?: string;
+      canEdit?: boolean;
+      server?: ServerFixture;
     } = {},
   ) {
+    server = options.server ?? serverFixture(options.stored ? JSON.parse(options.stored) : {});
+    server.failGet = options.getError ?? false;
+    server.invalidGet = options.invalidGet ?? false;
+    const backend = server;
+    const held = options.holdLoad
+      ? new Promise<void>((resolve) => {
+          resumeLoad = resolve;
+        })
+      : Promise.resolve();
     page = await browser.newPage();
     if (options.clock) await page.clock.install({ time: new Date(options.clock) });
-    const errors: string[] = [];
-    page.on("pageerror", (error) => errors.push(error.message));
-    await page.route("http://routine.test/**", (route) => {
+    await page.route("http://routine.test/**", async (route) => {
       const path = new URL(route.request().url()).pathname;
+      if (path === "/api/routines") {
+        if (route.request().method() === "PUT") {
+          const body = route.request().postDataJSON();
+          backend.puts.push(body);
+          if (backend.failSave)
+            return route.fulfill({ status: 503, json: { error: "routine_unavailable" } });
+          if (options.canEdit === false)
+            return route.fulfill({ status: 403, json: { error: "forbidden" } });
+          if (body.expected_revision !== (backend.records[body.role_key]?.revision ?? 0))
+            return route.fulfill({ status: 409, json: { error: "revision_conflict" } });
+          const record = {
+            role_key: body.role_key,
+            rows: body.rows,
+            revision: body.expected_revision + 1,
+            updated_at: "2026-10-12T16:00:00Z",
+          };
+          backend.records[body.role_key] = record;
+          return route.fulfill({ json: record });
+        }
+        backend.reads++;
+        await held;
+        return route.fulfill({
+          status: backend.failGet ? 503 : 200,
+          json: backend.invalidGet
+            ? {}
+            : { routines: Object.values(backend.records), can_edit: options.canEdit ?? true },
+        });
+      }
       return route.fulfill({
         contentType:
           path === "/fixture.js"
@@ -360,59 +427,29 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
         body: path === "/fixture.js" ? script : path === "/fixture.css" ? stylesheet : fixtureHtml,
       });
     });
-    await page.addInitScript(
-      ({ key, settings }) => {
-        if (settings.stored !== undefined && !sessionStorage.getItem("routineFixtureSeeded")) {
-          localStorage.setItem(key, settings.stored);
-          sessionStorage.setItem("routineFixtureSeeded", "true");
-        }
-        const fixtureWindow = window as unknown as FixtureWindow;
-        fixtureWindow.routineFailSave = settings.setError ?? false;
-        fixtureWindow.routineReadCount = 0;
-        const getItem = Storage.prototype.getItem;
-        const setItem = Storage.prototype.setItem;
-        Storage.prototype.getItem = function (key) {
-          fixtureWindow.routineReadCount++;
-          if (settings.getError) throw new DOMException("Storage blocked", "SecurityError");
-          return getItem.call(this, key);
-        };
-        Storage.prototype.setItem = function (key, value) {
-          if (fixtureWindow.routineFailSave)
-            throw new DOMException("Storage full", "QuotaExceededError");
-          return setItem.call(this, key, value);
-        };
-        if (settings.holdLoad) {
-          const setTimeout = fixtureWindow.setTimeout.bind(fixtureWindow);
-          let held = true;
-          const callbacks: Array<() => void> = [];
-          fixtureWindow.resumeRoutineLoad = () => {
-            held = false;
-            callbacks.splice(0).forEach((callback) => callback());
-          };
-          fixtureWindow.setTimeout = (handler, timeout, ...args) =>
-            setTimeout(
-              typeof handler === "function" && timeout === 0
-                ? () => {
-                    if (held) callbacks.push(() => handler(...args));
-                    else handler(...args);
-                  }
-                : handler,
-              timeout,
-              ...args,
-            );
-        }
-      },
-      { key: storageKey, settings: options },
-    );
-    await page.goto("http://routine.test/");
-    await browserExpect(page.getByRole("heading", { name: "Rotina semanal e diária", exact: true }))
-      .toBeVisible({ timeout: 2500 })
-      .catch((error) => {
-        throw new Error(`${error.message}\nBrowser errors: ${errors.join("; ")}`);
+    if (options.legacy !== undefined)
+      await page.addInitScript(({ key, value }) => localStorage.setItem(key, value), {
+        key: storageKey,
+        value: options.legacy,
       });
-    expect(errors).toEqual([]);
-    if (!options.holdLoad)
-      await browserExpect(page.getByRole("button", { name: "Salva alterações" })).toBeEnabled();
+    await page.goto("http://routine.test/");
+    await browserExpect(
+      page.getByRole("heading", { name: "Rotina semanal e diária", exact: true }),
+    ).toBeVisible();
+    if (!options.holdLoad && !options.getError && !options.invalidGet)
+      await browserExpect(page.getByRole("tabpanel")).toHaveAttribute("aria-busy", "false");
+  }
+
+  async function savedRows() {
+    await browserExpect(
+      page.getByRole("button", { name: "Salva alterações", exact: true }),
+    ).toBeEnabled();
+    await browserExpect(page.locator('[role="status"]')).not.toContainText(
+      "Alterações não salvas.",
+    );
+    return Object.fromEntries(
+      Object.entries(server.records).map(([key, record]) => [key, record.rows]),
+    );
   }
 
   it("blocks early edits and actions until the stored routine has loaded", async () => {
@@ -427,17 +464,13 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       page.getByRole("button", { name: "Inserir linha", exact: true }),
     ).toBeDisabled();
     expect(await page.locator('[role="tab"]:enabled, textarea:enabled').count()).toBe(0);
-    expect(await page.evaluate(() => (window as unknown as FixtureWindow).routineReadCount)).toBe(
-      0,
-    );
-    await page.evaluate(() => (window as unknown as FixtureWindow).resumeRoutineLoad());
+    expect(server.reads).toBe(1);
+    resumeLoad();
     const cell = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
     await browserExpect(cell).toHaveValue("Rotina recuperada");
     await cell.fill("Edição após carregar");
     await browserExpect(cell).toHaveValue("Edição após carregar");
-    expect(await page.evaluate(() => (window as unknown as FixtureWindow).routineReadCount)).toBe(
-      1,
-    );
+    expect(server.reads).toBe(1);
   });
 
   it("saves changes across roles and restores them on reload", async () => {
@@ -449,9 +482,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
     await page.getByRole("textbox", { name: "Sábado, linha 1", exact: true }).fill("Visita QA");
     await page.getByRole("button", { name: "Salva alterações" }).click();
-    const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), storageKey);
-    expect(stored["regional-house"][0]["Segunda-feira"]).toBe("Reunião QA");
-    expect(stored.corretor[0]["Sábado"]).toBe("Visita QA");
+    const stored = await savedRows();
+    expect(stored["regional-house"]?.[0]?.["Segunda-feira"]).toBe("Reunião QA");
+    expect(stored.corretor?.[0]?.["Sábado"]).toBe("Visita QA");
     await page.reload();
     await browserExpect(
       page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true }),
@@ -489,6 +522,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect.poll(() => prompts).toBe(3);
     await browserExpect(cell).toHaveValue("Edição protegida QA");
     await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
     await page.getByRole("link", { name: "Voltar para gestão" }).click();
     await browserExpect(page).toHaveURL("http://routine.test/app/gestao");
     expect(prompts).toBe(3);
@@ -527,6 +561,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
     await expectUnsavedNavigation(true);
     await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
     await expectUnsavedNavigation(false);
     await page
       .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
@@ -536,8 +571,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       page.getByRole("heading", { name: "Corretor", exact: true }).first(),
     ).toBeVisible();
     await browserExpect(page.locator("tbody tr")).toHaveCount(1);
-    const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), storageKey);
-    expect(stored.corretor[0]["Segunda-feira"]).toBe("");
+    expect(server.records.corretor?.rows[0]?.["Segunda-feira"]).toBe("");
   });
 
   it("keeps failed saves dirty, preserves the last stored version and permits retry", async () => {
@@ -546,39 +580,32 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await cell.fill("Versão salva QA");
     await page.getByRole("button", { name: "Salva alterações" }).click();
     await cell.fill("Versão ainda não salva QA");
-    await page.evaluate(() => {
-      (window as unknown as FixtureWindow).routineFailSave = true;
-    });
+    server.failSave = true;
     await page.getByRole("button", { name: "Salva alterações" }).click();
     await browserExpect(page.getByRole("alert")).toContainText(saveError);
     await expectUnsavedNavigation(true);
     await browserExpect(cell).toHaveValue("Versão ainda não salva QA");
-    const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), storageKey);
-    expect(stored["regional-house"][0]["Segunda-feira"]).toBe("Versão salva QA");
-    await page.evaluate(() => {
-      (window as unknown as FixtureWindow).routineFailSave = false;
-    });
+    expect(server.records["regional-house"]?.rows[0]?.["Segunda-feira"]).toBe("Versão salva QA");
+    server.failSave = false;
     await page.getByRole("button", { name: "Salva alterações" }).click();
     await browserExpect(page.getByRole("alert")).toHaveCount(0);
     await expectUnsavedNavigation(false);
-    const retried = await page.evaluate(
-      (key) => JSON.parse(localStorage.getItem(key)!),
-      storageKey,
-    );
-    expect(retried["regional-house"][0]["Segunda-feira"]).toBe("Versão ainda não salva QA");
+    const retried = await savedRows();
+    expect(retried["regional-house"]?.[0]?.["Segunda-feira"]).toBe("Versão ainda não salva QA");
   });
 
-  it.each([{ getError: true }, { stored: "{invalid-json" }])(
-    "reports read failures and invalid JSON without blocking editing: %j",
+  it.each([{ getError: true }, { invalidGet: true }])(
+    "blocks editing after failed GET and allows explicit retry: %j",
     async (settings) => {
       await openRoutine(settings);
       await browserExpect(page.getByRole("alert")).toContainText(loadError);
-      const cell = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
-      await browserExpect(cell).toHaveValue(
-        "Time 100% convocado nesse dia. Ativação on-line o dia inteiro.",
-      );
-      await cell.fill("Recuperação QA");
-      await page.getByRole("button", { name: "Salva alterações" }).click();
+      await browserExpect(page.getByRole("button", { name: "Salva alterações" })).toBeDisabled();
+      await browserExpect(page.getByRole("textbox").first()).toBeDisabled();
+      expect(server.puts).toEqual([]);
+      server.failGet = false;
+      server.invalidGet = false;
+      await page.getByRole("button", { name: "Recarregar do CRM" }).click();
+      await browserExpect(page.getByRole("textbox").first()).toBeEnabled();
       await browserExpect(page.getByRole("alert")).toHaveCount(0);
     },
   );
@@ -631,6 +658,200 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     ).toHaveCount(0);
   });
 
+  it("shows shared data read-only and never offers local import to readers", async () => {
+    await openRoutine({
+      canEdit: false,
+      legacy: JSON.stringify({ "regional-house": [{ "Segunda-feira": "Local" }] }),
+    });
+    await browserExpect(page.getByText("Somente visualização", { exact: true })).toBeVisible();
+    await browserExpect(page.getByRole("button", { name: "Salva alterações" })).toHaveCount(0);
+    await browserExpect(page.getByRole("button", { name: "Inserir linha" })).toHaveCount(0);
+    await browserExpect(
+      page.getByRole("button", { name: "Importar cópia local desta função" }),
+    ).toHaveCount(0);
+    expect(await page.locator("textarea:not([readonly]):enabled").count()).toBe(0);
+    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
+    await browserExpect(page.getByRole("tab", { name: "Corretor", exact: true })).toHaveAttribute(
+      "aria-selected",
+      "true",
+    );
+    expect(server.puts).toEqual([]);
+  });
+
+  it("imports legacy only after confirmation, only for the active role, without autosave", async () => {
+    const legacy = JSON.stringify(
+      Object.fromEntries(
+        Object.entries(
+          serverFixture({
+            "regional-house": [{ "Segunda-feira": "House local" }],
+            corretor: [{ "Segunda-feira": "Corretor local" }],
+          }).records,
+        ).map(([role, record]) => [role, record.rows]),
+      ),
+    );
+    await openRoutine({ legacy });
+    const cell = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
+    await browserExpect(cell).not.toHaveValue("House local");
+    expect(server.puts).toEqual([]);
+    page.once("dialog", (dialog) => dialog.dismiss());
+    await page.getByRole("button", { name: "Importar cópia local desta função" }).click();
+    await browserExpect(cell).not.toHaveValue("House local");
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "Importar cópia local desta função" }).click();
+    await browserExpect(cell).toHaveValue("House local");
+    await expectUnsavedNavigation(true);
+    expect(server.puts).toEqual([]);
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    expect(server.puts.map((value) => value.role_key)).toEqual(["regional-house"]);
+    expect(server.puts[0]?.expected_revision).toBe(0);
+    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
+    await browserExpect(page.locator("tbody tr")).toHaveCount(0);
+    expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBe(legacy);
+  });
+
+  it.each([
+    "{}",
+    "null",
+    "[]",
+    '"invalid root"',
+    "{broken",
+    JSON.stringify({ "regional-house": [{}] }),
+    JSON.stringify({ "regional-house": "invalid rows" }),
+    JSON.stringify({ corretor: [] }),
+    JSON.stringify({
+      "regional-house": [
+        {
+          ...serverFixture({ "regional-house": [{}] }).records["regional-house"]?.rows[0],
+          extra: "invalid",
+        },
+      ],
+    }),
+  ])("does not offer import for missing active role or invalid legacy: %s", async (legacy) => {
+    await openRoutine({ legacy });
+    await browserExpect(
+      page.getByRole("button", { name: "Importar cópia local desta função" }),
+    ).toHaveCount(0);
+    await browserExpect(page.locator("tbody tr")).toHaveCount(26);
+    expect(server.puts).toEqual([]);
+  });
+
+  it("accepts an explicitly empty legacy role only after import and save", async () => {
+    await openRoutine({ legacy: JSON.stringify({ "regional-house": [] }) });
+    await browserExpect(page.locator("tbody tr")).toHaveCount(26);
+    page.once("dialog", (dialog) => dialog.accept());
+    await page.getByRole("button", { name: "Importar cópia local desta função" }).click();
+    await browserExpect(page.locator("tbody tr")).toHaveCount(0);
+    expect(server.puts).toEqual([]);
+    await expectUnsavedNavigation(true);
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    expect(server.records["regional-house"]?.rows).toEqual([]);
+  });
+
+  it("shares saved content across independent sessions and refreshes clean readers on focus and 30s", async () => {
+    await openRoutine();
+    const writer = page;
+    const backend = server;
+    try {
+      await openRoutine({ server: backend, canEdit: false, clock: "2026-10-12T15:00:00Z" });
+      const reader = page;
+      const cellName = { name: "Segunda-feira, linha 1", exact: true };
+      await writer.getByRole("textbox", cellName).fill("Compartilhada QA");
+      await writer.getByRole("button", { name: "Salva alterações" }).click();
+      await browserExpect(writer.getByRole("status")).toContainText("Salvo no CRM");
+      await reader.evaluate(() => window.dispatchEvent(new Event("focus")));
+      await browserExpect(reader.getByRole("textbox", cellName)).toHaveValue("Compartilhada QA");
+      await writer.getByRole("textbox", cellName).fill("Atualizada QA");
+      await writer.getByRole("button", { name: "Salva alterações" }).click();
+      await browserExpect(writer.getByRole("status")).toContainText("Salvo no CRM");
+      await reader.clock.fastForward(30_000);
+      await browserExpect(reader.getByRole("textbox", cellName)).toHaveValue("Atualizada QA");
+      expect(backend.puts.map((value) => value.expected_revision)).toEqual([0, 1]);
+    } finally {
+      await writer.close();
+    }
+  });
+
+  it("preserves a stale session draft on 409 and requires confirmed reload", async () => {
+    await openRoutine();
+    const first = page;
+    const backend = server;
+    try {
+      await openRoutine({ server: backend, clock: "2026-10-12T15:00:00Z" });
+      const name = { name: "Segunda-feira, linha 1", exact: true };
+      await page.getByRole("textbox", name).fill("Rascunho da segunda sessão");
+      await first.getByRole("textbox", name).fill("Vencedora QA");
+      await first.getByRole("button", { name: "Salva alterações" }).click();
+      await browserExpect(first.getByRole("status")).toContainText("Salvo no CRM");
+      const reads = backend.reads;
+      await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+      await page.clock.fastForward(30_000);
+      expect(backend.reads).toBe(reads);
+      await page.getByRole("button", { name: "Salva alterações" }).click();
+      await browserExpect(page.getByRole("alert")).toContainText(
+        "Outra pessoa alterou esta rotina.",
+      );
+      await browserExpect(page.getByRole("textbox", name)).toHaveValue(
+        "Rascunho da segunda sessão",
+      );
+      await expectUnsavedNavigation(true);
+      expect(backend.records["regional-house"]?.rows[0]?.["Segunda-feira"]).toBe("Vencedora QA");
+      page.once("dialog", (dialog) => dialog.dismiss());
+      await page.getByRole("button", { name: "Recarregar do CRM" }).click();
+      await browserExpect(page.getByRole("textbox", name)).toHaveValue(
+        "Rascunho da segunda sessão",
+      );
+      page.once("dialog", (dialog) => dialog.accept());
+      await page.getByRole("button", { name: "Recarregar do CRM" }).click();
+      await browserExpect(page.getByRole("textbox", name)).toHaveValue("Vencedora QA");
+      await expectUnsavedNavigation(false);
+    } finally {
+      await first.close();
+    }
+  });
+
+  it("does not replace a successful PUT with an older in-flight GET", async () => {
+    await openRoutine();
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let started!: () => void;
+    const requested = new Promise<void>((resolve) => {
+      started = resolve;
+    });
+    await page.route("**/api/routines", async (route) => {
+      if (route.request().method() !== "GET") return route.fallback();
+      started();
+      await held;
+      await route.fulfill({ json: { routines: [], can_edit: true } });
+    });
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await requested;
+    const cell = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
+    await cell.fill("PUT mais recente QA");
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    const response = page.waitForResponse(
+      (response) =>
+        response.url().endsWith("/api/routines") && response.request().method() === "GET",
+    );
+    release();
+    await response;
+    await page.evaluate(
+      () =>
+        new Promise<void>((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve())),
+        ),
+    );
+    await browserExpect(cell).toHaveValue("PUT mais recente QA");
+    await cell.fill("Próxima revisão QA");
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    expect(server.puts.map((value) => value.expected_revision)).toEqual([0, 1]);
+  });
+
   it("filters Hoje without losing original row indices or in-session edits", async () => {
     await openRoutine({
       clock: "2026-10-12T15:00:00Z",
@@ -665,13 +886,13 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       .getByRole("textbox", { name: "Segunda-feira, linha 5", exact: true })
       .fill("Nova diária QA");
     await page.getByRole("button", { name: "Salva alterações", exact: true }).click();
-    const stored = await page.evaluate((key) => JSON.parse(localStorage.getItem(key)!), storageKey);
+    const stored = await savedRows();
     expect(stored["regional-house"]).toHaveLength(5);
-    expect(stored["regional-house"][0].Domingo).toBe("Legado A");
-    expect(stored["regional-house"][1]["Terça-feira"]).toBe("Terça QA");
-    expect(stored["regional-house"][2]["Segunda-feira"]).toBe("Inserção diária QA");
-    expect(stored["regional-house"][3].Domingo).toBe("Somente domingo");
-    expect(stored["regional-house"][4]["Segunda-feira"]).toBe("Nova diária QA");
+    expect(stored["regional-house"]?.[0]?.Domingo).toBe("Legado A");
+    expect(stored["regional-house"]?.[1]?.["Terça-feira"]).toBe("Terça QA");
+    expect(stored["regional-house"]?.[2]?.["Segunda-feira"]).toBe("Inserção diária QA");
+    expect(stored["regional-house"]?.[3]?.Domingo).toBe("Somente domingo");
+    expect(stored["regional-house"]?.[4]?.["Segunda-feira"]).toBe("Nova diária QA");
     await page.getByRole("button", { name: "Semana", exact: true }).click();
     await browserExpect(page.locator("tbody tr")).toHaveCount(5);
     await browserExpect(page.getByRole("textbox", { name: /Domingo/ })).toHaveCount(0);
@@ -695,14 +916,15 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
       .fill("Segunda atualizada");
     await page.getByRole("button", { name: "Salva alterações", exact: true }).click();
-    const saved = await page.evaluate((key) => localStorage.getItem(key), storageKey);
-    expect(JSON.parse(saved!)["regional-house"][0].Domingo).toBe("Domingo privado QA");
-    expect(JSON.parse(saved!).corretor[0].Domingo).toBe("Outro domingo QA");
+    const saved = await savedRows();
+    expect(saved["regional-house"]?.[0]?.Domingo).toBe("Domingo privado QA");
+    expect(saved.corretor?.[0]?.Domingo).toBe("Outro domingo QA");
     await page.reload();
     await browserExpect(
       page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true }),
     ).toHaveValue("Segunda atualizada");
-    expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBe(saved);
+    expect(await savedRows()).toEqual(saved);
+    expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBeNull();
   });
 
   it("uses a regular responsive title and a gold specular save action respecting reduced motion", async () => {

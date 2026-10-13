@@ -121,13 +121,13 @@ export const PROTECTED_PAGE_GATES = [
   {
     pageKey: "crm.management",
     path: "/app/gestao",
-    permission: "crm.settings.manage",
+    permission: "crm.dashboard.view",
     releaseEnabled: true,
   },
   {
     pageKey: "crm.management.routine",
     path: "/app/gestao/rotina",
-    permission: "crm.settings.manage",
+    permission: "crm.dashboard.view",
     releaseEnabled: true,
   },
   {

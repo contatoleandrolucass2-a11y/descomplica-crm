@@ -11,6 +11,7 @@ const repositoryRoot = process.cwd();
 const administratorProtectionMigration =
   "20261011143218_protect_administrator_accounts_and_enable_simulator_view.sql";
 const permissionAccessDraftMigration = "20261012113000_apply_user_permission_access_draft.sql";
+const sharedRoutinesMigration = "20261013014310_crm_shared_routines.sql";
 const administratorMasterOnlyPermissions = [
   "crm.simulators.execute",
   "crm.commercial_engine.execute",
@@ -31,15 +32,48 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 47-version manifest", async () => {
+  it("keeps a unique, ordered 48-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(47);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(47);
+    expect(migrations).toHaveLength(48);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(48);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
-    expect(migrations.at(-1)).toBe(permissionAccessDraftMigration);
+    expect(migrations.at(-2)).toBe(permissionAccessDraftMigration);
+    expect(migrations.at(-1)).toBe(sharedRoutinesMigration);
+  });
+
+  it("validates the current pgTAP inventory with the restore preflight", async () => {
+    const source = await readFile(
+      path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"),
+      "utf8",
+    );
+    const tree = ts.createSourceFile("restore.mjs", source, ts.ScriptTarget.Latest);
+    const declarations = tree.statements
+      .filter((statement) =>
+        ts.isFunctionDeclaration(statement)
+          ? statement.name?.text === "readPgTapPlan"
+          : ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(
+              (declaration) =>
+                ts.isIdentifier(declaration.name) && declaration.name.text === "expectedPgTapTests",
+            ),
+      )
+      .map((statement) => statement.getText(tree))
+      .join("\n");
+    // Run only the read-only inventory preflight, never the restore entry point.
+    const plan = await runInNewContext(
+      `${declarations}\nreadPgTapPlan()`,
+      {
+        readFile,
+        readdir,
+        path,
+        sourceSupabaseRoot: path.join(repositoryRoot, "supabase"),
+      },
+      { timeout: 1000 },
+    );
+    expect(plan.tests).toBe(1242);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -153,15 +187,16 @@ describe("release-candidate activation defaults", () => {
     );
     for (const role of matrix.expectedRoles) {
       const administrative = role === "master" || role === "admin";
+      const operational = role !== "pending";
       expect(matrix.allowedDirectRoutesForRole(role), role).toEqual(
         matrix.expectedDirectRoutesByRole[role],
       );
       for (const route of ["/app/gestao", "/app/gestao/rotina"]) {
         expect(matrix.expectedDirectRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
-          administrative,
+          operational,
         );
         expect(matrix.expectedHeaderRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
-          administrative,
+          operational,
         );
         expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(route);
       }
@@ -178,6 +213,20 @@ describe("release-candidate activation defaults", () => {
           "Administração",
         ]);
         expect(roots[4]).toEqual({
+          name: "Gestão",
+          tag: "BUTTON",
+          href: null,
+          controls: "authorized-navigation-crm-management",
+        });
+      } else if (operational) {
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(9);
+        expect(matrix.expectedAccountSettingsRoutesForRole(role)).toEqual([]);
+        expect(roots.map((root: { name: string }) => root.name)).toEqual([
+          "Dashboard",
+          role.endsWith("_house") ? "Ranking" : "Canal de Parcerias",
+          "Gestão",
+        ]);
+        expect(roots[2]).toEqual({
           name: "Gestão",
           tag: "BUTTON",
           href: null,
@@ -212,7 +261,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1151;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1242;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {
