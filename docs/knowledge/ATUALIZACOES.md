@@ -1,5 +1,87 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
+
+- Status: agenda ativa e aceite concluido. Fonte: journal, Supabase MCP,
+  get_workflow_details e auditoria salesforce-agenda-vps-2026-10-13.
+- Segundo inicio natural17:30Z, publicacao201 as17:36:10Z, request
+  3bdb5ff0-ee7a-4a32-974c-5947b50cd77a. Run392a3e84-bde8-46ea-afb3-e4fd6fa06484
+  succeeded,159 registros/uma auditoria. Primeira run tambem unica apos replay.
+- Snapshots avancaram17:08:37 ->17:33:45Z, mantendo3views/15metricas/
+  15empreendimentos/144participantes. Sete relatorios completos por ciclo.
+- Coletor689bf174 enabled/active, PID1138878 e zero reinicios; navegador2881480
+  preservado. Proximo disparo18:00Z. Pico723681280 bytes abaixo do limite768MiB.
+- N8n novo permanece dcffaf09/5nodes, ativo igual ao draft e sem salvar payloads.
+  Probes sem bearer e corpo vazio: n8n403/CRM401 as17:22Z. Antigo nao acessado.
+- Limites: causa do primeiro erro de coleta nao identificada; dois ciclos
+  posteriores aprovados nao provam ausencia de falhas. Em recorrencia investigar
+  diagnostico seguro sem enfraquecer integridade; MFA continua manual quando exigida.
+- Guia de conclusao consolida acessos, operacao, backups e reversao. Segunda
+  copia independente da chave de recuperacao continua recomendada ao operador.
+- Evidencias e guia publicados no PR209. Escopo final de cinco documentos,
+  sem novo deploy/restart; conferir CI desse PR antes de integrar. Runtime e
+  coletor permanecem no SHA689bf174 ja aprovado, independentemente do SHA documental.
+
+## 2026-10-13: Agenda ativa com primeiro recibo real confirmado
+
+- Fonte: CI38431108475, instalador689bf174, journal, Supabase MCP e tela
+  autenticada. Quatro jobs aprovados; ativacao17:04:52Z. Collector PID1138878,
+  zero reinicios, monitor independente disabled/inactive, browser PID2881480.
+- Publicacao17:10:59Z HTTP201, requestcf334046-6c94-4898-a04c-17f85e6ca05e;
+  run6d4aaa43-1a8d-4db7-889b-00d46151700c succeeded,159 registros e uma auditoria.
+  Replay controlado17:13Z HTTP200/idempotenttrue, sem duplicar run/auditoria.
+- Sete contagens19974/1092/515/2606/766/36/7. Snapshots3views/15metricas/
+  15empreendimentos/144participantes, generated_at17:08:37.306Z. CRM mostra
+  coleta concluida e proxima execucao14:30BRT. Segundo ciclo ainda pendente.
+- App foi publicado externamente em689bf174 as17:06:31Z, deploymentId
+  fee876e4-5133-46db-93d6-8cc708a53e92. Health200/ok e ledger reconferidos17:12Z,
+  inProgressnull; coletor nao reiniciou app ou navegador.
+- Windows integradob825c2e: pnpm verify exit0, lint/tipos/test/build passaram,
+  Vitest136arquivos/2647aprovados/63skips. Novo n8n mantem versao dcffaf09,
+  cinco nodes, sem persistir payloads; nenhuma alteracao de workflow ou n8n antigo.
+
+## 2026-10-13: Ensaio agendado revertido e coleta isolada completa
+
+- Fonte: journal systemd, instalador privado, exportCandidate e consulta MCP
+  agregada ao Supabase, entre16:26Z e16:39Z. CI38425049893 passou nos quatro
+  jobs antes da ativacao554a971. Credenciais e estabilidade inicial passaram.
+- Primeiro ciclo falhou16:28:55Z antes de publicar, sem diagnostico detalhado
+  no log do scheduler. Nao atribuir a falha a timeout, memoria ou mudanca de
+  dados sem evidencia. Ultima ingestao permaneceu07:28:32Z, request25ec6322.
+- Rollback corrigido concluiu sem excecao, restaurando monitor enabled/active.
+  Navegador manteve PID2881480. Historicos rolled-back foram arquivados sob
+  lock, com verificacao de inode/fase/monitor e fsync; nenhuma credencial apagada.
+- Repeticao isolada, publicacao false, concluiu os sete relatorios16:36:20Z:
+  19973/1091/514/2605/767/36/7 linhas,15 metricas e144 participantes. Esse
+  candidato privado nao foi enviado ao n8n/Supabase e nao prova agenda ativa.
+- Main avancou para689bf174 pelo PR208 de outra tarefa. Instalador bloqueou
+  preparo do SHA anterior, conforme contrato. Nenhuma mudanca em coletor,
+  lockfile ou CI entre554a971 e689bf174. Novo checkout limpo e preflight passaram;
+  aguardar CI38431108475 completa e dois ciclos reais antes de encerrar.
+
+## 2026-10-13: Correcao systemd integrada e nova conferencia externa
+
+- PR206 integrado em554a9715c2f2528dafa08dcc3eccd4d552d783d7 depois de
+  CI38418203102 aprovada. CI de push38425049893 em curso; sem nova ativacao
+  antes dos quatro jobs aprovados. Fonte: GitHub PR206/actions/main.
+- Main recebeu PR205 de outra tarefa; merge preservou os dois conjuntos e
+  todas as notas. Health e ledger as15:20Z confirmaram app7d6341f, publicacao
+  b4e2c6bd-1b5a-4d7f-b324-8a580562eb0b as15:16Z, sem transacao pendente.
+  Coletor e app possuem versoes separadas; esta tarefa nao reiniciou o CRM.
+- Windows no conjunto a7657a1: lint (zero erros/um aviso preexistente), tipos,
+  pnpm test completo e build passaram. Vitest136 arquivos/2647 testes/63skips;
+  suites Node/coletor/release exit0, instalador focado69/69. Uma rodada anterior
+  teve timeout30s Obsidian; repeticao sem build concorrente passou, sem mudar
+  limites ou assertions. Revisao independente estatica sem achados concretos.
+- Prova adicional com arquivo real de unidade systemd: dois ExecStartPre,
+  expansao de caminhos, arquivos0600 e validacao estrita passaram sem rede.
+  Unidade temporaria removida apos conferir seus bytes; runtime limpo pelo
+  systemd. Nao registrar prova isolada como coleta ou publicacao real.
+- Checkout554a971 preparado na VPS com copias locais de dependencias, sem
+  hardlinks externos; leitura ajustada somente nas copias. Codigo imutavel e
+  preflight dedicado passaram. Estado da tentativa anterior continua rolled-back,
+  monitor enabled/active, navegador preservado. Nova ativacao e dois ciclos pendentes.
+
 ## 2026-10-13: Credenciais systemd e reversao real do coletor
 
 - Fonte: VPS Ubuntu/systemd255, ensaio13/10 entre14:36Z e14:44Z, SHA1ace82d,

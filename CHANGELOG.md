@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-13: Evidencias operacionais da agenda Salesforce
+
+- Registra testes Windows/Linux, credenciais privadas systemd e reversao real.
+- Confirma agenda VPS ativa, dois ciclos reais publicados via novo n8n e
+  reconciliados no Supabase, sem duplicacao no replay da primeira carga.
+- Preserva a ultima carga valida quando um ciclo falha e o n8n antigo intocado.
+
 ## 2026-10-13: Logo Descomplica na aba do navegador
 
 - Substitui o favicon padrão pela logo fornecida pelo usuário, com as cores
