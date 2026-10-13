@@ -122,6 +122,9 @@ function fixture(enabled = "enabled", active = "active") {
       fingerprint: "c".repeat(64),
     },
     collector: { enabled: "disabled", active: "inactive" },
+    collectorPid: "1234",
+    collectorRestarts: "0",
+    collectorView: {},
     events: [],
     failure: null,
     candidate: approval(),
@@ -188,11 +191,35 @@ function fixture(enabled = "enabled", active = "active") {
     monitorSnapshot: () => event("monitor-snapshot", () => clone(context.monitor)),
     preflight: () => event("preflight"),
     verifyUnit: () => event("verify-unit"),
+    show: (name) =>
+      event(`show:${name}`, () => {
+        assert.equal(name, collector);
+        return {
+          LoadState: context.unit ? "loaded" : "not-found",
+          ActiveState: context.collector.active,
+          SubState:
+            context.collector.active === "active"
+              ? "running"
+              : context.collector.active === "failed"
+                ? "failed"
+                : "dead",
+          UnitFileState: context.unit ? context.collector.enabled : "",
+          FragmentPath: context.unit ? `/etc/systemd/system/${collector}` : "",
+          DropInPaths: "",
+          NeedDaemonReload: "no",
+          MainPID: context.collector.active === "active" ? context.collectorPid : "0",
+          NRestarts: context.collectorRestarts,
+          ...context.collectorView,
+        };
+      }),
+    wait: (milliseconds) => event(`wait:${milliseconds}`),
     assertService: (name, wantedEnabled, wantedActive) =>
       event(`assert:${name}`, () => {
         const service = name === monitor ? context.monitor : context.collector;
         assert.equal(service.enabled, wantedEnabled);
         assert.equal(service.active, wantedActive);
+        if (name === monitor)
+          assert.equal(service.sub, wantedActive === "active" ? "running" : "dead");
       }),
     systemctl: (operation, name) =>
       event(`systemctl:${operation}:${name ?? ""}`, () => {
@@ -209,7 +236,9 @@ function fixture(enabled = "enabled", active = "active") {
         if (operation === "stop" && service.active !== "failed") service.active = "inactive";
         if (operation === "reset-failed") {
           assert.equal(name, collector);
-          if (service.active === "failed") service.active = "inactive";
+          if (service.active !== "failed")
+            throw Object.assign(new Error(`Unit ${collector} not loaded.`), { code: 1 });
+          service.active = "inactive";
         }
         if (name === monitor) service.sub = service.active === "active" ? "running" : "dead";
       }),
@@ -229,8 +258,10 @@ test("unit pins destinations, credentials and a nonroot immutable release withou
     "ExecStart=/usr/local/bin/node ops/salesforce/run-every-30-minutes.mjs",
     "LoadCredential=n8n-bearer:/srv/descomplica-n8n/salesforce-test.token",
     "LoadCredential=status-bearer:/var/lib/descomplica-salesforce/status-bearer",
-    "Environment=SALESFORCE_N8N_SECRET_FILE=%d/n8n-bearer",
-    "Environment=SALESFORCE_STATUS_SECRET_FILE=%d/status-bearer",
+    "RuntimeDirectory=descomplica-salesforce-collector",
+    "RuntimeDirectoryMode=0700",
+    "Environment=SALESFORCE_N8N_SECRET_FILE=%t/descomplica-salesforce-collector/n8n-bearer",
+    "Environment=SALESFORCE_STATUS_SECRET_FILE=%t/descomplica-salesforce-collector/status-bearer",
     "Environment=SALESFORCE_CDP_URL=http://127.0.0.1:9222",
     "Environment=SALESFORCE_CRM_ORIGIN=https://crm.descomplicapro.com.br",
     "Environment=SALESFORCE_STATUS_ENABLED=true",
@@ -252,11 +283,15 @@ test("unit pins destinations, credentials and a nonroot immutable release withou
     "LimitCORE=0",
   ])
     assert.ok(unit.split("\n").includes(directive), directive);
-  assert.match(unit, new RegExp(`^After=.*${monitor.replaceAll(".", "\\.")}$`, "m"));
-  assert.doesNotMatch(
-    unit,
-    /EnvironmentFile|ExecStartPre|ExecStopPost|PartOf=|Requires=|Listen|@RELEASE@/u,
+  assert.deepEqual(
+    unit.split("\n").filter((line) => line.startsWith("ExecStartPre=")),
+    [
+      "ExecStartPre=/usr/bin/install -m 0600 -- %d/n8n-bearer %t/descomplica-salesforce-collector/n8n-bearer",
+      "ExecStartPre=/usr/bin/install -m 0600 -- %d/status-bearer %t/descomplica-salesforce-collector/status-bearer",
+    ],
   );
+  assert.match(unit, new RegExp(`^After=.*${monitor.replaceAll(".", "\\.")}$`, "m"));
+  assert.doesNotMatch(unit, /EnvironmentFile|ExecStopPost|PartOf=|Requires=|Listen|@RELEASE@/u);
   assert.throws(() => renderUnit(template, "main"));
 });
 
@@ -298,6 +333,7 @@ test("private file metadata refuses wrong owner, links and unsafe permissions", 
     { uid: 0 },
     { mode: 0o100640 },
     { mode: 0o100400 },
+    { mode: 0o100440 },
     { nlink: 2 },
     { isFile: () => false },
     { isSymbolicLink: () => true },
@@ -354,6 +390,83 @@ test("activation validates unit before stopping monitor and starts only one prod
   assert.deepEqual(context.collector, { active: "active", enabled: "enabled" });
   assert.equal(context.monitor.active, "inactive");
   assert.equal(context.monitor.enabled, "disabled");
+  const stability = context.events.slice(index(`systemctl:start:${collector}`) + 1);
+  assert.deepEqual(stability, [
+    `show:${collector}`,
+    `assert:${monitor}`,
+    "wait:1000",
+    `show:${collector}`,
+    `assert:${monitor}`,
+    "wait:1000",
+    `show:${collector}`,
+    `assert:${monitor}`,
+    "save:active",
+  ]);
+});
+
+test("activation refuses early failure, restart, PID drift and monitor reactivation during stabilization", async () => {
+  for (const change of [
+    (context) => {
+      context.collector.active = "failed";
+    },
+    (context) => {
+      context.collector.active = "inactive";
+    },
+    (context) => {
+      context.collectorPid = "5678";
+    },
+    (context) => {
+      context.collectorRestarts = "1";
+    },
+    (context) => {
+      context.monitor.active = "active";
+    },
+    (context) => {
+      context.monitor.enabled = "enabled";
+    },
+    (context) => {
+      context.monitor.sub = "failed";
+    },
+  ]) {
+    for (const failAt of [1, 2]) {
+      const { io, context } = fixture();
+      await installCollector(prepare, io);
+      const wait = io.wait;
+      let waits = 0;
+      io.wait = async (milliseconds) => {
+        await wait(milliseconds);
+        if (++waits === failAt) change(context);
+      };
+      await assert.rejects(installCollector(activate, io));
+      assert.equal(context.state.phase, "switching");
+      assert.equal(context.events.includes("save:active"), false);
+      assert.equal(waits, failAt);
+      assert.equal(await installCollector(rollback, io), "rolled-back");
+    }
+  }
+});
+
+test("activation fails closed on incomplete or unexpected service observations", async () => {
+  for (const observation of [
+    { LoadState: "not-found" },
+    { ActiveState: "activating" },
+    { SubState: "auto-restart" },
+    { UnitFileState: "disabled" },
+    { MainPID: "0" },
+    { MainPID: "-1" },
+    { MainPID: "1e3" },
+    { MainPID: "9007199254740992" },
+    { MainPID: undefined },
+    { NRestarts: undefined },
+    { NRestarts: "unknown" },
+  ]) {
+    const { io, context } = fixture();
+    await installCollector(prepare, io);
+    context.collectorView = observation;
+    await assert.rejects(installCollector(activate, io), /stable/u);
+    assert.equal(context.state.phase, "switching");
+    assert.equal(context.events.includes("save:active"), false);
+  }
 });
 
 for (const enabled of ["enabled", "disabled"]) {
@@ -387,6 +500,8 @@ for (const event of [
   `systemctl:disable:${monitor}`,
   `systemctl:enable:${collector}`,
   `systemctl:start:${collector}`,
+  `show:${collector}`,
+  "wait:1000",
   "save:active",
 ]) {
   for (const side of ["before", "after"]) {
@@ -408,6 +523,7 @@ for (const event of [
 for (const event of [
   `systemctl:disable:${collector}`,
   `systemctl:stop:${collector}`,
+  `show:${collector}`,
   `systemctl:reset-failed:${collector}`,
   "remove-unit",
   "systemctl:daemon-reload:",
@@ -421,6 +537,7 @@ for (const event of [
       const baseline = clone(context.monitor);
       await installCollector(prepare, io);
       await installCollector(activate, io);
+      if (event === `systemctl:reset-failed:${collector}`) context.collector.active = "failed";
       context.failure = `${event}:${side}`;
       await assert.rejects(installCollector(rollback, io), /injected/u);
       assert.ok(context.state.backup);
@@ -443,6 +560,91 @@ test("rollback resets failure only on collector before restoring monitor", async
     context.events.filter((event) => event.includes("reset-failed")),
     [`systemctl:reset-failed:${collector}`],
   );
+});
+
+test("rollback skips reset-failed for a stopped unit collected by systemd 255 and stays idempotent", async () => {
+  const { io, context } = fixture();
+  const baseline = clone(context.monitor);
+  await installCollector(prepare, io);
+  await installCollector(activate, io);
+  context.collector = { enabled: "disabled", active: "inactive" };
+  assert.equal(await installCollector(rollback, io), "rolled-back");
+  assert.deepEqual(context.monitor, baseline);
+  assert.equal(context.unit, null);
+  assert.equal(
+    context.events.some((event) => event.includes("reset-failed")),
+    false,
+  );
+  const previousEvents = context.events.length;
+  assert.equal(await installCollector(rollback, io), "rolled-back");
+  assert.equal(
+    context.events.slice(previousEvents).some((event) => event.startsWith("systemctl:")),
+    false,
+  );
+});
+
+test("rollback preserves reset-failed errors and does not restore monitor before recovery", async () => {
+  const { io, context } = fixture();
+  await installCollector(prepare, io);
+  await installCollector(activate, io);
+  context.collector.active = "failed";
+  const systemctl = io.systemctl;
+  const failure = Object.assign(new Error(`Unit ${collector} not loaded.`), { code: 1 });
+  io.systemctl = async (operation, name) => {
+    if (operation === "reset-failed") throw failure;
+    await systemctl(operation, name);
+  };
+  await assert.rejects(installCollector(rollback, io), (error) => error === failure);
+  assert.equal(context.state.phase, "rolling-back");
+  assert.equal(context.monitor.active, "inactive");
+  assert.equal(context.unit, context.state.unit);
+  io.systemctl = systemctl;
+  assert.equal(await installCollector(rollback, io), "rolled-back");
+});
+
+test("rollback refuses unknown, inconsistent or incomplete stopped states without clearing failures", async () => {
+  for (const observation of [
+    { LoadState: "not-found" },
+    { LoadState: "masked" },
+    { ActiveState: "active", SubState: "running" },
+    { ActiveState: "deactivating" },
+    { ActiveState: "maintenance" },
+    { ActiveState: "failed", SubState: "dead" },
+    { SubState: "failed" },
+    { SubState: "auto-restart" },
+    { UnitFileState: "enabled" },
+    { UnitFileState: "" },
+    { MainPID: "1234" },
+    { MainPID: undefined },
+    { NeedDaemonReload: "yes" },
+    { FragmentPath: "/run/systemd/system/foreign.service" },
+    { DropInPaths: "/etc/systemd/system/override.conf" },
+  ]) {
+    const { io, context } = fixture();
+    await installCollector(prepare, io);
+    await installCollector(activate, io);
+    context.collectorView = observation;
+    await assert.rejects(installCollector(rollback, io), /stopped/u);
+    assert.equal(context.state.phase, "rolling-back");
+    assert.equal(context.monitor.active, "inactive");
+    assert.equal(context.unit, context.state.unit);
+    assert.equal(
+      context.events.some((event) => event.includes("reset-failed")),
+      false,
+    );
+  }
+});
+
+test("a rolled-back state from another SHA remains intact and blocks prepare", async () => {
+  const { io, context } = fixture();
+  await installCollector(prepare, io);
+  await installCollector(activate, io);
+  await installCollector(rollback, io);
+  const state = clone(context.state);
+  const previousEvents = context.events.length;
+  await assert.rejects(installCollector({ ...prepare, sha: otherSha }, io), /First installation/u);
+  assert.deepEqual(context.state, state);
+  assert.deepEqual(context.events.slice(previousEvents), ["read-state"]);
 });
 
 test("rollback never touches a foreign or edited unit and retains recovery state", async () => {
@@ -618,12 +820,17 @@ function preflightFixture() {
     browser: { ActiveState: "active", SubState: "running", MainPID: "10" },
     failDependencies: false,
     failImport: false,
+    failInstall: false,
   };
   const io = {
     run: async (command, args, options) => {
       calls.push({ command, args, options });
       if (args[0] === "--version") return context.node;
       if (command.endsWith("/id")) return context.uid;
+      if (command === "/usr/sbin/runuser" && args[3] === "/usr/bin/install") {
+        if (context.failInstall) throw new Error("install unavailable");
+        return "install (GNU coreutils) 9.4\n";
+      }
       if (context.failImport) throw new Error("import failed");
       return "";
     },
@@ -668,7 +875,19 @@ test("preflight reads private credentials under their real owners and imports as
         call.options.privateFile,
     ),
   );
-  const invocation = calls.find((call) => call.command === "/usr/sbin/runuser");
+  const install = calls.find(
+    (call) => call.command === "/usr/sbin/runuser" && call.args[3] === "/usr/bin/install",
+  );
+  assert.deepEqual(install?.args, [
+    "-u",
+    "descomplica-salesforce",
+    "--",
+    "/usr/bin/install",
+    "--version",
+  ]);
+  const invocation = calls.find(
+    (call) => call.command === "/usr/sbin/runuser" && call.args[3] === "/usr/local/bin/node",
+  );
   assert.deepEqual(invocation.args.slice(0, 6), [
     "-u",
     "descomplica-salesforce",
@@ -707,6 +926,9 @@ test("preflight blocks invalid runtime, root account, malformed secrets, stopped
     },
     (value) => {
       value.failImport = true;
+    },
+    (value) => {
+      value.failInstall = true;
     },
   ]) {
     const { io, context } = preflightFixture();
