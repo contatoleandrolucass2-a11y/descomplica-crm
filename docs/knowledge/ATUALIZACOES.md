@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Coleta unica Salesforce na VPS validada
+
+- Fonte: SSH, probe do monitor e exportador do release
+  1a949982071ea0f62b094051668bfdb3f24b18b6, usuario descomplica-salesforce.
+- Probe confirmou connected as 23:14 Brasilia. Exportacao iniciou 23:14:21
+  e concluiu 23:20:21 com publisher explicitamente false, sem agenda.
+- Contagens: oportunidades 19965; agendamentos 1091; visitas 514; pastas 2603;
+  vendas 766; corretores 36; contas Canal Imob 7. Nao sao contagens de escrita.
+- Candidato privado na VPS: 46592 bytes, modo 600, 15 metricas e 144 registros
+  de ranking. Schema Zod salesforceIngestionSchema do release validou sem issues.
+- requestId 3f9abc26-a79e-42bf-8a6c-402c5aecf974. Lock removido pelo exportador;
+  nenhum conteudo de cliente copiado para Git, chat ou maquina local.
+- Teste local report-collection.node-test.mjs: 20/20 passaram, com fixtures.
+  Suite geral nao repetida: nenhuma alteracao de runtime nesta etapa.
+- Main remoto e health permanecem 1160a0e92d734414f267249b63f56d70325fc529;
+  branch iniciou em 99dfed55179b9c745adc00e30fc7f95762dc8593.
+- Nenhuma escrita Supabase, publicacao n8n ou alteracao do n8n antigo.
+  Pendentes os gates de backup/ACL/RPC, workflow completo, primeira ingestao
+  confirmada e idempotencia. Somente depois habilitar agenda de 30 minutos.
+- Transformacao levou aproximadamente 133 segundos apos a ultima fonte;
+  tempo total de cerca de seis minutos nao garante SLA em outros volumes.
+
 ## 2026-10-12: Autenticacao HTTP VPS para n8n confirmada
 
 - Fonte: SSH e MCP oficial, 23:11 Brasilia, branch codex/n8n-crm-isolado.

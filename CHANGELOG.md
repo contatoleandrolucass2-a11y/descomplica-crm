@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Coleta Salesforce na VPS comprovada
+
+- Sete relatorios coletados com sessao dedicada; candidato privado passou no schema.
+- Confirma somente coleta e transformacao, sem publicacao ou agenda automatica.
+
 ## 2026-10-12: Autenticacao HTTP da candidata confirmada
 
 - Teste sintetico VPS para novo n8n comprova rejeicao de token ausente/incorreto

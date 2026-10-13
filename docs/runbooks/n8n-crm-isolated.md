@@ -1,5 +1,17 @@
 # N8n exclusivo do CRM
 
+## Coleta unica em 12/10/2026
+
+Executada entre 23:14:21 e 23:20:21 Brasilia no release Salesforce
+1a949982071ea0f62b094051668bfdb3f24b18b6, com publisher explicitamente false.
+Contagens: oportunidades 19965, agendamentos 1091, visitas 514, pastas 2603,
+vendas 766, corretores 36 e contas Canal Imob 7. O arquivo candidato ficou
+somente na VPS, privado 600, com 46592 bytes; schema Zod do release aprovado
+sem issues, 15 metricas e 144 registros de ranking. Lock liberado normalmente.
+Nenhuma fonte bruta ou segredo entrou no Git. Nenhum dado foi enviado ao n8n
+ou Supabase. Os gates de primeira escrita do runbook de migracao continuam
+obrigatorios; esta evidencia nao habilita a agenda automaticamente.
+
 ## Evidencia HTTP em 12/10/2026, 23:11 Brasilia
 
 Teste isolado autorizado, com fixture inteiramente sintetica, executado da VPS

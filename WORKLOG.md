@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-12: Sete fontes coletadas na VPS
+
+- Coleta unica com publisher desligado concluiu em aproximadamente seis minutos.
+- Schema do release validou candidato privado: 15 metricas, 144 participantes.
+- Testes locais de coleta: 20 passaram; nenhuma mudanca de runtime ou deploy.
+- Sem envio ao n8n/Supabase; agenda continua desligada e gates de ingestao pendentes.
+
 ## 2026-10-12: Teste HTTP isolado concluido
 
 - Candidata L90AYSBEat4vYHLz publicada temporariamente por MCP com autorizacao.
