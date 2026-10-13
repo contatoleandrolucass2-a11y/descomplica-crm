@@ -86,6 +86,35 @@
 - Protege recursos existentes e documenta acesso privado, HTTPS e recuperacao.
 - Nao importa nem altera workflows ou credenciais da instancia anterior.
 
+## 2026-10-12: Gate de sessao da Rotina
+
+- Rotina: inclui a tabela compartilhada no gate restritivo de sessao/MFA e nos inventarios SQL de seguranca.
+
+## 2026-10-12: Persistencia compartilhada da Rotina
+
+- Grava rotinas no CRM, compartilhadas entre dispositivos e usuarios autorizados.
+- Restringe edicao a gestores autorizados e detecta conflitos de versao.
+- Permite importar a copia antiga do navegador sem substituir dados automaticamente.
+- Destaca o cabecalho dos dias com cor propria.
+
+## 2026-10-12: Rolagem da Rotina em producao
+
+- Publicado 1160a0e com Hoje alinhado a esquerda, rolagem de pagina e somente
+  os dias fixos abaixo do menu. Titulo e salvar seguem o padrao Associativo.
+- CI completa e conferencias operacionais/visuais aprovadas.
+
+## 2026-10-12: Rolagem e acabamento da Rotina
+
+- Usa rolagem da pagina, fixando apenas os dias abaixo do menu do CRM.
+- Alinha a visao Hoje a esquerda e aproxima titulo/botao do Associativo.
+- Preserva edicao, modos Semana/Hoje, conteudo e salvamento local.
+
+## 2026-10-12: Rotina compacta em producao
+
+- Publica Semana/Hoje, seis dias, textos centralizados, linhas compactas e
+  cabecalhos fixos na versao 9ff3fd3, com CI completa e smoke aprovado.
+- Preserva 26 linhas/74 atividades e salvamento local ao navegador.
+
 ## 2026-10-12: Teste de cancelamento assincrono
 
 - Sincroniza a verificacao do cancelamento no servidor com espera limitada,

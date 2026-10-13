@@ -17,7 +17,7 @@ import routineStyles from "./rotina/RoutineSettings.module.css";
 export const metadata = { title: "Gestão" };
 
 export default async function ManagementHubPage() {
-  await enforcePermission("crm.settings.manage");
+  await enforcePermission("crm.dashboard.view");
   if (!getProtectedPageGate("/app/gestao")?.releaseEnabled) forbidden();
   const routineReleased = getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true;
   const routineCard = (

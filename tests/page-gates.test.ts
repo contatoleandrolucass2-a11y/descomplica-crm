@@ -8,6 +8,19 @@ import {
 } from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
+  it.each(["gestao", "gestao/rotina"])(
+    "keeps %s readable behind the dashboard server guard",
+    (route) => {
+      const source = readFileSync(
+        new URL(`../app/(protected)/app/${route}/page.tsx`, import.meta.url),
+        "utf8",
+      );
+      expect(source).toContain('enforcePermission("crm.dashboard.view")');
+      expect(source).not.toContain('enforcePermission("crm.settings.manage")');
+      expect(getProtectedPageGate(`/app/${route}`)?.permission).toBe("crm.dashboard.view");
+    },
+  );
+
   it("matches the exact approved twenty-seven-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
@@ -19,8 +32,8 @@ describe("protected commercial page set", () => {
         "admin.pages|/admin/paginas|pages.manage",
         "admin.users|/admin/usuarios|users.view",
         "crm.dashboard|/app|crm.dashboard.view",
-        "crm.management.routine|/app/gestao/rotina|crm.settings.manage",
-        "crm.management|/app/gestao|crm.settings.manage",
+        "crm.management.routine|/app/gestao/rotina|crm.dashboard.view",
+        "crm.management|/app/gestao|crm.dashboard.view",
         "crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view",
         "crm.repasse|/app/repasse|crm.partnerships.view",
         "crm.ranking|/app/ranking|crm.ranking.view",

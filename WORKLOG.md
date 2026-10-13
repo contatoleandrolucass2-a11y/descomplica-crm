@@ -145,6 +145,48 @@
 - 37 testes focados, tipos/build aprovados; suite Windows tem nove falhas fora
   do escopo. CI Linux validate passou em26e29e5; gates completos ainda pendentes.
 
+## 2026-10-12: Rotina compartilhada
+
+- API autenticada e RPC versionada substituem localStorage como autoridade.
+  Leitura por crm.dashboard.view e escrita por crm.settings.manage.
+- Revisao por funcao impede sobrescrita concorrente; erros preservam rascunhos.
+  Atualizacao ao focar/30 segundos somente sem alteracoes pendentes.
+- Legado local permanece disponivel para importacao explicita por funcao.
+- Cabecalho com faixa teal e Hoje cyan, contraste legivel nos tres temas.
+- Usuario autorizou migration aditiva de producao apos testes e backup.
+  Implementacao em validacao; nao confundir com publicacao concluida.
+- CI inicial aprovou aplicativo Linux e detectou fixtures/inventario SQL;
+  corrigidos escopo unico e gate restritivo MFA, aguardando nova execucao.
+
+## 2026-10-12: Publicacao da rolagem da Rotina
+
+- PR #197 integrado em 1160a0e, CI main 38328297524 aprovada integralmente.
+- Imagem imutavel publicada com backup e coordenador, as 22:21:12 de Sao Paulo.
+- Smoke confirmou Hoje a esquerda, titulo regular e cabecalho dos dias a 58px,
+  imediatamente abaixo do menu. Titulo/abas/toolbar rolam; tabela sem scroll
+  vertical interno. Health exato e container saudavel, sem reinicios.
+- Evidencias, hashes e limites em docs/knowledge/ATUALIZACOES.md.
+
+## 2026-10-12: Rotina com rolagem de pagina
+
+- Remove limite de altura/rolagem vertical interna. Somente os dias acompanham
+  a pagina abaixo do menu, com o padrao de cabecalho real usado no Tabelao.
+  Titulo, abas e toolbar da funcao rolam normalmente; horizontal preservada.
+- Hoje alinha atividades a esquerda; Semana conserva centro e texto integral.
+- Titulo com peso regular e botao com contorno animado do padrao Associativo,
+  respeitando movimento reduzido e estado desabilitado. Referencia intacta.
+- Testes de geometria e matriz autenticada atualizados para o novo contrato.
+
+## 2026-10-12: Publicacao concluida da Rotina compacta
+
+- Publicado 9ff3fd3 pelo coordenador apos CI main 38302711569 integralmente
+  aprovada, prova da imagem imutavel e backup privado verificado.
+- Health exato, container saudavel e acesso anonimo protegido. Smoke
+  autenticado conferiu Semana/Hoje, 26 linhas/74 atividades e sticky.
+- Causa do bloqueio anterior confirmada na CI: fechamento do cliente precedia
+  o cancelamento do servidor. Teste sincronizado, sem mudar runtime ou gates.
+- Evidencias e limites em docs/knowledge/ATUALIZACOES.md; Obsidian sincronizado.
+
 ## 2026-10-12: Sincronizacao do teste de timeout do gateway
 
 - Aguarda de forma limitada o cancelamento observado no servidor depois do

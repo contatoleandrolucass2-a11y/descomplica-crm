@@ -20,7 +20,7 @@ describe("Gestão", () => {
   it("links to the released routine after the server permission guard", async () => {
     mocks.gate.mockReturnValue({ releaseEnabled: true });
     const markup = renderToStaticMarkup(await ManagementHubPage());
-    expect(mocks.enforce).toHaveBeenCalledWith("crm.settings.manage");
+    expect(mocks.enforce).toHaveBeenCalledWith("crm.dashboard.view");
     expect(markup).toContain('href="/app/gestao/rotina"');
     expect(markup).toContain("Rotina liberada");
   });

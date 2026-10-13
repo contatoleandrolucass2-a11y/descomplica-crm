@@ -385,6 +385,139 @@
   de carga comercial. Rollback limitado a parar este projeto sem excluir volumes.
   Nao alterar n8n antigo, conectar Supabase nem ativar agenda ate essas provas.
 
+## 2026-10-12: Persistencia compartilhada da Rotina em preparacao
+
+- Retomada: origin/main e health publico confirmam 1160a0e, status ok.
+  Branch codex/rotina-compartilhada preserva os registros documentais de #199.
+- Pedido confirmado: dados compartilhados entre computadores/usuarios;
+  somente administradores e gestores autorizados editam. Leitores sem escrita.
+- Plano: RPC autenticada, revisao por funcao para impedir sobrescrita concorrente,
+  importacao explicita de legado local e cabecalho com contraste distinto.
+  Nenhum dado local deve substituir silenciosamente a versao compartilhada.
+- Mudanca de banco sera aditiva e testada com pgTAP antes de qualquer aplicacao.
+  Producao ainda mantem salvamento local nesta conferencia.
+- Usuario autorizou explicitamente a migration aditiva da Rotina e publicacao,
+  condicionadas a testes e backup. Projeto confirmado pelo runtime:
+  hnncxuerlcsaahdxoswb, descomplica-crm-production; nao usar o banco self-hosted.
+- Implementacao: RPCs sem acesso direto a tabela, RLS forcada, CAS por funcao,
+  limite UTF-16 consistente e importacao apenas de papeis locais validos.
+  Revisao focal de seguranca sem achados residuais nesses caminhos.
+- Validacao local Windows/Node 24.19.0/pnpm 11.20.0: 70 testes focais de
+  API/interface aprovados, incluindo Chromium; 30 de inventario/hub aprovados.
+  Lint, tipos, formatacao e build aprovados. Suite geral: 2567 passaram, 43 ignorados e seis
+  falhas POSIX conhecidas em quatro arquivos; nao equivalem a CI aprovada.
+  Causa: modos/ownership Unix indisponiveis neste host; escopo exclusivo dos
+  testes de backup, retirement, manifesto comercial e mapping import.
+  Reavaliar no Linux do mesmo SHA, sem enfraquecer assertions.
+- pgTAP novo tem 91 casos; restore passa a esperar 1242 no total.
+  Execucao SQL, QA autenticado completo e gates de CI ainda pendentes.
+- PR #200, CI 38335624699: validate Linux aprovado; banco/restore reprovaram
+  fixture com escopos de equipe repetidos e inventario/gate MFA da nova tabela.
+  Corrigidos escopo unico por alvo, limpeza de claims administrativos, policy
+  restritiva padrao e allowlists de tabela/RPC. Sem remover assertions.
+  Nova execucao SQL obrigatoria antes de migration; producao inalterada.
+
+## 2026-10-12: Rolagem da Rotina publicada e verificada
+
+- Fonte: PR #197 e CI main 38328297524, quatro jobs aprovados, SHA exato
+  1160a0e92d734414f267249b63f56d70325fc529. Publicacao pelo coordenador
+  release:production, com consulta no minuto, CAS, travas e sem rebuild.
+- Deployment 519064c7-2816-4cb6-88a3-ed3100bd5489, concluido em
+  2026-10-13T01:21:12.886Z (12/10/2026 22:21:12 America/Sao_Paulo).
+  Anterior 9ff3fd3 preservado; nenhuma pendencia no ledger.
+- Imagem sha256:92857837d0e5076b607865651194a78dd4d591c30d2f2e8d28ac67eb69edd97a;
+  configuracao CI sha256:840f99b1dd7c323301d3711526b579eee41abc11acdce6b6f4adf42bc659483e.
+  Checksum, manifesto, 11 camadas e dois perfis de runtime verificados.
+- Backup privado verificado em
+  /var/backups/descomplica-crm/releases/1160a0e92d734414f267249b63f56d70325fc529.GwoIvt;
+  manifest SHA-256 90dde07278e50c6a6a25ee75211a74756baa07a956f4b2d43bbb61760eecec54.
+- Pos-publicacao: health publico com SHA exato, container healthy, zero
+  reinicios e sem OOM. Inventario anonimo 401; Gestao/Rotina anonimas 307.
+- Smoke autenticado somente leitura em /app/gestao/rotina: 156 campos,
+  74 preenchidos, Hoje com 24 atividades alinhadas a esquerda; h1 32px/400.
+  Regiao sem overflow vertical, max-height none. Com window.scrollY 472,
+  menu bottom 58px e cabecalho top 58px; titulo/abas/toolbar fora da viewport,
+  scrollTop interno zero. Capturas locais ignoradas em test-results/routine-preview:
+  rotina-rolagem-publicada.jpg e rotina-cabecalho-publicado.jpg.
+- Nenhum Salvar/Inserir/Reset executado em producao. Persistencia permanece
+  local ao navegador; nenhuma alteracao em Associativo, dados ou financeiro.
+  Limites Windows e validacao Linux registrados abaixo, sem relaxar gates.
+- Este encerramento e documental: nao requer novo deploy ou restart.
+
+## 2026-10-12: Rolagem de pagina aprovada e integrada
+
+- PR #197 aprovado na CI 38325392795 (validate, restore e release-gates),
+  integrado em 1160a0e92d734414f267249b63f56d70325fc529. PR #196 encerrado
+  como substituido com todos os registros preservados.
+- Node 24.19.0/pnpm 11.20.0 local: lint, typecheck e build aprovados.
+  Chromium 23/23. Suite Windows: 2522 aprovados, 28 skips, seis falhas POSIX
+  e tres timeouts de Obsidian. CI Linux integral aprovada, sem alterar gates.
+- Menu e cabecalho real verificados por geometria, inclusive fim de tabela;
+  titulo/abas/toolbar saem da viewport. Sem mudanca em Associativo ou dados.
+  Integracao nao e publicacao: aguardar CI main e promocao protegida.
+
+## 2026-10-12: Ajuste solicitado de rolagem e referencia Associativo
+
+- Abertura: GitHub main e health publico conferidos em 9ff3fd3, site ok.
+  PR documental #196 ainda aberto, validate/restore aprovados e release-gates
+  em andamento. Registros preservados nesta branch derivada.
+- Novo escopo: Hoje alinhado a esquerda, titulo/botao conforme Associativo,
+  rolagem vertical da pagina e somente cabecalho dos dias fixo abaixo do menu.
+  Titulo principal, abas e toolbar da funcao devem rolar normalmente.
+  Associativo permanece referencia somente leitura.
+- Retomada apos interrupcao do runtime: sessao local de validacao nao existe
+  mais e logs finais nao foram criados. Nenhuma aprovacao presumida; repetir
+  os checks. GitHub main e health continuam 9ff3fd3/ok; edicoes preservadas.
+- Chromium isolado atualizado: 23/23 aprovados. Exercita scroll da janela,
+  ausencia de overflow vertical interno, limite inferior da tabela, alinhamento
+  horizontal do cabecalho real, menu acima da tabela, titulo/abas/toolbar fora
+  da viewport, Hoje a esquerda e animacao do salvar com reduced-motion.
+  Capturas sinteticas inspecionadas; CI autenticada ainda necessaria.
+
+## 2026-10-12: Rotina compacta publicada e conferida
+
+- CI main 38302711569 aprovada nos quatro jobs: validate, release-gates,
+  isolated-restore e promotable-image. SHA publicado:
+  9ff3fd3fe175cc5b5b36babe0fb8815c53a8a14d. Sem rebuild na VPS.
+- Artefato verificado por checksum, configuracao, manifesto OCI e 11 camadas.
+  Config CI: sha256:ffe0d989b2a9aa15c6a317f43e3a63d2378bb707a5b6cb3b786cb8b2979720fa.
+  Imagem Docker: sha256:547a5c7b2dce3b08480d81f526ad6b2adb940b485816dae613d39e53a7650782.
+  Dois perfis de runtime aprovados sobre a mesma imagem.
+- Coordenador release:production concluiu com CAS/travas e consulta atual de
+  main/CI/health. Deployment 192fefa4-28bc-4421-9621-3bc77cdad8ca,
+  2026-10-12T21:47:17.004Z (18:47:17 America/Sao_Paulo), sem pendencia.
+  Anterior 1dd58c46e53281943ea68378efc4e8b3473c395c preservado.
+- Backup privado verificado em
+  /var/backups/descomplica-crm/releases/9ff3fd3fe175cc5b5b36babe0fb8815c53a8a14d.ky1ARs;
+  manifest SHA-256 9925f26c158432266c082073a7a43d4e3c809699a972b376105b31a7fcc5bb08.
+  Nenhum segredo registrado no Git ou exportado.
+- Pos-publicacao: health ok/SHA exato; container healthy, sem OOM e zero
+  reinicios. Inventario anonimo 401; Gestao e Rotina anonimas 307.
+- Smoke autenticado observacional: titulo novo, seis dias, 26 linhas,
+  156 campos habilitados e 74 atividades. Hoje exibiu 24 atividades de
+  segunda-feira. Titulo e cabecalho mantiveram top 180.0625px/216px apos
+  rolagem ate as ultimas linhas. Captura local ignorada:
+  test-results/routine-preview/rotina-publicada.jpg. Sem editar/salvar dados.
+- Limite preservado: salvamento local ao navegador, nao compartilhado.
+  Este fechamento documental nao exige novo restart da aplicacao.
+
+## 2026-10-12: Cancelamento corrigido e release da Rotina em validacao
+
+- CI 38289033322 reproduziu o cliente fechando antes do cancelamento no
+  servidor; diagnostico fixo do teste confirmou a ordem. Espera limitada
+  pelo abort preserva a assercao e reabertura, acrescentando backend sem
+  conexoes. Revisao independente sem achados; runtime nao foi alterado.
+- Linux: 2531 testes Vitest, 137 Salesforce e 94 de release aprovados.
+  Primeira tentativa parou depois por HTTP 403 da fonte Prefeitura; segunda
+  passou todos os gates, sem dispensar a consulta. PR #195 integrado em
+  9ff3fd3fe175cc5b5b36babe0fb8815c53a8a14d; CI main 38302711569 iniciada.
+- Local Windows: lint e typecheck aprovados (um warning herdado), build 49
+  rotas aprovado, gateway 36/36. Suite global: 2525 aprovados, 27 skips e
+  seis falhas de modos POSIX preexistentes. Linux segue autoridade do release.
+- Retomada apos espera longa: main ainda era 5bf6213 e health ok/1dd58c4
+  antes do merge. Checkout limpo de 9ff3fd3 preparado na VPS; sem deploy
+  ate esta nota. Versao publicada continua distinta da integrada.
+
 ## 2026-10-12: Retomada da publicacao da Rotina
 
 - Conferencia de abertura: GitHub main permanece 5bf6213; GET publico
