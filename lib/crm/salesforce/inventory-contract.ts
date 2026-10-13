@@ -49,6 +49,7 @@ export const salesforceInventorySchema = z
     sourceKind: z.literal("live"),
     reportId: z.literal("00OU6000007yRpKMAU"),
     generatedAt: z.iso.datetime(),
+    collectionMode: z.literal("automatic").optional(),
     sourceRows: z.number().int().positive().max(100_000),
     duplicateRows: z.number().int().nonnegative(),
     projectCount: z.number().int().positive(),

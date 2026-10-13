@@ -18,6 +18,8 @@ Environment=SALESFORCE_CRM_ORIGIN=https://crm.descomplicapro.com.br
 Environment=SALESFORCE_STATUS_ENABLED=true
 Environment=SALESFORCE_N8N_PUBLISH_ENABLED=true
 Environment=SALESFORCE_N8N_WEBHOOK_URL=https://n8n-crm.descomplicapro.com.br/webhook/descomplica-crm-salesforce-candidate
+Environment=SALESFORCE_INVENTORY_AUTOMATIC_ENABLED=true
+Environment=SALESFORCE_INVENTORY_OUTPUT=/var/lib/descomplica-salesforce/inventory-candidate.json
 Environment=SALESFORCE_CANDIDATE_OUTPUT=/var/lib/descomplica-salesforce/candidate.json
 LoadCredential=n8n-bearer:/srv/descomplica-n8n/salesforce-test.token
 LoadCredential=status-bearer:/var/lib/descomplica-salesforce/status-bearer
@@ -45,7 +47,7 @@ RestrictSUIDSGID=true
 LockPersonality=true
 CapabilityBoundingSet=
 RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
-ReadWritePaths=/var/lib/descomplica-salesforce
+ReadWritePaths=/var/lib/descomplica-salesforce /var/lib/descomplica-salesforce-inventory
 MemoryMax=768M
 TasksMax=128
 LimitCORE=0

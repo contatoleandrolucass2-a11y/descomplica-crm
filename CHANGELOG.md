@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-13 — Estoque automático
+
+Recupera a base anterior em falhas após a troca atômica e distingue publicação
+não confirmada quando a recuperação também falha ou há substituição concorrente.
+
+Adiciona ESTOQUE SPC à agenda automática de 30 minutos, totalizando oito relatórios em Integrações. Atualiza os quatro simuladores por publicação atômica validada, conserva última base válida em falhas e mostra horário próprio e modo automático.
+
 ## 2026-10-13: Estoque Salesforce para todos os simuladores
 
 - Acrescenta coleta completa e validada do ESTOQUE SPC e uma fonte oficial

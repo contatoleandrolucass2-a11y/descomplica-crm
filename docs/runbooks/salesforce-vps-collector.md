@@ -9,7 +9,9 @@ nao reinicia navegador, gateway, CRM ou n8n. O n8n antigo fica fora do escopo.
 - Primeiro ciclo imediato; seguintes nas fronteiras de 30 minutos. Se uma
   coleta atravessar uma fronteira, aguarda a proxima, sem sobreposicao.
 - Lock exclusivo pelo caminho do candidato, limite de coleta de 25 minutos,
-  cancelamento cooperativo e publicacao somente apos os sete relatorios.
+  cancelamento cooperativo e publicacao comercial somente apos os sete relatorios.
+  O ESTOQUE SPC é coletado e publicado em seguida, com limite adicional de cinco
+  minutos, antes de agendar o próximo ciclo. Ver [estoque automático](salesforce-inventory.md).
 - Arquivo candidato privado e substituido atomicamente. Falha de coleta nao
   substitui o candidato anterior; falha de publicacao nao apaga o banco.
 - Novo n8n recebe somente o snapshot normalizado. O CRM valida e chama a RPC
