@@ -56,6 +56,20 @@ destino externo autorizado antes de carregar dados comerciais nesta instancia.
 
 ## Proxima etapa
 
+### Estado em 12/10/2026, 21:32 Brasilia
+
+DNS A novo e certificado dedicados aplicados. Nginx usa nginx-pending.conf:
+HTTP redireciona ao HTTPS; HTTPS retorna503, sem proxy para o cadastro inicial.
+Certificado vence em 10/01/2027; certbot.timer ativo e hook existente de reload.
+Backup privado de configuracao em /srv/descomplica-n8n/nginx-before-https-20261013.tar.gz.
+Esse backup nao e backup dos dados n8n. Validacao nginx -t e HTTPS externo
+confirmados; CRM continua ok em9ff3fd3 e servicos Salesforce ativos.
+
+Antes de liberar: operador conclui owner pelo tunel; confirmar tela autenticada,
+configurar URLs HTTPS e N8N_PROXY_HOPS para o proxy unico, validar Compose,
+recriar somente novo n8n e aplicar vhost proxy revisado. Nao substituir503
+sem owner confirmado. MCP, backup/restore e automacoes permanecem pendentes.
+
 Depois de conta, HTTPS e MCP validado, criar fluxos inativos exclusivos do CRM.
 Nao ativar agenda antes de conciliar os sete relatórios e o recibo final da
 publicacao. Seguir [contrato Salesforce](salesforce-n8n-migration.md). Conexao

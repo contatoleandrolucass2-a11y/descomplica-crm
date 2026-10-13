@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Retomada DNS n8n pela Hostinger
+
+- Fonte: GitHub API e health publico em 2026-10-13T00:27Z. Main e runtime
+  permanecem em 9ff3fd3; PR198 aberto em 2608b31, CI38326970948 em andamento.
+- Acesso observacional a guia Hostinger recuperado nesta retomada. Autorizacao
+  limitada ao novo A n8n-crm e HTTPS; preservar registros e instancia antigos.
+  Owner ainda nao confirmado; nao expor setup administrativo na internet.
+- Aplicado 21:29-21:32 Brasilia: Hostinger confirmou novo A n8n-crm, TTL300;
+  DNS autoritativo e1.1.1.1 resolvem187.127.249.50. Registros anteriores intactos.
+  Certbot webroot com conta existente emitiu certificado ate2027-01-10.
+- Backup privado do Nginx anterior; virtual host exclusivo, nginx -t aprovado,
+  reload sem restart. Primeira consulta imediatamente apos reload viu certificado
+  antigo; consulta posterior com verificacao TLS normal confirmou503 esperado.
+  Opcoes listen alinhadas ao http2 existente para eliminar aviso Nginx.
+- HTTPS externo retorna503 deliberado, sem proxy para owner setup. Cadastro
+  privado observado em localhost5678/setup, handoff ao usuario para senha.
+  CRM segue ok/9ff3fd3; browser/monitor Salesforce e certbot.timer ativos.
+
 ## 2026-10-12: Inicio de instancia n8n exclusiva
 
 - Usuario confirmou preservar integralmente o n8n antigo e seguir com nova

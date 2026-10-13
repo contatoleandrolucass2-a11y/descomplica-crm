@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-12: DNS e HTTPS isolados do n8n
+
+- Novo A n8n-crm criado pela Hostinger, TTL300, para 187.127.249.50.
+- Certificado dedicado emitido com conta ACME existente, validade 2027-01-10.
+- Backup privado do Nginx antes da inclusao; nginx -t aprovado e reload apenas.
+- HTTPS retorna503 intencionalmente ate cadastro privado do owner. Nenhum proxy
+  ao setup publico, nenhum workflow alterado e nenhum restart do CRM.
+- Inclui tres testes de perimetro e templates HTTP/HTTPS pendentes.
+
 ## 2026-10-12: Preparacao de n8n exclusivo do CRM
 
 - Nova infraestrutura isolada em ops/n8n, sem modificar o n8n anterior.

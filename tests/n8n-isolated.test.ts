@@ -14,6 +14,25 @@ const compose = load(source);
 const hash = "a".repeat(64);
 const id = `sha256:${"b".repeat(64)}`;
 
+describe("unclaimed owner perimeter", () => {
+  it.each(["nginx-bootstrap.conf", "nginx-pending.conf"])(
+    "%s never proxies owner setup",
+    (file) => {
+      const config = readFileSync(new URL(`../ops/n8n/${file}`, import.meta.url), "utf8");
+      expect(config).toContain("server_name n8n-crm.descomplicapro.com.br;");
+      expect(config).toContain("return 503");
+      expect(config).toContain("location ^~ /.well-known/acme-challenge/");
+      expect(config).not.toMatch(/proxy_pass|default_server/);
+    },
+  );
+  it("uses the dedicated certificate and modern TLS", () => {
+    const config = readFileSync(new URL("../ops/n8n/nginx-pending.conf", import.meta.url), "utf8");
+    expect(config).toContain("/live/n8n-crm.descomplicapro.com.br/fullchain.pem;");
+    expect(config).toContain("ssl_protocols TLSv1.2 TLSv1.3;");
+    expect(config).toContain("return 301 https://n8n-crm.descomplicapro.com.br$request_uri;");
+  });
+});
+
 function fixture() {
   const files = new Map<string, string>();
   let created = false;

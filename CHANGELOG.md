@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: HTTPS inicial do n8n
+
+- Configura subdominio exclusivo e TLS sem expor cadastro publico do owner.
+- Preserva instancia anterior, DNS existente e sessao Salesforce.
+
 ## 2026-10-12: Base n8n isolada
 
 - Adiciona preparacao de nova instancia n8n com banco e runner exclusivos.
