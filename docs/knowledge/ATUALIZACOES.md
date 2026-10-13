@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Retomada do backup externo e gates de ingestao
+
+- Backup externo concluido: bucket privado crm-private-backups, dois objetos
+  CMS AES256GCM/OAEP-SHA256, total881567bytes. Upload sem sobrescrita,
+  download identico e decrypt local com SHA256 exato. Chave nunca transferida.
+  Recibo privado offsite-20261013-HFynaO e copia criptografada local preservados.
+- Novo backup n8n local-20261013T051032Z-Xi29nV restaurado148tabelas. Corrigida
+  corrida pg_isready/socket temporario para SELECT1/TCP no banco destino.
+  Primeira execucao via PowerShell acrescentou CR final; invocacao Node resolveu.
+  Segunda tentativa revelou corrida real; script corrigido passou exit0.
+- Revisao independente crm-dados confirmou gate Salesforce sem Qlik/v3 e
+  necessidade de promocao efetiva para aplicar env (mesmo SHA resulta noop).
+  Checklist atualizado, sem migrations, restart ou escrita de dados comerciais.
+- MCP relido: candidata L90AYSBEat4vYHLz inativa, cinco nodes, versao
+  dcffaf09-354c-4a82-817c-5e6ca9da1dd5, sem gravacao de execucoes/agenda.
+- Repeticao da CI passou validate em 05:11Z, inclusive fonte anteriormente403;
+  release-gates e restore ainda em andamento nessa consulta.
+- Consulta 2026-10-13T05:07Z: producao health ok/SHA7c50f59; PR198
+  head63bf15b aberto. CI38349346664 falhou na fonte Prefeitura ITBI HTTP403,
+  nao no teste de criptografia. Release/restore dependentes foram ignorados.
+- Nenhum gate sera removido por indisponibilidade de fonte. Backup externo
+  autorizado pode avancar sem publicar runtime; nova tentativa CI sera conferida.
+- Chave local continua sem segunda copia independente confirmada; usuario
+  informou nao dispor de pendrive. N8n antigo e agenda permanecem preservados.
+
 ## 2026-10-13: Bucket privado e recuperacao sintetica
 
 - Bucket crm-private-backups criado no projeto autorizado, privado, limite

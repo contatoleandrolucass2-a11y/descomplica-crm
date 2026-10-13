@@ -297,11 +297,11 @@ nessa copia via RPC com `service_role`: 15 metricas e 144 participantes. Replay
 do mesmo request confirmou idempotencia e um unico run. O endpoint HTTP real
 e a credencial de saida n8n ainda precisam de prova depois dos gates abaixo.
 
-O catalogo cloud de 13/10/2026 possui a RPC Salesforce, mas nao as outras duas
-RPCs do item 2. Nao executar `db push` para convergir todo o historico: existem
+O catalogo cloud de 13/10/2026 possui a RPC Salesforce, mas nao as RPCs Qlik/v3,
+que a revisao excluiu deste cutover. Nao executar `db push` para convergir todo o historico: existem
 migrations remotas de contencao Qlik que precisam ser reconciliadas. A auditoria
 e preparacao foram autorizadas; aplicacao de migrations nao esta autorizada
-automaticamente. Manter configuracao/publisher/agenda desligados ate revisao.
+automaticamente. Manter configuracao/publisher/agenda desligados ate os gates.
 
 ### Checklist de liberacao
 
@@ -309,17 +309,24 @@ automaticamente. Manter configuracao/publisher/agenda desligados ate revisao.
    pgTAP exigida pelo commit: 229 e 1.099 são referências históricas
    desatualizadas, e o HEAD atual exige 1.104; nenhuma dessas contagens é
    evidência de execução remota nesta etapa;
-2. confirmar no alvo que `anon` não acessa tabelas, que `service_role` não tem
-   acesso direto às tabelas Qlik e executa somente as três RPCs de ingestão
-   auditadas do schema atual: `ingest_crm_imob_ranking_snapshot`,
-   `ingest_crm_read_model_v3` e `ingest_crm_salesforce_snapshot`;
+2. para este fluxo Salesforce, confirmar no alvo a RPC publica
+   `ingest_crm_salesforce_snapshot(jsonb)` com contrato v2 e implementacao v1
+   privada: execucao permitida a `service_role`, negada a `PUBLIC`, `anon` e
+   `authenticated`, sem chamada direta a implementacao privada. Validar RLS e
+   grants minimos das tabelas Salesforce; preservar a proibicao de acesso direto
+   de `anon`, `authenticated` e `service_role` as duas tabelas Qlik.
+   `ingest_crm_imob_ranking_snapshot` e `ingest_crm_read_model_v3` pertencem a
+   cutovers separados; nao instalar migrations desses fluxos para liberar
+   Salesforce. Revisao estatica registrada na auditoria de 13/10/2026;
 3. manter publisher e candidata n8n inativos e validar o snapshot completo pelo
    schema Zod;
 4. manter `goalsAvailable=false` até existir fonte oficial de metas;
 5. manter `rouletteAvailable=false` até existir fonte oficial de roleta;
 6. fazer backup protegido do Supabase novo e validar leitura/checksum;
-7. gerar Bearers exclusivos para origem→n8n e n8n→CRM, mantendo o primeiro em
-   arquivo regular privado (`0600` POSIX ou ACL owner-only Windows);
+7. conferir e reutilizar os Bearers exclusivos existentes para origem→n8n e
+   n8n→CRM, mantendo o primeiro em arquivo regular privado (`0600` POSIX ou
+   ACL owner-only Windows). Geracao ou rotacao somente quando necessaria e
+   autorizada; nao substituir credenciais existentes durante o preflight;
 8. pelo MCP n8n, completar autenticação, schema v2 e o único envio HTTP para o
    CRM; validar antes do update e reler depois, ainda sem ativar a agenda;
 9. habilitar somente `SALESFORCE_INGEST_ENABLED` e manter
@@ -335,7 +342,15 @@ automaticamente. Manter configuracao/publisher/agenda desligados ate revisao.
 O estado indisponível de metas e roleta foi autorizado para a primeira carga em
 6 de agosto de 2026. Ele não autoriza inventar metas, percentuais ou eventos de
 roleta. Antes da escrita, o PR deve ter todos os checks do GitHub Actions verdes
-e a migration v2 deve passar por dry-run/auditoria e ser aplicada isoladamente.
+e o contrato v2 deve ser conferido no catalogo. Se ja estiver implantado, nao
+reaplicar a migration. Qualquer SQL faltante exige auditoria, ensaio isolado e
+autorizacao especifica antes da aplicacao remota.
+
+Configuracao deve entrar por promocao efetiva de imagem validada, com backup e
+rollback do env sob o coordenador protegido de release. Mesmo SHA/imagem retorna
+`noop` antes do Compose: alterar o arquivo env sozinho nao injeta secrets no
+container. Conferir presenca das variaveis sem revelar valores, health/version
+e refresh desabilitado apos a promocao. Nao usar restart manual como atalho.
 
 A primeira carga e a agenda permanecem bloqueadas enquanto faltar qualquer um
 destes itens: workflow n8n completo e relido por MCP, Chrome/CDP dedicado com

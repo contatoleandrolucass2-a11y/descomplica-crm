@@ -33,3 +33,12 @@ test("restore proof uses an isolated disposable database, not the live database"
   assert.ok(source.includes("credential_decryption=not_tested"));
   assert.ok(source.includes("offsite=false"));
 });
+
+test("readiness requires the final TCP server and the actual restore database", () => {
+  assert.ok(
+    source.includes(
+      "docker exec \"$restore_id\" psql -h 127.0.0.1 -U n8n -d n8n_restore -Atc 'SELECT 1'",
+    ),
+  );
+  assert.ok(!source.includes('docker exec "$restore_id" pg_isready'));
+});

@@ -80,6 +80,12 @@ somente para satisfazer esse item ampliaria risco sem dependencia tecnica.
 
 ## Condicoes restantes
 
+Revisao estatica independente em 13/10/2026 confirmou o escopo Salesforce v2
+sem dependencia Qlik/v3. Checklist ajustado sem alterar grants ou migrations.
+Tambem identificado `noop` no release de mesmo SHA/imagem: secrets exigem
+promocao efetiva protegida, nao apenas edicao de env. Backup externo registrado
+em `docs/runbooks/crm-backup-storage.md`; nao elimina limites do restore original.
+
 1. Revisar o gate e o escopo remoto, sem migrations automaticas.
 2. Concluir PR/CI; aplicar configuracao privada via release protegida, com backup
    e rollback da configuracao, refreshfalse e publisher/agenda desligados.

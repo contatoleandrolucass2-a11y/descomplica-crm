@@ -34,13 +34,27 @@ por falha de inicializacao do agente no Windows; nao houve relaxamento da ACL.
 
 ## Gates restantes
 
+- Em 13/10/2026, dois arquivos reais foram criptografados, enviados sem
+  sobrescrita, baixados e recuperados localmente. SHA256 do arquivo recuperado
+  identico ao empacotado na VPS. A chave privada nao saiu do Windows.
+- Recibo privado: `/srv/descomplica-backups/offsite-20261013-HFynaO/receipt.json`.
+  Copias criptografadas e recibo de recuperacao tambem estao na pasta protegida
+  local da chave. Total: 881567 bytes. Nao foram criados links publicos.
+- Origem Supabase: `supabase-pre-salesforce-20261013-h0umc6`, ja restaurada com
+  65 contagens de tabelas coincidentes. Limites da auditoria original permanecem.
+- Origem novo n8n: `local-20261013T051032Z-Xi29nV`, restore isolado148tabelas,
+  checksums conferidos, sem teste de boot ou descriptografia das credenciais.
+  A recuperacao externa comprovou igualdade dos arquivos; nao repetiu o boot.
+- Corrigida prontidao do restore: consultar o banco real por TCP, evitando o
+  servidor temporario Unix socket da inicializacao Postgres. Nova rodada exit0.
+
+### Pendencias
+
 - Confirmar custodia independente da chave antes de depender deste destino.
-- Empacotar e criptografar os backups reais, sem incluir a chave privada.
-- Usar nomes unicos e upload sem sobrescrita; nunca enviar dumps em claro.
-- Respeitar limite por objeto; nenhum aumento de plano foi autorizado.
-- Baixar ciphertext, comparar SHA256 e testar recuperacao/restauracao real.
-- Nao aceitar plaintext de decrypt com exit code diferente de zero.
-- Registrar restauracao e limites antes de liberar ingestao e agenda.
+- Testar boot/restauracao completa em ambiente isolado antes de alegar DR total.
+- Em proximos backups, manter nomes unicos, limite por objeto e criptografia;
+  nunca enviar dumps em claro nem aceitar decrypt com exit code diferente de zero.
+- Concluir PR/CI, configuracao e reconciliacao da carga real antes da agenda.
 
 O bucket esta fora da VPS, mas no mesmo projeto Supabase. Exclusao ou perda
 de acesso ao projeto continua um risco comum; nao e backup independente do

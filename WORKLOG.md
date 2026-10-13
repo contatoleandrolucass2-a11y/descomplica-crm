@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-13: Backup externo recuperado e prontidao corrigida
+
+- Backups Supabase e novo n8n criptografados para bucket privado autorizado.
+  Download/checksum e recuperacao local com igualdade SHA256 aprovados.
+  Chave privada somente Windows; segunda copia independente ainda pendente.
+- Corrige corrida no restore novo n8n: TCP/SELECT no banco destino aguarda
+  servidor definitivo, em vez do socket temporario aceito por pg_isready.
+  Ensaio remoto corrigido exit0/148tabelas; n8n antigo intocado.
+- Revisao independente confirma gate especifico Salesforce e promocao efetiva
+  para injetar env; documenta reutilizacao de credenciais e nenhuma migration.
+- CI63bf15b bloqueada por fonte Prefeitura HTTP403; uma repeticao solicitada,
+  sem remover verificacao. Configuracao, ingestao e agenda ainda desligadas.
+
 ## 2026-10-13: Destino privado e chave de recuperacao
 
 - Bucket privado autorizado criado e testado com dados ficticios; sem upgrade.

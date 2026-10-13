@@ -74,7 +74,8 @@ restore_id=$(docker run -d --network none --memory 512m --cpus 0.5 --pids-limit 
 [[ $restore_id =~ ^[a-f0-9]{64}$ ]]
 ready=false
 for attempt in {1..30}; do
-  if docker exec "$restore_id" pg_isready -U n8n -d n8n_restore >/dev/null 2>&1; then ready=true; break; fi
+  # The image's temporary init server accepts Unix sockets before database creation.
+  if docker exec "$restore_id" psql -h 127.0.0.1 -U n8n -d n8n_restore -Atc 'SELECT 1' >/dev/null 2>&1; then ready=true; break; fi
   sleep 1
 done
 [[ $ready == true ]]
