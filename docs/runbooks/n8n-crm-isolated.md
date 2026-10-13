@@ -23,10 +23,12 @@ nao usar REST, importacao CLI ou banco como contorno.
 - Resposta 202 com ok false identifica somente a candidata; nao e recibo de ingestao.
 - Armazenamento de execucoes desativado para sucesso, erro, manual e progresso;
   timeout de 600 segundos e timezone America/Sao_Paulo confirmados por releitura.
-- OAuth renovado com execucao e leitura de metadados de credenciais autorizadas,
-  mas execute_workflow ainda ausente no inventario deste chat. Recarregar MCP
-  no cliente e verificar disponibilidade antes do teste; sem contorno REST/CLI.
-  Testes locais e validacao SDK nao comprovam execucao remota ponta a ponta.
+- OAuth renovado com execucao e leitura de metadados de credenciais autorizadas.
+  Execucao manual MCP 2 aprovada em 12/10/2026, 22:57 Brasilia: fixture aceita
+  pelo validador e ultimo node success. Registro habilitado temporariamente
+  com autorizacao e restaurado para none/false apos o teste, com releitura.
+  Fixture sem header secreto nao verifica autenticacao HTTP, resposta de rede
+  ou integracao ponta a ponta. Fluxo continua inativo; evidencia sintetica mantida.
 - Antes de ativar: teste da credencial, contrato completo e teste ponta a ponta
   com dados sinteticos, mais destino externo autorizado de backup. Backup de Nginx
   nao substitui backup do PostgreSQL e da chave de criptografia.

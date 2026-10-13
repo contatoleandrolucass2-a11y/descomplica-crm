@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-12: Processamento sintetico confirmado
+
+- Execucao manual MCP 2 passou; accepted true no validador e ultimo node success.
+- Registro temporario autorizado restaurado para none/false e relido.
+- Fluxo inativo. Autenticacao HTTP da VPS, exportacao e ingestao nao testadas.
+- Somente documentacao local; sem nova suite geral ou deploy do CRM.
+
+
 ## 2026-10-12: Rate limit antes do teste sintetico
 
 - Registro temporario autorizado; validate_workflow recebeu HTTP 429.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Teste remoto da candidata aprovado
+
+- Confirma processamento de fixture pelo MCP e restauracao da privacidade.
+- Mantem automacao inativa e distingue teste interno de autenticacao HTTP.
+
+
 ## 2026-10-12: Limite MCP registrado
 
 - Registra HTTP 429 anterior a qualquer alteracao para teste sintetico.

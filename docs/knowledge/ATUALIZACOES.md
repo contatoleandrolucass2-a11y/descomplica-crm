@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Teste sintetico remoto aprovado
+
+- Limite liberado: validate_workflow retornou valid true/tres nodes. Fonte
+  SDK recarregada do arquivo local apos argumento ausente em chamada inicial;
+  erro de argumento nao foi HTTP 429 nem produziu alteracao remota.
+- Mediante autorizacao especifica, settings manual/success/error habilitados
+  temporariamente via MCP e relidos. Executada somente uma fixture sintetica,
+  sem header secreto, Salesforce ou saida Supabase, em executionMode manual.
+- Execucao 2 do workflow L90AYSBEat4vYHLz: status success, inicio 22:57:22 e
+  fim 22:57:25 Brasilia. Validador retornou accepted true e ultimo node
+  Responder Validacao Candidata terminou success, verificados por MCP.
+- Escopo da prova: processamento interno. Execucao MCP sem header nao testa
+  a autenticacao HTTP da VPS; nao comprova resposta de rede, exportacao real,
+  qualidade integral dos relatorios nem ingestao CRM. Fixture preservada
+  como evidencia, sem token real ou dados pessoais.
+- validate_workflow aprovado antes da restauracao; update e releitura
+  confirmaram saveManualExecutions false, success/error none, progresso false
+  e active false. Sem versao publicada. Nenhuma mudanca no n8n antigo.
+- Etapa documental local e teste remoto autorizado; sem nova suite geral,
+  alteracao de codigo ou deploy CRM. Proximo gate: teste HTTP autenticado
+  da VPS e, separadamente, conciliacao/exportacao e destino final autorizado.
+
 ## 2026-10-12: Teste temporario autorizado, bloqueado por rate limit
 
 - Operador autorizou persistencia temporaria exclusivamente de execucao
