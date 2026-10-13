@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-12: Rotina com rolagem de pagina
+
+- Remove limite de altura/rolagem vertical interna. Somente os dias acompanham
+  a pagina abaixo do menu, com o padrao de cabecalho real usado no Tabelao.
+  Titulo, abas e toolbar da funcao rolam normalmente; horizontal preservada.
+- Hoje alinha atividades a esquerda; Semana conserva centro e texto integral.
+- Titulo com peso regular e botao com contorno animado do padrao Associativo,
+  respeitando movimento reduzido e estado desabilitado. Referencia intacta.
+- Testes de geometria e matriz autenticada atualizados para o novo contrato.
+
+## 2026-10-12: Publicacao concluida da Rotina compacta
+
+- Publicado 9ff3fd3 pelo coordenador apos CI main 38302711569 integralmente
+  aprovada, prova da imagem imutavel e backup privado verificado.
+- Health exato, container saudavel e acesso anonimo protegido. Smoke
+  autenticado conferiu Semana/Hoje, 26 linhas/74 atividades e sticky.
+- Causa do bloqueio anterior confirmada na CI: fechamento do cliente precedia
+  o cancelamento do servidor. Teste sincronizado, sem mudar runtime ou gates.
+- Evidencias e limites em docs/knowledge/ATUALIZACOES.md; Obsidian sincronizado.
+
 ## 2026-10-12: Sincronizacao do teste de timeout do gateway
 
 - Aguarda de forma limitada o cancelamento observado no servidor depois do

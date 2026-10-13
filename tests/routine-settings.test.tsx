@@ -3,7 +3,13 @@ import { mkdir } from "node:fs/promises";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
-import { chromium, expect as browserExpect, type Browser, type Page } from "@playwright/test";
+import {
+  chromium,
+  expect as browserExpect,
+  type Browser,
+  type Locator,
+  type Page,
+} from "@playwright/test";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 
@@ -83,8 +89,12 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   let fixtureHtml: string;
   let script: string;
   let stylesheet: string;
+  let checkRoutineScrolling: (page: Page, region: Locator) => Promise<void>;
 
   beforeAll(async () => {
+    ({ checkRoutineScrolling } = await import(
+      pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
+    ));
     const require = createRequire(import.meta.url);
     const vitestRequire = createRequire(require.resolve("vitest/package.json"));
     const { build } = await import(pathToFileURL(vitestRequire.resolve("vite")).href);
@@ -138,8 +148,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     expect(script.length).toBeGreaterThan(0);
     fixtureHtml = `<!doctype html><html lang="pt-BR" data-theme="light"><head>
       <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-      <title>Rotina QA</title><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}</style>
-      <link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div>
+      <title>Rotina QA</title><style>body{margin:0;font-family:Arial,sans-serif}*{box-sizing:border-box}
+      [data-protected-topbar]{position:sticky;top:0;height:58px;z-index:100;background:#fff;color:#111}</style>
+      <link rel="stylesheet" href="/fixture.css"></head><body><nav data-protected-topbar aria-label="Menu sintético">Menu QA</nav><div id="root"></div>
       <script src="/fixture.js"></script></body></html>`;
     browser = await chromium.launch({ headless: true });
   }, 60_000);
@@ -282,12 +293,20 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
         });
       }
       await page.getByRole("button", { name: "Hoje", exact: true }).click();
+      expect(
+        await page
+          .locator("textarea")
+          .evaluateAll((fields) =>
+            fields.every((field) => getComputedStyle(field).textAlign === "left"),
+          ),
+      ).toBe(true);
       await page.getByRole("button", { name: "Inserir linha", exact: true }).focus();
       await page.keyboard.press("Tab");
       await browserExpect(page.locator("textarea").first()).toBeFocused();
       await page.waitForFunction(() =>
         document.documentElement
           .getAnimations({ subtree: true })
+          .filter((animation) => animation instanceof CSSTransition)
           .every((animation) => animation.playState !== "running" && !animation.pending),
       );
       const focus = await page.locator("td:focus-within").evaluate((cell) => {
@@ -686,50 +705,60 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBe(saved);
   });
 
-  it("keeps the toolbar and day headers visible while scrolling and fits Hoje on mobile", async () => {
+  it("uses a regular responsive title and a gold specular save action respecting reduced motion", async () => {
+    await openRoutine();
+    const title = page.getByRole("heading", { name: "Rotina semanal e diária", exact: true });
+    for (const [width, size] of [
+      [1440, "32px"],
+      [390, "24px"],
+    ] as const) {
+      await page.setViewportSize({ width, height: 900 });
+      await browserExpect(title).toHaveCSS("font-size", size);
+      await browserExpect(title).toHaveCSS("font-weight", "400");
+    }
+    const save = page.getByRole("button", { name: "Salva alterações", exact: true });
+    for (const state of ["idle", "hover", "focus"] as const) {
+      if (state === "hover") await save.hover();
+      if (state === "focus") {
+        await page.mouse.move(0, 0);
+        await page.keyboard.press("Tab");
+        await save.focus();
+        await browserExpect(save).toBeFocused();
+      }
+      const effect = await save.evaluate((element) => {
+        const css = getComputedStyle(element, "::before");
+        return {
+          name: css.animationName,
+          duration: css.animationDuration,
+          iterations: css.animationIterationCount,
+          background: css.backgroundImage,
+          pointerEvents: css.pointerEvents,
+        };
+      });
+      expect(effect.name).not.toBe("none");
+      expect(effect.duration).toBe("4.5s");
+      expect(effect.iterations).toBe("infinite");
+      expect(effect.background).toContain("conic-gradient");
+      expect(effect.background).toContain("rgb(213, 185, 111)");
+      expect(effect.pointerEvents).toBe("none");
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    expect(
+      await save.evaluate((element) => getComputedStyle(element, "::before").animationName),
+    ).toBe("none");
+  });
+
+  it("pins only real day headers below the menu during window scroll and fits Hoje on mobile", async () => {
     await openRoutine({ clock: "2026-10-12T15:00:00Z" });
     await page.setViewportSize({ width: 390, height: 800 });
     const region = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
     const insert = region.getByRole("button", { name: "Inserir linha", exact: true });
     await browserExpect(insert).toBeVisible();
     expect(await insert.evaluate((element) => element.closest("table") === null)).toBe(true);
-    await region.scrollIntoViewIfNeeded();
-    expect(
-      await region.evaluate((element) =>
-        Number.isFinite(parseFloat(getComputedStyle(element).maxHeight)),
-      ),
-    ).toBe(true);
     expect(
       await region.locator("table").evaluate((element) => getComputedStyle(element).minWidth),
     ).toBe("960px");
-    await region.evaluate((element) => {
-      element.scrollTop = 0;
-    });
-    const beforeInsert = await insert.boundingBox();
-    const beforeHeader = await region.locator("thead th").first().boundingBox();
-    await region.evaluate((element) => {
-      element.scrollTop = 400;
-    });
-    await browserExpect
-      .poll(() => region.evaluate((element) => element.scrollTop))
-      .toBeGreaterThan(0);
-    const afterInsert = await insert.boundingBox();
-    const afterHeader = await region.locator("thead th").first().boundingBox();
-    expect(beforeInsert).not.toBeNull();
-    expect(beforeHeader).not.toBeNull();
-    expect(Math.abs(afterInsert!.y - beforeInsert!.y)).toBeLessThanOrEqual(2);
-    expect(Math.abs(afterHeader!.y - beforeHeader!.y)).toBeLessThanOrEqual(2);
-    expect(afterHeader!.y).toBeGreaterThanOrEqual(afterInsert!.y + afterInsert!.height);
-    await region.evaluate((element) => {
-      element.scrollLeft = element.scrollWidth;
-    });
-    expect(await region.evaluate((element) => element.scrollLeft)).toBeGreaterThan(0);
-    const horizontalInsert = await insert.boundingBox();
-    expect(Math.abs(horizontalInsert!.x - afterInsert!.x)).toBeLessThanOrEqual(2);
-    expect(horizontalInsert!.x).toBeGreaterThanOrEqual((await region.boundingBox())!.x);
-    expect(horizontalInsert!.x + horizontalInsert!.width).toBeLessThanOrEqual(
-      (await region.boundingBox())!.x + (await region.boundingBox())!.width,
-    );
+    await checkRoutineScrolling(page, region);
     await region.getByRole("button", { name: "Hoje", exact: true }).click();
     const daily = page.getByRole("region", { name: "Tabela de rotina do dia", exact: true });
     await browserExpect
@@ -749,8 +778,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       for (const width of [1440, 390]) {
         await page.setViewportSize({ width, height: 900 });
         await page.getByRole("button", { name: "Semana", exact: true }).click();
+        await checkRoutineScrolling(page, region);
         await region.evaluate((element) => {
-          element.scrollTop = 400;
+          window.scrollTo(0, window.scrollY + element.getBoundingClientRect().top + 400);
           element.scrollLeft = element.scrollWidth;
         });
         await page.screenshot({

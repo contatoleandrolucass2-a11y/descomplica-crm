@@ -1,5 +1,67 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Ajuste solicitado de rolagem e referencia Associativo
+
+- Abertura: GitHub main e health publico conferidos em 9ff3fd3, site ok.
+  PR documental #196 ainda aberto, validate/restore aprovados e release-gates
+  em andamento. Registros preservados nesta branch derivada.
+- Novo escopo: Hoje alinhado a esquerda, titulo/botao conforme Associativo,
+  rolagem vertical da pagina e somente cabecalho dos dias fixo abaixo do menu.
+  Titulo principal, abas e toolbar da funcao devem rolar normalmente.
+  Associativo permanece referencia somente leitura.
+- Retomada apos interrupcao do runtime: sessao local de validacao nao existe
+  mais e logs finais nao foram criados. Nenhuma aprovacao presumida; repetir
+  os checks. GitHub main e health continuam 9ff3fd3/ok; edicoes preservadas.
+- Chromium isolado atualizado: 23/23 aprovados. Exercita scroll da janela,
+  ausencia de overflow vertical interno, limite inferior da tabela, alinhamento
+  horizontal do cabecalho real, menu acima da tabela, titulo/abas/toolbar fora
+  da viewport, Hoje a esquerda e animacao do salvar com reduced-motion.
+  Capturas sinteticas inspecionadas; CI autenticada ainda necessaria.
+
+## 2026-10-12: Rotina compacta publicada e conferida
+
+- CI main 38302711569 aprovada nos quatro jobs: validate, release-gates,
+  isolated-restore e promotable-image. SHA publicado:
+  9ff3fd3fe175cc5b5b36babe0fb8815c53a8a14d. Sem rebuild na VPS.
+- Artefato verificado por checksum, configuracao, manifesto OCI e 11 camadas.
+  Config CI: sha256:ffe0d989b2a9aa15c6a317f43e3a63d2378bb707a5b6cb3b786cb8b2979720fa.
+  Imagem Docker: sha256:547a5c7b2dce3b08480d81f526ad6b2adb940b485816dae613d39e53a7650782.
+  Dois perfis de runtime aprovados sobre a mesma imagem.
+- Coordenador release:production concluiu com CAS/travas e consulta atual de
+  main/CI/health. Deployment 192fefa4-28bc-4421-9621-3bc77cdad8ca,
+  2026-10-12T21:47:17.004Z (18:47:17 America/Sao_Paulo), sem pendencia.
+  Anterior 1dd58c46e53281943ea68378efc4e8b3473c395c preservado.
+- Backup privado verificado em
+  /var/backups/descomplica-crm/releases/9ff3fd3fe175cc5b5b36babe0fb8815c53a8a14d.ky1ARs;
+  manifest SHA-256 9925f26c158432266c082073a7a43d4e3c809699a972b376105b31a7fcc5bb08.
+  Nenhum segredo registrado no Git ou exportado.
+- Pos-publicacao: health ok/SHA exato; container healthy, sem OOM e zero
+  reinicios. Inventario anonimo 401; Gestao e Rotina anonimas 307.
+- Smoke autenticado observacional: titulo novo, seis dias, 26 linhas,
+  156 campos habilitados e 74 atividades. Hoje exibiu 24 atividades de
+  segunda-feira. Titulo e cabecalho mantiveram top 180.0625px/216px apos
+  rolagem ate as ultimas linhas. Captura local ignorada:
+  test-results/routine-preview/rotina-publicada.jpg. Sem editar/salvar dados.
+- Limite preservado: salvamento local ao navegador, nao compartilhado.
+  Este fechamento documental nao exige novo restart da aplicacao.
+
+## 2026-10-12: Cancelamento corrigido e release da Rotina em validacao
+
+- CI 38289033322 reproduziu o cliente fechando antes do cancelamento no
+  servidor; diagnostico fixo do teste confirmou a ordem. Espera limitada
+  pelo abort preserva a assercao e reabertura, acrescentando backend sem
+  conexoes. Revisao independente sem achados; runtime nao foi alterado.
+- Linux: 2531 testes Vitest, 137 Salesforce e 94 de release aprovados.
+  Primeira tentativa parou depois por HTTP 403 da fonte Prefeitura; segunda
+  passou todos os gates, sem dispensar a consulta. PR #195 integrado em
+  9ff3fd3fe175cc5b5b36babe0fb8815c53a8a14d; CI main 38302711569 iniciada.
+- Local Windows: lint e typecheck aprovados (um warning herdado), build 49
+  rotas aprovado, gateway 36/36. Suite global: 2525 aprovados, 27 skips e
+  seis falhas de modos POSIX preexistentes. Linux segue autoridade do release.
+- Retomada apos espera longa: main ainda era 5bf6213 e health ok/1dd58c4
+  antes do merge. Checkout limpo de 9ff3fd3 preparado na VPS; sem deploy
+  ate esta nota. Versao publicada continua distinta da integrada.
+
 ## 2026-10-12: Retomada da publicacao da Rotina
 
 - Conferencia de abertura: GitHub main permanece 5bf6213; GET publico

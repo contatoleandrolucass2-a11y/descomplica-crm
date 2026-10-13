@@ -33,7 +33,7 @@
   margin: 0;
   color: var(--inv-color-text);
   font-size: 32px;
-  font-weight: 500;
+  font-weight: 400;
   line-height: 1.15;
   letter-spacing: 0;
 }
@@ -87,6 +87,62 @@
   font-size: 13px;
   font-weight: 750;
   cursor: pointer;
+}
+
+@property --routine-specular-angle {
+  syntax: "<angle>";
+  inherits: false;
+  initial-value: 135deg;
+}
+
+/* Match the Associativo guide CTA without changing its shared styles. */
+.pageHeader .primaryAction {
+  position: relative;
+  isolation: isolate;
+  min-height: 36px;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-weight: 700;
+}
+
+.pageHeader .primaryAction:enabled::before {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  box-sizing: border-box;
+  padding: 1px;
+  border-radius: inherit;
+  content: "";
+  pointer-events: none;
+  background: conic-gradient(
+    from var(--routine-specular-angle),
+    transparent 0deg,
+    #d5b96f 30deg,
+    #fff4ca 45deg,
+    #d5b96f 60deg,
+    transparent 90deg 180deg,
+    #d5b96f 210deg,
+    #fff4ca 225deg,
+    #d5b96f 240deg,
+    transparent 270deg
+  );
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  animation: routine-specular-orbit 4.5s linear infinite;
+}
+
+@keyframes routine-specular-orbit {
+  to {
+    --routine-specular-angle: 495deg;
+  }
+}
+
+@media (pointer: coarse) {
+  .pageHeader .primaryAction {
+    min-height: 44px;
+  }
 }
 
 .secondaryAction {
@@ -261,19 +317,12 @@
 }
 
 .tableScroll {
-  --routine-toolbar-height: 58px;
-  overflow: auto;
-  max-height: max(240px, calc(100dvh - 190px));
-  scroll-padding-top: calc(var(--routine-toolbar-height) + 58px);
+  overflow-x: auto;
   border: 1px solid var(--routine-grid);
   background: var(--routine-surface);
 }
 
 .tableToolbar {
-  position: sticky;
-  top: 0;
-  left: 0;
-  z-index: 5;
   min-height: 52px;
   padding: 6px 10px;
   gap: 8px;
@@ -344,8 +393,9 @@
 }
 
 .routineTable thead th {
-  position: sticky;
-  top: var(--routine-toolbar-height);
+  position: relative;
+  top: auto;
+  transform: translateY(var(--routine-heading-offset, 0px));
   z-index: 3;
   height: 52px;
   padding: 6px 8px;
@@ -404,7 +454,17 @@
 }
 
 .routineTable thead th:first-child {
+  position: relative;
   z-index: 4;
+}
+
+:global(:root)
+  .page:global(.investor-page-shell)
+  .main:global(.investor-main)
+  .routineTable[data-view="day"]
+  td
+  textarea {
+  text-align: left;
 }
 
 .routineTable[data-view="day"] {
@@ -479,6 +539,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .pageHeader .primaryAction:enabled::before {
+    animation: none;
+  }
   .routineTable td {
     transition: none;
   }
@@ -530,10 +593,6 @@
 
   .saveState {
     font-size: 11px;
-  }
-
-  .tableScroll {
-    max-height: max(220px, calc(100dvh - 310px));
   }
 
   .sectionHeading,

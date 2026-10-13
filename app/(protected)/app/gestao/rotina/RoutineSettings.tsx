@@ -421,7 +421,6 @@ export function RoutineSettings() {
   const [editedCells, setEditedCells] = useState<Set<string>>(() => new Set());
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
   const tableRef = useRef<HTMLTableElement | null>(null);
-  const toolbarRef = useRef<HTMLDivElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const pendingRow = useRef<number | null>(null);
 
@@ -613,15 +612,54 @@ export function RoutineSettings() {
   }, [activeRows, view, today]);
 
   useEffect(() => {
-    const toolbar = toolbarRef.current;
-    const scroll = scrollRef.current;
-    if (!toolbar || !scroll) return;
-    const observer = new ResizeObserver(() => {
-      scroll.style.setProperty("--routine-toolbar-height", `${toolbar.offsetHeight}px`);
-    });
-    observer.observe(toolbar);
-    return () => observer.disconnect();
-  }, [activeRole]);
+    const table = tableRef.current;
+    const heading = table?.tHead;
+    if (!table || !heading) return;
+    const navigation = document.querySelector<HTMLElement>("[data-protected-topbar]");
+    const viewport = window.visualViewport;
+    let frame = 0;
+    let previousOffset = -1;
+
+    // Same page-scroll header pattern as Tabelao: preserve the real table headers.
+    const updateHeading = () => {
+      frame = 0;
+      const tableRect = table.getBoundingClientRect();
+      const headingRect = heading.getBoundingClientRect();
+      const top = Math.max(
+        viewport?.offsetTop ?? 0,
+        navigation?.getBoundingClientRect().bottom ?? 0,
+      );
+      const offset = Math.max(
+        0,
+        Math.min(top - headingRect.top, tableRect.bottom - headingRect.bottom),
+      );
+      if (offset !== previousOffset) {
+        table.style.setProperty("--routine-heading-offset", `${offset}px`);
+        previousOffset = offset;
+      }
+    };
+    const scheduleHeading = () => {
+      if (!frame) frame = window.requestAnimationFrame(updateHeading);
+    };
+    const observer = new ResizeObserver(scheduleHeading);
+    observer.observe(table);
+    observer.observe(heading);
+    if (navigation) observer.observe(navigation);
+    window.addEventListener("scroll", scheduleHeading, { capture: true, passive: true });
+    window.addEventListener("resize", scheduleHeading);
+    viewport?.addEventListener("resize", scheduleHeading);
+    viewport?.addEventListener("scroll", scheduleHeading);
+    scheduleHeading();
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      window.removeEventListener("scroll", scheduleHeading, true);
+      window.removeEventListener("resize", scheduleHeading);
+      viewport?.removeEventListener("resize", scheduleHeading);
+      viewport?.removeEventListener("scroll", scheduleHeading);
+      table.style.removeProperty("--routine-heading-offset");
+    };
+  }, [activeRole, view, currentDay, visibleRows.length]);
 
   useEffect(() => {
     const table = tableRef.current;
@@ -789,7 +827,7 @@ export function RoutineSettings() {
                 }
                 tabIndex={0}
               >
-                <div ref={toolbarRef} className={styles.tableToolbar}>
+                <div className={styles.tableToolbar}>
                   <h2 id="routine-table-title">{activeRoleInfo.label}</h2>
                   <div className={styles.tableStats} aria-label="Ações da rotina">
                     <div
