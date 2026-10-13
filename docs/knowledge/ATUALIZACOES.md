@@ -8,9 +8,25 @@
   `08c3ae453ddfb225c3cb64971b53333c36d8932e`, health 200/ok. PR202 integrado
   depois da nossa publicacao15ddedd; nao usar o ledger anterior para deploy.
 - PR203 documental continua aberto em a91d30e; CI38363681423 falhou em validate
-  e ignorou os jobs dependentes. Causa ainda em investigacao, sem alegar CI verde.
+  e ignorou os jobs dependentes. Log do job115183614012 confirmou HTTP403 da
+  fonte ITBI/SP. O mesmo verificador passou localmente depois, sem mudar o gate.
 - Merge de main preserva integralmente os registros de ambas as frentes.
   Agenda, monitor e configuracao remota ainda nao alterados nesta retomada.
+- Preflight09:31BRT: probe real retornou connected, n8n MCP ativo emdcffaf09
+  com cinco nodes e sem salvar execucoes. Container CRM ingesttrue/refreshfalse;
+  chaves efetivas correspondem aos arquivos privados, sem valores exportados.
+  Supabase ainda mostra a carga real07:28Z como ultima run.
+- Preparacao usa coletor integrado existente, unidade nao-root e LoadCredential
+  systemd255, com instalacao reversivel separada. Revisao crm-qa57tests passou;
+  encerramento forcado/lock e progresso volatil permanecem limites documentados.
+  Criterio de conclusao: CI verde, ativacao protegida e dois ciclos reconciliados.
+- Nova conferencia GitHub: main avancou para cdb26fb (PR204), exclusivamente
+  CHANGELOG/WORKLOG/ATUALIZACOES. Publicacao da aplicacao continua08c3ae.
+  Integrar as notas antes de enviar o coletor; nao reiniciar CRM por documentos.
+- Testes do instalador57/57, coletor194 antes do ultimo caso adicional,
+  release113/11 skips POSIX, lint/typecheck/build passaram. Suite Vitest local
+  registrou timeouts em devtools/Obsidian, ainda em diagnostico. CI Linux e
+  verificacao fisica do systemd permanecem gates, sem alegar ativacao.
 
 ## 2026-10-13: Conexao real concluida, agenda ainda desligada
 

@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-10-13: Preparacao da agenda Salesforce
+
+- Escopo autorizado: ativar rotina de 30 minutos na VPS depois da carga real
+  comprovada, preservando novo workflow e n8n antigo. Primeiro ciclo imediato,
+  seguintes nas fronteiras de 30 minutos, sem exportacoes concorrentes.
+- Revisao independente crm-qa: 57 testes Node e quatro verificacoes sinteticas
+  passaram em Node24.19/Windows. Nenhum bloqueio concreto no runner existente.
+  Limites: encerramento forcado pode deixar lock e reinicio zera progresso em memoria.
+- Preflight observacional: app08c3ae, ingesttrue/refreshfalse e segredos efetivos
+  correspondentes, sessao remota conectada as09:31 de Brasilia. Novo n8n ativo
+  emdcffaf09, cinco nodes, sem agenda interna nem payloads persistidos.
+- CI38363681423 do PR203 falhou por HTTP403 da fonte oficial ITBI/SP.
+  O mesmo verificador, sem alteracoes, passou localmente nesta retomada.
+- Servico e instalador em preparacao; ativacao e dois ciclos reais ainda pendentes.
+- Instalador concluido com 57 testes focados aprovados. Suite do coletor passou
+  194 testes antes do ultimo caso adicional; release113 passou/11 skips POSIX.
+  Lint sem erros (um aviso preexistente), typecheck e build aprovados.
+- pnpm test no Windows falhou em quatro testes por timeout (devtools/Obsidian).
+  Repeticao com dois workers e diagnostico isolado em andamento; nao atribuir
+  aprovacao integral local. Formato dos arquivos alterados e diff-check passaram.
+
 ## 2026-10-13: Conexao n8n e Supabase comprovada em producao
 
 - PR198 integrado; CI38358420498 aprovada. Artefato15ddedd teve checksum,

@@ -56,6 +56,9 @@ nao e necessario enviar novamente senhas ou chaves ao assistente.
 
 ## Proximo passo tecnico
 
+O [runbook do coletor VPS](salesforce-vps-collector.md) descreve a implantacao
+reversivel, os limites e os criterios de aceite. Preparo nao significa ativacao.
+
 1. Versionar a implantacao do agendador, integrando coleta e recibos ao monitor.
 2. Validar lock, timeout, restart, falha de coleta/publicacao e reautenticacao.
 3. Ativar a rotina aprovada de30min e comprovar dois ciclos completos na VPS,

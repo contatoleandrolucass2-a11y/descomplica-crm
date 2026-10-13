@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-13: Agenda Salesforce com instalacao reversivel
+
+- Prepara servico dedicado para coleta de 30 minutos e monitor no mesmo processo,
+  com credenciais privadas do systemd e exclusao do monitor independente.
+- Instalacao separada da sessao, fixada em SHA aprovado, com preparo sem ativacao,
+  verificacoes de CI/estado e reversao do monitor anterior.
+- Inclui testes do instalador na suite obrigatoria e runbook de dois ciclos reais.
+  Sem alteracao no n8n antigo, migrations ou reinicio da aplicacao CRM.
+
 ## 2026-10-13: Conexao real do novo n8n ao Supabase
 
 - Publica release15ddedd e habilita ingestao protegida no CRM, preservando
