@@ -5,6 +5,7 @@ import { chromium } from "@playwright/test";
 import { refreshSalesforceSession, safeCdpEndpoint } from "./browser-session.mjs";
 import { acquireExportLock } from "./export-lock.mjs";
 import { resolveCandidateOutputPath, writeCandidateAtomically } from "./export-candidate.mjs";
+import { publishInventory } from "./publish-inventory.mjs";
 import { collectInventory } from "./collect-inventory.mjs";
 import {
   safeSalesforceError,
@@ -12,7 +13,7 @@ import {
   withSalesforceSignal,
 } from "./report-request.mjs";
 
-// A private candidate only. Publication requires the reconciled file to be promoted separately.
+// Manual CLI writes a private candidate. The scheduler explicitly enables publication.
 export async function exportInventory(environment = process.env, options = {}) {
   const configuredOutput = environment.SALESFORCE_INVENTORY_OUTPUT?.trim();
   const commercialOutput = resolveCandidateOutputPath(environment);
@@ -24,6 +25,12 @@ export async function exportInventory(environment = process.env, options = {}) {
     output === commercialOutput ||
     output === `${commercialOutput}.lock` ||
     !output.endsWith(".json")
+  )
+    throw new SalesforceCollectionError("SALESFORCE_EXPORT_CONFIG");
+  if (
+    options.publish === true &&
+    (commercialOutput !== "/var/lib/descomplica-salesforce/candidate.json" ||
+      output !== "/var/lib/descomplica-salesforce/inventory-candidate.json")
   )
     throw new SalesforceCollectionError("SALESFORCE_EXPORT_CONFIG");
   const signal = options.signal
@@ -41,6 +48,10 @@ export async function exportInventory(environment = process.env, options = {}) {
     );
     const candidate = await collectInventory(sessionId, { ...options, signal });
     await writeCandidateAtomically(output, candidate, undefined, signal);
+    if (options.publish === true) {
+      const publication = await publishInventory(candidate, { signal });
+      options.onPublished?.(publication);
+    }
     return candidate;
   } finally {
     try {

@@ -29,6 +29,7 @@ export async function GET() {
         generatedAt: inventory.generatedAt,
         sourceRows: inventory.sourceRows,
         count: inventory.count,
+        automatic: inventory.collectionMode === "automatic",
       };
     } catch {
       snapshot.inventory = null;

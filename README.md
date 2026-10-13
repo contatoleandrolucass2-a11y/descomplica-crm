@@ -13,8 +13,8 @@ Base consolidada do Descomplica CRM. O sistema de login Next.js/Supabase é a fu
 As decisões completas estão em [ARCHITECTURE.md](ARCHITECTURE.md), [SECURITY.md](SECURITY.md) e [MIGRATION_PLAN.md](MIGRATION_PLAN.md).
 
 O estoque dos simuladores usa o relatório Salesforce ESTOQUE SPC quando a fonte
-oficial está configurada. Essa coleta é separada dos sete relatórios de funil e
-ranking. Ver [operação do estoque](docs/runbooks/salesforce-inventory.md).
+oficial está configurada. O coletor executa os oito relatórios no ciclo automático
+de 30 minutos; o estoque atualiza a base comum dos quatro simuladores. Ver [operação do estoque](docs/runbooks/salesforce-inventory.md).
 
 ## Pré-requisitos
 

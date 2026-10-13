@@ -221,15 +221,17 @@ export function ConnectedSystemsPanel({
   const hasReports = snapshot.reports !== null;
   const publicationFailed = snapshot.errorCode === "publication_failed";
   const cycleLabel =
-    snapshot.errorCode === "export_failed"
-      ? "Coleta não concluída"
-      : publicationFailed
-        ? snapshot.lastExportAt && hasReports
-          ? "Concluída"
-          : "Sem informação"
-        : snapshot.state === "unavailable" || snapshot.state === "unconfigured"
-          ? "Sem informação"
-          : CYCLES[snapshot.cycle];
+    snapshot.errorCode === "inventory_failed"
+      ? "Falha ao atualizar estoque"
+      : snapshot.errorCode === "export_failed"
+        ? "Coleta não concluída"
+        : publicationFailed
+          ? snapshot.lastExportAt && hasReports
+            ? "Concluída"
+            : "Sem informação"
+          : snapshot.state === "unavailable" || snapshot.state === "unconfigured"
+            ? "Sem informação"
+            : CYCLES[snapshot.cycle];
 
   return (
     <main className={styles.page} data-connected-systems>
@@ -464,7 +466,7 @@ export function ConnectedSystemsPanel({
           <header className={styles.sectionHeader}>
             <div className={styles.sectionTitle}>
               <h2 id="reports-title">Relatórios</h2>
-              <span>7 relatórios comerciais + estoque</span>
+              <span>8 relatórios</span>
             </div>
             <div className={styles.refreshAction}>
               {canRefresh ? (
@@ -516,7 +518,11 @@ export function ConnectedSystemsPanel({
                       <td>
                         {collectedAt
                           ? inventory
-                            ? "Base validada · coleta avulsa"
+                            ? snapshot.errorCode === "inventory_failed"
+                              ? "Falha na atualização · última base válida"
+                              : snapshot.inventory?.automatic
+                                ? "Coletado · automático (30 min)"
+                                : "Base validada · coleta avulsa"
                             : "Coletado"
                           : "Sem coleta confirmada"}
                       </td>

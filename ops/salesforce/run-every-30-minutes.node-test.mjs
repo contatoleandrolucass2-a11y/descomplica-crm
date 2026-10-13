@@ -112,3 +112,39 @@ test("collector distinguishes an unconfirmed publication from an export failure"
   assert.equal(progress.snapshot().lastExportAt, new Date(1000).toISOString());
   assert.equal(progress.snapshot().reports.length, 7);
 });
+
+for (const failure of [false, true]) {
+  test(`automatic stock follows the seven reports; inventory failure=${failure}`, async () => {
+    const controller = new AbortController();
+    const progress = createCollectorProgress(() => 2000);
+    const events = [];
+    const candidate = {
+      payload: { dashboard: { generatedAt: new Date(1000).toISOString() } },
+      diagnostics: { sourceRows: Object.fromEntries(salesforceReportKeys.map((key) => [key, 1])) },
+    };
+    await runCollector(
+      { SALESFORCE_INVENTORY_AUTOMATIC_ENABLED: "true", SALESFORCE_N8N_PUBLISH_ENABLED: "true" },
+      {
+        signal: controller.signal,
+        progress,
+        log: () => {},
+        export: async () => {
+          events.push("commercial");
+          return candidate;
+        },
+        inventory: async (_env, { signal, publish }) => {
+          events.push("inventory");
+          assert.equal(signal.aborted, false);
+          assert.equal(publish, true);
+          assert.equal(progress.snapshot().cycle, "running");
+          if (failure) throw new Error("private source details");
+        },
+        waitFor: async () => controller.abort(),
+      },
+    );
+    assert.deepEqual(events, ["commercial", "inventory"]);
+    assert.equal(progress.snapshot().cycle, failure ? "failed" : "succeeded");
+    assert.equal(progress.snapshot().errorCode, failure ? "inventory_failed" : null);
+    assert.equal(progress.snapshot().lastPublishedAt, new Date(2000).toISOString());
+  });
+}

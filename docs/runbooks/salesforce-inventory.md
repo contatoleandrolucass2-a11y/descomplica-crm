@@ -4,13 +4,17 @@ Em 13/10/2026, o usuário definiu o relatório Salesforce **ESTOQUE SPC**,
 `00OU6000007yRpKMAU`, como fonte oficial das unidades. Os sete relatórios
 comerciais continuam alimentando funil e ranking; não contêm esse estoque.
 
-## Coleta completa
+## Coleta automática completa
 
-`pnpm salesforce:inventory` usa a sessão dedicada já autenticada na VPS e a
+O scheduler `salesforce:export:watch`, com
+`SALESFORCE_INVENTORY_AUTOMATIC_ENABLED=true`, executa o ESTOQUE SPC depois
+dos sete relatórios comerciais, em cada ciclo de 30 minutos. Usa a sessão
+dedicada já autenticada na VPS e a
 mesma trava do coletor comercial. Exige caminhos absolutos em
 `SALESFORCE_CANDIDATE_OUTPUT` (candidato comercial existente, para a trava) e
-`SALESFORCE_INVENTORY_OUTPUT` (novo candidato privado de estoque). O comando
-não publica dados, não muda o relatório Salesforce e não altera o n8n.
+`SALESFORCE_INVENTORY_OUTPUT` (novo candidato privado de estoque). O scheduler publica o candidato validado automaticamente.
+O comando manual `pnpm salesforce:inventory` continua disponível para diagnóstico
+e escreve somente o candidato privado. Não altera o relatório Salesforce nem o n8n.
 
 A API limita os detalhes a 2.000 linhas. A coleta obtém primeiro contagens
 agrupadas por empreendimento, mantendo os filtros e o intervalo originais.
@@ -23,7 +27,8 @@ empreendimento que sozinho ultrapasse o limite também bloqueia a publicação.
 O limite total é cinco minutos; SIGTERM/SIGINT cancelam a coleta. A sessão
 continua exigindo login e MFA manuais quando o Salesforce solicitar. Não
 remover uma trava pertencente a outro processo nem interromper o coletor
-comercial para executar a coleta avulsa.
+comercial para executar um diagnóstico manual. O scheduler espera as duas
+etapas terminarem antes de agendar a próxima fronteira de 30 minutos.
 
 Valores usam os campos oficiais; o preço segue a fórmula já utilizada pelo CRM:
 Valor Final Com Kit menos B.A. da Unidade menos Folga de Tabela, em centavos.
@@ -50,19 +55,27 @@ arquivo aberto e a publicação deve trocar `current.json` por rename atômico.
 `generatedAt` identifica a conclusão da coleta; não é data de alteração de
 cada registro Salesforce nem horário de deploy da aplicação.
 
-Produção monta `/etc/descomplica-crm/inventory` somente para leitura. A pasta
-deve pertencer a root:root, modo 0710; `current.json`, root:root e 0640. O
-coletor não recebe permissão para escrever nesse diretório. Antes de promover
-um candidato, conferir o schema, SHA-256, data, contagens e arquivo anterior;
-guardar backup privado e repetir a conferência do estado esperado antes da
-substituição. Não versionar o candidato ou suas linhas comerciais no Git.
+Produção monta `/var/lib/descomplica-salesforce-inventory` somente para leitura.
+A pasta pertence a `descomplica-salesforce:root`, modo **2710**; `current.json`
+e `previous.json`, ao mesmo usuário/grupo e **0640**. O setgid da pasta permite
+herdar o grupo de leitura do container sem adicionar o coletor ao grupo root.
+Somente essa pasta de dados entra no `ReadWritePaths` do serviço, além do estado
+privado que já existia. O coletor não pode escrever no env, secrets ou código.
+
+A publicação ocorre dentro da trava de exportação, após coleta completa. Valida
+schema, tamanho, proprietário, data não futura e idade de até dez minutos.
+Rejeita carga anterior ou diferente no mesmo horário. Preserva `previous.json`,
+compara a base anterior, grava temporário exclusivo, fsync e rename atômico,
+e relê o hash instalado. A aplicação renova o cache em até 30 segundos sem
+reinício. Falha mantém a base anterior; o ciclo mostra `inventory_failed`.
+Não versionar candidatos, backups ou linhas comerciais.
 
 A primeira adoção exige release validada pelo fluxo normal de PR, CI e
 `pnpm release:production`. O wrapper verifica a base oficial antes de iniciar
 produção. A planilha histórica permanece intacta para rollback da versão.
 Uma nova carga não deve alterar silenciosamente uma proposta já selecionada.
 
-## Evidência na tela e limite da agenda
+## Evidência na tela e agenda
 
 Conectar Sistemas mostra os sete relatórios comerciais e o ESTOQUE SPC. A
 linha do estoque usa contagem e data do arquivo efetivamente servido; não
@@ -70,10 +83,35 @@ depende do progresso efêmero da sessão. O endpoint de status retorna somente
 esses metadados, sem unidades ou preços. A descrição da unidade selecionada
 apresenta o status original do Salesforce.
 
-Esta implementação realiza **coleta avulsa** de estoque. A agenda existente
-de 30 minutos continua restrita aos sete relatórios comerciais. Não apresentar
-o estoque como automaticamente atualizado. Integrar uma agenda de estoque
-exige publicar e reconciliar cada nova carga; conexão ativa não prova coleta.
+A tela totaliza **8 relatórios**. Uma carga publicada pelo scheduler recebe
+`collectionMode: automatic` e aparece como **Coletado · automático (30 min)**.
+O horário da linha é o da coleta efetivamente servida, separado dos sete relatórios.
+Conexão ativa não prova coleta: verificar avanço de data e hash em ciclos distintos.
+
+## Atualização do serviço existente
+
+O instalador `install-collector.mjs` continua exclusivo da primeira instalação.
+Não apagar seu registro nem simular uma instalação nova. Para atualizar o coletor:
+
+1. Aprovar PR e os quatro jobs de main; preparar checkout imutável e dependências.
+2. Criar a pasta de publicação com proprietário/modos acima; instalar a primeira
+   base validada e preservar backup privado. Não conceder grupo root ao coletor.
+3. Publicar o CRM pelo coordenador `release:production`; verificar SHA/health.
+4. Revisar a unidade anterior, ausência de overrides, usuário dedicado, paths e
+   hash exato. Preparar backup durável da unidade e do registro original.
+5. Dentro das três travas de produção e da trava do instalador, consultar novamente
+   release/data/health e CI/main no próprio minuto. Adquirir a trava de exportação:
+   se ocupada, aguardar o ciclo terminar; nunca interrompê-lo nem apagar a trava.
+6. Parar somente o coletor ocioso, substituir a unidade por CAS pelo template do
+   SHA aprovado, validar com systemd-analyze e daemon-reload. Repetir consulta ao
+   vivo no minuto antes de iniciar; liberar a trava de exportação antes do start.
+7. Verificar enabled/active, WorkingDirectory, PID estável, oito coletas e avanço
+   real da base. Registrar hash anterior/novo e horário. Se a troca falhar, restaurar
+   por CAS a unidade guardada e confirmar o serviço anterior; preservar evidência
+   de qualquer recuperação pendente. Não reiniciar navegador, n8n ou outros serviços.
+
+O arquivo anterior do estoque permite diagnóstico; não o promover automaticamente
+sobre uma coleta mais nova. A reversão de código já publicado segue novo PR/CI.
 
 ## Verificações
 

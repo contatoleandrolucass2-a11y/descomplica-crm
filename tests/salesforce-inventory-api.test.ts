@@ -87,10 +87,22 @@ describe("official Salesforce inventory", () => {
     const { GET } = await import("@/app/api/salesforce/status/route");
     const response = await GET();
     const data = await response.json();
-    expect(data.inventory).toEqual({ generatedAt: sample().generatedAt, sourceRows: 1, count: 1 });
+    expect(data.inventory).toEqual({
+      generatedAt: sample().generatedAt,
+      sourceRows: 1,
+      count: 1,
+      automatic: false,
+    });
     expect(JSON.stringify(data)).not.toContain("Produto sintético");
     expect(JSON.stringify(data)).not.toContain("finalPrice");
     expect(mocks.authorizeRoute).toHaveBeenCalledWith("crm.settings.manage");
+  });
+  it("reports automatic collection only from the inventory actually published", async () => {
+    await configure({ ...sample(), collectionMode: "automatic" });
+    const { GET } = await import("@/app/api/salesforce/status/route");
+    const data = await (await GET()).json();
+    expect(data.inventory.automatic).toBe(true);
+    expect(data.inventory.generatedAt).toBe(sample().generatedAt);
   });
   it("serves the same official units to both simulator sources without querying the legacy feed", async () => {
     await configure();

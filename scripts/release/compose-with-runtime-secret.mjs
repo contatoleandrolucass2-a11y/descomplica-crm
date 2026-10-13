@@ -9,7 +9,12 @@ import {
   inheritedLockDescriptors,
   waitForProcess,
 } from "./production-release-lock.mjs";
-import { salesforceInventorySchema } from "../../lib/crm/salesforce/inventory-contract.ts";
+import {
+  inventoryDirectory,
+  inventoryPublisherUid,
+  validateInventoryDirectory,
+  readPublishedInventory,
+} from "../../ops/salesforce/publish-inventory.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const dockerEnvironment = {
@@ -117,23 +122,9 @@ function declaredSecretSource(contents) {
 }
 
 async function validateSalesforceInventory() {
-  const directory = "/etc/descomplica-crm/inventory";
-  const filePath = path.join(directory, "current.json");
-  if ((await realpath(directory)) !== directory) fail("Salesforce inventory directory is invalid.");
-  const metadata = await stat(directory);
-  if (
-    !metadata.isDirectory() ||
-    metadata.uid !== 0 ||
-    metadata.gid !== 0 ||
-    (metadata.mode & 0o777) !== 0o710
-  ) {
-    fail("Salesforce inventory directory must be root-owned with mode 0710.");
-  }
-  await validateOwnedFile(filePath, 0o640, 0, "Salesforce inventory");
-  if ((await stat(filePath)).size > 8 * 1024 * 1024) fail("Salesforce inventory is too large.");
-  const payload = salesforceInventorySchema.parse(JSON.parse(await readFile(filePath, "utf8")));
-  if (Date.parse(payload.generatedAt) > Date.now() + 5000)
-    fail("Salesforce inventory timestamp is invalid.");
+  const owner = await inventoryPublisherUid();
+  await validateInventoryDirectory(inventoryDirectory, owner);
+  await readPublishedInventory(inventoryDirectory, owner);
 }
 
 export async function runtimeCompose(invocation, lock, beforeStart) {

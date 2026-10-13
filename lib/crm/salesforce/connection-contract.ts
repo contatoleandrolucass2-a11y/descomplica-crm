@@ -30,6 +30,7 @@ export const salesforceStatusErrorSchema = z.enum([
   "salesforce_unavailable",
   "export_failed",
   "publication_failed",
+  "inventory_failed",
   "collector_stopped",
   "collector_unreachable",
 ]);
@@ -79,6 +80,7 @@ export const salesforceConnectionSnapshotSchema = z
         generatedAt: timestamp,
         sourceRows: z.number().int().nonnegative(),
         count: z.number().int().nonnegative(),
+        automatic: z.boolean().optional(),
       })
       .strict()
       .nullable()

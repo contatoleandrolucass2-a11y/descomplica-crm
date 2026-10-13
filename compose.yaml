@@ -56,7 +56,7 @@ services:
     volumes:
       - next-cache:/app/.next/cache
       - type: bind
-        source: /etc/descomplica-crm/inventory
+        source: /var/lib/descomplica-salesforce-inventory
         target: /run/salesforce-inventory
         read_only: true
         bind:

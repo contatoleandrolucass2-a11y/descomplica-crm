@@ -668,11 +668,16 @@ async function runSynthetic() {
     await expect(stock).toContainText("Sem coleta confirmada");
     snapshot = {
       ...base,
-      inventory: { sourceRows: 36, count: 36, generatedAt: "2026-10-08T14:45:00.000Z" },
+      inventory: {
+        automatic: true,
+        sourceRows: 36,
+        count: 36,
+        generatedAt: "2026-10-08T14:45:00.000Z",
+      },
     };
     await verify.click();
     await expect(stock).toContainText("36");
-    await expect(stock).toContainText("Base validada · coleta avulsa");
+    await expect(stock).toContainText("Coletado · automático (30 min)");
     await expect(stock.locator("time")).toHaveAttribute("datetime", "2026-10-08T14:45:00.000Z");
     snapshot = base;
     await verify.click();

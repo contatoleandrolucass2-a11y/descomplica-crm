@@ -1,6 +1,7 @@
 import { setTimeout as wait } from "node:timers/promises";
 import { pathToFileURL } from "node:url";
 
+import { exportInventory } from "./export-inventory.mjs";
 import { exportCandidate } from "./export-candidate.mjs";
 import {
   createCollectorProgress,
@@ -74,10 +75,34 @@ export async function runCollector(environment = process.env, options = {}) {
             signal: controller.signal,
             onCollected: (result) => progress.collected(result),
           });
-          progress.succeed(candidate, environment.SALESFORCE_N8N_PUBLISH_ENABLED === "true");
+          progress.published(candidate, environment.SALESFORCE_N8N_PUBLISH_ENABLED === "true");
+          if (environment.SALESFORCE_INVENTORY_AUTOMATIC_ENABLED === "true") {
+            try {
+              await (options.inventory ?? exportInventory)(environment, {
+                signal: controller.signal,
+                publish: true,
+                onPublished: (receipt) =>
+                  (options.log ?? log)("inventory publication confirmed", {
+                    published: receipt.published,
+                    hash: receipt.hash,
+                    generatedAt: receipt.generatedAt,
+                    count: receipt.count,
+                  }),
+              });
+            } catch {
+              throw Object.assign(new Error("Inventory cycle failed"), {
+                code: "inventory_failed",
+              });
+            }
+          }
+          progress.succeed(candidate, false);
         } catch (error) {
           progress.fail(
-            error?.code === "publication_failed" ? "publication_failed" : "export_failed",
+            error?.code === "inventory_failed"
+              ? "inventory_failed"
+              : error?.code === "publication_failed"
+                ? "publication_failed"
+                : "export_failed",
           );
           throw error;
         }
