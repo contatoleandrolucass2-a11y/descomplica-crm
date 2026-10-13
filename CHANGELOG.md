@@ -11,6 +11,7 @@
 
 ## 2026-10-13: Rolagem estavel na Rotina
 
+- Publicado em 13/10 as 12:16 de Sao Paulo, versao 7d6341f, apos CI completa.
 - Corrige salto para cima durante a atualizacao automatica e medicao das celulas.
 - Preserva foco e selecao; rodape sem faixa, alinhado a direita, com entrada e
   brilho da direita para a esquerda e respeito a movimento reduzido.
