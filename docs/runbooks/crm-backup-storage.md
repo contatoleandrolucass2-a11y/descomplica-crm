@@ -64,4 +64,7 @@ por falha de inicializacao do agente no Windows; nao houve relaxamento da ACL.
 O bucket esta fora da VPS, mas no mesmo projeto Supabase. Exclusao ou perda
 de acesso ao projeto continua um risco comum; nao e backup independente do
 provedor. Backup nativo do banco nao substitui copia dos bytes do Storage.
-Agenda de 30 minutos e ingestao real permanecem desligadas nesta etapa.
+O registro acima descreve a etapa de backup. Posteriormente, a ingestao real
+foi habilitada e reconciliada; a agenda exige a ativacao separada documentada
+no [coletor VPS](salesforce-vps-collector.md). Conferir o estado atualizado no
+[guia de conclusao](conclusao-salesforce-n8n.md), sem inferir ativacao pelo backup.

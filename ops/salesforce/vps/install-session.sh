@@ -39,7 +39,8 @@ for unit in "${units[@]}"; do
   cmp -- "$source_dir/$unit" <(git -C "$release" show "$1:ops/salesforce/vps/$unit") ||
     fail "Unit differs from approved commit."
 done
-[[ $(find "$source_dir" -maxdepth 1 \( -name '*.service' -o -name '*.target' \) | wc -l) == "${#units[@]}" ]] ||
+# The collector has a separate, opt-in installer after ingestion is validated.
+[[ $(find "$source_dir" -maxdepth 1 \( -name '*.service' -o -name '*.target' \) ! -name 'descomplica-salesforce-collector.service' | wc -l) == "${#units[@]}" ]] ||
   fail "Unexpected unit in release."
 
 # First installation only: never replace an existing profile, service or secret.

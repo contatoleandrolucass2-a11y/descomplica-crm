@@ -1,5 +1,63 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Retomada para agenda Salesforce na VPS
+
+- Usuario autorizou continuar depois da conexao e carga real. Escopo agora:
+  preparar, validar e ativar o agendador de 30 minutos, preservando n8n antigo.
+- Consulta GitHub e health em 09:14 de Brasilia: main e versao publicada
+  `08c3ae453ddfb225c3cb64971b53333c36d8932e`, health 200/ok. PR202 integrado
+  depois da nossa publicacao15ddedd; nao usar o ledger anterior para deploy.
+- PR203 documental continua aberto em a91d30e; CI38363681423 falhou em validate
+  e ignorou os jobs dependentes. Log do job115183614012 confirmou HTTP403 da
+  fonte ITBI/SP. O mesmo verificador passou localmente depois, sem mudar o gate.
+- Merge de main preserva integralmente os registros de ambas as frentes.
+  Agenda, monitor e configuracao remota ainda nao alterados nesta retomada.
+- Preflight09:31BRT: probe real retornou connected, n8n MCP ativo emdcffaf09
+  com cinco nodes e sem salvar execucoes. Container CRM ingesttrue/refreshfalse;
+  chaves efetivas correspondem aos arquivos privados, sem valores exportados.
+  Supabase ainda mostra a carga real07:28Z como ultima run.
+- Preparacao usa coletor integrado existente, unidade nao-root e LoadCredential
+  systemd255, com instalacao reversivel separada. Revisao crm-qa57tests passou;
+  encerramento forcado/lock e progresso volatil permanecem limites documentados.
+  Criterio de conclusao: CI verde, ativacao protegida e dois ciclos reconciliados.
+- Nova conferencia GitHub: main avancou para cdb26fb (PR204), exclusivamente
+  CHANGELOG/WORKLOG/ATUALIZACOES. Publicacao da aplicacao continua08c3ae.
+  Integrar as notas antes de enviar o coletor; nao reiniciar CRM por documentos.
+- Testes do instalador57/57, coletor194 antes do ultimo caso adicional,
+  release113/11 skips POSIX, lint/typecheck/build passaram. Suite Vitest local
+  registrou timeouts em devtools/Obsidian, ainda em diagnostico. CI Linux e
+  verificacao fisica do systemd permanecem gates, sem alegar ativacao.
+
+## 2026-10-13: Conexao real concluida, agenda ainda desligada
+
+- Fontes atuais: GitHub PR198/main15ddedd e CI38358420498 com quatro jobs verdes;
+  VPS release54fc028d de07:27:06Z; health publico200/ok no SHA15ddedd.
+- Artefato da CI preservado sem rebuild. Diferenca classic/containerd provada
+  pela cadeia index/manifest/config/11camadas e RootFS; image:prove aprovou
+  os dois perfis. Auditoria registra checksums/digests e cronologia completa.
+- Configuracao aplicada pelo coordenador com tres travas, CAS, backup integral
+  root600 e verificacao dos quatro valores efetivos. Ingesttrue/refreshfalse;
+  CRM sem auth401, webhook n8n sem auth403, refresh desabilitado404.
+- MCP publicou L90AYSBEat4vYHLz/dcffaf09 e releu ativo igual ao draft.
+  Nome atual CRM VPS - Salesforce - Ingestao CRM, alterado somente por MCP
+  apos validate_workflow; nodes, credenciais, conexoes e settings identicos.
+- Exportacao real06:56Z, UUID25ec6322-4a01-4838-9b89-55934a9217fe:
+  HTTP201 em07:28Z e replay200/idempotenttrue em07:29Z. Supabase confirma
+  run d5b24cc6-561a-4eef-a427-97086d60c9ec, count159 e uma auditoria.
+  Snapshot13/10: 3views,15metricas,15empreendimentos,144participantes.
+- Navegador autenticado confirmou Salesforce conectado, n8n ingestao confirmada
+  e Supabase leitura confirmada. Sem logs persistentes de payloads no n8n.
+- Excecao operacional explicita: monitor atual nao recebe contagens/recibos
+  do envio pontual. Tabela do coletor ainda pode mostrar Sem dados; cartoes
+  consultam evidencia duravel independente. Revisar ao implantar agendador.
+- Agenda30min sem timer/processo ativo em07:31Z; publisher habilitado somente
+  em dois processos pontuais. Proximo passo exige implantacao versionada,
+  teste de falha/restart e dois ciclos reconciliados. Nao prometer recorrencia.
+- N8n antigo nao acessado/alterado. Sem migrations remotas. Backup offsite ja
+  recuperado; segunda copia independente da chave continua recomendada.
+- pnpm verify repetido exit0, CI completa verde e screenshot real inspecionado.
+  Documentacao final em branch separada, sem nova mudanca de runtime.
+
 ## 2026-10-13: Efeitos e compactacao da Rotina publicados
 
 - PR #202 aprovado pela CI38360349190, integrado em08c3ae453ddfb225c3cb64971b53333c36d8932e

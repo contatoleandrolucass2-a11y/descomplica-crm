@@ -186,6 +186,10 @@ do CRM so exibe Conectado com prova aceita e recente; recibo vence em 120s.
 Contagens continuam sem coleta, e agenda de 30 minutos continua inativa.
 Nao executar esse monitor junto com salesforce:export:watch no futuro.
 
+A ativacao posterior da agenda substitui somente esse monitor pelo
+[coletor integrado](salesforce-vps-collector.md), com instalador separado,
+backup e rollback. O instalador inicial de sessao nao instala o coletor.
+
 ## Validacao e rollback
 
 Validar no SHA exato: lint, typecheck, test, build, testes Node do supervisor
