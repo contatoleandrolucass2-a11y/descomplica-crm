@@ -64,6 +64,27 @@ tokens, credenciais ou dados privados da instancia antiga.
 
 ## Validacao e recuperacao
 
+### Backup local da nova instancia
+
+ops/n8n/backup-local.sh exige root, diretorio 0700, .env 0600, nomes/labels
+e volume exatos do projeto novo. Faz lock, pausa brevemente apenas o novo n8n,
+captura pg_dump, configuracao privada e volume .n8n, e libera a aplicacao com
+trap de recuperacao. Nao imprime segredos nem envia arquivos para fora da VPS.
+Nao executar durante coleta ativa ou alteracoes administrativas concorrentes.
+
+Cria diretorio exclusivo em /srv/descomplica-n8n/backups, sem sobrescrever ou
+remover copias. Verifica hashes e restaura o banco em PostgreSQL temporario
+sem rede, portas ou volume persistente, usando a mesma imagem local do banco.
+O container temporario e removido ao final, inclusive em falha. Artefatos
+incompletos ficam preservados para diagnostico; ausencia de verification.txt
+impede considerar a copia validada. Script nao configura agenda nem retencao.
+
+Em 12/10/2026, 22:25 Brasilia: backup local-20261013T012505Z-dSchqd passou,
+148 tabelas restauradas, arquivos 0600/root e pasta 0700/root, checksums validos,
+readiness ok depois. Nome usa UTC. Nao testou boot de aplicacao restaurada ou
+descriptografia de credenciais. Copia no mesmo disco NAO e backup externo.
+Destino externo continua dependendo de autorizacao; nenhuma copia saiu da VPS.
+
 Antes de iniciar: validar Compose com --quiet, recursos livres, digests,
 limites e ausencia de nomes/volumes preexistentes. Conferir healthz e
 healthz/readiness locais, versao, estado do runner e bind somente loopback.
@@ -86,7 +107,8 @@ concluido e cliente Codex visivel no n8n com leitura/escrita de workflows,
 leitura de execucoes/projetos/tags; sem execucao de fluxos nesta etapa.
 Se ferramentas nao aparecerem no chat, recarregar cliente/sessao e conferir
 inventario. Nao substituir MCP antigo, gerar token ou contornar por REST.
-Antes de qualquer update_workflow, executar validate_workflow_code e reler
+Antes de qualquer update_workflow, executar validate_workflow (substituicao
+nominal autorizada pelo operador em 12/10/2026) e reler
 depois. Autenticacao sozinha nao comprova validacao ou ativacao de automacoes.
 
 ### Liberado apos cadastro do owner
@@ -125,5 +147,6 @@ Salesforce, instancia n8n instalada e Supabase atualizado sao estados distintos.
 ## Fontes
 
 - [Instalacao oficial](https://docs.n8n.io/hosting/installation/docker/).
+- [Backup e restauracao](https://github.com/n8n-io/n8n-docs/blob/main/docs/deploy/host-n8n/keep-n8n-running/backup-and-restore.md).
 - [Runner externo](https://docs.n8n.io/hosting/configuration/task-runners/).
 - [Release 2.42.7](https://github.com/n8n-io/n8n/releases/tag/n8n%402.42.7).

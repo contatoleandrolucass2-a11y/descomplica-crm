@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-12: Backup local n8n
+
+- Adiciona backup privado e prova de restauracao PostgreSQL isolada da instancia nova.
+- Nao altera workflows, agenda, n8n antigo ou dados do CRM.
+
+
 ## 2026-10-12: Candidata Salesforce no novo n8n
 
 - Versiona SDK, settings e testes da candidata inativa, sem saida externa.

@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-12: Backup local do novo n8n
+
+- Script limitado ao projeto descomplica-n8n-crm, sem acessar a instancia antiga.
+- Backup privado de banco, configuracao e .n8n; restauracao em banco temporario
+  sem rede comprovou 148 tabelas. Container de teste removido; readiness ok.
+- Sem backup externo, boot de clone ou prova de descriptografia de credenciais.
+- Credencial e OAuth de execucao autorizados. CLI confirmou OAuth; ferramentas
+  de execucao ainda nao carregadas. Formulario de credencial aguarda o operador.
+- Onze testes especificos aprovados; lint (aviso anterior), typecheck e build
+  passaram; suite geral manteve seis falhas Windows, 2566 aprovados e 27 skips.
+
+
 ## 2026-10-12: Candidata Salesforce criada via MCP
 
 - Workflow L90AYSBEat4vYHLz criado, validado e relido no novo n8n; inativo.

@@ -1,5 +1,45 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Retomada para backup e credencial
+
+- Preflight: Git comum confirmado, branch codex/n8n-crm-isolado d7173b0;
+  GitHub PR198 aberto nesse head, consulta Actions sem runs retornados.
+  origin/main e health publico agora 1160a0e: publicacao externa ao trabalho
+  desta branch. Runbook n8n-crm-isolated ainda ausente de main; usar PR198.
+- Inventario MCP segue sem criacao de credenciais nem execucao de workflows.
+  Solicitada autorizacao especifica para credencial pela UI e OAuth de testes;
+  nenhuma ampliacao aplicada. Workflow e agenda permanecem inativos.
+
+### Resultado da retomada
+
+- Backup local privado executado em 12/10/2026 22:25 Brasilia; diretorio
+  /srv/descomplica-n8n/backups/local-20261013T012505Z-dSchqd (nome UTC).
+  pg_dump, configuracao/chave privada e volume .n8n arquivados na propria VPS;
+  checksums aprovados. Sem transferencia de segredos ou dumps para o desktop/Git.
+- Restore em container PostgreSQL descartavel sem rede/portas, imagem local
+  igual ao banco e armazenamento tmpfs: 148 tabelas restauradas. Container
+  removido; readiness ok. Diretório 0700/root e arquivos 0600/root confirmados.
+- Limites: sem backup externo, boot de aplicacao restaurada ou teste de
+  descriptografia. Copia no mesmo disco nao protege contra perda da VPS.
+- Fonte tecnica: documentacao oficial n8n backup-and-restore; script
+  ops/n8n/backup-local.sh. bash -n aprovado e execucao real delimitada acima.
+  Tres testes locais estaticos de guardas, mais oito da candidata, passaram.
+- Lint (aviso anterior), typecheck e build passaram. Suite geral: 2566 passaram,
+  27 skips e seis falhas Windows anteriores; etapas posteriores ao Vitest nao
+  executadas. Nao afirmar CI verde ou merge. Sem deploy/restart do CRM.
+- Operador autorizou credencial nova via UI e OAuth para testes sinteticos.
+  CLI confirmou login OAuth concluido com solicitacao de sete escopos:
+  workflow read/write/execute, execution read, credential read, project read,
+  tag read. Nenhuma permissao de administracao/pacotes/tabelas solicitada.
+- Uma guia duplicada exibiu sessao expirada, mas CLI da primeira autorizacao
+  confirmou sucesso. Tentativa redundante posterior cancelada, sem substituir
+  MCP antigo. Ferramentas novas ainda ausentes no inventario deste chat;
+  conferir carregamento antes de executar testes; nao contornar por REST.
+- Formulario Header Auth preparado, Authorization e dominios de saida None.
+  Usuario precisa colar/salvar segredo; token aleatorio 256 bits gerado em
+  memoria e colocado no clipboard por pedido de ajuda, sem registrar seu valor.
+  Credencial NAO confirmada salva nem vinculada. Nenhum workflow alterado/ativado.
+
 ## 2026-10-12: Candidata criada e privacidade relida
 
 - Fonte: MCP n8n_crm_vps, workflow L90AYSBEat4vYHLz. Criacao e releitura
