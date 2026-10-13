@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-12: Configuracao de ingestao auditada
+
+- Projeto Supabase de producao confirmado por URL/MCP; somente catalogos lidos.
+- Ingestao desligada e segredos necessarios ausentes no CRM; saida n8n sem credencial.
+- RPC Salesforce restrita a service_role; tabelas Qlik sem grants diretos aos tres papeis.
+- Oito testes de schema aprovados. Sem mutacao remota; login Supabase aguarda operador.
+
 ## 2026-10-12: Sete fontes coletadas na VPS
 
 - Coleta unica com publisher desligado concluiu em aproximadamente seis minutos.

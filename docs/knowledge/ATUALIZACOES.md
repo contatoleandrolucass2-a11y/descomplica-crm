@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Preflight da saida n8n para CRM
+
+- Inspecao sanitizada do container confirmou ingestao e refresh desligados,
+  SALESFORCE_INGEST_SECRET e SUPABASE_SECRET_KEY sem valor. Nao confundir
+  SUPABASE_URL de servidor com NEXT_PUBLIC_SUPABASE_URL inexistente no container.
+- Projeto da URL conferido via MCP: hnncxuerlcsaahdxoswb,
+  descomplica-crm-production, ACTIVE_HEALTHY. Nenhuma linha comercial consultada.
+- Catalogo remoto: ingest_crm_salesforce_snapshot(jsonb) existe; EXECUTE negado
+  a anon/authenticated e permitido a service_role. Nas duas tabelas Qlik, RLS
+  ativo e SELECT/INSERT/UPDATE/DELETE negados aos tres papeis.
+- As RPCs ingest_crm_imob_ranking_snapshot e ingest_crm_read_model_v3 nao foram
+  encontradas nesse projeto, inclusive em outros schemas. Nao aplicar migrations
+  para corrigir diferenca apenas com base no runbook; reconciliar antes de escrita.
+- MCP novo n8n lista somente a credencial de entrada. Saida n8n para CRM ainda
+  sem credencial propria; nao reutilizar token de entrada nem chave Supabase no n8n.
+- Vitest tests/ingestion.test.ts: oito testes aprovados. O segundo filtro
+  salesforce-config.test.ts nao encontrou arquivo; nao contar como suite executada.
+- Usuario pediu ajuda para criar chave secreta. Guia oficial de API Keys aberta,
+  redirecionou ao login; handoff ao usuario, nenhuma chave criada/extraida.
+- Sem mudanca de workflow, runtime, ACL, dados ou agenda. Pendentes chave privada
+  no servidor, credencial de saida, backup e demais gates da primeira ingestao.
+
 ## 2026-10-12: Coleta unica Salesforce na VPS validada
 
 - Fonte: SSH, probe do monitor e exportador do release

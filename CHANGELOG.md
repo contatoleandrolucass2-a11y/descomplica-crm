@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-12: Pendencias de ingestao identificadas
+
+- Registra preflight de configuracao e privilegios sem alterar dados ou permissoes.
+- Mantem agenda desligada enquanto faltam segredos, backup e gates de ingestao.
+
 ## 2026-10-12: Coleta Salesforce na VPS comprovada
 
 - Sete relatorios coletados com sessao dedicada; candidato privado passou no schema.
