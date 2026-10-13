@@ -74,6 +74,15 @@ export const salesforceObservationSchema = z
 
 export const salesforceConnectionSnapshotSchema = z
   .object({
+    inventory: z
+      .object({
+        generatedAt: timestamp,
+        sourceRows: z.number().int().nonnegative(),
+        count: z.number().int().nonnegative(),
+      })
+      .strict()
+      .nullable()
+      .optional(),
     state: z.enum([
       "unconfigured",
       "waiting",

@@ -35,6 +35,7 @@ const REPORTS = [
   { key: "sales", name: "Vendas", id: "00OU600000EjFyyMAF" },
   { key: "brokers", name: "Corretores", id: "00OTT000009j0l32AA" },
   { key: "imobAccounts", name: "Canal Imob", id: "00OU6000006RqzxMAC" },
+  { key: "inventory", name: "ESTOQUE SPC · unidades", id: "00OU6000007yRpKMAU" },
 ] as const;
 
 const STATES = {
@@ -305,7 +306,7 @@ export function ConnectedSystemsPanel({
               />
             </div>
             <h3>Salesforce</h3>
-            <p>Origem dos sete relatórios comerciais acompanhados pelo CRM.</p>
+            <p>Relatórios comerciais e estoque de unidades usados pelo CRM.</p>
             <div className={styles.serviceHealth}>
               <span className={styles.status} data-state={salesforceState}>
                 <StatusIcon size={15} aria-hidden="true" />
@@ -463,7 +464,7 @@ export function ConnectedSystemsPanel({
           <header className={styles.sectionHeader}>
             <div className={styles.sectionTitle}>
               <h2 id="reports-title">Relatórios</h2>
-              <span>7 relatórios previstos</span>
+              <span>7 relatórios comerciais + estoque</span>
             </div>
             <div className={styles.refreshAction}>
               {canRefresh ? (
@@ -499,17 +500,28 @@ export function ConnectedSystemsPanel({
               <tbody>
                 {REPORTS.map((report) => {
                   const result = snapshot.reports?.find((item) => item.key === report.key);
+                  const inventory = report.key === "inventory";
+                  const rows = inventory ? snapshot.inventory?.sourceRows : result?.rows;
+                  const collectedAt = inventory
+                    ? (snapshot.inventory?.generatedAt ?? null)
+                    : result
+                      ? snapshot.lastExportAt
+                      : null;
                   return (
                     <tr key={report.key}>
                       <th scope="row">{report.name}</th>
                       <td className={styles.count}>
-                        {result ? result.rows.toLocaleString("pt-BR") : "Sem dados"}
+                        {rows !== undefined ? rows.toLocaleString("pt-BR") : "Sem dados"}
                       </td>
                       <td>
-                        {result && snapshot.lastExportAt ? "Coletado" : "Sem coleta confirmada"}
+                        {collectedAt
+                          ? inventory
+                            ? "Base validada · coleta avulsa"
+                            : "Coletado"
+                          : "Sem coleta confirmada"}
                       </td>
                       <td>
-                        <Timestamp value={result ? snapshot.lastExportAt : null} />
+                        <Timestamp value={collectedAt} />
                       </td>
                       <td>
                         <a

@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-13: Estoque Salesforce para todos os simuladores
+
+- Acrescenta coleta completa e validada do ESTOQUE SPC e uma fonte oficial
+  comum para Tabelão, Associativo, Investidor e Tabela Direta.
+- Mostra estoque na lista de relatórios, com contagem/data reais e identificação
+  de coleta avulsa; preserva status das unidades e impede fallback para preços
+  históricos quando a fonte oficial está configurada.
+
 ## 2026-10-13: Logo Descomplica na aba do navegador
 
 - Substitui o favicon padrão pela logo fornecida pelo usuário, com as cores

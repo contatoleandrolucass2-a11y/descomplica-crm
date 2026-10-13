@@ -32,6 +32,7 @@
     "mapping:reconcile": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON ops/mappings/import.ts",
     "salesforce:chrome": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/launch-dedicated-chrome.mjs",
     "salesforce:export": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/export-candidate.mjs",
+    "salesforce:inventory": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/export-inventory.mjs",
     "salesforce:publish": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/publish-candidate.mjs",
     "salesforce:export:watch": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/run-every-30-minutes.mjs",
     "salesforce:monitor": "node --env-file-if-exists=ops/salesforce/.env ops/salesforce/connection-monitor.mjs",

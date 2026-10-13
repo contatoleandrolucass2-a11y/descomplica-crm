@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-10-13: Base de unidades pelo relatório oficial Salesforce
+
+- Usuário definiu ESTOQUE SPC como fonte oficial. Verificação encontrou feed
+  com 2.243 unidades e data 07/08, além da planilha fixa de 3.301 unidades com
+  referência 05/09. Os sete relatórios comerciais não atualizam esses dados.
+- Coleta completa do relatório `00OU6000007yRpKMAU` por 30 empreendimentos,
+  preservando filtros e validando contagens antes/depois. Em 17:43:49.870Z,
+  candidato privado com 2.976 linhas/unidades, zero duplicatas: 2.891 Disponível
+  e 85 Mirror. Duas sem identificador textual e três sem preço utilizável;
+  IDs Salesforce mantidos e valores ausentes não inventados. Não é publicação.
+- Ambos os endpoints de estoque podem servir a mesma carga oficial privada,
+  incluindo Tabela Direta. Cache renovável, autorização mantida e sem retorno
+  à base histórica quando a fonte oficial falha. Compose valida o arquivo.
+- Conectar Sistemas inclui estoque com evidência do arquivo servido e rótulo
+  de coleta avulsa. Agenda dos sete relatórios e n8n permanecem independentes.
+- `pnpm verify` aprovado: lint sem erros (um aviso preexistente), tipos,
+  137 arquivos Vitest, 2.658 testes aprovados e 63 skips existentes; suite Node
+  do coletor e release aprovadas (11 verificações físicas reservadas à CI Linux),
+  além de build. Audit sem vulnerabilidades conhecidas. CI e publicação ainda
+  pendentes neste registro. Nenhuma linha comercial foi adicionada ao Git.
+
 ## 2026-10-13: Logo na aba do navegador
 
 - Pedido e referência visual identificam o ícone da aba do navegador.

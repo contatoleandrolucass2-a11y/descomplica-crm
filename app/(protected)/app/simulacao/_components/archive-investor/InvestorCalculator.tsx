@@ -32,6 +32,7 @@ type InventoryItem = {
   businessUnit: "Direcional" | "Riva";
   project: string;
   product: string;
+  status?: string | null;
   identifier: string | null;
   plant: string | null;
   classification: string | null;
@@ -2371,6 +2372,7 @@ function PropertySummary({ item, label, associative = false, sectionRef }: { ite
     </header>
     <dl>
       <div tabIndex={0}><dt>Incorporadora</dt><dd>{informationLabel(item.businessUnit)}</dd></div>
+      {item.status ? <div tabIndex={0}><dt>Status no Salesforce</dt><dd>{item.status}</dd></div> : null}
       <div tabIndex={0}><dt>Planta</dt><dd>{informationLabel(item.plant)}</dd></div>
       <div tabIndex={0}><dt>Metragem</dt><dd>{item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "Não informada"}</dd></div>
       <div tabIndex={0}><dt>Andar</dt><dd>{floorLabel(item.floor)}</dd></div>
