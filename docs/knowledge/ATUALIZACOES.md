@@ -1,5 +1,52 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Correcao de rolagem da Rotina publicada
+
+- Implementado e integrado: PR #205, merge em 2026-10-13T14:38:26Z,
+  SHA 7d6341fed8bc1c13a1c9ef094c5a92695530c39b. Fontes GitHub:
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/205 e
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38415097083.
+  CI do PR 38410012580 aprovada; CI main concluida com validate, release-gates,
+  isolated-restore e promotable-image aprovados no SHA exato.
+- Validacao local final integrada: pnpm verify exit 0; lint/tipos/build,
+  Vitest 2647 (63 opt-in skips), coletor 195, release 113 (11 fisicos POSIX
+  executados na CI Linux). Aviso preexistente connected-systems.mjs:18 mantido.
+  Browser focal 90/90, CSS minificado, 24 combinacoes Axe em dois tamanhos,
+  tres temas, Semana/Hoje e ambas as preferencias de movimento.
+- Publicado exclusivamente pelo coordenador, com consulta no mesmo minuto,
+  tres travas, CAS e CI/main ao vivo: deployment
+  b4e2c6bd-1b5a-4d7f-b324-8a580562eb0b, deployedAt
+  2026-10-13T15:16:07.720Z (12:16:07 Sao Paulo), sem pendencia. Baseline
+  anterior observada d045c054-2ad5-4e5c-aff0-c8c100df3a03 / 08c3ae4,
+  publicada as 08:22:09.455Z. Nenhuma opcao de configuracao Salesforce usada.
+- Imagem carregada sha256:5e9fee434a08ddd1ae8bc70afb339ce4174fba3a1e3b72aef01e35bf19d7ce3c;
+  config/CI sha256:55f72655c8397f950db52a7f4e4c018d745e6bfa7e3915745e3dcbf9d3af8795;
+  artefato bf0683422a0cef3e49b5fa8ef929e20742d51da01c907ba867f4ea3efdd90749.
+  Checksum, manifesto, config e 11 camadas conferidos, dois perfis aprovados,
+  sem rebuild na VPS. Diferenca de IDs explicada pela cadeia OCI verificada.
+- Backup privado verificado em
+  /var/backups/descomplica-crm/releases/7d6341fed8bc1c13a1c9ef094c5a92695530c39b.HkkTkb;
+  manifesto e25281452cceb2734fa6c0ac9c2e2e2ab4746a90ab64781ffdc61ad3c425551e.
+  Imagem anterior preservada. Reversao apos conclusao exige PR/CI e nova
+  promocao; recover somente para pendencia exata, inexistente nesta publicacao.
+- Pos-publicacao: GET https://crm.descomplicapro.com.br/api/health HTTP 200,
+  ok e SHA exato; container healthy, OOM false e zero reinicios. Inventario
+  anonimo 401, Gestao/Rotina anonimas 307. Browser autenticado preservou
+  scrollY 2098 com foco original na linha 7 apos mais de 35s no fim da semana.
+  Rodape sem fundo/borda, alinhado a direita, animacoes 0.65s/4.5s; cabecalho
+  abaixo do menu em top 58; console vazio. Captura local:
+  test-results/routine-preview/rotina-rolagem-publicada.png.
+  Hoje tambem preservou foco na linha 7 e scrollY 68.6667 apos o intervalo,
+  sem mudanca de conteudo; captura rotina-diaria-rolagem-publicada.png.
+- Nenhuma edicao/salvamento real, migration, agenda, workflow ou configuracao
+  remota alterada nesta tarefa. O hover real e preservacao de selecao/digitacao
+  foram provados nos testes isolados e na CI; browser manual de producao
+  confere leitura/foco/rolagem, sem manipular dados reais. Mobile e contraste
+  dos outros temas foram cobertos pela matriz automatizada, nao manualmente.
+- Fechamento documental separado do runtime publicado. As falhas anteriores
+  de timeout, minificacao e contraste foram reproduzidas, corrigidas ou
+  reexecutadas com gates aprovados; registros historicos abaixo permanecem.
+
 ## 2026-10-13: Integracao concorrente durante a correcao da Rotina
 
 - PR203 integrado em1ace82d16ad3cdc117a96d36cd9f935657581bee as13:54:12Z,

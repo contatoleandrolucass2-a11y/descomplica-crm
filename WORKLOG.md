@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-13: Rolagem e rodape publicados
+
+- PR #205 integrado em 7d6341fed8bc1c13a1c9ef094c5a92695530c39b; CI do PR
+  38410012580 e os quatro jobs de main 38415097083 aprovados.
+- pnpm verify integrado passou: lint, typecheck, build, Vitest 2647,
+  coletor 195 e release 113. Os 11 casos fisicos Linux passaram na CI.
+  Browser focal: 90/90, incluindo 24 combinacoes Axe e CSS minificado.
+- Publicacao protegida em 13/10 as 12:16:07 de Sao Paulo (15:16:07.720Z),
+  deployment b4e2c6bd-1b5a-4d7f-b324-8a580562eb0b. Artefato da CI verificado,
+  backup privado conferido e sem rebuild na VPS; ledger sem pendencia.
+- Health publico confirma SHA exato; container healthy, zero reinicios/OOM.
+  Navegador real manteve scrollY 2098 e foco na linha 7 apos refresh, no fim
+  da tabela semanal. Rodape transparente, sem borda, a direita; cabecalho
+  em top 58 abaixo do menu e console sem erros. Nenhum dado real alterado.
+- Registro de fechamento apenas documental; nao republicar runtime por ele.
+  Identificadores, backup, limites e fontes em docs/knowledge/ATUALIZACOES.md.
+
 ## 2026-10-13: Correcao de rolagem e rodape da Rotina
 
 - Reproducao Chromium: com foco na linha 7 e mouse na ultima linha, o refresh
