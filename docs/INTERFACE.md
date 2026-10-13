@@ -24,6 +24,14 @@ Grupos usam `details`/`summary`, funcionam sem hover, fecham com `Escape` e
 devolvem foco ao disclosure. Também fecham ao clicar fora ou selecionar um link,
 e somente um grupo permanece aberto por vez.
 
+## Identidade na aba do navegador
+
+`app/icon.png` contém a logo Descomplica enviada pelo usuário, preservada em
+225 × 225 pixels. A convenção de metadados do Next.js adiciona o ícone às
+páginas públicas e protegidas, com URL versionada. Não manter o favicon padrão
+do template junto dessa marca. A identificação visual da aba é independente
+dos ícones de navegação dentro do CRM.
+
 ## Validação
 
 - Vitest valida o catálogo fechado dos três temas e rejeita valores persistidos desconhecidos.
