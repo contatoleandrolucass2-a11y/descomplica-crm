@@ -596,6 +596,18 @@ async function runSynthetic() {
       refreshes++;
       await route.fulfill({ json: { status: "started" } });
     });
+    let integrationStatusCode = 200;
+    let integrationStatus = "succeeded";
+    await page.route("**/api/dashboard/status", async (route) => {
+      await route.fulfill({
+        status: integrationStatusCode,
+        json: {
+          generatedAt: "2026-10-08T14:58:00.000Z",
+          ingestion: { status: integrationStatus, completedAt: "2026-10-08T14:59:00.000Z" },
+          refresh: { status: null, requestedAt: null },
+        },
+      });
+    });
     await page.clock.install();
     await page.goto(origin);
     await page.evaluate(() => new Promise((resolve) => queueMicrotask(resolve)));
@@ -691,6 +703,23 @@ async function runSynthetic() {
     snapshot = base;
     await verify.click();
     await expect(collection.locator("dd")).toHaveText("Concluída");
+
+    await page.evaluate(() => window.qaRender({ canReadSyncStatus: true }));
+    const services = page.locator('[aria-labelledby="services-title"]');
+    await expect(services.getByText("Ingestão confirmada", { exact: true })).toBeVisible();
+    await expect(services.getByText("Leitura confirmada", { exact: true })).toBeVisible();
+    await expect(services.getByText("Disponibilidade atual não verificada.")).toBeVisible();
+    await expect(services.locator('time[datetime="2026-10-08T14:59:00.000Z"]')).toHaveCount(1);
+    integrationStatusCode = 503;
+    await verify.click();
+    await expect(services.getByText("Não verificado", { exact: true })).toHaveCount(2);
+    integrationStatusCode = 200;
+    integrationStatus = "failed";
+    await verify.click();
+    await expect(services.getByText("Última ingestão falhou", { exact: true })).toBeVisible();
+    integrationStatus = "succeeded";
+    await verify.click();
+    await expect(services.getByText("Ingestão confirmada", { exact: true })).toBeVisible();
 
     const directory = path.join(root, "output/playwright/connected-systems");
     await mkdir(directory, { recursive: true });

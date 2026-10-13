@@ -105,6 +105,38 @@ evidência de frescor. Guardar saída sanitizada, SHA anterior/novo, horário UT
 e equivalente America/Sao_Paulo, fonte, decisão e smoke da jornada afetada.
 Não logar `.env`, secrets ou saída completa de `docker inspect`.
 
+### Conectar Salesforce, n8n e Supabase
+
+Para a primeira conexao autorizada, acrescentar `--salesforce-ingestion enable`
+ao comando `deploy` acima. A opcao exige um **novo SHA aprovado**; o SHA ja
+ativo e recusado para configuracao, sem transformar `noop` em reinicio.
+Nenhuma credencial pode ser passada na linha de comando.
+
+O host le somente os arquivos privados existentes:
+
+- `/etc/descomplica-crm/secrets/salesforce-supabase-secret`;
+- `/etc/descomplica-crm/secrets/salesforce-crm-ingest-bearer`.
+
+Depois da consulta final a CI e antes da intencao, prepara um backup privado
+duravel do env completo anterior e proposto, com hashes, em
+`/etc/descomplica-crm/config-backups/<deployment-id>.json`. O registro publico
+do procedimento contem somente UUID e hashes, nunca os valores. Esses backups
+contem segredos: nao versionar, publicar nem copiar para evidencias abertas.
+
+A troca usa CAS do **env completo**, preserva as demais configuracoes e aplica
+`SUPABASE_SECRET_KEY`, `SALESFORCE_INGEST_SECRET`,
+`SALESFORCE_INGEST_ENABLED=true` e `SALESFORCE_REFRESH_ENABLED=false`, junto
+com a imagem candidata. Duplicatas, arquivos inseguros, backup adulterado ou
+alteracao concorrente bloqueiam. As tres travas e o limite de frescor continuam
+obrigatorios. A confirmacao verifica tambem os quatro valores efetivos no
+container, sem imprimi-los; health aprovado sozinho nao confirma configuracao.
+
+Esta opcao nao publica workflows, agenda coletas, altera o banco ou aplica
+migrations. A primeira carga e seu replay seguem o
+[runbook Salesforce](salesforce-n8n-migration.md). Preservar o backup enquanto
+existir tentativa pendente; a recuperacao usa seu conteudo, sem depender da
+presenca posterior dos dois arquivos de credencial.
+
 ## Falha e recuperação
 
 Sem conclusão verificada, a pendência permanece. Manter o checkout limpo do
@@ -135,7 +167,11 @@ recibo de A após uma interrupção. Falha mantém a pendência e a fase persist
 
 Não há `rollback` genérico capaz de publicar uma imagem sem CI. Depois de uma
 release concluída, a correção/reversão segue PR, CI completa em `main` e nova
-promoção protegida. Recuperação não altera banco, secrets nem permissões.
+promoção protegida. Recuperação não altera banco nem os arquivos de origem dos
+secrets. Quando a tentativa inclui configuracao Salesforce, restaura por CAS o
+env completo anterior e verifica os valores efetivos no container. Alteracao
+externa ou perda/adulteracao do backup bloqueia, mantendo a pendencia. Releases
+sem essa opcao e registros antigos preservam o comportamento anterior.
 
 ## Limite operacional
 

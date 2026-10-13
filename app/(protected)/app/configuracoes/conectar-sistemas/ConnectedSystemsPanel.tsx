@@ -14,6 +14,11 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import { SalesforceRefreshButton } from "@/app/(protected)/app/_components/SalesforceRefreshButton";
 import {
+  fetchIntegrationEvidence,
+  getIntegrationServiceStatuses,
+  type IntegrationEvidence,
+} from "@/lib/crm/integrations/service-status";
+import {
   emptySalesforceConnectionSnapshot as emptySnapshot,
   salesforceConnectionSnapshotSchema,
   type SalesforceConnectionSnapshot,
@@ -110,12 +115,14 @@ export function ConnectedSystemsPanel({
   canRefresh,
   statusConfigured,
   consoleAvailable = false,
+  canReadSyncStatus = false,
 }: {
   ingestLabel: string;
   refreshAvailable: boolean;
   canRefresh: boolean;
   statusConfigured: boolean;
   consoleAvailable?: boolean;
+  canReadSyncStatus?: boolean;
 }) {
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [consoleError, setConsoleError] = useState(false);
@@ -127,6 +134,7 @@ export function ConnectedSystemsPanel({
     emptySnapshot(statusConfigured ? "waiting" : "unconfigured"),
   );
   const [checking, setChecking] = useState(false);
+  const [integrationEvidence, setIntegrationEvidence] = useState<IntegrationEvidence | null>(null);
   const verifyRef = useRef<(() => void) | null>(null);
 
   useEffect(() => {
@@ -142,20 +150,32 @@ export function ConnectedSystemsPanel({
       controller = request;
       setChecking(true);
       timeoutTimer = setTimeout(() => request.abort(), REQUEST_TIMEOUT_MS);
+      async function verifySalesforce() {
+        try {
+          const response = await fetch("/api/salesforce/status", {
+            cache: "no-store",
+            credentials: "same-origin",
+            headers: { accept: "application/json" },
+            signal: request.signal,
+          });
+          if (!response.ok) throw new Error("Status unavailable");
+          const body = salesforceConnectionSnapshotSchema.parse(await response.json());
+          if (body.state === "connected" && (!body.checkedAt || !body.receivedAt))
+            throw new Error("Missing session evidence");
+          if (!disposed && !request.signal.aborted) setSnapshot(body);
+        } catch {
+          if (!disposed) setSnapshot(emptySnapshot("unavailable"));
+        }
+      }
+
+      async function verifyIntegrations() {
+        if (!canReadSyncStatus) return;
+        const evidence = await fetchIntegrationEvidence(request.signal);
+        if (!disposed) setIntegrationEvidence(evidence);
+      }
+
       try {
-        const response = await fetch("/api/salesforce/status", {
-          cache: "no-store",
-          credentials: "same-origin",
-          headers: { accept: "application/json" },
-          signal: request.signal,
-        });
-        if (!response.ok) throw new Error("Status unavailable");
-        const body = salesforceConnectionSnapshotSchema.parse(await response.json());
-        if (body.state === "connected" && (!body.checkedAt || !body.receivedAt))
-          throw new Error("Missing session evidence");
-        if (!disposed && !request.signal.aborted) setSnapshot(body);
-      } catch {
-        if (!disposed) setSnapshot(emptySnapshot("unavailable"));
+        await Promise.all([verifySalesforce(), verifyIntegrations()]);
       } finally {
         clearTimeout(timeoutTimer);
         controller = null;
@@ -173,12 +193,13 @@ export function ConnectedSystemsPanel({
         ...current,
         state: statusConfigured ? "waiting" : "unconfigured",
       }));
+      setIntegrationEvidence(null);
       if (document.hidden) controller?.abort();
-      else if (statusConfigured) void verify();
+      else if (statusConfigured || canReadSyncStatus) void verify();
     }
 
     verifyRef.current = () => void verify();
-    if (statusConfigured) void verify();
+    if (statusConfigured || canReadSyncStatus) void verify();
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       disposed = true;
@@ -188,8 +209,11 @@ export function ConnectedSystemsPanel({
       controller?.abort();
       document.removeEventListener("visibilitychange", onVisibilityChange);
     };
-  }, [statusConfigured]);
+  }, [statusConfigured, canReadSyncStatus]);
 
+  const services = getIntegrationServiceStatuses(canReadSyncStatus ? integrationEvidence : null);
+  const N8nIcon = services.n8n.state === "confirmed" ? CircleCheck : CircleHelp;
+  const SupabaseIcon = services.supabase.state === "confirmed" ? CircleCheck : CircleHelp;
   const connection = STATES[snapshot.state];
   const StatusIcon = connection.icon;
   const { state: salesforceState, label: salesforceLabel } = getSalesforceServiceStatus(snapshot);
@@ -218,7 +242,7 @@ export function ConnectedSystemsPanel({
             type="button"
             className={styles.iconButton}
             aria-label="Verificar conexão"
-            title="Verificar conexão do Salesforce"
+            title="Verificar evidências das integrações"
             disabled={checking}
             onClick={() => verifyRef.current?.()}
           >
@@ -313,12 +337,25 @@ export function ConnectedSystemsPanel({
             </div>
             <h3>n8n</h3>
             <p>Fluxos de integração e atualização de dados.</p>
-            <div className={styles.serviceHealth}>
-              <span className={styles.status} data-state="unverified">
-                <CircleHelp size={15} aria-hidden="true" />
-                Não verificado
+            <div className={styles.serviceHealth} aria-live="polite">
+              <span
+                className={styles.status}
+                data-state={services.n8n.state === "confirmed" ? "connected" : services.n8n.state}
+              >
+                <N8nIcon size={15} aria-hidden="true" />
+                {services.n8n.label}
               </span>
-              <small>Fonte de status não exposta</small>
+              <small>
+                {services.n8n.timestamp ? (
+                  <>
+                    <Timestamp value={services.n8n.timestamp} />
+                    <br />
+                  </>
+                ) : null}
+                {canReadSyncStatus
+                  ? services.n8n.note
+                  : "Consulta não autorizada para este acesso."}
+              </small>
             </div>
           </article>
 
@@ -342,12 +379,27 @@ export function ConnectedSystemsPanel({
             </div>
             <h3>Supabase</h3>
             <p>Banco de dados e autenticação do CRM.</p>
-            <div className={styles.serviceHealth}>
-              <span className={styles.status} data-state="unverified">
-                <CircleHelp size={15} aria-hidden="true" />
-                Não verificado
+            <div className={styles.serviceHealth} aria-live="polite">
+              <span
+                className={styles.status}
+                data-state={
+                  services.supabase.state === "confirmed" ? "connected" : services.supabase.state
+                }
+              >
+                <SupabaseIcon size={15} aria-hidden="true" />
+                {services.supabase.label}
               </span>
-              <small>Fonte de status não exposta</small>
+              <small>
+                {services.supabase.timestamp ? (
+                  <>
+                    <Timestamp value={services.supabase.timestamp} />
+                    <br />
+                  </>
+                ) : null}
+                {canReadSyncStatus
+                  ? services.supabase.note
+                  : "Consulta não autorizada para este acesso."}
+              </small>
             </div>
           </article>
         </div>

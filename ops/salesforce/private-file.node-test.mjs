@@ -1,8 +1,13 @@
 import assert from "node:assert/strict";
-import { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import filesystem, { chmod, mkdtemp, rm, writeFile } from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { after, before, test } from "node:test";
+import {
+  allowOtherReaders,
+  assertNativePrivatePath,
+} from "./test-helpers/native-private-fixture.mjs";
 
 import {
   assertPrivateRegularFile,
@@ -24,14 +29,38 @@ after(async () => {
   await rm(directory, { recursive: true, force: true });
 });
 
-test("enforces owner-only POSIX permissions", async () => {
-  await assert.doesNotReject(assertPrivateRegularFile(privateFile, { platform: "linux" }));
-  await chmod(privateFile, 0o640);
+test("enforces the POSIX permission contract with simulated metadata on every host", async (context) => {
+  let mode = 0o600;
+  const inspect = context.mock.method(filesystem, "lstat", async (file) => {
+    assert.equal(file, privateFile);
+    return { mode, isFile: () => true, isSymbolicLink: () => false };
+  });
+  syncBuiltinESMExports();
+  try {
+    await assert.doesNotReject(assertPrivateRegularFile(privateFile, { platform: "linux" }));
+    for (mode of [0o640, 0o604, 0o666]) {
+      await assert.rejects(
+        assertPrivateRegularFile(privateFile, { platform: "linux" }),
+        /group or others/,
+      );
+    }
+    assert.equal(inspect.mock.callCount(), 4);
+  } finally {
+    inspect.mock.restore();
+    syncBuiltinESMExports();
+  }
+});
+
+test("enforces native private permissions and rejects a real additional reader", async () => {
+  const fixture = path.join(directory, "native-permissions");
+  await writeFile(fixture, "synthetic", { mode: 0o600 });
+  await hardenPrivateRegularFile(fixture);
+  await assertNativePrivatePath(fixture, 0o600);
+  await allowOtherReaders(fixture);
   await assert.rejects(
-    assertPrivateRegularFile(privateFile, { platform: "linux" }),
-    /group or others/,
+    assertPrivateRegularFile(fixture),
+    process.platform === "win32" ? /owner-only Windows ACL/ : /group or others/,
   );
-  await chmod(privateFile, 0o600);
 });
 
 test("uses Windows ACL validation instead of POSIX mode bits", async () => {

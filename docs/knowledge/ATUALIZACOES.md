@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Retomada apos integracao concorrente
+
+- Consulta as 03:58 Sao Paulo: origin/main mudou para15ddedd, PR #198
+  integrado as06:44:24Z com CI38354900341 aprovada. Health publico segue
+  ok/7c50f59. Fontes: GitHub PR198/main e /api/health do CRM.
+- Merge em codex/rotina-efeitos-compactos preserva ambos os historicos; conflitos
+  limitados a CHANGELOG, WORKLOG e este registro, resolvidos mantendo entradas.
+  Revalidar conjunto integrado; nao ativar opcao Salesforce, agenda ou migrations
+  nesta entrega de interface. Coordenador novo deve ser relido antes do deploy.
+- Conjunto integrado: lint/typecheck/test/build aprovados. Vitest2647/56skips,
+  coletor138/0skips, release113/11skips fisicos exclusivos Linux. Fixtures
+  Windows corrigidas pelo PR198 eliminam as seis falhas locais anteriores.
+  VITEST_MAX_WORKERS=2; CI Linux continua obrigatoria no SHA integrado exato.
+
 ## 2026-10-13: Abertura dos efeitos e compactacao da Rotina
 
 - Consulta as 02:23 de Sao Paulo: health publico em
@@ -51,6 +65,525 @@
   teve 2566 aprovados, seis falhas POSIX e um timeout transitorio do handshake
   Next DevTools; reexecucao isolada de project-devtools passou 24/24 em 2,32s
   sem alteracoes. Nao equivale a CI integral; reavaliar se timeout se repetir.
+
+## 2026-10-13: Preparacao transacional da conexao Salesforce
+
+- Encerramento da implementacao local06:06Z: pnpm verify aprovado, Vitest2647/
+  43skips, coletor138, release113/11skips Linux e build50rotas. N8n23/23,
+  fontes e QA sintetico nove telas/temas/zoom200% aprovados. Regressao manual
+  sem monitor corrigida. Revisao independente sem P1/P2; crash fisico do
+  conjunto config/Compose nao ensaiado. Status dos servicos usa endpoint
+  autorizado e distingue leitura/ingestao historica de disponibilidade atual.
+- Preflight VPS05:54Z: arquivos secretos privados/validos, baseline env/container
+  coincide, ingestfalse/refreshfalse e ledger sem pendencia. Nao houve injecao.
+- Formatacao alterada aprovada; comando global encontra dois artefatos output
+  preexistentes nao versionados, preservados e fora da CI. Consulta ao PR por
+  gh pr edit falhou pela API Projects classic; corpo atualizado via GitHub API,
+  sem impacto sobre a regra de MCP exclusivo do n8n.
+- Fonte: revisao do coordenador em c0fc782 e teste local de CLI/engine/policy/
+  recovery, 91 aprovados. Alteracao em preparo no PR198: opcao explicita de
+  configuracao, backup privado completo, CAS, verificacao efetiva e rollback.
+  Nao e evidencia de promocao nem de ingestao real. Validacao completa pendente.
+- Fonte remota 05:37Z: probe da sessao Salesforce conectado; Supabase ativo,
+  ACL da RPC Salesforce service_role-only e tabelas Qlik sem acesso direto.
+  Fonte MCP: candidata L90AYSBEat4vYHLz inativa, cinco nodes, sem agenda/logs.
+- Main1c36fce integrada localmente; publicacao continua7c50f59. Consulta05:44Z
+  PR198/head129e707: validate/restore aprovados, release-gates em andamento.
+- Correcao da orientacao anterior de custodia: backup ja recuperado e chave
+  fora da VPS/Supabase. Segunda copia independente recomendada; usuario nao
+  tem pendrive e solicitou continuidade. Perda do PC continua risco documentado,
+  sem dispensar gates de CI, autenticacao, restore ou reconciliacao de ingestao.
+
+## 2026-10-13: Inicio da conexao n8n e Supabase ao CRM
+
+- Usuario solicitou conectar o novo n8n e Supabase ao CRM. Main1c36fce contem
+  evidencia documental de outro trabalho; producao continua7c50f59/ok,
+  conferida05:31Z. PR198/head129e707 em conflito documental com main.
+- CI38351116371: validate aprovado; restore/release em andamento. Nenhuma
+  promocao autorizada por checks incompletos. Preservar n8n antigo e agenda.
+- Backup externo e recuperacao estao comprovados; segunda copia da chave
+  segue pendente. Conferir contrato de release/configuracao antes de mutacao.
+
+## 2026-10-13: Retomada do backup externo e gates de ingestao
+
+- Encerramento local: lint (um aviso preexistente), typecheck, test e build
+  aprovados; Vitest2620/43skips, coletor138, release86/10skips Linux, n8n23/23.
+  Fontes documentais e diff check aprovados. Build50rotas. PR198/aa2ec8f
+  publicado; CI38350763371 ainda em validacao na consulta05:22Z.
+- Health05:22Z ok/SHA7c50f59; runtime confirma ingestfalse/refreshfalse e
+  secrets ainda nao injetados. Novo n8n e Postgres running/pausedfalse.
+  Guia unico docs/runbooks/conclusao-salesforce-n8n.md entregue. Sem afirmar
+  carga HTTP real, agenda ativa ou recuperacao de desastre completa.
+- Restam custodia independente da chave, CI/main/imagem, promocao protegida da
+  configuracao e carga201/replay200 reconciliados. Nao dispensar esses gates.
+- Backup externo concluido: bucket privado crm-private-backups, dois objetos
+  CMS AES256GCM/OAEP-SHA256, total881567bytes. Upload sem sobrescrita,
+  download identico e decrypt local com SHA256 exato. Chave nunca transferida.
+  Recibo privado offsite-20261013-HFynaO e copia criptografada local preservados.
+- Novo backup n8n local-20261013T051032Z-Xi29nV restaurado148tabelas. Corrigida
+  corrida pg_isready/socket temporario para SELECT1/TCP no banco destino.
+  Primeira execucao via PowerShell acrescentou CR final; invocacao Node resolveu.
+  Segunda tentativa revelou corrida real; script corrigido passou exit0.
+- Revisao independente crm-dados confirmou gate Salesforce sem Qlik/v3 e
+  necessidade de promocao efetiva para aplicar env (mesmo SHA resulta noop).
+  Checklist atualizado, sem migrations, restart ou escrita de dados comerciais.
+- MCP relido: candidata L90AYSBEat4vYHLz inativa, cinco nodes, versao
+  dcffaf09-354c-4a82-817c-5e6ca9da1dd5, sem gravacao de execucoes/agenda.
+- Repeticao da CI passou validate em 05:11Z, inclusive fonte anteriormente403;
+  release-gates e restore ainda em andamento nessa consulta.
+- Consulta 2026-10-13T05:07Z: producao health ok/SHA7c50f59; PR198
+  head63bf15b aberto. CI38349346664 falhou na fonte Prefeitura ITBI HTTP403,
+  nao no teste de criptografia. Release/restore dependentes foram ignorados.
+- Nenhum gate sera removido por indisponibilidade de fonte. Backup externo
+  autorizado pode avancar sem publicar runtime; nova tentativa CI sera conferida.
+- Chave local continua sem segunda copia independente confirmada; usuario
+  informou nao dispor de pendrive. N8n antigo e agenda permanecem preservados.
+
+## 2026-10-13: Bucket privado e recuperacao sintetica
+
+- Bucket crm-private-backups criado no projeto autorizado, privado, limite
+  50MiB, MIME octet-stream. Sem policies anon/authenticated ou upgrade.
+  Upload/download ficticio identico, leitura anonima negada, probe removido.
+- RSA4096 local com ACL usuario/SYSTEM; somente certificado publico usado
+  temporariamente na VPS. CMS AES256GCM/OAEP-SHA256 recuperado no Windows;
+  adulteracao rejeitada. Chave sem senha propria, sob ACL; copia offline
+  ainda depende do usuario, que informou nao ter pendrive agora. Guia local
+  criado, sem segredo no Git. Nao considerar perda do PC coberta.
+- GPG falhou ao iniciar agente Windows; OpenSSL existente passou no teste.
+  Fontes: SDK Storage, catalogo SQL, ACL Windows e processos OpenSSL.
+- Limites: nenhum backup real no bucket, sem prova de restore offsite ainda.
+  Mesmo projeto nao protege contra exclusao do Supabase. Runbook
+  docs/runbooks/crm-backup-storage.md registra gates restantes.
+- PR198/e0fc881: validate e isolated-restore aprovados; release-gates ainda
+  em andamento na consulta desta etapa. Nenhuma alteracao no n8n antigo,
+  configuracao de runtime, migrations ou agenda.
+- Health publico reconferido em 2026-10-13T04:55:18Z: ok, SHA7c50f59.
+- Revalidacao local apos documentar a chave: lint aprovado (um aviso
+  preexistente), typecheck, Vitest2620/43skips, coletor138/0skips,
+  release86/10skips Linux e build50rotas aprovados. Formatacao dos quatro
+  documentos, fontes publicas e git diff --check aprovados. Commit5820879
+  publicado no PR198; nenhuma publicacao de runtime nesta etapa.
+
+## 2026-10-13: Inicio do destino privado de backup autorizado
+
+- Usuario autorizou bucket privado exclusivo no Supabase atual, sem upgrade.
+  Projeto MCP hnncxuerlcsaahdxoswb confirmado ACTIVE_HEALTHY, organizacao Free.
+- GitHub/main e health publico conferidos: 7c50f59/ok. PR198 head e0fc881;
+  CI38347083443 validate aprovado, restore/release-gates ainda em andamento.
+- Catalogo Storage: zero objetos/buckets/policies; RLS ativo em buckets/objects.
+  Management API confirma limite global 52428800 bytes, sem alterar configuracao.
+- Criacao e teste com arquivo ficticio nao equivalem a backup externo validado.
+  Dados reais aguardam criptografia e guarda da chave de recuperacao separada.
+  N8n antigo, agenda e configuracao do CRM permanecem fora desta operacao.
+
+## 2026-10-13: Windows validado e plano remoto para revisao
+
+- Corrigidas as seis falhas iniciais e incompatibilidades subsequentes nas
+  etapas Node Salesforce/release antes bloqueadas por Vitest. Sem relaxar
+  protecao de producao: ACL nativa Windows, POSIX fisico no Linux, logica CAS
+  em memoria e rejeicao explicita de publicacao Windows. Dois testes fisicos
+  POSIX somam-se aos oito flock ja exclusivos Linux; todos obrigatorios na CI.
+- Apos integrar main7c50f59 preservando as tres notas conflitantes, pnpm test
+  passou: Vitest2620/43skips, Salesforce138/0skips, release86/10skips, exit0.
+  VITEST_MAX_WORKERS=2 evitou timeouts de concorrencia vistos na primeira rodada.
+  Lint aprovado com aviso preexistente, typecheck e build50rotas aprovados.
+  Testes n8n focados22/22. CI38346664206 parou somente na formatacao de tres
+  arquivos n8n anteriores; formatacao corrigida e validada, nova CI necessaria.
+- Auditoria aprovada somente como preparacao: Qlik/v3 ausentes no cloud nao
+  sao dependencias do endpoint Salesforce v2. Plano e fontes em
+  docs/audits/salesforce-cloud-preflight-2026-10-13.md. Nao criar/reaplicar
+  migrations amplas para satisfazer gate de outro escopo; revisar gate primeiro.
+- Restore temporario removido apos conferir label/imagem/rede; backup e recibo
+  isolado privados preservados na VPS. Sem dados privados no Git. Backup externo
+  autorizado ainda necessario segundo runbook n8n antes da carga comercial.
+- Conferencia 2026-10-13T04:32:26Z: health200/ok e ledger7c50f59 sem pendencia;
+  ingestfalse, refreshfalse, segredos ainda fora do processo CRM. N8n novo relido
+  inativo por MCP; antigo intocado. Sem deploy, escrita cloud ou agenda nesta etapa.
+
+## 2026-10-13: Backup cloud e prova isolada Salesforce
+
+- Fonte: Supabase MCP, CLI 2.115.0 na VPS e restore Postgres 17.6.1.155.
+  Backup privado em /srv/descomplica-backups/supabase-pre-salesforce-20261013-h0umc6;
+  verification.json contem hashes/contagens, sem copiar dados para Git ou chat.
+  Schema/dados separados nao compartilham snapshot; sem objetos Storage/offsite.
+- Restore sem rede e sem portas passou: 65 tabelas COPY com contagens iguais;
+  checksums, arquivos root600 e fsync confirmados. Nao prova boot da aplicacao
+  restaurada ou descriptografia Vault. Nenhuma restauracao no banco cloud.
+- Exportacao real finalizada em 2026-10-13T04:12:59Z, publisher desativado.
+  Request 7fefa339-a000-4fdf-b7b5-7bce3231b1dd: RPC na copia isolada confirmou
+  159 registros (15 metricas/144 participantes), replay idempotente e um run.
+  Isto NAO comprova o caminho HTTP n8n -> CRM -> Supabase de producao.
+- Suite pgTAP secure_ingestion em copia com dados nao e fixture limpa:
+  primeiros 13 checks passaram, mas contagem preexistente e trigger de aceite
+  legal impedem usar essa execucao como gate integral; transacao revertida.
+- MCP remoto mostra somente RPC Salesforce dentre as tres do runbook;
+  service_role pode executa-la, anon/authenticated nao. Auditoria/preparacao
+  de migrations autorizada; sem aplicacao cloud e sem ativacao de agenda.
+- Publicacao externa mudou runtime para 7c50f59 durante a tarefa; ledger
+  bf212f6d-32ae-450c-868f-5ce080359fe9, deployedAt 2026-10-13T03:57:09.142Z,
+  CI38340719697 aprovada e health com nonce conferido. Nao foi deploy desta tarefa.
+
+## 2026-10-13: Inicio da primeira ingestao autorizada
+
+- Usuario autorizou backup do banco, aplicacao da configuracao, teste real
+  antes da agenda e correcao das seis falhas Windows; n8n antigo preservado.
+- Git comum confirmado; trabalho segue no worktree n8n-crm-isolado, HEAD
+  81e31af. Checkout principal tem alteracoes alheias e nao sera modificado.
+- Fontes: git fetch, GitHub PR198 e GET health. Main 7c50f59, PR aberto com
+  conflitos, runtime ok/1160a0e. Nenhuma dessas versoes equivale a outra.
+- MCP Supabase confirma hnncxuerlcsaahdxoswb ACTIVE_HEALTHY/Postgres17.
+  Acesso SQL de backup ainda nao comprovado; nao contornar esse gate.
+
+## 2026-10-12: Segredos privados preparados, sem aplicar runtime
+
+- Usuario criou crm_salesforce_backend_20261012 no projeto Supabase correto,
+  preservando a chave antiga, e transferiu o valor via entrada oculta/SSH.
+- /etc/descomplica-crm/secrets/salesforce-supabase-secret confirmado regular,
+  root 600. GET autenticado somente do catalogo OpenAPI retornou HTTP 200;
+  nao houve consulta a linhas comerciais nem ingestao.
+- Criado Bearer separado em salesforce-crm-ingest-bearer no mesmo diretorio,
+  root 600, sem exibir valor. Nao reutilizar segredo de entrada do n8n.
+- Formulario do novo n8n preparado para CRM VPS - Ingestao CRM saida,
+  Authorization, dominio especifico crm.descomplicapro.com.br; Valor e Salvar
+  dependem do handoff ao usuario. Nao afirmar credencial salva ate releitura MCP.
+- production.env nao alterado e app nao reiniciado. Aplicacao passa pelo
+  coordenador release:production; mesmo SHA ativo gera noop, nao autoriza
+  contornar locks com Compose/restart manual. Gates de ingestao permanecem.
+
+## 2026-10-12: Preflight da saida n8n para CRM
+
+- Inspecao sanitizada do container confirmou ingestao e refresh desligados,
+  SALESFORCE_INGEST_SECRET e SUPABASE_SECRET_KEY sem valor. Nao confundir
+  SUPABASE_URL de servidor com NEXT_PUBLIC_SUPABASE_URL inexistente no container.
+- Projeto da URL conferido via MCP: hnncxuerlcsaahdxoswb,
+  descomplica-crm-production, ACTIVE_HEALTHY. Nenhuma linha comercial consultada.
+- Catalogo remoto: ingest_crm_salesforce_snapshot(jsonb) existe; EXECUTE negado
+  a anon/authenticated e permitido a service_role. Nas duas tabelas Qlik, RLS
+  ativo e SELECT/INSERT/UPDATE/DELETE negados aos tres papeis.
+- As RPCs ingest_crm_imob_ranking_snapshot e ingest_crm_read_model_v3 nao foram
+  encontradas nesse projeto, inclusive em outros schemas. Nao aplicar migrations
+  para corrigir diferenca apenas com base no runbook; reconciliar antes de escrita.
+- MCP novo n8n lista somente a credencial de entrada. Saida n8n para CRM ainda
+  sem credencial propria; nao reutilizar token de entrada nem chave Supabase no n8n.
+- Vitest tests/ingestion.test.ts: oito testes aprovados. O segundo filtro
+  salesforce-config.test.ts nao encontrou arquivo; nao contar como suite executada.
+- Usuario pediu ajuda para criar chave secreta. Guia oficial de API Keys aberta,
+  redirecionou ao login; handoff ao usuario, nenhuma chave criada/extraida.
+- Sem mudanca de workflow, runtime, ACL, dados ou agenda. Pendentes chave privada
+  no servidor, credencial de saida, backup e demais gates da primeira ingestao.
+
+## 2026-10-12: Coleta unica Salesforce na VPS validada
+
+- Fonte: SSH, probe do monitor e exportador do release
+  1a949982071ea0f62b094051668bfdb3f24b18b6, usuario descomplica-salesforce.
+- Probe confirmou connected as 23:14 Brasilia. Exportacao iniciou 23:14:21
+  e concluiu 23:20:21 com publisher explicitamente false, sem agenda.
+- Contagens: oportunidades 19965; agendamentos 1091; visitas 514; pastas 2603;
+  vendas 766; corretores 36; contas Canal Imob 7. Nao sao contagens de escrita.
+- Candidato privado na VPS: 46592 bytes, modo 600, 15 metricas e 144 registros
+  de ranking. Schema Zod salesforceIngestionSchema do release validou sem issues.
+- requestId 3f9abc26-a79e-42bf-8a6c-402c5aecf974. Lock removido pelo exportador;
+  nenhum conteudo de cliente copiado para Git, chat ou maquina local.
+- Teste local report-collection.node-test.mjs: 20/20 passaram, com fixtures.
+  Suite geral nao repetida: nenhuma alteracao de runtime nesta etapa.
+- Main remoto e health permanecem 1160a0e92d734414f267249b63f56d70325fc529;
+  branch iniciou em 99dfed55179b9c745adc00e30fc7f95762dc8593.
+- Nenhuma escrita Supabase, publicacao n8n ou alteracao do n8n antigo.
+  Pendentes os gates de backup/ACL/RPC, workflow completo, primeira ingestao
+  confirmada e idempotencia. Somente depois habilitar agenda de 30 minutos.
+- Transformacao levou aproximadamente 133 segundos apos a ultima fonte;
+  tempo total de cerca de seis minutos nao garante SLA em outros volumes.
+
+## 2026-10-12: Autenticacao HTTP VPS para n8n confirmada
+
+- Fonte: SSH e MCP oficial, 23:11 Brasilia, branch codex/n8n-crm-isolado.
+- Arquivo privado do token confirmado regular, root e modo 600; valor nao registrado.
+- SDK validado antes da publicacao temporaria autorizada do workflow
+  L90AYSBEat4vYHLz, versao 88270273-9a3b-40e6-9684-6e7ff54204a1.
+- POST sintetico via HTTPS da VPS: sem token 403; token incorreto 403;
+  token salvo 202 com ok false e status candidate_validated_not_published.
+- Despublicacao via MCP concluida e relida: active false, activeVersionId null;
+  persistencia success/error none e manual/progress false preservada.
+- Nenhuma coleta Salesforce, escrita Supabase, agenda ou alteracao do n8n antigo.
+- Health CRM ok, versao 1160a0e92d734414f267249b63f56d70325fc529.
+  Consulta PR/CI indisponivel nesta retomada: gh ausente no PATH. Nao afirmar CI verde.
+- Limite: comprova autenticacao e resposta da candidata, nao exportacao ou ingestao.
+  Suite geral nao repetida: somente evidencia documental, sem mudanca de runtime.
+  Revisar o fluxo antes de habilitar dados reais; token permanece privado na VPS.
+
+## 2026-10-12: Teste sintetico remoto aprovado
+
+- Limite liberado: validate_workflow retornou valid true/tres nodes. Fonte
+  SDK recarregada do arquivo local apos argumento ausente em chamada inicial;
+  erro de argumento nao foi HTTP 429 nem produziu alteracao remota.
+- Mediante autorizacao especifica, settings manual/success/error habilitados
+  temporariamente via MCP e relidos. Executada somente uma fixture sintetica,
+  sem header secreto, Salesforce ou saida Supabase, em executionMode manual.
+- Execucao 2 do workflow L90AYSBEat4vYHLz: status success, inicio 22:57:22 e
+  fim 22:57:25 Brasilia. Validador retornou accepted true e ultimo node
+  Responder Validacao Candidata terminou success, verificados por MCP.
+- Escopo da prova: processamento interno. Execucao MCP sem header nao testa
+  a autenticacao HTTP da VPS; nao comprova resposta de rede, exportacao real,
+  qualidade integral dos relatorios nem ingestao CRM. Fixture preservada
+  como evidencia, sem token real ou dados pessoais.
+- validate_workflow aprovado antes da restauracao; update e releitura
+  confirmaram saveManualExecutions false, success/error none, progresso false
+  e active false. Sem versao publicada. Nenhuma mudanca no n8n antigo.
+- Etapa documental local e teste remoto autorizado; sem nova suite geral,
+  alteracao de codigo ou deploy CRM. Proximo gate: teste HTTP autenticado
+  da VPS e, separadamente, conciliacao/exportacao e destino final autorizado.
+
+## 2026-10-12: Teste temporario autorizado, bloqueado por rate limit
+
+- Operador autorizou persistencia temporaria exclusivamente de execucao
+  sintetica, com restauracao dos settings de privacidade depois.
+- get_workflow_details confirmou candidata inativa e persistencia desativada.
+  validate_workflow falhou no transporte HTTP 429 Too many requests, antes
+  de qualquer update_workflow. Nenhum setting alterado ou teste executado.
+- Aplicada regra de parada em falha MCP: sem repeticao ou fallback REST/UI.
+  Retomar apenas apos liberacao do limite, validando antes de qualquer escrita.
+  Autorizacao especifica registrada; nenhuma autorizacao para dados reais.
+- Etapa apenas documental local; sem nova suite, deploy ou acesso ao legado.
+
+## 2026-10-12: Primeiro teste manual MCP sem resultado recuperavel
+
+- execute_workflow passou a estar disponivel apos recarregamento. Detalhes
+  confirmaram candidata L90AYSBEat4vYHLz inativa, mesma versao 88270273,
+  Header Auth vinculado e saveManualExecutions false.
+- Teste manual com envelope inteiramente sintetico e header explicitamente
+  invalido retornou executionId 1/status started. Nao equivale a sucesso nem
+  a verificacao da autenticacao HTTP; MCP pode injetar dados no trigger.
+- get_workflow_execution retornou execution null e Execution 1 not found.
+  Nenhuma consulta por REST/UI/banco para contornar. Interrompidos os testes
+  remotos conforme regra de falha MCP. Nao afirmar processamento aprovado.
+- Nao persistir execucoes manuais pode explicar a falta de evidencia, mas
+  causa nao comprovada. Solicitada autorizacao para guardar temporariamente
+  uma execucao somente sintetica e restaurar a privacidade ao final.
+- Sem alteracao de codigo/workflow, publicacao, dados reais ou Supabase.
+  Health publico observado ok/1160a0e. Registro documental, sem nova suite.
+
+## 2026-10-12: Credencial vinculada a candidata
+
+- Operador salvou Header Auth. UI Detalhes confirmou ID VtBqo7sf3XOwxzpr;
+  nenhum segredo lido ou copiado. Nome original CRM VPS - Snapshot entrada.
+- validate_workflow aprovou SDK (tres nodes); setNodeCredential via MCP
+  vinculou httpHeaderAuth ao Receber Snapshot Normalizado. Releitura confirmou
+  referencia, active false e settings de privacidade preservados. Versao
+  88270273-9a3b-40e6-9684-6e7ff54204a1. Sem publicacao ou execucao.
+- Inventario e busca de ferramentas ainda nao expoem execute_workflow,
+  apesar de OAuth anterior confirmado pelo CLI. Bloqueio de disponibilidade
+  da ferramenta neste chat; nao contornado por REST, UI ou CLI de workflows.
+  Revisar apos recarregar a conexao MCP no cliente; sucesso de autenticacao
+  nao comprova exposicao da ferramenta nem teste da credencial.
+- Novo backup apos cadastro/vinculo: local-20261013T014724Z-gwfMvc em
+  /srv/descomplica-n8n/backups; 148 tabelas restauradas em banco isolado e
+  checksums aprovados. Permanece local, sem teste de descriptografia ou boot.
+- Apenas documentacao local alterada: gates de codigo da etapa anterior
+  preservados, sem nova execucao da suite geral. Validacao MCP e restore reais
+  feitos nesta etapa. CRM health ok/1160a0e e PR198 aberto em83eba34 antes
+  deste registro. Nenhum deploy/restart CRM ou acesso ao n8n antigo.
+
+## 2026-10-12: Retomada para backup e credencial
+
+- Preflight: Git comum confirmado, branch codex/n8n-crm-isolado d7173b0;
+  GitHub PR198 aberto nesse head, consulta Actions sem runs retornados.
+  origin/main e health publico agora 1160a0e: publicacao externa ao trabalho
+  desta branch. Runbook n8n-crm-isolated ainda ausente de main; usar PR198.
+- Inventario MCP segue sem criacao de credenciais nem execucao de workflows.
+  Solicitada autorizacao especifica para credencial pela UI e OAuth de testes;
+  nenhuma ampliacao aplicada. Workflow e agenda permanecem inativos.
+
+### Resultado da retomada
+
+- Backup local privado executado em 12/10/2026 22:25 Brasilia; diretorio
+  /srv/descomplica-n8n/backups/local-20261013T012505Z-dSchqd (nome UTC).
+  pg_dump, configuracao/chave privada e volume .n8n arquivados na propria VPS;
+  checksums aprovados. Sem transferencia de segredos ou dumps para o desktop/Git.
+- Restore em container PostgreSQL descartavel sem rede/portas, imagem local
+  igual ao banco e armazenamento tmpfs: 148 tabelas restauradas. Container
+  removido; readiness ok. Diretório 0700/root e arquivos 0600/root confirmados.
+- Limites: sem backup externo, boot de aplicacao restaurada ou teste de
+  descriptografia. Copia no mesmo disco nao protege contra perda da VPS.
+- Fonte tecnica: documentacao oficial n8n backup-and-restore; script
+  ops/n8n/backup-local.sh. bash -n aprovado e execucao real delimitada acima.
+  Tres testes locais estaticos de guardas, mais oito da candidata, passaram.
+- Lint (aviso anterior), typecheck e build passaram. Suite geral: 2566 passaram,
+  27 skips e seis falhas Windows anteriores; etapas posteriores ao Vitest nao
+  executadas. Nao afirmar CI verde ou merge. Sem deploy/restart do CRM.
+- Operador autorizou credencial nova via UI e OAuth para testes sinteticos.
+  CLI confirmou login OAuth concluido com solicitacao de sete escopos:
+  workflow read/write/execute, execution read, credential read, project read,
+  tag read. Nenhuma permissao de administracao/pacotes/tabelas solicitada.
+- Uma guia duplicada exibiu sessao expirada, mas CLI da primeira autorizacao
+  confirmou sucesso. Tentativa redundante posterior cancelada, sem substituir
+  MCP antigo. Ferramentas novas ainda ausentes no inventario deste chat;
+  conferir carregamento antes de executar testes; nao contornar por REST.
+- Formulario Header Auth preparado, Authorization e dominios de saida None.
+  Usuario precisa colar/salvar segredo; token aleatorio 256 bits gerado em
+  memoria e colocado no clipboard por pedido de ajuda, sem registrar seu valor.
+  Credencial NAO confirmada salva nem vinculada. Nenhum workflow alterado/ativado.
+
+## 2026-10-12: Candidata criada e privacidade relida
+
+- Fonte: MCP n8n_crm_vps, workflow L90AYSBEat4vYHLz. Criacao e releitura
+  confirmaram tres nodes, active false e activeVersionId null; nenhuma agenda.
+- Operador autorizou expressamente validate_workflow no lugar de
+  validate_workflow_code. Validacao SDK retornou valid true, tres nodes;
+  update_workflow aplicou uma operacao de settings e releitura confirmou
+  persistencia desativada, timeout 600 e timezone America/Sao_Paulo.
+- Webhook headerAuth sem credencial atribuida. Candidata NAO esta pronta para
+  receber dados. Sem execucao remota, publicacao de workflow ou escrita no CRM.
+- Oito testes Node locais aprovados: baseline, paridade SDK, autenticacao
+  requerida, resposta nao final e settings. Nao equivalem a teste ponta a ponta.
+- Pendencias: credencial de entrada, backup/restauracao da instancia, execucao
+  sintetica ponta a ponta e contrato completo antes da agenda de 30 minutos.
+  MCP sem ferramenta de execucao/credenciais: nao contornar por REST ou CLI.
+- Instancia antiga nao acessada nem modificada nesta etapa. Revisar bloqueios
+  apenas com evidencias dos gates e ferramentas autorizadas disponiveis.
+- Verificacao final: Node 24.19.0, pnpm 11.20.0; lint passou com aviso anterior
+  em scripts/qa/connected-systems.mjs:18; typecheck e build passaram.
+  pnpm test: 2566 passaram, 27 skips, seis falhas de caminhos/permissoes Windows
+  em commercial-engine, mapping-import e dois testes de retirement/backup.
+  Etapas posteriores ao Vitest nao rodaram; os oito testes Node acima rodaram
+  separadamente. Falhas impedem alegar todos os gates verdes ou merge aprovado.
+- Fontes finais: GitHub main 1160a0e, PR198 aberto (head anterior 2e95fa6 sem
+  runs encontrados); GET /api/health publico ok/9ff3fd3. Versoes distintas.
+  SSH docker ps confirmou n8n e PostgreSQL healthy, runner Up, n8n apenas em
+  127.0.0.1:5678. Nenhum restart/deploy do aplicativo nesta etapa.
+
+## 2026-10-12: MCP operacional e candidata nova
+
+- search_workflows via MCP novo respondeu count0. Instancia nova vazia;
+  nenhuma consulta ou alteracao no n8n antigo. SDK e tipos obtidos por MCP.
+- GitHub main avancou para1160a0e; runtime publico segue9ff3fd3. PR198 aberto
+  em2e95fa6 antes desta etapa. Consulta CI desse head nao retornou execucoes.
+- Candidata local tem quatro testes Node aprovados. Preparacao nova sera
+  inativa e autenticada, sem destino externo nem credenciais copiadas.
+  validate_workflow e a ferramenta de validacao SDK exposta pelo MCP atual;
+  validate_workflow_code nao existe neste inventario. Nao editar workflow
+  existente sem resolver o requisito nominal exigido pelo operador.
+
+## 2026-10-12: OAuth MCP confirmado
+
+- CLI confirmou Successfully logged in to MCP server n8n_crm_vps apos acao
+  do operador. UI Connected clients confirmou Codex e cinco escopos: listar
+  workflows, criar/atualizar workflows, detalhes de execucao, buscar projetos
+  e pastas, listar tags. Sem permissao de execucao ou instalacao de pacotes.
+- codex mcp get confirmou entrada HTTPS habilitada sem bearer/http_headers.
+  Autenticacao OAuth concluida nao prova ferramenta carregada no chat atual:
+  inventario ainda nao expoe n8n nem validate_workflow_code. Necessario recarregar
+  cliente/sessao MCP antes de trabalhar em workflows. Nao contornar via REST.
+- Nenhum workflow criado, alterado ou ativado. Etapa documental/operacional,
+  sem novo teste de codigo; preservar validacoes e limites do ultimo commit.
+
+## 2026-10-12: MCP habilitado com OAuth pendente
+
+- Confirmacao explicita recebida; Enable MCP access aplicado somente na nova
+  instancia. Tela confirmou zero workflows, zero agentes e zero clientes.
+- CLI oficial adicionou entrada separada n8n_crm_vps para URL HTTPS publica.
+  Hashes das secoes n8n e n8n.http_headers antigos permaneceram identicos.
+- OAuth padrao amplo foi cancelado antes do consentimento. Novo fluxo pede
+  workflow:read, workflow:write, execution:read, project:read e tag:read,
+  sem executar workflows, agentes, instalar pacotes ou ler credenciais.
+- Navegador exigiu login no dominio HTTPS; handoff ao operador, sem leitura
+  de senha/token e sem concessao concluida. Nenhum workflow alterado ou ativado.
+
+## 2026-10-12: Preflight da conexao MCP nova
+
+- Observacao CUA: Settings > Instance-level MCP em localhost5678 mostra
+  Enable MCP access, portanto acesso ainda desativado. Usuario autenticado.
+- Inventario de ferramentas sem MCP n8n; busca de plugins n8n retornou vazia.
+  CLI local suporta mcp add/login com OAuth. Nenhuma configuracao alterada.
+- Solicitada confirmacao no momento da habilitacao de acesso. Aguardar antes
+  de clicar ou conceder permissoes. Preservar entrada MCP antiga e nao criar,
+  editar nem ativar workflows sem ferramentas MCP e validacao exigida.
+- GitHub PR198 aberto em b8ed0ef; health publico ok/9ff3fd3 nesta consulta.
+  Somente diagnostico documental; sem testes novos ou restart nesta etapa.
+
+## 2026-10-12: Owner confirmado e HTTPS n8n liberado
+
+- Usuario confirmou cadastro. Navegador mostrou localhost/assistant autenticado,
+  sem leitura de senha. Override HTTPS aplicado somente ao container n8n novo.
+- Nginx validado e recarregado, sem restart CRM. HTTPS painel200, API anonima401,
+  owner/setup403 e pagina signin confirmados. N8n/Postgres saudaveis, runner
+  iniciado e servicos Salesforce ativos. CRM permanece ok/9ff3fd3.
+- Fonte: SSH, CUA, health publico e GitHub PR198 (aberto,0d4c21b antes desta
+  mudanca). CI desse head nao retornou run nesta consulta, sem afirmar aprovado.
+- Nenhum workflow ou credencial legado alterado; MCP e backup/restore pendentes.
+- Validacao final:41 testes focados, lint (um aviso anterior), typecheck e build
+  aprovados. Suite Windows:2566 aprovados,27 skips,6 falhas POSIX/caminhos em
+  arquivos fora do escopo; etapas encadeadas apos Vitest nao executadas.
+  Sem merge ou declaracao de CI aprovada. Login HTTPS entregue ao operador.
+
+## 2026-10-12: Retomada DNS n8n pela Hostinger
+
+- Fonte: GitHub API e health publico em 2026-10-13T00:27Z. Main e runtime
+  permanecem em 9ff3fd3; PR198 aberto em 2608b31, CI38326970948 em andamento.
+- Acesso observacional a guia Hostinger recuperado nesta retomada. Autorizacao
+  limitada ao novo A n8n-crm e HTTPS; preservar registros e instancia antigos.
+  Owner ainda nao confirmado; nao expor setup administrativo na internet.
+- Aplicado 21:29-21:32 Brasilia: Hostinger confirmou novo A n8n-crm, TTL300;
+  DNS autoritativo e1.1.1.1 resolvem187.127.249.50. Registros anteriores intactos.
+  Certbot webroot com conta existente emitiu certificado ate2027-01-10.
+- Backup privado do Nginx anterior; virtual host exclusivo, nginx -t aprovado,
+  reload sem restart. Primeira consulta imediatamente apos reload viu certificado
+  antigo; consulta posterior com verificacao TLS normal confirmou503 esperado.
+  Opcoes listen alinhadas ao http2 existente para eliminar aviso Nginx.
+- HTTPS externo retorna503 deliberado, sem proxy para owner setup. Cadastro
+  privado observado em localhost5678/setup, handoff ao usuario para senha.
+  CRM segue ok/9ff3fd3; browser/monitor Salesforce e certbot.timer ativos.
+- Encerramento 21:43 Brasilia: 40 testes focados aprovados; lint (um aviso
+  preexistente), typecheck e build aprovados. Suite Windows: 2564 passaram,
+  27 skips e7 falharam (seis contratos POSIX/caminhos, um timeout Obsidian
+  com timeout adicional de limpeza). Etapas encadeadas apos Vitest nao rodaram.
+- PR198 atualizado em d414e77; CI38328239216 na fila na consulta21:42.
+  Registro final documental requer CI do novo SHA. Sem merge, restart CRM,
+  proxy publico ao n8n ou ativacao de fluxos. Configuracao Codex conserva hash
+  anterior; antigo DNS n8n permanece187.77.226.131. Owner/MCP/backup pendentes.
+
+## 2026-10-12: Inicio de instancia n8n exclusiva
+
+- Usuario confirmou preservar integralmente o n8n antigo e seguir com nova
+  instancia; autorizou somente novo subdominio n8n-crm.descomplicapro.com.br
+  e HTTPS. Nenhum workflow antigo, banco, volume ou conexao sera substituido.
+- Fontes em 21:03 Brasilia: GitHub/main e health publico ok em 9ff3fd3,
+  CI push/main 38302711569 aprovada; novo worktree parte desse SHA. PR #194
+  documental continua aberto em 00ff6ac, separado desta implementacao.
+- SSH observacional: nenhum container/volume n8n, porta5678 livre e destino
+  /srv/descomplica-n8n ausente. DNS do novo nome ainda inexistente; NS Hostinger.
+  Configuracao MCP antiga preservada, sem ferramentas n8n disponiveis no chat.
+  Instalacao sera isolada, sem ativar workflows ou ingestao neste estagio.
+- Releases oficiais conferidos: n8n 2.42.7 (GitHub, publicado 12/10/2026),
+  runner 2.42.7 e PostgreSQL 17. Downloads de imagens concluidos sem iniciar
+  containers. Configuracao antiga do Codex nao foi editada nem lida em claro.
+- Painel Hostinger pelo navegador indisponivel por timeout; solicitado ao
+  operador apenas registro A n8n-crm para 187.127.249.50. Sem DNS aplicado
+  nesta etapa, nao emitir certificado nem expor setup administrativo publico.
+- Aplicacao privada autorizada, 21:19-21:22 Brasilia: preparador executado apos
+  testes focados e validacao Compose, hashes conferidos no transporte. Criados
+  somente /srv/descomplica-n8n (root0700), .env/compose (root0600), projeto
+  descomplica-n8n-crm e seus dois volumes/tres redes novos. N8n2.42.7 e Postgres
+  saudaveis; runner iniciado (sem healthcheck proprio). Porta127.0.0.1:5678;
+  healthz/readiness e pagina via tunel local retornam200. Nenhum workflow ativo.
+- Configuracao global Codex comparada por SHA256 antes/depois: identica. Nao
+  houve acesso mutante nem backup/exportacao do n8n antigo; nao afirmar backup
+  validado dessa instancia. Health CRM permanece ok/9ff3fd3, browser/monitor
+  Salesforce ativos. Sem restart do CRM ou alteracao de sua sessao.
+- Novo n8n segue privado, sem conta proprietaria confirmada, DNS ou HTTPS.
+  Tunel SSH local PID19368 aberto para cadastro pelo operador em localhost5678.
+  Comando open_in_codex retornou queued; nao comprova tela visual aberta.
+  Controle Chrome/Hostinger falhou por timeout; sem contornar protecoes.
+- Validacao Node24.19/pnpm11.20: 37 testes novos aprovados; lint com aviso
+  preexistente, tipos e build aprovados. Fixture de teste corrigida apos erro
+  inicial de tipos. Suite Windows: 2559 aprovados,27 skips,9 falhas (seis de
+  contratos POSIX/caminhos, dois timeouts Obsidian e um timeout reference-parity).
+  Estagios encadeados apos Vitest nao executados. CI Linux38326592427 do
+  SHA26e29e5: validate aprovado; isolated-restore/release-gates em andamento.
+  PR198 publicado, nao integrado. Registro final documental exige CI do novo SHA.
+- Limite: instalacao privada inicial nao e liberacao de automacao em producao.
+  Gates completos, owner, DNS/HTTPS, MCP e backup/restore sao pendencias antes
+  de carga comercial. Rollback limitado a parar este projeto sem excluir volumes.
+  Nao alterar n8n antigo, conectar Supabase nem ativar agenda ate essas provas.
 
 ## 2026-10-13: Rotina compartilhada publicada
 
@@ -2825,3 +3358,29 @@ Procedimento: [production-release-guard](../runbooks/production-release-guard.md
 CI executa testes de política, transação, recuperação e concorrência Linux.
 A adoção operacional exige histórico confiável para inicializar o ledger e
 uso do coordenador por todos os publicadores; esta entrega não publica runtime.
+
+## 2026-10-13 - Retomada do recibo n8n
+
+- Fonte: git fetch/ls-remote, health publico e MCP get_workflow_details.
+- Branch codex/n8n-crm-isolado em 897e5ad; main remoto em 7c50f59.
+  Health ok, runtime ainda 1160a0e; nao confundir main com publicado.
+- Workflow L90AYSBEat4vYHLz inativo, tres nodes, sem versao publicada.
+  Proxima etapa: preparar envio e recibo verificado, sem agenda/carga real.
+- Credenciais privadas armazenadas nao significam configuracao aplicada ao CRM.
+  Backup/restore do banco e gates de release permanecem pendentes.
+- Credencial de saida anqcQZ0zCBoko0YH confirmada por list_credentials e vinculada
+  ao POST fixo CRM. Nenhum segredo lido ou gravado no repositorio.
+- Validate_node_config e validate_workflow aprovados; update atomico com dez
+  operacoes e releitura: versao dcffaf09-354c-4a82-817c-5e6ca9da1dd5, cinco
+  nodes, active false e activeVersionId null. Sem persistencia success/error.
+- Testes locais: 19 passaram, incluindo recibos 200/201, idempotencia, rejeicao
+  de 202/ID divergente e bloqueio de campo proibido. Nao houve POST ao CRM.
+- PR198 consultado via conector: aberto, mergeable false. Nenhum workflow run
+  retornado para 897e5ad; nao declarar CI verde. N8n antigo nao alterado.
+- Lint aprovado com um aviso preexistente em connected-systems.mjs:18;
+  typecheck/build aprovados. Vitest 2566 passaram, 27 skips, seis falhas em
+  quatro arquivos de caminhos/permissoes Windows; as etapas Node/release
+  posteriores ao Vitest nao rodaram. Os 19 testes n8n foram executados a parte.
+- Validacao SDK final manteve um aviso PLAIN_GENERIC_AUTH pelo placeholder
+  newCredential; update utilizou o ID existente e releitura confirmou o vinculo.
+  Nao criar credencial duplicada a partir do placeholder. Nenhum deploy CRM.

@@ -1,7 +1,17 @@
 import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
-import { chmod, link, mkdtemp, readFile, realpath, rm, symlink, writeFile } from "node:fs/promises";
+import filesystem, {
+  chmod,
+  link,
+  mkdtemp,
+  readFile,
+  realpath,
+  rm,
+  symlink,
+  writeFile,
+} from "node:fs/promises";
+import { syncBuiltinESMExports } from "node:module";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
@@ -12,10 +22,17 @@ import {
   inheritedLockDescriptors,
   withFileLock,
   withFileLocks,
+  withProductionLock,
 } from "./production-release-lock.mjs";
 import { privateJsonStore } from "./private-json-store.mjs";
 
-const owner = process.getuid();
+const owner = process.getuid?.();
+const posixStorageOnly = {
+  skip:
+    process.platform !== "linux"
+      ? "Physical POSIX ownership, links and directory fsync require Linux; mandatory on CI Ubuntu."
+      : false,
+};
 async function fixture(t) {
   const directory = await realpath(await mkdtemp(path.join(os.tmpdir(), "release-guard-")));
   await chmod(directory, 0o700);
@@ -23,35 +40,126 @@ async function fixture(t) {
   return directory;
 }
 
-test("private ledger persists, performs CAS, and never overwrites foreign state", async (t) => {
-  const file = path.join(await fixture(t), "state.json");
-  const store = privateJsonStore(file, (value) => value, owner);
-  await store.compareAndWrite(null, { version: 1 });
-  await assert.rejects(store.compareAndWrite(null, { version: 2 }), /compare-and-swap/u);
-  await assert.rejects(store.compareAndWrite({ version: 0 }, { version: 2 }), /compare-and-swap/u);
-  await store.compareAndWrite({ version: 1 }, { version: 2 });
-  await store.compareAndWrite({ version: 2 }, { version: 2 });
-  assert.deepEqual(await store.read(), { version: 2 });
+test(
+  "private ledger persists, performs CAS, and never overwrites foreign state",
+  posixStorageOnly,
+  async (t) => {
+    const file = path.join(await fixture(t), "state.json");
+    const store = privateJsonStore(file, (value) => value, owner);
+    await store.compareAndWrite(null, { version: 1 });
+    await assert.rejects(store.compareAndWrite(null, { version: 2 }), /compare-and-swap/u);
+    await assert.rejects(
+      store.compareAndWrite({ version: 0 }, { version: 2 }),
+      /compare-and-swap/u,
+    );
+    await store.compareAndWrite({ version: 1 }, { version: 2 });
+    await store.compareAndWrite({ version: 2 }, { version: 2 });
+    assert.deepEqual(await store.read(), { version: 2 });
+  },
+);
+
+test(
+  "ledger rejects symlinks, extra hard links, permissive modes and corrupt JSON",
+  posixStorageOnly,
+  async (t) => {
+    const directory = await fixture(t);
+    const file = path.join(directory, "state.json");
+    const alias = path.join(directory, "alias.json");
+    const store = privateJsonStore(file, (value) => value, owner);
+    await writeFile(file, "{}", { mode: 0o600 });
+    await symlink(file, alias);
+    await assert.rejects(privateJsonStore(alias, (value) => value, owner).read());
+    await rm(alias);
+    await link(file, alias);
+    await assert.rejects(store.read(), /single link/u);
+    await rm(alias);
+    await chmod(file, 0o644);
+    await assert.rejects(store.read(), /0600/u);
+    await chmod(file, 0o600);
+    await writeFile(file, "{invalid");
+    await assert.rejects(store.compareAndWrite(null, {}));
+    assert.equal(await readFile(file, "utf8"), "{invalid");
+  },
+);
+
+test("ledger CAS and corrupt-state handling with an in-memory filesystem, not physical durability", async (t) => {
+  const directory = path.resolve(os.tmpdir(), "logical-release-fixture");
+  const file = path.join(directory, "state.json");
+  const contents = new Map();
+  const missing = () => Object.assign(new Error("missing fixture"), { code: "ENOENT" });
+  const patches = [
+    t.mock.method(filesystem, "lstat", async (target) => {
+      assert.equal(target, directory);
+      return { isDirectory: () => true, uid: 0, gid: 0, mode: 0o700 };
+    }),
+    t.mock.method(filesystem, "realpath", async (target) => target),
+    t.mock.method(filesystem, "open", async (target, flags, mode) => {
+      assert.equal(target === directory || path.dirname(target) === directory, true);
+      if (target !== directory) {
+        if (flags === "wx") {
+          assert.equal(mode, 0o600);
+          assert.equal(contents.has(target), false);
+          contents.set(target, "");
+        } else if (!contents.has(target)) throw missing();
+      }
+      return {
+        stat: async () => ({ isFile: () => true, uid: 0, gid: 0, nlink: 1, mode: 0o600, size: 20 }),
+        readFile: async () => contents.get(target),
+        writeFile: async (value) => {
+          contents.set(target, value);
+        },
+        sync: async () => {},
+        close: async () => {},
+      };
+    }),
+    t.mock.method(filesystem, "rename", async (from, to) => {
+      assert.equal(to, file);
+      assert.equal(contents.has(from), true);
+      contents.set(to, contents.get(from));
+      contents.delete(from);
+    }),
+    t.mock.method(filesystem, "rm", async (target) => {
+      contents.delete(target);
+    }),
+  ];
+  syncBuiltinESMExports();
+  try {
+    const store = privateJsonStore(file, (value) => value, 0);
+    await store.compareAndWrite(null, { version: 1 });
+    await assert.rejects(store.compareAndWrite(null, { version: 2 }), /compare-and-swap/u);
+    await assert.rejects(
+      store.compareAndWrite({ version: 0 }, { version: 2 }),
+      /compare-and-swap/u,
+    );
+    await store.compareAndWrite({ version: 1 }, { version: 2 });
+    const writes = patches[3].mock.callCount();
+    await store.compareAndWrite({ version: 2 }, { version: 2 });
+    assert.equal(patches[3].mock.callCount(), writes);
+    assert.deepEqual(await store.read(), { version: 2 });
+    contents.set(file, "{invalid");
+    await assert.rejects(store.compareAndWrite(null, {}), SyntaxError);
+    assert.equal(contents.get(file), "{invalid");
+  } finally {
+    for (const patch of patches) patch.mock.restore();
+    syncBuiltinESMExports();
+  }
 });
 
-test("ledger rejects symlinks, extra hard links, permissive modes and corrupt JSON", async (t) => {
-  const directory = await fixture(t);
-  const file = path.join(directory, "state.json");
-  const alias = path.join(directory, "alias.json");
-  const store = privateJsonStore(file, (value) => value, owner);
-  await writeFile(file, "{}", { mode: 0o600 });
-  await symlink(file, alias);
-  await assert.rejects(privateJsonStore(alias, (value) => value, owner).read());
-  await rm(alias);
-  await link(file, alias);
-  await assert.rejects(store.read(), /single link/u);
-  await rm(alias);
-  await chmod(file, 0o644);
-  await assert.rejects(store.read(), /0600/u);
-  await chmod(file, 0o600);
-  await writeFile(file, "{invalid");
-  await assert.rejects(store.compareAndWrite(null, {}));
-  assert.equal(await readFile(file, "utf8"), "{invalid");
+test("production lock rejects Windows before calling any mutation", () => {
+  const descriptor = Object.getOwnPropertyDescriptor(process, "platform");
+  const uidDescriptor = Object.getOwnPropertyDescriptor(process, "getuid");
+  try {
+    Object.defineProperty(process, "platform", { ...descriptor, value: "win32" });
+    Object.defineProperty(process, "getuid", { configurable: true, value: () => 0 });
+    assert.throws(
+      () => withProductionLock(() => assert.fail("Windows mutation must not run")),
+      /requires Linux and root/u,
+    );
+  } finally {
+    Object.defineProperty(process, "platform", descriptor);
+    if (uidDescriptor) Object.defineProperty(process, "getuid", uidDescriptor);
+    else delete process.getuid;
+  }
 });
 
 test("a forged lock token never authorizes a production mutation", async () => {

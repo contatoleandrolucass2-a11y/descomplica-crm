@@ -16,14 +16,15 @@ export function parseReleaseArguments(args) {
   };
   if (!Object.hasOwn(operations, operation)) throw new Error("Unknown release operation.");
   const required = operations[operation];
-  if (!required || rest.length !== required.length * 2)
+  const optional = operation === "deploy" ? ["salesforce-ingestion"] : [];
+  if (!required || rest.length % 2 !== 0 || rest.length < required.length * 2)
     throw new Error("Invalid release arguments.");
   const values = {};
   for (let index = 0; index < rest.length; index += 2) {
     const key = rest[index].replace(/^--/u, "");
     if (
       rest[index] !== `--${key}` ||
-      !required.includes(key) ||
+      ![...required, ...optional].includes(key) ||
       Object.hasOwn(values, key) ||
       !rest[index + 1] ||
       rest[index + 1].startsWith("--")
@@ -32,6 +33,10 @@ export function parseReleaseArguments(args) {
     }
     values[key] = rest[index + 1];
   }
+  if (required.some((key) => !Object.hasOwn(values, key)))
+    throw new Error("Missing release argument.");
+  if (values["salesforce-ingestion"] && values["salesforce-ingestion"] !== "enable")
+    throw new Error("Only explicit Salesforce ingestion enable is supported.");
   if (
     values["ci-run-id"] &&
     (!/^[1-9][0-9]*$/u.test(values["ci-run-id"]) ||
@@ -64,6 +69,7 @@ async function main(args) {
         targetSha: values.sha,
         targetImageId: values["image-id"],
         ciRunId: values["ci-run-id"] ? Number(values["ci-run-id"]) : undefined,
+        ...(values["salesforce-ingestion"] === "enable" ? { salesforceIngestion: true } : {}),
       },
       io,
     );
