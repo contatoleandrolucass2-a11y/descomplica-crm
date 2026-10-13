@@ -409,8 +409,8 @@ const protectedSurfaces = [
     heading: "Metas de pontos",
     allowed: adminRoles,
   },
-  { path: "/app/gestao", heading: "Gestão", allowed: adminRoles },
-  { path: "/app/gestao/rotina", heading: "Rotina", allowed: adminRoles },
+  { path: "/app/gestao", heading: "Gestão", allowed: activeOperationalRoles },
+  { path: "/app/gestao/rotina", heading: "Rotina", allowed: activeOperationalRoles },
   { path: "/app/simulacao", heading: "Hub de Simulação", allowed: simulatorViewRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
@@ -513,11 +513,23 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...simulatorRoutes,
     ...administrationRoutes,
   ]),
-  coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  manager_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  broker_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  coordinator: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/canal-de-parcerias",
+  ]),
+  manager_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  manager_imob: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/canal-de-parcerias",
+  ]),
+  broker_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  broker_imob: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/canal-de-parcerias",
+  ]),
   pending: [],
 };
 
@@ -540,11 +552,23 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...managementRoutes,
     ...administrationNavigationRoutes,
   ]),
-  coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  manager_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  broker_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  coordinator: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/canal-de-parcerias",
+  ]),
+  manager_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  manager_imob: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/canal-de-parcerias",
+  ]),
+  broker_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  broker_imob: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/canal-de-parcerias",
+  ]),
   pending: [],
 };
 
@@ -768,18 +792,20 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 15 : activeOperationalRoles.has(role) ? 7 : 0,
+      adminRoles.has(role) ? 15 : activeOperationalRoles.has(role) ? 9 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
     );
     expect(expectedPrimaryNavigationRootsForRole(role), role).toHaveLength(
-      adminRoles.has(role) ? 6 : activeOperationalRoles.has(role) ? 2 : 0,
+      adminRoles.has(role) ? 6 : activeOperationalRoles.has(role) ? 3 : 0,
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];
     for (const route of managementRoutes) {
-      expect(directRoutes.includes(route), `${role}: ${route}`).toBe(adminRoles.has(role));
+      expect(directRoutes.includes(route), `${role}: ${route}`).toBe(
+        activeOperationalRoles.has(role),
+      );
     }
     expect(expectedAccountSettingsRoutesForRole(role).includes(connectedSystemsRoute), role).toBe(
       directRoutes.includes(connectedSystemsRoute) && !directRoutes.includes("/admin"),

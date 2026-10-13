@@ -1,5 +1,32 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-12: Persistencia compartilhada da Rotina em preparacao
+
+- Retomada: origin/main e health publico confirmam 1160a0e, status ok.
+  Branch codex/rotina-compartilhada preserva os registros documentais de #199.
+- Pedido confirmado: dados compartilhados entre computadores/usuarios;
+  somente administradores e gestores autorizados editam. Leitores sem escrita.
+- Plano: RPC autenticada, revisao por funcao para impedir sobrescrita concorrente,
+  importacao explicita de legado local e cabecalho com contraste distinto.
+  Nenhum dado local deve substituir silenciosamente a versao compartilhada.
+- Mudanca de banco sera aditiva e testada com pgTAP antes de qualquer aplicacao.
+  Producao ainda mantem salvamento local nesta conferencia.
+- Usuario autorizou explicitamente a migration aditiva da Rotina e publicacao,
+  condicionadas a testes e backup. Projeto confirmado pelo runtime:
+  hnncxuerlcsaahdxoswb, descomplica-crm-production; nao usar o banco self-hosted.
+- Implementacao: RPCs sem acesso direto a tabela, RLS forcada, CAS por funcao,
+  limite UTF-16 consistente e importacao apenas de papeis locais validos.
+  Revisao focal de seguranca sem achados residuais nesses caminhos.
+- Validacao local Windows/Node 24.19.0/pnpm 11.20.0: 70 testes focais de
+  API/interface aprovados, incluindo Chromium; 30 de inventario/hub aprovados.
+  Lint, tipos, formatacao e build aprovados. Suite geral: 2567 passaram, 43 ignorados e seis
+  falhas POSIX conhecidas em quatro arquivos; nao equivalem a CI aprovada.
+  Causa: modos/ownership Unix indisponiveis neste host; escopo exclusivo dos
+  testes de backup, retirement, manifesto comercial e mapping import.
+  Reavaliar no Linux do mesmo SHA, sem enfraquecer assertions.
+- pgTAP novo tem 91 casos; restore passa a esperar 1242 no total.
+  Execucao SQL, QA autenticado completo e gates de CI ainda pendentes.
+
 ## 2026-10-12: Rolagem da Rotina publicada e verificada
 
 - Fonte: PR #197 e CI main 38328297524, quatro jobs aprovados, SHA exato

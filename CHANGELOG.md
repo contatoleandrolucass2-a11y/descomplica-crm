@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-12: Persistencia compartilhada da Rotina
+
+- Grava rotinas no CRM, compartilhadas entre dispositivos e usuarios autorizados.
+- Restringe edicao a gestores autorizados e detecta conflitos de versao.
+- Permite importar a copia antiga do navegador sem substituir dados automaticamente.
+- Destaca o cabecalho dos dias com cor propria.
+
 ## 2026-10-12: Rolagem da Rotina em producao
 
 - Publicado 1160a0e com Hoje alinhado a esquerda, rolagem de pagina e somente

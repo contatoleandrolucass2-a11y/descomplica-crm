@@ -4,7 +4,6 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 
-const storageKey = "descomplica.crm.settings.routine.v1";
 const roleLabels = [
   "Gerente regional house",
   "Gerente regional imob",
@@ -155,7 +154,65 @@ async function selectTheme(page, theme, width) {
   );
 }
 
-export async function checkRoutineSettings(page, origin, outputDirectory) {
+export async function checkRoutineSettings(page, origin, outputDirectory, { readerPage } = {}) {
+  const target = new URL(origin);
+  const database = new URL(process.env.QA_AUTH_SUPABASE_URL ?? "http://invalid");
+  assert.ok(
+    ["localhost", "127.0.0.1", "[::1]"].includes(target.hostname) &&
+      ["localhost", "127.0.0.1", "[::1]"].includes(database.hostname) &&
+      process.env.QA_AUTH_FIXTURE_VERIFICATION === "rls-marker-v1" &&
+      /^qa\..+@local\.invalid$/.test(process.env.QA_AUTH_EMAIL ?? ""),
+    "Routine writes require the verified isolated loopback runner and synthetic account",
+  );
+  let initialRowsSnapshot;
+  let lastWrittenRevision;
+  let peerContext;
+  let sharedSessionVerified = false;
+  const api = async () => {
+    const response = await page.request.get(`${origin}/api/routines`);
+    assert.equal(response.status(), 200);
+    assert.match(response.headers()["cache-control"] ?? "", /no-store/);
+    return response.json();
+  };
+  const put = async (rows) => {
+    const snapshot = await api();
+    const expected_revision =
+      snapshot.routines.find((record) => record.role_key === "regional-house")?.revision ?? 0;
+    if (lastWrittenRevision !== undefined)
+      assert.equal(
+        expected_revision,
+        lastWrittenRevision,
+        "Unexpected concurrent writer in isolated QA",
+      );
+    const response = await page.request.put(`${origin}/api/routines`, {
+      headers: { origin },
+      data: { role_key: "regional-house", rows, expected_revision },
+    });
+    assert.equal(response.status(), 200, "Real routine PUT must succeed");
+    const record = await response.json();
+    assert.equal(record.revision, expected_revision + 1);
+    lastWrittenRevision = record.revision;
+    assert.deepEqual(record.rows, rows);
+    return record;
+  };
+  const saveShared = async () => {
+    const responsePromise = page.waitForResponse(
+      (response) =>
+        response.url() === `${origin}/api/routines` && response.request().method() === "PUT",
+    );
+    await page.getByRole("button", { name: "Salva alterações", exact: true }).click();
+    const response = await responsePromise;
+    assert.equal(response.status(), 200, "UI save must reach the real backend");
+    const record = await response.json();
+    lastWrittenRevision = record.revision;
+    await expect(page.getByRole("status")).toContainText("Salvo no CRM");
+    const snapshot = await api();
+    assert.deepEqual(
+      snapshot.routines.find((value) => value.role_key === record.role_key),
+      record,
+    );
+    return record;
+  };
   await mkdir(outputDirectory, { recursive: true });
   const route = "/app/gestao/rotina";
   const checks = [];
@@ -197,6 +254,21 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
       .evaluateAll((fields) => fields.filter((field) => field.value.trim().length > 0).length);
     assert.equal(filled, 74, "All reference activities must remain present");
 
+    const initialSnapshot = await api();
+    assert.equal(initialSnapshot.can_edit, true);
+    initialRowsSnapshot =
+      initialSnapshot.routines.find((record) => record.role_key === "regional-house")?.rows ??
+      (await page.locator("tbody tr").evaluateAll((rows) =>
+        rows.map((row) => ({
+          ...Object.fromEntries(
+            Array.from(row.querySelectorAll("textarea")).map((field) => [
+              field.getAttribute("aria-label").split(", linha ")[0],
+              field.value,
+            ]),
+          ),
+          Domingo: "",
+        })),
+      ));
     checkpoint("edit-insert-save-reload");
     const first = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
 
@@ -207,7 +279,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
     await page
       .getByRole("textbox", { name: addedLabel, exact: true })
       .fill("Nova linha sintética.");
-    await save.click();
+    await saveShared();
     await page.reload();
     await expect(save).toBeEnabled();
     await expect(first).toHaveValue("Atividade sintética de validação.");
@@ -248,12 +320,13 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
     await first.fill("");
     await expect(first).toBeVisible();
     await first.fill("Atividade diária sintética.");
-    await save.click();
-    await page.evaluate((key) => {
-      const value = JSON.parse(localStorage.getItem(key));
-      value["regional-house"][0].Domingo = "Domingo legado QA";
-      localStorage.setItem(key, JSON.stringify(value));
-    }, storageKey);
+    await saveShared();
+    const dailyRecord = (await api()).routines.find(
+      (record) => record.role_key === "regional-house",
+    );
+    const sundayRows = structuredClone(dailyRecord.rows);
+    sundayRows[0].Domingo = "Domingo legado QA";
+    await put(sundayRows);
     await page.reload();
     await expect(save).toBeEnabled();
     await modes.getByRole("button", { name: "Hoje", exact: true }).click();
@@ -262,20 +335,54 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
     await expect(page.getByText("Sem rotina aos domingos.", { exact: true })).toBeVisible();
     await expect(page.getByRole("textbox")).toHaveCount(0);
     await modes.getByRole("button", { name: "Semana", exact: true }).click();
-    await save.click();
+    await first.fill("Conteúdo compartilhado entre sessões QA");
+    await saveShared();
     assert.equal(
-      await page.evaluate(
-        (key) => JSON.parse(localStorage.getItem(key))["regional-house"][0].Domingo,
-        storageKey,
-      ),
+      (await api()).routines.find((record) => record.role_key === "regional-house").rows[0].Domingo,
       "Domingo legado QA",
     );
     await expect(page.getByRole("textbox", { name: /Domingo/ })).toHaveCount(0);
-    await page.evaluate((key) => localStorage.removeItem(key), storageKey);
+
+    checkpoint("shared-session-real-backend");
+    let peer = readerPage;
+    if (!peer) {
+      peerContext = await page
+        .context()
+        .browser()
+        .newContext({
+          storageState: await page.context().storageState(),
+        });
+      peer = await peerContext.newPage();
+    }
+    await peer.goto(`${origin}${route}`);
+    await expect(
+      peer.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true }),
+    ).toHaveValue("Conteúdo compartilhado entre sessões QA");
+    const peerResponse = await peer.request.get(`${origin}/api/routines`);
+    assert.equal(peerResponse.status(), 200);
+    assert.deepEqual((await peerResponse.json()).routines, (await api()).routines);
+    sharedSessionVerified = true;
+    if (readerPage) {
+      await expect(peer.getByText("Somente visualização", { exact: true })).toBeVisible();
+      await expect(peer.getByRole("button", { name: "Salva alterações" })).toHaveCount(0);
+    }
+
+    checkpoint("restore-default-content-before-visual-matrix");
+    await put(initialRowsSnapshot);
     await page.clock.setFixedTime(new Date("2026-10-12T15:00:00Z"));
     await page.reload();
     await expect(save).toBeEnabled();
     await expect(page.locator("tbody tr")).toHaveCount(initialRows);
+    assert.deepEqual(
+      (await api()).routines.find((record) => record.role_key === "regional-house").rows,
+      initialRowsSnapshot,
+    );
+    assert.equal(
+      await page
+        .locator("textarea")
+        .evaluateAll((fields) => fields.filter((field) => field.value.trim()).length),
+      74,
+    );
 
     for (const width of [1440, 1024, 720, 390, 320]) {
       await page.setViewportSize({ width, height: 900 });
@@ -455,7 +562,12 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
       persistence: true,
       keyboard: true,
       modes: true,
-      sundayStoragePreserved: true,
+      sundayBackendPreserved: true,
+      backend: "real",
+      sharedSessionVerified,
+      distinctReaderUser: readerPage
+        ? "read-only session supplied; distinct identity must be verified by caller"
+        : "not supplied; separate session uses same synthetic account",
       checks,
       passed: true,
     };
@@ -467,7 +579,22 @@ export async function checkRoutineSettings(page, origin, outputDirectory) {
       // Playwright clocks are context-wide; restore advancing time for later checks.
       await page.clock.setSystemTime(new Date());
     } finally {
-      await page.evaluate((key) => window.localStorage.removeItem(key), storageKey).catch(() => {});
+      try {
+        if (initialRowsSnapshot && lastWrittenRevision !== undefined) {
+          const current = (await api()).routines.find(
+            (record) => record.role_key === "regional-house",
+          );
+          assert.equal(
+            current?.revision,
+            lastWrittenRevision,
+            "Concurrent write blocks QA cleanup",
+          );
+          if (JSON.stringify(current.rows) !== JSON.stringify(initialRowsSnapshot))
+            await put(initialRowsSnapshot);
+        }
+      } finally {
+        await peerContext?.close();
+      }
     }
   }
 }

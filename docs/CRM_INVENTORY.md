@@ -1,5 +1,11 @@
 # Inventário oficial da referência viva e do CRM seguro
 
+Atualização de 12/10/2026: Gestão e Rotina passam a leitura por
+`crm.dashboard.view`; salvar exige `crm.settings.manage` no servidor e no banco.
+`/api/routines` consulta e grava por RPC autenticada. A tabela `crm_routines`
+não concede acesso direto às roles da API. O catálogo existente mantém os
+estados de ativação; entradas ausentes continuam no fallback autorizado.
+
 Atualização de 08/10/2026: a rota suplementar
 `/app/configuracoes/conectar-sistemas` acrescenta Conectar Sistemas ao menu
 Configurações, após Recurso MKT, mediante `crm.settings.manage`. O inventário

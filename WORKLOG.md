@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-12: Rotina compartilhada
+
+- API autenticada e RPC versionada substituem localStorage como autoridade.
+  Leitura por crm.dashboard.view e escrita por crm.settings.manage.
+- Revisao por funcao impede sobrescrita concorrente; erros preservam rascunhos.
+  Atualizacao ao focar/30 segundos somente sem alteracoes pendentes.
+- Legado local permanece disponivel para importacao explicita por funcao.
+- Cabecalho com faixa teal e Hoje cyan, contraste legivel nos tres temas.
+- Usuario autorizou migration aditiva de producao apos testes e backup.
+  Implementacao em validacao; nao confundir com publicacao concluida.
+
 ## 2026-10-12: Publicacao da rolagem da Rotina
 
 - PR #197 integrado em 1160a0e, CI main 38328297524 aprovada integralmente.

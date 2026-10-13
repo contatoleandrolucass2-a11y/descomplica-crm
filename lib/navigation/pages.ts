@@ -109,6 +109,7 @@ const SUPPLEMENTAL_SIMULATOR_PAGES: readonly SupplementalNavigationDefinition[] 
 export function extendAuthorizedNavigationWithReleasedPages(
   pages: AppPage[],
   context: AuthorizationContext,
+  catalogPages: AppPage[] = pages,
 ): AppPage[] {
   const repasseGate = getProtectedPageGate("/app/repasse");
   const dashboardParent = pages.find(
@@ -207,12 +208,14 @@ export function extendAuthorizedNavigationWithReleasedPages(
   }
   const managementGate = getProtectedPageGate(MANAGEMENT_PARENT_PATH);
   if (
-    settingsParent &&
+    dashboardParent &&
     managementGate?.releaseEnabled &&
     managementGate.pageKey === MANAGEMENT_PARENT_KEY &&
     pageGateAllowsRole(managementGate, context.roleKey) &&
     context.permissions.includes(managementGate.permission) &&
-    !pages.some((page) => page.key === managementGate.pageKey || page.path === managementGate.path)
+    !catalogPages.some(
+      (page) => page.key === managementGate.pageKey || page.path === managementGate.path,
+    )
   ) {
     pages = [
       ...pages,
@@ -235,7 +238,7 @@ export function extendAuthorizedNavigationWithReleasedPages(
       page.key === MANAGEMENT_PARENT_KEY &&
       page.path === MANAGEMENT_PARENT_PATH &&
       page.section === "management" &&
-      page.permissionKey === "crm.settings.manage" &&
+      page.permissionKey === "crm.dashboard.view" &&
       page.parentKey === null &&
       page.isActive &&
       page.isNavigation,
@@ -247,7 +250,7 @@ export function extendAuthorizedNavigationWithReleasedPages(
     routineGate.pageKey === "crm.management.routine" &&
     pageGateAllowsRole(routineGate, context.roleKey) &&
     context.permissions.includes(routineGate.permission) &&
-    !pages.some((page) => page.key === routineGate.pageKey || page.path === routineGate.path)
+    !catalogPages.some((page) => page.key === routineGate.pageKey || page.path === routineGate.path)
   ) {
     pages = [
       ...pages,
@@ -363,9 +366,12 @@ async function queryPages(options: { navigationOnly: boolean; activeOnly: boolea
 export async function getAuthorizedNavigation(context: AuthorizationContext): Promise<AppPage[]> {
   if (!context.permissions.includes("pages.view")) return [];
 
-  const pages = await queryPages({ navigationOnly: true, activeOnly: true });
-  const authorizedPages = pages.filter((page) => pageGateAuthorizesNavigation(page, context));
-  return extendAuthorizedNavigationWithReleasedPages(authorizedPages, context);
+  // Keep catalog identities available so disabled management entries cannot be recreated.
+  const pages = await queryPages({ navigationOnly: false, activeOnly: false });
+  const authorizedPages = pages.filter(
+    (page) => page.isActive && page.isNavigation && pageGateAuthorizesNavigation(page, context),
+  );
+  return extendAuthorizedNavigationWithReleasedPages(authorizedPages, context, pages);
 }
 
 export function getDisabledNavigationItems(
