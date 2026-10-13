@@ -181,6 +181,15 @@
 - 37 testes focados, tipos/build aprovados; suite Windows tem nove falhas fora
   do escopo. CI Linux validate passou em26e29e5; gates completos ainda pendentes.
 
+## 2026-10-13: Publicacao da Rotina compartilhada
+
+- PR #200/7c50f59, quatro gates main aprovados; migration aditiva autorizada
+  aplicada via MCP apos snapshot verificado dos objetos afetados.
+- Deploy bf212f6d concluido as 00:57:09 de Sao Paulo pelo coordenador.
+- Persistencia real confirmada: house revisao 1/26 linhas, recarga bem-sucedida.
+  Cabecalho contrastante publicado, leitores sem escrita e CAS protegendo edicoes.
+- Evidencias, backups, timestamp remoto da migration e limites em ATUALIZACOES.md.
+
 ## 2026-10-12: Rotina compartilhada
 
 - API autenticada e RPC versionada substituem localStorage como autoridade.

@@ -106,6 +106,8 @@
 
 ## 2026-10-12: Gate de sessao da Rotina
 
+- Publicado: Rotina compartilhada no banco, edicao autorizada e cabecalho contrastante (PR #200, 7c50f59).
+
 - Rotina: inclui a tabela compartilhada no gate restritivo de sessao/MFA e nos inventarios SQL de seguranca.
 
 ## 2026-10-12: Persistencia compartilhada da Rotina
