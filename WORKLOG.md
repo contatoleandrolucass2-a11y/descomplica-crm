@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-13: Destino privado e chave de recuperacao
+
+- Bucket privado autorizado criado e testado com dados ficticios; sem upgrade.
+- Chave privada RSA4096 guardada somente no Windows com ACL restrita.
+- CMS AES256GCM/OAEP-SHA256: roundtrip VPS/Windows e rejeicao de adulteracao
+  aprovados. Nenhum backup real enviado, copia offline da chave pendente.
+- Documenta limites e gates em docs/runbooks/crm-backup-storage.md.
+- N8n antigo preservado; ingestao real e agenda continuam desligadas.
+
 ## 2026-10-13: Backup restaurado e ingestao isolada
 
 - Validacao final apos integrar main7c50f59: lint (um aviso preexistente),

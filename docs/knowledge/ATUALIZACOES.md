@@ -1,5 +1,37 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Bucket privado e recuperacao sintetica
+
+- Bucket crm-private-backups criado no projeto autorizado, privado, limite
+  50MiB, MIME octet-stream. Sem policies anon/authenticated ou upgrade.
+  Upload/download ficticio identico, leitura anonima negada, probe removido.
+- RSA4096 local com ACL usuario/SYSTEM; somente certificado publico usado
+  temporariamente na VPS. CMS AES256GCM/OAEP-SHA256 recuperado no Windows;
+  adulteracao rejeitada. Chave sem senha propria, sob ACL; copia offline
+  ainda depende do usuario, que informou nao ter pendrive agora. Guia local
+  criado, sem segredo no Git. Nao considerar perda do PC coberta.
+- GPG falhou ao iniciar agente Windows; OpenSSL existente passou no teste.
+  Fontes: SDK Storage, catalogo SQL, ACL Windows e processos OpenSSL.
+- Limites: nenhum backup real no bucket, sem prova de restore offsite ainda.
+  Mesmo projeto nao protege contra exclusao do Supabase. Runbook
+  docs/runbooks/crm-backup-storage.md registra gates restantes.
+- PR198/e0fc881: validate e isolated-restore aprovados; release-gates ainda
+  em andamento na consulta desta etapa. Nenhuma alteracao no n8n antigo,
+  configuracao de runtime, migrations ou agenda.
+- Health publico reconferido em 2026-10-13T04:55:18Z: ok, SHA7c50f59.
+
+## 2026-10-13: Inicio do destino privado de backup autorizado
+
+- Usuario autorizou bucket privado exclusivo no Supabase atual, sem upgrade.
+  Projeto MCP hnncxuerlcsaahdxoswb confirmado ACTIVE_HEALTHY, organizacao Free.
+- GitHub/main e health publico conferidos: 7c50f59/ok. PR198 head e0fc881;
+  CI38347083443 validate aprovado, restore/release-gates ainda em andamento.
+- Catalogo Storage: zero objetos/buckets/policies; RLS ativo em buckets/objects.
+  Management API confirma limite global 52428800 bytes, sem alterar configuracao.
+- Criacao e teste com arquivo ficticio nao equivalem a backup externo validado.
+  Dados reais aguardam criptografia e guarda da chave de recuperacao separada.
+  N8n antigo, agenda e configuracao do CRM permanecem fora desta operacao.
+
 ## 2026-10-13: Windows validado e plano remoto para revisao
 
 - Corrigidas as seis falhas iniciais e incompatibilidades subsequentes nas

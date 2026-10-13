@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-13: Preparacao do backup externo privado
+
+- Registra bucket privado autorizado e testes sinteticos de acesso/criptografia.
+- Documenta custodia da chave e gates restantes antes do backup real externo.
+- Sem alteracao de runtime, migrations ou agenda do n8n.
+
 ## 2026-10-13: Compatibilidade dos testes Windows
 
 - Suite completa Windows aprovada; mantem testes fisicos Linux obrigatorios na CI.
