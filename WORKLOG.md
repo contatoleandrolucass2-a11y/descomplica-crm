@@ -20,6 +20,12 @@
   do coletor e release aprovadas (11 verificações físicas reservadas à CI Linux),
   além de build. Audit sem vulnerabilidades conhecidas. CI e publicação ainda
   pendentes neste registro. Nenhuma linha comercial foi adicionada ao Git.
+- Matriz de navegador atualizada para os oito links, preservando os sete
+  relatórios comerciais. Caso sintético verifica a data própria do estoque e
+  o rótulo de coleta avulsa, sem inventar contagem quando a evidência falta.
+  Ensaio aprovado em nove combinações de tema/largura, zoom de 200%, estados,
+  polling e console sintético. A CI inicial do PR foi cancelada para incorporar
+  esse ajuste das expectativas de sete para oito linhas; nenhum gate foi removido.
 
 ## 2026-10-13: Logo na aba do navegador
 
