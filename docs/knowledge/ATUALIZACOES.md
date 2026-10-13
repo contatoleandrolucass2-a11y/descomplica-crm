@@ -1,5 +1,29 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Windows validado e plano remoto para revisao
+
+- Corrigidas as seis falhas iniciais e incompatibilidades subsequentes nas
+  etapas Node Salesforce/release antes bloqueadas por Vitest. Sem relaxar
+  protecao de producao: ACL nativa Windows, POSIX fisico no Linux, logica CAS
+  em memoria e rejeicao explicita de publicacao Windows. Dois testes fisicos
+  POSIX somam-se aos oito flock ja exclusivos Linux; todos obrigatorios na CI.
+- Apos integrar main7c50f59 preservando as tres notas conflitantes, pnpm test
+  passou: Vitest2620/43skips, Salesforce138/0skips, release86/10skips, exit0.
+  VITEST_MAX_WORKERS=2 evitou timeouts de concorrencia vistos na primeira rodada.
+  Lint aprovado com aviso preexistente, typecheck e build50rotas aprovados.
+  Testes n8n focados22/22. CI38346664206 parou somente na formatacao de tres
+  arquivos n8n anteriores; formatacao corrigida e validada, nova CI necessaria.
+- Auditoria aprovada somente como preparacao: Qlik/v3 ausentes no cloud nao
+  sao dependencias do endpoint Salesforce v2. Plano e fontes em
+  docs/audits/salesforce-cloud-preflight-2026-10-13.md. Nao criar/reaplicar
+  migrations amplas para satisfazer gate de outro escopo; revisar gate primeiro.
+- Restore temporario removido apos conferir label/imagem/rede; backup e recibo
+  isolado privados preservados na VPS. Sem dados privados no Git. Backup externo
+  autorizado ainda necessario segundo runbook n8n antes da carga comercial.
+- Conferencia 2026-10-13T04:32:26Z: health200/ok e ledger7c50f59 sem pendencia;
+  ingestfalse, refreshfalse, segredos ainda fora do processo CRM. N8n novo relido
+  inativo por MCP; antigo intocado. Sem deploy, escrita cloud ou agenda nesta etapa.
+
 ## 2026-10-13: Backup cloud e prova isolada Salesforce
 
 - Fonte: Supabase MCP, CLI 2.115.0 na VPS e restore Postgres 17.6.1.155.

@@ -2,6 +2,12 @@
 
 ## 2026-10-13: Backup restaurado e ingestao isolada
 
+- Validacao final apos integrar main7c50f59: lint (um aviso preexistente),
+  typecheck e build aprovados. pnpm test com VITEST_MAX_WORKERS=2 passou:
+  Vitest2620/43skips, coletor138/0skips, release86/10skips Linux obrigatorios.
+  Testes n8n adicionais22/22; formatacao dos tres arquivos legados corrigida.
+- Auditoria concluida: Qlik/v3 nao sao dependencias Salesforce. Preparado plano
+  de revisao, sem migration nova ou aplicacao cloud; ver auditoria de13/10.
 - Backup oficial do projeto hnncxuerlcsaahdxoswb na VPS, com schema, dados,
   roles e historico; arquivos privados, checksums relidos e fsync confirmado.
 - Restore em Postgres 17.6.1.155 sem rede/portas/volume persistente: 65 tabelas

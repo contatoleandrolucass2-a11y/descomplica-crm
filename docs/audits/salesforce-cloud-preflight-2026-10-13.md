@@ -15,6 +15,8 @@ das 65 tabelas COPY; todas coincidiram. Checksums relidos e fsync confirmado.
 Restore com erro interrompeu/reverteu a primeira transacao por role de plataforma
 ausente; apos criar somente essa role no container isolado, restore integral
 em transacao passou. Nenhuma alteracao equivalente no banco remoto.
+O container temporario foi removido apos as provas; backup e recibo
+`isolated-ingestion.json` permanecem privados na VPS.
 
 Sem rede, portas ou volume persistente no container de restore. Dados nao sairam
 da VPS. Limites: schema e dados exportados separadamente, sem snapshot comum;

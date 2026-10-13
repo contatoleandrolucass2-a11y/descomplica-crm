@@ -2,6 +2,8 @@
 
 ## 2026-10-13: Compatibilidade dos testes Windows
 
+- Suite completa Windows aprovada; mantem testes fisicos Linux obrigatorios na CI.
+- Publica auditoria e plano de revisao de RPCs, sem aplicar migrations remotas.
 - Corrige fixtures de permissoes e caminhos Windows sem relaxar seguranca Linux.
 - Adiciona verificacao de ACL real e rejeicao de leitor indevido em arquivos
   temporarios sinteticos; cobre ordem de fsync e metadados inseguros de backup.
