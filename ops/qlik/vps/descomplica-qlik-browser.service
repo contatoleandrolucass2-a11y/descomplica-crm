@@ -1,0 +1,33 @@
+[Unit]
+Description=Descomplica Qlik dedicated persistent browser
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-qlik
+Group=descomplica-qlik
+WorkingDirectory=@RELEASE@
+Environment=HOME=/var/lib/descomplica-qlik
+RuntimeDirectory=descomplica-qlik
+RuntimeDirectoryMode=0700
+RuntimeDirectoryPreserve=yes
+UMask=0077
+ExecStart=/usr/bin/xvfb-run --server-num=98 --auth-file=/run/descomplica-qlik/Xauthority --server-args="-screen 0 1440x900x24 -nolisten tcp" /usr/local/bin/node ops/qlik/launch-browser.mjs
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+KillMode=control-group
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/descomplica-qlik /run/descomplica-qlik /tmp
+MemoryMax=2G
+TasksMax=512
+LimitCORE=0
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

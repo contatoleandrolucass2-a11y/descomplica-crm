@@ -1,5 +1,35 @@
 # Changelog
 
+## 2026-10-14: Evidencias de publicacao Qlik
+
+- Registra a divergencia entre candidato, main e versao publicada; a coleta
+  e a agenda permanecem inativas ate validacao do fluxo completo.
+
+## 2026-10-14: Atualizacao protegida do servico Qlik
+
+- Adiciona operacoes especificas ao coordenador existente, com ledger separado,
+  mesmas travas/CI/frescor, backup privado, CAS e recuperacao da tentativa.
+- Preserva perfil, estado de boot, CRM e Salesforce; nao coleta fatos ou
+  aplica schema. Confirmacao do owner nao e confirmacao de ranking conectado.
+- Acrescenta testes de estado, entradas e host isolado, incluindo interrupcoes,
+  arquivos alterados, processos remanescentes e resultados antigos.
+
+## 2026-10-14: Integridade do preflight e audiencia Qlik
+
+- Inclui todos os modulos do preflight na verificacao de arquivos aprovados
+  e exige enigma.js2.15.0 com probe de leitura pelo usuario restrito.
+- Registra recorte completo para usuarios com crm.ranking.view; reader e
+  autorizacao no banco continuam pendentes, sem alterar grants nesta etapa.
+- Mantem instalador exclusivo para instalacao inicial, sem substituir o
+  owner existente ou ativar coleta antes de um upgrade protegido e validado.
+
+## 2026-10-14: Sessao e diagnostico Qlik isolados
+
+- Separa browser dedicado, console/cofre privado e cliente QIX da interface.
+- Adiciona SDK oficial fixado, inspecao restrita de objetos/masters, ciclo
+  sequencial e artefato privado atomico. Preflight desligado por padrao.
+- Preserva pagina ranking, Salesforce, banco e n8n. Nao entrega coleta ativa.
+
 ## 2026-10-14: Filtro e destaque da Rotina
 
 - Troca as abas por um seletor unico de rotina e reorganiza os botoes.
