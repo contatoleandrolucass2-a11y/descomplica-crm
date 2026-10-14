@@ -137,7 +137,7 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "inventory-brands",
     label: "Marcas nos simuladores",
     description:
-      "Libere uma ou ambas as marcas. Sem marca marcada, o usuário não visualiza unidades nos simuladores. Nenhum papel libera marcas automaticamente.",
+      "Libere uma ou ambas as marcas. Sem marca marcada, o usuário não visualiza unidades nos simuladores. O Administrador herda ambas; os demais papéis precisam de liberação individual.",
     matches: (key) => key.startsWith("crm.inventory."),
   },
   {

@@ -243,29 +243,7 @@ describe("catálogo localizado de acesso", () => {
       ),
     );
     expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(24);
-    expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([
-      "users.view",
-      "users.manage",
-      "permissions.view",
-      "permissions.manage",
-      "roles.view",
-      "roles.manage",
-      "audit.view",
-      "admin.access",
-      "pages.manage",
-      ...baseNavigationPermissions,
-      "crm.dashboard.all.view",
-      "crm.dashboard.with_canal_imob.view",
-      "crm.dashboard.without_canal_imob.view",
-      "crm.ranking.view",
-      "crm.partnerships.view",
-      "crm.settings.view",
-      "crm.settings.manage",
-      "crm.salesforce.refresh",
-      "crm.ingest.manage",
-      "crm.simulators.view",
-      "crm.simulators.execute",
-    ]);
+    expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual(Object.keys(PERMISSIONS));
     for (const roleKey of ["coordinator", "manager_imob", "broker_imob"] as const) {
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(withCanalImobPermissions);
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.ranking.view");
@@ -307,6 +285,45 @@ describe("catálogo localizado de acesso", () => {
     expect(downgrade.removed).toContain("roles.manage");
     expect(downgrade.added).toEqual([]);
   });
+
+  it.each([false, true])(
+    "marca os padrões do Administrador e respeita negação individual: %s",
+    (denyRiva) => {
+      const markup = renderToStaticMarkup(
+        createElement(UserAccessManager, {
+          users: [
+            {
+              userId: "81000000-0000-4000-8000-000000000006",
+              email: "administrador@example.test",
+              isActive: true,
+              accessStatus: "approved",
+              roleKey: "admin",
+              isSelf: false,
+              isManageable: true,
+              overrides: denyRiva
+                ? [{ permissionKey: "crm.inventory.riva.view", effect: "deny", reason: null }]
+                : [],
+            },
+          ],
+          assignableRoles: ["admin"],
+          manageablePermissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"],
+          canManageRoles: true,
+          canManagePermissions: true,
+          isMasterPermissionManager: true,
+          canManageUsers: true,
+          canApproveUsers: false,
+          reportingScopes: [],
+        }),
+      );
+      const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
+      expect(checkboxes.length).toBeGreaterThan(0);
+      for (const checkbox of checkboxes) {
+        expect(checkbox.includes('checked=""')).toBe(
+          !(denyRiva && checkbox.includes('aria-label="Acesso a RIVA"')),
+        );
+      }
+    },
+  );
 
   it("não mantém descrições de permissão em inglês na interface", () => {
     const visibleText = Object.values(PERMISSIONS)

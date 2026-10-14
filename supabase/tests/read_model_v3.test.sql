@@ -81,8 +81,8 @@ select is(
      'crm.read_model_v3.partnerships.view',
      'crm.read_model_v3.stock.view'
    )),
-  0::bigint,
-  'v3 permission catalog creation does not activate any role automatically'
+  4::bigint,
+  'Administrator inherits the four registered v3 read permissions'
 );
 set local role anon;
 select throws_ok(
@@ -344,6 +344,15 @@ from auth.users
 where id between
   '81000000-0000-4000-8000-000000000002'
   and '81000000-0000-4000-8000-000000000005';
+
+-- Keep the negative dataset test meaningful now that Administrator inherits
+-- every v3 permission. Its explicit deny must still beat the role default.
+insert into public.user_permission_overrides (
+  user_id, permission_key, effect, reason, granted_by
+) values (
+  '81000000-0000-4000-8000-000000000002', 'crm.read_model_v3.ranking.view', 'deny',
+  'V3 explicit dataset deny contract test', '81000000-0000-4000-8000-000000000001'
+);
 
 select is(
   (select count(*)
@@ -1496,7 +1505,7 @@ select throws_ok(
     )$$,
   '42501',
   'forbidden: read-model dataset is unavailable',
-  'generic funnel permission cannot open the ranking dataset'
+  'an explicit ranking deny blocks the dataset despite complete Administrator defaults'
 );
 select is(
   (public.get_crm_read_model_v3(
@@ -1886,8 +1895,8 @@ select is(
   (select array_agg(role_key order by role_key)
    from public.role_permissions
    where permission_key = 'crm.read_model_v3.view'),
-  array['master']::text[],
-  'test-local activation grants generic v3 access only to Master'
+  array['admin', 'master']::text[],
+  'Administrator inherits generic v3 access and the test also activates Master'
 );
 select is(
   (select array_agg(permission_key order by permission_key)
@@ -1899,7 +1908,7 @@ select is(
     'crm.read_model_v3.ranking.view',
     'crm.read_model_v3.stock.view'
   ]::text[],
-  'test-local activation grants each dataset-specific v3 capability only to Master'
+  'test-local activation adds every dataset-specific v3 capability to Master'
 );
 select is(
   (select string_agg(role_key || ':' || permission_key, ',' order by role_key, permission_key)

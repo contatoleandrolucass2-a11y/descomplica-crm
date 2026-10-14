@@ -171,6 +171,8 @@ select is(
     )
   ),
   array[
+    'admin:crm.commercial_engine.execute',
+    'admin:crm.commercial_policy.manage',
     'admin:crm.simulators.execute',
     'broker_house:crm.simulators.execute',
     'broker_imob:crm.simulators.execute',
@@ -180,7 +182,7 @@ select is(
     'master:crm.commercial_policy.manage',
     'master:crm.simulators.execute'
   ]::text[],
-  'commercial policy management remains Master-only while current roles inherit simulator execution'
+  'Administrator inherits the commercial catalog while other existing role defaults remain unchanged'
 );
 
 select ok(

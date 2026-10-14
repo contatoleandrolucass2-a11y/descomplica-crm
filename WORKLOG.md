@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-14: Administrador com herança completa
+
+- Atende ao pedido posterior para o papel Administrador herdar todo o catálogo atual: 31 permissões, incluindo RIVA, DIRECIONAL e permissões técnicas ocultas na matriz.
+- A migration adiciona oito vínculos ao papel Admin sem remover exceções individuais, alterar níveis, ampliar outros papéis ou modificar os gates de funções reservadas ao Master.
+- As três telas de rascunho comercial refletem o bloqueio Master-only já existente no banco, evitando oferecer ao Administrador ações que seriam recusadas.
+- Catálogo de apresentação, instrução das marcas, fixtures e testes foram alinhados. Evidências em `docs/audits/usuarios-acessos-local-2026-10-14.md`. Trabalho exclusivamente local.
+
 ## 2026-10-14: Acesso individual a marcas nos simuladores
 
 - Adiciona controles independentes RIVA e DIRECIONAL, ambos desativados em todos os papéis, inclusive Master. A liberação é individual e respeita a hierarquia existente.

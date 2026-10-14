@@ -786,14 +786,25 @@ begin
   ) then
     raise exception 'inherited commercial permission baseline diverged';
   end if;
+  if exists (
+    select 1 from public.permissions permission
+    where not exists (
+      select 1 from public.role_permissions role_permission
+      where role_permission.role_key = 'admin'
+        and role_permission.permission_key = permission.key
+    )
+  ) then
+    raise exception 'admin must inherit the complete permission catalog';
+  end if;
   if (
     select count(*) from public.permissions
     where key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
   ) <> 2 or exists (
     select 1 from public.role_permissions
-    where permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
+    where role_key <> 'admin'
+      and permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
   ) then
-    raise exception 'inventory brands must exist without inherited access';
+    raise exception 'inventory brands must be inherited only by admin';
   end if;
 end
 $qa_preflight$;

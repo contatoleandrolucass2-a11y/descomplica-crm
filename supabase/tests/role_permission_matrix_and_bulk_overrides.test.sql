@@ -1,6 +1,6 @@
 begin;
 
-select plan(124);
+select plan(133);
 
 select has_column(
   'public',
@@ -102,7 +102,23 @@ select ok(
         and role_permission.permission_key = required.permission_key
     )
   ),
-  'Administrator inherits all relevant non-Master operations and access management'
+  'Administrator inherits all relevant operations and access management'
+);
+
+select is(
+  (select count(*) from public.role_permissions where role_key = 'admin'),
+  31::bigint,
+  'Administrator inherits all thirty-one current catalog permissions'
+);
+select is(
+  (select array_agg(permission_key order by permission_key) from public.role_permissions where role_key = 'admin'),
+  (select array_agg(key order by key) from public.permissions),
+  'Administrator defaults match the complete catalog with no missing permission'
+);
+select is(
+  (select level from public.roles where key = 'admin'),
+  80,
+  'complete Administrator defaults do not promote its hierarchy level'
 );
 
 select is(
@@ -634,7 +650,7 @@ select lives_ok(
     'allow',
     'Master delegation to Administrator test'
   )$$,
-  'Master can allow an inherited-denied permission for an Administrator'
+  'Master can set an explicit allow for a restricted Administrator permission'
 );
 select is(
   (
@@ -662,7 +678,7 @@ select ok(
     'a3000000-0000-4000-8000-000000000002',
     'crm.commercial_policy.manage'
   ),
-  'Administrator cannot propagate a Master-level permission received by override'
+  'Administrator cannot propagate a minimum-level-100 permission even when inherited and explicitly allowed'
 );
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
 set local role authenticated;
@@ -1016,6 +1032,7 @@ select ok(has_function_privilege('authenticated', 'public.get_user_role_permissi
 select ok(not has_function_privilege('anon', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'anonymous cannot read role defaults');
 select ok(not has_function_privilege('service_role', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'service role has no direct defaults read grant');
 select is((select count(*) from public.get_user_role_permission_defaults() where role_key='manager_imob'), 7::bigint, 'Users viewers receive the authoritative Imob baseline');
+select is((select count(*) from public.get_user_role_permission_defaults() where role_key='admin'), 31::bigint, 'the defaults RPC exposes every inherited Administrator permission');
 select ok(exists(select 1 from public.get_user_role_permission_defaults() where role_key='master' and permission_key='crm.commercial_policy.manage'), 'role defaults reflect local policy grants absent from the static UI baseline');
 reset role;
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011', true);
@@ -1023,8 +1040,8 @@ set local role authenticated;
 select is((select count(*) from public.get_user_role_permission_defaults()), 0::bigint, 'callers without users.view receive no role defaults');
 reset role;
 
--- Brand access is explicit even for Master. Management capability does not
--- imply permission to read either stock catalog.
+-- Administrator inherits both brands; Master and operational roles still need
+-- explicit access. A deny remains authoritative without removing management.
 reset role;
 select set_config('request.jwt.claim.sub', '', true);
 select is(
@@ -1033,16 +1050,17 @@ select is(
   'both brand permissions exist with the operational minimum level'
 );
 select is(
-  (select count(*) from public.role_permissions where permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
-  0::bigint,
-  'no role inherits brand access, including Master'
+  (select array_agg(role_key || ':' || permission_key order by role_key, permission_key)
+   from public.role_permissions
+   where permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
+  array['admin:crm.inventory.direcional.view', 'admin:crm.inventory.riva.view']::text[],
+  'only Administrator inherits both inventory brands'
 );
 select ok(
   not exists (
     select 1
     from unnest(array[
       'a3000000-0000-4000-8000-000000000001'::uuid,
-      'a3000000-0000-4000-8000-000000000002'::uuid,
       'a3000000-0000-4000-8000-000000000004'::uuid,
       'a3000000-0000-4000-8000-000000000005'::uuid,
       'a3000000-0000-4000-8000-000000000006'::uuid,
@@ -1052,8 +1070,26 @@ select ok(
     where public._internal_has_permission(fixture.user_id, 'crm.inventory.riva.view')
       or public._internal_has_permission(fixture.user_id, 'crm.inventory.direcional.view')
   ),
-  'all seven approved role fixtures start without access to either brand'
+  'Master and the five operational roles start without access to either brand'
 );
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'Administrator initially receives both brands from the role default'
+);
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000002', array['crm.inventory.riva.view', 'crm.inventory.direcional.view'], 'deny', 'Synthetic Administrator brand deny')$$,
+  'Master can explicitly deny inherited brand access for Administrator'
+);
+reset role;
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'individual denies take precedence over the complete Administrator defaults'
+);
+select set_config('request.jwt.claim.sub', '', true);
 select ok(
   public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
     and public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view'),
@@ -1144,7 +1180,7 @@ select ok(
     and not public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view')
     and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
     and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
-  'managing another user never grants brand reading to Master or Administrator'
+  'managing another user does not bypass missing Master defaults or explicit Administrator denies'
 );
 set local role authenticated;
 select throws_ok(
@@ -1195,6 +1231,18 @@ reset role;
 select set_config('request.jwt.claim.sub', '', true);
 update public.profiles set is_active = true
 where user_id = 'a3000000-0000-4000-8000-000000000008';
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000002', array['crm.inventory.riva.view', 'crm.inventory.direcional.view'], 'inherit', 'Synthetic Administrator defaults restored')$$,
+  'Master can restore Administrator brand inheritance without rewriting role defaults'
+);
+reset role;
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'removing individual denies restores both inherited Administrator brands'
+);
 select is(
   (select count(*) from public.user_permission_overrides where user_id::text like 'a3000000-%' and permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
   0::bigint,

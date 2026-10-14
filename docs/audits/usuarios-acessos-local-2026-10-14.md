@@ -141,3 +141,55 @@ Validação local desta etapa:
 
 A nova migration também está fora do upgrade remoto de autenticação/MFA.
 A implementação e a aplicação da migration permanecem exclusivamente locais.
+
+## Administrador com todas as permissões herdadas
+
+O pedido posterior “Admin deve ter tudo herdado como padrão” substitui a
+regra anterior de marcas desativadas somente para o Administrador. A migration
+`20261014201400_local_admin_all_permission_defaults.sql` adiciona oito vínculos
+que faltavam e passa a associar esse papel a todas as 31 permissões atuais.
+O Master e os outros papéis mantêm seus padrões anteriores.
+
+A matriz possui 25 controles visíveis: cinco permissões técnicas continuam
+ocultas e as duas permissões de simuladores compartilham um controle. Em uma
+conta Administrador sem exceções, todos os 25 ficaram marcados por herança,
+incluindo RIVA, DIRECIONAL e os controles comerciais.
+
+Nenhuma exceção individual foi removida pela migration. Uma negação continua
+bloqueando o acesso correspondente; restaurar a herança repõe o padrão do papel.
+Administrador permanece nível 80. Gerenciamento exige alvo abaixo do ator,
+escopo compatível e os requisitos existentes de delegação. Autoalteração, pares,
+superiores e funções reservadas ao Master continuam bloqueados. A herança de
+uma permissão não ativa um motor desligado nem substitui esses gates.
+
+As três páginas de metas passaram a verificar o papel Master junto da permissão
+para oferecer rascunhos comerciais, refletindo a regra já aplicada pelas RPCs.
+Isso evita oferecer ao Administrador uma ação que o banco recusaria. Os nove
+testes dessa apresentação cobrem Admin com o catálogo completo e Master com e
+sem a permissão necessária.
+
+Validação desta atualização:
+
+- `pnpm lint`, `pnpm typecheck`, 2.327 testes Vitest e 83 testes Node passaram;
+  nove verificações opt-in não foram executadas. `pnpm build` passou.
+- Navegador: conta sintética de organização com papel Administrador, zero
+  exceções e 25/25 controles marcados. Captura ignorada pelo Git em
+  `.local-dev/usuarios-admin-heranca-final.png`.
+- A tentativa de converter a fixture de Gerente House, vinculada somente a
+  uma equipe, foi recusada pela compatibilidade de escopo existente. Nenhuma
+  regra foi afrouxada; a verificação visual usa uma fixture administrativa
+  separada com escopo de organização compatível.
+- Doze consultas HTTP autenticadas verificaram ambas as marcas herdadas pelo
+  Admin, negação de cada marca, negação das duas, restauração da herança e
+  Master sem liberação de marcas. A conta temporária e sua linhagem de escopo
+  foram removidas. Evidência: `.local-dev/admin-http-evidence.json`.
+- A revisão independente do diff não encontrou problemas acionáveis.
+
+A aplicação da migration foi exclusivamente no Docker local. Não houve
+publicação nem alteração de banco remoto. A sincronização do Obsidian continua
+`not-configured`; os documentos versionados registram os resultados.
+
+Banco desta atualização: 1.175 testes pgTAP passaram na origem isolada e 1.175
+na cópia restaurada, com lint, segurança, desempenho, preservação de privilégios
+e proprietários e fingerprints equivalentes. Evidência local ignorada:
+`.local-dev/admin-db-rehearsal.json`.

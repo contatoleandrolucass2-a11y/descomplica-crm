@@ -32,7 +32,8 @@
   O cache guarda a origem bruta apenas no servidor. Cada resposta de estoque vivo
   ou snapshot filtra unidades pelas permissões atuais `crm.inventory.riva.view`
   e `crm.inventory.direcional.view`, inclusive em cache HIT e consultas concorrentes.
-  Nenhum papel herda essas marcas. Sem liberação individual, a API retorna
+  O Administrador herda ambas as marcas; outros papéis precisam de liberação
+  individual. Negações individuais prevalecem. Sem acesso efetivo, a API retorna
   `count: 0, items: []` sem acessar a origem ou o cache. O acesso de gestão não
   concede leitura e o Master não tem bypass.
   Somente `businessUnit` Riva/Direcional, normalizado por espaços externos e

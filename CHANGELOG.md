@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14 — Padrão completo do Administrador, ambiente local
+
+- Administrador passa a herdar todas as 31 permissões atuais, incluindo RIVA e DIRECIONAL. Exceções individuais e hierarquia continuam prevalecendo.
+- Ajusta a apresentação de rascunhos comerciais para respeitar as restrições Master-only existentes no banco.
+
 ## 2026-10-14 — Marcas nos simuladores, ambiente local
 
 - Adiciona RIVA e DIRECIONAL como acessos independentes por usuário, desativados por padrão em todos os papéis.

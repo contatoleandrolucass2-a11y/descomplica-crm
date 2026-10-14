@@ -1,5 +1,13 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Administrador passa a herdar todo o catálogo
+
+- Fonte: pedido posterior do usuário, “Admin deve ter tudo herdado como padrão”. Substitui o padrão anterior de marcas desativadas somente para o Administrador; os outros papéis permanecem iguais.
+- `20261014201400_local_admin_all_permission_defaults.sql` associa o Administrador a todas as 31 permissões atuais. A tela oferece 25 controles porque cinco permissões técnicas ficam ocultas e as duas de simuladores compartilham um controle.
+- A alteração de defaults preserva negações individuais. Nível 80, escopo, bloqueios de autoalteração, pares e superiores e min_level de delegação não mudam. Herança não ativa motores desligados nem substitui gates explícitos Master-only.
+- Papéis e escopos são verificados separadamente: uma conta com apenas escopo de equipe não pode receber Administrador, que requer escopo compatível. A prévia usa uma conta sintética de organização, mantendo a recusa da transição incompatível.
+- Validação e limites em `docs/audits/usuarios-acessos-local-2026-10-14.md`. Nenhuma evidência desta nota comprova publicação remota.
+
 ## 2026-10-14: Marcas exigem liberação individual
 
 - Fonte: pedido do usuário e resposta explícita “Ambos desativados; liberar por usuário”. Nenhum papel, inclusive Master, herda `crm.inventory.riva.view` ou `crm.inventory.direcional.view`.

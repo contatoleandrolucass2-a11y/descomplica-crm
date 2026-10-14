@@ -42,7 +42,7 @@ export function requireCanAssignRole(actor: AuthorizationContext, targetRoleKey:
 // any held permission to a strictly lower target even when minLevel equals the
 // Master level. Other roles still require minLevel strictly below their level.
 // Target hierarchy is checked separately by requireCanManageTargetLevel.
-// Inventory brands are individually assigned and absent from every role default.
+// Inventory brands require individual access outside the Administrator defaults.
 // Permission managers can delegate those two accesses without receiving unit access.
 export function canGrantPermission(
   actor: AuthorizationContext,

@@ -1045,7 +1045,7 @@ for (const role of expectedRoles) {
       for (const inventoryPath of ["/api/inventory", "/api/inventory/snapshot"]) {
         const inventoryResponse = await page.request.get(inventoryPath);
         expect(inventoryResponse.headers()["cache-control"]).toContain("no-store");
-        if (role === "master") {
+        if (adminRoles.has(role)) {
           expect(inventoryResponse.status()).toBe(200);
           const inventoryPayload = await inventoryResponse.json();
           expect(inventoryPayload.items).toHaveLength(inventoryPayload.count);
@@ -1554,14 +1554,25 @@ test("released simulator pages respect explicit inventory access while the CAIXA
     for (const inventoryPath of ["/api/inventory", "/api/inventory/snapshot"]) {
       const inventory = await page.request.get(inventoryPath);
       expect(inventory.status()).toBe(200);
-      expect(await inventory.json()).toEqual({ count: 0, items: [] });
+      const payload = await inventory.json();
+      expect(payload.items).toHaveLength(payload.count);
+      expect(payload.count).toBeGreaterThan(0);
+      expect(
+        new Set(
+          payload.items.map((item: { businessUnit: string }) =>
+            item.businessUnit.trim().toLowerCase(),
+          ),
+        ),
+      ).toEqual(new Set(["direcional", "riva"]));
     }
     const response = await page.goto("/app/simulacao/associativo-fluxo-linear");
     expect(response?.status()).toBe(200);
     await expect(
       page.getByRole("heading", { level: 1, name: "Simulador Tabela Associativo", exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole("button", { name: /^Iniciar proposta com / })).toHaveCount(0);
+    await expect(
+      page.getByRole("button", { name: /^Iniciar proposta com / }).first(),
+    ).toBeVisible();
     await logoutAndAssertBoundary(page, "admin");
   });
 });

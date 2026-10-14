@@ -39,28 +39,9 @@ const MASTER_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
     permission !== "crm.inventory.riva.view" &&
     permission !== "crm.inventory.direcional.view",
 );
-const ADMIN_PERMISSIONS = [
-  "users.view",
-  "users.manage",
-  "permissions.view",
-  "permissions.manage",
-  "roles.view",
-  "roles.manage",
-  "audit.view",
-  "admin.access",
-  "pages.manage",
-  ...BASE_NAVIGATION_PERMISSIONS,
-  "crm.dashboard.all.view",
-  "crm.dashboard.with_canal_imob.view",
-  "crm.dashboard.without_canal_imob.view",
-  "crm.ranking.view",
-  "crm.partnerships.view",
-  "crm.settings.view",
-  "crm.settings.manage",
-  "crm.salesforce.refresh",
-  "crm.ingest.manage",
-  ...SIMULATOR_ACCESS_PERMISSIONS,
-] as const satisfies readonly PermissionKey[];
+// Administrator inherits the entire current catalog. Individual overrides and
+// database hierarchy, scope, account status, and runtime gates remain authoritative.
+const ADMIN_PERMISSIONS = Object.keys(PERMISSIONS) as PermissionKey[];
 const NO_INHERITED_PERMISSIONS = [] as const satisfies readonly PermissionKey[];
 
 // Baseline for role-change previews and isolated component fixtures. The Users
