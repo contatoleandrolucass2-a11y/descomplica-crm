@@ -2,14 +2,13 @@
 
 ## 2026-10-14: Conexao Qlik para ranking via VPS
 
-- Fluxo confirmado Qlik -> VPS -> ranking. PR214/ce82f707 fechado sem merge
-  as02:48Z: exportava no sentido inverso e SELECT privilegiado nao tinha grant
-  comprovado. Codigo anterior preservado. PR216 contem a preparacao correta.
-- Fontes: GitHub PR214/216, SSH e https://crm.descomplicapro.com.br/api/health.
-  As04:03Z main=792320b, health200/ok=0fdbb80; PR216/1313d64 aberto,
-  CI38509075428 em andamento. Fontes consultadas novamente nesta retomada.
-  Merge b78230d preservou notas de dashboard; CI ausente no ff1f59d devido ao
-  conflito documental. Preparacao operacional nao equivale a merge/deploy CRM.
+- Referencia vigente alterada pelo usuario para Canal de Parcerias em14/10:
+  mapa em docs/runbooks/qlik-partnerships-mapping.md. IMOBs/produtos, VGV/contratos;
+  escopo de corretores abaixo e historico. Fluxo Qlik -> VPS -> CRM.
+- PR214/ce82f707 fechado sem merge: sentido inverso e grant nao comprovado.
+- Fontes: GitHub PR216/main, SSH e https://crm.descomplicapro.com.br/api/health.
+  Conferencia05:21Z: main=faae8e9 (PR215 externo), site200/ok=792320b;
+  PR216/fb9b19f com CI verde e conflito. Novo mapa: CI propria pendente.
 - VPS atual sem exportador antigo/qlik-ranking-api; MCP n8n encontrou zero
   workflows ranking, sem mutacao. Documentos antigos nao provam estado atual.
   Chrome local mostra Visao House00171c17-48de-4488-b1f9-dd6dcb0249e2 e pastas
@@ -47,7 +46,7 @@
   detalhes preservados no runbook/WORKLOG e historico Git; notas alheias intactas.
 - Encerramento04:29Z: lint/tipos/test/build passaram (139 arquivos/2747 Vitest).
   Health200/ok=main792320b por deploy externo, nao Qlik. PR216 sem merge;
-  CI desta revisao pendente. Autorizacoes/preflight no runbook acima.
+  Novo mapa: lint/tipos/build OK;2 timeouts DevTools persistem. Ver WORKLOG.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 

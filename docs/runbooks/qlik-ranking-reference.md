@@ -1,5 +1,10 @@
 # Ranking Qlik: referencia integral e contrato pendente
 
+> Referencia substituida pelo usuario em 14/10/2026 por Canal de Parcerias.
+> Este inventario fica como historico, nao como escopo de coleta vigente.
+> Ver `qlik-partnerships-mapping.md`. Nao reutilizar o filtro fixo de
+> `ranking-scope.mjs` para a integracao de imobiliarias/VGV/contratos.
+
 ## Proveniencia e estado
 
 Inspecao em 14/10/2026, branch `codex/qlik-ranking-vps`, base `1313d64`.

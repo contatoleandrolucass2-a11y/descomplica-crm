@@ -2,6 +2,11 @@
 
 ## 2026-10-14: Preparacao da sessao Qlik na VPS
 
+- Atualiza a referencia vigente para Canal de Parcerias, com mapa de
+  IMOBs/empreendimentos, VGV/contratos, objetos candidatos e lacunas verificadas.
+- Marca o escopo de corretores e o publisher descrito em agosto como historico;
+  nao reutiliza o filtro anterior nem declara coleta ou relay ativos.
+
 - Mapeia o escopo integral da referencia do ranking e fixa DIRECIONAL VENDAS
   SPC no preflight offline; nao aprova campo Qlik, politica ou coleta.
 - Adiciona cadastro opcional de credencial Qlik cifrada na VPS, somente por

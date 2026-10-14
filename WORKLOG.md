@@ -1,5 +1,49 @@
 # Worklog
 
+## 2026-10-14: Referencia alterada para Canal de Parcerias
+
+Usuario substituiu expressamente a pagina de ranking por canal-de-parcerias
+como verdade para a coleta. Inspecao viva mapeou IMOBs/produtos, VGV/contratos,
+podio, top10, busca, variacao, totais e periodos mensal/anterior/anual/custom.
+Custom observado por mes; unidade somente Direcional; base antiga marcada
+desatualizada em20/08/2026. Nao ampliar para Riva nem aplicar filtro DV SPC.
+
+Qlik23.1 Painel Comercial/Web abriu Vendas e aba Parceiras; app/sheet/IDs de
+controles documentados, sem promover ID DOM a contrato Engine. A coluna de
+nomes e rotulada CORRETOR; formulas e recorte ainda nao demonstrados. Revisoes
+independentes identificaram contrato IMOB existente, unidade ausente em entries,
+leitor sem snapshot completo/produtos e riscos em helpers legados. Mapa em
+docs/runbooks/qlik-partnerships-mapping.md. Nao confundir este contrato com
+atividades/pontos do Salesforce. Historico anterior preservado com aviso.
+
+Somente documentacao: sem migration, coleta, agenda, mudanca de ACL ou runtime.
+Revisao independente corrigiu duas extrapolacoes: ausencia de selecao nao prova
+abrangencia nacional, e publisher nao localizado nao significa inexistente.
+Catalogo comercial sem rotulos carregados e timeouts repetidos do navegador
+impediram completar a leitura das formulas/campos; nao houve acesso alternativo
+a sessao, cookies ou credenciais. Inspecao deve ser retomada com UI responsiva.
+
+Node24.19.0/pnpm11.20.0: lint passou com aviso preexistente em connected-systems;
+typecheck passou. pnpm test falhou por5 timeouts em3 arquivos: project-devtools
+(parser Chrome e2 handshakes MCP), reference-parity (QA) e obsidian-knowledge
+(sync geracoes, tambem timeout de afterEach).136 arquivos/2742 testes passaram,
+63 skips. Suites Node/release nao chegaram a executar pelo encadeamento &&.
+Nao alterar timeout/assercoes nem atribuir causa comprovada a carga do host.
+Build separado passou: Next16.3.8,50 paginas. Repeticao dos3 arquivos com
+--maxWorkers=1:59 testes passaram,1 skip e2 timeouts permaneceram em
+project-devtools (parser Chrome e handshake Next). reference-parity e
+obsidian-knowledge passaram. Gate global continua falho; nenhuma tolerancia
+foi alterada. Prettier/check e git diff --check passaram.
+
+Consulta GitHub/health05:07Z: PR216/fb9b19f aberto, CI38511737166 em andamento;
+main=faae8e9 por PR215 externo, site200/ok ainda792320b. Nao e deploy Qlik.
+Sync Obsidian confirmou synced apos atualizacao de fonte; sem dados privados.
+Reconsulta05:21Z: CI38511737166/fb9b19f concluida com sucesso, PR216 aberto
+mas mergeable=false apos main externo. Site permanece200/ok=792320b.
+Esta revisao documental tera SHA/CI proprios; sem merge ou deploy, pois o
+mapeamento produtivo e os gates locais continuam pendentes. Nao resolver
+conflito com codigo externo por sobrescrita de notas ou alteracao de outra branch.
+
 ## 2026-10-14: Escopo integral do ranking legado
 
 Usuario definiu a pagina antiga inteira como referencia da nova `/app/ranking`.
