@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14: Correcao do lint SQL Qlik
+
+- Classifica os validadores de timestamp/conteudo como STABLE, preservando
+  validacao estrita, permissoes e exigencia de CI/restore antes da migration.
+
 ## 2026-10-14: Ciclo de publicacao Qlik
 
 - Adiciona conciliacao antes do envio, leitura restrita da credencial systemd

@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-14: Volatilidade SQL do ranking
+
+CI38620973126/ab61437 passou validate e os testes SQL; restore e release-gates
+falharam no mesmo lint: crm_qlik_v2_timestamp e crm_qlik_v2_content declaravam
+IMMUTABLE apesar dos casts de data/hora STABLE. Corrigida a classificacao na
+migration candidata ainda nao aplicada, sem alterar regras, ACLs ou gates.
+Nova CI/restore exigidos. Fonte: logs GitHub dos jobs116049856588 e116049856773,
+14/10/2026 19:14/19:18Z. A classificacao segue a documentacao PostgreSQL sobre
+volatilidade; testes de dados nao substituem o lint de funcao.
+
+VPS: dependencias do checkout d660ba9 convertidas de hardlinks para copias
+privadas identicas (32302 arquivos,38123 verificados), hashes conferidos e
+assertQlikDependencies aprovado. Nenhum pacote, unit ou servico alterado.
+Owner continua2f0907e/boot disabled. Health19:23:58Z200/ok77ddc69; main d660ba9
+com CI38620208026 ainda em execucao. Ainda sem coleta ou publicacao real.
+
 ## 2026-10-14: Validacao SQL e ciclo independente Qlik
 
 Candidate visual38610921925/47c1e85:42 testes Ranking/build/E2E passaram;

@@ -71,7 +71,7 @@ returns boolean language sql immutable set search_path = '' as $$
 $$;
 
 create function private.crm_qlik_v2_timestamp(p_value text)
-returns timestamptz language plpgsql immutable set search_path = '' set timezone = 'UTC' as $$
+returns timestamptz language plpgsql stable set search_path = '' set timezone = 'UTC' as $$
 declare v_value timestamptz;
 begin
   if p_value is null or p_value !~ '^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,6})?Z$' then
@@ -89,7 +89,7 @@ $$;
 -- Returns the exact JSONB content hashed by the writer, or NULL. Arrays must
 -- be canonically ordered; money is canonical decimal text, never float.
 create function private.crm_qlik_v2_content(p_payload jsonb, p_now timestamptz)
-returns jsonb language plpgsql immutable set search_path = '' set timezone = 'UTC' as $$
+returns jsonb language plpgsql stable set search_path = '' set timezone = 'UTC' as $$
 declare
   v_start timestamptz;
   v_end timestamptz;

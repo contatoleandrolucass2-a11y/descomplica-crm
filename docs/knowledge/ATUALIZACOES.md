@@ -15,6 +15,13 @@
 
 ## 2026-10-14: Qlik via VPS
 
+- CI38620973126/ab61437: validate/SQL passaram; restore e lint falharam pela
+  classificacao IMMUTABLE dos validadores timestamp/conteudo. Corrigida para
+  STABLE na migration nao aplicada; nova CI obrigatoria, sem relaxar gates.
+  Fonte logs GitHub19:14/19:18Z e documentacao PostgreSQL de volatilidade.
+  Dependencias d660ba9 na VPS agora privadas e verificadas byte a byte; owner
+  segue2f0907e, sem coleta. Health19:23:58Z200/ok77dd; mainCI ainda pendente.
+
 - Retomada19:04Z: CI main77dd/38610165621 concluida success; main avancou
   externamente para d660ba9, CI38620208026 pendente. Health200/ok77dd e ledger
   CRM ee03fade-fcd0-4c3c-b410-d2bc0abd57f7, deploy18:42:12.845Z. Nenhum

@@ -33,10 +33,20 @@ select ok(has_function_privilege('authenticated', 'public.get_qlik_ranking_v2(in
   'authenticated reader allowed');
 select ok(not has_function_privilege(r, 'public.get_qlik_ranking_v2(integer)', 'EXECUTE'), r || ' cannot read')
 from unnest(array['anon','service_role']) r;
-select ok(not has_function_privilege(r, f, 'EXECUTE'), r || ' cannot invoke private validator ' || f)
+select is(
+  jsonb_build_object(
+    'canExecute', has_function_privilege(r, f.signature, 'EXECUTE'),
+    'volatility', (select p.provolatile::text from pg_proc p where p.oid = f.signature::regprocedure)
+  ),
+  jsonb_build_object('canExecute', false, 'volatility', f.volatility),
+  r || ' private validator ACL and volatility: ' || f.signature
+)
 from unnest(array['anon','authenticated','service_role']) r
-cross join unnest(array['private.crm_qlik_v2_keys(jsonb,text[])',
-  'private.crm_qlik_v2_timestamp(text)','private.crm_qlik_v2_content(jsonb,timestamptz)']) f;
+cross join (values
+  ('private.crm_qlik_v2_keys(jsonb,text[])', 'i'),
+  ('private.crm_qlik_v2_timestamp(text)', 's'),
+  ('private.crm_qlik_v2_content(jsonb,timestamptz)', 's')
+) f(signature, volatility);
 select ok(p.prosecdef and pg_get_userbyid(p.proowner) = 'postgres'
   and 'search_path=""' = any(p.proconfig), p.proname || ' definer has pinned search_path and owner')
 from pg_proc p where p.oid in ('public.get_qlik_ranking_v2(integer)'::regprocedure,

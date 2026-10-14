@@ -24,6 +24,11 @@ Nao ampliar para clientes, dados de fluxo, outras regionais ou Salesforce.
 
 ## Contrato de coleta
 
+Os helpers SQL de timestamp/conteudo sao STABLE: casts e formatacao temporal
+nao podem ser anunciados ao otimizador como IMMUTABLE. Manter o lint em
+warning/fail-on warning e o ensaio de restore, alem do pgTAP. Referencia:
+[volatilidade PostgreSQL](https://www.postgresql.org/docs/current/xfunc-volatility.html).
+
 `contracts-v2.ts` define o envelope estrito. Cada observacao inclui batchId,
 requestId, inicio/fim, app/pasta, hash do mapeamento, recarga, recorte e meses.
 Cada mes contem os cubos IMOBs e empreendimentos completos, linhas com chave
