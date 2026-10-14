@@ -154,3 +154,8 @@ manter o limite de exportacao do Obsidian sem descartar evidencias.
   posterior deve permanecer distinto do runtime publicado, salvo nova demanda.
 - Fontes: GitHub PR226/run38610165621; coordenador; health publico e DOM/capturas
   autenticadas. Obsidian sincronizado apos registro, respeitando limite256000bytes.
+- Conferencia GitHub/git fetch e health em2026-10-14T19:10:46Z: main d660ba9
+  integrou dashboard enquanto CI documental38617882257 estava em andamento.
+  Merge local sem conflitos preserva todas as alteracoes externas; diff do
+  PR225 contra a base continua exclusivamente nos quatro documentos. Health
+  200/ok/77ddc69. Nova validacao obrigatoria antes de integrar, sem redeploy.

@@ -33,6 +33,10 @@
   deploymentee03fade, health200/ok e UI conferida, sem alterar dados reais.
   PR225 encerra evidencias sem novo deploy. Historico, testes e limites na
   [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+- Conferencia19:10Z: main avancou para d660ba9 (dashboard); PR225 atualizado
+  sem conflitos, mantendo diff de quatro documentos. Health200/ok/77ddc69.
+  CI documental anterior em andamento nao valida a nova base; aguardar checks
+  do novo SHA antes da integracao protegida. Nenhum novo deploy nesta etapa.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
