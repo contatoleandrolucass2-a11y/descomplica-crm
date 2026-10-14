@@ -8,6 +8,21 @@
   antes de exibir indicadores; nenhuma formula ou fonte comercial alterada.
 - Verifica a preservacao da navegacao na QA autenticada com fixture completa.
 
+## 2026-10-14: Rotina compacta por atividade
+
+- Posiciona a conclusao no canto superior esquerdo na semana e antes do
+  texto em Hoje, com alinhamento e altura compactos.
+- Reserva o gradiente para atividades realizadas; pendentes usam o fundo
+  da pagina. Dia atual destacado somente no cabecalho.
+- Remove a rolagem interna da tabela, mantendo a rolagem da pagina apenas
+  quando necessaria e o mesmo estado individual entre Semana e Hoje.
+
+## 2026-10-14: Rotina publicada
+
+- Disponibiliza conclusoes individuais salvas no CRM entre dispositivos,
+  com reinicio semanal segunda-feira as00h de Brasilia. Textos revisados
+  de Gerente regional imob e tipografia original preservados.
+
 ## 2026-10-14: Funis no comparativo mensal
 
 - Substitui as listas mensais por seis graficos em funil, com etapas coloridas,
