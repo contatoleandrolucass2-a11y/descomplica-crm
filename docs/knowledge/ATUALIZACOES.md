@@ -7,8 +7,8 @@
   destino confirmado /app/ranking; corretores abaixo sao historico. Qlik -> VPS -> CRM.
 - PR214/ce82f707 fechado sem merge: sentido inverso e grant nao comprovado.
 - Fontes: GitHub PR216/main, SSH e https://crm.descomplicapro.com.br/api/health.
-  Retomada11:51Z: main=16f4587, site200/ok=faae8e9 (deploy externo);
-  PR216/feddc6e aberto com conflito, sem runs CI. gh ausente; conector consultado.
+  Retomada12:44Z: main/site200/ok=16f4587 (deploy externo);
+  PR216/4e955c2 aberto com conflito, sem runs CI. gh ausente; conector consultado.
 - VPS atual sem exportador antigo/qlik-ranking-api; MCP n8n encontrou zero
   workflows ranking, sem mutacao. Documentos antigos nao provam estado atual.
   Chrome local mostra Visao House00171c17-48de-4488-b1f9-dd6dcb0249e2 e pastas
@@ -35,9 +35,9 @@
   de campos. Qlik29/29; smoke Linux real passou: fd/fsync, arquivo600, overwrite
   recusado e privada R_OK negado EACCES. Dados sinteticos removidos. Gates da
   base integrada repetidos no encerramento; evidencias completas em WORKLOG.md.
-- ConsoleHTTP200/saved:true e login VPS foram confirmados apos cadastro;
-  nenhuma credencial lida. Retomada: browser ativo, console inativo/VNC failed,
-  sem causa confirmada ou reinicio. Nao alegar autenticacao atual pelo processo.
+- Retomada12:47Z: VNC falhou por socket residual, PID0/sem listener confirmados;
+  recuperado somente esse socket. Console200/saved:true e login visual validos.
+  Sem leitura de segredo; excecao/limites em qlik-vps-session.md.
 - Novo recorte confirmado: Direcional/SP CAPITAL/CANAL IMOB, aplicado no Qlik.
   Produtos VGV localizados; totais nativos set202609 coincidem, anual difere em
   dois contratos. Nao prova export completo/centavos/formulas; mapa no runbook.
@@ -45,8 +45,8 @@
   BigInt offline exige cobertura separada. Salesforce/global e politicas intactos.
 - Sync apos merge excedeu256000bytes. Nota desta tarefa consolidada com
   detalhes preservados no runbook/WORKLOG e historico Git; notas alheias intactas.
-- Etapa12:21Z: verify OK,141 arquivos/2775 Vitest; preview320 a1800 sem overflow.
-  Health200/ok=faae8e9; main16f4587. PR216 sem merge/deploy; detalhes em WORKLOG.
+- Verify atual OK,2775 Vitest; foco89 OK. Exportacao nao entregou arquivo;
+  solicitado XLSX agregado. PR216 sem merge/deploy; limites no mapa e WORKLOG.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 

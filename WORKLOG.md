@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-10-14: Recuperacao do console e limite da exportacao Qlik
+
+Retomada12:44Z: fetch concluido; main e health200/ok em16f4587. PR216 aberto,
+head4e955c2, mergeable=false e sem runs CI pelo conector. Conhecimento atualizado
+e sincronizado antes da investigacao. Nenhuma alteracao de runtime nesta etapa.
+
+VNC falhava no ExecStartPre por socket residual. Conferidos PID0, socket privado
+sem symlink, dono correto e ausencia de listener; removido exclusivamente esse
+socket e iniciada a unit console existente. VNC/console ativos, status cofre
+saved=true. Tela remota confirmou sessao Qlik autenticada, sem ler credenciais.
+Perfil, navegador, unidades instaladas e Salesforce preservados.
+Ao encerrar a verificacao visual, console/VNC e tunel foram fechados; browser
+permaneceu ativo. VNC terminou com exit-code sem listener, nao parada limpa.
+
+Qlik local: exportacao oficial PRODUTO/XLSX abriu com Totais de colunas e
+Selecoes atuais. Clique e teclado nao entregaram arquivo em60s e20s; dialogo
+sem erro. Pagina interna de downloads bloqueada pela ferramenta, sem contorno.
+Solicitados ao usuario os dois XLSX agregados; aba mantida para esse handoff.
+Nao houve exportacao da tabela de clientes, escrita no banco ou agenda.
+
+Dois revisores confirmaram lacunas de contrato/cobertura, leitura atomica,
+identidades e autorizacao de produtos. Testes focados:89 aprovados, exit0.
+Sem migration/pgTAP/E2E nesta etapa. Detalhes e criterio de retomada nos runbooks
+qlik-partnerships-mapping.md e qlik-vps-session.md. Resultado conectado ainda
+nao concluido; preview nao equivale a integracao nem autorizacao de deploy.
+
+Validacao desta retomada: pnpm verify exit0 em Node24.19.0/pnpm11.20.0.
+Lint com um aviso preexistente, typecheck,141 arquivos/2775 Vitest aprovados
+e63 skips existentes, suites operacionais sem falhas e release113/124
+(11 skips POSIX existentes). Build Next16.3.8 concluiu50 paginas. Prettier dos
+cinco documentos e git diff --check passaram. Health12:57:46Z continuou200/ok,
+version16f4587; nenhuma publicacao desta demanda. PR continua dependente de
+conciliacao e gates de integracao/CI; testes locais nao validam dados reais.
+
 ## 2026-10-14: Destino e recorte Qlik confirmados
 
 Retomada11:51Z: fetch preservou checkout; main16f4587, local/PR216feddc6e,

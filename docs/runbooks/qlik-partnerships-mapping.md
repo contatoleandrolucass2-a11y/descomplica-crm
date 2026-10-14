@@ -88,6 +88,37 @@ FGTS, clientes ou dados de fluxo.
 
 ## Matriz origem -> contrato -> exibicao
 
+### Nova tentativa de exportacao em 14/10/2026
+
+Na retomada das 12:44 UTC, a barra manteve as tres selecoes confirmadas e
+setembro/202609. A exportacao oficial da tabela PRODUTO abriu o dialogo
+Dados/XLSX com opcoes Totais de colunas e Selecoes atuais. Ambas foram marcadas.
+O controle Baixar foi acionado; a ferramenta nao recebeu evento/arquivo em
+60 segundos. Uma segunda tentativa por teclado tambem terminou sem arquivo
+em 20 segundos, e o dialogo permaneceu sem mensagem de erro. Isso nao prova
+falta de permissao nem sucesso do download. Nao usar os totais visuais como
+substituto do arquivo ou obter cookies/estado oculto para contornar a falha.
+
+A verificacao da pagina interna de downloads foi bloqueada pela politica da
+ferramenta; nao houve tentativa alternativa de acessar historico ou pasta de
+downloads. Foi solicitado ao usuario anexar os dois XLSX agregados, PRODUTO e
+Parceiras, com totais e selecoes. Nenhuma tabela de clientes foi exportada.
+
+Revisao independente confirmou que o caminho minimo precisa de contrato
+aditivo com cobertura e vazio explicitos, snapshot atomico e reader que fixe
+uma unica carga. O reader antigo mistura runs e nao retorna produtos. Manter
+as permissoes atuais; o destino /app/ranking nao autoriza leitura regional
+irrestrita. Nao fabricar comparacoes legacy matched quando o baseline falta.
+Restaurar n8n legado, pontuacao Salesforce ou exigir totais iguais entre
+dimensoes nao sao requisitos deste ranking. O teste focado de contratos,
+relay e agregador passou: 89 testes, sem acesso remoto ao banco.
+
+Status: sessao VPS autenticada e console recuperado, mas nenhuma exportacao
+homologada, ingestao, migration ou agenda executada. Nao e entrega conectada.
+Retomar apos arquivo agregado verificavel ou acesso de integracao autorizado
+que permita extrair metadados e dados completos. Isso nao substitui testes,
+backup e aprovacao de migration nem autoriza ampliar ACLs.
+
 ### Retomada e recorte confirmado em 14/10/2026
 
 O usuario confirmou **Direcional + SP CAPITAL + CANAL IMOB**. Os tres filtros

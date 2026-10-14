@@ -146,3 +146,30 @@ Depois da confirmacao do usuario, o status retornou `saved:true` e a tela
 remota mostrou Qlik insights/home autenticado. Nenhum segredo foi lido.
 A origem Agendamentos abrangia varias regionais e tinha detalhe com timeout;
 recorte exato perguntado ao usuario antes de implementar coleta/publicacao.
+
+## Recuperacao observada em 14/10/2026, 12:47 UTC
+
+O browser estava ativo, mas VNC estava failed e console inativo. Journal e
+`systemctl show` confirmaram falha no primeiro ExecStartPre: o socket VNC
+residual existia. Antes da recuperacao foram conferidos MainPID=0, tipo socket,
+ausencia de symlink, dono descomplica-qlik e ausencia de listener em `ss -xapn`.
+Foi removido somente `/run/descomplica-qlik/vnc.sock`; o inicio da unit console
+existente iniciou tambem VNC. Ambos ficaram ativos, sem alterar units ou perfil.
+
+O tunel loopback foi reaberto e `/credentials/status` respondeu HTTP200 com
+saved=true, sem revelar identidade ou segredo. A tela remota mostrou Qlik
+insights/home autenticado e o aplicativo Painel Comercial disponivel. Esta
+e evidencia de sessao valida naquele momento, nao de coleta, agenda ou
+reautenticacao automatica. Browser permanece desabilitado no boot.
+
+Apos a verificacao visual, console/VNC foram parados e o tunel criado nesta
+retomada foi fechado. Browser permaneceu ativo com o mesmo PID. VNC terminou
+com Result=exit-code, sem listener; isso nao foi classificado como parada limpa
+nem corrigido por reset-failed. A recuperacao confirmou acesso temporario,
+nao disponibilidade permanente do console.
+
+A recuperacao manual e excepcional e so se aplica ao residual comprovado.
+Nao transformar em `ExecStopPost=rm -f`: systemd tambem executa essa fase quando
+ExecStartPre falha, podendo remover um socket que nao pertence a invocacao.
+Reavaliar o ciclo de vida com testes Linux e propriedade por invocacao antes
+de automatizar a limpeza. Nao remover locks de Chrome nem relaxar permissoes.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14: Diagnostico operacional Qlik
+
+- Documenta recuperacao restrita do console VPS e sessao Qlik autenticada.
+- Registra tentativa de exportacao sem arquivo recebido e requisitos de
+  snapshot/reader ainda pendentes. Nenhuma integracao ou agenda ativada.
+
 ## 2026-10-14: Ranking de parcerias no destino confirmado
 
 - Prepara /app/ranking para imobiliarias e empreendimentos, VGV/contratos e
