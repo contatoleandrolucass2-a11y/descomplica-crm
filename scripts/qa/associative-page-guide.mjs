@@ -8,7 +8,10 @@ import { isDeepStrictEqual } from "node:util";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
-import { checkAssociativeInitialViewport } from "./associative-compact-layout.mjs";
+import {
+  checkAssociativeCompactStock,
+  checkAssociativeInitialViewport,
+} from "./associative-compact-layout.mjs";
 
 const rootSelector = ".investor-associative-table-page";
 const guideId = "associative-page-guide";
@@ -435,6 +438,7 @@ export async function checkAssociativePageGuide(
         await setTheme(page, theme);
         const project = page.getByRole("combobox", { name: "Nome do Empreendimento", exact: true });
         await expect(project).toBeEnabled();
+        await checkAssociativeCompactStock(page);
         await project.selectOption("Empreendimento QA 01");
         await page
           .getByRole("combobox", { name: "Ordenar unidades por valor do imóvel", exact: true })
@@ -685,7 +689,12 @@ export async function runSyntheticAssociativePageGuide(options) {
   const snapshot = JSON.parse(buildSyntheticDirectTableQaSnapshot());
   // A small slice exercises filters and selection without the unrelated full-stock matrix.
   const items = snapshot.items.slice(0, 12);
-  const inventory = { ...snapshot, count: items.length, items };
+  const inventory = {
+    ...snapshot,
+    count: items.length,
+    items,
+    snapshotReferenceDate: "2026-09-05",
+  };
   const publicAssets = new Map(
     await Promise.all(
       [
@@ -711,7 +720,7 @@ export async function runSyntheticAssociativePageGuide(options) {
         .end(
           JSON.stringify({
             ...inventory,
-            sourceKind: url.pathname.endsWith("snapshot") ? "versioned-snapshot" : "live",
+            sourceKind: "versioned-snapshot",
           }),
         );
     } else if (files.has(url.pathname)) {

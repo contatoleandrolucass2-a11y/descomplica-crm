@@ -16,6 +16,10 @@ reiniciam a rolagem da lista, preservando a unidade e a proposta em edição.
 O campo fica desabilitado durante o carregamento ou falha do estoque. Em celular,
 ocupa uma linha própria e mantém os controles de toque com pelo menos 44 px.
 
+O cabeçalho móvel usa uma linha inteira para a pesquisa e duas colunas para
+contador/data e Limpar filtros, inclusive quando a referência do estoque ocupa
+mais de uma linha. O QA usa essa informação para verificar o alinhamento.
+
 ## Estrutura do shell
 
 O shell combina autenticação server-side com dois componentes client-side pequenos:

@@ -12,7 +12,11 @@
 - QA geral do guia: 18 cenários aprovados na repetição integral, sem erros de
   console/chamadas externas. Primeira execução falhou em Cheque Moradia no
   cenário 320x568-dark; nenhuma asserção ou cálculo foi alterado para passar.
-  O mesmo cenário isolado passou no código original. CI e deploy pendentes.
+  O mesmo cenário isolado passou no código original.
+- CI 38562897319 aprovou validate, restore, banco e E2E; falhou no alinhamento
+  do contador/data com Limpar filtros em 320/375/390 px. Grade móvel corrigida;
+  oito larguras passaram no contrato original. Fixture local passou a incluir
+  data e verificar essa geometria. Nova CI e deploy permanecem pendentes.
 - Health público em 14/10 às 12:17:40Z: HTTP 200/status ok/version faae8e9.
   Main remoto permaneceu 16f4587. Fonte: /api/health e git ls-remote origin.
   Checkout macOS fora do Git comum Windows autorizado para sincronização

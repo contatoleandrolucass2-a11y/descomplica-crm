@@ -24,7 +24,13 @@
   alterar o teste ou cálculos. O cenário isolado também passou na base original.
 - Regressão de seleção, pesquisa, Escape, limpeza e preservação da proposta
   executada em 1.440 e 375 px, usando 3.301 unidades sintéticas. Diff sem segredos.
-- PR #220 aberto; CI e publicação ainda pendentes. Consulta observacional
+- CI 38562897319 aprovou validate, restore isolado, banco e E2E. O contrato
+  visual encontrou o contador/data abaixo do botão de limpar em 320/375/390 px.
+  Corrigido com duas colunas na segunda linha do cabeçalho móvel. O fixture do
+  guia agora inclui a data do estoque e executa o contrato de geometria existente,
+  sem relaxar asserções. Layout, busca e seleção passaram em oito larguras
+  (320 a 1.440 px) com 3.301 unidades sintéticas; build final aprovado.
+- PR #220 aberto; nova CI e publicação ainda pendentes. Consulta observacional
   de 14/10 às 12:17:40Z retornou HTTP 200/ok, versão faae8e9. Isso não comprova
   publicação desta busca nem substitui o ledger exigido por DEPLOY-001.
 - Nenhuma alteração de cálculos, permissões, dados de estoque ou produção.
