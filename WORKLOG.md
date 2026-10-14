@@ -1,5 +1,13 @@
 # Worklog
 
+Conferencia16:22Z de14/10 (13:22 America/Sao_Paulo): GitHub PR224 aponta
+mergeable=false; consulta CI por SHA3e69135 retorna lista vazia. git fetch e
+ls-remote confirmam main0019690, apos merge PR220. Health200/ok continua
+5c4d95e. Etapa congelada: sem CI do candidato, nenhuma promocao permitida.
+Proximo requisito verificavel e reconciliar o PR com main e obter CI no SHA
+resultante, sem reduzir gates. Qlik nao sincroniza fatos; estoque e leads
+Salesforce nao foram alterados ou revalidados como parte desta entrega.
+
 ## 2026-10-14: Atualizador protegido do owner Qlik
 
 Retomada15:54Z: main/site HTTP200/ok5c4d95e, PR224/cc8c712 com validate e

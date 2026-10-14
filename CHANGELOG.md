@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14: Evidencias de publicacao Qlik
+
+- Registra a divergencia entre candidato, main e versao publicada; a coleta
+  e a agenda permanecem inativas ate validacao do fluxo completo.
+
 ## 2026-10-14: Atualizacao protegida do servico Qlik
 
 - Adiciona operacoes especificas ao coordenador existente, com ledger separado,
