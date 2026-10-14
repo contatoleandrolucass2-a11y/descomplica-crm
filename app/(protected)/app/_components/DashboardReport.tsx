@@ -22,6 +22,7 @@ import {
 import { CRM_STAGES } from "@/lib/crm/stages/catalog";
 
 import { SalesforceRefreshButton } from "./SalesforceRefreshButton";
+import { DashboardAutoRefresh } from "./DashboardAutoRefresh";
 import { DonutChart } from "./analytics/Charts";
 import {
   AnalyticsCard,
@@ -272,6 +273,10 @@ export function DashboardReport({
 
   return (
     <AnalyticsCanvas kind="dashboard">
+      <DashboardAutoRefresh
+        generatedAt={dashboard?.generatedAt ?? null}
+        updatedAt={dashboard?.updatedAt ?? null}
+      />
       <div className={styles.report}>
         <div className={styles.heading}>
           <div>

@@ -92,6 +92,47 @@ ls-remote e health publico. Sem candidato validado, publicacao bloqueada.
 Etapa congelada sem alterar controles. Qlik ainda sem coleta/migration/carga;
 estoque e leads Salesforce nao alterados nem revalidados nesta retomada.
 
+## 2026-10-14: Dashboard acompanha relatorios publicados
+
+- Confirma a mesma origem dos sete relatorios comerciais de Conectar sistemas.
+  Contagens de linhas nao substituem recortes e medias mensais.
+- Adiciona verificacao automatica da versao persistida a cada30 segundos,
+  foco/retomada/conexao. Preserva filtros, pausa abas ocultas e nao dispara
+  coleta ou ingestao. API de status acrescenta updatedAt com permissao/RLS.
+- Reconfere o lote apos leitura dos indicadores, com uma repeticao limitada,
+  para nao combinar numeros de publicacoes diferentes durante ingestao.
+- 180 testes focais/75 checks QA, tipos e build aprovados. Suite geral:2.869
+  passaram/79 skips e uma falha preexistente de symlink Windows. Coletor226/15
+  skips e release113/11 skips passaram separadamente; CI/publicacao pendentes.
+  Evidencias e limites em
+  [auditoria da atualizacao](docs/audits/dashboard-atualizacao-2026-10-14.md).
+- CI38570002899:2.870 testes passaram no Linux; restore e banco aprovados.
+  E2E novo exigia snapshot em etapa sem fixture global. Movido para a QA
+  autenticada que ja semeia/verifica/limpa esse dashboard, sem relaxar asserts,
+  alterar baselines ou dados remotos. Nova CI obrigatoria; deploy bloqueado.
+- CI38582426726: falha transitoria na QA da Rotina;20 ciclos locais sem
+  reproducao. Retentativa passou Rotina, mas expirou45min antes de concluir
+  helper novo. Teste passa a usar contexto proprio e limite60s com etapas
+  sanitizadas; causa de hang ainda nao comprovada. Runtime nao alterado.
+- CI38594232559 repetiu falha de geometria na Rotina antes do refresh. Inclui
+  diagnostico apenas numerico e antecipa QA de refresh, sem remover checks.
+- CI38597977609 localizou espera apos liberar RSC. QA passa a comprovar
+  transferencia pelo ResourceTiming exato, HTTP200 e tipo RSC, preservando
+  asserts de UI, limite10s/60s e rejeicao de transferencia incompleta.
+- CI38601828514 aprovou refresh no Next real. Rotina diagnosticada com modo
+  day e minWidth960px; QA aguarda CSS exato antes da geometria, mantendo asserts.
+- Main efc6a20 integrado preservando seletor/contorno e QA da Rotina; nova
+  validacao da combinacao obrigatoria antes de publicar o dashboard.
+- CI38607169365 aprovou2877 testes, restore e refresh Next real. Associativo
+  concorrente passou na repeticao sem mudanca. Falha restante de overflow foi
+  reproduzida com contorno atrasado; QA confere alinhamento antes da medicao,
+  preservando limites e rejeitando desalinhamento persistente. Runtime intacto.
+- Main77ddc69 integrado preservando operacoes Qlik; esta tarefa nao as aciona.
+- QA diaria aguarda CSS/contorno antes de medir tambem as celulas, na mesma
+  ordem da semanal; nenhuma verificacao removida ou tolerancia alterada.
+
+## 2026-10-14: Conferencias da integracao Qlik
+
 Conferencia intermediaria do owner:
 
 Conferencia17:13Z: CI38598554910/1d96204 terminou success em todos os gates

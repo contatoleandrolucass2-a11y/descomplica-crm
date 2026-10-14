@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Atualizacao dos relatorios no dashboard
+
+- Polling30s e leitura consistente implementados;180 testes focais/75 QA
+  aprovados. PR223 ainda bloqueado por QA: fixture corrigida, timeout limitado
+  e QA da Rotina aguardando CSS exato; refresh Next real aprovado na
+  CI38601828514, sem reduzir gates. Retomada17:28:51Z: fetch confirmou main
+  efc6a20/PR226; health200/ok/0019690. PR223 conflitante em documentos;
+  integracao preserva seletor/contorno e exige nova CI. Sem n8n ou dados remotos.
+  CI38607169365 aprovou2877 testes/restore/refresh real; QA aguarda tambem
+  alinhamento do contorno antes de overflow, com rejeicao de erro persistente.
+  Fontes, consultas de abertura, testes, falhas, limites e criterios integrais:
+  [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
+
 ## 2026-10-14: Qlik via VPS
 
 - Retomada19:04Z: CI main77dd/38610165621 concluida success; main avancou
@@ -73,21 +86,11 @@
 
 ## 2026-10-14: Funis mensais publicados
 
-- Seis funis no Comparativo mensal com dados atuais; origem somente leitura.
-  Aprovadas indisponiveis sem serie mensal propria. Nenhuma mudanca de dados,
-  regras ou n8n. QA74 checks e CI38519492545/de209f4 aprovados.
-- Retomada11:41:14Z: main/faae8e9, CI38514527676 success, health200/ok/faae8e9.
-  Fontes GitHub, git fetch e /api/health relidas apos interrupcao da ferramenta.
-  PR218 integrado em16f4587; CI main38558435232 concluida com quatro jobs verdes.
-  Publicado12:24:35.454Z (09:24 BRT), deployment713b3b88-e489-4153-9057-096c7b044661.
-  Imagem imutavel comprovada, backup verificado, locks/CAS/frescor cumpridos.
-  Smoke12:25Z: health200/ok/16f4587, /app307login e API401; sem pendencia.
-  Jornada autenticada e242 comparacoes validadas na CI, nao em conta privada.
-- Sync falhou com256.725 bytes acima de256.000. Historico/evidencias completos
-  movidos para [auditoria dos funis](../audits/dashboard-funis-2026-10-14.md),
-  sem alterar limites ou regras. Nova execucao confirmou status synced;
-  checkout documental16f4587 tambem sincronizado apos a troca de branch.
-  Encerramento apos deploy confirmou synced, tres documentos, sem ampliar limite.
+- PR218/16f4587 publicado12:24:35.454Z, CI main38558435232 verde, backup/imagem
+  e CAS verificados. Smoke200/ok, /app307login e API401;242 comparacoes na CI.
+  Origem intocada, aprovadas indisponiveis sem serie. Historico, recibo, excecao
+  do limite de sync e evidencias integrais em
+  [auditoria dos funis](../audits/dashboard-funis-2026-10-14.md). Sync final passou.
 
 ## 2026-10-14: Rotina individual publicada
 
@@ -100,60 +103,10 @@
 
 ## 2026-10-13: Replica informacional do dashboard legado
 
-- P2 do PR213 confirmado: ingestao sem ranking pode reutilizar generatedAt.
-  Leitor da equipe agora exige updated_at coincidente entre os dois headers,
-  alem da releitura/original. Duas regressoes reproduziram o erro antes do fix.
-  Fontes: comentario4265923448, secure_salesforce_ingestion.sql e set_updated_at
-  (now() transacional). Sem alteracao da RPC, schema ou ingestao remota.
-- Consulta14/10 02:44Z: CI38498361779 do candidato d67a855 aprovou validate,
-  restore e E2E. Predicado funcional original:154 responsivos,88 temas,242 Axe,
-  110 zoom e22 canvases aprovados. Gate visual falhou somente em11 imagens /app.
-  Fonte: artefato11865597980, hash e captura registrados em reference-parity/README.
-  Revisao visual e promocao transacional preservaram231 imagens e limiares1%/16.
-  Excecao: captura dirty, mas fingerprint reproduzido exatamente com diff vazio
-  e19 arquivos QA gerados. Registro preserva o valor original; validade limitada
-  a esse artefato, reavaliar toda futura captura. Nova CI verify/merge/deploy
-  pendentes; baseline promovida nao equivale a CI candidata aprovada.
-- PR213, candidato4484d72, CI38497027352: validate e isolated-restore passaram.
-  QA dedicado tambem aprovado em Linux; E2E falhou ao procurar o titulo antigo
-  Dashboard comercial. Tres expectativas atualizadas para o titulo solicitado,
-  mais verificacao de secoes/tabelas, sem mudar permissoes. Matriz visual nao
-  executou nessa tentativa. Fonte: logs do job115635936612, consulta14/10 01:53Z.
-  Publicacao segue bloqueada ate nova CI completa e revisao de baseline.
-- Pedido confirmado: manter em /app as informacoes e secoes de
-  https://descomplicapro.com.br/?synced=2026-08-07T04%3A04%3A27.433%2B00%3A00,
-  usando dados atuais do CRM. Origem inspecionada pelo navegador; sua data de
-  agosto nao sera copiada como dado atual. Destino anonimo redirecionou a login.
-- Branch codex/dashboard-referencia-completa criada de main0fdbb80; nota de
-  abertura preservada. Fonte: DOM da origem, dashboard/data.ts, presentation.ts,
-  transform.mjs e migrations versionadas. Sem leitura de dados privados remotos.
-- Seis blocos do comparativo mensal, pulso das cinco etapas, diagnostico,
-  quatro tabelas operacionais e estrutura comercial compoem a referencia.
-  SHOW_EXTENDED_DASHBOARD ocultava parte do conteudo existente no destino.
-- Limite confirmado: agregados v2 nao conservam gerente, responsavel ou empresa
-  para filtrar o funil. Visoes autorizadas por canal e periodo continuam validas;
-  nenhuma promocao do shadow v3 ou alteracao de grants/ingestao esta implicita.
-- Contagem por gerente pode usar participantes do ranking sob sessao/RLS e
-  crm.ranking.view, somente na visao global e com geracoes coincidentes.
-  O vinculo deriva do snapshot legado, nao de cadastro oficial de equipes.
-  Pontuacao e politica comercial permanecem bloqueadas conforme contrato atual.
-- Relatorio implementado com read models atuais, sem numeros da referencia.
-  QA sintetico aprovou 65 verificacoes e 21 capturas nos tres temas e larguras
-  390/768/1440. Tipos e build passaram; revisao encontrou e corrigiu reingestao
-  com mesmo generatedAt, comparando tambem updatedAt original do dashboard.
-- Limite Windows comprovado: pnpm test falha no teste preexistente de symlink
-  do estoque. O_NOFOLLOW e indefinido neste host; arquivos envolvidos iguais a
-  origin/main 0fdbb80, origem PR210. Coletor e release rodados separadamente
-  passaram, com skips de plataforma. Nao houve supressao; CI Linux obrigatoria.
-  Causa, evidencia e criterio de revisao: auditoria dashboard-reference-2026-10-13.
-- Docker local indisponivel; resources:doctor confirmou runtimes, Chromium e
-  CLIs requeridos. Matriz autenticada depende da CI isolada. GitHub main
-  reconferido em 14/10 as01:38Z continua0fdbb80; nenhuma integracao/publicacao
-  desta demanda ocorreu. Preview local contem somente fixtures sinteticas.
-- CI, revisao da baseline, merge e publicacao pendentes. Metas, ritmo esperado e plano
-  de acao sem autoridade disponivel permanecem identificados como indisponiveis.
-  Reavaliar dimensoes quando a fonte escopada e identidades estiverem aprovadas;
-  esta nota nao concede autorizacao para migrations ou operacoes remotas.
+- PR213: informacoes da referencia em /app com dados atuais, origem intocada.
+  Limites de dimensoes, series, autorizacao e evidencias da implementacao/CI
+  preservados integralmente no [historico da replica](../audits/dashboard-reference-knowledge-2026-10-14.md).
+  Historico nao comprova estado atual nem concede autorizacao.
 
 ## 2026-10-13: Conferencia de abertura do worktree 2fb2
 
