@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-13: Conteudo de Gerente regional imob
+
+- Cadastra no CRM 18 linhas e 93 atividades do Excel fornecido, usando o
+  mesmo componente e as visualizacoes Semana/Hoje de Gerente regional house.
+- Salvamento compartilhado conferido por recarga; sem alterar outras funcoes
+  ou publicar nova versao da aplicacao.
+
 ## 2026-10-13 — Estoque automático
 
 Recupera a base anterior em falhas após a troca atômica e distingue publicação

@@ -1,5 +1,49 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Cadastro da rotina Gerente regional imob
+
+- Abertura em 13/10 as 22:22 de Sao Paulo (2026-10-14T01:22Z): main e
+  health publico 200/ok em 0fdbb80aa79d731bcd458ca4bc892ecc76be2918.
+  GitHub CI main 38462971446 concluida com sucesso. Checkout anterior
+  d4d06e3 limpo; nova branch parte do main observado.
+- PR207 documental anterior continua aberto; validate da CI38425311572
+  falhou em Verify current documentation fee sources. Nao equivale a falha
+  da release da Rotina, validada e publicada em etapa anterior.
+- Pedido atual autoriza cadastrar conteudo do Excel fornecido somente na
+  funcao Gerente regional imob, preservando as outras funcoes. Conferir fonte,
+  estado vazio, correspondencia por dia e persistencia pela UI autenticada.
+  Sem necessidade presumida de mudanca de codigo, migration ou novo deploy.
+- Concluido pela UI autenticada em 13/10 as 22:27 de Sao Paulo: mensagem
+  Salvo no CRM. Fonte TESTE1.xlsx, aba GERENTE REGIONAL IMOB, D6:I26.
+  Dezoito linhas com 93 atividades; linhas 19, 20 e 25 integralmente vazias
+  removidas na apresentacao compacta. Dias e vazios individuais preservados.
+  Apenas espacos repetidos/de borda normalizados; textos e caixa preservados.
+- Extracao OOXML somente leitura, com FileShare.ReadWrite porque Excel mantinha
+  o arquivo aberto. Comparacao independente por SHA-256 da matriz normalizada:
+  2702986a13c1a617492dee6d07ccfa8b516322961cbcc1e7acac79535ee9d06c.
+  Arquivo original inalterado; nenhum conteudo da planilha versionado.
+- UI confirmou funcao vazia antes do cadastro, 108 campos e 93 preenchidos
+  identicos a fonte antes de salvar e apos recarregar. Hoje exibiu as 18
+  atividades da terca-feira correspondentes. Gerente regional house conferido
+  antes/depois sem mudanca. Console sem erros. Screenshot local em
+  test-results/routine-preview/regional-imob-cadastrada.png.
+- Operacao de conteudo autorizada pelo pedido atual; nao alterou codigo,
+  permissoes, schema, n8n ou runtime. Nao necessita publicacao de imagem.
+  Persistencia verificada por recarga autenticada; nao foi usada outra conta
+  ou computador, nem alegada nova auditoria de RLS nesta operacao.
+- Validacao documental: lint e typecheck aprovados; build separado exit 0.
+  pnpm test executado: 2662 passaram, 63 skips e uma falha no teste existente
+  tests/salesforce-inventory-api.test.ts:164 (symlink, esperado 502, recebido
+  200). Nenhum arquivo de estoque ou teste foi alterado. A causa nao foi
+  diagnosticada nesta tarefa de conteudo; revisar esse contrato no Windows
+  em trabalho proprio, sem reduzir assertions. Etapas Node de coletor/release
+  nao executadas nessa rodada porque a suite Vitest interrompeu o encadeamento.
+  Logs locais imob-documentation-verify.log e imob-documentation-build.log.
+  Nao alegar suite integral aprovada nem novo deploy. CI do main observado
+  continuava aprovada na abertura; registro documental segue PR separado.
+- Encerramento em 2026-10-14T01:38:26Z (13/10, 22:38 Sao Paulo): health
+  publico permanece HTTP200/ok/0fdbb80a; somente os tres documentos alterados.
+
 ## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
 
 - Status: agenda ativa e aceite concluido. Fonte: journal, Supabase MCP,

@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-13: Cadastro da rotina Gerente regional imob
+
+- Conteudo autorizado cadastrado pela UI existente, usando TESTE1.xlsx:
+  18 linhas e 93 atividades de segunda a sabado. Tres linhas vazias removidas;
+  textos completos, ordem dos dias e vazios individuais preservados.
+- Matriz normalizada conferida por hash e todas as 108 celulas comparadas
+  antes/depois de salvar e recarregar. Hoje corresponde a terca-feira;
+  Gerente regional house permaneceu igual e console sem erros.
+- Dados salvos no CRM as 22:27 de Sao Paulo. Sem codigo, migration, ACL,
+  workflow ou deploy. Planilha e captura permanecem fora do Git.
+- Lint/typecheck/build aprovados. Suite geral: 2662 passaram, 63 skips,
+  uma falha existente de symlink no estoque, registrada em ATUALIZACOES;
+  nenhuma alteracao para contornar o teste e nenhuma promocao de runtime.
+
 ## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
 
 Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior
