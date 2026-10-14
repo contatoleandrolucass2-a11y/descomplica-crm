@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Busca com lupa combina código, descrição e empreendimento com filtros e
+  ordenação do estoque carregado, antes da janela virtual de 60 linhas.
+  Normaliza caixa, acentos e separadores; mantém a proposta selecionada.
+  Implementação em inventory-search.ts e InvestorCalculator.tsx; PR #220.
+- Base 16f4587; lint, tipos, 2.814 testes da aplicação (79 skips existentes),
+  suites Node e build aprovados. Audit sem vulnerabilidades; diff sem segredos.
+  Testes sintéticos de pesquisa com 3.301 unidades passaram em desktop/celular.
+- QA geral do guia: 18 cenários aprovados na repetição integral, sem erros de
+  console/chamadas externas. Primeira execução falhou em Cheque Moradia no
+  cenário 320x568-dark; nenhuma asserção ou cálculo foi alterado para passar.
+  O mesmo cenário isolado passou no código original. CI e deploy pendentes.
+- Health público em 14/10 às 12:17:40Z: HTTP 200/status ok/version faae8e9.
+  Main remoto permaneceu 16f4587. Fonte: /api/health e git ls-remote origin.
+  Checkout macOS fora do Git comum Windows autorizado para sincronização
+  automática do Obsidian e publicação permanente; esses fluxos não foram usados.
+
 ## 2026-10-14: Retomada dos funis no comparativo mensal
 
 - Pedido: incluir os graficos em funil no Comparativo mensal de /app conforme

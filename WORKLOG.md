@@ -11,15 +11,22 @@
 - Busca ignora caixa, acentos e separadores usuais do código. Escape, botão de
   limpeza e Limpar filtros restauram a lista sem modificar a proposta em edição.
   Quantidade encontrada fica visível; seleções incompatíveis não são apagadas.
-- Primeira execução de `pnpm verify` aprovada: 2.814 testes da aplicação,
+- Validação final com `pnpm verify` aprovada: 2.814 testes da aplicação,
   79 skips existentes, suites Node e build concluídos. `pnpm audit` sem
   vulnerabilidades conhecidas. Lint mantém um aviso anterior em connected-systems.
 - Navegador local confirmou busca em 3.301 unidades sintéticas, código fora da
   janela inicial, combinação de filtros, Escape, limpeza e proposta preservada.
   Inspeção visual em 320, 375, 768 e 1.440 px e três temas.
-- O QA geral do guia falhou em `320x568-dark:fill-proposal` ao aguardar
-  Cheque Moradia habilitado. Investigação e nova execução estão em andamento;
-  CI e publicação permanecem pendentes. Nenhum gate foi ignorado.
+- QA do guia aprovado na execução final: 18 cenários (nove combinações de
+  tela/tema com e sem proposta), seis checks iniciais de desktop/notebook,
+  zero erros de console e zero chamadas externas. A primeira tentativa falhou
+  ao aguardar Cheque Moradia em 320x568-dark; repetição integral passou sem
+  alterar o teste ou cálculos. O cenário isolado também passou na base original.
+- Regressão de seleção, pesquisa, Escape, limpeza e preservação da proposta
+  executada em 1.440 e 375 px, usando 3.301 unidades sintéticas. Diff sem segredos.
+- PR #220 aberto; CI e publicação ainda pendentes. Consulta observacional
+  de 14/10 às 12:17:40Z retornou HTTP 200/ok, versão faae8e9. Isso não comprova
+  publicação desta busca nem substitui o ledger exigido por DEPLOY-001.
 - Nenhuma alteração de cálculos, permissões, dados de estoque ou produção.
   Gitleaks completo encontrou apenas o token sintético preexistente na linha 31
   de salesforce-release-environment.node-test.mjs, confirmado idêntico à base.
