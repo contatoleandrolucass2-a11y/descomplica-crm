@@ -223,7 +223,8 @@ ponta; nao converter ausencia em zero nem estimar VGV por ticket medio.
    operacional anterior desta tarefa nao encontrou esse publisher ativo.
    A atividade do legado nao foi comprovada. Nao presumir que a comparacao
    shadow esta disponivel, nem recriar publicador com autenticacao anonima.
-   Substituir esse gate exige decisao explicita e evidencia equivalente.
+   Usuario autorizou substituir esse gate em14/10/2026, conforme secao abaixo;
+   isso nao altera por si o codigo/flags do relay nem comprova as cargas.
 
 Fontes versionadas: `docs/qlik-relay-mapping-cutover/CALLER_AND_CONSUMERS.md`,
 `supabase/migrations/20260809144143_qlik_rls_contract_hardening.sql`,
@@ -253,6 +254,36 @@ CSS em memoria, em loopback, sem login, fonte real ou dependencias de dados.
 Nao comprova sessao autenticada, RPC/RLS, hidratacao interativa ou producao.
 
 ## Fechamento do mapeamento e ativacao
+
+### Substituicao autorizada do shadow legado
+
+Em14/10/2026, usuario autorizou expressamente duas coletas automaticas
+independentes, conciliadas com os totais nativos do Qlik, no lugar da comparacao
+com o publicador legado nao localizado. Manter testes, backup, acesso restrito
+e ultima carga valida. Nao fabricar requestId/run legado nem marcar matched
+sem executar a nova verificacao. Escopo permanece Direcional/SP CAPITAL/CANAL IMOB.
+
+Cada coleta deve registrar proveniencia, selecoes efetivas, recarga, cobertura
+completa por competencia/dimensao e totais nativos versus soma recebida.
+Duplicar o mesmo arquivo ou repetir a publicacao nao conta como segunda coleta.
+Se a fonte mudar entre coletas, nao exigir igualdade artificial: cada uma deve
+ser conciliada contra sua propria recarga/totais, com diferenca explicada.
+A autorizacao nao dispensa contrato, identidades, RPC/reader, RLS/pgTAP,
+canario, backup ou CI; nenhuma escrita ou flag foi habilitada por esta nota.
+
+### Preflight remoto de schema em14/10
+
+Supabase MCP confirmou projeto produtivo ativo. Catalogos mostram tres tabelas
+Qlik runs/entries/developments com RLS; SELECT/INSERT/UPDATE/DELETE efetivos
+negados a anon, authenticated e service_role. Nao foram lidos fatos, segredos
+ou corpos de funcoes legadas. RPCs observadas: publish_crm_imob_ranking(jsonb,text)
+e get_crm_imob_ranking_snapshot(text), ambas historicas. Papel crm_qlik_relay,
+novo relay, leitores de reporting_scope e tabelas de governanca/identidades
+nao foram encontrados nessa consulta dirigida. Nao aplicar toda a cadeia
+versionada nem conceder acesso direto para contornar a ausencia. Preparar uma
+migracao aditiva compativel e backup antes de qualquer alteracao remota.
+
+### Evidencias restantes
 
 - Preservar o recorte confirmado e comprovar calendario/semantica nas duas
   agregacoes; nao transportar `DIRECIONAL VENDAS SPC` do escopo substituido.

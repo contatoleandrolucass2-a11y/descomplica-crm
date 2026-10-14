@@ -6,6 +6,9 @@
   confirmado e inspecao de metadados sem leitura de linhas de clientes.
 - Resolve a aba Parceiras pelo objeto referenciado, sem confundir cId com ID
   Engine. Inclui ciclo sequencial, cancelamento e artefato privado atomico.
+- Resolve definicoes master somente dos cubos comprovados, com limite tipado.
+- Registra autorizacao de duas coletas conciliadas para substituir shadow
+  legado ausente; gates produtivos continuam desligados e dados preservados.
 - Preflight desligado por padrao; nao e coletor de fatos nem integracao ativa.
   Nenhuma unidade VPS, agenda produtiva, banco ou workflow n8n alterado.
 

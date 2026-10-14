@@ -13,6 +13,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
   const MAX_DEPTH = 8;
   const MAX_NODES = 128;
   const MAX_REFS = 512;
+  const MAX_MASTER_DEFINITIONS = 64;
   let referenceCount = 0;
   let textBudget = 65_536;
 
@@ -121,6 +122,11 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
   };
   function project(value, schema) {
     if (schema === "string") return string(value);
+    if (schema === "int32") {
+      if (!Number.isInteger(value) || value < -2147483648 || value > 2147483647)
+        fail("qix_invalid_metadata");
+      return value;
+    }
     if (schema === "boolean") {
       if (typeof value !== "boolean") fail("qix_invalid_metadata");
       return value;
@@ -297,6 +303,43 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       await inspectCandidate(partnerId, "partners_tab_candidate");
     }
 
+    // Plan the entire typed allowlist before any library request. No recursive master lookup.
+    const masterPlan = new Map();
+    for (const object of objects) {
+      if (!["products_candidate", "partners_tab_candidate"].includes(object.role)) continue;
+      for (const [type, field] of [
+        ["dimension", "qDimensions"],
+        ["measure", "qMeasures"],
+      ]) {
+        for (const [index, definition] of (object.qHyperCubeDef?.[field] ?? []).entries()) {
+          if (definition.qLibraryId === undefined || definition.qLibraryId === "") continue;
+          const libraryId = id(definition.qLibraryId);
+          const key = `${type}:${libraryId}`;
+          if (!masterPlan.has(key)) {
+            if (masterPlan.size >= MAX_MASTER_DEFINITIONS) fail("qix_metadata_limit");
+            masterPlan.set(key, { id: libraryId, type, referencedBy: [] });
+          }
+          masterPlan.get(key).referencedBy.push({ objectId: object.id, index });
+        }
+      }
+    }
+    // Additive output: {id,type,referencedBy:[{objectId,index}],qDim|qMeasure}.
+    const masterDefinitions = [];
+    for (const reference of masterPlan.values()) {
+      const isDimension = reference.type === "dimension";
+      const model = await call(doc, isDimension ? "getDimension" : "getMeasure", reference.id);
+      const properties = await call(model, "getProperties");
+      identity(properties, reference.id);
+      if (own(own(properties, "qInfo"), "qType") !== reference.type) fail("qix_scope_mismatch");
+      const field = isDimension ? "qDim" : "qMeasure";
+      const schema = isDimension
+        ? { ...dimension.qDef, qLabelExpression: "string", qAlias: "string" }
+        : { ...measure.qDef, qExpressions: ["string", 32], qActiveExpression: "int32" };
+      const definition = project(record(own(properties, field)), schema);
+      if (Object.keys(definition).length === 0) fail("qix_invalid_metadata");
+      masterDefinitions.push({ ...reference, [field]: definition });
+    }
+
     const layout = await call(doc, "getAppLayout");
     const reload = own(layout, "qLastReloadTime");
     let sourceReloadTime = null;
@@ -333,6 +376,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       dataRead: false,
       reasons,
       objects,
+      masterDefinitions,
       containerStructure,
     };
   } catch (error) {

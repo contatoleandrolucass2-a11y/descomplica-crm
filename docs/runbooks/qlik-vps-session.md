@@ -110,8 +110,10 @@ O inspetor abre somente app23.1/pasta23.1.7 conhecidos. Confere pertinencia
 dos objetos a pasta e resolve a aba Parceiras por refId/chartId do container:
 `pUYysrvJ` e cId da interface, nao ID Engine. Projeta definicoes/limites,
 referencias estruturais e recarga, sem avaliar medidas ou ler fatos.
-Master definitions nao resolvidas, identidade ambigua e shape desconhecido
-permanecem pendentes; nao sao substituidos por suposicoes. Modelo estrutural:
+Resolve somente masters de dimensao/medida referenciados pelos dois cubos
+comprovados, com tipo/ID exatos, no maximo64 pares unicos. Sem busca recursiva
+por qExtendsId, layout de objeto ou fatos. Master ausente/inacessivel falha
+fechado; identidade ambigua/shape desconhecido permanecem pendentes. Modelo:
 [sn-container oficial](https://github.com/qlik-oss/sn-container/blob/main/src/typings/data/properties.d.ts).
 
 `QLIK_METADATA_PREFLIGHT=enabled` no owner habilita somente esse diagnostico.

@@ -33,6 +33,29 @@ Nenhum handshake real, coleta de fatos, reconciliacao, migration, carga ou
 agenda produtiva executados nesta etapa. O preview e este preflight nao
 satisfazem a entrega final. Procedimento e limites em qlik-vps-session.md.
 
+Main5c4d95e conciliado preservando Rotina/Dashboard; verify repetido passou:
+144 arquivos/2835 Vitest,82 skips, suites Node/release sem falhas, build51
+paginas e resources:check OK. CI38584645149/12cd013 aprovou validate e restore;
+release-gates em andamento. Sync apos merge excedeu256000bytes; somente nota
+Qlik consolidada, conteudo preservado aqui/runbooks, synced em12cd013.
+
+Incremento do inspetor resolve somente qLibraryId dos dois cubos comprovados,
+com allowlist tipada e limite64;50 testes nativo/VM passaram, foco combinado
+com transporte56/56. Nenhuma busca recursiva qExtendsId ou leitura de fatos.
+
+Usuario autorizou duas coletas automaticas independentes conciliadas com totais
+nativos em substituicao ao shadow legado indisponivel, mantendo demais gates.
+Autorizacao registrada no mapa; codigo/flags do relay continuam inalterados.
+Supabase MCP somente catalogos: tabelas Qlik presentes/RLStrue e CRUDfalse
+para anon/authenticated/service_role; novo papel/relay/reader ausentes.
+Nenhum fato, segredo, corpo de funcao ou dado pessoal consultado, nem DDL.
+
+Nova rodada verify apos masters: lint/tipos OK;143 arquivos/2834 testes
+passaram e82 skips, um timeout no handshake Next DevTools (project-devtools).
+Suites Node/build nao executaram pelo encadeamento; repetir antes de publicar.
+Nenhuma assercao ou timeout foi alterado. Etapa operacional sera separada da
+UI em codex/qlik-api-session, preservando a pagina publicada ate dados prontos.
+
 ## 2026-10-14: Recuperacao do console e limite da exportacao Qlik
 
 Retomada12:44Z: fetch concluido; main e health200/ok em16f4587. PR216 aberto,

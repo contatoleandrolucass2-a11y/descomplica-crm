@@ -14,7 +14,7 @@
 - Fontes14:51Z: GitHubPR216, git fetch, SSH e /api/health. Main5c4d95e,
   site200/ok16f4587; browser2f0907e ativo/disabled. Main conciliado eme85e620;
   CI propria, coleta reconciliada, RPC/reader, backup/migration e agenda pendentes.
-  Exportador legado nao localizado; nao inventar comparacao shadow ou dados.
+  Usuario autorizou duas coletas conciliadas no lugar do shadow; detalhes no mapa.
 - Nota consolidada para256000bytes; detalhes no WORKLOG. Sem merge/deploy.
 
 ## 2026-10-14: Rotina compacta por conclusao
