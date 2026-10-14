@@ -178,6 +178,49 @@ ls-remote e health publico. Sem candidato validado, publicacao bloqueada.
 Etapa congelada sem alterar controles. Qlik ainda sem coleta/migration/carga;
 estoque e leads Salesforce nao alterados nem revalidados nesta retomada.
 
+## 2026-10-14: Base atual do preflight Qlik
+
+CI38628006919/64d9f24 aprovada em segunda tentativa. Primeiro E2E teve timeout
+ao preencher financiamento do Associativo, sem alteracao de seus arquivos;
+causa especifica nao isolada. Main avancou para6843ef1 somente em documentos.
+Merge sem conflitos preservou esse conteudo; protecao strict impede usar a
+CI anterior como aprovacao da nova combinacao. Health20:46:44Z200/ok6843ef1.
+Sem upgrade Qlik, migration ou carga; nova CI e promocao protegida pendentes.
+
+## 2026-10-14: IDs atuais da fonte para o preflight Qlik
+
+- Branch `codex/qlik-source-refresh`, base
+  `d660ba9121124be0094519814e6cbb5b704102b7`, worktree `qlik-api-session`.
+- Atualiza os UUIDs fixos de pasta, PRODUTO e container Parceiras
+  em `qix-metadata.mjs` e na fixture, conforme observacao real informada
+  pelo coordenador. Registra os IDs e a proveniencia no runbook de sessao.
+- Escopo aditivo autorizado: hashes SHA-256 dos metadados integrais de cubos
+  efetivos e masters, sem expor campos extras. Canonical JSON ordenado, arrays
+  preservados, UTF-8, limite 262144 bytes/profundidade 32 e rejeicao de accessors
+  e numeros nao finitos. Helper interno serializavel, sem imports novos.
+- Preserva app, aba `pUYysrvJ`, recorte, limites e verificacoes de pertencimento,
+  sigilo, CSP e API. Saida do preflight aditiva; coletor, autorizacoes e banco intactos.
+- Validacao Windows com Node 24.19.0 e pnpm 11.20.0: testes focados de
+  `qix-metadata`, `browser-preflight` e `metadata-artifact` via `node --test`
+  passaram com 84 aprovados, 2 skips Linux e zero falhas. Inclui SHA-256 real,
+  metadados fora da projecao, origem efetiva, limites e execucao serializada em VM.
+- Gates globais executados uma vez: `pnpm lint` aprovado com um warning
+  fora do escopo em `scripts/qa/connected-systems.mjs:18`; `pnpm typecheck`
+  aprovado. ESLint focado do codigo final e `git diff --check` aprovados.
+- `pnpm test` falhou no Vitest: 2871 aprovados, 85 skips e 6 falhas em quatro
+  arquivos. Timeouts em `obsidian-knowledge.test.ts:71`, `project-devtools.test.ts:128`,
+  handshake MCP do mesmo arquivo, `reference-parity.test.ts:727` e
+  `salesforce-inventory-api.test.ts:85`; divergencia de symlink em
+  `salesforce-inventory-api.test.ts:164` (HTTP 200, esperado 502). Sem retentativa
+  global ou alteracao nesses testes. Etapas Node gerais/release nao alcancadas
+  devido ao encadeamento do comando. A causa dos timeouts nao foi estabelecida.
+- `pnpm build` aprovado: compilacao, TypeScript e geracao das 51 paginas.
+  Prettier dos cinco arquivos aprovado. CI do candidato e preflight real
+  continuam pendentes; gates locais nao integralmente verdes pela suite global.
+  Sem commit, push, VPS ou publicacao.
+  ATUALIZACOES e sincronizacao ficam com o coordenador. Nao representa entrega
+  do ranking nem confirma mapping de producao ou coleta real.
+
 ## 2026-10-14: Dashboard acompanha relatorios publicados
 
 - Confirma a mesma origem dos sete relatorios comerciais de Conectar sistemas.

@@ -5,9 +5,9 @@
  */
 export async function inspectQlikRankingMetadata(global, options = {}) {
   const APP = "7c000871-8b32-4c0f-bfd5-4b9d46946575";
-  const SHEET = "772db774-0bc2-42d8-ac11-3e4917bd0d37";
-  const PRODUCTS = "17f54180-e9f8-44d4-8a58-d055cff3e94c";
-  const CONTAINER = "e039b893-0d96-444c-9773-aba1383f8d94";
+  const SHEET = "46d5bcf7-965d-40fc-a808-2fdde2d0f74d";
+  const PRODUCTS = "26aed86d-e96b-4151-bc15-7b54d456f032";
+  const CONTAINER = "8b78e5d8-6b6b-4a29-be0c-cd855b9ec765";
   // UI tab identity is NOT an Engine object ID.
   const PARTNERS_TAB = "pUYysrvJ";
   const MAX_DEPTH = 8;
@@ -57,6 +57,58 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
   }
   function checkAbort() {
     if (options.signal?.aborted) fail("qix_aborted");
+  }
+  async function definitionSha256(value) {
+    const encoder = new TextEncoder();
+    const parts = [];
+    let remaining = 262_144;
+    function append(text) {
+      remaining -= encoder.encode(text).length;
+      if (remaining < 0) fail("qix_metadata_limit");
+      parts.push(text);
+    }
+    function quoted(text) {
+      if (text.length > remaining) fail("qix_metadata_limit");
+      append(JSON.stringify(text));
+    }
+    // Match the collector's full-definition canonical JSON, without invoking getters/toJSON.
+    function canonical(item, depth = 0) {
+      checkAbort();
+      if (depth > 32) fail("qix_metadata_limit");
+      if (typeof item === "string") return quoted(item);
+      if (item === null || typeof item === "boolean") return append(JSON.stringify(item));
+      if (typeof item === "number") {
+        if (!Number.isFinite(item)) fail("qix_invalid_metadata");
+        return append(JSON.stringify(item));
+      }
+      if (!item || typeof item !== "object") fail("qix_invalid_metadata");
+      if (Object.getOwnPropertySymbols(item).length) fail("qix_invalid_metadata");
+      if (Array.isArray(item)) {
+        if (item.length > 131_071) fail("qix_metadata_limit");
+        append("[");
+        for (let index = 0; index < item.length; index++) {
+          if (index) append(",");
+          const property = Object.getOwnPropertyDescriptor(item, String(index));
+          if (!property || !("value" in property)) fail("qix_invalid_metadata");
+          canonical(property.value, depth + 1);
+        }
+        append("]");
+      } else {
+        append("{");
+        const keys = Object.keys(item).sort();
+        for (let index = 0; index < keys.length; index++) {
+          if (index) append(",");
+          quoted(keys[index]);
+          append(":");
+          canonical(own(item, keys[index]), depth + 1);
+        }
+        append("}");
+      }
+    }
+    canonical(value);
+    const hash = await crypto.subtle.digest("SHA-256", encoder.encode(parts.join("")));
+    checkAbort();
+    return Array.from(new Uint8Array(hash), (byte) => byte.toString(16).padStart(2, "0")).join("");
   }
   async function call(model, method, ...args) {
     checkAbort();
@@ -276,6 +328,9 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
         qStateName: "string",
         qHyperCubeDef: cubeDefinition,
       });
+      const fullCube = own(effective, "qHyperCubeDef");
+      if (fullCube !== undefined)
+        metadata.qHyperCubeSha256 = await definitionSha256(record(fullCube));
       const master = own(properties, "qExtendsId");
       if (master !== undefined && metadata.qExtendsId === undefined)
         metadata.qExtendsId = string(master);
@@ -323,7 +378,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
         }
       }
     }
-    // Additive output: {id,type,referencedBy:[{objectId,index}],qDim|qMeasure}.
+    // Full definitions stay private; only their digests augment the existing projection.
     const masterDefinitions = [];
     for (const reference of masterPlan.values()) {
       const isDimension = reference.type === "dimension";
@@ -335,9 +390,11 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       const schema = isDimension
         ? { ...dimension.qDef, qLabelExpression: "string", qAlias: "string" }
         : { ...measure.qDef, qExpressions: ["string", 32], qActiveExpression: "int32" };
-      const definition = project(record(own(properties, field)), schema);
+      const original = record(own(properties, field));
+      const definition = project(original, schema);
       if (Object.keys(definition).length === 0) fail("qix_invalid_metadata");
-      masterDefinitions.push({ ...reference, [field]: definition });
+      const hash = await definitionSha256(original);
+      masterDefinitions.push({ ...reference, [field]: definition, definitionSha256: hash });
     }
 
     const layout = await call(doc, "getAppLayout");
