@@ -65,3 +65,66 @@ Preservar fonte, textos, persistencia individual e virada semanal de Brasilia.
   deployment713b3b88-e489-4153-9057-096c7b044661, SHA16f4587 e data real
   2026-10-14T12:24:35.454Z. Fonte: release:production status; nao e evidencia
   de frescor para a proxima promocao, que exige nova consulta no minuto.
+- Retomada14:32Z apos indisponibilidade do acompanhamento local: git fetch,
+  GitHub e health relidos. CI38571239681/3def954 concluida com sucesso13:58:29Z,
+  PR222 CLEAN, main ainda8e015c6; health200/ok/16f4587. Nenhuma falha de gate.
+  Fontes: GitHub actions/runs e PR222, /api/health. Sync repetido antes de seguir.
+
+## Publicacao e encerramento
+
+- PR222 integrado por squash em 14:32:29Z. Main/publicado:
+  `5c4d95ee1e1b95d40d3ac283fb47d32d139494d7`. CI38581434699 concluida com os
+  quatro jobs aprovados: validate, release-gates, isolated-restore e
+  promotable-image. Nenhuma assercao, baseline ou gate relaxado.
+- Imagem da CI baixada somente apos todos os jobs concluirem. Checksum
+  comprimido77778823f67270d368c2ffb73bdba7dc2a0385ad2c6ce8486cd2c177af30c9e9.
+  Config/CI IDsha256:b8e878981263c0643ea3ced3d7ccc408d3ea44cbe10f1dafa3f84e4811cc894c;
+  OCI/Docker IDsha256:10177af0128dec1e419cb0e427b1c7412bce601256b1e1c307a4e323d5fbc11e.
+  Hashes, manifesto, plataforma linux/amd64,11 camadas e dois perfis comprovados.
+- Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/5c4d95ee1e1b95d40d3ac283fb47d32d139494d7.Ubfihv`.
+  Manifest2d4b23fb0d630b084791a9c8bbc053f58bdb3d25e044f770976c518de089985d.
+  Sem dumps, segredos ou arquivos privados no Git.
+- Publicado exclusivamente pelo coordenador release:production, com consulta
+  ao vivo no minuto, locks/CAS e rollback disponivel. Deployment
+  `9573a6e9-5c6b-451c-b071-5f79977d9ea0`, concluido
+  `2026-10-14T15:16:09.397Z` (12:16:09 America/Sao_Paulo), sem pendencia.
+  Versao anterior16f4587/deployment713b3b88 mantida como referencia de retorno.
+- Smoke: health200/ok/SHA esperado; container healthy, OOMfalse, reinicios0;
+  API inventory401 e rotas Gestao/Rotina307 para anonimo.
+- UI autenticada observacional: Semana e Hoje carregaram, fonte13px preservada,
+  controles antes do texto/primeira linha, overflow visible nos dois e sem
+  overflow da pagina no viewport observado. Pendentes iguais ao fundo e somente
+  concluida com gradiente; data-today ausente do corpo e cabecalho atual presente.
+  Textos e marcacoes identicos antes/depois da troca de visualizacao. Nao houve
+  escrita de atividades reais, alteracao de permissoes, migration ou n8n.
+- Capturas locais ignoradas: rotina-compacta-semana-publicada.jpg e
+  rotina-compacta-hoje-publicada.jpg em test-results/routine-preview. Navegador
+  reconectado apos a instancia anterior ficar indisponivel, sem contornar login.
+- Fontes: GitHub PR222, runs38565559075/38571239681/38581434699; registro do
+  coordenador; health publico e DOM/capturas da pagina publicada. Evidencia
+  operacional sanitizada em test-results/routine-release/compact-production.log.
+- Encerramento documental nao requer novo deploy. Publicacao desta nota no Git
+  segue PR/CI separados; nao confundir SHA documental com versao de runtime.
+
+## Registro historico do indice de conhecimento
+
+Fonte: docs/knowledge/ATUALIZACOES.md em ccd1639, preservado integralmente
+para manter o indice abaixo de 256000 bytes. Este trecho e historico.
+
+- Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
+  em faae8e9. Checkout documental df0c52c/PR219 com CI38518828290 aprovada,
+  conflitante apenas nos registros. Fontes: GitHub, git fetch e /api/health.
+- Nova branch codex/rotina-compacta preserva dashboard e registros anteriores.
+  Pedido: controles a esquerda, fundo somente por conclusao, destaque do dia
+  apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
+  Lint/tipos/build e QA focal4/4 aprovados; suite Windows integral indisponivel
+  por symlink/timeouts. PR222/CI38565559075 aprovada em ea2e639; incorporado
+  main8e015c6 documental, sem alterar runtime. CI38571239681/3def954 aprovada;
+  consulta14:32Z confirmou GitHub/health200/ok/16f4587 apos falha do acompanhamento.
+  PR222 integrado; CI main38581434699 com quatro jobs aprovados. Publicado
+  5c4d95e em15:16:09Z (12:16 BRT), deployment9573a6e9, sem pendencia.
+  Backup/rollback e frescor verificados; health correto, anonimo negado e UI
+  autenticada validada nos dois modos, sem alterar textos/marcacoes reais.
+  Evidencias e limites:
+  [auditoria compacta](../audits/rotina-compacta-2026-10-14.md).

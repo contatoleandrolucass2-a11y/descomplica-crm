@@ -96,6 +96,14 @@
   sequencial e artefato privado atomico. Preflight desligado por padrao.
 - Preserva pagina ranking, Salesforce, banco e n8n. Nao entrega coleta ativa.
 
+## 2026-10-14: Filtro e destaque da Rotina
+
+- Troca as abas por um seletor unico de rotina e reorganiza os botoes.
+- Aplica brilho branco apenas no contorno completo da coluna do dia atual,
+  incluindo o titulo; cabecalhos recebem o azul do antigo seletor ativo.
+- Mantem fundo neutro nas pendentes, gradiente nas concluidas e marcacoes
+  individuais sincronizadas entre Semana e Hoje.
+
 ## 2026-10-14: Pesquisa de unidades no Associativo
 
 - Adiciona campo com lupa para localizar unidades por código, descrição ou
@@ -116,6 +124,7 @@
   da pagina. Dia atual destacado somente no cabecalho.
 - Remove a rolagem interna da tabela, mantendo a rolagem da pagina apenas
   quando necessaria e o mesmo estado individual entre Semana e Hoje.
+- Publicado em 14/10 as12:16 BRT apos CI completa e verificacao autenticada.
 
 ## 2026-10-14: Rotina publicada
 
