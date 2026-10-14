@@ -23,6 +23,26 @@
   Fonte: test-results/dashboard-report/report.json. Demais gates em execucao.
   CI, revisao visual autenticada, merge e publicacao da correcao pendentes.
 
+## 2026-10-14: Rotina regional imob e conclusao individual
+
+- Imob revisada e salva no CRM em 13/10, 23:05 Sao Paulo: 18 linhas,
+  93 atividades, 108 campos conferidos apos recarga, revisao 3. House
+  preservada. Confirmado: imobiliarias sem produzir ha 60 dias.
+- Usuario autorizou conclusoes individuais persistidas e migration aditiva
+  apos testes/backup; reinicio segunda 00h America/Sao_Paulo. Implementado
+  em PR215, ainda sem migration remota nem publicacao da funcionalidade.
+- Lint/typecheck/build e 73 testes Chromium aprovados; CI38504861394 aprovou
+  1323 pgTAP, restore, E2E e QA real da Rotina com duas contas isoladas.
+  Gate visual geral falhou na selecao da conta administrativa sintetica.
+  Selecao deterministica corrigida, 3 testes Chromium e ESLint focal aprovados.
+- Consulta 2026-10-14T04:12Z: origin/main 792320ba037ea48655739aaeefe5295b95c33631,
+  CI38506931120 aprovada; health publico HTTP200/ok em 0fdbb80. Fontes:
+  GitHub Actions, git fetch/ls-remote e /api/health. Merge concorrente preserva
+  dashboard e ambos os registros; exige nova CI combinada e ledger fresco.
+- Evidencias completas, falhas anteriores e limites preservados em
+  [auditoria da Rotina](../audits/rotina-individual-2026-10-14.md).
+  Detalhes movidos somente para respeitar o limite de exportacao do Obsidian.
+
 ## 2026-10-13: Replica informacional do dashboard legado
 
 - P2 do PR213 confirmado: ingestao sem ranking pode reutilizar generatedAt.

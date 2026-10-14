@@ -990,6 +990,21 @@ async function login(page, origin, email, password) {
   ]);
 }
 
+async function selectAuthenticatedAdminUser(page, email) {
+  if (!email) throw new Error("Admin users visual QA requires the authenticated account email.");
+  const option = page
+    .getByRole("list", { name: "Resultados de usuários", exact: true })
+    .getByRole("button")
+    .filter({ has: page.getByText(email, { exact: true }) });
+  await expect(option).toHaveCount(1);
+  await option.click();
+  await expect(option).toHaveAttribute("aria-pressed", "true");
+  const detail = page.locator("#selected-user-panel");
+  await expect(detail.getByRole("heading", { name: email, exact: true })).toBeVisible();
+  await expect(detail.getByText("Conta atual", { exact: true })).toBeVisible();
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+}
+
 async function inspectRoute(
   page,
   origin,
@@ -997,7 +1012,7 @@ async function inspectRoute(
   expectedTheme,
   consoleErrors,
   pageErrors,
-  { waitForArchiveInventory = true, expectedAccountFirstName } = {},
+  { waitForArchiveInventory = true, expectedAccountFirstName, expectedAccountEmail } = {},
 ) {
   const approvedCanvas = approvedCanvasByRoute.get(route);
   const consoleStart = consoleErrors.length;
@@ -1009,6 +1024,9 @@ async function inspectRoute(
     consoleErrors,
     pageErrors,
   );
+  if (route === "/admin/usuarios") {
+    await selectAuthenticatedAdminUser(page, expectedAccountEmail);
+  }
   await page.evaluate(() => document.fonts.ready);
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
@@ -5439,6 +5457,7 @@ async function checkZoom(
           ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors, {
             waitForArchiveInventory: false,
             expectedAccountFirstName,
+            expectedAccountEmail: email,
           })),
         });
         await releaseRenderedRoute(page);
@@ -5791,6 +5810,7 @@ async function run() {
             pageErrors,
             {
               expectedAccountFirstName,
+              expectedAccountEmail: email,
             },
           );
           routeChecks.push({ viewport: viewport.key, ...check });
@@ -6007,7 +6027,7 @@ async function run() {
                 theme,
                 consoleErrors,
                 pageErrors,
-                { expectedAccountFirstName },
+                { expectedAccountFirstName, expectedAccountEmail: email },
               );
               themeChecks.push({
                 matrix: "desktop-themes",
@@ -6095,7 +6115,7 @@ async function run() {
               "dark",
               consoleErrors,
               pageErrors,
-              { expectedAccountFirstName },
+              { expectedAccountFirstName, expectedAccountEmail: email },
             );
             themeChecks.push({
               matrix: "mobile-dark",

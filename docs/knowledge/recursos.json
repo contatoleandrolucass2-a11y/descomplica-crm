@@ -114,6 +114,7 @@
         "app/(protected)/app/gestao/page.tsx",
         "app/(protected)/app/gestao/rotina/page.tsx",
         "app/api/routines/route.ts",
+        "app/api/routines/completions/route.ts",
         "app/(protected)/app/configuracoes/metas/page.tsx",
         "app/(protected)/app/configuracoes/metas/parcerias/page.tsx",
         "app/(protected)/app/configuracoes/metas/pontos/page.tsx"
@@ -123,6 +124,8 @@
         "tests/marketing-resources.test.tsx",
         "tests/routine-settings.test.tsx",
         "tests/routine-api.test.ts",
+        "tests/routine-completions-api.test.ts",
+        "supabase/tests/crm_routine_completions.test.sql",
         "scripts/qa/marketing-resources.mjs",
         "tests/point-settings.test.ts",
         "supabase/tests/funnel_goals.test.sql"
