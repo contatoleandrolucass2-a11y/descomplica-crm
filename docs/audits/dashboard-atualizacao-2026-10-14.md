@@ -130,3 +130,26 @@ Retomada14:37:39Z: git fetch e GitHub confirmam main5c4d95e (Rotina, PR222),
 CI push38581434699 em andamento; health publico200/ok permanece16f4587.
 Integracao concorrente deve ser preservada e revalidada. Nenhuma publicacao
 desta correcao nem alteracao da fonte de referencia.
+
+## Diagnostico da QA autenticada
+
+CI38582426726/8d7b6a7: primeira tentativa falhou no checkpoint da Rotina
+daily-layout-720-light antes do helper novo.20 ciclos locais com helpers reais
+passaram; os quatro arquivos dessa area sao identicos a main5c4d95e. Nenhuma
+causa de CSS ou tolerancia comprovada, portanto esses arquivos nao foram editados.
+
+Uma reexecucao dos jobs falhos passou toda a Rotina. Artefato11907544056
+contem routine-results.json e connected-systems-results.json, mas nao o resultado
+do dashboard nem dos passos seguintes. Job cancelado pelo limite45min em
+15:47:25Z. Ausencia de checkpoints no helper impediu identificar a espera.
+
+Hipotese inicial de clock herdado de checkConnectedSystems foi descartada como
+nao comprovada: pauseAt pertence ao runner sintetico separado, nao ao helper
+usado nessa matriz. Isolamento defensivo em contexto proprio, esperas de frame
+com timeout10s e limite total60s no Node evitam outro hang ilimitado e geram
+checkpoints sanitizados. Nao aumenta o limite da CI nem muda asserts/baselines.
+Validacao do helper real permanece pendente de nova CI.
+
+Consulta15:33:56Z confirmou main e health publico200/ok em5c4d95e, com todos
+os quatro jobs da CI38581434699 aprovados. Deploy concorrente da Rotina foi
+preservado;16f4587 deixou de ser baseline corrente e nao pode ser usado no CAS.

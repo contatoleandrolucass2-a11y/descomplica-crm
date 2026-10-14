@@ -5910,15 +5910,25 @@ async function run() {
             await systemsPage.close({ runBeforeUnload: false });
           }
           currentStage = "dashboard-auto-refresh";
-          const dashboardPage = configureQaPage(await context.newPage());
+          // Keep refresh checks independent of other pages, routes and context-wide clock mocks.
+          const dashboardContext = await browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            reducedMotion: "reduce",
+            locale: "pt-BR",
+            timezoneId: "America/Sao_Paulo",
+            httpCredentials,
+          });
           try {
+            await hideHomologationBannerForBaseline(dashboardContext);
+            const dashboardPage = configureQaPage(await dashboardContext.newPage());
+            await login(dashboardPage, origin, email, password);
             const dashboardRefresh = await checkDashboardAutoRefresh(dashboardPage, origin);
             await writeFile(
               path.join(artifactRoot, "dashboard-auto-refresh-results.json"),
               JSON.stringify(dashboardRefresh, null, 2),
             );
           } finally {
-            await dashboardPage.close({ runBeforeUnload: false });
+            await dashboardContext.close();
           }
           currentStage = "documentation-calculator";
           const documentationPage = configureQaPage(await context.newPage());

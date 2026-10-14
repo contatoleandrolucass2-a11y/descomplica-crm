@@ -12,7 +12,8 @@
   dado remoto ou workflow alterado.180 testes focais/75 QA/tipos/build passaram;
   suite Windows tem falha de symlink. CI38570002899:2.870 passaram; E2E novo
   estava em etapa sem fixture global. Movido para QA autenticada com fixture
-  verificada, mantendo asserts. Nova CI/publicacao pendentes.
+  verificada. CI38582426726 repetiu QA: Rotina passou, helper expirou. Isolamento
+  e timeout no teste; CI/publicacao pendentes. Runtime5c4d95e em15:33Z preservado.
   Fonte e limites: [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
 
 ## 2026-10-14: Rotina compacta por conclusao

@@ -2,6 +2,21 @@ import { expect } from "@playwright/test";
 
 // Run only after the authenticated visual runner has seeded and verified its dashboard.
 export async function checkDashboardAutoRefresh(page, origin) {
+  let timer;
+  try {
+    return await Promise.race([
+      verifyDashboardAutoRefresh(page, origin),
+      new Promise((_, reject) => {
+        timer = setTimeout(() => reject(new Error("Dashboard refresh QA exceeded 60s")), 60_000);
+      }),
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function verifyDashboardAutoRefresh(page, origin) {
+  process.stdout.write("[dashboard-auto-refresh] initial-snapshot\n");
   const pathname = "/app?view=with_canal_imob&period=week";
   await page.goto(`${origin}${pathname}`, { waitUntil: "networkidle" });
   const statusResponse = await page.request.get(`${origin}/api/dashboard/status`);
@@ -43,19 +58,32 @@ export async function checkDashboardAutoRefresh(page, origin) {
   // Handle early assertion failures without leaving a rejected response waiter behind.
   void refreshed.catch(() => {});
   try {
-    for (const event of ["focus", "online", "focus"]) {
+    process.stdout.write("[dashboard-auto-refresh] pending-rsc\n");
+    for (const [index, event] of ["focus", "online", "focus"].entries()) {
+      process.stdout.write(`[dashboard-auto-refresh] probe-${index + 1}\n`);
       const probe = page.waitForResponse(
         (response) => new URL(response.url()).pathname === "/api/dashboard/status",
       );
       await page.evaluate((type) => window.dispatchEvent(new Event(type)), event);
       await (await probe).finished();
-      await page.evaluate(() => new Promise((resolve) => requestAnimationFrame(() => resolve())));
+      await page.waitForFunction(
+        () => new Promise((resolve) => requestAnimationFrame(() => resolve(true))),
+        undefined,
+        { timeout: 10_000 },
+      );
     }
     await expect.poll(() => refreshes).toBe(1);
+    process.stdout.write("[dashboard-auto-refresh] release-rsc\n");
     releaseRefresh();
     await (await refreshed).finished();
-    await page.evaluate(
-      () => new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+    process.stdout.write("[dashboard-auto-refresh] state-preservation\n");
+    await page.waitForFunction(
+      () =>
+        new Promise((resolve) =>
+          requestAnimationFrame(() => requestAnimationFrame(() => resolve(true))),
+        ),
+      undefined,
+      { timeout: 10_000 },
     );
     expect(page.url()).toBe(urlBefore);
     await expect(details).toHaveAttribute("open", "");
@@ -63,6 +91,7 @@ export async function checkDashboardAutoRefresh(page, origin) {
       Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore),
     ).toBeLessThanOrEqual(2);
     await expect(page.locator(`a[aria-current="page"][href="${pathname}"]`).first()).toBeVisible();
+    process.stdout.write("[dashboard-auto-refresh] passed\n");
     return { passed: true, refreshes, filters: true, scroll: true, openDetails: true };
   } finally {
     releaseRefresh();

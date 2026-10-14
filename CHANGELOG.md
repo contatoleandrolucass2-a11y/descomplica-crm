@@ -7,6 +7,7 @@
 - Distingue coleta de publicacao confirmada e reconfere a consistencia do lote
   antes de exibir indicadores; nenhuma formula ou fonte comercial alterada.
 - Verifica a preservacao da navegacao na QA autenticada com fixture completa.
+- Isola a QA de refresh e limita suas esperas, sem reduzir os gates existentes.
 
 ## 2026-10-14: Rotina compacta por atividade
 

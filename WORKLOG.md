@@ -18,6 +18,10 @@
   E2E novo exigia snapshot em etapa sem fixture global. Movido para a QA
   autenticada que ja semeia/verifica/limpa esse dashboard, sem relaxar asserts,
   alterar baselines ou dados remotos. Nova CI obrigatoria; deploy bloqueado.
+- CI38582426726: falha transitoria na QA da Rotina;20 ciclos locais sem
+  reproducao. Retentativa passou Rotina, mas expirou45min antes de concluir
+  helper novo. Teste passa a usar contexto proprio e limite60s com etapas
+  sanitizadas; causa de hang ainda nao comprovada. Runtime nao alterado.
 
 ## 2026-10-14: Compactacao da Rotina
 
