@@ -13,7 +13,30 @@
 - Limites: seis funcoes, 200 linhas por funcao, sete dias no formato legado,
   4.000 caracteres por celula. Domingo preservado no dado, oculto na interface.
 
-## Transicao
+## Conclusoes individuais
+
+- GET/PUT `/api/routines/completions` exigem `crm.dashboard.view`. Concluir
+  uma atividade propria nao concede permissao para editar o texto compartilhado.
+- O servidor identifica o usuario pela sessao; a requisicao nao recebe user_id.
+  A tabela de conclusoes nao permite acesso direto e as RPCs repetem os guards.
+- Cada marca identifica funcao, linha, dia e texto salvo da atividade.
+  Atividade vazia, rascunho nao salvo ou texto substituido nao herda conclusao.
+- A semana e calculada no banco em America/Sao_Paulo. Segunda-feira as 00h
+  inicia um novo conjunto vazio para todos os usuarios, sem depender de cron,
+  navegador aberto ou exclusao de historico. Domingo ainda pertence a semana
+  anterior; nada reinicia diariamente. Uma requisicao atrasada nao marca a nova
+  semana usando uma confirmacao da semana anterior.
+- A interface usa a hora e o proximo limite informados pelo servidor. Revalida
+  por intervalo, foco e retorno a aba; uma falha nao aparece como salvamento.
+  O checkbox grava separadamente de Salvar alteracoes e conserva a tipografia.
+- A migration aditiva de conclusoes tem autorizacao especifica do usuario em
+  13/10/2026, condicionada a testes e backup. Nao aplicar outras migrations
+  pendentes. Registrar ausencia dos objetos novos, schema/ACL e historico antes
+  de aplicar; rollback da aplicacao preserva os dados e nao derruba a tabela.
+- Validar isolamento entre dois usuarios, permissao de leitor, MFA, virada
+  domingo/segunda, dispositivo com hora divergente, falha e concorrencia.
+
+## Transicao do conteudo
 
 A ausencia de registro usa a rotina inicial versionada. Salvar cria o registro
 da funcao atual ou grava as funcoes editadas. Outros usuarios veem o mesmo dado

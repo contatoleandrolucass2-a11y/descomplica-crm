@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-13: Conclusao semanal individual
+
+- Revisa o portugues das atividades de Gerente regional imob sem mudar seu
+  sentido ou a tipografia compartilhada com House.
+- Adiciona marcacao individual de atividades, persistida no CRM e separada
+  da edicao do conteudo, com nova semana segunda-feira as 00h de Brasilia.
+
 ## 2026-10-13: Texto regional imob
 
 - Padroniza as atividades salvas com primeira letra maiuscula e demais

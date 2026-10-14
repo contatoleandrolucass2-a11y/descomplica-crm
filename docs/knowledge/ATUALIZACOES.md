@@ -1,5 +1,38 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Abertura de conclusao individual semanal
+
+- Complemento solicitado: revisar portugues de regional imob, preservando
+  sentido e tipografia; conclusoes individuais com virada segunda 00h Brasilia.
+- Consulta em 2026-10-14T02:00Z: fetch sem divergencia de main, health publico
+  200/ok e origin/main em 0fdbb80aa79d731bcd458ca4bc892ecc76be2918.
+  Branch documental e9ef9c1/PR212: validate aprovado; gates ainda em andamento
+  na CI38498361340. Isto nao valida a funcionalidade ainda nao implementada.
+- Fontes: GitHub PR212/actions, GET /api/health e runbook shared-routines.
+  Migracao nova depende de autorizacao especifica; nao aplicar por inferencia.
+- Usuario confirmou conclusoes individuais e autorizou migration aditiva apos
+  testes/backup. Revisao de 40 textos distintos salva as 23:05 e 108 campos
+  conferidos apos recarga; 18 linhas/93 atividades preservadas. Trecho de
+  imobiliarias sem produzir ha 60 dias confirmado explicitamente.
+- Projeto confirmado pelo SUPABASE_URL do runtime: hnncxuerlcsaahdxoswb.
+  Antes da mudanca, tabela/RPCs/helpers novos ausentes; 36 migrations remotas,
+  ultima 20261013035612. Registro local ignorado completions-before.json;
+  nenhuma rotina existente ou cliente exportado. House rev2/26 linhas e
+  Imob rev3/18 linhas observadas. Docker local indisponivel; banco/restore
+  devem ser validados na CI isolada antes da migration.
+- Implementacao: checkbox individual por atividade, API autenticada, RPCs
+  vinculadas a auth.uid e tabela sem grants diretos aos papeis da API. Semana
+  calculada no banco, segunda 00h America/Sao_Paulo; historico anterior nao
+  aparece na semana nova. Marcacoes nao dependem do armazenamento do navegador.
+- Validacao local: lint sem erros, typecheck/build aprovados; 80 testes de
+  API/inventario de migrations aprovados. Suite serial: 2713 aprovados,
+  78 ignorados e tres falhas; duas do manifesto foram corrigidas e retestadas.
+  Restante: symlink Salesforce no Windows (502 esperado, 200 recebido), fora
+  dos arquivos da Rotina; verificar CI Linux, sem dispensar o gate.
+- UI Chromium: 73 testes aprovados antes do ajuste final de foco; regressao
+  focal de PUT/GET e scroll aprovada depois. QA sintetico de dois usuarios e
+  quatro analises axe aprovados. Banco real isolado e publicacao pendentes.
+
 ## 2026-10-13: Capitalizacao da rotina regional imob
 
 - Pedido complementar aplicado pela UI autenticada: primeira letra maiuscula

@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-13: Revisao e conclusoes individuais da Rotina
+
+- Revisao de portugues aplicada pela UI autorizada em regional imob, mantendo
+  sentido, capitalizacao e tipografia. Esclarecimento de 60 dias confirmado
+  pelo usuario. Salvo 23:05; 108 campos/93 atividades conferidos apos recarga.
+- Conclusao por usuario com persistencia no CRM, checkbox por atividade e
+  semana definida no servidor em America/Sao_Paulo. Migration nova autorizada
+  especificamente apos testes e backup, sem alterar dados comerciais.
+- API, tabela privada com RPCs e controles de conclusao implementados. Lint,
+  typecheck e build aprovados; 80 testes focais aprovados. Suite serial local
+  tem falha remanescente de symlink Salesforce no Windows, fora deste escopo.
+  Testes Chromium cobrem persistencia, isolamento, virada, foco e scroll.
+- Banco isolado, CI e publicacao ainda pendentes; runtime permanece 0fdbb80.
+
 ## 2026-10-13: Padrao de texto regional imob
 
 - Capitalizacao solicitada salva no CRM as 22:54: primeira letra maiuscula
