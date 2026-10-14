@@ -4,7 +4,8 @@
 
 - Polling30s e leitura consistente implementados;180 testes focais/75 QA
   aprovados. PR223 ainda bloqueado por QA: fixture corrigida, timeout limitado
-  e transferencia RSC/Rotina em diagnostico, sem reduzir gates. Health15:33:56Z
+  e QA da Rotina aguardando CSS exato; refresh Next real aprovado na
+  CI38601828514, sem reduzir gates. Health15:33:56Z
   HTTP200/ok/5c4d95e concorrente preservado. Sem n8n, formulas ou dados remotos.
   Fontes, consultas de abertura, testes, falhas, limites e criterios integrais:
   [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).

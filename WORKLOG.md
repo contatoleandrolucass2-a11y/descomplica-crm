@@ -27,6 +27,8 @@
 - CI38597977609 localizou espera apos liberar RSC. QA passa a comprovar
   transferencia pelo ResourceTiming exato, HTTP200 e tipo RSC, preservando
   asserts de UI, limite10s/60s e rejeicao de transferencia incompleta.
+- CI38601828514 aprovou refresh no Next real. Rotina diagnosticada com modo
+  day e minWidth960px; QA aguarda CSS exato antes da geometria, mantendo asserts.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 

@@ -10,6 +10,7 @@
 - Isola a QA de refresh e limita suas esperas, sem reduzir os gates existentes.
 - Acrescenta diagnostico geometrico sanitizado quando a QA de Rotina falha.
 - Confere a transferencia RSC pelo registro de rede do navegador na QA.
+- Aguarda o estilo de cada modo da Rotina antes de medir sua geometria na QA.
 
 ## 2026-10-14: Pesquisa de unidades no Associativo
 

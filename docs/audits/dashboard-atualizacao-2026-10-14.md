@@ -181,3 +181,13 @@ nenhuma entrada completa para o corpo aberto. Loopback sintetico, nao Next real.
 Suite Windows apos main001969:2.876 passaram/82 skips, somente symlink falhou;
 sem os timeouts anteriores. Tres testes Chromium de geometria passaram, assim
 como33 testes focais (72 casos opt-in nao executados nesse comando).
+
+CI38601828514/a8dc309 confirmou o helper Next real em17:08:57Z: tres sondagens,
+um refresh, HTTP/tipo RSC, ResourceTiming completo e preservacao de estado.
+Falhou depois na Rotina: data-view=day com minWidth=960px, demais medidas sem
+overflow. QA passa a aguardar toHaveCSS exato0px/960px para o modo antes de
+capturar geometria; assert anterior permanece e tolerancias/CSS nao mudam.
+Isso trata o ponto observado, sem atribuir causa interna nao comprovada ao browser.
+Regressao Chromium simula CSS day ainda960px e posterior0px; helper aguarda
+sem aceitar geometria incorreta. Quatro casos passaram, incluindo tres temas
+agora em1440/720/390px. Lint focal passou; nenhum arquivo de runtime alterado.
