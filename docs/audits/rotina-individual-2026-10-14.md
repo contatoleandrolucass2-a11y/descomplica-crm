@@ -1,5 +1,86 @@
 # Auditoria da Rotina individual
 
+## Registro curado anterior preservado em 14/10, 12:18Z
+
+## 2026-10-14: Rotina regional imob e conclusao individual
+
+- Imob revisada e salva no CRM em 13/10, 23:05 Sao Paulo: 18 linhas,
+  93 atividades, 108 campos conferidos apos recarga, revisao 3. House
+  preservada. Confirmado: imobiliarias sem produzir ha 60 dias.
+- Usuario autorizou conclusoes individuais persistidas e migration aditiva
+  apos testes/backup; reinicio segunda 00h America/Sao_Paulo. Implementado
+  e publicado pelo PR215 em faae8e9efa487c44d01b991a3949ce1627ad2980.
+- Lint/typecheck/build e 73 testes Chromium aprovados; CI38504861394 aprovou
+  1323 pgTAP, restore, E2E e QA real da Rotina com duas contas isoladas.
+  Selecao administrativa corrigida; CI38510935022 do PR e CI38514527676 do
+  main completas/aprovadas, incluindo imagem, restore e matriz visual.
+- Migration autorizada aplicada por MCP: remota 20261014054331, fonte local 20261014020437. Backup de metadados/ausencia dos objetos e SQL verificado;
+  RLS forcada, grants minimos e virada semanal conferidos. House/Imob intactas.
+- Deploy 2026-10-14T05:45:08.644Z (02:45 Sao Paulo), ID574a7a95-c8e3-480b-80f5-870cec5600d7.
+  Coordenador com lock/CAS/consulta fresca; health200/ok no SHA faae8e9 as05:46Z,
+  API anonima401. UI:108 textos iguais,93 checkboxes semana/18 hoje habilitados.
+  Fontes: GitHub CI, ledger privado, MCP Supabase e leitura autenticada.
+- Evidencias completas, falhas anteriores e limites preservados em
+  [auditoria da Rotina](../audits/rotina-individual-2026-10-14.md).
+  Detalhes movidos somente para respeitar o limite de exportacao do Obsidian.
+- Fechamento documental publicado na branch/PR219; integracao pendente da CI.
+  Auto-merge indisponivel no repositorio; nao alterada essa configuracao.
+  Reavaliar merge apos gates aprovados, sem novo deploy de runtime.
+
+## Publicacao confirmada em 14/10/2026
+
+- PR215: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/215,
+  integrado em 2026-10-14T05:02:31Z. SHA de runtime/main:
+  faae8e9efa487c44d01b991a3949ce1627ad2980.
+- CI do PR38510935022 e main38514527676 completas/aprovadas. Main inclui
+  validate (lint, tipos, testes, build), isolated-restore, release-gates e
+  promotable-image. Banco:1323 pgTAP. QA da Rotina comprova isolamento entre
+  duas contas, persistencia, Semana/Hoje, teclado, scroll e acessibilidade.
+- Imagem: config CI sha256:a2e5efd862e8d8fd33bea005c2c1fa043765c47f066fd71375fcedc6cc9b0536;
+  manifesto OCI/Docker sha256:067dab81d8b20fe3a833ee7b172aa48427237dfff835939cd2708acbece0c2de.
+  Checksum do arquivo, label, plataforma linux/amd64 e11 camadas conferidos.
+  Perfis homologation/production usam a mesma imagem, sem build na VPS.
+- Supabase hnncxuerlcsaahdxoswb: baseline05:26Z e releitura05:43Z confirmam
+  cinco objetos novos ausentes,36 migrations e funcoes existentes intactas.
+  Backup aplicavel e de metadados/ACL/ausencia mais SQL, nao dump integral:
+  /var/backups/descomplica-crm/migrations/routine-completions-20261014.Wn631L,
+  root0700/arquivos0600, manifesto8733c878d3b7d5848adc1cf56187abf5c3ecb61b6061686133220566d2911251.
+  Nenhum dado de cliente, usuario ou texto completo foi exportado.
+- Aplicada somente migration autorizada crm_routine_completions por MCP.
+  Fonte20261014020437, registro remoto20261014054331; diferenca de timestamp
+  gerada pelo MCP, sem reparar historico ou aplicar pendencias alheias.
+  RLS forcada; tabela somente postgres, RPCs somente postgres/authenticated,
+  helpers somente postgres. Policy restritiva vincula auth.uid e MFA.
+  Domingo2026-10-19T02:59:59Z pertence a semana12/10;03:00Z inicia19/10.
+  Hashes das RPCs existentes, House rev2/26 linhas e Imob rev3/18 preservados.
+- Primeiro preparo parou antes do coordenador por zod ausente no checkout
+  novo. Instaladas apenas dependencias do lock com pnpm install --prod
+  --frozen-lockfile --ignore-scripts (cache local). Nao houve troca de runtime,
+  bypass, alteracao de lockfile ou build no host. Reavaliar esse requisito
+  em cada checkout novo antes de executar o coordenador.
+- Backup runtime verificado em
+  /var/backups/descomplica-crm/releases/faae8e9efa487c44d01b991a3949ce1627ad2980.3PKaUE,
+  manifesto b4e5fd312d36232b6e474d5765657a4d36fd71626c2bc27eecd828b19f1e6961.
+  Env, ledger e Compose privados preservados; imagem anterior792320b disponivel.
+- Deploy exclusivo via pnpm release:production, com locks, CAS e consulta no
+  minuto da troca. Deployment574a7a95-c8e3-480b-80f5-870cec5600d7, concluido
+  2026-10-14T05:45:08.644Z (02:45:08 Sao Paulo), sem pendencia.
+  Anterior8fff7f32-9d09-4a61-8241-c4cf35acf120,792320b,04:15:43.522Z.
+- Pos-publicacao: health200/ok/faae8e9 as05:46:39Z; container healthy,
+  OOMfalse/restarts0; inventario e conclusoes anonimas401, rotas privadas307.
+  UI autenticada:108 textos exatamente iguais a revisao aprovada,93 controles
+  semana/18 Hoje habilitados e desmarcados, fonteGeist13px/400/18.2px.
+  Captura local ignorada: test-results/routine-preview/regional-imob-conclusoes-publicado.png.
+- Limites: nao marcou atividades reais para simular trabalho concluido.
+  Escrita entre contas/dispositivos e reset foram exercitados na CI; producao
+  recebeu leitura autenticada, catalogo e limite temporal sem mutacao ficticia.
+  Historico de conclusoes preservado; rollback da aplicacao nao apaga tabela.
+  N8n, clientes, propostas e regras financeiras nao foram alterados.
+- Fechamento documental no PR219, branch codex/rotina-evidencias-publicacao.
+  Auto-merge recusado pelo GitHub por configuracao existente; nao a alteramos.
+  Integracao deste registro depende dos gates do proprio PR, sem novo deploy.
+  Runtime do PR215 permanece publicado e validado independentemente da nota.
+
 ## 2026-10-14: Integracao concorrente durante validacao da Rotina
 
 - Consulta04:12Z: origin/main avancou para 792320ba037ea48655739aaeefe5295b95c33631

@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Rotina compacta por conclusao
+
+- Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
+  em faae8e9. Checkout documental df0c52c/PR219 com CI38518828290 aprovada,
+  conflitante apenas nos registros. Fontes: GitHub, git fetch e /api/health.
+- Nova branch codex/rotina-compacta preserva dashboard e registros anteriores.
+  Pedido: controles a esquerda, fundo somente por conclusao, destaque do dia
+  apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
+  Lint/tipos/build e QA focal4/4 aprovados; suite Windows integral indisponivel
+  por symlink/timeouts. PR222/CI38565559075 aprovada em ea2e639; incorporado
+  main8e015c6 documental, sem alterar runtime. Nova CI e publicacao pendentes.
+  Evidencias e limites:
+  [auditoria compacta](../audits/rotina-compacta-2026-10-14.md).
+
 ## 2026-10-14: Funis mensais publicados
 
 - Seis funis no Comparativo mensal com dados atuais; origem somente leitura.
@@ -18,25 +32,14 @@
   checkout documental16f4587 tambem sincronizado apos a troca de branch.
   Encerramento apos deploy confirmou synced, tres documentos, sem ampliar limite.
 
-## 2026-10-14: Rotina regional imob e conclusao individual
+## 2026-10-14: Rotina individual publicada
 
-- Imob revisada e salva no CRM em 13/10, 23:05 Sao Paulo: 18 linhas,
-  93 atividades, 108 campos conferidos apos recarga, revisao 3. House
-  preservada. Confirmado: imobiliarias sem produzir ha 60 dias.
-- Usuario autorizou conclusoes individuais persistidas e migration aditiva
-  apos testes/backup; reinicio segunda 00h America/Sao_Paulo. Implementado
-  em PR215, ainda sem migration remota nem publicacao da funcionalidade.
-- Lint/typecheck/build e 73 testes Chromium aprovados; CI38504861394 aprovou
-  1323 pgTAP, restore, E2E e QA real da Rotina com duas contas isoladas.
-  Gate visual geral falhou na selecao da conta administrativa sintetica.
-  Selecao deterministica corrigida, 3 testes Chromium e ESLint focal aprovados.
-- Consulta 2026-10-14T04:12Z: origin/main 792320ba037ea48655739aaeefe5295b95c33631,
-  CI38506931120 aprovada; health publico HTTP200/ok em 0fdbb80. Fontes:
-  GitHub Actions, git fetch/ls-remote e /api/health. Merge concorrente preserva
-  dashboard e ambos os registros; exige nova CI combinada e ledger fresco.
-- Evidencias completas, falhas anteriores e limites preservados em
+- PR215/runtime faae8e9, CI38514527676 aprovada, deploy05:45:08Z; migration
+  remota20261014054331 autorizada. Textos Imob revisados, conclusoes individuais
+  semanais persistidas. Evidencias e registro integral anterior preservados em
   [auditoria da Rotina](../audits/rotina-individual-2026-10-14.md).
-  Detalhes movidos somente para respeitar o limite de exportacao do Obsidian.
+- PR219 documental aprovado na CI, ainda nao integrado; conteudo preservado
+  na branch atual. Nao ampliar permissoes nem alterar dados comerciais.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 

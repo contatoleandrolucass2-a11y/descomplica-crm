@@ -187,7 +187,11 @@ export async function checkRoutineCompletions(page, origin, outputDirectory, { r
     await readerPage.reload();
     await expect(box(readerPage)).not.toBeChecked();
     await uiToggle(readerPage, true);
+    await page.getByRole("button", { name: "Hoje", exact: true }).click();
+    await expect(box(page)).toBeChecked();
     await uiToggle(page, false);
+    await page.getByRole("button", { name: "Semana", exact: true }).click();
+    await expect(box(page)).not.toBeChecked();
     assert.equal(
       completed(await read(readerPage)),
       true,
@@ -221,7 +225,11 @@ export async function checkRoutineCompletions(page, origin, outputDirectory, { r
       }
     }
     await uiToggle(readerPage, false);
+    await readerPage.getByRole("button", { name: "Semana", exact: true }).click();
+    await expect(box(readerPage)).not.toBeChecked();
     await uiToggle(readerPage, true);
+    await readerPage.getByRole("button", { name: "Hoje", exact: true }).click();
+    await expect(box(readerPage)).toBeChecked();
     assert.equal(completed(await read(page)), false);
     assert.deepEqual(
       (await api(page, "/api/routines")).routines,
@@ -242,6 +250,7 @@ export async function checkRoutineCompletions(page, origin, outputDirectory, { r
       persistence: true,
       keyboard: true,
       sharedTextsUnchanged: true,
+      crossViewSynchronization: true,
       week_start: week,
       checks,
       consoleErrors: 0,
@@ -292,7 +301,8 @@ export async function checkRoutineScrolling(page, region) {
     scrollTop: element.scrollTop,
   }));
   assert.equal(overflow.maxHeight, "none");
-  assert.equal(overflow.overflowX, "auto");
+  assert.equal(overflow.overflowX, "visible");
+  await checkRoutineOverflow(page, region);
   assert.ok(
     overflow.excessHeight <= 1,
     "Routine must have natural height without internal vertical overflow",
@@ -336,15 +346,13 @@ export async function checkRoutineScrolling(page, region) {
     await heading.evaluate((element, original) => element === original, originalHeading),
     true,
   );
-  await region.evaluate((element) => {
-    element.scrollLeft = element.scrollWidth;
-  });
+  await page.evaluate(() => window.scrollTo(document.documentElement.scrollWidth, window.scrollY));
   const horizontal = await heading.boundingBox();
-  const offset = await region.evaluate((element) => element.scrollLeft);
+  const offset = await page.evaluate(() => window.scrollX);
   assert.ok(horizontal);
   assert.ok(
     Math.abs(horizontal.x - pinned.x + offset) <= 2,
-    "Real day header must follow horizontal table scroll",
+    "Real day header must follow horizontal page scroll",
   );
   assert.ok(Math.abs(horizontal.y - pinned.y) <= 2);
   const lastHeading = await region.locator("thead th").last().boundingBox();
@@ -502,6 +510,8 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
         border = getComputedStyle(element, "::before");
       return {
         background: css.backgroundImage,
+        surface: css.backgroundColor,
+        pageSurface: getComputedStyle(element.closest(".investor-page-shell")).backgroundColor,
         color: css.color,
         image: border.backgroundImage,
         animation: border.animationName,
@@ -509,11 +519,8 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
         pointer: border.pointerEvents,
       };
     });
-    assert.match(
-      style.background,
-      /linear-gradient\(145deg, rgb\(23, 111, 138\), rgb\(18, 59, 99\)\)/,
-    );
-    assert.equal(style.color, "rgb(255, 255, 255)");
+    assert.equal(style.background, "none", "Day headers must not use the completion gradient");
+    assert.equal(style.surface, style.pageSurface);
     assert.equal(
       style.image.replace(/from [^,]+, /, ""),
       saveEffect.image.replace(/from [^,]+, /, ""),
@@ -573,9 +580,13 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
   );
   const today = page.locator('thead [aria-current="date"]');
   await expect(today.getByText("Hoje", { exact: true })).toBeVisible();
-  assert.match(
-    await today.evaluate((element) => getComputedStyle(element).boxShadow),
-    /rgb\(98, 216, 255\)/,
+  const todayStyle = await today.evaluate((element) => {
+    const style = getComputedStyle(element);
+    return { color: style.color, shadow: style.boxShadow };
+  });
+  assert.ok(
+    todayStyle.shadow.includes(todayStyle.color) && todayStyle.shadow.includes("2px"),
+    "Current day header must retain its accent border",
   );
   const animations = () =>
     credit.evaluate((element) =>
@@ -612,8 +623,132 @@ export async function checkRoutineCellEffects(page, outputDirectory) {
   );
 }
 
+export async function checkRoutineCompactLayout(page) {
+  const layout = await page.locator("tbody td").evaluateAll((cells) =>
+    cells.flatMap((cell) => {
+      const input = cell.querySelector('input[type="checkbox"]');
+      if (!input) return [];
+      const label = input.closest("label");
+      const editor = cell.querySelector("textarea");
+      const content = editor?.parentElement;
+      if (!label || !editor || !content) return [{ valid: false }];
+      const checkbox = input.getBoundingClientRect();
+      const control = label.getBoundingClientRect();
+      const text = editor.getBoundingClientRect();
+      const bounds = cell.getBoundingClientRect();
+      const daily = cell.closest("table").dataset.view === "day";
+      const editorStyle = getComputedStyle(editor);
+      const firstLineCenter =
+        text.top + parseFloat(editorStyle.paddingTop) + parseFloat(editorStyle.lineHeight) / 2;
+      // Touch controls can exceed the textarea's 32px minimum height.
+      const alignmentTolerance = Math.max(
+        2,
+        (control.height - parseFloat(editorStyle.minHeight)) / 2 + 0.5,
+      );
+      return [
+        {
+          valid:
+            cell.firstElementChild === content &&
+            label.parentElement === content &&
+            content.firstElementChild === label &&
+            content.lastElementChild === editor,
+          grid: getComputedStyle(content).display,
+          firstTrack: parseFloat(getComputedStyle(content).gridTemplateColumns),
+          noOverlap:
+            control.right <= text.left + 1 &&
+            text.width > 0 &&
+            text.right <= bounds.right + 1 &&
+            control.left >= bounds.left,
+          aligned: daily
+            ? Math.abs(checkbox.top + checkbox.height / 2 - firstLineCenter) <= alignmentTolerance
+            : control.top - bounds.top >= 0 &&
+              control.top - bounds.top <= 12 &&
+              control.left - bounds.left <= 12,
+        },
+      ];
+    }),
+  );
+  assert.ok(layout.length > 0, "Compact layout requires activities with checkboxes");
+  for (const cell of layout) {
+    assert.equal(cell.valid, true, "Checkbox must precede textarea inside the cell content");
+    assert.equal(cell.grid, "grid");
+    assert.equal(
+      cell.firstTrack,
+      await page.evaluate(() => (matchMedia("(pointer: coarse)").matches ? 44 : 28)),
+    );
+    assert.equal(cell.noOverlap, true, "Checkbox and text must occupy separate grid tracks");
+    assert.equal(
+      cell.aligned,
+      true,
+      "Checkbox must be top-left in Semana and aligned with the first text line in Hoje",
+    );
+  }
+}
+
+export async function checkRoutineOverflow(page, region) {
+  const metrics = await region.evaluate((element) => {
+    const table = element.querySelector("table");
+    const style = getComputedStyle(element);
+    const bounds = table.getBoundingClientRect();
+    return {
+      overflowX: style.overflowX,
+      overflowY: style.overflowY,
+      scrollLeft: element.scrollLeft,
+      scrollTop: element.scrollTop,
+      minWidth: getComputedStyle(table).minWidth,
+      day: table.dataset.view === "day",
+      tableOverflow: bounds.width > element.clientWidth + 1,
+      pageOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+    };
+  });
+  assert.equal(metrics.overflowX, "visible", "Routine must not own a horizontal scroller");
+  assert.equal(metrics.overflowY, "visible", "Routine must not own a vertical scroller");
+  assert.equal(metrics.scrollLeft, 0);
+  assert.equal(metrics.scrollTop, 0);
+  assert.equal(metrics.minWidth, metrics.day ? "0px" : "960px");
+  assert.equal(
+    metrics.pageOverflow,
+    metrics.tableOverflow,
+    "Page overflow is allowed only when the routine table exceeds the available width",
+  );
+  if (metrics.day) assert.equal(metrics.pageOverflow, false, "Hoje must fit the viewport");
+  const position = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+  try {
+    await page.evaluate(() => window.scrollTo(document.documentElement.scrollWidth, scrollY));
+    const last = await region.locator("thead th").last().boundingBox();
+    assert.ok(
+      last && last.x >= -1 && last.x + last.width <= page.viewportSize().width + 1,
+      "The last weekday must be fully reachable through page scrolling",
+    );
+    assert.equal(await region.evaluate((element) => element.scrollLeft), 0);
+    if (metrics.tableOverflow) assert.ok(await page.evaluate(() => scrollX > 0));
+  } finally {
+    await page.evaluate(({ x, y }) => window.scrollTo(x, y), position);
+  }
+  return metrics;
+}
+
+async function checkRoutineNeutralCells(page) {
+  const cells = await page.locator("tbody td:not([data-completed])").evaluateAll((elements) =>
+    elements.map((element) => {
+      const style = getComputedStyle(element);
+      const page = element.closest(".investor-page-shell");
+      return {
+        color: style.backgroundColor,
+        image: style.backgroundImage,
+        pageColor: getComputedStyle(page).backgroundColor,
+      };
+    }),
+  );
+  assert.ok(cells.length > 0);
+  for (const cell of cells) {
+    assert.equal(cell.image, "none", "Unchecked cells must never have a gradient");
+    assert.equal(cell.color, cell.pageColor, "Unchecked cells must match the page background");
+  }
+  await expect(page.locator("tbody [data-today]")).toHaveCount(0);
+}
+
 async function checkRoutineCellEffectsInMotion(page, outputDirectory, checkpoint) {
-  checkpoint("weekly-setup");
   const capture = async (mode) => {
     if (!outputDirectory) return;
     await mkdir(outputDirectory, { recursive: true });
@@ -627,18 +762,6 @@ async function checkRoutineCellEffectsInMotion(page, outputDirectory, checkpoint
       mask: [page.locator("[data-session-identity], [data-account-identity]")],
     });
   };
-  await page.getByRole("button", { name: "Semana", exact: true }).click();
-  const cells = page.locator("tbody tr");
-  // Tuesday/Wednesday avoid the independent Monday "today" treatment.
-  const target = cells.nth(1).locator("td").nth(1);
-  const rowPeer = cells.nth(1).locator("td").nth(2);
-  const columnPeer = cells.nth(2).locator("td").nth(1);
-  const outside = cells.nth(2).locator("td").nth(2);
-  const paint = (locator) =>
-    locator.evaluate((element) => {
-      const style = getComputedStyle(element);
-      return [style.backgroundColor, style.backgroundImage, style.boxShadow];
-    });
   const settle = () =>
     page.waitForFunction(() =>
       document
@@ -646,205 +769,96 @@ async function checkRoutineCellEffectsInMotion(page, outputDirectory, checkpoint
         .filter((animation) => animation instanceof CSSTransition)
         .every((animation) => animation.playState !== "running" && !animation.pending),
     );
-  await page.mouse.move(0, 0);
-  await page.evaluate(
-    () => document.activeElement instanceof HTMLElement && document.activeElement.blur(),
-  );
-  await settle();
-  const before = await Promise.all([rowPeer, columnPeer, outside].map(paint));
+  await page.getByRole("button", { name: "Semana", exact: true }).click();
   const values = () =>
     page.locator("tbody textarea").evaluateAll((fields) => fields.map((field) => field.value));
   const initialValues = await values();
-  const dimensions = () =>
-    page
-      .locator("tbody tr")
-      .evaluateAll((rows) =>
-        rows.map((row) =>
-          Array.from(row.children).map((cell) => [
-            cell.offsetWidth,
-            cell.offsetHeight,
-            cell.offsetLeft,
-            cell.offsetTop,
-          ]),
-        ),
-      );
-  const geometry = await dimensions();
-  checkpoint("weekly-hover");
-  await target.hover();
-  await settle();
-  assert.notDeepEqual(await paint(rowPeer), before[0], "Hover highlights its row");
-  assert.notDeepEqual(await paint(columnPeer), before[1], "Hover highlights its column");
-  assert.notDeepEqual(
-    (await paint(target)).slice(0, 2),
-    (await paint(columnPeer)).slice(0, 2),
-    "Intersection background must differ from the column background",
-  );
-  await expect(target.locator("textarea")).toHaveCSS("color", "rgb(255, 255, 255)");
-  assert.deepEqual(await paint(outside), before[2], "Unrelated cells keep their styling");
-  const scale = await target.evaluate((element) =>
-    Math.max(
-      ...[element, element.querySelector("textarea")].filter(Boolean).map((node) => {
-        const style = getComputedStyle(node);
-        const transform = style.transform === "none" ? 1 : new DOMMatrixReadOnly(style.transform).a;
-        return Math.max(transform, Number.parseFloat(style.scale) || 1);
-      }),
-    ),
-  );
-  assert.ok(scale > 1 && scale <= 1.08, "Hovered intersection scales subtly");
-  assert.deepEqual(await dimensions(), geometry, "Hover never changes table layout dimensions");
-  await capture("week-hover");
-  checkpoint("cell-reduced-motion");
-  await page.emulateMedia({ reducedMotion: "reduce" });
-  try {
-    await expect(target).toHaveCSS("transform", "none");
-    await expect(target).toHaveCSS("transition-duration", "0s");
-    assert.deepEqual(await dimensions(), geometry, "Reduced motion preserves table layout");
-  } finally {
-    await page.emulateMedia({ reducedMotion: "no-preference" });
-  }
-  await page.mouse.move(0, 0);
-  checkpoint("weekly-focus");
-  await target.locator("textarea").focus();
-  await settle();
-  assert.notDeepEqual(await paint(rowPeer), before[0], "Keyboard focus highlights its row");
-  assert.notDeepEqual(await paint(columnPeer), before[1], "Keyboard focus highlights its column");
-  assert.deepEqual(await paint(outside), before[2]);
-  assert.notDeepEqual(
-    (await paint(target)).slice(0, 2),
-    (await paint(columnPeer)).slice(0, 2),
-    "Focused intersection background must differ from the column background",
-  );
-  await capture("week-focus");
-  const hovered = cells.nth(3).locator("td").nth(3);
-  const hoverRow = cells.nth(3).locator("td").nth(4);
-  const hoverColumn = cells.nth(4).locator("td").nth(3);
-  const hoverBefore = await Promise.all([hoverRow, hoverColumn].map(paint));
-  checkpoint("hover-over-focus");
-  await hovered.hover();
-  await settle();
-  await expect(target.locator("textarea")).toBeFocused();
-  assert.deepEqual(await paint(rowPeer), before[0], "Hover suppresses the previously focused row");
-  assert.deepEqual(
-    await paint(columnPeer),
-    before[1],
-    "Hover suppresses the previously focused column",
-  );
-  assert.notDeepEqual(await paint(hoverRow), hoverBefore[0], "Only the hovered row is highlighted");
-  assert.notDeepEqual(
-    await paint(hoverColumn),
-    hoverBefore[1],
-    "Only the hovered column is highlighted",
-  );
-  assert.notDeepEqual((await paint(hovered)).slice(0, 2), (await paint(hoverColumn)).slice(0, 2));
-  await capture("hover-over-focus");
-  await page.mouse.move(0, 0);
-  await settle();
-  assert.notDeepEqual(await paint(rowPeer), before[0], "Mouseout restores focused row");
-  assert.notDeepEqual(await paint(columnPeer), before[1], "Mouseout restores focused column");
-  assert.deepEqual(await paint(hoverRow), hoverBefore[0]);
-  assert.deepEqual(await paint(hoverColumn), hoverBefore[1]);
-  await page.locator("thead th").nth(4).hover();
-  await settle();
-  assert.deepEqual(await paint(rowPeer), before[0], "Header hover also suppresses focused row");
-  assert.deepEqual(
-    await paint(columnPeer),
-    before[1],
-    "Header hover also suppresses focused column",
-  );
-  assert.notDeepEqual(await paint(hoverColumn), hoverBefore[1]);
-  await page.mouse.move(0, 0);
-  await settle();
-  assert.notDeepEqual(await paint(rowPeer), before[0]);
-  assert.notDeepEqual(await paint(columnPeer), before[1]);
-  checkpoint("today-focus");
-  const todayCell = page.locator("tbody td[data-today]").first();
-  await todayCell.locator("textarea").focus();
-  await settle();
-  await expect(todayCell.locator("textarea")).toHaveCSS("color", "rgb(255, 255, 255)");
-  assert.notDeepEqual(
-    (await paint(todayCell)).slice(0, 2),
-    (await paint(page.locator("tbody td[data-today]").nth(1))).slice(0, 2),
-    "Today's focused intersection keeps its distinct background",
-  );
-  for (const [name, peer] of [
-    ["same-row", cells.first().locator("td").nth(1)],
-    ["same-column", page.locator("tbody td[data-today]").nth(2)],
-  ]) {
-    checkpoint(`today-focus-${name}`);
-    await peer.hover();
-    await settle();
-    await expect(todayCell.locator("textarea")).toBeFocused();
-    const focus = await todayCell.evaluate((element) => {
-      const style = getComputedStyle(element);
-      const probe = document.createElement("span");
-      probe.style.color = "var(--inv-color-accent)";
-      element.append(probe);
-      const accent = getComputedStyle(probe).color;
-      probe.remove();
-      const luminance = (color) => {
-        const channels = color
-          .match(/[0-9.]+/g)
-          .slice(0, 3)
-          .map(Number)
-          .map((value) => {
-            const channel = value / 255;
-            return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
-          });
-        return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
-      };
-      const outline = luminance(style.outlineColor);
-      const backgrounds = style.backgroundImage.match(/rgb[a]?[(][^)]+[)]/g) ?? [
-        style.backgroundColor,
-      ];
-      return {
-        color: style.outlineColor,
-        accent,
-        width: parseFloat(style.outlineWidth),
-        style: style.outlineStyle,
-        contrast: backgrounds.map((color) => {
-          const background = luminance(color);
-          return (Math.max(outline, background) + 0.05) / (Math.min(outline, background) + 0.05);
-        }),
-      };
-    });
-    assert.equal(
-      focus.color,
-      focus.accent,
-      `Today focus on ${name} crosshair uses the theme accent`,
-    );
-    assert.equal(focus.style, "solid");
-    assert.ok(focus.width >= 2);
-    assert.ok(
-      focus.contrast.every((ratio) => ratio >= 3),
-      `Today focus contrast against both ${name} gradient endpoints must be >=3: ${JSON.stringify(focus)}`,
-    );
-    await capture(`today-focus-${name}`);
+  for (const mode of ["Semana", "Hoje"]) {
+    checkpoint(`${mode}-neutral`);
+    await page.getByRole("button", { name: mode, exact: true }).click();
     await page.mouse.move(0, 0);
+    await page.evaluate(
+      () => document.activeElement instanceof HTMLElement && document.activeElement.blur(),
+    );
     await settle();
-    await expect(todayCell).toHaveCSS("outline-color", "rgb(255, 255, 255)");
+    await checkRoutineCompactLayout(page);
+    await checkRoutineNeutralCells(page);
+    const target = page
+      .locator("tbody td:not([data-completed])")
+      .filter({ has: page.locator("textarea") })
+      .first();
+    const dimensions = () =>
+      page
+        .locator("tbody tr")
+        .evaluateAll((rows) =>
+          rows.map((row) =>
+            Array.from(row.children).map((cell) => [
+              cell.offsetWidth,
+              cell.offsetHeight,
+              cell.offsetLeft,
+              cell.offsetTop,
+            ]),
+          ),
+        );
+    const geometry = await dimensions();
+    for (const state of ["hover", "focus", "peer-hover"]) {
+      checkpoint(`${mode}-${state}`);
+      if (state === "hover") await target.hover();
+      if (state === "focus") await target.locator("textarea").focus();
+      if (state === "peer-hover")
+        await page.locator("tbody tr").nth(1).locator("td").first().hover();
+      await settle();
+      await checkRoutineNeutralCells(page);
+      assert.deepEqual(await dimensions(), geometry, "Hover and focus never change table geometry");
+      const scale = await target.evaluate((element) =>
+        [element, element.querySelector("textarea")].every((node) => {
+          const css = getComputedStyle(node);
+          return (
+            (css.transform === "none" || new DOMMatrixReadOnly(css.transform).a === 1) &&
+            (css.scale === "none" || Number(css.scale) === 1)
+          );
+        }),
+      );
+      assert.equal(scale, true, "Compact cells must not enlarge on hover or focus");
+      if (state !== "hover") {
+        await expect(target.locator("textarea")).toBeFocused();
+        const focus = await target.evaluate((element) => {
+          const css = getComputedStyle(element);
+          const luminance = (color) => {
+            const channels = color
+              .match(/[0-9.]+/g)
+              .slice(0, 3)
+              .map(Number)
+              .map((value) => {
+                const channel = value / 255;
+                return channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4;
+              });
+            return channels[0] * 0.2126 + channels[1] * 0.7152 + channels[2] * 0.0722;
+          };
+          const outline = luminance(css.outlineColor);
+          const background = luminance(css.backgroundColor);
+          return {
+            width: parseFloat(css.outlineWidth),
+            style: css.outlineStyle,
+            contrast:
+              (Math.max(outline, background) + 0.05) / (Math.min(outline, background) + 0.05),
+          };
+        });
+        assert.equal(focus.style, "solid");
+        assert.ok(focus.width >= 2);
+        assert.ok(focus.contrast >= 3, "Neutral cell focus must keep at least 3:1 contrast");
+      }
+      await capture(`${mode}-${state}`);
+    }
+    await page.emulateMedia({ reducedMotion: "reduce" });
+    try {
+      await expect(target).toHaveCSS("transform", "none");
+      await expect(target).toHaveCSS("transition-duration", "0s");
+      assert.deepEqual(await dimensions(), geometry, "Reduced motion preserves table layout");
+    } finally {
+      await page.emulateMedia({ reducedMotion: "no-preference" });
+    }
   }
-  checkpoint("daily-effects");
-  await page.getByRole("button", { name: "Hoje", exact: true }).click();
-  const dailyTarget = page.locator("tbody tr").nth(1).locator("td");
-  const dailyOther = page.locator("tbody tr").nth(2).locator("td");
-  await page.mouse.move(0, 0);
-  await page.evaluate(
-    () => document.activeElement instanceof HTMLElement && document.activeElement.blur(),
-  );
-  await settle();
-  const dailyBefore = await paint(dailyOther);
-  const targetBefore = await paint(dailyTarget);
-  await dailyTarget.hover();
-  await settle();
-  assert.notDeepEqual(await paint(dailyTarget), targetBefore, "Daily hover highlights its row");
-  assert.deepEqual(await paint(dailyOther), dailyBefore, "Daily hover does not highlight a column");
-  await page.mouse.move(0, 0);
-  await dailyTarget.locator("textarea").focus();
-  await settle();
-  await expect(dailyTarget.locator("textarea")).toHaveCSS("color", "rgb(255, 255, 255)");
-  assert.notDeepEqual(await paint(dailyTarget), targetBefore, "Daily focus highlights its row");
-  assert.deepEqual(await paint(dailyOther), dailyBefore, "Daily focus does not highlight a column");
-  await capture("day-focus");
   await page.getByRole("button", { name: "Semana", exact: true }).click();
   assert.deepEqual(
     await values(),
@@ -852,7 +866,6 @@ async function checkRoutineCellEffectsInMotion(page, outputDirectory, checkpoint
     "Hover, focus and view changes never edit routine data",
   );
 }
-
 async function selectTheme(page, theme, width) {
   const labels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
   if (width > 600) {
@@ -1184,11 +1197,12 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
         await selectTheme(page, theme, width);
         await checkRoutineHeaderEffects(page);
         if (width === 1440) await checkRoutineCellEffects(page, outputDirectory);
-        assert.equal(
-          await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1),
-          false,
-          `Rotina must not overflow at ${width}px in ${theme}`,
+        const weeklyOverflow = await checkRoutineOverflow(
+          page,
+          page.getByRole("region", { name: "Tabela de rotina semanal", exact: true }),
         );
+        await checkRoutineCompactLayout(page);
+        await checkRoutineNeutralCells(page);
         await expect(
           page.getByRole("heading", { name: "Rotina semanal e diária", exact: true }),
         ).toBeVisible();
@@ -1207,13 +1221,13 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
           await page
             .locator("tbody td")
             .evaluateAll((cells) =>
-              cells.every((cell) => getComputedStyle(cell).verticalAlign === "middle"),
+              cells.every((cell) => getComputedStyle(cell).verticalAlign === "top"),
             ),
           true,
-          "Semana cells must remain vertically centered",
+          "Semana cells must align their compact content to the top",
         );
         await expect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
-        await expect(page.locator("tbody td[data-today]")).toHaveCount(initialRows);
+        await expect(page.locator("tbody td[data-today]")).toHaveCount(0);
         const editorStyle = await page
           .locator("textarea")
           .first()
@@ -1247,19 +1261,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
               ),
           )
           .toBe(true);
-        if (width < 960) {
-          const scroll = page.getByRole("region", {
-            name: "Tabela de rotina semanal",
-            exact: true,
-          });
-          const scrolling = await scroll.evaluate((element) => {
-            element.scrollLeft = element.scrollWidth;
-            const reachedEnd = element.scrollLeft + element.clientWidth >= element.scrollWidth - 1;
-            element.scrollLeft = 0;
-            return reachedEnd;
-          });
-          assert.equal(scrolling, true, "Every weekday must remain reachable within the table");
-        }
+
         checkpoint(`weekly-accessibility-${width}-${theme}`);
         const result = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
@@ -1281,7 +1283,14 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
           animations: "disabled",
           mask: [page.locator("[data-session-identity], [data-account-identity]")],
         });
-        checks.push({ width, theme, mode: "Semana", overflow: false, accessibilityViolations: 0 });
+        checks.push({
+          width,
+          theme,
+          mode: "Semana",
+          overflow: weeklyOverflow.pageOverflow,
+          overflowOwner: "page",
+          accessibilityViolations: 0,
+        });
         checkpoint(`window-scroll-${width}-${theme}`);
         const weekly = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
         await checkRoutineScrolling(page, weekly);
@@ -1292,6 +1301,8 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
           .poll(() => daily.evaluate((element) => [element.scrollTop, element.scrollLeft]))
           .toEqual([0, 0]);
         await expect(daily.locator("thead th")).toHaveCount(2);
+        await checkRoutineCompactLayout(page);
+        await checkRoutineOverflow(page, daily);
         await expect
           .poll(() =>
             daily
