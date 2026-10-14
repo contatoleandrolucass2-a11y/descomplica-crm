@@ -4,6 +4,7 @@ import path from "node:path";
 import { lstat, readFile, realpath, chmod } from "node:fs/promises";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { WebSocket, WebSocketServer } from "ws";
+import { saveCredentials, credentialStatus } from "./credential-vault.mjs";
 
 export const CONSOLE_ORIGIN = "http://127.0.0.1:6082";
 const RUNTIME = "/run/descomplica-qlik";
@@ -31,7 +32,12 @@ export async function readAsset(url, assets = ASSETS) {
   if (typeof url !== "string" || url.includes("%") || url.includes("?") || url.includes("\\")) {
     return null;
   }
-  const local = { "/": "index.html", "/client.js": "client.js", "/style.css": "style.css" };
+  const local = {
+    "/": "index.html",
+    "/client.js": "client.js",
+    "/credential-client.js": "credential-client.js",
+    "/style.css": "style.css",
+  };
   if (Object.hasOwn(local, url)) {
     const type = url === "/" ? "text/html" : url.endsWith(".css") ? "text/css" : "text/javascript";
     return { body: await readFile(new URL(local[url], WEB)), type };
@@ -50,6 +56,9 @@ export function createQlikConsole({
   connect = () => net.createConnection({ path: `${RUNTIME}/vnc.sock` }),
   asset = readAsset,
   lifetimeMs = 10 * 60 * 1000,
+  saveCredential = saveCredentials,
+  getCredentialStatus = credentialStatus,
+  bodyTimeoutMs = 5000,
 } = {}) {
   const wss = new WebSocketServer({
     noServer: true,
@@ -61,8 +70,68 @@ export function createQlikConsole({
     { requestTimeout: 5000, headersTimeout: 5000 },
     async (req, res) => {
       res.setHeaders(new Headers(SECURITY_HEADERS));
-      if (!allowedRequest(req) || req.method !== "GET") {
+      if (!allowedRequest(req)) {
         res.writeHead(403).end();
+        return;
+      }
+      if (req.url === "/credentials" && req.method === "POST") {
+        if (
+          req.headers.origin !== CONSOLE_ORIGIN ||
+          req.headers["x-qlik-console"] !== "1" ||
+          req.headers["content-type"] !== "application/json"
+        ) {
+          res.writeHead(403).end();
+          return;
+        }
+        if (Number(req.headers["content-length"]) > 8192) {
+          res.writeHead(413).end();
+          return;
+        }
+        const chunks = [];
+        let length = 0;
+        let body;
+        const startedAt = performance.now();
+        const bodyDeadline = setTimeout(() => req.destroy(), bodyTimeoutMs);
+        try {
+          for await (const chunk of req) {
+            length += chunk.length;
+            if (length > 8192) {
+              res.writeHead(413).end();
+              return;
+            }
+            chunks.push(chunk);
+          }
+          clearTimeout(bodyDeadline);
+          if (performance.now() - startedAt >= bodyTimeoutMs) {
+            if (!res.destroyed) res.writeHead(408).end();
+            return;
+          }
+          body = Buffer.concat(chunks);
+          const credential = JSON.parse(body.toString("utf8"));
+          await saveCredential(credential);
+          res.writeHead(201, { "Content-Type": "application/json" }).end('{"saved":true}');
+        } catch (error) {
+          if (!res.destroyed) res.writeHead(error?.code === "credential_exists" ? 409 : 400).end();
+        } finally {
+          clearTimeout(bodyDeadline);
+          body?.fill(0);
+          for (const chunk of chunks) chunk.fill(0);
+        }
+        return;
+      }
+      if (req.method !== "GET") {
+        res.writeHead(403).end();
+        return;
+      }
+      if (req.url === "/credentials/status") {
+        try {
+          const result = await getCredentialStatus();
+          res
+            .writeHead(200, { "Content-Type": "application/json" })
+            .end(JSON.stringify({ saved: result.saved === true }));
+        } catch {
+          res.writeHead(503).end();
+        }
         return;
       }
       try {

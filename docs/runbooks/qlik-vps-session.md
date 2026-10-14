@@ -13,7 +13,8 @@ A conta observada possui login por usuario/senha. Autenticar diretamente no
 Qlik exibido pelo console e concluir MFA quando solicitada. Nao pedir senha
 pelo chat, extrair senhas do perfil pessoal ou copiar cookies do computador.
 O perfil privado da VPS conserva a sessao; isso nao impede sua expiracao nem
-dispensa MFA. O CRM e o coletor nao armazenam a senha Qlik.
+dispensa MFA. Em pedido posterior, o usuario autorizou guardar tambem usuario
+e senha na VPS. O cofre opcional abaixo e separado da sessao e da aplicacao CRM.
 
 ## Isolamento
 
@@ -85,6 +86,27 @@ O bloqueio `policy_pending` do ranking por pontos continua independente da
 conexao. A pagina de referencia e as configuracoes legadas nao aprovam pesos,
 bonus, desempate ou premios. Publicacao da aplicacao continua exclusivamente
 pelo coordenador `pnpm release:production`, com PR/CI e gates vigentes.
+
+## Credencial opcional na VPS
+
+O console permite cadastro inicial em `Credencial Qlik`, somente depois de
+instalar o cofre com `ops/qlik/vps/install-credential-vault.sh` conforme os
+pre-requisitos do script. A requisicao fica no loopback local e atravessa o
+tunel SSH; usuario/senha nao passam pelo chat, Git, n8n ou logs. Nao abrir
+portas publicas nem reutilizar esse formulario fora do console privado.
+
+O servidor cifra o payload com AES-256-GCM e protege sua chave com RSA-OAEP
+SHA-256. Chave privada root0600 em `/etc/descomplica-qlik`; gateway nao pode
+le-la. Envelope em diretorio privado de credenciais, sem endpoint de leitura
+ou substituicao. Status retorna somente se existe cadastro, sem usuario/senha.
+Campos sao limpos depois do envio; erros nao devolvem corpo nem credenciais.
+
+O cofre protege o arquivo em repouso, nao um host comprometido: root pode ler
+a chave e o processo recebe a senha em memoria durante o cadastro. O perfil
+Chrome tambem contem a sessao. O cadastro nao executa login, nao contorna MFA
+e nao comprova credencial valida. Ainda falta um consumidor autorizado para
+reautenticacao/coleta. Backup deve preservar chave privada e envelope sem
+exporta-los para repositorio ou chat; rotacao exige procedimento explicito.
 
 ## Reversao
 

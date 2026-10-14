@@ -38,6 +38,16 @@ usuario recebeu link para login manual, sem contorno. Instalador corrigido
 para novas instalacoes; testes direcionados de units/instalador8/8.
 PR216 aberto, sem merge; nenhum deploy do CRM ou agenda Qlik habilitada.
 
+Pedido posterior: usuario confirmou abertura do console e pediu guardar
+usuario/senha na propria VPS. Acrescentado cadastro inicial cifrado, protegido
+por Origin/Host e limite de corpo, sem eco de credenciais ou overwrite. Chave
+privada exclusiva de root, formulario separado do navegador e sem persistencia
+local no codigo. Nao equivale a login ou coletor configurado; MFA preservado.
+Gates repetidos: lint/tipos/build e pnpm test aprovados. Revisao corrigiu
+deadline absoluto do corpo, status de envelope incompleto, limpeza de ambos
+campos no erro e probe R_OK/EACCES da chave privada. Alvos Qlik29 aprovados,
+um smoke exclusivo Linux pendente da instalacao do cofre.
+
 ## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
 
 Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior

@@ -2,6 +2,8 @@
 
 ## 2026-10-14: Preparacao da sessao Qlik na VPS
 
+- Adiciona cadastro opcional de credencial Qlik cifrada na VPS, somente por
+  console privado, sem leitura da chave privada pelo gateway ou overwrite.
 - Qlik VPS: travessia nominal do pai dos releases no instalador, preservando
   ACL/mask existente; recuperacao manual documentada e login remoto pendente.
 - Adiciona navegador dedicado e console privado por SSH para login Qlik,

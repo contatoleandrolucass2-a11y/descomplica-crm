@@ -41,7 +41,7 @@ done
 [[ $(git -C "$release" rev-parse HEAD) == "$1" ]] || fail "Release SHA mismatch."
 release_status=$(git -C "$release" status --porcelain --untracked-files=all)
 [[ -z "$release_status" ]] || fail "Release must be clean."
-for relative in ops/qlik/vps/install-session.sh ops/qlik/console-gateway.mjs ops/qlik/launch-browser.mjs ops/qlik/console/index.html ops/qlik/console/client.js ops/qlik/console/style.css "${units[@]/#/ops/qlik/vps/}"; do
+for relative in ops/qlik/vps/install-session.sh ops/qlik/console-gateway.mjs ops/qlik/credential-vault.mjs ops/qlik/launch-browser.mjs ops/qlik/console/index.html ops/qlik/console/client.js ops/qlik/console/credential-client.js ops/qlik/console/style.css "${units[@]/#/ops/qlik/vps/}"; do
   file="$release/$relative"
   [[ -f "$file" && ! -L "$file" && $(stat -c %u "$file") == 0 ]] ||
     fail "Expected root-owned release file missing or symlink."

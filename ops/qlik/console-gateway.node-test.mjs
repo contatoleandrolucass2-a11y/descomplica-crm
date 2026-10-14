@@ -39,6 +39,114 @@ async function listen(server) {
   return server.address().port;
 }
 
+function post(port, body, extra = {}) {
+  return new Promise((resolve, reject) => {
+    const req = http.request(
+      {
+        hostname: "127.0.0.1",
+        port,
+        path: "/credentials",
+        method: "POST",
+        headers: {
+          ...headers,
+          "content-type": "application/json",
+          "x-qlik-console": "1",
+          ...extra,
+        },
+      },
+      (res) => {
+        const chunks = [];
+        res.on("data", (chunk) => chunks.push(chunk));
+        res.on("end", () =>
+          resolve({ status: res.statusCode, body: Buffer.concat(chunks).toString() }),
+        );
+      },
+    );
+    req.on("error", reject);
+    req.end(body);
+  });
+}
+
+test("credential submission requires same-origin JSON, bounds input and never echoes secrets", async (t) => {
+  let calls = 0;
+  const gateway = createQlikConsole({
+    saveCredential: async (value) => {
+      calls += 1;
+      assert.deepEqual(value, { username: "synthetic-user", password: "synthetic-password" });
+    },
+    getCredentialStatus: async () => ({ saved: true, username: "must-not-be-returned" }),
+  });
+  const port = await listen(gateway.server);
+  t.after(() => gateway.close());
+  const body = JSON.stringify({ username: "synthetic-user", password: "synthetic-password" });
+  for (const change of [
+    { origin: "null" },
+    { origin: "" },
+    { "x-qlik-console": "" },
+    { "content-type": "text/plain" },
+  ]) {
+    assert.equal((await post(port, body, change)).status, 403);
+  }
+  assert.equal((await post(port, "x".repeat(8193))).status, 413);
+  assert.equal((await post(port, "{broken-json")).status, 400);
+  assert.equal(calls, 0);
+  const saved = await post(port, body);
+  assert.equal(saved.status, 201);
+  assert.equal(saved.body, '{"saved":true}');
+  assert.equal(calls, 1);
+  assert.equal((await request(port, "/credentials/status")).body, '{"saved":true}');
+});
+
+test("credential errors do not disclose sensitive exception messages", async (t) => {
+  const gateway = createQlikConsole({
+    saveCredential: async () => {
+      throw Object.assign(new Error("synthetic-secret"), { code: "credential_exists" });
+    },
+    getCredentialStatus: async () => {
+      throw new Error("synthetic-secret");
+    },
+  });
+  const port = await listen(gateway.server);
+  t.after(() => gateway.close());
+  const response = await post(port, "{}");
+  assert.equal(response.status, 409);
+  assert.equal(response.body, "");
+  const status = await request(port, "/credentials/status");
+  assert.equal(status.status, 503);
+  assert.equal(status.body, "");
+});
+
+test("slow credential body expires before storage without reflecting submitted bytes", async (t) => {
+  let stored = false;
+  const gateway = createQlikConsole({
+    bodyTimeoutMs: 50,
+    saveCredential: async () => {
+      stored = true;
+    },
+  });
+  const port = await listen(gateway.server);
+  t.after(() => gateway.close());
+  const result = await new Promise((resolve) => {
+    const req = http.request(
+      {
+        hostname: "127.0.0.1",
+        port,
+        path: "/credentials",
+        method: "POST",
+        headers: { ...headers, "content-type": "application/json", "x-qlik-console": "1" },
+      },
+      (res) => {
+        res.resume();
+        res.once("end", () => resolve(res.statusCode));
+      },
+    );
+    req.on("error", (error) => resolve(error.code));
+    req.write('{"username":"synthetic');
+  });
+  assert.equal(result, "ECONNRESET");
+  assert.equal(stored, false);
+});
+
 test("console rejects foreign origins, DNS rebinding and cross-site navigation", () => {
   assert.equal(allowedRequest({ headers }), true);
   for (const changes of [

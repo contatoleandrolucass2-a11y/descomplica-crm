@@ -50,6 +50,15 @@
   Health publico em03:25Z continua200/ok/0fdbb80. Preparacao instalada nao e
   merge nem publicacao da aplicacao. Pendentes login, contrato por corretor,
   escolha de writer, carga reconciliada e agenda; policy_pending preservado.
+- Usuario confirmou abertura manual do console e pediu explicitamente guardar
+  usuario/senha na VPS. Cofre opcional em implementacao: formulario privado,
+  AES-GCM/RSA-OAEP, chave privada root0600 fora do acesso do gateway, cadastro
+  inicial sem overwrite, status sem identidade e nenhum segredo em logs/chat.
+  Credencial guardada nao significa login valido nem automacao configurada.
+- Cofre: gates locais completos aprovados; revisao corrigiu deadline de corpo,
+  validacao estrutural do envelope, limpeza de formulario e teste efetivo de
+  leitura negada da chave privada. Testes direcionados29/29, smoke Linux ainda
+  pendente. Nao declarar segredo guardado antes do cadastro feito pelo usuario.
 
 ## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
 

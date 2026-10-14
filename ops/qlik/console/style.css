@@ -48,3 +48,38 @@ main {
   min-height: 0;
   overflow: hidden;
 }
+details {
+  padding: 10px 16px;
+  border-bottom: 1px solid #3b4044;
+  max-height: 45dvh;
+  overflow: auto;
+}
+summary {
+  cursor: pointer;
+}
+form {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+label {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 200px;
+  min-width: 0;
+}
+input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #657079;
+  border-radius: 4px;
+  background: #202527;
+  color: inherit;
+  padding: 8px;
+  font: inherit;
+}
+#credential-status {
+  align-self: center;
+}
