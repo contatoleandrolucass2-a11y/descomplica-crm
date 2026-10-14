@@ -132,3 +132,53 @@ execucoes. Nova CI integral em verify, merge e publicacao continuam pendentes.
 
 Reavaliar filtros e criterios indisponiveis somente quando a fonte e a
 autoridade aplicaveis forem implementadas e verificadas em tarefa especifica.
+
+## Publicacao verificada em 14/10/2026
+
+PR213 integrado em `792320ba037ea48655739aaeefe5295b95c33631`; arvore igual a
+`f2f6f2b0c87d24738ef882adf1559673a172ee41`. CI de PR38503071023 aprovada.
+CI push/main38506931120 concluida com success as04:08:53Z, nos quatro jobs.
+Fontes: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/213 e
+https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38506931120.
+
+Linux:139 arquivos/2747 testes aprovados e63 skips;19 E2E;154 responsivos,
+88 temas,242 auditorias Axe,242 comparacoes visuais e110 zoom aprovados.
+Restore, lint, tipos, build, audit e provas de imagem aprovados. Reexecucao
+Windows apos o ultimo fix:2746 aprovados,63 skips e a unica falha de symlink
+preexistente descrita acima. Tipos/build/lint passaram; lint local encontrou
+tambem um aviso no modulo temporario gerado para promover a baseline, removido
+apos uso, sem arquivo rastreado ou warning adicional na CI.
+
+Artefato imutavel11868216878 `promotable-image-792320ba037ea48655739aaeefe5295b95c33631`:
+
+- SHA-256 de image.tar.gz: `34926bf22d07b96214e4bf149f73eaa834c7581f946e0398dc4c7b5aabd878ba`.
+- Config digest CI: `sha256:1b96b65a79033d498248c082f17869d1d8edda21d4b2cc815dfaa245e2a1e5d4`.
+- Manifest digest VPS: `sha256:3a8307ca51fecbfc895c1d1b306e67972d09f5abb19a4bbca4923fe3426f5458`.
+
+Conforme PROMOTABLE_IMAGE_RUNTIME, checksum e revision conferidos; index OCI,
+manifesto/configuracao e seus tamanhos/hashes ligam os dois digests. Manifesto
+legado,11 camadas tar, rootfs.diff_ids e RootFS.Layers coincidem; linux/amd64 e
+label da release confirmados. Prova somente leitura do artefato em
+`/srv/descomplica-crm-artifacts/792320ba037ea48655739aaeefe5295b95c33631/verify-image.py`.
+image:prove confirmou os dois perfis no destino com fixtures isoladas. Sem
+rebuild VPS; dependencias do checkout vieram do lockfile/cache existente.
+
+Backup root-only do ambiente/ledger, comparado byte a byte, em
+`/var/backups/descomplica-crm/releases/792320ba037ea48655739aaeefe5295b95c33631.QLwsJp`.
+Imagem anterior0fdbb80 preservada, ID
+`sha256:ea9c7df02c09cbe84c96b47ead5ae5ddf33d0080405034a8ed395c65a26b3740`.
+Recuperacao prevista exclusivamente pelo coordenador para a tentativa exata;
+depois de concluida, reversao exige novo PR/CI/promocao, sem editar ledger.
+
+release:production deploy confirmou `deployed` em2026-10-14T04:15:43.522Z
+(01:15:43 BRT), deployment `8fff7f32-9d09-4a61-8241-c4cf35acf120`, sem pendencia.
+Versao/data anteriores conferidas dentro das travas e janela de frescor pelo
+coordenador; CAS partiu de61a88f4d-45c1-44ed-b080-2e87e275c0e9/0fdbb80.
+Status posterior confirmou o recibo, novo SHA e image ID.
+
+Smoke observacional externo as04:16:16-17Z, sem cookies:
+health HTTP200/status ok/version792320ba037ea48655739aaeefe5295b95c33631;
+/app307 para/login; /api/dashboard/status e /api/inventory/snapshot401.
+Jornada autenticada testada na CI isolada, nao em conta pessoal produtiva.
+Nao houve migration, mudanca de dados, DNS, contas, cobrancas ou workflow n8n.
+Registro final apenas documental; nao causa nova publicacao de runtime.

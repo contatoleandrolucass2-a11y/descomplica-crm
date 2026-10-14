@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14: Relatorio publicado
+
+- Confirma a publicacao do relatorio completo em `/app`, com dados atuais,
+  CI integral, imagem verificada e acesso protegido. Registro documental
+  posterior nao altera runtime, regras comerciais ou workflows n8n.
+
 ## 2026-10-13: Relatorio completo no dashboard
 
 - Impede exibir equipe de versao anterior apos atualizacao parcial do dashboard.
