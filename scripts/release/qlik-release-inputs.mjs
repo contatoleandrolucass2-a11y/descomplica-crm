@@ -9,6 +9,14 @@ export const qlikReleaseFiles = Object.freeze([
   "ops/qlik/qix-metadata.mjs",
   "ops/qlik/collection-loop.mjs",
   "ops/qlik/metadata-artifact.mjs",
+  "ops/qlik/ranking-cycle.mjs",
+  "ops/qlik/browser-ranking.mjs",
+  "ops/qlik/qix-ranking.mjs",
+  "ops/qlik/ranking-mapping.mjs",
+  "ops/qlik/ranking-artifact.mjs",
+  "ops/qlik/ranking-credential.mjs",
+  "ops/qlik/publish-ranking.mjs",
+  "lib/crm/qlik/contracts-v2.ts",
   "ops/qlik/vps/descomplica-qlik-browser.service",
   "package.json",
   "pnpm-lock.yaml",
@@ -16,6 +24,37 @@ export const qlikReleaseFiles = Object.freeze([
 export const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 export const shaPattern = /^[a-f0-9]{40}$/u;
 export const idPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/u;
+export const qlikCredentialPath = "/etc/descomplica-crm/secrets/qlik-ranking-hmac";
+
+// Only metadata leaves this check; systemd delivers the contents to the owner.
+export async function inspectQlikCredential() {
+  await assertProtectedParents(path.dirname(qlikCredentialPath));
+  const info = await lstat(qlikCredentialPath);
+  if (
+    !info.isFile() ||
+    info.isSymbolicLink() ||
+    info.uid !== 0 ||
+    info.gid !== 0 ||
+    info.nlink !== 1 ||
+    (info.mode & 0o7777) !== 0o600 ||
+    info.size < 43 ||
+    info.size > 130 ||
+    (await realpath(qlikCredentialPath)) !== qlikCredentialPath
+  )
+    throw new Error("Protected Qlik credential required.");
+  const current = await lstat(qlikCredentialPath);
+  if (
+    ["dev", "ino", "size", "mtimeMs", "ctimeMs", "uid", "gid", "mode", "nlink"].some(
+      (key) => info[key] !== current[key],
+    ) ||
+    !current.isFile() ||
+    current.isSymbolicLink()
+  )
+    throw new Error("Qlik credential changed during inspection.");
+  return Object.fromEntries(
+    ["dev", "ino", "size", "mtimeMs", "ctimeMs"].map((key) => [key, info[key]]),
+  );
+}
 
 export async function readProtectedText(file, { uid = 0, mode, maximum = 262144 } = {}) {
   const before = await lstat(file);
@@ -84,22 +123,26 @@ export async function assertProtectedParents(directory) {
   }
 }
 
-export function renderQlikUnit(template, sha, preflight) {
+export function renderQlikUnit(template, sha, preflight, ranking = false) {
   if (
     typeof sha !== "string" ||
     !shaPattern.test(sha) ||
     typeof template !== "string" ||
     typeof preflight !== "boolean" ||
+    typeof ranking !== "boolean" ||
+    (ranking && preflight) ||
     template.split("@RELEASE@").length !== 2 ||
     template.split("Environment=HOME=/var/lib/descomplica-qlik\n").length !== 2 ||
-    template.includes("QLIK_METADATA_PREFLIGHT")
+    template.includes("QLIK_METADATA_PREFLIGHT") ||
+    template.includes("QLIK_RANKING_COLLECTION") ||
+    template.includes("LoadCredential")
   )
     throw new Error("Qlik unit template rejected.");
   return template
     .replace("@RELEASE@", `/srv/descomplica-crm-releases/${sha}`)
     .replace(
       "Environment=HOME=/var/lib/descomplica-qlik\n",
-      `Environment=HOME=/var/lib/descomplica-qlik\n${preflight ? "Environment=QLIK_METADATA_PREFLIGHT=enabled\n" : ""}`,
+      `Environment=HOME=/var/lib/descomplica-qlik\n${preflight ? "Environment=QLIK_METADATA_PREFLIGHT=enabled\n" : ""}${ranking ? `Environment=QLIK_RANKING_COLLECTION=enabled\nLoadCredential=qlik-ranking-hmac:${qlikCredentialPath}\n` : ""}`,
     );
 }
 
@@ -112,6 +155,8 @@ export function parseQlikUnit(contents, template) {
     if (contents === renderQlikUnit(template, sha, preflight))
       return { sha, unitHash: sha256(contents), preflight };
   }
+  if (contents === renderQlikUnit(template, sha, false, true))
+    return { sha, unitHash: sha256(contents), preflight: false, ranking: true };
   throw new Error("Qlik unit differs from the reviewed template.");
 }
 

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Coletor autonomo Qlik candidato
+
+- Implementa coleta independente dupla, conciliacao nativa, credencial privada,
+  ciclo horario e recibo restrito; mapeamento e ativacao reais ainda pendentes.
+- Protege habilitacao no boot com recibo novo, CAS e recuperacao; diagnosticos
+  usam codigos fixos, sem fatos ou credenciais.
+- Incorpora as11 capturas Ranking revisadas, preservando manifesto completo
+  e as231 imagens das demais telas; exige CI verify posterior.
+
 ## 2026-10-14: Abas do ranking em tablets
 
 - Reserva largura para o seletor IMOBs/Produtos entre768 e1024px e impede

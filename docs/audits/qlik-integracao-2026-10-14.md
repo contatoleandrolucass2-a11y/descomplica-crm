@@ -84,3 +84,63 @@ Essa prova verifica o mecanismo, nao usa chave real nem autentica o Qlik.
   docs/runbooks/qlik-partnerships-mapping.md e qlik-vps-session.md; WORKLOG
   registra testes e pendencias. Windows falhou symlink Salesforce; Linux validate
   cc8c712 passou CI; main0019690 conciliado em1c5466e. Nova CI pendente.
+
+## 2026-10-14: Revisao local do runtime autonomo
+
+Candidato ainda nao promovido. `qix-ranking` recebeu97 testes aprovados,
+incluindo dimensao fisica qIsCalculated=false, estado D nao selecionado e
+rejeicao de paginas reduzidas. Totais nativos, pagina completa, selecoes,
+recarga e hashes das definicoes continuam obrigatorios. Mapeamento produtivo
+ainda depende dos metadados reais; nenhum fixture foi tratado como fonte.
+
+Wrapper/credencial/launcher:158 testes focais aprovados no Node24.19/Windows.
+Timeout abrange criacao, navegacao, execucao e descarte da pagina. Descarte
+incerto bloqueia reutilizacao e permite somente ao main Linux encerrar o
+processo; Restart/KillMode existentes recolhem os filhos. Reinicio real por
+essa condicao ainda nao ensaiado. ACL do credential runtime continua exata;
+alteracoes de mtime/size em pais compartilhados nao invalidam arquivo intacto.
+
+Engine/CLI:312 testes aprovados apos reproduzir e corrigir fechamento de
+recibo sem reconferencia final do owner. Divergencia de unidade/atividade/boot
+preserva pendencia. Status/noop indicam evidencia registrada; confirmacao nova
+indica verificada. Nao reinterpretar status registrado como ciclo executado agora.
+
+Lint global, typecheck e build passaram. Suite Vitest local teve3173 aprovados,
+86 skips e quatro falhas: tres timeouts e seletor CSS antigo; este ultimo foi
+corrigido com12 testes focais aprovados. Suite release focada completa no
+Windows terminou com varios spawnSync ETIMEDOUT de25s, sem ampliar limites;
+uma observacao local mostrou menos de500MB de RAM livre, mas nao prova toda
+a causa. CI Linux do runtime combinado continua obrigatoria. Nao executar
+essas suites pesadas na VPS compartilhada.
+
+PR227/64d9f24 passou CI38628006919 na segunda tentativa; primeiro E2E falhou
+em fill_financing do Associativo, sem mudanca desses arquivos. Causa nao
+isolada, nao declarada corrigida pelo rerun. Main6843ef1 documental exigiu
+atualizacao pela protecao strict. Novo head4f814a8/CI38635047586 pendente.
+Merge automatico indisponivel no repositorio; configuracao nao alterada.
+Health publico20:46:44Z200/ok6843ef1, sem evidencia de carga Qlik real.
+
+## 2026-10-14: Validacao combinada e baseline revisada
+
+Suite local com VITEST_MAX_WORKERS=1 terminou exit0 em21:06:34Z:3177 Vitest,
+649 ops e664 release aprovados, skips87/19/14. Lint, tipos e build passaram.
+Ultima correcao do diagnostico foi posterior,21:06:48Z; possui106 testes
+focais/1 skip, lint e formatacao aprovados. Nao atribuir a suite anterior ao
+diff posterior. CI Linux combinada continua obrigatoria. Limites de testes
+inalterados; concorrencia Vitest limitada reduziu pressao local, sem provar
+que toda falha anterior tinha essa causa.
+
+Captura38634304020 aprovada em26m6s,43 testes browser e matriz completa.
+Artefato11929276378, ZIP SHA256
+b5ade6f21a181ef3331703ff5a8870ecf044e6bee46aeace3d6d7925fb1ad32d verificado
+no GitHub, VPS e desktop. Capture548d2f2a9207c5bafabb0d18303bf99aba871c96,
+pais6843ef1/679c6fe. Revisao11 imagens aprovada;768 agora mantem abas inteiras.
+Todos242 hashes/tamanhos conferidos antes de copiar;231 imagens alheias
+identicas. Incorporados somente11 WebP Ranking e manifesto completo original.
+154 rotas,88 temas,242 Axe e110 zoom aprovados. Baseline e sintetica e nao
+comprova disponibilidade de dados Qlik. CI normal verify permanece obrigatoria.
+
+Consulta SSH20:56Z: ledger CRM57c09296-d8d8-421b-bca7-c12d10b4d50e,
+SHA6843ef1, deployedAt2026-10-14T20:38:13.413Z, sem pendencia. Qlik-status
+registrado com preflightStatus:null/rankingConnected:false, sem pendencia.
+Nenhum upgrade owner, migration, HMAC ou coleta real realizado nesta etapa.

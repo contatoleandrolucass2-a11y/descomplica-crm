@@ -61,6 +61,27 @@ sucesso. Implementacao do coordenador nao prova sozinha sessao QIX independente.
 `ranking-credential.mjs` le somente a credencial fixa do systemd, com caminhos,
 ownership, limites e symlinks verificados; nenhum valor e exportado em logs.
 `ranking-artifact.mjs` projeta apenas estado e recibo, nunca payload ou erros.
+Falhas podem incluir um codigo de lista fixa, sem mensagens brutas. Diagnostico
+so e preservado quando o loop aceita o resultado dentro do prazo; timeout,
+cancelamento ou relogio invalido nao reutilizam o motivo de uma coleta tardia.
+
+O coletor `browser-ranking.mjs` abre uma pagina dedicada por observacao e uma
+identidade QIX UUID distinta, fecha pagina/sessao antes da segunda coleta e
+mantem autenticacao/CSRF dentro do navegador. Nao exporta cookies nem usa CDP
+ou bypass de CSP. O limite e180 segundos por observacao e ate5 segundos para
+confirmar descarte; o ciclo completo tem480 segundos. Timeout invalida o
+recibo, mesmo com event loop atrasado. Criacao/fechamento travados mantem o
+contexto bloqueado. Somente o main Linux opta por encerrar o processo quando
+o descarte nao e confirmado, permitindo recuperacao pela unit dedicada com
+Restart=always/KillMode=control-group; a biblioteca nao encerra processos.
+
+`qix-ranking.mjs` exige mapeamento aprovado a partir de metadados reais:
+hashes integrais dos cubos/masters, dimensao nativa, campo de identidade,
+indices das medidas, filtros e calendario. Verifica selecoes efetivas,
+paginacao, totais nativos por mes e aditividade do ano. Alteracao de definicao
+ou recarga, reducao, pagina incompleta ou identidade ambigua rejeita a carga.
+Fixtures e `verified:true` nao comprovam o mapeamento do tenant. O modulo de
+mapeamento produtivo permanece pendente ate a leitura privada do preflight.
 
 Publicacoes sao preservadas por ano. O reader retorna atual/anterior sob um
 snapshot SQL. Falha ou fonte mais antiga nao substitui a ultima carga valida.
@@ -85,8 +106,19 @@ transforma timestamp de coleta em timestamp de atualizacao da fonte.
    sem publicar nomes/valores comerciais ou credenciais nas evidencias.
 
 O owner Qlik usa as operacoes protegidas do mesmo coordenador, com ledger e
-backup separados. A primeira versao dessas operacoes habilita somente preflight
-de metadados; nao confundir seu sucesso com coleta de fatos ou agenda ativa.
+backup separados. O modo padrao continua somente metadados. O candidato
+`qlik-deploy --ranking enable` troca para coleta de fatos, com `LoadCredential`
+do systemd no caminho fixo, sem segredo nos argumentos ou na unit.
+Preflight e ranking sao mutuamente exclusivos. Arquivo root0600 e ACL nominal
+do usuario tecnico no credential runtime sao conferidos; a chave nao pode
+estar disponivel ao grupo ou a outros usuarios.
+
+O primeiro ciclo inicia imediatamente. O intervalo de uma hora comeca apos
+seu termino, sem sobreposicao. A habilitacao no boot depende de recibo novo
+de publicacao real, verificacao do owner e novas consultas ao CRM/main/CI sob
+as mesmas travas/CAS. Falha preserva pendencia recuperavel; nunca habilitar
+manualmente o servico para contornar esse gate. Status registrado nao substitui
+leitura atual do recibo, banco e pagina. Provar tambem um ciclo horario posterior.
 Sessao expirada/MFA deve produzir reautenticacao necessaria, preservar dados e
 exigir acao autorizada, sem contornar controles do provedor.
 

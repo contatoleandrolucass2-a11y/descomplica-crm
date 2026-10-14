@@ -28,7 +28,12 @@ export function parseReleaseArguments(args) {
   };
   if (!Object.hasOwn(operations, operation)) throw new Error("Unknown release operation.");
   const required = operations[operation];
-  const optional = operation === "deploy" ? ["salesforce-ingestion", "qlik-ranking"] : [];
+  const optional =
+    operation === "deploy"
+      ? ["salesforce-ingestion", "qlik-ranking"]
+      : operation === "qlik-deploy"
+        ? ["ranking"]
+        : [];
   if (!required || rest.length % 2 !== 0 || rest.length < required.length * 2)
     throw new Error("Invalid release arguments.");
   const values = {};
@@ -51,6 +56,8 @@ export function parseReleaseArguments(args) {
     throw new Error("Only explicit Salesforce ingestion enable is supported.");
   if (values["qlik-ranking"] && values["qlik-ranking"] !== "enable")
     throw new Error("Only explicit Qlik ranking enable is supported.");
+  if (values.ranking && values.ranking !== "enable")
+    throw new Error("Only explicit Qlik owner ranking enable is supported.");
   if (values["qlik-ranking"] && values["salesforce-ingestion"])
     throw new Error("Integration configurations require separate releases.");
   if (
@@ -60,6 +67,32 @@ export function parseReleaseArguments(args) {
   )
     throw new Error("Invalid CI run ID.");
   return { operation, values };
+}
+
+export function releaseOutput(operation, result) {
+  const { deploymentId, sha, imageId, deployedAt } = result.release ?? {};
+  const recorded = operation === "qlik-status" || result.status === "noop";
+  const observation = recorded ? result.release : result;
+  // Recorded receipts are history, not a new live ranking probe.
+  return {
+    status: result.status,
+    deploymentId,
+    sha,
+    imageId,
+    deployedAt,
+    ...(operation.startsWith("qlik-")
+      ? {
+          component: "qlik-owner",
+          preflightStatus: observation?.preflightStatus ?? null,
+          rankingStatus: observation?.rankingStatus ?? null,
+          rankingConnected: observation?.rankingConnected === true,
+          ...(result.release?.ranking === true
+            ? { rankingEvidence: recorded ? "recorded" : "verified" }
+            : {}),
+        }
+      : {}),
+    pendingDeploymentId: result.inProgress?.deploymentId ?? null,
+  };
 }
 
 async function main(args) {
@@ -85,6 +118,7 @@ async function main(args) {
           targetSha: values.sha,
           targetImageId: values["image-id"],
           ciRunId: Number(values["ci-run-id"]),
+          ...(values.ranking === "enable" ? { ranking: true } : {}),
         },
         qlik,
       );
@@ -118,10 +152,7 @@ async function main(args) {
   });
   // Expose only release identifiers/times. Attestation evidence, configuration
   // contents, raw Docker output and credentials never become CLI output.
-  const { deploymentId, sha, imageId, deployedAt } = result.release ?? {};
-  process.stdout.write(
-    `${JSON.stringify({ status: result.status, deploymentId, sha, imageId, deployedAt, ...(operation.startsWith("qlik-") ? { component: "qlik-owner", preflightStatus: result.preflightStatus ?? null, rankingConnected: false } : {}), pendingDeploymentId: result.inProgress?.deploymentId ?? null })}\n`,
-  );
+  process.stdout.write(`${JSON.stringify(releaseOutput(operation, result))}\n`);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {

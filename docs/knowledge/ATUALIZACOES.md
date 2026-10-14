@@ -15,6 +15,15 @@
 
 ## 2026-10-14: Qlik via VPS
 
+- Retomada21:15Z: captura38634304020/548d2f2a aprovada e11 imagens revisadas,
+  incluindo768px. Lote integral incorporado com242 hashes conferidos e231
+  imagens alheias preservadas. Suite local completa exit0:3177 Vitest,
+  649 ops e664 release; skips87/19/14. Lint/tipos/build aprovados. Diagnostico
+  final posterior teve106 testes focais/1 skip; nova CI combinada exigida.
+  Fonte GitHub/artefato11929276378/logs locais; detalhes WORKLOG/auditoria.
+  SSH20:56Z: CRM6843ef1, deploy57c09296 em20:38:13.413Z; owner sem preflight
+  e sem carga. Mapping/migration/ativacao ainda pendentes, sem alegar conexao.
+
 - Captura38627653608 aprovada tecnicamente, mas revisao humana encontrou
   abas quebradas em768px. Corrigida faixa tablet; lote nao promovido e nova
   captura exigida. PR227/CI38628006919 falhou em fill_financing do Associativo,

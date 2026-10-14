@@ -109,6 +109,7 @@ function harness() {
     gates: 0,
     ciChecks: 0,
     status: "pending",
+    rankingStatus: "succeeded",
     profileBackup: false,
     imageProven: false,
   };
@@ -152,11 +153,15 @@ function harness() {
         ? "cas"
         : next.inProgress === null
           ? "receipt"
-          : next.inProgress.phase === "recovering"
-            ? "recovery-intent"
-            : next.inProgress.phase === "profile-backed-up"
-              ? "backed-up"
-              : "intent";
+          : next.inProgress.boot &&
+              next.inProgress.boot !== expected?.inProgress?.boot &&
+              next.inProgress.boot !== "unchanged"
+            ? `boot-${next.inProgress.boot}`
+            : next.inProgress.phase === "recovering"
+              ? "recovery-intent"
+              : next.inProgress.phase === "profile-backed-up"
+                ? "backed-up"
+                : "intent";
       await event(kind, expected, next);
       assert.deepEqual(s.state, expected, "Qlik ledger CAS mismatch");
       s.state = clone(next);
@@ -210,7 +215,8 @@ function harness() {
         unitHash: tx.backup.targetUnitHash,
         enabled: tx.previousOwner.enabled,
         active: false,
-        preflight: true,
+        preflight: !tx.ranking,
+        ...(tx.ranking ? { ranking: true } : {}),
       });
       await event("after-apply", tx);
     },
@@ -230,7 +236,12 @@ function harness() {
       pending(tx);
       await event("verify", tx, restore);
       assert.equal(s.owner.active, true);
-      return { preflightStatus: s.owner.preflight ? s.status : "disabled" };
+      return {
+        preflightStatus: s.owner.preflight ? s.status : "disabled",
+        ...(s.owner.ranking
+          ? { rankingStatus: s.rankingStatus, rankingConnected: s.rankingStatus === "succeeded" }
+          : {}),
+      };
     },
     async restore(tx, beforeWrite) {
       pending(tx);
@@ -242,8 +253,25 @@ function harness() {
       pending(tx);
       check();
       s.events.push("restore-write");
-      s.owner = { ...clone(tx.previousOwner), active: false };
+      s.owner = {
+        ...clone(tx.previousOwner),
+        active: false,
+        ...(tx.ranking ? { enabled: s.owner.enabled } : {}),
+      };
       await event("after-restore");
+    },
+    async setBoot(tx, beforeBoot, restore) {
+      pending(tx);
+      assert.equal(tx.boot, restore ? "restore-pending" : "enable-pending");
+      const name = restore ? "restore-boot" : "enable-boot";
+      await event(name, tx);
+      const check = await beforeBoot();
+      await event(`${name}-recheck`, tx);
+      pending(tx);
+      check();
+      s.events.push(`${name}-write`);
+      s.owner.enabled = restore ? tx.previousOwner.enabled : true;
+      await event(`after-${name}`, tx);
     },
   };
   return s;
@@ -264,6 +292,360 @@ function noPublication(s) {
   assert.ok(!s.events.includes("apply-write"));
   assert.ok(!s.events.includes("start-write"));
 }
+
+test("ranking activation upgrades v1 only at durable intent and enables boot after a successful cycle", async () => {
+  const s = harness();
+  s.state = ledger();
+  const prior = clone(s.state);
+  s.hooks.prepare = (opts) => {
+    assert.equal(opts.ranking, true);
+    assert.deepEqual(s.state, prior);
+  };
+  const result = await executeQlikRelease(options({ ranking: true }), s.io);
+  assert.equal(s.state.schemaVersion, 2);
+  assert.deepEqual(s.state.baseline, prior.baseline);
+  assert.equal(result.release.ranking, true);
+  assert.equal(result.release.enabled, true);
+  assert.equal(result.release.preflight, false);
+  assert.equal(result.preflightStatus, "disabled");
+  assert.equal(result.rankingStatus, "succeeded");
+  assert.equal(result.rankingConnected, true);
+  assert.ok(s.events.indexOf("verify") < s.events.indexOf("boot-enable-pending"));
+  assert.ok(s.events.indexOf("boot-enable-pending") < s.events.indexOf("enable-boot-write"));
+  assert.ok(s.events.indexOf("enable-boot-write") < s.events.indexOf("receipt"));
+  assert.equal(s.state.inProgress, null);
+  validateQlikState(s.state, s.clock);
+});
+
+test("an eight-minute ranking cycle gets a new CRM/CI observation before enabling boot", async (t) => {
+  for (const change of ["none", "crm", "ci"])
+    await t.test(change, async () => {
+      const s = harness();
+      let gatesBeforeCycle;
+      let checksBeforeCycle;
+      s.hooks.verify = () => {
+        gatesBeforeCycle = s.gates;
+        checksBeforeCycle = s.ciChecks;
+        s.clock += 8 * 60_000;
+        if (change === "crm") s.crm.release.deploymentId = oldId;
+        if (change === "ci") s.candidate.run.conclusion = "failure";
+      };
+      s.hooks["enable-boot-recheck"] = () => {
+        assert.ok(s.gates > gatesBeforeCycle);
+        assert.ok(s.ciChecks > checksBeforeCycle);
+      };
+      if (change === "none") {
+        const result = await executeQlikRelease(options({ ranking: true }), s.io);
+        assert.equal(result.release.enabled, true);
+        assert.equal(result.release.deployedAt, new Date(s.clock).toISOString());
+      } else {
+        await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+        assert.ok(!s.events.includes("enable-boot-write"));
+        assert.equal(s.state.inProgress.boot, "enable-pending");
+      }
+    });
+});
+
+test("ranking failure, reauthentication and running cannot authorize boot or a receipt", async (t) => {
+  for (const status of ["running", "reauth_required", "unavailable", "invented"]) {
+    await t.test(status, async () => {
+      const s = harness();
+      s.rankingStatus = status;
+      await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+      assert.equal(s.state.inProgress.boot, "unchanged");
+      assert.equal(s.state.release, null);
+      assert.equal(s.owner.enabled, false);
+      assert.ok(!s.events.includes("enable-boot-write"));
+    });
+  }
+});
+
+test("ranking result must be exact and cannot claim connected without succeeded", async (t) => {
+  for (const result of [
+    { preflightStatus: "disabled", rankingStatus: "succeeded", rankingConnected: false },
+    { preflightStatus: "disabled", rankingStatus: "unavailable", rankingConnected: true },
+    {
+      preflightStatus: "disabled",
+      rankingStatus: "succeeded",
+      rankingConnected: true,
+      secret: "forbidden",
+    },
+    { preflightStatus: "inspected", rankingStatus: "succeeded", rankingConnected: true },
+  ])
+    await t.test(JSON.stringify(result), async () => {
+      const s = harness();
+      s.io.verifyOwner = async () => result;
+      await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+      assert.ok(!s.events.includes("enable-boot-write"));
+    });
+});
+
+test("ranking noop preserves recorded connection fields without another cycle or write", async () => {
+  const s = harness();
+  const deployed = await executeQlikRelease(options({ ranking: true }), s.io);
+  const writes = s.writes.length;
+  const cycles = s.events.filter((event) => event === "verify").length;
+  s.rankingStatus = "unavailable";
+  const result = await executeQlikRelease(
+    options({ ranking: true, expectedOwnerSha: targetSha }),
+    s.io,
+  );
+  assert.equal(result.status, "noop");
+  assert.deepEqual(result.release, deployed.release);
+  assert.equal(result.rankingStatus, "succeeded");
+  assert.equal(result.rankingConnected, true);
+  assert.equal(s.writes.length, writes);
+  assert.equal(s.events.filter((event) => event === "verify").length, cycles);
+});
+
+test("final CRM observation cannot hide owner drift before deploy or recovery receipt", async (t) => {
+  for (const ranking of [false, true])
+    for (const restore of [false, true])
+      for (const field of ["active", "unitHash", "enabled"])
+        await t.test(
+          `${ranking ? "v2" : "v1"}-${restore ? "recover" : "deploy"}-${field}`,
+          async () => {
+            const s = harness();
+            s.state = ledger();
+            const previous = clone(s.state.release);
+            const opts = options(ranking ? { ranking: true } : {});
+            if (restore) {
+              s.hooks.verify = () => {
+                throw new Error("Synthetic interruption");
+              };
+              await assert.rejects(executeQlikRelease(opts, s.io));
+              delete s.hooks.verify;
+            }
+            let verified = false;
+            let drifted = false;
+            s.hooks.verify = () => {
+              verified = true;
+            };
+            s.hooks.observe = () => {
+              if (verified && (restore || !ranking || s.state.inProgress.boot === "enabled")) {
+                drifted = true;
+                if (field === "unitHash") s.owner.unitHash = "f".repeat(64);
+                else s.owner[field] = !s.owner[field];
+              }
+            };
+            await assert.rejects(
+              restore ? recoverQlikRelease(deployId, s.io) : executeQlikRelease(opts, s.io),
+              restore ? /\(recovery-receipt\)/ : /\(receipt\)/,
+            );
+            assert.equal(drifted, true);
+            assert.equal(s.state.inProgress.deploymentId, deployId);
+            assert.deepEqual(s.state.release, previous);
+            assert.ok(!s.events.includes("receipt"));
+          },
+        );
+});
+
+test("same SHA cannot silently enable ranking; future deploys preserve the enabled mode", async () => {
+  const old = harness();
+  old.owner = owner({ preflight: true });
+  old.state = ledger(old.owner);
+  old.candidate = candidate(ownerSha);
+  await assert.rejects(
+    executeQlikRelease(
+      options({ targetSha: ownerSha, targetImageId: crmImage, ranking: true }),
+      old.io,
+    ),
+  );
+  assert.ok(!old.events.includes("prepare"));
+  const s = harness();
+  s.owner = owner({ ranking: true, enabled: true });
+  s.state = {
+    ...ledger(s.owner, { rankingStatus: "succeeded", rankingConnected: true }),
+    schemaVersion: 2,
+  };
+  s.hooks.prepare = (opts) => assert.equal(opts.ranking, true);
+  const result = await executeQlikRelease(options(), s.io);
+  assert.equal(result.release.ranking, true);
+  assert.equal(result.release.enabled, true);
+});
+
+test("ranking recovery handles every boot interruption and restores exact previous enabled/mode", async (t) => {
+  for (const enabled of [false, true])
+    for (const at of [
+      "after-apply",
+      "verify",
+      "after-boot-enable-pending",
+      "enable-boot",
+      "after-enable-boot",
+      "boot-enabled",
+      "after-boot-enabled",
+      "receipt",
+    ])
+      await t.test(`${enabled}-${at}`, async () => {
+        const s = harness();
+        s.owner.enabled = enabled;
+        const previous = clone(s.owner);
+        s.hooks[at] = () => {
+          throw new Error("Synthetic interrupted release");
+        };
+        await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+        delete s.hooks[at];
+        const result = await recoverQlikRelease(deployId, s.io);
+        assert.equal(result.status, "recovered");
+        assert.deepEqual(s.owner, previous);
+        assert.equal(s.state.inProgress, null);
+        assert.equal(result.release.enabled, enabled);
+        assert.equal(result.release.ranking, undefined);
+        assert.ok(s.events.indexOf("restore-write") < s.events.indexOf("restore-boot-write"));
+        assert.ok(s.events.indexOf("restore-boot-write") < s.events.indexOf("recovery-start"));
+      });
+});
+
+test("ranking recovery retries after restoring unit or boot, including a previous ranking owner", async (t) => {
+  for (const at of [
+    "after-restore",
+    "after-boot-restore-pending",
+    "restore-boot",
+    "after-restore-boot",
+    "after-boot-restored",
+    "recovery-start",
+  ]) {
+    await t.test(at, async () => {
+      const s = harness();
+      s.owner = owner({ ranking: true, enabled: true });
+      s.state = {
+        ...ledger(s.owner, { rankingStatus: "succeeded", rankingConnected: true }),
+        schemaVersion: 2,
+      };
+      const prior = clone(s.owner);
+      s.hooks["after-enable-boot"] = () => {
+        throw new Error("Interrupted enable");
+      };
+      await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+      delete s.hooks["after-enable-boot"];
+      s.hooks[at] = () => {
+        throw new Error("Interrupted recovery");
+      };
+      await assert.rejects(recoverQlikRelease(deployId, s.io));
+      delete s.hooks[at];
+      s.rankingStatus = "reauth_required";
+      const result = await recoverQlikRelease(deployId, s.io);
+      assert.deepEqual(s.owner, prior);
+      assert.equal(result.rankingConnected, false);
+      assert.equal(result.rankingStatus, "reauth_required");
+    });
+  }
+});
+
+test("boot callbacks recheck freshness, CRM, ledger and owner, including recovery", async (t) => {
+  for (const restore of [false, true])
+    for (const change of ["clock", "regression", "crm", "ledger", "unit", "active"]) {
+      await t.test(`${restore}-${change}`, async () => {
+        const s = harness();
+        if (restore) {
+          s.hooks["after-enable-boot"] = () => {
+            throw new Error("Interrupted enable");
+          };
+          await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+          delete s.hooks["after-enable-boot"];
+        }
+        const name = restore ? "restore-boot" : "enable-boot";
+        s.hooks[change === "clock" || change === "regression" ? `${name}-recheck` : name] = () => {
+          if (change === "clock") s.clock += 60001;
+          if (change === "regression") s.clock--;
+          if (change === "crm") s.crm.release.deploymentId = oldId;
+          if (change === "ledger") s.state.inProgress.startedAt = new Date(minute).toISOString();
+          if (change === "unit") s.owner.unitHash = "f".repeat(64);
+          if (change === "active") s.owner.active = restore;
+        };
+        await assert.rejects(
+          restore
+            ? recoverQlikRelease(deployId, s.io)
+            : executeQlikRelease(options({ ranking: true }), s.io),
+        );
+        assert.ok(!s.events.includes(`${name}-write`));
+        assert.ok(s.state.inProgress);
+      });
+    }
+});
+
+test("boot mutation must consume its synchronous guard exactly once", async (t) => {
+  for (const restore of [false, true])
+    for (const behavior of ["omit", "twice", "late", "swallow"]) {
+      await t.test(`${restore}-${behavior}`, async () => {
+        const s = harness();
+        if (restore) {
+          s.hooks["after-enable-boot"] = () => {
+            throw new Error("Interrupted enable");
+          };
+          await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+          delete s.hooks["after-enable-boot"];
+        }
+        let late;
+        s.io.setBoot = async (_tx, callback) => {
+          if (behavior === "omit") return;
+          const guard = await callback();
+          if (behavior === "late") {
+            late = guard;
+            return;
+          }
+          if (behavior === "swallow") s.clock += 60001;
+          try {
+            guard();
+            if (behavior === "twice") guard();
+          } catch {
+            /* Broken host double. */
+          }
+        };
+        await assert.rejects(
+          restore
+            ? recoverQlikRelease(deployId, s.io)
+            : executeQlikRelease(options({ ranking: true }), s.io),
+        );
+        if (late) assert.throws(late);
+        assert.ok(s.state.inProgress);
+      });
+    }
+});
+
+test("v2 ledger and ranking options stay strict; unjournaled boot drift is not recovery authority", async (t) => {
+  for (const value of [false, "enable", null, 1]) {
+    const s = harness();
+    await assert.rejects(executeQlikRelease(options({ ranking: value }), s.io));
+    assert.deepEqual(s.events, []);
+  }
+  const s = harness();
+  s.hooks.verify = () => {
+    throw new Error("Before boot intent");
+  };
+  await assert.rejects(executeQlikRelease(options({ ranking: true }), s.io));
+  for (const mutate of [
+    (v) => {
+      v.schemaVersion = 1;
+    },
+    (v) => {
+      v.inProgress.ranking = false;
+    },
+    (v) => {
+      v.inProgress.boot = "arbitrary";
+    },
+    (v) => {
+      v.inProgress.boot = "restored";
+    },
+    (v) => {
+      v.inProgress.phase = "prepared";
+      v.inProgress.boot = "enable-pending";
+    },
+    (v) => {
+      v.inProgress.previousOwner.ranking = true;
+      v.inProgress.previousOwner.preflight = true;
+    },
+  ]) {
+    const changed = clone(s.state);
+    mutate(changed);
+    assert.throws(() => validateQlikState(changed, s.clock));
+  }
+  await t.test("no enable intent", async () => {
+    s.owner.enabled = true;
+    await assert.rejects(recoverQlikRelease(deployId, s.io));
+    assert.ok(!s.events.includes("restore-write"));
+  });
+});
 
 test("first adoption records an observed baseline, durable intent before stop and a verified receipt", async () => {
   const s = harness();
@@ -821,7 +1203,7 @@ test("malformed ledgers cannot supply baseline history, arbitrary metadata or in
   const pending = (await failedAttempt()).state;
   const changes = [
     (s) => {
-      s.schemaVersion = 2;
+      s.schemaVersion = 3;
     },
     (s) => {
       s.baseline.deployedAt = "invented";

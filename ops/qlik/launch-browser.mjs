@@ -4,6 +4,9 @@ import { chromium } from "@playwright/test";
 import { collectBrowserMetadata } from "./browser-preflight.mjs";
 import { startQlikCollectionLoop } from "./collection-loop.mjs";
 import { writeMetadataArtifact } from "./metadata-artifact.mjs";
+import { runRankingCycle } from "./ranking-cycle.mjs";
+import { readRankingCredential } from "./ranking-credential.mjs";
+import { writeRankingArtifact } from "./ranking-artifact.mjs";
 
 const PROFILE = "/var/lib/descomplica-qlik/chrome";
 const ORIGIN = "https://direcional.us.qlikcloud.com/";
@@ -33,26 +36,100 @@ async function main() {
     args: ["--no-first-run", "--no-default-browser-check"],
   });
   const metadataOnly = process.env.QLIK_METADATA_PREFLIGHT === "enabled";
+  const ranking = process.env.QLIK_RANKING_COLLECTION === "enabled";
+  if (metadataOnly && ranking) {
+    await browser.close();
+    throw new Error("exclusive_qlik_collection_mode_required");
+  }
+  const rankingCollect = ranking
+    ? (await import("./browser-ranking.mjs")).collectBrowserRanking
+    : undefined;
   await holdBrowserSession(browser, {
-    startCollection: metadataOnly
+    startCollection: ranking
       ? (signal) =>
-          startQlikCollectionLoop({
+          startRankingCollection({
             signal,
-            collect: async (options) => {
-              const result = await collectBrowserMetadata(browser, options);
-              if (options.signal.aborted) return { state: "unavailable" };
-              await writeMetadataArtifact(result);
-              return {
-                state:
-                  result.status === "reauth_required"
-                    ? "reauth_required"
-                    : result.status === "inspected"
-                      ? "succeeded"
-                      : "unavailable",
-              };
-            },
+            collect: (options) =>
+              rankingCollect(browser, {
+                ...options,
+                onOwnerUnrecoverable: () => {
+                  console.error("qlik_owner_unrecoverable");
+                  process.exit(1);
+                },
+              }),
           })
-      : undefined,
+      : metadataOnly
+        ? (signal) =>
+            startQlikCollectionLoop({
+              signal,
+              collect: async (options) => {
+                const result = await collectBrowserMetadata(browser, options);
+                if (options.signal.aborted) return { state: "unavailable" };
+                await writeMetadataArtifact(result);
+                return {
+                  state:
+                    result.status === "reauth_required"
+                      ? "reauth_required"
+                      : result.status === "inspected"
+                        ? "succeeded"
+                        : "unavailable",
+                };
+              },
+            })
+        : undefined,
+  });
+}
+
+export function startRankingCollection({
+  signal,
+  collect,
+  credential = readRankingCredential,
+  cycle = runRankingCycle,
+  write = writeRankingArtifact,
+  loop = startQlikCollectionLoop,
+  clock = () => performance.now(),
+}) {
+  let completed;
+  let collectionSignal;
+  let startedAt;
+  let elapsed;
+  return loop({
+    signal,
+    intervalMs: 3_600_000,
+    timeoutMs: 480_000,
+    clock: () => {
+      elapsed = NaN;
+      const value = clock();
+      if (startedAt === undefined) startedAt = value;
+      elapsed = value - startedAt;
+      return value;
+    },
+    onStatus: async ({ state }) => {
+      if (state === "running") completed = undefined;
+      // Reuse the loop's own clock samples, including its post-collection check.
+      const acceptedFailure =
+        ["unavailable", "reauth_required"].includes(state) &&
+        state === completed?.state &&
+        !collectionSignal?.aborted &&
+        Number.isFinite(elapsed) &&
+        elapsed >= 0 &&
+        elapsed < 480_000;
+      try {
+        await write(state === "succeeded" || acceptedFailure ? completed : { state });
+      } finally {
+        if (state !== "running") startedAt = undefined;
+      }
+    },
+    collect: async ({ signal: cycleSignal }) => {
+      collectionSignal = cycleSignal;
+      if (cycleSignal.aborted) return { state: "unavailable" };
+      const secret = await credential();
+      if (cycleSignal.aborted) return { state: "unavailable" };
+      const result = await cycle({ signal: cycleSignal, collect, secret });
+      if (cycleSignal.aborted) return { state: "unavailable" };
+      completed = result;
+      return result;
+    },
   });
 }
 

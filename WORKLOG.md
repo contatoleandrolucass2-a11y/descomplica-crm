@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-10-14: Runtime Qlik e captura final revisados
+
+Coletor QIX candidato abre duas sessoes independentes, verifica definicoes,
+selecoes, cobertura e totais; preserva centavos exatos e rejeita recarga alterada.
+Loop horario sem sobreposicao, credencial systemd privada e recibo sem fatos.
+Coordenador passa a exigir publicacao real antes de habilitar boot, com CAS,
+backup e recuperacao separados. Diagnosticos aceitam somente codigos fixos;
+resultado apos timeout nao ganha recibo valido. Mapping real ainda pendente.
+
+Suite local completa com VITEST_MAX_WORKERS=1 terminou exit0:3177 Vitest/87
+skips,649 operacionais/19 skips e664 release/14 skips. Lint, tipos e build
+aprovados, com aviso preexistente connected-systems:18. Ultimo ajuste de
+diagnostico terminou depois dessa suite:106 testes focais/1 skip passaram;
+CI Linux do diff combinado continua obrigatoria.
+
+Captura38634304020 aprovada, artefato11929276378, ZIP SHA256
+b5ade6f21a181ef3331703ff5a8870ecf044e6bee46aeace3d6d7925fb1ad32d conferido.
+Commit548d2f2a tem pais6843ef1/679c6fe. Revisadas11 imagens Ranking; abas768
+corrigidas. Conferidos242 hashes/tamanhos, preservadas231 imagens alheias.
+Incorporados11 WebP e manifesto integral, sem alterar proveniencia. Captura
+sintetica nao comprova Qlik real. CI normal verify e carga produtiva pendentes.
+
 ## 2026-10-14: Revisao da captura autenticada do ranking
 
 Workflow38627653608 aprovado; artefato11925039515 com SHA256
