@@ -286,6 +286,71 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     }
   });
 
+  it("waits for the exact day layout style before measuring overflow", async () => {
+    await openRoutine({ clock: "2026-10-12T15:00:00Z" });
+    await page.setViewportSize({ width: 720, height: 900 });
+    await page.getByRole("button", { name: "Hoje", exact: true }).click();
+    const daily = page.getByRole("region", { name: "Tabela de rotina do dia", exact: true });
+    const table = daily.locator("table");
+    await table.evaluate((element) => {
+      element.style.minWidth = "960px";
+    });
+    await browserExpect(table).toHaveCSS("min-width", "960px");
+    const checking = checkRoutineOverflow(page, daily);
+    void checking.catch(() => {});
+    await table.evaluate(
+      (element) =>
+        new Promise<void>((resolve) => {
+          setTimeout(() => {
+            element.style.removeProperty("min-width");
+            resolve();
+          }, 150);
+        }),
+    );
+    await checking;
+    await browserExpect(table).toHaveCSS("min-width", "0px");
+  });
+
+  it.each([true, false])(
+    "checks the current column before page overflow (settles: %s)",
+    async (settles) => {
+      await openRoutine({ clock: "2026-10-12T15:00:00Z" });
+      await page.setViewportSize({ width: 720, height: 900 });
+      await page.getByRole("button", { name: "Hoje", exact: true }).click();
+      const daily = page.getByRole("region", { name: "Tabela de rotina do dia", exact: true });
+      await checkRoutineCurrentColumn(page);
+      const delayedColumn = await page.addStyleTag({
+        content: "[data-routine-current-column] { width: 1400px !important; }",
+      });
+      await browserExpect(daily.locator("table")).toHaveCSS("min-width", "0px");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth)).toBe(
+        true,
+      );
+      const checking = checkRoutineOverflow(page, daily);
+      void checking.catch(() => {});
+      try {
+        if (settles) {
+          await delayedColumn.evaluate(
+            (element) =>
+              new Promise<void>((resolve) => {
+                setTimeout(() => {
+                  element.parentNode?.removeChild(element);
+                  resolve();
+                }, 150);
+              }),
+          );
+          await checking;
+        } else {
+          await expect(checking).rejects.toThrow("One outline follows the current header");
+        }
+      } finally {
+        await delayedColumn.evaluate((element) => element.parentNode?.removeChild(element));
+      }
+      await checkRoutineOverflow(page, daily);
+    },
+    15_000,
+  );
+
   it.each(["light", "balanced", "dark"])(
     "renders continuous spreadsheet cells in %s without hiding text",
     async (theme) => {
@@ -592,7 +657,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
         document.documentElement.dataset.theme = value;
       }, theme);
       await mkdir("test-results/routine-preview", { recursive: true });
-      for (const width of [1440, 390]) {
+      for (const width of [1440, 720, 390]) {
         await page.setViewportSize({ width, height: 900 });
         await page.getByRole("button", { name: "Semana", exact: true }).click();
         const check = completionCell();

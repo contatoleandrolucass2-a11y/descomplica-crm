@@ -1,5 +1,8 @@
 # Replica informacional do dashboard
 
+Atualizacao posterior: [relatorios publicados e refresh automatico](dashboard-atualizacao-2026-10-14.md).
+O registro abaixo preserva a sequencia historica da replica e dos funis.
+
 ## Correcao dos funis em 14/10/2026
 
 Pedido adicional: incluir graficos no Comparativo mensal conforme o print,

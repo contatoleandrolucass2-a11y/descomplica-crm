@@ -742,18 +742,40 @@ export async function checkRoutineCompactLayout(page) {
             : control.top - bounds.top >= 0 &&
               control.top - bounds.top <= 12 &&
               control.left - bounds.left <= 12,
+          geometry: {
+            daily,
+            checkboxTop: checkbox.top,
+            checkboxHeight: checkbox.height,
+            firstLineCenter,
+            alignmentTolerance,
+            controlLeft: control.left,
+            controlRight: control.right,
+            textLeft: text.left,
+            textRight: text.right,
+            cellLeft: bounds.left,
+            cellRight: bounds.right,
+          },
         },
       ];
     }),
   );
   assert.ok(layout.length > 0, "Compact layout requires activities with checkboxes");
+  const expectedTrack = await page.evaluate(() =>
+    matchMedia("(pointer: coarse)").matches ? 44 : 28,
+  );
   for (const cell of layout) {
+    if (
+      !cell.valid ||
+      cell.grid !== "grid" ||
+      cell.firstTrack !== expectedTrack ||
+      !cell.noOverlap ||
+      !cell.aligned
+    ) {
+      process.stderr.write(`[routine-layout-mismatch] ${JSON.stringify(cell)}\n`);
+    }
     assert.equal(cell.valid, true, "Checkbox must precede textarea inside the cell content");
     assert.equal(cell.grid, "grid");
-    assert.equal(
-      cell.firstTrack,
-      await page.evaluate(() => (matchMedia("(pointer: coarse)").matches ? 44 : 28)),
-    );
+    assert.equal(cell.firstTrack, expectedTrack);
     assert.equal(cell.noOverlap, true, "Checkbox and text must occupy separate grid tracks");
     assert.equal(
       cell.aligned,
@@ -764,6 +786,11 @@ export async function checkRoutineCompactLayout(page) {
 }
 
 export async function checkRoutineOverflow(page, region) {
+  const table = region.locator("table");
+  const view = await table.getAttribute("data-view");
+  // Wait for the exact mode-specific style before taking the geometry snapshot.
+  await expect(table).toHaveCSS("min-width", view === "day" ? "0px" : "960px");
+  await checkRoutineCurrentColumn(page);
   const metrics = await region.evaluate((element) => {
     const table = element.querySelector("table");
     const style = getComputedStyle(element);
@@ -779,6 +806,17 @@ export async function checkRoutineOverflow(page, region) {
       pageOverflow: document.documentElement.scrollWidth > innerWidth + 1,
     };
   });
+  if (
+    metrics.overflowX !== "visible" ||
+    metrics.overflowY !== "visible" ||
+    metrics.scrollLeft !== 0 ||
+    metrics.scrollTop !== 0 ||
+    metrics.minWidth !== (metrics.day ? "0px" : "960px") ||
+    metrics.pageOverflow !== metrics.tableOverflow ||
+    (metrics.day && metrics.pageOverflow)
+  ) {
+    process.stderr.write(`[routine-overflow-mismatch] ${JSON.stringify(metrics)}\n`);
+  }
   assert.equal(metrics.overflowX, "visible", "Routine must not own a horizontal scroller");
   assert.equal(metrics.overflowY, "visible", "Routine must not own a vertical scroller");
   assert.equal(metrics.scrollLeft, 0);
@@ -794,6 +832,11 @@ export async function checkRoutineOverflow(page, region) {
   try {
     await page.evaluate(() => window.scrollTo(document.documentElement.scrollWidth, scrollY));
     const last = await region.locator("thead th").last().boundingBox();
+    if (!last || last.x < -1 || last.x + last.width > page.viewportSize().width + 1) {
+      process.stderr.write(
+        `[routine-last-column-mismatch] ${JSON.stringify({ last, viewport: page.viewportSize(), metrics })}\n`,
+      );
+    }
     assert.ok(
       last && last.x >= -1 && last.x + last.width <= page.viewportSize().width + 1,
       "The last weekday must be fully reachable through page scrolling",
@@ -1383,8 +1426,8 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
           .poll(() => daily.evaluate((element) => [element.scrollTop, element.scrollLeft]))
           .toEqual([0, 0]);
         await expect(daily.locator("thead th")).toHaveCount(2);
-        await checkRoutineCompactLayout(page);
         await checkRoutineOverflow(page, daily);
+        await checkRoutineCompactLayout(page);
         await expect
           .poll(() =>
             daily
