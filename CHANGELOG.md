@@ -12,6 +12,7 @@
 - Confere a transferencia RSC pelo registro de rede do navegador na QA.
 - Aguarda o estilo de cada modo da Rotina antes de medir sua geometria na QA.
 - Confere tambem o alinhamento do contorno antes de medir overflow da pagina.
+- Aplica essa prontidao antes da geometria das celulas na matriz diaria.
 
 ## 2026-10-14: Evidencias de publicacao Qlik
 

@@ -237,3 +237,8 @@ merge somente concilia os tres documentos, preservando codigo/lockfile recebidos
 Runbook/coordenador novos conferidos: operacoes Qlik sao separadas; pendencia
 Qlik bloqueia deploy CRM. Esta tarefa nao aciona upgrade, coleta ou recuperacao
 Qlik. Nova CI exata e consulta final de ambas as pendencias continuam exigidas.
+
+Ordem diaria alinhada a semanal: overflow (CSS/contorno alinhados) antecede
+geometria compacta. Evita medir celulas antes da barreira ja testada; nenhum
+predicado ou tolerancia removido. CI38613560953 iniciou em0e1d827, mas o gate
+final devera corresponder ao novo SHA que inclui essa ordem.

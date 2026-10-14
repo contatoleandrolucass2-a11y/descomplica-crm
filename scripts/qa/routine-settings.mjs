@@ -1426,8 +1426,8 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
           .poll(() => daily.evaluate((element) => [element.scrollTop, element.scrollLeft]))
           .toEqual([0, 0]);
         await expect(daily.locator("thead th")).toHaveCount(2);
-        await checkRoutineCompactLayout(page);
         await checkRoutineOverflow(page, daily);
+        await checkRoutineCompactLayout(page);
         await expect
           .poll(() =>
             daily

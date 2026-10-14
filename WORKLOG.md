@@ -36,6 +36,8 @@
   reproduzida com contorno atrasado; QA confere alinhamento antes da medicao,
   preservando limites e rejeitando desalinhamento persistente. Runtime intacto.
 - Main77ddc69 integrado preservando operacoes Qlik; esta tarefa nao as aciona.
+- QA diaria aguarda CSS/contorno antes de medir tambem as celulas, na mesma
+  ordem da semanal; nenhuma verificacao removida ou tolerancia alterada.
 
 ## 2026-10-14: Conferencias da integracao Qlik
 
