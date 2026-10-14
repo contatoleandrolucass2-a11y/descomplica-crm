@@ -154,6 +154,8 @@
   incluindo o titulo; cabecalhos recebem o azul do antigo seletor ativo.
 - Mantem fundo neutro nas pendentes, gradiente nas concluidas e marcacoes
   individuais sincronizadas entre Semana e Hoje.
+- Publicado em14/10/2026 com CI completa e verificacao no CRM; encerramento
+  das evidencias documentais sem outra publicacao do aplicativo.
 
 ## 2026-10-14: Pesquisa de unidades no Associativo
 
