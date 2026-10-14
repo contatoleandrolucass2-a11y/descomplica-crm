@@ -50,3 +50,18 @@ Preservar fonte, textos, persistencia individual e virada semanal de Brasilia.
 - Doze capturas sinteticas compact-completions em test-results/routine-preview;
   coordenador revisou Semana/Hoje dark1440 e Hoje dark390. Checkbox alinha a
   primeira linha, inclusive em textos longos. Nenhuma atividade real alterada.
+
+## Integracao
+
+- PR222, head ea2e639d88dfae4a829d8a4dc0ac1ce9d08dbb1d: CI38565559075
+  concluida com sucesso em 13:20:40Z. validate, release-gates e isolated-restore
+  aprovados; promotable-image corretamente nao se aplica ao evento de PR.
+  Aprovados suite Linux completa, banco, restore, E2E e matriz autenticada.
+- Consulta13:21Z: main mudou para8e015c6 somente com fechamento documental dos
+  funis. Integracao preserva as duas notas; conflito restrito a ATUALIZACOES.
+  Fonte: GitHub PR222/run38565559075 e git fetch. CI do novo SHA e deploy ainda
+  pendentes; aprovacao de ea2e639 nao substitui a verificacao do SHA integrado.
+- A consulta de producao em 14/10 durante a CI confirmou
+  deployment713b3b88-e489-4153-9057-096c7b044661, SHA16f4587 e data real
+  2026-10-14T12:24:35.454Z. Fonte: release:production status; nao e evidencia
+  de frescor para a proxima promocao, que exige nova consulta no minuto.

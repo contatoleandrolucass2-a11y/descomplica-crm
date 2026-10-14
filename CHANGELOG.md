@@ -25,6 +25,8 @@
   A pagina de referencia permanece intocada.
 - Atualiza somente as 11 referencias visuais do dashboard apos conferencia
   autenticada, mantendo as outras 231 imagens e os limiares existentes.
+- Publicado no CRM em14/10/2026 09:24 BRT, versao16f4587, apos CI completa,
+  verificacao da imagem e smoke de producao. Referencia de origem intocada.
 
 ## 2026-10-13: Conclusao semanal individual
 
