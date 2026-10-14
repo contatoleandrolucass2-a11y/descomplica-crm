@@ -304,6 +304,112 @@
   padding-top: 0.5rem;
 }
 
+.monthlyFunnel {
+  margin: 0;
+  color: #fff;
+  text-align: center;
+}
+
+.monthlyFunnel dl {
+  display: grid;
+  gap: 3px;
+}
+
+.funnelStep {
+  position: relative;
+  isolation: isolate;
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  min-height: 3.5rem;
+  padding: 0.375rem 1rem;
+  margin-inline: auto;
+  width: 100%;
+}
+
+.funnelStep::before {
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  content: "";
+  background: var(--funnel-fill);
+  border-top: 2px solid #ffffff45;
+  clip-path: polygon(0 0, 100% 0, 95% 100%, 5% 100%);
+}
+
+.funnelStep[data-stage="opportunities"] {
+  --funnel-fill: #244a76;
+}
+
+.funnelStep[data-stage="appointments"] {
+  --funnel-fill: #236578;
+  width: 92%;
+}
+
+.funnelStep[data-stage="visits"] {
+  --funnel-fill: #13788e;
+  width: 84%;
+}
+
+.funnelStep[data-stage="folders"] {
+  --funnel-fill: #007f98;
+  width: 76%;
+}
+
+.funnelStep[data-stage="approved-folders"] {
+  --funnel-fill: #15776f;
+  width: 68%;
+}
+
+.funnelStep[data-stage="sales"] {
+  --funnel-fill: #087b58;
+  width: 60%;
+}
+
+.monthlyFunnel dt {
+  max-width: 100%;
+  font-size: 0.75rem;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.monthlyFunnel dd {
+  max-width: 100%;
+  font-size: 1.5rem;
+  font-weight: 750;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+
+.monthlyFunnel dd[data-long="true"] {
+  font-size: 1rem;
+}
+
+.monthlyFunnel dd[data-unavailable="true"] {
+  font-size: 0.8125rem;
+  line-height: 1.5;
+}
+
+.report .monthlyFunnel dd > span {
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+  font-size: inherit;
+  font-weight: 500;
+  white-space: normal;
+}
+
+@media (forced-colors: active) {
+  .monthlyFunnel {
+    color: CanvasText;
+  }
+
+  .funnelStep {
+    border-block: 1px solid CanvasText;
+  }
+}
+
 .totalConversion dt > span {
   display: block;
   font-size: 0.75rem;

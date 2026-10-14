@@ -268,6 +268,105 @@ As03:58Z CI38507765662 ainda em curso, health200/ok/0fdbb80. PR216 sem merge;
 aguarda CI, recorte e contrato. Sync excedeu256000bytes apos integrar notas:
 consolidada somente nota Qlik, detalhes no runbook/WORKLOG/historico; sync passou.
 
+## 2026-10-14: Compactacao da Rotina
+
+- Pedido aplicado somente ao componente de Rotina e estilos locais. Grade
+  fixa para checkbox/texto; controles antes do texto, sem faixa extra abaixo.
+- Fundo neutro nas pendentes, gradiente exclusivamente em data-completed;
+  data-today restrito aos cabecalhos. Hover/foco por contorno, sem escala.
+- Wrapper deixa de criar scroll interno; semana conserva largura legivel
+  e pode exigir rolagem horizontal da pagina em telas estreitas. Hoje adapta.
+- Hook/API/banco e conteudo salvo preservados. Lint/tipos/build aprovados;
+  QA focal4/4 com tres temas e duas larguras, Axe e sincronizacao bidirecional.
+  Windows integral interrompido apos symlink/timeouts; exigir CI Linux completa.
+  CI e publicacao pendentes; nao confundir com deploy faae8e9 anterior.
+
+## 2026-10-14: Publicacao das conclusoes individuais
+
+- PR215 integrado; CI38510935022 e main CI38514527676 completas/aprovadas.
+- Migration aditiva autorizada aplicada apos backup tecnico verificado:
+  fonte 20261014020437, registro remoto 20261014054331. RLS/grants e limite
+  domingo/segunda conferidos; revisoes House2 e Imob3 preservadas.
+- Publicado faae8e9 pelo coordenador protegido em 05:45:08Z (02:45 Sao Paulo).
+  Container saudavel, sem reinicios/OOM; health correto e anonimo negado.
+- UI publicada preserva os 108 textos revisados e a fonte13px da House;
+  93 controles individuais na semana e18 em Hoje, habilitados. Nenhuma
+  atividade real marcada artificialmente; escrita/isolamento comprovados na CI.
+- Evidencia completa em docs/audits/rotina-individual-2026-10-14.md. Este
+  fechamento e documental e nao exige reiniciar novamente a aplicacao.
+
+## 2026-10-14: Funis no comparativo mensal
+
+- Corrige a ausencia dos graficos solicitados no comparativo de `/app`.
+  Cada bloco agora tem seis trapezios, rotulos e valores acessiveis em HTML.
+  Geometria ordinal fixa, sem sugerir area proporcional ou coorte individual.
+- Usa as cinco series existentes; Pastas aprovadas fica explicitamente
+  indisponivel. O ranking possui approvedFolder, mas nao e substituto da serie
+  mensal agregada por visao, historico e meta. Sem mudanca de contrato ou dados.
+- Referencia publica consultada somente por leitura no navegador; screenshot
+  enviado orienta o formato. Sem alteracao no site de origem nem em n8n.
+- Testes de componente: 18 aprovados. Tipos aprovados. QA sintetico: 74 checks
+  aprovados em tres temas e larguras, sem overflow, Axe ou erro de console.
+  Desktop completo: 4.704 px, mantendo o limite de 4.800. Lint/build aprovados.
+- CI38515347098, candidato aa5c835: validate aprovado, com 2.807 testes da
+  aplicacao (79 skips), 241 do coletor e 124 de release, sem falhas no Linux.
+  Windows apresentou timeouts em devtools/status, ACL do coletor e o symlink
+  preexistente; nenhum gate foi afrouxado. Release local:113 passaram/11 skips.
+  Integracao concorrente da Rotina preservada; navegador, baseline e deploy
+  ainda pendentes. Evidencias na auditoria do dashboard.
+- CI38515347098 concluiu banco/restore/E2E e checks funcionais visuais; somente
+  11 imagens de /app diferiram. Revisadas e promovidas com hashes/proveniencia,
+  preservando231 e limiares1%/16. Fingerprint comprovou apenas19 outputs QA.
+  Nova CI verify obrigatoria antes de merge/publicacao.
+- CI verify38519492545 aprovada; PR218 integrado em16f4587. CI main38558435232
+  aprovou os quatro jobs, incluindo1.323 testes de banco,19 E2E e242 comparacoes
+  visuais. Publicado em14/10/2026 09:24 BRT pelo coordenador protegido, com
+  imagem comprovada e backup verificado; health e acesso anonimo conferidos.
+  Recibo, hashes, limites e sincronizacao em
+  [auditoria dos funis](docs/audits/dashboard-funis-2026-10-14.md).
+
+## 2026-10-13: Revisao e conclusoes individuais da Rotina
+
+- Revisao de portugues aplicada pela UI autorizada em regional imob, mantendo
+  sentido, capitalizacao e tipografia. Esclarecimento de 60 dias confirmado
+  pelo usuario. Salvo 23:05; 108 campos/93 atividades conferidos apos recarga.
+- Conclusao por usuario com persistencia no CRM, checkbox por atividade e
+  semana definida no servidor em America/Sao_Paulo. Migration nova autorizada
+  especificamente apos testes e backup, sem alterar dados comerciais.
+- API, tabela privada com RPCs e controles de conclusao implementados. Lint,
+  typecheck e build aprovados; 80 testes focais aprovados. Suite serial local
+  tem falha remanescente de symlink Salesforce no Windows, fora deste escopo.
+  Testes Chromium cobrem persistencia, isolamento, virada, foco e scroll.
+- Banco isolado, CI e publicacao ainda pendentes; runtime permanece 0fdbb80.
+- CI inicial aprovou validate; restore revelou contador RLS legado, corrigido
+  de 40 para 41 tabelas. Os demais testes pgTAP passaram; repetir gates completos.
+- Segunda CI aprovou banco/restore/E2E; setup do leitor sintetico da matriz
+  visual falhou com SQLSTATE 23505. Publicacao bloqueada ate corrigir fixture.
+- Terceira CI aprovou a Rotina completa com duas contas reais isoladas. Nova
+  conta alterou a selecao inicial da captura administrativa; estabilizar essa
+  precondicao preservando todas as assertions e referencias visuais existentes.
+
+## 2026-10-13: Padrao de texto regional imob
+
+- Capitalizacao solicitada salva no CRM as 22:54: primeira letra maiuscula
+  e demais minusculas, preservando 93 atividades e 18 linhas.
+- Fonte, tamanho, peso e entrelinha iguais a House; 108 campos conferidos
+  apos recarga. Somente dados pela UI existente, sem codigo ou novo deploy.
+
+## 2026-10-13: Cadastro da rotina Gerente regional imob
+
+- Conteudo autorizado cadastrado pela UI existente, usando TESTE1.xlsx:
+  18 linhas e 93 atividades de segunda a sabado. Tres linhas vazias removidas;
+  textos completos, ordem dos dias e vazios individuais preservados.
+- Matriz normalizada conferida por hash e todas as 108 celulas comparadas
+  antes/depois de salvar e recarregar. Hoje corresponde a terca-feira;
+  Gerente regional house permaneceu igual e console sem erros.
+- Dados salvos no CRM as 22:27 de Sao Paulo. Sem codigo, migration, ACL,
+  workflow ou deploy. Planilha e captura permanecem fora do Git.
+- Lint/typecheck/build aprovados. Suite geral: 2662 passaram, 63 skips,
+  uma falha existente de symlink no estoque, registrada em ATUALIZACOES;
+  nenhuma alteracao para contornar o teste e nenhuma promocao de runtime.
+
 ## 2026-10-13: Replica informacional do dashboard
 
 - Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com

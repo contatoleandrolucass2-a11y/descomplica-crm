@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { CalendarDays, ListChecks, Plus, Save } from "lucide-react";
 import { routineRecordSchema, routineRowsSchema, routineSnapshotSchema } from "@/lib/crm/routines";
 
 import "@/app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css";
 import "@/app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css";
 import styles from "./RoutineSettings.module.css";
+import { useRoutineCompletions } from "./useRoutineCompletions";
 
 const STORAGE_KEY = "descomplica.crm.settings.routine.v1";
 
@@ -427,6 +428,7 @@ type RoutineBrowserNavigation = {
 class RoutineSaveError extends Error {}
 
 export function RoutineSettings() {
+  const completions = useRoutineCompletions();
   const [activeRole, setActiveRole] = useState<RoleKey>("regional-house");
   const [routine, setRoutine] = useState<RoutineState>(defaultRoutine);
   const [savedAt, setSavedAt] = useState<string | null>(null);
@@ -440,6 +442,17 @@ export function RoutineSettings() {
   const [loadAttempt, setLoadAttempt] = useState(0);
   const revisions = useRef<Partial<Record<RoleKey, number>>>({});
   const dirtyRoles = useRef(new Set<RoleKey>());
+  const [completionRoles, setCompletionRoles] = useState<Partial<Record<RoleKey, boolean>>>({});
+  const updateCompletionAvailability = useCallback(() => {
+    setCompletionRoles(
+      Object.fromEntries(
+        roles.map(({ key }) => [
+          key,
+          revisions.current[key] !== undefined && !dirtyRoles.current.has(key),
+        ]),
+      ),
+    );
+  }, []);
   const saving = useRef(false);
   const changeVersion = useRef(0);
   const [today, setToday] = useState<string | null>(null);
@@ -495,6 +508,7 @@ export function RoutineSettings() {
           nextRevisions[record.role_key] = record.revision;
         }
         revisions.current = nextRevisions;
+        updateCompletionAvailability();
         setRoutine(next);
         setCanEdit(snapshot.can_edit);
         setHasLoaded(true);
@@ -530,7 +544,7 @@ export function RoutineSettings() {
       window.removeEventListener("focus", refresh);
       document.removeEventListener("visibilitychange", refresh);
     };
-  }, [loadAttempt]);
+  }, [loadAttempt, updateCompletionAvailability]);
 
   useEffect(() => {
     if (!hasUnsavedChanges) return;
@@ -751,6 +765,7 @@ export function RoutineSettings() {
     if (!hasLoaded || !canEdit || saving.current) return;
     changeVersion.current += 1;
     dirtyRoles.current.add(activeRole);
+    updateCompletionAvailability();
     setEditedCells((current) => new Set(current).add(`${activeRole}:${weekday}:${rowIndex}`));
     setRoutine((current) => ({
       ...current,
@@ -768,6 +783,7 @@ export function RoutineSettings() {
       return;
     }
     dirtyRoles.current.add(activeRole);
+    updateCompletionAvailability();
     changeVersion.current += 1;
     pendingRow.current = activeRows.length;
     setRoutine((current) => ({
@@ -793,6 +809,7 @@ export function RoutineSettings() {
     try {
       for (const role of targets) {
         dirtyRoles.current.add(role);
+        updateCompletionAvailability();
         if (!routineRowsSchema.safeParse(routine[role]).success) {
           throw new RoutineSaveError("Use até 200 linhas por função e 4.000 caracteres por campo.");
         }
@@ -825,6 +842,8 @@ export function RoutineSettings() {
           throw new RoutineSaveError("Não foi possível confirmar o salvamento no CRM.");
         revisions.current[role] = saved.data.revision;
         dirtyRoles.current.delete(role);
+        updateCompletionAvailability();
+        completions.reload();
       }
       setSavedAt(
         new Intl.DateTimeFormat("pt-BR", {
@@ -854,10 +873,12 @@ export function RoutineSettings() {
     )
       return;
     dirtyRoles.current.clear();
+    updateCompletionAvailability();
     changeVersion.current += 1;
     setHasUnsavedChanges(false);
     setEditedCells(new Set());
     setHasLoaded(false);
+    completions.reload();
     setLoadAttempt((value) => value + 1);
   }
 
@@ -877,6 +898,7 @@ export function RoutineSettings() {
     )
       return;
     dirtyRoles.current.add(activeRole);
+    updateCompletionAvailability();
     changeVersion.current += 1;
     setRoutine((current) => ({ ...current, [activeRole]: localRows }));
     setHasUnsavedChanges(true);
@@ -977,7 +999,22 @@ export function RoutineSettings() {
           </div>
         ) : null}
 
-        {hasLoaded && !canEdit ? <p className={styles.syncNotice}>Somente visualização</p> : null}
+        {completions.error ? (
+          <div className={styles.storageError} role="alert">
+            <p>{completions.error}</p>
+            <button
+              className={styles.addButton}
+              type="button"
+              onClick={reloadSharedRoutine}
+              disabled={isSaving}
+            >
+              Recarregar rotina e conclusões
+            </button>
+          </div>
+        ) : null}
+        {hasLoaded && !canEdit ? (
+          <p className={styles.syncNotice}>Textos somente para leitura</p>
+        ) : null}
         {hasLoaded &&
         canEdit &&
         legacy?.[activeRole] &&
@@ -1074,26 +1111,70 @@ export function RoutineSettings() {
                       {visibleRows.map(({ row, index: rowIndex }) => (
                         <tr key={rowIndex}>
                           <th scope="row">{rowIndex + 1}</th>
-                          {visibleDays.map((weekday) => (
-                            <td
-                              key={weekday}
-                              data-label={weekday}
-                              data-today={weekday.toLocaleLowerCase("pt-BR") === today || undefined}
-                            >
-                              <textarea
-                                data-row={rowIndex}
-                                aria-label={`${weekday}, linha ${rowIndex + 1}`}
-                                disabled={!hasLoaded}
-                                readOnly={!canEdit || isSaving}
-                                maxLength={4000}
-                                value={row[weekday]}
-                                onChange={(event) =>
-                                  updateCell(rowIndex, weekday, event.target.value)
-                                }
-                                rows={1}
-                              />
-                            </td>
-                          ))}
+                          {visibleDays.map((weekday) => {
+                            const activity = {
+                              role_key: activeRole,
+                              row_index: rowIndex,
+                              day: weekday,
+                              activity_text: row[weekday],
+                            };
+                            const unsaved = !completionRoles[activeRole];
+                            const completed = completions.isCompleted(activity);
+                            const disabledReason = unsaved
+                              ? "Salve os textos desta função no CRM antes de marcar conclusões."
+                              : !hasLoaded || isSaving || completions.pending
+                                ? "Aguarde a operação em andamento."
+                                : !completions.ready
+                                  ? "Recarregue a rotina e as conclusões do CRM."
+                                  : "";
+                            return (
+                              <td
+                                key={weekday}
+                                data-label={weekday}
+                                data-completed={completed || undefined}
+                              >
+                                <div className={styles.activityContent}>
+                                  {row[weekday].trim() ? (
+                                    <label
+                                      className={styles.completionControl}
+                                      title={disabledReason || "Conclusão individual nesta semana"}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        aria-label={`Concluída: ${weekday}, linha ${rowIndex + 1}, ${row[weekday]}`}
+                                        aria-disabled={Boolean(disabledReason)}
+                                        disabled={
+                                          !hasLoaded ||
+                                          (unsaved && !isSaving) ||
+                                          (!completions.ready && !completions.pending)
+                                        }
+                                        checked={completed}
+                                        onChange={(event) => {
+                                          if (
+                                            !disabledReason &&
+                                            !dirtyRoles.current.has(activeRole)
+                                          )
+                                            completions.toggle(activity, event.target.checked);
+                                        }}
+                                      />
+                                    </label>
+                                  ) : null}
+                                  <textarea
+                                    data-row={rowIndex}
+                                    aria-label={`${weekday}, linha ${rowIndex + 1}`}
+                                    disabled={!hasLoaded}
+                                    readOnly={!canEdit || isSaving}
+                                    maxLength={4000}
+                                    value={row[weekday]}
+                                    onChange={(event) =>
+                                      updateCell(rowIndex, weekday, event.target.value)
+                                    }
+                                    rows={1}
+                                  />
+                                </div>
+                              </td>
+                            );
+                          })}
                         </tr>
                       ))}
                     </tbody>

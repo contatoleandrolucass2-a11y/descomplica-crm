@@ -2,52 +2,63 @@
 
 ## 2026-10-14: Conexao Qlik para ranking via VPS
 
-- Referencia vigente alterada pelo usuario para Canal de Parcerias em14/10:
-  mapa em docs/runbooks/qlik-partnerships-mapping.md. IMOBs/produtos, VGV/contratos;
-  destino confirmado /app/ranking; corretores abaixo sao historico. Qlik -> VPS -> CRM.
-- PR214/ce82f707 fechado sem merge: sentido inverso e grant nao comprovado.
-- Fontes: GitHub PR216/main, SSH e https://crm.descomplicapro.com.br/api/health.
-  Retomada13:34Z: main8e015c6, site200/ok16f4587 (deploy externo);
-  PR216/46378ce aberto com conflito, sem runs CI. gh ausente; conector consultado.
-- VPS atual sem exportador antigo/qlik-ranking-api; MCP n8n encontrou zero
-  workflows ranking, sem mutacao. Documentos antigos nao provam estado atual.
-  Chrome local mostra Visao House00171c17-48de-4488-b1f9-dd6dcb0249e2 e pastas
-  Agendamentos/Visitas/Pastas/Vendas; perfil Membro sem API key visivel. Nomes
-  nao comprovam contrato. Nenhum registro de cliente ou perfil pessoal copiado.
-- Usuario tem login/senha e autorizou guarda na VPS. Browser dedicado rootless
-  por pipe privado, console/VNC Unix via SSH; runtime/perfil0700, console0600,
-  sem novo TCP. Salesforce intacto. Cofre AES-GCM/RSA-OAEP com privada root0600;
-  gateway nao pode le-la, cadastro exclusivo, status sem identidade/segredo.
-  Nao contornar MFA; guardar credencial nao valida login nem configura coleta.
-- Instalacao inicial2f0907e parou no probe nao-root por ACL do pai releases,
-  apos usuario/perfil e antes de units. Recuperacao manual verificou esse estado,
-  adicionou somente travessia nominal --x, repetiu probe e verificou units.
-  Instalador agora preserva ACL/mask e recusa parcial. Excecao limitada a essa
-  parcial comprovada; reavaliar causa antes de qualquer recuperacao futura.
-- As03:41Z cofre/consoleff1f59d instalados; navegador manteve PID2585809 sem
-  reinicio. Backup unit e passos em docs/runbooks/qlik-vps-session.md. Socket VNC
-  residual retirado somente apos PID0, tipo/dono e ausencia de listener; nao
-  remover perfil/locks. Browser nao enabled no boot; nenhuma agenda ativada.
-- Gates antes do merge: lint/tipos/build/pnpm test aprovados,137 arquivos e
-  2663 testes Vitest, suites Node/release sem falhas. Timeouts iniciais sob carga
-  desapareceram sem concorrencia; lstat corrigiu symlink Windows conservando
-  O_NOFOLLOW. Revisao do cofre corrigiu deadline, envelope incompleto e limpeza
-  de campos. Qlik29/29; smoke Linux real passou: fd/fsync, arquivo600, overwrite
-  recusado e privada R_OK negado EACCES. Dados sinteticos removidos. Gates da
-  base integrada repetidos no encerramento; evidencias completas em WORKLOG.md.
-- Retomada12:47Z: VNC falhou por socket residual, PID0/sem listener confirmados;
-  recuperado somente esse socket. Console200/saved:true e login visual validos.
-  Sem leitura de segredo; excecao/limites em qlik-vps-session.md.
-- Novo recorte confirmado: Direcional/SP CAPITAL/CANAL IMOB, aplicado no Qlik.
-  Produtos VGV localizados; totais nativos set202609 coincidem, anual difere em
-  dois contratos. Nao prova export completo/centavos/formulas; mapa no runbook.
-- UI local /app/ranking usa parcerias indisponiveis, guard preservado; calculo
-  BigInt offline exige cobertura separada. Salesforce/global e politicas intactos.
-- Sync apos merge excedeu256000bytes. Nota desta tarefa consolidada com
-  detalhes preservados no runbook/WORKLOG e historico Git; notas alheias intactas.
-- XLSX nao recebido; usuario reafirmou automacao. Cliente QIX/SDK oficial e
-  preflight local implementados, desligados; sessao browser pode autenticar API.
-  Sem handshake real/coleta/carga. Testes/gates e limites em WORKLOG/runbooks.
+- Qlik -> VPS -> /app/ranking: referencia Canal de Parcerias; recorte confirmado
+  Direcional/SP CAPITAL/CANAL IMOB, IMOBs/produtos e VGV/contratos. Mapa, limites
+  e criterios em [mapeamento](../runbooks/qlik-partnerships-mapping.md).
+- Browser rootless/pipe privado e cofre instalados; sessao visual12:47Z valida,
+  saved:true, sem segredo lido. Recuperacao excepcional de socket residual,
+  backups, causas e criterio de revisao em [sessao](../runbooks/qlik-vps-session.md).
+- Localb773344: SDK QIX/preflight e ciclo sequencial desligados. Nao coleta
+  fatos nem alimenta ranking. OAuth nao e requisito universal; API usa sessao
+  browser. pnpm verify/audit OK; Linux/CSP/handshake real pendentes. WORKLOG
+  preserva historico/testes integrais. UI sem fonte; Salesforce/grants intactos.
+- Fontes14:51Z: GitHubPR216, git fetch, SSH e /api/health. Main5c4d95e,
+  site200/ok16f4587; browser2f0907e ativo/disabled. Conciliacao local em curso;
+  CI propria, coleta reconciliada, RPC/reader, backup/migration e agenda pendentes.
+  Exportador legado nao localizado; nao inventar comparacao shadow ou dados.
+- Nota Qlik consolidada para limite256000bytes; detalhes nos runbooks/WORKLOG
+  e historico Git, outras notas preservadas. Sem merge/deploy produtivo.
+
+## 2026-10-14: Rotina compacta por conclusao
+
+- Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
+  em faae8e9. Checkout documental df0c52c/PR219 com CI38518828290 aprovada,
+  conflitante apenas nos registros. Fontes: GitHub, git fetch e /api/health.
+- Nova branch codex/rotina-compacta preserva dashboard e registros anteriores.
+  Pedido: controles a esquerda, fundo somente por conclusao, destaque do dia
+  apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
+  Lint/tipos/build e QA focal4/4 aprovados; suite Windows integral indisponivel
+  por symlink/timeouts. PR222/CI38565559075 aprovada em ea2e639; incorporado
+  main8e015c6 documental, sem alterar runtime. Nova CI e publicacao pendentes.
+  Evidencias e limites:
+  [auditoria compacta](../audits/rotina-compacta-2026-10-14.md).
+
+## 2026-10-14: Funis mensais publicados
+
+- Seis funis no Comparativo mensal com dados atuais; origem somente leitura.
+  Aprovadas indisponiveis sem serie mensal propria. Nenhuma mudanca de dados,
+  regras ou n8n. QA74 checks e CI38519492545/de209f4 aprovados.
+- Retomada11:41:14Z: main/faae8e9, CI38514527676 success, health200/ok/faae8e9.
+  Fontes GitHub, git fetch e /api/health relidas apos interrupcao da ferramenta.
+  PR218 integrado em16f4587; CI main38558435232 concluida com quatro jobs verdes.
+  Publicado12:24:35.454Z (09:24 BRT), deployment713b3b88-e489-4153-9057-096c7b044661.
+  Imagem imutavel comprovada, backup verificado, locks/CAS/frescor cumpridos.
+  Smoke12:25Z: health200/ok/16f4587, /app307login e API401; sem pendencia.
+  Jornada autenticada e242 comparacoes validadas na CI, nao em conta privada.
+- Sync falhou com256.725 bytes acima de256.000. Historico/evidencias completos
+  movidos para [auditoria dos funis](../audits/dashboard-funis-2026-10-14.md),
+  sem alterar limites ou regras. Nova execucao confirmou status synced;
+  checkout documental16f4587 tambem sincronizado apos a troca de branch.
+  Encerramento apos deploy confirmou synced, tres documentos, sem ampliar limite.
+
+## 2026-10-14: Rotina individual publicada
+
+- PR215/runtime faae8e9, CI38514527676 aprovada, deploy05:45:08Z; migration
+  remota20261014054331 autorizada. Textos Imob revisados, conclusoes individuais
+  semanais persistidas. Evidencias e registro integral anterior preservados em
+  [auditoria da Rotina](../audits/rotina-individual-2026-10-14.md).
+- PR219 documental aprovado na CI, ainda nao integrado; conteudo preservado
+  na branch atual. Nao ampliar permissoes nem alterar dados comerciais.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 

@@ -44,6 +44,53 @@
 - Corrige rejeicao de symlink no leitor de estoque Windows, preservando a
   protecao O_NOFOLLOW no Linux.
 
+## 2026-10-14: Rotina compacta por atividade
+
+- Posiciona a conclusao no canto superior esquerdo na semana e antes do
+  texto em Hoje, com alinhamento e altura compactos.
+- Reserva o gradiente para atividades realizadas; pendentes usam o fundo
+  da pagina. Dia atual destacado somente no cabecalho.
+- Remove a rolagem interna da tabela, mantendo a rolagem da pagina apenas
+  quando necessaria e o mesmo estado individual entre Semana e Hoje.
+
+## 2026-10-14: Rotina publicada
+
+- Disponibiliza conclusoes individuais salvas no CRM entre dispositivos,
+  com reinicio semanal segunda-feira as00h de Brasilia. Textos revisados
+  de Gerente regional imob e tipografia original preservados.
+
+## 2026-10-14: Funis no comparativo mensal
+
+- Substitui as listas mensais por seis graficos em funil, com etapas coloridas,
+  valores centralizados e dados atuais do CRM, conforme o print solicitado.
+- Mantem conversoes, temas e permissoes. Pastas aprovadas aparece como
+  indisponivel porque nao existe serie mensal separada no read model atual.
+- Reforca testes de estrutura, geometria, acessibilidade e numeros longos.
+  A pagina de referencia permanece intocada.
+- Atualiza somente as 11 referencias visuais do dashboard apos conferencia
+  autenticada, mantendo as outras 231 imagens e os limiares existentes.
+- Publicado no CRM em14/10/2026 09:24 BRT, versao16f4587, apos CI completa,
+  verificacao da imagem e smoke de producao. Referencia de origem intocada.
+
+## 2026-10-13: Conclusao semanal individual
+
+- Revisa o portugues das atividades de Gerente regional imob sem mudar seu
+  sentido ou a tipografia compartilhada com House.
+- Adiciona marcacao individual de atividades, persistida no CRM e separada
+  da edicao do conteudo, com nova semana segunda-feira as 00h de Brasilia.
+
+## 2026-10-13: Texto regional imob
+
+- Padroniza as atividades salvas com primeira letra maiuscula e demais
+  minusculas, mantendo a mesma tipografia da aba Gerente regional house.
+
+## 2026-10-13: Conteudo de Gerente regional imob
+
+- Cadastra no CRM 18 linhas e 93 atividades do Excel fornecido, usando o
+  mesmo componente e as visualizacoes Semana/Hoje de Gerente regional house.
+- Salvamento compartilhado conferido por recarga; sem alterar outras funcoes
+  ou publicar nova versao da aplicacao.
+
 ## 2026-10-13: Relatorio completo no dashboard
 
 - Impede exibir equipe de versao anterior apos atualizacao parcial do dashboard.

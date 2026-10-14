@@ -125,9 +125,14 @@ function scenarios() {
       }
     }
   }
+  const large = structuredClone(complete);
+  for (const metrics of Object.values(large.dashboard.metrics)) {
+    for (const metric of Object.values(metrics)) metric.currentMonth = 9876543.2;
+  }
   return {
     complete,
     zero,
+    large,
     "no-goals": noGoals,
     unavailable: {
       ...complete,
@@ -332,6 +337,32 @@ async function checkStructure(page) {
   await expect(page.locator('[aria-labelledby="report-pulse-title"] article')).toHaveCount(5);
   await expect(page.locator('[aria-labelledby="report-pulse-title"] figure')).toHaveCount(5);
   await expect(page.locator('[aria-labelledby="report-monthly-title"] article')).toHaveCount(6);
+  const funnels = page.locator('[aria-labelledby="report-monthly-title"] figure');
+  await expect(funnels).toHaveCount(6);
+  for (const funnel of await funnels.all()) {
+    await expect(funnel).toHaveAccessibleName(/^Funil mensal: /);
+    await expect(funnel.locator("dt")).toHaveText([
+      "Oportunidades",
+      "Agendamentos",
+      "Visitas",
+      "Pastas",
+      "Pastas aprovadas",
+      "Vendas",
+    ]);
+    await expect(funnel.locator('[data-stage="approved-folders"] dd')).toHaveText("Indisponível");
+    const steps = await funnel.locator("[data-stage]").evaluateAll((entries) =>
+      entries.map((entry) => ({
+        width: entry.getBoundingClientRect().width,
+        shape: getComputedStyle(entry, "::before").clipPath,
+        fill: getComputedStyle(entry, "::before").backgroundColor,
+      })),
+    );
+    assert.equal(new Set(steps.map(({ fill }) => fill)).size, 6, "Six distinct funnel steps");
+    for (let index = 0; index < steps.length; index++) {
+      assert.match(steps[index].shape, /^polygon\(/, "Trapezoidal funnel, not a plain list");
+      if (index > 0) assert.ok(steps[index].width < steps[index - 1].width, "Narrowing funnel");
+    }
+  }
   const tables = page.locator('[aria-labelledby="report-operational-title"] table');
   await expect(tables).toHaveCount(4);
   for (const table of await tables.all()) await expect(table.locator("tbody tr")).toHaveCount(5);
@@ -510,6 +541,10 @@ async function run() {
             path: path.join(directory, `${scenario}-${theme}-${width}.png`),
             fullPage: true,
           });
+          if (scenario === "complete" && width !== 768)
+            await page.locator('[aria-labelledby="report-monthly-title"]').screenshot({
+              path: path.join(directory, `funnels-${theme}-${width}.png`),
+            });
         }
       }
     }
@@ -567,10 +602,21 @@ async function run() {
           assert.equal(url.searchParams.get("view"), "with_canal_imob");
       }
     });
-    for (const scenario of ["zero", "no-goals"]) {
+    for (const scenario of ["zero", "no-goals", "large"]) {
       await page.evaluate((name) => window.qaRender(name), scenario);
       await check(`${scenario}/structure`, () => checkStructure(page));
-      await check(`${scenario}/layout`, () => checkLayout(page));
+      for (const width of widths) {
+        await page.setViewportSize({ width, height: 900 });
+        await check(`${scenario}/${width}/layout`, () => checkLayout(page));
+      }
+      if (scenario === "large")
+        await check("large/exact-values", async () => {
+          await expect(
+            page
+              .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
+              .locator('[data-stage="sales"] dd'),
+          ).toHaveText("9.876.543,2");
+        });
       await settle(page);
       await page.screenshot({ path: path.join(directory, `${scenario}.png`), fullPage: true });
     }

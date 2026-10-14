@@ -1880,6 +1880,102 @@ async function createEphemeralQaUser(adminClient, runId) {
   return { id: assertUuid(data.user.id), email, password };
 }
 
+export function routineReaderSetupSql({ readerId, editorId }) {
+  if (assertUuid(readerId) === assertUuid(editorId))
+    throw new Error("Routine reader must be a separate ephemeral account.");
+  const reader = `${sqlLiteral(readerId)}::uuid`;
+  const editor = `${sqlLiteral(editorId)}::uuid`;
+  return `
+begin;
+do $routine_reader_preflight$
+begin
+  if not exists (
+    select 1 from auth.users u
+    join public.user_roles r on r.user_id = u.id
+    where u.id = ${reader} and u.email like 'qa.visual-%-reader@local.invalid'
+      and u.raw_app_meta_data->>'qa_ephemeral' = 'true' and r.role_key = 'pending'
+  ) then
+    raise exception 'routine reader requires a newly created synthetic pending account';
+  end if;
+  if not exists (
+    select 1 from public.role_permissions
+    where role_key = 'broker_house' and permission_key = 'crm.dashboard.view'
+  ) or exists (
+    select 1 from public.role_permissions
+    where role_key = 'broker_house' and permission_key = 'crm.settings.manage'
+  ) then
+    raise exception 'routine reader permission contract diverged';
+  end if;
+  if not exists (
+    select 1 from public.crm_organizations
+    where organization_key = 'qa-' || replace(${editor}::text, '-', '') and is_active
+  ) then
+    raise exception 'routine reader requires the editor synthetic organization';
+  end if;
+end
+$routine_reader_preflight$;
+-- broker_house requires exactly one person scope linked to its own Auth user
+-- and an active team membership before the profile approval trigger runs.
+insert into public.crm_people (id, person_key, display_name, auth_user_id)
+values (${reader}, 'qa-reader-' || replace(${reader}::text, '-', ''),
+  'Synthetic routine reader', ${reader});
+insert into public.crm_teams (id, organization_id, team_key, name)
+select ${reader}, id, 'qa-reader-' || replace(${reader}::text, '-', ''),
+  'Synthetic routine reader team'
+from public.crm_organizations
+where organization_key = 'qa-' || replace(${editor}::text, '-', '') and is_active;
+insert into public.crm_team_memberships (team_id, person_id, membership_role)
+values (${reader}, ${reader}, 'broker');
+insert into public.crm_reporting_scopes (id, scope_key, scope_type, person_id)
+values (${reader}, 'qa-reader-' || replace(${reader}::text, '-', ''), 'person', ${reader});
+update public.user_roles
+set role_key = 'broker_house', assigned_by = ${editor}, updated_at = now()
+where user_id = ${reader};
+insert into public.crm_user_reporting_scope_grants
+  (user_id, reporting_scope_id, granted_by, reason)
+values (${reader}, ${reader}, ${editor}, 'Ephemeral local routine reader person scope');
+update public.profiles
+set is_active = true, profile_completed = true, access_status = 'approved',
+    approved_at = now(), approved_by = ${editor}
+where user_id = ${reader};
+do $routine_reader_verify$
+begin
+  if not exists (
+    select 1 from public.profiles p join public.user_roles r on r.user_id = p.user_id
+    where p.user_id = ${reader} and p.is_active and p.profile_completed
+      and p.access_status = 'approved' and r.role_key = 'broker_house'
+      and private.user_role_scope_is_valid(p.user_id, r.role_key)
+  ) then
+    raise exception 'routine reader fixture was not provisioned';
+  end if;
+end
+$routine_reader_verify$;
+commit;
+`;
+}
+
+export function routineReaderCleanupSql({ readerId }) {
+  const reader = `${sqlLiteral(assertUuid(readerId))}::uuid`;
+  return `
+begin;
+-- Suspend before topology changes; the normal authorization triggers stay enabled.
+update public.profiles set is_active = false where user_id = ${reader};
+delete from private.crm_reporting_scope_grant_lineage
+where grant_id in (
+  select id from public.crm_user_reporting_scope_grants where user_id = ${reader}
+);
+delete from public.crm_user_reporting_scope_grants where user_id = ${reader};
+delete from public.crm_reporting_scopes
+where id = ${reader} and scope_key = 'qa-reader-' || replace(${reader}::text, '-', '');
+delete from public.crm_team_memberships where person_id = ${reader} and team_id = ${reader};
+delete from public.crm_people
+where id = ${reader} and person_key = 'qa-reader-' || replace(${reader}::text, '-', '');
+delete from public.crm_teams
+where id = ${reader} and team_key = 'qa-reader-' || replace(${reader}::text, '-', '');
+commit;
+`;
+}
+
 export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account, marker }) {
   const client = createClient(apiUrl, publishableKey, {
     auth: {
@@ -2068,7 +2164,7 @@ export async function verifyFixturesThroughRls({ apiUrl, publishableKey, account
   }
 }
 
-function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
+function runVisualHarness({ origin, apiUrl, publishableKey, account, readerAccount, marker }) {
   const requestedArguments = process.argv.slice(2);
   if (
     requestedArguments.length > 1 ||
@@ -2092,6 +2188,8 @@ function runVisualHarness({ origin, apiUrl, publishableKey, account, marker }) {
     QA_AUTH_ORIGIN: origin,
     QA_AUTH_EMAIL: account.email,
     QA_AUTH_PASSWORD: account.password,
+    QA_AUTH_ROUTINE_READER_EMAIL: readerAccount.email,
+    QA_AUTH_ROUTINE_READER_PASSWORD: readerAccount.password,
     QA_AUTH_SUPABASE_URL: apiUrl,
     QA_AUTH_SUPABASE_PUBLISHABLE_KEY: publishableKey,
     QA_AUTH_FIXTURE_VERIFICATION: "rls-marker-v1",
@@ -2154,11 +2252,44 @@ async function main() {
     const marker = `QA local synthetic — not production · run ${runId}`;
     const adminClient = createAdminClient(local.apiUrl, local.secretKey);
     let account = null;
+    let readerAccount = null;
     let cleanupPromise = null;
 
     const cleanup = () => {
       cleanupPromise ??= (async () => {
         const failures = [];
+
+        if (readerAccount) {
+          try {
+            runLocalSql(
+              local.database,
+              routineReaderCleanupSql({ readerId: readerAccount.id }),
+              "routine reader cleanup",
+            );
+          } catch (error) {
+            failures.push(error);
+          }
+          let readerRemoved = false;
+          for (let attempt = 0; attempt < 3 && !readerRemoved; attempt += 1) {
+            try {
+              await adminClient.auth.admin.deleteUser(readerAccount.id, false);
+              const lookup = await adminClient.auth.admin.getUserById(readerAccount.id);
+              if (
+                !lookup.data?.user &&
+                lookup.error?.status === 404 &&
+                lookup.error?.code === "user_not_found"
+              ) {
+                readerRemoved = true;
+                readerAccount = null;
+              }
+            } catch {
+              // Continue cleanup of both synthetic accounts even after a transport failure.
+            }
+            if (!readerRemoved && attempt < 2)
+              await new Promise((resolve) => setTimeout(resolve, 1_000));
+          }
+          if (!readerRemoved) failures.push(new Error("Ephemeral routine reader cleanup failed."));
+        }
 
         if (account) {
           try {
@@ -2212,11 +2343,22 @@ async function main() {
         marker,
       });
       throwIfInterrupted();
+      readerAccount = await createEphemeralQaUser(adminClient, `${runId}-reader`);
+      runLocalSql(
+        local.database,
+        routineReaderSetupSql({
+          readerId: readerAccount.id,
+          editorId: account.id,
+        }),
+        "routine reader setup",
+      );
+      throwIfInterrupted();
       await runVisualHarness({
         origin,
         apiUrl: local.apiUrl,
         publishableKey: local.publishableKey,
         account,
+        readerAccount,
         marker,
       });
       supabaseProxy.assertEvidence();

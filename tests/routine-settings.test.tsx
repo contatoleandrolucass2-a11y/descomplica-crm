@@ -79,6 +79,12 @@ const saveError = "Não foi possível salvar no CRM.";
 const loadError = "Não foi possível carregar a rotina do CRM.";
 type Row = Record<string, string>;
 type RecordFixture = { role_key: string; rows: Row[]; revision: number; updated_at: string };
+type CompletionFixture = {
+  role_key: string;
+  row_index: number;
+  day: string;
+  activity_text: string;
+};
 function serverFixture(seed: Record<string, Row[]> = {}) {
   const days = [
     "Segunda-feira",
@@ -106,6 +112,17 @@ function serverFixture(seed: Record<string, Row[]> = {}) {
     failSave: false,
     failGet: false,
     invalidGet: false,
+    completionSnapshot: {
+      week_start: "2026-10-12",
+      resets_at: "2026-10-19T03:00:00Z",
+      server_now: "2026-10-12T15:00:00Z",
+      completions: [] as CompletionFixture[],
+    },
+    completionPuts: [] as Array<
+      CompletionFixture & { expected_week_start: string; completed: boolean }
+    >,
+    completionReads: 0,
+    completionError: 0,
   };
 }
 type ServerFixture = ReturnType<typeof serverFixture>;
@@ -123,14 +140,15 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   let checkRoutineHeaderEffects: (page: Page) => Promise<void>;
   let checkRoutineCellEffects: (page: Page, outputDirectory?: string) => Promise<void>;
   let checkRoutineRefreshPosition: (page: Page) => Promise<void>;
+  let checkRoutineCompactLayout: (page: Page) => Promise<void>;
+  let checkRoutineOverflow: (page: Page, region: Locator) => Promise<unknown>;
 
   beforeAll(async () => {
     ({ checkRoutineScrolling, checkRoutineHeaderEffects, checkRoutineCellEffects } = await import(
       pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
     ));
-    ({ checkRoutineRefreshPosition } = await import(
-      pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
-    ));
+    ({ checkRoutineRefreshPosition, checkRoutineCompactLayout, checkRoutineOverflow } =
+      await import(pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href));
     const require = createRequire(import.meta.url);
     const vitestRequire = createRequire(require.resolve("vitest/package.json"));
     const { build } = await import(pathToFileURL(vitestRequire.resolve("vite")).href);
@@ -157,7 +175,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
                 import { createRoot } from "react-dom/client";
                 import "@/app/globals.css";
                 import { RoutineSettings } from "@/app/(protected)/app/gestao/rotina/RoutineSettings";
-                createRoot(document.getElementById("root")).render(createElement(RoutineSettings));
+                const root = createRoot(document.getElementById("root"));
+                root.render(createElement(RoutineSettings));
+                window.addEventListener("routine-unmount", () => root.unmount());
               `;
           },
         },
@@ -220,15 +240,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
             ),
         )
         .toBe(true);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
-        false,
-      );
       const table = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
-      if (width < 960) {
-        expect(await table.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
-          true,
-        );
-      }
+      await checkRoutineOverflow(page, table);
+      await checkRoutineCompactLayout(page);
       await page.screenshot({ path: `test-results/routine-preview/rotina-${width}.png` });
     }
   });
@@ -258,15 +272,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await page.clock.setSystemTime(new Date(Date.UTC(2026, 9, 12 + offset, 15)));
       await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
       await browserExpect(page.locator('thead [aria-current="date"]')).toContainText(day);
-      await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(26);
-      expect(
-        await page
-          .locator("tbody td[data-today]")
-          .evaluateAll(
-            (cells, day) => cells.every((cell) => cell.getAttribute("data-label") === day),
-            day,
-          ),
-      ).toBe(true);
+      await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(0);
     }
   });
 
@@ -321,7 +327,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           await page
             .locator("tbody td")
             .evaluateAll((cells) =>
-              cells.every((cell) => getComputedStyle(cell).verticalAlign === "middle"),
+              cells.every((cell) => getComputedStyle(cell).verticalAlign === "top"),
             ),
         ).toBe(true);
         await page.locator("thead").scrollIntoViewIfNeeded();
@@ -378,8 +384,8 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       });
       expect(
         focus.outline,
-        `Daily keyboard focus must contrast with the ${theme} day gradient`,
-      ).toBe("rgb(255, 255, 255)");
+        `Daily keyboard focus must use the ${theme} accent on a neutral cell`,
+      ).toBe(focus.accent);
       expect(focus.outline, `Daily keyboard focus must differ from the ${theme} surface`).not.toBe(
         focus.background,
       );
@@ -420,6 +426,29 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     if (options.clock) await page.clock.install({ time: new Date(options.clock) });
     await page.route("http://routine.test/**", async (route) => {
       const path = new URL(route.request().url()).pathname;
+      if (path === "/api/routines/completions") {
+        if (route.request().method() === "PUT") {
+          const body = route.request().postDataJSON();
+          backend.completionPuts.push(body);
+          if (backend.completionError)
+            return route.fulfill({
+              status: backend.completionError,
+              json: { error: "completion_unavailable" },
+            });
+          const { completed, role_key, row_index, day, activity_text } = body;
+          const activity = { role_key, row_index, day, activity_text };
+          backend.completionSnapshot.completions = backend.completionSnapshot.completions.filter(
+            (item) =>
+              !(
+                item.role_key === activity.role_key &&
+                item.row_index === activity.row_index &&
+                item.day === activity.day
+              ),
+          );
+          if (completed) backend.completionSnapshot.completions.push(activity);
+        } else backend.completionReads++;
+        return route.fulfill({ json: backend.completionSnapshot });
+      }
       if (path === "/api/routines") {
         if (route.request().method() === "PUT") {
           const body = route.request().postDataJSON();
@@ -482,6 +511,559 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       Object.entries(server.records).map(([key, record]) => [key, record.rows]),
     );
   }
+
+  function completionCell(day = "Segunda-feira", row = 1) {
+    return page.getByRole("checkbox", { name: new RegExp(`^Concluída: ${day}, linha ${row},`) });
+  }
+
+  it("lets readers autosave only their own completion independently of shared text saves", async () => {
+    const backend = serverFixture({
+      "regional-house": [
+        { "Segunda-feira": "Atividade semanal", "Terça-feira": "Outra atividade" },
+      ],
+    });
+    await openRoutine({ server: backend, canEdit: false, clock: "2026-10-12T15:00:00Z" });
+    expect(await page.getByRole("checkbox").count()).toBe(2);
+    await completionCell().click();
+    await browserExpect(completionCell()).toBeChecked();
+    expect(backend.completionPuts).toEqual([
+      {
+        role_key: "regional-house",
+        row_index: 0,
+        day: "Segunda-feira",
+        activity_text: "Atividade semanal",
+        expected_week_start: "2026-10-12",
+        completed: true,
+      },
+    ]);
+    expect(backend.puts).toEqual([]);
+    await expectUnsavedNavigation(false);
+    expect(await page.evaluate(() => localStorage.length)).toBe(0);
+    await page.getByRole("button", { name: "Hoje", exact: true }).click();
+    await browserExpect(completionCell()).toBeChecked();
+    await completionCell().click();
+    await browserExpect(completionCell()).not.toBeChecked();
+    expect(backend.completionPuts[1]?.completed).toBe(false);
+    await browserExpect(page.getByRole("textbox").first()).toHaveAttribute("readonly", "");
+    await page.getByRole("button", { name: "Semana", exact: true }).click();
+    await browserExpect(completionCell()).not.toBeChecked();
+    expect(backend.completionSnapshot.completions).toEqual([]);
+    await page.reload();
+    await browserExpect(completionCell()).not.toBeChecked();
+    expect(backend.puts).toEqual([]);
+  });
+
+  it.each(["light", "balanced", "dark"])(
+    "keeps compact completion geometry, neutral paint and cross-view state in %s",
+    async (theme) => {
+      const backend = serverFixture({
+        "regional-house": [
+          {
+            "Segunda-feira":
+              "Conferir o funil e organizar o acompanhamento da equipe para a semana.",
+            "Terça-feira": "Revisar os agendamentos",
+            "Quarta-feira": "Acompanhar visitas",
+            "Quinta-feira": "Conferir propostas",
+            "Sexta-feira": "Revisar resultados",
+            Sábado: "Planejar",
+          },
+          {
+            "Segunda-feira": "Conversar com a equipe e registrar as próximas ações.",
+            "Terça-feira": "Validar prioridades",
+          },
+        ],
+      });
+      await openRoutine({ server: backend, clock: "2026-10-12T15:00:00Z" });
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      await mkdir("test-results/routine-preview", { recursive: true });
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.getByRole("button", { name: "Semana", exact: true }).click();
+        const check = completionCell();
+        await browserExpect(check).not.toBeChecked();
+        await check.click();
+        await browserExpect(check).toBeChecked();
+        for (const mode of ["Semana", "Hoje"]) {
+          await page.getByRole("button", { name: mode, exact: true }).click();
+          await browserExpect(completionCell()).toBeChecked();
+          try {
+            await checkRoutineCompactLayout(page);
+          } catch (error) {
+            await page.screenshot({
+              path: `test-results/routine-preview/compact-completions-${mode}-${theme}-${width}-failure.png`,
+              animations: "disabled",
+            });
+            throw error;
+          }
+          await checkRoutineOverflow(
+            page,
+            page.getByRole("region", {
+              name: mode === "Semana" ? "Tabela de rotina semanal" : "Tabela de rotina do dia",
+              exact: true,
+            }),
+          );
+          const completed = page.locator("tbody td[data-completed]");
+          await browserExpect(completed).toHaveCount(1);
+          await browserExpect(completed.locator("textarea")).toHaveCSS(
+            "color",
+            "rgb(255, 255, 255)",
+          );
+          const paint = await completed.evaluate((cell) => getComputedStyle(cell).backgroundImage);
+          expect(paint).toContain("linear-gradient");
+          expect(paint).toContain("rgb(23, 111, 138)");
+          expect(paint).toContain("rgb(18, 59, 99)");
+          await completionCell().focus();
+          await browserExpect(completed).toHaveCSS("outline-color", "rgb(255, 255, 255)");
+          const position = await page.evaluate(() => [scrollX, scrollY]);
+          const unchecked = page.locator("tbody tr").nth(1).locator("td").first();
+          await unchecked.hover();
+          await browserExpect(completionCell()).toBeFocused();
+          expect(await page.evaluate(() => [scrollX, scrollY])).toEqual(position);
+          expect(await completed.evaluate((cell) => getComputedStyle(cell).backgroundImage)).toBe(
+            paint,
+          );
+          expect(
+            await page.locator("tbody td:not([data-completed])").evaluateAll((cells) =>
+              cells.every((cell) => {
+                const style = getComputedStyle(cell);
+                return (
+                  style.backgroundImage === "none" &&
+                  style.backgroundColor ===
+                    getComputedStyle(cell.closest(".investor-page-shell")!).backgroundColor
+                );
+              }),
+            ),
+          ).toBe(true);
+          await browserExpect(page.locator("tbody [data-today]")).toHaveCount(0);
+          await browserExpect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await page.screenshot({
+            path: `test-results/routine-preview/compact-completions-${mode}-${theme}-${width}.png`,
+            fullPage: width === 1440 || mode === "Hoje",
+            animations: "disabled",
+          });
+          const result = await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+            .analyze();
+          expect(
+            result.violations.map(({ id, nodes }) => ({
+              id,
+              targets: nodes.map(({ target }) => target),
+            })),
+            `${theme}/${width}/${mode}: completed and unchecked activities`,
+          ).toEqual([]);
+        }
+        await completionCell().click();
+        await browserExpect(completionCell()).not.toBeChecked();
+        await page.getByRole("button", { name: "Semana", exact: true }).click();
+        await browserExpect(completionCell()).not.toBeChecked();
+        await browserExpect(page.locator("tbody td[data-completed]")).toHaveCount(0);
+        expect(backend.completionSnapshot.completions).toEqual([]);
+        await page.reload();
+        await browserExpect(completionCell()).not.toBeChecked();
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+        }, theme);
+      }
+      expect(backend.puts).toEqual([]);
+    },
+    60_000,
+  );
+
+  it("blocks unpersisted defaults and dirty role text, including failed saves", async () => {
+    await openRoutine();
+    await browserExpect(page.getByRole("checkbox").first()).toBeDisabled();
+    await browserExpect(page.getByRole("checkbox").first().locator("..")).toHaveAttribute(
+      "title",
+      /Salve os textos/,
+    );
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    await browserExpect(completionCell()).toBeEnabled();
+    await page
+      .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
+      .fill("Texto alterado");
+    await browserExpect(completionCell()).toBeDisabled();
+    server.failSave = true;
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await browserExpect(page.getByRole("alert")).toContainText(saveError);
+    await browserExpect(completionCell()).toBeDisabled();
+    server.failSave = false;
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    await browserExpect(completionCell()).toBeEnabled();
+    expect(server.completionPuts).toEqual([]);
+  });
+
+  it.each([409, 503])(
+    "never reports completion success on HTTP %s; reload reconciles text and status",
+    async (status) => {
+      const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Texto original" }] });
+      await openRoutine({ server: backend, canEdit: false });
+      backend.completionError = status;
+      await completionCell().click();
+      await browserExpect(page.getByRole("alert")).toContainText(
+        status === 409 ? "A semana ou o texto" : "Não foi possível confirmar",
+      );
+      await browserExpect(completionCell()).not.toBeChecked();
+      await browserExpect(completionCell()).toBeDisabled();
+      backend.records["regional-house"]!.rows[0]!["Segunda-feira"] = "Texto atualizado";
+      backend.records["regional-house"]!.revision++;
+      backend.completionError = 0;
+      await page.getByRole("button", { name: "Recarregar rotina e conclusões" }).click();
+      await browserExpect(page.getByRole("textbox").first()).toHaveValue("Texto atualizado");
+      await browserExpect(completionCell()).toBeEnabled();
+      await completionCell().click();
+      await browserExpect(completionCell()).toBeChecked();
+      expect(backend.completionPuts[1]?.activity_text).toBe("Texto atualizado");
+    },
+  );
+
+  it("keeps completion identity by role, row, day and exact activity text", async () => {
+    const backend = serverFixture({
+      "regional-house": [
+        { "Segunda-feira": "Repetida", "Terça-feira": "Repetida" },
+        { "Segunda-feira": "Repetida" },
+      ],
+      corretor: [{ "Segunda-feira": "Repetida" }],
+    });
+    backend.completionSnapshot.completions = [
+      { role_key: "regional-house", row_index: 0, day: "Segunda-feira", activity_text: "Repetida" },
+    ];
+    await openRoutine({ server: backend });
+    await browserExpect(completionCell()).toBeChecked();
+    await browserExpect(completionCell("Terça-feira")).not.toBeChecked();
+    await browserExpect(completionCell("Segunda-feira", 2)).not.toBeChecked();
+    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
+    await browserExpect(completionCell()).not.toBeChecked();
+    await page.getByRole("tab", { name: "Gerente regional house", exact: true }).click();
+    await page
+      .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
+      .fill("Nova atividade");
+    await browserExpect(completionCell()).not.toBeChecked();
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    await browserExpect(completionCell()).toBeEnabled();
+    await browserExpect(completionCell()).not.toBeChecked();
+  });
+
+  it("preserves other checked activities while one shared text is dirty", async () => {
+    const backend = serverFixture({
+      "regional-house": [{ "Segunda-feira": "Primeira", "Terça-feira": "Segunda" }],
+    });
+    backend.completionSnapshot.completions = [
+      { role_key: "regional-house", row_index: 0, day: "Segunda-feira", activity_text: "Primeira" },
+      { role_key: "regional-house", row_index: 0, day: "Terça-feira", activity_text: "Segunda" },
+    ];
+    await openRoutine({ server: backend });
+    await browserExpect(completionCell()).toBeChecked();
+    await browserExpect(completionCell("Terça-feira")).toBeChecked();
+    await page
+      .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
+      .fill("Primeira editada");
+    await browserExpect(completionCell()).not.toBeChecked();
+    await browserExpect(completionCell()).toBeDisabled();
+    await browserExpect(completionCell("Terça-feira")).toBeChecked();
+    await browserExpect(completionCell("Terça-feira")).toBeDisabled();
+  });
+
+  it("preserves confirmed checks on transient GET failure and keeps routine content available", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Confirmada" }] });
+    backend.completionSnapshot.completions = [
+      {
+        role_key: "regional-house",
+        row_index: 0,
+        day: "Segunda-feira",
+        activity_text: "Confirmada",
+      },
+    ];
+    await openRoutine({ server: backend, canEdit: false });
+    await browserExpect(completionCell()).toBeChecked();
+    await page.route("**/api/routines/completions", (route) =>
+      route.fulfill({ status: 503, json: { error: "unavailable" } }),
+    );
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await browserExpect(page.getByRole("alert")).toContainText("Não foi possível confirmar");
+    await browserExpect(completionCell()).toBeChecked();
+    await browserExpect(completionCell()).toBeDisabled();
+    await browserExpect(page.getByRole("textbox").first()).toHaveValue("Confirmada");
+    await browserExpect(page.getByRole("tabpanel")).toHaveAttribute("aria-busy", "false");
+    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
+    await browserExpect(page.getByRole("tabpanel")).toHaveAttribute("id", "routine-panel-corretor");
+  });
+
+  it("rejects an older GET after a text-save reload supersedes it", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Atividade" }] });
+    await openRoutine({ server: backend });
+    await browserExpect(completionCell()).toBeEnabled();
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let intercepted = false;
+    const old = {
+      ...backend.completionSnapshot,
+      completions: [
+        {
+          role_key: "regional-house",
+          row_index: 0,
+          day: "Segunda-feira",
+          activity_text: "Atividade",
+        },
+      ],
+    };
+    await page.route("**/api/routines/completions", async (route) => {
+      if (intercepted) return route.fallback();
+      intercepted = true;
+      await held;
+      return route.fulfill({ json: old });
+    });
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await browserExpect(completionCell()).toBeDisabled();
+    await page.getByRole("button", { name: "Salva alterações" }).click();
+    await savedRows();
+    await browserExpect(completionCell()).toBeEnabled();
+    release();
+    await browserExpect(completionCell()).not.toBeChecked();
+    expect(backend.completionPuts).toEqual([]);
+  });
+
+  it("aborts completion work and clears timers on unmount", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Atividade" }] });
+    await openRoutine({ server: backend, clock: "2026-10-12T15:00:00Z" });
+    await browserExpect(completionCell()).toBeEnabled();
+    await page.evaluate(() => {
+      const originalFetch = window.fetch;
+      window.fetch = (...args) => {
+        if (args[0] === "/api/routines/completions")
+          args[1]?.signal?.addEventListener("abort", () => {
+            document.documentElement.dataset.completionAborted = "true";
+          });
+        return originalFetch(...args);
+      };
+    });
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/api/routines/completions", async (route) => {
+      await held;
+      return route.fulfill({ json: backend.completionSnapshot });
+    });
+    await completionCell().click();
+    await browserExpect(completionCell()).toBeDisabled();
+    await page.evaluate(() => window.dispatchEvent(new Event("routine-unmount")));
+    await browserExpect(page.locator("html")).toHaveAttribute("data-completion-aborted", "true");
+    release();
+    await page.clock.runFor(60_000);
+    expect(backend.completionReads).toBe(1);
+    await browserExpect(page.locator("#root")).toBeEmpty();
+  });
+
+  it("does not subtract slow GET transit time from the server reset deadline", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Semana" }] });
+    await openRoutine({ server: backend, clock: "2026-10-18T23:00:00Z" });
+    await browserExpect(completionCell()).toBeEnabled();
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    backend.completionSnapshot.server_now = "2026-10-19T02:59:50Z";
+    backend.completionSnapshot.completions = [
+      { role_key: "regional-house", row_index: 0, day: "Segunda-feira", activity_text: "Semana" },
+    ];
+    await page.route("**/api/routines/completions", async (route) => {
+      await held;
+      return route.fulfill({ json: backend.completionSnapshot });
+    });
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await browserExpect(completionCell()).toBeDisabled();
+    await page.clock.runFor(5_000);
+    release();
+    await browserExpect(completionCell()).toBeChecked();
+    await browserExpect(completionCell()).toBeEnabled();
+    await page.clock.runFor(5_100);
+    await browserExpect(completionCell()).toBeChecked();
+    await browserExpect(completionCell()).toBeEnabled();
+    backend.completionSnapshot = {
+      week_start: "2026-10-19",
+      server_now: "2026-10-19T03:00:00Z",
+      resets_at: "2026-10-26T03:00:00Z",
+      completions: [],
+    };
+    await page.clock.runFor(5_000);
+    await browserExpect(completionCell()).not.toBeChecked();
+  });
+
+  it("preserves checkbox focus and scroll during PUT and background GET without duplicate mutations", async () => {
+    const backend = serverFixture({
+      "regional-house": Array.from({ length: 30 }, (_, i) => ({
+        "Segunda-feira": `Atividade ${i}`,
+      })),
+    });
+    await openRoutine({ server: backend, canEdit: false, clock: "2026-10-12T15:00:00Z" });
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    let holdGet = false;
+    let releaseGet!: () => void;
+    const heldGet = new Promise<void>((resolve) => {
+      releaseGet = resolve;
+    });
+    let mutationRequests = 0;
+    await page.route("**/api/routines/completions", async (route) => {
+      if (route.request().method() === "PUT") {
+        mutationRequests++;
+        await held;
+      } else if (holdGet) await heldGet;
+      return route.fallback();
+    });
+    const checkbox = completionCell("Segunda-feira", 25);
+    await checkbox.scrollIntoViewIfNeeded();
+    await checkbox.focus();
+    const before = await page.evaluate(() => ({ x: scrollX, y: scrollY }));
+    await page.keyboard.press("Space");
+    await browserExpect(checkbox).toBeDisabled();
+    await browserExpect(checkbox).toHaveAttribute("aria-disabled", "true");
+    expect(await checkbox.evaluate((element: HTMLInputElement) => element.disabled)).toBe(false);
+    await browserExpect(checkbox).toBeFocused();
+    await browserExpect(checkbox).not.toBeChecked();
+    await page.keyboard.press("Space");
+    await browserExpect(checkbox).not.toBeChecked();
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    release();
+    await browserExpect(checkbox).toBeChecked();
+    await browserExpect(checkbox).toBeEnabled();
+    await browserExpect(checkbox).toBeFocused();
+    expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(before);
+    expect(mutationRequests).toBe(1);
+
+    holdGet = true;
+    await page.clock.runFor(30_000);
+    await browserExpect(checkbox).toHaveAttribute("aria-disabled", "true");
+    expect(await checkbox.evaluate((element: HTMLInputElement) => element.disabled)).toBe(false);
+    await browserExpect(checkbox).toBeFocused();
+    await browserExpect(checkbox).toBeChecked();
+    await page.keyboard.press("Space");
+    await browserExpect(checkbox).toBeChecked();
+    expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(before);
+    releaseGet();
+    await browserExpect(checkbox).toBeEnabled();
+    await browserExpect(checkbox).toBeFocused();
+    await browserExpect(checkbox).toBeChecked();
+    expect(await page.evaluate(() => ({ x: scrollX, y: scrollY }))).toEqual(before);
+    expect(mutationRequests).toBe(1);
+  });
+
+  it("clears Monday midnight by server offset even when the device clock is wrong", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Semana" }] });
+    backend.completionSnapshot.server_now = "2026-10-19T02:59:58Z";
+    backend.completionSnapshot.completions = [
+      { role_key: "regional-house", row_index: 0, day: "Segunda-feira", activity_text: "Semana" },
+    ];
+    await openRoutine({ server: backend, clock: "2020-01-01T12:00:00Z", canEdit: false });
+    await browserExpect(completionCell()).toBeChecked();
+    backend.completionSnapshot = {
+      week_start: "2026-10-19",
+      server_now: "2026-10-19T03:00:00Z",
+      resets_at: "2026-10-26T03:00:00Z",
+      completions: [],
+    };
+    await page.clock.runFor(2100);
+    await browserExpect(completionCell()).not.toBeChecked();
+    await browserExpect(completionCell()).toBeEnabled();
+    await completionCell().click();
+    await browserExpect(completionCell()).toBeChecked();
+    expect(backend.completionPuts[0]?.expected_week_start).toBe("2026-10-19");
+  });
+
+  it("rejects a PUT from the previous week after a background clock jump", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Semana" }] });
+    backend.completionSnapshot.server_now = "2026-10-19T02:59:50Z";
+    await openRoutine({ server: backend, clock: "2026-10-19T02:59:50Z", canEdit: false });
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    const old = {
+      ...backend.completionSnapshot,
+      completions: [
+        { role_key: "regional-house", row_index: 0, day: "Segunda-feira", activity_text: "Semana" },
+      ],
+    };
+    await page.route("**/api/routines/completions", async (route) => {
+      if (route.request().method() !== "PUT") return route.fallback();
+      await held;
+      await route.fulfill({ json: old });
+    });
+    await completionCell().click();
+    await browserExpect(completionCell()).toBeDisabled();
+    backend.completionSnapshot = {
+      week_start: "2026-10-19",
+      server_now: "2026-10-19T03:00:05Z",
+      resets_at: "2026-10-26T03:00:00Z",
+      completions: [],
+    };
+    await page.clock.fastForward(15_000);
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await browserExpect(completionCell()).toBeEnabled();
+    release();
+    await browserExpect(completionCell()).not.toBeChecked();
+    await page.clock.runFor(30_000);
+    await browserExpect(completionCell()).not.toBeChecked();
+  });
+
+  it("preserves the server week across manual device clock changes", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Semana" }] });
+    backend.completionSnapshot.server_now = "2026-10-19T02:59:50Z";
+    backend.completionSnapshot.completions = [
+      { role_key: "regional-house", row_index: 0, day: "Segunda-feira", activity_text: "Semana" },
+    ];
+    await openRoutine({ server: backend, clock: "2026-10-19T02:59:50Z", canEdit: false });
+    await browserExpect(completionCell()).toBeChecked();
+    const before = backend.completionReads;
+    await page.clock.setSystemTime(new Date("2030-01-01T00:00:00Z"));
+    await page.evaluate(() => window.dispatchEvent(new Event("focus")));
+    await browserExpect.poll(() => backend.completionReads).toBeGreaterThan(before);
+    await browserExpect(completionCell()).toBeEnabled();
+    await browserExpect(completionCell()).toBeChecked();
+    await page.clock.setSystemTime(new Date("2020-01-01T00:00:00Z"));
+    await page.clock.runFor(9_000);
+    await browserExpect(completionCell()).toBeChecked();
+    backend.completionSnapshot = {
+      week_start: "2026-10-19",
+      server_now: "2026-10-19T03:00:00Z",
+      resets_at: "2026-10-26T03:00:00Z",
+      completions: [],
+    };
+    await page.clock.runFor(1_100);
+    await browserExpect(completionCell()).not.toBeChecked();
+  });
+
+  it("times out a pending completion and recovers through a new server snapshot", async () => {
+    const backend = serverFixture({ "regional-house": [{ "Segunda-feira": "Semana" }] });
+    await openRoutine({ server: backend, clock: "2026-10-12T15:00:00Z", canEdit: false });
+    let release!: () => void;
+    const held = new Promise<void>((resolve) => {
+      release = resolve;
+    });
+    await page.route("**/api/routines/completions", async (route) => {
+      if (route.request().method() !== "PUT") return route.fallback();
+      await held;
+      return route.fulfill({ json: backend.completionSnapshot });
+    });
+    await completionCell().click();
+    await browserExpect(completionCell()).toBeDisabled();
+    await page.clock.runFor(20_100);
+    await browserExpect(page.getByRole("alert")).toContainText("Não foi possível confirmar");
+    await browserExpect(completionCell()).not.toBeChecked();
+    await page.getByRole("button", { name: "Recarregar rotina e conclusões" }).click();
+    await browserExpect(completionCell()).toBeEnabled();
+    release();
+  });
 
   it("blocks early edits and actions until the stored routine has loaded", async () => {
     await openRoutine({
@@ -697,7 +1279,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       canEdit: false,
       legacy: JSON.stringify({ "regional-house": [{ "Segunda-feira": "Local" }] }),
     });
-    await browserExpect(page.getByText("Somente visualização", { exact: true })).toBeVisible();
+    await browserExpect(
+      page.getByText("Textos somente para leitura", { exact: true }),
+    ).toBeVisible();
     await browserExpect(page.getByRole("button", { name: "Salva alterações" })).toHaveCount(0);
     await browserExpect(page.getByRole("button", { name: "Inserir linha" })).toHaveCount(0);
     await browserExpect(
@@ -1052,10 +1636,11 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
         await page.setViewportSize({ width, height: 900 });
         await checkRoutineHeaderEffects(page);
         await browserExpect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
-        await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(26);
-        expect(
-          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
-        ).toBe(true);
+        await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(0);
+        await checkRoutineOverflow(
+          page,
+          page.getByRole("region", { name: "Tabela de rotina semanal", exact: true }),
+        );
         await page.screenshot({
           path: `test-results/routine-preview/compact-header-${theme}-${width}.png`,
           fullPage: true,
@@ -1076,7 +1661,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   );
 
   it.each(["light", "balanced", "dark"])(
-    "highlights rows and weekly columns without moving cells in %s",
+    "keeps unchecked rows neutral without moving cells in %s",
     async (theme) => {
       await openRoutine({ clock: "2026-10-12T15:00:00Z" });
       await page.setViewportSize({ width: 1440, height: 1000 });
@@ -1117,14 +1702,14 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await page.addStyleTag({
         content:
           helper === "header"
-            ? "thead th { background-image: none !important; }"
-            : "tbody td, tbody textarea { transform: none !important; scale: none !important; }",
+            ? "thead th { background-image: linear-gradient(red, blue) !important; }"
+            : "tbody td { background-image: linear-gradient(red, blue) !important; }",
       });
       if (helper === "header")
-        await expect(checkRoutineHeaderEffects(page)).rejects.toThrow(/linear-gradient/);
+        await expect(checkRoutineHeaderEffects(page)).rejects.toThrow(/completion gradient/);
       else
         await expect(checkRoutineCellEffects(page)).rejects.toThrow(
-          "Hovered intersection scales subtly",
+          "Unchecked cells must never have a gradient",
         );
       expect(
         await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches),
@@ -1267,7 +1852,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
         await checkRoutineScrolling(page, region);
         await region.evaluate((element) => {
           window.scrollTo(0, window.scrollY + element.getBoundingClientRect().top + 400);
-          element.scrollLeft = element.scrollWidth;
+          window.scrollTo(document.documentElement.scrollWidth, window.scrollY);
         });
         await page.screenshot({
           path: `test-results/routine-preview/semana-scroll-${theme}-${width}.png`,
