@@ -55,6 +55,11 @@
 - Após o ajuste de tablet, `pnpm verify` passou integralmente; o guia repetiu os
   18 cenários sem erros de console ou chamadas externas. Oito larguras passaram
   no contrato de estoque e na busca/seleção; o diff permaneceu sem segredos.
+- CI 38574613120/d8e745c aprovou novamente código, restore, banco, guia, E2E e
+  o predicado funcional completo. O título passou nas dez larguras e três temas.
+  As 11 capturas do Associativo foram inspecionadas e promovidas; 231 referências
+  preservadas, sem alterar limiares. Proveniência e hashes constam no README de
+  paridade e em reviewedUpdates. Nova CI integral em verify ainda pendente.
 
 ## 2026-10-14: Funis no comparativo mensal
 

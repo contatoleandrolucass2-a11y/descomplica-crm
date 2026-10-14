@@ -28,6 +28,10 @@
   em 768 px. Controles separados na linha seguinte entre 761 e 1.023 px; nova
   asserção reproduziu a falha e passou após a correção. Baseline não promovida;
   nova captura e CI pendentes. Main 8e015c6 integrado preservando as notas dos funis.
+- CI 38574613120/d8e745c aprovou o predicado funcional integral e o título nas
+  dez larguras/três temas. As 11 imagens do Associativo foram revisadas e
+  promovidas, preservando 231 referências. Hashes e prova da captura constam no
+  README de paridade e em reviewedUpdates. CI final em verify e publicação pendentes.
 
 ## 2026-10-14: Funis mensais publicados
 
