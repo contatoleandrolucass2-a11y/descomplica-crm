@@ -12,6 +12,11 @@
   docs/runbooks/qlik-partnerships-mapping.md e qlik-vps-session.md; WORKLOG
   registra testes e pendencias. Windows falhou symlink Salesforce; Linux validate
   cc8c712 passou CI; 3e69135 conflita com main, sem CI. Promocao bloqueada.
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Registro recebido de main0019690 preservado integralmente em
+  [auditoria](../audits/associativo-pesquisa-conhecimento-2026-10-14.md).
+  Movido somente por limite de sincronizacao; nao revalida fatos historicos.
 
 ## 2026-10-14: Rotina compacta por conclusao
 
