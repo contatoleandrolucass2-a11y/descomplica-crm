@@ -2,6 +2,10 @@
 
 ## 2026-10-14: Dashboard acompanha relatorios publicados
 
+- PR223 integrado e CI completa aprovada; promocao d660ba9 recusada sem
+  mutacao. Main avancou para6843ef1 durante o preflight; exige nova CI/imagem.
+  Backup, artefato anterior e limites registrados na auditoria, sem contornar
+  o coordenador de producao. Publicacao ainda pendente em20:00Z.
 - Confirma a mesma origem dos sete relatorios comerciais de Conectar sistemas.
   Contagens de linhas nao substituem recortes e medias mensais.
 - Adiciona verificacao automatica da versao persistida a cada30 segundos,

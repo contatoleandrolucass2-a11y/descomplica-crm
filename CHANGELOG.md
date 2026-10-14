@@ -2,6 +2,8 @@
 
 ## 2026-10-14: Atualizacao automatica dos relatorios
 
+- Registra CI aprovada, verificacao do artefato e bloqueio de promocao por
+  divergencia de main, preservando a versao publicada e os gates de release.
 - Atualiza o dashboard aberto quando uma nova versao dos relatorios e
   publicada no CRM, preservando filtros e posicao da tela.
 - Distingue coleta de publicacao confirmada e reconfere a consistencia do lote

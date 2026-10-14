@@ -2,6 +2,14 @@
 
 ## 2026-10-14: Atualizacao dos relatorios no dashboard
 
+- PR223 integrado em d660ba9; CI38614164208 e push/main38620208026 aprovadas.
+  Publicacao ainda pendente em20:00Z: primeira tentativa recusada por SHA
+  anterior incompleto no argumento; segunda, apos main avancar para6843ef1
+  (PR225 documental,19:55:08Z). Sem mutacao ou intencao pendente; producao
+  permanece77ddc69/deploymentee03fade, publicada18:42:12.845Z. CI38627677505
+  do novo main em andamento. Nao reutilizar CI/imagem de d660ba9 para6843ef1.
+  HTTP403 transitorio da fonte oficial ITBI resolveu na repeticao, sem mudar
+  regras/fontes. Artefato d660ba9 e backup privados verificados, sem deploy.
 - Polling30s e leitura consistente implementados;180 testes focais/75 QA
   aprovados. PR223 ainda bloqueado por QA: fixture corrigida, timeout limitado
   e QA da Rotina aguardando CSS exato; refresh Next real aprovado na

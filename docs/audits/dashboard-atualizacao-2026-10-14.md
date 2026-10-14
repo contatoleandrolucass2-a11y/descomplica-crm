@@ -242,3 +242,62 @@ Ordem diaria alinhada a semanal: overflow (CSS/contorno alinhados) antecede
 geometria compacta. Evita medir celulas antes da barreira ja testada; nenhum
 predicado ou tolerancia removido. CI38613560953 iniciou em0e1d827, mas o gate
 final devera corresponder ao novo SHA que inclui essa ordem.
+
+## Integracao aprovada
+
+CI38614164208/703b59e concluida com sucesso:2877 Vitest/85 skips, coletores
+350 aprovados/1 skip, release507/507, lint/tipos/build/audit, restore isolado,
+banco/E2E. QA aprovou154 responsivos,88 temas,242 acessibilidade,242 comparacoes
+e110 verificacoes de zoom; nenhuma baseline promovida. Refresh e Rotina passaram.
+Suite local final Node24: lint/tipos/build passaram;2876 testes/85 skips, somente
+symlink Windows falhou. Duas regressoes finais de contorno repetidas e aprovadas.
+
+PR223 integrado em d660ba9121124be0094519814e6cbb5b704102b7. CI main38620208026
+em andamento; isso ainda nao autoriza promocao. Checkout remoto isolado do SHA
+foi preparado limpo, com install offline/frozen; nenhum build/teste pesado na VPS.
+
+Consulta19:03Z pelo coordenador do candidato: producao77ddc69, deployment
+ee03fade-fcd0-4c3c-b410-d2bc0abd57f7, imageId
+sha256:d6f0f5783e2a3adf1cc92013710530c6deacfc97229de7b959164334332dae70,
+deployedAt2026-10-14T18:42:12.845Z. CRM e Qlik sem pendencias. Publicacao
+concorrente preservada;0019690 nao e mais baseline. Essa consulta e preparatoria,
+nao substitui a observacao dentro do minuto exigida antes da publicacao.
+
+CI main38620208026, tentativa1: testes aprovados; verificacao de fontes
+documentais bloqueada19:04:51Z por HTTP403 da fonte oficial ITBI Sao Paulo
+https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517. Uma repeticao do
+job falho foi solicitada sem editar fonte, criterio ou regra financeira.
+Imagem, gates seguintes e deploy permanecem pendentes ate CI completa verde.
+Na tentativa2, validate passou integralmente: fonte oficial voltou a responder
+sem mudanca de URL, regra ou criterio. Demais jobs em andamento em19:10Z.
+
+## Preparacao e concorrencia de publicacao
+
+CI38620208026/attempt2 concluiu com os quatro jobs aprovados em19:47:48Z,
+incluindo a matriz completa. Artefato d660ba9 recebido diretamente dessa CI:
+archiveSHA25605fee35c42c860030461e695f84515a515ae6cf3b542b2a61aaa4e1b3637431a,
+configsha256:865ccdcf63f107eac2e56b42f640a801cec9936012d84e43b6164de8cb8688bd,
+manifestsha256:d3cd32d9909d07c34818c0d7d9fcd2df2d4199cbbf41c7a3d046ee2256a61cf2.
+Prova independente validou caminhos unicos, manifest/config,11 camadas, RootFS,
+revisao e identidade Docker. image:prove aprovou os dois perfis, sem imprimir
+secrets. Nenhum build/teste pesado executado na VPS.
+
+Backup root:root0700 em /etc/descomplica-crm/dashboard-refresh-20261014-FTRqEA:
+env e ledger privados0600, comparacao byte a byte aprovada. A impressao final
+inicial recebeu CR no transporte PowerShell; a verificacao foi repetida com
+saida somente de identificadores e confirmou a baseline77ddc69/ee03fade.
+
+Duas tentativas exclusivamente pelo coordenador foram recusadas antes de
+persistir intencao. A primeira19:52Z recebeu expected-sha incompleto (erro do
+operador, corrigido). Na segunda19:55:35Z, com SHA completo, main ja havia
+avancado19:55:08Z para6843ef1ca6ab1f4344c11cdd7491004fd4f9faa9, PR225 somente
+documental. O CLI retorna mensagem generica; a divergencia confirmada bloqueia
+o candidato pela politica, sem atribuir a mensagem a uma etapa interna nao
+instrumentada. Status posterior confirmou77ddc69 e pendingDeploymentIdnull.
+Nao houve bind, Compose direto, alteracao de locks/ledger ou contorno de gate.
+
+Em20:00Z, CI38627677505 do main6843ef1 tem validate/imagem aprovados; restore
+e release-gates pendentes. O novo SHA contem integralmente PR223, sem alteracao
+adicional de runtime. Exige artefato proprio, CI completa e nova observacao no
+minuto da promocao; d660ba9 aprovado nao autoriza publicar o main novo.
+Fontes: git ls-remote, commit/CI GitHub e release:production status na VPS.
