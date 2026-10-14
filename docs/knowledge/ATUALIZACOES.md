@@ -1,5 +1,34 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Dashboard integrado e publicado
+
+- Implementado, integrado e publicado: PR213 gerou main
+  792320ba037ea48655739aaeefe5295b95c33631, arvore identica ao candidato f2f6f2b.
+  CI de PR38503071023 e CI push/main38506931120 concluidas com success.
+  Consulta final14/10 04:16Z; fontes: PR213, jobs115666467944/115667225352 e
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38506931120.
+- CI Linux:2747 testes aprovados/63 skips;19 E2E aprovados;154 responsivos,
+  88 temas,242 Axe,242 comparacoes visuais e110 zoom aprovados. Restore,
+  audit, lint, tipos, build e imagem aprovados. Windows:2746 aprovados/63 skips
+  e a falha preexistente O_NOFOLLOW ja documentada; nao suprimida.
+- Artefato11868216878, sem rebuild VPS. Checksum, manifesto/configuracao,
+  plataforma linux/amd64 e11 camadas comprovados; image:prove confirmou os
+  dois perfis no destino. Digests e backup privado registrados na auditoria.
+- Coordenador release:production confirmou deploy em2026-10-14T04:15:43.522Z
+  (01:15:43 BRT), deployment8fff7f32-9d09-4a61-8241-c4cf35acf120, sem pendencia.
+  Consulta concorrente/CAS/travas/CI executadas pelo coordenador; status posterior
+  confirmou registro. Versao anterior0fdbb80 e imagem preservadas para recuperacao.
+- GET anonimo https://crm.descomplicapro.com.br/api/health as04:16:16Z:
+  HTTP200/status ok/version792320ba037ea48655739aaeefe5295b95c33631.
+  /app307 para/login; /api/dashboard/status e /api/inventory/snapshot401.
+  Sem cookies, leitura de clientes, migrations, mudanca n8n ou politica comercial.
+- Limite: jornada autenticada comprovada em CI isolada com fixtures, nao em
+  sessao pessoal de producao. Dimensoes/metas proporcionais/plano de acao sem
+  fonte ou autoridade seguem indisponiveis; isso nao autoriza inventar valores.
+  Reavaliar mediante fonte aprovada ou relato de falha autenticada reproduzivel.
+- Encerramento documental separado do runtime; nao republicar/reiniciar o app
+  para integrar estas evidencias. Sincronizacao final do conhecimento requerida.
+
 ## 2026-10-13: Replica informacional do dashboard legado
 
 - P2 do PR213 confirmado: ingestao sem ranking pode reutilizar generatedAt.

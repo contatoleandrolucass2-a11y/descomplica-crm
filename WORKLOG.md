@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-14: Publicacao do relatorio completo
+
+- PR213 integrado em792320ba; CI exata de main38506931120 aprovada nos quatro
+  jobs, incluindo imagem imutavel, restore,2747 testes e19 percursos E2E.
+  Matriz visual:154 responsivos,88 temas,242 Axe/comparacoes e110 zoom aprovados.
+- Publicado pelo coordenador as04:15:43Z/01:15:43 BRT. Identidade OCI e11
+  camadas conferidas, dois perfis revalidados e backup privado verificado.
+  Health200 anuncia792320ba; /app307/login e endpoints privados401 sem sessao.
+- Registro detalhado em dashboard-reference-2026-10-13.md e ATUALIZACOES.md.
+  Nao houve smoke autenticado pessoal em producao nem mutacao de dados/n8n.
+  Esta etapa e apenas documental e nao exige novo deploy/restart.
+
 ## 2026-10-13: Replica informacional do dashboard
 
 - Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com
