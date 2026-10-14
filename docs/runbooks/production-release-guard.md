@@ -139,6 +139,17 @@ presenca posterior dos dois arquivos de credencial.
 
 ## Falha e recuperação
 
+### Owner Qlik separado
+
+O mesmo coordenador expoe `qlik-status`, `qlik-deploy` e `qlik-recover` para a
+unidade dedicada Qlik. Nao muda imagem/env/ledger do CRM nem executa Compose;
+mantem as tres travas, CI completa no main exato, imagem homologada, consulta
+ao CRM no minuto da mutacao, CAS, backup e intencao duravel separada. Pendencia
+Qlik bloqueia novas mutacoes CRM. Nao ha atualizador paralelo ou argumento de
+unit/perfil arbitrario. Procedimento, limites e recuperacao em
+[sessao Qlik](qlik-vps-session.md#atualizacao-protegida-do-owner). Este suporte
+nao habilita coleta de fatos, banco ou agenda e nao confirma conexao Qlik.
+
 Sem conclusão verificada, a pendência permanece. Manter o checkout limpo do
 SHA que tentou publicar e a imagem anterior disponível. Consultar `status` e
 executar a recuperação da **mesma** tentativa:

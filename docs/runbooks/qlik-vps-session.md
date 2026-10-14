@@ -139,18 +139,76 @@ propriedade root e ausencia de escrita por grupo/outros. Confere somente o
 manifest enigma.js2.15.0 como root; o probe de SDK/schema roda depois como
 descomplica-qlik, antes de instalar units, sem executar coleta.
 
-Revisao de14/10 confirmou que `release:production` ainda promove somente o
-runtime CRM; nao troca units auxiliares. Antes do handshake, implementar e
-testar suporte explicito ao owner Qlik no coordenador, mantendo as travas,
-CAS, intencao duravel, observacao fresca e recuperacao da tentativa. Registrar
-separadamente versao/data do owner, sem confundir com health/deploy do CRM.
-Backup consistente do perfil exige owner parado e ausencia de processos
-remanescentes; nao apagar locks do Chrome nem iniciar segundo owner.
-Teste de instalacao inicial nao comprova upgrade ou restauracao do perfil.
+Na retomada de14/10 foi implementado suporte explicito ao owner Qlik no
+coordenador, descrito abaixo. Implementacao e testes locais nao comprovam
+instalacao ou handshake na VPS. O instalador inicial continua inalterado.
 
 Depois do handshake real, confirmar campos/medidas/IDs e recorte, implementar
 coleta agregada completa e RPC/reader autorizado, reconciliar duas cargas,
 so entao ativar rotina de fatos. Este preflight nao entrega ranking conectado.
+
+## Atualizacao protegida do owner
+
+Usar somente `pnpm release:production qlik-deploy`, no checkout canonico limpo
+do SHA aprovado em `/srv/descomplica-crm-releases/SHA`. Este procedimento muda
+somente o servico browser Qlik; nao executa Compose, altera production.env,
+reinicia CRM, habilita boot ou abre console/VNC. As tres travas compartilhadas
+e a CI completa de push/main no SHA exato continuam obrigatorias, incluindo
+imagem imutavel homologada. O usuario ja autorizou a conexao; isso nao dispensa
+nenhum gate nem aprova alteracoes de schema fora da autorizacao especifica.
+
+```bash
+pnpm release:production status
+pnpm release:production qlik-status
+pnpm release:production qlik-deploy \
+  --expected-deployment-id "$crm_deployment_id" \
+  --expected-sha "$crm_current_sha" \
+  --expected-owner-sha "$qlik_current_sha" \
+  --sha "$validated_main_sha" \
+  --image-id "$validated_image_id" \
+  --ci-run-id "$main_ci_run_id"
+```
+
+Os identificadores esperados devem vir de observacao verificavel, nunca de
+valores presumidos. O comando reconfirma versao/data reais do CRM e CI no
+minuto de cada troca/start, com idade maxima60s. Nao reescreve o ledger CRM.
+O ledger separado `/etc/descomplica-crm/qlik-release.json` guarda baseline
+observada, recibo do owner e intencao pendente. A baseline inicial nao inventa
+data de instalacao antiga: `deployedAt` do owner so e gravado apos confirmacao
+da nova operacao. A observacao do CRM continua exigindo sua data real.
+
+O preflight verifica unit integral/sem drop-ins, modos/proprietarios, arquivos
+contra o commit e dependencias privadas, sem importar pacotes como root.
+SDK/schema sao lidos pelo usuario tecnico. Unit e perfil anteriores ficam em
+`/etc/descomplica-crm/qlik-backups/DEPLOYMENT_ID`, root0700, arquivos0600.
+O arquivo de unit preparado para systemd-analyze e0644 dentro desse diretorio
+privado. O backup do perfil contem sessao privada: nao exportar, versionar,
+anexar ou imprimir. Tamanho/espaco sao limitados e ha recibo SHA256/fsync.
+
+Antes de copiar o perfil, console/VNC devem estar inativos. O coordenador para
+o owner e exige ausencia de qualquer processo do usuario tecnico. Nao apaga
+locks Chrome. Depois aplica a unit por CAS, recarrega systemd e inicia um
+unico owner, preservando habilitacao anterior. A nova unit habilita somente
+`QLIK_METADATA_PREFLIGHT=enabled`. Verifica tentativa nova de metadados e
+retorna apenas status sanitizado; `pending`, `unavailable` ou
+`reauth_required` nao sao conexao de fatos bem-sucedida.
+
+Qualquer falha apos intencao mantem a pendencia. Nao repetir deploy, apagar
+ledger/locks ou executar systemctl diretamente para contornar. Recuperar
+somente a tentativa exata pelo mesmo checkout candidato:
+
+```bash
+pnpm release:production qlik-status
+pnpm release:production qlik-recover --deployment-id "$pending_qlik_id"
+```
+
+Recuperacao restaura somente unit/configuracao da tentativa e reinicia o owner
+anterior com as mesmas travas e verificacao. Nao restaura o tar sobre um perfil
+vivo, nem desfaz automaticamente dados de sessao. Restauracao de perfil exige
+necessidade comprovada, owner parado e procedimento separado revisado. Unit
+alheia, mudanca do CRM ou backup adulterado bloqueiam. Pendencia Qlik tambem
+bloqueia novas mutacoes CRM por este coordenador. Falha de daemon-reload apos
+rename pode ser recuperada com owner parado; start exige unidade recarregada.
 
 ## Credencial opcional na VPS
 

@@ -171,6 +171,35 @@ test("rejects missing, unknown, duplicate, empty, and extra release arguments", 
   }
 });
 
+test("Qlik owner operations are explicit and never accept arbitrary units or Salesforce options", () => {
+  assert.deepEqual(parseReleaseArguments(["qlik-status"]), {
+    operation: "qlik-status",
+    values: {},
+  });
+  assert.deepEqual(parseReleaseArguments(["qlik-recover", "--deployment-id", deploymentId]), {
+    operation: "qlik-recover",
+    values: { "deployment-id": deploymentId },
+  });
+  const args = [
+    "qlik-deploy",
+    ...deployArguments().slice(1),
+    "--expected-owner-sha",
+    "c".repeat(40),
+  ];
+  const result = parseReleaseArguments(args);
+  assert.equal(result.operation, "qlik-deploy");
+  assert.equal(result.values["expected-owner-sha"], "c".repeat(40));
+  for (const invalid of [
+    args.slice(0, -2),
+    [...args, "--unit", "arbitrary.service"],
+    [...args, "--salesforce-ingestion", "enable"],
+    [...args, "--profile", "/tmp/profile"],
+    ["qlik-status", "--sha", sha],
+    ["qlik-recover", "--deployment-id", deploymentId, "--sha", sha],
+  ])
+    assert.throws(() => parseReleaseArguments(invalid));
+});
+
 test("rejects rollback as a public command instead of bypassing candidate CI", () => {
   const args = deployArguments().slice(0, -2);
   args[0] = "rollback";

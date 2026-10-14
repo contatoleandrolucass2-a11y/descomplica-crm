@@ -1,5 +1,45 @@
 # Worklog
 
+## 2026-10-14: Atualizador protegido do owner Qlik
+
+Retomada15:54Z: main/site HTTP200/ok5c4d95e, PR224/cc8c712 com validate e
+restore aprovados e matriz em andamento; posteriormente CI38589226253
+concluiu sucesso. PR216/b2bda52 falhou E2E Associativo sintetico com
+browser_fill_resources_failed; log15:41Z/job115942437414. Trechos envolvidos
+nao mudaram contra main; causa possivel de foco assincrono nao reproduzida.
+Nenhuma assercao ou timeout relaxados para passar CI.
+
+Implementado qlik-deploy/status/recover no coordenador existente. Ledger
+separado, tres travas, CI exact main, imagem aprovada e consulta real CRM no
+minuto. Nao altera production.env, ledger/imagem CRM, Salesforce ou Compose.
+Intencao antes de parar; unit validada contra template e backup privado do
+perfil parado. CAS/start exigem callback com guarda sincrona de frescor apos
+releituras locais, evitando que a aprovacao assincrona invalide verificacoes.
+Recuperacao somente da tentativa pendente; sem restauracao automatica de tar.
+
+Revisao corrigiu recovery apos rename/reload interrompido, start sem reload,
+CAS alterado durante callbacks, raiz do perfil substituida por symlink,
+coercao de SHA, pin Playwright e limite de fanout de dependencias. Probe SDK
+sempre nao-root. Artefato deve ser novo desde o start, rankingConnected=false.
+Baseline owner nao recebe data antiga presumida; recibo so apos verificacao.
+
+Lint/tipos/build51 passaram. Test global Windows:2805 Vitest passaram/82 skips,
+falhas preexistentes symlink Salesforce (O_NOFOLLOW) e timeout Next DevTools.
+Repeticao focal DevTools24/24 passou sem mudanca. Inputs108 passaram/2 skips
+fisicos Linux. Engine224 e host48 passaram; foco combinado engine/CLI232
+passou. Revisao independente encerrou achados apos correcoes e temporarios
+unicos por tentativa para nao bloquear recovery apos crash. Host exercita
+arquivos temporarios reais, mas emula comandos, UID/modos, locks e fsync de
+diretorios: nao e prova de operacao systemd/tar real ou sessao autenticada.
+CI anterior nao valida estes arquivos novos. VPS apenas observada: browser
+2f0907e ativo/disabled, unit sem drop-ins, perfil0700; nao houve upgrade,
+handshake, coleta de fatos, migration ou ingestao nesta retomada ate aqui.
+
+Suite completa de release repetida:507 testes,494 passaram/13 skips POSIX,
+zero falhas. Lint global repetido passou com aviso preexistente. Tipos/build
+passaram, formato/diff-check aprovados. Conhecimento sincronizado antes do
+commit; CI Linux do novo candidato continua obrigatoria para promocao.
+
 Conferencia15:24Z de14/10: git fetch manteve main5c4d95e; health publico
 HTTP200/ok agora identifica5c4d95e, nao16f4587. Atualizacao externa, nao
 publicacao Qlik. PR216/12cd013: validate e restore aprovados, matriz visual

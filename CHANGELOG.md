@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Atualizacao protegida do servico Qlik
+
+- Adiciona operacoes especificas ao coordenador existente, com ledger separado,
+  mesmas travas/CI/frescor, backup privado, CAS e recuperacao da tentativa.
+- Preserva perfil, estado de boot, CRM e Salesforce; nao coleta fatos ou
+  aplica schema. Confirmacao do owner nao e confirmacao de ranking conectado.
+- Acrescenta testes de estado, entradas e host isolado, incluindo interrupcoes,
+  arquivos alterados, processos remanescentes e resultados antigos.
+
 ## 2026-10-14: Integridade do preflight e audiencia Qlik
 
 - Inclui todos os modulos do preflight na verificacao de arquivos aprovados
