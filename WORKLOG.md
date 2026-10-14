@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-14: Dashboard acompanha relatorios publicados
+
+- Confirma a mesma origem dos sete relatorios comerciais de Conectar sistemas.
+  Contagens de linhas nao substituem recortes e medias mensais.
+- Adiciona verificacao automatica da versao persistida a cada30 segundos,
+  foco/retomada/conexao. Preserva filtros, pausa abas ocultas e nao dispara
+  coleta ou ingestao. API de status acrescenta updatedAt com permissao/RLS.
+- Reconfere o lote apos leitura dos indicadores, com uma repeticao limitada,
+  para nao combinar numeros de publicacoes diferentes durante ingestao.
+- 180 testes focais/75 checks QA, tipos e build aprovados. Suite geral:2.869
+  passaram/79 skips e uma falha preexistente de symlink Windows. Coletor226/15
+  skips e release113/11 skips passaram separadamente; CI/publicacao pendentes.
+  Evidencias e limites em
+  [auditoria da atualizacao](docs/audits/dashboard-atualizacao-2026-10-14.md).
+
 ## 2026-10-14: Funis no comparativo mensal
 
 - Corrige a ausencia dos graficos solicitados no comparativo de `/app`.

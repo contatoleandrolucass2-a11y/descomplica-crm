@@ -17,6 +17,7 @@ const views = ["all", "with_canal_imob", "without_canal_imob"];
 const stages = ["opportunities", "appointments", "visits", "folders", "sales"];
 const sourceFiles = [
   "app/(protected)/app/_components/DashboardReport.tsx",
+  "app/(protected)/app/_components/DashboardAutoRefresh.tsx",
   "app/(protected)/app/_components/DashboardReport.module.css",
   "app/(protected)/app/_components/analytics/analytics.module.css",
   "app/(protected)/app/_components/analytics/Charts.tsx",
@@ -199,9 +200,11 @@ async function bundle() {
                 return createElement("a", { ...props, href });
               }`;
           if (id === navigation)
-            return `export function useRouter() {
-              return { refresh() { window.qaRefreshes = (window.qaRefreshes || 0) + 1; } };
-            }`;
+            return `const router = { refresh() {
+              window.qaRefreshes = (window.qaRefreshes || 0) + 1;
+              if (!window.qaDeferRefresh) window.qaApplyPublished?.();
+            } };
+            export function useRouter() { return router; }`;
           if (id === entry)
             return `
               import { createRoot } from "react-dom/client";
@@ -217,6 +220,7 @@ async function bundle() {
               window.qaRender = (scenario = "complete", overrides = {}) => {
                 if (!Object.hasOwn(fixtures, scenario)) throw new Error("Unknown synthetic scenario");
                 const props = { ...structuredClone(fixtures[scenario]), ...overrides };
+                window.qaCurrentProps = props;
                 flushSync(() => root.render(
                   <ProtectedShellFrame shellClassName={shellStyles.shell} contentClassName={shellStyles.mainContent}
                     chrome={<header className={shellStyles.topbar}>Descomplica / QA SINTETICO</header>}>
@@ -226,6 +230,12 @@ async function bundle() {
                   </ProtectedShellFrame>
                 ));
                 document.documentElement.dataset.scenario = scenario;
+              };
+              window.qaApplyPublished = () => {
+                if (!window.qaNextDashboard) return;
+                window.qaRender(document.documentElement.dataset.scenario, {
+                  ...window.qaCurrentProps, dashboard: window.qaNextDashboard,
+                });
               };
               const query = new URLSearchParams(location.search);
               const scenario = query.get("scenario") || "complete";
@@ -278,6 +288,11 @@ async function startServer() {
       return response.end(JSON.stringify({ status: "started" }));
     }
     if (!["GET", "HEAD"].includes(request.method)) return response.writeHead(405).end();
+    if (url.pathname === "/api/dashboard/status") {
+      response.setHeader("Content-Type", "application/json");
+      const { generatedAt, updatedAt } = syntheticDashboard();
+      return response.end(JSON.stringify({ generatedAt, updatedAt }));
+    }
     if (url.pathname === "/" || url.pathname === "/app") {
       response.setHeader("Content-Type", "text/html; charset=utf-8");
       return response.end(html);
@@ -620,6 +635,71 @@ async function run() {
       await settle(page);
       await page.screenshot({ path: path.join(directory, `${scenario}.png`), fullPage: true });
     }
+    await check("refresh/automatic-published-snapshot", async () => {
+      let statusReads = 0;
+      let currentVersion = {
+        generatedAt: "2026-10-13T15:00:00.000Z",
+        updatedAt: "2026-10-13T15:00:00.000Z",
+      };
+      await page.route("**/api/dashboard/status", (route) => {
+        statusReads += 1;
+        return route.fulfill({ json: currentVersion });
+      });
+      const now = new Date("2026-10-14T15:00:00.000Z");
+      await page.clock.install({ time: now });
+      await page.clock.pauseAt(now);
+      await page.evaluate(() => {
+        window.qaNextDashboard = undefined;
+        window.qaRefreshes = 0;
+        window.qaRender("complete", { canRefresh: false, selectedPeriod: "week" });
+        window.dispatchEvent(new Event("focus"));
+      });
+      await expect.poll(() => statusReads).toBeGreaterThan(0);
+      await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(0);
+      await page.evaluate(() => {
+        window.qaDeferRefresh = true;
+        const next = structuredClone(window.qaCurrentProps.dashboard);
+        next.generatedAt = "2026-10-14T15:03:00.000Z";
+        next.updatedAt = "2026-10-14T15:03:05.000Z";
+        next.metrics.all.sales.currentMonth = 321;
+        window.qaNextDashboard = next;
+      });
+      currentVersion = {
+        generatedAt: "2026-10-14T15:03:00.000Z",
+        updatedAt: "2026-10-14T15:03:05.000Z",
+      };
+      const sales = page
+        .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
+        .locator('[data-stage="sales"] dd');
+      await page.clock.runFor(30_100);
+      await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
+      await expect(sales).toHaveText("100");
+      for (const event of ["focus", "online", "focus"]) {
+        const previousReads = statusReads;
+        await page.evaluate((type) => window.dispatchEvent(new Event(type)), event);
+        await expect.poll(() => statusReads).toBeGreaterThan(previousReads);
+      }
+      await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
+      await page.evaluate(() => {
+        window.qaDeferRefresh = false;
+        window.qaApplyPublished();
+      });
+      await expect(sales).toHaveText("321");
+      await page.clock.runFor(30_100);
+      await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
+      assert.equal(await page.evaluate(() => window.qaCurrentProps.selectedPeriod), "week");
+      // A corrected publication must refresh even if its source generation date is reused.
+      currentVersion = { ...currentVersion, updatedAt: "2026-10-14T15:04:00.000Z" };
+      await page.evaluate(() => {
+        window.qaNextDashboard.updatedAt = "2026-10-14T15:04:00.000Z";
+        window.qaNextDashboard.metrics.all.sales.currentMonth = 322;
+        window.dispatchEvent(new Event("focus"));
+      });
+      await expect(sales).toHaveText("322");
+      await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(2);
+      await page.clock.resume();
+      return { statusReads, routerRefreshes: 2, finalMonthlySales: 322, period: "week" };
+    });
     await check("browser/errors-and-network", () => {
       assert.deepEqual(report.pageErrors, [], "pageerror");
       assert.deepEqual(report.consoleErrors, [], "console.error");

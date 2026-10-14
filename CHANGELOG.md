@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-14: Atualizacao automatica dos relatorios
+
+- Atualiza o dashboard aberto quando uma nova versao dos relatorios e
+  publicada no CRM, preservando filtros e posicao da tela.
+- Distingue coleta de publicacao confirmada e reconfere a consistencia do lote
+  antes de exibir indicadores; nenhuma formula ou fonte comercial alterada.
+
 ## 2026-10-14: Funis no comparativo mensal
 
 - Substitui as listas mensais por seis graficos em funil, com etapas coloridas,

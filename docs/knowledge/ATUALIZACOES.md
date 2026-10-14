@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Atualizacao dos relatorios no dashboard
+
+- Fonte: GitHub main/CI38558435232 e health publico em12:47:52Z. Main e runtime
+  16f4587 coincidem, quatro jobs aprovados; branch documental2ac7d52 preservada.
+  Context/search e Git comum conferidos; notas antigas de coleta nao atestam
+  o ciclo atual. Nova branch codex/dashboard-atualizacao-relatorios.
+- Pedido: graficos devem acompanhar os relatorios do painel Conectar sistemas.
+  Codigo confirma read model real, mas /app nao verifica nova publicacao enquanto
+  permanece aberta. Implementados polling30s e reconferencia de lote, sem coleta,
+  dado remoto ou workflow alterado.180 testes focais/75 QA/tipos/build passaram;
+  suite Windows tem uma falha de symlink preexistente. CI/publicacao pendentes.
+  Fonte e limites: [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
+
 ## 2026-10-14: Funis mensais publicados
 
 - Seis funis no Comparativo mensal com dados atuais; origem somente leitura.

@@ -1,0 +1,107 @@
+# Atualizacao do dashboard pelos relatorios publicados
+
+## Pedido e conferencia inicial
+
+O usuario pediu que os funis acompanhem os relatorios atualizados exibidos em
+Conectar sistemas. Nao substituir os recortes mensais pelas contagens de linhas
+nem usar o retrato historico da pagina de referencia.
+
+Conferencia em14/10/2026 12:47:52Z: Git comum correto; main e runtime em
+`16f458720406e76efcd1eda8a1eeb791509800a3`, health HTTP200/ok. CI main38558435232
+aprovou os quatro jobs. Branch documental2ac7d52 preservada; trabalho iniciado
+em codex/dashboard-atualizacao-relatorios. Context/search e sync executados;
+notas antigas de operacao nao comprovam o estado atual do coletor.
+
+## Origem dos numeros
+
+- `ConnectedSystemsPanel.tsx` e `ops/salesforce/export-candidate.mjs` referem os
+  mesmos sete relatorios comerciais por chave/ID. Estoque segue outro ciclo de
+  publicacao e nao e uma etapa do funil.
+- `transform.mjs` normaliza/deduplica os registros, separa as tres visoes e
+  calcula as cinco etapas por periodo. Medias usam meses encerrados; o mes
+  anterior preserva o corte ate o mesmo dia. Nenhuma formula foi alterada.
+- A tabela mostra `diagnostics.sourceRows` do candidato. Esses totais de linhas
+  normalizadas abrangem o lote, nao sao iguais aos recortes ou medias mensais.
+- `publish-candidate.mjs` envia o payload pelo workflow versionado para a API
+  de ingestao; a RPC existente grava os indicadores e o cabecalho do dashboard.
+  Este trabalho nao publica workflow, nao dispara coleta e nao altera o banco.
+- `lastExportAt` confirma geracao do candidato, antes de publicar. Coleta sem
+  publicacao, falha ou recibo perdido nao certificam dados novos no dashboard.
+  `lastPublishedAt` registra a confirmacao recebida pelo coletor, nao a data de
+  geracao. A autoridade para a tela e o snapshot persistido no CRM.
+
+## Correcao
+
+A pagina carregava o read model real, mas permanecia com a versao renderizada
+quando chegava outra publicacao. `DashboardAutoRefresh` consulta a API existente
+ao montar, a cada30 segundos e ao voltar para a aba/foco ou recuperar conexao.
+Usa GET autenticado, same-origin e no-store; nao solicita ingestao ou refresh
+Salesforce. Abas ocultas pausam, requests pendentes sao deduplicados/cancelados,
+timeout de10 segundos e cleanup evitam listeners ou respostas tardias.
+Refresh da rota fica deduplicado ate receber novas props, com retry limitado
+apos60 segundos se a resposta nao chegar. Eventos repetidos nao multiplicam
+refreshes enquanto a mesma versao esta sendo aguardada nessa janela.
+
+A API preserva os campos existentes e adiciona `updatedAt` do cabecalho, com
+cliente autenticado/RLS e a mesma permissao `crm.dashboard.view`. O par
+generatedAt/updatedAt detecta publicacao normal e correcao que reutiliza a data
+de geracao. Metadados invalidos/indisponiveis nao simulam versao nova. 401/403
+revalidam a rota protegida e interrompem o polling daquela montagem.
+
+`router.refresh()` solicita os Server Components atuais sem substituir URL,
+filtros ou estado de navegador. A data exibida continua sendo a geracao do lote
+real; nao e o horario do polling. Sem mudanca de cores, funis ou baselines.
+
+Foi reproduzida tambem leitura intercalada: ingestao preserva o ID do snapshot
+e substitui filhos, enquanto o loader consulta cabecalho e metricas em requests
+separadas. A correcao reconfere a identidade/versao depois das leituras, repete
+uma vez se houver troca e falha fechada diante de outra troca. Nao apresenta
+um conjunto misto como ready e nao amplia permissoes nem exige migration.
+
+## Validacao e limites
+
+- Node24.19.0/pnpm11.20.0. Primeiros71 testes de polling, API, permissoes e
+  componentes passaram. Typecheck passou; lint sem erros, com um aviso
+  preexistente em scripts/qa/connected-systems.mjs:18.
+- QA sintetico Chromium:75 checks aprovados. O caso novo recebeu uma versao
+  publicada, alterou o funil, preservou periodo week, nao repetiu refresh para
+  versao igual e detectou updatedAt novo com generatedAt igual. Somente dados
+  sinteticos;75 checks nao atestam o ciclo real de coleta em producao.
+- Revisao independente conferiu pares de IDs e20 testes existentes de
+  transformacao/monitor/scheduler, sem rede ou mutacao remota. Falha de leitura
+  intercalada reproduzida em memoria; ocorrencia em producao nao foi verificada.
+- Documentacao Next local use-router e Supabase maybeSingle consultadas.
+  Changelog Supabase foi lido por HTTP apos o fetch web recusar text/markdown;
+  sem mudanca de SDK, grants ou schema nesta tarefa.
+- Suite global, CI, integracao e publicacao desta correcao ainda pendentes.
+  Funis16f4587 publicados nao incluem esta atualizacao automatica ate novo deploy.
+- A tela acompanha a ultima publicacao valida, nao promete atualizacao durante
+  indisponibilidade de rede, autenticacao ou falha da coleta/publicacao.
+  Pastas aprovadas permanece indisponivel ate haver serie mensal propria.
+
+## Validacao local consolidada
+
+- 180 testes focais passaram em sete arquivos, incluindo leitura intercalada,
+  precisao de microssegundos, cancelamento, autorizacao e retry. Typecheck e
+  build Next passaram. QA sintetico reexecutado apos revisao:75 checks verdes,
+  incluindo entrega tardia de props, varios eventos durante espera e atualizacao
+  por polling/foco sem repetir refresh quando a versao ja foi reconhecida.
+
+- `pnpm test`:2.869 passaram,79 skips e uma falha preexistente no Windows em
+  salesforce-inventory-api.test.ts:164 (symlink, esperado502/obtido200). A cadeia
+  parou antes dos testes Node. Execucao separada do coletor:226 passaram/15 skips;
+  release:113 passaram/11 skips POSIX. Nenhum teste foi desativado ou relaxado.
+- Revisao crm-qa reproduziu quatro refreshes para a mesma versao enquanto a
+  resposta RSC estava pendente. Corrigido e verificado por teste de deduplicacao,
+  retry60s e reconhecimento das props;48 testes da reavaliacao passaram.
+- E2E adicionado usa o Next real e segura a resposta RSC para verificar URL,
+  filtros, scroll e details abertos. Esse caso anuncia metadata sintetica nova
+  sem alterar o banco, portanto nao prova troca real de lote; a troca/reconhecimento
+  e coberta no loader, no componente e na QA sintetica. Execucao E2E depende da CI.
+- PR documental221 concluiu os tres gates aplicaveis na CI38564073920 e foi
+  integrado em8e015c6. Nenhum runtime foi publicado para essa alteracao documental;
+  a producao permanece16f4587 ate aprovacao/publicacao desta correcao.
+
+Referencias tecnicas: [Next useRouter](https://nextjs.org/docs/app/api-reference/functions/use-router),
+[Supabase maybeSingle](https://supabase.com/docs/reference/javascript/maybesingle),
+[CI anterior](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38558435232).
