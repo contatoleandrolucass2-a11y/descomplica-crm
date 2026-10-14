@@ -2,10 +2,10 @@
 
 ## 2026-10-14: Dashboard acompanha relatorios publicados
 
-- PR223 integrado e CI completa aprovada; promocao d660ba9 recusada sem
-  mutacao. Main avancou para6843ef1 durante o preflight; exige nova CI/imagem.
-  Backup, artefato anterior e limites registrados na auditoria, sem contornar
-  o coordenador de producao. Publicacao ainda pendente em20:00Z.
+- PR223 publicado no descendente6843ef1 em20:38:13.413Z, deployment57c09296,
+  apos CI38627677505 completa. Artefato, backup e CAS aprovados; health200/SHA,
+  /app307 e API401 sem sessao. Recusas anteriores preservadas na auditoria.
+  PR228 encerra evidencias documentais; nao requer outro restart.
 - Confirma a mesma origem dos sete relatorios comerciais de Conectar sistemas.
   Contagens de linhas nao substituem recortes e medias mensais.
 - Adiciona verificacao automatica da versao persistida a cada30 segundos,

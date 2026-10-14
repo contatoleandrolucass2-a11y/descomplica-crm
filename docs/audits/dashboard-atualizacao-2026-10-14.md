@@ -301,3 +301,50 @@ e release-gates pendentes. O novo SHA contem integralmente PR223, sem alteracao
 adicional de runtime. Exige artefato proprio, CI completa e nova observacao no
 minuto da promocao; d660ba9 aprovado nao autoriza publicar o main novo.
 Fontes: git ls-remote, commit/CI GitHub e release:production status na VPS.
+
+## Publicacao confirmada
+
+CI38627677505/attempt1, push/main6843ef1ca6ab1f4344c11cdd7491004fd4f9faa9,
+concluiu com validate, promotable-image, release-gates e isolated-restore
+aprovados. Refresh Next real passou20:13:51Z; QA completa passou20:35:58Z:
+154 responsivos,88 temas,242 acessibilidade,242 comparacoes e110 checks de
+zoom. Nenhuma baseline ou criterio relaxado. Lint, tipos, testes e build
+pertencem ao SHA exato publicado, nao apenas ao PR anterior.
+
+Artefato recebido diretamente desse run, sem build na VPS:
+
+- ArchiveSHA256:521356d84b05b8920eb5899ab863c07665709b6bb2392452190b5e91c725483f.
+- Config:sha256:78a38e7d5e03dc8747635dcc046d9d160d098f604ff022a38b7b7420b0998404.
+- Manifest/image:sha256:2d2b668d0ff92f846e0be851383fcb746b556dbc7e52871de87744ea3c4e951b.
+- Prova independente aprovou manifest/config,11 camadas e RootFS, revisao
+  linux/amd64 e identidade Docker. image:prove aprovou homologacao/producao,
+  mesma imagem e secretValuesPrintedfalse. Checkout remoto isolado limpo.
+
+Em20:36-20:38Z, backup env/ledger novamente comparado byte a byte, com sucesso.
+CRM permanecia77ddc69/deploymentee03fade, publicado18:42:12.845Z; sem pendencia
+CRM/Qlik. Expectativas completas conferidas, sem adotar baseline divergente.
+O coordenador consultou runtime, GitHub e CI novamente sob as tres travas,
+no minuto20:38Z, antes do CAS e Compose. Nenhum publicador alternativo usado.
+
+Recibo confirmado por release:production deploy e releitura status:
+
+- Status:deployed; pendingDeploymentIdnull.
+- Deployment:57c09296-d8d8-421b-bca7-c12d10b4d50e.
+- SHA:6843ef1ca6ab1f4344c11cdd7491004fd4f9faa9.
+- Image:sha256:2d2b668d0ff92f846e0be851383fcb746b556dbc7e52871de87744ea3c4e951b.
+- DeployedAt:2026-10-14T20:38:13.413Z,17:38:13.413 America/Sao_Paulo.
+
+Smoke20:38:38Z: GET /api/health HTTP200,statusok,versionSHA exato; /app307
+para autenticacao e /api/dashboard/status401 sem sessao. O coordenador tambem
+confirmou health local/publico e imagem. Nao foram consultados relatorios
+privados nem disparada coleta real; a jornada autenticada e a preservacao de
+filtros foram provadas na CI com fixtures isoladas. Isso nao certifica que
+uma coleta posterior especifica foi publicada: a tela segue o ultimo snapshot
+valido, com sua data, e nao converte statusColetado em recibo de publicacao.
+
+Historico acima preserva falhas e recusas; nenhuma delas virou excecao aos
+gates. Reavaliar falhas transitorias somente com evidencias sanitizadas se
+recorrerem. Windows symlink permanece limite local, coberto no Linux. Pastas
+aprovadas exige serie propria; formulas, fontes, n8n e schema nao mudaram.
+Registro final no PR228 e sync Obsidian, somente documentais: nao exigem novo
+restart do CRM. CI/merge desse registro sao distintos do runtime ja publicado.

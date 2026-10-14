@@ -2,23 +2,20 @@
 
 ## 2026-10-14: Atualizacao dos relatorios no dashboard
 
-- PR223 integrado em d660ba9; CI38614164208 e push/main38620208026 aprovadas.
-  Publicacao ainda pendente em20:00Z: primeira tentativa recusada por SHA
-  anterior incompleto no argumento; segunda, apos main avancar para6843ef1
-  (PR225 documental,19:55:08Z). Sem mutacao ou intencao pendente; producao
-  permanece77ddc69/deploymentee03fade, publicada18:42:12.845Z. CI38627677505
-  do novo main em andamento. Nao reutilizar CI/imagem de d660ba9 para6843ef1.
-  HTTP403 transitorio da fonte oficial ITBI resolveu na repeticao, sem mudar
-  regras/fontes. Artefato d660ba9 e backup privados verificados, sem deploy.
-- Polling30s e leitura consistente implementados;180 testes focais/75 QA
-  aprovados. PR223 ainda bloqueado por QA: fixture corrigida, timeout limitado
-  e QA da Rotina aguardando CSS exato; refresh Next real aprovado na
-  CI38601828514, sem reduzir gates. Retomada17:28:51Z: fetch confirmou main
-  efc6a20/PR226; health200/ok/0019690. PR223 conflitante em documentos;
-  integracao preserva seletor/contorno e exige nova CI. Sem n8n ou dados remotos.
-  CI38607169365 aprovou2877 testes/restore/refresh real; QA aguarda tambem
-  alinhamento do contorno antes de overflow, com rejeicao de erro persistente.
-  Fontes, consultas de abertura, testes, falhas, limites e criterios integrais:
+- PR223 integrado em d660ba9 e publicado no descendente6843ef1 em
+  2026-10-14T20:38:13.413Z (17:38 America/Sao_Paulo), deployment57c09296.
+  CI push/main38627677505 integralmente aprovada. Imagem imutavel,11 camadas,
+  dois perfis e backup verificados; somente release:production, com CAS e
+  observacoes no minuto. Status sem pendencias; health200/ok/SHA exato,
+  /app307 e API401 sem sessao. Fonte: GitHub, coordenador e GET publico.
+- Polling30s/foco acompanha a ultima publicacao valida dos sete relatorios;
+  linhas coletadas nao substituem medias/recortes. Coleta nao comprova
+  publicacao. Leitura reconferida evita misturar lotes. Sem n8n, migrations,
+  formulas ou dados remotos alterados; aprovadas sem serie segue indisponivel.
+- CI validou refresh Next real e matriz154/88/242/242/110. Limite: nao houve
+  nova coleta real nem acesso a dados privados de producao para esta prova.
+  PR228 registra o encerramento documental, sem exigir outro restart.
+  Historico das recusas, testes, falhas transitorias e criterios de revisao:
   [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
 
 ## 2026-10-14: Qlik operacional separado
