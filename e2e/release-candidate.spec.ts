@@ -1488,57 +1488,80 @@ test("dashboard filters retain selected state while partnership ranking stays un
       );
     }
 
-    for (const pathname of [
-      "/app/ranking?period=month&scope=managers",
-      "/app/ranking?period=week&scope=managers",
+    // pgTAP rolls back its Qlik publications; this isolated runtime has no v2 dataset.
+    for (const rankingCase of [
+      {
+        pathname: "/app/ranking?period=latest&kind=imobs",
+        kind: "imobs",
+        state: "Nenhuma publicação disponível",
+      },
+      {
+        pathname: "/app/ranking?period=latest&kind=developments",
+        kind: "developments",
+        state: "Nenhuma publicação disponível",
+      },
+      {
+        pathname: "/app/ranking?period=month&scope=managers",
+        kind: "imobs",
+        state: "Filtros inválidos",
+      },
+      {
+        pathname: "/app/ranking?period=week&scope=managers",
+        kind: "imobs",
+        state: "Filtros inválidos",
+      },
     ]) {
-      const response = await page.goto(pathname);
+      const response = await page.goto(rankingCase.pathname);
       expect(response?.status()).toBe(200);
       await expect(
         page.getByRole("heading", { level: 1, name: "Ranking das imobiliárias" }),
       ).toBeVisible();
       await expect(
-        page.getByRole("heading", { name: "Dados indisponíveis", exact: true }),
+        page.getByRole("heading", { name: rankingCase.state, exact: true }),
       ).toBeVisible();
       await expect(
-        page.getByText(
-          "Fonte Qlik ainda não homologada. Atualização e resultados não confirmados.",
-          { exact: true },
-        ),
+        page.getByText("Direcional · SP CAPITAL · CANAL IMOB", { exact: true }),
       ).toBeVisible();
       await expect(
-        page.getByRole("heading", { name: "Top 10 imobiliárias", exact: true }),
-      ).toBeVisible();
-      await expect(
-        page.getByRole("heading", { name: "Top 10 empreendimentos", exact: true }),
-      ).toBeVisible();
-      await expect(page.getByRole("table")).toHaveCount(2);
-      await expect(page.locator("table tbody tr")).toHaveCount(0);
-      for (const period of ["Mês atual", "Mês anterior", "Ano", "Personalizado"]) {
-        const control = page.getByRole("radio", { name: period, exact: true });
-        await expect(control).toBeDisabled();
-        await expect(control).not.toBeChecked();
-      }
-      await expect(page.getByRole("checkbox")).toHaveCount(4);
-      for (const quarter of [1, 2, 3, 4]) {
-        const control = page.getByRole("checkbox", { name: `${quarter}º trimestre`, exact: true });
-        await expect(control).toBeDisabled();
-        await expect(control).not.toBeChecked();
-      }
-      for (const [label, value] of [
-        ["Unidade de negócio", "Direcional"],
-        ["Regional", "SP CAPITAL"],
-        ["Canal", "CANAL IMOB"],
-      ] as const) {
-        const control = page.getByRole("combobox", { name: label, exact: true });
-        await expect(control).toBeDisabled();
-        await expect(control).toHaveValue(value);
-      }
-      await expect(
-        page.getByText("Recorte confirmado. Atualização automática ainda indisponível.", {
+        page.getByRole("heading", {
+          name: rankingCase.kind === "imobs" ? "Top 10 imobiliárias" : "Top 10 empreendimentos",
           exact: true,
         }),
       ).toBeVisible();
+      await expect(page.getByRole("table")).toHaveCount(1);
+      await expect(page.locator("table tbody tr")).toHaveCount(0);
+      const ranking = page.locator("main").last();
+      await expect(ranking).not.toContainText(/R\$|\b(?:NaN|undefined)\b/);
+      await expect(ranking.locator("time")).toHaveCount(0);
+      const values = ranking.locator("dd");
+      expect(await values.count()).toBeGreaterThan(0);
+      for (const value of await values.all()) await expect(value).toHaveText("Indisponível");
+      for (const label of ["Ano", "Período", "Mês inicial", "Mês final"]) {
+        const control = page.getByRole("combobox", { name: label, exact: true });
+        await expect(control).toBeDisabled();
+      }
+      await expect(page.getByRole("combobox", { name: "Período", exact: true })).toHaveValue(
+        "latest",
+      );
+      await expect(page.getByRole("searchbox")).toBeDisabled();
+      for (const [label, kind] of [
+        ["IMOBs", "imobs"],
+        ["Produtos", "developments"],
+      ] as const) {
+        const control = page.getByRole("radio", { name: label, exact: true });
+        await expect(control).toBeDisabled();
+        if (kind === rankingCase.kind) await expect(control).toBeChecked();
+        else await expect(control).not.toBeChecked();
+      }
+      for (const label of ["Unidade de negócio", "Regional", "Canal"]) {
+        await expect(page.getByRole("combobox", { name: label, exact: true })).toHaveCount(0);
+      }
+      const submit = page.getByRole("button", {
+        name: rankingCase.state === "Filtros inválidos" ? "Tentar novamente" : "Aplicar filtros",
+        exact: true,
+      });
+      if (rankingCase.state === "Filtros inválidos") await expect(submit).toBeEnabled();
+      else await expect(submit).toBeDisabled();
       await expect(
         page.getByLabel("Filtros do ranking de parcerias", { exact: true }).getByRole("link"),
       ).toHaveCount(0);

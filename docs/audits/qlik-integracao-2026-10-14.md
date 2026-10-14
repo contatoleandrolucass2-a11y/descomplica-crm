@@ -4,6 +4,44 @@ Registros historicos preservados durante a conciliacao das branches
 codex/qlik-ranking-vps e codex/qlik-api-session em14/10/2026. Estados abaixo
 tem a data de cada observacao; nao comprovam ativacao posterior.
 
+## 17:52Z: V2 local e owner integrado
+
+GitHub: PR224 head a282b3dde1e660670b1bedba84eb1611beb06b0b,
+CI38605138409 concluida success, merge77ddc69d79678d6944c34c5a3ac0f5c8a2ee2f8c.
+CI push/main38610165621 pendente. Fontes: GitHub MCP/gh, git fetch e GET publico
+https://crm.descomplicapro.com.br/api/health em2026-10-14T17:52:19Z:
+HTTP200,ok,version001969010d1d33297b9d42148be95832feefb6ab. Estados distintos.
+
+Checkout canonico77ddc69 criado na VPS; pnpm11.20.0 instalou dependencias
+fixadas com ignore-scripts/package-import-method=copy. Nenhum build, suite
+pesada, restart, upgrade do owner ou alteracao da imagem CRM na VPS.
+
+Backup privado: /srv/descomplica-backups/qlik-v2-pre-20261014-emn0Ed,
+root:root0700. Tres SQL root:root0600 gerados pelo CLI Supabase2.115.0
+ligado ao projeto hnncxuerlcsaahdxoswb; bytes/checksums relidos, fsync executado:
+
+| Arquivo     |   Bytes | SHA256                                                           |
+| ----------- | ------: | ---------------------------------------------------------------- |
+| schema.sql  |  187265 | cc4f19611d5a4264e66407acc4a6d302f4450e1f8d4918e777e03fdb93b9b0a6 |
+| data.sql    | 5794245 | a6b0ea1db77f2039ed3e0725f6540f3ccbee986c24cf4e764ad14d05069fbd4c |
+| history.sql |  291723 | da1d7a2e17ffd325af604b4ce691373c9bb64ec59b9dbf697f906709bbd08d0e |
+
+Limites: public/private e historico de migrations; schema/dados coletados
+separadamente, sem snapshot comum. Nao inclui schemas gerenciados completos,
+bytes Storage ou prova de restore deste backup. Nao exportado para chat/Git;
+somente metadados acima. O ensaio CI de schema/restore continua obrigatorio
+antes da migration aditiva; esse arquivo nao autoriza cadeia global ou DROP.
+
+Candidato local: contrato/endpoint/reader v2, migration isolada e pgTAP254,
+publisher limitado e opcao de ativacao HMAC recuperavel. UI real usa reader
+autenticado; fixture sintetica Playwright1440/390 revisada, sem overflow ou
+sobreposicao, com12 combinacoes largura/tema. Nao comprova Qlik ou RLS real.
+pnpm test exit0:3113 Vitest/83 skips, operacionais verdes e release528/14 skips.
+Lint/tipos/build/inventario e gitleaks passaram; warning lint legado mantido.
+Uma credencial fake hardcoded em teste existente gerava falso positivo;
+trocada por fixture gerada, sem ignore/rotacao/mudanca de segredo real.
+PostgreSQL e matriz autenticada ficam para CI. Nenhum dado Qlik publicado.
+
 ## 2026-10-14: Conexao Qlik para ranking via VPS
 
 - Qlik -> VPS -> /app/ranking: referencia Canal de Parcerias; recorte confirmado

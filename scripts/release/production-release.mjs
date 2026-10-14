@@ -28,7 +28,7 @@ export function parseReleaseArguments(args) {
   };
   if (!Object.hasOwn(operations, operation)) throw new Error("Unknown release operation.");
   const required = operations[operation];
-  const optional = operation === "deploy" ? ["salesforce-ingestion"] : [];
+  const optional = operation === "deploy" ? ["salesforce-ingestion", "qlik-ranking"] : [];
   if (!required || rest.length % 2 !== 0 || rest.length < required.length * 2)
     throw new Error("Invalid release arguments.");
   const values = {};
@@ -49,6 +49,10 @@ export function parseReleaseArguments(args) {
     throw new Error("Missing release argument.");
   if (values["salesforce-ingestion"] && values["salesforce-ingestion"] !== "enable")
     throw new Error("Only explicit Salesforce ingestion enable is supported.");
+  if (values["qlik-ranking"] && values["qlik-ranking"] !== "enable")
+    throw new Error("Only explicit Qlik ranking enable is supported.");
+  if (values["qlik-ranking"] && values["salesforce-ingestion"])
+    throw new Error("Integration configurations require separate releases.");
   if (
     values["ci-run-id"] &&
     (!/^[1-9][0-9]*$/u.test(values["ci-run-id"]) ||
@@ -107,6 +111,7 @@ async function main(args) {
         targetImageId: values["image-id"],
         ciRunId: values["ci-run-id"] ? Number(values["ci-run-id"]) : undefined,
         ...(values["salesforce-ingestion"] === "enable" ? { salesforceIngestion: true } : {}),
+        ...(values["qlik-ranking"] === "enable" ? { qlikRanking: true } : {}),
       },
       io,
     );

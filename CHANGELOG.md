@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Ingestao e ranking Qlik v2
+
+- Adiciona contrato/RPC/reader isolados, HMAC proprio, duas observacoes
+  conciliadas, historico por ano e preservacao da ultima carga valida.
+- Conecta a tela ao reader autorizado com filtros, IMOBs/produtos, podio,
+  totais em centavos e aviso de fonte atrasada, sem reutilizar Salesforce.
+- Integra ativacao recuperavel ao coordenador de release e testes SQL/HTTP/UI.
+  Candidato ainda sem migration ou coleta produtiva; nao e conexao concluida.
+
 ## 2026-10-14: Integracao Qlik em andamento
 
 - Inicia contrato aditivo de duas coletas e audiencia completa autorizada,

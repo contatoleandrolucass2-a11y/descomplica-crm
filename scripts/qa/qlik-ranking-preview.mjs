@@ -12,6 +12,7 @@ const { build } = await import(pathToFileURL(vitestRequire.resolve("vite")).href
 const entry = path.join(root, "scripts/qa/qlik-ranking-preview-memory.tsx").replaceAll("\\", "/");
 const guard = "\0qlik-preview-guard";
 const link = "\0qlik-preview-link";
+const reader = "\0qlik-preview-reader";
 
 // In-memory QA-only guard. The production page and its real guard stay untouched.
 const built = await build({
@@ -35,16 +36,25 @@ const built = await build({
         )
           return guard;
         if (id === "next/link") return link;
+        if (
+          normalized === "@/lib/crm/qlik/data-v2" ||
+          normalized === `${root.replaceAll("\\", "/")}/lib/crm/qlik/data-v2`
+        )
+          return reader;
         if (id.endsWith("qlik-ranking-preview-memory.tsx")) return entry;
         if (
           id === "server-only" ||
           id.startsWith("@supabase/") ||
-          /\/lib\/(?:auth|authorization|crm)\//.test(normalized)
+          /\/lib\/(?:auth|authorization)\//.test(normalized) ||
+          (/\/lib\/crm\//.test(normalized) &&
+            !normalized.endsWith("/lib/crm/qlik/ranking-presentation"))
         ) {
           throw new Error(`Data/auth dependency forbidden in preview: ${id}`);
         }
       },
       load(id) {
+        if (id === reader)
+          return 'export async function loadQlikRankingV2() { return { status: "unavailable" }; }';
         if (id === guard)
           return `export async function enforcePermission(key) {
         if (key !== "crm.ranking.view") throw new Error("Unexpected preview permission");
@@ -59,8 +69,8 @@ const built = await build({
         import { renderToStaticMarkup } from "react-dom/server";
         import RankingPage from "@/app/(protected)/app/ranking/page";
         import "@/app/globals.css";
-        export async function renderPreview() {
-          return renderToStaticMarkup(await RankingPage());
+        export async function renderPreview(params = {}) {
+          return renderToStaticMarkup(await RankingPage({ searchParams: Promise.resolve(params) }));
         }
       `;
       },
@@ -86,8 +96,15 @@ const evaluate = new Script(
 ).runInThisContext();
 evaluate(previewModule.exports, require, previewModule, entry, path.dirname(entry));
 const markup = await previewModule.exports.renderPreview();
-assert.ok(markup.includes("Top 10 empreendimentos") && markup.includes("CANAL IMOB"));
-assert.ok(!markup.includes("R$"), "Preview must not contain financial fixtures");
+const productsMarkup = await previewModule.exports.renderPreview({ kind: "developments" });
+assert.ok(markup.includes("Top 10 imobiliárias") && markup.includes("CANAL IMOB"));
+assert.ok(
+  productsMarkup.includes("Top 10 empreendimentos") && productsMarkup.includes("CANAL IMOB"),
+);
+assert.ok(
+  !`${markup}${productsMarkup}`.includes("R$"),
+  "Preview must not contain financial fixtures",
+);
 const assets = new Map(
   output.filter((file) => file.type === "asset").map((file) => [`/${file.fileName}`, file.source]),
 );
@@ -115,7 +132,9 @@ if (process.argv.includes("--check")) {
       const requested = url.searchParams.get("theme");
       const theme = ["light", "balanced", "dark"].includes(requested) ? requested : "light";
       response.setHeader("Content-Type", "text/html; charset=utf-8");
-      const html = `<!doctype html><html lang="pt-BR" data-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranking QA local - sem dados reais</title><link rel="icon" href="data:,">${css.map((file) => `<link rel="stylesheet" href="${file}">`).join("")}</head><body>${markup}</body></html>`;
+      const selectedMarkup =
+        url.searchParams.get("kind") === "developments" ? productsMarkup : markup;
+      const html = `<!doctype html><html lang="pt-BR" data-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranking QA local - sem dados reais</title><link rel="icon" href="data:,">${css.map((file) => `<link rel="stylesheet" href="${file}">`).join("")}</head><body>${selectedMarkup}</body></html>`;
       return response.end(request.method === "HEAD" ? undefined : html);
     }
     if (assets.has(url.pathname)) {

@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-10-14: Contrato, leitura e publicacao Qlik v2
+
+Implementados endpoint HMAC separado, contrato estrito, migration aditiva e
+reader MFA/permissao. Duas observacoes independentes conciliadas publicam por
+ano, preservando ultima base valida. UI usa RPC autenticada, periodos/busca,
+IMOBs/produtos, podio, totais exatos, comparacao condicionada e aviso apos3h.
+Publisher limitado a origem CRM, retries imutaveis, respostas/erros limitados.
+Ativacao da chave pelo coordenador existente com backup/CAS/recuperacao;
+nenhuma chave gerada ou flag habilitada na VPS nesta etapa.
+
+Windows/Node24.19.0: pnpm test exit0 com VITEST_MAX_WORKERS=1,3113 Vitest
+aprovados/83 skips; testes operacionais aprovados; release528/14 skips POSIX.
+Lint exit0 (warning preexistente connected-systems), tipos/build52/inventario
+aprovados. Revisao corrigiu flag vazia Compose, ACK/UUID, Retry-After e
+paridade SQL/TS. Gitleaks exit0 depois de representar fixture sintetica antiga
+como valor gerado, sem ignore nem alteracao de credencial real. pgTAP254 novo,
+inventario1577, ainda nao executado em PostgreSQL local sem Docker.
+
+Playwright sintetico validou filtros GET,12 combinacoes de tema/largura e
+pixels; capturas1440/390 revisadas, sem overflow da pagina ou sobreposicao.
+Nao comprova login/RPC real. Workflow separado gera baseline com o promotor
+existente; nenhuma imagem incorporada ainda, CI normal verify continua exigida.
+
+PR224/a282b3d aprovado CI38605138409 e integrado em77ddc69 as17:51Z.
+CI push/main38610165621 pendente; checkout canonico preparado na VPS com
+dependencias copiadas e scripts de instalacao desabilitados, sem upgrade.
+Health17:52:19Z200/ok0019690. Backup privado novo de public/private/historico
+gravado com checksums; limites e identificacao em auditoria Qlik. Sem DDL,
+coleta real, conciliacao ou agenda Qlik. Trabalho continua ate provar o fluxo.
+
 ## 2026-10-14: Retomada da integracao completa Qlik
 
 Consulta16:57Z: main0019690 e health200/ok5c4d95e; CI38598554910/1d96204

@@ -28,7 +28,7 @@ const newSha = "b".repeat(40);
 const backupId = "11111111-2222-4333-8444-555555555555";
 const secrets = {
   SUPABASE_SECRET_KEY: `sb_secret_${"fixture".repeat(5)}`,
-  SALESFORCE_INGEST_SECRET: "synthetic-bearer-fixture-12345678901234567890",
+  SALESFORCE_INGEST_SECRET: "fixture".repeat(8),
 };
 const before = `# untouched\nIMAGE_TAG=${oldSha}\nOTHER="keep $VALUE"\nSALESFORCE_INGEST_ENABLED=false\nSALESFORCE_REFRESH_ENABLED=false\n`;
 const transform = (contents = before, credentials = secrets) =>
