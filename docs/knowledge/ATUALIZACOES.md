@@ -20,8 +20,17 @@
   Fontes: dashboard/catalog.ts, presentation.ts e ops/salesforce/transform.mjs.
   Dezoito testes de componente, tipos e 74 checks QA sinteticos aprovados;
   tres temas/larguras, sem overflow ou Axe. Desktop4.704px abaixo de4.800px.
-  Fonte: test-results/dashboard-report/report.json. Demais gates em execucao.
-  CI, revisao visual autenticada, merge e publicacao da correcao pendentes.
+  Fonte: test-results/dashboard-report/report.json. Lint/build locais passaram.
+- Consulta14/10 05:17Z: CI38515347098/aa5c835 validate aprovado no Linux:
+  2.807 aplicacao/79 skips,241 coletor,124 release. Main/faae8e9 integrado,
+  preservando Rotina. Falhas Windows de timeout/ACL/symlink registradas na
+  auditoria; nenhuma assercao relaxada. Navegador, baseline e deploy pendentes.
+- CI38515347098: banco/restore/E2E e predicado visual funcional aprovados;
+  apenas11 imagens /app mudaram. Artefato11873042399 revisado e promovido em
+  05:55:40Z, preservando231 imagens e limiares. Captura20aed961 tem arvore igual
+  a aa5c835; fingerprint1289963a reproduzido com apenas19 outputs QA e diff
+  vazio. Flag dirty mantido; prova especifica, nao reutilizavel. Fontes e hashes
+  completos na auditoria/README de paridade. Nova CI verify e deploy pendentes.
 
 ## 2026-10-14: Rotina regional imob e conclusao individual
 

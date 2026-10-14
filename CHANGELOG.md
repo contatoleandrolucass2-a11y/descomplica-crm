@@ -8,6 +8,8 @@
   indisponivel porque nao existe serie mensal separada no read model atual.
 - Reforca testes de estrutura, geometria, acessibilidade e numeros longos.
   A pagina de referencia permanece intocada.
+- Atualiza somente as 11 referencias visuais do dashboard apos conferencia
+  autenticada, mantendo as outras 231 imagens e os limiares existentes.
 
 ## 2026-10-13: Conclusao semanal individual
 
