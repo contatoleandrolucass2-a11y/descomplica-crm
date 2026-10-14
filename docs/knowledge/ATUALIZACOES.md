@@ -11,11 +11,11 @@
 - SDK/preflight desligados, sem coleta. API usa sessao browser;
   OAuth nao e requisito universal. Verify corrigido OK; CI/handshake pendentes.
   Historico/testes no WORKLOG. UI sem fonte; Salesforce/grants intactos.
-- Fontes15:24Z: GitHubPR216/224, git fetch e /api/health. Main/site200/ok5c4d95e;
+- Fontes16:31Z: GitHubPR216/224, fetch e health. Main0019690; site200/ok5c4d95e;
   SSH14:51Z: browser2f0907e ativo/disabled. Main conciliado eme85e620;
-  CI propria, coleta reconciliada, RPC/reader, backup/migration e agenda pendentes.
+  CI216 falhou E2E; CI224/1d96204 rodando. Coleta/RPC/reader/migration pendentes.
   Usuario autorizou duas coletas conciliadas e recorte completo para ranking.view.
-- Upgrade do owner exige suporte no coordenador; detalhes no WORKLOG. Sem deploy.
+- PR224 conciliado com main, sem conflito; detalhes WORKLOG. Sem deploy.
 
 ## 2026-10-14: Rotina compacta por conclusao
 

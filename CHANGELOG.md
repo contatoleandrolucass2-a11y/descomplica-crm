@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14: Evidencias de publicacao Qlik
+
+- Registra o estado separado de implementacao, CI e producao. A integracao
+  continua pendente, sem alterar dados Salesforce ou controles de acesso.
+
 ## 2026-10-14: Integridade do preflight e audiencia Qlik
 
 - Inclui todos os modulos do preflight na verificacao de arquivos aprovados

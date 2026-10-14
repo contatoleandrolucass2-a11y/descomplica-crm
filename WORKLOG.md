@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-10-14: Retomada e limite de publicacao Qlik
+
+Fechamento16:31Z (13:31 BRT): conflitos apenas documentais do PR224 foram
+conciliados com main0019690, preservando ambos os historicos. Candidato
+1d96204 enviado; GitHub confirma mergeable=true e CI38598554910 em andamento.
+Lint, tipos e build51 passaram novamente. Vitest2813 passaram/82 skips,
+uma falha Windows no symlink Salesforce; nenhum teste foi relaxado.
+O historico recebido de main excedia o limite do sincronizador: secao completa
+preservada em auditoria vinculada, sem alterar o limite. Sync operacional OK.
+Health publico16:31:14Z continua200/ok5c4d95e. Sem deploy, coleta real,
+conciliacao de cargas, migration ou agenda Qlik ativa. CI pendente nao e
+aprovacao. Nenhuma alteracao remota em dados, credenciais ou servicos.
+
+No worktree qlik-api-session, commit3e69135 implementa qlik-deploy/status/recover
+no coordenador, com ledger separado, backup do perfil parado, CAS e recuperacao.
+Release494 passaram/13 skips POSIX; lint/tipos/build51 passaram. Vitest Windows
+teve falhas preexistentes symlink Salesforce e timeout DevTools; foco DevTools
+24/24 passou. Testes de host usam arquivos reais temporarios e comandos emulados.
+Nao ha prova de QIX real ou sincronizacao por esses testes.
+
+Conferencia16:22Z (13:22 America/Sao_Paulo): main0019690, site200/ok5c4d95e;
+PR224 mergeable=false, sem runs CI para3e69135. Fontes GitHub MCP, git fetch/
+ls-remote e health publico. Sem candidato validado, publicacao bloqueada.
+Etapa congelada sem alterar controles. Qlik ainda sem coleta/migration/carga;
+estoque e leads Salesforce nao alterados nem revalidados nesta retomada.
+
 Conferencia15:24Z de14/10: git fetch manteve main5c4d95e; health publico
 HTTP200/ok agora identifica5c4d95e, nao16f4587. Atualizacao externa, nao
 publicacao Qlik. PR216/12cd013: validate e restore aprovados, matriz visual
