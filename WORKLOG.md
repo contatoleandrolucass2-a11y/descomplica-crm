@@ -2,6 +2,13 @@
 
 ## 2026-10-14: Runtime Qlik e captura final revisados
 
+CI38638975238/ff75f51 recusou apenas formatacao do manifesto gerado. Aplicado
+Prettier com igualdade profunda JSON antes/depois: nenhum campo/proveniencia
+ou hash de imagem mudou. Manifesto SHA256 passou de941c62b7 para6059b95f
+somente por whitespace. Nova CI completa exigida. CI679 anterior foi cancelada
+por head substituido; captura duplicadaff75 tambem cancelada, mantendo o lote
+revisado38634304020. Nenhum gate obrigatorio foi removido.
+
 Coletor QIX candidato abre duas sessoes independentes, verifica definicoes,
 selecoes, cobertura e totais; preserva centavos exatos e rejeita recarga alterada.
 Loop horario sem sobreposicao, credencial systemd privada e recibo sem fatos.

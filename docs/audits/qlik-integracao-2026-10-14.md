@@ -144,3 +144,12 @@ Consulta SSH20:56Z: ledger CRM57c09296-d8d8-421b-bca7-c12d10b4d50e,
 SHA6843ef1, deployedAt2026-10-14T20:38:13.413Z, sem pendencia. Qlik-status
 registrado com preflightStatus:null/rankingConnected:false, sem pendencia.
 Nenhum upgrade owner, migration, HMAC ou coleta real realizado nesta etapa.
+
+CI38638975238/ff75f51 falhou em Formatting somente no manifesto gerado.
+Normalizado pelo Prettier, com assert.deepEqual(JSON.parse(antes),
+JSON.parse(depois)) aprovado. SHA256 dos bytes originais
+941c62b726abeed916c822f72ce5ad823626ed26117120ed5adf03c8bb3f92a0;
+apos formatacao6059b95f1b41af5a7cf1edee045ee16b31f812b0dc105f34d82832230980b6cc.
+Nenhum campo, proveniencia ou imagem alterado. Nova CI completa exigida.
+CI38634304252 do head679 foi cancelada por substituicao; captura38638975159
+duplicava lote ja revisado e foi cancelada. Nao foram removidos gates obrigatorios.

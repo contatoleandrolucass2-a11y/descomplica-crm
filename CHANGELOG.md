@@ -2,6 +2,8 @@
 
 ## 2026-10-14: Coletor autonomo Qlik candidato
 
+- Normaliza a formatacao do manifesto de capturas, com igualdade JSON comprovada
+  e sem mudar proveniencia ou hashes das imagens.
 - Implementa coleta independente dupla, conciliacao nativa, credencial privada,
   ciclo horario e recibo restrito; mapeamento e ativacao reais ainda pendentes.
 - Protege habilitacao no boot com recibo novo, CAS e recuperacao; diagnosticos

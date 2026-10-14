@@ -15,6 +15,11 @@
 
 ## 2026-10-14: Qlik via VPS
 
+- CI38638975238/ff75f51 falhou somente na formatacao do manifesto gerado.
+  Prettier aplicado com igualdade profunda JSON; campos/proveniencia/hashes
+  preservados. CI anterior679 cancelada por head substituido e nova captura
+  ff75 duplicada cancelada; lote revisado38634304020 mantido. Nova CI obrigatoria.
+
 - Retomada21:15Z: captura38634304020/548d2f2a aprovada e11 imagens revisadas,
   incluindo768px. Lote integral incorporado com242 hashes conferidos e231
   imagens alheias preservadas. Suite local completa exit0:3177 Vitest,
