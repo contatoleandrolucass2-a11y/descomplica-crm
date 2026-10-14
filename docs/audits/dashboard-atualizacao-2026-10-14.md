@@ -153,3 +153,10 @@ Validacao do helper real permanece pendente de nova CI.
 Consulta15:33:56Z confirmou main e health publico200/ok em5c4d95e, com todos
 os quatro jobs da CI38581434699 aprovados. Deploy concorrente da Rotina foi
 preservado;16f4587 deixou de ser baseline corrente e nao pode ser usado no CAS.
+
+CI38594232559/791593c voltou a falhar em daily-layout-720-light antes do teste
+novo. Agora a QA registra somente geometria/booleans dos predicados que falham,
+sem texto, identidade ou dados comerciais; o teste de refresh passa a ocorrer
+antes da Rotina, ambos continuam obrigatorios. Nenhum limiar/assert foi reduzido.
+Revisao independente comprovou timeout de frame10s, isolamento20/20 e deadline
+global60s em memoria; isso nao identifica a causa do cancelamento anterior.

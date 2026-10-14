@@ -22,6 +22,8 @@
   reproducao. Retentativa passou Rotina, mas expirou45min antes de concluir
   helper novo. Teste passa a usar contexto proprio e limite60s com etapas
   sanitizadas; causa de hang ainda nao comprovada. Runtime nao alterado.
+- CI38594232559 repetiu falha de geometria na Rotina antes do refresh. Inclui
+  diagnostico apenas numerico e antecipa QA de refresh, sem remover checks.
 
 ## 2026-10-14: Compactacao da Rotina
 

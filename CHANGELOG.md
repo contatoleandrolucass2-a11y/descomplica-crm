@@ -8,6 +8,7 @@
   antes de exibir indicadores; nenhuma formula ou fonte comercial alterada.
 - Verifica a preservacao da navegacao na QA autenticada com fixture completa.
 - Isola a QA de refresh e limita suas esperas, sem reduzir os gates existentes.
+- Acrescenta diagnostico geometrico sanitizado quando a QA de Rotina falha.
 
 ## 2026-10-14: Rotina compacta por atividade
 

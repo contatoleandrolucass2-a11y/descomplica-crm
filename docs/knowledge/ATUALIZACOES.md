@@ -2,19 +2,12 @@
 
 ## 2026-10-14: Atualizacao dos relatorios no dashboard
 
-- Fonte: GitHub main/CI38558435232 e health publico em12:47:52Z. Main e runtime
-  16f4587 coincidem, quatro jobs aprovados; branch documental2ac7d52 preservada.
-  Context/search e Git comum conferidos; notas antigas de coleta nao atestam
-  o ciclo atual. Nova branch codex/dashboard-atualizacao-relatorios.
-- Pedido: graficos devem acompanhar os relatorios do painel Conectar sistemas.
-  Codigo confirma read model real, mas /app nao verifica nova publicacao enquanto
-  permanece aberta. Implementados polling30s e reconferencia de lote, sem coleta,
-  dado remoto ou workflow alterado.180 testes focais/75 QA/tipos/build passaram;
-  suite Windows tem falha de symlink. CI38570002899:2.870 passaram; E2E novo
-  estava em etapa sem fixture global. Movido para QA autenticada com fixture
-  verificada. CI38582426726 repetiu QA: Rotina passou, helper expirou. Isolamento
-  e timeout no teste; CI/publicacao pendentes. Runtime5c4d95e em15:33Z preservado.
-  Fonte e limites: [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
+- Polling30s e leitura consistente implementados;180 testes focais/75 QA
+  aprovados. PR223 ainda bloqueado por QA: fixture corrigida, timeout limitado
+  e geometria da Rotina em diagnostico, sem reduzir gates. Health15:33:56Z
+  HTTP200/ok/5c4d95e concorrente preservado. Sem n8n, formulas ou dados remotos.
+  Fontes, consultas de abertura, testes, falhas, limites e criterios integrais:
+  [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
 
 ## 2026-10-14: Rotina compacta por conclusao
 
@@ -32,21 +25,11 @@
 
 ## 2026-10-14: Funis mensais publicados
 
-- Seis funis no Comparativo mensal com dados atuais; origem somente leitura.
-  Aprovadas indisponiveis sem serie mensal propria. Nenhuma mudanca de dados,
-  regras ou n8n. QA74 checks e CI38519492545/de209f4 aprovados.
-- Retomada11:41:14Z: main/faae8e9, CI38514527676 success, health200/ok/faae8e9.
-  Fontes GitHub, git fetch e /api/health relidas apos interrupcao da ferramenta.
-  PR218 integrado em16f4587; CI main38558435232 concluida com quatro jobs verdes.
-  Publicado12:24:35.454Z (09:24 BRT), deployment713b3b88-e489-4153-9057-096c7b044661.
-  Imagem imutavel comprovada, backup verificado, locks/CAS/frescor cumpridos.
-  Smoke12:25Z: health200/ok/16f4587, /app307login e API401; sem pendencia.
-  Jornada autenticada e242 comparacoes validadas na CI, nao em conta privada.
-- Sync falhou com256.725 bytes acima de256.000. Historico/evidencias completos
-  movidos para [auditoria dos funis](../audits/dashboard-funis-2026-10-14.md),
-  sem alterar limites ou regras. Nova execucao confirmou status synced;
-  checkout documental16f4587 tambem sincronizado apos a troca de branch.
-  Encerramento apos deploy confirmou synced, tres documentos, sem ampliar limite.
+- PR218/16f4587 publicado12:24:35.454Z, CI main38558435232 verde, backup/imagem
+  e CAS verificados. Smoke200/ok, /app307login e API401;242 comparacoes na CI.
+  Origem intocada, aprovadas indisponiveis sem serie. Historico, recibo, excecao
+  do limite de sync e evidencias integrais em
+  [auditoria dos funis](../audits/dashboard-funis-2026-10-14.md). Sync final passou.
 
 ## 2026-10-14: Rotina individual publicada
 
