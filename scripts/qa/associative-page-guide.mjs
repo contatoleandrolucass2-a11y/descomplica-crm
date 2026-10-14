@@ -111,16 +111,20 @@ async function fillSyntheticProposal(page) {
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("button", { name: "MCMV", exact: true }).click();
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
-  for (const [name, value] of [
-    ["Financiamento", "19000000"],
-    ["Subsídio", "0"],
-    ["FGTS", "0"],
-    ["Cheque Moradia", "0"],
-    ["Entrada", "100000"],
+  // The qualification transition focuses financing on the next animation frame.
+  // Wait for that focus before typing so it cannot steal a later field's input.
+  await expect(page.getByRole("textbox", { name: "Financiamento", exact: true })).toBeFocused();
+  for (const [name, value, formatted] of [
+    ["Financiamento", "19000000", "190.000,00"],
+    ["Subsídio", "0", "0,00"],
+    ["FGTS", "0", "0,00"],
+    ["Cheque Moradia", "0", "0,00"],
+    ["Entrada", "100000", "1.000,00"],
   ]) {
     const field = page.getByRole("textbox", { name, exact: true });
     await expect(field).toBeEnabled();
     await field.fill(value);
+    await expect(field).toHaveValue(formatted);
     await field.press("Tab");
   }
   await page.locator('input[name="quantidade-de-parcelas"]').fill("84");
@@ -134,6 +138,7 @@ async function fillSyntheticProposal(page) {
   ]) {
     await page.getByRole("button", { name: button, exact: true }).click();
     const field = page.getByRole("textbox", { name, exact: true });
+    await expect(field).toBeFocused();
     await field.fill(value);
     await field.press("Tab");
   }

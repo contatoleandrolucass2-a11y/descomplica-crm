@@ -30,6 +30,10 @@
   guia agora inclui a data do estoque e executa o contrato de geometria existente,
   sem relaxar asserções. Layout, busca e seleção passaram em oito larguras
   (320 a 1.440 px) com 3.301 unidades sintéticas; build final aprovado.
+- A falha intermitente do guia foi diagnosticada no próprio artefato: a Entrada
+  de R$ 1.000,00 aparecia em Financiamento após o foco automático agendado pela
+  qualificação. O helper agora aguarda esse foco e verifica cada valor formatado;
+  também aguarda o foco dos campos opcionais. Nenhum cálculo ou timeout foi alterado.
 - PR #220 aberto; nova CI e publicação ainda pendentes. Consulta observacional
   de 14/10 às 12:17:40Z retornou HTTP 200/ok, versão faae8e9. Isso não comprova
   publicação desta busca nem substitui o ledger exigido por DEPLOY-001.

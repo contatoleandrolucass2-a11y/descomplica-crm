@@ -8,6 +8,7 @@
   encontrada e permite limpar a busca sem descartar a proposta em edição.
 
 - No celular, a pesquisa ocupa uma linha e o contador/data permanece ao lado de Limpar filtros.
+- O teste do guia aguarda o foco automático antes de preencher valores, evitando corrida entre campos.
 
 ## 2026-10-14: Funis no comparativo mensal
 

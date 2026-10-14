@@ -16,7 +16,9 @@
 - CI 38562897319 aprovou validate, restore, banco e E2E; falhou no alinhamento
   do contador/data com Limpar filtros em 320/375/390 px. Grade móvel corrigida;
   oito larguras passaram no contrato original. Fixture local passou a incluir
-  data e verificar essa geometria. Nova CI e deploy permanecem pendentes.
+  data e verificar essa geometria. O helper de preenchimento aguarda o foco
+  agendado pela qualificação e confere valores formatados; o artefato de falha
+  mostrava o valor da Entrada digitado em Financiamento. Nova CI e deploy pendentes.
 - Health público em 14/10 às 12:17:40Z: HTTP 200/status ok/version faae8e9.
   Main remoto permaneceu 16f4587. Fonte: /api/health e git ls-remote origin.
   Checkout macOS fora do Git comum Windows autorizado para sincronização
