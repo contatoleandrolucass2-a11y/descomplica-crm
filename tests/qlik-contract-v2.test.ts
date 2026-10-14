@@ -27,7 +27,7 @@ function fixture(): QlikRankingV2 {
     completedAt: "2026-10-14T11:30:00Z",
     source: {
       appId: "7c000871-8b32-4c0f-bfd5-4b9d46946575",
-      sheetId: "772db774-0bc2-42d8-ac11-3e4917bd0d37",
+      sheetId: "46d5bcf7-965d-40fc-a808-2fdde2d0f74d",
       mappingSha256: "a".repeat(64),
       reloadTimestamp: "2026-10-14T10:00:00Z",
     },
@@ -37,6 +37,16 @@ function fixture(): QlikRankingV2 {
 }
 
 describe("isolated Qlik ranking v2 contract", () => {
+  it("rejects the retired sales sheet instead of accepting stale provenance", () => {
+    const input = fixture();
+    expect(
+      schema.safeParse({
+        ...input,
+        source: { ...input.source, sheetId: "772db774-0bc2-42d8-ac11-3e4917bd0d37" },
+      }).success,
+    ).toBe(false);
+  });
+
   it("exports a default schema and preserves the JSON payload without coercion", () => {
     const input = fixture();
     expect(schema.parse(input)).toEqual(input);

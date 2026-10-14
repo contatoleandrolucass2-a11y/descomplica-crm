@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-14: Fonte Qlik atual e densidade do ranking
+
+Catalogo Qlik em19:39Z confirmou a pasta atual46d5bcf7, produtos26aed86d e
+containerParceiras8b78e5d8. Endereco anterior retorna Pasta nao localizada;
+motivo da mudanca desconhecido. Contrato candidato SQL/TS e fixtures passam
+a exigir a nova pasta, com rejeicao explicita da anterior. Nenhuma migration
+remota aplicada. Metadados Engine, hashes e conciliacao ainda pendentes.
+Testes contratos/handler/reader com nova pasta:237 passaram no Windows/Node24.
+
+Captura parcial autenticada do candidato38620972947, cancelado por concorrencia,
+mostrou ranking1440x1248 acima do limite1125. Compactados gaps/padding/podio
+sem remover secoes ou controles. Fixture com shell/reset reais:1440x1096 e
+390x2166;24 estados/temas/visoes sem overflow de pagina, colisao ou texto cortado.
+42 testes com Chromium passaram novamente com o sheetId atual; confirmados
+cards8px/sem sombra e geometria desktop/mobile. CI autenticada continua
+obrigatoria. Nenhuma baseline promovida.
+
 ## 2026-10-14: Volatilidade SQL do ranking
 
 CI38620973126/ab61437 passou validate e os testes SQL; restore e release-gates

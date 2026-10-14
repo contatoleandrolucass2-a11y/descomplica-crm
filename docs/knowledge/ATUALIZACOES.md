@@ -15,6 +15,15 @@
 
 ## 2026-10-14: Qlik via VPS
 
+- Retomada19:40Z: Qlik substituiu os IDs observados da pasta/objetos. Navegacao
+  pelo catalogo confirma Vendas46d5bcf7, PRODUTO26aed86d e container8b78e5d8;
+  tabParceiraspUYysrvJ permanece. Motivo/periodicidade desconhecidos. Mapa
+  registra evidencia e limites; preflight precisa novo candidato aprovado.
+  Main d660ba9/CI38620208026 terminou com quatro jobs aprovados;
+  health19:40:30Z200/ok77dd.
+  FixSQL1ea9c09 passou validate e restore na CI38624000997; release pendente.
+  Nenhum owner atualizado, schema aplicado ou carga real publicada.
+
 - CI38620973126/ab61437: validate/SQL passaram; restore e lint falharam pela
   classificacao IMMUTABLE dos validadores timestamp/conteudo. Corrigida para
   STABLE na migration nao aplicada; nova CI obrigatoria, sem relaxar gates.

@@ -49,7 +49,7 @@ function validPayload(): QlikRankingV2 {
     completedAt: "2026-10-14T11:55:00.000Z",
     source: {
       appId: "7c000871-8b32-4c0f-bfd5-4b9d46946575",
-      sheetId: "772db774-0bc2-42d8-ac11-3e4917bd0d37",
+      sheetId: "46d5bcf7-965d-40fc-a808-2fdde2d0f74d",
       mappingSha256: "b".repeat(64),
       reloadTimestamp: "2026-10-14T11:45:00.000Z",
     },

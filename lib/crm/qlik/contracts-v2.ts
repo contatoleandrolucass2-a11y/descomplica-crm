@@ -133,7 +133,7 @@ export function createQlikRankingV2Schema(now: () => Date = () => new Date()) {
       source: z
         .object({
           appId: z.literal("7c000871-8b32-4c0f-bfd5-4b9d46946575"),
-          sheetId: z.literal("772db774-0bc2-42d8-ac11-3e4917bd0d37"),
+          sheetId: z.literal("46d5bcf7-965d-40fc-a808-2fdde2d0f74d"),
           mappingSha256: z.string().regex(/^[0-9a-f]{64}$(?![\s\S])/),
           reloadTimestamp: timestamp,
         })

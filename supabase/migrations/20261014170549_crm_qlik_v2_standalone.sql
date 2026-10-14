@@ -127,7 +127,7 @@ begin
     return null;
   end if;
   if p_payload#>>'{source,appId}' is distinct from '7c000871-8b32-4c0f-bfd5-4b9d46946575'
-     or p_payload#>>'{source,sheetId}' is distinct from '772db774-0bc2-42d8-ac11-3e4917bd0d37'
+     or p_payload#>>'{source,sheetId}' is distinct from '46d5bcf7-965d-40fc-a808-2fdde2d0f74d'
      or jsonb_typeof(p_payload#>'{source,mappingSha256}') <> 'string'
      or (p_payload#>>'{source,mappingSha256}') !~ '^[0-9a-f]{64}$'
      or jsonb_typeof(p_payload#>'{source,reloadTimestamp}') <> 'string' then

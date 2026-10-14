@@ -23,7 +23,7 @@ function snapshot(): QlikRankingV2 {
     completedAt: "2026-10-14T10:10:00Z",
     source: {
       appId: "7c000871-8b32-4c0f-bfd5-4b9d46946575",
-      sheetId: "772db774-0bc2-42d8-ac11-3e4917bd0d37",
+      sheetId: "46d5bcf7-965d-40fc-a808-2fdde2d0f74d",
       mappingSha256: "a".repeat(64),
       reloadTimestamp: "2026-10-14T09:00:00Z",
     },

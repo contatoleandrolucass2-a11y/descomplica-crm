@@ -23,6 +23,7 @@ import {
 import rankingStyles from "@/app/(protected)/app/ranking/RankingCanvas.module.css";
 import managementStyles from "@/app/(protected)/_components/ManagementCanvas.module.css";
 import analyticsStyles from "@/app/(protected)/app/_components/analytics/analytics.module.css";
+import shellStyles from "@/app/(protected)/_components/ProtectedShell.module.css";
 
 type Node = DefaultTreeAdapterMap["node"];
 type Element = DefaultTreeAdapterMap["element"];
@@ -66,7 +67,7 @@ function publication(): Extract<QlikRankingV2Data, { status: "ready" }> {
     completedAt: "2026-10-14T10:10:00Z",
     source: {
       appId: "7c000871-8b32-4c0f-bfd5-4b9d46946575",
-      sheetId: "772db774-0bc2-42d8-ac11-3e4917bd0d37",
+      sheetId: "46d5bcf7-965d-40fc-a808-2fdde2d0f74d",
       mappingSha256: "a".repeat(64),
       reloadTimestamp: "2026-10-14T09:00:00Z",
     },
@@ -120,6 +121,7 @@ describe("ranking v2 route and UI", () => {
         ["../app/(protected)/app/ranking/RankingCanvas.module.css", rankingStyles],
         ["../app/(protected)/_components/ManagementCanvas.module.css", managementStyles],
         ["../app/(protected)/app/_components/analytics/analytics.module.css", analyticsStyles],
+        ["../app/(protected)/_components/ProtectedShell.module.css", shellStyles],
       ] as const;
       const css = sheets
         .map(([file, classes]) => {
@@ -136,6 +138,7 @@ describe("ranking v2 route and UI", () => {
         /@import[^;]+;/g,
         "",
       );
+      const preflight = readFileSync(require.resolve("tailwindcss/preflight.css"), "utf8");
       const browser = await chromium.launch({ headless: true });
       let theme = "light";
       try {
@@ -147,7 +150,8 @@ describe("ranking v2 route and UI", () => {
           const { html } = await rendered(Object.fromEntries(url.searchParams));
           await route.fulfill({
             contentType: "text/html",
-            body: `<!doctype html><html lang="pt-BR" data-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranking sintético</title><style>${globals}\n*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif}${css}</style></head><body>${html}</body></html>`,
+            // Real shell sizing and reset; navigation is synthetic, with no session or reader.
+            body: `<!doctype html><html lang="pt-BR" data-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranking sintético</title><style>${preflight}\n${globals}\nbody{font-family:Arial,sans-serif}${css}</style></head><body><header class="${shellStyles.topbar}"><div class="${shellStyles.topbarInner}">CRM sintético</div></header><nav class="${shellStyles.breadcrumbs}" aria-label="Caminho"><ol><li>CRM</li><li>Ranking</li></ol></nav>${html}</body></html>`,
           });
         });
         for (const width of [320, 390, 768, 1440]) {
@@ -228,6 +232,93 @@ describe("ranking v2 route and UI", () => {
           await browserExpect(
             page.getByRole("button", { name: "Aplicar filtros", exact: true }),
           ).toBeDisabled();
+        }
+        for (const status of ["empty", "unavailable"] as const) {
+          loadQlikRankingV2.mockResolvedValue(
+            status === "empty" ? { status, availableYears: [] } : { status },
+          );
+          for (const width of [1440, 390]) {
+            await page.setViewportSize({ width, height: 900 });
+            for (theme of ["light", "balanced", "dark"]) {
+              for (const kind of ["imobs", "developments"]) {
+                await page.goto(`http://ranking.test/app/ranking?kind=${kind}`);
+                const podiumCards = page.locator(
+                  "section[aria-labelledby='ranking-podium-title'] article",
+                );
+                expect(
+                  await podiumCards.evaluateAll((cards) =>
+                    cards.map((card) => {
+                      const style = getComputedStyle(card);
+                      return { borderRadius: style.borderRadius, boxShadow: style.boxShadow };
+                    }),
+                  ),
+                ).toEqual(
+                  Array.from({ length: 3 }, () => ({ borderRadius: "8px", boxShadow: "none" })),
+                );
+                const geometry = await page.evaluate(() => {
+                  const overlaps: string[] = [];
+                  const groups = [
+                    "main > div > *",
+                    "form > label, form > fieldset, form > button",
+                    "section[aria-labelledby='ranking-podium-title'] article",
+                  ];
+                  for (const selector of groups) {
+                    const nodes = [...document.querySelectorAll(selector)];
+                    for (let i = 0; i < nodes.length; i++) {
+                      for (let j = i + 1; j < nodes.length; j++) {
+                        const a = nodes[i]!.getBoundingClientRect();
+                        const b = nodes[j]!.getBoundingClientRect();
+                        if (
+                          a.width &&
+                          b.width &&
+                          a.height &&
+                          b.height &&
+                          Math.min(a.right, b.right) - Math.max(a.left, b.left) > 1 &&
+                          Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top) > 1
+                        )
+                          overlaps.push(selector);
+                      }
+                    }
+                  }
+                  const clippedText = [
+                    ...document.querySelectorAll(
+                      "main h1, main h2, main h3, main p, main dt, main dd, main strong, form label",
+                    ),
+                  ]
+                    .filter(
+                      (node) => node.clientWidth > 0 && node.scrollWidth > node.clientWidth + 1,
+                    )
+                    .map((node) => node.tagName);
+                  return {
+                    height: Math.max(
+                      document.documentElement.scrollHeight,
+                      document.body.scrollHeight,
+                    ),
+                    width: document.documentElement.scrollWidth,
+                    overlaps,
+                    clippedText,
+                  };
+                });
+                expect(geometry.width).toBeLessThanOrEqual(width);
+                expect(geometry.overlaps).toEqual([]);
+                expect(geometry.clippedText).toEqual([]);
+                if (width === 1440) expect(geometry.height).toBeLessThanOrEqual(1125);
+                await browserExpect(page.locator("main h1")).toBeVisible();
+                await browserExpect(page.locator("#ranking-podium-title")).toBeVisible();
+                await browserExpect(page.locator("#ranking-table-title")).toBeVisible();
+                await browserExpect(page.locator("main dl[aria-label^='Resumo']")).toBeVisible();
+                await browserExpect(page.locator("tbody tr")).toHaveCount(0);
+                await browserExpect(page.locator("main")).not.toContainText("R$");
+                if (process.env.RANKING_LAYOUT_ARTIFACTS === "1") {
+                  await page.screenshot({
+                    path: `output/playwright/ranking-${status}-${kind}-${theme}-${width}.png`,
+                    fullPage: true,
+                  });
+                  console.log("Ranking layout", { status, kind, theme, ...geometry });
+                }
+              }
+            }
+          }
         }
         for (const period of ["month", "week"]) {
           await page.goto(`http://ranking.test/app/ranking?period=${period}&scope=managers`);

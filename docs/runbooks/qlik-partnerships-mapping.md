@@ -1,5 +1,26 @@
 # Qlik: mapeamento do Canal de Parcerias
 
+## Revisao da fonte em 14/10/2026, 19:39 UTC
+
+Uma aba nova do mesmo aplicativo recusou o endereco anterior com "Pasta nao
+localizada". Navegacao pelo catalogo Pastas, busca Vendas, abriu a pasta
+23.1.7 - Vendas com ID `46d5bcf7-965d-40fc-a808-2fdde2d0f74d`.
+DOM do slider PRODUTO: `26aed86d-e96b-4151-bc15-7b54d456f032_content`.
+DOM do tab Parceiras: `tab-8b78e5d8-6b6b-4a29-be0c-cd855b9ec765-pUYysrvJ`.
+Aplicativo permanece `7c000871-8b32-4c0f-bfd5-4b9d46946575`.
+Estes IDs substituem os candidatos antigos nas proximas validacoes, mas
+continuam exigindo vinculo Engine, definicoes, filtros e conciliacao reais.
+Nao foi apurado o motivo da alteracao nem se ela ocorre em toda recarga.
+
+Catalogo de campos confirma `DS_Produto - (DRCMPR)`,
+`DS_Produto Direcional - (DRCMPR)`, `#KEY_DRCMVE_PRODUTO`,
+`CD_Empreendimento - (DRCMEM)`, `Nome do empreendimento - (DRCMEM)` e
+`#KEY_DRCMVE_EMPREENDIMENTO`. Os campos de imobiliaria observados anteriormente
+continuam presentes. Existencia no catalogo nao define qual identidade usar;
+nenhum valor, relacionamento ou formula foi presumido a partir dos nomes.
+Nao houve exportacao nem ingestao. Evidencias antigas abaixo ficam como
+historico, nao configuracao vigente de coleta.
+
 ## Referencia vigente
 
 Em 14/10/2026 o usuario substituiu expressamente a referencia `/ranking` por

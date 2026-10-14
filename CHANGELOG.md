@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-14: Fonte e densidade do ranking
+
+- Atualiza a pasta Qlik candidata conforme catalogo atual e rejeita a origem
+  retirada, mantendo aplicativo, recorte e permissoes fixos.
+- Compacta a apresentacao sem remover conteudo; acrescenta verificacao de
+  altura desktop, overflow e colisao nos estados sem dados.
+
 ## 2026-10-14: Correcao do lint SQL Qlik
 
 - Classifica os validadores de timestamp/conteudo como STABLE, preservando
