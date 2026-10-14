@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14: Ciclo de publicacao Qlik
+
+- Adiciona conciliacao antes do envio, leitura restrita da credencial systemd
+  e recibo operacional sem dados comerciais. Ativacao produtiva pendente.
+- Corrige a matriz de testes das duas novas RPCs, preservando grants minimos.
+
 ## 2026-10-14: Ingestao e ranking Qlik v2
 
 - Adiciona contrato/RPC/reader isolados, HMAC proprio, duas observacoes

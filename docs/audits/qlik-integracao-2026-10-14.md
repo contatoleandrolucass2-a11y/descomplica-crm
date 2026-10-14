@@ -42,6 +42,19 @@ Uma credencial fake hardcoded em teste existente gerava falso positivo;
 trocada por fixture gerada, sem ignore/rotacao/mudanca de segredo real.
 PostgreSQL e matriz autenticada ficam para CI. Nenhum dado Qlik publicado.
 
+## 2026-10-14: Credenciais systemd e revisao do ciclo
+
+VPS confirmou systemd255.4-1ubuntu8.17. Probe transitorio nao secreto:
+LoadCredential=probe:/etc/hostname, usuario tecnico997 e getfacl apenas sobre
+metadados, sem ler/imprimir conteudo. Unidade descomplica-qlik-credential-probe
+usou --wait/--pipe/--collect, saiu0 em14ms; nenhum owner/CRM alterado.
+Diretorio root/root0500 com ACL nominal UID997/r-x e maskr-x (mode0550);
+arquivo root/root0400 com ACL nominal UID997/r-- e maskr-- (mode0440).
+Group/other sem acesso. Leitor inicial rejeitava esses bits; revisao exige
+validar ACL efetiva e principal unico, nao liberar grupo0440 genericamente.
+Fonte oficial: systemd/systemd v255 src/core/exec-credential.c, linhas176-191.
+Essa prova verifica o mecanismo, nao usa chave real nem autentica o Qlik.
+
 ## 2026-10-14: Conexao Qlik para ranking via VPS
 
 - Qlik -> VPS -> /app/ranking: referencia Canal de Parcerias; recorte confirmado

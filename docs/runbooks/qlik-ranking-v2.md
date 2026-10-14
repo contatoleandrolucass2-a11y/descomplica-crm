@@ -48,6 +48,15 @@ obrigatorias antes de habilitar dados reais. Replay idempotente nao conta
 como segunda coleta. O publisher reutiliza os mesmos bytes/requestId apenas
 em ate tres tentativas de transporte; o nonce muda a cada tentativa.
 
+`ranking-cycle.mjs` recebe o coletor e abre duas chamadas sequenciais com
+identidades UUID distintas. Copia cada resultado antes da proxima chamada,
+valida o mesmo contrato do endpoint e compara fonte/meses antes de enviar.
+Somente dois ACKs coerentes, staged e published, com o mesmo hash constituem
+sucesso. Implementacao do coordenador nao prova sozinha sessao QIX independente.
+`ranking-credential.mjs` le somente a credencial fixa do systemd, com caminhos,
+ownership, limites e symlinks verificados; nenhum valor e exportado em logs.
+`ranking-artifact.mjs` projeta apenas estado e recibo, nunca payload ou erros.
+
 Publicacoes sao preservadas por ano. O reader retorna atual/anterior sob um
 snapshot SQL. Falha ou fonte mais antiga nao substitui a ultima carga valida.
 Movimento exige periodo, cobertura e mapeamento comparaveis. Publicacao nao

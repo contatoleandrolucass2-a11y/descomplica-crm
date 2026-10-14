@@ -2,6 +2,22 @@
 
 ## 2026-10-14: Qlik via VPS
 
+- Retomada19:04Z: CI main77dd/38610165621 concluida success; main avancou
+  externamente para d660ba9, CI38620208026 pendente. Health200/ok77dd e ledger
+  CRM ee03fade-fcd0-4c3c-b410-d2bc0abd57f7, deploy18:42:12.845Z. Nenhum
+  upgrade Qlik executado. Fontes git fetch/GitHub/SSH e health publico.
+- Candidate visual38610921925 falhou sem artefato de diagnostico (upload so
+  em sucesso). Adicionado upload sanitizado always separado; nao promove
+  baseline reprovada. Reexecutar e corrigir causa antes de merge/deploy216.
+
+
+- CI216/47c1e85: pgTAP v2 passou254; suite falhou somente2 allowlists globais.
+  Expectativas corrigidas sem grants novos; nova CI/restore exigidos. Catalogo
+  produtivo18:07Z confirma helpers, ausencia v2 e ACLs legadas restritas.
+  Fonte GitHubCI38610922021/job116015515782 e Supabase MCP; nenhuma DDL.
+  Gates locais combinados passaram. Ciclo/credencial/recibo em implementacao;
+  nao confundem testes sinteticos com QIX, publicacao ou agenda real.
+
 - 17:52Z: PR224/a282b3d aprovado CI38605138409, merge77ddc69; CI push/main
   38610165621 pendente. Health publico200/ok0019690; owner ainda nao atualizado.
   Checkout/dependencias preparados, sem alterar servicos. Fonte GitHub/SSH/health.

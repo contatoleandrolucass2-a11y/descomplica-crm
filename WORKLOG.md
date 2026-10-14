@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-10-14: Validacao SQL e ciclo independente Qlik
+
+Candidate visual38610921925/47c1e85:42 testes Ranking/build/E2E passaram;
+captura falhou18:29:12Z, sem causa recuperavel porque upload era success-only.
+Adicionado upload always somente de diagnosticos sanitizados, separado do
+artefato promovivel. Nenhum snapshot atualizado nem gate dispensado.
+CI main77dd/38610165621 passou integralmente; em19:04Z main ja era d660ba9,
+CI38620208026 pendente. Publicacao externa CRM77dd confirmada health/ledger,
+deployment ee03fade-fcd0-4c3c-b410-d2bc0abd57f7 em18:42:12.845Z. Owner Qlik
+nao atualizado; candidato atual deve acompanhar main antes de qualquer troca.
+
+PR216/47c1e85: pgTAP Qlik v2 passou254/254 em PostgreSQL isolado
+na CI38610922021, job116015515782, as18:06:42Z. A suite global falhou2/1577:
+allowlists da matriz nao incluiam reader authenticated e writer service_role.
+Corrigidas somente as expectativas auditadas, sem alterar grants ou plan21.
+Catalogo produtivo18:07Z confirmou helpers MFA/permissao/hash e ausencia dos
+objetos v2; nove combinacoes de CRUD nas tres tabelas Qlik antigas negadas.
+Nenhuma migration aplicada. Reexecucao CI/restore permanece obrigatoria.
+
+Gates locais apos merge77dd: lint0 com warning existente, typecheck0, build0;
+pnpm test0,3113 Vitest/83 skips e release528/14 skips. Novos modulos de ciclo,
+credencial systemd e recibo privado em implementacao, sem caller produtivo.
+Ciclo valida contrato compartilhado, compara duas leituras independentes e
+exige ACK staged/published com mesmo hash. Testes focados24+21+10 passaram,
+um teste POSIX de artefato depende de Linux. Nao comprovam conexao real.
+
 ## 2026-10-14: Contrato, leitura e publicacao Qlik v2
 
 Implementados endpoint HMAC separado, contrato estrito, migration aditiva e
