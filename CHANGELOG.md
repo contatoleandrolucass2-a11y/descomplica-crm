@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-13: Relatorio completo no dashboard
+
+- Reproduz as secoes informacionais da pagina de referencia em `/app`, com
+  valores atuais do CRM e navegacao por periodo e visao autorizada.
+- Exibe conversoes entre etapas, comparativos mensais, realizado operacional,
+  VGV e distribuicao da equipe quando existe uma base consistente e permitida.
+- Distingue dados ausentes de zero e preserva a indisponibilidade de filtros
+  ou criterios comerciais que ainda nao fazem parte da fonte atual.
+
 ## 2026-10-13 — Estoque automático
 
 Recupera a base anterior em falhas após a troca atômica e distingue publicação
