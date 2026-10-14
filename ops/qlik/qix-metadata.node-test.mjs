@@ -1,12 +1,13 @@
 import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
 import { test } from "node:test";
 import { runInNewContext } from "node:vm";
 import { inspectQlikRankingMetadata } from "./qix-metadata.mjs";
 
 const APP = "7c000871-8b32-4c0f-bfd5-4b9d46946575";
-const SHEET = "772db774-0bc2-42d8-ac11-3e4917bd0d37";
-const PRODUCTS = "17f54180-e9f8-44d4-8a58-d055cff3e94c";
-const CONTAINER = "e039b893-0d96-444c-9773-aba1383f8d94";
+const SHEET = "46d5bcf7-965d-40fc-a808-2fdde2d0f74d";
+const PRODUCTS = "26aed86d-e96b-4151-bc15-7b54d456f032";
+const CONTAINER = "8b78e5d8-6b6b-4a29-be0c-cd855b9ec765";
 const PARTNERS = "synthetic-partner-engine-id";
 const TAB = "pUYysrvJ";
 const RELOAD = "2026-10-14T08:09:14.000Z";
@@ -109,6 +110,7 @@ function fixture() {
     properties,
     calls,
     masters,
+    effective: new Map(),
     failure: null,
     afterCall: null,
     layout: { qLastReloadTime: RELOAD, qTitle: PRIVATE, qFileName: PRIVATE },
@@ -131,7 +133,11 @@ function fixture() {
       return invoke("getProperties", [this.id], properties.get(this.id));
     }
     getEffectiveProperties() {
-      return invoke("getEffectiveProperties", [this.id], properties.get(this.id));
+      return invoke(
+        "getEffectiveProperties",
+        [this.id],
+        f.effective.get(this.id) ?? properties.get(this.id),
+      );
     }
     getLayout() {
       assert.fail("object layout is forbidden");
@@ -193,6 +199,35 @@ function fixture() {
 function clean(value) {
   return JSON.parse(JSON.stringify(value));
 }
+function canonical(value) {
+  if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
+  if (value !== null && typeof value === "object")
+    return `{${Object.keys(value)
+      .sort()
+      .map((key) => `${JSON.stringify(key)}:${canonical(value[key])}`)
+      .join(",")}}`;
+  return JSON.stringify(value);
+}
+function digest(value) {
+  return createHash("sha256").update(canonical(value), "utf8").digest("hex");
+}
+const hashTargets = [
+  {
+    name: "effective cube",
+    raw: (f) => f.properties.get(PRODUCTS).qHyperCubeDef,
+    output: (result) => result.objects.find(({ id }) => id === PRODUCTS),
+    hash: "qHyperCubeSha256",
+    projection: "qHyperCubeDef",
+  },
+  ...["dimension", "measure"].map((type) => ({
+    name: `${type} master`,
+    raw: (f) =>
+      f.masters.get(`${type}:synthetic-${type}-master`)[type === "dimension" ? "qDim" : "qMeasure"],
+    output: (result) => result.masterDefinitions.find((item) => item.type === type),
+    hash: "definitionSha256",
+    projection: type === "dimension" ? "qDim" : "qMeasure",
+  })),
+];
 function sanitized(code) {
   return (error) => {
     assert.equal(error.code, code);
@@ -207,8 +242,92 @@ function sanitized(code) {
 // Every scenario also runs from toString() in a realm without Node globals/imports.
 for (const [mode, inspect] of [
   ["module", inspectQlikRankingMetadata],
-  ["closure-free VM", runInNewContext(`(${inspectQlikRankingMetadata.toString()})`)],
+  [
+    "closure-free VM",
+    runInNewContext(`(${inspectQlikRankingMetadata.toString()})`, { crypto, TextEncoder }),
+  ],
 ]) {
+  test(`${mode}: cube digest uses effective properties rather than the sheet tree`, async () => {
+    const f = fixture();
+    const effective = structuredClone(f.properties.get(PRODUCTS));
+    effective.qHyperCubeDef.extraPrivateDefinition = PRIVATE;
+    f.effective.set(PRODUCTS, effective);
+    const product = (await inspect(f.global)).objects.find(({ id }) => id === PRODUCTS);
+    assert.equal(product.qHyperCubeSha256, digest(effective.qHyperCubeDef));
+    assert.notEqual(product.qHyperCubeSha256, digest(f.properties.get(PRODUCTS).qHyperCubeDef));
+    assert.equal(JSON.stringify(product).includes(PRIVATE), false);
+  });
+
+  for (const target of hashTargets) {
+    test(`${mode}: ${target.name} digest covers unprojected metadata without exposing it`, async () => {
+      const f = fixture();
+      const raw = target.raw(f);
+      raw.extraPrivateDefinition = {
+        z: PRIVATE,
+        a: { 2: "two", 10: "ten", text: "\u00e9\ud83d\ude00", value: [null, true, 1.5, -0] },
+      };
+      const first = target.output(await inspect(f.global));
+      assert.equal(first[target.hash], digest(raw));
+      assert.equal(JSON.stringify(first).includes(PRIVATE), false);
+      assert.equal(JSON.stringify(first).includes("extraPrivateDefinition"), false);
+      const reversed = Object.fromEntries(Object.entries(raw.extraPrivateDefinition).reverse());
+      raw.extraPrivateDefinition = reversed;
+      assert.equal(target.output(await inspect(f.global))[target.hash], first[target.hash]);
+      reversed.a.value.reverse();
+      const changed = target.output(await inspect(f.global));
+      assert.notEqual(changed[target.hash], first[target.hash]);
+      assert.equal(changed[target.hash], digest(raw));
+      assert.deepEqual(clean(changed[target.projection]), clean(first[target.projection]));
+    });
+
+    test(`${mode}: ${target.name} digest enforces the exact UTF8 byte boundary`, async () => {
+      const f = fixture();
+      const raw = target.raw(f);
+      raw.extra = "";
+      const remaining = 262_144 - Buffer.byteLength(canonical(raw), "utf8");
+      raw.extra = "\u00e9".repeat(Math.floor(remaining / 2)) + "a".repeat(remaining % 2);
+      assert.equal(Buffer.byteLength(canonical(raw), "utf8"), 262_144);
+      assert.equal(target.output(await inspect(f.global))[target.hash], digest(raw));
+      raw.extra += "a";
+      await assert.rejects(inspect(f.global), sanitized("qix_metadata_limit"));
+    });
+
+    test(`${mode}: ${target.name} digest rejects non-JSON values and accessors without invoking them`, async () => {
+      for (const value of [NaN, Infinity, -Infinity, undefined, 1n, () => {}, Array(1)]) {
+        const f = fixture();
+        target.raw(f).extra = value;
+        await assert.rejects(inspect(f.global), sanitized("qix_invalid_metadata"));
+      }
+      for (const extra of [{}, [0]]) {
+        const f = fixture();
+        let invoked = false;
+        Object.defineProperty(extra, Array.isArray(extra) ? "0" : "private", {
+          enumerable: true,
+          get() {
+            invoked = true;
+            throw new Error(PRIVATE);
+          },
+        });
+        target.raw(f).extra = extra;
+        await assert.rejects(inspect(f.global), sanitized("qix_invalid_metadata"));
+        assert.equal(invoked, false);
+      }
+    });
+
+    test(`${mode}: ${target.name} digest bounds recursive depth and cycles`, async () => {
+      const f = fixture();
+      const raw = target.raw(f);
+      let nested = null;
+      for (let index = 0; index < 31; index++) nested = { next: nested };
+      raw.extra = nested;
+      assert.equal(target.output(await inspect(f.global))[target.hash], digest(raw));
+      raw.extra = { next: nested };
+      await assert.rejects(inspect(f.global), sanitized("qix_metadata_limit"));
+      raw.extra = raw;
+      await assert.rejects(inspect(f.global), sanitized("qix_metadata_limit"));
+    });
+  }
+
   test(`${mode}: fixed scope, definitions only, actual tab refId, reload allowlist`, async () => {
     const f = fixture();
     const result = clean(await inspect(f.global));
@@ -225,6 +344,12 @@ for (const [mode, inspect] of [
       [SHEET, CONTAINER, PRODUCTS, PARTNERS],
     );
     const product = result.objects.find(({ id }) => id === PRODUCTS);
+    assert.equal(product.qHyperCubeSha256, digest(f.properties.get(PRODUCTS).qHyperCubeDef));
+    assert.equal(
+      result.objects.find(({ id }) => id === PARTNERS).qHyperCubeSha256,
+      digest(f.properties.get(PARTNERS).qHyperCubeDef),
+    );
+    assert.equal(result.objects.find(({ id }) => id === CONTAINER).qHyperCubeSha256, undefined);
     assert.equal(product.qHyperCubeDef.qMeasures[0].qDef.qDef, "Sum([Synthetic VGV])");
     assert.equal(product.qHyperCubeDef.qDimensions[0].qOtherTotalSpec.qOtherCounted.qv, "10");
     assert.equal(product.qHyperCubeDef.qDimensions[0].qLibraryId, "synthetic-dimension-master");
@@ -500,8 +625,13 @@ for (const [mode, inspect] of [
         qLabelExpression: "='Entity'",
         qAlias: "Entity",
       },
+      definitionSha256: digest(f.masters.get("dimension:synthetic-dimension-master").qDim),
     });
     assert.equal(measure.type, "measure");
+    assert.equal(
+      measure.definitionSha256,
+      digest(f.masters.get("measure:synthetic-measure-master").qMeasure),
+    );
     assert.deepEqual(measure.qMeasure.qExpressions, ["Sum([Synthetic VGV])"]);
     assert.equal(measure.qMeasure.qActiveExpression, 0);
     assert.equal(measure.qMeasure.qLabel, "VGV");
@@ -642,3 +772,31 @@ for (const [mode, inspect] of [
     await assert.rejects(inspect(f.global), sanitized("qix_invalid_reload_time"));
   });
 }
+
+test("serialized digest failures and cancellation remain sanitized", async () => {
+  for (const action of ["missing", "failure", "abort"]) {
+    const controller = new AbortController();
+    const inspect = runInNewContext(`(${inspectQlikRankingMetadata.toString()})`, {
+      TextEncoder,
+      crypto:
+        action === "missing"
+          ? undefined
+          : {
+              subtle: {
+                digest: async (...args) => {
+                  if (action === "failure") throw new Error(PRIVATE);
+                  const result = await crypto.subtle.digest(...args);
+                  controller.abort(PRIVATE);
+                  return result;
+                },
+              },
+            },
+    });
+    const f = fixture();
+    await assert.rejects(
+      inspect(f.global, { signal: controller.signal }),
+      sanitized(action === "abort" ? "qix_aborted" : "qix_metadata_failed"),
+    );
+    assert.equal(f.calls.at(-1)[0], "getEffectiveProperties");
+  }
+});

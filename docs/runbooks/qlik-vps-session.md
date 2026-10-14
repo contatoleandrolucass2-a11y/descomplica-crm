@@ -1,5 +1,37 @@
 # Sessao Qlik na VPS
 
+## Atualizacao dos IDs do preflight em 14/10/2026
+
+Segundo a observacao real comunicada pelo coordenador, a pasta anterior
+`772db774-0bc2-42d8-ac11-3e4917bd0d37` deixou de existir. O catalogo
+`Pastas > 23.1.7 Vendas` abre agora `46d5bcf7-965d-40fc-a808-2fdde2d0f74d`.
+No mesmo aplicativo `7c000871-8b32-4c0f-bfd5-4b9d46946575`, o elemento DOM
+de PRODUTO e `26aed86d-e96b-4151-bc15-7b54d456f032_content`, e o container
+Parceiras e `8b78e5d8-6b6b-4a29-be0c-cd855b9ec765_content`. A aba Parceiras
+mantem `cId=pUYysrvJ`; esse cId nao e um ID de objeto Engine.
+
+O hotfix atualiza os tres IDs fixos de `ops/qlik/qix-metadata.mjs`
+e suas fixtures. Os candidatos QIX usam os UUIDs sem o sufixo DOM `_content`;
+a prova de pertencimento na arvore e a resolucao da aba continuam obrigatorias.
+Preserva aplicativo, recorte, limites, autenticacao, CSP e chamadas API permitidas.
+Os registros abaixo permanecem historicos, nao referencias para esses tres IDs.
+
+O escopo aditivo autorizado inclui digests dos metadados integrais para o futuro
+manifest: `objects[].qHyperCubeSha256` representa o `qHyperCubeDef` integral de
+`getEffectiveProperties`, quando presente; `masterDefinitions[].definitionSha256`
+representa o `qDim` ou `qMeasure` original. Ambos usam SHA-256 via `crypto.subtle`,
+JSON com chaves ordenadas recursivamente, ordem dos arrays preservada e UTF-8,
+sem espacos adicionais. O limite por definicao e 262144 bytes e profundidade 32
+(raiz em 0); accessors, valores nao finitos e estruturas nao JSON sao recusados.
+Os hashes sao hexadecimais minusculos de 64 caracteres. Nenhuma definicao extra
+e exposta: as projecoes anteriores permanecem, e campos omitidos tambem afetam
+o digest. Nao ha import novo, leitura de fatos ou ampliacao da allowlist de API.
+
+Esta atualizacao operacional nao comprova mapping de producao, selecoes,
+coleta de fatos, conciliacao ou publicacao de ranking. A confirmacao do
+preflight na origem depende de promocao protegida e observacao pelo coordenador;
+esta tarefa nao acessa a VPS nem altera sessao, credenciais ou autorizacoes.
+
 ## Escopo e estado
 
 O fluxo solicitado e Qlik -> VPS -> ranking do CRM. Este componente prepara
