@@ -124,7 +124,11 @@ export async function loadDashboardTeam(
       readHeader("crm_dashboard_snapshots"),
     ]);
     if (!ranking || !initialDashboard) return unavailable("Snapshot da equipe indisponivel.");
-    if (!unchanged(expected.data, initialDashboard) || !sameMetadata(ranking, expected.data)) {
+    if (
+      !unchanged(expected.data, initialDashboard) ||
+      !sameMetadata(ranking, expected.data) ||
+      ranking.updated_at !== expected.data.updated_at
+    ) {
       return unavailable("Snapshots divergentes.");
     }
 

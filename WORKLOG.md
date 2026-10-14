@@ -2,6 +2,10 @@
 
 ## 2026-10-13: Replica informacional do dashboard
 
+- Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com
+  generatedAt reutilizado. Exige tambem updated_at coincidente entre ranking
+  e dashboard antes de consultar participantes; duas regressoes falharam antes
+  da correcao. RPC atual usa now() transacional para ambos; sem migration.
 - CI38498361779 aprovou validate, restore, E2E e todos os checks funcionais
   da matriz visual; falhou apenas nas 11 referencias alteradas de /app.
   Capturas revisadas e promovidas pelo helper original; 231 imagens preservadas.

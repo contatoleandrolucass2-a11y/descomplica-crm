@@ -2,6 +2,7 @@
 
 ## 2026-10-13: Relatorio completo no dashboard
 
+- Impede exibir equipe de versao anterior apos atualizacao parcial do dashboard.
 - Atualiza as 11 referencias visuais do dashboard apos revisao da captura
   autenticada isolada, preservando as demais 231 imagens e os limiares do gate.
 - Alinha o E2E ao titulo da referencia e verifica a presenca das secoes completas.

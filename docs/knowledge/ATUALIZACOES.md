@@ -2,6 +2,11 @@
 
 ## 2026-10-13: Replica informacional do dashboard legado
 
+- P2 do PR213 confirmado: ingestao sem ranking pode reutilizar generatedAt.
+  Leitor da equipe agora exige updated_at coincidente entre os dois headers,
+  alem da releitura/original. Duas regressoes reproduziram o erro antes do fix.
+  Fontes: comentario4265923448, secure_salesforce_ingestion.sql e set_updated_at
+  (now() transacional). Sem alteracao da RPC, schema ou ingestao remota.
 - Consulta14/10 02:44Z: CI38498361779 do candidato d67a855 aprovou validate,
   restore e E2E. Predicado funcional original:154 responsivos,88 temas,242 Axe,
   110 zoom e22 canvases aprovados. Gate visual falhou somente em11 imagens /app.

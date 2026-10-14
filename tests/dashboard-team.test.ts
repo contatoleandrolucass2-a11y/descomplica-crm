@@ -219,6 +219,17 @@ describe("loadDashboardTeam", () => {
     },
   );
 
+  it.each(["2026-10-13T15:00:59.999999Z", "2026-10-13T15:01:00.000000Z"])(
+    "recusa ranking antigo apos ingestao somente do dashboard: %s",
+    async (updatedAt) => {
+      for (const index of [0, 1]) {
+        changeHeader("crm_ranking_snapshots", index, { updated_at: updatedAt });
+      }
+      expect(await load()).toEqual({ status: "unavailable", reason: "Snapshots divergentes." });
+      expect(mocks.from).not.toHaveBeenCalledWith("crm_ranking_participants");
+    },
+  );
+
   it.each(["2026-10-13T15:02:00.000001Z", "2026-10-13T15:01:00.000002Z"])(
     "recusa regravacao anterior a leitura com mesmo generatedAt e novo updatedAt: %s",
     async (updatedAt) => {

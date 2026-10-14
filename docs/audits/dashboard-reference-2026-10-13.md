@@ -104,6 +104,13 @@ Publicacao pendente dos gates e da revisao de referencias visuais.
 
 ## Revisao da baseline
 
+Revisao P2 adicional do PR213: quando somente dashboard e regravado com mesmo
+generatedAt, ranking antigo podia passar por sameMetadata. Duas regressoes
+falharam antes do ajuste; agora ranking.updated_at deve coincidir com o
+updatedAt original do dashboard, antes da consulta de participantes. A RPC
+atual escreve ambos na mesma transacao com now(); fixture isolada tambem.
+Nenhuma alteracao de schema, policy ou ingestao foi necessaria.
+
 CI38498361779 do candidato d67a855 aprovou validate (incluindo pnpm test Linux),
 restore, E2E e os checks funcionais originais:154 responsivos,88 temas,242 Axe,
 110 zoom,22 canvases, teclado e simuladores. Falha limitada as11 comparacoes
