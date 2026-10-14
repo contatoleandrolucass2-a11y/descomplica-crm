@@ -17,6 +17,9 @@
   de 40 para 41 tabelas. Os demais testes pgTAP passaram; repetir gates completos.
 - Segunda CI aprovou banco/restore/E2E; setup do leitor sintetico da matriz
   visual falhou com SQLSTATE 23505. Publicacao bloqueada ate corrigir fixture.
+- Terceira CI aprovou a Rotina completa com duas contas reais isoladas. Nova
+  conta alterou a selecao inicial da captura administrativa; estabilizar essa
+  precondicao preservando todas as assertions e referencias visuais existentes.
 
 ## 2026-10-13: Padrao de texto regional imob
 

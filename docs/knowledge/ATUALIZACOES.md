@@ -44,6 +44,14 @@
   1743-1753, exige escopo compativel antes de aprovar/ativar o broker. Fixture
   do leitor precisa de pessoa, equipe, vinculo e concessao de escopo proprio;
   nao e necessario alterar guards ou permissoes de producao.
+- CI38504861394: fixture corrigida; routine-results.json confirma duas contas
+  distintas, marcacoes independentes persistidas, conteudo compartilhado intacto,
+  Semana/Hoje, teclado e quatro auditorias axe sem violacoes. Rotina passou
+  tambem na matriz de cinco larguras/tres temas e rolagem. Gate geral falhou
+  somente em /admin/usuarios: nova conta virou selecao automatica, mudando o
+  estado da captura (desktop 1324px contra referencia 1187px/limite1200).
+  Corrigir selecao deterministica da conta QA original, sem mudar UI, limites
+  ou imagens de referencia. Fonte: artefato candidato do mesmo run.
 
 ## 2026-10-13: Capitalizacao da rotina regional imob
 
