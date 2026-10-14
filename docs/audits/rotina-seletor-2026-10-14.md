@@ -98,3 +98,59 @@ Data: 2026-10-14. Branch: codex/rotina-seletor-coluna.
   CI38610165621 em andamento. Health200/ok continua0019690. Candidato anterior
   nao pode ser promovido: o coordenador exige main exato. Novo suporte Qlik tem
   comandos proprios e nao sera acionado; esta tarefa promove somente o CRM.
+
+## Historico transferido do indice
+
+Trecho integral de ATUALIZACOES apos integracao do PR224, transferido para
+manter o limite de exportacao do Obsidian sem descartar evidencias.
+
+- Retomada15:54Z: Git comum confirmado, main/publicado5c4d95e; health200/ok.
+  PR225 documental em5d7631c: validate/restore aprovados, release-gates falhou
+  em daily-layout-320-balanced (CI38588434885). Diagnostico antes do merge;
+  nao reiniciar CRM por documentos. Fontes: GitHub, git fetch e /api/health.
+- Novos ajustes autorizados para publicacao apos validacao: seletor unico,
+  controles redesenhados e contorno branco da coluna atual, sem mudar dados.
+  Evidencias: [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+- PR226/CI38597484257 aprovado, integrado em efc6a20; CI main38603513278
+  em andamento. Consulta17:06Z: health200/ok/0019690, publicado por trabalho
+  concorrente em16:58:40Z. Esta versao ja esta incluida no candidato.
+- Retomada17:55Z: main77ddc69/PR224 preserva Rotina; CI38610165621 em andamento.
+  Reexecucao de efc6a20 cancelada pela integracao, nao nova falha; health0019690.
+
+## Publicacao e verificacao final
+
+- Main77ddc69d79678d6944c34c5a3ac0f5c8a2ee2f8c aprovado integralmente na
+  CI38610165621: validate, release-gates, isolated-restore e promotable-image.
+  Matriz autenticada aprovada sem alterar criterio, timeout ou baseline.
+  Causa da primeira oscilacao em efc6a20 continua desconhecida; nao declarar
+  correcao causal. Reavaliar com diagnostico sanitizado se voltar a ocorrer.
+- Artifact baixado somente depois de todos os jobs concluirem. SHA256 gzip
+  ed89d385d5c577ed42fc7a616c9ac7fec57730157e21bcfec1e9fd7e50490da3;
+  config/CIsha256:b109a55e7ec5f6e4736774b4f9ff361d3ec6f1d803431be59ac60e90973d07f0;
+  OCI/Dockersha256:d6f0f5783e2a3adf1cc92013710530c6deacfc97229de7b959164334332dae70.
+  Revisao, plataforma linux/amd64,11 camadas e dois perfis comprovados.
+- Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/77ddc69d79678d6944c34c5a3ac0f5c8a2ee2f8c.GBuvp3`,
+  manifest0e05568db613d17e43d7c91f3b2b6053b1488bee4accdbe195b0d4a24068cd9a.
+  Arquivos privados e segredos nao foram exportados ao Git.
+- Publicacao exclusivamente por release:production deploy, locks/CAS e consulta
+  no minuto. Deploymentee03fade-fcd0-4c3c-b410-d2bc0abd57f7,
+  deployedAt2026-10-14T18:42:12.845Z (15:42:12 America/Sao_Paulo), pending=null.
+  Anterior0019690/deployment5c4dc0b6 mantido como referencia de recuperacao.
+  Nenhum comando Qlik de mutacao, migration, n8n ou dado comercial alterado.
+- Smoke: health200/ok/SHA77ddc69; container healthy, OOMfalse, reinicios0;
+  inventory anonimo401, Gestao e Rotina307. Evidencia operacional sanitizada:
+  test-results/routine-release/selector-production.log (ignorado pelo Git).
+- UI autenticada observacional confirmou seis opcoes, selecao unica e uma
+  secao visivel; House26linhas/Imob18linhas. Semana/Hoje preservaram os textos
+  e marcacoes das10atividades de quarta, sem gravar uma atividade real.
+  Fonte13px, overflow visible, Hoje sem excesso horizontal, contorno unico
+  pointer-events:none, branco, cabecalhos sem pseudo-brilho e no tom solicitado.
+  Desvio geometrico observado menor que0,34px. Navegacao de funcao/modo aprovada.
+- Capturas locais: test-results/routine-preview/seletor-semana-publicada.jpg e
+  seletor-hoje-publicada.jpg. Sem dados pessoais nos registros versionados.
+- PR225 passa a conter somente o encerramento documental sobre main77ddc69.
+  Sua integracao nao exige nem autoriza republicacao do CRM. SHA documental
+  posterior deve permanecer distinto do runtime publicado, salvo nova demanda.
+- Fontes: GitHub PR226/run38610165621; coordenador; health publico e DOM/capturas
+  autenticadas. Obsidian sincronizado apos registro, respeitando limite256000bytes.
