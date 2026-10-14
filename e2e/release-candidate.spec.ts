@@ -371,7 +371,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/ranking",
-    heading: "Ranking por pontos",
+    heading: "Ranking das imobiliárias",
     allowed: rankingRoles,
   },
   {
@@ -1428,7 +1428,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       ["/app/etapas/visitas", "Visitas"],
       ["/app/etapas/pastas", "Pastas"],
       ["/app/etapas/vendas", "Vendas"],
-      ["/app/ranking", "Ranking por pontos"],
+      ["/app/ranking", "Ranking das imobiliárias"],
       ["/app/canal-de-parcerias", "Ranking das imobiliárias"],
     ] as const;
 
@@ -1455,7 +1455,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
   });
 });
 
-test("dashboard and ranking filter links enforce their selected server state", async ({
+test("dashboard filters retain selected state while partnership ranking stays unavailable", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1467,14 +1467,6 @@ test("dashboard and ranking filter links enforce their selected server state", a
       {
         pathname: "/app?view=with_canal_imob&period=week",
         selectedHref: "/app?view=with_canal_imob&amp;period=week",
-      },
-      {
-        pathname: "/app/ranking?period=month&scope=managers",
-        selectedHref: "/app/ranking?period=month&amp;scope=managers",
-      },
-      {
-        pathname: "/app/ranking?period=week&scope=managers",
-        selectedHref: "/app/ranking?period=week&amp;scope=managers",
       },
     ];
 
@@ -1488,6 +1480,65 @@ test("dashboard and ranking filter links enforce their selected server state", a
       expect(html).toMatch(
         new RegExp(`<a(?=[^>]*href="${escapedHref}")(?=[^>]*aria-current="page")[^>]*>`),
       );
+    }
+
+    for (const pathname of [
+      "/app/ranking?period=month&scope=managers",
+      "/app/ranking?period=week&scope=managers",
+    ]) {
+      const response = await page.goto(pathname);
+      expect(response?.status()).toBe(200);
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Ranking das imobiliárias" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Dados indisponíveis", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText(
+          "Fonte Qlik ainda não homologada. Atualização e resultados não confirmados.",
+          { exact: true },
+        ),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Top 10 imobiliárias", exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: "Top 10 empreendimentos", exact: true }),
+      ).toBeVisible();
+      await expect(page.getByRole("table")).toHaveCount(2);
+      await expect(page.locator("table tbody tr")).toHaveCount(0);
+      for (const period of ["Mês atual", "Mês anterior", "Ano", "Personalizado"]) {
+        const control = page.getByRole("radio", { name: period, exact: true });
+        await expect(control).toBeDisabled();
+        await expect(control).not.toBeChecked();
+      }
+      await expect(page.getByRole("checkbox")).toHaveCount(4);
+      for (const quarter of [1, 2, 3, 4]) {
+        const control = page.getByRole("checkbox", { name: `${quarter}º trimestre`, exact: true });
+        await expect(control).toBeDisabled();
+        await expect(control).not.toBeChecked();
+      }
+      for (const [label, value] of [
+        ["Unidade de negócio", "Direcional"],
+        ["Regional", "SP CAPITAL"],
+        ["Canal", "CANAL IMOB"],
+      ] as const) {
+        const control = page.getByRole("combobox", { name: label, exact: true });
+        await expect(control).toBeDisabled();
+        await expect(control).toHaveValue(value);
+      }
+      await expect(
+        page.getByText("Recorte confirmado. Atualização automática ainda indisponível.", {
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(
+        page.getByLabel("Filtros do ranking de parcerias", { exact: true }).getByRole("link"),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("heading", { name: "Ranking por pontos", exact: true }),
+      ).toHaveCount(0);
     }
   });
 });

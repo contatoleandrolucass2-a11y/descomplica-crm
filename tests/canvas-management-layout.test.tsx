@@ -189,8 +189,12 @@ describe("management canvas layout", () => {
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
     );
 
-    expect(ranking).toContain("loadRankingReadModel");
-    expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
+    expect(ranking).not.toMatch(/loadRankingReadModel|loadReadModelV3|list_scoped_crm_imob/);
+    expect(ranking).toContain('enforcePermission("crm.ranking.view")');
+    expect(ranking).toContain("Fonte Qlik ainda não homologada");
+    expect(ranking).toContain("Top 10 imobiliárias");
+    expect(ranking).toContain("Top 10 empreendimentos");
+    expect(ranking).toContain("rows={[]}");
     expect(partnerships).toContain("Dado indisponível — integração pendente");
     expect(partnerships).toContain("Pódio das parcerias");
     expect(partnerships).toContain("Totais do período");

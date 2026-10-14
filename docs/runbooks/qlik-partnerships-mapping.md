@@ -11,12 +11,12 @@ Nao aplicar filtros, pontos, roleta, SLA, premios ou roster do ranking de
 corretores anterior. `ranking-scope.mjs` permanece um preflight offline daquele
 escopo, sem caller, e **nao valida nem autoriza esta integracao**.
 
-O destino originalmente solicitado continua `/app/ranking` ate nova orientacao;
-o repositorio ja tem
-`/app/canal-de-parcerias`, hoje sem dados reais. A troca de referencia nao e
-autorizacao para remover a tela de corretores, redirecionar rotas ou substituir
-seu snapshot Salesforce. Foi apresentada ao usuario a alternativa de usar a
-rota de parcerias existente; pergunta sem resposta nao muda o destino original.
+O usuario confirmou expressamente `/app/ranking` como destino em 14/10/2026,
+apos a troca de referencia. A nova tela deve apresentar imobiliarias e
+empreendimentos nesse endereco, nao em `/app/canal-de-parcerias`. O repositorio
+ja tem esta segunda rota como previa sem dados reais. A mudanca de apresentacao
+nao autoriza sobrescrever ou apagar o snapshot Salesforce de corretores, nem
+redirecionar outras rotas ou alterar suas permissoes implicitamente.
 
 ## Evidencias e limites
 
@@ -81,11 +81,64 @@ O catalogo de campos do aplicativo comercial ficou sem rotulos carregados na
 busca Canal e a ferramenta de navegador apresentou timeouts repetidos. Nao
 classificar esse resultado como campo ausente; retomar a inspecao quando a
 interface responder. A pesquisa anterior de Visao House nao o substitui.
-O objeto de empreendimentos com VGV ainda precisa ser identificado: a tabela
-`Dados de Fluxo` nao e substituta, pois tem filtro proprio de tabela Associativo
-e outras medidas. Nao coletar rendas, FGTS, clientes ou dados de fluxo.
+A tabela de produtos com VGV foi identificada na retomada abaixo; seu contrato
+tecnico ainda precisa ser validado. `Dados de Fluxo` nao e substituta, pois tem
+filtro proprio de tabela Associativo e outras medidas. Nao coletar rendas,
+FGTS, clientes ou dados de fluxo.
 
 ## Matriz origem -> contrato -> exibicao
+
+### Retomada e recorte confirmado em 14/10/2026
+
+O usuario confirmou **Direcional + SP CAPITAL + CANAL IMOB**. Os tres filtros
+foram aplicados na aba de inspecao, sem salvar configuracao do aplicativo. A
+barra de selecoes comprovou os nomes tecnicos abaixo; nao usar substring do
+helper legado nem confundir CANAL IMOB com IMOBILIARIAS PARCEIRAS.
+
+| Campo efetivo observado            | Selecao confirmada                          |
+| ---------------------------------- | ------------------------------------------- |
+| `Empresa (Filtro)`                 | `Direcional`                                |
+| `Regional (Filtro)`                | `SP CAPITAL`                                |
+| `DS_Canal de Vendas - (DRCMIM)`    | `CANAL IMOB`                                |
+| `=Year([DT])`, rotulo `DT.Cal.Ano` | `2026` na inspecao, nao ano fixo do coletor |
+
+O ano apareceu selecionado depois do carregamento, sem selecao manual de ano
+nesta retomada. O estado inicial transitorio de nenhuma selecao nao e base
+segura para extrair. Confirmar selecoes efetivas depois de todos os objetos
+carregarem. O calendario tambem expoe `DT.Cal.Ano/Mês`, `DT.Cal.Mês/Ano`,
+`DT.Cal.Data` e `DT.Cal.Trimestre`;
+vinculo comercial de DT com venda/contrato ainda nao demonstrado.
+
+A tabela de produtos carregou nesta retomada. Identificador DOM observado:
+`17f54180-e9f8-44d4-8a58-d055cff3e94c_content`; colunas PRODUTO, CONTRATOS,
+VGV, VGV NAO COMUNICADO, VGV COMUNICADO, VGV CADASTRADO e ESTOQUE. O alvo
+e a medida VGV, nao a soma arbitraria das colunas auxiliares. Nao e a tabela
+Dados de Fluxo nem a tabela detalhada de clientes. ID DOM ainda nao e prova
+de contrato Engine; nenhum dado de cliente foi exportado.
+
+Comparacao somente dos totais nativos formatados, sob os tres filtros e ano
+2026: produtos e Parceiras divergiram, com dois contratos a mais em produtos.
+Valores financeiros nao foram persistidos. Isso nao prova sozinho a causa,
+completude ou erro do Qlik: conciliar dimensoes nulas, filtros internos e
+definicoes das duas medidas antes de publicar ou exigir igualdade artificial.
+Atualizacao exibida pela fonte: 14/10/2026 08:09:14, fuso ainda nao confirmado.
+
+Na mesma sessao foi aplicado setembro, mes fechado, pelo campo observado
+`DT.Cal.Ano/Mês`. A barra revelou a expressao efetiva
+`=Year([DT])&Num(Month([DT]),'00')` com valor `202609`. Sob esse recorte, os
+totais exibidos de VGV e contratos das duas tabelas coincidiram. Esta e somente
+conciliacao de totais formatados na interface: nao prova centavos, soma de
+todas as linhas, chaves, ausencia de truncamento ou expressao das medidas.
+O menu de exportacao apresentou timeouts/intermitencia; nenhum arquivo foi
+baixado nesta retomada e nenhuma carga foi enviada ao CRM.
+
+Catalogo comercial agora respondeu: `DS_Canal de Vendas - (DRCMCR)` e
+`DS_Canal de Vendas - (DRCMIM)` sao campos distintos. A pesquisa Imobili
+mostrou `DS_Imobiliaria - (DRCMCR)`, `DS_Imobiliaria - (DRCMIM)`,
+`ID da Imobiliaria - (DRCMCR)`, `Id da Imobiliaria - (DRCMCRC)`,
+`ID_Imobiliaria - (DRCMVE)` e `ID_Imobiliaria - (DRCMVEFAC)`. Existencia no
+catalogo nao comprova qual dimensao a tabela Parceiras usa; nao gerar chaves
+por nome sem resolver identidade. Menus observados nao expuseram formulas.
 
 `observed` significa apenas rotulo/campo visto. `unresolved` exige prova de
 semantica, selecao ou cobertura. Nenhuma linha abaixo esta homologada ponta a
@@ -146,10 +199,32 @@ Fontes versionadas: `docs/qlik-relay-mapping-cutover/CALLER_AND_CONSUMERS.md`,
 `supabase/migrations/20260809181424_crm_read_model_v3.sql`.
 Marcadores sanitizados de migrations nao comprovam implementacao remota.
 
+## Implementacao local da apresentacao
+
+A rota `/app/ranking` passa a apresentar a estrutura de parcerias, com guard
+`crm.ranking.view` preservado. Nao chama o loader Salesforce nem o leitor Qlik
+incompleto. Os resultados e timestamps permanecem indisponiveis, sem fixtures
+financeiras; periodos/busca ficam desabilitados enquanto nao existe cobertura
+homologada. A outra rota de parcerias, catalogos e permissoes nao mudam.
+
+`lib/crm/qlik/ranking-presentation.ts` calcula centavos/contagens com BigInt,
+agrega por identidade e periodo antes de limitar o top 10 e exige metadados
+separados de cobertura/mono-unidade ligados ao requestId. E funcao pura ainda
+sem caller produtivo, nao autenticador de evidencias ou prova de aditividade
+comercial. `totals.entities` conta identidades representadas, inclusive zero;
+nao deve alimentar o rotulo "com producao" sem definir elegibilidade. O
+desempate por chave e apenas fallback deterministico, nao politica aprovada.
+Nao gera variacao sem snapshots comparaveis nem exige igualdade artificial
+entre os totais das duas dimensoes. BigInt requer serializacao explicita.
+
+O preview `scripts/qa/qlik-ranking-preview.mjs` renderiza a propria pagina e
+CSS em memoria, em loopback, sem login, fonte real ou dependencias de dados.
+Nao comprova sessao autenticada, RPC/RLS, hidratacao interativa ou producao.
+
 ## Fechamento do mapeamento e ativacao
 
-- Comprovar canal, empresa, regional e calendario nas duas agregacoes; nao
-  transportar `DIRECIONAL VENDAS SPC` do escopo substituido.
+- Preservar o recorte confirmado e comprovar calendario/semantica nas duas
+  agregacoes; nao transportar `DIRECIONAL VENDAS SPC` do escopo substituido.
 - Obter definicao das dimensoes/medidas e IDs dos objetos reais; resolver a
   coluna `CORRETOR` da aba Parceiras e o objeto de produtos.
 - Conciliar mes fechado com todos os registros, mesmos filtros e recarga,

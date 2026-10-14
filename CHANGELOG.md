@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Ranking de parcerias no destino confirmado
+
+- Prepara /app/ranking para imobiliarias e empreendimentos, VGV/contratos e
+  recorte confirmado Direcional/SP CAPITAL/CANAL IMOB; fonte ainda indisponivel.
+- Adiciona agregacao exata por centavos e cobertura explicita, com testes
+  sinteticos e preview local. Sem coletor, ingestao, migration ou agenda ativa.
+- Registra filtros tecnicos, tabela de produtos e comparacao nativa de setembro;
+  divergencia anual e homologacao completa permanecem pendentes.
+
 ## 2026-10-14: Preparacao da sessao Qlik na VPS
 
 - Atualiza a referencia vigente para Canal de Parcerias, com mapa de

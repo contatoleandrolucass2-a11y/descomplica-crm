@@ -4,11 +4,11 @@
 
 - Referencia vigente alterada pelo usuario para Canal de Parcerias em14/10:
   mapa em docs/runbooks/qlik-partnerships-mapping.md. IMOBs/produtos, VGV/contratos;
-  escopo de corretores abaixo e historico. Fluxo Qlik -> VPS -> CRM.
+  destino confirmado /app/ranking; corretores abaixo sao historico. Qlik -> VPS -> CRM.
 - PR214/ce82f707 fechado sem merge: sentido inverso e grant nao comprovado.
 - Fontes: GitHub PR216/main, SSH e https://crm.descomplicapro.com.br/api/health.
-  Conferencia05:21Z: main=faae8e9 (PR215 externo), site200/ok=792320b;
-  PR216/fb9b19f com CI verde e conflito. Novo mapa: CI propria pendente.
+  Retomada11:51Z: main=16f4587, site200/ok=faae8e9 (deploy externo);
+  PR216/feddc6e aberto com conflito, sem runs CI. gh ausente; conector consultado.
 - VPS atual sem exportador antigo/qlik-ranking-api; MCP n8n encontrou zero
   workflows ranking, sem mutacao. Documentos antigos nao provam estado atual.
   Chrome local mostra Visao House00171c17-48de-4488-b1f9-dd6dcb0249e2 e pastas
@@ -35,18 +35,18 @@
   de campos. Qlik29/29; smoke Linux real passou: fd/fsync, arquivo600, overwrite
   recusado e privada R_OK negado EACCES. Dados sinteticos removidos. Gates da
   base integrada repetidos no encerramento; evidencias completas em WORKLOG.md.
-- ConsoleHTTP200/saved:true e login VPS confirmado visualmente apos cadastro.
-  Aba manual do usuario acessivel; nenhuma credencial lida. Qlik abrange varias
-  regionais, detalhe com timeout. Escopo integral: DIRECIONAL VENDAS SPC;
-  inventario/aceite em docs/runbooks/qlik-ranking-reference.md.
-  Salesforce ja escreve ranking global e relay Qlik antigo trata imobiliarias:
-  faltam contrato por corretor, writer unico, carga reconciliada e agenda.
-  policy_pending permanece; conectar nao aprova pesos, bonus ou desempate.
+- ConsoleHTTP200/saved:true e login VPS foram confirmados apos cadastro;
+  nenhuma credencial lida. Retomada: browser ativo, console inativo/VNC failed,
+  sem causa confirmada ou reinicio. Nao alegar autenticacao atual pelo processo.
+- Novo recorte confirmado: Direcional/SP CAPITAL/CANAL IMOB, aplicado no Qlik.
+  Produtos VGV localizados; totais nativos set202609 coincidem, anual difere em
+  dois contratos. Nao prova export completo/centavos/formulas; mapa no runbook.
+- UI local /app/ranking usa parcerias indisponiveis, guard preservado; calculo
+  BigInt offline exige cobertura separada. Salesforce/global e politicas intactos.
 - Sync apos merge excedeu256000bytes. Nota desta tarefa consolidada com
   detalhes preservados no runbook/WORKLOG e historico Git; notas alheias intactas.
-- Encerramento04:29Z: lint/tipos/test/build passaram (139 arquivos/2747 Vitest).
-  Health200/ok=main792320b por deploy externo, nao Qlik. PR216 sem merge;
-  Novo mapa: lint/tipos/build OK;2 timeouts DevTools persistem. Ver WORKLOG.
+- Etapa12:21Z: verify OK,141 arquivos/2775 Vitest; preview320 a1800 sem overflow.
+  Health200/ok=faae8e9; main16f4587. PR216 sem merge/deploy; detalhes em WORKLOG.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 

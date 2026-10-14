@@ -47,7 +47,9 @@ describe("complete visual composition on the scoped v3 read model", () => {
     expect(page).toContain(
       "Ranking avançado, pesos, bônus, roleta e prêmios permanecem bloqueados",
     );
-    expect(productionPage).toContain("loadRankingReadModel");
+    expect(productionPage).not.toContain("loadRankingReadModel");
+    expect(productionPage).toContain('enforcePermission("crm.ranking.view")');
+    expect(productionPage).toContain("Fonte Qlik ainda não homologada");
   });
 
   it("does not prefill an unconfigured point policy with legacy defaults", () => {
@@ -111,8 +113,9 @@ describe("complete visual composition on the scoped v3 read model", () => {
 
     expect(partnerships).toContain('title="Ranking das imobiliárias"');
     expect(partnerships).not.toMatch(/Imob’s|IMOBs/);
-    expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
-    expect(ranking).toContain("Sem pontuação oficial");
+    expect(ranking).toContain("Top 10 imobiliárias");
+    expect(ranking).toContain("Top 10 empreendimentos");
+    expect(ranking).toContain("Dados indisponíveis");
     expect(funnel).toContain("Metas do funil de parcerias");
     expect(funnel).toContain("Base legada: somente leitura · Rascunho atual: editável");
     expect(points).toContain("Metas de pontos");

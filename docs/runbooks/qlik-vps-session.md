@@ -7,7 +7,10 @@ somente a autenticacao na origem: nao coleta relatorios, nao grava no Supabase,
 nao altera n8n e nao habilita pontuacao. A origem observada e o aplicativo
 `00171c17-48de-4488-b1f9-dd6dcb0249e2` (22.1 - Visao House) no tenant
 `https://direcional.us.qlikcloud.com/`. Seus titulos de pastas nao comprovam
-sozinhos o contrato dos dados.
+sozinhos o contrato dos dados. Esta foi a origem inspecionada antes da troca
+de escopo. A referencia vigente e Canal de Parcerias, com destino confirmado
+`/app/ranking` e candidato 23.1/Vendas. Recorte e evidencias atuais em
+`qlik-partnerships-mapping.md`; nao usar o escopo historico abaixo na coleta.
 
 A conta observada possui login por usuario/senha. Autenticar diretamente no
 Qlik exibido pelo console e concluir MFA quando solicitada. Nao pedir senha

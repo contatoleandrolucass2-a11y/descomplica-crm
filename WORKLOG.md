@@ -1,5 +1,57 @@
 # Worklog
 
+## 2026-10-14: Destino e recorte Qlik confirmados
+
+Retomada11:51Z: fetch preservou checkout; main16f4587, local/PR216feddc6e,
+PR aberto com conflito e sem CI desse SHA pelo conector. gh indisponivel no
+PATH. Health200/ok=faae8e9, publicacao externa; documentos main ainda descrevem
+publisher historico. Nota de abertura e Obsidian sincronizados antes da tarefa.
+
+Usuario confirmou destino /app/ranking e recorte Direcional + SP CAPITAL +
+CANAL IMOB. Aplicados somente na aba de inspecao Qlik, sem salvar aplicativo.
+Barra comprovou Empresa (Filtro), Regional (Filtro), DS_Canal de Vendas -
+(DRCMIM); calendario selecionado por expressao de DT. Tabela de produtos
+com VGV localizada, distinta de Dados de Fluxo/clientes. Totais nativos do ano
+divergem em dois contratos; setembro/202609 apresenta totais formatados iguais.
+Isso nao homologa centavos, formulas, identidade ou exportacao completa.
+Menus de exportacao intermitentes, sem arquivo baixado ou carga enviada.
+
+Etapa local: nova apresentacao de parcerias na rota confirmada, guard intacto,
+fonte indisponivel sem mocks ou readers incompletos. Salesforce e politicas
+preservados. Agregador puro de centavos BigInt com cobertura explicita e sem
+caller produtivo; nao confundir entidades representadas com producentes.
+Preview loopback com SSR/CSS reais, sem login ou dados. Testes e revisao
+independentes corrigem expectativas antigas da rota, nao gates de seguranca.
+
+SSH observacional: browser Qlik active/running e disabled no boot; console
+inactive/dead e VNC failed (Result=exit-code, ExecMainStatus=0). Nao atribuir
+causa apenas a esses campos, nao reiniciar nem remover socket/perfil; recuperar
+console quando uma nova autenticacao for necessaria. Nenhuma agenda instalada.
+
+Validacao final Node24.19.0/pnpm11.20.0: pnpm verify passou (lint com unico
+aviso preexistente connected-systems18:68, tipos,141 arquivos/2775 testes
+Vitest e63 skips, suites Node e release sem falhas, build50 paginas). Release:
+113 aprovados/11 skips POSIX existentes. Primeira rodada teve apenas expectativa
+antiga loadRankingReadModel em canvas-management-layout; corrigida para o novo
+contrato, sem restaurar o reader nem relaxar autorizacao. Novos testes focados:
+20 de calculo e6 de renderizacao; E2E da rota atualizado, mas nao executado.
+resources:check, formatacao dos arquivos tocados e diff-check passaram.
+
+Preview SSR real inspecionado via CUA: Claro desktop, Escuro mobile e Medio;
+larguras CSS medidas1800,400 e320, sem overflow global ou de campos/titulos.
+Tabelas tem rolagem interna com tabindex0. Capturas desktop/mobile conferidas;
+timeouts intermitentes de screenshot exigiram nova observacao. Viewport
+restaurado. Novo preview final confirmou quatro checkboxes, controles disabled,
+um unico h1 e copy de atualizacao automatica indisponivel. Nao e QA autenticado,
+matriz Axe/zoom completa ou validacao de dados; baselines nao alteradas.
+
+Conferencia12:21Z: fetch main16f4587, site200/ok=faae8e9. PR216 permanece
+etapa nao pronta para producao; conflito de main/CI propria e homologacao de
+fonte pendentes. Nenhuma migration, coleta, agenda ou deploy. Solicitado caminho
+de copia do exportador historico, se existente, para resolver metadados nao
+expostos pela UI; nao pedir nem ler credenciais. Conhecimento sincronizado ao
+encerrar, mantendo detalhes neste registro e no mapa para respeitar limite.
+
 ## 2026-10-14: Referencia alterada para Canal de Parcerias
 
 Usuario substituiu expressamente a pagina de ranking por canal-de-parcerias
