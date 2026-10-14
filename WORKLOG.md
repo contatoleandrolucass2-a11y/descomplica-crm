@@ -35,6 +35,119 @@
   concorrente passou na repeticao sem mudanca. Falha restante de overflow foi
   reproduzida com contorno atrasado; QA confere alinhamento antes da medicao,
   preservando limites e rejeitando desalinhamento persistente. Runtime intacto.
+- Main77ddc69 integrado preservando operacoes Qlik; esta tarefa nao as aciona.
+
+## 2026-10-14: Conferencias da integracao Qlik
+
+Conferencia17:13Z: CI38598554910/1d96204 terminou success em todos os gates
+de PR. Main avancou para efc6a20 (PR226); merge recusado por conflitos nos tres
+historicos. Conciliados sem modificar codigo recebido; nova CI necessaria.
+Nenhuma publicacao Qlik ocorreu. Historico proprio arquivado por limite sync.
+
+Conflitos com main0019690 limitados aos tres registros; conciliados preservando
+ambos os historicos, sem alterar codigo recebido. A secao de conhecimento do
+Associativo foi preservada integralmente em auditoria vinculada porque o main
+ja excedia o limite256000 do sync (257549 bytes). Limite nao alterado.
+CI do candidato combinado ainda necessaria; nenhuma promocao efetuada.
+
+Conferencia16:22Z de14/10 (13:22 America/Sao_Paulo): GitHub PR224 aponta
+mergeable=false; consulta CI por SHA3e69135 retorna lista vazia. git fetch e
+ls-remote confirmam main0019690, apos merge PR220. Health200/ok continua
+5c4d95e. Etapa congelada: sem CI do candidato, nenhuma promocao permitida.
+Proximo requisito verificavel e reconciliar o PR com main e obter CI no SHA
+resultante, sem reduzir gates. Qlik nao sincroniza fatos; estoque e leads
+Salesforce nao foram alterados ou revalidados como parte desta entrega.
+
+## 2026-10-14: Atualizador protegido do owner Qlik
+
+Retomada15:54Z: main/site HTTP200/ok5c4d95e, PR224/cc8c712 com validate e
+restore aprovados e matriz em andamento; posteriormente CI38589226253
+concluiu sucesso. PR216/b2bda52 falhou E2E Associativo sintetico com
+browser_fill_resources_failed; log15:41Z/job115942437414. Trechos envolvidos
+nao mudaram contra main; causa possivel de foco assincrono nao reproduzida.
+Nenhuma assercao ou timeout relaxados para passar CI.
+
+Implementado qlik-deploy/status/recover no coordenador existente. Ledger
+separado, tres travas, CI exact main, imagem aprovada e consulta real CRM no
+minuto. Nao altera production.env, ledger/imagem CRM, Salesforce ou Compose.
+Intencao antes de parar; unit validada contra template e backup privado do
+perfil parado. CAS/start exigem callback com guarda sincrona de frescor apos
+releituras locais, evitando que a aprovacao assincrona invalide verificacoes.
+Recuperacao somente da tentativa pendente; sem restauracao automatica de tar.
+
+Revisao corrigiu recovery apos rename/reload interrompido, start sem reload,
+CAS alterado durante callbacks, raiz do perfil substituida por symlink,
+coercao de SHA, pin Playwright e limite de fanout de dependencias. Probe SDK
+sempre nao-root. Artefato deve ser novo desde o start, rankingConnected=false.
+Baseline owner nao recebe data antiga presumida; recibo so apos verificacao.
+
+Lint/tipos/build51 passaram. Test global Windows:2805 Vitest passaram/82 skips,
+falhas preexistentes symlink Salesforce (O_NOFOLLOW) e timeout Next DevTools.
+Repeticao focal DevTools24/24 passou sem mudanca. Inputs108 passaram/2 skips
+fisicos Linux. Engine224 e host48 passaram; foco combinado engine/CLI232
+passou. Revisao independente encerrou achados apos correcoes e temporarios
+unicos por tentativa para nao bloquear recovery apos crash. Host exercita
+arquivos temporarios reais, mas emula comandos, UID/modos, locks e fsync de
+diretorios: nao e prova de operacao systemd/tar real ou sessao autenticada.
+CI anterior nao valida estes arquivos novos. VPS apenas observada: browser
+2f0907e ativo/disabled, unit sem drop-ins, perfil0700; nao houve upgrade,
+handshake, coleta de fatos, migration ou ingestao nesta retomada ate aqui.
+
+Suite completa de release repetida:507 testes,494 passaram/13 skips POSIX,
+zero falhas. Lint global repetido passou com aviso preexistente. Tipos/build
+passaram, formato/diff-check aprovados. Conhecimento sincronizado antes do
+commit; CI Linux do novo candidato continua obrigatoria para promocao.
+
+Conferencia15:24Z de14/10: git fetch manteve main5c4d95e; health publico
+HTTP200/ok agora identifica5c4d95e, nao16f4587. Atualizacao externa, nao
+publicacao Qlik. PR216/12cd013: validate e restore aprovados, matriz visual
+ainda em andamento. PR224/af935b7: validate Linux aprovado, demais gates
+pendentes. Correcoes do instalador exigem CI no novo SHA; sem merge/deploy.
+
+## 2026-10-14: Revisao do instalador e audiencia confirmada
+
+Dois achados P2 corrigidos: allowlist de integridade cobre os quatro modulos
+novos e o probe nao-root le SDK/schema enigma.js2.15.0. Testes focados17/17;
+suite Qlik completa107 passaram/3 Linux skips no Windows. Instalacao real
+Linux/runuser e upgrade nao executados. Nenhum servico remoto modificado.
+
+Usuario confirmou audiencia completa Direcional/SP CAPITAL/CANAL IMOB para
+quem possui crm.ranking.view. Contrato documentado; nao houve reader ou DDL.
+Revisao operacional confirmou que o coordenador nao suporta units auxiliares:
+upgrade protegido precisa ser implementado/testado antes do handshake real.
+
+Verify local deste checkout: lint/typecheck passaram; Vitest2806 passaram,
+82 skips e uma falha no teste de symlink do estoque Salesforce em Windows
+(esperado502, recebido200). O leitor de main depende de O_NOFOLLOW; a correcao
+lstat esta somente no PR216. Nao alterado Salesforce nem mascarado o teste
+nesta branch operacional. Build executado separadamente:51 paginas, exit0.
+CI38587608708/af935b7 aprovou validate Linux; demais gates ainda em andamento.
+Resultado de SHA anterior nao substitui CI apos as correcoes do instalador.
+
+## 2026-10-14: Qlik operacional separado da interface
+
+Branch codex/qlik-api-session criada de main5c4d95e, Git comum confirmado.
+Recupera de61cff23 somente ops/qlik, dependencia enigma.js2.15.0 e runbooks;
+nao altera pagina ranking, presenter, Salesforce, e2e/baselines, schema ou n8n.
+PR216 continua responsavel pela interface e integracao de fatos em andamento.
+
+Fonte13:34Z GitHub/main/PR216 e14:51Z SSH/health: site200/ok16f4587;
+browser VPS2f0907e ativo, disabled. Separacao nao e atualizacao da VPS.
+Cliente QIX usa sessao privada gerida pelo browser, inspecao limitada aos
+objetos comprovados e masters referenciados; sem exportar cookies/credenciais.
+Preflight desligado; nao coleta fatos nem publica no CRM. Ciclo sequencial,
+timeouts e artefato privado atomico, rankingConnected=false permanente.
+
+Usuario autorizou duas coletas independentes reconciliadas com totais nativos
+no lugar do publicador legado ausente. Mantidos backup, acesso restrito e
+ultima carga valida. Autorizacao e preflight remoto de schema no mapa; nenhuma
+DDL, ingestao ou flag ativa. Detalhes da sessao e limites no runbook VPS.
+
+Codigo de origem: Qlik56 testes de transporte/inspetor passaram; restante
+operacional foi validado no candidato anterior. Verify global origem61cff23
+teve timeout isolado Next DevTools; repeticao focal24/24 passou. Validacao
+completa deste checkout e CI propria ainda obrigatorias; nao herdar resultado
+de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
 
 ## 2026-10-14: Seletor e contorno da Rotina
 

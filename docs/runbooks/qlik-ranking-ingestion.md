@@ -1,6 +1,11 @@
 # Ingestão do ranking Qlik
 
-## Estado comprovado
+## Estado historico (agosto)
+
+> Nota de 14/10/2026: o estado descrito abaixo e historico de agosto, nao uma
+> verificacao de atividade atual. A conferencia desta tarefa nao encontrou o
+> servico/publisher legado ativo. Nova referencia e mapeamento vigente em
+> `qlik-partnerships-mapping.md`; revalidar pre-condicoes antes de cutover.
 
 O publisher ativo é o workflow n8n `r4DyPyOTDtoROXq0` (`ranking imobs`), com
 agenda de 30 minutos. A versão ativa observada foi

@@ -1,0 +1,30 @@
+[Unit]
+Description=Descomplica Qlik private UNIX VNC
+After=descomplica-qlik-browser.service
+BindsTo=descomplica-qlik-browser.service
+PartOf=descomplica-qlik-console.service
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=exec
+User=descomplica-qlik
+Group=descomplica-qlik
+UMask=0077
+ExecStartPre=/usr/bin/test ! -e /run/descomplica-qlik/vnc.sock
+ExecStartPre=/usr/bin/test ! -L /run/descomplica-qlik/vnc.sock
+ExecStart=/usr/bin/x11vnc -display :98 -auth /run/descomplica-qlik/Xauthority -unixsock /run/descomplica-qlik/vnc.sock -rfbport 0 -rfbportv6 0 -nopw -forever -shared -nosel -noprimary -nosetprimary -noclipboard -nosetclipboard -nolookup -quiet
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/run/descomplica-qlik
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=256M
+TasksMax=32
+LimitCORE=0
+StandardOutput=null
+StandardError=null

@@ -13,6 +13,20 @@
   Fontes, consultas de abertura, testes, falhas, limites e criterios integrais:
   [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
 
+## 2026-10-14: Qlik operacional separado
+
+- CI38598554910/1d96204 integralmente aprovada em14/10. Main avancou para
+  efc6a20 durante a CI; conflitos documentais conciliados preservando ambos.
+  Nova CI do candidato combinado exigida. Sem upgrade ou coleta Qlik na VPS.
+- [Historico integral](../audits/qlik-owner-historico-2026-10-14.md) movido
+  por limite do sync. Contrato e escopo em qlik-partnerships-mapping.md.
+
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Registro recebido de main0019690 preservado integralmente em
+  [auditoria](../audits/associativo-pesquisa-conhecimento-2026-10-14.md).
+  Movido somente por limite de sincronizacao; nao revalida fatos historicos.
+
 ## 2026-10-14: Seletor e contorno da Rotina
 
 - Retomada15:54Z: Git comum confirmado, main/publicado5c4d95e; health200/ok.

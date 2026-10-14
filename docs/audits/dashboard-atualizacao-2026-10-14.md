@@ -230,3 +230,10 @@ Essa espera e verificada, nao uma pausa fixa nem permissao para aceitar overflow
 Nova CI completa continua obrigatoria; sem deploy desta correcao ate aprovacao.
 Seis casos Chromium passaram (incluindo rejeicao persistente), sem erro de
 runtime; tipagem do cleanup da fixture ajustada para Node.parentNode.
+
+Retomada18:14:35Z: fetch confirmou main77ddc69 (owner Qlik), health publico
+200/ok permanece0019690. Head221ffbb ficou conflitante antes de disparar CI;
+merge somente concilia os tres documentos, preservando codigo/lockfile recebidos.
+Runbook/coordenador novos conferidos: operacoes Qlik sao separadas; pendencia
+Qlik bloqueia deploy CRM. Esta tarefa nao aciona upgrade, coleta ou recuperacao
+Qlik. Nova CI exata e consulta final de ambas as pendencias continuam exigidas.
