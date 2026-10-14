@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-14: Funis no comparativo mensal
+
+- Corrige a ausencia dos graficos solicitados no comparativo de `/app`.
+  Cada bloco agora tem seis trapezios, rotulos e valores acessiveis em HTML.
+  Geometria ordinal fixa, sem sugerir area proporcional ou coorte individual.
+- Usa as cinco series existentes; Pastas aprovadas fica explicitamente
+  indisponivel. O ranking possui approvedFolder, mas nao e substituto da serie
+  mensal agregada por visao, historico e meta. Sem mudanca de contrato ou dados.
+- Referencia publica consultada somente por leitura no navegador; screenshot
+  enviado orienta o formato. Sem alteracao no site de origem nem em n8n.
+- Testes de componente: 18 aprovados. Tipos aprovados. QA sintetico: 74 checks
+  aprovados em tres temas e larguras, sem overflow, Axe ou erro de console.
+  Desktop completo: 4.704 px, mantendo o limite de 4.800. Suite global, lint
+  e build em execucao; CI, revisao de baseline, merge e publicacao pendentes.
+
 ## 2026-10-13: Replica informacional do dashboard
 
 - Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com

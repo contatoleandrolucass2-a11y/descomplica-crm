@@ -1443,6 +1443,12 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
         await expect(
           page.locator('[aria-labelledby="report-operational-title"] table'),
         ).toHaveCount(4);
+        await expect(page.locator('[aria-labelledby="report-monthly-title"] figure')).toHaveCount(
+          6,
+        );
+        await expect(
+          page.locator('[aria-labelledby="report-monthly-title"] figure [data-stage]'),
+        ).toHaveCount(36);
       }
       await expect(page.locator("html")).not.toHaveJSProperty("scrollWidth", Number.NaN);
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);

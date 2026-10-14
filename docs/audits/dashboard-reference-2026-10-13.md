@@ -1,5 +1,37 @@
 # Replica informacional do dashboard
 
+## Correcao dos funis em 14/10/2026
+
+Pedido adicional: incluir graficos no Comparativo mensal conforme o print,
+permitindo melhorar a apresentacao e sem modificar a origem. A referencia foi
+consultada em navegador somente leitura, apos falha do fetch web. Ela contem
+cinco etapas; o print traz tambem Pastas aprovadas. A implementacao conserva
+os seis blocos e desenha seis etapas em cada um, com geometria ordinal fixa.
+As larguras indicam a ordem das etapas, nao uma escala quantitativa nem coortes.
+
+`dashboard/data.ts`, `catalog.ts` e `presentation.ts` fornecem cinco series.
+`ops/salesforce/transform.mjs` usa aprovadas no ranking e no diagnostico de
+qualidade, mas nao fornece serie mensal equivalente em todas as visoes,
+historicos e metas. Por isso, Pastas aprovadas fica indisponivel, sem repetir
+Pastas, extrapolar ranking ou importar o numero historico do print. Rever
+quando existir contrato mensal autorizado e validado para essa metrica.
+
+Markup SSR sem nova dependencia; nomes acessiveis por bloco, valores completos,
+contraste e diferenciacao entre ausencia e zero preservados. Numeros longos
+usam tipografia compacta sem abreviar os dados. Conversoes existentes continuam
+calculadas nas cinco series reais. Testes passaram a exigir seis figuras e 36
+etapas no E2E e na captura autenticada, alem da verificacao de trapezios no QA
+sintetico. Os limiares de pixels e altura permanecem inalterados.
+
+Validacao inicial da correcao: 18 testes de componente e typecheck aprovados.
+QA sintetico com 74 verificacoes aprovadas e 28 capturas, tres temas e larguras
+390/768/1440, estados completo, indisponivel, zero, sem meta e numeros longos.
+Sem overflow, violacoes Axe, erros de console ou acesso externo. Desktop
+completo mede 4.704 px; indisponivel 4.572 px, abaixo do limite existente de
+4.800 px. Funis claro/desktop e escuro/celular inspecionados. Fonte local:
+`test-results/dashboard-report/report.json` e capturas ignoradas correspondentes.
+Suite global, lint e build em execucao; CI, baseline, merge e deploy pendentes.
+
 ## Fonte e escopo
 
 Consulta da pagina publica em 13/10/2026 (14/10 em UTC):

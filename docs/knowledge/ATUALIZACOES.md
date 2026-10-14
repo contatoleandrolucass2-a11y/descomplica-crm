@@ -1,5 +1,28 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Retomada dos funis no comparativo mensal
+
+- Pedido: incluir os graficos em funil no Comparativo mensal de /app conforme
+  print fornecido. Origem descomplicapro.com.br somente leitura; dados atuais
+  do CRM preservados. Nao altera politicas, fontes remotas ou n8n.
+- Consulta14/10 04:50:56Z: main792320ba e CI38506931120 success; health publico
+  HTTP200/status ok/version792320ba037ea48655739aaeefe5295b95c33631. Fontes:
+  GitHub branches/main, actions/runs e crm.descomplicapro.com.br/api/health.
+- Checkout anterior db7116c limpo pertence ao PR documental217 ainda aberto;
+  nova branch codex/dashboard-funis-mensais parte de main792320ba. Registro
+  documental anterior permanece preservado em sua branch, sem reverter mudancas.
+- Runtime context/search consultados; notas truncadas nao usadas como prova.
+  Print local inspecionado. Web fetch falhou; leitura pelo navegador confirmou
+  seis blocos e cinco etapas na origem. O print inclui tambem Pastas aprovadas.
+- Implementacao: seis funis HTML/CSS com seis etapas, dados atuais e ausencia
+  distinta de zero. Aprovadas nao tem serie mensal no dashboard; ranking nao
+  substitui essa metrica. Mantida indisponivel ate contrato proprio validado.
+  Fontes: dashboard/catalog.ts, presentation.ts e ops/salesforce/transform.mjs.
+  Dezoito testes de componente, tipos e 74 checks QA sinteticos aprovados;
+  tres temas/larguras, sem overflow ou Axe. Desktop4.704px abaixo de4.800px.
+  Fonte: test-results/dashboard-report/report.json. Demais gates em execucao.
+  CI, revisao visual autenticada, merge e publicacao da correcao pendentes.
+
 ## 2026-10-13: Replica informacional do dashboard legado
 
 - P2 do PR213 confirmado: ingestao sem ranking pode reutilizar generatedAt.

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Funis no comparativo mensal
+
+- Substitui as listas mensais por seis graficos em funil, com etapas coloridas,
+  valores centralizados e dados atuais do CRM, conforme o print solicitado.
+- Mantem conversoes, temas e permissoes. Pastas aprovadas aparece como
+  indisponivel porque nao existe serie mensal separada no read model atual.
+- Reforca testes de estrutura, geometria, acessibilidade e numeros longos.
+  A pagina de referencia permanece intocada.
+
 ## 2026-10-13: Relatorio completo no dashboard
 
 - Impede exibir equipe de versao anterior apos atualizacao parcial do dashboard.
