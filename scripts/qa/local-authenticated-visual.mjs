@@ -1906,11 +1906,34 @@ begin
   ) then
     raise exception 'routine reader permission contract diverged';
   end if;
+  if not exists (
+    select 1 from public.crm_organizations
+    where organization_key = 'qa-' || replace(${editor}::text, '-', '') and is_active
+  ) then
+    raise exception 'routine reader requires the editor synthetic organization';
+  end if;
 end
 $routine_reader_preflight$;
+-- broker_house requires exactly one person scope linked to its own Auth user
+-- and an active team membership before the profile approval trigger runs.
+insert into public.crm_people (id, person_key, display_name, auth_user_id)
+values (${reader}, 'qa-reader-' || replace(${reader}::text, '-', ''),
+  'Synthetic routine reader', ${reader});
+insert into public.crm_teams (id, organization_id, team_key, name)
+select ${reader}, id, 'qa-reader-' || replace(${reader}::text, '-', ''),
+  'Synthetic routine reader team'
+from public.crm_organizations
+where organization_key = 'qa-' || replace(${editor}::text, '-', '') and is_active;
+insert into public.crm_team_memberships (team_id, person_id, membership_role)
+values (${reader}, ${reader}, 'broker');
+insert into public.crm_reporting_scopes (id, scope_key, scope_type, person_id)
+values (${reader}, 'qa-reader-' || replace(${reader}::text, '-', ''), 'person', ${reader});
 update public.user_roles
 set role_key = 'broker_house', assigned_by = ${editor}, updated_at = now()
 where user_id = ${reader};
+insert into public.crm_user_reporting_scope_grants
+  (user_id, reporting_scope_id, granted_by, reason)
+values (${reader}, ${reader}, ${editor}, 'Ephemeral local routine reader person scope');
 update public.profiles
 set is_active = true, profile_completed = true, access_status = 'approved',
     approved_at = now(), approved_by = ${editor}
@@ -1921,11 +1944,34 @@ begin
     select 1 from public.profiles p join public.user_roles r on r.user_id = p.user_id
     where p.user_id = ${reader} and p.is_active and p.profile_completed
       and p.access_status = 'approved' and r.role_key = 'broker_house'
+      and private.user_role_scope_is_valid(p.user_id, r.role_key)
   ) then
     raise exception 'routine reader fixture was not provisioned';
   end if;
 end
 $routine_reader_verify$;
+commit;
+`;
+}
+
+export function routineReaderCleanupSql({ readerId }) {
+  const reader = `${sqlLiteral(assertUuid(readerId))}::uuid`;
+  return `
+begin;
+-- Suspend before topology changes; the normal authorization triggers stay enabled.
+update public.profiles set is_active = false where user_id = ${reader};
+delete from private.crm_reporting_scope_grant_lineage
+where grant_id in (
+  select id from public.crm_user_reporting_scope_grants where user_id = ${reader}
+);
+delete from public.crm_user_reporting_scope_grants where user_id = ${reader};
+delete from public.crm_reporting_scopes
+where id = ${reader} and scope_key = 'qa-reader-' || replace(${reader}::text, '-', '');
+delete from public.crm_team_memberships where person_id = ${reader} and team_id = ${reader};
+delete from public.crm_people
+where id = ${reader} and person_key = 'qa-reader-' || replace(${reader}::text, '-', '');
+delete from public.crm_teams
+where id = ${reader} and team_key = 'qa-reader-' || replace(${reader}::text, '-', '');
 commit;
 `;
 }
@@ -2214,6 +2260,15 @@ async function main() {
         const failures = [];
 
         if (readerAccount) {
+          try {
+            runLocalSql(
+              local.database,
+              routineReaderCleanupSql({ readerId: readerAccount.id }),
+              "routine reader cleanup",
+            );
+          } catch (error) {
+            failures.push(error);
+          }
           let readerRemoved = false;
           for (let attempt = 0; attempt < 3 && !readerRemoved; attempt += 1) {
             try {

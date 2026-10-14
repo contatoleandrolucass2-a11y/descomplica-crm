@@ -15,6 +15,8 @@
 - Banco isolado, CI e publicacao ainda pendentes; runtime permanece 0fdbb80.
 - CI inicial aprovou validate; restore revelou contador RLS legado, corrigido
   de 40 para 41 tabelas. Os demais testes pgTAP passaram; repetir gates completos.
+- Segunda CI aprovou banco/restore/E2E; setup do leitor sintetico da matriz
+  visual falhou com SQLSTATE 23505. Publicacao bloqueada ate corrigir fixture.
 
 ## 2026-10-13: Padrao de texto regional imob
 

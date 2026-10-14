@@ -36,6 +36,14 @@
   apenas contador legado da matriz RLS (40, agora 41 tabelas). Lista nominal
   e 81 testes novos passaram. Contador atualizado sem remover as verificacoes.
   Suite Chromium final, incluindo correcao de foco: 73/73 aprovados.
+- CI38502364540: validate, 1323 testes pgTAP, advisors, restore e E2E de
+  autorizacao aprovados. Matriz visual bloqueada no setup da segunda conta
+  sintetica (SQLSTATE 23505); corrigir fixture, repetir CI e somente depois
+  migrar/publicar. Nenhuma mutacao remota de schema realizada neste ponto.
+- Causa do 23505: guard de profiles na migration 20260809144137, linhas
+  1743-1753, exige escopo compativel antes de aprovar/ativar o broker. Fixture
+  do leitor precisa de pessoa, equipe, vinculo e concessao de escopo proprio;
+  nao e necessario alterar guards ou permissoes de producao.
 
 ## 2026-10-13: Capitalizacao da rotina regional imob
 
