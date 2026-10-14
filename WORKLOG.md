@@ -1,5 +1,10 @@
 # Worklog
 
+Conferencia17:13Z: CI38598554910/1d96204 terminou success em todos os gates
+de PR. Main avancou para efc6a20 (PR226); merge recusado por conflitos nos tres
+historicos. Conciliados sem modificar codigo recebido; nova CI necessaria.
+Nenhuma publicacao Qlik ocorreu. Historico proprio arquivado por limite sync.
+
 Conflitos com main0019690 limitados aos tres registros; conciliados preservando
 ambos os historicos, sem alterar codigo recebido. A secao de conhecimento do
 Associativo foi preservada integralmente em auditoria vinculada porque o main
@@ -105,6 +110,17 @@ teve timeout isolado Next DevTools; repeticao focal24/24 passou. Validacao
 completa deste checkout e CI propria ainda obrigatorias; nao herdar resultado
 de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
 
+## 2026-10-14: Seletor e contorno da Rotina
+
+- Substitui as seis abas por selecao unica nativa, mantendo os rascunhos de
+  cada funcao e os controles de autorizacao existentes.
+- Cabecalhos usam o tom do antigo seletor ativo. Um contorno branco continuo
+  envolve a coluna atual, incluindo o cabecalho fixo, sem pintar pendentes.
+- Redesenha acoes com modos segmentados, insercao secundaria e salvamento
+  destacado; remove brilhos individuais. Movimento reduzido preservado.
+- Sem mudanca de texto, hook, API ou banco. Validacao/publicacao em andamento;
+  detalhes em docs/audits/rotina-seletor-2026-10-14.md.
+
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
 - Base isolada em `16f458720406e76efcd1eda8a1eeb791509800a3`, branch
@@ -186,7 +202,10 @@ de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
 - Hook/API/banco e conteudo salvo preservados. Lint/tipos/build aprovados;
   QA focal4/4 com tres temas e duas larguras, Axe e sincronizacao bidirecional.
   Windows integral interrompido apos symlink/timeouts; exigir CI Linux completa.
-  CI e publicacao pendentes; nao confundir com deploy faae8e9 anterior.
+- PR222 integrado em5c4d95e, CI38581434699 aprovada integralmente. Publicado
+  15:16:09Z (12:16 BRT) com backup, imagem imutavel e coordenador protegido.
+  Health/container/acesso anonimo e UI autenticada conferidos; textos e
+  marcacoes existentes preservados. Evidencia na auditoria da Rotina compacta.
 
 ## 2026-10-14: Publicacao das conclusoes individuais
 

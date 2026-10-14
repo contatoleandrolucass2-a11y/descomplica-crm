@@ -2,16 +2,11 @@
 
 ## 2026-10-14: Qlik operacional separado
 
-- Branch codex/qlik-api-session de main5c4d95e; prepara ops/qlik/SDK/runbooks
-  sem alterar /app/ranking, Salesforce ou banco. UI e fatos seguem no PR216.
-- Fontes GitHub/fetch/health16:22Z: main0019690, site200/ok5c4d95e. SSH15:56Z:
-  browser2f0907e ativo/disabled. PR224 draft; instalador corrigido e teste107/3.
-  Novo preflight desligado, sem handshake real, coleta, migration ou agenda.
-- Usuario autorizou duas coletas independentes conciliadas com totais Qlik
-  no lugar do shadow legado e recorte completo para crm.ranking.view. Mapa em
-  docs/runbooks/qlik-partnerships-mapping.md e qlik-vps-session.md; WORKLOG
-  registra testes e pendencias. Windows falhou symlink Salesforce; Linux validate
-  cc8c712 passou CI; main0019690 conciliado em1c5466e. Nova CI pendente.
+- CI38598554910/1d96204 integralmente aprovada em14/10. Main avancou para
+  efc6a20 durante a CI; conflitos documentais conciliados preservando ambos.
+  Nova CI do candidato combinado exigida. Sem upgrade ou coleta Qlik na VPS.
+- [Historico integral](../audits/qlik-owner-historico-2026-10-14.md) movido
+  por limite do sync. Contrato e escopo em qlik-partnerships-mapping.md.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
@@ -19,18 +14,26 @@
   [auditoria](../audits/associativo-pesquisa-conhecimento-2026-10-14.md).
   Movido somente por limite de sincronizacao; nao revalida fatos historicos.
 
+## 2026-10-14: Seletor e contorno da Rotina
+
+- Retomada15:54Z: Git comum confirmado, main/publicado5c4d95e; health200/ok.
+  PR225 documental em5d7631c: validate/restore aprovados, release-gates falhou
+  em daily-layout-320-balanced (CI38588434885). Diagnostico antes do merge;
+  nao reiniciar CRM por documentos. Fontes: GitHub, git fetch e /api/health.
+- Novos ajustes autorizados para publicacao apos validacao: seletor unico,
+  controles redesenhados e contorno branco da coluna atual, sem mudar dados.
+  Evidencias: [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- PR220 integrado em main0019690. Registro integral de implementacao, CI,
+  conflitos e limites preservado em
+  [auditoria da pesquisa](../audits/associativo-busca-conhecimento-2026-10-14.md).
+
 ## 2026-10-14: Rotina compacta por conclusao
 
-- Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
-  em faae8e9. Checkout documental df0c52c/PR219 com CI38518828290 aprovada,
-  conflitante apenas nos registros. Fontes: GitHub, git fetch e /api/health.
-- Nova branch codex/rotina-compacta preserva dashboard e registros anteriores.
-  Pedido: controles a esquerda, fundo somente por conclusao, destaque do dia
-  apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
-  Lint/tipos/build e QA focal4/4 aprovados; suite Windows integral indisponivel
-  por symlink/timeouts. PR222/CI38565559075 aprovada em ea2e639; incorporado
-  main8e015c6 documental, sem alterar runtime. Nova CI e publicacao pendentes.
-  Evidencias e limites:
+- PR222/publicado5c4d95e em15:16:09Z, deployment9573a6e9. Historico integral,
+  validacoes e limites preservados na
   [auditoria compacta](../audits/rotina-compacta-2026-10-14.md).
 
 ## 2026-10-14: Funis mensais publicados
