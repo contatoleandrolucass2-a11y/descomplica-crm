@@ -240,6 +240,7 @@
   min-height: 0;
 }
 .viewSwitch span {
+  white-space: nowrap;
   min-height: 2.75rem;
   border-bottom: 2px solid var(--analytics-line);
   padding: 0.5rem;
@@ -257,6 +258,12 @@
   min-height: 1.5rem;
   overflow-wrap: anywhere;
   margin-bottom: 0.5rem;
+}
+
+@media (min-width: 48rem) and (max-width: 64rem) {
+  .viewSwitch {
+    grid-column: span 2;
+  }
 }
 
 @media (max-width: 47.99rem) {

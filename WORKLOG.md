@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-14: Revisao da captura autenticada do ranking
+
+Workflow38627653608 aprovado; artefato11925039515 com SHA256
+34f85d352e299f1e70cfead24676df84854ef2edffabf7f9d23ed41dabc60024 conferido
+na VPS e no desktop. Captura462db494 tem paisd660ba9/60234fa, confirmados
+pela API GitHub. Manifesto limpo com154 rotas,88 temas,242 auditorias de
+acessibilidade e110 checks de zoom aprovados; apenas11 imagensRanking mudaram.
+Revisao visual das11 imagens encontrou palavras quebradas nas abas em768px.
+Lote nao incorporado. Corrigido seletor na faixa768-1024 e quebra de palavras;
+nova captura completa e CI verify obrigatorias, sem manifestos hibridos.
+Matriz tablet:24 combinacoes aprovadas com caracteres em linha unica.
+Suite43 no Windows teve42 aprovados e timeout60s no teste desktop/mobile
+anterior, em duas tentativas; causa interna nao isolada. Sem aumentar limite
+ou terceira repeticao. Lint/Prettier focados e diff-check aprovados; CI Linux
+deve validar integralmente a nova captura antes de qualquer baseline.
+
 ## 2026-10-14: Teste de tema do podio
 
 CI38627653582/60234fa encontrou somente a busca do seletor CSS anterior:

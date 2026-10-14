@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14: Abas do ranking em tablets
+
+- Reserva largura para o seletor IMOBs/Produtos entre768 e1024px e impede
+  quebra de palavras nos rotulos, mantendo todos os controles visiveis.
+
 ## 2026-10-14: Regressao do tema do ranking
 
 - Alinha a verificacao de tokens ao seletor composto do podio e verifica

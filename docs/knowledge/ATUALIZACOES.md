@@ -15,6 +15,12 @@
 
 ## 2026-10-14: Qlik via VPS
 
+- Captura38627653608 aprovada tecnicamente, mas revisao humana encontrou
+  abas quebradas em768px. Corrigida faixa tablet; lote nao promovido e nova
+  captura exigida. PR227/CI38628006919 falhou em fill_financing do Associativo,
+  sem mudanca nesses arquivos; repeticao unica passou E2E e segue em visual.
+  Causa especifica nao estabelecida: nao declarar bug corrigido pelo rerun.
+
 - CI38627653582/60234fa:3176 testes passaram; unico erro em teste que ainda
   buscava seletor CSS antigo do podio. Corrigido sem reduzir verificacoes;
   12 testes focais aprovados. PR227/64d9f24 de preflight atual passou validate

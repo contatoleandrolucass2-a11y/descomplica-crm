@@ -98,6 +98,39 @@ async function rendered(params: Record<string, string | string[] | undefined> = 
   return { html, nodes: elements(parseFragment(html)) };
 }
 
+function rankingFixtureCss() {
+  const require = createRequire(import.meta.url);
+  const { parse } = createRequire(require.resolve("next/package.json"))("postcss") as {
+    parse(source: string): {
+      walkRules(callback: (rule: { selector: string }) => void): void;
+      toString(): string;
+    };
+  };
+  const sheets = [
+    ["../app/(protected)/app/ranking/RankingCanvas.module.css", rankingStyles],
+    ["../app/(protected)/_components/ManagementCanvas.module.css", managementStyles],
+    ["../app/(protected)/app/_components/analytics/analytics.module.css", analyticsStyles],
+    ["../app/(protected)/_components/ProtectedShell.module.css", shellStyles],
+  ] as const;
+  const css = sheets
+    .map(([file, classes]) => {
+      const sheet = parse(readFileSync(new URL(file, import.meta.url), "utf8"));
+      sheet.walkRules((rule) => {
+        rule.selector = rule.selector
+          .replace(/:global\(([^)]+)\)/g, "$1")
+          .replace(/\.([a-zA-Z][\w-]*)/g, (_, name: string) => `.${classes[name] ?? name}`);
+      });
+      return sheet.toString();
+    })
+    .join("\n");
+  const globals = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8").replace(
+    /@import[^;]+;/g,
+    "",
+  );
+  const preflight = readFileSync(require.resolve("tailwindcss/preflight.css"), "utf8");
+  return `${preflight}\n${globals}\nbody{font-family:Arial,sans-serif}${css}`;
+}
+
 describe("ranking v2 route and UI", () => {
   beforeEach(() => {
     vi.resetAllMocks();
@@ -110,35 +143,7 @@ describe("ranking v2 route and UI", () => {
     async () => {
       const { chromium, expect: browserExpect } = await import("@playwright/test");
       const { default: sharp } = await import("sharp");
-      const require = createRequire(import.meta.url);
-      const { parse } = createRequire(require.resolve("next/package.json"))("postcss") as {
-        parse(source: string): {
-          walkRules(callback: (rule: { selector: string }) => void): void;
-          toString(): string;
-        };
-      };
-      const sheets = [
-        ["../app/(protected)/app/ranking/RankingCanvas.module.css", rankingStyles],
-        ["../app/(protected)/_components/ManagementCanvas.module.css", managementStyles],
-        ["../app/(protected)/app/_components/analytics/analytics.module.css", analyticsStyles],
-        ["../app/(protected)/_components/ProtectedShell.module.css", shellStyles],
-      ] as const;
-      const css = sheets
-        .map(([file, classes]) => {
-          const sheet = parse(readFileSync(new URL(file, import.meta.url), "utf8"));
-          sheet.walkRules((rule) => {
-            rule.selector = rule.selector
-              .replace(/:global\(([^)]+)\)/g, "$1")
-              .replace(/\.([a-zA-Z][\w-]*)/g, (_, name: string) => `.${classes[name] ?? name}`);
-          });
-          return sheet.toString();
-        })
-        .join("\n");
-      const globals = readFileSync(new URL("../app/globals.css", import.meta.url), "utf8").replace(
-        /@import[^;]+;/g,
-        "",
-      );
-      const preflight = readFileSync(require.resolve("tailwindcss/preflight.css"), "utf8");
+      const css = rankingFixtureCss();
       const browser = await chromium.launch({ headless: true });
       let theme = "light";
       try {
@@ -151,7 +156,7 @@ describe("ranking v2 route and UI", () => {
           await route.fulfill({
             contentType: "text/html",
             // Real shell sizing and reset; navigation is synthetic, with no session or reader.
-            body: `<!doctype html><html lang="pt-BR" data-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranking sintético</title><style>${preflight}\n${globals}\nbody{font-family:Arial,sans-serif}${css}</style></head><body><header class="${shellStyles.topbar}"><div class="${shellStyles.topbarInner}">CRM sintético</div></header><nav class="${shellStyles.breadcrumbs}" aria-label="Caminho"><ol><li>CRM</li><li>Ranking</li></ol></nav>${html}</body></html>`,
+            body: `<!doctype html><html lang="pt-BR" data-theme="${theme}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ranking sintético</title><style>${css}</style></head><body><header class="${shellStyles.topbar}"><div class="${shellStyles.topbarInner}">CRM sintético</div></header><nav class="${shellStyles.breadcrumbs}" aria-label="Caminho"><ol><li>CRM</li><li>Ranking</li></ol></nav>${html}</body></html>`,
           });
         });
         for (const width of [320, 390, 768, 1440]) {
@@ -329,6 +334,89 @@ describe("ranking v2 route and UI", () => {
           await browserExpect(
             page.getByRole("button", { name: "Tentar novamente", exact: true }),
           ).toBeEnabled();
+        }
+      } finally {
+        await browser.close();
+      }
+    },
+    60_000,
+  );
+
+  it.runIf(process.env.RANKING_V2_BROWSER === "1")(
+    "keeps tablet view labels on one real text line without overflow in both views and all themes",
+    async () => {
+      const { chromium } = await import("@playwright/test");
+      const css = rankingFixtureCss();
+      const browser = await chromium.launch({ headless: true });
+      try {
+        const page = await browser.newPage();
+        await page.route("**/*", (route) => route.abort());
+        for (const status of ["empty", "unavailable"] as const) {
+          loadQlikRankingV2.mockResolvedValue(
+            status === "empty" ? { status, availableYears: [] } : { status },
+          );
+          for (const width of [768, 1024]) {
+            await page.setViewportSize({ width, height: 900 });
+            for (const theme of ["light", "balanced", "dark"]) {
+              for (const kind of ["imobs", "developments"]) {
+                const { html } = await rendered({ kind });
+                await page.setContent(
+                  `<!doctype html><html lang="pt-BR" data-theme="${theme}"><head><meta charset="utf-8"><style>${css}</style></head><body>${html}</body></html>`,
+                );
+                const measured = await page
+                  .locator("form fieldset label > span")
+                  .evaluateAll((spans) =>
+                    spans.map((span) => {
+                      const box = span.getBoundingClientRect();
+                      const lines = new Set<number>();
+                      let contained = true;
+                      // Measure each visible character, not CSS nowrap or element overflow alone.
+                      for (const node of span.childNodes) {
+                        if (node.nodeType !== Node.TEXT_NODE) continue;
+                        const value = node.textContent ?? "";
+                        for (let i = 0; i < value.length; i++) {
+                          if (!value[i]!.trim()) continue;
+                          const range = document.createRange();
+                          range.setStart(node, i);
+                          range.setEnd(node, i + 1);
+                          const rect = range.getBoundingClientRect();
+                          lines.add(Math.round(rect.top));
+                          contained &&=
+                            rect.width > 0 && rect.left >= box.left && rect.right <= box.right + 1;
+                        }
+                      }
+                      return { text: span.textContent?.trim(), lines: lines.size, contained };
+                    }),
+                  );
+                expect(measured, `${status}/${width}/${theme}/${kind}`).toEqual([
+                  { text: "IMOBs", lines: 1, contained: true },
+                  { text: "Produtos", lines: 1, contained: true },
+                ]);
+                expect(
+                  await page.evaluate(() => document.documentElement.scrollWidth),
+                ).toBeLessThanOrEqual(width);
+                const boxes = await page
+                  .locator("form > label, form > fieldset, form > button")
+                  .evaluateAll((nodes) =>
+                    nodes.map((node) => {
+                      const { x, y, right, bottom } = node.getBoundingClientRect();
+                      return { x, y, right, bottom };
+                    }),
+                  );
+                for (let i = 0; i < boxes.length; i++)
+                  for (let j = i + 1; j < boxes.length; j++) {
+                    const a = boxes[i]!;
+                    const b = boxes[j]!;
+                    expect(
+                      a.right <= b.x + 1 ||
+                        b.right <= a.x + 1 ||
+                        a.bottom <= b.y + 1 ||
+                        b.bottom <= a.y + 1,
+                    ).toBe(true);
+                  }
+              }
+            }
+          }
         }
       } finally {
         await browser.close();
