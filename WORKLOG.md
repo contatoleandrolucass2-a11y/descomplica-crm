@@ -29,6 +29,19 @@
   asserts de UI, limite10s/60s e rejeicao de transferencia incompleta.
 - CI38601828514 aprovou refresh no Next real. Rotina diagnosticada com modo
   day e minWidth960px; QA aguarda CSS exato antes da geometria, mantendo asserts.
+- Main efc6a20 integrado preservando seletor/contorno e QA da Rotina; nova
+  validacao da combinacao obrigatoria antes de publicar o dashboard.
+
+## 2026-10-14: Seletor e contorno da Rotina
+
+- Substitui as seis abas por selecao unica nativa, mantendo os rascunhos de
+  cada funcao e os controles de autorizacao existentes.
+- Cabecalhos usam o tom do antigo seletor ativo. Um contorno branco continuo
+  envolve a coluna atual, incluindo o cabecalho fixo, sem pintar pendentes.
+- Redesenha acoes com modos segmentados, insercao secundaria e salvamento
+  destacado; remove brilhos individuais. Movimento reduzido preservado.
+- Sem mudanca de texto, hook, API ou banco. Validacao/publicacao em andamento;
+  detalhes em docs/audits/rotina-seletor-2026-10-14.md.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
@@ -111,7 +124,10 @@
 - Hook/API/banco e conteudo salvo preservados. Lint/tipos/build aprovados;
   QA focal4/4 com tres temas e duas larguras, Axe e sincronizacao bidirecional.
   Windows integral interrompido apos symlink/timeouts; exigir CI Linux completa.
-  CI e publicacao pendentes; nao confundir com deploy faae8e9 anterior.
+- PR222 integrado em5c4d95e, CI38581434699 aprovada integralmente. Publicado
+  15:16:09Z (12:16 BRT) com backup, imagem imutavel e coordenador protegido.
+  Health/container/acesso anonimo e UI autenticada conferidos; textos e
+  marcacoes existentes preservados. Evidencia na auditoria da Rotina compacta.
 
 ## 2026-10-14: Publicacao das conclusoes individuais
 

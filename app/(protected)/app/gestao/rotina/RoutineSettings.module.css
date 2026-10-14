@@ -3,6 +3,8 @@
   --routine-grid: color-mix(in srgb, var(--inv-color-line) 45%, var(--inv-color-panel));
   --routine-current: linear-gradient(145deg, #176f8a, #123b63);
   --routine-edge: #62d8ff;
+  --routine-table-heading-text: var(--inv-color-text);
+  --routine-table-heading: color-mix(in srgb, var(--inv-color-accent) 14%, var(--inv-color-panel));
   --routine-heading: #c5f0ee;
   --routine-heading-text: #123e43;
   --routine-heading-border: #167985;
@@ -16,6 +18,7 @@
 }
 
 :global(:root[data-theme="dark"]) .page {
+  --routine-table-heading-text: #ffffff;
   --routine-grid: #29435b;
   --routine-heading: #164c56;
   --routine-heading-text: #e6ffff;
@@ -92,7 +95,7 @@
 .actionRow {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   max-width: 100%;
 }
 
@@ -109,8 +112,8 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  border: 1px solid var(--inv-color-accent);
-  border-radius: 7px;
+  border: 1px solid var(--inv-color-line);
+  border-radius: 6px;
   padding: 8px 14px;
   color: var(--inv-color-text);
   background: color-mix(in srgb, var(--inv-color-accent) 12%, var(--inv-color-panel));
@@ -125,36 +128,42 @@
   initial-value: 135deg;
 }
 
-/* Match the Associativo guide CTA without changing its shared styles. */
 .actionRow button {
-  position: relative;
-  isolation: isolate;
-  min-height: 36px;
-  padding: 8px 16px;
-  border-radius: 6px;
+  min-height: 40px;
+  padding: 8px 14px;
   font-weight: 700;
+  transition:
+    background-color 160ms ease,
+    box-shadow 160ms ease;
 }
 
-.actionRow button:enabled::before,
-.routineTable thead th:not(:first-child)::before {
+.currentColumn {
   position: absolute;
-  inset: 0;
-  z-index: 2;
+  z-index: 5;
   box-sizing: border-box;
-  padding: 1px;
-  border-radius: inherit;
+  visibility: hidden;
+  pointer-events: none;
+  border: 1px solid #ffffffa6;
+  box-shadow: 0 0 0 1px #123b6366;
+}
+
+.currentColumn::before {
+  position: absolute;
+  inset: -1px;
+  box-sizing: border-box;
+  padding: 2px;
   content: "";
   pointer-events: none;
   background: conic-gradient(
     from var(--routine-specular-angle),
     transparent 0deg,
-    #d5b96f 30deg,
-    #fff4ca 45deg,
-    #d5b96f 60deg,
+    #ffffff80 30deg,
+    #ffffff 45deg,
+    #ffffff80 60deg,
     transparent 90deg 180deg,
-    #d5b96f 210deg,
-    #fff4ca 225deg,
-    #d5b96f 240deg,
+    #ffffff80 210deg,
+    #ffffff 225deg,
+    #ffffff80 240deg,
     transparent 270deg
   );
   mask:
@@ -185,6 +194,22 @@
 .addButton {
   min-height: 38px;
   padding-inline: 12px;
+}
+
+.actionRow .addButton {
+  background: transparent;
+  border-color: var(--inv-color-line);
+}
+
+.actionRow .primaryAction {
+  color: var(--inv-color-panel);
+  background: var(--inv-color-accent);
+  border-color: var(--inv-color-accent);
+  box-shadow: 0 2px 0 color-mix(in srgb, var(--inv-color-accent) 60%, transparent);
+}
+
+.actionRow .primaryAction:hover:enabled {
+  background: color-mix(in srgb, var(--inv-color-accent) 90%, var(--inv-color-text));
 }
 
 .primaryAction:hover:enabled,
@@ -233,12 +258,11 @@
   white-space: normal;
 }
 
-.page :is(button, textarea, [tabindex]):focus-visible {
+.page :is(button, select, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--inv-color-accent);
   outline-offset: 3px;
 }
 
-.rolesPanel,
 .tablePanel {
   min-width: 0;
   border-top: 1px solid var(--inv-color-line);
@@ -308,7 +332,6 @@
   line-height: 1.5;
 }
 
-.rolesPanel,
 .tablePanel {
   margin-top: 0;
 }
@@ -331,45 +354,55 @@
   font-weight: 750;
 }
 
-.roleTabs {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 0;
-  padding: 0;
+.roleFilter {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-top: 1px solid var(--inv-color-line);
 }
 
-.roleTab {
+.roleFilter label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--inv-color-muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.roleSelect {
+  position: relative;
   min-width: 0;
+  width: 300px;
+  max-width: 100%;
+}
+
+.roleSelect select {
+  appearance: none;
+  width: 100%;
   min-height: 44px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
-  padding: 6px 8px;
-  color: var(--inv-color-text);
-  text-align: center;
+  border: 1px solid var(--inv-color-line);
+  border-radius: 6px;
+  padding: 8px 36px 8px 12px;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 650;
   cursor: pointer;
 }
 
-.roleTab[aria-selected="true"] {
-  border-color: var(--inv-color-accent);
-  background: color-mix(in srgb, var(--inv-color-accent) 14%, var(--inv-color-panel));
+.roleSelect > svg {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: var(--inv-color-accent);
 }
 
-.roleTab strong,
-.roleTab span {
-  display: block;
-}
-
-.roleTab strong {
-  font-size: 13px;
-  line-height: 1.25;
-}
-
-.roleTab span {
-  margin-top: 8px;
-  color: var(--inv-color-muted);
-  font-size: 12px;
+.roleSelect select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .tableStats {
@@ -387,6 +420,7 @@
 }
 
 .tableScroll {
+  position: relative;
   overflow: visible;
   border: 1px solid var(--routine-grid);
   background: var(--routine-surface);
@@ -401,9 +435,11 @@
 
 .viewToggle {
   display: inline-flex;
-  border: 1px solid var(--inv-color-accent);
+  padding: 3px;
+  gap: 3px;
+  border: 1px solid var(--inv-color-line);
   border-radius: 6px;
-  overflow: hidden;
+  background: var(--inv-color-input);
 }
 
 .viewToggle button {
@@ -413,9 +449,10 @@
   gap: 5px;
   min-height: 36px;
   border: 0;
+  border-radius: 3px;
   padding: 8px 12px;
   color: var(--inv-color-text);
-  background: color-mix(in srgb, var(--inv-color-accent) 12%, var(--inv-color-panel));
+  background: transparent;
   font-size: 13px;
   font-weight: 700;
   cursor: pointer;
@@ -424,7 +461,7 @@
 .viewToggle button[aria-pressed="true"] {
   background: var(--inv-color-accent-soft);
   color: var(--inv-color-text);
-  box-shadow: inset 0 -2px var(--inv-color-accent);
+  box-shadow: inset 0 0 0 1px var(--inv-color-accent);
 }
 
 .viewToggle button:hover {
@@ -473,9 +510,9 @@
   z-index: 3;
   height: 52px;
   padding: 6px 8px;
-  color: var(--inv-color-text);
-  background: var(--routine-surface);
-  border-bottom: 2px solid var(--routine-edge);
+  color: var(--routine-table-heading-text);
+  background: var(--routine-table-heading);
+  border-bottom: 1px solid var(--inv-color-line);
   font-size: 12px;
   font-weight: 850;
   text-align: center;
@@ -541,7 +578,7 @@
 .routineTable thead th:first-child {
   position: relative;
   z-index: 4;
-  background: var(--routine-surface);
+  background: var(--routine-table-heading);
 }
 
 :global(:root)
@@ -611,13 +648,6 @@
   accent-color: #8adfff;
 }
 
-.routineTable thead [data-today] {
-  color: var(--inv-color-accent);
-  background: var(--routine-surface);
-  box-shadow: inset 0 0 0 2px var(--inv-color-accent);
-}
-
-.routineTable thead th:not(:first-child):hover,
 .routineTable tbody td:is(:hover, :focus-within) {
   box-shadow: inset 0 0 0 2px var(--inv-color-accent);
 }
@@ -703,12 +733,12 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .actionRow button:enabled::before,
-  .routineTable thead th:not(:first-child)::before,
+  .currentColumn::before,
   .footerCredit {
     animation: none;
   }
-  .routineTable td {
+  .routineTable td,
+  .actionRow button {
     transition: none !important;
   }
   .footerCredit {
@@ -731,12 +761,6 @@
 
 .emptyState p {
   max-width: 34rem;
-}
-
-@media (max-width: 1180px) {
-  .roleTabs {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
 }
 
 @media (max-width: 760px) {
@@ -770,10 +794,6 @@
     grid-template-columns: minmax(0, 1fr);
   }
 
-  .roleTabs {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
   .tableToolbar,
   .sectionHeading {
     align-items: stretch;
@@ -796,6 +816,16 @@
 }
 
 @media (max-width: 500px) {
+  .roleFilter {
+    align-items: stretch;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .roleSelect {
+    width: 100%;
+  }
+
   .actionRow {
     display: grid;
     width: 100%;

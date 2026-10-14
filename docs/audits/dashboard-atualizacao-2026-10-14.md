@@ -191,3 +191,10 @@ Isso trata o ponto observado, sem atribuir causa interna nao comprovada ao brows
 Regressao Chromium simula CSS day ainda960px e posterior0px; helper aguarda
 sem aceitar geometria incorreta. Quatro casos passaram, incluindo tres temas
 agora em1440/720/390px. Lint focal passou; nenhum arquivo de runtime alterado.
+
+Retomada17:28:51Z: origin/main avancou para efc6a20 (PR226, seletor/contorno
+da Rotina), enquanto health publico200/ok informou0019690. PR223 emfc5754e
+ficou conflitante e nao disparou CI. Merge preserva integralmente runtime e
+QA do PR226, assim como a espera exata de CSS e regressao adicionadas aqui.
+Conflitos somente documentais, resolvidos mantendo ambas as evidencias.
+Fonte: git fetch/log, GitHub PR223 e /api/health. Nova CI da combinacao exigida.

@@ -308,6 +308,7 @@ export async function checkRoutineScrolling(page, region) {
     "Routine must have natural height without internal vertical overflow",
   );
   assert.equal(overflow.scrollTop, 0);
+  await checkRoutineCurrentColumn(page);
   const initial = await heading.boundingBox();
   assert.ok(initial);
   await page.evaluate((y) => window.scrollTo(0, y + 400), initial.y);
@@ -319,6 +320,7 @@ export async function checkRoutineScrolling(page, region) {
       return header && menu ? Math.abs(header.y - menu.y - menu.height) : Infinity;
     })
     .toBeLessThanOrEqual(2);
+  await checkRoutineCurrentColumn(page);
   const pinned = await heading.boundingBox();
   const menu = await topbar.boundingBox();
   assert.ok(pinned && menu);
@@ -334,11 +336,15 @@ export async function checkRoutineScrolling(page, region) {
     true,
     "Protected menu must remain above the table",
   );
-  for (const locator of [page.locator("h1"), page.getByRole("tablist"), insert]) {
+  for (const locator of [
+    page.locator("h1"),
+    page.getByRole("combobox", { name: "Rotina", exact: true }),
+    insert,
+  ]) {
     const box = await locator.boundingBox();
     assert.ok(
       box && box.y + box.height <= 0,
-      "Title, tabs and header controls must scroll out of the viewport",
+      "Title, role selector and header controls must scroll out of the viewport",
     );
   }
   await expect(page.locator("thead")).toHaveCount(1);
@@ -355,6 +361,7 @@ export async function checkRoutineScrolling(page, region) {
     "Real day header must follow horizontal page scroll",
   );
   assert.ok(Math.abs(horizontal.y - pinned.y) <= 2);
+  await checkRoutineCurrentColumn(page);
   const lastHeading = await region.locator("thead th").last().boundingBox();
   const lastCell = await region.locator("tbody tr").first().locator("td").last().boundingBox();
   assert.ok(lastHeading && lastCell);
@@ -384,6 +391,7 @@ export async function checkRoutineScrolling(page, region) {
           : Infinity;
       })
       .toBeLessThanOrEqual(2);
+    await checkRoutineCurrentColumn(page);
     await page.evaluate(() => window.scrollBy(0, 100));
     await expect
       .poll(async () => {
@@ -429,6 +437,73 @@ async function withRoutineMotionModes(page, check, inspect) {
   }
 }
 
+export async function checkRoutineCurrentColumn(page) {
+  const overlay = page.locator("[data-routine-current-column]");
+  const today = page.locator("thead [data-today]");
+  if (!(await today.count()) || !(await page.locator("tbody tr").count())) {
+    await expect(overlay).toHaveCount(0);
+    return;
+  }
+  await expect(overlay).toHaveCount(1);
+  await expect(overlay).toHaveAttribute("aria-hidden", "true");
+  await expect(overlay).toHaveCSS("visibility", "visible");
+  await expect(overlay).toHaveCSS("pointer-events", "none");
+  assert.equal(
+    await overlay.evaluate((element) => element.parentElement?.matches('[role="region"]')),
+    true,
+    "Current column belongs to the table wrapper",
+  );
+  await expect
+    .poll(
+      () =>
+        overlay.evaluate((element) => {
+          const table = element.parentElement.querySelector("table");
+          const heading = table.querySelector("thead [data-today]");
+          const column = element.getBoundingClientRect();
+          const head = heading.getBoundingClientRect();
+          const bounds = table.getBoundingClientRect();
+          return Math.max(
+            Math.abs(column.left - head.left),
+            Math.abs(column.width - head.width),
+            Math.abs(column.top - head.top),
+            Math.abs(column.bottom - bounds.bottom),
+          );
+        }),
+      { message: "One outline follows the current header through the bottom of the table" },
+    )
+    .toBeLessThanOrEqual(2);
+  const effect = await overlay.evaluate((element) => {
+    const css = getComputedStyle(element, "::before");
+    return {
+      background: css.backgroundImage,
+      name: css.animationName,
+      duration: css.animationDuration,
+      iterations: css.animationIterationCount,
+      pointer: css.pointerEvents,
+      mask: css.maskComposite,
+      reduced: matchMedia("(prefers-reduced-motion: reduce)").matches,
+    };
+  });
+  assert.match(effect.background, /conic-gradient/);
+  const colors = effect.background.match(/rgba?\([^)]+\)/g) ?? [];
+  assert.ok(colors.includes("rgb(255, 255, 255)"), "Column outline includes white");
+  assert.ok(
+    colors.every(
+      (color) =>
+        /^rgba?\(255, 255, 255(?:, [\d.]+)?\)$/.test(color) || color === "rgba(0, 0, 0, 0)",
+    ),
+    "Column outline contains white and transparency only",
+  );
+  assert.equal(effect.pointer, "none");
+  assert.deepEqual(effect.mask.split(", "), ["exclude", "exclude"]);
+  if (effect.reduced) assert.equal(effect.name, "none");
+  else {
+    assert.notEqual(effect.name, "none");
+    assert.equal(effect.duration, "4.5s");
+    assert.equal(effect.iterations, "infinite");
+  }
+}
+
 export async function checkRoutineHeaderEffects(page) {
   return withRoutineMotionModes(page, "header", (checkpoint) =>
     checkRoutineHeaderEffectsInMotion(page, checkpoint),
@@ -446,7 +521,9 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
   ).toHaveCount(1);
   await expect(header.getByRole("button", { name: "Inserir linha", exact: true })).toHaveCount(1);
   await expect(page.locator("#routine-table-title, [class*='tableToolbar']")).toHaveCount(0);
-  await expect(page.getByRole("tabpanel").locator("h2")).toHaveCount(0);
+  await expect(
+    page.locator('section[id^="routine-panel-"]:not([hidden])').locator("h2"),
+  ).toHaveCount(0);
   await expect(page.locator("caption")).toContainText("gerente regional house");
   const controls = [modes, insert, save];
   const boxes = [];
@@ -497,39 +574,47 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
         "Header controls must not overlap",
       );
     }
-  const saveEffect = await save.evaluate((element) => {
-    const style = getComputedStyle(element, "::before");
-    return { image: style.backgroundImage, duration: style.animationDuration };
-  });
-  for (const [index, heading] of (
-    await page.locator("thead th:not(:first-child)").all()
-  ).entries()) {
+  for (const button of await header.getByRole("button").all()) {
+    const effect = await button.evaluate((element) => {
+      const css = getComputedStyle(element, "::before");
+      return { image: css.backgroundImage, animation: css.animationName };
+    });
+    assert.equal(effect.image, "none", "Header buttons must not retain a decorative gradient");
+    assert.equal(effect.animation, "none");
+  }
+  for (const [index, heading] of (await page.locator("thead th").all()).entries()) {
     checkpoint(`weekday-effect-${index}`);
     const style = await heading.evaluate((element) => {
       const css = getComputedStyle(element),
         border = getComputedStyle(element, "::before");
+      const probe = document.createElement("span");
+      probe.style.backgroundColor =
+        "color-mix(in srgb, var(--inv-color-accent) 14%, var(--inv-color-panel))";
+      element.append(probe);
+      const expectedSurface = getComputedStyle(probe).backgroundColor;
+      probe.remove();
       return {
         background: css.backgroundImage,
         surface: css.backgroundColor,
-        pageSurface: getComputedStyle(element.closest(".investor-page-shell")).backgroundColor,
+        expectedSurface,
         color: css.color,
         image: border.backgroundImage,
         animation: border.animationName,
-        duration: border.animationDuration,
-        pointer: border.pointerEvents,
+        theme: document.documentElement.dataset.theme,
       };
     });
     assert.equal(style.background, "none", "Day headers must not use the completion gradient");
-    assert.equal(style.surface, style.pageSurface);
     assert.equal(
-      style.image.replace(/from [^,]+, /, ""),
-      saveEffect.image.replace(/from [^,]+, /, ""),
+      style.surface,
+      style.expectedSurface,
+      "All headers use the former selected-tab blue token",
     );
-    assert.match(style.image, /conic-gradient/);
-    assert.notEqual(style.animation, "none");
-    assert.equal(style.duration, saveEffect.duration);
-    assert.equal(style.pointer, "none");
+    assert.equal(style.image, "none", "The column overlay is the only animated header outline");
+    assert.equal(style.animation, "none");
+    if (style.theme === "dark") assert.equal(style.color, "rgb(255, 255, 255)");
   }
+  checkpoint("current-column");
+  await checkRoutineCurrentColumn(page);
   checkpoint("footer-motion");
   const footer = page
     .locator("footer")
@@ -580,14 +665,6 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
   );
   const today = page.locator('thead [aria-current="date"]');
   await expect(today.getByText("Hoje", { exact: true })).toBeVisible();
-  const todayStyle = await today.evaluate((element) => {
-    const style = getComputedStyle(element);
-    return { color: style.color, shadow: style.boxShadow };
-  });
-  assert.ok(
-    todayStyle.shadow.includes(todayStyle.color) && todayStyle.shadow.includes("2px"),
-    "Current day header must retain its accent border",
-  );
   const animations = () =>
     credit.evaluate((element) =>
       [null, "::before", "::after"].map(
@@ -610,6 +687,7 @@ async function checkRoutineHeaderEffectsInMotion(page, checkpoint) {
         await item.evaluate((element) => getComputedStyle(element, "::before").animationName),
         "none",
       );
+    await checkRoutineCurrentColumn(page);
     await expect(credit).toHaveCSS("color", creditColor);
     await expect(credit).toHaveCSS("-webkit-text-fill-color", creditColor);
   } finally {
@@ -1075,7 +1153,11 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
     await expect(page).toHaveURL(`${origin}${route}`);
     const save = page.getByRole("button", { name: "Salva alterações", exact: true });
     await expect(save).toBeEnabled();
-    await expect(page.getByRole("tab")).toHaveText(roleLabels);
+    const selector = page.getByRole("combobox", { name: "Rotina", exact: true });
+    await expect(selector).toHaveCount(1);
+    await expect(selector).toHaveAttribute("id", "routine-role");
+    await expect(selector.getByRole("option")).toHaveText(roleLabels);
+    await expect(page.getByRole("tab")).toHaveCount(0);
     const modes = page.getByRole("group", { name: "Visualização da rotina", exact: true });
     await expect(modes.getByRole("button", { name: "Semana", exact: true })).toHaveAttribute(
       "aria-pressed",
@@ -1086,8 +1168,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
       "Rotina semanal editável para gerente regional house.",
     );
     await expect(page.getByRole("textbox", { name: /Domingo/ })).toHaveCount(0);
-    const house = page.getByRole("tab", { name: "Gerente regional house", exact: true });
-    await expect(house).toHaveAttribute("aria-selected", "true");
+    await expect(selector).toHaveValue("regional-house");
     const initialRows = await page.locator("tbody tr").count();
     assert.equal(initialRows, 26, "Complete house routine must retain the reference rows");
     const filled = await page
@@ -1130,19 +1211,20 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
 
     checkpoint("empty-roles-and-keyboard");
     for (const label of roleLabels.slice(1)) {
-      const tab = page.getByRole("tab", { name: label, exact: true });
-      await tab.click();
-      await expect(tab).toHaveAttribute("aria-selected", "true");
+      await selector.selectOption({ label });
+      await expect(page.getByRole("region", { name: label, exact: true })).toBeVisible();
       await expect(page.locator("tbody tr")).toHaveCount(0);
+      await expect(page.locator("[data-routine-current-column]")).toHaveCount(0);
       await expect(page.getByRole("button", { name: "Inserir linha", exact: true })).toBeVisible();
     }
-    await house.click();
-    await house.focus();
-    await page.keyboard.press("ArrowRight");
-    await expect(page.getByRole("tab", { name: /^Gerente regional imob/ })).toBeFocused();
+    await selector.selectOption("regional-house");
+    await selector.focus();
+    await page.keyboard.press("ArrowDown");
+    await expect(selector).toHaveValue("regional-imob");
+    await expect(selector).toBeFocused();
     await page.keyboard.press("Home");
-    await expect(house).toBeFocused();
-    await expect(house).toHaveAttribute("aria-selected", "true");
+    await expect(selector).toHaveValue("regional-house");
+    await expect(selector).toBeFocused();
 
     checkpoint("daily-mode-and-sunday-storage");
     await modes.getByRole("button", { name: "Hoje", exact: true }).click();

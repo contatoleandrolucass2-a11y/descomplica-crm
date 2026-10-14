@@ -34,6 +34,9 @@ describe("Rotina", () => {
       "Analisar o funil de vendas e conferir se cada etapa está de acordo com a média.",
     ])
       expect(markup).toContain(text);
+    expect(markup).toContain('<select id="routine-role"');
+    expect(markup).not.toContain('role="tab"');
+    expect(markup).not.toContain('role="tabpanel"');
     expect(markup).not.toContain("Restaurar rotina");
     expect(markup).not.toContain("Classificação da semana");
     expect(markup).not.toContain("26 linhas");
@@ -138,15 +141,19 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   let resumeLoad: () => void;
   let checkRoutineScrolling: (page: Page, region: Locator) => Promise<void>;
   let checkRoutineHeaderEffects: (page: Page) => Promise<void>;
+  let checkRoutineCurrentColumn: (page: Page) => Promise<void>;
   let checkRoutineCellEffects: (page: Page, outputDirectory?: string) => Promise<void>;
   let checkRoutineRefreshPosition: (page: Page) => Promise<void>;
   let checkRoutineCompactLayout: (page: Page) => Promise<void>;
   let checkRoutineOverflow: (page: Page, region: Locator) => Promise<unknown>;
 
   beforeAll(async () => {
-    ({ checkRoutineScrolling, checkRoutineHeaderEffects, checkRoutineCellEffects } = await import(
-      pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
-    ));
+    ({
+      checkRoutineScrolling,
+      checkRoutineHeaderEffects,
+      checkRoutineCurrentColumn,
+      checkRoutineCellEffects,
+    } = await import(pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href));
     ({ checkRoutineRefreshPosition, checkRoutineCompactLayout, checkRoutineOverflow } =
       await import(pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href));
     const require = createRequire(import.meta.url);
@@ -255,9 +262,11 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await openRoutine({ clock: "2026-10-12T02:59:50Z" });
     await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
     await browserExpect(page.locator('thead [aria-current="date"]')).toHaveCount(0);
+    await checkRoutineCurrentColumn(page);
     await page.getByRole("button", { name: "Hoje", exact: true }).click();
     await browserExpect(page.getByText("Sem rotina aos domingos.", { exact: true })).toBeVisible();
     await browserExpect(page.getByRole("textbox")).toHaveCount(0);
+    await checkRoutineCurrentColumn(page);
     await page.clock.fastForward(31_000);
     await browserExpect(page.locator('thead [aria-current="date"]')).toContainText("Segunda-feira");
     await page.getByRole("button", { name: "Semana", exact: true }).click();
@@ -273,6 +282,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
       await browserExpect(page.locator('thead [aria-current="date"]')).toContainText(day);
       await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(0);
+      await checkRoutineCurrentColumn(page);
     }
   });
 
@@ -375,10 +385,12 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       ).toBeFocused();
       await page.keyboard.press("Tab");
       await browserExpect(
-        page.getByRole("tab", { name: "Gerente regional house", exact: true }),
+        page.getByRole("combobox", { name: "Rotina", exact: true }),
       ).toBeFocused();
       await page.keyboard.press("Tab");
-      await browserExpect(page.getByRole("tabpanel")).toBeFocused();
+      await browserExpect(
+        page.locator('section[id^="routine-panel-"]:not([hidden])'),
+      ).toBeFocused();
       await page.keyboard.press("Tab");
       await browserExpect(
         page.getByRole("region", { name: "Tabela de rotina do dia", exact: true }),
@@ -522,7 +534,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       page.getByRole("heading", { name: "Rotina semanal e diária", exact: true }),
     ).toBeVisible();
     if (!options.holdLoad && !options.getError && !options.invalidGet)
-      await browserExpect(page.getByRole("tabpanel")).toHaveAttribute("aria-busy", "false");
+      await browserExpect(
+        page.locator('section[id^="routine-panel-"]:not([hidden])'),
+      ).toHaveAttribute("aria-busy", "false");
   }
 
   async function savedRows() {
@@ -615,6 +629,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           await browserExpect(completionCell()).toBeChecked();
           try {
             await checkRoutineCompactLayout(page);
+            await checkRoutineCurrentColumn(page);
           } catch (error) {
             await page.screenshot({
               path: `test-results/routine-preview/compact-completions-${mode}-${theme}-${width}-failure.png`,
@@ -761,9 +776,13 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(completionCell()).toBeChecked();
     await browserExpect(completionCell("Terça-feira")).not.toBeChecked();
     await browserExpect(completionCell("Segunda-feira", 2)).not.toBeChecked();
-    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Corretor" });
     await browserExpect(completionCell()).not.toBeChecked();
-    await page.getByRole("tab", { name: "Gerente regional house", exact: true }).click();
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Gerente regional house" });
     await page
       .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
       .fill("Nova atividade");
@@ -814,9 +833,15 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(completionCell()).toBeChecked();
     await browserExpect(completionCell()).toBeDisabled();
     await browserExpect(page.getByRole("textbox").first()).toHaveValue("Confirmada");
-    await browserExpect(page.getByRole("tabpanel")).toHaveAttribute("aria-busy", "false");
-    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
-    await browserExpect(page.getByRole("tabpanel")).toHaveAttribute("id", "routine-panel-corretor");
+    await browserExpect(
+      page.locator('section[id^="routine-panel-"]:not([hidden])'),
+    ).toHaveAttribute("aria-busy", "false");
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Corretor" });
+    await browserExpect(
+      page.locator('section[id^="routine-panel-"]:not([hidden])'),
+    ).toHaveAttribute("id", "routine-panel-corretor");
   });
 
   it("rejects an older GET after a text-save reload supersedes it", async () => {
@@ -1101,7 +1126,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(
       page.getByRole("button", { name: "Inserir linha", exact: true }),
     ).toBeDisabled();
-    expect(await page.locator('[role="tab"]:enabled, textarea:enabled').count()).toBe(0);
+    expect(await page.locator("#routine-role:enabled, textarea:enabled").count()).toBe(0);
     expect(server.reads).toBe(1);
     resumeLoad();
     const cell = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
@@ -1116,7 +1141,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await page
       .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
       .fill("Reunião QA");
-    await page.getByRole("tab", { name: "Corretor" }).click();
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Corretor" });
     await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
     await page.getByRole("textbox", { name: "Sábado, linha 1", exact: true }).fill("Visita QA");
     await page.getByRole("button", { name: "Salva alterações" }).click();
@@ -1127,7 +1154,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(
       page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true }),
     ).toHaveValue("Reunião QA");
-    await page.getByRole("tab", { name: "Corretor" }).click();
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Corretor" });
     await browserExpect(
       page.getByRole("textbox", { name: "Sábado, linha 1", exact: true }),
     ).toHaveValue("Visita QA");
@@ -1195,7 +1224,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   it("keeps inserted rows and later edits separate from the last saved version", async () => {
     await openRoutine();
     await page.getByRole("button", { name: "Salva alterações" }).click();
-    await page.getByRole("tab", { name: "Corretor" }).click();
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Corretor" });
     await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
     await expectUnsavedNavigation(true);
     await page.getByRole("button", { name: "Salva alterações" }).click();
@@ -1205,12 +1236,13 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       .getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true })
       .fill("Atividade QA");
     await expectUnsavedNavigation(true);
-    await browserExpect(page.getByRole("tab", { name: "Corretor", exact: true })).toHaveAttribute(
-      "aria-selected",
-      "true",
+    await browserExpect(page.getByRole("combobox", { name: "Rotina", exact: true })).toHaveValue(
+      "corretor",
     );
     await browserExpect(page.locator("caption")).toContainText("corretor");
-    await browserExpect(page.getByRole("tabpanel").locator("h2")).toHaveCount(0);
+    await browserExpect(
+      page.locator('section[id^="routine-panel-"]:not([hidden])').locator("h2"),
+    ).toHaveCount(0);
     await browserExpect(page.locator("tbody tr")).toHaveCount(1);
     expect(server.records.corretor?.rows[0]?.["Segunda-feira"]).toBe("");
   });
@@ -1253,7 +1285,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
 
   it("defaults to six-day Semana with exact labels and no removed chrome", async () => {
     await openRoutine();
-    await browserExpect(page.getByRole("tab")).toHaveText([
+    await browserExpect(
+      page.getByRole("combobox", { name: "Rotina", exact: true }).getByRole("option"),
+    ).toHaveText([
       "Gerente regional house",
       "Gerente regional imob",
       "Gerente house",
@@ -1313,10 +1347,11 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       page.getByRole("button", { name: "Importar cópia local desta função" }),
     ).toHaveCount(0);
     expect(await page.locator("textarea:not([readonly]):enabled").count()).toBe(0);
-    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
-    await browserExpect(page.getByRole("tab", { name: "Corretor", exact: true })).toHaveAttribute(
-      "aria-selected",
-      "true",
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Corretor" });
+    await browserExpect(page.getByRole("combobox", { name: "Rotina", exact: true })).toHaveValue(
+      "corretor",
     );
     expect(server.puts).toEqual([]);
   });
@@ -1348,7 +1383,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await savedRows();
     expect(server.puts.map((value) => value.role_key)).toEqual(["regional-house"]);
     expect(server.puts[0]?.expected_revision).toBe(0);
-    await page.getByRole("tab", { name: "Corretor", exact: true }).click();
+    await page
+      .getByRole("combobox", { name: "Rotina", exact: true })
+      .selectOption({ label: "Corretor" });
     await browserExpect(page.locator("tbody tr")).toHaveCount(0);
     expect(await page.evaluate((key) => localStorage.getItem(key), storageKey)).toBe(legacy);
   });
@@ -1801,7 +1838,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     90_000,
   );
 
-  it("uses a regular responsive title and a gold specular save action respecting reduced motion", async () => {
+  it("uses a regular responsive title and plain save action in every interaction state", async () => {
     await openRoutine();
     const title = page.getByRole("heading", { name: "Rotina semanal e diária", exact: true });
     for (const [width, size] of [
@@ -1831,12 +1868,8 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           pointerEvents: css.pointerEvents,
         };
       });
-      expect(effect.name).not.toBe("none");
-      expect(effect.duration).toBe("4.5s");
-      expect(effect.iterations).toBe("infinite");
-      expect(effect.background).toContain("conic-gradient");
-      expect(effect.background).toContain("rgb(213, 185, 111)");
-      expect(effect.pointerEvents).toBe("none");
+      expect(effect.name).toBe("none");
+      expect(effect.background).toBe("none");
     }
     await page.emulateMedia({ reducedMotion: "reduce" });
     expect(
@@ -1897,48 +1930,54 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     }
   }, 30_000);
 
-  it("links every tab and panel and supports arrows, Home, End and roving focus", async () => {
+  it("uses one native role selector with keyboard access and independent dirty drafts", async () => {
     await openRoutine();
-    const tabs = page.getByRole("tab");
-    expect(await tabs.count()).toBe(6);
-    for (const tab of await tabs.all()) {
-      const id = await tab.getAttribute("id");
-      const panelId = await tab.getAttribute("aria-controls");
-      const panel = page.locator(`[id="${panelId}"]`);
-      await browserExpect(panel).toHaveAttribute("role", "tabpanel");
-      await browserExpect(panel).toHaveAttribute("aria-labelledby", id!);
-    }
-    await tabs.nth(0).focus();
-    for (const [key, index] of [
-      ["ArrowRight", 1],
-      ["ArrowDown", 2],
-      ["ArrowUp", 1],
-      ["ArrowLeft", 0],
-      ["ArrowLeft", 5],
-      ["ArrowRight", 0],
-      ["End", 5],
-      ["Home", 0],
-    ] as const) {
-      await page.keyboard.press(key);
-      const selected = tabs.nth(index);
-      await browserExpect(selected).toBeFocused();
-      await browserExpect(selected).toHaveAttribute("aria-selected", "true");
-      await browserExpect(selected).toHaveAttribute("tabindex", "0");
-      expect(await page.locator('[role="tab"][tabindex="0"]').count()).toBe(1);
-      await browserExpect(page.getByRole("tabpanel")).toHaveAttribute(
-        "id",
-        (await selected.getAttribute("aria-controls"))!,
-      );
-    }
-    await page.keyboard.press("Tab");
-    await browserExpect(page.getByRole("tabpanel")).toBeFocused();
-    await page.getByRole("tab", { name: "Coordenador de parcerias" }).click();
-    await browserExpect(
-      page.getByRole("tab", { name: "Coordenador de parcerias" }),
-    ).toHaveAttribute("tabindex", "0");
-    await browserExpect(page.getByRole("tabpanel")).toHaveAttribute(
-      "id",
-      "routine-panel-coordenador-parcerias",
+    const selector = page.getByRole("combobox", { name: "Rotina", exact: true });
+    await browserExpect(selector).toHaveCount(1);
+    await browserExpect(selector).toHaveAttribute("id", "routine-role");
+    expect(await selector.evaluate((element) => element.tagName)).toBe("SELECT");
+    await browserExpect(page.getByRole("tablist")).toHaveCount(0);
+    await browserExpect(page.getByRole("tab")).toHaveCount(0);
+    await browserExpect(selector.getByRole("option")).toHaveCount(6);
+    const options = await selector.getByRole("option").evaluateAll((elements) =>
+      elements.map((option) => ({
+        value: (option as HTMLOptionElement).value,
+        label: option.textContent!,
+      })),
     );
+    for (const option of options) {
+      await selector.selectOption(option.value);
+      await browserExpect(selector).toHaveAttribute(
+        "aria-controls",
+        `routine-panel-${option.value}`,
+      );
+      await browserExpect(
+        page.getByRole("region", { name: option.label, exact: true }),
+      ).toBeVisible();
+      expect(await page.locator('section[id^="routine-panel-"]:not([hidden])').count()).toBe(1);
+      await checkRoutineCurrentColumn(page);
+    }
+    await selector.selectOption("regional-house");
+    const first = page.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true });
+    await first.fill("Rascunho house preservado");
+    await selector.selectOption("corretor");
+    await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
+    await first.fill("Rascunho corretor preservado");
+    await selector.selectOption("regional-house");
+    await browserExpect(first).toHaveValue("Rascunho house preservado");
+    await expectUnsavedNavigation(true);
+    await selector.selectOption("corretor");
+    await browserExpect(first).toHaveValue("Rascunho corretor preservado");
+    expect(server.puts).toEqual([]);
+    await selector.focus();
+    await page.keyboard.press("Home");
+    await browserExpect(selector).toHaveValue("regional-house");
+    await page.keyboard.press("ArrowDown");
+    await browserExpect(selector).toHaveValue("regional-imob");
+    await page.keyboard.press("End");
+    await browserExpect(selector).toHaveValue("corretor");
+    await browserExpect(first).toHaveValue("Rascunho corretor preservado");
+    await page.keyboard.press("Tab");
+    await browserExpect(page.getByRole("region", { name: "Corretor", exact: true })).toBeFocused();
   });
 });

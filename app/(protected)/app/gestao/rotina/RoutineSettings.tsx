@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
-import { CalendarDays, ListChecks, Plus, Save } from "lucide-react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { CalendarDays, ChevronDown, ListChecks, ListFilter, Plus, Save } from "lucide-react";
 import { routineRecordSchema, routineRowsSchema, routineSnapshotSchema } from "@/lib/crm/routines";
 
 import "@/app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css";
@@ -458,7 +458,7 @@ export function RoutineSettings() {
   const [today, setToday] = useState<string | null>(null);
   const [view, setView] = useState<"week" | "day">("week");
   const [editedCells, setEditedCells] = useState<Set<string>>(() => new Set());
-  const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const currentColumnRef = useRef<HTMLDivElement | null>(null);
   const tableRef = useRef<HTMLTableElement | null>(null);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const pendingRow = useRef<number | null>(null);
@@ -724,6 +724,21 @@ export function RoutineSettings() {
         table.style.setProperty("--routine-heading-offset", `${offset}px`);
         previousOffset = offset;
       }
+      const currentHeading = heading.querySelector<HTMLElement>("[data-today]");
+      const column = currentColumnRef.current;
+      const wrapper = scrollRef.current;
+      if (currentHeading && column && wrapper) {
+        const cellRect = currentHeading.getBoundingClientRect();
+        const wrapperRect = wrapper.getBoundingClientRect();
+        // One out-of-flow perimeter follows the pinned header, never the pointer.
+        Object.assign(column.style, {
+          left: `${cellRect.left - wrapperRect.left - wrapper.clientLeft}px`,
+          top: `${tableRect.top - wrapperRect.top - wrapper.clientTop + offset}px`,
+          width: `${cellRect.width}px`,
+          height: `${Math.max(0, tableRect.height - offset)}px`,
+          visibility: "visible",
+        });
+      }
     };
     const scheduleHeading = () => {
       if (!frame) frame = window.requestAnimationFrame(updateHeading);
@@ -904,32 +919,6 @@ export function RoutineSettings() {
     setHasUnsavedChanges(true);
   }
 
-  function handleRoleKeyDown(event: KeyboardEvent<HTMLButtonElement>, roleIndex: number) {
-    if (!hasLoaded) return;
-    let nextIndex: number;
-    switch (event.key) {
-      case "ArrowRight":
-      case "ArrowDown":
-        nextIndex = (roleIndex + 1) % roles.length;
-        break;
-      case "ArrowLeft":
-      case "ArrowUp":
-        nextIndex = (roleIndex - 1 + roles.length) % roles.length;
-        break;
-      case "Home":
-        nextIndex = 0;
-        break;
-      case "End":
-        nextIndex = roles.length - 1;
-        break;
-      default:
-        return;
-    }
-    event.preventDefault();
-    setActiveRole(roles[nextIndex]!.key);
-    tabRefs.current[nextIndex]?.focus();
-  }
-
   return (
     <div className={`investor-page-shell ${styles.page}`}>
       <main className={`investor-main ${styles.main}`}>
@@ -1032,37 +1021,34 @@ export function RoutineSettings() {
           </div>
         ) : null}
 
-        <section className={styles.rolesPanel} aria-label="Funções">
-          <div className={styles.roleTabs} role="tablist" aria-label="Opções de rotina">
-            {roles.map((role, roleIndex) => (
-              <button
-                key={role.key}
-                ref={(element) => {
-                  tabRefs.current[roleIndex] = element;
-                }}
-                id={`routine-tab-${role.key}`}
-                type="button"
-                role="tab"
-                aria-selected={activeRole === role.key}
-                aria-controls={`routine-panel-${role.key}`}
-                tabIndex={hasLoaded && activeRole === role.key ? 0 : -1}
-                disabled={!hasLoaded}
-                className={styles.roleTab}
-                onClick={() => setActiveRole(role.key)}
-                onKeyDown={(event) => handleRoleKeyDown(event, roleIndex)}
-              >
-                <strong>{role.label}</strong>
-              </button>
-            ))}
+        <div className={styles.roleFilter}>
+          <label htmlFor="routine-role">
+            <ListFilter size={16} aria-hidden="true" />
+            Rotina
+          </label>
+          <div className={styles.roleSelect}>
+            <select
+              id="routine-role"
+              aria-controls={`routine-panel-${activeRole}`}
+              value={activeRole}
+              disabled={!hasLoaded}
+              onChange={(event) => setActiveRole(event.target.value as RoleKey)}
+            >
+              {roles.map((role) => (
+                <option key={role.key} value={role.key}>
+                  {role.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={16} aria-hidden="true" />
           </div>
-        </section>
+        </div>
 
         {roles.map((role) => (
           <section
             key={role.key}
             id={`routine-panel-${role.key}`}
-            role="tabpanel"
-            aria-labelledby={`routine-tab-${role.key}`}
+            aria-label={role.label}
             aria-busy={!hasLoaded}
             tabIndex={0}
             hidden={activeRole !== role.key}
@@ -1078,6 +1064,14 @@ export function RoutineSettings() {
                 }
                 tabIndex={0}
               >
+                {currentDay && visibleRows.length > 0 ? (
+                  <div
+                    ref={currentColumnRef}
+                    className={styles.currentColumn}
+                    data-routine-current-column
+                    aria-hidden="true"
+                  />
+                ) : null}
                 {visibleRows.length && visibleDays.length ? (
                   <table ref={tableRef} className={styles.routineTable} data-view={view}>
                     <caption>
