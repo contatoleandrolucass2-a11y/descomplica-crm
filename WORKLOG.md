@@ -2,6 +2,8 @@
 
 ## 2026-10-14: Integração do painel de usuários para produção
 
+- A QA de teclado da Rotina usa busca nativa por rótulo no Chromium headless do macOS, que não confirma a navegação do popup por setas. O Linux mantém as verificações de Home/ArrowDown/End; foco, valor e rascunhos continuam verificados.
+
 - O gate compacto aguarda o PostgreSQL definitivo por TCP antes de executar a fixture; três execuções consecutivas passaram com 70 verificações cada.
 
 - Integra o painel aprovado localmente com o `main` atual, preservando paginação no servidor, gestão/rotina, estoque Salesforce e o coordenador de publicação.

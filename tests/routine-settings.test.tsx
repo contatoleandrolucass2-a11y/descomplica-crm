@@ -2010,12 +2010,23 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(first).toHaveValue("Rascunho corretor preservado");
     expect(server.puts).toEqual([]);
     await selector.focus();
-    await page.keyboard.press("Home");
-    await browserExpect(selector).toHaveValue("regional-house");
-    await page.keyboard.press("ArrowDown");
-    await browserExpect(selector).toHaveValue("regional-imob");
-    await page.keyboard.press("End");
-    await browserExpect(selector).toHaveValue("corretor");
+    for (const [key, value, label] of [
+      ["Home", "regional-house", "Gerente regional house"],
+      ["ArrowDown", "regional-imob", "Gerente regional imob"],
+      ["End", "corretor", "Corretor"],
+    ]) {
+      if (process.platform === "darwin") {
+        // Native type-ahead remains keyboard-driven when the macOS popup cannot commit.
+        await page.keyboard.press("Tab");
+        await page.keyboard.press("Shift+Tab");
+        await browserExpect(selector).toBeFocused();
+        await page.keyboard.type(label);
+      } else {
+        await page.keyboard.press(key);
+      }
+      await browserExpect(selector).toHaveValue(value);
+      await browserExpect(selector).toBeFocused();
+    }
     await browserExpect(first).toHaveValue("Rascunho corretor preservado");
     await page.keyboard.press("Tab");
     await browserExpect(page.getByRole("region", { name: "Corretor", exact: true })).toBeFocused();

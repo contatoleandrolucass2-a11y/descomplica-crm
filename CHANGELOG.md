@@ -2,6 +2,8 @@
 
 ## 2026-10-14 — Integração de usuários e presença
 
+- Torna a validação de teclado do seletor nativo da Rotina compatível com macOS, preservando os testes por setas no Linux.
+
 - Acrescenta à CI o ensaio isolado do contrato compacto de autorização, aguardando a inicialização definitiva do banco.
 
 - Integra o painel Pessoas e a matriz de acessos com a paginação e o catálogo reais do ambiente.
