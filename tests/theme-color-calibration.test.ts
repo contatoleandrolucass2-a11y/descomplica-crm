@@ -222,10 +222,12 @@ describe("three-theme color calibration", () => {
       color: "var(--analytics-ink)",
       "min-width": "0",
     });
-    expect(declarationsAt(ranking, ".podiumEntry")).toMatchObject({
+    expect(declarationsAt(ranking, ".canvas .podiumEntry")).toMatchObject({
       "border-color": "var(--analytics-line)",
       background: "var(--analytics-surface)",
       color: "var(--analytics-ink)",
+      "border-radius": "0.5rem",
+      "box-shadow": "none",
     });
     expect(declarationsAt(ranking, ".canvas :is(input, select, button)")).toMatchObject({
       border: "1px solid var(--analytics-line)",

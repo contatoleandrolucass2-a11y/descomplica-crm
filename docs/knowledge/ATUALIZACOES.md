@@ -15,6 +15,11 @@
 
 ## 2026-10-14: Qlik via VPS
 
+- CI38627653582/60234fa:3176 testes passaram; unico erro em teste que ainda
+  buscava seletor CSS antigo do podio. Corrigido sem reduzir verificacoes;
+  12 testes focais aprovados. PR227/64d9f24 de preflight atual passou validate
+  e restore; release-gates pendente. Nenhuma atualizacao real comprovada ainda.
+
 - Retomada19:40Z: Qlik substituiu os IDs observados da pasta/objetos. Navegacao
   pelo catalogo confirma Vendas46d5bcf7, PRODUTO26aed86d e container8b78e5d8;
   tabParceiraspUYysrvJ permanece. Motivo/periodicidade desconhecidos. Mapa

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14: Regressao do tema do ranking
+
+- Alinha a verificacao de tokens ao seletor composto do podio e verifica
+  explicitamente raio de8px e ausencia de sombra.
+
 ## 2026-10-14: Fonte e densidade do ranking
 
 - Atualiza a pasta Qlik candidata conforme catalogo atual e rejeita a origem

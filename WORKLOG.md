@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-14: Teste de tema do podio
+
+CI38627653582/60234fa encontrou somente a busca do seletor CSS anterior:
+3176 testes passaram,86 skips e1 falha. O podio usa agora seletor composto
+para vencer a regra global de cards. Teste atualizado para essa regra real,
+preservando tokens e acrescentando raio8px/sem sombra;12 testes focais passaram.
+Captura autenticada38627653608 segue em execucao; sem promover baseline parcial.
+
 ## 2026-10-14: Fonte Qlik atual e densidade do ranking
 
 Catalogo Qlik em19:39Z confirmou a pasta atual46d5bcf7, produtos26aed86d e
