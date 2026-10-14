@@ -1,5 +1,61 @@
 # Replica informacional do dashboard
 
+## Correcao dos funis em 14/10/2026
+
+Pedido adicional: incluir graficos no Comparativo mensal conforme o print,
+permitindo melhorar a apresentacao e sem modificar a origem. A referencia foi
+consultada em navegador somente leitura, apos falha do fetch web. Ela contem
+cinco etapas; o print traz tambem Pastas aprovadas. A implementacao conserva
+os seis blocos e desenha seis etapas em cada um, com geometria ordinal fixa.
+As larguras indicam a ordem das etapas, nao uma escala quantitativa nem coortes.
+
+`dashboard/data.ts`, `catalog.ts` e `presentation.ts` fornecem cinco series.
+`ops/salesforce/transform.mjs` usa aprovadas no ranking e no diagnostico de
+qualidade, mas nao fornece serie mensal equivalente em todas as visoes,
+historicos e metas. Por isso, Pastas aprovadas fica indisponivel, sem repetir
+Pastas, extrapolar ranking ou importar o numero historico do print. Rever
+quando existir contrato mensal autorizado e validado para essa metrica.
+
+Markup SSR sem nova dependencia; nomes acessiveis por bloco, valores completos,
+contraste e diferenciacao entre ausencia e zero preservados. Numeros longos
+usam tipografia compacta sem abreviar os dados. Conversoes existentes continuam
+calculadas nas cinco series reais. Testes passaram a exigir seis figuras e 36
+etapas no E2E e na captura autenticada, alem da verificacao de trapezios no QA
+sintetico. Os limiares de pixels e altura permanecem inalterados.
+
+Validacao inicial da correcao: 18 testes de componente e typecheck aprovados.
+QA sintetico com 74 verificacoes aprovadas e 28 capturas, tres temas e larguras
+390/768/1440, estados completo, indisponivel, zero, sem meta e numeros longos.
+Sem overflow, violacoes Axe, erros de console ou acesso externo. Desktop
+completo mede 4.704 px; indisponivel 4.572 px, abaixo do limite existente de
+4.800 px. Funis claro/desktop e escuro/celular inspecionados. Fonte local:
+`test-results/dashboard-report/report.json` e capturas ignoradas correspondentes.
+Lint e build locais aprovados. A suite global Windows teve 2.746 aprovados,
+63 skips, a falha preexistente de symlink e dois timeouts em devtools/status.
+Reexecucao isolada confirmou timeouts, inclusive inicializacao Next MCP; o
+coletor tambem encontrou falhas de ACL Windows. Nenhum timeout ou assercao foi
+relaxado. Release local: 113 passaram, 11 skips POSIX. Estes resultados nao
+equivalem a uma suite Windows verde; nao houve mudanca nesses modulos.
+
+Depois de integrar main/faae8e9 (Rotina), a CI38515347098 de aa5c835 aprovou
+validate: 2.807 testes de aplicacao, 79 skips, 241 testes do coletor e 124 de
+release, sem falhas. Lint, tipos, fontes documentais, audit e build tambem
+aprovados no Linux. Fonte: job115692777558, consulta14/10/2026 05:17Z. Captura
+autenticada ainda estava em execucao nessa consulta.
+
+CI concluida: restore, 1.323 pgTAP e 19 E2E passaram. Matriz autenticada passou
+154 responsivos, 88 temas, 242 Axe, 110 zoom, 22 canvases e demais checks do
+predicado funcional original. Desktop do dashboard mediu 4.744 px. Falha do
+gate limitada as 11 imagens do dashboard; outras 231 passaram.
+
+Captura20aed961 tem arvore identica a aa5c835. Artefato11873042399 teve hashes
+e baseline usada conferidos; funis inspecionados no desktop claro e celular
+escuro. Promocao transacional somente dessas11 imagens, preservando231 e sua
+proveniencia. Detalhes em docs/qa/reference-parity/README.md e reviewedUpdates.
+Flag dirty mantido: fingerprint1289963a foi reproduzido com diff rastreado vazio
+e19 arquivos QA gerados. Excecao limitada a esse artefato; nao dispensa prova
+em capturas futuras. Nova CI verify, merge e publicacao permanecem pendentes.
+
 ## Fonte e escopo
 
 Consulta da pagina publica em 13/10/2026 (14/10 em UTC):

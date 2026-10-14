@@ -1207,6 +1207,11 @@ async function inspectRoute(
               5 &&
             document.querySelectorAll('[aria-labelledby="report-monthly-title"] details').length ===
               6 &&
+            document.querySelectorAll('[aria-labelledby="report-monthly-title"] figure').length ===
+              6 &&
+            document.querySelectorAll(
+              '[aria-labelledby="report-monthly-title"] figure [data-stage]',
+            ).length === 36 &&
             document.querySelectorAll('[aria-labelledby="report-operational-title"] table')
               .length === 4),
         hasBrokenValue: /\b(?:NaN|undefined)\b/.test(text),

@@ -2,6 +2,27 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Funis mensais em 14/10/2026
+
+CI `38515347098`, artefato `11873042399`, captura
+`20aed961aa07982772d1cb25ed226af9ba3379f8`, arvore identica ao candidato
+`aa5c835f5448a389af16ce6b1c76cbc17ecfad2c`. SHA-256 do ZIP:
+`1f2508522260bd684e5a177b2847b573cfa1f2ff2dcd722ae2410e4bc780148b`.
+
+Validate, restore, 1.323 testes pgTAP e 19 E2E passaram. Predicado funcional
+original reaplicado: 154 responsivos, 88 temas, 242 Axe, 110 zoom e 22 canvases,
+alem de teclado e simuladores. Onze imagens de `/app` diferiram pela inclusao
+dos funis. Desktop claro e celular escuro inspecionados; demais 231 imagens
+preservadas byte a byte. Altura desktop: 4.744 px, abaixo de 4.800.
+
+Promocao pelo helper transacional original em 05:55:40Z, com hashes conferidos.
+Manifesto conserva proveniencia das outras imagens. Limiares 1%/16 intactos.
+Captura dirty foi comprovada, para este artefato, como diff rastreado vazio e
+19 outputs de Conectar Sistemas. Fingerprint original reproduzido:
+`1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b`.
+O flag original permanece true. Nao reutilizar esta excecao em outra captura;
+rever a proveniencia integral a cada promocao. Nova CI verify obrigatoria.
+
 ## Relatorio completo do dashboard em 13/10/2026
 
 CI `38498361779`, artefato `11865597980`, captura

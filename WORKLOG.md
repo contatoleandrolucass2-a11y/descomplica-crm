@@ -14,6 +14,30 @@
 - Evidencia completa em docs/audits/rotina-individual-2026-10-14.md. Este
   fechamento e documental e nao exige reiniciar novamente a aplicacao.
 
+## 2026-10-14: Funis no comparativo mensal
+
+- Corrige a ausencia dos graficos solicitados no comparativo de `/app`.
+  Cada bloco agora tem seis trapezios, rotulos e valores acessiveis em HTML.
+  Geometria ordinal fixa, sem sugerir area proporcional ou coorte individual.
+- Usa as cinco series existentes; Pastas aprovadas fica explicitamente
+  indisponivel. O ranking possui approvedFolder, mas nao e substituto da serie
+  mensal agregada por visao, historico e meta. Sem mudanca de contrato ou dados.
+- Referencia publica consultada somente por leitura no navegador; screenshot
+  enviado orienta o formato. Sem alteracao no site de origem nem em n8n.
+- Testes de componente: 18 aprovados. Tipos aprovados. QA sintetico: 74 checks
+  aprovados em tres temas e larguras, sem overflow, Axe ou erro de console.
+  Desktop completo: 4.704 px, mantendo o limite de 4.800. Lint/build aprovados.
+- CI38515347098, candidato aa5c835: validate aprovado, com 2.807 testes da
+  aplicacao (79 skips), 241 do coletor e 124 de release, sem falhas no Linux.
+  Windows apresentou timeouts em devtools/status, ACL do coletor e o symlink
+  preexistente; nenhum gate foi afrouxado. Release local:113 passaram/11 skips.
+  Integracao concorrente da Rotina preservada; navegador, baseline e deploy
+  ainda pendentes. Evidencias na auditoria do dashboard.
+- CI38515347098 concluiu banco/restore/E2E e checks funcionais visuais; somente
+  11 imagens de /app diferiram. Revisadas e promovidas com hashes/proveniencia,
+  preservando231 e limiares1%/16. Fingerprint comprovou apenas19 outputs QA.
+  Nova CI verify obrigatoria antes de merge/publicacao.
+
 ## 2026-10-13: Revisao e conclusoes individuais da Rotina
 
 - Revisao de portugues aplicada pela UI autorizada em regional imob, mantendo

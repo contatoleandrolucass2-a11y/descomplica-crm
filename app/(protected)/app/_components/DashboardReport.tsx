@@ -139,6 +139,41 @@ function ConversionDetails({ readings }: { readings: FunnelReading[] }) {
   );
 }
 
+function MonthlyFunnel({ label, readings }: { label: string; readings: FunnelReading[] }) {
+  // Approved folders have no monthly dashboard series; ranking totals are not interchangeable.
+  const entries = readings.flatMap((reading) =>
+    reading.key === "folders"
+      ? [
+          reading,
+          { key: "approved-folders", label: "Pastas aprovadas", value: null, conversion: null },
+        ]
+      : [reading],
+  );
+
+  return (
+    <figure className={styles.monthlyFunnel} aria-label={`Funil mensal: ${label}`}>
+      <dl>
+        {entries.map((entry) => (
+          <div className={styles.funnelStep} key={entry.key} data-stage={entry.key}>
+            <dt>{entry.label}</dt>
+            <dd
+              data-unavailable={entry.value === null}
+              data-long={entry.value !== null && numberFormatter.format(entry.value).length > 7}
+            >
+              {numberValue(
+                entry.value,
+                entry.key === "approved-folders"
+                  ? "Pastas aprovadas não possuem uma série mensal separada no dashboard."
+                  : undefined,
+              )}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </figure>
+  );
+}
+
 const operationalColumns: Array<AnalyticsColumn<OperationalComparison>> = [
   {
     key: "interval",
@@ -413,14 +448,7 @@ export function DashboardReport({
                 <AnalyticsCard key={block.key} className={styles.card} density="compact">
                   <h3>{block.label}</h3>
                   <p className={styles.blockDetail}>{block.detail}</p>
-                  <dl className={styles.readings}>
-                    {blockReadings.map((reading) => (
-                      <div key={reading.key}>
-                        <dt>{reading.label}</dt>
-                        <dd>{numberValue(reading.value)}</dd>
-                      </div>
-                    ))}
-                  </dl>
+                  <MonthlyFunnel label={block.label} readings={blockReadings} />
                   <dl className={styles.totalConversion}>
                     <div>
                       <dt>

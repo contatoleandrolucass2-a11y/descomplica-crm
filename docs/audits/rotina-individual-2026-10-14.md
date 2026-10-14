@@ -1,5 +1,32 @@
 # Auditoria da Rotina individual
 
+## Registro curado anterior preservado em 14/10, 12:18Z
+
+## 2026-10-14: Rotina regional imob e conclusao individual
+
+- Imob revisada e salva no CRM em 13/10, 23:05 Sao Paulo: 18 linhas,
+  93 atividades, 108 campos conferidos apos recarga, revisao 3. House
+  preservada. Confirmado: imobiliarias sem produzir ha 60 dias.
+- Usuario autorizou conclusoes individuais persistidas e migration aditiva
+  apos testes/backup; reinicio segunda 00h America/Sao_Paulo. Implementado
+  e publicado pelo PR215 em faae8e9efa487c44d01b991a3949ce1627ad2980.
+- Lint/typecheck/build e 73 testes Chromium aprovados; CI38504861394 aprovou
+  1323 pgTAP, restore, E2E e QA real da Rotina com duas contas isoladas.
+  Selecao administrativa corrigida; CI38510935022 do PR e CI38514527676 do
+  main completas/aprovadas, incluindo imagem, restore e matriz visual.
+- Migration autorizada aplicada por MCP: remota 20261014054331, fonte local 20261014020437. Backup de metadados/ausencia dos objetos e SQL verificado;
+  RLS forcada, grants minimos e virada semanal conferidos. House/Imob intactas.
+- Deploy 2026-10-14T05:45:08.644Z (02:45 Sao Paulo), ID574a7a95-c8e3-480b-80f5-870cec5600d7.
+  Coordenador com lock/CAS/consulta fresca; health200/ok no SHA faae8e9 as05:46Z,
+  API anonima401. UI:108 textos iguais,93 checkboxes semana/18 hoje habilitados.
+  Fontes: GitHub CI, ledger privado, MCP Supabase e leitura autenticada.
+- Evidencias completas, falhas anteriores e limites preservados em
+  [auditoria da Rotina](../audits/rotina-individual-2026-10-14.md).
+  Detalhes movidos somente para respeitar o limite de exportacao do Obsidian.
+- Fechamento documental publicado na branch/PR219; integracao pendente da CI.
+  Auto-merge indisponivel no repositorio; nao alterada essa configuracao.
+  Reavaliar merge apos gates aprovados, sem novo deploy de runtime.
+
 ## Publicacao confirmada em 14/10/2026
 
 - PR215: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/215,

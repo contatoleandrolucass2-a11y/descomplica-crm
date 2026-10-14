@@ -1,29 +1,55 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-14: Rotina regional imob e conclusao individual
+## 2026-10-14: Rotina compacta por conclusao
 
-- Imob revisada e salva no CRM em 13/10, 23:05 Sao Paulo: 18 linhas,
-  93 atividades, 108 campos conferidos apos recarga, revisao 3. House
-  preservada. Confirmado: imobiliarias sem produzir ha 60 dias.
-- Usuario autorizou conclusoes individuais persistidas e migration aditiva
-  apos testes/backup; reinicio segunda 00h America/Sao_Paulo. Implementado
-  e publicado pelo PR215 em faae8e9efa487c44d01b991a3949ce1627ad2980.
-- Lint/typecheck/build e 73 testes Chromium aprovados; CI38504861394 aprovou
-  1323 pgTAP, restore, E2E e QA real da Rotina com duas contas isoladas.
-  Selecao administrativa corrigida; CI38510935022 do PR e CI38514527676 do
-  main completas/aprovadas, incluindo imagem, restore e matriz visual.
-- Migration autorizada aplicada por MCP: remota 20261014054331, fonte local 20261014020437. Backup de metadados/ausencia dos objetos e SQL verificado;
-  RLS forcada, grants minimos e virada semanal conferidos. House/Imob intactas.
-- Deploy 2026-10-14T05:45:08.644Z (02:45 Sao Paulo), ID574a7a95-c8e3-480b-80f5-870cec5600d7.
-  Coordenador com lock/CAS/consulta fresca; health200/ok no SHA faae8e9 as05:46Z,
-  API anonima401. UI:108 textos iguais,93 checkboxes semana/18 hoje habilitados.
-  Fontes: GitHub CI, ledger privado, MCP Supabase e leitura autenticada.
-- Evidencias completas, falhas anteriores e limites preservados em
+- Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
+  em faae8e9. Checkout documental df0c52c/PR219 com CI38518828290 aprovada,
+  conflitante apenas nos registros. Fontes: GitHub, git fetch e /api/health.
+- Nova branch codex/rotina-compacta preserva dashboard e registros anteriores.
+  Pedido: controles a esquerda, fundo somente por conclusao, destaque do dia
+  apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
+  CI e publicacao deste novo ajuste ainda nao executadas.
+
+## 2026-10-14: Retomada dos funis no comparativo mensal
+
+- Pedido: incluir os graficos em funil no Comparativo mensal de /app conforme
+  print fornecido. Origem descomplicapro.com.br somente leitura; dados atuais
+  do CRM preservados. Nao altera politicas, fontes remotas ou n8n.
+- Consulta14/10 04:50:56Z: main792320ba e CI38506931120 success; health publico
+  HTTP200/status ok/version792320ba037ea48655739aaeefe5295b95c33631. Fontes:
+  GitHub branches/main, actions/runs e crm.descomplicapro.com.br/api/health.
+- Checkout anterior db7116c limpo pertence ao PR documental217 ainda aberto;
+  nova branch codex/dashboard-funis-mensais parte de main792320ba. Registro
+  documental anterior permanece preservado em sua branch, sem reverter mudancas.
+- Runtime context/search consultados; notas truncadas nao usadas como prova.
+  Print local inspecionado. Web fetch falhou; leitura pelo navegador confirmou
+  seis blocos e cinco etapas na origem. O print inclui tambem Pastas aprovadas.
+- Implementacao: seis funis HTML/CSS com seis etapas, dados atuais e ausencia
+  distinta de zero. Aprovadas nao tem serie mensal no dashboard; ranking nao
+  substitui essa metrica. Mantida indisponivel ate contrato proprio validado.
+  Fontes: dashboard/catalog.ts, presentation.ts e ops/salesforce/transform.mjs.
+  Dezoito testes de componente, tipos e 74 checks QA sinteticos aprovados;
+  tres temas/larguras, sem overflow ou Axe. Desktop4.704px abaixo de4.800px.
+  Fonte: test-results/dashboard-report/report.json. Lint/build locais passaram.
+- Consulta14/10 05:17Z: CI38515347098/aa5c835 validate aprovado no Linux:
+  2.807 aplicacao/79 skips,241 coletor,124 release. Main/faae8e9 integrado,
+  preservando Rotina. Falhas Windows de timeout/ACL/symlink registradas na
+  auditoria; nenhuma assercao relaxada. Navegador, baseline e deploy pendentes.
+- CI38515347098: banco/restore/E2E e predicado visual funcional aprovados;
+  apenas11 imagens /app mudaram. Artefato11873042399 revisado e promovido em
+  05:55:40Z, preservando231 imagens e limiares. Captura20aed961 tem arvore igual
+  a aa5c835; fingerprint1289963a reproduzido com apenas19 outputs QA e diff
+  vazio. Flag dirty mantido; prova especifica, nao reutilizavel. Fontes e hashes
+  completos na auditoria/README de paridade. Nova CI verify e deploy pendentes.
+
+## 2026-10-14: Rotina individual publicada
+
+- PR215/runtime faae8e9, CI38514527676 aprovada, deploy05:45:08Z; migration
+  remota20261014054331 autorizada. Textos Imob revisados, conclusoes individuais
+  semanais persistidas. Evidencias e registro integral anterior preservados em
   [auditoria da Rotina](../audits/rotina-individual-2026-10-14.md).
-  Detalhes movidos somente para respeitar o limite de exportacao do Obsidian.
-- Fechamento documental publicado na branch/PR219; integracao pendente da CI.
-  Auto-merge indisponivel no repositorio; nao alterada essa configuracao.
-  Reavaliar merge apos gates aprovados, sem novo deploy de runtime.
+- PR219 documental aprovado na CI, ainda nao integrado; conteudo preservado
+  na branch atual. Nao ampliar permissoes nem alterar dados comerciais.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 
