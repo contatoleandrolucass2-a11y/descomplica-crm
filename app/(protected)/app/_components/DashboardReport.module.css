@@ -1,0 +1,474 @@
+.report {
+  width: 100%;
+  min-width: 0;
+  color: var(--analytics-ink);
+  font-size: 0.875rem;
+  line-height: 1.5;
+  letter-spacing: 0;
+  overflow-wrap: anywhere;
+}
+
+.report * {
+  box-sizing: border-box;
+  letter-spacing: 0;
+}
+
+.report h1,
+.report h3,
+.report p,
+.report dl,
+.report dd {
+  margin: 0;
+}
+
+.report h1 {
+  font-size: 1.75rem;
+  line-height: 1.25;
+  font-weight: 650;
+}
+
+.report h3 {
+  font-size: 0.9375rem;
+  line-height: 1.4;
+  font-weight: 650;
+}
+
+.heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding-bottom: 1.25rem;
+}
+
+.heading > div,
+.metadata > div,
+.filterLinks > *,
+.pulseGrid > *,
+.monthlyGrid > *,
+.diagnosisGrid > *,
+.operationalGrid > *,
+.teamGrid > * {
+  min-width: 0;
+}
+
+.report .context {
+  margin-top: 0.4rem;
+  color: var(--analytics-muted);
+}
+
+.metadata,
+.teamTotals,
+.paceValues {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.5rem;
+}
+
+.metadata {
+  max-width: 32rem;
+  font-size: 0.8125rem;
+}
+
+.metadata dt,
+.dimensions dt,
+.teamTotals dt,
+.paceValues dt {
+  color: var(--analytics-muted);
+}
+
+.metadata dd,
+.teamTotals dd,
+.paceValues dd {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 1.25rem;
+  border-bottom: 1px solid var(--analytics-line);
+}
+
+.tabs a,
+.tabs > span {
+  display: flex;
+  min-height: 2.75rem;
+  align-items: center;
+  padding-block: 0.625rem;
+  border-bottom: 2px solid transparent;
+  text-decoration: none;
+}
+
+.tabs a {
+  color: var(--analytics-ink);
+}
+
+.tabs a[aria-current="page"] {
+  border-bottom-color: var(--analytics-cyan-strong);
+  color: var(--analytics-cyan-strong);
+  font-weight: 650;
+}
+
+.tabs a:hover {
+  color: var(--analytics-cyan-strong);
+  text-decoration: underline;
+}
+
+.tabs > span {
+  color: var(--analytics-muted);
+}
+
+.filters {
+  display: grid;
+  gap: 1rem;
+  padding-block: 1.25rem;
+  border-bottom: 1px solid var(--analytics-line);
+}
+
+.dimensions {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem 1.25rem;
+}
+
+.dimensions dd {
+  margin-top: 0.25rem;
+}
+
+.filterLinks {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 1rem 1.5rem;
+}
+
+.report .filterLinks fieldset {
+  max-width: 100%;
+  padding: 0;
+  border: 0;
+}
+
+.report .filterLinks legend {
+  font-size: 0.8125rem;
+  color: var(--analytics-muted);
+}
+
+.report .filterLinks a {
+  max-width: 100%;
+  min-height: 2.75rem;
+  border-radius: 6px;
+  font-size: 0.8125rem;
+  white-space: normal;
+}
+
+.refresh {
+  margin-left: auto;
+  align-self: end;
+}
+
+.report .refresh button {
+  min-height: 2.75rem;
+  max-width: 100%;
+  border-radius: 6px;
+  white-space: normal;
+}
+
+.refreshMessage {
+  max-width: 20rem;
+  color: var(--analytics-muted);
+  font-size: 0.8125rem;
+}
+
+.section {
+  padding-block: 1.5rem;
+  border-bottom: 1px solid var(--analytics-line);
+}
+
+.pulseGrid,
+.monthlyGrid,
+.operationalGrid,
+.teamGrid {
+  display: grid;
+  align-items: start;
+  gap: 1rem;
+}
+
+.pulseGrid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
+.monthlyGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.report .card[data-density="compact"] {
+  min-width: 0;
+  border: 1px solid var(--analytics-line);
+  border-radius: 8px;
+  background: var(--analytics-surface);
+  padding: 1rem;
+  box-shadow: none;
+}
+
+.donut {
+  display: grid;
+  place-items: center;
+  min-height: 7.5rem;
+  padding-block: 0.5rem;
+}
+
+.donut figure {
+  width: 7rem;
+  height: 7rem;
+  max-width: 100%;
+  margin: 0;
+}
+
+.donut figcaption {
+  max-width: 5rem;
+  font-size: 1rem;
+}
+
+.report .conversionCaption {
+  min-height: 2.5rem;
+  margin-bottom: 0.5rem;
+  color: var(--analytics-muted);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.readings > div,
+.totalConversion > div {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  align-items: baseline;
+  gap: 0.5rem;
+  padding-block: 0.375rem;
+}
+
+.readings dt,
+.totalConversion dt {
+  color: var(--analytics-muted);
+}
+
+.readings dd,
+.totalConversion dd {
+  min-width: 0;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.report .readings dd > span,
+.report .totalConversion dd > span,
+.report .paceValues dd > span,
+.report .dimensions dd > span {
+  max-width: 100%;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: inherit;
+  font-weight: 400;
+  white-space: normal;
+}
+
+.readings .quantity {
+  font-size: 1.25rem;
+}
+
+.report .assessment {
+  margin-top: 0.75rem;
+  border-top: 1px solid var(--analytics-line);
+  padding-top: 0.625rem;
+  color: var(--analytics-muted);
+  font-size: 0.8125rem;
+}
+
+.report .assessment[data-met="true"] {
+  color: var(--analytics-positive-ink);
+}
+
+.report .blockDetail {
+  margin-top: 0.2rem;
+  margin-bottom: 0.75rem;
+  color: var(--analytics-muted);
+  font-size: 0.8125rem;
+}
+
+.report .totalConversion {
+  margin-top: 0.625rem;
+  border-top: 1px solid var(--analytics-line);
+  padding-top: 0.5rem;
+}
+
+.totalConversion dt > span {
+  display: block;
+  font-size: 0.75rem;
+}
+
+.conversionDetails {
+  margin-top: 0.75rem;
+  font-size: 0.8125rem;
+}
+
+.conversionDetails summary,
+.otherIndicators > summary {
+  min-height: 2.75rem;
+  padding-block: 0.625rem;
+  color: var(--analytics-cyan-strong);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.conversionDetails summary:hover,
+.otherIndicators > summary:hover {
+  text-decoration: underline;
+}
+
+.pace {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: start;
+  gap: 1rem 2rem;
+  margin-top: 1.25rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--analytics-line);
+}
+
+.pace p,
+.diagnosisGrid p {
+  color: var(--analytics-muted);
+  font-size: 0.8125rem;
+}
+
+.diagnosisGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1.5rem;
+}
+
+.diagnosisGrid strong {
+  display: block;
+  margin-block: 0.5rem 0.25rem;
+  font-size: 1.25rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.report .diagnosisGrid strong > span {
+  max-width: 100%;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.875rem;
+  white-space: normal;
+}
+
+.report .footnote {
+  margin-top: 1rem;
+  color: var(--analytics-muted);
+  font-size: 0.8125rem;
+}
+
+.operationalGrid {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.tableSection > h3 {
+  margin-bottom: 0.625rem;
+}
+
+.report .tableSection > div {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.report .tableSection table {
+  font-size: 0.8125rem;
+}
+
+.interval,
+.comparison {
+  display: block;
+}
+
+.comparison {
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.teamTotals dd {
+  font-size: 1.25rem;
+}
+
+.teamGrid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-top: 1rem;
+}
+
+.report .notice {
+  padding-block: 0.875rem;
+  color: var(--analytics-muted);
+}
+
+.otherIndicators {
+  padding-block: 0.5rem;
+}
+
+.ranking {
+  max-width: 48rem;
+  padding-block: 1rem;
+}
+
+.report :is(a, button, summary, [tabindex]):focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+
+@media (max-width: 75rem) {
+  .pulseGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 56rem) {
+  .pulseGrid,
+  .monthlyGrid,
+  .diagnosisGrid,
+  .teamGrid,
+  .dimensions {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .refresh {
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 36rem) {
+  .report h1 {
+    font-size: 1.5rem;
+  }
+
+  .pulseGrid,
+  .monthlyGrid,
+  .diagnosisGrid,
+  .teamGrid,
+  .dimensions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .metadata,
+  .paceValues {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .section {
+    padding-block: 1.25rem;
+  }
+}

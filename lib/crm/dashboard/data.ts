@@ -19,6 +19,7 @@ const snapshotRowSchema = z.object({
   snapshot_key: z.string(),
   reference_date: z.string(),
   generated_at: z.string(),
+  updated_at: z.string(),
   timezone: z.string(),
   source: z.string(),
   goals_available: z.boolean(),
@@ -81,6 +82,7 @@ export interface DashboardReadModel {
   snapshotKey: string;
   referenceDate: string;
   generatedAt: string;
+  updatedAt: string;
   timezone: string;
   source: string;
   goalsAvailable: boolean;
@@ -115,7 +117,9 @@ export async function loadDashboardReadModel(
   const supabase = await createClient();
   const snapshotResult = await supabase
     .from("crm_dashboard_snapshots")
-    .select("id,snapshot_key,reference_date,generated_at,timezone,source,goals_available")
+    .select(
+      "id,snapshot_key,reference_date,generated_at,updated_at,timezone,source,goals_available",
+    )
     .eq("snapshot_key", "global")
     .maybeSingle();
 
@@ -213,6 +217,7 @@ export async function loadDashboardReadModel(
       snapshotKey: snapshot.snapshot_key,
       referenceDate: snapshot.reference_date,
       generatedAt: snapshot.generated_at,
+      updatedAt: snapshot.updated_at,
       timezone: snapshot.timezone,
       source: snapshot.source,
       goalsAvailable: snapshot.goals_available,

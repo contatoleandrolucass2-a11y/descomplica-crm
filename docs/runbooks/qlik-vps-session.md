@@ -131,3 +131,11 @@ Unix 0600, runtime/perfil 0700. Tunel local SSH em 6082 respondeu HTTP 200.
 O controle automatizado do Chrome retornou `ERR_BLOCKED_BY_CLIENT` para o endereco
 local; nao foi contornado. Login/validacao visual transferidos ao usuario.
 Autenticacao Qlik, coleta, reconciliacao e agenda permanecem pendentes.
+
+O cofre foi adicionado a partir de `ff1f59d8dc301cb8cd5a2374bb241c1005953458`.
+Smoke Linux sob usuario Qlik aprovado com dados sinteticos, sem tocar no destino
+da credencial real: escrita por fd ancorado, arquivo0600, sobrescrita recusada
+e leitura da chave privada negada com EACCES. Console passou para esse candidato;
+navegador permaneceu no candidato anterior, sem reinicio. Backup da unit em
+`/var/backups/descomplica-qlik/console-before-ff1f59d.service`.
+Antes do cadastro pelo usuario, `/credentials/status` retornou `saved:false`.
