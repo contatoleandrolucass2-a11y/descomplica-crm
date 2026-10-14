@@ -29,6 +29,15 @@ dependencias para usuario nao-root e preservou sockets residuais para
 recuperacao manual. Ensaio UNIX/Xvfb isolado na VPS: handshake RFB003.008 e
 zero TCP VNC, sem instalar servicos. Login real e coleta ainda pendentes.
 
+Ensaio operacional posterior: candidato 2f0907e instalado somente para login.
+Probe nao-root identificou falta de travessia no pai dos releases; recuperacao
+manual verificada, ACL nominal --x e nenhuma alteracao de grupo root. Tres
+units ativas; browser disabled no boot, socket console0600 e runtime0700.
+Tunel privado respondeu200. Chrome automatizado bloqueou endereco local;
+usuario recebeu link para login manual, sem contorno. Instalador corrigido
+para novas instalacoes; testes direcionados de units/instalador8/8.
+PR216 aberto, sem merge; nenhum deploy do CRM ou agenda Qlik habilitada.
+
 ## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
 
 Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior

@@ -17,7 +17,7 @@ readonly units=(
   descomplica-qlik-console.service
 )
 
-for command in realpath git stat find cmp getent ss useradd runuser install mktemp sed dirname wc systemctl systemd-analyze; do
+for command in realpath git stat find cmp getent getfacl setfacl ss useradd runuser install mktemp sed dirname wc systemctl systemd-analyze; do
   command -v "$command" >/dev/null || fail "Missing prerequisite: $command"
 done
 [[ $(realpath -e "$release") == "$release" ]] || fail "Release path must be canonical."
@@ -139,6 +139,15 @@ systemd-analyze verify "$staging/"*.service
 
 useradd --system --user-group --no-create-home --home-dir /var/lib/descomplica-qlik --shell /usr/sbin/nologin descomplica-qlik
 install -d -o descomplica-qlik -g descomplica-qlik -m 0700 /var/lib/descomplica-qlik /var/lib/descomplica-qlik/chrome
+# Traverse a known release path without listing the parent or changing other ACL entries/mask.
+releases_parent=/srv/descomplica-crm-releases
+setfacl --no-mask --modify=user:descomplica-qlik:--x -- "$releases_parent"
+releases_acl=$(getfacl --omit-header --absolute-names --no-effective -- "$releases_parent")
+[[ $'\n'"$releases_acl"$'\n' == *$'\nuser:descomplica-qlik:--x\n'* ]] || fail "Qlik release traversal ACL missing."
+runuser -u descomplica-qlik -- /usr/bin/test -x "$releases_parent" || fail "Qlik release traversal is masked."
+if runuser -u descomplica-qlik -- /usr/bin/test -r "$releases_parent"; then
+  fail "Qlik must not list the releases parent."
+fi
 # A failed non-root probe leaves the account/profile for manual inspection, with no units installed.
 (cd "$release" && runuser -u descomplica-qlik -- /usr/bin/env -i PATH="$PATH" HOME=/var/lib/descomplica-qlik "$node" --input-type=module -e "import { access } from 'node:fs/promises'; if (process.getuid() === 0) throw new Error('Non-root dependency probe required'); await import('ws'); await import('@playwright/test'); await access(new URL(import.meta.resolve('@novnc/novnc')))") >/dev/null
 for unit in "${units[@]}"; do

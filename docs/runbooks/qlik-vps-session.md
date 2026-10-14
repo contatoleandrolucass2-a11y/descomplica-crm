@@ -29,6 +29,8 @@ dispensa MFA. O CRM e o coletor nao armazenam a senha Qlik.
   Root e o usuario tecnico tem acesso ao socket. O tunel local e restrito a
   loopback e deve ser fechado quando terminar a autenticacao.
 - Perfil, processos, portas e credenciais Salesforce permanecem independentes.
+- ACL nominal somente de travessia (`--x`) no pai dos releases; sem listar o
+  diretorio, alterar sua mascara ou adicionar o usuario ao grupo root.
 
 ## Preparacao e login
 
@@ -90,3 +92,20 @@ Parar as tres unidades Qlik e desabilitar somente o browser Qlik caso tenha sido
 habilitado. Preservar perfil e evidencia de instalacao. Nao apagar dados,
 cookies, locks de perfil ou alterar Salesforce/n8n para recuperar a sessao.
 Retirada definitiva do perfil exige pedido especifico.
+
+## Ensaio de 14/10/2026
+
+Preparacao operacional instalada a partir de `2f0907e366b066222a6ff5e4560f3ffb23a1d3ad`,
+sem promover o CRM. O primeiro probe nao-root recusou acesso ao pai dos releases
+apos criar usuario/perfil, antes de instalar units. Recuperacao manual limitada:
+confirmados usuario/perfil privados, units ausentes e causa ACL; concedida apenas
+travessia nominal, repetido probe nao-root com sucesso e instaladas as tres units
+do mesmo SHA apos `systemd-analyze verify`. Nao removidos perfil ou locks.
+O instalador versionado passa a tratar essa ACL nas novas instalacoes; continua
+recusando instalacoes parciais/preexistentes, sem retomada automatica.
+
+Browser, VNC e console ficaram ativos, browser desabilitado no boot; console
+Unix 0600, runtime/perfil 0700. Tunel local SSH em 6082 respondeu HTTP 200.
+O controle automatizado do Chrome retornou `ERR_BLOCKED_BY_CLIENT` para o endereco
+local; nao foi contornado. Login/validacao visual transferidos ao usuario.
+Autenticacao Qlik, coleta, reconciliacao e agenda permanecem pendentes.

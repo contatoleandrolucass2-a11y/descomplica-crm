@@ -123,6 +123,42 @@ test("root only inspects dependency files; imports require the dedicated user be
 });
 
 const bash = process.platform === "win32" ? "C:/Program Files/Git/bin/bash.exe" : "/bin/bash";
+test("release traversal adds only the named execute ACL after user creation without widening the mask", () => {
+  assert.match(installer, /for command in .* getfacl setfacl /);
+  const grant = 'setfacl --no-mask --modify=user:descomplica-qlik:--x -- "$releases_parent"';
+  assert.ok(installer.includes(grant));
+  assert.ok(installer.indexOf(grant) > installer.indexOf("\nuseradd "));
+  assert.ok(installer.indexOf(grant) < installer.indexOf('(cd "$release" && runuser'));
+  assert.match(installer, /getfacl --omit-header --absolute-names --no-effective/);
+  assert.match(installer, /test -x "\$releases_parent"/);
+  assert.match(installer, /test -r "\$releases_parent"/);
+  assert.doesNotMatch(installer, /setfacl (?:-b|--remove-all)|--groups? root|usermod|--resume/);
+  assert.match(installer, /Dedicated user already exists; inspect before updating/);
+});
+
+test(
+  "root-owned 0750 with an r-x ACL mask passes the existing mode guard; writable modes fail",
+  {
+    skip: !existsSync(bash) && "Bash unavailable",
+  },
+  () => {
+    const guard = installer.match(/\(\( \(8#\$mode & 0022\) == 0 \)\)/)?.[0];
+    assert.ok(guard);
+    for (const [mode, allowed] of [
+      ["750", true],
+      ["770", false],
+      ["752", false],
+    ]) {
+      const result = spawnSync(bash, ["-c", `mode=${mode}; ${guard}`], {
+        encoding: "utf8",
+        timeout: 5000,
+      });
+      assert.equal(result.status, allowed ? 0 : 1, result.stderr);
+    }
+    assert.match(installer, /\$\(stat -c %u "\$directory"\) == 0/);
+  },
+);
+
 test(
   "installer parses and refuses invalid invocation before creating any resources",
   {

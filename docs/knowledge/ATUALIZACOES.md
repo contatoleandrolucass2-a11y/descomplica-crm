@@ -35,6 +35,21 @@
 - Ensaio VPS isolado :98 confirmou RFB003.008 por socket0700 e zero TCP VNC.
   Display liberado, nenhum servico instalado no ensaio. Instalacao de login
   ainda pendente; ensaio nao comprova autenticacao Qlik, exportacao ou agenda.
+- Atualizacao03:25Z: PR216 aberto, candidato2f0907e, CI38505855222 em andamento.
+  Preparacao de login instalada isoladamente; browser/VNC/console ativos,
+  sem boot habilitado ou coleta. Probe inicial falhou por ACL do pai releases;
+  usuario/perfil criados, units ainda ausentes. Recuperacao manual apos verificar
+  esse estado: ACL nominal --x, probe nao-root aprovado, units do SHA exato
+  verificadas/instaladas. Nenhuma alteracao no Salesforce ou runtime CRM.
+  Instalador corrigido para novas instalacoes, preservando mascara e recusa
+  de parcial; testes direcionados8/8. Reavaliar esta excecao apenas se repetir
+  a mesma parcial comprovada; nao constitui permissao de retomada automatica.
+- Console Unix0600, runtime/perfil0700, tunel local6082 respondeu200. Controle
+  Chrome bloqueou URL local com ERR_BLOCKED_BY_CLIENT; nao contornado. Usuario
+  recebeu login manual; nao confirmadas tela visual, autenticacao ou coleta.
+  Health publico em03:25Z continua200/ok/0fdbb80. Preparacao instalada nao e
+  merge nem publicacao da aplicacao. Pendentes login, contrato por corretor,
+  escolha de writer, carga reconciliada e agenda; policy_pending preservado.
 
 ## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
 
