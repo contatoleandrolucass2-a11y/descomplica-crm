@@ -2,6 +2,28 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Relatorio completo do dashboard em 13/10/2026
+
+CI `38498361779`, artefato `11865597980`, captura
+`771812cd350d124bcfe7af62e2298f7ac6b00178`, arvore identica ao candidato
+`d67a855773106c6bf1bde63454d9e514f9ff2c01`. SHA-256 do ZIP:
+`df0fb78729b7f5df57f284dbdc26a9e6f0361a2bf13790646635a9ce71accae5`.
+
+Validate, restore e E2E passaram. O predicado funcional original confirmou
+154 checks responsivos, 88 de tema, 242 auditorias Axe, 110 de zoom, teclado,
+simuladores, navegacao e 22 comparacoes de canvas. Somente 11 imagens de `/app`
+diferiram, pela inclusao das secoes da referencia com dados sinteticos atuais.
+Apos inspecao desktop e mobile nos temas claro/escuro, foram promovidas pelo
+helper transacional existente; 231 imagens e sua proveniencia foram preservadas.
+Limites de 1%/16 inalterados. Nova CI integral em verify continua obrigatoria.
+
+Excecao de proveniencia: a captura informa `worktreeDirtyAtCapture: true`.
+Seu fingerprint foi reproduzido exatamente com diff rastreado vazio e somente
+os 19 arquivos gerados em `output/playwright/connected-systems/`, presentes no
+mesmo artefato. O valor nao foi adulterado; arquivos e hash constam de
+`reviewedUpdates`. Esta prova vale apenas para esse artefato, nao autoriza
+capturas futuras com alteracoes desconhecidas. Reavaliar a cada promocao.
+
 ## Layout aprovado e politica fiscal combinados em 11/10/2026
 
 O PR #178 foi reconciliado com a politica fiscal SP/2026 publicada pelo PR
