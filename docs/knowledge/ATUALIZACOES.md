@@ -29,13 +29,14 @@
 
 ## 2026-10-14: Seletor e contorno da Rotina
 
-- Retomada15:54Z: Git comum confirmado, main/publicado5c4d95e; health200/ok.
-  PR225 documental em5d7631c: validate/restore aprovados, release-gates falhou
-  em daily-layout-320-balanced (CI38588434885). Diagnostico antes do merge;
-  nao reiniciar CRM por documentos. Fontes: GitHub, git fetch e /api/health.
-- Novos ajustes autorizados para publicacao apos validacao: seletor unico,
-  controles redesenhados e contorno branco da coluna atual, sem mudar dados.
-  Evidencias: [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+- PR226 integrado; CI38610165621 aprovada. Publicado77ddc69 em18:42:12Z,
+  deploymentee03fade, health200/ok e UI conferida, sem alterar dados reais.
+  PR225 encerra evidencias sem novo deploy. Historico, testes e limites na
+  [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+- Conferencia19:10Z: main avancou para d660ba9 (dashboard); PR225 atualizado
+  sem conflitos, mantendo diff de quatro documentos. Health200/ok/77ddc69.
+  CI documental anterior em andamento nao valida a nova base; aguardar checks
+  do novo SHA antes da integracao protegida. Nenhum novo deploy nesta etapa.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
