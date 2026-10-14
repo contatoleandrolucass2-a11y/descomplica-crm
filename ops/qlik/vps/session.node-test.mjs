@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync, readdirSync, existsSync } from "node:fs";
 import { spawnSync } from "node:child_process";
+import { runInNewContext } from "node:vm";
 import test from "node:test";
 
 const read = (name) => readFileSync(new URL(name, import.meta.url), "utf8");
@@ -77,6 +78,31 @@ test("installer permits only three reviewed units without enabling a service or 
   }
 });
 
+test("integrity allowlist covers every metadata module before dependency checks or user creation", () => {
+  const loop = installer.match(
+    /for relative in ops\/qlik\/vps\/install-session\.sh[^\n]+; do\n([\s\S]*?)\ndone/,
+  );
+  assert.ok(loop);
+  const files = loop[0].split("; do")[0].split(/\s+/);
+  for (const name of [
+    "browser-preflight",
+    "collection-loop",
+    "metadata-artifact",
+    "qix-metadata",
+  ]) {
+    assert.ok(files.includes(`ops/qlik/${name}.mjs`), name);
+  }
+  for (const guard of [
+    '! -L "$file"',
+    '$(stat -c %u "$file") == 0',
+    "(( (8#$mode & 0022) == 0 ))",
+    'cmp -- "$file" <(git -C "$release" show "$1:$relative")',
+  ])
+    assert.ok(loop[1].includes(guard), guard);
+  assert.ok(loop.index < installer.indexOf("<<'DEPENDENCY_METADATA'"));
+  assert.ok(loop.index < installer.indexOf("\nuseradd "));
+});
+
 test("preflight refuses conflicting identity, profile, units and X display", () => {
   for (const required of [
     "$EUID == 0 && $(uname -s) == Linux",
@@ -117,9 +143,62 @@ test("root only inspects dependency files; imports require the dedicated user be
   assert.match(metadata, /!within\(target\) \|\| !within\(realpathSync\(current\)\)/);
   assert.match(metadata, /info.uid !== 0/);
   assert.match(metadata, /info.nlink !== 1/);
-  for (const name of ["ws", "@novnc/novnc", "@playwright/test", "playwright", "playwright-core"]) {
+  for (const name of [
+    "ws",
+    "enigma.js",
+    "@novnc/novnc",
+    "@playwright/test",
+    "playwright",
+    "playwright-core",
+  ]) {
     assert.ok(metadata.includes(`'${name}'`));
   }
+});
+
+test("root metadata validation pins enigma without evaluating package code", () => {
+  const metadata = installer
+    .split("<<'DEPENDENCY_METADATA'\n")[1]
+    ?.split("\nDEPENDENCY_METADATA")[0];
+  assert.ok(metadata);
+  assert.ok(metadata.includes("['enigma.js', path.join(root, 'enigma.js/package.json')]"));
+  assert.ok(metadata.includes("if (!within(realpathSync(manifest))) throw new Error();"));
+  assert.ok(metadata.includes("JSON.parse(readFileSync(manifest, 'utf8'))"));
+  const guards = metadata
+    .split("\n")
+    .filter(
+      (line) =>
+        line.trimStart().startsWith("if (metadata.name !== name") ||
+        line.trimStart().startsWith("if (name === 'enigma.js'"),
+    )
+    .join("\n");
+  assert.equal(guards.split("\n").length, 2);
+  for (const [name, version, allowed] of [
+    ["enigma.js", "2.15.0", true],
+    ["enigma.js", "2.14.0", false],
+    ["enigma.js", "2.15.1", false],
+    ["enigma.js", "^2.15.0", false],
+    ["enigma.js", null, false],
+    ["enigma.js", "", false],
+    ["wrong-package", "2.15.0", false],
+  ]) {
+    const check = () => runInNewContext(guards, { name: "enigma.js", metadata: { name, version } });
+    if (allowed) assert.doesNotThrow(check);
+    else assert.throws(check);
+  }
+});
+
+test("metadata script probe runs only as the dedicated user, before units, without starting collection", () => {
+  const probe = installer.split("\n").find((line) => line.startsWith('(cd "$release" && runuser'));
+  assert.ok(probe);
+  const guard = "if (process.getuid() === 0) throw new Error('Non-root dependency probe required')";
+  const load =
+    "const { getBrowserMetadataScript } = await import('./ops/qlik/browser-preflight.mjs')";
+  assert.ok(probe.includes(load));
+  assert.ok(probe.indexOf(guard) < probe.indexOf(load));
+  assert.ok(probe.indexOf(load) < probe.indexOf("await getBrowserMetadataScript()"));
+  assert.ok(installer.indexOf(probe) > installer.indexOf("\nuseradd "));
+  assert.ok(installer.indexOf(probe) < installer.indexOf("install -o root -g root -m 0644"));
+  assert.doesNotMatch(probe, /collectBrowserMetadata|\.evaluate\(|\.launch|eval\(|new Function/);
 });
 
 const bash = process.platform === "win32" ? "C:/Program Files/Git/bin/bash.exe" : "/bin/bash";

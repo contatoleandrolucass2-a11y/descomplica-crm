@@ -1,5 +1,31 @@
 # Worklog
 
+Conferencia15:24Z de14/10: git fetch manteve main5c4d95e; health publico
+HTTP200/ok agora identifica5c4d95e, nao16f4587. Atualizacao externa, nao
+publicacao Qlik. PR216/12cd013: validate e restore aprovados, matriz visual
+ainda em andamento. PR224/af935b7: validate Linux aprovado, demais gates
+pendentes. Correcoes do instalador exigem CI no novo SHA; sem merge/deploy.
+
+## 2026-10-14: Revisao do instalador e audiencia confirmada
+
+Dois achados P2 corrigidos: allowlist de integridade cobre os quatro modulos
+novos e o probe nao-root le SDK/schema enigma.js2.15.0. Testes focados17/17;
+suite Qlik completa107 passaram/3 Linux skips no Windows. Instalacao real
+Linux/runuser e upgrade nao executados. Nenhum servico remoto modificado.
+
+Usuario confirmou audiencia completa Direcional/SP CAPITAL/CANAL IMOB para
+quem possui crm.ranking.view. Contrato documentado; nao houve reader ou DDL.
+Revisao operacional confirmou que o coordenador nao suporta units auxiliares:
+upgrade protegido precisa ser implementado/testado antes do handshake real.
+
+Verify local deste checkout: lint/typecheck passaram; Vitest2806 passaram,
+82 skips e uma falha no teste de symlink do estoque Salesforce em Windows
+(esperado502, recebido200). O leitor de main depende de O_NOFOLLOW; a correcao
+lstat esta somente no PR216. Nao alterado Salesforce nem mascarado o teste
+nesta branch operacional. Build executado separadamente:51 paginas, exit0.
+CI38587608708/af935b7 aprovou validate Linux; demais gates ainda em andamento.
+Resultado de SHA anterior nao substitui CI apos as correcoes do instalador.
+
 ## 2026-10-14: Qlik operacional separado da interface
 
 Branch codex/qlik-api-session criada de main5c4d95e, Git comum confirmado.

@@ -258,6 +258,23 @@ Nao comprova sessao autenticada, RPC/RLS, hidratacao interativa ou producao.
 
 ## Fechamento do mapeamento e ativacao
 
+### Audiencia autorizada
+
+Em14/10/2026, o usuario confirmou que quem ja possui permissao de ranking
+no CRM deve ver o recorte completo **Direcional + SP CAPITAL + CANAL IMOB**,
+incluindo imobiliarias e empreendimentos, sem limitar a propria carteira.
+Esta decisao substitui a pendencia de audiencia, nao as verificacoes de acesso:
+o novo reader deve exigir sessao valida, MFA e `crm.ranking.view` no banco,
+alem do guard da rota. Nao criar grants diretos para anon, authenticated ou
+service_role nas tabelas Qlik, nem reutilizar a RPC legada anonima por token.
+
+O recorte permitido deve ser fixado no servidor/banco; parametros de tela
+nao podem ampliar empresa, regional ou canal. As duas dimensoes, totais e
+cobertura devem vir da mesma carga validada. A autorizacao cobre somente os
+agregados do ranking, nao clientes, contratos individuais ou outras regionais.
+Esta nota registra a decisao; reader/migration e testes pgTAP positivos e
+negativos ainda sao necessarios antes de afirmar acesso implementado.
+
 ### Substituicao autorizada do shadow legado
 
 Em14/10/2026, usuario autorizou expressamente duas coletas automaticas

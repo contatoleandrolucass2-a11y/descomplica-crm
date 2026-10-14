@@ -4,12 +4,14 @@
 
 - Branch codex/qlik-api-session de main5c4d95e; prepara ops/qlik/SDK/runbooks
   sem alterar /app/ranking, Salesforce ou banco. UI e fatos seguem no PR216.
-- Fonte GitHub/SSH/health14:51Z: site200/ok16f4587, browser2f0907e ativo/disabled.
+- Fontes GitHub/fetch/health15:24Z: main/site200/ok5c4d95e. SSH14:51Z:
+  browser2f0907e ativo/disabled. PR224 draft; instalador corrigido e teste107/3.
   Novo preflight desligado, sem handshake real, coleta, migration ou agenda.
 - Usuario autorizou duas coletas independentes conciliadas com totais Qlik
-  no lugar do shadow legado; demais gates preservados. Mapa e limites em
+  no lugar do shadow legado e recorte completo para crm.ranking.view. Mapa em
   docs/runbooks/qlik-partnerships-mapping.md e qlik-vps-session.md; WORKLOG
-  registra testes e pendencias. CI/validacao deste SHA exigidas antes da troca.
+  registra testes e pendencias. Windows falhou symlink Salesforce; Linux validate
+  af935b7 passou, gates restantes pendentes. Upgrade exige suporte no coordenador.
 
 ## 2026-10-14: Rotina compacta por conclusao
 
