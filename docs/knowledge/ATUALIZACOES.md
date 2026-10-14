@@ -1,54 +1,25 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Seletor e contorno da Rotina
+
+- Retomada15:54Z: Git comum confirmado, main/publicado5c4d95e; health200/ok.
+  PR225 documental em5d7631c: validate/restore aprovados, release-gates falhou
+  em daily-layout-320-balanced (CI38588434885). Diagnostico antes do merge;
+  nao reiniciar CRM por documentos. Fontes: GitHub, git fetch e /api/health.
+- Novos ajustes autorizados para publicacao apos validacao: seletor unico,
+  controles redesenhados e contorno branco da coluna atual, sem mudar dados.
+  Evidencias: [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
-- Busca com lupa combina código, descrição e empreendimento com filtros e
-  ordenação do estoque carregado, antes da janela virtual de 60 linhas.
-  Normaliza caixa, acentos e separadores; mantém a proposta selecionada.
-  Implementação em inventory-search.ts e InvestorCalculator.tsx; PR #220.
-- Base 16f4587; lint, tipos, 2.814 testes da aplicação (79 skips existentes),
-  suites Node e build aprovados. Audit sem vulnerabilidades; diff sem segredos.
-  Testes sintéticos de pesquisa com 3.301 unidades passaram em desktop/celular.
-- QA geral do guia: 18 cenários aprovados na repetição integral, sem erros de
-  console/chamadas externas. Primeira execução falhou em Cheque Moradia no
-  cenário 320x568-dark; nenhuma asserção ou cálculo foi alterado para passar.
-  O mesmo cenário isolado passou no código original.
-- CI 38562897319 aprovou validate, restore, banco e E2E; falhou no alinhamento
-  do contador/data com Limpar filtros em 320/375/390 px. Grade móvel corrigida;
-  oito larguras passaram no contrato original. Fixture local passou a incluir
-  data e verificar essa geometria. O helper de preenchimento aguarda o foco
-  agendado pela qualificação e confere valores formatados; o artefato de falha
-  mostrava o valor da Entrada digitado em Financiamento. Nova CI e deploy pendentes.
-- Health público em 14/10 às 12:17:40Z: HTTP 200/status ok/version faae8e9.
-  Main remoto permaneceu 16f4587. Fonte: /api/health e git ls-remote origin.
-  Checkout macOS fora do Git comum Windows autorizado para sincronização
-  automática do Obsidian e publicação permanente; esses fluxos não foram usados.
-- CI 38568083961 concluiu todos os checks funcionais; 11 diferenças visuais
-  somente no Associativo. A revisão das capturas identificou compressão do título
-  em 768 px. Controles separados na linha seguinte entre 761 e 1.023 px; nova
-  asserção reproduziu a falha e passou após a correção. Baseline não promovida;
-  nova captura e CI pendentes. Main 8e015c6 integrado preservando as notas dos funis.
-- CI 38574613120/d8e745c aprovou o predicado funcional integral e o título nas
-  dez larguras/três temas. As 11 imagens do Associativo foram revisadas e
-  promovidas, preservando 231 referências. Hashes e prova da captura constam no
-  README de paridade e em reviewedUpdates. CI final em verify e publicação pendentes.
-- CI 38580539350/e043c9d aprovada, incluindo as 242 comparações visuais. Main
-  avançou para 5c4d95e durante a execução. A atualização de Rotina do PR #222
-  foi integrada sem alterar seus arquivos; conflitos apenas nas notas foram
-  reconciliados. Nova CI da versão combinada permanece necessária.
+- PR220 integrado em main0019690. Registro integral de implementacao, CI,
+  conflitos e limites preservado em
+  [auditoria da pesquisa](../audits/associativo-busca-conhecimento-2026-10-14.md).
 
 ## 2026-10-14: Rotina compacta por conclusao
 
-- Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
-  em faae8e9. Checkout documental df0c52c/PR219 com CI38518828290 aprovada,
-  conflitante apenas nos registros. Fontes: GitHub, git fetch e /api/health.
-- Nova branch codex/rotina-compacta preserva dashboard e registros anteriores.
-  Pedido: controles a esquerda, fundo somente por conclusao, destaque do dia
-  apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
-  Lint/tipos/build e QA focal4/4 aprovados; suite Windows integral indisponivel
-  por symlink/timeouts. PR222/CI38565559075 aprovada em ea2e639; incorporado
-  main8e015c6 documental, sem alterar runtime. Nova CI e publicacao pendentes.
-  Evidencias e limites:
+- PR222/publicado5c4d95e em15:16:09Z, deployment9573a6e9. Historico integral,
+  validacoes e limites preservados na
   [auditoria compacta](../audits/rotina-compacta-2026-10-14.md).
 
 ## 2026-10-14: Funis mensais publicados
