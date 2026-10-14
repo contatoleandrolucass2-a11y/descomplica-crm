@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Referencias atuais do preflight Qlik
+
+- Atualiza a pasta 23.1.7 Vendas e os candidatos PRODUTO/Parceiras para os
+  IDs observados pelo coordenador; preserva aplicativo, aba e restricoes.
+- Mantem o preflight restrito a metadados e registra a troca sem reescrever
+  o historico. Nao habilita coleta, publicacao ou entrega do ranking.
+- Acrescenta digests SHA-256 dos cubos efetivos e masters integrais para
+  fixar o futuro manifest, sem revelar definicoes alem da projecao existente.
+
 ## 2026-10-14: Atualizacao automatica dos relatorios
 
 - Atualiza o dashboard aberto quando uma nova versao dos relatorios e

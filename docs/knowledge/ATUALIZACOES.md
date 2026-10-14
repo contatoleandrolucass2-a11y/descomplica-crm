@@ -1,5 +1,21 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Atualizacao dos identificadores da fonte Qlik
+
+- Abertura19:40Z, branch codex/qlik-source-refresh, base/main d660ba9.
+  Git fetch confirmou main; CI38620208026 com validate/imagem/restore/E2E
+  aprovados, matriz visual ainda pendente. Health publico19:40:30Z200/ok77ddc69.
+  Fonte GitHub, Git e GET /api/health; nao confundir main com publicado.
+- Navegacao autenticada pelo catalogo Qlik: a antiga pasta772db774 retorna
+  Pasta nao localizada; 23.1.7 - Vendas agora abre46d5bcf7-965d-40fc-a808-2fdde2d0f74d
+  no mesmo aplicativo7c000871. DOM visivel identifica PRODUTO26aed86d e
+  containerParceiras8b78e5d8, mantendo tabcIdpUYysrvJ. Sem coleta/exportacao.
+  Atualizar somente o preflight e testes; confirmar Engine depois, sem atribuir
+  o motivo da republicacao nem presumir estabilidade futura dos IDs.
+- Owner VPS segue2f0907e e boot disabled; nenhuma atualizacao real publicada.
+  Reavaliar vinculo apos CI/promotion e metadados reais. Nao amplia recorte,
+  autorizacoes ou acesso a clientes. Candidato216 continua separado.
+
 ## 2026-10-14: Atualizacao dos relatorios no dashboard
 
 - Polling30s e leitura consistente implementados;180 testes focais/75 QA
