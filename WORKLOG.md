@@ -55,6 +55,18 @@ saved:false. Cadastro pelo usuario e autenticacao continuam pendentes.
 Main avancou para792320b; integrado sem descartar notas de dashboard. Gates
 da base integrada devem ser repetidos; ainda sem publicacao da aplicacao CRM.
 
+Encerramento integrado: lint/typecheck/test/build aprovados;139 arquivos e
+2747 testes Vitest,63 skips; suites Node/release aprovadas. Cofre saved:true
+confirmado por status booleano, sem ler segredo. Screenshot da aba privada
+aberta pelo usuario mostrou Qlik insights/home autenticado na VPS. Browser
+permanece dedicado; nenhuma coleta ou reautenticacao automatica ativada.
+Relatorio Agendamentos na origem usa somente Ano2026 e abrange varias regionais;
+detalhe mostra timeout. Perguntado recorte exato de equipe/gerente/imobiliaria
+e regional antes de coletar. Nao importar dados gerais nem contornar timeout.
+As03:58Z CI38507765662 ainda em curso, health200/ok/0fdbb80. PR216 sem merge;
+aguarda CI, recorte e contrato. Sync excedeu256000bytes apos integrar notas:
+consolidada somente nota Qlik, detalhes no runbook/WORKLOG/historico; sync passou.
+
 ## 2026-10-13: Replica informacional do dashboard
 
 - Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com

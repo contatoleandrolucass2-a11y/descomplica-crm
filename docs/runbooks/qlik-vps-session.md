@@ -139,3 +139,7 @@ e leitura da chave privada negada com EACCES. Console passou para esse candidato
 navegador permaneceu no candidato anterior, sem reinicio. Backup da unit em
 `/var/backups/descomplica-qlik/console-before-ff1f59d.service`.
 Antes do cadastro pelo usuario, `/credentials/status` retornou `saved:false`.
+Depois da confirmacao do usuario, o status retornou `saved:true` e a tela
+remota mostrou Qlik insights/home autenticado. Nenhum segredo foi lido.
+A origem Agendamentos abrangia varias regionais e tinha detalhe com timeout;
+recorte exato perguntado ao usuario antes de implementar coleta/publicacao.

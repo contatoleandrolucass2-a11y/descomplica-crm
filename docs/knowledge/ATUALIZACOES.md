@@ -2,74 +2,49 @@
 
 ## 2026-10-14: Conexao Qlik para ranking via VPS
 
-- Direcao confirmada pelo usuario: Qlik -> VPS -> ranking do CRM. PR #214
-  encerrado sem merge em 02:48Z porque implementava exportacao no sentido
-  inverso. Revisao tambem encontrou SELECT privilegiado sem grant comprovado.
-  Codigo preservado na branch anterior, fora desta branch baseada em main.
-- Consulta GitHub API em 02:44Z: main e health publico 200/ok em 0fdbb80.
-  PR #214/head ce82f707 tinha CI 38502171755 em andamento. Fontes:
-  github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/214 e /api/health.
-- SSH da VPS atual disponivel. Unidades/diretorios nao possuem o servico
-  qlik-ranking-api nem exportador antigo. MCP n8n por ranking retornou zero
-  workflows; nenhuma mutacao. Documentos de agosto nao comprovam estado atual.
-- Chrome local autenticado na origem Qlik; perfil Membro sem opcao visivel
-  de chaves API. Aplicativo 00171c17-48de-4488-b1f9-dd6dcb0249e2, Visao House,
-  possui pastas Agendamentos, Visitas, Pastas e Vendas. Titulos nao comprovam
-  granularidade/contrato completos. Nenhum registro de cliente copiado.
-- Usuario esclareceu possuir somente usuario/senha e solicitou sessao na VPS.
-  Preparar perfil dedicado e login manual pela origem, sem copiar perfil
-  pessoal, revelar senha, contornar MFA ou alterar a sessao Salesforce.
-- Revisao local: Salesforce ja publica ranking global; Qlik historico trata
-  imobiliarias. Nao sobrescrever global com publicadores concorrentes. Ranking
-  por pontos continua bloqueado por autoridade comercial; conectar a origem
-  nao aprova pesos, bonus ou desempate. Coleta e agenda ainda nao ativadas.
-- Preparacao local: console SSH/Unix e Chrome rootless por pipe privado, sem
-  porta CDP. Revisao corrigiu execucao de dependencias como root; instalador
-  valida arvore privada e importa somente como usuario dedicado. Socket
-  residual permanece fail-closed, com recuperacao manual apos verificar dono.
-- Validacao: lint aprovado com aviso preexistente, tipos aprovados apos
-  regenerar tipos Next, build aprovado pelo agente. pnpm test repetido sem
-  concorrencia passou: 137 arquivos/2.663 testes Vitest, suites Node e release
-  sem falhas. Primeiras tentativas tiveram timeouts sob carga e symlink
-  Windows; lstat corrige o symlink, mantendo O_NOFOLLOW no Linux.
-- Ensaio VPS isolado :98 confirmou RFB003.008 por socket0700 e zero TCP VNC.
-  Display liberado, nenhum servico instalado no ensaio. Instalacao de login
-  ainda pendente; ensaio nao comprova autenticacao Qlik, exportacao ou agenda.
-- Atualizacao03:25Z: PR216 aberto, candidato2f0907e, CI38505855222 em andamento.
-  Preparacao de login instalada isoladamente; browser/VNC/console ativos,
-  sem boot habilitado ou coleta. Probe inicial falhou por ACL do pai releases;
-  usuario/perfil criados, units ainda ausentes. Recuperacao manual apos verificar
-  esse estado: ACL nominal --x, probe nao-root aprovado, units do SHA exato
-  verificadas/instaladas. Nenhuma alteracao no Salesforce ou runtime CRM.
-  Instalador corrigido para novas instalacoes, preservando mascara e recusa
-  de parcial; testes direcionados8/8. Reavaliar esta excecao apenas se repetir
-  a mesma parcial comprovada; nao constitui permissao de retomada automatica.
-- Console Unix0600, runtime/perfil0700, tunel local6082 respondeu200. Controle
-  Chrome bloqueou URL local com ERR_BLOCKED_BY_CLIENT; nao contornado. Usuario
-  recebeu login manual; nao confirmadas tela visual, autenticacao ou coleta.
-  Health publico em03:25Z continua200/ok/0fdbb80. Preparacao instalada nao e
-  merge nem publicacao da aplicacao. Pendentes login, contrato por corretor,
-  escolha de writer, carga reconciliada e agenda; policy_pending preservado.
-- Usuario confirmou abertura manual do console e pediu explicitamente guardar
-  usuario/senha na VPS. Cofre opcional em implementacao: formulario privado,
-  AES-GCM/RSA-OAEP, chave privada root0600 fora do acesso do gateway, cadastro
-  inicial sem overwrite, status sem identidade e nenhum segredo em logs/chat.
-  Credencial guardada nao significa login valido nem automacao configurada.
-- Cofre: gates locais completos aprovados; revisao corrigiu deadline de corpo,
-  validacao estrutural do envelope, limpeza de formulario e teste efetivo de
-  leitura negada da chave privada. Testes direcionados29/29, smoke Linux ainda
-  pendente. Nao declarar segredo guardado antes do cadastro feito pelo usuario.
-- Ensaio03:41Z: cofre instalado do candidatoff1f59d; smoke real sob UID Qlik
-  passou (fd ancorado, fsync/publicacao exclusiva, arquivo0600, R_OK da chave
-  privada negado EACCES). Diretorio de teste sintetico removido, destino real
-  permaneceu vazio. Console atualizado com backup da unit; navegador manteve
-  PID2585809/zero reinicios. VNC residual removido somente apos MainPID0,
-  tipo socket/dono conferidos e ausencia de listener. Nao remover perfil/locks.
-- HTTP200 e formulario presentes; status saved:false antes da acao do usuario.
-  Usuario orientado a cadastrar diretamente no console. Nao confirmado login.
-  Fonte03:42Z: GitHub main avancou para792320b (dashboard), health200/ok ainda
-  0fdbb80. PR216 em conflito documental, sem CI paraff1f59d; merge de main
-  preserva ambas as notas. Refazer gates da integracao; nenhum deploy do CRM.
+- Fluxo confirmado Qlik -> VPS -> ranking. PR214/ce82f707 fechado sem merge
+  as02:48Z: exportava no sentido inverso e SELECT privilegiado nao tinha grant
+  comprovado. Codigo anterior preservado. PR216 contem a preparacao correta.
+- Fontes: GitHub PR214/216, SSH e https://crm.descomplicapro.com.br/api/health.
+  As02:44Z main/health200/ok=0fdbb80; as03:42Z main=792320b, health ainda0fdbb80.
+  Merge b78230d preservou notas de dashboard; CI ausente no ff1f59d devido ao
+  conflito documental. Preparacao operacional nao equivale a merge/deploy CRM.
+- VPS atual sem exportador antigo/qlik-ranking-api; MCP n8n encontrou zero
+  workflows ranking, sem mutacao. Documentos antigos nao provam estado atual.
+  Chrome local mostra Visao House00171c17-48de-4488-b1f9-dd6dcb0249e2 e pastas
+  Agendamentos/Visitas/Pastas/Vendas; perfil Membro sem API key visivel. Nomes
+  nao comprovam contrato. Nenhum registro de cliente ou perfil pessoal copiado.
+- Usuario tem login/senha e autorizou guarda na VPS. Browser dedicado rootless
+  por pipe privado, console/VNC Unix via SSH; runtime/perfil0700, console0600,
+  sem novo TCP. Salesforce intacto. Cofre AES-GCM/RSA-OAEP com privada root0600;
+  gateway nao pode le-la, cadastro exclusivo, status sem identidade/segredo.
+  Nao contornar MFA; guardar credencial nao valida login nem configura coleta.
+- Instalacao inicial2f0907e parou no probe nao-root por ACL do pai releases,
+  apos usuario/perfil e antes de units. Recuperacao manual verificou esse estado,
+  adicionou somente travessia nominal --x, repetiu probe e verificou units.
+  Instalador agora preserva ACL/mask e recusa parcial. Excecao limitada a essa
+  parcial comprovada; reavaliar causa antes de qualquer recuperacao futura.
+- As03:41Z cofre/consoleff1f59d instalados; navegador manteve PID2585809 sem
+  reinicio. Backup unit e passos em docs/runbooks/qlik-vps-session.md. Socket VNC
+  residual retirado somente apos PID0, tipo/dono e ausencia de listener; nao
+  remover perfil/locks. Browser nao enabled no boot; nenhuma agenda ativada.
+- Gates antes do merge: lint/tipos/build/pnpm test aprovados,137 arquivos e
+  2663 testes Vitest, suites Node/release sem falhas. Timeouts iniciais sob carga
+  desapareceram sem concorrencia; lstat corrigiu symlink Windows conservando
+  O_NOFOLLOW. Revisao do cofre corrigiu deadline, envelope incompleto e limpeza
+  de campos. Qlik29/29; smoke Linux real passou: fd/fsync, arquivo600, overwrite
+  recusado e privada R_OK negado EACCES. Dados sinteticos removidos. Gates da
+  base integrada repetidos no encerramento; evidencias completas em WORKLOG.md.
+- ConsoleHTTP200/saved:true e login VPS confirmado visualmente apos cadastro.
+  Aba manual do usuario acessivel; nenhuma credencial lida. Qlik abrange varias
+  regionais, detalhe com timeout. Recorte equipe/gerente/regional perguntado.
+  Salesforce ja escreve ranking global e relay Qlik antigo trata imobiliarias:
+  faltam contrato por corretor, writer unico, carga reconciliada e agenda.
+  policy_pending permanece; conectar nao aprova pesos, bonus ou desempate.
+- Sync apos merge excedeu256000bytes. Nota desta tarefa consolidada com
+  detalhes preservados no runbook/WORKLOG e historico Git; notas alheias intactas.
+- Encerramento03:58Z: lint/tipos/test/build integrados passaram (139 arquivos,
+  2747 Vitest). CI38507765662 ainda em curso; health0fdbb80/ok. Sync recuperado.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 
