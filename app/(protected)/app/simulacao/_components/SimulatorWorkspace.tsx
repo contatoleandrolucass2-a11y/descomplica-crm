@@ -958,7 +958,7 @@ export function SimulatorWorkspace({
           description={definition.description}
           statusLabel={
             executionAllowed
-              ? "Canário Master · sem persistência"
+              ? "Cálculo disponível · sem persistência"
               : isCaixa
                 ? "Jornada visual · motor bloqueado"
                 : "Motor aguardando validação"
@@ -970,7 +970,7 @@ export function SimulatorWorkspace({
           <DataState
             variant="warning"
             compact
-            title="Motor oficial em validação Master"
+            title="Motor oficial disponível"
             description="O cálculo usa a versão oficial identificada na referência viva. O resultado não é persistido nem constitui proposta comercial."
           />
         ) : !isCaixa ? (

@@ -323,8 +323,10 @@ select is(
   array[
     'apply_crm_commercial_policy_import',
     'apply_crm_source_identity_mapping_import',
+    'apply_user_permission_access_draft',
     'approve_user_access',
     'assign_user_role',
+    'assign_user_role_defaults',
     'begin_crm_salesforce_refresh',
     'current_session_is_live',
     'finish_crm_salesforce_refresh',
@@ -334,6 +336,7 @@ select is(
     'get_qlik_relay_health',
     'get_role_level',
     'get_user_authorization_context',
+    'get_user_role_permission_defaults',
     'has_permission',
     'list_app_pages_for_management',
     'list_crm_read_model_v3_scopes',

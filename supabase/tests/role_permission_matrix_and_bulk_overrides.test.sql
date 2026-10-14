@@ -1,6 +1,6 @@
 begin;
 
-select plan(62);
+select plan(97);
 
 select has_column(
   'public',
@@ -111,8 +111,8 @@ select is(
     from public.role_permissions
     where role_key = 'coordinator'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.stages.view,pages.view',
-  'Coordinator sees only the Imob channel, partnerships and common operational pages'
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Coordinator inherits Imob, partnerships, simulators, and common operational pages'
 );
 
 select is(
@@ -121,8 +121,8 @@ select is(
     from public.role_permissions
     where role_key = 'manager_house'
   ),
-  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.stages.view,pages.view',
-  'Gerente House sees only the House channel and ranking'
+  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Gerente House inherits House, ranking, and simulators'
 );
 
 select is(
@@ -131,8 +131,8 @@ select is(
     from public.role_permissions
     where role_key = 'manager_imob'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.stages.view,pages.view',
-  'Gerente Imob sees only the Imob channel and partnerships'
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Gerente Imob inherits Imob, partnerships, and simulators'
 );
 
 select is(
@@ -141,8 +141,8 @@ select is(
     from public.role_permissions
     where role_key = 'broker_house'
   ),
-  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.stages.view,pages.view',
-  'Corretor House sees only the House channel and ranking'
+  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Corretor House inherits House, ranking, and simulators'
 );
 
 select is(
@@ -151,8 +151,8 @@ select is(
     from public.role_permissions
     where role_key = 'broker_imob'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.stages.view,pages.view',
-  'Corretor Imob sees only the Imob channel and partnerships'
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Corretor Imob inherits Imob, partnerships, and simulators'
 );
 
 select is(
@@ -517,6 +517,62 @@ where user_id in (
   'a3000000-0000-4000-8000-000000000011'
 );
 
+-- Every current approved role inherits both sides of simulator access. These
+-- fixtures have valid reporting scopes, so an inherited grant can be effective.
+select ok(
+  public._internal_has_permission(fixture.user_id::uuid, 'crm.simulators.view')
+    and public._internal_has_permission(fixture.user_id::uuid, 'crm.simulators.execute'),
+  concat(fixture.role_key, ' receives both simulator permissions after approval')
+)
+from (values
+  ('a3000000-0000-4000-8000-000000000001', 'master'),
+  ('a3000000-0000-4000-8000-000000000002', 'admin'),
+  ('a3000000-0000-4000-8000-000000000004', 'coordinator'),
+  ('a3000000-0000-4000-8000-000000000005', 'manager_house'),
+  ('a3000000-0000-4000-8000-000000000006', 'manager_imob'),
+  ('a3000000-0000-4000-8000-000000000007', 'broker_house'),
+  ('a3000000-0000-4000-8000-000000000008', 'broker_imob')
+) as fixture(user_id, role_key);
+
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000010', 'crm.simulators.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000010', 'crm.simulators.execute'),
+  'pending accounts receive neither simulator permission'
+);
+
+update public.profiles
+set is_active = false
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute'),
+  'inactive approved accounts cannot use their inherited simulator permissions'
+);
+update public.profiles
+set is_active = true
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+
+insert into public.user_permission_overrides (user_id, permission_key, effect, reason, granted_by)
+values (
+  'a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute', 'deny',
+  'Synthetic simulator deny remains authoritative', 'a3000000-0000-4000-8000-000000000001'
+);
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute'),
+  'an existing explicit deny still overrides the expanded simulator defaults'
+);
+delete from public.user_permission_overrides
+where user_id = 'a3000000-0000-4000-8000-000000000008'
+  and permission_key = 'crm.simulators.execute';
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute'),
+  'removing the simulator deny restores the role default'
+);
+
+-- Isolate dashboard counts from persistent local fixtures. The enclosing
+-- transaction rolls back this cleanup along with every synthetic test row.
+delete from public.crm_dashboard_snapshots;
+
 insert into public.crm_dashboard_snapshots (snapshot_key, reference_date, generated_at, source)
 values ('matrix', current_date, now(), 'synthetic-role-matrix');
 
@@ -555,7 +611,7 @@ where snapshot.snapshot_key = 'matrix';
 select ok(
   public.can_grant_permission(
     'a3000000-0000-4000-8000-000000000001',
-    'crm.simulators.view'
+    'crm.commercial_policy.manage'
   ),
   'Master can delegate a held permission whose minimum level equals Master'
 );
@@ -574,7 +630,7 @@ select is((select count(*) from public.crm_dashboard_top_developments), 3::bigin
 select lives_ok(
   $$select public.set_user_permission_overrides_bulk(
     'a3000000-0000-4000-8000-000000000002',
-    array['crm.simulators.view'],
+    array['crm.commercial_policy.manage'],
     'allow',
     'Master delegation to Administrator test'
   )$$,
@@ -585,7 +641,7 @@ select is(
     select effect
     from public.user_permission_overrides
     where user_id = 'a3000000-0000-4000-8000-000000000002'
-      and permission_key = 'crm.simulators.view'
+      and permission_key = 'crm.commercial_policy.manage'
   ),
   'allow',
   'Master delegation persists as an explicit allow without changing the target role'
@@ -604,7 +660,7 @@ reset role;
 select ok(
   not public.can_grant_permission(
     'a3000000-0000-4000-8000-000000000002',
-    'crm.simulators.view'
+    'crm.commercial_policy.manage'
   ),
   'Administrator cannot propagate a Master-level permission received by override'
 );
@@ -816,7 +872,7 @@ select throws_ok(
 select throws_ok(
   $$select public.set_user_permission_overrides_bulk(
     'a3000000-0000-4000-8000-000000000007',
-    array['crm.dashboard.view', 'crm.simulators.view'],
+    array['crm.dashboard.view', 'crm.commercial_policy.manage'],
     'deny',
     'Atomic authorization failure test'
   )$$,
@@ -923,6 +979,49 @@ select ok(
   ),
   'retired roles remain unavailable even to Master through normal assignment'
 );
+
+
+-- Local direct-access controls preserve the existing hierarchy and audit RPCs.
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select ok(has_function_privilege('authenticated', 'public.assign_user_role_defaults(uuid,text)', 'EXECUTE'), 'authenticated can invoke guarded role defaults');
+select ok(not has_function_privilege('anon', 'public.assign_user_role_defaults(uuid,text)', 'EXECUTE'), 'anonymous cannot assign role defaults');
+select ok(not has_function_privilege('service_role', 'public.assign_user_role_defaults(uuid,text)', 'EXECUTE'), 'service role has no direct execute grant');
+select lives_ok($$select public.apply_user_permission_access_draft(
+  'a3000000-0000-4000-8000-000000000007', array['crm.partnerships.view'], array['crm.dashboard.view'], array[]::text[], 'Synthetic direct checkbox changes'
+)$$, 'mixed checkbox changes save atomically');
+select is((select effect from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007' and permission_key='crm.partnerships.view'), 'allow', 'checked exception is persisted');
+select is((select effect from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007' and permission_key='crm.dashboard.view'), 'deny', 'unchecked inherited permission is persisted');
+select lives_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000007','broker_imob')$$, 'role assignment restores defaults without manual reason');
+select is((select count(*) from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007'), 0::bigint, 'all old exceptions are removed');
+select is((select role_key from public.user_roles where user_id='a3000000-0000-4000-8000-000000000007'), 'broker_imob', 'new role is persisted');
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000001','admin')$$, '42501', null, 'self role change remains blocked');
+select throws_ok($$select public.apply_user_permission_access_draft('a3000000-0000-4000-8000-000000000007',array['crm.dashboard.view'],array['crm.dashboard.view'],array[]::text[],'Synthetic duplicate')$$, '22023', null, 'contradictory checkbox changes are rejected');
+select lives_ok($$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000007',array['crm.commercial_policy.manage'],'allow','Synthetic privileged exception')$$, 'Master can prepare a privileged exception');
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
+set local role authenticated;
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000003','coordinator')$$, '42501', null, 'peer role assignment remains blocked');
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000009','broker_imob')$$, '42501', null, 'out of scope assignment remains blocked');
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000007','broker_house')$$, '42501', null, 'undelegable exceptions reject the entire role change');
+select is((select role_key from public.user_roles where user_id='a3000000-0000-4000-8000-000000000007'), 'broker_imob', 'failed reset rolls back the role assignment');
+select throws_ok($$select public.apply_user_permission_access_draft('a3000000-0000-4000-8000-000000000007',array['pages.view'],array['users.manage'],array[]::text[],'Synthetic atomic failure')$$, '42501', null, 'a forbidden permission rejects the entire mixed draft');
+select is((select count(*) from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007' and permission_key='pages.view'), 0::bigint, 'earlier permitted draft group also rolls back');
+reset role;
+
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select ok(has_function_privilege('authenticated', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'authenticated can request guarded role defaults');
+select ok(not has_function_privilege('anon', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'anonymous cannot read role defaults');
+select ok(not has_function_privilege('service_role', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'service role has no direct defaults read grant');
+select is((select count(*) from public.get_user_role_permission_defaults() where role_key='manager_imob'), 7::bigint, 'Users viewers receive the authoritative Imob baseline');
+select ok(exists(select 1 from public.get_user_role_permission_defaults() where role_key='master' and permission_key='crm.commercial_policy.manage'), 'role defaults reflect local policy grants absent from the static UI baseline');
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011', true);
+set local role authenticated;
+select is((select count(*) from public.get_user_role_permission_defaults()), 0::bigint, 'callers without users.view receive no role defaults');
+reset role;
 
 select * from finish();
 rollback;

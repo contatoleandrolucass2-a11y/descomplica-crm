@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-14: Administração de acessos no ambiente local
+
+- Implementa quadrados com herança real do banco e exceções individuais,
+  salvamento atômico e restauração dos padrões ao trocar o papel.
+- Remove a solicitação manual de motivo, preservando o registro automático
+  e as validações de hierarquia, escopo e delegação no servidor e no banco.
+- Reúne visualização e execução em “Acessar simuladores” e concede ambos os
+  padrões aos sete papéis atuais. Remove a restrição exclusiva de Master da
+  execução autorizada, preservando a configuração e os contratos dos motores.
+- Oculta os quatro controles técnicos de read model v3 e o controle de leitura
+  de auditoria, que não tem página correspondente nesta versão. Não remove
+  suas permissões, funções ou registros.
+- Trabalho restrito ao checkout e banco locais; sem publicação remota.
+  Matriz, limites e evidências: `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
 ## 2026-10-09: Marca vetorial com cor coerente entre temas
 
 - Fonte: comparativo visual fornecido pelo usuário e implementação atual do

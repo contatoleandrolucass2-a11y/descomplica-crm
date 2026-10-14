@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-14 — Ambiente local
+
+- Corrige os quadrados de usuários para refletir a herança do papel e as
+  exceções, com alterações atômicas e auditoria sem motivo manual.
+- Restaura os padrões do novo papel ao salvar uma troca autorizada.
+- Disponibiliza visualização e execução de simuladores aos sete papéis atuais,
+  com um único controle de acesso e os bloqueios de conta preservados.
+- Oculta permissões técnicas de read model v3 e de consulta de auditoria
+  sem alterar as funcionalidades ou os registros correspondentes no banco.
+
 ## 2026-10-09
 
 - Substitui o símbolo PNG do cabeçalho protegido por uma marca SVG vetorial.

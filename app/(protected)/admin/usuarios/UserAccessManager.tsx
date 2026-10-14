@@ -23,6 +23,7 @@ import {
 } from "@/lib/authorization/permissions";
 import {
   ROLE_INHERITED_PERMISSIONS,
+  SIMULATOR_ACCESS_PERMISSIONS,
   summarizeRoleChange,
 } from "@/lib/authorization/access-presentation";
 import { ROLES, getRoleLabel, type RoleKey } from "@/lib/authorization/roles";
@@ -37,7 +38,40 @@ import {
 
 const INITIAL_STATE: AdminActionState = { status: "idle", message: "" };
 const PAGE_SIZE = 6;
-const ALL_PERMISSIONS = Object.keys(PERMISSIONS) as PermissionKey[];
+const HIDDEN_PERMISSION_KEYS = new Set<PermissionKey>([
+  "audit.view",
+  "crm.read_model_v3.view",
+  "crm.read_model_v3.ranking.view",
+  "crm.read_model_v3.partnerships.view",
+  "crm.read_model_v3.stock.view",
+]);
+const ALL_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
+  (key) => key !== "crm.simulators.execute" && !HIDDEN_PERMISSION_KEYS.has(key),
+);
+
+function getControlKeys(permissionKey: PermissionKey): readonly PermissionKey[] {
+  return permissionKey === "crm.simulators.view" ? SIMULATOR_ACCESS_PERMISSIONS : [permissionKey];
+}
+
+function getControlLabel(permissionKey: PermissionKey): string {
+  return permissionKey === "crm.simulators.view"
+    ? "Acessar simuladores"
+    : getPermissionLabel(permissionKey);
+}
+
+function getControlDescription(permissionKey: PermissionKey): string {
+  return permissionKey === "crm.simulators.view"
+    ? "Permite visualizar e executar os simuladores disponíveis."
+    : PERMISSIONS[permissionKey].description;
+}
+
+function countControls(keys: readonly PermissionKey[]): number {
+  return new Set(
+    keys
+      .filter((key) => !HIDDEN_PERMISSION_KEYS.has(key))
+      .map((key) => (key === "crm.simulators.execute" ? "crm.simulators.view" : key)),
+  ).size;
+}
 const ACTIVE_ROLE_KEYS = new Set<string>([
   "master",
   "admin",
@@ -120,6 +154,7 @@ export interface ManagedUser {
   isActive: boolean;
   accessStatus: "pending" | "approved" | "suspended" | "legacy_review";
   roleKey: RoleKey | null;
+  inheritedPermissions?: readonly PermissionKey[];
   isSelf: boolean;
   isManageable: boolean;
   overrides: UserPermissionOverride[];
@@ -162,6 +197,7 @@ function getVisibleRoleLabel(roleKey: RoleKey | null): string {
 }
 
 function getInheritedPermissions(user: ManagedUser): readonly PermissionKey[] {
+  if (user.inheritedPermissions) return user.inheritedPermissions;
   if (!user.roleKey) return [];
   return ROLE_INHERITED_PERMISSIONS[user.roleKey] ?? [];
 }
@@ -172,7 +208,9 @@ function getEffectivePermissionCount(user: ManagedUser): number {
     if (override.effect === "allow") effectivePermissions.add(override.permissionKey);
     else effectivePermissions.delete(override.permissionKey);
   }
-  return effectivePermissions.size;
+  return ALL_PERMISSIONS.filter((key) =>
+    getControlKeys(key).every((item) => effectivePermissions.has(item)),
+  ).length;
 }
 
 function confirmChange(event: FormEvent<HTMLFormElement>, summary: string) {
@@ -182,8 +220,15 @@ function confirmChange(event: FormEvent<HTMLFormElement>, summary: string) {
 }
 
 function formatPermissionList(keys: readonly PermissionKey[]): string {
-  if (keys.length === 0) return "Nenhum acesso";
-  return keys.map(getPermissionLabel).join(", ");
+  const visibleKeys = keys.filter((key) => !HIDDEN_PERMISSION_KEYS.has(key));
+  if (visibleKeys.length === 0) return "Nenhum acesso";
+  return [
+    ...new Set(
+      visibleKeys.map((key) =>
+        getControlLabel(key === "crm.simulators.execute" ? "crm.simulators.view" : key),
+      ),
+    ),
+  ].join(", ");
 }
 
 function ActionFeedback({ state }: { state: AdminActionState }) {
@@ -268,17 +313,7 @@ function ApprovalForm({
           </select>
         </label>
       </div>
-      <label>
-        <span>Motivo da aprovação</span>
-        <input
-          name="reason"
-          required
-          minLength={3}
-          maxLength={240}
-          autoComplete="off"
-          placeholder="Descreva o motivo…"
-        />
-      </label>
+
       <p className="admin-form-help">
         O banco revalida identidade, hierarquia, compatibilidade e unicidade do escopo. Nenhuma
         associação é inferida pelo nome.
@@ -301,21 +336,9 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
     INITIAL_STATE,
   );
   const change = summarizeRoleChange(user.roleKey, selectedRole);
-  const elevation = ROLES[selectedRole].level > (user.roleKey ? ROLES[user.roleKey].level : 0);
   const unchanged = user.roleKey === selectedRole;
-  const summary = [
-    `Papel: ${getVisibleRoleLabel(user.roleKey)} → ${getRoleLabel(selectedRole)}`,
-    `Acessos adicionados: ${formatPermissionList(change.added)}`,
-    `Acessos removidos: ${formatPermissionList(change.removed)}`,
-    "As exceções individuais existentes não serão alteradas.",
-  ].join("\n");
-
   return (
-    <form
-      action={action}
-      onSubmit={(event) => confirmChange(event, summary)}
-      className="admin-role-form"
-    >
+    <form action={action} className="admin-role-form">
       <div className="admin-role-form-fields">
         <label htmlFor={`role-${user.userId}`}>
           <span>Papel</span>
@@ -333,25 +356,23 @@ function RoleForm({ user, roles }: { user: ManagedUser; roles: RoleKey[] }) {
             ))}
           </select>
         </label>
-        <label htmlFor={`role-reason-${user.userId}`}>
-          <span>Motivo {elevation ? "(obrigatório para elevação)" : "(opcional)"}</span>
-          <input
-            id={`role-reason-${user.userId}`}
-            name="reason"
-            required={elevation}
-            minLength={elevation ? 3 : undefined}
-            maxLength={240}
-            autoComplete="off"
-            placeholder="Descreva a alteração…"
-          />
-        </label>
       </div>
       <p className="admin-role-description">{ROLES[selectedRole].description}</p>
       <div className="admin-change-summary">
         <strong>Resumo do papel</strong>
-        <span>{change.added.length} adicionadas</span>
-        <span>{change.removed.length} removidas</span>
+        <span>{countControls(change.added)} adicionadas</span>
+        <span>{countControls(change.removed)} removidas</span>
       </div>
+      {!unchanged ? (
+        <div className="admin-form-help">
+          <p>Acessos adicionados: {formatPermissionList(change.added)}.</p>
+          <p>Acessos removidos: {formatPermissionList(change.removed)}.</p>
+          <p>
+            Ao salvar, as exceções anteriores serão removidas e os acessos padrão do novo papel
+            serão aplicados.
+          </p>
+        </div>
+      ) : null}
       <button
         type="submit"
         disabled={pending || unchanged}
@@ -380,18 +401,6 @@ function StatusForm({ user }: { user: ManagedUser }) {
       onSubmit={(event) => confirmChange(event, summary)}
       className="admin-status-form"
     >
-      <label htmlFor={`status-reason-${user.userId}`}>
-        <span>Motivo {nextActive ? "(opcional)" : "(obrigatório para desativação)"}</span>
-        <input
-          id={`status-reason-${user.userId}`}
-          name="reason"
-          required={!nextActive}
-          minLength={!nextActive ? 3 : undefined}
-          maxLength={240}
-          autoComplete="off"
-          placeholder="Descreva o motivo…"
-        />
-      </label>
       <p className="admin-form-help">{summary}</p>
       <button
         type="submit"
@@ -402,15 +411,6 @@ function StatusForm({ user }: { user: ManagedUser }) {
       </button>
       <ActionFeedback state={state} />
     </form>
-  );
-}
-
-function getPermissionGroup(permissionKey: PermissionKey): Pick<PermissionGroup, "id" | "label"> {
-  return (
-    PERMISSION_GROUPS.find((group) => group.matches(permissionKey)) ?? {
-      id: "other",
-      label: "Outras permissões",
-    }
   );
 }
 
@@ -441,9 +441,7 @@ function PermissionMatrix({
   editable: boolean;
 }) {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<Set<PermissionKey>>(() => new Set());
-  const [effect, setEffect] = useState<BulkEffect>("allow");
-  const [reason, setReason] = useState("");
+  const [draftEffects, setDraftEffects] = useState<Map<PermissionKey, BulkEffect>>(() => new Map());
   const submitOverrides = useCallback(
     async (previousState: AdminActionState, formData: FormData) => {
       const nextState = await setPermissionOverridesBulkAction(
@@ -451,11 +449,7 @@ function PermissionMatrix({
         previousState,
         formData,
       );
-      if (nextState.status === "success") {
-        setSelected(new Set());
-        setEffect("allow");
-        setReason("");
-      }
+      if (nextState.status === "success") setDraftEffects(new Map());
       return nextState;
     },
     [user.userId],
@@ -467,73 +461,60 @@ function PermissionMatrix({
     () => new Map(user.overrides.map((override) => [override.permissionKey, override])),
     [user.overrides],
   );
-  const filteredPermissions = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("pt-BR");
-    if (!query) return ALL_PERMISSIONS;
-    return ALL_PERMISSIONS.filter((permissionKey) => {
-      const permission = PERMISSIONS[permissionKey];
-      return `${permission.label} ${permission.description} ${permissionKey}`
-        .toLocaleLowerCase("pt-BR")
-        .includes(query);
-    });
-  }, [search]);
-  const groupedPermissions = useMemo(() => {
-    const groups = new Map<string, { label: string; permissions: PermissionKey[] }>();
-    for (const permissionKey of filteredPermissions) {
-      const group = getPermissionGroup(permissionKey);
-      const current = groups.get(group.id);
-      if (current) current.permissions.push(permissionKey);
-      else groups.set(group.id, { label: group.label, permissions: [permissionKey] });
-    }
-    return [...groups.entries()];
-  }, [filteredPermissions]);
-  const selectableFiltered = filteredPermissions.filter((permissionKey) =>
-    manageable.has(permissionKey),
-  );
-  const allFilteredSelected =
-    selectableFiltered.length > 0 &&
-    selectableFiltered.every((permissionKey) => selected.has(permissionKey));
-  const selectedLabels = [...selected].map(getPermissionLabel);
-  const effectLabel =
-    effect === "allow" ? "permitir" : effect === "deny" ? "negar" : "restaurar o padrão de";
+  const filteredPermissions = ALL_PERMISSIONS.filter((permissionKey) => {
+    return `${getControlLabel(permissionKey)} ${getControlDescription(permissionKey)}`
+      .toLocaleLowerCase("pt-BR")
+      .includes(search.trim().toLocaleLowerCase("pt-BR"));
+  });
+  const groups = PERMISSION_GROUPS.map((group) => ({
+    ...group,
+    permissions: filteredPermissions.filter(group.matches),
+  })).filter((group) => group.permissions.length > 0);
 
-  function togglePermission(permissionKey: PermissionKey) {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (next.has(permissionKey)) next.delete(permissionKey);
-      else next.add(permissionKey);
-      return next;
-    });
+  function isChecked(permissionKey: PermissionKey) {
+    const effect =
+      draftEffects.get(permissionKey) ?? overrides.get(permissionKey)?.effect ?? "inherit";
+    return effect === "allow" || (effect === "inherit" && inherited.has(permissionKey));
   }
 
-  function toggleFiltered() {
-    setSelected((current) => {
-      const next = new Set(current);
-      if (allFilteredSelected) {
-        for (const permissionKey of selectableFiltered) next.delete(permissionKey);
-      } else {
-        for (const permissionKey of selectableFiltered) next.add(permissionKey);
+  function togglePermission(permissionKey: PermissionKey) {
+    const keys = getControlKeys(permissionKey);
+    if (!editable || !keys.every((key) => manageable.has(key)) || pending) return;
+    const checked = !keys.every(isChecked);
+    setDraftEffects((current) => {
+      const next = new Map(current);
+      for (const key of keys) {
+        const effect = checked === inherited.has(key) ? "inherit" : checked ? "allow" : "deny";
+        if (effect === (overrides.get(key)?.effect ?? "inherit")) next.delete(key);
+        else next.set(key, effect);
       }
       return next;
     });
   }
 
-  function clearDraft() {
-    setSelected(new Set());
-    setEffect("allow");
-    setReason("");
+  function restoreDefaults() {
+    setDraftEffects(
+      new Map(
+        manageablePermissions
+          .filter(
+            (permissionKey) =>
+              !HIDDEN_PERMISSION_KEYS.has(permissionKey) && overrides.has(permissionKey),
+          )
+          .map((permissionKey) => [permissionKey, "inherit" as const]),
+      ),
+    );
   }
 
-  const confirmation = `${selected.size} ${
-    selected.size === 1 ? "permissão será alterada" : "permissões serão alteradas"
-  }: ${selectedLabels.join(", ")}. A ação será ${effectLabel}. O papel não será alterado.`;
-
   return (
-    <form
-      action={action}
-      onSubmit={(event) => confirmChange(event, confirmation)}
-      className="admin-permission-form"
-    >
+    <form action={action} className="admin-permission-form">
+      {[...draftEffects].map(([permissionKey, effect]) => (
+        <input
+          key={permissionKey}
+          type="hidden"
+          name={`${effect}PermissionKeys`}
+          value={permissionKey}
+        />
+      ))}
       <div className="admin-permission-toolbar">
         <label className="admin-permission-search" htmlFor={`permission-search-${user.userId}`}>
           <Search aria-hidden="true" />
@@ -541,7 +522,6 @@ function PermissionMatrix({
             <span>Buscar permissão</span>
             <input
               id={`permission-search-${user.userId}`}
-              name="permissionSearch"
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -554,143 +534,94 @@ function PermissionMatrix({
           <button
             type="button"
             className={managementStyles.button}
-            onClick={toggleFiltered}
-            disabled={selectableFiltered.length === 0 || pending}
+            onClick={restoreDefaults}
+            disabled={pending}
           >
-            {allFilteredSelected ? "Limpar filtradas" : "Selecionar todas as filtradas"}
+            Usar padrão do perfil
           </button>
         ) : null}
       </div>
-
-      {editable ? (
-        <fieldset className="admin-permission-effects">
-          <legend>Aplicar às permissões selecionadas</legend>
-          {(
-            [
-              ["allow", "Permitir", Check],
-              ["deny", "Negar", CircleX],
-              ["inherit", "Restaurar padrão", CircleMinus],
-            ] as const
-          ).map(([value, label, Icon]) => (
-            <label key={value} data-selected={effect === value}>
-              <input
-                type="radio"
-                name="effect"
-                value={value}
-                checked={effect === value}
-                onChange={() => setEffect(value)}
-              />
-              <Icon aria-hidden="true" />
-              <span>{label}</span>
-            </label>
-          ))}
-        </fieldset>
-      ) : null}
-
       <div className="admin-permission-groups">
-        {groupedPermissions.length > 0 ? (
-          groupedPermissions.map(([groupId, group]) => (
-            <section
-              key={groupId}
-              className="admin-permission-group"
-              aria-labelledby={`permission-group-${user.userId}-${groupId}`}
-            >
-              <div className="admin-permission-group-header">
-                <h4 id={`permission-group-${user.userId}-${groupId}`}>{group.label}</h4>
-                <span>
-                  {group.permissions.length} {group.permissions.length === 1 ? "item" : "itens"}
-                </span>
-              </div>
-              <div className="admin-permission-grid">
-                {group.permissions.map((permissionKey) => {
-                  const override = overrides.get(permissionKey);
-                  const permissionState = getPermissionState(permissionKey, inherited, override);
-                  const canSelect = editable && manageable.has(permissionKey);
-                  return (
-                    <label
-                      key={permissionKey}
-                      className="admin-permission-option"
-                      data-disabled={!canSelect}
-                      data-editable={editable}
-                      data-selected={selected.has(permissionKey)}
-                    >
-                      {editable ? (
-                        <input
-                          type="checkbox"
-                          name="permissionKeys"
-                          value={permissionKey}
-                          checked={selected.has(permissionKey)}
-                          onChange={() => togglePermission(permissionKey)}
-                          disabled={!canSelect || pending}
-                        />
-                      ) : null}
-                      <span className="admin-permission-option-copy">
-                        <strong>{getPermissionLabel(permissionKey)}</strong>
-                        <small>{PERMISSIONS[permissionKey].description}</small>
-                        {override?.reason ? (
-                          <small className="admin-permission-override-reason">
-                            Motivo atual: {override.reason}
-                          </small>
-                        ) : null}
-                      </span>
-                      <span className="admin-permission-state" data-state={permissionState.key}>
-                        {permissionState.permitted ? (
-                          <Check aria-hidden="true" />
-                        ) : (
-                          <CircleMinus aria-hidden="true" />
-                        )}
-                        {permissionState.label}
-                      </span>
-                    </label>
-                  );
-                })}
-              </div>
-            </section>
-          ))
-        ) : (
+        {groups.map((group) => (
+          <section
+            key={group.id}
+            className="admin-permission-group"
+            aria-labelledby={`permission-group-${user.userId}-${group.id}`}
+          >
+            <div className="admin-permission-group-header">
+              <h4 id={`permission-group-${user.userId}-${group.id}`}>{group.label}</h4>
+              <span>{group.permissions.length} itens</span>
+            </div>
+            <div className="admin-permission-grid">
+              {group.permissions.map((permissionKey) => {
+                const keys = getControlKeys(permissionKey);
+                const checked = keys.every(isChecked);
+                const canEdit = editable && keys.every((key) => manageable.has(key));
+                const savedStates = keys.map((key) =>
+                  getPermissionState(key, inherited, overrides.get(key)),
+                );
+                const savedState =
+                  savedStates.find((state) => !state.permitted) ??
+                  savedStates.find((state) => state.key === "override-allow") ??
+                  savedStates[0]!;
+                const changed = keys.some((key) => draftEffects.has(key));
+                return (
+                  <label
+                    key={permissionKey}
+                    className="admin-permission-option"
+                    data-disabled={!canEdit}
+                    data-editable={editable}
+                    data-selected={checked}
+                  >
+                    <input
+                      type="checkbox"
+                      checked={checked}
+                      disabled={!canEdit || pending}
+                      onChange={() => togglePermission(permissionKey)}
+                      aria-label={
+                        permissionKey === "crm.simulators.view"
+                          ? "Acessar simuladores"
+                          : `Acesso a ${getPermissionLabel(permissionKey)}`
+                      }
+                    />
+                    <span className="admin-permission-option-copy">
+                      <strong>{getControlLabel(permissionKey)}</strong>
+                      <small>{getControlDescription(permissionKey)}</small>
+                    </span>
+                    <span className="admin-permission-state" data-state={savedState.key}>
+                      {checked ? <Check aria-hidden="true" /> : <CircleMinus aria-hidden="true" />}
+                      {changed ? "Alteração não salva" : savedState.label}
+                    </span>
+                  </label>
+                );
+              })}
+            </div>
+          </section>
+        ))}
+        {groups.length === 0 ? (
           <p className={managementStyles.emptyState}>Nenhuma permissão corresponde à busca.</p>
-        )}
+        ) : null}
       </div>
-
       {editable ? (
         <div className="admin-permission-footer">
-          <label htmlFor={`override-reason-${user.userId}`}>
-            <span>Motivo da alteração em lote</span>
-            <input
-              id={`override-reason-${user.userId}`}
-              name="reason"
-              value={reason}
-              onChange={(event) => setReason(event.target.value)}
-              required
-              minLength={3}
-              maxLength={240}
-              autoComplete="off"
-              placeholder="Explique por que estas permissões serão alteradas…"
-            />
-          </label>
           <div className="admin-permission-summary" role="status" aria-live="polite">
-            <strong>Resumo</strong>
-            <span>
-              {selected.size === 0
-                ? "Nenhuma permissão selecionada."
-                : `${selected.size} ${
-                    selected.size === 1 ? "permissão selecionada" : "permissões selecionadas"
-                  } para ${effectLabel}.`}
-            </span>
+            {draftEffects.size === 0
+              ? "Todos os ajustes estão salvos."
+              : `${countControls([...draftEffects.keys()])} ${countControls([...draftEffects.keys()]) === 1 ? "alteração não salva" : "alterações não salvas"}.`}
           </div>
           <div className="admin-permission-submit-actions">
             <button
               type="button"
               className={managementStyles.button}
-              onClick={clearDraft}
-              disabled={pending || (selected.size === 0 && reason.length === 0)}
+              onClick={() => setDraftEffects(new Map())}
+              disabled={pending || draftEffects.size === 0}
             >
-              Cancelar
+              Descartar
             </button>
             <button
               type="submit"
               className={managementStyles.buttonPrimary}
-              disabled={pending || selected.size === 0}
+              disabled={pending || draftEffects.size === 0}
             >
               {pending ? "Salvando…" : "Salvar alterações"}
             </button>
@@ -763,8 +694,11 @@ function UserDetail({
             </div>
             <span className="admin-section-count">{getEffectivePermissionCount(user)} acessos</span>
           </div>
-          {user.isManageable && canManageRoles && assignableRoles.length > 0 ? (
-            <RoleForm key={user.userId} user={user} roles={assignableRoles} />
+          {user.isManageable &&
+          canManageRoles &&
+          canManagePermissions &&
+          assignableRoles.length > 0 ? (
+            <RoleForm key={`${user.userId}:${user.roleKey}`} user={user} roles={assignableRoles} />
           ) : (
             <div className="admin-current-role">
               <strong>{getVisibleRoleLabel(user.roleKey)}</strong>
@@ -795,17 +729,17 @@ function UserDetail({
           {isMasterPermissionManager && user.isManageable ? (
             <p className="admin-permission-intro">
               <strong>Herdada: negada</strong> é apenas o padrão do papel. Como Master, você pode
-              selecionar essas permissões e aplicar <strong>Permitir</strong> para criar uma exceção
-              individual em qualquer usuário abaixo do seu nível. O papel do usuário não muda.
+              marcar essas permissões e salvar para criar uma exceção individual em qualquer usuário
+              abaixo do seu nível. O papel do usuário não muda.
             </p>
           ) : (
             <p className="admin-permission-intro">
               <strong>Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>{" "}
-              aparecem na mesma matriz. Selecione várias linhas e salve uma única vez.
+              aparecem na mesma matriz. Marcado permite; desmarcado bloqueia. Salve para aplicar.
             </p>
           )}
           <PermissionMatrix
-            key={user.userId}
+            key={`${user.userId}:${user.roleKey}:${JSON.stringify(user.overrides)}`}
             user={user}
             manageablePermissions={manageablePermissions}
             editable={canEditPermissions}

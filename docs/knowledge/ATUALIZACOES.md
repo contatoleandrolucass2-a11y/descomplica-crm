@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Herança e controle de acesso na prévia local
+
+- Fonte: solicitação do usuário, código do painel e banco Docker local.
+  A tela deve consultar os padrões atuais do banco, pois a lista estática
+  omitia uma permissão de políticas comerciais já concedida ao Master.
+- Um controle visual pode representar duas permissões técnicas: simuladores
+  requerem visualização e execução juntas. A execução verifica ambas; a
+  mudança não pode se limitar a remover o bloqueio visual ou o papel fixo.
+- Ocultar controles técnicos não significa revogar permissões ou remover
+  registros. A auditoria continua automática, apesar de não haver tela de
+  consulta nesta versão. Não restaurar silenciosamente exceções ocultas.
+- A troca de papel com restauração de exceções exige uma única transação e
+  a preservação dos bloqueios de hierarquia, escopo e delegação.
+- Suites de banco que esperam ausência de dados devem rodar em projetos
+  efêmeros; a base de demonstração contém fixtures persistidas.
+- Evidências e matriz: `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+  Escopo exclusivamente local; esta nota não comprova deploy remoto.
+
 ## 2026-10-09: símbolo da marca deve herdar o token do texto
 
 - Fonte: imagens de referência do usuário, `ProtectedShell.module.css` e

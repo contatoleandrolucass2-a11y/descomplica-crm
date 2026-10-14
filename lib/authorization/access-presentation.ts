@@ -7,16 +7,23 @@ const BASE_NAVIGATION_PERMISSIONS = [
   "crm.stages.view",
 ] as const satisfies readonly PermissionKey[];
 
+export const SIMULATOR_ACCESS_PERMISSIONS = [
+  "crm.simulators.view",
+  "crm.simulators.execute",
+] as const satisfies readonly PermissionKey[];
+
 const WITH_CANAL_IMOB_PERMISSIONS = [
   ...BASE_NAVIGATION_PERMISSIONS,
   "crm.dashboard.with_canal_imob.view",
   "crm.partnerships.view",
+  ...SIMULATOR_ACCESS_PERMISSIONS,
 ] as const satisfies readonly PermissionKey[];
 
 const WITHOUT_CANAL_IMOB_PERMISSIONS = [
   ...BASE_NAVIGATION_PERMISSIONS,
   "crm.dashboard.without_canal_imob.view",
   "crm.ranking.view",
+  ...SIMULATOR_ACCESS_PERMISSIONS,
 ] as const satisfies readonly PermissionKey[];
 
 const FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION = new Set<PermissionKey>([
@@ -25,7 +32,6 @@ const FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION = new Set<PermissionKey>([
   "crm.read_model_v3.partnerships.view",
   "crm.read_model_v3.stock.view",
   "crm.commercial_engine.execute",
-  "crm.commercial_policy.manage",
 ]);
 const MASTER_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
   (permission) => !FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION.has(permission),
@@ -50,12 +56,13 @@ const ADMIN_PERMISSIONS = [
   "crm.settings.manage",
   "crm.salesforce.refresh",
   "crm.ingest.manage",
+  ...SIMULATOR_ACCESS_PERMISSIONS,
 ] as const satisfies readonly PermissionKey[];
 const NO_INHERITED_PERMISSIONS = [] as const satisfies readonly PermissionKey[];
 
-// UI reflection of the production role_permissions baseline reconciled by this
-// release. Database helpers and RLS remain authoritative; future foundations
-// cannot appear here before their own production grants are approved.
+// Baseline for role-change previews and isolated component fixtures. The Users
+// page supplies live role defaults from its guarded RPC; database authorization
+// and RLS remain authoritative.
 export const ROLE_INHERITED_PERMISSIONS: Record<RoleKey, readonly PermissionKey[]> = {
   master: MASTER_PERMISSIONS,
   admin: ADMIN_PERMISSIONS,

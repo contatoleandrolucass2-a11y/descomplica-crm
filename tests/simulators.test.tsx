@@ -219,12 +219,12 @@ describe("simulator visual catalog", () => {
     );
   });
 
-  it("renders WF13 as actionable only when the server authorizes the Master canary", () => {
+  it("renders WF13 as actionable only when the server authorizes simulator execution", () => {
     const markup = renderToStaticMarkup(
       <SimulatorWorkspace definition={SIMULATORS["associativo-fluxo-linear"]} executionEnabled />,
     );
 
-    expect(markup).toContain("Motor oficial em validação Master");
+    expect(markup).toContain("Motor oficial disponível");
     expect(markup).toContain('type="submit"');
     expect(markup).toContain('data-cta-state="enabled"');
     expect(markup).not.toContain('data-cta-state="blocked"');

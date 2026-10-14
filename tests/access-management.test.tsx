@@ -217,11 +217,15 @@ describe("catálogo localizado de acesso", () => {
       ...baseNavigationPermissions,
       "crm.dashboard.with_canal_imob.view",
       "crm.partnerships.view",
+      "crm.simulators.view",
+      "crm.simulators.execute",
     ];
     const withoutCanalImobPermissions = [
       ...baseNavigationPermissions,
       "crm.dashboard.without_canal_imob.view",
       "crm.ranking.view",
+      "crm.simulators.view",
+      "crm.simulators.execute",
     ];
 
     expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(
@@ -233,11 +237,10 @@ describe("catálogo localizado de acesso", () => {
             "crm.read_model_v3.partnerships.view",
             "crm.read_model_v3.stock.view",
             "crm.commercial_engine.execute",
-            "crm.commercial_policy.manage",
           ].includes(permission),
       ),
     );
-    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(23);
+    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(24);
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual([
       "users.view",
       "users.manage",
@@ -258,6 +261,8 @@ describe("catálogo localizado de acesso", () => {
       "crm.settings.manage",
       "crm.salesforce.refresh",
       "crm.ingest.manage",
+      "crm.simulators.view",
+      "crm.simulators.execute",
     ]);
     for (const roleKey of ["coordinator", "manager_imob", "broker_imob"] as const) {
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(withCanalImobPermissions);
@@ -270,7 +275,7 @@ describe("catálogo localizado de acesso", () => {
     for (const roleKey of ["manager_house", "broker_house"] as const) {
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(withoutCanalImobPermissions);
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.partnerships.view");
-      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.simulators.view");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toContain("crm.simulators.view");
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.settings.manage");
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("pages.manage");
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("permissions.manage");
@@ -322,19 +327,27 @@ describe("catálogo localizado de acesso", () => {
     expect(ROLE_INHERITED_PERMISSIONS.broker_house).not.toContain("crm.partnerships.view");
   });
 
-  it("mantém as páginas de simuladores exclusivas do Master durante o canário WF13", () => {
+  it("concede visualização e execução de simuladores aos sete papéis ativos", () => {
     expect(PERMISSIONS["crm.simulators.view"]).toEqual({
       label: "Visualizar simuladores",
-      description: "Acessa as interfaces de simulação autorizadas para o perfil Master.",
-      minLevel: 100,
+      description: "Acessa as interfaces de simulação autorizadas para a conta.",
+      minLevel: 10,
     });
     expect(ROLE_INHERITED_PERMISSIONS.master).toContain("crm.simulators.view");
 
-    for (const roleKey of Object.keys(ROLE_INHERITED_PERMISSIONS).filter(
-      (roleKey) => roleKey !== "master",
-    ) as Array<Exclude<keyof typeof ROLE_INHERITED_PERMISSIONS, "master">>) {
-      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).not.toContain("crm.simulators.view");
+    for (const roleKey of [
+      "master",
+      "admin",
+      "coordinator",
+      "manager_house",
+      "manager_imob",
+      "broker_house",
+      "broker_imob",
+    ] as const) {
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toContain("crm.simulators.view");
+      expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toContain("crm.simulators.execute");
     }
+    expect(ROLE_INHERITED_PERMISSIONS.pending).toEqual([]);
   });
 
   it("mostra busca, herança e exceções sem oferecer autoelevação", () => {
@@ -371,7 +384,7 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).not.toContain("Salvar papel");
   });
 
-  it("oferece seleção múltipla com permitir, negar e restaurar em uma única ação", () => {
+  it("mostra caixas marcadas pelo padrão e exceções, sem campo de motivo", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
         users: [
@@ -408,15 +421,21 @@ describe("catálogo localizado de acesso", () => {
     );
 
     expect(markup).toContain("Buscar permissão");
-    expect(markup).toContain("Selecionar todas as filtradas");
-    expect(markup).toContain('name="permissionKeys"');
-    expect(markup.match(/name="permissionKeys"/g)?.length).toBeGreaterThan(1);
-    expect(markup).toContain('name="effect"');
-    expect(markup).toContain('value="allow"');
-    expect(markup).toContain('value="deny"');
-    expect(markup).toContain('value="inherit"');
-    expect(markup).toContain("Restaurar padrão");
-    expect(markup).toContain("Motivo da alteração em lote");
+    const checkbox = (label: string) =>
+      markup.match(new RegExp(`<input[^>]*aria-label="Acesso a ${label}"[^>]*>`))?.[0];
+    expect(checkbox("Visualizar dashboard")).toContain('checked=""');
+    expect(checkbox("Visualizar dashboard com Canal Imob")).not.toContain('checked=""');
+    expect(checkbox("Visualizar dashboard sem Canal Imob")).not.toContain('checked=""');
+    expect(checkbox("Gerenciar usuários")).toContain('disabled=""');
+    expect(markup.match(/aria-label="Acessar simuladores"/g)).toHaveLength(1);
+    expect(markup).toContain("Permite visualizar e executar os simuladores disponíveis.");
+    expect(markup).not.toContain('aria-label="Acesso a Executar simuladores oficiais"');
+    expect(markup).not.toContain("Visualizar read model v3");
+    expect(markup).not.toContain("Visualizar dataset v3");
+    expect(markup).not.toContain('aria-label="Acesso a Visualizar auditoria"');
+    expect(markup).toContain("Usar padrão do perfil");
+    expect(markup).not.toContain('name="reason"');
+    expect(markup).not.toContain('name="effect"');
     expect(markup).toContain("Salvar alterações");
     expect(markup).toContain("Herdada: negada");
     expect(markup).toContain("Como Master");
@@ -425,7 +444,47 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).not.toContain("Adicionar uma exceção");
   });
 
-  it("expõe aprovação pendente somente com papel, escopo oficial e motivo explícitos", () => {
+  it.each([
+    { inherited: ["crm.simulators.view", "crm.simulators.execute"], checked: true },
+    { inherited: ["crm.simulators.view"], checked: false },
+    { inherited: [], checked: false },
+  ] as const)(
+    "exibe um único acesso aos simuladores conforme a herança recebida: $checked",
+    ({ inherited, checked }) => {
+      const markup = renderToStaticMarkup(
+        createElement(UserAccessManager, {
+          users: [
+            {
+              userId: "81000000-0000-4000-8000-000000000005",
+              email: "simuladores@example.test",
+              isActive: true,
+              accessStatus: "approved",
+              roleKey: "broker_house",
+              inheritedPermissions: inherited,
+              isSelf: false,
+              isManageable: true,
+              overrides: [],
+            },
+          ],
+          assignableRoles: ["broker_house"],
+          manageablePermissions: ["crm.simulators.view"],
+          canManageRoles: true,
+          canManagePermissions: true,
+          isMasterPermissionManager: false,
+          canManageUsers: true,
+          canApproveUsers: false,
+          reportingScopes: [],
+        }),
+      );
+      const checkbox = markup.match(/<input[^>]*aria-label="Acessar simuladores"[^>]*>/)?.[0];
+      expect(checkbox).toBeDefined();
+      expect(checkbox?.includes('checked=""')).toBe(checked);
+      expect(checkbox).toContain('disabled=""');
+      expect(markup).not.toContain('aria-label="Acesso a Executar simuladores oficiais"');
+    },
+  );
+
+  it("expõe aprovação pendente com papel e escopo, sem motivo manual", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
         users: [
@@ -460,7 +519,7 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toContain("Aprovação de acesso escopado");
     expect(markup).toContain('name="reportingScopeIds"');
     expect(markup).toContain("team:qa-official");
-    expect(markup).toContain('name="reason"');
+    expect(markup).not.toContain('name="reason"');
     expect(markup).toContain("Nenhuma associação é inferida pelo nome");
   });
 });

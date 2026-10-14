@@ -20,9 +20,9 @@ describe("hierarquia de delegação de permissões", () => {
         actor({
           roleKey: "master",
           level: 100,
-          permissions: ["permissions.manage", "crm.simulators.view"],
+          permissions: ["permissions.manage", "crm.commercial_policy.manage"],
         }),
-        "crm.simulators.view",
+        "crm.commercial_policy.manage",
       ),
     ).toBe(true);
   });
@@ -30,15 +30,15 @@ describe("hierarquia de delegação de permissões", () => {
   it("não permite ao Administrador propagar uma permissão de nível Master", () => {
     expect(
       canGrantPermission(
-        actor({ permissions: ["permissions.manage", "crm.simulators.view"] }),
-        "crm.simulators.view",
+        actor({ permissions: ["permissions.manage", "crm.commercial_policy.manage"] }),
+        "crm.commercial_policy.manage",
       ),
     ).toBe(false);
   });
 
   it("não transforma o bypass de nível do Master em posse de permissão", () => {
     expect(
-      canGrantPermission(actor({ roleKey: "master", level: 100 }), "crm.simulators.view"),
+      canGrantPermission(actor({ roleKey: "master", level: 100 }), "crm.commercial_policy.manage"),
     ).toBe(false);
   });
 
@@ -47,5 +47,13 @@ describe("hierarquia de delegação de permissões", () => {
 
     expect(canManageTargetLevel(master, 80)).toBe(true);
     expect(canManageTargetLevel(master, 100)).toBe(false);
+  });
+
+  it("permite ao Administrador delegar os dois acessos aos simuladores que possui", () => {
+    const admin = actor({
+      permissions: ["permissions.manage", "crm.simulators.view", "crm.simulators.execute"],
+    });
+    expect(canGrantPermission(admin, "crm.simulators.view")).toBe(true);
+    expect(canGrantPermission(admin, "crm.simulators.execute")).toBe(true);
   });
 });

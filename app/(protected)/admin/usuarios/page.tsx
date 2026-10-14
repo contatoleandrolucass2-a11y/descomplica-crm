@@ -60,6 +60,7 @@ export default async function UsersAdminPage() {
     .select("user_id,email,is_active,created_at,access_status")
     .order("created_at", { ascending: false });
   const rolesResult = await supabase.from("user_roles").select("user_id,role_key");
+  const roleDefaultsResult = await supabase.rpc("get_user_role_permission_defaults");
   const overridesResult = await supabase
     .from("user_permission_overrides")
     .select("user_id,permission_key,effect,reason");
@@ -82,7 +83,7 @@ export default async function UsersAdminPage() {
     }));
   }
 
-  if (profileError || rolesResult.error || overridesResult.error) {
+  if (profileError || rolesResult.error || roleDefaultsResult.error || overridesResult.error) {
     throw new Error("Não foi possível carregar a administração de usuários.");
   }
 
@@ -110,6 +111,18 @@ export default async function UsersAdminPage() {
     .array(reportingScopeSchema)
     .parse(scopesResult.error ? [] : (scopesResult.data ?? []));
   const rolesByUser = new Map(assignments.map((row) => [row.user_id, row.role_key]));
+  const roleDefaults = z
+    .array(z.object({ role_key: z.string(), permission_key: z.string() }))
+    .parse(roleDefaultsResult.data ?? []);
+  const permissionsByRole = new Map<RoleKey, PermissionKey[]>();
+  for (const row of roleDefaults) {
+    if (!isRoleKey(row.role_key) || !isPermissionKey(row.permission_key)) {
+      throw new Error("O catálogo de permissões da aplicação está desatualizado.");
+    }
+    const permissions = permissionsByRole.get(row.role_key) ?? [];
+    permissions.push(row.permission_key);
+    permissionsByRole.set(row.role_key, permissions);
+  }
   const assignableRoles = getAssignableRoleKeys(context.level);
   const manageablePermissions = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
     (permissionKey) => canGrantPermission(context, permissionKey),
@@ -141,6 +154,7 @@ export default async function UsersAdminPage() {
       isActive: profile.is_active,
       accessStatus: profile.access_status,
       roleKey,
+      inheritedPermissions: roleKey ? (permissionsByRole.get(roleKey) ?? []) : [],
       isSelf: profile.user_id === context.userId,
       isManageable: profile.user_id !== context.userId && targetLevel < context.level,
       overrides: userOverrides,

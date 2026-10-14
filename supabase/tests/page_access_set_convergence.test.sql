@@ -119,13 +119,15 @@ select is(
     'crm.settings.goals',
     'crm.settings.partnerships',
     'crm.settings.points',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Admin retains the exact fifteen-page inherited set including partnerships'
+  'Admin retains the exact seventeen-page inherited set including partnerships and simulators'
 );
 
 select is(
@@ -147,13 +149,15 @@ select is(
   array[
     'crm.dashboard',
     'crm.ranking',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Corretor House retains the exact seven-page inherited set'
+  'Corretor House retains the exact nine-page inherited set including simulators'
 );
 
 select is(
@@ -175,13 +179,15 @@ select is(
   array[
     'crm.dashboard',
     'crm.partnerships',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Corretor Imob retains the exact seven-page inherited set'
+  'Corretor Imob retains the exact nine-page inherited set including simulators'
 );
 
 select is(
@@ -203,13 +209,15 @@ select is(
   array[
     'crm.dashboard',
     'crm.partnerships',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Coordinator retains the exact seven-page Imob inherited set'
+  'Coordinator retains the exact nine-page Imob inherited set including simulators'
 );
 
 select is(
@@ -231,13 +239,15 @@ select is(
   array[
     'crm.dashboard',
     'crm.ranking',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Gerente House retains the exact seven-page inherited set'
+  'Gerente House retains the exact nine-page inherited set including simulators'
 );
 
 select is(
@@ -259,13 +269,15 @@ select is(
   array[
     'crm.dashboard',
     'crm.partnerships',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Gerente Imob retains the exact seven-page inherited set'
+  'Gerente Imob retains the exact nine-page inherited set including simulators'
 );
 
 select is(
