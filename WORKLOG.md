@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-10-13: Conexao de exportacao do ranking para Qlik
+
+- Pedido: conectar `https://crm.descomplicapro.com.br/app/ranking` ao Qlik Cloud
+  para exportar informacoes, usando a referencia publica
+  `https://descomplicapro.com.br/ranking`.
+- Observacao externa: CRM health 200/ok em `0fdbb80`; producao e `origin/main`
+  no mesmo SHA. Pagina publica de ranking respondeu 200 e continha snapshot
+  visual sincronizado em 07/08/2026, 01:04. Qlik Cloud respondeu 200, mas sem
+  sessao autenticada util pelo acesso observacional.
+- Bloqueio n8n/Qlik: MCP n8n nao encontrou o workflow `r4DyPyOTDtoROXq0`,
+  execucoes ou credenciais Qlik; nenhuma alteracao de workflow foi feita.
+- Implementado no CRM: `GET /api/export/ranking`, protegido por
+  `RANKING_EXPORT_SECRET`, retorna JSON normalizado do read model atual para
+  conector REST do Qlik. Sem grants novos, sem expor `service_role` e sem
+  liberar dados quando o segredo nao esta configurado.
+- Gate de teste completo revelou falha preexistente no Windows: symlink de
+  estoque era aceito apesar de `O_NOFOLLOW`. Corrigido com `lstat` antes do
+  `open`; Linux preserva `O_NOFOLLOW` contra troca concorrente.
+- Validacao focal: rota de exportacao, matcher do proxy, inventario de recursos
+  e estoque passaram em 84 testes; typecheck aprovado. Gates completos serao
+  repetidos antes de publicacao.
+
 ## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
 
 Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior

@@ -170,6 +170,7 @@
       "skill": "descomplica-dados-integracoes",
       "routes": [
         "app/(protected)/app/configuracoes/conectar-sistemas/page.tsx",
+        "app/api/export/ranking/route.ts",
         "app/api/ingest/qlik/route.ts",
         "app/api/ingest/salesforce/route.ts",
         "app/api/refresh/salesforce/route.ts",
@@ -180,6 +181,7 @@
       ],
       "evidence": [
         "tests/connected-systems.test.tsx",
+        "tests/ranking-export-route.test.ts",
         "tests/salesforce-console-api.test.ts",
         "ops/salesforce/console-gateway.node-test.mjs",
         "scripts/qa/connected-systems.mjs",

@@ -1,5 +1,43 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Exportacao protegida do ranking para Qlik
+
+- Status: implementado e validado localmente; ainda nao publicado. Fonte:
+  codigo local, GET observacional, GitHub API, MCP n8n e pagina publica
+  `https://descomplicapro.com.br/ranking`.
+- Abertura: Git comum confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`; checkout
+  destacado em `0fdbb80aa79d731bcd458ca4bc892ecc76be2918`. `origin/main` e
+  health de `https://crm.descomplicapro.com.br/api/health` retornaram o mesmo
+  SHA e status `ok`. `gh` indisponivel; GitHub API mostrou CI main verde para
+  esse SHA e PRs abertos de outros escopos.
+- Conhecimento: `docs/runbooks/qlik-ranking-ingestion.md` confirma relay Qlik
+  inbound existente em `/api/ingest/qlik`, mas o pedido atual exige exportacao
+  do ranking CRM para consumo Qlik. Pagina publica de referencia respondeu 200,
+  titulo "Ranking dos corretores | Descomplica CRM", conteudo visual com
+  sincronizacao 07/08/2026 01:04, nove corretores e pódio; usada apenas como
+  referencia publica, sem credenciais ou dados privados.
+- Bloqueio externo: MCP n8n nao encontrou o workflow `r4DyPyOTDtoROXq0`, nem
+  execucoes ou credenciais Qlik. Nenhuma alteracao n8n foi feita; REST nao foi
+  usado. Qlik Cloud respondeu 200 sem sessao util pelo acesso observacional.
+- Mudanca: adicionado `GET /api/export/ranking`, protegido por
+  `RANKING_EXPORT_SECRET`, Bearer token, `no-store`, `noindex` e resposta
+  sanitizada. O endpoint fica 404 sem segredo configurado e retorna snapshot e
+  participantes normalizados do read model para conector REST do Qlik. A rota
+  foi excluida do proxy de sessao para nao depender de cookies Supabase.
+- Correcao associada: o gate completo revelou que, no Windows, `O_NOFOLLOW` nao
+  bloqueava symlink no estoque oficial. `lib/crm/salesforce/inventory-snapshot.ts`
+  agora usa `lstat` antes do `open` e mantem `O_NOFOLLOW` como defesa adicional.
+- Validacao: lint aprovado com um aviso preexistente em
+  `scripts/qa/connected-systems.mjs`; `pnpm typecheck` aprovado; `pnpm test`
+  aprovado com 2.668 testes Vitest, 226 testes Node Salesforce e 113 testes de
+  release, com skips Linux esperados; `pnpm test:release` repetido diretamente
+  no Node 24; `pnpm build` aprovado e listou `/api/export/ranking`.
+- Pendencias: configurar segredo `RANKING_EXPORT_SECRET` no runtime publicado,
+  criar a conexao REST no Qlik Cloud com esse Bearer token e validar ingestao no
+  Qlik com usuario/credencial autorizados. Publicacao ainda depende de PR, CI e
+  release conforme `docs/runbooks/production-release-guard.md`.
+
 ## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
 
 - Status: agenda ativa e aceite concluido. Fonte: journal, Supabase MCP,

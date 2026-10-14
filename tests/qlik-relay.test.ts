@@ -796,7 +796,10 @@ describe("Qlik relay telemetry and least privilege", () => {
     expect(matches("/api/ingest/qlik")).toBe(false);
     expect(matches("/api/ingest/qlik/")).toBe(false);
     expect(matches("/api/ingest/qlik/internal")).toBe(false);
+    expect(matches("/api/export/ranking")).toBe(false);
+    expect(matches("/api/export/ranking/")).toBe(false);
     expect(matches("/api/ingest/qlik-other")).toBe(true);
+    expect(matches("/api/export/ranking-other")).toBe(true);
     expect(matches("/api/ingest/salesforce")).toBe(true);
     expect(matches("/app/dashboard")).toBe(true);
   });

@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-13: Exportacao do ranking para Qlik
+
+- Adiciona `GET /api/export/ranking` para consumo servidor-servidor pelo Qlik,
+  protegido por Bearer token dedicado e sem abrir grants diretos nas tabelas.
+- Retorna snapshot e participantes normalizados com `no-store`, `noindex` e
+  falhas sanitizadas; o endpoint permanece 404 enquanto o segredo nao existir.
+- Exclui a rota do proxy de sessão para evitar dependencia de cookies Supabase.
+- Reforca a rejeicao de symlink no estoque oficial tambem no Windows, preservando
+  `O_NOFOLLOW` como defesa adicional no Linux.
+
 ## 2026-10-13 — Estoque automático
 
 Recupera a base anterior em falhas após a troca atômica e distingue publicação
