@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-13: Texto regional imob
+
+- Padroniza as atividades salvas com primeira letra maiuscula e demais
+  minusculas, mantendo a mesma tipografia da aba Gerente regional house.
+
 ## 2026-10-13: Conteudo de Gerente regional imob
 
 - Cadastra no CRM 18 linhas e 93 atividades do Excel fornecido, usando o

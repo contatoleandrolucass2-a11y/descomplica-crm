@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-13: Padrao de texto regional imob
+
+- Capitalizacao solicitada salva no CRM as 22:54: primeira letra maiuscula
+  e demais minusculas, preservando 93 atividades e 18 linhas.
+- Fonte, tamanho, peso e entrelinha iguais a House; 108 campos conferidos
+  apos recarga. Somente dados pela UI existente, sem codigo ou novo deploy.
+
 ## 2026-10-13: Cadastro da rotina Gerente regional imob
 
 - Conteudo autorizado cadastrado pela UI existente, usando TESTE1.xlsx:

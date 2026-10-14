@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-13: Capitalizacao da rotina regional imob
+
+- Pedido complementar aplicado pela UI autenticada: primeira letra maiuscula
+  e demais minusculas em cada atividade, sem reescrever o conteudo.
+- Fonte computada identica a House: Geist, 13px, peso 400, linha 18.2px.
+  Nenhuma alteracao de CSS, codigo, permissao ou schema.
+- Salvo no CRM em 13/10 as 22:54; apos recarga, os 108 campos correspondem
+  integralmente a matriz transformada, com 93 atividades e 18 linhas.
+  Captura local: test-results/routine-preview/regional-imob-sentence-case.png.
+- Validacao operacional de leitura, edicao, salvamento e recarga aprovada.
+  Suite de codigo nao repetida nesta operacao de dados; resultados e limite
+  da validacao anterior permanecem na nota abaixo. Nao houve novo deploy.
+- Fechamento em 2026-10-14T01:55Z: health publico 200/ok na versao
+  0fdbb80aa79d731bcd458ca4bc892ecc76be2918. PR212 aberto, SHA 6eaca7a:
+  validate e isolated-restore aprovados, release-gates em andamento.
+  Fontes: /api/health do CRM e GitHub actions/runs/38496863633.
+
 ## 2026-10-13: Cadastro da rotina Gerente regional imob
 
 - Abertura em 13/10 as 22:22 de Sao Paulo (2026-10-14T01:22Z): main e
