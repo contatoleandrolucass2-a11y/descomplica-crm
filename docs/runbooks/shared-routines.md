@@ -72,10 +72,16 @@ a versao antiga volta ao salvamento local e nao atualiza o registro compartilhad
 ## Evidencias
 
 Apresentacao: Semana/Hoje e Inserir linha ficam antes de Salvar no cabecalho.
-Apenas os dias da tabela acompanham a rolagem abaixo do menu. Gradientes e
-realce seguem a referencia visual, sem modificar a pagina de metas. Hover/foco
-destacam linha e coluna na semana e somente linha no dia; a ampliacao sutil nao
-redimensiona a grade. Movimento reduzido desativa brilho e ampliacao. Assinatura
+Apenas os dias da tabela acompanham a rolagem abaixo do menu. O dia atual e
+destacado somente no cabecalho, sem pintar a coluna. Atividades pendentes usam
+o fundo da pagina; somente a celula concluida recebe o gradiente azul e o check.
+Hover/foco usam contorno sem ampliar celulas nem colorir atividades pendentes.
+O controle fica no canto superior esquerdo na semana e antes do texto em Hoje,
+em trilho fixo que alinha os controles verticalmente. Ambas as vistas usam o
+mesmo estado individual, sem copiar ou salvar marcacoes separadas.
+A tabela nao cria barras internas: a pagina rola verticalmente e, na semana,
+horizontalmente apenas se a largura disponivel nao comportar os seis dias.
+Hoje se ajusta a largura da pagina. Movimento reduzido desativa brilho. Assinatura
 fica diretamente no fundo do rodape da Rotina, alinhada a direita, sem faixa
 nem borda e sem alterar o rodape global. Entrada e brilho seguem da direita
 para a esquerda; movimento reduzido deixa o texto estatico.

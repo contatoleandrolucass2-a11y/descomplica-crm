@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-14: Compactacao da Rotina
+
+- Pedido aplicado somente ao componente de Rotina e estilos locais. Grade
+  fixa para checkbox/texto; controles antes do texto, sem faixa extra abaixo.
+- Fundo neutro nas pendentes, gradiente exclusivamente em data-completed;
+  data-today restrito aos cabecalhos. Hover/foco por contorno, sem escala.
+- Wrapper deixa de criar scroll interno; semana conserva largura legivel
+  e pode exigir rolagem horizontal da pagina em telas estreitas. Hoje adapta.
+- Hook/API/banco e conteudo salvo preservados. Lint/tipos/build aprovados;
+  QA focal4/4 com tres temas e duas larguras, Axe e sincronizacao bidirecional.
+  Windows integral interrompido apos symlink/timeouts; exigir CI Linux completa.
+  CI e publicacao pendentes; nao confundir com deploy faae8e9 anterior.
+
 ## 2026-10-14: Publicacao das conclusoes individuais
 
 - PR215 integrado; CI38510935022 e main CI38514527676 completas/aprovadas.

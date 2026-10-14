@@ -8,7 +8,9 @@
 - Nova branch codex/rotina-compacta preserva dashboard e registros anteriores.
   Pedido: controles a esquerda, fundo somente por conclusao, destaque do dia
   apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
-  CI e publicacao deste novo ajuste ainda nao executadas.
+  Lint/tipos/build e QA focal4/4 aprovados; suite Windows integral indisponivel
+  por symlink/timeouts. CI Linux e publicacao pendentes. Evidencias e limites:
+  [auditoria compacta](../audits/rotina-compacta-2026-10-14.md).
 
 ## 2026-10-14: Retomada dos funis no comparativo mensal
 
