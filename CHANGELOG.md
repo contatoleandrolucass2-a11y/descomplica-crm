@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14: Integracao Qlik em andamento
+
+- Inicia contrato aditivo de duas coletas e audiencia completa autorizada,
+  mantendo o relay antigo e Salesforce separados. Ainda sem ativacao remota.
+
 ## 2026-10-14: Evidencias de publicacao Qlik
 
 - Registra o estado separado de implementacao, CI e producao. A integracao

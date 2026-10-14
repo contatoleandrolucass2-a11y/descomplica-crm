@@ -11,9 +11,9 @@
 - SDK/preflight desligados, sem coleta. API usa sessao browser;
   OAuth nao e requisito universal. Verify corrigido OK; CI/handshake pendentes.
   Historico/testes no WORKLOG. UI sem fonte; Salesforce/grants intactos.
-- Fontes16:31Z: GitHubPR216/224, fetch e health. Main0019690; site200/ok5c4d95e;
+- Fontes16:57Z: GitHubPR216/224, fetch e health. Main0019690; site200/ok5c4d95e;
   SSH14:51Z: browser2f0907e ativo/disabled. Main conciliado eme85e620;
-  CI216 falhou E2E; CI224/1d96204 rodando. Coleta/RPC/reader/migration pendentes.
+  CI224/1d96204: codigo/restore/E2E OK, visual rodando. Coleta/RPC pendentes.
   Usuario autorizou duas coletas conciliadas e recorte completo para ranking.view.
 - PR224 conciliado com main, sem conflito; detalhes WORKLOG. Sem deploy.
 

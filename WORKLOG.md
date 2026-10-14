@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-14: Retomada da integracao completa Qlik
+
+Consulta16:57Z: main0019690 e health200/ok5c4d95e; CI38598554910/1d96204
+aprovou codigo, restore, banco e E2E, aguardando matriz visual. Sync concluido.
+Catalogo MCP confirmou ausencia de relay/governanca legados em producao.
+Decidido contrato v2 aditivo com RPC writer restrita, reader MFA/permissao,
+duas coletas e HMAC proprio na VPS. Implementacao em andamento, sem DDL remota.
+Ledger observado depois registra deploy externo de0019690 em16:58:40Z;
+nenhuma publicacao Qlik executada por este trabalho ate esta conferencia.
+
 ## 2026-10-14: Retomada e limite de publicacao Qlik
 
 Fechamento16:31Z (13:31 BRT): conflitos apenas documentais do PR224 foram
