@@ -8,16 +8,14 @@
 - Browser rootless/pipe privado e cofre instalados; sessao visual12:47Z valida,
   saved:true, sem segredo lido. Recuperacao excepcional de socket residual,
   backups, causas e criterio de revisao em [sessao](../runbooks/qlik-vps-session.md).
-- Localb773344: SDK QIX/preflight e ciclo sequencial desligados. Nao coleta
-  fatos nem alimenta ranking. OAuth nao e requisito universal; API usa sessao
-  browser. pnpm verify/audit OK; Linux/CSP/handshake real pendentes. WORKLOG
-  preserva historico/testes integrais. UI sem fonte; Salesforce/grants intactos.
+- Localb773344: SDK/preflight desligados, sem coleta. API usa sessao browser;
+  OAuth nao e requisito universal. Verify/audit OK; Linux/handshake pendentes.
+  Historico/testes no WORKLOG. UI sem fonte; Salesforce/grants intactos.
 - Fontes14:51Z: GitHubPR216, git fetch, SSH e /api/health. Main5c4d95e,
-  site200/ok16f4587; browser2f0907e ativo/disabled. Conciliacao local em curso;
+  site200/ok16f4587; browser2f0907e ativo/disabled. Main conciliado eme85e620;
   CI propria, coleta reconciliada, RPC/reader, backup/migration e agenda pendentes.
   Exportador legado nao localizado; nao inventar comparacao shadow ou dados.
-- Nota Qlik consolidada para limite256000bytes; detalhes nos runbooks/WORKLOG
-  e historico Git, outras notas preservadas. Sem merge/deploy produtivo.
+- Nota consolidada para256000bytes; detalhes no WORKLOG. Sem merge/deploy.
 
 ## 2026-10-14: Rotina compacta por conclusao
 
