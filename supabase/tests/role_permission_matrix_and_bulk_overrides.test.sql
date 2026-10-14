@@ -1,6 +1,6 @@
 begin;
 
-select plan(97);
+select plan(124);
 
 select has_column(
   'public',
@@ -1022,6 +1022,184 @@ select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011
 set local role authenticated;
 select is((select count(*) from public.get_user_role_permission_defaults()), 0::bigint, 'callers without users.view receive no role defaults');
 reset role;
+
+-- Brand access is explicit even for Master. Management capability does not
+-- imply permission to read either stock catalog.
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+select is(
+  (select count(*) from public.permissions where key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view') and min_level = 10),
+  2::bigint,
+  'both brand permissions exist with the operational minimum level'
+);
+select is(
+  (select count(*) from public.role_permissions where permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
+  0::bigint,
+  'no role inherits brand access, including Master'
+);
+select ok(
+  not exists (
+    select 1
+    from unnest(array[
+      'a3000000-0000-4000-8000-000000000001'::uuid,
+      'a3000000-0000-4000-8000-000000000002'::uuid,
+      'a3000000-0000-4000-8000-000000000004'::uuid,
+      'a3000000-0000-4000-8000-000000000005'::uuid,
+      'a3000000-0000-4000-8000-000000000006'::uuid,
+      'a3000000-0000-4000-8000-000000000007'::uuid,
+      'a3000000-0000-4000-8000-000000000008'::uuid
+    ]) fixture(user_id)
+    where public._internal_has_permission(fixture.user_id, 'crm.inventory.riva.view')
+      or public._internal_has_permission(fixture.user_id, 'crm.inventory.direcional.view')
+  ),
+  'all seven approved role fixtures start without access to either brand'
+);
+select ok(
+  public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
+    and public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view'),
+  'Master can manage both brand permissions without reading either brand'
+);
+select ok(
+  public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'Administrator can manage both brand permissions without reading either brand'
+);
+select ok(
+  not public.can_grant_permission('a3000000-0000-4000-8000-000000000011', 'crm.inventory.riva.view')
+    and not public.can_grant_permission('a3000000-0000-4000-8000-000000000011', 'crm.inventory.direcional.view'),
+  'an actor without permissions.manage cannot delegate either brand'
+);
+insert into public.permissions (key, description, min_level)
+values ('crm.inventory.other.view', 'Synthetic brand-like permission outside the allowlist', 10);
+select ok(
+  not public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.other.view')
+    and not public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.commercial_policy.manage'),
+  'the brand exception does not extend to similar keys or restricted commercial policy'
+);
+delete from public.permissions where key = 'crm.inventory.other.view';
+update public.permissions set min_level = 100 where key = 'crm.inventory.riva.view';
+select ok(
+  not public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view'),
+  'brand delegation retains the existing minimum-level rule and Master exception'
+);
+update public.permissions set min_level = 10 where key = 'crm.inventory.riva.view';
+select ok(
+  not has_function_privilege('authenticated', 'public.can_grant_permission(uuid,text)', 'EXECUTE')
+    and not has_function_privilege('anon', 'public.can_grant_permission(uuid,text)', 'EXECUTE')
+    and not has_function_privilege('service_role', 'public.can_grant_permission(uuid,text)', 'EXECUTE')
+    and not has_table_privilege('authenticated', 'public.permissions', 'INSERT,UPDATE,DELETE')
+    and not has_table_privilege('anon', 'public.permissions', 'INSERT,UPDATE,DELETE'),
+  'brand configuration adds no direct function or catalog mutation grants'
+);
+
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view'], 'allow', 'Synthetic RIVA access')$$,
+  'Master grants RIVA to a lower user without possessing RIVA read access'
+);
+reset role;
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'RIVA-only access does not authorize DIRECIONAL'
+);
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.apply_user_permission_access_draft('a3000000-0000-4000-8000-000000000008', array['crm.inventory.direcional.view'], array[]::text[], array['crm.inventory.riva.view'], 'Synthetic DIRECIONAL-only access')$$,
+  'Administrator switches brands atomically without possessing brand read access'
+);
+reset role;
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'DIRECIONAL-only access does not authorize RIVA'
+);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view'], 'allow', 'Synthetic combined brand access')$$,
+  'Administrator can explicitly authorize both brands'
+);
+reset role;
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'both explicitly allowed brands are effective'
+);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view', 'crm.inventory.direcional.view'], 'inherit', 'Synthetic brand access revocation')$$,
+  'restoring defaults revokes both explicit brand grants'
+);
+reset role;
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'revocation leaves the target with neither brand'
+);
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'managing another user never grants brand reading to Master or Administrator'
+);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000002', array['crm.inventory.riva.view'], 'allow', 'Synthetic self brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access to self'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000003', array['crm.inventory.riva.view'], 'allow', 'Synthetic peer brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access to a peer'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000001', array['crm.inventory.riva.view'], 'allow', 'Synthetic superior brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access to Master'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000009', array['crm.inventory.direcional.view'], 'allow', 'Synthetic outside-scope brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access outside the reporting scope'
+);
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011', true);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view'], 'allow', 'Synthetic unmanaged brand grant')$$,
+  '42501', null, 'actors without permissions.manage cannot mutate brand access through the RPC'
+);
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000001', array['crm.inventory.riva.view'], 'allow', 'Synthetic Master self brand grant')$$,
+  '42501', null, 'Master cannot bypass the existing self-modification guard'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000010', array['crm.inventory.riva.view'], 'allow', 'Synthetic pending brand grant')$$,
+  '23505', null, 'pending users cannot receive brand permission exceptions'
+);
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+update public.profiles set is_active = false
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.direcional.view'], 'allow', 'Synthetic inactive brand grant')$$,
+  '23505', null, 'inactive users cannot receive brand permission exceptions'
+);
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+update public.profiles set is_active = true
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+select is(
+  (select count(*) from public.user_permission_overrides where user_id::text like 'a3000000-%' and permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
+  0::bigint,
+  'rejected brand mutations leave no residual access grants'
+);
 
 select * from finish();
 rollback;

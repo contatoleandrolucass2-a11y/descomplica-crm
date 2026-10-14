@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { canGrantPermission, canManageTargetLevel } from "@/lib/authorization/hierarchy";
 import type { AuthorizationContext } from "@/lib/authorization/types";
+import { ROLE_INHERITED_PERMISSIONS } from "@/lib/authorization/access-presentation";
 
 function actor(overrides: Partial<AuthorizationContext>): AuthorizationContext {
   return {
@@ -14,6 +15,23 @@ function actor(overrides: Partial<AuthorizationContext>): AuthorizationContext {
 }
 
 describe("hierarquia de delegação de permissões", () => {
+  it("mantém as duas marcas desativadas nos padrões de todos os papéis, inclusive Master", () => {
+    for (const permissions of Object.values(ROLE_INHERITED_PERMISSIONS)) {
+      expect(permissions).not.toContain("crm.inventory.riva.view");
+      expect(permissions).not.toContain("crm.inventory.direcional.view");
+    }
+  });
+
+  it("permite gerenciar marcas sem conceder acesso de consulta ao gestor", () => {
+    for (const permission of ["crm.inventory.riva.view", "crm.inventory.direcional.view"] as const) {
+      expect(canGrantPermission(actor({}), permission)).toBe(true);
+      expect(canGrantPermission(actor({ roleKey: "master", level: 100 }), permission)).toBe(true);
+      expect(canGrantPermission(actor({ permissions: [] }), permission)).toBe(false);
+      expect(canGrantPermission(actor({ level: 10 }), permission)).toBe(false);
+    }
+    expect(canGrantPermission(actor({}), "crm.simulators.view")).toBe(false);
+  });
+
   it("permite ao Master delegar uma permissão que possui mesmo com minLevel 100", () => {
     expect(
       canGrantPermission(

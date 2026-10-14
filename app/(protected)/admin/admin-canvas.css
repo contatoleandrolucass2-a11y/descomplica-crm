@@ -1035,6 +1035,11 @@
   font-size: 0.78rem;
 }
 
+.admin-permission-group > .admin-form-help {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+}
+
 .admin-permission-grid {
   display: grid;
   min-width: 0;

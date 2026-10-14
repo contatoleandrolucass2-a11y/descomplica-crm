@@ -1283,6 +1283,8 @@ ${masterPreflight}
     with expected(role_key, permission_key) as (
       values
         ('admin', 'crm.dashboard.view'),
+        ('admin', 'crm.simulators.view'),
+        ('admin', 'crm.simulators.execute'),
         ('admin', 'crm.dashboard.all.view'),
         ('admin', 'crm.dashboard.with_canal_imob.view'),
         ('admin', 'crm.dashboard.without_canal_imob.view'),
@@ -1295,22 +1297,32 @@ ${masterPreflight}
         ('admin', 'crm.salesforce.refresh'),
         ('admin', 'crm.ingest.manage'),
         ('coordinator', 'crm.dashboard.view'),
+        ('coordinator', 'crm.simulators.view'),
+        ('coordinator', 'crm.simulators.execute'),
         ('coordinator', 'crm.dashboard.with_canal_imob.view'),
         ('coordinator', 'crm.stages.view'),
         ('coordinator', 'crm.partnerships.view'),
         ('manager_house', 'crm.dashboard.view'),
+        ('manager_house', 'crm.simulators.view'),
+        ('manager_house', 'crm.simulators.execute'),
         ('manager_house', 'crm.dashboard.without_canal_imob.view'),
         ('manager_house', 'crm.stages.view'),
         ('manager_house', 'crm.ranking.view'),
         ('manager_imob', 'crm.dashboard.view'),
+        ('manager_imob', 'crm.simulators.view'),
+        ('manager_imob', 'crm.simulators.execute'),
         ('manager_imob', 'crm.dashboard.with_canal_imob.view'),
         ('manager_imob', 'crm.stages.view'),
         ('manager_imob', 'crm.partnerships.view'),
         ('broker_house', 'crm.dashboard.view'),
+        ('broker_house', 'crm.simulators.view'),
+        ('broker_house', 'crm.simulators.execute'),
         ('broker_house', 'crm.dashboard.without_canal_imob.view'),
         ('broker_house', 'crm.stages.view'),
         ('broker_house', 'crm.ranking.view'),
         ('broker_imob', 'crm.dashboard.view'),
+        ('broker_imob', 'crm.simulators.view'),
+        ('broker_imob', 'crm.simulators.execute'),
         ('broker_imob', 'crm.dashboard.with_canal_imob.view'),
         ('broker_imob', 'crm.stages.view'),
         ('broker_imob', 'crm.partnerships.view')
@@ -1328,6 +1340,7 @@ ${masterPreflight}
           'crm.ranking.view',
           'crm.partnerships.view',
           'crm.simulators.view',
+          'crm.simulators.execute',
           'pages.manage',
           'crm.settings.view',
           'crm.settings.manage',
@@ -1343,6 +1356,15 @@ ${masterPreflight}
     ) difference
   ) then
     raise exception 'inherited commercial permission baseline diverged';
+  end if;
+  if (
+    select count(*) from public.permissions
+    where key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
+  ) <> 2 or exists (
+    select 1 from public.role_permissions
+    where permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
+  ) then
+    raise exception 'inventory brands must exist without inherited access';
   end if;
   if exists (
     select 1
@@ -1361,6 +1383,19 @@ end
 $qa_preflight$;
 
 ${masterBootstrap}
+${
+  reuseExistingMaster
+    ? ""
+    : `
+-- Brand access belongs only to the newly created local synthetic Master.
+insert into public.user_permission_overrides (
+  user_id, permission_key, effect, reason, granted_by
+)
+values
+  (${userIdSql}, 'crm.inventory.riva.view', 'allow', 'Ephemeral local visual inventory QA fixture', ${userIdSql}),
+  (${userIdSql}, 'crm.inventory.direcional.view', 'allow', 'Ephemeral local visual inventory QA fixture', ${userIdSql});
+`
+}
 
 insert into public.crm_organizations (organization_key, name, kind)
 values (

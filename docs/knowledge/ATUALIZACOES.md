@@ -1,5 +1,14 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Marcas exigem liberação individual
+
+- Fonte: pedido do usuário e resposta explícita “Ambos desativados; liberar por usuário”. Nenhum papel, inclusive Master, herda `crm.inventory.riva.view` ou `crm.inventory.direcional.view`.
+- A gestão de permissões não concede leitura de estoque. O guard de delegação permite configurar somente essas duas chaves sem possuí-las, mantendo nível, escopo, estado da conta e bloqueio de autoelevação.
+- Associativo, Investidor, Direta e Tabelão usam as duas APIs protegidas de estoque. A marca é identificada pelo campo `businessUnit`, com trim e normalização de caixa, aceitando somente Riva e Direcional. Não inferir marca pelo empreendimento.
+- O cache pode compartilhar a origem bruta apenas no servidor; cada resposta deve filtrar novamente conforme as permissões atuais. Nenhuma marca significa estoque vazio sem consultar a fonte.
+- Trocar papel ou restaurar padrões remove as liberações individuais dessas marcas. Dados já carregados em uma aba não são apagados retroativamente; novas consultas aplicam a revogação.
+- Escopo local; esta nota não comprova publicação remota. Validação detalhada em `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
 ## 2026-10-14: Herança e controle de acesso na prévia local
 
 - Fonte: solicitação do usuário, código do painel e banco Docker local.

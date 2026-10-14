@@ -95,6 +95,7 @@ type BulkEffect = "allow" | "deny" | "inherit";
 interface PermissionGroup {
   id: string;
   label: string;
+  description?: string;
   matches: (permissionKey: PermissionKey) => boolean;
 }
 
@@ -131,6 +132,13 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
       key.startsWith("crm.simulators.") ||
       key.startsWith("crm.commercial_engine.") ||
       key.startsWith("crm.commercial_policy."),
+  },
+  {
+    id: "inventory-brands",
+    label: "Marcas nos simuladores",
+    description:
+      "Libere uma ou ambas as marcas. Sem marca marcada, o usuário não visualiza unidades nos simuladores. Nenhum papel libera marcas automaticamente.",
+    matches: (key) => key.startsWith("crm.inventory."),
   },
   {
     id: "settings",
@@ -552,6 +560,7 @@ function PermissionMatrix({
               <h4 id={`permission-group-${user.userId}-${group.id}`}>{group.label}</h4>
               <span>{group.permissions.length} itens</span>
             </div>
+            {group.description ? <p className="admin-form-help">{group.description}</p> : null}
             <div className="admin-permission-grid">
               {group.permissions.map((permissionKey) => {
                 const keys = getControlKeys(permissionKey);

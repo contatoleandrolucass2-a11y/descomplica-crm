@@ -3,6 +3,9 @@ import path from "node:path";
 
 import { describe, expect, it } from "vitest";
 
+// @ts-expect-error — SQL generation is tested without running the local QA harness.
+import { fixtureSetupSql } from "../scripts/qa/local-authenticated-visual.mjs";
+
 const repositoryRoot = process.cwd();
 const markerNames = [
   "20260808235856_grant_imob_ranking_service_role.sql",
@@ -19,12 +22,12 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 47-version manifest", async () => {
+  it("keeps a unique, ordered 48-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(47);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(47);
+    expect(migrations).toHaveLength(48);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(48);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
   });
@@ -42,6 +45,24 @@ describe("release-candidate migration train", () => {
 });
 
 describe("release-candidate activation defaults", () => {
+  it("grants inventory only to the newly created local visual fixture", () => {
+    const fixture = {
+      marker: "QA local synthetic inventory permissions",
+      userId: "10000000-0000-4000-8000-000000000001",
+    };
+    const localSql = fixtureSetupSql(fixture);
+    const reusedSql = fixtureSetupSql({ ...fixture, reuseExistingMaster: true });
+
+    for (const permission of ["crm.inventory.riva.view", "crm.inventory.direcional.view"]) {
+      expect(localSql).toContain(`('${fixture.userId}'::uuid, '${permission}', 'allow'`);
+      expect(reusedSql).not.toContain(`('${fixture.userId}'::uuid, '${permission}', 'allow'`);
+    }
+    for (const sql of [localSql, reusedSql]) {
+      expect(sql).not.toContain("insert into public.role_permissions");
+      expect(sql).toContain("inventory brands must exist without inherited access");
+    }
+  });
+
   it("keeps restore and browser gates synchronized with the released access matrix", async () => {
     const [restoreHarness, rlsHarness, browserHarness, visualHarness] = await Promise.all([
       readFile(path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"), "utf8"),
@@ -65,7 +86,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1139;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1166;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

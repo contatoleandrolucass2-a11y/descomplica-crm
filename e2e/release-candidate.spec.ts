@@ -13,6 +13,8 @@ import {
 } from "@playwright/test";
 
 import { isRecoveryTokenHash } from "../lib/auth/recovery-token";
+// @ts-expect-error — the existing local QA harness provides the validated synthetic input.
+import { syntheticProposal } from "../scripts/qa/concurrent-associativo.mjs";
 
 const expectedRoles = [
   "master",
@@ -332,7 +334,6 @@ const partnershipRoles = new Set<Role>([
   "broker_imob",
 ]);
 const repasseRoles = new Set<Role>(["master", "admin"]);
-const masterOnlyRoles = new Set<Role>(["master"]);
 const protectedSurfaces = [
   {
     path: "/app",
@@ -409,36 +410,36 @@ const protectedSurfaces = [
     heading: "Metas de pontos",
     allowed: adminRoles,
   },
-  { path: "/app/simulacao", heading: "Hub de Simulação", allowed: masterOnlyRoles },
+  { path: "/app/simulacao", heading: "Hub de Simulação", allowed: activeOperationalRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
     heading: "Simulador Tabela Associativo",
-    allowed: masterOnlyRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/calcular-documentacao",
     heading: "Calcular documentação",
-    allowed: masterOnlyRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/caixa",
     heading: "Simulação CAIXA",
-    allowed: masterOnlyRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/tabela-direta",
     heading: "Simulador Tabela Direta",
-    allowed: masterOnlyRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/tabelao",
     heading: "Simulador Tabelão",
-    allowed: masterOnlyRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/tabela-investidor",
     heading: "Simulador Tabela Investidor",
-    allowed: masterOnlyRoles,
+    allowed: activeOperationalRoles,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
@@ -499,13 +500,26 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     ...settingsRoutes,
+    ...simulatorRoutes,
     ...administrationRoutes,
   ]),
-  coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  manager_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  broker_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  coordinator: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/canal-de-parcerias",
+    ...simulatorRoutes,
+  ]),
+  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking", ...simulatorRoutes]),
+  manager_imob: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/canal-de-parcerias",
+    ...simulatorRoutes,
+  ]),
+  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking", ...simulatorRoutes]),
+  broker_imob: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/canal-de-parcerias",
+    ...simulatorRoutes,
+  ]),
   pending: [],
 };
 
@@ -524,12 +538,25 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     ...settingsRoutes,
+    ...simulatorRoutes,
   ]),
-  coordinator: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  manager_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
-  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking"]),
-  broker_imob: sortedRouteSet([...operationalRoutes, "/app/canal-de-parcerias"]),
+  coordinator: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/canal-de-parcerias",
+    ...simulatorRoutes,
+  ]),
+  manager_house: sortedRouteSet([...operationalRoutes, "/app/ranking", ...simulatorRoutes]),
+  manager_imob: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/canal-de-parcerias",
+    ...simulatorRoutes,
+  ]),
+  broker_house: sortedRouteSet([...operationalRoutes, "/app/ranking", ...simulatorRoutes]),
+  broker_imob: sortedRouteSet([
+    ...operationalRoutes,
+    "/app/canal-de-parcerias",
+    ...simulatorRoutes,
+  ]),
   pending: [],
 };
 
@@ -697,7 +724,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      role === "master" ? 22 : role === "admin" ? 15 : activeOperationalRoles.has(role) ? 7 : 0,
+      adminRoles.has(role) ? 22 : activeOperationalRoles.has(role) ? 14 : 0,
     );
     expect(expectedAccountAdminRoutesByRole[role], role).toHaveLength(adminRoles.has(role) ? 3 : 0);
   }
@@ -706,7 +733,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   );
   expect(
     protectedSurfaces.find((surface) => surface.path === "/app/simulacao/caixa")?.allowed,
-  ).toBe(masterOnlyRoles);
+  ).toBe(activeOperationalRoles);
 });
 
 test("anonymous boundaries and generic login failure stay closed", async ({ page }) => {
@@ -1031,6 +1058,9 @@ for (const role of expectedRoles) {
               snapshotReferenceDate: "2026-09-05",
             });
           }
+        } else if (activeOperationalRoles.has(role)) {
+          expect(inventoryResponse.status()).toBe(200);
+          expect(await inventoryResponse.json()).toEqual({ count: 0, items: [] });
         } else {
           expect(inventoryResponse.status()).toBe(403);
           expect(await inventoryResponse.json()).toEqual({ error: "forbidden" });
@@ -1040,22 +1070,27 @@ for (const role of expectedRoles) {
       const simulatorStatus = await page.request.get(
         "/api/official-simulator/associativo-fluxo-linear",
       );
-      if (role === "master") {
+      const simulatorExecution = await page.request.post(
+        "/api/official-simulator/associativo-fluxo-linear",
+        {
+          data: { schemaVersion: 1, input: syntheticProposal(0) },
+          headers: { origin: qaTarget.origin },
+        },
+      );
+      if (activeOperationalRoles.has(role)) {
         expect(simulatorStatus.status()).toBe(200);
         expect(await simulatorStatus.json()).toMatchObject({
           engineKey: "simulator.wf13",
           executionEnabled: true,
         });
+        expect(simulatorExecution.status()).toBe(200);
+        expect(await simulatorExecution.json()).toMatchObject({
+          engineKey: "simulator.wf13",
+          result: { ok: true },
+        });
       } else {
         expect(simulatorStatus.status()).toBe(403);
         expect(await simulatorStatus.json()).toEqual({ error: "forbidden" });
-        const simulatorExecution = await page.request.post(
-          "/api/official-simulator/associativo-fluxo-linear",
-          {
-            data: { schemaVersion: 1, input: {} },
-            headers: { origin: qaTarget.origin },
-          },
-        );
         expect(simulatorExecution.status()).toBe(403);
         expect(await simulatorExecution.json()).toEqual({ error: "forbidden" });
       }
@@ -1160,7 +1195,7 @@ for (const role of expectedRoles) {
       expect(navigationRoutes).toEqual(expectedHeaderRoutesByRole[role]);
       reportProgress("navigation");
 
-      if (role === "master") {
+      if (activeOperationalRoles.has(role)) {
         const hubResponse = await page.goto("/app/simulacao");
         expect(hubResponse?.status()).toBe(200);
         await expect(
@@ -1373,7 +1408,7 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("released simulator pages run only for Master while the CAIXA engine stays blocked", async ({
+test("released simulator pages respect explicit inventory access while the CAIXA engine stays blocked", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1514,11 +1549,19 @@ test("released simulator pages run only for Master while the CAIXA engine stays 
 
   await withRolePage(browser, "admin", async (page) => {
     const status = await page.request.get("/api/official-simulator/associativo-fluxo-linear");
-    expect(status.status()).toBe(403);
-    expect(await status.json()).toEqual({ error: "forbidden" });
-    await page.goto("/app/simulacao/associativo-fluxo-linear");
-    await expect(page.getByRole("heading", { level: 1, name: forbiddenHeading })).toBeVisible();
-    await expect(page.getByRole("button", { name: "Calcular fluxo linear" })).toHaveCount(0);
+    expect(status.status()).toBe(200);
+    expect(await status.json()).toMatchObject({ executionEnabled: true });
+    for (const inventoryPath of ["/api/inventory", "/api/inventory/snapshot"]) {
+      const inventory = await page.request.get(inventoryPath);
+      expect(inventory.status()).toBe(200);
+      expect(await inventory.json()).toEqual({ count: 0, items: [] });
+    }
+    const response = await page.goto("/app/simulacao/associativo-fluxo-linear");
+    expect(response?.status()).toBe(200);
+    await expect(
+      page.getByRole("heading", { level: 1, name: "Simulador Tabela Associativo", exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Iniciar proposta com / })).toHaveCount(0);
     await logoutAndAssertBoundary(page, "admin");
   });
 });

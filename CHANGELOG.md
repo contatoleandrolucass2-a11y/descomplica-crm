@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14 — Marcas nos simuladores, ambiente local
+
+- Adiciona RIVA e DIRECIONAL como acessos independentes por usuário, desativados por padrão em todos os papéis.
+- Oculta unidades das marcas não autorizadas nas respostas das APIs de todos os simuladores, incluindo o snapshot e consultas com cache.
+
 ## 2026-10-14 — Ambiente local
 
 - Corrige os quadrados de usuários para refletir a herança do papel e as

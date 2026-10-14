@@ -29,8 +29,19 @@
   O cache e por processo; reiniciar a aplicacao o descarta. Nao contem sessao,
   cookie, permissao ou dados pessoais do usuario.
 - A autorizacao `crm.simulators.view` ocorre antes de qualquer acesso ao cache.
-  O JSON da origem e o mesmo para todos os usuarios autorizados. Se esse contrato
-  mudar para estoque por organizacao, o cache devera ser particionado ou removido.
+  O cache guarda a origem bruta apenas no servidor. Cada resposta de estoque vivo
+  ou snapshot filtra unidades pelas permissões atuais `crm.inventory.riva.view`
+  e `crm.inventory.direcional.view`, inclusive em cache HIT e consultas concorrentes.
+  Nenhum papel herda essas marcas. Sem liberação individual, a API retorna
+  `count: 0, items: []` sem acessar a origem ou o cache. O acesso de gestão não
+  concede leitura e o Master não tem bypass.
+  Somente `businessUnit` Riva/Direcional, normalizado por espaços externos e
+  caixa, é aceito. Marcas desconhecidas são excluídas. A resposta recalcula a
+  contagem e conserva apenas metadados de procedência conhecidos. O snapshot
+  integral continua validado por SHA e 3.301 identificadores antes desse filtro.
+  Novas consultas aplicam a revogação; dados já recebidos por uma aba não podem
+  ser recolhidos retroativamente. Estoque por organização exigirá autorização
+  adicional; não reutilizar uma resposta filtrada entre usuários.
 - Respostas mantem `Cache-Control: no-store`; nao existe cache publico, persistencia
   no navegador nem retorno de entrada vencida quando a origem falha.
 - Falha de consulta inicia intervalo de cinco segundos por processo antes de
@@ -112,6 +123,8 @@ preservacao da proposta e contagens de filtros. Conferir em navegador autenticad
 desktop/mobile e comparar cache frio/quente separadamente.
 
 Reverter a versao da aplicacao remove o cache e restaura a sequencia anterior.
-Nao ha migration ou alteracao de workflow n8n. O complemento territorial do
+A restrição por marcas usa a migration local `20261014193926`; reverter somente
+a aplicação removeria essa restrição e exige avaliação explícita. Não houve
+alteração de workflow n8n. O complemento territorial do
 Tabelao usa parse5 e consultas separadas, limitadas e nao bloqueantes; conferir
 [Regioes e vagas](tabelao-regions.md) para fontes, contratos, caches e limites.

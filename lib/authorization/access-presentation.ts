@@ -34,7 +34,10 @@ const FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION = new Set<PermissionKey>([
   "crm.commercial_engine.execute",
 ]);
 const MASTER_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
-  (permission) => !FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION.has(permission),
+  (permission) =>
+    !FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION.has(permission) &&
+    permission !== "crm.inventory.riva.view" &&
+    permission !== "crm.inventory.direcional.view",
 );
 const ADMIN_PERMISSIONS = [
   "users.view",

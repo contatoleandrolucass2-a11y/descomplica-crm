@@ -5,6 +5,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { noStoreHeaders } from "@/lib/security/api";
 
+const authorizedBrands = {
+  ok: true,
+  context: { permissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"] },
+};
+
 const mocks = vi.hoisted(() => ({
   authorizeRoute: vi.fn(),
   readFile: vi.fn(),
@@ -21,7 +26,10 @@ const snapshotPath = path.resolve("synthetic-inventory-snapshot.json");
 const fixture = {
   source: "ESTOQUE SPC.xlsx",
   count: 3301,
-  items: Array.from({ length: 3301 }, (_, index) => ({ id: `synthetic-unit-${index}` })),
+  items: Array.from({ length: 3301 }, (_, index) => ({
+    id: `synthetic-unit-${index}`,
+    businessUnit: index % 2 === 0 ? "Riva" : "Direcional",
+  })),
   lineage: { origin: "synthetic-test", batchId: "synthetic-batch" },
   sourceKind: "untrusted-fixture-value",
   snapshotReferenceDate: "untrusted-fixture-value",
@@ -30,7 +38,9 @@ const fixture = {
 const contents = JSON.stringify(fixture);
 const snapshotSha256 = createHash("sha256").update(contents).digest("hex");
 const expectedSnapshot = {
-  ...fixture,
+  source: fixture.source,
+  count: fixture.count,
+  items: fixture.items,
   sourceKind: "versioned-snapshot",
   snapshotReferenceDate: "2026-09-05",
   snapshotSha256,
@@ -66,7 +76,7 @@ beforeEach(async () => {
   vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_PATH", ` ${snapshotPath} `);
   vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_SHA256", ` ${snapshotSha256} `);
   vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE", "");
-  mocks.authorizeRoute.mockResolvedValue({ ok: true });
+  mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
   mocks.readFile.mockResolvedValue(contents);
   ({ GET } = await import("@/app/api/inventory/snapshot/route"));
 });
@@ -78,6 +88,124 @@ afterEach(() => {
 });
 
 describe("inventory snapshot route", () => {
+  it.each([
+    { permissions: [], brands: [] },
+    { permissions: ["crm.inventory.riva.view"], brands: ["Riva"] },
+    { permissions: ["crm.inventory.direcional.view"], brands: ["Direcional"] },
+    { permissions: authorizedBrands.context.permissions, brands: ["Riva", "Direcional"] },
+  ])("filters a fully validated snapshot for $permissions", async ({ permissions, brands }) => {
+    mocks.authorizeRoute.mockResolvedValue({
+      ok: true,
+      context: { roleKey: "master", permissions },
+    });
+    const response = await GET();
+    expectNoStore(response);
+    const payload = await response.json();
+    const expectedItems = fixture.items.filter((item) => brands.includes(item.businessUnit));
+    expect(payload.items).toEqual(expectedItems);
+    expect(payload.count).toBe(expectedItems.length);
+    expect(payload).not.toHaveProperty("lineage");
+    if (permissions.length === 0) {
+      expect(payload).toEqual({ count: 0, items: [] });
+      expect(mocks.readFile).not.toHaveBeenCalled();
+      expect(createHash).not.toHaveBeenCalled();
+    } else {
+      expect(payload.snapshotSha256).toBe(snapshotSha256);
+      expect(createHash).toHaveBeenCalledExactlyOnceWith("sha256");
+    }
+  });
+
+  it("filters current permissions on a warm snapshot after brand access is changed or removed", async () => {
+    for (const permissions of [
+      authorizedBrands.context.permissions,
+      ["crm.inventory.riva.view"],
+      ["crm.inventory.direcional.view"],
+      [],
+      ["crm.inventory.riva.view"],
+    ]) {
+      mocks.authorizeRoute.mockResolvedValue({ ok: true, context: { permissions } });
+      const response = await GET();
+      expectNoStore(response);
+      const payload = await response.json();
+      const expectedItems = fixture.items.filter((item) =>
+        permissions.includes(`crm.inventory.${item.businessUnit.toLowerCase()}.view`),
+      );
+      expect(payload.items).toEqual(expectedItems);
+      expect(payload.count).toBe(expectedItems.length);
+      if (permissions.length === 0) expect(payload).toEqual({ count: 0, items: [] });
+    }
+    expect(mocks.readFile).toHaveBeenCalledTimes(1);
+    expect(createHash).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps concurrent brand profiles separate on the same pending snapshot", async () => {
+    const pending = deferredRead();
+    mocks.readFile.mockReturnValueOnce(pending.promise);
+    const requests = Array.from({ length: 20 }, (_, index) => {
+      const brand = index % 2 === 0 ? "Riva" : "Direcional";
+      mocks.authorizeRoute.mockResolvedValueOnce({
+        ok: true,
+        context: { permissions: [`crm.inventory.${brand.toLowerCase()}.view`] },
+      });
+      return GET().then(async (response) => {
+        expectNoStore(response);
+        const payload = await response.json();
+        const expectedItems = fixture.items.filter((item) => item.businessUnit === brand);
+        expect(payload.items).toEqual(expectedItems);
+        expect(payload.count).toBe(expectedItems.length);
+      });
+    });
+    await Promise.resolve();
+    pending.resolve(contents);
+    await Promise.all(requests);
+    expect(mocks.readFile).toHaveBeenCalledTimes(1);
+    expect(createHash).toHaveBeenCalledTimes(1);
+  });
+
+  it("omits empty, absent and unknown brands even when both brands are allowed", async () => {
+    const unknownBrands = [undefined, null, "", "  ", "Outra", "Riva Direcional", "Direcional Sul"];
+    const unknownFixture = {
+      ...fixture,
+      items: fixture.items.map((item, index) =>
+        index < unknownBrands.length ? { ...item, businessUnit: unknownBrands[index] } : item,
+      ),
+      facets: { projects: ["Projeto restrito"] },
+      aggregates: { count: 3301 },
+    };
+    const unknownContents = JSON.stringify(unknownFixture);
+    vi.stubEnv(
+      "INVESTOR_INVENTORY_SNAPSHOT_SHA256",
+      createHash("sha256").update(unknownContents).digest("hex"),
+    );
+    mocks.readFile.mockResolvedValueOnce(unknownContents);
+    const response = await GET();
+    expect(response.status).toBe(200);
+    const payload = await response.json();
+    expect(payload.items).toEqual(fixture.items.slice(unknownBrands.length));
+    expect(payload.count).toBe(3301 - unknownBrands.length);
+    expect(payload).not.toHaveProperty("facets");
+    expect(payload).not.toHaveProperty("aggregates");
+  });
+
+  it("validates all source rows before applying a narrow brand filter", async () => {
+    const invalidContents = JSON.stringify({
+      ...fixture,
+      items: fixture.items.map((item, index) =>
+        index === 3 ? { ...item, id: fixture.items[1]!.id } : item,
+      ),
+    });
+    vi.stubEnv(
+      "INVESTOR_INVENTORY_SNAPSHOT_SHA256",
+      createHash("sha256").update(invalidContents).digest("hex"),
+    );
+    mocks.readFile.mockResolvedValueOnce(invalidContents);
+    mocks.authorizeRoute.mockResolvedValue({
+      ok: true,
+      context: { permissions: ["crm.inventory.riva.view"] },
+    });
+    await expectUnavailable(await GET());
+  });
+
   it("bounds successive read failures before allowing a shared retry", async () => {
     mocks.readFile.mockRejectedValue(new Error("synthetic_read_failure"));
     for (let index = 0; index < 20; index += 1) {
@@ -175,7 +303,7 @@ describe("inventory snapshot route", () => {
     }
   });
 
-  it("reuses only the validated result on warm requests and preserves lineage", async () => {
+  it("reuses only the validated result on warm requests and preserves safe provenance", async () => {
     vi.stubEnv("INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE", " 2030-01-02 ");
     const parse = vi.spyOn(JSON, "parse");
     const cold = await GET();

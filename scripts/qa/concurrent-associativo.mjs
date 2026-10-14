@@ -126,7 +126,7 @@ export async function requestJson(
 function assertSnapshot(payload) {
   check(
     payload?.sourceKind === "versioned-snapshot" &&
-      payload.qaFixture?.synthetic === true &&
+      payload.source === snapshot.source &&
       payload.count === snapshot.count &&
       isDeepStrictEqual(payload.items, snapshot.items),
     "snapshot_not_synthetic",
@@ -136,7 +136,7 @@ function assertSnapshot(payload) {
 function assertSyntheticLiveInventory(payload) {
   check(
     payload?.sourceKind === "live" &&
-      payload.qaFixture?.synthetic === true &&
+      payload.source === snapshot.source &&
       payload.count === snapshot.count &&
       isDeepStrictEqual(payload.items, snapshot.items),
     "live_inventory_not_synthetic",
@@ -371,7 +371,8 @@ export async function runConcurrentAssociativo({
       http: "real local Next/auth/calculator/synthetic snapshot",
       browserLiveInventory: "real protected endpoint with QA-only loopback synthetic upstream",
       productionUpstream: "not exercised",
-      isolation: "two distinct master users; broker_house and pending users denied",
+      isolation:
+        "two distinct master users with explicit brand access; broker_house can calculate with empty inventory; pending denied",
       excluded:
         "real external inventory feed, production throughput, persisted proposals, twenty distinct identities",
     },
@@ -465,7 +466,7 @@ export async function runConcurrentAssociativo({
         if (
           response.status() >= 400 &&
           !(
-            account.role !== "master" &&
+            account.role === "pending" &&
             response.status() === 403 &&
             new URL(response.url()).pathname === simulatorPage
           )
@@ -524,16 +525,23 @@ export async function runConcurrentAssociativo({
         );
       });
     }
-    for (const context of contexts.slice(2))
-      requests.push((operationSignal) =>
-        requestJson(context.request, origin, simulatorEndpoint, {
-          method: "POST",
-          input: inputs[0],
-          expectedStatus: 403,
-          expectedError: "forbidden",
-          signal: operationSignal,
-        }),
-      );
+    requests.push(async (operationSignal) => {
+      const payload = await requestJson(contexts[2].request, origin, simulatorEndpoint, {
+        method: "POST",
+        input: inputs[0],
+        signal: operationSignal,
+      });
+      assertCalculation(payload, inputs[0]);
+    });
+    requests.push((operationSignal) =>
+      requestJson(contexts[3].request, origin, simulatorEndpoint, {
+        method: "POST",
+        input: inputs[0],
+        expectedStatus: 403,
+        expectedError: "forbidden",
+        signal: operationSignal,
+      }),
+    );
     for (const pathname of [snapshotEndpoint, simulatorEndpoint])
       requests.push((operationSignal) =>
         requestJson(anonymous, origin, pathname, {
@@ -546,8 +554,21 @@ export async function runConcurrentAssociativo({
     check(http.planned === 20 && http.peakInFlight === 20, "http_concurrency_not_reached");
 
     const negatives = [];
+    for (const pathname of [snapshotEndpoint, "/api/inventory"])
+      negatives.push(async (operationSignal) => {
+        const payload = await requestJson(contexts[2].request, origin, pathname, {
+          signal: operationSignal,
+          inventoryIsolation,
+        });
+        check(isDeepStrictEqual(payload, { count: 0, items: [] }), "ungranted_inventory_leaked");
+      });
+    negatives.push(async (operationSignal) => {
+      const payload = await requestJson(contexts[2].request, origin, simulatorEndpoint, {
+        signal: operationSignal,
+      });
+      check(payload.executionEnabled === true, "broker_execution_not_enabled");
+    });
     for (const [client, status, error] of [
-      [contexts[2].request, 403, "forbidden"],
       [contexts[3].request, 403, "forbidden"],
       [anonymous, 401, "unauthenticated"],
     ]) {
@@ -596,7 +617,26 @@ export async function runConcurrentAssociativo({
       "browserContexts",
       pages.map((page, index) => async () => {
         if (index < 2) await fillProposal(page, index, origin);
-        else {
+        else if (index === 2) {
+          const inventoryResponses = [snapshotEndpoint, "/api/inventory"].map((pathname) =>
+            page.waitForResponse((response) => new URL(response.url()).pathname === pathname),
+          );
+          await page.goto(`${origin}${simulatorPage}`, { waitUntil: "domcontentloaded" });
+          await page
+            .getByRole("heading", { name: "Simulador Tabela Associativo", exact: true })
+            .waitFor({ state: "visible" });
+          for (const response of await Promise.all(inventoryResponses)) {
+            check(response.status() === 200, "broker_inventory_response_failed");
+            check(
+              isDeepStrictEqual(await response.json(), { count: 0, items: [] }),
+              "ungranted_browser_inventory_leaked",
+            );
+          }
+          check(
+            (await page.getByRole("button", { name: /^Iniciar proposta com / }).count()) === 0,
+            "ungranted_browser_rendered_unit",
+          );
+        } else {
           await page.goto(`${origin}${simulatorPage}`, { waitUntil: "domcontentloaded" });
           await page
             .getByRole("heading", {

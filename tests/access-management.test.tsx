@@ -237,6 +237,8 @@ describe("catálogo localizado de acesso", () => {
             "crm.read_model_v3.partnerships.view",
             "crm.read_model_v3.stock.view",
             "crm.commercial_engine.execute",
+            "crm.inventory.riva.view",
+            "crm.inventory.direcional.view",
           ].includes(permission),
       ),
     );
@@ -426,6 +428,11 @@ describe("catálogo localizado de acesso", () => {
     expect(checkbox("Visualizar dashboard")).toContain('checked=""');
     expect(checkbox("Visualizar dashboard com Canal Imob")).not.toContain('checked=""');
     expect(checkbox("Visualizar dashboard sem Canal Imob")).not.toContain('checked=""');
+    expect(markup).toContain("Marcas nos simuladores");
+    expect(checkbox("RIVA")).toBeDefined();
+    expect(checkbox("RIVA")).not.toContain('checked=""');
+    expect(checkbox("DIRECIONAL")).toBeDefined();
+    expect(checkbox("DIRECIONAL")).not.toContain('checked=""');
     expect(checkbox("Gerenciar usuários")).toContain('disabled=""');
     expect(markup.match(/aria-label="Acessar simuladores"/g)).toHaveLength(1);
     expect(markup).toContain("Permite visualizar e executar os simuladores disponíveis.");

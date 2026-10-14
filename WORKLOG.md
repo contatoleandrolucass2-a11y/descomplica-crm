@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-14: Acesso individual a marcas nos simuladores
+
+- Adiciona controles independentes RIVA e DIRECIONAL, ambos desativados em todos os papéis, inclusive Master. A liberação é individual e respeita a hierarquia existente.
+- Gestores de permissões podem configurar essas duas marcas sem receber acesso de consulta. A exceção de delegação é limitada às duas chaves; autoalteração, pares, superiores e escopos continuam bloqueados.
+- As APIs de estoque vivo e snapshot filtram as unidades por permissões efetivas a cada requisição, inclusive com cache aquecido. Sem marcas, retornam estoque vazio. Marcas desconhecidas são negadas.
+- O snapshot completo continua validado por integridade antes do filtro. Contagens são recalculadas e metadados desconhecidos são descartados para não revelar unidades excluídas.
+- Migration aplicada somente ao banco Docker local. Evidências e limites estão em `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
 ## 2026-10-14: Administração de acessos no ambiente local
 
 - Implementa quadrados com herança real do banco e exceções individuais,
