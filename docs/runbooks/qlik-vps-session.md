@@ -134,6 +134,20 @@ Antes de ativar: candidato imutavel revisado, CI/Linux, backup da unit existente
 e procedimento de troca validado; preservar perfil e exclusividade do owner.
 Nao executar segundo owner nem anexar debugger para evitar essa etapa. A
 instalacao inicial recusa units existentes; nao usar como atualizador.
+O instalador confere os quatro modulos transitivos do preflight contra o SHA,
+propriedade root e ausencia de escrita por grupo/outros. Confere somente o
+manifest enigma.js2.15.0 como root; o probe de SDK/schema roda depois como
+descomplica-qlik, antes de instalar units, sem executar coleta.
+
+Revisao de14/10 confirmou que `release:production` ainda promove somente o
+runtime CRM; nao troca units auxiliares. Antes do handshake, implementar e
+testar suporte explicito ao owner Qlik no coordenador, mantendo as travas,
+CAS, intencao duravel, observacao fresca e recuperacao da tentativa. Registrar
+separadamente versao/data do owner, sem confundir com health/deploy do CRM.
+Backup consistente do perfil exige owner parado e ausencia de processos
+remanescentes; nao apagar locks do Chrome nem iniciar segundo owner.
+Teste de instalacao inicial nao comprova upgrade ou restauracao do perfil.
+
 Depois do handshake real, confirmar campos/medidas/IDs e recorte, implementar
 coleta agregada completa e RPC/reader autorizado, reconciliar duas cargas,
 so entao ativar rotina de fatos. Este preflight nao entrega ranking conectado.

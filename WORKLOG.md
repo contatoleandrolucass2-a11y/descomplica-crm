@@ -1,5 +1,38 @@
 # Worklog
 
+Conferencia15:24Z de14/10: git fetch manteve main5c4d95e; health publico
+HTTP200/ok agora identifica5c4d95e, nao16f4587. Atualizacao externa, nao
+publicacao Qlik. PR216/12cd013: validate e restore aprovados, matriz visual
+ainda em andamento. PR224/af935b7: validate Linux aprovado, demais gates
+pendentes. Correcoes do instalador exigem CI no novo SHA; sem merge/deploy.
+
+## 2026-10-14: Integridade operacional e audiencia Qlik
+
+Verify repetido apos correcoes: exit0, lint com um aviso preexistente,
+typecheck,144 arquivos/2835 Vitest/82 skips, suites operacionais sem falhas,
+release113/11 skips POSIX e build51 paginas. Prettier e diff-check aprovados.
+CI propria apos push ainda exigida; nenhum destes testes consultou fatos Qlik.
+
+Usuario confirmou recorte completo Direcional/SP CAPITAL/CANAL IMOB para
+usuarios com crm.ranking.view. Regra documentada para guard e reader no banco;
+nenhuma mudanca de ACL, RPC ou coleta foi executada por essa confirmacao.
+
+Revisao corrigiu dois P2 no instalador: quatro modulos transitivos incluidos
+na integridade do release e enigma.js2.15.0 validado por metadata como root,
+com probe do SDK/schema apenas sob usuario tecnico. Foco17/17 passou nos
+dois checkouts; instalacao real Linux e upgrade continuam nao executados.
+
+PR224 draft separa operacao do PR216; af935b7 validou lint/tipos/build local,
+mas Vitest Windows teve falha preexistente O_NOFOLLOW no estoque. Esta branch
+ja contem o check lstat; verify completo61cff23 passou2835/82 e build51 apos
+repeticao do timeout isolado Next DevTools, sem relaxar testes. CI Linux da
+branch operacional passou validate; demais gates nao concluidos nessa consulta.
+
+release:production nao atualiza units auxiliares. E necessario suporte
+explicito e testado com backup consistente/perfil parado, CAS e recuperacao
+antes de trocar owner e testar QIX real. Nao reutilizar instalador inicial.
+Sem handshake, fatos, RPC/reader novo, migration ou agenda: entrega pendente.
+
 ## 2026-10-14: Cliente QIX e preflight automatico
 
 Retomada13:34Z: main8e015c6, health200/ok16f4587, PR216/46378ce com conflito

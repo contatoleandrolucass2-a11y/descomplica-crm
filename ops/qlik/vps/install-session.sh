@@ -41,7 +41,7 @@ done
 [[ $(git -C "$release" rev-parse HEAD) == "$1" ]] || fail "Release SHA mismatch."
 release_status=$(git -C "$release" status --porcelain --untracked-files=all)
 [[ -z "$release_status" ]] || fail "Release must be clean."
-for relative in ops/qlik/vps/install-session.sh ops/qlik/console-gateway.mjs ops/qlik/credential-vault.mjs ops/qlik/launch-browser.mjs ops/qlik/console/index.html ops/qlik/console/client.js ops/qlik/console/credential-client.js ops/qlik/console/style.css "${units[@]/#/ops/qlik/vps/}"; do
+for relative in ops/qlik/vps/install-session.sh ops/qlik/console-gateway.mjs ops/qlik/credential-vault.mjs ops/qlik/launch-browser.mjs ops/qlik/browser-preflight.mjs ops/qlik/collection-loop.mjs ops/qlik/metadata-artifact.mjs ops/qlik/qix-metadata.mjs ops/qlik/console/index.html ops/qlik/console/client.js ops/qlik/console/credential-client.js ops/qlik/console/style.css "${units[@]/#/ops/qlik/vps/}"; do
   file="$release/$relative"
   [[ -f "$file" && ! -L "$file" && $(stat -c %u "$file") == 0 ]] ||
     fail "Expected root-owned release file missing or symlink."
@@ -90,6 +90,7 @@ try {
   const coreManifest = createRequire(playwrightManifest).resolve('playwright-core/package.json');
   const manifests = [
     ['ws', path.join(root, 'ws/package.json')],
+    ['enigma.js', path.join(root, 'enigma.js/package.json')],
     ['@novnc/novnc', path.join(root, '@novnc/novnc/package.json')],
     ['@playwright/test', testManifest],
     ['playwright', playwrightManifest],
@@ -99,6 +100,7 @@ try {
     if (!within(realpathSync(manifest))) throw new Error();
     const metadata = JSON.parse(readFileSync(manifest, 'utf8'));
     if (metadata.name !== name || typeof metadata.version !== 'string' || !metadata.version) throw new Error();
+    if (name === 'enigma.js' && metadata.version !== '2.15.0') throw new Error();
   }
 } catch {
   console.error('Unsafe or incomplete release dependency tree.');
@@ -149,7 +151,7 @@ if runuser -u descomplica-qlik -- /usr/bin/test -r "$releases_parent"; then
   fail "Qlik must not list the releases parent."
 fi
 # A failed non-root probe leaves the account/profile for manual inspection, with no units installed.
-(cd "$release" && runuser -u descomplica-qlik -- /usr/bin/env -i PATH="$PATH" HOME=/var/lib/descomplica-qlik "$node" --input-type=module -e "import { access } from 'node:fs/promises'; if (process.getuid() === 0) throw new Error('Non-root dependency probe required'); await import('ws'); await import('@playwright/test'); await access(new URL(import.meta.resolve('@novnc/novnc')))") >/dev/null
+(cd "$release" && runuser -u descomplica-qlik -- /usr/bin/env -i PATH="$PATH" HOME=/var/lib/descomplica-qlik "$node" --input-type=module -e "import { access } from 'node:fs/promises'; if (process.getuid() === 0) throw new Error('Non-root dependency probe required'); await import('ws'); await import('@playwright/test'); await access(new URL(import.meta.resolve('@novnc/novnc'))); const { getBrowserMetadataScript } = await import('./ops/qlik/browser-preflight.mjs'); await getBrowserMetadataScript()") >/dev/null
 for unit in "${units[@]}"; do
   install -o root -g root -m 0644 "$staging/$unit" "/etc/systemd/system/$unit"
 done

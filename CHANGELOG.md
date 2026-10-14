@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Integridade do preflight e audiencia Qlik
+
+- Inclui todos os modulos do preflight na verificacao de arquivos aprovados
+  e exige enigma.js2.15.0 com probe de leitura pelo usuario restrito.
+- Registra recorte completo para usuarios com crm.ranking.view; reader e
+  autorizacao no banco continuam pendentes, sem alterar grants nesta etapa.
+- Mantem instalador exclusivo para instalacao inicial, sem substituir o
+  owner existente ou ativar coleta antes de um upgrade protegido e validado.
+
 ## 2026-10-14: Preflight automatico Qlik pela sessao dedicada
 
 - Adiciona SDK oficial enigma.js fixado, cliente QIX restrito ao aplicativo

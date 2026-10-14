@@ -8,14 +8,14 @@
 - Browser rootless/pipe privado e cofre instalados; sessao visual12:47Z valida,
   saved:true, sem segredo lido. Recuperacao excepcional de socket residual,
   backups, causas e criterio de revisao em [sessao](../runbooks/qlik-vps-session.md).
-- Localb773344: SDK/preflight desligados, sem coleta. API usa sessao browser;
-  OAuth nao e requisito universal. Verify/audit OK; Linux/handshake pendentes.
+- SDK/preflight desligados, sem coleta. API usa sessao browser;
+  OAuth nao e requisito universal. Verify corrigido OK; CI/handshake pendentes.
   Historico/testes no WORKLOG. UI sem fonte; Salesforce/grants intactos.
-- Fontes14:51Z: GitHubPR216, git fetch, SSH e /api/health. Main5c4d95e,
-  site200/ok16f4587; browser2f0907e ativo/disabled. Main conciliado eme85e620;
+- Fontes15:24Z: GitHubPR216/224, git fetch e /api/health. Main/site200/ok5c4d95e;
+  SSH14:51Z: browser2f0907e ativo/disabled. Main conciliado eme85e620;
   CI propria, coleta reconciliada, RPC/reader, backup/migration e agenda pendentes.
-  Usuario autorizou duas coletas conciliadas no lugar do shadow; detalhes no mapa.
-- Nota consolidada para256000bytes; detalhes no WORKLOG. Sem merge/deploy.
+  Usuario autorizou duas coletas conciliadas e recorte completo para ranking.view.
+- Upgrade do owner exige suporte no coordenador; detalhes no WORKLOG. Sem deploy.
 
 ## 2026-10-14: Rotina compacta por conclusao
 
