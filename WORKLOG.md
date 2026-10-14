@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-14: Seletor e contorno da Rotina
+
+- Substitui as seis abas por selecao unica nativa, mantendo os rascunhos de
+  cada funcao e os controles de autorizacao existentes.
+- Cabecalhos usam o tom do antigo seletor ativo. Um contorno branco continuo
+  envolve a coluna atual, incluindo o cabecalho fixo, sem pintar pendentes.
+- Redesenha acoes com modos segmentados, insercao secundaria e salvamento
+  destacado; remove brilhos individuais. Movimento reduzido preservado.
+- Sem mudanca de texto, hook, API ou banco. Validacao/publicacao em andamento;
+  detalhes em docs/audits/rotina-seletor-2026-10-14.md.
+
 ## 2026-10-14: Compactacao da Rotina
 
 - Pedido aplicado somente ao componente de Rotina e estilos locais. Grade

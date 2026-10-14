@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-14: Filtro e destaque da Rotina
+
+- Troca as abas por um seletor unico de rotina e reorganiza os botoes.
+- Aplica brilho branco apenas no contorno completo da coluna do dia atual,
+  incluindo o titulo; cabecalhos recebem o azul do antigo seletor ativo.
+- Mantem fundo neutro nas pendentes, gradiente nas concluidas e marcacoes
+  individuais sincronizadas entre Semana e Hoje.
+
 ## 2026-10-14: Rotina compacta por atividade
 
 - Posiciona a conclusao no canto superior esquerdo na semana e antes do

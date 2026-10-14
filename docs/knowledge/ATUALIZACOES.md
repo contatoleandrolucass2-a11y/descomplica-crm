@@ -1,5 +1,15 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Seletor e contorno da Rotina
+
+- Retomada15:54Z: Git comum confirmado, main/publicado5c4d95e; health200/ok.
+  PR225 documental em5d7631c: validate/restore aprovados, release-gates falhou
+  em daily-layout-320-balanced (CI38588434885). Diagnostico antes do merge;
+  nao reiniciar CRM por documentos. Fontes: GitHub, git fetch e /api/health.
+- Novos ajustes autorizados para publicacao apos validacao: seletor unico,
+  controles redesenhados e contorno branco da coluna atual, sem mudar dados.
+  Evidencias: [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+
 ## 2026-10-14: Rotina compacta por conclusao
 
 - Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
