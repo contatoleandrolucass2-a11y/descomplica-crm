@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-14: Atualizacao automatica dos relatorios
+
+- Atualiza o dashboard aberto quando uma nova versao dos relatorios e
+  publicada no CRM, preservando filtros e posicao da tela.
+- Distingue coleta de publicacao confirmada e reconfere a consistencia do lote
+  antes de exibir indicadores; nenhuma formula ou fonte comercial alterada.
+- Verifica a preservacao da navegacao na QA autenticada com fixture completa.
+- Isola a QA de refresh e limita suas esperas, sem reduzir os gates existentes.
+- Acrescenta diagnostico geometrico sanitizado quando a QA de Rotina falha.
+- Confere a transferencia RSC pelo registro de rede do navegador na QA.
+- Aguarda o estilo de cada modo da Rotina antes de medir sua geometria na QA.
+- Confere tambem o alinhamento do contorno antes de medir overflow da pagina.
+- Aplica essa prontidao antes da geometria das celulas na matriz diaria.
+
 ## 2026-10-14: Evidencias de publicacao Qlik
 
 - Registra a divergencia entre candidato, main e versao publicada; a coleta

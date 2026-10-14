@@ -6,6 +6,10 @@ const mocks = vi.hoisted(() => ({
   requirePermission: vi.fn(),
   createClient: vi.fn(),
   rpc: vi.fn(),
+  from: vi.fn(),
+  select: vi.fn(),
+  eq: vi.fn(),
+  maybeSingle: vi.fn(),
 }));
 vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission: mocks.enforce }));
 vi.mock("@/lib/authorization/guards", async (importOriginal) => ({
@@ -27,7 +31,11 @@ beforeEach(() => {
   vi.clearAllMocks();
   mocks.enforce.mockResolvedValue({ roleKey: "admin", permissions: ["crm.settings.manage"] });
   mocks.requirePermission.mockResolvedValue({});
-  mocks.createClient.mockResolvedValue({ rpc: mocks.rpc });
+  mocks.createClient.mockResolvedValue({ rpc: mocks.rpc, from: mocks.from });
+  mocks.from.mockReturnValue({ select: mocks.select });
+  mocks.select.mockReturnValue({ eq: mocks.eq });
+  mocks.eq.mockReturnValue({ maybeSingle: mocks.maybeSingle });
+  mocks.maybeSingle.mockResolvedValue({ data: null, error: null });
   mocks.rpc.mockResolvedValue({
     data: [
       {
@@ -82,14 +90,48 @@ describe("connected systems evidence authorization", () => {
     expect(mocks.requirePermission).toHaveBeenCalledWith("crm.dashboard.view", true);
     expect(mocks.createClient).not.toHaveBeenCalled();
     expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalled();
   });
 
-  it("reads only the existing RPC through the authenticated client", async () => {
+  it("reads the existing RPC and snapshot version through the authenticated client", async () => {
     const response = await GET();
     expect(response.status).toBe(200);
     expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("get_crm_sync_status");
+    expect(mocks.from).toHaveBeenCalledExactlyOnceWith("crm_dashboard_snapshots");
+    expect(mocks.select).toHaveBeenCalledExactlyOnceWith("generated_at,updated_at");
+    expect(mocks.eq).toHaveBeenCalledExactlyOnceWith("snapshot_key", "global");
     expect(response.headers.get("cache-control")).toContain("no-store");
-    expect(await response.json()).toMatchObject({ ingestion: { status: null, completedAt: null } });
+    expect(await response.json()).toMatchObject({
+      generatedAt: null,
+      updatedAt: null,
+      ingestion: { status: null, completedAt: null },
+    });
+  });
+
+  it("uses the persisted version, including reimports with the same generation date", async () => {
+    mocks.maybeSingle.mockResolvedValue({
+      data: {
+        generated_at: "2026-10-14T12:33:00.123456+00:00",
+        updated_at: "2026-10-14T12:34:00.234567+00:00",
+      },
+      error: null,
+    });
+    expect(await (await GET()).json()).toMatchObject({
+      generatedAt: "2026-10-14T12:33:00.123456+00:00",
+      updatedAt: "2026-10-14T12:34:00.234567+00:00",
+    });
+  });
+
+  it.each([
+    { data: null, error: { message: "private database detail" } },
+    { data: {}, error: null },
+    { data: { generated_at: "invalid", updated_at: "invalid" }, error: null },
+  ])("fails closed when the snapshot version cannot be confirmed", async (result) => {
+    mocks.maybeSingle.mockResolvedValue(result);
+    const response = await GET();
+    expect(response.status).toBe(503);
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(await response.json()).toEqual({ error: "status_unavailable" });
   });
 
   it.each([

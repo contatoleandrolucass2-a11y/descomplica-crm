@@ -12,6 +12,7 @@ import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import { checkMarketingResources } from "./marketing-resources.mjs";
 import { checkRoutineSettings } from "./routine-settings.mjs";
 import { checkConnectedSystems } from "./connected-systems.mjs";
+import { checkDashboardAutoRefresh } from "./dashboard-auto-refresh.mjs";
 import { checkRepasse } from "./repasse.mjs";
 import {
   checkTabelaoLayout,
@@ -5867,6 +5868,27 @@ async function run() {
             );
           } finally {
             await marketingPage.close({ runBeforeUnload: false });
+          }
+          currentStage = "dashboard-auto-refresh";
+          // Keep refresh checks independent of other pages, routes and context-wide clock mocks.
+          const dashboardContext = await browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            reducedMotion: "reduce",
+            locale: "pt-BR",
+            timezoneId: "America/Sao_Paulo",
+            httpCredentials,
+          });
+          try {
+            await hideHomologationBannerForBaseline(dashboardContext);
+            const dashboardPage = configureQaPage(await dashboardContext.newPage());
+            await login(dashboardPage, origin, email, password);
+            const dashboardRefresh = await checkDashboardAutoRefresh(dashboardPage, origin);
+            await writeFile(
+              path.join(artifactRoot, "dashboard-auto-refresh-results.json"),
+              JSON.stringify(dashboardRefresh, null, 2),
+            );
+          } finally {
+            await dashboardContext.close();
           }
           currentStage = "routine-settings";
           // Playwright's clock belongs to the context, not only to its page.
