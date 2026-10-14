@@ -23,7 +23,6 @@
   em sucesso). Adicionado upload sanitizado always separado; nao promove
   baseline reprovada. Reexecutar e corrigir causa antes de merge/deploy216.
 
-
 - CI216/47c1e85: pgTAP v2 passou254; suite falhou somente2 allowlists globais.
   Expectativas corrigidas sem grants novos; nova CI/restore exigidos. Catalogo
   produtivo18:07Z confirma helpers, ausencia v2 e ACLs legadas restritas.
