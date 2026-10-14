@@ -163,8 +163,11 @@ de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
   envolve a coluna atual, incluindo o cabecalho fixo, sem pintar pendentes.
 - Redesenha acoes com modos segmentados, insercao secundaria e salvamento
   destacado; remove brilhos individuais. Movimento reduzido preservado.
-- Sem mudanca de texto, hook, API ou banco. Validacao/publicacao em andamento;
-  detalhes em docs/audits/rotina-seletor-2026-10-14.md.
+- Sem mudanca de texto, hook, API ou banco. PR226 integrado, CI final38610165621
+  integralmente aprovada; publicado77ddc69 em18:42:12Z, com backup e coordenador.
+  Health, limites anonimos e UI autenticada validados sem escrever atividades.
+  Fechamento documental no PR225, sem novo deploy; evidencias e limites em
+  docs/audits/rotina-seletor-2026-10-14.md.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
