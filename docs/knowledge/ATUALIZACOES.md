@@ -10,7 +10,12 @@
   apenas no cabecalho e rolagem da pagina. Sem alterar texto, API ou banco.
   Lint/tipos/build e QA focal4/4 aprovados; suite Windows integral indisponivel
   por symlink/timeouts. PR222/CI38565559075 aprovada em ea2e639; incorporado
-  main8e015c6 documental, sem alterar runtime. Nova CI e publicacao pendentes.
+  main8e015c6 documental, sem alterar runtime. CI38571239681/3def954 aprovada;
+  consulta14:32Z confirmou GitHub/health200/ok/16f4587 apos falha do acompanhamento.
+  PR222 integrado; CI main38581434699 com quatro jobs aprovados. Publicado
+  5c4d95e em15:16:09Z (12:16 BRT), deployment9573a6e9, sem pendencia.
+  Backup/rollback e frescor verificados; health correto, anonimo negado e UI
+  autenticada validada nos dois modos, sem alterar textos/marcacoes reais.
   Evidencias e limites:
   [auditoria compacta](../audits/rotina-compacta-2026-10-14.md).
 

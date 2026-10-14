@@ -11,7 +11,10 @@
 - Hook/API/banco e conteudo salvo preservados. Lint/tipos/build aprovados;
   QA focal4/4 com tres temas e duas larguras, Axe e sincronizacao bidirecional.
   Windows integral interrompido apos symlink/timeouts; exigir CI Linux completa.
-  CI e publicacao pendentes; nao confundir com deploy faae8e9 anterior.
+- PR222 integrado em5c4d95e, CI38581434699 aprovada integralmente. Publicado
+  15:16:09Z (12:16 BRT) com backup, imagem imutavel e coordenador protegido.
+  Health/container/acesso anonimo e UI autenticada conferidos; textos e
+  marcacoes existentes preservados. Evidencia na auditoria da Rotina compacta.
 
 ## 2026-10-14: Publicacao das conclusoes individuais
 

@@ -8,6 +8,7 @@
   da pagina. Dia atual destacado somente no cabecalho.
 - Remove a rolagem interna da tabela, mantendo a rolagem da pagina apenas
   quando necessaria e o mesmo estado individual entre Semana e Hoje.
+- Publicado em 14/10 as12:16 BRT apos CI completa e verificacao autenticada.
 
 ## 2026-10-14: Rotina publicada
 
