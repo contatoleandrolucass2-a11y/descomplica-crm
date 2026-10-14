@@ -1,118 +1,106 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-13: Abertura de conclusao individual semanal
+## 2026-10-14: Rotina regional imob e conclusao individual
 
-- Complemento solicitado: revisar portugues de regional imob, preservando
-  sentido e tipografia; conclusoes individuais com virada segunda 00h Brasilia.
-- Consulta em 2026-10-14T02:00Z: fetch sem divergencia de main, health publico
-  200/ok e origin/main em 0fdbb80aa79d731bcd458ca4bc892ecc76be2918.
-  Branch documental e9ef9c1/PR212: validate aprovado; gates ainda em andamento
-  na CI38498361340. Isto nao valida a funcionalidade ainda nao implementada.
-- Fontes: GitHub PR212/actions, GET /api/health e runbook shared-routines.
-  Migracao nova depende de autorizacao especifica; nao aplicar por inferencia.
-- Usuario confirmou conclusoes individuais e autorizou migration aditiva apos
-  testes/backup. Revisao de 40 textos distintos salva as 23:05 e 108 campos
-  conferidos apos recarga; 18 linhas/93 atividades preservadas. Trecho de
-  imobiliarias sem produzir ha 60 dias confirmado explicitamente.
-- Projeto confirmado pelo SUPABASE_URL do runtime: hnncxuerlcsaahdxoswb.
-  Antes da mudanca, tabela/RPCs/helpers novos ausentes; 36 migrations remotas,
-  ultima 20261013035612. Registro local ignorado completions-before.json;
-  nenhuma rotina existente ou cliente exportado. House rev2/26 linhas e
-  Imob rev3/18 linhas observadas. Docker local indisponivel; banco/restore
-  devem ser validados na CI isolada antes da migration.
-- Implementacao: checkbox individual por atividade, API autenticada, RPCs
-  vinculadas a auth.uid e tabela sem grants diretos aos papeis da API. Semana
-  calculada no banco, segunda 00h America/Sao_Paulo; historico anterior nao
-  aparece na semana nova. Marcacoes nao dependem do armazenamento do navegador.
-- Validacao local: lint sem erros, typecheck/build aprovados; 80 testes de
-  API/inventario de migrations aprovados. Suite serial: 2713 aprovados,
-  78 ignorados e tres falhas; duas do manifesto foram corrigidas e retestadas.
-  Restante: symlink Salesforce no Windows (502 esperado, 200 recebido), fora
-  dos arquivos da Rotina; verificar CI Linux, sem dispensar o gate.
-- UI Chromium: 73 testes aprovados antes do ajuste final de foco; regressao
-  focal de PUT/GET e scroll aprovada depois. QA sintetico de dois usuarios e
-  quatro analises axe aprovados. Banco real isolado e publicacao pendentes.
-- CI38501459791: validate aprovado; restore executou 1323 testes e encontrou
-  apenas contador legado da matriz RLS (40, agora 41 tabelas). Lista nominal
-  e 81 testes novos passaram. Contador atualizado sem remover as verificacoes.
-  Suite Chromium final, incluindo correcao de foco: 73/73 aprovados.
-- CI38502364540: validate, 1323 testes pgTAP, advisors, restore e E2E de
-  autorizacao aprovados. Matriz visual bloqueada no setup da segunda conta
-  sintetica (SQLSTATE 23505); corrigir fixture, repetir CI e somente depois
-  migrar/publicar. Nenhuma mutacao remota de schema realizada neste ponto.
-- Causa do 23505: guard de profiles na migration 20260809144137, linhas
-  1743-1753, exige escopo compativel antes de aprovar/ativar o broker. Fixture
-  do leitor precisa de pessoa, equipe, vinculo e concessao de escopo proprio;
-  nao e necessario alterar guards ou permissoes de producao.
-- CI38504861394: fixture corrigida; routine-results.json confirma duas contas
-  distintas, marcacoes independentes persistidas, conteudo compartilhado intacto,
-  Semana/Hoje, teclado e quatro auditorias axe sem violacoes. Rotina passou
-  tambem na matriz de cinco larguras/tres temas e rolagem. Gate geral falhou
-  somente em /admin/usuarios: nova conta virou selecao automatica, mudando o
-  estado da captura (desktop 1324px contra referencia 1187px/limite1200).
-  Corrigir selecao deterministica da conta QA original, sem mudar UI, limites
-  ou imagens de referencia. Fonte: artefato candidato do mesmo run.
+- Imob revisada e salva no CRM em 13/10, 23:05 Sao Paulo: 18 linhas,
+  93 atividades, 108 campos conferidos apos recarga, revisao 3. House
+  preservada. Confirmado: imobiliarias sem produzir ha 60 dias.
+- Usuario autorizou conclusoes individuais persistidas e migration aditiva
+  apos testes/backup; reinicio segunda 00h America/Sao_Paulo. Implementado
+  em PR215, ainda sem migration remota nem publicacao da funcionalidade.
+- Lint/typecheck/build e 73 testes Chromium aprovados; CI38504861394 aprovou
+  1323 pgTAP, restore, E2E e QA real da Rotina com duas contas isoladas.
+  Gate visual geral falhou na selecao da conta administrativa sintetica.
+  Selecao deterministica corrigida, 3 testes Chromium e ESLint focal aprovados.
+- Consulta 2026-10-14T04:12Z: origin/main 792320ba037ea48655739aaeefe5295b95c33631,
+  CI38506931120 aprovada; health publico HTTP200/ok em 0fdbb80. Fontes:
+  GitHub Actions, git fetch/ls-remote e /api/health. Merge concorrente preserva
+  dashboard e ambos os registros; exige nova CI combinada e ledger fresco.
+- Evidencias completas, falhas anteriores e limites preservados em
+  [auditoria da Rotina](../audits/rotina-individual-2026-10-14.md).
+  Detalhes movidos somente para respeitar o limite de exportacao do Obsidian.
 
-## 2026-10-13: Capitalizacao da rotina regional imob
+## 2026-10-13: Replica informacional do dashboard legado
 
-- Pedido complementar aplicado pela UI autenticada: primeira letra maiuscula
-  e demais minusculas em cada atividade, sem reescrever o conteudo.
-- Fonte computada identica a House: Geist, 13px, peso 400, linha 18.2px.
-  Nenhuma alteracao de CSS, codigo, permissao ou schema.
-- Salvo no CRM em 13/10 as 22:54; apos recarga, os 108 campos correspondem
-  integralmente a matriz transformada, com 93 atividades e 18 linhas.
-  Captura local: test-results/routine-preview/regional-imob-sentence-case.png.
-- Validacao operacional de leitura, edicao, salvamento e recarga aprovada.
-  Suite de codigo nao repetida nesta operacao de dados; resultados e limite
-  da validacao anterior permanecem na nota abaixo. Nao houve novo deploy.
-- Fechamento em 2026-10-14T01:55Z: health publico 200/ok na versao
-  0fdbb80aa79d731bcd458ca4bc892ecc76be2918. PR212 aberto, SHA 6eaca7a:
-  validate e isolated-restore aprovados, release-gates em andamento.
-  Fontes: /api/health do CRM e GitHub actions/runs/38496863633.
+- P2 do PR213 confirmado: ingestao sem ranking pode reutilizar generatedAt.
+  Leitor da equipe agora exige updated_at coincidente entre os dois headers,
+  alem da releitura/original. Duas regressoes reproduziram o erro antes do fix.
+  Fontes: comentario4265923448, secure_salesforce_ingestion.sql e set_updated_at
+  (now() transacional). Sem alteracao da RPC, schema ou ingestao remota.
+- Consulta14/10 02:44Z: CI38498361779 do candidato d67a855 aprovou validate,
+  restore e E2E. Predicado funcional original:154 responsivos,88 temas,242 Axe,
+  110 zoom e22 canvases aprovados. Gate visual falhou somente em11 imagens /app.
+  Fonte: artefato11865597980, hash e captura registrados em reference-parity/README.
+  Revisao visual e promocao transacional preservaram231 imagens e limiares1%/16.
+  Excecao: captura dirty, mas fingerprint reproduzido exatamente com diff vazio
+  e19 arquivos QA gerados. Registro preserva o valor original; validade limitada
+  a esse artefato, reavaliar toda futura captura. Nova CI verify/merge/deploy
+  pendentes; baseline promovida nao equivale a CI candidata aprovada.
+- PR213, candidato4484d72, CI38497027352: validate e isolated-restore passaram.
+  QA dedicado tambem aprovado em Linux; E2E falhou ao procurar o titulo antigo
+  Dashboard comercial. Tres expectativas atualizadas para o titulo solicitado,
+  mais verificacao de secoes/tabelas, sem mudar permissoes. Matriz visual nao
+  executou nessa tentativa. Fonte: logs do job115635936612, consulta14/10 01:53Z.
+  Publicacao segue bloqueada ate nova CI completa e revisao de baseline.
+- Pedido confirmado: manter em /app as informacoes e secoes de
+  https://descomplicapro.com.br/?synced=2026-08-07T04%3A04%3A27.433%2B00%3A00,
+  usando dados atuais do CRM. Origem inspecionada pelo navegador; sua data de
+  agosto nao sera copiada como dado atual. Destino anonimo redirecionou a login.
+- Branch codex/dashboard-referencia-completa criada de main0fdbb80; nota de
+  abertura preservada. Fonte: DOM da origem, dashboard/data.ts, presentation.ts,
+  transform.mjs e migrations versionadas. Sem leitura de dados privados remotos.
+- Seis blocos do comparativo mensal, pulso das cinco etapas, diagnostico,
+  quatro tabelas operacionais e estrutura comercial compoem a referencia.
+  SHOW_EXTENDED_DASHBOARD ocultava parte do conteudo existente no destino.
+- Limite confirmado: agregados v2 nao conservam gerente, responsavel ou empresa
+  para filtrar o funil. Visoes autorizadas por canal e periodo continuam validas;
+  nenhuma promocao do shadow v3 ou alteracao de grants/ingestao esta implicita.
+- Contagem por gerente pode usar participantes do ranking sob sessao/RLS e
+  crm.ranking.view, somente na visao global e com geracoes coincidentes.
+  O vinculo deriva do snapshot legado, nao de cadastro oficial de equipes.
+  Pontuacao e politica comercial permanecem bloqueadas conforme contrato atual.
+- Relatorio implementado com read models atuais, sem numeros da referencia.
+  QA sintetico aprovou 65 verificacoes e 21 capturas nos tres temas e larguras
+  390/768/1440. Tipos e build passaram; revisao encontrou e corrigiu reingestao
+  com mesmo generatedAt, comparando tambem updatedAt original do dashboard.
+- Limite Windows comprovado: pnpm test falha no teste preexistente de symlink
+  do estoque. O_NOFOLLOW e indefinido neste host; arquivos envolvidos iguais a
+  origin/main 0fdbb80, origem PR210. Coletor e release rodados separadamente
+  passaram, com skips de plataforma. Nao houve supressao; CI Linux obrigatoria.
+  Causa, evidencia e criterio de revisao: auditoria dashboard-reference-2026-10-13.
+- Docker local indisponivel; resources:doctor confirmou runtimes, Chromium e
+  CLIs requeridos. Matriz autenticada depende da CI isolada. GitHub main
+  reconferido em 14/10 as01:38Z continua0fdbb80; nenhuma integracao/publicacao
+  desta demanda ocorreu. Preview local contem somente fixtures sinteticas.
+- CI, revisao da baseline, merge e publicacao pendentes. Metas, ritmo esperado e plano
+  de acao sem autoridade disponivel permanecem identificados como indisponiveis.
+  Reavaliar dimensoes quando a fonte escopada e identidades estiverem aprovadas;
+  esta nota nao concede autorizacao para migrations ou operacoes remotas.
 
-## 2026-10-13: Cadastro da rotina Gerente regional imob
+## 2026-10-13: Conferencia de abertura do worktree 2fb2
 
-- Abertura em 13/10 as 22:22 de Sao Paulo (2026-10-14T01:22Z): main e
-  health publico 200/ok em 0fdbb80aa79d731bcd458ca4bc892ecc76be2918.
-  GitHub CI main 38462971446 concluida com sucesso. Checkout anterior
-  d4d06e3 limpo; nova branch parte do main observado.
-- PR207 documental anterior continua aberto; validate da CI38425311572
-  falhou em Verify current documentation fee sources. Nao equivale a falha
-  da release da Rotina, validada e publicada em etapa anterior.
-- Pedido atual autoriza cadastrar conteudo do Excel fornecido somente na
-  funcao Gerente regional imob, preservando as outras funcoes. Conferir fonte,
-  estado vazio, correspondencia por dia e persistencia pela UI autenticada.
-  Sem necessidade presumida de mudanca de codigo, migration ou novo deploy.
-- Concluido pela UI autenticada em 13/10 as 22:27 de Sao Paulo: mensagem
-  Salvo no CRM. Fonte TESTE1.xlsx, aba GERENTE REGIONAL IMOB, D6:I26.
-  Dezoito linhas com 93 atividades; linhas 19, 20 e 25 integralmente vazias
-  removidas na apresentacao compacta. Dias e vazios individuais preservados.
-  Apenas espacos repetidos/de borda normalizados; textos e caixa preservados.
-- Extracao OOXML somente leitura, com FileShare.ReadWrite porque Excel mantinha
-  o arquivo aberto. Comparacao independente por SHA-256 da matriz normalizada:
-  2702986a13c1a617492dee6d07ccfa8b516322961cbcc1e7acac79535ee9d06c.
-  Arquivo original inalterado; nenhum conteudo da planilha versionado.
-- UI confirmou funcao vazia antes do cadastro, 108 campos e 93 preenchidos
-  identicos a fonte antes de salvar e apos recarregar. Hoje exibiu as 18
-  atividades da terca-feira correspondentes. Gerente regional house conferido
-  antes/depois sem mudanca. Console sem erros. Screenshot local em
-  test-results/routine-preview/regional-imob-cadastrada.png.
-- Operacao de conteudo autorizada pelo pedido atual; nao alterou codigo,
-  permissoes, schema, n8n ou runtime. Nao necessita publicacao de imagem.
-  Persistencia verificada por recarga autenticada; nao foi usada outra conta
-  ou computador, nem alegada nova auditoria de RLS nesta operacao.
-- Validacao documental: lint e typecheck aprovados; build separado exit 0.
-  pnpm test executado: 2662 passaram, 63 skips e uma falha no teste existente
-  tests/salesforce-inventory-api.test.ts:164 (symlink, esperado 502, recebido
-  200). Nenhum arquivo de estoque ou teste foi alterado. A causa nao foi
-  diagnosticada nesta tarefa de conteudo; revisar esse contrato no Windows
-  em trabalho proprio, sem reduzir assertions. Etapas Node de coletor/release
-  nao executadas nessa rodada porque a suite Vitest interrompeu o encadeamento.
-  Logs locais imob-documentation-verify.log e imob-documentation-build.log.
-  Nao alegar suite integral aprovada nem novo deploy. CI do main observado
-  continuava aprovada na abertura; registro documental segue PR separado.
-- Encerramento em 2026-10-14T01:38:26Z (13/10, 22:38 Sao Paulo): health
-  publico permanece HTTP200/ok/0fdbb80a; somente os tres documentos alterados.
+- Consulta em 2026-10-14T01:04Z (13/10, 22:04 BRT). Git comum confirmado;
+  checkout inicialmente limpo, HEAD destacado em
+  b53dff377b56ac651cd7362f1babd7a6a0fb196b. Fetch origin concluido.
+- GitHub main em 0fdbb80aa79d731bcd458ca4bc892ecc76be2918, um commit a frente
+  do checkout. PR211 integrado em 13/10 as20:27:33Z; CI38462971446 concluida
+  com success para esse SHA as21:06:36Z. Fontes:
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/211 e
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38462971446.
+- GET publico de https://crm.descomplicapro.com.br/api/health as01:04:19Z:
+  HTTP200, status ok, version0fdbb80aa79d731bcd458ca4bc892ecc76be2918.
+  A versao anunciada coincide com main; esta leitura nao confere data de deploy,
+  ledger ou fluxos autenticados e nao substitui o coordenador de publicacao.
+- CONTEXTO, FERRAMENTAS, ATUALIZACOES e AGENTS locais sem diferenca para main.
+  Runtime context/search executado, incluindo referencias curadas do Obsidian;
+  notas historicas nao foram reutilizadas como prova operacional atual.
+- gh ausente do PATH; consultas realizadas pelo conector GitHub. Doctor local
+  incompleto por dependencias ausentes; Node24.19.0 e pnpm11.20.0 confirmados
+  nos comandos com runtime fixado. Checks locais ainda pendentes; pnpm iniciou
+  preparo automatico de dependencias pelo lockfile existente.
+- Escopo de implementacao ainda nao informado neste chat. Registro de abertura
+  local, sem novo commit, PR ou deploy. Reavaliar checkout e checks quando houver
+  tarefa definida; CI de main nao valida alteracoes locais desta nota.
 
 ## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
 

@@ -42,6 +42,39 @@
   uma falha existente de symlink no estoque, registrada em ATUALIZACOES;
   nenhuma alteracao para contornar o teste e nenhuma promocao de runtime.
 
+## 2026-10-13: Replica informacional do dashboard
+
+- Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com
+  generatedAt reutilizado. Exige tambem updated_at coincidente entre ranking
+  e dashboard antes de consultar participantes; duas regressoes falharam antes
+  da correcao. RPC atual usa now() transacional para ambos; sem migration.
+- CI38498361779 aprovou validate, restore, E2E e todos os checks funcionais
+  da matriz visual; falhou apenas nas 11 referencias alteradas de /app.
+  Capturas revisadas e promovidas pelo helper original; 231 imagens preservadas.
+  Fingerprint reproduzido prova apenas 19 outputs gerados, sem diff de codigo.
+  Limiares intactos e nova CI verify obrigatoria antes de merge/publicacao.
+- CI inicial do PR213 aprovou validate, restore e QA sintetico, mas E2E ainda
+  esperava o titulo anterior. Atualizadas as tres expectativas, preservando
+  a matriz de permissoes e acrescentando a verificacao das secoes/tabelas.
+- Pedido: reproduzir em `/app` as informacoes e secoes da referencia publica
+  `descomplicapro.com.br`, usando os dados atuais do CRM, conforme confirmacao
+  expressa do usuario. Nenhuma contagem historica foi copiada para o produto.
+- Relatorio com conversao por etapa, comparativos mensais, diagnostico,
+  realizado por intervalo e distribuicao de corretores por gerente. Preserva
+  shell, temas, visoes autorizadas e atualizacao Salesforce existente.
+- Equipe consultada via SSR/RLS apenas na visao Geral com as permissoes
+  correspondentes. Rejeita bases incompletas, geracoes divergentes e alteracao
+  concorrente; nao usa pontuacao nem altera a politica de ranking.
+- Dimensoes ausentes, meta proporcional e plano de acao permanecem
+  indisponiveis. Sem migration, mutacao de dados remotos ou alteracao no n8n.
+- QA sintetico: 65 verificacoes aprovadas, 18 combinacoes completas/indisponiveis
+  e 21 capturas, sem overflow ou violacao Axe grave. Revisao corrigiu a janela
+  de reingestao com timestamp igual usando updatedAt original do dashboard.
+- Tipos e build passaram. Suite Windows tem uma falha preexistente no teste de
+  symlink do estoque, reproduzida isoladamente; nao foi suprimida. CI Linux,
+  revisao de baseline e publicacao pendentes. Evidencias e limites em
+  `docs/audits/dashboard-reference-2026-10-13.md`.
+
 ## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
 
 Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior

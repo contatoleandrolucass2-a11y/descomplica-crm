@@ -161,6 +161,8 @@ if (approvedCanvasByRoute.size !== routes.length) {
 }
 
 const canvasDensityLimitByRoute = new Map([
+  // The complete reference report replaces the former single-screen dashboard.
+  ["/app", 4800],
   ["/admin/usuarios", 1200],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
@@ -1196,6 +1198,17 @@ async function inspectRoute(
         canvasDensityReady:
           root.clientWidth !== 1440 ||
           Math.max(root.scrollHeight, document.body.scrollHeight) <= maxDesktopHeight,
+        dashboardReportReady:
+          window.location.pathname !== "/app" ||
+          (["pulse", "monthly", "diagnosis", "operational", "team"].every((section) =>
+            document.querySelector(`#report-${section}-title`),
+          ) &&
+            document.querySelectorAll('[aria-labelledby="report-pulse-title"] figure').length ===
+              5 &&
+            document.querySelectorAll('[aria-labelledby="report-monthly-title"] details').length ===
+              6 &&
+            document.querySelectorAll('[aria-labelledby="report-operational-title"] table')
+              .length === 4),
         hasBrokenValue: /\b(?:NaN|undefined)\b/.test(text),
         protectedShellPresent: navigation instanceof HTMLElement,
         loginPresent: Boolean(document.querySelector('input[name="password"]')),
@@ -1352,6 +1365,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
+    snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&
     snapshot.themeControlsVisible &&

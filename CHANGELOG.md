@@ -19,6 +19,19 @@
 - Salvamento compartilhado conferido por recarga; sem alterar outras funcoes
   ou publicar nova versao da aplicacao.
 
+## 2026-10-13: Relatorio completo no dashboard
+
+- Impede exibir equipe de versao anterior apos atualizacao parcial do dashboard.
+- Atualiza as 11 referencias visuais do dashboard apos revisao da captura
+  autenticada isolada, preservando as demais 231 imagens e os limiares do gate.
+- Alinha o E2E ao titulo da referencia e verifica a presenca das secoes completas.
+- Reproduz as secoes informacionais da pagina de referencia em `/app`, com
+  valores atuais do CRM e navegacao por periodo e visao autorizada.
+- Exibe conversoes entre etapas, comparativos mensais, realizado operacional,
+  VGV e distribuicao da equipe quando existe uma base consistente e permitida.
+- Distingue dados ausentes de zero e preserva a indisponibilidade de filtros
+  ou criterios comerciais que ainda nao fazem parte da fonte atual.
+
 ## 2026-10-13 — Estoque automático
 
 Recupera a base anterior em falhas após a troca atômica e distingue publicação
