@@ -1,0 +1,42 @@
+[Unit]
+Description=Descomplica Qlik private UNIX console gateway
+After=descomplica-qlik-browser.service descomplica-qlik-vnc.service
+Requires=descomplica-qlik-vnc.service
+BindsTo=descomplica-qlik-browser.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-qlik
+Group=descomplica-qlik
+WorkingDirectory=@RELEASE@
+Environment=NODE_ENV=production
+ExecStartPre=/usr/bin/test ! -e /run/descomplica-qlik/console.sock
+ExecStartPre=/usr/bin/test ! -L /run/descomplica-qlik/console.sock
+ExecStart=/usr/local/bin/node ops/qlik/console-gateway.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/run/descomplica-qlik
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX
+MemoryMax=128M
+TasksMax=32
+LimitNOFILE=128
+LimitCORE=0
+StandardOutput=null
+StandardError=null

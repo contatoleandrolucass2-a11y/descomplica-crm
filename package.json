@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run && node --test ops/salesforce/*.node-test.mjs ops/salesforce/vps/*.node-test.mjs && pnpm test:release",
+    "test": "vitest run && node --test ops/salesforce/*.node-test.mjs ops/salesforce/vps/*.node-test.mjs ops/qlik/*.node-test.mjs ops/qlik/vps/*.node-test.mjs && pnpm test:release",
     "test:watch": "vitest",
     "qa:browser:install": "playwright install chromium",
     "qa:visual:reference": "node scripts/qa/reference-parity.mjs reference",

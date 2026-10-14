@@ -1,5 +1,34 @@
 # Worklog
 
+## 2026-10-14: Autenticacao Qlik isolada na VPS
+
+Pedido confirmado: coletar Qlik na VPS e alimentar ranking do CRM. Usuario
+possui somente login/senha; preparar console da origem para login manual e
+MFA, com perfil persistente privado e sem acesso ao perfil pessoal.
+
+O PR #214 foi encerrado sem merge por implementar o sentido inverso. A origem
+Visao House esta acessivel no Chrome local; ainda falta autenticar a VPS.
+O escritor Salesforce do ranking global e a autoridade de pontuacao exigem
+tratamento separado antes de habilitar publicacao ou agenda Qlik.
+
+Implementacao em validacao: console HTTP/WebSocket por socket Unix privado,
+restricao de Host/Origin, no-store, assets limitados, cliente unico e timeout;
+Chrome rootless/Xvfb, perfil proprio e VNC sem listeners TCP. Nenhuma mudanca
+aplicada ao runtime do CRM, banco, workflow n8n ou coleta comercial nesta preparacao.
+
+O gate Windows reproduziu a falha preexistente de symlink no leitor de estoque:
+O_NOFOLLOW nao bloqueia links nesse sistema. Conservada a verificacao lstat
+previamente testada no PR encerrado, mantendo O_NOFOLLOW no Linux. Suites de
+processos tambem sofreram timeout sob carga; repetir sem concorrencia antes
+de classificar o gate. Tipos Next regenerados apos trocar a branch.
+
+Validacao final local: lint/tipos/build aprovados; pnpm test aprovado apos
+encerrar a concorrencia de gates (137 arquivos, 2.663 testes Vitest, suites
+Node e release). Revisao do console retirou CDP TCP, transferiu imports de
+dependencias para usuario nao-root e preservou sockets residuais para
+recuperacao manual. Ensaio UNIX/Xvfb isolado na VPS: handshake RFB003.008 e
+zero TCP VNC, sem instalar servicos. Login real e coleta ainda pendentes.
+
 ## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
 
 Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior

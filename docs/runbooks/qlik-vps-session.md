@@ -1,0 +1,92 @@
+# Sessao Qlik na VPS
+
+## Escopo e estado
+
+O fluxo solicitado e Qlik -> VPS -> ranking do CRM. Este componente prepara
+somente a autenticacao na origem: nao coleta relatorios, nao grava no Supabase,
+nao altera n8n e nao habilita pontuacao. A origem observada e o aplicativo
+`00171c17-48de-4488-b1f9-dd6dcb0249e2` (22.1 - Visao House) no tenant
+`https://direcional.us.qlikcloud.com/`. Seus titulos de pastas nao comprovam
+sozinhos o contrato dos dados.
+
+A conta observada possui login por usuario/senha. Autenticar diretamente no
+Qlik exibido pelo console e concluir MFA quando solicitada. Nao pedir senha
+pelo chat, extrair senhas do perfil pessoal ou copiar cookies do computador.
+O perfil privado da VPS conserva a sessao; isso nao impede sua expiracao nem
+dispensa MFA. O CRM e o coletor nao armazenam a senha Qlik.
+
+## Isolamento
+
+- Usuario tecnico `descomplica-qlik`, sem shell, sudo ou Docker.
+- Perfil `/var/lib/descomplica-qlik/chrome`, em diretorio 0700.
+- Chrome oficial com sandbox; Xvfb autenticado no display :98, sem X11 TCP.
+- Controle do Chrome por pipe privado do processo Playwright; nenhuma porta
+  CDP TCP ou encaminhamento de depuracao para o computador.
+- VNC e console HTTP/WebSocket em sockets Unix no runtime 0700. Nenhum listener
+  VNC/HTTP novo em TCP. Clipboard VNC desligado e uma conexao por vez.
+- Console iniciado sob demanda, sessao visual limitada a dez minutos.
+- A autenticacao de transporte e SSH; nao ha password VNC em URL ou HTML.
+  Root e o usuario tecnico tem acesso ao socket. O tunel local e restrito a
+  loopback e deve ser fechado quando terminar a autenticacao.
+- Perfil, processos, portas e credenciais Salesforce permanecem independentes.
+
+## Preparacao e login
+
+Revisar o PR e validar scripts/testes antes de instalar. Usar checkout limpo,
+root-owned, com SHA completo em `/srv/descomplica-crm-releases/SHA` e somente
+dependencias do lockfile ja aprovadas. Nao executar build ou suite pesada na
+VPS compartilhada. Prerequisitos Chrome/Xvfb/xauth/x11vnc ja devem existir;
+o instalador nao instala pacotes nem substitui instalacoes anteriores.
+
+```bash
+bash ops/qlik/vps/install-session.sh SHA_COMPLETO_VALIDADO
+systemctl start descomplica-qlik-browser.service
+systemctl start descomplica-qlik-vnc.service
+systemctl start descomplica-qlik-console.service
+```
+
+Conferir usuario, modos, sockets privados e ausencia de listeners CDP e
+VNC TCP antes de abrir o tunel no computador:
+
+```powershell
+ssh -N -o ExitOnForwardFailure=yes -L 127.0.0.1:6082:/run/descomplica-qlik/console.sock descomplica-crm-vps
+```
+
+Abrir `http://127.0.0.1:6082/`, conectar e autenticar na pagina real do Qlik.
+O console rejeita Host/Origin diferentes dessa origem, acesso cross-site,
+traversal e clientes simultaneos. Uma indisponibilidade de socket/Chrome deve
+ser investigada; nao expor VNC/CDP ou relaxar permissao para contornar.
+
+Depois do login, encerrar o tunel e parar apenas console/VNC. Preservar o
+navegador e seu perfil. Habilitar o browser no boot somente depois de CI e
+verificacao operacional; isso mantem o processo, nao comprova sessao valida.
+
+```bash
+systemctl stop descomplica-qlik-console.service descomplica-qlik-vnc.service
+```
+
+## Contrato antes de coletar
+
+O ranking de corretores ja recebe o snapshot global da ingestao Salesforce.
+O relay Qlik existente trata imobiliarias e nao aceita o contrato por corretor.
+Nao publicar dados de corretores nesse relay nem inventar um dashboard para
+reutilizar o endpoint Salesforce. Nao manter dois writers substituindo global.
+
+Com a sessao da VPS autenticada, confirmar IDs de objetos, filtros de empresa,
+identidade do corretor/gerente, datas, periodos, paginacao e totais de cada
+relatorio. Versionar contrato e publicacao atomica com proveniencia, replay e
+fonte explicitamente escolhida antes do primeiro envio. Validar carga e replay
+antes de habilitar agenda. Logs devem conter somente status, datas e contagens,
+nunca registros, cookies ou credenciais.
+
+O bloqueio `policy_pending` do ranking por pontos continua independente da
+conexao. A pagina de referencia e as configuracoes legadas nao aprovam pesos,
+bonus, desempate ou premios. Publicacao da aplicacao continua exclusivamente
+pelo coordenador `pnpm release:production`, com PR/CI e gates vigentes.
+
+## Reversao
+
+Parar as tres unidades Qlik e desabilitar somente o browser Qlik caso tenha sido
+habilitado. Preservar perfil e evidencia de instalacao. Nao apagar dados,
+cookies, locks de perfil ou alterar Salesforce/n8n para recuperar a sessao.
+Retirada definitiva do perfil exige pedido especifico.

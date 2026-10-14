@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Preparacao da sessao Qlik na VPS
+
+- Adiciona navegador dedicado e console privado por SSH para login Qlik,
+  preservando a sessao Salesforce. Coleta e agenda continuam pendentes.
+- Encerra sem merge o PR #214, cujo fluxo CRM -> Qlik nao atendia ao pedido
+  confirmado de Qlik -> ranking do CRM.
+- Corrige rejeicao de symlink no leitor de estoque Windows, preservando a
+  protecao O_NOFOLLOW no Linux.
+
 ## 2026-10-13 — Estoque automático
 
 Recupera a base anterior em falhas após a troca atômica e distingue publicação

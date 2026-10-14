@@ -1,5 +1,41 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Conexao Qlik para ranking via VPS
+
+- Direcao confirmada pelo usuario: Qlik -> VPS -> ranking do CRM. PR #214
+  encerrado sem merge em 02:48Z porque implementava exportacao no sentido
+  inverso. Revisao tambem encontrou SELECT privilegiado sem grant comprovado.
+  Codigo preservado na branch anterior, fora desta branch baseada em main.
+- Consulta GitHub API em 02:44Z: main e health publico 200/ok em 0fdbb80.
+  PR #214/head ce82f707 tinha CI 38502171755 em andamento. Fontes:
+  github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/214 e /api/health.
+- SSH da VPS atual disponivel. Unidades/diretorios nao possuem o servico
+  qlik-ranking-api nem exportador antigo. MCP n8n por ranking retornou zero
+  workflows; nenhuma mutacao. Documentos de agosto nao comprovam estado atual.
+- Chrome local autenticado na origem Qlik; perfil Membro sem opcao visivel
+  de chaves API. Aplicativo 00171c17-48de-4488-b1f9-dd6dcb0249e2, Visao House,
+  possui pastas Agendamentos, Visitas, Pastas e Vendas. Titulos nao comprovam
+  granularidade/contrato completos. Nenhum registro de cliente copiado.
+- Usuario esclareceu possuir somente usuario/senha e solicitou sessao na VPS.
+  Preparar perfil dedicado e login manual pela origem, sem copiar perfil
+  pessoal, revelar senha, contornar MFA ou alterar a sessao Salesforce.
+- Revisao local: Salesforce ja publica ranking global; Qlik historico trata
+  imobiliarias. Nao sobrescrever global com publicadores concorrentes. Ranking
+  por pontos continua bloqueado por autoridade comercial; conectar a origem
+  nao aprova pesos, bonus ou desempate. Coleta e agenda ainda nao ativadas.
+- Preparacao local: console SSH/Unix e Chrome rootless por pipe privado, sem
+  porta CDP. Revisao corrigiu execucao de dependencias como root; instalador
+  valida arvore privada e importa somente como usuario dedicado. Socket
+  residual permanece fail-closed, com recuperacao manual apos verificar dono.
+- Validacao: lint aprovado com aviso preexistente, tipos aprovados apos
+  regenerar tipos Next, build aprovado pelo agente. pnpm test repetido sem
+  concorrencia passou: 137 arquivos/2.663 testes Vitest, suites Node e release
+  sem falhas. Primeiras tentativas tiveram timeouts sob carga e symlink
+  Windows; lstat corrige o symlink, mantendo O_NOFOLLOW no Linux.
+- Ensaio VPS isolado :98 confirmou RFB003.008 por socket0700 e zero TCP VNC.
+  Display liberado, nenhum servico instalado no ensaio. Instalacao de login
+  ainda pendente; ensaio nao comprova autenticacao Qlik, exportacao ou agenda.
+
 ## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
 
 - Status: agenda ativa e aceite concluido. Fonte: journal, Supabase MCP,
