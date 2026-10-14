@@ -89,5 +89,18 @@ reproduzida antes do fix e suite de equipe final com 64 testes aprovados.
 Typecheck global aprovado apos a correcao. Nao e uma transacao unica no banco;
 nao altera o contrato de escrita nem requer migration.
 
+## Primeira CI
+
+PR213 / candidato4484d72 / run38497027352. Validate, isolated-restore e QA
+sintetico passaram em Linux. E2E falhou ao exigir o titulo antigo, antes da
+matriz visual. Tres expectativas de titulo foram corrigidas para a referencia;
+adicionada verificacao das cinco secoes e quatro tabelas no percurso Master.
+Nenhuma permissao, perfil ou rota foi removida da matriz.
+
+Reexecucao local final: 98 testes focados aprovados; suite global com 2.744
+aprovados, 63 skips e a unica falha Windows de estoque ja documentada. Build,
+tipos e lint passaram; lint conserva um warning preexistente em connected-systems.
+Publicacao pendente dos gates e da revisao de referencias visuais.
+
 Reavaliar filtros e criterios indisponiveis somente quando a fonte e a
 autoridade aplicaveis forem implementadas e verificadas em tarefa especifica.

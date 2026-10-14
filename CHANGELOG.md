@@ -2,6 +2,7 @@
 
 ## 2026-10-13: Relatorio completo no dashboard
 
+- Alinha o E2E ao titulo da referencia e verifica a presenca das secoes completas.
 - Reproduz as secoes informacionais da pagina de referencia em `/app`, com
   valores atuais do CRM e navegacao por periodo e visao autorizada.
 - Exibe conversoes entre etapas, comparativos mensais, realizado operacional,

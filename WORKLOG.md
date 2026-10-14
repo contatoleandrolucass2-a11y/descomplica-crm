@@ -2,6 +2,9 @@
 
 ## 2026-10-13: Replica informacional do dashboard
 
+- CI inicial do PR213 aprovou validate, restore e QA sintetico, mas E2E ainda
+  esperava o titulo anterior. Atualizadas as tres expectativas, preservando
+  a matriz de permissoes e acrescentando a verificacao das secoes/tabelas.
 - Pedido: reproduzir em `/app` as informacoes e secoes da referencia publica
   `descomplicapro.com.br`, usando os dados atuais do CRM, conforme confirmacao
   expressa do usuario. Nenhuma contagem historica foi copiada para o produto.

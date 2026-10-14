@@ -2,6 +2,12 @@
 
 ## 2026-10-13: Replica informacional do dashboard legado
 
+- PR213, candidato4484d72, CI38497027352: validate e isolated-restore passaram.
+  QA dedicado tambem aprovado em Linux; E2E falhou ao procurar o titulo antigo
+  Dashboard comercial. Tres expectativas atualizadas para o titulo solicitado,
+  mais verificacao de secoes/tabelas, sem mudar permissoes. Matriz visual nao
+  executou nessa tentativa. Fonte: logs do job115635936612, consulta14/10 01:53Z.
+  Publicacao segue bloqueada ate nova CI completa e revisao de baseline.
 - Pedido confirmado: manter em /app as informacoes e secoes de
   https://descomplicapro.com.br/?synced=2026-08-07T04%3A04%3A27.433%2B00%3A00,
   usando dados atuais do CRM. Origem inspecionada pelo navegador; sua data de

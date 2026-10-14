@@ -336,7 +336,7 @@ const simulatorViewRoles = new Set<Role>(["master", "admin"]);
 const protectedSurfaces = [
   {
     path: "/app",
-    heading: "Dashboard comercial",
+    heading: "Relatório completo da equipe.",
     allowed: activeOperationalRoles,
   },
   {
@@ -1422,7 +1422,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 }) => {
   await withRolePage(browser, "master", async (page) => {
     const surfaces = [
-      ["/app", "Dashboard comercial"],
+      ["/app", "Relatório completo da equipe."],
       ["/app/etapas/oportunidades", "Oportunidades"],
       ["/app/etapas/agendamentos", "Agendamentos"],
       ["/app/etapas/visitas", "Visitas"],
@@ -1436,6 +1436,14 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       const response = await page.goto(pathname);
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
+      if (pathname === "/app") {
+        for (const section of ["pulse", "monthly", "diagnosis", "operational", "team"]) {
+          await expect(page.locator(`#report-${section}-title`)).toBeVisible();
+        }
+        await expect(
+          page.locator('[aria-labelledby="report-operational-title"] table'),
+        ).toHaveCount(4);
+      }
       await expect(page.locator("html")).not.toHaveJSProperty("scrollWidth", Number.NaN);
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);
     }
@@ -2224,7 +2232,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
       page.getByRole("button", { name: "Verificar e continuar", exact: true }).click(),
     ]);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Dashboard comercial" }),
+      page.getByRole("heading", { level: 1, name: "Relatório completo da equipe." }),
     ).toBeVisible();
 
     await page.goto("/conta/seguranca");
