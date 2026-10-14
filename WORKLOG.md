@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Base isolada em `16f458720406e76efcd1eda8a1eeb791509800a3`, branch
+  `codex/busca-unidade-associativo`, árvore limpa antes da implementação.
+  Dependências instaladas pelo lockfile existente com `pnpm install --frozen-lockfile`.
+- Campo de pesquisa com lupa no cabeçalho do estoque do Associativo. Pesquisa
+  código, descrição e empreendimento em todas as unidades carregadas, antes da
+  janela virtual de 60 linhas, junto aos filtros e à ordenação existentes.
+- Busca ignora caixa, acentos e separadores usuais do código. Escape, botão de
+  limpeza e Limpar filtros restauram a lista sem modificar a proposta em edição.
+  Quantidade encontrada fica visível; seleções incompatíveis não são apagadas.
+- Primeira execução de `pnpm verify` aprovada: 2.814 testes da aplicação,
+  79 skips existentes, suites Node e build concluídos. `pnpm audit` sem
+  vulnerabilidades conhecidas. Lint mantém um aviso anterior em connected-systems.
+- Navegador local confirmou busca em 3.301 unidades sintéticas, código fora da
+  janela inicial, combinação de filtros, Escape, limpeza e proposta preservada.
+  Inspeção visual em 320, 375, 768 e 1.440 px e três temas.
+- O QA geral do guia falhou em `320x568-dark:fill-proposal` ao aguardar
+  Cheque Moradia habilitado. Investigação e nova execução estão em andamento;
+  CI e publicação permanecem pendentes. Nenhum gate foi ignorado.
+- Nenhuma alteração de cálculos, permissões, dados de estoque ou produção.
+  Gitleaks completo encontrou apenas o token sintético preexistente na linha 31
+  de salesforce-release-environment.node-test.mjs, confirmado idêntico à base.
+
 ## 2026-10-14: Funis no comparativo mensal
 
 - Corrige a ausencia dos graficos solicitados no comparativo de `/app`.

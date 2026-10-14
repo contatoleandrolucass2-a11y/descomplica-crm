@@ -472,11 +472,34 @@ export async function checkAssociativeSelectedGold(page) {
   await expect(first.getByRole("button")).toHaveAttribute("aria-pressed", "true");
   const filters = page.locator(".investor-stock-filters");
   const count = await stock.locator("table").getAttribute("aria-rowcount");
+  const search = page.getByRole("searchbox", { name: "Buscar unidade ou empreendimento" });
+  const selectedIdentifier = (await first.getByRole("button").getAttribute("aria-label")).replace(
+    "Iniciar proposta com ",
+    "",
+  );
+  await search.fill(selectedIdentifier.toLowerCase().replaceAll("-", " "));
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", "2");
+  await expect(first).toHaveAttribute("aria-selected", "true");
+  await search.fill("unidade-inexistente-qa");
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", "1");
+  await expect(stock).toContainText("Nenhuma unidade encontrada");
+  await expect(page.locator(".investor-associative-qualification")).toBeVisible();
+  await search.press("Escape");
+  await expect(search).toHaveValue("");
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", count);
+  await search.fill(selectedIdentifier);
+  await page.getByRole("button", { name: "Limpar pesquisa de unidade" }).click();
+  await expect(search).toBeFocused();
+  await expect(first).toHaveAttribute("aria-selected", "true");
   const developer = filters.locator(":scope > label").first().getByRole("combobox");
   await developer.selectOption({ index: 1 });
   await expect(stock.locator("table")).not.toHaveAttribute("aria-rowcount", count);
   await filters.getByLabel("Ordenar unidades por valor do imóvel").selectOption("desc");
+  await search.fill("unidade-inexistente-qa");
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", "1");
+  await expect(developer).not.toHaveValue("Todas");
   await page.locator(".investor-stock-clear").click();
+  await expect(search).toHaveValue("");
   await expect(developer).toHaveValue("Todas");
   await expect(filters.getByLabel("Ordenar unidades por valor do imóvel")).toHaveValue("asc");
   await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", count);

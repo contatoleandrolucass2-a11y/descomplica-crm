@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-14: Pesquisa de unidades no Associativo
+
+- Adiciona campo com lupa para localizar unidades por código, descrição ou
+  empreendimento, inclusive sem acentos e com separadores diferentes no código.
+- Combina a pesquisa com os filtros e a ordenação do estoque, mostra a quantidade
+  encontrada e permite limpar a busca sem descartar a proposta em edição.
+
 ## 2026-10-14: Funis no comparativo mensal
 
 - Substitui as listas mensais por seis graficos em funil, com etapas coloridas,

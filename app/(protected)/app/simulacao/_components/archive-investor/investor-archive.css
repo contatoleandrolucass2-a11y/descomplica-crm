@@ -246,6 +246,73 @@
   margin-left: auto;
 }
 
+.investor-page-shell.investor-associative-table-page .investor-stock-search {
+  display: flex;
+  position: relative;
+  align-items: center;
+  width: 300px;
+  min-width: 0;
+  color: var(--inv-color-accent);
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search > svg {
+  position: absolute;
+  left: 10px;
+  pointer-events: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search input {
+  width: 100%;
+  min-width: 0;
+  height: 34px;
+  padding: 4px 34px;
+  border: 1px solid var(--inv-color-line);
+  border-radius: 8px;
+  color: var(--inv-color-text);
+  background: var(--inv-color-input);
+  font: inherit;
+  font-size: 12px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search input::placeholder {
+  color: var(--inv-color-muted);
+  opacity: 1;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search input:focus-visible {
+  outline: 2px solid var(--inv-color-accent);
+  outline-offset: 2px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search input::-webkit-search-cancel-button {
+  display: none;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search button {
+  position: absolute;
+  right: 0;
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  color: var(--inv-color-accent);
+  background: transparent;
+  cursor: pointer;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search button:focus-visible {
+  outline: 2px solid var(--inv-color-accent);
+  outline-offset: -3px;
+}
+
+.investor-page-shell.investor-associative-table-page .investor-stock-search input:disabled {
+  opacity: .6;
+  cursor: not-allowed;
+}
+
 .investor-page-shell.investor-associative-table-page .investor-stock-panel > .investor-section-heading .investor-stock-sync {
   min-width: 0;
   gap: 4px !important;
@@ -1349,6 +1416,22 @@
     grid-column: 1 / -1;
     width: 100%;
     justify-content: space-between;
+    flex-wrap: wrap;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-stock-search {
+    flex: 1 0 100%;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-stock-search input {
+    height: 44px;
+    padding-right: 44px;
+    font-size: 16px;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-stock-search button {
+    width: 44px;
+    height: 44px;
   }
 
   .investor-page-shell.investor-associative-table-page .investor-stock-clear {

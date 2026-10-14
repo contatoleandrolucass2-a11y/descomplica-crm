@@ -1,5 +1,23 @@
 # Shell da interface protegida
 
+## Pesquisa do estoque no Associativo
+
+O cabeçalho do estoque do Simulador Tabela Associativo oferece uma pesquisa com
+lupa por código da unidade, descrição do produto ou nome do empreendimento.
+A pesquisa considera todas as unidades carregadas antes de limitar as linhas
+visíveis e combina seus resultados com os filtros e a ordenação já selecionados.
+Os contadores dos filtros continuam descrevendo suas combinações dimensionais;
+o cabeçalho mostra a quantidade efetivamente encontrada pela pesquisa.
+
+Maiúsculas, acentos, espaços e hífens do código não impedem a localização.
+Escape ou o botão de limpeza apagam somente a pesquisa; Limpar filtros apaga
+também os filtros dimensionais e restaura a ordenação crescente. Essas ações
+reiniciam a rolagem da lista, preservando a unidade e a proposta em edição.
+O campo fica desabilitado durante o carregamento ou falha do estoque. Em celular,
+ocupa uma linha própria e mantém os controles de toque com pelo menos 44 px.
+
+## Estrutura do shell
+
 O shell combina autenticação server-side com dois componentes client-side pequenos:
 
 - `AuthorizedNavigation` recebe somente as páginas já filtradas por catálogo,
