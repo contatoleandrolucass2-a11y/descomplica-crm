@@ -1,13 +1,11 @@
 .page {
-  --routine-surface: var(--inv-color-panel);
+  --routine-surface: var(--inv-color-page);
   --routine-grid: color-mix(in srgb, var(--inv-color-line) 45%, var(--inv-color-panel));
   --routine-current: linear-gradient(145deg, #176f8a, #123b63);
   --routine-edge: #62d8ff;
   --routine-heading: #c5f0ee;
   --routine-heading-text: #123e43;
   --routine-heading-border: #167985;
-  --routine-crosshair: linear-gradient(145deg, #d0edf4, #c0dceb);
-  --routine-intersection: linear-gradient(145deg, #1c7891, #174a75);
   --routine-credit-text: #18354f;
   --routine-credit-shine: #156782;
   min-width: 0;
@@ -18,12 +16,10 @@
 }
 
 :global(:root[data-theme="dark"]) .page {
-  --routine-surface: #0e2135;
   --routine-grid: #29435b;
   --routine-heading: #164c56;
   --routine-heading-text: #e6ffff;
   --routine-heading-border: #52cbd8;
-  --routine-crosshair: linear-gradient(145deg, #185367, #163b56);
   --routine-credit-text: #ffffff;
   --routine-credit-shine: #7bdfff;
 }
@@ -391,7 +387,7 @@
 }
 
 .tableScroll {
-  overflow-x: auto;
+  overflow: visible;
   border: 1px solid var(--routine-grid);
   background: var(--routine-surface);
 }
@@ -477,8 +473,8 @@
   z-index: 3;
   height: 52px;
   padding: 6px 8px;
-  color: #ffffff;
-  background: var(--routine-current);
+  color: var(--inv-color-text);
+  background: var(--routine-surface);
   border-bottom: 2px solid var(--routine-edge);
   font-size: 12px;
   font-weight: 850;
@@ -507,15 +503,25 @@
   font-weight: 600;
 }
 
-/* Keep spreadsheet editors transparent over the full-cell day highlight. */
+/* A fixed leading control track keeps both views compact and aligned. */
+.activityContent {
+  display: grid;
+  grid-template-columns: 28px minmax(0, 1fr);
+  align-items: start;
+  min-width: 0;
+}
+
 :global(:root)
   .page:global(.investor-page-shell)
   .main:global(.investor-main)
   .routineTable
   td
   textarea {
+  grid-column: 2;
+  grid-row: 1;
   display: block;
   width: 100%;
+  min-width: 0;
   min-height: 32px;
   resize: none;
   overflow: hidden;
@@ -535,7 +541,7 @@
 .routineTable thead th:first-child {
   position: relative;
   z-index: 4;
-  background: var(--routine-current);
+  background: var(--routine-surface);
 }
 
 :global(:root)
@@ -554,10 +560,9 @@
 .routineTable td {
   position: relative;
   color: var(--inv-color-text);
-  transition:
-    box-shadow 180ms ease,
-    filter 180ms ease,
-    transform 180ms ease;
+  background: var(--routine-surface);
+  vertical-align: top;
+  transition: box-shadow 180ms ease;
 }
 
 .routineTable td:focus-within {
@@ -566,12 +571,14 @@
 }
 
 .completionControl {
+  grid-column: 1;
+  grid-row: 1;
   display: flex;
-  width: 32px;
-  height: 28px;
+  width: 28px;
+  height: 32px;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 3px;
+  margin: 0;
   cursor: pointer;
 }
 
@@ -593,164 +600,40 @@
   outline-offset: 3px;
 }
 
-.routineTable td[data-completed] .completionControl {
-  border-radius: 4px;
-  background: color-mix(in srgb, currentColor 12%, transparent);
+.routineTable td[data-completed] {
+  --routine-focus-edge: #ffffff;
+  color: #ffffff;
+  background: var(--routine-current);
+  box-shadow: inset 0 0 0 1px var(--routine-edge);
 }
 
-.routineTable [data-today] {
-  --routine-focus-edge: #ffffff;
-  color: #f4fcff;
-  background: var(--routine-current);
-  box-shadow:
-    inset 2px 0 var(--routine-edge),
-    inset -2px 0 var(--routine-edge);
+.routineTable td[data-completed] input[type="checkbox"] {
+  accent-color: #8adfff;
 }
 
 .routineTable thead [data-today] {
-  color: #ffffff;
-  background: var(--routine-current);
-  border-bottom-color: var(--routine-edge);
-  box-shadow:
-    inset 2px 0 var(--routine-edge),
-    inset -2px 0 var(--routine-edge),
-    inset 0 3px #73e2ff,
-    0 0 24px #62d8ff24;
-}
-
-.routineTable tbody tr:last-child [data-today] {
-  box-shadow:
-    inset 2px 0 var(--routine-edge),
-    inset -2px 0 var(--routine-edge),
-    inset 0 -2px var(--routine-edge);
-}
-
-/* Pointer takes priority; keyboard crosshair returns when the pointer leaves cells. */
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(2):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(2):focus-within)
-    )
-  )
-  tr
-  > :nth-child(2),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(3):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(3):focus-within)
-    )
-  )
-  tr
-  > :nth-child(3),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(4):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(4):focus-within)
-    )
-  )
-  tr
-  > :nth-child(4),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(5):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(5):focus-within)
-    )
-  )
-  tr
-  > :nth-child(5),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(6):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(6):focus-within)
-    )
-  )
-  tr
-  > :nth-child(6),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(7):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(7):focus-within)
-    )
-  )
-  tr
-  > :nth-child(7),
-.routineTable tbody tr:hover > *,
-.routineTable:where(:not(:has(td:hover, thead th:hover))) tbody tr:focus-within > * {
-  --routine-focus-edge: var(--inv-color-accent);
-  background: var(--routine-crosshair);
-  color: var(--inv-color-text);
-  box-shadow:
-    inset 0 1px var(--routine-edge),
-    inset 0 -1px var(--routine-edge);
+  color: var(--inv-color-accent);
+  background: var(--routine-surface);
+  box-shadow: inset 0 0 0 2px var(--inv-color-accent);
 }
 
 .routineTable thead th:not(:first-child):hover,
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(2):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(2):focus-within)
-    )
-  )
-  thead
-  th:nth-child(2),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(3):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(3):focus-within)
-    )
-  )
-  thead
-  th:nth-child(3),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(4):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(4):focus-within)
-    )
-  )
-  thead
-  th:nth-child(4),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(5):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(5):focus-within)
-    )
-  )
-  thead
-  th:nth-child(5),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(6):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(6):focus-within)
-    )
-  )
-  thead
-  th:nth-child(6),
-.routineTable:where(
-    [data-view="week"]:is(
-      :has(tr > :nth-child(7):hover),
-      :not(:has(td:hover, thead th:hover)):has(tr > :nth-child(7):focus-within)
-    )
-  )
-  thead
-  th:nth-child(7),
-.routineTable tbody tr > td:hover,
-.routineTable:where(:not(:has(td:hover, thead th:hover))) tbody tr > td:focus-within {
-  --routine-focus-edge: #ffffff;
-  background: var(--routine-intersection);
-  color: #ffffff;
-  box-shadow:
-    inset 0 0 0 2px var(--routine-edge),
-    0 0 14px #62d8ff30;
+.routineTable tbody td:is(:hover, :focus-within) {
+  box-shadow: inset 0 0 0 2px var(--inv-color-accent);
 }
 
 .routineTable tbody td:is(:hover, :focus-within) {
   z-index: 2;
 }
 
-@media (hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference) {
-  .routineTable tbody td:hover {
-    transform: scale(1.012);
-    filter: brightness(1.08);
+@media (pointer: coarse) {
+  .activityContent {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .completionControl {
+    width: 44px;
+    height: 44px;
   }
 }
 

@@ -140,14 +140,15 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   let checkRoutineHeaderEffects: (page: Page) => Promise<void>;
   let checkRoutineCellEffects: (page: Page, outputDirectory?: string) => Promise<void>;
   let checkRoutineRefreshPosition: (page: Page) => Promise<void>;
+  let checkRoutineCompactLayout: (page: Page) => Promise<void>;
+  let checkRoutineOverflow: (page: Page, region: Locator) => Promise<unknown>;
 
   beforeAll(async () => {
     ({ checkRoutineScrolling, checkRoutineHeaderEffects, checkRoutineCellEffects } = await import(
       pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
     ));
-    ({ checkRoutineRefreshPosition } = await import(
-      pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href
-    ));
+    ({ checkRoutineRefreshPosition, checkRoutineCompactLayout, checkRoutineOverflow } =
+      await import(pathToFileURL(resolve("scripts/qa/routine-settings.mjs")).href));
     const require = createRequire(import.meta.url);
     const vitestRequire = createRequire(require.resolve("vitest/package.json"));
     const { build } = await import(pathToFileURL(vitestRequire.resolve("vite")).href);
@@ -239,15 +240,9 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
             ),
         )
         .toBe(true);
-      expect(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth + 1)).toBe(
-        false,
-      );
       const table = page.getByRole("region", { name: "Tabela de rotina semanal", exact: true });
-      if (width < 960) {
-        expect(await table.evaluate((element) => element.scrollWidth > element.clientWidth)).toBe(
-          true,
-        );
-      }
+      await checkRoutineOverflow(page, table);
+      await checkRoutineCompactLayout(page);
       await page.screenshot({ path: `test-results/routine-preview/rotina-${width}.png` });
     }
   });
@@ -277,15 +272,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await page.clock.setSystemTime(new Date(Date.UTC(2026, 9, 12 + offset, 15)));
       await page.evaluate(() => document.dispatchEvent(new Event("visibilitychange")));
       await browserExpect(page.locator('thead [aria-current="date"]')).toContainText(day);
-      await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(26);
-      expect(
-        await page
-          .locator("tbody td[data-today]")
-          .evaluateAll(
-            (cells, day) => cells.every((cell) => cell.getAttribute("data-label") === day),
-            day,
-          ),
-      ).toBe(true);
+      await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(0);
     }
   });
 
@@ -340,7 +327,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
           await page
             .locator("tbody td")
             .evaluateAll((cells) =>
-              cells.every((cell) => getComputedStyle(cell).verticalAlign === "middle"),
+              cells.every((cell) => getComputedStyle(cell).verticalAlign === "top"),
             ),
         ).toBe(true);
         await page.locator("thead").scrollIntoViewIfNeeded();
@@ -397,8 +384,8 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       });
       expect(
         focus.outline,
-        `Daily keyboard focus must contrast with the ${theme} day gradient`,
-      ).toBe("rgb(255, 255, 255)");
+        `Daily keyboard focus must use the ${theme} accent on a neutral cell`,
+      ).toBe(focus.accent);
       expect(focus.outline, `Daily keyboard focus must differ from the ${theme} surface`).not.toBe(
         focus.background,
       );
@@ -558,7 +545,132 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
     await browserExpect(completionCell()).not.toBeChecked();
     expect(backend.completionPuts[1]?.completed).toBe(false);
     await browserExpect(page.getByRole("textbox").first()).toHaveAttribute("readonly", "");
+    await page.getByRole("button", { name: "Semana", exact: true }).click();
+    await browserExpect(completionCell()).not.toBeChecked();
+    expect(backend.completionSnapshot.completions).toEqual([]);
+    await page.reload();
+    await browserExpect(completionCell()).not.toBeChecked();
+    expect(backend.puts).toEqual([]);
   });
+
+  it.each(["light", "balanced", "dark"])(
+    "keeps compact completion geometry, neutral paint and cross-view state in %s",
+    async (theme) => {
+      const backend = serverFixture({
+        "regional-house": [
+          {
+            "Segunda-feira":
+              "Conferir o funil e organizar o acompanhamento da equipe para a semana.",
+            "Terça-feira": "Revisar os agendamentos",
+            "Quarta-feira": "Acompanhar visitas",
+            "Quinta-feira": "Conferir propostas",
+            "Sexta-feira": "Revisar resultados",
+            Sábado: "Planejar",
+          },
+          {
+            "Segunda-feira": "Conversar com a equipe e registrar as próximas ações.",
+            "Terça-feira": "Validar prioridades",
+          },
+        ],
+      });
+      await openRoutine({ server: backend, clock: "2026-10-12T15:00:00Z" });
+      await page.evaluate((value) => {
+        document.documentElement.dataset.theme = value;
+      }, theme);
+      await mkdir("test-results/routine-preview", { recursive: true });
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.getByRole("button", { name: "Semana", exact: true }).click();
+        const check = completionCell();
+        await browserExpect(check).not.toBeChecked();
+        await check.click();
+        await browserExpect(check).toBeChecked();
+        for (const mode of ["Semana", "Hoje"]) {
+          await page.getByRole("button", { name: mode, exact: true }).click();
+          await browserExpect(completionCell()).toBeChecked();
+          try {
+            await checkRoutineCompactLayout(page);
+          } catch (error) {
+            await page.screenshot({
+              path: `test-results/routine-preview/compact-completions-${mode}-${theme}-${width}-failure.png`,
+              animations: "disabled",
+            });
+            throw error;
+          }
+          await checkRoutineOverflow(
+            page,
+            page.getByRole("region", {
+              name: mode === "Semana" ? "Tabela de rotina semanal" : "Tabela de rotina do dia",
+              exact: true,
+            }),
+          );
+          const completed = page.locator("tbody td[data-completed]");
+          await browserExpect(completed).toHaveCount(1);
+          await browserExpect(completed.locator("textarea")).toHaveCSS(
+            "color",
+            "rgb(255, 255, 255)",
+          );
+          const paint = await completed.evaluate((cell) => getComputedStyle(cell).backgroundImage);
+          expect(paint).toContain("linear-gradient");
+          expect(paint).toContain("rgb(23, 111, 138)");
+          expect(paint).toContain("rgb(18, 59, 99)");
+          await completionCell().focus();
+          await browserExpect(completed).toHaveCSS("outline-color", "rgb(255, 255, 255)");
+          const position = await page.evaluate(() => [scrollX, scrollY]);
+          const unchecked = page.locator("tbody tr").nth(1).locator("td").first();
+          await unchecked.hover();
+          await browserExpect(completionCell()).toBeFocused();
+          expect(await page.evaluate(() => [scrollX, scrollY])).toEqual(position);
+          expect(await completed.evaluate((cell) => getComputedStyle(cell).backgroundImage)).toBe(
+            paint,
+          );
+          expect(
+            await page.locator("tbody td:not([data-completed])").evaluateAll((cells) =>
+              cells.every((cell) => {
+                const style = getComputedStyle(cell);
+                return (
+                  style.backgroundImage === "none" &&
+                  style.backgroundColor ===
+                    getComputedStyle(cell.closest(".investor-page-shell")!).backgroundColor
+                );
+              }),
+            ),
+          ).toBe(true);
+          await browserExpect(page.locator("tbody [data-today]")).toHaveCount(0);
+          await browserExpect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
+          await page.evaluate(() => window.scrollTo(0, 0));
+          await page.screenshot({
+            path: `test-results/routine-preview/compact-completions-${mode}-${theme}-${width}.png`,
+            fullPage: width === 1440 || mode === "Hoje",
+            animations: "disabled",
+          });
+          const result = await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+            .analyze();
+          expect(
+            result.violations.map(({ id, nodes }) => ({
+              id,
+              targets: nodes.map(({ target }) => target),
+            })),
+            `${theme}/${width}/${mode}: completed and unchecked activities`,
+          ).toEqual([]);
+        }
+        await completionCell().click();
+        await browserExpect(completionCell()).not.toBeChecked();
+        await page.getByRole("button", { name: "Semana", exact: true }).click();
+        await browserExpect(completionCell()).not.toBeChecked();
+        await browserExpect(page.locator("tbody td[data-completed]")).toHaveCount(0);
+        expect(backend.completionSnapshot.completions).toEqual([]);
+        await page.reload();
+        await browserExpect(completionCell()).not.toBeChecked();
+        await page.evaluate((value) => {
+          document.documentElement.dataset.theme = value;
+        }, theme);
+      }
+      expect(backend.puts).toEqual([]);
+    },
+    60_000,
+  );
 
   it("blocks unpersisted defaults and dirty role text, including failed saves", async () => {
     await openRoutine();
@@ -1524,10 +1636,11 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
         await page.setViewportSize({ width, height: 900 });
         await checkRoutineHeaderEffects(page);
         await browserExpect(page.locator('thead [aria-current="date"]')).toHaveCount(1);
-        await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(26);
-        expect(
-          await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
-        ).toBe(true);
+        await browserExpect(page.locator("tbody td[data-today]")).toHaveCount(0);
+        await checkRoutineOverflow(
+          page,
+          page.getByRole("region", { name: "Tabela de rotina semanal", exact: true }),
+        );
         await page.screenshot({
           path: `test-results/routine-preview/compact-header-${theme}-${width}.png`,
           fullPage: true,
@@ -1548,7 +1661,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
   );
 
   it.each(["light", "balanced", "dark"])(
-    "highlights rows and weekly columns without moving cells in %s",
+    "keeps unchecked rows neutral without moving cells in %s",
     async (theme) => {
       await openRoutine({ clock: "2026-10-12T15:00:00Z" });
       await page.setViewportSize({ width: 1440, height: 1000 });
@@ -1589,14 +1702,14 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       await page.addStyleTag({
         content:
           helper === "header"
-            ? "thead th { background-image: none !important; }"
-            : "tbody td, tbody textarea { transform: none !important; scale: none !important; }",
+            ? "thead th { background-image: linear-gradient(red, blue) !important; }"
+            : "tbody td { background-image: linear-gradient(red, blue) !important; }",
       });
       if (helper === "header")
-        await expect(checkRoutineHeaderEffects(page)).rejects.toThrow(/linear-gradient/);
+        await expect(checkRoutineHeaderEffects(page)).rejects.toThrow(/completion gradient/);
       else
         await expect(checkRoutineCellEffects(page)).rejects.toThrow(
-          "Hovered intersection scales subtly",
+          "Unchecked cells must never have a gradient",
         );
       expect(
         await page.evaluate(() => matchMedia("(prefers-reduced-motion: reduce)").matches),
@@ -1739,7 +1852,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
         await checkRoutineScrolling(page, region);
         await region.evaluate((element) => {
           window.scrollTo(0, window.scrollY + element.getBoundingClientRect().top + 400);
-          element.scrollLeft = element.scrollWidth;
+          window.scrollTo(document.documentElement.scrollWidth, window.scrollY);
         });
         await page.screenshot({
           path: `test-results/routine-preview/semana-scroll-${theme}-${width}.png`,

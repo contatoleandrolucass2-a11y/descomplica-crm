@@ -1131,45 +1131,47 @@ export function RoutineSettings() {
                               <td
                                 key={weekday}
                                 data-label={weekday}
-                                data-today={
-                                  weekday.toLocaleLowerCase("pt-BR") === today || undefined
-                                }
                                 data-completed={completed || undefined}
                               >
-                                <textarea
-                                  data-row={rowIndex}
-                                  aria-label={`${weekday}, linha ${rowIndex + 1}`}
-                                  disabled={!hasLoaded}
-                                  readOnly={!canEdit || isSaving}
-                                  maxLength={4000}
-                                  value={row[weekday]}
-                                  onChange={(event) =>
-                                    updateCell(rowIndex, weekday, event.target.value)
-                                  }
-                                  rows={1}
-                                />
-                                {row[weekday].trim() ? (
-                                  <label
-                                    className={styles.completionControl}
-                                    title={disabledReason || "Conclusão individual nesta semana"}
-                                  >
-                                    <input
-                                      type="checkbox"
-                                      aria-label={`Concluída: ${weekday}, linha ${rowIndex + 1}, ${row[weekday]}`}
-                                      aria-disabled={Boolean(disabledReason)}
-                                      disabled={
-                                        !hasLoaded ||
-                                        (unsaved && !isSaving) ||
-                                        (!completions.ready && !completions.pending)
-                                      }
-                                      checked={completed}
-                                      onChange={(event) => {
-                                        if (!disabledReason && !dirtyRoles.current.has(activeRole))
-                                          completions.toggle(activity, event.target.checked);
-                                      }}
-                                    />
-                                  </label>
-                                ) : null}
+                                <div className={styles.activityContent}>
+                                  {row[weekday].trim() ? (
+                                    <label
+                                      className={styles.completionControl}
+                                      title={disabledReason || "Conclusão individual nesta semana"}
+                                    >
+                                      <input
+                                        type="checkbox"
+                                        aria-label={`Concluída: ${weekday}, linha ${rowIndex + 1}, ${row[weekday]}`}
+                                        aria-disabled={Boolean(disabledReason)}
+                                        disabled={
+                                          !hasLoaded ||
+                                          (unsaved && !isSaving) ||
+                                          (!completions.ready && !completions.pending)
+                                        }
+                                        checked={completed}
+                                        onChange={(event) => {
+                                          if (
+                                            !disabledReason &&
+                                            !dirtyRoles.current.has(activeRole)
+                                          )
+                                            completions.toggle(activity, event.target.checked);
+                                        }}
+                                      />
+                                    </label>
+                                  ) : null}
+                                  <textarea
+                                    data-row={rowIndex}
+                                    aria-label={`${weekday}, linha ${rowIndex + 1}`}
+                                    disabled={!hasLoaded}
+                                    readOnly={!canEdit || isSaving}
+                                    maxLength={4000}
+                                    value={row[weekday]}
+                                    onChange={(event) =>
+                                      updateCell(rowIndex, weekday, event.target.value)
+                                    }
+                                    rows={1}
+                                  />
+                                </div>
                               </td>
                             );
                           })}
