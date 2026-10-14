@@ -64,6 +64,12 @@
   11 imagens de /app diferiram. Revisadas e promovidas com hashes/proveniencia,
   preservando231 e limiares1%/16. Fingerprint comprovou apenas19 outputs QA.
   Nova CI verify obrigatoria antes de merge/publicacao.
+- CI verify38519492545 aprovada; PR218 integrado em16f4587. CI main38558435232
+  aprovou os quatro jobs, incluindo1.323 testes de banco,19 E2E e242 comparacoes
+  visuais. Publicado em14/10/2026 09:24 BRT pelo coordenador protegido, com
+  imagem comprovada e backup verificado; health e acesso anonimo conferidos.
+  Recibo, hashes, limites e sincronizacao em
+  [auditoria dos funis](docs/audits/dashboard-funis-2026-10-14.md).
 
 ## 2026-10-13: Revisao e conclusoes individuais da Rotina
 
