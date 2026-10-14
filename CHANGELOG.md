@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-14: Preflight automatico Qlik pela sessao dedicada
+
+- Adiciona SDK oficial enigma.js fixado, cliente QIX restrito ao aplicativo
+  confirmado e inspecao de metadados sem leitura de linhas de clientes.
+- Resolve a aba Parceiras pelo objeto referenciado, sem confundir cId com ID
+  Engine. Inclui ciclo sequencial, cancelamento e artefato privado atomico.
+- Preflight desligado por padrao; nao e coletor de fatos nem integracao ativa.
+  Nenhuma unidade VPS, agenda produtiva, banco ou workflow n8n alterado.
+
 ## 2026-10-14: Diagnostico operacional Qlik
 
 - Documenta recuperacao restrita do console VPS e sessao Qlik autenticada.

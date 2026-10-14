@@ -90,6 +90,52 @@ conexao. A pagina de referencia e as configuracoes legadas nao aprovam pesos,
 bonus, desempate ou premios. Publicacao da aplicacao continua exclusivamente
 pelo coordenador `pnpm release:production`, com PR/CI e gates vigentes.
 
+## Preflight QIX no processo dono
+
+Implementacao local de14/10: `browser-preflight.mjs`, `qix-metadata.mjs`,
+`collection-loop.mjs` e `metadata-artifact.mjs`. Usa enigma.js2.15.0 fixado,
+schema12.612.0 e a sessao ja autenticada do navegador dedicado. Nao exige
+OAuth por definicao: [QIX oficial](https://qlik.dev/apis/json-rpc/) suporta
+autenticacao de navegador pela sessao. [Enigma](https://qlik.dev/toolkits/enigma-js/)
+e o SDK oficial. Isso nao comprova permissao efetiva do usuario neste tenant.
+
+O owner abre uma pagina temporaria no tenant fixo, carrega o SDK local sem
+alterar a biblioteca da pagina e respeita CSP. GET `/api/v1/csrf-token` e
+WebSocket QIX usam autenticacao gerida pelo browser; token/cookies nunca sao
+exportados ao Node, arquivo ou log. Sessao Engine tem identity separado.
+Nao ha API de codigo arbitrario, nova porta, CDP TCP, segundo perfil ou
+`bypassCSP`. Nao usar ferramentas alternativas para controlar browser pessoal.
+
+O inspetor abre somente app23.1/pasta23.1.7 conhecidos. Confere pertinencia
+dos objetos a pasta e resolve a aba Parceiras por refId/chartId do container:
+`pUYysrvJ` e cId da interface, nao ID Engine. Projeta definicoes/limites,
+referencias estruturais e recarga, sem avaliar medidas ou ler fatos.
+Master definitions nao resolvidas, identidade ambigua e shape desconhecido
+permanecem pendentes; nao sao substituidos por suposicoes. Modelo estrutural:
+[sn-container oficial](https://github.com/qlik-oss/sn-container/blob/main/src/typings/data/properties.d.ts).
+
+`QLIK_METADATA_PREFLIGHT=enabled` no owner habilita somente esse diagnostico.
+Padrao desligado; nenhuma unit foi alterada. Ciclo imediato e depois1h apos
+o anterior terminar, sem sobreposicao; timeout cooperativo120s, transporte60s.
+Callback que ignora cancelamento pode atrasar shutdown, nunca iniciar paralelo.
+401 ou redirecionamento externo sinaliza reautenticacao; MFA nao e contornado.
+Falha Engine generica nao e prova de credencial invalida nem de bloqueio OAuth.
+
+Resultado fica em `/run/descomplica-qlik/ranking-metadata.json`,0600, sob pai
+0700 do usuario tecnico; troca atomica e fsync. Links/multiplos hardlinks e
+permissoes divergentes sao recusados. O envelope sempre inclui
+`rankingConnected:false`; `inspected` significa somente metadados resolvidos,
+nao filtro, valores, cobertura, mapeamento produtivo ou carga homologados.
+Arquivo e privado e efemero, sem endpoint publico. Nao versionar seu conteudo.
+
+Antes de ativar: candidato imutavel revisado, CI/Linux, backup da unit existente
+e procedimento de troca validado; preservar perfil e exclusividade do owner.
+Nao executar segundo owner nem anexar debugger para evitar essa etapa. A
+instalacao inicial recusa units existentes; nao usar como atualizador.
+Depois do handshake real, confirmar campos/medidas/IDs e recorte, implementar
+coleta agregada completa e RPC/reader autorizado, reconciliar duas cargas,
+so entao ativar rotina de fatos. Este preflight nao entrega ranking conectado.
+
 ## Credencial opcional na VPS
 
 O console permite cadastro inicial em `Credencial Qlik`, somente depois de

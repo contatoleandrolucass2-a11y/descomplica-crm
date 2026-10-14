@@ -71,6 +71,7 @@
     "@novnc/novnc": "1.7.0",
     "@supabase/ssr": "0.12.4",
     "@supabase/supabase-js": "2.112.0",
+    "enigma.js": "2.15.0",
     "lucide-react": "1.48.0",
     "next": "16.3.8",
     "parse5": "8.0.1",

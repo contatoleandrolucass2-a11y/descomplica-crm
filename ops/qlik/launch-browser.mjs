@@ -1,6 +1,9 @@
 import { lstat } from "node:fs/promises";
 import { pathToFileURL } from "node:url";
 import { chromium } from "@playwright/test";
+import { collectBrowserMetadata } from "./browser-preflight.mjs";
+import { startQlikCollectionLoop } from "./collection-loop.mjs";
+import { writeMetadataArtifact } from "./metadata-artifact.mjs";
 
 const PROFILE = "/var/lib/descomplica-qlik/chrome";
 const ORIGIN = "https://direcional.us.qlikcloud.com/";
@@ -29,23 +32,52 @@ async function main() {
     acceptDownloads: false,
     args: ["--no-first-run", "--no-default-browser-check"],
   });
-  await holdBrowserSession(browser);
+  const metadataOnly = process.env.QLIK_METADATA_PREFLIGHT === "enabled";
+  await holdBrowserSession(browser, {
+    startCollection: metadataOnly
+      ? (signal) =>
+          startQlikCollectionLoop({
+            signal,
+            collect: async (options) => {
+              const result = await collectBrowserMetadata(browser, options);
+              if (options.signal.aborted) return { state: "unavailable" };
+              await writeMetadataArtifact(result);
+              return {
+                state:
+                  result.status === "reauth_required"
+                    ? "reauth_required"
+                    : result.status === "inspected"
+                      ? "succeeded"
+                      : "unavailable",
+              };
+            },
+          })
+      : undefined,
+  });
 }
 
 export async function holdBrowserSession(
   browser,
-  { signalSource = process, log = console.log } = {},
+  { signalSource = process, log = console.log, startCollection } = {},
 ) {
   let stopping = false;
+  const abort = new AbortController();
+  let collection;
   async function stop() {
     if (stopping) return;
     stopping = true;
+    abort.abort();
     await browser.close();
   }
   const onSignal = () => void stop().catch(() => {});
   const signals = ["SIGTERM", "SIGINT", "SIGHUP"];
   for (const signal of signals) signalSource.once(signal, onSignal);
-  const closed = new Promise((resolve) => browser.once("close", resolve));
+  const closed = new Promise((resolve) =>
+    browser.once("close", () => {
+      abort.abort();
+      resolve();
+    }),
+  );
   try {
     const page = browser.pages()[0] ?? (await browser.newPage());
     try {
@@ -53,10 +85,19 @@ export async function holdBrowserSession(
     } catch {
       if (!stopping) log("qlik_navigation_pending");
     }
+    if (!abort.signal.aborted && startCollection) {
+      collection = Promise.resolve()
+        .then(() => startCollection(abort.signal))
+        .catch(() => {
+          if (!abort.signal.aborted) log("qlik_metadata_preflight_unavailable");
+        });
+    }
     await closed;
   } finally {
+    abort.abort();
     for (const signal of signals) signalSource.removeListener(signal, onSignal);
     await browser.close();
+    await collection;
   }
 }
 

@@ -58,3 +58,60 @@ test("closing the remote browser releases signal handlers", async () => {
   for (const signal of ["SIGTERM", "SIGINT", "SIGHUP"])
     assert.equal(f.signals.listenerCount(signal), 0);
 });
+
+test("collection belongs to browser lifetime and shutdown awaits cancellation", async () => {
+  const f = fixture(async () => {});
+  const finished = Promise.withResolvers();
+  let collectionSignal;
+  let resolved = false;
+  const session = holdBrowserSession(f.browser, {
+    signalSource: f.signals,
+    startCollection: async (signal) => {
+      collectionSignal = signal;
+      await finished.promise;
+    },
+  }).then(() => {
+    resolved = true;
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(collectionSignal.aborted, false);
+  f.signals.emit("SIGTERM");
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(collectionSignal.aborted, true);
+  assert.equal(resolved, false);
+  finished.resolve();
+  await session;
+  assert.equal(resolved, true);
+});
+
+test("collection errors are sanitized without closing the login session", async () => {
+  const f = fixture(async () => {});
+  const session = holdBrowserSession(f.browser, {
+    signalSource: f.signals,
+    log: (message) => f.messages.push(message),
+    startCollection: async () => {
+      throw new Error("private upstream token");
+    },
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.deepEqual(f.messages, ["qlik_metadata_preflight_unavailable"]);
+  assert.equal(f.closed(), false);
+  await f.browser.close();
+  await session;
+});
+
+test("shutdown during navigation never starts collection", async () => {
+  const navigation = Promise.withResolvers();
+  const f = fixture(() => navigation.promise);
+  let calls = 0;
+  f.browser.once("close", () => navigation.reject(new Error("closed")));
+  const session = holdBrowserSession(f.browser, {
+    signalSource: f.signals,
+    startCollection: () => {
+      calls++;
+    },
+  });
+  f.signals.emit("SIGTERM");
+  await session;
+  assert.equal(calls, 0);
+});

@@ -7,8 +7,8 @@
   destino confirmado /app/ranking; corretores abaixo sao historico. Qlik -> VPS -> CRM.
 - PR214/ce82f707 fechado sem merge: sentido inverso e grant nao comprovado.
 - Fontes: GitHub PR216/main, SSH e https://crm.descomplicapro.com.br/api/health.
-  Retomada12:44Z: main/site200/ok=16f4587 (deploy externo);
-  PR216/4e955c2 aberto com conflito, sem runs CI. gh ausente; conector consultado.
+  Retomada13:34Z: main8e015c6, site200/ok16f4587 (deploy externo);
+  PR216/46378ce aberto com conflito, sem runs CI. gh ausente; conector consultado.
 - VPS atual sem exportador antigo/qlik-ranking-api; MCP n8n encontrou zero
   workflows ranking, sem mutacao. Documentos antigos nao provam estado atual.
   Chrome local mostra Visao House00171c17-48de-4488-b1f9-dd6dcb0249e2 e pastas
@@ -45,8 +45,9 @@
   BigInt offline exige cobertura separada. Salesforce/global e politicas intactos.
 - Sync apos merge excedeu256000bytes. Nota desta tarefa consolidada com
   detalhes preservados no runbook/WORKLOG e historico Git; notas alheias intactas.
-- Verify atual OK,2775 Vitest; foco89 OK. Exportacao nao entregou arquivo;
-  solicitado XLSX agregado. PR216 sem merge/deploy; limites no mapa e WORKLOG.
+- XLSX nao recebido; usuario reafirmou automacao. Cliente QIX/SDK oficial e
+  preflight local implementados, desligados; sessao browser pode autenticar API.
+  Sem handshake real/coleta/carga. Testes/gates e limites em WORKLOG/runbooks.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 

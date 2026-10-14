@@ -1,5 +1,38 @@
 # Worklog
 
+## 2026-10-14: Cliente QIX e preflight automatico
+
+Retomada13:34Z: main8e015c6, health200/ok16f4587, PR216/46378ce com conflito
+e sem runs CI. Conhecimento sincronizado antes da implementacao. Usuario
+reafirmou operacao autonoma diaria; XLSX manual nao atende a entrega.
+
+SDK oficial enigma.js2.15.0 fixado no lockfile, utilizado pelo processo dono
+do navegador. API QIX usa sessao autenticada do browser e CSRF obtido no mesmo
+tenant. OAuth nao e requisito universal; a afirmacao anterior foi restritiva.
+Nao extrai cookies, nao cria CDP TCP, nao desativa CSP e nao le o cofre.
+
+Inspecao limitada ao app/pasta confirmados, produtos e referencia da aba
+Parceiras. pUYysrvJ e cId de interface, nao ID Engine presumido. Projeta apenas
+definicoes e timestamp de recarga; limites de tamanho/profundidade e abort.
+Nao chama GetHyperCubeData, nao aplica selecoes nem consulta tabela de clientes.
+
+Ciclo imediato e sequencial, intervalo1h, timeout cooperativo120s; transporte
+encerra em60s. Shutdown aguarda trabalho proprio sem sobrepor execucoes.
+Artefato temporario em runtime privado,0600, rename/fsync; sempre declara
+rankingConnected=false. Flag QLIK_METADATA_PREFLIGHT=enabled somente no owner;
+nao habilitada em nenhuma unit. Testes Qlik:103 passaram/3 Linux skips.
+pnpm verify passou: lint (um aviso preexistente), typecheck,141 arquivos/2775
+Vitest e63 skips, suites operacionais/release sem falhas e build50 paginas.
+pnpm audit nao encontrou vulnerabilidades; frozen install e diff-check OK.
+Revisao independente sem achados concretos; SDK real em VM sintetica confirmou
+unwrap dos metodos. Linux/CSP/sessao real e falhas de fsync seguem nao validados.
+Consulta14:51Z: VPS browser ativo no release2f0907e, sem alteracao; health200/ok
+16f4587. Main avancou para5c4d95e, exigindo conciliacao e nova validacao.
+
+Nenhum handshake real, coleta de fatos, reconciliacao, migration, carga ou
+agenda produtiva executados nesta etapa. O preview e este preflight nao
+satisfazem a entrega final. Procedimento e limites em qlik-vps-session.md.
+
 ## 2026-10-14: Recuperacao do console e limite da exportacao Qlik
 
 Retomada12:44Z: fetch concluido; main e health200/ok em16f4587. PR216 aberto,
