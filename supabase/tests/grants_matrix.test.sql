@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  40::bigint,
+  41::bigint,
   'all public tables retain RLS'
 );
 

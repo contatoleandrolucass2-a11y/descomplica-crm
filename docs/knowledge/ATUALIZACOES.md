@@ -32,6 +32,10 @@
 - UI Chromium: 73 testes aprovados antes do ajuste final de foco; regressao
   focal de PUT/GET e scroll aprovada depois. QA sintetico de dois usuarios e
   quatro analises axe aprovados. Banco real isolado e publicacao pendentes.
+- CI38501459791: validate aprovado; restore executou 1323 testes e encontrou
+  apenas contador legado da matriz RLS (40, agora 41 tabelas). Lista nominal
+  e 81 testes novos passaram. Contador atualizado sem remover as verificacoes.
+  Suite Chromium final, incluindo correcao de foco: 73/73 aprovados.
 
 ## 2026-10-13: Capitalizacao da rotina regional imob
 

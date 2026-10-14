@@ -13,6 +13,8 @@
   tem falha remanescente de symlink Salesforce no Windows, fora deste escopo.
   Testes Chromium cobrem persistencia, isolamento, virada, foco e scroll.
 - Banco isolado, CI e publicacao ainda pendentes; runtime permanece 0fdbb80.
+- CI inicial aprovou validate; restore revelou contador RLS legado, corrigido
+  de 40 para 41 tabelas. Os demais testes pgTAP passaram; repetir gates completos.
 
 ## 2026-10-13: Padrao de texto regional imob
 
