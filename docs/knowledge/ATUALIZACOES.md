@@ -9,6 +9,11 @@
 - Novos ajustes autorizados para publicacao apos validacao: seletor unico,
   controles redesenhados e contorno branco da coluna atual, sem mudar dados.
   Evidencias: [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
+- PR226/CI38597484257 aprovado, integrado em efc6a20; CI main38603513278
+  em andamento. Consulta17:06Z: health200/ok/0019690, publicado por trabalho
+  concorrente em16:58:40Z. Esta versao ja esta incluida no candidato.
+- Retomada17:55Z: main77ddc69/PR224 preserva Rotina; CI38610165621 em andamento.
+  Reexecucao de efc6a20 cancelada pela integracao, nao nova falha; health0019690.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 

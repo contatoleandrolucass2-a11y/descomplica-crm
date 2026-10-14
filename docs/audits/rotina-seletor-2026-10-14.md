@@ -59,3 +59,42 @@ Data: 2026-10-14. Branch: codex/rotina-seletor-coluna.
 - ESLint focal, Prettier e typecheck repetidos apos os novos testes: aprovados.
 - Nao alterar dados reais para validar layout; usar fixtures sinteticas locais.
 - PR, CI completa, merge e publicacao ainda nao comprovados para este ajuste.
+
+## Integracao e retomada operacional
+
+- PR226 aprovado na CI38597484257, headfb324d3: validate, isolated-restore e
+  release-gates aprovados, incluindo matriz visual autenticada. Nenhum gate
+  dispensado. Integrado em efc6a20f7a60b477214e5889fec52081cce9f9b9 as17:04:24Z.
+- CI push/main38603513278 em andamento; ainda nao autoriza promocao da imagem.
+- PR225 antigo: segunda execucao da CI38588434885 falhou em zoom. Log confirma
+  Rotina aprovada em Semana/Hoje, todos os tamanhos/temas, incluindo320balanced.
+  Artifact candidate-results.json informa failure.stage=zoom, kind=sanitized;
+  causa especifica nao comprovada. Nao relaxar testes nem repetir por tentativa.
+- Conteudo documental do PR225 incorporado integralmente no PR226. Sua branch
+  foi reconciliada com main para registrar o encerramento operacional sem outro
+  deploy. Conflitos apenas no indice/arquivo historico, preservados integralmente.
+- Fonte ao vivo17:06:17Z: /api/health200/ok/001969010d1d33297b9d42148be95832feefb6ab.
+  Coordenador confirma deployment5c4dc0b6-173b-443f-be29-cb67bd32b0bc,
+  deployedAt2026-10-14T16:58:40.048Z, pending=null. Publicacao concorrente do
+  Associativo ja incluida em efc6a20. CI main38596610544 aprovada.
+- Preparado checkout remoto limpo efc6a20, dependencias de producao pelo lockfile,
+  sem build/testes pesados na VPS. Nenhuma promocao do novo runtime executada ainda.
+- CI main38603513278: primeira tentativa aprovou validate, restore, imagem e E2E,
+  mas falhou em daily-layout-1024-balanced antes de daily-size. Artifact sanitizado
+  informa apenas routine-settings; assert/causa especifica nao comprovada.
+- Reproducao local independente: tres rodadas validas,104 transicoes,zero falhas,
+  com26linhas/74atividades House do repositorio, segunda-feira,1024/320balanced.
+  Windows/Node24/Chromium151. Uma rodada extra com erro da instrumentacao foi
+  descartada, sem usar seu resultado como evidencia do produto.
+- Uma reexecucao do job main falho foi solicitada para verificar reproducibilidade
+  no mesmo SHA, apos inspecao dos logs e tentativas locais. Nenhum criterio,
+  timeout, baseline ou codigo foi alterado para obter aprovacao. Falha recorrente
+  exige instrumentacao sanitizada da assert antes de novas tentativas/publicacao.
+- A segunda tentativa foi CANCELADA, nao uma nova falha: GitHub informa
+  conclusion=cancelled apos integracao concorrente do PR224 em17:51:04Z.
+  Seu log confirma Rotina completa aprovada, incluindo1024balanced e320dark.
+  Nenhuma instrumentacao adicional foi aplicada com base no cancelamento.
+- Retomada17:55Z: main77ddc69d79678d6944c34c5a3ac0f5c8a2ee2f8c preserva efc6a20;
+  CI38610165621 em andamento. Health200/ok continua0019690. Candidato anterior
+  nao pode ser promovido: o coordenador exige main exato. Novo suporte Qlik tem
+  comandos proprios e nao sera acionado; esta tarefa promove somente o CRM.
