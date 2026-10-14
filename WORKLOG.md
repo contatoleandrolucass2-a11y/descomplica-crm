@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-14: Painel de usuários conforme a referência visual
+
+- Reorganiza o diretório como Pessoas, com contagem, busca, filtros Todos/Ativos/Revogados/Pendentes, avatar, papel, indicador de status e oito resultados por página.
+- A matriz apresenta quatro abas: Comercial, Simuladores, Configurações e Administração. Cada linha reúne caixa, descrição e estado de herança; a busca percorre todas as categorias sem perder o rascunho.
+- Preserva o controle único de simuladores, as marcas independentes, os padrões completos do Administrador, os controles técnicos ocultos e as validações do servidor/banco. Contas sem acesso não exibem permissões como liberadas.
+- Valida teclado, foco, estado vazio, busca, salvamento e restauração em contas sintéticas. Os três temas e larguras de 320, 722 e 1440 pixels foram conferidos no navegador local.
+- Lint, TypeScript, 2.329 testes Vitest, 83 testes Node e build passaram. Evidências detalhadas em `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
 ## 2026-10-14: Administrador com herança completa
 
 - Atende ao pedido posterior para o papel Administrador herdar todo o catálogo atual: 31 permissões, incluindo RIVA, DIRECIONAL e permissões técnicas ocultas na matriz.

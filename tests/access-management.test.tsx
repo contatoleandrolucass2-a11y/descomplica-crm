@@ -395,9 +395,14 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
 
-    expect(markup).toContain("Buscar usuário");
-    expect(markup).toContain("Permissões herdadas do papel");
-    expect(markup).toContain("Exceções individuais");
+    expect(markup).toContain("Buscar pessoas");
+    expect(markup).toContain('role="tablist" aria-label="Categorias de acesso"');
+    expect(markup.match(/role="tab"/g)).toHaveLength(4);
+    expect(markup.match(/role="tabpanel"/g)).toHaveLength(4);
+    expect(markup.match(/role="tabpanel" tabindex="-1" hidden=""/g)).toHaveLength(3);
+    expect(markup).toContain('aria-label="Filtrar pessoas por status"');
+    expect(markup).toContain("resultado do papel e das exceções individuais");
+    expect(markup).toContain("O que pode acessar");
     expect(markup).toContain("Configurações avançadas");
     expect(markup).toContain("proteção contra autoelevação");
     expect(markup).not.toContain("Salvar papel");
@@ -439,13 +444,13 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
 
-    expect(markup).toContain("Buscar permissão");
+    expect(markup).toContain("Buscar acesso");
     const checkbox = (label: string) =>
       markup.match(new RegExp(`<input[^>]*aria-label="Acesso a ${label}"[^>]*>`))?.[0];
     expect(checkbox("Visualizar dashboard")).toContain('checked=""');
     expect(checkbox("Visualizar dashboard com Canal Imob")).not.toContain('checked=""');
     expect(checkbox("Visualizar dashboard sem Canal Imob")).not.toContain('checked=""');
-    expect(markup).toContain("Marcas nos simuladores");
+    expect(markup).toContain("RIVA e DIRECIONAL controlam as unidades visíveis");
     expect(checkbox("RIVA")).toBeDefined();
     expect(checkbox("RIVA")).not.toContain('checked=""');
     expect(checkbox("DIRECIONAL")).toBeDefined();
@@ -462,9 +467,8 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).not.toContain('name="effect"');
     expect(markup).toContain("Salvar alterações");
     expect(markup).toContain("Herdada: negada");
-    expect(markup).toContain("Como Master");
-    expect(markup).toContain("qualquer usuário abaixo do seu nível");
-    expect(markup).toContain("O papel do usuário não muda");
+    expect(markup).toContain("o papel do usuário não muda");
+    expect(markup).toContain("Marcado: acesso liberado. Desmarcado: sem acesso.");
     expect(markup).not.toContain("Adicionar uma exceção");
   });
 
@@ -508,6 +512,45 @@ describe("catálogo localizado de acesso", () => {
     },
   );
 
+  it.each([
+    { isActive: false, accessStatus: "suspended" as const },
+    { isActive: true, accessStatus: "pending" as const },
+  ])("não apresenta herança administrativa como acesso efetivo de conta $accessStatus", (state) => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000007",
+            email: "sem-acesso@example.test",
+            ...state,
+            roleKey: "admin",
+            isSelf: false,
+            isManageable: true,
+            overrides: [
+              { permissionKey: "crm.inventory.riva.view", effect: "allow", reason: null },
+            ],
+          },
+        ],
+        assignableRoles: ["admin"],
+        manageablePermissions: ["crm.inventory.riva.view"],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: true,
+        canManageUsers: true,
+        canApproveUsers: false,
+        reportingScopes: [],
+      }),
+    );
+    const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
+    expect(checkboxes).toHaveLength(25);
+    for (const checkbox of checkboxes) {
+      expect(checkbox).not.toContain('checked=""');
+      expect(checkbox).toContain('disabled=""');
+    }
+    expect(markup).toContain("Conta sem acesso");
+    expect(markup).toContain('admin-section-count">0 acessos');
+    expect(markup).not.toContain("Salvar alterações");
+  });
   it("expõe aprovação pendente com papel e escopo, sem motivo manual", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {

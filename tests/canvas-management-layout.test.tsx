@@ -137,7 +137,7 @@ describe("management canvas layout", () => {
     expect(styles).toMatch(
       /@media \(max-width: 40rem\) \{[\s\S]*?\.admin-user-detail-header h2 \{[\s\S]*?min-height: 2\.5em[\s\S]*?-webkit-line-clamp: 2/,
     );
-    expect(users).toContain("const PAGE_SIZE = 6");
+    expect(users).toContain("const PAGE_SIZE = 8");
     expect(pages).toContain("const PAGE_SIZE = 8");
   });
 

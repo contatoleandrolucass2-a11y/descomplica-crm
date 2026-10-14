@@ -1,5 +1,14 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Referência visual do painel de usuários
+
+- Fonte: duas imagens fornecidas pelo usuário para o formato do diretório e da matriz. Usar a estrutura visual, sem copiar identidades ou quantidades da referência.
+- As categorias visíveis são Comercial (8), Simuladores (4), Configurações (5) e Administração (8), conforme o catálogo atual. Cinco permissões técnicas permanecem ocultas e visualizar/executar simuladores usam uma única caixa.
+- A busca percorre todas as categorias, ativa uma categoria com resultado e preserva alterações ainda não salvas. Abas usam setas, Home e End; o painel recebe foco também quando todos os controles estão desabilitados.
+- O contador de acessos representa o estado salvo. Contas inativas, pendentes e com papel inválido exibem zero acesso efetivo, sem alterar sua herança ou permissões persistidas.
+- O filtro Revogados não inclui contas que apenas aguardam aprovação. A busca por papel permanece disponível no campo de pesquisa, substituindo a seleção separada de papel.
+- Validação local registrada em `docs/audits/usuarios-acessos-local-2026-10-14.md`; nenhuma publicação remota foi realizada.
+
 ## 2026-10-14: Administrador passa a herdar todo o catálogo
 
 - Fonte: pedido posterior do usuário, “Admin deve ter tudo herdado como padrão”. Substitui o padrão anterior de marcas desativadas somente para o Administrador; os outros papéis permanecem iguais.

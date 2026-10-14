@@ -193,3 +193,29 @@ Banco desta atualização: 1.175 testes pgTAP passaram na origem isolada e 1.175
 na cópia restaurada, com lint, segurança, desempenho, preservação de privilégios
 e proprietários e fingerprints equivalentes. Evidência local ignorada:
 `.local-dev/admin-db-rehearsal.json`.
+
+## Formato visual do painel administrativo
+
+A referência fornecida pelo usuário foi aplicada ao diretório Pessoas e à matriz
+O que pode acessar. O diretório oferece busca, quatro filtros, avatar, papel,
+status, seleção lateral e paginação de oito contas. A matriz usa quatro abas,
+busca global e linhas únicas com descrição e estado de herança. As quantidades
+são calculadas pelo catálogo atual, sem reproduzir números ou pessoas das imagens.
+
+- A navegação entre abas e a busca preservaram uma negação ainda não salva de
+  RIVA. O salvamento produziu 24 controles liberados; restaurar o padrão e salvar
+  devolveu 25 controles liberados ao Administrador sintético, sem exceções.
+- Foram conferidos busca por papel, filtro sem resultados, teclado entre abas,
+  foco no painel de consulta da própria conta e restauração dos padrões.
+- Os temas Claro, Médio e Escuro foram inspecionados visualmente. Em 320 e 1440
+  pixels, a largura do documento coincidiu com a janela; apenas a barra de abas
+  rola horizontalmente na largura estreita. A janela normal de 722 pixels foi
+  restaurada após o teste.
+- Lint, TypeScript, 2.329 testes Vitest e 83 testes Node passaram, assim como o
+  build. Nove testes opcionais permaneceram ignorados. Os ajustes finais de
+  foco, nome acessível do status e mensagem vazia foram novamente verificados
+  com lint, TypeScript e os testes focados da interface.
+- Esta etapa visual não altera banco, APIs, hierarquia ou escopos. A validação
+  anterior da herança administrativa continua registrada acima.
+- A captura e os logs `users-layout-*` ficam somente em `.local-dev`, ignorado
+  pelo Git. A sincronização com Obsidian continua sem configuração neste checkout.

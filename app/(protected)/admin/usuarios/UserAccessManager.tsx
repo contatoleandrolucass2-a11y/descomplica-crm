@@ -7,7 +7,6 @@ import {
   CircleMinus,
   CircleX,
   Clock3,
-  KeyRound,
   Search,
   ShieldCheck,
   UserCheck,
@@ -37,7 +36,7 @@ import {
 } from "./actions";
 
 const INITIAL_STATE: AdminActionState = { status: "idle", message: "" };
-const PAGE_SIZE = 6;
+const PAGE_SIZE = 8;
 const HIDDEN_PERMISSION_KEYS = new Set<PermissionKey>([
   "audit.view",
   "crm.read_model_v3.view",
@@ -101,24 +100,10 @@ interface PermissionGroup {
 
 const PERMISSION_GROUPS: PermissionGroup[] = [
   {
-    id: "administration",
-    label: "Administração",
+    id: "commercial",
+    label: "Comercial",
     matches: (key) =>
-      key.startsWith("users.") ||
-      key.startsWith("permissions.") ||
-      key.startsWith("roles.") ||
-      key.startsWith("audit.") ||
-      key.startsWith("admin."),
-  },
-  {
-    id: "navigation",
-    label: "Navegação e páginas",
-    matches: (key) => key.startsWith("pages."),
-  },
-  {
-    id: "crm",
-    label: "CRM e canais",
-    matches: (key) =>
+      key === "pages.view" ||
       key.startsWith("crm.dashboard.") ||
       key.startsWith("crm.stages.") ||
       key.startsWith("crm.ranking.") ||
@@ -127,26 +112,33 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
   },
   {
     id: "simulators",
-    label: "Simuladores e políticas comerciais",
+    label: "Simuladores",
+    description:
+      "RIVA e DIRECIONAL controlam as unidades visíveis. O Administrador herda ambas; os demais papéis precisam de liberação individual.",
     matches: (key) =>
       key.startsWith("crm.simulators.") ||
-      key.startsWith("crm.commercial_engine.") ||
-      key.startsWith("crm.commercial_policy."),
-  },
-  {
-    id: "inventory-brands",
-    label: "Marcas nos simuladores",
-    description:
-      "Libere uma ou ambas as marcas. Sem marca marcada, o usuário não visualiza unidades nos simuladores. O Administrador herda ambas; os demais papéis precisam de liberação individual.",
-    matches: (key) => key.startsWith("crm.inventory."),
+      key.startsWith("crm.inventory.") ||
+      key.startsWith("crm.commercial_engine."),
   },
   {
     id: "settings",
-    label: "Configurações e dados",
+    label: "Configurações",
     matches: (key) =>
       key.startsWith("crm.settings.") ||
       key.startsWith("crm.salesforce.") ||
-      key.startsWith("crm.ingest."),
+      key.startsWith("crm.ingest.") ||
+      key.startsWith("crm.commercial_policy."),
+  },
+  {
+    id: "administration",
+    label: "Administração",
+    matches: (key) =>
+      key.startsWith("users.") ||
+      key.startsWith("permissions.") ||
+      key.startsWith("roles.") ||
+      key.startsWith("audit.") ||
+      key.startsWith("admin.") ||
+      key === "pages.manage",
   },
 ];
 
@@ -210,7 +202,16 @@ function getInheritedPermissions(user: ManagedUser): readonly PermissionKey[] {
   return ROLE_INHERITED_PERMISSIONS[user.roleKey] ?? [];
 }
 
+function accountHasAccess(user: ManagedUser): boolean {
+  return (
+    user.isActive &&
+    user.accessStatus === "approved" &&
+    Boolean(user.roleKey && ACTIVE_ROLE_KEYS.has(user.roleKey))
+  );
+}
+
 function getEffectivePermissionCount(user: ManagedUser): number {
+  if (!accountHasAccess(user)) return 0;
   const effectivePermissions = new Set<PermissionKey>(getInheritedPermissions(user));
   for (const override of user.overrides) {
     if (override.effect === "allow") effectivePermissions.add(override.permissionKey);
@@ -449,6 +450,7 @@ function PermissionMatrix({
   editable: boolean;
 }) {
   const [search, setSearch] = useState("");
+  const [activeGroupId, setActiveGroupId] = useState("commercial");
   const [draftEffects, setDraftEffects] = useState<Map<PermissionKey, BulkEffect>>(() => new Map());
   const submitOverrides = useCallback(
     async (previousState: AdminActionState, formData: FormData) => {
@@ -479,7 +481,10 @@ function PermissionMatrix({
     permissions: filteredPermissions.filter(group.matches),
   })).filter((group) => group.permissions.length > 0);
 
+  const activeGroup = groups.find((group) => group.id === activeGroupId) ?? groups[0];
+
   function isChecked(permissionKey: PermissionKey) {
+    if (!accountHasAccess(user)) return false;
     const effect =
       draftEffects.get(permissionKey) ?? overrides.get(permissionKey)?.effect ?? "inherit";
     return effect === "allow" || (effect === "inherit" && inherited.has(permissionKey));
@@ -527,39 +532,69 @@ function PermissionMatrix({
         <label className="admin-permission-search" htmlFor={`permission-search-${user.userId}`}>
           <Search aria-hidden="true" />
           <span>
-            <span>Buscar permissão</span>
+            <span>Buscar acesso</span>
             <input
               id={`permission-search-${user.userId}`}
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               autoComplete="off"
-              placeholder="Nome ou função…"
+              placeholder="Buscar acesso ou função…"
             />
           </span>
         </label>
-        {editable ? (
-          <button
-            type="button"
-            className={managementStyles.button}
-            onClick={restoreDefaults}
-            disabled={pending}
-          >
-            Usar padrão do perfil
-          </button>
-        ) : null}
       </div>
+      {groups.length > 0 ? (
+        <div className="admin-permission-tabs" role="tablist" aria-label="Categorias de acesso">
+          {groups.map((group, index) => (
+            <button
+              key={group.id}
+              id={`access-tab-${user.userId}-${group.id}`}
+              type="button"
+              role="tab"
+              className="admin-permission-tab"
+              aria-selected={activeGroup?.id === group.id}
+              aria-controls={`access-panel-${user.userId}-${group.id}`}
+              tabIndex={activeGroup?.id === group.id ? 0 : -1}
+              onClick={() => setActiveGroupId(group.id)}
+              onKeyDown={(event) => {
+                const next =
+                  event.key === "ArrowRight"
+                    ? (index + 1) % groups.length
+                    : event.key === "ArrowLeft"
+                      ? (index - 1 + groups.length) % groups.length
+                      : event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                          ? groups.length - 1
+                          : null;
+                if (next === null) return;
+                event.preventDefault();
+                setActiveGroupId(groups[next]!.id);
+                const buttons =
+                  event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>(
+                    '[role="tab"]',
+                  );
+                buttons?.[next]?.focus();
+              }}
+            >
+              {group.label}
+              <span>{group.permissions.length}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="admin-permission-groups">
         {groups.map((group) => (
           <section
             key={group.id}
-            className="admin-permission-group"
-            aria-labelledby={`permission-group-${user.userId}-${group.id}`}
+            id={`access-panel-${user.userId}-${group.id}`}
+            className="admin-permission-group admin-permission-panel"
+            role="tabpanel"
+            tabIndex={activeGroup?.id === group.id ? 0 : -1}
+            hidden={activeGroup?.id !== group.id}
+            aria-labelledby={`access-tab-${user.userId}-${group.id}`}
           >
-            <div className="admin-permission-group-header">
-              <h4 id={`permission-group-${user.userId}-${group.id}`}>{group.label}</h4>
-              <span>{group.permissions.length} itens</span>
-            </div>
             {group.description ? <p className="admin-form-help">{group.description}</p> : null}
             <div className="admin-permission-grid">
               {group.permissions.map((permissionKey) => {
@@ -569,10 +604,11 @@ function PermissionMatrix({
                 const savedStates = keys.map((key) =>
                   getPermissionState(key, inherited, overrides.get(key)),
                 );
-                const savedState =
-                  savedStates.find((state) => !state.permitted) ??
-                  savedStates.find((state) => state.key === "override-allow") ??
-                  savedStates[0]!;
+                const savedState = !accountHasAccess(user)
+                  ? { key: "account-denied", label: "Conta sem acesso", permitted: false }
+                  : (savedStates.find((state) => !state.permitted) ??
+                    savedStates.find((state) => state.key === "override-allow") ??
+                    savedStates[0]!);
                 const changed = keys.some((key) => draftEffects.has(key));
                 return (
                   <label
@@ -608,7 +644,7 @@ function PermissionMatrix({
           </section>
         ))}
         {groups.length === 0 ? (
-          <p className={managementStyles.emptyState}>Nenhuma permissão corresponde à busca.</p>
+          <p className={managementStyles.emptyState}>Nenhum acesso corresponde à busca.</p>
         ) : null}
       </div>
       {editable ? (
@@ -619,6 +655,14 @@ function PermissionMatrix({
               : `${countControls([...draftEffects.keys()])} ${countControls([...draftEffects.keys()]) === 1 ? "alteração não salva" : "alterações não salvas"}.`}
           </div>
           <div className="admin-permission-submit-actions">
+            <button
+              type="button"
+              className={managementStyles.button}
+              onClick={restoreDefaults}
+              disabled={pending}
+            >
+              Usar padrão do perfil
+            </button>
             <button
               type="button"
               className={managementStyles.button}
@@ -639,9 +683,18 @@ function PermissionMatrix({
         </div>
       ) : (
         <p className="admin-permission-readonly-note">
-          Esta matriz é somente para consulta. A hierarquia atual não permite alterar este usuário.
+          {accountHasAccess(user)
+            ? "Esta matriz é somente para consulta. A hierarquia atual não permite alterar este usuário."
+            : "Esta conta está sem acesso. A matriz mostra os acessos bloqueados enquanto a conta não estiver ativa, aprovada e com um papel válido."}
         </p>
       )}
+      <div className="admin-permission-catalog-note">
+        <ShieldCheck aria-hidden="true" />
+        <p>
+          A lista segue o catálogo autorizado do CRM. Acessos novos só aparecem quando adicionados
+          ao sistema e seguem os padrões do papel e as exceções individuais.
+        </p>
+      </div>
     </form>
   );
 }
@@ -652,7 +705,6 @@ function UserDetail({
   manageablePermissions,
   canManageRoles,
   canManagePermissions,
-  isMasterPermissionManager,
   canManageUsers,
   canApproveUsers,
   reportingScopes,
@@ -661,7 +713,10 @@ function UserDetail({
   const hasAnyMutation =
     user.isManageable && (canManageRoles || canManagePermissions || canManageUsers);
   const canEditPermissions =
-    user.isManageable && canManagePermissions && manageablePermissions.length > 0;
+    accountHasAccess(user) &&
+    user.isManageable &&
+    canManagePermissions &&
+    manageablePermissions.length > 0;
   const roleIsActive = user.roleKey ? ACTIVE_ROLE_KEYS.has(user.roleKey) : false;
 
   return (
@@ -729,24 +784,17 @@ function UserDetail({
           <div className="admin-access-section-heading">
             <div>
               <p>Acessos efetivos</p>
-              <h3 id={`permissions-title-${user.userId}`}>Permissões e exceções</h3>
+              <h3 id={`permissions-title-${user.userId}`}>O que pode acessar</h3>
             </div>
-            <span className="admin-section-count">
-              {user.overrides.length} {user.overrides.length === 1 ? "exceção" : "exceções"}
-            </span>
+            <span className="admin-section-count">{getEffectivePermissionCount(user)} acessos</span>
           </div>
-          {isMasterPermissionManager && user.isManageable ? (
-            <p className="admin-permission-intro">
-              <strong>Herdada: negada</strong> é apenas o padrão do papel. Como Master, você pode
-              marcar essas permissões e salvar para criar uma exceção individual em qualquer usuário
-              abaixo do seu nível. O papel do usuário não muda.
-            </p>
-          ) : (
-            <p className="admin-permission-intro">
-              <strong>Permissões herdadas do papel</strong> e <strong>Exceções individuais</strong>{" "}
-              aparecem na mesma matriz. Marcado permite; desmarcado bloqueia. Salve para aplicar.
-            </p>
-          )}
+          <p className="admin-permission-intro">
+            <strong>Marcado: acesso liberado. Desmarcado: sem acesso.</strong> As caixas mostram o
+            resultado do papel e das exceções individuais.
+            {canEditPermissions
+              ? " Clique para ajustar o rascunho; o papel do usuário não muda."
+              : ""}
+          </p>
           <PermissionMatrix
             key={`${user.userId}:${user.roleKey}:${JSON.stringify(user.overrides)}`}
             user={user}
@@ -776,7 +824,6 @@ function UserDetail({
 export function UserAccessManager(props: UserAccessManagerProps) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<"all" | "active" | "inactive" | "pending">("all");
-  const [role, setRole] = useState<"all" | RoleKey | "unassigned">("all");
   const [pageNumber, setPageNumber] = useState(1);
   const [selectedUserId, setSelectedUserId] = useState<string | null>(
     props.users[0]?.userId ?? null,
@@ -793,24 +840,15 @@ export function UserAccessManager(props: UserAccessManagerProps) {
           .includes(query);
       const matchesStatus =
         status === "all" ||
-        (status === "active" && user.isActive && user.accessStatus === "approved") ||
-        (status === "inactive" && (!user.isActive || user.accessStatus === "suspended")) ||
+        (status === "active" && accountHasAccess(user)) ||
+        (status === "inactive" &&
+          (user.accessStatus === "suspended" ||
+            (!user.isActive && user.accessStatus !== "pending"))) ||
         (status === "pending" && user.accessStatus === "pending");
-      const matchesRole =
-        role === "all" || (role === "unassigned" ? user.roleKey === null : user.roleKey === role);
-      return matchesSearch && matchesStatus && matchesRole;
+      return matchesSearch && matchesStatus;
     });
-  }, [props.users, role, search, status]);
-  const roleOptions = useMemo(
-    () =>
-      [...new Set(props.users.flatMap((user) => (user.roleKey ? [user.roleKey] : [])))]
-        .filter((roleKey) => ACTIVE_ROLE_KEYS.has(roleKey))
-        .sort((left, right) => getRoleLabel(left).localeCompare(getRoleLabel(right), "pt-BR")),
-    [props.users],
-  );
-  const activeCount = props.users.filter(
-    (user) => user.isActive && user.accessStatus === "approved",
-  ).length;
+  }, [props.users, search, status]);
+  const activeCount = props.users.filter(accountHasAccess).length;
   const pendingCount = props.users.filter((user) => user.accessStatus === "pending").length;
   const revokedCount = props.users.filter(
     (user) =>
@@ -874,20 +912,15 @@ export function UserAccessManager(props: UserAccessManagerProps) {
       <div className="admin-users-workspace">
         <aside className="admin-users-directory" aria-labelledby="users-directory-title">
           <header className="admin-users-directory-header">
-            <span className={managementStyles.iconFrame} aria-hidden="true">
-              <KeyRound />
-            </span>
-            <div>
-              <h2 id="users-directory-title">Usuários</h2>
-              <p>Selecione uma conta para revisar os acessos.</p>
-            </div>
+            <h2 id="users-directory-title">Pessoas</h2>
+            <span className="admin-directory-count">{props.users.length}</span>
           </header>
 
           <div className="admin-users-directory-controls">
             <label className="admin-directory-search" htmlFor="user-search">
               <Search aria-hidden="true" />
               <span>
-                <span>Buscar usuário</span>
+                <span className="sr-only">Buscar pessoas</span>
                 <input
                   id="user-search"
                   name="userSearch"
@@ -898,48 +931,35 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                     resetPage();
                   }}
                   autoComplete="off"
-                  placeholder="E-mail, papel ou status…"
+                  placeholder="Buscar e-mail ou papel…"
                 />
               </span>
             </label>
-            <div className="admin-directory-filters">
-              <label>
-                <span>Status</span>
-                <select
-                  name="userStatusFilter"
-                  value={status}
-                  onChange={(event) => {
-                    setStatus(event.target.value as typeof status);
+            <div
+              className="admin-directory-status-filters"
+              role="group"
+              aria-label="Filtrar pessoas por status"
+            >
+              {(
+                [
+                  ["all", "Todos"],
+                  ["active", "Ativos"],
+                  ["inactive", "Revogados"],
+                  ["pending", "Pendentes"],
+                ] as const
+              ).map(([value, label]) => (
+                <button
+                  type="button"
+                  key={value}
+                  aria-pressed={status === value}
+                  onClick={() => {
+                    setStatus(value);
                     resetPage();
                   }}
-                  autoComplete="off"
                 >
-                  <option value="all">Todos</option>
-                  <option value="active">Ativos</option>
-                  <option value="inactive">Revogados</option>
-                  <option value="pending">Pendentes</option>
-                </select>
-              </label>
-              <label>
-                <span>Papel</span>
-                <select
-                  name="userRoleFilter"
-                  value={role}
-                  onChange={(event) => {
-                    setRole(event.target.value as typeof role);
-                    resetPage();
-                  }}
-                  autoComplete="off"
-                >
-                  <option value="all">Todos</option>
-                  <option value="unassigned">Sem papel</option>
-                  {roleOptions.map((roleKey) => (
-                    <option key={roleKey} value={roleKey}>
-                      {getRoleLabel(roleKey)}
-                    </option>
-                  ))}
-                </select>
-              </label>
+                  {label}
+                </button>
+              ))}
             </div>
           </div>
 
@@ -951,7 +971,6 @@ export function UserAccessManager(props: UserAccessManagerProps) {
             {visibleUsers.length > 0 ? (
               visibleUsers.map((user) => {
                 const userStatus = getUserStatus(user);
-                const permissionCount = getEffectivePermissionCount(user);
                 return (
                   <li key={user.userId}>
                     <button
@@ -968,13 +987,14 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                       <span className="admin-user-option-copy">
                         <strong>{user.email ?? "E-mail não informado"}</strong>
                         <span>{getVisibleRoleLabel(user.roleKey)}</span>
-                        <small>
-                          {permissionCount} {permissionCount === 1 ? "permissão" : "permissões"}
-                        </small>
                       </span>
-                      <span className={managementStyles.statusPill} data-state={userStatus.key}>
-                        {userStatus.label}
-                      </span>
+                      <span
+                        className="admin-user-status-dot"
+                        role="img"
+                        data-state={userStatus.key}
+                        aria-label={userStatus.label}
+                        title={userStatus.label}
+                      />
                     </button>
                   </li>
                 );
@@ -991,32 +1011,38 @@ export function UserAccessManager(props: UserAccessManagerProps) {
           <footer className={`admin-users-pagination ${managementStyles.pagination}`}>
             <p aria-live="polite">
               {users.length
-                ? `${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, users.length)} de ${users.length}`
+                ? pageCount === 1
+                  ? `${users.length} de ${users.length}`
+                  : `${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, users.length)} de ${users.length}`
                 : "0 usuários"}
             </p>
-            <div className={managementStyles.paginationControls}>
-              <button
-                type="button"
-                className={managementStyles.pageButton}
-                disabled={currentPage === 1}
-                onClick={() => setPageNumber((value) => Math.max(1, value - 1))}
-                aria-label="Página anterior"
-              >
-                <ChevronLeft aria-hidden="true" />
-              </button>
-              <span className={managementStyles.pageButton} aria-current="page">
-                {currentPage}
-              </span>
-              <button
-                type="button"
-                className={managementStyles.pageButton}
-                disabled={currentPage === pageCount}
-                onClick={() => setPageNumber((value) => Math.min(pageCount, value + 1))}
-                aria-label="Próxima página"
-              >
-                <ChevronRight aria-hidden="true" />
-              </button>
-            </div>
+            {pageCount === 1 ? (
+              <span>Fim da lista.</span>
+            ) : (
+              <div className={managementStyles.paginationControls}>
+                <button
+                  type="button"
+                  className={managementStyles.pageButton}
+                  disabled={currentPage === 1}
+                  onClick={() => setPageNumber((value) => Math.max(1, value - 1))}
+                  aria-label="Página anterior"
+                >
+                  <ChevronLeft aria-hidden="true" />
+                </button>
+                <span className={managementStyles.pageButton} aria-current="page">
+                  {currentPage}
+                </span>
+                <button
+                  type="button"
+                  className={managementStyles.pageButton}
+                  disabled={currentPage === pageCount}
+                  onClick={() => setPageNumber((value) => Math.min(pageCount, value + 1))}
+                  aria-label="Próxima página"
+                >
+                  <ChevronRight aria-hidden="true" />
+                </button>
+              </div>
+            )}
           </footer>
         </aside>
 
@@ -1025,8 +1051,14 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         ) : (
           <section className="admin-user-detail admin-user-detail-empty" id="selected-user-panel">
             <ShieldCheck aria-hidden="true" />
-            <h2>Nenhum usuário cadastrado</h2>
-            <p>Quando houver contas disponíveis, selecione uma para revisar papel e permissões.</p>
+            <h2>
+              {props.users.length ? "Nenhuma pessoa encontrada" : "Nenhum usuário cadastrado"}
+            </h2>
+            <p>
+              {props.users.length
+                ? "Ajuste a busca ou o filtro de status para encontrar uma conta."
+                : "Quando houver contas disponíveis, selecione uma para revisar papel e permissões."}
+            </p>
           </section>
         )}
       </div>

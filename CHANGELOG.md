@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14 — Formato do painel de usuários, ambiente local
+
+- Aplica a referência visual ao diretório Pessoas e à matriz de acessos, com filtros em botões, quatro abas e estados de herança por linha.
+- Mantém rascunhos durante a navegação e busca entre categorias, com suporte a teclado, temas e telas estreitas.
+- Distingue resultados vazios de ausência de contas e impede que contas bloqueadas sejam apresentadas com acesso efetivo.
+
 ## 2026-10-14 — Padrão completo do Administrador, ambiente local
 
 - Administrador passa a herdar todas as 31 permissões atuais, incluindo RIVA e DIRECIONAL. Exceções individuais e hierarquia continuam prevalecendo.
