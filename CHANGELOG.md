@@ -1,5 +1,24 @@
 # Changelog
 
+## 2026-10-13: Conclusao semanal individual
+
+- Revisa o portugues das atividades de Gerente regional imob sem mudar seu
+  sentido ou a tipografia compartilhada com House.
+- Adiciona marcacao individual de atividades, persistida no CRM e separada
+  da edicao do conteudo, com nova semana segunda-feira as 00h de Brasilia.
+
+## 2026-10-13: Texto regional imob
+
+- Padroniza as atividades salvas com primeira letra maiuscula e demais
+  minusculas, mantendo a mesma tipografia da aba Gerente regional house.
+
+## 2026-10-13: Conteudo de Gerente regional imob
+
+- Cadastra no CRM 18 linhas e 93 atividades do Excel fornecido, usando o
+  mesmo componente e as visualizacoes Semana/Hoje de Gerente regional house.
+- Salvamento compartilhado conferido por recarga; sem alterar outras funcoes
+  ou publicar nova versao da aplicacao.
+
 ## 2026-10-13: Relatorio completo no dashboard
 
 - Impede exibir equipe de versao anterior apos atualizacao parcial do dashboard.

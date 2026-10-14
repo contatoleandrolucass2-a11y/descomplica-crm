@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-10-13: Revisao e conclusoes individuais da Rotina
+
+- Revisao de portugues aplicada pela UI autorizada em regional imob, mantendo
+  sentido, capitalizacao e tipografia. Esclarecimento de 60 dias confirmado
+  pelo usuario. Salvo 23:05; 108 campos/93 atividades conferidos apos recarga.
+- Conclusao por usuario com persistencia no CRM, checkbox por atividade e
+  semana definida no servidor em America/Sao_Paulo. Migration nova autorizada
+  especificamente apos testes e backup, sem alterar dados comerciais.
+- API, tabela privada com RPCs e controles de conclusao implementados. Lint,
+  typecheck e build aprovados; 80 testes focais aprovados. Suite serial local
+  tem falha remanescente de symlink Salesforce no Windows, fora deste escopo.
+  Testes Chromium cobrem persistencia, isolamento, virada, foco e scroll.
+- Banco isolado, CI e publicacao ainda pendentes; runtime permanece 0fdbb80.
+- CI inicial aprovou validate; restore revelou contador RLS legado, corrigido
+  de 40 para 41 tabelas. Os demais testes pgTAP passaram; repetir gates completos.
+- Segunda CI aprovou banco/restore/E2E; setup do leitor sintetico da matriz
+  visual falhou com SQLSTATE 23505. Publicacao bloqueada ate corrigir fixture.
+- Terceira CI aprovou a Rotina completa com duas contas reais isoladas. Nova
+  conta alterou a selecao inicial da captura administrativa; estabilizar essa
+  precondicao preservando todas as assertions e referencias visuais existentes.
+
+## 2026-10-13: Padrao de texto regional imob
+
+- Capitalizacao solicitada salva no CRM as 22:54: primeira letra maiuscula
+  e demais minusculas, preservando 93 atividades e 18 linhas.
+- Fonte, tamanho, peso e entrelinha iguais a House; 108 campos conferidos
+  apos recarga. Somente dados pela UI existente, sem codigo ou novo deploy.
+
+## 2026-10-13: Cadastro da rotina Gerente regional imob
+
+- Conteudo autorizado cadastrado pela UI existente, usando TESTE1.xlsx:
+  18 linhas e 93 atividades de segunda a sabado. Tres linhas vazias removidas;
+  textos completos, ordem dos dias e vazios individuais preservados.
+- Matriz normalizada conferida por hash e todas as 108 celulas comparadas
+  antes/depois de salvar e recarregar. Hoje corresponde a terca-feira;
+  Gerente regional house permaneceu igual e console sem erros.
+- Dados salvos no CRM as 22:27 de Sao Paulo. Sem codigo, migration, ACL,
+  workflow ou deploy. Planilha e captura permanecem fora do Git.
+- Lint/typecheck/build aprovados. Suite geral: 2662 passaram, 63 skips,
+  uma falha existente de symlink no estoque, registrada em ATUALIZACOES;
+  nenhuma alteracao para contornar o teste e nenhuma promocao de runtime.
+
 ## 2026-10-13: Replica informacional do dashboard
 
 - Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com

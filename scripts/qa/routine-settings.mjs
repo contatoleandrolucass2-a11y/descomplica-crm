@@ -4,6 +4,12 @@ import path from "node:path";
 import AxeBuilder from "@axe-core/playwright";
 import { expect } from "@playwright/test";
 
+export {
+  buildRoutineCompletionsPreview,
+  createRoutineCompletionsFixture,
+  openRoutineCompletionsPreview,
+} from "./routine-completions-preview.mjs";
+
 const roleLabels = [
   "Gerente regional house",
   "Gerente regional imob",
@@ -12,6 +18,260 @@ const roleLabels = [
   "Coordenador de parcerias",
   "Corretor",
 ];
+
+export async function checkRoutineCompletions(page, origin, outputDirectory, { readerPage } = {}) {
+  assert.ok(
+    readerPage,
+    "Routine completion isolation requires an independently authenticated readerPage",
+  );
+  assert.notEqual(page.context(), readerPage.context(), "Reader must use an independent context");
+  assert.ok(
+    ["localhost", "127.0.0.1", "[::1]"].includes(new URL(origin).hostname),
+    "Routine completion QA only runs against isolated loopback",
+  );
+  assert.equal(process.env.QA_AUTH_FIXTURE_VERIFICATION, "rls-marker-v1");
+  assert.match(process.env.QA_AUTH_EMAIL ?? "", /^qa\..+@local\.invalid$/);
+  assert.ok(
+    ["localhost", "127.0.0.1", "[::1]"].includes(
+      new URL(process.env.QA_AUTH_SUPABASE_URL ?? "http://invalid").hostname,
+    ),
+    "Completion writes require the isolated loopback database",
+  );
+  const endpoint = `${origin}/api/routines/completions`;
+  const errors = [];
+  const onError = (error) => errors.push(error.message);
+  const onConsole = (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  };
+  const pages = [page, readerPage];
+  const initial = [];
+  const lastWritten = new Map();
+  const checks = [];
+  let activity;
+  let week;
+  const api = async (target, pathname, body) => {
+    const response = await target.evaluate(
+      async ({ url, body }) => {
+        const result = await fetch(url, {
+          cache: "no-store",
+          ...(body
+            ? {
+                method: "PUT",
+                headers: { "content-type": "application/json" },
+                body: JSON.stringify(body),
+              }
+            : {}),
+        });
+        return {
+          status: result.status,
+          cache: result.headers.get("cache-control"),
+          data: await result.json(),
+        };
+      },
+      { url: `${origin}${pathname}`, body },
+    );
+    assert.equal(response.status, 200, `Authenticated routine API ${pathname}`);
+    assert.match(response.cache ?? "", /no-store/);
+    return response.data;
+  };
+  const read = async (target) => {
+    const snapshot = await api(target, "/api/routines/completions");
+    assert.match(snapshot.week_start, /^\d{4}-\d{2}-\d{2}$/);
+    assert.ok(Number.isFinite(Date.parse(snapshot.server_now)));
+    assert.ok(Date.parse(snapshot.resets_at) > Date.parse(snapshot.server_now));
+    assert.ok(Array.isArray(snapshot.completions));
+    if (week)
+      assert.equal(
+        snapshot.week_start,
+        week,
+        "Week changed during QA; rerun in a stable server week",
+      );
+    return snapshot;
+  };
+  const completed = (snapshot) =>
+    snapshot.completions.some((item) =>
+      Object.entries(activity).every(([key, value]) => item[key] === value),
+    );
+  const box = (target) =>
+    target.getByRole("checkbox", {
+      name: `Concluída: ${activity.day}, linha ${activity.row_index + 1}, ${activity.activity_text}`,
+      exact: true,
+    });
+  const put = async (target, value) => {
+    const data = await api(target, "/api/routines/completions", {
+      ...activity,
+      completed: value,
+      expected_week_start: week,
+    });
+    assert.equal(data.week_start, week);
+    assert.equal(completed(data), value);
+    lastWritten.set(target, value);
+  };
+  const uiToggle = async (target, value) => {
+    await expect(box(target)).toBeEnabled();
+    await expect(box(target)).toBeChecked({ checked: !value });
+    const responsePromise = target.waitForResponse(
+      (response) => response.url() === endpoint && response.request().method() === "PUT",
+    );
+    await box(target).focus();
+    await target.keyboard.press("Space");
+    const response = await responsePromise;
+    assert.equal(response.status(), 200, "Completion PUT must reach the authenticated backend");
+    assert.match(response.headers()["cache-control"] ?? "", /no-store/);
+    assert.deepEqual(response.request().postDataJSON(), {
+      ...activity,
+      completed: value,
+      expected_week_start: week,
+    });
+    const data = await response.json();
+    assert.equal(data.week_start, week);
+    assert.equal(completed(data), value);
+    lastWritten.set(target, value);
+    await expect(box(target)).toBeChecked({ checked: value });
+    await expect(box(target)).toBeEnabled();
+    assert.equal(completed(await read(target)), value);
+  };
+  for (const target of pages) {
+    assert.equal(new URL(target.url()).origin, origin);
+    target.on("pageerror", onError);
+    target.on("console", onConsole);
+  }
+  try {
+    const shared = await api(page, "/api/routines");
+    const readerShared = await api(readerPage, "/api/routines");
+    assert.equal(shared.can_edit, true, "Primary session must be an editor");
+    assert.equal(
+      readerShared.can_edit,
+      false,
+      "Second session must be a reader, not cloned editor credentials",
+    );
+    assert.deepEqual(readerShared.routines, shared.routines);
+    const record = shared.routines.find((item) => item.role_key === "regional-house");
+    assert.ok(record?.revision > 0, "Shared role must already be saved before checking activities");
+    const row_index = record.rows.findIndex((row) => row["Segunda-feira"].trim());
+    assert.ok(row_index >= 0);
+    activity = {
+      role_key: record.role_key,
+      row_index,
+      day: "Segunda-feira",
+      activity_text: record.rows[row_index]["Segunda-feira"],
+    };
+    for (const target of pages) {
+      const snapshot = await read(target);
+      week ??= snapshot.week_start;
+      initial.push(completed(snapshot));
+    }
+    // Touch only one known activity, retaining both users' initial marks for cleanup.
+    for (const target of pages) {
+      await put(target, false);
+      await target.reload();
+    }
+    await expect(
+      readerPage.getByRole("button", { name: "Salva alterações", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      readerPage.getByRole("button", { name: "Inserir linha", exact: true }),
+    ).toHaveCount(0);
+    assert.equal(
+      await readerPage
+        .locator("textarea")
+        .evaluateAll((fields) => fields.length > 0 && fields.every((field) => field.readOnly)),
+      true,
+    );
+    await uiToggle(page, true);
+    assert.equal(
+      completed(await read(readerPage)),
+      false,
+      "Editor's mark must not leak to the reader",
+    );
+    await readerPage.reload();
+    await expect(box(readerPage)).not.toBeChecked();
+    await uiToggle(readerPage, true);
+    await uiToggle(page, false);
+    assert.equal(
+      completed(await read(readerPage)),
+      true,
+      "Editor uncheck must not erase reader's mark",
+    );
+    for (const [index, target] of pages.entries()) {
+      await target.reload();
+      await expect(box(target)).toBeChecked({ checked: index === 1 });
+      for (const mode of ["Semana", "Hoje"]) {
+        await target
+          .getByRole("group", { name: "Visualização da rotina", exact: true })
+          .getByRole("button", { name: mode, exact: true })
+          .click();
+        await expect(box(target)).toBeChecked({ checked: index === 1 });
+        const result = await new AxeBuilder({ page: target })
+          .withTags(["wcag2a", "wcag2aa", "wcag21aa", "wcag22aa"])
+          .analyze();
+        assert.deepEqual(
+          result.violations.map(({ id, nodes }) => ({
+            id,
+            targets: nodes.map(({ target }) => target),
+          })),
+          [],
+          `Completion accessibility: ${index === 0 ? "editor" : "reader"}, ${mode}`,
+        );
+        checks.push({
+          session: index === 0 ? "editor" : "reader",
+          mode,
+          accessibilityViolations: 0,
+        });
+      }
+    }
+    await uiToggle(readerPage, false);
+    await uiToggle(readerPage, true);
+    assert.equal(completed(await read(page)), false);
+    assert.deepEqual(
+      (await api(page, "/api/routines")).routines,
+      shared.routines,
+      "Personal completions must not change shared text or revisions",
+    );
+    await mkdir(outputDirectory, { recursive: true });
+    await readerPage.screenshot({
+      path: path.join(outputDirectory, "rotina-conclusao-leitor.png"),
+      fullPage: true,
+      animations: "disabled",
+      mask: [readerPage.locator("[data-session-identity], [data-account-identity]")],
+    });
+    assert.deepEqual(errors, [], "Editor and reader must have no console or runtime errors");
+    return {
+      passed: true,
+      distinctReaderUser: true,
+      persistence: true,
+      keyboard: true,
+      sharedTextsUnchanged: true,
+      week_start: week,
+      checks,
+      consoleErrors: 0,
+      reset:
+        "covered separately by synthetic server-clock browser tests; real rollover not exercised",
+    };
+  } finally {
+    try {
+      for (const [index, target] of pages.entries()) {
+        if (!lastWritten.has(target)) continue;
+        const current = await read(target);
+        assert.equal(
+          completed(current),
+          lastWritten.get(target),
+          "Concurrent completion write blocks QA cleanup",
+        );
+        if (completed(current) !== initial[index]) await put(target, initial[index]);
+        await target
+          .getByRole("group", { name: "Visualização da rotina", exact: true })
+          .getByRole("button", { name: "Semana", exact: true })
+          .click();
+      }
+    } finally {
+      for (const target of pages) {
+        target.off("pageerror", onError);
+        target.off("console", onConsole);
+      }
+    }
+  }
+}
 
 export async function checkRoutineScrolling(page, region) {
   const topbar = page.locator("[data-protected-topbar]");
@@ -655,10 +915,24 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
       /^qa\..+@local\.invalid$/.test(process.env.QA_AUTH_EMAIL ?? ""),
     "Routine writes require the verified isolated loopback runner and synthetic account",
   );
+  if (!readerPage) {
+    assert.match(process.env.QA_AUTH_ROUTINE_READER_EMAIL ?? "", /^qa\..+-reader@local\.invalid$/);
+    assert.notEqual(
+      process.env.QA_AUTH_ROUTINE_READER_EMAIL,
+      process.env.QA_AUTH_EMAIL,
+      "Routine reader must not reuse the editor account",
+    );
+    assert.ok(
+      process.env.QA_AUTH_ROUTINE_READER_PASSWORD,
+      "Routine QA requires the ephemeral reader credentials from the isolated local runner",
+    );
+  }
   let initialRowsSnapshot;
   let lastWrittenRevision;
   let peerContext;
+  let ownedReaderContext;
   let sharedSessionVerified = false;
+  let completionChecks;
   const api = async () => {
     const response = await page.request.get(`${origin}/api/routines`);
     assert.equal(response.status(), 200);
@@ -719,6 +993,27 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
   };
 
   try {
+    if (!readerPage) {
+      ownedReaderContext = await page.context().browser().newContext({
+        viewport: page.viewportSize(),
+        reducedMotion: "reduce",
+        locale: "pt-BR",
+        timezoneId: "America/Sao_Paulo",
+        serviceWorkers: "block",
+      });
+      readerPage = await ownedReaderContext.newPage();
+      await readerPage.goto(`${origin}/login`, { waitUntil: "domcontentloaded", timeout: 90_000 });
+      const consent = readerPage.getByRole("button", { name: "Aceitar todos", exact: true });
+      if (await consent.isVisible()) await consent.click();
+      await readerPage.getByLabel("E-mail").fill(process.env.QA_AUTH_ROUTINE_READER_EMAIL);
+      await readerPage.getByLabel("Senha").fill(process.env.QA_AUTH_ROUTINE_READER_PASSWORD);
+      await Promise.all([
+        readerPage.waitForURL((url) => url.origin === origin && url.pathname === "/app", {
+          timeout: 90_000,
+        }),
+        readerPage.getByRole("button", { name: "Entrar", exact: true }).click(),
+      ]);
+    }
     await page.clock.setFixedTime(new Date("2026-10-12T15:00:00Z"));
     await page.goto(`${origin}/app/gestao`);
     await page.getByRole("link", { name: "Rotina", exact: true }).last().click();
@@ -845,6 +1140,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
         });
       peer = await peerContext.newPage();
     }
+    await peer.clock.setFixedTime(new Date("2026-10-12T15:00:00Z"));
     await peer.goto(`${origin}${route}`);
     await expect(
       peer.getByRole("textbox", { name: "Segunda-feira, linha 1", exact: true }),
@@ -854,7 +1150,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
     assert.deepEqual((await peerResponse.json()).routines, (await api()).routines);
     sharedSessionVerified = true;
     if (readerPage) {
-      await expect(peer.getByText("Somente visualização", { exact: true })).toBeVisible();
+      await expect(peer.getByText("Textos somente para leitura", { exact: true })).toBeVisible();
       await expect(peer.getByRole("button", { name: "Salva alterações" })).toHaveCount(0);
     }
 
@@ -874,6 +1170,9 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
         .evaluateAll((fields) => fields.filter((field) => field.value.trim()).length),
       74,
     );
+
+    checkpoint("individual-completions-two-authenticated-users");
+    completionChecks = await checkRoutineCompletions(page, origin, outputDirectory, { readerPage });
 
     checkpoint("last-row-background-refresh");
     await checkRoutineRefreshPosition(page);
@@ -1064,9 +1363,10 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
       modes: true,
       sundayBackendPreserved: true,
       backend: "real",
+      completionChecks,
       sharedSessionVerified,
       distinctReaderUser: readerPage
-        ? "read-only session supplied; distinct identity must be verified by caller"
+        ? "verified by distinct permissions and isolated completion snapshots"
         : "not supplied; separate session uses same synthetic account",
       checks,
       passed: true,
@@ -1078,6 +1378,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
     try {
       // Playwright clocks are context-wide; restore advancing time for later checks.
       await page.clock.setSystemTime(new Date());
+      if (readerPage) await readerPage.clock.setSystemTime(new Date());
     } finally {
       try {
         if (initialRowsSnapshot && lastWrittenRevision !== undefined) {
@@ -1094,6 +1395,7 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
         }
       } finally {
         await peerContext?.close();
+        await ownedReaderContext?.close();
       }
     }
   }

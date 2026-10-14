@@ -565,6 +565,39 @@
   outline-offset: -2px;
 }
 
+.completionControl {
+  display: flex;
+  width: 32px;
+  height: 28px;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 3px;
+  cursor: pointer;
+}
+
+.completionControl input[type="checkbox"] {
+  appearance: auto;
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  accent-color: var(--inv-color-accent);
+  cursor: inherit;
+}
+
+.completionControl:has(input:disabled, input[aria-disabled="true"]) {
+  cursor: not-allowed;
+}
+
+.completionControl input:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 3px;
+}
+
+.routineTable td[data-completed] .completionControl {
+  border-radius: 4px;
+  background: color-mix(in srgb, currentColor 12%, transparent);
+}
+
 .routineTable [data-today] {
   --routine-focus-edge: #ffffff;
   color: #f4fcff;
