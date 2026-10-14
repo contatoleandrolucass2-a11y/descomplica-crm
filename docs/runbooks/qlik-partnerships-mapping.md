@@ -233,6 +233,9 @@ Marcadores sanitizados de migrations nao comprovam implementacao remota.
 
 ## Implementacao local da apresentacao
 
+Esta secao descreve o candidato do PR216, nao a branch operacional
+codex/qlik-api-session. Essa branch nao inclui alteracoes da pagina ou presenter.
+
 A rota `/app/ranking` passa a apresentar a estrutura de parcerias, com guard
 `crm.ranking.view` preservado. Nao chama o loader Salesforce nem o leitor Qlik
 incompleto. Os resultados e timestamps permanecem indisponiveis, sem fixtures

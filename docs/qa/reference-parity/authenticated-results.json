@@ -42156,10 +42156,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+          "tracked": true,
+          "bytes": 48702,
+          "sha256": "51403e98d9406d8e689101844cdbaf0293d1fde9a39a09697a885178f735c172"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+      "bytes": 48702,
+      "sha256": "51403e98d9406d8e689101844cdbaf0293d1fde9a39a09697a885178f735c172",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 21560,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.0166358024691358,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
@@ -42167,23 +42185,13 @@
           "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
-      "bytes": 46796,
-      "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 11089,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0.008556327160493827,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
-          "tracked": true,
-          "bytes": 46796,
-          "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -42984,10 +42992,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 48702,
+          "sha256": "51403e98d9406d8e689101844cdbaf0293d1fde9a39a09697a885178f735c172"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+      "bytes": 48702,
+      "sha256": "51403e98d9406d8e689101844cdbaf0293d1fde9a39a09697a885178f735c172",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 21560,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.0166358024691358,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
@@ -42995,23 +43021,13 @@
           "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
         }
       },
-      "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
-      "bytes": 46796,
-      "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 11086,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0.008554012345679013,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 46796,
-          "sha256": "103322a99afb363d76ddee9faeabd8eb77131c7559ef603cf8ebb113acc6b70a"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -43812,10 +43828,28 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 49230,
+          "sha256": "d4e725a2341b1be6c0688a86e26b2da57ff37f8f6fc204359fb74f4962dae97a"
+        }
+      },
+      "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+      "bytes": 49230,
+      "sha256": "d4e725a2341b1be6c0688a86e26b2da57ff37f8f6fc204359fb74f4962dae97a",
+      "width": 1440,
+      "height": 900,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 16784,
+        "totalPixels": 1296000,
+        "changedPixelRatio": 0.012950617283950618,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
           "tracked": true,
@@ -43823,23 +43857,13 @@
           "sha256": "fbd2468c9fc69bdedc9506a670c5b8ce2ab1fe88b39cb93bce86b9a69b5ded65"
         }
       },
-      "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
-      "bytes": 47186,
-      "sha256": "fbd2468c9fc69bdedc9506a670c5b8ce2ab1fe88b39cb93bce86b9a69b5ded65",
-      "width": 1440,
-      "height": 900,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 6320,
-        "totalPixels": 1296000,
-        "changedPixelRatio": 0.004876543209876543,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 47186,
-          "sha256": "fbd2468c9fc69bdedc9506a670c5b8ce2ab1fe88b39cb93bce86b9a69b5ded65"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -44783,15 +44807,15 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1296000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 45504,
-          "sha256": "791fc2e8c8221fb22b31de9ac9c971e2a560e005fc03af8761aca2357ea4c392"
+          "bytes": 47596,
+          "sha256": "fcc94e9b751418aef535875bdb14bb669b009f08de59abe6541e639d2da80443"
         }
       },
       "approvedCanvasComparison": {
@@ -44800,28 +44824,36 @@
         "asset": "docs/qa/canvas-parity/reference/hub-simulacao-associativo.webp",
         "region": "right",
         "referenceSha256": "c1230fb6def529b27849270da823c3233da84c705973ca2671e3da7df44611ea",
-        "colorDistance": 13.101236979166666,
+        "colorDistance": 12.983506944444445,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 37.394205729166664,
+        "edgeDistance": 37.734456380208336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
-      "bytes": 45504,
-      "sha256": "791fc2e8c8221fb22b31de9ac9c971e2a560e005fc03af8761aca2357ea4c392",
+      "bytes": 47596,
+      "sha256": "fcc94e9b751418aef535875bdb14bb669b009f08de59abe6541e639d2da80443",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 11039,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 21533,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.008517746913580248,
+        "changedPixelRatio": 0.01661496913580247,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
           "bytes": 45504,
           "sha256": "791fc2e8c8221fb22b31de9ac9c971e2a560e005fc03af8761aca2357ea4c392"
         }
+      },
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -45710,10 +45742,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 921600,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+          "tracked": true,
+          "bytes": 48058,
+          "sha256": "4538544a2aa0c14eec444baed7a49267e9ae725e13738d8a30771f7647227818"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+      "bytes": 48058,
+      "sha256": "4538544a2aa0c14eec444baed7a49267e9ae725e13738d8a30771f7647227818",
+      "width": 1280,
+      "height": 720,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 11474,
+        "totalPixels": 921600,
+        "changedPixelRatio": 0.012450086805555555,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
           "tracked": true,
@@ -45721,23 +45771,13 @@
           "sha256": "74a081114100f279b4c3a3df13e0f8574c33ae23d60b266b6dcce9caca1dc46b"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
-      "bytes": 46080,
-      "sha256": "74a081114100f279b4c3a3df13e0f8574c33ae23d60b266b6dcce9caca1dc46b",
-      "width": 1280,
-      "height": 720,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 129,
-        "totalPixels": 921600,
-        "changedPixelRatio": 0.00013997395833333334,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
-          "tracked": true,
-          "bytes": 46080,
-          "sha256": "74a081114100f279b4c3a3df13e0f8574c33ae23d60b266b6dcce9caca1dc46b"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -46544,10 +46584,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+          "tracked": true,
+          "bytes": 42612,
+          "sha256": "9dbcbeffde09072baa56cdc1121651c0727497149cdae45f1256bb7531fdefd9"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+      "bytes": 42612,
+      "sha256": "9dbcbeffde09072baa56cdc1121651c0727497149cdae45f1256bb7531fdefd9",
+      "width": 1024,
+      "height": 768,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 12035,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0.015303293863932291,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
@@ -46555,23 +46613,13 @@
           "sha256": "2648667cb87abbbc88b750ecfb2739b86fac43bf9f5c3d675f215ec5d2081f87"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-      "bytes": 40432,
-      "sha256": "2648667cb87abbbc88b750ecfb2739b86fac43bf9f5c3d675f215ec5d2081f87",
-      "width": 1024,
-      "height": 768,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 2029,
-        "totalPixels": 786432,
-        "changedPixelRatio": 0.0025800069173177085,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-          "tracked": true,
-          "bytes": 40432,
-          "sha256": "2648667cb87abbbc88b750ecfb2739b86fac43bf9f5c3d675f215ec5d2081f87"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -47372,10 +47420,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+          "tracked": true,
+          "bytes": 39866,
+          "sha256": "7116a08d2332cda77c4039cfe4d2d50758f6dbd3f15ea6704424ad0bc6a6fea7"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+      "bytes": 39866,
+      "sha256": "7116a08d2332cda77c4039cfe4d2d50758f6dbd3f15ea6704424ad0bc6a6fea7",
+      "width": 768,
+      "height": 1024,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 142132,
+        "totalPixels": 786432,
+        "changedPixelRatio": 0.18073018391927084,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
@@ -47383,23 +47449,13 @@
           "sha256": "ba5a5661413ad6f8bd159f92b9d7b7b017ce50e41b01339112b946a1ae61d8b5"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
-      "bytes": 37680,
-      "sha256": "ba5a5661413ad6f8bd159f92b9d7b7b017ce50e41b01339112b946a1ae61d8b5",
-      "width": 768,
-      "height": 1024,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 2029,
-        "totalPixels": 786432,
-        "changedPixelRatio": 0.0025800069173177085,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
-          "tracked": true,
-          "bytes": 37680,
-          "sha256": "ba5a5661413ad6f8bd159f92b9d7b7b017ce50e41b01339112b946a1ae61d8b5"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -48200,10 +48256,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+          "tracked": true,
+          "bytes": 28908,
+          "sha256": "7b47639059f9d414f1b719209e77ff75d9046375dcb28d7ea194e121da81e672"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+      "bytes": 28908,
+      "sha256": "7b47639059f9d414f1b719209e77ff75d9046375dcb28d7ea194e121da81e672",
+      "width": 390,
+      "height": 844,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 78511,
+        "totalPixels": 329160,
+        "changedPixelRatio": 0.2385192611495929,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
           "tracked": true,
@@ -48211,23 +48285,13 @@
           "sha256": "1615745ad5b2ff6a1ff83eb8ccf54d876c906c6013646f34704ea500fb8c09bf"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
-      "bytes": 26964,
-      "sha256": "1615745ad5b2ff6a1ff83eb8ccf54d876c906c6013646f34704ea500fb8c09bf",
-      "width": 390,
-      "height": 844,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1717,
-        "totalPixels": 329160,
-        "changedPixelRatio": 0.005216308178393487,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
-          "tracked": true,
-          "bytes": 26964,
-          "sha256": "1615745ad5b2ff6a1ff83eb8ccf54d876c906c6013646f34704ea500fb8c09bf"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -49034,10 +49098,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 329160,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 31578,
+          "sha256": "0720ac067c7c30d84e78e5a84b02644c286d4ee8ad7f092b08d633244c1b1171"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+      "bytes": 31578,
+      "sha256": "0720ac067c7c30d84e78e5a84b02644c286d4ee8ad7f092b08d633244c1b1171",
+      "width": 390,
+      "height": 844,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 88729,
+        "totalPixels": 329160,
+        "changedPixelRatio": 0.2695619151780289,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
           "tracked": true,
@@ -49045,23 +49127,13 @@
           "sha256": "1b06737135ca0adfa4199fd0a58955e0496aff3b4266a0afcbebe37303de4296"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
-      "bytes": 29228,
-      "sha256": "1b06737135ca0adfa4199fd0a58955e0496aff3b4266a0afcbebe37303de4296",
-      "width": 390,
-      "height": 844,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1708,
-        "totalPixels": 329160,
-        "changedPixelRatio": 0.005188965852472961,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 29228,
-          "sha256": "1b06737135ca0adfa4199fd0a58955e0496aff3b4266a0afcbebe37303de4296"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -49868,10 +49940,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 304500,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+          "tracked": true,
+          "bytes": 27316,
+          "sha256": "ff68a085b473a520349c91f51055df7bc5fdb12cd01b83e4a2450a9c0001baf5"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+      "bytes": 27316,
+      "sha256": "ff68a085b473a520349c91f51055df7bc5fdb12cd01b83e4a2450a9c0001baf5",
+      "width": 375,
+      "height": 812,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 72946,
+        "totalPixels": 304500,
+        "changedPixelRatio": 0.23955993431855502,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
           "tracked": true,
@@ -49879,23 +49969,13 @@
           "sha256": "522fb081059cc9d7d1b982b5ecde75353e555074625945b61550eed5a19f7637"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
-      "bytes": 27020,
-      "sha256": "522fb081059cc9d7d1b982b5ecde75353e555074625945b61550eed5a19f7637",
-      "width": 375,
-      "height": 812,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1717,
-        "totalPixels": 304500,
-        "changedPixelRatio": 0.005638752052545156,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
-          "tracked": true,
-          "bytes": 27020,
-          "sha256": "522fb081059cc9d7d1b982b5ecde75353e555074625945b61550eed5a19f7637"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -50702,10 +50782,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 181760,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
+          "tracked": true,
+          "bytes": 31414,
+          "sha256": "cf94c500ef021af4f20e687cf0663d19435d5c302221da00b0f99c50302ae7c0"
+        }
+      },
+      "path": "target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
+      "bytes": 31414,
+      "sha256": "cf94c500ef021af4f20e687cf0663d19435d5c302221da00b0f99c50302ae7c0",
+      "width": 320,
+      "height": 568,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 33956,
+        "totalPixels": 181760,
+        "changedPixelRatio": 0.18681778169014085,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
           "tracked": true,
@@ -50713,23 +50811,13 @@
           "sha256": "b5c7beeec51bc2456e241d12e1318f1357e768fdc3c6453b72cde1e71ac08af0"
         }
       },
-      "path": "target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
-      "bytes": 29370,
-      "sha256": "b5c7beeec51bc2456e241d12e1318f1357e768fdc3c6453b72cde1e71ac08af0",
-      "width": 320,
-      "height": 568,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 1329,
-        "totalPixels": 181760,
-        "changedPixelRatio": 0.007311839788732394,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp",
-          "tracked": true,
-          "bytes": 29370,
-          "sha256": "b5c7beeec51bc2456e241d12e1318f1357e768fdc3c6453b72cde1e71ac08af0"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-14T14:22:46.458Z",
+        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+        "ciRunId": 38574613120,
+        "artifactId": 11901344067
       }
     },
     {
@@ -52639,6 +52727,66 @@
         "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
         "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
         "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp"
+      ],
+      "remainingImagesPreserved": 231,
+      "followUp": "Full verify-mode CI required before merge; this promotion is not a passing candidate run."
+    },
+    {
+      "reviewedAt": "2026-10-14T14:24:56.151Z",
+      "scope": "associative inventory search only; remaining screenshots and original capture provenance preserved",
+      "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38574613120",
+      "artifactId": 11901344067,
+      "artifactSha256": "11481c162d1914dcf5ddf9d74431e6385c7cd3cfdd552adeb44d61ca2301cb66",
+      "headCommit": "d8e745c1895da42e76a365b5c6656261988d7220",
+      "capturedAt": "2026-10-14T14:22:46.458Z",
+      "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+      "worktreeDirtyAtCapture": true,
+      "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
+      "ciRunId": 38574613120,
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
+      "generatedOnlyProof": {
+        "trackedDiff": "empty",
+        "generatedFiles": [
+          "output/playwright/connected-systems/balanced-1440.png",
+          "output/playwright/connected-systems/balanced-320.png",
+          "output/playwright/connected-systems/balanced-768.png",
+          "output/playwright/connected-systems/console-balanced-1440.png",
+          "output/playwright/connected-systems/console-balanced-320.png",
+          "output/playwright/connected-systems/console-balanced-768.png",
+          "output/playwright/connected-systems/console-dark-1440.png",
+          "output/playwright/connected-systems/console-dark-320.png",
+          "output/playwright/connected-systems/console-dark-768.png",
+          "output/playwright/connected-systems/console-light-1440.png",
+          "output/playwright/connected-systems/console-light-320.png",
+          "output/playwright/connected-systems/console-light-768.png",
+          "output/playwright/connected-systems/console-results.json",
+          "output/playwright/connected-systems/dark-1440.png",
+          "output/playwright/connected-systems/dark-320.png",
+          "output/playwright/connected-systems/dark-768.png",
+          "output/playwright/connected-systems/light-1440.png",
+          "output/playwright/connected-systems/light-320.png",
+          "output/playwright/connected-systems/light-768.png"
+        ],
+        "recomputedFingerprintMatches": true
+      },
+      "functionalChecksPassed": true,
+      "visualComparisonsBeforePromotion": {
+        "passed": 231,
+        "reviewedChanges": 11
+      },
+      "previousManifestSha256": "47b3b484e66bbf2c223718e2e3e1bca4533e02fbadb2ce956fae22d090fa3fd4",
+      "changedFiles": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-320x568.webp"
       ],
       "remainingImagesPreserved": 231,
       "followUp": "Full verify-mode CI required before merge; this promotion is not a passing candidate run."

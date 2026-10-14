@@ -2,6 +2,32 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Pesquisa de unidades do Associativo em 14/10/2026
+
+CI `38574613120`, artefato `11901344067`, captura
+`35b8991b438b1681bb24f32beb7d2afee37bd108`, árvore idêntica ao candidato
+`d8e745c1895da42e76a365b5c6656261988d7220`. SHA-256 do ZIP:
+`11481c162d1914dcf5ddf9d74431e6385c7cd3cfdd552adeb44d61ca2301cb66`.
+
+Código, restore, banco, guia e E2E passaram. O predicado funcional original
+confirmou 154 checks responsivos, 88 de tema, 242 auditorias Axe, 110 de zoom,
+22 canvases, teclado e jornadas dos simuladores. O título do estoque permaneceu
+em uma linha nas dez larguras e três temas do contrato de navegação.
+
+Onze capturas do Associativo diferiram pela pesquisa e sua distribuição no
+cabeçalho. Desktop, notebook, tablet e celular foram inspecionados, incluindo
+os três temas. Referências atualizadas pelo helper transacional original em
+14:24:56Z; 231 imagens e suas entradas no manifesto preservadas. Os metadados
+originais do manifesto e os limiares de 1%/16 também foram preservados.
+
+A captura mantém `worktreeDirtyAtCapture: true`. Para este artefato, o
+fingerprint foi reproduzido com diff rastreado vazio e somente os 19 outputs
+gerados de Conectar Sistemas:
+`5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a`.
+Hashes de todas as capturas e referências foram conferidos. A prova é exclusiva
+deste artefato e está registrada em `reviewedUpdates`. Uma nova CI integral em
+modo `verify` permanece obrigatória antes da integração e publicação.
+
 ## Funis mensais em 14/10/2026
 
 CI `38515347098`, artefato `11873042399`, captura

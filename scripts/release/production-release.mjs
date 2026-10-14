@@ -5,6 +5,8 @@ import { productionHost } from "./production-release-host.mjs";
 import { privateJsonStore } from "./private-json-store.mjs";
 import { executeRelease } from "./production-release-engine.mjs";
 import { recoverRelease } from "./production-release-recovery.mjs";
+import { qlikReleaseHost } from "./qlik-release-host.mjs";
+import { executeQlikRelease, recoverQlikRelease } from "./qlik-release-engine.mjs";
 
 export function parseReleaseArguments(args) {
   const [operation, ...rest] = args;
@@ -13,6 +15,16 @@ export function parseReleaseArguments(args) {
     initialize: ["attestation"],
     recover: ["deployment-id"],
     deploy: ["expected-deployment-id", "expected-sha", "sha", "image-id", "ci-run-id"],
+    "qlik-status": [],
+    "qlik-recover": ["deployment-id"],
+    "qlik-deploy": [
+      "expected-deployment-id",
+      "expected-sha",
+      "expected-owner-sha",
+      "sha",
+      "image-id",
+      "ci-run-id",
+    ],
   };
   if (!Object.hasOwn(operations, operation)) throw new Error("Unknown release operation.");
   const required = operations[operation];
@@ -49,6 +61,31 @@ export function parseReleaseArguments(args) {
 async function main(args) {
   const { operation, values } = parseReleaseArguments(args);
   const result = await withProductionLock(async (lock) => {
+    const qlik = qlikReleaseHost(lock);
+    if (operation === "qlik-status") {
+      const state = await qlik.readState();
+      return {
+        status: state?.inProgress ? "recovery-required" : "recorded",
+        release: state?.release ?? null,
+        inProgress: state?.inProgress ?? null,
+      };
+    }
+    if (operation === "qlik-recover") return recoverQlikRelease(values["deployment-id"], qlik);
+    if (operation === "qlik-deploy")
+      return executeQlikRelease(
+        {
+          operation,
+          expectedDeploymentId: values["expected-deployment-id"],
+          expectedSha: values["expected-sha"],
+          expectedOwnerSha: values["expected-owner-sha"],
+          targetSha: values.sha,
+          targetImageId: values["image-id"],
+          ciRunId: Number(values["ci-run-id"]),
+        },
+        qlik,
+      );
+    if (operation !== "status" && (await qlik.readState())?.inProgress)
+      throw new Error("Recover the pending Qlik operation before changing production.");
     const io = productionHost(lock);
     if (operation === "status") {
       const state = await io.readState();
@@ -76,9 +113,9 @@ async function main(args) {
   });
   // Expose only release identifiers/times. Attestation evidence, configuration
   // contents, raw Docker output and credentials never become CLI output.
-  const { deploymentId, sha, imageId, deployedAt } = result.release;
+  const { deploymentId, sha, imageId, deployedAt } = result.release ?? {};
   process.stdout.write(
-    `${JSON.stringify({ status: result.status, deploymentId, sha, imageId, deployedAt, pendingDeploymentId: result.inProgress?.deploymentId ?? null })}\n`,
+    `${JSON.stringify({ status: result.status, deploymentId, sha, imageId, deployedAt, ...(operation.startsWith("qlik-") ? { component: "qlik-owner", preflightStatus: result.preflightStatus ?? null, rankingConnected: false } : {}), pendingDeploymentId: result.inProgress?.deploymentId ?? null })}\n`,
   );
 }
 

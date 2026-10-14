@@ -36,6 +36,60 @@ ls-remote e health publico. Sem candidato validado, publicacao bloqueada.
 Etapa congelada sem alterar controles. Qlik ainda sem coleta/migration/carga;
 estoque e leads Salesforce nao alterados nem revalidados nesta retomada.
 
+Conflitos com main0019690 limitados aos tres registros; conciliados preservando
+ambos os historicos, sem alterar codigo recebido. A secao de conhecimento do
+Associativo foi preservada integralmente em auditoria vinculada porque o main
+ja excedia o limite256000 do sync (257549 bytes). Limite nao alterado.
+CI do candidato combinado ainda necessaria; nenhuma promocao efetuada.
+
+Conferencia16:22Z de14/10 (13:22 America/Sao_Paulo): GitHub PR224 aponta
+mergeable=false; consulta CI por SHA3e69135 retorna lista vazia. git fetch e
+ls-remote confirmam main0019690, apos merge PR220. Health200/ok continua
+5c4d95e. Etapa congelada: sem CI do candidato, nenhuma promocao permitida.
+Proximo requisito verificavel e reconciliar o PR com main e obter CI no SHA
+resultante, sem reduzir gates. Qlik nao sincroniza fatos; estoque e leads
+Salesforce nao foram alterados ou revalidados como parte desta entrega.
+
+## 2026-10-14: Atualizador protegido do owner Qlik
+
+Retomada15:54Z: main/site HTTP200/ok5c4d95e, PR224/cc8c712 com validate e
+restore aprovados e matriz em andamento; posteriormente CI38589226253
+concluiu sucesso. PR216/b2bda52 falhou E2E Associativo sintetico com
+browser_fill_resources_failed; log15:41Z/job115942437414. Trechos envolvidos
+nao mudaram contra main; causa possivel de foco assincrono nao reproduzida.
+Nenhuma assercao ou timeout relaxados para passar CI.
+
+Implementado qlik-deploy/status/recover no coordenador existente. Ledger
+separado, tres travas, CI exact main, imagem aprovada e consulta real CRM no
+minuto. Nao altera production.env, ledger/imagem CRM, Salesforce ou Compose.
+Intencao antes de parar; unit validada contra template e backup privado do
+perfil parado. CAS/start exigem callback com guarda sincrona de frescor apos
+releituras locais, evitando que a aprovacao assincrona invalide verificacoes.
+Recuperacao somente da tentativa pendente; sem restauracao automatica de tar.
+
+Revisao corrigiu recovery apos rename/reload interrompido, start sem reload,
+CAS alterado durante callbacks, raiz do perfil substituida por symlink,
+coercao de SHA, pin Playwright e limite de fanout de dependencias. Probe SDK
+sempre nao-root. Artefato deve ser novo desde o start, rankingConnected=false.
+Baseline owner nao recebe data antiga presumida; recibo so apos verificacao.
+
+Lint/tipos/build51 passaram. Test global Windows:2805 Vitest passaram/82 skips,
+falhas preexistentes symlink Salesforce (O_NOFOLLOW) e timeout Next DevTools.
+Repeticao focal DevTools24/24 passou sem mudanca. Inputs108 passaram/2 skips
+fisicos Linux. Engine224 e host48 passaram; foco combinado engine/CLI232
+passou. Revisao independente encerrou achados apos correcoes e temporarios
+unicos por tentativa para nao bloquear recovery apos crash. Host exercita
+arquivos temporarios reais, mas emula comandos, UID/modos, locks e fsync de
+diretorios: nao e prova de operacao systemd/tar real ou sessao autenticada.
+CI anterior nao valida estes arquivos novos. VPS apenas observada: browser
+2f0907e ativo/disabled, unit sem drop-ins, perfil0700; nao houve upgrade,
+handshake, coleta de fatos, migration ou ingestao nesta retomada ate aqui.
+
+Suite completa de release repetida:507 testes,494 passaram/13 skips POSIX,
+zero falhas. Lint global repetido passou com aviso preexistente. Tipos/build
+passaram, formato/diff-check aprovados. Conhecimento sincronizado antes do
+commit; CI Linux do novo candidato continua obrigatoria para promocao.
+
 Conferencia15:24Z de14/10: git fetch manteve main5c4d95e; health publico
 HTTP200/ok agora identifica5c4d95e, nao16f4587. Atualizacao externa, nao
 publicacao Qlik. PR216/12cd013: validate e restore aprovados, matriz visual
@@ -359,6 +413,121 @@ e regional antes de coletar. Nao importar dados gerais nem contornar timeout.
 As03:58Z CI38507765662 ainda em curso, health200/ok/0fdbb80. PR216 sem merge;
 aguarda CI, recorte e contrato. Sync excedeu256000bytes apos integrar notas:
 consolidada somente nota Qlik, detalhes no runbook/WORKLOG/historico; sync passou.
+
+## 2026-10-14: Revisao do instalador e audiencia confirmada
+
+Dois achados P2 corrigidos: allowlist de integridade cobre os quatro modulos
+novos e o probe nao-root le SDK/schema enigma.js2.15.0. Testes focados17/17;
+suite Qlik completa107 passaram/3 Linux skips no Windows. Instalacao real
+Linux/runuser e upgrade nao executados. Nenhum servico remoto modificado.
+
+Usuario confirmou audiencia completa Direcional/SP CAPITAL/CANAL IMOB para
+quem possui crm.ranking.view. Contrato documentado; nao houve reader ou DDL.
+Revisao operacional confirmou que o coordenador nao suporta units auxiliares:
+upgrade protegido precisa ser implementado/testado antes do handshake real.
+
+Verify local deste checkout: lint/typecheck passaram; Vitest2806 passaram,
+82 skips e uma falha no teste de symlink do estoque Salesforce em Windows
+(esperado502, recebido200). O leitor de main depende de O_NOFOLLOW; a correcao
+lstat esta somente no PR216. Nao alterado Salesforce nem mascarado o teste
+nesta branch operacional. Build executado separadamente:51 paginas, exit0.
+CI38587608708/af935b7 aprovou validate Linux; demais gates ainda em andamento.
+Resultado de SHA anterior nao substitui CI apos as correcoes do instalador.
+
+## 2026-10-14: Qlik operacional separado da interface
+
+Branch codex/qlik-api-session criada de main5c4d95e, Git comum confirmado.
+Recupera de61cff23 somente ops/qlik, dependencia enigma.js2.15.0 e runbooks;
+nao altera pagina ranking, presenter, Salesforce, e2e/baselines, schema ou n8n.
+PR216 continua responsavel pela interface e integracao de fatos em andamento.
+
+Fonte13:34Z GitHub/main/PR216 e14:51Z SSH/health: site200/ok16f4587;
+browser VPS2f0907e ativo, disabled. Separacao nao e atualizacao da VPS.
+Cliente QIX usa sessao privada gerida pelo browser, inspecao limitada aos
+objetos comprovados e masters referenciados; sem exportar cookies/credenciais.
+Preflight desligado; nao coleta fatos nem publica no CRM. Ciclo sequencial,
+timeouts e artefato privado atomico, rankingConnected=false permanente.
+
+Usuario autorizou duas coletas independentes reconciliadas com totais nativos
+no lugar do publicador legado ausente. Mantidos backup, acesso restrito e
+ultima carga valida. Autorizacao e preflight remoto de schema no mapa; nenhuma
+DDL, ingestao ou flag ativa. Detalhes da sessao e limites no runbook VPS.
+
+Codigo de origem: Qlik56 testes de transporte/inspetor passaram; restante
+operacional foi validado no candidato anterior. Verify global origem61cff23
+teve timeout isolado Next DevTools; repeticao focal24/24 passou. Validacao
+completa deste checkout e CI propria ainda obrigatorias; nao herdar resultado
+de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
+
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Base isolada em `16f458720406e76efcd1eda8a1eeb791509800a3`, branch
+  `codex/busca-unidade-associativo`, árvore limpa antes da implementação.
+  Dependências instaladas pelo lockfile existente com `pnpm install --frozen-lockfile`.
+- Campo de pesquisa com lupa no cabeçalho do estoque do Associativo. Pesquisa
+  código, descrição e empreendimento em todas as unidades carregadas, antes da
+  janela virtual de 60 linhas, junto aos filtros e à ordenação existentes.
+- Busca ignora caixa, acentos e separadores usuais do código. Escape, botão de
+  limpeza e Limpar filtros restauram a lista sem modificar a proposta em edição.
+  Quantidade encontrada fica visível; seleções incompatíveis não são apagadas.
+- Validação final com `pnpm verify` aprovada: 2.814 testes da aplicação,
+  79 skips existentes, suites Node e build concluídos. `pnpm audit` sem
+  vulnerabilidades conhecidas. Lint mantém um aviso anterior em connected-systems.
+- Navegador local confirmou busca em 3.301 unidades sintéticas, código fora da
+  janela inicial, combinação de filtros, Escape, limpeza e proposta preservada.
+  Inspeção visual em 320, 375, 768 e 1.440 px e três temas.
+- QA do guia aprovado na execução final: 18 cenários (nove combinações de
+  tela/tema com e sem proposta), seis checks iniciais de desktop/notebook,
+  zero erros de console e zero chamadas externas. A primeira tentativa falhou
+  ao aguardar Cheque Moradia em 320x568-dark; repetição integral passou sem
+  alterar o teste ou cálculos. O cenário isolado também passou na base original.
+- Regressão de seleção, pesquisa, Escape, limpeza e preservação da proposta
+  executada em 1.440 e 375 px, usando 3.301 unidades sintéticas. Diff sem segredos.
+- CI 38562897319 aprovou validate, restore isolado, banco e E2E. O contrato
+  visual encontrou o contador/data abaixo do botão de limpar em 320/375/390 px.
+  Corrigido com duas colunas na segunda linha do cabeçalho móvel. O fixture do
+  guia agora inclui a data do estoque e executa o contrato de geometria existente,
+  sem relaxar asserções. Layout, busca e seleção passaram em oito larguras
+  (320 a 1.440 px) com 3.301 unidades sintéticas; build final aprovado.
+- A falha intermitente do guia foi diagnosticada no próprio artefato: a Entrada
+  de R$ 1.000,00 aparecia em Financiamento após o foco automático agendado pela
+  qualificação. O helper agora aguarda esse foco e verifica cada valor formatado;
+  também aguarda o foco dos campos opcionais. Nenhum cálculo ou timeout foi alterado.
+- PR #220 aberto; nova CI e publicação ainda pendentes. Consulta observacional
+  de 14/10 às 12:17:40Z retornou HTTP 200/ok, versão faae8e9. Isso não comprova
+  publicação desta busca nem substitui o ledger exigido por DEPLOY-001.
+- Nenhuma alteração de cálculos, permissões, dados de estoque ou produção.
+  Gitleaks completo encontrou apenas o token sintético preexistente na linha 31
+  de salesforce-release-environment.node-test.mjs, confirmado idêntico à base.
+- CI 38568083961 aprovou o predicado funcional original: 154 checks responsivos,
+  88 de tema, 242 de acessibilidade, 110 de zoom, 22 canvases e as jornadas dos
+  simuladores. As 11 diferenças visuais foram exclusivas do Associativo. O ZIP
+  11899075772 teve hash conferido; captura 082a6f3 com árvore igual a 1219608 e
+  fingerprint reproduzido com diff vazio e apenas os 19 outputs de QA.
+- A inspeção de 768 px identificou o título do estoque comprimido em três linhas.
+  A referência desse artefato não foi promovida. Em 761 a 1.023 px, os controles
+  agora ocupam a linha seguinte; a nova asserção de título em uma linha falhou
+  antes da correção e passou depois, junto aos contratos existentes em oito larguras.
+- Main 8e015c6 integrado em c6f38b7; conflito apenas em notas resolvido preservando
+  o registro da publicação dos funis e o trabalho desta pesquisa. Nova captura
+  visual e CI integral permanecem necessárias antes da integração do PR.
+- Após o ajuste de tablet, `pnpm verify` passou integralmente; o guia repetiu os
+  18 cenários sem erros de console ou chamadas externas. Oito larguras passaram
+  no contrato de estoque e na busca/seleção; o diff permaneceu sem segredos.
+- CI 38574613120/d8e745c aprovou novamente código, restore, banco, guia, E2E e
+  o predicado funcional completo. O título passou nas dez larguras e três temas.
+  As 11 capturas do Associativo foram inspecionadas e promovidas; 231 referências
+  preservadas, sem alterar limiares. Proveniência e hashes constam no README de
+  paridade e em reviewedUpdates. Nova CI integral em verify ainda pendente.
+- CI 38580539350/e043c9d concluiu com os três gates obrigatórios aprovados,
+  incluindo as 242 comparações visuais em modo verify. Antes da integração,
+  main avançou para 5c4d95e com a interface compacta de Rotina do PR #222.
+  Conflitos foram apenas nas notas; implementação, testes e documentação de
+  Rotina foram preservados integralmente. A versão combinada requer nova CI.
+- `pnpm verify` da versão combinada passou: 2.814 testes da aplicação e 82
+  skips condicionais, incluindo três cenários de navegador adicionados pela
+  atualização de Rotina. Suites Node, lint, tipos e build passaram; formatação
+  aprovada. Nenhum teste ou arquivo da implementação recebida foi alterado.
 
 ## 2026-10-14: Compactacao da Rotina
 

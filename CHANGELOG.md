@@ -10,6 +10,20 @@
 - Registra o estado separado de implementacao, CI e producao. A integracao
   continua pendente, sem alterar dados Salesforce ou controles de acesso.
 
+## 2026-10-14: Evidencias de publicacao Qlik
+
+- Registra a divergencia entre candidato, main e versao publicada; a coleta
+  e a agenda permanecem inativas ate validacao do fluxo completo.
+
+## 2026-10-14: Atualizacao protegida do servico Qlik
+
+- Adiciona operacoes especificas ao coordenador existente, com ledger separado,
+  mesmas travas/CI/frescor, backup privado, CAS e recuperacao da tentativa.
+- Preserva perfil, estado de boot, CRM e Salesforce; nao coleta fatos ou
+  aplica schema. Confirmacao do owner nao e confirmacao de ranking conectado.
+- Acrescenta testes de estado, entradas e host isolado, incluindo interrupcoes,
+  arquivos alterados, processos remanescentes e resultados antigos.
+
 ## 2026-10-14: Integridade do preflight e audiencia Qlik
 
 - Inclui todos os modulos do preflight na verificacao de arquivos aprovados
@@ -65,6 +79,25 @@
   confirmado de Qlik -> ranking do CRM.
 - Corrige rejeicao de symlink no leitor de estoque Windows, preservando a
   protecao O_NOFOLLOW no Linux.
+
+## 2026-10-14: Sessao e diagnostico Qlik isolados
+
+- Separa browser dedicado, console/cofre privado e cliente QIX da interface.
+- Adiciona SDK oficial fixado, inspecao restrita de objetos/masters, ciclo
+  sequencial e artefato privado atomico. Preflight desligado por padrao.
+- Preserva pagina ranking, Salesforce, banco e n8n. Nao entrega coleta ativa.
+
+## 2026-10-14: Pesquisa de unidades no Associativo
+
+- Adiciona campo com lupa para localizar unidades por código, descrição ou
+  empreendimento, inclusive sem acentos e com separadores diferentes no código.
+- Combina a pesquisa com os filtros e a ordenação do estoque, mostra a quantidade
+  encontrada e permite limpar a busca sem descartar a proposta em edição.
+
+- No celular, a pesquisa ocupa uma linha e o contador/data permanece ao lado de Limpar filtros.
+- Em tablets estreitos, os controles ficam abaixo do título do estoque, mantendo o texto legível.
+- Atualiza as 11 referências visuais do Associativo após inspeção e validação funcional, preservando as outras 231 imagens.
+- O teste do guia aguarda o foco automático antes de preencher valores, evitando corrida entre campos.
 
 ## 2026-10-14: Rotina compacta por atividade
 

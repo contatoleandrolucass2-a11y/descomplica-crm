@@ -1,21 +1,23 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-14: Conexao Qlik para ranking via VPS
+## 2026-10-14: Qlik via VPS
 
-- Qlik -> VPS -> /app/ranking: referencia Canal de Parcerias; recorte confirmado
-  Direcional/SP CAPITAL/CANAL IMOB, IMOBs/produtos e VGV/contratos. Mapa, limites
-  e criterios em [mapeamento](../runbooks/qlik-partnerships-mapping.md).
-- Browser rootless/pipe privado e cofre instalados; sessao visual12:47Z valida,
-  saved:true, sem segredo lido. Recuperacao excepcional de socket residual,
-  backups, causas e criterio de revisao em [sessao](../runbooks/qlik-vps-session.md).
-- SDK/preflight desligados, sem coleta. API usa sessao browser;
-  OAuth nao e requisito universal. Verify corrigido OK; CI/handshake pendentes.
-  Historico/testes no WORKLOG. UI sem fonte; Salesforce/grants intactos.
-- Fontes16:57Z: GitHubPR216/224, fetch e health. Main0019690; site200/ok5c4d95e;
-  SSH14:51Z: browser2f0907e ativo/disabled. Main conciliado eme85e620;
-  CI224/1d96204: codigo/restore/E2E OK, visual rodando. Coleta/RPC pendentes.
-  Usuario autorizou duas coletas conciliadas e recorte completo para ranking.view.
-- PR224 conciliado com main, sem conflito; detalhes WORKLOG. Sem deploy.
+- Destino /app/ranking, referencia Canal de Parcerias, Direcional/SP CAPITAL/
+  CANAL IMOB. Duas coletas conciliadas e audiencia crm.ranking.view autorizadas.
+- Historico integral em [auditoria](../audits/qlik-integracao-2026-10-14.md);
+  contrato e pendencias em [mapa](../runbooks/qlik-partnerships-mapping.md).
+- Retomada16:57Z: CI224/1d96204 com codigo/restore/E2E OK, visual pendente.
+  Main0019690; health200/ok5c4d95e. Ledger externo depois registra0019690
+  em16:58:40Z. Sem publicacao Qlik. Sync confirmou tres documentos.
+- Migration/RPC v2 e endpoint HMAC em implementacao; sem DDL, carga ou agenda.
+  Salesforce preservado. Revisar apos CI e prova de coleta real; nao e excecao
+  aos controles. Historico arquivado por limite do sync, sem alterar o limite.
+
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Registro recebido de main0019690 preservado integralmente em
+  [auditoria](../audits/associativo-pesquisa-conhecimento-2026-10-14.md).
+  Movido somente por limite de sincronizacao; nao revalida fatos historicos.
 
 ## 2026-10-14: Rotina compacta por conclusao
 
