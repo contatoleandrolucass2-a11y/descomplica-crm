@@ -1,36 +1,22 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-14: Retomada dos funis no comparativo mensal
+## 2026-10-14: Funis mensais publicados
 
-- Pedido: incluir os graficos em funil no Comparativo mensal de /app conforme
-  print fornecido. Origem descomplicapro.com.br somente leitura; dados atuais
-  do CRM preservados. Nao altera politicas, fontes remotas ou n8n.
-- Consulta14/10 04:50:56Z: main792320ba e CI38506931120 success; health publico
-  HTTP200/status ok/version792320ba037ea48655739aaeefe5295b95c33631. Fontes:
-  GitHub branches/main, actions/runs e crm.descomplicapro.com.br/api/health.
-- Checkout anterior db7116c limpo pertence ao PR documental217 ainda aberto;
-  nova branch codex/dashboard-funis-mensais parte de main792320ba. Registro
-  documental anterior permanece preservado em sua branch, sem reverter mudancas.
-- Runtime context/search consultados; notas truncadas nao usadas como prova.
-  Print local inspecionado. Web fetch falhou; leitura pelo navegador confirmou
-  seis blocos e cinco etapas na origem. O print inclui tambem Pastas aprovadas.
-- Implementacao: seis funis HTML/CSS com seis etapas, dados atuais e ausencia
-  distinta de zero. Aprovadas nao tem serie mensal no dashboard; ranking nao
-  substitui essa metrica. Mantida indisponivel ate contrato proprio validado.
-  Fontes: dashboard/catalog.ts, presentation.ts e ops/salesforce/transform.mjs.
-  Dezoito testes de componente, tipos e 74 checks QA sinteticos aprovados;
-  tres temas/larguras, sem overflow ou Axe. Desktop4.704px abaixo de4.800px.
-  Fonte: test-results/dashboard-report/report.json. Lint/build locais passaram.
-- Consulta14/10 05:17Z: CI38515347098/aa5c835 validate aprovado no Linux:
-  2.807 aplicacao/79 skips,241 coletor,124 release. Main/faae8e9 integrado,
-  preservando Rotina. Falhas Windows de timeout/ACL/symlink registradas na
-  auditoria; nenhuma assercao relaxada. Navegador, baseline e deploy pendentes.
-- CI38515347098: banco/restore/E2E e predicado visual funcional aprovados;
-  apenas11 imagens /app mudaram. Artefato11873042399 revisado e promovido em
-  05:55:40Z, preservando231 imagens e limiares. Captura20aed961 tem arvore igual
-  a aa5c835; fingerprint1289963a reproduzido com apenas19 outputs QA e diff
-  vazio. Flag dirty mantido; prova especifica, nao reutilizavel. Fontes e hashes
-  completos na auditoria/README de paridade. Nova CI verify e deploy pendentes.
+- Seis funis no Comparativo mensal com dados atuais; origem somente leitura.
+  Aprovadas indisponiveis sem serie mensal propria. Nenhuma mudanca de dados,
+  regras ou n8n. QA74 checks e CI38519492545/de209f4 aprovados.
+- Retomada11:41:14Z: main/faae8e9, CI38514527676 success, health200/ok/faae8e9.
+  Fontes GitHub, git fetch e /api/health relidas apos interrupcao da ferramenta.
+  PR218 integrado em16f4587; CI main38558435232 concluida com quatro jobs verdes.
+  Publicado12:24:35.454Z (09:24 BRT), deployment713b3b88-e489-4153-9057-096c7b044661.
+  Imagem imutavel comprovada, backup verificado, locks/CAS/frescor cumpridos.
+  Smoke12:25Z: health200/ok/16f4587, /app307login e API401; sem pendencia.
+  Jornada autenticada e242 comparacoes validadas na CI, nao em conta privada.
+- Sync falhou com256.725 bytes acima de256.000. Historico/evidencias completos
+  movidos para [auditoria dos funis](../audits/dashboard-funis-2026-10-14.md),
+  sem alterar limites ou regras. Nova execucao confirmou status synced;
+  checkout documental16f4587 tambem sincronizado apos a troca de branch.
+  Encerramento apos deploy confirmou synced, tres documentos, sem ampliar limite.
 
 ## 2026-10-14: Rotina regional imob e conclusao individual
 
