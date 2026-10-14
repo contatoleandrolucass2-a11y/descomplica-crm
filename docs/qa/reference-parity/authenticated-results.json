@@ -41663,8 +41663,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 6281280,
+        "totalPixels": 6831360,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
+          "tracked": true,
+          "bytes": 188858,
+          "sha256": "66e83f427b1b3da1c76319a016c1785bba44c71629bde856da4c847a4595a5e1"
+        }
+      },
+      "path": "target-authenticated/dashboard-1440x900.webp",
+      "bytes": 188858,
+      "sha256": "66e83f427b1b3da1c76319a016c1785bba44c71629bde856da4c847a4595a5e1",
+      "width": 1440,
+      "height": 4744,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 4362
+        },
+        "actual": {
+          "width": 1440,
+          "height": 4744
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
@@ -41672,37 +41696,13 @@
           "sha256": "7f69da8dc774be2747620f8519d57c7d8120ee95a23ffe63ac7c9e90458a499c"
         }
       },
-      "path": "target-authenticated/dashboard-1440x900.webp",
-      "bytes": 153466,
-      "sha256": "7f69da8dc774be2747620f8519d57c7d8120ee95a23ffe63ac7c9e90458a499c",
-      "width": 1440,
-      "height": 4362,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 1121
-        },
-        "actual": {
-          "width": 1440,
-          "height": 4362
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
-          "tracked": true,
-          "bytes": 74362,
-          "sha256": "9c1a5e30de6b41613f0f1777fe3bdbe91e4c63026ce380e49fe18e6259bd0a59"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -42491,8 +42491,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 6281280,
+        "totalPixels": 6831360,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 188858,
+          "sha256": "66e83f427b1b3da1c76319a016c1785bba44c71629bde856da4c847a4595a5e1"
+        }
+      },
+      "path": "target-authenticated/themes/dashboard-light-1440x900.webp",
+      "bytes": 188858,
+      "sha256": "66e83f427b1b3da1c76319a016c1785bba44c71629bde856da4c847a4595a5e1",
+      "width": 1440,
+      "height": 4744,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 4362
+        },
+        "actual": {
+          "width": 1440,
+          "height": 4744
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
@@ -42500,37 +42524,13 @@
           "sha256": "7f69da8dc774be2747620f8519d57c7d8120ee95a23ffe63ac7c9e90458a499c"
         }
       },
-      "path": "target-authenticated/themes/dashboard-light-1440x900.webp",
-      "bytes": 153466,
-      "sha256": "7f69da8dc774be2747620f8519d57c7d8120ee95a23ffe63ac7c9e90458a499c",
-      "width": 1440,
-      "height": 4362,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 1121
-        },
-        "actual": {
-          "width": 1440,
-          "height": 4362
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 74362,
-          "sha256": "9c1a5e30de6b41613f0f1777fe3bdbe91e4c63026ce380e49fe18e6259bd0a59"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -43319,8 +43319,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 6281280,
+        "totalPixels": 6831360,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 189972,
+          "sha256": "a14d03bca75030993d144d72ed4ca6722fabdc1f31f875e5f389450a6ba05fa2"
+        }
+      },
+      "path": "target-authenticated/themes/dashboard-balanced-1440x900.webp",
+      "bytes": 189972,
+      "sha256": "a14d03bca75030993d144d72ed4ca6722fabdc1f31f875e5f389450a6ba05fa2",
+      "width": 1440,
+      "height": 4744,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 4362
+        },
+        "actual": {
+          "width": 1440,
+          "height": 4744
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
@@ -43328,37 +43352,13 @@
           "sha256": "f4662661662331b9242b9b8231a8e6ac7575e78c90078281dc5b63c66a519859"
         }
       },
-      "path": "target-authenticated/themes/dashboard-balanced-1440x900.webp",
-      "bytes": 155010,
-      "sha256": "f4662661662331b9242b9b8231a8e6ac7575e78c90078281dc5b63c66a519859",
-      "width": 1440,
-      "height": 4362,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 1121
-        },
-        "actual": {
-          "width": 1440,
-          "height": 4362
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 76508,
-          "sha256": "953f4ff9e3de7c69f7b9809a2d583914e0624bfc3e02da44bba6dcbeab06afea"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -44147,13 +44147,13 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 6281280,
+        "totalPixels": 6831360,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 153276,
-          "sha256": "20241c574aced5e4cf435fe3bc4cc4a409dae12eb1159596c04d029e416016e9"
+          "bytes": 200424,
+          "sha256": "9e94d597f970c2cdd0df0b6f813cb04f6ebb5a056109bbdc3926befae9ec9a14"
         }
       },
       "approvedCanvasComparison": {
@@ -44162,42 +44162,42 @@
         "asset": "docs/qa/canvas-parity/reference/dashboard-oportunidades.webp",
         "region": "left",
         "referenceSha256": "c7dbf6e14f7802fc9597d419dee04aa6dd6b48474c91926d3b52c1fbb86b88c4",
-        "colorDistance": 14.604600694444445,
+        "colorDistance": 17.372450086805557,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 35.732177734375,
+        "edgeDistance": 38.591715494791664,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/dashboard-dark-1440x900.webp",
-      "bytes": 153276,
-      "sha256": "20241c574aced5e4cf435fe3bc4cc4a409dae12eb1159596c04d029e416016e9",
+      "bytes": 200424,
+      "sha256": "9e94d597f970c2cdd0df0b6f813cb04f6ebb5a056109bbdc3926befae9ec9a14",
       "width": 1440,
-      "height": 4362,
+      "height": 4744,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1440,
-          "height": 1121
+          "height": 4362
         },
         "actual": {
           "width": 1440,
-          "height": 4362
+          "height": 4744
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 77454,
-          "sha256": "52acfa26e183db0cee3a9f1dac13629af506f25af6ac570f907984a22cbe3446"
+          "bytes": 153276,
+          "sha256": "20241c574aced5e4cf435fe3bc4cc4a409dae12eb1159596c04d029e416016e9"
         }
       },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -45217,8 +45217,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 5583360,
+        "totalPixels": 6072320,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
+          "tracked": true,
+          "bytes": 186878,
+          "sha256": "ec38658eb90d5b90dd7b4bb307bcee579ce386f5256915ad6d2168a247c19564"
+        }
+      },
+      "path": "target-authenticated/dashboard-1280x720.webp",
+      "bytes": 186878,
+      "sha256": "ec38658eb90d5b90dd7b4bb307bcee579ce386f5256915ad6d2168a247c19564",
+      "width": 1280,
+      "height": 4744,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1280,
+          "height": 4362
+        },
+        "actual": {
+          "width": 1280,
+          "height": 4744
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
@@ -45226,37 +45250,13 @@
           "sha256": "122b88dab39353e00f0a36c2de611ed5860f17b3c65edd890250c7dea5bb6cd4"
         }
       },
-      "path": "target-authenticated/dashboard-1280x720.webp",
-      "bytes": 150138,
-      "sha256": "122b88dab39353e00f0a36c2de611ed5860f17b3c65edd890250c7dea5bb6cd4",
-      "width": 1280,
-      "height": 4362,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1280,
-          "height": 1121
-        },
-        "actual": {
-          "width": 1280,
-          "height": 4362
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
-          "tracked": true,
-          "bytes": 75384,
-          "sha256": "d5ba20afc8521c496090c969f9382ea7b45cc1275cb7b95e396b7fbc488f9023"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -46051,8 +46051,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 4951040,
+        "totalPixels": 5342208,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
+          "tracked": true,
+          "bytes": 187476,
+          "sha256": "a64ed27fdac596338e94c2d6af468b3a7aa98f05245fe6e44a87b4403a95df34"
+        }
+      },
+      "path": "target-authenticated/dashboard-1024x768.webp",
+      "bytes": 187476,
+      "sha256": "a64ed27fdac596338e94c2d6af468b3a7aa98f05245fe6e44a87b4403a95df34",
+      "width": 1024,
+      "height": 5217,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1024,
+          "height": 4835
+        },
+        "actual": {
+          "width": 1024,
+          "height": 5217
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
@@ -46060,37 +46084,13 @@
           "sha256": "1dd4f97a86d15cc0456f222f6ca1af5783252e51e4a0e3ea84d129efa284bee4"
         }
       },
-      "path": "target-authenticated/dashboard-1024x768.webp",
-      "bytes": 151300,
-      "sha256": "1dd4f97a86d15cc0456f222f6ca1af5783252e51e4a0e3ea84d129efa284bee4",
-      "width": 1024,
-      "height": 4835,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1024,
-          "height": 1245
-        },
-        "actual": {
-          "width": 1024,
-          "height": 4835
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
-          "tracked": true,
-          "bytes": 70856,
-          "sha256": "a44d486f732357adfcb83bdeaacb9a5f0aa3369cba021efe9696ba971746473a"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -46879,8 +46879,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 4724736,
+        "totalPixels": 5164800,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
+          "tracked": true,
+          "bytes": 164128,
+          "sha256": "631e46444718e5cb33d95c3b332c442dedc3c889efeb98a2ca8fa488de67ced2"
+        }
+      },
+      "path": "target-authenticated/dashboard-768x1024.webp",
+      "bytes": 164128,
+      "sha256": "631e46444718e5cb33d95c3b332c442dedc3c889efeb98a2ca8fa488de67ced2",
+      "width": 768,
+      "height": 6725,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 768,
+          "height": 6152
+        },
+        "actual": {
+          "width": 768,
+          "height": 6725
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
@@ -46888,37 +46912,13 @@
           "sha256": "b76aead27320998ef8240858c780496f132662737867a11750880dc0370f6629"
         }
       },
-      "path": "target-authenticated/dashboard-768x1024.webp",
-      "bytes": 136056,
-      "sha256": "b76aead27320998ef8240858c780496f132662737867a11750880dc0370f6629",
-      "width": 768,
-      "height": 6152,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 768,
-          "height": 1743
-        },
-        "actual": {
-          "width": 768,
-          "height": 6152
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
-          "tracked": true,
-          "bytes": 68214,
-          "sha256": "cb8777e701940fc66b2ad1da5d8298082f25d77ad201bcd4b5b184cba210b980"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -47707,8 +47707,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 3482310,
+        "totalPixels": 3927300,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
+          "tracked": true,
+          "bytes": 147254,
+          "sha256": "6a61874bfac38397cc2a1b1d801ccfdce75dba4270b5bd8a68caf1a10410a3e3"
+        }
+      },
+      "path": "target-authenticated/dashboard-390x844.webp",
+      "bytes": 147254,
+      "sha256": "6a61874bfac38397cc2a1b1d801ccfdce75dba4270b5bd8a68caf1a10410a3e3",
+      "width": 390,
+      "height": 10070,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 8929
+        },
+        "actual": {
+          "width": 390,
+          "height": 10070
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
@@ -47716,37 +47740,13 @@
           "sha256": "fa2def7aadf28ad5036dc04f5e0401a3bb3c3196edb28802c3d97ed9efbae62d"
         }
       },
-      "path": "target-authenticated/dashboard-390x844.webp",
-      "bytes": 119036,
-      "sha256": "fa2def7aadf28ad5036dc04f5e0401a3bb3c3196edb28802c3d97ed9efbae62d",
-      "width": 390,
-      "height": 8929,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 1963
-        },
-        "actual": {
-          "width": 390,
-          "height": 8929
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
-          "tracked": true,
-          "bytes": 62720,
-          "sha256": "30f792e75aceda7a8096b1ba517cc01e17dcf8387094621458e105accc4f583c"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -48541,8 +48541,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 3482310,
+        "totalPixels": 3927300,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 155306,
+          "sha256": "90882d2710ada4f8efc89304c6c59bb2b83d9d8cc71ce5d112d123f0157d9b68"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
+      "bytes": 155306,
+      "sha256": "90882d2710ada4f8efc89304c6c59bb2b83d9d8cc71ce5d112d123f0157d9b68",
+      "width": 390,
+      "height": 10070,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 8929
+        },
+        "actual": {
+          "width": 390,
+          "height": 10070
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
@@ -48550,37 +48574,13 @@
           "sha256": "fcd93d2078b8e2e137f344dc9862b316ea940252c6db32141a208251c9e8c2e0"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
-      "bytes": 120284,
-      "sha256": "fcd93d2078b8e2e137f344dc9862b316ea940252c6db32141a208251c9e8c2e0",
-      "width": 390,
-      "height": 8929,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 1963
-        },
-        "actual": {
-          "width": 390,
-          "height": 8929
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 65324,
-          "sha256": "f0eb3d306a63a37b0271457d9715c42cc23afbafc4bb358b7c1b7726f5917660"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -49375,8 +49375,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 3364125,
+        "totalPixels": 3792000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
+          "tracked": true,
+          "bytes": 145362,
+          "sha256": "10bf1c7abbef7196a67d3dd6aae6d042154090ab9c60b29ad2fe18e10de89402"
+        }
+      },
+      "path": "target-authenticated/dashboard-375x812.webp",
+      "bytes": 145362,
+      "sha256": "10bf1c7abbef7196a67d3dd6aae6d042154090ab9c60b29ad2fe18e10de89402",
+      "width": 375,
+      "height": 10112,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 8971
+        },
+        "actual": {
+          "width": 375,
+          "height": 10112
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
@@ -49384,37 +49408,13 @@
           "sha256": "19485781786b99df9454636134d3da75f01bb17a156e3aeb25423ccae6060a6f"
         }
       },
-      "path": "target-authenticated/dashboard-375x812.webp",
-      "bytes": 118940,
-      "sha256": "19485781786b99df9454636134d3da75f01bb17a156e3aeb25423ccae6060a6f",
-      "width": 375,
-      "height": 8971,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 375,
-          "height": 1997
-        },
-        "actual": {
-          "width": 375,
-          "height": 8971
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
-          "tracked": true,
-          "bytes": 63956,
-          "sha256": "6e3bf76e817b3baa559363c018c7de9184c5688d39a82ac9850f5aac6c15027e"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -50209,8 +50209,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 2969280,
+        "totalPixels": 3334400,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
+          "tracked": true,
+          "bytes": 142950,
+          "sha256": "29b6ed7f189abaf4cc4bcd1ec251c1d78bc66ecb83b76edae2c442c3fc686ee0"
+        }
+      },
+      "path": "target-authenticated/dashboard-320x568.webp",
+      "bytes": 142950,
+      "sha256": "29b6ed7f189abaf4cc4bcd1ec251c1d78bc66ecb83b76edae2c442c3fc686ee0",
+      "width": 320,
+      "height": 10420,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 9279
+        },
+        "actual": {
+          "width": 320,
+          "height": 10420
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
@@ -50218,37 +50242,13 @@
           "sha256": "efd03f7cf7dc8a1b0e735e320ae19f69ea5178ec34aef437c8b84a182d6a2bd6"
         }
       },
-      "path": "target-authenticated/dashboard-320x568.webp",
-      "bytes": 117278,
-      "sha256": "efd03f7cf7dc8a1b0e735e320ae19f69ea5178ec34aef437c8b84a182d6a2bd6",
-      "width": 320,
-      "height": 9279,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 320,
-          "height": 2109
-        },
-        "actual": {
-          "width": 320,
-          "height": 9279
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
-          "tracked": true,
-          "bytes": 63998,
-          "sha256": "e745c4e2327cc4faf92e87505da8071fdf5dfe2037a226bf8d7f67056c5bd69b"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T02:35:30.409Z",
-        "captureCommit": "771812cd350d124bcfe7af62e2298f7ac6b00178",
+        "capturedAt": "2026-10-14T05:52:20.590Z",
+        "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24",
-        "ciRunId": 38498361779,
-        "artifactId": 11865597980
+        "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+        "ciRunId": 38515347098,
+        "artifactId": 11873042399
       }
     },
     {
@@ -51383,44 +51383,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
         "tracked": true,
-        "bytes": 151300,
-        "sha256": "1dd4f97a86d15cc0456f222f6ca1af5783252e51e4a0e3ea84d129efa284bee4"
+        "bytes": 187476,
+        "sha256": "a64ed27fdac596338e94c2d6af468b3a7aa98f05245fe6e44a87b4403a95df34"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
         "tracked": true,
-        "bytes": 150138,
-        "sha256": "122b88dab39353e00f0a36c2de611ed5860f17b3c65edd890250c7dea5bb6cd4"
+        "bytes": 186878,
+        "sha256": "ec38658eb90d5b90dd7b4bb307bcee579ce386f5256915ad6d2168a247c19564"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
         "tracked": true,
-        "bytes": 153466,
-        "sha256": "7f69da8dc774be2747620f8519d57c7d8120ee95a23ffe63ac7c9e90458a499c"
+        "bytes": 188858,
+        "sha256": "66e83f427b1b3da1c76319a016c1785bba44c71629bde856da4c847a4595a5e1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
         "tracked": true,
-        "bytes": 117278,
-        "sha256": "efd03f7cf7dc8a1b0e735e320ae19f69ea5178ec34aef437c8b84a182d6a2bd6"
+        "bytes": 142950,
+        "sha256": "29b6ed7f189abaf4cc4bcd1ec251c1d78bc66ecb83b76edae2c442c3fc686ee0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
         "tracked": true,
-        "bytes": 118940,
-        "sha256": "19485781786b99df9454636134d3da75f01bb17a156e3aeb25423ccae6060a6f"
+        "bytes": 145362,
+        "sha256": "10bf1c7abbef7196a67d3dd6aae6d042154090ab9c60b29ad2fe18e10de89402"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
         "tracked": true,
-        "bytes": 119036,
-        "sha256": "fa2def7aadf28ad5036dc04f5e0401a3bb3c3196edb28802c3d97ed9efbae62d"
+        "bytes": 147254,
+        "sha256": "6a61874bfac38397cc2a1b1d801ccfdce75dba4270b5bd8a68caf1a10410a3e3"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
         "tracked": true,
-        "bytes": 136056,
-        "sha256": "b76aead27320998ef8240858c780496f132662737867a11750880dc0370f6629"
+        "bytes": 164128,
+        "sha256": "631e46444718e5cb33d95c3b332c442dedc3c889efeb98a2ca8fa488de67ced2"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
@@ -52115,20 +52115,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 155010,
-        "sha256": "f4662661662331b9242b9b8231a8e6ac7575e78c90078281dc5b63c66a519859"
+        "bytes": 189972,
+        "sha256": "a14d03bca75030993d144d72ed4ca6722fabdc1f31f875e5f389450a6ba05fa2"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 153276,
-        "sha256": "20241c574aced5e4cf435fe3bc4cc4a409dae12eb1159596c04d029e416016e9"
+        "bytes": 200424,
+        "sha256": "9e94d597f970c2cdd0df0b6f813cb04f6ebb5a056109bbdc3926befae9ec9a14"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
         "tracked": true,
-        "bytes": 153466,
-        "sha256": "7f69da8dc774be2747620f8519d57c7d8120ee95a23ffe63ac7c9e90458a499c"
+        "bytes": 188858,
+        "sha256": "66e83f427b1b3da1c76319a016c1785bba44c71629bde856da4c847a4595a5e1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
@@ -52271,8 +52271,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
         "tracked": true,
-        "bytes": 120284,
-        "sha256": "fcd93d2078b8e2e137f344dc9862b316ea940252c6db32141a208251c9e8c2e0"
+        "bytes": 155306,
+        "sha256": "90882d2710ada4f8efc89304c6c59bb2b83d9d8cc71ce5d112d123f0157d9b68"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
@@ -52498,7 +52498,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "9529fc71a6cb7ef1bf72816a6f92572a335c3c132cdfb8238d0471bb89559987"
+    "manifestSha256": "43899daeb4507e1dc3f943db7eee24016c7e234c9ef5723332edbdabdedc42c5"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -52568,6 +52568,65 @@
         "reviewedChanges": 11
       },
       "previousManifestSha256": "f56e81a1e932dd44c205fed407b97a19ddbe08e713b8af2b0d92d1071d32ccf8",
+      "changedFiles": [
+        "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp"
+      ],
+      "remainingImagesPreserved": 231,
+      "followUp": "Full verify-mode CI required before merge; this promotion is not a passing candidate run."
+    },
+    {
+      "reviewedAt": "2026-10-14T05:55:40.931Z",
+      "scope": "monthly dashboard funnels only; remaining screenshots and original capture provenance preserved",
+      "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38515347098",
+      "artifactId": 11873042399,
+      "artifactSha256": "1f2508522260bd684e5a177b2847b573cfa1f2ff2dcd722ae2410e4bc780148b",
+      "headCommit": "aa5c835f5448a389af16ce6b1c76cbc17ecfad2c",
+      "capturedAt": "2026-10-14T05:52:20.590Z",
+      "captureCommit": "20aed961aa07982772d1cb25ed226af9ba3379f8",
+      "worktreeDirtyAtCapture": true,
+      "worktreeFingerprint": "1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b",
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
+      "generatedOnlyProof": {
+        "trackedDiff": "empty",
+        "generatedFiles": [
+          "output/playwright/connected-systems/balanced-1440.png",
+          "output/playwright/connected-systems/balanced-320.png",
+          "output/playwright/connected-systems/balanced-768.png",
+          "output/playwright/connected-systems/console-balanced-1440.png",
+          "output/playwright/connected-systems/console-balanced-320.png",
+          "output/playwright/connected-systems/console-balanced-768.png",
+          "output/playwright/connected-systems/console-dark-1440.png",
+          "output/playwright/connected-systems/console-dark-320.png",
+          "output/playwright/connected-systems/console-dark-768.png",
+          "output/playwright/connected-systems/console-light-1440.png",
+          "output/playwright/connected-systems/console-light-320.png",
+          "output/playwright/connected-systems/console-light-768.png",
+          "output/playwright/connected-systems/console-results.json",
+          "output/playwright/connected-systems/dark-1440.png",
+          "output/playwright/connected-systems/dark-320.png",
+          "output/playwright/connected-systems/dark-768.png",
+          "output/playwright/connected-systems/light-1440.png",
+          "output/playwright/connected-systems/light-320.png",
+          "output/playwright/connected-systems/light-768.png"
+        ],
+        "recomputedFingerprintMatches": true
+      },
+      "functionalChecksPassed": true,
+      "visualComparisonsBeforePromotion": {
+        "passed": 231,
+        "reviewedChanges": 11
+      },
+      "previousManifestSha256": "9529fc71a6cb7ef1bf72816a6f92572a335c3c132cdfb8238d0471bb89559987",
       "changedFiles": [
         "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
         "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",

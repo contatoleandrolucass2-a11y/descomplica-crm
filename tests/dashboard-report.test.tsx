@@ -202,9 +202,27 @@ function structuralContract(root: Node) {
     "Ritmo de vendas",
   ]);
   for (const block of elements(monthly, "article")) {
-    expect(elements(block, "dt").map(text)).toEqual(
-      expect.arrayContaining(["Oportunidades", "Agendamentos", "Visitas", "Pastas", "Vendas"]),
+    const funnel = only(elements(block, "figure"));
+    expect(attribute(funnel, "aria-label")).toBe(
+      `Funil mensal: ${text(only(elements(block, "h3")))}`,
     );
+    expect(elements(funnel, "dt").map(text)).toEqual([
+      "Oportunidades",
+      "Agendamentos",
+      "Visitas",
+      "Pastas",
+      "Pastas aprovadas",
+      "Vendas",
+    ]);
+    expect(elements(funnel, "div").map((step) => attribute(step, "data-stage"))).toEqual([
+      "opportunities",
+      "appointments",
+      "visits",
+      "folders",
+      "approved-folders",
+      "sales",
+    ]);
+    expect(value(funnel, "Pastas aprovadas")).toBe("Indisponível");
   }
   const tables = elements(section(root, "report-operational-title"), "table");
   expect(tables).toHaveLength(4);
@@ -242,6 +260,33 @@ function structuralContract(root: Node) {
 
 describe("DashboardReport: regressao com dados sinteticos", () => {
   it("preserva os blocos completos com snapshot disponivel", () => structuralContract(render()));
+
+  it("desenha os funis com valores atuais, sem copiar numeros do print ou estimar aprovadas", () => {
+    const monthly = section(render(), "report-monthly-title");
+    expect(elements(monthly, "figure")).toHaveLength(6);
+    const current = only(elements(card(monthly, "Mês atual"), "figure"));
+    expect(elements(current, "dd").map(text)).toEqual([
+      "2.000",
+      "1.000",
+      "500",
+      "250",
+      "Indisponível",
+      "100",
+    ]);
+    const missing = only(elements(current, "span"));
+    expect(attribute(missing, "title")).toContain("série mensal separada");
+  });
+
+  it("preserva numeros longos no funil sem abreviar o indicador", () => {
+    const dashboard = fixture();
+    dashboard.metrics.all!.sales.currentMonth = 9876543.2;
+    const current = card(section(render({ dashboard }), "report-monthly-title"), "Mês atual");
+    const sales = only(
+      elements(current, "div").filter((step) => attribute(step, "data-stage") === "sales"),
+    );
+    expect(text(only(elements(sales, "dd")))).toBe("9.876.543,2");
+    expect(attribute(only(elements(sales, "dd")), "data-long")).toBe("true");
+  });
 
   it("preserva a estrutura inteira sem snapshot e nunca apresenta ausencia como zero", () => {
     const root = render({

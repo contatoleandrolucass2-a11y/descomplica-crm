@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-14: Funis no comparativo mensal
+
+- Substitui as listas mensais por seis graficos em funil, com etapas coloridas,
+  valores centralizados e dados atuais do CRM, conforme o print solicitado.
+- Mantem conversoes, temas e permissoes. Pastas aprovadas aparece como
+  indisponivel porque nao existe serie mensal separada no read model atual.
+- Reforca testes de estrutura, geometria, acessibilidade e numeros longos.
+  A pagina de referencia permanece intocada.
+- Atualiza somente as 11 referencias visuais do dashboard apos conferencia
+  autenticada, mantendo as outras 231 imagens e os limiares existentes.
+
 ## 2026-10-13: Conclusao semanal individual
 
 - Revisa o portugues das atividades de Gerente regional imob sem mudar seu
