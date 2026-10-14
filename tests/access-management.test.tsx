@@ -178,7 +178,7 @@ describe("catálogo localizado de acesso", () => {
   });
 
   it("oferece somente os seis papéis ativos não protegidos", () => {
-    expect(getAssignableRoleKeys(100)).toEqual([
+    expect(getAssignableRoleKeys("master", 100)).toEqual([
       "admin",
       "coordinator",
       "manager_house",
@@ -186,13 +186,14 @@ describe("catálogo localizado de acesso", () => {
       "broker_house",
       "broker_imob",
     ]);
-    expect(getAssignableRoleKeys(80)).toEqual([
+    expect(getAssignableRoleKeys("admin", 80)).toEqual([
       "coordinator",
       "manager_house",
       "manager_imob",
       "broker_house",
       "broker_imob",
     ]);
+    expect(getAssignableRoleKeys("admin", 999)).not.toContain("admin");
     expect(
       Object.entries(ROLES)
         .filter(([, role]) => !role.assignable)
@@ -291,8 +292,11 @@ describe("catálogo localizado de acesso", () => {
     (denyRiva) => {
       const markup = renderToStaticMarkup(
         createElement(UserAccessManager, {
+          initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
           users: [
             {
+              inheritedPermissions: ROLE_INHERITED_PERMISSIONS["admin"],
+              permissionDetailsAvailable: true,
               userId: "81000000-0000-4000-8000-000000000006",
               email: "administrador@example.test",
               isActive: true,
@@ -353,6 +357,8 @@ describe("catálogo localizado de acesso", () => {
       minLevel: 10,
     });
     expect(ROLE_INHERITED_PERMISSIONS.master).toContain("crm.simulators.view");
+    expect(ROLE_INHERITED_PERMISSIONS.admin).toContain("crm.simulators.view");
+    expect(ROLE_INHERITED_PERMISSIONS.admin).toContain("crm.simulators.execute");
 
     for (const roleKey of [
       "master",
@@ -372,6 +378,7 @@ describe("catálogo localizado de acesso", () => {
   it("mostra busca, herança e exceções sem oferecer autoelevação", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
         users: [
           {
             userId: "81000000-0000-4000-8000-000000000001",
@@ -381,7 +388,9 @@ describe("catálogo localizado de acesso", () => {
             roleKey: "user",
             isSelf: true,
             isManageable: false,
+            inheritedPermissions: [],
             overrides: [],
+            permissionDetailsAvailable: true,
           },
         ],
         assignableRoles: ["admin", "broker_house"],
@@ -404,13 +413,14 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toContain("resultado do papel e das exceções individuais");
     expect(markup).toContain("O que pode acessar");
     expect(markup).toContain("Configurações avançadas");
-    expect(markup).toContain("proteção contra autoelevação");
+    expect(markup).toContain("Você não pode alterar seu próprio papel, permissões ou status.");
     expect(markup).not.toContain("Salvar papel");
   });
 
   it("mostra caixas marcadas pelo padrão e exceções, sem campo de motivo", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
         users: [
           {
             userId: "81000000-0000-4000-8000-000000000004",
@@ -420,6 +430,7 @@ describe("catálogo localizado de acesso", () => {
             roleKey: "broker_house",
             isSelf: false,
             isManageable: true,
+            inheritedPermissions: ["crm.dashboard.view", "crm.dashboard.without_canal_imob.view"],
             overrides: [
               {
                 permissionKey: "crm.dashboard.without_canal_imob.view",
@@ -427,6 +438,7 @@ describe("catálogo localizado de acesso", () => {
                 reason: "Restrição sintética",
               },
             ],
+            permissionDetailsAvailable: true,
           },
         ],
         assignableRoles: ["coordinator", "manager_house", "broker_house"],
@@ -481,8 +493,10 @@ describe("catálogo localizado de acesso", () => {
     ({ inherited, checked }) => {
       const markup = renderToStaticMarkup(
         createElement(UserAccessManager, {
+          initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
           users: [
             {
+              permissionDetailsAvailable: true,
               userId: "81000000-0000-4000-8000-000000000005",
               email: "simuladores@example.test",
               isActive: true,
@@ -518,8 +532,11 @@ describe("catálogo localizado de acesso", () => {
   ])("não apresenta herança administrativa como acesso efetivo de conta $accessStatus", (state) => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
         users: [
           {
+            inheritedPermissions: ROLE_INHERITED_PERMISSIONS["admin"],
+            permissionDetailsAvailable: true,
             userId: "81000000-0000-4000-8000-000000000007",
             email: "sem-acesso@example.test",
             ...state,
@@ -554,6 +571,7 @@ describe("catálogo localizado de acesso", () => {
   it("expõe aprovação pendente com papel e escopo, sem motivo manual", () => {
     const markup = renderToStaticMarkup(
       createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
         users: [
           {
             userId: "81000000-0000-4000-8000-000000000002",
@@ -563,7 +581,9 @@ describe("catálogo localizado de acesso", () => {
             roleKey: "pending",
             isSelf: false,
             isManageable: true,
+            inheritedPermissions: [],
             overrides: [],
+            permissionDetailsAvailable: true,
           },
         ],
         assignableRoles: ["coordinator", "broker_house"],
@@ -588,5 +608,186 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toContain("team:qa-official");
     expect(markup).not.toContain('name="reason"');
     expect(markup).toContain("Nenhuma associação é inferida pelo nome");
+  });
+  it("explica a proteção de outro Administrador e não renderiza controles mutáveis", () => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000005",
+            email: "admin-protegido@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey: "admin",
+            isSelf: false,
+            isManageable: false,
+            inheritedPermissions: [...ROLE_INHERITED_PERMISSIONS.admin],
+            overrides: [],
+            permissionDetailsAvailable: true,
+          },
+        ],
+        assignableRoles: [
+          "coordinator",
+          "manager_house",
+          "manager_imob",
+          "broker_house",
+          "broker_imob",
+        ],
+        manageablePermissions: ["crm.dashboard.view"],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: false,
+        canManageUsers: true,
+        canApproveUsers: true,
+        reportingScopes: [],
+      }),
+    );
+
+    expect(markup).toContain('class="admin-protected-account-badge" role="status"');
+    expect(markup).toContain("Protegida pelo Master");
+    expect(markup).toContain(
+      "Somente o Master pode alterar papel, permissões ou status de outro Administrador.",
+    );
+    expect(markup).not.toContain("Salvar papel");
+    expect(markup).not.toContain("Incluir na alteração");
+    expect(markup).not.toContain("Desativar usuário");
+    expect(markup).not.toContain('name="roleKey"');
+    expect(markup).not.toContain('name="effect"');
+  });
+
+  it("mantém os controles de outro Administrador disponíveis para o Master", () => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000006",
+            email: "admin-gerenciavel@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey: "admin",
+            isSelf: false,
+            isManageable: true,
+            inheritedPermissions: [...ROLE_INHERITED_PERMISSIONS.admin],
+            overrides: [],
+            permissionDetailsAvailable: true,
+          },
+        ],
+        assignableRoles: [
+          "admin",
+          "coordinator",
+          "manager_house",
+          "manager_imob",
+          "broker_house",
+          "broker_imob",
+        ],
+        manageablePermissions: ["crm.dashboard.view"],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: true,
+        canManageUsers: true,
+        canApproveUsers: true,
+        reportingScopes: [],
+      }),
+    );
+
+    expect(markup).not.toContain("Somente o Master pode alterar");
+    expect(markup).toContain("Salvar papel");
+    expect(markup).toContain("Clique para ajustar o rascunho");
+    expect(markup).toContain("Usar padrão do perfil");
+    expect(markup).toContain("Desativar usuário");
+    expect(markup).toContain('name="roleKey"');
+    expect(markup).not.toContain('name="effect"');
+  });
+  it("não renderiza caixas nem conta permissões quando os detalhes estão restritos", () => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000008",
+            email: "restrito@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey: "admin",
+            isSelf: false,
+            isManageable: false,
+            inheritedPermissions: ROLE_INHERITED_PERMISSIONS.admin,
+            overrides: [],
+            permissionDetailsAvailable: false,
+          },
+        ],
+        initialTotalCount: 40,
+        initialHasMore: true,
+        initialNextOffset: 6,
+        initialSummary: { total: 40, active: 32, pending: 5, revoked: 3 },
+        assignableRoles: [],
+        manageablePermissions: [],
+        canManageRoles: false,
+        canManagePermissions: false,
+        isMasterPermissionManager: false,
+        canManageUsers: false,
+        canApproveUsers: false,
+        reportingScopes: [],
+      }),
+    );
+    expect(markup).toContain("Detalhes de acesso efetivo indisponíveis");
+    expect(markup).not.toContain('type="checkbox"');
+    expect(markup).not.toContain("25 acessos");
+    expect(markup).toContain("1 de 40");
+    expect(markup).toContain("Carregar mais usuários");
+    expect(markup).not.toContain("Fim da lista.");
+    expect(markup).toMatch(/Total de usuários<\/span><strong[^>]*>40<\/strong>/);
+    expect(markup).toMatch(/Com acesso ativo<\/span><strong[^>]*>32<\/strong>/);
+  });
+  it("não exibe nem oferece salvar módulos ausentes do catálogo de 25 chaves", () => {
+    const absent = new Set([
+      "crm.read_model_v3.view",
+      "crm.read_model_v3.ranking.view",
+      "crm.read_model_v3.partnerships.view",
+      "crm.read_model_v3.stock.view",
+      "crm.commercial_engine.execute",
+      "crm.commercial_policy.manage",
+    ]);
+    const keys = ROLE_INHERITED_PERMISSIONS.admin.filter((key) => !absent.has(key));
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        users: [
+          {
+            userId: "81000000-0000-4000-8000-000000000009",
+            email: "catalogo@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey: "admin",
+            isSelf: false,
+            isManageable: true,
+            inheritedPermissions: keys,
+            overrides: [],
+            permissionDetailsAvailable: true,
+          },
+        ],
+        initialRoleDefaults: { admin: keys },
+        assignableRoles: ["admin"],
+        manageablePermissions: [...ROLE_INHERITED_PERMISSIONS.admin],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: true,
+        canManageUsers: true,
+        canApproveUsers: false,
+        reportingScopes: [],
+      }),
+    );
+    expect(keys).toHaveLength(25);
+    expect(markup).not.toContain("Executar motores comerciais");
+    expect(markup).not.toContain("Gerenciar políticas comerciais");
+    expect(markup).not.toContain("read model v3");
+    expect(markup).toContain('aria-label="Acesso a RIVA"');
+    expect(markup).toContain('aria-label="Acesso a DIRECIONAL"');
+    const checkboxes = [...markup.matchAll(/<input[^>]*type="checkbox"[^>]*>/g)].map(
+      ([input]) => input,
+    );
+    expect(checkboxes).toHaveLength(23);
+    expect(checkboxes.every((input) => input.includes('checked=""'))).toBe(true);
   });
 });

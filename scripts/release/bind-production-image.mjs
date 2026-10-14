@@ -1,22 +1,25 @@
-import { execFile, spawn } from "node:child_process";
-import { isUtf8 } from "node:buffer";
+import { execFile } from "node:child_process";
 import { constants } from "node:fs";
 import { lstat, open, realpath, rename, rm } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { pathToFileURL } from "node:url";
+import { assertHeldLock } from "./production-release-lock.mjs";
 import { promisify } from "node:util";
+import {
+  maximumEnvironmentBytes,
+  readBoundedEnvironmentText,
+  salesforceEnvironmentBackupStore,
+  selectEnvironmentChange,
+} from "./salesforce-release-environment.mjs";
 
 const execFileAsync = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const destination = "/etc/descomplica-crm/production.env";
 const destinationDirectory = path.dirname(destination);
-const lockPath = "/etc/descomplica-crm/.production-image-binding.lock";
-const lockMarker = "--production-image-binding-lock-held";
 const dockerSocketPath = "/var/run/docker.sock";
 const dockerEndpoint = "unix:///var/run/docker.sock";
 const dockerExecutable = "/usr/bin/docker";
-const flockExecutable = "/usr/bin/flock";
 const safeEnvironment = Object.freeze({
   DOCKER_HOST: dockerEndpoint,
   GIT_CONFIG_NOSYSTEM: "1",
@@ -107,7 +110,7 @@ async function captured(command, arguments_, label) {
   }
 }
 
-async function verifyReleaseBoundary(boundarySha) {
+export async function verifyReleaseBoundary(boundarySha) {
   const [{ stdout: headOutput }, { stdout: statusOutput }] = await Promise.all([
     captured("git", ["rev-parse", "HEAD"], "Production release Git SHA is unavailable."),
     captured(
@@ -147,18 +150,31 @@ function validateRootPrivateRegularFile(metadata, label) {
   }
 }
 
-async function readValidatedEnvironment() {
+export async function readValidatedEnvironment() {
   await validateConfigurationDirectory();
-  const handle = await open(destination, constants.O_RDONLY | constants.O_NOFOLLOW);
+  const handle = await open(
+    destination,
+    constants.O_RDONLY | constants.O_NOFOLLOW | constants.O_NONBLOCK,
+  );
   try {
-    validateRootPrivateRegularFile(await handle.stat(), "Production environment");
-    const bytes = await handle.readFile();
-    const validUtf8 = isUtf8(bytes);
-    const contents = bytes.toString("utf8");
-    bytes.fill(0);
-    if (!validUtf8) {
-      fail("Production environment must contain valid UTF-8 without byte loss.");
-    }
+    const before = await handle.stat();
+    validateRootPrivateRegularFile(before, "Production environment");
+    if (before.size > maximumEnvironmentBytes) fail("Production environment is too large.");
+    const contents = await readBoundedEnvironmentText(handle, maximumEnvironmentBytes);
+    const after = await handle.stat();
+    const current = await lstat(destination);
+    validateRootPrivateRegularFile(after, "Production environment");
+    validateRootPrivateRegularFile(current, "Production environment");
+    if (
+      current.isSymbolicLink() ||
+      before.dev !== current.dev ||
+      before.ino !== current.ino ||
+      before.size !== after.size ||
+      before.mtimeMs !== after.mtimeMs ||
+      before.ctimeMs !== after.ctimeMs ||
+      Buffer.byteLength(contents, "utf8") !== after.size
+    )
+      fail("Production environment changed while reading.");
     return contents;
   } finally {
     await handle.close();
@@ -183,7 +199,7 @@ async function validateDockerBoundary() {
   }
 }
 
-async function verifyPromotableImage(newSha, expectedImageId) {
+export async function verifyPromotableImage(newSha, expectedImageId) {
   await validateDockerBoundary();
   const image = `descomplica-crm:${newSha}`;
   const { stdout } = await captured(
@@ -211,7 +227,7 @@ async function verifyPromotableImage(newSha, expectedImageId) {
   }
 }
 
-async function writeEnvironmentAtomically(contents) {
+async function writeEnvironmentAtomically(contents, expectedContents) {
   const temporary = `${destination}.tmp-${process.pid}-${process.hrtime.bigint().toString(16)}`;
   let temporaryCreated = false;
   try {
@@ -225,6 +241,7 @@ async function writeEnvironmentAtomically(contents) {
     } finally {
       await handle.close();
     }
+    await assertEnvironmentUnchanged(expectedContents);
     await rename(temporary, destination);
     const directory = await open(destinationDirectory, "r");
     try {
@@ -243,91 +260,44 @@ async function restoreEnvironmentAfterFailedPostcondition(originalContents, tran
   if (currentContents !== transformedContents) {
     fail("Production environment changed while recovering a failed image binding.");
   }
-  await writeEnvironmentAtomically(originalContents);
+  await writeEnvironmentAtomically(originalContents, transformedContents);
   await assertEnvironmentUnchanged(originalContents);
 }
 
-async function ensureLockFile() {
-  await validateConfigurationDirectory();
-  let handle;
-  let created = false;
-  try {
-    try {
-      handle = await open(lockPath, "wx", 0o600);
-      created = true;
-    } catch (error) {
-      if (!error || typeof error !== "object" || !("code" in error) || error.code !== "EEXIST") {
-        throw error;
-      }
-      handle = await open(lockPath, constants.O_RDWR | constants.O_NOFOLLOW);
-    }
-    if (created) {
-      await handle.chown(0, 0);
-      await handle.chmod(0o600);
-      await handle.sync();
-    }
-    validateRootPrivateRegularFile(await handle.stat(), "Production image binding lock");
-  } finally {
-    await handle?.close();
-  }
-  const metadata = await lstat(lockPath);
-  if (metadata.isSymbolicLink()) fail("Production image binding lock path is invalid.");
-}
-
-function waitForChild(child) {
-  return new Promise((resolve, reject) => {
-    child.once("error", reject);
-    child.once("exit", (code, signal) => {
-      if (signal !== null || code !== 0) {
-        reject(new Error("Production image binding lock child failed."));
-        return;
-      }
-      resolve();
-    });
-  });
-}
-
-async function enterBindingLock(arguments_) {
-  if (arguments_[0] === lockMarker) {
-    return { delegated: false, arguments_: arguments_.slice(1) };
-  }
-  await ensureLockFile();
-  const process_ = spawn(
-    flockExecutable,
-    [
-      "--exclusive",
-      "--timeout",
-      "30",
-      lockPath,
-      process.execPath,
-      fileURLToPath(import.meta.url),
-      lockMarker,
-      ...arguments_,
-    ],
-    { env: safeEnvironment, stdio: "inherit" },
-  );
-  await waitForChild(process_);
-  return { delegated: true, arguments_: [] };
-}
-
-async function main(arguments_) {
+export async function bindProductionImage(options, lock, beforeWrite) {
   if (process.getuid?.() !== 0) fail("Production image binding requires root.");
-  const { operation, expectedCurrentSha, targetSha, boundarySha, expectedImageId } =
-    parseProductionImageBindingArguments(arguments_);
+  await assertHeldLock(lock);
+  if (typeof beforeWrite !== "function") fail("A fresh release observation is required.");
+  const { expectedCurrentSha, targetSha, boundarySha, expectedImageId } = options;
   await verifyReleaseBoundary(boundarySha);
   const originalContents = await readValidatedEnvironment();
-  const transformedContents = transformProductionImageEnvironment(
+  const imageContents = transformProductionImageEnvironment(
     originalContents,
     expectedCurrentSha,
     targetSha,
   );
+  if (options.restoreEnvironment !== undefined && !options.environmentChange) {
+    fail("Environment restore requires a recorded change descriptor.");
+  }
+  const transformedContents = options.environmentChange
+    ? selectEnvironmentChange(
+        originalContents,
+        await salesforceEnvironmentBackupStore().read(options.environmentChange),
+        options.environmentChange,
+        options,
+      )
+    : imageContents;
   await verifyPromotableImage(targetSha, expectedImageId);
 
   await verifyReleaseBoundary(boundarySha);
   await verifyPromotableImage(targetSha, expectedImageId);
   await assertEnvironmentUnchanged(originalContents);
   try {
-    await writeEnvironmentAtomically(transformedContents);
+    await assertHeldLock(lock);
+    await beforeWrite();
+    await assertHeldLock(lock);
+    await assertEnvironmentUnchanged(originalContents);
+    await writeEnvironmentAtomically(transformedContents, originalContents);
     await verifyReleaseBoundary(boundarySha);
     await verifyPromotableImage(targetSha, expectedImageId);
     await assertEnvironmentUnchanged(transformedContents);
@@ -335,21 +305,11 @@ async function main(arguments_) {
     await restoreEnvironmentAfterFailedPostcondition(originalContents, transformedContents);
     throw error;
   }
-
-  process.stdout.write(
-    `Production image ${operation} completed; environment values not printed.\n`,
-  );
-}
-
-async function dispatch() {
-  if (process.getuid?.() !== 0) fail("Production image binding requires root.");
-  const state = await enterBindingLock(process.argv.slice(2));
-  if (!state.delegated) await main(state.arguments_);
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
-  dispatch().catch(() => {
-    process.stderr.write("Production image binding failed; environment values not printed.\n");
-    process.exitCode = 1;
-  });
+  process.stderr.write(
+    "Standalone image binding is disabled. Use pnpm release:production; the lock must cover Compose and health.\n",
+  );
+  process.exitCode = 1;
 }

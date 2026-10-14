@@ -11,8 +11,11 @@ export type RouteAuthorizationResult =
   | { ok: true; context: AuthorizationContext }
   | { ok: false; response: Response };
 
-export async function authorizeRoute(permission: PermissionKey): Promise<RouteAuthorizationResult> {
-  return authorizeContext(() => requirePermission(permission));
+export async function authorizeRoute(
+  permission: PermissionKey,
+  allowSessionRefresh = true,
+): Promise<RouteAuthorizationResult> {
+  return authorizeContext(() => requirePermission(permission, allowSessionRefresh));
 }
 
 /** Authenticated self-service endpoints still enforce approval, scope and MFA. */

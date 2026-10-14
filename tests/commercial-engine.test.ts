@@ -1,11 +1,16 @@
 import { execFile } from "node:child_process";
-import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, open, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 
 import { afterAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+  return { ...actual, open: vi.fn(actual.open) };
+});
 
 import { COMMERCIAL_ENGINE_KEYS, SIMULATOR_ENGINE_KEYS } from "@/lib/crm/commercial-engine/catalog";
 import { hashCanonicalJson, serializeCanonicalJson } from "@/lib/crm/commercial-engine/canonical";
@@ -911,7 +916,10 @@ describe("commercial policy verifier CLI and telemetry", () => {
     expect(exitCode).toBe(0);
     expect(stderr).toBe("");
     expect(stdout).toContain('"goldenCaseCount": 2');
-    expect((await stat(manifestPath)).mode & 0o777).toBe(0o600);
+    expect(open).toHaveBeenCalledWith(expect.stringContaining(`${manifestPath}.tmp-`), "wx", 0o600);
+    if (process.platform !== "win32") {
+      expect((await stat(manifestPath)).mode & 0o777).toBe(0o600);
+    }
     const manifest = JSON.parse(await readFile(manifestPath, "utf8")) as Record<string, unknown>;
     expect(manifest.requestId).toBe(REQUEST_ID);
     expect(manifest).toHaveProperty("policyHash");

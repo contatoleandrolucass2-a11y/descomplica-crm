@@ -822,6 +822,9 @@
 }
 
 .admin-user-presence {
+  --admin-presence-online: #15803d;
+  --admin-presence-offline: #b91c1c;
+
   display: inline-flex;
   min-width: 0;
   align-items: center;
@@ -829,6 +832,11 @@
   color: var(--analytics-muted);
   font-size: 0.7rem;
   line-height: 1.4;
+}
+
+:root[data-theme="dark"] .admin-user-presence {
+  --admin-presence-online: #4ade80;
+  --admin-presence-offline: #f87171;
 }
 
 .admin-user-option > .admin-user-presence {
@@ -847,16 +855,36 @@
 }
 
 .admin-user-presence[data-state="online"] .admin-user-presence-dot {
-  background: var(--analytics-positive);
+  background: var(--admin-presence-online);
+  animation: admin-presence-online-pulse 1.6s ease-in-out infinite;
 }
 
 .admin-user-presence[data-state="offline"] .admin-user-presence-dot {
-  background: var(--analytics-muted);
+  background: var(--admin-presence-offline);
 }
 
 .admin-user-presence[data-state="unknown"] .admin-user-presence-dot {
   border: 1px solid var(--analytics-muted);
   background: transparent;
+}
+
+@keyframes admin-presence-online-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 color-mix(in srgb, var(--admin-presence-online) 30%, transparent);
+    transform: scale(1);
+  }
+
+  50% {
+    box-shadow: 0 0 0 0.18rem color-mix(in srgb, var(--admin-presence-online) 0%, transparent);
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .admin-user-presence[data-state="online"] .admin-user-presence-dot {
+    animation: none;
+  }
 }
 
 .admin-user-detail-statuses {
@@ -1539,4 +1567,37 @@
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
+}
+
+.admin-users-load-sentinel {
+  min-height: 1px;
+  padding: 0.55rem 0.75rem;
+  color: var(--analytics-muted);
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.admin-users-load-sentinel:empty {
+  padding: 0;
+}
+
+.admin-protected-account-badge {
+  display: inline-flex;
+  min-height: 1.7rem;
+  align-items: center;
+  gap: 0.3rem;
+  border: 1px solid var(--analytics-warning);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--analytics-warning) 9%, var(--analytics-surface));
+  padding: 0.18rem 0.48rem;
+  color: var(--analytics-warning-ink);
+  font-size: 0.66rem;
+  font-weight: 760;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
+.admin-protected-account-badge > svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }

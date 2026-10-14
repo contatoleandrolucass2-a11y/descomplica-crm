@@ -134,7 +134,15 @@ describe("FAQ Associativo: material de referência de 30/09/2026", () => {
     expect(answer(24)).toContain("escolhe a maior");
     expect(answer(25)).toContain("não inclui o valor da anual");
     expect(answer(28)).toContain("o mês da entrega já integra o pós-obra");
-    expect(answer(35)).toContain("sem distinguir todas as modalidades tributárias");
+    expect(answer(20)).toContain("Estar no SBPE não elimina automaticamente a isenção");
+    expect(answer(20)).toContain("não é uma decisão fiscal sobre o direito à isenção");
+    expect(answer(35)).toContain("não deduz essas condições de MCMV ou SBPE do perfil");
+    expect(answer(35)).toContain("separada da avaliação bancária");
+    expect(answer(35)).toContain(
+      "Outro município, outra vigência ou benefícios especiais ainda não validados",
+    );
+    expect(answer(35)).toContain("pendente de conferência, sem alterar o fluxo comercial");
+    expect(answer(35)).not.toContain("sem distinguir todas as modalidades tributárias");
     expect(answer(39)).toContain("não impõe Sinal 1 menor ou igual à entrada");
     expect(answer(41)).toContain("não são uma regra universal");
     expect(answer(43)).toContain("não comprova equivalência nem execução");

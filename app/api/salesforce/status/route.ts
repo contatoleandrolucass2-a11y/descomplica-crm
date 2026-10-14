@@ -4,6 +4,10 @@ import {
   salesforceObservationSchema,
 } from "@/lib/crm/salesforce/connection-contract";
 import { salesforceConnectionState } from "@/lib/crm/salesforce/connection-state";
+import {
+  hasSalesforceInventory,
+  readSalesforceInventory,
+} from "@/lib/crm/salesforce/inventory-snapshot";
 import { noStoreHeaders, secretsMatch } from "@/lib/security/api";
 import { authorizeRoute } from "@/lib/security/route-auth";
 
@@ -18,6 +22,19 @@ export async function GET() {
   const snapshot = config.available
     ? salesforceConnectionState.snapshot(config.statusSecret)
     : emptySalesforceConnectionSnapshot(config.enabled ? "unavailable" : "unconfigured");
+  if (hasSalesforceInventory()) {
+    try {
+      const inventory = JSON.parse(await readSalesforceInventory());
+      snapshot.inventory = {
+        generatedAt: inventory.generatedAt,
+        sourceRows: inventory.sourceRows,
+        count: inventory.count,
+        automatic: inventory.collectionMode === "automatic",
+      };
+    } catch {
+      snapshot.inventory = null;
+    }
+  }
   return Response.json(snapshot, { headers: noStoreHeaders() });
 }
 

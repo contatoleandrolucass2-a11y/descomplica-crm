@@ -1,12 +1,26 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
+import { runInNewContext } from "node:vm";
 
+import ts from "typescript";
 import { describe, expect, it } from "vitest";
+
+import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
 // @ts-expect-error — SQL generation is tested without running the local QA harness.
 import { fixtureSetupSql } from "../scripts/qa/local-authenticated-visual.mjs";
 
 const repositoryRoot = process.cwd();
+const administratorProtectionMigration =
+  "20261011143218_protect_administrator_accounts_and_enable_simulator_view.sql";
+const permissionAccessDraftMigration = "20261012113000_apply_user_permission_access_draft.sql";
+const sharedRoutinesMigration = "20261013014310_crm_shared_routines.sql";
+const routineCompletionsMigration = "20261014020437_crm_routine_completions.sql";
+const administratorMasterOnlyPermissions = [
+  "crm.simulators.execute",
+  "crm.commercial_engine.execute",
+  "crm.commercial_policy.manage",
+];
 const markerNames = [
   "20260808235856_grant_imob_ranking_service_role.sql",
   "20260809004414_add_atomic_imob_ranking_publish_rpc.sql",
@@ -22,14 +36,88 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 50-version manifest", async () => {
+  it("keeps a unique, ordered 54-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(50);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(50);
+    expect(migrations).toHaveLength(54);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(54);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
+    expect(migrations).toContain(permissionAccessDraftMigration);
+    expect(migrations).toContain(sharedRoutinesMigration);
+    expect(migrations).toContain(routineCompletionsMigration);
+    expect(migrations.at(-1)).toBe("20261014204014_local_user_presence.sql");
+  });
+
+  it("validates the current pgTAP inventory with the restore preflight", async () => {
+    const source = await readFile(
+      path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"),
+      "utf8",
+    );
+    const tree = ts.createSourceFile("restore.mjs", source, ts.ScriptTarget.Latest);
+    const declarations = tree.statements
+      .filter((statement) =>
+        ts.isFunctionDeclaration(statement)
+          ? statement.name?.text === "readPgTapPlan"
+          : ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(
+              (declaration) =>
+                ts.isIdentifier(declaration.name) && declaration.name.text === "expectedPgTapTests",
+            ),
+      )
+      .map((statement) => statement.getText(tree))
+      .join("\n");
+    // Run only the read-only inventory preflight, never the restore entry point.
+    const plan = await runInNewContext(
+      `${declarations}\nreadPgTapPlan()`,
+      {
+        readFile,
+        readdir,
+        path,
+        sourceSupabaseRoot: path.join(repositoryRoot, "supabase"),
+      },
+      { timeout: 1000 },
+    );
+    expect(plan.tests).toBe(1431);
+  });
+
+  it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
+    const sql = await readFile(
+      path.join(repositoryRoot, "supabase/migrations", administratorProtectionMigration),
+      "utf8",
+    );
+    const preflight = sql.match(/do \$migration\$[\s\S]*?\$migration\$;/)?.[0] ?? "";
+
+    expect(preflight).not.toContain("crm_user_reporting_scope_grants");
+    expect(preflight).not.toContain("private.current_user_is_master");
+    expect(sql).toContain("values ('admin', 'crm.simulators.view')");
+    expect(sql).toContain("target_role_key <> 'admin'");
+    expect(sql).toContain("actor_role.role_key = 'master'");
+    expect(sql).toContain("column_entry.column_name = 'access_status'");
+    expect(sql).toMatch(
+      /if to_regclass\('public\.crm_user_reporting_scope_grants'\) is not null then/,
+    );
+    expect(sql).toContain("v_expected_trigger_count integer := 3 + case");
+
+    const staleAllowCleanup =
+      sql.match(
+        /delete from public\.user_permission_overrides permission_override[\s\S]*?;/,
+      )?.[0] ?? "";
+    expect(staleAllowCleanup).toContain("target_role.role_key = 'admin'");
+    expect(staleAllowCleanup).toContain("permission_override.effect = 'allow'");
+    for (const permission of administratorMasterOnlyPermissions) {
+      expect(staleAllowCleanup).toContain(`'${permission}'`);
+    }
+
+    for (const triggerName of [
+      "administrator_account_boundary_roles",
+      "administrator_account_boundary_profiles",
+      "administrator_account_boundary_permission_overrides",
+      "administrator_account_boundary_reporting_scopes",
+    ]) {
+      expect(sql).toContain(triggerName);
+    }
   });
 
   it.each(markerNames)("keeps %s as a sanitized executable no-op", async (name) => {
@@ -63,6 +151,117 @@ describe("release-candidate activation defaults", () => {
     }
   });
 
+  it("converges the browser matrix with Gestão access and the released route inventory", async () => {
+    const source = await readFile(
+      path.join(repositoryRoot, "e2e/release-candidate.spec.ts"),
+      "utf8",
+    );
+    const tree = ts.createSourceFile("release-candidate.spec.ts", source, ts.ScriptTarget.Latest);
+    const declarationNames = new Set([
+      "expectedRoles",
+      "adminRoles",
+      "activeOperationalRoles",
+      "rankingRoles",
+      "partnershipRoles",
+      "repasseRoles",
+      "protectedSurfaces",
+      "operationalRoutes",
+      "connectedSystemsRoute",
+      "settingsRoutes",
+      "managementRoutes",
+      "simulatorRoutes",
+      "administrationRoutes",
+      "administrationNavigationRoutes",
+      "expectedDirectRoutesByRole",
+      "expectedHeaderRoutesByRole",
+      "allowedDirectRoutesForRole",
+      "sortedRouteSet",
+      "expectedAccountSettingsRoutesForRole",
+      "expectedPrimaryNavigationRootsForRole",
+    ]);
+    // Evaluate only the pure matrix declarations, without loading browser setup or credentials.
+    const declarations = tree.statements
+      .filter((statement) =>
+        ts.isFunctionDeclaration(statement)
+          ? declarationNames.has(statement.name?.text ?? "")
+          : ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(
+              (declaration) =>
+                ts.isIdentifier(declaration.name) && declarationNames.has(declaration.name.text),
+            ),
+      )
+      .map((statement) => statement.getText(tree))
+      .join("\n");
+    const matrix = runInNewContext(
+      ts.transpileModule(
+        `${declarations}\n({ expectedRoles, protectedSurfaces, expectedDirectRoutesByRole, expectedHeaderRoutesByRole, allowedDirectRoutesForRole, expectedAccountSettingsRoutesForRole, expectedPrimaryNavigationRootsForRole })`,
+        { compilerOptions: { target: ts.ScriptTarget.ES2022 } },
+      ).outputText,
+      {},
+      { timeout: 1000 },
+    );
+    const surfacePaths = matrix.protectedSurfaces.map((surface: { path: string }) => surface.path);
+    expect(surfacePaths).toHaveLength(27);
+    expect(new Set(surfacePaths).size).toBe(27);
+    expect([...surfacePaths].sort()).toEqual(
+      PROTECTED_PAGE_GATES.filter((gate) => gate.releaseEnabled)
+        .map((gate) => gate.path)
+        .sort(),
+    );
+    for (const role of matrix.expectedRoles) {
+      const administrative = role === "master" || role === "admin";
+      const operational = role !== "pending";
+      expect(matrix.allowedDirectRoutesForRole(role), role).toEqual(
+        matrix.expectedDirectRoutesByRole[role],
+      );
+      for (const route of ["/app/gestao", "/app/gestao/rotina"]) {
+        expect(matrix.expectedDirectRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
+          operational,
+        );
+        expect(matrix.expectedHeaderRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
+          operational,
+        );
+        expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(route);
+      }
+      const roots = matrix.expectedPrimaryNavigationRootsForRole(role);
+      expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
+      if (administrative) {
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(15);
+        expect(roots.map((root: { name: string }) => root.name)).toEqual([
+          "Dashboard",
+          "Simulação",
+          "Ranking",
+          "Canal de Parcerias",
+          "Gestão",
+          "Administração",
+        ]);
+        expect(roots[4]).toEqual({
+          name: "Gestão",
+          tag: "BUTTON",
+          href: null,
+          controls: "authorized-navigation-crm-management",
+        });
+      } else if (operational) {
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(10);
+        expect(matrix.expectedAccountSettingsRoutesForRole(role)).toEqual([]);
+        expect(roots.map((root: { name: string }) => root.name)).toEqual([
+          "Dashboard",
+          "Simulação",
+          role.endsWith("_house") ? "Ranking" : "Canal de Parcerias",
+          "Gestão",
+        ]);
+        expect(roots[3]).toEqual({
+          name: "Gestão",
+          tag: "BUTTON",
+          href: null,
+          controls: "authorized-navigation-crm-management",
+        });
+      } else {
+        expect(roots.some((root: { name: string }) => root.name === "Gestão")).toBe(false);
+      }
+    }
+  });
+
   it("keeps restore and browser gates synchronized with the released access matrix", async () => {
     const [restoreHarness, rlsHarness, browserHarness, visualHarness] = await Promise.all([
       readFile(path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"), "utf8"),
@@ -86,7 +285,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1212;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1431;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

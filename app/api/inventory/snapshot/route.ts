@@ -12,6 +12,10 @@ import {
 } from "@/lib/inventory/brand-access";
 import { noStoreHeaders } from "@/lib/security/api";
 import { authorizeRoute } from "@/lib/security/route-auth";
+import {
+  hasSalesforceInventory,
+  readSalesforceInventory,
+} from "@/lib/crm/salesforce/inventory-snapshot";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -111,7 +115,9 @@ export async function GET() {
   }
 
   try {
-    const snapshot = await readValidatedSnapshot();
+    const snapshot = hasSalesforceInventory()
+      ? (JSON.parse(await readSalesforceInventory()) as InventorySourcePayload)
+      : await readValidatedSnapshot();
     return new Response(JSON.stringify(filterInventoryByBrand(snapshot, brandAccess)), {
       headers: noStoreHeaders({ "content-type": "application/json; charset=utf-8" }),
     });

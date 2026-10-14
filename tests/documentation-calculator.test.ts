@@ -4,27 +4,21 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { DocumentationArchive } from "../app/(protected)/app/simulacao/_components/DocumentationArchive";
 import { DocumentationCalculator } from "../app/(protected)/app/simulacao/_components/archive-investor/DocumentationCalculator";
 import { calculateDocumentation } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
+import { documentationInput, documentationLegalContext } from "./fixtures/documentation-input";
 
-const input = {
-  businessUnit: "Direcional",
-  modality: "MCMV",
-  firstProperty: "SIM",
-  salePrice: 240000,
-  appraisalValue: 250000,
-  financing: 192000,
-  income: 5000,
-  baseDate: "2026-10-02",
-};
+const input = documentationInput();
 
-describe("documentation replica financial cases from the reference", () => {
+describe("documentation financial cases with confirmed SP/2026 legal context", () => {
   it("preserves the exempt MCMV result, Price installment and first due date", () => {
     expect(calculateDocumentation(input)).toMatchObject({
       ok: true,
       itbi: 0,
-      totalRegistration: 2651.99,
-      totalCash: 3951.99,
+      totalRegistration: 2235.79,
+      totalCash: 3535.79,
+      dispatchFee: 300,
+      caixaInsurance: 1000,
       installments: 40,
-      installmentValue: 132.1,
+      installmentValue: 118.19,
       firstInstallmentDate: "2027-01-15",
     });
   });
@@ -36,15 +30,16 @@ describe("documentation replica financial cases from the reference", () => {
         firstProperty: "NAO",
         income: "",
         financing: 201000,
+        legalContext: documentationLegalContext({ program: "NONE", firstAcquisition: "NAO" }),
       }),
     ).toMatchObject({
       ok: true,
       effectiveModality: "SBPE",
       itbi: 4175.8,
-      totalRegistration: 4710.41,
-      totalCash: 10186.21,
+      totalRegistration: 4887.35,
+      totalCash: 10363.15,
       installments: 36,
-      installmentValue: 368.26,
+      installmentValue: 374.65,
     });
   });
   it("accepts the financing ceiling exactly and refuses a cent above it", () => {
@@ -62,11 +57,15 @@ describe("documentation replica financial cases from the reference", () => {
     expect(calculateDocumentation({ ...input, income: "", modality: "SBPE" }).ok).toBe(true);
   });
   it("preserves the ITBI exemption boundary without rounding it up", () => {
-    expect(calculateDocumentation({ ...input, salePrice: 245527.77 })).toMatchObject({
+    expect(
+      calculateDocumentation(documentationInput({ salePrice: 245527.77 }, { itbiBase: 245527.77 })),
+    ).toMatchObject({
       ok: true,
       itbi: 0,
     });
-    expect(calculateDocumentation({ ...input, salePrice: 245527.78 })).toMatchObject({
+    expect(
+      calculateDocumentation(documentationInput({ salePrice: 245527.78 }, { itbiBase: 245527.78 })),
+    ).toMatchObject({
       ok: true,
       itbi: 4341.63,
     });
@@ -79,7 +78,13 @@ describe("documentation replica financial cases from the reference", () => {
     });
     expect(
       calculateDocumentation({ ...input, appraisalValue: 400000, financing: 240000.01 }),
-    ).toMatchObject({ ok: false, errors: ["Financiamento não pode superar o valor da venda."] });
+    ).toMatchObject({
+      ok: false,
+      errors: [
+        "Confira os valores da compra e do financiamento.",
+        "Financiamento não pode superar o valor da venda.",
+      ],
+    });
   });
 });
 

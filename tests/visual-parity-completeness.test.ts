@@ -61,26 +61,23 @@ describe("complete visual composition on the scoped v3 read model", () => {
   });
 
   it("keeps deterministic dashboard and partnership structures visible without invented data", () => {
-    const dashboard = source("app/(protected)/app/page.tsx");
+    const dashboardPage = source("app/(protected)/app/page.tsx");
+    const dashboard = source("app/(protected)/app/_components/DashboardReport.tsx");
     const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
 
     for (const label of [
-      "Dashboard comercial",
-      "Indicadores do funil",
-      "Funil do período",
+      "Relatório completo da equipe.",
+      "Conversão por etapa",
       "Oportunidades por empreendimento",
-      "Realizado e meta por etapa",
-      "Últimas atividades",
-      "Realizado frente ao esperado",
       "Realizado Funil",
-      "Diagnóstico, gargalo e plano de ação",
+      "Eficiência do funil",
       "Realizado e meta lado a lado",
-      "Realizados e referências temporais",
       "Corretores por gerente",
     ]) {
       expect(dashboard).toContain(label);
     }
-    expect(dashboard).toContain("const SHOW_EXTENDED_DASHBOARD = false");
+    expect(dashboardPage).toContain("<DashboardReport");
+    expect(dashboardPage).not.toContain("SHOW_EXTENDED_DASHBOARD");
     for (const label of [
       "Mês atual",
       "Mês anterior",
@@ -262,9 +259,12 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("approvedCanvasByRoute.size !== routes.length");
     expect(script).toContain("canvasDensityReady:");
     expect(script).toContain("canvasDensityLimitByRoute");
-    expect(script).toContain('["/admin/usuarios", 2500]');
+    expect(script).toContain('["/admin/usuarios", 1200]');
     expect(script).toContain("defaultCanvasDensityLimit");
     expect(script).toContain("snapshot.canvasDensityReady &&");
+    expect(script).toContain('["/app", 4800]');
+    expect(script).toContain("snapshot.dashboardReportReady &&");
+    expect(ciWorkflow).toContain("node scripts/qa/dashboard-report.mjs");
     expect(script).toContain("pageScrollHeight:");
     expect(script).toContain("const dedicatedSimulatorRoutes = new Set([");
     expect(script).toContain("!dedicatedSimulatorRoutes.has(route)");

@@ -1,13 +1,7 @@
 .canvas {
   min-width: 0;
   min-height: calc(100dvh - 5rem);
-  background:
-    radial-gradient(
-      circle at 82% 0%,
-      color-mix(in srgb, var(--analytics-cyan) 10%, transparent),
-      transparent 30rem
-    ),
-    var(--analytics-page);
+  background: var(--analytics-page);
   color: var(--analytics-ink);
 }
 
@@ -25,7 +19,86 @@
 
 .canvas article[data-tone="navy"] {
   border-color: var(--analytics-line);
-  background: linear-gradient(135deg, rgb(40 215 232 / 5%), transparent 48%), var(--analytics-navy);
+  background: var(--analytics-navy);
+}
+
+:global(:root[data-theme="light"]) .canvas article[data-tone="navy"],
+:global(:root[data-theme="balanced"]) .canvas article[data-tone="navy"] {
+  border-color: var(--analytics-line);
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+}
+
+:global(:root[data-theme="light"]) .canvas .pointsHeader,
+:global(:root[data-theme="balanced"]) .canvas .pointsHeader {
+  border-color: var(--analytics-line);
+}
+
+:global(:root[data-theme="light"]) .canvas .pointsKicker,
+:global(:root[data-theme="light"]) .canvas .podiumSilverAccent,
+:global(:root[data-theme="light"]) .canvas .podiumBronzeAccent,
+:global(:root[data-theme="balanced"]) .canvas .pointsKicker,
+:global(:root[data-theme="balanced"]) .canvas .podiumSilverAccent,
+:global(:root[data-theme="balanced"]) .canvas .podiumBronzeAccent {
+  color: var(--analytics-cyan-strong);
+}
+
+:global(:root[data-theme="light"]) .canvas .podiumGoldAccent,
+:global(:root[data-theme="balanced"]) .canvas .podiumGoldAccent {
+  color: var(--analytics-positive-ink);
+}
+
+:global(:root[data-theme="light"]) .canvas .pointsTitle,
+:global(:root[data-theme="light"]) .canvas .pointValue,
+:global(:root[data-theme="light"]) .canvas .podiumName,
+:global(:root[data-theme="light"]) .canvas .podiumScore,
+:global(:root[data-theme="balanced"]) .canvas .pointsTitle,
+:global(:root[data-theme="balanced"]) .canvas .pointValue,
+:global(:root[data-theme="balanced"]) .canvas .podiumName,
+:global(:root[data-theme="balanced"]) .canvas .podiumScore {
+  color: var(--analytics-ink);
+}
+
+:global(:root[data-theme="light"]) .canvas .pointsDescription,
+:global(:root[data-theme="light"]) .canvas .pointLabel,
+:global(:root[data-theme="light"]) .canvas .pointUnavailable,
+:global(:root[data-theme="light"]) .canvas .podiumMeta,
+:global(:root[data-theme="light"]) .canvas .podiumBreakdown,
+:global(:root[data-theme="balanced"]) .canvas .pointsDescription,
+:global(:root[data-theme="balanced"]) .canvas .pointLabel,
+:global(:root[data-theme="balanced"]) .canvas .pointUnavailable,
+:global(:root[data-theme="balanced"]) .canvas .podiumMeta,
+:global(:root[data-theme="balanced"]) .canvas .podiumBreakdown {
+  color: var(--analytics-muted);
+}
+
+:global(:root[data-theme="light"]) .canvas .podiumBreakdown,
+:global(:root[data-theme="balanced"]) .canvas .podiumBreakdown {
+  border-color: var(--analytics-line);
+}
+
+:global(:root[data-theme="light"]) .canvas .pointUnit,
+:global(:root[data-theme="balanced"]) .canvas .pointUnit {
+  color: var(--analytics-positive-ink);
+}
+
+:global(:root[data-theme="light"]) .canvas .pointItem,
+:global(:root[data-theme="light"]) .canvas .podiumEntry,
+:global(:root[data-theme="balanced"]) .canvas .pointItem,
+:global(:root[data-theme="balanced"]) .canvas .podiumEntry {
+  border-color: var(--analytics-line);
+  background: var(--analytics-surface-muted);
+}
+
+:global(:root[data-theme="light"]) .canvas .podiumGold,
+:global(:root[data-theme="balanced"]) .canvas .podiumGold {
+  border-color: var(--analytics-positive);
+  background: var(--analytics-surface-strong);
+}
+
+:global(:root[data-theme="light"]) .canvas .podiumBronze,
+:global(:root[data-theme="balanced"]) .canvas .podiumBronze {
+  border-color: var(--analytics-cyan-strong);
 }
 
 .canvas :is(a, button, input):focus-visible {

@@ -17,6 +17,7 @@ vi.mock("@/lib/auth/supabase/server", () => ({
 
 import { POST } from "@/app/api/presence/route";
 import { GET } from "@/app/api/admin/users/presence/route";
+import { authorizeRoute } from "@/lib/security/route-auth";
 
 const userId = "e5100000-0000-4000-8000-000000000001";
 const context = { userId, roleKey: "master", level: 100, permissions: ["users.view"] };
@@ -92,6 +93,13 @@ describe("user presence heartbeat", () => {
 });
 
 describe("scoped administration presence", () => {
+  it("preserves permission checks when a route disables session refresh", async () => {
+    const authorization = await authorizeRoute("crm.settings.manage", false);
+    expect(authorization).toEqual({ ok: true, context });
+    expect(mocks.requirePermission).toHaveBeenCalledExactlyOnceWith("crm.settings.manage", false);
+    expect(mocks.requireAuthorization).not.toHaveBeenCalled();
+  });
+
   it("requires users.view and returns only the RPC result with no cache or private metadata", async () => {
     mocks.rpc.mockResolvedValue({
       data: [
@@ -108,7 +116,7 @@ describe("scoped administration presence", () => {
     const response = await GET();
     expect(response.status).toBe(200);
     expectUncached(response);
-    expect(mocks.requirePermission).toHaveBeenCalledWith("users.view");
+    expect(mocks.requirePermission).toHaveBeenCalledWith("users.view", true);
     expect(mocks.rpc).toHaveBeenCalledWith("get_user_presence");
     expect(await response.json()).toEqual({
       observedAt: now,

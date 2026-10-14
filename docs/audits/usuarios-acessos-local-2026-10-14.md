@@ -90,12 +90,12 @@ ambas desativadas; liberar por usuário. A migration
 `20261014193926_local_inventory_brand_access.sql` adiciona duas permissões de
 nível mínimo 10, sem associá-las a qualquer papel, incluindo Master.
 
-| RIVA | DIRECIONAL | Unidades visíveis nos simuladores |
-| --- | --- | --- |
-| Desmarcada | Desmarcada | Nenhuma |
-| Marcada | Desmarcada | Somente RIVA |
-| Desmarcada | Marcada | Somente DIRECIONAL |
-| Marcada | Marcada | Ambas |
+| RIVA       | DIRECIONAL | Unidades visíveis nos simuladores |
+| ---------- | ---------- | --------------------------------- |
+| Desmarcada | Desmarcada | Nenhuma                           |
+| Marcada    | Desmarcada | Somente RIVA                      |
+| Desmarcada | Marcada    | Somente DIRECIONAL                |
+| Marcada    | Marcada    | Ambas                             |
 
 O controle “Acessar simuladores” continua separado. Ter uma marca liberada
 não substitui a permissão de abrir ou executar simuladores.

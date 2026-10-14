@@ -1,0 +1,36 @@
+[Unit]
+Description=Descomplica Salesforce dedicated browser
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-salesforce
+Group=descomplica-salesforce
+WorkingDirectory=@RELEASE@
+Environment=HOME=/var/lib/descomplica-salesforce
+Environment=SALESFORCE_CHROME_PROFILE=/var/lib/descomplica-salesforce/chrome
+Environment=SALESFORCE_CHROME_EXECUTABLE=/usr/bin/google-chrome-stable
+Environment=SALESFORCE_CDP_PORT=9222
+Environment=SALESFORCE_CDP_URL=http://127.0.0.1:9222
+RuntimeDirectory=descomplica-salesforce
+RuntimeDirectoryMode=0700
+UMask=0077
+ExecStart=/usr/bin/xvfb-run --server-num=99 --auth-file=/run/descomplica-salesforce/Xauthority --server-args="-screen 0 1440x900x24 -nolisten tcp" /usr/local/bin/node ops/salesforce/launch-dedicated-chrome.mjs --supervised
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+KillMode=control-group
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/descomplica-salesforce /run/descomplica-salesforce /tmp
+MemoryMax=2G
+TasksMax=512
+LimitCORE=0
+StandardOutput=journal
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

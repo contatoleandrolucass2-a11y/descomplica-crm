@@ -7,10 +7,14 @@ const mocks = vi.hoisted(() => ({
   ingest: vi.fn(),
   refresh: vi.fn(),
   status: vi.fn(),
+  console: vi.fn(),
 }));
 
 vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission: mocks.enforce }));
 vi.mock("@/lib/authorization/guards", () => ({ hasPermission: mocks.permission }));
+vi.mock("@/lib/crm/salesforce/console-config", () => ({
+  getSalesforceConsoleConfiguration: mocks.console,
+}));
 vi.mock("@/lib/crm/salesforce/config", () => ({
   getSalesforceIngestConfiguration: mocks.ingest,
   getSalesforceRefreshConfiguration: mocks.refresh,
@@ -18,6 +22,7 @@ vi.mock("@/lib/crm/salesforce/config", () => ({
 }));
 
 import ConnectedSystemsPage from "@/app/(protected)/app/configuracoes/conectar-sistemas/page";
+import { getSalesforceServiceStatus } from "@/app/(protected)/app/configuracoes/conectar-sistemas/ConnectedSystemsPanel";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -26,6 +31,7 @@ beforeEach(() => {
   mocks.ingest.mockReturnValue({ enabled: false, available: false });
   mocks.refresh.mockReturnValue({ enabled: false, available: false });
   mocks.status.mockReturnValue({ enabled: true, available: true });
+  mocks.console.mockReturnValue({ available: false });
 });
 
 describe("connected systems", () => {
@@ -36,6 +42,7 @@ describe("connected systems", () => {
     expect(mocks.ingest).not.toHaveBeenCalled();
     expect(mocks.refresh).not.toHaveBeenCalled();
     expect(mocks.status).not.toHaveBeenCalled();
+    expect(mocks.console).not.toHaveBeenCalled();
   });
 
   it("does not expose secrets or imply a connected session from configuration alone", async () => {
@@ -51,7 +58,7 @@ describe("connected systems", () => {
       refreshUrl: new URL("https://private.example.test/webhook"),
     });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
-    expect(markup).toContain("Sessão não verificada");
+    expect(markup).toContain("Não verificado");
     expect(markup).toContain("Configurada");
     expect(markup).not.toContain("private-");
     expect(markup).not.toContain("private.example.test");
@@ -92,19 +99,60 @@ describe("connected systems", () => {
       canRefresh: false,
       refreshAvailable: false,
       statusConfigured: true,
+      consoleAvailable: false,
     });
   });
 
-  it("renders seven report links without fabricating counts, dates or a schedule", async () => {
+  it.each([
+    ["master", true, true],
+    ["master", false, false],
+    ["admin", true, false],
+    ["corretor", true, false],
+  ])(
+    "limits the console to Master with complete configuration (%s/%s)",
+    async (roleKey, available, expected) => {
+      mocks.enforce.mockResolvedValue({ roleKey });
+      mocks.console.mockReturnValue({ available, password: "private-console" });
+      const page = await ConnectedSystemsPage();
+      expect(page.props.consoleAvailable).toBe(expected);
+      const markup = renderToStaticMarkup(page);
+      expect(markup).toContain("Conectar Salesforce");
+      expect(markup).toContain("Abrir no navegador");
+      expect(markup).not.toContain("private-console");
+      expect(markup).not.toContain("<dialog");
+      expect(markup).not.toContain('type="password"');
+    },
+  );
+
+  it("renders seven commercial reports and stock without fabricating counts, dates or a schedule", async () => {
     mocks.status.mockReturnValue({ enabled: false, available: false });
     const markup = renderToStaticMarkup(await ConnectedSystemsPage());
-    expect(markup).toContain("Status não configurado");
-    expect(markup.match(/lightning\/r\/Report\//g)).toHaveLength(7);
-    expect(markup.match(/Sem dados/g)).toHaveLength(7);
+    expect(markup).toContain("Não conectado");
+    expect(markup.match(/lightning\/r\/Report\//g)).toHaveLength(8);
+    expect(markup.match(/Sem dados/g)).toHaveLength(8);
+    expect(markup).toContain("ESTOQUE SPC · unidades");
+    expect(markup).toContain("00OU6000007yRpKMAU/view");
     expect(markup).toContain("Sem agenda confirmada");
     expect(markup).not.toContain("<time");
     expect(markup).not.toContain("30 minutos");
     expect(markup).toContain('aria-label="Verificar conexão"');
     expect(markup).toContain('data-simulation-page-heading="true"');
+  });
+
+  it.each(["reauth_required", "unavailable"] as const)(
+    "prioritizes the %s connection state over a running extraction cycle",
+    (state) => {
+      expect(getSalesforceServiceStatus({ state, cycle: "running" })).toEqual({
+        state,
+        label: "Não conectado",
+      });
+    },
+  );
+
+  it("keeps the extraction status for a running cycle with a valid connection", () => {
+    expect(getSalesforceServiceStatus({ state: "connected", cycle: "running" })).toEqual({
+      state: "extracting",
+      label: "Extraindo",
+    });
   });
 });

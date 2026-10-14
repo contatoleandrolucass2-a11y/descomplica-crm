@@ -1,5 +1,4 @@
 import { InvestorCalculator } from "./archive-investor/InvestorCalculator";
-import { SimulationCanvasHeader } from "./SimulationCanvasHeader";
 import "./archive-investor/investor-archive.css";
 
 export function AssociativeTableArchive() {
@@ -9,8 +8,11 @@ export function AssociativeTableArchive() {
       data-canvas-layout="simulator"
     >
       <main className="investor-main">
-        <SimulationCanvasHeader title="Simulador Tabela Associativo" />
-        <InvestorCalculator directTable={false} directVisualLayout />
+        <InvestorCalculator
+          pageTitle="Simulador Tabela Associativo"
+          directTable={false}
+          directVisualLayout
+        />
         <div className="investor-page-closing">
           <p className="simulation-disclaimer">
             Resultado preliminar sujeito à política comercial vigente.

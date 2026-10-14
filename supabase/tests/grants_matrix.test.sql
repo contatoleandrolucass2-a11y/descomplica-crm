@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  39::bigint,
+  41::bigint,
   'all public tables retain RLS'
 );
 
@@ -54,6 +54,8 @@ select is(
     'crm_read_model_v3_scope_coverage',
     'crm_reporting_scopes',
     'crm_role_scope_types',
+    'crm_routine_completions',
+    'crm_routines',
     'crm_source_identities',
     'crm_team_memberships',
     'crm_teams',
@@ -95,6 +97,8 @@ select is(
     'crm_read_model_v3_scope_coverage',
     'crm_reporting_scopes',
     'crm_role_scope_types',
+    'crm_routine_completions',
+    'crm_routines',
     'crm_source_identities',
     'crm_team_memberships',
     'crm_teams',
@@ -332,6 +336,8 @@ select is(
     'finish_crm_salesforce_refresh',
     'get_crm_commercial_configuration_draft',
     'get_crm_read_model_v3',
+    'get_crm_routine_completions',
+    'get_crm_routines',
     'get_crm_sync_status',
     'get_qlik_relay_health',
     'get_role_level',
@@ -349,8 +355,10 @@ select is(
     'replace_crm_point_settings',
     'revoke_current_user_sessions_after_password_recovery',
     'save_crm_commercial_configuration_draft',
+    'save_crm_routine',
     'set_app_page_active',
     'set_crm_commercial_engine_gate',
+    'set_crm_routine_completion',
     'set_user_active',
     'set_user_permission_override',
     'set_user_permission_overrides_bulk',

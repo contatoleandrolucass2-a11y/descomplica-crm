@@ -1,6 +1,6 @@
 # Contrato visual dos canvases aprovados
 
-Data da aprovação: 2026-10-04. Escopo: as 22 páginas protegidas do CRM.
+Data da aprovação: 2026-10-04. Escopo: as 22 páginas protegidas originais do CRM.
 
 Este diretório preserva os canvases aprovados pelo usuário como referência de
 composição, densidade, hierarquia e navegação. Eles não são autoridade para
@@ -12,7 +12,7 @@ validadas; ausência de fonte deve aparecer como estado indisponível.
 
 - Existe uma única navbar global. Páginas e simuladores não criam outro header
   ou outra navegação de aplicação dentro do conteúdo.
-- Os cinco grupos raiz continuam derivados do catálogo autorizado no servidor.
+- Os seis grupos raiz continuam derivados do catálogo autorizado no servidor.
   Submenus contêm somente páginas efetivamente permitidas ao perfil.
 - A geometria navy/cyan, os painéis compactos, a hierarquia tipográfica e a
   densidade dos canvases são o alvo nos três temas. Cores semânticas se adaptam
@@ -33,9 +33,13 @@ validadas; ausência de fonte deve aparecer como estado indisponível.
 
 O pedido de 04/10/2026 acrescenta `/app/configuracoes/recurso-mkt` como 23a
 pagina protegida. A guia usa o padrao da Tabela Associativo e o print fornecido
-para fundo, custo, percentuais, destinos e conversoes. Os 22 canvases originais
-continuam preservados; a nova pagina tem matriz funcional e visual propria em
-`scripts/qa/marketing-resources.mjs`.
+para fundo, custo, percentuais, destinos e conversoes. O pedido de 11/10/2026
+acrescentou Rotina em Configuracoes; o pedido seguinte moveu esse conteudo para
+`/app/gestao/rotina` e criou `/app/gestao`, elevando o inventario para 27 rotas
+protegidas. A rotina segue no padrao visual da Tabela Associativo, com
+classificacao inicial de Gerente regional house e demais funcoes nulas. Os 22
+canvases originais continuam preservados; Recurso MKT, Gestao e Rotina possuem
+testes funcionais proprios.
 
 | Canvas                           |   Região | Rota                                      |
 | -------------------------------- | -------: | ----------------------------------------- |
@@ -49,6 +53,8 @@ continuam preservados; a nova pagina tem matriz funcional e visual propria em
 | `ranking-canal-parcerias.webp`   |  direita | `/app/canal-de-parcerias`                 |
 | `configuracoes-metas-funil.webp` | esquerda | `/app/configuracoes`                      |
 | `configuracoes-metas-funil.webp` |  direita | `/app/configuracoes/metas`                |
+| `configuracoes-metas-funil.webp` | derivada | `/app/gestao`                             |
+| `hub-simulacao-associativo.webp` | derivada | `/app/gestao/rotina`                      |
 | `metas-parcerias-pontos.webp`    | esquerda | `/app/configuracoes/metas/parcerias`      |
 | `metas-parcerias-pontos.webp`    |  direita | `/app/configuracoes/metas/pontos`         |
 | `hub-simulacao-associativo.webp` | esquerda | `/app/simulacao`                          |
@@ -61,6 +67,19 @@ continuam preservados; a nova pagina tem matriz funcional e visual propria em
 | `tabelao-administracao.webp`     |  direita | `/admin`                                  |
 | `usuarios-catalogo-paginas.webp` | esquerda | `/admin/usuarios`                         |
 | `usuarios-catalogo-paginas.webp` |  direita | `/admin/paginas`                          |
+
+Gestão > Rotina reutiliza os tokens da Tabela Associativo. Sua rotina é uma
+nova superfície, validada pelo roteiro `scripts/qa/routine-settings.mjs`, com
+edição, inserção, persistência local, teclado, temas, Axe e capturas responsivas.
+A referência derivada identifica a origem visual; não afirma reprodução
+pixel a pixel de uma tela de rotina que não existia no canvas aprovado.
+
+O pedido de 12/10/2026 define a Rotina compacta com modos Semana e Hoje,
+seis dias visiveis (segunda a sabado), textos centralizados e cabecalhos
+fixos na area de rolagem. Hoje segue America/Sao_Paulo; domingo exibe estado
+sem rotina. O schema local preserva domingos anteriores sem exibi-los.
+Testar troca de modos, virada do dia, insercao com foco, salvamento,
+cabecalhos sem sobreposicao, teclado e temas sem alterar o Associativo.
 
 `navegacao-dropdown.webp` e `navegacao-mobile.webp` são contratos adicionais
 da navbar única. `dashboard-composicao-alternativa.webp` é referência secundária

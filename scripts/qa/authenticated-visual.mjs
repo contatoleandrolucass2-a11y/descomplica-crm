@@ -10,7 +10,9 @@ import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import { checkMarketingResources } from "./marketing-resources.mjs";
+import { checkRoutineSettings } from "./routine-settings.mjs";
 import { checkConnectedSystems } from "./connected-systems.mjs";
+import { checkDashboardAutoRefresh } from "./dashboard-auto-refresh.mjs";
 import { checkRepasse } from "./repasse.mjs";
 import {
   checkTabelaoLayout,
@@ -160,7 +162,9 @@ if (approvedCanvasByRoute.size !== routes.length) {
 }
 
 const canvasDensityLimitByRoute = new Map([
-  ["/admin/usuarios", 2500],
+  // The complete reference report replaces the former single-screen dashboard.
+  ["/app", 4800],
+  ["/admin/usuarios", 1200],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],
@@ -987,6 +991,40 @@ async function login(page, origin, email, password) {
   ]);
 }
 
+async function selectAuthenticatedAdminUser(page, email) {
+  if (!email) throw new Error("Admin users visual QA requires the authenticated account email.");
+  const option = page
+    .getByRole("list", { name: "Resultados de usuários", exact: true })
+    .getByRole("button")
+    .filter({ has: page.getByText(email, { exact: true }) });
+  // The authenticated account may be outside the first server page. Preserve the
+  // unfiltered directory while loading subsequent pages before measuring it.
+  const list = page.getByRole("list", { name: "Resultados de usuários", exact: true });
+  for (let attempt = 0; (await option.count()) === 0 && attempt < 200; attempt += 1) {
+    const loadMore = page.getByRole("button", { name: "Carregar mais usuários", exact: true });
+    await expect
+      .poll(async () => (await option.count()) > 0 || (await loadMore.count()) > 0)
+      .toBe(true);
+    if ((await option.count()) > 0) break;
+    const previousCount = await list.getByRole("button").count();
+    try {
+      await loadMore.click({ timeout: 1_000 });
+    } catch (error) {
+      // The list's observer may finish the same page between locating and
+      // clicking the button. Accept only the observed completion of that page.
+      if ((await list.getByRole("button").count()) <= previousCount) throw error;
+    }
+    await expect.poll(async () => list.getByRole("button").count()).toBeGreaterThan(previousCount);
+  }
+  await expect(option).toHaveCount(1);
+  await option.click();
+  await expect(option).toHaveAttribute("aria-pressed", "true");
+  const detail = page.locator("#selected-user-panel");
+  await expect(detail.getByRole("heading", { name: email, exact: true })).toBeVisible();
+  await expect(detail.getByText("Conta atual", { exact: true })).toBeVisible();
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+}
+
 async function inspectRoute(
   page,
   origin,
@@ -994,7 +1032,7 @@ async function inspectRoute(
   expectedTheme,
   consoleErrors,
   pageErrors,
-  { waitForArchiveInventory = true, expectedAccountFirstName } = {},
+  { waitForArchiveInventory = true, expectedAccountFirstName, expectedAccountEmail } = {},
 ) {
   const approvedCanvas = approvedCanvasByRoute.get(route);
   const consoleStart = consoleErrors.length;
@@ -1006,6 +1044,9 @@ async function inspectRoute(
     consoleErrors,
     pageErrors,
   );
+  if (route === "/admin/usuarios") {
+    await selectAuthenticatedAdminUser(page, expectedAccountEmail);
+  }
   await page.evaluate(() => document.fonts.ready);
 
   const isArchiveSimulator = archiveSimulatorRoutes.has(route);
@@ -1177,6 +1218,22 @@ async function inspectRoute(
         canvasDensityReady:
           root.clientWidth !== 1440 ||
           Math.max(root.scrollHeight, document.body.scrollHeight) <= maxDesktopHeight,
+        dashboardReportReady:
+          window.location.pathname !== "/app" ||
+          (["pulse", "monthly", "diagnosis", "operational", "team"].every((section) =>
+            document.querySelector(`#report-${section}-title`),
+          ) &&
+            document.querySelectorAll('[aria-labelledby="report-pulse-title"] figure').length ===
+              5 &&
+            document.querySelectorAll('[aria-labelledby="report-monthly-title"] details').length ===
+              6 &&
+            document.querySelectorAll('[aria-labelledby="report-monthly-title"] figure').length ===
+              6 &&
+            document.querySelectorAll(
+              '[aria-labelledby="report-monthly-title"] figure [data-stage]',
+            ).length === 36 &&
+            document.querySelectorAll('[aria-labelledby="report-operational-title"] table')
+              .length === 4),
         hasBrokenValue: /\b(?:NaN|undefined)\b/.test(text),
         protectedShellPresent: navigation instanceof HTMLElement,
         loginPresent: Boolean(document.querySelector('input[name="password"]')),
@@ -1333,6 +1390,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
+    snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&
     snapshot.themeControlsVisible &&
@@ -5185,18 +5243,18 @@ async function checkDirectTableValidation(page, origin, consoleErrors, pageError
     ]) {
       await responsivePage.setViewportSize(viewport);
       await responsivePage.evaluate(() => window.scrollTo(0, 0));
-      const simulationMenuUnclipped = await checkArchiveMenuPanel(
+      const dashboardMenuUnclipped = await checkArchiveMenuPanel(
         responsivePage,
-        "Simulação",
-        "authorized-navigation-crm-simulation",
+        "Dashboard",
+        "authorized-navigation-crm-dashboard",
       );
-      const settingsMenuUnclipped = await checkArchiveMenuPanel(
+      const administrationMenuUnclipped = await checkArchiveMenuPanel(
         responsivePage,
-        "Configurações",
-        "authorized-navigation-crm-settings",
+        "Administração",
+        "authorized-navigation-admin-home",
       );
       responsiveMenuChecks[`menuAndBodyUnclippedAt${viewport.width}`] =
-        simulationMenuUnclipped && settingsMenuUnclipped;
+        dashboardMenuUnclipped && administrationMenuUnclipped;
     }
   } finally {
     await closeAuxiliaryPage(responsivePage);
@@ -5419,6 +5477,7 @@ async function checkZoom(
           ...(await inspectRoute(page, origin, route, "light", consoleErrors, pageErrors, {
             waitForArchiveInventory: false,
             expectedAccountFirstName,
+            expectedAccountEmail: email,
           })),
         });
         await releaseRenderedRoute(page);
@@ -5771,6 +5830,7 @@ async function run() {
             pageErrors,
             {
               expectedAccountFirstName,
+              expectedAccountEmail: email,
             },
           );
           routeChecks.push({ viewport: viewport.key, ...check });
@@ -5827,6 +5887,52 @@ async function run() {
             );
           } finally {
             await marketingPage.close({ runBeforeUnload: false });
+          }
+          currentStage = "dashboard-auto-refresh";
+          // Keep refresh checks independent of other pages, routes and context-wide clock mocks.
+          const dashboardContext = await browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            reducedMotion: "reduce",
+            locale: "pt-BR",
+            timezoneId: "America/Sao_Paulo",
+            httpCredentials,
+          });
+          try {
+            await hideHomologationBannerForBaseline(dashboardContext);
+            const dashboardPage = configureQaPage(await dashboardContext.newPage());
+            await login(dashboardPage, origin, email, password);
+            const dashboardRefresh = await checkDashboardAutoRefresh(dashboardPage, origin);
+            await writeFile(
+              path.join(artifactRoot, "dashboard-auto-refresh-results.json"),
+              JSON.stringify(dashboardRefresh, null, 2),
+            );
+          } finally {
+            await dashboardContext.close();
+          }
+          currentStage = "routine-settings";
+          // Playwright's clock belongs to the context, not only to its page.
+          const routineContext = await browser.newContext({
+            viewport: { width: viewport.width, height: viewport.height },
+            reducedMotion: "reduce",
+            locale: "pt-BR",
+            timezoneId: "America/Sao_Paulo",
+            httpCredentials,
+          });
+          try {
+            await hideHomologationBannerForBaseline(routineContext);
+            const routinePage = configureQaPage(await routineContext.newPage());
+            await login(routinePage, origin, email, password);
+            const routine = await checkRoutineSettings(
+              routinePage,
+              origin,
+              path.join(artifactRoot, "routine"),
+            );
+            await writeFile(
+              path.join(artifactRoot, "routine-results.json"),
+              JSON.stringify(routine, null, 2),
+            );
+          } finally {
+            await routineContext.close();
           }
           currentStage = "connected-systems";
           const systemsPage = configureQaPage(await context.newPage());
@@ -5962,7 +6068,7 @@ async function run() {
                 theme,
                 consoleErrors,
                 pageErrors,
-                { expectedAccountFirstName },
+                { expectedAccountFirstName, expectedAccountEmail: email },
               );
               themeChecks.push({
                 matrix: "desktop-themes",
@@ -6050,7 +6156,7 @@ async function run() {
               "dark",
               consoleErrors,
               pageErrors,
-              { expectedAccountFirstName },
+              { expectedAccountFirstName, expectedAccountEmail: email },
             );
             themeChecks.push({
               matrix: "mobile-dark",

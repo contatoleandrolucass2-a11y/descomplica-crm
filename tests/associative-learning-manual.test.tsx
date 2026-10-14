@@ -119,7 +119,8 @@ describe("Associative learning manual", () => {
     expect(firstProperty).toContain("Se tiver qualquer um deles, marque Não");
     expect(firstProperty).toContain("ITBI (imposto sobre a compra)");
     expect(firstProperty).toContain("não prova, sozinha, que esta é a primeira compra");
-    expect(firstProperty).toContain("não garante dispensa de pagamento ou desconto");
+    expect(firstProperty).toContain("não concede isenção ou desconto");
+    expect(firstProperty).toContain("dados fiscais confirmados na documentação");
     expect(firstProperty).toContain("Banco, prefeitura e cartório precisam conferir");
   });
 
@@ -200,8 +201,14 @@ describe("Associative learning manual", () => {
       "HIS-1, HIS-2 e HMP são classificações municipais distintas",
       "Não há isenção nacional automática de ITBI",
       "Não possuir imóvel hoje não comprova que nunca houve aquisição anterior",
-      "em SBPE essa condição de isenção não é aplicada",
+      "SBPE não elimina, sozinho, esse direito",
+      "até R$ 245.527,77 quando for sua primeira aquisição ou a compra estiver no MCMV",
+      "Os descontos de registro dependem do contrato e não são somados entre si",
+      "A declaração de isenção e o enquadramento precisam ser conferidos pelo cartório",
       "ITBI + Registro total + Despachante + Seguro Caixa",
+      "ITBI e registro exigem os dados fiscais conferidos",
+      "maior base aplicável entre preço, valor venal do IPTU e base do ITBI",
+      "a garantia considera o financiamento",
       "o menor valor entre venda e avaliação × cota",
       "80% para MCMV e 90% para SBPE",
       "não são uma promessa de financiamento",
@@ -209,6 +216,7 @@ describe("Associative learning manual", () => {
     ]) {
       expect(policy).toContain(rule);
     }
+    expect(policy).not.toContain("em SBPE essa condição de isenção não é aplicada");
   });
 
   it.each([{ directTable: true }, {}])("keeps the other manuals unchanged: %j", (props) => {

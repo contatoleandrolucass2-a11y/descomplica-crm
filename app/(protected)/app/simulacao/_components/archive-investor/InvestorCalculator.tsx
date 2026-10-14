@@ -3,8 +3,10 @@
 "use client";
 
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { Search, X } from "lucide-react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { AssociativePageGuide } from "./AssociativePageGuide";
+import { SimulationCanvasHeader } from "../SimulationCanvasHeader";
 import { synchronizeAssociativeMotion } from "./associative-motion";
 import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE_PROFILE_HELP } from "./associative-learning-content";
 import { ASSOCIATIVE_FAQ_REFERENCE, ASSOCIATIVE_FAQ_SECTIONS, type AssociativeFaqSection } from "./associative-faq-content";
@@ -13,6 +15,7 @@ import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-in
 import { buildAssociativeSignalDates } from "@/lib/archive-investor/associative-linear-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
 import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
+import { filterInventoryBySearch } from "@/lib/archive-investor/inventory-search";
 import { completeMissingInventoryUnitFacts, inventoryIdentityKey, uniqueInventoryReferences } from "@/lib/archive-investor/inventory-reference";
 import { resolveAssociativeConstructionProgress } from "@/lib/archive-investor/associative-unit-facts";
 import { eligibleIntermediaryIndexes } from "@/lib/archive-investor/intermediary-fields";
@@ -20,6 +23,7 @@ import { ASSOCIATIVE_APPROVAL_TIERS, calculateAssociativeApproval, findAssociati
 import { buildAssociativeInstallmentMemory, buildAssociativePaymentComparison } from "@/lib/archive-investor/associative-installment-memory.mjs";
 import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
 import { calculateAssociativeDocumentationView, resolveAssociativeAppraisal } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
+import { DocumentationLegalFields, DocumentationLegalNotes, useDocumentationLegalContext } from "./DocumentationLegalFields";
 import { ASSOCIATIVE_COMMISSION_RATES, calculateAssociativeCommercialRemuneration } from "@/lib/archive-investor/associative-commercial-remuneration-rules.mjs";
 import { calculateAssociativeReleaseStatus } from "@/lib/archive-investor/associative-release-rules.mjs";
 import { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows, findAssociativeSeparatedCommissionRankingId } from "@/lib/archive-investor/associative-ready-proposal.mjs";
@@ -30,6 +34,7 @@ type InventoryItem = {
   businessUnit: "Direcional" | "Riva";
   project: string;
   product: string;
+  status?: string | null;
   identifier: string | null;
   plant: string | null;
   classification: string | null;
@@ -1072,6 +1077,7 @@ function AssociativeDocumentationPanel({
   financing,
   income,
   baseDate,
+  municipality,
   onAppraisalOverrideChange,
 }: {
   businessUnit: string;
@@ -1084,11 +1090,18 @@ function AssociativeDocumentationPanel({
   financing: string;
   income: string;
   baseDate: string;
+  municipality: "sao-paulo-sp" | "";
   onAppraisalOverrideChange: (value: string) => void;
 }) {
   const installmentsDialog = useRef<HTMLDialogElement>(null);
   const financingValue = currencyInputNumber(financing);
   const incomeValue = currencyInputNumber(income);
+  const { legalContext, onLegalChange } = useDocumentationLegalContext({
+    baseDate,
+    salePrice,
+    municipality,
+    reviewKey: JSON.stringify([baseDate, businessUnit, modality, manualModalityPreference, firstProperty, salePrice, reportedAppraisal, appraisalOverride, financingValue, incomeValue]),
+  });
   const documentationView = useMemo(() => calculateAssociativeDocumentationView({
     businessUnit,
     modality,
@@ -1100,7 +1113,8 @@ function AssociativeDocumentationPanel({
     financing: financingValue,
     income: incomeValue,
     baseDate,
-  }), [appraisalOverride, baseDate, businessUnit, financingValue, firstProperty, incomeValue, manualModalityPreference, modality, reportedAppraisal, salePrice]);
+    legalContext,
+  }), [appraisalOverride, baseDate, businessUnit, financingValue, firstProperty, incomeValue, legalContext, manualModalityPreference, modality, reportedAppraisal, salePrice]);
   const { appraisalFromReport, appraisalValue, missingItems, result, status } = documentationView;
   const documentationInstallments = useMemo(() => result.ok
     ? buildDocumentationInstallmentSchedule({
@@ -1125,6 +1139,8 @@ function AssociativeDocumentationPanel({
       <small id="investor-documentation-appraisal-help">O relatório da unidade não trouxe este valor.</small>
     </section> : null}
 
+    <DocumentationLegalFields value={legalContext} onChange={onLegalChange} />
+
     {result.ok ? <>
       <div className="investor-associative-documentation-summary" data-associative-motion-group="documentation">
         <section className="investor-associative-documentation-plan" aria-label="Plano sugerido para a documentação">
@@ -1138,17 +1154,22 @@ function AssociativeDocumentationPanel({
           <header><h4>Composição</h4><InvestorInfoHint label="Composição da documentação" title="De onde vem o total?" description={associativeHelp(`Some o ITBI (imposto da compra), o registro no cartório, o despachante e o Seguro Caixa. Modalidade usada: ${result.effectiveModality}.`, `Conta: ${money.format(result.itbi)} + ${money.format(result.totalRegistration)} + ${money.format(result.dispatchFee)} + ${money.format(result.caixaInsurance)} = ${money.format(result.totalCash)}.`, `Valor avaliado pelo banco: ${money.format(appraisalValue)}. Financiamento máximo estimado: ${money.format(result.maximumFinancing)}. ${result.itbiRule} Confirme os custos com banco, prefeitura e cartório.`)} /></header>
           <dl>
             <div><dt>ITBI</dt><dd>{money.format(result.itbi)}</dd></div>
-            <div><dt>Registro total</dt><dd>{money.format(result.totalRegistration)}</dd></div>
+            {result.registrationCombined ? <div><dt>Registro conjunto</dt><dd>{money.format(result.totalRegistration)}</dd></div> : <>
+              <div><dt>Registro de compra e venda</dt><dd>{money.format(result.purchaseRegistration)}</dd></div>
+              <div><dt>Registro da alienação fiduciária</dt><dd>{money.format(result.lienRegistration)}</dd></div>
+              <div><dt>Subtotal de registro</dt><dd>{money.format(result.totalRegistration)}</dd></div>
+            </>}
             <div><dt>Despachante</dt><dd>{money.format(result.dispatchFee)}</dd></div>
             <div><dt>Seguro Caixa</dt><dd>{money.format(result.caixaInsurance)}</dd></div>
             <div className="total"><dt>Total da documentação</dt><dd>{money.format(result.totalCash)}</dd></div>
           </dl>
         </section>
       </div>
+      <DocumentationLegalNotes result={result} legalContext={legalContext} />
     </> : <section className="investor-associative-documentation-empty" role={missingItems.length > 0 ? "status" : "alert"} aria-live="polite">
       <span aria-hidden="true">{missingItems.length > 0 ? "…" : "!"}</span>
-      <div><h4>{missingItems.length > 0 ? "Complete os dados para ver o resultado" : "A proposta precisa de ajuste"}</h4><p>{missingItems.length > 0 ? "O painel calcula automaticamente assim que as bases obrigatórias estiverem completas." : "O motor documental encontrou uma condição fora da regra."}</p>
-        <ul>{(missingItems.length > 0 ? missingItems : result.errors).map((item) => <li key={item}>{item}</li>)}</ul>
+      <div><h4>{missingItems.length > 0 ? "Documentação aguardando dados" : "Revise os dados da documentação"}</h4><p>{missingItems.length > 0 ? "A documentação será calculada após o preenchimento e a confirmação dos dados fiscais." : "Não foi possível calcular a documentação com os dados informados."}</p>
+        <ul>{[...new Set([...missingItems, ...result.errors])].map((item) => <li key={item}>{item}</li>)}</ul>
       </div>
     </section>}
   </aside>
@@ -2353,6 +2374,7 @@ function PropertySummary({ item, label, associative = false, sectionRef }: { ite
     </header>
     <dl>
       <div tabIndex={0}><dt>Incorporadora</dt><dd>{informationLabel(item.businessUnit)}</dd></div>
+      {item.status ? <div tabIndex={0}><dt>Status no Salesforce</dt><dd>{item.status}</dd></div> : null}
       <div tabIndex={0}><dt>Planta</dt><dd>{informationLabel(item.plant)}</dd></div>
       <div tabIndex={0}><dt>Metragem</dt><dd>{item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "Não informada"}</dd></div>
       <div tabIndex={0}><dt>Andar</dt><dd>{floorLabel(item.floor)}</dd></div>
@@ -2407,11 +2429,13 @@ function enrichInventory(items: InventoryItem[], reference: InventoryItem[], off
     const projectSource = referenceByProject.get(inventoryProjectKey(item));
     const inferred = inferLocation(item.identifier);
     const finalWithKit = item.finalWithKit ?? source?.finalWithKit ?? null;
-    const unitBonus = item.unitBonus ?? source?.unitBonus ?? 0;
-    const tableSlack = item.tableSlack ?? source?.tableSlack ?? 0;
+    const unitBonus = item.unitBonus ?? source?.unitBonus ?? null;
+    const tableSlack = item.tableSlack ?? source?.tableSlack ?? null;
     const cashBackSlack = item.cashBackSlack ?? source?.cashBackSlack ?? null;
     const finalPrice = finalWithKit != null
-      ? Math.max(0, finalWithKit - (unitBonus + tableSlack))
+      ? unitBonus != null && tableSlack != null
+        ? Math.max(0, Math.round(finalWithKit * 100) - Math.round(unitBonus * 100) - Math.round(tableSlack * 100)) / 100
+        : null
       : item.finalPrice ?? source?.finalPrice ?? null;
     return {
       ...item,
@@ -2443,9 +2467,11 @@ function enrichInventory(items: InventoryItem[], reference: InventoryItem[], off
 export function InvestorCalculator({
   directTable = false,
   directVisualLayout = false,
+  pageTitle,
 }: {
   directTable?: boolean;
   directVisualLayout?: boolean;
+  pageTitle?: string;
 }) {
   const usesDirectDesign = directTable || directVisualLayout;
   const compactAssociativeStock = directVisualLayout && !directTable;
@@ -2492,6 +2518,8 @@ export function InvestorCalculator({
   const [region, setRegion] = useState("Todas");
   const [salePriceFilter, setSalePriceFilter] = useState("Todos");
   const [priceSort, setPriceSort] = useState<"asc" | "desc">("asc");
+  const [inventorySearch, setInventorySearch] = useState("");
+  const inventorySearchRef = useRef<HTMLInputElement>(null);
   const [inventoryReloadKey, setInventoryReloadKey] = useState(0);
   const [filterNotice, setFilterNotice] = useState("");
   const [selectedUnitId, setSelectedUnitId] = useState("");
@@ -2612,7 +2640,10 @@ export function InvestorCalculator({
   const activeFilters = useMemo(() => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }), [businessUnit, project, plant, region, salePriceFilter]);
   const filterOptions = useMemo(() => buildInvestorFilterOptions(inventory, activeFilters), [inventory, activeFilters]);
   const sortedInventory = useMemo(() => sortInvestorInventoryBySalePrice(inventory, priceSort), [inventory, priceSort]);
-  const matchingInventory = useMemo(() => sortedInventory.filter((item) => matchesInvestorFilters(item, activeFilters)), [sortedInventory, activeFilters]);
+  const matchingInventory = useMemo(() => filterInventoryBySearch(
+    sortedInventory.filter((item) => matchesInvestorFilters(item, activeFilters)),
+    compactAssociativeStock ? inventorySearch : "",
+  ), [sortedInventory, activeFilters, compactAssociativeStock, inventorySearch]);
   const inventoryWindowSize = 60;
   const visibleInventory = useMemo(() => matchingInventory.slice(
     inventoryWindowStart,
@@ -3525,6 +3556,7 @@ export function InvestorCalculator({
     setRegion("Todas");
     setSalePriceFilter("Todos");
     setPriceSort("asc");
+    setInventorySearch("");
     setInventoryWindowStart(0);
     if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
     setFilterNotice(
@@ -3991,11 +4023,13 @@ export function InvestorCalculator({
   }
 
   const stockSync = <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
-    <small>{inventoryStatus === "ready" ? `${inventory.length.toLocaleString("pt-BR")} unidades` : inventoryStatus === "error" ? "Estoque indisponível" : "Carregando estoque"}</small>
+    <small>{inventoryStatus === "ready" ? compactAssociativeStock && inventorySearch.trim() ? `${matchingInventory.length.toLocaleString("pt-BR")} de ${inventory.length.toLocaleString("pt-BR")} unidades` : `${inventory.length.toLocaleString("pt-BR")} unidades` : inventoryStatus === "error" ? "Estoque indisponível" : "Carregando estoque"}</small>
     {inventoryMeta?.sourceKind === "versioned-snapshot" && inventoryMeta.snapshotReferenceDate ? <small>Arquivo {inventoryMeta.source || "ESTOQUE SPC.xlsx"} · referência {formatDate(inventoryMeta.snapshotReferenceDate)}</small> : inventoryMeta?.generatedAt ? <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small> : directTable && inventoryStatus === "ready" ? <small>Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não informada</small> : null}
   </div>;
 
   return (
+    <>
+    {pageTitle ? <SimulationCanvasHeader title={pageTitle} titleAccessory={compactAssociativeStock ? <AssociativePageGuide rootRef={motionRootRef} onStart={() => setTourOpen(false)} /> : undefined} /> : null}
     <div ref={motionRootRef} className={`investor-workspace${usesDirectDesign ? " investor-direct-workspace" : ""}${directVisualLayout ? " investor-direct-design-copy" : ""}${directTable ? directPrintReady ? " investor-direct-print-ready" : " investor-direct-print-blocked" : ""}`}>
       {directTable && !directPrintReady ? <section className="investor-direct-print-blocked-notice" aria-label="Impressão indisponível">
         <h2>Impressão indisponível</h2>
@@ -4048,6 +4082,29 @@ export function InvestorCalculator({
           <span>01</span>
           <div><p>Estoque SPC</p>{compactAssociativeStock ? <div className="investor-stock-title-row"><h2 id="investor-stock-title">Escolha a unidade</h2><InvestorInfoHint label="orientação dos filtros" title="Como usar os filtros?" description="Escolha os filtros para encontrar o imóvel. Confira a unidade, o preço e a entrega antes de começar. Esta simulação não vende vagas de garagem separadas do imóvel." /></div> : <h2 id="investor-stock-title">Escolha a unidade</h2>}</div>
           {compactAssociativeStock ? <div className="investor-stock-header-actions">
+            <div className="investor-stock-search">
+              <label className="sr-only" htmlFor="investor-stock-search">Buscar unidade ou empreendimento</label>
+              <Search aria-hidden="true" size={18} />
+              <input
+                id="investor-stock-search"
+                ref={inventorySearchRef}
+                type="search"
+                placeholder="Código ou nome"
+                disabled={inventoryStatus !== "ready"}
+                value={inventorySearch}
+                onChange={(event) => updateFilter(setInventorySearch, event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    event.preventDefault();
+                    updateFilter(setInventorySearch, "");
+                  }
+                }}
+              />
+              {inventorySearch && <button type="button" aria-label="Limpar pesquisa de unidade" onClick={() => {
+                updateFilter(setInventorySearch, "");
+                inventorySearchRef.current?.focus();
+              }}><X aria-hidden="true" size={16} /></button>}
+            </div>
             {stockSync}
             <button className="investor-stock-clear" type="button" disabled={inventoryStatus !== "ready"} onClick={clearFilters}>Limpar filtros</button>
           </div> : stockSync}
@@ -4147,7 +4204,6 @@ export function InvestorCalculator({
           </table>
         </div>
 
-        {compactAssociativeStock ? <AssociativePageGuide rootRef={motionRootRef} onStart={() => setTourOpen(false)} /> : null}
       </section>
 
       {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
@@ -4843,9 +4899,10 @@ export function InvestorCalculator({
           </section>
 
           {annualMode ? <div className="investor-associative-documentation-strip">
-            <fieldset className="investor-associative-documentation-lock" disabled={associativeCalculatedProposalLocked} aria-disabled={associativeCalculatedProposalLocked || undefined}>
+            <fieldset className="investor-associative-documentation-lock">
               <legend className="sr-only">Resultado da documentação</legend>
               <AssociativeDocumentationPanel
+                key={selectedUnit.id}
                 businessUnit={selectedUnit.businessUnit}
                 modality={associativeFinancingModality}
                 manualModalityPreference={associativeManualModalityPreference}
@@ -4856,6 +4913,7 @@ export function InvestorCalculator({
                 financing={financing}
                 income={income}
                 baseDate={baseDate}
+                municipality={selectedUnit.city?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase() === "sao paulo" && selectedUnit.state?.trim().toUpperCase() === "SP" ? "sao-paulo-sp" : ""}
                 onAppraisalOverrideChange={setDocumentationAppraisalOverride}
               />
             </fieldset>
@@ -4911,5 +4969,6 @@ export function InvestorCalculator({
         </div>
       ) : null}
     </div>
+    </>
   );
 }

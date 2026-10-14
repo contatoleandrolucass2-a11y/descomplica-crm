@@ -30,6 +30,8 @@ export const salesforceStatusErrorSchema = z.enum([
   "salesforce_unavailable",
   "export_failed",
   "publication_failed",
+  "inventory_failed",
+  "inventory_publication_uncertain",
   "collector_stopped",
   "collector_unreachable",
 ]);
@@ -74,6 +76,16 @@ export const salesforceObservationSchema = z
 
 export const salesforceConnectionSnapshotSchema = z
   .object({
+    inventory: z
+      .object({
+        generatedAt: timestamp,
+        sourceRows: z.number().int().nonnegative(),
+        count: z.number().int().nonnegative(),
+        automatic: z.boolean().optional(),
+      })
+      .strict()
+      .nullable()
+      .optional(),
     state: z.enum([
       "unconfigured",
       "waiting",

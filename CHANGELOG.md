@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14 — Integração de usuários e presença
+
+- Integra o painel Pessoas e a matriz de acessos com a paginação e o catálogo reais do ambiente.
+- Mostra presença online em verde pulsante e offline em vermelho, respeitando movimento reduzido e distinguindo indisponibilidade.
+- Preserva as regras de hierarquia e MFA nas instalações completas e compactas; as unidades dos simuladores respeitam RIVA e DIRECIONAL também no estoque Salesforce.
+
 ## 2026-10-14 — Presença dos usuários, ambiente local
 
 - Mostra Online/Offline separado da situação administrativa da conta, com atualização automática e indicação de indisponibilidade.
@@ -31,7 +37,577 @@
 - Oculta permissões técnicas de read model v3 e de consulta de auditoria
   sem alterar as funcionalidades ou os registros correspondentes no banco.
 
+## 2026-10-14: Atualizacao automatica dos relatorios
+
+- Atualiza o dashboard aberto quando uma nova versao dos relatorios e
+  publicada no CRM, preservando filtros e posicao da tela.
+- Distingue coleta de publicacao confirmada e reconfere a consistencia do lote
+  antes de exibir indicadores; nenhuma formula ou fonte comercial alterada.
+- Verifica a preservacao da navegacao na QA autenticada com fixture completa.
+- Isola a QA de refresh e limita suas esperas, sem reduzir os gates existentes.
+- Acrescenta diagnostico geometrico sanitizado quando a QA de Rotina falha.
+- Confere a transferencia RSC pelo registro de rede do navegador na QA.
+- Aguarda o estilo de cada modo da Rotina antes de medir sua geometria na QA.
+- Confere tambem o alinhamento do contorno antes de medir overflow da pagina.
+- Aplica essa prontidao antes da geometria das celulas na matriz diaria.
+
+## 2026-10-14: Evidencias de publicacao Qlik
+
+- Registra a divergencia entre candidato, main e versao publicada; a coleta
+  e a agenda permanecem inativas ate validacao do fluxo completo.
+
+## 2026-10-14: Atualizacao protegida do servico Qlik
+
+- Adiciona operacoes especificas ao coordenador existente, com ledger separado,
+  mesmas travas/CI/frescor, backup privado, CAS e recuperacao da tentativa.
+- Preserva perfil, estado de boot, CRM e Salesforce; nao coleta fatos ou
+  aplica schema. Confirmacao do owner nao e confirmacao de ranking conectado.
+- Acrescenta testes de estado, entradas e host isolado, incluindo interrupcoes,
+  arquivos alterados, processos remanescentes e resultados antigos.
+
+## 2026-10-14: Integridade do preflight e audiencia Qlik
+
+- Inclui todos os modulos do preflight na verificacao de arquivos aprovados
+  e exige enigma.js2.15.0 com probe de leitura pelo usuario restrito.
+- Registra recorte completo para usuarios com crm.ranking.view; reader e
+  autorizacao no banco continuam pendentes, sem alterar grants nesta etapa.
+- Mantem instalador exclusivo para instalacao inicial, sem substituir o
+  owner existente ou ativar coleta antes de um upgrade protegido e validado.
+
+## 2026-10-14: Sessao e diagnostico Qlik isolados
+
+- Separa browser dedicado, console/cofre privado e cliente QIX da interface.
+- Adiciona SDK oficial fixado, inspecao restrita de objetos/masters, ciclo
+  sequencial e artefato privado atomico. Preflight desligado por padrao.
+- Preserva pagina ranking, Salesforce, banco e n8n. Nao entrega coleta ativa.
+
+## 2026-10-14: Filtro e destaque da Rotina
+
+- Troca as abas por um seletor unico de rotina e reorganiza os botoes.
+- Aplica brilho branco apenas no contorno completo da coluna do dia atual,
+  incluindo o titulo; cabecalhos recebem o azul do antigo seletor ativo.
+- Mantem fundo neutro nas pendentes, gradiente nas concluidas e marcacoes
+  individuais sincronizadas entre Semana e Hoje.
+- Publicado em14/10/2026 com CI completa e verificacao no CRM; encerramento
+  das evidencias documentais sem outra publicacao do aplicativo.
+
+## 2026-10-14: Pesquisa de unidades no Associativo
+
+- Adiciona campo com lupa para localizar unidades por código, descrição ou
+  empreendimento, inclusive sem acentos e com separadores diferentes no código.
+- Combina a pesquisa com os filtros e a ordenação do estoque, mostra a quantidade
+  encontrada e permite limpar a busca sem descartar a proposta em edição.
+
+- No celular, a pesquisa ocupa uma linha e o contador/data permanece ao lado de Limpar filtros.
+- Em tablets estreitos, os controles ficam abaixo do título do estoque, mantendo o texto legível.
+- Atualiza as 11 referências visuais do Associativo após inspeção e validação funcional, preservando as outras 231 imagens.
+- O teste do guia aguarda o foco automático antes de preencher valores, evitando corrida entre campos.
+
+## 2026-10-14: Rotina compacta por atividade
+
+- Posiciona a conclusao no canto superior esquerdo na semana e antes do
+  texto em Hoje, com alinhamento e altura compactos.
+- Reserva o gradiente para atividades realizadas; pendentes usam o fundo
+  da pagina. Dia atual destacado somente no cabecalho.
+- Remove a rolagem interna da tabela, mantendo a rolagem da pagina apenas
+  quando necessaria e o mesmo estado individual entre Semana e Hoje.
+- Publicado em 14/10 as12:16 BRT apos CI completa e verificacao autenticada.
+
+## 2026-10-14: Rotina publicada
+
+- Disponibiliza conclusoes individuais salvas no CRM entre dispositivos,
+  com reinicio semanal segunda-feira as00h de Brasilia. Textos revisados
+  de Gerente regional imob e tipografia original preservados.
+
+## 2026-10-14: Funis no comparativo mensal
+
+- Substitui as listas mensais por seis graficos em funil, com etapas coloridas,
+  valores centralizados e dados atuais do CRM, conforme o print solicitado.
+- Mantem conversoes, temas e permissoes. Pastas aprovadas aparece como
+  indisponivel porque nao existe serie mensal separada no read model atual.
+- Reforca testes de estrutura, geometria, acessibilidade e numeros longos.
+  A pagina de referencia permanece intocada.
+- Atualiza somente as 11 referencias visuais do dashboard apos conferencia
+  autenticada, mantendo as outras 231 imagens e os limiares existentes.
+- Publicado no CRM em14/10/2026 09:24 BRT, versao16f4587, apos CI completa,
+  verificacao da imagem e smoke de producao. Referencia de origem intocada.
+
+## 2026-10-13: Conclusao semanal individual
+
+- Revisa o portugues das atividades de Gerente regional imob sem mudar seu
+  sentido ou a tipografia compartilhada com House.
+- Adiciona marcacao individual de atividades, persistida no CRM e separada
+  da edicao do conteudo, com nova semana segunda-feira as 00h de Brasilia.
+
+## 2026-10-13: Texto regional imob
+
+- Padroniza as atividades salvas com primeira letra maiuscula e demais
+  minusculas, mantendo a mesma tipografia da aba Gerente regional house.
+
+## 2026-10-13: Conteudo de Gerente regional imob
+
+- Cadastra no CRM 18 linhas e 93 atividades do Excel fornecido, usando o
+  mesmo componente e as visualizacoes Semana/Hoje de Gerente regional house.
+- Salvamento compartilhado conferido por recarga; sem alterar outras funcoes
+  ou publicar nova versao da aplicacao.
+
+## 2026-10-13: Relatorio completo no dashboard
+
+- Impede exibir equipe de versao anterior apos atualizacao parcial do dashboard.
+- Atualiza as 11 referencias visuais do dashboard apos revisao da captura
+  autenticada isolada, preservando as demais 231 imagens e os limiares do gate.
+- Alinha o E2E ao titulo da referencia e verifica a presenca das secoes completas.
+- Reproduz as secoes informacionais da pagina de referencia em `/app`, com
+  valores atuais do CRM e navegacao por periodo e visao autorizada.
+- Exibe conversoes entre etapas, comparativos mensais, realizado operacional,
+  VGV e distribuicao da equipe quando existe uma base consistente e permitida.
+- Distingue dados ausentes de zero e preserva a indisponibilidade de filtros
+  ou criterios comerciais que ainda nao fazem parte da fonte atual.
+
+## 2026-10-13 — Estoque automático
+
+Recupera a base anterior em falhas após a troca atômica e distingue publicação
+não confirmada quando a recuperação também falha ou há substituição concorrente.
+
+Adiciona ESTOQUE SPC à agenda automática de 30 minutos, totalizando oito relatórios em Integrações. Atualiza os quatro simuladores por publicação atômica validada, conserva última base válida em falhas e mostra horário próprio e modo automático.
+
+## 2026-10-13: Estoque Salesforce para todos os simuladores
+
+- Acrescenta coleta completa e validada do ESTOQUE SPC e uma fonte oficial
+  comum para Tabelão, Associativo, Investidor e Tabela Direta.
+- Mostra estoque na lista de relatórios, com contagem/data reais e identificação
+  de coleta avulsa; preserva status das unidades e impede fallback para preços
+  históricos quando a fonte oficial está configurada.
+- Mantém preços incompletos indisponíveis também no enriquecimento do simulador;
+  descontos ausentes não viram zero, e valores completos são calculados em centavos.
+
+## 2026-10-13: Evidencias operacionais da agenda Salesforce
+
+- Registra testes Windows/Linux, credenciais privadas systemd e reversao real.
+- Confirma agenda VPS ativa, dois ciclos reais publicados via novo n8n e
+  reconciliados no Supabase, sem duplicacao no replay da primeira carga.
+- Preserva a ultima carga valida quando um ciclo falha e o n8n antigo intocado.
+
+## 2026-10-13: Logo Descomplica na aba do navegador
+
+- Substitui o favicon padrão pela logo fornecida pelo usuário, com as cores
+  e proporções originais, em todas as páginas do CRM.
+
+## 2026-10-13: Compatibilidade do coletor com credenciais systemd
+
+- Converte credenciais montadas pelo systemd em copias privadas 0600 em `/run`,
+  sem afrouxar validacao de segredos nem expor valores em argumentos/logs.
+- Corrige reversao quando systemd ja descarregou a unidade parada e verifica
+  estabilidade inicial antes de registrar ativacao.
+- Falha inicial foi revertida; navegador autenticado, n8n antigo e banco
+  preservados. Nova ativacao depende de validacao e prova operacional.
+
+## 2026-10-13: Rolagem estavel na Rotina
+
+- Corrige salto para cima durante a atualizacao automatica e medicao das celulas.
+- Preserva foco e selecao; rodape sem faixa, alinhado a direita, com entrada e
+  brilho da direita para a esquerda e respeito a movimento reduzido.
+- Credito permanece branco no tema escuro e usa contraste adequado nos temas
+  claros, inclusive com animacoes desativadas; QA usa CSS minificado.
+
+## 2026-10-13: Agenda Salesforce com instalacao reversivel
+
+- Prepara servico dedicado para coleta de 30 minutos e monitor no mesmo processo,
+  com credenciais privadas do systemd e exclusao do monitor independente.
+- Instalacao separada da sessao, fixada em SHA aprovado, com preparo sem ativacao,
+  verificacoes de CI/estado e reversao do monitor anterior.
+- Inclui testes do instalador na suite obrigatoria e runbook de dois ciclos reais.
+  Sem alteracao no n8n antigo, migrations ou reinicio da aplicacao CRM.
+
+## 2026-10-13: Conexao real do novo n8n ao Supabase
+
+- Publica release15ddedd e habilita ingestao protegida no CRM, preservando
+  configuracao anterior em backup privado e verificando runtime efetivo.
+- Novo n8n envia carga real ao CRM/Supabase; replay confirmado sem duplicidade.
+  Tela apresenta evidencia da sessao Salesforce, ingestao e leitura do banco.
+- Documenta contagens, recibos, testes, backup e proximo passo do agendador.
+  N8n antigo preservado; agenda de30min ainda nao ativada.
+
+## 2026-10-13: Efeitos da Rotina publicados
+
+- Publicada a versao08c3ae4 com controles compactos, gradientes, destaque de
+  linha/coluna e rodape animado; persistencia e permissoes preservadas.
+
+## 2026-10-13: Efeitos e compactacao da Rotina
+
+- Rotina: garante transicoes desligadas no modo de movimento reduzido mesmo sob as regras globais.
+
+- QA da Rotina testa efeitos com e sem movimento reduzido, restaurando a preferencia do contexto apos sucesso ou falha.
+
+- Rotina: controles compactos no cabecalho, gradientes, realce de linha/coluna e rodape com brilho acessivel.
+
+## 2026-10-13: Configuracao Salesforce na publicacao protegida
+
+- Cartoes de integracao passam a consultar evidencias pelo endpoint autorizado
+  existente; leitura Supabase e ingestao passada nao afirmam n8n online.
+- Acrescenta opcao explicita para aplicar as credenciais existentes de ingestao
+  junto de nova imagem aprovada, mantendo refresh desligado.
+- Backup privado integral do env, CAS e recuperacao da configuracao anterior;
+  confirmacao exige valores efetivos no container, alem de health e versao.
+- Preserva releases sem a opcao, registros antigos e o n8n antigo. Nao ativa
+  workflow/agenda nem executa migrations por meio do comando de release.
+
+## 2026-10-13: Backup externo e prontidao do restore
+
+- Guia unico de conclusao com acessos e pendencias; suite completa e build
+  revalidados sem ativar a automacao.
+- Corrige espera do PostgreSQL temporario no backup isolado do novo n8n.
+- Registra envio criptografado e recuperacao exata dos dois backups externos.
+- Revisa gate Salesforce sem exigir migrations de outros fluxos ou rotacao
+  automatica de credenciais. Nenhuma agenda ou migration remota ativada.
+
+## 2026-10-13: Preparacao do backup externo privado
+
+- Registra bucket privado autorizado e testes sinteticos de acesso/criptografia.
+- Documenta custodia da chave e gates restantes antes do backup real externo.
+- Sem alteracao de runtime, migrations ou agenda do n8n.
+- Revalida lint, tipos, suite completa Windows e build apos a documentacao.
+
+## 2026-10-13: Compatibilidade dos testes Windows
+
+- Suite completa Windows aprovada; mantem testes fisicos Linux obrigatorios na CI.
+- Publica auditoria e plano de revisao de RPCs, sem aplicar migrations remotas.
+- Corrige fixtures de permissoes e caminhos Windows sem relaxar seguranca Linux.
+- Adiciona verificacao de ACL real e rejeicao de leitor indevido em arquivos
+  temporarios sinteticos; cobre ordem de fsync e metadados inseguros de backup.
+- Registra backup restaurado e ingestao real somente em copia isolada.
+
+## 2026-10-13: Confirmacao de ingestao no fluxo candidato
+
+- Prepara envio n8n para CRM com credencial distinta e recibo verificado.
+- Mantem fluxo inativo e sem persistencia de payloads; primeira carga pendente.
+
+## 2026-10-12: Preparacao dos segredos de ingestao
+
+- Registra chave Supabase validada e preparo de credencial distinta para n8n.
+- Nenhum segredo versionado; runtime e agenda continuam sem alteracao.
+
+## 2026-10-12: Pendencias de ingestao identificadas
+
+- Registra preflight de configuracao e privilegios sem alterar dados ou permissoes.
+- Mantem agenda desligada enquanto faltam segredos, backup e gates de ingestao.
+
+## 2026-10-12: Coleta Salesforce na VPS comprovada
+
+- Sete relatorios coletados com sessao dedicada; candidato privado passou no schema.
+- Confirma somente coleta e transformacao, sem publicacao ou agenda automatica.
+
+## 2026-10-12: Autenticacao HTTP da candidata confirmada
+
+- Teste sintetico VPS para novo n8n comprova rejeicao de token ausente/incorreto
+  e resposta 202 com token salvo. Webhook desativado novamente ao encerrar.
+- Exportacao Salesforce e ingestao permanecem fora da evidencia deste teste.
+
+## 2026-10-12: Teste remoto da candidata aprovado
+
+- Confirma processamento de fixture pelo MCP e restauracao da privacidade.
+- Mantem automacao inativa e distingue teste interno de autenticacao HTTP.
+
+## 2026-10-12: Limite MCP registrado
+
+- Registra HTTP 429 anterior a qualquer alteracao para teste sintetico.
+
+## 2026-10-12: Evidencia do primeiro teste MCP
+
+- Documenta teste iniciado e resultado nao recuperavel, sem alegar sucesso.
+
+## 2026-10-12: Entrada autenticada da candidata
+
+- Confirma vinculo da credencial ao webhook Salesforce, sem ativar a automacao.
+- Registra backup atualizado e bloqueio da ferramenta MCP de execucao.
+
+## 2026-10-12: Backup local n8n
+
+- Adiciona backup privado e prova de restauracao PostgreSQL isolada da instancia nova.
+- Nao altera workflows, agenda, n8n antigo ou dados do CRM.
+
+## 2026-10-12: Candidata Salesforce no novo n8n
+
+- Versiona SDK, settings e testes da candidata inativa, sem saida externa.
+- Resposta HTTP 202 com ok false nao confirma publicacao de snapshot.
+
+## 2026-10-12: OAuth MCP confirmado
+
+- Confirma cliente Codex separado no novo n8n; workflows aguardam ferramentas MCP.
+
+## 2026-10-12: Conexao MCP separada
+
+- Registra habilitacao autorizada do MCP novo, preservando a conexao anterior.
+- Consentimento OAuth ainda pendente de login do operador.
+
+## 2026-10-12: Painel n8n em HTTPS
+
+- Libera proxy dedicado apos confirmacao do owner, mantendo bloqueado seu cadastro publico.
+- Configura URLs externas e um salto de proxy sem alterar a instancia antiga.
+
+## 2026-10-12: HTTPS inicial do n8n
+
+- Configura subdominio exclusivo e TLS sem expor cadastro publico do owner.
+- Preserva instancia anterior, DNS existente e sessao Salesforce.
+
+## 2026-10-12: Base n8n isolada
+
+- Adiciona preparacao de nova instancia n8n com banco e runner exclusivos.
+- Protege recursos existentes e documenta acesso privado, HTTPS e recuperacao.
+- Nao importa nem altera workflows ou credenciais da instancia anterior.
+
+## 2026-10-12: Gate de sessao da Rotina
+
+- Publicado: Rotina compartilhada no banco, edicao autorizada e cabecalho contrastante (PR #200, 7c50f59).
+
+- Rotina: inclui a tabela compartilhada no gate restritivo de sessao/MFA e nos inventarios SQL de seguranca.
+
+## 2026-10-12: Persistencia compartilhada da Rotina
+
+- Grava rotinas no CRM, compartilhadas entre dispositivos e usuarios autorizados.
+- Restringe edicao a gestores autorizados e detecta conflitos de versao.
+- Permite importar a copia antiga do navegador sem substituir dados automaticamente.
+- Destaca o cabecalho dos dias com cor propria.
+
+## 2026-10-12: Rolagem da Rotina em producao
+
+- Publicado 1160a0e com Hoje alinhado a esquerda, rolagem de pagina e somente
+  os dias fixos abaixo do menu. Titulo e salvar seguem o padrao Associativo.
+- CI completa e conferencias operacionais/visuais aprovadas.
+
+## 2026-10-12: Rolagem e acabamento da Rotina
+
+- Usa rolagem da pagina, fixando apenas os dias abaixo do menu do CRM.
+- Alinha a visao Hoje a esquerda e aproxima titulo/botao do Associativo.
+- Preserva edicao, modos Semana/Hoje, conteudo e salvamento local.
+
+## 2026-10-12: Rotina compacta em producao
+
+- Publica Semana/Hoje, seis dias, textos centralizados, linhas compactas e
+  cabecalhos fixos na versao 9ff3fd3, com CI completa e smoke aprovado.
+- Preserva 26 linhas/74 atividades e salvamento local ao navegador.
+
+## 2026-10-12: Teste de cancelamento assincrono
+
+- Sincroniza a verificacao do cancelamento no servidor com espera limitada,
+  preservando as exigencias de seguranca do gateway e os gates de release.
+
+## 2026-10-12: Validacao da Rotina compacta
+
+- Registra aprovacao do PR #192 e bloqueio posterior da publicacao na CI de
+  main por teste de timeout do gateway Salesforce. Sem novo deploy da Rotina.
+
+## 2026-10-12: Rotina semanal e diaria compacta
+
+- Alterna entre planilha de segunda a sabado e atividades do dia atual.
+- Compacta cabecalho, abas e celulas, com texto centralizado e titulos fixos.
+- Mantem edicao, insercao e salvamento local, sem apagar domingos antigos.
+- Preserva foco de teclado visivel nos tres temas tambem na visao diaria.
+- Detalha evidencias de geometria e acessibilidade da matriz de Rotina.
+- Verifica a largura diaria apos a atualizacao do layout, sem relaxar limites.
+- Isola o relogio simulado da Rotina das demais jornadas de QA.
+
+## 2026-10-12: Planilha de Rotina em producao
+
+- Publica a grade continua e o destaque do dia na versao `83592ab`, apos CI
+  integral, verificacao da imagem, backup e promocao protegida.
+- Confirma a interface autenticada, health, container saudavel e preservacao
+  das 26 linhas/74 atividades. Salvamento continua local ao navegador.
+- Registra evidencias e excecoes verificadas no conhecimento do projeto;
+  fechamento documental nao reinicia a aplicacao.
+
+## 2026-10-12: Validacao visual do console
+
+- Aguarda transicoes de tema na matriz sintetica e detalha falhas de contraste.
+- Sincroniza tambem a matriz da pagina de integracoes antes de abrir o console.
+- Confere o fim das transicoes herdadas antes de medir contraste.
+
+## 2026-10-12: Conexao Salesforce pela VPS no CRM
+
+- Adiciona console remoto protegido para o Master autenticar no Salesforce
+  e aprovar a MFA, mantendo o navegador dedicado na VPS.
+- Separa acesso ao console da confirmacao real de conexao Salesforce.
+- Mantem n8n, exportacao e ingestao desligados nesta etapa.
+
+## 2026-10-12: Sessao remota Salesforce
+
+- Prepara Chrome dedicado supervisionado na VPS, independente do PC.
+- Adiciona console privado via SSH, login/MFA manual e perfil persistente.
+- Mantem monitor separado das exportacoes, com ativacao por prova real.
+- Documenta instalacao, reautenticacao, limites e rollback sem apagar perfil.
+
+## 2026-10-12: Rotina em planilha
+
+- Substitui caixas individuais por celulas continuas, linhas autoajustaveis e
+  foco na celula, preservando todas as atividades e o salvamento local.
+- Destaca o dia atual no fuso de Sao Paulo com coluna ciano e selo Hoje,
+  inspirado na referencia de metas de parcerias consultada somente em leitura.
+- Confere a virada do dia, os sete dias e o estilo da grade nos tres temas.
+
+## 2026-10-12: Rotina publicada
+
+- Publica Gestao > Rotina na versao `7c6dce5`, com CI integral aprovada,
+  imagem imutavel verificada, backup e promocao pelo coordenador protegido.
+- Confirma health, container saudavel, acesso anonimo negado e tela autenticada
+  com seis funcoes, 26 linhas e 74 atividades para Gerente regional house.
+- Registra evidencias finais, limites do salvamento local e excecoes operacionais
+  no conhecimento curado. Fechamento documental nao dispara novo deploy.
+
+## 2026-10-12: Conhecimento e Rotina
+
+- Integra a protecao atual de publicacao com consulta ao vivo, registro de
+  deployment e locks compartilhados, preservando o novo coordenador de main.
+- Exige conferencia atual de site/GitHub e sincronizacao do Obsidian antes de
+  cada novo chat do CRM, com resultados e excecoes documentados no encerramento.
+- Protege edicoes pendentes da Rotina ao sair, recarregar ou voltar no historico
+  e remove o link do hub quando a rotina estiver indisponivel.
+- Vincula a confirmacao de saida ao destino e evita um segundo aviso durante
+  a atualizacao do historico em navegacao lenta do App Router.
+- Corrige a verificacao de menus flutuantes no breakpoint de 1181 px, mantendo
+  a rejeicao de overflow, recorte e texto excedente sem trocar referencias.
+- Distingue a borda externa do painel compacto de overflow real e preserva
+  capitalizacao normal tambem no titulo do menu Gestao.
+
+## 2026-10-12
+
+- Adiciona promoção protegida com consulta ao vivo de versão/data, CI e `main`
+  no minuto da publicação; trava compartilhada cobre CAS, Compose e health.
+- Bloqueia duplicidade, divergências e tentativas interrompidas; recuperação
+  aceita somente a imagem anterior da pendência e preserva a data se o
+  runtime anterior continuou ativo. Comandos antigos não contornam o gate.
+- Inclui testes do guard na CI Linux. Ativação exige adotar o comando na VPS
+  e importar evidência da última publicação; nenhum deploy é disparado por
+  esta alteração de ferramentas.
+
+- Faz a caixa de cada acesso em Usuários representar diretamente o rascunho:
+  um clique marca ou desmarca, o tique permanece visível nos três temas e o
+  resumo identifica alterações ainda não salvas.
+- Adiciona `Usar padrão do perfil`, que remove as exceções individuais
+  aplicáveis e restaura a matriz herdada do papel selecionado sem trocar o
+  papel da conta.
+- Persiste marcações, desmarcações e restaurações em uma única transação por
+  meio de RPC autenticada, mantendo hierarquia, auditoria e a proteção
+  exclusiva do Master sobre contas Administrador no banco.
+- Aprova 1.151 testes pgTAP, testes direcionados de interface/Server Action e a
+  matriz visual autenticada com 154 checks responsivos, 88 de tema, 242 Axe,
+  242 comparações e 110 checks de zoom; os quatro simuladores permanecem
+  inalterados e cobertos.
+
+## 2026-10-11
+
+- Adiciona o menu Gestão com submenu Rotina, protegido por
+  `crm.settings.manage` e exposto no menu suplementar autorizado.
+- Cria a classificação inicial de Gerente regional house com layout da Tabela
+  Associativo, opções das demais funções nulas, inserção de linhas e salvamento
+  local no navegador.
+- Preserva 26 linhas e 74 atividades da referência. Trata erros de armazenamento,
+  confirma restauração, sinaliza alterações pendentes e oferece abas por teclado.
+- Mantém a capitalização em frase normal também nos estilos herdados do cabeçalho.
+- Exibe as atividades completas em campos com altura automática e preserva a
+  tabela semanal em rolagem horizontal acessível no celular.
+- Atualiza gates, navegação, inventário de recursos, contrato visual e matriz
+  de smoke de rotas protegidas para 27 URLs.
+
+- Recompõe Usuários e acessos conforme o draft aprovado: mestre-detalhe
+  compacto, diretório com filtros em chips, quatro abas de acesso, painel
+  rolável no desktop e empilhamento responsivo no mobile.
+- Remove os quatro indicadores que alongavam a tela, reduz o teto visual de
+  2.600 para 1.200 px e preserva paginação, herança, exceções, auditoria e a
+  fronteira exclusiva do Master sobre contas Administrador.
+- Promove onze referências autenticadas exclusivas de Usuários após 154 checks
+  responsivos, 88 de tema, 242 Axe, 242 comparações e 110 checks de zoom; os
+  quatro simuladores permaneceram cobertos e inalterados.
+- Corrige superficies escuras residuais de Ranking e Canal de Parcerias nos
+  temas Claro e Medio, preservando o tema Escuro aprovado.
+- Libera ao Administrador a visualizacao dos quatro simuladores sem ampliar a
+  execucao oficial, a politica comercial ou qualquer capacidade de Master.
+- Reserva ao Master a administracao de contas Administrador, com bloqueio de
+  criacao/promocao, desativacao, papel e excecoes na interface, servidor, RPCs
+  e triggers do banco.
+- Aprova a matriz visual pos-commit sem regravar referencias, o E2E dos oito
+  perfis, 1.141 testes pgTAP na origem/restore e os gates completos de
+  aplicacao; a revisao independente nao encontrou achados de seguranca.
+- Aplica isoladamente a fronteira de Administrador no banco remoto como versao
+  `20261011174323`, depois de backup privado verificado, e confirma grants,
+  triggers, matriz de atribuicao e preservacao das excecoes dos outros papeis.
+- Registra a limitacao honesta do ensaio produtivo: existe somente um
+  Administrador, portanto o bloqueio entre pares foi exercitado no pgTAP/E2E da
+  VPS; a conta existente foi bloqueada em transacao revertida e o Master passou
+  pelo mesmo guard sem persistir alteracao.
+- Publica a correcao de temas e a fronteira de Administrador na release
+  `6b3e5ffd`, pelo artefato imutavel aprovado da CI de `main`, com prova OCI,
+  backup privado, CAS e rollback preparado.
+- Confirma no pos-deploy health local/publico, container sem restart/OOM,
+  protecoes anonimas das rotas e APIs, assets, headers, redirecionamento HTTPS e
+  logs sem padrao critico; nenhum rebuild foi executado na VPS.
+- Promove o runtime do layout aprovado do CRM na release `ac3d7893`, com imagem
+  imutavel, backup verificado, CAS, rollback preparado e saude confirmada; o
+  aceite final permanece pendente da jornada autenticada em producao.
+- Repete na CI de `main` banco, restore, E2E e a matriz visual; preserva os
+  quatro simuladores e confirma guardas anonimos depois do deploy.
+- Confirma publicacao da politica fiscal SP/2026 no PR #177 e registra
+  validacao, backup, identidade da imagem e verificacoes pos-publicacao.
+- Atualiza conhecimento Git/Obsidian sem modificar o runtime ja publicado.
+- Faz reautenticacao necessaria e indisponibilidade do Salesforce prevalecerem
+  sobre um ciclo de extracao simultaneo, com regressao para os estados combinados.
+- Reconcilia o layout aprovado com a politica fiscal SP/2026 e promove somente
+  as onze referencias combinadas de Documentacao, preservando outras 231.
+
+## 2026-10-10
+
+- Integra o draft aprovado do CRM nos temas Claro, Medio e Escuro, com marca
+  horizontal completa, navegacao compacta e os canvases comerciais responsivos.
+- Faz Simulacao abrir diretamente o hub de seis ferramentas, move Configuracoes
+  para o menu da conta e agrupa Usuarios, Paginas e Integracoes em Administracao.
+- Renomeia Conectar Sistemas para Integracoes na interface, aplica os logos do
+  pacote e preserva estados reais ou nao verificados, sem importar dados
+  demonstrativos da previa.
+- Pagina o diretorio de Usuarios no servidor, com busca, filtro, rolagem
+  continua, fallback manual e representacao do acesso efetivo herdado.
+- Preserva campos, componentes e motores de Associativo, Tabela Direta, Tabela
+  Investidor e Tabelao; os novos estilos de hub, Documentacao e CAIXA ficam
+  escopados fora dessas quatro jornadas.
+- Aprova o E2E de release com 19 cenarios e um skip previsto, incluindo o
+  Associativo concorrente, e promove a baseline autenticada de 242 comparacoes.
+- Confere 154 checks responsivos, 88 de tema, 242 Axe, 110 de zoom, 22 canvases,
+  40 navegacoes dos quatro simuladores e 30 capturas manuais do Associativo.
+- Calibra de 2.500 para 2.600 px o teto estrito de `/admin/usuarios`: a pagina
+  mediu 2.592 px em 1.440 px ao exibir as 23 permissoes e badges efetivos.
+- Aprova `pnpm qa:visual:authenticated` pos-commit em modo `verify`: 154 checks
+  responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes
+  candidato/baseline e 110 de zoom; fixtures efemeras removidas.
+- Registra a abertura do PR #178 e a CI intermediaria `38094977306` no SHA
+  `4a8bfc8`; o merge e a promocao do runtime constam na entrada de 11/10, com o
+  aceite final ainda pendente.
+- Estabiliza em duas linhas o e-mail da conta no cabecalho de Usuarios entre
+  961 px e 1.152 px, mantendo o valor completo no DOM e em `title`. A segunda
+  CI havia exposto uma variacao de 21 px causada apenas pelo sufixo aleatorio do
+  fixture visual em 1.024 px; as outras 241 comparacoes permaneceram aprovadas.
+- Atualiza ITBI e registro da capital paulista para a politica validada de
+  2026, com isencao por primeira aquisicao ou MCMV e regime contratual explicito.
+- Substitui tabela anterior e fator fixo de registro por faixas atuais e
+  beneficios legais, sem acumular descontos. Discrimina compra e alienacao.
+- Exige dados fiscais confirmados e bloqueia municipios, vigencias e beneficios
+  especiais nao validados. Preserva despachante, seguro, juros e pro-soluto.
+- Diferencia os totais publicados pela ARISP e pelo 5o RI; exige confirmacao
+  da tabela aplicavel com o cartorio e nao presume repasse unico de ISS.
+- Ajuda explicita que sobreposicao de cobranca conjunta exige cartorio.
+- Organiza a conferencia fiscal em secao expansivel para preservar a densidade
+  inicial da pagina, mantendo preenchimento e confirmacao obrigatorios.
+- Mantem dados fiscais legiveis na impressao com conferencia independente
+  do contraste de tela.
+- Atualiza onze referencias visuais da documentacao apos revisao e aprovacao
+  dos gates funcionais, preservando as outras 231 capturas.
+- Acrescenta fontes, alertas, verificador de vigencia na CI e runbook de
+  manutencao; atualiza ajuda e conhecimento compartilhado.
+
 ## 2026-10-09
+
+- Move Guia passo a passo para a direita do titulo do Associativo, com largura
+  ajustada ao texto e quebra de linha em telas estreitas. Preserva os 36 passos
+  e o brilho existente; remove o acionador do rodape do estoque.
+- Confere o guia em 18 cenarios e atualiza 11 referencias visuais revisadas,
+  mantendo as outras 231 imagens e os limites de comparacao.
 
 - Substitui o símbolo PNG do cabeçalho protegido por uma marca SVG vetorial.
   O “D” agora herda a mesma cor de “escomplica” nos temas Claro, Médio e
@@ -46,6 +622,8 @@
 - Confere estoque completo em desktop/notebook e atualiza sete referencias
   visuais revisadas do Associativo, preservando as outras 235.
 - Integra a atualizacao aprovada de Repasse antes da validacao conjunta do guia.
+- Publica o guia no release `c20c9d2`, com CI completa e conferencia da
+  abertura, navegacao e fechamento na pagina real.
 
 ## 2026-10-08
 

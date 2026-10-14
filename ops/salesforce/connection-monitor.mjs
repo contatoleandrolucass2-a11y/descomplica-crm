@@ -155,6 +155,10 @@ export function createCollectorProgress(now = Date.now) {
       value.nextRunAt = new Date(timestamp).toISOString();
     },
     collected,
+    published(candidate, published) {
+      collected(candidate);
+      if (published) value.lastPublishedAt = new Date(now()).toISOString();
+    },
     succeed(candidate, published) {
       collected(candidate);
       value = {

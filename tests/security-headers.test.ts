@@ -67,8 +67,11 @@ describe("security headers regression", () => {
     for (const [filename, callbackLocations] of templates) {
       const source = await readFile(path.join(process.cwd(), filename), "utf8");
       expect(source.match(/location = \/auth\/callback/g)).toHaveLength(callbackLocations);
-      expect(source.match(/access_log off;/g)).toHaveLength(callbackLocations);
-      expect(source.match(/error_log \/dev\/null crit;/g)).toHaveLength(callbackLocations);
+      const callbacks = source.match(/location = \/auth\/callback \{[^}]+\}/g)!;
+      for (const block of callbacks) {
+        expect(block).toContain("access_log off;");
+        expect(block).toContain("error_log /dev/null crit;");
+      }
     }
   });
 

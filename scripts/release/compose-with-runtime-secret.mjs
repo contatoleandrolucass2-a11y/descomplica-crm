@@ -3,7 +3,18 @@ import { createHash } from "node:crypto";
 import { readFile, realpath, stat } from "node:fs/promises";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
+import {
+  assertHeldLock,
+  inheritedLockDescriptors,
+  waitForProcess,
+} from "./production-release-lock.mjs";
+import {
+  inventoryDirectory,
+  inventoryPublisherUid,
+  validateInventoryDirectory,
+  readPublishedInventory,
+} from "../../ops/salesforce/publish-inventory.mjs";
 
 const repositoryRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const dockerEnvironment = {
@@ -110,9 +121,15 @@ function declaredSecretSource(contents) {
   return matches.length === 1 ? matches[0].slice(matches[0].indexOf("=") + 1) : null;
 }
 
-async function main() {
+async function validateSalesforceInventory() {
+  const owner = await inventoryPublisherUid();
+  await validateInventoryDirectory(inventoryDirectory, owner);
+  await readPublishedInventory(inventoryDirectory, owner);
+}
+
+export async function runtimeCompose(invocation, lock, beforeStart) {
   if (process.getuid?.() !== 0) fail("Runtime Compose wrapper requires root.");
-  const [environmentName, command, ...arguments_] = process.argv.slice(2);
+  const [environmentName, command, ...arguments_] = invocation;
   const configuration = environments[environmentName];
   const allowedArguments = allowedInvocations.get(command);
   if (!configuration || !command || !allowedArguments) {
@@ -123,6 +140,11 @@ async function main() {
     arguments_.some((argument, index) => argument !== allowedArguments[index])
   ) {
     fail("Runtime Compose arguments are not allowlisted.");
+  }
+
+  if (environmentName === "production" && !["config", "ps"].includes(command)) {
+    await assertHeldLock(lock);
+    if (typeof beforeStart !== "function") fail("A fresh production observation is required.");
   }
 
   const secretDirectory = "/etc/descomplica-crm/secrets";
@@ -154,6 +176,7 @@ async function main() {
   // snapshot to the runtime, so enforce its integrity immediately before up.
   if (command === "up") {
     await validateInventorySnapshot(configuration.inventorySnapshot);
+    if (environmentName === "production") await validateSalesforceInventory();
   }
   const secretBytes = await readFile(configuration.secret);
   const contentLength =
@@ -171,6 +194,11 @@ async function main() {
   }
   secretBytes.fill(0);
 
+  if (environmentName === "production" && !["config", "ps"].includes(command)) {
+    await assertHeldLock(lock);
+    await beforeStart();
+  }
+
   const child = spawn(
     "/usr/bin/docker",
     [
@@ -185,28 +213,21 @@ async function main() {
     {
       cwd: repositoryRoot,
       env: dockerEnvironment,
-      stdio: "inherit",
+      stdio: lock
+        ? ["inherit", "inherit", "inherit", ...inheritedLockDescriptors(lock)]
+        : "inherit",
     },
   );
-  child.once("error", () => {
-    process.stderr.write("Docker Compose failed to start; secret not printed.\n");
-    process.exitCode = 1;
-  });
-  child.once("exit", (code, signal) => {
-    if (code !== 0) {
-      process.stderr.write(
-        `Docker Compose failed (${signal ?? code ?? "unknown"}); secret not printed.\n`,
-      );
-      process.exitCode = code ?? 1;
-    }
-  });
+  await waitForProcess(child, "Docker Compose failed; secret not printed.");
 }
 
-try {
-  await main();
-} catch (error) {
-  process.stderr.write(
-    `${error instanceof Error ? error.message : "Runtime Compose wrapper failed."}\n`,
-  );
-  process.exitCode = 1;
+if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+  try {
+    await runtimeCompose(process.argv.slice(2));
+  } catch {
+    process.stderr.write(
+      "Runtime Compose failed. Production mutations require pnpm release:production; secrets not printed.\n",
+    );
+    process.exitCode = 1;
+  }
 }

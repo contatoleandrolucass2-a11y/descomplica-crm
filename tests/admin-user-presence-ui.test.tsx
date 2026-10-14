@@ -1,3 +1,4 @@
+import { ROLE_INHERITED_PERMISSIONS } from "@/lib/authorization/access-presentation";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -24,8 +25,11 @@ const userId = "d4100000-0000-4000-8000-000000000001";
 function markup() {
   return renderToStaticMarkup(
     createElement(UserAccessManager, {
+      initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
       users: [
         {
+          inheritedPermissions: ROLE_INHERITED_PERMISSIONS["broker_house"],
+          permissionDetailsAvailable: true,
           userId,
           email: "presenca@example.test",
           isActive: true,

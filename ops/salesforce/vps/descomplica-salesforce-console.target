@@ -1,0 +1,4 @@
+[Unit]
+Description=Descomplica Salesforce temporary private console
+Requires=descomplica-salesforce-vnc.service descomplica-salesforce-web.service
+After=descomplica-salesforce-vnc.service descomplica-salesforce-web.service

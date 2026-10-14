@@ -2,6 +2,93 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Pesquisa de unidades do Associativo em 14/10/2026
+
+CI `38574613120`, artefato `11901344067`, captura
+`35b8991b438b1681bb24f32beb7d2afee37bd108`, árvore idêntica ao candidato
+`d8e745c1895da42e76a365b5c6656261988d7220`. SHA-256 do ZIP:
+`11481c162d1914dcf5ddf9d74431e6385c7cd3cfdd552adeb44d61ca2301cb66`.
+
+Código, restore, banco, guia e E2E passaram. O predicado funcional original
+confirmou 154 checks responsivos, 88 de tema, 242 auditorias Axe, 110 de zoom,
+22 canvases, teclado e jornadas dos simuladores. O título do estoque permaneceu
+em uma linha nas dez larguras e três temas do contrato de navegação.
+
+Onze capturas do Associativo diferiram pela pesquisa e sua distribuição no
+cabeçalho. Desktop, notebook, tablet e celular foram inspecionados, incluindo
+os três temas. Referências atualizadas pelo helper transacional original em
+14:24:56Z; 231 imagens e suas entradas no manifesto preservadas. Os metadados
+originais do manifesto e os limiares de 1%/16 também foram preservados.
+
+A captura mantém `worktreeDirtyAtCapture: true`. Para este artefato, o
+fingerprint foi reproduzido com diff rastreado vazio e somente os 19 outputs
+gerados de Conectar Sistemas:
+`5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a`.
+Hashes de todas as capturas e referências foram conferidos. A prova é exclusiva
+deste artefato e está registrada em `reviewedUpdates`. Uma nova CI integral em
+modo `verify` permanece obrigatória antes da integração e publicação.
+
+## Funis mensais em 14/10/2026
+
+CI `38515347098`, artefato `11873042399`, captura
+`20aed961aa07982772d1cb25ed226af9ba3379f8`, arvore identica ao candidato
+`aa5c835f5448a389af16ce6b1c76cbc17ecfad2c`. SHA-256 do ZIP:
+`1f2508522260bd684e5a177b2847b573cfa1f2ff2dcd722ae2410e4bc780148b`.
+
+Validate, restore, 1.323 testes pgTAP e 19 E2E passaram. Predicado funcional
+original reaplicado: 154 responsivos, 88 temas, 242 Axe, 110 zoom e 22 canvases,
+alem de teclado e simuladores. Onze imagens de `/app` diferiram pela inclusao
+dos funis. Desktop claro e celular escuro inspecionados; demais 231 imagens
+preservadas byte a byte. Altura desktop: 4.744 px, abaixo de 4.800.
+
+Promocao pelo helper transacional original em 05:55:40Z, com hashes conferidos.
+Manifesto conserva proveniencia das outras imagens. Limiares 1%/16 intactos.
+Captura dirty foi comprovada, para este artefato, como diff rastreado vazio e
+19 outputs de Conectar Sistemas. Fingerprint original reproduzido:
+`1289963a4108038891c9a6cd6fb70dd31f2eea2294e0882ba926d8728d72027b`.
+O flag original permanece true. Nao reutilizar esta excecao em outra captura;
+rever a proveniencia integral a cada promocao. Nova CI verify obrigatoria.
+
+## Relatorio completo do dashboard em 13/10/2026
+
+CI `38498361779`, artefato `11865597980`, captura
+`771812cd350d124bcfe7af62e2298f7ac6b00178`, arvore identica ao candidato
+`d67a855773106c6bf1bde63454d9e514f9ff2c01`. SHA-256 do ZIP:
+`df0fb78729b7f5df57f284dbdc26a9e6f0361a2bf13790646635a9ce71accae5`.
+
+Validate, restore e E2E passaram. O predicado funcional original confirmou
+154 checks responsivos, 88 de tema, 242 auditorias Axe, 110 de zoom, teclado,
+simuladores, navegacao e 22 comparacoes de canvas. Somente 11 imagens de `/app`
+diferiram, pela inclusao das secoes da referencia com dados sinteticos atuais.
+Apos inspecao desktop e mobile nos temas claro/escuro, foram promovidas pelo
+helper transacional existente; 231 imagens e sua proveniencia foram preservadas.
+Limites de 1%/16 inalterados. Nova CI integral em verify continua obrigatoria.
+
+Excecao de proveniencia: a captura informa `worktreeDirtyAtCapture: true`.
+Seu fingerprint foi reproduzido exatamente com diff rastreado vazio e somente
+os 19 arquivos gerados em `output/playwright/connected-systems/`, presentes no
+mesmo artefato. O valor nao foi adulterado; arquivos e hash constam de
+`reviewedUpdates`. Esta prova vale apenas para esse artefato, nao autoriza
+capturas futuras com alteracoes desconhecidas. Reavaliar a cada promocao.
+
+## Layout aprovado e politica fiscal combinados em 11/10/2026
+
+O PR #178 foi reconciliado com a politica fiscal SP/2026 publicada pelo PR
+#177 no commit limpo `bd8c5f69162824f9fa06a560d78a0a2888570df6`. A matriz
+autenticada aprovou 154 checks responsivos, 88 de tema, 242 auditorias Axe, 242
+comparacoes, 110 checks de zoom, 40 navegacoes dos quatro simuladores e 30
+capturas manuais do Associativo.
+
+Somente as onze referencias de Calcular Documentacao diferiram da baseline do
+layout. Elas foram inspecionadas em 1.440 px no tema claro e em 390 px no tema
+escuro e promovidas pelo helper transacional; as outras 231 imagens foram
+preservadas. O canvas documental mediu 1.191 px em desktop, abaixo do limite
+funcional de 1.200 px, e manteve os campos fiscais no disclosure acessivel.
+
+`reviewedUpdates` preserva a proveniencia do PR #177 e registra a captura
+combinada do PR #178. Limites de 1%/16 permanecem inalterados. A CI integral em
+modo `verify` continua obrigatoria antes do merge.
+
 ## Guia da pagina Associativo em 09/10/2026
 
 CI `37889190061`, artefato `11598453651`, captura limpa

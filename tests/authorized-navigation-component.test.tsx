@@ -54,7 +54,7 @@ describe("authorized navigation component", () => {
     expect(markup).not.toContain("Não autorizada");
   });
 
-  it("renders an explicitly disabled future journey without href", () => {
+  it("keeps Simulation as a direct hub link without child or future entries", () => {
     const markup = renderToStaticMarkup(
       <AuthorizedNavigation
         pages={[
@@ -91,14 +91,16 @@ describe("authorized navigation component", () => {
       />,
     );
 
-    expect(markup).toContain('aria-disabled="true"');
-    expect(markup).toContain("Jornada futura");
-    expect(markup).toContain("Aguardando autorização");
+    expect(markup).toContain('href="/app/simulacao"');
+    expect(markup).not.toContain('aria-disabled="true"');
+    expect(markup).not.toContain("Jornada futura");
+    expect(markup).not.toContain("Aguardando autorização");
+    expect(markup).not.toContain("Simulador Associativo");
     expect(markup).not.toContain('href="/app/simulacao/future"');
     expect(markup).not.toContain('aria-controls="crm.simulation.future"');
   });
 
-  it("renders the protected CAIXA visual journey as an authorized link", () => {
+  it("keeps protected CAIXA discoverable only from the Simulation hub", () => {
     const markup = renderToStaticMarkup(
       <AuthorizedNavigation
         pages={[
@@ -124,8 +126,9 @@ describe("authorized navigation component", () => {
       />,
     );
 
-    expect(markup).toContain('href="/app/simulacao/caixa"');
-    expect(markup).toContain("CAIXA");
+    expect(markup).toContain('href="/app/simulacao"');
+    expect(markup).not.toContain('href="/app/simulacao/caixa"');
+    expect(markup).not.toContain("CAIXA");
     expect(markup).not.toContain('aria-disabled="true"');
   });
 

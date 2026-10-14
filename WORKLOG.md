@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-14: Integração do painel de usuários para produção
+
+- Integra o painel aprovado localmente com o `main` atual, preservando paginação no servidor, gestão/rotina, estoque Salesforce e o coordenador de publicação.
+- Apresenta presença online com ponto verde pulsante e offline com ponto vermelho. Movimento reduzido desativa a animação; falhas de consulta continuam como presença indisponível.
+- Usa o catálogo real do banco para matriz e prévia do papel: produção compacta terá 25 permissões, enquanto a sequência completa local terá 31. O Administrador herda somente capacidades realmente implantadas.
+- Valida presença, hierarquia e MFA nos dois contratos do banco. O ensaio compacto passou em 70 verificações; o ensaio completo de backup/restauração passou em 1.431 verificações na origem e no destino.
+- A preparação das migrations não atribui as novas marcas. O padrão completo do Administrador deve ser aplicado depois da ativação do runtime compatível.
+- Build, lint, tipos e auditoria de dependências passaram. A validação visual, a CI e a promoção ainda estão em andamento. Evidências em `docs/audits/usuarios-presenca-vps-2026-10-14.md`.
+
 ## 2026-10-14: Presença online no painel local de usuários
 
 - Adiciona Online/Offline com indicador textual e visual no diretório Pessoas e no cabeçalho da conta selecionada, separado do estado administrativo Ativo/Revogado.
@@ -47,6 +56,1467 @@
 - Trabalho restrito ao checkout e banco locais; sem publicação remota.
   Matriz, limites e evidências: `docs/audits/usuarios-acessos-local-2026-10-14.md`.
 
+## 2026-10-14: Dashboard acompanha relatorios publicados
+
+- Confirma a mesma origem dos sete relatorios comerciais de Conectar sistemas.
+  Contagens de linhas nao substituem recortes e medias mensais.
+- Adiciona verificacao automatica da versao persistida a cada30 segundos,
+  foco/retomada/conexao. Preserva filtros, pausa abas ocultas e nao dispara
+  coleta ou ingestao. API de status acrescenta updatedAt com permissao/RLS.
+- Reconfere o lote apos leitura dos indicadores, com uma repeticao limitada,
+  para nao combinar numeros de publicacoes diferentes durante ingestao.
+- 180 testes focais/75 checks QA, tipos e build aprovados. Suite geral:2.869
+  passaram/79 skips e uma falha preexistente de symlink Windows. Coletor226/15
+  skips e release113/11 skips passaram separadamente; CI/publicacao pendentes.
+  Evidencias e limites em
+  [auditoria da atualizacao](docs/audits/dashboard-atualizacao-2026-10-14.md).
+- CI38570002899:2.870 testes passaram no Linux; restore e banco aprovados.
+  E2E novo exigia snapshot em etapa sem fixture global. Movido para a QA
+  autenticada que ja semeia/verifica/limpa esse dashboard, sem relaxar asserts,
+  alterar baselines ou dados remotos. Nova CI obrigatoria; deploy bloqueado.
+- CI38582426726: falha transitoria na QA da Rotina;20 ciclos locais sem
+  reproducao. Retentativa passou Rotina, mas expirou45min antes de concluir
+  helper novo. Teste passa a usar contexto proprio e limite60s com etapas
+  sanitizadas; causa de hang ainda nao comprovada. Runtime nao alterado.
+- CI38594232559 repetiu falha de geometria na Rotina antes do refresh. Inclui
+  diagnostico apenas numerico e antecipa QA de refresh, sem remover checks.
+- CI38597977609 localizou espera apos liberar RSC. QA passa a comprovar
+  transferencia pelo ResourceTiming exato, HTTP200 e tipo RSC, preservando
+  asserts de UI, limite10s/60s e rejeicao de transferencia incompleta.
+- CI38601828514 aprovou refresh no Next real. Rotina diagnosticada com modo
+  day e minWidth960px; QA aguarda CSS exato antes da geometria, mantendo asserts.
+- Main efc6a20 integrado preservando seletor/contorno e QA da Rotina; nova
+  validacao da combinacao obrigatoria antes de publicar o dashboard.
+- CI38607169365 aprovou2877 testes, restore e refresh Next real. Associativo
+  concorrente passou na repeticao sem mudanca. Falha restante de overflow foi
+  reproduzida com contorno atrasado; QA confere alinhamento antes da medicao,
+  preservando limites e rejeitando desalinhamento persistente. Runtime intacto.
+- Main77ddc69 integrado preservando operacoes Qlik; esta tarefa nao as aciona.
+- QA diaria aguarda CSS/contorno antes de medir tambem as celulas, na mesma
+  ordem da semanal; nenhuma verificacao removida ou tolerancia alterada.
+
+## 2026-10-14: Conferencias da integracao Qlik
+
+Conferencia17:13Z: CI38598554910/1d96204 terminou success em todos os gates
+de PR. Main avancou para efc6a20 (PR226); merge recusado por conflitos nos tres
+historicos. Conciliados sem modificar codigo recebido; nova CI necessaria.
+Nenhuma publicacao Qlik ocorreu. Historico proprio arquivado por limite sync.
+
+Conflitos com main0019690 limitados aos tres registros; conciliados preservando
+ambos os historicos, sem alterar codigo recebido. A secao de conhecimento do
+Associativo foi preservada integralmente em auditoria vinculada porque o main
+ja excedia o limite256000 do sync (257549 bytes). Limite nao alterado.
+CI do candidato combinado ainda necessaria; nenhuma promocao efetuada.
+
+Conferencia16:22Z de14/10 (13:22 America/Sao_Paulo): GitHub PR224 aponta
+mergeable=false; consulta CI por SHA3e69135 retorna lista vazia. git fetch e
+ls-remote confirmam main0019690, apos merge PR220. Health200/ok continua
+5c4d95e. Etapa congelada: sem CI do candidato, nenhuma promocao permitida.
+Proximo requisito verificavel e reconciliar o PR com main e obter CI no SHA
+resultante, sem reduzir gates. Qlik nao sincroniza fatos; estoque e leads
+Salesforce nao foram alterados ou revalidados como parte desta entrega.
+
+## 2026-10-14: Atualizador protegido do owner Qlik
+
+Retomada15:54Z: main/site HTTP200/ok5c4d95e, PR224/cc8c712 com validate e
+restore aprovados e matriz em andamento; posteriormente CI38589226253
+concluiu sucesso. PR216/b2bda52 falhou E2E Associativo sintetico com
+browser_fill_resources_failed; log15:41Z/job115942437414. Trechos envolvidos
+nao mudaram contra main; causa possivel de foco assincrono nao reproduzida.
+Nenhuma assercao ou timeout relaxados para passar CI.
+
+Implementado qlik-deploy/status/recover no coordenador existente. Ledger
+separado, tres travas, CI exact main, imagem aprovada e consulta real CRM no
+minuto. Nao altera production.env, ledger/imagem CRM, Salesforce ou Compose.
+Intencao antes de parar; unit validada contra template e backup privado do
+perfil parado. CAS/start exigem callback com guarda sincrona de frescor apos
+releituras locais, evitando que a aprovacao assincrona invalide verificacoes.
+Recuperacao somente da tentativa pendente; sem restauracao automatica de tar.
+
+Revisao corrigiu recovery apos rename/reload interrompido, start sem reload,
+CAS alterado durante callbacks, raiz do perfil substituida por symlink,
+coercao de SHA, pin Playwright e limite de fanout de dependencias. Probe SDK
+sempre nao-root. Artefato deve ser novo desde o start, rankingConnected=false.
+Baseline owner nao recebe data antiga presumida; recibo so apos verificacao.
+
+Lint/tipos/build51 passaram. Test global Windows:2805 Vitest passaram/82 skips,
+falhas preexistentes symlink Salesforce (O_NOFOLLOW) e timeout Next DevTools.
+Repeticao focal DevTools24/24 passou sem mudanca. Inputs108 passaram/2 skips
+fisicos Linux. Engine224 e host48 passaram; foco combinado engine/CLI232
+passou. Revisao independente encerrou achados apos correcoes e temporarios
+unicos por tentativa para nao bloquear recovery apos crash. Host exercita
+arquivos temporarios reais, mas emula comandos, UID/modos, locks e fsync de
+diretorios: nao e prova de operacao systemd/tar real ou sessao autenticada.
+CI anterior nao valida estes arquivos novos. VPS apenas observada: browser
+2f0907e ativo/disabled, unit sem drop-ins, perfil0700; nao houve upgrade,
+handshake, coleta de fatos, migration ou ingestao nesta retomada ate aqui.
+
+Suite completa de release repetida:507 testes,494 passaram/13 skips POSIX,
+zero falhas. Lint global repetido passou com aviso preexistente. Tipos/build
+passaram, formato/diff-check aprovados. Conhecimento sincronizado antes do
+commit; CI Linux do novo candidato continua obrigatoria para promocao.
+
+Conferencia15:24Z de14/10: git fetch manteve main5c4d95e; health publico
+HTTP200/ok agora identifica5c4d95e, nao16f4587. Atualizacao externa, nao
+publicacao Qlik. PR216/12cd013: validate e restore aprovados, matriz visual
+ainda em andamento. PR224/af935b7: validate Linux aprovado, demais gates
+pendentes. Correcoes do instalador exigem CI no novo SHA; sem merge/deploy.
+
+## 2026-10-14: Revisao do instalador e audiencia confirmada
+
+Dois achados P2 corrigidos: allowlist de integridade cobre os quatro modulos
+novos e o probe nao-root le SDK/schema enigma.js2.15.0. Testes focados17/17;
+suite Qlik completa107 passaram/3 Linux skips no Windows. Instalacao real
+Linux/runuser e upgrade nao executados. Nenhum servico remoto modificado.
+
+Usuario confirmou audiencia completa Direcional/SP CAPITAL/CANAL IMOB para
+quem possui crm.ranking.view. Contrato documentado; nao houve reader ou DDL.
+Revisao operacional confirmou que o coordenador nao suporta units auxiliares:
+upgrade protegido precisa ser implementado/testado antes do handshake real.
+
+Verify local deste checkout: lint/typecheck passaram; Vitest2806 passaram,
+82 skips e uma falha no teste de symlink do estoque Salesforce em Windows
+(esperado502, recebido200). O leitor de main depende de O_NOFOLLOW; a correcao
+lstat esta somente no PR216. Nao alterado Salesforce nem mascarado o teste
+nesta branch operacional. Build executado separadamente:51 paginas, exit0.
+CI38587608708/af935b7 aprovou validate Linux; demais gates ainda em andamento.
+Resultado de SHA anterior nao substitui CI apos as correcoes do instalador.
+
+## 2026-10-14: Qlik operacional separado da interface
+
+Branch codex/qlik-api-session criada de main5c4d95e, Git comum confirmado.
+Recupera de61cff23 somente ops/qlik, dependencia enigma.js2.15.0 e runbooks;
+nao altera pagina ranking, presenter, Salesforce, e2e/baselines, schema ou n8n.
+PR216 continua responsavel pela interface e integracao de fatos em andamento.
+
+Fonte13:34Z GitHub/main/PR216 e14:51Z SSH/health: site200/ok16f4587;
+browser VPS2f0907e ativo, disabled. Separacao nao e atualizacao da VPS.
+Cliente QIX usa sessao privada gerida pelo browser, inspecao limitada aos
+objetos comprovados e masters referenciados; sem exportar cookies/credenciais.
+Preflight desligado; nao coleta fatos nem publica no CRM. Ciclo sequencial,
+timeouts e artefato privado atomico, rankingConnected=false permanente.
+
+Usuario autorizou duas coletas independentes reconciliadas com totais nativos
+no lugar do publicador legado ausente. Mantidos backup, acesso restrito e
+ultima carga valida. Autorizacao e preflight remoto de schema no mapa; nenhuma
+DDL, ingestao ou flag ativa. Detalhes da sessao e limites no runbook VPS.
+
+Codigo de origem: Qlik56 testes de transporte/inspetor passaram; restante
+operacional foi validado no candidato anterior. Verify global origem61cff23
+teve timeout isolado Next DevTools; repeticao focal24/24 passou. Validacao
+completa deste checkout e CI propria ainda obrigatorias; nao herdar resultado
+de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
+
+## 2026-10-14: Seletor e contorno da Rotina
+
+- Substitui as seis abas por selecao unica nativa, mantendo os rascunhos de
+  cada funcao e os controles de autorizacao existentes.
+- Cabecalhos usam o tom do antigo seletor ativo. Um contorno branco continuo
+  envolve a coluna atual, incluindo o cabecalho fixo, sem pintar pendentes.
+- Redesenha acoes com modos segmentados, insercao secundaria e salvamento
+  destacado; remove brilhos individuais. Movimento reduzido preservado.
+- Sem mudanca de texto, hook, API ou banco. PR226 integrado, CI final38610165621
+  integralmente aprovada; publicado77ddc69 em18:42:12Z, com backup e coordenador.
+  Health, limites anonimos e UI autenticada validados sem escrever atividades.
+  Fechamento documental no PR225, sem novo deploy; evidencias e limites em
+  docs/audits/rotina-seletor-2026-10-14.md.
+
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Base isolada em `16f458720406e76efcd1eda8a1eeb791509800a3`, branch
+  `codex/busca-unidade-associativo`, árvore limpa antes da implementação.
+  Dependências instaladas pelo lockfile existente com `pnpm install --frozen-lockfile`.
+- Campo de pesquisa com lupa no cabeçalho do estoque do Associativo. Pesquisa
+  código, descrição e empreendimento em todas as unidades carregadas, antes da
+  janela virtual de 60 linhas, junto aos filtros e à ordenação existentes.
+- Busca ignora caixa, acentos e separadores usuais do código. Escape, botão de
+  limpeza e Limpar filtros restauram a lista sem modificar a proposta em edição.
+  Quantidade encontrada fica visível; seleções incompatíveis não são apagadas.
+- Validação final com `pnpm verify` aprovada: 2.814 testes da aplicação,
+  79 skips existentes, suites Node e build concluídos. `pnpm audit` sem
+  vulnerabilidades conhecidas. Lint mantém um aviso anterior em connected-systems.
+- Navegador local confirmou busca em 3.301 unidades sintéticas, código fora da
+  janela inicial, combinação de filtros, Escape, limpeza e proposta preservada.
+  Inspeção visual em 320, 375, 768 e 1.440 px e três temas.
+- QA do guia aprovado na execução final: 18 cenários (nove combinações de
+  tela/tema com e sem proposta), seis checks iniciais de desktop/notebook,
+  zero erros de console e zero chamadas externas. A primeira tentativa falhou
+  ao aguardar Cheque Moradia em 320x568-dark; repetição integral passou sem
+  alterar o teste ou cálculos. O cenário isolado também passou na base original.
+- Regressão de seleção, pesquisa, Escape, limpeza e preservação da proposta
+  executada em 1.440 e 375 px, usando 3.301 unidades sintéticas. Diff sem segredos.
+- CI 38562897319 aprovou validate, restore isolado, banco e E2E. O contrato
+  visual encontrou o contador/data abaixo do botão de limpar em 320/375/390 px.
+  Corrigido com duas colunas na segunda linha do cabeçalho móvel. O fixture do
+  guia agora inclui a data do estoque e executa o contrato de geometria existente,
+  sem relaxar asserções. Layout, busca e seleção passaram em oito larguras
+  (320 a 1.440 px) com 3.301 unidades sintéticas; build final aprovado.
+- A falha intermitente do guia foi diagnosticada no próprio artefato: a Entrada
+  de R$ 1.000,00 aparecia em Financiamento após o foco automático agendado pela
+  qualificação. O helper agora aguarda esse foco e verifica cada valor formatado;
+  também aguarda o foco dos campos opcionais. Nenhum cálculo ou timeout foi alterado.
+- PR #220 aberto; nova CI e publicação ainda pendentes. Consulta observacional
+  de 14/10 às 12:17:40Z retornou HTTP 200/ok, versão faae8e9. Isso não comprova
+  publicação desta busca nem substitui o ledger exigido por DEPLOY-001.
+- Nenhuma alteração de cálculos, permissões, dados de estoque ou produção.
+  Gitleaks completo encontrou apenas o token sintético preexistente na linha 31
+  de salesforce-release-environment.node-test.mjs, confirmado idêntico à base.
+- CI 38568083961 aprovou o predicado funcional original: 154 checks responsivos,
+  88 de tema, 242 de acessibilidade, 110 de zoom, 22 canvases e as jornadas dos
+  simuladores. As 11 diferenças visuais foram exclusivas do Associativo. O ZIP
+  11899075772 teve hash conferido; captura 082a6f3 com árvore igual a 1219608 e
+  fingerprint reproduzido com diff vazio e apenas os 19 outputs de QA.
+- A inspeção de 768 px identificou o título do estoque comprimido em três linhas.
+  A referência desse artefato não foi promovida. Em 761 a 1.023 px, os controles
+  agora ocupam a linha seguinte; a nova asserção de título em uma linha falhou
+  antes da correção e passou depois, junto aos contratos existentes em oito larguras.
+- Main 8e015c6 integrado em c6f38b7; conflito apenas em notas resolvido preservando
+  o registro da publicação dos funis e o trabalho desta pesquisa. Nova captura
+  visual e CI integral permanecem necessárias antes da integração do PR.
+- Após o ajuste de tablet, `pnpm verify` passou integralmente; o guia repetiu os
+  18 cenários sem erros de console ou chamadas externas. Oito larguras passaram
+  no contrato de estoque e na busca/seleção; o diff permaneceu sem segredos.
+- CI 38574613120/d8e745c aprovou novamente código, restore, banco, guia, E2E e
+  o predicado funcional completo. O título passou nas dez larguras e três temas.
+  As 11 capturas do Associativo foram inspecionadas e promovidas; 231 referências
+  preservadas, sem alterar limiares. Proveniência e hashes constam no README de
+  paridade e em reviewedUpdates. Nova CI integral em verify ainda pendente.
+- CI 38580539350/e043c9d concluiu com os três gates obrigatórios aprovados,
+  incluindo as 242 comparações visuais em modo verify. Antes da integração,
+  main avançou para 5c4d95e com a interface compacta de Rotina do PR #222.
+  Conflitos foram apenas nas notas; implementação, testes e documentação de
+  Rotina foram preservados integralmente. A versão combinada requer nova CI.
+- `pnpm verify` da versão combinada passou: 2.814 testes da aplicação e 82
+  skips condicionais, incluindo três cenários de navegador adicionados pela
+  atualização de Rotina. Suites Node, lint, tipos e build passaram; formatação
+  aprovada. Nenhum teste ou arquivo da implementação recebida foi alterado.
+
+## 2026-10-14: Compactacao da Rotina
+
+- Pedido aplicado somente ao componente de Rotina e estilos locais. Grade
+  fixa para checkbox/texto; controles antes do texto, sem faixa extra abaixo.
+- Fundo neutro nas pendentes, gradiente exclusivamente em data-completed;
+  data-today restrito aos cabecalhos. Hover/foco por contorno, sem escala.
+- Wrapper deixa de criar scroll interno; semana conserva largura legivel
+  e pode exigir rolagem horizontal da pagina em telas estreitas. Hoje adapta.
+- Hook/API/banco e conteudo salvo preservados. Lint/tipos/build aprovados;
+  QA focal4/4 com tres temas e duas larguras, Axe e sincronizacao bidirecional.
+  Windows integral interrompido apos symlink/timeouts; exigir CI Linux completa.
+- PR222 integrado em5c4d95e, CI38581434699 aprovada integralmente. Publicado
+  15:16:09Z (12:16 BRT) com backup, imagem imutavel e coordenador protegido.
+  Health/container/acesso anonimo e UI autenticada conferidos; textos e
+  marcacoes existentes preservados. Evidencia na auditoria da Rotina compacta.
+
+## 2026-10-14: Publicacao das conclusoes individuais
+
+- PR215 integrado; CI38510935022 e main CI38514527676 completas/aprovadas.
+- Migration aditiva autorizada aplicada apos backup tecnico verificado:
+  fonte 20261014020437, registro remoto 20261014054331. RLS/grants e limite
+  domingo/segunda conferidos; revisoes House2 e Imob3 preservadas.
+- Publicado faae8e9 pelo coordenador protegido em 05:45:08Z (02:45 Sao Paulo).
+  Container saudavel, sem reinicios/OOM; health correto e anonimo negado.
+- UI publicada preserva os 108 textos revisados e a fonte13px da House;
+  93 controles individuais na semana e18 em Hoje, habilitados. Nenhuma
+  atividade real marcada artificialmente; escrita/isolamento comprovados na CI.
+- Evidencia completa em docs/audits/rotina-individual-2026-10-14.md. Este
+  fechamento e documental e nao exige reiniciar novamente a aplicacao.
+
+## 2026-10-14: Funis no comparativo mensal
+
+- Corrige a ausencia dos graficos solicitados no comparativo de `/app`.
+  Cada bloco agora tem seis trapezios, rotulos e valores acessiveis em HTML.
+  Geometria ordinal fixa, sem sugerir area proporcional ou coorte individual.
+- Usa as cinco series existentes; Pastas aprovadas fica explicitamente
+  indisponivel. O ranking possui approvedFolder, mas nao e substituto da serie
+  mensal agregada por visao, historico e meta. Sem mudanca de contrato ou dados.
+- Referencia publica consultada somente por leitura no navegador; screenshot
+  enviado orienta o formato. Sem alteracao no site de origem nem em n8n.
+- Testes de componente: 18 aprovados. Tipos aprovados. QA sintetico: 74 checks
+  aprovados em tres temas e larguras, sem overflow, Axe ou erro de console.
+  Desktop completo: 4.704 px, mantendo o limite de 4.800. Lint/build aprovados.
+- CI38515347098, candidato aa5c835: validate aprovado, com 2.807 testes da
+  aplicacao (79 skips), 241 do coletor e 124 de release, sem falhas no Linux.
+  Windows apresentou timeouts em devtools/status, ACL do coletor e o symlink
+  preexistente; nenhum gate foi afrouxado. Release local:113 passaram/11 skips.
+  Integracao concorrente da Rotina preservada; navegador, baseline e deploy
+  ainda pendentes. Evidencias na auditoria do dashboard.
+- CI38515347098 concluiu banco/restore/E2E e checks funcionais visuais; somente
+  11 imagens de /app diferiram. Revisadas e promovidas com hashes/proveniencia,
+  preservando231 e limiares1%/16. Fingerprint comprovou apenas19 outputs QA.
+  Nova CI verify obrigatoria antes de merge/publicacao.
+- CI verify38519492545 aprovada; PR218 integrado em16f4587. CI main38558435232
+  aprovou os quatro jobs, incluindo1.323 testes de banco,19 E2E e242 comparacoes
+  visuais. Publicado em14/10/2026 09:24 BRT pelo coordenador protegido, com
+  imagem comprovada e backup verificado; health e acesso anonimo conferidos.
+  Recibo, hashes, limites e sincronizacao em
+  [auditoria dos funis](docs/audits/dashboard-funis-2026-10-14.md).
+
+## 2026-10-13: Revisao e conclusoes individuais da Rotina
+
+- Revisao de portugues aplicada pela UI autorizada em regional imob, mantendo
+  sentido, capitalizacao e tipografia. Esclarecimento de 60 dias confirmado
+  pelo usuario. Salvo 23:05; 108 campos/93 atividades conferidos apos recarga.
+- Conclusao por usuario com persistencia no CRM, checkbox por atividade e
+  semana definida no servidor em America/Sao_Paulo. Migration nova autorizada
+  especificamente apos testes e backup, sem alterar dados comerciais.
+- API, tabela privada com RPCs e controles de conclusao implementados. Lint,
+  typecheck e build aprovados; 80 testes focais aprovados. Suite serial local
+  tem falha remanescente de symlink Salesforce no Windows, fora deste escopo.
+  Testes Chromium cobrem persistencia, isolamento, virada, foco e scroll.
+- Banco isolado, CI e publicacao ainda pendentes; runtime permanece 0fdbb80.
+- CI inicial aprovou validate; restore revelou contador RLS legado, corrigido
+  de 40 para 41 tabelas. Os demais testes pgTAP passaram; repetir gates completos.
+- Segunda CI aprovou banco/restore/E2E; setup do leitor sintetico da matriz
+  visual falhou com SQLSTATE 23505. Publicacao bloqueada ate corrigir fixture.
+- Terceira CI aprovou a Rotina completa com duas contas reais isoladas. Nova
+  conta alterou a selecao inicial da captura administrativa; estabilizar essa
+  precondicao preservando todas as assertions e referencias visuais existentes.
+
+## 2026-10-13: Padrao de texto regional imob
+
+- Capitalizacao solicitada salva no CRM as 22:54: primeira letra maiuscula
+  e demais minusculas, preservando 93 atividades e 18 linhas.
+- Fonte, tamanho, peso e entrelinha iguais a House; 108 campos conferidos
+  apos recarga. Somente dados pela UI existente, sem codigo ou novo deploy.
+
+## 2026-10-13: Cadastro da rotina Gerente regional imob
+
+- Conteudo autorizado cadastrado pela UI existente, usando TESTE1.xlsx:
+  18 linhas e 93 atividades de segunda a sabado. Tres linhas vazias removidas;
+  textos completos, ordem dos dias e vazios individuais preservados.
+- Matriz normalizada conferida por hash e todas as 108 celulas comparadas
+  antes/depois de salvar e recarregar. Hoje corresponde a terca-feira;
+  Gerente regional house permaneceu igual e console sem erros.
+- Dados salvos no CRM as 22:27 de Sao Paulo. Sem codigo, migration, ACL,
+  workflow ou deploy. Planilha e captura permanecem fora do Git.
+- Lint/typecheck/build aprovados. Suite geral: 2662 passaram, 63 skips,
+  uma falha existente de symlink no estoque, registrada em ATUALIZACOES;
+  nenhuma alteracao para contornar o teste e nenhuma promocao de runtime.
+
+## 2026-10-13: Replica informacional do dashboard
+
+- Revisao P2 do PR213 reproduziu ranking antigo apos ingestao parcial com
+  generatedAt reutilizado. Exige tambem updated_at coincidente entre ranking
+  e dashboard antes de consultar participantes; duas regressoes falharam antes
+  da correcao. RPC atual usa now() transacional para ambos; sem migration.
+- CI38498361779 aprovou validate, restore, E2E e todos os checks funcionais
+  da matriz visual; falhou apenas nas 11 referencias alteradas de /app.
+  Capturas revisadas e promovidas pelo helper original; 231 imagens preservadas.
+  Fingerprint reproduzido prova apenas 19 outputs gerados, sem diff de codigo.
+  Limiares intactos e nova CI verify obrigatoria antes de merge/publicacao.
+- CI inicial do PR213 aprovou validate, restore e QA sintetico, mas E2E ainda
+  esperava o titulo anterior. Atualizadas as tres expectativas, preservando
+  a matriz de permissoes e acrescentando a verificacao das secoes/tabelas.
+- Pedido: reproduzir em `/app` as informacoes e secoes da referencia publica
+  `descomplicapro.com.br`, usando os dados atuais do CRM, conforme confirmacao
+  expressa do usuario. Nenhuma contagem historica foi copiada para o produto.
+- Relatorio com conversao por etapa, comparativos mensais, diagnostico,
+  realizado por intervalo e distribuicao de corretores por gerente. Preserva
+  shell, temas, visoes autorizadas e atualizacao Salesforce existente.
+- Equipe consultada via SSR/RLS apenas na visao Geral com as permissoes
+  correspondentes. Rejeita bases incompletas, geracoes divergentes e alteracao
+  concorrente; nao usa pontuacao nem altera a politica de ranking.
+- Dimensoes ausentes, meta proporcional e plano de acao permanecem
+  indisponiveis. Sem migration, mutacao de dados remotos ou alteracao no n8n.
+- QA sintetico: 65 verificacoes aprovadas, 18 combinacoes completas/indisponiveis
+  e 21 capturas, sem overflow ou violacao Axe grave. Revisao corrigiu a janela
+  de reingestao com timestamp igual usando updatedAt original do dashboard.
+- Tipos e build passaram. Suite Windows tem uma falha preexistente no teste de
+  symlink do estoque, reproduzida isoladamente; nao foi suprimida. CI Linux,
+  revisao de baseline e publicacao pendentes. Evidencias e limites em
+  `docs/audits/dashboard-reference-2026-10-13.md`.
+
+## 2026-10-13 — Estoque no ciclo automático dos oito relatórios
+
+Revisão P2 corrigida: uma falha depois do rename agora restaura a base anterior
+sob a mesma trava e confirma o hash. Inode inesperado ou recuperação não confirmada
+geram status próprio, sem sobrescrever alteração concorrente. Regressões simulam
+falha de fsync, releitura, primeira publicação e substituição externa.
+
+Pedido direto de 13/10/2026 substitui a coleta avulsa: o scheduler coleta e publica ESTOQUE SPC após os sete relatórios, na mesma agenda de 30 minutos. Base única dos quatro simuladores, troca atômica, proteção contra cargas antigas/incompletas e cópia anterior. Coletor escreve somente em diretório dedicado; aplicação mantém mount somente leitura. Falha de estoque aparece no ciclo, sem apagar a última base. Atualização do serviço exige CI, backup, CAS e consulta de release no minuto; n8n e seus contratos permanecem intactos.
+
+Validação local: lint/tipos/build aprovados; Vitest 2.663 aprovados (63 skips);
+coletor 233 aprovados (um skip), mais o caso de rejeição de lock alternativo;
+release 113 aprovados (11 skips exclusivos de Linux). Publicação atômica cobre
+idade, regressão temporal, cancelamento, symlink, permissões e backup. QA sintético
+passou nove combinações tema/largura, zoom 200% e evidência do modo automático.
+Audit sem vulnerabilidades conhecidas. CI e ativação do serviço ainda pendentes.
+
+## 2026-10-13: Base de unidades pelo relatório oficial Salesforce
+
+- Usuário definiu ESTOQUE SPC como fonte oficial. Verificação encontrou feed
+  com 2.243 unidades e data 07/08, além da planilha fixa de 3.301 unidades com
+  referência 05/09. Os sete relatórios comerciais não atualizam esses dados.
+- Coleta completa do relatório `00OU6000007yRpKMAU` por 30 empreendimentos,
+  preservando filtros e validando contagens antes/depois. Em 17:43:49.870Z,
+  candidato privado com 2.976 linhas/unidades, zero duplicatas: 2.891 Disponível
+  e 85 Mirror. Duas sem identificador textual e três sem preço utilizável;
+  IDs Salesforce mantidos e valores ausentes não inventados. Não é publicação.
+- Ambos os endpoints de estoque podem servir a mesma carga oficial privada,
+  incluindo Tabela Direta. Cache renovável, autorização mantida e sem retorno
+  à base histórica quando a fonte oficial falha. Compose valida o arquivo.
+- Conectar Sistemas inclui estoque com evidência do arquivo servido e rótulo
+  de coleta avulsa. Agenda dos sete relatórios e n8n permanecem independentes.
+- `pnpm verify` aprovado: lint sem erros (um aviso preexistente), tipos,
+  137 arquivos Vitest, 2.658 testes aprovados e 63 skips existentes; suite Node
+  do coletor e release aprovadas (11 verificações físicas reservadas à CI Linux),
+  além de build. Audit sem vulnerabilidades conhecidas. CI e publicação ainda
+  pendentes neste registro. Nenhuma linha comercial foi adicionada ao Git.
+- Matriz de navegador atualizada para os oito links, preservando os sete
+  relatórios comerciais. Caso sintético verifica a data própria do estoque e
+  o rótulo de coleta avulsa, sem inventar contagem quando a evidência falta.
+  Ensaio aprovado em nove combinações de tema/largura, zoom de 200%, estados,
+  polling e console sintético. A CI inicial do PR foi cancelada para incorporar
+  esse ajuste das expectativas de sete para oito linhas; nenhum gate foi removido.
+- Revisão do PR identificou conversão de descontos ausentes para zero no
+  enriquecimento legado da interface. Corrigida para manter preço incompleto
+  indisponível, com regressões para cada componente ausente, zero real e
+  precisão em centavos. Nova execução integral de `pnpm verify` e CI exigida
+  após a correção; a execução anterior da CI foi cancelada sem publicar.
+- Verificação integral final aprovada: 2.662 testes Vitest; coletor Node
+  222 aprovados/um skip; release 113 aprovados/11 skips Linux; lint, tipos e
+  build aprovados. Main documental 2a6ca66 integrado, preservando os registros
+  dos dois trabalhos. Runtime permanece idêntico a 23bab1e; CI reiniciada
+  para o merge reconciliado, sem reduzir gates.
+
+## 2026-10-13: Aceite operacional de dois ciclos concluido
+
+- Segundo disparo natural17:30Z publicou HTTP201 as17:36:10Z, request
+  3bdb5ff0-ee7a-4a32-974c-5947b50cd77a, run392a3e84-bde8-46ea-afb3-e4fd6fa06484.
+  MCP confirmou as duas runs distintas, cada uma com159 registros e uma auditoria.
+- Snapshots avancaram para17:33:45.009Z, sem acumular filhos:3views/15metricas/
+  15empreendimentos/144participantes. Sete relatorios completos nos dois ciclos.
+- Collector enabled/active, mesmo PID1138878 e zero reinicios, browser preservado.
+  Proximo disparo18:00Z. Pico723681280 bytes abaixo de768MiB. Agenda fica ativa.
+- Probes anonimos sinteticos rejeitados403 no n8n e401 no CRM. Novo workflow
+  dcffaf09 relido via MCP, sem mudanca ou persistencia de payload; antigo intocado.
+- Guia de conclusao atualizado com operacao, MFA, backups e reversao. Evidencias
+  somente agregadas, sem clientes ou segredos. Publicacao desta etapa e documental.
+
+## 2026-10-13: Primeira carga pela agenda e replay sem duplicacao
+
+- CI38431108475 passou quatro jobs; instalador ativou689bf174 as17:04:52Z.
+  Collector enabled/active, zero reinicios, navegador preservado. Monitor
+  independente desabilitado para nao sobrepor as verificacoes.
+- Primeira carga HTTP201 as17:10:59Z, requestcf334046 e run6d4aaa43.
+  Supabase confirmou159 registros normalizados e uma auditoria de sucesso.
+  Replay HTTP200/idempotenttrue manteve uma run/auditoria.
+- CRM mostra sete contagens, ultima publicacao14:10 e proxima execucao14:30.
+  Segundo ciclo natural em observacao; primeiro sucesso nao encerra o aceite.
+- pnpm verify localb825c2e passou lint/tipos/test/build. Nenhum workflow alterado;
+  n8n antigo intocado. App689bf174 publicado por outra tarefa, health/ledger
+  reconferidos17:12Z e coerentes, sem transacao pendente.
+
+## 2026-10-13: Coleta completa e repeticao da agenda pendente
+
+- Main554a971 passou CI38425049893 quatro jobs. Ativacao16:26Z iniciou sem
+  falha de credenciais; primeiro ciclo falhou16:28:55Z antes de publicar.
+  Causa ainda nao identificada. Dados validos anteriores foram preservados.
+- Rollback normal corrigido restaurou monitor, sem reiniciar o navegador.
+  Coleta isolada sem publicacao terminou16:36:20Z, sete relatorios completos:
+  19973/1091/514/2605/767/36/7. Nenhum envio real nesta repeticao.
+- PR208 externo avancou main para689bf174. Gate impediu reutilizar SHA antigo;
+  checkout e preflight atuais passaram, aguardando CI38431108475 e dois ciclos.
+
+## 2026-10-13: PR206 integrado e correcao validada
+
+- CI38418203102 aprovada; merge554a971. Main CI38425049893 em curso antes da
+  nova ativacao. O teste fisico Linux do bridge passou: coletor208/208,
+  release124/124, aplicativo2647/63skips. Instalador focado69/69.
+- Conjunto integradoa7657a1 no Windows passou lint/tipos/pnpm test/build.
+  Uma rodada teve timeout30s Obsidian; repeticao completa sem build concorrente
+  passou, sem ampliar timeout. Revisao independente sem achados concretos.
+- Unidade isolada real na VPS confirmou expansao dos caminhos e copias0600
+  pelo ExecStartPre, validacao estrita e limpeza automatica, sem acesso de rede.
+- App7d6341f publicado por outra tarefa, health/ledger15:20Z coerentes e sem
+  transacao pendente. Esta entrega nao reiniciou CRM, navegador ou n8n.
+- Checkout554a971 e dependencias preparados; preflight passou. Historico da
+  primeira tentativa preservado, monitor anterior ativo, agenda ainda desligada.
+
+## 2026-10-13: Logo na aba do navegador
+
+- Pedido e referência visual identificam o ícone da aba do navegador.
+- A imagem PNG original de 225 × 225 foi copiada sem transformação para
+  `app/icon.png`; o favicon padrão foi removido. O Next.js gera o link global
+  com tipo, tamanho e URL versionada conforme sua convenção de metadados.
+- SHA-256 do asset e do anexo conferidos como idênticos:
+  `6c5a443be4587aaf22c682c51c798e49a11aa4b9babeb34ccec240282653cdf4`.
+- Escopo restrito à identidade da aba. `pnpm verify` aprovado: lint sem erros
+  (um aviso preexistente), tipos, 136 arquivos Vitest (2.647 aprovados e 63
+  skips), 195 testes Node do coletor, 113 testes de release (11 skips Linux)
+  e build. Nenhum teste novo para esta troca de asset.
+- Preview HTTP confirmou página 200, único link de ícone com URL versionada,
+  `image/png` e `225x225`; resposta do ícone 200 com SHA-256 idêntico ao anexo.
+  CI e publicação ainda pendentes neste registro de preparação.
+- A atualização concorrente `554a971` foi incorporada antes da publicação;
+  os dois registros de documentação foram preservados na resolução do merge.
+
+## 2026-10-13: Ensaio real e correcao de compatibilidade systemd
+
+- CI38408795856 passou nos quatro jobs; suite final do coletor195/195 passou.
+  Ativacao1ace82d iniciada14:36Z e revertida apos falha inicial de configuracao.
+- Prova isolada systemd255: LoadCredential aparece0440/root, recusado pelo
+  contrato de arquivo privado. Copia com install0600 em RuntimeDirectory0700
+  passou nas duas credenciais; bytes identicos, sem rede, diretorio removido.
+- Rollback encontrou unidade ja descarregada em reset-failed. Recuperacao
+  conferiu collector disabled/inactive antes de omitir apenas esse reset;
+  demais CAS/lock/restauracao executados pelo instalador original.
+- Estado rolled-back, monitor enabled/active e navegador com mesmo PID2881480
+  confirmados14:44Z. Nenhuma nova publicacao confirmada. Correcao e reteste em curso.
+
+## 2026-10-13: PR203 integrado e ambiente do coletor preparado
+
+- Merge1ace82d depois de CI38400603988 aprovada. CI push38408795856 em curso;
+  nenhuma ativacao antes dos quatro jobs verdes no SHA exato.
+- Windows: Vitest completo maxWorkers1 passou136arquivos/2647testes/56skips,
+  sem alterar timeouts. Coletor194 e instalador final57 passaram; release113
+  passou/11skips POSIX. Systemd255 aceitou a unidade em verificacao isolada.
+- Dependencias copiadas sem hardlinks compartilhados; leitura corrigida apenas
+  nas copias de codigo. Preflight como usuario dedicado passou. Backup privado
+  de monitor/candidato conferido, com fsync. Nenhum servico reiniciado.
+- Health/ledger08c3ae e novo workflowdcffaf09 reconferidos11:00BRT.
+  Aplicacao e coletor possuem versoes separadas; n8n antigo preservado.
+
+## 2026-10-13: Correcao de rolagem e rodape da Rotina
+
+- Reproducao Chromium: com foco na linha 7 e mouse na ultima linha, o refresh
+  reduzia scrollY de 4028 para 237. A medicao zerava alturas dos campos reais,
+  reduzindo temporariamente o documento e limitando a rolagem do navegador.
+- Medicao agora usa campos invisiveis fora do fluxo, sem encolher os editores,
+  mudar foco ou redefinir a selecao. Conteudo, hover e persistencia preservados.
+- Credito direto no fundo, sem faixa/borda, a direita; entrada e brilho seguem
+  direita-esquerda. Movimento reduzido desativa ambas as animacoes.
+- Regressao cobre Semana/Hoje, desktop/mobile, leitura/edicao, refresh por
+  intervalo/foco, selecao e digitacao. Matriz autenticada inclui o caso de
+  ultima linha. Validacao global e publicacao pendentes.
+- Lint/tipos/test/build locais aprovados; suite geral2647, coletor138 e
+  release113 (11 fisicos Linux na CI). Browser87/87 com CSS minificado.
+- CI revelou contraste do credito branco no tema claro com movimento reduzido
+  (1.08:1), reproduzido localmente. Credito agora adapta a cor aos temas claros,
+  mantendo branco no escuro; Axe ampliado para ambas as preferencias de movimento.
+  QA de entrada verifica matriz real para resistir a minificacao CSS.
+
+## 2026-10-13: Preparacao da agenda Salesforce
+
+- Escopo autorizado: ativar rotina de 30 minutos na VPS depois da carga real
+  comprovada, preservando novo workflow e n8n antigo. Primeiro ciclo imediato,
+  seguintes nas fronteiras de 30 minutos, sem exportacoes concorrentes.
+- Revisao independente crm-qa: 57 testes Node e quatro verificacoes sinteticas
+  passaram em Node24.19/Windows. Nenhum bloqueio concreto no runner existente.
+  Limites: encerramento forcado pode deixar lock e reinicio zera progresso em memoria.
+- Preflight observacional: app08c3ae, ingesttrue/refreshfalse e segredos efetivos
+  correspondentes, sessao remota conectada as09:31 de Brasilia. Novo n8n ativo
+  emdcffaf09, cinco nodes, sem agenda interna nem payloads persistidos.
+- CI38363681423 do PR203 falhou por HTTP403 da fonte oficial ITBI/SP.
+  O mesmo verificador, sem alteracoes, passou localmente nesta retomada.
+- Servico e instalador em preparacao; ativacao e dois ciclos reais ainda pendentes.
+- Instalador concluido com 57 testes focados aprovados. Suite do coletor passou
+  194 testes antes do ultimo caso adicional; release113 passou/11 skips POSIX.
+  Lint sem erros (um aviso preexistente), typecheck e build aprovados.
+- pnpm test no Windows falhou em quatro testes por timeout (devtools/Obsidian).
+  Repeticao com dois workers e diagnostico isolado em andamento; nao atribuir
+  aprovacao integral local. Formato dos arquivos alterados e diff-check passaram.
+
+## 2026-10-13: Conexao n8n e Supabase comprovada em producao
+
+- PR198 integrado; CI38358420498 aprovada. Artefato15ddedd teve checksum,
+  cadeia OCI/config/11camadas e dois perfis de runtime comprovados na VPS.
+- Release protegida54fc028d publicada07:27Z, com backup integral privado do
+  env, ingestao habilitada, refresh desligado e nenhum secret em logs.
+- Novo workflow L90AYSBEat4vYHLz publicado exclusivamente via MCP. Nome e
+  descricao atualizados apos validar SDK; releitura confirmou grafo/settings
+  identicos. N8n antigo intocado, nenhuma migration remota aplicada.
+- Exportacao real dos sete relatorios: primeira carga201 e replay200 do mesmo
+  requestId, reconciliados no Supabase. Snapshot13/10, 15metricas/144participantes,
+  uma run e uma auditoria. Interface autenticada confirmou os tres servicos.
+- Agenda30min e refresh ainda desligados; monitor independente ainda nao recebe
+  contagens/recibos da carga pontual. Runbook e auditoria registram o limite.
+- Validacao local repetida: pnpm verify exit0 (lint/typecheck/test/build),
+  Vitest2647/43skips, release113/11skips Linux e coletor138. CI Linux verde.
+
+## 2026-10-13: Efeitos da Rotina em producao
+
+- PR202 integrado em08c3ae4; CI main38364326341 com quatro jobs aprovados.
+- Artefato imutavel e backup verificados; publicacao protegida concluida
+  as05:22:09 Sao Paulo, deploymentd045c054, sem pendencia.
+- Smoke operacional e navegador autenticado aprovados. Gradientes, controles,
+  Semana/Hoje e rodape conferidos; nenhum dado real editado ou salvo.
+- Versao15ddedd concorrente e suas configuracoes preservadas. Nenhuma migration,
+  workflow ou agenda alterada. Evidencias em docs/knowledge/ATUALIZACOES.md.
+
+## 2026-10-13: Efeitos e compactacao da Rotina
+
+- Controles Semana/Hoje/Inserir linha movidos para o cabecalho, antes de Salvar.
+  Removida faixa redundante de funcao e mantidas abas/caption acessiveis.
+- Titulos com gradiente azul-petroleo e contorno especular; realce de linha e
+  coluna na semana, linha no dia e ampliacao sutil sem alterar a grade.
+- Rodape local com assinatura branca e brilho, respeitando movimento reduzido.
+  Persistencia, regras de acesso, API e banco preservados.
+- Validacao local final: 80/80 casos de interface/API, Axe sem violacoes nas
+  12 combinacoes, lint/tipos/build/formatacao aprovados. Suite geral Windows:
+  2567 aprovados, seis falhas POSIX conhecidas; CI Linux ainda obrigatoria.
+- Corrigido helper QA para preservar movimento reduzido do runner autenticado;
+  83/83 casos focais aprovados. Runtime e criterios de aprovacao preservados.
+- Movimento reduzido desliga transicoes da tabela mesmo sob o CSS global;
+  fixture agora importa globals.css. 83/83 testes focais com cascata real passam.
+- Integra main15ddedd/PR198 sem descartar registros. Lint/tipos/test/build
+  aprovados: Vitest2647, coletor138, release113; testes fisicos Linux na CI.
+
+## 2026-10-13: Aplicacao transacional da configuracao Salesforce
+
+- Cartoes n8n/Supabase deixam o texto fixo e usam consulta autenticada existente,
+  respeitando permissao, falha, timeout e data do recibo. Sem endpoint publico
+  novo, elevacao de privilegio ou alegacao de disponibilidade continua do n8n.
+- Integra main1c36fce preservando os registros de ambas as frentes.
+- Revisao constatou que o coordenador anterior trocava somente IMAGE_TAG;
+  configurador legado ficava fora das travas. Adiciona opcao de ingestao ao
+  deploy existente, sem restart direto, bypass de CI ou segredo em argumentos.
+- Intencao registra apenas UUID/hashes do backup privado. Recuperacao restaura
+  env integral, inclusive quando Compose nao iniciou; verifica runtime antes
+  de concluir. Mesmo SHA nao pode confirmar uma configuracao nao aplicada.
+- Sessao Salesforce conectada em 05:37Z; RPC Salesforce executavel somente
+  pelo papel tecnico, Qlik continua sem acesso direto. Candidata n8n inativa.
+- Backup recuperado ja comprovado; segunda copia independente da chave e
+  recomendacao pendente, nao novo bloqueio a conexao solicitada.
+- Validacao final: pnpm verify aprovado (lint, typecheck, test e build50rotas),
+  Vitest2647/43skips, coletor138, release113/11skips Linux. N8n23/23 e fontes
+  publicas aprovados. Lint mantem um aviso preexistente no helper de tema.
+- QA sintetico aprovado: nove telas/temas, zoom200%, evidencia de ingestao/
+  leitura, falha503, logos e pixels do console. Corrige regressao da verificacao
+  manual quando monitor esta desativado, detectada pelo mesmo QA.
+- Formatacao dos arquivos alterados aprovada. format:check global encontra
+  dois arquivos preexistentes nao versionados em output; preservados. CI nao
+  recebe esses artefatos. Revisao independente sem achados P1/P2; interrupcao
+  fisica do conjunto backup/Compose nao foi ensaiada, somente I/O simulado.
+- CI, promocao e ingestao real ainda precisam de comprovacao.
+
+## 2026-10-13: Backup externo recuperado e prontidao corrigida
+
+- Validacao final: lint/typecheck/test/build, fontes documentais e diff check
+  aprovados. Vitest2620/43skips, coletor138, release86/10skips e n8n23/23.
+  CI do commit aa2ec8f em andamento; health publico continua7c50f59/ok.
+- Guia de conclusao entregue com acessos, backup, custodia, gates e limites.
+  Sem promocao, injecao de secrets ou ativacao de agenda nesta etapa.
+- Backups Supabase e novo n8n criptografados para bucket privado autorizado.
+  Download/checksum e recuperacao local com igualdade SHA256 aprovados.
+  Chave privada somente Windows; segunda copia independente ainda pendente.
+- Corrige corrida no restore novo n8n: TCP/SELECT no banco destino aguarda
+  servidor definitivo, em vez do socket temporario aceito por pg_isready.
+  Ensaio remoto corrigido exit0/148tabelas; n8n antigo intocado.
+- Revisao independente confirma gate especifico Salesforce e promocao efetiva
+  para injetar env; documenta reutilizacao de credenciais e nenhuma migration.
+- CI63bf15b bloqueada por fonte Prefeitura HTTP403; uma repeticao solicitada,
+  sem remover verificacao. Configuracao, ingestao e agenda ainda desligadas.
+
+## 2026-10-13: Destino privado e chave de recuperacao
+
+- Bucket privado autorizado criado e testado com dados ficticios; sem upgrade.
+- Chave privada RSA4096 guardada somente no Windows com ACL restrita.
+- CMS AES256GCM/OAEP-SHA256: roundtrip VPS/Windows e rejeicao de adulteracao
+  aprovados. Nenhum backup real enviado, copia offline da chave pendente.
+- Documenta limites e gates em docs/runbooks/crm-backup-storage.md.
+- N8n antigo preservado; ingestao real e agenda continuam desligadas.
+- Revalidacao: lint/typecheck/test/build aprovados, alem de formatacao e
+  fontes documentais. Vitest2620, coletor138 e release86 testes aprovados;
+  43 skips Vitest e 10 testes fisicos exclusivos Linux. Build50rotas.
+
+## 2026-10-13: Backup restaurado e ingestao isolada
+
+- Validacao final apos integrar main7c50f59: lint (um aviso preexistente),
+  typecheck e build aprovados. pnpm test com VITEST_MAX_WORKERS=2 passou:
+  Vitest2620/43skips, coletor138/0skips, release86/10skips Linux obrigatorios.
+  Testes n8n adicionais22/22; formatacao dos tres arquivos legados corrigida.
+- Auditoria concluida: Qlik/v3 nao sao dependencias Salesforce. Preparado plano
+  de revisao, sem migration nova ou aplicacao cloud; ver auditoria de13/10.
+- Backup oficial do projeto hnncxuerlcsaahdxoswb na VPS, com schema, dados,
+  roles e historico; arquivos privados, checksums relidos e fsync confirmado.
+- Restore em Postgres 17.6.1.155 sem rede/portas/volume persistente: 65 tabelas
+  COPY com contagens identicas. Nao inclui bytes de objetos Storage nem offsite.
+- Exportacao real dos sete relatorios, publisher desligado. Na copia isolada,
+  RPC service_role gravou 15 metricas/144 participantes; replay manteve um run.
+- Corrigidas fixtures Windows de caminhos canonicalizados, modos POSIX e ACLs
+  nativas; sem alterar a protecao de arquivos do codigo de producao.
+- Configuracao e primeira escrita cloud continuam bloqueadas pelo inventario
+  divergente de RPCs do runbook. Usuario autorizou auditoria/preparacao, nao
+  aplicacao automatica de migrations. N8n antigo e agenda preservados.
+
+## 2026-10-13: Recibo do CRM preparado no n8n
+
+- Credencial de saida salva pelo operador e confirmada/vinculada pelo MCP.
+- Candidata ampliada para cinco nodes, validada antes do update e relida inativa.
+- Envio HTTPS fixo, sem redirects/retries; sucesso exige 200/201, mesmo requestId
+  e idempotencia coerente. Nenhum dado real enviado e nenhuma agenda ativada.
+- Dezenove testes locais sinteticos passaram; lint (um aviso anterior), tipos
+  e build aprovados. Vitest: 2566 passaram, 27 skips e seis falhas Windows
+  de caminhos/permissoes; etapas seguintes de pnpm test nao executadas.
+- PR198 aberto, mergeable false; consulta de runs do head anterior vazia.
+
+## 2026-10-12: Preparacao privada da credencial de saida
+
+- Chave Supabase recebida em arquivo root 600 e aceita no catalogo HTTP 200.
+- Bearer exclusivo n8n para CRM gerado na VPS; formulario restrito ao dominio CRM.
+- Salvamento da credencial aguarda usuario. Sem edicao de workflow ou runtime.
+
+## 2026-10-12: Configuracao de ingestao auditada
+
+- Projeto Supabase de producao confirmado por URL/MCP; somente catalogos lidos.
+- Ingestao desligada e segredos necessarios ausentes no CRM; saida n8n sem credencial.
+- RPC Salesforce restrita a service_role; tabelas Qlik sem grants diretos aos tres papeis.
+- Oito testes de schema aprovados. Sem mutacao remota; login Supabase aguarda operador.
+
+## 2026-10-12: Sete fontes coletadas na VPS
+
+- Coleta unica com publisher desligado concluiu em aproximadamente seis minutos.
+- Schema do release validou candidato privado: 15 metricas, 144 participantes.
+- Testes locais de coleta: 20 passaram; nenhuma mudanca de runtime ou deploy.
+- Sem envio ao n8n/Supabase; agenda continua desligada e gates de ingestao pendentes.
+
+## 2026-10-12: Teste HTTP isolado concluido
+
+- Candidata L90AYSBEat4vYHLz publicada temporariamente por MCP com autorizacao.
+- POST da VPS: sem credencial 403, credencial incorreta 403, credencial salva 202.
+- Resposta candidata conferida; despublicacao e privacidade relidas por MCP.
+- Sem Salesforce, Supabase ou n8n antigo. Sem alteracao de codigo de runtime.
+- Suite geral nao repetida; PR/CI nao consultados por gh ausente no PATH.
+
+## 2026-10-12: Processamento sintetico confirmado
+
+- Execucao manual MCP 2 passou; accepted true no validador e ultimo node success.
+- Registro temporario autorizado restaurado para none/false e relido.
+- Fluxo inativo. Autenticacao HTTP da VPS, exportacao e ingestao nao testadas.
+- Somente documentacao local; sem nova suite geral ou deploy do CRM.
+
+## 2026-10-12: Rate limit antes do teste sintetico
+
+- Registro temporario autorizado; validate_workflow recebeu HTTP 429.
+- Nenhuma configuracao alterada. Fluxo inativo e persistencia desativada.
+- Parada sem fallback conforme regra MCP; teste remoto segue pendente.
+
+## 2026-10-12: Teste MCP iniciado, resultado indisponivel
+
+- Execucao manual 1 iniciada com fixture; consulta nao encontrou a execucao.
+- Resultado nao confirmado. Sem ativacao ou contorno REST/UI/banco.
+- Solicitado registro temporario somente sintetico para proxima verificacao.
+
+## 2026-10-12: Credencial vinculada por MCP
+
+- Header Auth salvo pelo operador e ID conferido na UI, sem acesso ao segredo.
+- Validacao SDK, vinculo por MCP e releitura aprovados; candidata inativa.
+- Backup atualizado e restore de 148 tabelas aprovado. Teste remoto bloqueado
+  por ausencia de execute_workflow no chat; necessario recarregar MCP.
+- Mudanca documental; sem nova suite geral, deploy CRM ou ativacao da coleta.
+
+## 2026-10-12: Backup local do novo n8n
+
+- Script limitado ao projeto descomplica-n8n-crm, sem acessar a instancia antiga.
+- Backup privado de banco, configuracao e .n8n; restauracao em banco temporario
+  sem rede comprovou 148 tabelas. Container de teste removido; readiness ok.
+- Sem backup externo, boot de clone ou prova de descriptografia de credenciais.
+- Credencial e OAuth de execucao autorizados. CLI confirmou OAuth; ferramentas
+  de execucao ainda nao carregadas. Formulario de credencial aguarda o operador.
+- Onze testes especificos aprovados; lint (aviso anterior), typecheck e build
+  passaram; suite geral manteve seis falhas Windows, 2566 aprovados e 27 skips.
+
+## 2026-10-12: Candidata Salesforce criada via MCP
+
+- Workflow L90AYSBEat4vYHLz criado, validado e relido no novo n8n; inativo.
+- Operador autorizou validate_workflow como substituto do validador antigo.
+- Settings de privacidade aplicados por MCP e relidos; nenhuma escrita no CRM.
+- Credencial de entrada, backup de dados e teste ponta a ponta ainda pendentes.
+- Validacao: oito testes Node passaram; lint (aviso anterior), typecheck e build
+  passaram. Suite geral: 2566 passaram, 27 skips, seis falhas Windows preexistentes.
+- Sem merge/deploy CRM; entrega publicada como candidata no PR198.
+
+## 2026-10-12: OAuth MCP conectado
+
+- CLI e UI confirmaram Codex conectado ao n8n_crm_vps com cinco escopos limitados.
+- Ferramentas ainda ausentes neste chat; recarregamento necessario antes dos fluxos.
+- Sem workflow criado/ativado, sem alteracao de legado ou credenciais em documentos.
+
+## 2026-10-12: Preparacao OAuth do MCP
+
+- MCP novo habilitado apos confirmacao; cliente n8n_crm_vps separado do legado.
+- Secoes de conexao n8n antiga preservadas por hash. OAuth reduzido aguarda login.
+- Somente registro operacional; sem novo codigo de runtime ou workflows.
+
+## 2026-10-12: Liberacao HTTPS apos owner
+
+- Operador concluiu cadastro; painel autenticado confirmado pelo navegador.
+- Override HTTPS aplicado somente ao novo n8n; banco/runner e legado preservados.
+- Nginx validado; painel200, API anonima401, owner/setup403, login HTTPS visivel.
+- Nenhum workflow criado ou ativado. MCP e backup/restore continuam pendentes.
+
+## 2026-10-12: DNS e HTTPS isolados do n8n
+
+- Novo A n8n-crm criado pela Hostinger, TTL300, para 187.127.249.50.
+- Certificado dedicado emitido com conta ACME existente, validade 2027-01-10.
+- Backup privado do Nginx antes da inclusao; nginx -t aprovado e reload apenas.
+- HTTPS retorna503 intencionalmente ate cadastro privado do owner. Nenhum proxy
+  ao setup publico, nenhum workflow alterado e nenhum restart do CRM.
+- Inclui tres testes de perimetro e templates HTTP/HTTPS pendentes.
+- Lint/tipos/build e40 testes focados aprovados. Suite Windows:2564 passaram,
+  27 skips,7 falhas fora do escopo (POSIX/caminhos e timeout Obsidian).
+  CI do novo head pendente; owner/MCP e automacoes ainda nao liberados.
+
+## 2026-10-12: Preparacao de n8n exclusivo do CRM
+
+- Nova infraestrutura isolada em ops/n8n, sem modificar o n8n anterior.
+- Preparacao recusa recursos existentes; segredos privados e imagens por digest.
+- Cadastro inicial privado, runner externo e PostgreSQL exclusivos. DNS/HTTPS
+  autorizados somente para n8n-crm.descomplicapro.com.br; painel DNS indisponivel.
+- Nenhum workflow ativado, nenhuma ingestao nem alteracao da sessao Salesforce.
+- Validacoes e estado aplicado registrados em docs/knowledge/ATUALIZACOES.md.
+- Instancia privada inicial instalada: readiness200, n8n2.42.7, Postgres saudavel
+  e runner iniciado. Configuracao Codex antiga identica. Owner/DNS/HTTPS pendentes.
+- 37 testes focados, tipos/build aprovados; suite Windows tem nove falhas fora
+  do escopo. CI Linux validate passou em26e29e5; gates completos ainda pendentes.
+
+## 2026-10-13: Publicacao da Rotina compartilhada
+
+- PR #200/7c50f59, quatro gates main aprovados; migration aditiva autorizada
+  aplicada via MCP apos snapshot verificado dos objetos afetados.
+- Deploy bf212f6d concluido as 00:57:09 de Sao Paulo pelo coordenador.
+- Persistencia real confirmada: house revisao 1/26 linhas, recarga bem-sucedida.
+  Cabecalho contrastante publicado, leitores sem escrita e CAS protegendo edicoes.
+- Evidencias, backups, timestamp remoto da migration e limites em ATUALIZACOES.md.
+
+## 2026-10-12: Rotina compartilhada
+
+- API autenticada e RPC versionada substituem localStorage como autoridade.
+  Leitura por crm.dashboard.view e escrita por crm.settings.manage.
+- Revisao por funcao impede sobrescrita concorrente; erros preservam rascunhos.
+  Atualizacao ao focar/30 segundos somente sem alteracoes pendentes.
+- Legado local permanece disponivel para importacao explicita por funcao.
+- Cabecalho com faixa teal e Hoje cyan, contraste legivel nos tres temas.
+- Usuario autorizou migration aditiva de producao apos testes e backup.
+  Implementacao em validacao; nao confundir com publicacao concluida.
+- CI inicial aprovou aplicativo Linux e detectou fixtures/inventario SQL;
+  corrigidos escopo unico e gate restritivo MFA, aguardando nova execucao.
+
+## 2026-10-12: Publicacao da rolagem da Rotina
+
+- PR #197 integrado em 1160a0e, CI main 38328297524 aprovada integralmente.
+- Imagem imutavel publicada com backup e coordenador, as 22:21:12 de Sao Paulo.
+- Smoke confirmou Hoje a esquerda, titulo regular e cabecalho dos dias a 58px,
+  imediatamente abaixo do menu. Titulo/abas/toolbar rolam; tabela sem scroll
+  vertical interno. Health exato e container saudavel, sem reinicios.
+- Evidencias, hashes e limites em docs/knowledge/ATUALIZACOES.md.
+
+## 2026-10-12: Rotina com rolagem de pagina
+
+- Remove limite de altura/rolagem vertical interna. Somente os dias acompanham
+  a pagina abaixo do menu, com o padrao de cabecalho real usado no Tabelao.
+  Titulo, abas e toolbar da funcao rolam normalmente; horizontal preservada.
+- Hoje alinha atividades a esquerda; Semana conserva centro e texto integral.
+- Titulo com peso regular e botao com contorno animado do padrao Associativo,
+  respeitando movimento reduzido e estado desabilitado. Referencia intacta.
+- Testes de geometria e matriz autenticada atualizados para o novo contrato.
+
+## 2026-10-12: Publicacao concluida da Rotina compacta
+
+- Publicado 9ff3fd3 pelo coordenador apos CI main 38302711569 integralmente
+  aprovada, prova da imagem imutavel e backup privado verificado.
+- Health exato, container saudavel e acesso anonimo protegido. Smoke
+  autenticado conferiu Semana/Hoje, 26 linhas/74 atividades e sticky.
+- Causa do bloqueio anterior confirmada na CI: fechamento do cliente precedia
+  o cancelamento do servidor. Teste sincronizado, sem mudar runtime ou gates.
+- Evidencias e limites em docs/knowledge/ATUALIZACOES.md; Obsidian sincronizado.
+
+## 2026-10-12: Sincronizacao do teste de timeout do gateway
+
+- Aguarda de forma limitada o cancelamento observado no servidor depois do
+  fechamento do cliente, como no teste vizinho de desconexao. Mantem a
+  assercao de abort e adiciona ausencia de conexao ao backend antes de autorizar.
+- Nao altera gateway, autenticacao, prazos de runtime ou gates de publicacao.
+
+## 2026-10-12: Evidencias finais e bloqueio de publicacao da Rotina
+
+- PR #192 integrado em 5bf6213 com CI 38282502810 aprovada e 30 combinacoes
+  visuais da Rotina verificadas. Suite Chromium isolada: 22/22.
+- CI de main 38285832880 falhou duas vezes no teste de timeout do gateway
+  Salesforce. Imagem nao gerada; deploy nao executado. Detalhes e criterio
+  de desbloqueio em docs/knowledge/ATUALIZACOES.md.
+- Health final ok em 1dd58c4, diferente do main integrado. Salvamento continua
+  local ao navegador. Referencia externa e Associativo nao foram alterados.
+
+## 2026-10-12: Rotina semanal e diaria compacta
+
+- Centraliza as atividades, remove domingo da exibicao e conserva o schema
+  local de sete dias para nao apagar conteudo previamente salvo.
+- Adiciona Semana/Hoje, com dia de Sao Paulo atualizado automaticamente,
+  linhas vazias editaveis e foco na nova linha. Titulo e dias permanecem
+  fixos dentro da area de rolagem, inclusive com quebra responsiva da barra.
+- Remove breadcrumb somente da Rotina, resumos, status ocioso e restauracao.
+  Preserva seis funcoes, armazenamento local e protecao contra saida sem salvar.
+- Validacao e publicacao em andamento; referencia externa e Associativo intactos.
+- Lint, tipos, build, inventario e nove testes de breadcrumbs aprovados.
+  Suite Windows: 2469 aprovados, 25 skips, seis falhas de modos POSIX;
+  gates Linux permanecem obrigatorios antes de publicar.
+- Chromium isolado: 19/19 aprovados, incluindo modos, domingo legado,
+  navegacao, persistencia, centralizacao e cabecalhos fixos sem sobreposicao.
+- Revisao corrigiu o foco da visao Hoje nos temas claros; regressao por
+  teclado passou nos tres temas. Tipagem do teste ajustada para consultar
+  animacoes no elemento raiz, com typecheck e repeticao focal aprovados.
+- CI 38267645863 falhou na matriz Rotina 720/claro, com causa ainda nao
+  comprovada. Adiciona diagnosticos sanitizados e espera do fim de transicoes
+  no QA diario, sem reduzir assercoes. Nova CI obrigatoria antes de publicar.
+- CI 38271094364 comprovou sticky e localizou a falha na largura ao trocar
+  para Hoje em 720px. QA aguarda o layout com a mesma tolerancia de 1px e
+  registra medidas iniciais/finais; nenhuma regra de overflow foi removida.
+- CI 38273867131 comprovou 30 combinacoes da Rotina e largura transitoria
+  960 -> 694 em 17ms. Falha restante agregava sticky do Tabelao desktop;
+  nao comprovava erro de ordenacao. Revisao reproduziu timers simulados
+  persistentes apos restaurar Date. QA da Rotina agora usa contexto proprio
+  e login sintetico, fechado ao terminar; Tabelao/Associativo intactos.
+- Regressao local final: 22/22 testes Chromium aprovados. Matriz de estilos
+  separada por tema, preservando limite por teste; lint focal e tipos passaram.
+
+## 2026-10-12: Planilha de Rotina publicada
+
+- PR #188 integrado e versao `83592ab` publicada pelo coordenador em
+  `2026-10-12T13:19:10.060Z`, deployment `48a08b2c-d4fe-4331-a710-5fdcb46f6d4c`.
+- CI do PR `38246693168` aprovada; CI final `38250580690`, tentativa 2,
+  aprovou os quatro jobs. Preparacao do pnpm falhou na primeira tentativa do
+  restore; repeticao isolada passou sem alterar os gates.
+- Imagem imutavel, 11 camadas, dois perfis e backup verificados. Health na
+  versao nova, container saudavel e acessos anonimos negados.
+- Smoke autenticado confirmou a grade continua, coluna Hoje, seis funcoes,
+  26 linhas e 74 atividades. Nenhuma mutacao no navegador de producao.
+- Helper externo encontrou Docker ainda starting apos o deploy concluido;
+  releitura confirmou healthy, sem reinicios. Evidencia detalhada no conhecimento.
+- Fechamento apenas documental, com sincronizacao do Obsidian, sem novo deploy.
+
+## 2026-10-12: Estabilizacao da matriz do console
+
+- CI 38271515539: validate aprovado; release-gates interrompido por contraste
+  no tema claro/320px. Nenhuma promocao realizada.
+- QA aguarda as transicoes reais de tema antes do axe e registra os elementos
+  e cores da falha. Mantidas todas as assercoes de acessibilidade.
+- Repeticao 38272615268: validate aprovado; mesma corrida tambem na matriz
+  da pagina anterior ao console. Espera compartilhada aplicada as duas matrizes.
+- Log 38273862007 confirmou cor intermediaria #6d7886 em vez de #68727f.
+  Espera agora cobre transicoes herdadas iniciadas apos a primeira leva.
+
+## 2026-10-12: Console Salesforce integrado ao CRM
+
+- Implementacao solicitada: autenticar manualmente no Chrome persistente da
+  VPS pelo CRM, sem depender do PC apos o login. Nenhuma automacao n8n,
+  exportacao ou escrita comercial/Supabase nesta etapa.
+- Console noVNC com bootstrap Master, origem exata, gateway loopback com
+  revalidacao de sessao, limite de tempo/conexao e prova Salesforce separada.
+- Senha Salesforce nao entra no formulario/API do CRM. A credencial tecnica
+  VNC permanece privada no servidor e transita apenas ao Master autorizado.
+- Validacoes e publicacao em andamento; evidencias finais em ATUALIZACOES.
+
+## 2026-10-12: Sessao Salesforce dedicada na VPS
+
+- Escopo solicitado: preparar navegador permanente na VPS, com login/MFA do
+  operador. N8n, exportacao recorrente e ingestao ficam fora desta etapa.
+- Servicos separados para navegador supervisionado, console SSH-only e
+  monitor existente. Perfil privado persistente, sem root/no-sandbox.
+- Instalacao opt-in, sem sobrescrever perfil, configuracao ou segredo;
+  console temporario e monitor desligado ate pareamento confirmado.
+- Validacao e provisionamento em andamento; resultados no conhecimento curado.
+
+## 2026-10-12: Redesenho da planilha de Rotina
+
+- Escopo: apenas Gestao > Rotina e seus testes. Referencia externa consultada
+  em leitura; nenhum formulario ou configuracao desse site foi alterado.
+- Grade continua, editor transparente sem borda/arredondamento, altura minima
+  de 44 px e autoajuste integral dos textos. Destaque de hoje em Sao Paulo,
+  renovado a cada 30 segundos e ao voltar a aba.
+- Conteudo inicial preservado: seis funcoes, 26 linhas e 74 atividades.
+  Persistencia continua local ao navegador; nenhuma migration ou dado remoto.
+- Validacao e publicacao em andamento; evidencias finais no conhecimento curado.
+
+## 2026-10-12: Publicacao de Gestao > Rotina concluida
+
+- PR #183 integrado; candidato `d679d8e` e main
+  `7c6dce5c48b9e267586283a273866bf4f87aa6e3` aprovados nas CIs
+  `38209790612` e `38213038968` (tentativa 2). Todos os quatro jobs passaram,
+  incluindo matriz autenticada, restore e imagem imutavel.
+- Promocao pelo coordenador release:production concluida em
+  `2026-10-12T07:22:13.239Z` (04:22:13.239 em Sao Paulo), deployment ID
+  `8f267ba8-ea32-4d42-9314-dbbc4113e11b`, sem pendencia. Artefato CI
+  `11730695750` verificado por checksum, cadeia OCI/camadas e perfis de runtime.
+- Backup privado verificado e versao anterior preservada para recuperacao.
+  Container saudavel, sem OOM/reinicio; health HTTP 200 em `7c6dce5`.
+  Inventory anonimo retorna 401 e as duas rotas protegidas retornam 307.
+- Smoke autenticado em producao confirmou Gestao > Rotina, seis funcoes,
+  26 linhas/74 atividades e demais opcoes nulas. Apenas leitura e troca de
+  abas; nenhum salvar, insercao, restauracao ou mutacao de dados de producao.
+  Edicao/insercao/persistencia/teclado foram exercitados na CI isolada.
+- O helper externo terminou com exit 1 depois do coordenador concluir; a causa
+  exata nao foi emitida. Recibo, ledger sem pendencia, container, health e smoke
+  posterior confirmaram sucesso. Nao houve rollback nem segunda promocao.
+- Protocolo de fontes atuais por chat integrado e instalado no runtime local.
+  Fechamento documental preserva historico e limites das excecoes, sincroniza
+  Obsidian e publica evidencias no Git, sem novo restart da aplicacao.
+  Salvamento de Rotina continua restrito ao navegador, nao compartilhado.
+
+## 2026-10-12: Integracao da protecao de publicacao atual
+
+- CI `38205980422` aprovou todos os gates do candidato `3bad94e`: 40 checks de
+  navegacao, zero falhas, Rotina em 15 combinacoes e controles completos.
+- Antes do merge, a conferencia ao vivo detectou main `e162411` (PR #186),
+  com o novo coordenador de publicacao e locks compartilhados. Integracao
+  preserva esse trabalho e exige nova CI no candidato combinado.
+- Registro privado da VPS corresponde ao runtime `f84867d`, com deployment ID
+  `1061530d-5dfc-4027-b943-5c18a43e0c93`, conclusao verificada em
+  `2026-10-12T03:26:50.036Z` e nenhuma tentativa pendente. A promocao usa
+  exclusivamente release:production, com nova consulta ao vivo no minuto da
+  troca, artefato aprovado, backup e recuperacao pelo mesmo coordenador.
+- Mudanca de tooling em main nao equivale a nova publicacao da aplicacao.
+  Nenhum container foi reiniciado por esta integracao; publicacao de Rotina
+  continua pendente da CI final e da imagem de main.
+
+## 2026-10-12: Geometria de borda no menu compacto
+
+- CI `38203285914` do candidato `b38a184` aprovou validate, restore, banco,
+  advisors, build e E2E. Rotina aprovou edicao, insercao, salvar/recarregar,
+  teclado, restauracao e 15 combinacoes de tema/largura, com zero overflow e Axe.
+- O fechamento da matriz falhou em 32 verificacoes de menus compactos. O painel
+  media 296 px, com clientWidth 294 px e scrollWidth 296 px; nav, pagina,
+  controles e ancestrais cabiam na viewport. A pintura alinhada a borda foi
+  confundida com excesso de conteudo pelo novo teste. O calculo agora considera
+  a caixa externa do painel; controles e container mantem limites anteriores.
+- As 32 medicoes do artefato passaram ao reaplicar o gate; excesso real continua
+  rejeitado pela regressao negativa. Testes direcionados: 34 aprovados e um skip.
+  O titulo do novo menu Gestao tambem recebe capitalizacao normal, com verificacao
+  de estilo computado na QA. Nenhuma referencia visual foi regravada.
+- Nova CI integral exigida no SHA final antes de merge e publicacao.
+
+## 2026-10-12: Conhecimento atual por chat e fechamento da Rotina
+
+- Pedido do usuario persistido em AGENTS.md, CONTEXTO.md, FERRAMENTAS.md,
+  runbook de Obsidian e perfil crm-memoria: consultar GitHub/site, confrontar
+  branch/SHA/CI/versao, registrar contexto curado e sincronizar antes da demanda.
+  Encerramento exige resultado, verificacoes e excecoes com causa, evidencia,
+  limites, aplicacao e criterio de reavaliacao, seguido de nova sincronizacao.
+- A orientacao local limitada ao Git comum e a nota ad_hoc autorizada foram
+  atualizadas para as conversas futuras. O fluxo usa instrucoes ao agente e o
+  runtime existente; nao depende de um hook nativo de abertura de chat.
+- Conferencia inicial de GitHub e health: main/site em `f84867d`, saudavel.
+  Conhecimento sincronizado antes de retomar a demanda. Integracao preservou os
+  PRs #184/#185 de Usuarios e suas evidencias; mudancas dessa area vieram de main.
+- Rotina protege edicoes pendentes nos links, recarregamento e historico, conforme
+  o padrao existente da Tabela Direta. O hub nao oferece link para a rotina com
+  gate desligado. Testes de servidor e navegador: 16/16 aprovados; tipos e
+  inventario aprovados. Gates completos e nova CI ainda em verificacao.
+- O candidato anterior `b08ba26` aprovou validate/restore, mas falhou na matriz
+  autenticada de navegacao. Publicacao permanece pendente enquanto houver gate
+  falho; o fechamento apura a causa sem reduzir os criterios de aceite.
+- Diagnostico do artefato da CI: quatro falhas iguais, nos quatro simuladores
+  em 1181 px. O menu flutuante cabia na viewport e aumentava o scrollWidth do
+  nav; o gate agora distingue essa extensao medida de overflow real, sem
+  alterar tolerancia ou referencias. Dezenove regressoes direcionadas passaram.
+- Revisao final encontrou uma aprovacao de saida com prazo de um segundo.
+  Chromium reproduziu o segundo aviso ao atrasar o pushState por 1,5 s. A
+  aprovacao agora acompanha o destino e termina em sucesso/erro ou nova edicao;
+  o guard nao cancela push/replace same-document durante o commit React.
+  Suite de navegador/servidor passou 17/17, com regressao vermelha antes do fix.
+- CI `38202252671` reexecutada aprovou validate e restore no candidato
+  `dbc9e13`. A primeira tentativa falhou por HTTP 403 transitorio da fonte
+  municipal; o mesmo verificador passou localmente e na tentativa 2, sem
+  trocar politica, fontes ou gates. A correcao final exige novo candidato CI.
+- Lint, tipos, recursos e build de 47 rotas aprovados. Suite Windows: 2.462
+  aprovados, 19 skips previstos e 11 falhas (seis POSIX e cinco timeouts).
+  Retestes de conhecimento/DevTools: 46/46; referencia: 15 aprovados e um skip.
+  Testes Node do Salesforce tambem executados separadamente; falharam nos
+  contratos POSIX/arquivos privados e executavel deste Windows.
+  O gate Linux continua obrigatorio antes de merge/publicacao.
+
+## 2026-10-11: Menu Gestão e submenu Rotina
+
+- Fonte: pedido do usuário, print do menu principal e planilha de referência
+  `TESTE1.xlsx` usada somente como dado de conteúdo.
+- Criada a raiz `/app/gestao` e o submenu `/app/gestao/rotina`, com gate
+  `crm.settings.manage`, mantendo a rotina editável fora de Configurações.
+- A tela reutiliza tokens e composição da Tabela Associativo. Inclui opções
+  Gerente regional house, Gerente regional imob, Gerente house, Coordenador de
+  vendas, Coordenador de parcerias e Corretor.
+- Somente Gerente regional house recebe rotina inicial revisada em português
+  brasileiro. Demais funções permanecem nulas por enquanto.
+- Conferência completa da fonte preserva 26 linhas preenchidas e 74 atividades,
+  com repetições e alinhamento original por dia; revisão não resume os detalhes.
+- A rotina é editável, permite inserir linhas e salvar alterações no
+  `localStorage` do navegador. Sem migration, banco, dados remotos ou n8n.
+- Gates locais aprovados: `pnpm lint`, `pnpm typecheck`, `pnpm build` e testes
+  focados de rota, navegação, inventário, contrato visual e componente.
+- `pnpm test` completo falhou em cenários já incompatíveis com este Windows:
+  seis falhas de permissões POSIX 0600/0700 e symlink de homologação.
+  O contador de rotas do contrato visual foi corrigido e revalidado.
+- Publicação retomada no PR #183; integração com main 7cbca83 preserva temas,
+  administração e configurações da versão atual. Revisão independente detectou
+  atividades omitidas na planilha; fechamento recupera o conteúdo integral,
+  trata falha ao salvar e inclui QA dedicada de edição, teclado e temas.
+- Node 24.19.0/pnpm 11.20.0: lint, tipos, formatação, build de 47 rotas e
+  71 testes focados (incluindo Chromium) passaram. Gitleaks não encontrou segredos.
+  Windows integral: 2.457 aprovados, oito falhas (seis POSIX e dois timeouts de
+  conhecimento); o reteste isolado de conhecimento aprovou 22/22.
+- CI Linux 38181426038 aprovou validate, restore, banco, advisors, build e E2E
+  por perfil. Capitalização herdada em caixa alta foi corrigida no fechamento,
+  com verificação de estilo computado; o SHA final exige nova CI integral.
+- Capturas autenticadas de 1440/1024/720/390/320 nos três temas aprovaram
+  edição, inserção, salvar/recarregar, teclado, restauração e Axe. Revisão visual
+  encontrou textos longos com rolagem interna e empilhamento excessivo no
+  celular; campos passaram a crescer com o conteúdo, as opções ficaram mais
+  compactas e a tabela preserva a semana em rolagem horizontal acessível.
+
+## 2026-10-12: Consulta ao vivo e exclusão mútua na publicação
+
+- Pedido: conferir a última publicação no próprio minuto do deploy, pois mais
+  de uma pessoa desenvolve o CRM. Implementação isolada na branch
+  `codex/deploy-live-version-guard`, baseada em `f84867d`; checkout da VPS
+  consultado somente para leitura, sem mudanças de produção.
+- Inventário: a CI valida e gera a imagem; a promoção existente separa o bind
+  de `IMAGE_TAG` do Compose. O lock cobre apenas o bind e o health não contém
+  a data do último deploy. Nenhum runner de deploy ou environment configurado
+  foi encontrado no GitHub durante o levantamento.
+- Plano: coordenador único com lock durante publicação/verificação/rollback,
+  registro durável de deployment ID e data real, CAS, consulta ao vivo de
+  GitHub/runtime no minuto da troca, testes de concorrência e atualização dos
+  procedimentos e do Obsidian. Ausência de histórico confiável bloqueia o
+  primeiro deploy até importar evidência verificável.
+- Implementação: comando único `release:production`, lock compartilhado por
+  descritor, CAS, registro privado durável, checagem da CI/main exatos e
+  observação no minuto/até 60 s tanto no bind quanto antes de iniciar Compose.
+  Noop não republica; falha mantém intenção e recuperação aceita apenas a
+  imagem anterior registrada. O comando antigo de bind e mutações diretas no
+  wrapper não contornam o gate.
+- Revisão independente removeu rollback genérico que permitiria pular a CI e
+  preservou data/ID quando uma tentativa abortada deixou o container anterior
+  executando. Testes cobrem ABA, timeout, CAS, relógio regressivo, persistência,
+  processos concorrentes, SIGKILL, descritor herdado e entrada legada recusada.
+- Node 24.19.0, pnpm 11.20.0, instalação frozen, resources doctor, formato,
+  lint, tipos, build e fontes documentais aprovados. Vitest: 126 arquivos,
+  2.461 testes aprovados e nove skips da plataforma; Salesforce Node: 83.
+  Guard: 94 testes aprovados em Linux isolado, sem skips, sem rede e sem acesso
+  à VPS. Audit, Gitleaks e OSV sem achados; actionlint aprovado.
+- O baseline macOS expôs caminhos temporários com alias e grupo herdado
+  diferentes do esperado por testes POSIX existentes. A suíte completa passou
+  usando o caminho real do TMPDIR do usuário, sem alterar testes de terceiros.
+- `knowledge:sync` retornou `not-configured` neste clone; documentação curada
+  versionada atualizada e DEPLOY-001 no cofre Obsidian do usuário atualizado
+  diretamente. Nenhum ledger ou runtime de produção foi alterado. Ativação
+  exige evidência real da última publicação e adoção por todos os publicadores;
+  integração com Docker Compose em produção não foi executada nesta tarefa.
+- Inspeção complementar somente de leitura encontrou as travas existentes
+  `.production-deploy.lock`, `.production-release.lock` e
+  `.production-image-binding.lock`, todas root:root 0600 e livres. O
+  coordenador adquire as três e transmite todos os descritores ao Docker para
+  respeitar os fluxos anteriores. O health servia `f84867d`; nenhum ledger da
+  data real existia no caminho esperado. Não foi fabricada data de bootstrap.
+- A recuperação agora persiste sua fase antes de bind/Compose. Se houver uma
+  interrupção após restaurar a imagem anterior, a retomada verifica a saúde e
+  grava novo ID e horário de conclusão, sem repetir o Compose. Oito regressões
+  adicionais cobrem falhas antes/depois da restauração e do CAS final; uma
+  sequência A → B → A não reaproveita o recibo antigo após um crash.
+
+## 2026-10-12: Caixas diretas e padrão do perfil em Usuários
+
+- A comparação com o contrato do draft aprovado em
+  `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps/outputs/modelo-site.html#users`
+  mostrou uma divergência funcional: a publicação exibia o acesso efetivo em
+  uma caixa desabilitada e exigia o botão separado `Incluir na alteração`,
+  seguido de Permitir/Negar/Restaurar. No draft, a própria caixa forma o
+  rascunho e o tique acompanha imediatamente o estado desejado.
+- A matriz agora alterna diretamente entre acesso liberado e negado, sinaliza
+  o item alterado, mantém o estado efetivo salvo como origem e oferece
+  `Usar padrão do perfil`. Esse botão prepara `inherit` para todas as exceções
+  atuais editáveis e descarta mudanças transitórias sem exceção, preservando o
+  papel do usuário.
+- O Server Action separa o rascunho em `allow`, `deny` e `inherit`. A nova RPC
+  `apply_user_permission_access_draft` executa os três grupos na mesma
+  transação e delega cada grupo à RPC protegida já existente, que continua
+  revalidando ator, alvo, hierarquia, escopo, concessão e auditoria. A função
+  nova é `SECURITY INVOKER`, executável somente por `authenticated`; não houve
+  mudança em grants Qlik nem nas regras dos simuladores.
+- Reset limpo aplicou as 47 migrations. `pnpm db:test` aprovou 27 arquivos e
+  1.151 testes, incluindo lote misto atômico, restauração do padrão, duplicata,
+  grants mínimos e bloqueio contra conta Administrador. Cinco arquivos de
+  teste direcionado aprovaram 55 casos e o build Next.js gerou as 45 rotas.
+- A promoção visual atualizou somente as onze referências esperadas de
+  Usuários. A matriz autenticada aprovou 154 checks responsivos, 88 de tema,
+  242 Axe, 242 comparações e 110 checks de zoom. Associativo, Tabela Direta,
+  Tabela Investidor e Tabelão passaram novamente todos os breakpoints e seus
+  ensaios próprios.
+- Um ensaio adicional com duas identidades sintéticas foi encerrado no login
+  local antes de exercitar a tela; ele não foi contado como evidência. O bloco
+  `finally` resetou o banco local e removeu integralmente as identidades. As
+  evidências válidas são a matriz autenticada, Vitest e pgTAP descritos acima.
+- Gates finais aprovados: formato, lint, tipos, inventário, audit sem
+  vulnerabilidades conhecidas, OSV e gitleaks sem achados, 126 arquivos Vitest
+  com 2.464 aprovados e seis ignorados, 83 testes Node, E2E de release com 19
+  aprovados e um skip previsto e restore isolado das 47 migrations. Origem e
+  restore repetiram os 1.151 pgTAP, lint/advisors e o mesmo fingerprint. O
+  `verify` visual pós-commit repetiu 154/88/242/242/110 sem regravar a baseline.
+- Evidências detalhadas: `docs/qa/users-permission-checkbox-2026-10-12.md`.
+
+## 2026-10-11: Usuarios alinhado ao mestre-detalhe aprovado
+
+- A comparação direta com
+  `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps/outputs/modelo-site.html#users`
+  confirmou que a publicação anterior havia preservado contratos reais, mas
+  incluído quatro indicadores e renderizado todos os grupos de permissão em
+  sequência. O resultado media 2.592 px e descaracterizava o fluxo compacto.
+- A tela agora usa diretório de Pessoas com busca, chips de status e lista
+  paginada à esquerda; perfil, status e acessos ficam no detalhe à direita. As
+  permissões são organizadas em Comercial, Simuladores, Configurações e
+  Administração, com somente uma aba visível por vez.
+- Perfis com muitos acessos usam uma região rolável focável no desktop. Em
+  mobile, diretório e detalhe são empilhados e a página mantém fluxo vertical,
+  sem overflow horizontal. Claro, Médio e Escuro usam exclusivamente tokens
+  semânticos; nenhuma ilha navy foi adicionada ao tema Claro.
+- Os contratos reais foram preservados: papel exige motivo quando aplicável,
+  exceções continuam em lote com permitir/negar/restaurar, alterações exigem
+  confirmação e auditoria, e as configurações de status permanecem avançadas.
+  A interface continua sem permitir que Administrador altere outra conta
+  Administrador; servidor, RPCs, triggers e RLS não foram modificados.
+- O limite autenticado de `/admin/usuarios` caiu de 2.600 para 1.200 px. A
+  captura desktop mediu 1.187 px. Uma primeira tentativa com 1.370 px foi
+  bloqueada pelo gate; a seguinte revelou `scrollable-region-focusable` e só
+  passou após tornar o `tabpanel` rolável acessível pelo teclado.
+- A promoção final atualizou somente onze referências de Usuários. A matriz
+  aprovou 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
+  comparações e 110 de zoom. Os quatro simuladores passaram a navegação em dez
+  larguras cada; o Associativo repetiu 30 capturas manuais. Conta e fixtures
+  sintéticas foram removidas.
+- Evidências detalhadas: `docs/qa/users-layout-parity-2026-10-11.md`.
+
+## 2026-10-11: Correcao de temas e fronteira de Administrador publicada
+
+- Ranking e Canal de Parcerias foram alinhados ao draft nos temas Claro e
+  Medio, removendo superficies navy residuais; o tema Escuro preserva o navy.
+- Administrador passou a visualizar os quatro simuladores, sem executar o fluxo
+  oficial nem receber capacidades de Master. Criacao/promocao, desativacao,
+  papel e excecoes de permissao de outra conta Administrador ficam restritos ao
+  Master na UI, Server Actions/RPCs e banco.
+- A migration convergente preserva os schemas compacto e escopado, nao altera
+  as tabelas Qlik e remove apenas `allow` de Administrador nas tres capacidades
+  exclusivas do plano de controle. Outros papeis e overrides `deny` permanecem
+  inalterados.
+- Reset limpo das 46 migrations, pgTAP direcionado 153/153, regressoes 214/214
+  e pgTAP completo 1.141/1.141 foram aprovados na origem e depois do restore.
+  A cobertura explicita inclui remocao e bulk `inherit` de override, alem de
+  `INSERT`/`DELETE` direto de escopo contra outro Administrador.
+- A primeira promocao visual bloqueou corretamente a pagina de Usuarios com
+  2.676 px. O aviso foi integrado ao cabecalho existente e a medicao final
+  voltou a 2.592 px, sem elevar o teto de 2.600 px. A matriz aprovou 154 checks
+  responsivos, 88 de tema, 242 Axe, 242 comparacoes, 110 de zoom, 40 checks dos
+  simuladores e 30 capturas do Associativo. Somente 24 referencias esperadas
+  mudaram: Ranking, Parcerias e Usuarios; nenhuma outra tela divergiu.
+- Gates locais finais aprovados: formato, lint, tipos, inventario, audit sem
+  vulnerabilidades conhecidas, 126 arquivos Vitest com 2.463 aprovados e seis
+  ignorados, 83 testes Node, build de 45 rotas e E2E com 19 aprovados e um skip
+  previsto. A revisao de seguranca independente nao encontrou achados no diff.
+- O `verify` visual pos-commit repetiu 154 checks responsivos, 88 de tema, 242
+  Axe, 242 comparacoes e 110 de zoom sem regravar a baseline; conta e fixtures
+  efemeras foram removidas.
+- O PR #181 teve a primeira CI candidata `38158141843` integralmente verde no
+  SHA `9327288a6c0e99f6ae8be626d82d9e06c8aec3a3`, incluindo validate, restore
+  isolado e todos os gates de release.
+- Antes da escrita remota, o backup logico privado foi verificado em
+  `/var/backups/descomplica-crm/20261011-admin-boundary-prechange.hm5P7J`; o
+  manifesto tem SHA-256
+  `4ec0ef67f7982963344881c70421af4cb41ad95517653839b38ebf4d10538950`.
+  A migration foi aplicada isoladamente como versão remota
+  `20261011174323_protect_administrator_accounts_and_enable_simulator_view`.
+- O pos-check remoto confirmou os tres triggers de fronteira compativeis com
+  o schema presente, zero ACL direta nas tabelas Qlik, `crm.simulators.view`
+  somente para Administrador/Master, zero capacidade de plano de controle para
+  Administrador e preservacao das tres excecoes operacionais de Coordenador.
+  Os helpers novos permanecem fora da Data API.
+- A producao possui somente uma conta Administrador; por isso nao foi criada
+  uma segunda conta para fabricar um teste entre pares. Em transacao revertida,
+  o Administrador existente foi bloqueado ao tentar alterar a propria conta e o
+  Master foi autorizado; o caso exato Administrador-contra-Administrador segue
+  comprovado no pgTAP e no E2E isolado executados nesta VPS.
+- Os advisors remotos nao apontaram regressao criada pela migration. Seguiram
+  10 avisos `INFO` de RLS sem policy, tres RPCs `SECURITY DEFINER` para `anon`,
+  17 para `authenticated`, um aviso de protecao de senha vazada e, em
+  performance, dez foreign keys sem indice e dois indices ainda nao usados.
+- A CI final do PR #181 (`38161298050`) aprovou validate, restore isolado e
+  release-gates no head `43f6ffde386336c4c0efe12ad0eefa474f7dd882`. O
+  merge protegido gerou a release
+  `6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2`; a CI de `main`
+  `38163173310` aprovou os quatro jobs, incluindo a imagem promovivel.
+- O artefato `11711780026` teve `image.tar.gz` SHA-256
+  `13d6d7333c1e3fdc1e75f841fc904af81cdc8eeb826f522b7dd40dbcd3a1ae51`.
+  Configuracao CI `sha256:9e172428`, manifesto/imagem local
+  `sha256:e68a6141`, label, `linux/amd64`, 11 camadas e 11 `diff_ids` foram
+  reconciliados. `image:prove` aprovou os dois perfis sem rebuild ou segredo.
+- O backup privado da aplicacao foi verificado em
+  `/var/backups/descomplica-crm/releases/6b3e5ffdd25c1a962f2a8ab46a763fec419a39b2.Ba84ee`,
+  com manifesto SHA-256
+  `b3eb1965f88ac761dfede67a4c238f821bdd541a9bffecbb1f82fa02736ab579`.
+  O CAS partiu de `ac3d7893`; rollback ficou preparado e nao foi necessario.
+- O container publicou o SHA novo, ficou `healthy`, sem restart/OOM e com
+  failing streak zero. Cinco healths locais e cinco publicos passaram; sete
+  rotas protegidas retornaram 307, seis APIs anonimas 401, sete assets 200,
+  sete headers de seguranca foram preservados, HTTP redirecionou para HTTPS e
+  os logs nao continham padrao critico.
+- A matriz autenticada desktop/mobile foi executada com identidades sinteticas
+  isoladas e removidas nesta VPS e na CI. Nenhuma sessao produtiva autenticada
+  foi improvisada; o pos-check hospedado foi observacional e anonimo.
+- O fechamento documental repetiu formato, inventario, lint, tipos, 2.463
+  testes Vitest, 83 testes Node e build de 45 rotas. O host continua sem vault
+  Obsidian configurado; `knowledge:sync` retornou `not-configured` e o
+  conhecimento versionado permanece como fonte.
+
+## 2026-10-11: Runtime do layout promovido; aceite pendente
+
+- PR #178 integrado apos a CI candidata `38133737505`; revisao final sem novos
+  apontamentos. A CI de `main` `38136053837` aprovou os quatro jobs, inclusive
+  banco, restore, E2E, matriz visual e imagem imutavel.
+- Release `ac3d7893c1e679298f54c1f1f8b57d03568715c2` promovida sem rebuild. Config
+  da CI `sha256:3b4432d`, manifesto/imagem local `sha256:d21f8ac`; revision,
+  plataforma, onze camadas e dois perfis de runtime comprovados.
+- Backup privado verificado em
+  `/var/backups/descomplica-crm/releases/ac3d7893c1e679298f54c1f1f8b57d03568715c2.NW7yqB`.
+  CAS partiu de `1de9f5a`; rollback ficou pronto e nao foi necessario.
+- Container saudavel, sem restart/OOM; health local e publico no SHA novo,
+  APIs anonimas 401, rotas protegidas 307, sete assets 200, headers preservados
+  e logs iniciais sem padrao critico.
+- Os quatro simuladores mantiveram 40 checks autenticados antes da publicacao e
+  suas rotas protegidas responderam corretamente no pos-check anonimo. Como nao
+  havia sessao produtiva autenticada conscientemente disponibilizada para
+  controle interativo, a jornada autenticada pos-deploy do gate 7 permanece
+  pendente; nao foram improvisados login, cookie, conta ou `storageState`.
+- Nao houve migration, nova conta, mudanca de acesso nem mutacao de dados
+  remotos. O deploy esta ativo e saudavel, mas a release nao deve ser tratada
+  como integralmente aceita ate a jornada autenticada observacional.
+- Conhecimento atualizado nos documentos versionados. O host nao possui vault
+  Obsidian configurado; a sincronizacao externa permanece pendente, sem instalar
+  ou conectar armazenamento sem autorizacao.
+
+## 2026-10-11: Publicacao do ITBI e registro confirmada
+
+- PR #177 e CI final aprovados; imagem imutavel da release `1de9f5a` publicada
+  com backup verificado, prova de identidade e CAS da versao anterior.
+- Health e container saudaveis; API anonima 401 e rotas protegidas 307. Novos
+  campos fiscais conferidos em sessao autenticada, sem alterar propostas.
+- Evidencias, digests, retry de auditoria e limites registrados no audit e no
+  conhecimento. Esta etapa altera somente documentos, sem novo restart.
+
+## 2026-10-10: Draft aprovado do CRM integrado para release
+
+- Fonte: pacote `/srv/descomplica-design-drafts/2026-10-10/draft-crm-para-vps`.
+  A referencia final `outputs/modelo-site.html` tem SHA-256
+  `a30980e6f2b790b648348d602e1cb07c9de6f0718ce6450ddb58e034f4f1c698`;
+  o manifesto conferido tem SHA-256
+  `c113f793b50efc36c08a0c2757980725af252d01c474f7ffd9ed773566242e18`.
+- O shell protegido adota a marca horizontal completa por tema e a navegacao
+  aprovada: Simulacao abre o hub diretamente, Configuracoes fica no menu da
+  conta e Administracao agrupa Usuarios, Paginas e Integracoes. O antigo nome
+  Conectar Sistemas permanece apenas na URL compativel.
+- Dashboard, etapas do funil, Ranking, Parcerias, Configuracoes, Recurso MKT,
+  Administracao, Usuarios e Integracoes receberam o canvas compacto e
+  responsivo dos temas Claro, Medio e Escuro. O hub conserva seis ferramentas
+  em duas colunas no desktop e uma no celular; Documentacao e CAIXA ganharam a
+  apresentacao aprovada sem habilitar motores indisponiveis.
+- Integracoes usa logos do pacote e mostra somente evidencias reais. Salesforce
+  distingue sessao, coleta e publicacao; n8n e Supabase ficam como nao
+  verificados quando nao ha fonte de status. Quantidades e estados ficticios da
+  previa nao foram transportados.
+- Usuarios agora carrega paginas reais de seis contas no servidor, busca e
+  filtra sem carregar o diretorio inteiro e continua com carregamento por
+  rolagem, fallback manual, erro e fim da lista. Permissoes herdadas e excecoes
+  sao apresentadas separadamente, mantendo guards, hierarquia e autorizacao no
+  servidor/banco.
+- Preservacao estrutural aplicada a
+  `/app/simulacao/associativo-fluxo-linear`, `/app/simulacao/tabela-direta`,
+  `/app/simulacao/tabela-investidor` e `/app/simulacao/tabelao`: componentes,
+  campos e motores existentes nao foram redesenhados. Os estilos novos do hub,
+  Documentacao e CAIXA foram escopados fora desses quatro destinos. A matriz
+  autenticada aprovou 40 checks de navegacao dessas quatro rotas; o Associativo
+  recebeu ainda revisao manual de 30 capturas.
+- Gates comprovados pelo coordenador: `pnpm format:check`, `pnpm lint`,
+  `pnpm typecheck` e `pnpm resources:check` aprovados; `pnpm test` com 124
+  arquivos, 2.292 aprovados e seis ignorados, mais 83 testes Node operacionais;
+  `pnpm build` aprovado no Next.js 16.3.8 com 45 rotas.
+- `pnpm qa:e2e:release` passou 19 cenarios e ignorou um previsto; o gate
+  concorrente do Associativo tambem ficou verde. O QA visual autenticado aprovou
+  154 checks responsivos, 88 de tema, 242 Axe, 242 comparacoes, 110 de zoom e 22
+  canvases aprovados. A promocao da baseline registrou `performed: true` e
+  `eligible: true`.
+- `/admin/usuarios` mediu 2.592 px em 1.440 px de largura. O teto estrito foi
+  calibrado de 2.500 para 2.600 px para comportar a matriz completa de 23
+  permissoes e seus badges de acesso efetivo; a pagina permaneceu dentro do novo
+  limite na promocao autenticada.
+- O QA sintetico de Integracoes passou em nove combinacoes de tema/largura, seis
+  estados, zoom de 200% e carregamento dos SVGs.
+- A verificacao pos-commit `pnpm qa:visual:authenticated`, em modo `verify`,
+  passou com 154 checks responsivos, 88 de tema, 242 de acessibilidade, 242
+  comparacoes candidato/baseline e 110 de zoom. As fixtures efemeras foram
+  removidas ao final.
+- Na etapa intermediaria, E2E, promocao visual e verificacao pos-commit estavam
+  aprovados. O PR #178 foi aberto e a CI `38094977306` aprovou `validate`,
+  `release-gates` e `isolated-restore` no SHA `4a8bfc8`; revisao, merge e
+  publicacao ainda estavam pendentes naquele ponto. O fechamento esta no topo
+  deste Worklog e as evidencias completas em
+  `docs/qa/draft-crm-vps-2026-10-10.md`.
+- A CI documental `38096802698` manteve `validate`, `isolated-restore`, E2E,
+  banco e 241 comparacoes visuais verdes, mas bloqueou uma captura de Usuarios
+  em 1.024 px: o e-mail sintetico aleatorio ocupou uma linha em vez de duas e
+  alterou somente a altura total em 21 px. O cabecalho intermediario passou a
+  reservar e limitar duas linhas, com texto integral no DOM e `title`; nova CI
+  do SHA corrigido e obrigatoria. A reproducao local com outra identidade
+  aleatoria aprovou novamente 154 checks responsivos, 88 de tema, 242 Axe, 242
+  comparacoes e 110 de zoom; Usuarios voltou a 1.024 x 4.082 px.
+- A reconciliacao com `main` preserva a politica fiscal SP/2026 publicada no PR
+  #177. O status do Salesforce agora prioriza reautenticacao necessaria ou
+  indisponibilidade sobre `cycle=running`; 225 testes focados e o verificador
+  de fontes publicas passaram antes do merge local.
+- No commit limpo `bd8c5f6`, lint, tipos, 2.453 testes Vitest, seis skips
+  previstos, 83 testes Node, fontes, inventario e build de 45 rotas passaram.
+  A matriz autenticada combinada aprovou 154 responsivos, 88 temas, 242 Axe,
+  242 comparacoes, 110 zoom, os 40 checks dos simuladores e 30 capturas do
+  Associativo. Somente onze referencias de Documentacao foram promovidas; 231
+  permaneceram intactas e a altura desktop ficou em 1.191/1.200 px.
+- A verificacao pos-commit `4111089`, em modo `verify`, repetiu 154 checks
+  responsivos, 88 de tema, 242 de acessibilidade, 242 comparacoes e 110 de zoom;
+  conta e fixtures efemeras foram removidas ao final.
+
+## 2026-10-10: ITBI e registro de Sao Paulo com vigencia e contrato fiscal
+
+- Pedido autorizado: corrigir, validar, publicar e sincronizar conhecimento.
+- Remove a isencao restrita a MCMV e os fatores arbitrarios de registro;
+  usa politica 2026 com 48 faixas, fontes e enquadramentos explicitos.
+- Compra e garantia sao discriminadas; cidade, datas, bases, tabela da serventia
+  e beneficios precisam de confirmacao independente do perfil comercial.
+- Mantem despachante, seguro, juros e fluxo comercial. Sem mudancas em banco,
+  n8n, permissoes ou dados de clientes.
+- Fontes conferidas; validacao e publicacao em andamento. Evidencias em
+  `docs/audits/itbi-registro-sp-2026-10-10.md`.
+- Primeira validacao Linux passou no PR #177; ajuda alinhada ao bloqueio de
+  cobranca conjunta antes da validacao final de navegador.
+- Matriz autenticada confirmou ausencia de erros de acessibilidade, mas
+  apontou altura excessiva da tela inicial documental. Correcao de densidade
+  usa secao fiscal expansivel sem excluir campos ou afrouxar o gate.
+- CI seguinte aprovou 2439 testes e detectou colisao nominal entre auditorias
+  de tela e impressao no contrato estatico. Variavel de print diferenciada;
+  ordem, contraste e exigencias da auditoria de tela permanecem intactos.
+- CI `38098773619` aprovou os gates funcionais completos; onze imagens da
+  documentacao revisadas e atualizadas com proveniencia, 231 preservadas.
+  Revalidacao das referencias e publicacao continuam pendentes.
+
+## 2026-10-09: Guia do Associativo no cabecalho
+
+- Fonte: novo pedido e dois prints do usuario. Branch
+  `codex/guia-associativo-cabecalho`; substitui a posicao inferior antes pedida.
+- Cabecalho e acionador compartilham a mesma linha, com largura intrinseca e
+  quebra responsiva. O guia permanece unico e ligado ao mesmo estado da pagina.
+- Nenhuma regra financeira, dado, permissao, rota ou dependencia alterada.
+- Testes atualizados verificam a nova posicao, largura em funcao do texto,
+  ausencia do botao antigo, area de toque e preservacao dos 36 passos.
+- Lint, tipos, build e 18 cenarios completos do guia passaram. CI Linux aprovou
+  suite integral, banco, restore e E2E; 11 referencias visuais revisadas e
+  atualizadas, com 231 preservadas. Reteste final e publicacao pendentes.
+  Limitacoes POSIX/timeouts locais registradas; nenhuma verificacao removida.
+  Evidencias em
+  `docs/audits/associativo-guia-cabecalho-2026-10-09.md`.
+
 ## 2026-10-09: Marca vetorial com cor coerente entre temas
 
 - Fonte: comparativo visual fornecido pelo usuário e implementação atual do
@@ -67,6 +1537,9 @@
 
 ## 2026-10-09: Guia completo da pagina Associativo
 
+- Resultado final: publicado no release `c20c9d2` pelo PR #174, CI main
+  `37898684744` integralmente aprovada, imagem comprovada, backup/CAS e health
+  conferidos. Guia aberto e navegacao validada na sessao real sem alterar dados.
 - Fonte: pedido e dois prints do usuario. Branch `codex/guia-pagina-associativo`.
 - Botao no rodape direito do quadro de estoque, com a classe visual existente.
   Guia independente do preenchimento, com 36 etapas, anterior/proximo, fechar,

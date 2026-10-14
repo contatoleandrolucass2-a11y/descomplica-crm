@@ -105,12 +105,30 @@ describe("management canvas layout", () => {
     const users = source("app/(protected)/admin/usuarios/UserAccessManager.tsx");
     const pages = source("app/(protected)/admin/paginas/PageCatalogManager.tsx");
     const styles = source("app/(protected)/admin/admin-canvas.css");
+    const visualHarness = source("scripts/qa/authenticated-visual.mjs");
 
     expect(admin).toContain('className="admin-canvas admin-home-page"');
     expect(admin).toContain('className="admin-home-grid"');
     expect(admin).not.toContain("Ferramentas autorizadas");
-    expect(users.indexOf("admin-users-toolbar")).toBeLessThan(users.indexOf("admin-users-summary"));
-    expect(users).toContain("Acessos revogados");
+    expect(users).toContain("admin-users-summary");
+    expect(users).toContain("admin-users-workspace");
+    expect(users).toContain("admin-directory-status-filters");
+    expect(users).toContain('role="tablist"');
+    expect(users).toContain("admin-permission-tabs");
+    expect(users).toContain("O que pode acessar");
+    expect(users).toContain("keys.every(isChecked)");
+    expect(users).toContain("onChange={() => togglePermission(permissionKey)}");
+    expect(users).toContain("Usar padrão do perfil");
+    expect(users).toContain("restoreDefaults");
+    expect(users).not.toContain("admin-permission-effects");
+    expect(users).toContain("Salvar alterações");
+    expect(users).toContain("Total de usuários");
+    expect(users).toContain('label: "Comercial"');
+    expect(users).toContain('label: "Simuladores"');
+    expect(users).toContain('label: "Configurações"');
+    expect(users).toContain('label: "Administração"');
+    expect(users).not.toContain('label: "Navegação e páginas"');
+    expect(visualHarness).toContain('["/admin/usuarios", 1200]');
     expect(pages).toContain("Páginas cadastradas");
     expect(pages).toContain('<th scope="col">Descrição</th>');
     expect(pages).toContain('<th scope="col">Rota</th>');
@@ -137,7 +155,7 @@ describe("management canvas layout", () => {
     expect(styles).toMatch(
       /@media \(max-width: 40rem\) \{[\s\S]*?\.admin-user-detail-header h2 \{[\s\S]*?min-height: 2\.5em[\s\S]*?-webkit-line-clamp: 2/,
     );
-    expect(users).toContain("const PAGE_SIZE = 8");
+    expect(users).toContain("const PAGE_SIZE = 6");
     expect(pages).toContain("const PAGE_SIZE = 8");
   });
 

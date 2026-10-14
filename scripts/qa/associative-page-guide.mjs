@@ -8,7 +8,10 @@ import { isDeepStrictEqual } from "node:util";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
-import { checkAssociativeInitialViewport } from "./associative-compact-layout.mjs";
+import {
+  checkAssociativeCompactStock,
+  checkAssociativeInitialViewport,
+} from "./associative-compact-layout.mjs";
 
 const rootSelector = ".investor-associative-table-page";
 const guideId = "associative-page-guide";
@@ -108,16 +111,20 @@ async function fillSyntheticProposal(page) {
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("button", { name: "MCMV", exact: true }).click();
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
-  for (const [name, value] of [
-    ["Financiamento", "19000000"],
-    ["Subsídio", "0"],
-    ["FGTS", "0"],
-    ["Cheque Moradia", "0"],
-    ["Entrada", "100000"],
+  // The qualification transition focuses financing on the next animation frame.
+  // Wait for that focus before typing so it cannot steal a later field's input.
+  await expect(page.getByRole("textbox", { name: "Financiamento", exact: true })).toBeFocused();
+  for (const [name, value, formatted] of [
+    ["Financiamento", "19000000", "190.000,00"],
+    ["Subsídio", "0", "0,00"],
+    ["FGTS", "0", "0,00"],
+    ["Cheque Moradia", "0", "0,00"],
+    ["Entrada", "100000", "1.000,00"],
   ]) {
     const field = page.getByRole("textbox", { name, exact: true });
     await expect(field).toBeEnabled();
     await field.fill(value);
+    await expect(field).toHaveValue(formatted);
     await field.press("Tab");
   }
   await page.locator('input[name="quantidade-de-parcelas"]').fill("84");
@@ -131,6 +138,7 @@ async function fillSyntheticProposal(page) {
   ]) {
     await page.getByRole("button", { name: button, exact: true }).click();
     const field = page.getByRole("textbox", { name, exact: true });
+    await expect(field).toBeFocused();
     await field.fill(value);
     await field.press("Tab");
   }
@@ -435,36 +443,59 @@ export async function checkAssociativePageGuide(
         await setTheme(page, theme);
         const project = page.getByRole("combobox", { name: "Nome do Empreendimento", exact: true });
         await expect(project).toBeEnabled();
+        await checkAssociativeCompactStock(page);
         await project.selectOption("Empreendimento QA 01");
         await page
           .getByRole("combobox", { name: "Ordenar unidades por valor do imóvel", exact: true })
           .selectOption("desc");
         await expect(page.locator(".investor-property-summary")).toHaveCount(0);
         await expect(
-          page.locator(".investor-stock-panel").getByRole("button", {
+          page.locator(".simulation-canvas-title-row").getByRole("button", {
             name: "Guia passo a passo",
             exact: true,
           }),
         ).toHaveCount(1);
+        await expect(
+          page.locator(".investor-stock-panel .associative-page-guide-launcher"),
+        ).toHaveCount(0);
+        await expect(launcher).toHaveCount(1);
         await launcher.scrollIntoViewIfNeeded();
+        await page.evaluate(() => window.scrollTo({ top: 0, behavior: "instant" }));
         assert.ok(
           await launcher.evaluate((element) => {
-            const panel = element.closest(".investor-stock-panel").getBoundingClientRect();
+            const row = element.closest(".simulation-canvas-title-row");
+            const panel = row.getBoundingClientRect();
             const rect = element.getBoundingClientRect();
-            const results = element
-              .closest(".investor-stock-panel")
-              .querySelector(".investor-stock-results")
+            const title = row.querySelector("h1").getBoundingClientRect();
+            const topbar = document
+              .querySelector("[data-protected-topbar]")
               .getBoundingClientRect();
+            const range = document.createRange();
+            range.selectNodeContents(element);
+            const text = range.getBoundingClientRect();
+            const besideTitle =
+              rect.left >= title.right &&
+              Math.abs(rect.top + rect.bottom - (title.top + title.bottom)) <= 2;
+            const belowTitle = rect.top >= title.bottom;
+            const touch = matchMedia("(max-width: 760px), (pointer: coarse)").matches;
             return (
               rect.left >= panel.left &&
+              title.top >= topbar.bottom &&
               rect.right <= panel.right + 1 &&
-              rect.top >= results.bottom - 1 &&
+              rect.top >= panel.top - 1 &&
               rect.bottom <= panel.bottom + 1 &&
-              panel.right - rect.right <= 32
+              panel.right - rect.right <= 2 &&
+              (window.innerWidth >= 1024 ? besideTitle : besideTitle || belowTitle) &&
+              rect.width - text.width >= 24 &&
+              rect.width - text.width <= 40 &&
+              rect.height >= (touch ? 44 : 36) &&
+              element.scrollWidth <= element.clientWidth
             );
           }),
-          "Guide launcher must sit inside the stock panel, below the stock, aligned right",
+          "Guide must fit its text, align to the title's right and wrap without overlap on mobile",
         );
+        if (artifactRoot)
+          await page.screenshot({ path: path.join(artifactRoot, `${scenario}-header.png`) });
         await walk(`${scenario}-no-unit`);
 
         checkpoint = `${scenario}:interact-with-open-guide`;
@@ -663,7 +694,12 @@ export async function runSyntheticAssociativePageGuide(options) {
   const snapshot = JSON.parse(buildSyntheticDirectTableQaSnapshot());
   // A small slice exercises filters and selection without the unrelated full-stock matrix.
   const items = snapshot.items.slice(0, 12);
-  const inventory = { ...snapshot, count: items.length, items };
+  const inventory = {
+    ...snapshot,
+    count: items.length,
+    items,
+    snapshotReferenceDate: "2026-09-05",
+  };
   const publicAssets = new Map(
     await Promise.all(
       [
@@ -689,7 +725,7 @@ export async function runSyntheticAssociativePageGuide(options) {
         .end(
           JSON.stringify({
             ...inventory,
-            sourceKind: url.pathname.endsWith("snapshot") ? "versioned-snapshot" : "live",
+            sourceKind: "versioned-snapshot",
           }),
         );
     } else if (files.has(url.pathname)) {

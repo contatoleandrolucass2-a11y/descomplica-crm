@@ -10,8 +10,6 @@ import {
   MARKETING_DISTRIBUTION,
   parseMarketingMoney,
 } from "@/lib/crm/marketing/resources";
-import "@/app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css";
-import "@/app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css";
 import styles from "./MarketingResources.module.css";
 
 const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });

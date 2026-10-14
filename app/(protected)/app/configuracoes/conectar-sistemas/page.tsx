@@ -1,5 +1,6 @@
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
+import { getSalesforceConsoleConfiguration } from "@/lib/crm/salesforce/console-config";
 import {
   getSalesforceIngestConfiguration,
   getSalesforceRefreshConfiguration,
@@ -8,7 +9,7 @@ import {
 
 import { ConnectedSystemsPanel } from "./ConnectedSystemsPanel";
 
-export const metadata = { title: "Conectar Sistemas" };
+export const metadata = { title: "Integrações" };
 
 export default async function ConnectedSystemsPage() {
   const context = await enforcePermission("crm.settings.manage");
@@ -24,6 +25,10 @@ export default async function ConnectedSystemsPage() {
       refreshAvailable={refresh.available}
       canRefresh={hasPermission(context, "crm.salesforce.refresh")}
       statusConfigured={status.available}
+      {...(hasPermission(context, "crm.dashboard.view") ? { canReadSyncStatus: true } : {})}
+      consoleAvailable={
+        context.roleKey === "master" && getSalesforceConsoleConfiguration().available
+      }
     />
   );
 }

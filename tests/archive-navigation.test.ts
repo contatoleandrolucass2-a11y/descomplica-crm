@@ -8,6 +8,7 @@ import { ProtectedShellFrame } from "../app/(protected)/_components/ProtectedShe
 
 const {
   archiveMenuPanelPassed,
+  archiveNavigationHorizontalFit,
   archiveNavigationPassed,
   archiveNavigationRoutes,
   archiveNavigationViewports,
@@ -15,6 +16,7 @@ const {
   parseArchivePreviewOrigin,
 } = navigationQa as {
   archiveMenuPanelPassed: (measurement: unknown) => boolean;
+  archiveNavigationHorizontalFit: (measurement: unknown) => boolean;
   archiveNavigationPassed: (result: unknown, options?: { scope: string }) => boolean;
   archiveNavigationRoutes: string[];
   archiveNavigationViewports: { width: number; height: number }[];
@@ -80,7 +82,101 @@ function completeResult() {
   };
 }
 
+function desktopNavigationMeasurement() {
+  return {
+    compact: false,
+    viewportWidth: 1181,
+    navigation: { left: 186, right: 840, scrollWidth: 668, clientWidth: 654 },
+    rootControls: [{ left: 539, right: 607, scrollWidth: 66, clientWidth: 66 }],
+    panels: [
+      {
+        left: 539,
+        right: 854,
+        scrollWidth: 315,
+        clientWidth: 315,
+        horizontalAncestorsFit: true,
+      },
+    ],
+  };
+}
+
 describe("archive navigation evidence gate", () => {
+  it("accepts the 1181px desktop disclosure extending beyond its nav track inside the viewport", () => {
+    expect(archiveNavigationHorizontalFit(desktopNavigationMeasurement())).toBe(true);
+  });
+
+  it("rejects root overflow and unexplained nav overflow even with a fitting desktop disclosure", () => {
+    const measurement = desktopNavigationMeasurement();
+    const control = measurement.rootControls[0]!;
+    expect(
+      archiveNavigationHorizontalFit({
+        ...measurement,
+        rootControls: [{ ...control, right: measurement.navigation.right + 2 }],
+      }),
+    ).toBe(false);
+    expect(
+      archiveNavigationHorizontalFit({
+        ...measurement,
+        rootControls: [{ ...control, scrollWidth: control.clientWidth + 2 }],
+      }),
+    ).toBe(false);
+    expect(
+      archiveNavigationHorizontalFit({
+        ...measurement,
+        navigation: { ...measurement.navigation, scrollWidth: 670 },
+      }),
+    ).toBe(false);
+    expect(archiveNavigationHorizontalFit({ ...measurement, panels: [] })).toBe(false);
+  });
+
+  it("rejects desktop disclosure viewport overflow, truncated text and clipping ancestors", () => {
+    const measurement = desktopNavigationMeasurement();
+    const panel = measurement.panels[0]!;
+    for (const invalidPanel of [
+      { ...panel, right: measurement.viewportWidth + 2 },
+      { ...panel, scrollWidth: panel.clientWidth + 2 },
+      { ...panel, horizontalAncestorsFit: false },
+    ]) {
+      expect(archiveNavigationHorizontalFit({ ...measurement, panels: [invalidPanel] })).toBe(
+        false,
+      );
+    }
+  });
+
+  it("keeps compact navigation constrained to its scroll container", () => {
+    expect(
+      archiveNavigationHorizontalFit({ ...desktopNavigationMeasurement(), compact: true }),
+    ).toBe(false);
+    const compact = {
+      compact: true,
+      viewportWidth: 375,
+      navigation: { left: 0, right: 375, scrollWidth: 375, clientWidth: 375 },
+      rootControls: [{ left: 20, right: 355, scrollWidth: 335, clientWidth: 335 }],
+      panels: [
+        {
+          left: 20,
+          right: 355,
+          scrollWidth: 335,
+          clientWidth: 333,
+          horizontalAncestorsFit: true,
+        },
+      ],
+    };
+    expect(archiveNavigationHorizontalFit(compact)).toBe(true);
+    expect(
+      archiveNavigationHorizontalFit({
+        ...compact,
+        panels: [{ ...compact.panels[0]!, scrollWidth: 337 }],
+      }),
+    ).toBe(false);
+    expect(
+      archiveNavigationHorizontalFit({
+        ...compact,
+        navigation: { ...compact.navigation, scrollWidth: 377 },
+      }),
+    ).toBe(false);
+  });
+
   it("keeps the global topbar below the consent panel without a fixed privacy shortcut", () => {
     const header = readFileSync(
       new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url),
@@ -160,8 +256,13 @@ describe("archive navigation evidence gate", () => {
 
     expect(gate).toContain('shellContract: "unified-protected-shell-v1"');
     expect(gate).toContain("await ensureArchiveNavigationOpen(page);");
-    expect(gate).toContain('"Metas de parcerias", "/app/configuracoes/metas/parcerias"');
+    expect(gate).toContain('"/app/configuracoes/metas/parcerias"');
+    expect(gate).toContain('"Rotina", "/app/gestao/rotina"');
     expect(gate).toContain('["Repasse", "/app/repasse"]');
+    expect(gate).toContain('["Integrações", "/app/configuracoes/conectar-sistemas"]');
+    expect(gate).toContain('main[data-simulation-hub] a[href="${destination}"]');
+    expect(gate).not.toContain("authorized-navigation-crm-simulation");
+    expect(gate).not.toContain("authorized-navigation-crm-settings");
     expect(gate).toContain("exactAuthorizedRootNavigation");
     expect(gate).toContain("exactAuthorizedAccountNavigation");
     expect(gate).toContain("width: 1280, height: 720");
@@ -177,13 +278,14 @@ describe("archive navigation evidence gate", () => {
     expect(compact).toContain('"Entire hovered row must be gold with dark readable text"');
   });
 
-  it("keeps the five authorized roots in the approved visual and keyboard order", () => {
+  it("keeps the six authorized roots in the approved visual and keyboard order", () => {
     expect(archiveRootNavigationContract).toEqual([
       { name: "Dashboard", tag: "BUTTON", href: null },
-      { name: "Simulação", tag: "BUTTON", href: null },
+      { name: "Simulação", tag: "A", href: "/app/simulacao" },
       { name: "Ranking", tag: "A", href: "/app/ranking" },
       { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
-      { name: "Configurações", tag: "BUTTON", href: null },
+      { name: "Gestão", tag: "BUTTON", href: null },
+      { name: "Administração", tag: "BUTTON", href: null },
     ]);
   });
 
@@ -266,6 +368,10 @@ describe("archive navigation evidence gate", () => {
     expect(gate).toContain("assertNavigationControlFocused");
     expect(gate).toContain(
       'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-dashboard"]',
+    );
+    expect(gate).toContain('a[data-navigation-root-control][href="/app/simulacao"]');
+    expect(gate).toContain(
+      'button[data-navigation-root-control][aria-controls="authorized-navigation-admin-home"]',
     );
     expect(gate).toContain('kind: "protected-topbar-geometry"');
     expect(gate).toContain("rootControlCount");

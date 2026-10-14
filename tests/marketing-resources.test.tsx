@@ -16,6 +16,7 @@ describe("Recurso MKT", () => {
     const markup = renderToStaticMarkup(await SettingsPage());
     expect(markup).toContain('href="/app/configuracoes/recurso-mkt"');
     expect(markup).toContain('aria-label="Recurso MKT"');
+    expect(markup).not.toContain('href="/app/configuracoes/rotina"');
   });
   it("preserves every amount and destination from the supplied reference", () => {
     expect(calculateMarketingResources(250_000, 100_000)).toEqual({

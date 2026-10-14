@@ -78,4 +78,31 @@ e sem alterar seu escopo. Nova CI conjunta obrigatoria antes da publicacao.
 
 ## Publicacao
 
-Pendente dos gates, PR/CI, artefato imutavel, backup, CAS e verificacao final.
+Concluida em 09/10/2026. PR #174 integrado normalmente, sem bypass, depois da
+CI conjunta `37895047634` aprovada. Release
+`c20c9d2951f4860d6419369daa1f99153f160351`; todos os jobs da CI main `37898684744`
+aprovados: validate, release-gates, isolated-restore e promotable-image.
+
+- Artefato de imagem `11601353622`; ZIP SHA-256
+  `82eff28da1563314526c271cea257d1c99f3db616f9184bf6435ed30126ea74d`.
+- Imagem compactada SHA-256
+  `19b19bbc3e4a70fee100604ac8e917b4e6bf1f53348ba76b2c521634e6017efa`.
+- Config ID da CI `sha256:cc4eb3746c28b9c44e7042a648346da387f986a4a7aa6b46454c81ae5daddf47`;
+  manifesto/ID local `sha256:919790ef6d43958e52a517a8740c5ca0be74d15b06fdbf2c292989b212e50715`.
+  Cadeia OCI, configuracao, camadas e label conferidos; `image:prove` aprovou
+  homologacao e producao usando a mesma imagem, sem rebuild no servidor.
+- Versao anterior reconciliada `4e16a619689ce29ac1c6b6e2dc7171119b798757`.
+  CAS, backup de configuracao com hashes e rollback preparados pelo helper
+  existente. Backup: `/var/backups/descomplica-crm/releases/c20c9d2951f4860d6419369daa1f99153f160351.o1dEq5`.
+- Container saudavel, health local/publico com SHA novo, APIs de estoque sem
+  sessao retornando 401 e rota protegida retornando 307. Nginx preservado.
+  Nenhuma migration, dado comercial, permissao, DNS ou workflow n8n alterado.
+- Sessao real conferida em aba separada: botao presente, abertura em Passo 1 de
+  36, avanco, retorno, Escape, fechamento e reabertura aprovados; nenhum imovel
+  selecionado ou valor alterado, sem erros de console. Guia deixado aberto.
+  Captura local ignorada pelo Git, sem exportar estoque ou identidade para o PR.
+
+Depois da integracao de Repasse, lint, typecheck e build locais passaram
+novamente. Windows: 2.279 testes aprovados, seis skips e as mesmas seis falhas
+POSIX; suites Linux obrigatorias aprovadas no PR e na main. Historico das etapas
+pendentes acima mantido como registro cronologico, nao como estado atual.

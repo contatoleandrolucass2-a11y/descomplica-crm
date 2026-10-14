@@ -25,15 +25,17 @@ function child(path: string): AppPage {
 }
 
 describe("authorized breadcrumbs", () => {
-  it.each(["/app/simulacao/associativo-fluxo-linear", "/app/simulacao/associativo-fluxo-linear/"])(
-    "omits only the associative workspace breadcrumb at %s",
-    (pathname) => {
-      mocks.pathname = pathname;
-      expect(
-        renderToStaticMarkup(<AuthorizedBreadcrumbs pages={[simulation, child(pathname)]} />),
-      ).toBe("");
-    },
-  );
+  it.each([
+    "/app/simulacao/associativo-fluxo-linear",
+    "/app/simulacao/associativo-fluxo-linear/",
+    "/app/gestao/rotina",
+    "/app/gestao/rotina/",
+  ])("omits the compact workspace breadcrumb at %s", (pathname) => {
+    mocks.pathname = pathname;
+    expect(
+      renderToStaticMarkup(<AuthorizedBreadcrumbs pages={[simulation, child(pathname)]} />),
+    ).toBe("");
+  });
 
   it.each([
     "/app/simulacao/tabela-direta",

@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 
-import { canGrantPermission, canManageTargetLevel } from "@/lib/authorization/hierarchy";
+import {
+  canAssignRole,
+  canGrantPermission,
+  canManageTargetLevel,
+  canManageTargetRole,
+} from "@/lib/authorization/hierarchy";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 import { ROLE_INHERITED_PERMISSIONS } from "@/lib/authorization/access-presentation";
 
@@ -24,7 +29,10 @@ describe("hierarquia de delegação de permissões", () => {
   });
 
   it("permite gerenciar marcas sem conceder acesso de consulta ao gestor", () => {
-    for (const permission of ["crm.inventory.riva.view", "crm.inventory.direcional.view"] as const) {
+    for (const permission of [
+      "crm.inventory.riva.view",
+      "crm.inventory.direcional.view",
+    ] as const) {
       expect(canGrantPermission(actor({}), permission)).toBe(true);
       expect(canGrantPermission(actor({ roleKey: "master", level: 100 }), permission)).toBe(true);
       expect(canGrantPermission(actor({ permissions: [] }), permission)).toBe(false);
@@ -74,5 +82,20 @@ describe("hierarquia de delegação de permissões", () => {
     });
     expect(canGrantPermission(admin, "crm.simulators.view")).toBe(true);
     expect(canGrantPermission(admin, "crm.simulators.execute")).toBe(true);
+  });
+
+  it("protege Administradores mesmo quando outro Administrador recebe nível numérico maior", () => {
+    const elevatedAdmin = actor({ level: 999 });
+
+    expect(canManageTargetLevel(elevatedAdmin, 80)).toBe(true);
+    expect(canManageTargetRole(elevatedAdmin, "admin", 80)).toBe(false);
+    expect(canAssignRole(elevatedAdmin, "admin")).toBe(false);
+  });
+
+  it("permite somente ao Master gerenciar e atribuir o papel Administrador", () => {
+    const master = actor({ roleKey: "master", level: 100 });
+
+    expect(canManageTargetRole(master, "admin", 80)).toBe(true);
+    expect(canAssignRole(master, "admin")).toBe(true);
   });
 });

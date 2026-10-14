@@ -1,5 +1,16 @@
 # Desempenho do estoque
 
+## Fonte oficial Salesforce
+
+Com `SALESFORCE_INVENTORY_PATH` configurado, os dois endpoints leem a mesma
+exportação validada do ESTOQUE SPC. A Tabela Direta também recebe essa carga;
+o arquivo histórico deixa de ser fonte ativa. Cache compartilhado de 30 s,
+sem fallback para preços antigos. Conectar Sistemas identifica a coleta como
+avulsa. Ver [coleta, publicação e limites](salesforce-inventory.md).
+As descrições de snapshot e feed abaixo documentam o modo legado, usado quando
+essa configuração está ausente. Os headers `X-Inventory-Cache` referem-se ao
+feed legado; o modo oficial preserva `Server-Timing` e `Cache-Control: no-store`.
+
 ## Funcionamento
 
 - Associativo e Investidor consultam snapshot e fonte viva simultaneamente.

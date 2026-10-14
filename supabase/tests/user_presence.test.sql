@@ -28,7 +28,8 @@ select ok(
   not has_function_privilege('anon', 'public.touch_user_presence()', 'EXECUTE')
     and not has_function_privilege('anon', 'public.get_user_presence()', 'EXECUTE')
     and not has_function_privilege('service_role', 'public.touch_user_presence()', 'EXECUTE')
-    and not has_function_privilege('service_role', 'public.get_user_presence()', 'EXECUTE'),
+    and not has_function_privilege('service_role', 'public.get_user_presence()', 'EXECUTE')
+    and not has_function_privilege('authenticated', 'private.user_presence_uses_scoped_contract()', 'EXECUTE'),
   'anonymous and service roles have no presence RPC capability'
 );
 select ok(

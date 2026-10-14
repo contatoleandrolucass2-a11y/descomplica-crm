@@ -1,4 +1,24 @@
+export interface DocumentationLegalContext {
+  municipality: "sao-paulo-sp" | "other" | "";
+  transactionDate: string;
+  financingContractDate: string;
+  registrationDate: string;
+  registryTable: "ARISP_2" | "QUINTO_SP_2026" | "OTHER" | "";
+  specialRegime: "NONE" | "OTHER" | "";
+  naturalPerson: "SIM" | "NAO" | "";
+  residential: "SIM" | "NAO" | "";
+  firstAcquisition: "SIM" | "NAO" | "";
+  program: "MCMV" | "MCMV_FAR_FDS" | "NONE" | "";
+  financingSystem: "SFH" | "SFI" | "PAR" | "HIS" | "CONSORCIO" | "";
+  funding: "FGTS" | "OTHER" | "";
+  firstTransfer: "SIM" | "NAO" | "";
+  itbiBase: string | number;
+  iptuValue: string | number;
+  basesConfirmed: boolean;
+}
+
 export interface DocumentationInput {
+  legalContext?: DocumentationLegalContext;
   businessUnit: string;
   modality: string;
   firstProperty: string | boolean;
@@ -37,6 +57,11 @@ export type DocumentationResult = DocumentationResultBase &
         financingHeadroom: number;
         itbi: number;
         itbiRule: string;
+        registrationRule: string;
+        registrationCombined: boolean;
+        legalPolicyVersion: string;
+        legalWarnings: string[];
+        legalSources: string[];
         purchaseRegistration: number;
         lienRegistration: number;
         totalRegistration: number;
@@ -59,8 +84,6 @@ export const OFFICIAL_PARAMETERS: Readonly<{
   dispatchFee: number;
   caixaInsurance: number;
   monthlyInterest: number;
-  firstPropertyPurchaseRegistrationFactor: number;
-  firstPropertyLienRegistrationFactor: number;
   direcionalInstallments: number;
   rivaInstallments: number;
   mcmvFinancingLimit: number;

@@ -1,6 +1,6 @@
 begin;
 
-select plan(133);
+select plan(180);
 
 select has_column(
   'public',
@@ -251,6 +251,142 @@ select ok(
   'service_role cannot bypass the authenticated bulk RPC contract'
 );
 
+select has_function(
+  'public',
+  'apply_user_permission_access_draft',
+  array['uuid', 'text[]', 'text[]', 'text[]', 'text'],
+  'atomic mixed permission access draft RPC exists'
+);
+
+select ok(
+  has_function_privilege(
+    'authenticated',
+    'public.apply_user_permission_access_draft(uuid,text[],text[],text[],text)',
+    'execute'
+  ),
+  'authenticated can invoke the guarded mixed access draft RPC'
+);
+
+select ok(
+  not has_function_privilege(
+    'anon',
+    'public.apply_user_permission_access_draft(uuid,text[],text[],text[],text)',
+    'execute'
+  ),
+  'anon cannot invoke the mixed access draft RPC'
+);
+
+select ok(
+  not has_function_privilege(
+    'service_role',
+    'public.apply_user_permission_access_draft(uuid,text[],text[],text[],text)',
+    'execute'
+  ),
+  'service_role cannot bypass the mixed access draft contract'
+);
+
+select is(
+  (
+    select string_agg(
+      concat_ws(
+        '|',
+        table_namespace.nspname,
+        table_entry.relname,
+        trigger_entry.tgname,
+        function_namespace.nspname || '.' || function_entry.proname,
+        trigger_entry.tgenabled
+      ),
+      ','
+      order by table_entry.relname
+    )
+    from pg_catalog.pg_trigger trigger_entry
+    join pg_catalog.pg_class table_entry
+      on table_entry.oid = trigger_entry.tgrelid
+    join pg_catalog.pg_namespace table_namespace
+      on table_namespace.oid = table_entry.relnamespace
+    join pg_catalog.pg_proc function_entry
+      on function_entry.oid = trigger_entry.tgfoid
+    join pg_catalog.pg_namespace function_namespace
+      on function_namespace.oid = function_entry.pronamespace
+    where trigger_entry.tgname like 'administrator_account_boundary_%'
+      and not trigger_entry.tgisinternal
+  ),
+  'public|crm_user_reporting_scope_grants|administrator_account_boundary_reporting_scopes|'
+    || 'private.enforce_administrator_account_boundary|O,'
+    || 'public|profiles|administrator_account_boundary_profiles|'
+    || 'private.enforce_administrator_account_boundary|O,'
+    || 'public|user_permission_overrides|administrator_account_boundary_permission_overrides|'
+    || 'private.enforce_administrator_account_boundary|O,'
+    || 'public|user_roles|administrator_account_boundary_roles|'
+    || 'private.enforce_administrator_account_boundary|O',
+  'all four Administrator boundary triggers are present, enabled and bound to the private guard'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    join pg_catalog.pg_roles owner_role
+      on owner_role.oid = function_entry.proowner
+    where function_entry.oid in (
+      'public.can_assign_role(uuid,text)'::regprocedure,
+      'private.current_actor_is_master_for_administrator_boundary()'::regprocedure,
+      'private.enforce_administrator_account_boundary()'::regprocedure
+    )
+      and (
+        not function_entry.prosecdef
+        or owner_role.rolname <> 'postgres'
+        or not ('search_path=""' = any(function_entry.proconfig))
+      )
+  ),
+  'Administrator guards and Master predicate are postgres-owned SECURITY DEFINER functions with an empty search path'
+);
+
+select ok(
+  not exists (
+    select 1
+    from pg_catalog.pg_proc function_entry
+    cross join lateral aclexplode(
+      coalesce(
+        function_entry.proacl,
+        acldefault('f', function_entry.proowner)
+      )
+    ) privilege
+    where function_entry.oid in (
+      'public.can_assign_role(uuid,text)'::regprocedure,
+      'private.current_actor_is_master_for_administrator_boundary()'::regprocedure,
+      'private.enforce_administrator_account_boundary()'::regprocedure
+    )
+      and privilege.privilege_type = 'EXECUTE'
+      and privilege.grantee in (
+        0,
+        (select oid from pg_catalog.pg_roles where rolname = 'anon'),
+        (select oid from pg_catalog.pg_roles where rolname = 'authenticated'),
+        (select oid from pg_catalog.pg_roles where rolname = 'service_role')
+      )
+  ),
+  'Data API roles and PUBLIC cannot execute internal Administrator guards'
+);
+
+select ok(
+  not exists (
+    select 1
+    from unnest(array['anon', 'authenticated', 'service_role']) api_role(role_name)
+    cross join unnest(array[
+      'public.profiles',
+      'public.user_roles',
+      'public.user_permission_overrides',
+      'public.crm_user_reporting_scope_grants'
+    ]) guarded_table(table_name)
+    where has_table_privilege(
+      api_role.role_name,
+      guarded_table.table_name,
+      'INSERT,UPDATE,DELETE,TRUNCATE'
+    )
+  ),
+  'Data API roles retain no direct write grant on the four guarded account tables'
+);
+
 insert into auth.users (id, email)
 values
   ('a3000000-0000-4000-8000-000000000001', 'matrix-master@example.test'),
@@ -263,7 +399,8 @@ values
   ('a3000000-0000-4000-8000-000000000008', 'matrix-broker-imob@example.test'),
   ('a3000000-0000-4000-8000-000000000009', 'matrix-out-of-scope@example.test'),
   ('a3000000-0000-4000-8000-000000000010', 'matrix-pending@example.test'),
-  ('a3000000-0000-4000-8000-000000000011', 'matrix-lower-actor@example.test');
+  ('a3000000-0000-4000-8000-000000000011', 'matrix-lower-actor@example.test'),
+  ('a3000000-0000-4000-8000-000000000012', 'matrix-brand-pending@example.test');
 
 select public.bootstrap_master_user('a3000000-0000-4000-8000-000000000001');
 
@@ -427,6 +564,14 @@ values
     null,
     null,
     'd3000000-0000-4000-8000-000000000004'
+  ),
+  (
+    'f3000000-0000-4000-8000-000000000008',
+    'matrix-org-b',
+    'organization',
+    'b3000000-0000-4000-8000-000000000002',
+    null,
+    null
   );
 
 insert into public.crm_user_reporting_scope_grants (
@@ -514,6 +659,21 @@ where user_id in (
   'a3000000-0000-4000-8000-000000000008',
   'a3000000-0000-4000-8000-000000000009',
   'a3000000-0000-4000-8000-000000000011'
+);
+
+insert into public.user_permission_overrides (
+  user_id,
+  permission_key,
+  effect,
+  reason,
+  granted_by
+)
+values (
+  'a3000000-0000-4000-8000-000000000003',
+  'crm.dashboard.view',
+  'deny',
+  'Synthetic peer removal guard',
+  'a3000000-0000-4000-8000-000000000001'
 );
 
 update public.profiles
@@ -631,6 +791,23 @@ select ok(
   ),
   'Master can delegate a held permission whose minimum level equals Master'
 );
+
+select ok(
+  not public.can_assign_role(
+    'a3000000-0000-4000-8000-000000000002',
+    'admin'
+  ),
+  'Administrator cannot assign the Administrator role to a peer'
+);
+
+select ok(
+  public.can_assign_role(
+    'a3000000-0000-4000-8000-000000000001',
+    'admin'
+  ),
+  'Master can assign the Administrator role'
+);
+
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
@@ -646,21 +823,21 @@ select is((select count(*) from public.crm_dashboard_top_developments), 3::bigin
 select lives_ok(
   $$select public.set_user_permission_overrides_bulk(
     'a3000000-0000-4000-8000-000000000002',
-    array['crm.commercial_policy.manage'],
+    array['crm.simulators.view'],
     'allow',
     'Master delegation to Administrator test'
   )$$,
-  'Master can set an explicit allow for a restricted Administrator permission'
+  'Master can preserve an explicit allow for an inherited Administrator permission'
 );
 select is(
   (
     select effect
     from public.user_permission_overrides
     where user_id = 'a3000000-0000-4000-8000-000000000002'
-      and permission_key = 'crm.commercial_policy.manage'
+      and permission_key = 'crm.simulators.view'
   ),
   'allow',
-  'Master delegation persists as an explicit allow without changing the target role'
+  'Master override persists without changing the Administrator role'
 );
 select is(
   (
@@ -678,7 +855,7 @@ select ok(
     'a3000000-0000-4000-8000-000000000002',
     'crm.commercial_policy.manage'
   ),
-  'Administrator cannot propagate a minimum-level-100 permission even when inherited and explicitly allowed'
+  'Administrator cannot propagate an inherited permission whose minimum level is 100'
 );
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
 set local role authenticated;
@@ -773,6 +950,17 @@ select is(
   'failed peer role change leaves the Administrator unchanged'
 );
 select throws_ok(
+  $$select public.approve_user_access(
+    'a3000000-0000-4000-8000-000000000010',
+    'admin',
+    array['f3000000-0000-4000-8000-000000000001'::uuid],
+    'Administrator promotion attempt'
+  )$$,
+  '42501',
+  null,
+  'Administrator cannot approve a pending identity as Administrator'
+);
+select throws_ok(
   $$select public.set_user_active(
     'a3000000-0000-4000-8000-000000000003',
     false,
@@ -807,6 +995,100 @@ select throws_ok(
   '42501',
   null,
   'Administrator cannot change another Administrator permissions'
+);
+select throws_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000003',
+    array[]::text[],
+    array['crm.dashboard.view'],
+    array[]::text[],
+    'Peer mixed access draft attempt'
+  )$$,
+  '42501',
+  null,
+  'Administrator cannot change another Administrator through the checkbox draft RPC'
+);
+select throws_ok(
+  $$select public.set_user_permission_override(
+    'a3000000-0000-4000-8000-000000000003',
+    'crm.dashboard.view',
+    'deny',
+    'Peer single override attempt'
+  )$$,
+  '42501',
+  null,
+  'Administrator cannot set a single permission override on another Administrator'
+);
+select throws_ok(
+  $test$
+  do $boundary$
+  begin
+    begin
+      perform public.remove_user_permission_override(
+        'a3000000-0000-4000-8000-000000000003',
+        'crm.dashboard.view',
+        'Peer override removal attempt'
+      );
+      raise exception 'expected peer override removal denial'
+        using errcode = 'P0001';
+    exception
+      when sqlstate '42501' then
+        if not exists (
+          select 1
+          from public.user_permission_overrides permission_override
+          where permission_override.user_id = 'a3000000-0000-4000-8000-000000000003'
+            and permission_override.permission_key = 'crm.dashboard.view'
+            and permission_override.effect = 'deny'
+        ) then
+          raise exception 'peer override was removed after denied RPC'
+            using errcode = 'P0001';
+        end if;
+        raise;
+    end;
+  end
+  $boundary$;
+  $test$,
+  '42501',
+  null,
+  'Administrator cannot remove another Administrator override and the row remains'
+);
+
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+delete from public.user_permission_overrides
+where user_id = 'a3000000-0000-4000-8000-000000000003'
+  and permission_key = 'crm.dashboard.view';
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
+set local role authenticated;
+
+select throws_ok(
+  $test$
+  do $boundary$
+  begin
+    if exists (
+      select 1
+      from public.user_permission_overrides permission_override
+      where permission_override.user_id = 'a3000000-0000-4000-8000-000000000003'
+        and permission_override.permission_key = 'crm.ranking.view'
+    ) then
+      raise exception 'unexpected peer override fixture'
+        using errcode = 'P0001';
+    end if;
+
+    perform public.set_user_permission_overrides_bulk(
+      'a3000000-0000-4000-8000-000000000003',
+      array['crm.ranking.view'],
+      'inherit',
+      'Peer inherit without row attempt'
+    );
+    raise exception 'expected peer inherit denial'
+      using errcode = 'P0001';
+  end
+  $boundary$;
+  $test$,
+  '42501',
+  null,
+  'Administrator bulk inherit cannot target another Administrator without an override row'
 );
 select throws_ok(
   $$select public.set_user_permission_overrides_bulk(
@@ -864,6 +1146,18 @@ select throws_ok(
   'bulk mutation rejects duplicate permission keys'
 );
 select throws_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000007',
+    array['crm.dashboard.view'],
+    array['crm.dashboard.view'],
+    array[]::text[],
+    'Duplicate mixed access draft test'
+  )$$,
+  '22023',
+  null,
+  'mixed access draft rejects a permission repeated across effect groups'
+);
+select throws_ok(
   $$select public.set_user_permission_overrides_bulk(
     'a3000000-0000-4000-8000-000000000007',
     array['crm.unknown.view'],
@@ -906,6 +1200,163 @@ select is(
   0::bigint,
   'atomic failure does not persist an earlier valid permission'
 );
+
+reset role;
+
+select throws_ok(
+  $$update public.user_roles
+    set role_key = 'coordinator'
+    where user_id = 'a3000000-0000-4000-8000-000000000003'$$,
+  '42501',
+  null,
+  'role trigger blocks direct Administrator-to-Administrator role mutation'
+);
+select throws_ok(
+  $$update public.profiles
+    set is_active = false,
+        access_status = 'suspended'
+    where user_id = 'a3000000-0000-4000-8000-000000000003'$$,
+  '42501',
+  null,
+  'profile trigger blocks direct Administrator-to-Administrator status mutation'
+);
+select throws_ok(
+  $$insert into public.user_permission_overrides (
+      user_id,
+      permission_key,
+      effect,
+      reason,
+      granted_by
+    ) values (
+      'a3000000-0000-4000-8000-000000000003',
+      'crm.dashboard.view',
+      'deny',
+      'Direct peer override attempt',
+      'a3000000-0000-4000-8000-000000000002'
+    )$$,
+  '42501',
+  null,
+  'override trigger blocks direct Administrator-to-Administrator permission mutation'
+);
+select throws_ok(
+  $$update public.crm_user_reporting_scope_grants
+    set reason = 'Direct peer scope attempt'
+    where user_id = 'a3000000-0000-4000-8000-000000000003'
+      and revoked_at is null$$,
+  '42501',
+  null,
+  'scope trigger blocks direct Administrator-to-Administrator reporting-scope mutation'
+);
+select throws_ok(
+  $test$
+  do $boundary$
+  begin
+    if exists (
+      select 1
+      from public.crm_user_reporting_scope_grants scope_grant
+      where scope_grant.user_id = 'a3000000-0000-4000-8000-000000000003'
+        and scope_grant.reporting_scope_id = 'f3000000-0000-4000-8000-000000000008'
+        and scope_grant.revoked_at is null
+    ) then
+      raise exception 'unexpected peer reporting-scope fixture'
+        using errcode = 'P0001';
+    end if;
+
+    insert into public.crm_user_reporting_scope_grants (
+      user_id,
+      reporting_scope_id,
+      granted_by,
+      reason
+    )
+    values (
+      'a3000000-0000-4000-8000-000000000003',
+      'f3000000-0000-4000-8000-000000000008',
+      'a3000000-0000-4000-8000-000000000002',
+      'Direct peer scope insert attempt'
+    );
+    raise exception 'expected peer reporting-scope insert denial'
+      using errcode = 'P0001';
+  end
+  $boundary$;
+  $test$,
+  '42501',
+  null,
+  'scope trigger blocks direct reporting-scope insert for another Administrator'
+);
+select throws_ok(
+  $test$
+  do $boundary$
+  begin
+    begin
+      delete from public.crm_user_reporting_scope_grants scope_grant
+      where scope_grant.user_id = 'a3000000-0000-4000-8000-000000000003'
+        and scope_grant.reporting_scope_id = 'f3000000-0000-4000-8000-000000000001'
+        and scope_grant.revoked_at is null;
+      raise exception 'expected peer reporting-scope delete denial'
+        using errcode = 'P0001';
+    exception
+      when sqlstate '42501' then
+        if not exists (
+          select 1
+          from public.crm_user_reporting_scope_grants scope_grant
+          where scope_grant.user_id = 'a3000000-0000-4000-8000-000000000003'
+            and scope_grant.reporting_scope_id = 'f3000000-0000-4000-8000-000000000001'
+            and scope_grant.revoked_at is null
+        ) then
+          raise exception 'peer reporting-scope row was removed after denied delete'
+            using errcode = 'P0001';
+        end if;
+        raise;
+    end;
+  end
+  $boundary$;
+  $test$,
+  '42501',
+  null,
+  'scope trigger blocks direct reporting-scope delete for another Administrator and the row remains'
+);
+
+set local role authenticated;
+
+select lives_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000007',
+    array['crm.dashboard.with_canal_imob.view'],
+    array['pages.view'],
+    array[]::text[],
+    'Direct checkbox mixed draft test'
+  )$$,
+  'Administrator can save checked and unchecked permissions in one atomic draft'
+);
+select is(
+  (
+    select string_agg(concat(permission_key, ':', effect), ',' order by permission_key)
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000007'
+  ),
+  'crm.dashboard.with_canal_imob.view:allow,pages.view:deny',
+  'mixed access draft persists each checkbox with its intended effect'
+);
+select lives_ok(
+  $$select public.apply_user_permission_access_draft(
+    'a3000000-0000-4000-8000-000000000007',
+    array[]::text[],
+    array[]::text[],
+    array['crm.dashboard.with_canal_imob.view', 'pages.view'],
+    'Restore selected profile defaults test'
+  )$$,
+  'Administrator can restore the selected profile defaults atomically'
+);
+select is(
+  (
+    select count(*)
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000007'
+  ),
+  0::bigint,
+  'profile default restore removes every changed override'
+);
+
 select lives_ok(
   $$select public.set_user_permission_overrides_bulk(
     'a3000000-0000-4000-8000-000000000007',
@@ -984,6 +1435,296 @@ select is(
   ),
   0::bigint,
   'rejected lower-role mutation persists nothing'
+);
+
+reset role;
+
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+
+select throws_ok(
+  $$select public.set_user_permission_override(
+    'a3000000-0000-4000-8000-000000000003',
+    'crm.simulators.execute',
+    'allow',
+    'Master-only simulator override attempt'
+  )$$,
+  '42501',
+  null,
+  'even Master cannot allow official simulator execution for an Administrator'
+);
+select throws_ok(
+  $$select public.set_user_permission_override(
+    'a3000000-0000-4000-8000-000000000003',
+    'crm.commercial_engine.execute',
+    'allow',
+    'Master-only commercial engine override attempt'
+  )$$,
+  '42501',
+  null,
+  'even Master cannot allow commercial engine execution for an Administrator'
+);
+select throws_ok(
+  $$select public.set_user_permission_override(
+    'a3000000-0000-4000-8000-000000000003',
+    'crm.commercial_policy.manage',
+    'allow',
+    'Master-only commercial policy override attempt'
+  )$$,
+  '42501',
+  null,
+  'even Master cannot allow commercial policy management for an Administrator'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk(
+    'a3000000-0000-4000-8000-000000000003',
+    array[
+      'crm.simulators.execute',
+      'crm.commercial_engine.execute',
+      'crm.commercial_policy.manage'
+    ],
+    'allow',
+    'Master-only bulk override attempt'
+  )$$,
+  '42501',
+  null,
+  'bulk override cannot grant any Master-only permission to an Administrator'
+);
+select is(
+  (
+    select count(*)
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000003'
+  ),
+  0::bigint,
+  'rejected Master-only allows persist no partial Administrator override'
+);
+reset role;
+
+select lives_ok(
+  $$insert into public.user_permission_overrides (
+      user_id,
+      permission_key,
+      effect,
+      reason,
+      granted_by
+    ) values
+      (
+        'a3000000-0000-4000-8000-000000000003',
+        'crm.simulators.execute',
+        'deny',
+        'Administrator simulator deny preservation test',
+        'a3000000-0000-4000-8000-000000000001'
+      ),
+      (
+        'a3000000-0000-4000-8000-000000000003',
+        'crm.commercial_engine.execute',
+        'deny',
+        'Administrator engine deny preservation test',
+        'a3000000-0000-4000-8000-000000000001'
+      ),
+      (
+        'a3000000-0000-4000-8000-000000000003',
+        'crm.commercial_policy.manage',
+        'deny',
+        'Administrator policy deny preservation test',
+        'a3000000-0000-4000-8000-000000000001'
+      )$$,
+  'Administrator boundary trigger preserves direct deny overrides for Master-only permissions'
+);
+select is(
+  (
+    select string_agg(
+      concat(permission_key, ':', effect),
+      ','
+      order by permission_key
+    )
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000003'
+  ),
+  'crm.commercial_engine.execute:deny,crm.commercial_policy.manage:deny,'
+    || 'crm.simulators.execute:deny',
+  'Administrator deny overrides remain intact for every Master-only permission'
+);
+select lives_ok(
+  $$delete from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000003'
+      and permission_key = any(array[
+      'crm.simulators.execute',
+      'crm.commercial_engine.execute',
+      'crm.commercial_policy.manage'
+    ])$$,
+  'trusted cleanup can remove Administrator deny overrides without widening access'
+);
+select lives_ok(
+  $$insert into public.user_permission_overrides (
+      user_id,
+      permission_key,
+      effect,
+      reason,
+      granted_by
+    ) values
+      (
+        'a3000000-0000-4000-8000-000000000007',
+        'crm.simulators.execute',
+        'allow',
+        'Non-Administrator simulator allow preservation test',
+        'a3000000-0000-4000-8000-000000000001'
+      ),
+      (
+        'a3000000-0000-4000-8000-000000000007',
+        'crm.commercial_engine.execute',
+        'allow',
+        'Non-Administrator engine allow preservation test',
+        'a3000000-0000-4000-8000-000000000001'
+      ),
+      (
+        'a3000000-0000-4000-8000-000000000007',
+        'crm.commercial_policy.manage',
+        'allow',
+        'Non-Administrator policy allow preservation test',
+        'a3000000-0000-4000-8000-000000000001'
+      )$$,
+  'Administrator boundary trigger leaves direct allow overrides for other roles unchanged'
+);
+select is(
+  (
+    select string_agg(
+      concat(permission_key, ':', effect),
+      ','
+      order by permission_key
+    )
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000007'
+  ),
+  'crm.commercial_engine.execute:allow,crm.commercial_policy.manage:allow,'
+    || 'crm.simulators.execute:allow',
+  'non-Administrator allow overrides are preserved exactly'
+);
+select lives_ok(
+  $$delete from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000007'
+      and permission_key = any(array[
+      'crm.simulators.execute',
+      'crm.commercial_engine.execute',
+      'crm.commercial_policy.manage'
+    ])$$,
+  'trusted cleanup can remove preserved non-Administrator overrides'
+);
+
+select throws_ok(
+  $$insert into public.user_permission_overrides (
+      user_id,
+      permission_key,
+      effect,
+      reason,
+      granted_by
+    ) values (
+      'a3000000-0000-4000-8000-000000000003',
+      'crm.simulators.execute',
+      'allow',
+      'Direct Master-only override attempt',
+      'a3000000-0000-4000-8000-000000000001'
+    )$$,
+  '42501',
+  null,
+  'override trigger blocks a direct Master-only allow for Administrator even from Master'
+);
+
+set local role authenticated;
+
+select lives_ok(
+  $$select public.approve_user_access(
+    'a3000000-0000-4000-8000-000000000010',
+    'admin',
+    array['f3000000-0000-4000-8000-000000000001'::uuid],
+    'Master approval of Administrator'
+  )$$,
+  'Master can approve a pending identity as Administrator with an organization scope'
+);
+select is(
+  (
+    select concat_ws(
+      '|',
+      user_role.role_key,
+      profile.access_status,
+      profile.is_active::text,
+      (
+        select count(*)::text
+        from public.crm_user_reporting_scope_grants scope_grant
+        where scope_grant.user_id = profile.user_id
+          and scope_grant.revoked_at is null
+      )
+    )
+    from public.profiles profile
+    join public.user_roles user_role on user_role.user_id = profile.user_id
+    where profile.user_id = 'a3000000-0000-4000-8000-000000000010'
+  ),
+  'admin|approved|true|1',
+  'Master approval persists the protected role, active status and one reporting scope'
+);
+select lives_ok(
+  $$select public.assign_user_role(
+    'a3000000-0000-4000-8000-000000000010',
+    'admin',
+    'Master Administrator role confirmation'
+  )$$,
+  'Master can assign Administrator to an approved Administrator account'
+);
+select lives_ok(
+  $$select public.set_user_active(
+    'a3000000-0000-4000-8000-000000000010',
+    false,
+    'Master Administrator suspension test'
+  )$$,
+  'Master can suspend an Administrator account'
+);
+
+reset role;
+
+select lives_ok(
+  $$update public.crm_user_reporting_scope_grants
+    set reason = 'Master direct protected-scope maintenance test'
+    where user_id = 'a3000000-0000-4000-8000-000000000010'
+      and revoked_at is null$$,
+  'scope trigger permits trusted Master maintenance while the Administrator is suspended'
+);
+
+set local role authenticated;
+
+select lives_ok(
+  $$select public.set_user_active(
+    'a3000000-0000-4000-8000-000000000010',
+    true,
+    'Master Administrator reactivation test'
+  )$$,
+  'Master can reactivate an Administrator account with a compatible scope'
+);
+select lives_ok(
+  $$select public.set_user_permission_override(
+    'a3000000-0000-4000-8000-000000000010',
+    'crm.dashboard.view',
+    'deny',
+    'Master Administrator override test'
+  )$$,
+  'Master can set a single permission override on an Administrator account'
+);
+select lives_ok(
+  $$select public.remove_user_permission_override(
+    'a3000000-0000-4000-8000-000000000010',
+    'crm.dashboard.view',
+    'Master Administrator override cleanup'
+  )$$,
+  'Master can remove a single permission override from an Administrator account'
+);
+select is(
+  (
+    select count(*)
+    from public.user_permission_overrides
+    where user_id = 'a3000000-0000-4000-8000-000000000010'
+  ),
+  0::bigint,
+  'Master override cleanup restores the Administrator inherited matrix'
 );
 
 reset role;
@@ -1214,7 +1955,7 @@ select throws_ok(
   '42501', null, 'Master cannot bypass the existing self-modification guard'
 );
 select throws_ok(
-  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000010', array['crm.inventory.riva.view'], 'allow', 'Synthetic pending brand grant')$$,
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000012', array['crm.inventory.riva.view'], 'allow', 'Synthetic pending brand grant')$$,
   '23505', null, 'pending users cannot receive brand permission exceptions'
 );
 reset role;

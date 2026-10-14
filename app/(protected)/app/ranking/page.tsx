@@ -55,21 +55,21 @@ const METRIC_ACCENTS = [
 const PODIUM_PRESENTATION = [
   {
     label: "Líder do ranking",
-    cardClass: "border-lime-300/55 bg-lime-300/10 lg:col-start-2 lg:row-start-1",
+    cardClass: `${styles.podiumGold} border-lime-300/55 bg-lime-300/10 lg:col-start-2 lg:row-start-1`,
     markerClass: "bg-lime-300 text-[#082137] ring-lime-200/35",
-    accentClass: "text-lime-300",
+    accentClass: `${styles.podiumGoldAccent} text-lime-300`,
   },
   {
     label: "Vice-líder",
     cardClass: "border-cyan-200/35 bg-white/8 lg:col-start-1 lg:row-start-1",
     markerClass: "bg-cyan-200 text-[#082137] ring-cyan-100/25",
-    accentClass: "text-cyan-200",
+    accentClass: `${styles.podiumSilverAccent} text-cyan-200`,
   },
   {
     label: "Top 3",
-    cardClass: "border-cyan-300/25 bg-cyan-300/6 lg:col-start-3 lg:row-start-1",
+    cardClass: `${styles.podiumBronze} border-cyan-300/25 bg-cyan-300/6 lg:col-start-3 lg:row-start-1`,
     markerClass: "bg-cyan-700 text-white ring-cyan-300/20",
-    accentClass: "text-cyan-300",
+    accentClass: `${styles.podiumBronzeAccent} text-cyan-300`,
   },
 ] as const;
 
@@ -142,7 +142,7 @@ function UnavailableRankingComposition({
                 >
                   {presentation.label}
                 </p>
-                <h3 className="mt-3 text-lg font-semibold text-white">—</h3>
+                <h3 className={`${styles.podiumName} mt-3 text-lg font-semibold text-white`}>—</h3>
                 <div className="mt-auto pt-3">
                   <UnavailableValue reason="Dado indisponível — integração pendente" />
                 </div>
@@ -249,10 +249,15 @@ export default async function RankingPage({
         <section aria-labelledby="ranking-points-title">
           <AnalyticsCard tone="navy" density="compact">
             <div className={`${styles.pointsHeader} border-b border-white/10 pb-4`}>
-              <p className="text-xs font-semibold tracking-[0.14em] text-cyan-300 uppercase">
+              <p
+                className={`${styles.pointsKicker} text-xs font-semibold tracking-[0.14em] text-cyan-300 uppercase`}
+              >
                 Sem pontuação oficial
               </p>
-              <h2 id="ranking-points-title" className="mt-1 text-xl font-semibold text-white">
+              <h2
+                id="ranking-points-title"
+                className={`${styles.pointsTitle} mt-1 text-xl font-semibold text-white`}
+              >
                 Pontos por ação
               </h2>
             </div>
@@ -262,13 +267,15 @@ export default async function RankingPage({
               {POINT_METRICS.map((metric, index) => (
                 <div
                   key={metric.key}
-                  className="relative min-h-20 overflow-hidden rounded-lg border border-white/10 bg-white/8 p-3"
+                  className={`${styles.pointItem} relative min-h-20 overflow-hidden rounded-lg border border-white/10 bg-white/8 p-3`}
                 >
                   <span
                     aria-hidden="true"
                     className={`absolute inset-x-0 top-0 h-0.5 ${METRIC_ACCENTS[index] ?? "bg-cyan-300"}`}
                   />
-                  <dt className="min-h-9 text-xs leading-4 font-medium text-slate-300">
+                  <dt
+                    className={`${styles.pointLabel} min-h-9 text-xs leading-4 font-medium text-slate-300`}
+                  >
                     {metric.label}
                   </dt>
                   <dd className="mt-3">
@@ -451,14 +458,19 @@ export default async function RankingPage({
             className={`${styles.pointsHeader} flex flex-wrap items-end justify-between gap-3 border-b border-white/10 pb-4`}
           >
             <div>
-              <p className="text-xs font-semibold tracking-[0.14em] text-cyan-300 uppercase">
+              <p
+                className={`${styles.pointsKicker} text-xs font-semibold tracking-[0.14em] text-cyan-300 uppercase`}
+              >
                 Regra vigente
               </p>
-              <h2 id="ranking-points-title" className="mt-1 text-xl font-semibold text-white">
+              <h2
+                id="ranking-points-title"
+                className={`${styles.pointsTitle} mt-1 text-xl font-semibold text-white`}
+              >
                 Pontos por ação
               </h2>
             </div>
-            <p className="max-w-xl text-sm leading-6 text-slate-300">
+            <p className={`${styles.pointsDescription} max-w-xl text-sm leading-6 text-slate-300`}>
               Os sete indicadores abaixo são os pesos confirmados usados no cálculo deste placar.
             </p>
           </div>
@@ -473,7 +485,7 @@ export default async function RankingPage({
               return (
                 <div
                   key={metric.key}
-                  className="relative min-h-20 overflow-hidden rounded-lg border border-white/10 bg-white/8 p-3"
+                  className={`${styles.pointItem} relative min-h-20 overflow-hidden rounded-lg border border-white/10 bg-white/8 p-3`}
                 >
                   <span
                     aria-hidden="true"
@@ -481,20 +493,28 @@ export default async function RankingPage({
                       METRIC_ACCENTS[index] ?? "bg-cyan-300"
                     }`}
                   />
-                  <dt className="min-h-9 text-xs leading-4 font-medium text-slate-300">
+                  <dt
+                    className={`${styles.pointLabel} min-h-9 text-xs leading-4 font-medium text-slate-300`}
+                  >
                     {metric.label}
                   </dt>
                   <dd className="mt-3">
                     {rouletteUnavailable ? (
-                      <strong className="block text-sm leading-5 text-cyan-200">
+                      <strong
+                        className={`${styles.pointUnavailable} block text-sm leading-5 text-cyan-200`}
+                      >
                         {DATA_UNAVAILABLE_LABEL}
                       </strong>
                     ) : (
                       <>
-                        <strong className="text-2xl leading-none font-semibold text-white">
+                        <strong
+                          className={`${styles.pointValue} text-2xl leading-none font-semibold text-white`}
+                        >
                           {numberFormatter.format(result.weights.weights[metric.key])}
                         </strong>
-                        <span className="ml-1.5 text-xs font-medium text-lime-300">
+                        <span
+                          className={`${styles.pointUnit} ml-1.5 text-xs font-medium text-lime-300`}
+                        >
                           pts por ação
                         </span>
                       </>
@@ -597,23 +617,29 @@ export default async function RankingPage({
                       >
                         {presentation.label}
                       </p>
-                      <h3 className="mt-2 text-xl font-semibold break-words text-white">
+                      <h3
+                        className={`${styles.podiumName} mt-2 text-xl font-semibold break-words text-white`}
+                      >
                         {line.name}
                       </h3>
-                      <p className="mt-1 text-sm text-slate-300">
+                      <p className={`${styles.podiumMeta} mt-1 text-sm text-slate-300`}>
                         {scope === "brokers"
                           ? line.managerName
                           : `${line.memberCount} ${line.memberCount === 1 ? "corretor" : "corretores"}`}
                       </p>
                       <div className="mt-auto pt-3">
-                        <strong className="block text-3xl font-semibold tracking-tight text-white">
+                        <strong
+                          className={`${styles.podiumScore} block text-3xl font-semibold tracking-tight text-white`}
+                        >
                           {numberFormatter.format(line.total)}
                         </strong>
                         <span className={`text-sm font-semibold ${presentation.accentClass}`}>
                           pontos
                         </span>
                       </div>
-                      <p className="mt-4 border-t border-white/10 pt-4 text-xs text-slate-300">
+                      <p
+                        className={`${styles.podiumBreakdown} mt-4 border-t border-white/10 pt-4 text-xs text-slate-300`}
+                      >
                         {numberFormatter.format(line.baseScore)} produção +{" "}
                         {numberFormatter.format(line.bonus)} bônus
                       </p>

@@ -80,8 +80,11 @@ historica e sinaliza a falha atual, sem declarar a base atualizada.
 O coletor e o Chrome precisam permanecer ligados na mesma maquina. Com o PC
 desligado, somente um servidor com sessao grafica dedicada e login/MFA manual
 aprovado pelo operador pode manter essa modalidade em execucao. Um servidor
-headless ou n8n sozinho nao substitui essa sessao. Nao instalar ambiente grafico,
-copiar perfil pessoal ou enfraquecer MFA para contornar esse requisito.
+headless ou n8n sozinho nao substitui essa sessao. Nao copiar perfil pessoal
+nem enfraquecer MFA. O pedido de 12/10/2026 autoriza preparar a sessao grafica
+dedicada na VPS; procedimento, limites e gates estao em
+[Sessao Salesforce na VPS](salesforce-vps-session.md). Essa etapa nao ativa
+n8n nem a exportacao dos relatórios.
 
 A autenticacao pode expirar ou ser revogada. Nesse caso, a coleta interrompe a
 publicacao e o operador precisa autenticar novamente. Nao existe garantia de
@@ -278,21 +281,52 @@ ativa. A evidência detalhada sem PII está em
 
 ## Gates antes da primeira escrita
 
+### Evidencia de backup e ensaio em 13/10/2026
+
+O backup do projeto `hnncxuerlcsaahdxoswb` foi restaurado em PostgreSQL
+17.6.1.155 isolado, sem rede, portas ou volume persistente. Local privado na
+VPS: `/srv/descomplica-backups/supabase-pre-salesforce-20261013-h0umc6`.
+`verification.json` registra hashes e comparacao de 65 tabelas COPY, todas
+iguais. Arquivos root600/pasta root700; checksums relidos e fsync confirmado.
+Inclui schema da aplicacao/plataforma, dados, roles e historico de migrations.
+Nao inclui bytes do Storage, nao e offsite e dumps de schema/dados nao sao um
+snapshot compartilhado. Nao houve restauracao no projeto cloud.
+
+Uma nova coleta real dos sete relatorios, sem publisher, foi aplicada somente
+nessa copia via RPC com `service_role`: 15 metricas e 144 participantes. Replay
+do mesmo request confirmou idempotencia e um unico run. O endpoint HTTP real
+e a credencial de saida n8n ainda precisam de prova depois dos gates abaixo.
+
+O catalogo cloud de 13/10/2026 possui a RPC Salesforce, mas nao as RPCs Qlik/v3,
+que a revisao excluiu deste cutover. Nao executar `db push` para convergir todo o historico: existem
+migrations remotas de contencao Qlik que precisam ser reconciliadas. A auditoria
+e preparacao foram autorizadas; aplicacao de migrations nao esta autorizada
+automaticamente. Manter configuracao/publisher/agenda desligados ate os gates.
+
+### Checklist de liberacao
+
 1. aplicar as migrations de reconciliação em ambiente isolado e obter a contagem
    pgTAP exigida pelo commit: 229 e 1.099 são referências históricas
    desatualizadas, e o HEAD atual exige 1.104; nenhuma dessas contagens é
    evidência de execução remota nesta etapa;
-2. confirmar no alvo que `anon` não acessa tabelas, que `service_role` não tem
-   acesso direto às tabelas Qlik e executa somente as três RPCs de ingestão
-   auditadas do schema atual: `ingest_crm_imob_ranking_snapshot`,
-   `ingest_crm_read_model_v3` e `ingest_crm_salesforce_snapshot`;
+2. para este fluxo Salesforce, confirmar no alvo a RPC publica
+   `ingest_crm_salesforce_snapshot(jsonb)` com contrato v2 e implementacao v1
+   privada: execucao permitida a `service_role`, negada a `PUBLIC`, `anon` e
+   `authenticated`, sem chamada direta a implementacao privada. Validar RLS e
+   grants minimos das tabelas Salesforce; preservar a proibicao de acesso direto
+   de `anon`, `authenticated` e `service_role` as duas tabelas Qlik.
+   `ingest_crm_imob_ranking_snapshot` e `ingest_crm_read_model_v3` pertencem a
+   cutovers separados; nao instalar migrations desses fluxos para liberar
+   Salesforce. Revisao estatica registrada na auditoria de 13/10/2026;
 3. manter publisher e candidata n8n inativos e validar o snapshot completo pelo
    schema Zod;
 4. manter `goalsAvailable=false` até existir fonte oficial de metas;
 5. manter `rouletteAvailable=false` até existir fonte oficial de roleta;
 6. fazer backup protegido do Supabase novo e validar leitura/checksum;
-7. gerar Bearers exclusivos para origem→n8n e n8n→CRM, mantendo o primeiro em
-   arquivo regular privado (`0600` POSIX ou ACL owner-only Windows);
+7. conferir e reutilizar os Bearers exclusivos existentes para origem→n8n e
+   n8n→CRM, mantendo o primeiro em arquivo regular privado (`0600` POSIX ou
+   ACL owner-only Windows). Geracao ou rotacao somente quando necessaria e
+   autorizada; nao substituir credenciais existentes durante o preflight;
 8. pelo MCP n8n, completar autenticação, schema v2 e o único envio HTTP para o
    CRM; validar antes do update e reler depois, ainda sem ativar a agenda;
 9. habilitar somente `SALESFORCE_INGEST_ENABLED` e manter
@@ -308,7 +342,17 @@ ativa. A evidência detalhada sem PII está em
 O estado indisponível de metas e roleta foi autorizado para a primeira carga em
 6 de agosto de 2026. Ele não autoriza inventar metas, percentuais ou eventos de
 roleta. Antes da escrita, o PR deve ter todos os checks do GitHub Actions verdes
-e a migration v2 deve passar por dry-run/auditoria e ser aplicada isoladamente.
+e o contrato v2 deve ser conferido no catalogo. Se ja estiver implantado, nao
+reaplicar a migration. Qualquer SQL faltante exige auditoria, ensaio isolado e
+autorizacao especifica antes da aplicacao remota.
+
+Configuracao deve entrar por promocao efetiva de imagem validada, com backup e
+rollback do env sob o coordenador protegido de release. Usar a opcao explicita
+`--salesforce-ingestion enable` com um novo SHA aprovado. Sem essa opcao,
+mesmo SHA/imagem retorna `noop`; com ela, o mesmo SHA e recusado. Alterar o
+arquivo env sozinho nao injeta secrets no
+container. Conferir presenca das variaveis sem revelar valores, health/version
+e refresh desabilitado apos a promocao. Nao usar restart manual como atalho.
 
 A primeira carga e a agenda permanecem bloqueadas enquanto faltar qualquer um
 destes itens: workflow n8n completo e relido por MCP, Chrome/CDP dedicado com
@@ -317,8 +361,36 @@ desligado durante todo esse processo.
 
 ## Rollback
 
+### Candidata no novo n8n em 13/10/2026
+
+`L90AYSBEat4vYHLz` possui cinco nodes: webhook autenticado, pre-filtro,
+POST HTTPS fixo para `/api/ingest/salesforce`, conferencia do recibo e resposta.
+Fonte: `ops/n8n/salesforce-candidate.sdk.js`. Alteracoes somente por MCP,
+com `validate_workflow` autorizado pelo operador antes de `update_workflow`
+e releitura depois. Credenciais de entrada e saida sao distintas e existentes.
+
+O pre-filtro nao substitui o schema Zod completo do CRM. O recibo somente aceita
+HTTP 200/201 com `ok: true`, o mesmo `requestId` e `idempotent` coerente com o
+codigo HTTP. Respostas 202, IDs divergentes e recibos invalidos resultam em 502
+sem repassar corpo/headers do destino. Falha de transporte/JSON interrompe o
+node e nao confirma publicacao. Timeout 60s, redirects e retries desativados.
+Timeout nao prova ausencia de escrita: reconciliar pelo mesmo requestId antes
+de repetir uma carga, nunca gerar outro ID para uma tentativa ambigua.
+
+O fluxo continua inativo, sem agenda ou persistencia de execucoes. Validacao
+estatica MCP e testes locais nao comprovam autenticacao n8n para CRM nem
+escrita no banco. A credencial foi vinculada, mas os segredos privados ainda
+nao foram aplicados ao runtime CRM. Cumprir backup/restore, reconciliacao do
+schema remoto, CI e release:production antes da primeira carga e replay.
+
+### Procedimento
+
 - desativar imediatamente a candidata;
-- definir `SALESFORCE_INGEST_ENABLED=false` e reiniciar somente o container da aplicação;
+- em tentativa de release pendente, executar `release:production recover`
+  com o deployment ID exato; o backup privado restaura imagem e env anteriores;
+- depois de uma release concluida, manter candidata/publisher inativos e fazer
+  qualquer desativacao do runtime por nova promocao protegida aprovada;
+  nao alterar env nem reiniciar containers diretamente;
 - manter o workflow antigo e seus backups sem alterações;
 - o snapshot anterior do CRM permanece substituível por uma nova ingestão mais
   recente; não executar SQL manual, reset, seed ou limpeza;

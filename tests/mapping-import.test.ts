@@ -1,8 +1,13 @@
-import { mkdtemp, readFile, rm, stat, writeFile } from "node:fs/promises";
+import { mkdtemp, open, readFile, rm, stat, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
+
+vi.mock("node:fs/promises", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("node:fs/promises")>();
+  return { ...actual, open: vi.fn(actual.open) };
+});
 
 import {
   canonicalizeMappingImportManifest,
@@ -237,7 +242,10 @@ describe("mapping import CLI", () => {
       if (mapping.decision === "verify") expect(capture.stdout()).not.toContain(mapping.targetId);
     }
 
-    expect((await stat(detailPath)).mode & 0o777).toBe(0o600);
+    expect(open).toHaveBeenCalledWith(detailPath, "wx", 0o600);
+    if (process.platform !== "win32") {
+      expect((await stat(detailPath)).mode & 0o777).toBe(0o600);
+    }
     expect(await readFile(detailPath, "utf8")).toContain("fixture-org-a");
   });
 

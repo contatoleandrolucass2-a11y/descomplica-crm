@@ -125,7 +125,8 @@ export const PERMISSIONS = {
   },
   "crm.inventory.direcional.view": {
     label: "DIRECIONAL",
-    description: "Visualiza unidades da DIRECIONAL nos simuladores quando liberado para este usuário.",
+    description:
+      "Visualiza unidades da DIRECIONAL nos simuladores quando liberado para este usuário.",
     minLevel: 10,
   },
   "crm.commercial_engine.execute": {

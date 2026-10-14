@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Qlik na VPS | Descomplica</title>
+    <link rel="stylesheet" href="/style.css" />
+  </head>
+  <body>
+    <header>
+      <strong>Qlik na VPS</strong><span id="status" role="status">Desconectado</span
+      ><button id="connect">Conectar</button><button id="disconnect" disabled>Desconectar</button>
+    </header>
+    <details id="credentials">
+      <summary>Credencial Qlik</summary>
+      <form id="credential-form" method="post" action="/credentials" autocomplete="off">
+        <label
+          >Usu&#225;rio <input name="username" autocomplete="off" maxlength="320" required
+        /></label>
+        <label
+          >Senha
+          <input name="password" type="password" autocomplete="off" maxlength="2048" required
+        /></label>
+        <button id="save-credential" disabled>Guardar na VPS</button>
+        <span id="credential-status" role="status">Verificando</span>
+      </form>
+    </details>
+    <main id="screen" aria-label="Navegador remoto Qlik"></main>
+    <script type="module" src="/credential-client.js"></script>
+    <script type="module" src="/client.js"></script>
+  </body>
+</html>

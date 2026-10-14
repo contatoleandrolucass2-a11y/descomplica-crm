@@ -1,9 +1,10 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
-import { mkdtemp, readFile, stat } from "node:fs/promises";
+import { mkdtemp, readFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { assertNativePrivatePath } from "./test-helpers/native-private-fixture.mjs";
 
 import {
   resolveCandidateOutputPath,
@@ -44,5 +45,5 @@ test("writes the candidate atomically as an owner-only file", async (context) =>
   assert.deepEqual(JSON.parse(await readFile(output, "utf8")), {
     payload: { schemaVersion: 2 },
   });
-  assert.equal((await stat(output)).mode & 0o777, 0o600);
+  await assertNativePrivatePath(output, 0o600);
 });

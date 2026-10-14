@@ -119,6 +119,18 @@ export const PROTECTED_PAGE_GATES = [
     releaseEnabled: true,
   },
   {
+    pageKey: "crm.management",
+    path: "/app/gestao",
+    permission: "crm.dashboard.view",
+    releaseEnabled: true,
+  },
+  {
+    pageKey: "crm.management.routine",
+    path: "/app/gestao/rotina",
+    permission: "crm.dashboard.view",
+    releaseEnabled: true,
+  },
+  {
     pageKey: "crm.simulation",
     path: "/app/simulacao",
     permission: "crm.simulators.view",

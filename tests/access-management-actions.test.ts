@@ -6,7 +6,7 @@ const mocks = vi.hoisted(() => ({
   requireCanAssignRole: vi.fn(),
   requireCanGrantAllPermissions: vi.fn(),
   requireCanGrantPermission: vi.fn(),
-  requireCanManageTargetLevel: vi.fn(),
+  requireCanManageTargetRole: vi.fn(),
   revalidatePath: vi.fn(),
   rpc: vi.fn(),
 }));
@@ -20,10 +20,11 @@ vi.mock("@/lib/authorization/hierarchy", () => ({
   requireCanAssignRole: mocks.requireCanAssignRole,
   requireCanGrantAllPermissions: mocks.requireCanGrantAllPermissions,
   requireCanGrantPermission: mocks.requireCanGrantPermission,
-  requireCanManageTargetLevel: mocks.requireCanManageTargetLevel,
+  requireCanManageTargetRole: mocks.requireCanManageTargetRole,
 }));
 
 import {
+  approveUserAccessAction,
   assignRoleAction,
   setPermissionOverridesBulkAction,
 } from "@/app/(protected)/admin/usuarios/actions";
@@ -35,7 +36,16 @@ const actor = {
   permissions: ["permissions.manage", "roles.manage"],
 };
 const targetUserId = "a5000000-0000-4000-8000-000000000002";
+const reportingScopeId = "a5000000-0000-4000-8000-000000000003";
 const idleState = { status: "idle" as const, message: "" };
+
+function approvalForm(roleKey: string) {
+  const formData = new FormData();
+  formData.set("roleKey", roleKey);
+  formData.append("reportingScopeIds", reportingScopeId);
+  formData.set("reason", "Aprovação sintética auditável");
+  return formData;
+}
 
 describe("ações administrativas em lote", () => {
   beforeEach(() => {
@@ -72,7 +82,7 @@ describe("ações administrativas em lote", () => {
       message: "Permissões salvas.",
     });
     expect(mocks.requirePermission).toHaveBeenCalledWith("permissions.manage");
-    expect(mocks.requireCanManageTargetLevel).toHaveBeenCalledWith(actor, 25);
+    expect(mocks.requireCanManageTargetRole).toHaveBeenCalledWith(actor, "broker_house", 25);
     expect(mocks.requireCanGrantAllPermissions).toHaveBeenCalledWith(actor, [
       "crm.dashboard.with_canal_imob.view",
       "crm.dashboard.view",
@@ -160,7 +170,7 @@ describe("ações administrativas em lote", () => {
   });
 
   it("não grava permissões quando a hierarquia rejeita o alvo", async () => {
-    mocks.requireCanManageTargetLevel.mockImplementationOnce(() => {
+    mocks.requireCanManageTargetRole.mockImplementationOnce(() => {
       throw new Error("FORBIDDEN");
     });
     const formData = new FormData();
@@ -171,5 +181,42 @@ describe("ações administrativas em lote", () => {
       "apply_user_permission_access_draft",
       expect.anything(),
     );
+  });
+  it("bloqueia aprovação como Administrador antes de criar cliente ou chamar RPC", async () => {
+    mocks.requireCanAssignRole.mockImplementationOnce(() => {
+      throw new Error("FORBIDDEN");
+    });
+
+    const result = await approveUserAccessAction(targetUserId, idleState, approvalForm("admin"));
+
+    expect(result).toEqual({
+      status: "error",
+      message: "Operação não autorizada ou inválida.",
+    });
+    expect(mocks.requirePermission).toHaveBeenNthCalledWith(1, "users.manage");
+    expect(mocks.requirePermission).toHaveBeenNthCalledWith(2, "roles.manage");
+    expect(mocks.requireCanAssignRole).toHaveBeenCalledWith(actor, "admin");
+    expect(mocks.createClient).not.toHaveBeenCalled();
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
+  it("permite ao Master aprovar o papel Administrador pela RPC auditada", async () => {
+    const master = { ...actor, roleKey: "master", level: 100 };
+    mocks.requirePermission.mockResolvedValue(master);
+
+    const result = await approveUserAccessAction(targetUserId, idleState, approvalForm("admin"));
+
+    expect(result).toEqual({
+      status: "success",
+      message: "Acesso aprovado com papel e escopo auditados.",
+      sessionRefreshRecommended: true,
+    });
+    expect(mocks.requireCanAssignRole).toHaveBeenCalledWith(master, "admin");
+    expect(mocks.rpc).toHaveBeenCalledWith("approve_user_access", {
+      target_user_id: targetUserId,
+      target_role_key: "admin",
+      reporting_scope_ids: [reportingScopeId],
+      reason: "Aprovação de acesso com papel e escopo pela administração de usuários.",
+    });
   });
 });
