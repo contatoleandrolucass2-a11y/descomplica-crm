@@ -40,6 +40,21 @@
 - Nenhuma alteração de cálculos, permissões, dados de estoque ou produção.
   Gitleaks completo encontrou apenas o token sintético preexistente na linha 31
   de salesforce-release-environment.node-test.mjs, confirmado idêntico à base.
+- CI 38568083961 aprovou o predicado funcional original: 154 checks responsivos,
+  88 de tema, 242 de acessibilidade, 110 de zoom, 22 canvases e as jornadas dos
+  simuladores. As 11 diferenças visuais foram exclusivas do Associativo. O ZIP
+  11899075772 teve hash conferido; captura 082a6f3 com árvore igual a 1219608 e
+  fingerprint reproduzido com diff vazio e apenas os 19 outputs de QA.
+- A inspeção de 768 px identificou o título do estoque comprimido em três linhas.
+  A referência desse artefato não foi promovida. Em 761 a 1.023 px, os controles
+  agora ocupam a linha seguinte; a nova asserção de título em uma linha falhou
+  antes da correção e passou depois, junto aos contratos existentes em oito larguras.
+- Main 8e015c6 integrado em c6f38b7; conflito apenas em notas resolvido preservando
+  o registro da publicação dos funis e o trabalho desta pesquisa. Nova captura
+  visual e CI integral permanecem necessárias antes da integração do PR.
+- Após o ajuste de tablet, `pnpm verify` passou integralmente; o guia repetiu os
+  18 cenários sem erros de console ou chamadas externas. Oito larguras passaram
+  no contrato de estoque e na busca/seleção; o diff permaneceu sem segredos.
 
 ## 2026-10-14: Funis no comparativo mensal
 

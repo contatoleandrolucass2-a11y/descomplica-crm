@@ -23,7 +23,11 @@
   Main remoto permaneceu 16f4587. Fonte: /api/health e git ls-remote origin.
   Checkout macOS fora do Git comum Windows autorizado para sincronização
   automática do Obsidian e publicação permanente; esses fluxos não foram usados.
-
+- CI 38568083961 concluiu todos os checks funcionais; 11 diferenças visuais
+  somente no Associativo. A revisão das capturas identificou compressão do título
+  em 768 px. Controles separados na linha seguinte entre 761 e 1.023 px; nova
+  asserção reproduziu a falha e passou após a correção. Baseline não promovida;
+  nova captura e CI pendentes. Main 8e015c6 integrado preservando as notas dos funis.
 
 ## 2026-10-14: Funis mensais publicados
 

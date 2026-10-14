@@ -1400,6 +1400,23 @@
   }
 }
 
+@media (min-width: 761px) and (max-width: 1023px) {
+  .investor-page-shell.investor-associative-table-page .investor-stock-panel > .investor-section-heading {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 4px 10px;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-stock-header-actions {
+    grid-column: 1 / -1;
+    width: 100%;
+  }
+
+  .investor-page-shell.investor-associative-table-page .investor-stock-search {
+    flex: 1;
+  }
+}
+
 @media (max-width: 760px) {
   .investor-page-shell.investor-associative-table-page .investor-page-closing {
     grid-template-columns: minmax(0, 1fr);

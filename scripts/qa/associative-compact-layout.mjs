@@ -374,13 +374,16 @@ export async function checkAssociativeCompactStock(page) {
   const header = await page.locator(".investor-stock-panel").evaluate((panel) => {
     const bounds = (selector) => panel.querySelector(selector).getBoundingClientRect();
     const heading = bounds(":scope > header");
-    const title = bounds("#investor-stock-title");
+    const titleElement = panel.querySelector("#investor-stock-title");
+    const title = titleElement.getBoundingClientRect();
     const hint = bounds(".investor-stock-title-row .investor-info-mark");
     const clear = bounds(".investor-stock-clear");
     const sync = bounds(".investor-stock-sync");
     const filters = bounds(".investor-stock-filters");
     const first = bounds(".investor-stock-filters > label");
     return {
+      titleSingleLine:
+        title.height <= Number.parseFloat(getComputedStyle(titleElement).lineHeight) + 1,
       hintCentered: Math.abs((hint.top + hint.bottom - title.top - title.bottom) / 2) <= 2,
       metadataLeftOfClear: sync.right <= clear.left,
       clearInsideHeader: clear.top >= heading.top && clear.bottom <= heading.bottom,
@@ -389,6 +392,7 @@ export async function checkAssociativeCompactStock(page) {
       noEmptyFilterRow: first.top - filters.top <= 6,
     };
   });
+  assert.ok(header.titleSingleLine, "Stock title must remain on one line");
   assert.ok(header.hintCentered, "Stock help icon must align with Escolha a unidade");
   assert.ok(header.metadataLeftOfClear, "Stock count and update must stay left of clear action");
   assert.ok(header.clearInsideHeader, "Clear action must be inside the stock header");
