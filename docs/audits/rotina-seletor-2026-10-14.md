@@ -29,6 +29,12 @@ Data: 2026-10-14. Branch: codex/rotina-seletor-coluna.
 
 ## Validacao
 
+- Retomada16:17Z: origin/main avancou para0019690 (PR220, pesquisa no
+  Associativo); health permaneceu200/ok/5c4d95e. Merge preserva codigo e
+  baselines recebidos, sem edita-los. Conflitos somente em tres registros,
+  conciliados com ambas as entradas. Nota detalhada do PR220 arquivada
+  integralmente para respeitar limite256000bytes do indice de conhecimento.
+
 - Lint aprovado, com warning preexistente em scripts/qa/connected-systems.mjs:18.
 - Typecheck e build aprovados. API/fixture da Rotina: 88 testes aprovados.
 - `pnpm test -- --maxWorkers=2` iniciado e interrompido apos falha externa ao

@@ -10,6 +10,12 @@
   controles redesenhados e contorno branco da coluna atual, sem mudar dados.
   Evidencias: [auditoria do seletor](../audits/rotina-seletor-2026-10-14.md).
 
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- PR220 integrado em main0019690. Registro integral de implementacao, CI,
+  conflitos e limites preservado em
+  [auditoria da pesquisa](../audits/associativo-busca-conhecimento-2026-10-14.md).
+
 ## 2026-10-14: Rotina compacta por conclusao
 
 - Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok

@@ -3,6 +3,7 @@
 "use client";
 
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { Search, X } from "lucide-react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { AssociativePageGuide } from "./AssociativePageGuide";
 import { SimulationCanvasHeader } from "../SimulationCanvasHeader";
@@ -14,6 +15,7 @@ import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-in
 import { buildAssociativeSignalDates } from "@/lib/archive-investor/associative-linear-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
 import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
+import { filterInventoryBySearch } from "@/lib/archive-investor/inventory-search";
 import { completeMissingInventoryUnitFacts, inventoryIdentityKey, uniqueInventoryReferences } from "@/lib/archive-investor/inventory-reference";
 import { resolveAssociativeConstructionProgress } from "@/lib/archive-investor/associative-unit-facts";
 import { eligibleIntermediaryIndexes } from "@/lib/archive-investor/intermediary-fields";
@@ -2516,6 +2518,8 @@ export function InvestorCalculator({
   const [region, setRegion] = useState("Todas");
   const [salePriceFilter, setSalePriceFilter] = useState("Todos");
   const [priceSort, setPriceSort] = useState<"asc" | "desc">("asc");
+  const [inventorySearch, setInventorySearch] = useState("");
+  const inventorySearchRef = useRef<HTMLInputElement>(null);
   const [inventoryReloadKey, setInventoryReloadKey] = useState(0);
   const [filterNotice, setFilterNotice] = useState("");
   const [selectedUnitId, setSelectedUnitId] = useState("");
@@ -2636,7 +2640,10 @@ export function InvestorCalculator({
   const activeFilters = useMemo(() => ({ businessUnit, project, plant, region, salePrice: salePriceFilter }), [businessUnit, project, plant, region, salePriceFilter]);
   const filterOptions = useMemo(() => buildInvestorFilterOptions(inventory, activeFilters), [inventory, activeFilters]);
   const sortedInventory = useMemo(() => sortInvestorInventoryBySalePrice(inventory, priceSort), [inventory, priceSort]);
-  const matchingInventory = useMemo(() => sortedInventory.filter((item) => matchesInvestorFilters(item, activeFilters)), [sortedInventory, activeFilters]);
+  const matchingInventory = useMemo(() => filterInventoryBySearch(
+    sortedInventory.filter((item) => matchesInvestorFilters(item, activeFilters)),
+    compactAssociativeStock ? inventorySearch : "",
+  ), [sortedInventory, activeFilters, compactAssociativeStock, inventorySearch]);
   const inventoryWindowSize = 60;
   const visibleInventory = useMemo(() => matchingInventory.slice(
     inventoryWindowStart,
@@ -3549,6 +3556,7 @@ export function InvestorCalculator({
     setRegion("Todas");
     setSalePriceFilter("Todos");
     setPriceSort("asc");
+    setInventorySearch("");
     setInventoryWindowStart(0);
     if (inventoryResultsRef.current) inventoryResultsRef.current.scrollTop = 0;
     setFilterNotice(
@@ -4015,7 +4023,7 @@ export function InvestorCalculator({
   }
 
   const stockSync = <div className="investor-stock-sync" role="status" aria-live="polite" aria-atomic="true">
-    <small>{inventoryStatus === "ready" ? `${inventory.length.toLocaleString("pt-BR")} unidades` : inventoryStatus === "error" ? "Estoque indisponível" : "Carregando estoque"}</small>
+    <small>{inventoryStatus === "ready" ? compactAssociativeStock && inventorySearch.trim() ? `${matchingInventory.length.toLocaleString("pt-BR")} de ${inventory.length.toLocaleString("pt-BR")} unidades` : `${inventory.length.toLocaleString("pt-BR")} unidades` : inventoryStatus === "error" ? "Estoque indisponível" : "Carregando estoque"}</small>
     {inventoryMeta?.sourceKind === "versioned-snapshot" && inventoryMeta.snapshotReferenceDate ? <small>Arquivo {inventoryMeta.source || "ESTOQUE SPC.xlsx"} · referência {formatDate(inventoryMeta.snapshotReferenceDate)}</small> : inventoryMeta?.generatedAt ? <small>Atualizado {dateTime.format(new Date(inventoryMeta.generatedAt))}</small> : directTable && inventoryStatus === "ready" ? <small>Fonte viva {inventoryMeta?.source || "estoque protegido"} · atualização não informada</small> : null}
   </div>;
 
@@ -4074,6 +4082,29 @@ export function InvestorCalculator({
           <span>01</span>
           <div><p>Estoque SPC</p>{compactAssociativeStock ? <div className="investor-stock-title-row"><h2 id="investor-stock-title">Escolha a unidade</h2><InvestorInfoHint label="orientação dos filtros" title="Como usar os filtros?" description="Escolha os filtros para encontrar o imóvel. Confira a unidade, o preço e a entrega antes de começar. Esta simulação não vende vagas de garagem separadas do imóvel." /></div> : <h2 id="investor-stock-title">Escolha a unidade</h2>}</div>
           {compactAssociativeStock ? <div className="investor-stock-header-actions">
+            <div className="investor-stock-search">
+              <label className="sr-only" htmlFor="investor-stock-search">Buscar unidade ou empreendimento</label>
+              <Search aria-hidden="true" size={18} />
+              <input
+                id="investor-stock-search"
+                ref={inventorySearchRef}
+                type="search"
+                placeholder="Código ou nome"
+                disabled={inventoryStatus !== "ready"}
+                value={inventorySearch}
+                onChange={(event) => updateFilter(setInventorySearch, event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Escape") {
+                    event.preventDefault();
+                    updateFilter(setInventorySearch, "");
+                  }
+                }}
+              />
+              {inventorySearch && <button type="button" aria-label="Limpar pesquisa de unidade" onClick={() => {
+                updateFilter(setInventorySearch, "");
+                inventorySearchRef.current?.focus();
+              }}><X aria-hidden="true" size={16} /></button>}
+            </div>
             {stockSync}
             <button className="investor-stock-clear" type="button" disabled={inventoryStatus !== "ready"} onClick={clearFilters}>Limpar filtros</button>
           </div> : stockSync}

@@ -11,6 +11,76 @@
 - Sem mudanca de texto, hook, API ou banco. Validacao/publicacao em andamento;
   detalhes em docs/audits/rotina-seletor-2026-10-14.md.
 
+## 2026-10-14: Pesquisa manual de unidades no Associativo
+
+- Base isolada em `16f458720406e76efcd1eda8a1eeb791509800a3`, branch
+  `codex/busca-unidade-associativo`, árvore limpa antes da implementação.
+  Dependências instaladas pelo lockfile existente com `pnpm install --frozen-lockfile`.
+- Campo de pesquisa com lupa no cabeçalho do estoque do Associativo. Pesquisa
+  código, descrição e empreendimento em todas as unidades carregadas, antes da
+  janela virtual de 60 linhas, junto aos filtros e à ordenação existentes.
+- Busca ignora caixa, acentos e separadores usuais do código. Escape, botão de
+  limpeza e Limpar filtros restauram a lista sem modificar a proposta em edição.
+  Quantidade encontrada fica visível; seleções incompatíveis não são apagadas.
+- Validação final com `pnpm verify` aprovada: 2.814 testes da aplicação,
+  79 skips existentes, suites Node e build concluídos. `pnpm audit` sem
+  vulnerabilidades conhecidas. Lint mantém um aviso anterior em connected-systems.
+- Navegador local confirmou busca em 3.301 unidades sintéticas, código fora da
+  janela inicial, combinação de filtros, Escape, limpeza e proposta preservada.
+  Inspeção visual em 320, 375, 768 e 1.440 px e três temas.
+- QA do guia aprovado na execução final: 18 cenários (nove combinações de
+  tela/tema com e sem proposta), seis checks iniciais de desktop/notebook,
+  zero erros de console e zero chamadas externas. A primeira tentativa falhou
+  ao aguardar Cheque Moradia em 320x568-dark; repetição integral passou sem
+  alterar o teste ou cálculos. O cenário isolado também passou na base original.
+- Regressão de seleção, pesquisa, Escape, limpeza e preservação da proposta
+  executada em 1.440 e 375 px, usando 3.301 unidades sintéticas. Diff sem segredos.
+- CI 38562897319 aprovou validate, restore isolado, banco e E2E. O contrato
+  visual encontrou o contador/data abaixo do botão de limpar em 320/375/390 px.
+  Corrigido com duas colunas na segunda linha do cabeçalho móvel. O fixture do
+  guia agora inclui a data do estoque e executa o contrato de geometria existente,
+  sem relaxar asserções. Layout, busca e seleção passaram em oito larguras
+  (320 a 1.440 px) com 3.301 unidades sintéticas; build final aprovado.
+- A falha intermitente do guia foi diagnosticada no próprio artefato: a Entrada
+  de R$ 1.000,00 aparecia em Financiamento após o foco automático agendado pela
+  qualificação. O helper agora aguarda esse foco e verifica cada valor formatado;
+  também aguarda o foco dos campos opcionais. Nenhum cálculo ou timeout foi alterado.
+- PR #220 aberto; nova CI e publicação ainda pendentes. Consulta observacional
+  de 14/10 às 12:17:40Z retornou HTTP 200/ok, versão faae8e9. Isso não comprova
+  publicação desta busca nem substitui o ledger exigido por DEPLOY-001.
+- Nenhuma alteração de cálculos, permissões, dados de estoque ou produção.
+  Gitleaks completo encontrou apenas o token sintético preexistente na linha 31
+  de salesforce-release-environment.node-test.mjs, confirmado idêntico à base.
+- CI 38568083961 aprovou o predicado funcional original: 154 checks responsivos,
+  88 de tema, 242 de acessibilidade, 110 de zoom, 22 canvases e as jornadas dos
+  simuladores. As 11 diferenças visuais foram exclusivas do Associativo. O ZIP
+  11899075772 teve hash conferido; captura 082a6f3 com árvore igual a 1219608 e
+  fingerprint reproduzido com diff vazio e apenas os 19 outputs de QA.
+- A inspeção de 768 px identificou o título do estoque comprimido em três linhas.
+  A referência desse artefato não foi promovida. Em 761 a 1.023 px, os controles
+  agora ocupam a linha seguinte; a nova asserção de título em uma linha falhou
+  antes da correção e passou depois, junto aos contratos existentes em oito larguras.
+- Main 8e015c6 integrado em c6f38b7; conflito apenas em notas resolvido preservando
+  o registro da publicação dos funis e o trabalho desta pesquisa. Nova captura
+  visual e CI integral permanecem necessárias antes da integração do PR.
+- Após o ajuste de tablet, `pnpm verify` passou integralmente; o guia repetiu os
+  18 cenários sem erros de console ou chamadas externas. Oito larguras passaram
+  no contrato de estoque e na busca/seleção; o diff permaneceu sem segredos.
+- CI 38574613120/d8e745c aprovou novamente código, restore, banco, guia, E2E e
+  o predicado funcional completo. O título passou nas dez larguras e três temas.
+  As 11 capturas do Associativo foram inspecionadas e promovidas; 231 referências
+  preservadas, sem alterar limiares. Proveniência e hashes constam no README de
+  paridade e em reviewedUpdates. Nova CI integral em verify ainda pendente.
+- CI 38580539350/e043c9d concluiu com os três gates obrigatórios aprovados,
+  incluindo as 242 comparações visuais em modo verify. Antes da integração,
+  main avançou para 5c4d95e com a interface compacta de Rotina do PR #222.
+  Conflitos foram apenas nas notas; implementação, testes e documentação de
+  Rotina foram preservados integralmente. A versão combinada requer nova CI.
+- `pnpm verify` da versão combinada passou: 2.814 testes da aplicação e 82
+  skips condicionais, incluindo três cenários de navegador adicionados pela
+  atualização de Rotina. Suites Node, lint, tipos e build passaram; formatação
+  aprovada. Nenhum teste ou arquivo da implementação recebida foi alterado.
+
 ## 2026-10-14: Compactacao da Rotina
 
 - Pedido aplicado somente ao componente de Rotina e estilos locais. Grade

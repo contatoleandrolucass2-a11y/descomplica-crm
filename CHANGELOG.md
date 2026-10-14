@@ -8,6 +8,18 @@
 - Mantem fundo neutro nas pendentes, gradiente nas concluidas e marcacoes
   individuais sincronizadas entre Semana e Hoje.
 
+## 2026-10-14: Pesquisa de unidades no Associativo
+
+- Adiciona campo com lupa para localizar unidades por código, descrição ou
+  empreendimento, inclusive sem acentos e com separadores diferentes no código.
+- Combina a pesquisa com os filtros e a ordenação do estoque, mostra a quantidade
+  encontrada e permite limpar a busca sem descartar a proposta em edição.
+
+- No celular, a pesquisa ocupa uma linha e o contador/data permanece ao lado de Limpar filtros.
+- Em tablets estreitos, os controles ficam abaixo do título do estoque, mantendo o texto legível.
+- Atualiza as 11 referências visuais do Associativo após inspeção e validação funcional, preservando as outras 231 imagens.
+- O teste do guia aguarda o foco automático antes de preencher valores, evitando corrida entre campos.
+
 ## 2026-10-14: Rotina compacta por atividade
 
 - Posiciona a conclusao no canto superior esquerdo na semana e antes do
