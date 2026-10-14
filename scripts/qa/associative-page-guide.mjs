@@ -8,7 +8,10 @@ import { isDeepStrictEqual } from "node:util";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
-import { checkAssociativeInitialViewport } from "./associative-compact-layout.mjs";
+import {
+  checkAssociativeCompactStock,
+  checkAssociativeInitialViewport,
+} from "./associative-compact-layout.mjs";
 
 const rootSelector = ".investor-associative-table-page";
 const guideId = "associative-page-guide";
@@ -108,16 +111,20 @@ async function fillSyntheticProposal(page) {
   await page.getByRole("textbox", { name: "Renda Familiar", exact: true }).fill("500000");
   await page.getByRole("button", { name: "MCMV", exact: true }).click();
   await page.getByRole("radio", { name: "Sim", exact: true }).check();
-  for (const [name, value] of [
-    ["Financiamento", "19000000"],
-    ["Subsídio", "0"],
-    ["FGTS", "0"],
-    ["Cheque Moradia", "0"],
-    ["Entrada", "100000"],
+  // The qualification transition focuses financing on the next animation frame.
+  // Wait for that focus before typing so it cannot steal a later field's input.
+  await expect(page.getByRole("textbox", { name: "Financiamento", exact: true })).toBeFocused();
+  for (const [name, value, formatted] of [
+    ["Financiamento", "19000000", "190.000,00"],
+    ["Subsídio", "0", "0,00"],
+    ["FGTS", "0", "0,00"],
+    ["Cheque Moradia", "0", "0,00"],
+    ["Entrada", "100000", "1.000,00"],
   ]) {
     const field = page.getByRole("textbox", { name, exact: true });
     await expect(field).toBeEnabled();
     await field.fill(value);
+    await expect(field).toHaveValue(formatted);
     await field.press("Tab");
   }
   await page.locator('input[name="quantidade-de-parcelas"]').fill("84");
@@ -131,6 +138,7 @@ async function fillSyntheticProposal(page) {
   ]) {
     await page.getByRole("button", { name: button, exact: true }).click();
     const field = page.getByRole("textbox", { name, exact: true });
+    await expect(field).toBeFocused();
     await field.fill(value);
     await field.press("Tab");
   }
@@ -435,6 +443,7 @@ export async function checkAssociativePageGuide(
         await setTheme(page, theme);
         const project = page.getByRole("combobox", { name: "Nome do Empreendimento", exact: true });
         await expect(project).toBeEnabled();
+        await checkAssociativeCompactStock(page);
         await project.selectOption("Empreendimento QA 01");
         await page
           .getByRole("combobox", { name: "Ordenar unidades por valor do imóvel", exact: true })
@@ -685,7 +694,12 @@ export async function runSyntheticAssociativePageGuide(options) {
   const snapshot = JSON.parse(buildSyntheticDirectTableQaSnapshot());
   // A small slice exercises filters and selection without the unrelated full-stock matrix.
   const items = snapshot.items.slice(0, 12);
-  const inventory = { ...snapshot, count: items.length, items };
+  const inventory = {
+    ...snapshot,
+    count: items.length,
+    items,
+    snapshotReferenceDate: "2026-09-05",
+  };
   const publicAssets = new Map(
     await Promise.all(
       [
@@ -711,7 +725,7 @@ export async function runSyntheticAssociativePageGuide(options) {
         .end(
           JSON.stringify({
             ...inventory,
-            sourceKind: url.pathname.endsWith("snapshot") ? "versioned-snapshot" : "live",
+            sourceKind: "versioned-snapshot",
           }),
         );
     } else if (files.has(url.pathname)) {

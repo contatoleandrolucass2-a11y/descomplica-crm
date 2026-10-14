@@ -374,13 +374,16 @@ export async function checkAssociativeCompactStock(page) {
   const header = await page.locator(".investor-stock-panel").evaluate((panel) => {
     const bounds = (selector) => panel.querySelector(selector).getBoundingClientRect();
     const heading = bounds(":scope > header");
-    const title = bounds("#investor-stock-title");
+    const titleElement = panel.querySelector("#investor-stock-title");
+    const title = titleElement.getBoundingClientRect();
     const hint = bounds(".investor-stock-title-row .investor-info-mark");
     const clear = bounds(".investor-stock-clear");
     const sync = bounds(".investor-stock-sync");
     const filters = bounds(".investor-stock-filters");
     const first = bounds(".investor-stock-filters > label");
     return {
+      titleSingleLine:
+        title.height <= Number.parseFloat(getComputedStyle(titleElement).lineHeight) + 1,
       hintCentered: Math.abs((hint.top + hint.bottom - title.top - title.bottom) / 2) <= 2,
       metadataLeftOfClear: sync.right <= clear.left,
       clearInsideHeader: clear.top >= heading.top && clear.bottom <= heading.bottom,
@@ -389,6 +392,7 @@ export async function checkAssociativeCompactStock(page) {
       noEmptyFilterRow: first.top - filters.top <= 6,
     };
   });
+  assert.ok(header.titleSingleLine, "Stock title must remain on one line");
   assert.ok(header.hintCentered, "Stock help icon must align with Escolha a unidade");
   assert.ok(header.metadataLeftOfClear, "Stock count and update must stay left of clear action");
   assert.ok(header.clearInsideHeader, "Clear action must be inside the stock header");
@@ -472,11 +476,34 @@ export async function checkAssociativeSelectedGold(page) {
   await expect(first.getByRole("button")).toHaveAttribute("aria-pressed", "true");
   const filters = page.locator(".investor-stock-filters");
   const count = await stock.locator("table").getAttribute("aria-rowcount");
+  const search = page.getByRole("searchbox", { name: "Buscar unidade ou empreendimento" });
+  const selectedIdentifier = (await first.getByRole("button").getAttribute("aria-label")).replace(
+    "Iniciar proposta com ",
+    "",
+  );
+  await search.fill(selectedIdentifier.toLowerCase().replaceAll("-", " "));
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", "2");
+  await expect(first).toHaveAttribute("aria-selected", "true");
+  await search.fill("unidade-inexistente-qa");
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", "1");
+  await expect(stock).toContainText("Nenhuma unidade encontrada");
+  await expect(page.locator(".investor-associative-qualification")).toBeVisible();
+  await search.press("Escape");
+  await expect(search).toHaveValue("");
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", count);
+  await search.fill(selectedIdentifier);
+  await page.getByRole("button", { name: "Limpar pesquisa de unidade" }).click();
+  await expect(search).toBeFocused();
+  await expect(first).toHaveAttribute("aria-selected", "true");
   const developer = filters.locator(":scope > label").first().getByRole("combobox");
   await developer.selectOption({ index: 1 });
   await expect(stock.locator("table")).not.toHaveAttribute("aria-rowcount", count);
   await filters.getByLabel("Ordenar unidades por valor do imóvel").selectOption("desc");
+  await search.fill("unidade-inexistente-qa");
+  await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", "1");
+  await expect(developer).not.toHaveValue("Todas");
   await page.locator(".investor-stock-clear").click();
+  await expect(search).toHaveValue("");
   await expect(developer).toHaveValue("Todas");
   await expect(filters.getByLabel("Ordenar unidades por valor do imóvel")).toHaveValue("asc");
   await expect(stock.locator("table")).toHaveAttribute("aria-rowcount", count);
