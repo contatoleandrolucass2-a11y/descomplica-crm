@@ -24,6 +24,9 @@
   sanitizadas; causa de hang ainda nao comprovada. Runtime nao alterado.
 - CI38594232559 repetiu falha de geometria na Rotina antes do refresh. Inclui
   diagnostico apenas numerico e antecipa QA de refresh, sem remover checks.
+- CI38597977609 localizou espera apos liberar RSC. QA passa a comprovar
+  transferencia pelo ResourceTiming exato, HTTP200 e tipo RSC, preservando
+  asserts de UI, limite10s/60s e rejeicao de transferencia incompleta.
 
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 

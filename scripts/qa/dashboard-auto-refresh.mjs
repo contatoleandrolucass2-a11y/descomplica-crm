@@ -29,6 +29,7 @@ async function verifyDashboardAutoRefresh(page, origin) {
   await expect(details).toHaveAttribute("open", "");
   const scrollBefore = await page.evaluate(() => window.scrollY);
   const urlBefore = page.url();
+  const startedAt = await page.evaluate(() => performance.now());
   let refreshes = 0;
   let releaseRefresh;
   const pendingRefresh = new Promise((resolve) => {
@@ -75,7 +76,30 @@ async function verifyDashboardAutoRefresh(page, origin) {
     await expect.poll(() => refreshes).toBe(1);
     process.stdout.write("[dashboard-auto-refresh] release-rsc\n");
     releaseRefresh();
-    await (await refreshed).finished();
+    const response = await refreshed;
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("text/x-component");
+    process.stdout.write("[dashboard-auto-refresh] rsc-headers\n");
+    // Resource Timing measures the last received byte without waiting on Playwright's
+    // completion bookkeeping for a routed, streamed response.
+    await expect
+      .poll(
+        () =>
+          page.evaluate(
+            ({ url, since }) =>
+              performance
+                .getEntriesByName(url, "resource")
+                .some(
+                  (entry) =>
+                    entry.startTime >= since &&
+                    entry.responseEnd > entry.startTime &&
+                    entry.decodedBodySize > 0,
+                ),
+            { url: response.url(), since: startedAt },
+          ),
+        { timeout: 10_000, message: "The complete RSC payload must reach the browser" },
+      )
+      .toBe(true);
     process.stdout.write("[dashboard-auto-refresh] state-preservation\n");
     await page.waitForFunction(
       () =>
@@ -92,7 +116,15 @@ async function verifyDashboardAutoRefresh(page, origin) {
     ).toBeLessThanOrEqual(2);
     await expect(page.locator(`a[aria-current="page"][href="${pathname}"]`).first()).toBeVisible();
     process.stdout.write("[dashboard-auto-refresh] passed\n");
-    return { passed: true, refreshes, filters: true, scroll: true, openDetails: true };
+    return {
+      passed: true,
+      refreshes,
+      responseComplete: true,
+      completionGauge: "resource-timing",
+      filters: true,
+      scroll: true,
+      openDetails: true,
+    };
   } finally {
     releaseRefresh();
     await page.unroute(statusPattern);

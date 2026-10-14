@@ -160,3 +160,24 @@ sem texto, identidade ou dados comerciais; o teste de refresh passa a ocorrer
 antes da Rotina, ambos continuam obrigatorios. Nenhum limiar/assert foi reduzido.
 Revisao independente comprovou timeout de frame10s, isolamento20/20 e deadline
 global60s em memoria; isso nao identifica a causa do cancelamento anterior.
+
+CI38597977609/6fa3cd6 executou as tres sondagens e confirmou um refresh
+pendente; chegou a release-rsc16:43:48Z e expirou60s aguardando a resposta/
+Response.finished, antes dos asserts de preservacao. Clock herdado nao e causa
+comprovada. O helper passa a exigir HTTP200, content-type RSC e ResourceTiming
+da URL exata, iniciado depois da sondagem, responseEnd positivo e bytes
+decodificados positivos. Prazo10s, mantendo60s global e todos os asserts de UI.
+
+Referencia primaria de semantica:
+[MDN responseEnd](https://developer.mozilla.org/en-US/docs/Web/API/PerformanceResourceTiming/responseEnd).
+[Relato Next96243](https://github.com/vercel/next.js/issues/96243) descreve falsos
+positivos de Response.finished em outra versao; nao comprova a causa neste CRM.
+Nao houve atualizacao de dependencia nem relaxamento para aceitar corpo aberto.
+
+Prova local independente do helper inteiro: resposta normal934ms e atraso400ms
+passaram com tres sondagens/um refresh e preservacao de UI; corpo aberto foi
+rejeitado em10.998ms pelo ResourceTiming. HTTP200/tipo RSC em todos os casos;
+nenhuma entrada completa para o corpo aberto. Loopback sintetico, nao Next real.
+Suite Windows apos main001969:2.876 passaram/82 skips, somente symlink falhou;
+sem os timeouts anteriores. Tres testes Chromium de geometria passaram, assim
+como33 testes focais (72 casos opt-in nao executados nesse comando).
