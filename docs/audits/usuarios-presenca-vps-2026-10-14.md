@@ -35,6 +35,35 @@ própria conta ou `users.view`, com gate restritivo de MFA. As migrations novas
 precisam validar ambos os contratos; aplicar toda a sequência histórica local
 não é uma estratégia de integração.
 
+## Compatibilidade e gates locais
+
+O catálogo compacto tem 23 permissões existentes e recebe duas marcas, totalizando 25. A interface consulta os defaults reais por RPC e não oferece os seis módulos
+presentes apenas na sequência completa de 31 permissões.
+
+A fixture compacta usa DDL e helpers de autorização, sem dados reais de usuários,
+e exerce 70 verificações de MFA, hierarquia, marcas, defaults e presença. Seu
+runner cria um PostgreSQL efêmero sem rede ou portas publicadas, monta o código
+somente para leitura e remove apenas os próprios recursos. A espera por TCP
+exclui o servidor Unix temporário de inicialização. Três execuções consecutivas
+passaram após a correção dessa condição de corrida. O gate foi incluído na CI.
+
+A sequência de preparação é: checkboxes/RPC de defaults, simuladores para os
+papéis ativos, catálogo de marcas e presença. Essas quatro migrations não
+atribuem RIVA/DIRECIONAL a usuários ou papéis. A migration de herança completa
+do Administrador deve ocorrer somente depois da ativação do runtime compatível,
+pois a versão anterior rejeita chaves novas no contexto de autorização.
+
+Validação local concluída até este checkpoint:
+
+- Formato, lint, tipos, build, inventário de 53 rotas, audit, Gitleaks e OSV passaram.
+- A suíte passou com 2.991 testes Vitest e 841 testes Node. Os 102 skips somados
+  são condicionais de ambiente ou opt-in; a CI Linux mantém os gates nativos.
+- O ensaio completo de migração e backup/restauração passou com 54 migrations,
+  30 arquivos pgTAP e 1.431 verificações em cada banco, preservando privilégios.
+- A primeira suíte Node teve duas falhas intermitentes no teste de host Qlik;
+  não foram reproduzidas em 64 repetições, testes focados ou na nova suíte completa.
+  Nenhuma verificação de segurança do runtime foi relaxada.
+
 ## Validação e publicação
 
 Os resultados finais dos gates, do backup aplicável e da promoção serão

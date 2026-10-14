@@ -2,6 +2,8 @@
 
 ## 2026-10-14 — Integração de usuários e presença
 
+- Acrescenta à CI o ensaio isolado do contrato compacto de autorização, aguardando a inicialização definitiva do banco.
+
 - Integra o painel Pessoas e a matriz de acessos com a paginação e o catálogo reais do ambiente.
 - Mostra presença online em verde pulsante e offline em vermelho, respeitando movimento reduzido e distinguindo indisponibilidade.
 - Preserva as regras de hierarquia e MFA nas instalações completas e compactas; as unidades dos simuladores respeitam RIVA e DIRECIONAL também no estoque Salesforce.

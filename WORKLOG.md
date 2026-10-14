@@ -2,6 +2,8 @@
 
 ## 2026-10-14: Integração do painel de usuários para produção
 
+- O gate compacto aguarda o PostgreSQL definitivo por TCP antes de executar a fixture; três execuções consecutivas passaram com 70 verificações cada.
+
 - Integra o painel aprovado localmente com o `main` atual, preservando paginação no servidor, gestão/rotina, estoque Salesforce e o coordenador de publicação.
 - Apresenta presença online com ponto verde pulsante e offline com ponto vermelho. Movimento reduzido desativa a animação; falhas de consulta continuam como presença indisponível.
 - Usa o catálogo real do banco para matriz e prévia do papel: produção compacta terá 25 permissões, enquanto a sequência completa local terá 31. O Administrador herda somente capacidades realmente implantadas.

@@ -87,9 +87,12 @@ async function waitForPostgres() {
   while (Date.now() < deadline) {
     cancellation.signal.throwIfAborted();
     try {
-      await docker(["exec", container, "pg_isready", "-U", "postgres", "-d", "postgres"], {
-        timeout: 5_000,
-      });
+      // The image initializes through a temporary Unix-socket-only server and
+      // then restarts PostgreSQL. TCP becomes available only on the final server.
+      await docker(
+        ["exec", container, "pg_isready", "-h", "127.0.0.1", "-U", "postgres", "-d", "postgres"],
+        { timeout: 5_000 },
+      );
       return;
     } catch {
       cancellation.signal.throwIfAborted();
@@ -184,13 +187,25 @@ try {
     throw new Error("The compact-test container does not satisfy the required isolation.");
   }
   await waitForPostgres();
-  await docker(["exec", container, "createdb", "-U", "postgres", "--template=template0", database]);
+  await docker([
+    "exec",
+    container,
+    "createdb",
+    "-h",
+    "127.0.0.1",
+    "-U",
+    "postgres",
+    "--template=template0",
+    database,
+  ]);
   const output = await docker([
     "exec",
     container,
     "psql",
     "-X",
     "-qAt",
+    "-h",
+    "127.0.0.1",
     "-U",
     "postgres",
     "-v",
