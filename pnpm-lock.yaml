@@ -36,6 +36,9 @@ importers:
       '@supabase/supabase-js':
         specifier: 2.112.0
         version: 2.112.0
+      enigma.js:
+        specifier: 2.15.0
+        version: 2.15.0
       lucide-react:
         specifier: 1.48.0
         version: 1.48.0(react@19.2.8)
@@ -1376,6 +1379,9 @@ packages:
   enhanced-resolve@5.21.3:
     resolution: {integrity: sha512-QyL119InA+XXEkNLNTPCXPugSvOfhwv0JOlGNzvxs0hZaiHLNvXSpudUWsOlsXGWJh8G6ckCScEkVHfX3kw/2Q==}
     engines: {node: '>=10.13.0'}
+
+  enigma.js@2.15.0:
+    resolution: {integrity: sha512-rzYFcosjFDTBSXRkIiicN2d6XYwYU/ieZIr5oRkervMzOy5djTVocZ4OCVZ3jK/Pjevv641HEbnYXHdBHLKUVg==}
 
   entities@8.1.0:
     resolution: {integrity: sha512-kxL7msIffSuh9aaFAMD7rxAIuTRMAHMeBtgHW2yUdWw732ZNh4MehkF2gdjvtdmikkaIP9bFDDJOPlsvm7avrA==}
@@ -4102,6 +4108,8 @@ snapshots:
     dependencies:
       graceful-fs: 4.2.11
       tapable: 2.3.3
+
+  enigma.js@2.15.0: {}
 
   entities@8.1.0: {}
 

@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-14: Qlik operacional separado da interface
+
+Branch codex/qlik-api-session criada de main5c4d95e, Git comum confirmado.
+Recupera de61cff23 somente ops/qlik, dependencia enigma.js2.15.0 e runbooks;
+nao altera pagina ranking, presenter, Salesforce, e2e/baselines, schema ou n8n.
+PR216 continua responsavel pela interface e integracao de fatos em andamento.
+
+Fonte13:34Z GitHub/main/PR216 e14:51Z SSH/health: site200/ok16f4587;
+browser VPS2f0907e ativo, disabled. Separacao nao e atualizacao da VPS.
+Cliente QIX usa sessao privada gerida pelo browser, inspecao limitada aos
+objetos comprovados e masters referenciados; sem exportar cookies/credenciais.
+Preflight desligado; nao coleta fatos nem publica no CRM. Ciclo sequencial,
+timeouts e artefato privado atomico, rankingConnected=false permanente.
+
+Usuario autorizou duas coletas independentes reconciliadas com totais nativos
+no lugar do publicador legado ausente. Mantidos backup, acesso restrito e
+ultima carga valida. Autorizacao e preflight remoto de schema no mapa; nenhuma
+DDL, ingestao ou flag ativa. Detalhes da sessao e limites no runbook VPS.
+
+Codigo de origem: Qlik56 testes de transporte/inspetor passaram; restante
+operacional foi validado no candidato anterior. Verify global origem61cff23
+teve timeout isolado Next DevTools; repeticao focal24/24 passou. Validacao
+completa deste checkout e CI propria ainda obrigatorias; nao herdar resultado
+de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
+
 ## 2026-10-14: Compactacao da Rotina
 
 - Pedido aplicado somente ao componente de Rotina e estilos locais. Grade

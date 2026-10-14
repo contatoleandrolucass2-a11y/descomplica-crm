@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-14: Sessao e diagnostico Qlik isolados
+
+- Separa browser dedicado, console/cofre privado e cliente QIX da interface.
+- Adiciona SDK oficial fixado, inspecao restrita de objetos/masters, ciclo
+  sequencial e artefato privado atomico. Preflight desligado por padrao.
+- Preserva pagina ranking, Salesforce, banco e n8n. Nao entrega coleta ativa.
+
 ## 2026-10-14: Rotina compacta por atividade
 
 - Posiciona a conclusao no canto superior esquerdo na semana e antes do

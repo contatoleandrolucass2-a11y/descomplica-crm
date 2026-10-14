@@ -1,0 +1,85 @@
+:root {
+  color-scheme: dark;
+  font-family: Arial, sans-serif;
+  background: #151719;
+  color: #f4f5f6;
+}
+* {
+  box-sizing: border-box;
+  letter-spacing: 0;
+}
+body {
+  margin: 0;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+header {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 10px 16px;
+  border-bottom: 1px solid #3b4044;
+}
+#status {
+  color: #bed5cc;
+  margin-right: auto;
+}
+button {
+  min-height: 40px;
+  padding: 6px 12px;
+  border-radius: 4px;
+  border: 1px solid #657079;
+  background: #282e32;
+  color: inherit;
+  cursor: pointer;
+}
+button:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+button:focus-visible {
+  outline: 2px solid #60d5b1;
+  outline-offset: 2px;
+}
+main {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+details {
+  padding: 10px 16px;
+  border-bottom: 1px solid #3b4044;
+  max-height: 45dvh;
+  overflow: auto;
+}
+summary {
+  cursor: pointer;
+}
+form {
+  display: flex;
+  gap: 12px;
+  align-items: end;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
+label {
+  display: grid;
+  gap: 6px;
+  flex: 1 1 200px;
+  min-width: 0;
+}
+input {
+  width: 100%;
+  min-height: 40px;
+  border: 1px solid #657079;
+  border-radius: 4px;
+  background: #202527;
+  color: inherit;
+  padding: 8px;
+  font: inherit;
+}
+#credential-status {
+  align-self: center;
+}

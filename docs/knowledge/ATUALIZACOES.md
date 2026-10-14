@@ -1,5 +1,16 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Qlik operacional separado
+
+- Branch codex/qlik-api-session de main5c4d95e; prepara ops/qlik/SDK/runbooks
+  sem alterar /app/ranking, Salesforce ou banco. UI e fatos seguem no PR216.
+- Fonte GitHub/SSH/health14:51Z: site200/ok16f4587, browser2f0907e ativo/disabled.
+  Novo preflight desligado, sem handshake real, coleta, migration ou agenda.
+- Usuario autorizou duas coletas independentes conciliadas com totais Qlik
+  no lugar do shadow legado; demais gates preservados. Mapa e limites em
+  docs/runbooks/qlik-partnerships-mapping.md e qlik-vps-session.md; WORKLOG
+  registra testes e pendencias. CI/validacao deste SHA exigidas antes da troca.
+
 ## 2026-10-14: Rotina compacta por conclusao
 
 - Retomada12:13Z: main16f4587/CI38558435232 em andamento; health200/ok
