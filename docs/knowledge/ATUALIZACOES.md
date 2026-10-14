@@ -2,9 +2,9 @@
 
 ## 2026-10-13: Exportacao protegida do ranking para Qlik
 
-- Status: implementado e validado localmente; ainda nao publicado. Fonte:
-  codigo local, GET observacional, GitHub API, MCP n8n e pagina publica
-  `https://descomplicapro.com.br/ranking`.
+- Status: implementado, validado localmente e aberto no PR #214; ainda nao
+  publicado. Fonte: codigo local, GET observacional, GitHub API, MCP n8n e
+  pagina publica `https://descomplicapro.com.br/ranking`.
 - Abertura: Git comum confirmado em
   `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`; checkout
   destacado em `0fdbb80aa79d731bcd458ca4bc892ecc76be2918`. `origin/main` e
@@ -37,6 +37,13 @@
   criar a conexao REST no Qlik Cloud com esse Bearer token e validar ingestao no
   Qlik com usuario/credencial autorizados. Publicacao ainda depende de PR, CI e
   release conforme `docs/runbooks/production-release-guard.md`.
+- Encerramento parcial em 2026-10-13 23:38 BRT: PR #214 aberto e mergeavel. A
+  CI do primeiro SHA do PR (`38499328523`) ainda estava `in_progress` no job
+  `release-gates`, step `Responsive, theme, zoom and keyboard matrix`;
+  `validate` e `isolated-restore` haviam concluido com sucesso, e
+  `promotable-image` pulou em PR. Health publicado ainda 200/`ok` em
+  `0fdbb80aa79d731bcd458ca4bc892ecc76be2918`. Merge e publicacao bloqueados ate
+  conclusao verde da CI do SHA final do PR.
 
 ## 2026-10-13: Dois ciclos automaticos e protecao de entrada confirmados
 
