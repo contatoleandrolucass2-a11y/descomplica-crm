@@ -1,5 +1,43 @@
 # Worklog
 
+## 2026-10-14: Escopo integral do ranking legado
+
+Usuario definiu a pagina antiga inteira como referencia da nova `/app/ranking`.
+Inspecao viva das duas visoes confirmou DIRECIONAL VENDAS SPC, calendario,
+filtros de pessoas, podio, placar, resumo, regras, equipes, produtividade, SLA
+e premios. Inventario sem registros pessoais em
+`docs/runbooks/qlik-ranking-reference.md`; referencia mostra sincronizacao
+de07/08/2026, nao baseline atual. Nenhuma configuracao comercial foi salva.
+
+Autorizada migracao aditiva Qlik apos testes e backup, preservando Salesforce.
+Leandro indicado como responsavel e Alvaro como substituto; identidades ativas
+ainda pendentes. Nao houve migration, mudanca ACL, policy, ingestao ou agenda.
+Sessao VPS abre Visao House/Agendamentos, mas a selecao apenas de ano2026
+abrange diversas regionais. Empresa lista Direcional/Riva, nao a imobiliaria;
+nao inferir que SP CAPITAL ou Direcional sejam equivalentes ao recorte exigido.
+
+Adicionado preflight offline `ranking-scope.mjs`, com tenant/app candidato,
+organizacao exata, exigencia de evidencia de campo/selecao e cobertura completa.
+Evidencias declaradas nao sao autenticadas pelo modulo: ele nunca retorna
+autorizacao de coleta nem mapeamento produtivo aprovado. Sem caller produtivo.
+Revisao corrigiu leitura de accessor no indice do array de selecao; teste
+adicionado sem alterar contratos produtivos. Lint e tipos passaram. Primeira
+suite global:137 arquivos passaram e2 falharam por quatro timeouts (calendario
+e conhecimento); repeticao isolada passou, sem elevar limites de teste.
+Resultado final:139 arquivos/2747 testes Vitest,63 skips; suites Node e release
+aprovadas (release113/11skips). Onze testes do preflight Qlik passaram; build
+Next16.3.8 concluiu50 paginas. Lint conserva apenas aviso preexistente em
+scripts/qa/connected-systems.mjs. Nenhuma alteracao visual nesta revisao;
+QA de navegador da nova interface e integracao Qlik ponta a ponta nao executadas.
+
+Preflight remoto MCP somente leitura confirmou ausencia do registro de owners,
+catalogo de motores, versoes de politica e gates no projeto produtivo, apesar
+das migrations locais existirem. Nao foi aplicada cadeia de migrations nem
+criado vinculo por nome. Preparar dependencias e teste/backup antes de mudar.
+Consulta04:29Z: main e health200/ok agora792320b, por publicacao externa; nao
+e deploy Qlik. CI38509075428 do1313d64 tinha validate/restore aprovados e
+release-gates em andamento. Esta revisao ainda requer sua propria CI.
+
 ## 2026-10-14: Autenticacao Qlik isolada na VPS
 
 Pedido confirmado: coletar Qlik na VPS e alimentar ranking do CRM. Usuario

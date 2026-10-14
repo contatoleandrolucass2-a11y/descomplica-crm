@@ -6,7 +6,8 @@
   as02:48Z: exportava no sentido inverso e SELECT privilegiado nao tinha grant
   comprovado. Codigo anterior preservado. PR216 contem a preparacao correta.
 - Fontes: GitHub PR214/216, SSH e https://crm.descomplicapro.com.br/api/health.
-  As02:44Z main/health200/ok=0fdbb80; as03:42Z main=792320b, health ainda0fdbb80.
+  As04:03Z main=792320b, health200/ok=0fdbb80; PR216/1313d64 aberto,
+  CI38509075428 em andamento. Fontes consultadas novamente nesta retomada.
   Merge b78230d preservou notas de dashboard; CI ausente no ff1f59d devido ao
   conflito documental. Preparacao operacional nao equivale a merge/deploy CRM.
 - VPS atual sem exportador antigo/qlik-ranking-api; MCP n8n encontrou zero
@@ -37,14 +38,16 @@
   base integrada repetidos no encerramento; evidencias completas em WORKLOG.md.
 - ConsoleHTTP200/saved:true e login VPS confirmado visualmente apos cadastro.
   Aba manual do usuario acessivel; nenhuma credencial lida. Qlik abrange varias
-  regionais, detalhe com timeout. Recorte equipe/gerente/regional perguntado.
+  regionais, detalhe com timeout. Escopo integral: DIRECIONAL VENDAS SPC;
+  inventario/aceite em docs/runbooks/qlik-ranking-reference.md.
   Salesforce ja escreve ranking global e relay Qlik antigo trata imobiliarias:
   faltam contrato por corretor, writer unico, carga reconciliada e agenda.
   policy_pending permanece; conectar nao aprova pesos, bonus ou desempate.
 - Sync apos merge excedeu256000bytes. Nota desta tarefa consolidada com
   detalhes preservados no runbook/WORKLOG e historico Git; notas alheias intactas.
-- Encerramento03:58Z: lint/tipos/test/build integrados passaram (139 arquivos,
-  2747 Vitest). CI38507765662 ainda em curso; health0fdbb80/ok. Sync recuperado.
+- Encerramento04:29Z: lint/tipos/test/build passaram (139 arquivos/2747 Vitest).
+  Health200/ok=main792320b por deploy externo, nao Qlik. PR216 sem merge;
+  CI desta revisao pendente. Autorizacoes/preflight no runbook acima.
 
 ## 2026-10-13: Replica informacional do dashboard legado
 

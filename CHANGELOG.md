@@ -2,10 +2,12 @@
 
 ## 2026-10-14: Preparacao da sessao Qlik na VPS
 
+- Mapeia o escopo integral da referencia do ranking e fixa DIRECIONAL VENDAS
+  SPC no preflight offline; nao aprova campo Qlik, politica ou coleta.
 - Adiciona cadastro opcional de credencial Qlik cifrada na VPS, somente por
   console privado, sem leitura da chave privada pelo gateway ou overwrite.
 - Qlik VPS: travessia nominal do pai dos releases no instalador, preservando
-  ACL/mask existente; recuperacao manual documentada e login remoto pendente.
+  ACL/mask existente; recuperacao manual documentada e login remoto confirmado.
 - Adiciona navegador dedicado e console privado por SSH para login Qlik,
   preservando a sessao Salesforce. Coleta e agenda continuam pendentes.
 - Encerra sem merge o PR #214, cujo fluxo CRM -> Qlik nao atendia ao pedido
