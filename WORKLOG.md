@@ -104,6 +104,7 @@ operacional foi validado no candidato anterior. Verify global origem61cff23
 teve timeout isolado Next DevTools; repeticao focal24/24 passou. Validacao
 completa deste checkout e CI propria ainda obrigatorias; nao herdar resultado
 de outro SHA. Protecoes de publicacao permanecem sem excecao nova.
+
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
 - Base isolada em `16f458720406e76efcd1eda8a1eeb791509800a3`, branch

@@ -29,6 +29,7 @@
 - Adiciona SDK oficial fixado, inspecao restrita de objetos/masters, ciclo
   sequencial e artefato privado atomico. Preflight desligado por padrao.
 - Preserva pagina ranking, Salesforce, banco e n8n. Nao entrega coleta ativa.
+
 ## 2026-10-14: Pesquisa de unidades no Associativo
 
 - Adiciona campo com lupa para localizar unidades por código, descrição ou

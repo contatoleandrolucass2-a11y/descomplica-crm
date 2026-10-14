@@ -11,7 +11,8 @@
   no lugar do shadow legado e recorte completo para crm.ranking.view. Mapa em
   docs/runbooks/qlik-partnerships-mapping.md e qlik-vps-session.md; WORKLOG
   registra testes e pendencias. Windows falhou symlink Salesforce; Linux validate
-  cc8c712 passou CI; 3e69135 conflita com main, sem CI. Promocao bloqueada.
+  cc8c712 passou CI; main0019690 conciliado em1c5466e. Nova CI pendente.
+
 ## 2026-10-14: Pesquisa manual de unidades no Associativo
 
 - Registro recebido de main0019690 preservado integralmente em
