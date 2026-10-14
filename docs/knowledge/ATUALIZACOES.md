@@ -2,6 +2,14 @@
 
 ## 2026-10-14: Atualizacao dos identificadores da fonte Qlik
 
+- Retomada20:46Z: PR227/64d9f24 passou CI38628006919 na segunda tentativa.
+  Primeira falhou em fill_financing do Associativo, cujos arquivos nao mudaram;
+  causa nao isolada, nao declarar correcao por rerun. GitHub confirmou main
+  6843ef1/PR225, somente documentos sobre d660ba9. Protecao strict exigiu merge
+  dessa base; integrado sem conflitos em2e06e4f, com nova CI obrigatoria.
+  GET /api/health20:46:44Z200/ok6843ef1; data/deployment ID ainda exigem
+  coordenador ao publicar. Nenhum upgrade Qlik, schema ou fatos publicados.
+
 - Abertura19:40Z, branch codex/qlik-source-refresh, base/main d660ba9.
   Git fetch confirmou main; CI38620208026 com validate/imagem/restore/E2E
   aprovados, matriz visual ainda pendente. Health publico19:40:30Z200/ok77ddc69.

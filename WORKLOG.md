@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-14: Base atual do preflight Qlik
+
+CI38628006919/64d9f24 aprovada em segunda tentativa. Primeiro E2E teve timeout
+ao preencher financiamento do Associativo, sem alteracao de seus arquivos;
+causa especifica nao isolada. Main avancou para6843ef1 somente em documentos.
+Merge sem conflitos preservou esse conteudo; protecao strict impede usar a
+CI anterior como aprovacao da nova combinacao. Health20:46:44Z200/ok6843ef1.
+Sem upgrade Qlik, migration ou carga; nova CI e promocao protegida pendentes.
+
 ## 2026-10-14: IDs atuais da fonte para o preflight Qlik
 
 - Branch `codex/qlik-source-refresh`, base

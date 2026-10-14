@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14: Integracao documental do preflight
+
+- Preserva a atualizacao concorrente da Rotina e registra a revalidacao do
+  candidato Qlik contra o main atual, sem mudar seu runtime.
+
 ## 2026-10-14: Referencias atuais do preflight Qlik
 
 - Atualiza a pasta 23.1.7 Vendas e os candidatos PRODUTO/Parceiras para os
