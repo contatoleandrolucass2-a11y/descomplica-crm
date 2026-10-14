@@ -6,6 +6,7 @@
   publicada no CRM, preservando filtros e posicao da tela.
 - Distingue coleta de publicacao confirmada e reconfere a consistencia do lote
   antes de exibir indicadores; nenhuma formula ou fonte comercial alterada.
+- Verifica a preservacao da navegacao na QA autenticada com fixture completa.
 
 ## 2026-10-14: Funis no comparativo mensal
 

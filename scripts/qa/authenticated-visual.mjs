@@ -12,6 +12,7 @@ import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
 import { checkMarketingResources } from "./marketing-resources.mjs";
 import { checkRoutineSettings } from "./routine-settings.mjs";
 import { checkConnectedSystems } from "./connected-systems.mjs";
+import { checkDashboardAutoRefresh } from "./dashboard-auto-refresh.mjs";
 import { checkRepasse } from "./repasse.mjs";
 import {
   checkTabelaoLayout,
@@ -5907,6 +5908,17 @@ async function run() {
             );
           } finally {
             await systemsPage.close({ runBeforeUnload: false });
+          }
+          currentStage = "dashboard-auto-refresh";
+          const dashboardPage = configureQaPage(await context.newPage());
+          try {
+            const dashboardRefresh = await checkDashboardAutoRefresh(dashboardPage, origin);
+            await writeFile(
+              path.join(artifactRoot, "dashboard-auto-refresh-results.json"),
+              JSON.stringify(dashboardRefresh, null, 2),
+            );
+          } finally {
+            await dashboardPage.close({ runBeforeUnload: false });
           }
           currentStage = "documentation-calculator";
           const documentationPage = configureQaPage(await context.newPage());

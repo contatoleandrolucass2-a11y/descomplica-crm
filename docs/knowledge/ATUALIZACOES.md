@@ -10,7 +10,9 @@
   Codigo confirma read model real, mas /app nao verifica nova publicacao enquanto
   permanece aberta. Implementados polling30s e reconferencia de lote, sem coleta,
   dado remoto ou workflow alterado.180 testes focais/75 QA/tipos/build passaram;
-  suite Windows tem uma falha de symlink preexistente. CI/publicacao pendentes.
+  suite Windows tem falha de symlink. CI38570002899:2.870 passaram; E2E novo
+  estava em etapa sem fixture global. Movido para QA autenticada com fixture
+  verificada, mantendo asserts. Nova CI/publicacao pendentes.
   Fonte e limites: [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
 
 ## 2026-10-14: Funis mensais publicados

@@ -14,6 +14,10 @@
   skips e release113/11 skips passaram separadamente; CI/publicacao pendentes.
   Evidencias e limites em
   [auditoria da atualizacao](docs/audits/dashboard-atualizacao-2026-10-14.md).
+- CI38570002899:2.870 testes passaram no Linux; restore e banco aprovados.
+  E2E novo exigia snapshot em etapa sem fixture global. Movido para a QA
+  autenticada que ja semeia/verifica/limpa esse dashboard, sem relaxar asserts,
+  alterar baselines ou dados remotos. Nova CI obrigatoria; deploy bloqueado.
 
 ## 2026-10-14: Funis no comparativo mensal
 

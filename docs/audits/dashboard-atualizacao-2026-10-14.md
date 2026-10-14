@@ -105,3 +105,28 @@ um conjunto misto como ready e nao amplia permissoes nem exige migration.
 Referencias tecnicas: [Next useRouter](https://nextjs.org/docs/app/api-reference/functions/use-router),
 [Supabase maybeSingle](https://supabase.com/docs/reference/javascript/maybesingle),
 [CI anterior](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38558435232).
+
+## Ajuste da fixture na CI
+
+CI38570002899 em8421e85: validate aprovou2.870 testes/79 skips, tipos, lint,
+build e auditoria sem vulnerabilidades conhecidas. Restore isolado e banco
+passaram. Novo E2E falhou em13:30:39Z: esperava generatedAt string, recebeu null.
+`local-rls-api.mjs:setupSql` nao cria dashboard global; nao e falha da API.
+
+O caso foi movido integralmente para `dashboard-auto-refresh.mjs`, chamado na
+QA autenticada apos `local-authenticated-visual.mjs` semear e verificar via RLS
+o dashboard global. Reutiliza fixture e cleanup existentes; nao acrescenta
+dado remoto, permissao, skip ou baseline. Asserts de versao, refresh unico,
+filtros, scroll e details permanecem. Aguarda cada probe concluido antes do
+proximo evento e remove interceptacoes ao finalizar. Nova CI completa exigida.
+
+Revisao independente confirmou integracao unica no bloco desktop, pagina
+isolada e cleanup existente. Lint/tipos/build passaram novamente. Suite local
+teve2.867 aprovados/79 skips, symlink Windows e dois timeouts; reteste focal
+executado sem build concorrente:33 passaram, somente symlink falhou.
+Nenhum timeout ampliado ou teste desativado.
+
+Retomada14:37:39Z: git fetch e GitHub confirmam main5c4d95e (Rotina, PR222),
+CI push38581434699 em andamento; health publico200/ok permanece16f4587.
+Integracao concorrente deve ser preservada e revalidada. Nenhuma publicacao
+desta correcao nem alteracao da fonte de referencia.
