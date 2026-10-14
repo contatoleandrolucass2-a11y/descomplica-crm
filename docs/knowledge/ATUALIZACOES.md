@@ -2,6 +2,15 @@
 
 ## 2026-10-13: Replica informacional do dashboard legado
 
+- Consulta14/10 02:44Z: CI38498361779 do candidato d67a855 aprovou validate,
+  restore e E2E. Predicado funcional original:154 responsivos,88 temas,242 Axe,
+  110 zoom e22 canvases aprovados. Gate visual falhou somente em11 imagens /app.
+  Fonte: artefato11865597980, hash e captura registrados em reference-parity/README.
+  Revisao visual e promocao transacional preservaram231 imagens e limiares1%/16.
+  Excecao: captura dirty, mas fingerprint reproduzido exatamente com diff vazio
+  e19 arquivos QA gerados. Registro preserva o valor original; validade limitada
+  a esse artefato, reavaliar toda futura captura. Nova CI verify/merge/deploy
+  pendentes; baseline promovida nao equivale a CI candidata aprovada.
 - PR213, candidato4484d72, CI38497027352: validate e isolated-restore passaram.
   QA dedicado tambem aprovado em Linux; E2E falhou ao procurar o titulo antigo
   Dashboard comercial. Tres expectativas atualizadas para o titulo solicitado,

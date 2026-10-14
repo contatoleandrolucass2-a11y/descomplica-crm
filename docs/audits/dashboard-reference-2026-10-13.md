@@ -102,5 +102,26 @@ aprovados, 63 skips e a unica falha Windows de estoque ja documentada. Build,
 tipos e lint passaram; lint conserva um warning preexistente em connected-systems.
 Publicacao pendente dos gates e da revisao de referencias visuais.
 
+## Revisao da baseline
+
+CI38498361779 do candidato d67a855 aprovou validate (incluindo pnpm test Linux),
+restore, E2E e os checks funcionais originais:154 responsivos,88 temas,242 Axe,
+110 zoom,22 canvases, teclado e simuladores. Falha limitada as11 comparacoes
+de /app contra a pagina anterior. As outras231 imagens passaram sem promocao.
+
+Captura771812cd350d124bcfe7af62e2298f7ac6b00178 tem arvore Git igual ao HEAD.
+Artefato11865597980 teve ZIP/hash, hashes individuais e baseline usada conferidos.
+Predicado funcional original foi executado novamente sem alteracao; helper
+transacional original promoveu somente11 arquivos, apos inspecao desktop/celular.
+Manifesto conserva proveniencia antiga das231 imagens e registra a nova captura
+nas11 entradas e em reviewedUpdates. Limiares1%/16 permanecem identicos.
+
+Excecao comprovada: worktreeDirtyAtCapture=true corresponde exclusivamente
+a19 outputs de Conectar Sistemas. O algoritmo original foi reproduzido com
+diff rastreado vazio e esses bytes do artefato, produzindo exatamente
+aa7fa1906244e121501ede0fb6cdcefa9edcd954a825a1a419f92cac08b37c24.
+Nao se afirma captura limpa; prova especifica, nao reutilizavel para outras
+execucoes. Nova CI integral em verify, merge e publicacao continuam pendentes.
+
 Reavaliar filtros e criterios indisponiveis somente quando a fonte e a
 autoridade aplicaveis forem implementadas e verificadas em tarefa especifica.

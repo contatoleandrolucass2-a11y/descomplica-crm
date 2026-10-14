@@ -2,6 +2,11 @@
 
 ## 2026-10-13: Replica informacional do dashboard
 
+- CI38498361779 aprovou validate, restore, E2E e todos os checks funcionais
+  da matriz visual; falhou apenas nas 11 referencias alteradas de /app.
+  Capturas revisadas e promovidas pelo helper original; 231 imagens preservadas.
+  Fingerprint reproduzido prova apenas 19 outputs gerados, sem diff de codigo.
+  Limiares intactos e nova CI verify obrigatoria antes de merge/publicacao.
 - CI inicial do PR213 aprovou validate, restore e QA sintetico, mas E2E ainda
   esperava o titulo anterior. Atualizadas as tres expectativas, preservando
   a matriz de permissoes e acrescentando a verificacao das secoes/tabelas.

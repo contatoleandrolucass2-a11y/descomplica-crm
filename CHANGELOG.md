@@ -2,6 +2,8 @@
 
 ## 2026-10-13: Relatorio completo no dashboard
 
+- Atualiza as 11 referencias visuais do dashboard apos revisao da captura
+  autenticada isolada, preservando as demais 231 imagens e os limiares do gate.
 - Alinha o E2E ao titulo da referencia e verifica a presenca das secoes completas.
 - Reproduz as secoes informacionais da pagina de referencia em `/app`, com
   valores atuais do CRM e navegacao por periodo e visao autorizada.
