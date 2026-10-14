@@ -8,6 +8,8 @@
   CI38601828514, sem reduzir gates. Retomada17:28:51Z: fetch confirmou main
   efc6a20/PR226; health200/ok/0019690. PR223 conflitante em documentos;
   integracao preserva seletor/contorno e exige nova CI. Sem n8n ou dados remotos.
+  CI38607169365 aprovou2877 testes/restore/refresh real; QA aguarda tambem
+  alinhamento do contorno antes de overflow, com rejeicao de erro persistente.
   Fontes, consultas de abertura, testes, falhas, limites e criterios integrais:
   [auditoria](../audits/dashboard-atualizacao-2026-10-14.md).
 

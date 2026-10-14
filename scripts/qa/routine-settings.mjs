@@ -790,6 +790,7 @@ export async function checkRoutineOverflow(page, region) {
   const view = await table.getAttribute("data-view");
   // Wait for the exact mode-specific style before taking the geometry snapshot.
   await expect(table).toHaveCSS("min-width", view === "day" ? "0px" : "960px");
+  await checkRoutineCurrentColumn(page);
   const metrics = await region.evaluate((element) => {
     const table = element.querySelector("table");
     const style = getComputedStyle(element);

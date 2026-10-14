@@ -11,6 +11,7 @@
 - Acrescenta diagnostico geometrico sanitizado quando a QA de Rotina falha.
 - Confere a transferencia RSC pelo registro de rede do navegador na QA.
 - Aguarda o estilo de cada modo da Rotina antes de medir sua geometria na QA.
+- Confere tambem o alinhamento do contorno antes de medir overflow da pagina.
 
 ## 2026-10-14: Filtro e destaque da Rotina
 

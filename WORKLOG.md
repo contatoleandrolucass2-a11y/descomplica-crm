@@ -31,6 +31,10 @@
   day e minWidth960px; QA aguarda CSS exato antes da geometria, mantendo asserts.
 - Main efc6a20 integrado preservando seletor/contorno e QA da Rotina; nova
   validacao da combinacao obrigatoria antes de publicar o dashboard.
+- CI38607169365 aprovou2877 testes, restore e refresh Next real. Associativo
+  concorrente passou na repeticao sem mudanca. Falha restante de overflow foi
+  reproduzida com contorno atrasado; QA confere alinhamento antes da medicao,
+  preservando limites e rejeitando desalinhamento persistente. Runtime intacto.
 
 ## 2026-10-14: Seletor e contorno da Rotina
 

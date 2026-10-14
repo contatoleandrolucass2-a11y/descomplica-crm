@@ -198,3 +198,35 @@ ficou conflitante e nao disparou CI. Merge preserva integralmente runtime e
 QA do PR226, assim como a espera exata de CSS e regressao adicionadas aqui.
 Conflitos somente documentais, resolvidos mantendo ambas as evidencias.
 Fonte: git fetch/log, GitHub PR223 e /api/health. Nova CI da combinacao exigida.
+
+## Integracao efc6a20 e prontidao geometrica
+
+CI38607169365/476c393: validate aprovou2877 testes/83 skips, lint, tipos,
+build e audit. Restore isolado aprovado. Local Node24: build/tipos/lint
+aprovados,103 testes focais e4 casos Chromium aprovados. Suite Windows teve
+2874 aprovados/83 skips, symlink conhecido e dois timeouts DevTools; os dois
+passaram no reteste focal sem alterar limites. Execucao inicial com Node25
+nao foi usada como gate; as verificacoes acima foram repetidas com Node24.
+
+Tentativa1 falhou no Associativo concorrente, etapa browser_fill_financing_failed:
+3/4 contextos passaram, sem erros de pagina/HTTP. O diagnostico sanitizado nao
+identifica a causa. Oito sequencias locais concorrentes passaram; repeticao unica
+do job sem mudar codigo/criterios aprovou4/4 contextos e o E2E completo. Nao
+atribuir a falha a foco sem prova; reavaliar com diagnostico sanitizado se repetir.
+
+Tentativa2 aprovou refresh Next real17:59:09Z. Rotina falhou em720/light com
+minWidth0, tableOverflowfalse e pageOverflowtrue. Artefato11917721064,
+SHA256f52d01548059a98f56f790dc0b2d7b03b1c090d10df1cc631a11869bcd527978.
+Prova independente com RAF updateHeading retido reproduziu esses predicados:
+tabela694px, contorno1368px e pagina1419px no viewport720. Ao liberar RAF,
+contorno656px/pagina720px e checks passaram. Mantendo retido, o assert existente
+de alinhamento falhou em5.020ms.28 verificacoes naturais passaram; mecanismo
+reproduzido nao comprova a causa historica da CI nem a jornada autenticada.
+
+QA passa a chamar checkRoutineCurrentColumn depois do CSS exato e antes de
+medir overflow. Nenhum assert, tolerancia, timeout ou runtime alterado. Regressao
+sintetica exige sucesso quando o contorno converge e falha se permanece largo.
+Essa espera e verificada, nao uma pausa fixa nem permissao para aceitar overflow.
+Nova CI completa continua obrigatoria; sem deploy desta correcao ate aprovacao.
+Seis casos Chromium passaram (incluindo rejeicao persistente), sem erro de
+runtime; tipagem do cleanup da fixture ajustada para Node.parentNode.
