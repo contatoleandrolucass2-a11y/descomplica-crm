@@ -821,28 +821,57 @@
   font-size: 0.95rem;
 }
 
-.admin-user-status-dot {
-  width: 0.65rem;
-  height: 0.65rem;
-  flex: 0 0 auto;
-  border: 2px solid var(--analytics-surface);
-  border-radius: 999px;
-  background: var(--analytics-muted);
-  box-shadow: 0 0 0 1px var(--analytics-line);
+.admin-user-presence {
+  display: inline-flex;
+  min-width: 0;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--analytics-muted);
+  font-size: 0.7rem;
+  line-height: 1.4;
 }
 
-.admin-user-status-dot[data-state="approved"],
-.admin-user-status-dot[data-state="active"] {
+.admin-user-option > .admin-user-presence {
+  max-width: 6.75rem;
+  justify-self: end;
+  font-size: 0.68rem;
+}
+
+.admin-user-presence-dot {
+  display: inline-block;
+  width: 0.45rem;
+  height: 0.45rem;
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--analytics-muted);
+}
+
+.admin-user-presence[data-state="online"] .admin-user-presence-dot {
   background: var(--analytics-positive);
 }
 
-.admin-user-status-dot[data-state="pending"],
-.admin-user-status-dot[data-state="legacy_review"] {
-  background: var(--analytics-warning);
+.admin-user-presence[data-state="offline"] .admin-user-presence-dot {
+  background: var(--analytics-muted);
 }
 
-.admin-user-status-dot[data-state="inactive"] {
-  background: var(--analytics-danger);
+.admin-user-presence[data-state="unknown"] .admin-user-presence-dot {
+  border: 1px solid var(--analytics-muted);
+  background: transparent;
+}
+
+.admin-user-detail-statuses {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.admin-user-presence-help {
+  margin: 0;
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
+  line-height: 1.5;
 }
 
 .admin-user-option-copy {
@@ -1459,6 +1488,10 @@
 }
 
 @media (max-width: 40rem) {
+  .admin-user-detail-statuses {
+    align-items: flex-start;
+  }
+
   .admin-users-summary {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-14: Presença online no painel local de usuários
+
+- Adiciona Online/Offline com indicador textual e visual no diretório Pessoas e no cabeçalho da conta selecionada, separado do estado administrativo Ativo/Revogado.
+- O shell autenticado envia sinal a cada 30 segundos enquanto a aba está visível. O servidor registra apenas a última presença e considera a conta online por dois minutos; fechar, ocultar a aba ou perder conexão deixa de renovar o sinal.
+- A leitura atualiza somente a presença, sem recarregar a página ou apagar rascunhos de permissões. Falha, dado inválido ou leitura expirada aparecem como presença indisponível.
+- A migration privada e as RPCs mantêm identidade e horário no servidor, MFA, aprovação, hierarquia e escopo. Nenhum histórico de navegação, IP ou sessão é armazenado.
+- Lint, TypeScript, 2.382 testes Vitest, 83 testes Node e build passaram. O ensaio isolado validou 1.212 testes pgTAP na origem e no banco restaurado, preservando dados e privilégios. A validação visual confirmou os estados de presença e a preservação do rascunho.
+- Escopo exclusivamente local. Evidências e resultados finais em `docs/audits/presenca-usuarios-local-2026-10-14.md`.
+
 ## 2026-10-14: Painel de usuários conforme a referência visual
 
 - Reorganiza o diretório como Pessoas, com contagem, busca, filtros Todos/Ativos/Revogados/Pendentes, avatar, papel, indicador de status e oito resultados por página.

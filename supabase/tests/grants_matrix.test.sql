@@ -336,6 +336,7 @@ select is(
     'get_qlik_relay_health',
     'get_role_level',
     'get_user_authorization_context',
+    'get_user_presence',
     'get_user_role_permission_defaults',
     'has_permission',
     'list_app_pages_for_management',
@@ -353,6 +354,7 @@ select is(
     'set_user_active',
     'set_user_permission_override',
     'set_user_permission_overrides_bulk',
+    'touch_user_presence',
     'upsert_crm_funnel_goals'
   ]::name[],
   'authenticated can execute only the audited browser and RLS functions'

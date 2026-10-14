@@ -34,9 +34,12 @@ import {
   setUserActiveAction,
   type AdminActionState,
 } from "./actions";
+import { useUserPresence, type UserPresence } from "./useUserPresence";
 
 const INITIAL_STATE: AdminActionState = { status: "idle", message: "" };
 const PAGE_SIZE = 8;
+const PRESENCE_HELP =
+  "Online: sinal recebido nos últimos 2 minutos. Atualização a cada 30 segundos.";
 const HIDDEN_PERMISSION_KEYS = new Set<PermissionKey>([
   "audit.view",
   "crm.read_model_v3.view",
@@ -699,8 +702,21 @@ function PermissionMatrix({
   );
 }
 
+function UserPresenceBadge({ presence }: { presence: UserPresence | undefined }) {
+  const state = presence?.status ?? "unknown";
+  const label =
+    state === "online" ? "Online" : state === "offline" ? "Offline" : "Presença indisponível";
+  return (
+    <span className="admin-user-presence" data-state={state} title={PRESENCE_HELP}>
+      <span className="admin-user-presence-dot" aria-hidden="true" />
+      <span className="admin-user-presence-label">{label}</span>
+    </span>
+  );
+}
+
 function UserDetail({
   user,
+  presence,
   assignableRoles,
   manageablePermissions,
   canManageRoles,
@@ -708,7 +724,7 @@ function UserDetail({
   canManageUsers,
   canApproveUsers,
   reportingScopes,
-}: UserAccessManagerProps & { user: ManagedUser }) {
+}: UserAccessManagerProps & { user: ManagedUser; presence: UserPresence | undefined }) {
   const status = getUserStatus(user);
   const hasAnyMutation =
     user.isManageable && (canManageRoles || canManagePermissions || canManageUsers);
@@ -732,9 +748,12 @@ function UserDetail({
             <span>{getVisibleRoleLabel(user.roleKey)}</span>
           </div>
         </div>
-        <span className={managementStyles.statusPill} data-state={status.key}>
-          {status.label}
-        </span>
+        <div className="admin-user-detail-statuses">
+          <span className={managementStyles.statusPill} data-state={status.key}>
+            {status.label}
+          </span>
+          <UserPresenceBadge presence={presence} />
+        </div>
       </header>
 
       <div className="admin-user-detail-body">
@@ -822,6 +841,7 @@ function UserDetail({
 }
 
 export function UserAccessManager(props: UserAccessManagerProps) {
+  const presence = useUserPresence(props.users.map((user) => user.userId));
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<"all" | "active" | "inactive" | "pending">("all");
   const [pageNumber, setPageNumber] = useState(1);
@@ -961,6 +981,7 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                 </button>
               ))}
             </div>
+            <p className="admin-user-presence-help">{PRESENCE_HELP}</p>
           </div>
 
           <ul
@@ -987,14 +1008,9 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                       <span className="admin-user-option-copy">
                         <strong>{user.email ?? "E-mail não informado"}</strong>
                         <span>{getVisibleRoleLabel(user.roleKey)}</span>
+                        <span className="sr-only">{userStatus.label}</span>
                       </span>
-                      <span
-                        className="admin-user-status-dot"
-                        role="img"
-                        data-state={userStatus.key}
-                        aria-label={userStatus.label}
-                        title={userStatus.label}
-                      />
+                      <UserPresenceBadge presence={presence.get(user.userId)} />
                     </button>
                   </li>
                 );
@@ -1047,7 +1063,12 @@ export function UserAccessManager(props: UserAccessManagerProps) {
         </aside>
 
         {selectedUser ? (
-          <UserDetail key={selectedUser.userId} user={selectedUser} {...props} />
+          <UserDetail
+            key={selectedUser.userId}
+            user={selectedUser}
+            presence={presence.get(selectedUser.userId)}
+            {...props}
+          />
         ) : (
           <section className="admin-user-detail admin-user-detail-empty" id="selected-user-panel">
             <ShieldCheck aria-hidden="true" />

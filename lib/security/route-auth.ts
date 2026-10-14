@@ -2,7 +2,7 @@ import "server-only";
 
 import type { AuthorizationContext } from "@/lib/authorization/types";
 import { AuthorizationError } from "@/lib/authorization/types";
-import { requirePermission } from "@/lib/authorization/guards";
+import { requireAuthorization, requirePermission } from "@/lib/authorization/guards";
 import type { PermissionKey } from "@/lib/authorization/permissions";
 
 import { noStoreHeaders } from "./api";
@@ -12,8 +12,19 @@ export type RouteAuthorizationResult =
   | { ok: false; response: Response };
 
 export async function authorizeRoute(permission: PermissionKey): Promise<RouteAuthorizationResult> {
+  return authorizeContext(() => requirePermission(permission));
+}
+
+/** Authenticated self-service endpoints still enforce approval, scope and MFA. */
+export async function authorizeAuthenticatedRoute(): Promise<RouteAuthorizationResult> {
+  return authorizeContext(requireAuthorization);
+}
+
+async function authorizeContext(
+  authorize: () => Promise<AuthorizationContext>,
+): Promise<RouteAuthorizationResult> {
   try {
-    return { ok: true, context: await requirePermission(permission) };
+    return { ok: true, context: await authorize() };
   } catch (error) {
     if (!(error instanceof AuthorizationError)) throw error;
     return {

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-14 — Presença dos usuários, ambiente local
+
+- Mostra Online/Offline separado da situação administrativa da conta, com atualização automática e indicação de indisponibilidade.
+- Registra presença recente da própria conta autenticada e limita a consulta aos usuários já visíveis ao gestor.
+
 ## 2026-10-14 — Formato do painel de usuários, ambiente local
 
 - Aplica a referência visual ao diretório Pessoas e à matriz de acessos, com filtros em botões, quatro abas e estados de herança por linha.

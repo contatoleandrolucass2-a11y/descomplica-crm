@@ -1,5 +1,16 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-14: Presença recente dos usuários
+
+- Fonte: pedido do usuário para identificar quem está online no sistema; implementação local em `20261014204014_local_user_presence.sql` e nas APIs `/api/presence` e `/api/admin/users/presence`.
+- Online significa sinal recebido há menos de dois minutos de uma conta ativa, aprovada e com papel/escopo válido. O navegador envia o sinal a cada 30 segundos somente na aba visível. Fechar, ocultar, sair ou perder conexão encerra a renovação; a expiração não é instantânea. Outra aba visível pode manter a conta online.
+- `private.user_presence` guarda uma linha por usuário com o último horário do servidor, sem histórico. `touch_user_presence()` não recebe identidade nem horário do cliente e limita gravações a uma por 20 segundos.
+- `get_user_presence()` exige `users.view` e repete a política atual de `profiles`: a própria conta ou `private.can_manage_user`. Mudanças futuras na policy devem revisar esse contrato e seus testes de escopo.
+- Consulta de presença não recarrega a rota, não concede permissões e não muda rascunhos. Falha ou resultado não renovado em 90 segundos aparece como indisponível, nunca como ausência confirmada.
+- O estado online expira individualmente pelo restante da janela de dois minutos, usando a idade informada pelo servidor e a duração monotônica local. Ao retomar uma aba, verificar esse prazo antes da próxima resposta para não exibir um sinal antigo como presença atual.
+- Estado administrativo Ativo/Revogado e presença Online/Offline são conceitos separados. O último login da autenticação não é fonte de presença.
+- Evidências em `docs/audits/presenca-usuarios-local-2026-10-14.md`; não houve publicação remota.
+
 ## 2026-10-14: Referência visual do painel de usuários
 
 - Fonte: duas imagens fornecidas pelo usuário para o formato do diretório e da matriz. Usar a estrutura visual, sem copiar identidades ou quantidades da referência.
