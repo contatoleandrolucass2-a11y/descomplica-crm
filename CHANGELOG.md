@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-14: Rotina publicada
+
+- Disponibiliza conclusoes individuais salvas no CRM entre dispositivos,
+  com reinicio semanal segunda-feira as00h de Brasilia. Textos revisados
+  de Gerente regional imob e tipografia original preservados.
+
 ## 2026-10-13: Conclusao semanal individual
 
 - Revisa o portugues das atividades de Gerente regional imob sem mudar seu

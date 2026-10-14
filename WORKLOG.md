@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-14: Publicacao das conclusoes individuais
+
+- PR215 integrado; CI38510935022 e main CI38514527676 completas/aprovadas.
+- Migration aditiva autorizada aplicada apos backup tecnico verificado:
+  fonte 20261014020437, registro remoto 20261014054331. RLS/grants e limite
+  domingo/segunda conferidos; revisoes House2 e Imob3 preservadas.
+- Publicado faae8e9 pelo coordenador protegido em 05:45:08Z (02:45 Sao Paulo).
+  Container saudavel, sem reinicios/OOM; health correto e anonimo negado.
+- UI publicada preserva os 108 textos revisados e a fonte13px da House;
+  93 controles individuais na semana e18 em Hoje, habilitados. Nenhuma
+  atividade real marcada artificialmente; escrita/isolamento comprovados na CI.
+- Evidencia completa em docs/audits/rotina-individual-2026-10-14.md. Este
+  fechamento e documental e nao exige reiniciar novamente a aplicacao.
+
 ## 2026-10-13: Revisao e conclusoes individuais da Rotina
 
 - Revisao de portugues aplicada pela UI autorizada em regional imob, mantendo
