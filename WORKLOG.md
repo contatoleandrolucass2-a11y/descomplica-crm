@@ -29,6 +29,11 @@
   Nenhuma falha foi ocultada; publicacao depende dos gates completos.
 - Docker local indisponivel; banco/RLS, restore e matriz autenticada dependem
   da CI isolada. Baselines autenticadas nao alteradas nesta etapa.
+- PR230 draft aberto no commit bbcca1b; CI38751246231 em andamento.
+  DevTools isolado24/24 passou, sem causa conclusiva para o timeout global.
+  Auditoria completa em docs/audits/dashboard-layout-2026-10-15.md; entrada
+  atual vinculada na nota principal para respeitar o limite de exportacao,
+  sem remover o historico ou aumentar o limite. Sem merge ou deploy.
 
 ## 2026-10-14: Base atual do preflight Qlik
 
