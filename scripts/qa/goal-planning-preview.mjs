@@ -209,7 +209,55 @@ export async function readGoalVisualLegibility(page) {
           text.right <= bounds.right + 1,
       };
     });
-    return { donuts, channels };
+    const percentageInputs = [
+      ...document.querySelectorAll(".goal-rate-input input, .goal-productive-input input"),
+    ].map((input) => {
+      const style = getComputedStyle(input);
+      const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+      // Native Chromium number controls reserve space even when arrows appear only on hover.
+      // Only an explicit textfield/none appearance proves that the spinner consumes no space.
+      const appearance = style.appearance || style.webkitAppearance;
+      const spinnerReserve =
+        input.type === "number" && !["none", "textfield"].includes(appearance)
+          ? Math.max(18, parseFloat(style.fontSize))
+          : 0;
+      context.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+      const canvasWidth = context.measureText(input.value).width;
+      // A real text probe also preserves tabular numerals and letter spacing, unlike canvas font shorthand.
+      const probe = document.createElement("span");
+      Object.assign(probe.style, {
+        position: "fixed",
+        left: "-10000px",
+        whiteSpace: "pre",
+        visibility: "hidden",
+        fontFamily: style.fontFamily,
+        fontSize: style.fontSize,
+        fontWeight: style.fontWeight,
+        fontStyle: style.fontStyle,
+        fontVariantNumeric: style.fontVariantNumeric,
+        fontFeatureSettings: style.fontFeatureSettings,
+        letterSpacing: style.letterSpacing,
+      });
+      probe.textContent = input.value;
+      document.body.append(probe);
+      const textWidth = Math.max(canvasWidth, probe.getBoundingClientRect().width);
+      probe.remove();
+      const availableWidth = input.clientWidth - padding - spinnerReserve;
+      return {
+        name: input.name,
+        value: input.value,
+        appearance,
+        font: context.font,
+        clientWidth: input.clientWidth,
+        padding,
+        spinnerReserve,
+        textWidth,
+        availableWidth,
+        visible: input.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+        fullValueFits: textWidth <= availableWidth + 0.5,
+      };
+    });
+    return { donuts, channels, percentageInputs };
   });
 }
 
@@ -724,6 +772,17 @@ export async function runGoalPlanningPreview() {
           channel.visible && channel.textFits,
           `Channel label must be visible without ellipsis or clipping: ${context}/${channel.text}`,
         );
+      assert.equal(
+        screen.legibility.percentageInputs.length,
+        screen.profile === "dv" ? 9 : 6,
+        `Complete percentage controls: ${context}`,
+      );
+      for (const input of screen.legibility.percentageInputs) {
+        assert.ok(
+          input.visible && input.fullValueFits,
+          `Full percentage value must fit inside its control: ${context}/${input.name}=${input.value}; text=${input.textWidth.toFixed(2)}px available=${input.availableWidth.toFixed(2)}px padding=${input.padding}px spinner=${input.spinnerReserve}px appearance=${input.appearance}`,
+        );
+      }
       assert.ok(
         screen.overflow.scrollWidth <= screen.overflow.width + 1,
         `Horizontal overflow: ${screen.theme}/${screen.width}`,

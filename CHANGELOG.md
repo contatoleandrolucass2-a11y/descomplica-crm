@@ -2470,3 +2470,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 - Conhecimento de Meta organizado em auditoria integral e indice sincronizavel,
   preservando historia anterior e o limite de exportacao.
+
+## 2026-10-15: Campos percentuais de Meta
+
+- Preserva todos os digitos dos percentuais no celular ao remover o spinner
+  nativo nas telas menores, mantendo a largura original dos controles.

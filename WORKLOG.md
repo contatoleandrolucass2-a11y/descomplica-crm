@@ -6210,3 +6210,12 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   indice com255933bytes. Prefixo historico comparado a main antes da distribuicao.
 - Runtime instalado confirmou synced/documents3. Limite e historia preservados;
   pendencia de Obsidian resolvida para o indice atual, sem mudanca de runtime.
+
+## 2026-10-15: Percentuais de Meta em telas menores
+
+- Remove as setas nativas que cortavam o ultimo digito dos percentuais ate1120px,
+  mantendo a largura e a geometria dos campos e a aparencia desktop.
+- Preview passa a conferir o espaco interno dos valores em24 capturas com CSS
+  compilado. Candidato anterior cancelado antes da promocao de qualquer baseline.
+- Suite local Windows:2906 aprovados,85 ignorados,2 falhas externas ao escopo;
+  validate Linux aprovado no candidato anterior. Nova CI integral obrigatoria.
