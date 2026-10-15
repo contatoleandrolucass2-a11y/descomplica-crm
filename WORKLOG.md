@@ -13,6 +13,8 @@
   preservados. Site externo somente leitura. Sem migration, coleta ou n8n.
 - Detalhes, digests, limites e fontes: docs/audits/dashboard-layout-2026-10-15.md.
   Esta atualizacao e documental; nao demanda outro deploy da aplicacao.
+- PR234 documental aguarda CI e merge. Auto-merge desabilitado no repositorio;
+  configuracao preservada. Obsidian sincronizado; runtime publicado inalterado.
 
 ## 2026-10-15: Organizacao do dashboard e limite dos filtros
 

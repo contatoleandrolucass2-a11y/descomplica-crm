@@ -55,7 +55,12 @@
   contrato completo e autorizacao especifica para migration/ingestao remotas.
 - Registro final exclusivamente documental, separado do SHA ja publicado.
   Nao reiniciar a aplicacao para integrar esta evidencia. A nota curta mantem
-  o limite de exportacao; sincronizacao final deve ser conferida pelo runtime.
+  o limite de exportacao. Sync confirmado em3247e36,3documentos; segunda
+  execucao retornou unchanged. PR234 aberto para este registro, CI propria
+  pendente. GitHub recusou auto-merge porque esta desabilitado no repositorio;
+  nenhuma configuracao/protecao foi alterada. Integracao documental manual
+  deve aguardar CI verde; indisponibilidade de auto-merge nao bloqueia nem
+  invalida o runtime ja publicado pelo PR230. Reavaliar ao concluir a CI234.
 
 ## Integracao concorrente
 
