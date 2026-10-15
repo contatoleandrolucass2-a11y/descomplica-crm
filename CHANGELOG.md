@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-15: Referências visuais de páginas e acessos
+
+- Incorpora a captura Linux aprovada `38819023825`: onze imagens de Usuários e onze de Páginas atualizadas, 220 imagens preservadas e 242 hashes conferidos. A matriz funcional e de acessibilidade passou sem ampliar os limites existentes.
+- Remove o workflow temporário de captura. A CI normal do commit final, a integração e a promoção continuam obrigatórias; esta revisão não publica o pacote de páginas.
+
 ## 2026-10-15: Acessos individuais por página
 
 - Separa treze permissões antes compartilhadas por módulo, mantendo uma caixa por página e os simuladores juntos. Admin e Master herdam todos os acessos implantados; decisões existentes são copiadas na criação das novas chaves.

@@ -30,6 +30,27 @@ O catálogo usa uma região de rolagem contínua de até 36 rem, com acesso por 
 - Navegador local com Master sintético: caixas individuais de Comercial e Configurações marcadas por herança, marcas RIVA/DIRECIONAL marcadas e 27 páginas na região de rolagem contínua. O contador exclui controles técnicos ocultos e a antiga permissão compartilhada de etapas.
 - Uma segunda conta sintética, com somente `pages.view` e `crm.management.routine.view`, entrou pela rota inicial diretamente na Rotina. A abertura direta de Dashboard foi bloqueada. O layout compartilhado aceita permissões individuais; hubs e links entre etapas consultam o catálogo autorizado. Após MFA e na tela de acesso negado, o início é resolvido pela rota `/`, sem presumir acesso ao Dashboard.
 
+## Captura Linux e revisão visual
+
+A execução `38819023825` foi aprovada no SHA de captura
+`ec191f6bf71d1940ffbfa6feb7a656e89a951211`, com árvore idêntica ao candidato
+`d9775f0f2e547e8ffd0d95327bad6817a53e20ce`. A árvore estava limpa; o hash do
+manifesto anterior e os 242 hashes e tamanhos das imagens foram conferidos.
+Somente 22 imagens mudaram: onze de Usuários e onze de Páginas. As outras 220
+permaneceram idênticas. A procedência completa consta no README das referências.
+
+Passaram 154 verificações responsivas, 88 de temas, 242 de acessibilidade,
+110 de zoom, teclado e jornadas. A revisão manual verificou desktop e celular
+nos temas claro e escuro. Os limites de comparação e densidade não foram
+ampliados. A categoria de permissões tem rolagem de até 32 rem; a lista de
+páginas mantém 36 rem e contém o posicionamento de seus rótulos acessíveis.
+
+A prévia local foi reaberta a pedido do usuário em `127.0.0.1:3012`, com uma
+conta Master sintética: 37 controles visíveis marcados por herança, incluindo
+RIVA e DIRECIONAL, e 27 registros no catálogo contínuo. A porta 3000 pertence
+a outra cópia local e não foi alterada. A CI normal do commit final e a
+publicação permanecem pendentes.
+
 ## Estado de publicação
 
 A versão final com caixas individuais está em validação. CI, integração e promoção precisam ser confirmadas pelo SHA exato. Este registro não comprova publicação em produção. A publicação deve aplicar a migration aprovada e usar o coordenador com consulta, travas compartilhadas e CAS conforme DEPLOY-001.
