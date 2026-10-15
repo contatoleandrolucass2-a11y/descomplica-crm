@@ -265,6 +265,22 @@ exporta-los para repositorio ou chat; rotacao exige procedimento explicito.
 
 ## Renovacao de sessao com o cofre existente
 
+Estado observado15/10/2026: owner9ffc8a9 foi promovido pelo coordenador em
+15:24:46.025Z apos CI38753275427 e prova da imagem. O helper preparou a
+credencial cifrada, e o QIX real respondeu metadados. Parceiras ainda nao
+resolvida; isso nao comprova fatos, conciliacao, ranking publicado ou agenda.
+O ramo corretivo de metadados precisa de nova CI/promocao antes de novo probe.
+
+O inspetor candidato reconhece `objects[].childRefId` e o associa somente a
+filhos diretos do container, rejeitando ambiguidade. Consulta catalogos
+transitorios de campos/medidas e somente propriedades dos aliases conhecidos
+VENDAS/VGV. Nomes/tags e definicoes tecnicas ficam no artefato privado; nao
+consulta linhas, valores, cardinalidades ou formulas avaliadas. Campo, variavel
+e titulo de medida homonimos sao candidatos, nao prova automatica de binding.
+`dependencyClosureVerified:false` conserva a revisao manual como requisito.
+Limites:10mil itens brutos,256 campos retidos e128KiB para artefato completo.
+Cleanup do objeto transitorio e obrigatorio, inclusive em cancelamento.
+
 Candidato de15/10, posterior ao ownerad49634. O preflight real desse owner
 retornou reauth_required em13:18Z; nenhuma carga foi publicada. A renovacao
 abaixo precisa de CI e promocao protegida antes de ser considerada instalada.
