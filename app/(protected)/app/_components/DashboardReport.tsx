@@ -1,4 +1,11 @@
 import Link from "next/link";
+import {
+  ArrowDownUp,
+  ChartNoAxesCombined,
+  CircleDollarSign,
+  ListChecks,
+  Target,
+} from "lucide-react";
 
 import {
   DASHBOARD_PERIODS,
@@ -14,7 +21,6 @@ import {
   buildOperationalComparisons,
   buildPeriodFunnelReadings,
   calculateConversion,
-  calculateProgress,
   metricValueForPeriod,
   type FunnelReading,
   type OperationalComparison,
@@ -23,17 +29,15 @@ import { CRM_STAGES } from "@/lib/crm/stages/catalog";
 
 import { SalesforceRefreshButton } from "./SalesforceRefreshButton";
 import { DashboardAutoRefresh } from "./DashboardAutoRefresh";
-import { DonutChart } from "./analytics/Charts";
+import { DashboardPulse } from "./DashboardPulse";
+import { DashboardComparisons } from "./DashboardComparisons";
 import {
   AnalyticsCard,
   AnalyticsCanvas,
-  AnalyticsTable,
-  CommercialSourceLabel,
   FilterGroup,
   FilterLink,
   RankingList,
   SectionHeading,
-  type AnalyticsColumn,
 } from "./analytics/DataDisplay";
 import { UnavailableValue } from "./analytics/DataState";
 import styles from "./DashboardReport.module.css";
@@ -175,49 +179,6 @@ function MonthlyFunnel({ label, readings }: { label: string; readings: FunnelRea
   );
 }
 
-const operationalColumns: Array<AnalyticsColumn<OperationalComparison>> = [
-  {
-    key: "interval",
-    label: "Intervalo",
-    render: (row) => (
-      <span>
-        <strong className={styles.interval}>{row.label}</strong>
-        <span className={styles.comparison}>{row.comparison}</span>
-      </span>
-    ),
-  },
-  {
-    key: "previous",
-    label: "Anterior",
-    align: "right",
-    render: (row) => numberValue(row.previous),
-  },
-  { key: "current", label: "Realizado", align: "right", render: (row) => numberValue(row.current) },
-  {
-    key: "variation",
-    label: "Variação",
-    align: "right",
-    render: (row) =>
-      row.variation === null ? (
-        <UnavailableValue reason="Sem base anterior suficiente para comparação." />
-      ) : (
-        `${row.variation > 0 ? "+" : ""}${percentFormatter.format(row.variation)}`
-      ),
-  },
-  {
-    key: "goal",
-    label: "Meta",
-    align: "right",
-    render: (row) => numberValue(row.goal, "Meta indisponível para este intervalo."),
-  },
-  {
-    key: "progress",
-    label: "% realizado da meta",
-    align: "right",
-    render: (row) => ratioValue(row.goalProgress),
-  },
-];
-
 const unavailableComparisons: OperationalComparison[] = [
   { key: "month", label: "Mês", comparison: "Mês anterior × mês atual" },
   {
@@ -252,6 +213,13 @@ export function DashboardReport({
   const metrics = dashboard?.metrics[selectedView] ?? null;
   const goalsAvailable = dashboard?.goalsAvailable === true;
   const readings = metrics ? buildPeriodFunnelReadings(metrics, selectedPeriod) : emptyReadings();
+  const goals = Object.fromEntries(
+    stages.map((stage) => {
+      const metric = metrics?.[stage];
+      const rawGoal = metric ? metricValueForPeriod(metric, selectedPeriod).goal : null;
+      return [stage, goalsAvailable && rawGoal !== null && rawGoal > 0 ? rawGoal : null];
+    }),
+  ) as Record<DashboardStageKey, number | null>;
   const monthly = metrics ? buildMonthlyFunnelSnapshots(metrics, goalsAvailable) : [];
   const sales = metrics ? metricValueForPeriod(metrics.sales, selectedPeriod) : null;
   const salesGoal = goalsAvailable && sales && sales.goal > 0 ? sales.goal : null;
@@ -277,24 +245,15 @@ export function DashboardReport({
         generatedAt={dashboard?.generatedAt ?? null}
         updatedAt={dashboard?.updatedAt ?? null}
       />
-      <div className={styles.report}>
+      <div className={styles.report} data-dashboard-source={dashboard?.source}>
         <div className={styles.heading}>
           <div>
             <h1>Relatório completo da equipe.</h1>
-            <p className={styles.context}>
-              {DASHBOARD_VIEWS[selectedView].label} · {DASHBOARD_PERIODS[selectedPeriod].label}
-            </p>
           </div>
           <dl className={styles.metadata}>
             <div>
               <dt>Atualizado em</dt>
               <dd>{updatedAt(dashboard)}</dd>
-            </div>
-            <div>
-              <dt>Fonte</dt>
-              <dd>
-                <CommercialSourceLabel value={dashboard?.source} />
-              </dd>
             </div>
           </dl>
         </div>
@@ -382,60 +341,7 @@ export function DashboardReport({
             description="Relações entre volumes agregados do período, sem acompanhar trajetórias individuais."
             density="compact"
           />
-          <div className={styles.pulseGrid}>
-            {readings.map((reading, index) => {
-              const metric = metrics?.[reading.key];
-              const rawGoal = metric ? metricValueForPeriod(metric, selectedPeriod).goal : null;
-              const goal = goalsAvailable && rawGoal !== null && rawGoal > 0 ? rawGoal : null;
-              const progress =
-                reading.value !== null && goal !== null
-                  ? calculateProgress(reading.value, goal)
-                  : null;
-              return (
-                <AnalyticsCard className={styles.card} key={reading.key} density="compact">
-                  <h3>{reading.label}</h3>
-                  <div className={styles.donut}>
-                    <DonutChart
-                      label={
-                        index === 0
-                          ? "Conversão de oportunidades"
-                          : `${readings[index - 1]?.label} para ${reading.label.toLocaleLowerCase("pt-BR")}`
-                      }
-                      value={
-                        index === 0
-                          ? "Entrada"
-                          : reading.conversion === null
-                            ? "N/D"
-                            : percentFormatter.format(reading.conversion)
-                      }
-                      ratio={reading.conversion}
-                      accent={CRM_STAGES[index]!.accent}
-                    />
-                  </div>
-                  <p className={styles.conversionCaption}>
-                    {index === 0 ? "Entrada do funil" : "Em relação à etapa anterior"}
-                  </p>
-                  <dl className={styles.readings}>
-                    <div>
-                      <dt>Quantidade</dt>
-                      <dd className={styles.quantity}>{numberValue(reading.value)}</dd>
-                    </div>
-                    <div>
-                      <dt>Meta</dt>
-                      <dd>{numberValue(goal, "Meta indisponível para o período.")}</dd>
-                    </div>
-                    <div>
-                      <dt>% realizado da meta</dt>
-                      <dd>{ratioValue(progress)}</dd>
-                    </div>
-                  </dl>
-                  <p className={styles.assessment} data-met={progress !== null && progress >= 1}>
-                    {goalAssessment(reading.value, goal)}
-                  </p>
-                </AnalyticsCard>
-              );
-            })}
-          </div>
+          <DashboardPulse readings={readings} goals={goals} />
         </section>
 
         <section className={styles.section} aria-labelledby="report-monthly-title">
@@ -502,17 +408,30 @@ export function DashboardReport({
           />
           <div className={styles.diagnosisGrid}>
             <div>
-              <h3>Conversão total</h3>
+              <h3>
+                <ChartNoAxesCombined size={18} aria-hidden="true" />
+                Conversão total
+              </h3>
               <strong>{ratioValue(totalConversion(readings))}</strong>
               <p>Vendas / oportunidades no período</p>
             </div>
             <div>
-              <h3>Falta para a meta de vendas</h3>
-              <strong>{numberValue(salesGap, "Meta ou realizado indisponível.")}</strong>
-              <p>{goalAssessment(sales?.current ?? null, salesGoal)}</p>
+              <h3>
+                <CircleDollarSign size={18} aria-hidden="true" />
+                VGV do período
+              </h3>
+              <strong>
+                {salesValue === null ? <UnavailableValue /> : currencyFormatter.format(salesValue)}
+              </strong>
+              <p>
+                {DASHBOARD_PERIODS[selectedPeriod].label} · {DASHBOARD_VIEWS[selectedView].label}
+              </p>
             </div>
             <div>
-              <h3>Menor relação entre etapas</h3>
+              <h3>
+                <ArrowDownUp size={18} aria-hidden="true" />
+                Menor relação entre etapas
+              </h3>
               <strong>{ratioValue(lowestConversion?.conversion ?? null)}</strong>
               <p>
                 {lowestConversion
@@ -520,21 +439,23 @@ export function DashboardReport({
                   : "Sem base suficiente para comparação"}
               </p>
             </div>
-            <div>
-              <h3>Plano de ação</h3>
+            <div data-secondary="true">
+              <h3>
+                <Target size={18} aria-hidden="true" />
+                Falta para a meta de vendas
+              </h3>
+              <strong>{numberValue(salesGap, "Meta ou realizado indisponível.")}</strong>
+              <p>{goalAssessment(sales?.current ?? null, salesGoal)}</p>
+            </div>
+            <div data-secondary="true">
+              <h3>
+                <ListChecks size={18} aria-hidden="true" />
+                Plano de ação
+              </h3>
               <strong>
                 <UnavailableValue reason="Critério de ação ainda não aprovado." />
               </strong>
               <p>Aguardando critério aprovado.</p>
-            </div>
-            <div>
-              <h3>VGV do período</h3>
-              <strong>
-                {salesValue === null ? <UnavailableValue /> : currencyFormatter.format(salesValue)}
-              </strong>
-              <p>
-                {DASHBOARD_PERIODS[selectedPeriod].label} · {DASHBOARD_VIEWS[selectedView].label}
-              </p>
             </div>
           </div>
           <p className={styles.footnote}>
@@ -557,16 +478,13 @@ export function DashboardReport({
                   {DASHBOARD_STAGES[stage].label}{" "}
                   {stage === "appointments" ? "realizados" : "realizadas"}
                 </h3>
-                <AnalyticsTable
-                  caption={`${DASHBOARD_STAGES[stage].label}: realizado, comparação e meta por intervalo`}
-                  captionVisible={false}
-                  columns={operationalColumns}
+                <DashboardComparisons
+                  label={DASHBOARD_STAGES[stage].label}
                   rows={
                     metrics
                       ? buildOperationalComparisons(metrics[stage], goalsAvailable)
                       : unavailableComparisons
                   }
-                  rowKey={(row) => row.key}
                 />
               </div>
             ))}
