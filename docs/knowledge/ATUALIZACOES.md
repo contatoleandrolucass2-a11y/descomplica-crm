@@ -3809,3 +3809,21 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
 - Limite: preview usa sessao sintetica e nao substitui auth/RLS/persistencia.
   Nao houve mudanca de banco, permissao, politica ou n8n. Reavaliar publicacao
   somente apos CI concluida; falha de gate impede deploy.
+
+## 2026-10-15: evidencia final local de Meta e limites do host
+
+- PR231: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/231,
+  candidato b8e215af9e418a6091937c43278c5f5ada376ec2; CI38753116358 em curso.
+- Suite Vitest completa limitada:2884 aprovados,85 skips,1 falha em
+  tests/salesforce-inventory-api.test.ts:164, esperado502/recebido200 no caso
+  symlink. Nao houve EPERM nesse resultado; causa nao isolada. Arquivos desse
+  dominio nao foram alterados. CI Linux no candidato e criterio de revisao.
+- Etapas Node executadas separadamente apos falha Vitest:ops360 aprovados,
+  18 skips; release494 aprovados,13 skips. Lint/tipos/build/inventario aprovados.
+- Preview final apos ordem semanal e foco:seis capturas aprovadas, incluindo
+  axe, overflow, menu, vendas e calendario. Sessao sintetica, sem persistencia.
+- knowledge:sync ao abrir aprovou; apos commit retornou Documento excede o
+  limite de exportacao. Causa:ATUALIZACOES.md acima de256000bytes. Escopo:
+  sincronizacao final pendente; nao alterado limite nem resumida autoridade.
+  Reavaliar apos manutencao preservando historico completo ou runtime autorizado
+  que suporte volume. Esta excecao nao concede autorizacao de publicacao.
