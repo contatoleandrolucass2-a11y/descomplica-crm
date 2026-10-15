@@ -396,12 +396,12 @@ const protectedSurfaces = [
   },
   {
     path: "/app/configuracoes/metas",
-    heading: "Metas do funil",
+    heading: "Planejamento de metas",
     allowed: adminRoles,
   },
   {
     path: "/app/configuracoes/metas/parcerias",
-    heading: "Metas do funil de parcerias",
+    heading: "Planejamento de metas",
     allowed: adminRoles,
   },
   {
@@ -542,6 +542,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/simulacao",
     ...managementRoutes,
     ...administrationNavigationRoutes,
+    "/app/configuracoes/metas",
   ]),
   admin: sortedRouteSet([
     ...operationalRoutes,
@@ -551,6 +552,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/simulacao",
     ...managementRoutes,
     ...administrationNavigationRoutes,
+    "/app/configuracoes/metas",
   ]),
   coordinator: sortedRouteSet([
     ...operationalRoutes,
@@ -792,7 +794,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 15 : activeOperationalRoles.has(role) ? 9 : 0,
+      adminRoles.has(role) ? 16 : activeOperationalRoles.has(role) ? 9 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
@@ -812,6 +814,9 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
     );
     expect(expectedHeaderRoutesByRole[role].includes(connectedSystemsRoute), role).toBe(
       directRoutes.includes(connectedSystemsRoute) && directRoutes.includes("/admin"),
+    );
+    expect(expectedHeaderRoutesByRole[role].includes("/app/configuracoes/metas"), role).toBe(
+      directRoutes.includes("/app/configuracoes/metas") && directRoutes.includes("/app/gestao"),
     );
   }
   expect(protectedSurfaces.find((surface) => surface.path === "/app/repasse")?.allowed).toBe(
@@ -1310,6 +1315,22 @@ for (const role of expectedRoles) {
           }),
         );
       expect(navigationRoots).toEqual(expectedPrimaryNavigationRootsForRole(role));
+      const metaLink = page.locator(
+        '#authorized-navigation-crm-management a[href="/app/configuracoes/metas"]',
+      );
+      await expect(metaLink).toHaveCount(adminRoles.has(role) ? 1 : 0);
+      if (adminRoles.has(role)) {
+        await navigation.getByRole("button", { name: "Gestão", exact: true }).click();
+        await expect(metaLink).toBeVisible();
+        await metaLink.click();
+        await expect(page).toHaveURL((url) => url.pathname === "/app/configuracoes/metas");
+        const goalsHeading = page.getByRole("heading", {
+          level: 1,
+          name: "Planejamento de metas",
+          exact: true,
+        });
+        await expect(page.locator("main").filter({ has: goalsHeading })).toBeVisible();
+      }
       await expect(navigation.locator('a[href="/admin"]')).toHaveCount(0);
 
       const administrationTrigger = navigation.getByRole("button", {

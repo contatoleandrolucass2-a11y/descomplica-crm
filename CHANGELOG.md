@@ -2425,3 +2425,5 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
   rolagem por teclado sem alterar politicas comerciais ou dados realizados.
 
 - Meta preserva a regiao principal acessivel da pagina no shell protegido.
+
+- Matriz E2E exige Meta em Gestao somente para Master/Admin e testa seu acesso.

@@ -6061,3 +6061,12 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Conferencia do shell identificou que ele fornece div de conteudo, enquanto
   cada pagina fornece o landmark main. O carregador Meta preserva agora essa
   regiao principal, com teste de regressao; sem mudanca visual ou de dados.
+
+## 2026-10-15: matriz autenticada inclui Meta em Gestao
+
+- CI38757496727:validate e isolated-restore passaram; E2E falhou no Master por
+  lista antiga de links, que omitia a nova Meta autorizada. Gate bloqueou merge.
+- Matriz agora exige16links em Master/Admin, incluindo Meta; demais perfis
+  preservam9/0 e negacao de acesso direto. Tambem clica Gestao > Meta nos dois
+  perfis autorizados e confere titulo/main, sem reduzir cobertura de27rotas.
+- Headings de DV/Parcerias refletem Planejamento de metas da referencia.

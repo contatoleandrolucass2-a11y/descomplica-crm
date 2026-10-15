@@ -3889,3 +3889,14 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
 - CI38755638673 passou validacao na tentativa2 apos HTTP403 da Prefeitura;
   restauracao/navegador estavam em curso. Ajuste semantico exige novo SHA/CI.
   Verificacao oficial passou localmente; nao houve mudanca de politica/gate.
+
+## 2026-10-15: regressao E2E da nova entrada Meta
+
+- Fonte:CI38757496727, SHA2227098. Validate/restore aprovados; release-gates
+  falhou em e2e/release-candidate.spec.ts:1294:rota Meta recebida mas ausente
+  na expectativa antiga do menu Master.3testes passaram e16nao rodaram apos
+  parada antecipada; nao afirmar nove perfis aprovados nessa tentativa.
+- Correcao do teste acompanha nova navegacao:Master/Admin16links, demais9/0,
+  rota direta autorizada permanece inalterada. Clique Meta e landmark/titulo
+  sao exigidos nos perfis autorizados, com a negacao dos demais preservada.
+- Novo SHA exige CI completa. Sem merge, deploy ou reducao de gate.
