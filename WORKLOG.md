@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-10-15: Organizacao do dashboard e limite dos filtros
+
+- Branch `codex/dashboard-filtros-layout`, base `ad496340`; producao observada
+  na abertura em `6843ef1`. Site de referencia apenas consultado pelo navegador.
+- Removidos os tres textos indicados. Componentes DashboardPulse e
+  DashboardComparisons preservam todos os indicadores e comparativos existentes.
+  Ritmo e diagnostico reorganizados sem alterar formulas ou fontes.
+- QA sintetica ampliada para 320, 390, 768, 1440 e 1920 px nos tres temas,
+  com ausencia, zero, numeros grandes e relacao acima de 100%.
+- Marcador sintetico do dashboard continua verificavel no atributo tecnico;
+  nao ha mais bloco Fonte visivel. Evidencia nova distingue verificacao de
+  marcador e forma de apresentacao; o manifesto historico nao foi adulterado.
+- Investigacao confirmou que o payload v2 oferece somente tres visoes
+  agregadas. Base geral nao fornece, por si, dimensoes ao painel. A resposta
+  do usuario nao confirmou equivalencia entre conta/corretor ou empresa/imobiliaria.
+  Nenhum filtro ficticio, migration remota, ACL, coleta ou workflow alterado.
+- Validacao local Node 24.19.0/pnpm 11.20.0: lint aprovado (um aviso previo
+  em connected-systems.mjs), typecheck e build aprovados; 49 testes focados
+  de relatorio, componentes e breadcrumbs aprovados. QA sintetica: 124/124,
+  incluindo tres temas, cinco larguras e atualizacao automatica.
+- Suite completa: 2.897 aprovados, 85 ignorados e duas falhas. Uma falha
+  preexistente foi reproduzida no Windows:
+  `salesforce-inventory-api.test.ts` aceita symlink porque `O_NOFOLLOW` nao existe
+  nessa plataforma. Teste e protecao nao modificados; Linux deve validar na CI.
+  A outra foi timeout de initialize/tools/list em project-devtools.test.ts.
+  Etapas Node de coletores/release nao executadas pelo comando apos a falha.
+  Nenhuma falha foi ocultada; publicacao depende dos gates completos.
+- Docker local indisponivel; banco/RLS, restore e matriz autenticada dependem
+  da CI isolada. Baselines autenticadas nao alteradas nesta etapa.
+
 ## 2026-10-14: Base atual do preflight Qlik
 
 CI38628006919/64d9f24 aprovada em segunda tentativa. Primeiro E2E teve timeout

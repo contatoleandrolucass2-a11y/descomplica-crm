@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-15: Organizacao visual do dashboard
+
+- Remove Fonte e contexto repetido do cabecalho e o breadcrumb da raiz `/app`.
+- Reorganiza as roscas, ritmo de vendas, diagnostico e tabelas comparativas,
+  preservando valores, intervalos, metas e atualizacao automatica.
+- Distingue entrada, ausencia, zero e conversoes acima de 100%; adapta tabelas
+  ao celular e utiliza os tokens dos tres temas existentes.
+- Filtros dimensionais completos permanecem pendentes: os agregados publicados
+  nao permitem recalcular resultados por gerente, responsavel e empresa.
+
 ## 2026-10-14: Integracao documental do preflight
 
 - Preserva a atualizacao concorrente da Rotina e registra a revalidacao do
