@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-15: Herança completa do Master
+
+- Todos os usuários Master passam a herdar todas as permissões implantadas, incluindo RIVA e DIRECIONAL. A prévia local acompanha o catálogo completo; a interface de produção usa os padrões consultados no banco.
+- Preserva os padrões dos outros papéis, exceções individuais, hierarquia, MFA, estado das contas e gates de execução. A consulta anterior em produção encontrou 23 de 25 permissões no Master e nenhuma negação individual de Master. Validação e aplicação serão registradas após verificação.
+
 ## 2026-10-15: Catálogo único e rolagem contínua de páginas
 
 - Centraliza as 27 páginas liberadas em um registro compartilhado por guards, matriz de acessos e geração da migration. Inclui as dez páginas que antes eram acrescentadas somente à navegação.

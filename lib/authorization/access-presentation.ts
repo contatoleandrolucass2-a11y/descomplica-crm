@@ -26,19 +26,8 @@ const WITHOUT_CANAL_IMOB_PERMISSIONS = [
   ...SIMULATOR_ACCESS_PERMISSIONS,
 ] as const satisfies readonly PermissionKey[];
 
-const FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION = new Set<PermissionKey>([
-  "crm.read_model_v3.view",
-  "crm.read_model_v3.ranking.view",
-  "crm.read_model_v3.partnerships.view",
-  "crm.read_model_v3.stock.view",
-  "crm.commercial_engine.execute",
-]);
-const MASTER_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
-  (permission) =>
-    !FUTURE_PERMISSIONS_ABSENT_FROM_PRODUCTION.has(permission) &&
-    permission !== "crm.inventory.riva.view" &&
-    permission !== "crm.inventory.direcional.view",
-);
+// Live role defaults remain authoritative and are limited to the deployed catalog.
+const MASTER_PERMISSIONS = Object.keys(PERMISSIONS) as PermissionKey[];
 // Administrator inherits the entire current catalog. Individual overrides and
 // database hierarchy, scope, account status, and runtime gates remain authoritative.
 const ADMIN_PERMISSIONS = Object.keys(PERMISSIONS) as PermissionKey[];

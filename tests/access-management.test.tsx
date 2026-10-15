@@ -229,21 +229,7 @@ describe("catálogo localizado de acesso", () => {
       "crm.simulators.execute",
     ];
 
-    expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(
-      Object.keys(PERMISSIONS).filter(
-        (permission) =>
-          ![
-            "crm.read_model_v3.view",
-            "crm.read_model_v3.ranking.view",
-            "crm.read_model_v3.partnerships.view",
-            "crm.read_model_v3.stock.view",
-            "crm.commercial_engine.execute",
-            "crm.inventory.riva.view",
-            "crm.inventory.direcional.view",
-          ].includes(permission),
-      ),
-    );
-    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(24);
+    expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(Object.keys(PERMISSIONS));
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual(Object.keys(PERMISSIONS));
     for (const roleKey of ["coordinator", "manager_imob", "broker_imob"] as const) {
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(withCanalImobPermissions);
@@ -287,47 +273,48 @@ describe("catálogo localizado de acesso", () => {
     expect(downgrade.added).toEqual([]);
   });
 
-  it.each([false, true])(
-    "marca os padrões do Administrador e respeita negação individual: %s",
-    (denyRiva) => {
-      const markup = renderToStaticMarkup(
-        createElement(UserAccessManager, {
-          initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
-          users: [
-            {
-              inheritedPermissions: ROLE_INHERITED_PERMISSIONS["admin"],
-              permissionDetailsAvailable: true,
-              userId: "81000000-0000-4000-8000-000000000006",
-              email: "administrador@example.test",
-              isActive: true,
-              accessStatus: "approved",
-              roleKey: "admin",
-              isSelf: false,
-              isManageable: true,
-              overrides: denyRiva
-                ? [{ permissionKey: "crm.inventory.riva.view", effect: "deny", reason: null }]
-                : [],
-            },
-          ],
-          assignableRoles: ["admin"],
-          manageablePermissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"],
-          canManageRoles: true,
-          canManagePermissions: true,
-          isMasterPermissionManager: true,
-          canManageUsers: true,
-          canApproveUsers: false,
-          reportingScopes: [],
-        }),
+  it.each([
+    ["admin", false],
+    ["admin", true],
+    ["master", false],
+  ] as const)("marca os padrões de %s e respeita negação individual: %s", (roleKey, denyRiva) => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
+        users: [
+          {
+            inheritedPermissions: ROLE_INHERITED_PERMISSIONS[roleKey],
+            permissionDetailsAvailable: true,
+            userId: "81000000-0000-4000-8000-000000000006",
+            email: "administrador@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey,
+            isSelf: false,
+            isManageable: true,
+            overrides: denyRiva
+              ? [{ permissionKey: "crm.inventory.riva.view", effect: "deny", reason: null }]
+              : [],
+          },
+        ],
+        assignableRoles: ["admin"],
+        manageablePermissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: true,
+        canManageUsers: true,
+        canApproveUsers: false,
+        reportingScopes: [],
+      }),
+    );
+    const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
+    expect(checkboxes.length).toBeGreaterThan(0);
+    for (const checkbox of checkboxes) {
+      expect(checkbox.includes('checked=""')).toBe(
+        !(denyRiva && checkbox.includes('aria-label="Acesso a RIVA"')),
       );
-      const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-      expect(checkboxes.length).toBeGreaterThan(0);
-      for (const checkbox of checkboxes) {
-        expect(checkbox.includes('checked=""')).toBe(
-          !(denyRiva && checkbox.includes('aria-label="Acesso a RIVA"')),
-        );
-      }
-    },
-  );
+    }
+  });
 
   it("não mantém descrições de permissão em inglês na interface", () => {
     const visibleText = Object.values(PERMISSIONS)

@@ -1781,7 +1781,7 @@ set local role authenticated;
 select is((select count(*) from public.get_user_role_permission_defaults()), 0::bigint, 'callers without users.view receive no role defaults');
 reset role;
 
--- Administrator inherits both brands; Master and operational roles still need
+-- Administrator and Master inherit both brands; operational roles need
 -- explicit access. A deny remains authoritative without removing management.
 reset role;
 select set_config('request.jwt.claim.sub', '', true);
@@ -1794,14 +1794,13 @@ select is(
   (select array_agg(role_key || ':' || permission_key order by role_key, permission_key)
    from public.role_permissions
    where permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
-  array['admin:crm.inventory.direcional.view', 'admin:crm.inventory.riva.view']::text[],
-  'only Administrator inherits both inventory brands'
+  array['admin:crm.inventory.direcional.view', 'admin:crm.inventory.riva.view', 'master:crm.inventory.direcional.view', 'master:crm.inventory.riva.view']::text[],
+  'Administrator and Master inherit both inventory brands'
 );
 select ok(
   not exists (
     select 1
     from unnest(array[
-      'a3000000-0000-4000-8000-000000000001'::uuid,
       'a3000000-0000-4000-8000-000000000004'::uuid,
       'a3000000-0000-4000-8000-000000000005'::uuid,
       'a3000000-0000-4000-8000-000000000006'::uuid,
@@ -1811,7 +1810,7 @@ select ok(
     where public._internal_has_permission(fixture.user_id, 'crm.inventory.riva.view')
       or public._internal_has_permission(fixture.user_id, 'crm.inventory.direcional.view')
   ),
-  'Master and the five operational roles start without access to either brand'
+  'the five operational roles start without access to either brand'
 );
 select ok(
   public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
@@ -1834,7 +1833,7 @@ select set_config('request.jwt.claim.sub', '', true);
 select ok(
   public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
     and public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view'),
-  'Master can manage both brand permissions without reading either brand'
+  'Master can manage both inherited brand permissions'
 );
 select ok(
   public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
@@ -1874,7 +1873,7 @@ select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001
 set local role authenticated;
 select lives_ok(
   $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view'], 'allow', 'Synthetic RIVA access')$$,
-  'Master grants RIVA to a lower user without possessing RIVA read access'
+  'Master grants inherited RIVA to a lower user'
 );
 reset role;
 select ok(
@@ -1917,11 +1916,11 @@ select ok(
   'revocation leaves the target with neither brand'
 );
 select ok(
-  not public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
-    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view')
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view')
     and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
     and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
-  'managing another user does not bypass missing Master defaults or explicit Administrator denies'
+  'managing another user preserves inherited Master access and explicit Administrator denies'
 );
 set local role authenticated;
 select throws_ok(

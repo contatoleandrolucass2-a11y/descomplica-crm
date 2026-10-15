@@ -66,6 +66,7 @@ begin
 end;
 $$;
 \ir ../../../supabase/migrations/20261014201400_local_admin_all_permission_defaults.sql
+\ir ../../../supabase/migrations/20261015201949_master_all_permission_defaults.sql
 \ir user-access.test.sql
 
 \ir page-catalog.test.sql
