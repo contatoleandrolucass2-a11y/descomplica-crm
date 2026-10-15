@@ -5788,3 +5788,27 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   evidência autenticada antiga (209 capturas) para a nova matriz (242
   capturas). Os resultados finais, CI, PR e publicação serão registrados após
   o gate visual real.
+
+## 2026-10-15: Meta no menu Gestao
+
+- Branch codex/gestao-meta, base ad496340cf57871c8fa80015aaaf0e0bd1da983c.
+- Reagrupa a pagina autorizada de metas sob Gestao com nome Meta, breadcrumbs
+  e destaque das subguias, sem ampliar catalogo, permissao ou acesso remoto.
+- Replica os oito blocos de https://descomplicapro.com.br/configuracoes/metas:
+  configuracao, funil, conversoes, semanas, equipe, producao, calendario e
+  produtividade. Reutiliza estilos locais da referencia com escopo CSS proprio.
+- Previa local interativa; valores ausentes permanecem vazios. Calendario usa
+  dias uteis segunda a sexta, sem descontar feriados. Mes/ano sao exploratorios;
+  a competencia do rascunho continua sendo a atual, conforme contrato existente.
+- Aplicar metas encaminha para revisao segura; persistencia continua somente
+  no rascunho inativo, com motivo, permissao, revisao e validacao no servidor.
+  Nao altera metas ativas, politica, ranking, migration nem workflow n8n.
+- Node24.19/pnpm11.20: lint aprovado com aviso anterior em connected-systems;
+  typecheck e build aprovados. Preview sintetico: seis capturas, tres temas,
+  desktop/celular, axe sem violacoes, teclado/overflow, Gestao > Meta, vendas2
+  produz215 oportunidades e calendario troca mes. Preview nao prova RLS/login.
+- Suite Windows inicial:2879 aprovados/85 skips/6falhas. Tres asserts antigos
+  de layout e um de copia foram atualizados ou preservados no novo componente;
+  parser DevTools passou na reexecucao com concorrencia limitada. Reexecucao
+  completa limitada mantem falha no symlink Salesforce (esperado502, recebido200), sem tocar teste
+  ou produto fora do escopo. CI Linux, PR/merge e release pendentes neste ponto.

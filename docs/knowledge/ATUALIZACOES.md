@@ -3778,3 +3778,34 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
 - Validacao SDK final manteve um aviso PLAIN_GENERIC_AUTH pelo placeholder
   newCredential; update utilizou o ID existente e releitura confirmou o vinculo.
   Nao criar credencial duplicada a partir do placeholder. Nenhum deploy CRM.
+
+## 2026-10-15: abertura da guia Meta em Gestao
+
+- Fonte: Git local e origin/main apos fetch, ambos ad496340cf57871c8fa80015aaaf0e0bd1da983c; checkout inicialmente destacado e limpo. GitHub conector confirmou main como branch padrao; consulta de runs do conector retorna somente PR e nao prova CI de main. CLI gh ausente no PATH.
+- Health observacional https://crm.descomplicapro.com.br/api/health em 15/10/2026 11:21 America/Sao_Paulo: HTTP 200, status ok, version 6843ef1ca6ab1f4344c11cdd7491004fd4f9faa9. Versao publicada difere do checkout; nao comprova esta demanda.
+- Referencia solicitada https://descomplicapro.com.br/configuracoes/metas acessivel pelo navegador; leitura publica para reproducao. Nenhuma alteracao de politica comercial autorizada.
+
+## 2026-10-15: implementacao e validacao da guia Meta
+
+- Fonte atual: GitHub API actions/runs, main ad496340, CI38640654844 success;
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38640654844.
+  Essa evidencia valida a base; nao valida as alteracoes desta branch.
+- Fonte visual: pagina publica /configuracoes/metas lida no navegador. Conteudo
+  dos oito blocos reproduzido em GoalPlanning. CSS original ja versionado no
+  archive-investor, extraido para modulo com escopo e contraste corrigido.
+- Helpers puros: exemplo completo108/12/5/4/1/1 e acumulados semanais conferidos.
+  Edicao temporaria no site de referencia, sem salvar: vendas2 resulta
+  215/24/10/7/3/2. Datas Sao Paulo, calendario sem feriados; sem dados reais.
+- Estado implementado: menu, breadcrumbs e previa. Persistencia continua no
+  rascunho inativo autorizado, sem ativacao; botao Aplicar metas abre revisao.
+  Calendarizacao exploratoria nao muda competencia de gravacao existente.
+- Validacao local: lint com aviso anterior, typecheck/build e29 testes focados
+  aprovados. Seis capturas sinteticas, axe e interacoes aprovadas. Suite geral
+  Windows:2884 aprovados/85 skips/1 falha no teste de symlink (esperado502, recebido200). Causa nao isolada; CI Linux permanece obrigatoria.
+- Fonte producao: release:production status observacional em /srv/descomplica-crm:
+  deployment57c09296-d8d8-421b-bca7-c12d10b4d50e, SHA6843ef1,
+  deployedAt2026-10-14T20:38:13.413Z, sem pendencia. Nao confundir status com
+  consulta fresca dentro do deploy. Publicacao exige CI/main exatos e coordenador.
+- Limite: preview usa sessao sintetica e nao substitui auth/RLS/persistencia.
+  Nao houve mudanca de banco, permissao, politica ou n8n. Reavaliar publicacao
+  somente apos CI concluida; falha de gate impede deploy.

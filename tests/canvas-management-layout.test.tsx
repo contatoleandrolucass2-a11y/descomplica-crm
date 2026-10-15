@@ -40,7 +40,6 @@ describe("management canvas layout", () => {
       "app/(protected)/admin/usuarios/page.tsx",
       "app/(protected)/admin/paginas/page.tsx",
       "app/(protected)/app/configuracoes/page.tsx",
-      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
       "app/(protected)/app/ranking/page.tsx",
       "app/(protected)/app/canal-de-parcerias/page.tsx",
@@ -51,8 +50,9 @@ describe("management canvas layout", () => {
 
   it("contains mobile goal layouts and separates semantic ink from accents", () => {
     const stylesheet = source("app/(protected)/_components/ManagementCanvas.module.css");
-    const funnel = source(
-      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
+    const funnel = source("app/(protected)/app/configuracoes/metas/_components/GoalPlanning.tsx");
+    const goalStyles = source(
+      "app/(protected)/app/configuracoes/metas/_components/GoalPlanning.module.css",
     );
     const pointSettings = source(
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
@@ -69,9 +69,10 @@ describe("management canvas layout", () => {
     expect(stylesheet).toMatch(
       /\.statusBadge\[data-tone="positive"\] \{[\s\S]*?border-color: var\(--analytics-positive\)[\s\S]*?color: var\(--analytics-positive-ink\)/,
     );
-    expect(funnel).toContain("w-full min-w-0 grid-cols-2");
-    expect(funnel).toContain("lg:w-auto lg:min-w-72");
-    expect(funnel).toContain("text-[var(--analytics-positive-ink)]");
+    expect(funnel).toContain("styles.planning");
+    expect(goalStyles).toContain("min-width: 0");
+    expect(goalStyles).toContain("overflow-x: auto");
+    expect(goalStyles).toContain("max-width: 760px");
     for (const component of [funnel, pointSettings, draftForm, userAccess]) {
       expect(component).not.toMatch(/text-\[var\(--analytics-(?:positive|warning|danger)\)\]/);
     }
@@ -182,9 +183,7 @@ describe("management canvas layout", () => {
   it("renders unavailable commercial states without invented rankings or defaults", () => {
     const ranking = source("app/(protected)/app/ranking/page.tsx");
     const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
-    const funnel = source(
-      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
-    );
+    const funnel = source("app/(protected)/app/configuracoes/metas/_components/GoalPlanning.tsx");
     const points = source(
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
     );
@@ -196,8 +195,10 @@ describe("management canvas layout", () => {
     expect(partnerships).toContain("Totais do período");
     expect(partnerships).not.toMatch(/ImobRankingRow|DevelopmentRankingRow/);
     expect(funnel).toContain('placeholder="—"');
-    expect(funnel).toContain("refletem exclusivamente a última base legada carregada");
-    expect(funnel).not.toContain("recalcula as etapas localmente");
+    expect(funnel).toContain("nenhum valor demonstrativo");
+    expect(funnel).toContain("projectGoalVolumes");
+    expect(funnel).toContain("Salvar rascunho de metas");
+    expect(funnel).not.toContain(".rpc(");
     expect(points).toContain('placeholder="—"');
     expect(points).not.toContain("DEFAULT_POINT_WEIGHTS");
     expect(points).toContain('id="point-activity-heading"');

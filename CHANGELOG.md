@@ -2343,3 +2343,11 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Pesos do ranking expostos somente para leitores autorizados; escrita direta permanece revogada.
 - Snapshots e participantes do ranking protegidos por `crm.ranking.view`, sem fallback demonstrativo.
 - Ingestão limitada a 1 MB e 20 snapshots/minuto com secret key server-only; refresh protegido por mesma origem, permissão, lock, cooldown e timeout.
+
+## 2026-10-15: Guia Meta em Gestao
+
+- Adiciona Meta ao menu Gestao para quem ja possui acesso autorizado a metas.
+- Reproduz planejamento completo com funil interativo, conversoes, distribuicao
+  semanal, equipe, calendario mensal e produtividade nos tres temas.
+- Preserva rascunhos inativos e controles do servidor; corrige contraste e
+  rolagem por teclado sem alterar politicas comerciais ou dados realizados.
