@@ -2,6 +2,9 @@
 
 ## 2026-10-15: Compatibilidade do diretório de produção
 
+- O layout aprovado de Pessoas, papel e matriz completa mede 1.598 pixels em desktop. O limite específico de densidade foi atualizado de 1.200 para 1.650 pixels; overflow, colisões, acessibilidade e demais limites permanecem verificados.
+- A captura local no macOS diverge das referências Linux por renderização de fontes. Um workflow temporário produz referências em Linux com todos os gates funcionais; somente as imagens pertinentes e revisadas podem ser incorporadas, com nova CI normal obrigatória.
+
 - Integra o `main` atual `9ffc8a9`, preservando as alterações recebidas de outros desenvolvedores.
 - Reconhece o contrato compacto por RPC protegida, pagina seis perfis por consulta sob RLS e calcula filtros e contagens no servidor. Contratos desconhecidos continuam sem aprovação presumida.
 - Amplia o gate compacto para 115 verificações e a sequência completa para 1.441 verificações na origem e no banco restaurado, com privilégios preservados. A publicação será registrada na auditoria de integração.

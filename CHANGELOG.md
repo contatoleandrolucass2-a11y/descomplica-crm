@@ -2,6 +2,8 @@
 
 ## 2026-10-15 — Diretório de usuários compatível com produção
 
+- Alinha o limite de altura do teste visual ao novo painel aprovado, mantendo verificações de overflow, navegação e acessibilidade.
+
 - Exibe a elegibilidade real dos usuários no banco compacto verificado, preservando paginação, hierarquia, MFA e políticas de acesso.
 - Mantém contas em revisão quando o contrato do banco estiver ausente, incompleto ou desconhecido.
 

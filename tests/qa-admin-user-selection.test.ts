@@ -51,7 +51,9 @@ describe("Authenticated admin visual selection", () => {
     expect(inspect.indexOf("await selectAuthenticatedAdminUser")).toBeLessThan(
       inspect.indexOf("const snapshot ="),
     );
-    expect(source).toContain('["/admin/usuarios", 1200]');
+    expect(source).toContain('["/admin/usuarios", 1650]');
+    expect(inspect).toContain("await page.evaluate(inspectAdminUserAccessWorkspace)");
+    expect(inspect).toContain("snapshot.userAccessWorkspaceReady &&");
   });
 
   it("fails closed without the authenticated identity", async () => {
@@ -148,6 +150,9 @@ describe("Authenticated admin visual selection", () => {
         )
         .join("\n");
       const selectSelf = readQaFunction("selectAuthenticatedAdminUser", { expect: browserExpect });
+      const inspectWorkspace = readQaFunction("inspectAdminUserAccessWorkspace") as () => {
+        userAccessWorkspaceReady: boolean;
+      };
       const capture = readQaFunction("captureComparableScreenshot", {
         archiveSimulatorRoutes: new Set(),
         qaNavigationTimeout: 5_000,
@@ -206,6 +211,45 @@ describe("Authenticated admin visual selection", () => {
             return { width: metadata.width, height: metadata.height };
           };
           await open([editor]);
+          expect(await page.evaluate(inspectWorkspace)).toEqual({ userAccessWorkspaceReady: true });
+          if (width === 1440) {
+            const tabs = page.locator(".admin-permission-tabs");
+            await tabs.evaluate((element) => element.setAttribute("role", "group"));
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await tabs.evaluate((element) => element.setAttribute("role", "tablist"));
+            const hiddenPanel = page.locator(".admin-permission-panel[hidden]").first();
+            const hiddenPanelId = await hiddenPanel.getAttribute("id");
+            await hiddenPanel.evaluate((element) => element.removeAttribute("hidden"));
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await page
+              .locator(`[id="${hiddenPanelId}"]`)
+              .evaluate((element) => element.setAttribute("hidden", ""));
+            const grid = page.locator(
+              ".admin-permission-panel:not([hidden]) .admin-permission-grid",
+            );
+            await grid.evaluate((element) => {
+              (element as HTMLElement).style.gridTemplateColumns = "1fr 1fr";
+            });
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await grid.evaluate((element) => element.removeAttribute("style"));
+            const panel = page.locator(".admin-permission-panel:not([hidden])");
+            await panel.evaluate((element) => {
+              (element as HTMLElement).style.maxHeight = "40px";
+            });
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await panel.evaluate((element) => element.removeAttribute("style"));
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: true,
+            });
+          }
           const selfOnly = await dimensions();
           for (const users of [
             [reader, editor],

@@ -164,7 +164,9 @@ if (approvedCanvasByRoute.size !== routes.length) {
 const canvasDensityLimitByRoute = new Map([
   // The complete reference report replaces the former single-screen dashboard.
   ["/app", 4800],
-  ["/admin/usuarios", 1200],
+  // The approved workspace includes the role and full permission rows without
+  // the former internal scroll area; its desktop capture is 1598px tall.
+  ["/admin/usuarios", 1650],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],
@@ -1025,6 +1027,40 @@ async function selectAuthenticatedAdminUser(page, email) {
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
 }
 
+function inspectAdminUserAccessWorkspace() {
+  const workspace = document.querySelector(".admin-users-workspace");
+  const detail = workspace?.querySelector("#selected-user-panel");
+  const tablist = detail?.querySelector('.admin-permission-tabs[role="tablist"]');
+  const tabs = tablist ? [...tablist.querySelectorAll('[role="tab"]')] : [];
+  const selectedTabs = tabs.filter((tab) => tab.getAttribute("aria-selected") === "true");
+  const panels = detail
+    ? [...detail.querySelectorAll('.admin-permission-panel[role="tabpanel"]')]
+    : [];
+  const visiblePanels = panels.filter(
+    (panel) => panel.getClientRects().length > 0 && getComputedStyle(panel).display !== "none",
+  );
+  const panel = visiblePanels[0];
+  const grid = panel?.querySelector(".admin-permission-grid");
+  const rows = grid ? [...grid.querySelectorAll(".admin-permission-option")] : [];
+  const gridBox = grid?.getBoundingClientRect();
+  return {
+    userAccessWorkspaceReady: Boolean(
+      workspace?.querySelector(".admin-users-directory") &&
+      detail?.querySelector('[id^="role-title-"]') &&
+      tabs.length >= 4 &&
+      panels.length === tabs.length &&
+      selectedTabs.length === 1 &&
+      visiblePanels.length === 1 &&
+      panel.getAttribute("aria-labelledby") === selectedTabs[0].id &&
+      selectedTabs[0].getAttribute("aria-controls") === panel.id &&
+      panel.scrollHeight <= panel.clientHeight + 1 &&
+      gridBox &&
+      rows.length > 0 &&
+      rows.every((row) => Math.abs(row.getBoundingClientRect().width - gridBox.width) <= 1),
+    ),
+  };
+}
+
 async function inspectRoute(
   page,
   origin,
@@ -1361,6 +1397,9 @@ async function inspectRoute(
   Object.assign(
     snapshot,
     await page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName),
+    route === "/admin/usuarios"
+      ? await page.evaluate(inspectAdminUserAccessWorkspace)
+      : { userAccessWorkspaceReady: true },
   );
   await accountTrigger.click();
   await accountPanel.waitFor({ state: "hidden", timeout: qaRouteBootstrapTimeout });
@@ -1390,6 +1429,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
+    snapshot.userAccessWorkspaceReady &&
     snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&

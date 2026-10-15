@@ -128,7 +128,7 @@ describe("management canvas layout", () => {
     expect(users).toContain('label: "Configurações"');
     expect(users).toContain('label: "Administração"');
     expect(users).not.toContain('label: "Navegação e páginas"');
-    expect(visualHarness).toContain('["/admin/usuarios", 1200]');
+    expect(visualHarness).toContain('["/admin/usuarios", 1650]');
     expect(pages).toContain("Páginas cadastradas");
     expect(pages).toContain('<th scope="col">Descrição</th>');
     expect(pages).toContain('<th scope="col">Rota</th>');

@@ -87,10 +87,28 @@ O ajuste posterior limita-se à presença compacta: um papel já atribuído
 continua elegível quando deixa de aceitar novas atribuições, conforme o core;
 as quatro verificações adicionais passaram no gate compacto.
 
-A QA visual anterior encontrou uma corrida de foco no simulador Associativo e
-falhas de navegação/estabilidade ainda em investigação. Nenhuma imagem de
-referência foi promovida a partir dessa execução falha. Os gates e seus limites
-permanecem obrigatórios antes da publicação.
+A nova QA visual passou nas 40 combinações de navegação dos simuladores,
+mas recusou o painel de Usuários pelo teto antigo de 1.200 pixels. O layout
+local aprovado já media 1.598 pixels nos três temas: contém resumo do papel e
+linhas completas da matriz. O teto específico passa a 1.650 pixels, com margem
+menor que uma linha. Os critérios de overflow, colisões, teclado, acessibilidade
+e comparação visual permanecem obrigatórios.
+
+Nenhuma referência macOS foi promovida. As 242 comparações com o ambiente Linux
+divergem por renderização da plataforma; um workflow temporário, seguindo o
+procedimento usado anteriormente no Ranking, gera o lote Linux com os gates
+funcionais completos. As imagens serão revisadas antes da incorporação e a CI
+normal de verificação continuará obrigatória.
+
+No SHA `01dd72e`, a suíte geral passou com 3.015 testes Vitest e 1.045 testes
+Node, além de 101 skips condicionais. O ensaio final limpo passou novamente em
+1.441 verificações na origem e no destino. A CI do PR #232 já aprovou validate
+e isolated-restore; release-gates ainda não confirmou o candidato visual.
+
+A leitura remota posterior encontrou 38 migrations: a nova `crm_qlik_v2_standalone`
+cria objetos privados e RPCs de Qlik; as políticas de perfis e o catálogo de
+23 permissões permanecem iguais. Foram preservadas as definições e os vínculos
+atuais de acesso em backup privado, sem dados pessoais de usuários.
 
 ## Validação e publicação
 
