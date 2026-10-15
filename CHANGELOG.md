@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-15 - Projecao Qlik delimitada
+
+- Restringe catalogos privados a campos relevantes e cinco aliases nativos
+  fixos, com adicionais apenas quando diretamente referenciados.
+- Diagnosticos de limite usam somente enums e contagens tecnicas validados;
+  caps, flags de verificacao e bloqueio de fatos permanecem intactos.
+- Testes focais207 e review22 passaram. Teste global Windows falhou com
+  timeouts de workers; nova rodada e CI Linux ainda obrigatorias.
+
+## 2026-10-15: Diagnostico de limites Qlik
+
+- Registra limite real de metadados e preserva a separacao entre owner
+  instalado, mapeamento conferido e publicacao de fatos.
+
 ## 2026-10-15: Resolucao de metadados Qlik
 
 - Registra gates locais e limite Windows, exigindo CI Linux e novo probe
