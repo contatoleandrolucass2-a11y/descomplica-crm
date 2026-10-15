@@ -17,6 +17,50 @@
   substituem somente as antigas regioes compactas DV/Parcerias, com hashes e
   proveniencia; referencias antigas, Pontos e tolerancias preservados.
 
+## 2026-10-15: Gates locais do metadata integrado
+
+Integrado mainfae77f9 emfacf284, preservando dashboard, referencias e textos
+dos dois ramos. Node24.19.0/pnpm11.20.0: lint/tipos/build51 rotas aprovados,
+formatacao global e Gitleaks sem achados (50,09MB). pnpm test:2898 aprovados,
+85 skips e uma falha preexistente de symlink Windows/O_NOFOLLOW no inventario;
+Node posterior nao executou nesse comando. Focais metadata/preflight141/141
+e revisao independente sem P1/P2 confirmados. Nenhum limite/assercao removido.
+CI Linux integral do head/main exatos permanece obrigatoria antes do upgrade.
+
+## 2026-10-15: Verificacao focal do inspetor
+
+141 testes metadata/preflight aprovados, zero skips; inclui script serializado
+com SDK real, join de filhos, aliases/campos, hashes, limites, abort e cleanup.
+Diagnostico limitado a11 codigos estaticos, sem mensagens/getters/campos privados.
+Lint global aprovado com aviso preexistente connected-systems.mjs:18.
+Tipos/testes/build globais e CI do novo candidato ainda pendentes.
+
+Fonte atual16:06Z: main remoto fae77f9 (dashboard), CI38765178719 em andamento;
+GET health16:04:57Z200/ok/6843ef1. Integrar main antes da proxima CI,
+sem confundir esse SHA integrado com runtime CRM ou owner9ffc8a9 publicados.
+
+## 2026-10-15: Metadados nativos e ajustes de resolucao
+
+Fontes: main9ffc8a9/CI38753275427 concluida success nos quatro jobs;
+health publico15:23:53Z HTTP200/ok/6843ef1, publicado ainda em14/10.
+Owner Qlik promovido pelo coordenador em15:24:46.025Z, deployment
+3a4698b7-b4b5-48cd-a55f-da61f15e53b9, sem pendencia. Download apos gates,
+ZIP77602d8a/tar83950120, cadeia11 camadas e image:prove2 perfis conferidos;
+antecipacao anterior foi repetida e nao dispensou gates. Credencial cifrada
+systemd preparada sem exposicao; autenticacao/QIX reais alcancados.
+
+Snapshot privado0TX0aCu9:3318bytes, hashcf87dcb1a1c31fbda9ceec14810dcb23c0a619c7f8ad272df3d37c230fdbb627,
+observado15:24:45.675Z, recarga14:13:23.247Z. Status pending por referencia
+Parceiras nao resolvida; produto com qSuppressMissing true, dimensao calculada
+Empreendimento (Filtro), metricas =VENDAS/=VGV. Nenhum fato lido/publicado.
+
+Ramo corretivo de metadados separado do PR216. Container sn-tabbed-container
+requer join childRefId com filhos diretos, nao tratar tab como Engine ID.
+Aliases exigem catalogos de medidas/variaveis/campos; nao substituir expressoes
+por suposicao nem usar avaliacao de dados para inferir lineage. Implementacao
+e testes deste delta em andamento. Historico de18 secoes arquivado literalmente,
+SHAaf225b06 e reconstrucao integral conferidos; notas recentes preservadas.
+
 ## 2026-10-15: Organizacao do dashboard e limite dos filtros
 
 - Branch `codex/dashboard-filtros-layout`, base `ad496340`; producao observada

@@ -72,8 +72,37 @@ export function createBrowserMetadataClient(enigma, schema, inspect, environment
     const active = work();
     try {
       return await Promise.race([active, interrupted]);
-    } catch {
-      return { status: "unavailable", reason: stopped ? "cancelled" : "engine_unavailable" };
+    } catch (error) {
+      let reason = "engine_unavailable";
+      if (!stopped && !abort.signal.aborted) {
+        try {
+          // Read only an own data-code, never error getters, messages or private fields.
+          const code = Object.getOwnPropertyDescriptor(error, "code")?.value;
+          if (
+            typeof code === "string" &&
+            [
+              "qix_invalid_metadata",
+              "qix_metadata_limit",
+              "qix_invalid_sdk",
+              "qix_request_failed",
+              "qix_scope_mismatch",
+              "qix_metadata_cycle",
+              "qix_duplicate_object",
+              "qix_invalid_reload_time",
+              "qix_aborted",
+              "qix_metadata_failed",
+              "qix_cleanup_failed",
+            ].includes(code)
+          )
+            reason = code;
+        } catch {
+          // Uninspectable thrown values retain the generic diagnostic.
+        }
+      }
+      return {
+        status: "unavailable",
+        reason: stopped || abort.signal.aborted ? "cancelled" : reason,
+      };
     } finally {
       stopped = true;
       abort.abort();
