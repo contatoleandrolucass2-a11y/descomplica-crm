@@ -65,6 +65,7 @@ describe("experiência de acesso", () => {
 
     expect(markup).toContain("Você não possui acesso a esta página");
     expect(markup).toContain("Voltar ao início");
+    expect(markup).toContain('href="/"');
     expect(markup).toContain("AUTH-403");
     expect(markup).not.toContain("admin.access");
   });

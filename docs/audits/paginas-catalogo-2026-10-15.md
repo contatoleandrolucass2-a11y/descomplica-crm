@@ -26,7 +26,9 @@ O catálogo usa uma região de rolagem contínua de até 36 rem, com acesso por 
 - `pnpm test`: 3.073 testes Vitest aprovados, 84 ignorados; 572 testes operacionais Node aprovados e quatro ignorados; 531 testes do coordenador aprovados e 13 dependentes de Linux ignorados. Dois testes adicionais de unicidade de páginas e separação entre leitura e escrita de Rotina passaram na suíte direcionada de 69 testes.
 - `pnpm lint`, `pnpm typecheck`, `pnpm build` e `pnpm format:check`: aprovados. O lint mantém somente o aviso preexistente citado acima. Gitleaks não encontrou segredos.
 - 1.441 verificações pgTAP aprovadas no schema completo; 138 verificações aprovadas no ensaio compacto, incluindo acesso isolado à Rotina sem Dashboard, negação no banco e preservação das exceções anteriores.
+- Ensaio das 58 migrations em dois projetos locais independentes: 1.441 verificações na origem e 1.441 após restauração, com lint e advisors aprovados. Dados, proprietários e privilégios efetivos foram preservados. O ensaio não representa uma restauração do histórico remoto compacto.
 - Navegador local com Master sintético: caixas individuais de Comercial e Configurações marcadas por herança, marcas RIVA/DIRECIONAL marcadas e 27 páginas na região de rolagem contínua. O contador exclui controles técnicos ocultos e a antiga permissão compartilhada de etapas.
+- Uma segunda conta sintética, com somente `pages.view` e `crm.management.routine.view`, entrou pela rota inicial diretamente na Rotina. A abertura direta de Dashboard foi bloqueada. O layout compartilhado aceita permissões individuais; hubs e links entre etapas consultam o catálogo autorizado. Após MFA e na tela de acesso negado, o início é resolvido pela rota `/`, sem presumir acesso ao Dashboard.
 
 ## Estado de publicação
 

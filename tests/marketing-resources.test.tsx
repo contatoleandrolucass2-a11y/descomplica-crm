@@ -11,6 +11,9 @@ vi.mock("@/lib/authorization/enforce", () => ({
   enforcePermission: vi.fn().mockResolvedValue({}),
 }));
 vi.mock("@/lib/authorization/guards", () => ({ hasPermission: vi.fn().mockReturnValue(true) }));
+vi.mock("@/lib/navigation/pages", () => ({
+  getAuthorizedNavigation: vi.fn().mockResolvedValue([{ path: "/app/configuracoes/recurso-mkt" }]),
+}));
 
 describe("Recurso MKT", () => {
   it("names the settings link for accessible navigation", async () => {

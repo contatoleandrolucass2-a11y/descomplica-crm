@@ -48,6 +48,7 @@ export interface DashboardReportProps {
   selectedPeriod: DashboardPeriodKey;
   authorizedViews: readonly DashboardViewKey[];
   canViewStages: boolean;
+  authorizedStagePaths?: readonly string[];
   canRefresh: boolean;
   canViewRanking: boolean;
   team?: { brokers: number; managers: Array<{ name: string; total: number }> } | null;
@@ -205,6 +206,7 @@ export function DashboardReport({
   selectedPeriod,
   authorizedViews,
   canViewStages,
+  authorizedStagePaths,
   canRefresh,
   canViewRanking,
   team,
@@ -267,7 +269,9 @@ export function DashboardReport({
             Visão geral
           </Link>
           {CRM_STAGES.map((stage) =>
-            canViewStages ? (
+            canViewStages &&
+            (authorizedStagePaths === undefined ||
+              authorizedStagePaths.includes(`/app/etapas/${stage.slug}`)) ? (
               <Link
                 key={stage.key}
                 href={`/app/etapas/${stage.slug}?view=${encodeURIComponent(selectedView)}&period=${encodeURIComponent(selectedPeriod)}`}

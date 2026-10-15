@@ -10,6 +10,7 @@ import {
 } from "@/app/(protected)/_components/ManagementCanvas";
 import { enforcePageAccess } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import styles from "../configuracoes/ConfigurationCanvas.module.css";
 import routineStyles from "./rotina/RoutineSettings.module.css";
@@ -17,9 +18,12 @@ import routineStyles from "./rotina/RoutineSettings.module.css";
 export const metadata = { title: "Gestão" };
 
 export default async function ManagementHubPage() {
-  await enforcePageAccess("/app/gestao");
+  const context = await enforcePageAccess("/app/gestao");
   if (!getProtectedPageGate("/app/gestao")?.releaseEnabled) forbidden();
-  const routineReleased = getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true;
+  const pages = await getAuthorizedNavigation(context);
+  const routineReleased =
+    getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true &&
+    pages.some((page) => page.path === "/app/gestao/rotina");
   const routineCard = (
     <article
       className={`${styles.settingsCard} ${managementStyles.panel} h-full p-4 ${routineReleased ? "group-hover:border-cyan-500 group-focus-visible:border-cyan-500" : "opacity-70"}`}

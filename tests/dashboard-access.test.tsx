@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   }),
   loadDashboardReadModel: vi.fn(),
   loadDashboardTeam: vi.fn(),
+  navigation: vi.fn(),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -25,6 +26,7 @@ vi.mock("@/lib/authorization/enforce", () => ({
 vi.mock("@/lib/crm/dashboard/team", () => ({
   loadDashboardTeam: mocks.loadDashboardTeam,
 }));
+vi.mock("@/lib/navigation/pages", () => ({ getAuthorizedNavigation: mocks.navigation }));
 vi.mock("@/lib/crm/dashboard/data", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/crm/dashboard/data")>();
   return {
@@ -41,6 +43,7 @@ describe("dashboard autorizado por visão", () => {
     vi.clearAllMocks();
     mocks.loadDashboardReadModel.mockResolvedValue({ status: "empty" });
     mocks.loadDashboardTeam.mockResolvedValue({ status: "unavailable", reason: "Sem equipe." });
+    mocks.navigation.mockResolvedValue([]);
   });
 
   it("mostra somente Canal Imob e não carrega ranking para o perfil Imob", async () => {
@@ -144,6 +147,31 @@ describe("dashboard autorizado por visão", () => {
     );
     expect(mocks.loadDashboardReadModel).not.toHaveBeenCalled();
     expect(mocks.loadDashboardTeam).not.toHaveBeenCalled();
+  });
+
+  it("links only the individually authorized stages from Dashboard and neighboring stages", async () => {
+    mocks.enforcePermission.mockResolvedValue({
+      permissions: ["crm.dashboard.view", "crm.dashboard.all.view", "crm.stages.view"],
+    });
+    mocks.navigation.mockResolvedValue([
+      { path: "/app/etapas/oportunidades" },
+      { path: "/app/etapas/vendas" },
+    ]);
+    const dashboard = renderToStaticMarkup(
+      await AppHomePage({ searchParams: Promise.resolve({}) }),
+    );
+    const stage = renderToStaticMarkup(
+      await StagePage({
+        params: Promise.resolve({ stage: "oportunidades" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+    for (const markup of [dashboard, stage]) {
+      expect(markup).toContain('href="/app/etapas/vendas?');
+      expect(markup).not.toContain('href="/app/etapas/agendamentos?');
+      expect(markup).not.toContain('href="/app/etapas/visitas?');
+      expect(markup).not.toContain('href="/app/etapas/pastas?');
+    }
   });
 
   it("encaminha a autorização e o snapshot atual para a contagem da equipe", async () => {

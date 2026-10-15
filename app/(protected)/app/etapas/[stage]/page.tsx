@@ -21,6 +21,7 @@ import {
 import { GOALS_UNAVAILABLE_LABEL, availableCommercialValue } from "@/lib/crm/source-availability";
 import { CRM_STAGES, getCrmStage, type CrmStage } from "@/lib/crm/stages/catalog";
 import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/presentation";
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import {
   AnalyticsCanvas,
@@ -86,24 +87,28 @@ function StageNavigation({
   stage,
   view,
   period,
+  authorizedPaths,
 }: {
   stage: CrmStage;
   view: DashboardViewKey;
   period: DashboardPeriodKey;
+  authorizedPaths: readonly string[];
 }) {
   return (
     <nav aria-label="Etapas do funil" className={styles.stageNavigation}>
-      {CRM_STAGES.map((item) => (
-        <Link
-          key={item.slug}
-          href={stageHref(item.slug, view, period)}
-          prefetch={false}
-          aria-current={item.slug === stage.slug ? "page" : undefined}
-          className={styles.stageNavigationLink}
-        >
-          {item.label}
-        </Link>
-      ))}
+      {CRM_STAGES.filter((item) => authorizedPaths.includes(`/app/etapas/${item.slug}`)).map(
+        (item) => (
+          <Link
+            key={item.slug}
+            href={stageHref(item.slug, view, period)}
+            prefetch={false}
+            aria-current={item.slug === stage.slug ? "page" : undefined}
+            className={styles.stageNavigationLink}
+          >
+            {item.label}
+          </Link>
+        ),
+      )}
     </nav>
   );
 }
@@ -249,12 +254,14 @@ function StageComposition({
   period,
   dashboard,
   authorizedViews,
+  authorizedPaths,
 }: {
   stage: CrmStage;
   view: DashboardViewKey;
   period: DashboardPeriodKey;
   dashboard: DashboardReadModel | null;
   authorizedViews: readonly DashboardViewKey[];
+  authorizedPaths: readonly string[];
 }) {
   const periodConfig = DASHBOARD_PERIODS[period];
   const viewMetrics = dashboard?.metrics[view] ?? null;
@@ -293,7 +300,12 @@ function StageComposition({
           meta={<StageMetadata dashboard={dashboard} />}
         />
 
-        <StageNavigation stage={stage} view={view} period={period} />
+        <StageNavigation
+          stage={stage}
+          view={view}
+          period={period}
+          authorizedPaths={authorizedPaths}
+        />
 
         <StageFilters stage={stage} view={view} period={period} authorizedViews={authorizedViews} />
 
@@ -392,19 +404,19 @@ function StageComposition({
               </div>
             </dl>
             <nav aria-label="Etapas adjacentes" className={styles.stageAdjacentNavigation}>
-              {previousStage ? (
+              {previousStage && authorizedPaths.includes(`/app/etapas/${previousStage.slug}`) ? (
                 <Link href={stageHref(previousStage.slug, view, period)} prefetch={false}>
                   ← {previousStage.label}
                 </Link>
               ) : (
-                <span>Início do funil</span>
+                <span>{previousStage ? previousStage.label : "Início do funil"}</span>
               )}
-              {nextStage ? (
+              {nextStage && authorizedPaths.includes(`/app/etapas/${nextStage.slug}`) ? (
                 <Link href={stageHref(nextStage.slug, view, period)} prefetch={false}>
                   {nextStage.label} →
                 </Link>
               ) : (
-                <span>Fim do funil</span>
+                <span>{nextStage ? nextStage.label : "Fim do funil"}</span>
               )}
             </nav>
           </AnalyticsCard>
@@ -475,6 +487,7 @@ export default async function StagePage({
   const view: DashboardViewKey = isDashboardView(query.view) ? query.view : authorizedViews[0]!;
   const period: DashboardPeriodKey = isDashboardPeriod(query.period) ? query.period : "month";
   const result = await loadDashboardReadModel([view]);
+  const pages = await getAuthorizedNavigation(authorization);
 
   return (
     <StageComposition
@@ -483,6 +496,7 @@ export default async function StagePage({
       period={period}
       dashboard={result.status === "ready" ? result.dashboard : null}
       authorizedViews={authorizedViews}
+      authorizedPaths={pages.map((page) => page.path)}
     />
   );
 }

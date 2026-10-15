@@ -4,12 +4,13 @@
 
 - Separa treze permissões antes compartilhadas por módulo, mantendo uma caixa por página e os simuladores juntos. Admin e Master herdam todos os acessos implantados; decisões existentes são copiadas na criação das novas chaves.
 - Consulta o catálogo persistido no Proxy e nos guards, bloqueando URLs negadas ou desativadas. Protege as APIs e RPCs de Rotina com o novo acesso específico.
+- Usa o catálogo autorizado também nos hubs e links entre etapas. A entrada compartilhada aceita uma única página concedida; login, retorno após MFA e acesso negado resolvem o início permitido para a conta.
 - Mantém as permissões de dados, operações, visões e a hierarquia. O runtime compatível deve ser publicado antes de ativar as chaves novas; a preparação e a ativação estão documentadas no runbook.
 
 ## 2026-10-15: Herança completa do Master
 
 - Todos os usuários Master passam a herdar todas as permissões implantadas, incluindo RIVA e DIRECIONAL. A prévia local acompanha o catálogo completo; a interface de produção usa os padrões consultados no banco.
-- Preserva os padrões dos outros papéis, exceções individuais, hierarquia, MFA, estado das contas e gates de execução. A consulta anterior em produção encontrou 23 de 25 permissões no Master e nenhuma negação individual de Master. Validação e aplicação serão registradas após verificação.
+- Preserva os padrões dos outros papéis, exceções individuais, hierarquia, MFA, estado das contas e gates de execução. A consulta anterior em produção encontrou 23 de 25 permissões no Master e nenhuma negação individual de Master. A aplicação separada em produção confirmou 25 de 25 padrões para os dois Master, sem permissão efetiva ausente, às 20:22 UTC; o recibo está na auditoria de páginas.
 
 ## 2026-10-15: Catálogo único e rolagem contínua de páginas
 
