@@ -110,14 +110,24 @@ export const PERMISSIONS = {
   },
   "crm.simulators.view": {
     label: "Visualizar simuladores",
-    description:
-      "Acessa as interfaces de simulação autorizadas; a execução oficial possui controle separado.",
-    minLevel: 100,
+    description: "Acessa as interfaces de simulação autorizadas para a conta.",
+    minLevel: 10,
   },
   "crm.simulators.execute": {
     label: "Executar simuladores oficiais",
-    description: "Executa motores oficiais somente na validação controlada do perfil Master.",
-    minLevel: 100,
+    description: "Executa os simuladores oficiais disponíveis para a conta.",
+    minLevel: 10,
+  },
+  "crm.inventory.riva.view": {
+    label: "RIVA",
+    description: "Visualiza unidades da RIVA nos simuladores quando liberado para este usuário.",
+    minLevel: 10,
+  },
+  "crm.inventory.direcional.view": {
+    label: "DIRECIONAL",
+    description:
+      "Visualiza unidades da DIRECIONAL nos simuladores quando liberado para este usuário.",
+    minLevel: 10,
   },
   "crm.commercial_engine.execute": {
     label: "Executar motores comerciais",

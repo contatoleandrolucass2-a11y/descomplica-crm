@@ -5,6 +5,11 @@ import path from "node:path";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+const authorizedBrands = {
+  ok: true,
+  context: { permissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"] },
+};
+
 const mocks = vi.hoisted(() => ({
   authorizeRoute: vi.fn(),
 }));
@@ -66,14 +71,17 @@ describe("inventory API authorization and cache boundaries", () => {
   );
 
   it("serves the validated private snapshot with server-owned lineage metadata", async () => {
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     const directory = await mkdtemp(path.join(os.tmpdir(), "direct-table-snapshot-test-"));
     temporaryDirectories.push(directory);
     const snapshotPath = path.join(directory, "inventory.json");
     const contents = JSON.stringify({
       source: "ESTOQUE SPC.xlsx",
       count: 3301,
-      items: Array.from({ length: 3301 }, (_, index) => ({ id: `fixture-${index + 1}` })),
+      items: Array.from({ length: 3301 }, (_, index) => ({
+        id: `fixture-${index + 1}`,
+        businessUnit: "Riva",
+      })),
     });
     process.env.INVESTOR_INVENTORY_SNAPSHOT_PATH = snapshotPath;
     process.env.INVESTOR_INVENTORY_SNAPSHOT_REFERENCE_DATE = "2026-09-05";
@@ -100,13 +108,20 @@ describe("inventory API authorization and cache boundaries", () => {
   });
 
   it("serves a valid live inventory only after authorization and without caching", async () => {
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     const upstreamFetch = vi.fn().mockResolvedValue(
       Response.json({
         source: "live-protected-source",
         generatedAt: "2026-09-06T03:00:00.000Z",
         count: 1,
-        items: [{ id: "unit-1", businessUnit: "QA", project: "Projeto sintetico", product: "101" }],
+        items: [
+          {
+            id: "unit-1",
+            businessUnit: "Direcional",
+            project: "Projeto sintetico",
+            product: "101",
+          },
+        ],
       }),
     );
     vi.stubGlobal("fetch", upstreamFetch);

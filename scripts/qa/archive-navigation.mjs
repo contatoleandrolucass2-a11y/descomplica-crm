@@ -109,6 +109,8 @@ async function assertRootAccessibleNames({ administration, dashboard, management
 
 export async function waitForArchiveHeaderTheme(page, theme, surfaces = {}) {
   let previous = null;
+  let samples = 0;
+  const startedAt = performance.now();
   await expect
     .poll(
       async () => {
@@ -150,7 +152,13 @@ export async function waitForArchiveHeaderTheme(page, theme, surfaces = {}) {
           !surface.transitioning &&
           signature === previous;
         previous = signature;
-        surfaces[theme] = { ...surface, settled };
+        samples += 1;
+        surfaces[theme] = {
+          ...surface,
+          settled,
+          samples,
+          elapsedMs: Math.round(performance.now() - startedAt),
+        };
         return settled;
       },
       {
@@ -1215,6 +1223,7 @@ export async function checkArchiveNavigation(
             } else {
               await button.click();
             }
+            stage = `theme:${theme}:selected-state`;
             await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
             if (compactThemeSwitch) {
               await expect(button).toHaveAttribute(
@@ -1225,7 +1234,9 @@ export async function checkArchiveNavigation(
               await expect(button).toHaveAttribute("aria-pressed", "true");
               await expect(themes.locator('[aria-pressed="true"]')).toHaveCount(1);
             }
+            stage = `theme:${theme}:geometry`;
             await assertHeaderGeometry(page, compact);
+            stage = `theme:${theme}:surface`;
             await waitForArchiveHeaderTheme(page, theme, check.headerSurfaces);
             check.compactHeader ??= {};
             check.compactHeader[theme] = await checkProtectedTopbar(page);
@@ -1542,21 +1553,30 @@ export async function checkArchiveNavigation(
           stage = "navigate-and-brand";
           await page.setViewportSize(viewport);
           await ensureArchiveNavigationOpen(page);
+          stage = "navigate-and-brand:simulation-link";
           await simulation.click();
+          stage = "navigate-and-brand:hub-url";
           await expect(page).toHaveURL(`${origin}/app/simulacao`);
+          stage = "navigate-and-brand:hub-content";
           await expect(page.locator("main[data-simulation-hub]")).toBeVisible();
           const destination =
             archiveNavigationRoutes[
               (archiveNavigationRoutes.indexOf(route) + 1) % archiveNavigationRoutes.length
             ];
           const simulatorCard = page.locator(`main[data-simulation-hub] a[href="${destination}"]`);
+          stage = "navigate-and-brand:destination-card";
           await expect(simulatorCard).toHaveCount(1);
           await simulatorCard.click();
+          stage = "navigate-and-brand:destination-url";
           await expect(page).toHaveURL(`${origin}${destination}`);
+          stage = "navigate-and-brand:destination-header";
           await expect(appearance(page)).toBeVisible();
           if (compact) await expect(navigation(page)).toBeHidden();
+          stage = "navigate-and-brand:brand-link";
           await page.locator('[data-protected-brand][href="/app"]').click();
+          stage = "navigate-and-brand:home-url";
           await expect(page).toHaveURL(`${origin}/app`);
+          stage = "navigate-and-brand:browser-errors";
           assert.equal(
             unexpectedErrorCount(errorStart),
             0,
@@ -1572,6 +1592,7 @@ export async function checkArchiveNavigation(
           check.diagnostics = {
             ...runtimeDiagnostics,
             ...(error?.safeDiagnostics ? { assertion: error.safeDiagnostics } : {}),
+            ...(error?.safeHoverDiagnostics ? { hover: error.safeHoverDiagnostics } : {}),
           };
         }
         check.runtimeErrorCount = unexpectedErrorCount(errorStart);

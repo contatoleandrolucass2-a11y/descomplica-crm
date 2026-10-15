@@ -251,6 +251,8 @@ export async function checkAssociativeCalculationContinuity(
     await field("Renda Familiar").blur();
     await qualification.getByRole("button", { name: "MCMV", exact: true }).click();
     await qualification.getByRole("radio", { name: "Sim", exact: true }).check();
+    // Qualification moves focus asynchronously; finish that handoff before entering resources.
+    await expect(field("Financiamento")).toBeFocused();
     for (const { label, amount, next } of resources) {
       const input = field(label);
       await expect(input).toBeEnabled({ timeout: 60_000 });

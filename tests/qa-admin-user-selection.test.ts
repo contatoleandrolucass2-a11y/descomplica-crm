@@ -51,7 +51,9 @@ describe("Authenticated admin visual selection", () => {
     expect(inspect.indexOf("await selectAuthenticatedAdminUser")).toBeLessThan(
       inspect.indexOf("const snapshot ="),
     );
-    expect(source).toContain('["/admin/usuarios", 1200]');
+    expect(source).toContain('["/admin/usuarios", 1650]');
+    expect(inspect).toContain("await page.evaluate(inspectAdminUserAccessWorkspace)");
+    expect(inspect).toContain("snapshot.userAccessWorkspaceReady &&");
   });
 
   it("fails closed without the authenticated identity", async () => {
@@ -91,8 +93,17 @@ describe("Authenticated admin visual selection", () => {
                 return `
               const unexpected = () => { throw new Error("Unexpected server action in visual selection"); };
               export const assignRoleAction = unexpected, approveUserAccessAction = unexpected,
-                loadUsersPageAction = unexpected, setPermissionOverridesBulkAction = unexpected,
-                setUserActiveAction = unexpected;
+                setPermissionOverridesBulkAction = unexpected, setUserActiveAction = unexpected;
+              export async function loadUsersPageAction(input) {
+                window.qaPageRequests.push(input);
+                await new Promise((resolve) => setTimeout(resolve, 20));
+                const users = window.qaAllUsers.slice(input.offset, input.offset + 6);
+                const next = input.offset + users.length;
+                return { status: "success", page: { users, hasMore: next < window.qaAllUsers.length,
+                  nextOffset: next < window.qaAllUsers.length ? next : null,
+                  totalCount: window.qaAllUsers.length, onboardingFoundationAvailable: true, summary: null,
+                  roleDefaults: window.qaRoleDefaults } };
+              }
             `;
               if (id === entry)
                 return `
@@ -101,11 +112,17 @@ describe("Authenticated admin visual selection", () => {
               import "@/app/globals.css";
               import "@/app/(protected)/admin/admin-canvas.css";
               import { PERMISSIONS } from "@/lib/authorization/permissions";
+              import { ROLE_INHERITED_PERMISSIONS } from "@/lib/authorization/access-presentation";
               import { ManagementPage } from "@/app/(protected)/_components/ManagementCanvas";
               import { UserAccessManager } from "@/app/(protected)/admin/usuarios/UserAccessManager";
+              window.qaRoleDefaults = ROLE_INHERITED_PERMISSIONS;
               createRoot(document.getElementById("root")).render(createElement(ManagementPage,
                 { className: "admin-canvas admin-users-page" }, createElement(UserAccessManager, {
-                users: window.qaUsers, assignableRoles: ["broker_house"],
+                users: window.qaUsers, initialRoleDefaults: ROLE_INHERITED_PERMISSIONS, initialHasMore: window.qaUsers.length < window.qaAllUsers.length,
+                initialNextOffset: window.qaUsers.length < window.qaAllUsers.length ? window.qaUsers.length : null,
+                initialTotalCount: window.qaAllUsers.length,
+                initialSummary: { total: window.qaAllUsers.length, active: window.qaAllUsers.length, pending: 0, revoked: 0 },
+                assignableRoles: ["broker_house"],
                 manageablePermissions: Object.keys(PERMISSIONS), canManageRoles: true,
                 canManagePermissions: true, isMasterPermissionManager: true,
                 canManageUsers: true, canApproveUsers: true, reportingScopes: [],
@@ -133,6 +150,9 @@ describe("Authenticated admin visual selection", () => {
         )
         .join("\n");
       const selectSelf = readQaFunction("selectAuthenticatedAdminUser", { expect: browserExpect });
+      const inspectWorkspace = readQaFunction("inspectAdminUserAccessWorkspace") as () => {
+        userAccessWorkspaceReady: boolean;
+      };
       const capture = readQaFunction("captureComparableScreenshot", {
         archiveSimulatorRoutes: new Set(),
         qaNavigationTimeout: 5_000,
@@ -164,15 +184,25 @@ describe("Authenticated admin visual selection", () => {
           const errors: string[] = [];
           page.on("pageerror", (error) => errors.push(error.message));
           await page.route("**/*", (route) => route.abort());
-          const open = async (users: (typeof editor)[]) => {
+          const open = async (users: (typeof editor)[], allUsers = users) => {
             await page.goto("about:blank");
             await page.setContent(
               '<html lang="pt-BR" data-theme="light"><body><main id="root"></main></body></html>',
             );
             await page.addStyleTag({ content: css });
-            await page.evaluate((users) => {
-              (window as unknown as { qaUsers: typeof users }).qaUsers = users;
-            }, users);
+            await page.evaluate(
+              ({ users, allUsers }) => {
+                const fixture = window as unknown as {
+                  qaUsers: typeof users;
+                  qaAllUsers: typeof users;
+                  qaPageRequests: unknown[];
+                };
+                fixture.qaUsers = users;
+                fixture.qaAllUsers = allUsers;
+                fixture.qaPageRequests = [];
+              },
+              { users, allUsers },
+            );
             await page.addScriptTag({ content: script });
             await browserExpect(page.locator("#selected-user-panel")).toBeVisible();
           };
@@ -181,6 +211,45 @@ describe("Authenticated admin visual selection", () => {
             return { width: metadata.width, height: metadata.height };
           };
           await open([editor]);
+          expect(await page.evaluate(inspectWorkspace)).toEqual({ userAccessWorkspaceReady: true });
+          if (width === 1440) {
+            const tabs = page.locator(".admin-permission-tabs");
+            await tabs.evaluate((element) => element.setAttribute("role", "group"));
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await tabs.evaluate((element) => element.setAttribute("role", "tablist"));
+            const hiddenPanel = page.locator(".admin-permission-panel[hidden]").first();
+            const hiddenPanelId = await hiddenPanel.getAttribute("id");
+            await hiddenPanel.evaluate((element) => element.removeAttribute("hidden"));
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await page
+              .locator(`[id="${hiddenPanelId}"]`)
+              .evaluate((element) => element.setAttribute("hidden", ""));
+            const grid = page.locator(
+              ".admin-permission-panel:not([hidden]) .admin-permission-grid",
+            );
+            await grid.evaluate((element) => {
+              (element as HTMLElement).style.gridTemplateColumns = "1fr 1fr";
+            });
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await grid.evaluate((element) => element.removeAttribute("style"));
+            const panel = page.locator(".admin-permission-panel:not([hidden])");
+            await panel.evaluate((element) => {
+              (element as HTMLElement).style.maxHeight = "40px";
+            });
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: false,
+            });
+            await panel.evaluate((element) => element.removeAttribute("style"));
+            expect(await page.evaluate(inspectWorkspace)).toEqual({
+              userAccessWorkspaceReady: true,
+            });
+          }
           const selfOnly = await dimensions();
           for (const users of [
             [reader, editor],
@@ -188,12 +257,16 @@ describe("Authenticated admin visual selection", () => {
           ]) {
             await open(users);
             if (users[0] === reader) {
-              await browserExpect(page.getByText("Alterar papel", { exact: true })).toBeVisible();
+              await browserExpect(
+                page.getByRole("button", { name: "Salvar papel", exact: true }),
+              ).toBeVisible();
             }
             await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight));
             await selectSelf(page, editor.email);
             expect(await page.evaluate(() => window.scrollY)).toBe(0);
-            await browserExpect(page.getByText("Alterar papel", { exact: true })).toHaveCount(0);
+            await browserExpect(
+              page.getByRole("button", { name: "Salvar papel", exact: true }),
+            ).toHaveCount(0);
             await browserExpect(page.locator("#user-search")).toHaveValue("");
             const list = page.locator('[data-qa-visual-volatile="user-results"]');
             await browserExpect(list.getByRole("button")).toHaveCount(2);
@@ -202,6 +275,25 @@ describe("Authenticated admin visual selection", () => {
             await browserExpect(list.getByRole("button")).toHaveCount(2);
             expect(await page.locator("[data-qa-visual-hidden]").count()).toBe(0);
           }
+          const pagedReaders = Array.from({ length: 6 }, (_, index) => ({
+            ...reader,
+            userId: `reader-${index}`,
+            email: `qa.reader-${index}@local.invalid`,
+          }));
+          await open(pagedReaders, [...pagedReaders, editor]);
+          await selectSelf(page, editor.email);
+          await browserExpect(
+            page.locator("#selected-user-panel").getByText("Conta atual", { exact: true }),
+          ).toBeVisible();
+          await browserExpect(page.locator("#user-search")).toHaveValue("");
+          await browserExpect(
+            page.getByRole("list", { name: "Resultados de usuários" }).getByRole("button"),
+          ).toHaveCount(7);
+          expect(
+            await page.evaluate(
+              () => (window as unknown as { qaPageRequests: unknown[] }).qaPageRequests,
+            ),
+          ).toContainEqual({ offset: 6, search: "", status: "all" });
           expect(errors).toEqual([]);
           await page.close();
         }

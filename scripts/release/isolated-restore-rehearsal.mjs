@@ -19,7 +19,7 @@ import { patchLocalSupabaseConfig } from "./supabase-config.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const sourceSupabaseRoot = path.join(repositoryRoot, "supabase");
-const expectedPgTapTests = 1323;
+const expectedPgTapTests = 1441;
 const applicationSchemas = ["commercial_engine", "private", "public", "qlik_relay"];
 const applicationRoles = ["crm_commercial_engine", "crm_qlik_relay"];
 const excludedServices = [

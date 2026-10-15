@@ -1,6 +1,15 @@
 "use client";
 
-import { Check, CircleMinus, Search, ShieldCheck } from "lucide-react";
+import {
+  Check,
+  CircleMinus,
+  CircleX,
+  Clock3,
+  Search,
+  ShieldCheck,
+  UserCheck,
+  UsersRound,
+} from "lucide-react";
 import {
   startTransition,
   useActionState,
@@ -18,7 +27,7 @@ import {
   getPermissionLabel,
   type PermissionKey,
 } from "@/lib/authorization/permissions";
-import { summarizeRoleChange } from "@/lib/authorization/access-presentation";
+import { SIMULATOR_ACCESS_PERMISSIONS } from "@/lib/authorization/access-presentation";
 import { ROLES, getRoleLabel, type RoleKey } from "@/lib/authorization/roles";
 
 import {
@@ -29,17 +38,46 @@ import {
   setUserActiveAction,
   type AdminActionState,
 } from "./actions";
-import type {
-  ManagedUser,
-  UserDirectoryStatusFilter,
-  UserPermissionOverride,
-} from "./user-directory-types";
-
-export type { ManagedUser } from "./user-directory-types";
+import { useUserPresence, type UserPresence } from "./useUserPresence";
 
 const INITIAL_STATE: AdminActionState = { status: "idle", message: "" };
 const PAGE_SIZE = 6;
-const ALL_PERMISSIONS = Object.keys(PERMISSIONS) as PermissionKey[];
+const PRESENCE_HELP =
+  "Online: sinal recebido nos últimos 2 minutos. Atualização a cada 30 segundos.";
+const HIDDEN_PERMISSION_KEYS = new Set<PermissionKey>([
+  "audit.view",
+  "crm.read_model_v3.view",
+  "crm.read_model_v3.ranking.view",
+  "crm.read_model_v3.partnerships.view",
+  "crm.read_model_v3.stock.view",
+]);
+const ALL_PERMISSIONS = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
+  (key) => key !== "crm.simulators.execute" && !HIDDEN_PERMISSION_KEYS.has(key),
+);
+
+function getControlKeys(permissionKey: PermissionKey): readonly PermissionKey[] {
+  return permissionKey === "crm.simulators.view" ? SIMULATOR_ACCESS_PERMISSIONS : [permissionKey];
+}
+
+function getControlLabel(permissionKey: PermissionKey): string {
+  return permissionKey === "crm.simulators.view"
+    ? "Acessar simuladores"
+    : getPermissionLabel(permissionKey);
+}
+
+function getControlDescription(permissionKey: PermissionKey): string {
+  return permissionKey === "crm.simulators.view"
+    ? "Permite visualizar e executar os simuladores disponíveis."
+    : PERMISSIONS[permissionKey].description;
+}
+
+function countControls(keys: readonly PermissionKey[]): number {
+  return new Set(
+    keys
+      .filter((key) => !HIDDEN_PERMISSION_KEYS.has(key))
+      .map((key) => (key === "crm.simulators.execute" ? "crm.simulators.view" : key)),
+  ).size;
+}
 const ACTIVE_ROLE_KEYS = new Set<string>([
   "master",
   "admin",
@@ -63,6 +101,7 @@ type BulkEffect = "allow" | "deny" | "inherit";
 interface PermissionGroup {
   id: string;
   label: string;
+  description?: string;
   matches: (permissionKey: PermissionKey) => boolean;
 }
 
@@ -81,10 +120,12 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
   {
     id: "simulators",
     label: "Simuladores",
+    description:
+      "RIVA e DIRECIONAL controlam as unidades visíveis. O Administrador herda ambas; os demais papéis precisam de liberação individual.",
     matches: (key) =>
       key.startsWith("crm.simulators.") ||
-      key.startsWith("crm.commercial_engine.") ||
-      key.startsWith("crm.commercial_policy."),
+      key.startsWith("crm.inventory.") ||
+      key.startsWith("crm.commercial_engine."),
   },
   {
     id: "settings",
@@ -92,7 +133,8 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     matches: (key) =>
       key.startsWith("crm.settings.") ||
       key.startsWith("crm.salesforce.") ||
-      key.startsWith("crm.ingest."),
+      key.startsWith("crm.ingest.") ||
+      key.startsWith("crm.commercial_policy."),
   },
   {
     id: "administration",
@@ -107,11 +149,22 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
   },
 ];
 
+import type {
+  ManagedUser,
+  UserPermissionOverride,
+  UserDirectoryStatusFilter,
+  UserDirectorySummary,
+  UserRoleDefaults,
+} from "./user-directory-types";
+export type { ManagedUser } from "./user-directory-types";
+
 interface UserAccessManagerProps {
   users: ManagedUser[];
+  initialRoleDefaults: UserRoleDefaults;
   initialHasMore?: boolean;
   initialNextOffset?: number | null;
   initialTotalCount?: number | null;
+  initialSummary?: UserDirectorySummary | null;
   assignableRoles: RoleKey[];
   manageablePermissions: PermissionKey[];
   canManageRoles: boolean;
@@ -150,14 +203,29 @@ function getInheritedPermissions(user: ManagedUser): readonly PermissionKey[] {
   return user.inheritedPermissions;
 }
 
-function getEffectivePermissionCount(user: ManagedUser): number {
-  if (!user.isActive || user.accessStatus !== "approved" || !user.roleKey) return 0;
+function accountHasAccess(user: ManagedUser): boolean {
+  return (
+    user.isActive &&
+    user.accessStatus === "approved" &&
+    Boolean(user.roleKey && ACTIVE_ROLE_KEYS.has(user.roleKey))
+  );
+}
+
+function getEffectivePermissionCount(
+  user: ManagedUser,
+  permissionCatalog: readonly PermissionKey[],
+): number {
+  if (!accountHasAccess(user)) return 0;
   const effectivePermissions = new Set<PermissionKey>(getInheritedPermissions(user));
   for (const override of user.overrides) {
     if (override.effect === "allow") effectivePermissions.add(override.permissionKey);
     else effectivePermissions.delete(override.permissionKey);
   }
-  return effectivePermissions.size;
+  return ALL_PERMISSIONS.filter((key) =>
+    getControlKeys(key).every(
+      (item) => permissionCatalog.includes(item) && effectivePermissions.has(item),
+    ),
+  ).length;
 }
 
 function confirmChange(event: FormEvent<HTMLFormElement>, summary: string) {
@@ -167,8 +235,15 @@ function confirmChange(event: FormEvent<HTMLFormElement>, summary: string) {
 }
 
 function formatPermissionList(keys: readonly PermissionKey[]): string {
-  if (keys.length === 0) return "Nenhum acesso";
-  return keys.map(getPermissionLabel).join(", ");
+  const visibleKeys = keys.filter((key) => !HIDDEN_PERMISSION_KEYS.has(key));
+  if (visibleKeys.length === 0) return "Nenhum acesso";
+  return [
+    ...new Set(
+      visibleKeys.map((key) =>
+        getControlLabel(key === "crm.simulators.execute" ? "crm.simulators.view" : key),
+      ),
+    ),
+  ].join(", ");
 }
 
 function ActionFeedback({ state }: { state: AdminActionState }) {
@@ -266,17 +341,7 @@ function ApprovalForm({
           </select>
         </label>
       </div>
-      <label>
-        <span>Motivo da aprovação</span>
-        <input
-          name="reason"
-          required
-          minLength={3}
-          maxLength={240}
-          autoComplete="off"
-          placeholder="Descreva o motivo…"
-        />
-      </label>
+
       <p className="admin-form-help">
         O banco revalida identidade, hierarquia, compatibilidade e unicidade do escopo. Nenhuma
         associação é inferida pelo nome.
@@ -292,10 +357,12 @@ function ApprovalForm({
 function RoleForm({
   user,
   roles,
+  roleDefaults,
   onMutationSuccess,
 }: {
   user: ManagedUser;
   roles: RoleKey[];
+  roleDefaults: UserRoleDefaults;
   onMutationSuccess: () => void;
 }) {
   const currentAssignableRole =
@@ -307,22 +374,15 @@ function RoleForm({
     INITIAL_STATE,
   );
   useRefreshAfterMutation(state, onMutationSuccess);
-  const change = summarizeRoleChange(user.roleKey, selectedRole);
-  const elevation = ROLES[selectedRole].level > (user.roleKey ? ROLES[user.roleKey].level : 0);
+  const currentDefaults = new Set(user.roleKey ? (roleDefaults[user.roleKey] ?? []) : []);
+  const nextDefaults = new Set(roleDefaults[selectedRole] ?? []);
+  const change = {
+    added: [...nextDefaults].filter((permission) => !currentDefaults.has(permission)),
+    removed: [...currentDefaults].filter((permission) => !nextDefaults.has(permission)),
+  };
   const unchanged = user.roleKey === selectedRole;
-  const summary = [
-    `Papel: ${getVisibleRoleLabel(user.roleKey)} → ${getRoleLabel(selectedRole)}`,
-    `Acessos adicionados: ${formatPermissionList(change.added)}`,
-    `Acessos removidos: ${formatPermissionList(change.removed)}`,
-    "As exceções individuais existentes não serão alteradas.",
-  ].join("\n");
-
   return (
-    <form
-      action={action}
-      onSubmit={(event) => confirmChange(event, summary)}
-      className="admin-role-form"
-    >
+    <form action={action} className="admin-role-form">
       <div className="admin-role-form-fields">
         <label htmlFor={`role-${user.userId}`}>
           <span>Papel</span>
@@ -340,25 +400,23 @@ function RoleForm({
             ))}
           </select>
         </label>
-        <label htmlFor={`role-reason-${user.userId}`}>
-          <span>Motivo {elevation ? "(obrigatório para elevação)" : "(opcional)"}</span>
-          <input
-            id={`role-reason-${user.userId}`}
-            name="reason"
-            required={elevation}
-            minLength={elevation ? 3 : undefined}
-            maxLength={240}
-            autoComplete="off"
-            placeholder="Descreva a alteração…"
-          />
-        </label>
       </div>
       <p className="admin-role-description">{ROLES[selectedRole].description}</p>
       <div className="admin-change-summary">
         <strong>Resumo do papel</strong>
-        <span>{change.added.length} adicionadas</span>
-        <span>{change.removed.length} removidas</span>
+        <span>{countControls(change.added)} adicionadas</span>
+        <span>{countControls(change.removed)} removidas</span>
       </div>
+      {!unchanged ? (
+        <div className="admin-form-help">
+          <p>Acessos adicionados: {formatPermissionList(change.added)}.</p>
+          <p>Acessos removidos: {formatPermissionList(change.removed)}.</p>
+          <p>
+            Ao salvar, as exceções anteriores serão removidas e os acessos padrão do novo papel
+            serão aplicados.
+          </p>
+        </div>
+      ) : null}
       <button
         type="submit"
         disabled={pending || unchanged}
@@ -394,18 +452,6 @@ function StatusForm({
       onSubmit={(event) => confirmChange(event, summary)}
       className="admin-status-form"
     >
-      <label htmlFor={`status-reason-${user.userId}`}>
-        <span>Motivo {nextActive ? "(opcional)" : "(obrigatório para desativação)"}</span>
-        <input
-          id={`status-reason-${user.userId}`}
-          name="reason"
-          required={!nextActive}
-          minLength={!nextActive ? 3 : undefined}
-          maxLength={240}
-          autoComplete="off"
-          placeholder="Descreva o motivo…"
-        />
-      </label>
       <p className="admin-form-help">{summary}</p>
       <button
         type="submit"
@@ -423,11 +469,7 @@ function getPermissionState(
   permissionKey: PermissionKey,
   inherited: ReadonlySet<PermissionKey>,
   override: UserPermissionOverride | undefined,
-  hasApprovedAccess: boolean,
 ) {
-  if (!hasApprovedAccess) {
-    return { key: "account-inactive", label: "Conta sem acesso", permitted: false } as const;
-  }
   if (override?.effect === "allow") {
     return { key: "override-allow", label: "Exceção permitida", permitted: true } as const;
   }
@@ -443,26 +485,19 @@ function getPermissionState(
 function PermissionMatrix({
   user,
   manageablePermissions,
+  permissionCatalog,
   editable,
   onMutationSuccess,
 }: {
   user: ManagedUser;
   manageablePermissions: PermissionKey[];
+  permissionCatalog: readonly PermissionKey[];
   editable: boolean;
   onMutationSuccess: () => void;
 }) {
   const [search, setSearch] = useState("");
-  const [activeGroup, setActiveGroup] = useState(() => {
-    const firstRelevantPermission =
-      getInheritedPermissions(user)[0] ??
-      user.overrides[0]?.permissionKey ??
-      manageablePermissions[0];
-    return firstRelevantPermission
-      ? (PERMISSION_GROUPS.find((group) => group.matches(firstRelevantPermission))?.id ?? "other")
-      : PERMISSION_GROUPS[0]!.id;
-  });
+  const [activeGroupId, setActiveGroupId] = useState("commercial");
   const [draftEffects, setDraftEffects] = useState<Map<PermissionKey, BulkEffect>>(() => new Map());
-  const [reason, setReason] = useState("");
   const submitOverrides = useCallback(
     async (previousState: AdminActionState, formData: FormData) => {
       const nextState = await setPermissionOverridesBulkAction(
@@ -470,10 +505,7 @@ function PermissionMatrix({
         previousState,
         formData,
       );
-      if (nextState.status === "success") {
-        setDraftEffects(new Map());
-        setReason("");
-      }
+      if (nextState.status === "success") setDraftEffects(new Map());
       return nextState;
     },
     [user.userId],
@@ -482,122 +514,69 @@ function PermissionMatrix({
   useRefreshAfterMutation(state, onMutationSuccess);
   const manageable = useMemo(() => new Set(manageablePermissions), [manageablePermissions]);
   const inherited = useMemo(() => new Set<PermissionKey>(getInheritedPermissions(user)), [user]);
-  const hasApprovedAccess =
-    user.isActive && user.accessStatus === "approved" && user.roleKey !== null;
   const overrides = useMemo(
     () => new Map(user.overrides.map((override) => [override.permissionKey, override])),
     [user.overrides],
   );
-  const filteredPermissions = useMemo(() => {
-    const query = search.trim().toLocaleLowerCase("pt-BR");
-    if (!query) return ALL_PERMISSIONS;
-    return ALL_PERMISSIONS.filter((permissionKey) => {
-      const permission = PERMISSIONS[permissionKey];
-      return `${permission.label} ${permission.description} ${permissionKey}`
-        .toLocaleLowerCase("pt-BR")
-        .includes(query);
-    });
-  }, [search]);
-  const permissionTabs = useMemo(() => {
-    const tabs = PERMISSION_GROUPS.map((group) => ({
-      id: group.id,
-      label: group.label,
-      permissions: filteredPermissions.filter(group.matches),
-      total: ALL_PERMISSIONS.filter(group.matches).length,
-    }));
-    const knownPermissions = new Set(
-      PERMISSION_GROUPS.flatMap((group) => ALL_PERMISSIONS.filter(group.matches)),
-    );
-    const otherPermissions = filteredPermissions.filter(
-      (permissionKey) => !knownPermissions.has(permissionKey),
-    );
-    const otherTotal = ALL_PERMISSIONS.filter(
-      (permissionKey) => !knownPermissions.has(permissionKey),
-    ).length;
-    if (otherTotal > 0) {
-      tabs.push({
-        id: "other",
-        label: "Outras",
-        permissions: otherPermissions,
-        total: otherTotal,
-      });
-    }
-    return tabs;
-  }, [filteredPermissions]);
-  const activeTab = permissionTabs.find((group) => group.id === activeGroup) ?? permissionTabs[0]!;
-  const changedLabels = [...draftEffects].map(([permissionKey, draftEffect]) => {
-    const checked =
-      draftEffect === "allow" || (draftEffect === "inherit" && inherited.has(permissionKey));
-    return `${getPermissionLabel(permissionKey)}: ${checked ? "com acesso" : "sem acesso"}`;
+  const filteredPermissions = ALL_PERMISSIONS.filter((permissionKey) => {
+    if (!getControlKeys(permissionKey).every((key) => permissionCatalog.includes(key)))
+      return false;
+    return `${getControlLabel(permissionKey)} ${getControlDescription(permissionKey)}`
+      .toLocaleLowerCase("pt-BR")
+      .includes(search.trim().toLocaleLowerCase("pt-BR"));
   });
+  const groups = PERMISSION_GROUPS.map((group) => ({
+    ...group,
+    permissions: filteredPermissions.filter(group.matches),
+  })).filter((group) => group.permissions.length > 0);
 
-  function getSavedEffect(permissionKey: PermissionKey): BulkEffect {
-    return overrides.get(permissionKey)?.effect ?? "inherit";
-  }
+  const activeGroup = groups.find((group) => group.id === activeGroupId) ?? groups[0];
 
-  function getDraftChecked(permissionKey: PermissionKey): boolean {
-    const draftEffect = draftEffects.get(permissionKey);
-    if (draftEffect === "allow") return true;
-    if (draftEffect === "deny") return false;
-    if (draftEffect === "inherit") return inherited.has(permissionKey);
-    return getPermissionState(
-      permissionKey,
-      inherited,
-      overrides.get(permissionKey),
-      hasApprovedAccess,
-    ).permitted;
-  }
-
-  function stageEffect(permissionKey: PermissionKey, nextEffect: BulkEffect) {
-    setDraftEffects((current) => {
-      const next = new Map(current);
-      if (nextEffect === getSavedEffect(permissionKey)) next.delete(permissionKey);
-      else next.set(permissionKey, nextEffect);
-      return next;
-    });
+  function isChecked(permissionKey: PermissionKey) {
+    if (!accountHasAccess(user)) return false;
+    const effect =
+      draftEffects.get(permissionKey) ?? overrides.get(permissionKey)?.effect ?? "inherit";
+    return effect === "allow" || (effect === "inherit" && inherited.has(permissionKey));
   }
 
   function togglePermission(permissionKey: PermissionKey) {
-    const nextChecked = !getDraftChecked(permissionKey);
-    const inheritedChecked = inherited.has(permissionKey);
-    const nextEffect =
-      nextChecked === inheritedChecked ? "inherit" : nextChecked ? "allow" : "deny";
-    stageEffect(permissionKey, nextEffect);
-  }
-
-  function restoreRoleDefaults() {
+    const keys = getControlKeys(permissionKey);
+    if (!editable || !keys.every((key) => manageable.has(key)) || pending) return;
+    const checked = !keys.every(isChecked);
     setDraftEffects((current) => {
       const next = new Map(current);
-      for (const permissionKey of manageablePermissions) {
-        if (overrides.has(permissionKey)) next.set(permissionKey, "inherit");
-        else next.delete(permissionKey);
+      for (const key of keys) {
+        const effect = checked === inherited.has(key) ? "inherit" : checked ? "allow" : "deny";
+        if (effect === (overrides.get(key)?.effect ?? "inherit")) next.delete(key);
+        else next.set(key, effect);
       }
       return next;
     });
   }
 
-  function clearDraft() {
-    setDraftEffects(new Map());
-    setReason("");
+  function restoreDefaults() {
+    setDraftEffects(
+      new Map(
+        manageablePermissions
+          .filter(
+            (permissionKey) =>
+              permissionCatalog.includes(permissionKey) &&
+              !HIDDEN_PERMISSION_KEYS.has(permissionKey) &&
+              overrides.has(permissionKey),
+          )
+          .map((permissionKey) => [permissionKey, "inherit" as const]),
+      ),
+    );
   }
 
-  const confirmation = `${draftEffects.size} ${
-    draftEffects.size === 1 ? "permissão será alterada" : "permissões serão alteradas"
-  }: ${changedLabels.join(", ")}. O papel não será alterado.`;
-
   return (
-    <form
-      action={action}
-      onSubmit={(event) => confirmChange(event, confirmation)}
-      className="admin-permission-form"
-    >
-      {manageablePermissions.map((permissionKey) => (
+    <form action={action} className="admin-permission-form">
+      {[...draftEffects].map(([permissionKey, effect]) => (
         <input
           key={permissionKey}
           type="hidden"
-          name={`${draftEffects.get(permissionKey) ?? "inherit"}PermissionKeys`}
+          name={`${effect}PermissionKeys`}
           value={permissionKey}
-          disabled={!draftEffects.has(permissionKey)}
         />
       ))}
       <div className="admin-permission-toolbar">
@@ -607,7 +586,6 @@ function PermissionMatrix({
             <span>Buscar acesso</span>
             <input
               id={`permission-search-${user.userId}`}
-              name="permissionSearch"
               type="search"
               value={search}
               onChange={(event) => setSearch(event.target.value)}
@@ -616,201 +594,202 @@ function PermissionMatrix({
             />
           </span>
         </label>
-        {editable ? (
-          <span className="admin-permission-toolbar-hint">
-            Clique na caixa para marcar ou desmarcar.
-          </span>
-        ) : null}
       </div>
-
-      <div className="admin-permission-tabs" role="tablist" aria-label="Grupos de acesso">
-        {permissionTabs.map((group) => (
-          <button
-            key={group.id}
-            id={`permission-tab-${user.userId}-${group.id}`}
-            type="button"
-            role="tab"
-            aria-selected={activeTab.id === group.id}
-            aria-controls={`permission-panel-${user.userId}-${group.id}`}
-            data-selected={activeTab.id === group.id}
-            onClick={() => setActiveGroup(group.id)}
-          >
-            <span>{group.label}</span>
-            <small>{group.total}</small>
-          </button>
-        ))}
-      </div>
-
+      {groups.length > 0 ? (
+        <div className="admin-permission-tabs" role="tablist" aria-label="Categorias de acesso">
+          {groups.map((group, index) => (
+            <button
+              key={group.id}
+              id={`access-tab-${user.userId}-${group.id}`}
+              type="button"
+              role="tab"
+              className="admin-permission-tab"
+              aria-selected={activeGroup?.id === group.id}
+              aria-controls={`access-panel-${user.userId}-${group.id}`}
+              tabIndex={activeGroup?.id === group.id ? 0 : -1}
+              onClick={() => setActiveGroupId(group.id)}
+              onKeyDown={(event) => {
+                const next =
+                  event.key === "ArrowRight"
+                    ? (index + 1) % groups.length
+                    : event.key === "ArrowLeft"
+                      ? (index - 1 + groups.length) % groups.length
+                      : event.key === "Home"
+                        ? 0
+                        : event.key === "End"
+                          ? groups.length - 1
+                          : null;
+                if (next === null) return;
+                event.preventDefault();
+                setActiveGroupId(groups[next]!.id);
+                const buttons =
+                  event.currentTarget.parentElement?.querySelectorAll<HTMLButtonElement>(
+                    '[role="tab"]',
+                  );
+                buttons?.[next]?.focus();
+              }}
+            >
+              {group.label}
+              <span>{group.permissions.length}</span>
+            </button>
+          ))}
+        </div>
+      ) : null}
       <div className="admin-permission-groups">
-        {activeTab.permissions.length > 0 ? (
+        {groups.map((group) => (
           <section
-            className="admin-permission-group"
-            id={`permission-panel-${user.userId}-${activeTab.id}`}
+            key={group.id}
+            id={`access-panel-${user.userId}-${group.id}`}
+            className="admin-permission-group admin-permission-panel"
             role="tabpanel"
-            tabIndex={0}
-            aria-labelledby={`permission-tab-${user.userId}-${activeTab.id}`}
+            tabIndex={activeGroup?.id === group.id ? 0 : -1}
+            hidden={activeGroup?.id !== group.id}
+            aria-labelledby={`access-tab-${user.userId}-${group.id}`}
           >
+            {group.description ? <p className="admin-form-help">{group.description}</p> : null}
             <div className="admin-permission-grid">
-              {activeTab.permissions.map((permissionKey) => {
-                const override = overrides.get(permissionKey);
-                const permissionState = getPermissionState(
-                  permissionKey,
-                  inherited,
-                  override,
-                  hasApprovedAccess,
+              {group.permissions.map((permissionKey) => {
+                const keys = getControlKeys(permissionKey);
+                const checked = keys.every(isChecked);
+                const canEdit = editable && keys.every((key) => manageable.has(key));
+                const savedStates = keys.map((key) =>
+                  getPermissionState(key, inherited, overrides.get(key)),
                 );
-                const canSelect = editable && manageable.has(permissionKey);
-                const checked = getDraftChecked(permissionKey);
-                const changed = draftEffects.has(permissionKey);
-                const draftEffect = draftEffects.get(permissionKey);
-                const displayedState = changed
-                  ? {
-                      key: `draft-${draftEffect}`,
-                      label:
-                        draftEffect === "inherit"
-                          ? "Padrão do perfil"
-                          : checked
-                            ? "Não salvo: com acesso"
-                            : "Não salvo: sem acesso",
-                    }
-                  : permissionState;
+                const savedState = !accountHasAccess(user)
+                  ? { key: "account-denied", label: "Conta sem acesso", permitted: false }
+                  : (savedStates.find((state) => !state.permitted) ??
+                    savedStates.find((state) => state.key === "override-allow") ??
+                    savedStates[0]!);
+                const changed = keys.some((key) => draftEffects.has(key));
                 return (
                   <label
                     key={permissionKey}
                     className="admin-permission-option"
-                    data-disabled={!canSelect}
+                    data-disabled={!canEdit}
                     data-editable={editable}
                     data-selected={checked}
-                    data-changed={changed}
                   >
                     <input
                       type="checkbox"
                       checked={checked}
-                      disabled={!canSelect || pending}
+                      disabled={!canEdit || pending}
                       onChange={() => togglePermission(permissionKey)}
-                      aria-label={`Acesso a ${getPermissionLabel(permissionKey)}`}
+                      aria-label={
+                        permissionKey === "crm.simulators.view"
+                          ? "Acessar simuladores"
+                          : `Acesso a ${getPermissionLabel(permissionKey)}`
+                      }
                     />
                     <span className="admin-permission-option-copy">
-                      <strong>
-                        {getPermissionLabel(permissionKey)}
-                        {changed ? (
-                          <span className="admin-permission-change-dot" title="Alteração não salva">
-                            <span className="sr-only"> · Alteração não salva</span>
-                          </span>
-                        ) : null}
-                      </strong>
-                      <small>{PERMISSIONS[permissionKey].description}</small>
-                      {override?.reason ? (
-                        <small className="admin-permission-override-reason">
-                          Motivo atual: {override.reason}
-                        </small>
-                      ) : null}
+                      <strong>{getControlLabel(permissionKey)}</strong>
+                      <small>{getControlDescription(permissionKey)}</small>
                     </span>
-                    <span className="admin-permission-state" data-state={displayedState.key}>
+                    <span className="admin-permission-state" data-state={savedState.key}>
                       {checked ? <Check aria-hidden="true" /> : <CircleMinus aria-hidden="true" />}
-                      {displayedState.label}
+                      {changed ? "Alteração não salva" : savedState.label}
                     </span>
                   </label>
                 );
               })}
             </div>
           </section>
-        ) : (
-          <p className={managementStyles.emptyState}>
-            Nenhum acesso deste grupo corresponde à busca.
-          </p>
-        )}
+        ))}
+        {groups.length === 0 ? (
+          <p className={managementStyles.emptyState}>Nenhum acesso corresponde à busca.</p>
+        ) : null}
       </div>
-
       {editable ? (
-        <>
-          <div className="admin-permission-role-default">
-            <span>
-              <ShieldCheck aria-hidden="true" />O padrão considera o papel{" "}
-              {getVisibleRoleLabel(user.roleKey)}.
-            </span>
+        <div className="admin-permission-footer">
+          <div className="admin-permission-summary" role="status" aria-live="polite">
+            {draftEffects.size === 0
+              ? "Todos os ajustes estão salvos."
+              : `${countControls([...draftEffects.keys()])} ${countControls([...draftEffects.keys()]) === 1 ? "alteração não salva" : "alterações não salvas"}.`}
+          </div>
+          <div className="admin-permission-submit-actions">
             <button
               type="button"
-              className="admin-permission-role-default-button"
-              onClick={restoreRoleDefaults}
-              disabled={pending || manageablePermissions.length === 0}
+              className={managementStyles.button}
+              onClick={restoreDefaults}
+              disabled={pending}
             >
               Usar padrão do perfil
             </button>
+            <button
+              type="button"
+              className={managementStyles.button}
+              onClick={() => setDraftEffects(new Map())}
+              disabled={pending || draftEffects.size === 0}
+            >
+              Descartar
+            </button>
+            <button
+              type="submit"
+              className={managementStyles.buttonPrimary}
+              disabled={pending || draftEffects.size === 0}
+            >
+              {pending ? "Salvando…" : "Salvar alterações"}
+            </button>
           </div>
-          <div className="admin-permission-footer">
-            <label htmlFor={`override-reason-${user.userId}`}>
-              <span>Motivo da alteração em lote</span>
-              <input
-                id={`override-reason-${user.userId}`}
-                name="reason"
-                value={reason}
-                onChange={(event) => setReason(event.target.value)}
-                required
-                minLength={3}
-                maxLength={240}
-                autoComplete="off"
-                placeholder="Explique por que estas permissões serão alteradas…"
-              />
-            </label>
-            <div className="admin-permission-summary" role="status" aria-live="polite">
-              <strong>Resumo</strong>
-              <span>
-                {draftEffects.size === 0
-                  ? "Todos os ajustes estão salvos."
-                  : `${draftEffects.size} ${
-                      draftEffects.size === 1 ? "alteração não salva" : "alterações não salvas"
-                    }.`}
-              </span>
-            </div>
-            <div className="admin-permission-submit-actions">
-              <button
-                type="button"
-                className={managementStyles.button}
-                onClick={clearDraft}
-                disabled={pending || (draftEffects.size === 0 && reason.length === 0)}
-              >
-                Descartar
-              </button>
-              <button
-                type="submit"
-                className={managementStyles.buttonPrimary}
-                disabled={pending || draftEffects.size === 0}
-              >
-                {pending ? "Salvando…" : "Salvar alterações"}
-              </button>
-            </div>
-            <ActionFeedback state={state} />
-          </div>
-        </>
+          <ActionFeedback state={state} />
+        </div>
       ) : (
         <p className="admin-permission-readonly-note">
-          Esta matriz é somente para consulta. A hierarquia atual não permite alterar este usuário.
+          {accountHasAccess(user)
+            ? "Esta matriz é somente para consulta. A hierarquia atual não permite alterar este usuário."
+            : "Esta conta está sem acesso. A matriz mostra os acessos bloqueados enquanto a conta não estiver ativa, aprovada e com um papel válido."}
         </p>
       )}
+      <div className="admin-permission-catalog-note">
+        <ShieldCheck aria-hidden="true" />
+        <p>
+          A lista segue o catálogo autorizado do CRM. Acessos novos só aparecem quando adicionados
+          ao sistema e seguem os padrões do papel e as exceções individuais.
+        </p>
+      </div>
     </form>
+  );
+}
+
+function UserPresenceBadge({ presence }: { presence: UserPresence | undefined }) {
+  const state = presence?.status ?? "unknown";
+  const label =
+    state === "online" ? "Online" : state === "offline" ? "Offline" : "Presença indisponível";
+  return (
+    <span className="admin-user-presence" data-state={state} title={PRESENCE_HELP}>
+      <span className="admin-user-presence-dot" aria-hidden="true" />
+      <span className="admin-user-presence-label">{label}</span>
+    </span>
   );
 }
 
 function UserDetail({
   user,
+  presence,
   assignableRoles,
   manageablePermissions,
   canManageRoles,
   canManagePermissions,
-  isMasterPermissionManager,
   canManageUsers,
   canApproveUsers,
   reportingScopes,
+  isMasterPermissionManager,
+  roleDefaults,
+  permissionCatalog,
   onMutationSuccess,
-}: UserAccessManagerProps & { user: ManagedUser; onMutationSuccess: () => void }) {
+}: UserAccessManagerProps & {
+  user: ManagedUser;
+  presence: UserPresence | undefined;
+  roleDefaults: UserRoleDefaults;
+  permissionCatalog: readonly PermissionKey[];
+  onMutationSuccess: () => void;
+}) {
   const status = getUserStatus(user);
   const hasAnyMutation =
     user.isManageable && (canManageRoles || canManagePermissions || canManageUsers);
   const canEditPermissions =
+    user.permissionDetailsAvailable &&
+    accountHasAccess(user) &&
     user.isManageable &&
-    user.isActive &&
-    user.accessStatus === "approved" &&
     canManagePermissions &&
     manageablePermissions.length > 0;
   const roleIsActive = user.roleKey ? ACTIVE_ROLE_KEYS.has(user.roleKey) : false;
@@ -835,10 +814,11 @@ function UserDetail({
             <span>{getVisibleRoleLabel(user.roleKey)}</span>
           </div>
         </div>
-        <div className="admin-user-detail-badges">
+        <div className="admin-user-detail-statuses">
           <span className={managementStyles.statusPill} data-state={status.key}>
             {status.label}
           </span>
+          <UserPresenceBadge presence={presence} />
           {!hasAnyMutation ? (
             <span
               className="admin-protected-account-badge"
@@ -871,31 +851,29 @@ function UserDetail({
           </section>
         ) : null}
 
-        <section
-          className="admin-access-section admin-profile-section"
-          aria-labelledby={`role-title-${user.userId}`}
-        >
+        <section className="admin-access-section" aria-labelledby={`role-title-${user.userId}`}>
           <div className="admin-access-section-heading">
             <div>
-              <p>Perfil</p>
-              <h3 id={`role-title-${user.userId}`}>{getVisibleRoleLabel(user.roleKey)}</h3>
+              <p>Papel e responsabilidades</p>
+              <h3 id={`role-title-${user.userId}`}>Papel do usuário</h3>
             </div>
             <span className="admin-section-count">
-              {user.permissionDetailsAvailable !== false
-                ? `${getEffectivePermissionCount(user)} acessos`
-                : "Acessos restritos"}
+              {user.permissionDetailsAvailable
+                ? `${getEffectivePermissionCount(user, permissionCatalog)} acessos`
+                : "Detalhes restritos"}
             </span>
           </div>
-          {user.isManageable && canManageRoles && assignableRoles.length > 0 ? (
-            <details className="admin-role-editor">
-              <summary>Alterar papel</summary>
-              <RoleForm
-                key={user.userId}
-                user={user}
-                roles={assignableRoles}
-                onMutationSuccess={onMutationSuccess}
-              />
-            </details>
+          {user.isManageable &&
+          canManageRoles &&
+          canManagePermissions &&
+          assignableRoles.length > 0 ? (
+            <RoleForm
+              key={`${user.userId}:${user.roleKey}`}
+              user={user}
+              roles={assignableRoles}
+              roleDefaults={roleDefaults}
+              onMutationSuccess={onMutationSuccess}
+            />
           ) : (
             <div className="admin-current-role">
               <strong>{getVisibleRoleLabel(user.roleKey)}</strong>
@@ -920,28 +898,24 @@ function UserDetail({
               <h3 id={`permissions-title-${user.userId}`}>O que pode acessar</h3>
             </div>
             <span className="admin-section-count">
-              {user.permissionDetailsAvailable !== false
-                ? `${getEffectivePermissionCount(user)} acessos`
+              {user.permissionDetailsAvailable
+                ? `${getEffectivePermissionCount(user, permissionCatalog)} acessos`
                 : "Detalhes restritos"}
             </span>
           </div>
-          {isMasterPermissionManager && user.isManageable ? (
-            <p className="admin-permission-intro">
-              <strong>Marcado: acesso liberado. Desmarcado: sem acesso.</strong> As caixas mostram o
-              resultado do papel e das exceções individuais. Clique para ajustar o rascunho; o papel
-              do usuário não muda.
-            </p>
-          ) : (
-            <p className="admin-permission-intro">
-              <strong>Marcado: acesso liberado. Desmarcado: sem acesso.</strong> A origem identifica
-              permissões herdadas do papel e exceções individuais.
-            </p>
-          )}
-          {user.permissionDetailsAvailable !== false ? (
+          <p className="admin-permission-intro">
+            <strong>Marcado: acesso liberado. Desmarcado: sem acesso.</strong> As caixas mostram o
+            resultado do papel e das exceções individuais.
+            {canEditPermissions
+              ? " Clique para ajustar o rascunho; o papel do usuário não muda."
+              : ""}
+          </p>
+          {user.permissionDetailsAvailable ? (
             <PermissionMatrix
-              key={user.userId}
+              key={`${user.userId}:${user.roleKey}:${JSON.stringify(user.overrides)}:${JSON.stringify(user.inheritedPermissions)}:${JSON.stringify(permissionCatalog)}`}
               user={user}
               manageablePermissions={manageablePermissions}
+              permissionCatalog={permissionCatalog}
               editable={canEditPermissions}
               onMutationSuccess={onMutationSuccess}
             />
@@ -951,13 +925,6 @@ function UserDetail({
               individuais. Nenhuma permissão é presumida.
             </p>
           )}
-          <p className="admin-access-catalog-note">
-            <ShieldCheck aria-hidden="true" />
-            <span>
-              A lista segue o catálogo autorizado do CRM. Novas capacidades só aparecem quando
-              versionadas e continuam sem acesso por padrão.
-            </span>
-          </p>
         </section>
 
         <details className="admin-advanced-settings">
@@ -980,12 +947,18 @@ export function UserAccessManager(props: UserAccessManagerProps) {
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [status, setStatus] = useState<UserDirectoryStatusFilter>("all");
   const [users, setUsers] = useState(props.users);
+  const [roleDefaults, setRoleDefaults] = useState(props.initialRoleDefaults);
+  const permissionCatalog = useMemo(
+    () => [...new Set(Object.values(roleDefaults).flat())],
+    [roleDefaults],
+  );
+  const presence = useUserPresence(users.map((user) => user.userId));
   const [hasMore, setHasMore] = useState(props.initialHasMore ?? false);
   const [nextOffset, setNextOffset] = useState<number | null>(
     props.initialNextOffset ?? (props.initialHasMore ? PAGE_SIZE : null),
   );
   const [totalCount, setTotalCount] = useState<number | null>(
-    props.initialTotalCount ?? props.users.length,
+    props.initialTotalCount === undefined ? props.users.length : props.initialTotalCount,
   );
   const [loading, setLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -997,7 +970,10 @@ export function UserAccessManager(props: UserAccessManagerProps) {
   const loadingRef = useRef(false);
   const requestGenerationRef = useRef(0);
   const filterEffectReadyRef = useRef(false);
-  const initialUsersSignature = JSON.stringify(props.users);
+  const initialUsersSignature = JSON.stringify({
+    users: props.users,
+    roleDefaults: props.initialRoleDefaults,
+  });
   const previousInitialUsersSignatureRef = useRef(initialUsersSignature);
 
   const selectedUser = users.find((user) => user.userId === selectedUserId) ?? users[0] ?? null;
@@ -1039,6 +1015,7 @@ export function UserAccessManager(props: UserAccessManagerProps) {
           return;
         }
 
+        if (result.page.users.length > 0) setRoleDefaults(result.page.roleDefaults);
         setUsers((current) => {
           if (replace) return result.page.users;
           const merged = new Map(current.map((user) => [user.userId, user]));
@@ -1116,15 +1093,19 @@ export function UserAccessManager(props: UserAccessManagerProps) {
       ...props.users,
       ...current.filter((user) => !initialIds.has(user.userId)),
     ]);
+    setRoleDefaults(props.initialRoleDefaults);
     setSelectedUserId((current) => current ?? props.users[0]?.userId ?? null);
     setHasMore(props.initialHasMore ?? false);
     setNextOffset(props.initialNextOffset ?? (props.initialHasMore ? PAGE_SIZE : null));
-    setTotalCount(props.initialTotalCount ?? props.users.length);
+    setTotalCount(
+      props.initialTotalCount === undefined ? props.users.length : props.initialTotalCount,
+    );
   }, [
     initialUsersSignature,
     props.initialHasMore,
     props.initialNextOffset,
     props.initialTotalCount,
+    props.initialRoleDefaults,
     props.users,
     search,
     status,
@@ -1156,18 +1137,73 @@ export function UserAccessManager(props: UserAccessManagerProps) {
 
   return (
     <div className="admin-users-content">
+      <section
+        aria-label="Resumo de usuários"
+        className={`${managementStyles.summaryGrid} admin-users-summary`}
+      >
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <UsersRound />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Total de usuários</span>
+            <strong className={managementStyles.summaryValue}>
+              {props.initialSummary?.total ?? "Indisponível"}
+            </strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <UserCheck />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Com acesso ativo</span>
+            <strong className={managementStyles.summaryValue}>
+              {props.initialSummary?.active ?? "Indisponível"}
+            </strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <Clock3 />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Aguardando aprovação</span>
+            <strong className={managementStyles.summaryValue}>
+              {props.initialSummary?.pending ?? "Indisponível"}
+            </strong>
+          </div>
+        </article>
+        <article className={managementStyles.summaryCard}>
+          <span className={managementStyles.iconFrame} aria-hidden="true">
+            <CircleX />
+          </span>
+          <div>
+            <span className={managementStyles.summaryLabel}>Acessos revogados</span>
+            <strong className={managementStyles.summaryValue}>
+              {props.initialSummary?.revoked ?? "Indisponível"}
+            </strong>
+          </div>
+        </article>
+      </section>
+
       <div className="admin-users-workspace">
         <aside className="admin-users-directory" aria-labelledby="users-directory-title">
           <header className="admin-users-directory-header">
             <h2 id="users-directory-title">Pessoas</h2>
-            <span>{totalCount ?? users.length}</span>
+            <span
+              className="admin-directory-count"
+              aria-label={totalCount === null ? "Total indisponível" : undefined}
+            >
+              {totalCount ?? "—"}
+            </span>
           </header>
 
           <div className="admin-users-directory-controls">
             <label className="admin-directory-search" htmlFor="user-search">
               <Search aria-hidden="true" />
               <span>
-                <span>Buscar pessoa</span>
+                <span className="sr-only">Buscar pessoas</span>
                 <input
                   id="user-search"
                   name="userSearch"
@@ -1175,11 +1211,15 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   autoComplete="off"
-                  placeholder="Buscar nome ou e-mail"
+                  placeholder="Buscar e-mail…"
                 />
               </span>
             </label>
-            <div className="admin-directory-filter-chips" aria-label="Filtrar por status">
+            <div
+              className="admin-directory-status-filters"
+              role="group"
+              aria-label="Filtrar pessoas por status"
+            >
               {(
                 [
                   ["all", "Todos"],
@@ -1199,6 +1239,7 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                 </button>
               ))}
             </div>
+            <p className="admin-user-presence-help">{PRESENCE_HELP}</p>
           </div>
 
           <ul
@@ -1226,14 +1267,9 @@ export function UserAccessManager(props: UserAccessManagerProps) {
                       <span className="admin-user-option-copy">
                         <strong>{user.email ?? "E-mail não informado"}</strong>
                         <span>{getVisibleRoleLabel(user.roleKey)}</span>
-                      </span>
-                      <span
-                        className="admin-user-status-dot"
-                        data-state={userStatus.key}
-                        title={userStatus.label}
-                      >
                         <span className="sr-only">{userStatus.label}</span>
                       </span>
+                      <UserPresenceBadge presence={presence.get(user.userId)} />
                     </button>
                   </li>
                 );
@@ -1303,14 +1339,31 @@ export function UserAccessManager(props: UserAccessManagerProps) {
           <UserDetail
             key={selectedUser.userId}
             user={selectedUser}
+            roleDefaults={roleDefaults}
+            permissionCatalog={permissionCatalog}
+            presence={presence.get(selectedUser.userId)}
             onMutationSuccess={refreshDirectory}
             {...props}
           />
         ) : (
           <section className="admin-user-detail admin-user-detail-empty" id="selected-user-panel">
             <ShieldCheck aria-hidden="true" />
-            <h2>Nenhum usuário cadastrado</h2>
-            <p>Quando houver contas disponíveis, selecione uma para revisar papel e permissões.</p>
+            <h2>
+              {loading
+                ? "Carregando usuários…"
+                : loadError
+                  ? "Lista indisponível"
+                  : search || status !== "all"
+                    ? "Nenhuma pessoa encontrada"
+                    : "Nenhum usuário cadastrado"}
+            </h2>
+            <p>
+              {loadError
+                ? "Tente carregar a lista novamente."
+                : search || status !== "all"
+                  ? "Ajuste a busca ou o filtro de status para encontrar uma conta."
+                  : "Quando houver contas disponíveis, selecione uma para revisar papel e permissões."}
+            </p>
           </section>
         )}
       </div>

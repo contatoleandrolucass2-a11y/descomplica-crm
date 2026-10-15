@@ -18,7 +18,7 @@ export interface ManagedUser {
   roleKey: RoleKey | null;
   isSelf: boolean;
   isManageable: boolean;
-  inheritedPermissions: PermissionKey[];
+  inheritedPermissions: readonly PermissionKey[];
   overrides: UserPermissionOverride[];
   permissionDetailsAvailable: boolean;
 }
@@ -30,7 +30,10 @@ export interface UserDirectorySummary {
   revoked: number | null;
 }
 
+export type UserRoleDefaults = Partial<Record<RoleKey, readonly PermissionKey[]>>;
+
 export interface UserDirectoryPage {
+  roleDefaults: UserRoleDefaults;
   users: ManagedUser[];
   nextOffset: number | null;
   hasMore: boolean;

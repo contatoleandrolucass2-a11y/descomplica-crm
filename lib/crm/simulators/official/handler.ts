@@ -169,7 +169,10 @@ export async function handleOfficialSimulatorPost(
     });
     return authorization.response;
   }
-  if (authorization.context.roleKey !== "master") {
+  if (
+    !authorization.context.permissions.includes("crm.simulators.view") ||
+    !authorization.context.permissions.includes("crm.simulators.execute")
+  ) {
     emit({ outcome: "forbidden", httpStatus: 403, engineKey });
     return json(request, { error: "forbidden" }, 403);
   }

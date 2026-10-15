@@ -1,6 +1,6 @@
 begin;
 
-select plan(109);
+select plan(180);
 
 select has_column(
   'public',
@@ -77,20 +77,48 @@ select ok(
   'Master inherits every relevant operational and administrative permission'
 );
 
-select is(
-  (
-    select string_agg(permission_key, ',' order by permission_key)
-    from public.role_permissions
-    where role_key = 'admin'
+select ok(
+  not exists (
+    select 1
+    from unnest(array[
+      'pages.view',
+      'crm.dashboard.view',
+      'crm.dashboard.all.view',
+      'crm.dashboard.with_canal_imob.view',
+      'crm.dashboard.without_canal_imob.view',
+      'crm.stages.view',
+      'crm.ranking.view',
+      'crm.partnerships.view',
+      'permissions.manage',
+      'roles.manage',
+      'users.manage',
+      'pages.manage',
+      'crm.settings.manage'
+    ]) required(permission_key)
+    where not exists (
+      select 1
+      from public.role_permissions role_permission
+      where role_permission.role_key = 'admin'
+        and role_permission.permission_key = required.permission_key
+    )
   ),
-  'admin.access,audit.view,crm.dashboard.all.view,crm.dashboard.view,'
-    || 'crm.dashboard.with_canal_imob.view,crm.dashboard.without_canal_imob.view,'
-    || 'crm.ingest.manage,crm.partnerships.view,crm.ranking.view,'
-    || 'crm.salesforce.refresh,crm.settings.manage,crm.settings.view,'
-    || 'crm.simulators.view,crm.stages.view,pages.manage,pages.view,'
-    || 'permissions.manage,permissions.view,roles.manage,roles.view,'
-    || 'users.manage,users.view',
-  'Administrator inherits the exact approved matrix with simulator view and without execution'
+  'Administrator inherits all relevant operations and access management'
+);
+
+select is(
+  (select count(*) from public.role_permissions where role_key = 'admin'),
+  31::bigint,
+  'Administrator inherits all thirty-one current catalog permissions'
+);
+select is(
+  (select array_agg(permission_key order by permission_key) from public.role_permissions where role_key = 'admin'),
+  (select array_agg(key order by key) from public.permissions),
+  'Administrator defaults match the complete catalog with no missing permission'
+);
+select is(
+  (select level from public.roles where key = 'admin'),
+  80,
+  'complete Administrator defaults do not promote its hierarchy level'
 );
 
 select is(
@@ -99,8 +127,8 @@ select is(
     from public.role_permissions
     where role_key = 'coordinator'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.stages.view,pages.view',
-  'Coordinator sees only the Imob channel, partnerships and common operational pages'
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Coordinator inherits Imob, partnerships, simulators, and common operational pages'
 );
 
 select is(
@@ -109,8 +137,8 @@ select is(
     from public.role_permissions
     where role_key = 'manager_house'
   ),
-  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.stages.view,pages.view',
-  'Gerente House sees only the House channel and ranking'
+  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Gerente House inherits House, ranking, and simulators'
 );
 
 select is(
@@ -119,8 +147,8 @@ select is(
     from public.role_permissions
     where role_key = 'manager_imob'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.stages.view,pages.view',
-  'Gerente Imob sees only the Imob channel and partnerships'
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Gerente Imob inherits Imob, partnerships, and simulators'
 );
 
 select is(
@@ -129,8 +157,8 @@ select is(
     from public.role_permissions
     where role_key = 'broker_house'
   ),
-  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.stages.view,pages.view',
-  'Corretor House sees only the House channel and ranking'
+  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Corretor House inherits House, ranking, and simulators'
 );
 
 select is(
@@ -139,8 +167,8 @@ select is(
     from public.role_permissions
     where role_key = 'broker_imob'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.stages.view,pages.view',
-  'Corretor Imob sees only the Imob channel and partnerships'
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stages.view,pages.view',
+  'Corretor Imob inherits Imob, partnerships, and simulators'
 );
 
 select is(
@@ -371,7 +399,8 @@ values
   ('a3000000-0000-4000-8000-000000000008', 'matrix-broker-imob@example.test'),
   ('a3000000-0000-4000-8000-000000000009', 'matrix-out-of-scope@example.test'),
   ('a3000000-0000-4000-8000-000000000010', 'matrix-pending@example.test'),
-  ('a3000000-0000-4000-8000-000000000011', 'matrix-lower-actor@example.test');
+  ('a3000000-0000-4000-8000-000000000011', 'matrix-lower-actor@example.test'),
+  ('a3000000-0000-4000-8000-000000000012', 'matrix-brand-pending@example.test');
 
 select public.bootstrap_master_user('a3000000-0000-4000-8000-000000000001');
 
@@ -664,6 +693,62 @@ where user_id in (
   'a3000000-0000-4000-8000-000000000011'
 );
 
+-- Every current approved role inherits both sides of simulator access. These
+-- fixtures have valid reporting scopes, so an inherited grant can be effective.
+select ok(
+  public._internal_has_permission(fixture.user_id::uuid, 'crm.simulators.view')
+    and public._internal_has_permission(fixture.user_id::uuid, 'crm.simulators.execute'),
+  concat(fixture.role_key, ' receives both simulator permissions after approval')
+)
+from (values
+  ('a3000000-0000-4000-8000-000000000001', 'master'),
+  ('a3000000-0000-4000-8000-000000000002', 'admin'),
+  ('a3000000-0000-4000-8000-000000000004', 'coordinator'),
+  ('a3000000-0000-4000-8000-000000000005', 'manager_house'),
+  ('a3000000-0000-4000-8000-000000000006', 'manager_imob'),
+  ('a3000000-0000-4000-8000-000000000007', 'broker_house'),
+  ('a3000000-0000-4000-8000-000000000008', 'broker_imob')
+) as fixture(user_id, role_key);
+
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000010', 'crm.simulators.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000010', 'crm.simulators.execute'),
+  'pending accounts receive neither simulator permission'
+);
+
+update public.profiles
+set is_active = false
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute'),
+  'inactive approved accounts cannot use their inherited simulator permissions'
+);
+update public.profiles
+set is_active = true
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+
+insert into public.user_permission_overrides (user_id, permission_key, effect, reason, granted_by)
+values (
+  'a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute', 'deny',
+  'Synthetic simulator deny remains authoritative', 'a3000000-0000-4000-8000-000000000001'
+);
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute'),
+  'an existing explicit deny still overrides the expanded simulator defaults'
+);
+delete from public.user_permission_overrides
+where user_id = 'a3000000-0000-4000-8000-000000000008'
+  and permission_key = 'crm.simulators.execute';
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.simulators.execute'),
+  'removing the simulator deny restores the role default'
+);
+
+-- Isolate dashboard counts from persistent local fixtures. The enclosing
+-- transaction rolls back this cleanup along with every synthetic test row.
+delete from public.crm_dashboard_snapshots;
+
 insert into public.crm_dashboard_snapshots (snapshot_key, reference_date, generated_at, source)
 values ('matrix', current_date, now(), 'synthetic-role-matrix');
 
@@ -702,7 +787,7 @@ where snapshot.snapshot_key = 'matrix';
 select ok(
   public.can_grant_permission(
     'a3000000-0000-4000-8000-000000000001',
-    'crm.simulators.view'
+    'crm.commercial_policy.manage'
   ),
   'Master can delegate a held permission whose minimum level equals Master'
 );
@@ -742,7 +827,7 @@ select lives_ok(
     'allow',
     'Master delegation to Administrator test'
   )$$,
-  'Master can persist an explicit allow for an Administrator inherited permission'
+  'Master can preserve an explicit allow for an inherited Administrator permission'
 );
 select is(
   (
@@ -768,9 +853,9 @@ reset role;
 select ok(
   not public.can_grant_permission(
     'a3000000-0000-4000-8000-000000000002',
-    'crm.simulators.view'
+    'crm.commercial_policy.manage'
   ),
-  'Administrator cannot propagate the Master-managed simulator permission'
+  'Administrator cannot propagate an inherited permission whose minimum level is 100'
 );
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
 set local role authenticated;
@@ -1097,7 +1182,7 @@ select throws_ok(
 select throws_ok(
   $$select public.set_user_permission_overrides_bulk(
     'a3000000-0000-4000-8000-000000000007',
-    array['crm.dashboard.view', 'crm.simulators.view'],
+    array['crm.dashboard.view', 'crm.commercial_policy.manage'],
     'deny',
     'Atomic authorization failure test'
   )$$,
@@ -1650,6 +1735,259 @@ select ok(
     'supervisor'
   ),
   'retired roles remain unavailable even to Master through normal assignment'
+);
+
+
+-- Local direct-access controls preserve the existing hierarchy and audit RPCs.
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select ok(has_function_privilege('authenticated', 'public.assign_user_role_defaults(uuid,text)', 'EXECUTE'), 'authenticated can invoke guarded role defaults');
+select ok(not has_function_privilege('anon', 'public.assign_user_role_defaults(uuid,text)', 'EXECUTE'), 'anonymous cannot assign role defaults');
+select ok(not has_function_privilege('service_role', 'public.assign_user_role_defaults(uuid,text)', 'EXECUTE'), 'service role has no direct execute grant');
+select lives_ok($$select public.apply_user_permission_access_draft(
+  'a3000000-0000-4000-8000-000000000007', array['crm.partnerships.view'], array['crm.dashboard.view'], array[]::text[], 'Synthetic direct checkbox changes'
+)$$, 'mixed checkbox changes save atomically');
+select is((select effect from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007' and permission_key='crm.partnerships.view'), 'allow', 'checked exception is persisted');
+select is((select effect from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007' and permission_key='crm.dashboard.view'), 'deny', 'unchecked inherited permission is persisted');
+select lives_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000007','broker_imob')$$, 'role assignment restores defaults without manual reason');
+select is((select count(*) from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007'), 0::bigint, 'all old exceptions are removed');
+select is((select role_key from public.user_roles where user_id='a3000000-0000-4000-8000-000000000007'), 'broker_imob', 'new role is persisted');
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000001','admin')$$, '42501', null, 'self role change remains blocked');
+select throws_ok($$select public.apply_user_permission_access_draft('a3000000-0000-4000-8000-000000000007',array['crm.dashboard.view'],array['crm.dashboard.view'],array[]::text[],'Synthetic duplicate')$$, '22023', null, 'contradictory checkbox changes are rejected');
+select lives_ok($$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000007',array['crm.commercial_policy.manage'],'allow','Synthetic privileged exception')$$, 'Master can prepare a privileged exception');
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
+set local role authenticated;
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000003','coordinator')$$, '42501', null, 'peer role assignment remains blocked');
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000009','broker_imob')$$, '42501', null, 'out of scope assignment remains blocked');
+select throws_ok($$select public.assign_user_role_defaults('a3000000-0000-4000-8000-000000000007','broker_house')$$, '42501', null, 'undelegable exceptions reject the entire role change');
+select is((select role_key from public.user_roles where user_id='a3000000-0000-4000-8000-000000000007'), 'broker_imob', 'failed reset rolls back the role assignment');
+select throws_ok($$select public.apply_user_permission_access_draft('a3000000-0000-4000-8000-000000000007',array['pages.view'],array['users.manage'],array[]::text[],'Synthetic atomic failure')$$, '42501', null, 'a forbidden permission rejects the entire mixed draft');
+select is((select count(*) from public.user_permission_overrides where user_id='a3000000-0000-4000-8000-000000000007' and permission_key='pages.view'), 0::bigint, 'earlier permitted draft group also rolls back');
+reset role;
+
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select ok(has_function_privilege('authenticated', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'authenticated can request guarded role defaults');
+select ok(not has_function_privilege('anon', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'anonymous cannot read role defaults');
+select ok(not has_function_privilege('service_role', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'service role has no direct defaults read grant');
+select is((select count(*) from public.get_user_role_permission_defaults() where role_key='manager_imob'), 7::bigint, 'Users viewers receive the authoritative Imob baseline');
+select is((select count(*) from public.get_user_role_permission_defaults() where role_key='admin'), 31::bigint, 'the defaults RPC exposes every inherited Administrator permission');
+select ok(exists(select 1 from public.get_user_role_permission_defaults() where role_key='master' and permission_key='crm.commercial_policy.manage'), 'role defaults reflect local policy grants absent from the static UI baseline');
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011', true);
+set local role authenticated;
+select is((select count(*) from public.get_user_role_permission_defaults()), 0::bigint, 'callers without users.view receive no role defaults');
+reset role;
+
+-- Administrator inherits both brands; Master and operational roles still need
+-- explicit access. A deny remains authoritative without removing management.
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+select is(
+  (select count(*) from public.permissions where key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view') and min_level = 10),
+  2::bigint,
+  'both brand permissions exist with the operational minimum level'
+);
+select is(
+  (select array_agg(role_key || ':' || permission_key order by role_key, permission_key)
+   from public.role_permissions
+   where permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
+  array['admin:crm.inventory.direcional.view', 'admin:crm.inventory.riva.view']::text[],
+  'only Administrator inherits both inventory brands'
+);
+select ok(
+  not exists (
+    select 1
+    from unnest(array[
+      'a3000000-0000-4000-8000-000000000001'::uuid,
+      'a3000000-0000-4000-8000-000000000004'::uuid,
+      'a3000000-0000-4000-8000-000000000005'::uuid,
+      'a3000000-0000-4000-8000-000000000006'::uuid,
+      'a3000000-0000-4000-8000-000000000007'::uuid,
+      'a3000000-0000-4000-8000-000000000008'::uuid
+    ]) fixture(user_id)
+    where public._internal_has_permission(fixture.user_id, 'crm.inventory.riva.view')
+      or public._internal_has_permission(fixture.user_id, 'crm.inventory.direcional.view')
+  ),
+  'Master and the five operational roles start without access to either brand'
+);
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'Administrator initially receives both brands from the role default'
+);
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000002', array['crm.inventory.riva.view', 'crm.inventory.direcional.view'], 'deny', 'Synthetic Administrator brand deny')$$,
+  'Master can explicitly deny inherited brand access for Administrator'
+);
+reset role;
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'individual denies take precedence over the complete Administrator defaults'
+);
+select set_config('request.jwt.claim.sub', '', true);
+select ok(
+  public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
+    and public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view'),
+  'Master can manage both brand permissions without reading either brand'
+);
+select ok(
+  public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'Administrator can manage both brand permissions without reading either brand'
+);
+select ok(
+  not public.can_grant_permission('a3000000-0000-4000-8000-000000000011', 'crm.inventory.riva.view')
+    and not public.can_grant_permission('a3000000-0000-4000-8000-000000000011', 'crm.inventory.direcional.view'),
+  'an actor without permissions.manage cannot delegate either brand'
+);
+insert into public.permissions (key, description, min_level)
+values ('crm.inventory.other.view', 'Synthetic brand-like permission outside the allowlist', 10);
+select ok(
+  not public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.other.view')
+    and not public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.commercial_policy.manage'),
+  'the brand exception does not extend to similar keys or restricted commercial policy'
+);
+delete from public.permissions where key = 'crm.inventory.other.view';
+update public.permissions set min_level = 100 where key = 'crm.inventory.riva.view';
+select ok(
+  not public.can_grant_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public.can_grant_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view'),
+  'brand delegation retains the existing minimum-level rule and Master exception'
+);
+update public.permissions set min_level = 10 where key = 'crm.inventory.riva.view';
+select ok(
+  not has_function_privilege('authenticated', 'public.can_grant_permission(uuid,text)', 'EXECUTE')
+    and not has_function_privilege('anon', 'public.can_grant_permission(uuid,text)', 'EXECUTE')
+    and not has_function_privilege('service_role', 'public.can_grant_permission(uuid,text)', 'EXECUTE')
+    and not has_table_privilege('authenticated', 'public.permissions', 'INSERT,UPDATE,DELETE')
+    and not has_table_privilege('anon', 'public.permissions', 'INSERT,UPDATE,DELETE'),
+  'brand configuration adds no direct function or catalog mutation grants'
+);
+
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view'], 'allow', 'Synthetic RIVA access')$$,
+  'Master grants RIVA to a lower user without possessing RIVA read access'
+);
+reset role;
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'RIVA-only access does not authorize DIRECIONAL'
+);
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000002', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.apply_user_permission_access_draft('a3000000-0000-4000-8000-000000000008', array['crm.inventory.direcional.view'], array[]::text[], array['crm.inventory.riva.view'], 'Synthetic DIRECIONAL-only access')$$,
+  'Administrator switches brands atomically without possessing brand read access'
+);
+reset role;
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'DIRECIONAL-only access does not authorize RIVA'
+);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view'], 'allow', 'Synthetic combined brand access')$$,
+  'Administrator can explicitly authorize both brands'
+);
+reset role;
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'both explicitly allowed brands are effective'
+);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view', 'crm.inventory.direcional.view'], 'inherit', 'Synthetic brand access revocation')$$,
+  'restoring defaults revokes both explicit brand grants'
+);
+reset role;
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000008', 'crm.inventory.direcional.view'),
+  'revocation leaves the target with neither brand'
+);
+select ok(
+  not public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000001', 'crm.inventory.direcional.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and not public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'managing another user does not bypass missing Master defaults or explicit Administrator denies'
+);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000002', array['crm.inventory.riva.view'], 'allow', 'Synthetic self brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access to self'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000003', array['crm.inventory.riva.view'], 'allow', 'Synthetic peer brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access to a peer'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000001', array['crm.inventory.riva.view'], 'allow', 'Synthetic superior brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access to Master'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000009', array['crm.inventory.direcional.view'], 'allow', 'Synthetic outside-scope brand grant')$$,
+  '42501', null, 'Administrator cannot grant brand access outside the reporting scope'
+);
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011', true);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.riva.view'], 'allow', 'Synthetic unmanaged brand grant')$$,
+  '42501', null, 'actors without permissions.manage cannot mutate brand access through the RPC'
+);
+reset role;
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000001', array['crm.inventory.riva.view'], 'allow', 'Synthetic Master self brand grant')$$,
+  '42501', null, 'Master cannot bypass the existing self-modification guard'
+);
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000012', array['crm.inventory.riva.view'], 'allow', 'Synthetic pending brand grant')$$,
+  '23505', null, 'pending users cannot receive brand permission exceptions'
+);
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+update public.profiles set is_active = false
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select throws_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000008', array['crm.inventory.direcional.view'], 'allow', 'Synthetic inactive brand grant')$$,
+  '23505', null, 'inactive users cannot receive brand permission exceptions'
+);
+reset role;
+select set_config('request.jwt.claim.sub', '', true);
+update public.profiles set is_active = true
+where user_id = 'a3000000-0000-4000-8000-000000000008';
+select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000001', true);
+set local role authenticated;
+select lives_ok(
+  $$select public.set_user_permission_overrides_bulk('a3000000-0000-4000-8000-000000000002', array['crm.inventory.riva.view', 'crm.inventory.direcional.view'], 'inherit', 'Synthetic Administrator defaults restored')$$,
+  'Master can restore Administrator brand inheritance without rewriting role defaults'
+);
+reset role;
+select ok(
+  public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view')
+    and public._internal_has_permission('a3000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'),
+  'removing individual denies restores both inherited Administrator brands'
+);
+select is(
+  (select count(*) from public.user_permission_overrides where user_id::text like 'a3000000-%' and permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')),
+  0::bigint,
+  'rejected brand mutations leave no residual access grants'
 );
 
 select * from finish();
