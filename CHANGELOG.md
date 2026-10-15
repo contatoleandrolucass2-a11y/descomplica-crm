@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-15: Catálogo único e rolagem contínua de páginas
+
+- Centraliza as 27 páginas liberadas em um registro compartilhado por guards, matriz de acessos e geração da migration. Inclui as dez páginas que antes eram acrescentadas somente à navegação.
+- Adiciona `pages:sync` e `pages:check`; build e testes impedem publicar uma rota sem cadastro ou com migration desatualizada. Preserva visibilidade existente, hierarquia, exceções individuais e o controle único dos simuladores.
+- Mostra as páginas vinculadas a cada acesso e permite encontrá-las na busca. Substitui a paginação do catálogo por uma região de rolagem contínua, acessível por teclado, com todos os resultados dos filtros.
+- Remove a reconstrução de páginas suplementares fora do banco, para que desativar uma página não a recrie no menu. Validação e publicação serão registradas após a conclusão dos gates.
+
 ## 2026-10-15 — Diretório de usuários compatível com produção
 
 - Alinha o limite de altura do teste visual ao novo painel aprovado, mantendo verificações de overflow, navegação e acessibilidade.

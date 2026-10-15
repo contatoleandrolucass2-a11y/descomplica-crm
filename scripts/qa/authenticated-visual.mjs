@@ -5,6 +5,8 @@ import { copyFile, cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/pr
 import path from "node:path";
 import process from "node:process";
 
+import { PAGE_REGISTRY } from "../../lib/navigation/registry.ts";
+
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
@@ -1397,6 +1399,32 @@ async function inspectRoute(
   Object.assign(
     snapshot,
     await page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName),
+    route === "/admin/paginas"
+      ? await page.evaluate(
+          (expectedPaths) => {
+            const list = document.querySelector(".admin-pages-scroll");
+            const pagination = [...document.querySelectorAll("button")].some((button) =>
+              ["Próxima página", "Página anterior"].includes(button.getAttribute("aria-label")),
+            );
+            const paths = [...(list?.querySelectorAll('td[data-label="Rota"]') ?? [])].map((cell) =>
+              cell.textContent.trim(),
+            );
+            return {
+              pageCatalogScrollReady: Boolean(
+                list &&
+                list.tabIndex === 0 &&
+                getComputedStyle(list).overflowY === "auto" &&
+                list.scrollHeight > list.clientHeight &&
+                paths.length === expectedPaths.length &&
+                new Set(paths).size === expectedPaths.length &&
+                expectedPaths.every((expectedPath) => paths.includes(expectedPath)) &&
+                !pagination,
+              ),
+            };
+          },
+          PAGE_REGISTRY.map((entry) => entry.path),
+        )
+      : { pageCatalogScrollReady: true },
     route === "/admin/usuarios"
       ? await page.evaluate(inspectAdminUserAccessWorkspace)
       : { userAccessWorkspaceReady: true },
@@ -1430,6 +1458,7 @@ async function inspectRoute(
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
     snapshot.userAccessWorkspaceReady &&
+    snapshot.pageCatalogScrollReady &&
     snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&

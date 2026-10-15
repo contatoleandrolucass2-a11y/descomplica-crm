@@ -1601,3 +1601,16 @@
   width: 0.9rem;
   height: 0.9rem;
 }
+
+/* The complete authorized catalog is already loaded, so scrolling needs no page switch. */
+.admin-pages-results .admin-pages-scroll {
+  max-height: 36rem;
+  overflow: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+}
+
+.admin-pages-scroll:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}

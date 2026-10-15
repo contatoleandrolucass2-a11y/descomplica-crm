@@ -172,3 +172,7 @@ As duas origens continuam recuperáveis por tags e bundles Git:
 - Bundles: diretório irmão `../source-checkpoints/` no pacote de entrega.
 
 Os ZIPs originais não são versionados e não devem ser enviados ao GitHub.
+
+## Cadastro de páginas e acessos
+
+O [cadastro único de páginas](docs/runbooks/page-catalog.md) mantém rotas, acessos administrativos e configurações sincronizados. Ao adicionar uma página, registre-a em `lib/navigation/registry.ts` e execute `pnpm pages:sync`. O build bloqueia registros ou migrations ausentes.

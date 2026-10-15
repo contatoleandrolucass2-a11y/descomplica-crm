@@ -20,11 +20,11 @@ import {
   type NavigationItem,
 } from "../lib/navigation/presentation";
 import {
-  extendAuthorizedNavigationWithReleasedPages,
   getAuthorizedNavigation,
   getDisabledNavigationItems,
   type AppPage,
 } from "../lib/navigation/pages";
+import { PAGE_REGISTRY } from "@/lib/navigation/registry";
 import type { AuthorizationContext } from "../lib/authorization/types";
 
 const pages: NavigationItem[] = [
@@ -123,151 +123,48 @@ beforeEach(() => {
 });
 
 describe("authorized hierarchical navigation", () => {
-  it("adds Repasse only under the active Dashboard for Master or Admin with partnership access", () => {
-    const dashboard: AppPage = {
-      ...simulationParent,
-      key: "crm.dashboard",
-      path: "/app",
-      name: "Dashboard",
-      section: "crm",
-      permissionKey: "crm.dashboard.view",
+  it.each(PAGE_REGISTRY)("honors persisted activation and permission for $path", async (entry) => {
+    const row: AppPage = {
+      key: entry.pageKey,
+      path: entry.path,
+      name: entry.name,
+      description: entry.description,
+      section: entry.section,
+      parentKey: entry.parentKey,
+      sortOrder: entry.sortOrder,
+      isNavigation: entry.isNavigation,
+      permissionKey: entry.permission,
+      isActive: true,
     };
     const context: AuthorizationContext = {
       ...viewerContext,
-      roleKey: "master",
-      permissions: ["pages.view", "crm.dashboard.view", "crm.partnerships.view"],
+      roleKey: "admin",
+      permissions: ["pages.view", entry.permission],
     };
-    const result = extendAuthorizedNavigationWithReleasedPages([dashboard], context);
+    configurePageCatalog([pageRow(row)]);
+    expect(await getAuthorizedNavigation(context)).toEqual([row]);
+    configurePageCatalog([pageRow({ ...row, isActive: false })]);
+    expect(await getAuthorizedNavigation(context)).toEqual([]);
+    configurePageCatalog([]); // RLS also omits disabled rows entirely.
+    expect(await getAuthorizedNavigation(context)).toEqual([]);
+    configurePageCatalog([pageRow(row)]);
+    expect(await getAuthorizedNavigation({ ...context, permissions: ["pages.view"] })).toEqual([]);
+  });
 
-    expect(result.map((page) => page.path)).toEqual([
-      "/app",
-      "/app/repasse",
-      "/app/gestao",
-      "/app/gestao/rotina",
-    ]);
-    expect(result.find((page) => page.path === "/app/repasse")?.description).toBe(
-      "Acompanhe os repasses da assessoria.",
-    );
-    expect(buildBreadcrumbs("/app/repasse", result).map((page) => page.name)).toEqual([
-      "Dashboard",
-      "Repasse",
+  it("retains the additional Repasse role restriction", async () => {
+    const entry = PAGE_REGISTRY.find((page) => page.pageKey === "crm.repasse")!;
+    configurePageCatalog([
+      pageRow({ ...entry, key: entry.pageKey, permissionKey: entry.permission, isActive: true }),
     ]);
     expect(
-      extendAuthorizedNavigationWithReleasedPages([dashboard], {
-        ...context,
-        roleKey: "admin",
-      }).map((page) => page.path),
-    ).toEqual(["/app", "/app/repasse", "/app/gestao", "/app/gestao/rotina"]);
-    for (const roleKey of ["coordinator", "manager_imob", "broker_imob"] as const) {
-      expect(
-        extendAuthorizedNavigationWithReleasedPages([dashboard], {
-          ...context,
-          roleKey,
-        }),
-      ).not.toContainEqual(expect.objectContaining({ key: "crm.repasse" }));
-    }
-    expect(
-      extendAuthorizedNavigationWithReleasedPages([dashboard], {
-        ...context,
-        permissions: ["pages.view", "crm.dashboard.view"],
+      await getAuthorizedNavigation({
+        ...viewerContext,
+        roleKey: "coordinator",
+        permissions: ["pages.view", "crm.partnerships.view"],
       }),
-    ).not.toContainEqual(expect.objectContaining({ key: "crm.repasse" }));
-    expect(
-      extendAuthorizedNavigationWithReleasedPages(
-        [{ ...dashboard, path: "/app/divergent" }],
-        context,
-      ),
-    ).toHaveLength(1);
-    expect(extendAuthorizedNavigationWithReleasedPages(result, context)).toEqual(result);
+    ).toEqual([]);
   });
 
-  it("adds settings tools only under the active authorized root with management permission", () => {
-    const settings: AppPage = {
-      ...simulationParent,
-      key: "crm.settings",
-      path: "/app/configuracoes",
-      name: "Configurações",
-      section: "settings",
-      permissionKey: "crm.settings.view",
-    };
-    const context: AuthorizationContext = {
-      ...viewerContext,
-      permissions: ["pages.view", "crm.settings.view", "crm.settings.manage"],
-    };
-    const result = extendAuthorizedNavigationWithReleasedPages([settings], context);
-    expect(result.map((page) => page.path)).toEqual([
-      "/app/configuracoes",
-      "/app/configuracoes/recurso-mkt",
-      "/app/configuracoes/conectar-sistemas",
-    ]);
-    expect(
-      buildBreadcrumbs("/app/configuracoes/recurso-mkt", result).map((page) => page.name),
-    ).toEqual(["Configurações", "Recurso MKT"]);
-    expect(
-      buildBreadcrumbs("/app/configuracoes/conectar-sistemas", result).map((page) => page.name),
-    ).toEqual(["Configurações", "Integrações"]);
-    expect(extendAuthorizedNavigationWithReleasedPages([settings], viewerContext)).toEqual([
-      settings,
-    ]);
-    expect(extendAuthorizedNavigationWithReleasedPages([], context)).toEqual([]);
-    expect(
-      extendAuthorizedNavigationWithReleasedPages([{ ...settings, isActive: false }], context),
-    ).toHaveLength(1);
-    expect(
-      extendAuthorizedNavigationWithReleasedPages(
-        [{ ...settings, path: "/app/divergent" }],
-        context,
-      ),
-    ).toHaveLength(1);
-    expect(extendAuthorizedNavigationWithReleasedPages(result, context)).toEqual(result);
-    expect(
-      extendAuthorizedNavigationWithReleasedPages(
-        [settings, { ...settings, key: "crm.settings.marketing", path: "/app/collision" }],
-        context,
-      ),
-    ).toHaveLength(3);
-    const collision = extendAuthorizedNavigationWithReleasedPages(
-      [settings, { ...settings, key: "crm.settings.connected_systems", path: "/app/collision" }],
-      context,
-    );
-    expect(collision.some((page) => page.path === "/app/configuracoes/conectar-sistemas")).toBe(
-      false,
-    );
-  });
-  it("adds Gestão and Rotina for dashboard readers without settings permissions", () => {
-    const settings: AppPage = {
-      ...simulationParent,
-      key: "crm.dashboard",
-      path: "/app",
-      name: "Dashboard",
-      section: "crm",
-      permissionKey: "crm.dashboard.view",
-    };
-    const context: AuthorizationContext = {
-      ...viewerContext,
-      permissions: ["pages.view", "crm.dashboard.view"],
-    };
-    const result = extendAuthorizedNavigationWithReleasedPages([settings], context);
-
-    expect(result.map((page) => page.path)).toEqual(["/app", "/app/gestao", "/app/gestao/rotina"]);
-    expect(buildBreadcrumbs("/app/gestao/rotina", result).map((page) => page.name)).toEqual([
-      "Gestão",
-      "Rotina",
-    ]);
-    expect(
-      extendAuthorizedNavigationWithReleasedPages([settings], {
-        ...context,
-        permissions: ["pages.view", "crm.settings.view"],
-      }),
-    ).toEqual([settings]);
-    expect(extendAuthorizedNavigationWithReleasedPages(result, context)).toEqual(result);
-    expect(
-      extendAuthorizedNavigationWithReleasedPages(
-        [settings, { ...settings, key: "crm.management", path: "/app/collision" }],
-        context,
-      ),
-    ).not.toContainEqual(expect.objectContaining({ path: "/app/gestao" }));
-  });
   it.each([
     { isActive: false },
     { isNavigation: false },
@@ -322,7 +219,7 @@ describe("authorized hierarchical navigation", () => {
       permissions: ["pages.view", "crm.dashboard.view"],
     });
     expect(result.filter((page) => page.key === routine.key)).toEqual(isActive ? [routine] : []);
-    expect(result.some((page) => page.key === "crm.management")).toBe(true);
+    expect(result.some((page) => page.key === "crm.management")).toBe(false);
   });
 
   it("keeps the approved root order without creating unauthorized entries", () => {
@@ -596,96 +493,6 @@ describe("authorized hierarchical navigation", () => {
     ]);
   });
 
-  it("adds only released supplemental simulators after their authorized parent", () => {
-    const result = extendAuthorizedNavigationWithReleasedPages([simulationParent], viewerContext);
-    const supplemental = result.filter((page) => page.key !== simulationParent.key);
-
-    expect(supplemental.map((page) => page.path)).toEqual([
-      "/app/simulacao/tabela-direta",
-      "/app/simulacao/tabela-investidor",
-      "/app/simulacao/tabelao",
-      "/app/simulacao/calcular-documentacao",
-      "/app/simulacao/caixa",
-    ]);
-    expect(
-      supplemental.every(
-        (page) =>
-          page.permissionKey === "crm.simulators.view" &&
-          page.parentKey === simulationParent.key &&
-          page.isNavigation &&
-          page.isActive,
-      ),
-    ).toBe(true);
-    expect(result.map((page) => page.path)).toContain("/app/simulacao/caixa");
-  });
-
-  it("does not expose supplemental labels without permission or an authorized root", () => {
-    const withoutPermission = extendAuthorizedNavigationWithReleasedPages([simulationParent], {
-      ...viewerContext,
-      permissions: ["pages.view"],
-    });
-    const withoutParent = extendAuthorizedNavigationWithReleasedPages([], viewerContext);
-
-    expect(withoutPermission).toEqual([simulationParent]);
-    expect(withoutParent).toEqual([]);
-    expect(JSON.stringify([withoutPermission, withoutParent])).not.toMatch(
-      /Tabela Direta|Tabela Investidor|Tabelão|Documentação|CAIXA/,
-    );
-  });
-
-  it("fails closed when the simulator parent key collides with another catalog identity", () => {
-    const conflictingParent: AppPage = {
-      ...simulationParent,
-      path: "/app/catalog-collision",
-      section: "crm",
-      permissionKey: "crm.dashboard.view",
-    };
-
-    expect(extendAuthorizedNavigationWithReleasedPages([conflictingParent], viewerContext)).toEqual(
-      [conflictingParent],
-    );
-    expect(getDisabledNavigationItems(viewerContext, [conflictingParent])).toEqual([]);
-  });
-
-  it("fails closed per supplemental entry when a catalog key or path collides", () => {
-    const keyCollision: AppPage = {
-      ...simulationParent,
-      key: "crm.simulation.wf14",
-      path: "/app/catalog-owned",
-      name: "Entrada do catálogo",
-      parentKey: simulationParent.key,
-      sortOrder: 20,
-    };
-    const pathCollision: AppPage = {
-      ...simulationParent,
-      key: "crm.simulation.catalog-collision",
-      path: "/app/simulacao/tabela-investidor",
-      name: "Caminho do catálogo",
-      parentKey: simulationParent.key,
-      sortOrder: 25,
-    };
-
-    const result = extendAuthorizedNavigationWithReleasedPages(
-      [simulationParent, keyCollision, pathCollision],
-      viewerContext,
-    );
-
-    expect(result.filter((page) => page.key === keyCollision.key)).toEqual([keyCollision]);
-    expect(result.filter((page) => page.path === pathCollision.path)).toEqual([pathCollision]);
-    expect(result).not.toContainEqual(
-      expect.objectContaining({
-        key: "crm.simulation.wf14",
-        path: "/app/simulacao/tabela-direta",
-      }),
-    );
-    expect(result).not.toContainEqual(
-      expect.objectContaining({
-        key: "crm.simulation.wf15",
-        path: "/app/simulacao/tabela-investidor",
-      }),
-    );
-  });
-
   it("does not duplicate CAIXA as a pathless item after its protected page is released", () => {
     const blocked = getDisabledNavigationItems(viewerContext, [simulationParent]);
 
@@ -708,7 +515,7 @@ describe("authorized hierarchical navigation", () => {
     expect(mocks.createClient).not.toHaveBeenCalled();
   });
 
-  it("filters catalog rows before deriving supplemental navigation", async () => {
+  it("uses only persisted catalog rows and never fabricates absent pages", async () => {
     const dashboard: AppPage = {
       ...simulationParent,
       key: "crm.dashboard",
@@ -764,12 +571,6 @@ describe("authorized hierarchical navigation", () => {
       "/app",
       "/app/simulacao",
       "/app/simulacao/caixa",
-      "/app/gestao",
-      "/app/gestao/rotina",
-      "/app/simulacao/tabela-direta",
-      "/app/simulacao/tabela-investidor",
-      "/app/simulacao/tabelao",
-      "/app/simulacao/calcular-documentacao",
     ]);
   });
 });

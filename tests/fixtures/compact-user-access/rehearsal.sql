@@ -67,3 +67,5 @@ end;
 $$;
 \ir ../../../supabase/migrations/20261014201400_local_admin_all_permission_defaults.sql
 \ir user-access.test.sql
+
+\ir page-catalog.test.sql

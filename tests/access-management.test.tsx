@@ -469,7 +469,8 @@ describe("catálogo localizado de acesso", () => {
     expect(checkbox("DIRECIONAL")).not.toContain('checked=""');
     expect(checkbox("Gerenciar usuários")).toContain('disabled=""');
     expect(markup.match(/aria-label="Acessar simuladores"/g)).toHaveLength(1);
-    expect(markup).toContain("Permite visualizar e executar os simuladores disponíveis.");
+    expect(markup).toContain("Visualiza e executa os simuladores disponíveis:");
+    expect(markup).toContain("Páginas vinculadas: Dashboard · Gestão · Rotina.");
     expect(markup).not.toContain('aria-label="Acesso a Executar simuladores oficiais"');
     expect(markup).not.toContain("Visualizar read model v3");
     expect(markup).not.toContain("Visualizar dataset v3");

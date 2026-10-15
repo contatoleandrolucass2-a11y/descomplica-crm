@@ -36,18 +36,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 54-version manifest", async () => {
+  it("keeps a unique, ordered 55-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(54);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(54);
+    expect(migrations).toHaveLength(55);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(55);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.at(-1)).toBe("20261014204014_local_user_presence.sql");
+    expect(migrations.at(-1)).toBe("20261015195915_unified_page_catalog.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {

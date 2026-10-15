@@ -4,8 +4,8 @@ select plan(12);
 
 select is(
   (select count(*) from public.app_pages),
-  17::bigint,
-  'the page catalog contains exactly the seventeen approved entries'
+  27::bigint,
+  'the page catalog contains exactly the twenty-seven approved entries'
 );
 
 select is(
@@ -22,14 +22,24 @@ select is(
     'admin.pages|/admin/paginas|pages.manage|true',
     'admin.users|/admin/usuarios|users.view|true',
     'crm.dashboard|/app|crm.dashboard.view|true',
+    'crm.management|/app/gestao|crm.dashboard.view|true',
+    'crm.management.routine|/app/gestao/rotina|crm.dashboard.view|true',
     'crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view|true',
     'crm.ranking|/app/ranking|crm.ranking.view|true',
+    'crm.repasse|/app/repasse|crm.partnerships.view|true',
     'crm.settings|/app/configuracoes|crm.settings.view|true',
+    'crm.settings.connected_systems|/app/configuracoes/conectar-sistemas|crm.settings.manage|true',
     'crm.settings.goals|/app/configuracoes/metas|crm.settings.manage|true',
+    'crm.settings.marketing|/app/configuracoes/recurso-mkt|crm.settings.manage|true',
     'crm.settings.partnerships|/app/configuracoes/metas/parcerias|crm.settings.manage|true',
     'crm.settings.points|/app/configuracoes/metas/pontos|crm.settings.manage|true',
     'crm.simulation|/app/simulacao|crm.simulators.view|true',
+    'crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view|true',
+    'crm.simulation.tabelao|/app/simulacao/tabelao|crm.simulators.view|true',
     'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|true',
+    'crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view|true',
+    'crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view|true',
+    'crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view|true',
     'crm.stage.appointments|/app/etapas/agendamentos|crm.stages.view|true',
     'crm.stage.folders|/app/etapas/pastas|crm.stages.view|true',
     'crm.stage.opportunities|/app/etapas/oportunidades|crm.stages.view|true',
@@ -50,8 +60,8 @@ select is(
       'crm.simulation.wf16'
     )
   ),
-  0::bigint,
-  'the four restore-only simulator entries are absent from the approved catalog'
+  4::bigint,
+  'the four released simulator entries are present in the managed catalog'
 );
 
 select is(
@@ -75,21 +85,31 @@ select is(
     'admin.pages',
     'admin.users',
     'crm.dashboard',
+    'crm.management',
+    'crm.management.routine',
     'crm.partnerships',
     'crm.ranking',
+    'crm.repasse',
     'crm.settings',
+    'crm.settings.connected_systems',
     'crm.settings.goals',
+    'crm.settings.marketing',
     'crm.settings.partnerships',
     'crm.settings.points',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Master resolves the exact seventeen-page production set'
+  'Master resolves the exact twenty-seven-page catalog set'
 );
 
 select is(
@@ -113,21 +133,31 @@ select is(
     'admin.pages',
     'admin.users',
     'crm.dashboard',
+    'crm.management',
+    'crm.management.routine',
     'crm.partnerships',
     'crm.ranking',
+    'crm.repasse',
     'crm.settings',
+    'crm.settings.connected_systems',
     'crm.settings.goals',
+    'crm.settings.marketing',
     'crm.settings.partnerships',
     'crm.settings.points',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Admin retains the exact seventeen-page inherited set including partnerships and simulators'
+  'Admin retains the exact twenty-seven-page inherited set including partnerships and simulators'
 );
 
 select is(
@@ -148,16 +178,23 @@ select is(
   ),
   array[
     'crm.dashboard',
+    'crm.management',
+    'crm.management.routine',
     'crm.ranking',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Corretor House retains the exact nine-page inherited set including simulators'
+  'Corretor House retains the exact inherited inherited set including simulators'
 );
 
 select is(
@@ -178,16 +215,24 @@ select is(
   ),
   array[
     'crm.dashboard',
+    'crm.management',
+    'crm.management.routine',
     'crm.partnerships',
+    'crm.repasse',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Corretor Imob retains the exact nine-page inherited set including simulators'
+  'Corretor Imob retains the exact inherited inherited set including simulators'
 );
 
 select is(
@@ -208,16 +253,24 @@ select is(
   ),
   array[
     'crm.dashboard',
+    'crm.management',
+    'crm.management.routine',
     'crm.partnerships',
+    'crm.repasse',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Coordinator retains the exact nine-page Imob inherited set including simulators'
+  'Coordinator retains the exact inherited Imob inherited set including simulators'
 );
 
 select is(
@@ -238,16 +291,23 @@ select is(
   ),
   array[
     'crm.dashboard',
+    'crm.management',
+    'crm.management.routine',
     'crm.ranking',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Gerente House retains the exact nine-page inherited set including simulators'
+  'Gerente House retains the exact inherited inherited set including simulators'
 );
 
 select is(
@@ -268,16 +328,24 @@ select is(
   ),
   array[
     'crm.dashboard',
+    'crm.management',
+    'crm.management.routine',
     'crm.partnerships',
+    'crm.repasse',
     'crm.simulation',
+    'crm.simulation.caixa',
+    'crm.simulation.tabelao',
     'crm.simulation.wf13',
+    'crm.simulation.wf14',
+    'crm.simulation.wf15',
+    'crm.simulation.wf16',
     'crm.stage.appointments',
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Gerente Imob retains the exact nine-page inherited set including simulators'
+  'Gerente Imob retains the exact inherited inherited set including simulators'
 );
 
 select is(

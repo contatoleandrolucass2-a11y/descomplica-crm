@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-15: Catálogo único e rolagem contínua de páginas
+
+- Centraliza as 27 páginas liberadas em um registro compartilhado por guards, matriz de acessos e geração da migration. Inclui as dez páginas que antes eram acrescentadas somente à navegação.
+- Adiciona `pages:sync` e `pages:check`; build e testes impedem publicar uma rota sem cadastro ou com migration desatualizada. Preserva visibilidade existente, hierarquia, exceções individuais e o controle único dos simuladores.
+- Mostra as páginas vinculadas a cada acesso e permite encontrá-las na busca. Substitui a paginação do catálogo por uma região de rolagem contínua, acessível por teclado, com todos os resultados dos filtros.
+- Remove a reconstrução de páginas suplementares fora do banco, para que desativar uma página não a recrie no menu.
+- Validação local aprovada: lint, tipos, build, formato, dependências, Gitleaks, 3.063 testes Vitest e suítes Node. Ensaios de banco: 1.441 verificações na origem/restauração e 123 no contrato compacto. Conferência visual de busca, filtros, rolagem e ativação concluída. Evidências em `docs/audits/paginas-catalogo-2026-10-15.md`; CI e promoção ainda pendentes.
+
 ## 2026-10-15: Compatibilidade do diretório de produção
 
 - Incorpora o dashboard aprovado de `fae77f9a` e revisa a captura Linux `38766616330`: onze imagens de Usuários atualizadas, 231 imagens preservadas, 242 hashes conferidos e toda a matriz funcional aprovada. O workflow temporário foi removido; a CI normal continua obrigatória.
