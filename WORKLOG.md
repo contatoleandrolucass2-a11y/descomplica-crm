@@ -6070,3 +6070,11 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   preservam9/0 e negacao de acesso direto. Tambem clica Gestao > Meta nos dois
   perfis autorizados e confere titulo/main, sem reduzir cobertura de27rotas.
 - Headings de DV/Parcerias refletem Planejamento de metas da referencia.
+
+## 2026-10-15: expectativa unitaria da matriz de Meta
+
+- Atualiza tambem o teste unitario que interpreta a matriz E2E:16links em
+  Master/Admin e ausencia de Meta nos demais, sem alterar rotas/permissoes.
+- CI38760150881 parou nessa expectativa antiga de15; demais2884testes passaram.
+  Reexecucao integral local antes do proximo envio; nenhum gate foi dispensado.
+- Suite integral local:2884aprovados,85skips,apenas falha Windows de symlink; teste unitario da matriz20/20aprovado.

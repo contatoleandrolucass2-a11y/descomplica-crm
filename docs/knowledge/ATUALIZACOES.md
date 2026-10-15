@@ -3900,3 +3900,12 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
   rota direta autorizada permanece inalterada. Clique Meta e landmark/titulo
   sao exigidos nos perfis autorizados, com a negacao dos demais preservada.
 - Novo SHA exige CI completa. Sem merge, deploy ou reducao de gate.
+
+## 2026-10-15: convergencia dos testes da matriz Meta
+
+- CI38760150881 no SHAae47ffa identificou expectativa unitaria antiga de15links
+  em tests/release-candidate.test.ts:208, depois da atualizacao E2E para16.
+- Teste unitario agora exige16e a presenca de Meta apenas em Master/Admin;
+  os demais continuam sem Meta. Nao altera autorizacao nem reduz cobertura.
+  Reexecutar suite integral antes do envio; CI completa permanece obrigatoria.
+- Reexecucao integral local confirmou2884aprovados/85skips/1falha de symlink Windows;20testes unitarios da matriz aprovados. Sem nova falha relacionada a Meta.

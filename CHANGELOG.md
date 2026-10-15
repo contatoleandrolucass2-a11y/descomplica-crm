@@ -2427,3 +2427,4 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Meta preserva a regiao principal acessivel da pagina no shell protegido.
 
 - Matriz E2E exige Meta em Gestao somente para Master/Admin e testa seu acesso.
+- Converge a expectativa unitaria dos links com a nova entrada Meta autorizada.
