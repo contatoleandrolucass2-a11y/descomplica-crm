@@ -259,9 +259,54 @@ Campos sao limpos depois do envio; erros nao devolvem corpo nem credenciais.
 O cofre protege o arquivo em repouso, nao um host comprometido: root pode ler
 a chave e o processo recebe a senha em memoria durante o cadastro. O perfil
 Chrome tambem contem a sessao. O cadastro nao executa login, nao contorna MFA
-e nao comprova credencial valida. Ainda falta um consumidor autorizado para
-reautenticacao/coleta. Backup deve preservar chave privada e envelope sem
+e nao comprova credencial valida. O ownerad49634 nao contem consumidor; o
+candidato abaixo acrescenta a renovacao. Backup deve preservar chave privada e envelope sem
 exporta-los para repositorio ou chat; rotacao exige procedimento explicito.
+
+## Renovacao de sessao com o cofre existente
+
+Candidato de15/10, posterior ao ownerad49634. O preflight real desse owner
+retornou reauth_required em13:18Z; nenhuma carga foi publicada. A renovacao
+abaixo precisa de CI e promocao protegida antes de ser considerada instalada.
+
+`prepare-login-credential.mjs` converte o envelope RSA/AES existente, como root,
+para `/etc/descomplica-qlik/qlik-login.cred`, usando systemd-creds com chave do
+host e nome fixo qlik-login. Conteudo passa somente por pipes e memoria; nao
+usar senha em argumentos, variaveis, arquivos temporarios ou logs. O arquivo
+resultante e cifrado, root0600, exclusivo, com fsync e verificacao de retorno.
+Um arquivo existente nao e substituido. Preservar o cofre original e sua chave.
+
+```bash
+node ops/qlik/prepare-login-credential.mjs
+```
+
+Executar somente o helper revisado do release canonico aprovado, antes de
+promover o owner. `LoadCredentialEncrypted` entrega o JSON decifrado apenas
+ao runtime privado do systemd. A chave RSA do cofre nao e entregue ao browser.
+`SetCredential=qlik-login:{}` e um fallback publico para a instalacao inicial
+sem cofre; nao autentica e nao transforma falha de decriptacao em sucesso.
+Referencia: [credenciais systemd](https://github.com/systemd/systemd/blob/v255/docs/CREDENTIALS.md).
+
+O owner usa sua pagina existente, sem CDP, exportacao de cookies ou novo perfil.
+O destino observado e o tenant Microsoft Entra8c139cd3 da Direcional. O fluxo
+confere a navegacao iniciada no Qlik, tenant, origem e formulario antes de
+preencher a credencial. Senha tem somente uma submissao por tentativa. O
+retorno so e autenticado depois de um probe CSRF204 (ou200 compativel) no tenant Qlik, sem
+exportar o token. MFA, CAPTCHA, formulario desconhecido e senha rejeitada
+exigem atencao; nao sao resolvidos nem repetidos automaticamente.
+Contrato oficial: [CSRF Qlik](https://qlik.dev/apis/rest/csrf-token/).
+
+`login-attempt.json`, no home privado do usuario tecnico, registra somente
+estado e data. Claim duravel e trava impedem repeticao de senha apos falha,
+incerteza ou reinicio. Sessao Qlik comprovadamente restaurada, inclusive pelo
+console privado, libera esse bloqueio. Nao apagar o arquivo para forcar
+tentativas. Nunca registrar usuario, hash de senha ou texto bruto do provedor.
+
+Renovacao tem limite120s; o ciclo de metadados tem300s para incluir login e
+coleta, com cancelamento cooperativo. A nova unit tem orcamento420s para
+aceitar um recibo fresco; comandos de host conservam seus proprios timeouts.
+Nao aceita recibo apos o prazo nem altera o limite da unit legada. Intervalo horario continua apos o ciclo anterior, sem
+sobreposicao. Autenticacao nao comprova mapeamento, fatos ou publicacao.
 
 ## Reversao
 

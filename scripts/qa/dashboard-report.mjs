@@ -267,7 +267,7 @@ async function bundle() {
   return { files, html };
 }
 
-async function startServer() {
+export async function startServer() {
   const sources = await sourceHashes();
   const { files, html } = await bundle();
   assert.deepEqual(await sourceHashes(), sources, "Product changed during bundling; rerun QA");
@@ -322,6 +322,29 @@ async function startServer() {
         server.close((error) => (error ? reject(error) : resolve())),
       );
     },
+  };
+}
+
+export async function observeDashboardStatusReads(page) {
+  await page.evaluate(() => {
+    window.qaStatusReadsCompleted = 0;
+    const fetch = window.fetch.bind(window);
+    window.fetch = async (...args) => {
+      const response = await fetch(...args);
+      if (new URL(response.url).pathname === "/api/dashboard/status") {
+        const json = response.json.bind(response);
+        response.json = async () => {
+          const value = await json();
+          window.qaStatusReadsCompleted += 1;
+          return value;
+        };
+      }
+      return response;
+    };
+  });
+  return async (reads) => {
+    // The next browser task follows the JSON consumer's continuation and finally.
+    await expect.poll(() => page.evaluate(() => window.qaStatusReadsCompleted)).toBe(reads);
   };
 }
 
@@ -636,6 +659,7 @@ async function run() {
       await page.screenshot({ path: path.join(directory, `${scenario}.png`), fullPage: true });
     }
     await check("refresh/automatic-published-snapshot", async () => {
+      const waitForStatusReads = await observeDashboardStatusReads(page);
       let statusReads = 0;
       let currentVersion = {
         generatedAt: "2026-10-13T15:00:00.000Z",
@@ -655,6 +679,7 @@ async function run() {
         window.dispatchEvent(new Event("focus"));
       });
       await expect.poll(() => statusReads).toBeGreaterThan(0);
+      await waitForStatusReads(statusReads);
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(0);
       await page.evaluate(() => {
         window.qaDeferRefresh = true;
@@ -673,19 +698,27 @@ async function run() {
         .locator('[data-stage="sales"] dd');
       await page.clock.runFor(30_100);
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
+      await waitForStatusReads(statusReads);
       await expect(sales).toHaveText("100");
       for (const event of ["focus", "online", "focus"]) {
         const previousReads = statusReads;
         await page.evaluate((type) => window.dispatchEvent(new Event(type)), event);
         await expect.poll(() => statusReads).toBeGreaterThan(previousReads);
+        await waitForStatusReads(statusReads);
       }
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
+      const beforePublishedProps = statusReads;
       await page.evaluate(() => {
         window.qaDeferRefresh = false;
         window.qaApplyPublished();
       });
       await expect(sales).toHaveText("321");
+      await expect.poll(() => statusReads).toBeGreaterThan(beforePublishedProps);
+      await waitForStatusReads(statusReads);
+      const beforeUnchangedPoll = statusReads;
       await page.clock.runFor(30_100);
+      await expect.poll(() => statusReads).toBeGreaterThan(beforeUnchangedPoll);
+      await waitForStatusReads(statusReads);
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
       assert.equal(await page.evaluate(() => window.qaCurrentProps.selectedPeriod), "week");
       // A corrected publication must refresh even if its source generation date is reused.
