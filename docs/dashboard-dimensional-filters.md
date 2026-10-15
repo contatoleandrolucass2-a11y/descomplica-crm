@@ -5,6 +5,12 @@ Verificacao local: 2026-10-15, Windows/PowerShell, branch
 `codex/dashboard-filtros-layout`, HEAD
 `ad496340cf57871c8fa80015aaaf0e0bd1da983c`.
 
+Conferencia posterior pelo coordenador em15/10/2026,14:30Z: metadados de
+producao via Supabase MCP confirmam tabelas legadas agregadas, sem os quatro
+IDs dimensionais, e nao listam as tabelas v3 em public. Sem registros de
+clientes ou mutacoes. Evidencia e limites em
+[auditoria do layout](audits/dashboard-layout-2026-10-15.md#metadados-remotos-e-revalidacao).
+
 ## Objetivo e decisao recebida
 
 Aplicar Canal de vendas, Gerente de Vendas, Responsavel da conta e Empresa a

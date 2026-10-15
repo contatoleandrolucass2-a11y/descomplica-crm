@@ -23,6 +23,13 @@
   Nota excedeu256000 bytes no commit; somente esta entrada foi distribuida
   na auditoria para recuperar sync, sem truncar historico ou ampliar limite.
   Reavaliar publicacao apos CI completa e filtros apos contrato/cobertura.
+- MCP Supabase14:30Z confirmou estrutura legada agregada; consulta nao listou
+  v3 em public. Somente metadados, sem dados de clientes/mutacoes. CI38751646222
+  em3764dfb: validate/restore aprovados, matriz autenticada pendente15:05Z.
+  Sync recuperado e confirmado em3764dfb; detalhes e limites na auditoria.
+- CI38751646222 falhou somente11 capturas /app. Predicado funcional aprovado;
+  referencias revisadas/promovidas15:13Z,231 preservadas. Nova CI verify exigida;
+  detalhes/hashes e excecao de captura dirty na auditoria/manifesto. Sem deploy.
 
 ## 2026-10-14: Atualizacao dos identificadores da fonte Qlik
 

@@ -61,3 +61,45 @@ Status: implementacao visual em PR, sem publicacao. Filtros pendentes.
   Nenhuma autoridade, limite ou historia anterior foi alterada. Confirmar
   sync antes de encerrar; arquivo de auditoria nao e exportado integralmente
   pelo runtime, mas sua referencia e a sintese constam do documento exportado.
+
+## Metadados remotos e revalidacao
+
+- Em2026-10-15T14:30Z, Supabase MCP list_projects e execute_sql somente SELECT
+  sobre information_schema confirmaram o projeto descomplica-crm-production,
+  ref hnncxuerlcsaahdxoswb. Identidade confrontada com
+  docs/runbooks/conclusao-salesforce-n8n.md:10 e
+  docs/audits/salesforce-cloud-preflight-2026-10-13.md:9.
+- Public contem crm_dashboard_snapshots, crm_dashboard_views,
+  crm_dashboard_metrics e crm_dashboard_top_developments. Metricas guardam
+  snapshot_id, view_key, stage_key e agregados/metas/comparativos por periodo;
+  views guarda snapshot/view e VGV agregado. Nao possuem os quatro IDs
+  dimensionais. A consulta nao listou tabelas public com nomes crm%v3% ou
+  crm%read_model%. Isso confirma o limite da estrutura consultada, nao prova
+  ausencia de todas as fontes externas ou de outros schemas privados.
+- Nenhum registro de cliente carregado; nenhuma DDL, DML, ACL, migration,
+  refresh ou coleta executada. As consultas nao autorizam ativacao remota.
+- Sync do runtime instalado passou antes e depois do commit3764dfb:
+  status synced, documents3, worktree bfe40c1501eed9fc. O registro integral
+  continua no Git e a sintese vinculada foi exportada, sem alterar o limite.
+- CI38751646222, SHA3764dfb129b80fb5bd0e97ca002cc95407358316:
+  validate e isolated-restore aprovados; release-gates ainda em execucao
+  na consulta15:05Z. Banco, build e E2E ja concluidos com sucesso; matriz
+  autenticada iniciou14:47:08Z. Imagem skipped em PR, conforme workflow.
+  CI38751246231 anterior nao comprova o SHA posterior. Sem merge/deploy.
+
+## Revisao de referencias
+
+- CI38751646222 terminou com falha somente visual:11 capturas do dashboard;
+  nenhum route/theme/axe check falhou. Artefato11983918049, SHA-256
+  06289bbad965bff87472e249a08b03aa3166625543e27b4c15de6bd8bb084a64 conferido.
+- Captura0574301121961bb9aa94d3cf44b19f773577b370 tem a mesma arvore Git
+  do HEAD3764dfb. Predicado funcional original reaplicado e aprovado.
+  Fingerprint dirty reproduzido pelos19 outputs de Conectar Sistemas,
+  sem diff rastreado. Detalhes preservados em reviewedUpdates do manifesto.
+- Inspecao dos tres temas desktop e celular320, incluindo tabelas e roscas.
+  Promovidas somente11 referencias de /app pelo helper transacional existente;
+  outras231 entradas/imagens preservadas. Limiares inalterados. Marcador da
+  fixture verificado no atributo do dashboard; fonte visivel segue removida.
+- Edicoes locais adicionais eram exclusivamente os documentos desta tarefa;
+  nenhum codigo foi alterado depois da captura. A promocao em15:13:01Z nao
+  aprova um release: nova CI verify completa continua obrigatoria.

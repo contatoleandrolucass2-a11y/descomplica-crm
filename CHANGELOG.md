@@ -9,6 +9,9 @@
   ao celular e utiliza os tokens dos tres temas existentes.
 - Filtros dimensionais completos permanecem pendentes: os agregados publicados
   nao permitem recalcular resultados por gerente, responsavel e empresa.
+- Registra a verificacao observacional da estrutura remota, sem alterar dados.
+- Atualiza somente onze referencias visuais revisadas do dashboard, mantendo
+  os criterios de regressao e as demais telas.
 
 ## 2026-10-14: Integracao documental do preflight
 

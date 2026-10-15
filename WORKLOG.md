@@ -34,6 +34,13 @@
   Auditoria completa em docs/audits/dashboard-layout-2026-10-15.md; entrada
   atual vinculada na nota principal para respeitar o limite de exportacao,
   sem remover o historico ou aumentar o limite. Sem merge ou deploy.
+- Metadados Supabase de producao, somente leitura, confirmaram agregados sem
+  os quatro IDs e nenhuma tabela v3 listada em public. Evidencia na auditoria.
+  Sync confirmado em3764dfb; CI38751646222 aprovou validate/restore, banco e
+  E2E. Matriz autenticada pendente na consulta15:05Z; sem publicacao.
+- CI concluida com falha somente nas11 capturas esperadas de /app; predicado
+  funcional completo aprovado. Referencias inspecionadas e promovidas com
+  hashes/proveniencia, preservando231 imagens. Nova CI verify obrigatoria.
 
 ## 2026-10-14: Base atual do preflight Qlik
 
