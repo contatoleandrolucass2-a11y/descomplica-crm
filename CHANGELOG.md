@@ -2441,3 +2441,6 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 - Matriz E2E exige Meta em Gestao somente para Master/Admin e testa seu acesso.
 - Converge a expectativa unitaria dos links com a nova entrada Meta autorizada.
+
+- Conhecimento de Meta organizado em auditoria integral e indice sincronizavel,
+  preservando historia anterior e o limite de exportacao.

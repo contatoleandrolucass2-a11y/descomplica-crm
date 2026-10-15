@@ -6125,3 +6125,10 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 
 - Preserva integralmente o main fae77f9, integrado sem conflitos. Nova CI da
   combinacao e obrigatoria; Meta mantem conteudo, navegacao e permissoes.
+
+## 2026-10-15: conhecimento de Meta sincronizado
+
+- Notas desta entrega preservadas integralmente em docs/audits/meta-2026-10-15.md;
+  indice com255933bytes. Prefixo historico comparado a main antes da distribuicao.
+- Runtime instalado confirmou synced/documents3. Limite e historia preservados;
+  pendencia de Obsidian resolvida para o indice atual, sem mudanca de runtime.
