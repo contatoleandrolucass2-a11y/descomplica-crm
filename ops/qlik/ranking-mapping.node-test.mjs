@@ -44,6 +44,17 @@ function create({ instant = NOW, definition = syntheticDefinition() } = {}) {
   return createRankingMapping({ now: () => new Date(instant), definition });
 }
 
+function syntheticAliases() {
+  const definition = syntheticDefinition();
+  definition.cubes.developments.aliasPins = ["VENDAS", "VGV"].map((alias, measureIndex) => ({
+    alias,
+    measureIndex,
+    id: `synthetic-alias-${alias}`,
+    propertiesSha256: digest(`synthetic-properties-${alias}`),
+  }));
+  return definition;
+}
+
 function canonical(value) {
   if (Array.isArray(value)) return `[${value.map(canonical).join(",")}]`;
   if (value !== null && typeof value === "object")
@@ -92,6 +103,85 @@ test("synthetic definition yields only schema-one contract, fixed scope and poli
   assert.equal(mapping.periods.at(-1), "2026-10-01");
   assert.match(mapping.mappingSha256, /^[a-f0-9]{64}$/);
   assert.equal(PRODUCTION_DEFINITION, null);
+});
+
+test("optional alias pins default to empty without admitting other cube properties", () => {
+  const legacy = syntheticDefinition();
+  const implicit = create({ definition: legacy });
+  for (const role of ["imobs", "developments"]) {
+    assert.deepEqual(implicit.cubes[role].aliasPins, []);
+    legacy.cubes[role].aliasPins = [];
+  }
+  assert.deepEqual(create({ definition: legacy }), implicit);
+  legacy.cubes.imobs.variablePins = [];
+  assert.throws(() => create({ definition: legacy }), /^Error: mapping_invalid$/);
+});
+
+test("master-only alias pins are detached, frozen and part of the semantic hash", () => {
+  const definition = syntheticAliases();
+  const mapping = create({ definition });
+  assert.deepEqual(mapping.cubes.developments.aliasPins, definition.cubes.developments.aliasPins);
+  assert.ok(Object.isFrozen(mapping.cubes.developments.aliasPins));
+  assert.ok(Object.isFrozen(mapping.cubes.developments.aliasPins[0]));
+  assert.notEqual(mapping.mappingSha256, create().mappingSha256);
+  for (const mutate of [
+    (pins) => (pins[0].id = "synthetic-other-master"),
+    (pins) => (pins[0].propertiesSha256 = digest("synthetic-other-properties")),
+    (pins) => pins.pop(),
+  ]) {
+    const changed = syntheticAliases();
+    mutate(changed.cubes.developments.aliasPins);
+    assert.notEqual(create({ definition: changed }).mappingSha256, mapping.mappingSha256);
+  }
+  definition.cubes.developments.aliasPins[0].id = "synthetic-mutated-input";
+  assert.notEqual(
+    mapping.cubes.developments.aliasPins[0].id,
+    definition.cubes.developments.aliasPins[0].id,
+  );
+  assert.equal(PRODUCTION_DEFINITION, null);
+});
+
+for (const [name, mutate] of [
+  ["null", (cube) => (cube.aliasPins = null)],
+  ["wrong container", (cube) => (cube.aliasPins = {})],
+  ["too many", (cube) => cube.aliasPins.push({ ...cube.aliasPins[0] })],
+  ["unknown alias", (cube) => (cube.aliasPins[0].alias = "OTHER")],
+  ["wrong case", (cube) => (cube.aliasPins[0].alias = "vendas")],
+  ["expression as alias", (cube) => (cube.aliasPins[0].alias = "=VENDAS")],
+  ["wrong index", (cube) => (cube.aliasPins[0].measureIndex = 1)],
+  ["string index", (cube) => (cube.aliasPins[0].measureIndex = "0")],
+  ["malformed ID", (cube) => (cube.aliasPins[0].id = "synthetic master")],
+  ["bad digest", (cube) => (cube.aliasPins[0].propertiesSha256 = "a".repeat(63))],
+  ["duplicate alias", (cube) => (cube.aliasPins = [cube.aliasPins[0], { ...cube.aliasPins[0] }])],
+  ["duplicate master", (cube) => (cube.aliasPins[1].id = cube.aliasPins[0].id)],
+  ["variable target", (cube) => (cube.aliasPins[0].kind = "variable")],
+  ["raw definition", (cube) => (cube.aliasPins[0].qDefinition = "synthetic-private-expression")],
+  ["missing field", (cube) => delete cube.aliasPins[0].propertiesSha256],
+]) {
+  test(`factory rejects alias pins ${name}`, () => {
+    const definition = syntheticAliases();
+    mutate(definition.cubes.developments);
+    assert.throws(() => create({ definition }), /^Error: mapping_invalid$/);
+  });
+}
+
+test("optional alias pin accessors, symbols and sparse arrays never execute", () => {
+  let called = 0;
+  const dangerous = () => {
+    called++;
+    throw new Error("synthetic-private-secret");
+  };
+  for (const mutate of [
+    (cube) => Object.defineProperty(cube, "aliasPins", { get: dangerous, enumerable: true }),
+    (cube) => Object.defineProperty(cube.aliasPins[0], "id", { get: dangerous, enumerable: true }),
+    (cube) => (cube.aliasPins[0][Symbol("extra")] = true),
+    (cube) => delete cube.aliasPins[0],
+  ]) {
+    const definition = syntheticAliases();
+    mutate(definition.cubes.developments);
+    assert.throws(() => create({ definition }), /^Error: mapping_invalid$/);
+  }
+  assert.equal(called, 0);
 });
 
 for (const [instant, year, months] of [

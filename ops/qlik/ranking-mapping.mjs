@@ -80,6 +80,7 @@ function cube(value) {
     "vgvMeasureIndex",
     "contractsMeasureIndex",
     "masterPins",
+    ...(Object.hasOwn(value, "aliasPins") ? ["aliasPins"] : []),
   ]);
   id(result.objectId);
   check(![APP, SHEET].includes(result.objectId));
@@ -103,6 +104,21 @@ function cube(value) {
     new Set(result.masterPins.map((pin) => `${pin.kind}:${pin.id}`)).size ===
       result.masterPins.length,
   );
+  result.aliasPins = Object.hasOwn(result, "aliasPins")
+    ? list(result.aliasPins, 0, 2, (value) => {
+        const pin = record(value, ["alias", "measureIndex", "id", "propertiesSha256"]);
+        check(["VENDAS", "VGV"].includes(pin.alias));
+        check(
+          pin.measureIndex ===
+            (pin.alias === "VENDAS" ? result.contractsMeasureIndex : result.vgvMeasureIndex),
+        );
+        id(pin.id);
+        hash(pin.propertiesSha256);
+        return pin;
+      })
+    : [];
+  for (const key of ["alias", "measureIndex", "id"])
+    check(new Set(result.aliasPins.map((pin) => pin[key])).size === result.aliasPins.length);
   return result;
 }
 

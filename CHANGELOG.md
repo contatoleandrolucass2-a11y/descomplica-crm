@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15: Pins de medidas Qlik
+
+- Vincula aliases nomeados a masters pinados, com catalogo fresco e rejeicao
+  de colisoes/mudancas, preservando conciliacao integral e a configuracao
+  produtiva bloqueada ate leitura nativa.
+
 ## 2026-10-15: Evidencia operacional concorrente
 
 - Registra a baseline publicada do dashboard separada do owner Qlik, sem

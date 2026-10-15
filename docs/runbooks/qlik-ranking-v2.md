@@ -83,6 +83,20 @@ ou recarga, reducao, pagina incompleta ou identidade ambigua rejeita a carga.
 Fixtures e `verified:true` nao comprovam o mapeamento do tenant. O modulo de
 mapeamento produtivo permanece pendente ate a leitura privada do preflight.
 
+`aliasPins` cobre referencias diretas VENDAS/VGV a masters nomeados: alias,
+indice nativo selecionado, ID e SHA256 de GetProperties integral. Em cada
+checkpoint, um catalogo novo e limitado deve apontar um unico candidato por
+titulo ou label; identidade/titulo aprovado e hash integral sao relidos.
+Colisoes, mudancas e disposicao nao confirmada rejeitam a observacao. O
+enriquecido usa qLibraryId explicito, sem reescrever o cubo nativo, e mantem
+conciliacao por nome/mes/ano e totais. Espacos e colchetes nao dispensam pins;
+qLibraryId nativo valido prevalece sobre o fallback inline.
+
+Esse contrato opt-in nao resolve variaveis, macros ou dependencias transitivas
+automaticamente. Cada definicao real ainda precisa de revisao. Referencias:
+[masters em expressoes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Measures/use-master-measures-expressions.htm)
+e [precedencia de nomes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Expressions/references-fields-measures-variables.htm).
+
 `ranking-mapping.mjs` falha fechado enquanto a definicao produtiva e null.
 Depois da conferencia nativa, a factory deriva janeiro ate o mes corrente do
 ano atual em America/Sao_Paulo. O SHA semantico inclui definicao estatica,

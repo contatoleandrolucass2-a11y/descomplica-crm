@@ -1,5 +1,20 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Alias pinado e evidencia inicial real
+
+- Cinco suites367/367 e review independente14 probes/367 testes passaram.
+  Catalogo unico/fresco e hash integral protegem masters nomeados; enriquecido
+  usa biblioteca explicita e preserva nativo/totais/IDs. Espacos/colchetes e
+  fallback com biblioteca cobertos. Producao null; transitivas ainda pendentes.
+- Lint/tipos/test/build globais passaram no Windows/Node24.19.0/pnpm11.20.0:
+  total4979 aprovados/120 skips,51 paginas. CI Linux/publicacao nao inferidas
+  desses skips; limites/assercoes preservados.
+- Banco production consultado17:44:43Z: zero observacoes/publicacoes v2.
+  Sessao CRM autenticada manualmente confirmada; ainda UI antiga. Referencia
+  acessivel IAB17:38Z, mas agosto/fonte20-08 desatualizados, nao conciliacao
+  atual. Projecao privada corrigida antes de uso real,38 testes sinteticos;
+  detalhes e limites integrais em WORKLOG. CI main38775901605 ainda pendente.
+
 ## 2026-10-15: Publicacao concorrente observada
 
 - Coordenador status consultado17:20Z registra CRM8e3594fd/fae77f9,

@@ -3,6 +3,7 @@
  * Mapping authority is external: verified=true is required, not an attestation.
  * Hashes: SHA-256 of UTF-8 JSON, recursively sorted object keys, array order retained.
  * cubeSha256 pins qHyperCubeDef; master pins hash qDim / qMeasure, not just library IDs.
+ * aliasPins bind only fixed master names and hash their complete GetProperties response.
  */
 export async function collectQlikRanking(global, { mapping, signal } = {}) {
   const APP = "7c000871-8b32-4c0f-bfd5-4b9d46946575";
@@ -35,6 +36,18 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     value.length <= max &&
     !/[\p{Cc}\p{Cs}]/u.test(value);
   const sha = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
+  // Normalize recognition only; native expressions and their hashes remain byte-exact.
+  const directAlias = (value) => {
+    if (typeof value !== "string") return;
+    let name = value.trim();
+    if (name.startsWith("=")) name = name.slice(1).trim();
+    if (name.startsWith("[") && name.endsWith("]")) {
+      name = name.slice(1, -1);
+      // Quoted-name whitespace must not silently become a different master name.
+      check(name === name.trim() || !["VENDAS", "VGV"].includes(name.trim()), "measure_unresolved");
+    }
+    return ["VENDAS", "VGV"].find((alias) => name === alias);
+  };
   const equal = (a, b) => canonical(a) === canonical(b);
   function canonical(value, depth = 0) {
     check(depth <= 32, "definition_limit");
@@ -176,6 +189,100 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     check(Date.parse(value) <= Date.now(), "reload_unavailable");
     return value;
   }
+  function aliasCandidates(layout, id, pins) {
+    noError(layout);
+    check(layout.qInfo?.qId === id && layout.qInfo.qType === "MeasureList", "object_mismatch");
+    const list = layout.qMeasureList;
+    noError(list);
+    check(!Object.hasOwn(list, "qIsReduced") || list.qIsReduced === false, "reduced_page");
+    check(Array.isArray(list.qItems) && list.qItems.length <= 4096, "coverage_limit");
+    const ids = new Set();
+    for (const item of list.qItems) {
+      check(
+        record(item) &&
+          text(item.qInfo?.qId) &&
+          item.qInfo.qType === "measure" &&
+          !ids.has(item.qInfo.qId) &&
+          record(item.qData),
+        "master_pin_mismatch",
+      );
+      ids.add(item.qInfo.qId);
+      for (const key of ["title", "label"]) {
+        const value = item.qData[key];
+        check(value === undefined || value === "" || text(value), "master_pin_mismatch");
+      }
+    }
+    return pins.map((pin) => {
+      const matches = list.qItems.filter(
+        (item) => item.qData.title === pin.alias || item.qData.label === pin.alias,
+      );
+      check(matches.length === 1 && matches[0].qInfo.qId === pin.id, "master_pin_mismatch");
+      return {
+        id: pin.id,
+        title: matches[0].qData.title ?? "",
+        label: matches[0].qData.label ?? "",
+      };
+    });
+  }
+  async function pinnedAliases(config, cube) {
+    const pins = config.aliasPins;
+    const selected = [config.vgvMeasureIndex, config.contractsMeasureIndex];
+    const required = selected.filter(
+      (index) => !cube.qMeasures[index].qLibraryId && directAlias(cube.qMeasures[index].qDef?.qDef),
+    );
+    check(required.length === pins.length, "master_pin_mismatch");
+    for (const pin of pins) {
+      const measure = cube.qMeasures[pin.measureIndex];
+      check(
+        !measure.qLibraryId && directAlias(measure.qDef?.qDef) === pin.alias,
+        "master_pin_mismatch",
+      );
+    }
+    const definitions = new Map();
+    if (!pins.length) return definitions;
+    const id = `ranking-${crypto.randomUUID()}`;
+    temporary.push(id);
+    try {
+      const catalog = await call(doc, "createSessionObject", {
+        qInfo: { qId: id, qType: "MeasureList" },
+        qMeasureListDef: {
+          qType: "measure",
+          qData: { title: "/qMetaDef/title", label: "/qMeasure/qLabel" },
+        },
+      });
+      const before = aliasCandidates(await call(catalog, "getLayout"), id, pins);
+      for (const [index, pin] of pins.entries()) {
+        const model = await call(doc, "getMeasure", pin.id);
+        const properties = await call(model, "getProperties");
+        // Only the approved native title binds a name; display labels detect collisions only.
+        check(
+          record(properties) &&
+            properties.qInfo?.qId === pin.id &&
+            properties.qInfo.qType === "measure" &&
+            properties.qMetaDef?.title === pin.alias &&
+            properties.qMetaDef.title === before[index].title &&
+            (properties.qMeasure?.qLabel ?? "") === before[index].label,
+          "master_pin_mismatch",
+        );
+        check((await digest(properties)) === pin.propertiesSha256, "master_changed");
+        definitions.set(pin.measureIndex, { id: pin.id, definition: properties.qMeasure });
+      }
+      check(
+        equal(before, aliasCandidates(await call(catalog, "getLayout"), id, pins)),
+        "master_changed",
+      );
+    } finally {
+      // Cleanup is owned even after abort; only confirmed disposal removes the retry entry.
+      try {
+        check((await doc.destroySessionObject(id)) === true, "cleanup_failed");
+      } catch {
+        fail("cleanup_failed");
+      }
+      temporary.splice(temporary.indexOf(id), 1);
+    }
+    aborted();
+    return definitions;
+  }
   async function pinned(config) {
     const model = await call(doc, "getObject", config.objectId);
     const properties = await call(model, "getEffectiveProperties");
@@ -240,6 +347,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     }
     const resolved = (definition, kind) =>
       definition.qLibraryId ? masters.get(`${kind}:${definition.qLibraryId}`) : definition.qDef;
+    const aliases = await pinnedAliases(config, cube);
     const name = {
       ...cube.qDimensions[0],
       qLibraryId: "",
@@ -247,15 +355,17 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     };
     dimension(name);
     const measures = [config.vgvMeasureIndex, config.contractsMeasureIndex].map((index) => {
-      const definition = resolved(cube.qMeasures[index], "measure");
+      const alias = aliases.get(index);
+      const definition = alias ? alias.definition : resolved(cube.qMeasures[index], "measure");
       check(record(definition) && text(definition.qDef, 16384), "measure_unresolved");
+      check(!directAlias(definition.qDef), "measure_unresolved");
       check(
         !definition.qRelative &&
           !definition.qAccumulate &&
           (!definition.qGrouping || definition.qGrouping === "N"),
         "non_additive_measure",
       );
-      return { qDef: definition };
+      return alias ? { qLibraryId: alias.id } : { qDef: definition };
     });
     return { model, cube, name, measures };
   }
@@ -451,6 +561,26 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
           ),
         "mapping_invalid",
       );
+      if (!Object.hasOwn(config, "aliasPins")) config.aliasPins = [];
+      check(Array.isArray(config.aliasPins) && config.aliasPins.length <= 2, "mapping_invalid");
+      for (const pin of config.aliasPins) {
+        check(
+          record(pin) &&
+            equal(Object.keys(pin).sort(), ["alias", "id", "measureIndex", "propertiesSha256"]) &&
+            ["VENDAS", "VGV"].includes(pin.alias) &&
+            pin.measureIndex ===
+              (pin.alias === "VENDAS" ? config.contractsMeasureIndex : config.vgvMeasureIndex) &&
+            text(pin.id) &&
+            !/[\u0000-\u0020\u007f]/u.test(pin.id) &&
+            sha(pin.propertiesSha256),
+          "mapping_invalid",
+        );
+      }
+      for (const key of ["alias", "measureIndex", "id"])
+        check(
+          new Set(config.aliasPins.map((pin) => pin[key])).size === config.aliasPins.length,
+          "mapping_invalid",
+        );
     }
     aborted();
     doc = await call(global, "openDoc", APP);

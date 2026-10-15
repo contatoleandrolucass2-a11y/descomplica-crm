@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-15: Pins explicitos para aliases nomeados
+
+Implementado aliasPins opt-in por cubo, com indice/alias/ID/hash integral de
+GetProperties, catalogo fresco e unico a cada checkpoint, biblioteca explicita
+no enriquecido e nativo intacto. Mantem cobertura e conciliacao por nome,
+mes/ano e totais. Regressao inclui espacos/colchetes e precedencia de biblioteca
+pinada sobre fallback. Cinco suites367/367 sem skips; review independente
+14 probes modulo/VM e367 testes passou, sem P1/P2 remanescente. ESLint/Prettier
+focais e lint global passaram. Gates globais sequenciais em Windows/Node24.19.0/
+pnpm11.20.0: tipos/test/build exit0;3199 Vitest/87 skips,1077 operacionais/19
+skips,703 release/14 skips, total4979/120 skips e51 paginas. Sem mudar limites;
+skips nao validam Linux. Producao continua null/mapping_unverified;
+dependencias transitivas/binding real e CI exata ainda pendentes.
+
+Leitura observacional Supabase17:44:43Z confirmou projeto production e zero
+observacoes/publicacoes Qlik v2, sem ler linhas comerciais. Sessao CRM real
+confirmada apos login manual; pagina ainda mostra o ranking antigo bloqueado.
+Referencia Canal de Parcerias acessivel no IAB17:38Z, mas dados de agosto/fonte
+20/08, desatualizados. Serve como referencia de estrutura, nao totais atuais.
+Fetch web dessa referencia expirou; IAB confirmou acesso sem contornar login.
+Utilitario privado de projecao teve dois vazamentos sinteticos potenciais
+corrigidos antes de uso real: agora apenas IDs/hashes/campos de catalogo,
+leitura limitada em FD e arquivo privado. Review38 casos passou, sem provar
+Linux/arquivamento real. Nenhum payload, credencial ou formula crua versionado.
+
 ## 2026-10-15: Baseline publicada concorrente
 
 Consulta status17:20Z e health publico17:20:49Z confirmam CRMfae77f9,

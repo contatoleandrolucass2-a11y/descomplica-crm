@@ -5,6 +5,7 @@ import test from "node:test";
 import enigma from "enigma.js";
 import schema from "enigma.js/schemas/12.612.0.json" with { type: "json" };
 import { collectQlikRanking } from "./qix-ranking.mjs";
+import { createRankingMapping } from "./ranking-mapping.mjs";
 
 const APP = "7c000871-8b32-4c0f-bfd5-4b9d46946575";
 const SHEET = "46d5bcf7-965d-40fc-a808-2fdde2d0f74d";
@@ -228,6 +229,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
     return [{ ...dimensionCell(filter.value, 0), qState: state.selected.has(field) ? "S" : "O" }];
   }
   const doc = {
+    getVariableByName: async () => assert.fail("Variables are not an alias fallback"),
     getAppLayout: async () => invoke("reload", { qLastReloadTime: "2026-01-01T00:00:00.123456Z" }),
     getObject: async (id) => {
       const role = Object.keys(mapping.cubes).find((key) => mapping.cubes[key].objectId === id);
@@ -265,6 +267,34 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       state.created.push(id);
       state.sessions.set(id, properties);
       invoke("create", undefined, { properties });
+      if (properties.qMeasureListDef) {
+        assert.equal(properties.qInfo.qType, "MeasureList");
+        assert.deepEqual(JSON.parse(JSON.stringify(properties.qMeasureListDef)), {
+          qType: "measure",
+          qData: { title: "/qMetaDef/title", label: "/qMeasure/qLabel" },
+        });
+        return {
+          getLayout: async () =>
+            invoke("catalog", {
+              qInfo: { ...properties.qInfo },
+              qMeasureList: {
+                qItems: [...masters.values()]
+                  .filter((master) => master.qInfo.qType === "measure")
+                  .map((master) => ({
+                    qInfo: { ...master.qInfo },
+                    qData: {
+                      ...(master.qMetaDef?.title === undefined
+                        ? {}
+                        : { title: master.qMetaDef.title }),
+                      ...(master.qMeasure.qLabel === undefined
+                        ? {}
+                        : { label: master.qMeasure.qLabel }),
+                    },
+                  })),
+              },
+            }),
+        };
+      }
       if (properties.qSelectionObjectDef)
         return {
           getLayout: async () =>
@@ -341,8 +371,9 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
           mapping.cubes[key].idField === properties.qHyperCubeDef.qDimensions[0].qDef.qFieldDefs[0],
       );
       assert.ok(role);
+      const vgv = properties.qHyperCubeDef.qMeasures[0];
       assert.equal(
-        properties.qHyperCubeDef.qMeasures[0].qDef.qDef,
+        vgv.qLibraryId ? masters.get(vgv.qLibraryId).qMeasure.qDef : vgv.qDef.qDef,
         masters.get(`synthetic-${role}-vgv-master`).qMeasure.qDef,
       );
       return cubeModel(role, false);
@@ -386,6 +417,547 @@ function missingFixture(options) {
   f.mapping.cubes.developments.cubeSha256 = hash(cube);
   return f;
 }
+
+function aliasFixture(options) {
+  const f = missingFixture(options);
+  const config = f.mapping.cubes.developments;
+  f.masters.get("synthetic-imobs-vgv-master").qMeasure.qLabel = "Synthetic independent amount";
+  f.mapping.cubes.imobs.masterPins[1].sha256 = hash(
+    f.masters.get("synthetic-imobs-vgv-master").qMeasure,
+  );
+  config.masterPins = config.masterPins.filter((pin) => pin.kind !== "measure");
+  config.aliasPins = ["VENDAS", "VGV"].map((alias, measureIndex) => {
+    const id =
+      measureIndex === 1
+        ? "synthetic-developments-vgv-master"
+        : "synthetic-developments-contracts-alias";
+    const qMeasure =
+      measureIndex === 1
+        ? f.masters.get(id).qMeasure
+        : { qDef: "Count([Synthetic.Contract])", qGrouping: "N" };
+    qMeasure.qLabel = `Synthetic presentation ${alias}`;
+    const properties = {
+      qInfo: { qId: id, qType: "measure" },
+      qMetaDef: { title: alias },
+      qMeasure,
+    };
+    f.masters.set(id, properties);
+    f.cubes.developments.qMeasures[measureIndex] = {
+      qDef: { qDef: `=${alias}`, qLabel: measureIndex === 0 ? "CONTRATOS" : "VGV" },
+    };
+    return { alias, measureIndex, id, propertiesSha256: hash(properties) };
+  });
+  config.cubeSha256 = hash(f.cubes.developments);
+  return f;
+}
+
+for (const serialized of [false, true]) {
+  test(`explicit master aliases preserve six-measure native parity, serialized=${serialized}`, async () => {
+    const f = aliasFixture();
+    const native = structuredClone(f.cubes);
+    const reference = fixture();
+    const expected = await collectQlikRanking(reference.global, reference.options);
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    const result = await collect(f.global, f.options);
+    assert.deepEqual(JSON.parse(JSON.stringify(result)), expected);
+    assert.deepEqual(f.cubes, native);
+    assert.equal(f.cubes.developments.qMeasures.length, 6);
+    const enriched = f.state.calls
+      .filter((call) => call.method === "create" && call.properties.qHyperCubeDef)
+      .map((call) => call.properties.qHyperCubeDef)
+      .find(
+        (cube) => cube.qDimensions[0].qDef.qFieldDefs[0] === f.mapping.cubes.developments.idField,
+      );
+    assert.deepEqual(JSON.parse(JSON.stringify(enriched.qMeasures)), [
+      { qLibraryId: f.mapping.cubes.developments.aliasPins[1].id },
+      { qLibraryId: f.mapping.cubes.developments.aliasPins[0].id },
+    ]);
+    assert.equal(enriched.qSuppressMissing, false);
+    assert.equal(enriched.qSuppressZero, false);
+    assert.equal(f.state.counts.get("catalog"), 2 * (1 + 2 * (f.mapping.periods.length + 1)));
+    assert.equal(f.state.sessions.size, 0);
+    assert.equal(f.state.created.length, f.state.destroyed.length);
+    assert.doesNotMatch(JSON.stringify(result), /qLibraryId|propertiesSha256|Sum\(|Count\(/);
+  });
+}
+
+for (const [alias, measureIndex] of [
+  ["VENDAS", 0],
+  ["VGV", 1],
+]) {
+  for (const expression of [`= ${alias}`, ` =${alias} `, `${alias} `]) {
+    test(`whitespace identifies ${JSON.stringify(expression)} without rewriting the pinned source`, async () => {
+      const f = aliasFixture();
+      f.cubes.developments.qMeasures[measureIndex].qDef.qDef = expression;
+      const config = f.mapping.cubes.developments;
+      config.cubeSha256 = hash(f.cubes.developments);
+      const native = structuredClone(f.cubes.developments);
+      const collect = runInNewContext(`(${collectQlikRanking.toString()})`, {
+        crypto: webcrypto,
+        TextEncoder,
+      });
+      const result = await collect(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.deepEqual(f.cubes.developments, native);
+      assert.equal(config.cubeSha256, hash(f.cubes.developments));
+      assert.equal(f.cubes.developments.qMeasures[measureIndex].qDef.qDef, expression);
+      assert.equal(f.state.sessions.size, 0);
+    });
+
+    test(`whitespace cannot bypass the required ${alias} pin: ${JSON.stringify(expression)}`, async () => {
+      const f = aliasFixture();
+      f.cubes.developments.qMeasures[measureIndex].qDef.qDef = expression;
+      const config = f.mapping.cubes.developments;
+      config.cubeSha256 = hash(f.cubes.developments);
+      config.aliasPins = config.aliasPins.filter((pin) => pin.alias !== alias);
+      await rejected(f, "master_pin_mismatch");
+      assert.ok(!f.state.calls.some((call) => call.method === "catalog"));
+    });
+  }
+}
+
+test("whitespace does not bypass the exact source cube hash", async () => {
+  const f = aliasFixture();
+  f.cubes.developments.qMeasures[1].qDef.qDef = " =VGV ";
+  await rejected(f, "definition_changed");
+});
+
+test("bracketed VENDAS cannot collect without a pin or a catalog check", async () => {
+  const f = fixture();
+  f.cubes.developments.qMeasures[0].qDef.qDef = "=[VENDAS]";
+  f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+  await rejected(f, "master_pin_mismatch");
+  assert.equal(f.state.counts.get("catalog") ?? 0, 0);
+});
+
+test("valid library pin takes precedence over its inline VGV fallback", async () => {
+  const f = fixture();
+  f.cubes.developments.qMeasures[1].qDef = { qDef: "VGV" };
+  f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+  const native = structuredClone(f.cubes.developments);
+  const result = await collectQlikRanking(f.global, f.options);
+  assert.equal(result.status, "collected", JSON.stringify(result));
+  assert.equal(f.state.counts.get("catalog") ?? 0, 0);
+  assert.deepEqual(f.cubes.developments, native);
+});
+
+for (const [alias, measureIndex] of [
+  ["VENDAS", 0],
+  ["VGV", 1],
+]) {
+  for (const expression of [`=[${alias}]`, ` = [${alias}] `, ` [${alias}] `]) {
+    test(`bracketed ${JSON.stringify(expression)} requires its explicit alias pin`, async () => {
+      const f = aliasFixture();
+      f.cubes.developments.qMeasures[measureIndex].qDef.qDef = expression;
+      const config = f.mapping.cubes.developments;
+      config.cubeSha256 = hash(f.cubes.developments);
+      config.aliasPins = config.aliasPins.filter((pin) => pin.alias !== alias);
+      await rejected(f, "master_pin_mismatch");
+    });
+
+    test(`bracketed ${JSON.stringify(expression)} binds by ID without rewriting the native expression`, async () => {
+      const f = aliasFixture();
+      f.cubes.developments.qMeasures[measureIndex].qDef.qDef = expression;
+      f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+      const native = structuredClone(f.cubes.developments);
+      const collect = runInNewContext(`(${collectQlikRanking.toString()})`, {
+        crypto: webcrypto,
+        TextEncoder,
+      });
+      const result = await collect(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.ok(f.state.counts.get("catalog") > 0);
+      assert.deepEqual(f.cubes.developments, native);
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+
+  for (const expression of [`=[ ${alias}]`, `=[${alias} ]`, ` = [ ${alias} ] `]) {
+    test(`spaces inside quoted ${JSON.stringify(expression)} fail closed without trimming the name`, async () => {
+      const f = aliasFixture();
+      f.cubes.developments.qMeasures[measureIndex].qDef.qDef = expression;
+      f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+      await rejected(f, "measure_unresolved");
+      assert.equal(f.state.counts.get("catalog") ?? 0, 0);
+    });
+  }
+
+  for (const expression of [`= ${alias}`, ` = [${alias}] `, `=[ ${alias} ]`]) {
+    test(`library ID precedence ignores unused inline fallback ${JSON.stringify(expression)}`, async () => {
+      const f = fixture();
+      const config = f.mapping.cubes.developments;
+      let id = "synthetic-developments-vgv-master";
+      if (alias === "VENDAS") {
+        id = "synthetic-library-contracts";
+        f.masters.set(id, {
+          qInfo: { qId: id, qType: "measure" },
+          qMeasure: { qDef: "Count([Synthetic.Contract])", qGrouping: "N" },
+        });
+        config.masterPins.push({ kind: "measure", id, sha256: hash(f.masters.get(id).qMeasure) });
+      }
+      f.cubes.developments.qMeasures[measureIndex] = { qLibraryId: id, qDef: { qDef: expression } };
+      config.cubeSha256 = hash(f.cubes.developments);
+      const native = structuredClone(f.cubes.developments);
+      const result = await collectQlikRanking(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.equal(f.state.counts.get("catalog") ?? 0, 0);
+      assert.deepEqual(f.cubes.developments, native);
+    });
+  }
+}
+
+test("a bracketed alias in the actual linked master definition remains unbound", async () => {
+  const f = fixture();
+  const id = "synthetic-developments-vgv-master";
+  f.masters.get(id).qMeasure.qDef = " = [VGV] ";
+  f.mapping.cubes.developments.masterPins[1].sha256 = hash(f.masters.get(id).qMeasure);
+  await rejected(f, "measure_unresolved");
+});
+
+for (const expression of ["=V GV", "=VGV+0", "=$(VGV)", "==VGV", "=vgv"]) {
+  test(`only direct fixed aliases can use an alias pin, not ${JSON.stringify(expression)}`, async () => {
+    const f = aliasFixture();
+    f.cubes.developments.qMeasures[1].qDef.qDef = expression;
+    f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+    await rejected(f, "master_pin_mismatch");
+  });
+}
+
+test("title-only named masters bind without a matching or present display label", async () => {
+  const f = aliasFixture();
+  for (const pin of f.mapping.cubes.developments.aliasPins) {
+    delete f.masters.get(pin.id).qMeasure.qLabel;
+    pin.propertiesSha256 = hash(f.masters.get(pin.id));
+  }
+  const result = await collectQlikRanking(f.global, f.options);
+  assert.equal(result.status, "collected", JSON.stringify(result));
+  assert.equal(f.state.sessions.size, 0);
+});
+
+test("label-only candidate without an approved native title remains blocked", async () => {
+  const f = aliasFixture();
+  const pin = f.mapping.cubes.developments.aliasPins[1];
+  const properties = f.masters.get(pin.id);
+  delete properties.qMetaDef.title;
+  properties.qMeasure.qLabel = pin.alias;
+  pin.propertiesSha256 = hash(properties);
+  await rejected(f, "master_pin_mismatch");
+});
+
+test("whitespace in an unbound linked-master alias fails closed", async () => {
+  const f = fixture();
+  const id = "synthetic-developments-vgv-master";
+  f.masters.get(id).qMeasure.qDef = " = VGV ";
+  f.mapping.cubes.developments.masterPins[1].sha256 = hash(f.masters.get(id).qMeasure);
+  await rejected(f, "measure_unresolved");
+});
+
+test("alias catalog examines the complete list, ignores item order and reads no unrelated properties", async () => {
+  const f = aliasFixture({
+    hook(method, value, context) {
+      if (method === "catalog" && context.count % 2 === 0) value.qMeasureList.qItems.reverse();
+      if (method === "master") assert.ok(!context.id.startsWith("synthetic-unrelated-"));
+      return value;
+    },
+  });
+  for (let index = 0; index < 70; index++)
+    f.masters.set(`synthetic-unrelated-${index}`, {
+      qInfo: { qId: `synthetic-unrelated-${index}`, qType: "measure" },
+      qMetaDef: { title: `Synthetic unrelated ${index}` },
+      qMeasure: { qDef: "synthetic-private-unrelated", qLabel: "" },
+    });
+  const result = await collectQlikRanking(f.global, f.options);
+  assert.equal(result.status, "collected", JSON.stringify(result));
+  assert.equal(f.state.sessions.size, 0);
+});
+
+for (const [name, mutate] of [
+  ["no pins", (f) => delete f.mapping.cubes.developments.aliasPins],
+  ["partial pins", (f) => f.mapping.cubes.developments.aliasPins.pop()],
+  [
+    "linked native measure cannot opt in",
+    (f) => {
+      f.cubes.developments.qMeasures[0].qLibraryId = "synthetic-developments-vgv-master";
+      f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+    },
+  ],
+  [
+    "no master candidate, with no variable fallback",
+    (f) => f.masters.delete(f.mapping.cubes.developments.aliasPins[0].id),
+  ],
+  [
+    "mismatched native alias",
+    (f) => {
+      f.cubes.developments.qMeasures[0].qDef.qDef = "=VGV";
+      f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+    },
+  ],
+  [
+    "master name differs even when its label matches",
+    (f) => {
+      const pin = f.mapping.cubes.developments.aliasPins[0];
+      const properties = f.masters.get(pin.id);
+      properties.qMetaDef.title = "Synthetic other name";
+      properties.qMeasure.qLabel = pin.alias;
+      pin.propertiesSha256 = hash(properties);
+    },
+  ],
+]) {
+  test(`master aliases reject ${name}`, async () => {
+    const f = aliasFixture();
+    mutate(f);
+    await rejected(f, "master_pin_mismatch");
+  });
+}
+
+for (const [name, mutate] of [
+  ["null", (config) => (config.aliasPins = null)],
+  ["extra variable kind", (config) => (config.aliasPins[0].kind = "variable")],
+  ["wrong index", (config) => (config.aliasPins[0].measureIndex = 1)],
+  ["wrong alias", (config) => (config.aliasPins[0].alias = "OTHER")],
+  ["bad digest", (config) => (config.aliasPins[0].propertiesSha256 = "private-secret")],
+  ["duplicate entry", (config) => (config.aliasPins = [config.aliasPins[0], config.aliasPins[0]])],
+]) {
+  test(`direct collector rejects alias pins ${name} before QIX`, async () => {
+    const f = aliasFixture();
+    mutate(f.mapping.cubes.developments);
+    await rejected(f, "mapping_invalid");
+    assert.equal(f.state.calls.length, 0);
+  });
+}
+
+test("factory alias mapping crosses the actual collector boundary without altering formulas", async () => {
+  const f = aliasFixture();
+  const mapping = createRankingMapping({
+    now: () => new Date("2026-02-15T12:00:00.000Z"),
+    definition: {
+      verified: true,
+      provenance: {
+        kind: "synthetic-fixture",
+        observedAt: "2026-01-01T00:00:00.000Z",
+        metadataSha256: hash("synthetic-metadata"),
+      },
+      filters: f.mapping.filters,
+      calendar: f.mapping.calendar,
+      cubes: f.mapping.cubes,
+    },
+  });
+  const result = await collectQlikRanking(f.global, { mapping, signal: f.controller.signal });
+  assert.equal(result.status, "collected", JSON.stringify(result));
+  assert.equal(result.source.mappingSha256, mapping.mappingSha256);
+  assert.equal(f.cubes.developments.qMeasures[0].qDef.qDef, "=VENDAS");
+  assert.equal(f.cubes.developments.qMeasures[1].qDef.qDef, "=VGV");
+  assert.equal(f.state.sessions.size, 0);
+});
+
+for (const stage of ["month", "annual"]) {
+  test(`master alias binding still rejects internally consistent but divergent ${stage} facts`, async () => {
+    const f = aliasFixture({
+      hook(method, value, context) {
+        if (context.role !== "developments" || context.annual !== (stage === "annual"))
+          return value;
+        if (stage === "month" && context.native) return value;
+        if (method === "cubeLayout") value.qHyperCube.qGrandTotalRow[context.native ? 1 : 0].qNum++;
+        if (method === "cubeData") value[context.native ? 1 : 2].qMatrix[0][0].qNum++;
+        return value;
+      },
+    });
+    await rejected(f, "totals_mismatch");
+  });
+}
+
+test("master alias properties are rehashed after data paging even when the cube is unchanged", async () => {
+  let changed = false;
+  const f = aliasFixture({
+    hook(method, value, context) {
+      if (method === "cubeData" && context.role === "developments") {
+        context.masters.get("synthetic-developments-vgv-master").qMetaDef.privateNote =
+          "synthetic-private-secret";
+        changed = true;
+      }
+      return value;
+    },
+  });
+  await rejected(f, "master_changed");
+  assert.ok(changed);
+});
+
+test("a master cannot silently introduce another unbound literal alias", async () => {
+  const f = aliasFixture();
+  const pin = f.mapping.cubes.developments.aliasPins[1];
+  f.masters.get(pin.id).qMeasure.qDef = "=VENDAS";
+  pin.propertiesSha256 = hash(f.masters.get(pin.id));
+  await rejected(f, "measure_unresolved");
+});
+
+test("a linked native master cannot leave a literal alias unresolved", async () => {
+  const f = fixture();
+  const id = "synthetic-developments-vgv-master";
+  f.masters.get(id).qMeasure.qDef = "=VGV";
+  f.mapping.cubes.developments.masterPins[1].sha256 = hash(f.masters.get(id).qMeasure);
+  await rejected(f, "measure_unresolved");
+});
+
+test("abort while disposing the alias catalog cannot create a late enriched cube", async () => {
+  const f = aliasFixture({
+    hook(method, value, context) {
+      if (
+        method === "destroy" &&
+        context.state.calls.some(
+          (call) =>
+            call.method === "create" &&
+            call.properties.qInfo.qId === context.id &&
+            call.properties.qMeasureListDef,
+        )
+      )
+        context.controller.abort();
+      return value;
+    },
+  });
+  await rejected(f, "cancelled");
+  const cubes = f.state.calls.filter(
+    (call) => call.method === "create" && call.properties.qHyperCubeDef,
+  );
+  assert.equal(cubes.length, 1);
+});
+
+for (const match of ["title", "label"]) {
+  test(`a second master matching by ${match} is ambiguous and is never opened`, async () => {
+    const f = aliasFixture({
+      hook(method, value) {
+        if (method === "catalog")
+          value.qMeasureList.qItems.push({
+            qInfo: { qId: "synthetic-unapproved-collision", qType: "measure" },
+            qData: { [match]: "VGV" },
+          });
+        return value;
+      },
+    });
+    await rejected(f, "master_pin_mismatch");
+    assert.ok(!f.state.calls.some((call) => call.id === "synthetic-unapproved-collision"));
+  });
+}
+
+for (const [name, mutate, reason] of [
+  [
+    "full properties changed outside qMeasure",
+    (properties) => (properties.qMetaDef.privateNote = "synthetic-private-secret"),
+    "master_changed",
+  ],
+  [
+    "label expression changed",
+    (properties) => (properties.qMeasure.qLabelExpression = "synthetic-private-secret"),
+    "master_changed",
+  ],
+  [
+    "wrong ID",
+    (properties) => (properties.qInfo.qId = "synthetic-unapproved"),
+    "master_pin_mismatch",
+  ],
+  ["wrong type", (properties) => (properties.qInfo.qType = "variable"), "master_pin_mismatch"],
+]) {
+  test(`master alias rejects ${name} without exposing private properties`, async () => {
+    const f = aliasFixture({
+      hook(method, value, context) {
+        if (method === "master" && context.id === "synthetic-developments-vgv-master")
+          mutate(value);
+        return value;
+      },
+    });
+    await rejected(f, reason);
+  });
+}
+
+for (const [name, mutate, reason] of [
+  ["missing catalog", (value) => delete value.qMeasureList, "invalid_source"],
+  [
+    "oversized catalog",
+    (value) => (value.qMeasureList.qItems = Array(4097).fill({})),
+    "coverage_limit",
+  ],
+  ["reduced catalog", (value) => (value.qMeasureList.qIsReduced = true), "reduced_page"],
+  [
+    "duplicate item",
+    (value) => value.qMeasureList.qItems.push(value.qMeasureList.qItems[0]),
+    "master_pin_mismatch",
+  ],
+  [
+    "wrong catalog identity",
+    (value) => (value.qInfo.qId = "synthetic-unapproved"),
+    "object_mismatch",
+  ],
+]) {
+  test(`master aliases reject ${name}`, async () => {
+    await rejected(
+      aliasFixture({
+        hook(method, value) {
+          if (method === "catalog") mutate(value);
+          return value;
+        },
+      }),
+      reason,
+    );
+  });
+}
+
+for (const checkpoint of ["catalog", "month", "annual"]) {
+  test(`alias candidate membership is rechecked at ${checkpoint} checkpoint`, async () => {
+    let changed = false;
+    const f = aliasFixture({
+      hook(method, value, context) {
+        if (
+          (checkpoint === "catalog" && method === "catalog" && context.count === 2) ||
+          (checkpoint !== "catalog" &&
+            method === "cubeData" &&
+            context.role === "developments" &&
+            context.annual === (checkpoint === "annual"))
+        )
+          changed = true;
+        if (changed && method === "catalog")
+          value.qMeasureList.qItems.push({
+            qInfo: { qId: "synthetic-late-collision", qType: "measure" },
+            qData: { title: "VGV" },
+          });
+        return value;
+      },
+    });
+    await rejected(f, "master_pin_mismatch");
+    assert.ok(changed);
+  });
+}
+
+for (const stage of ["create", "catalog", "master"]) {
+  test(`abort during alias ${stage} stops further work and cleans owned catalogs`, async () => {
+    const f = aliasFixture({
+      hook(method, value, context) {
+        if (
+          method === stage &&
+          (stage !== "create" || context.properties.qMeasureListDef) &&
+          (stage !== "master" || context.id === "synthetic-developments-vgv-master")
+        )
+          context.controller.abort();
+        return value;
+      },
+    });
+    await rejected(f, "cancelled");
+  });
+}
+
+test("alias catalog cleanup failure is sanitized and cannot produce collected facts", async () => {
+  const f = aliasFixture({
+    hook(method, value, context) {
+      if (method === "destroy" && context.state.sessions.size >= 5)
+        throw new Error("synthetic-private-secret");
+      return value;
+    },
+  });
+  assert.deepEqual(await collectQlikRanking(f.global, f.options), {
+    status: "unavailable",
+    reason: "cleanup_failed",
+  });
+});
 
 async function rejected(f, reason) {
   const result = await collectQlikRanking(f.global, f.options);
@@ -606,8 +1178,7 @@ test("standalone serialization runs in an isolated browser-like realm", async ()
   assert.equal(f.state.sessions.size, 0);
 });
 
-test("real Enigma 12.612 methods and return unwrapping collect over synthetic transport", async () => {
-  const f = fixture();
+async function assertSdkCollection(f) {
   const transportErrors = [];
   const models = new Map([[-1, { type: "Global", model: f.global }]]);
   const objectTypes = {
@@ -686,6 +1257,14 @@ test("real Enigma 12.612 methods and return unwrapping collect over synthetic tr
   } finally {
     await session.close();
   }
+}
+
+test("real Enigma 12.612 methods and return unwrapping collect over synthetic transport", async () => {
+  await assertSdkCollection(fixture());
+});
+
+test("real Enigma 12.612 binds explicit aliases by pinned library IDs", async () => {
+  await assertSdkCollection(aliasFixture());
 });
 
 test("strict pagination covers 3001 IDs without reading unrelated native columns", async () => {
