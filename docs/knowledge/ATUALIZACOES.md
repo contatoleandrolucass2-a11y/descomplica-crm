@@ -3870,3 +3870,14 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
   aprovados. Branch codex/gestao-meta, PR231; CI do candidato final pendente.
   Sem merge nem publicacao ate gate completo. knowledge:sync permanece limitado
   pelo tamanho do historico, conforme excecao registrada acima.
+
+## 2026-10-15: integracao concorrente de main na guia Meta
+
+- Nova conferencia as11:54 America/Sao_Paulo: origin/main avancou para
+  9ffc8a9824c3de9cfde6ef41567dc28f3f12585d (PR229 Qlik), enquanto health publico
+  permaneceu200/ok/6843ef1. Fontes:git fetch origin e GET/api/health observacional.
+- Merge sem conflitos preservou integralmente a atualizacao externa. Nenhuma
+  alteracao Qlik reimplementada pelo trabalho Meta. CI anterior nao valida a
+  combinacao atual; repetir gates no novo SHA antes de integrar/publicar.
+- knowledge:sync segue indisponivel pelo limite de tamanho registrado;
+  criterio de revisao inalterado, sem ampliar limite nem resumir historico.
