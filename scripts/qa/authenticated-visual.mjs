@@ -166,8 +166,8 @@ if (approvedCanvasByRoute.size !== routes.length) {
 const canvasDensityLimitByRoute = new Map([
   // The complete reference report replaces the former single-screen dashboard.
   ["/app", 4800],
-  // The approved workspace includes the role and full permission rows without
-  // the former internal scroll area; its desktop capture is 1598px tall.
+  // Keep the workspace compact while independent page controls scroll inside
+  // their keyboard-accessible category panel.
   ["/admin/usuarios", 1650],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
@@ -1055,7 +1055,9 @@ function inspectAdminUserAccessWorkspace() {
       visiblePanels.length === 1 &&
       panel.getAttribute("aria-labelledby") === selectedTabs[0].id &&
       selectedTabs[0].getAttribute("aria-controls") === panel.id &&
-      panel.scrollHeight <= panel.clientHeight + 1 &&
+      getComputedStyle(panel).overflowY === "auto" &&
+      panel.tabIndex === 0 &&
+      panel.scrollWidth <= panel.clientWidth + 1 &&
       gridBox &&
       rows.length > 0 &&
       rows.every((row) => Math.abs(row.getBoundingClientRect().width - gridBox.width) <= 1),
