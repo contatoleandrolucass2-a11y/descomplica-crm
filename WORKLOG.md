@@ -6219,3 +6219,12 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   compilado. Candidato anterior cancelado antes da promocao de qualquer baseline.
 - Suite local Windows:2906 aprovados,85 ignorados,2 falhas externas ao escopo;
   validate Linux aprovado no candidato anterior. Nova CI integral obrigatoria.
+
+## 2026-10-15: Referencia visual provisoria de Meta
+
+- Conferidos242 hashes da CI38785631184;22 diferencas somente Meta e220
+  entradas preservadas, incluindo Pontos. Predicado funcional original aprovado.
+- Revisao visual registra P2 de clipping no calendario desktop/tablet.
+  Referencia provisoria documenta essa pendencia; nao aprova release.
+- Correcao, assert de legibilidade e CI completa da integracao continuam
+  obrigatorios; nenhum limiar ou predicado foi reduzido.

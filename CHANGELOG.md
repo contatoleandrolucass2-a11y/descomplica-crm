@@ -2475,3 +2475,8 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 - Preserva todos os digitos dos percentuais no celular ao remover o spinner
   nativo nas telas menores, mantendo a largura original dos controles.
+
+## 2026-10-15: Evidencias autenticadas de Meta
+
+- Registra a nova estrutura visual de Meta como referencia provisoria, com
+  pendencia do calendario e exigencia de nova validacao antes da publicacao.
