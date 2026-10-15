@@ -156,7 +156,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
               dimensionCell(row.name, index),
               numberCell(row.contracts),
               numberCell(row.vgv),
-              numberCell(777),
+              ...cubes[role].qMeasures.slice(2).map(() => numberCell(777)),
             ]
           : [
               dimensionCell(row.id, index),
@@ -185,14 +185,18 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
             qHyperCube: {
               qStateName: "$",
               qMode: "S",
-              qSize: { qcx: 4, qcy: items.length },
+              qSize: { qcx: native ? 1 + cubes[role].qMeasures.length : 4, qcy: items.length },
               qDimensionInfo: Array.from({ length: native ? 1 : 2 }, () => ({
                 qIsCalculated: false,
               })),
-              qMeasureInfo: Array.from({ length: native ? 3 : 2 }, () => ({})),
-              qGrandTotalRow: (native ? [contracts, vgv, 777] : [vgv, contracts]).map((value) =>
-                numberCell(value, true),
+              qMeasureInfo: Array.from(
+                { length: native ? cubes[role].qMeasures.length : 2 },
+                () => ({}),
               ),
+              qGrandTotalRow: (native
+                ? [contracts, vgv, ...cubes[role].qMeasures.slice(2).map(() => 777)]
+                : [vgv, contracts]
+              ).map((value) => numberCell(value, true)),
             },
           },
           { role, native, annual: state.months.length > 1 },
@@ -201,7 +205,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       getHyperCubeData: async (path, pages) => {
         assert.equal(path, "/qHyperCubeDef");
         assert.ok(pages.reduce((sum, page) => sum + page.qWidth * page.qHeight, 0) <= 10000);
-        if (native) assert.ok(pages.every((page) => page.qLeft !== 3));
+        if (native) assert.ok(pages.every((page) => [0, 1, 2].includes(page.qLeft)));
         const all = matrix();
         const result = pages.map((area) => ({
           qArea: { ...area },
@@ -369,6 +373,20 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
   };
 }
 
+function missingFixture(options) {
+  const f = fixture(options);
+  const cube = f.cubes.developments;
+  cube.qReductionMode = "N";
+  cube.qSuppressMissing = true;
+  delete cube.qSuppressZero;
+  for (let index = 3; index < 6; index++)
+    cube.qMeasures.push({
+      qDef: { qDef: `Sum([Synthetic.Unrelated${index}])`, qLabel: "NOT COLLECTED" },
+    });
+  f.mapping.cubes.developments.cubeSha256 = hash(cube);
+  return f;
+}
+
 async function rejected(f, reason) {
   const result = await collectQlikRanking(f.global, f.options);
   assert.equal(result.status, "unavailable", JSON.stringify(result));
@@ -403,6 +421,156 @@ test("complete synthetic collection reconciles native, IDs, months and accumulat
   assert.deepEqual(f.state.destroyed, [...f.state.created].reverse());
   assert.doesNotMatch(JSON.stringify(result), /Sum\(|Synthetic\.Amount|777/);
 });
+
+test("native missing suppression with observed flags reconciles all rows in the serialized collector", async () => {
+  const reference = fixture();
+  const expected = await collectQlikRanking(reference.global, reference.options);
+  assert.equal(expected.status, "collected", JSON.stringify(expected));
+  const f = missingFixture();
+  const cube = f.cubes.developments;
+  assert.equal(cube.qMode, "S");
+  assert.equal(cube.qReductionMode, "N");
+  assert.equal(cube.qSuppressMissing, true);
+  assert.equal(Object.hasOwn(cube, "qSuppressZero"), false);
+  assert.equal(cube.qDimensions.length, 1);
+  assert.equal(cube.qMeasures.length, 6);
+  const collect = runInNewContext(`(${collectQlikRanking.toString()})`, {
+    crypto: webcrypto,
+    TextEncoder,
+  });
+  const result = await collect(f.global, f.options);
+  assert.deepEqual(JSON.parse(JSON.stringify(result)), expected);
+  const enriched = f.state.calls
+    .filter((call) => call.method === "create" && call.properties.qHyperCubeDef)
+    .map((call) => call.properties.qHyperCubeDef);
+  assert.equal(enriched.length, 2);
+  for (const definition of enriched) {
+    assert.equal(definition.qSuppressMissing, false);
+    assert.equal(definition.qSuppressZero, false);
+    assert.ok(definition.qDimensions.every((dimension) => dimension.qNullSuppression === false));
+  }
+  assert.equal(f.state.sessions.size, 0);
+  assert.equal(f.state.created.length, f.state.destroyed.length);
+});
+
+for (const empty of [false, true]) {
+  test(`native missing suppression rejects hidden zero rows even with matching totals and native empty=${empty}`, async () => {
+    const f = missingFixture({
+      hook(method, value, context) {
+        if (method === "cubeLayout" && context.native && context.role === "developments")
+          value.qHyperCube.qSize.qcy = empty ? 0 : 1;
+        return value;
+      },
+    });
+    for (const rows of Object.values(f.data.developments))
+      for (const [index, row] of rows.entries())
+        if (empty || index === 1) Object.assign(row, { vgv: 0, contracts: 0 });
+    await rejected(f, "dimension_mismatch");
+  });
+}
+
+for (const cell of [
+  { qNum: "NaN", qIsNull: true, qElemNumber: -2 },
+  { qNum: 0, qIsNull: true },
+]) {
+  test(`native missing suppression never turns hidden null-only facts into zero: ${cell.qNum}`, async () => {
+    const f = missingFixture({
+      rows: 1,
+      hook(method, value, context) {
+        if (context.role !== "developments") return value;
+        if (method === "cubeLayout" && context.native) value.qHyperCube.qSize.qcy = 0;
+        if (method === "cubeData" && !context.native)
+          for (const page of value)
+            if (page.qArea.qLeft >= 2) Object.assign(page.qMatrix[0][0], cell);
+        return value;
+      },
+    });
+    for (const rows of Object.values(f.data.developments))
+      Object.assign(rows[0], { vgv: 0, contracts: 0 });
+    await rejected(f, "invalid_number");
+  });
+}
+
+test("native missing suppression cannot hide a nonzero contribution under a surviving name", async () => {
+  const f = missingFixture({
+    hook(method, value, context) {
+      if (context.role !== "developments" || !context.native) return value;
+      if (method === "cubeLayout") value.qHyperCube.qGrandTotalRow[1].qNum--;
+      if (method === "cubeData") value.find((page) => page.qArea.qLeft === 2).qMatrix[0][0].qNum--;
+      return value;
+    },
+  });
+  await rejected(f, "totals_mismatch");
+});
+
+test("native missing suppression remains pinned by the complete definition hash", async () => {
+  const f = fixture();
+  f.cubes.developments.qSuppressMissing = true;
+  await rejected(f, "definition_changed");
+});
+
+for (const [name, mutate] of [
+  ["zero suppression", (cube) => (cube.qSuppressZero = true)],
+  ["data reduction", (cube) => (cube.qReductionMode = "D1")],
+  [
+    "dimension limits",
+    (cube) => (cube.qDimensions[0].qOtherTotalSpec.qOtherMode = "OTHER_COUNTED"),
+  ],
+  ["nonboolean missing suppression", (cube) => (cube.qSuppressMissing = "true")],
+]) {
+  test(`native missing suppression does not permit ${name}`, async () => {
+    const f = missingFixture();
+    mutate(f.cubes.developments);
+    f.mapping.cubes.developments.cubeSha256 = hash(f.cubes.developments);
+    await rejected(f, "limited_cube");
+  });
+}
+
+for (const [name, hook, reason] of [
+  [
+    "reduced pages",
+    (method, value) => {
+      if (method === "cubeData") for (const page of value) page.qIsReduced = true;
+    },
+    "reduced_page",
+  ],
+  [
+    "incomplete pages",
+    (method, value) => {
+      if (method === "cubeData") value[0].qMatrix.pop();
+    },
+    "incomplete_page",
+  ],
+  [
+    "unproven totals",
+    (method, value) => {
+      if (method === "cubeLayout") value.qHyperCube.qGrandTotalRow[0].qNum++;
+    },
+    "totals_mismatch",
+  ],
+  [
+    "annual mismatch",
+    (method, value, context) => {
+      if (context.annual && method === "cubeLayout")
+        value.qHyperCube.qGrandTotalRow[context.native ? 1 : 0].qNum *= 2;
+      if (context.annual && method === "cubeData")
+        for (const row of value[context.native ? 1 : 2].qMatrix) row[0].qNum *= 2;
+    },
+    "totals_mismatch",
+  ],
+]) {
+  test(`native missing suppression does not permit ${name}`, async () => {
+    await rejected(
+      missingFixture({
+        hook(method, value, context) {
+          if (context.role === "developments") hook(method, value, context);
+          return value;
+        },
+      }),
+      reason,
+    );
+  });
+}
 
 test("physical dimensions with qIsCalculated false collect successfully", async () => {
   let physicalLists = 0;

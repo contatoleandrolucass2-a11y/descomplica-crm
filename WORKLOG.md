@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-10-15: Supressao nativa de ausentes conciliada
+
+Snapshot real confirmou qSuppressMissing true. Coletor agora aceita essa flag
+sem mudar o enriquecido sem supressao, cobertura integral, celulas numericas,
+identidades e totais mensais/anuais. Linhas ocultas, nulas ou contribuicoes
+nao zero omitidas continuam rejeitadas. Supressao de zero e reducao bloqueadas.
+218 testes focais aprovados, incluindo15 regressoes novas; lint/formatacao
+focais aprovados. Aliases VENDAS/VGV exigem metadados adicionais antes de pins.
+CI/global deste delta ainda pendentes; nenhum fato publicado.
+
+## 2026-10-15: Autenticacao e metadados QIX reais
+
+Main9ffc8a9/CI38753275427 quatro jobs success. Repetido download apos gates,
+checksum/cadeia11 camadas e image:prove2 perfis aprovados; desvio anterior
+nao usado como promocao. Credencial systemd cifrada preparada com helper.
+Owner3a4698b7/9ffc8a9 promovido15:24:46.025Z pelo coordenador, sem pendencia.
+CRM6843ef1 preservado. QIX real retornou metadados, recarga14:13:23.247Z,
+snapshot privado cf87dcb1/3318bytes. Nao e ainda conexao de fatos.
+
+Referencia de Parceiras nao resolvida no container sn-tabbed-container;
+produto suprime valores ausentes e usa aliases VENDAS/VGV. Extensao de
+metadados e conciliacao correspondente pendentes, sem inventar pins ou zeros.
+
 ## 2026-10-15: Mapping por ciclo e diagnostico fechado
 
 Factory local valida definicao e politica, deriva YTD no fuso de Sao Paulo,

@@ -2,6 +2,25 @@
 
 ## Retomada em 15/10/2026
 
+CI main38753275427/9ffc8a9 concluida success nos quatro jobs. Depois disso,
+novo download privado em qlik-owner-verified-9ffc8a9-fJcSJDzQ confirmou ZIP
+77602d8a e tar83950120; cadeia OCI11 camadas e image:prove2 perfis aprovados.
+A antecipacao anterior nao foi usada para promover. Conversor aprovado
+preparou qlik-login.cred, sem imprimir valor nem fornecer chave RSA ao browser.
+
+Promocao protegida concluida2026-10-15T15:24:46.025Z:
+3a4698b7-b4b5-48cd-a55f-da61f15e53b9/9ffc8a9, imagem local64f2aad6,
+preflight pending, sem pendencia e CRM6843ef1 inalterado. QIX real alcançado,
+recarga2026-10-15T14:13:23.247Z. Snapshot privado imutavel0TX0aCu9,
+3318bytes/SHA256cf87dcb1a1c31fbda9ceec14810dcb23c0a619c7f8ad272df3d37c230fdbb627.
+Sem linhas de dados lidas/publicadas. Pendente: partners_membership_unproven;
+container real e sn-tabbed-container, estrutura ainda nao reconhecida.
+
+Produto: qSuppressMissing true, uma dimensao calculada Empreendimento (Filtro)
+e medidas CONTRATOS/VGV por aliases VENDAS/VGV. Requer conferir variaveis e
+campo de identidade; nao preencher hashes ou totais por suposicao. Ajustes
+de metadados em ramo separado e conciliacao de supressao em desenvolvimento.
+
 PR229/a90d8f3 aprovado na CI38747697537 e integrado em main9ffc8a9,
 merge2026-10-15T14:38:57Z. CI push38753275427 ainda pendente. Checkout
 canonico novo, dependencias copiadas de ad49634 apos igualdade package/lock;

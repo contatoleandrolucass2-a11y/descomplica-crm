@@ -187,9 +187,10 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
       (!cube.qStateName || cube.qStateName === "$") && (!cube.qMode || cube.qMode === "S"),
       "state_mismatch",
     );
+    // Native missing suppression is safe only after unsuppressed ID/name/totals reconciliation.
     check(
       !cube.qSuppressZero &&
-        !cube.qSuppressMissing &&
+        (!Object.hasOwn(cube, "qSuppressMissing") || typeof cube.qSuppressMissing === "boolean") &&
         (!cube.qReductionMode || cube.qReductionMode === "N"),
       "limited_cube",
     );

@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Supressao real nao implica zero
+
+- Snapshot QIX real tinha qSuppressMissing true. Aceitacao agora depende da
+  mesma prova integral nativo/enriquecido, sem converter NULL em zero. Dados
+  ocultos, faltantes e totais divergentes continuam rejeitados. Focais218,
+  incluindo15 regressoes novas, lint/formatacao aprovados. CI ainda pendente.
+- Aliases reais =VENDAS/=VGV ainda requerem definicoes e precedencia; somente
+  os nomes nao provam se sao variaveis/medidas/campos. Metadata corretivo em
+  branch separada, sem enfraquecer o bloqueio produtivo do mapping.
+
+## 2026-10-15: QIX real autenticado, mapping pendente
+
+- Main9ffc8a9/CI38753275427 quatro jobs success. Download repetido apos gates,
+  hashes/cadeia OCI11 camadas e image:prove2 perfis aprovados. Credencial
+  systemd preparada sem expor valor. Desvio anterior nao dispensou gates.
+- Owner3a4698b7/9ffc8a9 promovido15:24:46.025Z, CRM6843ef1 preservado,
+  sem pendencia. QIX real leu metadados; recarga14:13:23.247Z. Snapshot
+  privado0TX0aCu9/cf87dcb1/3318bytes, sem linhas de dados nem publicacao.
+- Container sn-tabbed-container nao resolvido para Parceiras. Produto tem
+  qSuppressMissing true e aliases VENDAS/VGV; conferir definicoes/identidades
+  reais antes do mapping. Ramo metadata corretivo separado; coleta bloqueada.
+
 ## 2026-10-15: Mapping dinamico, ainda sem pins produtivos
 
 - Factory/launcher passaram62 testes e review independente. Mesmo snapshot

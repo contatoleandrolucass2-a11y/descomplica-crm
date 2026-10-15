@@ -2,6 +2,9 @@
 
 ## 2026-10-15
 
+- Concilia cubos Qlik com supressao de ausentes, preservando rejeicao de dados
+  ocultos/nulos e igualdade integral entre nativo e enriquecido.
+
 - Qlik: mapping por ciclo compartilhado pelas duas sessoes, com ano/mes
   corrente em America/Sao_Paulo e hash da definicao/politica, sem periodos
   dinamicos. Configuracao produtiva permanece bloqueada ate conferencia nativa.
