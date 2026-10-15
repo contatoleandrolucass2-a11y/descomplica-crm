@@ -27,6 +27,16 @@
 - Diagnosticos QIX preservam somente a allowlist existente; mensagens brutas
   e campos privados continuam descartados no transporte do browser.
 
+## 2026-10-15: Resolucao de metadados Qlik
+
+- Registra gates locais e limite Windows, exigindo CI Linux e novo probe
+  nativo antes de qualquer ativacao.
+- Reconhece as referencias childRefId do container nativo de abas, mantendo
+  rejeicao de associacoes ambiguas e sem promover IDs de interface a Engine IDs.
+- Amplia a leitura limitada de metadados para identificar aliases das medidas
+  e campos de identidade. Nao coleta clientes, fatos nem verifica automaticamente
+  o mapeamento produtivo; configuracao depende de revisao nativa.
+
 ## 2026-10-15: Organizacao visual do dashboard
 
 - Remove Fonte e contexto repetido do cabecalho e o breadcrumb da raiz `/app`.

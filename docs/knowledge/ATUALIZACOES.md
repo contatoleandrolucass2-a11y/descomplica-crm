@@ -120,6 +120,40 @@ Historico integral: [arquivo de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-20
   authenticated-only e zero EXECUTE PUBLIC. Ainda sem fatos ou flag ativa.
   Detalhes, limites do backup e prova em WORKLOG/auditoria Qlik.
 
+
+## 2026-10-15: Metadata integrado validado localmente
+
+- Mainfae77f9 integrado emfacf284, sem perder dashboard/referencias/notas.
+  Lint/tipos/build51, formatacao e Gitleaks aprovados. Global2898/85 skips,
+  uma falha Windows/O_NOFOLLOW do inventario; nao ocultada ou flexibilizada.
+- Focais141 e review independente sem achado P1/P2. CI Linux exata ainda
+  obrigatoria; API nativa desta versao, fatos e ranking continuam pendentes.
+
+## 2026-10-15: Inspetor focal validado e main concorrente
+
+- Metadata/preflight141 testes aprovados, zero skips, incluindo SDK real
+  serializado. Lint aprovado com aviso preexistente; globais/CI pendentes.
+  Somente11 codigos fixos atravessam erros, sem mensagens ou dados privados.
+- Git ls-remote/gh16:06Z: mainfae77f9 (dashboard), CI38765178719 em execucao.
+  Health publico16:04:57Z200/ok/6843ef1; owner9ffc8a9/3a4698b7 separado.
+  Integrar main para validar o candidato exato; nada deste delta publicado.
+
+## 2026-10-15: Preflight real e correcao de metadados
+
+- Main9ffc8a9/CI38753275427 quatro jobs success. Novo download apos gates,
+  hashes/cadeia11 camadas e image:prove2 perfis aprovados. Owner3a4698b7
+  promovido15:24:46.025Z, sem pendencia; CRM6843ef1 preservado, health publico
+  200/ok em15:23:53Z. Credencial cifrada preparada sem valor exposto.
+- QIX autenticado retornou snapshot0TX0aCu9/cf87dcb1/3318bytes, recarga14:13Z.
+  Parceiras ainda nao resolvida em sn-tabbed-container; produto usa
+  qSuppressMissing true e aliases VENDAS/VGV. Nao converter ausencia em zero,
+  nao inferir dependencia de variavel somente pelo nome. Corrigir metadados
+  neste ramo antes do mapping PR216; fatos/agenda ainda nao comprovados.
+- Arquivamento literal de18 secoes, af225b06, preserva conteudo completo e
+  permite sync sem aumentar limites. Alteracoes corretivas ainda em validacao.
+
+Historico integral: [arquivo de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-2026-09-27-a-2026-10-13.md).
+
 ## 2026-10-15: Dashboard, PR230
 
 - Visual implementado; filtros pendentes. CI38751646222:11 capturas revisadas,
