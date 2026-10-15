@@ -12,13 +12,17 @@ import { chromium, expect } from "@playwright/test";
 const root = path.resolve(import.meta.dirname, "../..");
 const directory = path.join(root, "test-results/dashboard-report");
 const themes = ["light", "balanced", "dark"];
-const widths = [390, 768, 1440];
+const widths = [320, 390, 768, 1440, 1920];
 const views = ["all", "with_canal_imob", "without_canal_imob"];
 const stages = ["opportunities", "appointments", "visits", "folders", "sales"];
 const sourceFiles = [
   "app/(protected)/app/_components/DashboardReport.tsx",
   "app/(protected)/app/_components/DashboardAutoRefresh.tsx",
   "app/(protected)/app/_components/DashboardReport.module.css",
+  "app/(protected)/app/_components/DashboardPulse.tsx",
+  "app/(protected)/app/_components/DashboardPulse.module.css",
+  "app/(protected)/app/_components/DashboardComparisons.tsx",
+  "app/(protected)/app/_components/DashboardComparisons.module.css",
   "app/(protected)/app/_components/analytics/analytics.module.css",
   "app/(protected)/app/_components/analytics/Charts.tsx",
   "app/(protected)/app/_components/analytics/DataDisplay.tsx",
@@ -130,10 +134,14 @@ function scenarios() {
   for (const metrics of Object.values(large.dashboard.metrics)) {
     for (const metric of Object.values(metrics)) metric.currentMonth = 9876543.2;
   }
+  const overCapacity = structuredClone(complete);
+  overCapacity.dashboard.metrics.all.visits.currentMonth = 45;
+  overCapacity.dashboard.metrics.all.folders.currentMonth = 102;
   return {
     complete,
     zero,
     large,
+    "over-capacity": overCapacity,
     "no-goals": noGoals,
     unavailable: {
       ...complete,
@@ -372,7 +380,11 @@ async function checkStructure(page) {
     await expect(page.getByRole("heading", { name: new RegExp(`^${name}`, "i") })).toHaveCount(1);
   }
   await expect(page.locator("main")).not.toContainText(/NaN|Infinity|undefined/);
-  await expect(page.locator('[aria-labelledby="report-pulse-title"] article')).toHaveCount(5);
+  await expect(page.locator("main dt").filter({ hasText: /^Fonte$/ })).toHaveCount(0);
+  await expect(page.locator("main")).not.toContainText("Salesforce Analytics Reports API");
+  await expect(page.locator('[aria-labelledby="report-pulse-title"] li[data-stage]')).toHaveCount(
+    5,
+  );
   await expect(page.locator('[aria-labelledby="report-pulse-title"] figure')).toHaveCount(5);
   await expect(page.locator('[aria-labelledby="report-monthly-title"] article')).toHaveCount(6);
   const funnels = page.locator('[aria-labelledby="report-monthly-title"] figure');
@@ -412,7 +424,7 @@ async function checkLayout(page) {
     if (document.documentElement.scrollWidth > innerWidth + 1)
       problems.push("document horizontal overflow");
     for (const element of document.querySelectorAll(
-      "main h1, main h2, main h3, main a, main button, main summary, main dt, main dd",
+      "main h1, main h2, main h3, main a, main button, main summary, main dt, main dd, main td",
     )) {
       if (!element.checkVisibility()) continue;
       const bounds = element.getBoundingClientRect();
@@ -423,8 +435,8 @@ async function checkLayout(page) {
       if (clipped)
         problems.push(`${element.tagName}: ${element.textContent.trim()} (clipped text)`);
     }
-    const cards = [...document.querySelectorAll("main article")].filter((card) =>
-      card.checkVisibility(),
+    const cards = [...document.querySelectorAll("main article, main li[data-stage]")].filter(
+      (card) => card.checkVisibility(),
     );
     for (let index = 0; index < cards.length; index++) {
       const first = cards[index].getBoundingClientRect();
@@ -550,7 +562,9 @@ async function run() {
           await settle(page);
           if (scenario === "complete" && width === 1440) {
             report.themeSamples[theme] = await page.evaluate(() => {
-              const card = document.querySelector('[aria-labelledby="report-pulse-title"] article');
+              const card = document.querySelector(
+                '[aria-labelledby="report-pulse-title"] li[data-stage]',
+              );
               return {
                 background: getComputedStyle(card).backgroundColor,
                 color: getComputedStyle(card).color,
@@ -579,6 +593,13 @@ async function run() {
             path: path.join(directory, `${scenario}-${theme}-${width}.png`),
             fullPage: true,
           });
+          if (scenario === "complete" && [320, 1440, 1920].includes(width)) {
+            for (const section of ["pulse", "diagnosis", "operational"]) {
+              await page.locator(`[aria-labelledby="report-${section}-title"]`).screenshot({
+                path: path.join(directory, `${section}-${theme}-${width}.png`),
+              });
+            }
+          }
           if (scenario === "complete" && width !== 768)
             await page.locator('[aria-labelledby="report-monthly-title"]').screenshot({
               path: path.join(directory, `funnels-${theme}-${width}.png`),
@@ -640,7 +661,7 @@ async function run() {
           assert.equal(url.searchParams.get("view"), "with_canal_imob");
       }
     });
-    for (const scenario of ["zero", "no-goals", "large"]) {
+    for (const scenario of ["zero", "no-goals", "large", "over-capacity"]) {
       await page.evaluate((name) => window.qaRender(name), scenario);
       await check(`${scenario}/structure`, () => checkStructure(page));
       for (const width of widths) {
@@ -654,6 +675,16 @@ async function run() {
               .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
               .locator('[data-stage="sales"] dd'),
           ).toHaveText("9.876.543,2");
+        });
+      if (scenario === "over-capacity")
+        await check("over-capacity/exact-ratio", async () => {
+          const figure = page.locator(
+            '[aria-labelledby="report-pulse-title"] li[data-stage="folders"] figure',
+          );
+          await expect(figure).toHaveAttribute("data-overflow", "true");
+          await expect(figure.locator("strong")).toHaveText("226,7%");
+          await expect(figure).toHaveAccessibleName(/226,7%.*acima de 100%/);
+          await expect(figure.locator("circle")).toHaveCount(3);
         });
       await settle(page);
       await page.screenshot({ path: path.join(directory, `${scenario}.png`), fullPage: true });

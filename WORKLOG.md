@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-15: Captura combinada apos main concorrente
+
+Integracao de mainfae77f9 preserva o codigo Ranking e o novo dashboard.
+Referencias temporarias sao integralmente as da main: manifesto2383f380 e
+242 imagens conferidas por hash/tamanho/dimensoes. Os11 Ranking anteriores
+permanecem recuperaveis em e03b972. Nao foi criada proveniencia composta.
+Nova captura combinada obrigatoria antes de promover referencias Ranking;
+verify pode acusar as11 diferencas intencionais enquanto isso. Nenhum deploy.
+Teste reference-parity15 aprovado, um browser condicional nao executado;
+formatacao/diff-check aprovados. CI/captura completas pendentes deste merge.
+
 ## 2026-10-15: Supressao nativa de ausentes conciliada
 
 Snapshot real confirmou qSuppressMissing true. Coletor agora aceita essa flag
@@ -84,6 +95,48 @@ ou legados para anon/authenticated/service_role e zero EXECUTE PUBLIC nas RPCs
 e helpers. Writer somente service_role, reader somente authenticated; helpers
 com volatilidade i/s/s. Nenhuma carga/flag Qlik habilitada ainda. Autenticacao
 na VPS depende da promocao do PR229; resultado atual continua reauth_required.
+
+## 2026-10-15: Organizacao do dashboard e limite dos filtros
+
+- Branch `codex/dashboard-filtros-layout`, base `ad496340`; producao observada
+  na abertura em `6843ef1`. Site de referencia apenas consultado pelo navegador.
+- Removidos os tres textos indicados. Componentes DashboardPulse e
+  DashboardComparisons preservam todos os indicadores e comparativos existentes.
+  Ritmo e diagnostico reorganizados sem alterar formulas ou fontes.
+- QA sintetica ampliada para 320, 390, 768, 1440 e 1920 px nos tres temas,
+  com ausencia, zero, numeros grandes e relacao acima de 100%.
+- Marcador sintetico do dashboard continua verificavel no atributo tecnico;
+  nao ha mais bloco Fonte visivel. Evidencia nova distingue verificacao de
+  marcador e forma de apresentacao; o manifesto historico nao foi adulterado.
+- Investigacao confirmou que o payload v2 oferece somente tres visoes
+  agregadas. Base geral nao fornece, por si, dimensoes ao painel. A resposta
+  do usuario nao confirmou equivalencia entre conta/corretor ou empresa/imobiliaria.
+  Nenhum filtro ficticio, migration remota, ACL, coleta ou workflow alterado.
+- Validacao local Node 24.19.0/pnpm 11.20.0: lint aprovado (um aviso previo
+  em connected-systems.mjs), typecheck e build aprovados; 49 testes focados
+  de relatorio, componentes e breadcrumbs aprovados. QA sintetica: 124/124,
+  incluindo tres temas, cinco larguras e atualizacao automatica.
+- Suite completa: 2.897 aprovados, 85 ignorados e duas falhas. Uma falha
+  preexistente foi reproduzida no Windows:
+  `salesforce-inventory-api.test.ts` aceita symlink porque `O_NOFOLLOW` nao existe
+  nessa plataforma. Teste e protecao nao modificados; Linux deve validar na CI.
+  A outra foi timeout de initialize/tools/list em project-devtools.test.ts.
+  Etapas Node de coletores/release nao executadas pelo comando apos a falha.
+  Nenhuma falha foi ocultada; publicacao depende dos gates completos.
+- Docker local indisponivel; banco/RLS, restore e matriz autenticada dependem
+  da CI isolada. Baselines autenticadas nao alteradas nesta etapa.
+- PR230 draft aberto no commit bbcca1b; CI38751246231 em andamento.
+  DevTools isolado24/24 passou, sem causa conclusiva para o timeout global.
+  Auditoria completa em docs/audits/dashboard-layout-2026-10-15.md; entrada
+  atual vinculada na nota principal para respeitar o limite de exportacao,
+  sem remover o historico ou aumentar o limite. Sem merge ou deploy.
+- Metadados Supabase de producao, somente leitura, confirmaram agregados sem
+  os quatro IDs e nenhuma tabela v3 listada em public. Evidencia na auditoria.
+  Sync confirmado em3764dfb; CI38751646222 aprovou validate/restore, banco e
+  E2E. Matriz autenticada pendente na consulta15:05Z; sem publicacao.
+- CI concluida com falha somente nas11 capturas esperadas de /app; predicado
+  funcional completo aprovado. Referencias inspecionadas e promovidas com
+  hashes/proveniencia, preservando231 imagens. Nova CI verify obrigatoria.
 
 ## 2026-10-15: Renovacao Qlik pelo cofre autorizado
 

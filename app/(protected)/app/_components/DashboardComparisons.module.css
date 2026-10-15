@@ -1,0 +1,161 @@
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.45;
+  letter-spacing: 0;
+}
+
+.caption {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem 0.625rem;
+  border-bottom: 1px solid var(--analytics-line);
+  text-align: right;
+  vertical-align: middle;
+  overflow-wrap: anywhere;
+}
+
+.table thead th {
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+  font-weight: 650;
+}
+
+.table th:first-child {
+  width: 30%;
+  text-align: left;
+}
+
+.table .current {
+  background: var(--analytics-surface-strong);
+  color: var(--analytics-ink);
+}
+
+.current b {
+  font-size: 1rem;
+  font-weight: 750;
+}
+
+.interval,
+.comparison,
+.value {
+  display: block;
+  min-width: 0;
+}
+
+.interval {
+  font-weight: 700;
+}
+
+.comparison {
+  margin-top: 0.1875rem;
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.variation {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.1875rem;
+  max-width: 100%;
+  font-weight: 650;
+}
+
+.variation svg {
+  flex: 0 0 14px;
+}
+
+.variation[data-direction="up"] {
+  color: var(--analytics-positive-ink);
+}
+
+.variation[data-direction="down"] {
+  color: var(--analytics-danger-ink);
+}
+
+.unavailable {
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+  font-weight: 400;
+}
+
+.table .empty {
+  padding-block: 1rem;
+  color: var(--analytics-muted);
+  text-align: center;
+}
+
+@media (max-width: 600px) {
+  .table,
+  .table tbody {
+    display: block;
+  }
+
+  /* Keep column headers available to screen readers in the stacked layout. */
+  .table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  .table tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    padding-block: 0.5rem;
+    border-bottom: 1px solid var(--analytics-line);
+  }
+
+  .table th,
+  .table td {
+    min-width: 0;
+    border-bottom: 0;
+    padding: 0.5rem 0.625rem;
+    text-align: left;
+  }
+
+  .table th:first-child {
+    grid-column: 1 / -1;
+    width: auto;
+  }
+
+  .table td::before {
+    display: block;
+    margin-bottom: 0.25rem;
+    color: var(--analytics-muted);
+    font-size: 0.75rem;
+    font-weight: 500;
+    content: attr(data-label);
+    content: attr(data-label) / "";
+  }
+
+  .table td:last-child {
+    grid-column: 1 / -1;
+  }
+
+  .value {
+    font-size: 1rem;
+  }
+
+  .variation {
+    justify-content: flex-start;
+  }
+}

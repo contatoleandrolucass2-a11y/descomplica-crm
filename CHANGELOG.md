@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-15: Integracao de referencias visuais
+
+- Preserva dashboard e Ranking na mesma base; exige nova captura combinada,
+  sem atribuir imagens de lotes distintos a uma unica proveniencia.
+
 ## 2026-10-15
 
 - Concilia cubos Qlik com supressao de ausentes, preservando rejeicao de dados
@@ -10,6 +15,19 @@
   dinamicos. Configuracao produtiva permanece bloqueada ate conferencia nativa.
 - Diagnosticos QIX preservam somente a allowlist existente; mensagens brutas
   e campos privados continuam descartados no transporte do browser.
+
+## 2026-10-15: Organizacao visual do dashboard
+
+- Remove Fonte e contexto repetido do cabecalho e o breadcrumb da raiz `/app`.
+- Reorganiza as roscas, ritmo de vendas, diagnostico e tabelas comparativas,
+  preservando valores, intervalos, metas e atualizacao automatica.
+- Distingue entrada, ausencia, zero e conversoes acima de 100%; adapta tabelas
+  ao celular e utiliza os tokens dos tres temas existentes.
+- Filtros dimensionais completos permanecem pendentes: os agregados publicados
+  nao permitem recalcular resultados por gerente, responsavel e empresa.
+- Registra a verificacao observacional da estrutura remota, sem alterar dados.
+- Atualiza somente onze referencias visuais revisadas do dashboard, mantendo
+  os criterios de regressao e as demais telas.
 
 ## 2026-10-15: Renovacao de sessao Qlik
 

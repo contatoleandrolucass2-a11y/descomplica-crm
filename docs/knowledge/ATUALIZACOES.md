@@ -1,5 +1,16 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Baseline integrada exige captura nova
+
+- Mainfae77f9 integrado ao ramo Ranking. Referencia temporaria integral da
+  main, manifesto2383f380/242 imagens verificadas, sem proveniencia mista.
+  Lote Ranking anterior preservado em e03b972. Codigo Ranking inalterado;
+  nova captura combinada/revisao exigidas antes de atualizar a referencia.
+- Reference-parity15 aprovado e um browser condicional nao executado.
+  CI completa ainda pendente. O PR de fatos segue draft enquanto faltam
+  pins nativos/publicacao. Owner9ffc8a9 consultou QIX sozinho16:24:52Z,
+  mesmo PID3446769/sem restarts desde15:24:35Z; ainda somente metadados.
+
 ## 2026-10-15: Supressao real nao implica zero
 
 - Snapshot QIX real tinha qSuppressMissing true. Aceitacao agora depende da
@@ -70,6 +81,12 @@ Historico integral: [arquivo de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-20
   zero grants diretos novos/legados, writer service_role-only, reader
   authenticated-only e zero EXECUTE PUBLIC. Ainda sem fatos ou flag ativa.
   Detalhes, limites do backup e prova em WORKLOG/auditoria Qlik.
+
+## 2026-10-15: Dashboard, PR230
+
+- Visual implementado; filtros pendentes. CI38751646222:11 capturas revisadas,
+  demais gates aprovados; sem deploy. Integracao9ffc8a9 exige nova CI.
+  Fontes, testes e limites integrais: [auditoria](../audits/dashboard-layout-2026-10-15.md).
 
 ## 2026-10-15: Renovacao candidata da sessao Qlik
 
