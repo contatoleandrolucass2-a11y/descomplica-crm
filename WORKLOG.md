@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-15: Baseline publicada concorrente
+
+Consulta status17:20Z e health publico17:20:49Z confirmam CRMfae77f9,
+deployment8e3594fd, horario real16:50:53.010Z, sem pendencia. CI38765178719
+quatro jobs success. Publicacao feita por outro trabalho, nao por esta tarefa.
+Preservar esse baseline nas novas consultas/CAS; ownerQlik continua9ffc8a9.
+Checkout a7fdf92/dependencias privados preparados sem instalar runtime.
+
 ## 2026-10-15: Referencia combinada revisada
 
 Captura38770527668 success, artefato11993236211, ZIP SHA256

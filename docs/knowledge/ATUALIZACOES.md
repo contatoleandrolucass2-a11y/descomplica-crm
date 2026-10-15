@@ -1,5 +1,16 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Publicacao concorrente observada
+
+- Coordenador status consultado17:20Z registra CRM8e3594fd/fae77f9,
+  deployedAt16:50:53.010Z, imagem3fc560e5, sem pendencia. GET publico
+  /api/health17:20:49Z confirma200/ok/fae77f9. CI main38765178719 quatro
+  jobs success. Este agente nao publicou esse dashboard; preservar baseline
+  nova nas proximas observacoes/CAS, nunca reutilizar o esperado6843ef1.
+- Checkout separado a7fdf92 preparado sem runtime; package/lock identicos a
+  9ffc8a9, copia de dependencias38123 entradas protegidas/root/nlink1,
+  sem bytes modificados ou build na VPS. CI38775901605 ainda pendente.
+
 ## 2026-10-15: Captura unica promovida para revisao verify
 
 - Captura38770527668/aa9df803 success,242 hashes conferidos,11 Ranking

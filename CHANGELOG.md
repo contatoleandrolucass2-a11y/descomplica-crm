@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-15: Evidencia operacional concorrente
+
+- Registra a baseline publicada do dashboard separada do owner Qlik, sem
+  promover dados ou modificar o servico ativo nesta etapa.
+
 ## 2026-10-15: Referencias do Ranking revisadas
 
 - Promove a captura combinada limpa de242 imagens, com11 Ranking revisados e
