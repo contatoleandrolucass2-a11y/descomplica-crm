@@ -17,7 +17,7 @@ const fixture = {
   appointments: 12,
   visits: 5,
   folders: 4,
-  approvedFolders: 2,
+  approvedFolders: 1,
   sales: 1,
   opportunitiesRate: 896,
   appointmentsRate: 242,
@@ -60,6 +60,13 @@ export async function runGoalPlanningPreview() {
     ["crm.management", "/app/gestao", "Gestão", "management", null],
     ["crm.settings", "/app/configuracoes", "Configurações", "settings", null],
     ["crm.settings.goals", goalsPath, "Metas do funil", "settings", "crm.settings"],
+    [
+      "crm.settings.partnerships",
+      `${goalsPath}/parcerias`,
+      "Parcerias",
+      "settings",
+      "crm.settings",
+    ],
   ].map(([key, route, name, section, parentKey], index) => ({
     key,
     path: route,
@@ -126,7 +133,10 @@ export async function runGoalPlanningPreview() {
           import {PathnameContext} from 'next/dist/shared/lib/hooks-client-context.shared-runtime.js';
           import '@/app/globals.css';
           void(async()=>{
-            const content=<main><GoalPlanning profile="dv" initialValues={${JSON.stringify(fixture)}} canManageDraft={true} revision={0} today="2026-10-15" /></main>;
+            const profile=location.pathname.endsWith('/parcerias')?'partnerships':'dv';
+            const empty=new URLSearchParams(location.search).has('empty');
+            const values=empty?null:{...${JSON.stringify(fixture)},profileKey:profile};
+            const content=<main><GoalPlanning profile={profile} initialValues={values} canManageDraft={!empty} revision={0} today="2026-10-15" /></main>;
             const shell=await ProtectedLayout({children:content});
             createRoot(document.getElementById('root')).render(<PathnameContext.Provider value={location.pathname}>{shell}</PathnameContext.Provider>);
           })();`;
@@ -171,7 +181,7 @@ export async function runGoalPlanningPreview() {
               : "text/javascript",
         })
         .end(files.get(pathname));
-    else if (pathname === goalsPath)
+    else if ([goalsPath, `${goalsPath}/parcerias`].includes(pathname))
       response.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     else {
       evidence.unexpectedRequests.push(pathname);
@@ -203,72 +213,150 @@ export async function runGoalPlanningPreview() {
     page.on("console", (message) => {
       if (message.type() === "error") evidence.consoleErrors.push(message.text());
     });
-    for (const width of [1440, 390]) {
-      await page.setViewportSize({ width, height: 900 });
-      await page.goto(`${origin}${goalsPath}`);
-      await expect(
-        page.getByRole("heading", { name: "Planejamento de metas", exact: true }),
-      ).toBeVisible();
-      if (width === 1440) {
-        const management = page.getByRole("button", { name: "Gestão", exact: true });
-        await management.click();
-        const meta = page
-          .locator('[data-navigation-panel-for="crm.management"] a')
-          .filter({ hasText: "Meta" });
-        await expect(meta).toBeVisible();
-        await expect(meta).toHaveAttribute("href", goalsPath);
-        await meta.click();
+    for (const profile of ["dv", "partnerships"]) {
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        await page.goto(`${origin}${goalsPath}${profile === "partnerships" ? "/parcerias" : ""}`);
         await expect(
           page.getByRole("heading", { name: "Planejamento de metas", exact: true }),
         ).toBeVisible();
-        evidence.navigation = "Gestão > Meta clicked; authorized fixture route displayed";
-      }
-      for (const theme of ["light", "balanced", "dark"]) {
-        await page.evaluate(
-          (value) => document.documentElement.setAttribute("data-theme", value),
-          theme,
+        if (width === 1440 && profile === "dv") {
+          const management = page.getByRole("button", { name: "Gestão", exact: true });
+          await management.click();
+          const meta = page
+            .locator('[data-navigation-panel-for="crm.management"] a')
+            .filter({ hasText: "Meta" });
+          await expect(meta).toBeVisible();
+          await expect(meta).toHaveAttribute("href", goalsPath);
+          await meta.click();
+          await expect(
+            page.getByRole("heading", { name: "Planejamento de metas", exact: true }),
+          ).toBeVisible();
+          evidence.navigation = "Gestão > Meta clicked; authorized fixture route displayed";
+        }
+        if (profile === "partnerships") {
+          await expect(page.locator(".goal-rate-card")).toHaveCount(3);
+          await expect(
+            page.locator(
+              ".goal-broker-production-panel .goal-productivity-fields input:not([type=hidden])",
+            ),
+          ).toHaveCount(2);
+          await expect(page.locator(".goal-productive-card")).toHaveCount(3);
+          if (width === 1440) {
+            const columns = await page.evaluate(() => {
+              const count = (selector) =>
+                getComputedStyle(document.querySelector(selector)).gridTemplateColumns.split(" ")
+                  .length;
+              return {
+                weekly: count(".goal-broker-production-panel .goal-productivity-fields"),
+                productive: count(".goal-productive-grid"),
+              };
+            });
+            assert.deepEqual(
+              columns,
+              { weekly: 2, productive: 3 },
+              "Partnerships must not reserve empty columns",
+            );
+            evidence.partnershipColumns = columns;
+          }
+        }
+        for (const theme of ["light", "balanced", "dark"]) {
+          await page.evaluate(
+            (value) => document.documentElement.setAttribute("data-theme", value),
+            theme,
+          );
+          await page.evaluate(
+            () =>
+              new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
+          );
+          const overflow = await page.evaluate(() => ({
+            width: innerWidth,
+            scrollWidth: document.documentElement.scrollWidth,
+          }));
+          const axe = await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+            .analyze();
+          const screenshot = path.join(
+            outputRoot,
+            `${profile === "dv" ? "goals" : "partnerships"}-${theme}-${width}.png`,
+          );
+          await page.screenshot({ path: screenshot, fullPage: true });
+          if (profile === "dv" && width === 1440 && theme === "dark") {
+            await page.screenshot({
+              path: path.join(outputRoot, "goals-dark-desktop.png"),
+              fullPage: false,
+            });
+          }
+          evidence.screens.push({
+            width,
+            profile,
+            theme,
+            overflow,
+            violations: axe.violations.map(({ id, impact, nodes }) => ({
+              id,
+              impact,
+              nodes: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })),
+            })),
+            screenshot,
+          });
+        }
+        await page
+          .getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true })
+          .fill("2");
+        await expect(page.locator(".goal-premium-stage output").first()).toHaveText(
+          profile === "dv" ? "215" : "10",
         );
-        await page.evaluate(
-          () =>
-            new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),
-        );
-        const overflow = await page.evaluate(() => ({
-          width: innerWidth,
-          scrollWidth: document.documentElement.scrollWidth,
-        }));
-        const axe = await new AxeBuilder({ page })
-          .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
-          .analyze();
-        const screenshot = path.join(outputRoot, `goals-${theme}-${width}.png`);
-        await page.screenshot({ path: screenshot, fullPage: true });
-        evidence.screens.push({
+        evidence.interactions ??= [];
+        evidence.interactions.push({
           width,
-          theme,
-          overflow,
-          violations: axe.violations.map(({ id, impact, nodes }) => ({
-            id,
-            impact,
-            nodes: nodes.map(({ target, failureSummary }) => ({ target, failureSummary })),
-          })),
-          screenshot,
+          profile,
+          sales: 2,
+          opportunities: await page.locator(".goal-premium-stage output").first().textContent(),
         });
+        await page
+          .getByRole("combobox", { name: "Selecionar mês", exact: true })
+          .selectOption("10");
+        await expect(
+          page.getByRole("combobox", { name: "Selecionar mês", exact: true }),
+        ).toHaveValue("10");
+        await expect(page.locator(".goal-calendar-heading")).toContainText(/novembro/i);
       }
-      await page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }).fill("2");
-      await expect(page.locator(".goal-premium-stage output").first()).not.toHaveText("108");
-      evidence.interactions ??= [];
-      evidence.interactions.push({
-        width,
-        sales: 2,
-        opportunities: await page.locator(".goal-premium-stage output").first().textContent(),
-      });
-      await page.getByRole("combobox", { name: "Selecionar mês", exact: true }).selectOption("10");
-      await expect(page.getByRole("combobox", { name: "Selecionar mês", exact: true })).toHaveValue(
-        "10",
-      );
-      await expect(page.locator(".goal-calendar-heading")).toContainText(/novembro/i);
     }
     for (const interaction of evidence.interactions)
-      assert.equal(interaction.opportunities, "215", "Sales=2 projected opportunities");
+      assert.equal(
+        interaction.opportunities,
+        interaction.profile === "dv" ? "215" : "10",
+        "Sales=2 projected first-stage volume",
+      );
+    for (const width of [1440, 390]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.goto(`${origin}${goalsPath}?empty=1`);
+      await expect(
+        page.getByText(
+          "Metas ainda não configuradas. Preencha os campos para planejar; nenhum valor demonstrativo foi aplicado.",
+        ),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
+      ).toBeDisabled();
+      await expect(page.locator(".goal-premium-stage output")).toHaveText([
+        "—",
+        "—",
+        "—",
+        "—",
+        "—",
+        "—",
+      ]);
+      await expect(
+        page.getByRole("button", { name: "Salvar rascunho de metas", exact: true }),
+      ).toHaveCount(0);
+      await page.screenshot({
+        path: path.join(outputRoot, `unconfigured-readonly-${width}.png`),
+        fullPage: true,
+      });
+    }
+    evidence.unconfiguredReadOnly =
+      "1440/390: no fabricated values; disabled fields; no save button";
     assert.deepEqual(evidence.consoleErrors, [], "Browser errors");
     assert.deepEqual(evidence.unexpectedRequests, [], "Unexpected local requests");
     assert.deepEqual(evidence.blockedExternalRequests, [], "External requests must not be needed");

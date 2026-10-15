@@ -5812,3 +5812,13 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   parser DevTools passou na reexecucao com concorrencia limitada. Reexecucao
   completa limitada mantem falha no symlink Salesforce (esperado502, recebido200), sem tocar teste
   ou produto fora do escopo. CI Linux, PR/merge e release pendentes neste ponto.
+
+## 2026-10-15: Meta e subguia Parcerias conferidas
+
+- Revisao encontrou grades DV preservadas ao ocultar campos de Parcerias.
+  Classes especificas agora ativam3taxas,2campos de producao e3cards produtivos.
+- Preview final:12capturas DV/Parcerias,1440/390px,tres temas; axe0,overflow0,
+  console/rede0. Estado sem metas e somente leitura tambem passou nas duas
+  larguras. Evidencias locais sinteticas em test-results/goal-planning-preview.
+  -56testes focados aprovados. Tipos/lint/build locais aprovados; CI Linux e
+  promocao protegida seguem pendentes. Nenhum dado remoto ou politica alterado.

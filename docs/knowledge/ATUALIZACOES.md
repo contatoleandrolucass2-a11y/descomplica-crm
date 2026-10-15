@@ -3827,3 +3827,13 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
   sincronizacao final pendente; nao alterado limite nem resumida autoridade.
   Reavaliar apos manutencao preservando historico completo ou runtime autorizado
   que suporte volume. Esta excecao nao concede autorizacao de publicacao.
+
+## 2026-10-15: cobertura final das subguias de Meta
+
+- Parcerias corrigida para3taxas,2campos semanais e3cards de produtividade,
+  com classes especificas ja presentes na referencia.12capturas DV/Parcerias
+  em desktop/celular e tres temas passaram; axe,overflow,console/rede sem erros.
+- Estado vazio/somente leitura passou nas duas larguras.56testes focados
+  aprovados. Branch codex/gestao-meta, PR231; CI do candidato final pendente.
+  Sem merge nem publicacao ate gate completo. knowledge:sync permanece limitado
+  pelo tamanho do historico, conforme excecao registrada acima.

@@ -133,7 +133,9 @@ export function GoalPlanning({
   const body = (
     <>
       <input type="hidden" name="draftRevision" value={revision} />
-      <div className="goal-studio">
+      <div
+        className={`goal-studio ${profile === "partnerships" ? "goal-studio-partnerships" : ""}`}
+      >
         <section className="goal-panel goal-controls-panel">
           <PanelHeader number="01" kicker="Configuração" title="Volume necessário por etapa" />
           <p className="goal-panel-note">
@@ -372,7 +374,9 @@ export function GoalPlanning({
                 <strong>Produção por {unit}</strong>
                 <small>meta semanal</small>
               </div>
-              <div className="goal-productivity-fields goal-productivity-fields-three">
+              <div
+                className={`goal-productivity-fields ${profile === "partnerships" ? "goal-productivity-fields-two" : "goal-productivity-fields-three"}`}
+              >
                 {(
                   ["brokerWeeklyAppointments", "brokerWeeklyVisits", "brokerWeeklyFolders"] as const
                 ).map((key, index) =>
@@ -486,7 +490,9 @@ export function GoalPlanning({
           <p className="goal-panel-note">
             Defina a porcentagem mínima da equipe que deve atingir cada meta.
           </p>
-          <div className="goal-productive-grid">
+          <div
+            className={`goal-productive-grid ${profile === "partnerships" ? "goal-productive-grid-three" : ""}`}
+          >
             {(
               [
                 "productiveTeamAppointments",
