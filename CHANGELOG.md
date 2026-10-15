@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-15: Resolucao de metadados Qlik
+
+- Reconhece as referencias childRefId do container nativo de abas, mantendo
+  rejeicao de associacoes ambiguas e sem promover IDs de interface a Engine IDs.
+- Amplia a leitura limitada de metadados para identificar aliases das medidas
+  e campos de identidade. Nao coleta clientes, fatos nem verifica automaticamente
+  o mapeamento produtivo; configuracao depende de revisao nativa.
+
 ## 2026-10-15: Renovacao de sessao Qlik
 
 - Converte o cofre existente em credencial systemd cifrada para renovar o login

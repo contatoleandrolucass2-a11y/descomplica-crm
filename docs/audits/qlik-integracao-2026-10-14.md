@@ -1,5 +1,21 @@
 # Integracao Qlik via VPS
 
+## 15/10/2026: Metadados autenticados
+
+Main9ffc8a9, CI38753275427 com os quatro jobs success. A imagem foi baixada
+novamente apos os gates para qlik-owner-verified-9ffc8a9-fJcSJDzQ: ZIP77602d8a,
+tar83950120, config5530412d e manifesto local64f2aad6,11 camadas. Prova de dois
+perfis aprovada. A preparacao antecipada contrariou a ordem do runbook e nao
+foi usada para promover; repeticao posterior corrigiu a sequencia, sem waiver.
+
+Helper do release aprovado preparou qlik-login.cred. Owner3a4698b7-b4b5-48cd-a55f-da61f15e53b9
+promovido15:24:46.025Z pelo coordenador, sem pendencia e sem alterar CRM6843ef1.
+QIX real acessivel, snapshot privado0TX0aCu9/cf87dcb1,3318bytes, observedAt
+15:24:45.675Z e reload14:13:23.247Z. Nenhuma linha de fatos ou cliente lida.
+Status pending: partners_membership_unproven. Native sn-tabbed-container usa
+referencias childRefId; produto tem supressao de ausentes e aliases VENDAS/VGV.
+Este ramo corrige coleta de metadados, nao habilita ranking/fatos/boot.
+
 ## Retomada em 15/10/2026
 
 Mainad49634, CI38640654844 com quatro jobs aprovados. Artefato11929858423:
