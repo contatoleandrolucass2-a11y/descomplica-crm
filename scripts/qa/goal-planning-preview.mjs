@@ -261,10 +261,17 @@ export async function runGoalPlanningPreview() {
           }
         }
         for (const theme of ["light", "balanced", "dark"]) {
-          await page.evaluate(
-            (value) => document.documentElement.setAttribute("data-theme", value),
-            theme,
-          );
+          const labels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
+          const desktopTheme = page.getByRole("button", { name: labels[theme], exact: true });
+          if (await desktopTheme.isVisible()) {
+            await desktopTheme.click();
+          } else {
+            for (let attempt = 0; attempt < 3; attempt += 1) {
+              if ((await page.locator("html").getAttribute("data-theme")) === theme) break;
+              await page.locator("[data-theme-cycle-mobile]").click();
+            }
+          }
+          await expect(page.locator("html")).toHaveAttribute("data-theme", theme);
           await page.evaluate(
             () =>
               new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve))),

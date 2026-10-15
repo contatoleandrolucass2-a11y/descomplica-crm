@@ -1,8 +1,10 @@
 /* Goal planning reference: archive-investor/investor-archive.css. Scoped to this page. */
 .planning {
+  --goal-rem: clamp(14px, 0.75vw, 16px);
   min-width: 0;
   color: var(--analytics-ink);
   background: var(--analytics-page);
+  font-size: var(--goal-rem);
 }
 .planning,
 .planning * {
@@ -19,8 +21,16 @@
   min-height: 100vh;
   padding-bottom: 48px;
   background:
-    radial-gradient(circle at 10% 5%, rgba(38, 198, 218, 0.13), transparent 26rem),
-    radial-gradient(circle at 92% 12%, rgba(199, 243, 107, 0.12), transparent 24rem),
+    radial-gradient(
+      circle at 10% 5%,
+      rgba(38, 198, 218, 0.13),
+      transparent calc(26 * var(--goal-rem))
+    ),
+    radial-gradient(
+      circle at 92% 12%,
+      rgba(199, 243, 107, 0.12),
+      transparent calc(24 * var(--goal-rem))
+    ),
     var(--analytics-page);
 }
 .planning :global(.goal-page-hero) {
@@ -35,7 +45,7 @@
 .planning :global(.goal-kicker) {
   margin: 0 0 10px;
   color: var(--analytics-cyan-strong);
-  font-size: 0.72rem;
+  font-size: calc(0.72 * var(--goal-rem));
   font-weight: 850;
   letter-spacing: 0.18em;
   text-transform: uppercase;
@@ -43,7 +53,7 @@
 .planning :global(.goal-page-hero h1) {
   margin: 0;
   color: var(--analytics-ink);
-  font-size: clamp(2.25rem, 3.8vw, 3.55rem);
+  font-size: clamp(calc(2.25 * var(--goal-rem)), 3.8vw, calc(3.55 * var(--goal-rem)));
   line-height: 0.96;
   letter-spacing: -0.055em;
 }
@@ -118,7 +128,7 @@
   color: var(--analytics-cyan-strong);
   border-radius: 10px;
   background: #e5f6f7;
-  font-size: 0.7rem;
+  font-size: calc(0.7 * var(--goal-rem));
   font-weight: 900;
 }
 .planning :global(.goal-panel > header div) {
@@ -128,7 +138,7 @@
 .planning :global(.goal-panel > header p) {
   margin: 0;
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   font-weight: 800;
   letter-spacing: 0.1em;
   text-transform: uppercase;
@@ -136,13 +146,13 @@
 .planning :global(.goal-panel > header h2) {
   margin: 0;
   color: var(--analytics-ink);
-  font-size: 1.04rem;
+  font-size: calc(1.04 * var(--goal-rem));
   letter-spacing: -0.02em;
 }
 .planning :global(.goal-panel-note) {
   margin: 15px 0;
   color: var(--analytics-muted);
-  font-size: 0.8rem;
+  font-size: calc(0.8 * var(--goal-rem));
   line-height: 1.5;
 }
 .planning :global(.goal-rate-list) {
@@ -180,7 +190,7 @@
   color: var(--analytics-muted);
   border-radius: 9px;
   background: var(--analytics-surface-strong);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   font-weight: 850;
 }
 .planning :global(.goal-rate-copy) {
@@ -191,20 +201,20 @@
 .planning :global(.goal-rate-copy strong) {
   overflow: hidden;
   color: var(--analytics-ink);
-  font-size: 0.86rem;
+  font-size: calc(0.86 * var(--goal-rem));
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .planning :global(.goal-rate-copy small) {
   overflow: hidden;
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 .planning :global(.goal-rate-copy em) {
   color: var(--analytics-cyan-strong);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   font-style: normal;
   font-weight: 800;
 }
@@ -224,14 +234,14 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: 1rem;
+  font-size: calc(1 * var(--goal-rem));
   font-weight: 900;
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
 .planning :global(.goal-rate-input b) {
   color: var(--analytics-cyan-strong);
-  font-size: 0.72rem;
+  font-size: calc(0.72 * var(--goal-rem));
 }
 .planning :global(.goal-sales-target) {
   display: flex;
@@ -250,11 +260,11 @@
 }
 .planning :global(.goal-sales-target strong) {
   color: var(--analytics-ink);
-  font-size: 0.8rem;
+  font-size: calc(0.8 * var(--goal-rem));
 }
 .planning :global(.goal-sales-target small) {
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
 }
 .planning :global(.goal-sales-input) {
   display: flex;
@@ -274,13 +284,13 @@
   outline: 0;
   background: transparent;
   font-family: var(--font-geist-mono), monospace;
-  font-size: 1.25rem;
+  font-size: calc(1.25 * var(--goal-rem));
   font-weight: 900;
   text-align: center;
 }
 .planning :global(.goal-sales-input span) {
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   font-weight: 700;
 }
 .planning :global(.goal-preview-panel) {
@@ -297,12 +307,12 @@
 }
 .planning :global(.goal-funnel-total small) {
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
 }
 .planning :global(.goal-funnel-total strong) {
   color: var(--analytics-cyan-strong);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 1rem;
+  font-size: calc(1 * var(--goal-rem));
 }
 .planning :global(.goal-premium-funnel) {
   display: grid;
@@ -340,7 +350,7 @@
   text-shadow: none;
 }
 .planning :global(.goal-premium-stage > span) {
-  font-size: 0.76rem;
+  font-size: calc(0.76 * var(--goal-rem));
   font-weight: 850;
 }
 .planning :global(.goal-premium-stage output),
@@ -351,7 +361,7 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: clamp(1.28rem, 1.8vw, 1.62rem);
+  font-size: clamp(calc(1.28 * var(--goal-rem)), 1.8vw, calc(1.62 * var(--goal-rem)));
   font-weight: 900;
   text-align: center;
   font-variant-numeric: tabular-nums;
@@ -393,7 +403,7 @@
   gap: 8px;
   padding: 0 2px 4px;
   color: var(--analytics-ink);
-  font-size: 0.84rem;
+  font-size: calc(0.84 * var(--goal-rem));
   font-weight: 850;
 }
 .planning :global(.goal-conversion-stage i) {
@@ -417,13 +427,13 @@
 .planning :global(.goal-conversion-cell small) {
   grid-column: 1 / -1;
   color: var(--analytics-muted);
-  font-size: 0.69rem;
+  font-size: calc(0.69 * var(--goal-rem));
   line-height: 1.35;
 }
 .planning :global(.goal-conversion-cell b) {
   color: var(--analytics-ink);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 0.76rem;
+  font-size: calc(0.76 * var(--goal-rem));
   white-space: nowrap;
 }
 .planning :global(.goal-conversion-cell strong) {
@@ -433,7 +443,7 @@
   border: 1px solid #bcdedb;
   border-radius: 999px;
   background: #eefaf8;
-  font-size: 0.73rem;
+  font-size: calc(0.73 * var(--goal-rem));
   white-space: nowrap;
 }
 .planning :global(.goal-conversion-sales strong) {
@@ -521,16 +531,16 @@
 }
 .planning :global(.goal-summary-spotlight small) {
   color: #9dc1d8;
-  font-size: 0.7rem;
+  font-size: calc(0.7 * var(--goal-rem));
 }
 .planning :global(.goal-summary-spotlight strong) {
-  font-size: 3rem;
+  font-size: calc(3 * var(--goal-rem));
   line-height: 1;
   letter-spacing: -0.06em;
 }
 .planning :global(.goal-summary-spotlight span) {
   color: #c1d4e2;
-  font-size: 0.7rem;
+  font-size: calc(0.7 * var(--goal-rem));
 }
 .planning :global(.goal-summary-grid) {
   display: grid;
@@ -549,11 +559,11 @@
 }
 .planning :global(.goal-summary-grid small) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
 }
 .planning :global(.goal-summary-grid strong) {
   color: var(--analytics-ink);
-  font-size: 1.12rem;
+  font-size: calc(1.12 * var(--goal-rem));
   font-variant-numeric: tabular-nums;
 }
 .planning :global(.goal-formula-note) {
@@ -567,11 +577,11 @@
 }
 .planning :global(.goal-formula-note strong) {
   color: #146b5a;
-  font-size: 0.72rem;
+  font-size: calc(0.72 * var(--goal-rem));
 }
 .planning :global(.goal-formula-note span) {
   color: #54746d;
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   line-height: 1.45;
 }
 .planning :global(.goal-save-button) {
@@ -602,13 +612,13 @@
   min-height: 20px;
   margin: 11px 0 0;
   color: var(--analytics-muted);
-  font-size: 0.72rem;
+  font-size: calc(0.72 * var(--goal-rem));
   line-height: 1.45;
 }
 .planning :global(.goal-updated-at) {
   margin-top: 2px;
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
 }
 @media (max-width: 1120px) {
   .planning :global(.goal-studio) {
@@ -740,11 +750,11 @@
 }
 .planning :global(.goal-productivity-block-heading strong) {
   color: var(--analytics-ink);
-  font-size: 0.82rem;
+  font-size: calc(0.82 * var(--goal-rem));
 }
 .planning :global(.goal-productivity-block-heading small) {
   color: var(--analytics-muted);
-  font-size: 0.7rem;
+  font-size: calc(0.7 * var(--goal-rem));
 }
 .planning :global(.goal-productivity-fields) {
   display: grid;
@@ -771,7 +781,7 @@
 .planning :global(.goal-productivity-field span) {
   overflow: hidden;
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   font-weight: 750;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -784,7 +794,7 @@
   border-bottom: 2px solid #b8dfe3;
   outline: 0;
   background: transparent;
-  font-size: 1.45rem;
+  font-size: calc(1.45 * var(--goal-rem));
   font-weight: 900;
   text-align: center;
 }
@@ -793,7 +803,7 @@
 }
 .planning :global(.goal-productivity-field small) {
   color: var(--analytics-muted);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
 }
 @media (max-width: 900px) {
   .planning :global(.goal-team-row) {
@@ -863,12 +873,12 @@
 }
 .planning :global(.goal-calendar-heading strong) {
   color: var(--analytics-ink);
-  font-size: 0.9rem;
+  font-size: calc(0.9 * var(--goal-rem));
   text-transform: capitalize;
 }
 .planning :global(.goal-calendar-heading small) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   line-height: 1.35;
 }
 .planning :global(.goal-calendar-actions) {
@@ -882,7 +892,7 @@
   color: var(--analytics-cyan-strong);
   border-radius: 999px;
   background: #e4f7f6;
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   font-weight: 850;
   white-space: nowrap;
 }
@@ -894,7 +904,7 @@
   display: grid;
   gap: 2px;
   color: var(--analytics-muted);
-  font-size: 0.55rem;
+  font-size: calc(0.55 * var(--goal-rem));
   font-weight: 750;
   text-transform: uppercase;
 }
@@ -907,7 +917,7 @@
   outline: 0;
   background: #fff;
   font: inherit;
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   font-weight: 750;
   text-transform: capitalize;
 }
@@ -927,7 +937,7 @@
 .planning :global(.goal-calendar-week) {
   margin-bottom: 5px;
   color: var(--analytics-muted);
-  font-size: 0.57rem;
+  font-size: calc(0.57 * var(--goal-rem));
   font-weight: 800;
   text-align: center;
   text-transform: uppercase;
@@ -943,7 +953,7 @@
   place-items: center;
   justify-self: center;
   border-radius: 50%;
-  font-size: 0.62rem;
+  font-size: calc(0.62 * var(--goal-rem));
   font-style: normal;
 }
 .planning :global(.goal-calendar-grid > span) {
@@ -998,15 +1008,15 @@
 }
 .planning :global(.goal-calendar-insights small) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
 }
 .planning :global(.goal-calendar-insights strong) {
   color: var(--analytics-ink);
-  font-size: 1.28rem;
+  font-size: calc(1.28 * var(--goal-rem));
 }
 .planning :global(.goal-calendar-insights span) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   line-height: 1.2;
 }
 .planning :global(.goal-calendar-insights .goal-calendar-rule) {
@@ -1016,7 +1026,7 @@
 }
 .planning :global(.goal-calendar-rule strong) {
   color: #146b5a;
-  font-size: 0.88rem;
+  font-size: calc(0.88 * var(--goal-rem));
   white-space: nowrap;
 }
 .planning :global(.goal-calendar-rule span) {
@@ -1087,17 +1097,17 @@
 }
 .planning :global(.goal-donut strong) {
   color: var(--analytics-ink);
-  font-size: 1.55rem;
+  font-size: calc(1.55 * var(--goal-rem));
   line-height: 1;
 }
 .planning :global(.goal-donut span) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   font-weight: 700;
 }
 .planning :global(.goal-productive-label) {
   color: var(--analytics-ink);
-  font-size: 0.92rem;
+  font-size: calc(0.92 * var(--goal-rem));
   font-weight: 850;
   line-height: 1.1;
   text-align: center;
@@ -1117,7 +1127,7 @@
 }
 .planning :global(.goal-productive-target small) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   font-weight: 700;
 }
 .planning :global(.goal-productive-input) {
@@ -1137,13 +1147,13 @@
   border: 0;
   outline: 0;
   background: transparent;
-  font-size: 1.05rem;
+  font-size: calc(1.05 * var(--goal-rem));
   font-weight: 900;
   text-align: center;
 }
 .planning :global(.goal-productive-input b) {
   color: var(--analytics-cyan-strong);
-  font-size: 0.72rem;
+  font-size: calc(0.72 * var(--goal-rem));
 }
 .planning :global(.goal-productive-grid-three) {
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -1198,7 +1208,7 @@
 .planning :global(.goal-weekly-context) {
   margin-left: auto;
   color: var(--analytics-cyan-strong);
-  font-size: 0.7rem;
+  font-size: calc(0.7 * var(--goal-rem));
   font-weight: 800;
 }
 .planning :global(.goal-weekly-distribution) {
@@ -1225,7 +1235,7 @@
 .planning :global(.goal-weekly-table-head) {
   color: var(--analytics-muted);
   background: var(--analytics-surface-strong);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   font-weight: 850;
   text-align: center;
   text-transform: uppercase;
@@ -1237,7 +1247,7 @@
   display: block;
   margin-top: 3px;
   color: var(--analytics-muted);
-  font-size: 0.66rem;
+  font-size: calc(0.66 * var(--goal-rem));
   font-weight: 650;
   text-transform: none;
 }
@@ -1246,7 +1256,7 @@
   align-items: center;
   gap: 8px;
   color: var(--analytics-ink);
-  font-size: 0.76rem;
+  font-size: calc(0.76 * var(--goal-rem));
   font-weight: 800;
 }
 .planning :global(.goal-weekly-stage i) {
@@ -1258,14 +1268,14 @@
 .planning :global(.goal-weekly-stage small) {
   margin-left: auto;
   color: var(--analytics-muted);
-  font-size: 0.66rem;
+  font-size: calc(0.66 * var(--goal-rem));
   font-weight: 650;
 }
 .planning :global(.goal-weekly-table-row > strong) {
   color: var(--analytics-ink);
   border-left: 1px solid var(--analytics-line);
   font-family: var(--font-geist-mono), monospace;
-  font-size: 1.08rem;
+  font-size: calc(1.08 * var(--goal-rem));
   text-align: center;
 }
 .planning :global(.goal-weekly-legend) {
@@ -1274,7 +1284,7 @@
   gap: 12px;
   margin-top: 12px;
   color: var(--analytics-muted);
-  font-size: 0.7rem;
+  font-size: calc(0.7 * var(--goal-rem));
 }
 .planning :global(.goal-weekly-legend strong) {
   color: var(--analytics-cyan-strong);
@@ -1310,7 +1320,7 @@
 }
 .planning :global(.goal-weekly-table-row > .goal-weekly-projection b) {
   color: #fff;
-  font-size: 1.2rem;
+  font-size: calc(1.2 * var(--goal-rem));
 }
 .planning :global(.goal-weekly-table-row > .goal-weekly-projection small) {
   color: #bffaf5;
@@ -1359,7 +1369,7 @@
   border-radius: 999px;
   color: #fff;
   background: #0c7d88;
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   font-style: normal;
   letter-spacing: 0.04em;
 }
@@ -1402,13 +1412,13 @@
 }
 .planning :global(.goal-weekly-table-row > strong b) {
   color: var(--analytics-ink);
-  font-size: 1.08rem;
+  font-size: calc(1.08 * var(--goal-rem));
   line-height: 1;
 }
 .planning :global(.goal-weekly-table-row > strong small) {
   color: var(--analytics-muted);
   font-family: var(--font-geist-sans), sans-serif;
-  font-size: 0.66rem;
+  font-size: calc(0.66 * var(--goal-rem));
   font-weight: 650;
   white-space: nowrap;
 }
@@ -1435,21 +1445,21 @@
 }
 .planning :global(.goal-weekly-card-top span) {
   color: var(--analytics-ink);
-  font-size: 0.76rem;
+  font-size: calc(0.76 * var(--goal-rem));
   font-weight: 800;
 }
 .planning :global(.goal-weekly-card-top b) {
   color: var(--weekly-color);
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
 }
 .planning :global(.goal-weekly-card > strong) {
   color: var(--analytics-ink);
-  font-size: 2.05rem;
+  font-size: calc(2.05 * var(--goal-rem));
   line-height: 1;
 }
 .planning :global(.goal-weekly-card > small) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
 }
 .planning :global(.goal-weekly-bar) {
   height: 7px;
@@ -1466,7 +1476,7 @@
 }
 .planning :global(.goal-weekly-card em) {
   color: var(--analytics-muted);
-  font-size: 0.6rem;
+  font-size: calc(0.6 * var(--goal-rem));
   font-style: normal;
 }
 @media (max-width: 760px) {
@@ -1682,8 +1692,16 @@
 
 :global(:root[data-theme="balanced"]) .planning {
   background:
-    radial-gradient(circle at 10% 5%, rgba(38, 198, 218, 0.1), transparent 26rem),
-    radial-gradient(circle at 92% 12%, rgba(199, 243, 107, 0.08), transparent 24rem),
+    radial-gradient(
+      circle at 10% 5%,
+      rgba(38, 198, 218, 0.1),
+      transparent calc(26 * var(--goal-rem))
+    ),
+    radial-gradient(
+      circle at 92% 12%,
+      rgba(199, 243, 107, 0.08),
+      transparent calc(24 * var(--goal-rem))
+    ),
     var(--analytics-surface-muted);
 }
 
@@ -1694,8 +1712,16 @@
 
 :global(:root[data-theme="dark"]) .planning {
   background:
-    radial-gradient(circle at 10% 5%, rgba(38, 198, 218, 0.08), transparent 25rem),
-    radial-gradient(circle at 92% 12%, rgba(199, 243, 107, 0.05), transparent 24rem),
+    radial-gradient(
+      circle at 10% 5%,
+      rgba(38, 198, 218, 0.08),
+      transparent calc(25 * var(--goal-rem))
+    ),
+    radial-gradient(
+      circle at 92% 12%,
+      rgba(199, 243, 107, 0.05),
+      transparent calc(24 * var(--goal-rem))
+    ),
     var(--analytics-surface-muted);
 }
 
@@ -2069,12 +2095,12 @@
 }
 
 .planning :global(.goal-profile-tabs a span) {
-  font-size: 0.78rem;
+  font-size: calc(0.78 * var(--goal-rem));
   font-weight: 850;
 }
 .planning :global(.goal-profile-tabs a small) {
   color: var(--analytics-muted);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
 }
 
 .planning :global(.goal-profile-tabs a.active) {
@@ -2175,7 +2201,7 @@
   margin-bottom: 7px;
 }
 .planning :global(.goal-page-hero h1) {
-  font-size: clamp(2.15rem, 3.3vw, 3.3rem);
+  font-size: clamp(calc(2.15 * var(--goal-rem)), 3.3vw, calc(3.3 * var(--goal-rem)));
 }
 
 .planning :global(.goal-command-center) {
@@ -2211,7 +2237,7 @@
 
 .planning :global(.goal-channel-label small) {
   color: var(--analytics-muted);
-  font-size: 0.61rem;
+  font-size: calc(0.61 * var(--goal-rem));
   font-weight: 800;
   letter-spacing: 0.09em;
   text-transform: uppercase;
@@ -2219,7 +2245,7 @@
 
 .planning :global(.goal-channel-label strong) {
   color: var(--analytics-ink);
-  font-size: 0.76rem;
+  font-size: calc(0.76 * var(--goal-rem));
 }
 
 .planning :global(.goal-profile-tabs) {
@@ -2275,7 +2301,7 @@
 .planning :global(.goal-profile-tabs a span) {
   overflow: hidden;
   color: inherit;
-  font-size: 0.74rem;
+  font-size: calc(0.74 * var(--goal-rem));
   font-weight: 850;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2284,7 +2310,7 @@
 .planning :global(.goal-profile-tabs a small) {
   overflow: hidden;
   color: var(--analytics-muted);
-  font-size: 0.61rem;
+  font-size: calc(0.61 * var(--goal-rem));
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -2346,7 +2372,7 @@
   overflow: hidden;
   max-width: 210px;
   color: var(--analytics-ink);
-  font-size: 0.64rem;
+  font-size: calc(0.64 * var(--goal-rem));
   font-weight: 750;
   text-align: left;
   text-overflow: ellipsis;
@@ -2354,7 +2380,7 @@
 }
 .planning :global(.goal-save-state .goal-updated-at) {
   color: var(--analytics-muted);
-  font-size: 0.58rem;
+  font-size: calc(0.58 * var(--goal-rem));
   text-align: left;
   white-space: nowrap;
 }
@@ -2373,7 +2399,7 @@
   border-radius: 12px;
   background: linear-gradient(135deg, #0c7f8b, #123c64);
   box-shadow: 0 10px 22px rgba(7, 63, 83, 0.18);
-  font-size: 0.72rem;
+  font-size: calc(0.72 * var(--goal-rem));
   letter-spacing: 0.01em;
 }
 
@@ -2385,7 +2411,7 @@
   color: #07344a;
   border-radius: 50%;
   background: #6fe7d7;
-  font-size: 0.68rem;
+  font-size: calc(0.68 * var(--goal-rem));
   font-weight: 950;
 }
 
@@ -2588,4 +2614,10 @@
 }
 .planning :global(a.goal-save-button) {
   text-decoration: none;
+}
+/* The public reference uses a 16px root on small screens; scope that base to this page. */
+@media (max-width: 760px) {
+  .planning {
+    --goal-rem: 16px;
+  }
 }

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15: Fidelidade de escala da guia Meta
+
+- Reproduz a base tipografica da referencia dentro de Meta, preservando a
+  escala do restante do CRM e os tres temas existentes.
+- Atualiza o contrato exato da navegacao visual para a entrada Meta autorizada.
+
 ## 2026-10-15: Organizacao visual do dashboard
 
 - Remove Fonte e contexto repetido do cabecalho e o breadcrumb da raiz `/app`.

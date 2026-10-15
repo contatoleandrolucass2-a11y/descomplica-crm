@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-15: Escala e contrato visual de Meta
+
+- CSS publico atual confrontado com os estilos locais: 241 seletores comuns
+  mantem geometria e tipografia. Corrigida a base rem somente no wrapper de
+  Meta para reproduzir 14 px em desktop e 16 px no breakpoint movel.
+- Chromium confirmou quatro fontes calculadas iguais em 390, 1440 e 2560 px.
+  Preview local: 12 capturas, tres temas, sem overflow ou violacoes Axe.
+- Contrato exato de Gestao no QA de navegacao agora inclui Meta; 47 testes
+  focados aprovados. Falha anterior da CI nao foi tratada como aprovacao.
+  Evidencias e limites em docs/audits/meta-2026-10-15.md.
+
 ## 2026-10-15: Organizacao do dashboard e limite dos filtros
 
 - Branch `codex/dashboard-filtros-layout`, base `ad496340`; producao observada
