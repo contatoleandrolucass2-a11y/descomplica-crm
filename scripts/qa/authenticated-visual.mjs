@@ -139,8 +139,11 @@ const approvedCanvasByRoute = new Map([
   ["/app/ranking", { asset: "ranking-canal-parcerias.webp", region: "left" }],
   ["/app/canal-de-parcerias", { asset: "ranking-canal-parcerias.webp", region: "right" }],
   ["/app/configuracoes", { asset: "configuracoes-metas-funil.webp", region: "left" }],
-  ["/app/configuracoes/metas", { asset: "configuracoes-metas-funil.webp", region: "right" }],
-  ["/app/configuracoes/metas/parcerias", { asset: "metas-parcerias-pontos.webp", region: "left" }],
+  ["/app/configuracoes/metas", { asset: "metas-dv-live-2026-10-15.webp", region: "full" }],
+  [
+    "/app/configuracoes/metas/parcerias",
+    { asset: "metas-parcerias-live-2026-10-15.webp", region: "full" },
+  ],
   ["/app/configuracoes/metas/pontos", { asset: "metas-parcerias-pontos.webp", region: "right" }],
   ["/app/simulacao", { asset: "hub-simulacao-associativo.webp", region: "left" }],
   [
@@ -796,7 +799,10 @@ async function compareApprovedCanvas(buffer, approvedCanvas) {
   const left =
     approvedCanvas.region === "left" ? 0 : Math.ceil(metadata.width / 2) + separatorInset;
   const width = approvedCanvas.region === "left" ? half - separatorInset : metadata.width - left;
-  const extract = { left, top: 0, width, height: metadata.height };
+  const extract =
+    approvedCanvas.region === "full"
+      ? { left: 0, top: 0, width: metadata.width, height: metadata.height }
+      : { left, top: 0, width, height: metadata.height };
   const [actualColor, expectedColor, actualEdges, expectedEdges] = await Promise.all([
     normalizeCanvasReference(buffer, null, false),
     normalizeCanvasReference(reference, extract, false),

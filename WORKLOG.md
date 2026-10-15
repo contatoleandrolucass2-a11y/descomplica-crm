@@ -12,6 +12,10 @@
   Evidencias e limites em docs/audits/meta-2026-10-15.md.
 - Referencia completa mede 2201/1852 px em DV/Parcerias a 1440 px; o QA usa
   limites especificos 2600/2300 e exige todos os oito paineis nessas rotas.
+- Cores e fonte de Meta usam escopo local conforme pagina publica; o preview
+  carrega Geist do build local. Dois canvases novos da origem publica completa
+  substituem somente as antigas regioes compactas DV/Parcerias, com hashes e
+  proveniencia; referencias antigas, Pontos e tolerancias preservados.
 
 ## 2026-10-15: Organizacao do dashboard e limite dos filtros
 

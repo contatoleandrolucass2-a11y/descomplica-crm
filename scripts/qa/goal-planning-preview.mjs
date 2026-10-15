@@ -1,7 +1,8 @@
 import assert from "node:assert/strict";
 import { createServer } from "node:http";
 import { createRequire } from "node:module";
-import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
+import { createHash } from "node:crypto";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import AxeBuilder from "@axe-core/playwright";
@@ -38,7 +39,104 @@ const fixture = {
   updatedAt: "2026-10-15T12:00:00Z",
 };
 
+/** Reuse only the Latin Geist face from an existing local Next build. */
+export async function loadGoalPreviewGeistFont(buildRoot = path.join(root, ".next")) {
+  const require = createRequire(import.meta.url);
+  const nextRequire = createRequire(require.resolve("next/package.json"));
+  const postcss = nextRequire("postcss");
+  const chunks = path.join(buildRoot, "static/chunks");
+  let cssFiles;
+  try {
+    cssFiles = (await readdir(chunks)).filter((file) => file.endsWith(".css")).sort();
+  } catch {
+    throw new Error(
+      `Geist preview requires an existing local Next build: CSS chunks missing at ${chunks}. No build or font download is performed.`,
+    );
+  }
+  const assets = new Map();
+  const faces = [];
+  const sources = [];
+  let family;
+  for (const filename of cssFiles) {
+    const cssPath = path.join(chunks, filename);
+    const stylesheet = postcss.parse(await readFile(cssPath, "utf8"), { from: cssPath });
+    const candidates = [];
+    stylesheet.walkAtRules("font-face", (face) => {
+      const declarations = Object.fromEntries(
+        face.nodes.filter((node) => node.type === "decl").map((node) => [node.prop, node.value]),
+      );
+      const candidateFamily = declarations["font-family"]?.replace(/^["']|["']$/g, "");
+      if (!/^Geist(?:_[a-z0-9]+)?$/i.test(candidateFamily ?? "")) return;
+      const latin = (declarations["unicode-range"] ?? "").split(",").some((range) => {
+        const match = /^\s*U\+([0-9a-f?]+)(?:-([0-9a-f]+))?\s*$/i.exec(range);
+        if (!match) return false;
+        const start = parseInt(match[1].replaceAll("?", "0"), 16);
+        const end = parseInt(match[2] ?? match[1].replaceAll("?", "f"), 16);
+        return start <= 0x41 && end >= 0x7a;
+      });
+      if (!latin) return;
+      const url =
+        /^url\(\s*["']?(\.\.\/media\/[a-z0-9._-]+\.woff2)["']?\s*\)\s*format\(["']woff2["']\)$/i.exec(
+          declarations.src ?? "",
+        );
+      if (!url) throw new Error(`Geist Latin source must be one local WOFF2 file: ${cssPath}`);
+      candidates.push({ face, relative: url[1], family: candidateFamily });
+    });
+    for (const candidate of candidates) {
+      assert.ok(
+        !family || family === candidate.family,
+        "Existing build contains conflicting Geist Latin families",
+      );
+      family = candidate.family;
+      const fontPath = path.resolve(chunks, candidate.relative);
+      const mediaRoot = path.resolve(buildRoot, "static/media");
+      assert.equal(
+        path.dirname(fontPath),
+        mediaRoot,
+        "Font must stay inside the existing local build media directory",
+      );
+      let bytes;
+      try {
+        bytes = await readFile(fontPath);
+      } catch {
+        throw new Error(
+          `Geist preview requires the existing local build font: ${fontPath}. No remote fallback is permitted.`,
+        );
+      }
+      const endpoint = `/qa-fonts/${path.basename(fontPath)}`;
+      const face = candidate.face.clone();
+      face.walkDecls("src", (declaration) => {
+        declaration.value = `url("${endpoint}") format("woff2")`;
+      });
+      if (!assets.has(endpoint)) {
+        assets.set(endpoint, bytes);
+        faces.push(face.toString());
+        sources.push({
+          cssFile: path.relative(root, cssPath),
+          fontFile: path.relative(root, fontPath),
+          modifiedAt: (await stat(cssPath)).mtime.toISOString(),
+          sha256: createHash("sha256").update(bytes).digest("hex"),
+        });
+      }
+    }
+  }
+  assert.ok(
+    family && faces.length,
+    `Geist Latin font-face missing from existing local Next build at ${chunks}. No build or remote font download is performed.`,
+  );
+  return {
+    assets,
+    css: `${faces.join("\n")}\n:root,body{--font-geist-sans:"${family}",Arial,sans-serif;}`,
+    evidence: {
+      origin: "existing local Next build; AST-selected Latin non-Mono face only",
+      family,
+      sources,
+    },
+  };
+}
+
 export async function runGoalPlanningPreview() {
+  const geist = await loadGoalPreviewGeistFont();
   await mkdir(outputRoot, { recursive: true });
   const evidence = {
     environment:
@@ -50,6 +148,7 @@ export async function runGoalPlanningPreview() {
     consoleErrors: [],
     blockedExternalRequests: [],
     unexpectedRequests: [],
+    font: geist.evidence,
   };
   const require = createRequire(import.meta.url);
   const vitestRequire = createRequire(require.resolve("vitest/package.json"));
@@ -156,7 +255,7 @@ export async function runGoalPlanningPreview() {
   );
   const script = output.find((file) => file.type === "chunk" && file.isEntry)?.fileName;
   assert.ok(script);
-  const html = `<!doctype html><html lang="pt-BR" data-theme="light"><head><title>Metas QA sintético</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${[
+  const html = `<!doctype html><html lang="pt-BR" data-theme="light"><head><title>Metas QA sintético</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${geist.css}</style>${[
     ...files.keys(),
   ]
     .filter((file) => file.endsWith(".css"))
@@ -171,6 +270,10 @@ export async function runGoalPlanningPreview() {
       evidence.unexpectedRequests.push(`${request.method} ${pathname}`);
       response.writeHead(405).end();
     } else if (pathname === "/favicon.ico") response.writeHead(204).end();
+    else if (geist.assets.has(pathname))
+      response
+        .writeHead(200, { "content-type": "font/woff2", "cache-control": "no-store" })
+        .end(geist.assets.get(pathname));
     else if (files.has(pathname))
       response
         .writeHead(200, {
@@ -220,6 +323,22 @@ export async function runGoalPlanningPreview() {
         await expect(
           page.getByRole("heading", { name: "Planejamento de metas", exact: true }),
         ).toBeVisible();
+        await page.evaluate(async () => {
+          await document.fonts.ready;
+        });
+        assert.equal(
+          await page.evaluate(
+            (family) =>
+              document.fonts.check(`16px "${family}"`) &&
+              [...document.fonts].some(
+                (face) =>
+                  face.family.replace(/^["']|["']$/g, "") === family && face.status === "loaded",
+              ),
+            geist.evidence.family,
+          ),
+          true,
+          "Local Geist font must load before screenshots",
+        );
         if (width === 1440 && profile === "dv") {
           const management = page.getByRole("button", { name: "Gestão", exact: true });
           await management.click();

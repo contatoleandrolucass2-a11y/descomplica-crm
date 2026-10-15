@@ -1,10 +1,25 @@
 /* Goal planning reference: archive-investor/investor-archive.css. Scoped to this page. */
 .planning {
+  --analytics-ink: #11233f;
+  --analytics-muted: #53647d;
+  --analytics-surface: #fff;
+  --analytics-surface-muted: #f4f7fb;
+  --analytics-line: #dce4ef;
+  --analytics-cyan: #22c9cc;
+  --analytics-lime: #c7f36b;
+  --analytics-shadow: 0 20px 60px #1930501a;
+  --analytics-navy: #071a31;
+  --analytics-navy-raised: #10284a;
+  --analytics-page: #eef3f8;
+  --analytics-cyan-strong: #087080;
+  --analytics-surface-strong: #e7eef4;
   --goal-rem: clamp(14px, 0.75vw, 16px);
   min-width: 0;
   color: var(--analytics-ink);
   background: var(--analytics-page);
   font-size: var(--goal-rem);
+  font-family: var(--font-geist-sans), Arial, sans-serif;
+  line-height: 1.5;
 }
 .planning,
 .planning * {
@@ -1546,105 +1561,106 @@
 .planning :global(.goal-studio) {
   gap: 10px;
 }
-.planning :global(.goal-panel) {
+/* Preserve the public .goal-page-shell specificity above panel-specific rules. */
+.planning.planning :global(.goal-panel) {
   padding: 12px 14px;
   border-radius: 16px;
 }
-.planning :global(.goal-panel > header) {
+.planning.planning :global(.goal-panel > header) {
   gap: 8px;
   padding-bottom: 8px;
 }
-.planning :global(.goal-panel > header > span) {
+.planning.planning :global(.goal-panel > header > span) {
   width: 31px;
   height: 31px;
   border-radius: 9px;
 }
-.planning :global(.goal-panel-note) {
+.planning.planning :global(.goal-panel-note) {
   margin: 7px 0;
   line-height: 1.3;
 }
-.planning :global(.goal-rate-list) {
+.planning.planning :global(.goal-rate-list) {
   gap: 5px;
 }
-.planning :global(.goal-rate-card) {
+.planning.planning :global(.goal-rate-card) {
   min-height: 48px;
   padding: 5px 8px;
 }
-.planning :global(.goal-sales-target) {
+.planning.planning :global(.goal-sales-target) {
   margin-top: 7px;
   padding: 7px 9px;
 }
-.planning :global(.goal-premium-funnel) {
+.planning.planning :global(.goal-premium-funnel) {
   grid-template-rows: repeat(6, minmax(48px, 1fr));
   gap: 2px;
   padding-top: 7px;
 }
-.planning :global(.goal-conversion-table) {
+.planning.planning :global(.goal-conversion-table) {
   gap: 4px;
 }
-.planning :global(.goal-conversion-row) {
+.planning.planning :global(.goal-conversion-row) {
   gap: 5px;
   padding: 6px 7px;
   border-radius: 11px;
 }
-.planning :global(.goal-conversion-cell) {
+.planning.planning :global(.goal-conversion-cell) {
   min-height: 53px;
   padding: 6px 7px;
 }
-.planning :global(.goal-productivity-layout) {
+.planning.planning :global(.goal-productivity-layout) {
   gap: 10px;
 }
-.planning :global(.goal-productivity-block) {
+.planning.planning :global(.goal-productivity-block) {
   padding: 10px;
   border-radius: 14px;
 }
-.planning :global(.goal-productivity-block-heading) {
+.planning.planning :global(.goal-productivity-block-heading) {
   margin-bottom: 7px;
 }
-.planning :global(.goal-productivity-fields) {
+.planning.planning :global(.goal-productivity-fields) {
   gap: 6px;
 }
-.planning :global(.goal-productivity-field) {
+.planning.planning :global(.goal-productivity-field) {
   gap: 3px;
   padding: 8px;
   border-radius: 11px;
 }
-.planning :global(.goal-calendar-layout) {
+.planning.planning :global(.goal-calendar-layout) {
   gap: 5px;
   padding: 8px;
   border-radius: 13px;
 }
-.planning :global(.goal-calendar-heading) {
+.planning.planning :global(.goal-calendar-heading) {
   margin-bottom: 5px;
 }
-.planning :global(.goal-calendar-actions) {
+.planning.planning :global(.goal-calendar-actions) {
   gap: 4px !important;
 }
-.planning :global(.goal-calendar-insights > div) {
+.planning.planning :global(.goal-calendar-insights > div) {
   min-height: 64px;
   padding: 5px 4px;
 }
-.planning :global(.goal-productive-panel .goal-panel-note) {
+.planning.planning :global(.goal-productive-panel .goal-panel-note) {
   margin: 6px 0 7px;
 }
-.planning :global(.goal-productive-grid) {
+.planning.planning :global(.goal-productive-grid) {
   border-radius: 14px;
 }
-.planning :global(.goal-productive-card) {
+.planning.planning :global(.goal-productive-card) {
   gap: 7px;
   padding: 9px 8px;
   border-top-width: 4px;
 }
-.planning :global(.goal-productive-target) {
+.planning.planning :global(.goal-productive-target) {
   padding: 5px 8px;
   border-radius: 10px;
 }
-.planning :global(.goal-weekly-table-row > span),
-.planning :global(.goal-weekly-table-row > strong) {
+.planning.planning :global(.goal-weekly-table-row > span),
+.planning.planning :global(.goal-weekly-table-row > strong) {
   min-height: 48px;
   padding: 8px 10px;
 }
-.planning :global(.goal-weekly-legend) {
+.planning.planning :global(.goal-weekly-legend) {
   margin-top: 7px;
 }
 .planning :global(.goal-weekly-panel),
@@ -2620,4 +2636,58 @@
   .planning {
     --goal-rem: 16px;
   }
+}
+/* Reference theme tokens are local to Meta. Strong accents retain accessible contrast. */
+:global(:root[data-theme="balanced"]) .planning {
+  --analytics-ink: #132943;
+  --analytics-muted: #53687d;
+  --analytics-surface: #f8fbfc;
+  --analytics-surface-muted: #dfe9ed;
+  --analytics-line: #c6d5dd;
+  --analytics-cyan: #22c9cc;
+  --analytics-lime: #c7f36b;
+  --analytics-shadow: 0 20px 60px #0e293b24;
+  --analytics-navy: #071a31;
+  --analytics-navy-raised: #10284a;
+  --analytics-page: #dfe9ed;
+  --analytics-cyan-strong: #087080;
+  --analytics-surface-strong: #e7eef4;
+}
+:global(:root[data-theme="dark"]) .planning {
+  --analytics-ink: #eef6ff;
+  --analytics-muted: #a9bad0;
+  --analytics-surface: #10243a;
+  --analytics-surface-muted: #061524;
+  --analytics-line: #29435b;
+  --analytics-cyan: #22c9cc;
+  --analytics-lime: #c7f36b;
+  --analytics-shadow: 0 20px 60px #0000004d;
+  --analytics-navy: #071a31;
+  --analytics-navy-raised: #10284a;
+  --analytics-page: #061524;
+  --analytics-cyan-strong: #41d7d1;
+  --analytics-surface-strong: color-mix(
+    in srgb,
+    var(--analytics-surface) 70%,
+    var(--analytics-surface-muted)
+  );
+}
+
+/* Match the public page background while keeping the CRM shell untouched. */
+.planning,
+:global(:root[data-theme="balanced"]) .planning,
+:global(:root[data-theme="dark"]) .planning {
+  background:
+    radial-gradient(
+      circle at 8% 0%,
+      rgba(34, 201, 204, 0.09),
+      transparent calc(26 * var(--goal-rem))
+    ),
+    var(--analytics-surface-muted);
+}
+:global(:root:not([data-theme="dark"])) .planning :global(.goal-panel > header h2) {
+  color: #10284a;
+}
+:global(:root:not([data-theme="dark"])) .planning :global(.goal-panel-note) {
+  color: #52667d;
 }

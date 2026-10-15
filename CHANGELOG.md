@@ -6,6 +6,9 @@
   escala do restante do CRM e os tres temas existentes.
 - Atualiza o contrato exato da navegacao visual para a entrada Meta autorizada.
 - Confere os oito blocos completos com limites de altura proprios por rota.
+- Aplica paleta e fonte da referencia em Meta e preserva contraste acessivel.
+- Registra capturas independentes da origem publica como referencia completa
+  de DV e Parcerias, mantendo os assets anteriores e os limiares do QA.
 
 ## 2026-10-15: Organizacao visual do dashboard
 
