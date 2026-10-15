@@ -3915,3 +3915,15 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
   os demais continuam sem Meta. Nao altera autorizacao nem reduz cobertura.
   Reexecutar suite integral antes do envio; CI completa permanece obrigatoria.
 - Reexecucao integral local confirmou2884aprovados/85skips/1falha de symlink Windows;20testes unitarios da matriz aprovados. Sem nova falha relacionada a Meta.
+
+## 2026-10-15: segunda integracao concorrente na guia Meta
+
+- Conferencia13:02 America/Sao_Paulo:main avancou para
+  fae77f9a254197f0e9c72a6fdbbadefe24a8103e, atualizacao de dashboard. Health
+  continuou200/ok/6843ef1. Fontes:git fetch origin e GET/api/health observacional.
+- Merge sem conflitos preservou componentes, testes, evidencias e documentos
+  externos. A guia Meta nao foi reescrita. Snapshot previo de CI e de base nao
+  valida esta combinacao; repetir gates no novo SHA antes da integracao/release.
+- CI38760969827 do candidato anterior aprovou validacao,restore e E2E;
+  matriz visual ainda estava em curso. Nao tratar como aprovacao da nova base.
+  Sincronizacao Obsidian continua pendente pelo limite de exportacao.

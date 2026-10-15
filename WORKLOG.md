@@ -6120,3 +6120,8 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - CI38760150881 parou nessa expectativa antiga de15; demais2884testes passaram.
   Reexecucao integral local antes do proximo envio; nenhum gate foi dispensado.
 - Suite integral local:2884aprovados,85skips,apenas falha Windows de symlink; teste unitario da matriz20/20aprovado.
+
+## 2026-10-15: integracao de dashboard concorrente em Meta
+
+- Preserva integralmente o main fae77f9, integrado sem conflitos. Nova CI da
+  combinacao e obrigatoria; Meta mantem conteudo, navegacao e permissoes.
