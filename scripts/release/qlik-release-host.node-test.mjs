@@ -6,6 +6,21 @@ import test from "node:test";
 const fixture = fileURLToPath(new URL("./fixtures/qlik-host-fixture.mjs", import.meta.url));
 const scenarios = [
   "happy",
+  "current-unit",
+  "credential-valid",
+  "credential-stat-error",
+  "credential-absent",
+  "credential-owner",
+  "credential-mode",
+  "credential-special-mode",
+  "credential-empty",
+  "credential-oversize",
+  "credential-hardlink",
+  "credential-symlink",
+  "credential-directory",
+  "credential-parent-mode",
+  "credential-parent-owner",
+  "credential-parent-symlink",
   "status-pending",
   "status-reauth_required",
   "status-unavailable",
@@ -23,12 +38,18 @@ const scenarios = [
   "apply-callback",
   "start-callback",
   "artifact-stale",
+  "artifact-stale-legacy",
+  "artifact-delayed",
+  "artifact-deadline-overrun",
+  "artifact-deadline-exact",
+  "artifact-deadline-delay",
   "artifact-future",
   "artifact-connected",
   "artifact-owner",
   "artifact-mode",
   "recovery",
   "recovery-residue",
+  "legacy-recovery",
   "lost-lock",
   "backup-identity",
   "start-reload",
@@ -72,5 +93,18 @@ for (const scenario of scenarios) {
     assert.equal(report.temporaryRemoved, true);
     assert.equal(report.realExternalCommands, 0);
     assert.ok(report.lockChecks > 0);
+    if (scenario === "artifact-delayed") {
+      assert.equal(report.verification.elapsedMs, 200_000);
+      assert.deepEqual(report.verification.delays, Array(100).fill(2000));
+    }
+    if (scenario.startsWith("artifact-deadline-")) {
+      assert.equal(
+        report.verification.elapsedMs,
+        scenario === "artifact-deadline-overrun" ? 420_001 : 420_000,
+      );
+      assert.deepEqual(report.verification.delays, [
+        scenario === "artifact-deadline-delay" ? 500 : 0,
+      ]);
+    }
   });
 }

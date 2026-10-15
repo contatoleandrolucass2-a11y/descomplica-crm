@@ -1,7 +1,57 @@
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import { test } from "node:test";
-import { holdBrowserSession } from "./launch-browser.mjs";
+import { collectAuthenticatedMetadata, holdBrowserSession } from "./launch-browser.mjs";
+
+test("metadata collection requires verified login and shares the owner cancellation signal", async () => {
+  const signal = new AbortController().signal;
+  const browser = {};
+  const calls = [];
+  const store = { canAttempt: async () => true, claimAttempt: async () => true };
+  const result = await collectAuthenticatedMetadata(
+    browser,
+    { signal },
+    {
+      attempts: () => store,
+      renew: async (context, options) => {
+        assert.equal(context, browser);
+        assert.equal(options.signal, signal);
+        assert.equal(options.canAttempt, store.canAttempt);
+        calls.push("login");
+        return { status: "authenticated" };
+      },
+      collect: async (context, options) => {
+        assert.equal(context, browser);
+        assert.equal(options.signal, signal);
+        calls.push("metadata");
+        return { status: "inspected", metadata: "synthetic" };
+      },
+    },
+  );
+  assert.deepEqual(calls, ["login", "metadata"]);
+  assert.equal(result.status, "inspected");
+});
+
+test("MFA, invalid login and cancellation never start the Engine collector", async () => {
+  for (const status of ["reauth_required", "unavailable", "unknown", "throw", "cancel"]) {
+    const abort = new AbortController();
+    const result = await collectAuthenticatedMetadata(
+      {},
+      { signal: abort.signal },
+      {
+        attempts: () => ({}),
+        renew: async () => {
+          if (status === "throw") throw new Error("private authentication detail");
+          if (status === "cancel") abort.abort();
+          return { status };
+        },
+        collect: async () => assert.fail("Engine must not start"),
+      },
+    );
+    assert.equal(result.status, status === "reauth_required" ? "reauth_required" : "unavailable");
+    assert.doesNotMatch(JSON.stringify(result), /private/);
+  }
+});
 
 function fixture(goto) {
   const browser = new EventEmitter();
@@ -33,6 +83,23 @@ test("initial navigation failure leaves the session available for manual recover
   await session;
   assert.equal(f.closed(), true);
   assert.equal(f.signals.listenerCount("SIGTERM"), 0);
+});
+
+test("authenticated collection preserves an existing MFA page until its guarded login flow runs", async () => {
+  const f = fixture(async () => assert.fail("Do not replace a pending MFA page"));
+  let started = false;
+  const session = holdBrowserSession(f.browser, {
+    signalSource: f.signals,
+    navigate: false,
+    startCollection: async () => {
+      started = true;
+    },
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(started, true);
+  assert.deepEqual(f.messages, []);
+  await f.browser.close();
+  await session;
 });
 
 test("SIGTERM during navigation closes cleanly without a false unavailable diagnostic", async () => {

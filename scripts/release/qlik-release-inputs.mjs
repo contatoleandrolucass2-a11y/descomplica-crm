@@ -5,17 +5,27 @@ import path from "node:path";
 
 export const qlikReleaseFiles = Object.freeze([
   "ops/qlik/launch-browser.mjs",
+  "ops/qlik/browser-login.mjs",
+  "ops/qlik/login-credential.mjs",
+  "ops/qlik/prepare-login-credential.mjs",
+  "ops/qlik/login-attempt.mjs",
+  "ops/qlik/credential-vault.mjs",
   "ops/qlik/browser-preflight.mjs",
   "ops/qlik/qix-metadata.mjs",
   "ops/qlik/collection-loop.mjs",
   "ops/qlik/metadata-artifact.mjs",
   "ops/qlik/vps/descomplica-qlik-browser.service",
+  "scripts/release/private-json-store.mjs",
+  "scripts/release/production-release-lock.mjs",
   "package.json",
   "pnpm-lock.yaml",
 ]);
 export const sha256 = (value) => createHash("sha256").update(value).digest("hex");
 export const shaPattern = /^[a-f0-9]{40}$/u;
 export const idPattern = /^[a-f0-9]{8}-[a-f0-9]{4}-4[a-f0-9]{3}-[89ab][a-f0-9]{3}-[a-f0-9]{12}$/u;
+const home = "Environment=HOME=/var/lib/descomplica-qlik\n";
+const loginCredentials =
+  "LoadCredentialEncrypted=qlik-login:/etc/descomplica-qlik/qlik-login.cred\nSetCredential=qlik-login:{}\n";
 
 export async function readProtectedText(file, { uid = 0, mode, maximum = 262144 } = {}) {
   const before = await lstat(file);
@@ -92,14 +102,15 @@ export function renderQlikUnit(template, sha, preflight) {
     typeof preflight !== "boolean" ||
     template.split("@RELEASE@").length !== 2 ||
     template.split("Environment=HOME=/var/lib/descomplica-qlik\n").length !== 2 ||
+    template.split(home + loginCredentials).length !== 2 ||
     template.includes("QLIK_METADATA_PREFLIGHT")
   )
     throw new Error("Qlik unit template rejected.");
   return template
     .replace("@RELEASE@", `/srv/descomplica-crm-releases/${sha}`)
     .replace(
-      "Environment=HOME=/var/lib/descomplica-qlik\n",
-      `Environment=HOME=/var/lib/descomplica-qlik\n${preflight ? "Environment=QLIK_METADATA_PREFLIGHT=enabled\n" : ""}`,
+      home + loginCredentials,
+      home + loginCredentials + (preflight ? "Environment=QLIK_METADATA_PREFLIGHT=enabled\n" : ""),
     );
 }
 
@@ -109,7 +120,9 @@ export function parseQlikUnit(contents, template) {
   )?.[1];
   if (!sha) throw new Error("Qlik release identity unavailable.");
   for (const preflight of [false, true]) {
-    if (contents === renderQlikUnit(template, sha, preflight))
+    const expected = renderQlikUnit(template, sha, preflight);
+    // Older owners and persisted backups differ only by these two reviewed lines.
+    if (contents === expected || contents === expected.replace(loginCredentials, ""))
       return { sha, unitHash: sha256(contents), preflight };
   }
   throw new Error("Qlik unit differs from the reviewed template.");

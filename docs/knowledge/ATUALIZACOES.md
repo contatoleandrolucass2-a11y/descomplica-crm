@@ -1,5 +1,38 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Renovacao candidata da sessao Qlik
+
+- Owner159addfc/ad49634 promovido13:18:04Z pela CI38640654844 e coordenador;
+  resultado real reauth_required. Credencial cifrada systemd e renovacao
+  Microsoft Entra em implementacao, conforme autorizacao existente de uso do
+  cofre. Focais101/201/32/14 aprovados,2 skips fisicos. Global/CI/uso real
+  pendentes. Runbook qlik-vps-session documenta origem, travas e limites.
+  Referencias de fatos/ranking copiadas deba96607 sao historico do PR216,
+  nao codigo de coleta ja integrado nesta branch operacional.
+- API Qlik documenta CSRF204, nao apenas200. Probe candidato/testes corrigidos
+  antes do uso real. Chromium final39 passou; review tambem corrigiu titulo
+  KMSI duplicado e contagem de senha contida no usuario. ACL systemd real
+  confirmada com credencial sintetica; cofre real permanece intocado.
+
+## 2026-10-15: Retomada da conexao Qlik
+
+- Owner Qlik promovido pelo coordenador em13:18:04.215Z:159addfc/ad49634,
+  sem pendencia; preflight real reauth_required. Imagem CI11929858423 e cadeia
+  de11 camadas conferidas; image:prove2 perfis. EACCES previo foi corrigido
+  apenas na leitura da copia candidata de dependencias. CRM permanece6843ef1.
+- Corrida da QA dashboard reproduzida: request contado antes de consumir JSON.
+  Espera agora acompanha consumo;75 checks,1 regressao e35 testes focais
+  aprovados, sem ampliar limites. Regressao acrescentada a CI. Nova CI exigida.
+
+- Fontes13:10Z: git fetch/GitHub e GET publico /api/health. Mainad49634,
+  CI push38640654844 concluida com validate, release-gates, isolated-restore
+  e promotable-image aprovados. Site200/ok ainda6843ef1. Localab715e6 inclui
+  essa main; PR216 remoto ainda precisa novo push/CI apos integracao.
+- Falha anterior38639662097 ocorreu na QA sintetica dashboard, espera por nova
+  leitura de status apos eventos, sem falha de codigo/formatacao. Investigar
+  corrida antes de repetir. Owner, dados e agenda ainda nao comprovados;
+  consultar recibos atuais da VPS antes da promocao protegida.
+
 ## 2026-10-14: Atualizacao dos identificadores da fonte Qlik
 
 - Retomada20:46Z: PR227/64d9f24 passou CI38628006919 na segunda tentativa.

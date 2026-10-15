@@ -22,6 +22,13 @@ test("browser delegates to the reviewed non-root launcher without a CDP TCP endp
   assert.match(browser, /^RuntimeDirectoryMode=0700$/m);
   assert.match(browser, /^RuntimeDirectoryPreserve=yes$/m);
   assert.match(browser, /^UMask=0077$/m);
+  assert.ok(
+    browser.includes(
+      "Environment=HOME=/var/lib/descomplica-qlik\n" +
+        "LoadCredentialEncrypted=qlik-login:/etc/descomplica-qlik/qlik-login.cred\n" +
+        "SetCredential=qlik-login:{}\n",
+    ),
+  );
   assert.match(browser, /^Restart=always$/m);
   assert.match(browser, /^WantedBy=multi-user.target$/m);
   assert.doesNotMatch(
@@ -85,6 +92,10 @@ test("integrity allowlist covers every metadata module before dependency checks 
   assert.ok(loop);
   const files = loop[0].split("; do")[0].split(/\s+/);
   for (const name of [
+    "browser-login",
+    "login-credential",
+    "prepare-login-credential",
+    "login-attempt",
     "browser-preflight",
     "collection-loop",
     "metadata-artifact",
@@ -92,6 +103,10 @@ test("integrity allowlist covers every metadata module before dependency checks 
   ]) {
     assert.ok(files.includes(`ops/qlik/${name}.mjs`), name);
   }
+  for (const name of ["private-json-store", "production-release-lock"]) {
+    assert.ok(files.includes(`scripts/release/${name}.mjs`), name);
+  }
+  assert.match(installer, /for relative in ''[^\n]+ scripts scripts\/release; do/);
   for (const guard of [
     '! -L "$file"',
     '$(stat -c %u "$file") == 0',
@@ -195,10 +210,20 @@ test("metadata script probe runs only as the dedicated user, before units, witho
     "const { getBrowserMetadataScript } = await import('./ops/qlik/browser-preflight.mjs')";
   assert.ok(probe.includes(load));
   assert.ok(probe.indexOf(guard) < probe.indexOf(load));
+  for (const name of [
+    "browser-login",
+    "login-credential",
+    "prepare-login-credential",
+    "login-attempt",
+  ])
+    assert.ok(probe.includes(`'${name}'`), name);
   assert.ok(probe.indexOf(load) < probe.indexOf("await getBrowserMetadataScript()"));
   assert.ok(installer.indexOf(probe) > installer.indexOf("\nuseradd "));
   assert.ok(installer.indexOf(probe) < installer.indexOf("install -o root -g root -m 0644"));
-  assert.doesNotMatch(probe, /collectBrowserMetadata|\.evaluate\(|\.launch|eval\(|new Function/);
+  assert.doesNotMatch(
+    probe,
+    /collectBrowserMetadata|renewBrowserLogin\(|readLoginCredential\(|prepareLoginCredential\(|loginAttemptStore\(|\.evaluate\(|\.launch|eval\(|new Function/,
+  );
 });
 
 const bash = process.platform === "win32" ? "C:/Program Files/Git/bin/bash.exe" : "/bin/bash";

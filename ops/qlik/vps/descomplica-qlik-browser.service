@@ -11,6 +11,8 @@ User=descomplica-qlik
 Group=descomplica-qlik
 WorkingDirectory=@RELEASE@
 Environment=HOME=/var/lib/descomplica-qlik
+LoadCredentialEncrypted=qlik-login:/etc/descomplica-qlik/qlik-login.cred
+SetCredential=qlik-login:{}
 RuntimeDirectory=descomplica-qlik
 RuntimeDirectoryMode=0700
 RuntimeDirectoryPreserve=yes
