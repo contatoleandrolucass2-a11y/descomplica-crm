@@ -10,6 +10,8 @@ import { pathToFileURL } from "node:url";
 
 import { createClient } from "@supabase/supabase-js";
 
+import { PAGE_REGISTRY } from "../../lib/navigation/registry.ts";
+
 import legalDocumentVersions from "../../lib/legal/versions.json" with { type: "json" };
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 import { runConcurrentAssociativo } from "./concurrent-associativo.mjs";
@@ -44,24 +46,26 @@ const legacyRoles = new Set([
   "broker",
   "user",
 ]);
-const simulatorPageKeys = ["crm.simulation", "crm.simulation.wf13"];
-const inheritedAnalyticalPageKeys = [
-  "crm.dashboard",
-  "crm.stage.appointments",
-  "crm.stage.folders",
-  "crm.stage.opportunities",
-  "crm.stage.sales",
-  "crm.stage.visits",
-];
-const rankingPageKeys = ["crm.ranking"];
-const partnershipPageKeys = ["crm.partnerships"];
-const administrativeCommercialPageKeys = [
-  "crm.settings",
-  "crm.settings.goals",
-  "crm.settings.partnerships",
-  "crm.settings.points",
-];
-const masterAdministrativePageKeys = ["admin.home", "admin.pages", "admin.users"];
+// These assertions cover database catalog visibility. Route-specific role gates
+// remain independently tested by the protected HTTP inventory.
+function pageKeysForPermissions(...permissions) {
+  return PAGE_REGISTRY.filter(
+    (page) => page.releaseEnabled && page.isNavigation && permissions.includes(page.permission),
+  ).map((page) => page.pageKey);
+}
+const simulatorPageKeys = pageKeysForPermissions("crm.simulators.view");
+const inheritedAnalyticalPageKeys = pageKeysForPermissions("crm.dashboard.view", "crm.stages.view");
+const rankingPageKeys = pageKeysForPermissions("crm.ranking.view");
+const partnershipPageKeys = pageKeysForPermissions("crm.partnerships.view");
+const administrativeCommercialPageKeys = pageKeysForPermissions(
+  "crm.settings.view",
+  "crm.settings.manage",
+);
+const masterAdministrativePageKeys = pageKeysForPermissions(
+  "admin.access",
+  "pages.manage",
+  "users.view",
+);
 const expectedPageKeysByRole = {
   master: [
     ...masterAdministrativePageKeys,
