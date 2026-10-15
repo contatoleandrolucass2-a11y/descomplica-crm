@@ -2,6 +2,8 @@
 
 ## 2026-10-15: Resolucao de metadados Qlik
 
+- Registra gates locais e limite Windows, exigindo CI Linux e novo probe
+  nativo antes de qualquer ativacao.
 - Reconhece as referencias childRefId do container nativo de abas, mantendo
   rejeicao de associacoes ambiguas e sem promover IDs de interface a Engine IDs.
 - Amplia a leitura limitada de metadados para identificar aliases das medidas

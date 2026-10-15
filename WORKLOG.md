@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-15: Gates locais do metadata integrado
+
+Integrado mainfae77f9 emfacf284, preservando dashboard, referencias e textos
+dos dois ramos. Node24.19.0/pnpm11.20.0: lint/tipos/build51 rotas aprovados,
+formatacao global e Gitleaks sem achados (50,09MB). pnpm test:2898 aprovados,
+85 skips e uma falha preexistente de symlink Windows/O_NOFOLLOW no inventario;
+Node posterior nao executou nesse comando. Focais metadata/preflight141/141
+e revisao independente sem P1/P2 confirmados. Nenhum limite/assercao removido.
+CI Linux integral do head/main exatos permanece obrigatoria antes do upgrade.
+
 ## 2026-10-15: Verificacao focal do inspetor
 
 141 testes metadata/preflight aprovados, zero skips; inclui script serializado

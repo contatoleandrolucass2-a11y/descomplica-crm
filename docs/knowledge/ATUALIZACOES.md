@@ -1,5 +1,13 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Metadata integrado validado localmente
+
+- Mainfae77f9 integrado emfacf284, sem perder dashboard/referencias/notas.
+  Lint/tipos/build51, formatacao e Gitleaks aprovados. Global2898/85 skips,
+  uma falha Windows/O_NOFOLLOW do inventario; nao ocultada ou flexibilizada.
+- Focais141 e review independente sem achado P1/P2. CI Linux exata ainda
+  obrigatoria; API nativa desta versao, fatos e ranking continuam pendentes.
+
 ## 2026-10-15: Inspetor focal validado e main concorrente
 
 - Metadata/preflight141 testes aprovados, zero skips, incluindo SDK real
