@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-15: Corrida da QA e owner Qlik atualizado
+
+Reproduzida falha38639662097: statusReads incrementava na entrada da rota,
+antes do consumo do JSON e liberacao do controller. A QA agora aguarda esse
+consumo entre eventos, preservando assercoes e limites. Regressao usa componente
+real com HTTP/JSON controlados; integrada a CI. QA75/75, regressao1/1,
+35 testes dashboard, lint e formatacao focais aprovados pelo agente QA.
+
+Mainad49634/CI38640654844 aprovada integralmente; artefato imutavel conferido
+na VPS e image:prove validou os dois perfis. Primeiro deploy parou antes da
+intencao por EACCES nas dependencias copiadas0600. Ajustada somente leitura
+da copia candidata, preservando bytes, root ownership, links privados e ausencia
+de escrita alheia; probe nao-root passou. Promocao protegida concluida13:18:04Z,
+owner159addfc/ad49634, CRM6843ef1 inalterado. Preflight real retornou
+reauth_required; ainda sem coleta/publicacao. Renovacao autorizada da credencial
+do cofre em implementacao separada, sem contornar MFA.
+
 ## 2026-10-14: Runtime Qlik e captura final revisados
 
 CI38638975238/ff75f51 recusou apenas formatacao do manifesto gerado. Aplicado

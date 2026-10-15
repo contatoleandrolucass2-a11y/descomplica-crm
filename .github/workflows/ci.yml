@@ -98,7 +98,9 @@ jobs:
           RANKING_V2_BROWSER: "1"
 
       - name: Dashboard report with synthetic data across themes and viewports
-        run: node scripts/qa/dashboard-report.mjs
+        run: |
+          node scripts/qa/dashboard-report.mjs
+          node --test scripts/qa/dashboard-report.node-test.mjs
 
       - name: Associative page guide with synthetic inventory
         run: node scripts/qa/reference-parity.mjs associative-page-guide

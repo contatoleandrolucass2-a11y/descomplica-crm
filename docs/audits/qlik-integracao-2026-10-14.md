@@ -1,5 +1,22 @@
 # Integracao Qlik via VPS
 
+## Retomada em 15/10/2026
+
+Mainad49634, CI38640654844 com quatro jobs aprovados. Artefato11929858423:
+ZIP4c6ed829, tar e91870b2, config CIeda816fd, manifesto/image local1cee9135.
+Cadeia de11 camadas e dois perfis runtime conferidos na VPS, sem rebuild.
+Dependencias copiadas de lockfile identico tinham arquivos0600; bloqueio
+pre-intencao EACCES confirmado pelo probe nao-root. Leitura normalizada somente
+na copia candidata, preservando conteudo/ownership/links privados. Probe passou.
+Promocao pelo coordenador:159addfc-ba27-4dc4-a623-bdb98c453bac,
+deployedAt2026-10-15T13:18:04.215Z, SHAad49634, sem pendencia. Preflight real
+reauth_required. CRM6843ef1 segue publicado; ainda sem carga real Qlik.
+
+Falha QA38639662097 reproduzida isoladamente: request contado antes do JSON,
+enquanto controller impedia novo evento. Espera foi corrigida sem ampliar
+timeouts ou remover assercoes. QA75/75, regressao1/1 e35 testes focais passaram;
+regressao integrada a CI. Renovacao de login via cofre autorizado em implementacao.
+
 Registros historicos preservados durante a conciliacao das branches
 codex/qlik-ranking-vps e codex/qlik-api-session em14/10/2026. Estados abaixo
 tem a data de cada observacao; nao comprovam ativacao posterior.

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15: Sincronizacao da QA do dashboard
+
+- Aguarda o consumo do JSON antes do proximo evento sintetico de retomada,
+  corrigindo a corrida da verificacao sem mudar o comportamento do dashboard.
+- Adiciona regressao controlada na CI, preservando assercoes e limites.
+
 ## 2026-10-14: Coletor autonomo Qlik candidato
 
 - Normaliza a formatacao do manifesto de capturas, com igualdade JSON comprovada
