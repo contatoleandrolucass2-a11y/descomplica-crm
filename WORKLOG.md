@@ -1,5 +1,81 @@
 # Worklog
 
+## 2026-10-15: Integracao da renovacao ao coletor de ranking
+
+Merge de a90d8f3 no ramo PR216 preserva autenticacao antes de HMAC/coleta,
+recibos, CAS e orcamentos separados de preflight/ranking. Host/inputs/engine:
+553 testes aprovados, dois skips fisicos Linux. Launcher combinado:39 aprovados.
+Lint aprovado com aviso preexistente em connected-systems.mjs:18; tipos aprovados.
+pnpm test:3176 aprovados,87 skips, um timeout30s no conhecimento entre checkouts;
+repeticao isolada do arquivo aprovou22/22. Nao suprimido timeout ou assercao.
+Build aprovado nas51 rotas. Node integrado encontrou um timeout25s no caso
+artifact-stale; repeticao isolada aprovou em1,8s, sem alterar limites. Restante
+do lote concluiu; CI Linux integral do merge continua obrigatoria.
+
+Revisao independente confirmou os bloqueios produtivos ja pendentes: mapping
+real ainda ausente e nao passado pelo main; manifesto exige esse arquivo.
+Nao promover este ramo ate leitura nativa, mapeamento e nova CI integral.
+PR229 separa a renovacao necessaria a essa leitura. Nenhum fato foi publicado.
+Notas antigas movidas literalmente para arquivo versionado para respeitar
+limite de exportacao; igualdade integral/hash conferidos e sync aprovado.
+
+## 2026-10-15: Estrutura Qlik v2 aplicada apos CI e backup
+
+CI38742972444/ba96607 concluida success, incluindo validate, restore e
+release-gates. Aplicada somente migration aditiva20261014170549 desse commit,
+por Supabase MCP, conforme autorizacao anterior do usuario. Historico remoto
+registrou20261015141558/crm_qlik_v2_standalone; nao executar repair/db push para
+igualar carimbos. Fonte local e historico remoto permanecem explicitamente ligados.
+
+Backup privado novo /srv/descomplica-backups/qlik-v2-pre-20261015-lAzyGoTT,
+root0700/arquivos0600, checksums e fsync conferidos: roles/schema/data/historico.
+Dados5809574bytes, SHA256cbad3af04298fb88e6c5d5958272542082d19879447bb3d02d40638a3e4f800c.
+Snapshots separados, sem alegar DR completo ou restore deste arquivo real.
+
+Pos-check MCP: duas tabelas postgres/RLS/force true; zero grants diretos novos
+ou legados para anon/authenticated/service_role e zero EXECUTE PUBLIC nas RPCs
+e helpers. Writer somente service_role, reader somente authenticated; helpers
+com volatilidade i/s/s. Nenhuma carga/flag Qlik habilitada ainda. Autenticacao
+na VPS depende da promocao do PR229; resultado atual continua reauth_required.
+
+## 2026-10-15: Renovacao Qlik pelo cofre autorizado
+
+Ownerad49634 foi promovido pela CI38640654844 e coordenador em13:18:04Z;
+preflight real reauth_required. Implementada renovacao candidata via Microsoft
+Entra do tenant observado, usando credencial cifrada systemd derivada do cofre
+existente. Chave RSA fica fora do browser. Uma tentativa duravel de senha;
+falha/incerteza/MFA preservam atencao atraves de reinicios. Sessao comprovada
+libera atencao; pagina MFA nao e substituida pelo launcher.
+
+Inputs/unit/installer verificam novos modulos e aceitam bytes legados exatos
+para recuperacao. Fallback publico{} permite setup inicial; nao autentica.
+Prazos login120s/ciclo300s/owner novo420s cobrem etapas novas; legado180s.
+Correcoes da QA dashboard foram trazidas do commitba96607, com seus registros.
+Nenhuma credencial real foi lida ou convertida nesta implementacao.
+
+Focais: credenciais101 aprovados; unit/host/installer201 aprovados/2 skips;
+browser sintetico32 aprovados; integracao launcher/attempt14 aprovados.
+Gates globais e CI ainda pendentes deste candidato. Sem carga Qlik publicada.
+
+Lint/tipos/build passaram. pnpm test:2876 Vitest aprovados/85 skips e uma falha
+no teste de symlink Windows do inventario, fora do diff; Node posterior nao
+executou nesse comando. Suite Node Qlik/release focada:687 aprovados/5 skips.
+CI Linux integral continua obrigatoria. Gitleaks encontrou somente o fixture
+Salesforce sintetico ja corrigido no PR216; mesma geracao de fixture trazida
+para este ramo, sem alterar credenciais ou runtime Salesforce.
+
+Smoke systemd leve na VPS com credencial falsa confirmou usuario997/grupo986,
+diretorio root550/ACL nominal r-x e arquivo root440/ACL nominal r--. Unit
+transitoria encerrada; owner/perfil/credenciais reais nao usados nesse smoke.
+
+Revisao independente reproduziu dois casos do login: titulo KMSI duplicado e
+senha contida no usuario. Corrigidos com selecao por prioridade e contagem do
+campo passwd efetivo, incluindo campo vazio na identificacao. Conferencia da
+API oficial confirmou CSRF204; probe aceita204/200 com header e origem exatos,
+rejeitando outros2xx. Chromium sintetico final:39 aprovados/zero skips.
+Regressao host cobre200s aceitos e420s/420,001s rejeitados durante I/O.
+Gitleaks final apos fixture:sem achados. Nenhum login real realizado ainda.
+
 ## 2026-10-15: Corrida da QA e owner Qlik atualizado
 
 Reproduzida falha38639662097: statusReads incrementava na entrada da rota,

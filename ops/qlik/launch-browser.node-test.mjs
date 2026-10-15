@@ -2,9 +2,114 @@ import assert from "node:assert/strict";
 import { spawnSync } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { test } from "node:test";
-import { holdBrowserSession, startRankingCollection } from "./launch-browser.mjs";
+import {
+  collectAuthenticatedMetadata,
+  holdBrowserSession,
+  startRankingCollection,
+} from "./launch-browser.mjs";
 import { startQlikCollectionLoop } from "./collection-loop.mjs";
 import { rankingCycleArtifact } from "./ranking-artifact.mjs";
+
+test("ranking authenticates before loading its writer credential or starting collection", async () => {
+  const events = [];
+  const signal = new AbortController().signal;
+  await startRankingCollection({
+    signal,
+    collect: async () => {},
+    authenticate: async (options) => {
+      assert.equal(options.signal, signal);
+      events.push("login");
+      return { status: "authenticated" };
+    },
+    credential: async () => {
+      events.push("credential");
+      return "fixture";
+    },
+    cycle: async () => {
+      events.push("cycle");
+      return { state: "unavailable" };
+    },
+    write: async () => {},
+    loop: async (options) => {
+      await options.collect({ signal });
+    },
+  });
+  assert.deepEqual(events, ["login", "credential", "cycle"]);
+});
+
+test("MFA, unknown login and cancellation cannot load the ranking writer credential", async () => {
+  for (const status of ["reauth_required", "unavailable", "unknown", "cancel"]) {
+    const abort = new AbortController();
+    await startRankingCollection({
+      signal: abort.signal,
+      collect: async () => assert.fail("No collection while login is unavailable"),
+      authenticate: async () => {
+        if (status === "cancel") abort.abort();
+        return { status };
+      },
+      credential: async () => assert.fail("No HMAC access before authenticated session"),
+      cycle: async () => assert.fail("No publication while login is unavailable"),
+      write: async () => {},
+      loop: async (options) => {
+        const result = await options.collect({ signal: abort.signal });
+        assert.equal(
+          result.state,
+          status === "reauth_required" ? "reauth_required" : "unavailable",
+        );
+      },
+    });
+  }
+});
+
+test("metadata collection requires verified login and shares the owner cancellation signal", async () => {
+  const signal = new AbortController().signal;
+  const browser = {};
+  const calls = [];
+  const store = { canAttempt: async () => true, claimAttempt: async () => true };
+  const result = await collectAuthenticatedMetadata(
+    browser,
+    { signal },
+    {
+      attempts: () => store,
+      renew: async (context, options) => {
+        assert.equal(context, browser);
+        assert.equal(options.signal, signal);
+        assert.equal(options.canAttempt, store.canAttempt);
+        calls.push("login");
+        return { status: "authenticated" };
+      },
+      collect: async (context, options) => {
+        assert.equal(context, browser);
+        assert.equal(options.signal, signal);
+        calls.push("metadata");
+        return { status: "inspected", metadata: "synthetic" };
+      },
+    },
+  );
+  assert.deepEqual(calls, ["login", "metadata"]);
+  assert.equal(result.status, "inspected");
+});
+
+test("MFA, invalid login and cancellation never start the Engine collector", async () => {
+  for (const status of ["reauth_required", "unavailable", "unknown", "throw", "cancel"]) {
+    const abort = new AbortController();
+    const result = await collectAuthenticatedMetadata(
+      {},
+      { signal: abort.signal },
+      {
+        attempts: () => ({}),
+        renew: async () => {
+          if (status === "throw") throw new Error("private authentication detail");
+          if (status === "cancel") abort.abort();
+          return { status };
+        },
+        collect: async () => assert.fail("Engine must not start"),
+      },
+    );
+    assert.equal(result.status, status === "reauth_required" ? "reauth_required" : "unavailable");
+    assert.doesNotMatch(JSON.stringify(result), /private/);
+  }
+});
 
 function fixture(goto) {
   const browser = new EventEmitter();
@@ -36,6 +141,23 @@ test("initial navigation failure leaves the session available for manual recover
   await session;
   assert.equal(f.closed(), true);
   assert.equal(f.signals.listenerCount("SIGTERM"), 0);
+});
+
+test("authenticated collection preserves an existing MFA page until its guarded login flow runs", async () => {
+  const f = fixture(async () => assert.fail("Do not replace a pending MFA page"));
+  let started = false;
+  const session = holdBrowserSession(f.browser, {
+    signalSource: f.signals,
+    navigate: false,
+    startCollection: async () => {
+      started = true;
+    },
+  });
+  await new Promise((resolve) => setImmediate(resolve));
+  assert.equal(started, true);
+  assert.deepEqual(f.messages, []);
+  await f.browser.close();
+  await session;
 });
 
 test("SIGTERM during navigation closes cleanly without a false unavailable diagnostic", async () => {
@@ -396,8 +518,15 @@ test("Linux main explicitly exits nonzero for an unrecoverable ranking owner", (
     replace("./metadata-artifact.mjs", { writeMetadataArtifact: async () => assert.fail("wrong mode") });
     replace("./ranking-credential.mjs", { readRankingCredential: async () => "synthetic-only" });
     replace("./ranking-artifact.mjs", { writeRankingArtifact: async () => {} });
+    let authenticated = false;
+    replace("./login-attempt.mjs", { loginAttemptStore: () => ({}) });
+    replace("./browser-login.mjs", { renewBrowserLogin: async () => {
+      authenticated = true;
+      return { status: "authenticated" };
+    }});
     replace("./ranking-cycle.mjs", { runRankingCycle: async ({ collect, signal }) => collect({ signal }) });
     replace("./browser-ranking.mjs", { collectBrowserRanking: async (context, options) => {
+      assert.equal(authenticated, true);
       assert.equal(context, browser);
       assert.equal(typeof options.onOwnerUnrecoverable, "function");
       console.log("ranking_callback_reached");

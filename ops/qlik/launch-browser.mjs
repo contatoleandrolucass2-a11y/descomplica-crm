@@ -7,6 +7,7 @@ import { writeMetadataArtifact } from "./metadata-artifact.mjs";
 import { runRankingCycle } from "./ranking-cycle.mjs";
 import { readRankingCredential } from "./ranking-credential.mjs";
 import { writeRankingArtifact } from "./ranking-artifact.mjs";
+import { loginAttemptStore } from "./login-attempt.mjs";
 
 const PROFILE = "/var/lib/descomplica-qlik/chrome";
 const ORIGIN = "https://direcional.us.qlikcloud.com/";
@@ -45,10 +46,12 @@ async function main() {
     ? (await import("./browser-ranking.mjs")).collectBrowserRanking
     : undefined;
   await holdBrowserSession(browser, {
+    navigate: !(metadataOnly || ranking),
     startCollection: ranking
       ? (signal) =>
           startRankingCollection({
             signal,
+            authenticate: (options) => authenticateBrowserSession(browser, options),
             collect: (options) =>
               rankingCollect(browser, {
                 ...options,
@@ -62,8 +65,9 @@ async function main() {
         ? (signal) =>
             startQlikCollectionLoop({
               signal,
+              timeoutMs: 300_000,
               collect: async (options) => {
-                const result = await collectBrowserMetadata(browser, options);
+                const result = await collectAuthenticatedMetadata(browser, options);
                 if (options.signal.aborted) return { state: "unavailable" };
                 await writeMetadataArtifact(result);
                 return {
@@ -83,6 +87,7 @@ async function main() {
 export function startRankingCollection({
   signal,
   collect,
+  authenticate,
   credential = readRankingCredential,
   cycle = runRankingCycle,
   write = writeRankingArtifact,
@@ -123,6 +128,16 @@ export function startRankingCollection({
     collect: async ({ signal: cycleSignal }) => {
       collectionSignal = cycleSignal;
       if (cycleSignal.aborted) return { state: "unavailable" };
+      if (authenticate) {
+        const login = await authenticate({ signal: cycleSignal });
+        if (cycleSignal.aborted) return { state: "unavailable" };
+        if (login?.status !== "authenticated") {
+          completed = {
+            state: login?.status === "reauth_required" ? "reauth_required" : "unavailable",
+          };
+          return completed;
+        }
+      }
       const secret = await credential();
       if (cycleSignal.aborted) return { state: "unavailable" };
       const result = await cycle({ signal: cycleSignal, collect, secret });
@@ -133,9 +148,58 @@ export function startRankingCollection({
   });
 }
 
+export async function authenticateBrowserSession(
+  browser,
+  options,
+  {
+    renew = async (...args) => (await import("./browser-login.mjs")).renewBrowserLogin(...args),
+    attempts = loginAttemptStore,
+  } = {},
+) {
+  if (options.signal.aborted) return { status: "unavailable", reason: "cancelled" };
+  try {
+    const store = attempts();
+    const login = await renew(browser, { ...options, ...store });
+    if (options.signal.aborted) return { status: "unavailable", reason: "cancelled" };
+    if (login?.status === "reauth_required") {
+      const reasons = new Set([
+        "mfa_required",
+        "captcha_required",
+        "credential_rejected",
+        "attempt_blocked",
+        "account_mismatch",
+      ]);
+      return {
+        status: "reauth_required",
+        reason: reasons.has(login.reason) ? login.reason : "login_required",
+      };
+    }
+    if (login?.status !== "authenticated")
+      return { status: "unavailable", reason: "login_unavailable" };
+    return { status: "authenticated" };
+  } catch {
+    return { status: "unavailable", reason: "login_unavailable" };
+  }
+}
+
+export async function collectAuthenticatedMetadata(
+  browser,
+  options,
+  { collect = collectBrowserMetadata, ...authentication } = {},
+) {
+  const login = await authenticateBrowserSession(browser, options, authentication);
+  if (login.status !== "authenticated") return login;
+  try {
+    const result = await collect(browser, options);
+    return options.signal.aborted ? { status: "unavailable", reason: "cancelled" } : result;
+  } catch {
+    return { status: "unavailable", reason: "collection_unavailable" };
+  }
+}
+
 export async function holdBrowserSession(
   browser,
-  { signalSource = process, log = console.log, startCollection } = {},
+  { signalSource = process, log = console.log, startCollection, navigate = true } = {},
 ) {
   let stopping = false;
   const abort = new AbortController();
@@ -157,10 +221,12 @@ export async function holdBrowserSession(
   );
   try {
     const page = browser.pages()[0] ?? (await browser.newPage());
-    try {
-      await page.goto(ORIGIN, { waitUntil: "domcontentloaded", timeout: 60_000 });
-    } catch {
-      if (!stopping) log("qlik_navigation_pending");
+    if (navigate) {
+      try {
+        await page.goto(ORIGIN, { waitUntil: "domcontentloaded", timeout: 60_000 });
+      } catch {
+        if (!stopping) log("qlik_navigation_pending");
+      }
     }
     if (!abort.signal.aborted && startCollection) {
       collection = Promise.resolve()

@@ -2,6 +2,20 @@
 
 ## Retomada em 15/10/2026
 
+Migration aditiva aplicada por Supabase MCP apos CI38742972444/ba96607 success
+e backup novo privado /srv/descomplica-backups/qlik-v2-pre-20261015-lAzyGoTT.
+Fonte versionada20261014170549; historico remoto20261015141558, nome
+crm_qlik_v2_standalone. Nao reparar historico ou db push da cadeia divergente.
+Backup roles370/schema187265/data5809574/history-schema1116/history-data291723
+bytes, arquivos root0600 e diretorio0700; SHA256SUMS/fsync conferidos. Data
+SHA256cbad3af04298fb88e6c5d5958272542082d19879447bb3d02d40638a3e4f800c,
+schema SHA256cc4f19611d5a4264e66407acc4a6d302f4450e1f8d4918e777e03fdb93b9b0a6.
+Snapshots separados; nao comprova DR completo nem restore destes bytes reais.
+Pos-check: tabelas novas postgres com RLS/force true; zero grants diretos
+novos/legados para os tres papeis API. Writer service_role true apenas; reader
+authenticated true apenas. Zero EXECUTE PUBLIC nas duas RPCs/tres helpers.
+Helpers keys/timestamp/content i/s/s. Dados/flags/publicacao ainda inativos.
+
 Mainad49634, CI38640654844 com quatro jobs aprovados. Artefato11929858423:
 ZIP4c6ed829, tar e91870b2, config CIeda816fd, manifesto/image local1cee9135.
 Cadeia de11 camadas e dois perfis runtime conferidos na VPS, sem rebuild.
