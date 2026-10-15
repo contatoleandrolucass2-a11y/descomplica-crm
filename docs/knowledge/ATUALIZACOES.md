@@ -25,6 +25,12 @@
 
 Historico integral: [arquivo de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-2026-09-27-a-2026-10-13.md).
 
+## 2026-10-15: Dashboard, PR230
+
+- Visual implementado; filtros pendentes. CI38751646222:11 capturas revisadas,
+  demais gates aprovados; sem deploy. Integracao9ffc8a9 exige nova CI.
+  Fontes, testes e limites integrais: [auditoria](../audits/dashboard-layout-2026-10-15.md).
+
 ## 2026-10-15: Renovacao candidata da sessao Qlik
 
 - Owner159addfc/ad49634 promovido13:18:04Z pela CI38640654844 e coordenador;

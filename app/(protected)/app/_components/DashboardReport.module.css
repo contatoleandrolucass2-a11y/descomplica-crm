@@ -36,7 +36,7 @@
 .heading {
   display: flex;
   flex-wrap: wrap;
-  align-items: start;
+  align-items: center;
   justify-content: space-between;
   gap: 1rem 2rem;
   padding-bottom: 1.25rem;
@@ -45,17 +45,11 @@
 .heading > div,
 .metadata > div,
 .filterLinks > *,
-.pulseGrid > *,
 .monthlyGrid > *,
 .diagnosisGrid > *,
 .operationalGrid > *,
 .teamGrid > * {
   min-width: 0;
-}
-
-.report .context {
-  margin-top: 0.4rem;
-  color: var(--analytics-muted);
 }
 
 .metadata,
@@ -187,17 +181,12 @@
   border-bottom: 1px solid var(--analytics-line);
 }
 
-.pulseGrid,
 .monthlyGrid,
 .operationalGrid,
 .teamGrid {
   display: grid;
   align-items: start;
   gap: 1rem;
-}
-
-.pulseGrid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
 }
 
 .monthlyGrid {
@@ -211,33 +200,6 @@
   background: var(--analytics-surface);
   padding: 1rem;
   box-shadow: none;
-}
-
-.donut {
-  display: grid;
-  place-items: center;
-  min-height: 7.5rem;
-  padding-block: 0.5rem;
-}
-
-.donut figure {
-  width: 7rem;
-  height: 7rem;
-  max-width: 100%;
-  margin: 0;
-}
-
-.donut figcaption {
-  max-width: 5rem;
-  font-size: 1rem;
-}
-
-.report .conversionCaption {
-  min-height: 2.5rem;
-  margin-bottom: 0.5rem;
-  color: var(--analytics-muted);
-  font-size: 0.8125rem;
-  text-align: center;
 }
 
 .readings > div,
@@ -273,22 +235,6 @@
   font-size: inherit;
   font-weight: 400;
   white-space: normal;
-}
-
-.readings .quantity {
-  font-size: 1.25rem;
-}
-
-.report .assessment {
-  margin-top: 0.75rem;
-  border-top: 1px solid var(--analytics-line);
-  padding-top: 0.625rem;
-  color: var(--analytics-muted);
-  font-size: 0.8125rem;
-}
-
-.report .assessment[data-met="true"] {
-  color: var(--analytics-positive-ink);
 }
 
 .report .blockDetail {
@@ -435,13 +381,43 @@
 }
 
 .pace {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: start;
-  gap: 1rem 2rem;
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) minmax(0, 2fr);
+  align-items: center;
+  gap: 1.25rem;
   margin-top: 1.25rem;
-  padding-top: 1rem;
+  padding-block: 1.25rem 0.25rem;
   border-top: 1px solid var(--analytics-line);
+}
+
+.paceValues {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.paceValues > div {
+  min-width: 0;
+  border-left: 2px solid var(--analytics-line);
+  padding-left: 1rem;
+}
+
+.paceValues > div:first-child {
+  border-left-color: var(--analytics-cyan-strong);
+}
+
+.paceValues dt {
+  font-size: 0.75rem;
+}
+
+.paceValues dd {
+  margin-top: 0.375rem;
+  font-size: 1.5rem;
+  line-height: 1.25;
+}
+
+.report .paceValues dd > span {
+  font-size: 0.875rem;
 }
 
 .pace p,
@@ -452,14 +428,40 @@
 
 .diagnosisGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 0 1.5rem;
+}
+
+.diagnosisGrid > div {
+  grid-column: span 2;
+  padding-block: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--analytics-line);
+}
+
+.diagnosisGrid > div[data-secondary="true"] {
+  grid-column: span 3;
+  padding-block: 1.25rem 0;
+  border-bottom: 0;
+}
+
+.diagnosisGrid h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: 2.5rem;
+  font-size: 0.8125rem;
+}
+
+.diagnosisGrid h3 svg {
+  flex: none;
+  color: var(--analytics-cyan-strong);
 }
 
 .diagnosisGrid strong {
   display: block;
-  margin-block: 0.5rem 0.25rem;
-  font-size: 1.25rem;
+  margin-block: 0.5rem;
+  font-size: 1.75rem;
+  line-height: 1.25;
   font-variant-numeric: tabular-nums;
 }
 
@@ -485,26 +487,6 @@
 
 .tableSection > h3 {
   margin-bottom: 0.625rem;
-}
-
-.report .tableSection > div {
-  max-width: 100%;
-  border-radius: 8px;
-}
-
-.report .tableSection table {
-  font-size: 0.8125rem;
-}
-
-.interval,
-.comparison {
-  display: block;
-}
-
-.comparison {
-  color: var(--analytics-muted);
-  font-size: 0.75rem;
-  font-weight: 400;
 }
 
 .teamTotals dd {
@@ -535,16 +517,8 @@
   outline-offset: 3px;
 }
 
-@media (max-width: 75rem) {
-  .pulseGrid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 @media (max-width: 56rem) {
-  .pulseGrid,
   .monthlyGrid,
-  .diagnosisGrid,
   .teamGrid,
   .dimensions {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -553,6 +527,21 @@
   .refresh {
     margin-left: 0;
   }
+
+  .pace {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .diagnosisGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .diagnosisGrid > div,
+  .diagnosisGrid > div[data-secondary="true"] {
+    grid-column: auto;
+    padding-block: 1rem;
+    border-bottom: 1px solid var(--analytics-line);
+  }
 }
 
 @media (max-width: 36rem) {
@@ -560,12 +549,16 @@
     font-size: 1.5rem;
   }
 
-  .pulseGrid,
   .monthlyGrid,
   .diagnosisGrid,
   .teamGrid,
   .dimensions {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .paceValues {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.875rem;
   }
 
   .metadata,
