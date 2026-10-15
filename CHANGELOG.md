@@ -48,6 +48,16 @@
 - Oculta permissões técnicas de read model v3 e de consulta de auditoria
   sem alterar as funcionalidades ou os registros correspondentes no banco.
 
+## 2026-10-15: Resolucao de metadados Qlik
+
+- Registra gates locais e limite Windows, exigindo CI Linux e novo probe
+  nativo antes de qualquer ativacao.
+- Reconhece as referencias childRefId do container nativo de abas, mantendo
+  rejeicao de associacoes ambiguas e sem promover IDs de interface a Engine IDs.
+- Amplia a leitura limitada de metadados para identificar aliases das medidas
+  e campos de identidade. Nao coleta clientes, fatos nem verifica automaticamente
+  o mapeamento produtivo; configuracao depende de revisao nativa.
+
 ## 2026-10-15: Organizacao visual do dashboard
 
 - Remove Fonte e contexto repetido do cabecalho e o breadcrumb da raiz `/app`.

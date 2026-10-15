@@ -135,6 +135,16 @@ o marcador sintético é verificado no atributo da página e permanece visível 
 Oportunidades. Ambas as verificações continuam obrigatórias; nenhum resultado
 da captura foi alterado para satisfazer o teste.
 
+## Reconciliação com a atualização Qlik
+
+A CI normal `38771992767` concluiu com `validate`, `release-gates` e
+`isolated-restore` aprovados. Antes da integração, a consulta remota encontrou
+`main` em `a7fdf92d38345307465c60b486fba627696b0844`, após o PR #233.
+A atualização de metadados Qlik foi incorporada integralmente. Os dois
+conflitos eram somente em CHANGELOG e WORKLOG; ambos os históricos foram
+preservados. A aplicação, as migrations de usuários e as referências visuais
+permanecem iguais. Uma nova CI do candidato reconciliado é obrigatória.
+
 ## Validação e publicação
 
 Os resultados finais dos gates, do backup aplicável e da promoção serão
