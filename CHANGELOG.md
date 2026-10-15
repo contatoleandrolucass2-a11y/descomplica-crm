@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-15 - Estado de selecao Qlik
+
+- Vincula explicitamente o objeto de selecao ao estado padrao e rejeita
+  layout ausente/alternativo antes da coleta.247 testes focais aprovados.
+- Registra CI verde do head anterior e nova baseline CRM concorrente,
+  sem confundir testes e metadados com publicacao real de ranking.
+
 ## 2026-10-15: Evidencias de CI e coletor
 
 - Registra verify visual aprovado, promocao isolada do owner e limite real

@@ -295,11 +295,13 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
             }),
         };
       }
-      if (properties.qSelectionObjectDef)
+      if (properties.qSelectionObjectDef) {
+        assert.equal(properties.qSelectionObjectDef.qStateName, "$");
         return {
           getLayout: async () =>
             invoke("selectionLayout", {
               qSelectionObject: {
+                qStateName: "$",
                 qSelections: [
                   ...[...state.selected].map(([qField]) => ({
                     qField,
@@ -319,6 +321,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
               },
             }),
         };
+      }
       if (properties.qListObjectDef) {
         const field = properties.qListObjectDef.qDef.qFieldDefs[0];
         return {
@@ -1418,6 +1421,47 @@ test("master changes during paging reject the whole observation", async () => {
   });
   await rejected(f, "master_changed");
 });
+
+for (const serialized of [false, true]) {
+  for (const state of ["missing", "alternate"]) {
+    for (const phase of ["initial", "selected"]) {
+      test(`selection object rejects ${state} state at ${phase}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value) {
+            if (
+              method === "selectionLayout" &&
+              (phase === "initial" || value.qSelectionObject.qSelections.length)
+            ) {
+              if (state === "missing") delete value.qSelectionObject.qStateName;
+              else value.qSelectionObject.qStateName = "synthetic-alternate";
+            }
+            return value;
+          },
+        });
+        const collect = serialized
+          ? runInNewContext(`(${collectQlikRanking.toString()})`, {
+              crypto: webcrypto,
+              TextEncoder,
+            })
+          : collectQlikRanking;
+        assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+          status: "unavailable",
+          reason: "state_mismatch",
+        });
+        assert.equal(
+          f.state.calls.some((call) => call.method === "cubeData"),
+          false,
+        );
+        assert.equal(
+          f.state.calls.some((call) => call.method === "selectMonth"),
+          phase === "selected",
+        );
+        assert.equal(f.state.sessions.size, 0);
+        assert.equal(f.state.created.length, f.state.destroyed.length);
+      });
+    }
+  }
+}
 
 for (const [name, mutation, reason] of [
   [

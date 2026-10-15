@@ -585,7 +585,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     aborted();
     doc = await call(global, "openDoc", APP);
     const initialReload = await reload();
-    const selection = await create({ qSelectionObjectDef: {} });
+    const selection = await create({ qSelectionObjectDef: { qStateName: "$" } });
     const lists = [];
     for (const field of [...mapping.filters.map((item) => item.field), CALENDAR]) {
       lists.push(
@@ -631,6 +631,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     }
     async function selectedFields(empty = false) {
       const layout = await call(selection, "getLayout");
+      check(layout?.qSelectionObject?.qStateName === "$", "state_mismatch");
       const selections = layout?.qSelectionObject?.qSelections;
       check(Array.isArray(selections) && selections.length <= 5, "selection_unproven");
       if (empty) {

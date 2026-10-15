@@ -1,5 +1,47 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Consistencia do estado de selecao QIX
+
+- Primary acrescenta estado$ explicito ao objeto proprio SelectionObject e
+  exige qStateName$ em todos os layouts. Oito regressoes modulo/VM cobrem
+  ausencia/alternancia antes de fatos/cleanup;247 focais aprovados, lint e
+  format aprovados. Demais gates e runtime do delta ainda nao verificados.
+- Revisao readonly consultou schema instalado12.612.0/Enigma2.15.0 e
+  https://help.qlik.com/en-US/sense-developer/May2026/Subsystems/EngineJSONAPI/Content/models-selectionobject.htm.
+  Layouts HyperCube/ListObject possuem qStateName oficial; nao relaxar
+  guards pela ausencia no required OpenRPC sem evidencia real de omissao.
+
+## 2026-10-15: Nova baseline CRM e retomada de transporte
+
+- SSH2632 perdeu transporte; tentativa de reconexao e conector GitHub
+  ficaram indisponiveis temporariamente. Sessao97485 restabelecida sem
+  alterar contas/rede/permissoes. Nao houve mutacao durante a indisponibilidade.
+- GET publico20:16:53Z confirmou200/ok/d83c22d. Coordenador status registra
+  deployment72be7b10-a4f6-4178-8f9f-6049dd5ae0d3, d83c22d,
+  imagem2e832356, deployedAt19:15:11.541Z, sem pendencia. Publicacao
+  concorrente PR232, nao realizada por esta frente. Qlik owner00bbab75/a7fdf92
+  permanece separado, rankingConnectedfalse e sem pendencia.
+- CI38785519700/2f27e2f concluiu tres gates success; imagem PR skipped.
+  Nao e CI main nem comprova carga real. Probe privado readonly de config
+  recusou na fase imports: a7 nao possui o transform Qlik ainda exclusivo
+  do PR216. Nao prova ausencia de credencial e nao alterou arquivos privados.
+- Fontes: coordinator status/qlik-status, GitHub actions/jobs e health.
+  Preservar nova baseline nas proximas operacoes CAS. Pins/fatos pendentes.
+
+## 2026-10-15: Retomada observacional as18:56Z
+
+- Git comum confirmado; fetch preservou codex/qlik-ranking-vps/2f27e2f.
+  GitHub branches/main retornou d83c22d, merge concorrente PR232. Nao
+  confundir main integrado com CRM publicado fae77f9: GET publico sem
+  cookies18:56:18Z confirmou HTTP200/statusok/versao fae77f9.
+- CI38785519700 no head2f27e2f: validate/restore success e release-gates
+  ainda em progresso. Nao valida o hotfix OP nao commitado. Owner Qlik
+  segue a7fdf92 com ultimo diagnostico qix_metadata_limit; sem evidencia
+  nova de fatos publicados. Gates completos e nova coleta real pendentes.
+- Fontes: GitHub API branches/main e actions/runs/38785519700/jobs,
+  https://crm.descomplicapro.com.br/api/health e Git local. Reavaliar
+  main/CI/health/ledger no minuto de cada promocao protegida.
+
 ## 2026-10-15: CI visual verde e limite real de metadados
 
 - CI38777064690/0acb00f concluiu os tres gates success, incluindo verify das

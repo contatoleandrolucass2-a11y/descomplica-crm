@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-15: Estado explicito do objeto de selecao QIX
+
+Schema/documentacao oficial confirmam qStateName em HyperCube, ListObject e
+SelectionObject. Ausencia em required do OpenRPC nao comprova omissao real;
+guards de cubo/lista preservados. Objeto proprio de selecao agora declara
+estado$ e valida estritamente o layout tanto vazio quanto apos selecoes.
+Regressoes8 modulo/VM recusam estado ausente/alternativo antes de fatos e
+verificam cleanup.247/247 testes focais, lint/format/diff aprovados; demais
+gates desse delta ainda pendentes, sem modificacao produtiva.
+
+CI38785519700/head2f27e2f concluiu tres gates success, imagem PR skipped.
+Nao cobre o delta de estado. CRM concorrente d83c22d/deployment72be7b10,
+deployedAt19:15:11.541Z, confirmado status e health20:16:53Z. Owner Qlik
+00bbab75/a7fdf92 separado, sem fatos. Configprobe readonly recusou imports
+porque a7 ainda nao inclui transform Qlik; nao examinou credenciais.
+
 ## 2026-10-15: CI visual concluida e limite nativo
 
 CI38777064690 de0acb00f concluiu tres gates success, inclusive verify da
