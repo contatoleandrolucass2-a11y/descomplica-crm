@@ -35,6 +35,8 @@ describe("management canvas layout", () => {
   });
 
   it("keeps every delegated management surface on the compact canvas", () => {
+    const goals = source("app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx");
+    expect(goals.match(/<main(?:\s|>)/g)).toHaveLength(1);
     for (const file of [
       "app/(protected)/admin/page.tsx",
       "app/(protected)/admin/usuarios/page.tsx",

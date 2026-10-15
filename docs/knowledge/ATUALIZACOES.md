@@ -3881,3 +3881,11 @@ uso do coordenador por todos os publicadores; esta entrega não publica runtime.
   combinacao atual; repetir gates no novo SHA antes de integrar/publicar.
 - knowledge:sync segue indisponivel pelo limite de tamanho registrado;
   criterio de revisao inalterado, sem ampliar limite nem resumir historico.
+
+## 2026-10-15: regiao principal acessivel em Meta
+
+- Fonte:ProtectedShellFrame.tsx usa div; o carregador de metas precisa manter
+  main como as demais paginas. Landmark restaurado, sem cabecalho global novo.
+- CI38755638673 passou validacao na tentativa2 apos HTTP403 da Prefeitura;
+  restauracao/navegador estavam em curso. Ajuste semantico exige novo SHA/CI.
+  Verificacao oficial passou localmente; nao houve mudanca de politica/gate.

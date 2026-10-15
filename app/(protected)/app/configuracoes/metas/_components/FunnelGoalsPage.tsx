@@ -31,7 +31,7 @@ export async function FunnelGoalsPage({
     day: "2-digit",
   }).format(referenceDate);
   return (
-    <section
+    <main
       aria-label={profile === "partnerships" ? "Metas do funil de parcerias" : "Metas do funil"}
     >
       <p className="px-5 py-2 text-xs text-[var(--analytics-muted)]" role="status">
@@ -47,6 +47,6 @@ export async function FunnelGoalsPage({
         today={today}
         notification={notification}
       />
-    </section>
+    </main>
   );
 }

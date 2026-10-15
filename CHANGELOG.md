@@ -2423,3 +2423,5 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
   semanal, equipe, calendario mensal e produtividade nos tres temas.
 - Preserva rascunhos inativos e controles do servidor; corrige contraste e
   rolagem por teclado sem alterar politicas comerciais ou dados realizados.
+
+- Meta preserva a regiao principal acessivel da pagina no shell protegido.

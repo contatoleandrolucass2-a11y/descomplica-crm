@@ -6055,3 +6055,9 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   larguras. Evidencias locais sinteticas em test-results/goal-planning-preview.
   -56testes focados aprovados. Tipos/lint/build locais aprovados; CI Linux e
   promocao protegida seguem pendentes. Nenhum dado remoto ou politica alterado.
+
+## 2026-10-15: semantica principal da guia Meta
+
+- Conferencia do shell identificou que ele fornece div de conteudo, enquanto
+  cada pagina fornece o landmark main. O carregador Meta preserva agora essa
+  regiao principal, com teste de regressao; sem mudanca visual ou de dados.
