@@ -14,6 +14,54 @@
 - Registra limite real de metadados e preserva a separacao entre owner
   instalado, mapeamento conferido e publicacao de fatos.
 
+## 2026-10-15 — Diretório de usuários compatível com produção
+
+- Alinha o limite de altura do teste visual ao novo painel aprovado, mantendo verificações de overflow, navegação e acessibilidade.
+
+- Exibe a elegibilidade real dos usuários no banco compacto verificado, preservando paginação, hierarquia, MFA e políticas de acesso.
+- Mantém contas em revisão quando o contrato do banco estiver ausente, incompleto ou desconhecido.
+
+## 2026-10-14 — Integração de usuários e presença
+
+- Torna a validação de teclado do seletor nativo da Rotina compatível com macOS, preservando os testes por setas no Linux.
+
+- Acrescenta à CI o ensaio isolado do contrato compacto de autorização, aguardando a inicialização definitiva do banco.
+
+- Integra o painel Pessoas e a matriz de acessos com a paginação e o catálogo reais do ambiente.
+- Mostra presença online em verde pulsante e offline em vermelho, respeitando movimento reduzido e distinguindo indisponibilidade.
+- Preserva as regras de hierarquia e MFA nas instalações completas e compactas; as unidades dos simuladores respeitam RIVA e DIRECIONAL também no estoque Salesforce.
+
+## 2026-10-14 — Presença dos usuários, ambiente local
+
+- Mostra Online/Offline separado da situação administrativa da conta, com atualização automática e indicação de indisponibilidade.
+- Registra presença recente da própria conta autenticada e limita a consulta aos usuários já visíveis ao gestor.
+
+## 2026-10-14 — Formato do painel de usuários, ambiente local
+
+- Aplica a referência visual ao diretório Pessoas e à matriz de acessos, com filtros em botões, quatro abas e estados de herança por linha.
+- Mantém rascunhos durante a navegação e busca entre categorias, com suporte a teclado, temas e telas estreitas.
+- Distingue resultados vazios de ausência de contas e impede que contas bloqueadas sejam apresentadas com acesso efetivo.
+
+## 2026-10-14 — Padrão completo do Administrador, ambiente local
+
+- Administrador passa a herdar todas as 31 permissões atuais, incluindo RIVA e DIRECIONAL. Exceções individuais e hierarquia continuam prevalecendo.
+- Ajusta a apresentação de rascunhos comerciais para respeitar as restrições Master-only existentes no banco.
+
+## 2026-10-14 — Marcas nos simuladores, ambiente local
+
+- Adiciona RIVA e DIRECIONAL como acessos independentes por usuário, desativados por padrão em todos os papéis.
+- Oculta unidades das marcas não autorizadas nas respostas das APIs de todos os simuladores, incluindo o snapshot e consultas com cache.
+
+## 2026-10-14 — Ambiente local
+
+- Corrige os quadrados de usuários para refletir a herança do papel e as
+  exceções, com alterações atômicas e auditoria sem motivo manual.
+- Restaura os padrões do novo papel ao salvar uma troca autorizada.
+- Disponibiliza visualização e execução de simuladores aos sete papéis atuais,
+  com um único controle de acesso e os bloqueios de conta preservados.
+- Oculta permissões técnicas de read model v3 e de consulta de auditoria
+  sem alterar as funcionalidades ou os registros correspondentes no banco.
+
 ## 2026-10-15: Resolucao de metadados Qlik
 
 - Registra gates locais e limite Windows, exigindo CI Linux e novo probe

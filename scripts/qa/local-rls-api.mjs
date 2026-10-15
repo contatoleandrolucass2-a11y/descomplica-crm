@@ -79,11 +79,23 @@ const expectedPageKeysByRole = {
     ...partnershipPageKeys,
     ...simulatorPageKeys,
   ].sort(),
-  coordinator: [...inheritedAnalyticalPageKeys, ...partnershipPageKeys].sort(),
-  manager_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys].sort(),
-  manager_imob: [...inheritedAnalyticalPageKeys, ...partnershipPageKeys].sort(),
-  broker_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys].sort(),
-  broker_imob: [...inheritedAnalyticalPageKeys, ...partnershipPageKeys].sort(),
+  coordinator: [
+    ...inheritedAnalyticalPageKeys,
+    ...partnershipPageKeys,
+    ...simulatorPageKeys,
+  ].sort(),
+  manager_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys, ...simulatorPageKeys].sort(),
+  manager_imob: [
+    ...inheritedAnalyticalPageKeys,
+    ...partnershipPageKeys,
+    ...simulatorPageKeys,
+  ].sort(),
+  broker_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys, ...simulatorPageKeys].sort(),
+  broker_imob: [
+    ...inheritedAnalyticalPageKeys,
+    ...partnershipPageKeys,
+    ...simulatorPageKeys,
+  ].sort(),
   pending: [],
 };
 const positivePageRoles = new Set(
@@ -700,35 +712,46 @@ begin
     with expected(role_key, permission_key) as (
       values
         ('admin', 'crm.dashboard.view'),
+        ('admin', 'crm.simulators.view'),
+        ('admin', 'crm.simulators.execute'),
         ('admin', 'crm.dashboard.all.view'),
         ('admin', 'crm.dashboard.with_canal_imob.view'),
         ('admin', 'crm.dashboard.without_canal_imob.view'),
         ('admin', 'crm.stages.view'),
         ('admin', 'crm.ranking.view'),
         ('admin', 'crm.partnerships.view'),
-        ('admin', 'crm.simulators.view'),
         ('admin', 'pages.manage'),
         ('admin', 'crm.settings.view'),
         ('admin', 'crm.settings.manage'),
         ('admin', 'crm.salesforce.refresh'),
         ('admin', 'crm.ingest.manage'),
         ('coordinator', 'crm.dashboard.view'),
+        ('coordinator', 'crm.simulators.view'),
+        ('coordinator', 'crm.simulators.execute'),
         ('coordinator', 'crm.dashboard.with_canal_imob.view'),
         ('coordinator', 'crm.stages.view'),
         ('coordinator', 'crm.partnerships.view'),
         ('manager_house', 'crm.dashboard.view'),
+        ('manager_house', 'crm.simulators.view'),
+        ('manager_house', 'crm.simulators.execute'),
         ('manager_house', 'crm.dashboard.without_canal_imob.view'),
         ('manager_house', 'crm.stages.view'),
         ('manager_house', 'crm.ranking.view'),
         ('manager_imob', 'crm.dashboard.view'),
+        ('manager_imob', 'crm.simulators.view'),
+        ('manager_imob', 'crm.simulators.execute'),
         ('manager_imob', 'crm.dashboard.with_canal_imob.view'),
         ('manager_imob', 'crm.stages.view'),
         ('manager_imob', 'crm.partnerships.view'),
         ('broker_house', 'crm.dashboard.view'),
+        ('broker_house', 'crm.simulators.view'),
+        ('broker_house', 'crm.simulators.execute'),
         ('broker_house', 'crm.dashboard.without_canal_imob.view'),
         ('broker_house', 'crm.stages.view'),
         ('broker_house', 'crm.ranking.view'),
         ('broker_imob', 'crm.dashboard.view'),
+        ('broker_imob', 'crm.simulators.view'),
+        ('broker_imob', 'crm.simulators.execute'),
         ('broker_imob', 'crm.dashboard.with_canal_imob.view'),
         ('broker_imob', 'crm.stages.view'),
         ('broker_imob', 'crm.partnerships.view')
@@ -746,6 +769,7 @@ begin
           'crm.ranking.view',
           'crm.partnerships.view',
           'crm.simulators.view',
+          'crm.simulators.execute',
           'pages.manage',
           'crm.settings.view',
           'crm.settings.manage',
@@ -761,6 +785,26 @@ begin
     ) difference
   ) then
     raise exception 'inherited commercial permission baseline diverged';
+  end if;
+  if exists (
+    select 1 from public.permissions permission
+    where not exists (
+      select 1 from public.role_permissions role_permission
+      where role_permission.role_key = 'admin'
+        and role_permission.permission_key = permission.key
+    )
+  ) then
+    raise exception 'admin must inherit the complete permission catalog';
+  end if;
+  if (
+    select count(*) from public.permissions
+    where key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
+  ) <> 2 or exists (
+    select 1 from public.role_permissions
+    where role_key <> 'admin'
+      and permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
+  ) then
+    raise exception 'inventory brands must be inherited only by admin';
   end if;
 end
 $qa_preflight$;
@@ -813,6 +857,19 @@ function createFixtures(runKey) {
   };
 }
 
+function inventoryAccessFixtureSql(userId) {
+  const userIdSql = sqlUuid(userId);
+  return `
+-- Only this ephemeral synthetic account receives the two inventory brands.
+insert into public.user_permission_overrides (
+  user_id, permission_key, effect, reason, granted_by
+)
+values
+  (${userIdSql}, 'crm.inventory.riva.view', 'allow', 'Ephemeral local inventory QA fixture', ${userIdSql}),
+  (${userIdSql}, 'crm.inventory.direcional.view', 'allow', 'Ephemeral local inventory QA fixture', ${userIdSql});
+`;
+}
+
 function setupSql(accounts, fixtures) {
   const byRole = Object.fromEntries(accounts.map((account) => [account.role, account]));
   const masterId = sqlUuid(byRole.master.id);
@@ -835,6 +892,8 @@ function setupSql(accounts, fixtures) {
 begin;
 
 select public.bootstrap_master_user(${masterId});
+
+${inventoryAccessFixtureSql(byRole.master.id)}
 
 insert into public.crm_organizations (id, organization_key, name, kind)
 values
@@ -1736,7 +1795,10 @@ async function main() {
       concurrentAccounts.push(secondMaster);
       runLocalSql(
         local.database,
-        `begin; select public.bootstrap_master_user(${sqlUuid(secondMaster.id)}); commit;`,
+        `begin;
+select public.bootstrap_master_user(${sqlUuid(secondMaster.id)});
+${inventoryAccessFixtureSql(secondMaster.id)}
+commit;`,
         "concurrent master setup",
       );
       await verifyAccountThroughRest(local, secondMaster, fixtures);

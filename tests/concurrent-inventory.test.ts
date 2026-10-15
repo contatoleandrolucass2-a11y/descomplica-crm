@@ -121,14 +121,19 @@ describe("QA-only inventory upstream isolation", () => {
         expect((await GET()).status).toBe(status);
       }
       expect(upstream.requestCount()).toBe(0);
-      authorize.mockResolvedValue({ ok: true, context: { roleKey: "master" } });
+      authorize.mockResolvedValue({
+        ok: true,
+        context: {
+          roleKey: "master",
+          permissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"],
+        },
+      });
       const response = await GET();
       expect(response.status).toBe(200);
       expect(response.headers.get("cache-control")).toContain("no-store");
       expect(await response.json()).toMatchObject({
         count: 3301,
         sourceKind: "live",
-        qaFixture: { synthetic: true },
       });
       expect(upstream.requestCount()).toBe(1);
       for (const [status, error] of [

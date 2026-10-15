@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 
+import { ROLES } from "@/lib/authorization/roles";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 import {
   getOfficialSimulatorRuntimeConfiguration,
@@ -112,48 +113,103 @@ describe("endpoint oficial dos simuladores", () => {
     expect(authorize).not.toHaveBeenCalled();
   });
 
-  it("exige autenticação, permissão e papel Master mesmo com flag ativa", async () => {
-    const unauthenticated = await handleOfficialSimulatorPost(
+  it.each([401, 403])("preserva a recusa de autorização com status %s", async (status) => {
+    const authorize = vi.fn(async () => ({
+      ok: false as const,
+      response: Response.json(
+        { error: status === 401 ? "unauthenticated" : "forbidden" },
+        { status },
+      ),
+    }));
+    const configured = dependencies({ authorize });
+    const execute = vi.spyOn(configured.calculators["associativo-fluxo-linear"]!, "execute");
+    const response = await handleOfficialSimulatorPost(
       request(),
       "associativo-fluxo-linear",
-      dependencies({
-        authorize: vi.fn(async () => ({
-          ok: false as const,
-          response: Response.json({ error: "unauthenticated" }, { status: 401 }),
-        })),
-      }),
-    );
-    const nonMaster = await handleOfficialSimulatorPost(
-      request(),
-      "associativo-fluxo-linear",
-      dependencies({
-        authorize: vi.fn(async () => ({
-          ok: true as const,
-          context: { ...masterContext, roleKey: "admin" as const, level: 80 },
-        })),
-      }),
+      configured,
     );
 
-    expect(unauthenticated.status).toBe(401);
-    expect(nonMaster.status).toBe(403);
+    expect(response.status).toBe(status);
+    expect(authorize).toHaveBeenCalledWith("crm.simulators.execute");
+    expect(execute).not.toHaveBeenCalled();
   });
 
-  it("expõe status no-store para recuperar UI de canário sem relaxar autorização", async () => {
+  it.each([
+    "master",
+    "admin",
+    "coordinator",
+    "manager_house",
+    "manager_imob",
+    "broker_house",
+    "broker_imob",
+  ] as const)("permite %s com visualizar e executar efetivos", async (roleKey) => {
+    const context = { ...masterContext, roleKey, level: ROLES[roleKey].level };
+    const configured = dependencies({
+      authorize: vi.fn(async () => ({ ok: true as const, context })),
+    });
     expect(
       officialSimulatorExecutionIsEnabled(
-        { mode: "active", enabledKeys: ["simulator.wf13"] },
+        configured.configuration(),
         "associativo-fluxo-linear",
-        masterContext,
+        context,
       ),
     ).toBe(true);
-    expect(
-      officialSimulatorExecutionIsEnabled(
-        { mode: "active", enabledKeys: ["simulator.wf13"] },
-        "associativo-fluxo-linear",
-        { ...masterContext, roleKey: "admin", level: 80 },
-      ),
-    ).toBe(false);
 
+    const response = await handleOfficialSimulatorPost(
+      request(),
+      "associativo-fluxo-linear",
+      configured,
+    );
+    expect(response.status).toBe(200);
+    await expect(response.json()).resolves.toMatchObject({ result: { ok: true } });
+
+    const status = await handleOfficialSimulatorStatus(
+      new Request(ENDPOINT),
+      "associativo-fluxo-linear",
+      configured,
+    );
+    expect(status.status).toBe(200);
+    await expect(status.json()).resolves.toMatchObject({ executionEnabled: true });
+  });
+
+  it.each([
+    { permissions: [] },
+    { permissions: ["crm.simulators.view"] },
+    { permissions: ["crm.simulators.execute"] },
+  ] satisfies { permissions: AuthorizationContext["permissions"] }[])(
+    "recusa execução se falta parte do acesso: $permissions",
+    async ({ permissions }) => {
+      const context = { ...masterContext, permissions };
+      const configured = dependencies({
+        authorize: vi.fn(async () => ({ ok: true as const, context })),
+      });
+      const execute = vi.spyOn(configured.calculators["associativo-fluxo-linear"]!, "execute");
+      expect(
+        officialSimulatorExecutionIsEnabled(
+          configured.configuration(),
+          "associativo-fluxo-linear",
+          context,
+        ),
+      ).toBe(false);
+
+      const response = await handleOfficialSimulatorPost(
+        request(),
+        "associativo-fluxo-linear",
+        configured,
+      );
+      expect(response.status).toBe(403);
+      expect(execute).not.toHaveBeenCalled();
+
+      const status = await handleOfficialSimulatorStatus(
+        new Request(ENDPOINT),
+        "associativo-fluxo-linear",
+        configured,
+      );
+      await expect(status.json()).resolves.toMatchObject({ executionEnabled: false });
+    },
+  );
+
+  it("expõe status no-store sem alterar as flags independentes do motor", async () => {
     const enabled = await handleOfficialSimulatorStatus(
       new Request(ENDPOINT),
       "associativo-fluxo-linear",
@@ -173,20 +229,8 @@ describe("endpoint oficial dos simuladores", () => {
       "associativo-fluxo-linear",
       dependencies({ configuration: () => ({ mode: "off", enabledKeys: [] }) }),
     );
-    const nonMaster = await handleOfficialSimulatorStatus(
-      new Request(ENDPOINT),
-      "associativo-fluxo-linear",
-      dependencies({
-        authorize: vi.fn(async () => ({
-          ok: true as const,
-          context: { ...masterContext, roleKey: "admin" as const, level: 80 },
-        })),
-      }),
-    );
     expect(blocked.status).toBe(200);
     await expect(blocked.json()).resolves.toMatchObject({ executionEnabled: false });
-    expect(nonMaster.status).toBe(200);
-    await expect(nonMaster.json()).resolves.toMatchObject({ executionEnabled: false });
   });
 
   it("mantém o status autenticado e não revela execução a quem não pode ver simuladores", async () => {

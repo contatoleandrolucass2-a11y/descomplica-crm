@@ -152,7 +152,7 @@ select is(
   '[
     {"key":"crm.commercial_engine.execute","minLevel":100},
     {"key":"crm.commercial_policy.manage","minLevel":100},
-    {"key":"crm.simulators.execute","minLevel":100}
+    {"key":"crm.simulators.execute","minLevel":10}
   ]'::jsonb,
   'commercial management and execution permissions have bounded hierarchy levels'
 );
@@ -171,10 +171,18 @@ select is(
     )
   ),
   array[
+    'admin:crm.commercial_engine.execute',
+    'admin:crm.commercial_policy.manage',
+    'admin:crm.simulators.execute',
+    'broker_house:crm.simulators.execute',
+    'broker_imob:crm.simulators.execute',
+    'coordinator:crm.simulators.execute',
+    'manager_house:crm.simulators.execute',
+    'manager_imob:crm.simulators.execute',
     'master:crm.commercial_policy.manage',
     'master:crm.simulators.execute'
   ]::text[],
-  'commercial management and simulator execution are Master-only'
+  'Administrator inherits the commercial catalog while other existing role defaults remain unchanged'
 );
 
 select ok(

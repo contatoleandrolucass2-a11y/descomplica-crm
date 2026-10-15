@@ -164,7 +164,9 @@ if (approvedCanvasByRoute.size !== routes.length) {
 const canvasDensityLimitByRoute = new Map([
   // The complete reference report replaces the former single-screen dashboard.
   ["/app", 4800],
-  ["/admin/usuarios", 1200],
+  // The approved workspace includes the role and full permission rows without
+  // the former internal scroll area; its desktop capture is 1598px tall.
+  ["/admin/usuarios", 1650],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],
@@ -997,6 +999,25 @@ async function selectAuthenticatedAdminUser(page, email) {
     .getByRole("list", { name: "Resultados de usuários", exact: true })
     .getByRole("button")
     .filter({ has: page.getByText(email, { exact: true }) });
+  // The authenticated account may be outside the first server page. Preserve the
+  // unfiltered directory while loading subsequent pages before measuring it.
+  const list = page.getByRole("list", { name: "Resultados de usuários", exact: true });
+  for (let attempt = 0; (await option.count()) === 0 && attempt < 200; attempt += 1) {
+    const loadMore = page.getByRole("button", { name: "Carregar mais usuários", exact: true });
+    await expect
+      .poll(async () => (await option.count()) > 0 || (await loadMore.count()) > 0)
+      .toBe(true);
+    if ((await option.count()) > 0) break;
+    const previousCount = await list.getByRole("button").count();
+    try {
+      await loadMore.click({ timeout: 1_000 });
+    } catch (error) {
+      // The list's observer may finish the same page between locating and
+      // clicking the button. Accept only the observed completion of that page.
+      if ((await list.getByRole("button").count()) <= previousCount) throw error;
+    }
+    await expect.poll(async () => list.getByRole("button").count()).toBeGreaterThan(previousCount);
+  }
   await expect(option).toHaveCount(1);
   await option.click();
   await expect(option).toHaveAttribute("aria-pressed", "true");
@@ -1004,6 +1025,40 @@ async function selectAuthenticatedAdminUser(page, email) {
   await expect(detail.getByRole("heading", { name: email, exact: true })).toBeVisible();
   await expect(detail.getByText("Conta atual", { exact: true })).toBeVisible();
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+}
+
+function inspectAdminUserAccessWorkspace() {
+  const workspace = document.querySelector(".admin-users-workspace");
+  const detail = workspace?.querySelector("#selected-user-panel");
+  const tablist = detail?.querySelector('.admin-permission-tabs[role="tablist"]');
+  const tabs = tablist ? [...tablist.querySelectorAll('[role="tab"]')] : [];
+  const selectedTabs = tabs.filter((tab) => tab.getAttribute("aria-selected") === "true");
+  const panels = detail
+    ? [...detail.querySelectorAll('.admin-permission-panel[role="tabpanel"]')]
+    : [];
+  const visiblePanels = panels.filter(
+    (panel) => panel.getClientRects().length > 0 && getComputedStyle(panel).display !== "none",
+  );
+  const panel = visiblePanels[0];
+  const grid = panel?.querySelector(".admin-permission-grid");
+  const rows = grid ? [...grid.querySelectorAll(".admin-permission-option")] : [];
+  const gridBox = grid?.getBoundingClientRect();
+  return {
+    userAccessWorkspaceReady: Boolean(
+      workspace?.querySelector(".admin-users-directory") &&
+      detail?.querySelector('[id^="role-title-"]') &&
+      tabs.length >= 4 &&
+      panels.length === tabs.length &&
+      selectedTabs.length === 1 &&
+      visiblePanels.length === 1 &&
+      panel.getAttribute("aria-labelledby") === selectedTabs[0].id &&
+      selectedTabs[0].getAttribute("aria-controls") === panel.id &&
+      panel.scrollHeight <= panel.clientHeight + 1 &&
+      gridBox &&
+      rows.length > 0 &&
+      rows.every((row) => Math.abs(row.getBoundingClientRect().width - gridBox.width) <= 1),
+    ),
+  };
 }
 
 async function inspectRoute(
@@ -1342,6 +1397,9 @@ async function inspectRoute(
   Object.assign(
     snapshot,
     await page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName),
+    route === "/admin/usuarios"
+      ? await page.evaluate(inspectAdminUserAccessWorkspace)
+      : { userAccessWorkspaceReady: true },
   );
   await accountTrigger.click();
   await accountPanel.waitFor({ state: "hidden", timeout: qaRouteBootstrapTimeout });
@@ -1371,6 +1429,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
+    snapshot.userAccessWorkspaceReady &&
     snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&

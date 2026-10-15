@@ -7,6 +7,9 @@ import { describe, expect, it } from "vitest";
 
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
 
+// @ts-expect-error — SQL generation is tested without running the local QA harness.
+import { fixtureSetupSql } from "../scripts/qa/local-authenticated-visual.mjs";
+
 const repositoryRoot = process.cwd();
 const administratorProtectionMigration =
   "20261011143218_protect_administrator_accounts_and_enable_simulator_view.sql";
@@ -33,17 +36,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 49-version manifest", async () => {
+  it("keeps a unique, ordered 54-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(49);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(49);
+    expect(migrations).toHaveLength(54);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(54);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
-    expect(migrations.at(-3)).toBe(permissionAccessDraftMigration);
-    expect(migrations.at(-2)).toBe(sharedRoutinesMigration);
-    expect(migrations.at(-1)).toBe(routineCompletionsMigration);
+    expect(migrations).toContain(permissionAccessDraftMigration);
+    expect(migrations).toContain(sharedRoutinesMigration);
+    expect(migrations).toContain(routineCompletionsMigration);
+    expect(migrations.at(-1)).toBe("20261014204014_local_user_presence.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -75,7 +79,7 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.tests).toBe(1323);
+    expect(plan.tests).toBe(1441);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -129,6 +133,24 @@ describe("release-candidate migration train", () => {
 });
 
 describe("release-candidate activation defaults", () => {
+  it("grants inventory only to the newly created local visual fixture", () => {
+    const fixture = {
+      marker: "QA local synthetic inventory permissions",
+      userId: "10000000-0000-4000-8000-000000000001",
+    };
+    const localSql = fixtureSetupSql(fixture);
+    const reusedSql = fixtureSetupSql({ ...fixture, reuseExistingMaster: true });
+
+    for (const permission of ["crm.inventory.riva.view", "crm.inventory.direcional.view"]) {
+      expect(localSql).toContain(`('${fixture.userId}'::uuid, '${permission}', 'allow'`);
+      expect(reusedSql).not.toContain(`('${fixture.userId}'::uuid, '${permission}', 'allow'`);
+    }
+    for (const sql of [localSql, reusedSql]) {
+      expect(sql).not.toContain("insert into public.role_permissions");
+      expect(sql).toContain("inventory brands must be inherited only by admin");
+    }
+  });
+
   it("converges the browser matrix with Gestão access and the released route inventory", async () => {
     const source = await readFile(
       path.join(repositoryRoot, "e2e/release-candidate.spec.ts"),
@@ -142,7 +164,6 @@ describe("release-candidate activation defaults", () => {
       "rankingRoles",
       "partnershipRoles",
       "repasseRoles",
-      "simulatorViewRoles",
       "protectedSurfaces",
       "operationalRoutes",
       "connectedSystemsRoute",
@@ -221,14 +242,15 @@ describe("release-candidate activation defaults", () => {
           controls: "authorized-navigation-crm-management",
         });
       } else if (operational) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(9);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(10);
         expect(matrix.expectedAccountSettingsRoutesForRole(role)).toEqual([]);
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
+          "Simulação",
           role.endsWith("_house") ? "Ranking" : "Canal de Parcerias",
           "Gestão",
         ]);
-        expect(roots[2]).toEqual({
+        expect(roots[3]).toEqual({
           name: "Gestão",
           tag: "BUTTON",
           href: null,
@@ -263,7 +285,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1323;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1441;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

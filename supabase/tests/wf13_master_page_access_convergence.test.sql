@@ -10,8 +10,8 @@ select is(
 
 select is(
   (select min_level from public.permissions where key = 'crm.simulators.view'),
-  100,
-  'the WF13 page permission remains delegable only at Master level'
+  10,
+  'the simulator page permission has the shared operational minimum level'
 );
 
 select is(
@@ -20,8 +20,8 @@ select is(
     from public.role_permissions
     where permission_key = 'crm.simulators.view'
   ),
-  array['admin', 'master']::text[],
-  'Administrator and Master inherit the WF13 page permission'
+  array['admin', 'broker_house', 'broker_imob', 'coordinator', 'manager_house', 'manager_imob', 'master']::text[],
+  'all seven current roles inherit the simulator page permission'
 );
 
 select is(
@@ -29,20 +29,25 @@ select is(
     select count(*)
     from public.role_permissions
     where permission_key = 'crm.simulators.view'
-      and role_key not in ('admin', 'master')
+      and role_key not in ('master', 'admin', 'coordinator', 'manager_house', 'manager_imob', 'broker_house', 'broker_imob')
   ),
   0::bigint,
-  'no role below Administrator inherits the WF13 page permission'
+  'pending and retired roles do not inherit the simulator page permission'
 );
 
 select is(
   (
     select count(*)
-    from public.user_permission_overrides
-    where permission_key = 'crm.simulators.view'
+    from public.role_permissions page_permission
+    where page_permission.permission_key = 'crm.simulators.view'
+      and not exists (
+        select 1 from public.role_permissions execution_permission
+        where execution_permission.role_key = page_permission.role_key
+          and execution_permission.permission_key = 'crm.simulators.execute'
+      )
   ),
   0::bigint,
-  'no direct override is needed for the inherited Administrator and Master page gate'
+  'every role with simulator viewing also inherits execution'
 );
 
 select is(
@@ -81,8 +86,8 @@ select is(
     from public.role_permissions
     where permission_key = 'crm.simulators.execute'
   ),
-  array['master']::text[],
-  'the independent execution gate remains Master-only'
+  array['admin', 'broker_house', 'broker_imob', 'coordinator', 'manager_house', 'manager_imob', 'master']::text[],
+  'the execution permission is inherited by the same seven current roles'
 );
 
 select ok(

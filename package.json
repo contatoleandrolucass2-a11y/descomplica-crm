@@ -20,6 +20,7 @@
     "qa:e2e:release": "QA_RELEASE_BROWSER=true node scripts/qa/local-rls-api.mjs",
     "qa:security:anonymous": "node scripts/qa/reference-parity.mjs boundary",
     "qa:security:rls-api": "node scripts/qa/local-rls-api.mjs",
+    "qa:database:compact-users": "node scripts/qa/compact-user-access.mjs",
     "homologation:prepare": "node scripts/homologation/prepare-runtime.mjs",
     "homologation:fixtures": "node scripts/homologation/provision-visual.mjs",
     "homologation:dns": "node scripts/homologation/configure-dns.mjs",
