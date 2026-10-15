@@ -1,5 +1,48 @@
 # Auditoria de layout do dashboard em 15/10/2026
 
+## Integracao concorrente
+
+- Main avancou para9ffc8a9/PR229 durante a validacao. Merge preserva
+  integralmente a renovacao Qlik e a correcao da espera de JSON na QA do
+  dashboard. Conflitos somente documentais, resolvidos mantendo ambos.
+- ATUALIZACOES do main ja tinha255544 bytes. Entrada deste trabalho preservada
+  integralmente abaixo; indice curto aponta para esta auditoria sem alterar
+  historia concorrente ou limite de256000. Confirmar sync apos integrar.
+- CI anterior nao valida a nova combinacao; repetir os gates no novo SHA.
+
+### Entrada do indice preservada integralmente
+
+## 2026-10-15: Filtros e organizacao visual do dashboard
+
+- Branch codex/dashboard-filtros-layout, base/main ad496340 (CI38640654844
+  aprovada); implementacao bbcca1b no PR230 draft. CI38751246231 em andamento
+  em14:26Z. GET publico /api/health14:26:01Z HTTP200/ok, version6843ef1.
+  Fontes: Git fetch, GitHub branches/PR/Actions e health sem sessao.
+  Sem merge ou deploy; versoes local, integrada e publicada sao distintas.
+- Textos removidos, roscas, ritmo, diagnostico e comparativos reorganizados.
+  49 testes focados e QA sintetica124/124 (3 temas,320-1920px), lint
+  (aviso previo), tipos e build aprovados. Suite Windows2897/85skip/2falhas:
+  symlink estoque por O_NOFOLLOW ausente e timeout DevTools. DevTools passou
+  isolado24/24; causa do timeout nao comprovada. Etapas Node posteriores
+  nao rodaram. Docker ausente; CI Linux/banco/RLS/restore e baseline pendentes.
+- Base geral segue permissoes. V2 tem somente tres visoes agregadas; quatro
+  filtros reais exigem dimensoes oficiais e recalculo de todos os blocos.
+  Nao assumir conta=corretor/empresa=imobiliaria ou filtrar totais ficticiamente.
+  Fonte externa apenas lida pelo navegador. Nenhum schema/coletor/n8n alterado.
+- Evidencias integrais preservadas em
+  [auditoria](../audits/dashboard-layout-2026-10-15.md);
+  contrato pendente em [filtros](../dashboard-dimensional-filters.md).
+  Nota excedeu256000 bytes no commit; somente esta entrada foi distribuida
+  na auditoria para recuperar sync, sem truncar historico ou ampliar limite.
+  Reavaliar publicacao apos CI completa e filtros apos contrato/cobertura.
+- MCP Supabase14:30Z confirmou estrutura legada agregada; consulta nao listou
+  v3 em public. Somente metadados, sem dados de clientes/mutacoes. CI38751646222
+  em3764dfb: validate/restore aprovados, matriz autenticada pendente15:05Z.
+  Sync recuperado e confirmado em3764dfb; detalhes e limites na auditoria.
+- CI38751646222 falhou somente11 capturas /app. Predicado funcional aprovado;
+  referencias revisadas/promovidas15:13Z,231 preservadas. Nova CI verify exigida;
+  detalhes/hashes e excecao de captura dirty na auditoria/manifesto. Sem deploy.
+
 Status: implementacao visual em PR, sem publicacao. Filtros pendentes.
 
 ## 2026-10-15: Filtros e organizacao visual do dashboard

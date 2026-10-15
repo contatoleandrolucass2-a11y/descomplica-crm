@@ -33,6 +33,36 @@ const environment = Object.freeze({
   GIT_CONFIG_NOSYSTEM: "1",
 });
 
+async function validateLoginCredentialMetadata() {
+  const directory = "/etc/descomplica-qlik";
+  const file = `${directory}/qlik-login.cred`;
+  await assertProtectedParents(path.dirname(directory));
+  try {
+    await lstat(directory);
+  } catch (error) {
+    if (error.code === "ENOENT") return;
+    throw error;
+  }
+  await assertProtectedParents(directory);
+  let info;
+  try {
+    info = await lstat(file);
+  } catch (error) {
+    if (error.code === "ENOENT") return;
+    throw error;
+  }
+  if (
+    !info.isFile() ||
+    info.isSymbolicLink() ||
+    info.uid !== 0 ||
+    info.nlink !== 1 ||
+    (info.mode & 0o7777) !== 0o600 ||
+    info.size < 1 ||
+    info.size > 65_536
+  )
+    throw new Error("Qlik login credential metadata rejected.");
+}
+
 async function syncDirectory(directory) {
   const handle = await open(
     directory,
@@ -355,6 +385,7 @@ export function qlikReleaseHost(lock) {
         if (contents !== stdout)
           throw new Error("Qlik release input differs from the approved commit.");
       }
+      await validateLoginCredentialMetadata();
       await assertQlikDependencies(root);
       await command("/usr/sbin/runuser", [
         "-u",
@@ -367,7 +398,7 @@ export function qlikReleaseHost(lock) {
         "/usr/local/bin/node",
         "--input-type=module",
         "-e",
-        "if(process.getuid()===0||!/^24\\.19\\./.test(process.versions.node))throw new Error();await import('@playwright/test');const {getBrowserMetadataScript}=await import('./ops/qlik/browser-preflight.mjs');await getBrowserMetadataScript();",
+        "if(process.getuid()===0||!/^24\\.19\\./.test(process.versions.node))throw new Error();await import('@playwright/test');for(const name of ['browser-login','login-credential','prepare-login-credential','login-attempt'])await import('./ops/qlik/'+name+'.mjs');const {getBrowserMetadataScript}=await import('./ops/qlik/browser-preflight.mjs');await getBrowserMetadataScript();",
       ]);
       if (!idPattern.test(deploymentId)) throw new Error("Qlik deployment identity rejected.");
       if (!isDeepStrictEqual(await inspectOwner(), owner) || !owner.active)
@@ -495,8 +526,16 @@ export function qlikReleaseHost(lock) {
     },
     async verifyOwner(transaction, restore = false) {
       const value = await backup(transaction);
-      const expected = parseQlikUnit(restore ? value.before : value.after, await getTemplate());
-      for (let attempt = 0; attempt < 90; attempt++) {
+      const contents = restore ? value.before : value.after;
+      const expected = parseQlikUnit(contents, await getTemplate());
+      // Approved login units allow 120s authentication plus 120s metadata within a
+      // 420s verification budget. Legacy preflight units retain their 180s budget.
+      const login = contents.includes(
+        "LoadCredentialEncrypted=qlik-login:/etc/descomplica-qlik/qlik-login.cred\n",
+      );
+      const attempts = login ? 210 : 90;
+      const deadline = login ? Date.now() + 420_000 : Infinity;
+      for (let attempt = 0; attempt < attempts && Date.now() < deadline; attempt++) {
         await pending(transaction);
         const current = await inspectOwner();
         if (
@@ -532,6 +571,7 @@ export function qlikReleaseHost(lock) {
               Number.isFinite(observed) &&
               observed >= startedAt.get(transaction.deploymentId) &&
               observed <= Date.now() &&
+              Date.now() < deadline &&
               ["inspected", "pending", "reauth_required", "unavailable"].includes(
                 artifact.result?.status,
               )
@@ -541,7 +581,7 @@ export function qlikReleaseHost(lock) {
             /* No artifact body or authentication data leaves the private runtime. */
           }
         }
-        await delay(2000);
+        await delay(Math.min(2000, Math.max(0, deadline - Date.now())));
       }
       throw new Error("Qlik owner did not confirm a fresh metadata attempt.");
     },

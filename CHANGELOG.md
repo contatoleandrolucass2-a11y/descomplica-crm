@@ -13,6 +13,78 @@
 - Atualiza somente onze referencias visuais revisadas do dashboard, mantendo
   os criterios de regressao e as demais telas.
 
+## 2026-10-15: Renovacao de sessao Qlik
+
+- Converte o cofre existente em credencial systemd cifrada para renovar o login
+  no tenant corporativo, sem expor a chave RSA ou gravar senha em claro.
+- Impede novas tentativas de senha apos falha/incerteza e preserva a pagina
+  quando houver MFA; sucesso depende de verificacao na origem Qlik.
+- Preserva recuperacao das units legadas e mantem o setup inicial sem cofre.
+
+## 2026-10-15: Sincronizacao da QA do dashboard
+
+- Aguarda o consumo do JSON antes do proximo evento sintetico de retomada,
+  corrigindo a corrida da verificacao sem mudar o comportamento do dashboard.
+- Adiciona regressao controlada na CI, preservando assercoes e limites.
+
+## 2026-10-14: Coletor autonomo Qlik candidato
+
+- Normaliza a formatacao do manifesto de capturas, com igualdade JSON comprovada
+  e sem mudar proveniencia ou hashes das imagens.
+- Implementa coleta independente dupla, conciliacao nativa, credencial privada,
+  ciclo horario e recibo restrito; mapeamento e ativacao reais ainda pendentes.
+- Protege habilitacao no boot com recibo novo, CAS e recuperacao; diagnosticos
+  usam codigos fixos, sem fatos ou credenciais.
+- Incorpora as11 capturas Ranking revisadas, preservando manifesto completo
+  e as231 imagens das demais telas; exige CI verify posterior.
+
+## 2026-10-14: Abas do ranking em tablets
+
+- Reserva largura para o seletor IMOBs/Produtos entre768 e1024px e impede
+  quebra de palavras nos rotulos, mantendo todos os controles visiveis.
+
+## 2026-10-14: Regressao do tema do ranking
+
+- Alinha a verificacao de tokens ao seletor composto do podio e verifica
+  explicitamente raio de8px e ausencia de sombra.
+
+## 2026-10-14: Fonte e densidade do ranking
+
+- Atualiza a pasta Qlik candidata conforme catalogo atual e rejeita a origem
+  retirada, mantendo aplicativo, recorte e permissoes fixos.
+- Compacta a apresentacao sem remover conteudo; acrescenta verificacao de
+  altura desktop, overflow e colisao nos estados sem dados.
+
+## 2026-10-14: Correcao do lint SQL Qlik
+
+- Classifica os validadores de timestamp/conteudo como STABLE, preservando
+  validacao estrita, permissoes e exigencia de CI/restore antes da migration.
+
+## 2026-10-14: Ciclo de publicacao Qlik
+
+- Adiciona conciliacao antes do envio, leitura restrita da credencial systemd
+  e recibo operacional sem dados comerciais. Ativacao produtiva pendente.
+- Corrige a matriz de testes das duas novas RPCs, preservando grants minimos.
+
+## 2026-10-14: Ingestao e ranking Qlik v2
+
+- Adiciona contrato/RPC/reader isolados, HMAC proprio, duas observacoes
+  conciliadas, historico por ano e preservacao da ultima carga valida.
+- Conecta a tela ao reader autorizado com filtros, IMOBs/produtos, podio,
+  totais em centavos e aviso de fonte atrasada, sem reutilizar Salesforce.
+- Integra ativacao recuperavel ao coordenador de release e testes SQL/HTTP/UI.
+  Candidato ainda sem migration ou coleta produtiva; nao e conexao concluida.
+
+## 2026-10-14: Integracao Qlik em andamento
+
+- Inicia contrato aditivo de duas coletas e audiencia completa autorizada,
+  mantendo o relay antigo e Salesforce separados. Ainda sem ativacao remota.
+
+## 2026-10-14: Evidencias de publicacao Qlik
+
+- Registra o estado separado de implementacao, CI e producao. A integracao
+  continua pendente, sem alterar dados Salesforce ou controles de acesso.
+
 ## 2026-10-14: Integracao documental do preflight
 
 - Preserva a atualizacao concorrente da Rotina e registra a revalidacao do

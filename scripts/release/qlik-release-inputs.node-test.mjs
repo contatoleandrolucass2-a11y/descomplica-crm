@@ -20,6 +20,8 @@ import {
 const sha = "0123456789abcdef0123456789abcdef01234567";
 const deploymentId = "01234567-89ab-4cde-8fab-0123456789ab";
 const home = "Environment=HOME=/var/lib/descomplica-qlik\n";
+const loginCredentials =
+  "LoadCredentialEncrypted=qlik-login:/etc/descomplica-qlik/qlik-login.cred\nSetCredential=qlik-login:{}\n";
 const template = [
   "[Unit]",
   "Description=Synthetic Qlik service",
@@ -27,6 +29,7 @@ const template = [
   "User=descomplica-qlik",
   "WorkingDirectory=@RELEASE@",
   home.trimEnd(),
+  loginCredentials.trimEnd(),
   "ExecStart=/usr/local/bin/node ops/qlik/launch-browser.mjs",
   "[Install]",
   "WantedBy=multi-user.target",
@@ -128,11 +131,18 @@ function reading(options = {}) {
 test("release inventory is frozen, unique and includes every reviewed input", () => {
   assert.deepEqual(qlikReleaseFiles, [
     "ops/qlik/launch-browser.mjs",
+    "ops/qlik/browser-login.mjs",
+    "ops/qlik/login-credential.mjs",
+    "ops/qlik/prepare-login-credential.mjs",
+    "ops/qlik/login-attempt.mjs",
+    "ops/qlik/credential-vault.mjs",
     "ops/qlik/browser-preflight.mjs",
     "ops/qlik/qix-metadata.mjs",
     "ops/qlik/collection-loop.mjs",
     "ops/qlik/metadata-artifact.mjs",
     "ops/qlik/vps/descomplica-qlik-browser.service",
+    "scripts/release/private-json-store.mjs",
+    "scripts/release/production-release-lock.mjs",
     "package.json",
     "pnpm-lock.yaml",
   ]);
@@ -189,7 +199,12 @@ for (const preflight of [false, true]) {
   test(`unit render/parse round-trip is byte-exact with preflight=${preflight}`, () => {
     const expected = template
       .replace("@RELEASE@", `/srv/descomplica-crm-releases/${sha}`)
-      .replace(home, home + (preflight ? "Environment=QLIK_METADATA_PREFLIGHT=enabled\n" : ""));
+      .replace(
+        home + loginCredentials,
+        home +
+          loginCredentials +
+          (preflight ? "Environment=QLIK_METADATA_PREFLIGHT=enabled\n" : ""),
+      );
     assert.equal(renderQlikUnit(template, sha, preflight), expected);
     assert.deepEqual(parseQlikUnit(expected, template), {
       sha,
@@ -197,6 +212,16 @@ for (const preflight of [false, true]) {
       unitHash: sha256(expected),
     });
     assert.equal(template.includes("@RELEASE@"), true);
+  });
+  test(`legacy unit parse preserves its exact bytes and ledger shape with preflight=${preflight}`, () => {
+    const current = renderQlikUnit(template, sha, preflight);
+    const legacy = current.replace(loginCredentials, "");
+    assert.deepEqual(parseQlikUnit(legacy, template), {
+      sha,
+      preflight,
+      unitHash: sha256(legacy),
+    });
+    assert.notEqual(sha256(legacy), sha256(current), "Unit hash must include login configuration");
   });
 }
 
@@ -208,6 +233,10 @@ for (const [label, value] of [
   ["existing preflight", `${template}Environment=QLIK_METADATA_PREFLIGHT=disabled\n`],
   ["commented preflight", `${template}# QLIK_METADATA_PREFLIGHT\n`],
   ["CRLF template", template.replaceAll("\n", "\r\n")],
+  ["missing login credentials", template.replace(loginCredentials, "")],
+  ["changed login path", template.replace("/qlik-login.cred", "/other.cred")],
+  ["changed login default", template.replace("qlik-login:{}", "qlik-login:secret")],
+  ["login before HOME", template.replace(home + loginCredentials, loginCredentials + home)],
 ]) {
   test(`unit renderer rejects ${label}`, () => {
     assert.throws(() => renderQlikUnit(value, sha, false), /Qlik unit template rejected\./u);
@@ -261,6 +290,24 @@ for (const [label, change] of [
   ["missing identity", (value) => value.replace("WorkingDirectory=", "#WorkingDirectory=")],
   ["uppercase identity", (value) => value.replace(sha, sha.toUpperCase())],
   ["foreign release root", (value) => value.replace("/srv/descomplica-crm-releases/", "/tmp/")],
+  ["changed login path", (value) => value.replace("/qlik-login.cred", "/other.cred")],
+  ["changed login default", (value) => value.replace("qlik-login:{}", "qlik-login:secret")],
+  [
+    "missing encrypted load only",
+    (value) => value.replace(loginCredentials.split("\n")[0] + "\n", ""),
+  ],
+  ["missing default only", (value) => value.replace("SetCredential=qlik-login:{}\n", "")],
+  ["duplicate credentials", (value) => value + loginCredentials],
+  ["extra credentials", (value) => value + "LoadCredential=other:/etc/unreviewed\n"],
+  ["credential directory override", (value) => value + "Environment=CREDENTIALS_DIRECTORY=/tmp\n"],
+  [
+    "different login order",
+    (value) =>
+      value.replace(
+        loginCredentials,
+        loginCredentials.split("\n").filter(Boolean).reverse().join("\n") + "\n",
+      ),
+  ],
 ]) {
   test(`unit parser rejects ${label}`, () => {
     assert.throws(
@@ -269,6 +316,35 @@ for (const [label, change] of [
     );
   });
 }
+
+test("legacy unit compatibility never accepts additional service directives", () => {
+  for (const preflight of [false, true]) {
+    const legacy = renderQlikUnit(template, sha, preflight).replace(loginCredentials, "");
+    for (const extra of [
+      "ExecStartPost=/bin/true\n",
+      "User=root\n",
+      "LoadCredentialEncrypted=qlik-login:/etc/other.cred\n",
+      "SetCredential=qlik-login:{}\n",
+      "Environment=CREDENTIALS_DIRECTORY=/tmp\n",
+      "[Service]\nProtectSystem=false\n",
+    ])
+      assert.throws(() => parseQlikUnit(legacy + extra, template), /Qlik unit differs/u);
+  }
+});
+
+test("the real unit template preserves the public default, exact login pair and legacy parse", async () => {
+  const actual = await filesystem.readFile(
+    new URL("../../ops/qlik/vps/descomplica-qlik-browser.service", import.meta.url),
+    "utf8",
+  );
+  for (const preflight of [false, true]) {
+    const current = renderQlikUnit(actual, sha, preflight);
+    assert.ok(current.includes(home + loginCredentials));
+    assert.equal(parseQlikUnit(current, actual).unitHash, sha256(current));
+    const legacy = current.replace(loginCredentials, "");
+    assert.equal(parseQlikUnit(legacy, actual).unitHash, sha256(legacy));
+  }
+});
 
 for (const [label, contents, maximum, chunk] of [
   ["empty at zero limit", "", 0, 1],

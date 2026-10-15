@@ -1,35 +1,43 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-15: Filtros e organizacao visual do dashboard
+## 2026-10-15: Dashboard, PR230
 
-- Branch codex/dashboard-filtros-layout, base/main ad496340 (CI38640654844
-  aprovada); implementacao bbcca1b no PR230 draft. CI38751246231 em andamento
-  em14:26Z. GET publico /api/health14:26:01Z HTTP200/ok, version6843ef1.
-  Fontes: Git fetch, GitHub branches/PR/Actions e health sem sessao.
-  Sem merge ou deploy; versoes local, integrada e publicada sao distintas.
-- Textos removidos, roscas, ritmo, diagnostico e comparativos reorganizados.
-  49 testes focados e QA sintetica124/124 (3 temas,320-1920px), lint
-  (aviso previo), tipos e build aprovados. Suite Windows2897/85skip/2falhas:
-  symlink estoque por O_NOFOLLOW ausente e timeout DevTools. DevTools passou
-  isolado24/24; causa do timeout nao comprovada. Etapas Node posteriores
-  nao rodaram. Docker ausente; CI Linux/banco/RLS/restore e baseline pendentes.
-- Base geral segue permissoes. V2 tem somente tres visoes agregadas; quatro
-  filtros reais exigem dimensoes oficiais e recalculo de todos os blocos.
-  Nao assumir conta=corretor/empresa=imobiliaria ou filtrar totais ficticiamente.
-  Fonte externa apenas lida pelo navegador. Nenhum schema/coletor/n8n alterado.
-- Evidencias integrais preservadas em
-  [auditoria](../audits/dashboard-layout-2026-10-15.md);
-  contrato pendente em [filtros](../dashboard-dimensional-filters.md).
-  Nota excedeu256000 bytes no commit; somente esta entrada foi distribuida
-  na auditoria para recuperar sync, sem truncar historico ou ampliar limite.
-  Reavaliar publicacao apos CI completa e filtros apos contrato/cobertura.
-- MCP Supabase14:30Z confirmou estrutura legada agregada; consulta nao listou
-  v3 em public. Somente metadados, sem dados de clientes/mutacoes. CI38751646222
-  em3764dfb: validate/restore aprovados, matriz autenticada pendente15:05Z.
-  Sync recuperado e confirmado em3764dfb; detalhes e limites na auditoria.
-- CI38751646222 falhou somente11 capturas /app. Predicado funcional aprovado;
-  referencias revisadas/promovidas15:13Z,231 preservadas. Nova CI verify exigida;
-  detalhes/hashes e excecao de captura dirty na auditoria/manifesto. Sem deploy.
+- Visual implementado; filtros pendentes. CI38751646222:11 capturas revisadas,
+  demais gates aprovados; sem deploy. Integracao9ffc8a9 exige nova CI.
+  Fontes, testes e limites integrais: [auditoria](../audits/dashboard-layout-2026-10-15.md).
+
+## 2026-10-15: Renovacao candidata da sessao Qlik
+
+- Owner159addfc/ad49634 promovido13:18:04Z pela CI38640654844 e coordenador;
+  resultado real reauth_required. Credencial cifrada systemd e renovacao
+  Microsoft Entra em implementacao, conforme autorizacao existente de uso do
+  cofre. Focais101/201/32/14 aprovados,2 skips fisicos. Global/CI/uso real
+  pendentes. Runbook qlik-vps-session documenta origem, travas e limites.
+  Referencias de fatos/ranking copiadas deba96607 sao historico do PR216,
+  nao codigo de coleta ja integrado nesta branch operacional.
+- API Qlik documenta CSRF204, nao apenas200. Probe candidato/testes corrigidos
+  antes do uso real. Chromium final39 passou; review tambem corrigiu titulo
+  KMSI duplicado e contagem de senha contida no usuario. ACL systemd real
+  confirmada com credencial sintetica; cofre real permanece intocado.
+
+## 2026-10-15: Retomada da conexao Qlik
+
+- Owner Qlik promovido pelo coordenador em13:18:04.215Z:159addfc/ad49634,
+  sem pendencia; preflight real reauth_required. Imagem CI11929858423 e cadeia
+  de11 camadas conferidas; image:prove2 perfis. EACCES previo foi corrigido
+  apenas na leitura da copia candidata de dependencias. CRM permanece6843ef1.
+- Corrida da QA dashboard reproduzida: request contado antes de consumir JSON.
+  Espera agora acompanha consumo;75 checks,1 regressao e35 testes focais
+  aprovados, sem ampliar limites. Regressao acrescentada a CI. Nova CI exigida.
+
+- Fontes13:10Z: git fetch/GitHub e GET publico /api/health. Mainad49634,
+  CI push38640654844 concluida com validate, release-gates, isolated-restore
+  e promotable-image aprovados. Site200/ok ainda6843ef1. Localab715e6 inclui
+  essa main; PR216 remoto ainda precisa novo push/CI apos integracao.
+- Falha anterior38639662097 ocorreu na QA sintetica dashboard, espera por nova
+  leitura de status apos eventos, sem falha de codigo/formatacao. Investigar
+  corrida antes de repetir. Owner, dados e agenda ainda nao comprovados;
+  consultar recibos atuais da VPS antes da promocao protegida.
 
 ## 2026-10-14: Atualizacao dos identificadores da fonte Qlik
 
