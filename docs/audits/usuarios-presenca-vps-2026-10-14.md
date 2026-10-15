@@ -110,6 +110,31 @@ cria objetos privados e RPCs de Qlik; as políticas de perfis e o catálogo de
 23 permissões permanecem iguais. Foram preservadas as definições e os vínculos
 atuais de acesso em backup privado, sem dados pessoais de usuários.
 
+## Captura Linux e revisão visual
+
+O avanço de `main` para `fae77f9a254197f0e9c72a6fdbbadefe24a8103e` foi
+incorporado antes da captura, preservando o dashboard do PR #230. Os conflitos
+eram documentais. A integração passou em 69 testes focados, tipos e formato.
+
+A execução `38766616330` concluiu com sucesso em 15/10/2026. A captura
+`2416b3853c025fe4c6f2a55bb2db3c1d69353b01` possui a mesma árvore Git de
+`128ca2bc531ba23e660f2cd360eb04788135c839`, sem alterações locais. O ZIP
+do artefato `11991336833` foi conferido pelo SHA-256
+`412802e785318008ca59fe6974651dc7c22b113f065787f1c34fb05285ba80de`.
+
+Os 242 hashes e tamanhos foram validados. Onze imagens de Usuários foram
+revisadas nos três temas e nas larguras de 320 a 1440 pixels; as outras 231
+permaneceram idênticas. Passaram 154 verificações responsivas, 88 de temas,
+242 de acessibilidade, 110 de zoom e 40 combinações de navegação dos simuladores,
+além das jornadas e do teclado. O manifesto completo da captura foi mantido.
+O workflow temporário foi removido; a CI normal de verificação será executada
+novamente no candidato final antes de integrar e publicar.
+
+O teste do manifesto foi alinhado ao contrato já produzido pelo novo dashboard:
+o marcador sintético é verificado no atributo da página e permanece visível em
+Oportunidades. Ambas as verificações continuam obrigatórias; nenhum resultado
+da captura foi alterado para satisfazer o teste.
+
 ## Validação e publicação
 
 Os resultados finais dos gates, do backup aplicável e da promoção serão

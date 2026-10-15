@@ -2,6 +2,7 @@
 
 ## 2026-10-15: Compatibilidade do diretório de produção
 
+- Incorpora o dashboard aprovado de `fae77f9a` e revisa a captura Linux `38766616330`: onze imagens de Usuários atualizadas, 231 imagens preservadas, 242 hashes conferidos e toda a matriz funcional aprovada. O workflow temporário foi removido; a CI normal continua obrigatória.
 - O layout aprovado de Pessoas, papel e matriz completa mede 1.598 pixels em desktop. O limite específico de densidade foi atualizado de 1.200 para 1.650 pixels; overflow, colisões, acessibilidade e demais limites permanecem verificados.
 - A captura local no macOS diverge das referências Linux por renderização de fontes. Um workflow temporário produz referências em Linux com todos os gates funcionais; somente as imagens pertinentes e revisadas podem ser incorporadas, com nova CI normal obrigatória.
 
