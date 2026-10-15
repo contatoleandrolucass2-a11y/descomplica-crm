@@ -26,6 +26,8 @@ function child(path: string): AppPage {
 
 describe("authorized breadcrumbs", () => {
   it.each([
+    "/app",
+    "/app/",
     "/app/simulacao/associativo-fluxo-linear",
     "/app/simulacao/associativo-fluxo-linear/",
     "/app/gestao/rotina",
