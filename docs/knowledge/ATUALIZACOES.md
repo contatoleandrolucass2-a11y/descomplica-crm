@@ -2,8 +2,8 @@
 
 ## 2026-10-15: Dashboard, PR230
 
-- Visual implementado; filtros pendentes. CI38751646222:11 capturas revisadas,
-  demais gates aprovados; sem deploy. Integracao9ffc8a9 exige nova CI.
+- Visual publicado fae77f9 em15/10/2026 16:50:53Z; CI38765178719 verde.
+  Health200/ok, /app307/login, status401; filtros dimensionais pendentes.
   Fontes, testes e limites integrais: [auditoria](../audits/dashboard-layout-2026-10-15.md).
 
 ## 2026-10-15: Renovacao candidata da sessao Qlik

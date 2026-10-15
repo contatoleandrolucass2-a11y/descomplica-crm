@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-15: Publicacao validada do dashboard
+
+- PR230 integrado em `fae77f9a254197f0e9c72a6fdbbadefe24a8103e`.
+  CI38759074659 do PR e CI38765178719 push/main completas e aprovadas.
+- Artefato11988267327 conferido por checksum; cadeia OCI/config e11 camadas
+  comprovadas, image:prove validou os dois perfis. Sem rebuild na VPS.
+- Coordenador release:production publicou16:50:53.010Z (13:50:53 Brasilia),
+  deployment8e3594fd-64a9-49b2-b068-4b5666524f80, sem pendencia.
+  Health200/ok no SHA exato; /app redireciona ao login e status nega anonimo401.
+- Quatro filtros dimensionais continuam pendentes; dados/fontes/permissoes
+  preservados. Site externo somente leitura. Sem migration, coleta ou n8n.
+- Detalhes, digests, limites e fontes: docs/audits/dashboard-layout-2026-10-15.md.
+  Esta atualizacao e documental; nao demanda outro deploy da aplicacao.
+- PR234 documental aguarda CI e merge. Auto-merge desabilitado no repositorio;
+  configuracao preservada. Obsidian sincronizado; runtime publicado inalterado.
+
 ## 2026-10-15: Organizacao do dashboard e limite dos filtros
 
 - Branch `codex/dashboard-filtros-layout`, base `ad496340`; producao observada
