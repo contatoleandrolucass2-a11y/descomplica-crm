@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15: Referencias do Ranking revisadas
+
+- Promove a captura combinada limpa de242 imagens, com11 Ranking revisados e
+  231 imagens preservadas; alinha o teste ao marcador sintetico por atributo
+  emitido pelo harness atual, sem remover verificacoes de origem e RLS.
+
 ## 2026-10-15: Integracao de referencias visuais
 
 - Preserva dashboard e Ranking na mesma base; exige nova captura combinada,

@@ -1,5 +1,32 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Captura unica promovida para revisao verify
+
+- Captura38770527668/aa9df803 success,242 hashes conferidos,11 Ranking
+  revisados e231 preservados. Proveniencia unica; ZIPb8c118f1 e manifesto
+  217a76c2. Detalhes/limites em WORKLOG. Nova CI verify ainda obrigatoria.
+- Contrato antigo sourceMarkerVisible divergia do harness main que emite
+  sourceMarkerVerified/Presentation. Teste agora exige os valores atuais
+  exatos; nao remove RLS/contagens. Focal15 passou, um browser condicional
+  nao executado. Ranking produtivo continua bloqueado por pins reais.
+
+## 2026-10-15: Retomada observacional as16:50Z
+
+- PR233/6b0350b: CI38769375192 concluida success nos tres gates do PR,
+  inclusive matriz integral. Merge normal, com head exato, em maina7fdf92
+  as17:16:04Z. CI push/main e imagem ainda pendentes; owner nao alterado.
+- Gates locais de b4fc3fc, Node24.19.0/pnpm11.20.0/Windows, sequenciais:
+  lint/tipos/test/build exit0. Vitest3199/87 skips, release703/14 skips,
+  build51 paginas. Warning lint preexistente e MODULE_TYPELESS preservados;
+  nenhum timeout/asserção alterado. Nao substitui CI/publicacao real.
+- Fetch/GitHub: mainfae77f9; PR233/6b0350b com validate/restore success e
+  matriz visual em curso. PR216/b4fc3fc permanece draft; captura combinada
+  38770527668 e CI38770527596 em curso, sem aprovar outra versao por inferencia.
+- GET publico de /api/health16:50:20Z:200/ok/6843ef1. Coordenador confirma
+  CRM57c09296/14-10T20:38:13.413Z e owner3a4698b7/9ffc8a9/15:24:46.025Z,
+  ambos sem pendencia. Fonte GitHub e health consultadas nesta retomada;
+  metadados autonomos anteriores nao comprovam publicacao de fatos.
+
 ## 2026-10-15: Baseline integrada exige captura nova
 
 - Mainfae77f9 integrado ao ramo Ranking. Referencia temporaria integral da

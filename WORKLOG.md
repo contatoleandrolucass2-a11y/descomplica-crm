@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-15: Referencia combinada revisada
+
+Captura38770527668 success, artefato11993236211, ZIP SHA256
+b8c118f16d49046bccddb14710027da0c272ed39453eb39b838ffe994a9d3b47.
+Origem limpa aa9df803fd6f1d4ad8e823529cf526ad30973323, arvore identica a
+b4fc3fc; concluida17:05:40.579Z. Predicado integral:154 rotas,88 temas,
+242 Axe e110 zoom. Verificados242 hashes, promovidos11 Ranking e manifesto
+completo, preservadas231 imagens. Onze Ranking inspecionados; comparacao com
+e03b972 e dashboardsfae77f9 confirma corpos iguais, variacao abaixo de0,004%
+apenas avatar/horario. Manifesto SHA256217a76c27f15cafc821b5f2b972b27f5f11886c14e677b8e35585d494133f050.
+
+Teste de proveniencia exigia formato antigo sourceMarkerVisible, apesar de
+o harness integrado emitir sourceMarkerVerified/sourceMarkerPresentation.
+Contrato alinhado estritamente ao formato atual, mantendo RLS/marcador e
+contagens integrais; focal15 aprovados/um browser condicional nao executado.
+Gates locais anteriores de b4fc3fc: lint/tipos/test/build exit0, Vitest3199/87
+skips e release703/14 skips,51 paginas. Nova CI verify ainda obrigatoria.
+PR233 integrou em maina7fdf92 as17:16:04Z apos CI38769375192 success;
+CI38775901605 da main pendente. Nenhuma publicacao de fatos afirmada.
+
 ## 2026-10-15: Captura combinada apos main concorrente
 
 Integracao de mainfae77f9 preserva o codigo Ranking e o novo dashboard.
