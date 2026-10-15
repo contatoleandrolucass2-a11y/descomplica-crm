@@ -6,6 +6,10 @@
 - O banco ativo possui contrato compacto; as novas migrations precisam preservar esse contrato e o contrato completo local. Os testes de ambos e a publicação protegida serão registrados em [evidências da integração](../audits/usuarios-presenca-vps-2026-10-14.md).
 - As cinco seções da preparação local foram movidas integralmente para [conhecimento local de usuários](../audits/usuarios-conhecimento-local-2026-10-14.md) para manter este arquivo abaixo do limite de exportação, sem descartar o histórico.
 
+## 2026-10-15: Registros operacionais Qlik
+
+- Os registros de renovação, retomada e atualização da fonte recebidos de `main` foram preservados integralmente no [histórico Qlik](../audits/qlik-conhecimento-2026-10-15.md), por limite de exportação. A integração de usuários não executa essas operações.
+
 ## 2026-10-14: Atualizacao dos relatorios no dashboard
 
 - Polling30s e leitura consistente implementados;180 testes focais/75 QA

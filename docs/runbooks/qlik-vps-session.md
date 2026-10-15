@@ -1,5 +1,37 @@
 # Sessao Qlik na VPS
 
+## Atualizacao dos IDs do preflight em 14/10/2026
+
+Segundo a observacao real comunicada pelo coordenador, a pasta anterior
+`772db774-0bc2-42d8-ac11-3e4917bd0d37` deixou de existir. O catalogo
+`Pastas > 23.1.7 Vendas` abre agora `46d5bcf7-965d-40fc-a808-2fdde2d0f74d`.
+No mesmo aplicativo `7c000871-8b32-4c0f-bfd5-4b9d46946575`, o elemento DOM
+de PRODUTO e `26aed86d-e96b-4151-bc15-7b54d456f032_content`, e o container
+Parceiras e `8b78e5d8-6b6b-4a29-be0c-cd855b9ec765_content`. A aba Parceiras
+mantem `cId=pUYysrvJ`; esse cId nao e um ID de objeto Engine.
+
+O hotfix atualiza os tres IDs fixos de `ops/qlik/qix-metadata.mjs`
+e suas fixtures. Os candidatos QIX usam os UUIDs sem o sufixo DOM `_content`;
+a prova de pertencimento na arvore e a resolucao da aba continuam obrigatorias.
+Preserva aplicativo, recorte, limites, autenticacao, CSP e chamadas API permitidas.
+Os registros abaixo permanecem historicos, nao referencias para esses tres IDs.
+
+O escopo aditivo autorizado inclui digests dos metadados integrais para o futuro
+manifest: `objects[].qHyperCubeSha256` representa o `qHyperCubeDef` integral de
+`getEffectiveProperties`, quando presente; `masterDefinitions[].definitionSha256`
+representa o `qDim` ou `qMeasure` original. Ambos usam SHA-256 via `crypto.subtle`,
+JSON com chaves ordenadas recursivamente, ordem dos arrays preservada e UTF-8,
+sem espacos adicionais. O limite por definicao e 262144 bytes e profundidade 32
+(raiz em 0); accessors, valores nao finitos e estruturas nao JSON sao recusados.
+Os hashes sao hexadecimais minusculos de 64 caracteres. Nenhuma definicao extra
+e exposta: as projecoes anteriores permanecem, e campos omitidos tambem afetam
+o digest. Nao ha import novo, leitura de fatos ou ampliacao da allowlist de API.
+
+Esta atualizacao operacional nao comprova mapping de producao, selecoes,
+coleta de fatos, conciliacao ou publicacao de ranking. A confirmacao do
+preflight na origem depende de promocao protegida e observacao pelo coordenador;
+esta tarefa nao acessa a VPS nem altera sessao, credenciais ou autorizacoes.
+
 ## Escopo e estado
 
 O fluxo solicitado e Qlik -> VPS -> ranking do CRM. Este componente prepara
@@ -227,9 +259,54 @@ Campos sao limpos depois do envio; erros nao devolvem corpo nem credenciais.
 O cofre protege o arquivo em repouso, nao um host comprometido: root pode ler
 a chave e o processo recebe a senha em memoria durante o cadastro. O perfil
 Chrome tambem contem a sessao. O cadastro nao executa login, nao contorna MFA
-e nao comprova credencial valida. Ainda falta um consumidor autorizado para
-reautenticacao/coleta. Backup deve preservar chave privada e envelope sem
+e nao comprova credencial valida. O ownerad49634 nao contem consumidor; o
+candidato abaixo acrescenta a renovacao. Backup deve preservar chave privada e envelope sem
 exporta-los para repositorio ou chat; rotacao exige procedimento explicito.
+
+## Renovacao de sessao com o cofre existente
+
+Candidato de15/10, posterior ao ownerad49634. O preflight real desse owner
+retornou reauth_required em13:18Z; nenhuma carga foi publicada. A renovacao
+abaixo precisa de CI e promocao protegida antes de ser considerada instalada.
+
+`prepare-login-credential.mjs` converte o envelope RSA/AES existente, como root,
+para `/etc/descomplica-qlik/qlik-login.cred`, usando systemd-creds com chave do
+host e nome fixo qlik-login. Conteudo passa somente por pipes e memoria; nao
+usar senha em argumentos, variaveis, arquivos temporarios ou logs. O arquivo
+resultante e cifrado, root0600, exclusivo, com fsync e verificacao de retorno.
+Um arquivo existente nao e substituido. Preservar o cofre original e sua chave.
+
+```bash
+node ops/qlik/prepare-login-credential.mjs
+```
+
+Executar somente o helper revisado do release canonico aprovado, antes de
+promover o owner. `LoadCredentialEncrypted` entrega o JSON decifrado apenas
+ao runtime privado do systemd. A chave RSA do cofre nao e entregue ao browser.
+`SetCredential=qlik-login:{}` e um fallback publico para a instalacao inicial
+sem cofre; nao autentica e nao transforma falha de decriptacao em sucesso.
+Referencia: [credenciais systemd](https://github.com/systemd/systemd/blob/v255/docs/CREDENTIALS.md).
+
+O owner usa sua pagina existente, sem CDP, exportacao de cookies ou novo perfil.
+O destino observado e o tenant Microsoft Entra8c139cd3 da Direcional. O fluxo
+confere a navegacao iniciada no Qlik, tenant, origem e formulario antes de
+preencher a credencial. Senha tem somente uma submissao por tentativa. O
+retorno so e autenticado depois de um probe CSRF204 (ou200 compativel) no tenant Qlik, sem
+exportar o token. MFA, CAPTCHA, formulario desconhecido e senha rejeitada
+exigem atencao; nao sao resolvidos nem repetidos automaticamente.
+Contrato oficial: [CSRF Qlik](https://qlik.dev/apis/rest/csrf-token/).
+
+`login-attempt.json`, no home privado do usuario tecnico, registra somente
+estado e data. Claim duravel e trava impedem repeticao de senha apos falha,
+incerteza ou reinicio. Sessao Qlik comprovadamente restaurada, inclusive pelo
+console privado, libera esse bloqueio. Nao apagar o arquivo para forcar
+tentativas. Nunca registrar usuario, hash de senha ou texto bruto do provedor.
+
+Renovacao tem limite120s; o ciclo de metadados tem300s para incluir login e
+coleta, com cancelamento cooperativo. A nova unit tem orcamento420s para
+aceitar um recibo fresco; comandos de host conservam seus proprios timeouts.
+Nao aceita recibo apos o prazo nem altera o limite da unit legada. Intervalo horario continua apos o ciclo anterior, sem
+sobreposicao. Autenticacao nao comprova mapeamento, fatos ou publicacao.
 
 ## Reversao
 

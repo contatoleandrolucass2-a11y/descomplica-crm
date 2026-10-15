@@ -60,6 +60,282 @@
 - Trabalho restrito ao checkout e banco locais; sem publicação remota.
   Matriz, limites e evidências: `docs/audits/usuarios-acessos-local-2026-10-14.md`.
 
+## 2026-10-15: Renovacao Qlik pelo cofre autorizado
+
+Ownerad49634 foi promovido pela CI38640654844 e coordenador em13:18:04Z;
+preflight real reauth_required. Implementada renovacao candidata via Microsoft
+Entra do tenant observado, usando credencial cifrada systemd derivada do cofre
+existente. Chave RSA fica fora do browser. Uma tentativa duravel de senha;
+falha/incerteza/MFA preservam atencao atraves de reinicios. Sessao comprovada
+libera atencao; pagina MFA nao e substituida pelo launcher.
+
+Inputs/unit/installer verificam novos modulos e aceitam bytes legados exatos
+para recuperacao. Fallback publico{} permite setup inicial; nao autentica.
+Prazos login120s/ciclo300s/owner novo420s cobrem etapas novas; legado180s.
+Correcoes da QA dashboard foram trazidas do commitba96607, com seus registros.
+Nenhuma credencial real foi lida ou convertida nesta implementacao.
+
+Focais: credenciais101 aprovados; unit/host/installer201 aprovados/2 skips;
+browser sintetico32 aprovados; integracao launcher/attempt14 aprovados.
+Gates globais e CI ainda pendentes deste candidato. Sem carga Qlik publicada.
+
+Lint/tipos/build passaram. pnpm test:2876 Vitest aprovados/85 skips e uma falha
+no teste de symlink Windows do inventario, fora do diff; Node posterior nao
+executou nesse comando. Suite Node Qlik/release focada:687 aprovados/5 skips.
+CI Linux integral continua obrigatoria. Gitleaks encontrou somente o fixture
+Salesforce sintetico ja corrigido no PR216; mesma geracao de fixture trazida
+para este ramo, sem alterar credenciais ou runtime Salesforce.
+
+Smoke systemd leve na VPS com credencial falsa confirmou usuario997/grupo986,
+diretorio root550/ACL nominal r-x e arquivo root440/ACL nominal r--. Unit
+transitoria encerrada; owner/perfil/credenciais reais nao usados nesse smoke.
+
+Revisao independente reproduziu dois casos do login: titulo KMSI duplicado e
+senha contida no usuario. Corrigidos com selecao por prioridade e contagem do
+campo passwd efetivo, incluindo campo vazio na identificacao. Conferencia da
+API oficial confirmou CSRF204; probe aceita204/200 com header e origem exatos,
+rejeitando outros2xx. Chromium sintetico final:39 aprovados/zero skips.
+Regressao host cobre200s aceitos e420s/420,001s rejeitados durante I/O.
+Gitleaks final apos fixture:sem achados. Nenhum login real realizado ainda.
+
+## 2026-10-15: Corrida da QA e owner Qlik atualizado
+
+Reproduzida falha38639662097: statusReads incrementava na entrada da rota,
+antes do consumo do JSON e liberacao do controller. A QA agora aguarda esse
+consumo entre eventos, preservando assercoes e limites. Regressao usa componente
+real com HTTP/JSON controlados; integrada a CI. QA75/75, regressao1/1,
+35 testes dashboard, lint e formatacao focais aprovados pelo agente QA.
+
+Mainad49634/CI38640654844 aprovada integralmente; artefato imutavel conferido
+na VPS e image:prove validou os dois perfis. Primeiro deploy parou antes da
+intencao por EACCES nas dependencias copiadas0600. Ajustada somente leitura
+da copia candidata, preservando bytes, root ownership, links privados e ausencia
+de escrita alheia; probe nao-root passou. Promocao protegida concluida13:18:04Z,
+owner159addfc/ad49634, CRM6843ef1 inalterado. Preflight real retornou
+reauth_required; ainda sem coleta/publicacao. Renovacao autorizada da credencial
+do cofre em implementacao separada, sem contornar MFA.
+
+## 2026-10-14: Runtime Qlik e captura final revisados
+
+CI38638975238/ff75f51 recusou apenas formatacao do manifesto gerado. Aplicado
+Prettier com igualdade profunda JSON antes/depois: nenhum campo/proveniencia
+ou hash de imagem mudou. Manifesto SHA256 passou de941c62b7 para6059b95f
+somente por whitespace. Nova CI completa exigida. CI679 anterior foi cancelada
+por head substituido; captura duplicadaff75 tambem cancelada, mantendo o lote
+revisado38634304020. Nenhum gate obrigatorio foi removido.
+
+Coletor QIX candidato abre duas sessoes independentes, verifica definicoes,
+selecoes, cobertura e totais; preserva centavos exatos e rejeita recarga alterada.
+Loop horario sem sobreposicao, credencial systemd privada e recibo sem fatos.
+Coordenador passa a exigir publicacao real antes de habilitar boot, com CAS,
+backup e recuperacao separados. Diagnosticos aceitam somente codigos fixos;
+resultado apos timeout nao ganha recibo valido. Mapping real ainda pendente.
+
+Suite local completa com VITEST_MAX_WORKERS=1 terminou exit0:3177 Vitest/87
+skips,649 operacionais/19 skips e664 release/14 skips. Lint, tipos e build
+aprovados, com aviso preexistente connected-systems:18. Ultimo ajuste de
+diagnostico terminou depois dessa suite:106 testes focais/1 skip passaram;
+CI Linux do diff combinado continua obrigatoria.
+
+Captura38634304020 aprovada, artefato11929276378, ZIP SHA256
+b5ade6f21a181ef3331703ff5a8870ecf044e6bee46aeace3d6d7925fb1ad32d conferido.
+Commit548d2f2a tem pais6843ef1/679c6fe. Revisadas11 imagens Ranking; abas768
+corrigidas. Conferidos242 hashes/tamanhos, preservadas231 imagens alheias.
+Incorporados11 WebP e manifesto integral, sem alterar proveniencia. Captura
+sintetica nao comprova Qlik real. CI normal verify e carga produtiva pendentes.
+
+## 2026-10-14: Revisao da captura autenticada do ranking
+
+Workflow38627653608 aprovado; artefato11925039515 com SHA256
+34f85d352e299f1e70cfead24676df84854ef2edffabf7f9d23ed41dabc60024 conferido
+na VPS e no desktop. Captura462db494 tem paisd660ba9/60234fa, confirmados
+pela API GitHub. Manifesto limpo com154 rotas,88 temas,242 auditorias de
+acessibilidade e110 checks de zoom aprovados; apenas11 imagensRanking mudaram.
+Revisao visual das11 imagens encontrou palavras quebradas nas abas em768px.
+Lote nao incorporado. Corrigido seletor na faixa768-1024 e quebra de palavras;
+nova captura completa e CI verify obrigatorias, sem manifestos hibridos.
+Matriz tablet:24 combinacoes aprovadas com caracteres em linha unica.
+Suite43 no Windows teve42 aprovados e timeout60s no teste desktop/mobile
+anterior, em duas tentativas; causa interna nao isolada. Sem aumentar limite
+ou terceira repeticao. Lint/Prettier focados e diff-check aprovados; CI Linux
+deve validar integralmente a nova captura antes de qualquer baseline.
+
+## 2026-10-14: Teste de tema do podio
+
+CI38627653582/60234fa encontrou somente a busca do seletor CSS anterior:
+3176 testes passaram,86 skips e1 falha. O podio usa agora seletor composto
+para vencer a regra global de cards. Teste atualizado para essa regra real,
+preservando tokens e acrescentando raio8px/sem sombra;12 testes focais passaram.
+Captura autenticada38627653608 segue em execucao; sem promover baseline parcial.
+
+## 2026-10-14: Fonte Qlik atual e densidade do ranking
+
+Catalogo Qlik em19:39Z confirmou a pasta atual46d5bcf7, produtos26aed86d e
+containerParceiras8b78e5d8. Endereco anterior retorna Pasta nao localizada;
+motivo da mudanca desconhecido. Contrato candidato SQL/TS e fixtures passam
+a exigir a nova pasta, com rejeicao explicita da anterior. Nenhuma migration
+remota aplicada. Metadados Engine, hashes e conciliacao ainda pendentes.
+Testes contratos/handler/reader com nova pasta:237 passaram no Windows/Node24.
+
+Captura parcial autenticada do candidato38620972947, cancelado por concorrencia,
+mostrou ranking1440x1248 acima do limite1125. Compactados gaps/padding/podio
+sem remover secoes ou controles. Fixture com shell/reset reais:1440x1096 e
+390x2166;24 estados/temas/visoes sem overflow de pagina, colisao ou texto cortado.
+42 testes com Chromium passaram novamente com o sheetId atual; confirmados
+cards8px/sem sombra e geometria desktop/mobile. CI autenticada continua
+obrigatoria. Nenhuma baseline promovida.
+
+## 2026-10-14: Volatilidade SQL do ranking
+
+CI38620973126/ab61437 passou validate e os testes SQL; restore e release-gates
+falharam no mesmo lint: crm_qlik_v2_timestamp e crm_qlik_v2_content declaravam
+IMMUTABLE apesar dos casts de data/hora STABLE. Corrigida a classificacao na
+migration candidata ainda nao aplicada, sem alterar regras, ACLs ou gates.
+Nova CI/restore exigidos. Fonte: logs GitHub dos jobs116049856588 e116049856773,
+14/10/2026 19:14/19:18Z. A classificacao segue a documentacao PostgreSQL sobre
+volatilidade; testes de dados nao substituem o lint de funcao.
+
+VPS: dependencias do checkout d660ba9 convertidas de hardlinks para copias
+privadas identicas (32302 arquivos,38123 verificados), hashes conferidos e
+assertQlikDependencies aprovado. Nenhum pacote, unit ou servico alterado.
+Owner continua2f0907e/boot disabled. Health19:23:58Z200/ok77ddc69; main d660ba9
+com CI38620208026 ainda em execucao. Ainda sem coleta ou publicacao real.
+
+## 2026-10-14: Validacao SQL e ciclo independente Qlik
+
+Candidate visual38610921925/47c1e85:42 testes Ranking/build/E2E passaram;
+captura falhou18:29:12Z, sem causa recuperavel porque upload era success-only.
+Adicionado upload always somente de diagnosticos sanitizados, separado do
+artefato promovivel. Nenhum snapshot atualizado nem gate dispensado.
+CI main77dd/38610165621 passou integralmente; em19:04Z main ja era d660ba9,
+CI38620208026 pendente. Publicacao externa CRM77dd confirmada health/ledger,
+deployment ee03fade-fcd0-4c3c-b410-d2bc0abd57f7 em18:42:12.845Z. Owner Qlik
+nao atualizado; candidato atual deve acompanhar main antes de qualquer troca.
+
+PR216/47c1e85: pgTAP Qlik v2 passou254/254 em PostgreSQL isolado
+na CI38610922021, job116015515782, as18:06:42Z. A suite global falhou2/1577:
+allowlists da matriz nao incluiam reader authenticated e writer service_role.
+Corrigidas somente as expectativas auditadas, sem alterar grants ou plan21.
+Catalogo produtivo18:07Z confirmou helpers MFA/permissao/hash e ausencia dos
+objetos v2; nove combinacoes de CRUD nas tres tabelas Qlik antigas negadas.
+Nenhuma migration aplicada. Reexecucao CI/restore permanece obrigatoria.
+
+Gates locais apos merge77dd: lint0 com warning existente, typecheck0, build0;
+pnpm test0,3113 Vitest/83 skips e release528/14 skips. Novos modulos de ciclo,
+credencial systemd e recibo privado em implementacao, sem caller produtivo.
+Ciclo valida contrato compartilhado, compara duas leituras independentes e
+exige ACK staged/published com mesmo hash. Testes focados24+21+10 passaram,
+um teste POSIX de artefato depende de Linux. Nao comprovam conexao real.
+
+## 2026-10-14: Contrato, leitura e publicacao Qlik v2
+
+Implementados endpoint HMAC separado, contrato estrito, migration aditiva e
+reader MFA/permissao. Duas observacoes independentes conciliadas publicam por
+ano, preservando ultima base valida. UI usa RPC autenticada, periodos/busca,
+IMOBs/produtos, podio, totais exatos, comparacao condicionada e aviso apos3h.
+Publisher limitado a origem CRM, retries imutaveis, respostas/erros limitados.
+Ativacao da chave pelo coordenador existente com backup/CAS/recuperacao;
+nenhuma chave gerada ou flag habilitada na VPS nesta etapa.
+
+Windows/Node24.19.0: pnpm test exit0 com VITEST_MAX_WORKERS=1,3113 Vitest
+aprovados/83 skips; testes operacionais aprovados; release528/14 skips POSIX.
+Lint exit0 (warning preexistente connected-systems), tipos/build52/inventario
+aprovados. Revisao corrigiu flag vazia Compose, ACK/UUID, Retry-After e
+paridade SQL/TS. Gitleaks exit0 depois de representar fixture sintetica antiga
+como valor gerado, sem ignore nem alteracao de credencial real. pgTAP254 novo,
+inventario1577, ainda nao executado em PostgreSQL local sem Docker.
+
+Playwright sintetico validou filtros GET,12 combinacoes de tema/largura e
+pixels; capturas1440/390 revisadas, sem overflow da pagina ou sobreposicao.
+Nao comprova login/RPC real. Workflow separado gera baseline com o promotor
+existente; nenhuma imagem incorporada ainda, CI normal verify continua exigida.
+
+PR224/a282b3d aprovado CI38605138409 e integrado em77ddc69 as17:51Z.
+CI push/main38610165621 pendente; checkout canonico preparado na VPS com
+dependencias copiadas e scripts de instalacao desabilitados, sem upgrade.
+Health17:52:19Z200/ok0019690. Backup privado novo de public/private/historico
+gravado com checksums; limites e identificacao em auditoria Qlik. Sem DDL,
+coleta real, conciliacao ou agenda Qlik. Trabalho continua ate provar o fluxo.
+
+## 2026-10-14: Retomada da integracao completa Qlik
+
+Consulta16:57Z: main0019690 e health200/ok5c4d95e; CI38598554910/1d96204
+aprovou codigo, restore, banco e E2E, aguardando matriz visual. Sync concluido.
+Catalogo MCP confirmou ausencia de relay/governanca legados em producao.
+Decidido contrato v2 aditivo com RPC writer restrita, reader MFA/permissao,
+duas coletas e HMAC proprio na VPS. Implementacao em andamento, sem DDL remota.
+Ledger observado depois registra deploy externo de0019690 em16:58:40Z;
+nenhuma publicacao Qlik executada por este trabalho ate esta conferencia.
+
+## 2026-10-14: Retomada e limite de publicacao Qlik
+
+Fechamento16:31Z (13:31 BRT): conflitos apenas documentais do PR224 foram
+conciliados com main0019690, preservando ambos os historicos. Candidato
+1d96204 enviado; GitHub confirma mergeable=true e CI38598554910 em andamento.
+Lint, tipos e build51 passaram novamente. Vitest2813 passaram/82 skips,
+uma falha Windows no symlink Salesforce; nenhum teste foi relaxado.
+O historico recebido de main excedia o limite do sincronizador: secao completa
+preservada em auditoria vinculada, sem alterar o limite. Sync operacional OK.
+Health publico16:31:14Z continua200/ok5c4d95e. Sem deploy, coleta real,
+conciliacao de cargas, migration ou agenda Qlik ativa. CI pendente nao e
+aprovacao. Nenhuma alteracao remota em dados, credenciais ou servicos.
+
+No worktree qlik-api-session, commit3e69135 implementa qlik-deploy/status/recover
+no coordenador, com ledger separado, backup do perfil parado, CAS e recuperacao.
+Release494 passaram/13 skips POSIX; lint/tipos/build51 passaram. Vitest Windows
+teve falhas preexistentes symlink Salesforce e timeout DevTools; foco DevTools
+24/24 passou. Testes de host usam arquivos reais temporarios e comandos emulados.
+Nao ha prova de QIX real ou sincronizacao por esses testes.
+
+Conferencia16:22Z (13:22 America/Sao_Paulo): main0019690, site200/ok5c4d95e;
+PR224 mergeable=false, sem runs CI para3e69135. Fontes GitHub MCP, git fetch/
+ls-remote e health publico. Sem candidato validado, publicacao bloqueada.
+Etapa congelada sem alterar controles. Qlik ainda sem coleta/migration/carga;
+estoque e leads Salesforce nao alterados nem revalidados nesta retomada.
+
+## 2026-10-14: Base atual do preflight Qlik
+
+CI38628006919/64d9f24 aprovada em segunda tentativa. Primeiro E2E teve timeout
+ao preencher financiamento do Associativo, sem alteracao de seus arquivos;
+causa especifica nao isolada. Main avancou para6843ef1 somente em documentos.
+Merge sem conflitos preservou esse conteudo; protecao strict impede usar a
+CI anterior como aprovacao da nova combinacao. Health20:46:44Z200/ok6843ef1.
+Sem upgrade Qlik, migration ou carga; nova CI e promocao protegida pendentes.
+
+## 2026-10-14: IDs atuais da fonte para o preflight Qlik
+
+- Branch `codex/qlik-source-refresh`, base
+  `d660ba9121124be0094519814e6cbb5b704102b7`, worktree `qlik-api-session`.
+- Atualiza os UUIDs fixos de pasta, PRODUTO e container Parceiras
+  em `qix-metadata.mjs` e na fixture, conforme observacao real informada
+  pelo coordenador. Registra os IDs e a proveniencia no runbook de sessao.
+- Escopo aditivo autorizado: hashes SHA-256 dos metadados integrais de cubos
+  efetivos e masters, sem expor campos extras. Canonical JSON ordenado, arrays
+  preservados, UTF-8, limite 262144 bytes/profundidade 32 e rejeicao de accessors
+  e numeros nao finitos. Helper interno serializavel, sem imports novos.
+- Preserva app, aba `pUYysrvJ`, recorte, limites e verificacoes de pertencimento,
+  sigilo, CSP e API. Saida do preflight aditiva; coletor, autorizacoes e banco intactos.
+- Validacao Windows com Node 24.19.0 e pnpm 11.20.0: testes focados de
+  `qix-metadata`, `browser-preflight` e `metadata-artifact` via `node --test`
+  passaram com 84 aprovados, 2 skips Linux e zero falhas. Inclui SHA-256 real,
+  metadados fora da projecao, origem efetiva, limites e execucao serializada em VM.
+- Gates globais executados uma vez: `pnpm lint` aprovado com um warning
+  fora do escopo em `scripts/qa/connected-systems.mjs:18`; `pnpm typecheck`
+  aprovado. ESLint focado do codigo final e `git diff --check` aprovados.
+- `pnpm test` falhou no Vitest: 2871 aprovados, 85 skips e 6 falhas em quatro
+  arquivos. Timeouts em `obsidian-knowledge.test.ts:71`, `project-devtools.test.ts:128`,
+  handshake MCP do mesmo arquivo, `reference-parity.test.ts:727` e
+  `salesforce-inventory-api.test.ts:85`; divergencia de symlink em
+  `salesforce-inventory-api.test.ts:164` (HTTP 200, esperado 502). Sem retentativa
+  global ou alteracao nesses testes. Etapas Node gerais/release nao alcancadas
+  devido ao encadeamento do comando. A causa dos timeouts nao foi estabelecida.
+- `pnpm build` aprovado: compilacao, TypeScript e geracao das 51 paginas.
+  Prettier dos cinco arquivos aprovado. CI do candidato e preflight real
+  continuam pendentes; gates locais nao integralmente verdes pela suite global.
+  Sem commit, push, VPS ou publicacao.
+  ATUALIZACOES e sincronizacao ficam com o coordenador. Nao representa entrega
+  do ranking nem confirma mapping de producao ou coleta real.
+
 ## 2026-10-14: Dashboard acompanha relatorios publicados
 
 - Confirma a mesma origem dos sete relatorios comerciais de Conectar sistemas.
