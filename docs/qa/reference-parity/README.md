@@ -2,6 +2,30 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Organizacao do dashboard em 15/10/2026
+
+CI `38751646222`, artefato `11983918049`, captura
+`0574301121961bb9aa94d3cf44b19f773577b370`, arvore igual ao HEAD
+`3764dfb129b80fb5bd0e97ca002cc95407358316`. SHA-256 do ZIP:
+`06289bbad965bff87472e249a08b03aa3166625543e27b4c15de6bd8bb084a64`.
+
+Validate, restore, banco e E2E passaram. Predicado funcional original aprovado:
+154 responsivos, 88 temas, 242 Axe, zoom, teclado, jornadas e canvases.
+Somente onze capturas de `/app` diferiram pelas mudancas solicitadas de
+cabecalho, roscas, ritmo, diagnostico e comparativos. Desktop nos tres temas
+e celular foram inspecionados, incluindo detalhes das tabelas empilhadas.
+Promocao pelo helper transacional original em15:13:01Z; 231 imagens e sua
+proveniencia preservadas. Limiares de 1%/16 permanecem intactos.
+
+Captura dirty teve fingerprint reproduzido exatamente com diff rastreado
+vazio e somente os 19 outputs de Conectar Sistemas, do mesmo artefato:
+`e97b548007d8f1bb28e082a7c1e7ca0b626cbfa9bb2e47d307df4a8a4b89da21`.
+A prova vale somente para esta captura; o flag original continua true.
+`reviewedUpdates` conserva hashes, origem e verificacao do marcador sintetico
+no atributo do dashboard, sem exigir o texto Fonte removido. Nenhuma
+credencial ou dado real foi carregado. CI integral em verify obrigatoria
+antes de integrar/publicar; esta promocao nao transforma a CI anterior em verde.
+
 ## Pesquisa de unidades do Associativo em 14/10/2026
 
 CI `38574613120`, artefato `11901344067`, captura

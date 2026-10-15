@@ -5463,6 +5463,13 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
     ["stageOpportunities", "/app/etapas/oportunidades"],
   ]) {
     await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
+    if (key === "dashboard") {
+      const report = page.locator("[data-dashboard-source]");
+      await expect(report).toHaveAttribute("data-dashboard-source", expectedMarker);
+      await expect(report.locator("dt").filter({ hasText: /^Fonte$/ })).toHaveCount(0);
+      checks[key] = true;
+      continue;
+    }
     const sourceLabel = page
       .locator("dt")
       .filter({ hasText: /^Fonte$/ })
@@ -6282,7 +6289,8 @@ async function run() {
         contract: fixtureVerification,
         assertion: "synthetic marker and exact fixture counts verified through authenticated RLS",
         sourceMarkerPolicy: "QA local synthetic — not production · run <ephemeral-id>",
-        sourceMarkerVisible: fixtureSourceMarker,
+        sourceMarkerVerified: fixtureSourceMarker,
+        sourceMarkerPresentation: { dashboard: "data-attribute", stageOpportunities: "visible" },
       },
       data: "synthetic local-only fixtures; never production runtime",
       credentialsPersisted: false,

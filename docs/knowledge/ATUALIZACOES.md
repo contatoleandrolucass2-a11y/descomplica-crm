@@ -1,5 +1,11 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Dashboard, PR230
+
+- Visual implementado; filtros pendentes. CI38751646222:11 capturas revisadas,
+  demais gates aprovados; sem deploy. Integracao9ffc8a9 exige nova CI.
+  Fontes, testes e limites integrais: [auditoria](../audits/dashboard-layout-2026-10-15.md).
+
 ## 2026-10-14: Integração de usuários e presença para a VPS
 
 - Fonte: pedido direto para publicar o painel local e usar ponto verde pulsante quando online e vermelho quando offline. Retomada incorporou `main` `9ffc8a9`; produção permanece em `6843ef1`; a consulta inicial encontrou produção nesse SHA, publicada em `2026-10-14T20:38:13.413Z`, sem pendência. Isso não substitui a consulta final dentro das travas.
