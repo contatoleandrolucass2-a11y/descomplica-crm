@@ -164,6 +164,9 @@ if (approvedCanvasByRoute.size !== routes.length) {
 const canvasDensityLimitByRoute = new Map([
   // The complete reference report replaces the former single-screen dashboard.
   ["/app", 4800],
+  // Full eight-section goal reference replaces the former compact settings form.
+  ["/app/configuracoes/metas", 2600],
+  ["/app/configuracoes/metas/parcerias", 2300],
   ["/admin/usuarios", 1200],
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
@@ -1199,6 +1202,21 @@ async function inspectRoute(
         canvasDensityReady:
           root.clientWidth !== 1440 ||
           Math.max(root.scrollHeight, document.body.scrollHeight) <= maxDesktopHeight,
+        goalPlanningComplete:
+          !["/app/configuracoes/metas", "/app/configuracoes/metas/parcerias"].includes(
+            window.location.pathname,
+          ) ||
+          (document.querySelectorAll(".goal-studio .goal-panel").length === 8 &&
+            [
+              "controls",
+              "preview",
+              "conversion",
+              "weekly",
+              "brokers",
+              "broker-production",
+              "calendar",
+              "productive",
+            ].every((panel) => document.querySelector(`.goal-${panel}-panel`))),
         dashboardReportReady:
           window.location.pathname !== "/app" ||
           (["pulse", "monthly", "diagnosis", "operational", "team"].every((section) =>
@@ -1371,6 +1389,7 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
+    snapshot.goalPlanningComplete &&
     snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&

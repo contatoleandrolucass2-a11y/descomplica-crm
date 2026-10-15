@@ -10,6 +10,8 @@
 - Contrato exato de Gestao no QA de navegacao agora inclui Meta; 47 testes
   focados aprovados. Falha anterior da CI nao foi tratada como aprovacao.
   Evidencias e limites em docs/audits/meta-2026-10-15.md.
+- Referencia completa mede 2201/1852 px em DV/Parcerias a 1440 px; o QA usa
+  limites especificos 2600/2300 e exige todos os oito paineis nessas rotas.
 
 ## 2026-10-15: Organizacao do dashboard e limite dos filtros
 
