@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
 
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ refresh: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
   forbidden: mocks.forbidden,
   notFound: mocks.notFound,
 }));
@@ -60,8 +61,9 @@ describe("dashboard autorizado por visão", () => {
 
     expect(mocks.loadDashboardReadModel).toHaveBeenCalledWith(["with_canal_imob"], {
       includeTopDevelopments: false,
+      includeAnalysis: true,
     });
-    expect(markup).toContain("Com canal de imobiliárias");
+    expect(markup).not.toContain('href="/app?view=');
     expect(markup).not.toContain("Sem canal de imobiliárias");
     expect(markup).not.toContain(">Geral<");
     expect(markup).not.toContain("Ranking validado");
@@ -86,8 +88,9 @@ describe("dashboard autorizado por visão", () => {
 
     expect(mocks.loadDashboardReadModel).toHaveBeenCalledWith(["without_canal_imob"], {
       includeTopDevelopments: true,
+      includeAnalysis: true,
     });
-    expect(markup).toContain("Sem canal de imobiliárias");
+    expect(markup).not.toContain('href="/app?view=');
     expect(markup).not.toContain("Com canal de imobiliárias");
     expect(markup).not.toContain(">Geral<");
     expect(markup).toContain("Ranking validado");
@@ -145,7 +148,7 @@ describe("dashboard autorizado por visão", () => {
     expect(mocks.loadDashboardTeam).not.toHaveBeenCalled();
   });
 
-  it("encaminha a autorização e o snapshot atual para a contagem da equipe", async () => {
+  it("nao usa o cadastro de ativos como equipe dos relatorios filtrados", async () => {
     const authorization = {
       userId: "a4000000-0000-4000-8000-000000000005",
       roleKey: "admin",
@@ -175,13 +178,9 @@ describe("dashboard autorizado por visão", () => {
     const markup = renderToStaticMarkup(
       await AppHomePage({ searchParams: Promise.resolve({ view: "all", period: "week" }) }),
     );
-    expect(mocks.loadDashboardTeam).toHaveBeenCalledExactlyOnceWith(
-      dashboard,
-      authorization,
-      "all",
-    );
-    expect(markup).toContain("Gerente sintetico");
-    expect(markup).toContain("Vínculos informados no snapshot");
+    expect(mocks.loadDashboardTeam).not.toHaveBeenCalled();
+    expect(markup).not.toContain("Gerente sintetico");
+    expect(markup).toContain("Aguardando a coleta detalhada da equipe.");
     expect(markup).not.toContain('href="/app/etapas/');
   });
 });

@@ -17,9 +17,11 @@ const REFRESH_RETRY_MS = 60_000;
 export function DashboardAutoRefresh({
   generatedAt,
   updatedAt,
+  referenceDay,
 }: {
   generatedAt: string | null;
   updatedAt: string | null;
+  referenceDay?: string | undefined;
 }) {
   const router = useRouter();
 
@@ -54,7 +56,10 @@ export function DashboardAutoRefresh({
         const parsed = versionSchema.safeParse(await response.json());
         if (!parsed.success || disposed || request.signal.aborted) return;
         // Compare the persisted snapshot, not a collection attempt or an ingestion receipt.
-        if (parsed.data.generatedAt !== generatedAt || parsed.data.updatedAt !== updatedAt) {
+        const currentDay = referenceDay ? new Intl.DateTimeFormat("en-CA", {
+          timeZone: "America/Sao_Paulo", year: "numeric", month: "2-digit", day: "2-digit",
+        }).format(new Date()) : undefined;
+        if (parsed.data.generatedAt !== generatedAt || parsed.data.updatedAt !== updatedAt || currentDay !== referenceDay) {
           // New props acknowledge delivery. Retry after a bounded wait if refresh failed.
           if (refreshRequestedAt !== null && Date.now() - refreshRequestedAt < REFRESH_RETRY_MS) {
             return;
@@ -95,7 +100,7 @@ export function DashboardAutoRefresh({
       window.removeEventListener("focus", resume);
       window.removeEventListener("online", resume);
     };
-  }, [generatedAt, updatedAt, router]);
+  }, [generatedAt, updatedAt, referenceDay, router]);
 
   return null;
 }

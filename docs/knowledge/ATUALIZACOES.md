@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Dashboard, filtros dependentes e metas
+
+- Retomada18:36Z: maina7fdf92, CI38775901605 success; site200/ok/fae77f9.
+  Branch codex/dashboard-filtros-metas criada do main. PR234 documental tem
+  CI38773011324 verde, mas conflito com main; preservado sem integrar.
+- Usuario definiu colunas: Gerentes de vendas, Contato Corretor Proprietario,
+  Unidade de Negocio e Imobiliaria; canal limitado aos dois textos informados.
+  Novas regras de meses fechados, metas e comparativos requerem verificacao
+  do contrato completo. Confirmado depois: metas por responsavel unico dos
+  relatorios filtrados, dias uteis segunda-sexta com quinta valendo2.
+  Usuario autorizou explicitamente atualizacao aditiva do banco/coletor apos
+  testes. Autorizacao nao e evidencia de aplicacao. Fontes:
+  Git fetch/GitHub branches/main, PR234/Actions e health publico sem sessao.
+
 ## 2026-10-15: Metadata integrado validado localmente
 
 - Mainfae77f9 integrado emfacf284, sem perder dashboard/referencias/notas.

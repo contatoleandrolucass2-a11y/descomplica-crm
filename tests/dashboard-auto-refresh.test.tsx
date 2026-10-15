@@ -18,7 +18,7 @@ let windowTarget: EventTarget;
 let cleanup: (() => void) | undefined;
 const fetchMock = vi.fn();
 
-function mount(props: { generatedAt: string | null; updatedAt: string | null } = version) {
+function mount(props: { generatedAt: string | null; updatedAt: string | null; referenceDay?: string } = version) {
   expect(DashboardAutoRefresh(props)).toBeNull();
   cleanup = mocks.effect.mock.lastCall![0]();
 }
@@ -41,6 +41,18 @@ afterEach(() => {
 });
 
 describe("dashboard published snapshot refresh", () => {
+  it("recalcula metas na virada do dia de Sao Paulo mesmo sem nova coleta", async () => {
+    vi.setSystemTime(new Date("2026-10-15T02:59:50Z"));
+    mount({ ...version, referenceDay: "2026-10-14" });
+    await vi.advanceTimersByTimeAsync(0);
+    expect(mocks.refresh).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+    cleanup?.();
+    mount({ ...version, referenceDay: "2026-10-15" });
+    await vi.advanceTimersByTimeAsync(30_000);
+    expect(mocks.refresh).toHaveBeenCalledTimes(1);
+  });
   it("checks on mount and every 30 seconds without refreshing unchanged values", async () => {
     mount();
     await vi.advanceTimersByTimeAsync(0);

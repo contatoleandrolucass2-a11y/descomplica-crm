@@ -3,6 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
+import { dashboardAnalysisSliceSchema, type DashboardAnalysisSlice } from "./analysis-contract";
 
 import {
   DASHBOARD_STAGES,
@@ -64,9 +65,9 @@ const developmentRowSchema = z.object({
 });
 
 export interface DashboardMetric {
-  currentMonth: number;
-  currentWeek: number;
-  currentToday: number;
+  currentMonth: number | null;
+  currentWeek: number | null;
+  currentToday: number | null;
   goalMonth: number;
   goalWeek: number;
   goalToday: number;
@@ -82,6 +83,7 @@ export interface DashboardMetric {
 }
 
 export interface DashboardReadModel {
+  analysis?: Partial<Record<DashboardViewKey, DashboardAnalysisSlice>>;
   id: number;
   snapshotKey: string;
   referenceDate: string;
@@ -90,7 +92,9 @@ export interface DashboardReadModel {
   timezone: string;
   source: string;
   goalsAvailable: boolean;
-  salesValue: Partial<Record<DashboardViewKey, { month: number; week: number; today: number }>>;
+  salesValue: Partial<
+    Record<DashboardViewKey, { month: number | null; week: number | null; today: number | null }>
+  >;
   metrics: Partial<Record<DashboardViewKey, Record<DashboardStageKey, DashboardMetric>>>;
   topDevelopments: Partial<
     Record<DashboardViewKey, Array<{ rank: number; name: string; total: number }>>
@@ -133,7 +137,7 @@ function sameSnapshot(
 
 export async function loadDashboardReadModel(
   viewKeys: readonly DashboardViewKey[],
-  options: { includeTopDevelopments?: boolean } = {},
+  options: { includeTopDevelopments?: boolean; includeAnalysis?: boolean } = {},
 ): Promise<DashboardLoadResult> {
   const requestedViews = [...new Set(viewKeys)];
   if (requestedViews.length === 0) {
@@ -165,7 +169,14 @@ export async function loadDashboardReadModel(
           .in("view_key", requestedViews)
           .order("rank")
       : Promise.resolve({ data: [], error: null });
-    const [viewsResult, metricsResult, developmentsResult] = await Promise.all([
+    const analysisRequest = options.includeAnalysis
+      ? supabase
+          .from("crm_dashboard_analysis")
+          .select("view_key,payload")
+          .eq("snapshot_id", snapshot.id)
+          .in("view_key", requestedViews)
+      : Promise.resolve({ data: [], error: null });
+    const [viewsResult, metricsResult, developmentsResult, analysisResult] = await Promise.all([
       supabase
         .from("crm_dashboard_views")
         .select("view_key,sales_value_month,sales_value_week,sales_value_today")
@@ -179,6 +190,7 @@ export async function loadDashboardReadModel(
         .eq("snapshot_id", snapshot.id)
         .in("view_key", requestedViews),
       developmentsRequest,
+      analysisRequest,
     ]);
 
     const latestSnapshot = await readSnapshot();
@@ -188,6 +200,22 @@ export async function loadDashboardReadModel(
 
     // A replaced snapshot can leave obsolete/incomplete child results in this read.
     if (!latestSnapshot || !sameSnapshot(snapshot, latestSnapshot)) continue;
+    // An additive rollout may precede the migration; other database errors fail closed.
+    if (analysisResult.error && !["42P01", "PGRST205"].includes(analysisResult.error.code)) {
+      throw new Error("Não foi possível carregar os filtros do dashboard.");
+    }
+    const analysis: NonNullable<DashboardReadModel["analysis"]> = {};
+    for (const row of analysisResult.data ?? []) {
+      const slice = dashboardAnalysisSliceSchema.parse(row.payload);
+      if (
+        !requestedViews.includes(slice.viewKey) ||
+        row.view_key !== slice.viewKey ||
+        slice.referenceDate !== snapshot.reference_date
+      ) {
+        throw new Error("A análise do dashboard não corresponde ao snapshot.");
+      }
+      analysis[slice.viewKey] = slice;
+    }
 
     const viewRows = z.array(viewRowSchema).parse(viewsResult.data ?? []);
     const metricRows = z.array(metricRowSchema).parse(metricsResult.data ?? []);
@@ -255,6 +283,7 @@ export async function loadDashboardReadModel(
         timezone: snapshot.timezone,
         source: snapshot.source,
         goalsAvailable: snapshot.goals_available,
+        ...(options.includeAnalysis ? { analysis } : {}),
         salesValue,
         metrics,
         topDevelopments,

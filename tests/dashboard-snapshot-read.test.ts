@@ -10,6 +10,7 @@ type Table =
   | "crm_dashboard_snapshots"
   | "crm_dashboard_views"
   | "crm_dashboard_metrics"
+  | "crm_dashboard_analysis"
   | "crm_dashboard_top_developments";
 type ChildTable = Exclude<Table, "crm_dashboard_snapshots">;
 interface Response {
@@ -110,6 +111,7 @@ beforeEach(() => {
     crm_dashboard_snapshots: [],
     crm_dashboard_views: [],
     crm_dashboard_metrics: [],
+    crm_dashboard_analysis: [],
     crm_dashboard_top_developments: [],
   };
   headers(baseHeader, baseHeader);
@@ -125,6 +127,55 @@ beforeEach(() => {
 });
 
 describe("loadDashboardReadModel snapshot consistency", () => {
+  const payload = {
+    version: 1,
+    viewKey: "all",
+    coverageStart: "2026-01-01",
+    referenceDate: "2026-10-14",
+    dimensions: { managers: [], owners: [], companies: [], developments: [] },
+    facts: [],
+  };
+  it("carrega somente a analise autorizada e da mesma versao", async () => {
+    responses.crm_dashboard_analysis = [{ data: [{ view_key: "all", payload }], error: null }];
+    const result = await loadDashboardReadModel(["all"], { includeAnalysis: true });
+    expect(result).toMatchObject({ status: "ready", dashboard: { analysis: { all: payload } } });
+    expect(queriesFor("crm_dashboard_analysis")[0]!.in).toHaveBeenCalledWith("view_key", ["all"]);
+  });
+  it.each(["42P01", "PGRST205"])("tolera migration ainda ausente: %s", async (code) => {
+    responses.crm_dashboard_analysis = [{ data: null, error: { code } }];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).resolves.toMatchObject(
+      { status: "ready", dashboard: { analysis: {} } },
+    );
+  });
+  it("nao esconde erro de permissao da analise", async () => {
+    responses.crm_dashboard_analysis = [{ data: null, error: { code: "42501" } }];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+      "filtros",
+    );
+  });
+  it.each([{ viewKey: "with_canal_imob" }, { referenceDate: "2026-10-13" }])(
+    "recusa analise de outra visao ou referencia: %j",
+    async (changes) => {
+      responses.crm_dashboard_analysis = [
+        { data: [{ view_key: "all", payload: { ...payload, ...changes } }], error: null },
+      ];
+      await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+        "snapshot",
+      );
+    },
+  );
+  it("descarta analise misturada antes de validar e recarrega", async () => {
+    headers(baseHeader, nextHeader, nextHeader, nextHeader);
+    children([1, 2]);
+    responses.crm_dashboard_analysis = [
+      { data: [{ view_key: "all", payload: { invalid: true } }], error: null },
+      { data: [{ view_key: "all", payload }], error: null },
+    ];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).resolves.toMatchObject(
+      { status: "ready", dashboard: { analysis: { all: payload } } },
+    );
+    expect(queriesFor("crm_dashboard_analysis")).toHaveLength(2);
+  });
   it.each([0, 1])(
     "retorna lote estavel com contagem %s, preservando ausencia e zero",
     async (count) => {

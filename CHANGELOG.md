@@ -1,5 +1,17 @@
 # Changelog
 
+## 2026-10-15: Dashboard filtrado e metas por responsavel
+
+- Adiciona filtros dependentes de canal, gerente, responsavel e empresa usando
+  dimensoes dos relatorios e apenas os dois canais definidos pelo usuario.
+- Preserva agregados diarios com RLS por visao e leitura coerente do snapshot.
+- Mostra meses encerrados usados nas medias em pop-up com grafico; mes anterior
+  passa a ser integral na nova analise, sem alterar comparativos de outras telas.
+- Calcula metas mensais por responsavel unico e esperado proporcional ao dia;
+  atualiza a pagina na virada do dia de Sao Paulo.
+- Remove controles/textos indicados na raiz e resume tabelas em uma linha
+  Realizado com cinco periodos. Ativacao depende da migration/coleta e gates.
+
 ## 2026-10-15: Resolucao de metadados Qlik
 
 - Registra gates locais e limite Windows, exigindo CI Linux e novo probe

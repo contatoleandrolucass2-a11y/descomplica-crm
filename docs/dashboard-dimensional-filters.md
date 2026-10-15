@@ -1,5 +1,82 @@
 # Filtros dimensionais do DashboardReport
 
+## Implementacao de 15/10/2026
+
+Esta secao substitui a proposta historica abaixo para a raiz `/app`.
+Branch `codex/dashboard-filtros-metas`, base a7fdf92. Estado: implementacao local
+em validacao; nao representa migration aplicada ou coletor publicado.
+Usuario confirmou o significado das colunas e autorizou explicitamente a
+atualizacao aditiva do banco e coletor, preservando dados e permissoes.
+
+### Fonte e contrato
+
+- Canal: `Imobiliaria` (`realEstateName`), correspondencia por conteudo sem
+  diferenciar caixa, exclusivamente SPC - CANAL IMOB PJ / DIRECIONAL VENDAS SPC.
+  Correspondencia com ambos rejeita a carga, sem escolher arbitrariamente.
+- Gerente: `Gerente(s) de vendas` (`managerName`); responsavel:
+  `Contato Corretor Proprietario`/corretor da atividade (`brokerName`).
+- Empresa: `Unidade de Negocio` (`businessUnit`), nunca Imobiliaria. Metadados
+  Salesforce GET describe confirmaram `Activity.Unidade_de_negocio__c` nas duas
+  atividades. Campos existentes de oportunidade/pasta/venda foram preservados.
+- Nomes unicos sao valores de filtro, nao IDs oficiais nem joins de identidade.
+  A deduplicacao de eventos continua por ID de origem antes da agregacao.
+- `dashboard.analysis` e opcional no envelope v2. Dicionarios por visao + tuplas
+  diarias contêm etapa, data, indices dimensionais, quantidade, valor e contagem
+  de pastas aprovadas. Nenhum cliente, CPF, telefone ou detalhe de proposta.
+- Nova `crm_dashboard_analysis` acompanha o mesmo snapshot por PK/FK. RPC
+  existente envolve a implementacao v2 privada, preserva replay/stale/lock e
+  atomiza a substituicao. Nova carga legada remove analise antiga para nao misturar
+  geracoes. Rollback do coletor nao preserva filtros antigos como se fossem novos.
+- UI usa cliente autenticado, permissao de dashboard e visao. Opcoes e totais
+  nunca atravessam visoes nao autorizadas. `service_role` nao tem acesso direto
+  a nova tabela; escreve exclusivamente pela RPC. Nenhuma ACL Qlik alterada.
+
+### Regras confirmadas
+
+Filtros multisselecao: OR dentro de uma dimensao, AND entre as quatro. Opcoes
+unicas consideram os outros filtros, ignorando apenas a propria selecao.
+Responsaveis de registros sem nome nao sao inventados. Metas contam nomes
+unicos identificados no recorte de relatorios, incluindo todas as etapas e a
+cobertura coletada; nao o cadastro de ativos. Nenhum responsavel identificado
+em recorte com fatos torna a meta indisponivel; recorte vazio tem meta zero.
+
+Por responsavel: agendamentos 1 segunda-sexta e 2 quinta, visitas8, pastas4,
+vendas1 por mes. Nenhum calendario adicional de feriados foi fornecido.
+Esperado = meta mensal x dia civil atual / dias do mes, sem arredondamento no
+calculo. Oportunidades e pastas aprovadas continuam sem meta definida.
+Data civil America/Sao_Paulo; o ultimo dia recebe a meta integral.
+
+Media do ano considera meses completos no ano; media de3 usa os ultimos3
+completos, inclusive ano anterior quando necessario. Mes atual nunca entra,
+mesmo no ultimo dia. Mes anterior e integral. Cobertura inicia no menor entre
+1 de janeiro e primeiro dia de3 meses atras. Periodo fora da cobertura e null,
+nao zero. Pop-ups listam exatamente os meses usados e os respectivos valores.
+Sem analise nao e possivel comprovar os meses; nao reconstruir series pela media.
+
+Realizado usa as datas originais de cada relatorio no mes de referencia. Quando
+a coleta ainda pertence a outro mes, a raiz nao apresenta esses numeros como
+mes vigente. Auto-refresh observa troca do snapshot e virada do dia local.
+Pastas aprovadas nao recebem serie mensal derivada de ranking/status atual:
+definicao temporal permanece pendente, apresentada como indisponivel.
+
+### Ativacao e recuperacao
+
+Flag `SALESFORCE_DASHBOARD_ANALYSIS_ENABLED=true` somente no coletor aprovado.
+Default false preserva produtor legado. Ordem: gates/CI, backup privado,
+migration aditiva revisada, app aprovado pelo coordenador de producao, coletor
+com flag, coleta/recibo e reconciliacao. Nao reinstalar o servico existente.
+Atualizacao do coletor deve conferir unidade/SHA atual, guardar backup privado
+da unidade/drop-ins e validar novo caminho antes de reiniciar somente o coletor.
+Falha preserva snapshot anterior; recuperar unidade/flag anteriores sem apagar
+dados, candidato, locks ou ledger. Sem REST de n8n; nenhum workflow alterado.
+
+Comprovar lint, tipos, testes, build, pgTAP e QA de temas/responsividade;
+conferir versoes de CRM e coletor separadamente. Os resultados finais e provas
+de ativacao serao registrados apos os gates. A secao abaixo e historica e nao
+substitui a decisao mais recente do usuario nem comprova estado remoto.
+
+---
+
 Status: proposta de contrato; nao implementada nem ativada.
 Verificacao local: 2026-10-15, Windows/PowerShell, branch
 `codex/dashboard-filtros-layout`, HEAD

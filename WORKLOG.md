@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-15: Filtros, meses encerrados e metas do dashboard
+
+Implementacao em `codex/dashboard-filtros-metas`, base a7fdf92. Usuario confirmou
+as colunas de origem, metas por responsavel unico dos relatorios filtrados e
+autorizou explicitamente atualizacao aditiva do banco/coletor apos testes.
+Referencia descomplicapro.com.br consultada somente como conhecimento.
+
+Dimensoes preservadas em agregados diarios compactos por visao autorizada;
+extensao opcional do envelope v2 e migration nova, sem alterar Qlik ou grants
+legados. Filtros OR interno/AND entre dimensoes e opcoes dependentes. Historico
+usa apenas meses completos, com pop-up e grafico dos meses considerados.
+Metas: agendamentos 1 por dia util/2 quinta, visitas8, pastas4, vendas1 por
+responsavel identificado; esperado mensal proporcional ao dia civil atual.
+Tabelas operacionais transpostas; controles/textos removidos apenas na raiz.
+
+Tipos e 55 testes de acesso/leitura aprovados na primeira rodada. Gates globais,
+pgTAP, QA visual, CI e publicacao ainda em andamento; nao comprovam ativacao.
+Detalhes e limites: docs/dashboard-dimensional-filters.md.
+
 ## 2026-10-15: Gates locais do metadata integrado
 
 Integrado mainfae77f9 emfacf284, preservando dashboard, referencias e textos

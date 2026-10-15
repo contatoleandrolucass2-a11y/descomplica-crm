@@ -90,132 +90,91 @@ function bodyRows(root: Node) {
 
 describe("DashboardComparisons: SSR com dados sinteticos", () => {
   it.each(["Agendamentos", "Visitas", "Pastas", "Vendas"])(
-    "preserva caption, cinco intervalos e seis colunas para %s",
+    "transpoe os cinco periodos em uma unica linha Realizado para %s",
     (label) => {
       const root = render(fixture(), label);
       expect(elements(root, "table")).toHaveLength(1);
-      expect(elements(root, "caption").map(text)).toEqual([
-        `${label}: realizado, comparação e meta por intervalo`,
-      ]);
-      expect(elements(root, "h3")).toHaveLength(0);
+      expect(elements(root, "caption").map(text)).toEqual([`${label}: realizado por intervalo`]);
       const headers = elements(elements(root, "thead")[0]!, "th");
       expect(headers.map(text)).toEqual([
-        "Intervalo",
-        "Anterior",
-        "Realizado",
-        "Variação",
-        "Meta",
-        "% realizado da meta",
+        "Indicador",
+        "Mês",
+        "Últimos 14 dias",
+        "Últimos 7 dias",
+        "Esta Semana",
+        "Hoje",
       ]);
       for (const header of headers) expect(attribute(header, "scope")).toBe("col");
       const rows = bodyRows(root);
-      expect(rows).toHaveLength(5);
-      rows.forEach((row, index) => {
-        const heading = elements(row, "th");
-        expect(heading).toHaveLength(1);
-        expect(attribute(heading[0]!, "scope")).toBe("row");
-        expect(elements(row, "strong").map(text)).toEqual([fixture()[index]!.label]);
-        expect(elements(heading[0]!, "span").map(text)).toEqual([fixture()[index]!.comparison]);
-        expect(elements(row, "td")).toHaveLength(5);
-      });
+      expect(rows).toHaveLength(1);
+      expect(elements(rows[0]!, "th").map(text)).toEqual(["Realizado"]);
+      expect(attribute(elements(rows[0]!, "th")[0]!, "scope")).toBe("row");
+      expect(elements(rows[0]!, "td").map(text)).toEqual(["1.000", "Indisponível", "0", "10", "0"]);
+      expect(text(root)).not.toMatch(/Anterior|Variação|Meta|%|comparação|×/);
+      expect(elements(root, "svg")).toHaveLength(0);
     },
   );
 
-  it("distingue nulos, zeros, queda e meta superada sem recalcular os dados", () => {
-    const root = render();
-    expect(bodyRows(root).map((row) => elements(row, "td").map(text))).toEqual([
-      ["800", "1.000", "+25%", "1.600", "62,5%"],
-      Array(5).fill("Indisponível"),
-      ["0", "0", "Indisponível", "0", "Indisponível"],
-      ["20", "10", "-50%", "5", "200%"],
-      ["0", "0", "0%", "10", "0%"],
+  it("associa contagens por chave mesmo quando os periodos chegam fora de ordem", () => {
+    const rows = fixture()
+      .map((row, index) => ({ ...row, current: index + 1 }))
+      .reverse();
+    expect(elements(bodyRows(render(rows))[0]!, "td").map(text)).toEqual(["1", "2", "3", "4", "5"]);
+  });
+
+  it("mantem colunas ausentes como indisponiveis sem deslocar contagens ou fabricar zeros", () => {
+    const root = render([fixture()[3]!]);
+    expect(bodyRows(root)).toHaveLength(1);
+    expect(elements(bodyRows(root)[0]!, "td").map(text)).toEqual([
+      "Indisponível",
+      "Indisponível",
+      "Indisponível",
+      "10",
+      "Indisponível",
     ]);
-    expect(elements(bodyRows(root)[0]!, "b").map(text)).toEqual(["1.000"]);
-    const unavailable = elements(bodyRows(root)[1]!, "span").filter((node) =>
-      attribute(node, "title"),
-    );
-    expect(unavailable).toHaveLength(5);
+    const unavailable = elements(root, "span");
+    expect(unavailable).toHaveLength(4);
     for (const node of unavailable) {
+      expect(attribute(node, "title")).toBe("Dados indisponíveis para este intervalo.");
       expect(attribute(node, "aria-label")).toBe(`Indisponível: ${attribute(node, "title")}`);
     }
   });
 
-  it("mantem sinais e numeros negativos sem limitar percentuais de meta", () => {
-    const rows = [
-      {
-        ...fixture()[0]!,
-        previous: -12.5,
-        current: -5,
-        variation: -1.25,
-        goal: -10,
-        goalProgress: -0.5,
-      },
-    ];
-    expect(elements(bodyRows(render(rows))[0]!, "td").map(text)).toEqual([
-      "-12,5",
-      "-5",
-      "-125%",
-      "-10",
-      "-50%",
-    ]);
+  it("preserva a unica linha e os cinco periodos quando a lista esta vazia", () => {
+    const root = render([]);
+    expect(bodyRows(root)).toHaveLength(1);
+    expect(elements(bodyRows(root)[0]!, "th").map(text)).toEqual(["Realizado"]);
+    expect(elements(bodyRows(root)[0]!, "td").map(text)).toEqual(Array(5).fill("Indisponível"));
   });
 
-  it("usa setas Lucide decorativas com sinal textual e estado neutro distinto", () => {
-    const root = render();
-    const variations = elements(root, "span").filter((node) => attribute(node, "data-direction"));
-    expect(variations.map((node) => attribute(node, "data-direction"))).toEqual([
-      "up",
-      "down",
-      "flat",
-    ]);
-    expect(variations.map(text)).toEqual(["+25%", "-50%", "0%"]);
-    const icons = elements(root, "svg");
-    expect(icons).toHaveLength(3);
-    for (const icon of icons) {
-      expect(attribute(icon, "aria-hidden")).toBe("true");
-      expect(attribute(icon, "focusable")).toBe("false");
-    }
+  it.each([NaN, Infinity, -Infinity])("trata %s como indisponivel", (current) => {
+    const root = render([{ ...fixture()[0]!, current }]);
+    expect(elements(bodyRows(root)[0]!, "td").map(text)).toEqual(Array(5).fill("Indisponível"));
+    expect(text(root)).not.toMatch(/NaN|Infinity|undefined/);
   });
 
-  it("preserva papeis de tabela e rotulos mobile sem estilos inline", () => {
+  it("formata o realizado recebido sem recalcular ou limitar seu valor", () => {
+    const root = render([{ ...fixture()[0]!, current: -12.5 }]);
+    expect(text(elements(bodyRows(root)[0]!, "td")[0]!)).toBe("-12,5");
+  });
+
+  it("preserva semantica de tabela e uma regiao de rolagem nomeada acessivel por teclado", () => {
     const root = render();
+    const region = elements(root, "div")[0]!;
+    expect(attribute(region, "role")).toBe("region");
+    expect(attribute(region, "aria-label")).toBe("Agendamentos: períodos");
+    expect(attribute(region, "tabindex")).toBe("0");
     expect(attribute(elements(root, "table")[0]!, "role")).toBe("table");
-    expect(attribute(elements(root, "thead")[0]!, "role")).toBe("rowgroup");
-    for (const row of bodyRows(root)) {
-      expect(attribute(row, "role")).toBe("row");
-      expect(attribute(elements(row, "th")[0]!, "role")).toBe("rowheader");
-      expect(elements(row, "td").map((cell) => attribute(cell, "data-label"))).toEqual([
-        "Anterior",
-        "Realizado",
-        "Variação",
-        "Meta",
-        "% realizado da meta",
-      ]);
-      for (const cell of elements(row, "td")) expect(attribute(cell, "role")).toBe("cell");
+    for (const tag of ["thead", "tbody"]) {
+      expect(attribute(elements(root, tag)[0]!, "role")).toBe("rowgroup");
     }
+    for (const row of elements(root, "tr")) expect(attribute(row, "role")).toBe("row");
+    expect(attribute(elements(bodyRows(root)[0]!, "th")[0]!, "role")).toBe("rowheader");
+    for (const cell of elements(root, "td")) expect(attribute(cell, "role")).toBe("cell");
     expect(
       renderToStaticMarkup(
         createElement(DashboardComparisons, { label: "Vendas", rows: fixture() }),
       ),
-    ).not.toMatch(/style=|NaN|Infinity|undefined/);
-  });
-
-  it("trata numeros nao finitos como indisponiveis e informa lista vazia", () => {
-    const rows = [
-      {
-        ...fixture()[0]!,
-        previous: NaN,
-        current: Infinity,
-        variation: -Infinity,
-        goal: NaN,
-        goalProgress: Infinity,
-      },
-    ];
-    expect(elements(bodyRows(render(rows))[0]!, "td").map(text)).toEqual(
-      Array(5).fill("Indisponível"),
-    );
-    const empty = elements(bodyRows(render([]))[0]!, "td");
-    expect(empty.map(text)).toEqual(["Nenhum intervalo disponível."]);
-    expect(attribute(empty[0]!, "colspan")).toBe("6");
+    ).not.toMatch(/style=/);
   });
 });
