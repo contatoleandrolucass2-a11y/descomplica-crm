@@ -335,15 +335,19 @@ export function GoalPlanning({
             <PanelHeader
               number="05"
               kicker="Equipe de vendas"
-              title={`${profile === "dv" ? "Corretores" : "Imobiliárias"} por gerente`}
+              title={profile === "dv" ? "Corretores por gerente" : "Imobiliárias por coordenador"}
             />
             <p className="goal-panel-note">
-              Defina quantos {units} cada gerente deve manter ativos, conforme o tempo de casa.
+              {profile === "dv"
+                ? "Defina quantos corretores cada gerente deve manter ativos, conforme o tempo de casa."
+                : "Defina quantas imobiliárias cada coordenador deve manter ativas, conforme o tempo de parceria."}
             </p>
             <div className="goal-productivity-block">
               <div className="goal-productivity-block-heading">
-                <strong>Meta por tempo de casa</strong>
-                <small>{units} por gerente</small>
+                <strong>Meta por tempo de {profile === "dv" ? "casa" : "parceria"}</strong>
+                <small>
+                  {units} por {profile === "dv" ? "gerente" : "coordenador"}
+                </small>
               </div>
               <div className="goal-productivity-fields">
                 {(
@@ -476,7 +480,7 @@ export function GoalPlanning({
                 <span>{calendar.workdays - calendar.elapsedWorkdays} restantes</span>
               </div>
               <div className="goal-calendar-rule">
-                <small>Ritmo por {unit}</small>
+                <small>{profile === "dv" ? "Ritmo por corretor" : "Ritmo de visitas"}</small>
                 <strong>1 por dia útil</strong>
                 <span>
                   {calendar.workdays} {profile === "dv" ? "agendamentos" : "visitas"} no mês

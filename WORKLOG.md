@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-15: Legibilidade de Meta no CSS compilado
+
+- Revisao independente recusou as capturas anteriores: percentuais ocultos
+  nos donuts escuros, abas truncadas e textos de Parcerias divergentes.
+  Nenhuma baseline foi promovida com esses problemas.
+- Fundo do miolo usa o token tematico na regra base, evitando o ramo invalido
+  produzido pela minificacao de pseudoelemento em :is(). Abas exibem nomes
+  completos e Parcerias usa coordenador/tempo de parceria/Ritmo de visitas.
+- Preview usa CSS real do build Next, removendo equivalentes Vite para nao
+  mascarar defeitos; exige build atualizado, sem opcao de ignorar freshness.
+  24 capturas em quatro larguras/tres temas passaram com contraste minimo
+  14,16:1, zero Axe/overflow/console/rede e interacoes preservadas.
+- Integrado main a7fdf92 de metadados Qlik em889f46c, sem alterar o trabalho
+  externo. Conflitos documentais preservaram ambos os registros. O prefixo
+  de conhecimento de main foi mantido byte a byte, com indice Meta completo;
+  historico arquivado pelo outro PR permanece integral. Sync aprovado.
+
 ## 2026-10-15: Escala e contrato visual de Meta
 
 - CSS publico atual confrontado com os estilos locais: 241 seletores comuns

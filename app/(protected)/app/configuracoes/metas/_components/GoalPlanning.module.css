@@ -1100,7 +1100,7 @@
   width: 62%;
   aspect-ratio: 1;
   border-radius: 50%;
-  background: #fff;
+  background: var(--analytics-surface);
   content: "";
 }
 .planning :global(.goal-donut > div) {
@@ -2690,4 +2690,24 @@
 }
 :global(:root:not([data-theme="dark"])) .planning :global(.goal-panel-note) {
   color: #52667d;
+}
+/* Keep channel names readable when toolbar controls compete for width. */
+.planning :global(.goal-profile-tabs a span),
+.planning :global(.goal-profile-tabs a small) {
+  overflow: visible;
+  text-overflow: clip;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.planning :global(.goal-save-state) {
+  min-width: 0;
+  max-width: 145px;
+}
+.planning :global(.goal-save-state .goal-updated-at) {
+  white-space: normal;
+}
+@media (max-width: 1320px) and (min-width: 761px) {
+  .planning :global(.goal-command-center) {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }

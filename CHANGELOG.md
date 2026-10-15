@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15: Correcao visual de Meta compilada
+
+- Mantem os percentuais dos donuts legiveis no tema escuro apos minificacao.
+- Exibe os nomes completos dos canais e os textos de coordenacao de Parcerias.
+- Confere o CSS Next compilado em 24 capturas e exige build local atualizado.
+
 ## 2026-10-15: Fidelidade de escala da guia Meta
 
 - Reproduz a base tipografica da referencia dentro de Meta, preservando a

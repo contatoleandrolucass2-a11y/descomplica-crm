@@ -135,6 +135,193 @@ export async function loadGoalPreviewGeistFont(buildRoot = path.join(root, ".nex
   };
 }
 
+export async function readGoalVisualLegibility(page) {
+  return page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = canvas.height = 1;
+    const context = canvas.getContext("2d", { willReadFrequently: true });
+    const rgba = (color) => {
+      context.clearRect(0, 0, 1, 1);
+      context.fillStyle = color;
+      context.fillRect(0, 0, 1, 1);
+      return [...context.getImageData(0, 0, 1, 1).data];
+    };
+    const luminance = (channels) =>
+      channels
+        .slice(0, 3)
+        .map((value) => {
+          const normalized = value / 255;
+          return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+        })
+        .reduce((total, value, index) => total + value * [0.2126, 0.7152, 0.0722][index], 0);
+    const donuts = [...document.querySelectorAll(".goal-productive-card")].map((card) => {
+      const donut = card.querySelector(".goal-donut");
+      const value = donut.querySelector("strong");
+      const center = getComputedStyle(donut, "::before");
+      const text = getComputedStyle(value);
+      const background = rgba(center.backgroundColor);
+      const foreground = rgba(text.color);
+      const blended = foreground
+        .slice(0, 3)
+        .map(
+          (channel, index) =>
+            (channel * foreground[3]) / 255 + background[index] * (1 - foreground[3] / 255),
+        );
+      const backgroundLuminance = luminance(background);
+      const textLuminance = luminance(blended);
+      const bounds = value.getBoundingClientRect();
+      const donutBounds = donut.getBoundingClientRect();
+      const diameter = parseFloat(center.width);
+      return {
+        label: card.querySelector(".goal-productive-label").textContent.trim(),
+        text: value.textContent.trim(),
+        expectedText: `${card.querySelector(".goal-productive-input input").value}%`,
+        centerColor: center.backgroundColor,
+        textColor: text.color,
+        centerOpaque: background[3] === 255,
+        centerLuminance: backgroundLuminance,
+        contrast:
+          (Math.max(backgroundLuminance, textLuminance) + 0.05) /
+          (Math.min(backgroundLuminance, textLuminance) + 0.05),
+        visible: value.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+        textFitsCenter:
+          bounds.width <= diameter + 1 &&
+          bounds.height <= diameter + 1 &&
+          bounds.left >= donutBounds.left - 1 &&
+          bounds.right <= donutBounds.right + 1,
+      };
+    });
+    const channels = [...document.querySelectorAll(".goal-profile-tabs a > span")].map((label) => {
+      const range = document.createRange();
+      range.selectNodeContents(label);
+      const text = range.getBoundingClientRect();
+      const bounds = label.getBoundingClientRect();
+      return {
+        text: label.textContent.trim(),
+        visible: label.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+        clientWidth: label.clientWidth,
+        scrollWidth: label.scrollWidth,
+        textWidth: text.width,
+        textFits:
+          label.scrollWidth <= label.clientWidth + 1 &&
+          text.width <= bounds.width + 1 &&
+          text.left >= bounds.left - 1 &&
+          text.right <= bounds.right + 1,
+      };
+    });
+    return { donuts, channels };
+  });
+}
+
+/** Keep Next's compiled selectors verbatim, including any minifier defects. */
+export async function loadGoalPreviewProductionCss(viteCss) {
+  const require = createRequire(import.meta.url);
+  const nextRequire = createRequire(require.resolve("next/package.json"));
+  const postcss = nextRequire("postcss");
+  const sourcePaths = ["GoalPlanning.module.css", "GoalPlanning.tsx"].map((name) =>
+    path.join(root, "app/(protected)/app/configuracoes/metas/_components", name),
+  );
+  const sourceTimes = await Promise.all(sourcePaths.map((file) => stat(file)));
+  let buildTime = null;
+  try {
+    buildTime = (await stat(path.join(root, ".next/BUILD_ID"))).mtime;
+  } catch {
+    throw new Error(
+      "Compiled GoalPlanning preview requires an existing completed local Next build (.next/BUILD_ID). Run pnpm build before visual QA.",
+    );
+  }
+  const stale = !buildTime || sourceTimes.some((source) => source.mtimeMs > buildTime.getTime());
+  if (stale)
+    throw new Error(
+      "Compiled GoalPlanning preview is stale: GoalPlanning CSS/TSX changed after the existing local Next build. Run pnpm build before visual QA; Vite styles cannot substitute production CSS.",
+    );
+  const chunks = path.join(root, ".next/static/chunks");
+  const selected = postcss.root();
+  const files = [];
+  let nextClass;
+  for (const name of (await readdir(chunks)).filter((file) => file.endsWith(".css")).sort()) {
+    const filename = path.join(chunks, name);
+    const text = await readFile(filename, "utf8");
+    const parsed = postcss.parse(text, { from: filename });
+    const roots = new Set();
+    parsed.walkRules((rule) => {
+      for (const match of rule.selector.matchAll(/\.([\w-]*GoalPlanning[\w-]*__planning)\b/g))
+        roots.add(match[1]);
+    });
+    if (!roots.size) continue;
+    assert.equal(roots.size, 1, "Compiled GoalPlanning must have one scoped root class");
+    const scoped = [...roots][0];
+    assert.ok(!nextClass || nextClass === scoped, "Compiled GoalPlanning roots must agree");
+    nextClass = scoped;
+    const prune = (node) => {
+      if (node.type === "rule") return node.selector.includes(`.${scoped}`) ? node.clone() : null;
+      if (node.type !== "atrule" && node.type !== "root") return null;
+      const children = (node.nodes ?? []).map(prune).filter(Boolean);
+      if (!children.length) return null;
+      return node.clone({ nodes: children });
+    };
+    const filtered = prune(parsed);
+    selected.append(filtered.nodes);
+    files.push({
+      file: path.relative(root, filename),
+      sha256: createHash("sha256").update(text).digest("hex"),
+    });
+  }
+  assert.ok(
+    nextClass && selected.nodes.length,
+    "Existing Next build has no scoped GoalPlanning CSS. Run pnpm build before visual QA.",
+  );
+  const compiledCss = selected.toString();
+  const hash = createHash("sha256").update(compiledCss).digest("hex");
+  await mkdir(outputRoot, { recursive: true });
+  const snapshot = path.join(outputRoot, `compiled-goal-css-${hash}.css`);
+  await writeFile(snapshot, compiledCss);
+  const parsedVite = postcss.parse(viteCss);
+  const viteRoots = new Set();
+  parsedVite.walkRules((rule) => {
+    for (const match of rule.selector.matchAll(/\.([\w-]+)\s+\.goal-studio\b/g))
+      viteRoots.add(match[1]);
+  });
+  assert.equal(
+    viteRoots.size,
+    1,
+    "Vite GoalPlanning root must be identified before replacing its CSS",
+  );
+  const viteClass = [...viteRoots][0];
+  let removed = 0;
+  parsedVite.walkRules((rule) => {
+    if (rule.selector.includes(`.${viteClass}`)) {
+      rule.remove();
+      removed += 1;
+    }
+  });
+  assert.ok(
+    removed,
+    "Unminified Vite GoalPlanning rules must be removed so they cannot mask production defects",
+  );
+  selected.walkRules((rule) => {
+    rule.selector = rule.selector.replaceAll(`.${nextClass}`, `.${viteClass}`);
+  });
+  const evidence = {
+    origin:
+      "existing completed local Next build; only scoped GoalPlanning rules; Vite equivalents removed",
+    buildCompletedAt: buildTime?.toISOString() ?? null,
+    sourceFiles: sourcePaths.map((file, index) => ({
+      file: path.relative(root, file),
+      modifiedAt: sourceTimes[index].mtime.toISOString(),
+    })),
+    stale,
+    files,
+    nextClass,
+    viteClass,
+    removedViteRules: removed,
+    selectedCssSha256: hash,
+    snapshot: path.relative(root, snapshot),
+  };
+  await writeFile(`${snapshot}.json`, `${JSON.stringify(evidence, null, 2)}\n`);
+  return { css: `${parsedVite.toString()}\n${selected.toString()}`, evidence };
+}
+
 export async function runGoalPlanningPreview() {
   const geist = await loadGoalPreviewGeistFont();
   await mkdir(outputRoot, { recursive: true });
@@ -253,6 +440,13 @@ export async function runGoalPlanningPreview() {
   const files = new Map(
     output.map((file) => [`/${file.fileName}`, file.type === "chunk" ? file.code : file.source]),
   );
+  const stylesheets = [...files.keys()].filter((name) => name.endsWith(".css"));
+  const productionStyles = await loadGoalPreviewProductionCss(
+    stylesheets.map((name) => String(files.get(name))).join("\n"),
+  );
+  for (const name of stylesheets) files.delete(name);
+  files.set("/goal-preview-production.css", productionStyles.css);
+  evidence.productionCss = productionStyles.evidence;
   const script = output.find((file) => file.type === "chunk" && file.isEntry)?.fileName;
   assert.ok(script);
   const html = `<!doctype html><html lang="pt-BR" data-theme="light"><head><title>Metas QA sintético</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><style>${geist.css}</style>${[
@@ -317,7 +511,7 @@ export async function runGoalPlanningPreview() {
       if (message.type() === "error") evidence.consoleErrors.push(message.text());
     });
     for (const profile of ["dv", "partnerships"]) {
-      for (const width of [1440, 390]) {
+      for (const width of [1440, 1280, 768, 390]) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`${origin}${goalsPath}${profile === "partnerships" ? "/parcerias" : ""}`);
         await expect(
@@ -354,6 +548,11 @@ export async function runGoalPlanningPreview() {
           evidence.navigation = "Gestão > Meta clicked; authorized fixture route displayed";
         }
         if (profile === "partnerships") {
+          await expect(
+            page.getByRole("heading", { name: "Imobiliárias por coordenador", exact: true }),
+          ).toBeVisible();
+          await expect(page.getByText("Meta por tempo de parceria", { exact: true })).toBeVisible();
+          await expect(page.getByText("Ritmo de visitas", { exact: true })).toBeVisible();
           await expect(page.locator(".goal-rate-card")).toHaveCount(3);
           await expect(
             page.locator(
@@ -399,6 +598,7 @@ export async function runGoalPlanningPreview() {
             width: innerWidth,
             scrollWidth: document.documentElement.scrollWidth,
           }));
+          const legibility = await readGoalVisualLegibility(page);
           const axe = await new AxeBuilder({ page })
             .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
             .analyze();
@@ -418,6 +618,7 @@ export async function runGoalPlanningPreview() {
             profile,
             theme,
             overflow,
+            legibility,
             violations: axe.violations.map(({ id, impact, nodes }) => ({
               id,
               impact,
@@ -487,6 +688,42 @@ export async function runGoalPlanningPreview() {
     assert.deepEqual(evidence.unexpectedRequests, [], "Unexpected local requests");
     assert.deepEqual(evidence.blockedExternalRequests, [], "External requests must not be needed");
     for (const screen of evidence.screens) {
+      const context = `${screen.profile}/${screen.theme}/${screen.width}`;
+      assert.equal(
+        screen.legibility.donuts.length,
+        screen.profile === "dv" ? 4 : 3,
+        `Complete productivity cards: ${context}`,
+      );
+      for (const donut of screen.legibility.donuts) {
+        assert.equal(
+          donut.text,
+          donut.expectedText,
+          `Visible percentage matches its input: ${context}/${donut.label}`,
+        );
+        assert.ok(
+          donut.visible && donut.textFitsCenter && donut.centerOpaque,
+          `Donut percentage must fit an opaque center: ${context}/${donut.label}`,
+        );
+        assert.ok(
+          donut.contrast >= 4.5,
+          `Donut percentage contrast ${donut.contrast.toFixed(2)} must reach 4.5: ${context}/${donut.label}`,
+        );
+        if (screen.theme === "dark")
+          assert.ok(
+            donut.centerLuminance < 0.3,
+            `Dark theme donut center must stay dark: ${context}/${donut.label}`,
+          );
+      }
+      assert.deepEqual(
+        screen.legibility.channels.map((channel) => channel.text),
+        ["Direcional Vendas", "Canal Parcerias", "Meta por pontos"],
+        `Complete channel labels: ${context}`,
+      );
+      for (const channel of screen.legibility.channels)
+        assert.ok(
+          channel.visible && channel.textFits,
+          `Channel label must be visible without ellipsis or clipping: ${context}/${channel.text}`,
+        );
       assert.ok(
         screen.overflow.scrollWidth <= screen.overflow.width + 1,
         `Horizontal overflow: ${screen.theme}/${screen.width}`,
