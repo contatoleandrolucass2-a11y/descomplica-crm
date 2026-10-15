@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-15 — Diretório de usuários compatível com produção
+
+- Exibe a elegibilidade real dos usuários no banco compacto verificado, preservando paginação, hierarquia, MFA e políticas de acesso.
+- Mantém contas em revisão quando o contrato do banco estiver ausente, incompleto ou desconhecido.
+
 ## 2026-10-14 — Integração de usuários e presença
 
 - Torna a validação de teclado do seletor nativo da Rotina compatível com macOS, preservando os testes por setas no Linux.

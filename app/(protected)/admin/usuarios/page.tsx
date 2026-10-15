@@ -35,8 +35,8 @@ export default async function UsersAdminPage() {
     { includeSummary: true },
   );
   const supabase = await createClient();
-  // The paged loader keeps the pre-foundation fallback fail-closed by mapping
-  // legacy rows to `access_status: "legacy_review"`; other database errors fail.
+  // Only the verified scoped contract supports approval. Compact accounts use
+  // their operational role and active flag; unknown contracts remain in review.
   const onboardingFoundationAvailable = initialPage.onboardingFoundationAvailable;
 
   const canManageRoles = hasPermission(context, "roles.manage");

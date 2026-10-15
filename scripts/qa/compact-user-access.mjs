@@ -9,7 +9,7 @@ import { promisify } from "node:util";
 const execute = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const image = "public.ecr.aws/supabase/postgres:17.6.1.159";
-const expectedAssertions = 70;
+const expectedAssertions = 115;
 const fixture = "tests/fixtures/compact-user-access/rehearsal.sql";
 const invocationId = randomUUID();
 const container = `descomplica-compact-users-${invocationId}`;

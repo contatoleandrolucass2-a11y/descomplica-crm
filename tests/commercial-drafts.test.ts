@@ -109,11 +109,12 @@ describe("inactive commercial configuration drafts", () => {
   it("keeps the app readable before the additive draft foundation exists", () => {
     const draftLoader = readFileSync("lib/crm/commercial-engine/draft-data.ts", "utf8");
     const usersPage = readFileSync("app/(protected)/admin/usuarios/page.tsx", "utf8");
+    const usersDirectory = readFileSync("app/(protected)/admin/usuarios/user-directory.ts", "utf8");
 
     expect(draftLoader).toContain('error?.code === "PGRST202"');
     expect(draftLoader).not.toContain("if (error) return null");
     expect(usersPage).toContain("isMissingOnboardingFoundation");
-    expect(usersPage).toContain('access_status: "legacy_review"');
+    expect(usersDirectory).toContain('access_status: "legacy_review"');
     expect(usersPage).toContain("scopesResult.error && !isMissingOnboardingFoundation");
   });
 });

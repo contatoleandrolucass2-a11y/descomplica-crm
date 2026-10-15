@@ -2014,7 +2014,7 @@ describe.runIf(process.env.ROUTINE_SETTINGS_BROWSER === "1")("Rotina no navegado
       ["Home", "regional-house", "Gerente regional house"],
       ["ArrowDown", "regional-imob", "Gerente regional imob"],
       ["End", "corretor", "Corretor"],
-    ]) {
+    ] as const) {
       if (process.platform === "darwin") {
         // Native type-ahead remains keyboard-driven when the macOS popup cannot commit.
         await page.keyboard.press("Tab");

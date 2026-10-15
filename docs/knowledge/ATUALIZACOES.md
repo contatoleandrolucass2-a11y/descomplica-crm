@@ -2,7 +2,7 @@
 
 ## 2026-10-14: Integração de usuários e presença para a VPS
 
-- Fonte: pedido direto para publicar o painel local e usar ponto verde pulsante quando online e vermelho quando offline. Integração em andamento com `main` `6843ef1`; a consulta inicial encontrou produção nesse SHA, publicada em `2026-10-14T20:38:13.413Z`, sem pendência. Isso não substitui a consulta final dentro das travas.
+- Fonte: pedido direto para publicar o painel local e usar ponto verde pulsante quando online e vermelho quando offline. Retomada incorporou `main` `9ffc8a9`; produção permanece em `6843ef1`; a consulta inicial encontrou produção nesse SHA, publicada em `2026-10-14T20:38:13.413Z`, sem pendência. Isso não substitui a consulta final dentro das travas.
 - O banco ativo possui contrato compacto; as novas migrations precisam preservar esse contrato e o contrato completo local. Os testes de ambos e a publicação protegida serão registrados em [evidências da integração](../audits/usuarios-presenca-vps-2026-10-14.md).
 - As cinco seções da preparação local foram movidas integralmente para [conhecimento local de usuários](../audits/usuarios-conhecimento-local-2026-10-14.md) para manter este arquivo abaixo do limite de exportação, sem descartar o histórico.
 

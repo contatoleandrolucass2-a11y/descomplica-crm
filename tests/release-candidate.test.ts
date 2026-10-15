@@ -79,7 +79,7 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.tests).toBe(1431);
+    expect(plan.tests).toBe(1441);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -285,7 +285,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1431;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1441;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

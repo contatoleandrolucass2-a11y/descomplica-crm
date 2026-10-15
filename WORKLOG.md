@@ -1,5 +1,11 @@
 # Worklog
 
+## 2026-10-15: Compatibilidade do diretório de produção
+
+- Integra o `main` atual `9ffc8a9`, preservando as alterações recebidas de outros desenvolvedores.
+- Reconhece o contrato compacto por RPC protegida, pagina seis perfis por consulta sob RLS e calcula filtros e contagens no servidor. Contratos desconhecidos continuam sem aprovação presumida.
+- Amplia o gate compacto para 115 verificações e a sequência completa para 1.441 verificações na origem e no banco restaurado, com privilégios preservados. A publicação será registrada na auditoria de integração.
+
 ## 2026-10-14: Integração do painel de usuários para produção
 
 - A QA de teclado da Rotina usa busca nativa por rótulo no Chromium headless do macOS, que não confirma a navegação do popup por setas. O Linux mantém as verificações de Home/ArrowDown/End; foco, valor e rascunhos continuam verificados.

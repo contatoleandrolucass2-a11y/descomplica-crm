@@ -1,6 +1,6 @@
 begin;
 
-select plan(37);
+select plan(47);
 
 select has_table('private', 'user_presence', 'presence uses a private table');
 select is(
@@ -21,7 +21,9 @@ select ok(
 );
 select ok(
   has_function_privilege('authenticated', 'public.touch_user_presence()', 'EXECUTE')
-    and has_function_privilege('authenticated', 'public.get_user_presence()', 'EXECUTE'),
+    and has_function_privilege('authenticated', 'public.get_user_presence()', 'EXECUTE')
+    and has_function_privilege('authenticated', 'public.get_user_directory_contract()', 'EXECUTE')
+    and has_function_privilege('authenticated', 'public.get_compact_user_directory_page(integer,text,text,boolean)', 'EXECUTE'),
   'authenticated callers can execute the guarded presence RPCs'
 );
 select ok(
@@ -29,21 +31,25 @@ select ok(
     and not has_function_privilege('anon', 'public.get_user_presence()', 'EXECUTE')
     and not has_function_privilege('service_role', 'public.touch_user_presence()', 'EXECUTE')
     and not has_function_privilege('service_role', 'public.get_user_presence()', 'EXECUTE')
-    and not has_function_privilege('authenticated', 'private.user_presence_uses_scoped_contract()', 'EXECUTE'),
+    and not has_function_privilege('authenticated', 'private.user_presence_uses_scoped_contract()', 'EXECUTE')
+    and not has_function_privilege('anon', 'public.get_user_directory_contract()', 'EXECUTE')
+    and not has_function_privilege('service_role', 'public.get_user_directory_contract()', 'EXECUTE')
+    and not has_function_privilege('anon', 'public.get_compact_user_directory_page(integer,text,text,boolean)', 'EXECUTE')
+    and not has_function_privilege('service_role', 'public.get_compact_user_directory_page(integer,text,text,boolean)', 'EXECUTE'),
   'anonymous and service roles have no presence RPC capability'
 );
 select ok(
   not exists (
     select 1 from pg_catalog.pg_proc procedure
     cross join lateral aclexplode(coalesce(procedure.proacl, acldefault('f', procedure.proowner))) privilege
-    where procedure.oid in ('public.touch_user_presence()'::regprocedure, 'public.get_user_presence()'::regprocedure)
+    where procedure.oid in ('public.touch_user_presence()'::regprocedure, 'public.get_user_presence()'::regprocedure, 'public.get_user_directory_contract()'::regprocedure)
       and privilege.grantee = 0 and privilege.privilege_type = 'EXECUTE'
   ),
   'PUBLIC cannot invoke the SECURITY DEFINER entry points'
 );
 select ok(
   (select bool_and(prosecdef and 'search_path=""' = any(proconfig) and 'statement_timeout=3s' = any(proconfig))
-   from pg_catalog.pg_proc where oid in ('public.touch_user_presence()'::regprocedure, 'public.get_user_presence()'::regprocedure)),
+   from pg_catalog.pg_proc where oid in ('public.touch_user_presence()'::regprocedure, 'public.get_user_presence()'::regprocedure, 'public.get_user_directory_contract()'::regprocedure)),
   'presence entry points use bounded execution and an empty search path'
 );
 
@@ -97,11 +103,14 @@ where user_id in (
 set local role anon;
 select throws_ok($$select public.touch_user_presence()$$, '42501', null, 'anonymous heartbeat is denied');
 select throws_ok($$select public.get_user_presence()$$, '42501', null, 'anonymous presence listing is denied');
+select throws_ok($$select public.get_user_directory_contract()$$, '42501', null, 'anonymous callers cannot identify the directory contract');
+select throws_ok($$select public.get_compact_user_directory_page()$$, '42501', null, 'anonymous callers cannot use directory pagination');
 reset role;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config('request.jwt.claim.sub', '', true);
 set local role authenticated;
 select throws_ok($$select public.touch_user_presence()$$, '28000', null, 'heartbeat requires an authenticated identity');
+select throws_ok($$select public.get_user_directory_contract()$$, '28000', null, 'directory contract requires an authenticated identity');
 select set_config('request.jwt.claim.sub', 'a9000000-0000-4000-8000-000000000005', true);
 select throws_ok($$select public.touch_user_presence()$$, '42501', null, 'pending accounts cannot report presence');
 select set_config('request.jwt.claim.sub', 'a9000000-0000-4000-8000-000000000003', true);
@@ -120,6 +129,8 @@ select throws_ok(
   '42501', null, 'direct timestamp updates are denied'
 );
 select throws_ok($$select public.get_user_presence()$$, '42501', null, 'an approved user without users.view cannot list presence');
+select throws_ok($$select public.get_user_directory_contract()$$, '42501', null, 'directory contract requires users.view');
+select throws_ok($$select public.get_compact_user_directory_page()$$, '42501', null, 'directory pagination requires users.view');
 reset role;
 select is(
   (select count(*) from private.user_presence where user_id::text like 'a9000000-%'),
@@ -155,6 +166,8 @@ select throws_ok($$select public.touch_user_presence()$$, '42501', null, 'suspen
 select set_config('request.jwt.claim.sub', 'a9000000-0000-4000-8000-000000000007', true);
 select throws_ok($$select public.touch_user_presence()$$, '42501', null, 'accounts without a valid role scope cannot report presence');
 select set_config('request.jwt.claim.sub', 'a9000000-0000-4000-8000-000000000002', true);
+select is(public.get_user_directory_contract(), 'scoped', 'a scoped users.view reader receives the verified directory contract');
+select throws_ok($$select public.get_compact_user_directory_page()$$, '55000', null, 'the compact pagination RPC cannot bypass scoped authorization');
 select is(
   (select array_agg(user_id order by user_id) from public.get_user_presence()),
   (select array_agg(user_id order by user_id) from public.profiles),
@@ -235,6 +248,24 @@ select is(
   (select count(*) from pg_catalog.pg_policies where schemaname = 'private' and tablename = 'user_presence'),
   0::bigint, 'private presence storage has no permissive direct-access policy'
 );
+
+-- Contract probes must also fail closed when the full schema drifts.
+create policy presence_future_scope_restriction on public.profiles as restrictive
+  for select to authenticated using (user_id = (select auth.uid()));
+set local role authenticated;
+select throws_ok($$select public.get_user_directory_contract()$$, '55000', null, 'a changed scoped profile policy is not reported as a recognized contract');
+reset role;
+drop policy presence_future_scope_restriction on public.profiles;
+alter function private.lock_and_assert_actor(uuid) rename to presence_test_missing_actor_guard;
+set local role authenticated;
+select throws_ok($$select public.get_user_directory_contract()$$, '55000', null, 'a partially installed scoped schema cannot authorize the directory');
+reset role;
+alter function private.presence_test_missing_actor_guard(uuid) rename to lock_and_assert_actor;
+select set_config('request.jwt.claims', '{}', true);
+set local role authenticated;
+select throws_ok($$select public.get_user_directory_contract()$$, '42501', null, 'directory contract requires a valid session and MFA context');
+reset role;
+select set_config('request.jwt.claims', '', true);
 
 select * from finish();
 rollback;

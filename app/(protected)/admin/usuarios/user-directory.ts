@@ -26,6 +26,21 @@ const profileSchema = z.object({
   created_at: z.string(),
   access_status: z.enum(["pending", "approved", "suspended", "legacy_review"]),
 });
+const compactProfileSchema = profileSchema
+  .extend({ access_status: z.enum(["approved", "suspended", "legacy_review"]) })
+  .refine((profile) => (profile.access_status === "suspended") === !profile.is_active);
+const compactPageSchema = z.object({
+  profiles: z.array(compactProfileSchema).max(USER_DIRECTORY_PAGE_SIZE),
+  total_count: z.number().int().nonnegative(),
+  summary: z
+    .object({
+      total: z.number().int().nonnegative(),
+      active: z.number().int().nonnegative(),
+      pending: z.literal(0),
+      revoked: z.number().int().nonnegative(),
+    })
+    .nullable(),
+});
 const roleAssignmentSchema = z.object({ user_id: z.string().uuid(), role_key: z.string() });
 const overrideSchema = z.object({
   user_id: z.string().uuid(),
@@ -47,6 +62,7 @@ interface ProfilesPage {
   rows: z.infer<typeof profileSchema>[];
   count: number | null;
   onboardingFoundationAvailable: boolean;
+  summary?: UserDirectorySummary;
 }
 
 export function isMissingOnboardingFoundation(code: string | undefined) {
@@ -101,6 +117,42 @@ async function loadProfilesPage(
   supabase: SupabaseServerClient,
   input: NormalizedLoadUsersPageInput,
 ): Promise<ProfilesPage> {
+  const contractResult = await supabase.rpc("get_user_directory_contract");
+  if (contractResult.error && !["PGRST202", "42883", "55000"].includes(contractResult.error.code)) {
+    throw new Error("user_directory_contract_failed");
+  }
+  if (!contractResult.error && contractResult.data === "compact") {
+    const compactResult = await supabase.rpc("get_compact_user_directory_page", {
+      p_offset: input.offset,
+      p_search: input.search,
+      p_status: input.status,
+      p_include_summary: input.includeSummary,
+    });
+    if (compactResult.error) throw new Error("compact_profiles_page_failed");
+    const compactPage = compactPageSchema.parse(compactResult.data);
+    if (input.includeSummary && compactPage.summary === null) {
+      throw new Error("compact_profiles_summary_failed");
+    }
+    return {
+      rows: compactPage.profiles,
+      count: compactPage.total_count,
+      onboardingFoundationAvailable: false,
+      ...(compactPage.summary ? { summary: compactPage.summary } : {}),
+    };
+  }
+  if (!contractResult.error && contractResult.data === "scoped") {
+    return loadScopedProfilesPage(supabase, input);
+  }
+
+  // Only the protected database contract can recognize compact accounts as
+  // active. An absent, unknown, or partial contract remains in legacy review.
+  return loadLegacyProfilesPage(supabase, input);
+}
+
+async function loadScopedProfilesPage(
+  supabase: SupabaseServerClient,
+  input: NormalizedLoadUsersPageInput,
+): Promise<ProfilesPage> {
   let currentQuery = supabase
     .from("profiles")
     .select("user_id,email,is_active,created_at,access_status", { count: "exact" })
@@ -120,12 +172,13 @@ async function loadProfilesPage(
       onboardingFoundationAvailable: true,
     };
   }
-  if (!isMissingOnboardingFoundation(currentResult.error.code)) {
-    throw new Error("profiles_page_failed");
-  }
+  throw new Error("profiles_page_failed");
+}
 
-  // Before the additive onboarding schema exists, no account is presented as
-  // approved. The legacy list remains readable, but every row is fail-closed.
+async function loadLegacyProfilesPage(
+  supabase: SupabaseServerClient,
+  input: NormalizedLoadUsersPageInput,
+): Promise<ProfilesPage> {
   if (input.status === "active" || input.status === "pending") {
     return { rows: [], count: 0, onboardingFoundationAvailable: false };
   }
@@ -215,7 +268,9 @@ export async function loadUserDirectoryPage(
   const normalizedInput = normalizeInput(input, options.includeSummary ?? false);
   const supabase = await createClient();
   const profilesPage = await loadProfilesPage(supabase, normalizedInput);
-  const summary = normalizedInput.includeSummary ? await loadSummary(supabase, profilesPage) : null;
+  const summary = normalizedInput.includeSummary
+    ? (profilesPage.summary ?? (await loadSummary(supabase, profilesPage)))
+    : null;
   const userIds = profilesPage.rows.map((profile) => profile.user_id);
 
   if (userIds.length === 0) {
