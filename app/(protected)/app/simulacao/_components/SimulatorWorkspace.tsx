@@ -954,7 +954,7 @@ export function SimulatorWorkspace({
     <main className={`${styles.page} ${isCaixa ? styles.caixaPage : ""}`}>
       <div className={styles.container}>
         <SimulationCanvasHeader
-          eyebrow={`Simulação · ${definition.code}`}
+          eyebrow="Simulação"
           title={definition.title}
           description={definition.description}
           statusLabel={
@@ -1214,7 +1214,6 @@ export function SimulatorWorkspace({
                       ? "Cálculo concluído para conferência."
                       : "Entradas rejeitadas pelas regras oficiais."}
                   </strong>
-                  <span>Versão da fórmula: {officialResult.formulaVersion}</span>
                   {officialResult.errors.map((error) => (
                     <span key={error}>{error}</span>
                   ))}

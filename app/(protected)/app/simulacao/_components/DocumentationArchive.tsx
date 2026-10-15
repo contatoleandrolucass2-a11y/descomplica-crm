@@ -15,7 +15,7 @@ export function DocumentationArchive() {
   return (
     <div className="goal-page-shell documentation-page-shell" data-canvas-layout="documentation">
       <SimulationCanvasHeader
-        eyebrow="Simulação · WF16"
+        eyebrow="Simulação"
         title="Calcular documentação"
         description="Composição para registrar modalidade, condição de compra e valores da operação."
         statusLabel="Cálculo local · validar no fluxo oficial"

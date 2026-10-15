@@ -126,7 +126,7 @@ describe("simulator visual catalog", () => {
       title: "Tabela Investidor",
       shortTitle: "Tabela Investidor",
     });
-    expect(markup).toContain("Simulação · WF15");
+    expect(markup).not.toMatch(/\bWF-?\d+\b/i);
     expect(markup).toContain("Tabela Investidor");
     expect(markup).toContain('data-cta-state="unavailable"');
     expect(markup).not.toContain("Calcular documentação");

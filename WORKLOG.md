@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-15: Códigos de workflow ocultos na interface comercial
+
+- Remove os códigos WF dos cards do Hub de Simulação, dos cabeçalhos, das mensagens, da ajuda e da versão técnica exibida no resultado. Mantém os nomes comerciais e os indicadores CAIXA, CONSULTA e de autorização.
+- Preserva os identificadores internos, as rotas, as permissões, os contratos de API e todas as regras de cálculo. A implementação parte de `d83c22d510478ee089f8c5cb5969a488451d433b`, em checkout isolado.
+- Atualiza as expectativas existentes de apresentação. Lint, tipos, build e auditoria de dependências passaram; o lint mantém um aviso anterior em `scripts/qa/connected-systems.mjs`. A suíte verificou 3.034 testes Vitest, 572 testes operacionais e 531 testes de release, sem falhas; os skips condicionais de plataforma e ambiente permanecem explícitos.
+- A prévia sintética renderizada pelo componente real do Hub foi conferida em 1440 e 390 pixels: seis links preservados, nenhum código WF visível e nenhuma rolagem horizontal. As capturas locais não substituem a matriz autenticada Linux da CI. Produção permanece sem alteração nesta etapa.
+
 ## 2026-10-15: Compatibilidade do diretório de produção
 
 - Incorpora o dashboard aprovado de `fae77f9a` e revisa a captura Linux `38766616330`: onze imagens de Usuários atualizadas, 231 imagens preservadas, 242 hashes conferidos e toda a matriz funcional aprovada. O workflow temporário foi removido; a CI normal continua obrigatória.

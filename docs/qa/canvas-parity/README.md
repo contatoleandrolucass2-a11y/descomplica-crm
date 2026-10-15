@@ -20,6 +20,10 @@ validadas; ausência de fonte deve aparecer como estado indisponível.
 - Os textos e traços mostrados nos canvases representam composição visual, não
   registros comerciais. Nenhum número, nome, status ou participante ilustrado
   pode virar dado real ou fixture produtiva.
+- O pedido de 15/10/2026 remove os códigos WF da apresentação comercial,
+  incluindo cards, cabeçalhos, mensagens, ajuda e resultados. Esses códigos
+  permanecem apenas nos identificadores e contratos internos. A referência
+  histórica não autoriza reintroduzi-los no texto visível.
 - O selo “Prévia visual · sem dados reais” só é válido em estado sintético ou
   comprovadamente sem fonte. Quando houver snapshot validado, a interface deve
   identificar honestamente a origem e o estado reais.

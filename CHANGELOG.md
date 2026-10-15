@@ -1,5 +1,9 @@
 # Changelog
 
+## 2026-10-15 — Simuladores sem códigos internos visíveis
+
+- Remove as referências WF da interface e da ajuda dos simuladores, mantendo os nomes comerciais, os estados de disponibilidade e as regras de cálculo.
+
 ## 2026-10-15 — Diretório de usuários compatível com produção
 
 - Alinha o limite de altura do teste visual ao novo painel aprovado, mantendo verificações de overflow, navegação e acessibilidade.
