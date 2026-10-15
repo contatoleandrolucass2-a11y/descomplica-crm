@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-15: Evidencias de CI e coletor
+
+- Registra verify visual aprovado, promocao isolada do owner e limite real
+  de metadados; distingue instalacao de servico e publicacao de fatos.
+
 ## 2026-10-15: Pins de medidas Qlik
 
 - Vincula aliases nomeados a masters pinados, com catalogo fresco e rejeicao

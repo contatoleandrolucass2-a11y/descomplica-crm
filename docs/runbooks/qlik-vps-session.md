@@ -190,6 +190,16 @@ so entao ativar rotina de fatos. Este preflight nao entrega ranking conectado.
 
 ## Atualizacao protegida do owner
 
+O checkout de codigo deve ser root-owned, sem escrita para grupo/outros e
+legivel pelo usuario tecnico. Ao preparar uma copia nova, a permissao do Git
+para arquivos/diretorios de codigo nao deve herdar o umask077 dos backups.
+Backups, perfil e credenciais continuam0700/0600. Se a copia foi criada
+restritiva, conferir bytes/identidade/Git limpo e normalizar somente arquivos
+versionados e seus pais, preservando o bit executavel do Git. Nunca aplicar
+chmod recursivo em ignorados, segredos, perfil ou na arvore de producao ativa.
+Repetir o probe nao-root aprovado pelo host, com Node24 em /usr/local/bin/node;
+/usr/bin/node pode ser uma versao antiga e nao valida esse runtime.
+
 Usar somente `pnpm release:production qlik-deploy`, no checkout canonico limpo
 do SHA aprovado em `/srv/descomplica-crm-releases/SHA`. Este procedimento muda
 somente o servico browser Qlik; nao executa Compose, altera production.env,

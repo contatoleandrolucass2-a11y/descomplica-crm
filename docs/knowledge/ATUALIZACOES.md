@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: CI visual verde e limite real de metadados
+
+- CI38777064690/0acb00f concluiu os tres gates success, incluindo verify das
+  referencias combinadas. c00d390 acrescenta aliases e gates locais verdes,
+  mas permanece somente local; nao confundir CIs de SHAs diferentes.
+- Owner00bbab75/a7fdf92 promovido pelo coordenador18:12:40.057Z apos CI
+  main38775901605 quatro jobs success, imagem/verificacao OCI11 camadas e
+  dois perfis runtime. CRM8e3594fd/fae77f9 preservado; sem pendencia.
+- Checkout inicialmente0700/0600 bloqueou antes de intencao. Modos somente
+  da copia de codigo versionado foram normalizados, com hashes/Git limpo;
+  1369 arquivos/203 diretorios. Probe efetivo com Node24/usuario tecnico
+  passou. Ignorados/credenciais/perfil nao alterados; detalhes no ramo OP.
+- Nova tentativa QIX gerou unavailable/qix_metadata_limit: snapshot privado
+  7WjFNw/181bytes/afaa9c83/18:12:39.879Z. Limite especifico ainda desconhecido.
+  Correto restringir projecao e diagnosticar, nao aumentar caps para passar.
+  Nenhum fato publicado; corretivo separado em codex/qlik-bounded-catalog.
+
 ## 2026-10-15: Alias pinado e evidencia inicial real
 
 - Cinco suites367/367 e review independente14 probes/367 testes passaram.

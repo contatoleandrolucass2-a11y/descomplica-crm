@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-15: CI visual concluida e limite nativo
+
+CI38777064690 de0acb00f concluiu tres gates success, inclusive verify da
+referencia combinada. Alias commitc00d390 ainda requer sua propria CI.
+Maina7fdf92/CI38775901605 quatro jobs success; artefato11993912111 baixado
+apos gates, ZIPcd46ea9c/tare589a5cb/config3317425c/manifesto9346dc27,
+11 camadas e dois perfis runtime verificados. Sem rebuild ou deploy do CRM.
+
+Primeira promocao bloqueada antes de intencao: checkout criado sob umask077
+estava0700/0600. Codigo candidato normalizado conforme modos do Git,1369
+arquivos/203 diretorios,1572 modos; hashes antes/depois e Git limpo. Ignorados,
+dependencias, credenciais e perfil nao foram alterados. Helper revisado27
+casos e sem locks opcionais do Git. Diagnostico inicial usou Node18 errado;
+probe do host aprovado repetido com /usr/local/bin/node24/env limpo/usuario
+tecnico confirmou SDK/script. Nao alterar umask/ACL global ou caminhos privados.
+
+Promocao protegida18:12:40.057Z:00bbab75-3495-425e-ac7f-a7217f5186e1/a7fdf92,
+sem pendencia, preflight unavailable e rankingConnected false. Nova tentativa
+QIX falhou qix_metadata_limit, snapshot privado181bytes em7WjFNw,
+SHA256afaa9c83c82bf261be03e6d473471dbe7c6e4de8d4cc788b7e87aa9555e74069e,
+observado18:12:39.879Z. Nao atribuir a um contador especifico sem evidencia.
+CRMfae77f9 preservado, health18:12:04Z200/ok. Novo ramo OP limita projecao
+a identidades/definicoes pertinentes e acrescenta diagnostico fixo por cap;
+nao aumentar limites para passar. Ainda zero publicacoes reais verificadas.
+
 ## 2026-10-15: Pins explicitos para aliases nomeados
 
 Implementado aliasPins opt-in por cubo, com indice/alias/ID/hash integral de
