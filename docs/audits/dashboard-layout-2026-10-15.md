@@ -1,5 +1,62 @@
 # Auditoria de layout do dashboard em 15/10/2026
 
+## Resultado publicado
+
+- PR230 integrado em `fae77f9a254197f0e9c72a6fdbbadefe24a8103e`.
+  CI do PR38759074659 aprovada no HEAD7a0dff0. CI push/main38765178719
+  aprovou validate, release-gates, isolated-restore e promotable-image.
+  Inclui lint, tipos, testes Linux, build, banco/RLS, restore, E2E e matriz
+  autenticada visual em modo verify. As falhas locais Windows anteriormente
+  registradas nao foram ocultadas; a CI completa executou em Linux.
+- Fontes: [PR230](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/230),
+  [CI main](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38765178719),
+  API GitHub de jobs/artefatos e GET publico sem sessao. Main conferido antes
+  da promocao e novamente pelo coordenador; o candidato era o main exato.
+- Artefato11988267327, ZIP SHA256
+  `7c766f78e31df0abc5fc44957df9ad1fb8de70500b4c383a1123735e2e4352cc`;
+  image.tar.gz SHA256
+  `80cef777694b821b9994b21dff6a6b0cd072ac498d73d15c0ba1cfaf4188a775`.
+  Arquivo e revision conferidos localmente e na VPS. SCP parcial foi encerrado
+  por lentidao; download direto do mesmo artefato e hashes completos conferidos
+  antes de substituir o arquivo parcial e carregar. Nenhum rebuild no servidor.
+- Image ID da CI/config:
+  `sha256:54c04839d1b2617df5349e2c71ccc63a6b69a3fbb8cb5613145a17a3c3f69bc0`.
+  Image ID containerd/manifesto OCI:
+  `sha256:3fc560e53abb3338bdc6927e6d92cb2c51e7d0ebc2ae8fa5fcbd78eefb14a1df`.
+  Equivalencia comprovada sobre o arquivo aprovado: index, manifesto, config,
+  tamanhos/hashes, label, linux/amd64, manifesto legado e11 camadas tar sem
+  compressao interna; rootfs.diff_ids coincide com RootFS.Layers carregado.
+  image:prove aprovou dois perfis com fixtures isoladas, sem segredos reais.
+- Imagem anterior6843ef1 preservada e disponivel, ID
+  `sha256:2d2b668d0ff92f846e0be851383fcb746b556dbc7e52871de87744ea3c4e951b`.
+  Recibo de backup existente e privado conferido no caminho documentado em
+  crm-backup-storage.md, modo600. Nao houve novo backup nem nova prova de DR;
+  esta release nao altera banco, dados, secrets ou configuracao de integracao.
+  Recuperacao preparada pelo coordenador, sem execucao por nao haver falha.
+- Consulta final16:50:36Z: deployment57c09296-d8d8-421b-bca7-c12d10b4d50e,
+  SHA6843ef1, data real2026-10-14T20:38:13.413Z, sem pendencia. Publicacao
+  exclusivamente por pnpm release:production, checkout limpo do candidato,
+  tres travas/CAS e consulta CI/main/health no minuto da troca.
+- Resultado deployed: deployment8e3594fd-64a9-49b2-b068-4b5666524f80,
+  SHAfae77f9, image ID OCI acima, data real2026-10-15T16:50:53.010Z
+  (13:50:53.010 America/Sao_Paulo), pendingDeploymentId null.
+  Status posterior confirmou o mesmo registro. Nenhum owner Qlik promovido.
+- Smoke publico16:51:08Z: /api/health200, statusok, versionfae77f9;
+  /app307 para/login. /api/dashboard/status401 em16:51:25Z. Primeiro probe
+  de status usou indevidamente /api/crm/dashboard/status e retornou404;
+  corrigido pelo caminho verificado no codigo, sem atribuir404 a falha do app.
+  Sem login contornado, leitura privada, exportacao de clientes ou carga em
+  producao. Jornada autenticada validada na CI, nao repetida com dados reais.
+- Entregue: tres textos removidos, roscas/ritmo/diagnostico/comparativos
+  responsivos nos tres temas; funis e atualizacao automatica preservados.
+  Pendente: quatro filtros dimensionais, por ausencia do contrato/dados
+  oficiais no read model publicado. Base geral nao remove autorizacoes nem
+  confirma identidades equivalentes. Reavaliar com fonte/mapeamentos oficiais,
+  contrato completo e autorizacao especifica para migration/ingestao remotas.
+- Registro final exclusivamente documental, separado do SHA ja publicado.
+  Nao reiniciar a aplicacao para integrar esta evidencia. A nota curta mantem
+  o limite de exportacao; sincronizacao final deve ser conferida pelo runtime.
+
 ## Integracao concorrente
 
 - Main avancou para9ffc8a9/PR229 durante a validacao. Merge preserva

@@ -2,6 +2,8 @@
 
 ## 2026-10-15: Organizacao visual do dashboard
 
+- Publicada em `fae77f9`, PR230, apos CI completa e promocao protegida;
+  registro de evidencia posterior nao modifica o runtime.
 - Remove Fonte e contexto repetido do cabecalho e o breadcrumb da raiz `/app`.
 - Reorganiza as roscas, ritmo de vendas, diagnostico e tabelas comparativas,
   preservando valores, intervalos, metas e atualizacao automatica.
