@@ -120,7 +120,6 @@ Historico integral: [arquivo de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-20
   authenticated-only e zero EXECUTE PUBLIC. Ainda sem fatos ou flag ativa.
   Detalhes, limites do backup e prova em WORKLOG/auditoria Qlik.
 
-
 ## 2026-10-15: Metadata integrado validado localmente
 
 - Mainfae77f9 integrado emfacf284, sem perder dashboard/referencias/notas.
