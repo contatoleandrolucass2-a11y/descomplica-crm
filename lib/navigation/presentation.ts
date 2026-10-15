@@ -1,3 +1,5 @@
+import { PAGE_REGISTRY } from "./registry";
+
 export interface NavigationItem {
   key: string;
   path: string;
@@ -62,7 +64,16 @@ function compareRootPages(left: NavigationItem, right: NavigationItem) {
 }
 
 export function buildNavigationGroups(pages: NavigationItem[]): NavigationGroup[] {
-  const rootPages = pages.filter((page) => page.parentKey === null).sort(compareRootPages);
+  const keys = new Set(pages.map((page) => page.key));
+  const rootPages = pages
+    .filter(
+      (page) =>
+        page.parentKey === null ||
+        (page.section !== "admin" &&
+          !keys.has(page.parentKey) &&
+          PAGE_REGISTRY.some((entry) => entry.pageKey === page.key && entry.path === page.path)),
+    )
+    .sort(compareRootPages);
 
   return rootPages.map((page) => ({
     page,
@@ -127,7 +138,7 @@ export function getAuthorizedSettingsNavigation(pages: NavigationItem[]) {
       page.section === "settings" &&
       page.parentKey === null,
   );
-  if (!root) return [];
+  if (!root) return pages.filter((page) => page.section === "settings").sort(comparePages);
   const integrationsPresentedInAdmin = pages.some(
     (page) =>
       page.key === ADMIN_ROOT_KEY &&

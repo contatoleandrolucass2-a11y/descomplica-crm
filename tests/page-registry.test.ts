@@ -46,12 +46,24 @@ describe("unified page registration", () => {
       pageKey: "crm.future",
       path: "/app/futura",
       name: "Página futura",
+      permission: "users.manage" as const,
     };
     const sql = renderPageCatalogMigration([...PAGE_REGISTRY, page]);
     expect(sql).toContain("'crm.future', '/app/futura', 'Página futura'");
     expect(sql).not.toContain("is_active = excluded.is_active");
-    expect(sql).not.toContain("user_permission_overrides");
+    expect(sql).toContain("newly_registered_page_permissions");
     expect(sql).toContain("(values ('master'), ('admin'))");
+  });
+
+  it("requires independent page permissions except for the simulator group", () => {
+    const page = PAGE_REGISTRY[0];
+    expect(() =>
+      validatePageRegistry([
+        page,
+        { ...page, pageKey: "crm.duplicate-access", path: "/app/duplicate-access" },
+      ]),
+    ).toThrow("permission");
+    expect(() => validatePageRegistry([...PAGE_REGISTRY])).not.toThrow();
   });
 
   it("renders every managed row in one keyboard-scrollable list without pagination", () => {

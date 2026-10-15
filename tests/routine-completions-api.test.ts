@@ -3,7 +3,7 @@ import { GET, PUT } from "@/app/api/routines/completions/route";
 import { routineCompletionSaveSchema } from "@/lib/crm/routine-completions";
 
 const mocks = vi.hoisted(() => ({ authorize: vi.fn(), client: vi.fn(), rpc: vi.fn() }));
-vi.mock("@/lib/security/route-auth", () => ({ authorizeRoute: mocks.authorize }));
+vi.mock("@/lib/security/route-auth", () => ({ authorizePageRoute: mocks.authorize }));
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.client }));
 
 const completion = {
@@ -35,7 +35,10 @@ async function result(response: Response, status: number, value: unknown) {
 beforeEach(() => {
   vi.resetAllMocks();
   vi.stubEnv("APP_ORIGIN", "http://routine.test");
-  mocks.authorize.mockResolvedValue({ ok: true });
+  mocks.authorize.mockResolvedValue({
+    ok: true,
+    context: { permissions: ["crm.settings.manage"] },
+  });
   mocks.client.mockResolvedValue({ rpc: mocks.rpc });
   mocks.rpc.mockResolvedValue({ data: snapshot, error: null });
 });
@@ -60,7 +63,7 @@ describe("individual weekly routine completions", () => {
       });
       await result(await method(), Number(status), { error });
     }
-    expect(mocks.authorize.mock.calls).toEqual([["crm.dashboard.view"], ["crm.dashboard.view"]]);
+    expect(mocks.authorize.mock.calls).toEqual([["/app/gestao/rotina"], ["/app/gestao/rotina"]]);
     expect(mocks.client).not.toHaveBeenCalled();
   });
 
@@ -81,7 +84,7 @@ describe("individual weekly routine completions", () => {
     "a viewer can set completed=%s using only the six contract fields",
     async (completed) => {
       await result(await PUT(request({ ...body, completed })), 200, snapshot);
-      expect(mocks.authorize).toHaveBeenCalledExactlyOnceWith("crm.dashboard.view");
+      expect(mocks.authorize).toHaveBeenCalledExactlyOnceWith("/app/gestao/rotina");
       expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("set_crm_routine_completion", {
         p_role_key: completion.role_key,
         p_row_index: 0,

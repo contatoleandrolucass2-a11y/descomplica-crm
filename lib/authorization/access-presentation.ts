@@ -5,6 +5,13 @@ const BASE_NAVIGATION_PERMISSIONS = [
   "pages.view",
   "crm.dashboard.view",
   "crm.stages.view",
+  "crm.stage.opportunities.view",
+  "crm.stage.appointments.view",
+  "crm.stage.visits.view",
+  "crm.stage.folders.view",
+  "crm.stage.sales.view",
+  "crm.management.view",
+  "crm.management.routine.view",
 ] as const satisfies readonly PermissionKey[];
 
 export const SIMULATOR_ACCESS_PERMISSIONS = [

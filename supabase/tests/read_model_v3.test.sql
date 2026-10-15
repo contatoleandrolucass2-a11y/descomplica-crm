@@ -81,8 +81,8 @@ select is(
      'crm.read_model_v3.partnerships.view',
      'crm.read_model_v3.stock.view'
    )),
-  4::bigint,
-  'Administrator inherits the four registered v3 read permissions'
+  8::bigint,
+  'Administrator and Master inherit the four registered v3 read permissions'
 );
 set local role anon;
 select throws_ok(
@@ -219,7 +219,7 @@ values
   ('master', 'crm.read_model_v3.view'),
   ('master', 'crm.read_model_v3.ranking.view'),
   ('master', 'crm.read_model_v3.partnerships.view'),
-  ('master', 'crm.read_model_v3.stock.view');
+  ('master', 'crm.read_model_v3.stock.view') on conflict do nothing;
 
 insert into public.crm_organizations (id, organization_key, name, kind)
 values
@@ -1940,11 +1940,11 @@ select is(
   'crm.dashboard:crm.dashboard.view,'
     || 'crm.partnerships:crm.partnerships.view,'
     || 'crm.ranking:crm.ranking.view,'
-    || 'crm.stage.appointments:crm.stages.view,'
-    || 'crm.stage.folders:crm.stages.view,'
-    || 'crm.stage.opportunities:crm.stages.view,'
-    || 'crm.stage.sales:crm.stages.view,'
-    || 'crm.stage.visits:crm.stages.view',
+    || 'crm.stage.appointments:crm.stage.appointments.view,'
+    || 'crm.stage.folders:crm.stage.folders.view,'
+    || 'crm.stage.opportunities:crm.stage.opportunities.view,'
+    || 'crm.stage.sales:crm.stage.sales.view,'
+    || 'crm.stage.visits:crm.stage.visits.view',
   'v3 migration leaves production navigation gates unchanged during shadow validation'
 );
 

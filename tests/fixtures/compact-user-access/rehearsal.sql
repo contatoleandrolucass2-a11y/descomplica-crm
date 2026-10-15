@@ -70,3 +70,5 @@ $$;
 \ir user-access.test.sql
 
 \ir page-catalog.test.sql
+
+\ir individual-pages.test.sql

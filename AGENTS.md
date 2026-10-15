@@ -28,7 +28,8 @@ Este repositório consolida o sistema de login e o Descomplica CRM. O login Next
 
 Toda nova página comercial ou administrativa deve ser registrada em
 `lib/navigation/registry.ts`, com a permissão correspondente e os guards de
-servidor. Executar `pnpm pages:sync` e incluir a migration gerada na mesma
+servidor. Cada página deve ter uma permissão própria; somente os simuladores
+compartilham o controle de acesso. Executar `pnpm pages:sync` e incluir a migration gerada na mesma
 entrega. `pnpm pages:check` bloqueia páginas esquecidas e catálogo divergente.
 Não reintroduzir listas suplementares que escapem das configurações de páginas.
 Procedimento completo: `docs/runbooks/page-catalog.md`.

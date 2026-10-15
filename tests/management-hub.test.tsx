@@ -2,7 +2,7 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({ enforce: vi.fn(), gate: vi.fn(), forbidden: vi.fn() }));
-vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission: mocks.enforce }));
+vi.mock("@/lib/authorization/enforce", () => ({ enforcePageAccess: mocks.enforce }));
 vi.mock("@/lib/authorization/page-gates", () => ({ getProtectedPageGate: mocks.gate }));
 vi.mock("next/navigation", () => ({ forbidden: mocks.forbidden }));
 
@@ -20,7 +20,7 @@ describe("Gestão", () => {
   it("links to the released routine after the server permission guard", async () => {
     mocks.gate.mockReturnValue({ releaseEnabled: true });
     const markup = renderToStaticMarkup(await ManagementHubPage());
-    expect(mocks.enforce).toHaveBeenCalledWith("crm.dashboard.view");
+    expect(mocks.enforce).toHaveBeenCalledWith("/app/gestao");
     expect(markup).toContain('href="/app/gestao/rotina"');
     expect(markup).toContain("Rotina liberada");
   });

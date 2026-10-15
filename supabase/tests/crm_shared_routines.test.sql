@@ -30,8 +30,8 @@ select is((select count(*) from public.crm_routines), 0::bigint, 'no routine see
 select is((select count(*) from public.permissions where key like 'crm.routines.%'),
   0::bigint, 'no new permission keys break old authorization clients');
 select ok(not exists (select 1 from public.app_pages
-  where key in ('crm.management', 'crm.management.routine')
-    and permission_key <> 'crm.dashboard.view'), 'existing catalog entries use dashboard view');
+  where (key = 'crm.management' and permission_key <> 'crm.management.view')
+    or (key = 'crm.management.routine' and permission_key <> 'crm.management.routine.view')), 'existing catalog entries use independent page access');
 
 create temporary table routine_actors (id uuid primary key, role_key text);
 insert into routine_actors values
@@ -213,17 +213,17 @@ select ok(not exists (select 1 from public.audit_logs where action = 'crm.routin
     or (after - array['role_key','revision','row_count','updated_at']) <> '{}'::jsonb)),
   'audit contains metadata only, never routine contents');
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason, granted_by)
-values ('ab710000-0000-4000-8000-000000000002', 'crm.dashboard.view', 'deny',
+values ('ab710000-0000-4000-8000-000000000002', 'crm.management.routine.view', 'deny',
   'Synthetic dashboard denial', 'ab710000-0000-4000-8000-000000000001'),
-  ('ab710000-0000-4000-8000-000000000006', 'crm.dashboard.view', 'deny',
+  ('ab710000-0000-4000-8000-000000000006', 'crm.management.routine.view', 'deny',
   'Synthetic reader denial', 'ab710000-0000-4000-8000-000000000001');
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'ab710000-0000-4000-8000-000000000002', true);
 select throws_ok($$select public.get_crm_routines()$$, '42501',
-  'forbidden: missing routine read permission', 'explicit read deny also blocks editor');
+  'forbidden: routine page unavailable', 'explicit read deny also blocks editor');
 select set_config('request.jwt.claim.sub', 'ab710000-0000-4000-8000-000000000006', true);
 select throws_ok($$select public.get_crm_routines()$$, '42501',
-  'forbidden: missing routine read permission', 'explicit deny blocks reader');
+  'forbidden: routine page unavailable', 'explicit deny blocks reader');
 reset role;
 select set_config('request.jwt.claim.sub', '', true);
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason, granted_by)
@@ -232,7 +232,7 @@ values ('ab710000-0000-4000-8000-000000000002', 'crm.settings.manage', 'deny',
 set local role authenticated;
 select set_config('request.jwt.claim.sub', 'ab710000-0000-4000-8000-000000000002', true);
 select throws_ok($$select public.save_crm_routine('corretor','[]',2)$$, '42501',
-  'forbidden: missing crm.settings.manage', 'explicit deny blocks editor');
+  'forbidden: routine page unavailable', 'explicit deny blocks editor');
 
 -- Real JWT claims cannot use the privileged legacy pgTAP assurance fallback.
 select set_config('request.jwt.claim.sub', 'ab710000-0000-4000-8000-000000000001', true);

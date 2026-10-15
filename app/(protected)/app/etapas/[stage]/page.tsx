@@ -2,7 +2,7 @@ import Link from "next/link";
 import { forbidden, notFound } from "next/navigation";
 
 import { getAuthorizedDashboardViews } from "@/lib/authorization/dashboard-views";
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 import {
   DASHBOARD_PERIODS,
   DASHBOARD_VIEWS,
@@ -464,10 +464,10 @@ export default async function StagePage({
   params: Promise<{ stage: string }>;
   searchParams: Promise<{ view?: string | string[]; period?: string | string[] }>;
 }) {
-  const authorization = await enforcePermission("crm.stages.view");
   const [{ stage: slug }, query] = await Promise.all([params, searchParams]);
   const stage = getCrmStage(slug);
   if (!stage) notFound();
+  const authorization = await enforcePageAccess(`/app/etapas/${stage.slug}`);
 
   const authorizedViews = getAuthorizedDashboardViews(authorization.permissions);
   if (authorizedViews.length === 0) forbidden();

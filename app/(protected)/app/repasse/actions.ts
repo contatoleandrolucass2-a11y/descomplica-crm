@@ -3,7 +3,7 @@
 import { z } from "zod";
 import { forbidden } from "next/navigation";
 
-import { requirePermission } from "@/lib/authorization/guards";
+import { requirePageAccess } from "@/lib/authorization/page-access";
 import { getProtectedPageGate, pageGateAllowsRole } from "@/lib/authorization/page-gates";
 import type { RepasseLookupState } from "@/lib/crm/repasse/contracts";
 import { lookupRepasseByFid } from "@/lib/crm/repasse/data";
@@ -18,14 +18,14 @@ async function authorizeRepasseAccess() {
   if (
     gate?.releaseEnabled !== true ||
     gate.pageKey !== "crm.repasse" ||
-    gate.permission !== "crm.partnerships.view" ||
+    gate.permission !== "crm.repasse.view" ||
     gate.allowedRoles?.length !== 2 ||
     !gate.allowedRoles.includes("master") ||
     !gate.allowedRoles.includes("admin")
   ) {
     forbidden();
   }
-  const context = await requirePermission("crm.partnerships.view");
+  const context = await requirePageAccess("/app/repasse");
   if (!pageGateAllowsRole(gate, context.roleKey)) forbidden();
 }
 

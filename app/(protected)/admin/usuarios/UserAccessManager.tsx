@@ -86,7 +86,11 @@ function getControlDescription(permissionKey: PermissionKey): string {
 function countControls(keys: readonly PermissionKey[]): number {
   return new Set(
     keys
-      .filter((key) => !HIDDEN_PERMISSION_KEYS.has(key))
+      .filter(
+        (key) =>
+          !HIDDEN_PERMISSION_KEYS.has(key) &&
+          (key !== "crm.stages.view" || !keys.includes("crm.stage.opportunities.view")),
+      )
       .map((key) => (key === "crm.simulators.execute" ? "crm.simulators.view" : key)),
   ).size;
 }
@@ -133,7 +137,7 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "simulators",
     label: "Simuladores",
     description:
-      "RIVA e DIRECIONAL controlam as unidades visíveis. O Administrador herda ambas; os demais papéis precisam de liberação individual.",
+      "RIVA e DIRECIONAL controlam as unidades visíveis. Master e Administrador herdam ambas; os demais papéis precisam de liberação individual.",
     matches: (key) =>
       key.startsWith("crm.simulators.") ||
       key.startsWith("crm.inventory.") ||
@@ -233,10 +237,12 @@ function getEffectivePermissionCount(
     if (override.effect === "allow") effectivePermissions.add(override.permissionKey);
     else effectivePermissions.delete(override.permissionKey);
   }
-  return ALL_PERMISSIONS.filter((key) =>
-    getControlKeys(key).every(
-      (item) => permissionCatalog.includes(item) && effectivePermissions.has(item),
-    ),
+  return ALL_PERMISSIONS.filter(
+    (key) =>
+      (key !== "crm.stages.view" || !permissionCatalog.includes("crm.stage.opportunities.view")) &&
+      getControlKeys(key).every(
+        (item) => permissionCatalog.includes(item) && effectivePermissions.has(item),
+      ),
   ).length;
 }
 
@@ -531,6 +537,11 @@ function PermissionMatrix({
     [user.overrides],
   );
   const filteredPermissions = ALL_PERMISSIONS.filter((permissionKey) => {
+    if (
+      permissionKey === "crm.stages.view" &&
+      permissionCatalog.includes("crm.stage.opportunities.view")
+    )
+      return false;
     if (!getControlKeys(permissionKey).every((key) => permissionCatalog.includes(key)))
       return false;
     return `${getControlLabel(permissionKey)} ${getControlDescription(permissionKey)} ${getPermissionPages(

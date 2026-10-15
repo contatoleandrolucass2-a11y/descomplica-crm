@@ -7,6 +7,7 @@ import SettingsPage from "@/app/(protected)/app/configuracoes/page";
 import { calculateMarketingResources, parseMarketingMoney } from "@/lib/crm/marketing/resources";
 
 vi.mock("@/lib/authorization/enforce", () => ({
+  enforcePageAccess: vi.fn().mockResolvedValue({}),
   enforcePermission: vi.fn().mockResolvedValue({}),
 }));
 vi.mock("@/lib/authorization/guards", () => ({ hasPermission: vi.fn().mockReturnValue(true) }));
@@ -78,7 +79,7 @@ describe("Recurso MKT", () => {
 
   it("guards the page on the server before rendering the marketing workspace", () => {
     const source = readFileSync("app/(protected)/app/configuracoes/recurso-mkt/page.tsx", "utf8");
-    expect(source).toContain('await enforcePermission("crm.settings.manage")');
+    expect(source).toContain('await enforcePageAccess("/app/configuracoes/recurso-mkt")');
     expect(source).toContain(
       'getProtectedPageGate("/app/configuracoes/recurso-mkt")?.releaseEnabled',
     );

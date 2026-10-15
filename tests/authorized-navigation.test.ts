@@ -412,7 +412,9 @@ describe("authorized hierarchical navigation", () => {
 
   it("uses only an authorized root as the brand destination", () => {
     expect(getNavigationHome(pages)?.path).toBe("/app");
-    expect(getNavigationHome(pages.filter((page) => page.key !== "crm.dashboard"))).toBeNull();
+    expect(getNavigationHome(pages.filter((page) => page.key !== "crm.dashboard"))?.path).toBe(
+      "/app/etapas/oportunidades",
+    );
     expect(
       getNavigationHome([
         {

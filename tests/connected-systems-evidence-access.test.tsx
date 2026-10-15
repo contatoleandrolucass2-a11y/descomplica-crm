@@ -11,7 +11,7 @@ const mocks = vi.hoisted(() => ({
   eq: vi.fn(),
   maybeSingle: vi.fn(),
 }));
-vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission: mocks.enforce }));
+vi.mock("@/lib/authorization/enforce", () => ({ enforcePageAccess: mocks.enforce }));
 vi.mock("@/lib/authorization/guards", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/lib/authorization/guards")>()),
   requirePermission: mocks.requirePermission,
@@ -54,7 +54,7 @@ describe("connected systems evidence authorization", () => {
   it("stops at the settings guard", async () => {
     mocks.enforce.mockRejectedValue(new Error("forbidden"));
     await expect(ConnectedSystemsPage()).rejects.toThrow("forbidden");
-    expect(mocks.enforce).toHaveBeenCalledWith("crm.settings.manage");
+    expect(mocks.enforce).toHaveBeenCalledWith("/app/configuracoes/conectar-sistemas");
     expect(mocks.createClient).not.toHaveBeenCalled();
   });
 

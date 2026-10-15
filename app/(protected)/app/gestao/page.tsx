@@ -8,7 +8,7 @@ import {
   ManagementStatusBadge,
   managementStyles,
 } from "@/app/(protected)/_components/ManagementCanvas";
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 
 import styles from "../configuracoes/ConfigurationCanvas.module.css";
@@ -17,7 +17,7 @@ import routineStyles from "./rotina/RoutineSettings.module.css";
 export const metadata = { title: "Gestão" };
 
 export default async function ManagementHubPage() {
-  await enforcePermission("crm.dashboard.view");
+  await enforcePageAccess("/app/gestao");
   if (!getProtectedPageGate("/app/gestao")?.releaseEnabled) forbidden();
   const routineReleased = getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true;
   const routineCard = (

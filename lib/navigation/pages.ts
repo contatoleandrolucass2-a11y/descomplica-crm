@@ -8,6 +8,7 @@ import { getProtectedPageGate, pageGateAllowsRole } from "@/lib/authorization/pa
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import type { AuthorizationContext } from "@/lib/authorization/types";
 import { PAGE_REGISTRY, type RegisteredPage } from "@/lib/navigation/registry";
+import { pagePermissionMatches } from "./page-access";
 import type { DisabledNavigationItem } from "@/lib/navigation/presentation";
 
 const appPageRowSchema = z.object({
@@ -65,12 +66,14 @@ function parsePages(data: unknown): AppPage[] {
 
 function pageGateAuthorizesNavigation(page: AppPage, context: AuthorizationContext) {
   const gate = getProtectedPageGate(page.path);
+  const registration = PAGE_REGISTRY.find((item) => item.pageKey === page.key);
   return (
     gate?.releaseEnabled === true &&
     gate.pageKey === page.key &&
-    gate.permission === page.permissionKey &&
+    registration !== undefined &&
+    pagePermissionMatches(registration, page.permissionKey) &&
     pageGateAllowsRole(gate, context.roleKey) &&
-    context.permissions.includes(gate.permission)
+    context.permissions.includes(page.permissionKey)
   );
 }
 

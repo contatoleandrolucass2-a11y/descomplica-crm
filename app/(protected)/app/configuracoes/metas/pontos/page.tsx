@@ -1,4 +1,4 @@
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 
 import { PointSettingsPage } from "./_components/PointSettingsPage";
 
@@ -9,7 +9,7 @@ export default async function PointGoalsPage({
 }: {
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
-  const authorization = await enforcePermission("crm.settings.manage");
+  const authorization = await enforcePageAccess("/app/configuracoes/metas/pontos");
   // Match the database gate for commercial policy drafts, which remains Master-only.
   const canManageDraft =
     authorization.roleKey === "master" &&

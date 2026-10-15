@@ -20,6 +20,7 @@ vi.mock("next/navigation", () => ({
 }));
 vi.mock("@/lib/authorization/enforce", () => ({
   enforcePermission: mocks.enforcePermission,
+  enforcePageAccess: mocks.enforcePermission,
 }));
 vi.mock("@/lib/crm/dashboard/team", () => ({
   loadDashboardTeam: mocks.loadDashboardTeam,

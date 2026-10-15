@@ -1,14 +1,14 @@
 import { createClient } from "@/lib/auth/supabase/server";
 import { routineRecordSchema, routineSaveSchema, routineSnapshotSchema } from "@/lib/crm/routines";
 import { isSameOriginRequest, noStoreHeaders } from "@/lib/security/api";
-import { authorizeRoute } from "@/lib/security/route-auth";
+import { authorizePageRoute } from "@/lib/security/route-auth";
 
 const MAX_BYTES = 1_000_000;
 const failure = (error: string, status: number) =>
   Response.json({ error }, { status, headers: noStoreHeaders() });
 
 export async function GET() {
-  const authorization = await authorizeRoute("crm.dashboard.view");
+  const authorization = await authorizePageRoute("/app/gestao/rotina");
   if (!authorization.ok) return authorization.response;
   try {
     const supabase = await createClient();
@@ -22,8 +22,10 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const authorization = await authorizeRoute("crm.settings.manage");
+  const authorization = await authorizePageRoute("/app/gestao/rotina");
   if (!authorization.ok) return authorization.response;
+  if (!authorization.context.permissions.includes("crm.settings.manage"))
+    return failure("forbidden", 403);
   if (!isSameOriginRequest(request, process.env.APP_ORIGIN)) return failure("invalid_origin", 403);
   if (!request.headers.get("content-type")?.startsWith("application/json"))
     return failure("invalid_content_type", 415);

@@ -4,7 +4,7 @@ import {
   routineCompletionSnapshotSchema,
 } from "@/lib/crm/routine-completions";
 import { isSameOriginRequest, noStoreHeaders } from "@/lib/security/api";
-import { authorizeRoute } from "@/lib/security/route-auth";
+import { authorizePageRoute } from "@/lib/security/route-auth";
 
 const MAX_BYTES = 32_768;
 const failure = (error: string, status: number) =>
@@ -30,7 +30,7 @@ function rpcFailure(code: string | undefined) {
 }
 
 export async function GET() {
-  const authorization = await authorizeRoute("crm.dashboard.view");
+  const authorization = await authorizePageRoute("/app/gestao/rotina");
   if (!authorization.ok) return authorization.response;
   try {
     const supabase = await createClient();
@@ -45,7 +45,7 @@ export async function GET() {
 }
 
 export async function PUT(request: Request) {
-  const authorization = await authorizeRoute("crm.dashboard.view");
+  const authorization = await authorizePageRoute("/app/gestao/rotina");
   if (!authorization.ok) return authorization.response;
   if (!isSameOriginRequest(request, process.env.APP_ORIGIN)) return failure("invalid_origin", 403);
   if (

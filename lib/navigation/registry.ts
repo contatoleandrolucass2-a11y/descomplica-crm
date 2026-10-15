@@ -5,6 +5,7 @@ export interface RegisteredPage {
   pageKey: string;
   path: string;
   permission: PermissionKey;
+  legacyPermission?: PermissionKey;
   releaseEnabled: boolean;
   allowedRoles?: readonly RoleKey[];
   name: string;
@@ -33,7 +34,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.repasse",
     path: "/app/repasse",
-    permission: "crm.partnerships.view",
+    permission: "crm.repasse.view",
+    legacyPermission: "crm.partnerships.view",
     releaseEnabled: true,
     allowedRoles: ["master", "admin"],
     name: "Repasse",
@@ -46,7 +48,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.stage.opportunities",
     path: "/app/etapas/oportunidades",
-    permission: "crm.stages.view",
+    permission: "crm.stage.opportunities.view",
+    legacyPermission: "crm.stages.view",
     releaseEnabled: true,
     name: "Oportunidades",
     description: "Detalhe da etapa de oportunidades",
@@ -58,7 +61,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.stage.appointments",
     path: "/app/etapas/agendamentos",
-    permission: "crm.stages.view",
+    permission: "crm.stage.appointments.view",
+    legacyPermission: "crm.stages.view",
     releaseEnabled: true,
     name: "Agendamentos",
     description: "Detalhe da etapa de agendamentos",
@@ -70,7 +74,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.stage.visits",
     path: "/app/etapas/visitas",
-    permission: "crm.stages.view",
+    permission: "crm.stage.visits.view",
+    legacyPermission: "crm.stages.view",
     releaseEnabled: true,
     name: "Visitas",
     description: "Detalhe da etapa de visitas",
@@ -82,7 +87,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.stage.folders",
     path: "/app/etapas/pastas",
-    permission: "crm.stages.view",
+    permission: "crm.stage.folders.view",
+    legacyPermission: "crm.stages.view",
     releaseEnabled: true,
     name: "Pastas",
     description: "Detalhe da etapa de pastas",
@@ -94,7 +100,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.stage.sales",
     path: "/app/etapas/vendas",
-    permission: "crm.stages.view",
+    permission: "crm.stage.sales.view",
+    legacyPermission: "crm.stages.view",
     releaseEnabled: true,
     name: "Vendas",
     description: "Detalhe da etapa de vendas",
@@ -142,7 +149,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.settings.goals",
     path: "/app/configuracoes/metas",
-    permission: "crm.settings.manage",
+    permission: "crm.settings.goals.view",
+    legacyPermission: "crm.settings.manage",
     releaseEnabled: true,
     name: "Metas do funil",
     description: "Metas do funil DV",
@@ -154,7 +162,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.settings.partnerships",
     path: "/app/configuracoes/metas/parcerias",
-    permission: "crm.settings.manage",
+    permission: "crm.settings.partnerships.view",
+    legacyPermission: "crm.settings.manage",
     releaseEnabled: true,
     name: "Metas de parcerias",
     description: "Metas do canal de parcerias",
@@ -166,7 +175,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.settings.points",
     path: "/app/configuracoes/metas/pontos",
-    permission: "crm.settings.manage",
+    permission: "crm.settings.points.view",
+    legacyPermission: "crm.settings.manage",
     releaseEnabled: true,
     name: "Metas de pontos",
     description: "Pesos e metas de pontuação",
@@ -178,7 +188,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.settings.marketing",
     path: "/app/configuracoes/recurso-mkt",
-    permission: "crm.settings.manage",
+    permission: "crm.settings.marketing.view",
+    legacyPermission: "crm.settings.manage",
     releaseEnabled: true,
     name: "Recurso MKT",
     description: "Fundo de investimento de Marketing e distribuição dos recursos.",
@@ -190,7 +201,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.settings.connected_systems",
     path: "/app/configuracoes/conectar-sistemas",
-    permission: "crm.settings.manage",
+    permission: "crm.settings.connected_systems.view",
+    legacyPermission: "crm.settings.manage",
     releaseEnabled: true,
     name: "Integrações",
     description: "Salesforce e atualização dos relatórios",
@@ -202,7 +214,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.management",
     path: "/app/gestao",
-    permission: "crm.dashboard.view",
+    permission: "crm.management.view",
+    legacyPermission: "crm.dashboard.view",
     releaseEnabled: true,
     name: "Gestão",
     description: "Rotinas e acompanhamento operacional.",
@@ -214,7 +227,8 @@ export const PAGE_REGISTRY = [
   {
     pageKey: "crm.management.routine",
     path: "/app/gestao/rotina",
-    permission: "crm.dashboard.view",
+    permission: "crm.management.routine.view",
+    legacyPermission: "crm.dashboard.view",
     releaseEnabled: true,
     name: "Rotina",
     description: "Classificação semanal da rotina por função.",

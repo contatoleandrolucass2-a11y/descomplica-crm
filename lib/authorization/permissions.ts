@@ -72,6 +72,71 @@ export const PERMISSIONS = {
     description: "Consulta somente os indicadores sem Canal Imob.",
     minLevel: 10,
   },
+  "crm.repasse.view": {
+    label: "Visualizar Repasse",
+    description: "Consulta a página de repasses.",
+    minLevel: 80,
+  },
+  "crm.stage.opportunities.view": {
+    label: "Visualizar Oportunidades",
+    description: "Consulta a página de oportunidades.",
+    minLevel: 10,
+  },
+  "crm.stage.appointments.view": {
+    label: "Visualizar Agendamentos",
+    description: "Consulta a página de agendamentos.",
+    minLevel: 10,
+  },
+  "crm.stage.visits.view": {
+    label: "Visualizar Visitas",
+    description: "Consulta a página de visitas.",
+    minLevel: 10,
+  },
+  "crm.stage.folders.view": {
+    label: "Visualizar Pastas",
+    description: "Consulta a página de pastas.",
+    minLevel: 10,
+  },
+  "crm.stage.sales.view": {
+    label: "Visualizar Vendas",
+    description: "Consulta a página de vendas.",
+    minLevel: 10,
+  },
+  "crm.settings.goals.view": {
+    label: "Visualizar Metas do funil",
+    description: "Consulta a página de metas do funil.",
+    minLevel: 80,
+  },
+  "crm.settings.partnerships.view": {
+    label: "Visualizar Metas de parcerias",
+    description: "Consulta a página de metas de parcerias.",
+    minLevel: 80,
+  },
+  "crm.settings.points.view": {
+    label: "Visualizar Metas de pontos",
+    description: "Consulta a página de metas de pontos.",
+    minLevel: 80,
+  },
+  "crm.settings.marketing.view": {
+    label: "Visualizar Recurso MKT",
+    description: "Consulta a página do recurso de Marketing.",
+    minLevel: 80,
+  },
+  "crm.settings.connected_systems.view": {
+    label: "Visualizar Integrações",
+    description: "Consulta a página de integrações.",
+    minLevel: 80,
+  },
+  "crm.management.view": {
+    label: "Visualizar Gestão",
+    description: "Consulta a página de gestão.",
+    minLevel: 10,
+  },
+  "crm.management.routine.view": {
+    label: "Visualizar Rotina",
+    description: "Consulta e preenche a rotina autorizada para a conta.",
+    minLevel: 10,
+  },
   "crm.stages.view": {
     label: "Visualizar etapas",
     description: "Consulta oportunidades, agendamentos, visitas, pastas e vendas.",

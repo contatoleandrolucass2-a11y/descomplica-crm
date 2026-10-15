@@ -213,7 +213,18 @@ describe("catálogo localizado de acesso", () => {
   });
 
   it("mantém a matriz visual dos papéis alinhada ao catálogo protegido", () => {
-    const baseNavigationPermissions = ["pages.view", "crm.dashboard.view", "crm.stages.view"];
+    const baseNavigationPermissions = [
+      "pages.view",
+      "crm.dashboard.view",
+      "crm.stages.view",
+      "crm.stage.opportunities.view",
+      "crm.stage.appointments.view",
+      "crm.stage.visits.view",
+      "crm.stage.folders.view",
+      "crm.stage.sales.view",
+      "crm.management.view",
+      "crm.management.routine.view",
+    ];
     const withCanalImobPermissions = [
       ...baseNavigationPermissions,
       "crm.dashboard.with_canal_imob.view",
@@ -457,7 +468,7 @@ describe("catálogo localizado de acesso", () => {
     expect(checkbox("Gerenciar usuários")).toContain('disabled=""');
     expect(markup.match(/aria-label="Acessar simuladores"/g)).toHaveLength(1);
     expect(markup).toContain("Visualiza e executa os simuladores disponíveis:");
-    expect(markup).toContain("Páginas vinculadas: Dashboard · Gestão · Rotina.");
+    expect(markup).toContain("Páginas vinculadas: Dashboard.");
     expect(markup).not.toContain('aria-label="Acesso a Executar simuladores oficiais"');
     expect(markup).not.toContain("Visualizar read model v3");
     expect(markup).not.toContain("Visualizar dataset v3");
@@ -547,7 +558,7 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-    expect(checkboxes).toHaveLength(25);
+    expect(checkboxes).toHaveLength(37);
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toContain('checked=""');
       expect(checkbox).toContain('disabled=""');
@@ -729,7 +740,7 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toMatch(/Total de usuários<\/span><strong[^>]*>40<\/strong>/);
     expect(markup).toMatch(/Com acesso ativo<\/span><strong[^>]*>32<\/strong>/);
   });
-  it("não exibe nem oferece salvar módulos ausentes do catálogo de 25 chaves", () => {
+  it("não exibe nem oferece salvar módulos ausentes do catálogo de 38 chaves", () => {
     const absent = new Set([
       "crm.read_model_v3.view",
       "crm.read_model_v3.ranking.view",
@@ -766,7 +777,7 @@ describe("catálogo localizado de acesso", () => {
         reportingScopes: [],
       }),
     );
-    expect(keys).toHaveLength(25);
+    expect(keys).toHaveLength(38);
     expect(markup).not.toContain("Executar motores comerciais");
     expect(markup).not.toContain("Gerenciar políticas comerciais");
     expect(markup).not.toContain("read model v3");
@@ -775,7 +786,7 @@ describe("catálogo localizado de acesso", () => {
     const checkboxes = [...markup.matchAll(/<input[^>]*type="checkbox"[^>]*>/g)].map(
       ([input]) => input,
     );
-    expect(checkboxes).toHaveLength(23);
+    expect(checkboxes).toHaveLength(35);
     expect(checkboxes.every((input) => input.includes('checked=""'))).toBe(true);
   });
 });

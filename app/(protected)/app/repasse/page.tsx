@@ -1,6 +1,6 @@
 import { forbidden } from "next/navigation";
 
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 import { getProtectedPageGate, pageGateAllowsRole } from "@/lib/authorization/page-gates";
 import type { RepasseOverviewState } from "@/lib/crm/repasse/contracts";
 import { listRepasseOverview } from "@/lib/crm/repasse/data";
@@ -10,7 +10,7 @@ import { RepasseWorkspace } from "./RepasseWorkspace";
 export const metadata = { title: "Visão geral de repasses" };
 
 export default async function RepassePage() {
-  const context = await enforcePermission("crm.partnerships.view");
+  const context = await enforcePageAccess("/app/repasse");
   const gate = getProtectedPageGate("/app/repasse");
   if (
     !gate?.releaseEnabled ||

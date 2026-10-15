@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PUT } from "@/app/api/routines/route";
 
 const mocks = vi.hoisted(() => ({ authorize: vi.fn(), client: vi.fn(), rpc: vi.fn() }));
-vi.mock("@/lib/security/route-auth", () => ({ authorizeRoute: mocks.authorize }));
+vi.mock("@/lib/security/route-auth", () => ({ authorizePageRoute: mocks.authorize }));
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.client }));
 
 const row = {
@@ -37,7 +37,10 @@ async function result(response: Response, status: number, value: unknown) {
 beforeEach(() => {
   vi.resetAllMocks();
   vi.stubEnv("APP_ORIGIN", "http://routine.test");
-  mocks.authorize.mockResolvedValue({ ok: true });
+  mocks.authorize.mockResolvedValue({
+    ok: true,
+    context: { permissions: ["crm.settings.manage"] },
+  });
   mocks.client.mockResolvedValue({ rpc: mocks.rpc });
   mocks.rpc.mockResolvedValue({ data: record, error: null });
 });
@@ -55,8 +58,8 @@ describe("shared routine API", () => {
       });
       await result(await method(), status, { error: "denied" });
     }
-    expect(mocks.authorize).toHaveBeenNthCalledWith(1, "crm.dashboard.view");
-    expect(mocks.authorize).toHaveBeenNthCalledWith(2, "crm.settings.manage");
+    expect(mocks.authorize).toHaveBeenNthCalledWith(1, "/app/gestao/rotina");
+    expect(mocks.authorize).toHaveBeenNthCalledWith(2, "/app/gestao/rotina");
     expect(mocks.client).not.toHaveBeenCalled();
   });
   it.each([true, false])(
@@ -68,6 +71,14 @@ describe("shared routine API", () => {
       expect(mocks.rpc).toHaveBeenCalledWith("get_crm_routines");
     },
   );
+  it("does not allow routine page access to grant routine editing", async () => {
+    mocks.authorize.mockResolvedValue({
+      ok: true,
+      context: { permissions: ["crm.management.routine.view"] },
+    });
+    await result(await PUT(request()), 403, { error: "forbidden" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
   it("accepts an empty database without inventing a saved default", async () => {
     mocks.rpc.mockResolvedValue({ data: { routines: [], can_edit: true }, error: null });
     await result(await GET(), 200, { routines: [], can_edit: true });
