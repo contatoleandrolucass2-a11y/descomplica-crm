@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Renovacao candidata da sessao Qlik
+
+- Owner159addfc/ad49634 promovido13:18:04Z pela CI38640654844 e coordenador;
+  resultado real reauth_required. Credencial cifrada systemd e renovacao
+  Microsoft Entra em implementacao, conforme autorizacao existente de uso do
+  cofre. Focais101/201/32/14 aprovados,2 skips fisicos. Global/CI/uso real
+  pendentes. Runbook qlik-vps-session documenta origem, travas e limites.
+  Referencias de fatos/ranking copiadas deba96607 sao historico do PR216,
+  nao codigo de coleta ja integrado nesta branch operacional.
+- API Qlik documenta CSRF204, nao apenas200. Probe candidato/testes corrigidos
+  antes do uso real. Chromium final39 passou; review tambem corrigiu titulo
+  KMSI duplicado e contagem de senha contida no usuario. ACL systemd real
+  confirmada com credencial sintetica; cofre real permanece intocado.
+
 ## 2026-10-15: Retomada da conexao Qlik
 
 - Owner Qlik promovido pelo coordenador em13:18:04.215Z:159addfc/ad49634,

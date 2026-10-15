@@ -1,5 +1,43 @@
 # Worklog
 
+## 2026-10-15: Renovacao Qlik pelo cofre autorizado
+
+Ownerad49634 foi promovido pela CI38640654844 e coordenador em13:18:04Z;
+preflight real reauth_required. Implementada renovacao candidata via Microsoft
+Entra do tenant observado, usando credencial cifrada systemd derivada do cofre
+existente. Chave RSA fica fora do browser. Uma tentativa duravel de senha;
+falha/incerteza/MFA preservam atencao atraves de reinicios. Sessao comprovada
+libera atencao; pagina MFA nao e substituida pelo launcher.
+
+Inputs/unit/installer verificam novos modulos e aceitam bytes legados exatos
+para recuperacao. Fallback publico{} permite setup inicial; nao autentica.
+Prazos login120s/ciclo300s/owner novo420s cobrem etapas novas; legado180s.
+Correcoes da QA dashboard foram trazidas do commitba96607, com seus registros.
+Nenhuma credencial real foi lida ou convertida nesta implementacao.
+
+Focais: credenciais101 aprovados; unit/host/installer201 aprovados/2 skips;
+browser sintetico32 aprovados; integracao launcher/attempt14 aprovados.
+Gates globais e CI ainda pendentes deste candidato. Sem carga Qlik publicada.
+
+Lint/tipos/build passaram. pnpm test:2876 Vitest aprovados/85 skips e uma falha
+no teste de symlink Windows do inventario, fora do diff; Node posterior nao
+executou nesse comando. Suite Node Qlik/release focada:687 aprovados/5 skips.
+CI Linux integral continua obrigatoria. Gitleaks encontrou somente o fixture
+Salesforce sintetico ja corrigido no PR216; mesma geracao de fixture trazida
+para este ramo, sem alterar credenciais ou runtime Salesforce.
+
+Smoke systemd leve na VPS com credencial falsa confirmou usuario997/grupo986,
+diretorio root550/ACL nominal r-x e arquivo root440/ACL nominal r--. Unit
+transitoria encerrada; owner/perfil/credenciais reais nao usados nesse smoke.
+
+Revisao independente reproduziu dois casos do login: titulo KMSI duplicado e
+senha contida no usuario. Corrigidos com selecao por prioridade e contagem do
+campo passwd efetivo, incluindo campo vazio na identificacao. Conferencia da
+API oficial confirmou CSRF204; probe aceita204/200 com header e origem exatos,
+rejeitando outros2xx. Chromium sintetico final:39 aprovados/zero skips.
+Regressao host cobre200s aceitos e420s/420,001s rejeitados durante I/O.
+Gitleaks final apos fixture:sem achados. Nenhum login real realizado ainda.
+
 ## 2026-10-15: Corrida da QA e owner Qlik atualizado
 
 Reproduzida falha38639662097: statusReads incrementava na entrada da rota,

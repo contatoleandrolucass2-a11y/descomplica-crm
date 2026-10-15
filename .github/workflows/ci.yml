@@ -92,6 +92,11 @@ jobs:
       - name: Salesforce console with synthetic RFB authentication and pixels
         run: node scripts/qa/connected-systems.mjs --synthetic
 
+      - name: Qlik login with synthetic corporate provider
+        run: node --test ops/qlik/browser-login.node-test.mjs
+        env:
+          QLIK_LOGIN_BROWSER_TEST: "enabled"
+
       - name: Dashboard report with synthetic data across themes and viewports
         run: |
           node scripts/qa/dashboard-report.mjs

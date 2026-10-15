@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-15: Renovacao de sessao Qlik
+
+- Converte o cofre existente em credencial systemd cifrada para renovar o login
+  no tenant corporativo, sem expor a chave RSA ou gravar senha em claro.
+- Impede novas tentativas de senha apos falha/incerteza e preserva a pagina
+  quando houver MFA; sucesso depende de verificacao na origem Qlik.
+- Preserva recuperacao das units legadas e mantem o setup inicial sem cofre.
+
 ## 2026-10-15: Sincronizacao da QA do dashboard
 
 - Aguarda o consumo do JSON antes do proximo evento sintetico de retomada,

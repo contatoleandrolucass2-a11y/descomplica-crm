@@ -24,7 +24,7 @@ done
 [[ $(realpath -e "${BASH_SOURCE[0]}") == "$source_dir/install-session.sh" ]] ||
   fail "Run the installer from the validated release."
 # Every parent of executable release inputs must resist unprivileged replacement.
-for relative in '' ops ops/qlik ops/qlik/vps ops/qlik/console; do
+for relative in '' ops ops/qlik ops/qlik/vps ops/qlik/console scripts scripts/release; do
   directory="$release${relative:+/$relative}"
   [[ -d "$directory" && ! -L "$directory" ]] || fail "Invalid release directory."
   [[ $(stat -c %u "$directory") == 0 ]] || fail "Release directories must be root-owned."
@@ -41,7 +41,7 @@ done
 [[ $(git -C "$release" rev-parse HEAD) == "$1" ]] || fail "Release SHA mismatch."
 release_status=$(git -C "$release" status --porcelain --untracked-files=all)
 [[ -z "$release_status" ]] || fail "Release must be clean."
-for relative in ops/qlik/vps/install-session.sh ops/qlik/console-gateway.mjs ops/qlik/credential-vault.mjs ops/qlik/launch-browser.mjs ops/qlik/browser-preflight.mjs ops/qlik/collection-loop.mjs ops/qlik/metadata-artifact.mjs ops/qlik/qix-metadata.mjs ops/qlik/console/index.html ops/qlik/console/client.js ops/qlik/console/credential-client.js ops/qlik/console/style.css "${units[@]/#/ops/qlik/vps/}"; do
+for relative in ops/qlik/vps/install-session.sh ops/qlik/console-gateway.mjs ops/qlik/credential-vault.mjs ops/qlik/launch-browser.mjs ops/qlik/browser-login.mjs ops/qlik/login-credential.mjs ops/qlik/prepare-login-credential.mjs ops/qlik/login-attempt.mjs scripts/release/private-json-store.mjs scripts/release/production-release-lock.mjs ops/qlik/browser-preflight.mjs ops/qlik/collection-loop.mjs ops/qlik/metadata-artifact.mjs ops/qlik/qix-metadata.mjs ops/qlik/console/index.html ops/qlik/console/client.js ops/qlik/console/credential-client.js ops/qlik/console/style.css "${units[@]/#/ops/qlik/vps/}"; do
   file="$release/$relative"
   [[ -f "$file" && ! -L "$file" && $(stat -c %u "$file") == 0 ]] ||
     fail "Expected root-owned release file missing or symlink."
@@ -151,7 +151,7 @@ if runuser -u descomplica-qlik -- /usr/bin/test -r "$releases_parent"; then
   fail "Qlik must not list the releases parent."
 fi
 # A failed non-root probe leaves the account/profile for manual inspection, with no units installed.
-(cd "$release" && runuser -u descomplica-qlik -- /usr/bin/env -i PATH="$PATH" HOME=/var/lib/descomplica-qlik "$node" --input-type=module -e "import { access } from 'node:fs/promises'; if (process.getuid() === 0) throw new Error('Non-root dependency probe required'); await import('ws'); await import('@playwright/test'); await access(new URL(import.meta.resolve('@novnc/novnc'))); const { getBrowserMetadataScript } = await import('./ops/qlik/browser-preflight.mjs'); await getBrowserMetadataScript()") >/dev/null
+(cd "$release" && runuser -u descomplica-qlik -- /usr/bin/env -i PATH="$PATH" HOME=/var/lib/descomplica-qlik "$node" --input-type=module -e "import { access } from 'node:fs/promises'; if (process.getuid() === 0) throw new Error('Non-root dependency probe required'); await import('ws'); await import('@playwright/test'); await access(new URL(import.meta.resolve('@novnc/novnc'))); for (const name of ['browser-login', 'login-credential', 'prepare-login-credential', 'login-attempt']) await import('./ops/qlik/' + name + '.mjs'); const { getBrowserMetadataScript } = await import('./ops/qlik/browser-preflight.mjs'); await getBrowserMetadataScript()") >/dev/null
 for unit in "${units[@]}"; do
   install -o root -g root -m 0644 "$staging/$unit" "/etc/systemd/system/$unit"
 done
