@@ -8,6 +8,7 @@ import { runRankingCycle } from "./ranking-cycle.mjs";
 import { readRankingCredential } from "./ranking-credential.mjs";
 import { writeRankingArtifact } from "./ranking-artifact.mjs";
 import { loginAttemptStore } from "./login-attempt.mjs";
+import { getBrowserRankingScript } from "./browser-ranking.mjs";
 
 const PROFILE = "/var/lib/descomplica-qlik/chrome";
 const ORIGIN = "https://direcional.us.qlikcloud.com/";
@@ -52,6 +53,8 @@ async function main() {
           startRankingCollection({
             signal,
             authenticate: (options) => authenticateBrowserSession(browser, options),
+            mappingFactory: async () =>
+              (await import("./ranking-mapping.mjs")).createRankingMapping(),
             collect: (options) =>
               rankingCollect(browser, {
                 ...options,
@@ -88,6 +91,8 @@ export function startRankingCollection({
   signal,
   collect,
   authenticate,
+  // Legacy injected cycles may omit this; production main always supplies it.
+  mappingFactory,
   credential = readRankingCredential,
   cycle = runRankingCycle,
   write = writeRankingArtifact,
@@ -138,9 +143,35 @@ export function startRankingCollection({
           return completed;
         }
       }
+      let cycleCollect = collect;
+      if (mappingFactory !== undefined) {
+        let mapping;
+        try {
+          mapping = structuredClone(await mappingFactory());
+          if (cycleSignal.aborted) return { state: "unavailable" };
+          if (mapping?.schemaVersion !== 1 || mapping?.verified !== true)
+            throw new Error("mapping_invalid");
+          const freeze = (value) => {
+            if (value && typeof value === "object" && !Object.isFrozen(value)) {
+              Object.freeze(value);
+              Object.values(value).forEach(freeze);
+            }
+          };
+          freeze(mapping);
+          // Enforce the real browser serialization/scope boundary before HMAC access.
+          await getBrowserRankingScript({ mapping });
+        } catch {
+          if (cycleSignal.aborted) return { state: "unavailable" };
+          completed = { state: "unavailable", reason: "mapping_invalid" };
+          return completed;
+        }
+        if (cycleSignal.aborted) return { state: "unavailable" };
+        // One detached immutable snapshot belongs to both independent sessions.
+        cycleCollect = (options) => collect({ ...options, mapping });
+      }
       const secret = await credential();
       if (cycleSignal.aborted) return { state: "unavailable" };
-      const result = await cycle({ signal: cycleSignal, collect, secret });
+      const result = await cycle({ signal: cycleSignal, collect: cycleCollect, secret });
       if (cycleSignal.aborted) return { state: "unavailable" };
       completed = result;
       return result;

@@ -9,6 +9,47 @@ import {
 } from "./launch-browser.mjs";
 import { startQlikCollectionLoop } from "./collection-loop.mjs";
 import { rankingCycleArtifact } from "./ranking-artifact.mjs";
+import { collectBrowserRanking } from "./browser-ranking.mjs";
+import { runRankingCycle } from "./ranking-cycle.mjs";
+import { createRankingMapping } from "./ranking-mapping.mjs";
+
+// Synthetic transport metadata only; never a source of production pins.
+function syntheticDefinition() {
+  const cube = (role) => ({
+    objectId: `synthetic_${role}`,
+    cubeSha256: "b".repeat(64),
+    idField: "SyntheticIdentity",
+    idEncoding: "plain",
+    vgvMeasureIndex: 0,
+    contractsMeasureIndex: 1,
+    masterPins: [],
+  });
+  return {
+    verified: true,
+    provenance: {
+      kind: "synthetic-fixture",
+      observedAt: "2026-01-01T00:00:00.000Z",
+      metadataSha256: "a".repeat(64),
+    },
+    filters: [
+      { field: "SyntheticBusinessUnit", value: "Direcional" },
+      { field: "SyntheticRegional", value: "SP CAPITAL" },
+      { field: "SyntheticChannel", value: "CANAL IMOB" },
+    ],
+    calendar: {
+      expression: "=Year([DT])&Num(Month([DT]),'00')",
+      selectionFields: ["SyntheticYearMonth"],
+    },
+    cubes: { imobs: cube("imobs"), developments: cube("developments") },
+  };
+}
+
+function syntheticMapping() {
+  return createRankingMapping({
+    now: () => new Date("2026-11-01T02:59:59.999Z"),
+    definition: syntheticDefinition(),
+  });
+}
 
 test("ranking authenticates before loading its writer credential or starting collection", async () => {
   const events = [];
@@ -20,6 +61,10 @@ test("ranking authenticates before loading its writer credential or starting col
       assert.equal(options.signal, signal);
       events.push("login");
       return { status: "authenticated" };
+    },
+    mappingFactory: () => {
+      events.push("mapping");
+      return syntheticMapping();
     },
     credential: async () => {
       events.push("credential");
@@ -34,7 +79,7 @@ test("ranking authenticates before loading its writer credential or starting col
       await options.collect({ signal });
     },
   });
-  assert.deepEqual(events, ["login", "credential", "cycle"]);
+  assert.deepEqual(events, ["login", "mapping", "credential", "cycle"]);
 });
 
 test("MFA, unknown login and cancellation cannot load the ranking writer credential", async () => {
@@ -47,6 +92,7 @@ test("MFA, unknown login and cancellation cannot load the ranking writer credent
         if (status === "cancel") abort.abort();
         return { status };
       },
+      mappingFactory: () => assert.fail("No mapping access before authenticated session"),
       credential: async () => assert.fail("No HMAC access before authenticated session"),
       cycle: async () => assert.fail("No publication while login is unavailable"),
       write: async () => {},
@@ -59,6 +105,167 @@ test("MFA, unknown login and cancellation cannot load the ranking writer credent
       },
     });
   }
+});
+
+test("invalid or unverified mapping never reads HMAC or starts a publication cycle", async () => {
+  for (const mappingFactory of [
+    () => createRankingMapping(),
+    () => {
+      throw new Error("mapping_unverified: private source detail");
+    },
+    () => null,
+    () => ({ ...syntheticMapping(), verified: false }),
+    () => ({ ...syntheticMapping(), appId: "wrong-source" }),
+    () => ({ ...syntheticMapping(), unsupported: () => {} }),
+  ]) {
+    const signal = new AbortController().signal;
+    await startRankingCollection({
+      signal,
+      authenticate: async () => ({ status: "authenticated" }),
+      mappingFactory,
+      credential: () => assert.fail("No HMAC for an invalid mapping"),
+      collect: () => assert.fail("No browser collection for an invalid mapping"),
+      cycle: () => assert.fail("No publication cycle for an invalid mapping"),
+      loop: async ({ collect }) => {
+        assert.deepEqual(await collect({ signal }), {
+          state: "unavailable",
+          reason: "mapping_invalid",
+        });
+      },
+    });
+  }
+});
+
+test("cancellation while creating the mapping never reads HMAC or starts collection", async () => {
+  const abort = new AbortController();
+  const entered = Promise.withResolvers();
+  const pending = Promise.withResolvers();
+  const work = startRankingCollection({
+    signal: abort.signal,
+    authenticate: async () => ({ status: "authenticated" }),
+    mappingFactory: () => {
+      entered.resolve();
+      return pending.promise;
+    },
+    credential: () => assert.fail("No HMAC after mapping cancellation"),
+    collect: () => assert.fail("No collection after mapping cancellation"),
+    cycle: () => assert.fail("No publication after mapping cancellation"),
+    loop: async ({ collect }) => {
+      assert.deepEqual(await collect({ signal: abort.signal }), { state: "unavailable" });
+    },
+  });
+  await entered.promise;
+  abort.abort();
+  pending.resolve(syntheticMapping());
+  await work;
+});
+
+test("one detached mapping crosses the real browser script boundary twice and refreshes next cycle", async () => {
+  const signal = new AbortController().signal;
+  const snapshots = [];
+  const identities = [];
+  const scripts = [];
+  const factoryResults = [];
+  const events = [];
+  let instant = new Date("2026-11-01T02:59:59.999Z");
+  let closedPages = 0;
+  let published = 0;
+  const collected = () => {
+    const cube = () => ({
+      coverage: { state: "complete", sourceRows: 1 },
+      nativeTotals: { vgv: "100.25", contracts: 1 },
+      rows: [{ key: "1", name: "Synthetic entity", vgv: "100.25", contracts: 1 }],
+    });
+    return {
+      status: "collected",
+      source: {
+        appId: syntheticMapping().appId,
+        sheetId: syntheticMapping().sheetId,
+        mappingSha256: snapshots.at(-1).mappingSha256,
+        reloadTimestamp: "2026-10-14T17:00:00.000Z",
+      },
+      scope: { businessUnit: "Direcional", regional: "SP CAPITAL", channel: "CANAL IMOB" },
+      months: [{ periodMonth: "2026-09-01", imobs: cube(), developments: cube() }],
+    };
+  };
+  const context = {
+    newPage: async () => ({
+      goto: async () => {},
+      url: () => "https://direcional.us.qlikcloud.com/insights/home",
+      addScriptTag: async ({ content }) => {
+        assert.ok(content.includes("__descomplicaQlikRankingV1"));
+        scripts.push(content);
+      },
+      evaluate: async () => collected(),
+      close: async () => {
+        closedPages++;
+      },
+    }),
+  };
+  await startRankingCollection({
+    signal,
+    authenticate: async () => {
+      events.push("login");
+      return { status: "authenticated" };
+    },
+    mappingFactory: () => {
+      events.push("mapping");
+      const value = structuredClone(
+        createRankingMapping({
+          now: () => instant,
+          definition: syntheticDefinition(),
+        }),
+      );
+      factoryResults.push(value);
+      return value;
+    },
+    credential: () => {
+      events.push("credential");
+      return "a".repeat(43);
+    },
+    collect: async (options) => {
+      snapshots.push(options.mapping);
+      identities.push(options.identity);
+      assert.ok(Object.isFrozen(options.mapping.periods));
+      assert.throws(() => options.mapping.periods.push("2099-01-01"), TypeError);
+      if (snapshots.length === 1) {
+        instant = new Date("2026-11-01T03:00:00.000Z");
+        factoryResults[0].periods.push("2099-01-01");
+      }
+      return collectBrowserRanking(context, options);
+    },
+    cycle: (options) =>
+      runRankingCycle({
+        ...options,
+        now: () => new Date("2026-11-14T18:00:00.000Z"),
+        publish: async (payload) => ({
+          state: ++published % 2 ? "staged" : "published",
+          requestId: payload.requestId,
+          contentSha256: "c".repeat(64),
+        }),
+      }),
+    loop: async ({ collect }) => {
+      for (let count = 0; count < 2; count++)
+        assert.equal((await collect({ signal })).state, "succeeded");
+    },
+  });
+  assert.deepEqual(events, ["login", "mapping", "credential", "login", "mapping", "credential"]);
+  assert.equal(factoryResults.length, 2);
+  assert.equal(snapshots.length, 4);
+  assert.equal(snapshots[0], snapshots[1]);
+  assert.equal(snapshots[2], snapshots[3]);
+  assert.notEqual(snapshots[0], snapshots[2]);
+  assert.notEqual(snapshots[0], factoryResults[0]);
+  assert.equal(snapshots[0].periods.length, 10);
+  assert.equal(snapshots[2].periods.length, 11);
+  assert.equal(new Set(identities).size, 4);
+  assert.equal(closedPages, 4);
+  assert.equal(published, 4);
+  for (const script of scripts) assert.equal(script.includes("2099-01-01"), false);
+  assert.equal(scripts[0].includes("2026-11-01"), false);
+  assert.equal(scripts[1].includes("2026-11-01"), false);
+  assert.equal(scripts[2].includes("2026-11-01"), true);
+  assert.equal(scripts[3].includes("2026-11-01"), true);
 });
 
 test("metadata collection requires verified login and shares the owner cancellation signal", async () => {
@@ -498,6 +705,7 @@ test("Linux main explicitly exits nonzero for an unrecoverable ranking owner", (
     import { EventEmitter } from "node:events";
     import { fileURLToPath } from "node:url";
     const launcher = ${JSON.stringify(launcher)};
+    const { getBrowserRankingScript } = await import(new URL("./browser-ranking.mjs", launcher).href);
     Object.defineProperty(process, "platform", { value: "linux" });
     Object.defineProperty(process, "getuid", { value: () => 997 });
     process.argv[1] = fileURLToPath(launcher);
@@ -524,9 +732,19 @@ test("Linux main explicitly exits nonzero for an unrecoverable ranking owner", (
       authenticated = true;
       return { status: "authenticated" };
     }});
-    replace("./ranking-cycle.mjs", { runRankingCycle: async ({ collect, signal }) => collect({ signal }) });
-    replace("./browser-ranking.mjs", { collectBrowserRanking: async (context, options) => {
+    let mappings = 0;
+    replace("./ranking-mapping.mjs", { createRankingMapping: (...args) => {
       assert.equal(authenticated, true);
+      assert.equal(args.length, 0);
+      mappings++;
+      return ${JSON.stringify(syntheticMapping())};
+    }});
+    replace("./ranking-cycle.mjs", { runRankingCycle: async ({ collect, signal }) => collect({ signal }) });
+    replace("./browser-ranking.mjs", { getBrowserRankingScript, collectBrowserRanking: async (context, options) => {
+      assert.equal(authenticated, true);
+      assert.equal(mappings, 1);
+      assert.equal(options.mapping.periods.length, 10);
+      assert.equal(Object.isFrozen(options.mapping), true);
       assert.equal(context, browser);
       assert.equal(typeof options.onOwnerUnrecoverable, "function");
       console.log("ranking_callback_reached");

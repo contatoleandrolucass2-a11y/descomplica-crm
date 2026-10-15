@@ -3,7 +3,12 @@ import { chmod, lstat, mkdtemp, readFile, rm, symlink } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
-import { rankingCycleArtifact, writeRankingArtifact } from "./ranking-artifact.mjs";
+import { runInNewContext } from "node:vm";
+import {
+  isRankingFailureCode,
+  rankingCycleArtifact,
+  writeRankingArtifact,
+} from "./ranking-artifact.mjs";
 
 const now = new Date("2026-10-14T19:00:00.000Z");
 const success = {
@@ -13,6 +18,40 @@ const success = {
   contentSha256: "c".repeat(64),
   completedAt: "2026-10-14T18:59:59.000Z",
 };
+
+test("diagnostic authority serializes without Node/module closures and preserves projection", () => {
+  const standalone = runInNewContext(`(${isRankingFailureCode.toString()})`);
+  for (const code of [
+    "mapping_invalid",
+    "master_pin_mismatch",
+    "selection_failed",
+    "definition_changed",
+    "collection_unavailable",
+    "cleanup_failed",
+  ]) {
+    assert.equal(standalone(code), true);
+    assert.equal(isRankingFailureCode(code), true);
+    for (const state of ["unavailable", "reauth_required"]) {
+      assert.deepEqual(
+        rankingCycleArtifact({ state, reason: code, secret: "synthetic-private" }, now).result,
+        { state, code },
+      );
+    }
+  }
+  for (const code of [
+    "synthetic-private",
+    "mapping_invalid:synthetic-private",
+    "",
+    undefined,
+    null,
+    ["mapping_invalid"],
+    {},
+    123,
+  ]) {
+    assert.equal(standalone(code), false);
+    assert.equal(isRankingFailureCode(code), false);
+  }
+});
 for (const state of ["running", "reauth_required", "unavailable"]) {
   test(`${state} contains no details and does not claim connection`, () => {
     const artifact = rankingCycleArtifact(

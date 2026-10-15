@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-15
+
+- Qlik: mapping por ciclo compartilhado pelas duas sessoes, com ano/mes
+  corrente em America/Sao_Paulo e hash da definicao/politica, sem periodos
+  dinamicos. Configuracao produtiva permanece bloqueada ate conferencia nativa.
+- Diagnosticos QIX preservam somente a allowlist existente; mensagens brutas
+  e campos privados continuam descartados no transporte do browser.
+
 ## 2026-10-15: Renovacao de sessao Qlik
 
 - Converte o cofre existente em credencial systemd cifrada para renovar o login

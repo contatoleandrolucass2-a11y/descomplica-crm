@@ -7,6 +7,7 @@ import {
   collectBrowserRanking,
   getBrowserRankingScript,
 } from "./browser-ranking.mjs";
+import { isRankingFailureCode, rankingCycleArtifact } from "./ranking-artifact.mjs";
 
 const ORIGIN = "https://direcional.us.qlikcloud.com";
 const APP = "7c000871-8b32-4c0f-bfd5-4b9d46946575";
@@ -120,6 +121,165 @@ function owner() {
   };
   return { context, page, options, calls, controller, timers };
 }
+
+async function serializedDiagnostic(result, throwMessage, sdkError = false) {
+  const f = transport();
+  f.environment.WebSocket = class {
+    constructor() {
+      f.calls.push("socket_created");
+      queueMicrotask(() => {
+        if (sdkError) this.onerror?.(new Error("mapping_invalid:synthetic-private-sdk"));
+        else this.onopen?.();
+      });
+    }
+    send() {
+      assert.fail("The diagnostic fixture issues no QIX commands");
+    }
+    close() {
+      f.calls.push("socket_closed");
+      this.onclose?.({ code: 1000 });
+    }
+  };
+  const window = { enigma: "existing-sdk" };
+  const source = {
+    ...mapping(),
+    fixtureResult: result,
+    ...(throwMessage === undefined ? {} : { fixtureThrow: throwMessage }),
+  };
+  const script = await getBrowserRankingScript({
+    mapping: source,
+    collect: async function diagnosticCollector(_global, { mapping }) {
+      if (mapping.fixtureThrow) throw new Error(mapping.fixtureThrow);
+      return mapping.fixtureResult;
+    },
+    // The builder must ignore caller-supplied authority and serialize its own.
+    isFailureCode: () => true,
+  });
+  assert.ok(script.includes(isRankingFailureCode.toString()));
+  runInNewContext(script, { ...f.environment, window });
+  const value = await window.__descomplicaQlikRankingV1.run(randomUUID());
+  assert.equal(window.enigma, "existing-sdk");
+  assert.ok(f.calls.includes("socket_created"));
+  assert.ok(f.calls.includes("socket_closed"));
+  assert.equal(f.timers.pending.size, 0);
+  return JSON.parse(JSON.stringify(value));
+}
+
+test("generated client and SDK preserve only authoritative QIX failure reasons", async () => {
+  for (const reason of [
+    "mapping_invalid",
+    "master_pin_mismatch",
+    "definition_changed",
+    "selection_failed",
+    "coverage_limit",
+    "annual_mismatch",
+  ]) {
+    for (const status of ["unavailable", "reauth_required"]) {
+      const value = await serializedDiagnostic({
+        status,
+        reason,
+        token: "synthetic-private-token",
+        payload: { privateRecord: "synthetic-private-record" },
+        message: "synthetic-private-message",
+      });
+      assert.deepEqual(value, { status, reason });
+      assert.deepEqual(rankingCycleArtifact({ state: status, ...value }).result, {
+        state: status,
+        code: reason,
+      });
+    }
+  }
+});
+
+test("generated client discards unknown codes, secret details and non-string reasons", async () => {
+  for (const reason of [
+    "synthetic-private-secret",
+    "mapping_invalid:synthetic-private",
+    "MAPPING_INVALID",
+    "",
+    null,
+    ["mapping_invalid"],
+    { code: "mapping_invalid" },
+    123,
+  ]) {
+    for (const status of ["unavailable", "reauth_required"]) {
+      assert.deepEqual(
+        await serializedDiagnostic({
+          status,
+          reason,
+          code: "mapping_invalid",
+          secret: "synthetic-private",
+        }),
+        status === "reauth_required" ? { status } : { status, reason: "collection_unavailable" },
+      );
+    }
+  }
+  for (const status of ["pending", "inspected", "published", "unknown"]) {
+    assert.deepEqual(
+      await serializedDiagnostic({
+        status,
+        reason: "mapping_invalid",
+        secret: "synthetic-private",
+      }),
+      { status: "unavailable", reason: "collection_unavailable" },
+    );
+  }
+});
+
+test("serialized SDK/collector exceptions remain generic even when the error text is allowlisted", async () => {
+  for (const message of [
+    "mapping_invalid",
+    "mapping_invalid:synthetic-private",
+    "synthetic-private-secret",
+  ]) {
+    assert.deepEqual(
+      await serializedDiagnostic({ status: "unavailable", reason: "mapping_invalid" }, message),
+      { status: "unavailable", reason: "engine_unavailable" },
+    );
+  }
+  assert.deepEqual(
+    await serializedDiagnostic(
+      { status: "unavailable", reason: "mapping_invalid" },
+      undefined,
+      true,
+    ),
+    { status: "unavailable", reason: "engine_unavailable" },
+  );
+});
+
+test("fifth environment argument stays compatible and omitted checker denies even known QIX reasons", async () => {
+  const f = transport();
+  assert.deepEqual(
+    await createBrowserRankingClient(
+      f.enigma,
+      {},
+      async () => ({ status: "unavailable", reason: "mapping_invalid" }),
+      mapping(),
+      f.environment,
+    ).run(randomUUID()),
+    { status: "unavailable", reason: "collection_unavailable" },
+  );
+});
+
+test("failure reason is captured once before checking and projecting it", async () => {
+  const f = transport();
+  let reads = 0;
+  const result = await createBrowserRankingClient(
+    f.enigma,
+    {},
+    async () => ({
+      status: "unavailable",
+      get reason() {
+        return ++reads === 1 ? "mapping_invalid" : "synthetic-private-secret";
+      },
+    }),
+    mapping(),
+    f.environment,
+    isRankingFailureCode,
+  ).run(randomUUID());
+  assert.deepEqual(result, { status: "unavailable", reason: "mapping_invalid" });
+  assert.equal(reads, 1);
+});
 
 test("different collection UUIDs create isolated QIX URLs with no resume or token export", async () => {
   const f = transport();

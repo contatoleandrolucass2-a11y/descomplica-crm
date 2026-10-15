@@ -1,5 +1,6 @@
 import { readFile } from "node:fs/promises";
 import { createRequire } from "node:module";
+import { isRankingFailureCode } from "./ranking-artifact.mjs";
 
 const require = createRequire(import.meta.url);
 const ORIGIN = "https://direcional.us.qlikcloud.com";
@@ -49,6 +50,8 @@ export function createBrowserRankingClient(
   collect,
   mapping,
   environment = globalThis,
+  // The production builder supplies only the artifact authority, never a caller option.
+  isFailureCode = () => false,
 ) {
   const origin = "https://direcional.us.qlikcloud.com";
   const app = "7c000871-8b32-4c0f-bfd5-4b9d46946575";
@@ -135,8 +138,15 @@ export function createBrowserRankingClient(
       if (stopped) throw new Error();
       const result = await collect(global, { signal: abort.signal, mapping: fixedMapping });
       if (stopped) throw new Error();
-      if (result?.status === "reauth_required") return { status: "reauth_required" };
-      if (result?.status !== "collected")
+      const status = result?.status;
+      if (status === "reauth_required" || status === "unavailable") {
+        const reason = result.reason;
+        const allowed = typeof reason === "string" && isFailureCode(reason) === true;
+        return status === "reauth_required"
+          ? { status, ...(allowed ? { reason } : {}) }
+          : { status, reason: allowed ? reason : "collection_unavailable" };
+      }
+      if (status !== "collected")
         return { status: "unavailable", reason: "collection_unavailable" };
       // The cycle validates the aggregate contract. Never forward arbitrary status details.
       return {
@@ -183,9 +193,10 @@ export async function getBrowserRankingScript({ mapping, collect } = {}) {
     ${sdk}
     const collect = (${collector.toString()});
     const create = (${createBrowserRankingClient.toString()});
+    const isFailureCode = (${isRankingFailureCode.toString()});
     const mapping = JSON.parse(${JSON.stringify(text)});
     Object.defineProperty(window, "__descomplicaQlikRankingV1", {
-      value: create(module.exports, ${JSON.stringify(schema)}, collect, mapping),
+      value: create(module.exports, ${JSON.stringify(schema)}, collect, mapping, globalThis, isFailureCode),
       configurable: false, writable: false, enumerable: false
     });
   })();`;

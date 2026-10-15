@@ -1,5 +1,28 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Mapping dinamico, ainda sem pins produtivos
+
+- Factory/launcher passaram62 testes e review independente. Mesmo snapshot
+  nas duas sessoes; novo ciclo recalcula YTD em Sao Paulo. Definicao/politica
+  entram no SHA; periodos derivados nao. Default null bloqueia uso produtivo.
+- Transporte preserva somente codigos QIX da allowlist existente, antes
+  descartados genericamente. Script serializado/limites:149 aprovados/um skip.
+  Lint/formatacao focais aprovados. Fatos e CI deste delta nao comprovados.
+
+## 2026-10-15: Renovacao integrada, ativacao ainda bloqueada
+
+- PR229/CI38747697537 aprovado; main9ffc8a9 integrado14:38:57Z,
+  CI38753275427 ainda em execucao. Novo checkout/deps protegidos e HMAC
+  dedicado root0600 preparados, sem ativacao ou leitura do segredo.
+- Imagem isolada foi baixada/carregada antes de todos os gates, ordem incorreta
+  detalhada na auditoria. Sem runtime promovido. Repetir download/verificacao/
+  prova apos quatro jobs success; excecao nao altera o procedimento autorizado.
+- Global local repetido:3176 aprovados/87 skips, timeout MCP devtools;
+  isolado24/24 passou sem ampliar limites. Linux continua gate integral.
+- Review QIX: mes excluido sem fatos falha fechado antes dos cubos. Nao
+  converter X em zero. Ocorrencia real nao verificada; exige prova nativa se
+  surgir. Fontes oficiais/limites na revisao, nao alterar selecoes por suposicao.
+
 ## 2026-10-15: Integracao candidata e limite das evidencias
 
 - Renovacao integrada ao ramo PR216, ainda sem mapping produtivo. Revisao

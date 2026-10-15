@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-10-15: Mapping por ciclo e diagnostico fechado
+
+Factory local valida definicao e politica, deriva YTD no fuso de Sao Paulo,
+destaca/congela um mapa por ciclo para as duas sessoes e valida serializer
+antes de ler HMAC. PRODUCTION_DEFINITION continua null ate metadados reais.
+Revisao independente e62 testes mapping/launcher aprovados. Hash semantico
+inclui politica temporal e definicao estatica, nao os periodos derivados.
+
+Browser QIX descartava motivos conhecidos como collection_unavailable.
+Checker agora autocontido/serializado, com allowlist inalterada e sem mensagens
+brutas/campos extras. Regressao executa script serializado real:149 aprovados,
+um skip POSIX preexistente, incluindo abort/deadline/descarte. Lint/formatacao
+focais aprovados; CI/global/fatos deste delta ainda pendentes.
+
+## 2026-10-15: Main de renovacao e preparacao privada
+
+PR229 aprovado e integrado em9ffc8a9; CI main38753275427 ainda pendente.
+Checkout canonico e dependencias protegidas preparados; HMAC dedicado novo
+root0600, sem valor exposto ou flag ativa. Cofre de login ainda nao convertido.
+Artefato antecipado antes do fim dos gates nao autoriza promocao; download,
+verificacao e prova devem ser repetidos apos todos os jobs, conforme auditoria.
+Segunda execucao pnpm test:3176 aprovados/87 skips e um timeout MCP devtools;
+repeticao isolada aprovou24/24 em5,35s. Nenhuma assercao/limite foi alterado.
+
 ## 2026-10-15: Integracao da renovacao ao coletor de ranking
 
 Merge de a90d8f3 no ramo PR216 preserva autenticacao antes de HMAC/coleta,

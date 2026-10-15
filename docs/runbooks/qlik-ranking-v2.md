@@ -83,6 +83,15 @@ ou recarga, reducao, pagina incompleta ou identidade ambigua rejeita a carga.
 Fixtures e `verified:true` nao comprovam o mapeamento do tenant. O modulo de
 mapeamento produtivo permanece pendente ate a leitura privada do preflight.
 
+`ranking-mapping.mjs` falha fechado enquanto a definicao produtiva e null.
+Depois da conferencia nativa, a factory deriva janeiro ate o mes corrente do
+ano atual em America/Sao_Paulo. O SHA semantico inclui definicao estatica,
+proveniencia e politica temporal explicita; exclui somente periodos derivados.
+O launcher destaca/congela um snapshot por ciclo, valida sua serializacao antes
+do HMAC e o compartilha entre as duas sessoes. O ciclo seguinte recria o mapa.
+Motivos de falha QIX atravessam o browser somente pela allowlist versionada;
+nenhuma mensagem bruta do SDK, formula ou linha de dados entra no recibo.
+
 Publicacoes sao preservadas por ano. O reader retorna atual/anterior sob um
 snapshot SQL. Falha ou fonte mais antiga nao substitui a ultima carga valida.
 Movimento exige periodo, cobertura e mapeamento comparaveis. Publicacao nao

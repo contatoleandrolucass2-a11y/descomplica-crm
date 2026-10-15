@@ -2,6 +2,22 @@
 
 ## Retomada em 15/10/2026
 
+PR229/a90d8f3 aprovado na CI38747697537 e integrado em main9ffc8a9,
+merge2026-10-15T14:38:57Z. CI push38753275427 ainda pendente. Checkout
+canonico novo, dependencias copiadas de ad49634 apos igualdade package/lock;
+38123 entradas protegidas/root e legiveis conferidas. HMAC dedicado criado
+exclusivamente no caminho privado previsto, root0600/44bytes, com fsync e
+sem exposicao; nao habilitado no CRM/owner. Credencial de login nao convertida.
+
+Excecao operacional: artefato11982761300 foi baixado/carregado como imagem
+isolada antes da conferencia dos quatro jobs concluidos, contrariando a ordem
+do runbook PROMOTABLE_IMAGE_RUNTIME. Causa: antecipacao indevida da preparacao.
+ZIP77602d8a, tar83950120, config5530412d e manifesto64f2aad6/11 camadas
+conferidos; isso nao substitui o gate. Nenhum container/owner de producao foi
+alterado nem imagem promovida. Correcao exigida: aguardar quatro jobs success,
+repetir download/verificacao/prova em novo diretorio e somente entao promover
+pelo coordenador. Nao usar esta excecao como autorizacao ou procedimento futuro.
+
 Migration aditiva aplicada por Supabase MCP apos CI38742972444/ba96607 success
 e backup novo privado /srv/descomplica-backups/qlik-v2-pre-20261015-lAzyGoTT.
 Fonte versionada20261014170549; historico remoto20261015141558, nome
