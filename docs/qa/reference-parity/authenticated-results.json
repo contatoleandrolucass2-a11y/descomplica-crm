@@ -46606,8 +46606,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 2550784,
+        "totalPixels": 2564096,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
+          "tracked": true,
+          "bytes": 354388,
+          "sha256": "914238f42ff42cd195ed27a392493ccab6d023cd78ecd37f18d3ee31e42dcd98"
+        }
+      },
+      "path": "target-authenticated/configuracoes-metas-1024x768.webp",
+      "bytes": 354388,
+      "sha256": "914238f42ff42cd195ed27a392493ccab6d023cd78ecd37f18d3ee31e42dcd98",
+      "width": 1024,
+      "height": 2504,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1024,
+          "height": 2491
+        },
+        "actual": {
+          "width": 1024,
+          "height": 2504
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
           "tracked": true,
@@ -46615,37 +46639,13 @@
           "sha256": "8b7469aca1ca0e3f5a1f5ac48bcb34c88543f2ce87d6e89647b30613918c6155"
         }
       },
-      "path": "target-authenticated/configuracoes-metas-1024x768.webp",
-      "bytes": 356604,
-      "sha256": "8b7469aca1ca0e3f5a1f5ac48bcb34c88543f2ce87d6e89647b30613918c6155",
-      "width": 1024,
-      "height": 2491,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1024,
-          "height": 1967
-        },
-        "actual": {
-          "width": 1024,
-          "height": 2491
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
-          "tracked": true,
-          "bytes": 86888,
-          "sha256": "6090af930dffd3636bb2dd7dcaf045ba8578f01d893aa75a403496ec0d804eb5"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-15T19:10:40.789Z",
-        "captureCommit": "7ae8c2fac763f88d7b703c7a88881546a2c37399",
+        "capturedAt": "2026-10-16T01:33:53.607Z",
+        "captureCommit": "91a6431b61f8b4fb21bc5acc4ca1f26cf940d9ce",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "74c0a8036bdc3c20507c668d03f10a95d258853baf9b656469666869b64bccfa",
-        "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38785631184",
-        "artifactSha256": "0cda0bc52fc9c6ed4f110e6f35519a72a59a49a8fe1ccdcbb70525089546ac88"
+        "worktreeFingerprint": "f3dbe0307480759650206ee2b35083f57651553dd2dc53a64c2d16c55f3b52ec",
+        "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38831699685",
+        "artifactSha256": "dce6ac7d96eca763ea0136317e11433079bf0c4423f973d9c58f5829aa065f83"
       }
     },
     {
@@ -51693,8 +51693,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
         "tracked": true,
-        "bytes": 356604,
-        "sha256": "8b7469aca1ca0e3f5a1f5ac48bcb34c88543f2ce87d6e89647b30613918c6155"
+        "bytes": 354388,
+        "sha256": "914238f42ff42cd195ed27a392493ccab6d023cd78ecd37f18d3ee31e42dcd98"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1280x720.webp",
@@ -52934,7 +52934,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "b1af5a5d5752f38796f8bec5912adfdf6e5fa7b648056f558d9d99e0c3b8697c"
+    "manifestSha256": "38e511cfe407d9b630ab2ca15ac3f785cb58fd58d277144ba7f01b3549fc5b68"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -53485,6 +53485,156 @@
         "worktreeFingerprint": "74c0a8036bdc3c20507c668d03f10a95d258853baf9b656469666869b64bccfa",
         "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38785631184",
         "artifactSha256": "0cda0bc52fc9c6ed4f110e6f35519a72a59a49a8fe1ccdcbb70525089546ac88"
+      }
+    },
+    {
+      "approved": true,
+      "candidateResultSha256": "46479a891b0f33bbf8c72b7e113ef028840ce030d8e63fad6b935d660521108a",
+      "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38831699685",
+      "artifactSha256": "dce6ac7d96eca763ea0136317e11433079bf0c4423f973d9c58f5829aa065f83",
+      "reviewedAt": "2026-10-16T01:41:48.336Z",
+      "reviewScope": "Exactly one reviewed responsive light Meta screenshot at 1024x768; not release approval",
+      "reviewers": [
+        "meta_estilos (independent visual review)",
+        "root (coordinator approval)",
+        "menu_meta (provenance and preservation proof)"
+      ],
+      "approvedScreenshotKeys": [
+        "[\"/app/configuracoes/metas\",\"responsive\",\"tablet-1024x768\",\"light\"]"
+      ],
+      "reviewEvidence": "Calendar month minimum width preserves complete Agosto/2026. Block 07 starts at the same Y1792/1793/1794 boundary. Caption wraps from three to four lines, explaining the 13px full-page height increase. No collision or clipping found by the independent reviewer.",
+      "releaseApproved": false,
+      "followUp": "Human visual inspection and explicit reviewed approval required before promotion; full verify CI required afterwards.",
+      "mode": "inspect",
+      "headCommit": "3b38dec04ebe3a3fd520cc77458abd91ac44b3b5",
+      "captureCommit": "91a6431b61f8b4fb21bc5acc4ca1f26cf940d9ce",
+      "captureTree": "26cc92df9fc07a4f0d69a1ba25ce8d12fe9b10f3",
+      "artifactRoot": "C:\\Users\\Leandro Lucas\\.codex\\worktrees\\4c91\\DESCOMPLICA-CRM\\test-results\\meta-ci-38831699685\\test-results\\authenticated-visual",
+      "baselineResultSha256": "ef2c89f2369443bb6faaa897916257c7840f1a9958cc0323de67fc3658804eb4",
+      "harnessSha256": "06b28f26f20ff24cd1bef2fc9c421b7fb37bf22f8a5ea2b46e431b183df37da6",
+      "functionalChecksPassed": true,
+      "baselineCommittedAtStart": true,
+      "unchangedDuringCapture": true,
+      "screenshotHashesVerified": 242,
+      "changed": [
+        {
+          "route": "/app/configuracoes/metas",
+          "path": "docs/qa/reference-parity/target-authenticated/configuracoes-metas-1024x768.webp",
+          "sha256": "914238f42ff42cd195ed27a392493ccab6d023cd78ecd37f18d3ee31e42dcd98",
+          "previousSha256": "8b7469aca1ca0e3f5a1f5ac48bcb34c88543f2ce87d6e89647b30613918c6155"
+        }
+      ],
+      "preservedEntries": 241,
+      "fingerprint": {
+        "kind": "artifact-specific-generated-only",
+        "trackedDiff": "empty (proven by exact fingerprint reconstruction)",
+        "generatedFiles": [
+          {
+            "path": "output/playwright/connected-systems/balanced-1440.png",
+            "bytes": 168583,
+            "sha256": "00eb0450a14899eefc5274485f05f4c10882de15b31455c560346c3485b6ebb9"
+          },
+          {
+            "path": "output/playwright/connected-systems/balanced-320.png",
+            "bytes": 132629,
+            "sha256": "cfff31201f3b31912617c7609776214c7f6c67e6a922b3f52625f9a301b97a8f"
+          },
+          {
+            "path": "output/playwright/connected-systems/balanced-768.png",
+            "bytes": 169932,
+            "sha256": "1b9c49cd17eb818267e112c2a5706e9dd5d99891d4cd28c513f9a99e18640413"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-balanced-1440.png",
+            "bytes": 34696,
+            "sha256": "7fdaf4a85448bb749eea5fc5347f43bd8757a7c1c88d44bdb986d5e028988215"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-balanced-320.png",
+            "bytes": 15592,
+            "sha256": "89337b99d7b79f34e7896cacf9ae64fdd1e17947b2db1d669e84b927d54af2d0"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-balanced-768.png",
+            "bytes": 20862,
+            "sha256": "428cf42685611a810e56987911cd0fe91c6dbc233b050b94f0a441f544b6ed18"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-dark-1440.png",
+            "bytes": 35195,
+            "sha256": "e96ab9607903ee04b73289f3165bc623801e6a90822c85a575adf3ec966b190e"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-dark-320.png",
+            "bytes": 15888,
+            "sha256": "5beba77d9bae4a15cfe3f97facea7bdcd4dd144dd2b8858ba68e57f419c21d82"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-dark-768.png",
+            "bytes": 20965,
+            "sha256": "4b0467871984128637bc1d6359521fed4ec4818fcee7bb6824c919a25c1cc012"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-light-1440.png",
+            "bytes": 34547,
+            "sha256": "675c326e66b4331a7d87f584d8ba47e0a655009bbf6006a56b31ed4706400dec"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-light-320.png",
+            "bytes": 15322,
+            "sha256": "4d3a47759c7d14a10c6cb69a02631ba74345488d8b38eef44f72b7cb67fafa90"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-light-768.png",
+            "bytes": 20570,
+            "sha256": "f0ae6f7fae4f136b0529d05a73848148b9ce1a19fa1fded7e228ade780571ecb"
+          },
+          {
+            "path": "output/playwright/connected-systems/console-results.json",
+            "bytes": 246,
+            "sha256": "6954dcfb4867840b8073bdeb18964a8571d6b8743ee71a72a933ace4c0bc8996"
+          },
+          {
+            "path": "output/playwright/connected-systems/dark-1440.png",
+            "bytes": 168648,
+            "sha256": "d5d2a6a71a64971c33dfea98bcd933e74fb8c8b219daa58482e4835af55114b7"
+          },
+          {
+            "path": "output/playwright/connected-systems/dark-320.png",
+            "bytes": 133281,
+            "sha256": "f9ef58ce86228aab26b7535694ab5e4890f5df7ca660cac79722de52bbaf98f5"
+          },
+          {
+            "path": "output/playwright/connected-systems/dark-768.png",
+            "bytes": 170316,
+            "sha256": "82c994beb062e3fdeebb0f8b00ccaf85c899fefef1b31570abc85d7ce394a36b"
+          },
+          {
+            "path": "output/playwright/connected-systems/light-1440.png",
+            "bytes": 167150,
+            "sha256": "9957d69abb08d9df76641014634f22204c6a9d9dcadf40bdacbeefde31ad6596"
+          },
+          {
+            "path": "output/playwright/connected-systems/light-320.png",
+            "bytes": 130114,
+            "sha256": "c22332cda1067bf55ba093a9a74a5e2eac33ccc3df5e1de629e0c00cfaf13e28"
+          },
+          {
+            "path": "output/playwright/connected-systems/light-768.png",
+            "bytes": 168446,
+            "sha256": "88eb76c744da1376aa09b4d1efb07d9c91a57ec1af49f626f5f1202a102e1b75"
+          }
+        ],
+        "reproducedFingerprint": "f3dbe0307480759650206ee2b35083f57651553dd2dc53a64c2d16c55f3b52ec"
+      },
+      "baselineModified": false,
+      "captureProvenance": {
+        "capturedAt": "2026-10-16T01:33:53.607Z",
+        "captureCommit": "91a6431b61f8b4fb21bc5acc4ca1f26cf940d9ce",
+        "worktreeDirtyAtCapture": true,
+        "worktreeFingerprint": "f3dbe0307480759650206ee2b35083f57651553dd2dc53a64c2d16c55f3b52ec",
+        "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38831699685",
+        "artifactSha256": "dce6ac7d96eca763ea0136317e11433079bf0c4423f973d9c58f5829aa065f83"
       }
     }
   ],

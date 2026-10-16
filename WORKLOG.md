@@ -6360,3 +6360,5 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Corrige step inteiro nas cinco taxas, permitindo percentuais fracionários aceitos pelo servidor. Contagens mantêm passo inteiro.
 - Acrescenta verificação nativa de1.67/2.42 e restauração dos valores no preview; cálculos, fixtures e limites de servidor permanecem intactos.
 - CI38829857417 cancelada após validate aprovado; nova combinação deve cumprir todos os gates antes de publicação.
+
+- Meta: revisa única divergência visual DV1024 (13px da legenda após corrigir calendário); mantém241referências e exige novaCI.

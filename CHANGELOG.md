@@ -2551,3 +2551,5 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 ## 2026-10-15: Percentuais fracionários de Meta
 
 - Permite validar e salvar rascunhos com taxas como1,67%, preservando o valor informado.
+
+- Meta: registra referência de calendário legível em1024px, sem alterar limiares deQA.

@@ -3475,3 +3475,5 @@ Retomada16/10/2026 00:19UTC: main e health HTTP200/statusok permanecem d83c22d; 
 Consulta16/10/2026 00:29UTC: main17ab106 com CI38829007559 em andamento; produção HTTP200/statusok ainda d83c22d. Meta:30capturas compiladas passaram e combinação final aguarda CI. [Evidências](../audits/meta-2026-10-15.md).
 
 Meta: calendário revisado em18capturas e30checks compilados; validate Linux38829857417 aprovado. Teste Windows teve3036pass/87skip/7falhas (seis timeouts e symlink); detalhes e limite de arredondamento legado na auditoria. Publicação ainda pendente.
+
+- Meta,15/10/2026 22h40BRT:CI38831699685 passou validação,restauração eE2E; única divergência visual de13px emDV1024 decorrente da correção legítima do calendário. Revisão/proveniência e plano de atualização de apenas1referência em[Auditoria Meta](../audits/meta-2026-10-15.md). Publicação bloqueada até novaCI completa; nenhuma mutação em produção.
