@@ -19,6 +19,8 @@
   filtros de periodo/visao nas etapas e ranking.
 - Mantem o E2E valido quando ainda nao existe snapshot, sem depender do atributo
   opcional que identifica a fonte da coleta.
+- Confere persistencia do novo filtro de canal no auto-refresh autenticado,
+  preservando as provas de resposta completa, rolagem e detalhes abertos.
 - Calcula metas mensais por responsavel unico e esperado proporcional ao dia;
   atualiza a pagina na virada do dia de Sao Paulo.
 - Remove controles/textos indicados na raiz e resume tabelas em uma linha

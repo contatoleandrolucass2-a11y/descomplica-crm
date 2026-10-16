@@ -12,6 +12,10 @@ DDL remoto. Evidencias: docs/audits/dashboard-filtros-metas-2026-10-15.md.
 CI38836371948 confirmou os mesmos gates, mas o novo teste usava atributo de
 fonte opcional em cenario sem snapshot. Seletor alterado para landmark main,
 mantendo todas as assercoes funcionais. Nao altera a interface ou a fonte.
+CI38838263880 aprovou o E2E autenticado. Matriz interrompeu em auto-refresh:
+o helper ainda exigia o link antigo de periodo. Atualizado para canal canonico
+na URL e checkbox selecionado, preservando provas de RSC completo, uma unica
+requisicao, URL, rolagem e detalhes abertos. Nenhum gate removido.
 
 Implementacao em `codex/dashboard-filtros-metas`, base a7fdf92. Usuario confirmou
 as colunas de origem, metas por responsavel unico dos relatorios filtrados e

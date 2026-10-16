@@ -10,6 +10,9 @@
 - CI38836371948/270ccb3 repetiu banco/restore aprovados; E2E dependia de
   atributo opcional ausente sem snapshot. Seletor corrigido; quatro casos
   sinteticos passaram com/sem coleta. Matriz autenticada ainda pendente.
+- CI38838263880/01cea33: E2E autenticado aprovado. Matriz parou no helper de
+  auto-refresh que exigia link removido; atualizado para selecao real de canal,
+  sem reduzir provas de RSC/estado. Referencias e ativacao ainda pendentes.
 
 - Retomada18:36Z: maina7fdf92, CI38775901605 success; site200/ok/fae77f9.
   Branch codex/dashboard-filtros-metas criada do main. PR234 documental tem

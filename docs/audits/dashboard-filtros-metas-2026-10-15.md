@@ -49,6 +49,11 @@ Nenhuma permissao Qlik ou workflow n8n foi alterado.
   alteracao de produto ou reducao de assertions. Nova CI completa necessaria.
 - Reteste Playwright local: quatro casos, com e sem snapshot e entradas month/
   week, aprovados com os seletores finais. Prova sintetica, nao autenticacao.
+- CI38838263880/01cea33: validate, restore, banco e E2E autenticado aprovados.
+  Matriz interrompida no helper dashboard-auto-refresh, que ainda exigia link
+  de periodo removido. Artefato12021440037 registra failure.stage correspondente;
+  ainda nao ha captura completa elegivel para promover referencias. Helper
+  passa a usar selecao canonica de canal; demais assercoes de RSC/estado mantidas.
 
 ## Estado remoto e recuperacao preparada
 
