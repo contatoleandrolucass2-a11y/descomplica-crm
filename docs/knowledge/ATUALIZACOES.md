@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-16: Grupos de funis em validacao no PR245
+
+- Resultado da CI38970011556: validate/restore aprovados,
+  mas E2E exigia report-diagnosis-title removido. Atualizado
+  e2e/release-candidate.spec.ts para exigir13 funis/78 etapas, ordem3/5/5
+  e ausencia das secoes removidas. Guards e demais paginas preservados;
+  nova CI obrigatoria antes de publicar. Comparacao visual autenticada nao rodou.
+
+- Fonte GitHub CI38970011556: validate e isolated-restore aprovados;
+  release-gates ainda em andamento. Base main34517ba2 integrada emc20d0dc7;
+  arvore coincide com merge de teste1be8d014 emd75318ac599d8dd0660a65d4ad2eab268376b77b.
+- GET observacional https://crm.descomplicapro.com.br/api/health em21:41:35Z:
+  HTTP200/statusok/version34517ba2b2e4022f52bec29260e071b9cf124cca.
+  Publicacao concorrente de Qlik; nao e a entrega dos grupos do dashboard.
+- QA local:200 verificacoes aprovadas nos tres temas,320/390/768/1440/1920px,
+  com dados sinteticos; build, lint, tipos e3670 testes Vitest aprovados.
+  pnpm test local parou depois por ACL temporaria Windows em testes de
+  publish-candidate Salesforce; sem relaxar permissoes. Comando completo
+  aprovado na CI Linux da arvore equivalente. Limite e evidencia no audit
+  docs/audits/dashboard-grupos-2026-10-16.md; reavaliar com gates finais.
+- Nenhum deploy desta entrega, migration ou workflow n8n executado.
+
 ## 2026-10-16: Retomada dos grupos de funis
 
 - Fonte Git fetch origin e GitHub via gh na VPS: main69ae9839, CI38928064973

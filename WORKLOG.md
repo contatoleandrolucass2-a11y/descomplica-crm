@@ -2,6 +2,13 @@
 
 ## 2026-10-16: Grupos comparativos do dashboard
 
+QA local concluido:200 verificacoes aprovadas nos tres temas e320 a1920px;
+3670 Vitest aprovados, build aprovado. Suite Node local bloqueada por ACL
+Windows temporaria de Salesforce, sem alterar permissoes; validate Linux
+aprovado. CI38970011556 aprovou restauracao, mas E2E ainda exigia secoes
+removidas. Jornada atualizada para13 funis,78 etapas e ordem3/5/5, preservando
+guards e navegacao das demais paginas. Nova CI necessaria; sem deploy.
+
 Implementa treze funis em grupos3/5/5: metas, periodos do mes vigente e
 historico com media por uma venda. Recorta semana anterior e ontem ao mes
 atual, preserva indisponibilidade e evita dividir por vendas nulas ou zero.
@@ -10,7 +17,7 @@ tabelas operacionais, equipe e ranking apenas deste dashboard; preserva roscas.
 Layout empilha funis no celular, sem exigir rolagem horizontal.
 Validacao parcial:13 testes de periodos,28 de apresentacao e fechamento dos
 filtros em Chromium desktop/mobile passaram. Lint e tipos passaram na retomada.
-Gates completos e matriz visual ainda em verificacao; nao publicado.
+Gates completos ainda em verificacao; nao publicado.
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
