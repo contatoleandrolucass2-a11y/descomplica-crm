@@ -26,6 +26,49 @@ cargas. Main d83c22d integrado; main17ab106 observado depois, integracao pendent
 pgTAP, CI, nova build e publicacao em andamento; nao comprovam ativacao.
 Detalhes e limites: docs/dashboard-dimensional-filters.md.
 
+## 2026-10-15: Projecao delimitada e diagnostico de limites
+
+Catalogo retido limitado a IDs comerciais, filtros/calendario e campos
+referenciados. Normalizacao de acento somente para matching; qName original
+preservado. Titulos/campos alheios sao ignorados antes do limite de retencao;
+objetos relevantes continuam sujeitos aos mesmos caps. Cinco aliases nativos
+fixos, tres adicionais somente quando referenciados diretamente no cubo.
+Erro de limite agora expoe apenas stage/kind/observed/maximum validados;
+nenhuma mensagem SDK, nome privado, formula ou valor e publicado.
+
+Focais Node207/207 e revisao independente22 probes passaram, sem P1/P2;
+fingerprint dos quatro arquivos a21af516fda85fae7069380ef7bfcbdfdc2b604b30c840eb407261ace4c8d447.
+Lint e tipos globais passaram. Teste global Windows terminou exit1 apos
+4918.24s:10 arquivos falharam/132 passaram;26 testes falharam/2798 passaram/
+85 skips,5 erros incluindo Timeout waiting for worker to respond. Causa de
+todas as falhas nao isolada; nao declarar regressao resolvida ou suite verde.
+Node/release nao executaram pelo encadeamento; build interrompido antes de
+conclusao para integrar main. Nova rodada com um worker e CI Linux pendentes.
+
+Main remoto d83c22d/PR232; GET publico20:16:53Z200/ok/d83c22d e coordinator
+deployment72be7b10,19:15:11.541Z/imagem2e832356. Owner Qlik00bbab75/a7fdf92
+permanece sem fatos e sem pendencia. Transporte SSH/GitHub temporariamente
+indisponivel recuperado sem mutacao. Integrar mudancas concorrentes antes da
+CI; novo metadata real necessario para identificar qual cap falhou.
+
+## 2026-10-15: Limite de metadados em fonte real
+
+Maina7fdf92/CI38775901605 quatro gates success. Artefato11993912111 baixado
+somente apos gates, ZIPcd46ea9c/tare589a5cb/config3317425c/manifesto9346dc27;
+cadeia11 camadas e image:prove2 perfis passaram. Sem build ou deploy CRM.
+Checkout0700/0600 criado sob umask077 bloqueou antes de intencao. Normalizados
+somente codigo Git e pais, com bytes/Git limpo,1369 arquivos/203 diretorios;
+1572 modos, sem ignorados/segredos/perfil. Probe inicial Node18 nao valida;
+repeticao correta com Node24/env limpo/usuario tecnico passou SDK/script.
+
+Owner promovido pelo coordenador18:12:40.057Z, ID00bbab75-3495-425e-ac7f-a7217f5186e1,
+SHAa7fdf92, sem pendencia. Preflightunavailable/qix_metadata_limit, sem fatos.
+Snapshot privado7WjFNw/181bytes, observado18:12:39.879Z,
+SHA256afaa9c83c82bf261be03e6d473471dbe7c6e4de8d4cc788b7e87aa9555e74069e.
+CRM8e3594fd/fae77f9 preservado, health18:12:04Z200/ok. Novo ramo corretivo
+restringe projecao e acrescenta diagnosticos fixos, sem alegar qual contador
+atingiu o limite ou aumentar caps para passar. Mapeamento/fatos continuam pendentes.
+
 ## 2026-10-15: Compatibilidade do diretório de produção
 
 - Incorpora o dashboard aprovado de `fae77f9a` e revisa a captura Linux `38766616330`: onze imagens de Usuários atualizadas, 231 imagens preservadas, 242 hashes conferidos e toda a matriz funcional aprovada. O workflow temporário foi removido; a CI normal continua obrigatória.
