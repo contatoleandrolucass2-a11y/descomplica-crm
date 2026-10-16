@@ -112,7 +112,12 @@ describe("FAQ Associativo: material de referência de 30/09/2026", () => {
         "não 50% da renda anual",
         "1,005",
       ],
-      43: ["40%, 30%, 20% e 10%", "B64, B68, B72 e B76", "WF-13B", "Não são a mesma coisa que SAC"],
+      43: [
+        "40%, 30%, 20% e 10%",
+        "B64, B68, B72 e B76",
+        "processos oficiais de cálculo",
+        "Não são a mesma coisa que SAC",
+      ],
     };
     for (const [id, fragments] of Object.entries(required)) {
       for (const fragment of fragments)

@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-15: Códigos de workflow ocultos na interface comercial
+
+- A captura Linux limpa `38828948624` passou em todos os gates funcionais. Foram revisadas e incorporadas somente quatro imagens móveis do Hub; as outras 238 imagens e a proveniência das atualizações de Metas, Ranking e Usuários foram preservadas. Os 242 hashes finais foram conferidos. O workflow temporário foi removido, e a CI normal continua obrigatória.
+- Integra `main` em `b5458ff5eef483d76ee58c9c14129d3872de8291`, preservando as alterações concorrentes de Metas e Qlik. A produção observada em 16/10/2026 às 03:15 UTC estava em `b9377a1031865a01dccfbda4a87fa2d2dd84b2c5`, publicada às 02:59:30.399 UTC. Esta observação não substitui a consulta final protegida.
+
+- A CI `38824006181` aprovou os testes funcionais, a acessibilidade e o ensaio de restauração. Quatro referências móveis do Hub divergiram somente na altura após a retirada dos códigos. Um workflow temporário reproduz a captura em Linux, com checkout limpo e os mesmos gates funcionais, para revisão antes da nova CI normal.
+
+- Remove os códigos WF dos cards do Hub de Simulação, dos cabeçalhos, das mensagens, da ajuda e da versão técnica exibida no resultado. Mantém os nomes comerciais e os indicadores CAIXA, CONSULTA e de autorização.
+- Preserva os identificadores internos, as rotas, as permissões, os contratos de API e todas as regras de cálculo. A implementação parte de `d83c22d510478ee089f8c5cb5969a488451d433b`, em checkout isolado.
+- Atualiza as expectativas existentes de apresentação. Lint, tipos, build e auditoria de dependências passaram; o lint mantém um aviso anterior em `scripts/qa/connected-systems.mjs`. A suíte verificou 3.034 testes Vitest, 572 testes operacionais e 531 testes de release, sem falhas; os skips condicionais de plataforma e ambiente permanecem explícitos.
+- A prévia sintética renderizada pelo componente real do Hub foi conferida em 1440 e 390 pixels: seis links preservados, nenhum código WF visível e nenhuma rolagem horizontal. As capturas locais não substituem a matriz autenticada Linux da CI. Produção permanece sem alteração nesta etapa.
+
 ## 2026-10-15: Legibilidade de Meta no CSS compilado
 
 - Revisao independente recusou as capturas anteriores: percentuais ocultos

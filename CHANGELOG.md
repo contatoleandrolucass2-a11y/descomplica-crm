@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-15 — Simuladores sem códigos internos visíveis
+
+- Atualiza quatro referências visuais móveis do Hub após revisão da captura Linux limpa; preserva as outras 238 imagens e os gates de publicação.
+
+- Remove as referências WF da interface e da ajuda dos simuladores, mantendo os nomes comerciais, os estados de disponibilidade e as regras de cálculo.
+
 ## 2026-10-15: Correcao visual de Meta compilada
 
 - Mantem os percentuais dos donuts legiveis no tema escuro apos minificacao.
