@@ -10,7 +10,7 @@ export function InvestorTableArchive() {
     >
       <main className="investor-main">
         <SimulationCanvasHeader
-          eyebrow="Simulação · WF15"
+          eyebrow="Simulação"
           title="Simulador Tabela Investidor"
           description="Seleção de estoque e montagem da proposta para conferência comercial."
           statusLabel="Estoque · fonte identificada"

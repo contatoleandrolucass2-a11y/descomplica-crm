@@ -17,14 +17,14 @@ export const dynamic = "force-dynamic";
 
 interface HubSimulator {
   slug: string;
-  code: string;
+  badge?: string;
   title: string;
   description: string;
 }
 
 const TABELAO_HUB_ITEM: HubSimulator = {
   slug: "tabelao",
-  code: "CONSULTA",
+  badge: "CONSULTA",
   title: "Tabelão",
   description: "Consulta unificada de estoque para visão ampliada e análise comercial.",
 };
@@ -55,7 +55,7 @@ function SimulatorCardContent({
       <span>
         <h2>{simulator.title}</h2>
         <p>{simulator.description}</p>
-        <span className={styles.hubCode}>{simulator.code}</span>
+        {simulator.badge ? <span className={styles.hubCode}>{simulator.badge}</span> : null}
         {!releaseEnabled || engineBlocked ? (
           <span className={styles.hubBlocked}>Aguardando autorização</span>
         ) : null}
@@ -75,7 +75,7 @@ export default async function SimulationHubPage() {
     authorization,
   );
   const simulatorCards = SIMULATOR_LIST.map((simulator) => ({
-    simulator,
+    simulator: simulator.slug === "caixa" ? { ...simulator, badge: "CAIXA" } : simulator,
     releaseEnabled:
       getProtectedPageGate(`/app/simulacao/${simulator.slug}`)?.releaseEnabled === true,
   }));

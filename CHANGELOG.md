@@ -25,6 +25,12 @@
 - Mostra as páginas vinculadas a cada acesso e permite encontrá-las na busca. Substitui a paginação do catálogo por uma região de rolagem contínua, acessível por teclado, com todos os resultados dos filtros.
 - Remove a reconstrução de páginas suplementares fora do banco, para que desativar uma página não a recrie no menu. Validação e publicação serão registradas após a conclusão dos gates.
 
+## 2026-10-15 — Simuladores sem códigos internos visíveis
+
+- Atualiza quatro referências visuais móveis do Hub após revisão da captura Linux limpa; preserva as outras 238 imagens e os gates de publicação.
+
+- Remove as referências WF da interface e da ajuda dos simuladores, mantendo os nomes comerciais, os estados de disponibilidade e as regras de cálculo.
+
 ## 2026-10-15: Correcao visual de Meta compilada
 
 - Mantem os percentuais dos donuts legiveis no tema escuro apos minificacao.

@@ -42061,7 +42061,7 @@
         "reason": "within_threshold",
         "changedPixels": 46,
         "totalPixels": 1404000,
-        "changedPixelRatio": 3.2763532763532764e-5,
+        "changedPixelRatio": 0.000032763532763532764,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
           "tracked": true,
@@ -42098,7 +42098,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.328491890583394e-5,
+        "changedPixelRatio": 0.00003328491890583394,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
           "tracked": true,
@@ -42274,7 +42274,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1440x900.webp",
           "tracked": true,
@@ -42356,7 +42356,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8075380166060266e-5,
+        "changedPixelRatio": 0.000018075380166060266,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
           "tracked": true,
@@ -42393,7 +42393,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1722240,
-        "changedPixelRatio": 7.199925678186548e-5,
+        "changedPixelRatio": 0.00007199925678186548,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
           "tracked": true,
@@ -42541,7 +42541,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1440x900.webp",
           "tracked": true,
@@ -42857,7 +42857,7 @@
         "reason": "within_threshold",
         "changedPixels": 46,
         "totalPixels": 1404000,
-        "changedPixelRatio": 3.2763532763532764e-5,
+        "changedPixelRatio": 0.000032763532763532764,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
           "tracked": true,
@@ -42894,7 +42894,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.328491890583394e-5,
+        "changedPixelRatio": 0.00003328491890583394,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
           "tracked": true,
@@ -43070,7 +43070,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-light-1440x900.webp",
           "tracked": true,
@@ -43152,7 +43152,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8075380166060266e-5,
+        "changedPixelRatio": 0.000018075380166060266,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
           "tracked": true,
@@ -43189,7 +43189,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1722240,
-        "changedPixelRatio": 7.199925678186548e-5,
+        "changedPixelRatio": 0.00007199925678186548,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
           "tracked": true,
@@ -43337,7 +43337,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-light-1440x900.webp",
           "tracked": true,
@@ -43653,7 +43653,7 @@
         "reason": "within_threshold",
         "changedPixels": 46,
         "totalPixels": 1404000,
-        "changedPixelRatio": 3.2763532763532764e-5,
+        "changedPixelRatio": 0.000032763532763532764,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
           "tracked": true,
@@ -43690,7 +43690,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.328491890583394e-5,
+        "changedPixelRatio": 0.00003328491890583394,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
           "tracked": true,
@@ -43866,7 +43866,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-balanced-1440x900.webp",
           "tracked": true,
@@ -43948,7 +43948,7 @@
         "reason": "within_threshold",
         "changedPixels": 32,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8658456945610598e-5,
+        "changedPixelRatio": 0.000018658456945610598,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
           "tracked": true,
@@ -43985,7 +43985,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1722240,
-        "changedPixelRatio": 7.199925678186548e-5,
+        "changedPixelRatio": 0.00007199925678186548,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
           "tracked": true,
@@ -44133,7 +44133,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
           "tracked": true,
@@ -44537,7 +44537,7 @@
         "reason": "within_threshold",
         "changedPixels": 45,
         "totalPixels": 1404000,
-        "changedPixelRatio": 3.205128205128205e-5,
+        "changedPixelRatio": 0.00003205128205128205,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
           "tracked": true,
@@ -44585,7 +44585,7 @@
         "reason": "within_threshold",
         "changedPixels": 45,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.4041394335511986e-5,
+        "changedPixelRatio": 0.000034041394335511986,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-dark-1440x900.webp",
           "tracked": true,
@@ -44805,7 +44805,7 @@
         "reason": "within_threshold",
         "changedPixels": 45,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.324468085106383e-5,
+        "changedPixelRatio": 0.00003324468085106383,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-dark-1440x900.webp",
           "tracked": true,
@@ -44909,7 +44909,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8075380166060266e-5,
+        "changedPixelRatio": 0.000018075380166060266,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
           "tracked": true,
@@ -44957,7 +44957,7 @@
         "reason": "within_threshold",
         "changedPixels": 115,
         "totalPixels": 1722240,
-        "changedPixelRatio": 6.677350427350428e-5,
+        "changedPixelRatio": 0.00006677350427350428,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
           "tracked": true,
@@ -45149,7 +45149,7 @@
         "reason": "within_threshold",
         "changedPixels": 45,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.324468085106383e-5,
+        "changedPixelRatio": 0.00003324468085106383,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-dark-1440x900.webp",
           "tracked": true,
@@ -45465,7 +45465,7 @@
         "reason": "within_threshold",
         "changedPixels": 46,
         "totalPixels": 1269760,
-        "changedPixelRatio": 3.6227318548387094e-5,
+        "changedPixelRatio": 0.000036227318548387094,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
           "tracked": true,
@@ -45502,7 +45502,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 944640,
-        "changedPixelRatio": 4.657859078590786e-5,
+        "changedPixelRatio": 0.00004657859078590786,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
           "tracked": true,
@@ -45678,7 +45678,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 986880,
-        "changedPixelRatio": 4.4584954604409855e-5,
+        "changedPixelRatio": 0.000044584954604409855,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1280x720.webp",
           "tracked": true,
@@ -45760,7 +45760,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1524480,
-        "changedPixelRatio": 2.03348026868178e-5,
+        "changedPixelRatio": 0.0000203348026868178,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
           "tracked": true,
@@ -45797,7 +45797,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1530880,
-        "changedPixelRatio": 8.099916387959867e-5,
+        "changedPixelRatio": 0.00008099916387959867,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
           "tracked": true,
@@ -45945,7 +45945,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 972800,
-        "changedPixelRatio": 4.523026315789474e-5,
+        "changedPixelRatio": 0.00004523026315789474,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1280x720.webp",
           "tracked": true,
@@ -46261,7 +46261,7 @@
         "reason": "within_threshold",
         "changedPixels": 36,
         "totalPixels": 1744896,
-        "changedPixelRatio": 2.0631602112676056e-5,
+        "changedPixelRatio": 0.000020631602112676056,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
           "tracked": true,
@@ -46298,7 +46298,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 804864,
-        "changedPixelRatio": 4.224316157760814e-5,
+        "changedPixelRatio": 0.00004224316157760814,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
           "tracked": true,
@@ -46474,7 +46474,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 827392,
-        "changedPixelRatio": 4.109297648514852e-5,
+        "changedPixelRatio": 0.00004109297648514852,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
           "tracked": true,
@@ -46556,7 +46556,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 1219584,
-        "changedPixelRatio": 1.7218986146095718e-5,
+        "changedPixelRatio": 0.000017218986146095718,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
           "tracked": true,
@@ -46593,7 +46593,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 1224704,
-        "changedPixelRatio": 6.613843018394648e-5,
+        "changedPixelRatio": 0.00006613843018394648,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
           "tracked": true,
@@ -46741,7 +46741,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 827392,
-        "changedPixelRatio": 4.109297648514852e-5,
+        "changedPixelRatio": 0.00004109297648514852,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1024x768.webp",
           "tracked": true,
@@ -47057,7 +47057,7 @@
         "reason": "within_threshold",
         "changedPixels": 36,
         "totalPixels": 1774080,
-        "changedPixelRatio": 2.0292207792207792e-5,
+        "changedPixelRatio": 0.000020292207792207792,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-768x1024.webp",
           "tracked": true,
@@ -47094,7 +47094,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 969984,
-        "changedPixelRatio": 3.505212457112695e-5,
+        "changedPixelRatio": 0.00003505212457112695,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
           "tracked": true,
@@ -47270,7 +47270,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 955392,
-        "changedPixelRatio": 3.5587486602357986e-5,
+        "changedPixelRatio": 0.000035587486602357986,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-768x1024.webp",
           "tracked": true,
@@ -47352,7 +47352,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 923904,
-        "changedPixelRatio": 2.272963424771405e-5,
+        "changedPixelRatio": 0.00002272963424771405,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
           "tracked": true,
@@ -47389,7 +47389,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 1382400,
-        "changedPixelRatio": 5.859375e-5,
+        "changedPixelRatio": 0.00005859375,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
           "tracked": true,
@@ -47537,7 +47537,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 817152,
-        "changedPixelRatio": 4.1607926065162905e-5,
+        "changedPixelRatio": 0.000041607926065162905,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-768x1024.webp",
           "tracked": true,
@@ -47853,7 +47853,7 @@
         "reason": "within_threshold",
         "changedPixels": 36,
         "totalPixels": 1197690,
-        "changedPixelRatio": 3.0057861383162586e-5,
+        "changedPixelRatio": 0.000030057861383162586,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-390x844.webp",
           "tracked": true,
@@ -47890,7 +47890,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 622050,
-        "changedPixelRatio": 5.465798569246845e-5,
+        "changedPixelRatio": 0.00005465798569246845,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
           "tracked": true,
@@ -48045,28 +48045,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 530400,
+        "totalPixels": 514020,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-390x844.webp",
           "tracked": true,
-          "bytes": 46260,
-          "sha256": "69060c76423be4202c591a77dfd97f543e64b291a147b96237bfba1f4ea4bda8"
+          "bytes": 45174,
+          "sha256": "553e2ce334918a9c912b47ecb1a8dcc6896a629c46a6ed644ad30b79cb898dcc"
         }
       },
       "path": "target-authenticated/simulacao-390x844.webp",
-      "bytes": 46260,
-      "sha256": "69060c76423be4202c591a77dfd97f543e64b291a147b96237bfba1f4ea4bda8",
+      "bytes": 45174,
+      "sha256": "553e2ce334918a9c912b47ecb1a8dcc6896a629c46a6ed644ad30b79cb898dcc",
       "width": 390,
-      "height": 1360,
+      "height": 1318,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 34,
-        "totalPixels": 530400,
-        "changedPixelRatio": 6.41025641025641e-5,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 1360
+        },
+        "actual": {
+          "width": 390,
+          "height": 1318
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-390x844.webp",
           "tracked": true,
@@ -48148,7 +48154,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 721890,
-        "changedPixelRatio": 2.909030461704692e-5,
+        "changedPixelRatio": 0.00002909030461704692,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
           "tracked": true,
@@ -48185,7 +48191,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 841620,
-        "changedPixelRatio": 9.624296000570329e-5,
+        "changedPixelRatio": 0.00009624296000570329,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-390x844.webp",
           "tracked": true,
@@ -48333,7 +48339,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 344760,
-        "changedPixelRatio": 9.861932938856015e-5,
+        "changedPixelRatio": 0.00009861932938856015,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-390x844.webp",
           "tracked": true,
@@ -48649,7 +48655,7 @@
         "reason": "within_threshold",
         "changedPixels": 38,
         "totalPixels": 1197690,
-        "changedPixelRatio": 3.1727742571116064e-5,
+        "changedPixelRatio": 0.000031727742571116064,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
           "tracked": true,
@@ -48686,7 +48692,7 @@
         "reason": "within_threshold",
         "changedPixels": 38,
         "totalPixels": 622050,
-        "changedPixelRatio": 6.108833695040591e-5,
+        "changedPixelRatio": 0.00006108833695040591,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
           "tracked": true,
@@ -48841,28 +48847,34 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 530400,
+        "totalPixels": 514020,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
           "tracked": true,
-          "bytes": 46600,
-          "sha256": "573d41d069563494e314cc8b26cc32cf1b4401ac463089f9065e34db908ab1c0"
+          "bytes": 45542,
+          "sha256": "0f3032a1b21cd83ad895f2d2fa8fb9ed0e1a9e705b0c6137750195873f079618"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
-      "bytes": 46600,
-      "sha256": "573d41d069563494e314cc8b26cc32cf1b4401ac463089f9065e34db908ab1c0",
+      "bytes": 45542,
+      "sha256": "0f3032a1b21cd83ad895f2d2fa8fb9ed0e1a9e705b0c6137750195873f079618",
       "width": 390,
-      "height": 1360,
+      "height": 1318,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 38,
-        "totalPixels": 530400,
-        "changedPixelRatio": 7.164404223227752e-5,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 1360
+        },
+        "actual": {
+          "width": 390,
+          "height": 1318
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
           "tracked": true,
@@ -48944,7 +48956,7 @@
         "reason": "within_threshold",
         "changedPixels": 20,
         "totalPixels": 721890,
-        "changedPixelRatio": 2.770505201623516e-5,
+        "changedPixelRatio": 0.00002770505201623516,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
           "tracked": true,
@@ -48981,7 +48993,7 @@
         "reason": "within_threshold",
         "changedPixels": 82,
         "totalPixels": 841620,
-        "changedPixelRatio": 9.743114469713173e-5,
+        "changedPixelRatio": 0.00009743114469713173,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
           "tracked": true,
@@ -49445,7 +49457,7 @@
         "reason": "within_threshold",
         "changedPixels": 36,
         "totalPixels": 1189125,
-        "changedPixelRatio": 3.0274361400189216e-5,
+        "changedPixelRatio": 0.000030274361400189216,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-375x812.webp",
           "tracked": true,
@@ -49482,7 +49494,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 598125,
-        "changedPixelRatio": 5.684430512016719e-5,
+        "changedPixelRatio": 0.00005684430512016719,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
           "tracked": true,
@@ -49637,28 +49649,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 510000,
+        "totalPixels": 494250,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-375x812.webp",
           "tracked": true,
-          "bytes": 46212,
-          "sha256": "e8713b3bc11be053c510a969095a6f87d4c3efc19adfd9111342302334e335c4"
+          "bytes": 45192,
+          "sha256": "8e7de89bc45ce1c1d053eea2a7d196c4b7863f3b8aa4b5e1ef0329fd722379e9"
         }
       },
       "path": "target-authenticated/simulacao-375x812.webp",
-      "bytes": 46212,
-      "sha256": "e8713b3bc11be053c510a969095a6f87d4c3efc19adfd9111342302334e335c4",
+      "bytes": 45192,
+      "sha256": "8e7de89bc45ce1c1d053eea2a7d196c4b7863f3b8aa4b5e1ef0329fd722379e9",
       "width": 375,
-      "height": 1360,
+      "height": 1318,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 34,
-        "totalPixels": 510000,
-        "changedPixelRatio": 6.666666666666667e-5,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 1360
+        },
+        "actual": {
+          "width": 375,
+          "height": 1318
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-375x812.webp",
           "tracked": true,
@@ -49740,7 +49758,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 703125,
-        "changedPixelRatio": 2.9866666666666666e-5,
+        "changedPixelRatio": 0.000029866666666666666,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
           "tracked": true,
@@ -49777,7 +49795,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 825375,
-        "changedPixelRatio": 9.813721035892776e-5,
+        "changedPixelRatio": 0.00009813721035892776,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
           "tracked": true,
@@ -50241,7 +50259,7 @@
         "reason": "within_threshold",
         "changedPixels": 36,
         "totalPixels": 1035840,
-        "changedPixelRatio": 3.475440222428174e-5,
+        "changedPixelRatio": 0.00003475440222428174,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-320x568.webp",
           "tracked": true,
@@ -50278,7 +50296,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 519040,
-        "changedPixelRatio": 6.550554870530209e-5,
+        "changedPixelRatio": 0.00006550554870530209,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp",
           "tracked": true,
@@ -50433,28 +50451,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 480320,
+        "totalPixels": 445760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-320x568.webp",
           "tracked": true,
-          "bytes": 45628,
-          "sha256": "e411cf22e3b8923d9c0b4e4f758c6209c3131ab2550780a19afb0106b13dc6e6"
+          "bytes": 44374,
+          "sha256": "dc5c292ed4e857039d5e1da623b56edd54d15342b40bb96cef00237628cd3767"
         }
       },
       "path": "target-authenticated/simulacao-320x568.webp",
-      "bytes": 45628,
-      "sha256": "e411cf22e3b8923d9c0b4e4f758c6209c3131ab2550780a19afb0106b13dc6e6",
+      "bytes": 44374,
+      "sha256": "dc5c292ed4e857039d5e1da623b56edd54d15342b40bb96cef00237628cd3767",
       "width": 320,
-      "height": 1501,
+      "height": 1393,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 34,
-        "totalPixels": 480320,
-        "changedPixelRatio": 7.078614257161892e-5,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 1501
+        },
+        "actual": {
+          "width": 320,
+          "height": 1393
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-320x568.webp",
           "tracked": true,
@@ -50536,7 +50560,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 636480,
-        "changedPixelRatio": 3.299396681749623e-5,
+        "changedPixelRatio": 0.00003299396681749623,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp",
           "tracked": true,
@@ -51751,6 +51775,90 @@
         "sha256": "13235b8b0b3bc7f061191f4bcea08f7a2d586631ed8c7a06ac525a17cbabbbc5"
       },
       {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1024x768.webp",
+        "tracked": true,
+        "bytes": 53812,
+        "sha256": "2a1d55af66ba3e1e7ae618415fc23c0a567d23a51c0535b77f1482f9ddd75cd5"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1280x720.webp",
+        "tracked": true,
+        "bytes": 58944,
+        "sha256": "f3e24c4ab87b0f8c2bf92341c4c40185c2a6e7c77e781c3aaac7a5b0c5013f0d"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1440x900.webp",
+        "tracked": true,
+        "bytes": 60526,
+        "sha256": "365a375569503a731b8cdffe33b1a4cc8ab80cbe67be2cb4560e1167f0ea4f65"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-320x568.webp",
+        "tracked": true,
+        "bytes": 36812,
+        "sha256": "523c4688116aff03fd1f8e08704e8fcf60e60f648df1dfd56d260283e8ff2a6d"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-375x812.webp",
+        "tracked": true,
+        "bytes": 38310,
+        "sha256": "cfed857aa2164b2583e3281d69b27fefb3e01b53e7b965703f867f6865c52e1d"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-390x844.webp",
+        "tracked": true,
+        "bytes": 38266,
+        "sha256": "1eedd5489dce48a493c7a9105ba935fdfd45ee48a2fd4795968277193088fd00"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-768x1024.webp",
+        "tracked": true,
+        "bytes": 38504,
+        "sha256": "611a3729e527f17be72145639a32249d7b2c54bf42eb01a1b36f76c0de135f9e"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
+        "tracked": true,
+        "bytes": 94360,
+        "sha256": "76927a09926690150abb385ad2eadec4085a13a44056fc90a97931cd601e68aa"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
+        "tracked": true,
+        "bytes": 98358,
+        "sha256": "724a82011c5c1eee89c3586e81669fe897fa2854de628cbb9f866972cb883e93"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
+        "tracked": true,
+        "bytes": 99036,
+        "sha256": "e76505a1bdfec0762eacf22aab09a0a69f68fe65a9090036407dc90c756d6d34"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
+        "tracked": true,
+        "bytes": 81408,
+        "sha256": "f54e24c2c1c7eefd22bad5b15c41881d085f2264be577ea8d3a2f93b1539b149"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
+        "tracked": true,
+        "bytes": 84556,
+        "sha256": "43f7d93c32e597be5e72c0128eff8295f123245956c714379ddacd05b6ed6bb9"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
+        "tracked": true,
+        "bytes": 84522,
+        "sha256": "d6bc509d6bad28cb784aa355b7bce428c1519ee560c6bdec7d0da7f5eb193b49"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp",
+        "tracked": true,
+        "bytes": 93400,
+        "sha256": "5c201dfe4ee8b18c328f40175284860483f2600e1223897745a3f3a322d079a4"
+      },
+      {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
         "tracked": true,
         "bytes": 107828,
@@ -52275,20 +52383,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-320x568.webp",
         "tracked": true,
-        "bytes": 45628,
-        "sha256": "e411cf22e3b8923d9c0b4e4f758c6209c3131ab2550780a19afb0106b13dc6e6"
+        "bytes": 44374,
+        "sha256": "dc5c292ed4e857039d5e1da623b56edd54d15342b40bb96cef00237628cd3767"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-375x812.webp",
         "tracked": true,
-        "bytes": 46212,
-        "sha256": "e8713b3bc11be053c510a969095a6f87d4c3efc19adfd9111342302334e335c4"
+        "bytes": 45192,
+        "sha256": "8e7de89bc45ce1c1d053eea2a7d196c4b7863f3b8aa4b5e1ef0329fd722379e9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-390x844.webp",
         "tracked": true,
-        "bytes": 46260,
-        "sha256": "69060c76423be4202c591a77dfd97f543e64b291a147b96237bfba1f4ea4bda8"
+        "bytes": 45174,
+        "sha256": "553e2ce334918a9c912b47ecb1a8dcc6896a629c46a6ed644ad30b79cb898dcc"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-768x1024.webp",
@@ -52567,6 +52675,42 @@
         "sha256": "e693bf86ca841d481bfb15bad0a6fb8aa386743b01a85438f217a3ed69f1df07"
       },
       {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-balanced-1440x900.webp",
+        "tracked": true,
+        "bytes": 59686,
+        "sha256": "0089f3202202ca9ca977db5665b27e269cf8d38f9c338bcc2e5d8d7842312933"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-dark-1440x900.webp",
+        "tracked": true,
+        "bytes": 60910,
+        "sha256": "fef59edc231e95c6cdaf729dbf1687d770c3378a509015c97c3422fb8812b688"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-light-1440x900.webp",
+        "tracked": true,
+        "bytes": 60526,
+        "sha256": "365a375569503a731b8cdffe33b1a4cc8ab80cbe67be2cb4560e1167f0ea4f65"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
+        "tracked": true,
+        "bytes": 97828,
+        "sha256": "5fb9f3e04a74124e6bcd2e6548b6eab9e9dcd17db8a5c8b7f3be7cc39578f0e8"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
+        "tracked": true,
+        "bytes": 99324,
+        "sha256": "171f4bca5224af0278137a984823efcc97447059f13994fb878da22b31019d4b"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
+        "tracked": true,
+        "bytes": 99036,
+        "sha256": "e76505a1bdfec0762eacf22aab09a0a69f68fe65a9090036407dc90c756d6d34"
+      },
+      {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
         "tracked": true,
         "bytes": 101662,
@@ -52771,6 +52915,18 @@
         "sha256": "3049995131794ad4e63dcc3f2324803bcd1b98eda1d6dad38e76d09e731f8fd2"
       },
       {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-paginas-dark-390x844.webp",
+        "tracked": true,
+        "bytes": 38290,
+        "sha256": "80f478e7b0dbe7087e50432c1f877934a263c64f79c558e2370f10697e76e76c"
+      },
+      {
+        "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
+        "tracked": true,
+        "bytes": 84694,
+        "sha256": "4485f6ad854214a83569276c57cd2826713b5579455f4a82b7642e4e2951ebc6"
+      },
+      {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
         "tracked": true,
         "bytes": 97372,
@@ -52863,8 +53019,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
         "tracked": true,
-        "bytes": 46600,
-        "sha256": "573d41d069563494e314cc8b26cc32cf1b4401ac463089f9065e34db908ab1c0"
+        "bytes": 45542,
+        "sha256": "0f3032a1b21cd83ad895f2d2fa8fb9ed0e1a9e705b0c6137750195873f079618"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-tabela-direta-dark-390x844.webp",
@@ -53027,142 +53183,10 @@
         "tracked": true,
         "bytes": 48972,
         "sha256": "e9684ac7ac11e1b680d4a4eae3f7ef2133d060e776519753c2489f8b85b4a2c3"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1024x768.webp",
-        "tracked": true,
-        "bytes": 53812,
-        "sha256": "2a1d55af66ba3e1e7ae618415fc23c0a567d23a51c0535b77f1482f9ddd75cd5"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1280x720.webp",
-        "tracked": true,
-        "bytes": 58944,
-        "sha256": "f3e24c4ab87b0f8c2bf92341c4c40185c2a6e7c77e781c3aaac7a5b0c5013f0d"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1440x900.webp",
-        "tracked": true,
-        "bytes": 60526,
-        "sha256": "365a375569503a731b8cdffe33b1a4cc8ab80cbe67be2cb4560e1167f0ea4f65"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-320x568.webp",
-        "tracked": true,
-        "bytes": 36812,
-        "sha256": "523c4688116aff03fd1f8e08704e8fcf60e60f648df1dfd56d260283e8ff2a6d"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-375x812.webp",
-        "tracked": true,
-        "bytes": 38310,
-        "sha256": "cfed857aa2164b2583e3281d69b27fefb3e01b53e7b965703f867f6865c52e1d"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-390x844.webp",
-        "tracked": true,
-        "bytes": 38266,
-        "sha256": "1eedd5489dce48a493c7a9105ba935fdfd45ee48a2fd4795968277193088fd00"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-768x1024.webp",
-        "tracked": true,
-        "bytes": 38504,
-        "sha256": "611a3729e527f17be72145639a32249d7b2c54bf42eb01a1b36f76c0de135f9e"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1024x768.webp",
-        "tracked": true,
-        "bytes": 94360,
-        "sha256": "76927a09926690150abb385ad2eadec4085a13a44056fc90a97931cd601e68aa"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
-        "tracked": true,
-        "bytes": 98358,
-        "sha256": "724a82011c5c1eee89c3586e81669fe897fa2854de628cbb9f866972cb883e93"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
-        "tracked": true,
-        "bytes": 99036,
-        "sha256": "e76505a1bdfec0762eacf22aab09a0a69f68fe65a9090036407dc90c756d6d34"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
-        "tracked": true,
-        "bytes": 81408,
-        "sha256": "f54e24c2c1c7eefd22bad5b15c41881d085f2264be577ea8d3a2f93b1539b149"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
-        "tracked": true,
-        "bytes": 84556,
-        "sha256": "43f7d93c32e597be5e72c0128eff8295f123245956c714379ddacd05b6ed6bb9"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
-        "tracked": true,
-        "bytes": 84522,
-        "sha256": "d6bc509d6bad28cb784aa355b7bce428c1519ee560c6bdec7d0da7f5eb193b49"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp",
-        "tracked": true,
-        "bytes": 93400,
-        "sha256": "5c201dfe4ee8b18c328f40175284860483f2600e1223897745a3f3a322d079a4"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-balanced-1440x900.webp",
-        "tracked": true,
-        "bytes": 59686,
-        "sha256": "0089f3202202ca9ca977db5665b27e269cf8d38f9c338bcc2e5d8d7842312933"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-dark-1440x900.webp",
-        "tracked": true,
-        "bytes": 60910,
-        "sha256": "fef59edc231e95c6cdaf729dbf1687d770c3378a509015c97c3422fb8812b688"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-light-1440x900.webp",
-        "tracked": true,
-        "bytes": 60526,
-        "sha256": "365a375569503a731b8cdffe33b1a4cc8ab80cbe67be2cb4560e1167f0ea4f65"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-balanced-1440x900.webp",
-        "tracked": true,
-        "bytes": 97828,
-        "sha256": "5fb9f3e04a74124e6bcd2e6548b6eab9e9dcd17db8a5c8b7f3be7cc39578f0e8"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-dark-1440x900.webp",
-        "tracked": true,
-        "bytes": 99324,
-        "sha256": "171f4bca5224af0278137a984823efcc97447059f13994fb878da22b31019d4b"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/admin-usuarios-light-1440x900.webp",
-        "tracked": true,
-        "bytes": 99036,
-        "sha256": "e76505a1bdfec0762eacf22aab09a0a69f68fe65a9090036407dc90c756d6d34"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-paginas-dark-390x844.webp",
-        "tracked": true,
-        "bytes": 38290,
-        "sha256": "80f478e7b0dbe7087e50432c1f877934a263c64f79c558e2370f10697e76e76c"
-      },
-      {
-        "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
-        "tracked": true,
-        "bytes": 84694,
-        "sha256": "4485f6ad854214a83569276c57cd2826713b5579455f4a82b7642e4e2951ebc6"
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "7830c359d382389678dc569e30a674b37047935d15ad6cdd7a4a739f8192aac3"
+    "manifestSha256": "c61554a716ea4034d0b44c542b01d07562404530650e2112388c9fcb7289525c"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -53864,6 +53888,34 @@
         "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38831699685",
         "artifactSha256": "dce6ac7d96eca763ea0136317e11433079bf0c4423f973d9c58f5829aa065f83"
       }
+    },
+    {
+      "reviewedAt": "2026-10-16T03:15:59.013Z",
+      "scope": "Four mobile Hub screenshots only; all other images and source provenance preserved. Combined final CI remains required.",
+      "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38828948624",
+      "artifactId": 12016679397,
+      "sourceManifestSha256": "6fcbddf506e36be79a25c548750f6e3dcfdac6af69efe1098fd118d29b82e94c",
+      "captureCommit": "1da35b73e14c43fa566f88e042a4b4c7943e1665",
+      "capturedAt": "2026-10-16T00:48:28.806Z",
+      "worktreeDirtyAtCapture": false,
+      "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
+      "captureFunctionalChecksPassed": true,
+      "originalBaselinePromotion": {
+        "requested": true,
+        "performed": true,
+        "method": "same-filesystem transactional rename with rollback",
+        "previousBaselineManifestSha256": "6bbda27772536123639cb3e33586b225c0de1cbe2eb2fe5f61f02e8e5045b80a",
+        "previousBaselineResultSha256": "96d5799b37ea0eb7408c58ecacecbc251defe06704f2e53888d75ab8faada6bc"
+      },
+      "changedScreenshots": [
+        "target-authenticated/simulacao-390x844.webp",
+        "target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
+        "target-authenticated/simulacao-375x812.webp",
+        "target-authenticated/simulacao-320x568.webp"
+      ],
+      "preservedScreenshots": 238,
+      "integrationBase": "b5458ff5eef483d76ee58c9c14129d3872de8291"
     }
   ],
   "integrationProvenance": [
@@ -142219,6 +142271,21 @@
       },
       "otherRouteEvidencePreserved": true,
       "newCapturePerformed": false
+    },
+    {
+      "kind": "disjoint-baseline-source-integration",
+      "recordedAt": "2026-10-16T04:10:14.377993+00:00",
+      "sourceCommit": "cd004e49c7317bc7fc7ef04c680ecc5054ac2428",
+      "sourceManifestSha256": "61b1c6deea7da4b33d6a95717c91eed381dbe024d130ebee8a4e3ddd7e628713",
+      "changedScreenshots": [
+        "target-authenticated/simulacao-390x844.webp",
+        "target-authenticated/themes/mobile-dark/simulacao-dark-390x844.webp",
+        "target-authenticated/simulacao-375x812.webp",
+        "target-authenticated/simulacao-320x568.webp"
+      ],
+      "preservedScreenshots": 238,
+      "newCapturePerformed": false,
+      "reason": "Preserve the approved removal of WF labels while retaining the page access references."
     }
   ],
   "rootEvidenceUpdates": [

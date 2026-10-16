@@ -127,7 +127,7 @@ export const SIMULATORS = {
             type: "select",
             required: true,
             options: ["05", "10", "15"],
-            hint: "O WF13 aceita exclusivamente os dias 05, 10 ou 15.",
+            hint: "Escolha o dia 05, 10 ou 15 para o vencimento das mensais.",
           },
           { key: "income", label: "Renda", type: "currency", required: true },
           {

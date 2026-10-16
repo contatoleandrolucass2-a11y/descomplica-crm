@@ -41,6 +41,18 @@ reexecutados no candidato integrado e no SHA final de `main` antes do deploy.
 - Remove a reconstrução de páginas suplementares fora do banco, para que desativar uma página não a recrie no menu.
 - Validação local aprovada: lint, tipos, build, formato, dependências, Gitleaks, 3.063 testes Vitest e suítes Node. Ensaios de banco: 1.441 verificações na origem/restauração e 123 no contrato compacto. Conferência visual de busca, filtros, rolagem e ativação concluída. Evidências em `docs/audits/paginas-catalogo-2026-10-15.md`; CI e promoção ainda pendentes.
 
+## 2026-10-15: Códigos de workflow ocultos na interface comercial
+
+- A captura Linux limpa `38828948624` passou em todos os gates funcionais. Foram revisadas e incorporadas somente quatro imagens móveis do Hub; as outras 238 imagens e a proveniência das atualizações de Metas, Ranking e Usuários foram preservadas. Os 242 hashes finais foram conferidos. O workflow temporário foi removido, e a CI normal continua obrigatória.
+- Integra `main` em `b5458ff5eef483d76ee58c9c14129d3872de8291`, preservando as alterações concorrentes de Metas e Qlik. A produção observada em 16/10/2026 às 03:15 UTC estava em `b9377a1031865a01dccfbda4a87fa2d2dd84b2c5`, publicada às 02:59:30.399 UTC. Esta observação não substitui a consulta final protegida.
+
+- A CI `38824006181` aprovou os testes funcionais, a acessibilidade e o ensaio de restauração. Quatro referências móveis do Hub divergiram somente na altura após a retirada dos códigos. Um workflow temporário reproduz a captura em Linux, com checkout limpo e os mesmos gates funcionais, para revisão antes da nova CI normal.
+
+- Remove os códigos WF dos cards do Hub de Simulação, dos cabeçalhos, das mensagens, da ajuda e da versão técnica exibida no resultado. Mantém os nomes comerciais e os indicadores CAIXA, CONSULTA e de autorização.
+- Preserva os identificadores internos, as rotas, as permissões, os contratos de API e todas as regras de cálculo. A implementação parte de `d83c22d510478ee089f8c5cb5969a488451d433b`, em checkout isolado.
+- Atualiza as expectativas existentes de apresentação. Lint, tipos, build e auditoria de dependências passaram; o lint mantém um aviso anterior em `scripts/qa/connected-systems.mjs`. A suíte verificou 3.034 testes Vitest, 572 testes operacionais e 531 testes de release, sem falhas; os skips condicionais de plataforma e ambiente permanecem explícitos.
+- A prévia sintética renderizada pelo componente real do Hub foi conferida em 1440 e 390 pixels: seis links preservados, nenhum código WF visível e nenhuma rolagem horizontal. As capturas locais não substituem a matriz autenticada Linux da CI. Produção permanece sem alteração nesta etapa.
+
 ## 2026-10-15: Legibilidade de Meta no CSS compilado
 
 - Revisao independente recusou as capturas anteriores: percentuais ocultos
@@ -7026,3 +7038,20 @@ a execução completa com dois workers passou sem ampliar nenhum timeout.
 O ensaio local de 60 migrations aprovou 1.722 asserções na origem e 1.722 no
 banco restaurado, preservando owners e privilégios. Manifesto:
 `4735639196c72ac139221706ba978654fcb781ec9107c9840fb801f50064edb6`.
+
+## 2026-10-16: Preservação da remoção dos códigos WF
+
+A CI `38845163240` aprovou integralmente `4652aefb`. Antes da integração,
+`main` avançou para `cd004e49` pelo PR #237. A proteção interrompeu o merge
+do candidato anterior. Esta integração preserva os textos novos dos simuladores
+e suas quatro referências móveis, mantendo os acessos, o catálogo e as 22
+referências administrativas já revisadas. Os 242 arquivos foram conferidos
+por hash e tamanho; o digest agregado do manifesto foi recalculado. Não houve
+alteração de autorização, banco, regras financeiras ou limites de comparação.
+Os testes pertinentes serão repetidos e a nova CI completa continua obrigatória.
+
+A integração dos textos WF passou novamente em lint, tipos, formato, build e
+3.402 testes Vitest, com 86 skips. O diff confirmou ausência de mudanças em
+migrations, autorização e coordenador de release; esses componentes conservam
+os testes e o ensaio de restauração aprovados na rodada anterior. A CI completa
+do novo SHA voltará a validar o conjunto antes da integração.
