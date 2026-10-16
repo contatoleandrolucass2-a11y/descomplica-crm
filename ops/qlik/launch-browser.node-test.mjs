@@ -109,7 +109,7 @@ test("MFA, unknown login and cancellation cannot load the ranking writer credent
 
 test("invalid or unverified mapping never reads HMAC or starts a publication cycle", async () => {
   for (const mappingFactory of [
-    () => createRankingMapping(),
+    () => createRankingMapping({ definition: null }),
     () => {
       throw new Error("mapping_unverified: private source detail");
     },

@@ -20,6 +20,9 @@
   11 baselines e manifesto integral promovidos;231 demais imagens preservadas.
   Testref15pass/1skip. Prettier apenas formata JSON, igualdade semantica exigida.
   Collector+mapping260pass, lint/tipos exit0. Nova CI ainda necessaria.
+- Build Windows exit0; teste completo falhou somente na fixture que esperava
+  default produtivo null. Corrigida para definition:null sem relaxar bloqueio
+  de HMAC/coleta. Novo teste completo e CI ainda exigidos.
 
 ## 2026-10-16: Coleta priorizada, interface congelada
 

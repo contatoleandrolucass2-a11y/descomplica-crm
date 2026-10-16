@@ -31,6 +31,11 @@ formatado por Prettier com igualdade JSON verificada. Testref15pass/1skip.
 Quatro PNG diagnosticos legitimos ficam fora do manifesto; helper privado
 que os rejeita nao foi anunciado como aprovado. Nenhum gate/tolerancia mudou.
 
+Quatro comandos Windows executados: lint/tipos/build exit0; pnpm test exit1
+somente porque launch-browser testava o default produtivo como ausente.
+Fixture corrigida para definition:null, preservando bloqueio de HMAC/coleta
+em mapa invalido. Rodada completa e CI do ajuste ainda exigidas.
+
 Metadados nao comprovam selecoes, grain, conciliacao nem escrita. Owner ainda
 metadata-only e CRM d83c22d; nenhuma publicacao de fatos afirmada. Pendentes
 CI do candidato, ativacao protegida app/owner, duas coletas conciliadas e

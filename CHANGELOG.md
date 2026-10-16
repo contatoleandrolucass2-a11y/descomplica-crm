@@ -9,6 +9,8 @@
 - Sem novas alteracoes de interface ou banco.
 - Corrige limite de titulos alheios no catalogo de medidas e atualiza apenas
   referencias de teste Ranking a partir da captura limpa revisada.
+- Explicita definicao ausente na fixture de bloqueio do launcher, agora que
+  o mapeamento produtivo possui os pins nativos.
 
 ## 2026-10-15 - Estado de selecao Qlik
 
