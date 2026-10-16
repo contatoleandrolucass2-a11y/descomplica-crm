@@ -2750,3 +2750,19 @@ pendente dos gates completos no SHA final.
 - Permite validar e salvar rascunhos com taxas como1,67%, preservando o valor informado.
 
 - Meta: registra referência de calendário legível em1024px, sem alterar limiares deQA.
+
+## 2026-10-16 - Interoperabilidade do catalogo Qlik
+
+- Trata metadados opcionais ausentes/nulos e textos de medidas alheias ao
+  ranking, preservando identidade, cobertura, unicidade e pins selecionados.
+- Distingue recusas do catalogo por codigos fixos, sem dados ou erros brutos.
+- Registra CRM publicado em b937 e coleta real recusada por master_pin_mismatch;
+  owner recuperado pelo coordenador. Atualizacao de fatos ainda pendente.
+- Registra lint/tipos/build Windows aprovados; falhas locais de subprocessos
+  permanecem explicitas e a CI do corretivo ainda e obrigatoria.
+- Integra main concorrente de Meta, preservando ambos os registros e todas
+  as referencias existentes, sem alterar a interface nesta frente.
+- Aceita paginas QIX completas com group tails explicitamente zeradas,
+  mantendo limites, cobertura exata e rejeicao de qualquer cauda pendente.
+- Preserva main concorrente e separa ao final os registros deste ajuste,
+  evitando conflito manual de prefixo sem alterar a protecao de CI.
