@@ -10,6 +10,12 @@ import { fileURLToPath } from "node:url";
 // Only this child process installs module mocks. Production modules are imported
 // afterwards; all filesystem calls are confined to a private temporary root.
 const scenario = process.argv[2];
+const ranking = scenario.startsWith("ranking-");
+const previousRanking = scenario === "ranking-recovery-ranking";
+const initialEnabled =
+  previousRanking || ["ranking-previous-enabled", "ranking-recovery-enabled"].includes(scenario);
+let clock = Date.now();
+let serviceStartedAt;
 const clocked = scenario === "artifact-delayed" || scenario.startsWith("artifact-deadline-");
 let fixtureNow = Date.now();
 let verificationStartedAt;
@@ -32,7 +38,9 @@ const unit = "descomplica-qlik-browser.service";
 const unitPath = `/etc/systemd/system/${unit}`;
 const profile = "/var/lib/descomplica-qlik/chrome";
 const runtime = "/run/descomplica-qlik";
-const artifactPath = `${runtime}/ranking-metadata.json`;
+const artifactPath = `${runtime}/${ranking ? "ranking-status.json" : "ranking-metadata.json"}`;
+const credentialPath = "/etc/descomplica-crm/secrets/qlik-ranking-hmac";
+const bootLink = `/etc/systemd/system/multi-user.target.wants/${unit}`;
 const loginCredential = "/etc/descomplica-qlik/qlik-login.cred";
 const backupDirectory = `/etc/descomplica-crm/qlik-backups/${deploymentId}`;
 const uid = 4242;
@@ -46,7 +54,8 @@ let lockHeld = true;
 let lockChecks = 0;
 let delayCalls = 0;
 let browserActive = true;
-const enabled = false;
+let enabled = initialEnabled;
+let failedBootCommand = false;
 let processesRemain = false;
 let consoleActive = false;
 let effectiveOverrides = {};
@@ -118,6 +127,7 @@ function protectedStat(info, file) {
   const synthetic = metadata.get(file);
   return Object.assign(Object.create(Object.getPrototypeOf(info)), info, synthetic, {
     mode: (info.mode & ~0o7777) | synthetic.mode,
+    ...(synthetic.linkTarget ? { isSymbolicLink: () => true, isFile: () => false } : {}),
   });
 }
 
@@ -160,7 +170,8 @@ const filesystem = {
     if (file === profile) profileWalks++;
     return realFilesystem.readdir(physical(file));
   },
-  readlink: async (file) => realFilesystem.readlink(physical(file)),
+  readlink: async (file) =>
+    metadata.get(file)?.linkTarget ?? realFilesystem.readlink(physical(file)),
   statfs: async (file) => {
     physical(file);
     return { bavail: 8 * 1024 * 1024, bsize: 4096 };
@@ -188,6 +199,7 @@ const filesystem = {
     metadata.delete(file);
   },
   open: async (file, flags, mode) => {
+    assert.notEqual(file, credentialPath, "Host must never open the credential contents");
     assert.notEqual(file, loginCredential, "Release prepare must not read credential contents");
     if (
       file === `${backupDirectory}/profile.tar` &&
@@ -251,14 +263,82 @@ const template =
   "[Service]\nUser=descomplica-qlik\nWorkingDirectory=@RELEASE@\nEnvironment=HOME=/var/lib/descomplica-qlik\n" +
   loginCredentials +
   "ExecStart=/usr/local/bin/node ops/qlik/launch-browser.mjs\n";
-const beforeUnit = (
-  scenario === "current-unit" ? template : template.replace(loginCredentials, "")
-).replace("@RELEASE@", `/srv/descomplica-crm-releases/${previousSha}`);
+const rankingDirectives = `Environment=QLIK_RANKING_COLLECTION=enabled\nLoadCredential=qlik-ranking-hmac:${credentialPath}\n`;
+const beforeUnit = (scenario === "current-unit" ? template : template.replace(loginCredentials, ""))
+  .replace("@RELEASE@", `/srv/descomplica-crm-releases/${previousSha}`)
+  .replace(
+    "Environment=HOME=/var/lib/descomplica-qlik\n",
+    `Environment=HOME=/var/lib/descomplica-qlik\n${previousRanking ? rankingDirectives : ""}`,
+  );
 let afterUnit = template
   .replace("@RELEASE@", releaseRoot)
-  .replace(loginCredentials, loginCredentials + "Environment=QLIK_METADATA_PREFLIGHT=enabled\n");
+  .replace(
+    loginCredentials,
+    loginCredentials +
+      (ranking ? rankingDirectives : "Environment=QLIK_METADATA_PREFLIGHT=enabled\n"),
+  );
+
+async function bootLinkState(value) {
+  if (value) {
+    await put(bootLink, "synthetic systemd link", 0o777);
+    Object.assign(metadata.get(bootLink), { linkTarget: `../${unit}`, redirect: unitPath });
+  } else {
+    await realFilesystem.unlink(physical(bootLink)).catch((error) => {
+      if (error.code !== "ENOENT") throw error;
+    });
+    metadata.delete(bootLink);
+  }
+}
+
+async function rankingArtifact() {
+  const state =
+    (scenario === "ranking-eight-minutes" && clock - serviceStartedAt < 480000) ||
+    scenario === "ranking-timeout"
+      ? "running"
+      : scenario === "ranking-unavailable"
+        ? "unavailable"
+        : scenario === "ranking-reauth_required"
+          ? "reauth_required"
+          : "succeeded";
+  const value = {
+    schemaVersion: 1,
+    kind: "qlik_ranking_cycle",
+    observedAt: new Date(clock).toISOString(),
+    rankingConnected: state === "succeeded",
+    result: {
+      state,
+      ...(state === "succeeded"
+        ? {
+            batchId: "00000000-0000-4000-8000-000000000011",
+            requestId: "00000000-0000-4000-8000-000000000012",
+            contentSha256: "d".repeat(64),
+            completedAt: new Date(clock).toISOString(),
+          }
+        : {}),
+    },
+  };
+  if (scenario === "ranking-artifact-stale") value.observedAt = new Date(clock - 1).toISOString();
+  if (scenario === "ranking-artifact-future")
+    value.observedAt = new Date(clock + 600001).toISOString();
+  if (scenario === "ranking-artifact-retimestamped")
+    value.result.completedAt = new Date(clock - 1).toISOString();
+  if (scenario === "ranking-artifact-receipt") delete value.result.requestId;
+  if (scenario === "ranking-artifact-hash") value.result.contentSha256 = "no hash";
+  if (scenario === "ranking-artifact-uuid") value.result.batchId = value.result.requestId;
+  if (scenario === "ranking-artifact-kind") value.kind = "qlik_metadata_preflight";
+  if (scenario === "ranking-artifact-extra") value.result.rawData = "forbidden";
+  if (scenario === "ranking-artifact-connected") value.result = { state: "running" };
+  await put(
+    artifactPath,
+    JSON.stringify(value),
+    scenario === "ranking-artifact-mode" ? 0o644 : 0o600,
+    scenario === "ranking-artifact-owner" ? 0 : uid,
+  );
+  if (scenario === "ranking-artifact-link") metadata.get(artifactPath).linkTarget = "elsewhere";
+}
 
 async function artifact() {
+  if (ranking) return rankingArtifact();
   const status = scenario.startsWith("status-") ? scenario.slice(7) : "inspected";
   const observedAt = new Date(
     Date.now() +
@@ -390,7 +470,21 @@ async function emulate(executable, args) {
     }
     if (verb === "start") {
       browserActive = true;
+      serviceStartedAt = clock;
       await artifact();
+      return {};
+    }
+    if (ranking && ["enable", "disable"].includes(verb)) {
+      enabled = verb === "enable";
+      await bootLinkState(enabled);
+      if (
+        !failedBootCommand &&
+        ((scenario === "ranking-recovery-after-enable" && enabled) ||
+          (scenario === "ranking-recovery-disable-fail" && !enabled))
+      ) {
+        failedBootCommand = true;
+        return { code: 1 };
+      }
       return {};
     }
   }
@@ -407,6 +501,10 @@ function spawn(executable, args, options) {
       ["start", "recovery-start"].includes(liveGuard),
       "Start must immediately follow a synchronous guard",
     );
+    assert.equal(events.at(-1), `guard:${liveGuard}`);
+  }
+  if (executable === "/usr/bin/systemctl" && ["enable", "disable"].includes(args[0])) {
+    assert.ok(["boot", "restore-boot"].includes(liveGuard));
     assert.equal(events.at(-1), `guard:${liveGuard}`);
   }
   events.push(`command:${executable}:${args[0]}`);
@@ -429,7 +527,8 @@ function spawn(executable, args, options) {
 }
 
 async function install() {
-  if (clocked) mock.method(Date, "now", () => fixtureNow);
+  if (ranking) mock.method(Date, "now", () => clock);
+  else if (clocked) mock.method(Date, "now", () => fixtureNow);
   await ensureDirectory(releaseRoot);
   await ensureDirectory("/etc/systemd/system");
   await ensureDirectory("/etc/descomplica-crm", 0o700);
@@ -437,6 +536,11 @@ async function install() {
   await ensureDirectory(runtime, 0o700, uid);
   await put(`${profile}/Preferences`, '{"synthetic":true}', 0o600, uid);
   await put(unitPath, beforeUnit, 0o644);
+  if (ranking) {
+    await ensureDirectory("/etc/descomplica-crm/secrets", 0o700);
+    await put(credentialPath, "S".repeat(43));
+    if (initialEnabled) await bootLinkState(true);
+  }
   const files = [
     "ops/qlik/launch-browser.mjs",
     "ops/qlik/browser-login.mjs",
@@ -448,6 +552,14 @@ async function install() {
     "ops/qlik/qix-metadata.mjs",
     "ops/qlik/collection-loop.mjs",
     "ops/qlik/metadata-artifact.mjs",
+    "ops/qlik/ranking-cycle.mjs",
+    "ops/qlik/browser-ranking.mjs",
+    "ops/qlik/qix-ranking.mjs",
+    "ops/qlik/ranking-mapping.mjs",
+    "ops/qlik/ranking-artifact.mjs",
+    "ops/qlik/ranking-credential.mjs",
+    "ops/qlik/publish-ranking.mjs",
+    "lib/crm/qlik/contracts-v2.ts",
     `ops/qlik/vps/${unit}`,
     "scripts/release/private-json-store.mjs",
     "scripts/release/production-release-lock.mjs",
@@ -482,13 +594,20 @@ async function install() {
   mock.module("node:timers/promises", {
     exports: {
       setTimeout: async (ms) => {
-        if (clocked) {
-          assert.ok(ms >= 0 && ms <= 2000);
-          verificationDelays.push(ms);
-          fixtureNow += ms;
-        } else assert.equal(ms, 2000);
-        delayCalls++;
-        if (scenario === "artifact-delayed" && delayCalls === 100) await artifact();
+        if (ranking) {
+          assert.ok(ms > 0 && ms <= 2000);
+          delayCalls++;
+          clock += ms;
+          if (scenario === "ranking-eight-minutes") await rankingArtifact();
+        } else {
+          if (clocked) {
+            assert.ok(ms >= 0 && ms <= 2000);
+            verificationDelays.push(ms);
+            fixtureNow += ms;
+          } else assert.equal(ms, 2000);
+          delayCalls++;
+          if (scenario === "artifact-delayed" && delayCalls === 100) await artifact();
+        }
       },
     },
   });
@@ -547,6 +666,175 @@ async function install() {
   });
 }
 
+async function runRanking(host, state, archive) {
+  const pending = state.inProgress;
+  if (scenario === "ranking-credential-start") {
+    await assert.rejects(
+      host.start(pending, async () => {
+        metadata.get(credentialPath).mode = 0o640;
+        return () => assert.fail("Changed credential must fail before start");
+      }),
+      /credential/u,
+    );
+    assert.equal(events.includes("command:/usr/bin/systemctl:start"), false);
+    return;
+  }
+  await host.start(pending, async () => freshnessGuard("start"));
+  if (scenario === "ranking-deadline-expired") clock = serviceStartedAt + 600001;
+  if (
+    scenario.startsWith("ranking-artifact-") ||
+    ["ranking-timeout", "ranking-deadline-expired"].includes(scenario)
+  ) {
+    await assert.rejects(host.verifyOwner(pending), /fresh ranking cycle within 10 minutes/u);
+    assert.equal(delayCalls, scenario === "ranking-deadline-expired" ? 0 : 300);
+    assert.equal(events.filter((event) => event === "command:/usr/bin/systemctl:start").length, 1);
+    assert.equal(events.includes("command:/usr/bin/systemctl:enable"), false);
+    return;
+  }
+  const verified = await host.verifyOwner(pending);
+  const status =
+    scenario === "ranking-unavailable"
+      ? "unavailable"
+      : scenario === "ranking-reauth_required"
+        ? "reauth_required"
+        : "succeeded";
+  assert.deepEqual(verified, {
+    preflightStatus: "disabled",
+    rankingStatus: status,
+    rankingConnected: status === "succeeded",
+  });
+  if (scenario === "ranking-eight-minutes") {
+    assert.equal(delayCalls, 240);
+    assert.equal(clock - serviceStartedAt, 480000);
+  }
+  const enabling = { ...state, inProgress: { ...pending, boot: "enable-pending" } };
+  await host.writeState(state, enabling);
+  state = enabling;
+  if (status !== "succeeded") {
+    await assert.rejects(
+      host.setBoot(state.inProgress, async () => () => assert.fail("No successful publication")),
+      /successful ranking cycle/u,
+    );
+    assert.equal(events.includes("command:/usr/bin/systemctl:enable"), false);
+    return;
+  }
+  if (scenario.startsWith("ranking-boot-") || scenario === "ranking-credential-boot") {
+    const reason = scenario.replace("ranking-boot-", "");
+    let guards = 0;
+    await assert.rejects(
+      host.setBoot(state.inProgress, async () => {
+        if (reason === "unit") await put(unitPath, afterUnit + "# altered\n", 0o644);
+        if (reason === "ledger")
+          await host.writeState(state, {
+            ...state,
+            inProgress: { ...state.inProgress, phase: "recovering" },
+          });
+        if (reason === "lock") lockHeld = false;
+        if (reason === "enabled") {
+          enabled = true;
+          await bootLinkState(true);
+        }
+        if (reason === "link") {
+          await bootLinkState(true);
+          metadata.get(bootLink).linkTarget = "/tmp/unapproved.service";
+        }
+        if (reason === "reload") effectiveOverrides.NeedDaemonReload = "yes";
+        if (reason === "active") browserActive = false;
+        if (reason === "artifact")
+          await put(
+            artifactPath,
+            JSON.stringify({
+              schemaVersion: 1,
+              kind: "qlik_ranking_cycle",
+              observedAt: new Date(clock).toISOString(),
+              rankingConnected: false,
+              result: { state: "unavailable" },
+            }),
+            0o600,
+            uid,
+          );
+        if (scenario === "ranking-credential-boot") metadata.get(credentialPath).ctimeMs = -1;
+        if (reason === "guard-missing") return undefined;
+        return () => {
+          guards++;
+          if (reason === "guard-expired") throw new Error("Synthetic freshness expired");
+          assert.fail("Boot guard must not run after local authority changes");
+        };
+      }),
+      /Qlik|credential|Synthetic|Fresh/u,
+    );
+    assert.equal(guards, reason === "guard-expired" ? 1 : 0);
+    assert.equal(events.includes("command:/usr/bin/systemctl:enable"), false);
+    return;
+  }
+  const bootApproval = async () => {
+    assert.deepEqual(await host.readState(), state);
+    return freshnessGuard("boot");
+  };
+  if (scenario === "ranking-recovery-after-enable") {
+    await assert.rejects(host.setBoot(state.inProgress, bootApproval), /Qlik host command failed/u);
+    assert.equal(enabled, true);
+  } else if (scenario !== "ranking-recovery-before-enable") {
+    await host.setBoot(state.inProgress, bootApproval);
+    assert.equal(enabled, true);
+    assert.equal(events.includes("command:/usr/bin/systemctl:enable"), !initialEnabled);
+    assert.equal(await filesystem.readlink(bootLink), `../${unit}`);
+    const committedBoot = { ...state, inProgress: { ...state.inProgress, boot: "enabled" } };
+    await host.writeState(state, committedBoot);
+    state = committedBoot;
+    assert.equal((await host.inspectOwner()).enabled, true);
+  }
+  if (scenario.startsWith("ranking-recovery-")) {
+    if (scenario === "ranking-recovery-without-credential")
+      await realFilesystem.unlink(physical(credentialPath));
+    const { qlikReleaseHost } = await import("../qlik-release-host.mjs");
+    host = qlikReleaseHost(lock);
+    assert.deepEqual(await host.readState(), state);
+    const recovering = { ...state, inProgress: { ...state.inProgress, phase: "recovering" } };
+    await host.writeState(state, recovering);
+    state = recovering;
+    await host.quiesce(state.inProgress);
+    await host.restore(state.inProgress, async () => freshnessGuard("restore"));
+    assert.equal(await realFilesystem.readFile(physical(unitPath), "utf8"), beforeUnit);
+    const restoring = { ...state, inProgress: { ...state.inProgress, boot: "restore-pending" } };
+    await host.writeState(state, restoring);
+    state = restoring;
+    if (scenario === "ranking-recovery-disable-fail") {
+      await assert.rejects(
+        host.setBoot(state.inProgress, async () => freshnessGuard("restore-boot"), true),
+        /Qlik host command failed/u,
+      );
+      assert.equal(enabled, false);
+      host = qlikReleaseHost(lock);
+    }
+    await host.setBoot(state.inProgress, async () => freshnessGuard("restore-boot"), true);
+    assert.equal(enabled, initialEnabled);
+    const restored = { ...state, inProgress: { ...state.inProgress, boot: "restored" } };
+    await host.writeState(state, restored);
+    state = restored;
+    await host.start(state.inProgress, async () => freshnessGuard("recovery-start"), true);
+    assert.deepEqual(await host.verifyOwner(state.inProgress, true), {
+      preflightStatus: "disabled",
+      ...(previousRanking ? { rankingStatus: "succeeded", rankingConnected: true } : {}),
+    });
+    assert.deepEqual(
+      await realFilesystem.readFile(physical(`${backupDirectory}/profile.tar`)),
+      archive,
+    );
+    assert.equal(events.filter((event) => event === "command:/usr/bin/tar:--create").length, 1);
+  }
+  assert.ok(events.indexOf("pending") < events.indexOf("command:/usr/bin/systemctl:stop"));
+  assert.ok(events.indexOf("command:/usr/bin/tar:--create") < events.indexOf(`rename:${unitPath}`));
+  assert.ok(
+    events.indexOf(`rename:${unitPath}`) < events.indexOf("command:/usr/bin/systemctl:start"),
+  );
+  if (events.includes("command:/usr/bin/systemctl:enable"))
+    assert.ok(
+      events.indexOf("command:/usr/bin/systemctl:start") <
+        events.indexOf("command:/usr/bin/systemctl:enable"),
+    );
+}
+
 async function run() {
   await install();
   const { qlikReleaseHost } = await import("../qlik-release-host.mjs");
@@ -557,8 +845,9 @@ async function run() {
     sha: previousSha,
     unitHash: digest(beforeUnit),
     preflight: false,
-    enabled: false,
+    enabled: initialEnabled,
     active: true,
+    ...(previousRanking ? { ranking: true } : {}),
   });
   const options = {
     operation: "qlik-deploy",
@@ -568,7 +857,19 @@ async function run() {
     targetSha,
     targetImageId,
     ciRunId: 123,
+    ...(ranking ? { ranking: true } : {}),
   };
+
+  if (scenario.startsWith("ranking-credential-prepare-")) {
+    const invalid = scenario.slice("ranking-credential-prepare-".length);
+    if (invalid === "missing") await realFilesystem.unlink(physical(credentialPath));
+    if (invalid === "owner") metadata.get(credentialPath).uid = uid;
+    if (invalid === "mode") metadata.get(credentialPath).mode = 0o640;
+    if (invalid === "link") metadata.get(credentialPath).linkTarget = "elsewhere";
+    await assert.rejects(host.prepare(options, owner, deploymentId));
+    assert.equal(events.includes("command:/usr/bin/systemctl:stop"), false);
+    return;
+  }
 
   const early = {
     "input-mismatch": async () => {
@@ -660,8 +961,25 @@ async function run() {
     id: deploymentId,
     before: beforeUnit,
     after: afterUnit,
-    enabled: false,
+    enabled: initialEnabled,
+    ...(ranking
+      ? {
+          credential: Object.fromEntries(
+            ["dev", "ino", "size", "mtimeMs", "ctimeMs"].map((key) => [key, saved.credential[key]]),
+          ),
+        }
+      : {}),
   });
+  if (ranking) {
+    const credential = await filesystem.lstat(credentialPath);
+    assert.deepEqual(
+      saved.credential,
+      Object.fromEntries(
+        ["dev", "ino", "size", "mtimeMs", "ctimeMs"].map((key) => [key, credential[key]]),
+      ),
+    );
+    assert.equal(JSON.stringify(saved).includes("S".repeat(43)), false);
+  }
   assert.equal(metadata.get(`${backupDirectory}/unit.json`).mode, 0o600);
   if (["legacy-recovery", "artifact-stale-legacy"].includes(scenario)) {
     // Recreate a persisted transaction written before credential directives existed.
@@ -682,8 +1000,14 @@ async function run() {
     backup,
     operation: "qlik-deploy",
     phase: "prepared",
+    ...(ranking ? { ranking: true, boot: "unchanged" } : {}),
   };
-  let state = { schemaVersion: 1, baseline: owner, release: null, inProgress: transaction };
+  let state = {
+    schemaVersion: ranking ? 2 : 1,
+    baseline: owner,
+    release: null,
+    inProgress: transaction,
+  };
   await host.writeState(null, state);
   assert.deepEqual(await host.readState(), state);
   events.push("pending");
@@ -826,6 +1150,17 @@ async function run() {
     assert.deepEqual(await unitTemporaryNames(), []);
     return;
   }
+  if (scenario === "ranking-credential-apply") {
+    await assert.rejects(
+      host.apply(pending, async () => {
+        metadata.get(credentialPath).mode = 0o640;
+        return () => assert.fail("Changed credential must fail before rename");
+      }),
+      /credential/u,
+    );
+    assert.equal(await realFilesystem.readFile(physical(unitPath), "utf8"), beforeUnit);
+    return;
+  }
   await host.apply(pending, async () => {
     assert.equal(await realFilesystem.readFile(physical(unitPath), "utf8"), beforeUnit);
     assert.equal(browserActive, false);
@@ -835,6 +1170,10 @@ async function run() {
   });
   assert.equal(await realFilesystem.readFile(physical(unitPath), "utf8"), afterUnit);
   assert.equal(metadata.get(unitPath).mode, 0o644);
+  if (ranking) {
+    await runRanking(host, state, archive);
+    return;
+  }
   if (scenario === "start-reload" || scenario === "start-directory") {
     effectiveOverrides =
       scenario === "start-reload"

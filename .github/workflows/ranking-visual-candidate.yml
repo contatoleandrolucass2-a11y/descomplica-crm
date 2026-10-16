@@ -1,0 +1,93 @@
+name: Ranking visual candidate
+
+on:
+  pull_request:
+    paths:
+      - "app/(protected)/app/ranking/**"
+      - "lib/crm/qlik/**"
+      - ".github/workflows/ranking-visual-candidate.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ranking-visual-candidate-${{ github.ref }}
+  cancel-in-progress: true
+
+# Review artifact only. The normal CI verify gate remains required after the
+# reviewed Ranking screenshots are incorporated; this workflow cannot deploy.
+jobs:
+  candidate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Node.js 24
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version-file: .nvmrc
+      - name: Enable pnpm
+        run: |
+          npm install --global corepack@0.35.0
+          corepack enable
+          corepack prepare pnpm@11.20.0 --activate
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Install Chromium
+        run: pnpm exec playwright install --with-deps chromium
+      - name: Synthetic ranking interactions and viewport pixels
+        run: pnpm exec vitest run tests/ranking-parcerias.test.tsx --maxWorkers=1
+        env:
+          RANKING_V2_BROWSER: "1"
+      - name: Start isolated Supabase
+        shell: bash
+        run: |
+          start_log="$(mktemp "${RUNNER_TEMP}/supabase-start.XXXXXX")"
+          if pnpm db:start >"${start_log}" 2>&1; then
+            rm -f "${start_log}"
+            echo "Isolated Supabase started."
+          else
+            start_status=$?
+            rm -f "${start_log}"
+            echo "::error::Isolated Supabase failed; raw output withheld."
+            exit "${start_status}"
+          fi
+      - name: Replay migrations
+        run: pnpm exec supabase db reset --local --no-seed
+      - name: Build
+        run: pnpm build
+      - name: Authorization and release E2E
+        run: pnpm qa:e2e:release
+      - name: Capture with existing functional and accessibility gates
+        run: pnpm qa:visual:authenticated --update-baseline
+        env:
+          QA_ALLOW_MISSING_PRIVATE_INVENTORY: "true"
+      - name: Record candidate provenance
+        run: |
+          mkdir -p test-results/ranking-visual-provenance
+          git rev-parse HEAD > test-results/ranking-visual-provenance/captured-sha.txt
+          git diff --name-only > test-results/ranking-visual-provenance/changed-files.txt
+          git diff -- docs/qa/reference-parity/authenticated-results.json > test-results/ranking-visual-provenance/manifest.diff
+      - name: Upload successful candidate inputs
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ranking-visual-candidate-${{ github.sha }}
+          path: |
+            test-results/authenticated-visual
+            test-results/ranking-visual-provenance
+            docs/qa/reference-parity/target-authenticated
+            docs/qa/reference-parity/authenticated-results.json
+          if-no-files-found: error
+          retention-days: 7
+      - name: Upload sanitized candidate diagnostics
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: ranking-visual-diagnostics-${{ github.sha }}
+          path: test-results/authenticated-visual
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Stop isolated Supabase
+        if: always()
+        run: pnpm exec supabase stop --no-backup

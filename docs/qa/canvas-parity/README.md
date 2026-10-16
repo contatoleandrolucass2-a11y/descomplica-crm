@@ -2,6 +2,19 @@
 
 Data da aprovação: 2026-10-04. Escopo: as 22 páginas protegidas originais do CRM.
 
+Em 15/10/2026, o pedido de reproducao integral do link publico de Meta
+substitui somente as regioes DV e Parcerias dos canvases compactos anteriores.
+As referencias novas sao capturas independentes de
+https://descomplicapro.com.br/configuracoes/metas e sua subguia Parcerias,
+feitas pelo navegador em 1440x900, tema escuro, pagina completa, sem login.
+JPEGs capturados em 16:59:57 e 17:01:12 UTC foram convertidos em WebP sem
+nova perda. O navegador excluiu a faixa da scrollbar, resultando em largura
+1424px. Hashes, fontes e limites estao no manifesto e na auditoria de Meta.
+Os quinze assets anteriores permanecem identicos; Pontos continua usando sua
+regiao original. Os novos assets usam regiao full e os mesmos limites de
+distancia de cor/bordas. Nenhuma captura do proprio CRM vira referencia de
+origem. A baseline autenticada e revisada separadamente apos os gates.
+
 Este diretório preserva os canvases aprovados pelo usuário como referência de
 composição, densidade, hierarquia e navegação. Eles não são autoridade para
 dados, permissões, políticas comerciais, fórmulas ou disponibilidade de
@@ -45,32 +58,32 @@ classificacao inicial de Gerente regional house e demais funcoes nulas. Os 22
 canvases originais continuam preservados; Recurso MKT, Gestao e Rotina possuem
 testes funcionais proprios.
 
-| Canvas                           |   Região | Rota                                      |
-| -------------------------------- | -------: | ----------------------------------------- |
-| `dashboard-oportunidades.webp`   | esquerda | `/app`                                    |
-| `dashboard-oportunidades.webp`   |  direita | `/app/etapas/oportunidades`               |
-| `agendamentos-visitas.webp`      | esquerda | `/app/etapas/agendamentos`                |
-| `agendamentos-visitas.webp`      |  direita | `/app/etapas/visitas`                     |
-| `pastas-vendas.webp`             | esquerda | `/app/etapas/pastas`                      |
-| `pastas-vendas.webp`             |  direita | `/app/etapas/vendas`                      |
-| `ranking-canal-parcerias.webp`   | esquerda | `/app/ranking`                            |
-| `ranking-canal-parcerias.webp`   |  direita | `/app/canal-de-parcerias`                 |
-| `configuracoes-metas-funil.webp` | esquerda | `/app/configuracoes`                      |
-| `configuracoes-metas-funil.webp` |  direita | `/app/configuracoes/metas`                |
-| `configuracoes-metas-funil.webp` | derivada | `/app/gestao`                             |
-| `hub-simulacao-associativo.webp` | derivada | `/app/gestao/rotina`                      |
-| `metas-parcerias-pontos.webp`    | esquerda | `/app/configuracoes/metas/parcerias`      |
-| `metas-parcerias-pontos.webp`    |  direita | `/app/configuracoes/metas/pontos`         |
-| `hub-simulacao-associativo.webp` | esquerda | `/app/simulacao`                          |
-| `hub-simulacao-associativo.webp` |  direita | `/app/simulacao/associativo-fluxo-linear` |
-| `documentacao-caixa.webp`        | esquerda | `/app/simulacao/calcular-documentacao`    |
-| `documentacao-caixa.webp`        |  direita | `/app/simulacao/caixa`                    |
-| `tabela-direta-investidor.webp`  | esquerda | `/app/simulacao/tabela-direta`            |
-| `tabela-direta-investidor.webp`  |  direita | `/app/simulacao/tabela-investidor`        |
-| `tabelao-administracao.webp`     | esquerda | `/app/simulacao/tabelao`                  |
-| `tabelao-administracao.webp`     |  direita | `/admin`                                  |
-| `usuarios-catalogo-paginas.webp` | esquerda | `/admin/usuarios`                         |
-| `usuarios-catalogo-paginas.webp` |  direita | `/admin/paginas`                          |
+| Canvas                                 |   Região | Rota                                      |
+| -------------------------------------- | -------: | ----------------------------------------- |
+| `dashboard-oportunidades.webp`         | esquerda | `/app`                                    |
+| `dashboard-oportunidades.webp`         |  direita | `/app/etapas/oportunidades`               |
+| `agendamentos-visitas.webp`            | esquerda | `/app/etapas/agendamentos`                |
+| `agendamentos-visitas.webp`            |  direita | `/app/etapas/visitas`                     |
+| `pastas-vendas.webp`                   | esquerda | `/app/etapas/pastas`                      |
+| `pastas-vendas.webp`                   |  direita | `/app/etapas/vendas`                      |
+| `ranking-canal-parcerias.webp`         | esquerda | `/app/ranking`                            |
+| `ranking-canal-parcerias.webp`         |  direita | `/app/canal-de-parcerias`                 |
+| `configuracoes-metas-funil.webp`       | esquerda | `/app/configuracoes`                      |
+| `metas-dv-live-2026-10-15.webp`        | completa | `/app/configuracoes/metas`                |
+| `configuracoes-metas-funil.webp`       | derivada | `/app/gestao`                             |
+| `hub-simulacao-associativo.webp`       | derivada | `/app/gestao/rotina`                      |
+| `metas-parcerias-live-2026-10-15.webp` | completa | `/app/configuracoes/metas/parcerias`      |
+| `metas-parcerias-pontos.webp`          |  direita | `/app/configuracoes/metas/pontos`         |
+| `hub-simulacao-associativo.webp`       | esquerda | `/app/simulacao`                          |
+| `hub-simulacao-associativo.webp`       |  direita | `/app/simulacao/associativo-fluxo-linear` |
+| `documentacao-caixa.webp`              | esquerda | `/app/simulacao/calcular-documentacao`    |
+| `documentacao-caixa.webp`              |  direita | `/app/simulacao/caixa`                    |
+| `tabela-direta-investidor.webp`        | esquerda | `/app/simulacao/tabela-direta`            |
+| `tabela-direta-investidor.webp`        |  direita | `/app/simulacao/tabela-investidor`        |
+| `tabelao-administracao.webp`           | esquerda | `/app/simulacao/tabelao`                  |
+| `tabelao-administracao.webp`           |  direita | `/admin`                                  |
+| `usuarios-catalogo-paginas.webp`       | esquerda | `/admin/usuarios`                         |
+| `usuarios-catalogo-paginas.webp`       |  direita | `/admin/paginas`                          |
 
 Gestão > Rotina reutiliza os tokens da Tabela Associativo. Sua rotina é uma
 nova superfície, validada pelo roteiro `scripts/qa/routine-settings.mjs`, com

@@ -4,6 +4,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
+  parseRankingFilters,
+  RankingDashboard,
+} from "@/app/(protected)/app/ranking/RankingDashboard";
+
+import {
   ManagementPage,
   ManagementPageHeader,
   ManagementStatusBadge,
@@ -35,24 +40,29 @@ describe("management canvas layout", () => {
   });
 
   it("keeps every delegated management surface on the compact canvas", () => {
+    const goals = source("app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx");
+    expect(goals.match(/<main(?:\s|>)/g)).toHaveLength(1);
     for (const file of [
       "app/(protected)/admin/page.tsx",
       "app/(protected)/admin/usuarios/page.tsx",
       "app/(protected)/admin/paginas/page.tsx",
       "app/(protected)/app/configuracoes/page.tsx",
-      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
-      "app/(protected)/app/ranking/page.tsx",
+      "app/(protected)/app/ranking/RankingDashboard.tsx",
       "app/(protected)/app/canal-de-parcerias/page.tsx",
     ]) {
       expect(source(file), file).toContain("ManagementPage");
     }
+    expect(source("app/(protected)/app/ranking/page.tsx")).toContain(
+      "<RankingDashboard data={data} filters={filters}",
+    );
   });
 
   it("contains mobile goal layouts and separates semantic ink from accents", () => {
     const stylesheet = source("app/(protected)/_components/ManagementCanvas.module.css");
-    const funnel = source(
-      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
+    const funnel = source("app/(protected)/app/configuracoes/metas/_components/GoalPlanning.tsx");
+    const goalStyles = source(
+      "app/(protected)/app/configuracoes/metas/_components/GoalPlanning.module.css",
     );
     const pointSettings = source(
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
@@ -69,9 +79,10 @@ describe("management canvas layout", () => {
     expect(stylesheet).toMatch(
       /\.statusBadge\[data-tone="positive"\] \{[\s\S]*?border-color: var\(--analytics-positive\)[\s\S]*?color: var\(--analytics-positive-ink\)/,
     );
-    expect(funnel).toContain("w-full min-w-0 grid-cols-2");
-    expect(funnel).toContain("lg:w-auto lg:min-w-72");
-    expect(funnel).toContain("text-[var(--analytics-positive-ink)]");
+    expect(funnel).toContain("styles.planning");
+    expect(goalStyles).toContain("min-width: 0");
+    expect(goalStyles).toContain("overflow-x: auto");
+    expect(goalStyles).toContain("max-width: 760px");
     for (const component of [funnel, pointSettings, draftForm, userAccess]) {
       expect(component).not.toMatch(/text-\[var\(--analytics-(?:positive|warning|danger)\)\]/);
     }
@@ -162,22 +173,42 @@ describe("management canvas layout", () => {
   it("renders unavailable commercial states without invented rankings or defaults", () => {
     const ranking = source("app/(protected)/app/ranking/page.tsx");
     const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
-    const funnel = source(
-      "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
-    );
+    const funnel = source("app/(protected)/app/configuracoes/metas/_components/GoalPlanning.tsx");
     const points = source(
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
     );
 
-    expect(ranking).toContain("loadRankingReadModel");
-    expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
+    expect(ranking).not.toMatch(/loadRankingReadModel|loadReadModelV3|list_scoped_crm_imob/);
+    expect(ranking).toContain('enforcePermission("crm.ranking.view")');
+    expect(ranking).toContain("await loadQlikRankingV2(filters.year)");
+    expect(ranking.indexOf('await enforcePermission("crm.ranking.view")')).toBeLessThan(
+      ranking.indexOf("await loadQlikRankingV2"),
+    );
+    for (const [kind, title] of [
+      ["imobs", "Top 10 imobiliárias"],
+      ["developments", "Top 10 empreendimentos"],
+    ]) {
+      const markup = renderToStaticMarkup(
+        createElement(RankingDashboard, {
+          data: { status: "unavailable" },
+          filters: parseRankingFilters({ kind: kind! }),
+          now: new Date("2026-10-14T12:00:00Z"),
+        }),
+      );
+      expect(markup).toContain(title);
+      expect(markup).toContain("Dados indisponíveis");
+      expect(markup).toContain("<tbody></tbody>");
+      expect(markup).not.toMatch(/R\$|>0<|Parceira [0-9]|Ouro: (?!Indisponível)/);
+    }
     expect(partnerships).toContain("Dado indisponível — integração pendente");
     expect(partnerships).toContain("Pódio das parcerias");
     expect(partnerships).toContain("Totais do período");
     expect(partnerships).not.toMatch(/ImobRankingRow|DevelopmentRankingRow/);
     expect(funnel).toContain('placeholder="—"');
-    expect(funnel).toContain("refletem exclusivamente a última base legada carregada");
-    expect(funnel).not.toContain("recalcula as etapas localmente");
+    expect(funnel).toContain("nenhum valor demonstrativo");
+    expect(funnel).toContain("projectGoalVolumes");
+    expect(funnel).toContain("Salvar rascunho de metas");
+    expect(funnel).not.toContain(".rpc(");
     expect(points).toContain('placeholder="—"');
     expect(points).not.toContain("DEFAULT_POINT_WEIGHTS");
     expect(points).toContain('id="point-activity-heading"');

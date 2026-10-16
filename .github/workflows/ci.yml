@@ -92,6 +92,11 @@ jobs:
       - name: Salesforce console with synthetic RFB authentication and pixels
         run: node scripts/qa/connected-systems.mjs --synthetic
 
+      - name: Qlik ranking with synthetic data, filters and viewport pixels
+        run: pnpm exec vitest run tests/ranking-parcerias.test.tsx --maxWorkers=1
+        env:
+          RANKING_V2_BROWSER: "1"
+
       - name: Qlik login with synthetic corporate provider
         run: node --test ops/qlik/browser-login.node-test.mjs
         env:

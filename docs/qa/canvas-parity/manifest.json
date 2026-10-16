@@ -4,6 +4,28 @@
   "policy": "Visual composition only; never authority for data, authorization, formulas or commercial policy.",
   "assets": [
     {
+      "path": "reference/metas-dv-live-2026-10-15.webp",
+      "sha256": "70c25b25f4732084dde7b2a187e6b0ac2c9885c331b794c4fc956183d5476142",
+      "source": "https://descomplicapro.com.br/configuracoes/metas",
+      "status": "authoritative-live-reference",
+      "capturedOn": "2026-10-15",
+      "viewport": "1440x900",
+      "theme": "dark",
+      "capture": "Public page via browser, fullPage JPEG; lossless WebP conversion; no target screenshot or real CRM data.",
+      "sourceSha256": "db691c3b32d7f312c20d6195e61cfec084049b1dff81ed8f59148ecd5d7c2485"
+    },
+    {
+      "path": "reference/metas-parcerias-live-2026-10-15.webp",
+      "sha256": "d080bac64d9b4073192b71a92fe50f95f09356586c90af9a2cf24258a69bf66b",
+      "source": "https://descomplicapro.com.br/configuracoes/metas/parcerias",
+      "status": "authoritative-live-reference",
+      "capturedOn": "2026-10-15",
+      "viewport": "1440x900",
+      "theme": "dark",
+      "capture": "Public page via browser, fullPage JPEG; lossless WebP conversion; no target screenshot or real CRM data.",
+      "sourceSha256": "990ff61a83120526cef75576009415a169d1a5949d6df8cd9848b23e8859b61e"
+    },
+    {
       "path": "reference/dashboard-oportunidades.webp",
       "sha256": "c7dbf6e14f7802fc9597d419dee04aa6dd6b48474c91926d3b52c1fbb86b88c4",
       "source": "exec-0ef7db55-7bf2-40c7-a11f-8cd4f797418f.png",

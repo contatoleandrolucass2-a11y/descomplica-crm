@@ -171,6 +171,15 @@ propriedade root e ausencia de escrita por grupo/outros. Confere somente o
 manifest enigma.js2.15.0 como root; o probe de SDK/schema roda depois como
 descomplica-qlik, antes de instalar units, sem executar coleta.
 
+Revisao inicial de14/10 confirmou que `release:production` promovia somente o
+runtime CRM; nao trocava units auxiliares. Foi necessario implementar e
+testar suporte explicito ao owner Qlik no coordenador, mantendo as travas,
+CAS, intencao duravel, observacao fresca e recuperacao da tentativa. Registrar
+separadamente versao/data do owner, sem confundir com health/deploy do CRM.
+Backup consistente do perfil exige owner parado e ausencia de processos
+remanescentes; nao apagar locks do Chrome nem iniciar segundo owner.
+Teste de instalacao inicial nao comprova upgrade ou restauracao do perfil.
+
 Na retomada de14/10 foi implementado suporte explicito ao owner Qlik no
 coordenador, descrito abaixo. Implementacao e testes locais nao comprovam
 instalacao ou handshake na VPS. O instalador inicial continua inalterado.
@@ -180,6 +189,16 @@ coleta agregada completa e RPC/reader autorizado, reconciliar duas cargas,
 so entao ativar rotina de fatos. Este preflight nao entrega ranking conectado.
 
 ## Atualizacao protegida do owner
+
+O checkout de codigo deve ser root-owned, sem escrita para grupo/outros e
+legivel pelo usuario tecnico. Ao preparar uma copia nova, a permissao do Git
+para arquivos/diretorios de codigo nao deve herdar o umask077 dos backups.
+Backups, perfil e credenciais continuam0700/0600. Se a copia foi criada
+restritiva, conferir bytes/identidade/Git limpo e normalizar somente arquivos
+versionados e seus pais, preservando o bit executavel do Git. Nunca aplicar
+chmod recursivo em ignorados, segredos, perfil ou na arvore de producao ativa.
+Repetir o probe nao-root aprovado pelo host, com Node24 em /usr/local/bin/node;
+/usr/bin/node pode ser uma versao antiga e nao valida esse runtime.
 
 Usar somente `pnpm release:production qlik-deploy`, no checkout canonico limpo
 do SHA aprovado em `/srv/descomplica-crm-releases/SHA`. Este procedimento muda

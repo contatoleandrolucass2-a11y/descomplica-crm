@@ -27,6 +27,7 @@ export function ConfigurationDraftForm({
   children,
   enabled = true,
   saveLabel,
+  reviewId,
 }: {
   action: (
     state: CommercialDraftActionState,
@@ -35,6 +36,7 @@ export function ConfigurationDraftForm({
   children: ReactNode;
   enabled?: boolean;
   saveLabel: string;
+  reviewId?: string;
 }) {
   const [state, formAction, pending] = useActionState(action, initialCommercialDraftActionState);
 
@@ -62,6 +64,7 @@ export function ConfigurationDraftForm({
     <form action={formAction} className={`${styles.draftForm} grid gap-3`}>
       {children}
       <section
+        id={reviewId}
         aria-label="Validação do rascunho"
         className={`${styles.draftActions} ${managementStyles.panel} ${managementStyles.panelPadded} ${managementStyles.panelStrong} grid gap-3`}
       >
