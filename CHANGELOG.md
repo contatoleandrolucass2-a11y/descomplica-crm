@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-16: Expressões multilinha no coletor Qlik
+
+- Aceita TAB, CR e LF nas expressões nativas das medidas, mantendo hashes
+  integrais, limites, validação dos demais controles e conciliação dos dados.
+- Cobre a regressão em medidas inline, masters referenciados e aliases,
+  sem alterar fórmulas, identificadores, permissões ou escopo da coleta.
+
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
 - Publica app66ed7360 com preparacao aditiva e ativacao atomica do catalogo,

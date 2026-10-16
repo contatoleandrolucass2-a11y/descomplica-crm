@@ -35,6 +35,13 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     value.length > 0 &&
     value.length <= max &&
     !/[\p{Cc}\p{Cs}]/u.test(value);
+  // Native expressions may contain tabs and line breaks. Validate without rewriting
+  // the source: cube/master hashes still cover every original character.
+  const expression = (value) =>
+    typeof value === "string" &&
+    value.trim().length > 0 &&
+    value.length <= 16384 &&
+    !/[\p{Cc}\p{Cs}]/u.test(value.replace(/[\t\r\n]/gu, ""));
   const sha = (value) => typeof value === "string" && /^[0-9a-f]{64}$/.test(value);
   // Normalize recognition only; native expressions and their hashes remain byte-exact.
   const directAlias = (value) => {
@@ -364,7 +371,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     const measures = [config.vgvMeasureIndex, config.contractsMeasureIndex].map((index) => {
       const alias = aliases.get(index);
       const definition = alias ? alias.definition : resolved(cube.qMeasures[index], "measure");
-      check(record(definition) && text(definition.qDef, 16384), "measure_unresolved");
+      check(record(definition) && expression(definition.qDef), "measure_unresolved");
       check(!directAlias(definition.qDef), "measure_unresolved");
       check(
         !definition.qRelative &&

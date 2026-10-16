@@ -99,6 +99,14 @@ automaticamente. Cada definicao real ainda precisa de revisao. Referencias:
 [masters em expressoes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Measures/use-master-measures-expressions.htm)
 e [precedencia de nomes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Expressions/references-fields-measures-variables.htm).
 
+Expressões nativas podem conter TAB, CR e LF, conforme o uso multilinha do
+[editor de expressões](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Expressions/work-with-expression-editor.htm).
+O coletor aceita esses três controles somente no corpo da expressão. O texto
+original permanece intacto no hash e na definição entregue ao QIX; não há
+normalização, substituição de fórmulas ou dispensa de pins. Outros controles,
+surrogates isolados, conteúdo apenas em branco e mais de 16.384 caracteres
+continuam recusados. Nomes, rótulos e identificadores mantêm regras separadas.
+
 `ranking-mapping.mjs` rejeita definicao ausente ou nao revisada. A definicao
 produtiva agora contem os pins nativos da conferencia00:58 UTC16/10/2026,
 nao uma atestacao de coleta/publicacao. A factory deriva janeiro ate o mes corrente do
