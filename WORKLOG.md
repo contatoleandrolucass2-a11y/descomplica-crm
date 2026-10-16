@@ -6960,3 +6960,5 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - Meta: revisa única divergência visual DV1024 (13px da legenda após corrigir calendário); mantém241referências e exige novaCI.
 
 - Meta publicada em16/10/2026 00:59 BRT: PR231, main b5458ff, CI38844155079 completa, imagem imutável comprovada, health e autenticação anônima verificados. Evidências em docs/audits/meta-2026-10-15.md.
+
+- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
