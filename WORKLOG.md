@@ -31,7 +31,10 @@ A matriz Chromium sintética passou nos três temas, em três larguras, com zoom
 teclado, acessibilidade e handshake noVNC dos dois provedores. Auditorias pnpm,
 OSV e Gitleaks não encontraram vulnerabilidades conhecidas ou segredos expostos.
 O inventário de recursos, o catálogo de páginas e as fontes documentais passaram.
-Após o ajuste do instalador, os 62 testes específicos Meta passaram novamente.
+Após os ajustes do instalador e da URL após login, os 64 testes específicos Meta
+passaram novamente. A inspeção da interface real autenticada confirmou as três
+abas e o controle da conta. Os parâmetros transitórios acrescentados pela Meta
+são validados somente em memória e nunca integram o heartbeat ou o destino salvo.
 As quatro unidades passaram em `systemd-analyze verify` na VPS, em diretório
 temporário, sem instalação, reload ou início de serviço. Typecheck também passou.
 

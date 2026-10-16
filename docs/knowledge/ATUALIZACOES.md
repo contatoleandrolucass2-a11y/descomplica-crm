@@ -17,8 +17,10 @@ backup integral, lock compartilhado e comparação atômica.
 
 Build, formatação, testes locais e matriz sintética de navegador passaram; as
 auditorias de dependências e segredos não encontraram achados. Esses resultados
-não comprovam instalação, login, coleta ou publicação. O acesso real ao link Meta
-exigiu login. A configuração automática do Obsidian não está instalada neste Git
+não comprovam instalação, login na VPS, coleta ou publicação. Após login no
+navegador local, a interface real confirmou a conta e os seletores; parâmetros
+transitórios de navegação são aceitos com validação estrita, sem persistência.
+A configuração automática do Obsidian não está instalada neste Git
 comum. Fontes: código e testes desta branch, inspeção somente leitura da VPS e
 runbook `docs/runbooks/meta-ads-vps-session.md`. Revalidar SHA, CI e estado real
 antes de qualquer ativação.

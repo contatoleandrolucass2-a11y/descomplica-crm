@@ -7,7 +7,7 @@ seu acesso pela página Integrações do CRM. A conta de anúncios autorizada é
 `1080988750909489`, no business `310106776631136`.
 
 O destino fixo é o [Gerenciador de Anúncios solicitado](https://adsmanager.facebook.com/adsmanager/manage/campaigns/?global_scope_id=310106776631136&business_id=310106776631136&act=1080988750909489&nav_entry_point=am_global_scope_selector).
-O parâmetro temporário `redirect_session_id` não é persistido. Não há nova página
+Os parâmetros temporários de navegação não são persistidos. Não há nova página
 comercial, coleta de métricas, importação de leads, exportação de campanhas,
 agendamento de coleta ou publicação de anúncios nesta etapa. Esses contratos
 dependem da próxima definição do usuário.
@@ -75,7 +75,7 @@ página a indicadores booleanos; textos da conta ou das campanhas não saem do
 navegador.
 
 Para não renovar um estado baseado em DOM antigo, o monitor recarrega somente a
-rota canônica de campanhas, sem parâmetros adicionais, hash, campo de edição
+rota canônica de campanhas, sem parâmetros desconhecidos, hash com conteúdo, campo de edição
 focado, diálogo, área editável ou controle de rascunho/publicação visível. Antes
 de recarregar, obtém uma reserva exclusiva de até 25 segundos no gateway local e
 revalida a interface dentro dessa reserva. Enquanto ela existir, uma nova abertura
@@ -84,6 +84,17 @@ monitor não consegue reservar nem recarregar. A prova positiva sempre vem do DO
 posterior ao reload. Redirecionamento a login ou conta diferente substitui o
 estado anterior. Falha do gateway, console ativo ou impossibilidade de reserva
 produz `unavailable`, nunca um novo `connected`.
+
+O login interativo pode acrescentar parâmetros transitórios à rota de campanhas.
+A validação aceita `biz_login_source` somente com o valor
+`biz_unified_f3_fb_login_button`, e `join_id` ou `redirect_session_id` somente como
+UUID v4 válido. Parâmetros duplicados, inclusive quando seus nomes usam codificação
+percentual, são recusados. Um `#` vazio ao final é permitido; fragmentos com
+conteúdo e parâmetros de seleção/edição permanecem bloqueados. Esses valores são
+validados apenas em memória, não aparecem no heartbeat e não são persistidos.
+Os controles globais “Descartar rascunhos” e “Conferir e publicar” com contagem
+não caracterizam edição isoladamente; formulários, diálogos e áreas editáveis
+continuam bloqueando o reload.
 
 A coordenação usa `GET /session-active`, `POST /session-probe` e
 `DELETE /session-probe` exclusivamente em `127.0.0.1:6083`. A reserva possui um

@@ -57,11 +57,22 @@ export function inspectPageUrl(value) {
 export function isReadOnlyCampaignsUrl(value) {
   if (inspectPageUrl(value)?.kind !== "workspace") return false;
   const url = new URL(value);
+  const parameters = [...url.searchParams.keys()];
+  const sessionId = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
   return (
     /^\/adsmanager\/manage\/campaigns\/?$/.test(url.pathname) &&
     !url.hash &&
-    [...url.searchParams.keys()].every((key) =>
-      ["global_scope_id", "business_id", "act", "nav_entry_point"].includes(key),
-    )
+    new Set(parameters).size === parameters.length &&
+    parameters.every((key) => {
+      // Meta adds these transient navigation values after an interactive login.
+      // Validate them in memory only; never persist them or send them to CRM.
+      if (key === "biz_login_source") {
+        return url.searchParams.get(key) === "biz_unified_f3_fb_login_button";
+      }
+      if (key === "join_id" || key === "redirect_session_id") {
+        return sessionId.test(url.searchParams.get(key));
+      }
+      return ["global_scope_id", "business_id", "act", "nav_entry_point"].includes(key);
+    })
   );
 }

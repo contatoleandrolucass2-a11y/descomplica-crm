@@ -22,6 +22,7 @@ import {
 import {
   assertCdpConfiguration,
   inspectPageUrl,
+  isReadOnlyCampaignsUrl,
   META_ADS_ACCOUNT_ID,
   META_ADS_BUSINESS_ID,
   META_ADS_CDP_URL,
@@ -94,6 +95,38 @@ test("CDP is fixed to the dedicated port, with no credentials, paths or other or
     assert.throws(() => assertCdpConfiguration({ META_ADS_CDP_URL: endpoint }));
 });
 
+test("read-only campaigns accepts only validated transient login navigation parameters", () => {
+  const uuid = "12345678-1234-4123-8123-123456789abc";
+  const transient = `&biz_login_source=biz_unified_f3_fb_login_button&join_id=${uuid}&redirect_session_id=${uuid}`;
+  for (const suffix of [
+    "",
+    "#",
+    `&join_id=${uuid}`,
+    `&redirect_session_id=${uuid}`,
+    transient,
+    `${transient}#`,
+  ]) {
+    assert.equal(isReadOnlyCampaignsUrl(`${META_ADS_MANAGER_URL}${suffix}`), true);
+  }
+  for (const suffix of [
+    "&biz_login_source=unknown",
+    "&biz_login_source=",
+    "&join_id=invalid",
+    `&join_id=${uuid.replace("-4123-", "-5123-")}`,
+    `&join_id=${uuid.replace("-8123-", "-7123-")}`,
+    `&join_id=${uuid}&join_id=${uuid}`,
+    `&redirect_session_id=${uuid}&redirect_session_id=${uuid}`,
+    "&biz_login_source=biz_unified_f3_fb_login_button&biz_login_source=biz_unified_f3_fb_login_button",
+    `&join_id=${uuid}&%6aoin_id=${uuid}`,
+    "&nav_entry_point=am_global_scope_selector",
+    `&redirect_session_id=${uuid}%20`,
+    `&join_id=${uuid}&selected_campaign_ids=123`,
+    "&edit=true",
+    "#edit",
+  ])
+    assert.equal(isReadOnlyCampaignsUrl(`${META_ADS_MANAGER_URL}${suffix}`), false);
+});
+
 test("URL or partial DOM evidence never proves connection; login and denied override tabs", () => {
   assert.equal(classifyEvidence({ kind: "workspace" }, complete), "connected");
   assert.equal(classifyEvidence({ kind: "workspace" }), "unavailable");
@@ -155,6 +188,15 @@ test("visible DOM probe emits booleans only and requires exact account identity 
   }
   assert.equal(domEvidence([...labels, identity], { password: true }).login, true);
   assert.equal(domEvidence([{ label: "Continuar com o Facebook", role: "button" }]).login, true);
+  assert.equal(
+    domEvidence([
+      ...labels,
+      identity,
+      { role: "button", label: "Descartar rascunhos" },
+      { role: "button", label: "Conferir e publicar (13)" },
+    ]).editing,
+    false,
+  );
 });
 
 function browserFixture(
@@ -482,6 +524,21 @@ test("editing or unexpected query prevents refresh even with old connected DOM",
     );
     assert.equal(f.reloads(), 0);
   }
+});
+
+test("post-login transient URL can obtain fresh connected proof without entering the heartbeat", async () => {
+  const url = `${META_ADS_MANAGER_URL}&biz_login_source=biz_unified_f3_fb_login_button&join_id=12345678-1234-4123-8123-123456789abc#`;
+  const f = browserFixture([url]);
+  assert.equal(
+    await probeMetaAdsConnection({}, { ...leaseOptions, connect: async () => f.browser }),
+    "connected",
+  );
+  assert.equal(f.reloads(), 1);
+  assert.equal(
+    observationSchema.safeParse({ ...observation, join_id: "12345678-1234-4123-8123-123456789abc" })
+      .success,
+    false,
+  );
 });
 
 test("fresh UI and redirects supersede stale connected DOM; exclusive lease is always released", async () => {
