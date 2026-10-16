@@ -4,7 +4,7 @@ import type { AvailableQlikRelayConfiguration } from "./config";
 import { QLIK_RELAY_MAX_CLOCK_SKEW_MS } from "./config";
 
 const RELAY_PATH = "/api/ingest/qlik";
-type RelayPath = typeof RELAY_PATH | "/api/ingest/qlik/v2";
+type RelayPath = typeof RELAY_PATH | "/api/ingest/qlik/v2" | "/api/ingest/qlik/status";
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const ISO_TIMESTAMP_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,6})?Z$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;

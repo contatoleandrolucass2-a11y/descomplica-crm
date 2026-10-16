@@ -179,6 +179,7 @@
         "app/(protected)/app/configuracoes/conectar-sistemas/page.tsx",
         "app/api/ingest/qlik/route.ts",
         "app/api/ingest/qlik/v2/route.ts",
+        "app/api/ingest/qlik/status/route.ts",
         "app/api/ingest/salesforce/route.ts",
         "app/api/refresh/salesforce/route.ts",
         "app/api/salesforce/status/route.ts",

@@ -109,6 +109,19 @@ do HMAC e o compartilha entre as duas sessoes. O ciclo seguinte recria o mapa.
 Motivos de falha QIX atravessam o browser somente pela allowlist versionada;
 nenhuma mensagem bruta do SDK, formula ou linha de dados entra no recibo.
 
+O catalogo de medidas trata qData/title/label opcionais sem transformar
+metadados alheios em requisito financeiro. IDs/tipos/duplicatas e limite4096
+continuam conferidos em toda a lista. Um alias so vincula o master aprovado,
+com titulo nativo, hash integral e unicidade; nenhum texto alheio e publicado.
+Codigos master_catalog_item, master_catalog_text, master_catalog_binding e
+master_alias_identity distinguem recusas sem incluir valores da fonte.
+
+Paginas completas podem conter qTails zeradas: [NxGroupTail](https://help.qlik.com/en-US/sense-developer/May2026/Subsystems/EngineJSONAPI/Content/models-nxgrouptail.htm)
+descreve contagens de elementos de grupos anteriores/seguintes. O coletor
+aceita somente zeros explicitos em array limitado pela largura do cubo;
+caudas nao-zero ou malformadas continuam recusadas. A area/matriz deve
+corresponder exatamente a cada pagina solicitada, sem reducao ou lacunas.
+
 Publicacoes sao preservadas por ano. O reader retorna atual/anterior sob um
 snapshot SQL. Falha ou fonte mais antiga nao substitui a ultima carga valida.
 Movimento exige periodo, cobertura e mapeamento comparaveis. Publicacao nao
@@ -148,7 +161,34 @@ leitura atual do recibo, banco e pagina. Provar tambem um ciclo horario posterio
 Sessao expirada/MFA deve produzir reautenticacao necessaria, preservar dados e
 exigir acao autorizada, sem contornar controles do provedor.
 
-## Recuperacao
+## Status em Integrações
+
+O cartão Qlik aparece entre Salesforce e n8n, com SVGs vetoriais para os temas
+claro/médio e escuro. O painel separa o estado do último ciclo, o horário da
+coleta validada, a confirmação de publicação no CRM, a recarga da fonte e a
+próxima coleta prevista. Uma sessão do navegador aberta não comprova publicação.
+
+O owner de ranking envia um heartbeat a cada 30 segundos para
+`POST /api/ingest/qlik/status`, assinado pelo HMAC existente com domínio de rota
+próprio. O contrato aceita somente metadados operacionais; não transporta linhas,
+nomes comerciais, fórmulas, credenciais ou mensagens brutas de erro. O servidor
+limita o corpo a 8 KiB e cinco segundos, valida assinatura, idade, ordem e nonce.
+O `GET` exige acesso à página Integrações, incluindo as verificações existentes
+de sessão, MFA, aprovação e escopo. Nenhuma tabela ou ACL é modificada.
+
+Sem heartbeat por 90 segundos, o status expira. Um ciclo travado também expira
+mesmo recebendo heartbeat. Falha e reautenticação preservam os horários da última
+publicação confirmada durante a vida do owner. Reinício do servidor ou rotação
+da chave exige novo heartbeat; reinício do owner exige nova publicação antes de
+afirmar sucesso. Os dados duráveis do ranking continuam no banco existente.
+
+Falha na entrega do status não dispara nova coleta nem altera a publicação.
+O monitor não se sobrepõe; a interface consulta a cada 15 segundos e suspende
+consultas em abas ocultas. O intervalo comercial permanece de uma hora após o
+término do ciclo. Status e agenda previstos não substituem a prova de uma
+execução automática posterior, exigida na ativação controlada.
+
+## Recuperação operacional
 
 Configuracao do aplicativo usa backup privado versionado do env completo,
 CAS e `release:production recover` da tentativa exata. Nao apagar ledger/lock.

@@ -26,6 +26,13 @@ import {
 
 import styles from "./ConnectedSystemsPanel.module.css";
 import { SalesforceConsoleDialog } from "./SalesforceConsoleDialog";
+import { QlikServiceCard, QlikStatusDetails } from "./QlikIntegration";
+import {
+  emptyQlikStatus,
+  qlikStatusSnapshotSchema,
+  QLIK_STATUS_PATH,
+  type QlikStatusSnapshot,
+} from "@/lib/crm/qlik/status-contract";
 
 const REPORTS = [
   { key: "opportunities", name: "Oportunidades", id: "00OU600000DrfDeMAJ" },
@@ -135,6 +142,7 @@ export function ConnectedSystemsPanel({
     emptySnapshot(statusConfigured ? "waiting" : "unconfigured"),
   );
   const [checking, setChecking] = useState(false);
+  const [qlikSnapshot, setQlikSnapshot] = useState<QlikStatusSnapshot>(() => emptyQlikStatus());
   const [integrationEvidence, setIntegrationEvidence] = useState<IntegrationEvidence | null>(null);
   const verifyRef = useRef<(() => void) | null>(null);
 
@@ -144,7 +152,7 @@ export function ConnectedSystemsPanel({
     let pollTimer: ReturnType<typeof setTimeout> | undefined;
     let timeoutTimer: ReturnType<typeof setTimeout> | undefined;
 
-    async function verify() {
+    async function verify(manual = false) {
       if (disposed || controller || document.hidden) return;
       clearTimeout(pollTimer);
       const request = new AbortController();
@@ -152,6 +160,7 @@ export function ConnectedSystemsPanel({
       setChecking(true);
       timeoutTimer = setTimeout(() => request.abort(), REQUEST_TIMEOUT_MS);
       async function verifySalesforce() {
+        if (!statusConfigured && !canReadSyncStatus && !manual) return;
         try {
           const response = await fetch("/api/salesforce/status", {
             cache: "no-store",
@@ -175,8 +184,24 @@ export function ConnectedSystemsPanel({
         if (!disposed) setIntegrationEvidence(evidence);
       }
 
+      async function verifyQlik() {
+        try {
+          const response = await fetch(QLIK_STATUS_PATH, {
+            cache: "no-store",
+            credentials: "same-origin",
+            headers: { accept: "application/json" },
+            signal: request.signal,
+          });
+          if (!response.ok) throw new Error("Status unavailable");
+          const body = qlikStatusSnapshotSchema.parse(await response.json());
+          if (!disposed && !request.signal.aborted) setQlikSnapshot(body);
+        } catch {
+          if (!disposed) setQlikSnapshot(emptyQlikStatus("unavailable"));
+        }
+      }
+
       try {
-        await Promise.all([verifySalesforce(), verifyIntegrations()]);
+        await Promise.all([verifySalesforce(), verifyIntegrations(), verifyQlik()]);
       } finally {
         clearTimeout(timeoutTimer);
         controller = null;
@@ -195,12 +220,13 @@ export function ConnectedSystemsPanel({
         state: statusConfigured ? "waiting" : "unconfigured",
       }));
       setIntegrationEvidence(null);
+      setQlikSnapshot(emptyQlikStatus());
       if (document.hidden) controller?.abort();
-      else if (statusConfigured || canReadSyncStatus) void verify();
+      else void verify();
     }
 
-    verifyRef.current = () => void verify();
-    if (statusConfigured || canReadSyncStatus) void verify();
+    verifyRef.current = () => void verify(true);
+    void verify();
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       disposed = true;
@@ -296,7 +322,7 @@ export function ConnectedSystemsPanel({
             <h2 id="services-title">Serviços</h2>
             <p>O estado só é afirmado quando existe uma fonte real de evidência.</p>
           </div>
-          <span>3 serviços</span>
+          <span>4 serviços</span>
         </div>
         <div className={styles.servicesGrid}>
           <article className={styles.serviceCard}>
@@ -321,6 +347,8 @@ export function ConnectedSystemsPanel({
               </small>
             </div>
           </article>
+
+          <QlikServiceCard snapshot={qlikSnapshot} />
 
           <article className={styles.serviceCard}>
             <div className={styles.serviceLogoArea}>
@@ -409,6 +437,8 @@ export function ConnectedSystemsPanel({
           </article>
         </div>
       </section>
+
+      <QlikStatusDetails snapshot={qlikSnapshot} />
 
       <section className={styles.salesforceDetails} aria-labelledby="salesforce-details-title">
         <div className={styles.salesforceDetailsHeading}>

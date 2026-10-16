@@ -2,6 +2,13 @@
 
 Rota: `/app/configuracoes/conectar-sistemas`.
 
+A revisão Qlik de 16/10/2026 acrescenta um quarto serviço entre Salesforce e
+n8n, duas logos SVG e evidências operacionais específicas. O cenário sintético
+confere ordem, carregamento das sete imagens, publicação, login necessário,
+falha, status expirado e coleta em andamento. Preserva os testes de responsividade,
+temas, acessibilidade, cancelamento, console Salesforce e ausência de sobreposição.
+O cenário não autentica o Qlik real nem comprova publicação na VPS.
+
 A guia usa SimulationCanvasHeader e o canvas compacto da Tabela Associativo,
 com CSS local e a navegacao autorizada de Configuracoes.
 Não possui canvas de referência aprovado no manifesto histórico.

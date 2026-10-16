@@ -103,7 +103,7 @@
 
 .servicesGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -184,6 +184,10 @@
   border-radius: 7px;
   background: var(--analytics-surface);
   padding: 0 16px 12px;
+}
+
+.qlikDetails {
+  margin-bottom: 18px;
 }
 
 .salesforceDetailsHeading {

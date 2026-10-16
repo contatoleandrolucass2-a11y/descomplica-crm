@@ -774,3 +774,20 @@ test("Linux main explicitly exits nonzero for an unrecoverable ranking owner", (
   assert.match(child.stderr, /qlik_owner_unrecoverable/);
   assert.doesNotMatch(child.stderr, /synthetic-only/);
 });
+
+test("status does not retain success when the private receipt cannot be written", async () => {
+  const signal = new AbortController().signal;
+  const states = [];
+  await startRankingCollection({
+    signal,
+    collect: async () => assert.fail("source must not run"),
+    write: async () => {
+      throw new Error("private receipt unavailable");
+    },
+    monitor: { update: (result) => states.push(result) },
+    loop: async ({ onStatus }) => {
+      await assert.rejects(onStatus({ state: "running" }), /private receipt unavailable/);
+    },
+  });
+  assert.deepEqual(states, [{ state: "unavailable" }]);
+});
