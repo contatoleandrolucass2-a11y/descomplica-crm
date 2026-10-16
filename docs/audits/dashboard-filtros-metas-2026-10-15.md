@@ -2,6 +2,28 @@
 
 ## Escopo e autoridade
 
+Em16/10/2026 o usuario autorizou explicitamente coordenar tambem a atualizacao
+aditiva do catalogo de paginas, preservando os acessos existentes. Isso resolve
+a pendencia de autorizacao registrada anteriormente, sem dispensar os gates.
+Conferencia10:55Z: main2eae903, PR238/2234298 aberto; health200/ok/b5458ff;
+deployment e42363ec-0f81-4084-9ced-aa405c263b09, concluido03:59:23.023Z,
+sem pendencia. CI38858636662: validate/restore verdes, release-gates cancelado
+ao atingir o limite global; repeticao iniciada. Fonte: Git/gh, health anonimo,
+coordenador status e metadados MCP Supabase.
+
+Backup delimitado anterior ao catalogo:
+`/srv/descomplica-backups/dashboard-catalog-20261016-BdFdKs/before.json`,
+44313 bytes, SHA-256
+`61092986a34a54dcd280b559da68727deeb0d37c9362b2b5f6af6b406625d627`.
+Diretorio root0700, arquivo root0600, gravacao exclusiva/fsync e releitura
+conferida; copia transitoria local removida. Contem configuracao de acesso,
+rotinas, policies, ACL e historico, sem dados comerciais. O round-trip do
+arquivo nao equivale a ensaio de restauracao SQL. Antes de cada mutacao,
+revalidar o estado e abortar se houver divergencia administrativa concorrente.
+Quatro RPCs de Rotina existem com owner postgres, EXECUTE authenticated e
+sem EXECUTE anon/service_role; ingestao permanece exclusiva service_role.
+Producao ainda tem17 paginas/25 permissoes e nenhuma tabela de analise.
+
 Pedido de15/10/2026: filtros pelas colunas exportadas, meses integralmente
 fechados com detalhes, metas por responsavel unico dos relatorios filtrados
 e comparativos transpostos. O usuario autorizou explicitamente a atualizacao

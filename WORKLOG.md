@@ -2,6 +2,14 @@
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
+Retomada16/10: usuario autorizou tambem a atualizacao aditiva do catalogo.
+Conferencia10:55Z manteve main2eae903, PR238/2234298 e producao b5458ff,
+sem deploy pendente. CI do HEAD teve validate/restore verdes e release-gates
+cancelado no limite de45 minutos; repeticao solicitada. Backup delimitado do
+catalogo salvo em diretorio privado root0700/arquivo0600, com round-trip e
+SHA-256 conferidos. Preparacao de ensaio atomico com falha na ultima migration
+para comprovar rollback integral antes da ativacao; nenhuma migration aplicada.
+
 CI38854933173/cb3078f verde em todos os jobs de PR; validacao local final:
 lint/tipos/build,3614 Vitest/1181 Node/703 release aprovados, skips90/19/14.
 Dois workers evitaram timeouts de infraestrutura Windows sem relaxar limites.

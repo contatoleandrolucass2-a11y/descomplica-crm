@@ -2,6 +2,9 @@
 
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
+- Prepara a ativacao conjunta do catalogo autorizado com fontes fixadas por
+  hash, comparacao do backup e ensaio isolado de falha/rollback, sem executar
+  migrations pelo planejador nem alterar escolhas de acesso preexistentes.
 - Integra o catalogo de paginas mantendo leituras restritas por etapa e os
   filtros completos somente no dashboard autorizado; preserva referencias administrativas.
 - Preserva a retirada de codigos internos dos simuladores integrada pela main,

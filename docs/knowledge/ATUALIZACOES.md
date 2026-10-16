@@ -2,6 +2,27 @@
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
+- Catalogo autorizado16/10: planejador offline fixa hashes do trio PR235,
+  remove somente wrappers externos e produz uma unica instrucao DO em autocommit.
+  CAS e preservacao abrangem cinco tabelas, inclusive user_roles.40 testes locais
+  passaram; revisao independente sem bloqueio concreto. Ensaio compacto ampliado
+  mantem165 assertions e acrescenta53, com falha tardia P0235 e comparacao integral
+  antes/depois. PostgreSQL real ainda nao executado: Docker indisponivel neste
+  Windows; CI deve comprovar o resultado antes de qualquer aplicacao remota.
+  Lint global passou com tres warnings preexistentes; suite completa em andamento.
+  Backup privado BdFdKs salvo/releitura/hash conferidos, sem dados comerciais;
+  nao equivale a restore SQL e precisa novo snapshot/CAS antes da ativacao.
+- Retomada16/10/10:55Z: usuario autorizou explicitamente coordenar tambem a
+  atualizacao aditiva do catalogo, preservando acessos. A pendencia de autorizacao
+  abaixo esta resolvida; testes, backup, transacao atomica e coordenador continuam
+  obrigatorios. Git fetch confirma main2eae903 e HEAD2234298; PR238 aberto,
+  MERGEABLE/BLOCKED. CI38858636662 passou validate/restore, mas release-gates foi
+  cancelado, portanto ainda nao autoriza merge/publicacao do SHA atual.
+- GET anonimo10:54:59Z200/ok/b5458ff e coordenador status confirmam deploy
+  e42363ec-0f81-4084-9ced-aa405c263b09 de03:59:23.023Z, sem pendencia.
+  Historico MCP Supabase permanece sem migrations do catalogo novo, somente
+  master_all_permission_defaults apos o marco de preparacao. Fontes: GitHub/gh,
+  Git, health publico e Supabase; nenhuma mutacao remota nesta conferencia.
 - Encerramento16/10/05:54Z: PR238/cb3078f esta CLEAN/MERGEABLE e CI38854933173
   verde em validate/release-gates/restore. Build e tipos locais verdes; suite
   completa em componentes:3614 Vitest/1181 Node/703 release, skips90/19/14.
