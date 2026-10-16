@@ -173,6 +173,8 @@
 
 ## 2026-10-14: Atualizacao automatica dos relatorios
 
+- Publicado em6843ef1 apos CI completa, backup, imagem verificada e promocao
+  protegida; recibo e smoke registrados, sem outro restart por documentacao.
 - Atualiza o dashboard aberto quando uma nova versao dos relatorios e
   publicada no CRM, preservando filtros e posicao da tela.
 - Distingue coleta de publicacao confirmada e reconfere a consistencia do lote
