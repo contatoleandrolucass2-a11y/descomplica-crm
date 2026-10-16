@@ -33,6 +33,10 @@ validadas; ausência de fonte deve aparecer como estado indisponível.
 - Os textos e traços mostrados nos canvases representam composição visual, não
   registros comerciais. Nenhum número, nome, status ou participante ilustrado
   pode virar dado real ou fixture produtiva.
+- O pedido de 15/10/2026 remove os códigos WF da apresentação comercial,
+  incluindo cards, cabeçalhos, mensagens, ajuda e resultados. Esses códigos
+  permanecem apenas nos identificadores e contratos internos. A referência
+  histórica não autoriza reintroduzi-los no texto visível.
 - O selo “Prévia visual · sem dados reais” só é válido em estado sintético ou
   comprovadamente sem fonte. Quando houver snapshot validado, a interface deve
   identificar honestamente a origem e o estado reais.
@@ -127,3 +131,12 @@ diferencas inevitaveis entre canvas gerado e captura do navegador, como
 rasterizacao de fonte e altura de conteudo. A regressao pixel a pixel da
 aplicacao continua mais restritiva, com tolerancia de `1%` e diferenca maxima de
 `16` por canal.
+
+### Revisão dos códigos internos em 16/10/2026
+
+A captura Linux limpa da execução `38828948624`, artefato `12016679397`,
+validou a remoção dos códigos WF. Foram atualizadas somente as referências
+móveis do Hub em 320, 375 e 390 pixels, incluindo o tema escuro em 390 pixels.
+As outras 238 imagens foram preservadas. A proveniência está em
+`docs/qa/reference-parity/authenticated-results.json`; a integração com
+`main` em `b5458ff5` exige nova CI normal antes da publicação.

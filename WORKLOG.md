@@ -1,74 +1,16 @@
 # Worklog
 
-## 2026-10-16: CRM publicado; recusa real no catalogo Qlik
+## 2026-10-15: Códigos de workflow ocultos na interface comercial
 
-Main b937/CI38839240305 quatro jobs success. ZIP12021130754 validado,
-11 camadas OCI e perfis homologation/production comprovados na VPS, mesma
-imagem90701463142349786838f3b51dc8a0890d91b1b4652a287394bbf5acf36941d5.
-Coordenador publicou CRM a8a126eb-c373-4005-b68a-456012a6336b as02:59:30.399Z,
-QLIK_RANKING_V2_ENABLED efetivo conferido. Health03:00:08.353Z200/ok/b937.
+- A captura Linux limpa `38828948624` passou em todos os gates funcionais. Foram revisadas e incorporadas somente quatro imagens móveis do Hub; as outras 238 imagens e a proveniência das atualizações de Metas, Ranking e Usuários foram preservadas. Os 242 hashes finais foram conferidos. O workflow temporário foi removido, e a CI normal continua obrigatória.
+- Integra `main` em `b5458ff5eef483d76ee58c9c14129d3872de8291`, preservando as alterações concorrentes de Metas e Qlik. A produção observada em 16/10/2026 às 03:15 UTC estava em `b9377a1031865a01dccfbda4a87fa2d2dd84b2c5`, publicada às 02:59:30.399 UTC. Esta observação não substitui a consulta final protegida.
 
-Primeira tentativa owner e26cdcd3 interrompida com perfil ja protegido e
-servico parado; causa exata nao exposta. Recuperacao exclusiva pelo mesmo
-coordenador restaurou17ab/c8314c64 as03:01:24.321Z, sem apagar ledger/travas.
-Segunda tentativa84cdd4c0 iniciou o servico, mas coleta real03:02:41.093Z
-retornou unavailable/master_pin_mismatch. Nenhum recibo de publicacao.
-Recuperada exatamente em28b9ffc9-eb35-49e6-9166-dfed49e0a91c as03:07:20.476Z;
-owner17ab metadata-only, sem pendencia. CRM b937 preservado, sem novo restart.
-Banco03:10:14.101Z confirma0 observacoes/0 publicacoes v2.
+- A CI `38824006181` aprovou os testes funcionais, a acessibilidade e o ensaio de restauração. Quatro referências móveis do Hub divergiram somente na altura após a retirada dos códigos. Um workflow temporário reproduz a captura em Linux, com checkout limpo e os mesmos gates funcionais, para revisão antes da nova CI normal.
 
-Corretivo focal trata projeccoes opcionais null/ausentes e textos alheios ao
-ranking no catalogo. Aliases relevantes continuam limitados, propriedades
-pinadas e colisoes recusadas. Codigos fixos distinguem item/texto/binding/
-identidade, sem expor catalogo ou mensagens. O mecanismo e reproduzivel por
-fixture; a entrada exata do catalogo nativo ainda nao foi observada, portanto
-nao atribuir a causa produtiva a um valor especifico antes do novo canario.
-Sem mudanca de interface, banco, pins, recorte, selecoes ou conciliacao.
-
-Focais collector/artifact327 testes:326 aprovados,0 falhas e1 skip POSIX
-preexistente. Regressao direta/VM cobre labels projetados null/ausentes com
-hash nativo intacto, label explicitamente divergente, titulo/identidade/hash
-alterados e cleanup. Revisao independente sem P1/P2 de binding nos cenarios.
-Gates globais e novo canario real ainda pendentes; nao declarar origem resolvida.
-
-Rodada Windows do corretivo: lint/tipos/build exit0. Teste completo ainda em
-execucao, com falhas observadas em subprocessos de inventario/devtools e
-referencia; causas nao isoladas, nao alterar asserts nem atribuir ao Qlik.
-PR239 aberto em draft; consulta inicial sem checks vinculados. Nova revisao
-documental envia evento synchronize; CI Linux do SHA exato segue obrigatoria.
-
-GitHub confirmou PR239 CONFLICTING/DIRTY: main recebeu PR231/b5458ff
-enquanto o corretivo era preparado. Ausencia de checks nao prova falha de
-credencial ou da CI. Merge preserva integralmente as secoes documentais de
-Meta e Qlik; codigo/interface de main entram sem resolucao manual nem novo
-ajuste visual desta frente. Revalidar conjunto integrado antes da promocao.
-
-Confronto com protocolo oficial revelou outra incompatibilidade independente:
-NxDataPage pode conter qTails com qUp/qDown zero. Duas regressoes (direta/VM)
-falharam antes do patch por incomplete_page. Aceita apenas array limitado por
-qSize.qcx e entradas explicitamente zero; pendencias nao-zero, tipos invalidos
-e cobertura incorreta continuam rejeitados.388 focais:387pass/1skip POSIX.
-Nao foi o codigo do canario nativo observado: este parou antes em master pins.
-Fontes: modelos NxGroupTail/NxDataPage e exemplo HyperCube oficiais Qlik.
-Revisao independente de tails sem P1/P2,44 testes focados de paginas/reducao
-aprovados; suite completa e execucao nativa nao foram atribuidas a essa revisao.
-
-## 2026-10-16: Candidato integrado e CI exata de main
-
-PR216/head8dd4a3e integrado normalmente em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5
-as02:12:36Z; arvore identica. CI38834764103 tentativa2: tres gates aprovados,
-incluindo matriz visual corrigida; tentativa1 bloqueada por fonte ITBI HTTP403,
-sem alteracao financeira para obter verde. MainCI38839240305 ainda em progresso.
-Windows quatro comandos executados; teste completo3334/1164/703 aprovados,
-89/19/14 skips explicitos. Captura adicional38834764063 success.
-
-VPS b937 preparada: package/lock iguais17ab,38123 dependencias verificadas,
-SDK/script/mapa como UID997 Node24 e validacao root aprovados. Probe readonly
-de configuracao complete/preparationAccepted true, sem escrita de segredos.
-Health publico02:16:20.295Z200/ok/d83; ledgers CRM72be7b10 e owner933a111d/17ab
-sem pendencia. Nenhum runtime trocado, nenhuma imagem antecipada e nenhum
-fato publicado nesta etapa. Banco produtivo01:34Z:0observacoes/0publicacoes,
-writer de cinco argumentos e reader presentes. Ativacao e prova real pendentes.
+- Remove os códigos WF dos cards do Hub de Simulação, dos cabeçalhos, das mensagens, da ajuda e da versão técnica exibida no resultado. Mantém os nomes comerciais e os indicadores CAIXA, CONSULTA e de autorização.
+- Preserva os identificadores internos, as rotas, as permissões, os contratos de API e todas as regras de cálculo. A implementação parte de `d83c22d510478ee089f8c5cb5969a488451d433b`, em checkout isolado.
+- Atualiza as expectativas existentes de apresentação. Lint, tipos, build e auditoria de dependências passaram; o lint mantém um aviso anterior em `scripts/qa/connected-systems.mjs`. A suíte verificou 3.034 testes Vitest, 572 testes operacionais e 531 testes de release, sem falhas; os skips condicionais de plataforma e ambiente permanecem explícitos.
+- A prévia sintética renderizada pelo componente real do Hub foi conferida em 1440 e 390 pixels: seis links preservados, nenhum código WF visível e nenhuma rolagem horizontal. As capturas locais não substituem a matriz autenticada Linux da CI. Produção permanece sem alteração nesta etapa.
 
 ## 2026-10-15: Legibilidade de Meta no CSS compilado
 
@@ -7028,3 +6970,95 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - CI38829857417 cancelada após validate aprovado; nova combinação deve cumprir todos os gates antes de publicação.
 
 - Meta: revisa única divergência visual DV1024 (13px da legenda após corrigir calendário); mantém241referências e exige novaCI.
+
+## 2026-10-16: CRM publicado; recusa real no catalogo Qlik
+
+Main b937/CI38839240305 quatro jobs success. ZIP12021130754 validado,
+11 camadas OCI e perfis homologation/production comprovados na VPS, mesma
+imagem90701463142349786838f3b51dc8a0890d91b1b4652a287394bbf5acf36941d5.
+Coordenador publicou CRM a8a126eb-c373-4005-b68a-456012a6336b as02:59:30.399Z,
+QLIK_RANKING_V2_ENABLED efetivo conferido. Health03:00:08.353Z200/ok/b937.
+
+Primeira tentativa owner e26cdcd3 interrompida com perfil ja protegido e
+servico parado; causa exata nao exposta. Recuperacao exclusiva pelo mesmo
+coordenador restaurou17ab/c8314c64 as03:01:24.321Z, sem apagar ledger/travas.
+Segunda tentativa84cdd4c0 iniciou o servico, mas coleta real03:02:41.093Z
+retornou unavailable/master_pin_mismatch. Nenhum recibo de publicacao.
+Recuperada exatamente em28b9ffc9-eb35-49e6-9166-dfed49e0a91c as03:07:20.476Z;
+owner17ab metadata-only, sem pendencia. CRM b937 preservado, sem novo restart.
+Banco03:10:14.101Z confirma0 observacoes/0 publicacoes v2.
+
+Corretivo focal trata projeccoes opcionais null/ausentes e textos alheios ao
+ranking no catalogo. Aliases relevantes continuam limitados, propriedades
+pinadas e colisoes recusadas. Codigos fixos distinguem item/texto/binding/
+identidade, sem expor catalogo ou mensagens. O mecanismo e reproduzivel por
+fixture; a entrada exata do catalogo nativo ainda nao foi observada, portanto
+nao atribuir a causa produtiva a um valor especifico antes do novo canario.
+Sem mudanca de interface, banco, pins, recorte, selecoes ou conciliacao.
+
+Focais collector/artifact327 testes:326 aprovados,0 falhas e1 skip POSIX
+preexistente. Regressao direta/VM cobre labels projetados null/ausentes com
+hash nativo intacto, label explicitamente divergente, titulo/identidade/hash
+alterados e cleanup. Revisao independente sem P1/P2 de binding nos cenarios.
+Gates globais e novo canario real ainda pendentes; nao declarar origem resolvida.
+
+Rodada Windows do corretivo: lint/tipos/build exit0. Teste completo ainda em
+execucao, com falhas observadas em subprocessos de inventario/devtools e
+referencia; causas nao isoladas, nao alterar asserts nem atribuir ao Qlik.
+PR239 aberto em draft; consulta inicial sem checks vinculados. Nova revisao
+documental envia evento synchronize; CI Linux do SHA exato segue obrigatoria.
+
+GitHub confirmou PR239 CONFLICTING/DIRTY: main recebeu PR231/b5458ff
+enquanto o corretivo era preparado. Ausencia de checks nao prova falha de
+credencial ou da CI. Merge preserva integralmente as secoes documentais de
+Meta e Qlik; codigo/interface de main entram sem resolucao manual nem novo
+ajuste visual desta frente. Revalidar conjunto integrado antes da promocao.
+
+Confronto com protocolo oficial revelou outra incompatibilidade independente:
+NxDataPage pode conter qTails com qUp/qDown zero. Duas regressoes (direta/VM)
+falharam antes do patch por incomplete_page. Aceita apenas array limitado por
+qSize.qcx e entradas explicitamente zero; pendencias nao-zero, tipos invalidos
+e cobertura incorreta continuam rejeitados.388 focais:387pass/1skip POSIX.
+Nao foi o codigo do canario nativo observado: este parou antes em master pins.
+Fontes: modelos NxGroupTail/NxDataPage e exemplo HyperCube oficiais Qlik.
+Revisao independente de tails sem P1/P2,44 testes focados de paginas/reducao
+aprovados; suite completa e execucao nativa nao foram atribuidas a essa revisao.
+
+## 2026-10-16: Candidato integrado e CI exata de main
+
+PR216/head8dd4a3e integrado normalmente em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5
+as02:12:36Z; arvore identica. CI38834764103 tentativa2: tres gates aprovados,
+incluindo matriz visual corrigida; tentativa1 bloqueada por fonte ITBI HTTP403,
+sem alteracao financeira para obter verde. MainCI38839240305 ainda em progresso.
+Windows quatro comandos executados; teste completo3334/1164/703 aprovados,
+89/19/14 skips explicitos. Captura adicional38834764063 success.
+
+VPS b937 preparada: package/lock iguais17ab,38123 dependencias verificadas,
+SDK/script/mapa como UID997 Node24 e validacao root aprovados. Probe readonly
+de configuracao complete/preparationAccepted true, sem escrita de segredos.
+Health publico02:16:20.295Z200/ok/d83; ledgers CRM72be7b10 e owner933a111d/17ab
+sem pendencia. Nenhum runtime trocado, nenhuma imagem antecipada e nenhum
+fato publicado nesta etapa. Banco produtivo01:34Z:0observacoes/0publicacoes,
+writer de cinco argumentos e reader presentes. Ativacao e prova real pendentes.
+
+## 2026-10-16: Integracao concorrente e registros separados
+
+CI38846173348/headcf2b1c1 concluiu validate/restore/release success. Merge
+normal foi bloqueado apos entrada concorrente PR237/cd004e49c7317bc7fc7ef04c680ecc5054ac2428
+em main, com conflitos somente em CHANGELOG/WORKLOG. Protecao GitHub strict=true
+confirmada por consulta readonly; nova base exige novos checks, sem bypass.
+
+Merge preserva integralmente main e os cinco registros Qlik deste PR. Estes
+foram movidos ao final de WORKLOG/CHANGELOG/ATUALIZACOES por apply_patch,
+com hashes de conteudo iguais antes/depois e restante igual a main (apenas
+normalizacao de linhas em branco pelo formatter). Assim futuras insercoes
+de prefixo nao disputam o mesmo trecho; a protecao de CI permanece intacta.
+Diff de ops/qlik contra cf2b1c1 vazio: nenhum novo ajuste de coletor ou UI.
+
+Windows concluiu lint/tipos/build exit0. Reexecucao pnpm test com
+VITEST_MAX_WORKERS=1 passou3337 vitest/1248 ops/703 release,89/19/14 skips;
+timeouts anteriores nao foram reproduzidos, sem ampliar timeout/asserts.
+CI cf2b1c1 valida o SHA imutavel; execucao local atravessou integracao de main.
+Novo conjunto integrado ainda exige CI. Metadata privada03:07:20.107Z,
+recarga02:14:57.356Z, confirmou cubos/masters/aliases selecionados inalterados;
+nao le fatos. Health03:55:48.744Z200/ok/b937, sem nova promocao CRM nesta etapa.
