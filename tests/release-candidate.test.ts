@@ -17,6 +17,7 @@ const permissionAccessDraftMigration = "20261012113000_apply_user_permission_acc
 const sharedRoutinesMigration = "20261013014310_crm_shared_routines.sql";
 const routineCompletionsMigration = "20261014020437_crm_routine_completions.sql";
 const dashboardAnalysisMigration = "20261015185150_dashboard_analysis_snapshots.sql";
+const qlikRankingV2Migration = "20261014170549_crm_qlik_v2_standalone.sql";
 const administratorMasterOnlyPermissions = [
   "crm.simulators.execute",
   "crm.commercial_engine.execute",
@@ -37,12 +38,12 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 55-version manifest", async () => {
+  it("keeps a unique, ordered 56-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(55);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(55);
+    expect(migrations).toHaveLength(56);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(56);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
@@ -50,6 +51,7 @@ describe("release-candidate migration train", () => {
     expect(migrations).toContain(routineCompletionsMigration);
     expect(migrations.at(-2)).toBe("20261014204014_local_user_presence.sql");
     expect(migrations.at(-1)).toBe(dashboardAnalysisMigration);
+    expect(migrations).toContain(qlikRankingV2Migration);
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -81,7 +83,7 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.tests).toBe(1629);
+    expect(plan.tests).toBe(1883);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -287,7 +289,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1629;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1883;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

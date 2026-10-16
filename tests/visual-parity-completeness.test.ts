@@ -1,5 +1,12 @@
 import { readFileSync } from "node:fs";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+
+import {
+  parseRankingFilters,
+  RankingDashboard,
+} from "@/app/(protected)/app/ranking/RankingDashboard";
 
 function source(relativePath: string) {
   return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
@@ -42,12 +49,27 @@ describe("complete visual composition on the scoped v3 read model", () => {
   it("keeps shadow ranking facts separate while its commercial motor stays blocked", () => {
     const productionPage = source("app/(protected)/app/ranking/page.tsx");
     const page = source("app/(protected)/app/read-model-v3/ranking/page.tsx");
+    const ranking = source("app/(protected)/app/ranking/RankingDashboard.tsx");
+    const reader = source("lib/crm/qlik/data-v2.ts");
 
     expect(page).toContain('dataset="ranking"');
     expect(page).toContain(
       "Ranking avançado, pesos, bônus, roleta e prêmios permanecem bloqueados",
     );
-    expect(productionPage).toContain("loadRankingReadModel");
+    expect(productionPage).not.toContain("loadRankingReadModel");
+    expect(productionPage).toContain('enforcePermission("crm.ranking.view")');
+    expect(productionPage).toContain("await loadQlikRankingV2(filters.year)");
+    expect(productionPage.indexOf('await enforcePermission("crm.ranking.view")')).toBeLessThan(
+      productionPage.indexOf("await loadQlikRankingV2"),
+    );
+    expect(productionPage).toContain("<RankingDashboard data={data} filters={filters}");
+    expect(reader).toContain('.rpc("get_qlik_ranking_v2", { p_year: year })');
+    expect(reader).toContain("responseSchema.safeParse(data)");
+    expect(reader).not.toMatch(/createPrivilegedClient|service_role|\.from\(/);
+    expect(ranking).not.toMatch(
+      /loadRankingReadModel|loadReadModelV3|DEFAULT_POINT_WEIGHTS|rankingPolicyAuthorityAvailable/,
+    );
+    expect(ranking).toContain("Dados indisponíveis");
   });
 
   it("does not prefill an unconfigured point policy with legacy defaults", () => {
@@ -98,7 +120,6 @@ describe("complete visual composition on the scoped v3 read model", () => {
 
   it("keeps final commercial copy localized and technical identifiers disclosed on demand", () => {
     const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
-    const ranking = source("app/(protected)/app/ranking/page.tsx");
     const funnel = source(
       "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
     );
@@ -112,8 +133,22 @@ describe("complete visual composition on the scoped v3 read model", () => {
 
     expect(partnerships).toContain('title="Ranking das imobiliárias"');
     expect(partnerships).not.toMatch(/Imob’s|IMOBs/);
-    expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
-    expect(ranking).toContain("Sem pontuação oficial");
+    for (const [kind, title] of [
+      ["imobs", "Top 10 imobiliárias"],
+      ["developments", "Top 10 empreendimentos"],
+    ]) {
+      const ranking = renderToStaticMarkup(
+        createElement(RankingDashboard, {
+          data: { status: "unavailable" },
+          filters: parseRankingFilters({ kind: kind! }),
+          now: new Date("2026-10-14T12:00:00Z"),
+        }),
+      );
+      expect(ranking).toContain(title);
+      expect(ranking).toContain("Dados indisponíveis");
+      expect(ranking).toContain("<tbody></tbody>");
+      expect(ranking).not.toMatch(/R\$|mappingSha256|batchId|requestId|schemaVersion/);
+    }
     expect(funnel).toContain("Metas do funil de parcerias");
     expect(funnel).toContain("Base legada: somente leitura · Rascunho atual: editável");
     expect(points).toContain("Metas de pontos");

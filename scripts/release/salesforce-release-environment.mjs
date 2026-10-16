@@ -19,6 +19,7 @@ const keys = Object.freeze([
   "SALESFORCE_INGEST_ENABLED",
   "SALESFORCE_REFRESH_ENABLED",
 ]);
+const qlikKeys = Object.freeze(["QLIK_RANKING_V2_ENABLED", "QLIK_RANKING_V2_HMAC_SECRET"]);
 
 function fail(message) {
   throw new Error(message);
@@ -169,6 +170,61 @@ export function salesforceEnvironmentValues(contents) {
   );
 }
 
+export function qlikEnvironmentValues(contents) {
+  const entries = assignments(contents);
+  return Object.fromEntries(
+    qlikKeys.map((key) => {
+      const value = entries.has(key) ? literal(entries.get(key)) : "";
+      return [key, value || (key.endsWith("_ENABLED") ? "false" : "")];
+    }),
+  );
+}
+
+export function transformQlikReleaseEnvironment(contents, expectedSha, targetSha, secret) {
+  if (
+    typeof expectedSha !== "string" ||
+    typeof targetSha !== "string" ||
+    !sha.test(expectedSha) ||
+    !sha.test(targetSha) ||
+    expectedSha === targetSha ||
+    imageSha(contents) !== expectedSha
+  )
+    fail("Qlik configuration requires distinct exact release SHAs.");
+  const entries = assignments(contents);
+  const supabase = entries.get("SUPABASE_SECRET_KEY");
+  if (!supabase || !/^sb_secret_[A-Za-z0-9_-]{20,}$/u.test(literal(supabase)))
+    fail("Qlik requires the existing privileged server configuration.");
+  if (
+    typeof secret !== "string" ||
+    !/^[A-Za-z0-9_-]{43,128}$/u.test(secret) ||
+    ["SUPABASE_SECRET_KEY", "SALESFORCE_INGEST_SECRET", "QLIK_RELAY_HMAC_SECRET"].some(
+      (key) => entries.has(key) && literal(entries.get(key)) === secret,
+    )
+  )
+    fail("A separate Qlik ranking credential is required.");
+  qlikEnvironmentValues(contents);
+  const replacements = {
+    IMAGE_TAG: targetSha,
+    QLIK_RANKING_V2_ENABLED: "true",
+    QLIK_RANKING_V2_HMAC_SECRET: secret,
+  };
+  let after = contents;
+  for (const edit of Object.entries(replacements)
+    .filter(([key]) => entries.has(key))
+    .map(([key, value]) => ({ ...entries.get(key), replacement: `${key}=${value}` }))
+    .sort((a, b) => b.offset - a.offset)) {
+    after = after.slice(0, edit.offset) + edit.replacement + after.slice(edit.offset + edit.length);
+  }
+  const newline = contents.includes("\r\n") ? "\r\n" : "\n";
+  for (const [key, value] of Object.entries(replacements)) {
+    if (entries.has(key)) continue;
+    if (after && !after.endsWith("\n")) after += newline;
+    after += `${key}=${value}${newline}`;
+  }
+  assignments(after);
+  return after;
+}
+
 function descriptor(backup) {
   return {
     backupId: backup.backupId,
@@ -186,9 +242,11 @@ function validateBackup(backup, change) {
     "afterSha256",
     "before",
     "after",
+    ...(backup?.schemaVersion === 2 ? ["kind"] : []),
   ]);
   if (
-    backup.schemaVersion !== 1 ||
+    ![1, 2].includes(backup.schemaVersion) ||
+    (backup.schemaVersion === 2 && backup.kind !== "qlik-ranking-v2") ||
     backup.backupId !== change.backupId ||
     backup.beforeSha256 !== change.beforeSha256 ||
     backup.afterSha256 !== change.afterSha256 ||
@@ -198,6 +256,19 @@ function validateBackup(backup, change) {
     environmentSha256(backup.after) !== change.afterSha256
   )
     fail("Environment backup does not match its descriptor or digests.");
+  if (backup.schemaVersion === 2) {
+    const secret = qlikEnvironmentValues(backup.after).QLIK_RANKING_V2_HMAC_SECRET;
+    if (
+      transformQlikReleaseEnvironment(
+        backup.before,
+        imageSha(backup.before),
+        imageSha(backup.after),
+        secret,
+      ) !== backup.after
+    )
+      fail("Qlik backup contains an unrelated transformation.");
+    return backup;
+  }
   const values = salesforceEnvironmentValues(backup.after);
   if (
     transformSalesforceReleaseEnvironment(
@@ -251,6 +322,15 @@ export function assertSalesforceContainerDigests(contents, digests) {
 
 // Docker receives only this fixed program. Neither arguments nor stdout contain secrets.
 export const salesforceContainerDigestScript = `const {createHash}=require('node:crypto');const keys=${JSON.stringify(keys)};process.stdout.write(JSON.stringify(Object.fromEntries(keys.map(key=>[key,process.env[key]===undefined?null:createHash('sha256').update(process.env[key],'utf8').digest('hex')]))));`;
+
+export const qlikContainerDigestScript = `const {createHash}=require('node:crypto');const keys=${JSON.stringify(qlikKeys)};process.stdout.write(JSON.stringify(Object.fromEntries(keys.map(key=>[key,createHash('sha256').update(process.env[key]??(key.endsWith('_ENABLED')?'false':''),'utf8').digest('hex')]))));`;
+
+export function assertQlikContainerDigests(contents, digests) {
+  exactKeys(digests, qlikKeys);
+  const expected = qlikEnvironmentValues(contents);
+  if (qlikKeys.some((key) => digests[key] !== environmentSha256(expected[key])))
+    fail("Effective Qlik configuration differs from its recorded environment.");
+}
 
 export async function readBoundedEnvironmentText(handle, maximum) {
   const bytes = Buffer.alloc(maximum + 1);
@@ -326,6 +406,16 @@ export async function readSalesforceReleaseSecrets() {
   return secrets;
 }
 
+export async function readQlikReleaseSecret() {
+  await validatePrivateDirectory(path.dirname(secretDirectory));
+  await validatePrivateDirectory(secretDirectory);
+  const value = (
+    await readPrivateText(path.join(secretDirectory, "qlik-ranking-hmac"), 130)
+  ).replace(/\r?\n$/u, "");
+  if (!/^[A-Za-z0-9_-]{43,128}$/u.test(value)) fail("Invalid private Qlik credential.");
+  return value;
+}
+
 // The optional path/owner are for isolated POSIX fixtures. Production uses only defaults.
 export function salesforceEnvironmentBackupStore(directory = backupDirectory, owner = 0) {
   async function validateDirectory(create = false) {
@@ -368,9 +458,11 @@ export function salesforceEnvironmentBackupStore(directory = backupDirectory, ow
     return validateBackup(backup, change);
   }
 
-  async function create(backupId, before, after) {
+  async function create(backupId, before, after, kind = "salesforce") {
+    if (!["salesforce", "qlik-ranking-v2"].includes(kind)) fail("Unknown environment change.");
     const backup = {
-      schemaVersion: 1,
+      schemaVersion: kind === "salesforce" ? 1 : 2,
+      ...(kind === "qlik-ranking-v2" ? { kind } : {}),
       backupId,
       beforeSha256: environmentSha256(before),
       afterSha256: environmentSha256(after),
