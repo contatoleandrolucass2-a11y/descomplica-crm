@@ -2,6 +2,8 @@
 
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
+- Preserva o planejamento de metas integrado pela main e combina suas
+  referencias com as do dashboard, sem substituir telas de outros trabalhos.
 - Atualiza somente11 referencias visuais do dashboard apos revisao das
   mudancas solicitadas; preserva231 capturas e registra proveniencia integral.
 - Integra o ranking Qlik v2 da main, preservando seus gates e referencias;
@@ -29,6 +31,22 @@
   atualiza a pagina na virada do dia de Sao Paulo.
 - Remove controles/textos indicados na raiz e resume tabelas em uma linha
   Realizado com cinco periodos. Ativacao depende da migration/coleta e gates.
+
+## 2026-10-15: Correcao visual de Meta compilada
+
+- Mantem os percentuais dos donuts legiveis no tema escuro apos minificacao.
+- Exibe os nomes completos dos canais e os textos de coordenacao de Parcerias.
+- Confere o CSS Next compilado em 24 capturas e exige build local atualizado.
+
+## 2026-10-15: Fidelidade de escala da guia Meta
+
+- Reproduz a base tipografica da referencia dentro de Meta, preservando a
+  escala do restante do CRM e os tres temas existentes.
+- Atualiza o contrato exato da navegacao visual para a entrada Meta autorizada.
+- Confere os oito blocos completos com limites de altura proprios por rota.
+- Aplica paleta e fonte da referencia em Meta e preserva contraste acessivel.
+- Registra capturas independentes da origem publica como referencia completa
+  de DV e Parcerias, mantendo os assets anteriores e os limiares do QA.
 
 ## 2026-10-16 - Mapeamento nativo Qlik
 
@@ -2634,3 +2652,40 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Pesos do ranking expostos somente para leitores autorizados; escrita direta permanece revogada.
 - Snapshots e participantes do ranking protegidos por `crm.ranking.view`, sem fallback demonstrativo.
 - Ingestão limitada a 1 MB e 20 snapshots/minuto com secret key server-only; refresh protegido por mesma origem, permissão, lock, cooldown e timeout.
+
+## 2026-10-15: Guia Meta em Gestao
+
+- Adiciona Meta ao menu Gestao para quem ja possui acesso autorizado a metas.
+- Reproduz planejamento completo com funil interativo, conversoes, distribuicao
+  semanal, equipe, calendario mensal e produtividade nos tres temas.
+- Preserva rascunhos inativos e controles do servidor; corrige contraste e
+  rolagem por teclado sem alterar politicas comerciais ou dados realizados.
+
+- Meta preserva a regiao principal acessivel da pagina no shell protegido.
+
+- Matriz E2E exige Meta em Gestao somente para Master/Admin e testa seu acesso.
+- Converge a expectativa unitaria dos links com a nova entrada Meta autorizada.
+
+- Conhecimento de Meta organizado em auditoria integral e indice sincronizavel,
+  preservando historia anterior e o limite de exportacao.
+
+## 2026-10-15: Campos percentuais de Meta
+
+- Preserva todos os digitos dos percentuais no celular ao remover o spinner
+  nativo nas telas menores, mantendo a largura original dos controles.
+
+## 2026-10-15: Evidencias autenticadas de Meta
+
+- Registra a nova estrutura visual de Meta como referencia provisoria, com
+  pendencia do calendario e exigencia de nova validacao antes da publicacao.
+
+## 2026-10-15: Calendário da guia Meta
+
+- Exibe mês e ano completos nos seletores do calendário em desktop, tablet e celular.
+- Preserva a integração de Usuários e as restrições de edição dos rascunhos comerciais.
+
+## 2026-10-15: Percentuais fracionários de Meta
+
+- Permite validar e salvar rascunhos com taxas como1,67%, preservando o valor informado.
+
+- Meta: registra referência de calendário legível em1024px, sem alterar limiares deQA.

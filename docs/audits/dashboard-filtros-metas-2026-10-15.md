@@ -16,6 +16,10 @@ Nenhuma permissao Qlik ou workflow n8n foi alterado.
 Merge posterior4fa4c5d incorporou mainb9377a1 e sua integracao Qlik v2, sem
 sobrescrever referencias do ranking. Inventario combinado56 migrations/1883
 assercoes pgTAP. Revisao independente dos conflitos nao encontrou regressao.
+Em03:27Z, mainb5458ff trouxe PR231. Merge estruturado do manifesto preservou
+11 entradas de dashboard e231 da main, inclusive novas telas de planejamento.
+Hashes das242 imagens conferidos;66 testes locais focais passaram. Essa
+composicao requer CI completa; o resultado anterior nao valida o novo merge.
 
 ## Validacao
 

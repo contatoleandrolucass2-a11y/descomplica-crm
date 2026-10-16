@@ -5,6 +5,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 // @ts-expect-error Operational ESM script, also exercised directly by the CLI.
 import * as navigationQa from "../scripts/qa/archive-navigation.mjs";
 import { ProtectedShellFrame } from "../app/(protected)/_components/ProtectedShellFrame";
+import {
+  buildNavigationGroups,
+  getPrimaryNavigation,
+  type NavigationItem,
+} from "../lib/navigation/presentation";
 
 const {
   archiveMenuPanelPassed,
@@ -13,6 +18,7 @@ const {
   archiveNavigationRoutes,
   archiveNavigationViewports,
   archiveRootNavigationContract,
+  archiveManagementNavigationContract,
   parseArchivePreviewOrigin,
 } = navigationQa as {
   archiveMenuPanelPassed: (measurement: unknown) => boolean;
@@ -21,6 +27,7 @@ const {
   archiveNavigationRoutes: string[];
   archiveNavigationViewports: { width: number; height: number }[];
   archiveRootNavigationContract: { name: string; tag: string; href: string | null }[];
+  archiveManagementNavigationContract: string[][];
   parseArchivePreviewOrigin: (value: string) => string;
 };
 
@@ -276,6 +283,45 @@ describe("archive navigation evidence gate", () => {
     expect(compact).not.toContain("Title must sit close to the menu divider");
     expect(compact).toContain('"Virtual row height must match CSS"');
     expect(compact).toContain('"Entire hovered row must be gold with dark readable text"');
+  });
+
+  it("matches the exact Gestão visual contract to the authorized presentation including Meta", () => {
+    const management: NavigationItem = {
+      key: "crm.management",
+      path: "/app/gestao",
+      name: "Gestão",
+      description: "Gestão autorizada",
+      section: "management",
+      parentKey: null,
+      sortOrder: 10,
+    };
+    const routine: NavigationItem = {
+      ...management,
+      key: "crm.management.routine",
+      path: "/app/gestao/rotina",
+      name: "Rotina",
+      parentKey: management.key,
+      sortOrder: 20,
+    };
+    const goals: NavigationItem = {
+      ...management,
+      key: "crm.settings.goals",
+      path: "/app/configuracoes/metas",
+      name: "Metas do funil",
+      section: "settings",
+      parentKey: "crm.settings",
+      sortOrder: 20,
+    };
+    const group = buildNavigationGroups(getPrimaryNavigation([management, routine, goals]))[0]!;
+    expect(archiveManagementNavigationContract).toEqual([
+      ["Visão geral", management.path],
+      ...group.children.map((page) => [page.name, page.path]),
+    ]);
+    expect(archiveManagementNavigationContract).toEqual([
+      ["Visão geral", "/app/gestao"],
+      ["Rotina", "/app/gestao/rotina"],
+      ["Meta", "/app/configuracoes/metas"],
+    ]);
   });
 
   it("keeps the six authorized roots in the approved visual and keyboard order", () => {
