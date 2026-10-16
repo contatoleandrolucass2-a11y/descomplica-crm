@@ -9,6 +9,7 @@ import {
 } from "@/app/(protected)/_components/ManagementCanvas";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 export const metadata = {
   title: "Área administrativa",
@@ -16,6 +17,8 @@ export const metadata = {
 
 export default async function AdminHomePage() {
   const context = await enforcePermission("admin.access");
+  const pages = await getAuthorizedNavigation(context);
+  const canOpen = (path: string) => pages.some((page) => page.path === path);
 
   return (
     <ManagementPage className="admin-canvas admin-home-page">
@@ -30,7 +33,7 @@ export default async function AdminHomePage() {
           Gestão do CRM
         </h2>
         <div className="admin-home-grid">
-          {hasPermission(context, "users.view") ? (
+          {hasPermission(context, "users.view") && canOpen("/admin/usuarios") ? (
             <Link
               href="/admin/usuarios"
               prefetch={false}
@@ -50,7 +53,7 @@ export default async function AdminHomePage() {
               <ArrowRight aria-hidden="true" className="admin-home-card-arrow size-5" />
             </Link>
           ) : null}
-          {hasPermission(context, "pages.manage") ? (
+          {hasPermission(context, "pages.manage") && canOpen("/admin/paginas") ? (
             <Link
               href="/admin/paginas"
               prefetch={false}
@@ -70,7 +73,7 @@ export default async function AdminHomePage() {
               <ArrowRight aria-hidden="true" className="admin-home-card-arrow size-5" />
             </Link>
           ) : null}
-          {hasPermission(context, "crm.settings.manage") ? (
+          {canOpen("/app/configuracoes/conectar-sistemas") ? (
             <Link
               href="/app/configuracoes/conectar-sistemas"
               prefetch={false}

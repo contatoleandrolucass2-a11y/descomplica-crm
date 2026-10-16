@@ -7,6 +7,8 @@ import { requirePermission } from "@/lib/authorization/guards";
 import { getProtectedPageGate, pageGateAllowsRole } from "@/lib/authorization/page-gates";
 import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import type { AuthorizationContext } from "@/lib/authorization/types";
+import { PAGE_REGISTRY, type RegisteredPage } from "@/lib/navigation/registry";
+import { pagePermissionMatches } from "./page-access";
 import type { DisabledNavigationItem } from "@/lib/navigation/presentation";
 
 const appPageRowSchema = z.object({
@@ -33,273 +35,6 @@ export interface AppPage {
   sortOrder: number;
   isNavigation: boolean;
   isActive: boolean;
-}
-
-interface SupplementalNavigationDefinition {
-  key: string;
-  path: string;
-  name: string;
-  description: string;
-  sortOrder: number;
-}
-
-const SIMULATION_PARENT_KEY = "crm.simulation";
-const SIMULATION_PARENT_PATH = "/app/simulacao";
-const DASHBOARD_PARENT_KEY = "crm.dashboard";
-const DASHBOARD_PARENT_PATH = "/app";
-const MANAGEMENT_PARENT_KEY = "crm.management";
-const MANAGEMENT_PARENT_PATH = "/app/gestao";
-
-function hasAuthorizedSimulationRoot(pages: AppPage[]) {
-  return pages.some(
-    (page) =>
-      page.key === SIMULATION_PARENT_KEY &&
-      page.path === SIMULATION_PARENT_PATH &&
-      page.section === "simulation" &&
-      page.permissionKey === "crm.simulators.view" &&
-      page.parentKey === null &&
-      page.isNavigation &&
-      page.isActive,
-  );
-}
-
-/**
- * Released simulator pages intentionally kept outside the 17-page database
- * catalog are discoverable only after the authenticated catalog has authorized
- * their parent and the route gate has authorized the caller's permission.
- */
-const SUPPLEMENTAL_SIMULATOR_PAGES: readonly SupplementalNavigationDefinition[] = [
-  {
-    key: "crm.simulation.wf14",
-    path: "/app/simulacao/tabela-direta",
-    name: "Tabela Direta",
-    description: "Monte e compare fluxos da Tabela Direta.",
-    sortOrder: 30,
-  },
-  {
-    key: "crm.simulation.wf15",
-    path: "/app/simulacao/tabela-investidor",
-    name: "Tabela Investidor",
-    description: "Consulte a jornada comercial para investidores.",
-    sortOrder: 40,
-  },
-  {
-    key: "crm.simulation.tabelao",
-    path: "/app/simulacao/tabelao",
-    name: "Tabelão",
-    description: "Consulte o estoque SPC disponível.",
-    sortOrder: 50,
-  },
-  {
-    key: "crm.simulation.wf16",
-    path: "/app/simulacao/calcular-documentacao",
-    name: "Documentação",
-    description: "Calcule a documentação da proposta.",
-    sortOrder: 60,
-  },
-  {
-    key: "crm.simulation.caixa",
-    path: "/app/simulacao/caixa",
-    name: "CAIXA",
-    description: "Consulte a jornada visual; cálculo e envio permanecem bloqueados.",
-    sortOrder: 70,
-  },
-] as const;
-
-export function extendAuthorizedNavigationWithReleasedPages(
-  pages: AppPage[],
-  context: AuthorizationContext,
-  catalogPages: AppPage[] = pages,
-): AppPage[] {
-  const repasseGate = getProtectedPageGate("/app/repasse");
-  const dashboardParent = pages.find(
-    (page) =>
-      page.key === DASHBOARD_PARENT_KEY &&
-      page.path === DASHBOARD_PARENT_PATH &&
-      page.section === "crm" &&
-      page.permissionKey === "crm.dashboard.view" &&
-      page.parentKey === null &&
-      page.isActive &&
-      page.isNavigation,
-  );
-  if (
-    dashboardParent &&
-    repasseGate?.releaseEnabled &&
-    repasseGate.pageKey === "crm.repasse" &&
-    pageGateAllowsRole(repasseGate, context.roleKey) &&
-    context.permissions.includes(repasseGate.permission) &&
-    !pages.some((page) => page.key === repasseGate.pageKey || page.path === repasseGate.path)
-  ) {
-    pages = [
-      ...pages,
-      {
-        key: repasseGate.pageKey,
-        path: repasseGate.path,
-        name: "Repasse",
-        description: "Acompanhe os repasses da assessoria.",
-        section: "crm",
-        permissionKey: repasseGate.permission,
-        parentKey: dashboardParent.key,
-        sortOrder: 60,
-        isActive: true,
-        isNavigation: true,
-      },
-    ];
-  }
-
-  const marketingGate = getProtectedPageGate("/app/configuracoes/recurso-mkt");
-  const settingsParent = pages.find(
-    (page) =>
-      page.key === "crm.settings" &&
-      page.path === "/app/configuracoes" &&
-      page.section === "settings" &&
-      page.permissionKey === "crm.settings.view" &&
-      page.parentKey === null &&
-      page.isActive &&
-      page.isNavigation,
-  );
-  if (
-    settingsParent &&
-    marketingGate?.releaseEnabled &&
-    marketingGate.pageKey === "crm.settings.marketing" &&
-    pageGateAllowsRole(marketingGate, context.roleKey) &&
-    context.permissions.includes(marketingGate.permission) &&
-    !pages.some((page) => page.key === marketingGate.pageKey || page.path === marketingGate.path)
-  ) {
-    pages = [
-      ...pages,
-      {
-        key: marketingGate.pageKey,
-        path: marketingGate.path,
-        name: "Recurso MKT",
-        description: "Fundo de investimento de Marketing e distribuição dos recursos.",
-        section: "settings",
-        permissionKey: marketingGate.permission,
-        parentKey: settingsParent.key,
-        sortOrder: 50,
-        isActive: true,
-        isNavigation: true,
-      },
-    ];
-  }
-  const systemsGate = getProtectedPageGate("/app/configuracoes/conectar-sistemas");
-  if (
-    settingsParent &&
-    systemsGate?.releaseEnabled &&
-    systemsGate.pageKey === "crm.settings.connected_systems" &&
-    context.permissions.includes(systemsGate.permission) &&
-    !pages.some((page) => page.key === systemsGate.pageKey || page.path === systemsGate.path)
-  ) {
-    pages = [
-      ...pages,
-      {
-        key: systemsGate.pageKey,
-        path: systemsGate.path,
-        name: "Integrações",
-        description: "Salesforce e atualização dos relatórios",
-        section: "settings",
-        permissionKey: systemsGate.permission,
-        parentKey: settingsParent.key,
-        sortOrder: 60,
-        isActive: true,
-        isNavigation: true,
-      },
-    ];
-  }
-  const managementGate = getProtectedPageGate(MANAGEMENT_PARENT_PATH);
-  if (
-    dashboardParent &&
-    managementGate?.releaseEnabled &&
-    managementGate.pageKey === MANAGEMENT_PARENT_KEY &&
-    pageGateAllowsRole(managementGate, context.roleKey) &&
-    context.permissions.includes(managementGate.permission) &&
-    !catalogPages.some(
-      (page) => page.key === managementGate.pageKey || page.path === managementGate.path,
-    )
-  ) {
-    pages = [
-      ...pages,
-      {
-        key: managementGate.pageKey,
-        path: managementGate.path,
-        name: "Gestão",
-        description: "Rotinas e acompanhamento operacional.",
-        section: "management",
-        permissionKey: managementGate.permission,
-        parentKey: null,
-        sortOrder: 50,
-        isActive: true,
-        isNavigation: true,
-      },
-    ];
-  }
-  const managementParent = pages.find(
-    (page) =>
-      page.key === MANAGEMENT_PARENT_KEY &&
-      page.path === MANAGEMENT_PARENT_PATH &&
-      page.section === "management" &&
-      page.permissionKey === "crm.dashboard.view" &&
-      page.parentKey === null &&
-      page.isActive &&
-      page.isNavigation,
-  );
-  const routineGate = getProtectedPageGate("/app/gestao/rotina");
-  if (
-    managementParent &&
-    routineGate?.releaseEnabled &&
-    routineGate.pageKey === "crm.management.routine" &&
-    pageGateAllowsRole(routineGate, context.roleKey) &&
-    context.permissions.includes(routineGate.permission) &&
-    !catalogPages.some((page) => page.key === routineGate.pageKey || page.path === routineGate.path)
-  ) {
-    pages = [
-      ...pages,
-      {
-        key: routineGate.pageKey,
-        path: routineGate.path,
-        name: "Rotina",
-        description: "Classificação semanal da rotina por função.",
-        section: "management",
-        permissionKey: routineGate.permission,
-        parentKey: managementParent.key,
-        sortOrder: 10,
-        isActive: true,
-        isNavigation: true,
-      },
-    ];
-  }
-  if (!hasAuthorizedSimulationRoot(pages)) return pages;
-
-  const occupiedKeys = new Set(pages.map((page) => page.key));
-  const occupiedPaths = new Set(pages.map((page) => page.path));
-  const supplementalPages: AppPage[] = [];
-
-  for (const definition of SUPPLEMENTAL_SIMULATOR_PAGES) {
-    const gate = getProtectedPageGate(definition.path);
-    if (
-      !gate?.releaseEnabled ||
-      gate.pageKey !== definition.key ||
-      !pageGateAllowsRole(gate, context.roleKey) ||
-      !context.permissions.includes(gate.permission) ||
-      occupiedKeys.has(definition.key) ||
-      occupiedPaths.has(definition.path)
-    ) {
-      continue;
-    }
-
-    supplementalPages.push({
-      ...definition,
-      section: "simulation",
-      permissionKey: gate.permission,
-      parentKey: SIMULATION_PARENT_KEY,
-      isNavigation: true,
-      isActive: true,
-    });
-    occupiedKeys.add(definition.key);
-    occupiedPaths.add(definition.path);
-  }
-
-  return [...pages, ...supplementalPages];
 }
 
 function isPermissionKey(value: string): value is PermissionKey {
@@ -331,12 +66,14 @@ function parsePages(data: unknown): AppPage[] {
 
 function pageGateAuthorizesNavigation(page: AppPage, context: AuthorizationContext) {
   const gate = getProtectedPageGate(page.path);
+  const registration = PAGE_REGISTRY.find((item) => item.pageKey === page.key);
   return (
     gate?.releaseEnabled === true &&
     gate.pageKey === page.key &&
-    gate.permission === page.permissionKey &&
+    registration !== undefined &&
+    pagePermissionMatches(registration, page.permissionKey) &&
     pageGateAllowsRole(gate, context.roleKey) &&
-    context.permissions.includes(gate.permission)
+    context.permissions.includes(page.permissionKey)
   );
 }
 
@@ -366,41 +103,38 @@ async function queryPages(options: { navigationOnly: boolean; activeOnly: boolea
 export async function getAuthorizedNavigation(context: AuthorizationContext): Promise<AppPage[]> {
   if (!context.permissions.includes("pages.view")) return [];
 
-  // Keep catalog identities available so disabled management entries cannot be recreated.
+  // Navigation uses only persisted, authorized rows. A disabled or missing page is never recreated.
   const pages = await queryPages({ navigationOnly: false, activeOnly: false });
   const authorizedPages = pages.filter(
     (page) => page.isActive && page.isNavigation && pageGateAuthorizesNavigation(page, context),
   );
-  return extendAuthorizedNavigationWithReleasedPages(authorizedPages, context, pages);
+  return authorizedPages;
 }
 
 export function getDisabledNavigationItems(
   context: AuthorizationContext,
   pages: AppPage[],
 ): DisabledNavigationItem[] {
-  const caixaGate = getProtectedPageGate("/app/simulacao/caixa");
-
-  if (
-    !hasAuthorizedSimulationRoot(pages) ||
-    !caixaGate ||
-    caixaGate.releaseEnabled ||
-    caixaGate.pageKey !== "crm.simulation.caixa" ||
-    !context.permissions.includes(caixaGate.permission)
-  ) {
-    return [];
-  }
-
-  return [
-    {
-      key: caixaGate.pageKey,
-      name: "CAIXA",
-      description: "Jornada preservada até a autorização oficial.",
-      section: "simulation",
-      parentKey: SIMULATION_PARENT_KEY,
-      sortOrder: 70,
+  const registry: readonly RegisteredPage[] = PAGE_REGISTRY;
+  return registry
+    .filter(
+      (page) =>
+        !page.releaseEnabled &&
+        page.isNavigation &&
+        pageGateAllowsRole(page, context.roleKey) &&
+        context.permissions.includes(page.permission) &&
+        page.parentKey !== null &&
+        pages.some((parent) => parent.key === page.parentKey && parent.isActive),
+    )
+    .map((page) => ({
+      key: page.pageKey,
+      name: page.name,
+      description: page.description,
+      section: page.section,
+      parentKey: page.parentKey!,
+      sortOrder: page.sortOrder,
       reason: "Aguardando autorização",
-    },
-  ];
+    }));
 }
 
 export async function getManageablePages(): Promise<AppPage[]> {

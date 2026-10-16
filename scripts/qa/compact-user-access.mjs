@@ -9,7 +9,8 @@ import { promisify } from "node:util";
 const execute = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const image = "public.ecr.aws/supabase/postgres:17.6.1.159";
-const expectedAssertions = 115;
+const expectedPlans = [116, 8, 14, 27];
+const expectedAssertions = expectedPlans.reduce((sum, count) => sum + count, 0);
 const fixture = "tests/fixtures/compact-user-access/rehearsal.sql";
 const invocationId = randomUUID();
 const container = `descomplica-compact-users-${invocationId}`;
@@ -106,12 +107,22 @@ function verifyTap(output) {
   const plans = [...output.matchAll(/^1\.\.(\d+)\s*$/gm)];
   const assertions = [...output.matchAll(/^(ok|not ok) (\d+)\b.*$/gm)];
   if (
-    plans.length !== 1 ||
-    Number(plans[0][1]) !== expectedAssertions ||
+    plans.length !== expectedPlans.length ||
     assertions.length !== expectedAssertions ||
-    assertions.some(
-      (assertion, index) => assertion[1] !== "ok" || Number(assertion[2]) !== index + 1,
-    ) ||
+    plans.some((plan, planIndex) => {
+      const suite = assertions.filter(
+        (assertion) =>
+          assertion.index > plan.index &&
+          assertion.index < (plans[planIndex + 1]?.index ?? output.length),
+      );
+      return (
+        Number(plan[1]) !== expectedPlans[planIndex] ||
+        suite.length !== expectedPlans[planIndex] ||
+        suite.some(
+          (assertion, index) => assertion[1] !== "ok" || Number(assertion[2]) !== index + 1,
+        )
+      );
+    }) ||
     /^Bail out!/im.test(output) ||
     /(?:^|\n)(?:psql:[^\n]*\s)?(?:ERROR|FATAL):/m.test(output)
   ) {

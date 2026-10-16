@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft, ChevronRight, FileText, MoreHorizontal, Search } from "lucide-react";
+import { FileText, MoreHorizontal, Search } from "lucide-react";
 import { useMemo, useState } from "react";
 
 import { managementStyles } from "@/app/(protected)/_components/ManagementCanvas";
@@ -9,13 +9,10 @@ import type { AppPage } from "@/lib/navigation/pages";
 
 import { setPageVisibilityAction } from "./actions";
 
-const PAGE_SIZE = 8;
-
 export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
   const [search, setSearch] = useState("");
   const [status, setStatus] = useState<"all" | "active" | "inactive">("all");
   const [section, setSection] = useState("all");
-  const [pageNumber, setPageNumber] = useState(1);
 
   const sections = useMemo(
     () =>
@@ -40,15 +37,6 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
     });
   }, [pages, search, section, status]);
 
-  const pageCount = Math.max(1, Math.ceil(filteredPages.length / PAGE_SIZE));
-  const currentPage = Math.min(pageNumber, pageCount);
-  const pageStart = (currentPage - 1) * PAGE_SIZE;
-  const visiblePages = filteredPages.slice(pageStart, pageStart + PAGE_SIZE);
-
-  function resetPage() {
-    setPageNumber(1);
-  }
-
   return (
     <div className="admin-pages-content">
       <section
@@ -65,7 +53,6 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
                 value={search}
                 onChange={(event) => {
                   setSearch(event.target.value);
-                  resetPage();
                 }}
                 placeholder="Nome, rota ou permissão"
                 className={managementStyles.searchInput}
@@ -78,7 +65,6 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
               value={status}
               onChange={(event) => {
                 setStatus(event.target.value as "all" | "active" | "inactive");
-                resetPage();
               }}
               className={managementStyles.select}
             >
@@ -93,7 +79,6 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
               value={section}
               onChange={(event) => {
                 setSection(event.target.value);
-                resetPage();
               }}
               className={managementStyles.select}
             >
@@ -128,7 +113,13 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
           </div>
         </div>
 
-        <div className={managementStyles.tableRegion}>
+        <div
+          key={`${search}:${status}:${section}`}
+          className={`${managementStyles.tableRegion} admin-pages-scroll`}
+          role="region"
+          aria-label="Lista de páginas: rolagem contínua"
+          tabIndex={0}
+        >
           <table className={managementStyles.table}>
             <caption className="sr-only">Catálogo gerenciável de páginas</caption>
             <thead>
@@ -141,8 +132,8 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
               </tr>
             </thead>
             <tbody>
-              {visiblePages.length ? (
-                visiblePages.map((page) => {
+              {filteredPages.length ? (
+                filteredPages.map((page) => {
                   const action = setPageVisibilityAction.bind(null, page.key, !page.isActive);
 
                   return (
@@ -217,33 +208,9 @@ export function PageCatalogManager({ pages }: { pages: AppPage[] }) {
 
         <div className={`${managementStyles.panelPadded} ${managementStyles.pagination}`}>
           <span aria-live="polite">
-            {filteredPages.length
-              ? `Mostrando ${pageStart + 1}–${Math.min(pageStart + PAGE_SIZE, filteredPages.length)} de ${filteredPages.length} páginas`
-              : "0 páginas"}
+            {filteredPages.length} de {pages.length} páginas
           </span>
-          <div className={managementStyles.paginationControls}>
-            <button
-              type="button"
-              className={managementStyles.pageButton}
-              disabled={currentPage === 1}
-              onClick={() => setPageNumber((value) => Math.max(1, value - 1))}
-              aria-label="Página anterior"
-            >
-              <ChevronLeft aria-hidden="true" className="size-4" />
-            </button>
-            <span className={managementStyles.pageButton} aria-current="page">
-              {currentPage}
-            </span>
-            <button
-              type="button"
-              className={managementStyles.pageButton}
-              disabled={currentPage === pageCount}
-              onClick={() => setPageNumber((value) => Math.min(pageCount, value + 1))}
-              aria-label="Próxima página"
-            >
-              <ChevronRight aria-hidden="true" className="size-4" />
-            </button>
-          </div>
+          <span>Fim da lista.</span>
         </div>
       </section>
     </div>

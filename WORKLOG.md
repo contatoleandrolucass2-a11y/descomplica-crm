@@ -2,6 +2,13 @@
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
+Main2eae903/PR235 integrado: loader de etapas conserva somente dados autorizados,
+sem analise, ranking ou resumo financeiro. Testes cobrem retry e troca de snapshot.
+156 testes focais passaram; inventario61 migrations/33 arquivos/1910 assertions
+reconciliado. Baseline preserva11 entradas do dashboard e231 da main, incluindo
+22 capturas administrativas novas. CI38851076367/f36f9fa verde antes deste merge;
+nao valida o conjunto novo. Nenhuma migration/coletor/app ativado por esta tarefa.
+
 Maincd004e4/PR237 integrado preservando simuladores e quatro referencias moveis.
 Manifesto combinado com11 entradas de dashboard e231 da main;242 hashes
 conferidos. Testes focais:62 aprovados,1 skip de navegador opcional.
@@ -77,6 +84,47 @@ Segunda rodada38832697093:165 assercoes passaram antes da fixture tentar um
 allow global proibido pelo trigger existente. Fixture passa a usar manager_house,
 que ja possui ranking, e deny explicito para provar revogacao imediata. Contexto
 JWT e restaurado entre preparacao e leitura. Regras do produto inalteradas.
+
+## 2026-10-16: Reconciliação com as entregas concorrentes de Meta e Ranking
+
+A CI `38827702755` aprovou o candidato de páginas `3b44e0ba`. Antes da
+publicação, a consulta ao vivo identificou produção em `b9377a10`, concluída
+em `2026-10-16T02:59:30.399Z`, e `main` em `b5458ff5`. Nenhuma promoção do
+candidato anterior foi executada. A branch incorporou esse `main`, preservando
+as entregas de Meta, Ranking e Qlik e as alterações de páginas e acessos.
+
+Os conflitos documentais preservam ambos os históricos. O manifesto visual
+mantém a proveniência de `main` e recebe somente as 22 imagens e verificações
+de Usuários e Páginas já revisadas. Os 242 hashes e tamanhos foram conferidos;
+não houve nova captura nem alteração de limiares nessa composição. O ensaio
+completo passa a conter 60 migrations e 1.722 asserções pgTAP. Os gates serão
+reexecutados no candidato integrado e no SHA final de `main` antes do deploy.
+
+## 2026-10-15: Referências visuais de páginas e acessos
+
+- Incorpora a captura Linux aprovada `38819023825`: onze imagens de Usuários e onze de Páginas atualizadas, 220 imagens preservadas e 242 hashes conferidos. A matriz funcional e de acessibilidade passou sem ampliar os limites existentes.
+- Remove o workflow temporário de captura. A CI normal do commit final, a integração e a promoção continuam obrigatórias; esta revisão não publica o pacote de páginas.
+
+## 2026-10-15: Acessos individuais por página
+
+- Separa treze permissões antes compartilhadas por módulo, mantendo uma caixa por página e os simuladores juntos. Admin e Master herdam todos os acessos implantados; decisões existentes são copiadas na criação das novas chaves.
+- Consulta o catálogo persistido no Proxy e nos guards, bloqueando URLs negadas ou desativadas. Protege as APIs e RPCs de Rotina com o novo acesso específico.
+- Usa o catálogo autorizado também nos hubs e links entre etapas. A entrada compartilhada aceita uma única página concedida; login, retorno após MFA e acesso negado resolvem o início permitido para a conta.
+- Limita cada categoria de permissões a uma área rolável de 32 rem, acessível por teclado, para acomodar as caixas individuais sem alongar o painel inteiro.
+- Mantém as permissões de dados, operações, visões e a hierarquia. O runtime compatível deve ser publicado antes de ativar as chaves novas; a preparação e a ativação estão documentadas no runbook.
+
+## 2026-10-15: Herança completa do Master
+
+- Todos os usuários Master passam a herdar todas as permissões implantadas, incluindo RIVA e DIRECIONAL. A prévia local acompanha o catálogo completo; a interface de produção usa os padrões consultados no banco.
+- Preserva os padrões dos outros papéis, exceções individuais, hierarquia, MFA, estado das contas e gates de execução. A consulta anterior em produção encontrou 23 de 25 permissões no Master e nenhuma negação individual de Master. A aplicação separada em produção confirmou 25 de 25 padrões para os dois Master, sem permissão efetiva ausente, às 20:22 UTC; o recibo está na auditoria de páginas.
+
+## 2026-10-15: Catálogo único e rolagem contínua de páginas
+
+- Centraliza as 27 páginas liberadas em um registro compartilhado por guards, matriz de acessos e geração da migration. Inclui as dez páginas que antes eram acrescentadas somente à navegação.
+- Adiciona `pages:sync` e `pages:check`; build e testes impedem publicar uma rota sem cadastro ou com migration desatualizada. Preserva visibilidade existente, hierarquia, exceções individuais e o controle único dos simuladores.
+- Mostra as páginas vinculadas a cada acesso e permite encontrá-las na busca. Substitui a paginação do catálogo por uma região de rolagem contínua, acessível por teclado, com todos os resultados dos filtros.
+- Remove a reconstrução de páginas suplementares fora do banco, para que desativar uma página não a recrie no menu.
+- Validação local aprovada: lint, tipos, build, formato, dependências, Gitleaks, 3.063 testes Vitest e suítes Node. Ensaios de banco: 1.441 verificações na origem/restauração e 123 no contrato compacto. Conferência visual de busca, filtros, rolagem e ativação concluída. Evidências em `docs/audits/paginas-catalogo-2026-10-15.md`; CI e promoção ainda pendentes.
 
 ## 2026-10-15: Códigos de workflow ocultos na interface comercial
 
@@ -6941,6 +6989,23 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   capturas). Os resultados finais, CI, PR e publicação serão registrados após
   o gate visual real.
 
+### Leitura independente das páginas antes da publicação
+
+A revisão final reproduziu a dependência indevida dos dados de Etapas, Metas e
+Pontos em permissões dos módulos anteriores. A migration
+`20261016000120_individual_page_data_access.sql` altera somente cinco policies de
+leitura. Preserva canais, MFA, contas ativas, grants, escrita e os acessos
+preexistentes do Dashboard e Ranking. Uma etapa isolada consulta somente as
+etapas autorizadas, sem exigir ou expor resumos financeiros. Metas DV e Parcerias
+continuam separadas por perfil. A ativação ocorre na mesma transação das chaves
+individuais e das RPCs de Rotina.
+
+Os 27 novos testes pgTAP cobrem concessões e negações por etapa, canal e perfil,
+páginas desativadas, contas inativas, sessão de recuperação e ausência de escrita.
+A suíte completa passa a 1.468 testes e o contrato compacto a 165. O manifesto
+passa a 59 migrations. Esta nota descreve a implementação; publicação permanece
+pendente dos gates completos no SHA final.
+
 ## 2026-10-15: Meta no menu Gestao
 
 - Branch codex/gestao-meta, base ad496340cf57871c8fa80015aaaf0e0bd1da983c.
@@ -7048,3 +7113,30 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - CI38829857417 cancelada após validate aprovado; nova combinação deve cumprir todos os gates antes de publicação.
 
 - Meta: revisa única divergência visual DV1024 (13px da legenda após corrigir calendário); mantém241referências e exige novaCI.
+
+A integração passou em lint, tipos, formato, build, auditoria de dependências e
+Gitleaks. Vitest concluiu 3.402 testes, com 86 skips; os testes Node concluíram
+1.178 casos, com cinco skips; o guard de publicação concluiu 703 casos, com
+14 verificações físicas reservadas ao Linux da CI. A execução inicial com
+concorrência livre excedeu prazos na máquina carregada e foi interrompida;
+a execução completa com dois workers passou sem ampliar nenhum timeout.
+O ensaio local de 60 migrations aprovou 1.722 asserções na origem e 1.722 no
+banco restaurado, preservando owners e privilégios. Manifesto:
+`4735639196c72ac139221706ba978654fcb781ec9107c9840fb801f50064edb6`.
+
+## 2026-10-16: Preservação da remoção dos códigos WF
+
+A CI `38845163240` aprovou integralmente `4652aefb`. Antes da integração,
+`main` avançou para `cd004e49` pelo PR #237. A proteção interrompeu o merge
+do candidato anterior. Esta integração preserva os textos novos dos simuladores
+e suas quatro referências móveis, mantendo os acessos, o catálogo e as 22
+referências administrativas já revisadas. Os 242 arquivos foram conferidos
+por hash e tamanho; o digest agregado do manifesto foi recalculado. Não houve
+alteração de autorização, banco, regras financeiras ou limites de comparação.
+Os testes pertinentes serão repetidos e a nova CI completa continua obrigatória.
+
+A integração dos textos WF passou novamente em lint, tipos, formato, build e
+3.402 testes Vitest, com 86 skips. O diff confirmou ausência de mudanças em
+migrations, autorização e coordenador de release; esses componentes conservam
+os testes e o ensaio de restauração aprovados na rodada anterior. A CI completa
+do novo SHA voltará a validar o conjunto antes da integração.

@@ -11,20 +11,20 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  23::bigint,
-  'twenty-three platform and CRM permissions are seeded'
+  36::bigint,
+  'thirty-six platform and CRM permissions are seeded'
 );
 
 select is(
   (select count(*) from public.app_pages),
-  17::bigint,
+  27::bigint,
   'the catalog contains exactly the approved production pages'
 );
 
 select is(
   (select count(*) from public.app_pages where is_active and is_navigation),
-  17::bigint,
-  'exactly the approved seventeen production pages are active navigation entries'
+  27::bigint,
+  'exactly the approved twenty-seven production pages are active navigation entries'
 );
 
 select is(
@@ -108,9 +108,8 @@ select is(
     from public.app_pages
     where section = 'simulation'
   ),
-  'crm.simulation|/app/simulacao|crm.simulators.view|root,'
-    || 'crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation',
-  'only the simulator hub and WF13 belong to the authorized page hierarchy'
+  'crm.simulation|/app/simulacao|crm.simulators.view|root,crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view|crm.simulation,crm.simulation.wf14|/app/simulacao/tabela-direta|crm.simulators.view|crm.simulation,crm.simulation.wf15|/app/simulacao/tabela-investidor|crm.simulators.view|crm.simulation,crm.simulation.tabelao|/app/simulacao/tabelao|crm.simulators.view|crm.simulation,crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view|crm.simulation,crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view|crm.simulation',
+  'all seven released simulator pages belong to the authorized hierarchy'
 );
 
 select has_function(
@@ -290,16 +289,23 @@ select is(
   (select array_agg(key order by sort_order, key) from public.app_pages),
   array[
     'crm.dashboard',
+    'crm.management.routine',
     'crm.simulation',
     'crm.simulation.wf13',
     'crm.stage.opportunities',
+    'crm.simulation.wf14',
     'crm.stage.appointments',
+    'crm.simulation.wf15',
     'crm.stage.visits',
+    'crm.management',
+    'crm.simulation.tabelao',
     'crm.stage.folders',
+    'crm.simulation.wf16',
     'crm.stage.sales',
-    'crm.ranking'
+    'crm.ranking',
+    'crm.simulation.caixa'
   ]::text[],
-  'scoped Gerente House sees its nine inherited pages including simulators'
+  'scoped Gerente House sees its sixteen inherited pages including simulators'
 );
 
 select throws_ok(
@@ -361,7 +367,7 @@ select lives_ok(
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  17::bigint,
+  27::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 
@@ -373,14 +379,21 @@ select is(
   (select array_agg(key order by sort_order, key) from public.app_pages),
   array[
     'crm.dashboard',
+    'crm.management.routine',
     'crm.simulation',
     'crm.simulation.wf13',
     'crm.stage.opportunities',
+    'crm.simulation.wf14',
     'crm.stage.appointments',
+    'crm.simulation.wf15',
     'crm.stage.visits',
+    'crm.management',
+    'crm.simulation.tabelao',
     'crm.stage.folders',
+    'crm.simulation.wf16',
     'crm.stage.sales',
-    'crm.ranking'
+    'crm.ranking',
+    'crm.simulation.caixa'
   ]::text[],
   'scoped House role retains simulator access when partnership visibility changes'
 );

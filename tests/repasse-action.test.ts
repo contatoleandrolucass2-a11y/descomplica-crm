@@ -2,12 +2,12 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mocks = vi.hoisted(() => ({
   lookupRepasseByFid: vi.fn(),
-  requirePermission: vi.fn(),
+  requirePageAccess: vi.fn(),
   releaseEnabled: true,
 }));
 
-vi.mock("@/lib/authorization/guards", () => ({
-  requirePermission: mocks.requirePermission,
+vi.mock("@/lib/authorization/page-access", () => ({
+  requirePageAccess: mocks.requirePageAccess,
 }));
 vi.mock("@/lib/crm/repasse/data", () => ({
   lookupRepasseByFid: mocks.lookupRepasseByFid,
@@ -16,7 +16,7 @@ vi.mock("@/lib/authorization/page-gates", () => ({
   getProtectedPageGate: () => ({
     pageKey: "crm.repasse",
     path: "/app/repasse",
-    permission: "crm.partnerships.view",
+    permission: "crm.repasse.view",
     releaseEnabled: mocks.releaseEnabled,
     allowedRoles: ["master", "admin"],
   }),
@@ -40,7 +40,7 @@ function form(fid: string) {
 beforeEach(() => {
   vi.clearAllMocks();
   mocks.releaseEnabled = true;
-  mocks.requirePermission.mockResolvedValue({
+  mocks.requirePageAccess.mockResolvedValue({
     userId: "10000000-0000-4000-8000-000000000001",
     roleKey: "master",
   });
@@ -52,7 +52,7 @@ describe("Server Action da consulta de repasse", () => {
       status: "validation_error",
       message: "Informe um FID numérico com até 12 dígitos.",
     });
-    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
+    expect(mocks.requirePageAccess).toHaveBeenCalledWith("/app/repasse");
     expect(mocks.lookupRepasseByFid).not.toHaveBeenCalled();
   });
 
@@ -62,12 +62,12 @@ describe("Server Action da consulta de repasse", () => {
     await expect(lookupRepasseAction({ status: "idle" }, form("123456"))).rejects.toThrow(
       "NEXT_FORBIDDEN",
     );
-    expect(mocks.requirePermission).not.toHaveBeenCalled();
+    expect(mocks.requirePageAccess).not.toHaveBeenCalled();
     expect(mocks.lookupRepasseByFid).not.toHaveBeenCalled();
   });
 
   it("nega perfil fora da allowlist mesmo quando Parcerias esta permitida", async () => {
-    mocks.requirePermission.mockResolvedValue({
+    mocks.requirePageAccess.mockResolvedValue({
       userId: "10000000-0000-4000-8000-000000000002",
       roleKey: "coordinator",
     });
@@ -75,12 +75,12 @@ describe("Server Action da consulta de repasse", () => {
     await expect(lookupRepasseAction({ status: "idle" }, form("123456"))).rejects.toThrow(
       "NEXT_FORBIDDEN",
     );
-    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
+    expect(mocks.requirePageAccess).toHaveBeenCalledWith("/app/repasse");
     expect(mocks.lookupRepasseByFid).not.toHaveBeenCalled();
   });
 
   it("autoriza Administrador na consulta e no detalhe", async () => {
-    mocks.requirePermission.mockResolvedValue({
+    mocks.requirePageAccess.mockResolvedValue({
       userId: "10000000-0000-4000-8000-000000000003",
       roleKey: "admin",
     });
@@ -100,7 +100,7 @@ describe("Server Action da consulta de repasse", () => {
       status: "ready",
       fid: "123456",
     });
-    expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
+    expect(mocks.requirePageAccess).toHaveBeenCalledWith("/app/repasse");
     expect(mocks.lookupRepasseByFid).toHaveBeenCalledWith("123456");
   });
 

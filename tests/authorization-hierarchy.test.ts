@@ -20,9 +20,9 @@ function actor(overrides: Partial<AuthorizationContext>): AuthorizationContext {
 }
 
 describe("hierarquia de delegação de permissões", () => {
-  it("mantém as duas marcas desativadas nos padrões dos papéis que não são Administrador", () => {
+  it("mantém as duas marcas desativadas nos padrões dos papéis que não são Administrador ou Master", () => {
     for (const [role, permissions] of Object.entries(ROLE_INHERITED_PERMISSIONS)) {
-      if (role === "admin") continue;
+      if (role === "admin" || role === "master") continue;
       expect(permissions).not.toContain("crm.inventory.riva.view");
       expect(permissions).not.toContain("crm.inventory.direcional.view");
     }

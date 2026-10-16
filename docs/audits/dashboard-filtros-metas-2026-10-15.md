@@ -126,6 +126,18 @@ Nao aplicar templates sem confrontar hash/conteudo atual e guardar backup.
 
 ## Pendencias
 
+CI38851076367/f36f9fa terminou verde. Local: lint/tipos/test/build aprovados;
+3556 Vitest/1181 operacionais/703 release, skips90/19/14. Dois timeouts Windows
+na primeira repeticao passaram isolados e na repeticao completa sem relaxar gates.
+
+Main2eae903/PR235 avancou durante essa CI. Merge preserva catalogo/permissoes,
+loader de etapas sem analise/ranking/resumo financeiro, coerencia de snapshots
+e188 assertions da analise. Inventario combinado61 migrations/33arquivos/1910
+assertions,156 testes focais aprovados;11 entradas visuais de dashboard e231
+da main com todos os hashes verificados. Novo CI obrigatorio. Health observado
+05:07:33.837Z200/ok/b5458ff. Migrations de catalogo da outra entrega nao foram
+aplicadas por esta tarefa; verificar compatibilidade/estado antes de promover.
+
 CI38846827500/7804c73 concluida verde: validate, release-gates e isolated-restore.
 Promotable-image ignorado por ser PR. Confirma matriz visual completa revisada;
 nao valida automaticamente o merge posterior. Operador isolado executado no

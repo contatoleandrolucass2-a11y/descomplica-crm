@@ -10,6 +10,7 @@ import {
   parseDashboardFilters,
 } from "@/lib/crm/dashboard/analysis";
 import { getSalesforceRefreshConfiguration } from "@/lib/crm/salesforce/config";
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import { DashboardReport } from "./_components/DashboardReport";
 import styles from "./_components/analytics/analytics.module.css";
@@ -32,6 +33,7 @@ export default async function AppHomePage({
     : authorizedViews[0]!;
   const filters = parseDashboardFilters(query);
   const canViewRanking = authorization.permissions.includes("crm.ranking.view");
+  const pages = await getAuthorizedNavigation(authorization);
   const result = await loadDashboardReadModel([selectedView], {
     includeTopDevelopments: canViewRanking,
     includeAnalysis: true,
@@ -65,7 +67,8 @@ export default async function AppHomePage({
         filters={filters}
         today={today}
         authorizedViews={authorizedViews}
-        canViewStages={authorization.permissions.includes("crm.stages.view")}
+        canViewStages={pages.some((page) => page.path.startsWith("/app/etapas/"))}
+        authorizedStagePaths={pages.map((page) => page.path)}
         canViewRanking={canViewRanking}
         canRefresh={canRefresh}
         team={null}

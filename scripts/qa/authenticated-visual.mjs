@@ -5,6 +5,8 @@ import { copyFile, cp, mkdir, readFile, rename, rm, writeFile } from "node:fs/pr
 import path from "node:path";
 import process from "node:process";
 
+import { PAGE_REGISTRY } from "../../lib/navigation/registry.ts";
+
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
@@ -170,8 +172,8 @@ const canvasDensityLimitByRoute = new Map([
   // Full eight-section goal reference replaces the former compact settings form.
   ["/app/configuracoes/metas", 2600],
   ["/app/configuracoes/metas/parcerias", 2300],
-  // The approved workspace includes the role and full permission rows without
-  // the former internal scroll area; its desktop capture is 1598px tall.
+  // Keep the workspace compact while independent page controls scroll inside
+  // their keyboard-accessible category panel.
   ["/admin/usuarios", 1650],
 
   ["/app/etapas/agendamentos", 1500],
@@ -1063,7 +1065,9 @@ function inspectAdminUserAccessWorkspace() {
       visiblePanels.length === 1 &&
       panel.getAttribute("aria-labelledby") === selectedTabs[0].id &&
       selectedTabs[0].getAttribute("aria-controls") === panel.id &&
-      panel.scrollHeight <= panel.clientHeight + 1 &&
+      getComputedStyle(panel).overflowY === "auto" &&
+      panel.tabIndex === 0 &&
+      panel.scrollWidth <= panel.clientWidth + 1 &&
       gridBox &&
       rows.length > 0 &&
       rows.every((row) => Math.abs(row.getBoundingClientRect().width - gridBox.width) <= 1),
@@ -1479,6 +1483,32 @@ async function inspectRoute(
   Object.assign(
     snapshot,
     await page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName),
+    route === "/admin/paginas"
+      ? await page.evaluate(
+          (expectedPaths) => {
+            const list = document.querySelector(".admin-pages-scroll");
+            const pagination = [...document.querySelectorAll("button")].some((button) =>
+              ["Próxima página", "Página anterior"].includes(button.getAttribute("aria-label")),
+            );
+            const paths = [...(list?.querySelectorAll('td[data-label="Rota"]') ?? [])].map((cell) =>
+              cell.textContent.trim(),
+            );
+            return {
+              pageCatalogScrollReady: Boolean(
+                list &&
+                list.tabIndex === 0 &&
+                getComputedStyle(list).overflowY === "auto" &&
+                list.scrollHeight > list.clientHeight &&
+                paths.length === expectedPaths.length &&
+                new Set(paths).size === expectedPaths.length &&
+                expectedPaths.every((expectedPath) => paths.includes(expectedPath)) &&
+                !pagination,
+              ),
+            };
+          },
+          PAGE_REGISTRY.map((entry) => entry.path),
+        )
+      : { pageCatalogScrollReady: true },
     route === "/admin/usuarios"
       ? await page.evaluate(inspectAdminUserAccessWorkspace)
       : { userAccessWorkspaceReady: true },
@@ -1514,6 +1544,7 @@ async function inspectRoute(
     snapshot.goalPlanningComplete &&
     snapshot.goalCalendarReadable &&
     snapshot.userAccessWorkspaceReady &&
+    snapshot.pageCatalogScrollReady &&
     snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&

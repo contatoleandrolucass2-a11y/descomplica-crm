@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DASHBOARD_STAGES, type DashboardViewKey } from "@/lib/crm/dashboard/catalog";
-import { loadDashboardReadModel } from "@/lib/crm/dashboard/data";
+import { loadDashboardReadModel, loadStageReadModel } from "@/lib/crm/dashboard/data";
 
 const mocks = vi.hoisted(() => ({ createClient: vi.fn(), from: vi.fn(), rpc: vi.fn() }));
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.createClient }));
@@ -296,6 +296,90 @@ describe("loadDashboardReadModel snapshot consistency", () => {
     );
     expect(mocks.rpc).toHaveBeenCalledTimes(2);
     expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(4);
+  });
+  it("loads only authorized stages without requiring sales summaries or ranking", async () => {
+    const result = await loadStageReadModel(["all"], ["opportunities"]);
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("Expected stage fixture");
+    expect(Object.keys(result.dashboard.metrics.all ?? {})).toEqual(["opportunities"]);
+    expect(result.dashboard.salesValue).toEqual({});
+    expect(result.dashboard).not.toHaveProperty("analysis");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
+    expect(queriesFor("crm_dashboard_metrics")[0]!.in).toHaveBeenCalledWith("stage_key", [
+      "opportunities",
+    ]);
+  });
+
+  it("fails closed when an authorized stage is missing or no stage is requested", async () => {
+    await expect(loadStageReadModel(["all"], [])).rejects.toThrow("etapa autorizada");
+    responses.crm_dashboard_metrics = [{ data: [], error: null }];
+    await expect(loadStageReadModel(["all"], ["sales"])).rejects.toThrow("incompleto");
+  });
+
+  it("retries a changed snapshot for independent stage reads", async () => {
+    headers(baseHeader, nextHeader, nextHeader, nextHeader);
+    children([1, 2]);
+    await expect(loadStageReadModel(["all"], ["visits"])).resolves.toMatchObject({
+      status: "ready",
+      dashboard: {
+        generatedAt: nextHeader.generated_at,
+        metrics: { all: { visits: { currentMonth: 2 } } },
+      },
+    });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
+    for (const builder of queriesFor("crm_dashboard_metrics")) {
+      expect(builder.in).toHaveBeenCalledWith("view_key", ["all"]);
+      expect(builder.in).toHaveBeenCalledWith("stage_key", ["visits"]);
+    }
+  });
+
+  it("preserva somente visoes e etapas solicitadas ao substituir o snapshot", async () => {
+    const replacement = { ...nextHeader, id: 20 };
+    const views = ["with_canal_imob", "without_canal_imob"] as const;
+    const stages = ["opportunities", "visits"] as const;
+    headers(baseHeader, replacement, replacement, replacement);
+    children([1, 2], views);
+    const result = await loadStageReadModel([...views, views[0]], [...stages, stages[0]]);
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("Expected stage fixture");
+    expect(result.dashboard.id).toBe(20);
+    expect(Object.keys(result.dashboard.metrics)).toEqual(views);
+    for (const view of views) {
+      expect(Object.keys(result.dashboard.metrics[view]!)).toEqual(stages);
+      expect(result.dashboard.metrics[view]!.visits!.currentMonth).toBe(2);
+    }
+    expect(result.dashboard.salesValue).toEqual({});
+    expect(result.dashboard).not.toHaveProperty("analysis");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
+    const builders = queriesFor("crm_dashboard_metrics");
+    expect(builders).toHaveLength(2);
+    for (const [index, builder] of builders.entries()) {
+      expect(builder.eq).toHaveBeenCalledExactlyOnceWith("snapshot_id", index === 0 ? 10 : 20);
+      expect(builder.in.mock.calls).toEqual([
+        ["view_key", views],
+        ["stage_key", stages],
+      ]);
+    }
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(4);
+  });
+
+  it("falha fechada nas etapas apos dois conflitos sem consulta ampla", async () => {
+    headers(baseHeader, nextHeader, nextHeader, { ...nextHeader, id: 20 });
+    children([1, 2]);
+    await expect(loadStageReadModel(["all"], ["visits"])).rejects.toThrow(
+      "mudou durante a leitura",
+    );
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(4);
+    expect(queriesFor("crm_dashboard_metrics")).toHaveLength(2);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
   });
   it.each([0, 1])(
     "retorna lote estavel com contagem %s, preservando ausencia e zero",

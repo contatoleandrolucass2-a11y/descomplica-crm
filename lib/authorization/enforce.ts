@@ -6,6 +6,7 @@ import { requireAnyPermission, requireAuthorization, requirePermission } from ".
 import { AuthorizationError } from "./types";
 import type { AuthorizationContext } from "./types";
 import type { PermissionKey } from "./permissions";
+import { requirePageAccess } from "./page-access";
 
 // Bridges the throwing M5 guards to Next.js routing. The guards deliberately
 // know nothing about routing (no next/navigation); this is the single place
@@ -31,6 +32,20 @@ export async function enforceAuthorization(): Promise<AuthorizationContext> {
     }
   }
 
+  if (denial === "UNAUTHENTICATED") redirect("/login");
+  if (denial === "MFA_REQUIRED") redirect("/mfa");
+  if (denial === "PASSWORD_RECOVERY_REQUIRED") redirect("/redefinir-senha");
+  forbidden();
+}
+
+export async function enforcePageAccess(pathname: string): Promise<AuthorizationContext> {
+  let denial: AuthorizationError["code"] | null = null;
+  try {
+    return await requirePageAccess(pathname);
+  } catch (error) {
+    if (error instanceof AuthorizationError) denial = error.code;
+    else throw error;
+  }
   if (denial === "UNAUTHENTICATED") redirect("/login");
   if (denial === "MFA_REQUIRED") redirect("/mfa");
   if (denial === "PASSWORD_RECOVERY_REQUIRED") redirect("/redefinir-senha");

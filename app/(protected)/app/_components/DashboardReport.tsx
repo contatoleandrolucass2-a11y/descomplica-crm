@@ -52,6 +52,7 @@ export interface DashboardReportProps {
   selectedPeriod: DashboardPeriodKey;
   authorizedViews: readonly DashboardViewKey[];
   canViewStages: boolean;
+  authorizedStagePaths?: readonly string[];
   canRefresh: boolean;
   canViewRanking: boolean;
   team?: { brokers: number; managers: Array<{ name: string; total: number }> } | null;

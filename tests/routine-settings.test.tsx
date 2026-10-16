@@ -58,7 +58,7 @@ describe("Rotina", () => {
 
   it("guards the page on the server before rendering the routine workspace", () => {
     const source = readFileSync("app/(protected)/app/gestao/rotina/page.tsx", "utf8");
-    expect(source).toContain('await enforcePermission("crm.dashboard.view")');
+    expect(source).toContain('await enforcePageAccess("/app/gestao/rotina")');
     expect(source).toContain('getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled');
     expect(source).toContain("forbidden()");
   });

@@ -2,6 +2,18 @@
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
+- CI38851076367/f36f9fa concluida verde nos tres jobs de PR. Merge posterior
+  2eae903 preserva restricao por etapa e analise somente no dashboard;156 testes
+  focais passaram, inventario61 migrations/1910 assertions.11 capturas do
+  dashboard e231 da main preservadas. Novos gates combinados ainda obrigatorios;
+  migrations de catalogo alheias nao estao autorizadas por esta demanda.
+- Retomada16/10/05:07Z: main2eae903 integrou PR235 de catalogo/permissoes,
+  exigindo merge da leitura de etapas, inventario e referencias. Health anonimo
+  05:07:33.837Z200/ok/b5458ff; GitHubPR238 conflitante. CI38851076367/f36f9fa
+  ainda na matriz visual; lint/tipos/test/build locais passaram na repeticao
+  (3556/1181/703, skips90/19/14). Primeira repeticao Windows teve dois timeouts,
+  ambos passaram isolados e na suite completa sem aumentar limites. Nova CI
+  combinada obrigatoria. Fontes Git fetch/GitHub/GET; nenhuma mutacao remota.
 - CI38846827500/7804c73 concluida com validate, release-gates e restore verdes;
   imagem ignorada como previsto em PR. Merge posterior com cd004e4 requer nova
   CI. Operador isolado Linux:84 testes aprovados,1 skip exclusivo de Windows,
