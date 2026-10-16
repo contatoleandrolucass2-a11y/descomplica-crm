@@ -13,6 +13,8 @@
   passa a ser integral na nova analise, sem alterar comparativos de outras telas.
 - Oculta o aviso de coleta pendente quando o historico mensal ja esta disponivel.
 - Corrige o tipo do literal de whitespace na fixture SQL de validacao.
+- Exercita revogacao do ranking com perfil autorizado, preservando a proibicao
+  existente de grants globais individuais.
 - Calcula metas mensais por responsavel unico e esperado proporcional ao dia;
   atualiza a pagina na virada do dia de Sao Paulo.
 - Remove controles/textos indicados na raiz e resume tabelas em uma linha

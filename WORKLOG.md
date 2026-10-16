@@ -36,6 +36,11 @@ literal polimorfico sem tipo na fixture pgTAP. SELECT sintetico isolado confirmo
 42804; cast explicito para text corrige a preparacao, sem alterar a migration
 ou enfraquecer as188 assercoes. Reexecucao completa obrigatoria.
 
+Segunda rodada38832697093:165 assercoes passaram antes da fixture tentar um
+allow global proibido pelo trigger existente. Fixture passa a usar manager_house,
+que ja possui ranking, e deny explicito para provar revogacao imediata. Contexto
+JWT e restaurado entre preparacao e leitura. Regras do produto inalteradas.
+
 ## 2026-10-15: Projecao delimitada e diagnostico de limites
 
 Catalogo retido limitado a IDs comerciais, filtros/calendario e campos

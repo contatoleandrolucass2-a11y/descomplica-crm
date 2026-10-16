@@ -414,24 +414,28 @@ select is((select count(*) from pg_temp.read_analysis(array['without_canal_imob'
 reset role;
 reset request.jwt.claim.sub;
 reset request.jwt.claim.role;
-insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
-select user_id,'crm.ranking.view','allow','Synthetic analysis ranking grant'
-from analysis_roles where key='coordinator';
-select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='coordinator'),true);
+select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='manager_house'),true);
 select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;
 select is((select payload from pg_temp.read_analysis()),
-  (select payload from raw_analysis where view_key='with_canal_imob'),
-  'explicit ranking grant allows the full authorized view');
-reset role;
-update public.user_permission_overrides set effect='deny'
-where user_id=(select user_id from analysis_roles where key='coordinator') and permission_key='crm.ranking.view';
-set local role authenticated;
-select is((select jsonb_array_length(payload->'facts') from pg_temp.read_analysis()),5,
-  'ranking revocation takes effect immediately and reaggregates again');
+  (select payload from raw_analysis where view_key='without_canal_imob'),
+  'existing role ranking grant allows the full authorized view');
 reset role;
 reset request.jwt.claim.sub;
 reset request.jwt.claim.role;
+insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
+select user_id,'crm.ranking.view','deny','Synthetic analysis ranking revocation'
+from analysis_roles where key='manager_house';
+select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='manager_house'),true);
+select set_config('request.jwt.claim.role','authenticated',true);
+set local role authenticated;
+select is((select payload#>'{dimensions,developments}' from pg_temp.read_analysis()),'[]'::jsonb,
+  'ranking revocation takes effect immediately and removes protected developments');
+reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
+delete from public.user_permission_overrides
+where user_id=(select user_id from analysis_roles where key='manager_house') and permission_key='crm.ranking.view';
 select is((select jsonb_agg(to_jsonb(a) order by a.view_key) from public.crm_dashboard_analysis a),
   (select jsonb_agg(to_jsonb(a) order by a.view_key) from raw_analysis a),
   'reading either representation never changes stored analysis');
@@ -452,13 +456,19 @@ select throws_ok('select * from pg_temp.read_analysis()','22023',
 reset role;
 update public.crm_dashboard_analysis a set payload=r.payload
 from raw_analysis r where a.view_key=r.view_key and a.snapshot_id=r.snapshot_id;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
 select user_id,'crm.dashboard.all.view','allow','Synthetic empty analysis view grant'
 from analysis_roles where key='coordinator';
+select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='coordinator'),true);
+select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;
 select is((select payload->'facts' from pg_temp.read_analysis(array['all'])),'[]'::jsonb,
   'empty facts stay an empty array after redaction');
 reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
 delete from public.user_permission_overrides
 where user_id=(select user_id from analysis_roles where key='coordinator') and permission_key='crm.dashboard.all.view';
 select set_config('request.jwt.claims',jsonb_build_object(
