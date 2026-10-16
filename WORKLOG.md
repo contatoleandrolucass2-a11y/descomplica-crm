@@ -9,6 +9,9 @@ e ausencia dos links antigos na raiz; selecao legada segue conferida na etapa
 de oportunidades e no ranking. Matriz visual ainda nao executada nessa rodada.
 Backup privado delimitado da funcao/ACL preparado, sem dados de clientes ou
 DDL remoto. Evidencias: docs/audits/dashboard-filtros-metas-2026-10-15.md.
+CI38836371948 confirmou os mesmos gates, mas o novo teste usava atributo de
+fonte opcional em cenario sem snapshot. Seletor alterado para landmark main,
+mantendo todas as assercoes funcionais. Nao altera a interface ou a fonte.
 
 Implementacao em `codex/dashboard-filtros-metas`, base a7fdf92. Usuario confirmou
 as colunas de origem, metas por responsavel unico dos relatorios filtrados e

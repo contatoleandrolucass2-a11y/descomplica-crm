@@ -42,6 +42,13 @@ Nenhuma permissao Qlik ou workflow n8n foi alterado.
 - Seletores novos executados localmente com Playwright na preview sintetica:
   dois casos passaram, incluindo cabecalhos e linha Realizado. Typecheck passou.
   Essa prova de DOM nao substitui autenticacao, servidor e RLS da proxima CI.
+- CI38836371948/270ccb3: validate, restore, banco e build passaram; E2E12
+  aprovados,1 falho,7 nao executados. O cenario sem snapshot omite o atributo
+  opcional data-dashboard-source; o seletor novo nao encontrava o painel.
+  Corrigido para landmark main, mantendo contagens, rotulos e tabelas. Nenhuma
+  alteracao de produto ou reducao de assertions. Nova CI completa necessaria.
+- Reteste Playwright local: quatro casos, com e sem snapshot e entradas month/
+  week, aprovados com os seletores finais. Prova sintetica, nao autenticacao.
 
 ## Estado remoto e recuperacao preparada
 

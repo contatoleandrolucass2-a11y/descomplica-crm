@@ -7,6 +7,9 @@
   Matriz visual/merge/ativacao pendentes. Health16/10/01:23Z200/ok/d83c22d.
   Backup privado da funcao/ACL preparado, sem DDL ou dados de clientes;
   [evidencias e limites](../audits/dashboard-filtros-metas-2026-10-15.md).
+- CI38836371948/270ccb3 repetiu banco/restore aprovados; E2E dependia de
+  atributo opcional ausente sem snapshot. Seletor corrigido; quatro casos
+  sinteticos passaram com/sem coleta. Matriz autenticada ainda pendente.
 
 - Retomada18:36Z: maina7fdf92, CI38775901605 success; site200/ok/fae77f9.
   Branch codex/dashboard-filtros-metas criada do main. PR234 documental tem

@@ -1501,7 +1501,7 @@ test("dashboard uses management filters while stage and ranking links preserve s
     for (const period of ["month", "week"]) {
       const response = await page.goto(`/app?view=with_canal_imob&period=${period}`);
       expect(response?.status()).toBe(200);
-      const report = page.locator("[data-dashboard-source]");
+      const report = page.getByRole("main");
       const filters = report.getByRole("region", { name: "Filtros do relatório", exact: true });
       await expect(filters.locator("summary")).toHaveCount(4);
       for (const label of [
