@@ -12,7 +12,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run && node --test ops/salesforce/*.node-test.mjs ops/salesforce/vps/*.node-test.mjs ops/qlik/*.node-test.mjs ops/qlik/vps/*.node-test.mjs && pnpm test:release",
+    "test": "vitest run && node --test ops/salesforce/*.node-test.mjs ops/salesforce/vps/*.node-test.mjs ops/qlik/*.node-test.mjs ops/qlik/vps/*.node-test.mjs ops/meta-ads/*.node-test.mjs ops/meta-ads/vps/*.node-test.mjs && pnpm test:release",
     "test:watch": "vitest",
     "qa:browser:install": "playwright install chromium",
     "qa:visual:reference": "node scripts/qa/reference-parity.mjs reference",
@@ -68,7 +68,9 @@
     "release:production": "node scripts/release/production-release.mjs",
     "test:release": "node --test scripts/release/*.node-test.mjs",
     "pages:sync": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/pages/catalog.mjs",
-    "pages:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/pages/catalog.mjs --check"
+    "pages:check": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/pages/catalog.mjs --check",
+    "meta-ads:chrome": "node ops/meta-ads/launch-dedicated-chrome.mjs",
+    "meta-ads:monitor": "node --env-file-if-exists=ops/meta-ads/.env ops/meta-ads/connection-monitor.mjs"
   },
   "dependencies": {
     "@novnc/novnc": "1.7.0",

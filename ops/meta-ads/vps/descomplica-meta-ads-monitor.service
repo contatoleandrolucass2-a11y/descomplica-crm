@@ -1,0 +1,33 @@
+[Unit]
+Description=Descomplica Meta Ads connection evidence (no exports)
+Wants=network-online.target
+After=network-online.target descomplica-meta-ads-browser.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-meta-ads
+Group=descomplica-meta-ads
+WorkingDirectory=@RELEASE@
+EnvironmentFile=/etc/descomplica-meta-ads/monitor.env
+ExecStart=/usr/local/bin/node ops/meta-ads/connection-monitor.mjs
+Restart=on-failure
+RestartSec=15
+TimeoutStopSec=35
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=256M
+TasksMax=64
+LimitCORE=0
+StandardOutput=journal
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

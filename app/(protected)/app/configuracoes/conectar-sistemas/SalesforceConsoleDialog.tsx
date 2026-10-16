@@ -4,7 +4,7 @@ import { LoaderCircle, Monitor, RefreshCw, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 
 import styles from "./ConnectedSystemsPanel.module.css";
-import { startConsoleSession, type ConsoleState } from "./console-session";
+import { startConsoleSession, type ConsoleProvider, type ConsoleState } from "./console-session";
 
 const LABELS: Record<ConsoleState, string> = {
   loading: "Conectando ao console…",
@@ -16,9 +16,13 @@ const LABELS: Record<ConsoleState, string> = {
 
 export function SalesforceConsoleDialog({
   onClose,
+  provider = "salesforce",
 }: {
   onClose: (credentialsFailed?: boolean) => void;
+  provider?: ConsoleProvider;
 }) {
+  const titleId = `${provider}-console-title`;
+  const noteId = `${provider}-console-note`;
   const dialogRef = useRef<HTMLDialogElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const [attempt, setAttempt] = useState(0);
@@ -65,16 +69,17 @@ export function SalesforceConsoleDialog({
     <dialog
       ref={dialogRef}
       className={styles.consoleDialog}
-      aria-labelledby="salesforce-console-title"
-      aria-describedby="salesforce-console-note"
+      aria-labelledby={titleId}
+      aria-describedby={noteId}
       onCancel={(event) => {
         event.preventDefault();
         onClose();
       }}
     >
       <header className={styles.consoleHeader}>
-        <h2 id="salesforce-console-title">
-          <Monitor size={18} aria-hidden="true" /> Salesforce
+        <h2 id={titleId}>
+          <Monitor size={18} aria-hidden="true" />
+          {provider === "meta-ads" ? "Meta Ads · Facebook Ads" : "Salesforce"}
         </h2>
         <button
           ref={closeRef}
@@ -88,14 +93,15 @@ export function SalesforceConsoleDialog({
         </button>
       </header>
       <ConsoleViewport
-        key={attempt}
+        key={`${provider}-${attempt}`}
+        provider={provider}
         onClose={onClose}
         onRetry={() => {
           closeRef.current?.focus();
           setAttempt((value) => value + 1);
         }}
       />
-      <footer className={styles.consoleFooter} id="salesforce-console-note">
+      <footer className={styles.consoleFooter} id={noteId}>
         Acesso por até 10 minutos. Ao fechar, a sessão do navegador na VPS permanece aberta.
       </footer>
     </dialog>
@@ -105,17 +111,19 @@ export function SalesforceConsoleDialog({
 function ConsoleViewport({
   onClose,
   onRetry,
+  provider,
 }: {
   onClose: (credentialsFailed?: boolean) => void;
   onRetry: () => void;
+  provider: ConsoleProvider;
 }) {
   const targetRef = useRef<HTMLDivElement>(null);
   const [state, setState] = useState<ConsoleState>("loading");
   useEffect(() => {
     const target = targetRef.current;
     if (!target) return;
-    return startConsoleSession(target, setState, () => onClose(true));
-  }, [onClose]);
+    return startConsoleSession(target, setState, () => onClose(true), provider);
+  }, [onClose, provider]);
 
   return (
     <>
@@ -131,7 +139,12 @@ function ConsoleViewport({
         ) : null}
       </div>
       <div className={styles.consoleScreen} aria-busy={state === "loading"}>
-        <div ref={targetRef} className={styles.consoleViewport} data-salesforce-console-screen />
+        <div
+          ref={targetRef}
+          className={styles.consoleViewport}
+          data-salesforce-console-screen={provider === "salesforce" ? true : undefined}
+          data-meta-ads-console-screen={provider === "meta-ads" ? true : undefined}
+        />
       </div>
     </>
   );

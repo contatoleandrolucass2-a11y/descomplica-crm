@@ -22,6 +22,12 @@ O ranking usa duas observações conciliadas por ciclo e preserva a última base
 válida quando a coleta falha. A agenda horária na VPS depende da ativação
 protegida e da sessão Qlik; ver [operação do ranking Qlik](docs/runbooks/qlik-ranking-v2.md).
 
+O painel também inclui Facebook Ads para a conta `1080988750909489`, com
+navegador dedicado e console restrito ao master. O status confirma somente
+uma sessão recente na conta correta; a extração de métricas e a futura página
+comercial não estão habilitadas nesta etapa. Consulte a
+[operação do console Meta](docs/runbooks/meta-ads-vps-session.md).
+
 ## Pré-requisitos
 
 | Ferramenta                 | Versão validada | Uso                               |

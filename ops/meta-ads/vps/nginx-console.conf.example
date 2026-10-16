@@ -1,0 +1,16 @@
+# Include only inside the existing approved HTTPS server block. Preserve all
+# other providers, run nginx -t, and reload only after a private backup.
+# Do not proxy /session-active or /session-probe; coordination stays loopback-only.
+location = /meta-ads-console/socket {
+    proxy_pass http://127.0.0.1:6083;
+    proxy_http_version 1.1;
+    proxy_set_header Upgrade $http_upgrade;
+    proxy_set_header Connection "upgrade";
+    proxy_set_header Host $host;
+    proxy_set_header Origin $http_origin;
+    proxy_set_header Cookie $http_cookie;
+    proxy_buffering off;
+    proxy_read_timeout 620s;
+    proxy_send_timeout 620s;
+    access_log off;
+}
