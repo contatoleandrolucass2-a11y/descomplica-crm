@@ -2663,3 +2663,7 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Permite validar e salvar rascunhos com taxas como1,67%, preservando o valor informado.
 
 - Meta: registra referência de calendário legível em1024px, sem alterar limiares deQA.
+
+- Gestão > Meta disponível em produção, com planejamento completo, calendário legível e taxas fracionárias; permissões e rascunho inativo preservados.
+
+- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
