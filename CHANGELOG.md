@@ -2,6 +2,8 @@
 
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
+- Atualiza somente11 referencias visuais do dashboard apos revisao das
+  mudancas solicitadas; preserva231 capturas e registra proveniencia integral.
 - Integra o ranking Qlik v2 da main, preservando seus gates e referencias;
   atualiza inventario combinado de migrations e assercoes de restore.
 - Adiciona filtros dependentes de canal, gerente, responsavel e empresa usando

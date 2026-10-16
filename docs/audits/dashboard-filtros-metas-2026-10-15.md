@@ -13,8 +13,17 @@ https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/238.
 Main17ab106 integrado, incluindo alteracoes concorrentes de usuarios e Qlik.
 Nenhuma permissao Qlik ou workflow n8n foi alterado.
 
+Merge posterior4fa4c5d incorporou mainb9377a1 e sua integracao Qlik v2, sem
+sobrescrever referencias do ranking. Inventario combinado56 migrations/1883
+assercoes pgTAP. Revisao independente dos conflitos nao encontrou regressao.
+
 ## Validacao
 
+- Merge4fa4c5d: pnpm lint, typecheck, test e build locais aprovados. Vitest3547
+  aprovados/90 ignorados; Node1181 aprovados/19 ignorados; release703 aprovados/
+  14 ignorados. Skips de plataforma continuam exigindo CI Linux. Lint sem erros,
+  tres avisos: connected-systems preexistente e dois helpers locais ignorados.
+  33 testes focais de inventario/paridade aprovados. CI38841091143 em andamento.
 - Local: lint, tipos, build e formatacao aprovados; suites focadas e185 checks
   sinteticos de dashboard nos tres temas. Capturas incluem celular, desktop,
   filtros, metas e pop-ups. Dados sinteticos nao comprovam coleta real.
@@ -56,6 +65,24 @@ Nenhuma permissao Qlik ou workflow n8n foi alterado.
   passa a usar selecao canonica de canal; demais assercoes de RSC/estado mantidas.
 
 ## Estado remoto e recuperacao preparada
+
+CI38841091143 concluiu gates funcionais, inclusive auto-refresh, banco1883,
+restore e E2E. Matriz completa:242 auditorias de acessibilidade aprovadas,
+rotas/temas/zoom/teclado aprovados,231 referencias iguais e11 diferencas apenas
+em `/app`, compativeis com filtros, historicos e tabelas solicitados. Inspecao
+visual incluiu tres temas desktop, tablet e celular. Artefato12022638666:
+SHA256 `78e52ce30d8ec5ab03d2789bef1559ed8a7549fee37b4d6316963e977ad3566b`.
+Capture5e712c62b0a7972db3359a8389f3d3b78ada7070 tem arvore Git identica ao
+HEAD4fa4c5d; fingerprint recomputado confirmou apenas19 arquivos gerados de
+connected-systems. Todos os hashes de imagens e baseline foram conferidos.
+Promocao delimitada atualizou11 imagens e manteve231 imagens/entradas intactas,
+incluindo ranking Qlik. Proveniencia adicionada ao manifesto. A CI original
+continua falha por diferenca visual; nova CI verify completa ainda obrigatoria.
+
+Preflight Salesforce GET describe em16/10/2026 02:58:19Z, na sessao dedicada
+existente: `Activity.Unidade_de_negocio__c` esta selecionada nos dois relatorios
+de atividades e tem rotulo `Unidade de negocio`. Sem alteracao de relatorio,
+execucao de export ou saida de registros privados. Confirma coluna, nao carga.
 
 GET anonimo `https://crm.descomplicapro.com.br/api/health` em
 2026-10-16T01:23:42.265Z: HTTP200, statusok,

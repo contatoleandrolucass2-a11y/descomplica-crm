@@ -2,10 +2,21 @@
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
+- CI38841091143/4fa4c5d: funcional/banco1883/restore/E2E aprovados. Matriz242
+  completa com11 diferencas apenas em /app; referencias revisadas e231 restantes
+  preservadas, incluindo Qlik. Hash/arvore/fingerprint comprovados no audit.
+  Nova CI verify exigida; sem migration, coletor ou app publicados. Preflight
+  Salesforce02:58Z confirmou Unidade de Negocio selecionada nas duas atividades.
 - Retomada16/10/02:33Z: origin/main b9377a1 incorporado, preservando ranking
   Qlik v2 e suas referencias. Inventario combinado:56 migrations/1883 assercoes
   pgTAP. PR238 estava DIRTY, sem CI para d08070d; resolucao preserva testes de
   dashboard e ranking. Nova validacao obrigatoria antes de qualquer ativacao.
+- Merge4fa4c5d em PR238, CI38841091143 iniciada; formatacao/lint/tipos verdes
+  em02:35Z, restante pendente. Health anonimo02:35:49.765Z200/ok/d83c22d.
+  Fontes: GitHub Actions/PR238 via gh e GET publico; sem mutacao de runtime.
+- Verificacao local4fa4c5d: lint/tipos/test/build passaram,3547 Vitest/1181 Node/
+  703 release aprovados;90/19/14 skips registrados. CI Linux e provas reais
+  continuam obrigatorias. Revisao independente do merge sem achados no escopo.
 - CI38834121342/3f05de8: validate/banco/restore aprovados; E2E exige links
   removidos da raiz e foi atualizado ao novo contrato, preservando as etapas.
   Matriz visual/merge/ativacao pendentes. Health16/10/01:23Z200/ok/d83c22d.

@@ -5,6 +5,11 @@
 Main b9377a1 incorporado preservando Qlik v2, seus testes e referencias.
 Conflitos resolvidos com inventario combinado de56 migrations/1883 assercoes;
 33 testes locais de release/paridade aprovados. Nova CI necessaria no merge.
+No merge4fa4c5d, lint/typecheck/test/build locais passaram;3547 Vitest,1181 Node
+e703 release aprovados. Skips de plataforma permanecem dependentes da CI Linux.
+CI38841091143 concluiu todos os gates funcionais. Diferencas visuais restritas
+as11 capturas de /app foram revisadas;231 referencias preservadas. Artefato,
+arvore Git, fingerprint e hashes verificados. Nova CI verify obrigatoria.
 
 CI38834121342/3f05de8 aprovou validate, banco, autorizacao compacta, advisors,
 build e restore isolado. E2E encontrou expectativa antiga dos links removidos
