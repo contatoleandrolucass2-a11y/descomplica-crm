@@ -2,6 +2,14 @@
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
+CI38834121342/3f05de8 aprovou validate, banco, autorizacao compacta, advisors,
+build e restore isolado. E2E encontrou expectativa antiga dos links removidos
+na raiz. Contrato atualizado: quatro filtros, tres historicos, tabela transposta
+e ausencia dos links antigos na raiz; selecao legada segue conferida na etapa
+de oportunidades e no ranking. Matriz visual ainda nao executada nessa rodada.
+Backup privado delimitado da funcao/ACL preparado, sem dados de clientes ou
+DDL remoto. Evidencias: docs/audits/dashboard-filtros-metas-2026-10-15.md.
+
 Implementacao em `codex/dashboard-filtros-metas`, base a7fdf92. Usuario confirmou
 as colunas de origem, metas por responsavel unico dos relatorios filtrados e
 autorizou explicitamente atualizacao aditiva do banco/coletor apos testes.
