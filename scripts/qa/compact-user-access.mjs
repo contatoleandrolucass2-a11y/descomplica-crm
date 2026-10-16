@@ -9,7 +9,7 @@ import { promisify } from "node:util";
 const execute = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const image = "public.ecr.aws/supabase/postgres:17.6.1.159";
-const expectedPlans = [116, 8, 14];
+const expectedPlans = [116, 8, 14, 27];
 const expectedAssertions = expectedPlans.reduce((sum, count) => sum + count, 0);
 const fixture = "tests/fixtures/compact-user-access/rehearsal.sql";
 const invocationId = randomUUID();

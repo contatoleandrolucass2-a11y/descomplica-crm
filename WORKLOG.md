@@ -6203,3 +6203,20 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   evidência autenticada antiga (209 capturas) para a nova matriz (242
   capturas). Os resultados finais, CI, PR e publicação serão registrados após
   o gate visual real.
+
+### Leitura independente das páginas antes da publicação
+
+A revisão final reproduziu a dependência indevida dos dados de Etapas, Metas e
+Pontos em permissões dos módulos anteriores. A migration
+`20261016000120_individual_page_data_access.sql` altera somente cinco policies de
+leitura. Preserva canais, MFA, contas ativas, grants, escrita e os acessos
+preexistentes do Dashboard e Ranking. Uma etapa isolada consulta somente as
+etapas autorizadas, sem exigir ou expor resumos financeiros. Metas DV e Parcerias
+continuam separadas por perfil. A ativação ocorre na mesma transação das chaves
+individuais e das RPCs de Rotina.
+
+Os 27 novos testes pgTAP cobrem concessões e negações por etapa, canal e perfil,
+páginas desativadas, contas inativas, sessão de recuperação e ausência de escrita.
+A suíte completa passa a 1.468 testes e o contrato compacto a 165. O manifesto
+passa a 59 migrations. Esta nota descreve a implementação; publicação permanece
+pendente dos gates completos no SHA final.

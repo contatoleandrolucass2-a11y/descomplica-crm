@@ -39,7 +39,7 @@ export function metricValueForPeriod(metric: DashboardMetric, period: DashboardP
 }
 
 export function buildFunnelReadings(
-  metrics: DashboardMetricMap,
+  metrics: Partial<DashboardMetricMap>,
   valueForStage: (metric: DashboardMetric) => number | null,
 ): FunnelReading[] {
   const stages = Object.entries(DASHBOARD_STAGES) as Array<
@@ -47,9 +47,11 @@ export function buildFunnelReadings(
   >;
 
   return stages.map(([key, stage], index) => {
-    const value = valueForStage(metrics[key]);
+    const metric = metrics[key];
+    const value = metric ? valueForStage(metric) : null;
     const previousKey = stages[index - 1]?.[0];
-    const previous = previousKey ? valueForStage(metrics[previousKey]) : null;
+    const previousMetric = previousKey ? metrics[previousKey] : undefined;
+    const previous = previousMetric ? valueForStage(previousMetric) : null;
 
     return {
       key,
@@ -63,7 +65,10 @@ export function buildFunnelReadings(
   });
 }
 
-export function buildPeriodFunnelReadings(metrics: DashboardMetricMap, period: DashboardPeriodKey) {
+export function buildPeriodFunnelReadings(
+  metrics: Partial<DashboardMetricMap>,
+  period: DashboardPeriodKey,
+) {
   return buildFunnelReadings(metrics, (metric) => metricValueForPeriod(metric, period).current);
 }
 

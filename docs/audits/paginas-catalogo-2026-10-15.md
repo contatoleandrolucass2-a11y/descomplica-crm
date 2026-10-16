@@ -78,3 +78,31 @@ A sessão de produção no navegador chegou à tela de login durante a conferên
 a confirmação efetiva foi feita por consulta do banco, além dos testes da
 interface. O pacote de páginas permanece em desenvolvimento, agora com caixas
 individuais por página e simuladores agrupados, conforme a resposta do usuário.
+
+### Leitura independente das páginas antes da publicação
+
+A revisão final reproduziu a dependência indevida dos dados de Etapas, Metas e
+Pontos em permissões dos módulos anteriores. A migration
+`20261016000120_individual_page_data_access.sql` altera somente cinco policies de
+leitura. Preserva canais, MFA, contas ativas, grants, escrita e os acessos
+preexistentes do Dashboard e Ranking. Uma etapa isolada consulta somente as
+etapas autorizadas, sem exigir ou expor resumos financeiros. Metas DV e Parcerias
+continuam separadas por perfil. A ativação ocorre na mesma transação das chaves
+individuais e das RPCs de Rotina.
+
+Os 27 novos testes pgTAP cobrem concessões e negações por etapa, canal e perfil,
+páginas desativadas, contas inativas, sessão de recuperação e ausência de escrita.
+A suíte completa passa a 1.468 testes e o contrato compacto a 165. O manifesto
+passa a 59 migrations. Esta nota descreve a implementação; publicação permanece
+pendente dos gates completos no SHA final.
+
+Validação final local: lint sem erros, tipos, build, formatação, 3.093 testes
+Vitest, 572 testes Node e 531 testes do coordenador aprovados (os testes de
+Linux permanecem obrigatórios na CI). O ensaio de restauração executou as 59
+migrations e passou 1.468 testes em cada banco independente, preservando dados,
+proprietários e privilégios efetivos. O contrato compacto passou 165 testes.
+Uma sessão sintética pela aplicação abriu somente Oportunidades no canal
+permitido; Dashboard e Vendas negados retornaram HTTP 403, e o canal negado
+renderizou acesso restrito sem dados. O Next.js pode iniciar HTTP 200 antes
+do bloqueio de canal por streaming; o guard e a RLS negam o conteúdo. Os dados
+sintéticos e as exceções temporárias foram removidos após a verificação.

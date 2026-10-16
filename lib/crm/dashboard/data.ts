@@ -101,6 +101,12 @@ export type DashboardLoadResult =
   | { status: "empty" }
   | { status: "ready"; dashboard: DashboardReadModel };
 
+export type StageReadModel = Omit<DashboardReadModel, "metrics"> & {
+  metrics: Partial<Record<DashboardViewKey, Partial<Record<DashboardStageKey, DashboardMetric>>>>;
+};
+
+type StageLoadResult = { status: "empty" } | { status: "ready"; dashboard: StageReadModel };
+
 function isDashboardViewKey(value: string): value is DashboardViewKey {
   return Object.prototype.hasOwnProperty.call(DASHBOARD_VIEWS, value);
 }
@@ -135,7 +141,32 @@ export async function loadDashboardReadModel(
   viewKeys: readonly DashboardViewKey[],
   options: { includeTopDevelopments?: boolean } = {},
 ): Promise<DashboardLoadResult> {
+  // The complete dashboard validates all five stages and its sales summary.
+  return loadCommercialReadModel(viewKeys, options) as Promise<DashboardLoadResult>;
+}
+
+export async function loadStageReadModel(
+  viewKeys: readonly DashboardViewKey[],
+  stageKeys: readonly DashboardStageKey[],
+): Promise<StageLoadResult> {
+  if (stageKeys.length === 0 || stageKeys.some((key) => !isDashboardStageKey(key))) {
+    throw new Error("Nenhuma etapa autorizada foi informada.");
+  }
+  return loadCommercialReadModel(viewKeys, { stageKeys, includeSalesValue: false });
+}
+
+async function loadCommercialReadModel(
+  viewKeys: readonly DashboardViewKey[],
+  options: {
+    includeTopDevelopments?: boolean;
+    stageKeys?: readonly DashboardStageKey[];
+    includeSalesValue?: boolean;
+  },
+): Promise<StageLoadResult> {
   const requestedViews = [...new Set(viewKeys)];
+  const requestedStages = [
+    ...new Set(options.stageKeys ?? Object.keys(DASHBOARD_STAGES)),
+  ] as DashboardStageKey[];
   if (requestedViews.length === 0) {
     throw new Error("Nenhuma visão autorizada foi informada para o dashboard.");
   }
@@ -165,19 +196,25 @@ export async function loadDashboardReadModel(
           .in("view_key", requestedViews)
           .order("rank")
       : Promise.resolve({ data: [], error: null });
+    const viewsRequest =
+      options.includeSalesValue !== false
+        ? supabase
+            .from("crm_dashboard_views")
+            .select("view_key,sales_value_month,sales_value_week,sales_value_today")
+            .eq("snapshot_id", snapshot.id)
+            .in("view_key", requestedViews)
+        : Promise.resolve({ data: [], error: null });
+    let metricsRequest = supabase
+      .from("crm_dashboard_metrics")
+      .select(
+        "view_key,stage_key,current_month,current_week,current_today,goal_month,goal_week,goal_today,previous_month,year_closed_months_average,last_three_closed_months_average,previous_fourteen_days,last_fourteen_days,previous_seven_days,last_seven_days,previous_week,yesterday",
+      )
+      .eq("snapshot_id", snapshot.id)
+      .in("view_key", requestedViews);
+    if (options.stageKeys) metricsRequest = metricsRequest.in("stage_key", requestedStages);
     const [viewsResult, metricsResult, developmentsResult] = await Promise.all([
-      supabase
-        .from("crm_dashboard_views")
-        .select("view_key,sales_value_month,sales_value_week,sales_value_today")
-        .eq("snapshot_id", snapshot.id)
-        .in("view_key", requestedViews),
-      supabase
-        .from("crm_dashboard_metrics")
-        .select(
-          "view_key,stage_key,current_month,current_week,current_today,goal_month,goal_week,goal_today,previous_month,year_closed_months_average,last_three_closed_months_average,previous_fourteen_days,last_fourteen_days,previous_seven_days,last_seven_days,previous_week,yesterday",
-        )
-        .eq("snapshot_id", snapshot.id)
-        .in("view_key", requestedViews),
+      viewsRequest,
+      metricsRequest,
       developmentsRequest,
     ]);
 
@@ -192,25 +229,26 @@ export async function loadDashboardReadModel(
     const viewRows = z.array(viewRowSchema).parse(viewsResult.data ?? []);
     const metricRows = z.array(metricRowSchema).parse(metricsResult.data ?? []);
     const developmentRows = z.array(developmentRowSchema).parse(developmentsResult.data ?? []);
-    const metrics = {} as DashboardReadModel["metrics"];
+    const metrics: StageReadModel["metrics"] = {};
     const salesValue = {} as DashboardReadModel["salesValue"];
     const topDevelopments = {} as DashboardReadModel["topDevelopments"];
 
     for (const viewKey of requestedViews) {
-      const viewRow = viewRows.find((row) => row.view_key === viewKey);
-      if (!viewRow || !isDashboardViewKey(viewRow.view_key)) {
-        throw new Error("O resumo por visão do dashboard está incompleto.");
+      if (options.includeSalesValue !== false) {
+        const viewRow = viewRows.find((row) => row.view_key === viewKey);
+        if (!viewRow || !isDashboardViewKey(viewRow.view_key)) {
+          throw new Error("O resumo por visão do dashboard está incompleto.");
+        }
+        salesValue[viewKey] = {
+          month: viewRow.sales_value_month,
+          week: viewRow.sales_value_week,
+          today: viewRow.sales_value_today,
+        };
       }
 
-      salesValue[viewKey] = {
-        month: viewRow.sales_value_month,
-        week: viewRow.sales_value_week,
-        today: viewRow.sales_value_today,
-      };
+      const viewMetrics: Partial<Record<DashboardStageKey, DashboardMetric>> = {};
 
-      const viewMetrics = {} as Record<DashboardStageKey, DashboardMetric>;
-
-      for (const stageKey of Object.keys(DASHBOARD_STAGES) as DashboardStageKey[]) {
+      for (const stageKey of requestedStages) {
         const row = metricRows.find(
           (item) => item.view_key === viewKey && item.stage_key === stageKey,
         );

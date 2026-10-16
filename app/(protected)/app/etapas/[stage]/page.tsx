@@ -12,7 +12,7 @@ import {
   type DashboardStageKey,
   type DashboardViewKey,
 } from "@/lib/crm/dashboard/catalog";
-import { loadDashboardReadModel, type DashboardReadModel } from "@/lib/crm/dashboard/data";
+import { loadStageReadModel, type StageReadModel } from "@/lib/crm/dashboard/data";
 import {
   buildPeriodFunnelReadings,
   calculateConversion,
@@ -157,7 +157,7 @@ function StageFilters({
 }
 
 function comparisonColumns(
-  dashboard: DashboardReadModel | null,
+  dashboard: StageReadModel | null,
 ): Array<AnalyticsColumn<StageComparison>> {
   const unavailableReason = "A janela não existe no snapshot validado atual.";
 
@@ -221,7 +221,7 @@ function comparisonColumns(
   ];
 }
 
-function generatedAtLabel(dashboard: DashboardReadModel | null) {
+function generatedAtLabel(dashboard: StageReadModel | null) {
   if (!dashboard) return DATA_UNAVAILABLE_LABEL;
 
   return new Intl.DateTimeFormat("pt-BR", {
@@ -231,7 +231,7 @@ function generatedAtLabel(dashboard: DashboardReadModel | null) {
   }).format(new Date(dashboard.generatedAt));
 }
 
-function StageMetadata({ dashboard }: { dashboard: DashboardReadModel | null }) {
+function StageMetadata({ dashboard }: { dashboard: StageReadModel | null }) {
   return (
     <dl className={styles.stageMetadata}>
       <div>
@@ -259,7 +259,7 @@ function StageComposition({
   stage: CrmStage;
   view: DashboardViewKey;
   period: DashboardPeriodKey;
-  dashboard: DashboardReadModel | null;
+  dashboard: StageReadModel | null;
   authorizedViews: readonly DashboardViewKey[];
   authorizedPaths: readonly string[];
 }) {
@@ -277,8 +277,9 @@ function StageComposition({
   const stageIndex = CRM_STAGES.findIndex((item) => item.slug === stage.slug);
   const previousStage = stageIndex > 0 ? CRM_STAGES[stageIndex - 1] : null;
   const nextStage = stageIndex < CRM_STAGES.length - 1 ? CRM_STAGES[stageIndex + 1] : null;
-  const previousValue =
-    viewMetrics && previousStage ? viewMetrics[previousStage.key][periodConfig.currentField] : null;
+  const previousValue = previousStage
+    ? (viewMetrics?.[previousStage.key]?.[periodConfig.currentField] ?? null)
+    : null;
   const volumeRatio =
     current === null || previousValue === null ? null : calculateConversion(current, previousValue);
   const comparisons = metric ? buildStageComparisons(metric) : EMPTY_COMPARISONS;
@@ -486,8 +487,14 @@ export default async function StagePage({
   if (isDashboardView(query.view) && !authorizedViews.includes(query.view)) forbidden();
   const view: DashboardViewKey = isDashboardView(query.view) ? query.view : authorizedViews[0]!;
   const period: DashboardPeriodKey = isDashboardPeriod(query.period) ? query.period : "month";
-  const result = await loadDashboardReadModel([view]);
   const pages = await getAuthorizedNavigation(authorization);
+  const readableStages = CRM_STAGES.filter(
+    (item) =>
+      authorization.permissions.includes("crm.dashboard.view") ||
+      item.key === stage.key ||
+      pages.some((page) => page.path === `/app/etapas/${item.slug}`),
+  ).map((item) => item.key);
+  const result = await loadStageReadModel([view], readableStages);
 
   return (
     <StageComposition

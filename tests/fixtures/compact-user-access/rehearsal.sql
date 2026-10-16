@@ -72,3 +72,5 @@ $$;
 \ir page-catalog.test.sql
 
 \ir individual-pages.test.sql
+
+\ir page-data.test.sql
