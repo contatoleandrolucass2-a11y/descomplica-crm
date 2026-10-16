@@ -170,7 +170,10 @@ const canvasDensityLimitByRoute = new Map([
   // Full eight-section goal reference replaces the former compact settings form.
   ["/app/configuracoes/metas", 2600],
   ["/app/configuracoes/metas/parcerias", 2300],
-  ["/admin/usuarios", 1200],
+  // The approved workspace includes the role and full permission rows without
+  // the former internal scroll area; its desktop capture is 1598px tall.
+  ["/admin/usuarios", 1650],
+
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],
@@ -1006,6 +1009,25 @@ async function selectAuthenticatedAdminUser(page, email) {
     .getByRole("list", { name: "Resultados de usuários", exact: true })
     .getByRole("button")
     .filter({ has: page.getByText(email, { exact: true }) });
+  // The authenticated account may be outside the first server page. Preserve the
+  // unfiltered directory while loading subsequent pages before measuring it.
+  const list = page.getByRole("list", { name: "Resultados de usuários", exact: true });
+  for (let attempt = 0; (await option.count()) === 0 && attempt < 200; attempt += 1) {
+    const loadMore = page.getByRole("button", { name: "Carregar mais usuários", exact: true });
+    await expect
+      .poll(async () => (await option.count()) > 0 || (await loadMore.count()) > 0)
+      .toBe(true);
+    if ((await option.count()) > 0) break;
+    const previousCount = await list.getByRole("button").count();
+    try {
+      await loadMore.click({ timeout: 1_000 });
+    } catch (error) {
+      // The list's observer may finish the same page between locating and
+      // clicking the button. Accept only the observed completion of that page.
+      if ((await list.getByRole("button").count()) <= previousCount) throw error;
+    }
+    await expect.poll(async () => list.getByRole("button").count()).toBeGreaterThan(previousCount);
+  }
   await expect(option).toHaveCount(1);
   await option.click();
   await expect(option).toHaveAttribute("aria-pressed", "true");
@@ -1013,6 +1035,40 @@ async function selectAuthenticatedAdminUser(page, email) {
   await expect(detail.getByRole("heading", { name: email, exact: true })).toBeVisible();
   await expect(detail.getByText("Conta atual", { exact: true })).toBeVisible();
   await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+}
+
+function inspectAdminUserAccessWorkspace() {
+  const workspace = document.querySelector(".admin-users-workspace");
+  const detail = workspace?.querySelector("#selected-user-panel");
+  const tablist = detail?.querySelector('.admin-permission-tabs[role="tablist"]');
+  const tabs = tablist ? [...tablist.querySelectorAll('[role="tab"]')] : [];
+  const selectedTabs = tabs.filter((tab) => tab.getAttribute("aria-selected") === "true");
+  const panels = detail
+    ? [...detail.querySelectorAll('.admin-permission-panel[role="tabpanel"]')]
+    : [];
+  const visiblePanels = panels.filter(
+    (panel) => panel.getClientRects().length > 0 && getComputedStyle(panel).display !== "none",
+  );
+  const panel = visiblePanels[0];
+  const grid = panel?.querySelector(".admin-permission-grid");
+  const rows = grid ? [...grid.querySelectorAll(".admin-permission-option")] : [];
+  const gridBox = grid?.getBoundingClientRect();
+  return {
+    userAccessWorkspaceReady: Boolean(
+      workspace?.querySelector(".admin-users-directory") &&
+      detail?.querySelector('[id^="role-title-"]') &&
+      tabs.length >= 4 &&
+      panels.length === tabs.length &&
+      selectedTabs.length === 1 &&
+      visiblePanels.length === 1 &&
+      panel.getAttribute("aria-labelledby") === selectedTabs[0].id &&
+      selectedTabs[0].getAttribute("aria-controls") === panel.id &&
+      panel.scrollHeight <= panel.clientHeight + 1 &&
+      gridBox &&
+      rows.length > 0 &&
+      rows.every((row) => Math.abs(row.getBoundingClientRect().width - gridBox.width) <= 1),
+    ),
+  };
 }
 
 async function inspectRoute(
@@ -1198,6 +1254,50 @@ async function inspectRoute(
       const blockedStyle = blockedAction ? getComputedStyle(blockedAction) : null;
       const enabledStyle = enabledAction ? getComputedStyle(enabledAction) : null;
       const unavailableStyle = unavailableAction ? getComputedStyle(unavailableAction) : null;
+      const isGoalPlanning = [
+        "/app/configuracoes/metas",
+        "/app/configuracoes/metas/parcerias",
+      ].includes(window.location.pathname);
+      const goalCalendarSelections = isGoalPlanning
+        ? [...document.querySelectorAll(".goal-calendar-filters select")].map((select) => {
+            const style = getComputedStyle(select);
+            const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            const arrowReserve = ["none", "textfield"].includes(style.appearance) ? 0 : 18;
+            const availableWidth = select.clientWidth - padding - arrowReserve;
+            const probe = document.createElement("span");
+            Object.assign(probe.style, {
+              position: "fixed",
+              left: "-10000px",
+              whiteSpace: "pre",
+              visibility: "hidden",
+              fontFamily: style.fontFamily,
+              fontSize: style.fontSize,
+              fontWeight: style.fontWeight,
+              fontStyle: style.fontStyle,
+              fontVariantNumeric: style.fontVariantNumeric,
+              fontFeatureSettings: style.fontFeatureSettings,
+              letterSpacing: style.letterSpacing,
+              textTransform: style.textTransform,
+            });
+            document.body.append(probe);
+            const optionWidths = [...select.options].map((option) => {
+              probe.textContent = option.label;
+              return probe.getBoundingClientRect().width;
+            });
+            probe.remove();
+            return {
+              label: select.getAttribute("aria-label"),
+              selectedText: select.selectedOptions[0]?.label ?? "",
+              optionCount: select.options.length,
+              availableWidth,
+              widestOption: Math.max(...optionWidths),
+              visible: select.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+              textFits:
+                optionWidths.length > 0 &&
+                optionWidths.every((width) => width <= availableWidth + 0.5),
+            };
+          })
+        : [];
       return {
         pathname: window.location.pathname,
         h1Count: document.querySelectorAll("h1").length,
@@ -1223,6 +1323,19 @@ async function inspectRoute(
               "calendar",
               "productive",
             ].every((panel) => document.querySelector(`.goal-${panel}-panel`))),
+        goalCalendarSelections,
+        goalCalendarReadable:
+          !isGoalPlanning ||
+          (goalCalendarSelections.length === 2 &&
+            goalCalendarSelections.some(
+              (field) => field.label === "Selecionar mês" && field.optionCount === 12,
+            ) &&
+            goalCalendarSelections.some(
+              (field) => field.label === "Selecionar ano" && field.optionCount === 11,
+            ) &&
+            goalCalendarSelections.every(
+              (field) => field.visible && field.selectedText && field.textFits,
+            )),
         dashboardReportReady:
           window.location.pathname !== "/app" ||
           (["pulse", "monthly", "diagnosis", "operational", "team"].every((section) =>
@@ -1366,6 +1479,9 @@ async function inspectRoute(
   Object.assign(
     snapshot,
     await page.evaluate(inspectAccountIdentityDisplay, expectedAccountFirstName),
+    route === "/admin/usuarios"
+      ? await page.evaluate(inspectAdminUserAccessWorkspace)
+      : { userAccessWorkspaceReady: true },
   );
   await accountTrigger.click();
   await accountPanel.waitFor({ state: "hidden", timeout: qaRouteBootstrapTimeout });
@@ -1396,6 +1512,8 @@ async function inspectRoute(
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
     snapshot.goalPlanningComplete &&
+    snapshot.goalCalendarReadable &&
+    snapshot.userAccessWorkspaceReady &&
     snapshot.dashboardReportReady &&
     snapshot.accountMenuReady &&
     snapshot.identityDisplayReady &&

@@ -71,14 +71,19 @@ export function requireCanAssignRole(actor: AuthorizationContext, targetRoleKey:
 // Rule 3: an actor can only grant a permission it holds. Master may delegate
 // any held permission to a strictly lower target even when minLevel equals the
 // Master level. Other roles still require minLevel strictly below their level.
-// Target hierarchy and the protected Administrator role are checked separately
+// Target hierarchy and protected Administrator accounts are checked separately
 // by requireCanManageTargetRole.
+// Inventory brands require individual access outside the Administrator defaults.
+// Permission managers can delegate those two accesses without receiving unit access.
 export function canGrantPermission(
   actor: AuthorizationContext,
   permission: PermissionKey,
 ): boolean {
+  const managesInventoryBrand =
+    (permission === "crm.inventory.riva.view" || permission === "crm.inventory.direcional.view") &&
+    actor.permissions.includes("permissions.manage");
   return (
-    actor.permissions.includes(permission) &&
+    (actor.permissions.includes(permission) || managesInventoryBrand) &&
     (actor.roleKey === "master" || actor.level > PERMISSIONS[permission].minLevel)
   );
 }

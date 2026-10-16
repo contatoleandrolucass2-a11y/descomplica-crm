@@ -257,7 +257,49 @@ export async function readGoalVisualLegibility(page) {
         fullValueFits: textWidth <= availableWidth + 0.5,
       };
     });
-    return { donuts, channels, percentageInputs };
+    const calendarSelects = [...document.querySelectorAll(".goal-calendar-filters select")].map(
+      (select) => {
+        const style = getComputedStyle(select);
+        const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+        const appearance = style.appearance || style.webkitAppearance;
+        const arrowReserve = ["none", "textfield"].includes(appearance) ? 0 : 18;
+        const availableWidth = select.clientWidth - padding - arrowReserve;
+        const probe = document.createElement("span");
+        Object.assign(probe.style, {
+          position: "fixed",
+          left: "-10000px",
+          visibility: "hidden",
+          whiteSpace: "pre",
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          fontWeight: style.fontWeight,
+          fontStyle: style.fontStyle,
+          fontVariantNumeric: style.fontVariantNumeric,
+          fontFeatureSettings: style.fontFeatureSettings,
+          letterSpacing: style.letterSpacing,
+          textTransform: style.textTransform,
+        });
+        document.body.append(probe);
+        const options = [...select.options].map((option) => {
+          probe.textContent = option.label;
+          const textWidth = probe.getBoundingClientRect().width;
+          return { text: option.label, textWidth, fullTextFits: textWidth <= availableWidth + 0.5 };
+        });
+        probe.remove();
+        return {
+          label: select.getAttribute("aria-label"),
+          selectedText: select.selectedOptions[0].label,
+          visible: select.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+          appearance,
+          padding,
+          arrowReserve,
+          clientWidth: select.clientWidth,
+          availableWidth,
+          options,
+        };
+      },
+    );
+    return { donuts, channels, percentageInputs, calendarSelects };
   });
 }
 
@@ -384,6 +426,7 @@ export async function runGoalPlanningPreview() {
     blockedExternalRequests: [],
     unexpectedRequests: [],
     font: geist.evidence,
+    presence: "UserPresenceHeartbeat replaced by a synthetic no-op; no presence requests or writes",
   };
   const require = createRequire(import.meta.url);
   const vitestRequire = createRequire(require.resolve("vitest/package.json"));
@@ -432,6 +475,7 @@ export async function runGoalPlanningPreview() {
     [...boundaries].map(([id, source], i) => [`\0goals-boundary-${i}`, { id, source }]),
   );
   const actionId = "\0goals-safe-action";
+  const presenceId = "\0goals-safe-presence";
   const built = await build({
     root,
     configFile: false,
@@ -450,13 +494,19 @@ export async function runGoalPlanningPreview() {
         name: "goal-planning-synthetic-preview",
         enforce: "pre",
         resolveId(id, importer) {
-          if (virtual.has(id) || id === actionId) return id;
+          if (virtual.has(id) || id === actionId || id === presenceId) return id;
+          if (
+            id === "./_components/UserPresenceHeartbeat" &&
+            importer?.replaceAll("\\", "/").endsWith("/app/(protected)/layout.tsx")
+          )
+            return presenceId;
           if (id === "../actions" && importer?.replaceAll("\\", "/").endsWith("/GoalPlanning.tsx"))
             return actionId;
           if (id.endsWith("goal-planning-memory.tsx")) return entry;
         },
         load(id) {
           if (virtual.has(id)) return virtual.get(id).source;
+          if (id === presenceId) return "export function UserPresenceHeartbeat(){return null;}";
           if (id === actionId)
             return "export async function prepareFunnelGoalsDraftAction(){return {status:'error',message:'QA sintético: persistência desabilitada.'}}";
           if (id === entry)
@@ -559,7 +609,7 @@ export async function runGoalPlanningPreview() {
       if (message.type() === "error") evidence.consoleErrors.push(message.text());
     });
     for (const profile of ["dv", "partnerships"]) {
-      for (const width of [1440, 1280, 768, 390]) {
+      for (const width of [1440, 1280, 1024, 768, 390]) {
         await page.setViewportSize({ width, height: 900 });
         await page.goto(`${origin}${goalsPath}${profile === "partnerships" ? "/parcerias" : ""}`);
         await expect(
@@ -782,6 +832,24 @@ export async function runGoalPlanningPreview() {
           input.visible && input.fullValueFits,
           `Full percentage value must fit inside its control: ${context}/${input.name}=${input.value}; text=${input.textWidth.toFixed(2)}px available=${input.availableWidth.toFixed(2)}px padding=${input.padding}px spinner=${input.spinnerReserve}px appearance=${input.appearance}`,
         );
+      }
+      assert.deepEqual(
+        screen.legibility.calendarSelects.map((select) => select.label),
+        ["Selecionar mês", "Selecionar ano"],
+        `Both calendar controls are present: ${context}`,
+      );
+      for (const select of screen.legibility.calendarSelects) {
+        assert.ok(select.visible, `Calendar select is visible: ${context}/${select.label}`);
+        assert.equal(
+          select.options.length,
+          select.label === "Selecionar mês" ? 12 : 11,
+          `Complete calendar options: ${context}/${select.label}`,
+        );
+        for (const option of select.options)
+          assert.ok(
+            option.fullTextFits,
+            `Complete calendar option must fit selected-text area: ${context}/${select.label}/${option.text}; text=${option.textWidth.toFixed(2)}px available=${select.availableWidth.toFixed(2)}px padding=${select.padding}px nativeArrow=${select.arrowReserve}px`,
+          );
       }
       assert.ok(
         screen.overflow.scrollWidth <= screen.overflow.width + 1,

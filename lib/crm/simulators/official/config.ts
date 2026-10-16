@@ -65,7 +65,7 @@ export function officialSimulatorExecutionIsEnabled(
 ): boolean {
   return (
     officialSimulatorRuntimeIsEnabled(configuration, slug) &&
-    authorization.roleKey === "master" &&
+    authorization.permissions.includes("crm.simulators.view") &&
     authorization.permissions.includes("crm.simulators.execute")
   );
 }

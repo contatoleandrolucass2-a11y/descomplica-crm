@@ -34,6 +34,76 @@
   substituem somente as antigas regioes compactas DV/Parcerias, com hashes e
   proveniencia; referencias antigas, Pontos e tolerancias preservados.
 
+## 2026-10-15: Compatibilidade do diretório de produção
+
+- Incorpora o dashboard aprovado de `fae77f9a` e revisa a captura Linux `38766616330`: onze imagens de Usuários atualizadas, 231 imagens preservadas, 242 hashes conferidos e toda a matriz funcional aprovada. O workflow temporário foi removido; a CI normal continua obrigatória.
+- O layout aprovado de Pessoas, papel e matriz completa mede 1.598 pixels em desktop. O limite específico de densidade foi atualizado de 1.200 para 1.650 pixels; overflow, colisões, acessibilidade e demais limites permanecem verificados.
+- A captura local no macOS diverge das referências Linux por renderização de fontes. Um workflow temporário produz referências em Linux com todos os gates funcionais; somente as imagens pertinentes e revisadas podem ser incorporadas, com nova CI normal obrigatória.
+
+- Integra o `main` atual `9ffc8a9`, preservando as alterações recebidas de outros desenvolvedores.
+- Reconhece o contrato compacto por RPC protegida, pagina seis perfis por consulta sob RLS e calcula filtros e contagens no servidor. Contratos desconhecidos continuam sem aprovação presumida.
+- Amplia o gate compacto para 115 verificações e a sequência completa para 1.441 verificações na origem e no banco restaurado, com privilégios preservados. A publicação será registrada na auditoria de integração.
+
+## 2026-10-14: Integração do painel de usuários para produção
+
+- A QA de teclado da Rotina usa busca nativa por rótulo no Chromium headless do macOS, que não confirma a navegação do popup por setas. O Linux mantém as verificações de Home/ArrowDown/End; foco, valor e rascunhos continuam verificados.
+
+- O gate compacto aguarda o PostgreSQL definitivo por TCP antes de executar a fixture; três execuções consecutivas passaram com 70 verificações cada.
+
+- Integra o painel aprovado localmente com o `main` atual, preservando paginação no servidor, gestão/rotina, estoque Salesforce e o coordenador de publicação.
+- Apresenta presença online com ponto verde pulsante e offline com ponto vermelho. Movimento reduzido desativa a animação; falhas de consulta continuam como presença indisponível.
+- Usa o catálogo real do banco para matriz e prévia do papel: produção compacta terá 25 permissões, enquanto a sequência completa local terá 31. O Administrador herda somente capacidades realmente implantadas.
+- Valida presença, hierarquia e MFA nos dois contratos do banco. O ensaio compacto passou em 70 verificações; o ensaio completo de backup/restauração passou em 1.431 verificações na origem e no destino.
+- A preparação das migrations não atribui as novas marcas. O padrão completo do Administrador deve ser aplicado depois da ativação do runtime compatível.
+- Build, lint, tipos e auditoria de dependências passaram. A validação visual, a CI e a promoção ainda estão em andamento. Evidências em `docs/audits/usuarios-presenca-vps-2026-10-14.md`.
+
+## 2026-10-14: Presença online no painel local de usuários
+
+- Adiciona Online/Offline com indicador textual e visual no diretório Pessoas e no cabeçalho da conta selecionada, separado do estado administrativo Ativo/Revogado.
+- O shell autenticado envia sinal a cada 30 segundos enquanto a aba está visível. O servidor registra apenas a última presença e considera a conta online por dois minutos; fechar, ocultar a aba ou perder conexão deixa de renovar o sinal.
+- A leitura atualiza somente a presença, sem recarregar a página ou apagar rascunhos de permissões. Falha, dado inválido ou leitura expirada aparecem como presença indisponível.
+- A migration privada e as RPCs mantêm identidade e horário no servidor, MFA, aprovação, hierarquia e escopo. Nenhum histórico de navegação, IP ou sessão é armazenado.
+- Lint, TypeScript, 2.382 testes Vitest, 83 testes Node e build passaram. O ensaio isolado validou 1.212 testes pgTAP na origem e no banco restaurado, preservando dados e privilégios. A validação visual confirmou os estados de presença e a preservação do rascunho.
+- Escopo exclusivamente local. Evidências e resultados finais em `docs/audits/presenca-usuarios-local-2026-10-14.md`.
+
+## 2026-10-14: Painel de usuários conforme a referência visual
+
+- Reorganiza o diretório como Pessoas, com contagem, busca, filtros Todos/Ativos/Revogados/Pendentes, avatar, papel, indicador de status e oito resultados por página.
+- A matriz apresenta quatro abas: Comercial, Simuladores, Configurações e Administração. Cada linha reúne caixa, descrição e estado de herança; a busca percorre todas as categorias sem perder o rascunho.
+- Preserva o controle único de simuladores, as marcas independentes, os padrões completos do Administrador, os controles técnicos ocultos e as validações do servidor/banco. Contas sem acesso não exibem permissões como liberadas.
+- Valida teclado, foco, estado vazio, busca, salvamento e restauração em contas sintéticas. Os três temas e larguras de 320, 722 e 1440 pixels foram conferidos no navegador local.
+- Lint, TypeScript, 2.329 testes Vitest, 83 testes Node e build passaram. Evidências detalhadas em `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
+## 2026-10-14: Administrador com herança completa
+
+- Atende ao pedido posterior para o papel Administrador herdar todo o catálogo atual: 31 permissões, incluindo RIVA, DIRECIONAL e permissões técnicas ocultas na matriz.
+- A migration adiciona oito vínculos ao papel Admin sem remover exceções individuais, alterar níveis, ampliar outros papéis ou modificar os gates de funções reservadas ao Master.
+- As três telas de rascunho comercial refletem o bloqueio Master-only já existente no banco, evitando oferecer ao Administrador ações que seriam recusadas.
+- Catálogo de apresentação, instrução das marcas, fixtures e testes foram alinhados. Evidências em `docs/audits/usuarios-acessos-local-2026-10-14.md`. Trabalho exclusivamente local.
+
+## 2026-10-14: Acesso individual a marcas nos simuladores
+
+- Adiciona controles independentes RIVA e DIRECIONAL, ambos desativados em todos os papéis, inclusive Master. A liberação é individual e respeita a hierarquia existente.
+- Gestores de permissões podem configurar essas duas marcas sem receber acesso de consulta. A exceção de delegação é limitada às duas chaves; autoalteração, pares, superiores e escopos continuam bloqueados.
+- As APIs de estoque vivo e snapshot filtram as unidades por permissões efetivas a cada requisição, inclusive com cache aquecido. Sem marcas, retornam estoque vazio. Marcas desconhecidas são negadas.
+- O snapshot completo continua validado por integridade antes do filtro. Contagens são recalculadas e metadados desconhecidos são descartados para não revelar unidades excluídas.
+- Migration aplicada somente ao banco Docker local. Evidências e limites estão em `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
+## 2026-10-14: Administração de acessos no ambiente local
+
+- Implementa quadrados com herança real do banco e exceções individuais,
+  salvamento atômico e restauração dos padrões ao trocar o papel.
+- Remove a solicitação manual de motivo, preservando o registro automático
+  e as validações de hierarquia, escopo e delegação no servidor e no banco.
+- Reúne visualização e execução em “Acessar simuladores” e concede ambos os
+  padrões aos sete papéis atuais. Remove a restrição exclusiva de Master da
+  execução autorizada, preservando a configuração e os contratos dos motores.
+- Oculta os quatro controles técnicos de read model v3 e o controle de leitura
+  de auditoria, que não tem página correspondente nesta versão. Não remove
+  suas permissões, funções ou registros.
+- Trabalho restrito ao checkout e banco locais; sem publicação remota.
+  Matriz, limites e evidências: `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
 ## 2026-10-15: Gates locais do metadata integrado
 
 Integrado mainfae77f9 emfacf284, preservando dashboard, referencias e textos
@@ -6228,3 +6298,11 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   Referencia provisoria documenta essa pendencia; nao aprova release.
 - Correcao, assert de legibilidade e CI completa da integracao continuam
   obrigatorios; nenhum limiar ou predicado foi reduzido.
+
+## 2026-10-15: Integração final de Meta com Usuários
+
+- Integra main d83c22d preservando a entrega de Usuários, presença, marcas e guards Master de edição. A navegação combina Meta com os novos acessos dos simuladores.
+- Combina 22 referências Meta e 11 de Usuários, com 242 hashes e histórico integral. A referência Meta é provisória e documenta o P2 do calendário, sem aprovação de release.
+- Corrige a reserva dupla da seta nos seletores de mês/ano e amplia a largura mínima do mês. Preview e CI autenticada exigem que todas as opções caibam integralmente.
+- Preview isola apenas o heartbeat de presença, sem chamadas ou escritas remotas. Nova matriz prevista: 30 capturas, cinco larguras e três temas.
+- Gates da combinação e revisão das novas capturas continuam pendentes.

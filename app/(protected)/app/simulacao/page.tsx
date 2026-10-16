@@ -112,7 +112,7 @@ export default async function SimulationHubPage() {
           <span>
             <strong>
               {wf13Enabled
-                ? "WF13 disponível em canário Master"
+                ? "Simulador Associativo disponível"
                 : "Cálculos temporariamente indisponíveis"}
             </strong>
             <small>

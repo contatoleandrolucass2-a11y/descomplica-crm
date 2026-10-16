@@ -9,7 +9,6 @@ import { createClient } from "@/lib/auth/supabase/server";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
 import { canGrantPermission } from "@/lib/authorization/hierarchy";
-import { PERMISSIONS, type PermissionKey } from "@/lib/authorization/permissions";
 import { getAssignableRoleKeys } from "@/lib/authorization/roles";
 
 import { UserAccessManager } from "./UserAccessManager";
@@ -26,14 +25,18 @@ const reportingScopeSchema = z.object({
 
 export default async function UsersAdminPage() {
   const context = await enforcePermission("users.view");
-  const initialPage = await loadUserDirectoryPage(context, {
-    offset: 0,
-    search: "",
-    status: "all",
-  });
+  const initialPage = await loadUserDirectoryPage(
+    context,
+    {
+      offset: 0,
+      search: "",
+      status: "all",
+    },
+    { includeSummary: true },
+  );
   const supabase = await createClient();
-  // The paged loader keeps the pre-foundation fallback fail-closed by mapping
-  // legacy rows to `access_status: "legacy_review"`; other database errors fail.
+  // Only the verified scoped contract supports approval. Compact accounts use
+  // their operational role and active flag; unknown contracts remain in review.
   const onboardingFoundationAvailable = initialPage.onboardingFoundationAvailable;
 
   const canManageRoles = hasPermission(context, "roles.manage");
@@ -57,8 +60,9 @@ export default async function UsersAdminPage() {
     .array(reportingScopeSchema)
     .parse(scopesResult.error ? [] : (scopesResult.data ?? []));
   const assignableRoles = getAssignableRoleKeys(context.roleKey, context.level);
-  const manageablePermissions = (Object.keys(PERMISSIONS) as PermissionKey[]).filter(
-    (permissionKey) => canGrantPermission(context, permissionKey),
+  const permissionCatalog = [...new Set(Object.values(initialPage.roleDefaults).flat())];
+  const manageablePermissions = permissionCatalog.filter((permissionKey) =>
+    canGrantPermission(context, permissionKey),
   );
 
   return (
@@ -73,6 +77,8 @@ export default async function UsersAdminPage() {
         initialHasMore={initialPage.hasMore}
         initialNextOffset={initialPage.nextOffset}
         initialTotalCount={initialPage.totalCount}
+        initialSummary={initialPage.summary}
+        initialRoleDefaults={initialPage.roleDefaults}
         assignableRoles={assignableRoles}
         manageablePermissions={manageablePermissions}
         canManageRoles={canManageRoles}

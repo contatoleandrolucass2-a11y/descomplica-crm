@@ -6,6 +6,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 const mocks = vi.hoisted(() => ({ authorizeRoute: vi.fn() }));
 vi.mock("@/lib/security/route-auth", () => ({ authorizeRoute: mocks.authorizeRoute }));
 const directories: string[] = [];
+const authorizedBrands = {
+  ok: true,
+  context: { permissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"] },
+};
 
 const sample = () => ({
   schemaVersion: 1,
@@ -57,6 +61,16 @@ const sample = () => ({
   ],
 });
 
+function visiblePayload(payload = sample(), items = payload.items) {
+  return {
+    source: payload.source,
+    sourceKind: payload.sourceKind,
+    generatedAt: payload.generatedAt,
+    count: items.length,
+    items,
+  };
+}
+
 async function configure(payload: unknown = sample()) {
   const directory = await mkdtemp(path.join(os.tmpdir(), "salesforce-stock-test-"));
   directories.push(directory);
@@ -68,7 +82,7 @@ async function configure(payload: unknown = sample()) {
 
 beforeEach(() => {
   vi.resetModules();
-  mocks.authorizeRoute.mockReset().mockResolvedValue({ ok: true });
+  mocks.authorizeRoute.mockReset().mockResolvedValue(authorizedBrands);
   vi.spyOn(Date, "now").mockReturnValue(Date.parse("2026-10-13T18:00:00Z"));
   delete process.env.SALESFORCE_INVENTORY_PATH;
 });
@@ -116,9 +130,92 @@ describe("official Salesforce inventory", () => {
     for (const response of responses) {
       expect(response.status).toBe(200);
       expect(response.headers.get("cache-control")).toContain("no-store");
-      expect(await response.json()).toEqual(sample());
+      expect(await response.json()).toEqual(visiblePayload());
     }
     expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("filters both official endpoints using current brand permissions on cold and warm reads", async () => {
+    const data = sample();
+    data.items.push(
+      { ...data.items[0]!, id: "a0Q000000000002AAA", businessUnit: "Direcional" },
+      { ...data.items[0]!, id: "a0Q000000000003AAA", businessUnit: "Unknown" },
+    );
+    data.count = data.sourceRows = data.items.length;
+    const file = await configure(data);
+    const fetch = vi.fn();
+    vi.stubGlobal("fetch", fetch);
+    const [{ GET: live }, { GET: snapshot }] = await Promise.all([
+      import("@/app/api/inventory/route"),
+      import("@/app/api/inventory/snapshot/route"),
+    ]);
+
+    for (const [index, permissions] of [
+      ["crm.inventory.riva.view"],
+      ["crm.inventory.direcional.view"],
+      authorizedBrands.context.permissions,
+      [],
+      ["crm.inventory.riva.view"],
+    ].entries()) {
+      mocks.authorizeRoute.mockResolvedValue({
+        ok: true,
+        context: { roleKey: "master", permissions },
+      });
+      for (const response of await Promise.all([live(), snapshot()])) {
+        expect(response.status).toBe(200);
+        expect(response.headers.get("cache-control")).toContain("no-store");
+        const expectedItems = data.items.filter((item) =>
+          permissions.includes(`crm.inventory.${item.businessUnit.toLowerCase()}.view`),
+        );
+        expect(await response.json()).toEqual(
+          permissions.length === 0 ? { count: 0, items: [] } : visiblePayload(data, expectedItems),
+        );
+      }
+      // Subsequent calls must reuse the validated raw cache, then filter it again.
+      if (index === 0) await rm(file);
+    }
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it("keeps concurrent brand profiles separate on the shared official source", async () => {
+    const data = sample();
+    data.items.push({ ...data.items[0]!, id: "a0Q000000000002AAA", businessUnit: "Direcional" });
+    data.count = data.sourceRows = 2;
+    await configure(data);
+    const [{ GET: live }, { GET: snapshot }] = await Promise.all([
+      import("@/app/api/inventory/route"),
+      import("@/app/api/inventory/snapshot/route"),
+    ]);
+    await Promise.all(
+      Array.from({ length: 20 }, async (_, index) => {
+        const brand = index % 2 === 0 ? "Riva" : "Direcional";
+        mocks.authorizeRoute.mockResolvedValueOnce({
+          ok: true,
+          context: { permissions: [`crm.inventory.${brand.toLowerCase()}.view`] },
+        });
+        const response = await (index % 3 === 0 ? snapshot : live)();
+        expect(response.status).toBe(200);
+        expect(await response.json()).toEqual(
+          visiblePayload(
+            data,
+            data.items.filter((item) => item.businessUnit === brand),
+          ),
+        );
+      }),
+    );
+  });
+
+  it("does not read a configured official source when no brand is granted", async () => {
+    process.env.SALESFORCE_INVENTORY_PATH = "/missing/inventory.json";
+    mocks.authorizeRoute.mockResolvedValue({ ok: true, context: { permissions: [] } });
+    const [{ GET: live }, { GET: snapshot }] = await Promise.all([
+      import("@/app/api/inventory/route"),
+      import("@/app/api/inventory/snapshot/route"),
+    ]);
+    for (const response of await Promise.all([live(), snapshot()])) {
+      expect(response.status).toBe(200);
+      expect(await response.json()).toEqual({ count: 0, items: [] });
+    }
   });
 
   it.each([401, 403])(
@@ -178,6 +275,6 @@ describe("official Salesforce inventory", () => {
     await writeFile(`${file}.next`, JSON.stringify(updated));
     await rename(`${file}.next`, file);
     vi.mocked(Date.now).mockReturnValue(Date.parse("2026-10-13T18:00:31Z"));
-    expect(await (await GET()).json()).toEqual(updated);
+    expect(await (await GET()).json()).toEqual(visiblePayload(updated));
   });
 });

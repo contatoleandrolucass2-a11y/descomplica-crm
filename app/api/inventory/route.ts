@@ -1,3 +1,9 @@
+import {
+  filterInventoryByBrand,
+  getInventoryBrandAccess,
+  hasInventoryBrandAccess,
+  type InventorySourcePayload,
+} from "@/lib/inventory/brand-access";
 import { noStoreHeaders } from "@/lib/security/api";
 import { authorizeRoute } from "@/lib/security/route-auth";
 import {
@@ -9,9 +15,9 @@ const REFERENCE_INVENTORY_URL = "https://descomplicapro.com.br/api/inventory";
 const INVENTORY_TTL_MS = 30_000;
 const INVENTORY_RETRY_DELAY_MS = 5_000;
 
-type InventoryCache = { body: string; fetchedAt: number };
-// The upstream inventory is identical for all authorized simulator users.
-// Authorization still runs for every request, including cache hits.
+type InventoryCache = { payload: InventorySourcePayload; fetchedAt: number };
+// Only the raw source is shared server-side. Each response is filtered using the
+// current caller's permissions, including cache hits and coalesced requests.
 let cachedInventory: InventoryCache | null = null;
 let pendingInventory: Promise<InventoryCache> | null = null;
 let inventoryFailure: { code: string; retryAt: number } | null = null;
@@ -54,7 +60,7 @@ async function fetchValidatedInventory(): Promise<InventoryCache> {
     throw new Error("inventory_payload_invalid");
   }
 
-  const result = { body: JSON.stringify(payload), fetchedAt: Date.now() };
+  const result = { payload: payload as InventorySourcePayload, fetchedAt: Date.now() };
   cachedInventory = result;
   inventoryFailure = null;
   return result;
@@ -69,9 +75,15 @@ export async function GET() {
     "server-timing": `auth;dur=${(authorizedAt - startedAt).toFixed(1)}, inventory;dur=${(performance.now() - authorizedAt).toFixed(1)}`,
   });
 
+  const brandAccess = getInventoryBrandAccess(authorization.context.permissions);
+  if (!hasInventoryBrandAccess(brandAccess)) {
+    return Response.json({ count: 0, items: [] }, { headers: noStoreHeaders(timingHeaders()) });
+  }
+
   try {
     if (hasSalesforceInventory()) {
-      return new Response(await readSalesforceInventory(), {
+      const inventory = JSON.parse(await readSalesforceInventory()) as InventorySourcePayload;
+      return new Response(JSON.stringify(filterInventoryByBrand(inventory, brandAccess)), {
         headers: noStoreHeaders({
           ...timingHeaders(),
           "content-type": "application/json; charset=utf-8",
@@ -100,7 +112,7 @@ export async function GET() {
       inventory = await pendingInventory;
     }
 
-    return new Response(inventory.body, {
+    return new Response(JSON.stringify(filterInventoryByBrand(inventory.payload, brandAccess)), {
       headers: noStoreHeaders({
         ...timingHeaders(),
         "content-type": "application/json; charset=utf-8",

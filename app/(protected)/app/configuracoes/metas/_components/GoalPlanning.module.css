@@ -933,7 +933,8 @@
 }
 .planning :global(.goal-calendar-filters select) {
   min-width: 72px;
-  padding: 5px 22px 5px 7px;
+  /* Native selects already reserve their arrow; do not reserve it again in padding. */
+  padding: 5px 7px;
   color: var(--analytics-ink);
   border: 1px solid var(--analytics-line);
   border-radius: 8px;
@@ -943,6 +944,9 @@
   font-size: calc(0.64 * var(--goal-rem));
   font-weight: 750;
   text-transform: capitalize;
+}
+.planning :global(.goal-calendar-filters select[aria-label="Selecionar mês"]) {
+  min-width: 90px;
 }
 .planning :global(.goal-calendar-filters select:focus) {
   border-color: #19aeb8;

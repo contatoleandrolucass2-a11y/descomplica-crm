@@ -13,6 +13,8 @@ import {
 } from "@playwright/test";
 
 import { isRecoveryTokenHash } from "../lib/auth/recovery-token";
+// @ts-expect-error — the existing local QA harness provides the validated synthetic input.
+import { syntheticProposal } from "../scripts/qa/concurrent-associativo.mjs";
 
 const expectedRoles = [
   "master",
@@ -332,7 +334,6 @@ const partnershipRoles = new Set<Role>([
   "broker_imob",
 ]);
 const repasseRoles = new Set<Role>(["master", "admin"]);
-const simulatorViewRoles = new Set<Role>(["master", "admin"]);
 const protectedSurfaces = [
   {
     path: "/app",
@@ -411,36 +412,36 @@ const protectedSurfaces = [
   },
   { path: "/app/gestao", heading: "Gestão", allowed: activeOperationalRoles },
   { path: "/app/gestao/rotina", heading: "Rotina", allowed: activeOperationalRoles },
-  { path: "/app/simulacao", heading: "Hub de Simulação", allowed: simulatorViewRoles },
+  { path: "/app/simulacao", heading: "Hub de Simulação", allowed: activeOperationalRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
     heading: "Simulador Tabela Associativo",
-    allowed: simulatorViewRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/calcular-documentacao",
     heading: "Calcular documentação",
-    allowed: simulatorViewRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/caixa",
     heading: "Simulação CAIXA",
-    allowed: simulatorViewRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/tabela-direta",
     heading: "Simulador Tabela Direta",
-    allowed: simulatorViewRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/tabelao",
     heading: "Simulador Tabelão",
-    allowed: simulatorViewRoles,
+    allowed: activeOperationalRoles,
   },
   {
     path: "/app/simulacao/tabela-investidor",
     heading: "Simulador Tabela Investidor",
-    allowed: simulatorViewRoles,
+    allowed: activeOperationalRoles,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
@@ -517,18 +518,31 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...operationalRoutes,
     ...managementRoutes,
     "/app/canal-de-parcerias",
+    ...simulatorRoutes,
   ]),
-  manager_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  manager_house: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/ranking",
+    ...simulatorRoutes,
+  ]),
   manager_imob: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
     "/app/canal-de-parcerias",
+    ...simulatorRoutes,
   ]),
-  broker_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  broker_house: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/ranking",
+    ...simulatorRoutes,
+  ]),
   broker_imob: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
     "/app/canal-de-parcerias",
+    ...simulatorRoutes,
   ]),
   pending: [],
 };
@@ -556,18 +570,31 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
   ]),
   coordinator: sortedRouteSet([
     ...operationalRoutes,
+    "/app/simulacao",
     ...managementRoutes,
     "/app/canal-de-parcerias",
   ]),
-  manager_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  manager_house: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/ranking",
+    "/app/simulacao",
+  ]),
   manager_imob: sortedRouteSet([
     ...operationalRoutes,
+    "/app/simulacao",
     ...managementRoutes,
     "/app/canal-de-parcerias",
   ]),
-  broker_house: sortedRouteSet([...operationalRoutes, ...managementRoutes, "/app/ranking"]),
+  broker_house: sortedRouteSet([
+    ...operationalRoutes,
+    ...managementRoutes,
+    "/app/ranking",
+    "/app/simulacao",
+  ]),
   broker_imob: sortedRouteSet([
     ...operationalRoutes,
+    "/app/simulacao",
     ...managementRoutes,
     "/app/canal-de-parcerias",
   ]),
@@ -794,13 +821,13 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 16 : activeOperationalRoles.has(role) ? 9 : 0,
+      adminRoles.has(role) ? 16 : activeOperationalRoles.has(role) ? 10 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
     );
     expect(expectedPrimaryNavigationRootsForRole(role), role).toHaveLength(
-      adminRoles.has(role) ? 6 : activeOperationalRoles.has(role) ? 3 : 0,
+      adminRoles.has(role) ? 6 : activeOperationalRoles.has(role) ? 4 : 0,
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];
@@ -824,7 +851,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   );
   expect(
     protectedSurfaces.find((surface) => surface.path === "/app/simulacao/caixa")?.allowed,
-  ).toBe(simulatorViewRoles);
+  ).toBe(activeOperationalRoles);
 });
 
 test("anonymous boundaries and generic login failure stay closed", async ({ page }) => {
@@ -1155,7 +1182,7 @@ for (const role of expectedRoles) {
       for (const inventoryPath of ["/api/inventory", "/api/inventory/snapshot"]) {
         const inventoryResponse = await page.request.get(inventoryPath);
         expect(inventoryResponse.headers()["cache-control"]).toContain("no-store");
-        if (simulatorViewRoles.has(role)) {
+        if (adminRoles.has(role)) {
           expect(inventoryResponse.status()).toBe(200);
           const inventoryPayload = await inventoryResponse.json();
           expect(inventoryPayload.items).toHaveLength(inventoryPayload.count);
@@ -1168,6 +1195,9 @@ for (const role of expectedRoles) {
               snapshotReferenceDate: "2026-09-05",
             });
           }
+        } else if (activeOperationalRoles.has(role)) {
+          expect(inventoryResponse.status()).toBe(200);
+          expect(await inventoryResponse.json()).toEqual({ count: 0, items: [] });
         } else {
           expect(inventoryResponse.status()).toBe(403);
           expect(await inventoryResponse.json()).toEqual({ error: "forbidden" });
@@ -1177,24 +1207,27 @@ for (const role of expectedRoles) {
       const simulatorStatus = await page.request.get(
         "/api/official-simulator/associativo-fluxo-linear",
       );
-      if (simulatorViewRoles.has(role)) {
+      const simulatorExecution = await page.request.post(
+        "/api/official-simulator/associativo-fluxo-linear",
+        {
+          data: { schemaVersion: 1, input: syntheticProposal(0) },
+          headers: { origin: qaTarget.origin },
+        },
+      );
+      if (activeOperationalRoles.has(role)) {
         expect(simulatorStatus.status()).toBe(200);
         expect(await simulatorStatus.json()).toMatchObject({
           engineKey: "simulator.wf13",
-          executionEnabled: role === "master",
+          executionEnabled: true,
+        });
+        expect(simulatorExecution.status()).toBe(200);
+        expect(await simulatorExecution.json()).toMatchObject({
+          engineKey: "simulator.wf13",
+          result: { ok: true },
         });
       } else {
         expect(simulatorStatus.status()).toBe(403);
         expect(await simulatorStatus.json()).toEqual({ error: "forbidden" });
-      }
-      if (role !== "master") {
-        const simulatorExecution = await page.request.post(
-          "/api/official-simulator/associativo-fluxo-linear",
-          {
-            data: { schemaVersion: 1, input: {} },
-            headers: { origin: qaTarget.origin },
-          },
-        );
         expect(simulatorExecution.status()).toBe(403);
         expect(await simulatorExecution.json()).toEqual({ error: "forbidden" });
       }
@@ -1370,7 +1403,7 @@ for (const role of expectedRoles) {
       }
       reportProgress("navigation");
 
-      if (simulatorViewRoles.has(role)) {
+      if (activeOperationalRoles.has(role)) {
         const hubResponse = await page.goto("/app/simulacao");
         expect(hubResponse?.status()).toBe(200);
         await expect(
@@ -1604,7 +1637,7 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("released simulator pages allow Admin viewing while official execution remains Master-only", async ({
+test("released simulator pages respect explicit inventory access while the CAIXA engine stays blocked", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1750,16 +1783,22 @@ test("released simulator pages allow Admin viewing while official execution rema
     expect(status.headers()["cache-control"]).toContain("no-store");
     expect(await status.json()).toMatchObject({
       engineKey: "simulator.wf13",
-      executionEnabled: false,
+      executionEnabled: true,
     });
-
-    const execution = await page.request.post("/api/official-simulator/associativo-fluxo-linear", {
-      data: { schemaVersion: 1, input: {} },
-      headers: { origin: qaTarget.origin },
-    });
-    expect(execution.status()).toBe(403);
-    expect(await execution.json()).toEqual({ error: "forbidden" });
-
+    for (const inventoryPath of ["/api/inventory", "/api/inventory/snapshot"]) {
+      const inventory = await page.request.get(inventoryPath);
+      expect(inventory.status()).toBe(200);
+      const payload = await inventory.json();
+      expect(payload.items).toHaveLength(payload.count);
+      expect(payload.count).toBeGreaterThan(0);
+      expect(
+        new Set(
+          payload.items.map((item: { businessUnit: string }) =>
+            item.businessUnit.trim().toLowerCase(),
+          ),
+        ),
+      ).toEqual(new Set(["direcional", "riva"]));
+    }
     for (const surface of [
       {
         path: "/app/simulacao/associativo-fluxo-linear",
@@ -1775,6 +1814,11 @@ test("released simulator pages allow Admin viewing while official execution rema
         page.getByRole("heading", { level: 1, name: surface.heading, exact: true }),
       ).toBeVisible();
       await expect(page.getByRole("heading", { level: 1, name: forbiddenHeading })).toHaveCount(0);
+      if (surface.path === "/app/simulacao/associativo-fluxo-linear") {
+        await expect(
+          page.getByRole("button", { name: /^Iniciar proposta com / }).first(),
+        ).toBeVisible();
+      }
     }
     await logoutAndAssertBoundary(page, "admin");
   });
