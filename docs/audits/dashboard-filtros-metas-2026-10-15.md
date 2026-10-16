@@ -126,6 +126,48 @@ Nao aplicar templates sem confrontar hash/conteudo atual e guardar backup.
 
 ## Pendencias
 
+### Resultado validado e bloqueio de publicacao
+
+Em16/10/2026 05:54Z, PR238/cb3078f823a4dd8a0ae6fc424703499dd447e33b esta
+CLEAN/MERGEABLE. CI38854933173 aprovou validate, release-gates e isolated-restore;
+imagem ignorada conforme contrato de PR. Local: lint sem erros, tipos e build
+aprovados. Vitest3614/90 skips com dois workers, Node1181/19 skips e release703/14
+skips. Execucao local concorrente de Vitest teve dois timeouts e um timeout de
+cleanup em Obsidian; repeticao completa com dois workers passou sem aumentar
+limites. CI Linux passou normalmente. Logs locais ignorados dashboard-catalog-merge-*.
+
+Main2eae903175251e720ff22aec247182b764523f09 tem quatro jobs verdes na
+CI38853488035, mas producao permanece em b5458ff5eef483d76ee58c9c14129d3872de8291.
+GET anonimo05:53:58.936Z retornou200/ok. Coordenador status confirmou:
+deploymentIde42363ec-0f81-4084-9ced-aa405c263b09,
+deployedAt2026-10-16T03:59:23.023Z, sem pendencia,
+imageIdsha256:9823bcf0a1b0306398059d451f35ecc7797d57c8e353a8cfbcb5246b3e635f2a.
+Essa consulta nao substitui a verificacao protegida de ate60s no minuto do deploy.
+
+MCP Supabase confirmou17 linhas no catalogo, nenhuma das quatro paginas de
+preparacao consultadas e nenhuma das quatro permissoes independentes respectivas.
+Historico posterior a20261015195915 contem somente master_all_permission_defaults.
+O runbook page-catalog exige preparacao compativel antes da imagem nova. Como
+os guards agora dependem exclusivamente do catalogo persistido, promover sem
+essa conciliacao pode retirar acessos. Merge/publicacao deste PR ficam retidos
+para nao impedir a publicacao pendente da main exata pelo responsavel do PR235.
+
+Revisao read-only encontrou ainda um limite operacional daquela outra entrega:
+o trio de ativacao deve ser atomico, mas os arquivos SQL contem BEGIN/COMMIT
+proprios. O responsavel precisa validar o executor atomico, sem simplesmente
+aplicar os tres arquivos sequencialmente. Nenhuma dessas migrations foi aplicada
+por esta tarefa. Usuario consultado sobre aguardar essa entrega ou autorizar
+coordenacao aditiva do catalogo; resposta pendente nesta verificacao. Excecao
+nao amplia autorizacao nem permite ignorar os gates. Reavaliar com evidencia
+de catalogo/runtime conciliados ou autorizacao especifica e novo plano validado.
+
+MCP n8n confirmou workflowL90AYSBEat4vYHLz ativo, cinco nodes, versao
+dcffaf09-354c-4a82-817c-5e6ca9da1dd5 identica ao draft, alterado em13/10.
+HTTP encaminha $json.payload integral; sucesso depende do recibo/requestId.
+SaveManualExecutions/saveExecutionProgress false, dados de sucesso/erro none.
+Nenhuma edicao. Consulta de metadados Supabase04:34Z confirmou funcao/ACL iguais
+ao backup e extensao ausente. Provas preparadas nao substituem dois ciclos reais.
+
 CI38851076367/f36f9fa terminou verde. Local: lint/tipos/test/build aprovados;
 3556 Vitest/1181 operacionais/703 release, skips90/19/14. Dois timeouts Windows
 na primeira repeticao passaram isolados e na repeticao completa sem relaxar gates.

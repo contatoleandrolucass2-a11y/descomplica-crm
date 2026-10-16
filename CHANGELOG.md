@@ -36,7 +36,8 @@
 - Calcula metas mensais por responsavel unico e esperado proporcional ao dia;
   atualiza a pagina na virada do dia de Sao Paulo.
 - Remove controles/textos indicados na raiz e resume tabelas em uma linha
-  Realizado com cinco periodos. Ativacao depende da migration/coleta e gates.
+  Realizado com cinco periodos. CI aprovada; ativacao depende da preparacao
+  pendente do catalogo, migration/coleta e gates de publicacao.
 
 ## 2026-10-15: Referências visuais de páginas e acessos
 

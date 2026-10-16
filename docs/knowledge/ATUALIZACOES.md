@@ -2,6 +2,25 @@
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
+- Encerramento16/10/05:54Z: PR238/cb3078f esta CLEAN/MERGEABLE e CI38854933173
+  verde em validate/release-gates/restore. Build e tipos locais verdes; suite
+  completa em componentes:3614 Vitest/1181 Node/703 release, skips90/19/14.
+  Vitest precisou dois workers por timeouts locais de Obsidian, sem aumentar
+  limites; CI Linux passou sem essa adaptacao. Worktree de codigo limpo.
+- Publicacao retida por dependencia do PR235, nao por falha do dashboard:
+  main2eae903 tem os quatro jobs verdes, mas health05:53:58.936Z ainda b5458ff.
+  Coordenador registra deploye42363ec-0f81-4084-9ced-aa405c263b09 em03:59:23.023Z,
+  sem pendencia. Supabase confirma17 paginas, ausencia da preparacao do catalogo
+  e das novas permissoes; somente defaults Master aplicados. Runtime novo exige
+  preparacao do catalogo para preservar acessos. Nao aplicar migrations alheias
+  sob autorizacao exclusiva da analise. Usuario consultado: aguardar responsavel
+  ou autorizar coordenacao aditiva do catalogo; sem resposta nesta verificacao.
+  Reavaliar quando catalogo/runtime forem conciliados ou houver autorizacao.
+- Nenhuma migration, app, Nginx, coletor ou workflow foi alterado por esta tarefa.
+  MCP n8n confirmou versao ativa dcffaf09-354c-4a82-817c-5e6ca9da1dd5,
+  payload integral e persistencia de execucoes desativada. Backup delimitado e
+  operador temporario preparados nao comprovam publicacao. Fonte: GitHub/gh,
+  GET anonimo, coordenador status, MCP Supabase/n8n; detalhes no audit.
 - CI38851076367/f36f9fa concluida verde nos tres jobs de PR. Merge posterior
   2eae903 preserva restricao por etapa e analise somente no dashboard;156 testes
   focais passaram, inventario61 migrations/1910 assertions.11 capturas do

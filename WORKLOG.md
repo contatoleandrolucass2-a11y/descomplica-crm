@@ -2,6 +2,14 @@
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
+CI38854933173/cb3078f verde em todos os jobs de PR; validacao local final:
+lint/tipos/build,3614 Vitest/1181 Node/703 release aprovados, skips90/19/14.
+Dois workers evitaram timeouts de infraestrutura Windows sem relaxar limites.
+Publicacao retida: main2eae903 inclui catalogo ainda nao preparado no banco
+(17 paginas), enquanto runtime publicado continua b5458ff. Atualizacao alheia
+nao incluida na autorizacao desta analise; usuario consultado. Detalhes/criterio
+de retomada no audit. Nenhuma alteracao remota de runtime, banco ou workflow.
+
 Main2eae903/PR235 integrado: loader de etapas conserva somente dados autorizados,
 sem analise, ranking ou resumo financeiro. Testes cobrem retry e troca de snapshot.
 156 testes focais passaram; inventario61 migrations/33 arquivos/1910 assertions
