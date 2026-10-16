@@ -2,6 +2,57 @@
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
+- Aceite16/10/15:07Z: dois ciclos automaticos novos publicados e conciliados.
+  Ingestoes14:36:04.49803Z e15:06:30.629428Z succeeded; inventarios confirmados,
+  proximo ciclo15:30Z. Tres visoes presentes no banco, hashes dos fatos,
+  contagens e generatedAt identicos a cada carga; segunda carga ja apresentou
+  incremento real. Filtros dependentes, nove meses fechados do ano, julho-setembro
+  e metas individuais (27 agendamentos,8 visitas,4 pastas,1 venda em outubro)
+  conferidos usando codigo atual e agregados reais, sem exportar nomes/registros.
+  Falha inicial nao se repetiu nos dois ciclos seguintes; causa nao comprovada,
+  sem relaxar validacao. Reavaliar se houver recorrencia ou defasagem da coleta.
+  Validacao local repetida: lint Node24 com zero erros/tres warnings existentes,
+  tipos/build verdes,3654 Vitest/1181 Node/703 release, skips90/19/14.
+  Fonte: journal sanitizado, carga privada no host e consultas agregadas MCP.
+- Atualizacao16/10/14:24Z: coleta antiga retomou com ingestao14:06:19Z e
+  inventario confirmado; preflight passou. Coletor66ed7360 ativado14:10Z com
+  transacao preservada. Reload systemd reordenou dependencias sem mudar conjuntos
+  ou identidades: CAS pausou antes do start; comparacao canonica e retomada
+  restrita testadas91 Windows/90 Linux+1skip, mantendo bloqueio de drift real.
+  Primeiro ciclo novo falhou antes de publicar; diagnostico somente leitura
+  validou20230 oportunidades, mas nao comprova causa nem aceite integral.
+  Aguardar dois ciclos completos novos. Health200/ok/66ed7360 e acesso anonimo
+  redirecionado ao login; n8n inalterado, payload integral confirmado via MCP.
+- Publicacao16/10/13:24Z: PR238 integrado em66ed7360, CI38901994232 com os
+  quatro jobs verdes. Coordenador unico confirmou deploy69796520-5afb-4136-a8dd-9ffe0b907e97
+  em13:24:00.784Z, sem pendencia; health anonimo confirmou66ed7360/ok.
+  Preparacao aditiva do banco aplicada via MCP em13:23:14Z; trio do catalogo
+  aplicado em uma unica instrucao atomica em13:24:47Z, apos a imagem compativel.
+  Conferencias13:25Z e13:58Z preservaram permissoes antigas, overrides, papeis,
+  visibilidade, ACL/RLS e policies fora do escopo. Catalogo:27 paginas,
+  38 permissoes,146 vinculos de papeis,6 overrides e10 vinculos de usuarios.
+  Nginx validado/recarregado13:25:41Z:8m somente no endpoint Salesforce.
+- Coletor ainda antigo nesta conferencia: ciclo12:00Z deixou lock apos morte
+  do processo; falhas13:00Z e13:30Z antecedem a troca do coletor, ainda nao feita.
+  Owner morto, cgroup apenas com scheduler e ausencia de exportacao confirmados.
+  Em13:42:03Z o lock original foi movido intacto para backup privado, sob trava
+  de instalacao e CAS de identidade/metadados; nenhum dado ou credencial apagado.
+  Aguardar ciclo natural14:00Z com publicacao confirmada antes da atualizacao.
+  Guard de ciclo completo nao foi relaxado. Criterio final: dois ciclos reais
+  distintos do coletor novo e conciliacao dos agregados; health nao os comprova.
+  Browser de producao indisponivel por timeout de foco; matriz visual da CI
+  aprovada nao equivale a inspecao autenticada em producao. Fontes: GitHub,
+  coordenador, health anonimo, MCP Supabase e metadados/journal sanitizados.
+- Conferencia16/10/12:38Z apos interrupcao de transporte: Git fetch concluido,
+  PR238/25ec804 CLEAN/MERGEABLE, CI38892072377 verde em validate, release-gates
+  e isolated-restore. Matriz visual terminou12:00:23Z; imagem ignorada em PR,
+  conforme contrato. Ensaio PostgreSQL real do catalogo passou165+53 assertions,
+  incluindo falha tardia/rollback e ativacao normal. Restore sintetico passou
+  61 migrations/1910 assertions, preservando owners e privilegios efetivos.
+  Gates locais completos: lint/tipos/build/format verdes; testes3654 Vitest,
+  1181 Node e703 release, skips90/19/14. Health publico12:38:27Z200/ok/b5458ff;
+  nada aplicado ao banco, app, Nginx, coletor ou workflow. Fontes: GitHub Actions,
+  Git e GET anonimo. A aprovacao do PR nao substitui CI da main nem publicacao.
 - Catalogo autorizado16/10: planejador offline fixa hashes do trio PR235,
   remove somente wrappers externos e produz uma unica instrucao DO em autocommit.
   CAS e preservacao abrangem cinco tabelas, inclusive user_roles.40 testes locais

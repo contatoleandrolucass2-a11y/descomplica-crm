@@ -2,6 +2,19 @@
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
+Publicacao16/10: PR238/66ed7360 integrado, quatro jobs CI38901994232 verdes.
+Preparacao do banco e ativacao atomica do catalogo aplicadas via MCP, com
+backups privados, CAS e preservacao dos acessos comprovada. App publicado pelo
+coordenador em13:24:00.784Z; Nginx8m restrito ao ingest Salesforce validado.
+Lock orfao preexistente preservado integralmente em backup13:42Z; ciclo antigo
+confirmado14:06Z. Coletor novo ativo14:10Z apos CAS/reload e retomada testada,
+mas primeira tentativa falhou antes de publicar. Nenhum workflow n8n editado.
+Aceitacao concluida com ciclos automaticos14:36:04Z e15:06:30Z, ambos succeeded,
+inventario confirmado e tres visoes conciliadas por hash/contagem/data com o
+banco. Meses encerrados, filtros dependentes e metas por responsavel conferidos
+sobre agregados reais, sem exportar nomes. Lint Node24, tipos,3654 Vitest,
+1181 Node,703 release e build passaram; skips90/19/14. Detalhes e limites no audit.
+
 Retomada16/10: usuario autorizou tambem a atualizacao aditiva do catalogo.
 Conferencia10:55Z manteve main2eae903, PR238/2234298 e producao b5458ff,
 sem deploy pendente. CI do HEAD teve validate/restore verdes e release-gates

@@ -221,6 +221,112 @@ ao PID, InvocationID, boot, cursores e hashes; log de falha nao prova ausencia
 de publicacao. Scheduler antigo/candidato tem blob8d1de86e3a5ec3ed915e9ba12be6ad38af762c8b.
 Pendente ensaio Linux e evidencias reais antes de qualquer uso operacional.
 
+## Publicacao autorizada em16/10/2026
+
+O estado abaixo substitui as pendencias de autorizacao/publicacao anteriores.
+PR238 integrado12:38:53Z em66ed7360e5406129da20cde8983be4e51b7b83db.
+CI38901994232 concluiu os quatro jobs com sucesso. Artefato imutavel SHA256
+0f395a9017fc1782412a653d0989a05656e10638f5d4b885563aace1d938f1b6,
+config da imagem e49e71c15ec77055acead06b6984e3b2e73d4bd32870231060094f6906c0b016.
+Coordenador publicou deployment69796520-5afb-4136-a8dd-9ffe0b907e97
+em13:24:00.784Z, sem pendencia. Health anonimo confirmou versao66ed7360/ok.
+
+MCP aplicou dashboard_analysis_catalog_preparation (20261016132314), uma
+instrucao DO com CAS e fontes fixadas; depois da imagem compativel aplicou
+dashboard_catalog_pr235_activation (20261016132447), trio atomico autorizado.
+SQL preparado SHA25687ec2996e64cd41714fca19b08d064408afad831277113b974d8ee16c1fccb0e
+e367f7a7fe3b3dfa1d03f0d3f3053c5c2f1d0df37d0216bd30ed4b6fcbcc983f9.
+Backups privados Kt84Zh/before.json e gUo2Ma/before.json em
+/srv/descomplica-backups/dashboard-catalog-20261016-\*, respectivamente SHA256
+3e5ee173f38b425b9a1f0ae81424cc2576fe788ff1f3aa87a3141a1d6536a002 e
+1e2b8e749f361c780f4b7f1a7566625b2e9c4b651f731c452dbc0410b89bfc20.
+Diretorios0700/arquivos0600, fsync/releitura; somente configuracao/DDL/ACL,
+sem dados comerciais. Verificacao13:25:23Z e nova comparacao13:58:54Z confirmam
+27 paginas,38 permissoes,146 role_permissions,6 overrides,10 user_roles;
+preservacao integral dos acessos existentes, ACL/owners das rotinas e policies
+fora das cinco leituras previstas. Travas temporarias liberadas somente apos
+conclusao SQL confirmada. Rollback para runtime pre-catalogo exige conciliacao.
+
+Nginx atualizado13:25:41.596Z sob coordenacao/CAS: somente duas locations exatas
+do ingest Salesforce com8m; nginx-t/reload/active aprovados. Config novo SHA256
+ee0ca62d70c032c33fe41e2464c07bf2ac579b98c5fcf54262a371b8d930b135.
+Recibo privado /var/backups/descomplica-crm/nginx/ed38812d-b258-4afe-ac09-a5c673bec1ea/result.json.
+
+Coletor ainda0fdbb80: preflight identificou lock de exportacao orfao criado
+12:00Z, ownerPID2231411 morto; schedulerPID2170274 reiniciado12:03Z.
+Falhas13:00Z/13:30Z preexistentes, ultima ingestao confirmada11:36:04Z.
+Sob installation.lock, cgroup/owner/fuser/journal/identidade/inode conferidos,
+o lock foi movido intacto13:42:03.240Z para backup privado
+/srv/descomplica-backups/dashboard-orphan-lock-20261016-FUOOtp/orphan-candidate.lock,
+SHA25694278891109fe83e5b884274e0cd01517fda8c446f1c402c8512f23da4a541e5.
+Sem stop, exclusao de dados ou mudanca de credenciais. Aguardar ciclo natural
+14:00Z antes de atualizar; guard de publicacao completa permanece obrigatorio.
+Operador temporario teve87 testes Linux aprovados e1 skip exclusivo de Windows.
+Ledger inicial689bf174 permanece intacto; baseline atual0fdbb80 comprovada por
+template exato. Listas systemd vazias exigem prova tipada D-Bus, nao inferencia.
+
+CUA nao conseguiu selecionar a aba autenticada por timeout de foco; nao houve
+contorno de login/perfil. Matriz visual CI verde, inspecao visual live pendente.
+Dois ciclos novos e conciliacao dos agregados continuam obrigatorios antes de
+declarar novos filtros alimentados por producao. N8n nao alterado.
+
+Coleta antiga retomada: ingestao14:06:19.078798Z succeeded, seguida de
+inventario confirmado e proximo ciclo14:30Z. Preflight de atualizacao passou.
+Transacaof7eabd2e-9a2c-4869-a9b9-c9f0539ef263 preservou backup/ledger e
+parou cooperativamente o coletor; reload alterou somente a ordem de dependencias
+systemd. CAS bloqueou antes do start, fase reloading, processo ausente e exit0.
+Diagnostico comprovou mesmos conjuntos Wants/Requires/After e identidades dos
+servicos auxiliares. Comparacao canonica ordena somente as cinco propriedades
+de dependencia; mudanca de conteudo/multiplicidade permanece bloqueada.
+Retomada restrita a reloading, config nova carregada e processo limpo/inativo,
+com gates/CAS novos, sem recriar transacao. Testes91 Windows e90 Linux/1skip
+passaram. Coletor novo ativo14:10Z, PID2476563, zero restarts; flag de analise
+habilitada, horario e credenciais preservados. Recibo de ativacao privado
+/srv/descomplica-backups/dashboard-activation-20261016-lMbYAA/evidence.json,
+SHA256cbc86946c6a2a24a62059675015e26d09469166593da695545c19a85e6d8a1e8.
+
+Primeira tentativa nova falhou14:13:37Z antes de publicar, mantendo carga14:06Z.
+Diagnostico somente leitura do relatorio de oportunidades validou20230 linhas;
+nenhuma linha exportada, gravada ou publicada pelo diagnostico. Nao comprova
+causa transitoria nem substitui ciclo integral. Aguardar execucoes automaticas.
+MCP n8n14:20Z confirmou mesma versao ativa/draft e payload integral, sem edicao.
+GET anonimo14:24:31Z confirmou200/ok/66ed7360 e /app redirecionou para /login.
+
+## Aceite do coletor em16/10/2026
+
+Dois ciclos automaticos consecutivos concluidos, sem disparo manual de publicacao:
+
+- Carga gerada14:33:17.597Z, ingestao14:36:04.49803Z succeeded, inventario
+  confirmado14:36:33.997Z. Requestabbe56b1-fa09-495a-89f0-da1078be405d.
+- Carga gerada15:03:39.874Z, ingestao15:06:30.629428Z succeeded, inventario
+  confirmado15:07:02.942Z. Request76b9d71d-7a3c-4af8-bf6d-6183d02a7ab0.
+
+Em ambas, tres visoes e cobertura2026-01-01/2026-10-16 presentes. Quantidade,
+generatedAt e SHA256 de todos os fatos comparados entre arquivo privado do
+coletor e banco via MCP, sem extrair nomes ou registros de clientes. Segunda
+carga:9154/4939/4215 agregados all/with_canal_imob/without_canal_imob; hashes:
+04aa55c9d84180f7fc9a76fd003abc52aec1b0e53edee1a3791cb637db7b14eb,
+a2cfaf484d6c0d2226f6acc5c69e3d7df9b76bd2432c5f4bcaa24710b66491bb,
+90284c66983e360c1f5f798fa34f76c5dbb2630d48c0773f79895a43fa161bed.
+Oportunidades do mes incrementaram827 para828 entre ciclos, comprovando carga
+nova e nao apenas releitura do mesmo candidato. Nenhum volume foi fixado na UI.
+
+Conferencia limitada read-only no host com as funcoes atuais e carga real:
+opcoes unicas/dependentes dos dois canais,315 responsaveis distintos no conjunto,
+nove meses completos no ano, julho/agosto/setembro na media trimestral,
+setembro anterior. Recorte de um responsavel em cada canal validou metas27/8/4/1
+e esperado proporcional16/31, sem divulgar nomes. Nao equivale a captura de UI.
+Teste pequeno de agregados, sem build/suite pesada na VPS. Causa da primeira
+falha nao comprovada; dois ciclos subsequentes completos sem erro, reavaliar
+em recorrencia/defasagem. Scheduler preservado, proxima execucao15:30Z.
+
+Repeticao local Node24: lint zero erros/tres warnings preexistentes, tipos e
+build verdes,3654 Vitest/1181 Node/703 release, skips90/19/14. Primeira chamada
+de lint encontrou Node25 do PATH e foi descartada como evidencia de toolchain;
+repeticao com runtime24.19 correto passou. Nenhum pacote/lockfile modificado.
+Somente registros documentais seguem para Git; nao republicar runtime por isso.
+
+Plano anterior a publicacao:
 Concluir CI/matriz visual, revisar somente referencias afetadas, integrar PR e
 exigir os quatro jobs no main exato. Em seguida conferir novamente drift,
 backup e imagem; aplicar migration autorizada, publicar pelo coordenador unico,
