@@ -6958,3 +6958,5 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 - CI38829857417 cancelada após validate aprovado; nova combinação deve cumprir todos os gates antes de publicação.
 
 - Meta: revisa única divergência visual DV1024 (13px da legenda após corrigir calendário); mantém241referências e exige novaCI.
+
+- Meta publicada em16/10/2026 00:59 BRT: PR231, main b5458ff, CI38844155079 completa, imagem imutável comprovada, health e autenticação anônima verificados. Evidências em docs/audits/meta-2026-10-15.md.
