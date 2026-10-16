@@ -12,7 +12,9 @@ O publisher local origem→n8n também nasce desligado por
 `SALESFORCE_N8N_PUBLISH_ENABLED=false`. Quando habilitado, ele falha fechado:
 envia somente o objeto `.payload` do candidato, por HTTPS sem credenciais na
 URL, usa um Bearer exclusivo lido de arquivo regular privado (`0600` no POSIX;
-ACL owner-only validada no Windows) e limita o corpo a 1 MB. Sucesso exige a
+ACL owner-only validada no Windows) e limita o corpo Salesforce a 8 MiB de
+UTF-8, sem truncamento. API e location exata do proxy devem ter o mesmo limite;
+demais endpoints preservam seus limites anteriores. Sucesso exige a
 confirmação final do CRM em HTTP `200` ou `201`, JSON com `ok=true` e o mesmo
 `requestId`; um aceite intermediário `202` do n8n não autoriza considerar a
 carga concluída.

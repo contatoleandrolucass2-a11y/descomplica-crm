@@ -65,6 +65,42 @@ fica root-only, protegido por lock e comparacao integral antes de escrita.
 
 ## Aceite em producao
 
+### Atualizacao aditiva do dashboard
+
+Autorizacao especifica recebida em15/10/2026 para preservar dimensoes dos
+relatorios e habilitar filtros/metas. Nao usar o instalador de primeira
+ativacao para atualizar uma unidade existente, nem apagar seu ledger.
+
+1. Exigir CI completa do main exato, migration revisada aplicada, CRM compativel
+   publicado e location Salesforce8m validada. Checkout imutavel no caminho
+   aprovado, Node24.19.x e dependencias legiveis pelo usuario dedicado.
+2. Sob `installation.lock` existente, guardar em diretorio novo root-only a
+   unidade, conjunto completo de drop-ins e ledger original, com hashes e
+   estado efetivo. Registrar a atualizacao separadamente, sem alterar o ledger
+   da primeira instalacao. Conferir CAS de todos os arquivos antes da troca.
+3. Aguardar fim do ciclo, inclusive estoque. Parar somente o coletor e exigir
+   MainPID0, cgroup vazio e ausencia de export ativo. Timeout, encerramento
+   forcado ou lock remanescente bloqueiam; nao limpar locks automaticamente.
+4. Conferir novamente CAS e instalar atomicamente apenas o drop-in aprovado:
+   WorkingDirectory da release exata e
+   `Environment=SALESFORCE_DASHBOARD_ANALYSIS_ENABLED=true`. Preservar usuario,
+   sandbox, ExecStart, credenciais, destinos e agenda. Drop-in preexistente
+   desconhecido ou override concorrente bloqueiam.
+5. Executar systemd-analyze verify, daemon-reload e conferir configuracao
+   efetiva privadamente, sem imprimir segredos. Iniciar somente o coletor,
+   verificar PID estavel, cwd/flag e manter navegador/monitor no estado anterior.
+6. Exigir os dois ciclos distintos e conciliacao descritos abaixo. Uma unidade
+   ativa nao comprova ingestao. Workflow n8n preserva o payload integral;
+   configuracao efetiva e recibo final devem ser confirmados, nao presumidos.
+
+Recuperacao: sob a mesma trava e CAS, parar apenas o coletor, confirmar termino,
+restaurar somente o drop-in anterior (ou remover o arquivo criado pela propria
+transacao), daemon-reload e iniciar a release anterior. Nao restaurar candidato
+antigo, ledger, credenciais ou snapshots. Publicacao ambigua exige conciliacao
+por requestId antes de nova tentativa. Manter backup e registro da tentativa.
+
+### Evidencias obrigatorias
+
 - Coletor `enabled/active`, usuario dedicado; monitor independente
   `disabled/inactive`. Navegador e demais servicos permanecem ativos.
 - Dois ciclos reais distintos: requestId, referencia, contagens de origem,
