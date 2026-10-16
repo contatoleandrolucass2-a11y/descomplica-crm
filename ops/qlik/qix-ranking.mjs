@@ -401,9 +401,17 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
         check(matches.length === 1, "incomplete_page");
         const page = matches[0];
         check(!Object.hasOwn(page, "qIsReduced") || page.qIsReduced === false, "reduced_page");
+        const tails = page.qTails;
+        // QIX can report explicit zero tails even when the requested page is complete.
         check(
-          !page.qTails?.length &&
-            Array.isArray(page.qMatrix) &&
+          tails == null ||
+            (Array.isArray(tails) &&
+              tails.length <= size.qcx &&
+              tails.every((tail) => record(tail) && tail.qUp === 0 && tail.qDown === 0)),
+          "incomplete_page",
+        );
+        check(
+          Array.isArray(page.qMatrix) &&
             page.qMatrix.length === area.qHeight &&
             page.qMatrix.every((row) => Array.isArray(row) && row.length === 1),
           "incomplete_page",

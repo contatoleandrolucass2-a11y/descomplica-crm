@@ -43,6 +43,16 @@ credencial ou da CI. Merge preserva integralmente as secoes documentais de
 Meta e Qlik; codigo/interface de main entram sem resolucao manual nem novo
 ajuste visual desta frente. Revalidar conjunto integrado antes da promocao.
 
+Confronto com protocolo oficial revelou outra incompatibilidade independente:
+NxDataPage pode conter qTails com qUp/qDown zero. Duas regressoes (direta/VM)
+falharam antes do patch por incomplete_page. Aceita apenas array limitado por
+qSize.qcx e entradas explicitamente zero; pendencias nao-zero, tipos invalidos
+e cobertura incorreta continuam rejeitados.388 focais:387pass/1skip POSIX.
+Nao foi o codigo do canario nativo observado: este parou antes em master pins.
+Fontes: modelos NxGroupTail/NxDataPage e exemplo HyperCube oficiais Qlik.
+Revisao independente de tails sem P1/P2,44 testes focados de paginas/reducao
+aprovados; suite completa e execucao nativa nao foram atribuidas a essa revisao.
+
 ## 2026-10-16: Candidato integrado e CI exata de main
 
 PR216/head8dd4a3e integrado normalmente em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5

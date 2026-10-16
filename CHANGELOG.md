@@ -11,6 +11,8 @@
   permanecem explicitas e a CI do corretivo ainda e obrigatoria.
 - Integra main concorrente de Meta, preservando ambos os registros e todas
   as referencias existentes, sem alterar a interface nesta frente.
+- Aceita paginas QIX completas com group tails explicitamente zeradas,
+  mantendo limites, cobertura exata e rejeicao de qualquer cauda pendente.
 
 ## 2026-10-15: Correcao visual de Meta compilada
 

@@ -116,6 +116,12 @@ com titulo nativo, hash integral e unicidade; nenhum texto alheio e publicado.
 Codigos master_catalog_item, master_catalog_text, master_catalog_binding e
 master_alias_identity distinguem recusas sem incluir valores da fonte.
 
+Paginas completas podem conter qTails zeradas: [NxGroupTail](https://help.qlik.com/en-US/sense-developer/May2026/Subsystems/EngineJSONAPI/Content/models-nxgrouptail.htm)
+descreve contagens de elementos de grupos anteriores/seguintes. O coletor
+aceita somente zeros explicitos em array limitado pela largura do cubo;
+caudas nao-zero ou malformadas continuam recusadas. A area/matriz deve
+corresponder exatamente a cada pagina solicitada, sem reducao ou lacunas.
+
 Publicacoes sao preservadas por ano. O reader retorna atual/anterior sob um
 snapshot SQL. Falha ou fonte mais antiga nao substitui a ultima carga valida.
 Movimento exige periodo, cobertura e mapeamento comparaveis. Publicacao nao

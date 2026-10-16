@@ -1974,6 +1974,55 @@ test("explicitly unreduced list and cube pages retain the reconciliation path", 
   assert.equal(f.state.sessions.size, 0);
 });
 
+for (const serialized of [false, true]) {
+  test(`zero group tails preserve complete native pages, serialized=${serialized}`, async () => {
+    const f = fixture({
+      hook(method, value) {
+        if (method === "cubeData" || method === "listData")
+          for (const page of value) page.qTails = [{ qUp: 0, qDown: 0 }];
+        return value;
+      },
+    });
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    const result = await collect(f.global, f.options);
+    assert.equal(result.status, "collected", JSON.stringify(result));
+    assert.deepEqual(JSON.parse(JSON.stringify(result.months[0].imobs.nativeTotals)), {
+      vgv: "3.00",
+      contracts: 2,
+    });
+    assert.equal(f.state.sessions.size, 0);
+    assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+  });
+}
+
+for (const method of ["listData", "cubeData"]) {
+  for (const tails of [
+    [{ qUp: 1, qDown: 0 }],
+    [{ qUp: 0, qDown: 1 }],
+    [{ qUp: -1, qDown: 0 }],
+    [{ qUp: 0, qDown: 0.5 }],
+    [{ qUp: "0", qDown: 0 }],
+    [{}],
+    [null],
+    { length: 0 },
+    false,
+    Array.from({ length: 100 }, () => ({ qUp: 0, qDown: 0 })),
+  ]) {
+    test(`invalid group tails reject ${method} ${JSON.stringify(tails)}`, async () => {
+      const f = fixture({
+        hook(actual, value) {
+          if (actual === method) value[0].qTails = structuredClone(tails);
+          return value;
+        },
+      });
+      await rejected(f, "incomplete_page");
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+}
+
 for (const [name, mutate] of [
   ["missing page", (pages) => pages.pop()],
   ["short page", (pages) => pages[0].qMatrix.pop()],

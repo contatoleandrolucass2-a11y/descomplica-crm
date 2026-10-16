@@ -31,6 +31,13 @@
   PR231/b5458ff. Nao era evidencia de credencial invalida. Merge preservou
   secoes completas Meta/Qlik de CHANGELOG/WORKLOG; codigo e referencias main
   sem ajuste manual. Conjunto integrado exige CI nova, sem trocar baselines.
+- Protocolo Qlik NxGroupTail permite qUp/qDown zero em paginas completas;
+  duas regressoes direta/VM falharam antes e passam apos tratamento estrito
+  de zeros. Array limitado por qSize.qcx, nao-zero/tipos invalidos recusados,
+  area/matriz/reducao/totais preservados.388 focais:387pass/1skip POSIX.
+  Nao atribuir o canario master_pin_mismatch a tails (fase posterior).
+- Revisao readonly de tails sem P1/P2;44 testes focados de paginacao/reducao
+  passaram. Nao substitui CI completa nem prova a coleta produtiva.
 
 ## 2026-10-16: PR216 integrado; promocao e fatos ainda pendentes
 
