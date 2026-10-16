@@ -454,6 +454,63 @@ function aliasFixture(options) {
   return f;
 }
 
+function expressionFixture(kind, expression, repin = true) {
+  const f = kind === "alias" ? aliasFixture() : fixture();
+  const config = f.mapping.cubes.developments;
+  const properties = f.masters.get("synthetic-developments-vgv-master");
+  properties.qMeasure.qDef = expression;
+  if (kind === "inline") {
+    f.cubes.developments.qMeasures[1] = { qDef: structuredClone(properties.qMeasure) };
+    config.masterPins = config.masterPins.filter((pin) => pin.kind !== "measure");
+    if (repin) config.cubeSha256 = hash(f.cubes.developments);
+  } else if (repin && kind === "library") {
+    config.masterPins.find((pin) => pin.kind === "measure").sha256 = hash(properties.qMeasure);
+  } else if (repin) {
+    config.aliasPins.find((pin) => pin.alias === "VGV").propertiesSha256 = hash(properties);
+  }
+  return f;
+}
+
+for (const kind of ["inline", "library", "alias"]) {
+  for (const whitespace of ["\n", "\r\n", "\t", "\r\n\t"]) {
+    test(`pinned ${kind} expression preserves native whitespace ${JSON.stringify(whitespace)}`, async () => {
+      const expression = `Sum(${whitespace}[Synthetic.Amount]${whitespace})`;
+      const f = expressionFixture(kind, expression);
+      const native = structuredClone(f.cubes);
+      const masters = structuredClone([...f.masters]);
+      const collect = runInNewContext(`(${collectQlikRanking.toString()})`, {
+        crypto: webcrypto,
+        TextEncoder,
+      });
+      const result = await collect(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.deepEqual(f.cubes, native);
+      assert.deepEqual([...f.masters], masters);
+      assert.equal(f.state.sessions.size, 0);
+      assert.doesNotMatch(JSON.stringify(result), /Sum\(|Synthetic.Amount/);
+    });
+  }
+
+  test(`formatting changes still require a new ${kind} definition pin`, async () => {
+    const f = expressionFixture(kind, "Sum(\r\n\t[Synthetic.Amount]\r\n)", false);
+    await rejected(f, kind === "inline" ? "definition_changed" : "master_changed");
+  });
+
+  for (const invalid of ["\u0000", "\u000b", "\u000c", "\u001b", "\u007f", "\u0085", "\ud800"]) {
+    test(`pinned ${kind} expression rejects unsupported control ${JSON.stringify(invalid)}`, async () => {
+      await rejected(
+        expressionFixture(kind, `Sum(${invalid}[Synthetic.Amount])`),
+        "measure_unresolved",
+      );
+    });
+  }
+  for (const invalid of ["", " \t\r\n ", "x".repeat(16385)]) {
+    test(`pinned ${kind} expression rejects empty or oversized definition (${invalid.length})`, async () => {
+      await rejected(expressionFixture(kind, invalid), "measure_unresolved");
+    });
+  }
+}
+
 for (const serialized of [false, true]) {
   test(`explicit master aliases preserve six-measure native parity, serialized=${serialized}`, async () => {
     const f = aliasFixture();
