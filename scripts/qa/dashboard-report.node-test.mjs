@@ -1,7 +1,88 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { chromium, expect } from "@playwright/test";
-import { observeDashboardStatusReads, startServer } from "./dashboard-report.mjs";
+import {
+  captureDashboardScreenshot,
+  observeDashboardStatusReads,
+  startServer,
+  verifyAnalysisInteractions,
+} from "./dashboard-report.mjs";
+
+test("screenshots reset native sticky chrome without scrolling section crops or modal viewports", async () => {
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const page = await browser.newPage({ viewport: { width: 640, height: 480 } });
+    await page.setContent(`<!doctype html><style>
+      body { margin: 0; }
+      header { position: sticky; top: 0; height: 60px; background: rgb(0, 128, 0); }
+      section { height: 2000px; background: rgb(0, 0, 128); }
+      dialog { width: 300px; height: 200px; }
+    </style><div data-protected-shell><header>Native sticky header</header>
+      <section id="funnel">Synthetic funnel</section>
+      <dialog><button>Close</button></dialog>
+    </div>`);
+    const inspect = async (buffer, points) =>
+      page.evaluate(
+        async ({ bytes, points }) => {
+          const bitmap = await createImageBitmap(
+            new Blob([new Uint8Array(bytes)], { type: "image/png" }),
+          );
+          const canvas = document.createElement("canvas");
+          canvas.width = bitmap.width;
+          canvas.height = bitmap.height;
+          const context = canvas.getContext("2d");
+          context.drawImage(bitmap, 0, 0);
+          const pixels = points.map(([x, y]) => [...context.getImageData(x, y, 1, 1).data]);
+          bitmap.close();
+          return { width: canvas.width, height: canvas.height, pixels };
+        },
+        { bytes: [...buffer], points },
+      );
+    await page.evaluate(() => window.scrollTo(0, 900));
+    assert.ok(await page.evaluate(() => window.scrollY > 0));
+    const whole = await inspect(await captureDashboardScreenshot(page), [
+      [2, 30],
+      [2, 930],
+    ]);
+    assert.equal(whole.height, 2060, "Full document must not be clipped to the viewport");
+    assert.deepEqual(whole.pixels, [
+      [0, 128, 0, 255],
+      [0, 0, 128, 255],
+    ]);
+    await page.evaluate(() => window.scrollTo(0, 900));
+    const crop = await inspect(
+      await captureDashboardScreenshot(page, { section: page.locator("#funnel") }),
+      [
+        [2, 30],
+        [2, 930],
+      ],
+    );
+    assert.equal(crop.height, 2000);
+    assert.deepEqual(crop.pixels, [
+      [0, 0, 128, 255],
+      [0, 0, 128, 255],
+    ]);
+    assert.equal(
+      await page.evaluate(() => window.scrollY),
+      0,
+      "Section capture must not auto-scroll",
+    );
+    await expect(page.locator("header")).toHaveCSS("position", "sticky");
+    await expect(page.locator("header")).not.toHaveAttribute("style");
+    await page.evaluate(() => {
+      window.scrollTo(0, 900);
+      document.querySelector("dialog").showModal();
+    });
+    const before = await page.evaluate(() => window.scrollY);
+    await expect(page.getByRole("button", { name: "Close" })).toBeFocused();
+    const modal = await inspect(await captureDashboardScreenshot(page, { dialog: true }), []);
+    assert.deepEqual([modal.width, modal.height], [640, 480]);
+    assert.equal(await page.evaluate(() => window.scrollY), before);
+    await expect(page.getByRole("button", { name: "Close" })).toBeFocused();
+  } finally {
+    await browser.close();
+  }
+});
 
 test("status probes wait for browser JSON consumption before the next resume event", async (t) => {
   assert.match(process.version, /^v24\.19\./, "Use Node 24.19.x");
@@ -107,6 +188,86 @@ test("status probes wait for browser JSON consumption before the next resume eve
     assert.equal(await page.evaluate(() => window.qaRefreshes), 0);
     assert.deepEqual(server.requests, []);
     assert.deepEqual(server.refreshes, []);
+  } finally {
+    await browser?.close();
+    await server.close();
+  }
+});
+
+test("synthetic analysis recalculates filtered history and per-broker goals with keyboard-safe Info dialogs", async () => {
+  assert.match(process.version, /^v24\.19\./, "Use Node 24.19.x");
+  const server = await startServer();
+  let browser;
+  const errors = [];
+  const blocked = [];
+  try {
+    browser = await chromium.launch({ headless: true });
+    const context = await browser.newContext({
+      locale: "pt-BR",
+      timezoneId: "America/Sao_Paulo",
+      serviceWorkers: "block",
+    });
+    await context.route("**/*", (route) => {
+      if (new URL(route.request().url()).origin === server.origin) return route.continue();
+      blocked.push(route.request().url());
+      return route.abort("blockedbyclient");
+    });
+    const page = await context.newPage();
+    page.on("pageerror", (error) => errors.push(error.message));
+    page.on("console", (message) => {
+      if (message.type() === "error") errors.push(message.text());
+    });
+    await page.goto(`${server.origin}/app?scenario=analysis`, { waitUntil: "networkidle" });
+    await verifyAnalysisInteractions(page);
+    assert.deepEqual(errors, [], "Browser errors");
+    assert.deepEqual(blocked, [], "External requests");
+    assert.deepEqual(server.requests, [], "Unknown local requests");
+    assert.deepEqual(server.refreshes, [], "Filtering must never trigger ingestion");
+  } finally {
+    await browser?.close();
+    await server.close();
+  }
+});
+
+test("closing a history dialog cannot steal focus from the next history trigger", async () => {
+  const server = await startServer();
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.route("**/*", (route) =>
+      new URL(route.request().url()).origin === server.origin
+        ? route.continue()
+        : route.abort("blockedbyclient"),
+    );
+    await page.goto(`${server.origin}/app?scenario=analysis`, { waitUntil: "networkidle" });
+    await page
+      .getByRole("button", { name: "Ver histórico mensal: Média do ano", exact: true })
+      .click();
+    const nextName = "Ver histórico mensal: Média dos últimos 3 meses";
+    await page.evaluate(async (name) => {
+      const dialog = document.querySelector("dialog[open]");
+      const next = [...document.querySelectorAll("button")].find(
+        (button) => button.getAttribute("aria-label") === name,
+      );
+      const closed = new Promise((resolve) => {
+        dialog.addEventListener("close", () => requestAnimationFrame(resolve), { once: true });
+      });
+      // Native close restores focus synchronously, before the queued close event.
+      dialog.close();
+      next.focus();
+      await closed;
+    }, nextName);
+    await expect(page.getByRole("button", { name: nextName, exact: true })).toBeFocused();
+    await page.keyboard.press("Enter");
+    const nextDialog = page.getByRole("dialog", {
+      name: "Média dos últimos 3 meses: histórico mensal",
+      exact: true,
+    });
+    await expect(nextDialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(nextDialog).not.toBeVisible();
+    await expect(page.getByRole("button", { name: nextName, exact: true })).toBeFocused();
   } finally {
     await browser?.close();
     await server.close();

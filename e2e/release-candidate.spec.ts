@@ -1543,18 +1543,54 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
   });
 });
 
-test("dashboard filters retain selected state while partnership ranking stays unavailable", async ({
+test("dashboard uses management filters while stages retain selection and partnership ranking stays unavailable", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
+    for (const period of ["month", "week"]) {
+      const response = await page.goto(`/app?view=with_canal_imob&period=${period}`);
+      expect(response?.status()).toBe(200);
+      const report = page.getByRole("main");
+      const filters = report.getByRole("region", { name: "Filtros do relatório", exact: true });
+      await expect(filters.locator("summary")).toHaveCount(4);
+      for (const label of [
+        "Canal de vendas",
+        "Gerente de Vendas",
+        "Responsável da conta",
+        "Empresa",
+      ]) {
+        await expect(filters.getByText(label, { exact: true })).toBeVisible();
+      }
+      for (const label of [
+        "Com canal de imobiliárias",
+        "Sem canal de imobiliárias",
+        "Mês",
+        "Semana",
+        "Hoje",
+      ]) {
+        await expect(report.getByRole("link", { name: label, exact: true })).toHaveCount(0);
+      }
+      await expect(report.getByRole("heading", { name: "Mês atual", exact: true })).toBeVisible();
+      await expect(report.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
+      const table = report.locator('[aria-labelledby="report-operational-title"] table').first();
+      await expect(table.getByRole("columnheader")).toHaveText([
+        "Indicador",
+        "Mês",
+        "Últimos 14 dias",
+        "Últimos 7 dias",
+        "Esta Semana",
+        "Hoje",
+      ]);
+      await expect(table.getByRole("rowheader")).toHaveText(["Realizado"]);
+    }
     const cases = [
       {
-        pathname: "/app?view=with_canal_imob&period=month",
-        selectedHref: "/app?view=with_canal_imob&amp;period=month",
+        pathname: "/app/etapas/oportunidades?view=with_canal_imob&period=month",
+        selectedHref: "/app/etapas/oportunidades?view=with_canal_imob&amp;period=month",
       },
       {
-        pathname: "/app?view=with_canal_imob&period=week",
-        selectedHref: "/app?view=with_canal_imob&amp;period=week",
+        pathname: "/app/etapas/oportunidades?view=with_canal_imob&period=week",
+        selectedHref: "/app/etapas/oportunidades?view=with_canal_imob&amp;period=week",
       },
     ];
 

@@ -51,7 +51,7 @@ export function DashboardPulse({ readings, goals }: DashboardPulseProps) {
         // Only the circular scale stops at 100%; the label retains the full ratio.
         const arc = ratio === null ? null : Math.min(100, Math.max(0, ratio * 100));
         const rawGoal = goals[reading.key];
-        const goal = rawGoal !== null && rawGoal > 0 ? rawGoal : null;
+        const goal = rawGoal !== null && rawGoal >= 0 ? rawGoal : null;
         const progress =
           reading.value !== null && goal !== null ? calculateProgress(reading.value, goal) : null;
         const previousKey = stageOrder[stageOrder.indexOf(reading.key) - 1];

@@ -17,13 +17,24 @@ export async function checkDashboardAutoRefresh(page, origin) {
 
 async function verifyDashboardAutoRefresh(page, origin) {
   process.stdout.write("[dashboard-auto-refresh] initial-snapshot\n");
-  const pathname = "/app?view=with_canal_imob&period=week";
+  const selectedChannel = "SPC - CANAL IMOB PJ";
+  const pathname = `/app?view=with_canal_imob&channel=${encodeURIComponent(selectedChannel)}`;
   await page.goto(`${origin}${pathname}`, { waitUntil: "networkidle" });
   const statusResponse = await page.request.get(`${origin}/api/dashboard/status`);
   expect(statusResponse.status()).toBe(200);
   const status = await statusResponse.json();
   expect(status.generatedAt).toEqual(expect.any(String));
   expect(status.updatedAt).toEqual(expect.any(String));
+  const channelFilter = page
+    .getByRole("region", { name: "Filtros do relatório", exact: true })
+    .locator("details")
+    .first();
+  await channelFilter.locator("summary").click();
+  const channelSelection = channelFilter.getByRole("checkbox", {
+    name: selectedChannel,
+    exact: true,
+  });
+  await expect(channelSelection).toBeChecked();
   const details = page.locator('[aria-labelledby="report-monthly-title"] details').first();
   await details.locator("summary").click();
   await expect(details).toHaveAttribute("open", "");
@@ -114,7 +125,8 @@ async function verifyDashboardAutoRefresh(page, origin) {
     expect(
       Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore),
     ).toBeLessThanOrEqual(2);
-    await expect(page.locator(`a[aria-current="page"][href="${pathname}"]`).first()).toBeVisible();
+    await expect(channelFilter).toHaveAttribute("open", "");
+    await expect(channelSelection).toBeChecked();
     process.stdout.write("[dashboard-auto-refresh] passed\n");
     return {
       passed: true,

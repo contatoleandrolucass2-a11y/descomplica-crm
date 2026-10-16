@@ -23,6 +23,10 @@ const sourceFiles = [
   "app/(protected)/app/_components/DashboardPulse.module.css",
   "app/(protected)/app/_components/DashboardComparisons.tsx",
   "app/(protected)/app/_components/DashboardComparisons.module.css",
+  "app/(protected)/app/_components/DashboardFilters.tsx",
+  "app/(protected)/app/_components/DashboardFilters.module.css",
+  "app/(protected)/app/_components/DashboardMonthlyHistory.tsx",
+  "app/(protected)/app/_components/DashboardMonthlyHistory.module.css",
   "app/(protected)/app/_components/analytics/analytics.module.css",
   "app/(protected)/app/_components/analytics/Charts.tsx",
   "app/(protected)/app/_components/analytics/DataDisplay.tsx",
@@ -33,10 +37,13 @@ const sourceFiles = [
   "app/globals.css",
   "lib/crm/dashboard/presentation.ts",
   "lib/crm/dashboard/catalog.ts",
+  "lib/crm/dashboard/analysis-contract.ts",
+  "lib/crm/dashboard/analysis.ts",
+  "lib/crm/dashboard/management-goals.ts",
 ];
 const sections = [
   "Convers\u00e3o por etapa",
-  "Realizado e meta lado a lado",
+  "Comparativo mensal",
   "Ritmo",
   "Efici\u00eancia do funil",
   "Realizado Funil",
@@ -94,6 +101,43 @@ function syntheticDashboard() {
   };
 }
 
+function syntheticAnalysis() {
+  const facts = [];
+  for (let month = 1; month <= 10; month += 1) {
+    const date = `2026-${String(month).padStart(2, "0")}-${month === 10 ? "13" : "15"}`;
+    for (let owner = 0; owner < 2; owner += 1) {
+      for (const [stage, multiplier] of [10, 6, 3, 2, 1].entries()) {
+        const count = (month === 10 ? 2 : month) * (owner + 1) * multiplier;
+        facts.push([
+          stage,
+          date,
+          owner,
+          owner,
+          owner,
+          owner,
+          owner,
+          count,
+          stage === 4 ? count * 250000 : 0,
+          stage === 3 ? count / 2 : 0,
+        ]);
+      }
+    }
+  }
+  return {
+    version: 1,
+    viewKey: "all",
+    coverageStart: "2026-01-01",
+    referenceDate: "2026-10-13",
+    dimensions: {
+      managers: ["Gerencia sintetica Alfa", "Gerencia sintetica Beta"],
+      owners: ["Responsavel sintetico Alfa", "Responsavel sintetico Beta"],
+      companies: ["Empresa sintetica Alfa", "Empresa sintetica Beta"],
+      developments: ["Empreendimento sintetico Alfa", "Empreendimento sintetico Beta"],
+    },
+    facts,
+  };
+}
+
 function scenarios() {
   const dashboard = syntheticDashboard();
   const complete = {
@@ -139,6 +183,7 @@ function scenarios() {
   overCapacity.dashboard.metrics.all.folders.currentMonth = 102;
   return {
     complete,
+    analysis: { ...complete, today: "2026-10-13" },
     zero,
     large,
     "over-capacity": overCapacity,
@@ -211,23 +256,36 @@ async function bundle() {
             return `const router = { refresh() {
               window.qaRefreshes = (window.qaRefreshes || 0) + 1;
               if (!window.qaDeferRefresh) window.qaApplyPublished?.();
+            }, replace(url, options) {
+              window.qaReplacements.push({url, options});
+              queueMicrotask(() => window.qaNavigate(url));
             } };
-            export function useRouter() { return router; }`;
+            export function useRouter() { return router; }
+            export function useSearchParams() { return new URLSearchParams(window.location.search); }`;
           if (id === entry)
             return `
               import { createRoot } from "react-dom/client";
               import { flushSync } from "react-dom";
               import { DashboardReport } from "@/app/(protected)/app/_components/DashboardReport";
+              import { analyzeDashboard, applyDashboardAnalysis, emptyDashboardFilters, parseDashboardFilters, DASHBOARD_FILTER_KEYS } from "@/lib/crm/dashboard/analysis";
+              import { dashboardAnalysisSliceSchema } from "@/lib/crm/dashboard/analysis-contract";
               import { ProtectedShellFrame } from "@/app/(protected)/_components/ProtectedShellFrame";
               import shellStyles from "@/app/(protected)/_components/ProtectedShell.module.css";
               import analyticsStyles from "@/app/(protected)/app/_components/analytics/analytics.module.css";
               import "@/app/globals.css";
               const fixtures = ${JSON.stringify(scenarios())};
+              const analysisSlice = dashboardAnalysisSliceSchema.parse(${JSON.stringify(syntheticAnalysis())});
               const root = createRoot(document.getElementById("root"));
               window.qaRefreshes = 0;
+              window.qaReplacements = [];
               window.qaRender = (scenario = "complete", overrides = {}) => {
                 if (!Object.hasOwn(fixtures, scenario)) throw new Error("Unknown synthetic scenario");
                 const props = { ...structuredClone(fixtures[scenario]), ...overrides };
+                if (scenario === "analysis") {
+                  props.filters = overrides.filters ?? emptyDashboardFilters();
+                  props.analysis = analyzeDashboard(analysisSlice, props.filters);
+                  props.dashboard = applyDashboardAnalysis(props.dashboard, props.analysis, props.selectedView);
+                }
                 window.qaCurrentProps = props;
                 flushSync(() => root.render(
                   <ProtectedShellFrame shellClassName={shellStyles.shell} contentClassName={shellStyles.mainContent}
@@ -238,6 +296,16 @@ async function bundle() {
                   </ProtectedShellFrame>
                 ));
                 document.documentElement.dataset.scenario = scenario;
+              };
+              window.qaNavigate = (href) => {
+                const next = new URL(href, location.href);
+                if (next.origin !== location.origin || next.pathname !== "/app") throw new Error("Nonlocal harness navigation");
+                const filters = parseDashboardFilters(Object.fromEntries(DASHBOARD_FILTER_KEYS.map(key => [key, next.searchParams.getAll(key)])));
+                history.replaceState(null, "", next);
+                window.qaRender(document.documentElement.dataset.scenario, {
+                  ...window.qaCurrentProps, filters,
+                  selectedPeriod: next.searchParams.get("period") || "month",
+                });
               };
               window.qaApplyPublished = () => {
                 if (!window.qaNextDashboard) return;
@@ -251,6 +319,7 @@ async function bundle() {
               if (["month", "week", "today"].includes(query.get("period"))) overrides.selectedPeriod = query.get("period");
               if (fixtures[scenario]?.authorizedViews.includes(query.get("view"))) overrides.selectedView = query.get("view");
               if (${JSON.stringify(themes)}.includes(query.get("theme"))) document.documentElement.dataset.theme = query.get("theme");
+              if (scenario === "analysis") overrides.filters = parseDashboardFilters(Object.fromEntries(DASHBOARD_FILTER_KEYS.map(key => [key, query.getAll(key)])));
               window.qaRender(scenario, overrides);
             `;
         },
@@ -386,8 +455,12 @@ async function checkStructure(page) {
     5,
   );
   await expect(page.locator('[aria-labelledby="report-pulse-title"] figure')).toHaveCount(5);
-  await expect(page.locator('[aria-labelledby="report-monthly-title"] article')).toHaveCount(6);
-  const funnels = page.locator('[aria-labelledby="report-monthly-title"] figure');
+  await expect(
+    page.locator('[aria-labelledby="report-monthly-title"] article[data-tone]'),
+  ).toHaveCount(6);
+  const funnels = page.locator(
+    '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"]',
+  );
   await expect(funnels).toHaveCount(6);
   for (const funnel of await funnels.all()) {
     await expect(funnel).toHaveAccessibleName(/^Funil mensal: /);
@@ -415,7 +488,23 @@ async function checkStructure(page) {
   }
   const tables = page.locator('[aria-labelledby="report-operational-title"] table');
   await expect(tables).toHaveCount(4);
-  for (const table of await tables.all()) await expect(table.locator("tbody tr")).toHaveCount(5);
+  for (const table of await tables.all()) {
+    await expect(table.locator("thead th")).toHaveText([
+      "Indicador",
+      "Mês",
+      "Últimos 14 dias",
+      "Últimos 7 dias",
+      "Esta Semana",
+      "Hoje",
+    ]);
+    await expect(table.locator("tbody tr")).toHaveCount(1);
+    await expect(table.locator("tbody th")).toHaveText("Realizado");
+    await expect(table.locator("tbody td")).toHaveCount(5);
+  }
+  await expect(page.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
+  for (const name of ["Mês", "Semana", "Hoje"])
+    await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
+  await expect(page.locator('a[href*="/etapas/"]')).toHaveCount(0);
 }
 
 async function checkLayout(page) {
@@ -461,6 +550,190 @@ async function checkLayout(page) {
     scrollWidth: document.documentElement.scrollWidth,
     bodyScrollHeight: document.body.scrollHeight,
   }));
+}
+
+export async function captureDashboardScreenshot(page, { path, section, dialog = false } = {}) {
+  if (dialog) {
+    // Modal dialogs belong to the current viewport, not a stitched full document.
+    await expect(page.locator("dialog[open]")).toBeVisible();
+    return page.screenshot({ path, fullPage: false });
+  }
+  // Locator screenshots scroll their targets into view and displace sticky chrome
+  // in subsequent full-page captures. Keep native CSS and capture from document zero.
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+  await expect.poll(() => page.evaluate(() => [window.scrollX, window.scrollY])).toEqual([0, 0]);
+  const header = page.locator("[data-protected-shell] > header");
+  await expect(header).toHaveCSS("position", "sticky");
+  const headerBox = await header.boundingBox();
+  assert.ok(
+    headerBox && Math.abs(headerBox.y) <= 1,
+    "Native sticky header must be at document top",
+  );
+  const clip = section ? await section.boundingBox() : undefined;
+  if (section)
+    assert.ok(clip && clip.width > 0 && clip.height > 0, "Visible section bounds required");
+  return page.screenshot({ path, fullPage: true, ...(clip ? { clip } : {}) });
+}
+
+export async function verifyMonthlyHistory(page, { title, months, sales, screenshot } = {}) {
+  const trigger = page.getByRole("button", { name: `Ver histórico mensal: ${title}`, exact: true });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: `${title}: histórico mensal`, exact: true });
+  await expect(dialog).toBeVisible();
+  const close = dialog.getByRole("button", { name: "Fechar histórico mensal", exact: true });
+  await expect(close).toBeFocused();
+  await expect(
+    dialog.getByRole("heading", { name: `Meses considerados (${months.length})`, exact: true }),
+  ).toBeVisible();
+  assert.deepEqual(
+    await dialog
+      .locator("section ul time")
+      .evaluateAll((nodes) => nodes.map((node) => node.dateTime)),
+    months,
+  );
+  await expect(dialog.getByRole("figure")).toHaveCount(months.length ? 5 : 0);
+  if (sales) {
+    await expect(
+      dialog.getByRole("figure", { name: "Vendas", exact: true }).locator("li > span"),
+    ).toHaveText(
+      sales.map((value) =>
+        new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(value),
+      ),
+    );
+  }
+  for (const key of ["Tab", "Shift+Tab"]) {
+    await page.keyboard.press(key);
+    await expect(close).toBeFocused();
+  }
+  const layout = await dialog.evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const clipped = [...element.querySelectorAll("h2,h3,button,time,span,figcaption")]
+      .filter(
+        (node) =>
+          node.checkVisibility() && node.clientWidth && node.scrollWidth > node.clientWidth + 2,
+      )
+      .map((node) => node.textContent);
+    return {
+      left: box.left,
+      right: box.right,
+      viewport: innerWidth,
+      overflow: element.scrollWidth > element.clientWidth + 1,
+      clipped,
+    };
+  });
+  assert.ok(
+    layout.left >= 0 && layout.right <= layout.viewport + 1,
+    "History dialog must fit viewport",
+  );
+  assert.equal(layout.overflow, false, "History dialog horizontal overflow");
+  assert.deepEqual(layout.clipped, [], "History dialog clipped labels");
+  const axe = await new AxeBuilder({ page }).include("dialog[open]").analyze();
+  assert.deepEqual(
+    axe.violations.filter(({ impact }) => impact === "serious" || impact === "critical"),
+    [],
+    "History dialog axe",
+  );
+  if (screenshot) await captureDashboardScreenshot(page, { path: screenshot, dialog: true });
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await close.click();
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  return { months, focusReturned: true, escapeClosed: true, layout };
+}
+
+export async function verifyAnalysisInteractions(page) {
+  await page.evaluate(() => {
+    history.replaceState(null, "", "/app?scenario=analysis&view=all&period=week");
+    window.qaReplacements = [];
+    window.qaRender("analysis", { selectedPeriod: "week" });
+  });
+  const value = (label, stage) =>
+    page
+      .getByRole("figure", { name: `Funil mensal: ${label}`, exact: true })
+      .locator(`[data-stage="${stage}"] dd`);
+  const select = async (key, label) => {
+    const summary = page.locator(`summary[aria-labelledby="filter-${key} value-${key}"]`);
+    const menu = summary.locator("..");
+    if (!(await menu.evaluate((element) => element.open))) await summary.click();
+    await page.getByRole("checkbox", { name: label, exact: true }).check();
+    await expect(page.getByRole("checkbox", { name: label, exact: true })).toBeChecked();
+    if (await menu.evaluate((element) => element.open)) await summary.click();
+  };
+  await expect(value("Meta mês", "appointments")).toHaveText("54");
+  await expect(value("Meta mês", "visits")).toHaveText("16");
+  await expect(value("Meta mês", "sales")).toHaveText("2");
+  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0,8");
+  await expect(value("Mês atual", "sales")).toHaveText("6");
+  await expect(value("Média do ano", "sales")).toHaveText("15");
+  await expect(value("Média dos últimos 3 meses", "sales")).toHaveText("24");
+  await expect(value("Mês anterior", "sales")).toHaveText("27");
+  const year = Array.from(
+    { length: 9 },
+    (_, index) => `2026-${String(index + 1).padStart(2, "0")}`,
+  );
+  await verifyMonthlyHistory(page, {
+    title: "Média do ano",
+    months: year,
+    sales: [3, 6, 9, 12, 15, 18, 21, 24, 27],
+  });
+  await verifyMonthlyHistory(page, {
+    title: "Média dos últimos 3 meses",
+    months: year.slice(-3),
+    sales: [21, 24, 27],
+  });
+  await verifyMonthlyHistory(page, { title: "Mês anterior", months: year.slice(-1), sales: [27] });
+  await select("owner", "Responsavel sintetico Alfa");
+  await expect(value("Meta mês", "appointments")).toHaveText("27");
+  await expect(value("Meta mês", "visits")).toHaveText("8");
+  await expect(value("Meta mês", "folders")).toHaveText("4");
+  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0,4");
+  await expect(value("Mês atual", "sales")).toHaveText("2");
+  await expect(value("Média do ano", "sales")).toHaveText("5");
+  await expect(value("Mês anterior", "sales")).toHaveText("9");
+  const firstNavigation = await page.evaluate(() => window.qaReplacements.at(-1));
+  const query = new URL(firstNavigation.url, "http://127.0.0.1").searchParams;
+  assert.deepEqual(query.getAll("owner"), ["Responsavel sintetico Alfa"]);
+  assert.equal(query.get("view"), "all");
+  assert.equal(query.has("period"), false);
+  assert.deepEqual(firstNavigation.options, { scroll: false });
+  await verifyMonthlyHistory(page, {
+    title: "Média do ano",
+    months: year,
+    sales: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  });
+  await select("owner", "Responsavel sintetico Beta");
+  await expect(value("Meta mês", "sales")).toHaveText("2");
+  await expect(value("Mês atual", "sales")).toHaveText("6");
+  await select("manager", "Gerencia sintetica Beta");
+  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Mês atual", "sales")).toHaveText("4");
+  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await expect(value("Meta mês", "sales")).toHaveText("2");
+  await expect(page.getByRole("button", { name: "Limpar filtros", exact: true })).toBeDisabled();
+  await select("company", "Empresa sintetica Alfa");
+  await expect(value("Mês atual", "sales")).toHaveText("2");
+  await select("channel", "SPC - CANAL IMOB PJ");
+  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Mês atual", "sales")).toHaveText("2");
+  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await expect(value("Mês atual", "sales")).toHaveText("6");
+  assert.deepEqual(await page.evaluate(() => window.qaCurrentProps.filters), {
+    channel: [],
+    manager: [],
+    owner: [],
+    company: [],
+  });
+  return {
+    months: year,
+    recalculatedBrokerCounts: [2, 1, 2, 1, 2, 1, 2],
+    navigation: firstNavigation,
+  };
 }
 
 async function keyboardDetails(page) {
@@ -550,7 +823,7 @@ async function run() {
     page.on("pageerror", (error) => report.pageErrors.push(error.message));
     await page.goto(server.origin);
     await checkStructure(page);
-    for (const scenario of ["complete", "unavailable"]) {
+    for (const scenario of ["complete", "unavailable", "analysis"]) {
       await page.evaluate((name) => window.qaRender(name), scenario);
       for (const theme of themes) {
         await page.evaluate((value) => {
@@ -589,19 +862,33 @@ async function run() {
             );
             return { violations: axe.violations.map(({ id, impact }) => ({ id, impact })) };
           });
-          await page.screenshot({
+          await captureDashboardScreenshot(page, {
             path: path.join(directory, `${scenario}-${theme}-${width}.png`),
-            fullPage: true,
           });
+          if (scenario === "analysis") {
+            await check(`${label}/history-popup`, () =>
+              verifyMonthlyHistory(page, {
+                title: "Média do ano",
+                months: Array.from(
+                  { length: 9 },
+                  (_, index) => `2026-${String(index + 1).padStart(2, "0")}`,
+                ),
+                sales: [3, 6, 9, 12, 15, 18, 21, 24, 27],
+                screenshot: path.join(directory, `analysis-history-${theme}-${width}.png`),
+              }),
+            );
+          }
           if (scenario === "complete" && [320, 1440, 1920].includes(width)) {
             for (const section of ["pulse", "diagnosis", "operational"]) {
-              await page.locator(`[aria-labelledby="report-${section}-title"]`).screenshot({
+              await captureDashboardScreenshot(page, {
+                section: page.locator(`[aria-labelledby="report-${section}-title"]`),
                 path: path.join(directory, `${section}-${theme}-${width}.png`),
               });
             }
           }
           if (scenario === "complete" && width !== 768)
-            await page.locator('[aria-labelledby="report-monthly-title"]').screenshot({
+            await captureDashboardScreenshot(page, {
+              section: page.locator('[aria-labelledby="report-monthly-title"]'),
               path: path.join(directory, `funnels-${theme}-${width}.png`),
             });
         }
@@ -613,6 +900,9 @@ async function run() {
         3,
       );
     });
+    await check("analysis/filters-history-goals-navigation", () =>
+      verifyAnalysisInteractions(page),
+    );
     await page.evaluate(() => window.qaRender("complete"));
     await check("keyboard/details", () => keyboardDetails(page));
     await check("ranking/authorized", async () => {
@@ -632,7 +922,7 @@ async function run() {
         [],
         "Opened ranking axe",
       );
-      await page.screenshot({ path: path.join(directory, "ranking-open.png"), fullPage: true });
+      await captureDashboardScreenshot(page, { path: path.join(directory, "ranking-open.png") });
     });
     await check("refresh/synthetic-only", async () => {
       await page.getByRole("button", { name: /atualizar/i }).click();
@@ -687,7 +977,7 @@ async function run() {
           await expect(figure.locator("circle")).toHaveCount(3);
         });
       await settle(page);
-      await page.screenshot({ path: path.join(directory, `${scenario}.png`), fullPage: true });
+      await captureDashboardScreenshot(page, { path: path.join(directory, `${scenario}.png`) });
     }
     await check("refresh/automatic-published-snapshot", async () => {
       const waitForStatusReads = await observeDashboardStatusReads(page);
@@ -783,7 +1073,7 @@ async function run() {
     report.error = error.stack;
     if (page)
       await page
-        .screenshot({ path: path.join(directory, "failure.png"), fullPage: true })
+        .screenshot({ path: path.join(directory, "failure.png"), fullPage: false })
         .catch(() => {});
   } finally {
     await browser?.close();

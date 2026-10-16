@@ -1,7 +1,11 @@
 import { createPrivilegedClient } from "@/lib/auth/supabase/privileged";
 import { salesforceIngestionSchema } from "@/lib/crm/ingestion/schema";
 import { getSalesforceIngestConfiguration } from "@/lib/crm/salesforce/config";
-import { MAX_INGESTION_BODY_BYTES, noStoreHeaders, secretsMatch } from "@/lib/security/api";
+import {
+  MAX_SALESFORCE_INGESTION_BODY_BYTES,
+  readSalesforceIngestionBody,
+} from "@/lib/crm/salesforce/transport";
+import { noStoreHeaders, secretsMatch } from "@/lib/security/api";
 
 function bearerToken(request: Request): string | null {
   const authorization = request.headers.get("authorization");
@@ -21,21 +25,24 @@ export async function POST(request: Request) {
     return Response.json({ error: "unauthorized" }, { status: 401, headers: noStoreHeaders() });
   }
 
-  const declaredLength = Number(request.headers.get("content-length") ?? 0);
-  if (Number.isFinite(declaredLength) && declaredLength > MAX_INGESTION_BODY_BYTES) {
+  const declaredLength = request.headers.get("content-length");
+  if (declaredLength !== null && !/^\d+$/.test(declaredLength)) {
+    return Response.json({ error: "invalid_payload" }, { status: 400, headers: noStoreHeaders() });
+  }
+  if (Number(declaredLength ?? 0) > MAX_SALESFORCE_INGESTION_BODY_BYTES) {
     return Response.json(
       { error: "payload_too_large" },
       { status: 413, headers: noStoreHeaders() },
     );
   }
 
-  let body: string;
+  let body: Uint8Array | null;
   try {
-    body = await request.text();
+    body = await readSalesforceIngestionBody(request);
   } catch {
     return Response.json({ error: "invalid_payload" }, { status: 400, headers: noStoreHeaders() });
   }
-  if (Buffer.byteLength(body, "utf8") > MAX_INGESTION_BODY_BYTES) {
+  if (body === null) {
     return Response.json(
       { error: "payload_too_large" },
       { status: 413, headers: noStoreHeaders() },
@@ -44,7 +51,7 @@ export async function POST(request: Request) {
 
   let input: unknown;
   try {
-    input = JSON.parse(body);
+    input = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(body));
   } catch {
     return Response.json({ error: "invalid_payload" }, { status: 400, headers: noStoreHeaders() });
   }

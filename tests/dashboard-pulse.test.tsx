@@ -125,7 +125,7 @@ describe("DashboardPulse", () => {
     expect(elements(card, "p").map(content)).toEqual(["Meta atingida"]);
   });
 
-  it.each([null, 0, -1])("keeps conversion available without a positive goal (%s)", (goal) => {
+  it.each([null, -1])("keeps conversion available without a valid goal (%s)", (goal) => {
     const card = appointment(fixture({}, goal));
     expect(elements(card, "strong").map(content)).toContain("50%");
     expect(elements(card, "dd").map(content)).toEqual([
@@ -134,6 +134,27 @@ describe("DashboardPulse", () => {
       "N/DSem base suficiente para calcular o realizado da meta.",
     ]);
     expect(elements(card, "p").map(content)).toEqual(["Meta indisponível"]);
+  });
+
+  it.each([0, 5])("shows a zero goal with realized %s without dividing by zero", (value) => {
+    const card = appointment(fixture({ value, conversion: value === 0 ? 0 : 0.5 }, 0));
+    expect(elements(card, "dd").map(content)).toEqual([
+      String(value),
+      "0",
+      "N/DSem base suficiente para calcular o realizado da meta.",
+    ]);
+    expect(elements(card, "p").map(content)).toEqual(["Meta atingida"]);
+    expect(content(card)).not.toMatch(/NaN|Infinity|Meta indisponível/);
+  });
+
+  it("preserves a zero goal when realized data is unavailable", () => {
+    const card = appointment(fixture({ value: null, conversion: null }, 0));
+    expect(elements(card, "dd").map(content)).toEqual([
+      "N/DQuantidade indisponível para este intervalo.",
+      "0",
+      "N/DSem base suficiente para calcular o realizado da meta.",
+    ]);
+    expect(elements(card, "p").map(content)).toEqual(["Realizado indisponível"]);
   });
 
   it("retains the goal when realized data is missing", () => {

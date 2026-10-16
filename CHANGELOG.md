@@ -1,5 +1,47 @@
 # Changelog
 
+## 2026-10-15: Dashboard filtrado e metas por responsavel
+
+- Prepara a ativacao conjunta do catalogo autorizado com fontes fixadas por
+  hash, comparacao do backup e ensaio isolado de falha/rollback, sem executar
+  migrations pelo planejador nem alterar escolhas de acesso preexistentes.
+- Integra o catalogo de paginas mantendo leituras restritas por etapa e os
+  filtros completos somente no dashboard autorizado; preserva referencias administrativas.
+- Preserva a retirada de codigos internos dos simuladores integrada pela main,
+  sem substituir as referencias visuais das demais paginas.
+- Corrige disputa de foco ao abrir historicos em sequencia, preservando
+  retorno nativo, Escape e navegacao por teclado; adiciona teste de regressao.
+- Preserva o planejamento de metas integrado pela main e combina suas
+  referencias com as do dashboard, sem substituir telas de outros trabalhos.
+- Atualiza somente11 referencias visuais do dashboard apos revisao das
+  mudancas solicitadas; preserva231 capturas e registra proveniencia integral.
+- Integra o ranking Qlik v2 da main, preservando seus gates e referencias;
+  atualiza inventario combinado de migrations e assercoes de restore.
+- Adiciona filtros dependentes de canal, gerente, responsavel e empresa usando
+  dimensoes dos relatorios e apenas os dois canais definidos pelo usuario.
+- Preserva agregados diarios com RLS por visao e leitura coerente do snapshot.
+- Protege detalhes de empreendimentos por RPC e permissao de ranking, sem
+  impedir filtros e totais autorizados. Reagrupa fatos antes de ocultar a dimensao.
+- Limita o transporte Salesforce a8MiB no publicador, API e rota exata Nginx,
+  mantendo os limites dos demais endpoints e sem truncar cargas.
+- Mostra meses encerrados usados nas medias em pop-up com grafico; mes anterior
+  passa a ser integral na nova analise, sem alterar comparativos de outras telas.
+- Oculta o aviso de coleta pendente quando o historico mensal ja esta disponivel.
+- Corrige o tipo do literal de whitespace na fixture SQL de validacao.
+- Exercita revogacao do ranking com perfil autorizado, preservando a proibicao
+  existente de grants globais individuais.
+- Atualiza E2E para os controles gerenciais da raiz, mantendo verificacao dos
+  filtros de periodo/visao nas etapas e ranking.
+- Mantem o E2E valido quando ainda nao existe snapshot, sem depender do atributo
+  opcional que identifica a fonte da coleta.
+- Confere persistencia do novo filtro de canal no auto-refresh autenticado,
+  preservando as provas de resposta completa, rolagem e detalhes abertos.
+- Calcula metas mensais por responsavel unico e esperado proporcional ao dia;
+  atualiza a pagina na virada do dia de Sao Paulo.
+- Remove controles/textos indicados na raiz e resume tabelas em uma linha
+  Realizado com cinco periodos. CI aprovada; ativacao depende da preparacao
+  pendente do catalogo, migration/coleta e gates de publicacao.
+
 ## 2026-10-15: Referências visuais de páginas e acessos
 
 - Incorpora a captura Linux aprovada `38819023825`: onze imagens de Usuários e onze de Páginas atualizadas, 220 imagens preservadas e 242 hashes conferidos. A matriz funcional e de acessibilidade passou sem ampliar os limites existentes.

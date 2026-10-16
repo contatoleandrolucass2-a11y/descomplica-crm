@@ -1,5 +1,106 @@
 # Worklog
 
+## 2026-10-15: Filtros, meses encerrados e metas do dashboard
+
+Retomada16/10: usuario autorizou tambem a atualizacao aditiva do catalogo.
+Conferencia10:55Z manteve main2eae903, PR238/2234298 e producao b5458ff,
+sem deploy pendente. CI do HEAD teve validate/restore verdes e release-gates
+cancelado no limite de45 minutos; repeticao solicitada. Backup delimitado do
+catalogo salvo em diretorio privado root0700/arquivo0600, com round-trip e
+SHA-256 conferidos. Preparacao de ensaio atomico com falha na ultima migration
+para comprovar rollback integral antes da ativacao; nenhuma migration aplicada.
+
+CI38854933173/cb3078f verde em todos os jobs de PR; validacao local final:
+lint/tipos/build,3614 Vitest/1181 Node/703 release aprovados, skips90/19/14.
+Dois workers evitaram timeouts de infraestrutura Windows sem relaxar limites.
+Publicacao retida: main2eae903 inclui catalogo ainda nao preparado no banco
+(17 paginas), enquanto runtime publicado continua b5458ff. Atualizacao alheia
+nao incluida na autorizacao desta analise; usuario consultado. Detalhes/criterio
+de retomada no audit. Nenhuma alteracao remota de runtime, banco ou workflow.
+
+Main2eae903/PR235 integrado: loader de etapas conserva somente dados autorizados,
+sem analise, ranking ou resumo financeiro. Testes cobrem retry e troca de snapshot.
+156 testes focais passaram; inventario61 migrations/33 arquivos/1910 assertions
+reconciliado. Baseline preserva11 entradas do dashboard e231 da main, incluindo
+22 capturas administrativas novas. CI38851076367/f36f9fa verde antes deste merge;
+nao valida o conjunto novo. Nenhuma migration/coletor/app ativado por esta tarefa.
+
+Maincd004e4/PR237 integrado preservando simuladores e quatro referencias moveis.
+Manifesto combinado com11 entradas de dashboard e231 da main;242 hashes
+conferidos. Testes focais:62 aprovados,1 skip de navegador opcional.
+
+CI38845696585 detectou disputa de foco entre historicos. Reproducao local:
+fechar o dialogo e focar o proximo botao era revertido pelo onClose atrasado.
+Removida restauracao manual redundante; dialog nativo conserva o retorno normal.
+Novo teste falhou antes e passou depois; quatro testes de navegador passaram.
+
+Mainb5458ff/PR231 incorporado apos avancar durante a revisao visual. Merge
+estruturado preserva11 entradas de dashboard e231 da main, com hashes conferidos;
+66 testes focais passaram. Mantidas as duas paginas e regras de suas rotas.
+
+Main b9377a1 incorporado preservando Qlik v2, seus testes e referencias.
+Conflitos resolvidos com inventario combinado de56 migrations/1883 assercoes;
+33 testes locais de release/paridade aprovados. Nova CI necessaria no merge.
+No merge4fa4c5d, lint/typecheck/test/build locais passaram;3547 Vitest,1181 Node
+e703 release aprovados. Skips de plataforma permanecem dependentes da CI Linux.
+CI38841091143 concluiu todos os gates funcionais. Diferencas visuais restritas
+as11 capturas de /app foram revisadas;231 referencias preservadas. Artefato,
+arvore Git, fingerprint e hashes verificados. Nova CI verify obrigatoria.
+
+CI38834121342/3f05de8 aprovou validate, banco, autorizacao compacta, advisors,
+build e restore isolado. E2E encontrou expectativa antiga dos links removidos
+na raiz. Contrato atualizado: quatro filtros, tres historicos, tabela transposta
+e ausencia dos links antigos na raiz; selecao legada segue conferida na etapa
+de oportunidades e no ranking. Matriz visual ainda nao executada nessa rodada.
+Backup privado delimitado da funcao/ACL preparado, sem dados de clientes ou
+DDL remoto. Evidencias: docs/audits/dashboard-filtros-metas-2026-10-15.md.
+CI38836371948 confirmou os mesmos gates, mas o novo teste usava atributo de
+fonte opcional em cenario sem snapshot. Seletor alterado para landmark main,
+mantendo todas as assercoes funcionais. Nao altera a interface ou a fonte.
+CI38838263880 aprovou o E2E autenticado. Matriz interrompeu em auto-refresh:
+o helper ainda exigia o link antigo de periodo. Atualizado para canal canonico
+na URL e checkbox selecionado, preservando provas de RSC completo, uma unica
+requisicao, URL, rolagem e detalhes abertos. Nenhum gate removido.
+
+Implementacao em `codex/dashboard-filtros-metas`, base a7fdf92. Usuario confirmou
+as colunas de origem, metas por responsavel unico dos relatorios filtrados e
+autorizou explicitamente atualizacao aditiva do banco/coletor apos testes.
+Referencia descomplicapro.com.br consultada somente como conhecimento.
+
+Dimensoes preservadas em agregados diarios compactos por visao autorizada;
+extensao opcional do envelope v2 e migration nova, sem alterar Qlik ou grants
+legados. Filtros OR interno/AND entre dimensoes e opcoes dependentes. Historico
+usa apenas meses completos, com pop-up e grafico dos meses considerados.
+Metas: agendamentos 1 por dia util/2 quinta, visitas8, pastas4, vendas1 por
+responsavel identificado; esperado mensal proporcional ao dia civil atual.
+Tabelas operacionais transpostas; controles/textos removidos apenas na raiz.
+
+Validacao local: tipos, primeira build51rotas, 284 testes focais e 37 testes Node
+do coletor/transporte aprovados. QA sintetica185 verificacoes aprovada; captura
+do header sticky corrigida depois, exigindo nova rodada. Leitura protegida por
+RPC adicionada na revisao, com68 testes de acesso/leitura aprovados.
+Global3245 testes aprovados/88skips: falha de texto removido corrigida e41
+focais aprovados; falha conhecida O_NOFOLLOW/Windows ainda depende de Linux.
+Transporte Salesforce ampliado apenas no endpoint exato para8MiB, sem truncar
+cargas. Main d83c22d integrado; main17ab106 observado depois, integracao pendente.
+pgTAP, CI, nova build e publicacao em andamento; nao comprovam ativacao.
+Detalhes e limites: docs/dashboard-dimensional-filters.md.
+
+Revisao visual posterior: nova matriz185 checks aprovada; imagens sem deslocar
+header sticky. Inspecao manual encontrou aviso de coleta em historico preenchido;
+condicao corrigida com regressao focal. PR238 aberto, CI em andamento. Migration
+agora inclui188 assercoes SQL e matriz total1629; nenhuma aplicacao remota.
+
+CI38831855601: validate aprovado, restore interrompido apos25 assercoes por
+literal polimorfico sem tipo na fixture pgTAP. SELECT sintetico isolado confirmou
+42804; cast explicito para text corrige a preparacao, sem alterar a migration
+ou enfraquecer as188 assercoes. Reexecucao completa obrigatoria.
+
+Segunda rodada38832697093:165 assercoes passaram antes da fixture tentar um
+allow global proibido pelo trigger existente. Fixture passa a usar manager_house,
+que ja possui ranking, e deny explicito para provar revogacao imediata. Contexto
+JWT e restaurado entre preparacao e leitura. Regras do produto inalteradas.
+
 ## 2026-10-16: Reconciliação com as entregas concorrentes de Meta e Ranking
 
 A CI `38827702755` aprovou o candidato de páginas `3b44e0ba`. Antes da

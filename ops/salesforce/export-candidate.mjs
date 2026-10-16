@@ -23,6 +23,7 @@ import {
   withSalesforceSignal,
 } from "./report-request.mjs";
 import { buildSalesforceSnapshot } from "./transform.mjs";
+import { dashboardAnalysisCoverageStart } from "./analysis-transform.mjs";
 
 export const REPORTS = [
   {
@@ -134,7 +135,7 @@ function recordId(row, name) {
   return row[name]?.recordId ?? "";
 }
 
-function project(key, rows) {
+function project(key, rows, analysisEnabled = false) {
   if (key === "opportunities") {
     return rows.map((row) => ({
       recordId: recordId(row, "Opportunity.Name"),
@@ -160,6 +161,9 @@ function project(key, rows) {
       development: field(row, "Activity.PDV__c.Name"),
       accountSource: field(row, "Activity.Account.AccountSource"),
       campaignName: field(row, "Activity.Account.Campanha__c.Name__lookup"),
+      ...(analysisEnabled === true
+        ? { businessUnit: field(row, "Activity.Unidade_de_negocio__c") }
+        : {}),
     }));
   }
   if (key === "folders") {
@@ -210,8 +214,16 @@ function project(key, rows) {
 }
 
 export async function collectReport(sessionId, definition, startDate, endDate, options = {}) {
-  const rows = await collectReportRows(sessionId, definition, startDate, endDate, options);
-  return validateProjectedRows(definition.key, project(definition.key, rows));
+  const analysisEnabled = options.analysisEnabled === true;
+  const requiredDefinition =
+    analysisEnabled && ["appointments", "visits"].includes(definition.key)
+      ? {
+          ...definition,
+          requiredColumns: [...definition.requiredColumns, "Activity.Unidade_de_negocio__c"],
+        }
+      : definition;
+  const rows = await collectReportRows(sessionId, requiredDefinition, startDate, endDate, options);
+  return validateProjectedRows(definition.key, project(definition.key, rows, analysisEnabled));
 }
 
 function saoPauloReferenceDate() {
@@ -275,10 +287,20 @@ export async function publishCandidatePayload(candidate, environment, signal) {
   }
 }
 
+export function resolveAnalysisOptions(referenceDate, environment = process.env) {
+  const analysisEnabled = environment.SALESFORCE_DASHBOARD_ANALYSIS_ENABLED === "true";
+  return {
+    analysisEnabled,
+    startDate: analysisEnabled
+      ? dashboardAnalysisCoverageStart(referenceDate)
+      : `${referenceDate.slice(0, 4)}-01-01`,
+  };
+}
+
 export async function exportCandidate(environment = process.env, options = {}) {
   const outputPath = resolveCandidateOutputPath(environment);
   const referenceDate = resolveReferenceDate(environment);
-  const startDate = `${referenceDate.slice(0, 4)}-01-01`;
+  const { analysisEnabled, startDate } = resolveAnalysisOptions(referenceDate, environment);
   throwIfSalesforceAborted(options.signal);
   const cycleTimeoutMs = Math.min(options.cycleTimeoutMs ?? 25 * 60_000, 25 * 60_000);
   if (!Number.isFinite(cycleTimeoutMs) || cycleTimeoutMs <= 0)
@@ -325,7 +347,7 @@ export async function exportCandidate(environment = process.env, options = {}) {
         definition,
         startDate,
         referenceDate,
-        { signal },
+        { signal, analysisEnabled },
       );
       log("report collected", { report: definition.key, rows: reports[definition.key].length });
     }
@@ -335,6 +357,7 @@ export async function exportCandidate(environment = process.env, options = {}) {
       referenceDate,
       generatedAt,
       requestId: randomUUID(),
+      analysisEnabled,
     });
     await writeCandidateAtomically(outputPath, candidate, undefined, signal);
     throwIfSalesforceAborted(signal);

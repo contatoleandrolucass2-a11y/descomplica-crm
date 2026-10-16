@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   ArrowDownUp,
   ChartNoAxesCombined,
@@ -25,17 +24,22 @@ import {
   type FunnelReading,
   type OperationalComparison,
 } from "@/lib/crm/dashboard/presentation";
-import { CRM_STAGES } from "@/lib/crm/stages/catalog";
+import {
+  emptyDashboardFilters,
+  type DashboardAnalysisResult,
+  type DashboardFilters as FilterValues,
+} from "@/lib/crm/dashboard/analysis";
+import { buildDashboardManagementGoals } from "@/lib/crm/dashboard/management-goals";
 
 import { SalesforceRefreshButton } from "./SalesforceRefreshButton";
 import { DashboardAutoRefresh } from "./DashboardAutoRefresh";
 import { DashboardPulse } from "./DashboardPulse";
 import { DashboardComparisons } from "./DashboardComparisons";
+import { DashboardFilters } from "./DashboardFilters";
+import { DashboardMonthlyHistory } from "./DashboardMonthlyHistory";
 import {
   AnalyticsCard,
   AnalyticsCanvas,
-  FilterGroup,
-  FilterLink,
   RankingList,
   SectionHeading,
 } from "./analytics/DataDisplay";
@@ -53,6 +57,9 @@ export interface DashboardReportProps {
   canViewRanking: boolean;
   team?: { brokers: number; managers: Array<{ name: string; total: number }> } | null;
   teamUnavailableReason?: string | undefined;
+  analysis?: DashboardAnalysisResult | null;
+  filters?: FilterValues;
+  today?: string;
 }
 
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -70,15 +77,11 @@ const operationalStages = ["appointments", "visits", "folders", "sales"] as cons
 const monthlyBlocks = [
   { key: "year-average", label: "Média do ano", detail: "Meses encerrados" },
   { key: "three-month-average", label: "Média dos últimos 3 meses", detail: "Meses encerrados" },
-  { key: "previous", label: "Mês anterior", detail: "Até o mesmo dia do mês" },
-  { key: "goal", label: "Meta atual", detail: "Meta mensal" },
-  { key: "expected", label: "Meta esperada até hoje", detail: "Esperado indisponível" },
+  { key: "previous", label: "Mês anterior", detail: "Mês encerrado" },
+  { key: "goal", label: "Meta mês", detail: "Meta mensal por corretor" },
+  { key: "expected", label: "Meta esperada até hoje", detail: "Proporcional ao dia do mês" },
   { key: "current", label: "Mês atual", detail: "Realizado" },
 ] as const;
-
-function dashboardHref(view: DashboardViewKey, period: DashboardPeriodKey) {
-  return `/app?view=${encodeURIComponent(view)}&period=${encodeURIComponent(period)}`;
-}
 
 function emptyReadings(): FunnelReading[] {
   return stages.map((key) => ({
@@ -204,29 +207,56 @@ export function DashboardReport({
   dashboard,
   selectedView,
   selectedPeriod,
-  authorizedViews,
-  canViewStages,
-  authorizedStagePaths,
   canRefresh,
   canViewRanking,
   team,
   teamUnavailableReason,
+  analysis = null,
+  filters = emptyDashboardFilters(),
+  today,
 }: DashboardReportProps) {
-  const metrics = dashboard?.metrics[selectedView] ?? null;
+  const staleMonth =
+    !!today && !!dashboard && today.slice(0, 7) !== dashboard.referenceDate.slice(0, 7);
+  const staleDay = !!today && !!dashboard && today !== dashboard.referenceDate;
+  const sourceMetrics = dashboard?.metrics[selectedView] ?? null;
+  const metrics = staleMonth ? null : sourceMetrics;
   const goalsAvailable = dashboard?.goalsAvailable === true;
   const readings = metrics ? buildPeriodFunnelReadings(metrics, selectedPeriod) : emptyReadings();
-  const goals = Object.fromEntries(
-    stages.map((stage) => {
-      const metric = metrics?.[stage];
-      const rawGoal = metric ? metricValueForPeriod(metric, selectedPeriod).goal : null;
-      return [stage, goalsAvailable && rawGoal !== null && rawGoal > 0 ? rawGoal : null];
-    }),
-  ) as Record<DashboardStageKey, number | null>;
-  const monthly = metrics ? buildMonthlyFunnelSnapshots(metrics, goalsAvailable) : [];
+  const managementGoals = dashboard
+    ? buildDashboardManagementGoals({
+        referenceDate: today ?? dashboard.referenceDate,
+        brokerCount: analysis?.brokerCount ?? null,
+      })
+    : null;
+  const goals =
+    managementGoals?.monthlyGoals ??
+    (Object.fromEntries(stages.map((stage) => [stage, null])) as Record<
+      DashboardStageKey,
+      number | null
+    >);
+  const expected = managementGoals?.expectedByToday;
+  const monthly = sourceMetrics ? buildMonthlyFunnelSnapshots(sourceMetrics, false) : [];
+  const goalReadings = (
+    values: Record<DashboardStageKey, number | null> | undefined,
+  ): FunnelReading[] =>
+    stages.map((key, index) => {
+      const value = values?.[key] ?? null;
+      const previous = index ? (values?.[stages[index - 1]!] ?? null) : null;
+      return {
+        key,
+        label: DASHBOARD_STAGES[key].label,
+        value,
+        conversion:
+          value === null || previous === null ? null : calculateConversion(value, previous),
+      };
+    });
   const sales = metrics ? metricValueForPeriod(metrics.sales, selectedPeriod) : null;
-  const salesGoal = goalsAvailable && sales && sales.goal > 0 ? sales.goal : null;
-  const salesGap = sales && salesGoal !== null ? Math.max(0, salesGoal - sales.current) : null;
-  const salesValue = dashboard?.salesValue[selectedView]?.[selectedPeriod] ?? null;
+  const salesGoal = goals.sales;
+  const salesGap =
+    sales?.current != null && salesGoal !== null ? Math.max(0, salesGoal - sales.current) : null;
+  const salesValue = staleMonth
+    ? null
+    : (dashboard?.salesValue[selectedView]?.[selectedPeriod] ?? null);
   const lowestConversion = readings.reduce<FunnelReading | null>((lowest, reading) => {
     if (reading.conversion === null) return lowest;
     return lowest?.conversion === null || lowest === null || reading.conversion < lowest.conversion
@@ -234,7 +264,9 @@ export function DashboardReport({
       : lowest;
   }, null);
   const lowestIndex = lowestConversion ? readings.indexOf(lowestConversion) : -1;
-  const visibleTeam = selectedView === "all" && canViewRanking ? team : null;
+  const visibleTeam = canViewRanking
+    ? (analysis?.team ?? (selectedView === "all" ? team : null))
+    : null;
   const knownManagers =
     visibleTeam?.managers.filter(
       (manager) => manager.name.trim().toLocaleLowerCase("pt-BR") !== "sem gerente informado",
@@ -244,6 +276,7 @@ export function DashboardReport({
   return (
     <AnalyticsCanvas kind="dashboard">
       <DashboardAutoRefresh
+        referenceDay={today}
         generatedAt={dashboard?.generatedAt ?? null}
         updatedAt={dashboard?.updatedAt ?? null}
       />
@@ -260,80 +293,24 @@ export function DashboardReport({
           </dl>
         </div>
 
-        <nav className={styles.tabs} aria-label="Visão geral e etapas comerciais">
-          <Link
-            href={dashboardHref(selectedView, selectedPeriod)}
-            prefetch={false}
-            aria-current="page"
-          >
-            Visão geral
-          </Link>
-          {CRM_STAGES.map((stage) =>
-            canViewStages &&
-            (authorizedStagePaths === undefined ||
-              authorizedStagePaths.includes(`/app/etapas/${stage.slug}`)) ? (
-              <Link
-                key={stage.key}
-                href={`/app/etapas/${stage.slug}?view=${encodeURIComponent(selectedView)}&period=${encodeURIComponent(selectedPeriod)}`}
-                prefetch={false}
-              >
-                {stage.label}
-              </Link>
-            ) : (
-              <span key={stage.key} title="Acesso indisponível">
-                {stage.label}
-              </span>
-            ),
-          )}
-        </nav>
-
         <section className={styles.filters} aria-label="Filtros do relatório">
-          <dl className={styles.dimensions}>
-            {["Canal de vendas", "Gerente de Vendas", "Responsável da conta", "Empresa"].map(
-              (label) => (
-                <div key={label}>
-                  <dt>{label}</dt>
-                  <dd>
-                    <UnavailableValue reason="Sem dados disponíveis para este filtro." />
-                  </dd>
-                </div>
-              ),
-            )}
-          </dl>
-          <div className={styles.filterLinks}>
-            <FilterGroup label="Visão">
-              {authorizedViews.map((view) => (
-                <FilterLink
-                  key={view}
-                  href={dashboardHref(view, selectedPeriod)}
-                  active={selectedView === view}
-                >
-                  {DASHBOARD_VIEWS[view].label}
-                </FilterLink>
-              ))}
-            </FilterGroup>
-            <FilterGroup label="Período">
-              {(Object.keys(DASHBOARD_PERIODS) as DashboardPeriodKey[]).map((period) => (
-                <FilterLink
-                  key={period}
-                  href={dashboardHref(selectedView, period)}
-                  active={selectedPeriod === period}
-                >
-                  {DASHBOARD_PERIODS[period].label}
-                </FilterLink>
-              ))}
-            </FilterGroup>
-            {canRefresh ? (
-              <div className={styles.refresh}>
-                <SalesforceRefreshButton available messageClassName={styles.refreshMessage!} />
-              </div>
-            ) : null}
-          </div>
+          <DashboardFilters
+            values={filters}
+            options={analysis?.options ?? emptyDashboardFilters()}
+            available={analysis !== null}
+          />
+          {canRefresh ? (
+            <div className={styles.refresh}>
+              <SalesforceRefreshButton available messageClassName={styles.refreshMessage!} />
+            </div>
+          ) : null}
         </section>
 
         {!metrics ? (
           <p className={styles.notice} role="status">
-            Dados indisponíveis para esta visão.
+            {staleMonth
+              ? "Aguardando a coleta do mês vigente."
+              : "Dados indisponíveis para esta visão."}
           </p>
         ) : null}
 
@@ -342,27 +319,52 @@ export function DashboardReport({
             id="report-pulse-title"
             kicker="Pulso do funil"
             title="Conversão por etapa"
-            description="Relações entre volumes agregados do período, sem acompanhar trajetórias individuais."
             density="compact"
           />
           <DashboardPulse readings={readings} goals={goals} />
         </section>
 
         <section className={styles.section} aria-labelledby="report-monthly-title">
-          <SectionHeading
-            id="report-monthly-title"
-            kicker="Comparativo mensal"
-            title="Realizado e meta lado a lado"
-            density="compact"
-          />
+          <SectionHeading id="report-monthly-title" title="Comparativo mensal" density="compact" />
           <div className={styles.monthlyGrid}>
             {monthlyBlocks.map((block) => {
+              const history =
+                block.key === "year-average" ||
+                block.key === "three-month-average" ||
+                block.key === "previous";
               const blockReadings =
-                monthly.find((snapshot) => snapshot.key === block.key)?.readings ?? emptyReadings();
+                block.key === "goal"
+                  ? goalReadings(goals)
+                  : block.key === "expected"
+                    ? goalReadings(expected)
+                    : block.key === "current"
+                      ? metrics
+                        ? buildPeriodFunnelReadings(metrics, "month")
+                        : emptyReadings()
+                      : analysis && !staleMonth
+                        ? (monthly.find((snapshot) => snapshot.key === block.key)?.readings ??
+                          emptyReadings())
+                        : emptyReadings();
               return (
                 <AnalyticsCard key={block.key} className={styles.card} density="compact">
-                  <h3>{block.label}</h3>
-                  <p className={styles.blockDetail}>{block.detail}</p>
+                  {history ? (
+                    <DashboardMonthlyHistory
+                      title={block.label}
+                      months={staleMonth ? [] : (analysis?.history[block.key] ?? [])}
+                      missingReason={
+                        staleMonth || !analysis?.history[block.key]?.length
+                          ? "Aguardando a coleta detalhada dos meses encerrados."
+                          : ""
+                      }
+                    />
+                  ) : (
+                    <h3>{block.label}</h3>
+                  )}
+                  <p className={styles.blockDetail}>
+                    {block.key === "goal" && analysis?.brokerCount != null
+                      ? `${numberFormatter.format(analysis.brokerCount)} corretores no grupo`
+                      : block.detail}
+                  </p>
                   <MonthlyFunnel label={block.label} readings={blockReadings} />
                   <dl className={styles.totalConversion}>
                     <div>
@@ -390,13 +392,19 @@ export function DashboardReport({
               <div>
                 <dt>Esperado até hoje</dt>
                 <dd>
-                  <UnavailableValue reason="Meta esperada até hoje ainda não definida." />
+                  {numberValue(expected?.sales ?? null, "Quantidade de corretores indisponível.")}
                 </dd>
               </div>
               <div>
                 <dt>Parecer de ritmo</dt>
                 <dd>
-                  <UnavailableValue reason="Depende do esperado até hoje." />
+                  {staleDay || expected?.sales == null || metrics?.sales.currentMonth == null ? (
+                    <UnavailableValue reason="Depende do esperado e realizado até hoje." />
+                  ) : metrics.sales.currentMonth >= expected.sales ? (
+                    "Dentro do esperado"
+                  ) : (
+                    "Abaixo do esperado"
+                  )}
                 </dd>
               </div>
             </dl>

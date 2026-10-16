@@ -30,3 +30,36 @@ Além dos testes unitários e do ensaio completo de restauração, conferir o ca
 2. Promover a imagem aprovada. O novo código aceita a chave antiga apenas quando ela continua registrada naquela linha do banco; ausência, erro, desativação ou negação por RLS nunca ativam um fallback.
 3. Ativar `20261015202643_sync_page_catalog.sql`, `20261015202644_routine_individual_page_access.sql` e `20261016000120_individual_page_data_access.sql` na mesma transação. A primeira separa as permissões e preserva as decisões antigas; a segunda aplica a permissão de Rotina às quatro RPCs correspondentes. A terceira permite ler os dados de cada etapa, perfil de metas e pontos pela respectiva página, preservando canais, sessão, bloqueio de contas e as permissões de escrita. Etapas não consultam o resumo financeiro do Dashboard; etapas não autorizadas permanecem sem valores e sem conversões inferidas. Conservar backup privado dos registros anteriores e validar os padrões, exceções, RLS, APIs e navegação.
 4. Após a ativação, um retorno a uma imagem que desconhece as treze chaves exige reconciliação do catálogo. Não promover a imagem antiga com as novas permissões ainda ativas. Correções após uma publicação concluída seguem novo PR, CI e coordenador; não executar um rollback informal.
+
+### Ativação conjunta verificada
+
+`scripts/pages/catalog-activation.mjs` prepara exclusivamente o trio aprovado
+acima. Não conecta ao banco, aplica migrations ou publica runtime. Confere os
+hashes dos arquivos, remove somente seus wrappers externos e produz uma única
+instrução `DO`, sem commits intermediários. Não concatenar as migrations
+originais dentro de outro `BEGIN`: seus próprios `COMMIT` encerrariam a
+transação antecipadamente.
+
+O coordenador deve conservar um backup privado completo de `app_pages`,
+`permissions`, `role_permissions`, `user_permission_overrides` e `user_roles`,
+com os fingerprints de `snapshotSql` obtidos no mesmo snapshot consistente.
+Incluir definições, owners, ACLs e policies anteriores das rotinas e tabelas
+afetadas. Nunca enviar registros reais aos testes ou versionar esse backup.
+`buildActivation` bloqueia as cinco tabelas, compara os fingerprints e aborta
+se alguma decisão mudou. Nesse caso, conferir a alteração concorrente e obter
+novo backup completo; não substituir apenas o hash esperado.
+
+Somente após a promoção concluída do runtime compatível, executar o SQL
+preparado em uma chamada `apply_migration`, sob as travas compartilhadas de
+produção. Não envolver `release:production` nessas mesmas travas externamente.
+Revalidar versão, ledger sem pendência, definições e permissões antes da
+ativação; o CAS de registros não detecta mudanças concorrentes de schema.
+Conferir separadamente o histórico gravado pelo MCP e sua correspondência com
+os três arquivos de origem, sem registrar versões fictícias ou reaplicá-las
+indiscriminadamente. Validar o conjunto de novas concessões, além das contagens.
+
+`pnpm qa:database:compact-users` mantém a cobertura existente e executa um
+segundo banco descartável com dados sintéticos. O ensaio força uma falha depois
+da última policy, exige o erro previsto e compara catálogo, rotinas e policies
+com o estado anterior. Em seguida testa a ativação normal. Esse ensaio não é
+uma restauração do backup real nem substitui o smoke do runtime publicado.

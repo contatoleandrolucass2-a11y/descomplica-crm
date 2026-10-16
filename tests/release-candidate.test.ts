@@ -16,6 +16,7 @@ const administratorProtectionMigration =
 const permissionAccessDraftMigration = "20261012113000_apply_user_permission_access_draft.sql";
 const sharedRoutinesMigration = "20261013014310_crm_shared_routines.sql";
 const routineCompletionsMigration = "20261014020437_crm_routine_completions.sql";
+const dashboardAnalysisMigration = "20261015185150_dashboard_analysis_snapshots.sql";
 const qlikRankingV2Migration = "20261014170549_crm_qlik_v2_standalone.sql";
 const administratorMasterOnlyPermissions = [
   "crm.simulators.execute",
@@ -37,17 +38,26 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 60-version manifest", async () => {
+  it("keeps a unique, ordered 61-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(60);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(60);
+    expect(migrations).toHaveLength(61);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(61);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
+    expect(migrations.slice(-7)).toEqual([
+      "20261014204014_local_user_presence.sql",
+      dashboardAnalysisMigration,
+      "20261015195915_unified_page_catalog.sql",
+      "20261015201949_master_all_permission_defaults.sql",
+      "20261015202643_sync_page_catalog.sql",
+      "20261015202644_routine_individual_page_access.sql",
+      "20261016000120_individual_page_data_access.sql",
+    ]);
     expect(migrations).toContain(qlikRankingV2Migration);
     expect(migrations.at(-1)).toBe("20261016000120_individual_page_data_access.sql");
   });
@@ -81,7 +91,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.tests).toBe(1722);
+    expect(plan.files).toBe(33);
+    expect(plan.tests).toBe(1910);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -292,7 +303,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1722;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1910;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

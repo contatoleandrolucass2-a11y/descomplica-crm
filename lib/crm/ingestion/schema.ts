@@ -1,5 +1,6 @@
 import { z } from "zod";
 
+import { dashboardAnalysisSchema } from "../dashboard/analysis-contract";
 import { DASHBOARD_STAGES, DASHBOARD_VIEWS } from "../dashboard/catalog";
 import { RANKING_PERIODS } from "../ranking/catalog";
 
@@ -70,9 +71,18 @@ const dashboardSchema = z
     views: z.array(dashboardViewSchema).length(3),
     metrics: z.array(dashboardMetricSchema).length(15),
     topDevelopments: z.array(topDevelopmentSchema).max(15),
+    analysis: dashboardAnalysisSchema.optional(),
   })
   .strict()
   .superRefine((dashboard, context) => {
+    if (dashboard.analysis && dashboard.analysis.referenceDate !== dashboard.referenceDate) {
+      context.addIssue({
+        code: "custom",
+        path: ["analysis", "referenceDate"],
+        message: "dashboard analysis must belong to the same snapshot",
+      });
+    }
+
     const receivedViews = new Set(dashboard.views.map((view) => view.viewKey));
     if (receivedViews.size !== dashboardViewKeys.length) {
       context.addIssue({ code: "custom", message: "dashboard views must be unique" });

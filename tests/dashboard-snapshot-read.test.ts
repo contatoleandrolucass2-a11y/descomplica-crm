@@ -3,7 +3,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { DASHBOARD_STAGES, type DashboardViewKey } from "@/lib/crm/dashboard/catalog";
 import { loadDashboardReadModel, loadStageReadModel } from "@/lib/crm/dashboard/data";
 
-const mocks = vi.hoisted(() => ({ createClient: vi.fn(), from: vi.fn() }));
+const mocks = vi.hoisted(() => ({ createClient: vi.fn(), from: vi.fn(), rpc: vi.fn() }));
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.createClient }));
 
 type Table =
@@ -51,6 +51,7 @@ function query(table: Table, response: Response | Error) {
 }
 
 let responses: Record<Table, Array<Response | Error>>;
+let analysisResponses: Array<Response | Error>;
 let queries: Array<{ table: Table; builder: ReturnType<typeof query> }>;
 let resolvedTables: Table[];
 
@@ -112,6 +113,7 @@ beforeEach(() => {
     crm_dashboard_metrics: [],
     crm_dashboard_top_developments: [],
   };
+  analysisResponses = [];
   headers(baseHeader, baseHeader);
   children();
   mocks.from.mockImplementation((table: Table) => {
@@ -121,16 +123,188 @@ beforeEach(() => {
     queries.push({ table, builder });
     return builder;
   });
-  mocks.createClient.mockResolvedValue({ from: mocks.from });
+  mocks.rpc.mockImplementation(async () => {
+    const response = analysisResponses.shift();
+    if (!response) throw new Error("Unexpected analysis RPC");
+    if (response instanceof Error) throw response;
+    return response;
+  });
+  mocks.createClient.mockResolvedValue({ from: mocks.from, rpc: mocks.rpc });
 });
 
 describe("loadDashboardReadModel snapshot consistency", () => {
+  const payload = {
+    version: 1,
+    viewKey: "all",
+    coverageStart: "2026-01-01",
+    referenceDate: "2026-10-14",
+    dimensions: { managers: [], owners: [], companies: [], developments: [] },
+    facts: [],
+  };
+  it("carrega somente a analise autorizada e da mesma versao", async () => {
+    analysisResponses = [{ data: [{ view_key: "all", payload }], error: null }];
+    const result = await loadDashboardReadModel(["all"], { includeAnalysis: true });
+    expect(result).toMatchObject({ status: "ready", dashboard: { analysis: { all: payload } } });
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("read_crm_dashboard_analysis", {
+      p_snapshot_id: baseHeader.id,
+      p_view_keys: ["all"],
+    });
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_analysis");
+  });
+  it.each(["PGRST202", "42883"])("tolera somente RPC ainda ausente: %s", async (code) => {
+    analysisResponses = [{ data: null, error: { code } }];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).resolves.toMatchObject(
+      { status: "ready", dashboard: { analysis: {} } },
+    );
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(2);
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_analysis");
+  });
+  it.each(["42501", "42P01", "PGRST205", "57014", "PGRST301"])(
+    "nao esconde erro real da analise: %s",
+    async (code) => {
+      analysisResponses = [{ data: null, error: { code } }];
+      await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+        "filtros",
+      );
+    },
+  );
+  it.each([{ viewKey: "with_canal_imob" }, { referenceDate: "2026-10-13" }])(
+    "recusa analise de outra visao ou referencia: %j",
+    async (changes) => {
+      analysisResponses = [
+        { data: [{ view_key: "all", payload: { ...payload, ...changes } }], error: null },
+      ];
+      await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+        "snapshot",
+      );
+    },
+  );
+  it("descarta analise misturada antes de validar e recarrega", async () => {
+    headers(baseHeader, nextHeader, nextHeader, nextHeader);
+    children([1, 2]);
+    analysisResponses = [
+      { data: [{ view_key: "all", payload: { invalid: true } }], error: null },
+      { data: [{ view_key: "all", payload }], error: null },
+    ];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).resolves.toMatchObject(
+      { status: "ready", dashboard: { analysis: { all: payload } } },
+    );
+    expect(mocks.rpc).toHaveBeenCalledTimes(2);
+  });
+  it.each([false, true])("preserva o payload da RPC, com ranking=%s", async (ranking) => {
+    const slice = {
+      ...payload,
+      viewKey: "with_canal_imob",
+      dimensions: {
+        managers: ["Gerente sintetico"],
+        owners: ["Responsavel sintetico"],
+        companies: ["Empresa sintetica"],
+        developments: ranking ? ["Empreendimento sintetico"] : [],
+      },
+      facts: [
+        [0, payload.referenceDate, 0, 0, 0, 0, ranking ? 0 : -1, 5, 0, 0],
+        [4, payload.referenceDate, 0, 0, 0, 0, ranking ? 0 : -1, 2, 500_000, 0],
+      ],
+    };
+    children([1], ["with_canal_imob"]);
+    analysisResponses = [{ data: [{ view_key: "with_canal_imob", payload: slice }], error: null }];
+    const result = await loadDashboardReadModel(["with_canal_imob", "with_canal_imob"], {
+      includeAnalysis: true,
+      includeTopDevelopments: ranking,
+    });
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("Expected ready");
+    expect(result.dashboard.analysis).toEqual({ with_canal_imob: slice });
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("read_crm_dashboard_analysis", {
+      p_snapshot_id: baseHeader.id,
+      p_view_keys: ["with_canal_imob"],
+    });
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_analysis");
+  });
+  it("reenvia novo snapshot e somente visoes solicitadas apos conflito", async () => {
+    const replacement = { ...nextHeader, id: 20 };
+    const views = ["with_canal_imob", "without_canal_imob"] as const;
+    headers(baseHeader, replacement, replacement, replacement);
+    children([1, 2], views);
+    analysisResponses = [
+      { data: null, error: { code: "PGRST202" } },
+      {
+        data: views.map((view_key) => ({ view_key, payload: { ...payload, viewKey: view_key } })),
+        error: null,
+      },
+    ];
+    const result = await loadDashboardReadModel([...views, views[0]], { includeAnalysis: true });
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("Expected ready");
+    expect(Object.keys(result.dashboard.analysis!)).toEqual(views);
+    expect(mocks.rpc).toHaveBeenNthCalledWith(1, "read_crm_dashboard_analysis", {
+      p_snapshot_id: 10,
+      p_view_keys: views,
+    });
+    expect(mocks.rpc).toHaveBeenNthCalledWith(2, "read_crm_dashboard_analysis", {
+      p_snapshot_id: 20,
+      p_view_keys: views,
+    });
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(4);
+  });
+  it("recusa visao extra retornada pela RPC mesmo com payload valido", async () => {
+    analysisResponses = [
+      {
+        data: [
+          { view_key: "all", payload },
+          {
+            view_key: "without_canal_imob",
+            payload: { ...payload, viewKey: "without_canal_imob" },
+          },
+        ],
+        error: null,
+      },
+    ];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+      "snapshot",
+    );
+  });
+  it("recusa divergencia entre view_key e o slice retornado", async () => {
+    analysisResponses = [{ data: [{ view_key: "with_canal_imob", payload }], error: null }];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+      "snapshot",
+    );
+  });
+  it("recusa payload invalido em cabecalho estavel", async () => {
+    analysisResponses = [
+      { data: [{ view_key: "all", payload: { ...payload, version: 2 } }], error: null },
+    ];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow();
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(2);
+  });
+  it("propaga falha de transporte da RPC sem fallback para tabela", async () => {
+    analysisResponses = [new Error("synthetic-rpc-network-failure")];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+      "synthetic-rpc-network-failure",
+    );
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_analysis");
+  });
+  it("nao retorna analise parcial quando duas leituras conflitam", async () => {
+    headers(baseHeader, nextHeader, nextHeader, { ...nextHeader, id: 20 });
+    children([1, 2]);
+    analysisResponses = [
+      { data: [{ view_key: "all", payload }], error: null },
+      { data: [{ view_key: "all", payload }], error: null },
+    ];
+    await expect(loadDashboardReadModel(["all"], { includeAnalysis: true })).rejects.toThrow(
+      "mudou durante a leitura",
+    );
+    expect(mocks.rpc).toHaveBeenCalledTimes(2);
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(4);
+  });
   it("loads only authorized stages without requiring sales summaries or ranking", async () => {
     const result = await loadStageReadModel(["all"], ["opportunities"]);
     expect(result.status).toBe("ready");
     if (result.status !== "ready") throw new Error("Expected stage fixture");
     expect(Object.keys(result.dashboard.metrics.all ?? {})).toEqual(["opportunities"]);
     expect(result.dashboard.salesValue).toEqual({});
+    expect(result.dashboard).not.toHaveProperty("analysis");
+    expect(mocks.rpc).not.toHaveBeenCalled();
     expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
     expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
     expect(queriesFor("crm_dashboard_metrics")[0]!.in).toHaveBeenCalledWith("stage_key", [
@@ -154,6 +328,58 @@ describe("loadDashboardReadModel snapshot consistency", () => {
         metrics: { all: { visits: { currentMonth: 2 } } },
       },
     });
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
+    for (const builder of queriesFor("crm_dashboard_metrics")) {
+      expect(builder.in).toHaveBeenCalledWith("view_key", ["all"]);
+      expect(builder.in).toHaveBeenCalledWith("stage_key", ["visits"]);
+    }
+  });
+
+  it("preserva somente visoes e etapas solicitadas ao substituir o snapshot", async () => {
+    const replacement = { ...nextHeader, id: 20 };
+    const views = ["with_canal_imob", "without_canal_imob"] as const;
+    const stages = ["opportunities", "visits"] as const;
+    headers(baseHeader, replacement, replacement, replacement);
+    children([1, 2], views);
+    const result = await loadStageReadModel([...views, views[0]], [...stages, stages[0]]);
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("Expected stage fixture");
+    expect(result.dashboard.id).toBe(20);
+    expect(Object.keys(result.dashboard.metrics)).toEqual(views);
+    for (const view of views) {
+      expect(Object.keys(result.dashboard.metrics[view]!)).toEqual(stages);
+      expect(result.dashboard.metrics[view]!.visits!.currentMonth).toBe(2);
+    }
+    expect(result.dashboard.salesValue).toEqual({});
+    expect(result.dashboard).not.toHaveProperty("analysis");
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
+    const builders = queriesFor("crm_dashboard_metrics");
+    expect(builders).toHaveLength(2);
+    for (const [index, builder] of builders.entries()) {
+      expect(builder.eq).toHaveBeenCalledExactlyOnceWith("snapshot_id", index === 0 ? 10 : 20);
+      expect(builder.in.mock.calls).toEqual([
+        ["view_key", views],
+        ["stage_key", stages],
+      ]);
+    }
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(4);
+  });
+
+  it("falha fechada nas etapas apos dois conflitos sem consulta ampla", async () => {
+    headers(baseHeader, nextHeader, nextHeader, { ...nextHeader, id: 20 });
+    children([1, 2]);
+    await expect(loadStageReadModel(["all"], ["visits"])).rejects.toThrow(
+      "mudou durante a leitura",
+    );
+    expect(queriesFor("crm_dashboard_snapshots")).toHaveLength(4);
+    expect(queriesFor("crm_dashboard_metrics")).toHaveLength(2);
+    expect(mocks.rpc).not.toHaveBeenCalled();
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
   });
   it.each([0, 1])(
     "retorna lote estavel com contagem %s, preservando ausencia e zero",
@@ -180,6 +406,7 @@ describe("loadDashboardReadModel snapshot consistency", () => {
         "crm_dashboard_snapshots",
       ]);
       expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
+      expect(mocks.rpc).not.toHaveBeenCalled();
       for (const builder of queriesFor("crm_dashboard_snapshots")) {
         expect(builder.select).toHaveBeenCalledExactlyOnceWith(
           "id,snapshot_key,reference_date,generated_at,updated_at,timezone,source,goals_available",
