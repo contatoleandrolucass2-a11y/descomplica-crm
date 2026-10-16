@@ -2,6 +2,9 @@
 
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
+- Publica app66ed7360 com preparacao aditiva e ativacao atomica do catalogo,
+  preservando acessos existentes; coletor validado em dois ciclos automaticos,
+  com agregados dos novos filtros conciliados por hash com o banco.
 - Prepara a ativacao conjunta do catalogo autorizado com fontes fixadas por
   hash, comparacao do backup e ensaio isolado de falha/rollback, sem executar
   migrations pelo planejador nem alterar escolhas de acesso preexistentes.
