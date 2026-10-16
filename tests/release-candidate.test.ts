@@ -16,6 +16,7 @@ const administratorProtectionMigration =
 const permissionAccessDraftMigration = "20261012113000_apply_user_permission_access_draft.sql";
 const sharedRoutinesMigration = "20261013014310_crm_shared_routines.sql";
 const routineCompletionsMigration = "20261014020437_crm_routine_completions.sql";
+const qlikRankingV2Migration = "20261014170549_crm_qlik_v2_standalone.sql";
 const administratorMasterOnlyPermissions = [
   "crm.simulators.execute",
   "crm.commercial_engine.execute",
@@ -36,17 +37,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 59-version manifest", async () => {
+  it("keeps a unique, ordered 60-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(59);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(59);
+    expect(migrations).toHaveLength(60);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(60);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
+    expect(migrations).toContain(qlikRankingV2Migration);
     expect(migrations.at(-1)).toBe("20261016000120_individual_page_data_access.sql");
   });
 
@@ -79,7 +81,7 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.tests).toBe(1468);
+    expect(plan.tests).toBe(1722);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -224,9 +226,14 @@ describe("release-candidate activation defaults", () => {
         expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(route);
       }
       const roots = matrix.expectedPrimaryNavigationRootsForRole(role);
+      expect(
+        matrix.expectedHeaderRoutesByRole[role].includes("/app/configuracoes/metas"),
+        role,
+      ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(15);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(16);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
           "Simulação",
@@ -285,7 +292,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1468;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1722;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

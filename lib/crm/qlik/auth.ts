@@ -4,6 +4,7 @@ import type { AvailableQlikRelayConfiguration } from "./config";
 import { QLIK_RELAY_MAX_CLOCK_SKEW_MS } from "./config";
 
 const RELAY_PATH = "/api/ingest/qlik";
+type RelayPath = typeof RELAY_PATH | "/api/ingest/qlik/v2";
 const UUID_V4_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 const ISO_TIMESTAMP_PATTERN = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.\d{1,6})?Z$/;
 const SHA256_PATTERN = /^[0-9a-f]{64}$/;
@@ -27,13 +28,16 @@ export function qlikRelayBodySha256(body: Uint8Array): string {
   return createHash("sha256").update(body).digest("hex");
 }
 
-export function qlikRelayCanonicalRequest(input: {
-  keyId: string;
-  timestamp: string;
-  nonce: string;
-  bodySha256: string;
-}): string {
-  return ["POST", RELAY_PATH, input.keyId, input.timestamp, input.nonce, input.bodySha256].join(
+export function qlikRelayCanonicalRequest(
+  input: {
+    keyId: string;
+    timestamp: string;
+    nonce: string;
+    bodySha256: string;
+  },
+  relayPath: RelayPath = RELAY_PATH,
+): string {
+  return ["POST", relayPath, input.keyId, input.timestamp, input.nonce, input.bodySha256].join(
     "\n",
   );
 }
@@ -41,8 +45,11 @@ export function qlikRelayCanonicalRequest(input: {
 export function createQlikRelaySignature(
   secret: string,
   input: { keyId: string; timestamp: string; nonce: string; bodySha256: string },
+  relayPath: RelayPath = RELAY_PATH,
 ): string {
-  return createHmac("sha256", secret).update(qlikRelayCanonicalRequest(input)).digest("hex");
+  return createHmac("sha256", secret)
+    .update(qlikRelayCanonicalRequest(input, relayPath))
+    .digest("hex");
 }
 
 function parseStrictUtcTimestamp(value: string): number | null {
@@ -69,9 +76,17 @@ function parseStrictUtcTimestamp(value: string): number | null {
 export function authenticateQlikRelayRequest(
   request: Request,
   body: Uint8Array,
-  configuration: AvailableQlikRelayConfiguration,
+  configuration: Pick<AvailableQlikRelayConfiguration, "keyId" | "hmacSecret">,
   now: Date = new Date(),
+  relayPath: RelayPath = RELAY_PATH,
 ): QlikRelayAuthentication {
+  if (
+    request.method !== "POST" ||
+    new URL(request.url).pathname !== relayPath ||
+    !Number.isFinite(now.getTime())
+  ) {
+    return { ok: false };
+  }
   const keyId = request.headers.get("x-crm-relay-key-id") ?? "";
   const requestedAt = request.headers.get("x-crm-relay-timestamp") ?? "";
   const nonce = request.headers.get("x-crm-relay-nonce") ?? "";
@@ -100,12 +115,16 @@ export function authenticateQlikRelayRequest(
   const bodySha256 = qlikRelayBodySha256(body);
   if (!equalHex(bodySha256, declaredDigest)) return { ok: false };
 
-  const expectedSignature = createQlikRelaySignature(configuration.hmacSecret, {
-    keyId,
-    timestamp: requestedAt,
-    nonce,
-    bodySha256,
-  });
+  const expectedSignature = createQlikRelaySignature(
+    configuration.hmacSecret,
+    {
+      keyId,
+      timestamp: requestedAt,
+      nonce,
+      bodySha256,
+    },
+    relayPath,
+  );
   if (!equalHex(signature, expectedSignature)) return { ok: false };
 
   return {

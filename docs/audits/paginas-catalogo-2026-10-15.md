@@ -106,3 +106,24 @@ permitido; Dashboard e Vendas negados retornaram HTTP 403, e o canal negado
 renderizou acesso restrito sem dados. O Next.js pode iniciar HTTP 200 antes
 do bloqueio de canal por streaming; o guard e a RLS negam o conteúdo. Os dados
 sintéticos e as exceções temporárias foram removidos após a verificação.
+
+## Reconciliação operacional em 16/10/2026
+
+A CI `38827702755` concluiu com sucesso no candidato `3b44e0ba`. A consulta
+posterior identificou produção em `b9377a10`, publicada em
+`2026-10-16T02:59:30.399Z`, e revisão remota `b5458ff5`. O deploy anterior
+não foi executado; a branch incorporou o novo `main`, preservando Meta,
+Ranking e Qlik. As referências visuais foram compostas por rota, mantendo
+22 imagens de Usuários/Páginas e 220 da revisão remota. Todos os hashes e
+tamanhos coincidiram com os arquivos. O inventário combinado contém
+60 migrations e 1.722 asserções pgTAP; exige nova CI completa antes de publicar.
+
+A integração passou em lint, tipos, formato, build, auditoria de dependências e
+Gitleaks. Vitest concluiu 3.402 testes, com 86 skips; os testes Node concluíram
+1.178 casos, com cinco skips; o guard de publicação concluiu 703 casos, com
+14 verificações físicas reservadas ao Linux da CI. A execução inicial com
+concorrência livre excedeu prazos na máquina carregada e foi interrompida;
+a execução completa com dois workers passou sem ampliar nenhum timeout.
+O ensaio local de 60 migrations aprovou 1.722 asserções na origem e 1.722 no
+banco restaurado, preservando owners e privilégios. Manifesto:
+`4735639196c72ac139221706ba978654fcb781ec9107c9840fb801f50064edb6`.

@@ -41,9 +41,10 @@ const dashboardLinks = [
   ["Vendas", "/app/etapas/vendas"],
   ["Repasse", "/app/repasse"],
 ];
-const managementLinks = [
+export const archiveManagementNavigationContract = [
   ["Visão geral", "/app/gestao"],
   ["Rotina", "/app/gestao/rotina"],
+  ["Meta", "/app/configuracoes/metas"],
 ];
 const administrationLinks = [
   ["Usuários", "/admin/usuarios"],
@@ -1441,7 +1442,12 @@ export async function checkArchiveNavigation(
             "none",
             "Management labels must retain sentence case",
           );
-          await assertLinks(page, "authorized-navigation-crm-management", managementLinks, route);
+          await assertLinks(
+            page,
+            "authorized-navigation-crm-management",
+            archiveManagementNavigationContract,
+            route,
+          );
           await assertDisabledItems(page, "authorized-navigation-crm-management", []);
           await assertOpenNavigationGeometry(page);
           stage = "switch-disclosure-by-pointer";

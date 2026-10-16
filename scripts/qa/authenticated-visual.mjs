@@ -141,8 +141,11 @@ const approvedCanvasByRoute = new Map([
   ["/app/ranking", { asset: "ranking-canal-parcerias.webp", region: "left" }],
   ["/app/canal-de-parcerias", { asset: "ranking-canal-parcerias.webp", region: "right" }],
   ["/app/configuracoes", { asset: "configuracoes-metas-funil.webp", region: "left" }],
-  ["/app/configuracoes/metas", { asset: "configuracoes-metas-funil.webp", region: "right" }],
-  ["/app/configuracoes/metas/parcerias", { asset: "metas-parcerias-pontos.webp", region: "left" }],
+  ["/app/configuracoes/metas", { asset: "metas-dv-live-2026-10-15.webp", region: "full" }],
+  [
+    "/app/configuracoes/metas/parcerias",
+    { asset: "metas-parcerias-live-2026-10-15.webp", region: "full" },
+  ],
   ["/app/configuracoes/metas/pontos", { asset: "metas-parcerias-pontos.webp", region: "right" }],
   ["/app/simulacao", { asset: "hub-simulacao-associativo.webp", region: "left" }],
   [
@@ -166,9 +169,13 @@ if (approvedCanvasByRoute.size !== routes.length) {
 const canvasDensityLimitByRoute = new Map([
   // The complete reference report replaces the former single-screen dashboard.
   ["/app", 4800],
+  // Full eight-section goal reference replaces the former compact settings form.
+  ["/app/configuracoes/metas", 2600],
+  ["/app/configuracoes/metas/parcerias", 2300],
   // Keep the workspace compact while independent page controls scroll inside
   // their keyboard-accessible category panel.
   ["/admin/usuarios", 1650],
+
   ["/app/etapas/agendamentos", 1500],
   ["/app/etapas/visitas", 1500],
   ["/app/etapas/pastas", 1350],
@@ -797,7 +804,10 @@ async function compareApprovedCanvas(buffer, approvedCanvas) {
   const left =
     approvedCanvas.region === "left" ? 0 : Math.ceil(metadata.width / 2) + separatorInset;
   const width = approvedCanvas.region === "left" ? half - separatorInset : metadata.width - left;
-  const extract = { left, top: 0, width, height: metadata.height };
+  const extract =
+    approvedCanvas.region === "full"
+      ? { left: 0, top: 0, width: metadata.width, height: metadata.height }
+      : { left, top: 0, width, height: metadata.height };
   const [actualColor, expectedColor, actualEdges, expectedEdges] = await Promise.all([
     normalizeCanvasReference(buffer, null, false),
     normalizeCanvasReference(reference, extract, false),
@@ -1248,6 +1258,50 @@ async function inspectRoute(
       const blockedStyle = blockedAction ? getComputedStyle(blockedAction) : null;
       const enabledStyle = enabledAction ? getComputedStyle(enabledAction) : null;
       const unavailableStyle = unavailableAction ? getComputedStyle(unavailableAction) : null;
+      const isGoalPlanning = [
+        "/app/configuracoes/metas",
+        "/app/configuracoes/metas/parcerias",
+      ].includes(window.location.pathname);
+      const goalCalendarSelections = isGoalPlanning
+        ? [...document.querySelectorAll(".goal-calendar-filters select")].map((select) => {
+            const style = getComputedStyle(select);
+            const padding = parseFloat(style.paddingLeft) + parseFloat(style.paddingRight);
+            const arrowReserve = ["none", "textfield"].includes(style.appearance) ? 0 : 18;
+            const availableWidth = select.clientWidth - padding - arrowReserve;
+            const probe = document.createElement("span");
+            Object.assign(probe.style, {
+              position: "fixed",
+              left: "-10000px",
+              whiteSpace: "pre",
+              visibility: "hidden",
+              fontFamily: style.fontFamily,
+              fontSize: style.fontSize,
+              fontWeight: style.fontWeight,
+              fontStyle: style.fontStyle,
+              fontVariantNumeric: style.fontVariantNumeric,
+              fontFeatureSettings: style.fontFeatureSettings,
+              letterSpacing: style.letterSpacing,
+              textTransform: style.textTransform,
+            });
+            document.body.append(probe);
+            const optionWidths = [...select.options].map((option) => {
+              probe.textContent = option.label;
+              return probe.getBoundingClientRect().width;
+            });
+            probe.remove();
+            return {
+              label: select.getAttribute("aria-label"),
+              selectedText: select.selectedOptions[0]?.label ?? "",
+              optionCount: select.options.length,
+              availableWidth,
+              widestOption: Math.max(...optionWidths),
+              visible: select.checkVisibility({ checkOpacity: true, checkVisibilityCSS: true }),
+              textFits:
+                optionWidths.length > 0 &&
+                optionWidths.every((width) => width <= availableWidth + 0.5),
+            };
+          })
+        : [];
       return {
         pathname: window.location.pathname,
         h1Count: document.querySelectorAll("h1").length,
@@ -1258,6 +1312,34 @@ async function inspectRoute(
         canvasDensityReady:
           root.clientWidth !== 1440 ||
           Math.max(root.scrollHeight, document.body.scrollHeight) <= maxDesktopHeight,
+        goalPlanningComplete:
+          !["/app/configuracoes/metas", "/app/configuracoes/metas/parcerias"].includes(
+            window.location.pathname,
+          ) ||
+          (document.querySelectorAll(".goal-studio .goal-panel").length === 8 &&
+            [
+              "controls",
+              "preview",
+              "conversion",
+              "weekly",
+              "brokers",
+              "broker-production",
+              "calendar",
+              "productive",
+            ].every((panel) => document.querySelector(`.goal-${panel}-panel`))),
+        goalCalendarSelections,
+        goalCalendarReadable:
+          !isGoalPlanning ||
+          (goalCalendarSelections.length === 2 &&
+            goalCalendarSelections.some(
+              (field) => field.label === "Selecionar mês" && field.optionCount === 12,
+            ) &&
+            goalCalendarSelections.some(
+              (field) => field.label === "Selecionar ano" && field.optionCount === 11,
+            ) &&
+            goalCalendarSelections.every(
+              (field) => field.visible && field.selectedText && field.textFits,
+            )),
         dashboardReportReady:
           window.location.pathname !== "/app" ||
           (["pulse", "monthly", "diagnosis", "operational", "team"].every((section) =>
@@ -1459,6 +1541,8 @@ async function inspectRoute(
     !snapshot.topbarCollision &&
     snapshot.navigationGeometryReady &&
     snapshot.canvasDensityReady &&
+    snapshot.goalPlanningComplete &&
+    snapshot.goalCalendarReadable &&
     snapshot.userAccessWorkspaceReady &&
     snapshot.pageCatalogScrollReady &&
     snapshot.dashboardReportReady &&

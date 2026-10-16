@@ -24,6 +24,13 @@ referência anterior. Nenhum limiar foi ampliado. O workflow temporário de capt
 foi removido; a CI normal em modo de verificação permanece obrigatória antes da
 integração e publicação.
 
+Na reconciliação de 16/10 com `main` em `b5458ff5`, o manifesto passou a
+preservar as referências concorrentes de Meta e Ranking e a incorporar somente
+os registros de Usuários e Páginas da captura acima. A composição está
+documentada em `integrationProvenance`; os 242 arquivos mantêm os hashes e
+tamanhos de suas capturas de origem. Essa composição não representa uma nova
+captura nem dispensa a CI completa do candidato integrado.
+
 ## Usuários e presença em 15/10/2026
 
 A captura Linux `38766616330` concluiu com sucesso no commit

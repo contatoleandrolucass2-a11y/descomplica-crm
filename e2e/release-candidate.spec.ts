@@ -372,7 +372,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/ranking",
-    heading: "Ranking por pontos",
+    heading: "Ranking das imobiliárias",
     allowed: rankingRoles,
   },
   {
@@ -397,12 +397,12 @@ const protectedSurfaces = [
   },
   {
     path: "/app/configuracoes/metas",
-    heading: "Metas do funil",
+    heading: "Planejamento de metas",
     allowed: adminRoles,
   },
   {
     path: "/app/configuracoes/metas/parcerias",
-    heading: "Metas do funil de parcerias",
+    heading: "Planejamento de metas",
     allowed: adminRoles,
   },
   {
@@ -556,6 +556,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/simulacao",
     ...managementRoutes,
     ...administrationNavigationRoutes,
+    "/app/configuracoes/metas",
   ]),
   admin: sortedRouteSet([
     ...operationalRoutes,
@@ -565,6 +566,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/simulacao",
     ...managementRoutes,
     ...administrationNavigationRoutes,
+    "/app/configuracoes/metas",
   ]),
   coordinator: sortedRouteSet([
     ...operationalRoutes,
@@ -819,7 +821,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 15 : activeOperationalRoles.has(role) ? 10 : 0,
+      adminRoles.has(role) ? 16 : activeOperationalRoles.has(role) ? 10 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
@@ -839,6 +841,9 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
     );
     expect(expectedHeaderRoutesByRole[role].includes(connectedSystemsRoute), role).toBe(
       directRoutes.includes(connectedSystemsRoute) && directRoutes.includes("/admin"),
+    );
+    expect(expectedHeaderRoutesByRole[role].includes("/app/configuracoes/metas"), role).toBe(
+      directRoutes.includes("/app/configuracoes/metas") && directRoutes.includes("/app/gestao"),
     );
   }
   expect(protectedSurfaces.find((surface) => surface.path === "/app/repasse")?.allowed).toBe(
@@ -1343,6 +1348,50 @@ for (const role of expectedRoles) {
           }),
         );
       expect(navigationRoots).toEqual(expectedPrimaryNavigationRootsForRole(role));
+      const metaLink = page.locator(
+        '#authorized-navigation-crm-management a[href="/app/configuracoes/metas"]',
+      );
+      await expect(metaLink).toHaveCount(adminRoles.has(role) ? 1 : 0);
+      if (adminRoles.has(role)) {
+        await navigation.getByRole("button", { name: "Gestão", exact: true }).click();
+        await expect(metaLink).toBeVisible();
+        await metaLink.click();
+        await expect(page).toHaveURL((url) => url.pathname === "/app/configuracoes/metas");
+        const goalsHeading = page.getByRole("heading", {
+          level: 1,
+          name: "Planejamento de metas",
+          exact: true,
+        });
+        await expect(page.locator("main").filter({ has: goalsHeading })).toBeVisible();
+        if (role === "master") {
+          const rateNames = [
+            "opportunitiesRate",
+            "appointmentsRate",
+            "visitsRate",
+            "foldersRate",
+            "approvedFoldersRate",
+          ] as const;
+          for (const [index, name] of rateNames.entries()) {
+            const rateInput = page.locator(`.goal-rate-input input[name="${name}"]`);
+            const originalValue = await rateInput.inputValue();
+            const fractionalValue = index % 2 === 0 ? "1.67" : "2.42";
+            await rateInput.fill(fractionalValue);
+            await expect(rateInput).toHaveValue(fractionalValue);
+            expect(
+              await rateInput.evaluate((element) => {
+                const input = element as HTMLInputElement;
+                return {
+                  valid: input.checkValidity(),
+                  stepMismatch: input.validity.stepMismatch,
+                };
+              }),
+              name,
+            ).toEqual({ valid: true, stepMismatch: false });
+            await rateInput.fill(originalValue);
+            await expect(rateInput).toHaveValue(originalValue);
+          }
+        }
+      }
       await expect(navigation.locator('a[href="/admin"]')).toHaveCount(0);
 
       const administrationTrigger = navigation.getByRole("button", {
@@ -1461,7 +1510,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       ["/app/etapas/visitas", "Visitas"],
       ["/app/etapas/pastas", "Pastas"],
       ["/app/etapas/vendas", "Vendas"],
-      ["/app/ranking", "Ranking por pontos"],
+      ["/app/ranking", "Ranking das imobiliárias"],
       ["/app/canal-de-parcerias", "Ranking das imobiliárias"],
     ] as const;
 
@@ -1494,7 +1543,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
   });
 });
 
-test("dashboard and ranking filter links enforce their selected server state", async ({
+test("dashboard filters retain selected state while partnership ranking stays unavailable", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1506,14 +1555,6 @@ test("dashboard and ranking filter links enforce their selected server state", a
       {
         pathname: "/app?view=with_canal_imob&period=week",
         selectedHref: "/app?view=with_canal_imob&amp;period=week",
-      },
-      {
-        pathname: "/app/ranking?period=month&scope=managers",
-        selectedHref: "/app/ranking?period=month&amp;scope=managers",
-      },
-      {
-        pathname: "/app/ranking?period=week&scope=managers",
-        selectedHref: "/app/ranking?period=week&amp;scope=managers",
       },
     ];
 
@@ -1527,6 +1568,88 @@ test("dashboard and ranking filter links enforce their selected server state", a
       expect(html).toMatch(
         new RegExp(`<a(?=[^>]*href="${escapedHref}")(?=[^>]*aria-current="page")[^>]*>`),
       );
+    }
+
+    // pgTAP rolls back its Qlik publications; this isolated runtime has no v2 dataset.
+    for (const rankingCase of [
+      {
+        pathname: "/app/ranking?period=latest&kind=imobs",
+        kind: "imobs",
+        state: "Nenhuma publicação disponível",
+      },
+      {
+        pathname: "/app/ranking?period=latest&kind=developments",
+        kind: "developments",
+        state: "Nenhuma publicação disponível",
+      },
+      {
+        pathname: "/app/ranking?period=month&scope=managers",
+        kind: "imobs",
+        state: "Filtros inválidos",
+      },
+      {
+        pathname: "/app/ranking?period=week&scope=managers",
+        kind: "imobs",
+        state: "Filtros inválidos",
+      },
+    ]) {
+      const response = await page.goto(rankingCase.pathname);
+      expect(response?.status()).toBe(200);
+      await expect(
+        page.getByRole("heading", { level: 1, name: "Ranking das imobiliárias" }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", { name: rankingCase.state, exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByText("Direcional · SP CAPITAL · CANAL IMOB", { exact: true }),
+      ).toBeVisible();
+      await expect(
+        page.getByRole("heading", {
+          name: rankingCase.kind === "imobs" ? "Top 10 imobiliárias" : "Top 10 empreendimentos",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await expect(page.getByRole("table")).toHaveCount(1);
+      await expect(page.locator("table tbody tr")).toHaveCount(0);
+      const ranking = page.locator("main").last();
+      await expect(ranking).not.toContainText(/R\$|\b(?:NaN|undefined)\b/);
+      await expect(ranking.locator("time")).toHaveCount(0);
+      const values = ranking.locator("dd");
+      expect(await values.count()).toBeGreaterThan(0);
+      for (const value of await values.all()) await expect(value).toHaveText("Indisponível");
+      for (const label of ["Ano", "Período", "Mês inicial", "Mês final"]) {
+        const control = page.getByRole("combobox", { name: label, exact: true });
+        await expect(control).toBeDisabled();
+      }
+      await expect(page.getByRole("combobox", { name: "Período", exact: true })).toHaveValue(
+        "latest",
+      );
+      await expect(page.getByRole("searchbox")).toBeDisabled();
+      for (const [label, kind] of [
+        ["IMOBs", "imobs"],
+        ["Produtos", "developments"],
+      ] as const) {
+        const control = page.getByRole("radio", { name: label, exact: true });
+        await expect(control).toBeDisabled();
+        if (kind === rankingCase.kind) await expect(control).toBeChecked();
+        else await expect(control).not.toBeChecked();
+      }
+      for (const label of ["Unidade de negócio", "Regional", "Canal"]) {
+        await expect(page.getByRole("combobox", { name: label, exact: true })).toHaveCount(0);
+      }
+      const submit = page.getByRole("button", {
+        name: rankingCase.state === "Filtros inválidos" ? "Tentar novamente" : "Aplicar filtros",
+        exact: true,
+      });
+      if (rankingCase.state === "Filtros inválidos") await expect(submit).toBeEnabled();
+      else await expect(submit).toBeDisabled();
+      await expect(
+        page.getByLabel("Filtros do ranking de parcerias", { exact: true }).getByRole("link"),
+      ).toHaveCount(0);
+      await expect(
+        page.getByRole("heading", { name: "Ranking por pontos", exact: true }),
+      ).toHaveCount(0);
     }
   });
 });

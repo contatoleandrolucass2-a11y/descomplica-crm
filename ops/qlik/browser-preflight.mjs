@@ -74,9 +74,10 @@ export function createBrowserMetadataClient(enigma, schema, inspect, environment
       return await Promise.race([active, interrupted]);
     } catch (error) {
       let reason = "engine_unavailable";
+      let limit;
       if (!stopped && !abort.signal.aborted) {
         try {
-          // Read only an own data-code, never error getters, messages or private fields.
+          // Own data descriptors only; never getters, messages or SDK payloads.
           const code = Object.getOwnPropertyDescriptor(error, "code")?.value;
           if (
             typeof code === "string" &&
@@ -93,15 +94,61 @@ export function createBrowserMetadataClient(enigma, schema, inspect, environment
               "qix_metadata_failed",
               "qix_cleanup_failed",
             ].includes(code)
-          )
+          ) {
             reason = code;
+            if (code === "qix_metadata_limit") {
+              const detail = Object.getOwnPropertyDescriptor(error, "limit")?.value;
+              const read = (key) => Object.getOwnPropertyDescriptor(detail, key)?.value;
+              const stage = read("stage");
+              const kind = read("kind");
+              const observed = read("observed");
+              const maximum = read("maximum");
+              const maxima = {
+                array_items: [16, 32, 64, 128, 512, 10_000, 131_071],
+                string_length: [256, 4096],
+                text_budget: [65_536],
+                definition_bytes: [262_144, 524_288],
+                definition_depth: [32, 34],
+                tree_depth: [8],
+                tree_nodes: [128],
+                references: [512],
+                master_definitions: [64],
+                catalog_items: [10_000],
+                catalog_fields: [256],
+                result_bytes: [262_144],
+                artifact_bytes: [131_072],
+              };
+              if (
+                [
+                  "property_tree",
+                  "reachability",
+                  "candidate",
+                  "container",
+                  "master_plan",
+                  "measure_catalog",
+                  "field_catalog",
+                  "master_definitions",
+                  "named_measures",
+                  "variables",
+                  "output",
+                ].includes(stage) &&
+                typeof kind === "string" &&
+                Object.hasOwn(maxima, kind) &&
+                maxima[kind].includes(maximum) &&
+                Number.isSafeInteger(observed) &&
+                observed > maximum
+              )
+                limit = { stage, kind, observed, maximum };
+            }
+          }
         } catch {
-          // Uninspectable thrown values retain the generic diagnostic.
+          // Uninspectable details never replace the fixed diagnostic or escape this boundary.
         }
       }
       return {
         status: "unavailable",
         reason: stopped || abort.signal.aborted ? "cancelled" : reason,
+        ...(!stopped && !abort.signal.aborted && limit ? { limit } : {}),
       };
     } finally {
       stopped = true;
