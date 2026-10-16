@@ -23,6 +23,10 @@
   projetado ausente nao vira propriedade vazia; titulo/ID/hash nativos continuam
   obrigatorios. Alteracoes e colisoes seguem recusadas. Revisao independente
   sem P1/P2 de binding nos cenarios, nao confirma entrada exata da fonte.
+- Lint/tipos/build Windows exit0 no corretivo. Teste completo registrou falhas
+  de subprocessos locais fora do Qlik; conjunto ainda em execucao e causa
+  nao isolada. Nao ocultar falhas ou reduzir cobertura. PR239 inicialmente
+  sem checks; push documental synchronize sera conferido, sem alegar CI verde.
 
 ## 2026-10-16: PR216 integrado; promocao e fatos ainda pendentes
 

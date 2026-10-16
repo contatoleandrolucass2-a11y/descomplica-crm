@@ -7,6 +7,8 @@
 - Distingue recusas do catalogo por codigos fixos, sem dados ou erros brutos.
 - Registra CRM publicado em b937 e coleta real recusada por master_pin_mismatch;
   owner recuperado pelo coordenador. Atualizacao de fatos ainda pendente.
+- Registra lint/tipos/build Windows aprovados; falhas locais de subprocessos
+  permanecem explicitas e a CI do corretivo ainda e obrigatoria.
 
 ## 2026-10-16 - Mapeamento nativo Qlik
 

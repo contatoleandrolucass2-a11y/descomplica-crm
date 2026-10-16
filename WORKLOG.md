@@ -31,6 +31,12 @@ hash nativo intacto, label explicitamente divergente, titulo/identidade/hash
 alterados e cleanup. Revisao independente sem P1/P2 de binding nos cenarios.
 Gates globais e novo canario real ainda pendentes; nao declarar origem resolvida.
 
+Rodada Windows do corretivo: lint/tipos/build exit0. Teste completo ainda em
+execucao, com falhas observadas em subprocessos de inventario/devtools e
+referencia; causas nao isoladas, nao alterar asserts nem atribuir ao Qlik.
+PR239 aberto em draft; consulta inicial sem checks vinculados. Nova revisao
+documental envia evento synchronize; CI Linux do SHA exato segue obrigatoria.
+
 ## 2026-10-16: Candidato integrado e CI exata de main
 
 PR216/head8dd4a3e integrado normalmente em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5
