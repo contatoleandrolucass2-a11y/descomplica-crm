@@ -493,6 +493,115 @@ describe("authorized hierarchical navigation", () => {
     expect(isNavigationRootActive("/app/ranking/detalhe", simulationParent)).toBe(false);
   });
 
+  it("presents authorized goals as Meta under Gestão and preserves the source catalog", () => {
+    const management: NavigationItem = {
+      key: "crm.management",
+      path: "/app/gestao",
+      name: "Gestão",
+      description: "Gestão autorizada",
+      section: "management",
+      parentKey: null,
+      sortOrder: 10,
+    };
+    const goals: NavigationItem = {
+      key: "crm.settings.goals",
+      path: "/app/configuracoes/metas",
+      name: "Metas do funil",
+      description: "Metas autorizadas",
+      section: "settings",
+      parentKey: "crm.settings",
+      sortOrder: 20,
+    };
+    const partnershipGoals: NavigationItem = {
+      ...goals,
+      key: "crm.settings.partnerships",
+      path: "/app/configuracoes/metas/parcerias",
+      name: "Parcerias",
+    };
+    const points: NavigationItem = {
+      ...goals,
+      key: "crm.settings.points",
+      path: "/app/configuracoes/metas/pontos",
+      name: "Pontuação",
+    };
+    const source = [management, goals, partnershipGoals, points];
+    const snapshot = structuredClone(source);
+    const groups = buildNavigationGroups(getPrimaryNavigation(source));
+    const group = groups[0]!;
+
+    expect(groups).toHaveLength(1);
+    expect(group.page).toEqual(management);
+    expect(group.children).toEqual([
+      { ...goals, name: "Meta", section: "management", parentKey: management.key, sortOrder: 30 },
+    ]);
+    const breadcrumbs = getBreadcrumbNavigation(source);
+    expect(buildBreadcrumbs(goals.path, breadcrumbs).map((page) => page.name)).toEqual([
+      "Gestão",
+      "Meta",
+    ]);
+    expect(buildBreadcrumbs(partnershipGoals.path, breadcrumbs).map((page) => page.name)).toEqual([
+      "Gestão",
+      "Meta",
+      "Parcerias",
+    ]);
+    expect(buildBreadcrumbs(points.path, breadcrumbs).map((page) => page.name)).toEqual([
+      "Gestão",
+      "Meta",
+      "Pontuação",
+    ]);
+    for (const path of [goals.path, partnershipGoals.path, points.path]) {
+      expect(isNavigationGroupActive(path, group)).toBe(true);
+    }
+    expect(isNavigationGroupActive(`${goals.path}/desconhecida`, group)).toBe(false);
+    expect(source).toEqual(snapshot);
+  });
+
+  it("never creates Meta or regroups goals without their authorized Gestão root", () => {
+    const management: NavigationItem = {
+      key: "crm.management",
+      path: "/app/gestao",
+      name: "Gestão",
+      description: "Gestão autorizada",
+      section: "management",
+      parentKey: null,
+      sortOrder: 10,
+    };
+    const goals: NavigationItem = {
+      ...management,
+      key: "crm.settings.goals",
+      path: "/app/configuracoes/metas",
+      name: "Metas do funil",
+      section: "settings",
+      parentKey: "crm.settings",
+    };
+    expect(getPrimaryNavigation([goals])).toEqual([]);
+    expect(getBreadcrumbNavigation([goals])).toEqual([goals]);
+    expect(getPrimaryNavigation([management])).toEqual([management]);
+    for (const invalidRoot of [
+      { ...management, path: "/app/outra" },
+      { ...management, section: "settings" },
+      { ...management, parentKey: "outra" },
+    ]) {
+      expect(
+        getPrimaryNavigation([invalidRoot, goals]).some((page) => page.key === goals.key),
+      ).toBe(false);
+      expect(getBreadcrumbNavigation([invalidRoot, goals])).toEqual([invalidRoot, goals]);
+    }
+    for (const invalidGoals of [
+      { ...goals, path: "/app/outra" },
+      { ...goals, section: "outra" },
+      { ...goals, parentKey: "outra" },
+    ]) {
+      expect(
+        getPrimaryNavigation([management, invalidGoals]).some((page) => page.name === "Meta"),
+      ).toBe(false);
+      expect(getBreadcrumbNavigation([management, invalidGoals])).toEqual([
+        management,
+        invalidGoals,
+      ]);
+    }
+  });
+
   it("groups only children whose authorized parent is present", () => {
     const groups = buildNavigationGroups(pages);
 

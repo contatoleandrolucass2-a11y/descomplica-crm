@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-10-15: Legibilidade de Meta no CSS compilado
+
+- Revisao independente recusou as capturas anteriores: percentuais ocultos
+  nos donuts escuros, abas truncadas e textos de Parcerias divergentes.
+  Nenhuma baseline foi promovida com esses problemas.
+- Fundo do miolo usa o token tematico na regra base, evitando o ramo invalido
+  produzido pela minificacao de pseudoelemento em :is(). Abas exibem nomes
+  completos e Parcerias usa coordenador/tempo de parceria/Ritmo de visitas.
+- Preview usa CSS real do build Next, removendo equivalentes Vite para nao
+  mascarar defeitos; exige build atualizado, sem opcao de ignorar freshness.
+  24 capturas em quatro larguras/tres temas passaram com contraste minimo
+  14,16:1, zero Axe/overflow/console/rede e interacoes preservadas.
+- Integrado main a7fdf92 de metadados Qlik em889f46c, sem alterar o trabalho
+  externo. Conflitos documentais preservaram ambos os registros. O prefixo
+  de conhecimento de main foi mantido byte a byte, com indice Meta completo;
+  historico arquivado pelo outro PR permanece integral. Sync aprovado.
+
+## 2026-10-15: Escala e contrato visual de Meta
+
+- CSS publico atual confrontado com os estilos locais: 241 seletores comuns
+  mantem geometria e tipografia. Corrigida a base rem somente no wrapper de
+  Meta para reproduzir 14 px em desktop e 16 px no breakpoint movel.
+- Chromium confirmou quatro fontes calculadas iguais em 390, 1440 e 2560 px.
+  Preview local: 12 capturas, tres temas, sem overflow ou violacoes Axe.
+- Contrato exato de Gestao no QA de navegacao agora inclui Meta; 47 testes
+  focados aprovados. Falha anterior da CI nao foi tratada como aprovacao.
+  Evidencias e limites em docs/audits/meta-2026-10-15.md.
+- Referencia completa mede 2201/1852 px em DV/Parcerias a 1440 px; o QA usa
+  limites especificos 2600/2300 e exige todos os oito paineis nessas rotas.
+- Cores e fonte de Meta usam escopo local conforme pagina publica; o preview
+  carrega Geist do build local. Dois canvases novos da origem publica completa
+  substituem somente as antigas regioes compactas DV/Parcerias, com hashes e
+  proveniencia; referencias antigas, Pontos e tolerancias preservados.
+
 ## 2026-10-16: Metadados reais resolvidos e mapeamento nativo
 
 Main17ab106 concluiu os quatro gates em38829007559. Imagem imutavel validada
@@ -6816,3 +6850,111 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
   evidência autenticada antiga (209 capturas) para a nova matriz (242
   capturas). Os resultados finais, CI, PR e publicação serão registrados após
   o gate visual real.
+
+## 2026-10-15: Meta no menu Gestao
+
+- Branch codex/gestao-meta, base ad496340cf57871c8fa80015aaaf0e0bd1da983c.
+- Reagrupa a pagina autorizada de metas sob Gestao com nome Meta, breadcrumbs
+  e destaque das subguias, sem ampliar catalogo, permissao ou acesso remoto.
+- Replica os oito blocos de https://descomplicapro.com.br/configuracoes/metas:
+  configuracao, funil, conversoes, semanas, equipe, producao, calendario e
+  produtividade. Reutiliza estilos locais da referencia com escopo CSS proprio.
+- Previa local interativa; valores ausentes permanecem vazios. Calendario usa
+  dias uteis segunda a sexta, sem descontar feriados. Mes/ano sao exploratorios;
+  a competencia do rascunho continua sendo a atual, conforme contrato existente.
+- Aplicar metas encaminha para revisao segura; persistencia continua somente
+  no rascunho inativo, com motivo, permissao, revisao e validacao no servidor.
+  Nao altera metas ativas, politica, ranking, migration nem workflow n8n.
+- Node24.19/pnpm11.20: lint aprovado com aviso anterior em connected-systems;
+  typecheck e build aprovados. Preview sintetico: seis capturas, tres temas,
+  desktop/celular, axe sem violacoes, teclado/overflow, Gestao > Meta, vendas2
+  produz215 oportunidades e calendario troca mes. Preview nao prova RLS/login.
+- Suite Windows inicial:2879 aprovados/85 skips/6falhas. Tres asserts antigos
+  de layout e um de copia foram atualizados ou preservados no novo componente;
+  parser DevTools passou na reexecucao com concorrencia limitada. Reexecucao
+  completa limitada mantem falha no symlink Salesforce (esperado502, recebido200), sem tocar teste
+  ou produto fora do escopo. CI Linux, PR/merge e release pendentes neste ponto.
+
+## 2026-10-15: Meta e subguia Parcerias conferidas
+
+- Revisao encontrou grades DV preservadas ao ocultar campos de Parcerias.
+  Classes especificas agora ativam3taxas,2campos de producao e3cards produtivos.
+- Preview final:12capturas DV/Parcerias,1440/390px,tres temas; axe0,overflow0,
+  console/rede0. Estado sem metas e somente leitura tambem passou nas duas
+  larguras. Evidencias locais sinteticas em test-results/goal-planning-preview.
+  -56testes focados aprovados. Tipos/lint/build locais aprovados; CI Linux e
+  promocao protegida seguem pendentes. Nenhum dado remoto ou politica alterado.
+
+## 2026-10-15: semantica principal da guia Meta
+
+- Conferencia do shell identificou que ele fornece div de conteudo, enquanto
+  cada pagina fornece o landmark main. O carregador Meta preserva agora essa
+  regiao principal, com teste de regressao; sem mudanca visual ou de dados.
+
+## 2026-10-15: matriz autenticada inclui Meta em Gestao
+
+- CI38757496727:validate e isolated-restore passaram; E2E falhou no Master por
+  lista antiga de links, que omitia a nova Meta autorizada. Gate bloqueou merge.
+- Matriz agora exige16links em Master/Admin, incluindo Meta; demais perfis
+  preservam9/0 e negacao de acesso direto. Tambem clica Gestao > Meta nos dois
+  perfis autorizados e confere titulo/main, sem reduzir cobertura de27rotas.
+- Headings de DV/Parcerias refletem Planejamento de metas da referencia.
+
+## 2026-10-15: expectativa unitaria da matriz de Meta
+
+- Atualiza tambem o teste unitario que interpreta a matriz E2E:16links em
+  Master/Admin e ausencia de Meta nos demais, sem alterar rotas/permissoes.
+- CI38760150881 parou nessa expectativa antiga de15; demais2884testes passaram.
+  Reexecucao integral local antes do proximo envio; nenhum gate foi dispensado.
+- Suite integral local:2884aprovados,85skips,apenas falha Windows de symlink; teste unitario da matriz20/20aprovado.
+
+## 2026-10-15: integracao de dashboard concorrente em Meta
+
+- Preserva integralmente o main fae77f9, integrado sem conflitos. Nova CI da
+  combinacao e obrigatoria; Meta mantem conteudo, navegacao e permissoes.
+
+## 2026-10-15: conhecimento de Meta sincronizado
+
+- Notas desta entrega preservadas integralmente em docs/audits/meta-2026-10-15.md;
+  indice com255933bytes. Prefixo historico comparado a main antes da distribuicao.
+- Runtime instalado confirmou synced/documents3. Limite e historia preservados;
+  pendencia de Obsidian resolvida para o indice atual, sem mudanca de runtime.
+
+## 2026-10-15: Percentuais de Meta em telas menores
+
+- Remove as setas nativas que cortavam o ultimo digito dos percentuais ate1120px,
+  mantendo a largura e a geometria dos campos e a aparencia desktop.
+- Preview passa a conferir o espaco interno dos valores em24 capturas com CSS
+  compilado. Candidato anterior cancelado antes da promocao de qualquer baseline.
+- Suite local Windows:2906 aprovados,85 ignorados,2 falhas externas ao escopo;
+  validate Linux aprovado no candidato anterior. Nova CI integral obrigatoria.
+
+## 2026-10-15: Referencia visual provisoria de Meta
+
+- Conferidos242 hashes da CI38785631184;22 diferencas somente Meta e220
+  entradas preservadas, incluindo Pontos. Predicado funcional original aprovado.
+- Revisao visual registra P2 de clipping no calendario desktop/tablet.
+  Referencia provisoria documenta essa pendencia; nao aprova release.
+- Correcao, assert de legibilidade e CI completa da integracao continuam
+  obrigatorios; nenhum limiar ou predicado foi reduzido.
+
+## 2026-10-15: Integração final de Meta com Usuários
+
+- Integra main d83c22d preservando a entrega de Usuários, presença, marcas e guards Master de edição. A navegação combina Meta com os novos acessos dos simuladores.
+- Combina 22 referências Meta e 11 de Usuários, com 242 hashes e histórico integral. A referência Meta é provisória e documenta o P2 do calendário, sem aprovação de release.
+- Corrige a reserva dupla da seta nos seletores de mês/ano e amplia a largura mínima do mês. Preview e CI autenticada exigem que todas as opções caibam integralmente.
+- Preview isola apenas o heartbeat de presença, sem chamadas ou escritas remotas. Nova matriz prevista: 30 capturas, cinco larguras e três temas.
+- Gates da combinação e revisão das novas capturas continuam pendentes.
+
+## 2026-10-15: Meta com calendário legível na matriz compilada
+
+- Build, typecheck e lint dos fontes aprovados;30capturas compiladas passaram com todas as opções do calendário legíveis, incluindo1024px.
+- Integra main17ab106 de ferramentas Qlik, preservando aplicação, CSS, histórico e referências de outras áreas. CI da combinação continua obrigatória.
+
+## 2026-10-15: Taxas fracionárias no formulário Meta
+
+- Corrige step inteiro nas cinco taxas, permitindo percentuais fracionários aceitos pelo servidor. Contagens mantêm passo inteiro.
+- Acrescenta verificação nativa de1.67/2.42 e restauração dos valores no preview; cálculos, fixtures e limites de servidor permanecem intactos.
+- CI38829857417 cancelada após validate aprovado; nova combinação deve cumprir todos os gates antes de publicação.
+
+- Meta: revisa única divergência visual DV1024 (13px da legenda após corrigir calendário); mantém241referências e exige novaCI.
