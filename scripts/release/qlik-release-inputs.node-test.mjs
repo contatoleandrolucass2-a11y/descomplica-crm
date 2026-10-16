@@ -149,6 +149,8 @@ test("release inventory is frozen, unique and includes every reviewed input", ()
     "ops/qlik/ranking-artifact.mjs",
     "ops/qlik/ranking-credential.mjs",
     "ops/qlik/publish-ranking.mjs",
+    "ops/qlik/status-monitor.mjs",
+    "lib/crm/qlik/status-contract.ts",
     "lib/crm/qlik/contracts-v2.ts",
     "ops/qlik/vps/descomplica-qlik-browser.service",
     "scripts/release/private-json-store.mjs",

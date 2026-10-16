@@ -98,6 +98,7 @@ export async function runRankingCycle({
       requestId: second.requestId,
       contentSha256: committed.contentSha256,
       completedAt: second.completedAt,
+      sourceUpdatedAt: second.source.reloadTimestamp,
     };
   } catch {
     // Never propagate source records, transport messages or credentials.

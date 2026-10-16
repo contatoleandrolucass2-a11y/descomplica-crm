@@ -24,6 +24,10 @@ test("diagnostic authority serializes without Node/module closures and preserves
   for (const code of [
     "mapping_invalid",
     "master_pin_mismatch",
+    "master_catalog_item",
+    "master_catalog_text",
+    "master_catalog_binding",
+    "master_alias_identity",
     "selection_failed",
     "definition_changed",
     "collection_unavailable",
@@ -52,6 +56,47 @@ test("diagnostic authority serializes without Node/module closures and preserves
     assert.equal(isRankingFailureCode(code), false);
   }
 });
+for (const code of [
+  "master_catalog_item",
+  "master_catalog_text",
+  "master_catalog_binding",
+  "master_alias_identity",
+]) {
+  test(`artifact accepts only exact diagnostic enum ${code} and strips raw payload`, () => {
+    const standalone = runInNewContext(`(${isRankingFailureCode.toString()})`);
+    for (const state of ["unavailable", "reauth_required"]) {
+      for (const field of ["reason", "code"]) {
+        const artifact = rankingCycleArtifact(
+          {
+            state,
+            [field]: code,
+            payload: { qData: { title: "synthetic-private\ntext" }, rows: ["private"] },
+            error: "synthetic-private",
+          },
+          now,
+        );
+        assert.deepEqual(artifact.result, { state, code });
+        assert.equal(artifact.rankingConnected, false);
+        assert.doesNotMatch(JSON.stringify(artifact), /synthetic-private|qData|payload|rows/);
+      }
+      for (const invalid of [
+        `${code}:synthetic-private`,
+        `${code}\n`,
+        `${code} `,
+        code.toUpperCase(),
+        [code],
+        { code },
+      ]) {
+        assert.equal(standalone(invalid), false);
+        assert.equal(isRankingFailureCode(invalid), false);
+        for (const field of ["reason", "code"])
+          assert.deepEqual(rankingCycleArtifact({ state, [field]: invalid }, now).result, {
+            state,
+          });
+      }
+    }
+  });
+}
 for (const state of ["running", "reauth_required", "unavailable"]) {
   test(`${state} contains no details and does not claim connection`, () => {
     const artifact = rankingCycleArtifact(

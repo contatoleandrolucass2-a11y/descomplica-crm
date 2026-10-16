@@ -7181,3 +7181,147 @@ A integração dos textos WF passou novamente em lint, tipos, formato, build e
 migrations, autorização e coordenador de release; esses componentes conservam
 os testes e o ensaio de restauração aprovados na rodada anterior. A CI completa
 do novo SHA voltará a validar o conjunto antes da integração.
+
+## 2026-10-16: CRM publicado; recusa real no catalogo Qlik
+
+Main b937/CI38839240305 quatro jobs success. ZIP12021130754 validado,
+11 camadas OCI e perfis homologation/production comprovados na VPS, mesma
+imagem90701463142349786838f3b51dc8a0890d91b1b4652a287394bbf5acf36941d5.
+Coordenador publicou CRM a8a126eb-c373-4005-b68a-456012a6336b as02:59:30.399Z,
+QLIK_RANKING_V2_ENABLED efetivo conferido. Health03:00:08.353Z200/ok/b937.
+
+Primeira tentativa owner e26cdcd3 interrompida com perfil ja protegido e
+servico parado; causa exata nao exposta. Recuperacao exclusiva pelo mesmo
+coordenador restaurou17ab/c8314c64 as03:01:24.321Z, sem apagar ledger/travas.
+Segunda tentativa84cdd4c0 iniciou o servico, mas coleta real03:02:41.093Z
+retornou unavailable/master_pin_mismatch. Nenhum recibo de publicacao.
+Recuperada exatamente em28b9ffc9-eb35-49e6-9166-dfed49e0a91c as03:07:20.476Z;
+owner17ab metadata-only, sem pendencia. CRM b937 preservado, sem novo restart.
+Banco03:10:14.101Z confirma0 observacoes/0 publicacoes v2.
+
+Corretivo focal trata projeccoes opcionais null/ausentes e textos alheios ao
+ranking no catalogo. Aliases relevantes continuam limitados, propriedades
+pinadas e colisoes recusadas. Codigos fixos distinguem item/texto/binding/
+identidade, sem expor catalogo ou mensagens. O mecanismo e reproduzivel por
+fixture; a entrada exata do catalogo nativo ainda nao foi observada, portanto
+nao atribuir a causa produtiva a um valor especifico antes do novo canario.
+Sem mudanca de interface, banco, pins, recorte, selecoes ou conciliacao.
+
+Focais collector/artifact327 testes:326 aprovados,0 falhas e1 skip POSIX
+preexistente. Regressao direta/VM cobre labels projetados null/ausentes com
+hash nativo intacto, label explicitamente divergente, titulo/identidade/hash
+alterados e cleanup. Revisao independente sem P1/P2 de binding nos cenarios.
+Gates globais e novo canario real ainda pendentes; nao declarar origem resolvida.
+
+Rodada Windows do corretivo: lint/tipos/build exit0. Teste completo ainda em
+execucao, com falhas observadas em subprocessos de inventario/devtools e
+referencia; causas nao isoladas, nao alterar asserts nem atribuir ao Qlik.
+PR239 aberto em draft; consulta inicial sem checks vinculados. Nova revisao
+documental envia evento synchronize; CI Linux do SHA exato segue obrigatoria.
+
+GitHub confirmou PR239 CONFLICTING/DIRTY: main recebeu PR231/b5458ff
+enquanto o corretivo era preparado. Ausencia de checks nao prova falha de
+credencial ou da CI. Merge preserva integralmente as secoes documentais de
+Meta e Qlik; codigo/interface de main entram sem resolucao manual nem novo
+ajuste visual desta frente. Revalidar conjunto integrado antes da promocao.
+
+Confronto com protocolo oficial revelou outra incompatibilidade independente:
+NxDataPage pode conter qTails com qUp/qDown zero. Duas regressoes (direta/VM)
+falharam antes do patch por incomplete_page. Aceita apenas array limitado por
+qSize.qcx e entradas explicitamente zero; pendencias nao-zero, tipos invalidos
+e cobertura incorreta continuam rejeitados.388 focais:387pass/1skip POSIX.
+Nao foi o codigo do canario nativo observado: este parou antes em master pins.
+Fontes: modelos NxGroupTail/NxDataPage e exemplo HyperCube oficiais Qlik.
+Revisao independente de tails sem P1/P2,44 testes focados de paginas/reducao
+aprovados; suite completa e execucao nativa nao foram atribuidas a essa revisao.
+
+## 2026-10-16: Candidato integrado e CI exata de main
+
+PR216/head8dd4a3e integrado normalmente em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5
+as02:12:36Z; arvore identica. CI38834764103 tentativa2: tres gates aprovados,
+incluindo matriz visual corrigida; tentativa1 bloqueada por fonte ITBI HTTP403,
+sem alteracao financeira para obter verde. MainCI38839240305 ainda em progresso.
+Windows quatro comandos executados; teste completo3334/1164/703 aprovados,
+89/19/14 skips explicitos. Captura adicional38834764063 success.
+
+VPS b937 preparada: package/lock iguais17ab,38123 dependencias verificadas,
+SDK/script/mapa como UID997 Node24 e validacao root aprovados. Probe readonly
+de configuracao complete/preparationAccepted true, sem escrita de segredos.
+Health publico02:16:20.295Z200/ok/d83; ledgers CRM72be7b10 e owner933a111d/17ab
+sem pendencia. Nenhum runtime trocado, nenhuma imagem antecipada e nenhum
+fato publicado nesta etapa. Banco produtivo01:34Z:0observacoes/0publicacoes,
+writer de cinco argumentos e reader presentes. Ativacao e prova real pendentes.
+
+## 2026-10-16: Integracao concorrente e registros separados
+
+CI38846173348/headcf2b1c1 concluiu validate/restore/release success. Merge
+normal foi bloqueado apos entrada concorrente PR237/cd004e49c7317bc7fc7ef04c680ecc5054ac2428
+em main, com conflitos somente em CHANGELOG/WORKLOG. Protecao GitHub strict=true
+confirmada por consulta readonly; nova base exige novos checks, sem bypass.
+
+Merge preserva integralmente main e os cinco registros Qlik deste PR. Estes
+foram movidos ao final de WORKLOG/CHANGELOG/ATUALIZACOES por apply_patch,
+com hashes de conteudo iguais antes/depois e restante igual a main (apenas
+normalizacao de linhas em branco pelo formatter). Assim futuras insercoes
+de prefixo nao disputam o mesmo trecho; a protecao de CI permanece intacta.
+Diff de ops/qlik contra cf2b1c1 vazio: nenhum novo ajuste de coletor ou UI.
+
+Windows concluiu lint/tipos/build exit0. Reexecucao pnpm test com
+VITEST_MAX_WORKERS=1 passou3337 vitest/1248 ops/703 release,89/19/14 skips;
+timeouts anteriores nao foram reproduzidos, sem ampliar timeout/asserts.
+CI cf2b1c1 valida o SHA imutavel; execucao local atravessou integracao de main.
+Novo conjunto integrado ainda exige CI. Metadata privada03:07:20.107Z,
+recarga02:14:57.356Z, confirmou cubos/masters/aliases selecionados inalterados;
+nao le fatos. Health03:55:48.744Z200/ok/b937, sem nova promocao CRM nesta etapa.
+
+## 2026-10-16: Qlik nas integrações e retomada da coleta automática
+
+O usuário autorizou a correção da ingestão, a inclusão do Qlik entre Salesforce
+e n8n com status real e a atualização automática do ranking na VPS. O trabalho
+usa a branch isolada `codex/qlik-integracao-status-auto`, a partir de
+69ae98394a697c8f7b4d5fc3f022a4d83635f72b. O corretivo da PR #239, SHA
+3d868329568168d39c0dc6641f96d82b1d001581, foi integrado sem alterar a branch
+original; o conflito documental foi resolvido preservando ambos os registros.
+
+A consulta operacional inicial encontrou CRM 66ed7360, publicado em
+2026-10-16T13:24:00.784Z, sem pendência, e owner Qlik 17ab106f em modo de
+metadados. A tentativa de 19:10:06.160Z exigiu login. Esses horários são
+observações de diagnóstico e não substituem o preflight de promoção.
+O console privado foi disponibilizado por túnel loopback; o login foi entregue
+ao usuário, sem leitura de credenciais. Um socket VNC comprovadamente sem
+listener foi preservado por rename, sob a trava existente, antes de iniciar
+o console temporário. Não houve alteração de unidade, perfil ou segredo.
+
+As logos recebidas foram convertidas em caminhos SVG, sem dependência de fonte
+ou imagem embutida: cinza/verde para claro e médio, branco/verde para escuro.
+O novo status usa a credencial HMAC existente, com domínio separado de rota,
+corpo estrito de metadados, replay/ordem/idade verificados e leitura restrita à
+página Integrações. Heartbeats não alteram dados comerciais. Coleta, confirmação
+de publicação e recarga da fonte permanecem distintas; ausência de evidência
+expira o status e não fabrica conexão. Nenhuma migration ou ACL foi alterada.
+
+Validação parcial: 348 testes focados do corretivo passaram (um teste físico
+Linux não aplicável ao macOS). A rodada operacional ampliada passou 1.171 casos,
+com seis skips físicos. Tipos, 27 testes existentes de Integrações, 25 testes
+combinados da nova fronteira e quatro testes do monitor passaram. A validação
+completa, o SHA de CI, a publicação e um ciclo automático posterior ainda serão
+registrados; este texto não declara a ingestão corrigida em produção.
+
+A validação local da aplicação concluiu 3.666 testes Vitest, com 90 skips,
+e 1.305 testes operacionais, com cinco skips. O ensaio de release inicialmente
+recusou a fixture por não incluir os novos arquivos protegidos; o inventário
+sintético foi atualizado, preservando as verificações. A nova execução do
+release passou todos os 703 casos executáveis no macOS, com 14 verificações
+físicas reservadas ao Linux. O build, tipos, formato e inventário de rotas
+passaram. Lint manteve somente um aviso preexistente no harness visual.
+
+O QA sintético de Integrações passou nos nove pares tema/largura, zoom 200%,
+acessibilidade e ciclo completo do console Salesforce. As capturas claro,
+escuro e celular foram inspecionadas. Datas exibidas nessas imagens são fixtures,
+não evidência de produção. Auditorias pnpm e OSV não encontraram vulnerabilidades.
+Gitleaks não encontrou vazamentos na árvore atual. A varredura do histórico
+apontou somente a literal fictícia de teste do commit 52411c1d, arquivo
+scripts/release/salesforce-release-environment.node-test.mjs, linha 31; o código
+atual já substitui esse valor por repetição explícita de "fixture". Nenhuma
+regra do scanner foi desativada ou ignorada para esta entrega.
+A conferência das fontes públicas de documentação também passou nesta rodada.

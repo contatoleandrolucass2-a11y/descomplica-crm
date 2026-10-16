@@ -16,6 +16,12 @@ O estoque dos simuladores usa o relatório Salesforce ESTOQUE SPC quando a fonte
 oficial está configurada. O coletor executa os oito relatórios no ciclo automático
 de 30 minutos; o estoque atualiza a base comum dos quatro simuladores. Ver [operação do estoque](docs/runbooks/salesforce-inventory.md).
 
+O painel Integrações inclui o Qlik entre Salesforce e n8n, com evidência assinada
+do coletor e horários separados de coleta, publicação e atualização da fonte.
+O ranking usa duas observações conciliadas por ciclo e preserva a última base
+válida quando a coleta falha. A agenda horária na VPS depende da ativação
+protegida e da sessão Qlik; ver [operação do ranking Qlik](docs/runbooks/qlik-ranking-v2.md).
+
 ## Pré-requisitos
 
 | Ferramenta                 | Versão validada | Uso                               |

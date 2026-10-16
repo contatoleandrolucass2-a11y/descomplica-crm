@@ -9,6 +9,7 @@ import { readRankingCredential } from "./ranking-credential.mjs";
 import { writeRankingArtifact } from "./ranking-artifact.mjs";
 import { loginAttemptStore } from "./login-attempt.mjs";
 import { getBrowserRankingScript } from "./browser-ranking.mjs";
+import { startQlikStatusMonitor } from "./status-monitor.mjs";
 
 const PROFILE = "/var/lib/descomplica-qlik/chrome";
 const ORIGIN = "https://direcional.us.qlikcloud.com/";
@@ -52,6 +53,7 @@ async function main() {
       ? (signal) =>
           startRankingCollection({
             signal,
+            monitor: startQlikStatusMonitor({ signal }),
             authenticate: (options) => authenticateBrowserSession(browser, options),
             mappingFactory: async () =>
               (await import("./ranking-mapping.mjs")).createRankingMapping(),
@@ -98,6 +100,7 @@ export function startRankingCollection({
   write = writeRankingArtifact,
   loop = startQlikCollectionLoop,
   clock = () => performance.now(),
+  monitor,
 }) {
   let completed;
   let collectionSignal;
@@ -125,7 +128,12 @@ export function startRankingCollection({
         elapsed >= 0 &&
         elapsed < 480_000;
       try {
-        await write(state === "succeeded" || acceptedFailure ? completed : { state });
+        const result = state === "succeeded" || acceptedFailure ? completed : { state };
+        await write(result);
+        monitor?.update(result);
+      } catch (error) {
+        monitor?.update({ state: "unavailable" });
+        throw error;
       } finally {
         if (state !== "running") startedAt = undefined;
       }
