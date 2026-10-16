@@ -226,9 +226,14 @@ describe("release-candidate activation defaults", () => {
         expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(route);
       }
       const roots = matrix.expectedPrimaryNavigationRootsForRole(role);
+      expect(
+        matrix.expectedHeaderRoutesByRole[role].includes("/app/configuracoes/metas"),
+        role,
+      ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(15);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(16);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
           "Simulação",

@@ -45,13 +45,33 @@ describe("approved canvas parity contract", () => {
   it("keeps every versioned canvas byte-identifiable and marks the unsafe draft superseded", () => {
     expect(manifest.schemaVersion).toBe(1);
     expect(manifest.policy).toContain("never authority for data");
-    expect(manifest.assets).toHaveLength(15);
-    expect(new Set(manifest.assets.map(({ path }) => path)).size).toBe(15);
+    expect(manifest.assets).toHaveLength(17);
+    expect(new Set(manifest.assets.map(({ path }) => path)).size).toBe(17);
+    const liveReferences = new Map([
+      [
+        "reference/metas-dv-live-2026-10-15.webp",
+        "https://descomplicapro.com.br/configuracoes/metas",
+      ],
+      [
+        "reference/metas-parcerias-live-2026-10-15.webp",
+        "https://descomplicapro.com.br/configuracoes/metas/parcerias",
+      ],
+    ]);
+    expect(
+      manifest.assets
+        .filter(({ status }) => status === "authoritative-live-reference")
+        .map(({ path }) => path)
+        .sort(),
+    ).toEqual([...liveReferences.keys()].sort());
 
     for (const asset of manifest.assets) {
       const contents = readFileSync(new URL(asset.path, root));
       expect(createHash("sha256").update(contents).digest("hex"), asset.path).toBe(asset.sha256);
-      expect(asset.source).toMatch(/^exec-[a-f0-9-]+\.png$/u);
+      if (liveReferences.has(asset.path)) {
+        expect(asset.source).toBe(liveReferences.get(asset.path));
+      } else {
+        expect(asset.source).toMatch(/^exec-[a-f0-9-]+\.png$/u);
+      }
     }
 
     expect(
