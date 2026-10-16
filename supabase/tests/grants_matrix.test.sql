@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  41::bigint,
+  42::bigint,
   'all public tables retain RLS'
 );
 
@@ -27,6 +27,7 @@ select is(
   array[
     'app_pages',
     'audit_logs',
+    'crm_dashboard_analysis',
     'crm_dashboard_metrics',
     'crm_dashboard_snapshots',
     'crm_dashboard_top_developments',
@@ -135,6 +136,7 @@ select is(
   array[
     'app_pages:app_pages_select_authorized',
     'audit_logs:audit_logs_select_scoped',
+    'crm_dashboard_analysis:crm_dashboard_analysis_select_authorized',
     'crm_dashboard_metrics:crm_dashboard_metrics_select_authorized',
     'crm_dashboard_snapshots:crm_dashboard_snapshots_select_authorized',
     'crm_dashboard_top_developments:crm_dashboard_top_developments_select_authorized',
@@ -353,6 +355,7 @@ select is(
     'preview_crm_commercial_configuration_draft',
     'preview_crm_commercial_policy_import',
     'preview_crm_source_identity_mapping_import',
+    'read_crm_dashboard_analysis',
     'remove_user_permission_override',
     'replace_crm_point_settings',
     'revoke_current_user_sessions_after_password_recovery',

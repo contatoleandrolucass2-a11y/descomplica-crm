@@ -8,10 +8,14 @@ export const ANALYSIS_STAGE_KEYS = [
   "folders",
   "sales",
 ] as const;
-const date = z.iso.date().refine(value => value.slice(0, 4) !== "0000");
+const date = z.iso.date().refine((value) => value.slice(0, 4) !== "0000");
 function validCoverage(start: string, reference: string) {
   const monthNumber = (value: string) => Number(value.slice(0, 4)) * 12 + Number(value.slice(5, 7));
-  return start <= reference && start.slice(8) === "01" && monthNumber(reference) - monthNumber(start) <= 15;
+  return (
+    start <= reference &&
+    start.slice(8) === "01" &&
+    monthNumber(reference) - monthNumber(start) <= 15
+  );
 }
 const labels = z
   .array(z.string().trim().min(1).max(200))

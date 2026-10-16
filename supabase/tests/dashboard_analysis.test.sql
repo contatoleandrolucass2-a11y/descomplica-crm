@@ -1,13 +1,13 @@
 begin;
-select no_plan();
+-- 73 individual assertions + 5 ACL rows + 62 invalid cases + 3 checks for each of 16 roles.
+select plan(188);
 
 select has_table('public', 'crm_dashboard_analysis', 'packed analysis table exists');
 select ok((select relrowsecurity from pg_class where oid = 'public.crm_dashboard_analysis'::regclass),
   'analysis has RLS enabled');
 select ok(
-  has_table_privilege('authenticated', 'public.crm_dashboard_analysis', 'select')
-  and not has_table_privilege('authenticated', 'public.crm_dashboard_analysis', 'insert,update,delete,truncate,references,trigger'),
-  'authenticated has SELECT only'
+  not has_table_privilege('authenticated', 'public.crm_dashboard_analysis', 'select,insert,update,delete,truncate,references,trigger'),
+  'authenticated has no direct table privileges'
 );
 select ok(not has_table_privilege(role_name, 'public.crm_dashboard_analysis', 'select,insert,update,delete,truncate,references,trigger'),
   role_name || ' has no direct table privilege')
@@ -27,6 +27,17 @@ from unnest(array['anon', 'authenticated', 'service_role']) role_name;
 select ok((select prosecdef and proconfig @> array['search_path=""']
   from pg_proc where oid = 'public.ingest_crm_salesforce_snapshot(jsonb)'::regprocedure),
   'public wrapper is SECURITY DEFINER with empty search_path');
+select ok(has_function_privilege('authenticated', 'public.read_crm_dashboard_analysis(bigint,text[])', 'execute')
+  and not has_function_privilege('anon', 'public.read_crm_dashboard_analysis(bigint,text[])', 'execute')
+  and not has_function_privilege('service_role', 'public.read_crm_dashboard_analysis(bigint,text[])', 'execute'),
+  'only authenticated can execute the read RPC');
+select ok((select prosecdef and proconfig @> array['search_path=""']
+  from pg_proc where oid = 'public.read_crm_dashboard_analysis(bigint,text[])'::regprocedure),
+  'read RPC is SECURITY DEFINER with empty search_path');
+select ok(not exists (
+  select 1 from pg_proc p, lateral aclexplode(p.proacl) a
+  where p.oid = 'public.read_crm_dashboard_analysis(bigint,text[])'::regprocedure and a.grantee = 0
+), 'PUBLIC cannot execute the read RPC');
 
 create function pg_temp.analysis_fixture()
 returns jsonb language sql as $$
@@ -99,6 +110,8 @@ select throws_ok('select * from public.crm_dashboard_analysis', '42501', null,
   'service_role cannot directly read analysis');
 select throws_ok('delete from public.crm_dashboard_analysis', '42501', null,
   'service_role cannot directly delete analysis');
+select throws_ok($$select * from public.read_crm_dashboard_analysis(1,array['all'])$$, '42501', null,
+  'service_role cannot execute the read RPC');
 reset role;
 
 select is((select count(*) from public.crm_dashboard_analysis), 3::bigint, 'three packed view rows stored');
@@ -249,6 +262,31 @@ reset role;
 select is((select payload->'facts' from public.crm_dashboard_analysis where view_key='all'),
   '[]'::jsonb, 'empty view facts replace old facts rather than merging');
 
+-- Distinct developments, including an unknown one, must become one anonymous
+-- aggregate per remaining key. Dates, channels and managers stay independent.
+update public.crm_dashboard_analysis set payload = jsonb_set(jsonb_set(payload,
+  '{dimensions,developments}', '["Hidden development A","Hidden development B"]'), '{facts}', '[
+    [3,"2026-08-04",0,0,0,0,0,2,0,1],
+    [3,"2026-08-04",0,0,0,0,1,3,0,2],
+    [3,"2026-08-04",0,0,0,0,-1,1,0,0],
+    [3,"2026-08-04",-1,0,0,0,0,2,0,1],
+    [4,"2026-08-04",-1,-1,-1,0,0,1,100,0],
+    [4,"2026-08-04",-1,-1,-1,0,1,2,250,0],
+    [4,"2026-08-03",-1,-1,-1,0,0,1,50,0],
+    [4,"2026-08-04",-1,-1,-1,1,1,1,75,0]
+  ]') where view_key='with_canal_imob';
+create temporary table raw_analysis as select * from public.crm_dashboard_analysis;
+grant select on raw_analysis to authenticated;
+select set_config('test.analysis_snapshot_id',
+  (select id::text from public.crm_dashboard_snapshots where snapshot_key='analysis-test'),true);
+create function pg_temp.read_analysis(
+  p_keys text[] default array['all','with_canal_imob','without_canal_imob'],
+  p_snapshot bigint default current_setting('test.analysis_snapshot_id')::bigint
+) returns table(view_key text,payload jsonb) language sql as $$
+  select * from public.read_crm_dashboard_analysis(p_snapshot,p_keys);
+$$;
+grant execute on function pg_temp.read_analysis(text[],bigint) to authenticated;
+
 -- Compare RLS with the existing view policy for every catalogued role.
 create temporary table analysis_roles as
 select key, ('ad000000-0000-4000-8000-' || lpad(row_number() over(order by key)::text,12,'0'))::uuid as user_id
@@ -294,7 +332,7 @@ begin
   perform set_config('request.jwt.claim.sub', p_user::text, true);
   perform set_config('request.jwt.claim.role','authenticated',true);
   execute 'set local role authenticated';
-  select coalesce(string_agg(view_key,',' order by view_key),'') into v_actual from public.crm_dashboard_analysis;
+  select coalesce(string_agg(view_key,',' order by view_key),'') into v_actual from pg_temp.read_analysis();
   select coalesce(string_agg(view_key,',' order by view_key),'') into v_views from public.crm_dashboard_views;
   v_expected := case
     when p_key in ('master','admin') then 'all,with_canal_imob,without_canal_imob'
@@ -303,6 +341,8 @@ begin
     else '' end;
   return next is(v_actual,v_expected,p_key || ' sees only its authorized analysis views');
   return next is(v_actual,v_views,p_key || ' analysis policy matches crm_dashboard_views');
+  return next throws_ok('select * from public.crm_dashboard_analysis','42501',null,
+    p_key || ' cannot bypass redaction with direct SELECT');
   execute 'reset role';
   perform set_config('request.jwt.claim.sub','',true);
   perform set_config('request.jwt.claim.role','',true);
@@ -314,8 +354,46 @@ select set_config('request.jwt.claim.sub',(select user_id::text from analysis_ro
 select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;
 select ok(not public.has_permission(auth.uid(),'crm.ranking.view'), 'coordinator has no ranking permission');
-select is((select payload#>>'{dimensions,owners,0}' from public.crm_dashboard_analysis),
+select is((select payload#>>'{dimensions,owners,0}' from pg_temp.read_analysis()),
   'Synthetic owner','authorized dashboard filter includes owner labels without ranking access');
+select is((select payload#>'{dimensions,developments}' from pg_temp.read_analysis()),
+  '[]'::jsonb,'read RPC removes the complete development dictionary without ranking permission');
+select ok(not exists (
+  select 1 from pg_temp.read_analysis() a, lateral jsonb_array_elements(a.payload->'facts') f
+  where f->6 <> '-1'::jsonb
+), 'no development index survives to reconstruct a protected ranking');
+select is((select jsonb_agg(f order by f) from pg_temp.read_analysis() a,
+  lateral jsonb_array_elements(a.payload->'facts') f),
+  (select jsonb_agg(f order by f) from jsonb_array_elements('[
+    [3,"2026-08-04",0,0,0,0,-1,6,0,3],
+    [3,"2026-08-04",-1,0,0,0,-1,2,0,1],
+    [4,"2026-08-04",-1,-1,-1,0,-1,3,350,0],
+    [4,"2026-08-03",-1,-1,-1,0,-1,1,50,0],
+    [4,"2026-08-04",-1,-1,-1,1,-1,1,75,0]
+  ]'::jsonb) f), 'hidden developments are reaggregated with exact count, amount and approvals');
+select ok(not exists (
+  select 1 from pg_temp.read_analysis() a, lateral jsonb_array_elements(a.payload->'facts') f
+  group by a.view_key,jsonb_build_array(f->0,f->1,f->2,f->3,f->4,f->5,f->6)
+  having count(*) > 1
+), 'redacted facts preserve the unique first-seven-fields contract');
+select is((select payload - 'facts' - 'dimensions' from pg_temp.read_analysis()),
+  (select payload - 'facts' - 'dimensions' from raw_analysis where view_key='with_canal_imob'),
+  'redaction preserves version, view and coverage metadata');
+select is((select (payload->'dimensions') - 'developments' from pg_temp.read_analysis()),
+  (select (payload->'dimensions') - 'developments' from raw_analysis where view_key='with_canal_imob'),
+  'authorized filter dictionaries remain unchanged');
+select is((select count(*) from pg_temp.read_analysis(array['with_canal_imob'])),1::bigint,
+  'authorized requested view is returned');
+select is((select count(*) from pg_temp.read_analysis(array['all','without_canal_imob'])),0::bigint,
+  'requested unauthorized views are omitted');
+select is((select count(*) from pg_temp.read_analysis(array['with_canal_imob'], -1)),0::bigint,
+  'another snapshot cannot fall back to the current analysis');
+select is((select count(*) from pg_temp.read_analysis(null)),0::bigint,'null view selection exposes nothing');
+select is((select count(*) from pg_temp.read_analysis(array[]::text[])),0::bigint,'empty view selection exposes nothing');
+select is((select count(*) from pg_temp.read_analysis(array['with_canal_imob'], null)),0::bigint,
+  'null snapshot exposes nothing');
+select is((select count(*) from pg_temp.read_analysis(array['with_canal_imob','with_canal_imob','unknown',null])),1::bigint,
+  'duplicate, unknown and null keys cannot broaden or duplicate results');
 select is((select count(*) from public.crm_ranking_participants),0::bigint,'filter access does not expose ranking rows');
 select throws_ok('insert into public.crm_dashboard_analysis values (1,''all'',''{}'')','42501',null,'authenticated cannot insert');
 select throws_ok('update public.crm_dashboard_analysis set payload=''{}''','42501',null,'authenticated cannot update');
@@ -325,13 +403,83 @@ reset role;
 reset request.jwt.claim.sub;
 reset request.jwt.claim.role;
 
+select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='master'),true);
+select set_config('request.jwt.claim.role','authenticated',true);
+set local role authenticated;
+select is((select jsonb_agg(to_jsonb(a) order by a.view_key) from pg_temp.read_analysis() a),
+  (select jsonb_agg(jsonb_build_object('view_key',a.view_key,'payload',a.payload) order by a.view_key) from raw_analysis a),
+  'ranking-authorized reader receives the exact original payloads');
+select is((select count(*) from pg_temp.read_analysis(array['without_canal_imob'])),1::bigint,
+  'ranking permission never broadens requested views');
+reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
+insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
+select user_id,'crm.ranking.view','allow','Synthetic analysis ranking grant'
+from analysis_roles where key='coordinator';
+select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='coordinator'),true);
+select set_config('request.jwt.claim.role','authenticated',true);
+set local role authenticated;
+select is((select payload from pg_temp.read_analysis()),
+  (select payload from raw_analysis where view_key='with_canal_imob'),
+  'explicit ranking grant allows the full authorized view');
+reset role;
+update public.user_permission_overrides set effect='deny'
+where user_id=(select user_id from analysis_roles where key='coordinator') and permission_key='crm.ranking.view';
+set local role authenticated;
+select is((select jsonb_array_length(payload->'facts') from pg_temp.read_analysis()),5,
+  'ranking revocation takes effect immediately and reaggregates again');
+reset role;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
+select is((select jsonb_agg(to_jsonb(a) order by a.view_key) from public.crm_dashboard_analysis a),
+  (select jsonb_agg(to_jsonb(a) order by a.view_key) from raw_analysis a),
+  'reading either representation never changes stored analysis');
+
+update public.crm_dashboard_analysis set payload=jsonb_set(payload,'{facts,0,7}','1000000000')
+where view_key='with_canal_imob';
+select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='coordinator'),true);
+select set_config('request.jwt.claim.role','authenticated',true);
+set local role authenticated;
+select throws_ok('select * from pg_temp.read_analysis()','22023',
+  'dashboard analysis aggregate exceeds contract bounds','count overflow fails closed without truncating totals');
+reset role;
+update public.crm_dashboard_analysis a set payload=jsonb_set(r.payload,'{facts,4,8}','1000000000000000')
+from raw_analysis r where a.view_key=r.view_key and a.snapshot_id=r.snapshot_id and a.view_key='with_canal_imob';
+set local role authenticated;
+select throws_ok('select * from pg_temp.read_analysis()','22023',
+  'dashboard analysis aggregate exceeds contract bounds','amount overflow fails closed without truncating totals');
+reset role;
+update public.crm_dashboard_analysis a set payload=r.payload
+from raw_analysis r where a.view_key=r.view_key and a.snapshot_id=r.snapshot_id;
+insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
+select user_id,'crm.dashboard.all.view','allow','Synthetic empty analysis view grant'
+from analysis_roles where key='coordinator';
+set local role authenticated;
+select is((select payload->'facts' from pg_temp.read_analysis(array['all'])),'[]'::jsonb,
+  'empty facts stay an empty array after redaction');
+reset role;
+delete from public.user_permission_overrides
+where user_id=(select user_id from analysis_roles where key='coordinator') and permission_key='crm.dashboard.all.view';
+select set_config('request.jwt.claims',jsonb_build_object(
+  'sub',(select user_id from analysis_roles where key='coordinator'),
+  'session_id','aa000000-0000-4000-8000-000000000099','aal','aal1'
+)::text,true);
+set local role authenticated;
+select is((select count(*) from pg_temp.read_analysis()),0::bigint,
+  'read RPC does not bypass the live-session and MFA permission guard');
+reset role;
+reset request.jwt.claims;
+reset request.jwt.claim.sub;
+reset request.jwt.claim.role;
+
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason)
 select user_id,'crm.dashboard.with_canal_imob.view','deny','Synthetic analysis view denial'
 from analysis_roles where key='coordinator';
 select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='coordinator'),true);
 select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;
-select is((select count(*) from public.crm_dashboard_analysis),0::bigint,'specific view deny hides analysis');
+select is((select count(*) from pg_temp.read_analysis()),0::bigint,'specific view deny hides analysis');
 reset role;
 reset request.jwt.claim.sub;
 reset request.jwt.claim.role;
@@ -341,12 +489,12 @@ from analysis_roles where key='admin';
 select set_config('request.jwt.claim.sub',(select user_id::text from analysis_roles where key='admin'),true);
 select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;
-select is((select count(*) from public.crm_dashboard_analysis),0::bigint,'base dashboard deny overrides individual view grants');
+select is((select count(*) from pg_temp.read_analysis()),0::bigint,'base dashboard deny overrides individual view grants');
 reset role;
 reset request.jwt.claim.sub;
 reset request.jwt.claim.role;
 set local role authenticated;
-select is((select count(*) from public.crm_dashboard_analysis),0::bigint,'missing identity fails closed');
+select is((select count(*) from pg_temp.read_analysis()),0::bigint,'missing identity fails closed');
 reset role;
 set local role anon;
 select throws_ok('select * from public.crm_dashboard_analysis','42501',null,'anon cannot read analysis');
@@ -354,6 +502,8 @@ select throws_ok('insert into public.crm_dashboard_analysis values (1,''all'',''
 select throws_ok('update public.crm_dashboard_analysis set payload=''{}''','42501',null,'anon cannot update');
 select throws_ok('delete from public.crm_dashboard_analysis','42501',null,'anon cannot delete');
 select throws_ok('select public.ingest_crm_salesforce_snapshot(''{}'')','42501',null,'anon cannot call ingestion');
+select throws_ok($$select * from public.read_crm_dashboard_analysis(1,array['all'])$$,'42501',null,
+  'anon cannot execute the analysis read RPC');
 reset role;
 
 set local role service_role;

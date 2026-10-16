@@ -1,11 +1,13 @@
-import { readFile } from "node:fs/promises";
+import { open, readFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import process from "node:process";
 
 import { assertPrivateRegularFile } from "./private-file.mjs";
-
-const MAX_PAYLOAD_BYTES = 1_048_576;
+import {
+  MAX_SALESFORCE_CANDIDATE_FILE_BYTES,
+  MAX_SALESFORCE_INGESTION_BODY_BYTES,
+} from "../../lib/crm/salesforce/transport.ts";
 const MINIMUM_MACHINE_SECRET_LENGTH = 32;
 
 function log(message, details = {}) {
@@ -77,8 +79,8 @@ export async function publishSalesforceCandidate(
     throw new Error("Salesforce candidate payload identity is invalid");
   }
   const body = JSON.stringify(payload);
-  if (Buffer.byteLength(body, "utf8") > MAX_PAYLOAD_BYTES) {
-    throw new Error("Salesforce candidate payload exceeds 1 MB");
+  if (Buffer.byteLength(body, "utf8") > MAX_SALESFORCE_INGESTION_BODY_BYTES) {
+    throw new Error("Salesforce candidate payload exceeds 8 MiB");
   }
 
   const webhookUrl = safeWebhookUrl(environment.SALESFORCE_N8N_WEBHOOK_URL);
@@ -120,12 +122,53 @@ export async function publishSalesforceCandidate(
   };
 }
 
+export async function readSalesforceCandidateFile(candidatePath) {
+  let handle;
+  try {
+    handle = await open(candidatePath, "r");
+    const metadata = await handle.stat();
+    if (!metadata.isFile()) throw new Error("Salesforce candidate file is invalid");
+    if (metadata.size > MAX_SALESFORCE_CANDIDATE_FILE_BYTES) {
+      throw new Error("Salesforce candidate file exceeds its bounded read limit");
+    }
+    // Recheck actual bytes while reading: the file may grow after stat().
+    const chunks = [];
+    let total = 0;
+    while (true) {
+      const chunk = Buffer.allocUnsafe(
+        Math.min(64 * 1024, MAX_SALESFORCE_CANDIDATE_FILE_BYTES - total + 1),
+      );
+      const { bytesRead } = await handle.read(chunk, 0, chunk.length, null);
+      if (!bytesRead) break;
+      total += bytesRead;
+      if (total > MAX_SALESFORCE_CANDIDATE_FILE_BYTES) {
+        throw new Error("Salesforce candidate file exceeds its bounded read limit");
+      }
+      chunks.push(chunk.subarray(0, bytesRead));
+    }
+    try {
+      return JSON.parse(
+        new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks, total)),
+      );
+    } catch {
+      throw new Error("Salesforce candidate file is invalid");
+    }
+  } catch (error) {
+    if (error?.message === "Salesforce candidate file exceeds its bounded read limit") throw error;
+    throw new Error("Salesforce candidate file is invalid");
+  } finally {
+    await handle?.close().catch(() => {
+      throw new Error("Salesforce candidate file is invalid");
+    });
+  }
+}
+
 async function publishFromFile(environment = process.env) {
   const candidatePath = environment.SALESFORCE_CANDIDATE_OUTPUT;
   if (!candidatePath || !path.isAbsolute(candidatePath)) {
     throw new Error("absolute Salesforce candidate path required");
   }
-  const candidate = JSON.parse(await readFile(candidatePath, "utf8"));
+  const candidate = await readSalesforceCandidateFile(candidatePath);
   const result = await publishSalesforceCandidate(candidate, environment);
   log("Salesforce candidate publication completed", result);
   return result;

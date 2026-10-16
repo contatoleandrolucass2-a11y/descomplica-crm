@@ -5,6 +5,10 @@
 - Adiciona filtros dependentes de canal, gerente, responsavel e empresa usando
   dimensoes dos relatorios e apenas os dois canais definidos pelo usuario.
 - Preserva agregados diarios com RLS por visao e leitura coerente do snapshot.
+- Protege detalhes de empreendimentos por RPC e permissao de ranking, sem
+  impedir filtros e totais autorizados. Reagrupa fatos antes de ocultar a dimensao.
+- Limita o transporte Salesforce a8MiB no publicador, API e rota exata Nginx,
+  mantendo os limites dos demais endpoints e sem truncar cargas.
 - Mostra meses encerrados usados nas medias em pop-up com grafico; mes anterior
   passa a ser integral na nova analise, sem alterar comparativos de outras telas.
 - Calcula metas mensais por responsavel unico e esperado proporcional ao dia;

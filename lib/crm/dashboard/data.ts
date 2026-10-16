@@ -170,11 +170,10 @@ export async function loadDashboardReadModel(
           .order("rank")
       : Promise.resolve({ data: [], error: null });
     const analysisRequest = options.includeAnalysis
-      ? supabase
-          .from("crm_dashboard_analysis")
-          .select("view_key,payload")
-          .eq("snapshot_id", snapshot.id)
-          .in("view_key", requestedViews)
+      ? supabase.rpc("read_crm_dashboard_analysis", {
+          p_snapshot_id: snapshot.id,
+          p_view_keys: requestedViews,
+        })
       : Promise.resolve({ data: [], error: null });
     const [viewsResult, metricsResult, developmentsResult, analysisResult] = await Promise.all([
       supabase
@@ -201,7 +200,7 @@ export async function loadDashboardReadModel(
     // A replaced snapshot can leave obsolete/incomplete child results in this read.
     if (!latestSnapshot || !sameSnapshot(snapshot, latestSnapshot)) continue;
     // An additive rollout may precede the migration; other database errors fail closed.
-    if (analysisResult.error && !["42P01", "PGRST205"].includes(analysisResult.error.code)) {
+    if (analysisResult.error && !["PGRST202", "42883"].includes(analysisResult.error.code)) {
       throw new Error("Não foi possível carregar os filtros do dashboard.");
     }
     const analysis: NonNullable<DashboardReadModel["analysis"]> = {};

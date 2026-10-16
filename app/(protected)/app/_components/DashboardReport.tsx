@@ -216,6 +216,7 @@ export function DashboardReport({
 }: DashboardReportProps) {
   const staleMonth =
     !!today && !!dashboard && today.slice(0, 7) !== dashboard.referenceDate.slice(0, 7);
+  const staleDay = !!today && !!dashboard && today !== dashboard.referenceDate;
   const sourceMetrics = dashboard?.metrics[selectedView] ?? null;
   const metrics = staleMonth ? null : sourceMetrics;
   const goalsAvailable = dashboard?.goalsAvailable === true;
@@ -392,7 +393,7 @@ export function DashboardReport({
               <div>
                 <dt>Parecer de ritmo</dt>
                 <dd>
-                  {expected?.sales == null || metrics?.sales.currentMonth == null ? (
+                  {staleDay || expected?.sales == null || metrics?.sales.currentMonth == null ? (
                     <UnavailableValue reason="Depende do esperado e realizado até hoje." />
                   ) : metrics.sales.currentMonth >= expected.sales ? (
                     "Dentro do esperado"

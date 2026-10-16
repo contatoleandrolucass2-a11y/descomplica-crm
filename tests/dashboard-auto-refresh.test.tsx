@@ -18,7 +18,9 @@ let windowTarget: EventTarget;
 let cleanup: (() => void) | undefined;
 const fetchMock = vi.fn();
 
-function mount(props: { generatedAt: string | null; updatedAt: string | null; referenceDay?: string } = version) {
+function mount(
+  props: { generatedAt: string | null; updatedAt: string | null; referenceDay?: string } = version,
+) {
   expect(DashboardAutoRefresh(props)).toBeNull();
   cleanup = mocks.effect.mock.lastCall![0]();
 }

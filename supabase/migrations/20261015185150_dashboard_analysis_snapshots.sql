@@ -18,10 +18,11 @@ create table public.crm_dashboard_analysis (
 
 alter table public.crm_dashboard_analysis enable row level security;
 revoke all on public.crm_dashboard_analysis from public, anon, authenticated, service_role;
-grant select on public.crm_dashboard_analysis to authenticated;
-
--- Match crm_dashboard_views: owner labels are authorized filter dimensions,
--- not ranked participant records, and do not require crm.ranking.view.
+create policy authenticated_session_mfa_gate on public.crm_dashboard_analysis
+  as restrictive for all to authenticated
+  using ((select private.current_session_satisfies_mfa()))
+  with check ((select private.current_session_satisfies_mfa()));
+-- Defense in depth only: clients must use the permission-aware read RPC.
 create policy crm_dashboard_analysis_select_authorized
   on public.crm_dashboard_analysis for select to authenticated
   using (
@@ -39,6 +40,74 @@ create policy crm_dashboard_analysis_select_authorized
       else false
     end
   );
+
+create function public.read_crm_dashboard_analysis(p_snapshot_id bigint, p_view_keys text[])
+returns table(view_key text, payload jsonb)
+language plpgsql
+stable
+security definer
+set search_path = ''
+as $$
+declare
+  v_user_id uuid := auth.uid();
+  v_can_rank boolean;
+  v_row record;
+  v_facts jsonb;
+begin
+  if v_user_id is null
+     or not coalesce(public.has_permission(v_user_id, 'crm.dashboard.view'), false) then
+    return;
+  end if;
+  v_can_rank := coalesce(public.has_permission(v_user_id, 'crm.ranking.view'), false);
+
+  for v_row in
+    select a.view_key, a.payload
+    from public.crm_dashboard_analysis a
+    where a.snapshot_id = p_snapshot_id
+      and a.view_key = any(p_view_keys)
+      and case a.view_key
+        when 'all' then public.has_permission(v_user_id, 'crm.dashboard.all.view')
+        when 'with_canal_imob' then public.has_permission(v_user_id, 'crm.dashboard.with_canal_imob.view')
+        when 'without_canal_imob' then public.has_permission(v_user_id, 'crm.dashboard.without_canal_imob.view')
+        else false
+      end
+    order by a.view_key
+  loop
+    view_key := v_row.view_key;
+    payload := v_row.payload;
+    if not v_can_rank then
+      -- Removing just labels would still reveal a ranked per-development series.
+      -- Collapse the hidden dimension before returning any facts to the caller.
+      select coalesce(jsonb_agg(
+        g.fact_key || jsonb_build_array(g.fact_count, g.amount, g.approved_count)
+        order by g.fact_key
+      ), '[]'::jsonb) into v_facts
+      from (
+        select jsonb_build_array(f->0, f->1, f->2, f->3, f->4, f->5, -1) as fact_key,
+          sum((f->>7)::numeric) as fact_count,
+          sum((f->>8)::numeric) as amount,
+          sum((f->>9)::numeric) as approved_count
+        from jsonb_array_elements(v_row.payload->'facts') f
+        group by jsonb_build_array(f->0, f->1, f->2, f->3, f->4, f->5, -1)
+      ) g;
+      -- Fail closed instead of emitting tuples outside the unchanged read contract.
+      if exists (
+        select 1 from jsonb_array_elements(v_facts) f
+        where (f->>7)::numeric > 1000000000 or (f->>8)::numeric > 1000000000000000
+      ) then
+        raise exception 'dashboard analysis aggregate exceeds contract bounds' using errcode = '22023';
+      end if;
+      payload := jsonb_set(jsonb_set(payload, '{dimensions,developments}', '[]'::jsonb), '{facts}', v_facts);
+    end if;
+    return next;
+  end loop;
+end;
+$$;
+
+alter function public.read_crm_dashboard_analysis(bigint, text[]) owner to postgres;
+revoke all on function public.read_crm_dashboard_analysis(bigint, text[])
+  from public, anon, authenticated, service_role;
+grant execute on function public.read_crm_dashboard_analysis(bigint, text[]) to authenticated;
 
 create function private.validate_crm_dashboard_analysis(p_analysis jsonb, p_reference_date text)
 returns void

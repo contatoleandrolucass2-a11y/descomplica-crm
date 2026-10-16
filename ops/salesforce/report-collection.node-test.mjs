@@ -12,6 +12,7 @@ import {
   exportCandidate,
   publishCandidatePayload,
   REPORTS,
+  resolveAnalysisOptions,
 } from "./export-candidate.mjs";
 import { buildSalesforceSnapshot } from "./transform.mjs";
 
@@ -128,6 +129,121 @@ function client({ describeFor, resultFor, startFor } = {}) {
 function collect(key, fixture, start = REFERENCE, end = REFERENCE) {
   return collectReport("synthetic-sid", definitionFor(key), start, end, fixture.options);
 }
+
+test("analysis requires and projects the verified business-unit column for both activity reports only", async () => {
+  const column = "Activity.Unidade_de_negocio__c";
+  for (const key of ["appointments", "visits"]) {
+    const missing = client();
+    const legacy = await collect(key, missing);
+    assert.equal(Object.hasOwn(legacy[0], "businessUnit"), false);
+    await assert.rejects(
+      collectReport("synthetic-sid", definitionFor(key), REFERENCE, REFERENCE, {
+        ...client().options,
+        analysisEnabled: true,
+      }),
+      { code: "SALESFORCE_INVALID_REPORT" },
+    );
+    const enriched = client({
+      describeFor: (metadata) => ({
+        ...metadata,
+        detailColumns: [...metadata.detailColumns, column],
+      }),
+      resultFor: (definition, metadata) => {
+        const result = complete(definition, metadata);
+        result.factMap["T!T"].rows[0].dataCells[metadata.detailColumns.indexOf(column)] = {
+          value: "UNIDADE EMPRESA SINTETICA",
+          label: "UNIDADE EMPRESA SINTETICA",
+        };
+        return result;
+      },
+    });
+    const rows = await collectReport("synthetic-sid", definitionFor(key), REFERENCE, REFERENCE, {
+      ...enriched.options,
+      analysisEnabled: true,
+    });
+    assert.equal(rows[0].businessUnit, "UNIDADE EMPRESA SINTETICA");
+    assert.equal(definitionFor(key).requiredColumns.includes(column), false);
+  }
+});
+
+test("real report column projections keep Empresa as business unit and Canal as real estate for all five stages", async () => {
+  const columns = {
+    opportunities: ["Opportunity.Unidade_De_Neg_cio__c", "Opportunity.Imobiliaria__c.Name"],
+    appointments: ["Activity.Unidade_de_negocio__c", "Activity.Imobiliaria__c.Name"],
+    visits: ["Activity.Unidade_de_negocio__c", "Activity.Imobiliaria__c.Name"],
+    folders: [
+      "Avaliacao_credito__c.Empreendimento__c.UnidadeDeNegocio__c",
+      "Avaliacao_credito__c.Imobiliaria__c",
+    ],
+    sales: ["Opportunity.Unidade_De_Neg_cio__c", "Opportunity.Imobiliaria__c.Name"],
+  };
+  const fixture = client({
+    describeFor: (metadata, definition) =>
+      ["appointments", "visits"].includes(definition.key)
+        ? { ...metadata, detailColumns: [...metadata.detailColumns, columns[definition.key][0]] }
+        : metadata,
+    resultFor: (definition, metadata) => {
+      const result = complete(definition, metadata, [1, 2]);
+      for (const [index, row] of result.factMap["T!T"].rows.entries()) {
+        for (const [field, value] of [
+          [columns[definition.key][0], index === 0 ? "Empresa Norte" : "Empresa Sul"],
+          [
+            columns[definition.key][1],
+            index === 0 ? "SPC - CANAL IMOB PJ" : "DIRECIONAL VENDAS SPC",
+          ],
+        ])
+          row.dataCells[metadata.detailColumns.indexOf(field)] = { value, label: value };
+      }
+      return result;
+    },
+  });
+  const reports = {};
+  for (const key of Object.keys(columns)) {
+    reports[key] = await collectReport("synthetic-sid", definitionFor(key), REFERENCE, REFERENCE, {
+      ...fixture.options,
+      analysisEnabled: true,
+    });
+    assert.equal(reports[key][0].businessUnit, "Empresa Norte");
+    assert.equal(reports[key][0].realEstateName, "SPC - CANAL IMOB PJ");
+    assert.equal(reports[key][1].businessUnit, "Empresa Sul");
+    assert.equal(reports[key][1].realEstateName, "DIRECIONAL VENDAS SPC");
+  }
+  const analysis = buildSalesforceSnapshot({
+    reports,
+    referenceDate: REFERENCE,
+    generatedAt: `${REFERENCE}T15:00:00Z`,
+    requestId: "00000000-0000-4000-8000-000000000001",
+    analysisEnabled: true,
+  }).payload.dashboard.analysis;
+  assert.deepEqual(analysis.views[0].dimensions.companies, ["Empresa Norte", "Empresa Sul"]);
+  assert.deepEqual(analysis.views[1].dimensions.companies, ["Empresa Norte"]);
+  assert.deepEqual(analysis.views[2].dimensions.companies, ["Empresa Sul"]);
+  assert.equal(analysis.views[0].facts.length, 10);
+  for (const [index, current] of analysis.views.slice(1).entries()) {
+    assert.equal(current.facts.length, 5);
+    assert.ok(current.facts.every((fact) => fact[5] === index && fact[4] === 0));
+  }
+});
+
+test("export analysis options require the literal environment flag and expand January coverage", () => {
+  for (const flag of [undefined, "false", "TRUE", " true", "true ", "1", true, 1, "true"]) {
+    assert.deepEqual(
+      resolveAnalysisOptions("2026-01-15", {
+        SALESFORCE_DASHBOARD_ANALYSIS_ENABLED: flag,
+      }),
+      {
+        analysisEnabled: flag === "true",
+        startDate: flag === "true" ? "2025-10-01" : "2026-01-01",
+      },
+    );
+  }
+  assert.deepEqual(
+    resolveAnalysisOptions("2026-10-15", {
+      SALESFORCE_DASHBOARD_ANALYSIS_ENABLED: "true",
+    }),
+    { analysisEnabled: true, startDate: "2026-01-01" },
+  );
+});
 
 test("collects all seven reports preserving projection, IDs and transform business semantics", async () => {
   const fixture = client();

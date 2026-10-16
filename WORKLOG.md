@@ -15,8 +15,15 @@ Metas: agendamentos 1 por dia util/2 quinta, visitas8, pastas4, vendas1 por
 responsavel identificado; esperado mensal proporcional ao dia civil atual.
 Tabelas operacionais transpostas; controles/textos removidos apenas na raiz.
 
-Tipos e 55 testes de acesso/leitura aprovados na primeira rodada. Gates globais,
-pgTAP, QA visual, CI e publicacao ainda em andamento; nao comprovam ativacao.
+Validacao local: tipos, primeira build51rotas, 284 testes focais e 37 testes Node
+do coletor/transporte aprovados. QA sintetica185 verificacoes aprovada; captura
+do header sticky corrigida depois, exigindo nova rodada. Leitura protegida por
+RPC adicionada na revisao, com68 testes de acesso/leitura aprovados.
+Global3245 testes aprovados/88skips: falha de texto removido corrigida e41
+focais aprovados; falha conhecida O_NOFOLLOW/Windows ainda depende de Linux.
+Transporte Salesforce ampliado apenas no endpoint exato para8MiB, sem truncar
+cargas. Main d83c22d integrado; main17ab106 observado depois, integracao pendente.
+pgTAP, CI, nova build e publicacao em andamento; nao comprovam ativacao.
 Detalhes e limites: docs/dashboard-dimensional-filters.md.
 
 ## 2026-10-15: Compatibilidade do diretório de produção

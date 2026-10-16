@@ -53,7 +53,11 @@ const monthEnd = (date: string) => shiftDate(shiftMonth(date, 1), -1);
 const average = (values: number[]) =>
   values.length ? values.reduce((sum, value) => sum + value, 0) / values.length : null;
 
-export function analyzeDashboard(slice: DashboardAnalysisSlice, filters: DashboardFilters) {
+export function analyzeDashboard(
+  slice: DashboardAnalysisSlice,
+  filters: DashboardFilters,
+  asOfDate = slice.referenceDate,
+) {
   const { dimensions, referenceDate, coverageStart } = slice;
   const dimensionValue = (fact: DashboardAnalysisFact, key: DashboardFilterKey) => {
     if (key === "channel") return DASHBOARD_CHANNELS[fact[5]];
@@ -86,9 +90,10 @@ export function analyzeDashboard(slice: DashboardAnalysisSlice, filters: Dashboa
   for (let start = coverageStart; start < monthStart(referenceDate); start = shiftMonth(start, 1)) {
     if (monthEnd(start) <= referenceDate) closedStarts.push(start);
   }
-  const yearMonths = coverageStart <= `${referenceDate.slice(0, 4)}-01-01` ? closedStarts.filter(
-    (start) => start.slice(0, 4) === referenceDate.slice(0, 4),
-  ) : [];
+  const yearMonths =
+    coverageStart <= `${referenceDate.slice(0, 4)}-01-01`
+      ? closedStarts.filter((start) => start.slice(0, 4) === referenceDate.slice(0, 4))
+      : [];
   const threeMonths = closedStarts.length >= 3 ? closedStarts.slice(-3) : [];
   const previousStart = shiftMonth(referenceDate, -1);
   const previousMonths = closedStarts.includes(previousStart) ? [previousStart] : [];
@@ -144,6 +149,26 @@ export function analyzeDashboard(slice: DashboardAnalysisSlice, filters: Dashboa
       } satisfies DashboardMetric,
     ]),
   ) as Record<DashboardStageKey, DashboardMetric>;
+  const sameDay = asOfDate === referenceDate;
+  const sameMonth = monthStart(asOfDate) === monthStart(referenceDate);
+  const currentWeekday = new Date(`${asOfDate}T12:00:00Z`).getUTCDay();
+  const sameWeek = weekStart === shiftDate(asOfDate, -((currentWeekday + 6) % 7));
+  if (!sameDay) {
+    // Old snapshots remain dated; never relabel yesterday's events as today's.
+    for (const metric of Object.values(metrics)) {
+      metric.currentToday = null;
+      metric.yesterday = null;
+      metric.lastSevenDays = null;
+      metric.lastFourteenDays = null;
+      metric.previousSevenDays = null;
+      metric.previousFourteenDays = null;
+      if (!sameWeek) {
+        metric.currentWeek = null;
+        metric.previousWeek = null;
+      }
+      if (!sameMonth) metric.currentMonth = null;
+    }
+  }
   const owners = new Set(facts.filter((fact) => fact[3] >= 0).map((fact) => fact[3]));
   const managerOwners = new Map<string, Set<number>>();
   for (const fact of facts) {
@@ -182,9 +207,9 @@ export function analyzeDashboard(slice: DashboardAnalysisSlice, filters: Dashboa
         .sort((a, b) => a.name.localeCompare(b.name, "pt-BR")),
     },
     salesValue: {
-      month: amount(monthStart(referenceDate)),
-      week: amount(weekStart),
-      today: amount(referenceDate),
+      month: sameMonth ? amount(monthStart(referenceDate)) : null,
+      week: sameWeek ? amount(weekStart) : null,
+      today: sameDay ? amount(referenceDate) : null,
     },
     topDevelopments: [...developmentCounts]
       .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0], "pt-BR"))

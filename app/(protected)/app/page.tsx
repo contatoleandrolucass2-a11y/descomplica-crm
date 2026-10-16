@@ -37,18 +37,20 @@ export default async function AppHomePage({
     includeAnalysis: true,
   });
   const sourceDashboard = result.status === "ready" ? result.dashboard : null;
-  const slice = sourceDashboard?.analysis?.[selectedView];
-  const analysis = slice ? analyzeDashboard(slice, filters) : null;
-  const dashboard =
-    sourceDashboard && analysis
-      ? applyDashboardAnalysis(sourceDashboard, analysis, selectedView)
-      : sourceDashboard ? { ...sourceDashboard, metrics: {}, salesValue: {}, topDevelopments: {} } : null;
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
     month: "2-digit",
     day: "2-digit",
   }).format(new Date());
+  const slice = sourceDashboard?.analysis?.[selectedView];
+  const analysis = slice ? analyzeDashboard(slice, filters, today) : null;
+  const dashboard =
+    sourceDashboard && analysis
+      ? applyDashboardAnalysis(sourceDashboard, analysis, selectedView)
+      : sourceDashboard
+        ? { ...sourceDashboard, metrics: {}, salesValue: {}, topDevelopments: {} }
+        : null;
   const canRefresh =
     authorization.permissions.includes("crm.salesforce.refresh") &&
     getSalesforceRefreshConfiguration().available;

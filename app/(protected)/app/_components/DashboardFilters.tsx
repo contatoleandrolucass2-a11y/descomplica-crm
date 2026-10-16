@@ -88,7 +88,10 @@ export function DashboardFilters({
                       type="checkbox"
                       checked={values[key].includes(value)}
                       onChange={() => navigate(key, value)}
-                      disabled={!values[key].includes(value) && (!options[key].includes(value) || values[key].length >= 50)}
+                      disabled={
+                        !values[key].includes(value) &&
+                        (!options[key].includes(value) || values[key].length >= 50)
+                      }
                     />
                     <span>{value}</span>
                   </label>

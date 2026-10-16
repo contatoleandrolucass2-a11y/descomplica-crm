@@ -529,6 +529,12 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     expect(value(pulseCard(root, "Agendamentos"), "Meta")).toBe("270");
   });
 
+  it("nao emite parecer de hoje com coleta de outro dia", () => {
+    const dashboard = fixture();
+    const root = render({ dashboard, analysis: analysisFixture(), today: "2026-10-14" });
+    expect(value(section(root, "report-monthly-title"), "Parecer de ritmo")).toBe("Indisponível");
+  });
+
   it("nao usa equipe legada como fallback para cohort desconhecido", () => {
     const root = render({ analysis: { ...analysisFixture(), brokerCount: null } });
     expect(value(pulseCard(root, "Agendamentos"), "Meta")).toBe(pulseUnavailable.goal);

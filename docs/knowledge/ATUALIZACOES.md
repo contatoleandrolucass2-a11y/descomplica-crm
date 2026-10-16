@@ -13,6 +13,14 @@
   Usuario autorizou explicitamente atualizacao aditiva do banco/coletor apos
   testes. Autorizacao nao e evidencia de aplicacao. Fontes:
   Git fetch/GitHub branches/main, PR234/Actions e health publico sem sessao.
+- Validacao posterior:284 focais,37 Node e185 checks visuais aprovados; revisao
+  isolou ranking via RPC protegida (68 testes). Global3245 aprovados/88skips,
+  texto removido corrigido; O_NOFOLLOW no Windows requer CI Linux. Transporte
+  Salesforce8MiB somente no endpoint exato, restante preservado. Nenhuma
+  migration, configuracao remota ou workflow alterado nesta etapa.
+- Main d83c22d integrado em b26ddaa; health16/10/2026 00:22:32Z200/ok/d83c22d.
+  Fetch posterior mostrou main17ab106, CI38829007559 em andamento. Fonte:
+  Git/GitHub via gh no host existente; versoes local/integrada/publicada distintas.
 
 ## 2026-10-15: Metadata integrado validado localmente
 

@@ -30,6 +30,13 @@ atualizacao aditiva do banco e coletor, preservando dados e permissoes.
 - UI usa cliente autenticado, permissao de dashboard e visao. Opcoes e totais
   nunca atravessam visoes nao autorizadas. `service_role` nao tem acesso direto
   a nova tabela; escreve exclusivamente pela RPC. Nenhuma ACL Qlik alterada.
+- Leitura exclusivamente pela RPC `read_crm_dashboard_analysis`; sem acesso
+  direto de authenticated a tabela. Sem `crm.ranking.view`, remove a dimensao
+  empreendimento e reagrupa os fatos antes de devolve-los, preservando os totais
+  sem permitir reconstruir o ranking protegido.
+- Transporte Salesforce limitado a 8 MiB de UTF-8 na publicacao, stream da API
+  e location exata do Nginx. Demais endpoints conservam 1 MB/1m. Excesso rejeita
+  a carga integral, sem truncar dados ou substituir o snapshot valido no banco.
 
 ### Regras confirmadas
 
@@ -56,6 +63,8 @@ Sem analise nao e possivel comprovar os meses; nao reconstruir series pela media
 Realizado usa as datas originais de cada relatorio no mes de referencia. Quando
 a coleta ainda pertence a outro mes, a raiz nao apresenta esses numeros como
 mes vigente. Auto-refresh observa troca do snapshot e virada do dia local.
+Coleta de outro dia nao gera parecer de ritmo para hoje nem reutiliza janelas
+moveis com rotulos atuais; os totais mensais permanecem datados ate nova coleta.
 Pastas aprovadas nao recebem serie mensal derivada de ranking/status atual:
 definicao temporal permanece pendente, apresentada como indisponivel.
 
