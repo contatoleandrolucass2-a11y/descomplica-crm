@@ -203,30 +203,30 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
           text(item.qInfo?.qId) &&
           item.qInfo.qType === "measure" &&
           !ids.has(item.qInfo.qId) &&
-          record(item.qData),
-        "master_pin_mismatch",
+          (item.qData == null || record(item.qData)),
+        "master_catalog_item",
       );
       ids.add(item.qInfo.qId);
-      const related = pins.some(
-        (pin) => item.qData.title === pin.alias || item.qData.label === pin.alias,
-      );
+      const data = item.qData ?? {};
+      const related = pins.some((pin) => data.title === pin.alias || data.label === pin.alias);
       for (const key of ["title", "label"]) {
-        const value = item.qData[key];
+        const value = data[key];
+        // Optional projections of unrelated masters are not ranking labels or definitions.
         check(
-          value === undefined || value === "" || text(value, related ? 256 : Infinity),
-          "master_pin_mismatch",
+          value == null || value === "" || (related ? text(value) : typeof value === "string"),
+          "master_catalog_text",
         );
       }
     }
     return pins.map((pin) => {
       const matches = list.qItems.filter(
-        (item) => item.qData.title === pin.alias || item.qData.label === pin.alias,
+        (item) => item.qData?.title === pin.alias || item.qData?.label === pin.alias,
       );
-      check(matches.length === 1 && matches[0].qInfo.qId === pin.id, "master_pin_mismatch");
+      check(matches.length === 1 && matches[0].qInfo.qId === pin.id, "master_catalog_binding");
       return {
         id: pin.id,
         title: matches[0].qData.title ?? "",
-        label: matches[0].qData.label ?? "",
+        label: matches[0].qData.label ?? null,
       };
     });
   }
@@ -267,8 +267,9 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
             properties.qInfo.qType === "measure" &&
             properties.qMetaDef?.title === pin.alias &&
             properties.qMetaDef.title === before[index].title &&
-            (properties.qMeasure?.qLabel ?? "") === before[index].label,
-          "master_pin_mismatch",
+            (before[index].label === null ||
+              (properties.qMeasure?.qLabel ?? "") === before[index].label),
+          "master_alias_identity",
         );
         check((await digest(properties)) === pin.propertiesSha256, "master_changed");
         definitions.set(pin.measureIndex, { id: pin.id, definition: properties.qMeasure });

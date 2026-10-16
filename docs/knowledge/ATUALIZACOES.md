@@ -1,5 +1,52 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-16: Publicacao app e recusa de fatos preservada
+
+- Main b937/CI38839240305 quatro success. ZIP12021130754 SHA3f37c0258cd1fe10d10bfbd032a0132011c7068ac1fe71cf2a7de5d98240269f,
+  OCI11 camadas e dois perfis comprovados. CRM a8a126eb-c373-4005-b68a-456012a6336b
+  publicado02:59:30.399Z pelo coordenador, Qlik v2 habilitado. Health03:00:08.353Z
+  200/ok/b937. Nao confundir endpoint habilitado com dados atualizados.
+- Owner e26cdcd3 interrompido apos backup; recuperado17ab/c8314c64 via comando
+  exato. Nova tentativa84cdd4c0 gerou recibo real03:02:41.093Z unavailable/
+  master_pin_mismatch, sem publicacao. Recuperada em28b9ffc9/17ab03:07:20.476Z.
+  Sem remover ledgers/travas, restaurar perfil automaticamente ou alterar ACL.
+- Banco produtivo MCP03:10:14.101Z:0observacoes/0publicacoes. Diagnostico do
+  artifact exige UID/GID997: tentativa root usou validador que compara gid do
+  processo e recusou a leitura; nao era ausencia de arquivo. Projetor como
+  usuario tecnico validou o recibo e imprimiu somente codigo fixo.
+- Corretivo focal separa metadados opcionais alheios dos aliases pinados e
+  acrescenta diagnosticos fixos de catalogo. Mecanismo local reproduzivel;
+  entrada exata da fonte nao observada. Novo canario necessario para confirmar
+  causa/resolucao, sem relaxar conciliacao, selecoes ou hashes. Interface intacta.
+  Fontes: GitHub, coordenador, artifact sanitizado e Supabase MCP.
+- Focais collector/artifact327:326 pass/1 skip POSIX, sem falhas. Label
+  projetado ausente nao vira propriedade vazia; titulo/ID/hash nativos continuam
+  obrigatorios. Alteracoes e colisoes seguem recusadas. Revisao independente
+  sem P1/P2 de binding nos cenarios, nao confirma entrada exata da fonte.
+
+## 2026-10-16: PR216 integrado; promocao e fatos ainda pendentes
+
+- Head8dd4a3e: lint/tipos/build Windows exit0; teste completo3334 vitest,
+  1164 ops e703 release aprovados (89/19/14 skips explicitos). CI38834764103
+  tentativa1 falhou por HTTP403 da fonte publica ITBI; tentativa2 concluiu
+  validate/restore/release success, sem alterar politica, fonte ou gate.
+- PR216 integrado normalmente02:12:36Z em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5,
+  arvore identica ao head. MainCI38839240305 em andamento, nao e autorizacao
+  para baixar/promover imagem antes dos quatro jobs success. Captura adicional
+  38834764063 tambem concluiu success; nao houve nova mudanca visual.
+- Canonical b937 na VPS tem package/lock identicos a17ab,38123 dependencias
+  verificadas e probe UID997/Node24 com SDK/script/mapa aprovado. Probe privado
+  readonly do transform retornou complete/preparationAccepted true, sem revelar
+  ou escrever segredos; nao comprova autenticacao Supabase/RPC ou coleta QIX.
+- GET publico02:16:20.295Z200/ok/d83c22d. Coordenador confirma CRM72be7b10,
+  publicado15/10/19:15:11.541Z; owner933a111d/17ab,16/10/00:58:46.990Z.
+  Ambos sem pendencia. Nenhum servico alterado por esta preparacao.
+- Supabase MCP confirmou projeto hnncxuerlcsaahdxoswb, production ACTIVE_HEALTHY;
+  consulta01:34Z mostra0 observacoes/0 publicacoes. Writer presente com assinatura
+  de cinco argumentos igual migration, service_role permitido/anon negado;
+  probe inicial usou assinatura incorreta de dois argumentos, nao era ausencia.
+  Reader presente. Fontes: Git/GitHub, health, coordenador, probes e catalogos.
+
 ## 2026-10-16: Limite Qlik corrigido na fonte real
 
 - Main17ab106/CI38829007559 quatro success; imagem imutavel e dois perfis

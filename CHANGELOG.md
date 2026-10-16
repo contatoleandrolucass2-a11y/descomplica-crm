@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-16 - Interoperabilidade do catalogo Qlik
+
+- Trata metadados opcionais ausentes/nulos e textos de medidas alheias ao
+  ranking, preservando identidade, cobertura, unicidade e pins selecionados.
+- Distingue recusas do catalogo por codigos fixos, sem dados ou erros brutos.
+- Registra CRM publicado em b937 e coleta real recusada por master_pin_mismatch;
+  owner recuperado pelo coordenador. Atualizacao de fatos ainda pendente.
+
 ## 2026-10-16 - Mapeamento nativo Qlik
 
 - Configura Parceiras/PRODUTO com IDs, identidades e medidas reais pinadas,

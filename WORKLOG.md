@@ -1,5 +1,53 @@
 # Worklog
 
+## 2026-10-16: CRM publicado; recusa real no catalogo Qlik
+
+Main b937/CI38839240305 quatro jobs success. ZIP12021130754 validado,
+11 camadas OCI e perfis homologation/production comprovados na VPS, mesma
+imagem90701463142349786838f3b51dc8a0890d91b1b4652a287394bbf5acf36941d5.
+Coordenador publicou CRM a8a126eb-c373-4005-b68a-456012a6336b as02:59:30.399Z,
+QLIK_RANKING_V2_ENABLED efetivo conferido. Health03:00:08.353Z200/ok/b937.
+
+Primeira tentativa owner e26cdcd3 interrompida com perfil ja protegido e
+servico parado; causa exata nao exposta. Recuperacao exclusiva pelo mesmo
+coordenador restaurou17ab/c8314c64 as03:01:24.321Z, sem apagar ledger/travas.
+Segunda tentativa84cdd4c0 iniciou o servico, mas coleta real03:02:41.093Z
+retornou unavailable/master_pin_mismatch. Nenhum recibo de publicacao.
+Recuperada exatamente em28b9ffc9-eb35-49e6-9166-dfed49e0a91c as03:07:20.476Z;
+owner17ab metadata-only, sem pendencia. CRM b937 preservado, sem novo restart.
+Banco03:10:14.101Z confirma0 observacoes/0 publicacoes v2.
+
+Corretivo focal trata projeccoes opcionais null/ausentes e textos alheios ao
+ranking no catalogo. Aliases relevantes continuam limitados, propriedades
+pinadas e colisoes recusadas. Codigos fixos distinguem item/texto/binding/
+identidade, sem expor catalogo ou mensagens. O mecanismo e reproduzivel por
+fixture; a entrada exata do catalogo nativo ainda nao foi observada, portanto
+nao atribuir a causa produtiva a um valor especifico antes do novo canario.
+Sem mudanca de interface, banco, pins, recorte, selecoes ou conciliacao.
+
+Focais collector/artifact327 testes:326 aprovados,0 falhas e1 skip POSIX
+preexistente. Regressao direta/VM cobre labels projetados null/ausentes com
+hash nativo intacto, label explicitamente divergente, titulo/identidade/hash
+alterados e cleanup. Revisao independente sem P1/P2 de binding nos cenarios.
+Gates globais e novo canario real ainda pendentes; nao declarar origem resolvida.
+
+## 2026-10-16: Candidato integrado e CI exata de main
+
+PR216/head8dd4a3e integrado normalmente em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5
+as02:12:36Z; arvore identica. CI38834764103 tentativa2: tres gates aprovados,
+incluindo matriz visual corrigida; tentativa1 bloqueada por fonte ITBI HTTP403,
+sem alteracao financeira para obter verde. MainCI38839240305 ainda em progresso.
+Windows quatro comandos executados; teste completo3334/1164/703 aprovados,
+89/19/14 skips explicitos. Captura adicional38834764063 success.
+
+VPS b937 preparada: package/lock iguais17ab,38123 dependencias verificadas,
+SDK/script/mapa como UID997 Node24 e validacao root aprovados. Probe readonly
+de configuracao complete/preparationAccepted true, sem escrita de segredos.
+Health publico02:16:20.295Z200/ok/d83; ledgers CRM72be7b10 e owner933a111d/17ab
+sem pendencia. Nenhum runtime trocado, nenhuma imagem antecipada e nenhum
+fato publicado nesta etapa. Banco produtivo01:34Z:0observacoes/0publicacoes,
+writer de cinco argumentos e reader presentes. Ativacao e prova real pendentes.
+
 ## 2026-10-16: Metadados reais resolvidos e mapeamento nativo
 
 Main17ab106 concluiu os quatro gates em38829007559. Imagem imutavel validada

@@ -109,6 +109,13 @@ do HMAC e o compartilha entre as duas sessoes. O ciclo seguinte recria o mapa.
 Motivos de falha QIX atravessam o browser somente pela allowlist versionada;
 nenhuma mensagem bruta do SDK, formula ou linha de dados entra no recibo.
 
+O catalogo de medidas trata qData/title/label opcionais sem transformar
+metadados alheios em requisito financeiro. IDs/tipos/duplicatas e limite4096
+continuam conferidos em toda a lista. Um alias so vincula o master aprovado,
+com titulo nativo, hash integral e unicidade; nenhum texto alheio e publicado.
+Codigos master_catalog_item, master_catalog_text, master_catalog_binding e
+master_alias_identity distinguem recusas sem incluir valores da fonte.
+
 Publicacoes sao preservadas por ano. O reader retorna atual/anterior sob um
 snapshot SQL. Falha ou fonte mais antiga nao substitui a ultima carga valida.
 Movimento exige periodo, cobertura e mapeamento comparaveis. Publicacao nao
