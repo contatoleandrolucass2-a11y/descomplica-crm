@@ -2547,3 +2547,7 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 
 - Exibe mês e ano completos nos seletores do calendário em desktop, tablet e celular.
 - Preserva a integração de Usuários e as restrições de edição dos rascunhos comerciais.
+
+## 2026-10-15: Percentuais fracionários de Meta
+
+- Permite validar e salvar rascunhos com taxas como1,67%, preservando o valor informado.

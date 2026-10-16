@@ -1363,6 +1363,34 @@ for (const role of expectedRoles) {
           exact: true,
         });
         await expect(page.locator("main").filter({ has: goalsHeading })).toBeVisible();
+        if (role === "master") {
+          const rateNames = [
+            "opportunitiesRate",
+            "appointmentsRate",
+            "visitsRate",
+            "foldersRate",
+            "approvedFoldersRate",
+          ] as const;
+          for (const [index, name] of rateNames.entries()) {
+            const rateInput = page.locator(`.goal-rate-input input[name="${name}"]`);
+            const originalValue = await rateInput.inputValue();
+            const fractionalValue = index % 2 === 0 ? "1.67" : "2.42";
+            await rateInput.fill(fractionalValue);
+            await expect(rateInput).toHaveValue(fractionalValue);
+            expect(
+              await rateInput.evaluate((element) => {
+                const input = element as HTMLInputElement;
+                return {
+                  valid: input.checkValidity(),
+                  stepMismatch: input.validity.stepMismatch,
+                };
+              }),
+              name,
+            ).toEqual({ valid: true, stepMismatch: false });
+            await rateInput.fill(originalValue);
+            await expect(rateInput).toHaveValue(originalValue);
+          }
+        }
       }
       await expect(navigation.locator('a[href="/admin"]')).toHaveCount(0);
 

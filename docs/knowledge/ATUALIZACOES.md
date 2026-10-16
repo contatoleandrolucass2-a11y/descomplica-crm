@@ -3473,3 +3473,5 @@ publicacao. Evidencias completas na auditoria vinculada.
 Retomada16/10/2026 00:19UTC: main e health HTTP200/statusok permanecem d83c22d; CI38787167602 success. Meta em integração local, sem publicação. [Evidências e limites](../audits/meta-2026-10-15.md).
 
 Consulta16/10/2026 00:29UTC: main17ab106 com CI38829007559 em andamento; produção HTTP200/statusok ainda d83c22d. Meta:30capturas compiladas passaram e combinação final aguarda CI. [Evidências](../audits/meta-2026-10-15.md).
+
+Meta: calendário revisado em18capturas e30checks compilados; validate Linux38829857417 aprovado. Teste Windows teve3036pass/87skip/7falhas (seis timeouts e symlink); detalhes e limite de arredondamento legado na auditoria. Publicação ainda pendente.

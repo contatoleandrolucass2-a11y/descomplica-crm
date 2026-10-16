@@ -6354,3 +6354,9 @@ Na primeira repetição dos gates com o stack local ativo, o ESLint varreu códi
 
 - Build, typecheck e lint dos fontes aprovados;30capturas compiladas passaram com todas as opções do calendário legíveis, incluindo1024px.
 - Integra main17ab106 de ferramentas Qlik, preservando aplicação, CSS, histórico e referências de outras áreas. CI da combinação continua obrigatória.
+
+## 2026-10-15: Taxas fracionárias no formulário Meta
+
+- Corrige step inteiro nas cinco taxas, permitindo percentuais fracionários aceitos pelo servidor. Contagens mantêm passo inteiro.
+- Acrescenta verificação nativa de1.67/2.42 e restauração dos valores no preview; cálculos, fixtures e limites de servidor permanecem intactos.
+- CI38829857417 cancelada após validate aprovado; nova combinação deve cumprir todos os gates antes de publicação.

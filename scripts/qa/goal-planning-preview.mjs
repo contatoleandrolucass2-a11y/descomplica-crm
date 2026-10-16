@@ -303,6 +303,83 @@ export async function readGoalVisualLegibility(page) {
   });
 }
 
+export async function checkGoalFractionalRates(page, profile) {
+  const rates = page.locator(".goal-rate-input input");
+  const originals = await rates.evaluateAll((inputs) =>
+    inputs.map((input) => ({ name: input.name, value: input.value })),
+  );
+  assert.equal(
+    originals.length,
+    profile === "dv" ? 5 : 3,
+    "Only the visible funnel rates are exercised",
+  );
+  const originalFunnel = await page.locator(".goal-premium-stage output").allTextContents();
+  const counts = await page
+    .locator('.goal-studio input[type="number"]')
+    .evaluateAll((inputs) =>
+      inputs
+        .filter((input) => !input.closest(".goal-rate-input"))
+        .map((input) => ({ name: input.name, step: input.step })),
+    );
+  assert.equal(
+    counts.length,
+    profile === "dv" ? 12 : 10,
+    "Existing sales, team and production controls remain present",
+  );
+  for (const count of counts)
+    assert.equal(
+      count.step,
+      "1",
+      `Integer controls retain their native step: ${profile}/${count.name}`,
+    );
+  const checks = [];
+  try {
+    for (let index = 0; index < originals.length; index += 1) {
+      const input = rates.nth(index);
+      for (const fractional of ["1.67", "2.42"]) {
+        await input.fill(fractional);
+        await expect(input).toHaveValue(fractional);
+        const native = await input.evaluate((field) => ({
+          name: field.name,
+          value: field.value,
+          number: field.valueAsNumber,
+          step: field.step,
+          valid: field.checkValidity(),
+          stepMismatch: field.validity.stepMismatch,
+        }));
+        checks.push(native);
+        assert.equal(
+          native.value,
+          fractional,
+          `Fractional rate must not be rounded: ${profile}/${native.name}`,
+        );
+        assert.equal(
+          native.number,
+          Number(fractional),
+          `Native numeric value must retain the fraction: ${profile}/${native.name}`,
+        );
+        assert.equal(
+          native.stepMismatch,
+          false,
+          `Fractional rate must not cause stepMismatch: ${profile}/${native.name}=${fractional} step=${native.step}`,
+        );
+        assert.equal(
+          native.valid,
+          true,
+          `Rate input itself must be natively valid: ${profile}/${native.name}=${fractional}`,
+        );
+      }
+    }
+  } finally {
+    for (let index = 0; index < originals.length; index += 1) {
+      await rates.nth(index).fill(originals[index].value);
+      await expect(rates.nth(index)).toHaveValue(originals[index].value);
+    }
+  }
+  await expect(page.locator(".goal-premium-stage output")).toHaveText(originalFunnel);
+  return { checks, integerControls: counts, restoredOriginals: originals };
+}
+
 /** Keep Next's compiled selectors verbatim, including any minifier defects. */
 export async function loadGoalPreviewProductionCss(viteCss) {
   const require = createRequire(import.meta.url);
@@ -725,6 +802,12 @@ export async function runGoalPlanningPreview() {
             screenshot,
           });
         }
+        evidence.fractionalRates ??= [];
+        evidence.fractionalRates.push({
+          width,
+          profile,
+          ...(await checkGoalFractionalRates(page, profile)),
+        });
         await page
           .getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true })
           .fill("2");

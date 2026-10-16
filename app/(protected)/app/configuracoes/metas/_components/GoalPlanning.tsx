@@ -106,7 +106,7 @@ export function GoalPlanning({
         type="number"
         min="0"
         max={max}
-        step="1"
+        step={GOAL_RATE_FIELDS.some((field) => field.key === key) ? "any" : "1"}
         required
         value={values[key] ?? ""}
         placeholder="—"
