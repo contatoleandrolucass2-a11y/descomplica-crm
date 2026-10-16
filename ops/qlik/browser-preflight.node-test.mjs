@@ -225,6 +225,140 @@ test("error projection reads only one own data code without invoking private acc
   );
 });
 
+test("serialized limit diagnostics retain only fixed enums, existing caps and safe counts", async () => {
+  const kinds = {
+    array_items: [16, 32, 64, 128, 512, 10_000, 131_071],
+    string_length: [256, 4096],
+    text_budget: [65_536],
+    definition_bytes: [262_144, 524_288],
+    definition_depth: [32, 34],
+    tree_depth: [8],
+    tree_nodes: [128],
+    references: [512],
+    master_definitions: [64],
+    catalog_items: [10_000],
+    catalog_fields: [256],
+    result_bytes: [262_144],
+    artifact_bytes: [131_072],
+  };
+  const stages = [
+    "property_tree",
+    "reachability",
+    "candidate",
+    "container",
+    "master_plan",
+    "measure_catalog",
+    "field_catalog",
+    "master_definitions",
+    "named_measures",
+    "variables",
+    "output",
+  ];
+  let index = 0;
+  for (const [kind, caps] of Object.entries(kinds))
+    for (const maximum of caps) {
+      const limit = {
+        stage: stages[index++ % stages.length],
+        kind,
+        maximum,
+        observed: maximum + 1,
+      };
+      const error = {
+        code: "qix_metadata_limit",
+        limit: { ...limit, message: "synthetic-private", data: { token: "synthetic-private" } },
+      };
+      assert.deepEqual(await serializedFailure(error), {
+        status: "unavailable",
+        reason: "qix_metadata_limit",
+        limit,
+      });
+    }
+});
+
+test("limit diagnostic rejects private strings, unknown caps and malformed counts without coercion", async () => {
+  const valid = { stage: "field_catalog", kind: "catalog_fields", observed: 257, maximum: 256 };
+  for (const [key, values] of [
+    ["stage", ["synthetic-private", "field_catalog?token=synthetic-private", undefined, 1]],
+    ["kind", ["synthetic-private", "__proto__", "constructor", undefined, ["catalog_fields"]]],
+    ["maximum", [257, 0, -1, NaN, Infinity, "256", undefined]],
+    ["observed", [256, -1, 257.1, NaN, Infinity, Number.MAX_SAFE_INTEGER + 1, "257", undefined]],
+  ])
+    for (const value of values)
+      assert.deepEqual(
+        await serializedFailure({ code: "qix_metadata_limit", limit: { ...valid, [key]: value } }),
+        { status: "unavailable", reason: "qix_metadata_limit" },
+      );
+  for (const limit of [null, undefined, "synthetic-private", Object.create(valid)])
+    assert.deepEqual(await serializedFailure({ code: "qix_metadata_limit", limit }), {
+      status: "unavailable",
+      reason: "qix_metadata_limit",
+    });
+  assert.deepEqual(await serializedFailure({ code: "qix_scope_mismatch", limit: valid }), {
+    status: "unavailable",
+    reason: "qix_scope_mismatch",
+  });
+});
+
+test("limit sanitization never invokes accessors or exports unrelated private fields", async () => {
+  let getters = 0;
+  const valid = { stage: "field_catalog", kind: "catalog_fields", observed: 257, maximum: 256 };
+  const accessor = () => ({
+    get() {
+      getters++;
+      throw new Error("synthetic-private");
+    },
+  });
+  const top = Object.defineProperty({ code: "qix_metadata_limit" }, "limit", accessor());
+  assert.deepEqual(await serializedFailure(top), {
+    status: "unavailable",
+    reason: "qix_metadata_limit",
+  });
+  for (const key of Object.keys(valid)) {
+    const limit = Object.defineProperty({ ...valid }, key, accessor());
+    assert.deepEqual(await serializedFailure({ code: "qix_metadata_limit", limit }), {
+      status: "unavailable",
+      reason: "qix_metadata_limit",
+    });
+  }
+  const limit = { ...valid };
+  for (const key of ["message", "data", "token", "expression", "field"])
+    Object.defineProperty(limit, key, accessor());
+  assert.deepEqual(await serializedFailure({ code: "qix_metadata_limit", limit }), {
+    status: "unavailable",
+    reason: "qix_metadata_limit",
+    limit: valid,
+  });
+  const proxy = new Proxy(
+    {},
+    {
+      getOwnPropertyDescriptor() {
+        throw new Error("synthetic-private");
+      },
+    },
+  );
+  assert.deepEqual(await serializedFailure({ code: "qix_metadata_limit", limit: proxy }), {
+    status: "unavailable",
+    reason: "qix_metadata_limit",
+  });
+  assert.equal(getters, 0);
+});
+
+test("cancellation suppresses otherwise valid limit diagnostics", async () => {
+  const f = fixture();
+  let client;
+  const inspect = async () => {
+    client.cancel();
+    throw {
+      code: "qix_metadata_limit",
+      limit: { stage: "field_catalog", kind: "catalog_fields", observed: 257, maximum: 256 },
+    };
+  };
+  client = createBrowserMetadataClient(f.enigma, {}, inspect, f.environment);
+  assert.deepEqual(await client.run(), { status: "unavailable", reason: "cancelled" });
+  assert.equal(f.timers.size, 0);
+  assert.ok(f.calls.includes("socket_closed"));
+});
+
 test("generated script and bundled SDK preserve real inspector failures without engine details", async () => {
   const script = await getBrowserMetadataScript();
   assert.ok(script.includes(createBrowserMetadataClient.toString()));

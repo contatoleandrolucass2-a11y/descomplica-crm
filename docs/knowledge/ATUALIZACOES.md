@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-15: Projecao delimitada e validacao inconclusiva Windows
+
+- Ramo codex/qlik-bounded-catalog/basea7fdf92:207 focais aprovados e
+  review independente22 probes sem P1/P2. Caps mantidos; catalogo relevante
+  retido antes de validar comprimento. Diagnostico fixo inclui stage/kind/
+  observed/maximum, sem campos/expressoes. Tres aliases adicionais somente
+  com referencia direta. Ainda nao identifica qual limite real falhou.
+- Lint/tipos exit0; teste global exit1/4918.24s,10 arquivos/26 testes
+  falhos,2798 aprovados/85 skips,5 erros incluindo worker timeout. Causa
+  completa nao isolada. Node/release nao rodaram e build interrompido;
+  repetir com um worker apos integrar main e exigir CI Linux completa.
+- GitHub main d83c22d/PR232; health publico20:16:53Z200/ok/d83c22d,
+  ledger deployment72be7b10/deployedAt19:15:11.541Z/imagem2e832356,
+  sem pendencia. Owner00bbab75/a7 permanece separado, sem fatos. Nao
+  confundir main integrado, validacao Windows e runtime publicado.
+- Fontes: GitHub branches/main, health e coordenador status/qlik-status.
+  Transporte temporariamente indisponivel recuperado; nenhuma mutacao
+  durante a falha. Proxima promocao depende de fresh CI/main/CAS e imagem.
+
+## 2026-10-15: Owner atualizado, limite nativo ainda bloqueia
+
+- Maina7fdf92/CI38775901605 quatro jobs success. Artefato11993912111 baixado
+  somente apos gates: ZIPcd46ea9c, tare589a5cb, config3317425c e manifesto
+  local9346dc27/11 camadas conferidos. image:prove dois perfis passou.
+- Primeira promocao bloqueou antes de intencao, sem trocar owner/pendencia.
+  Checkout novo sob umask077 tinha codigo0700/0600; dependencias estavam
+  legiveis. Corrigidos somente1369 arquivos versionados e203 diretorios do
+  candidato,1572 modos, hashes antes/depois e Git limpo. Helper revisado27
+  casos, sem locks opcionais do Git. Ignorados/credenciais/perfil preservados.
+  Probe inicial usou /usr/bin/node18 e nao valida o runtime; probe exato com
+  /usr/local/bin/node24, env limpo e usuario tecnico passou SDK/script.
+  Reavaliar em cada checkout novo; nao mudar umask/ACL global ou segredos.
+- Promocao pelo coordenador as18:12:40.057Z: owner00bbab75/a7fdf92,
+  sem pendencia, rankingConnected false, preflight unavailable. Snapshot
+  privado7WjFNw,181bytes/SHAafaa9c83, observado18:12:39.879Z, motivo
+  qix_metadata_limit. Nao atribuir o limite a um contador sem diagnostico.
+  CRM8e3594fd/fae77f9 preservado, health18:12:04Z200/ok/fae77f9.
+  Ramo corretivo codex/qlik-bounded-catalog separado; ainda sem fatos.
+
 ## 2026-10-15: Metadata integrado validado localmente
 
 - Mainfae77f9 integrado emfacf284, sem perder dashboard/referencias/notas.
@@ -3432,3 +3471,5 @@ em d83c22d. CI38785631184 gerou candidato visual para revisao; Meta ainda sem
 publicacao. Evidencias completas na auditoria vinculada.
 
 Retomada16/10/2026 00:19UTC: main e health HTTP200/statusok permanecem d83c22d; CI38787167602 success. Meta em integração local, sem publicação. [Evidências e limites](../audits/meta-2026-10-15.md).
+
+Consulta16/10/2026 00:29UTC: main17ab106 com CI38829007559 em andamento; produção HTTP200/statusok ainda d83c22d. Meta:30capturas compiladas passaram e combinação final aguarda CI. [Evidências](../audits/meta-2026-10-15.md).
