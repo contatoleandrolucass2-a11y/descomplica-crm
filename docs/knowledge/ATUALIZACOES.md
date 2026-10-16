@@ -1,5 +1,51 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-16: Retomada dos grupos de funis
+
+- Fonte Git fetch origin e GitHub via gh na VPS: main69ae9839, CI38928064973
+  concluida/success; HEAD local1c91e0c no ramo codex/dashboard-grupos-periodos-20261016.
+  Health publico18:42:09Z HTTP200/ok/66ed7360; integrado, local e publicado distintos.
+- Escopo solicitado: grupos3/5/5, periodos limitados ao mes vigente, media anual
+  por uma venda, fechar filtros fora/Escape, remover diagnostico/tabelas/equipe/ranking.
+  Preservar metas por responsavel e roscas. Sem migrations ou workflows.
+- Retomada preservou edicoes locais. Treze testes de periodos e teste de filtros
+  em Chromium desktop/mobile passaram. Suite visual e gates globais em andamento;
+  nenhuma publicacao desta alteracao. Revisar capturas dos tres temas antes do deploy.
+
+## 2026-10-16: Conferencia autenticada dos tres temas
+
+- Complemento responsivo16/10: inspecao autenticada em viewports1920x1080,
+  1366x768,390x844 e360x800, alternando Claro/Medio/Escuro. Roscas, funis,
+  filtros abertos, historicos e tabelas nos trechos examinados sem sobreposicao
+  indevida. Medicao DOM nao encontrou overflow horizontal da pagina nem dos
+  textos folha visiveis avaliados. Tabelas moveis possuem overflow:auto local;
+  ultima coluna Hoje acessivel (scrollLeft233, largura343/conteudo576).
+  Historico movel rolavel, largura357 sem overflow horizontal, altura811 e
+  conteudo1188. Nao e teste em aparelho fisico nem garantia de toda combinacao.
+- Captura nativa inicial divergiu do viewport; captura documentada com clip
+  no scroll atual confirmou enquadramento correto. Evidencias JPG locais fora
+  do Git. Console capturado sem erros; coleta mostrada14:03BRT. Viewport
+  temporario removido, Claro restaurado, filtros limpos e dialogos fechados.
+  Nenhuma alteracao de codigo ou deploy; suites nao repetidas nesta inspecao.
+
+- Navegador de producao acessivel apos login pelo usuario. Claro, Medio e
+  Escuro inspecionados na largura atual do painel (304px), com roscas, funis,
+  metas e dialogos legiveis; nenhuma falha visual observada nos trechos vistos.
+  Nao equivale a uma nova matriz desktop/mobile. Console capturado sem erros.
+- Filtros de canal, gerente, responsavel e empresa exercitados; opcoes dependentes
+  e limpeza confirmadas. Um responsavel produziu metas27/8/4/1; esperado ate
+  hoje proporcional a16/31. Troca de tema preservou filtro e valores; limpeza
+  restaurou315 responsaveis. Historicos: janeiro-setembro, julho-setembro e
+  setembro, sem outubro ainda aberto. Fonte: UI autenticada, coleta13:33BRT.
+- Estado final: tema Claro, sem filtros ou dialogos. Nenhuma alteracao de
+  dados, integracao ou runtime. Health publico16:58:38Z ok/66ed7360; HEAD
+  local1c91e0c e versao publicada continuam distintos. Nova consulta gh
+  indisponivel no PATH; nao alegar nova validacao CI. Suites nao repetidas
+  nesta verificacao observacional. Evidencias visuais locais fora do Git.
+- Limite: disponibilidade de pastas aprovadas e metas nao definidas nao foi
+  alterada. Reavaliar apos mudanca de dados, layout ou regras. Registro local
+  de verificacao, sem nova publicacao de runtime.
+
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
 - Aceite16/10/15:07Z: dois ciclos automaticos novos publicados e conciliados.

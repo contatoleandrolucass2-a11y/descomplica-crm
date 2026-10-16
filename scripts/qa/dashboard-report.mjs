@@ -41,14 +41,7 @@ const sourceFiles = [
   "lib/crm/dashboard/analysis.ts",
   "lib/crm/dashboard/management-goals.ts",
 ];
-const sections = [
-  "Convers\u00e3o por etapa",
-  "Comparativo mensal",
-  "Ritmo",
-  "Efici\u00eancia do funil",
-  "Realizado Funil",
-  "Corretores por gerente",
-];
+const sections = ["Convers\u00e3o por etapa", "Funis comerciais", "Ritmo"];
 
 // Only generated values enter this harness. No environment files, auth or data loaders.
 function syntheticDashboard() {
@@ -441,7 +434,7 @@ async function settle(page) {
     .toBe(0);
 }
 
-async function checkStructure(page) {
+export async function checkStructure(page) {
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(
     "Relat\u00f3rio completo da equipe.",
   );
@@ -457,11 +450,24 @@ async function checkStructure(page) {
   await expect(page.locator('[aria-labelledby="report-pulse-title"] figure')).toHaveCount(5);
   await expect(
     page.locator('[aria-labelledby="report-monthly-title"] article[data-tone]'),
-  ).toHaveCount(6);
+  ).toHaveCount(13);
   const funnels = page.locator(
     '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"]',
   );
-  await expect(funnels).toHaveCount(6);
+  await expect(funnels).toHaveCount(13);
+  for (const [group, labels] of [
+    ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
+    ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
+    [
+      "history",
+      ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
+    ],
+  ]) {
+    const region = page.locator(`[aria-labelledby="report-${group}-title"]`);
+    await expect(region.locator("article[data-tone]")).toHaveCount(labels.length);
+    await expect(region.locator("h3:visible")).toHaveText(labels);
+    await expect(region.locator('figure[aria-label^="Funil mensal:"]')).toHaveCount(labels.length);
+  }
   for (const funnel of await funnels.all()) {
     await expect(funnel).toHaveAccessibleName(/^Funil mensal: /);
     await expect(funnel.locator("dt")).toHaveText([
@@ -486,21 +492,9 @@ async function checkStructure(page) {
       if (index > 0) assert.ok(steps[index].width < steps[index - 1].width, "Narrowing funnel");
     }
   }
-  const tables = page.locator('[aria-labelledby="report-operational-title"] table');
-  await expect(tables).toHaveCount(4);
-  for (const table of await tables.all()) {
-    await expect(table.locator("thead th")).toHaveText([
-      "Indicador",
-      "Mês",
-      "Últimos 14 dias",
-      "Últimos 7 dias",
-      "Esta Semana",
-      "Hoje",
-    ]);
-    await expect(table.locator("tbody tr")).toHaveCount(1);
-    await expect(table.locator("tbody th")).toHaveText("Realizado");
-    await expect(table.locator("tbody td")).toHaveCount(5);
-  }
+  await expect(
+    page.locator("#report-operational-title, #report-diagnosis-title, #report-team-title"),
+  ).toHaveCount(0);
   await expect(page.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
   for (const name of ["Mês", "Semana", "Hoje"])
     await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
@@ -512,6 +506,14 @@ async function checkLayout(page) {
     const problems = [];
     if (document.documentElement.scrollWidth > innerWidth + 1)
       problems.push("document horizontal overflow");
+    for (const region of document.querySelectorAll(
+      "main section[aria-labelledby], main details[open]",
+    )) {
+      if (region.scrollWidth > region.clientWidth + 1)
+        problems.push(
+          `${region.getAttribute("aria-labelledby") || "open disclosure"}: horizontal overflow`,
+        );
+    }
     for (const element of document.querySelectorAll(
       "main h1, main h2, main h3, main a, main button, main summary, main dt, main dd, main td",
     )) {
@@ -646,6 +648,68 @@ export async function verifyMonthlyHistory(page, { title, months, sales, screens
   return { months, focusReturned: true, escapeClosed: true, layout };
 }
 
+export async function verifyFilterDismissal(page) {
+  const summaries = page.locator('summary[aria-labelledby^="filter-"]');
+  await expect(summaries).toHaveCount(4);
+  const before = await page.evaluate(() => ({
+    url: location.href,
+    filters: window.qaCurrentProps.filters,
+  }));
+  for (const summary of await summaries.all()) {
+    const menu = summary.locator("..");
+    await summary.click();
+    await expect(menu).toHaveAttribute("open", "");
+    await checkLayout(page);
+    await page.getByRole("heading", { level: 1 }).click();
+    await expect(menu).not.toHaveAttribute("open", "");
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await expect(menu).toHaveAttribute("open", "");
+    await page.keyboard.press("Escape");
+    await expect(menu).not.toHaveAttribute("open", "");
+    await expect(summary).toBeFocused();
+  }
+  await summaries.nth(0).click();
+  await summaries.nth(1).focus();
+  await page.keyboard.press("Enter");
+  await expect(summaries.nth(0).locator("..")).not.toHaveAttribute("open", "");
+  await expect(summaries.nth(1).locator("..")).toHaveAttribute("open", "");
+  await summaries.nth(2).focus();
+  await expect(summaries.nth(1).locator("..")).not.toHaveAttribute("open", "");
+  assert.deepEqual(
+    await page.evaluate(() => ({ url: location.href, filters: window.qaCurrentProps.filters })),
+    before,
+  );
+  return {
+    outsidePointer: 4,
+    escape: 4,
+    focusReturn: true,
+    exclusiveMenu: true,
+    focusOutside: true,
+  };
+}
+
+export async function verifySaleNormalization(page) {
+  const values = () =>
+    page.getByRole("figure", { name: "Funil mensal: Média venda", exact: true }).locator("dd");
+  await expect(values()).toHaveText(["10", "6", "3", "2", "Indisponível", "1"]);
+  const original = await page.evaluate(() => window.qaCurrentProps);
+  try {
+    for (const sales of [0, null]) {
+      await page.evaluate((sales) => {
+        const props = structuredClone(window.qaCurrentProps);
+        props.dashboard.metrics.all.sales.yearClosedMonthsAverage = sales;
+        window.qaRender("complete", props);
+      }, sales);
+      await expect(values()).toHaveText(Array(6).fill("Indisponível"));
+      await expect(page.locator("main")).not.toContainText(/NaN|Infinity/);
+    }
+  } finally {
+    await page.evaluate((props) => window.qaRender("analysis", props), original);
+  }
+  return { perSale: [10, 6, 3, 2, null, 1], zeroAndMissingSales: "unavailable" };
+}
+
 export async function verifyAnalysisInteractions(page) {
   await page.evaluate(() => {
     history.replaceState(null, "", "/app?scenario=analysis&view=all&period=week");
@@ -672,6 +736,17 @@ export async function verifyAnalysisInteractions(page) {
   await expect(value("Média do ano", "sales")).toHaveText("15");
   await expect(value("Média dos últimos 3 meses", "sales")).toHaveText("24");
   await expect(value("Mês anterior", "sales")).toHaveText("27");
+  await verifySaleNormalization(page);
+  for (const [label, sales] of [
+    ["Mês (Períodos do mês)", "6"],
+    ["Semana anterior", "0"],
+    ["Esta semana", "6"],
+    ["Ontem", "0"],
+    ["Hoje", "6"],
+    ["Mês (Histórico)", "6"],
+  ]) {
+    await expect(value(label, "sales")).toHaveText(sales);
+  }
   const year = Array.from(
     { length: 9 },
     (_, index) => `2026-${String(index + 1).padStart(2, "0")}`,
@@ -696,6 +771,8 @@ export async function verifyAnalysisInteractions(page) {
   await expect(value("Mês atual", "sales")).toHaveText("2");
   await expect(value("Média do ano", "sales")).toHaveText("5");
   await expect(value("Mês anterior", "sales")).toHaveText("9");
+  await expect(value("Média venda", "sales")).toHaveText("1");
+  await expect(value("Média venda", "opportunities")).toHaveText("10");
   const firstNavigation = await page.evaluate(() => window.qaReplacements.at(-1));
   const query = new URL(firstNavigation.url, "http://127.0.0.1").searchParams;
   assert.deepEqual(query.getAll("owner"), ["Responsavel sintetico Alfa"]);
@@ -739,7 +816,7 @@ export async function verifyAnalysisInteractions(page) {
 async function keyboardDetails(page) {
   const details = page.locator("main details");
   const count = await details.count();
-  assert.ok(count > 0, "Authorized ranking must remain in a details disclosure");
+  assert.ok(count > 0, "Filters and conversion details remain keyboard accessible");
   for (let index = 0; index < count; index++) {
     const disclosure = details.nth(index);
     const summary = disclosure.locator(":scope > summary");
@@ -791,6 +868,7 @@ async function run() {
   let browser;
   let page;
   const check = async (name, action) => {
+    process.stdout.write(`Checking ${name}\n`);
     try {
       const details = await action();
       report.checks.push({ name, status: "passed", ...(details ? { details } : {}) });
@@ -831,6 +909,7 @@ async function run() {
         }, theme);
         for (const width of widths) {
           const label = `${scenario}/${theme}/${width}`;
+          process.stdout.write(`Viewport ${label}\n`);
           await page.setViewportSize({ width, height: 900 });
           await settle(page);
           if (scenario === "complete" && width === 1440) {
@@ -866,6 +945,7 @@ async function run() {
             path: path.join(directory, `${scenario}-${theme}-${width}.png`),
           });
           if (scenario === "analysis") {
+            await check(`${label}/filter-dismissal`, () => verifyFilterDismissal(page));
             await check(`${label}/history-popup`, () =>
               verifyMonthlyHistory(page, {
                 title: "Média do ano",
@@ -879,7 +959,7 @@ async function run() {
             );
           }
           if (scenario === "complete" && [320, 1440, 1920].includes(width)) {
-            for (const section of ["pulse", "diagnosis", "operational"]) {
+            for (const section of ["pulse"]) {
               await captureDashboardScreenshot(page, {
                 section: page.locator(`[aria-labelledby="report-${section}-title"]`),
                 path: path.join(directory, `${section}-${theme}-${width}.png`),
@@ -905,24 +985,14 @@ async function run() {
     );
     await page.evaluate(() => window.qaRender("complete"));
     await check("keyboard/details", () => keyboardDetails(page));
-    await check("ranking/authorized", async () => {
+    await check("ranking/removed-from-dashboard", async () => {
       const ranking = page
         .locator("main details")
         .filter({ hasText: "Empreendimento sintetico Alfa" });
-      await expect(ranking).toHaveCount(1);
-      await ranking.locator(":scope > summary").focus();
-      await page.keyboard.press("Enter");
+      await expect(ranking).toHaveCount(0);
       await expect(
-        ranking.getByText("Empreendimento sintetico Alfa", { exact: true }),
-      ).toBeVisible();
-      await settle(page);
-      const axe = await new AxeBuilder({ page }).include("main details[open]").analyze();
-      assert.deepEqual(
-        axe.violations.filter(({ impact }) => impact === "serious" || impact === "critical"),
-        [],
-        "Opened ranking axe",
-      );
-      await captureDashboardScreenshot(page, { path: path.join(directory, "ranking-open.png") });
+        page.locator("#report-team-title, #report-diagnosis-title, #report-operational-title"),
+      ).toHaveCount(0);
     });
     await check("refresh/synthetic-only", async () => {
       await page.getByRole("button", { name: /atualizar/i }).click();
@@ -961,9 +1031,9 @@ async function run() {
       if (scenario === "large")
         await check("large/exact-values", async () => {
           await expect(
-            page
-              .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
-              .locator('[data-stage="sales"] dd'),
+            page.locator(
+              '[aria-labelledby="report-pulse-title"] [data-stage="sales"] dl > div:first-child dd',
+            ),
           ).toHaveText("9.876.543,2");
         });
       if (scenario === "over-capacity")
@@ -1007,20 +1077,20 @@ async function run() {
         const next = structuredClone(window.qaCurrentProps.dashboard);
         next.generatedAt = "2026-10-14T15:03:00.000Z";
         next.updatedAt = "2026-10-14T15:03:05.000Z";
-        next.metrics.all.sales.currentMonth = 321;
+        next.metrics.all.sales.currentWeek = 321;
         window.qaNextDashboard = next;
       });
       currentVersion = {
         generatedAt: "2026-10-14T15:03:00.000Z",
         updatedAt: "2026-10-14T15:03:05.000Z",
       };
-      const sales = page
-        .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
-        .locator('[data-stage="sales"] dd');
+      const sales = page.locator(
+        '[aria-labelledby="report-pulse-title"] [data-stage="sales"] dl > div:first-child dd',
+      );
       await page.clock.runFor(30_100);
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
       await waitForStatusReads(statusReads);
-      await expect(sales).toHaveText("100");
+      await expect(sales).toHaveText("7");
       for (const event of ["focus", "online", "focus"]) {
         const previousReads = statusReads;
         await page.evaluate((type) => window.dispatchEvent(new Event(type)), event);
@@ -1046,13 +1116,13 @@ async function run() {
       currentVersion = { ...currentVersion, updatedAt: "2026-10-14T15:04:00.000Z" };
       await page.evaluate(() => {
         window.qaNextDashboard.updatedAt = "2026-10-14T15:04:00.000Z";
-        window.qaNextDashboard.metrics.all.sales.currentMonth = 322;
+        window.qaNextDashboard.metrics.all.sales.currentWeek = 322;
         window.dispatchEvent(new Event("focus"));
       });
       await expect(sales).toHaveText("322");
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(2);
       await page.clock.resume();
-      return { statusReads, routerRefreshes: 2, finalMonthlySales: 322, period: "week" };
+      return { statusReads, routerRefreshes: 2, finalWeeklySales: 322, period: "week" };
     });
     await check("browser/errors-and-network", () => {
       assert.deepEqual(report.pageErrors, [], "pageerror");

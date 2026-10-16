@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-16: Grupos comparativos do dashboard
+
+Implementa treze funis em grupos3/5/5: metas, periodos do mes vigente e
+historico com media por uma venda. Recorta semana anterior e ontem ao mes
+atual, preserva indisponibilidade e evita dividir por vendas nulas ou zero.
+Filtros fecham fora, por Escape e ao abrir outro filtro. Remove diagnostico,
+tabelas operacionais, equipe e ranking apenas deste dashboard; preserva roscas.
+Layout empilha funis no celular, sem exigir rolagem horizontal.
+Validacao parcial:13 testes de periodos,28 de apresentacao e fechamento dos
+filtros em Chromium desktop/mobile passaram. Lint e tipos passaram na retomada.
+Gates completos e matriz visual ainda em verificacao; nao publicado.
+
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
 Publicacao16/10: PR238/66ed7360 integrado, quatro jobs CI38901994232 verdes.

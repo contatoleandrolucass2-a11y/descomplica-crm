@@ -90,15 +90,22 @@ describe("complete visual composition on the scoped v3 read model", () => {
     for (const label of [
       "Relatório completo da equipe.",
       "Conversão por etapa",
-      "Oportunidades por empreendimento",
-      "Realizado Funil",
-      "Eficiência do funil",
-      "Comparativo mensal",
-      "Corretores por gerente",
+      "Funis comerciais",
+      "Períodos do mês",
+      "Histórico e média por venda",
+      "Média venda",
     ]) {
       expect(dashboard).toContain(label);
     }
     expect(dashboard).not.toContain("Realizado e meta lado a lado");
+    for (const removed of [
+      "Realizado Funil",
+      "Eficiência do funil",
+      "Corretores por gerente",
+      "Oportunidades por empreendimento",
+    ]) {
+      expect(dashboard).not.toContain(removed);
+    }
     expect(dashboardPage).toContain("<DashboardReport");
     expect(dashboardPage).not.toContain("SHOW_EXTENDED_DASHBOARD");
     for (const label of [

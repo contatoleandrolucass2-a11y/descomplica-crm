@@ -5,7 +5,16 @@ import {
   type DashboardAnalysisSlice,
 } from "./analysis-contract";
 import type { DashboardMetric, DashboardReadModel } from "./data";
-import type { DashboardStageKey } from "./catalog";
+import { DASHBOARD_STAGES, type DashboardStageKey } from "./catalog";
+import { calculateConversion, type FunnelReading } from "./presentation";
+
+export type DashboardFunnelPeriodKey =
+  | "month"
+  | "previous-week"
+  | "current-week"
+  | "yesterday"
+  | "today";
+export type DashboardPeriodReadings = Record<DashboardFunnelPeriodKey, FunnelReading[]>;
 
 export const DASHBOARD_FILTER_KEYS = ["channel", "manager", "owner", "company"] as const;
 export type DashboardFilterKey = (typeof DASHBOARD_FILTER_KEYS)[number];
@@ -169,6 +178,41 @@ export function analyzeDashboard(
       if (!sameMonth) metric.currentMonth = null;
     }
   }
+  // These funnels are month-scoped; legacy metrics retain their original windows.
+  const currentMonthStart = monthStart(referenceDate);
+  const periodReadingsFor = (start: string, end: string, fresh: boolean): FunnelReading[] => {
+    const clippedStart = start < currentMonthStart ? currentMonthStart : start;
+    const values = ANALYSIS_STAGE_KEYS.map((_, stage) => {
+      if (!sameMonth || !fresh || clippedStart < coverageStart) return null;
+      return end < clippedStart ? 0 : count(stage, clippedStart, end);
+    });
+    return ANALYSIS_STAGE_KEYS.map((key, index) => {
+      const value = values[index]!;
+      const previous = values[index - 1] ?? null;
+      return {
+        key,
+        label: DASHBOARD_STAGES[key].label,
+        value,
+        conversion:
+          value === null || previous === null ? null : calculateConversion(value, previous),
+      };
+    });
+  };
+  const periodReadings: DashboardPeriodReadings = {
+    month: periodReadingsFor(currentMonthStart, referenceDate, sameMonth),
+    "previous-week": periodReadingsFor(
+      shiftDate(weekStart, -7),
+      shiftDate(weekStart, -1),
+      sameWeek,
+    ),
+    "current-week": periodReadingsFor(weekStart, referenceDate, sameWeek),
+    yesterday: periodReadingsFor(
+      shiftDate(referenceDate, -1),
+      shiftDate(referenceDate, -1),
+      sameDay,
+    ),
+    today: periodReadingsFor(referenceDate, referenceDate, sameDay),
+  };
   const owners = new Set(facts.filter((fact) => fact[3] >= 0).map((fact) => fact[3]));
   const managerOwners = new Map<string, Set<number>>();
   for (const fact of facts) {
@@ -194,6 +238,7 @@ export function analyzeDashboard(
     filters,
     options,
     metrics,
+    periodReadings,
     history: {
       "year-average": history(yearMonths),
       "three-month-average": history(threeMonths),

@@ -1342,20 +1342,41 @@ async function inspectRoute(
             )),
         dashboardReportReady:
           window.location.pathname !== "/app" ||
-          (["pulse", "monthly", "diagnosis", "operational", "team"].every((section) =>
+          (["pulse", "monthly"].every((section) =>
             document.querySelector(`#report-${section}-title`),
           ) &&
+            [
+              ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
+              ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
+              [
+                "history",
+                ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
+              ],
+            ].every(([group, labels]) => {
+              const region = document.querySelector(`[aria-labelledby="report-${group}-title"]`);
+              return (
+                region &&
+                region.querySelectorAll("article[data-tone]").length === labels.length &&
+                JSON.stringify(
+                  [...region.querySelectorAll("h3")].map((heading) => heading.textContent.trim()),
+                ) === JSON.stringify(labels) &&
+                region.scrollWidth <= region.clientWidth + 1
+              );
+            }) &&
+            !document.querySelector(
+              "#report-operational-title, #report-diagnosis-title, #report-team-title",
+            ) &&
             document.querySelectorAll('[aria-labelledby="report-pulse-title"] figure').length ===
               5 &&
             document.querySelectorAll('[aria-labelledby="report-monthly-title"] details').length ===
-              6 &&
+              13 &&
             document.querySelectorAll('[aria-labelledby="report-monthly-title"] figure').length ===
-              6 &&
+              13 &&
             document.querySelectorAll(
               '[aria-labelledby="report-monthly-title"] figure [data-stage]',
-            ).length === 36 &&
+            ).length === 78 &&
             document.querySelectorAll('[aria-labelledby="report-operational-title"] table')
-              .length === 4),
+              .length === 0),
         hasBrokenValue: /\b(?:NaN|undefined)\b/.test(text),
         protectedShellPresent: navigation instanceof HTMLElement,
         loginPresent: Boolean(document.querySelector('input[name="password"]')),

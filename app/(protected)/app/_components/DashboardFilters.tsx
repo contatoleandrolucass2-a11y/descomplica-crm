@@ -24,6 +24,45 @@ const allLabels: Record<DashboardFilterKey, string> = {
   company: "Todas as empresas",
 };
 
+function attachMenuDismissal(root: HTMLDivElement | null) {
+  if (!root) return;
+  const document = root.ownerDocument;
+  const openMenus = () => root.querySelectorAll<HTMLDetailsElement>("details[open]");
+  function dismissOutside(event: Event) {
+    for (const menu of openMenus()) {
+      if (event.target instanceof Node && !menu.contains(event.target)) {
+        if (menu.contains(document.activeElement)) menu.querySelector("summary")?.focus();
+        menu.open = false;
+      }
+    }
+  }
+  function dismissOnEscape(event: KeyboardEvent) {
+    if (event.key !== "Escape" || event.defaultPrevented) return;
+    const menu = openMenus()[0];
+    if (!menu) return;
+    event.preventDefault();
+    menu.open = false;
+    menu.querySelector("summary")?.focus();
+  }
+  function closeOtherMenus(event: Event) {
+    const opened = event.target;
+    if (!(opened instanceof HTMLDetailsElement) || !opened.open) return;
+    for (const menu of openMenus()) {
+      if (menu !== opened) menu.open = false;
+    }
+  }
+  document.addEventListener("pointerdown", dismissOutside, true);
+  document.addEventListener("focusin", dismissOutside);
+  document.addEventListener("keydown", dismissOnEscape);
+  root.addEventListener("toggle", closeOtherMenus, true);
+  return () => {
+    document.removeEventListener("pointerdown", dismissOutside, true);
+    document.removeEventListener("focusin", dismissOutside);
+    document.removeEventListener("keydown", dismissOnEscape);
+    root.removeEventListener("toggle", closeOtherMenus, true);
+  };
+}
+
 export function DashboardFilters({
   values,
   options,
@@ -51,7 +90,7 @@ export function DashboardFilters({
     startTransition(() => router.replace(`/app?${next}`, { scroll: false }));
   }
   return (
-    <div className={styles.filters} aria-busy={pending}>
+    <div ref={attachMenuDismissal} className={styles.filters} aria-busy={pending}>
       <div className={styles.heading}>
         <h2>Filtros</h2>
         <button

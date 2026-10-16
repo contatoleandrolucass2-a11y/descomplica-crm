@@ -1,5 +1,14 @@
 # Changelog
 
+## Em validacao: Grupos de funis do dashboard
+
+- Organiza metas, periodos do mes e historico em grupos3/5/5 no desktop,
+  com empilhamento legivel no celular nos tres temas.
+- Compara mes, semana anterior, esta semana, ontem e hoje dentro do mes vigente.
+- Inclui media anual normalizada por uma venda e preserva estados sem base.
+- Fecha filtros ao clicar fora, pressionar Escape ou abrir outro filtro.
+- Retira diagnostico, tabelas operacionais, equipe e ranking deste dashboard.
+
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
 - Publica app66ed7360 com preparacao aditiva e ativacao atomica do catalogo,
