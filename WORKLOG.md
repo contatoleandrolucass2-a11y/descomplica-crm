@@ -2,6 +2,8 @@
 
 ## 2026-10-15: Códigos de workflow ocultos na interface comercial
 
+- A CI `38824006181` aprovou os testes funcionais, a acessibilidade e o ensaio de restauração. Quatro referências móveis do Hub divergiram somente na altura após a retirada dos códigos. Um workflow temporário reproduz a captura em Linux, com checkout limpo e os mesmos gates funcionais, para revisão antes da nova CI normal.
+
 - Remove os códigos WF dos cards do Hub de Simulação, dos cabeçalhos, das mensagens, da ajuda e da versão técnica exibida no resultado. Mantém os nomes comerciais e os indicadores CAIXA, CONSULTA e de autorização.
 - Preserva os identificadores internos, as rotas, as permissões, os contratos de API e todas as regras de cálculo. A implementação parte de `d83c22d510478ee089f8c5cb5969a488451d433b`, em checkout isolado.
 - Atualiza as expectativas existentes de apresentação. Lint, tipos, build e auditoria de dependências passaram; o lint mantém um aviso anterior em `scripts/qa/connected-systems.mjs`. A suíte verificou 3.034 testes Vitest, 572 testes operacionais e 531 testes de release, sem falhas; os skips condicionais de plataforma e ambiente permanecem explícitos.

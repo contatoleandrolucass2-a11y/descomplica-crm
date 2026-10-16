@@ -2,6 +2,8 @@
 
 ## 2026-10-15 — Simuladores sem códigos internos visíveis
 
+- Prepara a atualização das referências visuais móveis do Hub para refletir a retirada dos códigos, preservando os gates de publicação.
+
 - Remove as referências WF da interface e da ajuda dos simuladores, mantendo os nomes comerciais, os estados de disponibilidade e as regras de cálculo.
 
 ## 2026-10-15 — Diretório de usuários compatível com produção
