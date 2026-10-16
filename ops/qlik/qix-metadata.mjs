@@ -15,11 +15,13 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
   const MAX_NODES = 128;
   const MAX_REFS = 512;
   const MAX_MASTER_DEFINITIONS = 64;
-  const ALIASES = ["VENDAS", "VGV"];
+  const BASE_ALIASES = ["VENDAS", "VGV"];
+  const ALIASES = [...BASE_ALIASES, "VGV N\u00c3O COMUNICADO", "VGV COMUNICADO", "VGV CADASTRADO"];
   const MAX_CATALOG_ITEMS = 10_000;
   const MAX_CATALOG_FIELDS = 256;
   let referenceCount = 0;
   let textBudget = 65_536;
+  let stage = "property_tree";
 
   class MetadataError extends Error {
     constructor(code) {
@@ -30,6 +32,12 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
   const fail = (code) => {
     throw new MetadataError(code);
   };
+  function limit(kind, maximum, observed, at = stage) {
+    const error = new MetadataError("qix_metadata_limit");
+    // Fixed stages/kinds and technical counts only; never keys, expressions or SDK data.
+    error.limit = { stage: at, kind, observed, maximum };
+    throw error;
+  }
   function record(value) {
     if (!value || typeof value !== "object" || Array.isArray(value)) {
       fail("qix_invalid_metadata");
@@ -44,14 +52,14 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
   }
   function array(value, max) {
     if (!Array.isArray(value)) fail("qix_invalid_metadata");
-    if (value.length > max) fail("qix_metadata_limit");
+    if (value.length > max) limit("array_items", max, value.length);
     return value;
   }
   function string(value, max = 4096) {
     if (typeof value !== "string") fail("qix_invalid_metadata");
-    if (value.length > max) fail("qix_metadata_limit");
+    if (value.length > max) limit("string_length", max, value.length);
     textBudget -= value.length;
-    if (textBudget < 0) fail("qix_metadata_limit");
+    if (textBudget < 0) limit("text_budget", 65_536, 65_536 - textBudget);
     return value;
   }
   function id(value) {
@@ -68,17 +76,19 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     let remaining = maxBytes;
     function append(text) {
       remaining -= encoder.encode(text).length;
-      if (remaining < 0) fail("qix_metadata_limit");
+      if (remaining < 0) limit("definition_bytes", maxBytes, maxBytes - remaining);
       parts.push(text);
     }
     function quoted(text) {
-      if (text.length > remaining) fail("qix_metadata_limit");
+      // Stop before allocating escaped JSON; this count is a byte lower bound.
+      if (text.length > remaining)
+        limit("definition_bytes", maxBytes, maxBytes - remaining + text.length);
       append(JSON.stringify(text));
     }
     // Match the collector's full-definition canonical JSON, without invoking getters/toJSON.
     function canonical(item, depth = 0) {
       checkAbort();
-      if (depth > maxDepth) fail("qix_metadata_limit");
+      if (depth > maxDepth) limit("definition_depth", maxDepth, depth);
       if (typeof item === "string") return quoted(item);
       if (item === null || typeof item === "boolean") return append(JSON.stringify(item));
       if (typeof item === "number") {
@@ -88,7 +98,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       if (!item || typeof item !== "object") fail("qix_invalid_metadata");
       if (Object.getOwnPropertySymbols(item).length) fail("qix_invalid_metadata");
       if (Array.isArray(item)) {
-        if (item.length > 131_071) fail("qix_metadata_limit");
+        if (item.length > 131_071) limit("array_items", 131_071, item.length);
         append("[");
         for (let index = 0; index < item.length; index++) {
           if (index) append(",");
@@ -219,7 +229,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     const edges = new Map();
     const visitedEntries = new WeakSet();
     function edge(parent, child) {
-      if (++referenceCount > MAX_REFS) fail("qix_metadata_limit");
+      if (++referenceCount > MAX_REFS) limit("references", MAX_REFS, referenceCount);
       if (!edges.has(parent)) edges.set(parent, new Set());
       edges.get(parent).add(child);
     }
@@ -236,7 +246,8 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     }
     function visit(entry, parent, depth) {
       checkAbort();
-      if (depth > MAX_DEPTH || propertiesById.size >= MAX_NODES) fail("qix_metadata_limit");
+      if (depth > MAX_DEPTH) limit("tree_depth", MAX_DEPTH, depth);
+      if (propertiesById.size >= MAX_NODES) limit("tree_nodes", MAX_NODES, propertiesById.size + 1);
       record(entry);
       if (visitedEntries.has(entry)) fail("qix_metadata_cycle");
       visitedEntries.add(entry);
@@ -267,7 +278,8 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
         const children = edges.get(current) ?? [];
         for (const child of children) {
           if (seen.has(child)) continue;
-          if (depth >= MAX_DEPTH || seen.size >= MAX_REFS) fail("qix_metadata_limit");
+          if (depth >= MAX_DEPTH) limit("tree_depth", MAX_DEPTH, depth + 1, "reachability");
+          if (seen.size >= MAX_REFS) limit("references", MAX_REFS, seen.size + 1, "reachability");
           seen.add(child);
           queue.push([child, depth + 1]);
         }
@@ -375,6 +387,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       return structure;
     }
     async function inspectCandidate(objectId, role) {
+      stage = "candidate";
       const model = await call(doc, "getObject", objectId);
       const properties = propertiesById.get(objectId) ?? (await call(model, "getProperties"));
       identity(properties, objectId);
@@ -401,7 +414,10 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
         ...metadata,
       });
       read.add(objectId);
-      if (objectId === CONTAINER) containerStructure = await containerReferences(effective);
+      if (objectId === CONTAINER) {
+        stage = "container";
+        containerStructure = await containerReferences(effective);
+      }
     }
     const candidates = [CONTAINER, PRODUCTS];
     // Fixed candidates first; only a proved matching tab may add one Engine ID.
@@ -419,6 +435,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     }
 
     // Plan the entire typed allowlist before any library request. No recursive master lookup.
+    stage = "master_plan";
     const masterPlan = new Map();
     for (const object of objects) {
       if (!["products_candidate", "partners_tab_candidate"].includes(object.role)) continue;
@@ -431,7 +448,8 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
           const libraryId = id(definition.qLibraryId);
           const key = `${type}:${libraryId}`;
           if (!masterPlan.has(key)) {
-            if (masterPlan.size >= MAX_MASTER_DEFINITIONS) fail("qix_metadata_limit");
+            if (masterPlan.size >= MAX_MASTER_DEFINITIONS)
+              limit("master_definitions", MAX_MASTER_DEFINITIONS, masterPlan.size + 1);
             masterPlan.set(key, { id: libraryId, type, referencedBy: [] });
           }
           masterPlan.get(key).referencedBy.push({ objectId: object.id, index });
@@ -443,6 +461,24 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     const inspectAliases = objects.some(
       (object) => object.id !== CONTAINER && object.qHyperCubeDef,
     );
+    function referencesAlias(definition, alias) {
+      const reference = definition.qDef?.qDef?.trim().replace(/^=\s*/, "");
+      return reference === alias || reference === `[${alias}]`;
+    }
+    // Preserve the original two diagnostics; additional aliases need a direct scoped reference.
+    const scopedAliases = inspectAliases
+      ? ALIASES.filter(
+          (alias) =>
+            BASE_ALIASES.includes(alias) ||
+            objects.some(
+              (object) =>
+                ["products_candidate", "partners_tab_candidate"].includes(object.role) &&
+                object.qHyperCubeDef?.qMeasures?.some((definition) =>
+                  referencesAlias(definition, alias),
+                ),
+            ),
+        )
+      : [];
     const fieldCatalog = [];
     const fieldNames = new Set();
     const sourceFields = new Set();
@@ -458,27 +494,43 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
           for (const field of definition.qDef?.qFieldDefs ?? []) sourceField(field);
     let catalogFields;
     let scannedFields = 0;
+    function businessIdentity(name) {
+      const parts = name
+        .normalize("NFD")
+        .replace(/\p{M}/gu, "")
+        .toUpperCase()
+        .split(/[^A-Z0-9]+/u);
+      const business = /^(?:IMOB(?:ILIARIA)?|EMPREEND(?:IMENTO)?|PRODUTO)$/;
+      return (
+        (parts.some((part) => ["ID", "CD", "KEY"].includes(part)) &&
+          parts.some((part) => business.test(part))) ||
+        parts.some((part) =>
+          /^(?:ID|CD|KEY)(?:IMOB(?:ILIARIA)?|EMPREEND(?:IMENTO)?|PRODUTO)$/.test(part),
+        )
+      );
+    }
     function catalogField(item) {
-      if (++scannedFields > MAX_CATALOG_ITEMS) fail("qix_metadata_limit");
+      if (++scannedFields > MAX_CATALOG_ITEMS)
+        limit("catalog_items", MAX_CATALOG_ITEMS, scannedFields);
       const name = own(item, "qName");
-      if (typeof name !== "string") fail("qix_invalid_metadata");
-      if (name.length > 256) fail("qix_metadata_limit");
+      if (typeof name !== "string" || !name) fail("qix_invalid_metadata");
       if (
         name.startsWith("=") ||
         !(
-          /imob|empreend|produto/i.test(name) ||
+          businessIdentity(name) ||
           name === "DT" ||
           name.startsWith("DT.Cal.") ||
-          /^(Empresa|Regional)\s*\(Filtro\)$/.test(name) ||
+          /^(Imob(?:iliaria)?|Empreendimento|Produto|Empresa|Regional)\s*\(Filtro\)$/i.test(name) ||
           name.startsWith("DS_Canal") ||
           ALIASES.includes(name) ||
           sourceFields.has(name)
         )
       )
         return;
-      if (!name || /[\p{Cc}\p{Cs}]/u.test(name) || fieldNames.has(name))
-        fail("qix_invalid_metadata");
-      if (fieldCatalog.length >= MAX_CATALOG_FIELDS) fail("qix_metadata_limit");
+      if (name.length > 256) limit("string_length", 256, name.length);
+      if (/[\p{Cc}\p{Cs}]/u.test(name) || fieldNames.has(name)) fail("qix_invalid_metadata");
+      if (fieldCatalog.length >= MAX_CATALOG_FIELDS)
+        limit("catalog_fields", MAX_CATALOG_FIELDS, fieldCatalog.length + 1);
       fieldNames.add(name);
       fieldCatalog.push({
         name: string(name, 256),
@@ -488,6 +540,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     if (typeof doc.destroySessionObject !== "function") fail("qix_invalid_sdk");
     const catalogId = `ranking-metadata-catalog-${crypto.randomUUID()}`;
     try {
+      stage = "measure_catalog";
       const catalog = await call(doc, "createSessionObject", {
         qInfo: { qId: catalogId, qType: "MeasureList" },
         qMeasureListDef: {
@@ -511,10 +564,11 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
         const data = own(item, "qData");
         const title = own(data, "title");
         const label = own(data, "label");
-        for (const value of [title, label])
-          if (typeof value === "string" && value.length > 256) fail("qix_metadata_limit");
-        const aliases = ALIASES.filter((alias) => alias === title || alias === label);
+        const aliases = scopedAliases.filter((alias) => alias === title || alias === label);
         if (!inspectAliases || !aliases.length) continue;
+        for (const value of [title, label])
+          if (typeof value === "string" && value.length > 256)
+            limit("string_length", 256, value.length);
         const info = own(item, "qInfo");
         const measureId = id(own(info, "qId"));
         if (own(info, "qType") !== "measure" || namedPlan.has(measureId))
@@ -524,7 +578,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
           if (!["products_candidate", "partners_tab_candidate"].includes(object.role)) continue;
           for (const [index, definition] of (object.qHyperCubeDef?.qMeasures ?? []).entries()) {
             for (const alias of aliases)
-              if ([alias, `=${alias}`].includes(definition.qDef?.qDef?.trim()))
+              if (referencesAlias(definition, alias))
                 referencedByAlias.push({ objectId: object.id, index, alias });
           }
         }
@@ -539,8 +593,10 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
           ...masterPlan.keys(),
           ...[...namedPlan.keys()].map((id) => `measure:${id}`),
         ]);
-        if (all.size > MAX_MASTER_DEFINITIONS) fail("qix_metadata_limit");
+        if (all.size > MAX_MASTER_DEFINITIONS)
+          limit("master_definitions", MAX_MASTER_DEFINITIONS, all.size);
       }
+      stage = "field_catalog";
       catalogFields = array(own(own(layout, "qFieldList"), "qItems"), MAX_CATALOG_ITEMS);
     } finally {
       // Cleanup must still run after abort, and never destroy a source object.
@@ -553,6 +609,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     checkAbort();
 
     // Full properties remain private; no unrelated measure definitions are requested.
+    stage = "master_definitions";
     const masterDefinitions = [];
     const masterProperties = new Map();
     for (const reference of masterPlan.values()) {
@@ -573,6 +630,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       masterProperties.set(`${reference.type}:${reference.id}`, properties);
       if (isDimension) for (const field of definition.qFieldDefs ?? []) sourceField(field);
     }
+    stage = "field_catalog";
     for (const item of catalogFields) {
       catalogField(item);
       const derived = own(item, "qDerivedFieldData");
@@ -583,6 +641,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
     fieldCatalog.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
 
     const matchingMasterMeasures = [];
+    stage = "named_measures";
     for (const reference of namedPlan.values()) {
       let properties = masterProperties.get(`measure:${reference.id}`);
       if (!properties) {
@@ -613,7 +672,8 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       });
     }
     const variableDefinitions = [];
-    for (const name of inspectAliases ? ALIASES : []) {
+    stage = "variables";
+    for (const name of scopedAliases) {
       let properties;
       try {
         const model = await call(doc, "getVariableByName", name);
@@ -641,7 +701,7 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
         propertiesSha256: await definitionSha256(properties, 524_288, 34),
       });
     }
-    for (const title of inspectAliases ? ALIASES : []) {
+    for (const title of scopedAliases) {
       const count = [...namedPlan.values()].filter((item) => item.aliases.includes(title)).length;
       if (count !== 1)
         extraReasons.push(
@@ -692,8 +752,10 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       fieldCatalog,
       containerStructure,
     };
+    stage = "output";
     const encoder = new TextEncoder();
-    if (encoder.encode(JSON.stringify(result)).length > 262_144) fail("qix_metadata_limit");
+    const resultBytes = encoder.encode(JSON.stringify(result)).length;
+    if (resultBytes > 262_144) limit("result_bytes", 262_144, resultBytes);
     // The private artifact writer and owner preflight impose a tighter envelope cap.
     const artifact = {
       schemaVersion: 1,
@@ -702,7 +764,8 @@ export async function inspectQlikRankingMetadata(global, options = {}) {
       rankingConnected: false,
       result,
     };
-    if (encoder.encode(JSON.stringify(artifact)).length > 131_072) fail("qix_metadata_limit");
+    const artifactBytes = encoder.encode(JSON.stringify(artifact)).length;
+    if (artifactBytes > 131_072) limit("artifact_bytes", 131_072, artifactBytes);
     return result;
   } catch (error) {
     if (error instanceof MetadataError) throw error;
