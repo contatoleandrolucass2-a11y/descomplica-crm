@@ -2,6 +2,16 @@
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
+- CI38846827500/7804c73 concluida com validate, release-gates e restore verdes;
+  imagem ignorada como previsto em PR. Merge posterior com cd004e4 requer nova
+  CI. Operador isolado Linux:84 testes aprovados,1 skip exclusivo de Windows,
+  sem mutacao de servicos ou dados. Nao substitui aceite real de dois ciclos.
+- Retomada16/10/04:22Z: maincd004e4 integrou PR237 dos simuladores; PR238
+  exige merge de documentos e manifesto. Preservadas11 entradas do dashboard
+  e231 da main, incluindo quatro novas referencias moveis dos simuladores.
+  Health anonimo04:22:48.788Z200/ok/b5458ff; CI38846827500/7804c73 ainda na
+  matriz visual, validate/restore aprovados. Fontes GitHub/gh, Git fetch e GET
+  publico; nenhuma ativacao remota desta tarefa. Nova CI combinada obrigatoria.
 - CI38845696585/2014576: validate passou; QA sintetico encontrou disputa de
   foco ao abrir historicos em sequencia. Teste deterministico reproduziu:
   onClose atrasado roubava foco do proximo botao apos close nativo. Removido

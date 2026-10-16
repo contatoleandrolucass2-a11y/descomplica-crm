@@ -126,6 +126,25 @@ Nao aplicar templates sem confrontar hash/conteudo atual e guardar backup.
 
 ## Pendencias
 
+CI38846827500/7804c73 concluida verde: validate, release-gates e isolated-restore.
+Promotable-image ignorado por ser PR. Confirma matriz visual completa revisada;
+nao valida automaticamente o merge posterior. Operador isolado executado no
+Linux em /tmp/dashboard-operator-tests-Jv1QcebM:84 testes passaram,1 skip
+exclusivo de Windows;167ms, sem executar adaptador real ou alterar servicos.
+
+Retomada16/10/04:22Z: maincd004e4/PR237 integrado apos avancar. Merge JSON
+preserva11 entradas do dashboard e231 da main, incluindo as quatro capturas
+moveis dos simuladores;242 hashes verificados.62 testes focais passaram,
+1 teste opcional de navegador ignorado. Health publico04:22:48.788Z200/ok
+b5458ff, distinto de main e candidato. CI combinada nova continua obrigatoria.
+
+Operador temporario de atualizacao delimitada preparado fora do Git:85 testes
+isolados passaram em Windows, sintaxe/ESLint aprovados, sem execucao remota.
+Recuperacao de primeiro ciclo falho exige conciliacao externa posterior ligada
+ao PID, InvocationID, boot, cursores e hashes; log de falha nao prova ausencia
+de publicacao. Scheduler antigo/candidato tem blob8d1de86e3a5ec3ed915e9ba12be6ad38af762c8b.
+Pendente ensaio Linux e evidencias reais antes de qualquer uso operacional.
+
 Concluir CI/matriz visual, revisar somente referencias afetadas, integrar PR e
 exigir os quatro jobs no main exato. Em seguida conferir novamente drift,
 backup e imagem; aplicar migration autorizada, publicar pelo coordenador unico,

@@ -2,6 +2,8 @@
 
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
+- Preserva a retirada de codigos internos dos simuladores integrada pela main,
+  sem substituir as referencias visuais das demais paginas.
 - Corrige disputa de foco ao abrir historicos em sequencia, preservando
   retorno nativo, Escape e navegacao por teclado; adiciona teste de regressao.
 - Preserva o planejamento de metas integrado pela main e combina suas
@@ -33,6 +35,12 @@
   atualiza a pagina na virada do dia de Sao Paulo.
 - Remove controles/textos indicados na raiz e resume tabelas em uma linha
   Realizado com cinco periodos. Ativacao depende da migration/coleta e gates.
+
+## 2026-10-15 — Simuladores sem códigos internos visíveis
+
+- Atualiza quatro referências visuais móveis do Hub após revisão da captura Linux limpa; preserva as outras 238 imagens e os gates de publicação.
+
+- Remove as referências WF da interface e da ajuda dos simuladores, mantendo os nomes comerciais, os estados de disponibilidade e as regras de cálculo.
 
 ## 2026-10-15: Correcao visual de Meta compilada
 
