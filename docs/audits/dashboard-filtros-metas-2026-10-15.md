@@ -23,6 +23,11 @@ composicao requer CI completa; o resultado anterior nao valida o novo merge.
 
 ## Validacao
 
+- CI38845696585/2014576: validate passou, QA sintetico falhou ao abrir o
+  segundo historico. Reproducao local deterministica confirmou foco roubado
+  pelo onClose atrasado, apos o fechamento nativo ja restaurar o foco.
+  Callback redundante removido; teste regressivo falhou antes/passou depois.
+  Quatro testes Node com Chromium passaram, incluindo foco/teclado/filtros.
 - Merge4fa4c5d: pnpm lint, typecheck, test e build locais aprovados. Vitest3547
   aprovados/90 ignorados; Node1181 aprovados/19 ignorados; release703 aprovados/
   14 ignorados. Skips de plataforma continuam exigindo CI Linux. Lint sem erros,

@@ -2,6 +2,11 @@
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
+CI38845696585 detectou disputa de foco entre historicos. Reproducao local:
+fechar o dialogo e focar o proximo botao era revertido pelo onClose atrasado.
+Removida restauracao manual redundante; dialog nativo conserva o retorno normal.
+Novo teste falhou antes e passou depois; quatro testes de navegador passaram.
+
 Mainb5458ff/PR231 incorporado apos avancar durante a revisao visual. Merge
 estruturado preserva11 entradas de dashboard e231 da main, com hashes conferidos;
 66 testes focais passaram. Mantidas as duas paginas e regras de suas rotas.

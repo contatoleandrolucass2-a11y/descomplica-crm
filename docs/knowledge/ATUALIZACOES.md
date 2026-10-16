@@ -2,6 +2,15 @@
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
+- CI38845696585/2014576: validate passou; QA sintetico encontrou disputa de
+  foco ao abrir historicos em sequencia. Teste deterministico reproduziu:
+  onClose atrasado roubava foco do proximo botao apos close nativo. Removido
+  callback redundante; teste falhou antes/passou depois e quatro testes de
+  navegador passaram. Nova CI continua obrigatoria; sem ativacao remota.
+- Consulta16/10/03:28:58.816Z: health publico200/ok/b9377a1, atualizado por
+  outra publicacao; mainb5458ff e branch2014576 sao distintos. CI38845696585
+  em andamento no PR238. Fontes: GET anonimo, Git remoto e GitHub Actions.
+  Nenhuma ativacao de analise/DDL/coletor desta demanda foi executada.
 - Retomada16/10/03:27Z: mainb5458ff integrou PR231 de planejamento de metas.
   PR238 precisou novo merge. Manifesto combinado por JSON:11 entradas do
   dashboard preservadas e231 da main preservadas, todos os hashes conferidos.

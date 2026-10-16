@@ -46,7 +46,6 @@ export function DashboardMonthlyHistory({
 }: DashboardMonthlyHistoryProps) {
   const id = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const orderedMonths = [...months].sort((left, right) => left.month.localeCompare(right.month));
   const hasHistory = orderedMonths.some((month) =>
@@ -57,7 +56,6 @@ export function DashboardMonthlyHistory({
     <div className={styles.heading}>
       <h3 className={styles.title}>{title}</h3>
       <button
-        ref={triggerRef}
         type="button"
         className={styles.iconButton}
         aria-label={`Ver histórico mensal: ${title}`}
@@ -84,7 +82,6 @@ export function DashboardMonthlyHistory({
           event.preventDefault();
           event.currentTarget.close();
         }}
-        onClose={() => triggerRef.current?.focus()}
         onClick={(event) => {
           if (event.target === event.currentTarget) event.currentTarget.close();
         }}

@@ -228,3 +228,48 @@ test("synthetic analysis recalculates filtered history and per-broker goals with
     await server.close();
   }
 });
+
+test("closing a history dialog cannot steal focus from the next history trigger", async () => {
+  const server = await startServer();
+  let browser;
+  try {
+    browser = await chromium.launch({ headless: true });
+    const page = await browser.newPage();
+    await page.route("**/*", (route) =>
+      new URL(route.request().url()).origin === server.origin
+        ? route.continue()
+        : route.abort("blockedbyclient"),
+    );
+    await page.goto(`${server.origin}/app?scenario=analysis`, { waitUntil: "networkidle" });
+    await page
+      .getByRole("button", { name: "Ver histórico mensal: Média do ano", exact: true })
+      .click();
+    const nextName = "Ver histórico mensal: Média dos últimos 3 meses";
+    await page.evaluate(async (name) => {
+      const dialog = document.querySelector("dialog[open]");
+      const next = [...document.querySelectorAll("button")].find(
+        (button) => button.getAttribute("aria-label") === name,
+      );
+      const closed = new Promise((resolve) => {
+        dialog.addEventListener("close", () => requestAnimationFrame(resolve), { once: true });
+      });
+      // Native close restores focus synchronously, before the queued close event.
+      dialog.close();
+      next.focus();
+      await closed;
+    }, nextName);
+    await expect(page.getByRole("button", { name: nextName, exact: true })).toBeFocused();
+    await page.keyboard.press("Enter");
+    const nextDialog = page.getByRole("dialog", {
+      name: "Média dos últimos 3 meses: histórico mensal",
+      exact: true,
+    });
+    await expect(nextDialog).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(nextDialog).not.toBeVisible();
+    await expect(page.getByRole("button", { name: nextName, exact: true })).toBeFocused();
+  } finally {
+    await browser?.close();
+    await server.close();
+  }
+});

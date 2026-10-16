@@ -2,6 +2,8 @@
 
 ## 2026-10-15: Dashboard filtrado e metas por responsavel
 
+- Corrige disputa de foco ao abrir historicos em sequencia, preservando
+  retorno nativo, Escape e navegacao por teclado; adiciona teste de regressao.
 - Preserva o planejamento de metas integrado pela main e combina suas
   referencias com as do dashboard, sem substituir telas de outros trabalhos.
 - Atualiza somente11 referencias visuais do dashboard apos revisao das
