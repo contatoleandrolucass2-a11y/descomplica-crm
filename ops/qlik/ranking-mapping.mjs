@@ -15,9 +15,88 @@ const PERIOD_POLICY = Object.freeze({
 });
 const UNVERIFIED = Symbol("unverified");
 
-// Only native metadata reviewed by the coordinator may replace this null.
-// A supplied verified flag/provenance is configuration, never an attestation.
-export const PRODUCTION_DEFINITION = null;
+// Native structure reviewed on 2026-10-16; collection rechecks every pin and total.
+// These pins do not attest successful selections, reconciliation or publication.
+export const PRODUCTION_DEFINITION = freeze({
+  verified: true,
+  provenance: {
+    kind: "qlik-native-metadata",
+    observedAt: "2026-10-16T00:58:46.525Z",
+    metadataSha256: "7972045382ad30177e123aa6716f176a76c41c695147e3d97c74be6424e96ffa",
+  },
+  filters: [
+    {
+      field: "Empresa (Filtro)",
+      value: "Direcional",
+    },
+    {
+      field: "Regional (Filtro)",
+      value: "SP CAPITAL",
+    },
+    {
+      field: "DS_Canal de Vendas - (DRCMIM)",
+      value: "CANAL IMOB",
+    },
+  ],
+  calendar: {
+    expression: "=Year([DT])&Num(Month([DT]),'00')",
+    selectionFields: ["DT"],
+  },
+  cubes: {
+    imobs: {
+      objectId: "f329b391-4760-4b29-b65b-5f63e46ce423",
+      cubeSha256: "c599f1916c7b1055e65f90186cf20beb04ed82772a7ac780d06494aa53ff369c",
+      idField: "Id da Imobiliaria - (DRCMCRC)",
+      idEncoding: "utf8-hex",
+      vgvMeasureIndex: 0,
+      contractsMeasureIndex: 1,
+      masterPins: [
+        {
+          kind: "measure",
+          id: "ambkS",
+          sha256: "12b95aab8efa827b0f429f1a8a5b7d52bb9ed3c594d6430f2f045508d8763121",
+        },
+      ],
+      aliasPins: [
+        {
+          alias: "VENDAS",
+          measureIndex: 1,
+          id: "b49e2791-42be-4b14-b4a6-854cdf7da894",
+          propertiesSha256: "02fb1d99e15442444d4dff6bf7c07f5b6e2c57cedc7719c924d830f62377f566",
+        },
+      ],
+    },
+    developments: {
+      objectId: "26aed86d-e96b-4151-bc15-7b54d456f032",
+      cubeSha256: "1d2d665a6b03f76831c8fe43852ecaa457ac40c8717b96add50f8f140abfff78",
+      idField: "CD_Empreendimento - (DRCMEM)",
+      idEncoding: "utf8-hex",
+      vgvMeasureIndex: 1,
+      contractsMeasureIndex: 0,
+      masterPins: [
+        {
+          kind: "measure",
+          id: "ytvHG",
+          sha256: "2f573da74bfd9a20254071cf6253a5042baa21b85bc4774dc565fdc6653a6355",
+        },
+      ],
+      aliasPins: [
+        {
+          alias: "VENDAS",
+          measureIndex: 0,
+          id: "b49e2791-42be-4b14-b4a6-854cdf7da894",
+          propertiesSha256: "02fb1d99e15442444d4dff6bf7c07f5b6e2c57cedc7719c924d830f62377f566",
+        },
+        {
+          alias: "VGV",
+          measureIndex: 1,
+          id: "ambkS",
+          propertiesSha256: "d3eaf483241916a971fff339118b4fc8a2f995a514f4529e87fcb1a85b3005ce",
+        },
+      ],
+    },
+  },
+});
 
 function check(condition) {
   if (!condition) throw new Error("mapping_invalid");

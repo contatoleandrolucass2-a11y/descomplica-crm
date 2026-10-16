@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-16 - Mapeamento nativo Qlik
+
+- Configura Parceiras/PRODUTO com IDs, identidades e medidas reais pinadas,
+  preservando Direcional/SP CAPITAL/CANAL IMOB e calendario nativo DT.
+- Confirma a correcao de qix_metadata_limit no owner da VPS; publicacao de
+  fatos continua condicionada a coleta conciliada e ativacao protegida.
+- Sem novas alteracoes de interface ou banco.
+- Corrige limite de titulos alheios no catalogo de medidas e atualiza apenas
+  referencias de teste Ranking a partir da captura limpa revisada.
+
 ## 2026-10-15 - Estado de selecao Qlik
 
 - Vincula explicitamente o objeto de selecao ao estado padrao e rejeita

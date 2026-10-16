@@ -80,8 +80,10 @@ hashes integrais dos cubos/masters, dimensao nativa, campo de identidade,
 indices das medidas, filtros e calendario. Verifica selecoes efetivas,
 paginacao, totais nativos por mes e aditividade do ano. Alteracao de definicao
 ou recarga, reducao, pagina incompleta ou identidade ambigua rejeita a carga.
-Fixtures e `verified:true` nao comprovam o mapeamento do tenant. O modulo de
-mapeamento produtivo permanece pendente ate a leitura privada do preflight.
+Fixtures e `verified:true` nao comprovam o mapeamento do tenant. Em16/10/2026
+o preflight privado forneceu os pins nativos configurados; ver
+[mapeamento](qlik-partnerships-mapping.md). A coleta real conciliada permanece
+exigida antes de afirmar conexao produtiva.
 
 `aliasPins` cobre referencias diretas VENDAS/VGV a masters nomeados: alias,
 indice nativo selecionado, ID e SHA256 de GetProperties integral. Em cada
@@ -97,8 +99,9 @@ automaticamente. Cada definicao real ainda precisa de revisao. Referencias:
 [masters em expressoes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Measures/use-master-measures-expressions.htm)
 e [precedencia de nomes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Expressions/references-fields-measures-variables.htm).
 
-`ranking-mapping.mjs` falha fechado enquanto a definicao produtiva e null.
-Depois da conferencia nativa, a factory deriva janeiro ate o mes corrente do
+`ranking-mapping.mjs` rejeita definicao ausente ou nao revisada. A definicao
+produtiva agora contem os pins nativos da conferencia00:58 UTC16/10/2026,
+nao uma atestacao de coleta/publicacao. A factory deriva janeiro ate o mes corrente do
 ano atual em America/Sao_Paulo. O SHA semantico inclui definicao estatica,
 proveniencia e politica temporal explicita; exclui somente periodos derivados.
 O launcher destaca/congela um snapshot por ciclo, valida sua serializacao antes

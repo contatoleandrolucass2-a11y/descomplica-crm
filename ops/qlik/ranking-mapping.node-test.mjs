@@ -8,6 +8,7 @@ import { collectQlikRanking } from "./qix-ranking.mjs";
 const CALENDAR = "=Year([DT])&Num(Month([DT]),'00')";
 const NOW = "2026-10-15T12:00:00.000Z";
 const digest = (text) => createHash("sha256").update(text, "utf8").digest("hex");
+const productionSnapshot = JSON.stringify(PRODUCTION_DEFINITION);
 
 // Every pin/field below is synthetic. Never use this definition in production.
 function syntheticDefinition() {
@@ -65,12 +66,14 @@ function canonical(value) {
   return JSON.stringify(value);
 }
 
-test("production stays null and fails closed, without clock/I/O or invented verified pins", () => {
-  assert.equal(PRODUCTION_DEFINITION, null);
-  assert.throws(() => createRankingMapping(), /^Error: mapping_unverified$/);
+test("missing or unverified mapping fails closed before reading the clock", () => {
+  assert.throws(() => createRankingMapping({ definition: null }), /^Error: mapping_unverified$/);
   assert.throws(
     () =>
-      createRankingMapping({ now: () => assert.fail("Unverified mapping must not use the clock") }),
+      createRankingMapping({
+        definition: null,
+        now: () => assert.fail("Unverified mapping must not use the clock"),
+      }),
     /^Error: mapping_unverified$/,
   );
   for (const verified of [false, null, "true", 1, undefined]) {
@@ -78,6 +81,52 @@ test("production stays null and fails closed, without clock/I/O or invented veri
     definition.verified = verified;
     assert.throws(() => create({ definition }), /^Error: mapping_unverified$/);
   }
+});
+
+test("native production pins preserve the reviewed scope, identities and full definitions", () => {
+  const mapping = createRankingMapping({ now: () => new Date("2026-10-16T01:10:00.000Z") });
+  assert.equal(mapping.provenance.kind, "qlik-native-metadata");
+  assert.equal(mapping.provenance.observedAt, "2026-10-16T00:58:46.525Z");
+  assert.equal(
+    mapping.provenance.metadataSha256,
+    "7972045382ad30177e123aa6716f176a76c41c695147e3d97c74be6424e96ffa",
+  );
+  assert.equal(
+    mapping.mappingSha256,
+    "cf043926ff11afac6cd0ded0346205dbf5dea8074dda1494276aa20e9af77be5",
+  );
+  assert.deepEqual(mapping.filters, [
+    { field: "Empresa (Filtro)", value: "Direcional" },
+    { field: "Regional (Filtro)", value: "SP CAPITAL" },
+    { field: "DS_Canal de Vendas - (DRCMIM)", value: "CANAL IMOB" },
+  ]);
+  assert.deepEqual(mapping.calendar, { expression: CALENDAR, selectionFields: ["DT"] });
+  assert.equal(mapping.cubes.imobs.objectId, "f329b391-4760-4b29-b65b-5f63e46ce423");
+  assert.equal(mapping.cubes.imobs.idField, "Id da Imobiliaria - (DRCMCRC)");
+  assert.equal(mapping.cubes.imobs.vgvMeasureIndex, 0);
+  assert.equal(mapping.cubes.imobs.contractsMeasureIndex, 1);
+  assert.equal(mapping.cubes.developments.objectId, "26aed86d-e96b-4151-bc15-7b54d456f032");
+  assert.equal(mapping.cubes.developments.idField, "CD_Empreendimento - (DRCMEM)");
+  assert.equal(mapping.cubes.developments.vgvMeasureIndex, 1);
+  assert.equal(mapping.cubes.developments.contractsMeasureIndex, 0);
+  for (const role of ["imobs", "developments"]) {
+    assert.equal(mapping.cubes[role].idEncoding, "utf8-hex");
+    assert.ok(Object.isFrozen(PRODUCTION_DEFINITION.cubes[role]));
+    assert.ok(Object.isFrozen(PRODUCTION_DEFINITION.cubes[role].masterPins));
+    assert.ok(Object.isFrozen(PRODUCTION_DEFINITION.cubes[role].aliasPins));
+  }
+  assert.ok(Object.isFrozen(PRODUCTION_DEFINITION));
+  assert.ok(Object.isFrozen(PRODUCTION_DEFINITION.filters[0]));
+  assert.equal(mapping.periods.length, 10);
+  assert.equal(mapping.periods[0], "2026-01-01");
+  assert.equal(mapping.periods.at(-1), "2026-10-01");
+  assert.throws(
+    () =>
+      createRankingMapping({
+        now: () => new Date("2026-10-16T00:58:46.524Z"),
+      }),
+    /^Error: mapping_invalid$/,
+  );
 });
 
 test("synthetic definition yields only schema-one contract, fixed scope and policy", () => {
@@ -102,7 +151,7 @@ test("synthetic definition yields only schema-one contract, fixed scope and poli
   assert.equal(mapping.periods[0], "2026-01-01");
   assert.equal(mapping.periods.at(-1), "2026-10-01");
   assert.match(mapping.mappingSha256, /^[a-f0-9]{64}$/);
-  assert.equal(PRODUCTION_DEFINITION, null);
+  assert.equal(JSON.stringify(PRODUCTION_DEFINITION), productionSnapshot);
 });
 
 test("optional alias pins default to empty without admitting other cube properties", () => {
@@ -138,7 +187,7 @@ test("master-only alias pins are detached, frozen and part of the semantic hash"
     mapping.cubes.developments.aliasPins[0].id,
     definition.cubes.developments.aliasPins[0].id,
   );
-  assert.equal(PRODUCTION_DEFINITION, null);
+  assert.equal(JSON.stringify(PRODUCTION_DEFINITION), productionSnapshot);
 });
 
 for (const [name, mutate] of [

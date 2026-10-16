@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-10-16: Metadados reais resolvidos e mapeamento nativo
+
+Main17ab106 concluiu os quatro gates em38829007559. Imagem imutavel validada
+e comprovada nos dois perfis isolados; owner promovido pelo coordenador em
+2026-10-16T00:58:46.990Z, deployment933a111d-17db-4ea3-a327-9f10be9cbaa6.
+O Qlik real respondeu sem qix_metadata_limit. Coleta de metadados00:58:46.525Z,
+recarga00:12:35.983Z; arquivo18438 bytes permaneceu privado na VPS.
+
+Pins produtivos agora derivados desse arquivo, SHA256
+7972045382ad30177e123aa6716f176a76c41c695147e3d97c74be6424e96ffa.
+Parceiras e PRODUTO usam IDs reais, medidas/bibliotecas/aliases pinados,
+identidades nativas e calendario DT; recorte confirmado preservado. Hash do
+mapeamento cf043926ff11afac6cd0ded0346205dbf5dea8074dda1494276aa20e9af77be5.
+Os39 testes focais passaram. Estruturas das duas medidas foram conferidas
+privadamente, sem exportar formulas, literais, clientes ou segredos.
+
+Corretivo focal do catalogo ignora tamanho de titulos alheios, preservando
+limites de aliases relevantes, tipos, IDs e colisoes; collector+mapping260
+testes aprovados. Lint e tipos exit0. Revisao independente sem P1/P2 no mapa;
+selecao efetiva DT e grain ainda dependem da fonte. Helper privado de estrutura
+nao esta aprovado como exportador generico (fallback lexical); nao reutilizar.
+
+CI38829579490 validate/restore success; matriz visual falhou somente nas11
+referencias Ranking por dimensions_changed,231 demais passaram. Captura limpa
+38829579457/artifact12017910719 revisada:484 hashes/dimensoes e33 comparacoes
+aprovadas. Promovidos11 WebP Ranking e manifesto integral desse mesmo batch,
+231 imagens preservadas. Manifesto original SHA77be297ba750ca6d0be12b2e369b09925b4b930d0d280414d721303ff13cf588,
+formatado por Prettier com igualdade JSON verificada. Testref15pass/1skip.
+Quatro PNG diagnosticos legitimos ficam fora do manifesto; helper privado
+que os rejeita nao foi anunciado como aprovado. Nenhum gate/tolerancia mudou.
+
+Metadados nao comprovam selecoes, grain, conciliacao nem escrita. Owner ainda
+metadata-only e CRM d83c22d; nenhuma publicacao de fatos afirmada. Pendentes
+CI do candidato, ativacao protegida app/owner, duas coletas conciliadas e
+segundo ciclo autonomo. Interface congelada por pedido do usuario.
+
 ## 2026-10-16: Merge combinado e nova captura pendente
 
 PR236 integrado normalmente em17ab106f9951781cdfe50717317323b4ce6df355,

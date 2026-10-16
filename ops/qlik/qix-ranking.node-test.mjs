@@ -676,6 +676,77 @@ test("alias catalog examines the complete list, ignores item order and reads no 
   assert.equal(f.state.sessions.size, 0);
 });
 
+for (const serialized of [false, true]) {
+  for (const length of [257, 16384]) {
+    test(`unrelated catalog text length ${length} collects, serialized=${serialized}`, async () => {
+      const f = aliasFixture();
+      f.masters.set("synthetic-unrelated-long", {
+        qInfo: { qId: "synthetic-unrelated-long", qType: "measure" },
+        qMetaDef: { title: "x".repeat(length) },
+        qMeasure: { qDef: "synthetic-private-unrelated", qLabel: "y".repeat(length) },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      const result = await collect(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.equal(f.state.sessions.size, 0);
+      assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+      assert.ok(!f.state.calls.some((call) => call.id === "synthetic-unrelated-long"));
+    });
+  }
+}
+
+for (const aliasField of ["title", "label"]) {
+  test(`catalog ${aliasField} alias keeps the other text bounded`, async () => {
+    const f = aliasFixture({
+      hook(method, value) {
+        if (method === "catalog") {
+          const item = value.qMeasureList.qItems.find(
+            (entry) => entry.qInfo.qId === "synthetic-developments-vgv-master",
+          );
+          item.qData = { title: "x".repeat(257), label: "y".repeat(257), [aliasField]: "VGV" };
+        }
+        return value;
+      },
+    });
+    await rejected(f, "master_pin_mismatch");
+    assert.equal(f.state.sessions.size, 0);
+  });
+
+  test(`duplicate ${aliasField} alias with long companion text stays blocked`, async () => {
+    const f = aliasFixture();
+    f.masters.set("synthetic-unapproved-collision", {
+      qInfo: { qId: "synthetic-unapproved-collision", qType: "measure" },
+      qMetaDef: { title: aliasField === "title" ? "VGV" : "x".repeat(16384) },
+      qMeasure: {
+        qDef: "synthetic-private-unrelated",
+        qLabel: aliasField === "label" ? "VGV" : "y".repeat(16384),
+      },
+    });
+    await rejected(f, "master_pin_mismatch");
+    assert.equal(f.state.sessions.size, 0);
+    assert.ok(!f.state.calls.some((call) => call.id === "synthetic-unapproved-collision"));
+  });
+}
+
+for (const invalid of [42, {}, [], true]) {
+  test(`unrelated catalog text rejects type ${JSON.stringify(invalid)}`, async () => {
+    const f = aliasFixture({
+      hook(method, value) {
+        if (method === "catalog")
+          value.qMeasureList.qItems.push({
+            qInfo: { qId: "synthetic-unrelated-invalid", qType: "measure" },
+            qData: { title: invalid, label: "x".repeat(257) },
+          });
+        return value;
+      },
+    });
+    await rejected(f, "master_pin_mismatch");
+    assert.equal(f.state.sessions.size, 0);
+  });
+}
+
 for (const [name, mutate] of [
   ["no pins", (f) => delete f.mapping.cubes.developments.aliasPins],
   ["partial pins", (f) => f.mapping.cubes.developments.aliasPins.pop()],

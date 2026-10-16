@@ -207,9 +207,15 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
         "master_pin_mismatch",
       );
       ids.add(item.qInfo.qId);
+      const related = pins.some(
+        (pin) => item.qData.title === pin.alias || item.qData.label === pin.alias,
+      );
       for (const key of ["title", "label"]) {
         const value = item.qData[key];
-        check(value === undefined || value === "" || text(value), "master_pin_mismatch");
+        check(
+          value === undefined || value === "" || text(value, related ? 256 : Infinity),
+          "master_pin_mismatch",
+        );
       }
     }
     return pins.map((pin) => {

@@ -1,5 +1,31 @@
 # Qlik: mapeamento do Canal de Parcerias
 
+## Estado nativo conferido em16/10/2026,00:58 UTC
+
+Esta secao atualiza o estado historico descrito abaixo; nao e prova de fatos
+publicados. Interface permanece congelada. A correcao de limite foi promovida
+no owner17ab106 pelo coordenador e respondeu ao Qlik real sem o erro anterior.
+
+Metadados privados: observacao2026-10-16T00:58:46.525Z, recarga00:12:35.983Z,
+SHA2567972045382ad30177e123aa6716f176a76c41c695147e3d97c74be6424e96ffa.
+O mapeamento versionado em ops/qlik/ranking-mapping.mjs fixa:
+
+- Parceiras: objeto f329b391-4760-4b29-b65b-5f63e46ce423, identidade
+  Id da Imobiliaria - (DRCMCRC), VGV indice0 e VENDAS indice1.
+- PRODUTO: objeto26aed86d-e96b-4151-bc15-7b54d456f032, identidade
+  CD_Empreendimento - (DRCMEM), VENDAS indice0 e VGV indice1.
+- Medidas nativas, aliases e bibliotecas preservados e pinados integralmente;
+  codigo confere novamente cada hash e recusa alteracoes/colisoes.
+- Empresa (Filtro)=Direcional, Regional (Filtro)=SP CAPITAL e
+  DS_Canal de Vendas - (DRCMIM)=CANAL IMOB. Calendario calculado usa DT.
+- Identidades codificadas sem perda em UTF8 hexadecimal, nao por slug de nome.
+
+Catalogo e estrutura nao provam unicidade das identidades, selecoes efetivas
+ou ausencia de variaveis homonimas. A conciliacao integral nativa versus
+enriquecida, mensal e anual, permanece obrigatoria nas duas coletas independentes.
+Uma recusa nao habilita flags, remove registros nem substitui a ultima carga.
+Ativacao protegida e segundo ciclo horario autonomo ainda pendentes neste registro.
+
 ## Revisao da fonte em 14/10/2026, 19:39 UTC
 
 Uma aba nova do mesmo aplicativo recusou o endereco anterior com "Pasta nao

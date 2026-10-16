@@ -1,5 +1,65 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-16: Limite Qlik corrigido na fonte real
+
+- Main17ab106/CI38829007559 quatro success; imagem imutavel e dois perfis
+  comprovados. Owner deployment933a111d-17db-4ea3-a327-9f10be9cbaa6 promovido
+  pelo coordenador00:58:46.990Z. Qlik real respondeu sem qix_metadata_limit.
+- Metadados nativos00:58:46.525Z/recarga00:12:35.983Z,18438 bytes privados.
+  Hash7972045382ad30177e123aa6716f176a76c41c695147e3d97c74be6424e96ffa.
+  Mapeamento configurado com dois objetos reais, IDs CRC/MEM, DT e medidas
+  pinadas.39 testes focais aprovados; nao equivale a conciliacao ou publicacao.
+- Fonte JSON foi relida via SSH sem TTY: quebra de linha do terminal havia
+  duplicado caracteres em transcricoes de hashes. Recusas ocorreram antes
+  de escrita; pins produtivos usam somente os64 caracteres do JSON original.
+- Fontes: coordenador/ledger owner, JSON nativo privado e testes locais.
+  CRM continua d83c22d; fatos e agenda habilitada ainda nao comprovados.
+  Manter interface congelada; proxima evidencia exigida e carga real conciliada.
+- CI38829579490 validate/restore success, matriz falhou somente11Ranking
+  por dimensions_changed. Captura38829579457/artifact12017910719 revisada,
+  11 baselines e manifesto integral promovidos;231 demais imagens preservadas.
+  Testref15pass/1skip. Prettier apenas formata JSON, igualdade semantica exigida.
+  Collector+mapping260pass, lint/tipos exit0. Nova CI ainda necessaria.
+
+## 2026-10-16: Coleta priorizada, interface congelada
+
+- Escopo vigente: corrigir Qlik e provar atualizacao real via VPS, sem novas
+  mudancas na interface. Canal de Parcerias continua referencia, recorte
+  Direcional/SP CAPITAL/CANAL IMOB e destino /app/ranking preservados.
+- Fetch/GitHub confirmam main17ab106; CI38829007559 com validate/restore/
+  imagem success, matriz final ainda em andamento. GET publico00:53:44Z
+  HTTP200/ok/d83c22d. Ledgers CRM72be7b10 e owner00bbab75/a7 sem pendencia.
+  Nenhuma nova promocao realizada; aguardar gate sem dispensa.
+- Checkout17ab tem codigo legivel e SDK/script aprovados como UID tecnico,
+  Node24; assertQlikDependencies passou. Copia d83 tinha dependencias somente
+  de producao e foi preservada em quarentena privada. Reposta com copia
+  integral a7,38123 entradas verificadas, bytes preservados. JSON package
+  difere apenas pelo comando QA compacto; lock byte a byte igual. Sem build
+  na VPS, credencial ou perfil alterado.
+- Nova leitura web da referencia retornou400/timeout; nao alegar atualizacao
+  dessa fonte. Usar contrato observado previamente e documentado no runbook,
+  nao valores antigos para conciliar a carga atual. Confirmar metadados reais
+  apos promocao protegida. Fontes: GitHub, health e probes locais/host.
+
+## 2026-10-16: Conferencia apos interrupcao e limite da entrega
+
+- Conferencia00:47Z: Git primary7c11e3c limpo, exceto output preexistente;
+  health publico HTTP200/ok/d83c22d. CI main38829007559/17ab106 com
+  validate/restore/imagem success e release-gates ainda em progresso.
+  Nenhuma nova promocao app/owner executada nesta retomada.
+- Atualizacao real do ranking continua nao comprovada. Ultima falha nativa
+  conferida foi qix_metadata_limit; preparar checkout/testes nao a resolve
+  por si. Priorizar coleta real e reaproveitamento da referencia Canal de
+  Parcerias, sem novas frentes de interface. Gates de seguranca/publicacao
+  continuam obrigatorios, sem transformar este redirecionamento em dispensa.
+- Fontes: Git local, GET /api/health e GitHub actions38829007559/jobs.
+  Ferramenta de subagentes retornou not_found para os IDs anteriores apos
+  interrupcao; nao inferir seus resultados finais. Logs locais preservados.
+- Recibos locais posteriormente lidos em qa-primary-sequential-7c11e3c
+  confirmam lint exit0, tipos exit0 e teste exit1 concluido00:42:33Z;
+  build ainda sem comprovacao. Sessao SSH56092 tambem retornou not_found,
+  sem comando novo ou alteracao de servicos. Nao declarar gates locais verdes.
+
 ## 2026-10-16: PR236 integrado, primary combinado
 
 - Merge normal PR236/f7e6731 em17ab106 apos CI38802612284 tres success.
