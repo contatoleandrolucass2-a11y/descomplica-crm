@@ -178,6 +178,7 @@
       "routes": [
         "app/(protected)/app/configuracoes/conectar-sistemas/page.tsx",
         "app/api/ingest/qlik/route.ts",
+        "app/api/ingest/qlik/v2/route.ts",
         "app/api/ingest/salesforce/route.ts",
         "app/api/refresh/salesforce/route.ts",
         "app/api/salesforce/status/route.ts",
@@ -191,6 +192,7 @@
         "ops/salesforce/console-gateway.node-test.mjs",
         "scripts/qa/connected-systems.mjs",
         "tests/qlik-relay.test.ts",
+        "tests/qlik-handler-v2.test.ts",
         "tests/ingestion.test.ts",
         "tests/health-route.test.ts",
         "docs/runbooks/salesforce-n8n-migration.md",

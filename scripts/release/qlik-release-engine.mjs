@@ -20,7 +20,9 @@ const optionKeys = [
   "ciRunId",
 ];
 const statuses = ["inspected", "pending", "unavailable", "reauth_required"];
+const rankingStatuses = ["running", "succeeded", "reauth_required", "unavailable"];
 const clone = (value) => structuredClone(value);
+const rankingFields = (value) => (Object.hasOwn(value, "ranking") ? ["ranking"] : []);
 
 function requireValid(condition) {
   if (!condition) throw new Error("Invalid Qlik release state or boundary.");
@@ -46,7 +48,8 @@ function time(value, now) {
 }
 
 function validateOwner(owner) {
-  keys(owner, ownerKeys);
+  keys(owner, [...ownerKeys, ...rankingFields(owner)]);
+  if (Object.hasOwn(owner, "ranking")) requireValid(owner.ranking === true && !owner.preflight);
   pattern(owner.sha, shaPattern);
   pattern(owner.unitHash, hashPattern);
   for (const key of ["enabled", "active", "preflight"])
@@ -55,7 +58,8 @@ function validateOwner(owner) {
 }
 
 function validateOptions(options) {
-  keys(options, optionKeys);
+  keys(options, [...optionKeys, ...rankingFields(options)]);
+  if (Object.hasOwn(options, "ranking")) requireValid(options.ranking === true);
   requireValid(options.operation === "qlik-deploy");
   pattern(options.expectedDeploymentId, idPattern);
   for (const key of ["expectedSha", "expectedOwnerSha", "targetSha"])
@@ -75,7 +79,15 @@ function validateBackup(backup, transaction) {
 }
 
 function ownerFromReceipt(receipt) {
-  return Object.fromEntries(ownerKeys.map((key) => [key, receipt[key]]));
+  return Object.fromEntries(
+    [...ownerKeys, ...rankingFields(receipt)].map((key) => [key, receipt[key]]),
+  );
+}
+
+function validateRankingResult(result) {
+  requireValid(rankingStatuses.includes(result.rankingStatus));
+  requireValid(typeof result.rankingConnected === "boolean");
+  requireValid(result.rankingConnected === (result.rankingStatus === "succeeded"));
 }
 
 function validateReceipt(receipt, now) {
@@ -86,8 +98,10 @@ function validateReceipt(receipt, now) {
     "ciRunId",
     "deployedAt",
     "preflightStatus",
+    ...(receipt.ranking ? ["ranking", "rankingStatus", "rankingConnected"] : []),
   ]);
   validateOwner(ownerFromReceipt(receipt));
+  if (receipt.ranking) validateRankingResult(receipt);
   requireValid(receipt.active);
   pattern(receipt.deploymentId, idPattern);
   time(receipt.deployedAt, now);
@@ -108,10 +122,12 @@ export function validateQlikState(state, now) {
   requireValid(Number.isFinite(now) && Number.isFinite(new Date(now).getTime()));
   if (state === null) return state;
   keys(state, ["schemaVersion", "baseline", "release", "inProgress"]);
-  requireValid(state.schemaVersion === 1);
+  requireValid([1, 2].includes(state.schemaVersion));
   validateOwner(state.baseline);
   requireValid(state.baseline.active);
   if (state.release !== null) validateReceipt(state.release, now);
+  if (state.schemaVersion === 1)
+    requireValid(!state.baseline.ranking && !state.release?.ranking && !state.inProgress?.ranking);
   if (state.inProgress !== null) {
     const transaction = state.inProgress;
     keys(transaction, [
@@ -126,8 +142,22 @@ export function validateQlikState(state, now) {
       "backup",
       "operation",
       "phase",
+      ...(transaction.ranking ? ["ranking", "boot"] : []),
     ]);
     validateOwner(transaction.previousOwner);
+    if (transaction.ranking) {
+      requireValid(state.schemaVersion === 2 && transaction.ranking === true);
+      requireValid(
+        ["unchanged", "enable-pending", "enabled", "restore-pending", "restored"].includes(
+          transaction.boot,
+        ),
+      );
+      requireValid(transaction.phase !== "prepared" || transaction.boot === "unchanged");
+      requireValid(
+        !["restore-pending", "restored"].includes(transaction.boot) ||
+          transaction.phase === "recovering",
+      );
+    } else requireValid(!transaction.previousOwner.ranking);
     validateOptions({
       operation: transaction.operation,
       expectedDeploymentId: transaction.expectedDeploymentId,
@@ -231,40 +261,62 @@ function desiredOwner(transaction, restore = false, active = true) {
     : {
         sha: transaction.targetSha,
         unitHash: transaction.backup.targetUnitHash,
-        enabled: transaction.previousOwner.enabled,
+        enabled:
+          transaction.ranking && transaction.boot === "enabled"
+            ? true
+            : transaction.previousOwner.enabled,
         active,
-        preflight: true,
+        preflight: !transaction.ranking,
+        ...(transaction.ranking ? { ranking: true } : {}),
       };
 }
 
 function assertRelatedOwner(owner, transaction) {
+  const bootIntermediate =
+    transaction.ranking &&
+    ["enable-pending", "enabled", "restore-pending"].includes(transaction.boot);
   requireValid(
     isDeepStrictEqual(owner, desiredOwner(transaction, true, owner.active)) ||
-      isDeepStrictEqual(owner, desiredOwner(transaction, false, owner.active)),
+      isDeepStrictEqual(owner, desiredOwner(transaction, false, owner.active)) ||
+      (bootIntermediate &&
+        [true, transaction.previousOwner.enabled].includes(owner.enabled) &&
+        [true, false].some((restore) =>
+          isDeepStrictEqual(owner, {
+            ...desiredOwner(transaction, restore, owner.active),
+            enabled: owner.enabled,
+          }),
+        )),
   );
 }
 
 async function verify(io, run, transaction, restore) {
   const result = await io.verifyOwner(clone(transaction), restore);
-  keys(result, ["preflightStatus"]);
   const owner = desiredOwner(transaction, restore);
+  keys(result, [
+    "preflightStatus",
+    ...(owner.ranking ? ["rankingStatus", "rankingConnected"] : []),
+  ]);
+  if (owner.ranking) validateRankingResult(result);
   requireValid(
     owner.preflight
       ? statuses.includes(result.preflightStatus)
       : result.preflightStatus === "disabled",
   );
   requireValid(isDeepStrictEqual(await run.inspect(), owner));
-  return { owner, preflightStatus: result.preflightStatus };
+  return { owner, ...result };
 }
 
-function receipt(deploymentId, owner, imageId, ciRunId, now, preflightStatus) {
+function receipt(deploymentId, owner, imageId, ciRunId, now, verified) {
   return {
     ...owner,
     deploymentId,
     imageId,
     ciRunId,
     deployedAt: new Date(now).toISOString(),
-    preflightStatus,
+    preflightStatus: verified.preflightStatus,
+    ...(owner.ranking
+      ? { rankingStatus: verified.rankingStatus, rankingConnected: verified.rankingConnected }
+      : {}),
   };
 }
 
@@ -276,8 +328,9 @@ function receipt(deploymentId, owner, imageId, ciRunId, now, preflightStatus) {
  * apply/restore(tx, beforeWrite), start(tx, beforeStart, restore=false) await
  * the callback, recheck host lock/CAS, and consume its synchronous freshness
  * guard once at rename/spawn without intervening async work.
- * verifyOwner(tx, restore=false) proves a new PID and, when
- * enabled, a fresh rankingConnected:false artifact; it returns only status.
+ * verifyOwner(tx, restore=false) proves the started owner and a fresh artifact.
+ * Ranking requires a successful cycle before the journaled setBoot mutation.
+ * Recovery restores recorded unit bytes and boot state, including interrupted enable.
  * No operation here restores a profile archive, writes the CRM ledger or runs Compose.
  */
 export async function executeQlikRelease(options, io) {
@@ -302,8 +355,11 @@ export async function executeQlikRelease(options, io) {
     await run.gate(options, true);
     if (owner.sha === options.targetSha) {
       requireValid(
-        previous?.release !== null && previous?.release !== undefined && owner.preflight,
+        previous?.release !== null &&
+          previous?.release !== undefined &&
+          (owner.preflight || owner.ranking),
       );
+      requireValid(!options.ranking || (owner.ranking && owner.enabled));
       requireValid(previous.release.imageId === options.targetImageId);
       requireValid(isDeepStrictEqual(await run.read(), previous));
       requireValid(isDeepStrictEqual(await run.inspect(), owner));
@@ -311,6 +367,12 @@ export async function executeQlikRelease(options, io) {
         status: "noop",
         release: clone(previous.release),
         preflightStatus: previous.release.preflightStatus,
+        ...(owner.ranking
+          ? {
+              rankingStatus: previous.release.rankingStatus,
+              rankingConnected: previous.release.rankingConnected,
+            }
+          : {}),
       };
     }
 
@@ -321,7 +383,14 @@ export async function executeQlikRelease(options, io) {
       deploymentId !== options.expectedDeploymentId &&
         deploymentId !== previous?.release?.deploymentId,
     );
-    const backup = clone(await io.prepare(clone(options), clone(owner), deploymentId));
+    const ranking = options.ranking === true || owner.ranking === true;
+    const backup = clone(
+      await io.prepare(
+        { ...clone(options), ...(ranking ? { ranking: true } : {}) },
+        clone(owner),
+        deploymentId,
+      ),
+    );
     const transaction = {
       deploymentId,
       expectedDeploymentId: options.expectedDeploymentId,
@@ -334,9 +403,10 @@ export async function executeQlikRelease(options, io) {
       backup,
       operation: "qlik-deploy",
       phase: "prepared",
+      ...(ranking ? { ranking: true, boot: "unchanged" } : {}),
     };
     let state = {
-      schemaVersion: 1,
+      schemaVersion: ranking || previous?.schemaVersion === 2 ? 2 : 1,
       baseline: previous?.baseline ?? owner,
       release: previous?.release ?? null,
       inProgress: transaction,
@@ -383,18 +453,49 @@ export async function executeQlikRelease(options, io) {
     );
     stage = "verify";
     const verified = await verify(io, run, state.inProgress, false);
+    if (ranking) {
+      requireValid(verified.rankingStatus === "succeeded" && verified.rankingConnected);
+      stage = "boot-intent";
+      const enabling = { ...state, inProgress: { ...state.inProgress, boot: "enable-pending" } };
+      await run.write(state, enabling);
+      state = enabling;
+      stage = "boot-enable";
+      await guardedMutation(
+        (beforeBoot) => io.setBoot(clone(state.inProgress), beforeBoot, false),
+        async () => {
+          const current = await run.gate(options, true);
+          requireValid(isDeepStrictEqual(await run.inspect(), desiredOwner(state.inProgress)));
+          await run.cas(state, current);
+          return () => assertFreshObservation(current, run.now());
+        },
+      );
+      const enabled = { ...state, inProgress: { ...state.inProgress, boot: "enabled" } };
+      requireValid(isDeepStrictEqual(await run.inspect(), desiredOwner(enabled.inProgress)));
+      await run.write(state, enabled);
+      state = enabled;
+      verified.owner = desiredOwner(state.inProgress);
+    }
     stage = "receipt";
-    await run.gate(options, false);
+    const finalObservation = await run.gate(options, false);
+    requireValid(isDeepStrictEqual(await run.inspect(), verified.owner));
+    assertFreshObservation(finalObservation, run.now());
     const release = receipt(
       deploymentId,
       verified.owner,
       options.targetImageId,
       options.ciRunId,
       run.now(),
-      verified.preflightStatus,
+      verified,
     );
     await run.write(state, { ...state, release, inProgress: null });
-    return { status: "deployed", release, preflightStatus: verified.preflightStatus };
+    return {
+      status: "deployed",
+      release,
+      preflightStatus: verified.preflightStatus,
+      ...(ranking
+        ? { rankingStatus: verified.rankingStatus, rankingConnected: verified.rankingConnected }
+        : {}),
+    };
   } catch {
     throw new Error(`Qlik release blocked or incomplete (${stage}). Private details withheld.`);
   }
@@ -436,6 +537,35 @@ export async function recoverQlikRelease(deploymentId, io) {
         return () => assertFreshObservation(current, run.now());
       },
     );
+    if (original.ranking) {
+      stage = "recovery-boot-intent";
+      const restoringBoot = {
+        ...state,
+        inProgress: { ...state.inProgress, boot: "restore-pending" },
+      };
+      await run.write(state, restoringBoot);
+      state = restoringBoot;
+      stage = "recovery-boot";
+      await guardedMutation(
+        (beforeBoot) => io.setBoot(clone(state.inProgress), beforeBoot, true),
+        async () => {
+          const current = await run.gate(original, false);
+          const currentOwner = await run.inspect();
+          assertRelatedOwner(currentOwner, state.inProgress);
+          requireValid(
+            !currentOwner.active && currentOwner.unitHash === original.previousOwner.unitHash,
+          );
+          await run.cas(state, current);
+          return () => assertFreshObservation(current, run.now());
+        },
+      );
+      const restored = { ...state, inProgress: { ...state.inProgress, boot: "restored" } };
+      requireValid(
+        isDeepStrictEqual(await run.inspect(), desiredOwner(state.inProgress, true, false)),
+      );
+      await run.write(state, restored);
+      state = restored;
+    }
     stage = "recovery-start";
     await guardedMutation(
       (beforeStart) => io.start(clone(state.inProgress), beforeStart, true),
@@ -451,7 +581,9 @@ export async function recoverQlikRelease(deploymentId, io) {
     stage = "recovery-verify";
     const verified = await verify(io, run, state.inProgress, true);
     stage = "recovery-receipt";
-    await run.gate(original, false);
+    const finalObservation = await run.gate(original, false);
+    requireValid(isDeepStrictEqual(await run.inspect(), verified.owner));
+    assertFreshObservation(finalObservation, run.now());
     const recoveryId = io.id();
     pattern(recoveryId, idPattern);
     requireValid(
@@ -465,10 +597,17 @@ export async function recoverQlikRelease(deploymentId, io) {
       state.release?.imageId ?? null,
       state.release?.ciRunId ?? null,
       run.now(),
-      verified.preflightStatus,
+      verified,
     );
     await run.write(state, { ...state, release, inProgress: null });
-    return { status: "recovered", release, preflightStatus: verified.preflightStatus };
+    return {
+      status: "recovered",
+      release,
+      preflightStatus: verified.preflightStatus,
+      ...(verified.owner.ranking
+        ? { rankingStatus: verified.rankingStatus, rankingConnected: verified.rankingConnected }
+        : {}),
+    };
   } catch {
     throw new Error(`Qlik release blocked or incomplete (${stage}). Private details withheld.`);
   }

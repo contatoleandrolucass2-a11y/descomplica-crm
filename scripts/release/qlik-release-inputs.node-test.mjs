@@ -9,8 +9,10 @@ import {
   assertProtectedParents,
   assertQlikDependencies,
   idPattern,
+  inspectQlikCredential,
   parseQlikUnit,
   qlikReleaseFiles,
+  qlikCredentialPath,
   readProtectedText,
   renderQlikUnit,
   sha256,
@@ -140,6 +142,14 @@ test("release inventory is frozen, unique and includes every reviewed input", ()
     "ops/qlik/qix-metadata.mjs",
     "ops/qlik/collection-loop.mjs",
     "ops/qlik/metadata-artifact.mjs",
+    "ops/qlik/ranking-cycle.mjs",
+    "ops/qlik/browser-ranking.mjs",
+    "ops/qlik/qix-ranking.mjs",
+    "ops/qlik/ranking-mapping.mjs",
+    "ops/qlik/ranking-artifact.mjs",
+    "ops/qlik/ranking-credential.mjs",
+    "ops/qlik/publish-ranking.mjs",
+    "lib/crm/qlik/contracts-v2.ts",
     "ops/qlik/vps/descomplica-qlik-browser.service",
     "scripts/release/private-json-store.mjs",
     "scripts/release/production-release-lock.mjs",
@@ -149,6 +159,100 @@ test("release inventory is frozen, unique and includes every reviewed input", ()
   assert.equal(Object.isFrozen(qlikReleaseFiles), true);
   assert.equal(new Set(qlikReleaseFiles).size, qlikReleaseFiles.length);
   assert.throws(() => qlikReleaseFiles.push("unreviewed"), TypeError);
+});
+
+test("ranking unit has only the fixed opt-in and credential, without metadata collection", () => {
+  const rendered = renderQlikUnit(template, sha, false, true);
+  assert.ok(
+    rendered.includes(
+      home +
+        loginCredentials +
+        `Environment=QLIK_RANKING_COLLECTION=enabled\nLoadCredential=qlik-ranking-hmac:${qlikCredentialPath}\n`,
+    ),
+  );
+  assert.ok(!rendered.includes("QLIK_METADATA_PREFLIGHT"));
+  assert.deepEqual(parseQlikUnit(rendered, template), {
+    sha,
+    unitHash: sha256(rendered),
+    preflight: false,
+    ranking: true,
+  });
+  const legacy = rendered.replace(loginCredentials, "");
+  assert.deepEqual(parseQlikUnit(legacy, template), {
+    sha,
+    unitHash: sha256(legacy),
+    preflight: false,
+    ranking: true,
+  });
+  assert.notEqual(sha256(legacy), sha256(rendered));
+  for (const source of [rendered, legacy]) {
+    for (const extra of [
+      "LoadCredential=other:/tmp/key\n",
+      "SetCredential=qlik-login:{}\n",
+      "Environment=EXTRA=true\n",
+    ])
+      assert.throws(() => parseQlikUnit(source + extra, template));
+  }
+  assert.throws(() => renderQlikUnit(template, sha, true, true));
+  for (const value of [null, 0, "enable", {}, []])
+    assert.throws(() => renderQlikUnit(template, sha, false, value));
+  for (const changed of [
+    rendered.replace(qlikCredentialPath, "/tmp/key"),
+    rendered.replace("qlik-ranking-hmac:", "other:"),
+    rendered.replace("COLLECTION=enabled", "COLLECTION=true"),
+    rendered + "Environment=EXTRA=true\n",
+    rendered.replace("LoadCredential=", "LoadCredentialEncrypted="),
+    rendered.replace("Environment=QLIK_RANKING_COLLECTION=enabled\n", ""),
+    rendered.replace(`LoadCredential=qlik-ranking-hmac:${qlikCredentialPath}\n`, ""),
+    rendered.replace(home, home + "Environment=QLIK_METADATA_PREFLIGHT=enabled\n"),
+  ])
+    assert.throws(() => parseQlikUnit(changed, template));
+  for (const directive of ["QLIK_RANKING_COLLECTION", "LoadCredential", "LoadCredentialEncrypted"])
+    assert.throws(() => renderQlikUnit(template + directive, sha, false, true));
+});
+
+test("credential inspection is fixed-path metadata only, root:root 0600 without links", async (t) => {
+  for (const change of [
+    null,
+    { uid: 1000 },
+    { gid: 1000 },
+    { mode: 0o640 },
+    { mode: 0o4600 },
+    { nlink: 2 },
+    { kind: "symlink" },
+    { kind: "directory" },
+    { size: 42 },
+    { size: 131 },
+    "escape",
+    "missing",
+  ]) {
+    await t.test(JSON.stringify(change), async (t) => {
+      const info = metadata({ gid: 0, size: 43, ...(typeof change === "object" ? change : {}) });
+      await withFilesystem(
+        t,
+        {
+          lstat: async (file) => {
+            if (file !== qlikCredentialPath) return metadata({ kind: "directory" });
+            if (change === "missing") throw Object.assign(new Error("missing"), { code: "ENOENT" });
+            return info;
+          },
+          realpath: async (file) =>
+            change === "escape" && file === qlikCredentialPath ? "/tmp/key" : file,
+        },
+        async () => {
+          if (change !== null) await assert.rejects(inspectQlikCredential());
+          else
+            assert.deepEqual(await inspectQlikCredential(), {
+              dev: 1,
+              ino: 101,
+              size: 43,
+              mtimeMs: 1000,
+              ctimeMs: 1000,
+            });
+        },
+      );
+    });
+  }
 });
 
 test("SHA-256 matches independent standard vectors and hashes bytes exactly", () => {

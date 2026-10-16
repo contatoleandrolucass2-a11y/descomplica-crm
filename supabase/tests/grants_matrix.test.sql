@@ -340,6 +340,7 @@ select is(
     'get_crm_routine_completions',
     'get_crm_routines',
     'get_crm_sync_status',
+    'get_qlik_ranking_v2',
     'get_qlik_relay_health',
     'get_role_level',
     'get_user_authorization_context',
@@ -418,7 +419,8 @@ select is(
   array[
     'ingest_crm_imob_ranking_snapshot',
     'ingest_crm_read_model_v3',
-    'ingest_crm_salesforce_snapshot'
+    'ingest_crm_salesforce_snapshot',
+    'ingest_qlik_ranking_v2'
   ]::name[],
   'service_role can execute only the audited server-side ingestion RPCs'
 );

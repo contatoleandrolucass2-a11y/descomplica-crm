@@ -1,10 +1,21 @@
 import { spawn } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 import { constants } from "node:fs";
-import { lstat, mkdir, open, readdir, realpath, rename, statfs, unlink } from "node:fs/promises";
+import {
+  lstat,
+  mkdir,
+  open,
+  readdir,
+  readlink,
+  realpath,
+  rename,
+  statfs,
+  unlink,
+} from "node:fs/promises";
 import path from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { isDeepStrictEqual } from "node:util";
+import { isRankingFailureCode } from "../../ops/qlik/ranking-artifact.mjs";
 import { assertHeldLock, inheritedLockDescriptors } from "./production-release-lock.mjs";
 import { privateJsonStore } from "./private-json-store.mjs";
 import { verifyPromotableImage, verifyReleaseBoundary } from "./bind-production-image.mjs";
@@ -14,6 +25,7 @@ import {
   assertProtectedParents,
   assertQlikDependencies,
   idPattern,
+  inspectQlikCredential,
   parseQlikUnit,
   qlikReleaseFiles,
   readProtectedText,
@@ -22,8 +34,27 @@ import {
 } from "./qlik-release-inputs.mjs";
 
 const root = path.resolve(import.meta.dirname, "../..");
+
+export function assertRankingFailureResult(result) {
+  if (
+    result === null ||
+    typeof result !== "object" ||
+    Array.isArray(result) ||
+    !["running", "reauth_required", "unavailable"].includes(result.state) ||
+    !Object.hasOwn(result, "state") ||
+    (Object.keys(result).length !== 1 &&
+      !(
+        Object.keys(result).length === 2 &&
+        Object.hasOwn(result, "code") &&
+        result.state !== "running" &&
+        isRankingFailureCode(result.code)
+      ))
+  )
+    throw new Error("Invalid Qlik ranking result.");
+}
 const unit = "descomplica-qlik-browser.service";
 const unitPath = `/etc/systemd/system/${unit}`;
+const bootLink = `/etc/systemd/system/multi-user.target.wants/${unit}`;
 const backupRoot = "/etc/descomplica-crm/qlik-backups";
 const profile = "/var/lib/descomplica-qlik/chrome";
 const ledgerPath = "/etc/descomplica-crm/qlik-release.json";
@@ -193,6 +224,32 @@ export function qlikReleaseHost(lock) {
         }),
     );
   }
+  async function assertBootState(enabled) {
+    await assertProtectedParents(path.dirname(unitPath));
+    try {
+      await lstat(path.dirname(bootLink));
+    } catch (error) {
+      if (error.code === "ENOENT" && !enabled) return;
+      throw error;
+    }
+    await assertProtectedParents(path.dirname(bootLink));
+    let info;
+    try {
+      info = await lstat(bootLink);
+    } catch (error) {
+      if (error.code === "ENOENT" && !enabled) return;
+      throw error;
+    }
+    if (
+      !enabled ||
+      !info.isSymbolicLink() ||
+      info.uid !== 0 ||
+      info.gid !== 0 ||
+      path.resolve(path.dirname(bootLink), await readlink(bootLink)) !== unitPath ||
+      (await realpath(bootLink)) !== unitPath
+    )
+      throw new Error("Qlik boot link differs from the fixed unit.");
+  }
   async function inspectOwner() {
     await assertHeldLock(lock);
     await getIdentity();
@@ -219,6 +276,7 @@ export function qlikReleaseHost(lock) {
         (effective.SubState !== "running" || !/^[1-9][0-9]*$/u.test(effective.MainPID)))
     )
       throw new Error("Qlik effective service differs from its approved unit.");
+    if (info.ranking) await assertBootState(effective.UnitFileState === "enabled");
     return {
       ...info,
       enabled: effective.UnitFileState === "enabled",
@@ -255,11 +313,93 @@ export function qlikReleaseHost(lock) {
       after.sha !== expected.targetSha ||
       before.unitHash !== expected.previousUnitHash ||
       after.unitHash !== expected.targetUnitHash ||
-      !after.preflight ||
+      (transaction.ranking ? !after.ranking : !after.preflight) ||
       value.enabled !== transaction.previousOwner.enabled
     )
       throw new Error("Qlik unit backup does not match the pending release.");
+    const expectedKeys = [
+      "id",
+      "before",
+      "after",
+      "enabled",
+      ...(transaction.ranking ? ["credential"] : []),
+    ];
+    if (
+      Object.keys(value).length !== expectedKeys.length ||
+      expectedKeys.some((key) => !Object.hasOwn(value, key))
+    )
+      throw new Error("Qlik unit backup has unexpected fields.");
     return value;
+  }
+  async function credentialMatches(value) {
+    if (!isDeepStrictEqual(await inspectQlikCredential(), value.credential))
+      throw new Error("Qlik credential changed during release.");
+  }
+  async function rankingArtifact(transaction) {
+    const directory = "/run/descomplica-qlik";
+    const info = await lstat(directory);
+    if (
+      !info.isDirectory() ||
+      info.isSymbolicLink() ||
+      info.uid !== (await getIdentity()) ||
+      (info.mode & 0o777) !== 0o700 ||
+      (await realpath(directory)) !== directory
+    )
+      throw new Error("Private Qlik ranking runtime required.");
+    const artifact = JSON.parse(
+      await readProtectedText(`${directory}/ranking-status.json`, {
+        uid: await getIdentity(),
+        mode: 0o600,
+        maximum: 131072,
+      }),
+    );
+    const observed = Date.parse(artifact.observedAt);
+    const state = artifact.result?.state;
+    const exactKeys = (value, keys) =>
+      value !== null &&
+      typeof value === "object" &&
+      !Array.isArray(value) &&
+      Object.keys(value).length === keys.length &&
+      keys.every((key) => Object.hasOwn(value, key));
+    if (
+      artifact.schemaVersion !== 1 ||
+      artifact.kind !== "qlik_ranking_cycle" ||
+      !exactKeys(artifact, ["schemaVersion", "kind", "observedAt", "rankingConnected", "result"]) ||
+      typeof artifact.observedAt !== "string" ||
+      !Number.isFinite(observed) ||
+      new Date(observed).toISOString() !== artifact.observedAt ||
+      !(observed >= startedAt.get(transaction.deploymentId)) ||
+      observed > Date.now() ||
+      !["running", "succeeded", "reauth_required", "unavailable"].includes(state) ||
+      typeof artifact.rankingConnected !== "boolean" ||
+      artifact.rankingConnected !== (state === "succeeded")
+    )
+      throw new Error("Fresh Qlik ranking observation required.");
+    if (state === "succeeded") {
+      const receipt = artifact.result;
+      const completed = Date.parse(receipt.completedAt);
+      if (
+        !exactKeys(receipt, ["state", "batchId", "requestId", "contentSha256", "completedAt"]) ||
+        typeof receipt.batchId !== "string" ||
+        !idPattern.test(receipt.batchId) ||
+        typeof receipt.requestId !== "string" ||
+        !idPattern.test(receipt.requestId) ||
+        receipt.batchId === receipt.requestId ||
+        typeof receipt.contentSha256 !== "string" ||
+        !/^[0-9a-f]{64}$/u.test(receipt.contentSha256) ||
+        typeof receipt.completedAt !== "string" ||
+        !Number.isFinite(completed) ||
+        new Date(completed).toISOString() !== receipt.completedAt ||
+        !(completed >= startedAt.get(transaction.deploymentId)) ||
+        completed > observed
+      )
+        throw new Error("Fresh Qlik ranking publication receipt required.");
+    } else assertRankingFailureResult(artifact.result);
+    return {
+      preflightStatus: "disabled",
+      rankingStatus: state,
+      rankingConnected: artifact.rankingConnected,
+    };
   }
   async function stopped() {
     for (const name of [unit, "descomplica-qlik-vnc.service", "descomplica-qlik-console.service"]) {
@@ -327,6 +467,7 @@ export function qlikReleaseHost(lock) {
     if (current !== value.before && current !== value.after)
       throw new Error("Qlik unit compare-and-swap refused.");
     if (!restore) await validateProfileBackup(transaction);
+    if (!restore && transaction.ranking) await credentialMatches(value);
     const temporary = `${unitPath}.${transaction.deploymentId}.${randomUUID()}.tmp`;
     await exclusiveText(temporary, desired, 0o644);
     try {
@@ -338,6 +479,7 @@ export function qlikReleaseHost(lock) {
       await pending(transaction);
       if ((await readProtectedText(unitPath, { mode: 0o644 })) !== current)
         throw new Error("Qlik unit changed during approval.");
+      if (!restore && transaction.ranking) await credentialMatches(value);
       await assertHeldLock(lock);
       finalCheck();
       await rename(temporary, unitPath);
@@ -408,10 +550,19 @@ export function qlikReleaseHost(lock) {
       await mkdir(directory, { mode: 0o700 });
       await syncDirectory(backupRoot);
       const before = await readProtectedText(unitPath, { mode: 0o644 });
-      const after = renderQlikUnit(await getTemplate(), options.targetSha, true);
+      const ranking = options.ranking === true || owner.ranking === true;
+      const credential = ranking ? await inspectQlikCredential() : undefined;
+      if (ranking) await assertBootState(owner.enabled);
+      const after = renderQlikUnit(await getTemplate(), options.targetSha, !ranking, ranking);
       await exclusiveText(
         path.join(directory, "unit.json"),
-        JSON.stringify({ id: deploymentId, before, after, enabled: owner.enabled }),
+        JSON.stringify({
+          id: deploymentId,
+          before,
+          after,
+          enabled: owner.enabled,
+          ...(ranking ? { credential } : {}),
+        }),
       );
       await exclusiveText(path.join(directory, unit), after, 0o644);
       await command("/usr/bin/systemd-analyze", ["verify", path.join(directory, unit)]);
@@ -486,6 +637,53 @@ export function qlikReleaseHost(lock) {
     async restore(transaction, beforeWrite) {
       await replaceUnit(transaction, true, beforeWrite);
     },
+    async setBoot(transaction, beforeBoot, restore = false) {
+      if (
+        !transaction.ranking ||
+        transaction.boot !== (restore ? "restore-pending" : "enable-pending")
+      )
+        throw new Error("Qlik boot intent required.");
+      const value = await backup(transaction);
+      const expected = parseQlikUnit(restore ? value.before : value.after, await getTemplate());
+      const desired = restore ? value.enabled : true;
+      const before = await inspectOwner();
+      if (
+        before.unitHash !== expected.unitHash ||
+        before.active !== !restore ||
+        ![value.enabled, true].includes(before.enabled)
+      )
+        throw new Error("Qlik boot owner mismatch.");
+      await assertBootState(before.enabled);
+      const approve = async () => {
+        const guard = await beforeBoot();
+        if (typeof guard !== "function") throw new Error("Fresh boot guard required.");
+        await pending(transaction);
+        if (
+          !isDeepStrictEqual(await inspectOwner(), before) ||
+          (await properties(unit)).NeedDaemonReload !== "no"
+        )
+          throw new Error("Qlik boot owner changed during approval.");
+        await assertBootState(before.enabled);
+        if (!restore) {
+          await credentialMatches(value);
+          if (!(await rankingArtifact(transaction)).rankingConnected)
+            throw new Error("Qlik boot requires a successful ranking cycle.");
+        }
+        await assertHeldLock(lock);
+        return guard;
+      };
+      if (before.enabled !== desired) {
+        await command("/usr/bin/systemctl", [desired ? "enable" : "disable", unit], {
+          beforeSpawn: approve,
+        });
+        await syncDirectory(path.dirname(bootLink));
+        await syncDirectory(path.dirname(unitPath));
+      } else (await approve())();
+      await pending(transaction);
+      await assertBootState(desired);
+      if (!isDeepStrictEqual(await inspectOwner(), { ...before, enabled: desired }))
+        throw new Error("Qlik boot mutation was not verified.");
+    },
     async start(transaction, beforeStart, restore = false) {
       const value = await backup(transaction);
       await stopped();
@@ -516,6 +714,7 @@ export function qlikReleaseHost(lock) {
               (restore ? value.before : value.after)
           )
             throw new Error("Qlik start changed during approval.");
+          if (expected.ranking) await credentialMatches(value);
           await assertHeldLock(lock);
           return () => {
             finalCheck();
@@ -528,23 +727,41 @@ export function qlikReleaseHost(lock) {
       const value = await backup(transaction);
       const contents = restore ? value.before : value.after;
       const expected = parseQlikUnit(contents, await getTemplate());
-      // Approved login units allow 120s authentication plus 120s metadata within a
-      // 420s verification budget. Legacy preflight units retain their 180s budget.
+      // Ranking keeps its 600s budget from start. Login preflight allows 420s;
+      // legacy preflight units retain their 90 probes at 2s intervals.
       const login = contents.includes(
         "LoadCredentialEncrypted=qlik-login:/etc/descomplica-qlik/qlik-login.cred\n",
       );
-      const attempts = login ? 210 : 90;
-      const deadline = login ? Date.now() + 420_000 : Infinity;
+      const attempts = expected.ranking ? 300 : login ? 210 : 90;
+      const deadline = expected.ranking
+        ? startedAt.get(transaction.deploymentId) + 600_000
+        : login
+          ? Date.now() + 420_000
+          : Infinity;
       for (let attempt = 0; attempt < attempts && Date.now() < deadline; attempt++) {
         await pending(transaction);
         const current = await inspectOwner();
         if (
           current.sha !== expected.sha ||
           current.unitHash !== expected.unitHash ||
-          current.enabled !== value.enabled
+          current.enabled !==
+            (transaction.ranking && transaction.boot === "enabled" && !restore
+              ? true
+              : value.enabled)
         )
           throw new Error("Qlik owner changed during verification.");
         if (current.active) {
+          if (current.ranking) {
+            try {
+              const result = await rankingArtifact(transaction);
+              if (Date.now() >= deadline) break;
+              if (result.rankingStatus !== "running") return result;
+            } catch {
+              /* Invalid/stale artifacts never authorize boot or become public output. */
+            }
+            await delay(Math.min(2000, Math.max(0, deadline - Date.now())));
+            continue;
+          }
           if (!current.preflight) return { preflightStatus: "disabled" };
           try {
             const file = "/run/descomplica-qlik/ranking-metadata.json";
@@ -583,7 +800,11 @@ export function qlikReleaseHost(lock) {
         }
         await delay(Math.min(2000, Math.max(0, deadline - Date.now())));
       }
-      throw new Error("Qlik owner did not confirm a fresh metadata attempt.");
+      throw new Error(
+        expected.ranking
+          ? "Qlik owner did not confirm a fresh ranking cycle within 10 minutes."
+          : "Qlik owner did not confirm a fresh metadata attempt.",
+      );
     },
   };
 }

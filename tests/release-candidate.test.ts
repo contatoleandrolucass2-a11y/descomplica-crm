@@ -16,6 +16,7 @@ const administratorProtectionMigration =
 const permissionAccessDraftMigration = "20261012113000_apply_user_permission_access_draft.sql";
 const sharedRoutinesMigration = "20261013014310_crm_shared_routines.sql";
 const routineCompletionsMigration = "20261014020437_crm_routine_completions.sql";
+const qlikRankingV2Migration = "20261014170549_crm_qlik_v2_standalone.sql";
 const administratorMasterOnlyPermissions = [
   "crm.simulators.execute",
   "crm.commercial_engine.execute",
@@ -36,17 +37,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 54-version manifest", async () => {
+  it("keeps a unique, ordered 55-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(54);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(54);
+    expect(migrations).toHaveLength(55);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(55);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
+    expect(migrations).toContain(qlikRankingV2Migration);
     expect(migrations.at(-1)).toBe("20261014204014_local_user_presence.sql");
   });
 
@@ -79,7 +81,7 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.tests).toBe(1441);
+    expect(plan.tests).toBe(1695);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -290,7 +292,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1441;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1695;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

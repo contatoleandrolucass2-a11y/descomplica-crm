@@ -241,6 +241,46 @@ const environmentChange = {
   afterSha256: "2".repeat(64),
 };
 
+test("Qlik configuration uses the same durable intent and verification gates", async () => {
+  const system = harness();
+  system.io.prepareEnvironmentChange = async (input, id) => {
+    assert.equal(input.qlikRanking, true);
+    assert.equal(input.salesforceIngestion, undefined);
+    assert.equal(id, nextId);
+    assert.equal(system.candidateCount, 2);
+    assert.equal(system.writeCount, 0);
+    return structuredClone(environmentChange);
+  };
+  const verify = system.io.verify;
+  system.io.verify = async (sha, image, check) => {
+    assert.deepEqual(check, { change: environmentChange, restore: false });
+    await verify(sha, image);
+  };
+  await executeRelease(options({ qlikRanking: true }), system.io);
+  assert.equal(system.state.inProgress, null);
+});
+
+test("Qlik configuration cannot skip backup, freshness, distinct SHA or candidate checks", async () => {
+  for (const scenario of ["missing", "stale", "same-sha", "bad-ci", "mixed", "not-boolean"]) {
+    const system = harness();
+    system.io.prepareEnvironmentChange = async () => {
+      if (scenario === "missing") return undefined;
+      if (scenario === "stale") system.clock += 60_000;
+      return structuredClone(environmentChange);
+    };
+    if (scenario === "bad-ci")
+      system.hooks.candidate = () => ({ ...approvedCandidate(), mainSha: currentSha });
+    const input = options({
+      qlikRanking: scenario === "not-boolean" ? "true" : true,
+      ...(scenario === "same-sha" ? { targetSha: currentSha, targetImageId: currentImageId } : {}),
+      ...(scenario === "mixed" ? { salesforceIngestion: true } : {}),
+    });
+    await assert.rejects(executeRelease(input, system.io));
+    assert.equal(system.writeCount, 0);
+    assert.equal(system.events.includes("bind"), false);
+  }
+});
+
 test("configuration deploy binds a durable backup to intent and verifies runtime before receipt", async () => {
   const system = harness();
   system.io.prepareEnvironmentChange = async (releaseOptions, id) => {

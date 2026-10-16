@@ -137,6 +137,25 @@ migrations. A primeira carga e seu replay seguem o
 existir tentativa pendente; a recuperacao usa seu conteudo, sem depender da
 presenca posterior dos dois arquivos de credencial.
 
+### Conectar o ranking Qlik v2
+
+Para a ativacao autorizada, `deploy --qlik-ranking enable` utiliza um novo SHA
+validado e a chave exclusiva em
+`/etc/descomplica-crm/secrets/qlik-ranking-hmac`. O arquivo deve ser regular,
+privado e root-owned. Nunca passar seu valor na linha de comando.
+
+A opcao preserva a configuracao Supabase ja existente e todas as chaves
+Salesforce. Somente IMAGE_TAG, QLIK_RANKING_V2_ENABLED e
+QLIK_RANKING_V2_HMAC_SECRET mudam, sob as mesmas travas, frescor e CAS integral.
+Backup privado schemaVersion2/kind qlik-ranking-v2 registra antes/depois;
+recuperacao verifica esse contrato e os hashes dos valores efetivos. Backups
+Salesforce schemaVersion1 continuam compativeis. As duas ativacoes nao podem
+ser solicitadas juntas. Vazio/ausente da flag Qlik equivale ao default false
+do Compose, sem relaxar a exigencia das flags Salesforce.
+
+Esta opcao nao aplica migration, nao modifica o owner Qlik nem habilita coleta.
+Validacoes e etapas separadas em [ranking Qlik v2](qlik-ranking-v2.md).
+
 ## Falha e recuperação
 
 ### Owner Qlik separado

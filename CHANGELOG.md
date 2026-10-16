@@ -16,6 +16,63 @@
 - Registra capturas independentes da origem publica como referencia completa
   de DV e Parcerias, mantendo os assets anteriores e os limiares do QA.
 
+## 2026-10-16 - Mapeamento nativo Qlik
+
+- Configura Parceiras/PRODUTO com IDs, identidades e medidas reais pinadas,
+  preservando Direcional/SP CAPITAL/CANAL IMOB e calendario nativo DT.
+- Confirma a correcao de qix_metadata_limit no owner da VPS; publicacao de
+  fatos continua condicionada a coleta conciliada e ativacao protegida.
+- Sem novas alteracoes de interface ou banco.
+- Corrige limite de titulos alheios no catalogo de medidas e atualiza apenas
+  referencias de teste Ranking a partir da captura limpa revisada.
+- Explicita definicao ausente na fixture de bloqueio do launcher, agora que
+  o mapeamento produtivo possui os pins nativos.
+
+## 2026-10-15 - Estado de selecao Qlik
+
+- Vincula explicitamente o objeto de selecao ao estado padrao e rejeita
+  layout ausente/alternativo antes da coleta.247 testes focais aprovados.
+- Registra CI verde do head anterior e nova baseline CRM concorrente,
+  sem confundir testes e metadados com publicacao real de ranking.
+
+## 2026-10-15: Evidencias de CI e coletor
+
+- Registra verify visual aprovado, promocao isolada do owner e limite real
+  de metadados; distingue instalacao de servico e publicacao de fatos.
+
+## 2026-10-15: Pins de medidas Qlik
+
+- Vincula aliases nomeados a masters pinados, com catalogo fresco e rejeicao
+  de colisoes/mudancas, preservando conciliacao integral e a configuracao
+  produtiva bloqueada ate leitura nativa.
+
+## 2026-10-15: Evidencia operacional concorrente
+
+- Registra a baseline publicada do dashboard separada do owner Qlik, sem
+  promover dados ou modificar o servico ativo nesta etapa.
+
+## 2026-10-15: Referencias do Ranking revisadas
+
+- Promove a captura combinada limpa de242 imagens, com11 Ranking revisados e
+  231 imagens preservadas; alinha o teste ao marcador sintetico por atributo
+  emitido pelo harness atual, sem remover verificacoes de origem e RLS.
+
+## 2026-10-15: Integracao de referencias visuais
+
+- Preserva dashboard e Ranking na mesma base; exige nova captura combinada,
+  sem atribuir imagens de lotes distintos a uma unica proveniencia.
+
+## 2026-10-15
+
+- Concilia cubos Qlik com supressao de ausentes, preservando rejeicao de dados
+  ocultos/nulos e igualdade integral entre nativo e enriquecido.
+
+- Qlik: mapping por ciclo compartilhado pelas duas sessoes, com ano/mes
+  corrente em America/Sao_Paulo e hash da definicao/politica, sem periodos
+  dinamicos. Configuracao produtiva permanece bloqueada ate conferencia nativa.
+- Diagnosticos QIX preservam somente a allowlist existente; mensagens brutas
+  e campos privados continuam descartados no transporte do browser.
+
 ## 2026-10-15 - Projecao Qlik delimitada
 
 - Restringe catalogos privados a campos relevantes e cinco aliases nativos
@@ -223,6 +280,53 @@
   autorizacao no banco continuam pendentes, sem alterar grants nesta etapa.
 - Mantem instalador exclusivo para instalacao inicial, sem substituir o
   owner existente ou ativar coleta antes de um upgrade protegido e validado.
+
+## 2026-10-14: Preflight automatico Qlik pela sessao dedicada
+
+- Adiciona SDK oficial enigma.js fixado, cliente QIX restrito ao aplicativo
+  confirmado e inspecao de metadados sem leitura de linhas de clientes.
+- Resolve a aba Parceiras pelo objeto referenciado, sem confundir cId com ID
+  Engine. Inclui ciclo sequencial, cancelamento e artefato privado atomico.
+- Resolve definicoes master somente dos cubos comprovados, com limite tipado.
+- Registra autorizacao de duas coletas conciliadas para substituir shadow
+  legado ausente; gates produtivos continuam desligados e dados preservados.
+- Preflight desligado por padrao; nao e coletor de fatos nem integracao ativa.
+  Nenhuma unidade VPS, agenda produtiva, banco ou workflow n8n alterado.
+
+## 2026-10-14: Diagnostico operacional Qlik
+
+- Documenta recuperacao restrita do console VPS e sessao Qlik autenticada.
+- Registra tentativa de exportacao sem arquivo recebido e requisitos de
+  snapshot/reader ainda pendentes. Nenhuma integracao ou agenda ativada.
+
+## 2026-10-14: Ranking de parcerias no destino confirmado
+
+- Prepara /app/ranking para imobiliarias e empreendimentos, VGV/contratos e
+  recorte confirmado Direcional/SP CAPITAL/CANAL IMOB; fonte ainda indisponivel.
+- Adiciona agregacao exata por centavos e cobertura explicita, com testes
+  sinteticos e preview local. Sem coletor, ingestao, migration ou agenda ativa.
+- Registra filtros tecnicos, tabela de produtos e comparacao nativa de setembro;
+  divergencia anual e homologacao completa permanecem pendentes.
+
+## 2026-10-14: Preparacao da sessao Qlik na VPS
+
+- Atualiza a referencia vigente para Canal de Parcerias, com mapa de
+  IMOBs/empreendimentos, VGV/contratos, objetos candidatos e lacunas verificadas.
+- Marca o escopo de corretores e o publisher descrito em agosto como historico;
+  nao reutiliza o filtro anterior nem declara coleta ou relay ativos.
+
+- Mapeia o escopo integral da referencia do ranking e fixa DIRECIONAL VENDAS
+  SPC no preflight offline; nao aprova campo Qlik, politica ou coleta.
+- Adiciona cadastro opcional de credencial Qlik cifrada na VPS, somente por
+  console privado, sem leitura da chave privada pelo gateway ou overwrite.
+- Qlik VPS: travessia nominal do pai dos releases no instalador, preservando
+  ACL/mask existente; recuperacao manual documentada e login remoto confirmado.
+- Adiciona navegador dedicado e console privado por SSH para login Qlik,
+  preservando a sessao Salesforce. Coleta e agenda continuam pendentes.
+- Encerra sem merge o PR #214, cujo fluxo CRM -> Qlik nao atendia ao pedido
+  confirmado de Qlik -> ranking do CRM.
+- Corrige rejeicao de symlink no leitor de estoque Windows, preservando a
+  protecao O_NOFOLLOW no Linux.
 
 ## 2026-10-14: Sessao e diagnostico Qlik isolados
 
