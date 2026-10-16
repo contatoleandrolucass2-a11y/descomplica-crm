@@ -31,6 +31,11 @@ header sticky. Inspecao manual encontrou aviso de coleta em historico preenchido
 condicao corrigida com regressao focal. PR238 aberto, CI em andamento. Migration
 agora inclui188 assercoes SQL e matriz total1629; nenhuma aplicacao remota.
 
+CI38831855601: validate aprovado, restore interrompido apos25 assercoes por
+literal polimorfico sem tipo na fixture pgTAP. SELECT sintetico isolado confirmou
+42804; cast explicito para text corrige a preparacao, sem alterar a migration
+ou enfraquecer as188 assercoes. Reexecucao completa obrigatoria.
+
 ## 2026-10-15: Projecao delimitada e diagnostico de limites
 
 Catalogo retido limitado a IDs comerciais, filtros/calendario e campos

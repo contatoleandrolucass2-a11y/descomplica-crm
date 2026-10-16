@@ -182,7 +182,7 @@ insert into malformed_analysis values
   ('non-array dictionary', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners}', '{}')),
   ('null dictionary label', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners,0}', 'null')),
   ('empty dictionary label', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners,0}', '"  "')),
-  ('whitespace dictionary label', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners,0}', to_jsonb(E'\t\n'))),
+  ('whitespace dictionary label', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners,0}', to_jsonb(E'\t\n'::text))),
   ('long dictionary label', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners,0}', to_jsonb(repeat('x',201)))),
   ('duplicate dictionary labels', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners}', '["Owner","Owner"]')),
   ('oversized dictionary', jsonb_set(pg_temp.analysis_fixture(), '{views,0,dimensions,owners}',
