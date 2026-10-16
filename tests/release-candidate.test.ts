@@ -37,19 +37,19 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 55-version manifest", async () => {
+  it("keeps a unique, ordered 60-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(55);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(55);
+    expect(migrations).toHaveLength(60);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(60);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261014204014_local_user_presence.sql");
+    expect(migrations.at(-1)).toBe("20261016000120_individual_page_data_access.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -81,7 +81,7 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.tests).toBe(1695);
+    expect(plan.tests).toBe(1722);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -292,7 +292,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1695;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1722;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

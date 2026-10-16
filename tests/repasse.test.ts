@@ -326,11 +326,11 @@ describe("consulta protegida de repasse", () => {
     );
     const source = readFileSync(new URL("../lib/crm/repasse/data.ts", import.meta.url), "utf8");
 
-    expect(page).toContain('const context = await enforcePermission("crm.partnerships.view")');
+    expect(page).toContain('const context = await enforcePageAccess("/app/repasse")');
     expect(page).toContain('getProtectedPageGate("/app/repasse")');
     expect(page).toContain("pageGateAllowsRole(gate, context.roleKey)");
     expect(page).toContain("await listRepasseOverview()");
-    expect(action).toContain('const context = await requirePermission("crm.partnerships.view")');
+    expect(action).toContain('const context = await requirePageAccess("/app/repasse")');
     expect(action).toContain("gate?.releaseEnabled !== true");
     expect(action).toContain('gate.allowedRoles.includes("master")');
     expect(action).toContain('gate.allowedRoles.includes("admin")');

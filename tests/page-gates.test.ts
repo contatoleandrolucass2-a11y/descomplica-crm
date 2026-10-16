@@ -9,15 +9,17 @@ import {
 
 describe("protected commercial page set", () => {
   it.each(["gestao", "gestao/rotina"])(
-    "keeps %s readable behind the dashboard server guard",
+    "keeps %s readable behind its independent page guard",
     (route) => {
       const source = readFileSync(
         new URL(`../app/(protected)/app/${route}/page.tsx`, import.meta.url),
         "utf8",
       );
-      expect(source).toContain('enforcePermission("crm.dashboard.view")');
+      expect(source).toContain(`enforcePageAccess("/app/${route}")`);
       expect(source).not.toContain('enforcePermission("crm.settings.manage")');
-      expect(getProtectedPageGate(`/app/${route}`)?.permission).toBe("crm.dashboard.view");
+      expect(getProtectedPageGate(`/app/${route}`)?.permission).toBe(
+        route === "gestao" ? "crm.management.view" : "crm.management.routine.view",
+      );
     },
   );
 
@@ -32,16 +34,16 @@ describe("protected commercial page set", () => {
         "admin.pages|/admin/paginas|pages.manage",
         "admin.users|/admin/usuarios|users.view",
         "crm.dashboard|/app|crm.dashboard.view",
-        "crm.management.routine|/app/gestao/rotina|crm.dashboard.view",
-        "crm.management|/app/gestao|crm.dashboard.view",
+        "crm.management.routine|/app/gestao/rotina|crm.management.routine.view",
+        "crm.management|/app/gestao|crm.management.view",
         "crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view",
-        "crm.repasse|/app/repasse|crm.partnerships.view",
+        "crm.repasse|/app/repasse|crm.repasse.view",
         "crm.ranking|/app/ranking|crm.ranking.view",
-        "crm.settings.goals|/app/configuracoes/metas|crm.settings.manage",
-        "crm.settings.partnerships|/app/configuracoes/metas/parcerias|crm.settings.manage",
-        "crm.settings.points|/app/configuracoes/metas/pontos|crm.settings.manage",
-        "crm.settings.marketing|/app/configuracoes/recurso-mkt|crm.settings.manage",
-        "crm.settings.connected_systems|/app/configuracoes/conectar-sistemas|crm.settings.manage",
+        "crm.settings.goals|/app/configuracoes/metas|crm.settings.goals.view",
+        "crm.settings.partnerships|/app/configuracoes/metas/parcerias|crm.settings.partnerships.view",
+        "crm.settings.points|/app/configuracoes/metas/pontos|crm.settings.points.view",
+        "crm.settings.marketing|/app/configuracoes/recurso-mkt|crm.settings.marketing.view",
+        "crm.settings.connected_systems|/app/configuracoes/conectar-sistemas|crm.settings.connected_systems.view",
         "crm.settings|/app/configuracoes|crm.settings.view",
         "crm.simulation.caixa|/app/simulacao/caixa|crm.simulators.view",
         "crm.simulation.wf13|/app/simulacao/associativo-fluxo-linear|crm.simulators.view",
@@ -50,11 +52,11 @@ describe("protected commercial page set", () => {
         "crm.simulation.wf16|/app/simulacao/calcular-documentacao|crm.simulators.view",
         "crm.simulation.tabelao|/app/simulacao/tabelao|crm.simulators.view",
         "crm.simulation|/app/simulacao|crm.simulators.view",
-        "crm.stage.appointments|/app/etapas/agendamentos|crm.stages.view",
-        "crm.stage.folders|/app/etapas/pastas|crm.stages.view",
-        "crm.stage.opportunities|/app/etapas/oportunidades|crm.stages.view",
-        "crm.stage.sales|/app/etapas/vendas|crm.stages.view",
-        "crm.stage.visits|/app/etapas/visitas|crm.stages.view",
+        "crm.stage.appointments|/app/etapas/agendamentos|crm.stage.appointments.view",
+        "crm.stage.folders|/app/etapas/pastas|crm.stage.folders.view",
+        "crm.stage.opportunities|/app/etapas/oportunidades|crm.stage.opportunities.view",
+        "crm.stage.sales|/app/etapas/vendas|crm.stage.sales.view",
+        "crm.stage.visits|/app/etapas/visitas|crm.stage.visits.view",
       ].sort(),
     );
   });
@@ -76,7 +78,7 @@ describe("protected commercial page set", () => {
   it("keeps Repasse restricted to Master and Admin in addition to its permission", () => {
     const repasseGate = getProtectedPageGate("/app/repasse");
     expect(repasseGate).toMatchObject({
-      permission: "crm.partnerships.view",
+      permission: "crm.repasse.view",
       releaseEnabled: true,
       allowedRoles: ["master", "admin"],
     });

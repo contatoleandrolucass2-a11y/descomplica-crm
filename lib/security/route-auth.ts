@@ -6,6 +6,7 @@ import { requireAuthorization, requirePermission } from "@/lib/authorization/gua
 import type { PermissionKey } from "@/lib/authorization/permissions";
 
 import { noStoreHeaders } from "./api";
+import { requirePageAccess } from "@/lib/authorization/page-access";
 
 export type RouteAuthorizationResult =
   | { ok: true; context: AuthorizationContext }
@@ -16,6 +17,10 @@ export async function authorizeRoute(
   allowSessionRefresh = true,
 ): Promise<RouteAuthorizationResult> {
   return authorizeContext(() => requirePermission(permission, allowSessionRefresh));
+}
+
+export async function authorizePageRoute(pathname: string, allowSessionRefresh = true) {
+  return authorizeContext(() => requirePageAccess(pathname, allowSessionRefresh));
 }
 
 /** Authenticated self-service endpoints still enforce approval, scope and MFA. */

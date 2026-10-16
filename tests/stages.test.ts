@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { CRM_STAGES, getCrmStage } from "../lib/crm/stages/catalog";
 import { buildStageComparisons } from "../lib/crm/stages/presentation";
+import { buildPeriodFunnelReadings } from "../lib/crm/dashboard/presentation";
 
 const metric = {
   currentMonth: 80,
@@ -22,6 +23,18 @@ const metric = {
 };
 
 describe("stage details", () => {
+  it("does not expose or invent values and conversions for unauthorized stages", () => {
+    const readings = buildPeriodFunnelReadings({ visits: metric }, "month");
+    expect(readings.find((reading) => reading.key === "visits")).toMatchObject({
+      value: 80,
+      conversion: null,
+    });
+    expect(
+      readings
+        .filter((reading) => reading.key !== "visits")
+        .every((reading) => reading.value === null && reading.conversion === null),
+    ).toBe(true);
+  });
   it("maps the five authorized slugs to dashboard stages", () => {
     expect(CRM_STAGES).toHaveLength(5);
     expect(getCrmStage("visitas")?.key).toBe("visits");

@@ -1,4 +1,4 @@
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
 import { getSalesforceConsoleConfiguration } from "@/lib/crm/salesforce/console-config";
 import {
@@ -12,7 +12,7 @@ import { ConnectedSystemsPanel } from "./ConnectedSystemsPanel";
 export const metadata = { title: "Integrações" };
 
 export default async function ConnectedSystemsPage() {
-  const context = await enforcePermission("crm.settings.manage");
+  const context = await enforcePageAccess("/app/configuracoes/conectar-sistemas");
   const ingest = getSalesforceIngestConfiguration();
   const refresh = getSalesforceRefreshConfiguration();
   const status = getSalesforceStatusConfiguration();

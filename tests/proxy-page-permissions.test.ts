@@ -10,6 +10,7 @@ const mocks = vi.hoisted(() => ({
 vi.mock("@/lib/auth/supabase/middleware", () => ({ updateSession: mocks.updateSession }));
 
 import { proxy } from "@/proxy";
+import { PAGE_REGISTRY } from "@/lib/navigation/registry";
 
 const origin = "https://crm.example.test";
 
@@ -29,7 +30,35 @@ function configureSession(permissions: string[], roleKey = "master") {
   mocks.rpc.mockResolvedValue({ data: [{ permissions, role_key: roleKey }], error: null });
   mocks.updateSession.mockResolvedValue({
     response,
-    supabase: { auth: { getUser: mocks.getUser }, rpc: mocks.rpc },
+    supabase: {
+      auth: { getUser: mocks.getUser },
+      rpc: mocks.rpc,
+      from: () => {
+        let pageKey = "";
+        const query = {
+          select: () => query,
+          eq: (column: string, value: unknown) => {
+            if (column === "key") pageKey = String(value);
+            return query;
+          },
+          maybeSingle: async () => {
+            const page = PAGE_REGISTRY.find((entry) => entry.pageKey === pageKey);
+            return {
+              data: page
+                ? {
+                    key: page.pageKey,
+                    path: page.path,
+                    permission_key: page.permission,
+                    is_active: true,
+                  }
+                : null,
+              error: null,
+            };
+          },
+        };
+        return query;
+      },
+    },
   });
 }
 
@@ -41,16 +70,16 @@ afterEach(() => {
 describe("pre-stream page permission gates", () => {
   it.each([
     ["/app", "crm.dashboard.view"],
-    ["/app/repasse", "crm.partnerships.view"],
-    ["/app/etapas/oportunidades", "crm.stages.view"],
+    ["/app/repasse", "crm.repasse.view"],
+    ["/app/etapas/oportunidades", "crm.stage.opportunities.view"],
     ["/app/ranking", "crm.ranking.view"],
     ["/app/canal-de-parcerias", "crm.partnerships.view"],
     ["/app/configuracoes", "crm.settings.view"],
-    ["/app/configuracoes/metas", "crm.settings.manage"],
-    ["/app/configuracoes/metas/parcerias", "crm.settings.manage"],
-    ["/app/configuracoes/metas/pontos", "crm.settings.manage"],
-    ["/app/configuracoes/recurso-mkt", "crm.settings.manage"],
-    ["/app/configuracoes/conectar-sistemas", "crm.settings.manage"],
+    ["/app/configuracoes/metas", "crm.settings.goals.view"],
+    ["/app/configuracoes/metas/parcerias", "crm.settings.partnerships.view"],
+    ["/app/configuracoes/metas/pontos", "crm.settings.points.view"],
+    ["/app/configuracoes/recurso-mkt", "crm.settings.marketing.view"],
+    ["/app/configuracoes/conectar-sistemas", "crm.settings.connected_systems.view"],
     ["/app/simulacao", "crm.simulators.view"],
     ["/app/simulacao/associativo-fluxo-linear", "crm.simulators.view"],
     ["/app/simulacao/tabela-direta", "crm.simulators.view"],
@@ -90,19 +119,22 @@ describe("pre-stream page permission gates", () => {
     expect(response.headers.get("x-middleware-next")).toBe("1");
   });
 
-  it.each(["master", "admin"])("allows Repasse for %s with partnership access", async (roleKey) => {
-    configureSession(["crm.partnerships.view"], roleKey);
+  it.each(["master", "admin"])(
+    "allows Repasse for %s with its independent access",
+    async (roleKey) => {
+      configureSession(["crm.repasse.view"], roleKey);
 
-    const response = await proxy(new NextRequest(`${origin}/app/repasse`));
+      const response = await proxy(new NextRequest(`${origin}/app/repasse`));
 
-    expect(response.status).toBe(200);
-    expect(response.headers.get("x-middleware-next")).toBe("1");
-  });
+      expect(response.status).toBe(200);
+      expect(response.headers.get("x-middleware-next")).toBe("1");
+    },
+  );
 
   it.each(["coordinator", "manager_imob", "broker_imob"])(
     "denies Repasse for %s even with partnership access",
     async (roleKey) => {
-      configureSession(["crm.partnerships.view"], roleKey);
+      configureSession(["crm.repasse.view"], roleKey);
 
       const response = await proxy(new NextRequest(`${origin}/app/repasse`));
 

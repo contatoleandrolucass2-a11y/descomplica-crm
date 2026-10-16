@@ -1,14 +1,14 @@
 -- Compact-schema behavior uses production authorization definitions and only
 -- synthetic users. This file is intentionally outside supabase/tests.
 begin;
-select plan(115);
+select plan(116);
 
 select ok(not private.user_presence_uses_scoped_contract(), 'fixture uses the verified compact authorization contract');
 select is((select count(*) from public.permissions), 25::bigint, 'compact catalog adds only the two deployed inventory brands');
 select is((select count(*) from public.role_permissions where role_key = 'admin'), 25::bigint, 'Administrator inherits the complete deployed catalog');
 select is((select count(*) from public.role_permissions where permission_key in ('crm.simulators.view', 'crm.simulators.execute')), 14::bigint, 'all seven current roles inherit both simulator permissions');
 select is((select count(*) from public.role_permissions where role_key in ('pending', 'user', 'broker', 'supervisor', 'real_estate', 'broker_lead')), 0::bigint, 'pending and legacy roles gain no defaults');
-select is((select array_agg(role_key || ':' || permission_key order by permission_key) from public.role_permissions where permission_key like 'crm.inventory.%'), array['admin:crm.inventory.direcional.view', 'admin:crm.inventory.riva.view'], 'only Administrator inherits inventory brands');
+select is((select array_agg(role_key || ':' || permission_key order by role_key, permission_key) from public.role_permissions where permission_key like 'crm.inventory.%'), array['admin:crm.inventory.direcional.view', 'admin:crm.inventory.riva.view', 'master:crm.inventory.direcional.view', 'master:crm.inventory.riva.view'], 'Administrator and Master inherit inventory brands');
 select is((select level from public.roles where key = 'admin'), 80, 'Administrator remains at level eighty');
 select ok(not exists (select 1 from public.permissions where key in ('crm.simulators.view','crm.simulators.execute','crm.inventory.riva.view','crm.inventory.direcional.view') and min_level <> 10), 'simulator and brand permissions keep their explicit minimum');
 
@@ -29,7 +29,8 @@ values
   ('d9000000-0000-4000-8000-000000000007', 'broker_house'),
   ('d9000000-0000-4000-8000-000000000008', 'user');
 
-select ok(not public._internal_has_permission('d9000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view'), 'Master does not gain inventory read access');
+select ok(public._internal_has_permission('d9000000-0000-4000-8000-000000000001', 'crm.inventory.riva.view'), 'Master inherits inventory read access');
+select is((select count(*) from public.role_permissions where role_key='master'), (select count(*) from public.permissions), 'every Master inherits the complete deployed catalog');
 select ok(public._internal_has_permission('d9000000-0000-4000-8000-000000000002', 'crm.inventory.riva.view') and public._internal_has_permission('d9000000-0000-4000-8000-000000000002', 'crm.inventory.direcional.view'), 'Administrator effectively inherits both brands');
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason, granted_by)
 values ('d9000000-0000-4000-8000-000000000002','crm.inventory.riva.view','deny','Synthetic inherited denial','d9000000-0000-4000-8000-000000000001');
@@ -64,7 +65,7 @@ select throws_ok($$select public.get_compact_user_directory_page(0,'','invalid')
 select throws_ok($$select public.get_compact_user_directory_page(0,repeat('x',201))$$, '22023', null, 'search input is bounded');
 select throws_ok($$select public.get_compact_user_directory_page(0,'','all',null)$$, '22023', null, 'ambiguous summary arguments are rejected');
 select is((select count(*) from public.get_user_role_permission_defaults() where role_key = 'admin'), 25::bigint, 'default catalog RPC returns the compact Administrator catalog');
-select lives_ok($$select public.set_user_permission_overrides_bulk('d9000000-0000-4000-8000-000000000004', array['crm.inventory.riva.view'], 'allow', 'Synthetic RIVA access')$$, 'Master can delegate RIVA without possessing RIVA');
+select lives_ok($$select public.set_user_permission_overrides_bulk('d9000000-0000-4000-8000-000000000004', array['crm.inventory.riva.view'], 'allow', 'Synthetic RIVA access')$$, 'Master can delegate inherited RIVA');
 select ok(public.has_permission('d9000000-0000-4000-8000-000000000004', 'crm.inventory.riva.view') and not public.has_permission('d9000000-0000-4000-8000-000000000004', 'crm.inventory.direcional.view'), 'RIVA-only access does not include DIRECIONAL');
 select lives_ok($$select public.apply_user_permission_access_draft('d9000000-0000-4000-8000-000000000004', array['crm.inventory.direcional.view'], array['crm.inventory.riva.view'], array[]::text[], 'Synthetic independent brands')$$, 'mixed draft atomically switches independent brands');
 select ok(not public.has_permission('d9000000-0000-4000-8000-000000000004', 'crm.inventory.riva.view') and public.has_permission('d9000000-0000-4000-8000-000000000004', 'crm.inventory.direcional.view'), 'DIRECIONAL-only access does not include RIVA');

@@ -1373,10 +1373,10 @@ ${masterPreflight}
     where key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
   ) <> 2 or exists (
     select 1 from public.role_permissions
-    where role_key <> 'admin'
+    where role_key not in ('admin', 'master')
       and permission_key in ('crm.inventory.riva.view', 'crm.inventory.direcional.view')
   ) then
-    raise exception 'inventory brands must be inherited only by admin';
+    raise exception 'inventory brands must be inherited only by admin and master';
   end if;
   if exists (
     select 1

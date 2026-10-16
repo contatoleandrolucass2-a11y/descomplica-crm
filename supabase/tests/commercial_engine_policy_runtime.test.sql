@@ -179,6 +179,7 @@ select is(
     'coordinator:crm.simulators.execute',
     'manager_house:crm.simulators.execute',
     'manager_imob:crm.simulators.execute',
+    'master:crm.commercial_engine.execute',
     'master:crm.commercial_policy.manage',
     'master:crm.simulators.execute'
   ]::text[],

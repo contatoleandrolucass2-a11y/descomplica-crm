@@ -241,14 +241,14 @@ reset role;
 select set_config('request.jwt.claim.sub', '', true);
 select set_config('request.jwt.claims', '', true);
 insert into public.user_permission_overrides (user_id, permission_key, effect, reason, granted_by)
-values ('ac710000-0000-4000-8000-000000000003', 'crm.dashboard.view', 'deny',
+values ('ac710000-0000-4000-8000-000000000003', 'crm.management.routine.view', 'deny',
   'Synthetic completion denial', 'ac710000-0000-4000-8000-000000000001');
 set local role authenticated;
 select pg_temp.completion_login('ac710000-0000-4000-8000-000000000003');
 select throws_ok($$select public.get_crm_routine_completions()$$, '42501',
-  'forbidden: missing routine read permission', 'explicit permission deny blocks GET');
+  'forbidden: routine page unavailable', 'explicit permission deny blocks GET');
 select throws_ok($$select pg_temp.completion_mark()$$, '42501',
-  'forbidden: missing routine read permission', 'explicit permission deny blocks PUT');
+  'forbidden: routine page unavailable', 'explicit permission deny blocks PUT');
 
 reset role;
 select set_config('request.jwt.claim.sub', '', true);

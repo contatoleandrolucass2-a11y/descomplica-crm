@@ -234,6 +234,10 @@ values (
   'dashboard RLS test'
 );
 
+insert into public.user_permission_overrides (user_id,permission_key,effect,reason)
+select '20000000-0000-0000-0000-000000000001',key,'deny','Deny all independent stage reads'
+from public.permissions where key like 'crm.stage.%.view';
+
 select set_config('request.jwt.claim.sub', '20000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;

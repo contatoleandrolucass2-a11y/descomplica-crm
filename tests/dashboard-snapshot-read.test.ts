@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { DASHBOARD_STAGES, type DashboardViewKey } from "@/lib/crm/dashboard/catalog";
-import { loadDashboardReadModel } from "@/lib/crm/dashboard/data";
+import { loadDashboardReadModel, loadStageReadModel } from "@/lib/crm/dashboard/data";
 
 const mocks = vi.hoisted(() => ({ createClient: vi.fn(), from: vi.fn() }));
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.createClient }));
@@ -125,6 +125,36 @@ beforeEach(() => {
 });
 
 describe("loadDashboardReadModel snapshot consistency", () => {
+  it("loads only authorized stages without requiring sales summaries or ranking", async () => {
+    const result = await loadStageReadModel(["all"], ["opportunities"]);
+    expect(result.status).toBe("ready");
+    if (result.status !== "ready") throw new Error("Expected stage fixture");
+    expect(Object.keys(result.dashboard.metrics.all ?? {})).toEqual(["opportunities"]);
+    expect(result.dashboard.salesValue).toEqual({});
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_views");
+    expect(mocks.from).not.toHaveBeenCalledWith("crm_dashboard_top_developments");
+    expect(queriesFor("crm_dashboard_metrics")[0]!.in).toHaveBeenCalledWith("stage_key", [
+      "opportunities",
+    ]);
+  });
+
+  it("fails closed when an authorized stage is missing or no stage is requested", async () => {
+    await expect(loadStageReadModel(["all"], [])).rejects.toThrow("etapa autorizada");
+    responses.crm_dashboard_metrics = [{ data: [], error: null }];
+    await expect(loadStageReadModel(["all"], ["sales"])).rejects.toThrow("incompleto");
+  });
+
+  it("retries a changed snapshot for independent stage reads", async () => {
+    headers(baseHeader, nextHeader, nextHeader, nextHeader);
+    children([1, 2]);
+    await expect(loadStageReadModel(["all"], ["visits"])).resolves.toMatchObject({
+      status: "ready",
+      dashboard: {
+        generatedAt: nextHeader.generated_at,
+        metrics: { all: { visits: { currentMonth: 2 } } },
+      },
+    });
+  });
   it.each([0, 1])(
     "retorna lote estavel com contagem %s, preservando ausencia e zero",
     async (count) => {

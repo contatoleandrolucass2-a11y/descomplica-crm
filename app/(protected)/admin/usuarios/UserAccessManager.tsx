@@ -28,6 +28,7 @@ import {
   type PermissionKey,
 } from "@/lib/authorization/permissions";
 import { SIMULATOR_ACCESS_PERMISSIONS } from "@/lib/authorization/access-presentation";
+import { getPermissionPages } from "@/lib/navigation/registry";
 import { ROLES, getRoleLabel, type RoleKey } from "@/lib/authorization/roles";
 
 import {
@@ -66,15 +67,30 @@ function getControlLabel(permissionKey: PermissionKey): string {
 }
 
 function getControlDescription(permissionKey: PermissionKey): string {
-  return permissionKey === "crm.simulators.view"
-    ? "Permite visualizar e executar os simuladores disponíveis."
-    : PERMISSIONS[permissionKey].description;
+  const pages = getPermissionPages(permissionKey);
+  if (pages.length > 0) {
+    const names = pages
+      .map((page) =>
+        page.allowedRoles
+          ? `${page.name} (${page.allowedRoles.map(getRoleLabel).join("/")})`
+          : page.name,
+      )
+      .join(" · ");
+    return permissionKey === "crm.simulators.view"
+      ? `Visualiza e executa os simuladores disponíveis: ${names}.`
+      : `Páginas vinculadas: ${names}.`;
+  }
+  return PERMISSIONS[permissionKey].description;
 }
 
 function countControls(keys: readonly PermissionKey[]): number {
   return new Set(
     keys
-      .filter((key) => !HIDDEN_PERMISSION_KEYS.has(key))
+      .filter(
+        (key) =>
+          !HIDDEN_PERMISSION_KEYS.has(key) &&
+          (key !== "crm.stages.view" || !keys.includes("crm.stage.opportunities.view")),
+      )
       .map((key) => (key === "crm.simulators.execute" ? "crm.simulators.view" : key)),
   ).size;
 }
@@ -121,7 +137,7 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
     id: "simulators",
     label: "Simuladores",
     description:
-      "RIVA e DIRECIONAL controlam as unidades visíveis. O Administrador herda ambas; os demais papéis precisam de liberação individual.",
+      "RIVA e DIRECIONAL controlam as unidades visíveis. Master e Administrador herdam ambas; os demais papéis precisam de liberação individual.",
     matches: (key) =>
       key.startsWith("crm.simulators.") ||
       key.startsWith("crm.inventory.") ||
@@ -221,10 +237,12 @@ function getEffectivePermissionCount(
     if (override.effect === "allow") effectivePermissions.add(override.permissionKey);
     else effectivePermissions.delete(override.permissionKey);
   }
-  return ALL_PERMISSIONS.filter((key) =>
-    getControlKeys(key).every(
-      (item) => permissionCatalog.includes(item) && effectivePermissions.has(item),
-    ),
+  return ALL_PERMISSIONS.filter(
+    (key) =>
+      (key !== "crm.stages.view" || !permissionCatalog.includes("crm.stage.opportunities.view")) &&
+      getControlKeys(key).every(
+        (item) => permissionCatalog.includes(item) && effectivePermissions.has(item),
+      ),
   ).length;
 }
 
@@ -519,15 +537,32 @@ function PermissionMatrix({
     [user.overrides],
   );
   const filteredPermissions = ALL_PERMISSIONS.filter((permissionKey) => {
+    if (
+      permissionKey === "crm.stages.view" &&
+      permissionCatalog.includes("crm.stage.opportunities.view")
+    )
+      return false;
     if (!getControlKeys(permissionKey).every((key) => permissionCatalog.includes(key)))
       return false;
-    return `${getControlLabel(permissionKey)} ${getControlDescription(permissionKey)}`
+    return `${getControlLabel(permissionKey)} ${getControlDescription(permissionKey)} ${getPermissionPages(
+      permissionKey,
+    )
+      .map((page) => `${page.name} ${page.path}`)
+      .join(" ")}`
       .toLocaleLowerCase("pt-BR")
       .includes(search.trim().toLocaleLowerCase("pt-BR"));
   });
   const groups = PERMISSION_GROUPS.map((group) => ({
     ...group,
-    permissions: filteredPermissions.filter(group.matches),
+    permissions: filteredPermissions.filter(
+      (key) =>
+        group.matches(key) ||
+        (!PERMISSION_GROUPS.some((item) => item.matches(key)) &&
+          group.id ===
+            ({ simulation: "simulators", settings: "settings", admin: "administration" }[
+              getPermissionPages(key)[0]?.section ?? ""
+            ] ?? "commercial")),
+    ),
   })).filter((group) => group.permissions.length > 0);
 
   const activeGroup = groups.find((group) => group.id === activeGroupId) ?? groups[0];

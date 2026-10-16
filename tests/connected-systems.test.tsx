@@ -10,7 +10,7 @@ const mocks = vi.hoisted(() => ({
   console: vi.fn(),
 }));
 
-vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission: mocks.enforce }));
+vi.mock("@/lib/authorization/enforce", () => ({ enforcePageAccess: mocks.enforce }));
 vi.mock("@/lib/authorization/guards", () => ({ hasPermission: mocks.permission }));
 vi.mock("@/lib/crm/salesforce/console-config", () => ({
   getSalesforceConsoleConfiguration: mocks.console,
@@ -38,7 +38,7 @@ describe("connected systems", () => {
   it("stops before reading configuration when management access is denied", async () => {
     mocks.enforce.mockRejectedValue(new Error("forbidden"));
     await expect(ConnectedSystemsPage()).rejects.toThrow("forbidden");
-    expect(mocks.enforce).toHaveBeenCalledWith("crm.settings.manage");
+    expect(mocks.enforce).toHaveBeenCalledWith("/app/configuracoes/conectar-sistemas");
     expect(mocks.ingest).not.toHaveBeenCalled();
     expect(mocks.refresh).not.toHaveBeenCalled();
     expect(mocks.status).not.toHaveBeenCalled();
