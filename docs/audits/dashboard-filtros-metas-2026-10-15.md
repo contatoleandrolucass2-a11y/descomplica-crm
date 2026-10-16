@@ -134,7 +134,7 @@ imagem ignorada conforme contrato de PR. Local: lint sem erros, tipos e build
 aprovados. Vitest3614/90 skips com dois workers, Node1181/19 skips e release703/14
 skips. Execucao local concorrente de Vitest teve dois timeouts e um timeout de
 cleanup em Obsidian; repeticao completa com dois workers passou sem aumentar
-limites. CI Linux passou normalmente. Logs locais ignorados dashboard-catalog-merge-*.
+limites. CI Linux passou normalmente. Logs locais ignorados dashboard-catalog-merge-\*.
 
 Main2eae903175251e720ff22aec247182b764523f09 tem quatro jobs verdes na
 CI38853488035, mas producao permanece em b5458ff5eef483d76ee58c9c14129d3872de8291.
