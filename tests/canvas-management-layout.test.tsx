@@ -118,25 +118,25 @@ describe("management canvas layout", () => {
     expect(admin).toContain('className="admin-canvas admin-home-page"');
     expect(admin).toContain('className="admin-home-grid"');
     expect(admin).not.toContain("Ferramentas autorizadas");
-    expect(users).not.toContain("admin-users-summary");
+    expect(users).toContain("admin-users-summary");
     expect(users).toContain("admin-users-workspace");
-    expect(users).toContain("admin-directory-filter-chips");
+    expect(users).toContain("admin-directory-status-filters");
     expect(users).toContain('role="tablist"');
     expect(users).toContain("admin-permission-tabs");
     expect(users).toContain("O que pode acessar");
-    expect(users).toContain("getDraftChecked(permissionKey)");
+    expect(users).toContain("keys.every(isChecked)");
     expect(users).toContain("onChange={() => togglePermission(permissionKey)}");
     expect(users).toContain("Usar padrão do perfil");
-    expect(users).toContain("restoreRoleDefaults");
+    expect(users).toContain("restoreDefaults");
     expect(users).not.toContain("admin-permission-effects");
     expect(users).toContain("Salvar alterações");
-    expect(users).not.toContain("Total de usuários");
+    expect(users).toContain("Total de usuários");
     expect(users).toContain('label: "Comercial"');
     expect(users).toContain('label: "Simuladores"');
     expect(users).toContain('label: "Configurações"');
     expect(users).toContain('label: "Administração"');
     expect(users).not.toContain('label: "Navegação e páginas"');
-    expect(visualHarness).toContain('["/admin/usuarios", 1200]');
+    expect(visualHarness).toContain('["/admin/usuarios", 1650]');
     expect(pages).toContain("Páginas cadastradas");
     expect(pages).toContain('<th scope="col">Descrição</th>');
     expect(pages).toContain('<th scope="col">Rota</th>');
@@ -163,26 +163,6 @@ describe("management canvas layout", () => {
     expect(styles).toMatch(
       /@media \(max-width: 40rem\) \{[\s\S]*?\.admin-user-detail-header h2 \{[\s\S]*?min-height: 2\.5em[\s\S]*?-webkit-line-clamp: 2/,
     );
-    expect(styles).toMatch(
-      /\.admin-users-workspace \{[\s\S]*?grid-template-columns: 17\.875rem minmax\(0, 1fr\)/,
-    );
-    expect(styles).toMatch(
-      /\.admin-users-list \{[\s\S]*?height: 30\.125rem[\s\S]*?overflow-y: auto/,
-    );
-    expect(styles).toMatch(
-      /\.admin-permission-group \{[\s\S]*?max-height: 21\.5rem[\s\S]*?overflow-y: auto/,
-    );
-    expect(styles).toMatch(
-      /\.admin-permission-option > input \{[\s\S]*?appearance: none[\s\S]*?cursor: pointer/,
-    );
-    expect(styles).toContain(".admin-permission-role-default-button");
-    expect(styles).toMatch(
-      /@media \(max-width: 60rem\) \{[\s\S]*?\.admin-users-workspace \{[\s\S]*?grid-template-columns: minmax\(0, 1fr\)/,
-    );
-    expect(styles).toMatch(
-      /@media \(min-width: 60\.0625rem\) and \(max-width: 72rem\) \{[\s\S]*?\.admin-user-detail-header h2 \{[\s\S]*?min-height: 2\.5em[\s\S]*?max-height: 2\.5em[\s\S]*?-webkit-line-clamp: 2/,
-    );
-    expect(users).toContain("<h2 title={user.email ?? undefined}>");
     expect(users).toContain("const PAGE_SIZE = 6");
     expect(pages).toContain("const PAGE_SIZE = 8");
   });

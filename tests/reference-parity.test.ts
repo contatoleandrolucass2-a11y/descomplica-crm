@@ -195,7 +195,7 @@ const authenticatedResults = JSON.parse(
     assertion: string;
     sourceMarkerPolicy: string;
     sourceMarkerVerified: Record<string, boolean>;
-    sourceMarkerPresentation: Record<string, "visible" | "data-attribute">;
+    sourceMarkerPresentation: { dashboard: "data-attribute"; stageOpportunities: "visible" };
   };
   routeChecks: Array<{
     route: string;

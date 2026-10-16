@@ -67,7 +67,7 @@ export default async function SimulatorPage({
   const executionReason = visualOnly
     ? "A jornada CAIXA foi liberada somente para revisão visual; motor e integração bancária permanecem indisponíveis"
     : runtimeEnabled
-      ? "Disponível somente para o perfil Master nesta etapa de validação."
+      ? "Disponível para contas com acesso aos simuladores."
       : "Cálculo temporariamente indisponível — regra aguardando validação";
 
   if (simulator === "associativo-fluxo-linear") {

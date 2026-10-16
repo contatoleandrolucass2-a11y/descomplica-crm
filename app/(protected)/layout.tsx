@@ -42,6 +42,7 @@ import { DescomplicaBrandMark } from "./_components/DescomplicaBrandMark";
 import { PROTECTED_CONTENT_ID, ProtectedShellFrame } from "./_components/ProtectedShellFrame";
 import styles from "./_components/ProtectedShell.module.css";
 import { ThemeSwitch } from "./_components/ThemeSwitch";
+import { UserPresenceHeartbeat } from "./_components/UserPresenceHeartbeat";
 
 export default async function ProtectedLayout({ children }: { children: ReactNode }) {
   const context = await enforceAuthorization();
@@ -159,6 +160,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
       contentClassName={styles.mainContent}
       chrome={chrome}
     >
+      <UserPresenceHeartbeat />
       {children}
     </ProtectedShellFrame>
   );

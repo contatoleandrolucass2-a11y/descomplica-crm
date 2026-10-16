@@ -74,13 +74,12 @@ describe("ações administrativas em lote", () => {
     const formData = new FormData();
     formData.append("allowPermissionKeys", "crm.dashboard.with_canal_imob.view");
     formData.append("denyPermissionKeys", "crm.dashboard.view");
-    formData.set("reason", "Ajuste sintético em lote");
 
     const result = await setPermissionOverridesBulkAction(targetUserId, idleState, formData);
 
     expect(result).toEqual({
       status: "success",
-      message: "Acessos atualizados e auditados. O papel do usuário foi preservado.",
+      message: "Permissões salvas.",
     });
     expect(mocks.requirePermission).toHaveBeenCalledWith("permissions.manage");
     expect(mocks.requireCanManageTargetRole).toHaveBeenCalledWith(actor, "broker_house", 25);
@@ -93,7 +92,7 @@ describe("ações administrativas em lote", () => {
       allow_permission_keys: ["crm.dashboard.with_canal_imob.view"],
       deny_permission_keys: ["crm.dashboard.view"],
       inherit_permission_keys: [],
-      reason: "Ajuste sintético em lote",
+      reason: "Alteração de permissões pelos controles de acesso da administração de usuários.",
     });
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/admin/usuarios");
     expect(mocks.revalidatePath).toHaveBeenCalledWith("/", "layout");
@@ -102,13 +101,12 @@ describe("ações administrativas em lote", () => {
   it("restaura a herança pelo mesmo contrato em lote", async () => {
     const formData = new FormData();
     formData.append("inheritPermissionKeys", "crm.dashboard.view");
-    formData.set("reason", "Retorno à matriz do papel");
 
     const result = await setPermissionOverridesBulkAction(targetUserId, idleState, formData);
 
     expect(result).toEqual({
       status: "success",
-      message: "Acessos atualizados e auditados. O papel do usuário foi preservado.",
+      message: "Permissões salvas.",
     });
     expect(mocks.rpc).toHaveBeenCalledWith(
       "apply_user_permission_access_draft",
@@ -120,7 +118,6 @@ describe("ações administrativas em lote", () => {
     const formData = new FormData();
     formData.append("allowPermissionKeys", "crm.dashboard.view");
     formData.append("denyPermissionKeys", "crm.dashboard.view");
-    formData.set("reason", "Duplicata sintética");
 
     const result = await setPermissionOverridesBulkAction(targetUserId, idleState, formData);
 
@@ -135,7 +132,6 @@ describe("ações administrativas em lote", () => {
   it("bloqueia alteração do próprio acesso antes da RPC", async () => {
     const formData = new FormData();
     formData.append("denyPermissionKeys", "crm.dashboard.view");
-    formData.set("reason", "Autoalteração sintética");
 
     const result = await setPermissionOverridesBulkAction(actor.userId, idleState, formData);
 
@@ -161,7 +157,31 @@ describe("ações administrativas em lote", () => {
     expect(mocks.createClient).not.toHaveBeenCalled();
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
+  it("atribui papel com restauração atômica sem exigir motivo", async () => {
+    const formData = new FormData();
+    formData.set("roleKey", "manager_house");
+    const result = await assignRoleAction(targetUserId, idleState, formData);
+    expect(result.status).toBe("success");
+    expect(mocks.requirePermission).toHaveBeenCalledWith("permissions.manage");
+    expect(mocks.rpc).toHaveBeenCalledWith("assign_user_role_defaults", {
+      target_user_id: targetUserId,
+      target_role_key: "manager_house",
+    });
+  });
 
+  it("não grava permissões quando a hierarquia rejeita o alvo", async () => {
+    mocks.requireCanManageTargetRole.mockImplementationOnce(() => {
+      throw new Error("FORBIDDEN");
+    });
+    const formData = new FormData();
+    formData.append("allowPermissionKeys", "crm.dashboard.view");
+    const result = await setPermissionOverridesBulkAction(targetUserId, idleState, formData);
+    expect(result.status).toBe("error");
+    expect(mocks.rpc).not.toHaveBeenCalledWith(
+      "apply_user_permission_access_draft",
+      expect.anything(),
+    );
+  });
   it("bloqueia aprovação como Administrador antes de criar cliente ou chamar RPC", async () => {
     mocks.requireCanAssignRole.mockImplementationOnce(() => {
       throw new Error("FORBIDDEN");
@@ -196,7 +216,7 @@ describe("ações administrativas em lote", () => {
       target_user_id: targetUserId,
       target_role_key: "admin",
       reporting_scope_ids: [reportingScopeId],
-      reason: "Aprovação sintética auditável",
+      reason: "Aprovação de acesso com papel e escopo pela administração de usuários.",
     });
   });
 });

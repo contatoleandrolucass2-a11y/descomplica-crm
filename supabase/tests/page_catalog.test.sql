@@ -11,8 +11,8 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  21::bigint,
-  'twenty-one platform and CRM permissions are seeded'
+  23::bigint,
+  'twenty-three platform and CRM permissions are seeded'
 );
 
 select is(
@@ -54,8 +54,8 @@ select is(
         )
     ) = 5
   ),
-  array['admin', 'master']::text[],
-  'Administrator and Master inherit all global v2 CRM page-read permissions'
+  array['admin', 'broker_house', 'manager_house', 'master']::text[],
+  'Master, Admin and House roles inherit the CRM read set including ranking and simulators'
 );
 
 select is(
@@ -290,6 +290,8 @@ select is(
   (select array_agg(key order by sort_order, key) from public.app_pages),
   array[
     'crm.dashboard',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.opportunities',
     'crm.stage.appointments',
     'crm.stage.visits',
@@ -297,7 +299,7 @@ select is(
     'crm.stage.sales',
     'crm.ranking'
   ]::text[],
-  'scoped Gerente House sees only its seven inherited production pages'
+  'scoped Gerente House sees its nine inherited pages including simulators'
 );
 
 select throws_ok(
@@ -371,6 +373,8 @@ select is(
   (select array_agg(key order by sort_order, key) from public.app_pages),
   array[
     'crm.dashboard',
+    'crm.simulation',
+    'crm.simulation.wf13',
     'crm.stage.opportunities',
     'crm.stage.appointments',
     'crm.stage.visits',
@@ -378,7 +382,7 @@ select is(
     'crm.stage.sales',
     'crm.ranking'
   ]::text[],
-  'scoped real-estate role remains isolated from simulator visibility changes'
+  'scoped House role retains simulator access when partnership visibility changes'
 );
 
 reset role;

@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-10-15: Checagem privada e ciclo autonomo ainda bloqueado
+
+Owner a7/00bbab75 segue PID3849356, active/running, NRestarts0 desde18:12:31Z.
+Artefato da tentativa autonoma20:12:51.412Z:181bytes, SHA69aab6081d791f5e67bd4206515087354ac12927901bf5f3223f6dc1a9db2fe4,
+arquivo privado7H0sjX, unavailable/qix_metadata_limit, sem contador especifico
+nesse codigo antigo. Nao e observacao de fatos nem publicacao de ranking.
+Projector atualizado fixedreason/limit/cincoaliases:344 testes sinteticos,
+SHA3b205e38 conferido root600 na VPS, sem ler/exportar valores comerciais.
+
+Probe standalone nativo/root/Node24, caminhos fixos/no-follow/bounded/stable:
+114 checks e review independente70 sem P1/P2. Helper SHA256
+fda44ef52c5ca84a5e0dc250774d87b320d2c8ad72067e60e9ac17cd6ac2a1b2
+conferido; execucao privada retornou complete, seis booleanos
+de leitura/presenca/formato Supabase e HMAC true. Zero valores/digests de
+segredos na saida. Nao prova autenticacao/RPC/separacao nem aceite integral
+do transform; tentativa anterior a7 recusou imports antes de ler segredos.
+
+PR236/f7e6731 aberto e anexado; CI38802612284 validate Linux success,
+restore/release ainda em progresso. Gates Windows com um worker pendentes.
+Merge main d83c no primary preserva usuarios/presenca/migrations e exige
+recaptura sintetica integral unica antes de promover baseline Ranking.
+
 ## 2026-10-15: Estado explicito do objeto de selecao QIX
 
 Schema/documentacao oficial confirmam qStateName em HyperCube, ListObject e
@@ -189,6 +211,76 @@ ou legados para anon/authenticated/service_role e zero EXECUTE PUBLIC nas RPCs
 e helpers. Writer somente service_role, reader somente authenticated; helpers
 com volatilidade i/s/s. Nenhuma carga/flag Qlik habilitada ainda. Autenticacao
 na VPS depende da promocao do PR229; resultado atual continua reauth_required.
+
+## 2026-10-15: Compatibilidade do diretório de produção
+
+- Incorpora o dashboard aprovado de `fae77f9a` e revisa a captura Linux `38766616330`: onze imagens de Usuários atualizadas, 231 imagens preservadas, 242 hashes conferidos e toda a matriz funcional aprovada. O workflow temporário foi removido; a CI normal continua obrigatória.
+- O layout aprovado de Pessoas, papel e matriz completa mede 1.598 pixels em desktop. O limite específico de densidade foi atualizado de 1.200 para 1.650 pixels; overflow, colisões, acessibilidade e demais limites permanecem verificados.
+- A captura local no macOS diverge das referências Linux por renderização de fontes. Um workflow temporário produz referências em Linux com todos os gates funcionais; somente as imagens pertinentes e revisadas podem ser incorporadas, com nova CI normal obrigatória.
+
+- Integra o `main` atual `9ffc8a9`, preservando as alterações recebidas de outros desenvolvedores.
+- Reconhece o contrato compacto por RPC protegida, pagina seis perfis por consulta sob RLS e calcula filtros e contagens no servidor. Contratos desconhecidos continuam sem aprovação presumida.
+- Amplia o gate compacto para 115 verificações e a sequência completa para 1.441 verificações na origem e no banco restaurado, com privilégios preservados. A publicação será registrada na auditoria de integração.
+
+## 2026-10-14: Integração do painel de usuários para produção
+
+- A QA de teclado da Rotina usa busca nativa por rótulo no Chromium headless do macOS, que não confirma a navegação do popup por setas. O Linux mantém as verificações de Home/ArrowDown/End; foco, valor e rascunhos continuam verificados.
+
+- O gate compacto aguarda o PostgreSQL definitivo por TCP antes de executar a fixture; três execuções consecutivas passaram com 70 verificações cada.
+
+- Integra o painel aprovado localmente com o `main` atual, preservando paginação no servidor, gestão/rotina, estoque Salesforce e o coordenador de publicação.
+- Apresenta presença online com ponto verde pulsante e offline com ponto vermelho. Movimento reduzido desativa a animação; falhas de consulta continuam como presença indisponível.
+- Usa o catálogo real do banco para matriz e prévia do papel: produção compacta terá 25 permissões, enquanto a sequência completa local terá 31. O Administrador herda somente capacidades realmente implantadas.
+- Valida presença, hierarquia e MFA nos dois contratos do banco. O ensaio compacto passou em 70 verificações; o ensaio completo de backup/restauração passou em 1.431 verificações na origem e no destino.
+- A preparação das migrations não atribui as novas marcas. O padrão completo do Administrador deve ser aplicado depois da ativação do runtime compatível.
+- Build, lint, tipos e auditoria de dependências passaram. A validação visual, a CI e a promoção ainda estão em andamento. Evidências em `docs/audits/usuarios-presenca-vps-2026-10-14.md`.
+
+## 2026-10-14: Presença online no painel local de usuários
+
+- Adiciona Online/Offline com indicador textual e visual no diretório Pessoas e no cabeçalho da conta selecionada, separado do estado administrativo Ativo/Revogado.
+- O shell autenticado envia sinal a cada 30 segundos enquanto a aba está visível. O servidor registra apenas a última presença e considera a conta online por dois minutos; fechar, ocultar a aba ou perder conexão deixa de renovar o sinal.
+- A leitura atualiza somente a presença, sem recarregar a página ou apagar rascunhos de permissões. Falha, dado inválido ou leitura expirada aparecem como presença indisponível.
+- A migration privada e as RPCs mantêm identidade e horário no servidor, MFA, aprovação, hierarquia e escopo. Nenhum histórico de navegação, IP ou sessão é armazenado.
+- Lint, TypeScript, 2.382 testes Vitest, 83 testes Node e build passaram. O ensaio isolado validou 1.212 testes pgTAP na origem e no banco restaurado, preservando dados e privilégios. A validação visual confirmou os estados de presença e a preservação do rascunho.
+- Escopo exclusivamente local. Evidências e resultados finais em `docs/audits/presenca-usuarios-local-2026-10-14.md`.
+
+## 2026-10-14: Painel de usuários conforme a referência visual
+
+- Reorganiza o diretório como Pessoas, com contagem, busca, filtros Todos/Ativos/Revogados/Pendentes, avatar, papel, indicador de status e oito resultados por página.
+- A matriz apresenta quatro abas: Comercial, Simuladores, Configurações e Administração. Cada linha reúne caixa, descrição e estado de herança; a busca percorre todas as categorias sem perder o rascunho.
+- Preserva o controle único de simuladores, as marcas independentes, os padrões completos do Administrador, os controles técnicos ocultos e as validações do servidor/banco. Contas sem acesso não exibem permissões como liberadas.
+- Valida teclado, foco, estado vazio, busca, salvamento e restauração em contas sintéticas. Os três temas e larguras de 320, 722 e 1440 pixels foram conferidos no navegador local.
+- Lint, TypeScript, 2.329 testes Vitest, 83 testes Node e build passaram. Evidências detalhadas em `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
+## 2026-10-14: Administrador com herança completa
+
+- Atende ao pedido posterior para o papel Administrador herdar todo o catálogo atual: 31 permissões, incluindo RIVA, DIRECIONAL e permissões técnicas ocultas na matriz.
+- A migration adiciona oito vínculos ao papel Admin sem remover exceções individuais, alterar níveis, ampliar outros papéis ou modificar os gates de funções reservadas ao Master.
+- As três telas de rascunho comercial refletem o bloqueio Master-only já existente no banco, evitando oferecer ao Administrador ações que seriam recusadas.
+- Catálogo de apresentação, instrução das marcas, fixtures e testes foram alinhados. Evidências em `docs/audits/usuarios-acessos-local-2026-10-14.md`. Trabalho exclusivamente local.
+
+## 2026-10-14: Acesso individual a marcas nos simuladores
+
+- Adiciona controles independentes RIVA e DIRECIONAL, ambos desativados em todos os papéis, inclusive Master. A liberação é individual e respeita a hierarquia existente.
+- Gestores de permissões podem configurar essas duas marcas sem receber acesso de consulta. A exceção de delegação é limitada às duas chaves; autoalteração, pares, superiores e escopos continuam bloqueados.
+- As APIs de estoque vivo e snapshot filtram as unidades por permissões efetivas a cada requisição, inclusive com cache aquecido. Sem marcas, retornam estoque vazio. Marcas desconhecidas são negadas.
+- O snapshot completo continua validado por integridade antes do filtro. Contagens são recalculadas e metadados desconhecidos são descartados para não revelar unidades excluídas.
+- Migration aplicada somente ao banco Docker local. Evidências e limites estão em `docs/audits/usuarios-acessos-local-2026-10-14.md`.
+
+## 2026-10-14: Administração de acessos no ambiente local
+
+- Implementa quadrados com herança real do banco e exceções individuais,
+  salvamento atômico e restauração dos padrões ao trocar o papel.
+- Remove a solicitação manual de motivo, preservando o registro automático
+  e as validações de hierarquia, escopo e delegação no servidor e no banco.
+- Reúne visualização e execução em “Acessar simuladores” e concede ambos os
+  padrões aos sete papéis atuais. Remove a restrição exclusiva de Master da
+  execução autorizada, preservando a configuração e os contratos dos motores.
+- Oculta os quatro controles técnicos de read model v3 e o controle de leitura
+  de auditoria, que não tem página correspondente nesta versão. Não remove
+  suas permissões, funções ou registros.
+- Trabalho restrito ao checkout e banco locais; sem publicação remota.
+  Matriz, limites e evidências: `docs/audits/usuarios-acessos-local-2026-10-14.md`.
 
 ## 2026-10-15: Gates locais do metadata integrado
 

@@ -28,12 +28,14 @@
         "app/(account)/mfa/page.tsx",
         "app/(account)/conta/seguranca/page.tsx",
         "app/auth/callback/route.ts",
-        "app/auth/mfa/verify/route.ts"
+        "app/auth/mfa/verify/route.ts",
+        "app/api/presence/route.ts"
       ],
       "evidence": [
         "tests/auth-security-foundation.test.ts",
         "tests/session-persistence.test.ts",
-        "supabase/tests/auth_mfa_legal_foundation.test.sql"
+        "supabase/tests/auth_mfa_legal_foundation.test.sql",
+        "tests/user-presence-api.test.ts"
       ]
     },
     {
@@ -58,12 +60,14 @@
       "routes": [
         "app/(protected)/admin/page.tsx",
         "app/(protected)/admin/usuarios/page.tsx",
-        "app/(protected)/admin/paginas/page.tsx"
+        "app/(protected)/admin/paginas/page.tsx",
+        "app/api/admin/users/presence/route.ts"
       ],
       "evidence": [
         "tests/access-management.test.tsx",
         "tests/page-gates.test.ts",
-        "supabase/tests/rls_scope_matrix.test.sql"
+        "supabase/tests/rls_scope_matrix.test.sql",
+        "tests/user-presence-api.test.ts"
       ]
     },
     {
