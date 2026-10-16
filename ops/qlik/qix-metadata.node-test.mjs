@@ -13,6 +13,13 @@ const PARTNERS = "synthetic-partner-engine-id";
 const TAB = "pUYysrvJ";
 const RELOAD = "2026-10-14T08:09:14.000Z";
 const PRIVATE = "DO_NOT_RETURN_PRIVATE_CUSTOMER_OR_TOKEN";
+const NATIVE_ALIASES = [
+  "VENDAS",
+  "VGV",
+  "VGV N\u00c3O COMUNICADO",
+  "VGV COMUNICADO",
+  "VGV CADASTRADO",
+];
 
 // Enigma resolves the single out parameter, not the raw JSON-RPC result wrapper.
 // GenericObjectEntry uses qProperty/qChildren; sn-container uses children[].refId/cId.
@@ -208,7 +215,7 @@ function fixture() {
       return invoke("destroySessionObject", [objectId], f.cleanupResult);
     }
     getVariableByName(name) {
-      assert.ok(["VENDAS", "VGV"].includes(name), "no broad variable scan");
+      assert.ok(NATIVE_ALIASES.includes(name), "no broad variable scan");
       if (!f.variables.has(name)) {
         calls.push(["getVariableByName", name]);
         throw new Error(PRIVATE);
@@ -298,6 +305,28 @@ function namedMeasure(f, measureId, title, label = title) {
   return properties;
 }
 
+function nativeAliasFixture(prefix = "") {
+  const f = tabbedFixture();
+  f.properties.get(PRODUCTS).qHyperCubeDef.qMeasures = [
+    { qDef: { qDef: "=VENDAS", qLabel: "CONTRATOS" } },
+    { qDef: { qDef: "=VGV", qLabel: "VGV" } },
+    ...NATIVE_ALIASES.slice(2).map((alias) => ({ qDef: { qDef: `${prefix}[${alias}]` } })),
+    { qLibraryId: "synthetic-measure-master" },
+  ];
+  for (const [index, name] of NATIVE_ALIASES.slice(2).entries()) {
+    const id = `synthetic-extra-alias-${index}`;
+    namedMeasure(f, id, name);
+    f.variables.set(name, {
+      qInfo: { qId: `synthetic-extra-variable-${index}`, qType: "variable" },
+      qName: name,
+      qDefinition: `Sum([Synthetic Metric ${index}])`,
+      qComment: PRIVATE,
+    });
+    f.fields.push({ qName: name, qTags: ["$numeric"] });
+  }
+  return f;
+}
+
 function clean(value) {
   return JSON.parse(JSON.stringify(value));
 }
@@ -337,6 +366,20 @@ function sanitized(code) {
     assert.equal(error.cause, undefined);
     assert.equal(error.data, undefined);
     assert.ok(!String(error.stack).includes(PRIVATE));
+    return true;
+  };
+}
+function limited(stage, kind, maximum, observed) {
+  return (error) => {
+    sanitized("qix_metadata_limit")(error);
+    const detail = clean(error.limit);
+    assert.deepEqual(Object.keys(detail).sort(), ["kind", "maximum", "observed", "stage"]);
+    assert.equal(detail.stage, stage);
+    assert.equal(detail.kind, kind);
+    assert.equal(detail.maximum, maximum);
+    assert.ok(Number.isSafeInteger(detail.observed) && detail.observed > maximum);
+    if (observed !== undefined) assert.equal(detail.observed, observed);
+    assert.ok(!JSON.stringify(detail).includes(PRIVATE));
     return true;
   };
 }
@@ -1148,6 +1191,108 @@ for (const [mode, inspect] of [
     assert.equal(result.productionMappingVerified, false);
   });
 
+  test(`${mode}: the five fixed native aliases collect nominal definitions without claiming closure`, async () => {
+    for (const prefix of ["", "=", "= "]) {
+      const f = nativeAliasFixture(prefix);
+      const result = clean(await inspect(f.global));
+      assert.equal(result.status, "inspected");
+      assert.deepEqual(
+        f.calls.filter(([method]) => method === "getVariableByName").map(([, name]) => name),
+        NATIVE_ALIASES,
+      );
+      assert.equal(result.matchingMasterMeasures.length, 4);
+      assert.equal(result.variableDefinitions.length, 5);
+      for (const [index, alias] of NATIVE_ALIASES.slice(2).entries()) {
+        const candidate = result.matchingMasterMeasures.find(({ title }) => title === alias);
+        assert.deepEqual(candidate.referencedByAlias, [
+          { objectId: PRODUCTS, index: index + 2, alias },
+        ]);
+        assert.equal(
+          candidate.definitionSha256,
+          digest(f.masters.get(`measure:${candidate.id}`).qMeasure),
+        );
+        assert.equal(candidate.propertiesSha256, digest(f.masters.get(`measure:${candidate.id}`)));
+        assert.ok(result.fieldCatalog.some(({ name }) => name === alias));
+        const variable = result.variableDefinitions.find(({ name }) => name === alias);
+        assert.equal(variable.propertiesSha256, digest(f.variables.get(alias)));
+      }
+      for (const flag of [
+        "dependencyClosureVerified",
+        "productionMappingVerified",
+        "selectionsVerified",
+        "dataRead",
+      ])
+        assert.equal(result[flag], false);
+      assert.equal(f.sessions.size, 0);
+      assert.ok(!JSON.stringify(result).includes(PRIVATE));
+      assert.ok(Buffer.byteLength(JSON.stringify(result)) < 131_072);
+    }
+  });
+
+  test(`${mode}: additional aliases require exact direct references in proved cubes`, async () => {
+    for (const expression of [
+      "Sum([VGV COMUNICADO])",
+      "$(VGV COMUNICADO)",
+      "=[VGV DESCONHECIDO]",
+      "=[vgv comunicado]",
+    ]) {
+      const f = fixture();
+      f.properties.get(PRODUCTS).qHyperCubeDef.qMeasures.push({ qDef: { qDef: expression } });
+      namedMeasure(f, "unreferenced-extra", "VGV COMUNICADO");
+      const result = await inspect(f.global);
+      assert.equal(result.matchingMasterMeasures.length, 1);
+      assert.deepEqual(
+        f.calls.filter(([method]) => method === "getVariableByName").map(([, name]) => name),
+        NATIVE_ALIASES.slice(0, 2),
+      );
+      assert.ok(!f.calls.some((call) => call.includes("unreferenced-extra")));
+    }
+    const absent = nativeAliasFixture();
+    absent.tree.qChildren = [];
+    absent.tree.qProperty.cells = [];
+    const pending = await inspect(absent.global);
+    assert.equal(pending.status, "pending");
+    assert.ok(
+      !absent.calls.some(([method]) => ["getVariableByName", "getMeasure"].includes(method)),
+    );
+  });
+
+  test(`${mode}: missing extra alias candidates remain diagnostic pending with no fallback expansion`, async () => {
+    const f = nativeAliasFixture();
+    const alias = NATIVE_ALIASES[2];
+    f.variables.delete(alias);
+    f.measureItems = f.measureItems.filter(({ qData }) => qData.title !== alias);
+    const result = await inspect(f.global);
+    assert.equal(result.status, "pending");
+    assert.ok(result.reasons.includes(`variable_${alias}_unresolved`));
+    assert.ok(result.reasons.includes(`named_measure_${alias}_unresolved`));
+    assert.equal(result.dependencyClosureVerified, false);
+    assert.equal(result.productionMappingVerified, false);
+  });
+
+  test(`${mode}: extra native aliases share the unchanged 64-master boundary`, async () => {
+    for (const count of [59, 60]) {
+      const f = nativeAliasFixture();
+      for (let index = 0; index < count; index++)
+        namedMeasure(f, `extra-homonym-${index}`, "VGV COMUNICADO");
+      if (count === 59) {
+        const result = await inspect(f.global);
+        assert.equal(
+          f.calls.filter(([method]) => ["getDimension", "getMeasure"].includes(method)).length,
+          64,
+        );
+        assert.equal(result.dependencyClosureVerified, false);
+      } else {
+        await assert.rejects(
+          inspect(f.global),
+          limited("measure_catalog", "master_definitions", 64, 65),
+        );
+        assert.ok(!f.calls.some(([method]) => ["getDimension", "getMeasure"].includes(method)));
+      }
+      assert.equal(f.sessions.size, 0);
+    }
+  });
+
   test(`${mode}: all exact homonyms remain candidates; absent aliases remain diagnostic pending`, async () => {
     const f = fixture();
     namedMeasure(f, "synthetic-duplicate-sales", "VENDAS");
@@ -1276,6 +1421,389 @@ for (const [mode, inspect] of [
       assert.ok(!JSON.stringify(result).includes(denied), denied);
   });
 
+  test(`${mode}: descriptive business fields do not consume identity catalogue slots or text`, async () => {
+    const f = fixture();
+    const identities = [
+      "ID_IMOBILIARIA",
+      "CD_IMOB",
+      "#KEY_IMOBILIARIA",
+      "#KEY_CLIENTE_EMPREENDIMENTO",
+      "ID_PRODUTO",
+      "CD_EMPREENDIMENTO",
+      "IMOBILIARIA_ID",
+      "PRODUTO_CD",
+      "IDIMOB",
+      "CDPRODUTO",
+      "ID_Imobiliaria(DRCMVE)",
+      "CD_Empreendimento(DRCMEM)",
+      "ID da Imobili\u00e1ria (DRCMIM)",
+      "ID da Imobilia\u0301ria (DRCMIM)",
+      "IDIMOBILIARIA(DRCMVE)",
+      "#KEYPRODUTO(DRCMPR)",
+      "#KEYPRODUTO(ID)",
+      "Empreendimento (Filtro)",
+      "Imobiliaria (Filtro)",
+      "Produto (Filtro)",
+      "Empresa (Filtro)",
+      "Regional (Filtro)",
+      "DT",
+      "DT.Cal.AnoMes",
+      "DS_Canal_Origem",
+      "VENDAS",
+      "VGV",
+      "Synthetic Entity ID",
+      "Synthetic Partner Key",
+    ];
+    f.properties.get(PARTNERS).qHyperCubeDef.qDimensions.push({
+      qDef: { qFieldDefs: ["=[Synthetic Partner Key]"] },
+    });
+    f.fields = Array.from({ length: 10_000 - identities.length }, (_, index) => {
+      const name = ["DS_IMOBILIARIA", "NOME_EMPREENDIMENTO", "DESCRICAO_PRODUTO"][index % 3];
+      const item = { qName: `${name}_${index}`.padEnd(256, "x") };
+      for (const key of ["qTags", "qCardinal", "qData", "qValues"])
+        Object.defineProperty(item, key, {
+          get() {
+            throw new Error(PRIVATE);
+          },
+        });
+      return item;
+    });
+    f.fields.push(...identities.map((qName) => ({ qName, qTags: ["$key"] })));
+    const result = clean(await inspect(f.global));
+    assert.deepEqual(
+      result.fieldCatalog,
+      identities.sort().map((name) => ({ name, tags: ["$key"] })),
+    );
+    assert.equal(result.dependencyClosureVerified, false);
+    assert.equal(f.sessions.size, 0);
+    for (const denied of ["DS_IMOBILIARIA", "NOME_EMPREENDIMENTO", "DESCRICAO_PRODUTO", PRIVATE])
+      assert.ok(!JSON.stringify(result).includes(denied));
+  });
+
+  test(`${mode}: unrelated long names and descriptive IDfoo names are ignored without reading tags`, async () => {
+    const f = fixture();
+    f.fields = [
+      { qName: "ID_Imobiliaria(DRCMVE)", qTags: ["$key"] },
+      ...[
+        "Unrelated".padEnd(8192, "x"),
+        "DS_PRODUTO".padEnd(8192, "x"),
+        "IDfoo da Imobili\u00e1ria (DRCMIM)",
+        "Nome da Imobili\u00e1ria (DRCMIM)",
+        "Descricao do Produto IDfoo",
+      ].map((qName) => {
+        const item = { qName };
+        Object.defineProperty(item, "qTags", {
+          get() {
+            throw new Error(PRIVATE);
+          },
+        });
+        return item;
+      }),
+    ];
+    const result = clean(await inspect(f.global));
+    assert.deepEqual(result.fieldCatalog, [{ name: "ID_Imobiliaria(DRCMVE)", tags: ["$key"] }]);
+    assert.equal(f.sessions.size, 0);
+    assert.ok(!JSON.stringify(result).includes("IDfoo"));
+    assert.ok(!JSON.stringify(result).includes("Unrelated"));
+  });
+
+  test(`${mode}: retained identity, calendar, filter and source names still obey 256 characters`, async () => {
+    for (const [prefix, source] of [
+      ["ID_Imobiliaria_", false],
+      ["DT.Cal.", false],
+      ["DS_Canal_", false],
+      ["Synthetic source ", true],
+    ]) {
+      const f = fixture();
+      const name = prefix.padEnd(257, "x");
+      f.fields = [{ qName: name }];
+      if (source)
+        f.properties.get(PRODUCTS).qHyperCubeDef.qDimensions.push({
+          qDef: { qFieldDefs: [`[${name}]`] },
+        });
+      await assert.rejects(inspect(f.global), limited("field_catalog", "string_length", 256, 257));
+      assert.equal(f.sessions.size, 0);
+    }
+  });
+
+  test(`${mode}: empty field names remain invalid rather than silently discarded`, async () => {
+    const f = fixture();
+    f.fields = [{ qName: "", qTags: [] }];
+    await assert.rejects(inspect(f.global), sanitized("qix_invalid_metadata"));
+    assert.equal(f.sessions.size, 0);
+  });
+
+  test(`${mode}: unrelated master titles and labels are filtered before alias text limits`, async () => {
+    const f = fixture();
+    f.measureItems.push(
+      ...Array.from({ length: 9_999 }, (_, index) => ({
+        qData: { title: `${PRIVATE}_${index}`.padEnd(4097, "x"), label: "x".repeat(4097) },
+        get qInfo() {
+          throw new Error(PRIVATE);
+        },
+      })),
+    );
+    const result = clean(await inspect(f.global));
+    assert.equal(result.matchingMasterMeasures.length, 1);
+    assert.equal(f.calls.filter(([method]) => method === "getMeasure").length, 1);
+    assert.equal(
+      result.matchingMasterMeasures[0].propertiesSha256,
+      digest(f.masters.get("measure:synthetic-measure-master")),
+    );
+    assert.ok(!JSON.stringify(result).includes(PRIVATE));
+    assert.equal(f.sessions.size, 0);
+  });
+
+  for (const [name, mutate, stage, kind, maximum, observed] of [
+    [
+      "tree depth",
+      (f) => {
+        let node = f.tree;
+        for (let i = 0; i < 9; i++) {
+          const child = entry(`depth-${i}`);
+          node.qChildren = [child];
+          node = child;
+        }
+      },
+      "property_tree",
+      "tree_depth",
+      8,
+      9,
+    ],
+    [
+      "tree node count",
+      (f) => {
+        f.tree.qChildren = Array.from({ length: 128 }, (_, i) => entry(`node-${i}`));
+      },
+      "property_tree",
+      "tree_nodes",
+      128,
+      129,
+    ],
+    [
+      "reference count",
+      (f) => {
+        f.tree.qProperty.cells = Array.from({ length: 512 }, () => ({ name: PRODUCTS }));
+      },
+      "property_tree",
+      "references",
+      512,
+      513,
+    ],
+    [
+      "cube dimensions",
+      (f) => {
+        f.properties.get(PRODUCTS).qHyperCubeDef.qDimensions = Array(33).fill({});
+      },
+      "candidate",
+      "array_items",
+      32,
+      33,
+    ],
+    [
+      "expression length",
+      (f) => {
+        f.properties.get(PRODUCTS).qHyperCubeDef.qMeasures[0].qDef.qDef = PRIVATE.padEnd(4097, "x");
+      },
+      "candidate",
+      "string_length",
+      4096,
+      4097,
+    ],
+    [
+      "cube hash bytes",
+      (f) => {
+        f.properties.get(PRODUCTS).qHyperCubeDef.privateMetadata = PRIVATE.padEnd(262_144, "x");
+      },
+      "candidate",
+      "definition_bytes",
+      262_144,
+    ],
+    [
+      "cube hash depth",
+      (f) => {
+        let nested = {};
+        for (let i = 0; i < 34; i++) nested = { nested };
+        f.properties.get(PRODUCTS).qHyperCubeDef.privateMetadata = nested;
+      },
+      "candidate",
+      "definition_depth",
+      32,
+      33,
+    ],
+    [
+      "canonical array count",
+      (f) => {
+        f.properties.get(PRODUCTS).qHyperCubeDef.privateMetadata = Array(131_072).fill(null);
+      },
+      "candidate",
+      "array_items",
+      131_071,
+      131_072,
+    ],
+    [
+      "container array count",
+      (f) => {
+        f.properties.get(CONTAINER).children = Array(65).fill({});
+      },
+      "container",
+      "array_items",
+      64,
+      65,
+    ],
+    [
+      "typed master plan",
+      (f) => {
+        const cube = f.properties.get(PRODUCTS).qHyperCubeDef;
+        cube.qDimensions = Array.from({ length: 32 }, (_, i) => ({ qLibraryId: `dimension-${i}` }));
+        cube.qMeasures = Array.from({ length: 32 }, (_, i) => ({ qLibraryId: `measure-${i}` }));
+      },
+      "master_plan",
+      "master_definitions",
+      64,
+      65,
+    ],
+    [
+      "raw measure list",
+      (f) => {
+        f.measureItems = Array(10_001).fill({});
+      },
+      "measure_catalog",
+      "array_items",
+      10_000,
+      10_001,
+    ],
+    [
+      "retained alias label",
+      (f) => {
+        f.measureItems = [{ qData: { title: "VENDAS", label: PRIVATE.padEnd(257, "x") } }];
+      },
+      "measure_catalog",
+      "string_length",
+      256,
+      257,
+    ],
+    [
+      "raw field list",
+      (f) => {
+        f.fields = Array(10_001).fill({ qName: "Unrelated" });
+      },
+      "field_catalog",
+      "array_items",
+      10_000,
+      10_001,
+    ],
+    [
+      "aggregate derived fields",
+      (f) => {
+        f.fields = [
+          {
+            qName: "DT",
+            qDerivedFieldData: {
+              qDerivedFieldLists: [{ qFieldDefs: Array(10_000).fill({ qName: "Unrelated" }) }],
+            },
+          },
+        ];
+      },
+      "field_catalog",
+      "catalog_items",
+      10_000,
+      10_001,
+    ],
+    [
+      "retained fields",
+      (f) => {
+        f.fields = Array.from({ length: 257 }, (_, i) => ({ qName: `ID_IMOB_${i}` }));
+      },
+      "field_catalog",
+      "catalog_fields",
+      256,
+      257,
+    ],
+    [
+      "retained field name length",
+      (f) => {
+        f.fields = [{ qName: `ID_IMOB_${PRIVATE}`.padEnd(257, "x") }];
+      },
+      "field_catalog",
+      "string_length",
+      256,
+      257,
+    ],
+    [
+      "retained text",
+      (f) => {
+        f.fields = Array.from({ length: 9 }, (_, i) => ({
+          qName: `ID_IMOB_${i}`,
+          qTags: Array(32).fill("x".repeat(256)),
+        }));
+      },
+      "field_catalog",
+      "text_budget",
+      65_536,
+    ],
+    [
+      "library definition hash",
+      (f) => {
+        f.masters.get("dimension:synthetic-dimension-master").qDim.privateMetadata = PRIVATE.padEnd(
+          262_144,
+          "x",
+        );
+      },
+      "master_definitions",
+      "definition_bytes",
+      262_144,
+    ],
+    [
+      "named definition length",
+      (f) => {
+        namedMeasure(f, "synthetic-new-alias", "VENDAS").qMeasure.qDef = PRIVATE.padEnd(4097, "x");
+      },
+      "named_measures",
+      "string_length",
+      4096,
+      4097,
+    ],
+    [
+      "named properties hash",
+      (f) => {
+        namedMeasure(f, "synthetic-new-alias", "VENDAS").privateMetadata = PRIVATE.padEnd(
+          524_288,
+          "x",
+        );
+      },
+      "named_measures",
+      "definition_bytes",
+      524_288,
+    ],
+    [
+      "variable definition length",
+      (f) => {
+        f.variables.get("VGV").qDefinition = PRIVATE.padEnd(4097, "x");
+      },
+      "variables",
+      "string_length",
+      4096,
+      4097,
+    ],
+    [
+      "variable properties hash",
+      (f) => {
+        f.variables.get("VGV").privateMetadata = PRIVATE.padEnd(524_288, "x");
+      },
+      "variables",
+      "definition_bytes",
+      524_288,
+    ],
+  ]) {
+    test(`${mode}: fixed limit diagnostic identifies ${name} without metadata values`, async () => {
+      const f = fixture();
+      mutate(f);
+      await assert.rejects(inspect(f.global), limited(stage, kind, maximum, observed));
+      assert.equal(f.sessions.size, 0);
+    });
+  }
+
   test(`${mode}: derived calendar definitions retain only filtered names/tags, never expressions`, async () => {
     const f = fixture();
     const derived = { qName: "DT.Cal.AnoMes", qTags: ["$date", "$hidden"] };
@@ -1309,10 +1837,10 @@ for (const [mode, inspect] of [
         f.fields = Array.from({ length: 10_001 }, () => ({ qName: "Unrelated" }));
       },
       (f) => {
-        f.fields = [{ qName: "x".repeat(257) }];
+        f.fields = [{ qName: "ID_IMOB_".padEnd(257, "x") }];
       },
       (f) => {
-        f.fields = Array.from({ length: 257 }, (_, i) => ({ qName: `IMOB_${i}` }));
+        f.fields = Array.from({ length: 257 }, (_, i) => ({ qName: `ID_IMOB_${i}` }));
       },
       (f) => {
         f.fields = [{ qName: "DT", qTags: Array(33).fill("tag") }];
@@ -1322,7 +1850,7 @@ for (const [mode, inspect] of [
       },
       (f) => {
         f.fields = Array.from({ length: 9 }, (_, i) => ({
-          qName: `IMOB_${i}`,
+          qName: `ID_IMOB_${i}`,
           qTags: Array(32).fill("x".repeat(256)),
         }));
       },
@@ -1330,7 +1858,7 @@ for (const [mode, inspect] of [
         f.measureItems = Array(10_001).fill({});
       },
       (f) => {
-        f.measureItems = [{ qData: { title: "x".repeat(257) } }];
+        f.measureItems = [{ qData: { title: "VENDAS", label: "x".repeat(257) } }];
       },
       (f) => {
         f.fields = [
@@ -1437,7 +1965,7 @@ for (const [mode, inspect] of [
         const result = await inspect(f.global);
         assert.ok(Buffer.byteLength(JSON.stringify(result), "utf8") <= 262_144);
       } else {
-        await assert.rejects(inspect(f.global), sanitized("qix_metadata_limit"));
+        await assert.rejects(inspect(f.global), limited("output", "result_bytes", 262_144));
         assert.equal(f.calls.at(-1)[0], "getAppLayout");
       }
     }
@@ -1462,7 +1990,7 @@ for (const [mode, inspect] of [
         assert.ok(Buffer.byteLength(JSON.stringify(artifact), "utf8") <= 131_072);
       } else {
         // These definitions fit individually and the result fits 256 KiB, but not the artifact.
-        await assert.rejects(inspect(f.global), sanitized("qix_metadata_limit"));
+        await assert.rejects(inspect(f.global), limited("output", "artifact_bytes", 131_072));
         assert.equal(f.calls.at(-1)[0], "getAppLayout");
       }
     }
@@ -1509,12 +2037,25 @@ test("serialized digest failures and cancellation remain sanitized", async () =>
 
 test("generated script and pinned SDK round-trip native tabs, catalogues and variable properties with owned cleanup", async () => {
   const script = await getBrowserMetadataScript();
-  for (const scenario of ["success", "missing-reload", "field-limit", "catalog-failure"]) {
-    const f = tabbedFixture();
-    f.properties.get(PRODUCTS).qHyperCubeDef.qMeasures = [
-      { qDef: { qDef: "=VENDAS", qLabel: "CONTRATOS" } },
-      { qDef: { qDef: "=VGV", qLabel: "VGV" } },
-    ];
+  for (const scenario of [
+    "success",
+    "missing-reload",
+    "native-aliases",
+    "narrowed-catalog",
+    "unrelated-labels",
+    "field-limit",
+    "retained-field-limit",
+    "alias-label-limit",
+    "artifact-limit",
+    "result-limit",
+    "catalog-failure",
+  ]) {
+    const f = scenario === "native-aliases" ? nativeAliasFixture() : tabbedFixture();
+    if (scenario !== "native-aliases")
+      f.properties.get(PRODUCTS).qHyperCubeDef.qMeasures = [
+        { qDef: { qDef: "=VENDAS", qLabel: "CONTRATOS" } },
+        { qDef: { qDef: "=VGV", qLabel: "VGV" } },
+      ];
     f.fields.push({
       qName: "UnrelatedDate",
       qDerivedFieldData: {
@@ -1524,7 +2065,41 @@ test("generated script and pinned SDK round-trip native tabs, catalogues and var
       },
     });
     if (scenario === "missing-reload") f.layout = {};
+    if (scenario === "narrowed-catalog") {
+      f.fields.push({ qName: "ID_IMOB", qTags: ["$key"] });
+      for (const qName of [
+        "ID_Imobiliaria(DRCMVE)",
+        "CD_Empreendimento(DRCMEM)",
+        "ID da Imobili\u00e1ria (DRCMIM)",
+      ])
+        f.fields.push({ qName, qTags: ["$key"] });
+      f.fields.push({ qName: "Unrelated".padEnd(257, "x"), qTags: [PRIVATE] });
+      f.fields.push(
+        ...Array.from({ length: 500 }, (_, index) => ({
+          qName: `DS_PRODUTO_${index}`,
+          qTags: [PRIVATE],
+          qData: PRIVATE,
+        })),
+      );
+    }
+    if (scenario === "unrelated-labels")
+      f.measureItems.push(
+        ...Array.from({ length: 300 }, () => ({
+          qData: { title: PRIVATE.padEnd(4097, "x"), label: PRIVATE.padEnd(4097, "x") },
+        })),
+      );
     if (scenario === "field-limit") f.fields = Array(10_001).fill({ qName: "Unrelated" });
+    if (scenario === "retained-field-limit")
+      f.fields = Array.from({ length: 257 }, (_, index) => ({ qName: `ID_IMOB_${index}` }));
+    if (scenario === "alias-label-limit") f.measureItems[0].qData.label = PRIVATE.padEnd(257, "x");
+    if (["artifact-limit", "result-limit"].includes(scenario))
+      for (const objectId of [PRODUCTS, PARTNERS])
+        f.properties.get(objectId).qHyperCubeDef.qMeasures = Array.from(
+          {
+            length: scenario === "artifact-limit" ? 4 : 6,
+          },
+          () => ({ qDef: { qDef: "\u0001".repeat(4096) } }),
+        );
     if (scenario === "catalog-failure") f.failure = "catalogLayout";
     const handles = new Map([[-1, f.global]]);
     let nextHandle = 0;
@@ -1604,23 +2179,83 @@ test("generated script and pinned SDK round-trip native tabs, catalogues and var
       },
     });
     const result = clean(await window.__descomplicaQlikMetadataV1.run());
-    if (["success", "missing-reload"].includes(scenario)) {
-      assert.equal(result.status, scenario === "success" ? "inspected" : "pending");
-      assert.equal(result.sourceReloadTime, scenario === "success" ? RELOAD : null);
+    if (
+      [
+        "success",
+        "missing-reload",
+        "native-aliases",
+        "narrowed-catalog",
+        "unrelated-labels",
+      ].includes(scenario)
+    ) {
+      assert.equal(result.status, scenario === "missing-reload" ? "pending" : "inspected");
+      assert.equal(result.sourceReloadTime, scenario === "missing-reload" ? null : RELOAD);
       if (scenario === "missing-reload")
         assert.ok(result.reasons.includes("reload_time_unavailable"));
-      assert.equal(result.matchingMasterMeasures.length, 1);
-      assert.equal(result.variableDefinitions.length, 2);
+      assert.equal(result.matchingMasterMeasures.length, scenario === "native-aliases" ? 4 : 1);
+      assert.equal(result.variableDefinitions.length, scenario === "native-aliases" ? 5 : 2);
       assert.equal(result.containerStructure.references[0].engineId, PARTNERS);
       assert.ok(result.fieldCatalog.some(({ name }) => name === "DT.Cal.AnoMes"));
       assert.equal(result.dependencyClosureVerified, false);
       assert.equal(result.productionMappingVerified, false);
       assert.ok(rpc.includes("GetVariableByName"));
       assert.ok(rpc.includes("GetAppLayout"));
+      if (scenario === "narrowed-catalog")
+        assert.deepEqual(
+          result.fieldCatalog.map(({ name }) => name),
+          [
+            "CD_Empreendimento(DRCMEM)",
+            "DT",
+            "DT.Cal.AnoMes",
+            "ID da Imobili\u00e1ria (DRCMIM)",
+            "ID_IMOB",
+            "ID_Imobiliaria(DRCMVE)",
+          ],
+        );
+      if (scenario === "native-aliases") {
+        assert.deepEqual(
+          result.variableDefinitions.map(({ name }) => name),
+          NATIVE_ALIASES,
+        );
+        assert.equal(
+          result.matchingMasterMeasures.find(({ title }) => title === NATIVE_ALIASES[2])
+            .referencedByAlias[0].index,
+          2,
+        );
+      }
     } else {
+      const limits = {
+        "field-limit": {
+          stage: "field_catalog",
+          kind: "array_items",
+          maximum: 10_000,
+          observed: 10_001,
+        },
+        "retained-field-limit": {
+          stage: "field_catalog",
+          kind: "catalog_fields",
+          maximum: 256,
+          observed: 257,
+        },
+        "alias-label-limit": {
+          stage: "measure_catalog",
+          kind: "string_length",
+          maximum: 256,
+          observed: 257,
+        },
+        "artifact-limit": { stage: "output", kind: "artifact_bytes", maximum: 131_072 },
+        "result-limit": { stage: "output", kind: "result_bytes", maximum: 262_144 },
+      };
+      const expected = limits[scenario];
+      if (expected && expected.observed === undefined) {
+        assert.ok(Number.isSafeInteger(result.limit.observed));
+        assert.ok(result.limit.observed > expected.maximum);
+        expected.observed = result.limit.observed;
+      }
       assert.deepEqual(result, {
         status: "unavailable",
-        reason: scenario === "field-limit" ? "qix_metadata_limit" : "qix_request_failed",
+        reason: expected ? "qix_metadata_limit" : "qix_request_failed",
+        ...(expected ? { limit: expected } : {}),
       });
     }
     assert.equal(f.sessions.size, 0);
