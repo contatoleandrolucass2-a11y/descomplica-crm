@@ -5,7 +5,7 @@ import { enforcePermission } from "@/lib/authorization/enforce";
 import "./_components/archive-investor/canvas-layout.css";
 
 // Page visibility and engine execution remain separate gates. This layout
-// enforces only the Master-scoped simulator page permission before streaming;
+// enforces the simulator page permission before streaming;
 // every page/endpoint still rechecks its own execution contract.
 export default async function SimulationLayout({ children }: { children: ReactNode }) {
   await enforcePermission("crm.simulators.view");

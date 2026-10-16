@@ -2,6 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import { noStoreHeaders } from "@/lib/security/api";
 
+const authorizedBrands = {
+  ok: true,
+  context: { permissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"] },
+};
+
 const mocks = vi.hoisted(() => ({
   authorizeRoute: vi.fn(),
   fetch: vi.fn(),
@@ -22,6 +27,22 @@ const validPayload = {
   generatedAt: "2026-09-28T12:00:00.000Z",
   count: 1,
   items: [unit],
+};
+const mixedPayload = {
+  ...validPayload,
+  count: 7,
+  items: [
+    { ...unit, id: "riva", businessUnit: "  rIvA " },
+    { ...unit, id: "direcional", businessUnit: " DIRECIONAL ", project: "Riva no nome" },
+    { ...unit, id: "unknown", businessUnit: "Outra" },
+    { ...unit, id: "empty", businessUnit: "" },
+    { ...unit, id: "blank", businessUnit: "  " },
+    { ...unit, id: "partial", businessUnit: "Riva Direcional" },
+    { ...unit, id: "prefix", businessUnit: "Direcional Sul" },
+  ],
+  facets: { projects: ["Projeto restrito"], businessUnits: ["Riva", "Direcional"] },
+  totals: { price: 900_000 },
+  lineage: { unitIds: ["riva", "direcional"] },
 };
 
 function expectNoStore(response: Response) {
@@ -51,6 +72,93 @@ afterEach(() => {
 });
 
 describe("inventory route authorization", () => {
+  it.each([
+    { permissions: [], ids: [] },
+    { permissions: ["crm.inventory.riva.view"], ids: ["riva"] },
+    { permissions: ["crm.inventory.direcional.view"], ids: ["direcional"] },
+    {
+      permissions: authorizedBrands.context.permissions,
+      ids: ["riva", "direcional"],
+    },
+  ])("returns only explicitly allowed brands for $permissions", async ({ permissions, ids }) => {
+    mocks.authorizeRoute.mockResolvedValue({
+      ok: true,
+      context: { roleKey: "master", permissions },
+    });
+    mocks.fetch.mockResolvedValue(Response.json(mixedPayload));
+
+    const response = await GET();
+    expect(response.status).toBe(200);
+    expectNoStore(response);
+    expect(response.headers.get("server-timing")).toMatch(/auth;dur=\d/);
+    const payload = await response.json();
+    expect(payload.count).toBe(ids.length);
+    expect(payload.items.map((item: { id: string }) => item.id)).toEqual(ids);
+    expect(payload).not.toHaveProperty("facets");
+    expect(payload).not.toHaveProperty("totals");
+    expect(payload).not.toHaveProperty("lineage");
+    if (permissions.length === 0) {
+      expect(payload).toEqual({ count: 0, items: [] });
+      expect(mocks.fetch).not.toHaveBeenCalled();
+      expect(response.headers.get("x-inventory-cache")).toBeNull();
+    } else {
+      expect(payload.source).toBe(mixedPayload.source);
+      expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    }
+  });
+
+  it("reapplies changed brand permissions on every warm request without sharing filtered results", async () => {
+    mocks.fetch.mockResolvedValue(Response.json(mixedPayload));
+    for (const [permissions, ids] of [
+      [authorizedBrands.context.permissions, ["riva", "direcional"]],
+      [["crm.inventory.riva.view"], ["riva"]],
+      [["crm.inventory.direcional.view"], ["direcional"]],
+      [[], []],
+      [["crm.inventory.riva.view"], ["riva"]],
+    ] as const) {
+      mocks.authorizeRoute.mockResolvedValue({ ok: true, context: { permissions } });
+      const response = await GET();
+      expectNoStore(response);
+      const payload = await response.json();
+      expect(payload.count).toBe(ids.length);
+      expect(payload.items.map((item: { id: string }) => item.id)).toEqual(ids);
+      if (permissions.length === 0) {
+        expect(payload).toEqual({ count: 0, items: [] });
+        expect(response.headers.get("x-inventory-cache")).toBeNull();
+      }
+    }
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    expect(mocks.authorizeRoute).toHaveBeenCalledTimes(5);
+  });
+
+  it("isolates concurrent brand profiles while sharing only one raw source fetch", async () => {
+    const profiles = [
+      { permissions: ["crm.inventory.riva.view"], ids: ["riva"] },
+      { permissions: ["crm.inventory.direcional.view"], ids: ["direcional"] },
+      { permissions: authorizedBrands.context.permissions, ids: ["riva", "direcional"] },
+      { permissions: [], ids: [] },
+    ];
+    const pending = deferredFetch();
+    mocks.fetch.mockReturnValueOnce(pending.promise);
+    const requests = Array.from({ length: 40 }, (_, index) => {
+      const profile = profiles[index % profiles.length]!;
+      mocks.authorizeRoute.mockResolvedValueOnce({
+        ok: true,
+        context: { permissions: profile.permissions },
+      });
+      return GET().then(async (response) => {
+        expectNoStore(response);
+        const payload = await response.json();
+        expect(payload.count).toBe(profile.ids.length);
+        expect(payload.items.map((item: { id: string }) => item.id)).toEqual(profile.ids);
+      });
+    });
+    await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1));
+    pending.resolve(Response.json(mixedPayload));
+    await Promise.all(requests);
+    expect(mocks.fetch).toHaveBeenCalledTimes(1);
+  });
+
   it("does not query or expose inventory when the user lacks simulator access", async () => {
     mocks.authorizeRoute.mockResolvedValue({
       ok: false,
@@ -65,7 +173,7 @@ describe("inventory route authorization", () => {
 
   it("reuses validated stock for 30 seconds with authorization and private no-store responses", async () => {
     vi.useFakeTimers();
-    mocks.authorizeRoute.mockResolvedValue({ ok: true, context: {} });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     mocks.fetch.mockResolvedValue(Response.json(validPayload, { status: 200 }));
 
     const response = await GET();
@@ -94,7 +202,7 @@ describe("inventory route authorization", () => {
   });
 
   it("never exposes a warm cache to a user who lost permission", async () => {
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     mocks.fetch.mockResolvedValue(Response.json(validPayload));
     await GET();
     mocks.authorizeRoute.mockResolvedValue({
@@ -108,7 +216,7 @@ describe("inventory route authorization", () => {
   });
 
   it("authorizes 20 cold, in-flight and warm requests while sharing one upstream fetch", async () => {
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     const pending = deferredFetch();
     mocks.fetch.mockReturnValueOnce(pending.promise);
     const requests = Array.from({ length: 20 }, () => GET());
@@ -161,7 +269,7 @@ describe("inventory route authorization", () => {
 
       const pending = deferredFetch();
       mocks.fetch.mockReturnValueOnce(pending.promise);
-      mocks.authorizeRoute.mockResolvedValueOnce({ ok: true });
+      mocks.authorizeRoute.mockResolvedValueOnce(authorizedBrands);
       const allowed = GET();
       await vi.waitFor(() => expect(mocks.fetch).toHaveBeenCalledTimes(1));
       // Denied callers must finish before the authorized upstream request resolves.
@@ -204,7 +312,7 @@ describe("inventory route authorization", () => {
     { count: 2, items: [unit, null] },
   ])("does not cache an invalid upstream payload: %j", async (payload) => {
     vi.useFakeTimers();
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     mocks.fetch.mockResolvedValueOnce(Response.json(payload));
     const failed = await GET();
     expect(failed.status).toBe(502);
@@ -227,19 +335,22 @@ describe("inventory route authorization", () => {
     expect(mocks.fetch).toHaveBeenCalledTimes(2);
   });
 
-  it.each([0, "0", 1, "1"])("preserves compatible numeric counts: %j", async (count) => {
-    const payload = { ...validPayload, count, items: Number(count) === 0 ? [] : [unit] };
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
-    mocks.fetch.mockResolvedValueOnce(Response.json(payload));
-    for (const cache of ["MISS", "HIT"]) {
-      const response = await GET();
-      expect(response.status).toBe(200);
-      expectNoStore(response);
-      expect(response.headers.get("x-inventory-cache")).toBe(cache);
-      await expect(response.json()).resolves.toEqual(payload);
-    }
-    expect(mocks.fetch).toHaveBeenCalledTimes(1);
-  });
+  it.each([0, "0", 1, "1"])(
+    "accepts compatible source counts and returns the visible numeric count: %j",
+    async (count) => {
+      const payload = { ...validPayload, count, items: Number(count) === 0 ? [] : [unit] };
+      mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
+      mocks.fetch.mockResolvedValueOnce(Response.json(payload));
+      for (const cache of ["MISS", "HIT"]) {
+        const response = await GET();
+        expect(response.status).toBe(200);
+        expectNoStore(response);
+        expect(response.headers.get("x-inventory-cache")).toBe(cache);
+        await expect(response.json()).resolves.toEqual({ ...payload, count: Number(count) });
+      }
+      expect(mocks.fetch).toHaveBeenCalledTimes(1);
+    },
+  );
 
   it("preserves optional null fields and upstream commercial data without normalization", async () => {
     const payload = {
@@ -257,7 +368,7 @@ describe("inventory route authorization", () => {
         },
       ],
     };
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     mocks.fetch.mockResolvedValueOnce(Response.json(payload));
     for (const cache of ["MISS", "HIT"]) {
       const response = await GET();
@@ -269,7 +380,7 @@ describe("inventory route authorization", () => {
 
   it("shares an invalid payload across 20 requests and retries once before warming the cache", async () => {
     vi.useFakeTimers();
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     const invalid = deferredFetch();
     mocks.fetch.mockReturnValueOnce(invalid.promise);
     const requests = Array.from({ length: 20 }, () => GET());
@@ -306,7 +417,7 @@ describe("inventory route authorization", () => {
 
   it("fails closed when the expired cache cannot be refreshed", async () => {
     vi.useFakeTimers();
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     mocks.fetch.mockResolvedValueOnce(Response.json(validPayload));
     await GET();
     vi.advanceTimersByTime(30_000);
@@ -318,7 +429,7 @@ describe("inventory route authorization", () => {
 
   it("bounds successive failure retries and shares recovery after the cooldown", async () => {
     vi.useFakeTimers();
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     mocks.fetch.mockRejectedValue(new Error("synthetic upstream failure"));
 
     for (let index = 0; index < 20; index += 1) {
@@ -359,7 +470,7 @@ describe("inventory route authorization", () => {
   });
 
   it("keeps the shared upstream request alive when one caller disconnects", async () => {
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     const pending = deferredFetch();
     mocks.fetch.mockReturnValueOnce(pending.promise);
     const controller = new AbortController();
@@ -380,7 +491,7 @@ describe("inventory route authorization", () => {
 
   it.each(["headers", "body"])("limits shared upstream %s waits to 20 seconds", async (phase) => {
     vi.useFakeTimers();
-    mocks.authorizeRoute.mockResolvedValue({ ok: true });
+    mocks.authorizeRoute.mockResolvedValue(authorizedBrands);
     const controller = new AbortController();
     vi.spyOn(AbortSignal, "timeout").mockImplementationOnce((delay) => {
       setTimeout(() => controller.abort(new DOMException("Timed out", "TimeoutError")), delay);

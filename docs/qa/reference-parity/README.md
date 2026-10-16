@@ -2,6 +2,28 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Usuários e presença em 15/10/2026
+
+A captura Linux `38766616330` concluiu com sucesso no commit
+`2416b3853c025fe4c6f2a55bb2db3c1d69353b01`, com árvore idêntica ao candidato
+`128ca2bc531ba23e660f2cd360eb04788135c839` e sem alterações locais.
+Artefato `11991336833`, ZIP SHA-256
+`412802e785318008ca59fe6974651dc7c22b113f065787f1c34fb05285ba80de`.
+
+Foram conferidos os 242 hashes e tamanhos. Somente onze imagens de
+`/admin/usuarios` mudaram; as outras 231 permaneceram idênticas, incluindo
+o dashboard incorporado de `fae77f9a`. A revisão cobriu os três temas desktop
+e as larguras de 320 a 1440 pixels. A lista de pessoas é mascarada apenas
+na captura determinística; a interface real continua exibindo seus registros.
+
+Passaram 154 verificações responsivas, 88 de temas, 242 de acessibilidade,
+110 de zoom, teclado, jornadas e 40 combinações de navegação dos simuladores.
+O manifesto completo original foi incorporado e normalizado pelo Prettier
+sem alteração de seus dados. Ele registra a promoção transacional e os hashes
+do manifesto anterior, cujo histórico permanece no Git. O workflow temporário
+de captura foi removido. A CI normal em modo de verificação continua obrigatória;
+esta revisão não publica a aplicação.
+
 ## Organizacao do dashboard em 15/10/2026
 
 CI `38751646222`, artefato `11983918049`, captura

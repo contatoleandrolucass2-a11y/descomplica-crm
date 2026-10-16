@@ -1220,10 +1220,23 @@ export async function checkRoutineSettings(page, origin, outputDirectory, { read
     }
     await selector.selectOption("regional-house");
     await selector.focus();
-    await page.keyboard.press("ArrowDown");
+    if (process.platform === "darwin") {
+      // Headless Chromium on macOS does not commit native popup arrow navigation.
+      await page.keyboard.type("Gerente regional imob");
+    } else {
+      await page.keyboard.press("ArrowDown");
+    }
     await expect(selector).toHaveValue("regional-imob");
     await expect(selector).toBeFocused();
-    await page.keyboard.press("Home");
+    if (process.platform === "darwin") {
+      // Move focus out and back to reset the native type-ahead buffer.
+      await page.keyboard.press("Tab");
+      await page.keyboard.press("Shift+Tab");
+      await expect(selector).toBeFocused();
+      await page.keyboard.type("Gerente regional house");
+    } else {
+      await page.keyboard.press("Home");
+    }
     await expect(selector).toHaveValue("regional-house");
     await expect(selector).toBeFocused();
 

@@ -10,13 +10,13 @@ select is(
 
 select is(
   (select min_level from public.permissions where key = 'crm.simulators.execute'),
-  100,
-  'the simulator execution gate is managed only at Master level'
+  10,
+  'the simulator execution permission has the shared operational minimum level'
 );
 
 select is(
   (select description from public.permissions where key = 'crm.simulators.execute'),
-  'Executar simuladores oficiais em validação controlada',
+  'Executar simuladores autorizados para o usuário',
   'the simulator execution permission has the approved label'
 );
 
@@ -26,8 +26,8 @@ select is(
     from public.role_permissions
     where permission_key = 'crm.simulators.execute'
   ),
-  array['master']::text[],
-  'only Master inherits simulator execution'
+  array['admin', 'broker_house', 'broker_imob', 'coordinator', 'manager_house', 'manager_imob', 'master']::text[],
+  'all seven current roles inherit simulator execution'
 );
 
 select is(
@@ -35,20 +35,21 @@ select is(
     select count(*)
     from public.role_permissions
     where permission_key = 'crm.simulators.execute'
-      and role_key <> 'master'
+      and role_key not in ('master', 'admin', 'coordinator', 'manager_house', 'manager_imob', 'broker_house', 'broker_imob')
   ),
   0::bigint,
-  'no non-Master role inherits simulator execution'
+  'pending and retired roles do not inherit simulator execution'
 );
 
 select is(
   (
     select count(*)
-    from public.user_permission_overrides
-    where permission_key = 'crm.simulators.execute'
+    from public.role_permissions
+    where permission_key in ('crm.simulators.view', 'crm.simulators.execute')
+      and role_key in ('master', 'admin', 'coordinator', 'manager_house', 'manager_imob', 'broker_house', 'broker_imob')
   ),
-  0::bigint,
-  'no direct override bypasses the Master-only simulator gate'
+  14::bigint,
+  'each current role inherits both viewing and execution'
 );
 
 select ok(

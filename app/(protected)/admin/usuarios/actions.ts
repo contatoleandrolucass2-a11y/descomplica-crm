@@ -18,12 +18,6 @@ import { loadUserDirectoryPage } from "./user-directory";
 import type { LoadUsersPageActionResult, LoadUsersPageInput } from "./user-directory-types";
 
 const userIdSchema = z.string().uuid();
-const optionalReasonSchema = z.string().trim().max(240).optional();
-const requiredReasonSchema = z
-  .string()
-  .trim()
-  .min(3, "Informe um motivo com pelo menos 3 caracteres.")
-  .max(240);
 const targetContextSchema = z.object({
   user_id: z.string().uuid(),
   role_key: z.string(),
@@ -48,14 +42,6 @@ function isRoleKey(value: string): value is RoleKey {
 
 function isPermissionKey(value: string): value is PermissionKey {
   return Object.prototype.hasOwnProperty.call(PERMISSIONS, value);
-}
-
-function readOptionalReason(formData: FormData): string | null {
-  return optionalReasonSchema.parse(formData.get("reason") || undefined) ?? null;
-}
-
-function readRequiredReason(formData: FormData): string {
-  return requiredReasonSchema.parse(formData.get("reason"));
 }
 
 function refreshUsersAdmin() {
@@ -127,21 +113,17 @@ export async function assignRoleAction(
     requireCanManageTargetRole(actor, target.role_key, target.level);
     requireCanAssignRole(actor, roleKeyInput);
 
-    const reason =
-      ROLES[roleKeyInput].level > target.level
-        ? readRequiredReason(formData)
-        : readOptionalReason(formData);
-    const { error } = await supabase.rpc("assign_user_role", {
+    await requirePermission("permissions.manage");
+    const { error } = await supabase.rpc("assign_user_role_defaults", {
       target_user_id: userId,
       target_role_key: roleKeyInput,
-      reason,
     });
 
     if (error) return failure();
     refreshUsersAdmin();
     return {
       status: "success",
-      message: "Papel atualizado. O novo acesso será verificado em cada requisição.",
+      message: "Papel atualizado com as permissões padrão. Exceções anteriores removidas.",
       sessionRefreshRecommended: true,
     };
   } catch (error) {
@@ -160,7 +142,7 @@ export async function setPermissionOverrideAction(
     const userId = userIdSchema.parse(targetUserId);
     const permissionKeyInput = z.string().parse(formData.get("permissionKey"));
     const effect = z.enum(["allow", "deny"]).parse(formData.get("effect"));
-    const reason = readRequiredReason(formData);
+    const reason = "Alteração individual de acesso pela administração de usuários.";
 
     if (!isPermissionKey(permissionKeyInput)) return failure("Permissão inválida.");
     if (userId === actor.userId) return failure("Você não pode alterar o próprio acesso.");
@@ -204,8 +186,8 @@ export async function setPermissionOverridesBulkAction(
       ...denyPermissionKeys,
       ...inheritPermissionKeys,
     ];
-    const reason = readRequiredReason(formData);
-
+    const reason =
+      "Alteração de permissões pelos controles de acesso da administração de usuários.";
     if (permissionKeys.length < 1 || permissionKeys.length > 100) {
       return failure("Selecione entre 1 e 100 permissões.");
     }
@@ -233,7 +215,7 @@ export async function setPermissionOverridesBulkAction(
     refreshUsersAdmin();
     return {
       status: "success",
-      message: "Acessos atualizados e auditados. O papel do usuário foi preservado.",
+      message: "Permissões salvas.",
     };
   } catch (error) {
     if (error instanceof z.ZodError) return failure(error.issues[0]?.message);
@@ -245,12 +227,14 @@ export async function removePermissionOverrideAction(
   targetUserId: string,
   permissionKeyInput: string,
   _previousState: AdminActionState,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<AdminActionState> {
+  void _previousState;
+  void _formData;
   try {
     const actor = await requirePermission("permissions.manage");
     const userId = userIdSchema.parse(targetUserId);
-    const reason = readRequiredReason(formData);
+    const reason = "Restauração da permissão padrão pela administração de usuários.";
 
     if (!isPermissionKey(permissionKeyInput)) return failure("Permissão inválida.");
     if (userId === actor.userId) return failure("Você não pode alterar o próprio acesso.");
@@ -279,8 +263,10 @@ export async function setUserActiveAction(
   targetUserId: string,
   nextActive: boolean,
   _previousState: AdminActionState,
-  formData: FormData,
+  _formData: FormData,
 ): Promise<AdminActionState> {
+  void _previousState;
+  void _formData;
   try {
     const actor = await requirePermission("users.manage");
     const userId = userIdSchema.parse(targetUserId);
@@ -290,7 +276,9 @@ export async function setUserActiveAction(
     if (!isRoleKey(target.role_key)) return failure();
     requireCanManageTargetRole(actor, target.role_key, target.level);
 
-    const reason = nextActive ? readOptionalReason(formData) : readRequiredReason(formData);
+    const reason = nextActive
+      ? "Reativação de acesso pela administração de usuários."
+      : "Desativação de acesso pela administração de usuários.";
     const { error } = await supabase.rpc("set_user_active", {
       target_user_id: userId,
       target_is_active: nextActive,
@@ -325,7 +313,7 @@ export async function approveUserAccessAction(
       .min(1)
       .max(20)
       .parse(formData.getAll("reportingScopeIds"));
-    const reason = readRequiredReason(formData);
+    const reason = "Aprovação de acesso com papel e escopo pela administração de usuários.";
     if (!isRoleKey(roleKeyInput) || !ROLES[roleKeyInput].assignable) {
       return failure("Esse papel não pode ser aprovado pela interface.");
     }

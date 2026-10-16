@@ -194,7 +194,8 @@ const authenticatedResults = JSON.parse(
     contract: string;
     assertion: string;
     sourceMarkerPolicy: string;
-    sourceMarkerVisible: Record<string, boolean>;
+    sourceMarkerVerified: Record<string, boolean>;
+    sourceMarkerPresentation: { dashboard: "data-attribute"; stageOpportunities: "visible" };
   };
   routeChecks: Array<{
     route: string;
@@ -739,7 +740,8 @@ describe("versioned reference parity catalog", () => {
       contract: "rls-marker-v1",
       assertion: "synthetic marker and exact fixture counts verified through authenticated RLS",
       sourceMarkerPolicy: "QA local synthetic — not production · run <ephemeral-id>",
-      sourceMarkerVisible: { dashboard: true, stageOpportunities: true },
+      sourceMarkerVerified: { dashboard: true, stageOpportunities: true },
+      sourceMarkerPresentation: { dashboard: "data-attribute", stageOpportunities: "visible" },
     });
     const viewportKeys = authenticatedResults.viewports.map(({ key }) => key);
     expect(viewportKeys).toEqual(expectedExpandedViewports.map(({ key }) => key));
