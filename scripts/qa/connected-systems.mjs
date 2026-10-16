@@ -470,6 +470,8 @@ async function runSynthetic() {
   for (const asset of [
     "n8n-dark.svg",
     "n8n-light.svg",
+    "qlik-dark.svg",
+    "qlik-light.svg",
     "salesforce.svg",
     "supabase-dark.svg",
     "supabase-light.svg",
@@ -591,6 +593,19 @@ async function runSynthetic() {
         });
       await route.fulfill({ status: statusCode, json: snapshot }).catch(() => {});
     });
+    const qlikBase = {
+      state: "succeeded",
+      checkedAt: "2026-10-08T15:00:00.000Z",
+      receivedAt: "2026-10-08T15:00:01.000Z",
+      lastCollectedAt: "2026-10-08T14:59:00.000Z",
+      lastPublishedAt: "2026-10-08T15:00:00.000Z",
+      sourceUpdatedAt: "2026-10-08T14:00:00.000Z",
+      nextRunAt: "2026-10-08T16:00:00.000Z",
+    };
+    let qlikSnapshot = qlikBase;
+    await page.route("**/api/ingest/qlik/status", async (route) => {
+      await route.fulfill({ json: qlikSnapshot });
+    });
     let refreshes = 0;
     await page.route("**/api/refresh/salesforce", async (route) => {
       refreshes++;
@@ -632,7 +647,13 @@ async function runSynthetic() {
     const status = page.locator('[role="status"][data-state]');
     const verify = page.getByRole("button", { name: "Verificar conexão", exact: true });
     await expect(status).toHaveText("Conectado");
-    await expect(page.locator("img")).toHaveCount(5);
+    await expect(page.locator("img")).toHaveCount(7);
+    const qlikDetails = page.locator('[aria-labelledby="qlik-details-title"]');
+    await expect(qlikDetails.getByText("Publicação confirmada", { exact: true })).toBeVisible();
+    assert.deepEqual(
+      await page.locator('[aria-labelledby="services-title"] h3').allTextContents(),
+      ["Salesforce", "Qlik", "n8n", "Supabase"],
+    );
     assert.deepEqual(
       await page
         .locator("img")
@@ -660,6 +681,21 @@ async function runSynthetic() {
     await expect.poll(() => requests).toBe(2);
     assert.equal(refreshes, 0, "Checking the session never triggers ingestion");
     await expect(verify).toBeEnabled();
+    for (const [state, label] of [
+      ["reauth_required", "Login necessário"],
+      ["unavailable", "Atualização indisponível"],
+      ["stale", "Sem confirmação recente"],
+      ["running", "Atualizando ranking"],
+    ]) {
+      qlikSnapshot = { ...qlikBase, state, nextRunAt: null };
+      await verify.click();
+      await expect(qlikDetails.getByText(label, { exact: true })).toBeVisible();
+      await expect(qlikDetails.locator('time[datetime="2026-10-08T15:00:00.000Z"]')).toHaveCount(1);
+      await expect(qlikDetails.getByText("Sem agenda confirmada", { exact: true })).toBeVisible();
+    }
+    qlikSnapshot = qlikBase;
+    await verify.click();
+    await expect(qlikDetails.getByText("Publicação confirmada", { exact: true })).toBeVisible();
     await page.getByRole("button", { name: "Atualizar Salesforce", exact: true }).click();
     await expect.poll(() => refreshes).toBe(1);
     await expect(page.getByText("Sem publicação confirmada", { exact: true })).toBeVisible();
@@ -710,7 +746,17 @@ async function runSynthetic() {
     await expect(publication.getByText("Publicação não confirmada", { exact: true })).toBeVisible();
     await expect(collection.locator("dd")).toHaveText("Concluída");
     await expect(page.getByRole("row", { name: /Agendamentos/ })).toContainText("1.334");
-    await expect(page.locator('time[datetime="2026-10-08T15:00:00.000Z"]')).toHaveCount(10);
+    await expect(
+      page.locator(
+        '[aria-labelledby="salesforce-details-title"] time[datetime="2026-10-08T15:00:00.000Z"]',
+      ),
+    ).toHaveCount(9);
+    await expect(
+      page
+        .getByRole("article")
+        .filter({ has: page.getByRole("heading", { name: "Salesforce", exact: true }) })
+        .locator('time[datetime="2026-10-08T15:00:00.000Z"]'),
+    ).toHaveCount(1);
     await expect(publication.locator("time")).toHaveAttribute(
       "datetime",
       collected.lastPublishedAt,
@@ -827,7 +873,11 @@ async function runSynthetic() {
     }
     snapshot = { ...base, lastPublishedAt: "2026-10-08T14:59:00.000Z" };
     await verify.click();
-    await expect(page.locator('time[datetime="2026-10-08T14:59:00.000Z"]')).toBeVisible();
+    await expect(
+      page.locator(
+        '[aria-labelledby="salesforce-details-title"] time[datetime="2026-10-08T14:59:00.000Z"]',
+      ),
+    ).toBeVisible();
     statusCode = 503;
     await verify.click();
     await expect(status).toHaveText("Não conectado");

@@ -2766,3 +2766,13 @@ pendente dos gates completos no SHA final.
   mantendo limites, cobertura exata e rejeicao de qualquer cauda pendente.
 - Preserva main concorrente e separa ao final os registros deste ajuste,
   evitando conflito manual de prefixo sem alterar a protecao de CI.
+
+## 2026-10-16: Integração Qlik e status do ranking
+
+- Inclui Qlik entre Salesforce e n8n, com logos SVG para os três temas.
+- Separa coleta, confirmação de publicação, recarga da fonte e próxima coleta.
+- Acrescenta status assinado do coletor, com expiração, limite de corpo, proteção
+  contra replay e leitura autorizada pela página Integrações.
+- Preserva a última publicação válida quando a sessão expira ou a coleta falha.
+- Integra o corretivo de interoperabilidade QIX da PR #239 sem alterar os pins,
+  o recorte aprovado, as duas observações independentes ou a reconciliação.

@@ -7261,3 +7261,55 @@ CI cf2b1c1 valida o SHA imutavel; execucao local atravessou integracao de main.
 Novo conjunto integrado ainda exige CI. Metadata privada03:07:20.107Z,
 recarga02:14:57.356Z, confirmou cubos/masters/aliases selecionados inalterados;
 nao le fatos. Health03:55:48.744Z200/ok/b937, sem nova promocao CRM nesta etapa.
+
+## 2026-10-16: Qlik nas integrações e retomada da coleta automática
+
+O usuário autorizou a correção da ingestão, a inclusão do Qlik entre Salesforce
+e n8n com status real e a atualização automática do ranking na VPS. O trabalho
+usa a branch isolada `codex/qlik-integracao-status-auto`, a partir de
+69ae98394a697c8f7b4d5fc3f022a4d83635f72b. O corretivo da PR #239, SHA
+3d868329568168d39c0dc6641f96d82b1d001581, foi integrado sem alterar a branch
+original; o conflito documental foi resolvido preservando ambos os registros.
+
+A consulta operacional inicial encontrou CRM 66ed7360, publicado em
+2026-10-16T13:24:00.784Z, sem pendência, e owner Qlik 17ab106f em modo de
+metadados. A tentativa de 19:10:06.160Z exigiu login. Esses horários são
+observações de diagnóstico e não substituem o preflight de promoção.
+O console privado foi disponibilizado por túnel loopback; o login foi entregue
+ao usuário, sem leitura de credenciais. Um socket VNC comprovadamente sem
+listener foi preservado por rename, sob a trava existente, antes de iniciar
+o console temporário. Não houve alteração de unidade, perfil ou segredo.
+
+As logos recebidas foram convertidas em caminhos SVG, sem dependência de fonte
+ou imagem embutida: cinza/verde para claro e médio, branco/verde para escuro.
+O novo status usa a credencial HMAC existente, com domínio separado de rota,
+corpo estrito de metadados, replay/ordem/idade verificados e leitura restrita à
+página Integrações. Heartbeats não alteram dados comerciais. Coleta, confirmação
+de publicação e recarga da fonte permanecem distintas; ausência de evidência
+expira o status e não fabrica conexão. Nenhuma migration ou ACL foi alterada.
+
+Validação parcial: 348 testes focados do corretivo passaram (um teste físico
+Linux não aplicável ao macOS). A rodada operacional ampliada passou 1.171 casos,
+com seis skips físicos. Tipos, 27 testes existentes de Integrações, 25 testes
+combinados da nova fronteira e quatro testes do monitor passaram. A validação
+completa, o SHA de CI, a publicação e um ciclo automático posterior ainda serão
+registrados; este texto não declara a ingestão corrigida em produção.
+
+A validação local da aplicação concluiu 3.666 testes Vitest, com 90 skips,
+e 1.305 testes operacionais, com cinco skips. O ensaio de release inicialmente
+recusou a fixture por não incluir os novos arquivos protegidos; o inventário
+sintético foi atualizado, preservando as verificações. A nova execução do
+release passou todos os 703 casos executáveis no macOS, com 14 verificações
+físicas reservadas ao Linux. O build, tipos, formato e inventário de rotas
+passaram. Lint manteve somente um aviso preexistente no harness visual.
+
+O QA sintético de Integrações passou nos nove pares tema/largura, zoom 200%,
+acessibilidade e ciclo completo do console Salesforce. As capturas claro,
+escuro e celular foram inspecionadas. Datas exibidas nessas imagens são fixtures,
+não evidência de produção. Auditorias pnpm e OSV não encontraram vulnerabilidades.
+Gitleaks não encontrou vazamentos na árvore atual. A varredura do histórico
+apontou somente a literal fictícia de teste do commit 52411c1d, arquivo
+scripts/release/salesforce-release-environment.node-test.mjs, linha 31; o código
+atual já substitui esse valor por repetição explícita de "fixture". Nenhuma
+regra do scanner foi desativada ou ignorada para esta entrega.
+A conferência das fontes públicas de documentação também passou nesta rodada.

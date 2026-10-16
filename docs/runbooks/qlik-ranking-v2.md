@@ -161,7 +161,34 @@ leitura atual do recibo, banco e pagina. Provar tambem um ciclo horario posterio
 Sessao expirada/MFA deve produzir reautenticacao necessaria, preservar dados e
 exigir acao autorizada, sem contornar controles do provedor.
 
-## Recuperacao
+## Status em Integrações
+
+O cartão Qlik aparece entre Salesforce e n8n, com SVGs vetoriais para os temas
+claro/médio e escuro. O painel separa o estado do último ciclo, o horário da
+coleta validada, a confirmação de publicação no CRM, a recarga da fonte e a
+próxima coleta prevista. Uma sessão do navegador aberta não comprova publicação.
+
+O owner de ranking envia um heartbeat a cada 30 segundos para
+`POST /api/ingest/qlik/status`, assinado pelo HMAC existente com domínio de rota
+próprio. O contrato aceita somente metadados operacionais; não transporta linhas,
+nomes comerciais, fórmulas, credenciais ou mensagens brutas de erro. O servidor
+limita o corpo a 8 KiB e cinco segundos, valida assinatura, idade, ordem e nonce.
+O `GET` exige acesso à página Integrações, incluindo as verificações existentes
+de sessão, MFA, aprovação e escopo. Nenhuma tabela ou ACL é modificada.
+
+Sem heartbeat por 90 segundos, o status expira. Um ciclo travado também expira
+mesmo recebendo heartbeat. Falha e reautenticação preservam os horários da última
+publicação confirmada durante a vida do owner. Reinício do servidor ou rotação
+da chave exige novo heartbeat; reinício do owner exige nova publicação antes de
+afirmar sucesso. Os dados duráveis do ranking continuam no banco existente.
+
+Falha na entrega do status não dispara nova coleta nem altera a publicação.
+O monitor não se sobrepõe; a interface consulta a cada 15 segundos e suspende
+consultas em abas ocultas. O intervalo comercial permanece de uma hora após o
+término do ciclo. Status e agenda previstos não substituem a prova de uma
+execução automática posterior, exigida na ativação controlada.
+
+## Recuperação operacional
 
 Configuracao do aplicativo usa backup privado versionado do env completo,
 CAS e `release:production recover` da tentativa exata. Nao apagar ledger/lock.
