@@ -553,6 +553,7 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     expect(value(yearly, "Oportunidades")).toBe("0");
     expect(value(card(monthly, "Mês atual"), "Oportunidades")).toBe("10");
     const dialog = only(elements(yearly, "dialog"));
+    expect(text(dialog)).not.toContain("Aguardando a coleta detalhada");
     expect(elements(dialog, "figure")).toHaveLength(5);
     expect(
       elements(only(elements(dialog, "ul")), "time").map((node) => attribute(node, "datetime")),

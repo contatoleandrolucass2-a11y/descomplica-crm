@@ -26,6 +26,11 @@ cargas. Main d83c22d integrado; main17ab106 observado depois, integracao pendent
 pgTAP, CI, nova build e publicacao em andamento; nao comprovam ativacao.
 Detalhes e limites: docs/dashboard-dimensional-filters.md.
 
+Revisao visual posterior: nova matriz185 checks aprovada; imagens sem deslocar
+header sticky. Inspecao manual encontrou aviso de coleta em historico preenchido;
+condicao corrigida com regressao focal. PR238 aberto, CI em andamento. Migration
+agora inclui188 assercoes SQL e matriz total1629; nenhuma aplicacao remota.
+
 ## 2026-10-15: Projecao delimitada e diagnostico de limites
 
 Catalogo retido limitado a IDs comerciais, filtros/calendario e campos

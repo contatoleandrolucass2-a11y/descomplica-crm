@@ -350,7 +350,11 @@ export function DashboardReport({
                     <DashboardMonthlyHistory
                       title={block.label}
                       months={staleMonth ? [] : (analysis?.history[block.key] ?? [])}
-                      missingReason="Aguardando a coleta detalhada dos meses encerrados."
+                      missingReason={
+                        staleMonth || !analysis?.history[block.key]?.length
+                          ? "Aguardando a coleta detalhada dos meses encerrados."
+                          : ""
+                      }
                     />
                   ) : (
                     <h3>{block.label}</h3>

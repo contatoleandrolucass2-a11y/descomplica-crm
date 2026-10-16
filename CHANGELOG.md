@@ -11,6 +11,7 @@
   mantendo os limites dos demais endpoints e sem truncar cargas.
 - Mostra meses encerrados usados nas medias em pop-up com grafico; mes anterior
   passa a ser integral na nova analise, sem alterar comparativos de outras telas.
+- Oculta o aviso de coleta pendente quando o historico mensal ja esta disponivel.
 - Calcula metas mensais por responsavel unico e esperado proporcional ao dia;
   atualiza a pagina na virada do dia de Sao Paulo.
 - Remove controles/textos indicados na raiz e resume tabelas em uma linha
