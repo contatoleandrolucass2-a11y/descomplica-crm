@@ -7,7 +7,7 @@ import { after, before, test } from "node:test";
 import { promisify } from "node:util";
 import { pathToFileURL } from "node:url";
 
-import { parseReleaseArguments } from "./production-release.mjs";
+import { parseReleaseArguments, releaseOutput } from "./production-release.mjs";
 
 const execFileAsync = promisify(execFile);
 const sha = "a".repeat(40);
@@ -189,15 +189,105 @@ test("Qlik owner operations are explicit and never accept arbitrary units or Sal
   const result = parseReleaseArguments(args);
   assert.equal(result.operation, "qlik-deploy");
   assert.equal(result.values["expected-owner-sha"], "c".repeat(40));
+  assert.equal(parseReleaseArguments([...args, "--ranking", "enable"]).values.ranking, "enable");
   for (const invalid of [
     args.slice(0, -2),
     [...args, "--unit", "arbitrary.service"],
     [...args, "--salesforce-ingestion", "enable"],
     [...args, "--profile", "/tmp/profile"],
+    [...args, "--qlik-ranking", "enable"],
+    [...args, "--ranking", "disable"],
+    [...args, "--ranking", "true"],
+    [...args, "--ranking", "enable", "--ranking", "enable"],
+    [...args, "--ranking", "enable", "--credential", "/tmp/key"],
+    [...deployArguments(), "--ranking", "enable"],
+    ["qlik-status", "--ranking", "enable"],
+    ["qlik-recover", "--deployment-id", deploymentId, "--ranking", "enable"],
     ["qlik-status", "--sha", sha],
     ["qlik-recover", "--deployment-id", deploymentId, "--sha", sha],
   ])
     assert.throws(() => parseReleaseArguments(invalid));
+});
+
+test("Qlik status and noop expose recorded ranking evidence, never an invented live result", () => {
+  const release = {
+    deploymentId,
+    sha,
+    imageId,
+    deployedAt: "2026-10-14T12:00:00.000Z",
+    ranking: true,
+    preflightStatus: "disabled",
+    rankingStatus: "succeeded",
+    rankingConnected: true,
+    privateData: "DO_NOT_EXPOSE",
+  };
+  for (const [operation, status] of [
+    ["qlik-status", "recorded"],
+    ["qlik-status", "recovery-required"],
+    ["qlik-deploy", "noop"],
+  ]) {
+    const output = releaseOutput(operation, {
+      status,
+      release,
+      rankingStatus: "unavailable",
+      rankingConnected: false,
+      inProgress:
+        status === "recovery-required"
+          ? { deploymentId: "pending", secret: "DO_NOT_EXPOSE" }
+          : null,
+    });
+    assert.equal(output.rankingConnected, true);
+    assert.equal(output.rankingStatus, "succeeded");
+    assert.equal(output.preflightStatus, "disabled");
+    assert.equal(output.rankingEvidence, "recorded");
+    assert.equal(output.pendingDeploymentId, status === "recovery-required" ? "pending" : null);
+    assert.doesNotMatch(JSON.stringify(output), /DO_NOT_EXPOSE/);
+  }
+  for (const [operation, status] of [
+    ["qlik-deploy", "deployed"],
+    ["qlik-recover", "recovered"],
+  ]) {
+    const output = releaseOutput(operation, {
+      status,
+      release,
+      preflightStatus: "disabled",
+      rankingStatus: "reauth_required",
+      rankingConnected: false,
+    });
+    assert.equal(output.rankingStatus, "reauth_required");
+    assert.equal(output.rankingConnected, false);
+    assert.equal(output.rankingEvidence, "verified");
+  }
+});
+
+test("release output preserves v1 and CRM fields without ranking evidence or private data", () => {
+  const release = {
+    deploymentId,
+    sha,
+    imageId,
+    deployedAt: "2026-10-14T12:00:00.000Z",
+    preflightStatus: "pending",
+  };
+  const common = {
+    status: "recorded",
+    deploymentId,
+    sha,
+    imageId,
+    deployedAt: release.deployedAt,
+    pendingDeploymentId: null,
+  };
+  assert.deepEqual(releaseOutput("status", { status: "recorded", release }), common);
+  assert.deepEqual(releaseOutput("qlik-status", { status: "recorded", release }), {
+    ...common,
+    component: "qlik-owner",
+    preflightStatus: "pending",
+    rankingStatus: null,
+    rankingConnected: false,
+  });
+  const missing = releaseOutput("qlik-status", { status: "recorded", release: null });
+  assert.equal(missing.rankingStatus, null);
+  assert.equal(missing.rankingConnected, false);
+  assert.equal(Object.hasOwn(missing, "rankingEvidence"), false);
 });
 
 test("rejects rollback as a public command instead of bypassing candidate CI", () => {

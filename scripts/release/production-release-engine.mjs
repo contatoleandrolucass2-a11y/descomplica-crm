@@ -47,6 +47,11 @@ export async function executeRelease(options, io) {
   }
   if (options.salesforceIngestion !== undefined && options.salesforceIngestion !== true)
     fail("Salesforce ingestion requires an explicit enable request.");
+  if (options.qlikRanking !== undefined && options.qlikRanking !== true)
+    fail("Qlik ranking requires an explicit enable request.");
+  if (options.qlikRanking && options.salesforceIngestion)
+    fail("Integration configurations require separate releases.");
+  const configurationRequested = options.salesforceIngestion || options.qlikRanking;
   const releaseOptions = {
     operation: options.operation,
     expectedDeploymentId: options.expectedDeploymentId,
@@ -55,6 +60,7 @@ export async function executeRelease(options, io) {
     targetImageId: options.targetImageId,
     ciRunId: options.ciRunId,
     ...(options.salesforceIngestion ? { salesforceIngestion: true } : {}),
+    ...(options.qlikRanking ? { qlikRanking: true } : {}),
   };
   const { operation, expectedDeploymentId, expectedSha, targetSha, targetImageId, ciRunId } =
     releaseOptions;
@@ -62,7 +68,7 @@ export async function executeRelease(options, io) {
   const initial = captureObservation(await io.observe());
   assertLiveDeployment(initial, expected, io.now());
   if (decideRelease(initial, targetSha, targetImageId) === "noop") {
-    if (options.salesforceIngestion)
+    if (configurationRequested)
       fail("Configuration changes require a new CI-approved release SHA.");
     return { status: "noop", release: initial.state.release };
   }
@@ -87,7 +93,7 @@ export async function executeRelease(options, io) {
   if (deploymentId === previousState.release.deploymentId) {
     fail("A new release must have a new deployment ID.");
   }
-  const environmentChange = options.salesforceIngestion
+  const environmentChange = configurationRequested
     ? await io.prepareEnvironmentChange(releaseOptions, deploymentId)
     : undefined;
   const startedAt = io.now();
@@ -102,7 +108,7 @@ export async function executeRelease(options, io) {
     operation,
     ...(environmentChange ? { environmentChange } : {}),
   };
-  if (options.salesforceIngestion && !environmentChange)
+  if (configurationRequested && !environmentChange)
     fail("A durable environment backup is required before deployment intent.");
   const intentState = {
     schemaVersion: 1,

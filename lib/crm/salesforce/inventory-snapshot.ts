@@ -1,7 +1,7 @@
 import "server-only";
 
 import { constants } from "node:fs";
-import { open } from "node:fs/promises";
+import { lstat, open } from "node:fs/promises";
 import path from "node:path";
 import { salesforceInventorySchema } from "./inventory-contract";
 
@@ -18,6 +18,8 @@ export async function readSalesforceInventory(): Promise<string> {
   if (cached?.path === configured && cached.until > Date.now()) return cached.body;
   if (pending?.path === configured) return pending.result;
   const result = (async () => {
+    const pathMetadata = await lstat(configured);
+    if (pathMetadata.isSymbolicLink()) throw new Error("inventory_file_invalid");
     const handle = await open(configured, constants.O_RDONLY | constants.O_NOFOLLOW);
     try {
       const metadata = await handle.stat();

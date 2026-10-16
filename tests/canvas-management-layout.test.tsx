@@ -4,6 +4,11 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import {
+  parseRankingFilters,
+  RankingDashboard,
+} from "@/app/(protected)/app/ranking/RankingDashboard";
+
+import {
   ManagementPage,
   ManagementPageHeader,
   ManagementStatusBadge,
@@ -42,11 +47,14 @@ describe("management canvas layout", () => {
       "app/(protected)/app/configuracoes/page.tsx",
       "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
-      "app/(protected)/app/ranking/page.tsx",
+      "app/(protected)/app/ranking/RankingDashboard.tsx",
       "app/(protected)/app/canal-de-parcerias/page.tsx",
     ]) {
       expect(source(file), file).toContain("ManagementPage");
     }
+    expect(source("app/(protected)/app/ranking/page.tsx")).toContain(
+      "<RankingDashboard data={data} filters={filters}",
+    );
   });
 
   it("contains mobile goal layouts and separates semantic ink from accents", () => {
@@ -169,8 +177,28 @@ describe("management canvas layout", () => {
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
     );
 
-    expect(ranking).toContain("loadRankingReadModel");
-    expect(ranking).toContain("Nenhuma pontuação oficial foi calculada");
+    expect(ranking).not.toMatch(/loadRankingReadModel|loadReadModelV3|list_scoped_crm_imob/);
+    expect(ranking).toContain('enforcePermission("crm.ranking.view")');
+    expect(ranking).toContain("await loadQlikRankingV2(filters.year)");
+    expect(ranking.indexOf('await enforcePermission("crm.ranking.view")')).toBeLessThan(
+      ranking.indexOf("await loadQlikRankingV2"),
+    );
+    for (const [kind, title] of [
+      ["imobs", "Top 10 imobiliárias"],
+      ["developments", "Top 10 empreendimentos"],
+    ]) {
+      const markup = renderToStaticMarkup(
+        createElement(RankingDashboard, {
+          data: { status: "unavailable" },
+          filters: parseRankingFilters({ kind: kind! }),
+          now: new Date("2026-10-14T12:00:00Z"),
+        }),
+      );
+      expect(markup).toContain(title);
+      expect(markup).toContain("Dados indisponíveis");
+      expect(markup).toContain("<tbody></tbody>");
+      expect(markup).not.toMatch(/R\$|>0<|Parceira [0-9]|Ouro: (?!Indisponível)/);
+    }
     expect(partnerships).toContain("Dado indisponível — integração pendente");
     expect(partnerships).toContain("Pódio das parcerias");
     expect(partnerships).toContain("Totais do período");

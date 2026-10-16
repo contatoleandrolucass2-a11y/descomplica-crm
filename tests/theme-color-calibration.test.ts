@@ -3,12 +3,18 @@ import { createRequire } from "node:module";
 import { describe, expect, it } from "vitest";
 
 const require = createRequire(import.meta.url);
+type CssRule = {
+  selector: string;
+  walkDecls: (callback: (declaration: { prop: string; value: string }) => void) => void;
+};
 const { parse } = createRequire(require.resolve("next/package.json"))("postcss") as {
   parse: (css: string) => {
-    walkRules: (
+    walkRules: (callback: (rule: CssRule) => void) => void;
+    walkAtRules: (
+      name: string,
       callback: (rule: {
-        selector: string;
-        walkDecls: (callback: (declaration: { prop: string; value: string }) => void) => void;
+        params: string;
+        walkRules: (callback: (rule: CssRule) => void) => void;
       }) => void,
     ) => void;
   };
@@ -166,12 +172,14 @@ describe("three-theme color calibration", () => {
       expect(stylesheet).not.toMatch(/^\s*--analytics-/m);
       expect(stylesheet).not.toContain("color-scheme: dark");
       expect(stylesheet).toContain("var(--analytics-page)");
-      expect(stylesheet).toContain("var(--analytics-cyan)");
+      expect(stylesheet).toContain(
+        path.includes("/ranking/") ? "var(--analytics-cyan-strong)" : "var(--analytics-cyan)",
+      );
     }
   });
 
-  it("uses clear semantic surfaces for Ranking and Partnerships in Claro and Médio", () => {
-    for (const stylesheet of [ranking, partnerships]) {
+  it("preserves the existing Canal surfaces in Claro and Médio", () => {
+    for (const stylesheet of [partnerships]) {
       expect(declarationsAt(stylesheet, '.canvas article[data-tone="navy"]')).toMatchObject({
         "border-color": "var(--analytics-line)",
         background: "var(--analytics-navy)",
@@ -192,22 +200,10 @@ describe("three-theme color calibration", () => {
     for (const theme of ["light", "balanced"]) {
       expect(
         declarationsIncluding(
-          ranking,
-          `:global(:root[data-theme="${theme}"]) .canvas article[data-tone="navy"]`,
-        ).background,
-      ).toBe("var(--analytics-surface)");
-      expect(
-        declarationsIncluding(
           partnerships,
           `:global(:root[data-theme="${theme}"]) .canvas article[data-tone="navy"]`,
         ).background,
       ).toBe("var(--analytics-surface-strong)");
-      expect(
-        declarationsIncluding(ranking, `:global(:root[data-theme="${theme}"]) .canvas .pointItem`),
-      ).toMatchObject({
-        "border-color": "var(--analytics-line)",
-        background: "var(--analytics-surface-muted)",
-      });
       expect(
         declarationsIncluding(
           partnerships,
@@ -218,6 +214,78 @@ describe("three-theme color calibration", () => {
         "box-shadow": "inset 0 3px 0 var(--analytics-cyan-strong)",
       });
     }
+  });
+
+  it("keeps partnership ranking surfaces and controls on accessible semantic tokens", () => {
+    expect(declarationsAt(ranking, ".canvas")).toMatchObject({
+      background: "var(--analytics-page)",
+      color: "var(--analytics-ink)",
+      "min-width": "0",
+    });
+    expect(declarationsAt(ranking, ".canvas .podiumEntry")).toMatchObject({
+      "border-color": "var(--analytics-line)",
+      background: "var(--analytics-surface)",
+      color: "var(--analytics-ink)",
+      "border-radius": "0.5rem",
+      "box-shadow": "none",
+    });
+    expect(declarationsAt(ranking, ".canvas :is(input, select, button)")).toMatchObject({
+      border: "1px solid var(--analytics-line)",
+      background: "var(--analytics-surface-muted)",
+      color: "var(--analytics-muted)",
+      "min-height": "2.75rem",
+      "max-width": "100%",
+    });
+    expect(declarationsAt(ranking, ".canvas :disabled").opacity).toBe("1");
+    expect(declarationsAt(ranking, ".canvas :focus-visible")).toMatchObject({
+      outline: "2px solid var(--analytics-cyan-strong)",
+      "outline-offset": "3px",
+    });
+    expect(declarationsAt(ranking, ".quarters label")).toMatchObject({
+      "min-height": "2.75rem",
+      color: "var(--analytics-muted)",
+    });
+    expect(declarationsAt(ranking, '.quarters input[type="checkbox"]')).toMatchObject({
+      appearance: "auto",
+      width: "1.125rem",
+      height: "1.125rem",
+      "min-height": "1.125rem",
+    });
+    for (const theme of ["light", "balanced", "dark"] as const) {
+      const colors = globalTheme(theme);
+      expect(
+        contrast(colors["--analytics-ink"]!, colors["--analytics-surface"]!),
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrast(colors["--analytics-muted"]!, colors["--analytics-surface-muted"]!),
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrast(colors["--analytics-cyan-strong"]!, colors["--analytics-page"]!),
+      ).toBeGreaterThanOrEqual(3);
+    }
+  });
+
+  it("keeps ranking grids responsive and controls wrapping without clipping text", () => {
+    const css = readFileSync(ranking, "utf8");
+    const mobile: Record<string, Record<string, string>> = {};
+    parse(css).walkAtRules("media", (media) => {
+      if (media.params !== "(max-width: 47.99rem)") return;
+      media.walkRules((rule) => {
+        for (const selector of rule.selector.split(",").map((value) => value.trim())) {
+          rule.walkDecls(({ prop, value }) => {
+            (mobile[selector] ??= {})[prop] = value;
+          });
+        }
+      });
+    });
+    for (const selector of [".monthInputs", ".podiumGrid", ".sourceMeta", ".summary"]) {
+      expect(mobile[selector]?.["grid-template-columns"], selector).toBe("minmax(0, 1fr)");
+    }
+    expect(declarationsIncluding(ranking, ".quarters")["flex-wrap"]).toBe("wrap");
+    expect(
+      declarationsAt(ranking, ".canvas :is(h1, h2, h3, p, dt, dd, label)")["overflow-wrap"],
+    ).toBe("anywhere");
+    expect(declarationsAt(ranking, ".search")["max-width"]).toBe("100%");
   });
 
   it("keeps the documentation canvas header on the accessible global foreground tokens", () => {

@@ -21,6 +21,10 @@ import {
   salesforceContainerDigestScript,
   salesforceEnvironmentBackupStore,
   transformSalesforceReleaseEnvironment,
+  assertQlikContainerDigests,
+  qlikContainerDigestScript,
+  readQlikReleaseSecret,
+  transformQlikReleaseEnvironment,
 } from "./salesforce-release-environment.mjs";
 
 const exec = promisify(execFile);
@@ -99,7 +103,7 @@ async function containerVersion(includeStopped = false) {
   };
 }
 
-async function assertRuntimeEnvironment(contents, expectedSha, expectedImageId) {
+async function assertRuntimeEnvironment(contents, expectedSha, expectedImageId, qlik = false) {
   const container = await containerVersion();
   if (container.containerSha !== expectedSha || container.containerImageId !== expectedImageId) {
     throw new Error("Runtime configuration check requires the exact production image.");
@@ -120,6 +124,24 @@ async function assertRuntimeEnvironment(contents, expectedSha, expectedImageId) 
     throw new Error("Effective production configuration is unavailable.");
   }
   assertSalesforceContainerDigests(contents, digests);
+  if (qlik) {
+    let qlikDigests;
+    try {
+      qlikDigests = JSON.parse(
+        await docker([
+          "exec",
+          container.containerId,
+          "node",
+          "--input-type=commonjs",
+          "--eval",
+          qlikContainerDigestScript,
+        ]),
+      );
+    } catch {
+      throw new Error("Effective Qlik configuration is unavailable.");
+    }
+    assertQlikContainerDigests(contents, qlikDigests);
+  }
   if (
     !isDeepStrictEqual(await containerVersion(), container) ||
     (await readValidatedEnvironment()) !== contents
@@ -196,8 +218,12 @@ export function productionHost(lock) {
     },
     async prepareEnvironmentChange(options, deploymentId) {
       await assertHeldLock(lock);
-      if (options.operation !== "deploy" || options.salesforceIngestion !== true) {
-        throw new Error("Salesforce configuration requires an explicit protected deployment.");
+      if (
+        options.operation !== "deploy" ||
+        (options.salesforceIngestion !== true && options.qlikRanking !== true) ||
+        (options.salesforceIngestion === true && options.qlikRanking === true)
+      ) {
+        throw new Error("Integration configuration requires an explicit protected deployment.");
       }
       const state = await store.read();
       if (
@@ -208,15 +234,32 @@ export function productionHost(lock) {
         throw new Error("Environment preparation requires the exact previous release.");
       }
       const before = await readValidatedEnvironment();
-      const after = transformSalesforceReleaseEnvironment(
+      const after = options.qlikRanking
+        ? transformQlikReleaseEnvironment(
+            before,
+            options.expectedSha,
+            options.targetSha,
+            await readQlikReleaseSecret(),
+          )
+        : transformSalesforceReleaseEnvironment(
+            before,
+            options.expectedSha,
+            options.targetSha,
+            await readSalesforceReleaseSecrets(),
+          );
+      await assertRuntimeEnvironment(
         before,
         options.expectedSha,
-        options.targetSha,
-        await readSalesforceReleaseSecrets(),
+        state.release.imageId,
+        options.qlikRanking === true,
       );
-      await assertRuntimeEnvironment(before, options.expectedSha, state.release.imageId);
       await assertHeldLock(lock);
-      const change = await environmentBackups.create(deploymentId, before, after);
+      const change = await environmentBackups.create(
+        deploymentId,
+        before,
+        after,
+        options.qlikRanking ? "qlik-ranking-v2" : "salesforce",
+      );
       await assertHeldLock(lock);
       if (
         (await readValidatedEnvironment()) !== before ||
@@ -291,7 +334,12 @@ export function productionHost(lock) {
                 environmentCheck.change,
                 environmentCheck.restore,
               );
-              await assertRuntimeEnvironment(contents, sha, imageId);
+              await assertRuntimeEnvironment(
+                contents,
+                sha,
+                imageId,
+                backup.kind === "qlik-ranking-v2",
+              );
               await assertHeldLock(lock);
             }
             return;
