@@ -7,6 +7,11 @@ import {
   getSalesforceStatusConfiguration,
 } from "@/lib/crm/salesforce/config";
 
+import {
+  getMetaAdsConsoleConfiguration,
+  getMetaAdsStatusConfiguration,
+} from "@/lib/crm/meta-ads/config";
+
 import { ConnectedSystemsPanel } from "./ConnectedSystemsPanel";
 
 export const metadata = { title: "Integrações" };
@@ -26,6 +31,10 @@ export default async function ConnectedSystemsPage() {
       canRefresh={hasPermission(context, "crm.salesforce.refresh")}
       statusConfigured={status.available}
       {...(hasPermission(context, "crm.dashboard.view") ? { canReadSyncStatus: true } : {})}
+      metaAdsStatusConfigured={getMetaAdsStatusConfiguration().available}
+      metaAdsConsoleAvailable={
+        context.roleKey === "master" && getMetaAdsConsoleConfiguration().available
+      }
       consoleAvailable={
         context.roleKey === "master" && getSalesforceConsoleConfiguration().available
       }

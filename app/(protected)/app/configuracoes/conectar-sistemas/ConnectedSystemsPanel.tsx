@@ -28,6 +28,11 @@ import styles from "./ConnectedSystemsPanel.module.css";
 import { SalesforceConsoleDialog } from "./SalesforceConsoleDialog";
 import { QlikServiceCard, QlikStatusDetails } from "./QlikIntegration";
 import {
+  MetaAdsServiceCard,
+  MetaAdsStatusDetails,
+  useMetaAdsConnection,
+} from "./MetaAdsIntegration";
+import {
   emptyQlikStatus,
   qlikStatusSnapshotSchema,
   QLIK_STATUS_PATH,
@@ -124,6 +129,8 @@ export function ConnectedSystemsPanel({
   statusConfigured,
   consoleAvailable = false,
   canReadSyncStatus = false,
+  metaAdsStatusConfigured = false,
+  metaAdsConsoleAvailable = false,
 }: {
   ingestLabel: string;
   refreshAvailable: boolean;
@@ -131,7 +138,16 @@ export function ConnectedSystemsPanel({
   statusConfigured: boolean;
   consoleAvailable?: boolean;
   canReadSyncStatus?: boolean;
+  metaAdsStatusConfigured?: boolean;
+  metaAdsConsoleAvailable?: boolean;
 }) {
+  const metaAds = useMetaAdsConnection(metaAdsStatusConfigured);
+  const [metaConsoleOpen, setMetaConsoleOpen] = useState(false);
+  const [metaConsoleError, setMetaConsoleError] = useState(false);
+  const closeMetaConsole = useCallback((credentialsFailed = false) => {
+    setMetaConsoleOpen(false);
+    setMetaConsoleError(credentialsFailed);
+  }, []);
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [consoleError, setConsoleError] = useState(false);
   const closeConsole = useCallback((credentialsFailed = false) => {
@@ -274,13 +290,16 @@ export function ConnectedSystemsPanel({
             className={styles.iconButton}
             aria-label="Verificar conexão"
             title="Verificar evidências das integrações"
-            disabled={checking}
-            onClick={() => verifyRef.current?.()}
+            disabled={checking || metaAds.checking}
+            onClick={() => {
+              verifyRef.current?.();
+              metaAds.verify();
+            }}
           >
             <RefreshCw
               size={17}
               aria-hidden="true"
-              className={checking ? styles.spinning : undefined}
+              className={checking || metaAds.checking ? styles.spinning : undefined}
             />
           </button>
           <button
@@ -315,6 +334,14 @@ export function ConnectedSystemsPanel({
         </p>
       ) : null}
       {consoleOpen && consoleAvailable ? <SalesforceConsoleDialog onClose={closeConsole} /> : null}
+      {metaConsoleError ? (
+        <p role="alert" className={styles.consoleAlert}>
+          Não foi possível autorizar o console Meta Ads. Tente novamente.
+        </p>
+      ) : null}
+      {metaConsoleOpen && metaAdsConsoleAvailable ? (
+        <SalesforceConsoleDialog provider="meta-ads" onClose={closeMetaConsole} />
+      ) : null}
 
       <section className={styles.services} aria-labelledby="services-title">
         <div className={styles.servicesHeading}>
@@ -322,7 +349,7 @@ export function ConnectedSystemsPanel({
             <h2 id="services-title">Serviços</h2>
             <p>O estado só é afirmado quando existe uma fonte real de evidência.</p>
           </div>
-          <span>4 serviços</span>
+          <span>5 serviços</span>
         </div>
         <div className={styles.servicesGrid}>
           <article className={styles.serviceCard}>
@@ -349,6 +376,8 @@ export function ConnectedSystemsPanel({
           </article>
 
           <QlikServiceCard snapshot={qlikSnapshot} />
+
+          <MetaAdsServiceCard snapshot={metaAds.snapshot} />
 
           <article className={styles.serviceCard}>
             <div className={styles.serviceLogoArea}>
@@ -439,6 +468,17 @@ export function ConnectedSystemsPanel({
       </section>
 
       <QlikStatusDetails snapshot={qlikSnapshot} />
+
+      <MetaAdsStatusDetails
+        snapshot={metaAds.snapshot}
+        checking={metaAds.checking}
+        consoleAvailable={metaAdsConsoleAvailable}
+        onVerify={metaAds.verify}
+        onConnect={() => {
+          setMetaConsoleError(false);
+          setMetaConsoleOpen(true);
+        }}
+      />
 
       <section className={styles.salesforceDetails} aria-labelledby="salesforce-details-title">
         <div className={styles.salesforceDetailsHeading}>

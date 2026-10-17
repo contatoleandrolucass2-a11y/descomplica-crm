@@ -1,5 +1,56 @@
 # Worklog
 
+## 2026-10-16: Integração Facebook Ads e console dedicado
+
+A implementação parte de `34517ba2`, em branch isolada `codex/facebook-ads-integracao`.
+A consulta inicial de produção informou `66ed7360`; essa observação não comprova
+publicação desta entrega. O objetivo é conectar a conta de anúncios indicada pelo
+usuário pelo navegador dedicado na VPS, reutilizando os controles do console
+Salesforce. A nova página comercial e o contrato de extração de métricas serão
+definidos em uma etapa posterior.
+
+O console Meta usa perfil, portas, credenciais técnicas e autorização próprios.
+A leitura de status exige acesso efetivo à página Integrações, incluindo seu
+catálogo persistido; o acesso ao console exige também perfil master. O monitor
+confirma a interface autenticada da conta esperada e
+publica somente estado e horário, sem cookies, tokens Meta ou dados de campanhas.
+A evidência expira em 120 segundos. As logos SVG preservam azul e usam lettering
+escuro nos temas claro/médio e branco no tema escuro.
+
+O coordenador de publicação oferece `--meta-ads enable`, com pareamento privado,
+backup integral, comparação atômica e recuperação independente dos arquivos de
+segredos. O instalador mantém os serviços parados e verifica o acesso do usuário
+dedicado ao release antes de instalar as unidades. A revisão corrigiu a limpeza
+da evidência ao desativar a configuração, o pareamento dos caminhos privados e a
+travessia mínima do diretório de releases.
+
+Validação local: build e formatação aprovados; 3.726 testes Vitest, 1.367 testes
+operacionais Node e 723 testes de release aprovados. As respectivas exclusões
+previstas foram 90, 5 e 14; verificações específicas de Linux permanecem na CI.
+A matriz Chromium sintética passou nos três temas, em três larguras, com zoom,
+teclado, acessibilidade e handshake noVNC dos dois provedores. Auditorias pnpm,
+OSV e Gitleaks não encontraram vulnerabilidades conhecidas ou segredos expostos.
+O inventário de recursos, o catálogo de páginas e as fontes documentais passaram.
+Após os ajustes do instalador e da URL após login, os 64 testes específicos Meta
+passaram novamente. A inspeção da interface real autenticada confirmou as três
+abas e o controle da conta. Os parâmetros transitórios acrescentados pela Meta
+são validados somente em memória e nunca integram o heartbeat ou o destino salvo.
+As quatro unidades passaram em `systemd-analyze verify` na VPS, em diretório
+temporário, sem instalação, reload ou início de serviço. Typecheck também passou.
+
+A CI `38964676168` aprovou todos os gates aplicáveis ao PR no SHA `3767d810`.
+Durante a execução, a main avançou para `c889bfc8` com a correção de expressões
+Qlik do PR #244. O merge preservou integralmente essa correção; os conflitos
+estavam apenas nas entradas de CHANGELOG e WORKLOG. Os 426 testes focais Qlik e
+Meta passaram, assim como a formatação e a verificação do diff. O candidato
+combinado exige nova validação de CI e a produção será consultada novamente
+antes da promoção.
+
+Publicação, instalação e login reais ainda não foram realizados. Nenhuma
+alteração de campanha, cobrança, conta Meta, workflow n8n ou schema Supabase faz
+parte desta etapa. A sincronização automática do Obsidian retornou
+`not-configured` neste Git comum; o conhecimento permanece versionado no projeto.
+
 ## 2026-10-16: Expressões nativas multilinha do Qlik
 
 A aplicação `34517ba2` foi publicada pelo coordenador em

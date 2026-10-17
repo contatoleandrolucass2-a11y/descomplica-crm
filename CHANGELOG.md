@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-16: Facebook Ads nas integrações
+
+- Adiciona a conta Facebook Ads indicada ao painel Integrações, com logos SVG por tema.
+- Prepara console remoto na VPS com perfil independente, restrito ao master,
+  autorização recorrente e acesso limitado a dez minutos.
+- Exibe evidência recente da sessão e distingue login necessário, conta incorreta,
+  indisponibilidade e monitor suspenso.
+- Mantém coleta de métricas e nova página comercial pendentes de definição.
+
 ## 2026-10-16: Expressões multilinha no coletor Qlik
 
 - Aceita TAB, CR e LF nas expressões nativas das medidas, mantendo hashes

@@ -1,0 +1,26 @@
+[Unit]
+Description=Descomplica Meta Ads private VNC console
+After=descomplica-meta-ads-browser.service
+Requisite=descomplica-meta-ads-browser.service
+StartLimitIntervalSec=300
+StartLimitBurst=10
+
+[Service]
+Type=exec
+User=descomplica-meta-ads
+Group=descomplica-meta-ads
+UMask=0077
+ExecStart=/usr/bin/x11vnc -display :101 -auth /run/descomplica-meta-ads/Xauthority -localhost -rfbport 5911 -rfbauth /var/lib/descomplica-meta-ads/vnc.passwd -forever -shared -nosel -noprimary -noclipboard -nosetclipboard -nolookup -quiet
+Restart=on-failure
+RestartSec=5
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictSUIDSGID=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6
+MemoryMax=256M
+TasksMax=32
+LimitCORE=0
+StandardOutput=null
+StandardError=null

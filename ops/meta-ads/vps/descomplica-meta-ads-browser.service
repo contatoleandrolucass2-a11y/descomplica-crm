@@ -1,0 +1,32 @@
+[Unit]
+Description=Descomplica Meta Ads dedicated browser
+Wants=network-online.target
+After=network-online.target
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-meta-ads
+Group=descomplica-meta-ads
+WorkingDirectory=@RELEASE@
+Environment=META_ADS_CDP_URL=http://127.0.0.1:9224
+RuntimeDirectory=descomplica-meta-ads
+RuntimeDirectoryMode=0700
+UMask=0077
+ExecStart=/usr/bin/xvfb-run --server-num=101 --auth-file=/run/descomplica-meta-ads/Xauthority --server-args="-screen 0 1440x900x24 -nolisten tcp" /usr/local/bin/node ops/meta-ads/launch-dedicated-chrome.mjs
+Restart=always
+RestartSec=10
+TimeoutStopSec=30
+KillMode=control-group
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/descomplica-meta-ads /run/descomplica-meta-ads /tmp
+MemoryMax=2G
+TasksMax=512
+LimitCORE=0
+StandardOutput=journal
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target

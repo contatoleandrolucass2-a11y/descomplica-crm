@@ -93,6 +93,39 @@ describe("Salesforce console client lifecycle", () => {
     expect(instances.clients[0]?.url).toBe("ws://localhost:3001/salesforce-console/socket");
   });
 
+  it("opens the isolated Meta Ads console only with a matching provider ticket", async () => {
+    fetchMock.mockResolvedValue({
+      ok: true,
+      status: 200,
+      json: async () => ({ ...ticket, websocketPath: "/meta-ads-console/socket" }),
+    });
+    dispose = startConsoleSession(target, onState, onFailure, "meta-ads");
+    await vi.advanceTimersByTimeAsync(0);
+    expect(fetchMock).toHaveBeenCalledWith(
+      "/api/meta-ads/console",
+      expect.objectContaining({ method: "POST" }),
+    );
+    expect(instances.clients[0]?.url).toBe("wss://crm.example.test/meta-ads-console/socket");
+  });
+
+  it.each([
+    ["meta-ads", "/salesforce-console/socket"],
+    ["salesforce", "/meta-ads-console/socket"],
+  ] as const)(
+    "rejects a socket belonging to a different provider: %s",
+    async (provider, websocketPath) => {
+      fetchMock.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: async () => ({ ...ticket, websocketPath }),
+      });
+      dispose = startConsoleSession(target, onState, onFailure, provider);
+      await vi.advanceTimersByTimeAsync(0);
+      expect(onState).toHaveBeenCalledExactlyOnceWith("error");
+      expect(instances.clients).toHaveLength(0);
+    },
+  );
+
   it.each([401, 403])("closes on HTTP %s without rendering its body", async (status) => {
     const json = vi.fn();
     fetchMock.mockResolvedValue({ ok: false, status, json });

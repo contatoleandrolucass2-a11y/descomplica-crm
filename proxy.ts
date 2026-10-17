@@ -194,7 +194,11 @@ export async function proxy(request: NextRequest) {
 
   // This probe reuses frozen gateway cookies. Its route checks identity, live
   // session, MFA and Master permission without refreshing tokens or cookies.
-  if (request.nextUrl.pathname === "/api/salesforce/console/authorize") {
+  if (
+    ["/api/salesforce/console/authorize", "/api/meta-ads/console/authorize"].includes(
+      request.nextUrl.pathname,
+    )
+  ) {
     const response = NextResponse.next({ request });
     applySecurityHeaders(response.headers, { isProd: isSecureProduction });
     response.headers.set("Cache-Control", "no-store");

@@ -100,6 +100,8 @@ describe("connected systems", () => {
       refreshAvailable: false,
       statusConfigured: true,
       consoleAvailable: false,
+      metaAdsStatusConfigured: false,
+      metaAdsConsoleAvailable: false,
     });
   });
 

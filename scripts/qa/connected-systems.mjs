@@ -15,7 +15,8 @@ async function settleTheme(page) {
     .poll(() =>
       page.evaluate(() => {
         // Inherited colors can start descendant transitions after the first batch ends.
-        for (const element of document.querySelectorAll("body *")) getComputedStyle(element).color;
+        for (const element of document.querySelectorAll("body *"))
+          void getComputedStyle(element).color;
         return document
           .getAnimations()
           .filter(
@@ -203,13 +204,25 @@ function syntheticFramebuffer(socket, { rejectCredentials = false, stall = false
   return peer;
 }
 
-async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
+async function checkSyntheticConsole(
+  page,
+  directory,
+  setSnapshot,
+  fixture,
+  provider = "salesforce",
+) {
   const { peers } = fixture;
+  const meta = provider === "meta-ads";
+  const label = meta ? "Meta Ads" : "Salesforce";
+  const dialogLabel = meta ? "Meta Ads · Facebook Ads" : "Salesforce";
+  const endpoint = `/api/${provider}/console`;
+  const socketPath = `/${provider}-console/socket`;
+  const initialPeer = peers.length;
   let ticketStatus = 200;
   let holdTicket = false;
   let releaseTicket;
   let tickets = 0;
-  await page.route("**/api/salesforce/console", async (route) => {
+  await page.route(`**${endpoint}`, async (route) => {
     tickets++;
     assert.equal(route.request().method(), "POST");
     assert.equal(route.request().postData(), null);
@@ -222,20 +235,29 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
         status: ticketStatus,
         json:
           ticketStatus === 200
-            ? { password: "TestVnc1", websocketPath: "/salesforce-console/socket", expiresIn: 600 }
+            ? { password: "TestVnc1", websocketPath: socketPath, expiresIn: 600 }
             : { error: "synthetic-private-reason" },
       })
       .catch(() => {});
   });
-  const open = page.getByRole("button", { name: "Conectar Salesforce", exact: true });
+  const open = page.getByRole("button", { name: `Conectar ${label}`, exact: true });
   await expect(open).toBeDisabled();
   assert.equal(tickets, 0);
   setSnapshot();
-  await page.evaluate(() => window.qaRender({ consoleAvailable: true }));
-  const status = page.locator('[role="status"][data-state]');
-  await expect(status).toHaveText("Não conectado");
+  await page.evaluate(
+    (meta) =>
+      window.qaRender(meta ? { metaAdsConsoleAvailable: true } : { consoleAvailable: true }),
+    meta,
+  );
+  const status = page.locator(
+    meta
+      ? '[aria-labelledby="meta-ads-details-title"] [role="status"]'
+      : '[aria-labelledby="salesforce-details-title"] [role="status"][data-state]',
+  );
+  const disconnectedLabel = meta ? "Login necessário" : "Não conectado";
+  await expect(status).toHaveText(disconnectedLabel);
   await open.click();
-  const dialog = page.getByRole("dialog", { name: "Salesforce", exact: true });
+  const dialog = page.getByRole("dialog", { name: dialogLabel, exact: true });
   const close = dialog.getByRole("button", { name: "Fechar console", exact: true });
   try {
     await expect(dialog.getByRole("status")).toHaveText("Console conectado");
@@ -253,7 +275,7 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
     throw error;
   }
   await expect(close).toBeFocused();
-  await expect(status).toHaveText("Não conectado");
+  await expect(status).toHaveText(disconnectedLabel);
   const canvas = dialog.locator("canvas");
   await expect(canvas).toHaveAttribute("width", "640");
   await expect
@@ -291,7 +313,9 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
         false,
       );
       const axe = await new AxeBuilder({ page }).include("dialog").analyze();
-      await page.screenshot({ path: path.join(directory, `console-${theme}-${width}.png`) });
+      await page.screenshot({
+        path: path.join(directory, `console-${provider}-${theme}-${width}.png`),
+      });
       assert.deepEqual(
         axe.violations.map(({ id, nodes }) => ({
           id,
@@ -306,7 +330,7 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
   await expect(canvas).toBeFocused();
   await page.keyboard.press("Tab");
   await expect(canvas).toBeFocused();
-  await expect.poll(() => peers[0].remoteTab).toBe(true);
+  await expect.poll(() => peers[initialPeer].remoteTab).toBe(true);
   await page.keyboard.press("Shift+Tab");
   await expect(close).toBeFocused();
   await page.keyboard.press("Tab");
@@ -314,7 +338,7 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
   await page.keyboard.press("Escape");
   await expect(dialog).toHaveCount(0);
   await expect(open).toBeFocused();
-  await expect.poll(() => peers[0].closed).toBe(true);
+  await expect.poll(() => peers[initialPeer].closed).toBe(true);
   await open.click();
   await expect(dialog.getByRole("status")).toHaveText("Console conectado");
   peers.at(-1).socket.close({ code: 1000 });
@@ -334,7 +358,9 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
   await open.click();
   await expect(dialog).toHaveCount(0);
   await expect(page.getByRole("alert")).toHaveText(
-    "Não foi possível autorizar o console. Tente novamente.",
+    meta
+      ? "Não foi possível autorizar o console Meta Ads. Tente novamente."
+      : "Não foi possível autorizar o console. Tente novamente.",
   );
   await expect(open).toBeFocused();
   fixture.rejectCredentials = false;
@@ -373,9 +399,8 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
   await page.keyboard.press("Escape");
   assert.equal(
     await page.evaluate(
-      () =>
-        window.qaRequests.filter((request) => request.url === "/api/salesforce/console").at(-1)
-          .aborted,
+      (endpoint) => window.qaRequests.filter((request) => request.url === endpoint).at(-1).aborted,
+      endpoint,
     ),
     true,
   );
@@ -387,7 +412,7 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
   await page.evaluate(() => window.qaRender());
   const result = {
     status: "passed",
-    fixture: "synthetic-rfb-not-real-salesforce",
+    fixture: `synthetic-rfb-not-real-${provider}`,
     checkedAt: new Date().toISOString(),
     realNoVNC: true,
     passwordHandshake: true,
@@ -396,7 +421,7 @@ async function checkSyntheticConsole(page, directory, setSnapshot, fixture) {
     closeRetryExpiry: true,
   };
   await writeFile(
-    path.join(directory, "console-results.json"),
+    path.join(directory, `console-${provider}-results.json`),
     JSON.stringify(result, null, 2) + "\n",
   );
   return result;
@@ -448,7 +473,7 @@ async function runSynthetic() {
           window.qaRender = (props = {}) => root.render(
             <ProtectedShellFrame shellClassName={shellStyles.shell} contentClassName={shellStyles.mainContent}
               chrome={<header className={shellStyles.topbar}>Descomplica · Ambiente sintético</header>}>
-              <ConnectedSystemsPanel key={JSON.stringify(props)} ingestLabel="Configurada" refreshAvailable canRefresh statusConfigured {...props} />
+              <ConnectedSystemsPanel key={JSON.stringify(props)} ingestLabel="Configurada" refreshAvailable canRefresh statusConfigured metaAdsStatusConfigured {...props} />
             </ProtectedShellFrame>
           );
           window.qaRender();
@@ -470,6 +495,8 @@ async function runSynthetic() {
   for (const asset of [
     "n8n-dark.svg",
     "n8n-light.svg",
+    "meta-dark.svg",
+    "meta-light.svg",
     "qlik-dark.svg",
     "qlik-light.svg",
     "salesforce.svg",
@@ -509,7 +536,7 @@ async function runSynthetic() {
   const consoleFixture = { peers: [], rejectCredentials: false, stall: false };
   const websocketServer = new WebSocketServer({ noServer: true });
   server.on("upgrade", (request, socket, head) => {
-    if (request.url !== "/salesforce-console/socket") {
+    if (!["/salesforce-console/socket", "/meta-ads-console/socket"].includes(request.url)) {
       socket.destroy();
       return;
     }
@@ -606,6 +633,20 @@ async function runSynthetic() {
     await page.route("**/api/ingest/qlik/status", async (route) => {
       await route.fulfill({ json: qlikSnapshot });
     });
+    const metaBase = {
+      state: "connected",
+      checkedAt: "2026-10-16T15:00:00.000Z",
+      receivedAt: "2026-10-16T15:00:01.000Z",
+      accountId: "1080988750909489",
+      businessId: "310106776631136",
+    };
+    let metaSnapshot = metaBase;
+    let metaStatusCode = 200;
+    let metaRequests = 0;
+    await page.route("**/api/meta-ads/status", async (route) => {
+      metaRequests++;
+      await route.fulfill({ status: metaStatusCode, json: metaSnapshot }).catch(() => {});
+    });
     let refreshes = 0;
     await page.route("**/api/refresh/salesforce", async (route) => {
       refreshes++;
@@ -647,12 +688,12 @@ async function runSynthetic() {
     const status = page.locator('[role="status"][data-state]');
     const verify = page.getByRole("button", { name: "Verificar conexão", exact: true });
     await expect(status).toHaveText("Conectado");
-    await expect(page.locator("img")).toHaveCount(7);
+    await expect(page.locator("img")).toHaveCount(9);
     const qlikDetails = page.locator('[aria-labelledby="qlik-details-title"]');
     await expect(qlikDetails.getByText("Publicação confirmada", { exact: true })).toBeVisible();
     assert.deepEqual(
       await page.locator('[aria-labelledby="services-title"] h3').allTextContents(),
-      ["Salesforce", "Qlik", "n8n", "Supabase"],
+      ["Salesforce", "Qlik", "Meta Ads · Facebook Ads", "n8n", "Supabase"],
     );
     assert.deepEqual(
       await page
@@ -670,17 +711,65 @@ async function runSynthetic() {
     await expect(page.getByRole("row", { name: /Agendamentos/ })).toContainText("1.234");
     await expect(page.locator("tbody tr")).toHaveCount(8);
     await expect(page.locator('input[type="password"]')).toHaveCount(0);
-    assert.deepEqual(await page.evaluate(() => window.qaRequests[0]), {
-      url: "/api/salesforce/status",
-      cache: "no-store",
-      credentials: "same-origin",
-      aborted: false,
-    });
+    assert.deepEqual(
+      await page.evaluate(() =>
+        window.qaRequests.find((request) => request.url === "/api/salesforce/status"),
+      ),
+      {
+        url: "/api/salesforce/status",
+        cache: "no-store",
+        credentials: "same-origin",
+        aborted: false,
+      },
+    );
     await verify.focus();
     await page.keyboard.press("Enter");
     await expect.poll(() => requests).toBe(2);
     assert.equal(refreshes, 0, "Checking the session never triggers ingestion");
     await expect(verify).toBeEnabled();
+    const metaDetails = page.locator('[aria-labelledby="meta-ads-details-title"]');
+    const metaState = metaDetails.getByRole("status");
+    const metaVerify = page.getByRole("button", { name: "Verificar Meta Ads", exact: true });
+    await expect(metaState).toHaveText("Sessão conectada");
+    await expect(metaDetails.getByText("Não configurada", { exact: true })).toBeVisible();
+    await expect(metaDetails.getByText(metaBase.accountId, { exact: true })).toBeVisible();
+    await expect(metaDetails.getByText(metaBase.businessId, { exact: true })).toBeVisible();
+    const managerUrl = new URL(await metaDetails.getByRole("link").getAttribute("href"));
+    assert.equal(managerUrl.hostname, "adsmanager.facebook.com");
+    assert.equal(managerUrl.searchParams.get("act"), metaBase.accountId);
+    assert.equal(managerUrl.searchParams.get("business_id"), metaBase.businessId);
+    assert.equal(managerUrl.searchParams.has("redirect_session_id"), false);
+    for (const [state, label] of [
+      ["waiting", "Não verificado"],
+      ["unconfigured", "Não configurado"],
+      ["reauth_required", "Login necessário"],
+      ["unavailable", "Não conectado"],
+      ["stale", "Sem confirmação recente"],
+      ["wrong_account", "Conta divergente"],
+    ]) {
+      metaSnapshot = { ...metaBase, state };
+      const beforeSalesforce = requests;
+      await metaVerify.click();
+      await expect(metaState).toHaveText(label);
+      await expect(status).toHaveText("Conectado");
+      assert.equal(requests, beforeSalesforce, "Meta verification must not query Salesforce");
+      await expect(metaDetails.getByText("Não configurada", { exact: true })).toBeVisible();
+    }
+    for (const invalid of [
+      { ...metaBase, accountId: "another-account" },
+      { ...metaBase, checkedAt: null },
+    ]) {
+      metaSnapshot = invalid;
+      await metaVerify.click();
+      await expect(metaState).toHaveText("Não conectado");
+    }
+    metaStatusCode = 503;
+    await metaVerify.click();
+    await expect(metaState).toHaveText("Não conectado");
+    metaStatusCode = 200;
+    metaSnapshot = metaBase;
+    await metaVerify.click();
+    await expect(metaState).toHaveText("Sessão conectada");
     for (const [state, label] of [
       ["reauth_required", "Login necessário"],
       ["unavailable", "Atualização indisponível"],
@@ -800,6 +889,17 @@ async function runSynthetic() {
       for (const width of [320, 768, 1440]) {
         await page.setViewportSize({ width, height: 900 });
         await settleTheme(page);
+        const metaCard = page.locator("[data-meta-ads-service]");
+        await expect(
+          metaCard.locator(
+            `img[src="/integrations/meta-${theme === "dark" ? "dark" : "light"}.svg"]`,
+          ),
+        ).toBeVisible();
+        await expect(
+          metaCard.locator(
+            `img[src="/integrations/meta-${theme === "dark" ? "light" : "dark"}.svg"]`,
+          ),
+        ).toBeHidden();
         await page.screenshot({
           path: path.join(directory, `${theme}-${width}.png`),
           fullPage: true,
@@ -859,6 +959,15 @@ async function runSynthetic() {
       },
       consoleFixture,
     );
+    const metaConsoleChecks = await checkSyntheticConsole(
+      page,
+      directory,
+      () => {
+        metaSnapshot = { ...metaBase, state: "reauth_required" };
+      },
+      consoleFixture,
+      "meta-ads",
+    );
 
     for (const [state, label] of [
       ["waiting", "Não verificado"],
@@ -917,8 +1026,10 @@ async function runSynthetic() {
       document.dispatchEvent(new Event("visibilitychange"));
     });
     const beforeHidden = requests;
+    const beforeMetaHidden = metaRequests;
     await page.clock.runFor(60_000);
     assert.equal(requests, beforeHidden, "Hidden tabs do not poll");
+    assert.equal(metaRequests, beforeMetaHidden, "Hidden tabs do not poll Meta Ads");
     snapshot = base;
     await page.evaluate(() => {
       Object.defineProperty(document, "hidden", { configurable: true, value: false });
@@ -934,7 +1045,15 @@ async function runSynthetic() {
     await verify.click();
     await expect(verify).toBeDisabled();
     await page.evaluate(() => window.qaUnmount());
-    await expect.poll(() => page.evaluate(() => window.qaRequests.at(-1).aborted)).toBe(true);
+    await expect
+      .poll(() =>
+        page.evaluate(
+          () =>
+            window.qaRequests.filter((request) => request.url === "/api/salesforce/status").at(-1)
+              .aborted,
+        ),
+      )
+      .toBe(true);
     const beforeUnmount = requests;
     await page.clock.runFor(60_000);
     assert.equal(requests, beforeUnmount, "Unmount cancels timers");
@@ -948,6 +1067,8 @@ async function runSynthetic() {
         states: 6,
         polling: "no overlap; timeout; hidden; cleanup",
         console: consoleChecks,
+        metaConsole: metaConsoleChecks,
+        metaStates: 7,
         screenshots: directory,
       }) + "\n",
     );

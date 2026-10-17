@@ -149,12 +149,56 @@ Salesforce. Somente IMAGE_TAG, QLIK_RANKING_V2_ENABLED e
 QLIK_RANKING_V2_HMAC_SECRET mudam, sob as mesmas travas, frescor e CAS integral.
 Backup privado schemaVersion2/kind qlik-ranking-v2 registra antes/depois;
 recuperacao verifica esse contrato e os hashes dos valores efetivos. Backups
-Salesforce schemaVersion1 continuam compativeis. As duas ativacoes nao podem
+Salesforce schemaVersion1 continuam compativeis. As ativacoes de integracoes nao podem
 ser solicitadas juntas. Vazio/ausente da flag Qlik equivale ao default false
 do Compose, sem relaxar a exigencia das flags Salesforce.
 
 Esta opcao nao aplica migration, nao modifica o owner Qlik nem habilita coleta.
 Validacoes e etapas separadas em [ranking Qlik v2](qlik-ranking-v2.md).
+
+### Conectar a sessão do Meta Ads
+
+Para a ativação autorizada, acrescentar `--meta-ads enable` ao comando `deploy`.
+A opção exige um novo SHA com CI aprovada e não pode ser combinada com
+`--salesforce-ingestion` ou `--qlik-ranking`. Não editar `production.env`
+manualmente, não passar credenciais na linha de comando e não reutilizar
+segredos Salesforce, Supabase ou Qlik.
+
+O coordenador lê exclusivamente estes arquivos regulares, privados,
+`root:root 0600`, no diretório de segredos protegido:
+
+- `/etc/descomplica-crm/secrets/meta-ads-status-bearer`: 32 a 256 caracteres
+  ASCII seguros; o instalador gera 96 caracteres hexadecimais;
+- `/etc/descomplica-crm/secrets/meta-ads-console-password`: exatamente oito
+  caracteres ASCII seguros, incluindo `+` e `/`, compatíveis com a senha
+  gerada pelo instalador. O console permanece atrás da autenticação do CRM.
+
+A leitura aceita somente uma quebra de linha terminal opcional. Espaços,
+controles, interpolação de shell/dotenv e arquivos inseguros bloqueiam a
+preparação. Os valores nunca aparecem em argumentos Docker ou saída do
+coordenador.
+
+Sob as três travas, a consulta final e o CAS integral já descritos, a mudança
+altera somente `IMAGE_TAG`, `META_ADS_STATUS_ENABLED=true`,
+`META_ADS_STATUS_SECRET`, `META_ADS_CONSOLE_ENABLED=true` e
+`META_ADS_CONSOLE_PASSWORD`. Todas as demais configurações permanecem intactas,
+inclusive Salesforce e Qlik. Antes de persistir a intenção, o coordenador
+salva o ambiente anterior e proposto no backup privado schemaVersion 2,
+`kind: meta-ads-session`; o ledger recebe somente seu identificador e hashes.
+A verificação compara os quatro valores efetivos do Meta Ads no container por
+hash, além da configuração Salesforce preservada. Ausência ou valor vazio das
+flags Meta Ads corresponde ao padrão `false` do Compose, permitindo recuperar
+a imagem anterior, que ainda não conhece a integração.
+
+A recuperação restaura exatamente o backup anterior, inclusive após remoção
+dos dois arquivos de segredos de origem. Divergência no conteúdo integral do
+env, backup adulterado ou valores diferentes no container bloqueiam conclusão.
+Backups Salesforce schemaVersion 1 e Qlik schemaVersion 2 continuam compatíveis.
+
+Esta opção ativa apenas o status e o console da sessão. Instalação da unidade
+Meta Ads, login humano, validação da conta e uma futura coleta de campanhas
+são etapas separadas; o deploy não comprova sessão autenticada nem extração de
+dados. Consultar o [runbook Meta Ads](meta-ads-vps-session.md).
 
 ## Falha e recuperação
 

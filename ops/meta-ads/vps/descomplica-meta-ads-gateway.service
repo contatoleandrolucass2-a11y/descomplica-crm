@@ -1,0 +1,45 @@
+[Unit]
+Description=Descomplica Meta Ads authenticated console gateway
+After=descomplica-meta-ads-browser.service descomplica-meta-ads-vnc.service
+Requires=descomplica-meta-ads-browser.service descomplica-meta-ads-vnc.service
+StartLimitIntervalSec=300
+StartLimitBurst=5
+
+[Service]
+Type=exec
+User=descomplica-meta-ads
+Group=descomplica-meta-ads
+WorkingDirectory=@RELEASE@
+# Provision root-owned 0600; systemd reads this before dropping privileges.
+EnvironmentFile=/etc/descomplica-meta-ads/gateway.env
+Environment=NODE_ENV=production
+ExecStart=/usr/local/bin/node ops/meta-ads/console-gateway.mjs
+Restart=on-failure
+RestartSec=5
+TimeoutStopSec=10
+KillMode=control-group
+UMask=0077
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+PrivateDevices=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+RestrictRealtime=true
+LockPersonality=true
+CapabilityBoundingSet=
+RestrictAddressFamilies=AF_UNIX AF_INET
+IPAddressDeny=any
+IPAddressAllow=127.0.0.1/32
+MemoryMax=128M
+TasksMax=32
+LimitNOFILE=128
+LimitCORE=0
+StandardOutput=null
+StandardError=null
+
+[Install]
+WantedBy=multi-user.target
