@@ -107,6 +107,20 @@ normalização, substituição de fórmulas ou dispensa de pins. Outros controle
 surrogates isolados, conteúdo apenas em branco e mais de 16.384 caracteres
 continuam recusados. Nomes, rótulos e identificadores mantêm regras separadas.
 
+Os objetos temporários solicitam `qStateName: "$"` na raiz e na definição.
+O [estado da seleção QIX](https://help.qlik.com/en-US/sense-developer/May2026/Subsystems/EngineJSONAPI/Content/models-selectionobject.htm)
+tem `$` como padrão. Um layout com estado omitido ou vazio só é aceito com
+prova adicional: propriedades efetivas do mesmo objeto antes e depois de uma
+nova leitura, identidade e tipo correspondentes, ausência de `qExtendsId`,
+estado padrão e definição solicitada preservada ou hash nativo aprovado.
+O fingerprint efetivo permanece estável nas leituras posteriores do mesmo
+modelo. `null`, booleanos, números, espaços, estados alternativos, mudança
+de identidade/definição ou método indisponível impedem a publicação. Os códigos
+`selection_state_unproven`, `list_state_unproven` e `cube_state_unproven`
+identificam somente a fronteira que não conseguiu comprovar o estado; não
+transportam valores de filtros, fórmulas ou dados. Essa compatibilidade não
+dispensa a verificação de seleções, cobertura e totais antes/depois dos dados.
+
 `ranking-mapping.mjs` rejeita definicao ausente ou nao revisada. A definicao
 produtiva agora contem os pins nativos da conferencia00:58 UTC16/10/2026,
 nao uma atestacao de coleta/publicacao. A factory deriva janeiro ate o mes corrente do

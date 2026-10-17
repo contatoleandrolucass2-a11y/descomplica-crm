@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-16: Prova do estado padrão do Qlik
+
+- Define explicitamente o estado padrão nos objetos temporários de coleta.
+- Aceita sua representação omitida ou vazia no layout somente após conferir
+  identidade, definição efetiva e estabilidade; estados alternativos e provas
+  ausentes continuam bloqueando a publicação do ranking.
+
 ## 2026-10-16: Expressões multilinha no coletor Qlik
 
 - Aceita TAB, CR e LF nas expressões nativas das medidas, mantendo hashes

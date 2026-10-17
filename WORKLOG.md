@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
+
+A correção de expressões foi integrada em `c889bfc8`, com os quatro gates da
+CI `38972259741` aprovados. A ativação protegida do owner chegou à coleta real,
+mas recusou o ciclo de `2026-10-17T00:01:48.561Z` com `state_mismatch`.
+A tentativa `b09e187e-da6f-47e6-8843-45e7073bd3f4` foi recuperada pelo
+coordenador; o recibo `6345cf46-1452-4d08-9635-35c7b45d1371` confirmou o
+owner anterior em `2026-10-17T00:03:06.179Z`, sem pendência. A aplicação
+permaneceu em `34517ba2`. Ainda não há publicação do ranking comprovada.
+
+O código exigia o literal `$` em todos os layouts. A documentação QIX descreve
+esse estado como padrão, mas uma propriedade ausente não comprova sozinha o
+escopo. A correção solicita `$` também na raiz dos objetos temporários e,
+quando o layout omite o estado ou retorna string vazia, exige propriedades
+efetivas antes e depois de uma nova leitura. Confere identidade, tipo, estado,
+ausência de herança de outro objeto, definição solicitada ou hash nativo
+aprovado e estabilidade do objeto. Mudanças posteriores também são recusadas.
+Não foi capturado o layout real que provocou a falha; esta compatibilidade
+ainda precisa ser confirmada no ciclo produtivo, sem alterar os filtros.
+
+Os testes cobrem os quatro caminhos (seleções, listas, cubos temporários e
+nativos), execução serializada, identidade/definição/estado inválidos,
+mudanças entre leituras e conciliação de dez meses. A conciliação financeira,
+as duas observações independentes, a cobertura integral e os pins permanecem
+obrigatórios. Diagnósticos novos são códigos fixos, sem conteúdo da fonte.
+
 ## 2026-10-16: Expressões nativas multilinha do Qlik
 
 A aplicação `34517ba2` foi publicada pelo coordenador em
