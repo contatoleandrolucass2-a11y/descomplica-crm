@@ -27,7 +27,10 @@ nas 255 asserções pgTAP, inclusive a negação para acesso exclusivo à House.
 A ingestão automática Qlik continua pendente da coleta real e de um ciclo
 agendado posterior. A CI identificou expectativas E2E anteriores que ainda
 associavam imobiliárias à rota House; elas foram corrigidas, com verificação
-explícita de filtros House e ausência de conteúdo Qlik nessa página.
+explícita de filtros House e ausência de conteúdo Qlik nessa página. Essa jornada
+passou na execução seguinte. O teste de estados visuais também foi limitado
+ao seu próprio overlay sintético, pois o estado vazio real de parcerias
+passou a coexistir com o estado vazio criado pelo teste.
 
 ## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
 

@@ -2202,7 +2202,9 @@ test("login, logout and terminal state surfaces remain visually explicit", async
         wrapper.append(clone);
         document.body.append(wrapper);
       }, state);
-      await expect(rolePage.locator(`[data-variant="${state.variant}"]`)).toBeVisible();
+      const evidence = rolePage.locator('[data-qa-state-evidence="true"]');
+      await expect(evidence.locator(`[data-variant="${state.variant}"]`)).toBeVisible();
+      await expect(evidence.getByRole("heading", { name: state.title, exact: true })).toBeVisible();
       await captureState(rolePage, state.variant);
     }
 
