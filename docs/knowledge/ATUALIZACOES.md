@@ -73,6 +73,30 @@
 - Limite: disponibilidade de pastas aprovadas e metas nao definidas nao foi
   alterada. Reavaliar apos mudanca de dados, layout ou regras. Registro local
   de verificacao, sem nova publicacao de runtime.
+## 2026-10-16: Sessão Meta Ads na página Integrações
+
+A etapa implementa a conta de anúncios `1080988750909489`, no business
+`310106776631136`, com console dedicado na VPS e status separado de Salesforce.
+Não há nova página comercial nem extração de métricas nesta entrega. A leitura
+exige acesso efetivo à página Integrações; o console exige também papel master.
+A prova de conexão combina URL, conta e interface visível após atualização
+controlada; URL ou sessão antiga isoladas não confirmam conexão.
+
+O monitor evita atualizar o navegador enquanto o console está ocupado, publica
+somente estado e horário e permite que a evidência expire após 120 segundos.
+Os perfis, portas e segredos são exclusivos. O instalador não inicia serviços e
+o coordenador aceita `deploy --meta-ads enable` e aplica a configuração com
+backup integral, lock compartilhado e comparação atômica.
+
+Build, formatação, testes locais e matriz sintética de navegador passaram; as
+auditorias de dependências e segredos não encontraram achados. Esses resultados
+não comprovam instalação, login na VPS, coleta ou publicação. Após login no
+navegador local, a interface real confirmou a conta e os seletores; parâmetros
+transitórios de navegação são aceitos com validação estrita, sem persistência.
+A configuração automática do Obsidian não está instalada neste Git
+comum. Fontes: código e testes desta branch, inspeção somente leitura da VPS e
+runbook `docs/runbooks/meta-ads-vps-session.md`. Revalidar SHA, CI e estado real
+antes de qualquer ativação.
 
 ## 2026-10-15: Dashboard, filtros dependentes e metas
 
