@@ -57,6 +57,15 @@ test("diagnostic authority serializes without Node/module closures and preserves
   }
 });
 for (const code of [
+  "master_catalog_shape",
+  "master_catalog_coverage_limit",
+  "page_size_invalid",
+  "selection_list_coverage_limit",
+  "calendar_list_coverage_limit",
+  "imobs_native_coverage_limit",
+  "imobs_identity_coverage_limit",
+  "developments_native_coverage_limit",
+  "developments_identity_coverage_limit",
   "master_catalog_item",
   "master_catalog_text",
   "master_catalog_binding",

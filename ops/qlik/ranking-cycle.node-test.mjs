@@ -223,6 +223,15 @@ test("exceptions never expose source details or credentials", async () => {
 });
 
 for (const reason of [
+  "master_catalog_shape",
+  "master_catalog_coverage_limit",
+  "page_size_invalid",
+  "selection_list_coverage_limit",
+  "calendar_list_coverage_limit",
+  "imobs_native_coverage_limit",
+  "imobs_identity_coverage_limit",
+  "developments_native_coverage_limit",
+  "developments_identity_coverage_limit",
   "mapping_invalid",
   "definition_changed",
   "master_changed",

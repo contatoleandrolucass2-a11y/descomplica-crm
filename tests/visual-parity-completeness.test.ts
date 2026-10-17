@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseRankingFilters,
   RankingDashboard,
-} from "@/app/(protected)/app/ranking/RankingDashboard";
+} from "@/app/(protected)/app/canal-de-parcerias/RankingDashboard";
 
 function source(relativePath: string) {
   return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
@@ -49,20 +49,23 @@ describe("complete visual composition on the scoped v3 read model", () => {
   it("keeps shadow ranking facts separate while its commercial motor stays blocked", () => {
     const productionPage = source("app/(protected)/app/ranking/page.tsx");
     const page = source("app/(protected)/app/read-model-v3/ranking/page.tsx");
-    const ranking = source("app/(protected)/app/ranking/RankingDashboard.tsx");
+    const ranking = source("app/(protected)/app/canal-de-parcerias/RankingDashboard.tsx");
     const reader = source("lib/crm/qlik/data-v2.ts");
 
     expect(page).toContain('dataset="ranking"');
     expect(page).toContain(
       "Ranking avançado, pesos, bônus, roleta e prêmios permanecem bloqueados",
     );
-    expect(productionPage).not.toContain("loadRankingReadModel");
+    expect(productionPage).toContain("loadRankingReadModel");
+    expect(productionPage).not.toContain("loadQlikRankingV2");
+    expect(productionPage).toContain("Ranking de corretores da House");
+    const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
     expect(productionPage).toContain('enforcePermission("crm.ranking.view")');
-    expect(productionPage).toContain("await loadQlikRankingV2(filters.year)");
-    expect(productionPage.indexOf('await enforcePermission("crm.ranking.view")')).toBeLessThan(
-      productionPage.indexOf("await loadQlikRankingV2"),
+    expect(partnerships).toContain("await loadQlikRankingV2(filters.year)");
+    expect(partnerships.indexOf('await enforcePermission("crm.partnerships.view")')).toBeLessThan(
+      partnerships.indexOf("await loadQlikRankingV2"),
     );
-    expect(productionPage).toContain("<RankingDashboard data={data} filters={filters}");
+    expect(partnerships).toContain("<RankingDashboard data={data} filters={filters}");
     expect(reader).toContain('.rpc("get_qlik_ranking_v2", { p_year: year })');
     expect(reader).toContain("responseSchema.safeParse(data)");
     expect(reader).not.toMatch(/createPrivilegedClient|service_role|\.from\(/);
@@ -85,7 +88,7 @@ describe("complete visual composition on the scoped v3 read model", () => {
   it("keeps deterministic dashboard and partnership structures visible without invented data", () => {
     const dashboardPage = source("app/(protected)/app/page.tsx");
     const dashboard = source("app/(protected)/app/_components/DashboardReport.tsx");
-    const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
+    const partnerships = source("app/(protected)/app/canal-de-parcerias/RankingDashboard.tsx");
 
     for (const label of [
       "Relatório completo da equipe.",
@@ -109,15 +112,15 @@ describe("complete visual composition on the scoped v3 read model", () => {
     expect(dashboardPage).toContain("<DashboardReport");
     expect(dashboardPage).not.toContain("SHOW_EXTENDED_DASHBOARD");
     for (const label of [
-      "Mês atual",
+      "Último mês disponível",
       "Mês anterior",
-      "Ano",
+      "Ano até a última competência",
       "Personalizado",
-      "Período personalizado",
+      "Mês inicial",
       "Ranking das imobiliárias",
-      "Pódio das parcerias",
-      "Totais do período",
-      "Aguardando conciliação das fontes",
+      "Pódio de",
+      "VGV total",
+      "Nenhuma publicação disponível",
     ]) {
       expect(partnerships).toContain(label);
     }
@@ -126,7 +129,7 @@ describe("complete visual composition on the scoped v3 read model", () => {
   });
 
   it("keeps final commercial copy localized and technical identifiers disclosed on demand", () => {
-    const partnerships = source("app/(protected)/app/canal-de-parcerias/page.tsx");
+    const partnerships = source("app/(protected)/app/canal-de-parcerias/RankingDashboard.tsx");
     const funnel = source(
       "app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage.tsx",
     );

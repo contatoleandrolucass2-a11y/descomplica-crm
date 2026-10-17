@@ -41999,8 +41999,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1548000,
+        "totalPixels": 1487520,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
+          "tracked": true,
+          "bytes": 75202,
+          "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d"
+        }
+      },
+      "path": "target-authenticated/ranking-1440x900.webp",
+      "bytes": 75202,
+      "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d",
+      "width": 1440,
+      "height": 1033,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 1075
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1033
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
           "tracked": true,
@@ -42008,29 +42032,14 @@
           "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea"
         }
       },
-      "path": "target-authenticated/ranking-1440x900.webp",
-      "bytes": 67860,
-      "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea",
-      "width": 1440,
-      "height": 1075,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 1033
-        },
-        "actual": {
-          "width": 1440,
-          "height": 1075
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
-          "tracked": true,
-          "bytes": 73496,
-          "sha256": "11d594ff51687fd0ce268fe4fc5a80b496a28846361f4aa31a9a805164f3f7a8"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -42040,10 +42049,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1404000,
+        "totalPixels": 1548000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
+          "tracked": true,
+          "bytes": 68942,
+          "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7"
+        }
+      },
+      "path": "target-authenticated/canal-de-parcerias-1440x900.webp",
+      "bytes": 68942,
+      "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7",
+      "width": 1440,
+      "height": 1075,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 975
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1075
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
           "tracked": true,
@@ -42051,23 +42084,14 @@
           "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
         }
       },
-      "path": "target-authenticated/canal-de-parcerias-1440x900.webp",
-      "bytes": 101578,
-      "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6",
-      "width": 1440,
-      "height": 975,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 46,
-        "totalPixels": 1404000,
-        "changedPixelRatio": 0.000032763532763532764,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
-          "tracked": true,
-          "bytes": 101578,
-          "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -42795,8 +42819,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1548000,
+        "totalPixels": 1487520,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 75202,
+          "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d"
+        }
+      },
+      "path": "target-authenticated/themes/ranking-light-1440x900.webp",
+      "bytes": 75202,
+      "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d",
+      "width": 1440,
+      "height": 1033,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 1075
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1033
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
           "tracked": true,
@@ -42804,29 +42852,14 @@
           "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea"
         }
       },
-      "path": "target-authenticated/themes/ranking-light-1440x900.webp",
-      "bytes": 67860,
-      "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea",
-      "width": 1440,
-      "height": 1075,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 1033
-        },
-        "actual": {
-          "width": 1440,
-          "height": 1075
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 73496,
-          "sha256": "11d594ff51687fd0ce268fe4fc5a80b496a28846361f4aa31a9a805164f3f7a8"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -42836,10 +42869,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1404000,
+        "totalPixels": 1548000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 68942,
+          "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7"
+        }
+      },
+      "path": "target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
+      "bytes": 68942,
+      "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7",
+      "width": 1440,
+      "height": 1075,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 975
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1075
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
           "tracked": true,
@@ -42847,23 +42904,14 @@
           "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
         }
       },
-      "path": "target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
-      "bytes": 101578,
-      "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6",
-      "width": 1440,
-      "height": 975,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 46,
-        "totalPixels": 1404000,
-        "changedPixelRatio": 0.000032763532763532764,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 101578,
-          "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -43591,8 +43639,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1548000,
+        "totalPixels": 1487520,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 75294,
+          "sha256": "d0f24329bf78fbf05a33fc3b81448110ecbbfaa4fc65d52393a98d224aa36041"
+        }
+      },
+      "path": "target-authenticated/themes/ranking-balanced-1440x900.webp",
+      "bytes": 75294,
+      "sha256": "d0f24329bf78fbf05a33fc3b81448110ecbbfaa4fc65d52393a98d224aa36041",
+      "width": 1440,
+      "height": 1033,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 1075
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1033
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
           "tracked": true,
@@ -43600,29 +43672,14 @@
           "sha256": "373570d220d195572108d1a7b9e0705e92940cd2727fc20755bf2736cdea0769"
         }
       },
-      "path": "target-authenticated/themes/ranking-balanced-1440x900.webp",
-      "bytes": 68056,
-      "sha256": "373570d220d195572108d1a7b9e0705e92940cd2727fc20755bf2736cdea0769",
-      "width": 1440,
-      "height": 1075,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 1033
-        },
-        "actual": {
-          "width": 1440,
-          "height": 1075
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 73596,
-          "sha256": "d31daaa5f0e420042921dd9f20947bef81980144262137154011d1d2b5aa3c1f"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -43632,10 +43689,34 @@
       "theme": "balanced",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1404000,
+        "totalPixels": 1548000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 69122,
+          "sha256": "96bfb79262ad07e50775e4f3f2ed2bee650155bda560c01c8b7e2ea582b69418"
+        }
+      },
+      "path": "target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
+      "bytes": 69122,
+      "sha256": "96bfb79262ad07e50775e4f3f2ed2bee650155bda560c01c8b7e2ea582b69418",
+      "width": 1440,
+      "height": 1075,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 975
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1075
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
           "tracked": true,
@@ -43643,23 +43724,14 @@
           "sha256": "549202c28070e4f6b287cf7dc00a5697ee4ce43286798ca88517ccbbe50630fd"
         }
       },
-      "path": "target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
-      "bytes": 101662,
-      "sha256": "549202c28070e4f6b287cf7dc00a5697ee4ce43286798ca88517ccbbe50630fd",
-      "width": 1440,
-      "height": 975,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 46,
-        "totalPixels": 1404000,
-        "changedPixelRatio": 0.000032763532763532764,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 101662,
-          "sha256": "549202c28070e4f6b287cf7dc00a5697ee4ce43286798ca88517ccbbe50630fd"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -44453,13 +44525,13 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1548000,
+        "totalPixels": 1487520,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 68720,
-          "sha256": "9c3a6a325732c75cddee60f79af7e703567f0a9ad4dfbb174909dfd5be382481"
+          "bytes": 75964,
+          "sha256": "d2a0eb43b29fa10dc3609973c5ed7948d575c77d5dc55cd20627a9615cd63b51"
         }
       },
       "approvedCanvasComparison": {
@@ -44468,34 +44540,43 @@
         "asset": "docs/qa/canvas-parity/reference/ranking-canal-parcerias.webp",
         "region": "left",
         "referenceSha256": "e81e5862046159302a7504809e83c89fc9ee9bd7226b7f09922802babedceab7",
-        "colorDistance": 19.501790364583332,
+        "colorDistance": 20.49289279513889,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 41.801025390625,
+        "edgeDistance": 38.889322916666664,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/ranking-dark-1440x900.webp",
-      "bytes": 68720,
-      "sha256": "9c3a6a325732c75cddee60f79af7e703567f0a9ad4dfbb174909dfd5be382481",
+      "bytes": 75964,
+      "sha256": "d2a0eb43b29fa10dc3609973c5ed7948d575c77d5dc55cd20627a9615cd63b51",
       "width": 1440,
-      "height": 1075,
+      "height": 1033,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1440,
-          "height": 1033
+          "height": 1075
         },
         "actual": {
           "width": 1440,
-          "height": 1075
+          "height": 1033
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 74578,
-          "sha256": "cca0b964a39eca919dd9b8ec85f106ae490c2bd2d9d82d55a606863b7a46a1a6"
+          "bytes": 68720,
+          "sha256": "9c3a6a325732c75cddee60f79af7e703567f0a9ad4dfbb174909dfd5be382481"
         }
+      },
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -44505,15 +44586,15 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1404000,
+        "totalPixels": 1548000,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 100870,
-          "sha256": "b2cddd0d912e77665b0e1eeb0c8201f8018cd3bc3616c63552a05d9aba6e61b8"
+          "bytes": 69906,
+          "sha256": "53cbb16a5a41ce159045afd4c43a02b2488807117f35b9aa0cd6c2bb032d01c1"
         }
       },
       "approvedCanvasComparison": {
@@ -44522,28 +44603,43 @@
         "asset": "docs/qa/canvas-parity/reference/ranking-canal-parcerias.webp",
         "region": "right",
         "referenceSha256": "e81e5862046159302a7504809e83c89fc9ee9bd7226b7f09922802babedceab7",
-        "colorDistance": 17.34353298611111,
+        "colorDistance": 17.903157552083332,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 41.566731770833336,
+        "edgeDistance": 42.06494140625,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
-      "bytes": 100870,
-      "sha256": "b2cddd0d912e77665b0e1eeb0c8201f8018cd3bc3616c63552a05d9aba6e61b8",
+      "bytes": 69906,
+      "sha256": "53cbb16a5a41ce159045afd4c43a02b2488807117f35b9aa0cd6c2bb032d01c1",
       "width": 1440,
-      "height": 975,
+      "height": 1075,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 45,
-        "totalPixels": 1404000,
-        "changedPixelRatio": 0.00003205128205128205,
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 975
+        },
+        "actual": {
+          "width": 1440,
+          "height": 1075
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
           "tracked": true,
           "bytes": 100870,
           "sha256": "b2cddd0d912e77665b0e1eeb0c8201f8018cd3bc3616c63552a05d9aba6e61b8"
         }
+      },
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -45403,8 +45499,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1376000,
+        "totalPixels": 1322240,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
+          "tracked": true,
+          "bytes": 74614,
+          "sha256": "6cb10c3a685be3b4d032972d6f81ef0f5eace2d091407bdfda98eeae49b911aa"
+        }
+      },
+      "path": "target-authenticated/ranking-1280x720.webp",
+      "bytes": 74614,
+      "sha256": "6cb10c3a685be3b4d032972d6f81ef0f5eace2d091407bdfda98eeae49b911aa",
+      "width": 1280,
+      "height": 1033,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1280,
+          "height": 1075
+        },
+        "actual": {
+          "width": 1280,
+          "height": 1033
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
           "tracked": true,
@@ -45412,29 +45532,14 @@
           "sha256": "118605570febabb15be722d4c3d146b98391bd7eb585c27f6ce6d66affec3f8c"
         }
       },
-      "path": "target-authenticated/ranking-1280x720.webp",
-      "bytes": 65714,
-      "sha256": "118605570febabb15be722d4c3d146b98391bd7eb585c27f6ce6d66affec3f8c",
-      "width": 1280,
-      "height": 1075,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1280,
-          "height": 1033
-        },
-        "actual": {
-          "width": 1280,
-          "height": 1075
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
-          "tracked": true,
-          "bytes": 72894,
-          "sha256": "29d161fad36f72c3f1edd2126cbfda288908e6e40c1888e892fd368a02a2a958"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -45444,10 +45549,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1269760,
+        "totalPixels": 1376000,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
+          "tracked": true,
+          "bytes": 66794,
+          "sha256": "6dfdb8d1763af76dd2bb455e15b00146cd46c712f3d4d25e5c315f56ef31c7ed"
+        }
+      },
+      "path": "target-authenticated/canal-de-parcerias-1280x720.webp",
+      "bytes": 66794,
+      "sha256": "6dfdb8d1763af76dd2bb455e15b00146cd46c712f3d4d25e5c315f56ef31c7ed",
+      "width": 1280,
+      "height": 1075,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1280,
+          "height": 992
+        },
+        "actual": {
+          "width": 1280,
+          "height": 1075
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
           "tracked": true,
@@ -45455,23 +45584,14 @@
           "sha256": "752dc5cb020a7c9aa032743a0d264fc2a4309018ab5ee79b521caa389da8b994"
         }
       },
-      "path": "target-authenticated/canal-de-parcerias-1280x720.webp",
-      "bytes": 99576,
-      "sha256": "752dc5cb020a7c9aa032743a0d264fc2a4309018ab5ee79b521caa389da8b994",
-      "width": 1280,
-      "height": 992,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 46,
-        "totalPixels": 1269760,
-        "changedPixelRatio": 0.000036227318548387094,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
-          "tracked": true,
-          "bytes": 99576,
-          "sha256": "752dc5cb020a7c9aa032743a0d264fc2a4309018ab5ee79b521caa389da8b994"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -46199,8 +46319,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1155072,
+        "totalPixels": 1437696,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
+          "tracked": true,
+          "bytes": 71770,
+          "sha256": "3286ebd37098cec74de15ee6d9f18899ff10b862890138f16dfdf6fa99c19a09"
+        }
+      },
+      "path": "target-authenticated/ranking-1024x768.webp",
+      "bytes": 71770,
+      "sha256": "3286ebd37098cec74de15ee6d9f18899ff10b862890138f16dfdf6fa99c19a09",
+      "width": 1024,
+      "height": 1404,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1024,
+          "height": 1128
+        },
+        "actual": {
+          "width": 1024,
+          "height": 1404
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
           "tracked": true,
@@ -46208,29 +46352,14 @@
           "sha256": "b5beb0714144e641f194d972fd194a1dad4c0b045d91435f84709024771c8eef"
         }
       },
-      "path": "target-authenticated/ranking-1024x768.webp",
-      "bytes": 61570,
-      "sha256": "b5beb0714144e641f194d972fd194a1dad4c0b045d91435f84709024771c8eef",
-      "width": 1024,
-      "height": 1128,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1024,
-          "height": 1404
-        },
-        "actual": {
-          "width": 1024,
-          "height": 1128
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
-          "tracked": true,
-          "bytes": 71516,
-          "sha256": "99123cc584b746b8a99ec85cf776149d10c47536a9e4a05eb7a08ca5055cc045"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -46240,10 +46369,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1744896,
+        "totalPixels": 1155072,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
+          "tracked": true,
+          "bytes": 62270,
+          "sha256": "0e3f7f48be0ac09e13ba3e726ffdb79a4e58ffbcbbd5fa3a3222d6b52d45b617"
+        }
+      },
+      "path": "target-authenticated/canal-de-parcerias-1024x768.webp",
+      "bytes": 62270,
+      "sha256": "0e3f7f48be0ac09e13ba3e726ffdb79a4e58ffbcbbd5fa3a3222d6b52d45b617",
+      "width": 1024,
+      "height": 1128,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1024,
+          "height": 1704
+        },
+        "actual": {
+          "width": 1024,
+          "height": 1128
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
           "tracked": true,
@@ -46251,23 +46404,14 @@
           "sha256": "9bc3a3a62a8e51f54e2a4a9e6a280c07a813c08bb413512c01d026d3425abd61"
         }
       },
-      "path": "target-authenticated/canal-de-parcerias-1024x768.webp",
-      "bytes": 107828,
-      "sha256": "9bc3a3a62a8e51f54e2a4a9e6a280c07a813c08bb413512c01d026d3425abd61",
-      "width": 1024,
-      "height": 1704,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 36,
-        "totalPixels": 1744896,
-        "changedPixelRatio": 0.000020631602112676056,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
-          "tracked": true,
-          "bytes": 107828,
-          "sha256": "9bc3a3a62a8e51f54e2a4a9e6a280c07a813c08bb413512c01d026d3425abd61"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -46995,8 +47139,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 860160,
+        "totalPixels": 1565952,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/ranking-768x1024.webp",
+          "tracked": true,
+          "bytes": 68858,
+          "sha256": "4aaa3f7548086ef22a77614206f1a5135429fabbfd4add4e7ab6f436319ff64c"
+        }
+      },
+      "path": "target-authenticated/ranking-768x1024.webp",
+      "bytes": 68858,
+      "sha256": "4aaa3f7548086ef22a77614206f1a5135429fabbfd4add4e7ab6f436319ff64c",
+      "width": 768,
+      "height": 2039,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 768,
+          "height": 1120
+        },
+        "actual": {
+          "width": 768,
+          "height": 2039
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-768x1024.webp",
           "tracked": true,
@@ -47004,29 +47172,14 @@
           "sha256": "a2bfe97dd5ad136d256a24cb644152e146a901be2504e82292942a91be75e2be"
         }
       },
-      "path": "target-authenticated/ranking-768x1024.webp",
-      "bytes": 61430,
-      "sha256": "a2bfe97dd5ad136d256a24cb644152e146a901be2504e82292942a91be75e2be",
-      "width": 768,
-      "height": 1120,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 768,
-          "height": 2039
-        },
-        "actual": {
-          "width": 768,
-          "height": 1120
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/ranking-768x1024.webp",
-          "tracked": true,
-          "bytes": 68456,
-          "sha256": "90742ada6139efaed88779c4ac27554085ecde38095a80e21e33f980578ca0dd"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -47036,10 +47189,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1774080,
+        "totalPixels": 860160,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-768x1024.webp",
+          "tracked": true,
+          "bytes": 62434,
+          "sha256": "8235aa3f00eb6c044c884408b1dd8c55cd66aad45cd90586d9d3b3dd12509bb9"
+        }
+      },
+      "path": "target-authenticated/canal-de-parcerias-768x1024.webp",
+      "bytes": 62434,
+      "sha256": "8235aa3f00eb6c044c884408b1dd8c55cd66aad45cd90586d9d3b3dd12509bb9",
+      "width": 768,
+      "height": 1120,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 768,
+          "height": 2310
+        },
+        "actual": {
+          "width": 768,
+          "height": 1120
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-768x1024.webp",
           "tracked": true,
@@ -47047,23 +47224,14 @@
           "sha256": "cba560b891d2d7a1da7265e39b45de9554594dd1626766825188b77766795fed"
         }
       },
-      "path": "target-authenticated/canal-de-parcerias-768x1024.webp",
-      "bytes": 102814,
-      "sha256": "cba560b891d2d7a1da7265e39b45de9554594dd1626766825188b77766795fed",
-      "width": 768,
-      "height": 2310,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 36,
-        "totalPixels": 1774080,
-        "changedPixelRatio": 0.000020292207792207792,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-768x1024.webp",
-          "tracked": true,
-          "bytes": 102814,
-          "sha256": "cba560b891d2d7a1da7265e39b45de9554594dd1626766825188b77766795fed"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -47791,8 +47959,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 853320,
+        "totalPixels": 1009320,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/ranking-390x844.webp",
+          "tracked": true,
+          "bytes": 65006,
+          "sha256": "3487c65b1a4d2758cfb07d6507e1be4abd3fd10f573150611193c57a6d0f817f"
+        }
+      },
+      "path": "target-authenticated/ranking-390x844.webp",
+      "bytes": 65006,
+      "sha256": "3487c65b1a4d2758cfb07d6507e1be4abd3fd10f573150611193c57a6d0f817f",
+      "width": 390,
+      "height": 2588,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 2188
+        },
+        "actual": {
+          "width": 390,
+          "height": 2588
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-390x844.webp",
           "tracked": true,
@@ -47800,29 +47992,14 @@
           "sha256": "744396340b0b2a34a2bcb3a17e692768725e395c304a7b9eaa51ddc966f7ad83"
         }
       },
-      "path": "target-authenticated/ranking-390x844.webp",
-      "bytes": 49576,
-      "sha256": "744396340b0b2a34a2bcb3a17e692768725e395c304a7b9eaa51ddc966f7ad83",
-      "width": 390,
-      "height": 2188,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 2561
-        },
-        "actual": {
-          "width": 390,
-          "height": 2188
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/ranking-390x844.webp",
-          "tracked": true,
-          "bytes": 64514,
-          "sha256": "a13c6177625c3d7956dd2bccedb702930c652bd11aec112c311a91928b89fd00"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -47832,10 +48009,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1197690,
+        "totalPixels": 853320,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-390x844.webp",
+          "tracked": true,
+          "bytes": 50378,
+          "sha256": "0b635b3dcf8b6ae5455a2cf7265507d9be672ccfd29f14ab3ae81477004a2fa0"
+        }
+      },
+      "path": "target-authenticated/canal-de-parcerias-390x844.webp",
+      "bytes": 50378,
+      "sha256": "0b635b3dcf8b6ae5455a2cf7265507d9be672ccfd29f14ab3ae81477004a2fa0",
+      "width": 390,
+      "height": 2188,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 3071
+        },
+        "actual": {
+          "width": 390,
+          "height": 2188
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-390x844.webp",
           "tracked": true,
@@ -47843,23 +48044,14 @@
           "sha256": "5c6d6a9c2ac3a061dab67264122adf773d4253ea9f75fac72ec12bd77ddc34d0"
         }
       },
-      "path": "target-authenticated/canal-de-parcerias-390x844.webp",
-      "bytes": 96156,
-      "sha256": "5c6d6a9c2ac3a061dab67264122adf773d4253ea9f75fac72ec12bd77ddc34d0",
-      "width": 390,
-      "height": 3071,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 36,
-        "totalPixels": 1197690,
-        "changedPixelRatio": 0.000030057861383162586,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-390x844.webp",
-          "tracked": true,
-          "bytes": 96156,
-          "sha256": "5c6d6a9c2ac3a061dab67264122adf773d4253ea9f75fac72ec12bd77ddc34d0"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -48593,8 +48785,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 853320,
+        "totalPixels": 1009320,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 66272,
+          "sha256": "f05ed3dd24f00c4b85f95af7c5dba8c91b972aae2b95409cfdd85dd03ccfb69e"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
+      "bytes": 66272,
+      "sha256": "f05ed3dd24f00c4b85f95af7c5dba8c91b972aae2b95409cfdd85dd03ccfb69e",
+      "width": 390,
+      "height": 2588,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 2188
+        },
+        "actual": {
+          "width": 390,
+          "height": 2588
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
           "tracked": true,
@@ -48602,29 +48818,14 @@
           "sha256": "9cc92b5750ee749bd5b2ff1ec39cec9a5f3c64e0a76f76caae29c9b568420f6d"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
-      "bytes": 51000,
-      "sha256": "9cc92b5750ee749bd5b2ff1ec39cec9a5f3c64e0a76f76caae29c9b568420f6d",
-      "width": 390,
-      "height": 2188,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 2561
-        },
-        "actual": {
-          "width": 390,
-          "height": 2188
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 66292,
-          "sha256": "96a9bdd1c4bc71fc17f3c3fa967b2b8942beb26e2ce4f5201e7e572e42d0f15d"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -48634,10 +48835,34 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1197690,
+        "totalPixels": 853320,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 52386,
+          "sha256": "bce89a38e453c5f2943607690b63c20914c1454219fe52140a190baf3a5725fa"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
+      "bytes": 52386,
+      "sha256": "bce89a38e453c5f2943607690b63c20914c1454219fe52140a190baf3a5725fa",
+      "width": 390,
+      "height": 2188,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 3071
+        },
+        "actual": {
+          "width": 390,
+          "height": 2188
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
           "tracked": true,
@@ -48645,23 +48870,14 @@
           "sha256": "96df450009275146b4328fde1c0d69e622629871ad1965449d133f6590ebd65b"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
-      "bytes": 97372,
-      "sha256": "96df450009275146b4328fde1c0d69e622629871ad1965449d133f6590ebd65b",
-      "width": 390,
-      "height": 3071,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 38,
-        "totalPixels": 1197690,
-        "changedPixelRatio": 0.000031727742571116064,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 97372,
-          "sha256": "96df450009275146b4328fde1c0d69e622629871ad1965449d133f6590ebd65b"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -49395,8 +49611,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 838500,
+        "totalPixels": 977625,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/ranking-375x812.webp",
+          "tracked": true,
+          "bytes": 64548,
+          "sha256": "c10ad4e9c16d401dcaf8dc010d1a8692441ea4c93cd2648158a69ec577bd8e70"
+        }
+      },
+      "path": "target-authenticated/ranking-375x812.webp",
+      "bytes": 64548,
+      "sha256": "c10ad4e9c16d401dcaf8dc010d1a8692441ea4c93cd2648158a69ec577bd8e70",
+      "width": 375,
+      "height": 2607,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 2236
+        },
+        "actual": {
+          "width": 375,
+          "height": 2607
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-375x812.webp",
           "tracked": true,
@@ -49404,29 +49644,14 @@
           "sha256": "8c4c9b40d8c95463ca1195ccb1fe31e22a1cf54eff8a97795eb12a268404d2c5"
         }
       },
-      "path": "target-authenticated/ranking-375x812.webp",
-      "bytes": 49808,
-      "sha256": "8c4c9b40d8c95463ca1195ccb1fe31e22a1cf54eff8a97795eb12a268404d2c5",
-      "width": 375,
-      "height": 2236,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 375,
-          "height": 2561
-        },
-        "actual": {
-          "width": 375,
-          "height": 2236
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/ranking-375x812.webp",
-          "tracked": true,
-          "bytes": 63774,
-          "sha256": "0235da4484c14ef6468bd043e9e36df8b50b523e400b40a74a7f8b8b34cf00dc"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -49436,10 +49661,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1189125,
+        "totalPixels": 838500,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-375x812.webp",
+          "tracked": true,
+          "bytes": 50618,
+          "sha256": "a88e81a0e04d3451fd247ed239e1fad54601d043eeecb6e0ee4c1c596eb83637"
+        }
+      },
+      "path": "target-authenticated/canal-de-parcerias-375x812.webp",
+      "bytes": 50618,
+      "sha256": "a88e81a0e04d3451fd247ed239e1fad54601d043eeecb6e0ee4c1c596eb83637",
+      "width": 375,
+      "height": 2236,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 3171
+        },
+        "actual": {
+          "width": 375,
+          "height": 2236
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-375x812.webp",
           "tracked": true,
@@ -49447,23 +49696,14 @@
           "sha256": "37ea08800a6d52456ebb5f2f24903793ed9c26a381b3fd87617add647aa3a81f"
         }
       },
-      "path": "target-authenticated/canal-de-parcerias-375x812.webp",
-      "bytes": 96014,
-      "sha256": "37ea08800a6d52456ebb5f2f24903793ed9c26a381b3fd87617add647aa3a81f",
-      "width": 375,
-      "height": 3171,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 36,
-        "totalPixels": 1189125,
-        "changedPixelRatio": 0.000030274361400189216,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-375x812.webp",
-          "tracked": true,
-          "bytes": 96014,
-          "sha256": "37ea08800a6d52456ebb5f2f24903793ed9c26a381b3fd87617add647aa3a81f"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -50197,8 +50437,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 715520,
+        "totalPixels": 848640,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/ranking-320x568.webp",
+          "tracked": true,
+          "bytes": 64516,
+          "sha256": "3325283d3891dcd083341318f6aaaf9bcb480d7fc71ab7f33b36062abf3c8ed1"
+        }
+      },
+      "path": "target-authenticated/ranking-320x568.webp",
+      "bytes": 64516,
+      "sha256": "3325283d3891dcd083341318f6aaaf9bcb480d7fc71ab7f33b36062abf3c8ed1",
+      "width": 320,
+      "height": 2652,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 2236
+        },
+        "actual": {
+          "width": 320,
+          "height": 2652
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-320x568.webp",
           "tracked": true,
@@ -50206,29 +50470,14 @@
           "sha256": "549cd0535930b29c33efe20b1635d20b92268d622e92eddb548c7e9d6108b61e"
         }
       },
-      "path": "target-authenticated/ranking-320x568.webp",
-      "bytes": 49242,
-      "sha256": "549cd0535930b29c33efe20b1635d20b92268d622e92eddb548c7e9d6108b61e",
-      "width": 320,
-      "height": 2236,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 320,
-          "height": 2625
-        },
-        "actual": {
-          "width": 320,
-          "height": 2236
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/ranking-320x568.webp",
-          "tracked": true,
-          "bytes": 63838,
-          "sha256": "9929334291e15476032e7f2da61ebaa751e86a85b04336738b2944283564b7fb"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -50238,10 +50487,34 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1035840,
+        "totalPixels": 715520,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-320x568.webp",
+          "tracked": true,
+          "bytes": 49996,
+          "sha256": "b68debc3ba883ac5b1009ff71df4142c165efa2449957726b9795578e1ee97d3"
+        }
+      },
+      "path": "target-authenticated/canal-de-parcerias-320x568.webp",
+      "bytes": 49996,
+      "sha256": "b68debc3ba883ac5b1009ff71df4142c165efa2449957726b9795578e1ee97d3",
+      "width": 320,
+      "height": 2236,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 3237
+        },
+        "actual": {
+          "width": 320,
+          "height": 2236
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-320x568.webp",
           "tracked": true,
@@ -50249,23 +50522,14 @@
           "sha256": "48c2ca0651df842842c948780ff6370a480bf999b425324868595f4e812d3b3e"
         }
       },
-      "path": "target-authenticated/canal-de-parcerias-320x568.webp",
-      "bytes": 95462,
-      "sha256": "48c2ca0651df842842c948780ff6370a480bf999b425324868595f4e812d3b3e",
-      "width": 320,
-      "height": 3237,
-      "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 36,
-        "totalPixels": 1035840,
-        "changedPixelRatio": 0.00003475440222428174,
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-320x568.webp",
-          "tracked": true,
-          "bytes": 95462,
-          "sha256": "48c2ca0651df842842c948780ff6370a480bf999b425324868595f4e812d3b3e"
-        }
+      "captureProvenance": {
+        "capturedAt": "2026-10-17T01:25:55.549Z",
+        "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+        "worktreeDirtyAtCapture": false,
+        "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+        "ciRunId": 38988640861,
+        "artifactId": 12084629722,
+        "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898"
       }
     },
     {
@@ -51861,44 +52125,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
         "tracked": true,
-        "bytes": 107828,
-        "sha256": "9bc3a3a62a8e51f54e2a4a9e6a280c07a813c08bb413512c01d026d3425abd61"
+        "bytes": 62270,
+        "sha256": "0e3f7f48be0ac09e13ba3e726ffdb79a4e58ffbcbbd5fa3a3222d6b52d45b617"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
         "tracked": true,
-        "bytes": 99576,
-        "sha256": "752dc5cb020a7c9aa032743a0d264fc2a4309018ab5ee79b521caa389da8b994"
+        "bytes": 66794,
+        "sha256": "6dfdb8d1763af76dd2bb455e15b00146cd46c712f3d4d25e5c315f56ef31c7ed"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
         "tracked": true,
-        "bytes": 101578,
-        "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
+        "bytes": 68942,
+        "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-320x568.webp",
         "tracked": true,
-        "bytes": 95462,
-        "sha256": "48c2ca0651df842842c948780ff6370a480bf999b425324868595f4e812d3b3e"
+        "bytes": 49996,
+        "sha256": "b68debc3ba883ac5b1009ff71df4142c165efa2449957726b9795578e1ee97d3"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-375x812.webp",
         "tracked": true,
-        "bytes": 96014,
-        "sha256": "37ea08800a6d52456ebb5f2f24903793ed9c26a381b3fd87617add647aa3a81f"
+        "bytes": 50618,
+        "sha256": "a88e81a0e04d3451fd247ed239e1fad54601d043eeecb6e0ee4c1c596eb83637"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-390x844.webp",
         "tracked": true,
-        "bytes": 96156,
-        "sha256": "5c6d6a9c2ac3a061dab67264122adf773d4253ea9f75fac72ec12bd77ddc34d0"
+        "bytes": 50378,
+        "sha256": "0b635b3dcf8b6ae5455a2cf7265507d9be672ccfd29f14ab3ae81477004a2fa0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-768x1024.webp",
         "tracked": true,
-        "bytes": 102814,
-        "sha256": "cba560b891d2d7a1da7265e39b45de9554594dd1626766825188b77766795fed"
+        "bytes": 62434,
+        "sha256": "8235aa3f00eb6c044c884408b1dd8c55cd66aad45cd90586d9d3b3dd12509bb9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
@@ -52323,44 +52587,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
         "tracked": true,
-        "bytes": 61570,
-        "sha256": "b5beb0714144e641f194d972fd194a1dad4c0b045d91435f84709024771c8eef"
+        "bytes": 71770,
+        "sha256": "3286ebd37098cec74de15ee6d9f18899ff10b862890138f16dfdf6fa99c19a09"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
         "tracked": true,
-        "bytes": 65714,
-        "sha256": "118605570febabb15be722d4c3d146b98391bd7eb585c27f6ce6d66affec3f8c"
+        "bytes": 74614,
+        "sha256": "6cb10c3a685be3b4d032972d6f81ef0f5eace2d091407bdfda98eeae49b911aa"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
         "tracked": true,
-        "bytes": 67860,
-        "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea"
+        "bytes": 75202,
+        "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-320x568.webp",
         "tracked": true,
-        "bytes": 49242,
-        "sha256": "549cd0535930b29c33efe20b1635d20b92268d622e92eddb548c7e9d6108b61e"
+        "bytes": 64516,
+        "sha256": "3325283d3891dcd083341318f6aaaf9bcb480d7fc71ab7f33b36062abf3c8ed1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-375x812.webp",
         "tracked": true,
-        "bytes": 49808,
-        "sha256": "8c4c9b40d8c95463ca1195ccb1fe31e22a1cf54eff8a97795eb12a268404d2c5"
+        "bytes": 64548,
+        "sha256": "c10ad4e9c16d401dcaf8dc010d1a8692441ea4c93cd2648158a69ec577bd8e70"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-390x844.webp",
         "tracked": true,
-        "bytes": 49576,
-        "sha256": "744396340b0b2a34a2bcb3a17e692768725e395c304a7b9eaa51ddc966f7ad83"
+        "bytes": 65006,
+        "sha256": "3487c65b1a4d2758cfb07d6507e1be4abd3fd10f573150611193c57a6d0f817f"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-768x1024.webp",
         "tracked": true,
-        "bytes": 61430,
-        "sha256": "a2bfe97dd5ad136d256a24cb644152e146a901be2504e82292942a91be75e2be"
+        "bytes": 68858,
+        "sha256": "4aaa3f7548086ef22a77614206f1a5135429fabbfd4add4e7ab6f436319ff64c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
@@ -52713,20 +52977,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 101662,
-        "sha256": "549202c28070e4f6b287cf7dc00a5697ee4ce43286798ca88517ccbbe50630fd"
+        "bytes": 69122,
+        "sha256": "96bfb79262ad07e50775e4f3f2ed2bee650155bda560c01c8b7e2ea582b69418"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 100870,
-        "sha256": "b2cddd0d912e77665b0e1eeb0c8201f8018cd3bc3616c63552a05d9aba6e61b8"
+        "bytes": 69906,
+        "sha256": "53cbb16a5a41ce159045afd4c43a02b2488807117f35b9aa0cd6c2bb032d01c1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
         "tracked": true,
-        "bytes": 101578,
-        "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
+        "bytes": 68942,
+        "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
@@ -52929,8 +53193,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
         "tracked": true,
-        "bytes": 97372,
-        "sha256": "96df450009275146b4328fde1c0d69e622629871ad1965449d133f6590ebd65b"
+        "bytes": 52386,
+        "sha256": "bce89a38e453c5f2943607690b63c20914c1454219fe52140a190baf3a5725fa"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
@@ -52995,8 +53259,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
         "tracked": true,
-        "bytes": 51000,
-        "sha256": "9cc92b5750ee749bd5b2ff1ec39cec9a5f3c64e0a76f76caae29c9b568420f6d"
+        "bytes": 66272,
+        "sha256": "f05ed3dd24f00c4b85f95af7c5dba8c91b972aae2b95409cfdd85dd03ccfb69e"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
@@ -53043,20 +53307,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 68056,
-        "sha256": "373570d220d195572108d1a7b9e0705e92940cd2727fc20755bf2736cdea0769"
+        "bytes": 75294,
+        "sha256": "d0f24329bf78fbf05a33fc3b81448110ecbbfaa4fc65d52393a98d224aa36041"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 68720,
-        "sha256": "9c3a6a325732c75cddee60f79af7e703567f0a9ad4dfbb174909dfd5be382481"
+        "bytes": 75964,
+        "sha256": "d2a0eb43b29fa10dc3609973c5ed7948d575c77d5dc55cd20627a9615cd63b51"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
         "tracked": true,
-        "bytes": 67860,
-        "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea"
+        "bytes": 75202,
+        "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
@@ -53186,7 +53450,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "d6ba803228f50bc6bd51bace4d6827ed61ea9ba077882189e667c0f46211a943"
+    "manifestSha256": "5928fa5c3d16f27c4d9e8a3a0ed642f4f81c0138e71156d141d6b6dc712fb9bf"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -53988,6 +54252,46 @@
       ],
       "remainingImagesPreserved": 231,
       "followUp": "Full verify-mode CI required before merge; this promotion is not a passing candidate run."
+    },
+    {
+      "reviewedAt": "2026-10-17T01:28:14.308320+00:00",
+      "scope": "Only Ranking House and Canal de Parcerias, as explicitly corrected by the user; all unrelated images and original capture provenance preserved.",
+      "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38988640861",
+      "artifactId": 12084629722,
+      "headCommit": "6676a2d1a6243e1a300dc4c121a3df35ca857898",
+      "captureCommit": "dc3718e4b39bd8a688e3075f38a17faf7a8deba5",
+      "capturedAt": "2026-10-17T01:25:55.549Z",
+      "worktreeDirtyAtCapture": false,
+      "worktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+      "sourceManifestSha256": "faf1f0e1f521ff81c2e178c9c7106a790a1abf6b0621c50fae0aa04b0a7f92a4",
+      "previousManifestSha256": "a2fa3241e7f9a75b03e565fe7409758a1dbac88dba6991a4251e1d79d03fa783",
+      "functionalChecksPassed": true,
+      "changedScreenshots": [
+        "target-authenticated/canal-de-parcerias-1024x768.webp",
+        "target-authenticated/canal-de-parcerias-1280x720.webp",
+        "target-authenticated/canal-de-parcerias-1440x900.webp",
+        "target-authenticated/canal-de-parcerias-320x568.webp",
+        "target-authenticated/canal-de-parcerias-375x812.webp",
+        "target-authenticated/canal-de-parcerias-390x844.webp",
+        "target-authenticated/canal-de-parcerias-768x1024.webp",
+        "target-authenticated/ranking-1024x768.webp",
+        "target-authenticated/ranking-1280x720.webp",
+        "target-authenticated/ranking-1440x900.webp",
+        "target-authenticated/ranking-320x568.webp",
+        "target-authenticated/ranking-375x812.webp",
+        "target-authenticated/ranking-390x844.webp",
+        "target-authenticated/ranking-768x1024.webp",
+        "target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
+        "target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
+        "target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
+        "target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
+        "target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
+        "target-authenticated/themes/ranking-balanced-1440x900.webp",
+        "target-authenticated/themes/ranking-dark-1440x900.webp",
+        "target-authenticated/themes/ranking-light-1440x900.webp"
+      ],
+      "preservedScreenshots": 220,
+      "followUp": "Full verify-mode CI on the combined commit remains required before merge."
     },
     {
       "reviewedAt": "2026-10-17T12:03:42.272Z",

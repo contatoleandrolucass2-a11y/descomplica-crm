@@ -34,6 +34,76 @@ Validacao parcial:13 testes de periodos,28 de apresentacao e fechamento dos
 filtros em Chromium desktop/mobile passaram. Lint e tipos passaram na retomada.
 Gates completos ainda em verificacao; nao publicado.
 
+## 2026-10-16: Separação urgente entre Ranking House e Canal de Parcerias
+
+O usuário corrigiu explicitamente o destino: o ranking de imobiliárias fica
+em Canal de Parcerias; `/app/ranking` é dos corretores da House. O merge
+automático da PR #246 foi interrompido antes de qualquer integração ou nova
+publicação. A consulta ao banco confirmou zero observações e zero publicações
+Qlik, sem dados incompletos a corrigir.
+
+A composição Qlik e seus filtros GET foram movidos para a página de parcerias,
+com `crm.partnerships.view` no servidor e no reader SQL. A página House e seu
+CSS foram restaurados da revisão anterior à substituição por Qlik, mantendo
+o read model Salesforce, o guard `crm.ranking.view` e o bloqueio existente
+de pontuação sem política aprovada. A correção não inventa uma pontuação nem
+converte dados de imobiliárias em atividades de corretores.
+
+A suíte focal passou com 109 testes e duas verificações de navegador reservadas
+à CI. Os testes de rota e banco cobrem separação de conteúdo e autorização;
+as validações completas, pgTAP e visuais ainda são exigidas antes de publicar.
+A descrição genérica já registrada de `crm.ranking.view` foi preservada para
+manter o catálogo sincronizado, sem recadastrar páginas ou alterar acessos
+individuais. O teste legado de parcerias agora verifica o estado Qlik. Lint, tipos, build, fontes e formato passaram. A suíte completa local passou
+com 3.671 testes Vitest, 1.497 operacionais e 703 do coordenador. Em um banco
+local isolado e descartável, baseline Qlik mais a nova migration passaram
+nas 255 asserções pgTAP, inclusive a negação para acesso exclusivo à House.
+A ingestão automática Qlik continua pendente da coleta real e de um ciclo
+agendado posterior. A CI identificou expectativas E2E anteriores que ainda
+associavam imobiliárias à rota House; elas foram corrigidas, com verificação
+explícita de filtros House e ausência de conteúdo Qlik nessa página. Essa jornada
+passou na execução seguinte. O teste de estados visuais também foi limitado
+ao seu próprio overlay sintético, pois o estado vazio real de parcerias
+passou a coexistir com o estado vazio criado pelo teste.
+
+A base concorrente `f1088046`, incluindo a integração Meta Ads, foi incorporada
+sem remover o trabalho de outros desenvolvedores. Sobre `6676a2d1`, lint,
+formatação, tipos e build passaram, assim como 3.731 testes Vitest, 1.561
+operacionais e 723 do coordenador (6.015 no total). A captura Linux
+`38988640861` passou no E2E e na matriz de temas, tamanhos, zoom e teclado.
+Foram revisadas as páginas House e Parcerias em desktop e celular, incluindo
+temas claro e escuro. Somente suas 22 referências visuais foram atualizadas
+do artefato `12084629722`; as outras 220 e sua proveniência foram preservadas.
+O commit de captura `dc3718e4` tem como pais a base e o candidato conferidos.
+A CI de comparação sobre o commit combinado continua obrigatória antes do
+merge; esta revisão não comprova publicação em produção.
+
+## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
+
+A correção de expressões foi integrada em `c889bfc8`, com os quatro gates da
+CI `38972259741` aprovados. A ativação protegida do owner chegou à coleta real,
+mas recusou o ciclo de `2026-10-17T00:01:48.561Z` com `state_mismatch`.
+A tentativa `b09e187e-da6f-47e6-8843-45e7073bd3f4` foi recuperada pelo
+coordenador; o recibo `6345cf46-1452-4d08-9635-35c7b45d1371` confirmou o
+owner anterior em `2026-10-17T00:03:06.179Z`, sem pendência. A aplicação
+permaneceu em `34517ba2`. Ainda não há publicação do ranking comprovada.
+
+O código exigia o literal `$` em todos os layouts. A documentação QIX descreve
+esse estado como padrão, mas uma propriedade ausente não comprova sozinha o
+escopo. A correção solicita `$` também na raiz dos objetos temporários e,
+quando o layout omite o estado ou retorna string vazia, exige propriedades
+efetivas antes e depois de uma nova leitura. Confere identidade, tipo, estado,
+ausência de herança de outro objeto, definição solicitada ou hash nativo
+aprovado e estabilidade do objeto. Mudanças posteriores também são recusadas.
+Não foi capturado o layout real que provocou a falha; esta compatibilidade
+ainda precisa ser confirmada no ciclo produtivo, sem alterar os filtros.
+
+Os testes cobrem os quatro caminhos (seleções, listas, cubos temporários e
+nativos), execução serializada, identidade/definição/estado inválidos,
+mudanças entre leituras e conciliação de dez meses. A conciliação financeira,
+as duas observações independentes, a cobertura integral e os pins permanecem
+obrigatórios. Diagnósticos novos são códigos fixos, sem conteúdo da fonte.
+
 ## 2026-10-16: Integração Facebook Ads e console dedicado
 
 A implementação parte de `34517ba2`, em branch isolada `codex/facebook-ads-integracao`.
@@ -7423,3 +7493,36 @@ scripts/release/salesforce-release-environment.node-test.mjs, linha 31; o códig
 atual já substitui esse valor por repetição explícita de "fixture". Nenhuma
 regra do scanner foi desativada ou ignorada para esta entrega.
 A conferência das fontes públicas de documentação também passou nesta rodada.
+
+## 2026-10-17: Correção publicada e diagnóstico de cobertura Qlik
+
+A correção urgente foi publicada no aplicativo `eff7f729c4386af14af16902fe4c761027df597a`,
+recibo `6a8e7f60-2847-4e32-8be3-9c6e1d23ed39`, em
+`2026-10-17T04:49:20.557Z`, depois dos quatro gates aprovados da CI `39000609517`.
+A imagem imutável foi conferida e a publicação coordenada com a integração Meta Ads.
+A migration do reader Qlik foi aplicada com backup, comparação da definição e
+exclusão mútua. A verificação autenticada confirmou House em Ranking e imobiliárias
+em Canal de Parcerias; a política de pontuação House continua pendente de aprovação.
+
+A primeira coleta do owner dessa revisão recusou o ciclo em
+`2026-10-17T04:51:47.508Z` com `coverage_limit`. A pendência
+`2bfb25a4-64cf-43b0-8ab8-263775e94d50` foi recuperada pelo coordenador. O recibo
+`c62805c6-cc4e-4f3a-861d-9bdbc3dbf400`, de `2026-10-17T04:52:55.374Z`,
+restaurou o owner anterior `17ab106f9951781cdfe50717317323b4ce6df355`, sem
+pendência e sem reverter o aplicativo ou a integração Meta.
+
+O novo diagnóstico distingue formato inválido, catálogo, listas e os quatro
+cubos por códigos fixos. Preserva os limites de 4.096 masters e 5.000 linhas,
+as seleções, a paginação, os pins, a conciliação, os prazos e a limpeza de sessão.
+Os testes exercitam cada rejeição no módulo e no coletor serializado, além da
+propagação permitida e da remoção de mensagens arbitrárias. O código não registra
+conteúdo comercial ou credenciais. A causa exata na origem, a primeira publicação
+real e um ciclo automático posterior continuam sem comprovação.
+
+A validação local desta alteração passou com 3.731 testes Vitest, 1.610
+operacionais e 723 do coordenador, totalizando 6.064 casos aprovados. Permanecem
+90 skips Vitest e 19 verificações operacionais/físicas não executáveis neste
+perfil macOS. Lint, tipos, build, formato e verificação das fontes documentais
+passaram. A aceitação de 5.000 linhas e a rejeição de 5.001 foram verificadas.
+A CI no SHA exato e a ativação protegida do owner ainda são necessárias; nenhuma
+nova publicação do aplicativo é exigida por esta mudança de diagnóstico.

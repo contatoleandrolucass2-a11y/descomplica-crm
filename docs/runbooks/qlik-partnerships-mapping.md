@@ -1,5 +1,11 @@
 # Qlik: mapeamento do Canal de Parcerias
 
+> Correção de destino solicitada pelo usuário em 16/10/2026: imobiliárias e
+> empreendimentos Qlik pertencem exclusivamente a `/app/canal-de-parcerias`,
+> com `crm.partnerships.view`. `/app/ranking` é reservado ao ranking House.
+> Esta decisão substitui as referências históricas de rota abaixo; não altera
+> o recorte Qlik, os contratos de ingestão ou a política de pontuação House.
+
 ## Estado nativo conferido em16/10/2026,00:58 UTC
 
 Esta secao atualiza o estado historico descrito abaixo; nao e prova de fatos
@@ -154,7 +160,7 @@ Parceiras, com totais e selecoes. Nenhuma tabela de clientes foi exportada.
 Revisao independente confirmou que o caminho minimo precisa de contrato
 aditivo com cobertura e vazio explicitos, snapshot atomico e reader que fixe
 uma unica carga. O reader antigo mistura runs e nao retorna produtos. Manter
-as permissoes atuais; o destino /app/ranking nao autoriza leitura regional
+as permissoes atuais; o destino /app/canal-de-parcerias nao autoriza leitura regional
 irrestrita. Nao fabricar comparacoes legacy matched quando o baseline falta.
 Restaurar n8n legado, pontuacao Salesforce ou exigir totais iguais entre
 dimensoes nao sao requisitos deste ranking. O teste focado de contratos,
@@ -278,7 +284,9 @@ Fontes versionadas: `docs/qlik-relay-mapping-cutover/CALLER_AND_CONSUMERS.md`,
 `supabase/migrations/20260809181424_crm_read_model_v3.sql`.
 Marcadores sanitizados de migrations nao comprovam implementacao remota.
 
-## Implementacao local da apresentacao
+## Registro historico da apresentacao no PR216
+
+A decisao de rota desta secao foi substituida em 16/10/2026: Qlik fica exclusivamente em `/app/canal-de-parcerias`, com `crm.partnerships.view`; `/app/ranking` permanece House. O texto abaixo registra o candidato anterior e nao deve orientar a publicacao atual.
 
 Esta secao descreve o candidato do PR216, nao a branch operacional
 codex/qlik-api-session. Essa branch nao inclui alteracoes da pagina ou presenter.

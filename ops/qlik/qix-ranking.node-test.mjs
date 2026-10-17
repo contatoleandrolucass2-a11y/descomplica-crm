@@ -149,7 +149,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       }
     return [...groups.values()];
   }
-  function cubeModel(role, native) {
+  function cubeModel(role, native, properties) {
     const matrix = () =>
       combined(role, native).map((row, index) =>
         native
@@ -169,12 +169,14 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
     return {
       getEffectiveProperties: async () =>
         invoke(
-          "properties",
-          {
-            qInfo: { qId: mapping.cubes[role].objectId },
-            qHyperCubeDef: structuredClone(cubes[role]),
-          },
-          { role },
+          native ? "properties" : "ownedProperties",
+          native
+            ? {
+                qInfo: { qId: mapping.cubes[role].objectId, qType: "table" },
+                qHyperCubeDef: structuredClone(cubes[role]),
+              }
+            : structuredClone(properties),
+          { role, native },
         ),
       getLayout: async () => {
         const items = combined(role, native);
@@ -183,6 +185,9 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
         return invoke(
           "cubeLayout",
           {
+            qInfo: native
+              ? { qId: mapping.cubes[role].objectId, qType: "table" }
+              : { ...properties.qInfo },
             qHyperCube: {
               qStateName: "$",
               qMode: "S",
@@ -298,8 +303,11 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       if (properties.qSelectionObjectDef) {
         assert.equal(properties.qSelectionObjectDef.qStateName, "$");
         return {
+          getEffectiveProperties: async () =>
+            invoke("ownedProperties", structuredClone(properties)),
           getLayout: async () =>
             invoke("selectionLayout", {
+              qInfo: { ...properties.qInfo },
               qSelectionObject: {
                 qStateName: "$",
                 qSelections: [
@@ -325,10 +333,13 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       if (properties.qListObjectDef) {
         const field = properties.qListObjectDef.qDef.qFieldDefs[0];
         return {
+          getEffectiveProperties: async () =>
+            invoke("ownedProperties", structuredClone(properties), { field }),
           getLayout: async () =>
             invoke(
               "listLayout",
               {
+                qInfo: { ...properties.qInfo },
                 qListObject: {
                   qStateName: "$",
                   qSize: { qcx: 1, qcy: listValues(field).length },
@@ -379,7 +390,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
         vgv.qLibraryId ? masters.get(vgv.qLibraryId).qMeasure.qDef : vgv.qDef.qDef,
         masters.get(`synthetic-${role}-vgv-master`).qMeasure.qDef,
       );
-      return cubeModel(role, false);
+      return cubeModel(role, false, properties);
     },
     destroySessionObject: async (id) => {
       assert.ok(state.created.includes(id));
@@ -1292,7 +1303,7 @@ for (const [name, mutate, reason] of [
   [
     "oversized catalog",
     (value) => (value.qMeasureList.qItems = Array(4097).fill({})),
-    "coverage_limit",
+    "master_catalog_coverage_limit",
   ],
   ["reduced catalog", (value) => (value.qMeasureList.qIsReduced = true), "reduced_page"],
   [
@@ -1375,6 +1386,99 @@ test("alias catalog cleanup failure is sanitized and cannot produce collected fa
     reason: "cleanup_failed",
   });
 });
+
+for (const serialized of [false, true]) {
+  for (const role of ["imobs", "developments"]) {
+    for (const native of [false, true]) {
+      test(`coverage rejection identifies ${role}/${native ? "native" : "identity"}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value, context) {
+            if (method === "cubeLayout" && context.role === role && context.native === native)
+              value.qHyperCube.qSize.qcy = 5001;
+            return value;
+          },
+        });
+        const collect = serialized
+          ? runInNewContext(`(${collectQlikRanking.toString()})`, {
+              crypto: webcrypto,
+              TextEncoder,
+            })
+          : collectQlikRanking;
+        const result = JSON.parse(JSON.stringify(await collect(f.global, f.options)));
+        assert.deepEqual(result, {
+          status: "unavailable",
+          reason: `${role}_${native ? "native" : "identity"}_coverage_limit`,
+        });
+        assert.equal(f.state.sessions.size, 0);
+        assert.ok(
+          !f.state.calls.some(
+            (call) => call.method === "cubeData" && call.role === role && call.native === native,
+          ),
+        );
+      });
+    }
+  }
+  for (const calendar of [false, true]) {
+    test(`coverage rejection identifies ${calendar ? "calendar" : "selection"} list, serialized=${serialized}`, async () => {
+      const f = fixture({
+        hook(method, value, context) {
+          if (method === "listLayout" && (context.field === CALENDAR) === calendar)
+            value.qListObject.qSize.qcy = 5001;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: calendar ? "calendar_list_coverage_limit" : "selection_list_coverage_limit",
+      });
+      assert.equal(f.state.sessions.size, 0);
+      assert.ok(
+        !f.state.calls.some(
+          (call) => call.method === "listData" && (call.field === CALENDAR) === calendar,
+        ),
+      );
+    });
+  }
+  for (const invalid of [undefined, null, -1, 0.5, "synthetic-private-secret", Infinity]) {
+    test(`invalid page height ${String(invalid)} is not a row-limit rejection, serialized=${serialized}`, async () => {
+      const f = fixture({
+        hook(method, value) {
+          if (method === "listLayout") value.qListObject.qSize.qcy = invalid;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: "page_size_invalid",
+      });
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+  for (const invalid of [null, "synthetic-private-secret", {}]) {
+    test(`invalid catalog shape remains private, serialized=${serialized}, shape=${typeof invalid}`, async () => {
+      const f = aliasFixture({
+        hook(method, value) {
+          if (method === "catalog") value.qMeasureList.qItems = invalid;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: "master_catalog_shape",
+      });
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+}
 
 async function rejected(f, reason) {
   const result = await collectQlikRanking(f.global, f.options);
@@ -1684,16 +1788,18 @@ test("real Enigma 12.612 binds explicit aliases by pinned library IDs", async ()
   await assertSdkCollection(aliasFixture());
 });
 
-test("strict pagination covers 3001 IDs without reading unrelated native columns", async () => {
-  const f = fixture({ rows: 3001, periods: 1 });
-  const result = await collectQlikRanking(f.global, f.options);
-  assert.equal(result.status, "collected", JSON.stringify(result));
-  assert.equal(result.months[0].developments.rows.length, 3001);
-  assert.ok(
-    f.state.calls.some((call) => call.method === "cubeData" && call.pages[0].qTop === 2500),
-  );
-  assert.equal(f.state.sessions.size, 0);
-});
+for (const rows of [3001, 5000]) {
+  test(`strict pagination covers ${rows} IDs without reading unrelated native columns`, async () => {
+    const f = fixture({ rows, periods: 1 });
+    const result = await collectQlikRanking(f.global, f.options);
+    assert.equal(result.status, "collected", JSON.stringify(result));
+    assert.equal(result.months[0].developments.rows.length, rows);
+    assert.ok(
+      f.state.calls.some((call) => call.method === "cubeData" && call.pages[0].qTop === 2500),
+    );
+    assert.equal(f.state.sessions.size, 0);
+  });
+}
 
 for (const [name, mutate] of [
   [
@@ -1836,12 +1942,153 @@ test("master changes during paging reject the whole observation", async () => {
   await rejected(f, "master_changed");
 });
 
+const stateCases = [
+  ["selectionLayout", "qSelectionObject", "selection_state_unproven", false],
+  ["listLayout", "qListObject", "list_state_unproven", false],
+  ["cubeLayout", "qHyperCube", "cube_state_unproven", false],
+  ["cubeLayout", "qHyperCube", "cube_state_unproven", true],
+];
+
+test("default state proof preserves ten-month reconciliation and explicit creation", async () => {
+  const f = fixture({
+    periods: 10,
+    hook(method, value, context) {
+      if (method === "create" && !context.properties.qMeasureListDef)
+        assert.equal(context.properties.qStateName, "$");
+      const entry = stateCases.find(([name]) => name === method);
+      if (entry) delete value[entry[1]].qStateName;
+      return value;
+    },
+  });
+  const result = await collectQlikRanking(f.global, f.options);
+  assert.equal(result.status, "collected", JSON.stringify(result));
+  assert.equal(f.state.sessions.size, 0);
+});
+
+test("explicit state after a default proof cannot bypass effective definition drift", async () => {
+  let reads = 0;
+  const f = fixture({
+    hook(method, value) {
+      if (method === "selectionLayout" && reads < 2) delete value.qSelectionObject.qStateName;
+      if (method === "ownedProperties" && value.qSelectionObjectDef) {
+        reads++;
+        if (reads > 2) value.syntheticChanged = true;
+      }
+      return value;
+    },
+  });
+  await rejected(f, "selection_state_unproven");
+});
+
 for (const serialized of [false, true]) {
+  for (const [methodName, key, proofCode, native] of stateCases) {
+    const matches = (method, context) =>
+      method === methodName && (method !== "cubeLayout" || context.native === native);
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    for (const omitted of [true, false]) {
+      test(`proves default state from effective properties: ${key}, native=${native}, omitted=${omitted}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value, context) {
+            if (matches(method, context)) {
+              if (omitted) delete value[key].qStateName;
+              else value[key].qStateName = "";
+            }
+            return value;
+          },
+        });
+        if (native) {
+          for (const role of ["imobs", "developments"]) {
+            delete f.cubes[role].qStateName;
+            f.mapping.cubes[role].cubeSha256 = hash(f.cubes[role]);
+          }
+        }
+        const result = await collect(f.global, f.options);
+        assert.equal(result.status, "collected", JSON.stringify(result));
+        assert.equal(f.state.sessions.size, 0);
+        assert.ok(
+          f.state.calls.some((call) => call.method === (native ? "properties" : "ownedProperties")),
+        );
+        assert.doesNotMatch(JSON.stringify(result), /qStateName|qHyperCubeDef|Synthetic.Amount/);
+      });
+    }
+    for (const mutation of [
+      "identity",
+      "type",
+      "root-alternate",
+      "root-null",
+      "definition-state",
+      "definition-change",
+      "extends",
+      "unstable",
+      "later-change",
+      "layout-identity",
+      "layout-state",
+    ]) {
+      test(`rejects unproven default ${mutation}: ${key}, native=${native}, serialized=${serialized}`, async () => {
+        let active = false;
+        let proofReads = 0;
+        const f = fixture({
+          hook(method, value, context) {
+            if (matches(method, context)) {
+              active = true;
+              delete value[key].qStateName;
+              if (mutation === "layout-identity") value.qInfo.qId = "synthetic-other";
+              if (mutation === "layout-state" && proofReads) value[key].qStateName = "alternate";
+            }
+            if (
+              active &&
+              method === (native ? "properties" : "ownedProperties") &&
+              value[`${key}Def`]
+            ) {
+              proofReads++;
+              if (mutation === "identity") value.qInfo.qId = "synthetic-other";
+              if (mutation === "type") value.qInfo.qType = "";
+              if (mutation === "root-alternate") value.qStateName = "alternate";
+              if (mutation === "root-null") value.qStateName = null;
+              if (mutation === "definition-state") value[`${key}Def`].qStateName = "alternate";
+              if (mutation === "definition-change") {
+                if (key === "qSelectionObject") value[`${key}Def`].qStateName = "";
+                else if (key === "qListObject")
+                  value[`${key}Def`].qDef.qFieldDefs = ["Synthetic.Other"];
+                else value[`${key}Def`].qDimensions = [];
+              }
+              if (mutation === "extends") value.qExtendsId = "synthetic-other";
+              if (mutation === "unstable") value.syntheticVersion = proofReads;
+              if (mutation === "later-change" && proofReads > 2) value.syntheticVersion = 1;
+            }
+            return value;
+          },
+        });
+        const result = JSON.parse(JSON.stringify(await collect(f.global, f.options)));
+        assert.deepEqual(result, { status: "unavailable", reason: proofCode });
+        assert.equal(f.state.sessions.size, 0);
+      });
+    }
+    for (const invalid of [null, false, 0, " ", "alternate"]) {
+      test(`rejects unsupported layout state ${JSON.stringify(invalid)}: ${key}, native=${native}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value, context) {
+            if (matches(method, context)) value[key].qStateName = invalid;
+            return value;
+          },
+        });
+        const result = JSON.parse(JSON.stringify(await collect(f.global, f.options)));
+        assert.deepEqual(result, {
+          status: "unavailable",
+          reason: key === "qHyperCube" ? "cube_shape" : "state_mismatch",
+        });
+        assert.equal(f.state.sessions.size, 0);
+      });
+    }
+  }
   for (const state of ["missing", "alternate"]) {
     for (const phase of ["initial", "selected"]) {
-      test(`selection object rejects ${state} state at ${phase}, serialized=${serialized}`, async () => {
+      test(`selection object rejects ${state} state without effective proof at ${phase}, serialized=${serialized}`, async () => {
         const f = fixture({
           hook(method, value) {
+            if (state === "missing" && method === "ownedProperties") delete value.qStateName;
             if (
               method === "selectionLayout" &&
               (phase === "initial" || value.qSelectionObject.qSelections.length)
@@ -1860,7 +2107,7 @@ for (const serialized of [false, true]) {
           : collectQlikRanking;
         assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
           status: "unavailable",
-          reason: "state_mismatch",
+          reason: state === "missing" ? "selection_state_unproven" : "state_mismatch",
         });
         assert.equal(
           f.state.calls.some((call) => call.method === "cubeData"),
@@ -2234,7 +2481,7 @@ for (const [name, hook, reason] of [
       if (method === "cubeLayout") value.qHyperCube.qSize.qcy = 5001;
       return value;
     },
-    "coverage_limit",
+    "imobs_native_coverage_limit",
   ],
   [
     "calculation error",
