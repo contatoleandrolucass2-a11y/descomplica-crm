@@ -32,6 +32,18 @@ passou na execução seguinte. O teste de estados visuais também foi limitado
 ao seu próprio overlay sintético, pois o estado vazio real de parcerias
 passou a coexistir com o estado vazio criado pelo teste.
 
+A base concorrente `f1088046`, incluindo a integração Meta Ads, foi incorporada
+sem remover o trabalho de outros desenvolvedores. Sobre `6676a2d1`, lint,
+formatação, tipos e build passaram, assim como 3.731 testes Vitest, 1.561
+operacionais e 723 do coordenador (6.015 no total). A captura Linux
+`38988640861` passou no E2E e na matriz de temas, tamanhos, zoom e teclado.
+Foram revisadas as páginas House e Parcerias em desktop e celular, incluindo
+temas claro e escuro. Somente suas 22 referências visuais foram atualizadas
+do artefato `12084629722`; as outras 220 e sua proveniência foram preservadas.
+O commit de captura `dc3718e4` tem como pais a base e o candidato conferidos.
+A CI de comparação sobre o commit combinado continua obrigatória antes do
+merge; esta revisão não comprova publicação em produção.
+
 ## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
 
 A correção de expressões foi integrada em `c889bfc8`, com os quatro gates da

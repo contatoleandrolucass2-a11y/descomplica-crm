@@ -2,6 +2,7 @@
 
 ## 2026-10-16: Ranking House separado de Canal de Parcerias
 
+- Atualiza somente as 22 referências visuais de House e Parcerias após revisão da captura Linux, preservando as outras 220.
 - A captura E2E de estados valida seu overlay sintético sem confundi-lo com o estado real da página.
 - O E2E verifica os filtros da House na rota própria e os filtros Qlik em Canal de Parcerias.
 - Os testes de acesso distinguem a fonte Qlik de parcerias e mantêm o catálogo existente sincronizado.
