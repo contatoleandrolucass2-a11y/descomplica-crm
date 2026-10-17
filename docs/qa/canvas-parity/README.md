@@ -58,6 +58,16 @@ classificacao inicial de Gerente regional house e demais funcoes nulas. Os 22
 canvases originais continuam preservados; Recurso MKT, Gestao e Rotina possuem
 testes funcionais proprios.
 
+O pedido de 16/10/2026 acrescenta `/app/gestao/previsao`, elevando o inventário
+para 28 rotas protegidas. Os três prints enviados pelo usuário são referência
+para a entrada em Gestão e a tabela manual com Nome do corretor, Previsão e
+Realizado, sem os cards de entrada numérica. A tela permite incluir e excluir
+linhas e colunas e salvar. Esses prints não foram incorporados como baseline
+nem constituem uma comparação externa executada. A validação sintética prevista
+em `tests/forecast-settings.test.tsx`, com `FORECAST_SETTINGS_BROWSER=1`, cobre
+edição, salvamento e conflitos; seus resultados devem ser registrados após
+execução, sem alegar paridade visual antes dessa evidência.
+
 | Canvas                                 |   Região | Rota                                      |
 | -------------------------------------- | -------: | ----------------------------------------- |
 | `dashboard-oportunidades.webp`         | esquerda | `/app`                                    |

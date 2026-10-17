@@ -238,6 +238,18 @@ export const PAGE_REGISTRY = [
     isNavigation: true,
   },
   {
+    pageKey: "crm.management.forecast",
+    path: "/app/gestao/previsao",
+    permission: "crm.management.forecast.view",
+    releaseEnabled: true,
+    name: "Previsão",
+    description: "Previsão e realizado do time em uma tabela editável.",
+    section: "management",
+    parentKey: "crm.management",
+    sortOrder: 15,
+    isNavigation: true,
+  },
+  {
     pageKey: "crm.simulation",
     path: "/app/simulacao",
     permission: "crm.simulators.view",

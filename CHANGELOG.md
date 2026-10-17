@@ -2832,3 +2832,18 @@ pendente dos gates completos no SHA final.
   sem registrar dados comerciais ou credenciais.
 - Preserva os limites de cobertura e a rejeição integral de coletas incompletas.
 - Mantém compatibilidade com o status do aplicativo e com recibos anteriores.
+
+## 2026-10-17: Validação de permissões da Previsão
+
+- Corrige a identidade da fixture pgTAP ao preparar overrides administrativos,
+  preservando as61 verificações e os controles de autorização do banco.
+- Atualiza a matriz autenticada para conferir a nova página Previsão conforme
+  os perfis previstos no catálogo.
+
+## 2026-10-16: Previsão no menu Gestão
+
+- Adiciona tabela manual de previsão e realizado por corretor, com título de
+  equipe, edição de cabeçalhos/células e inclusão/exclusão de linhas e colunas.
+- Salva no CRM com permissão própria, validação no servidor e banco e proteção
+  contra sobrescrita concorrente; falhas conservam as alterações locais.
+- Mantém a apresentação integrada da tabela, sem caixas numéricas destacadas.

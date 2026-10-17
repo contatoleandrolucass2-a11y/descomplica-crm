@@ -137,6 +137,11 @@ export const PERMISSIONS = {
     description: "Consulta e preenche a rotina autorizada para a conta.",
     minLevel: 10,
   },
+  "crm.management.forecast.view": {
+    label: "Visualizar Previsão",
+    description: "Consulta a previsão e o realizado do time na tabela compartilhada.",
+    minLevel: 10,
+  },
   "crm.stages.view": {
     label: "Visualizar etapas",
     description: "Consulta oportunidades, agendamentos, visitas, pastas e vendas.",

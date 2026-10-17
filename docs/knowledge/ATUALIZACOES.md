@@ -722,3 +722,87 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
   selecionados iguais aos revisados, sem ler fatos. Health03:55:48.744Z200/
   ok/b937. Coleta real corrigida e publicacao ainda pendentes. Fontes:
   GitHub/protecao/checks, Git/digests, recibos locais e projecao privada.
+
+## 2026-10-16: Abertura da aba Previsao em Gestao
+
+- Fonte: Git local e `git fetch origin`, consulta em 2026-10-17T02:21Z (16/10 em America/Sao_Paulo). Git comum confirmado; checkout inicialmente detached e limpo, SHA f10880465f80c8f1164a6db9aaea43907f14fdd1 igual a origin/main, merge do PR #243. Documentos de contexto/ferramentas lidos nessa base.
+- GET observacional https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 34517ba2b2e4022f52bec29260e071b9cf124cca. Versao publicada difere da base local/main; health nao prova publicacao desta demanda.
+- gh ausente no PATH e no caminho padrao. Conector GitHub consultado separadamente para metadados/CI; limites dos resultados devem ser preservados. Nenhum dado privado consultado.
+- Escopo solicitado: nova pagina Previsao em Gestao, tabela manual com Nome do corretor, Previsao e Realizado, inclusao/exclusao de linhas/colunas e Salvar. Prints sao referencias visuais. Novas migrations remotas permanecem condicionadas a autorizacao especifica.
+
+- Complemento da abertura: API publica GitHub confirmou main e PR #243 integrado; CI main 38988235307 concluida com success no SHA f10880465f80c8f1164a6db9aaea43907f14fdd1 (https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38988235307). O conector de workflow runs retorna apenas eventos pull_request e nao prova CI de main. Usuario autorizou explicitamente a migration aditiva da Previsao e permissao apos validacao; autorizacao limitada a esta entrega.
+
+## 2026-10-16: Implementação e validação da Previsão
+
+- Branch `codex/gestao-previsao`, base f1088046. Página e GET/PUT usam permissão
+  própria `crm.management.forecast.view`; escrita exige também settings.manage.
+  Tabela global manual, com equipe, colunas e linhas editáveis, sem cálculo ou
+  integração comercial. As referências visuais não fornecem registros iniciais.
+- Salvamento usa RPC com revisão otimista. RLS forçada e ausência de ACL direta
+  protegem a tabela; usuário, conta ativa, MFA e página ativa são verificados no
+  banco. Auditoria contém somente revisão/quantidades. Conflito e falha preservam
+  o rascunho. Limites agregados de 2 MB complementam os limites de células.
+- Build e tipos aprovados em Node 24.19.0/pnpm 11.20.0 Windows. Testes focais:
+  backend 51, acesso administrativo 65 e contratos/recursos 33 aprovados.
+  Navegador sintético: 5 aprovados, nove capturas em três temas e larguras
+  1440/390/320, axe sem violações; inspeção das capturas desktop/escuro e
+  celular/médio realizada. Isto não substitui uma sessão real de produção.
+- Primeira suite global Windows: 3765 passaram, 17 falharam, 94 skips. Falhas de
+  inventários/contagens foram corrigidas e retestadas; os demais timeouts e teste
+  de concorrência requerem repetição com menor paralelismo e confirmação na CI
+  Linux. Testes de banco locais não executados: Docker indisponível. Novo pgTAP
+  tem 61 assertions; inventário agregado passa a 1971 em 34 arquivos.
+- Projeto de produção confirmado pelo hostname do runtime e MCP:
+  hnncxuerlcsaahdxoswb. Conferência prévia somente leitura encontrou 27 páginas,
+  38 permissões, 146 vínculos de papel, 6 overrides e ausência da nova tabela,
+  RPCs, permissão e página. Backup privado de catálogo, ausência dos objetos,
+  histórico e hashes de preservação retido na VPS, modo 0600, SHA-256
+  45ec1a83f82b5c5377fdce656d3047a1d4c619bfa5e08a47b7dd678075f664ef.
+  Nenhuma migration aplicada nesta etapa. Reavaliar baseline imediatamente antes
+  da aplicação; publicar somente com CI completa e coordenador de release.
+
+## 2026-10-17: Retomada, CI e publicacao pendente da Previsao
+
+- Fonte: PR #247 e CI https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38996000303 no SHA 58ff617ea8f775ea5ecc396c61ffcd883c8340a0. Tentativas 1 e 2 aprovaram formatacao, lint, tipos e pnpm test completo Linux (incluindo suites operacionais e release); pararam na fonte externa https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517 com HTTP 403. Segunda falha observada em 2026-10-17T12:02:45Z. Gate preservado; banco, restore e imagem nao executaram nessas tentativas.
+- Fechamento local da base anterior: Vitest 3782 aprovados/94 skips, navegador sintetico 5 aprovados, formatacao/lint/tipos/build e Gitleaks aprovados. Suites Node Windows: operacionais 1386 aprovados/15 falhas/19 skips; release 711 aprovados/12 falhas/14 skips, com contratos POSIX e tempos do host, sem modificar assercoes para passar. Linux da CI aprovou 1419 operacionais (1 skip) e737 release. A validacao financeira externa passou localmente, inclusive em nova consulta desta retomada; isso nao substitui o gate da CI.
+- Estado externo mudou durante a espera: fetch confirmou origin/main 61c9a6a8fe2813831bc167d91e6d7e0ab9b3bab4, PR #248 integrado e CI main39007579400 verde. Health observacional em 2026-10-17T12:03:29Z retornou HTTP200/ok/eff7f729c4386af14af16902fe4c761027df597a. Esta versao e de outra entrega; Previsao segue sem publicacao, merge ou migration remota.
+- Integracao da main atual em andamento para manter o PR revisavel, preservando Qlik/House/Parcerias e suas referencias. Novo catalogo e restore devem somar as assertions recebidas da main e os61 testes da Previsao. Backup inicial e antigo e deve ser revalidado/refeito antes de qualquer aplicacao remota. A autorizacao especifica da migration permanece limitada a Previsao e seu catalogo, apos gates; nao inclui aplicar migrations Qlik de outra entrega.
+- Limite de publicacao: o403 externo impede promocao enquanto persistir; nao alterar fonte financeira, remover gate ou declarar banco/restauracao aprovados. Reavaliar em CI completa do candidato integrado. Nenhum dado de producao foi gravado por esta tarefa.
+
+## 2026-10-17: Validacao integrada da Previsao e correcao da fixture
+
+- CI39031197492 no candidato8fe43e72 aprovou validate completo, inclusive fonte
+  externa, lint, tipos, testes Linux, auditoria e build. Os cinco testes de
+  navegador da Previsao passaram. Local integrado: Vitest3787 aprovados/94 skips,
+  lint/tipos/build aprovados. O403 anterior deixou de ocorrer nesta execucao.
+- Restore isolado interrompeu o pgTAP apos46 de61 assertions da Previsao.
+  A fixture mantinha claim.sub do corretor depois de RESET ROLE e em seguida
+  preparava override de Admin, atingindo o guard de contas administrativas.
+  Corrigida somente a identidade da preparacao privilegiada;61 assertions e
+  controles de runtime preservados. Teste focal release-candidate:21 aprovados.
+  Confirmacao SQL depende da nova CI; Docker local permanece indisponivel.
+- PR #247 ainda sem merge/publicacao; migrations remotas nao aplicadas. A
+  autorizacao recebida permite aplicar as duas migrations desta entrega apos
+  aprovacao integral dos gates e nova conferencia da baseline de producao.
+
+## 2026-10-17: Banco e restore aprovados; matriz autenticada da Previsao
+
+- CI39032248476, tentativa2, candidato f16b558f (merge sintetico794ded8a):
+  validate aprovado; restore isolado aprovado em2026-10-17T12:37Z. Fonte ITBI
+  retornou403 na primeira tentativa e respondeu normalmente na segunda.
+- Ensaio de64 migrations e34 arquivos pgTAP:1972 assertions aprovadas na
+  origem e no destino, incluindo61 da Previsao. Lint/advisors de seguranca e
+  performance aprovados; backup/restauracao logica e fingerprints de ACL/owner
+  preservados. Ambiente sintetico, sem restore remoto representativo.
+- Release-gates aprovou banco e build; parou em local-rls-api.mjs com
+  Application-page visibility does not match role permissions. Matriz de
+  paginas esperadas em revisao para incluir a nova permissao sem relaxar guards.
+  PR continua sem merge e producao sem mutacao desta tarefa.
+- Retomada apos pausa do host: em2026-10-17T13:34Z, fetch confirmou main ainda
+  61c9a6a8 e CI39007579400 success. GET publico api/health retornou ok/eff7f729.
+  Fontes: origin, GitHub via gh e endpoint publico; versao da Previsao continua
+  somente no PR. Matrizes QA corrigidas sem alterar acesso de runtime.
+- Em13:38Z main avancou para ca6c33cf, mergePR245/dashboard; CI39037162463 em
+  andamento. Integracao preservou dashboard e Previsao; conflitos restritos aos
+  prefixos de WORKLOG/CHANGELOG, conservando ambos os registros. Matriz RLS e
+  menu corrigidos passaram42 testes focais. Nova CI integrada necessaria.

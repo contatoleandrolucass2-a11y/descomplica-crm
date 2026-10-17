@@ -6,6 +6,7 @@ import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
+import { PAGE_REGISTRY } from "@/lib/navigation/registry";
 
 // @ts-expect-error — SQL generation is tested without running the local QA harness.
 import { fixtureSetupSql } from "../scripts/qa/local-authenticated-visual.mjs";
@@ -38,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 62-version manifest", async () => {
+  it("keeps a unique, ordered 64-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(62);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(62);
+    expect(migrations).toHaveLength(64);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(64);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-8)).toEqual([
+    expect(migrations.slice(-10)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -58,9 +59,11 @@ describe("release-candidate migration train", () => {
       "20261015202644_routine_individual_page_access.sql",
       "20261016000120_individual_page_data_access.sql",
       "20261017003100_qlik_partnerships_reader_permission.sql",
+      "20261017022411_crm_forecasts.sql",
+      "20261017022450_sync_page_catalog.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261017003100_qlik_partnerships_reader_permission.sql");
+    expect(migrations.at(-1)).toBe("20261017022450_sync_page_catalog.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -92,8 +95,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(33);
-    expect(plan.tests).toBe(1911);
+    expect(plan.files).toBe(34);
+    expect(plan.tests).toBe(1972);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -215,8 +218,8 @@ describe("release-candidate activation defaults", () => {
       { timeout: 1000 },
     );
     const surfacePaths = matrix.protectedSurfaces.map((surface: { path: string }) => surface.path);
-    expect(surfacePaths).toHaveLength(27);
-    expect(new Set(surfacePaths).size).toBe(27);
+    expect(surfacePaths).toHaveLength(28);
+    expect(new Set(surfacePaths).size).toBe(28);
     expect([...surfacePaths].sort()).toEqual(
       PROTECTED_PAGE_GATES.filter((gate) => gate.releaseEnabled)
         .map((gate) => gate.path)
@@ -225,6 +228,15 @@ describe("release-candidate activation defaults", () => {
     for (const role of matrix.expectedRoles) {
       const administrative = role === "master" || role === "admin";
       const operational = role !== "pending";
+      for (const routes of [
+        matrix.expectedDirectRoutesByRole[role],
+        matrix.expectedHeaderRoutesByRole[role],
+      ]) {
+        expect(routes.includes("/app/gestao/previsao"), role).toBe(administrative);
+      }
+      expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(
+        "/app/gestao/previsao",
+      );
       expect(matrix.allowedDirectRoutesForRole(role), role).toEqual(
         matrix.expectedDirectRoutesByRole[role],
       );
@@ -244,7 +256,7 @@ describe("release-candidate activation defaults", () => {
       ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(16);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(17);
         expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
@@ -281,6 +293,67 @@ describe("release-candidate activation defaults", () => {
     }
   });
 
+  it("keeps REST catalog visibility aligned with the released catalog and default roles", async () => {
+    const source = await readFile(
+      path.join(repositoryRoot, "scripts/qa/local-rls-api.mjs"),
+      "utf8",
+    );
+    const tree = ts.createSourceFile("local-rls-api.mjs", source, ts.ScriptTarget.Latest);
+    const names = new Set([
+      "pageKeysForPermissions",
+      "simulatorPageKeys",
+      "inheritedAnalyticalPageKeys",
+      "rankingPageKeys",
+      "partnershipPageKeys",
+      "administrativeCommercialPageKeys",
+      "masterAdministrativePageKeys",
+      "expectedPageKeysByRole",
+    ]);
+    const declarations = tree.statements
+      .filter((statement) =>
+        ts.isFunctionDeclaration(statement)
+          ? names.has(statement.name?.text ?? "")
+          : ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(
+              (declaration) =>
+                ts.isIdentifier(declaration.name) && names.has(declaration.name.text),
+            ),
+      )
+      .map((statement) => statement.getText(tree))
+      .join("\n");
+    const matrix = runInNewContext(
+      `${declarations}\nexpectedPageKeysByRole`,
+      { PAGE_REGISTRY },
+      { timeout: 1000 },
+    );
+    const operational = [
+      "master",
+      "admin",
+      "coordinator",
+      "manager_house",
+      "manager_imob",
+      "broker_house",
+      "broker_imob",
+    ];
+    for (const role of [...operational, "pending"]) {
+      const administrative = role === "master" || role === "admin";
+      expect(matrix[role].includes("crm.management.forecast"), role).toBe(administrative);
+      expect(new Set(matrix[role]).size, role).toBe(matrix[role].length);
+      if (administrative) {
+        expect(matrix[role], role).toEqual(
+          PAGE_REGISTRY.filter((page) => page.releaseEnabled && page.isNavigation)
+            .map((page) => page.pageKey)
+            .sort(),
+        );
+      } else if (role === "pending") {
+        expect(matrix[role]).toEqual([]);
+      } else {
+        expect(matrix[role], role).toContain("crm.management.routine");
+        expect(matrix[role], role).toContain("crm.management");
+      }
+    }
+  });
+
   it("keeps restore and browser gates synchronized with the released access matrix", async () => {
     const [restoreHarness, rlsHarness, browserHarness, visualHarness] = await Promise.all([
       readFile(path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"), "utf8"),
@@ -304,7 +377,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1911;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 1972;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

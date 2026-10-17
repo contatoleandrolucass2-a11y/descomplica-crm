@@ -79,7 +79,7 @@ describe("unified page registration", () => {
     );
     for (const page of PAGE_REGISTRY) expect(markup).toContain(page.path);
     expect(markup).toContain('tabindex="0"');
-    expect(markup).toContain("27 de 27 páginas");
+    expect(markup).toContain(`${PAGE_REGISTRY.length} de ${PAGE_REGISTRY.length} páginas`);
     expect(markup).not.toContain("Próxima página");
     expect(markup).not.toContain("Página anterior");
   });

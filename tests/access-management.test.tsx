@@ -565,7 +565,7 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-    expect(checkboxes).toHaveLength(37);
+    expect(checkboxes).toHaveLength(38);
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toContain('checked=""');
       expect(checkbox).toContain('disabled=""');
@@ -749,6 +749,7 @@ describe("catálogo localizado de acesso", () => {
   });
   it("não exibe nem oferece salvar módulos ausentes do catálogo de 38 chaves", () => {
     const absent = new Set([
+      "crm.management.forecast.view",
       "crm.read_model_v3.view",
       "crm.read_model_v3.ranking.view",
       "crm.read_model_v3.partnerships.view",
@@ -785,6 +786,8 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     expect(keys).toHaveLength(38);
+    expect(keys).not.toContain("crm.management.forecast.view");
+    expect(markup).not.toContain('aria-label="Acesso a Previsão"');
     expect(markup).not.toContain("Executar motores comerciais");
     expect(markup).not.toContain("Gerenciar políticas comerciais");
     expect(markup).not.toContain("read model v3");

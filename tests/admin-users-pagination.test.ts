@@ -593,10 +593,11 @@ describe("paginação server-side da administração de usuários", () => {
     expect(from).toHaveBeenCalledOnce();
     expect(rpc).toHaveBeenCalledExactlyOnceWith("get_user_directory_contract");
   });
-  it.each([38, 44])(
+  it.each([38, 45])(
     "aceita catálogo com %i chaves e herança Admin integral do banco",
     async (size) => {
       const excluded = new Set([
+        "crm.management.forecast.view",
         "crm.read_model_v3.view",
         "crm.read_model_v3.ranking.view",
         "crm.read_model_v3.partnerships.view",
@@ -604,7 +605,7 @@ describe("paginação server-side da administração de usuários", () => {
         "crm.commercial_engine.execute",
         "crm.commercial_policy.manage",
       ]);
-      const keys = Object.keys(PERMISSIONS).filter((key) => size === 44 || !excluded.has(key));
+      const keys = Object.keys(PERMISSIONS).filter((key) => size === 45 || !excluded.has(key));
       const row = profile(1);
       const results = currentSchemaResults([row], 1);
       results.user_roles = [{ data: [{ user_id: row.user_id, role_key: "admin" }], error: null }];
@@ -620,6 +621,7 @@ describe("paginação server-side da administração de usuários", () => {
         page: { roleDefaults: { admin: keys }, users: [{ inheritedPermissions: keys }] },
       });
       expect(keys).toHaveLength(size);
+      expect(keys.includes("crm.management.forecast.view")).toBe(size === 45);
     },
   );
 });

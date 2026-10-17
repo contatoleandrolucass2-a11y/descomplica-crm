@@ -107,8 +107,8 @@ select ok(
 
 select is(
   (select count(*) from public.role_permissions where role_key = 'admin'),
-  44::bigint,
-  'Administrator inherits all forty-four current catalog permissions'
+  45::bigint,
+  'Administrator inherits all forty-five current catalog permissions'
 );
 select is(
   (select array_agg(permission_key order by permission_key) from public.role_permissions where role_key = 'admin'),
@@ -1773,7 +1773,7 @@ select ok(has_function_privilege('authenticated', 'public.get_user_role_permissi
 select ok(not has_function_privilege('anon', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'anonymous cannot read role defaults');
 select ok(not has_function_privilege('service_role', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'service role has no direct defaults read grant');
 select is((select count(*) from public.get_user_role_permission_defaults() where role_key='manager_imob'), 14::bigint, 'Users viewers receive the authoritative Imob baseline');
-select is((select count(*) from public.get_user_role_permission_defaults() where role_key='admin'), 44::bigint, 'the defaults RPC exposes every inherited Administrator permission');
+select is((select count(*) from public.get_user_role_permission_defaults() where role_key='admin'), 45::bigint, 'the defaults RPC exposes every inherited Administrator permission');
 select ok(exists(select 1 from public.get_user_role_permission_defaults() where role_key='master' and permission_key='crm.commercial_policy.manage'), 'role defaults reflect local policy grants absent from the static UI baseline');
 reset role;
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011', true);

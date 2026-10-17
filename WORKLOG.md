@@ -7526,3 +7526,35 @@ perfil macOS. Lint, tipos, build, formato e verificação das fontes documentais
 passaram. A aceitação de 5.000 linhas e a rejeição de 5.001 foram verificadas.
 A CI no SHA exato e a ativação protegida do owner ainda são necessárias; nenhuma
 nova publicação do aplicativo é exigida por esta mudança de diagnóstico.
+
+## 2026-10-17: Fixture de permissões da Previsão
+
+CI39031197492 aprovou validate e navegador da Previsão, mas o restore parou
+após46 assertions. A preparação do override de Admin retinha a identidade do
+corretor após RESET ROLE. Limpeza explícita do claim na fixture preserva o guard
+e as61 verificações. Teste focal release-candidate:21 aprovados; nova CI SQL
+necessária. Nenhuma migration ou publicação em produção realizada nesta etapa.
+
+## 2026-10-17: Banco validado e matriz autenticada da Previsão
+
+CI39032248476/tentativa2 aprovou1972 assertions de banco, restore isolado,
+advisors e build. O navegador sintético da Previsão passou; a matriz autenticada
+parou na comparação de páginas por perfil em local-rls-api.mjs. Ajuste da
+expectativa da nova página preserva as restrições de Master/Admin e os guards.
+
+## 2026-10-16: Previsão editável em Gestão
+
+Base f1088046, branch `codex/gestao-previsao`. A abertura confirmou Git comum,
+main/CI e health publicado 34517ba2; estados distintos registrados em conhecimento.
+Os três prints fornecidos são dados de referência visual, sem nomes como seed.
+
+A nova página inclui tabela compartilhada manual com Nome do corretor, Previsão
+e Realizado, equipe editável, inclusão/exclusão de linhas e colunas e Salvar.
+As células usam editores integrados, sem cards numéricos. Permissão própria de
+página, edição com `crm.settings.manage`, RPC autenticada, RLS/ACL e revisão
+otimista protegem o salvamento. Erros e conflitos preservam o rascunho.
+
+O usuário autorizou a migration aditiva de armazenamento e catálogo após
+validação. Não há migração de dados de clientes nem integração com n8n.
+As verificações globais, pgTAP, fluxo de navegador e publicação seguem os gates
+existentes. Resultados efetivos e limites serão registrados em ATUALIZACOES.

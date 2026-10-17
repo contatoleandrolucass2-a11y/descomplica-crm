@@ -13,6 +13,7 @@ beforeEach(() => {
 describe("independent commercial page entry", () => {
   it.each([
     "crm.management.routine.view",
+    "crm.management.forecast.view",
     "crm.management.view",
     "crm.stage.sales.view",
     "crm.settings.goals.view",

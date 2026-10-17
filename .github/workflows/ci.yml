@@ -97,6 +97,11 @@ jobs:
         env:
           RANKING_V2_BROWSER: "1"
 
+      - name: Forecast table with synthetic edits and save conflicts
+        run: pnpm exec vitest run tests/forecast-settings.test.tsx --maxWorkers=1
+        env:
+          FORECAST_SETTINGS_BROWSER: "1"
+
       - name: Qlik login with synthetic corporate provider
         run: node --test ops/qlik/browser-login.node-test.mjs
         env:
