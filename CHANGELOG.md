@@ -1,5 +1,7 @@
 # Changelog
 
+- CI: amplia para 60 minutos o gate visual completo, preservando toda a matriz.
+
 - Dashboard: referencias visuais revisadas para os grupos3/5/5 em desktop e mobile.
 
 - QA dashboard: confere selecao oculta apos fechamento do filtro no refresh RSC.
