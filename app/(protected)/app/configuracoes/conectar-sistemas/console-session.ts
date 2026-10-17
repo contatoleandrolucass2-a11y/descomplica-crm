@@ -1,12 +1,28 @@
 import type RFB from "@novnc/novnc";
 
 export type ConsoleState = "loading" | "connected" | "disconnected" | "expired" | "error";
+export type ConsoleProvider = "salesforce" | "meta-ads";
+
+const PROVIDERS = {
+  salesforce: {
+    endpoint: "/api/salesforce/console",
+    socket: "/salesforce-console/socket",
+    screenLabel: "Tela remota do Salesforce",
+  },
+  "meta-ads": {
+    endpoint: "/api/meta-ads/console",
+    socket: "/meta-ads-console/socket",
+    screenLabel: "Tela remota do Meta Ads",
+  },
+} as const;
 
 export function startConsoleSession(
   target: HTMLElement,
   onState: (state: ConsoleState) => void,
   onCredentialsFailure: () => void,
+  provider: ConsoleProvider = "salesforce",
 ) {
+  const configuration = PROVIDERS[provider];
   const request = new AbortController();
   const startedAt = Date.now();
   let disposed = false;
@@ -54,7 +70,7 @@ export function startConsoleSession(
       // Import only after the operator opens the console; never evaluate noVNC during SSR.
       const { default: RemoteFramebuffer } = await import("@novnc/novnc");
       if (disposed) return;
-      const response = await fetch("/api/salesforce/console", {
+      const response = await fetch(configuration.endpoint, {
         method: "POST",
         cache: "no-store",
         credentials: "same-origin",
@@ -78,7 +94,7 @@ export function startConsoleSession(
         typeof body.password !== "string" ||
         !body.password ||
         !("websocketPath" in body) ||
-        body.websocketPath !== "/salesforce-console/socket" ||
+        body.websocketPath !== configuration.socket ||
         !("expiresIn" in body) ||
         typeof body.expiresIn !== "number" ||
         !Number.isInteger(body.expiresIn) ||
@@ -90,7 +106,7 @@ export function startConsoleSession(
       expiresAt = startedAt + body.expiresIn * 1000;
       checkExpiry();
       if (disposed) return;
-      const url = new URL(body.websocketPath, window.location.origin);
+      const url = new URL(configuration.socket, window.location.origin);
       url.protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
       rfb = new RemoteFramebuffer(target, url.href, {
         credentials: { password: body.password },
@@ -106,7 +122,7 @@ export function startConsoleSession(
         if (disposed) return;
         clearTimeout(connectionTimer);
         const canvas = target.querySelector("canvas");
-        canvas?.setAttribute("aria-label", "Tela remota do Salesforce");
+        canvas?.setAttribute("aria-label", configuration.screenLabel);
         onState("connected");
       };
       listeners.push(

@@ -20,18 +20,25 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("Salesforce read-only probe proxy boundary", () => {
-  it("skips refresh only for the probe while retaining transport and cache headers", async () => {
-    const response = await proxy(new NextRequest(`${origin}/api/salesforce/console/authorize`));
-    expect(mocks.updateSession).not.toHaveBeenCalled();
-    expect(response.headers.get("x-middleware-next")).toBe("1");
-    expect(response.headers.has("set-cookie")).toBe(false);
-    expect(response.headers.get("cache-control")).toContain("no-store");
-    expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
-    expect(response.headers.get("strict-transport-security")).toContain("max-age=");
-  });
+  it.each(["/api/salesforce/console/authorize", "/api/meta-ads/console/authorize"])(
+    "skips refresh only for the probe %s while retaining transport and cache headers",
+    async (path) => {
+      const response = await proxy(new NextRequest(`${origin}${path}`));
+      expect(mocks.updateSession).not.toHaveBeenCalled();
+      expect(response.headers.get("x-middleware-next")).toBe("1");
+      expect(response.headers.has("set-cookie")).toBe(false);
+      expect(response.headers.get("cache-control")).toContain("no-store");
+      expect(response.headers.get("content-security-policy")).toContain("frame-ancestors 'none'");
+      expect(response.headers.get("strict-transport-security")).toContain("max-age=");
+    },
+  );
 
   it.each([
     ["/api/salesforce/console", "POST"],
+    ["/api/meta-ads/console", "POST"],
+    ["/api/meta-ads/status", "GET"],
+    ["/api/meta-ads/console/authorize-other", "GET"],
+    ["/api/meta-ads/console/authorize/child", "GET"],
     ["/api/salesforce/status", "GET"],
     ["/api/salesforce/console/authorize-other", "GET"],
     ["/api/salesforce/console/authorize/child", "GET"],

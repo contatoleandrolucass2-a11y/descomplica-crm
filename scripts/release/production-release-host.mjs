@@ -25,6 +25,10 @@ import {
   qlikContainerDigestScript,
   readQlikReleaseSecret,
   transformQlikReleaseEnvironment,
+  assertMetaAdsContainerDigests,
+  metaAdsContainerDigestScript,
+  readMetaAdsReleaseSecrets,
+  transformMetaAdsReleaseEnvironment,
 } from "./salesforce-release-environment.mjs";
 
 const exec = promisify(execFile);
@@ -103,7 +107,12 @@ async function containerVersion(includeStopped = false) {
   };
 }
 
-async function assertRuntimeEnvironment(contents, expectedSha, expectedImageId, qlik = false) {
+async function assertRuntimeEnvironment(
+  contents,
+  expectedSha,
+  expectedImageId,
+  kind = "salesforce",
+) {
   const container = await containerVersion();
   if (container.containerSha !== expectedSha || container.containerImageId !== expectedImageId) {
     throw new Error("Runtime configuration check requires the exact production image.");
@@ -124,7 +133,7 @@ async function assertRuntimeEnvironment(contents, expectedSha, expectedImageId, 
     throw new Error("Effective production configuration is unavailable.");
   }
   assertSalesforceContainerDigests(contents, digests);
-  if (qlik) {
+  if (kind === "qlik-ranking-v2") {
     let qlikDigests;
     try {
       qlikDigests = JSON.parse(
@@ -141,6 +150,24 @@ async function assertRuntimeEnvironment(contents, expectedSha, expectedImageId, 
       throw new Error("Effective Qlik configuration is unavailable.");
     }
     assertQlikContainerDigests(contents, qlikDigests);
+  }
+  if (kind === "meta-ads-session") {
+    let metaAdsDigests;
+    try {
+      metaAdsDigests = JSON.parse(
+        await docker([
+          "exec",
+          container.containerId,
+          "node",
+          "--input-type=commonjs",
+          "--eval",
+          metaAdsContainerDigestScript,
+        ]),
+      );
+    } catch {
+      throw new Error("Effective Meta Ads configuration is unavailable.");
+    }
+    assertMetaAdsContainerDigests(contents, metaAdsDigests);
   }
   if (
     !isDeepStrictEqual(await containerVersion(), container) ||
@@ -220,8 +247,11 @@ export function productionHost(lock) {
       await assertHeldLock(lock);
       if (
         options.operation !== "deploy" ||
-        (options.salesforceIngestion !== true && options.qlikRanking !== true) ||
-        (options.salesforceIngestion === true && options.qlikRanking === true)
+        [options.salesforceIngestion, options.qlikRanking, options.metaAds].some(
+          (value) => value !== undefined && value !== true,
+        ) ||
+        [options.salesforceIngestion, options.qlikRanking, options.metaAds].filter(Boolean)
+          .length !== 1
       ) {
         throw new Error("Integration configuration requires an explicit protected deployment.");
       }
@@ -241,25 +271,27 @@ export function productionHost(lock) {
             options.targetSha,
             await readQlikReleaseSecret(),
           )
-        : transformSalesforceReleaseEnvironment(
-            before,
-            options.expectedSha,
-            options.targetSha,
-            await readSalesforceReleaseSecrets(),
-          );
-      await assertRuntimeEnvironment(
-        before,
-        options.expectedSha,
-        state.release.imageId,
-        options.qlikRanking === true,
-      );
+        : options.metaAds
+          ? transformMetaAdsReleaseEnvironment(
+              before,
+              options.expectedSha,
+              options.targetSha,
+              await readMetaAdsReleaseSecrets(),
+            )
+          : transformSalesforceReleaseEnvironment(
+              before,
+              options.expectedSha,
+              options.targetSha,
+              await readSalesforceReleaseSecrets(),
+            );
+      const kind = options.qlikRanking
+        ? "qlik-ranking-v2"
+        : options.metaAds
+          ? "meta-ads-session"
+          : "salesforce";
+      await assertRuntimeEnvironment(before, options.expectedSha, state.release.imageId, kind);
       await assertHeldLock(lock);
-      const change = await environmentBackups.create(
-        deploymentId,
-        before,
-        after,
-        options.qlikRanking ? "qlik-ranking-v2" : "salesforce",
-      );
+      const change = await environmentBackups.create(deploymentId, before, after, kind);
       await assertHeldLock(lock);
       if (
         (await readValidatedEnvironment()) !== before ||
@@ -334,12 +366,7 @@ export function productionHost(lock) {
                 environmentCheck.change,
                 environmentCheck.restore,
               );
-              await assertRuntimeEnvironment(
-                contents,
-                sha,
-                imageId,
-                backup.kind === "qlik-ranking-v2",
-              );
+              await assertRuntimeEnvironment(contents, sha, imageId, backup.kind);
               await assertHeldLock(lock);
             }
             return;
