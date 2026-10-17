@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   requireAuthorization: vi.fn(),
   requirePermission: vi.fn(),
   loadReadModelV3: vi.fn(),
+  loadQlikRankingV2: vi.fn(async () => ({ status: "unavailable" })),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -24,6 +25,10 @@ vi.mock("@/lib/authorization/guards", () => ({
 }));
 vi.mock("@/lib/crm/read-model-v3/data", () => ({
   loadReadModelV3: mocks.loadReadModelV3,
+}));
+
+vi.mock("@/lib/crm/qlik/data-v2", () => ({
+  loadQlikRankingV2: mocks.loadQlikRankingV2,
 }));
 
 import ForbiddenPage from "@/app/forbidden";
@@ -100,8 +105,9 @@ describe("experiência de acesso", () => {
 
     expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
     expect(markup).toContain("Ranking das imobiliárias");
-    expect(markup).toContain("Aguardando conciliação das fontes");
-    expect(markup).toContain("Dado indisponível — integração pendente");
+    expect(markup).toContain("A leitura da fonte Qlik não pôde ser confirmada.");
+    expect(markup).toContain("Dados indisponíveis");
+    expect(mocks.loadQlikRankingV2).toHaveBeenCalledExactlyOnceWith(undefined);
     expect(markup).not.toContain("crm_imob_ranking");
     expect(mocks.loadReadModelV3).not.toHaveBeenCalled();
   });

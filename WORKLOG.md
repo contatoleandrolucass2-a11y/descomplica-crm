@@ -17,7 +17,10 @@ converte dados de imobiliárias em atividades de corretores.
 
 A suíte focal passou com 109 testes e duas verificações de navegador reservadas
 à CI. Os testes de rota e banco cobrem separação de conteúdo e autorização;
-as validações completas, pgTAP e visuais ainda são exigidas antes de publicar. A ingestão automática
+as validações completas, pgTAP e visuais ainda são exigidas antes de publicar.
+A descrição genérica já registrada de `crm.ranking.view` foi preservada para
+manter o catálogo sincronizado, sem recadastrar páginas ou alterar acessos
+individuais. O teste legado de parcerias agora verifica o estado Qlik. A ingestão automática
 Qlik continua pendente da coleta real e de um ciclo agendado posterior.
 
 ## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
