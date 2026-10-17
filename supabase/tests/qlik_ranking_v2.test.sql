@@ -1,7 +1,7 @@
 begin;
 set local timezone = 'UTC';
--- 77 single-row assertions + 177 assertions from explicit test matrices.
-select plan(254);
+-- 78 single-row assertions + 177 assertions from explicit test matrices.
+select plan(255);
 
 -- Runs against either the standalone baseline (auth.uid, MFA and permission
 -- helpers only) or the full local history. No customer/auth fixture is needed.
@@ -59,7 +59,7 @@ $$;
 create or replace function public.has_permission(user_uuid uuid, permission_key text)
 returns boolean language sql stable security definer set search_path = '' as $$
   select user_uuid = '91000000-0000-4000-8000-000000000001'::uuid
-    and permission_key = 'crm.ranking.view'
+    and permission_key = coalesce(nullif(current_setting('test.qlik_permission_key', true), ''), 'crm.partnerships.view')
     and nullif(current_setting('test.qlik_permission', true), '')::boolean;
 $$;
 
@@ -105,6 +105,10 @@ select set_config('request.jwt.claims', '{"sub":"91000000-0000-4000-8000-0000000
 set local role authenticated;
 select is(public.get_qlik_ranking_v2(), '{"current":null,"previous":null,"publishedAt":null,"availableYears":[]}'::jsonb,
   'empty reader; MFA helper approval does not require hardcoded aal2');
+select set_config('test.qlik_permission_key', 'crm.ranking.view', true);
+select throws_ok('select public.get_qlik_ranking_v2()', '42501', 'ranking access denied',
+  'House ranking permission alone cannot read partnership facts');
+select set_config('test.qlik_permission_key', 'crm.partnerships.view', true);
 select set_config('test.qlik_mfa', 'false', true);
 select throws_ok('select public.get_qlik_ranking_v2()', '42501', 'ranking access denied', 'MFA denial blocks reader');
 select set_config('test.qlik_mfa', '', true);

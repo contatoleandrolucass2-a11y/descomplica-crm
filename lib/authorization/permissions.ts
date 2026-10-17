@@ -144,7 +144,7 @@ export const PERMISSIONS = {
   },
   "crm.ranking.view": {
     label: "Visualizar ranking",
-    description: "Consulta o ranking comercial disponível.",
+    description: "Consulta o ranking dos corretores da House.",
     minLevel: 10,
   },
   "crm.partnerships.view": {

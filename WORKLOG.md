@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-16: Separação urgente entre Ranking House e Canal de Parcerias
+
+O usuário corrigiu explicitamente o destino: o ranking de imobiliárias fica
+em Canal de Parcerias; `/app/ranking` é dos corretores da House. O merge
+automático da PR #246 foi interrompido antes de qualquer integração ou nova
+publicação. A consulta ao banco confirmou zero observações e zero publicações
+Qlik, sem dados incompletos a corrigir.
+
+A composição Qlik e seus filtros GET foram movidos para a página de parcerias,
+com `crm.partnerships.view` no servidor e no reader SQL. A página House e seu
+CSS foram restaurados da revisão anterior à substituição por Qlik, mantendo
+o read model Salesforce, o guard `crm.ranking.view` e o bloqueio existente
+de pontuação sem política aprovada. A correção não inventa uma pontuação nem
+converte dados de imobiliárias em atividades de corretores.
+
+A suíte focal passou com 109 testes e duas verificações de navegador reservadas
+à CI. Os testes de rota e banco cobrem separação de conteúdo e autorização;
+as validações completas, pgTAP e visuais ainda são exigidas antes de publicar. A ingestão automática
+Qlik continua pendente da coleta real e de um ciclo agendado posterior.
+
 ## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
 
 A correção de expressões foi integrada em `c889bfc8`, com os quatro gates da

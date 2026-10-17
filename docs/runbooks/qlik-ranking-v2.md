@@ -2,13 +2,21 @@
 
 ## Escopo e estado
 
-Referencia: Canal de Parcerias. Destino: `/app/ranking`. Recorte fixo:
+Referencia: Canal de Parcerias. Destino: `/app/canal-de-parcerias`. Recorte fixo:
 Direcional / SP CAPITAL / CANAL IMOB. A audiencia autorizada e quem possui
-`crm.ranking.view`, com sessao e MFA validados no servidor e no banco.
+`crm.partnerships.view`, com sessao e MFA validados no servidor e no banco.
 
 Implementacao candidata em14/10/2026. A existencia destes arquivos nao comprova
 migration aplicada, autenticacao QIX, coleta, conciliacao, publicacao ou agenda.
 Nao ampliar para clientes, dados de fluxo, outras regionais ou Salesforce.
+
+A página `/app/ranking` permanece exclusiva da House, com o read model
+Salesforce e `crm.ranking.view`. A correção de rota não ativa pesos, bônus ou
+prêmios enquanto a política oficial não estiver aprovada. A migration
+`20261017003100_qlik_partnerships_reader_permission.sql` transfere somente o
+guard do reader Qlik para `crm.partnerships.view`, sem alterar dados, escritor
+ou grants diretos. Aplicá-la com backup da definição anterior e verificação
+pgTAP antes de ativar a coleta; conferir ambas as páginas após o deploy.
 
 ## Fronteiras
 

@@ -69,7 +69,10 @@ function contrast(foreground: string, background: string) {
 
 const globals = new URL("../app/globals.css", import.meta.url);
 const shell = new URL("../app/(protected)/_components/ProtectedShell.module.css", import.meta.url);
-const ranking = new URL("../app/(protected)/app/ranking/RankingCanvas.module.css", import.meta.url);
+const ranking = new URL(
+  "../app/(protected)/app/canal-de-parcerias/PartnershipsRanking.module.css",
+  import.meta.url,
+);
 const partnerships = new URL(
   "../app/(protected)/app/canal-de-parcerias/PartnershipsCanvas.module.css",
   import.meta.url,

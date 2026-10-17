@@ -113,7 +113,7 @@ export function QlikStatusDetails({ snapshot }: { snapshot: QlikStatusSnapshot }
     >
       <header className={styles.salesforceDetailsHeading}>
         <div>
-          <h2 id="qlik-details-title">Qlik e ranking</h2>
+          <h2 id="qlik-details-title">Qlik · Canal de Parcerias</h2>
           <p>Direcional · SP Capital · Canal Imob</p>
         </div>
         <QlikState snapshot={snapshot} />

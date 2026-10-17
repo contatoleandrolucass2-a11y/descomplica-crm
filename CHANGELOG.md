@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-16: Ranking House separado de Canal de Parcerias
+
+- Restaura a página Ranking para corretores e gerentes da House, preservando
+  sua fonte Salesforce e a política de pontuação existente.
+- Move o ranking Qlik de imobiliárias e empreendimentos para Canal de
+  Parcerias, com filtros na rota correta e autorização própria no banco.
+- Identifica a integração Qlik como fonte do Canal de Parcerias.
+
 ## 2026-10-16: Prova do estado padrão do Qlik
 
 - Define explicitamente o estado padrão nos objetos temporários de coleta.
