@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-17: Calendário Qlik consultado por ano
+
+- Pesquisa o ano solicitado antes de ler os meses do calendário, evitando que
+  o histórico excluído inteiro exceda o limite da coleta.
+- Mantém os limites, a verificação de seleções globais e a conciliação integral
+  dos rankings; uma pesquisa ou limpeza malsucedida não publica dados.
+
 ## 2026-10-16: Ranking House separado de Canal de Parcerias
 
 - Atualiza somente as 22 referências visuais de House e Parcerias após revisão da captura Linux, preservando as outras 220.

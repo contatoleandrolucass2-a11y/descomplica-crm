@@ -30,7 +30,12 @@ const numberCell = (value, total = false) => ({
   qElemNumber: total ? -1 : 0,
 });
 
-function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {}) {
+function fixture({
+  hook = (_method, value) => value,
+  rows = 2,
+  periods = 2,
+  calendarHistory = 0,
+} = {}) {
   const controller = new AbortController();
   const state = {
     calls: [],
@@ -40,6 +45,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
     created: [],
     destroyed: [],
     counts: new Map(),
+    searches: new Map(),
   };
   const masters = new Map();
   const cubes = {};
@@ -226,10 +232,19 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
   }
   function listValues(field) {
     if (field === CALENDAR)
-      return mapping.periods.map((period, index) => ({
-        ...dimensionCell(period.slice(0, 7).replace("-", ""), index),
-        qState: state.months.includes(period) ? "S" : state.months.length ? "A" : "O",
-      }));
+      return [
+        ...mapping.periods.map((period, index) => ({
+          ...dimensionCell(period.slice(0, 7).replace("-", ""), calendarHistory + index),
+          qState: state.months.includes(period) ? "S" : state.months.length ? "A" : "O",
+        })),
+        ...Array.from({ length: calendarHistory }, (_, index) => ({
+          ...dimensionCell(
+            `${1000 + Math.floor(index / 12)}${String((index % 12) + 1).padStart(2, "0")}`,
+            index,
+          ),
+          qState: "X",
+        })),
+      ];
     const filter = mapping.filters.find((item) => item.field === field);
     return [{ ...dimensionCell(filter.value, 0), qState: state.selected.has(field) ? "S" : "O" }];
   }
@@ -332,7 +347,25 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       }
       if (properties.qListObjectDef) {
         const field = properties.qListObjectDef.qDef.qFieldDefs[0];
+        const visible = () =>
+          listValues(field).filter((cell) => {
+            const search = state.searches.get(field);
+            return !search || cell.qText.startsWith(search.slice(0, -1));
+          });
         return {
+          searchListObjectFor: async (path, query) => {
+            assert.equal(field, CALENDAR);
+            assert.equal(path, "/qListObjectDef");
+            assert.match(query, /^\d{4}\*$/);
+            const accepted = invoke("calendarSearch", true, { field, query });
+            if (accepted) state.searches.set(field, query);
+            return accepted;
+          },
+          abortListObjectSearch: async (path) => {
+            assert.equal(path, "/qListObjectDef");
+            invoke("calendarSearchAbort", undefined, { field });
+            state.searches.delete(field);
+          },
           getEffectiveProperties: async () =>
             invoke("ownedProperties", structuredClone(properties), { field }),
           getLayout: async () =>
@@ -342,7 +375,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
                 qInfo: { ...properties.qInfo },
                 qListObject: {
                   qStateName: "$",
-                  qSize: { qcx: 1, qcy: listValues(field).length },
+                  qSize: { qcx: 1, qcy: visible().length },
                   qDimensionInfo: {
                     qIsCalculated: field === CALENDAR,
                     qStateCounts: {
@@ -362,7 +395,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
               "listData",
               pages.map((area) => ({
                 qArea: { ...area },
-                qMatrix: listValues(field)
+                qMatrix: visible()
                   .slice(area.qTop, area.qTop + area.qHeight)
                   .map((cell) => [cell]),
               })),
@@ -374,7 +407,11 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
             assert.equal(path, "/qListObjectDef");
             assert.equal(toggle, false);
             assert.equal(softLock, false);
-            state.months = values.map((index) => mapping.periods[index]);
+            state.months = values.map((element) => {
+              const period = mapping.periods[element - calendarHistory];
+              assert.ok(period, "selection must use the returned element ID, not its row index");
+              return period;
+            });
             return invoke("selectMonth", true);
           },
         };
@@ -1388,6 +1425,75 @@ test("alias catalog cleanup failure is sanitized and cannot produce collected fa
 });
 
 for (const serialized of [false, true]) {
+  test(`calendar search reads the approved year from a large history, serialized=${serialized}`, async () => {
+    const f = fixture({ calendarHistory: 6000, periods: 12 });
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    const result = await collect(f.global, f.options);
+    assert.equal(result.status, "collected", JSON.stringify(result));
+    assert.equal(result.months.length, 12);
+    const searches = f.state.calls.filter((call) => call.method === "calendarSearch");
+    assert.ok(searches.length > 0);
+    assert.ok(searches.every((call) => call.query === "2026*"));
+    assert.equal(f.state.counts.get("calendarSearchAbort"), searches.length);
+    assert.equal(f.state.searches.size, 0);
+    assert.equal(f.state.sessions.size, 0);
+  });
+
+  test(`calendar search cannot hide selections outside its results, serialized=${serialized}`, async () => {
+    const f = fixture({
+      calendarHistory: 6000,
+      hook(method, value, context) {
+        if (method === "listLayout" && context.field === CALENDAR && context.state.months.length)
+          value.qListObject.qDimensionInfo.qStateCounts.qSelected++;
+        return value;
+      },
+    });
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+      status: "unavailable",
+      reason: "selection_changed",
+    });
+    assert.equal(f.state.searches.size, 0);
+    assert.equal(f.state.sessions.size, 0);
+  });
+
+  for (const stage of ["calendarSearch", "calendarSearchAbort"]) {
+    test(`calendar ${stage} failure never returns partial data, serialized=${serialized}`, async () => {
+      const f = fixture({
+        hook(method, value) {
+          if (method === stage) throw new Error("synthetic-private-secret");
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: "collection_failed",
+      });
+      assert.equal(f.state.sessions.size, 0);
+      assert.ok(!f.state.calls.some((call) => call.method === "selectMonth"));
+    });
+  }
+
+  test(`rejected calendar search is not treated as a match, serialized=${serialized}`, async () => {
+    const f = fixture({ hook: (method, value) => (method === "calendarSearch" ? false : value) });
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+      status: "unavailable",
+      reason: "selection_failed",
+    });
+    assert.equal(f.state.counts.get("calendarSearchAbort"), 1);
+    assert.equal(f.state.sessions.size, 0);
+  });
+
   for (const role of ["imobs", "developments"]) {
     for (const native of [false, true]) {
       test(`coverage rejection identifies ${role}/${native ? "native" : "identity"}, serialized=${serialized}`, async () => {
@@ -1781,7 +1887,7 @@ async function assertSdkCollection(f) {
 }
 
 test("real Enigma 12.612 methods and return unwrapping collect over synthetic transport", async () => {
-  await assertSdkCollection(fixture());
+  await assertSdkCollection(fixture({ calendarHistory: 6000 }));
 });
 
 test("real Enigma 12.612 binds explicit aliases by pinned library IDs", async () => {

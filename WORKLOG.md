@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-17: Consulta do calendário Qlik limitada ao ano solicitado
+
+A CI `39007579400` aprovou o SHA `61c9a6a8`, com imagem conferida na VPS.
+A tentativa protegida do owner identificou `calendar_list_coverage_limit`
+em `2026-10-17T06:36:32.755Z`. A recuperação da tentativa
+`aea70d84-5eab-4137-aa99-440e6830153d` restaurou o owner anterior às
+`06:37:03.634Z`, sem pendência. A correção House/Parcerias segue publicada
+no aplicativo `eff7f729`; essa tentativa não publicou dados do ranking Qlik.
+
+O coletor passa a pesquisar o prefixo do ano aprovado na lista temporária do
+calendário antes de lê-la. A pesquisa reduz a visualização da lista sem fazer
+seleções comerciais. Todos os resultados encontrados continuam sujeitos à
+paginação completa e ao limite de 5.000 linhas. Os meses precisam corresponder
+exatamente aos solicitados e a contagem global de selecionados precisa bater
+com as células lidas, recusando seleções ocultas fora da pesquisa. O filtro de
+pesquisa é encerrado em `finally`; a seleção usa os identificadores de elemento
+retornados, sem depender da posição das linhas. Falhas de pesquisa, limpeza,
+estado ou conciliação continuam recusando o resultado.
+
+As regressões cobrem 6.000 meses históricos, os 12 meses do ano, IDs distintos
+das posições, seleção fora da pesquisa e falhas do SDK. Também verificam a
+função serializada e os métodos reais do schema Enigma instalado. A publicação
+continua dependendo da CI completa, da coleta produtiva e de um ciclo
+automático posterior; os testes sintéticos não comprovam esses resultados.
+
 ## 2026-10-16: Separação urgente entre Ranking House e Canal de Parcerias
 
 O usuário corrigiu explicitamente o destino: o ranking de imobiliárias fica
