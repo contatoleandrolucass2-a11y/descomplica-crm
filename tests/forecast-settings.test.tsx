@@ -103,8 +103,8 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       failLoad = options.failLoad ?? false;
       conflict = false;
       puts = [];
-    const context = await browser.newContext();
-    page = await context.newPage();
+      const context = await browser.newContext();
+      page = await context.newPage();
       page.on("pageerror", (error) => console.error("Forecast fixture:", error.message));
       await page.route("https://forecast.test/**", async (route) => {
         const url = new URL(route.request().url());
