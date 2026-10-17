@@ -1519,18 +1519,18 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
       if (pathname === "/app") {
-        for (const section of ["pulse", "monthly", "diagnosis", "operational", "team"]) {
+        for (const section of ["pulse", "monthly", "goals", "periods", "history"]) {
           await expect(page.locator(`#report-${section}-title`)).toBeVisible();
         }
         await expect(
-          page.locator('[aria-labelledby="report-operational-title"] table'),
-        ).toHaveCount(4);
+          page.locator("#report-operational-title, #report-diagnosis-title, #report-team-title"),
+        ).toHaveCount(0);
         await expect(page.locator('[aria-labelledby="report-monthly-title"] figure')).toHaveCount(
-          6,
+          13,
         );
         await expect(
           page.locator('[aria-labelledby="report-monthly-title"] figure [data-stage]'),
-        ).toHaveCount(36);
+        ).toHaveCount(78);
       }
       await expect(page.locator("html")).not.toHaveJSProperty("scrollWidth", Number.NaN);
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);
@@ -1572,16 +1572,19 @@ test("dashboard uses management filters while stages retain selection and partne
       }
       await expect(report.getByRole("heading", { name: "Mês atual", exact: true })).toBeVisible();
       await expect(report.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
-      const table = report.locator('[aria-labelledby="report-operational-title"] table').first();
-      await expect(table.getByRole("columnheader")).toHaveText([
-        "Indicador",
-        "Mês",
-        "Últimos 14 dias",
-        "Últimos 7 dias",
-        "Esta Semana",
-        "Hoje",
-      ]);
-      await expect(table.getByRole("rowheader")).toHaveText(["Realizado"]);
+      await expect(report.locator('[aria-labelledby="report-operational-title"]')).toHaveCount(0);
+      for (const [group, labels] of [
+        ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
+        ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
+        [
+          "history",
+          ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
+        ],
+      ] as const) {
+        const region = report.locator(`[aria-labelledby="report-${group}-title"]`);
+        await expect(region.getByRole("heading", { level: 3 })).toHaveText([...labels]);
+        await expect(region.getByRole("figure")).toHaveCount(labels.length);
+      }
     }
     const cases = [
       {

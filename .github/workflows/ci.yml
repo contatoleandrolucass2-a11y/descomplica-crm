@@ -106,6 +106,7 @@ jobs:
         run: |
           node scripts/qa/dashboard-report.mjs
           node --test scripts/qa/dashboard-report.node-test.mjs
+          DASHBOARD_FILTERS_BROWSER=1 pnpm exec vitest run tests/dashboard-filters-dismissal.test.ts --maxWorkers=1
 
       - name: Associative page guide with synthetic inventory
         run: node scripts/qa/reference-parity.mjs associative-page-guide

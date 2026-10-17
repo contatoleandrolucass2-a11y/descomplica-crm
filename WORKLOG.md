@@ -1,5 +1,39 @@
 # Worklog
 
+CI38995290171 concluiu verificacoes funcionais, RSC, acessibilidade e zoom.
+Revisadas11 alteracoes visuais /app, preservadas231 capturas de outras telas.
+Baseline atualizada com proveniencia do artefato12087754329; nova CI exigida.
+
+CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
+Teste RSC usa includeHidden para conferir selecao dentro do filtro fechado.
+Reproducao Chromium local confirma0 elementos no locator visivel e1 no oculto.
+Sem mudanca de produto nesta correcao; nova CI exigida antes de publicar.
+
+## 2026-10-16: Grupos comparativos do dashboard
+
+CI38972729758 aprovou validate, restore e jornada E2E; a matriz autenticada
+parou em dashboard-auto-refresh. O teste ainda exigia filtro aberto depois
+de clicar fora: agora exige fechamento e preservacao da selecao no refresh.
+Leitura de titulos da matriz ignora titulos dos dialogs fechados. Nova CI
+necessaria antes de revisar/promover referencias; nenhum baseline promovido.
+
+QA local concluido:200 verificacoes aprovadas nos tres temas e320 a1920px;
+3670 Vitest aprovados, build aprovado. Suite Node local bloqueada por ACL
+Windows temporaria de Salesforce, sem alterar permissoes; validate Linux
+aprovado. CI38970011556 aprovou restauracao, mas E2E ainda exigia secoes
+removidas. Jornada atualizada para13 funis,78 etapas e ordem3/5/5, preservando
+guards e navegacao das demais paginas. Nova CI necessaria; sem deploy.
+
+Implementa treze funis em grupos3/5/5: metas, periodos do mes vigente e
+historico com media por uma venda. Recorta semana anterior e ontem ao mes
+atual, preserva indisponibilidade e evita dividir por vendas nulas ou zero.
+Filtros fecham fora, por Escape e ao abrir outro filtro. Remove diagnostico,
+tabelas operacionais, equipe e ranking apenas deste dashboard; preserva roscas.
+Layout empilha funis no celular, sem exigir rolagem horizontal.
+Validacao parcial:13 testes de periodos,28 de apresentacao e fechamento dos
+filtros em Chromium desktop/mobile passaram. Lint e tipos passaram na retomada.
+Gates completos ainda em verificacao; nao publicado.
+
 ## 2026-10-16: Separação urgente entre Ranking House e Canal de Parcerias
 
 O usuário corrigiu explicitamente o destino: o ranking de imobiliárias fica

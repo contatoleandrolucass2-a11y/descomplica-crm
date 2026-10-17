@@ -41763,8 +41763,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 5029920,
+        "totalPixels": 4445280,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
+          "tracked": true,
+          "bytes": 119578,
+          "sha256": "f37de87a5f1bb3e373b877837b710e98c1e1d58388a44e5fe47d9dc8bff2147c"
+        }
+      },
+      "path": "target-authenticated/dashboard-1440x900.webp",
+      "bytes": 119578,
+      "sha256": "f37de87a5f1bb3e373b877837b710e98c1e1d58388a44e5fe47d9dc8bff2147c",
+      "width": 1440,
+      "height": 3087,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 3493
+        },
+        "actual": {
+          "width": 1440,
+          "height": 3087
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
@@ -41772,37 +41796,13 @@
           "sha256": "232af071691b9f3d9cb41801abe0f4e4387a7d7a79559fd8c5908ca3b020184d"
         }
       },
-      "path": "target-authenticated/dashboard-1440x900.webp",
-      "bytes": 147576,
-      "sha256": "232af071691b9f3d9cb41801abe0f4e4387a7d7a79559fd8c5908ca3b020184d",
-      "width": 1440,
-      "height": 3493,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 4768
-        },
-        "actual": {
-          "width": 1440,
-          "height": 3493
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
-          "tracked": true,
-          "bytes": 204886,
-          "sha256": "b4f71c862d21ddfe11415b1563ce4332baa4f79f14a1f855bdeddf681c12761d"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -42122,7 +42122,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.328491890583394e-5,
+        "changedPixelRatio": 0.00003328491890583394,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1440x900.webp",
           "tracked": true,
@@ -42298,7 +42298,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1440x900.webp",
           "tracked": true,
@@ -42380,7 +42380,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8075380166060266e-5,
+        "changedPixelRatio": 0.000018075380166060266,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
           "tracked": true,
@@ -42417,7 +42417,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1722240,
-        "changedPixelRatio": 7.199925678186548e-5,
+        "changedPixelRatio": 0.00007199925678186548,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
           "tracked": true,
@@ -42565,7 +42565,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1440x900.webp",
           "tracked": true,
@@ -42583,8 +42583,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 5029920,
+        "totalPixels": 4445280,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
+          "tracked": true,
+          "bytes": 119578,
+          "sha256": "f37de87a5f1bb3e373b877837b710e98c1e1d58388a44e5fe47d9dc8bff2147c"
+        }
+      },
+      "path": "target-authenticated/themes/dashboard-light-1440x900.webp",
+      "bytes": 119578,
+      "sha256": "f37de87a5f1bb3e373b877837b710e98c1e1d58388a44e5fe47d9dc8bff2147c",
+      "width": 1440,
+      "height": 3087,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 3493
+        },
+        "actual": {
+          "width": 1440,
+          "height": 3087
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
@@ -42592,37 +42616,13 @@
           "sha256": "232af071691b9f3d9cb41801abe0f4e4387a7d7a79559fd8c5908ca3b020184d"
         }
       },
-      "path": "target-authenticated/themes/dashboard-light-1440x900.webp",
-      "bytes": 147576,
-      "sha256": "232af071691b9f3d9cb41801abe0f4e4387a7d7a79559fd8c5908ca3b020184d",
-      "width": 1440,
-      "height": 3493,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 4768
-        },
-        "actual": {
-          "width": 1440,
-          "height": 3493
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
-          "tracked": true,
-          "bytes": 204886,
-          "sha256": "b4f71c862d21ddfe11415b1563ce4332baa4f79f14a1f855bdeddf681c12761d"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -42942,7 +42942,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.328491890583394e-5,
+        "changedPixelRatio": 0.00003328491890583394,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-light-1440x900.webp",
           "tracked": true,
@@ -43118,7 +43118,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-light-1440x900.webp",
           "tracked": true,
@@ -43200,7 +43200,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8075380166060266e-5,
+        "changedPixelRatio": 0.000018075380166060266,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-light-1440x900.webp",
           "tracked": true,
@@ -43237,7 +43237,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1722240,
-        "changedPixelRatio": 7.199925678186548e-5,
+        "changedPixelRatio": 0.00007199925678186548,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
           "tracked": true,
@@ -43385,7 +43385,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-light-1440x900.webp",
           "tracked": true,
@@ -43403,8 +43403,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 5029920,
+        "totalPixels": 4445280,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
+          "tracked": true,
+          "bytes": 126172,
+          "sha256": "f0ff093441b4e68bf8bd4506c70fda20fd51cae18e72e6355a039efc39981c3c"
+        }
+      },
+      "path": "target-authenticated/themes/dashboard-balanced-1440x900.webp",
+      "bytes": 126172,
+      "sha256": "f0ff093441b4e68bf8bd4506c70fda20fd51cae18e72e6355a039efc39981c3c",
+      "width": 1440,
+      "height": 3087,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1440,
+          "height": 3493
+        },
+        "actual": {
+          "width": 1440,
+          "height": 3087
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
@@ -43412,37 +43436,13 @@
           "sha256": "42424ee66b2272c03ae76b50263ffd3fbd3ea52325ef42f64aa26defbacb6943"
         }
       },
-      "path": "target-authenticated/themes/dashboard-balanced-1440x900.webp",
-      "bytes": 154846,
-      "sha256": "42424ee66b2272c03ae76b50263ffd3fbd3ea52325ef42f64aa26defbacb6943",
-      "width": 1440,
-      "height": 3493,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 4768
-        },
-        "actual": {
-          "width": 1440,
-          "height": 3493
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
-          "tracked": true,
-          "bytes": 213094,
-          "sha256": "bf6126653b34b209e9493f73469562f201642a4e11693ccc13545293a59ac92f"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -43762,7 +43762,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.328491890583394e-5,
+        "changedPixelRatio": 0.00003328491890583394,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
           "tracked": true,
@@ -43938,7 +43938,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-balanced-1440x900.webp",
           "tracked": true,
@@ -44020,7 +44020,7 @@
         "reason": "within_threshold",
         "changedPixels": 32,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8658456945610598e-5,
+        "changedPixelRatio": 0.000018658456945610598,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
           "tracked": true,
@@ -44057,7 +44057,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1722240,
-        "changedPixelRatio": 7.199925678186548e-5,
+        "changedPixelRatio": 0.00007199925678186548,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
           "tracked": true,
@@ -44205,7 +44205,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.2505910165484634e-5,
+        "changedPixelRatio": 0.000032505910165484634,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-balanced-1440x900.webp",
           "tracked": true,
@@ -44223,13 +44223,13 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 5029920,
+        "totalPixels": 4445280,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 154552,
-          "sha256": "b3dfde08947c24faacc36428b3096ace24705e6599a2327e4eb3a417282be6b5"
+          "bytes": 126156,
+          "sha256": "d37c4a869898ebaa5f22711cce904c32ca5030004ae4b2ae683a261fbea7c452"
         }
       },
       "approvedCanvasComparison": {
@@ -44238,42 +44238,42 @@
         "asset": "docs/qa/canvas-parity/reference/dashboard-oportunidades.webp",
         "region": "left",
         "referenceSha256": "c7dbf6e14f7802fc9597d419dee04aa6dd6b48474c91926d3b52c1fbb86b88c4",
-        "colorDistance": 18.976453993055557,
+        "colorDistance": 20.69086371527778,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 41.709309895833336,
+        "edgeDistance": 42.458984375,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/dashboard-dark-1440x900.webp",
-      "bytes": 154552,
-      "sha256": "b3dfde08947c24faacc36428b3096ace24705e6599a2327e4eb3a417282be6b5",
+      "bytes": 126156,
+      "sha256": "d37c4a869898ebaa5f22711cce904c32ca5030004ae4b2ae683a261fbea7c452",
       "width": 1440,
-      "height": 3493,
+      "height": 3087,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1440,
-          "height": 4768
+          "height": 3493
         },
         "actual": {
           "width": 1440,
-          "height": 3493
+          "height": 3087
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 213060,
-          "sha256": "004512201c757bac4ad0236ae91c5f244cd4431e81d89b78e77b53935251233e"
+          "bytes": 154552,
+          "sha256": "b3dfde08947c24faacc36428b3096ace24705e6599a2327e4eb3a417282be6b5"
         }
       },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -44681,7 +44681,7 @@
         "reason": "within_threshold",
         "changedPixels": 45,
         "totalPixels": 1321920,
-        "changedPixelRatio": 3.4041394335511986e-5,
+        "changedPixelRatio": 0.000034041394335511986,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-dark-1440x900.webp",
           "tracked": true,
@@ -44901,7 +44901,7 @@
         "reason": "within_threshold",
         "changedPixels": 45,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.324468085106383e-5,
+        "changedPixelRatio": 0.00003324468085106383,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-dark-1440x900.webp",
           "tracked": true,
@@ -45005,7 +45005,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1715040,
-        "changedPixelRatio": 1.8075380166060266e-5,
+        "changedPixelRatio": 0.000018075380166060266,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-dark-1440x900.webp",
           "tracked": true,
@@ -45053,7 +45053,7 @@
         "reason": "within_threshold",
         "changedPixels": 115,
         "totalPixels": 1722240,
-        "changedPixelRatio": 6.677350427350428e-5,
+        "changedPixelRatio": 0.00006677350427350428,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
           "tracked": true,
@@ -45245,7 +45245,7 @@
         "reason": "within_threshold",
         "changedPixels": 45,
         "totalPixels": 1353600,
-        "changedPixelRatio": 3.324468085106383e-5,
+        "changedPixelRatio": 0.00003324468085106383,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-dark-1440x900.webp",
           "tracked": true,
@@ -45263,8 +45263,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 4471040,
+        "totalPixels": 3989760,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
+          "tracked": true,
+          "bytes": 120090,
+          "sha256": "36b6b68ecf8f0cc4a9837ce4a0bd565b44579ff42a17bde528851b05282a15ff"
+        }
+      },
+      "path": "target-authenticated/dashboard-1280x720.webp",
+      "bytes": 120090,
+      "sha256": "36b6b68ecf8f0cc4a9837ce4a0bd565b44579ff42a17bde528851b05282a15ff",
+      "width": 1280,
+      "height": 3117,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1280,
+          "height": 3493
+        },
+        "actual": {
+          "width": 1280,
+          "height": 3117
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
@@ -45272,37 +45296,13 @@
           "sha256": "2a3e7670857a13904e968ac80ec6ab895116e9dd679cbee08ed01e3b0db98c11"
         }
       },
-      "path": "target-authenticated/dashboard-1280x720.webp",
-      "bytes": 145502,
-      "sha256": "2a3e7670857a13904e968ac80ec6ab895116e9dd679cbee08ed01e3b0db98c11",
-      "width": 1280,
-      "height": 3493,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1280,
-          "height": 4768
-        },
-        "actual": {
-          "width": 1280,
-          "height": 3493
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
-          "tracked": true,
-          "bytes": 196218,
-          "sha256": "1b4aacc2bf889ecf979ab7b34906790b1ca85af87e9eb247083a2fcfdb6bd7da"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -45622,7 +45622,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 944640,
-        "changedPixelRatio": 4.657859078590786e-5,
+        "changedPixelRatio": 0.00004657859078590786,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1280x720.webp",
           "tracked": true,
@@ -45798,7 +45798,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 986880,
-        "changedPixelRatio": 4.4584954604409855e-5,
+        "changedPixelRatio": 0.000044584954604409855,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1280x720.webp",
           "tracked": true,
@@ -45880,7 +45880,7 @@
         "reason": "within_threshold",
         "changedPixels": 31,
         "totalPixels": 1524480,
-        "changedPixelRatio": 2.03348026868178e-5,
+        "changedPixelRatio": 0.0000203348026868178,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
           "tracked": true,
@@ -45917,7 +45917,7 @@
         "reason": "within_threshold",
         "changedPixels": 124,
         "totalPixels": 1530880,
-        "changedPixelRatio": 8.099916387959867e-5,
+        "changedPixelRatio": 0.00008099916387959867,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
           "tracked": true,
@@ -46065,7 +46065,7 @@
         "reason": "within_threshold",
         "changedPixels": 44,
         "totalPixels": 972800,
-        "changedPixelRatio": 4.523026315789474e-5,
+        "changedPixelRatio": 0.00004523026315789474,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1280x720.webp",
           "tracked": true,
@@ -46083,8 +46083,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 4020224,
+        "totalPixels": 6837248,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
+          "tracked": true,
+          "bytes": 111248,
+          "sha256": "1354df59b10829c53b6b726bb3484aa23382f97935f222e2b58e75be3ac16c1f"
+        }
+      },
+      "path": "target-authenticated/dashboard-1024x768.webp",
+      "bytes": 111248,
+      "sha256": "1354df59b10829c53b6b726bb3484aa23382f97935f222e2b58e75be3ac16c1f",
+      "width": 1024,
+      "height": 6677,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 1024,
+          "height": 3926
+        },
+        "actual": {
+          "width": 1024,
+          "height": 6677
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
@@ -46092,37 +46116,13 @@
           "sha256": "5d8eabe8aeedaf494d1c99c6d120aba8c5119557a075f655913983a51564f53e"
         }
       },
-      "path": "target-authenticated/dashboard-1024x768.webp",
-      "bytes": 132936,
-      "sha256": "5d8eabe8aeedaf494d1c99c6d120aba8c5119557a075f655913983a51564f53e",
-      "width": 1024,
-      "height": 3926,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1024,
-          "height": 5292
-        },
-        "actual": {
-          "width": 1024,
-          "height": 3926
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
-          "tracked": true,
-          "bytes": 184728,
-          "sha256": "d890dabfecfc3c238f6001a5676a1417c719bcf7df162adca21e2d5ea2ec4963"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -46442,7 +46442,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 804864,
-        "changedPixelRatio": 4.224316157760814e-5,
+        "changedPixelRatio": 0.00004224316157760814,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
           "tracked": true,
@@ -46618,7 +46618,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 827392,
-        "changedPixelRatio": 4.109297648514852e-5,
+        "changedPixelRatio": 0.00004109297648514852,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
           "tracked": true,
@@ -46700,7 +46700,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 1219584,
-        "changedPixelRatio": 1.7218986146095718e-5,
+        "changedPixelRatio": 0.000017218986146095718,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
           "tracked": true,
@@ -46737,7 +46737,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 1224704,
-        "changedPixelRatio": 6.613843018394648e-5,
+        "changedPixelRatio": 0.00006613843018394648,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
           "tracked": true,
@@ -46885,7 +46885,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 827392,
-        "changedPixelRatio": 4.109297648514852e-5,
+        "changedPixelRatio": 0.00004109297648514852,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1024x768.webp",
           "tracked": true,
@@ -46903,8 +46903,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 3752448,
+        "totalPixels": 7728384,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
+          "tracked": true,
+          "bytes": 106938,
+          "sha256": "213cf71a785f302e468a6a594ec3685d225ceb2b538ef4d4b4b02d6b374360e0"
+        }
+      },
+      "path": "target-authenticated/dashboard-768x1024.webp",
+      "bytes": 106938,
+      "sha256": "213cf71a785f302e468a6a594ec3685d225ceb2b538ef4d4b4b02d6b374360e0",
+      "width": 768,
+      "height": 10063,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 768,
+          "height": 4886
+        },
+        "actual": {
+          "width": 768,
+          "height": 10063
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
@@ -46912,37 +46936,13 @@
           "sha256": "d06e713ba36b75831bd217de97648df312dbf5b9bca6e379494088ce5693da61"
         }
       },
-      "path": "target-authenticated/dashboard-768x1024.webp",
-      "bytes": 111118,
-      "sha256": "d06e713ba36b75831bd217de97648df312dbf5b9bca6e379494088ce5693da61",
-      "width": 768,
-      "height": 4886,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 768,
-          "height": 6339
-        },
-        "actual": {
-          "width": 768,
-          "height": 4886
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
-          "tracked": true,
-          "bytes": 170040,
-          "sha256": "514d59879b9edee404746bfdc7b1e28a41af82bc91c1190be902fb73ed041c63"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -47262,7 +47262,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 969984,
-        "changedPixelRatio": 3.505212457112695e-5,
+        "changedPixelRatio": 0.00003505212457112695,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-768x1024.webp",
           "tracked": true,
@@ -47438,7 +47438,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 955392,
-        "changedPixelRatio": 3.5587486602357986e-5,
+        "changedPixelRatio": 0.000035587486602357986,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-768x1024.webp",
           "tracked": true,
@@ -47520,7 +47520,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 923904,
-        "changedPixelRatio": 2.272963424771405e-5,
+        "changedPixelRatio": 0.00002272963424771405,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-768x1024.webp",
           "tracked": true,
@@ -47557,7 +47557,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 1382400,
-        "changedPixelRatio": 5.859375e-5,
+        "changedPixelRatio": 0.00005859375,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
           "tracked": true,
@@ -47705,7 +47705,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 817152,
-        "changedPixelRatio": 4.1607926065162905e-5,
+        "changedPixelRatio": 0.000041607926065162905,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-768x1024.webp",
           "tracked": true,
@@ -47723,8 +47723,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 3281460,
+        "totalPixels": 4438590,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
+          "tracked": true,
+          "bytes": 93296,
+          "sha256": "c90c3c860ba47e6d2312a1a857cda7e05c364ad268b2fcc551822c6d4d489300"
+        }
+      },
+      "path": "target-authenticated/dashboard-390x844.webp",
+      "bytes": 93296,
+      "sha256": "c90c3c860ba47e6d2312a1a857cda7e05c364ad268b2fcc551822c6d4d489300",
+      "width": 390,
+      "height": 11381,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 8414
+        },
+        "actual": {
+          "width": 390,
+          "height": 11381
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
@@ -47732,37 +47756,13 @@
           "sha256": "df547ea9ce3167560bc80ae166d8fa6376bbd04918fc740fa197ba45f8247474"
         }
       },
-      "path": "target-authenticated/dashboard-390x844.webp",
-      "bytes": 97782,
-      "sha256": "df547ea9ce3167560bc80ae166d8fa6376bbd04918fc740fa197ba45f8247474",
-      "width": 390,
-      "height": 8414,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 13489
-        },
-        "actual": {
-          "width": 390,
-          "height": 8414
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
-          "tracked": true,
-          "bytes": 158982,
-          "sha256": "c0a787339cdbaaebeae9f6db2ac0feddb9dc5546ec140964491a6e8e25fed717"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -48082,7 +48082,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 622050,
-        "changedPixelRatio": 5.465798569246845e-5,
+        "changedPixelRatio": 0.00005465798569246845,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-390x844.webp",
           "tracked": true,
@@ -48346,7 +48346,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 721890,
-        "changedPixelRatio": 2.909030461704692e-5,
+        "changedPixelRatio": 0.00002909030461704692,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-390x844.webp",
           "tracked": true,
@@ -48383,7 +48383,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 841620,
-        "changedPixelRatio": 9.624296000570329e-5,
+        "changedPixelRatio": 0.00009624296000570329,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-390x844.webp",
           "tracked": true,
@@ -48531,7 +48531,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 344760,
-        "changedPixelRatio": 9.861932938856015e-5,
+        "changedPixelRatio": 0.00009861932938856015,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-390x844.webp",
           "tracked": true,
@@ -48549,8 +48549,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 3281460,
+        "totalPixels": 4438590,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
+          "tracked": true,
+          "bytes": 97162,
+          "sha256": "4d61ddae16d81d3c9484daec6b8eb8acbc4dcce0b716c29ead91727b203ff7ab"
+        }
+      },
+      "path": "target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
+      "bytes": 97162,
+      "sha256": "4d61ddae16d81d3c9484daec6b8eb8acbc4dcce0b716c29ead91727b203ff7ab",
+      "width": 390,
+      "height": 11381,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 390,
+          "height": 8414
+        },
+        "actual": {
+          "width": 390,
+          "height": 11381
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
@@ -48558,37 +48582,13 @@
           "sha256": "3ee7f2175a0352a58e91c7a89b9acf81ac6a14aa6d7a9e45946efeeb276e6fc1"
         }
       },
-      "path": "target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
-      "bytes": 101988,
-      "sha256": "3ee7f2175a0352a58e91c7a89b9acf81ac6a14aa6d7a9e45946efeeb276e6fc1",
-      "width": 390,
-      "height": 8414,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 13489
-        },
-        "actual": {
-          "width": 390,
-          "height": 8414
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
-          "tracked": true,
-          "bytes": 170128,
-          "sha256": "b0c2a1f08643b79de0789879a69abbef4df968a9add7168751baee5edc3222aa"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -48908,7 +48908,7 @@
         "reason": "within_threshold",
         "changedPixels": 38,
         "totalPixels": 622050,
-        "changedPixelRatio": 6.108833695040591e-5,
+        "changedPixelRatio": 0.00006108833695040591,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
           "tracked": true,
@@ -49172,7 +49172,7 @@
         "reason": "within_threshold",
         "changedPixels": 20,
         "totalPixels": 721890,
-        "changedPixelRatio": 2.770505201623516e-5,
+        "changedPixelRatio": 0.00002770505201623516,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
           "tracked": true,
@@ -49209,7 +49209,7 @@
         "reason": "within_threshold",
         "changedPixels": 82,
         "totalPixels": 841620,
-        "changedPixelRatio": 9.743114469713173e-5,
+        "changedPixelRatio": 0.00009743114469713173,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
           "tracked": true,
@@ -49375,8 +49375,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 3155250,
+        "totalPixels": 4267875,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
+          "tracked": true,
+          "bytes": 92114,
+          "sha256": "6c4401030bceb41029b2642032c15e2ccff9151a0054ba4c76eb648aeafa2119"
+        }
+      },
+      "path": "target-authenticated/dashboard-375x812.webp",
+      "bytes": 92114,
+      "sha256": "6c4401030bceb41029b2642032c15e2ccff9151a0054ba4c76eb648aeafa2119",
+      "width": 375,
+      "height": 11381,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 375,
+          "height": 8414
+        },
+        "actual": {
+          "width": 375,
+          "height": 11381
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
@@ -49384,37 +49408,13 @@
           "sha256": "72a9a885d63c5b6074f070d7a8fb8731e1483499352888fd3f5a1e220e2101e2"
         }
       },
-      "path": "target-authenticated/dashboard-375x812.webp",
-      "bytes": 96940,
-      "sha256": "72a9a885d63c5b6074f070d7a8fb8731e1483499352888fd3f5a1e220e2101e2",
-      "width": 375,
-      "height": 8414,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 375,
-          "height": 13531
-        },
-        "actual": {
-          "width": 375,
-          "height": 8414
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
-          "tracked": true,
-          "bytes": 159060,
-          "sha256": "edff3f7b1b40e927846576b1431361b2eba9c3e7aa8c6f71e0aff59b56f38dc5"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -49734,7 +49734,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 598125,
-        "changedPixelRatio": 5.684430512016719e-5,
+        "changedPixelRatio": 0.00005684430512016719,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-375x812.webp",
           "tracked": true,
@@ -49998,7 +49998,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 703125,
-        "changedPixelRatio": 2.9866666666666666e-5,
+        "changedPixelRatio": 0.000029866666666666666,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-375x812.webp",
           "tracked": true,
@@ -50035,7 +50035,7 @@
         "reason": "within_threshold",
         "changedPixels": 81,
         "totalPixels": 825375,
-        "changedPixelRatio": 9.813721035892776e-5,
+        "changedPixelRatio": 0.00009813721035892776,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
           "tracked": true,
@@ -50201,8 +50201,32 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 2740160,
+        "totalPixels": 3665280,
         "changedPixelRatio": 0,
+        "baselineUsed": {
+          "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
+          "tracked": true,
+          "bytes": 82640,
+          "sha256": "4738a0974994b5ee269de788ca34cc577939f12a277adafe76b0937636c12c92"
+        }
+      },
+      "path": "target-authenticated/dashboard-320x568.webp",
+      "bytes": 82640,
+      "sha256": "4738a0974994b5ee269de788ca34cc577939f12a277adafe76b0937636c12c92",
+      "width": 320,
+      "height": 11454,
+      "previousBaselineComparison": {
+        "passed": false,
+        "reason": "dimensions_changed",
+        "changedPixelRatio": 1,
+        "expected": {
+          "width": 320,
+          "height": 8563
+        },
+        "actual": {
+          "width": 320,
+          "height": 11454
+        },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
@@ -50210,37 +50234,13 @@
           "sha256": "d3c3df299a9a66a39ef49180fd31b13c1402a094241f62165984e4dc280cfefe"
         }
       },
-      "path": "target-authenticated/dashboard-320x568.webp",
-      "bytes": 97140,
-      "sha256": "d3c3df299a9a66a39ef49180fd31b13c1402a094241f62165984e4dc280cfefe",
-      "width": 320,
-      "height": 8563,
-      "previousBaselineComparison": {
-        "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 320,
-          "height": 13734
-        },
-        "actual": {
-          "width": 320,
-          "height": 8563
-        },
-        "baselineUsed": {
-          "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
-          "tracked": true,
-          "bytes": 157188,
-          "sha256": "6fc372b3ae86f8a9288820ced9ec8d98c5c5a3f32a538bed9e82f00c926f4b27"
-        }
-      },
       "captureProvenance": {
-        "capturedAt": "2026-10-16T03:17:23.506Z",
-        "captureCommit": "5e712c62b0a7972db3359a8389f3d3b78ada7070",
+        "capturedAt": "2026-10-17T03:20:17.093Z",
+        "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "07198e4f936f4b65bfbca6e4e8e2c459113d5590da251fb275c80e841f64773a",
-        "ciRunId": 38841091143,
-        "artifactId": 12022638666
+        "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+        "ciRunId": 38995290171,
+        "artifactId": 12087754329
       }
     },
     {
@@ -50560,7 +50560,7 @@
         "reason": "within_threshold",
         "changedPixels": 34,
         "totalPixels": 519040,
-        "changedPixelRatio": 6.550554870530209e-5,
+        "changedPixelRatio": 0.00006550554870530209,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/configuracoes-320x568.webp",
           "tracked": true,
@@ -50824,7 +50824,7 @@
         "reason": "within_threshold",
         "changedPixels": 21,
         "totalPixels": 636480,
-        "changedPixelRatio": 3.299396681749623e-5,
+        "changedPixelRatio": 0.00003299396681749623,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-320x568.webp",
           "tracked": true,
@@ -52125,44 +52125,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1024x768.webp",
         "tracked": true,
-        "bytes": 107828,
-        "sha256": "9bc3a3a62a8e51f54e2a4a9e6a280c07a813c08bb413512c01d026d3425abd61"
+        "bytes": 62270,
+        "sha256": "0e3f7f48be0ac09e13ba3e726ffdb79a4e58ffbcbbd5fa3a3222d6b52d45b617"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1280x720.webp",
         "tracked": true,
-        "bytes": 99576,
-        "sha256": "752dc5cb020a7c9aa032743a0d264fc2a4309018ab5ee79b521caa389da8b994"
+        "bytes": 66794,
+        "sha256": "6dfdb8d1763af76dd2bb455e15b00146cd46c712f3d4d25e5c315f56ef31c7ed"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
         "tracked": true,
-        "bytes": 101578,
-        "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
+        "bytes": 68942,
+        "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-320x568.webp",
         "tracked": true,
-        "bytes": 95462,
-        "sha256": "48c2ca0651df842842c948780ff6370a480bf999b425324868595f4e812d3b3e"
+        "bytes": 49996,
+        "sha256": "b68debc3ba883ac5b1009ff71df4142c165efa2449957726b9795578e1ee97d3"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-375x812.webp",
         "tracked": true,
-        "bytes": 96014,
-        "sha256": "37ea08800a6d52456ebb5f2f24903793ed9c26a381b3fd87617add647aa3a81f"
+        "bytes": 50618,
+        "sha256": "a88e81a0e04d3451fd247ed239e1fad54601d043eeecb6e0ee4c1c596eb83637"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-390x844.webp",
         "tracked": true,
-        "bytes": 96156,
-        "sha256": "5c6d6a9c2ac3a061dab67264122adf773d4253ea9f75fac72ec12bd77ddc34d0"
+        "bytes": 50378,
+        "sha256": "0b635b3dcf8b6ae5455a2cf7265507d9be672ccfd29f14ab3ae81477004a2fa0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-768x1024.webp",
         "tracked": true,
-        "bytes": 102814,
-        "sha256": "cba560b891d2d7a1da7265e39b45de9554594dd1626766825188b77766795fed"
+        "bytes": 62434,
+        "sha256": "8235aa3f00eb6c044c884408b1dd8c55cd66aad45cd90586d9d3b3dd12509bb9"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/configuracoes-1024x768.webp",
@@ -52335,44 +52335,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
         "tracked": true,
-        "bytes": 132936,
-        "sha256": "5d8eabe8aeedaf494d1c99c6d120aba8c5119557a075f655913983a51564f53e"
+        "bytes": 111248,
+        "sha256": "1354df59b10829c53b6b726bb3484aa23382f97935f222e2b58e75be3ac16c1f"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
         "tracked": true,
-        "bytes": 145502,
-        "sha256": "2a3e7670857a13904e968ac80ec6ab895116e9dd679cbee08ed01e3b0db98c11"
+        "bytes": 120090,
+        "sha256": "36b6b68ecf8f0cc4a9837ce4a0bd565b44579ff42a17bde528851b05282a15ff"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
         "tracked": true,
-        "bytes": 147576,
-        "sha256": "232af071691b9f3d9cb41801abe0f4e4387a7d7a79559fd8c5908ca3b020184d"
+        "bytes": 119578,
+        "sha256": "f37de87a5f1bb3e373b877837b710e98c1e1d58388a44e5fe47d9dc8bff2147c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
         "tracked": true,
-        "bytes": 97140,
-        "sha256": "d3c3df299a9a66a39ef49180fd31b13c1402a094241f62165984e4dc280cfefe"
+        "bytes": 82640,
+        "sha256": "4738a0974994b5ee269de788ca34cc577939f12a277adafe76b0937636c12c92"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
         "tracked": true,
-        "bytes": 96940,
-        "sha256": "72a9a885d63c5b6074f070d7a8fb8731e1483499352888fd3f5a1e220e2101e2"
+        "bytes": 92114,
+        "sha256": "6c4401030bceb41029b2642032c15e2ccff9151a0054ba4c76eb648aeafa2119"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
         "tracked": true,
-        "bytes": 97782,
-        "sha256": "df547ea9ce3167560bc80ae166d8fa6376bbd04918fc740fa197ba45f8247474"
+        "bytes": 93296,
+        "sha256": "c90c3c860ba47e6d2312a1a857cda7e05c364ad268b2fcc551822c6d4d489300"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
         "tracked": true,
-        "bytes": 111118,
-        "sha256": "d06e713ba36b75831bd217de97648df312dbf5b9bca6e379494088ce5693da61"
+        "bytes": 106938,
+        "sha256": "213cf71a785f302e468a6a594ec3685d225ceb2b538ef4d4b4b02d6b374360e0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
@@ -52587,44 +52587,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-1024x768.webp",
         "tracked": true,
-        "bytes": 61570,
-        "sha256": "b5beb0714144e641f194d972fd194a1dad4c0b045d91435f84709024771c8eef"
+        "bytes": 71770,
+        "sha256": "3286ebd37098cec74de15ee6d9f18899ff10b862890138f16dfdf6fa99c19a09"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-1280x720.webp",
         "tracked": true,
-        "bytes": 65714,
-        "sha256": "118605570febabb15be722d4c3d146b98391bd7eb585c27f6ce6d66affec3f8c"
+        "bytes": 74614,
+        "sha256": "6cb10c3a685be3b4d032972d6f81ef0f5eace2d091407bdfda98eeae49b911aa"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
         "tracked": true,
-        "bytes": 67860,
-        "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea"
+        "bytes": 75202,
+        "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-320x568.webp",
         "tracked": true,
-        "bytes": 49242,
-        "sha256": "549cd0535930b29c33efe20b1635d20b92268d622e92eddb548c7e9d6108b61e"
+        "bytes": 64516,
+        "sha256": "3325283d3891dcd083341318f6aaaf9bcb480d7fc71ab7f33b36062abf3c8ed1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-375x812.webp",
         "tracked": true,
-        "bytes": 49808,
-        "sha256": "8c4c9b40d8c95463ca1195ccb1fe31e22a1cf54eff8a97795eb12a268404d2c5"
+        "bytes": 64548,
+        "sha256": "c10ad4e9c16d401dcaf8dc010d1a8692441ea4c93cd2648158a69ec577bd8e70"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-390x844.webp",
         "tracked": true,
-        "bytes": 49576,
-        "sha256": "744396340b0b2a34a2bcb3a17e692768725e395c304a7b9eaa51ddc966f7ad83"
+        "bytes": 65006,
+        "sha256": "3487c65b1a4d2758cfb07d6507e1be4abd3fd10f573150611193c57a6d0f817f"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/ranking-768x1024.webp",
         "tracked": true,
-        "bytes": 61430,
-        "sha256": "a2bfe97dd5ad136d256a24cb644152e146a901be2504e82292942a91be75e2be"
+        "bytes": 68858,
+        "sha256": "4aaa3f7548086ef22a77614206f1a5135429fabbfd4add4e7ab6f436319ff64c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-1024x768.webp",
@@ -52977,20 +52977,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 101662,
-        "sha256": "549202c28070e4f6b287cf7dc00a5697ee4ce43286798ca88517ccbbe50630fd"
+        "bytes": 69122,
+        "sha256": "96bfb79262ad07e50775e4f3f2ed2bee650155bda560c01c8b7e2ea582b69418"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 100870,
-        "sha256": "b2cddd0d912e77665b0e1eeb0c8201f8018cd3bc3616c63552a05d9aba6e61b8"
+        "bytes": 69906,
+        "sha256": "53cbb16a5a41ce159045afd4c43a02b2488807117f35b9aa0cd6c2bb032d01c1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
         "tracked": true,
-        "bytes": 101578,
-        "sha256": "f021681b54af815934e3d87d9fe4e9c978b04569ccf37dbae848fe18248043d6"
+        "bytes": 68942,
+        "sha256": "90312f1a79747ff05b227f0f394622455ca776339fd0fb0190884915e0f584e7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/configuracoes-balanced-1440x900.webp",
@@ -53067,20 +53067,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 154846,
-        "sha256": "42424ee66b2272c03ae76b50263ffd3fbd3ea52325ef42f64aa26defbacb6943"
+        "bytes": 126172,
+        "sha256": "f0ff093441b4e68bf8bd4506c70fda20fd51cae18e72e6355a039efc39981c3c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 154552,
-        "sha256": "b3dfde08947c24faacc36428b3096ace24705e6599a2327e4eb3a417282be6b5"
+        "bytes": 126156,
+        "sha256": "d37c4a869898ebaa5f22711cce904c32ca5030004ae4b2ae683a261fbea7c452"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
         "tracked": true,
-        "bytes": 147576,
-        "sha256": "232af071691b9f3d9cb41801abe0f4e4387a7d7a79559fd8c5908ca3b020184d"
+        "bytes": 119578,
+        "sha256": "f37de87a5f1bb3e373b877837b710e98c1e1d58388a44e5fe47d9dc8bff2147c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
@@ -53193,8 +53193,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/canal-de-parcerias-dark-390x844.webp",
         "tracked": true,
-        "bytes": 97372,
-        "sha256": "96df450009275146b4328fde1c0d69e622629871ad1965449d133f6590ebd65b"
+        "bytes": 52386,
+        "sha256": "bce89a38e453c5f2943607690b63c20914c1454219fe52140a190baf3a5725fa"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/configuracoes-dark-390x844.webp",
@@ -53223,8 +53223,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
         "tracked": true,
-        "bytes": 101988,
-        "sha256": "3ee7f2175a0352a58e91c7a89b9acf81ac6a14aa6d7a9e45946efeeb276e6fc1"
+        "bytes": 97162,
+        "sha256": "4d61ddae16d81d3c9484daec6b8eb8acbc4dcce0b716c29ead91727b203ff7ab"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
@@ -53259,8 +53259,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/ranking-dark-390x844.webp",
         "tracked": true,
-        "bytes": 51000,
-        "sha256": "9cc92b5750ee749bd5b2ff1ec39cec9a5f3c64e0a76f76caae29c9b568420f6d"
+        "bytes": 66272,
+        "sha256": "f05ed3dd24f00c4b85f95af7c5dba8c91b972aae2b95409cfdd85dd03ccfb69e"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-associativo-fluxo-linear-dark-390x844.webp",
@@ -53307,20 +53307,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 68056,
-        "sha256": "373570d220d195572108d1a7b9e0705e92940cd2727fc20755bf2736cdea0769"
+        "bytes": 75294,
+        "sha256": "d0f24329bf78fbf05a33fc3b81448110ecbbfaa4fc65d52393a98d224aa36041"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 68720,
-        "sha256": "9c3a6a325732c75cddee60f79af7e703567f0a9ad4dfbb174909dfd5be382481"
+        "bytes": 75964,
+        "sha256": "d2a0eb43b29fa10dc3609973c5ed7948d575c77d5dc55cd20627a9615cd63b51"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
         "tracked": true,
-        "bytes": 67860,
-        "sha256": "f9ef3a97bc969f19fec8aca97183f8a83bce38a28946a252a82cc87affa8ceea"
+        "bytes": 75202,
+        "sha256": "5d1cd842ab4b31e3d0dee6f3b2bd24752bb2deb019168c50bca59b196e41224d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-balanced-1440x900.webp",
@@ -53450,7 +53450,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "0990b2841f2421d9457b001760a599d88b3990e0fc4fb62d7a949315dc47f3a6"
+    "manifestSha256": "5928fa5c3d16f27c4d9e8a3a0ed642f4f81c0138e71156d141d6b6dc712fb9bf"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -54292,6 +54292,88 @@
       ],
       "preservedScreenshots": 220,
       "followUp": "Full verify-mode CI on the combined commit remains required before merge."
+    },
+    {
+      "reviewedAt": "2026-10-17T12:03:42.272Z",
+      "scope": "dashboard funnel groups 3/5/5, current-month periods, normalized sale average and removal of requested sections; other routes and original capture provenance preserved",
+      "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38995290171",
+      "artifactId": 12087754329,
+      "artifactSha256": "8924cd122a1408041eb31c6a43a8975c98cdd8fc437dc34645b397b00bb4d80e",
+      "headCommit": "f669899702ffb53268599cfb6d8e0c85b3e4b5c8",
+      "capturedAt": "2026-10-17T03:20:17.093Z",
+      "captureCommit": "c530d24b1891716408cfe24e70d9b3caa037256e",
+      "worktreeDirtyAtCapture": true,
+      "worktreeFingerprint": "4407f0e0c7326366b6e4fdd01c12b12daff140e678029921941e0a6e1433a854",
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
+      "generatedOnlyProof": {
+        "trackedDiff": "empty",
+        "generatedFiles": [
+          "output/playwright/connected-systems/balanced-1440.png",
+          "output/playwright/connected-systems/balanced-320.png",
+          "output/playwright/connected-systems/balanced-768.png",
+          "output/playwright/connected-systems/console-meta-ads-balanced-1440.png",
+          "output/playwright/connected-systems/console-meta-ads-balanced-320.png",
+          "output/playwright/connected-systems/console-meta-ads-balanced-768.png",
+          "output/playwright/connected-systems/console-meta-ads-dark-1440.png",
+          "output/playwright/connected-systems/console-meta-ads-dark-320.png",
+          "output/playwright/connected-systems/console-meta-ads-dark-768.png",
+          "output/playwright/connected-systems/console-meta-ads-light-1440.png",
+          "output/playwright/connected-systems/console-meta-ads-light-320.png",
+          "output/playwright/connected-systems/console-meta-ads-light-768.png",
+          "output/playwright/connected-systems/console-meta-ads-results.json",
+          "output/playwright/connected-systems/console-salesforce-balanced-1440.png",
+          "output/playwright/connected-systems/console-salesforce-balanced-320.png",
+          "output/playwright/connected-systems/console-salesforce-balanced-768.png",
+          "output/playwright/connected-systems/console-salesforce-dark-1440.png",
+          "output/playwright/connected-systems/console-salesforce-dark-320.png",
+          "output/playwright/connected-systems/console-salesforce-dark-768.png",
+          "output/playwright/connected-systems/console-salesforce-light-1440.png",
+          "output/playwright/connected-systems/console-salesforce-light-320.png",
+          "output/playwright/connected-systems/console-salesforce-light-768.png",
+          "output/playwright/connected-systems/console-salesforce-results.json",
+          "output/playwright/connected-systems/dark-1440.png",
+          "output/playwright/connected-systems/dark-320.png",
+          "output/playwright/connected-systems/dark-768.png",
+          "output/playwright/connected-systems/light-1440.png",
+          "output/playwright/connected-systems/light-320.png",
+          "output/playwright/connected-systems/light-768.png"
+        ],
+        "recomputedFingerprintMatches": true
+      },
+      "functionalChecksPassed": true,
+      "fixtureVerification": {
+        "contract": "rls-marker-v1",
+        "assertion": "synthetic marker and exact fixture counts verified through authenticated RLS",
+        "sourceMarkerPolicy": "QA local synthetic — not production · run <ephemeral-id>",
+        "sourceMarkerVerified": {
+          "dashboard": true,
+          "stageOpportunities": true
+        },
+        "sourceMarkerPresentation": {
+          "dashboard": "data-attribute",
+          "stageOpportunities": "visible"
+        }
+      },
+      "visualComparisonsBeforePromotion": {
+        "passed": 231,
+        "reviewedChanges": 11
+      },
+      "previousManifestSha256": "0990b2841f2421d9457b001760a599d88b3990e0fc4fb62d7a949315dc47f3a6",
+      "changedFiles": [
+        "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp"
+      ],
+      "remainingImagesPreserved": 231,
+      "followUp": "Full verify-mode CI required before merge; this promotion is not a passing candidate run."
     }
   ],
   "integrationProvenance": [

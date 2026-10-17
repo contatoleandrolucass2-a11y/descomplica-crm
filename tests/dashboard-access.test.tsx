@@ -78,7 +78,7 @@ describe("dashboard autorizado por visão", () => {
     expect(markup).not.toContain("Oportunidades por empreendimento");
   });
 
-  it("mostra somente House e o ranking para o perfil House", async () => {
+  it("mantem somente a visao House e remove o ranking desta pagina", async () => {
     mocks.enforcePermission.mockResolvedValue({
       userId: "a4000000-0000-4000-8000-000000000002",
       roleKey: "broker_house",
@@ -101,8 +101,8 @@ describe("dashboard autorizado por visão", () => {
     expect(markup).not.toContain('href="/app?view=');
     expect(markup).not.toContain("Com canal de imobiliárias");
     expect(markup).not.toContain(">Geral<");
-    expect(markup).toContain("Ranking validado");
-    expect(markup).toContain("Oportunidades por empreendimento");
+    expect(markup).not.toContain("Ranking validado");
+    expect(markup).not.toContain("Oportunidades por empreendimento");
   });
 
   it("mantem filtros e metas com analise sanitizada sem permissao de ranking", async () => {
@@ -282,7 +282,8 @@ describe("dashboard autorizado por visão", () => {
     );
     expect(mocks.loadDashboardTeam).not.toHaveBeenCalled();
     expect(markup).not.toContain("Gerente sintetico");
-    expect(markup).toContain("Aguardando a coleta detalhada da equipe.");
+    expect(markup).not.toContain("Corretores por gerente");
+    expect(markup).toContain("Filtros aguardando coleta detalhada dos relatórios.");
     expect(markup).not.toContain('href="/app/etapas/');
   });
 });
