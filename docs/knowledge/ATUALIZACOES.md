@@ -1,5 +1,15 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-17: Revisao visual do dashboard e retomada12:03Z
+
+- CI38995290171: funcional, RSC, acessibilidade e zoom aprovados;11 diferencas
+  intencionais /app revisadas,231 capturas preservadas. Baseline parcial
+  promovida com hashes e proveniencia no manifesto, sem reduzir tolerancias.
+- Git fetch: main61c9a6a8. GET /api/health12:03:55Z:200/ok, versaoeff7f729.
+  PR245 aberto, HEADf6698997. Nenhuma publicacao do dashboard realizada.
+- Incorporar base Qlik concorrente e repetir CI verify antes de merge/deploy.
+  Fontes: Actions38995290171, PR245, origin/main e health publico.
+
 ## 2026-10-17: Locator de filtro fechado na verificacao RSC
 
 - CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.

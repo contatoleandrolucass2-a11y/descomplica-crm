@@ -34,6 +34,18 @@
 
 ## Estado da entrega
 
+CI38995290171: verificacoes funcionais completas aprovadas, incluindo refresh
+RSC,242 auditorias de acessibilidade e zoom80-200%. Apenas11 capturas /app
+diferem intencionalmente;231 preservadas. Capturas desktop claro/medio/escuro
+e mobile revisadas, sem overflow ou sobreposicao nos trechos examinados.
+Artefato12087754329 SHA256
+8924cd122a1408041eb31c6a43a8975c98cdd8fc437dc34645b397b00bb4d80e.
+Arvore capturadac530d24b igual a HEADf6698997; fingerprint recomposto a partir
+de29 arquivos gerados exclusivamente em output/playwright/connected-systems.
+Baseline promovida somente para11 imagens /app, mantendo231 registros e hashes.
+Nova CI verify obrigatoria. Retomada12:03Z: main61c9a6a8 e producaoeff7f729,
+HTTP200/statusok; incorporar base concorrente antes de publicacao.
+
 CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
 Refresh chegou a state-preservation, mas o locator de checkbox excluia
 elementos ocultos depois do fechamento do filtro. Reproducao Chromium local:

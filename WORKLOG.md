@@ -1,5 +1,9 @@
 # Worklog
 
+CI38995290171 concluiu verificacoes funcionais, RSC, acessibilidade e zoom.
+Revisadas11 alteracoes visuais /app, preservadas231 capturas de outras telas.
+Baseline atualizada com proveniencia do artefato12087754329; nova CI exigida.
+
 CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
 Teste RSC usa includeHidden para conferir selecao dentro do filtro fechado.
 Reproducao Chromium local confirma0 elementos no locator visivel e1 no oculto.

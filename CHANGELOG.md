@@ -1,5 +1,7 @@
 # Changelog
 
+- Dashboard: referencias visuais revisadas para os grupos3/5/5 em desktop e mobile.
+
 - QA dashboard: confere selecao oculta apos fechamento do filtro no refresh RSC.
 
 ## Em validacao: Grupos de funis do dashboard
