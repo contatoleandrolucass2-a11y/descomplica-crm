@@ -20,7 +20,7 @@ import {
   type QlikRankingView,
 } from "@/lib/crm/qlik/ranking-presentation";
 
-import styles from "./RankingCanvas.module.css";
+import styles from "./PartnershipsRanking.module.css";
 
 const PERIODS = {
   latest: "Último mês disponível",
@@ -383,7 +383,7 @@ export function RankingDashboard({
         </dl>
       </section>
       <form
-        action="/app/ranking"
+        action="/app/canal-de-parcerias"
         method="get"
         className={styles.filters}
         aria-label="Filtros do ranking de parcerias"
@@ -462,7 +462,7 @@ export function RankingDashboard({
           <label>
             <input type="radio" name="kind" value="imobs" defaultChecked={isImob} />
             <span>
-              <Building2 size={17} aria-hidden="true" /> IMOBs
+              <Building2 size={17} aria-hidden="true" /> Imobiliárias
             </span>
           </label>
           <label>

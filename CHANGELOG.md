@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-16: Ranking House separado de Canal de Parcerias
+
+- Atualiza somente as 22 referências visuais de House e Parcerias após revisão da captura Linux, preservando as outras 220.
+- A captura E2E de estados valida seu overlay sintético sem confundi-lo com o estado real da página.
+- O E2E verifica os filtros da House na rota própria e os filtros Qlik em Canal de Parcerias.
+- Os testes de acesso distinguem a fonte Qlik de parcerias e mantêm o catálogo existente sincronizado.
+
+- Restaura a página Ranking para corretores e gerentes da House, preservando
+  sua fonte Salesforce e a política de pontuação existente.
+- Move o ranking Qlik de imobiliárias e empreendimentos para Canal de
+  Parcerias, com filtros na rota correta e autorização própria no banco.
+- Identifica a integração Qlik como fonte do Canal de Parcerias.
+
+## 2026-10-16: Prova do estado padrão do Qlik
+
+- Define explicitamente o estado padrão nos objetos temporários de coleta.
+- Aceita sua representação omitida ou vazia no layout somente após conferir
+  identidade, definição efetiva e estabilidade; estados alternativos e provas
+  ausentes continuam bloqueando a publicação do ranking.
+
 ## 2026-10-16: Facebook Ads nas integrações
 
 - Adiciona a conta Facebook Ads indicada ao painel Integrações, com logos SVG por tema.

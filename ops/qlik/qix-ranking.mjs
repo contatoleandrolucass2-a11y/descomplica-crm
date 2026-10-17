@@ -12,6 +12,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
   const SCOPE = { businessUnit: "Direcional", regional: "SP CAPITAL", channel: "CANAL IMOB" };
   const MAX_ROWS = 5000;
   const temporary = [];
+  const stateAuthorities = new WeakMap();
   let doc;
   let result;
   class Failure extends Error {
@@ -179,10 +180,87 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
   async function create(properties) {
     const id = `ranking-${crypto.randomUUID()}`;
     temporary.push(id);
-    return await call(doc, "createSessionObject", {
+    const requested = {
       ...properties,
+      qStateName: "$",
       qInfo: { qId: id, qType: "ranking-session" },
-    });
+    };
+    const model = await call(doc, "createSessionObject", requested);
+    stateAuthorities.set(model, { requested: JSON.parse(canonical(requested)) });
+    return model;
+  }
+  const defaultState = (value) => value === undefined || value === "" || value === "$";
+  // QIX may omit default values in layouts. Absence alone is not evidence of
+  // the default state: bind a fresh layout to stable effective properties.
+  async function stateLayout(model, key, code) {
+    const initial = await call(model, "getLayout");
+    const state = initial?.[key]?.qStateName;
+    const authority = stateAuthorities.get(model);
+    check(record(initial?.[key]) && defaultState(initial.qStateName), code);
+    if (state === "$" && !authority?.effectiveSha256) return initial;
+    check(defaultState(state), code);
+    const proofCode = {
+      qSelectionObject: "selection_state_unproven",
+      qListObject: "list_state_unproven",
+      qHyperCube: "cube_state_unproven",
+    }[key];
+    check(authority && typeof model.getEffectiveProperties === "function", proofCode);
+    const definitionKey = `${key}Def`;
+    function contains(actual, expected) {
+      if (Array.isArray(expected))
+        return (
+          Array.isArray(actual) &&
+          actual.length === expected.length &&
+          expected.every((item, index) => contains(actual[index], item))
+        );
+      if (record(expected))
+        return (
+          record(actual) &&
+          Object.keys(expected).every(
+            (name) => Object.hasOwn(actual, name) && contains(actual[name], expected[name]),
+          )
+        );
+      return actual === expected;
+    }
+    async function properties() {
+      const value = await call(model, "getEffectiveProperties");
+      check(
+        record(value) &&
+          record(value[definitionKey]) &&
+          defaultState(value.qStateName) &&
+          defaultState(value[definitionKey].qStateName) &&
+          (!Object.hasOwn(value, "qExtendsId") || value.qExtendsId === ""),
+        proofCode,
+      );
+      if (authority.requested) {
+        check(contains(value, authority.requested), proofCode);
+      } else {
+        check(
+          key === "qHyperCube" &&
+            value.qInfo?.qId === authority.id &&
+            text(value.qInfo.qType) &&
+            (await digest(value.qHyperCubeDef)) === authority.cubeSha256,
+          proofCode,
+        );
+      }
+      return value;
+    }
+    const before = await properties();
+    const fingerprint = await digest(before);
+    check(!authority.effectiveSha256 || authority.effectiveSha256 === fingerprint, proofCode);
+    const layout = await call(model, "getLayout");
+    check(
+      record(layout?.[key]) &&
+        record(layout.qInfo) &&
+        equal(layout.qInfo, before.qInfo) &&
+        defaultState(layout.qStateName) &&
+        defaultState(layout[key].qStateName),
+      proofCode,
+    );
+    const after = await properties();
+    check(equal(before, after), proofCode);
+    authority.effectiveSha256 = fingerprint;
+    return { ...layout, [key]: { ...layout[key], qStateName: "$" } };
   }
   async function reload() {
     const layout = await call(doc, "getAppLayout");
@@ -301,13 +379,11 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     const model = await call(doc, "getObject", config.objectId);
     const properties = await call(model, "getEffectiveProperties");
     check(properties?.qInfo?.qId === config.objectId, "object_mismatch");
-    check(!properties.qStateName || properties.qStateName === "$", "state_mismatch");
+    check(defaultState(properties.qStateName), "state_mismatch");
     const cube = properties.qHyperCubeDef;
     check(record(cube) && (await digest(cube)) === config.cubeSha256, "definition_changed");
-    check(
-      (!cube.qStateName || cube.qStateName === "$") && (!cube.qMode || cube.qMode === "S"),
-      "state_mismatch",
-    );
+    check(defaultState(cube.qStateName) && (!cube.qMode || cube.qMode === "S"), "state_mismatch");
+    stateAuthorities.set(model, { id: config.objectId, cubeSha256: config.cubeSha256 });
     // Native missing suppression is safe only after unsuppressed ID/name/totals reconciliation.
     check(
       !cube.qSuppressZero &&
@@ -431,12 +507,12 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     return rows;
   }
   async function list(model) {
-    const before = (await call(model, "getLayout"))?.qListObject;
+    const before = (await stateLayout(model, "qListObject", "state_mismatch"))?.qListObject;
     noError(before);
     check(before.qStateName === "$" && before.qSize?.qcx === 1, "state_mismatch");
     noError(before.qDimensionInfo);
     const rows = await pages(model, "getListObjectData", "/qListObjectDef", before.qSize, [0]);
-    const after = (await call(model, "getLayout"))?.qListObject;
+    const after = (await stateLayout(model, "qListObject", "selection_changed"))?.qListObject;
     noError(after);
     check(
       after.qStateName === "$" &&
@@ -490,9 +566,17 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     return cube;
   }
   async function readCube(model, dimensions, measures, columns, totalIndices) {
-    const before = cubeLayout(await call(model, "getLayout"), dimensions, measures);
+    const before = cubeLayout(
+      await stateLayout(model, "qHyperCube", "cube_shape"),
+      dimensions,
+      measures,
+    );
     const rows = await pages(model, "getHyperCubeData", "/qHyperCubeDef", before.qSize, columns);
-    const after = cubeLayout(await call(model, "getLayout"), dimensions, measures);
+    const after = cubeLayout(
+      await stateLayout(model, "qHyperCube", "cube_shape"),
+      dimensions,
+      measures,
+    );
     for (const field of ["qSize", "qGrandTotalRow", "qDimensionInfo", "qMeasureInfo"])
       check(equal(before[field], after[field]), "cube_changed");
     check(
@@ -652,7 +736,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
       sources[role] = { ...native, idCube };
     }
     async function selectedFields(empty = false) {
-      const layout = await call(selection, "getLayout");
+      const layout = await stateLayout(selection, "qSelectionObject", "state_mismatch");
       check(layout?.qSelectionObject?.qStateName === "$", "state_mismatch");
       const selections = layout?.qSelectionObject?.qSelections;
       check(Array.isArray(selections) && selections.length <= 5, "selection_unproven");
