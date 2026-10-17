@@ -1,5 +1,13 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-17: Locator de filtro fechado na verificacao RSC
+
+- CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
+  Refresh chegou a state-preservation; checkbox dentro de details fechado nao
+  e encontrado por getByRole padrao. Reproduzido em Chromium local:0 vs1 com
+  includeHidden, mantendo toBeChecked. Teste corrigido sem relaxar assercoes.
+- Producao e baseline permanecem inalteradas; nova CI e revisao visual exigidas.
+
 ## 2026-10-17: Retomada do PR245 e base concorrente integrada
 
 - Consulta GitHub02:01Z: PR245 mergeable, HEAD73d37fee; CI38993263801 iniciada.

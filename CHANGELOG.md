@@ -1,5 +1,7 @@
 # Changelog
 
+- QA dashboard: confere selecao oculta apos fechamento do filtro no refresh RSC.
+
 ## Em validacao: Grupos de funis do dashboard
 
 - Organiza metas, periodos do mes e historico em grupos3/5/5 no desktop,

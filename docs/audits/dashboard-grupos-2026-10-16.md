@@ -34,6 +34,13 @@
 
 ## Estado da entrega
 
+CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
+Refresh chegou a state-preservation, mas o locator de checkbox excluia
+elementos ocultos depois do fechamento do filtro. Reproducao Chromium local:
+getByRole padrao encontra0; includeHidden encontra1 e toBeChecked passa.
+Leitura corrigida com includeHidden, sem alterar interacao ou assercoes.
+Nova CI obrigatoria; nenhuma baseline promovida ou publicacao realizada.
+
 CI38972729758 aprovou validate, restore e E2E apos a correcao da jornada.
 Matriz autenticada parou em dashboard-auto-refresh, sem produzir comparacao
 visual completa. O teste exigia filtro aberto apos clique externo; expectativa

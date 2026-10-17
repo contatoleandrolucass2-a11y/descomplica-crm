@@ -1,5 +1,10 @@
 # Worklog
 
+CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
+Teste RSC usa includeHidden para conferir selecao dentro do filtro fechado.
+Reproducao Chromium local confirma0 elementos no locator visivel e1 no oculto.
+Sem mudanca de produto nesta correcao; nova CI exigida antes de publicar.
+
 ## 2026-10-16: Grupos comparativos do dashboard
 
 CI38972729758 aprovou validate, restore e jornada E2E; a matriz autenticada
