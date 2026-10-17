@@ -719,6 +719,20 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
         }),
       );
     }
+    async function calendarList() {
+      // A list includes excluded historical values. Search narrows its data view,
+      // not the app selections; global state counts still prove no selected
+      // value was hidden. Read every matching row and retain the existing limit.
+      try {
+        check(
+          (await call(lists[3], "searchListObjectFor", "/qListObjectDef", `${year}*`)) === true,
+          "selection_failed",
+        );
+        return await list(lists[3], "calendar_list_coverage_limit");
+      } finally {
+        await call(lists[3], "abortListObjectSearch", "/qListObjectDef");
+      }
+    }
     const sources = {};
     for (const role of ["imobs", "developments"]) {
       const config = mapping.cubes[role];
@@ -787,12 +801,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     async function verifySelection(periods) {
       await selectedFields();
       for (let index = 0; index < 4; index++) {
-        const values = (
-          await list(
-            lists[index],
-            index === 3 ? "calendar_list_coverage_limit" : "selection_list_coverage_limit",
-          )
-        )
+        const values = (index === 3 ? await calendarList() : await list(lists[index]))
           .filter((cell) => cell.qState === "S")
           .map((cell) => cell.qText)
           .sort();
@@ -819,7 +828,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
           "selection_failed",
         );
       }
-      const calendar = await list(lists[3], "calendar_list_coverage_limit");
+      const calendar = await calendarList();
       const values = periods.map((period) => {
         const matches = calendar.filter(
           (cell) => cell.qText === period.slice(0, 7).replace("-", ""),

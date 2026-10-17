@@ -84,6 +84,18 @@ códigos; este diagnóstico do owner é compatível com o aplicativo publicado.
 Um código identifica a etapa recusada, mas não autoriza ampliar o limite,
 truncar resultados ou afirmar que houve publicação completa.
 
+O calendário usa `SearchListObjectFor` com o prefixo do ano validado, por
+exemplo `2026*`, antes de cada leitura. Segundo o
+[exemplo oficial de pesquisa em listas](https://help.qlik.com/en-US/sense-developer/May2026/Subsystems/EngineAPI/Content/Sense_EngineAPI/DiscoveringAndAnalysing/SearchInData/search-string-in-list-object.htm),
+o layout e as páginas refletem os resultados da pesquisa enquanto as contagens
+de estado continuam abrangendo a seleção do campo. Todos os resultados são
+lidos, sem aumentar os limites. A contagem global de selecionados deve ser
+igual ao número de células selecionadas lidas, e seus textos devem corresponder
+exatamente aos meses solicitados. Isso recusa seleções escondidas pela pesquisa.
+`AbortListObjectSearch` encerra o filtro de pesquisa em `finally`; o coletor
+seleciona pelos IDs de elemento retornados. Não aceita a pesquisa inteira como
+seleção nem altera os filtros, as fórmulas ou a política de períodos aprovados.
+
 O coletor `browser-ranking.mjs` abre uma pagina dedicada por observacao e uma
 identidade QIX UUID distinta, fecha pagina/sessao antes da segunda coleta e
 mantem autenticacao/CSRF dentro do navegador. Nao exporta cookies nem usa CDP
