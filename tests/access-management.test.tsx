@@ -107,7 +107,7 @@ describe("experiência de acesso", () => {
     expect(markup).toContain("Ranking das imobiliárias");
     expect(markup).toContain("A leitura da fonte Qlik não pôde ser confirmada.");
     expect(markup).toContain("Dados indisponíveis");
-    expect(mocks.loadQlikRankingV2).toHaveBeenCalledExactlyOnceWith(undefined);
+    expect(mocks.loadQlikRankingV2).toHaveBeenCalledExactlyOnceWith(null);
     expect(markup).not.toContain("crm_imob_ranking");
     expect(mocks.loadReadModelV3).not.toHaveBeenCalled();
   });

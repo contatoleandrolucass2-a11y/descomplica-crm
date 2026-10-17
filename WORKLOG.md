@@ -20,8 +20,12 @@ A suíte focal passou com 109 testes e duas verificações de navegador reservad
 as validações completas, pgTAP e visuais ainda são exigidas antes de publicar.
 A descrição genérica já registrada de `crm.ranking.view` foi preservada para
 manter o catálogo sincronizado, sem recadastrar páginas ou alterar acessos
-individuais. O teste legado de parcerias agora verifica o estado Qlik. A ingestão automática
-Qlik continua pendente da coleta real e de um ciclo agendado posterior.
+individuais. O teste legado de parcerias agora verifica o estado Qlik. Lint, tipos, build, fontes e formato passaram. A suíte completa local passou
+com 3.671 testes Vitest, 1.497 operacionais e 703 do coordenador. Em um banco
+local isolado e descartável, baseline Qlik mais a nova migration passaram
+nas 255 asserções pgTAP, inclusive a negação para acesso exclusivo à House.
+A ingestão automática Qlik continua pendente da coleta real e de um ciclo
+agendado posterior.
 
 ## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
 

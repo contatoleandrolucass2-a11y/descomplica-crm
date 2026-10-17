@@ -3,8 +3,9 @@ set local timezone = 'UTC';
 -- 78 single-row assertions + 177 assertions from explicit test matrices.
 select plan(255);
 
--- Runs against either the standalone baseline (auth.uid, MFA and permission
--- helpers only) or the full local history. No customer/auth fixture is needed.
+-- Runs against the standalone Qlik baseline plus the partnerships reader migration
+-- (auth.uid, MFA and permission helpers only) or the full local history.
+-- No customer/auth fixture is needed.
 -- Helper doubles below test delegation, not the helpers' own implementation.
 -- All replacement definitions and synthetic rows are rolled back at the end.
 truncate private.crm_qlik_v2_publications, private.crm_qlik_v2_observations;

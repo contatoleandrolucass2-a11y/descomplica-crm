@@ -232,7 +232,10 @@ describe("ranking v2 route and UI", () => {
           await browserExpect(page.locator("tbody tr")).toHaveCount(0);
           await browserExpect(page.locator("main")).not.toContainText("R$");
           await browserExpect(
-            page.getByRole("radio", { name: kind === "imobs" ? "IMOBs" : "Produtos", exact: true }),
+            page.getByRole("radio", {
+              name: kind === "imobs" ? "Imobiliárias" : "Produtos",
+              exact: true,
+            }),
           ).toBeChecked();
           await browserExpect(
             page.getByRole("button", { name: "Aplicar filtros", exact: true }),
@@ -391,7 +394,7 @@ describe("ranking v2 route and UI", () => {
                     }),
                   );
                 expect(measured, `${status}/${width}/${theme}/${kind}`).toEqual([
-                  { text: "IMOBs", lines: 1, contained: true },
+                  { text: "Imobiliárias", lines: 1, contained: true },
                   { text: "Produtos", lines: 1, contained: true },
                 ]);
                 expect(

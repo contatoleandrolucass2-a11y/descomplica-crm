@@ -2,6 +2,8 @@
 
 ## 2026-10-16: Ranking House separado de Canal de Parcerias
 
+- Os testes de acesso distinguem a fonte Qlik de parcerias e mantêm o catálogo existente sincronizado.
+
 - Restaura a página Ranking para corretores e gerentes da House, preservando
   sua fonte Salesforce e a política de pontuação existente.
 - Move o ranking Qlik de imobiliárias e empreendimentos para Canal de
