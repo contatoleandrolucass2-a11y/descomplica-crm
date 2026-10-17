@@ -2827,3 +2827,8 @@ pendente dos gates completos no SHA final.
   sem registrar dados comerciais ou credenciais.
 - Preserva os limites de cobertura e a rejeição integral de coletas incompletas.
 - Mantém compatibilidade com o status do aplicativo e com recibos anteriores.
+
+## 2026-10-17: Validação de permissões da Previsão
+
+- Corrige a identidade da fixture pgTAP ao preparar overrides administrativos,
+  preservando as61 verificações e os controles de autorização do banco.

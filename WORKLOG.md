@@ -7509,3 +7509,11 @@ perfil macOS. Lint, tipos, build, formato e verificação das fontes documentais
 passaram. A aceitação de 5.000 linhas e a rejeição de 5.001 foram verificadas.
 A CI no SHA exato e a ativação protegida do owner ainda são necessárias; nenhuma
 nova publicação do aplicativo é exigida por esta mudança de diagnóstico.
+
+## 2026-10-17: Fixture de permissões da Previsão
+
+CI39031197492 aprovou validate e navegador da Previsão, mas o restore parou
+após46 assertions. A preparação do override de Admin retinha a identidade do
+corretor após RESET ROLE. Limpeza explícita do claim na fixture preserva o guard
+e as61 verificações. Teste focal release-candidate:21 aprovados; nova CI SQL
+necessária. Nenhuma migration ou publicação em produção realizada nesta etapa.

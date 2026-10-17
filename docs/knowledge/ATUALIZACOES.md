@@ -664,3 +664,19 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
 - Estado externo mudou durante a espera: fetch confirmou origin/main 61c9a6a8fe2813831bc167d91e6d7e0ab9b3bab4, PR #248 integrado e CI main39007579400 verde. Health observacional em 2026-10-17T12:03:29Z retornou HTTP200/ok/eff7f729c4386af14af16902fe4c761027df597a. Esta versao e de outra entrega; Previsao segue sem publicacao, merge ou migration remota.
 - Integracao da main atual em andamento para manter o PR revisavel, preservando Qlik/House/Parcerias e suas referencias. Novo catalogo e restore devem somar as assertions recebidas da main e os61 testes da Previsao. Backup inicial e antigo e deve ser revalidado/refeito antes de qualquer aplicacao remota. A autorizacao especifica da migration permanece limitada a Previsao e seu catalogo, apos gates; nao inclui aplicar migrations Qlik de outra entrega.
 - Limite de publicacao: o403 externo impede promocao enquanto persistir; nao alterar fonte financeira, remover gate ou declarar banco/restauracao aprovados. Reavaliar em CI completa do candidato integrado. Nenhum dado de producao foi gravado por esta tarefa.
+
+## 2026-10-17: Validacao integrada da Previsao e correcao da fixture
+
+- CI39031197492 no candidato8fe43e72 aprovou validate completo, inclusive fonte
+  externa, lint, tipos, testes Linux, auditoria e build. Os cinco testes de
+  navegador da Previsao passaram. Local integrado: Vitest3787 aprovados/94 skips,
+  lint/tipos/build aprovados. O403 anterior deixou de ocorrer nesta execucao.
+- Restore isolado interrompeu o pgTAP apos46 de61 assertions da Previsao.
+  A fixture mantinha claim.sub do corretor depois de RESET ROLE e em seguida
+  preparava override de Admin, atingindo o guard de contas administrativas.
+  Corrigida somente a identidade da preparacao privilegiada;61 assertions e
+  controles de runtime preservados. Teste focal release-candidate:21 aprovados.
+  Confirmacao SQL depende da nova CI; Docker local permanece indisponivel.
+- PR #247 ainda sem merge/publicacao; migrations remotas nao aplicadas. A
+  autorizacao recebida permite aplicar as duas migrations desta entrega apos
+  aprovacao integral dos gates e nova conferencia da baseline de producao.

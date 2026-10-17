@@ -133,6 +133,8 @@ select is((select count(*) from public.audit_logs where action='crm.forecast.sav
 select ok(not exists (select 1 from public.audit_logs where action='crm.forecast.saved'
   and ((before-array['revision'])<>'{}'::jsonb or (after-array['revision','row_count','column_count','updated_at'])<>'{}'::jsonb)),
   'audit retains only metadata, never title or cell content');
+-- Privileged fixture setup must not retain the previous request actor.
+select set_config('request.jwt.claim.sub','',true);
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason,granted_by) values
   ('ac710000-0000-4000-8000-000000000006','crm.management.forecast.view','allow','Synthetic read grant','ac710000-0000-4000-8000-000000000001');
 set local role authenticated;
@@ -140,6 +142,9 @@ select set_config('request.jwt.claim.sub','ac710000-0000-4000-8000-000000000006'
 select is(public.get_crm_forecast()->>'can_edit','false','page grant allows shared read, not editing');
 select throws_ok($$select public.save_crm_forecast(pg_temp.forecast_doc(),5)$$,'42501','forbidden: missing crm.settings.manage','reader cannot save');
 reset role;
+-- RESET ROLE changes the SQL role, not auth.uid()'s request claims. Clear the
+-- broker identity before the postgres fixture changes an Administrator account.
+select set_config('request.jwt.claim.sub','',true);
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason,granted_by) values
   ('ac710000-0000-4000-8000-000000000002','crm.management.forecast.view','deny','Synthetic read denial','ac710000-0000-4000-8000-000000000001');
 set local role authenticated;
