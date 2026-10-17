@@ -38,10 +38,43 @@ são validados somente em memória e nunca integram o heartbeat ou o destino sal
 As quatro unidades passaram em `systemd-analyze verify` na VPS, em diretório
 temporário, sem instalação, reload ou início de serviço. Typecheck também passou.
 
+A CI `38964676168` aprovou todos os gates aplicáveis ao PR no SHA `3767d810`.
+Durante a execução, a main avançou para `c889bfc8` com a correção de expressões
+Qlik do PR #244. O merge preservou integralmente essa correção; os conflitos
+estavam apenas nas entradas de CHANGELOG e WORKLOG. Os 426 testes focais Qlik e
+Meta passaram, assim como a formatação e a verificação do diff. O candidato
+combinado exige nova validação de CI e a produção será consultada novamente
+antes da promoção.
+
 Publicação, instalação e login reais ainda não foram realizados. Nenhuma
 alteração de campanha, cobrança, conta Meta, workflow n8n ou schema Supabase faz
 parte desta etapa. A sincronização automática do Obsidian retornou
 `not-configured` neste Git comum; o conhecimento permanece versionado no projeto.
+
+## 2026-10-16: Expressões nativas multilinha do Qlik
+
+A aplicação `34517ba2` foi publicada pelo coordenador em
+`2026-10-16T20:54:23.498Z`, com os quatro gates da CI `38959856367`
+aprovados e a imagem imutável comprovada. Integrações autenticada mostra
+Qlik entre Salesforce e n8n; a rota de status nega acesso anônimo.
+
+A ativação do coletor recusou a primeira coleta com `measure_unresolved`.
+O preflight privado confirmou CR, LF e tabulações nas definições nativas,
+sem exportar fórmulas ou dados comerciais. O validador usado para nomes
+rejeitava esses caracteres também nas expressões. A tentativa
+`ed4b9bd3-3ed9-451c-826e-912efe8218f6` foi recuperada pelo coordenador;
+o owner anterior voltou em `2026-10-16T20:58:24.784Z`, sem pendência.
+Console privado, VNC e túnel desta tarefa foram encerrados.
+
+O validador de expressões agora permite somente TAB, CR e LF entre os
+controles, preservando integralmente o texto usado nos hashes e no QIX.
+Nomes e identificadores mantêm a validação anterior. Definições vazias,
+grandes demais, outros controles e surrogates isolados continuam recusados.
+Doze casos sintéticos reproduziram a falha antes da correção; a suíte focal
+passou com 368 testes, incluindo caminhos inline, biblioteca e alias,
+serialização para navegador, integridade dos pins e descarte das sessões.
+A publicação do ranking e o ciclo automático posterior ainda não foram
+comprovados; dependem de nova CI e ativação protegida do candidato corrigido.
 
 ## 2026-10-15: Filtros, meses encerrados e metas do dashboard
 
