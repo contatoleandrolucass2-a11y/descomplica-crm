@@ -4,6 +4,8 @@ on:
   pull_request:
     paths:
       - "app/(protected)/app/ranking/**"
+      - "app/(protected)/app/canal-de-parcerias/**"
+      - "app/(protected)/app/configuracoes/conectar-sistemas/**"
       - "lib/crm/qlik/**"
       - ".github/workflows/ranking-visual-candidate.yml"
 

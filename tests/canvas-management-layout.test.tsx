@@ -6,7 +6,7 @@ import { describe, expect, it } from "vitest";
 import {
   parseRankingFilters,
   RankingDashboard,
-} from "@/app/(protected)/app/ranking/RankingDashboard";
+} from "@/app/(protected)/app/canal-de-parcerias/RankingDashboard";
 
 import {
   ManagementPage,
@@ -48,12 +48,12 @@ describe("management canvas layout", () => {
       "app/(protected)/admin/paginas/page.tsx",
       "app/(protected)/app/configuracoes/page.tsx",
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
-      "app/(protected)/app/ranking/RankingDashboard.tsx",
-      "app/(protected)/app/canal-de-parcerias/page.tsx",
+      "app/(protected)/app/canal-de-parcerias/RankingDashboard.tsx",
+      "app/(protected)/app/ranking/page.tsx",
     ]) {
       expect(source(file), file).toContain("ManagementPage");
     }
-    expect(source("app/(protected)/app/ranking/page.tsx")).toContain(
+    expect(source("app/(protected)/app/canal-de-parcerias/page.tsx")).toContain(
       "<RankingDashboard data={data} filters={filters}",
     );
   });
@@ -180,11 +180,13 @@ describe("management canvas layout", () => {
       "app/(protected)/app/configuracoes/metas/pontos/_components/PointSettingsPage.tsx",
     );
 
-    expect(ranking).not.toMatch(/loadRankingReadModel|loadReadModelV3|list_scoped_crm_imob/);
+    expect(ranking).toContain("loadRankingReadModel");
+    expect(ranking).not.toContain("loadQlikRankingV2");
     expect(ranking).toContain('enforcePermission("crm.ranking.view")');
-    expect(ranking).toContain("await loadQlikRankingV2(filters.year)");
-    expect(ranking.indexOf('await enforcePermission("crm.ranking.view")')).toBeLessThan(
-      ranking.indexOf("await loadQlikRankingV2"),
+    expect(ranking).toContain("Ranking de corretores da House");
+    expect(partnerships).toContain('enforcePermission("crm.partnerships.view")');
+    expect(partnerships.indexOf('await enforcePermission("crm.partnerships.view")')).toBeLessThan(
+      partnerships.indexOf("await loadQlikRankingV2"),
     );
     for (const [kind, title] of [
       ["imobs", "Top 10 imobiliárias"],
@@ -202,9 +204,7 @@ describe("management canvas layout", () => {
       expect(markup).toContain("<tbody></tbody>");
       expect(markup).not.toMatch(/R\$|>0<|Parceira [0-9]|Ouro: (?!Indisponível)/);
     }
-    expect(partnerships).toContain("Dado indisponível — integração pendente");
-    expect(partnerships).toContain("Pódio das parcerias");
-    expect(partnerships).toContain("Totais do período");
+    expect(partnerships).toContain("await loadQlikRankingV2(filters.year)");
     expect(partnerships).not.toMatch(/ImobRankingRow|DevelopmentRankingRow/);
     expect(funnel).toContain('placeholder="—"');
     expect(funnel).toContain("nenhum valor demonstrativo");

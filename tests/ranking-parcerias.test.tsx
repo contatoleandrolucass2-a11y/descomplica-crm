@@ -13,14 +13,14 @@ const { enforcePermission, loadQlikRankingV2 } = vi.hoisted(() => ({
 }));
 vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission }));
 vi.mock("@/lib/crm/qlik/data-v2", () => ({ loadQlikRankingV2 }));
-import RankingPage from "@/app/(protected)/app/ranking/page";
+import RankingPage from "@/app/(protected)/app/canal-de-parcerias/page";
 import {
   buildRankingV2Selection,
   formatRankingMoney,
   parseRankingFilters,
   RankingDashboard,
-} from "@/app/(protected)/app/ranking/RankingDashboard";
-import rankingStyles from "@/app/(protected)/app/ranking/RankingCanvas.module.css";
+} from "@/app/(protected)/app/canal-de-parcerias/RankingDashboard";
+import rankingStyles from "@/app/(protected)/app/canal-de-parcerias/PartnershipsRanking.module.css";
 import managementStyles from "@/app/(protected)/_components/ManagementCanvas.module.css";
 import analyticsStyles from "@/app/(protected)/app/_components/analytics/analytics.module.css";
 import shellStyles from "@/app/(protected)/_components/ProtectedShell.module.css";
@@ -107,7 +107,7 @@ function rankingFixtureCss() {
     };
   };
   const sheets = [
-    ["../app/(protected)/app/ranking/RankingCanvas.module.css", rankingStyles],
+    ["../app/(protected)/app/canal-de-parcerias/PartnershipsRanking.module.css", rankingStyles],
     ["../app/(protected)/_components/ManagementCanvas.module.css", managementStyles],
     ["../app/(protected)/app/_components/analytics/analytics.module.css", analyticsStyles],
     ["../app/(protected)/_components/ProtectedShell.module.css", shellStyles],
@@ -150,7 +150,7 @@ describe("ranking v2 route and UI", () => {
         const page = await browser.newPage();
         await page.route("**/*", async (route) => {
           const url = new URL(route.request().url());
-          if (url.origin !== "http://ranking.test" || url.pathname !== "/app/ranking")
+          if (url.origin !== "http://ranking.test" || url.pathname !== "/app/canal-de-parcerias")
             return route.abort();
           const { html } = await rendered(Object.fromEntries(url.searchParams));
           await route.fulfill({
@@ -162,7 +162,7 @@ describe("ranking v2 route and UI", () => {
         for (const width of [320, 390, 768, 1440]) {
           await page.setViewportSize({ width, height: 900 });
           for (theme of ["light", "balanced", "dark"]) {
-            await page.goto("http://ranking.test/app/ranking");
+            await page.goto("http://ranking.test/app/canal-de-parcerias");
             expect(
               await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
             ).toBe(true);
@@ -218,7 +218,7 @@ describe("ranking v2 route and UI", () => {
         ).toBeVisible();
         loadQlikRankingV2.mockResolvedValue({ status: "empty", availableYears: [] });
         for (const kind of ["imobs", "developments"]) {
-          await page.goto(`http://ranking.test/app/ranking?period=latest&kind=${kind}`);
+          await page.goto(`http://ranking.test/app/canal-de-parcerias?period=latest&kind=${kind}`);
           await browserExpect(
             page.getByRole("heading", { name: "Nenhuma publicação disponível", exact: true }),
           ).toBeVisible();
@@ -232,7 +232,10 @@ describe("ranking v2 route and UI", () => {
           await browserExpect(page.locator("tbody tr")).toHaveCount(0);
           await browserExpect(page.locator("main")).not.toContainText("R$");
           await browserExpect(
-            page.getByRole("radio", { name: kind === "imobs" ? "IMOBs" : "Produtos", exact: true }),
+            page.getByRole("radio", {
+              name: kind === "imobs" ? "Imobiliárias" : "Produtos",
+              exact: true,
+            }),
           ).toBeChecked();
           await browserExpect(
             page.getByRole("button", { name: "Aplicar filtros", exact: true }),
@@ -246,7 +249,7 @@ describe("ranking v2 route and UI", () => {
             await page.setViewportSize({ width, height: 900 });
             for (theme of ["light", "balanced", "dark"]) {
               for (const kind of ["imobs", "developments"]) {
-                await page.goto(`http://ranking.test/app/ranking?kind=${kind}`);
+                await page.goto(`http://ranking.test/app/canal-de-parcerias?kind=${kind}`);
                 const podiumCards = page.locator(
                   "section[aria-labelledby='ranking-podium-title'] article",
                 );
@@ -326,7 +329,9 @@ describe("ranking v2 route and UI", () => {
           }
         }
         for (const period of ["month", "week"]) {
-          await page.goto(`http://ranking.test/app/ranking?period=${period}&scope=managers`);
+          await page.goto(
+            `http://ranking.test/app/canal-de-parcerias?period=${period}&scope=managers`,
+          );
           await browserExpect(
             page.getByRole("heading", { name: "Filtros inválidos", exact: true }),
           ).toBeVisible();
@@ -389,7 +394,7 @@ describe("ranking v2 route and UI", () => {
                     }),
                   );
                 expect(measured, `${status}/${width}/${theme}/${kind}`).toEqual([
-                  { text: "IMOBs", lines: 1, contained: true },
+                  { text: "Imobiliárias", lines: 1, contained: true },
                   { text: "Produtos", lines: 1, contained: true },
                 ]);
                 expect(
@@ -427,7 +432,7 @@ describe("ranking v2 route and UI", () => {
 
   it("keeps ranking.view before all reads and propagates denial", async () => {
     await rendered();
-    expect(enforcePermission).toHaveBeenCalledExactlyOnceWith("crm.ranking.view");
+    expect(enforcePermission).toHaveBeenCalledExactlyOnceWith("crm.partnerships.view");
     expect(enforcePermission.mock.invocationCallOrder[0]).toBeLessThan(
       loadQlikRankingV2.mock.invocationCallOrder[0]!,
     );
@@ -488,7 +493,7 @@ describe("ranking v2 route and UI", () => {
   it("has native GET controls, bounded year options and no mutable scope controls", async () => {
     const { nodes } = await rendered();
     const form = nodes.find((node) => node.tagName === "form")!;
-    expect(attr(form, "action")).toBe("/app/ranking");
+    expect(attr(form, "action")).toBe("/app/canal-de-parcerias");
     expect(attr(form, "method")).toBe("get");
     expect(
       nodes.filter((node) => node.tagName === "select").map((node) => attr(node, "name")),

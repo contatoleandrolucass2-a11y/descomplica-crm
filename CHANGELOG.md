@@ -8,6 +8,26 @@
   contra sobrescrita concorrente; falhas conservam as alterações locais.
 - Mantém a apresentação integrada da tabela, sem caixas numéricas destacadas.
 
+## 2026-10-16: Ranking House separado de Canal de Parcerias
+
+- Atualiza somente as 22 referências visuais de House e Parcerias após revisão da captura Linux, preservando as outras 220.
+- A captura E2E de estados valida seu overlay sintético sem confundi-lo com o estado real da página.
+- O E2E verifica os filtros da House na rota própria e os filtros Qlik em Canal de Parcerias.
+- Os testes de acesso distinguem a fonte Qlik de parcerias e mantêm o catálogo existente sincronizado.
+
+- Restaura a página Ranking para corretores e gerentes da House, preservando
+  sua fonte Salesforce e a política de pontuação existente.
+- Move o ranking Qlik de imobiliárias e empreendimentos para Canal de
+  Parcerias, com filtros na rota correta e autorização própria no banco.
+- Identifica a integração Qlik como fonte do Canal de Parcerias.
+
+## 2026-10-16: Prova do estado padrão do Qlik
+
+- Define explicitamente o estado padrão nos objetos temporários de coleta.
+- Aceita sua representação omitida ou vazia no layout somente após conferir
+  identidade, definição efetiva e estabilidade; estados alternativos e provas
+  ausentes continuam bloqueando a publicação do ranking.
+
 ## 2026-10-16: Facebook Ads nas integrações
 
 - Adiciona a conta Facebook Ads indicada ao painel Integrações, com logos SVG por tema.
@@ -2800,3 +2820,10 @@ pendente dos gates completos no SHA final.
 - Preserva a última publicação válida quando a sessão expira ou a coleta falha.
 - Integra o corretivo de interoperabilidade QIX da PR #239 sem alterar os pins,
   o recorte aprovado, as duas observações independentes ou a reconciliação.
+
+## 2026-10-17: Diagnóstico de cobertura do coletor Qlik
+
+- Distingue falhas de catálogo, listas, calendário e cubos por códigos fixos,
+  sem registrar dados comerciais ou credenciais.
+- Preserva os limites de cobertura e a rejeição integral de coletas incompletas.
+- Mantém compatibilidade com o status do aplicativo e com recibos anteriores.
