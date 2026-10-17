@@ -2,6 +2,12 @@
 
 ## 2026-10-16: Grupos comparativos do dashboard
 
+CI38972729758 aprovou validate, restore e jornada E2E; a matriz autenticada
+parou em dashboard-auto-refresh. O teste ainda exigia filtro aberto depois
+de clicar fora: agora exige fechamento e preservacao da selecao no refresh.
+Leitura de titulos da matriz ignora titulos dos dialogs fechados. Nova CI
+necessaria antes de revisar/promover referencias; nenhum baseline promovido.
+
 QA local concluido:200 verificacoes aprovadas nos tres temas e320 a1920px;
 3670 Vitest aprovados, build aprovado. Suite Node local bloqueada por ACL
 Windows temporaria de Salesforce, sem alterar permissoes; validate Linux

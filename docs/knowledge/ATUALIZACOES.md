@@ -2,6 +2,12 @@
 
 ## 2026-10-16: Grupos de funis em validacao no PR245
 
+- CI38972729758 aprovou validate/restore/E2E; matriz autenticada interrompida
+  em dashboard-auto-refresh. Teste exigia filtro aberto depois de clique
+  externo; alinhado ao comportamento solicitado e mantida selecao/RSC.
+  Titulos de dialogs fechados excluidos da leitura de titulos visiveis.
+  Artefato incompleto nao promovido; nova CI necessaria, sem publicacao.
+
 - Resultado da CI38970011556: validate/restore aprovados,
   mas E2E exigia report-diagnosis-title removido. Atualizado
   e2e/release-candidate.spec.ts para exigir13 funis/78 etapas, ordem3/5/5

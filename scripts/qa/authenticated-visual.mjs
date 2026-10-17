@@ -1358,7 +1358,9 @@ async function inspectRoute(
                 region &&
                 region.querySelectorAll("article[data-tone]").length === labels.length &&
                 JSON.stringify(
-                  [...region.querySelectorAll("h3")].map((heading) => heading.textContent.trim()),
+                  [...region.querySelectorAll("h3")]
+                    .filter((heading) => heading.getClientRects().length > 0)
+                    .map((heading) => heading.textContent.trim()),
                 ) === JSON.stringify(labels) &&
                 region.scrollWidth <= region.clientWidth + 1
               );

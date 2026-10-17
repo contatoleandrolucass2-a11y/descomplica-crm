@@ -38,6 +38,7 @@ async function verifyDashboardAutoRefresh(page, origin) {
   const details = page.locator('[aria-labelledby="report-monthly-title"] details').first();
   await details.locator("summary").click();
   await expect(details).toHaveAttribute("open", "");
+  await expect(channelFilter).not.toHaveAttribute("open", "");
   const scrollBefore = await page.evaluate(() => window.scrollY);
   const urlBefore = page.url();
   const startedAt = await page.evaluate(() => performance.now());
@@ -125,7 +126,7 @@ async function verifyDashboardAutoRefresh(page, origin) {
     expect(
       Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore),
     ).toBeLessThanOrEqual(2);
-    await expect(channelFilter).toHaveAttribute("open", "");
+    await expect(channelFilter).not.toHaveAttribute("open", "");
     await expect(channelSelection).toBeChecked();
     process.stdout.write("[dashboard-auto-refresh] passed\n");
     return {
@@ -134,6 +135,7 @@ async function verifyDashboardAutoRefresh(page, origin) {
       responseComplete: true,
       completionGauge: "resource-timing",
       filters: true,
+      filterDismissed: true,
       scroll: true,
       openDetails: true,
     };

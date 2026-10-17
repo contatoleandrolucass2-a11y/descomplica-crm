@@ -34,6 +34,14 @@
 
 ## Estado da entrega
 
+CI38972729758 aprovou validate, restore e E2E apos a correcao da jornada.
+Matriz autenticada parou em dashboard-auto-refresh, sem produzir comparacao
+visual completa. O teste exigia filtro aberto apos clique externo; expectativa
+alinhada ao fechamento solicitado, preservando verificacao de selecao e RSC.
+Leitura dos titulos passa a ignorar dialogs fechados. Artefato12077459977,
+SHA256a30a62f9f6f6b0283170e4d5997be89a38d7eedf13085e2f72a5ca54c08708ab,
+nao elegivel para promover baseline. Nova CI obrigatoria.
+
 PR245 e CI38970011556. Validacao principal e restauracao aprovadas. E2E falhou
 por ainda exigir diagnostico e tabelas removidos; jornada ajustada para13 funis,
 78 etapas, ordem3/5/5 e ausencia das secoes retiradas. Nova CI, referencias visuais
