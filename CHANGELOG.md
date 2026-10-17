@@ -8,6 +8,7 @@
 - Inclui media anual normalizada por uma venda e preserva estados sem base.
 - Fecha filtros ao clicar fora, pressionar Escape ou abrir outro filtro.
 - Retira diagnostico, tabelas operacionais, equipe e ranking deste dashboard.
+
 ## 2026-10-16: Facebook Ads nas integrações
 
 - Adiciona a conta Facebook Ads indicada ao painel Integrações, com logos SVG por tema.

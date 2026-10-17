@@ -24,6 +24,7 @@ Layout empilha funis no celular, sem exigir rolagem horizontal.
 Validacao parcial:13 testes de periodos,28 de apresentacao e fechamento dos
 filtros em Chromium desktop/mobile passaram. Lint e tipos passaram na retomada.
 Gates completos ainda em verificacao; nao publicado.
+
 ## 2026-10-16: Integração Facebook Ads e console dedicado
 
 A implementação parte de `34517ba2`, em branch isolada `codex/facebook-ads-integracao`.

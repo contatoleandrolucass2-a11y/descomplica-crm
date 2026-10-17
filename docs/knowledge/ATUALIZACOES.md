@@ -1,5 +1,17 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-17: Retomada do PR245 e base concorrente integrada
+
+- Consulta GitHub02:01Z: PR245 mergeable, HEAD73d37fee; CI38993263801 iniciada.
+  Mainf1088046 integrada preservando os registros Meta Ads e dashboard.
+- GET anonimo /api/health02:01:42Z: HTTP200, statusok, versao34517ba2.
+  Dashboard ainda nao publicado. Fontes: GitHub PR245/Actions38993263801 e
+  https://crm.descomplicapro.com.br/api/health.
+- Nao ativar integracoes ou servicos adicionais nesta entrega. Matriz local
+  aprovada nao substitui a CI autenticada, baseline revisada e gates de deploy.
+- Proximo criterio: CI funcional completa, revisao das diferencas visuais
+  intencionais e nova CI de verificacao antes de merge/publicacao.
+
 ## 2026-10-16: Grupos de funis em validacao no PR245
 
 - CI38972729758 aprovou validate/restore/E2E; matriz autenticada interrompida
@@ -73,6 +85,7 @@
 - Limite: disponibilidade de pastas aprovadas e metas nao definidas nao foi
   alterada. Reavaliar apos mudanca de dados, layout ou regras. Registro local
   de verificacao, sem nova publicacao de runtime.
+
 ## 2026-10-16: Sessão Meta Ads na página Integrações
 
 A etapa implementa a conta de anúncios `1080988750909489`, no business
