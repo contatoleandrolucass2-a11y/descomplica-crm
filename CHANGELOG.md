@@ -2,6 +2,7 @@
 
 ## 2026-10-16: Ranking House separado de Canal de Parcerias
 
+- O E2E verifica os filtros da House na rota própria e os filtros Qlik em Canal de Parcerias.
 - Os testes de acesso distinguem a fonte Qlik de parcerias e mantêm o catálogo existente sincronizado.
 
 - Restaura a página Ranking para corretores e gerentes da House, preservando

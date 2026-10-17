@@ -25,7 +25,9 @@ com 3.671 testes Vitest, 1.497 operacionais e 703 do coordenador. Em um banco
 local isolado e descartável, baseline Qlik mais a nova migration passaram
 nas 255 asserções pgTAP, inclusive a negação para acesso exclusivo à House.
 A ingestão automática Qlik continua pendente da coleta real e de um ciclo
-agendado posterior.
+agendado posterior. A CI identificou expectativas E2E anteriores que ainda
+associavam imobiliárias à rota House; elas foram corrigidas, com verificação
+explícita de filtros House e ausência de conteúdo Qlik nessa página.
 
 ## 2026-10-16: Compatibilidade comprovada do estado de seleção Qlik
 

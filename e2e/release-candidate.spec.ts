@@ -372,7 +372,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/ranking",
-    heading: "Ranking das imobiliárias",
+    heading: "Ranking de corretores da House",
     allowed: rankingRoles,
   },
   {
@@ -1510,7 +1510,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       ["/app/etapas/visitas", "Visitas"],
       ["/app/etapas/pastas", "Pastas"],
       ["/app/etapas/vendas", "Vendas"],
-      ["/app/ranking", "Ranking das imobiliárias"],
+      ["/app/ranking", "Ranking de corretores da House"],
       ["/app/canal-de-parcerias", "Ranking das imobiliárias"],
     ] as const;
 
@@ -1536,10 +1536,10 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);
     }
 
-    await expect(page.getByText("Dado indisponível — integração pendente").first()).toBeVisible();
     await expect(
-      page.getByLabel("Visões e filtros do Canal de Parcerias", { exact: true }),
+      page.getByRole("heading", { name: "Nenhuma publicação disponível", exact: true }),
     ).toBeVisible();
+    await expect(page.getByLabel("Filtros do ranking de parcerias", { exact: true })).toBeVisible();
   });
 });
 
@@ -1606,25 +1606,59 @@ test("dashboard uses management filters while stages retain selection and partne
       );
     }
 
+    // House filters remain on their own route and never render partnership facts.
+    for (const period of ["month", "week"]) {
+      for (const scope of ["brokers", "managers"]) {
+        const response = await page.goto(`/app/ranking?period=${period}&scope=${scope}`);
+        expect(response?.status()).toBe(200);
+        await expect(
+          page.getByRole("heading", {
+            level: 1,
+            name:
+              scope === "brokers"
+                ? "Ranking de corretores da House"
+                : "Ranking de gerentes da House",
+            exact: true,
+          }),
+        ).toBeVisible();
+        const filters = page.getByLabel("Filtros autorizados do ranking", { exact: true });
+        await expect(
+          filters.getByRole("link", {
+            name: scope === "brokers" ? "Corretores" : "Gerentes",
+            exact: true,
+          }),
+        ).toHaveAttribute("aria-current", "page");
+        await expect(
+          filters.getByRole("link", {
+            name: period === "month" ? "Mês atual" : "Esta semana",
+            exact: true,
+          }),
+        ).toHaveAttribute("aria-current", "page");
+        await expect(page.getByRole("main")).not.toContainText(
+          /CANAL IMOB|Ranking das imobiliárias|Publicação Qlik/,
+        );
+      }
+    }
+
     // pgTAP rolls back its Qlik publications; this isolated runtime has no v2 dataset.
     for (const rankingCase of [
       {
-        pathname: "/app/ranking?period=latest&kind=imobs",
+        pathname: "/app/canal-de-parcerias?period=latest&kind=imobs",
         kind: "imobs",
         state: "Nenhuma publicação disponível",
       },
       {
-        pathname: "/app/ranking?period=latest&kind=developments",
+        pathname: "/app/canal-de-parcerias?period=latest&kind=developments",
         kind: "developments",
         state: "Nenhuma publicação disponível",
       },
       {
-        pathname: "/app/ranking?period=month&scope=managers",
+        pathname: "/app/canal-de-parcerias?period=month&scope=managers",
         kind: "imobs",
         state: "Filtros inválidos",
       },
       {
-        pathname: "/app/ranking?period=week&scope=managers",
+        pathname: "/app/canal-de-parcerias?period=week&scope=managers",
         kind: "imobs",
         state: "Filtros inválidos",
       },
@@ -1663,7 +1697,7 @@ test("dashboard uses management filters while stages retain selection and partne
       );
       await expect(page.getByRole("searchbox")).toBeDisabled();
       for (const [label, kind] of [
-        ["IMOBs", "imobs"],
+        ["Imobiliárias", "imobs"],
         ["Produtos", "developments"],
       ] as const) {
         const control = page.getByRole("radio", { name: label, exact: true });
