@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-16: Previsão editável em Gestão
+
+Base f1088046, branch `codex/gestao-previsao`. A abertura confirmou Git comum,
+main/CI e health publicado 34517ba2; estados distintos registrados em conhecimento.
+Os três prints fornecidos são dados de referência visual, sem nomes como seed.
+
+A nova página inclui tabela compartilhada manual com Nome do corretor, Previsão
+e Realizado, equipe editável, inclusão/exclusão de linhas e colunas e Salvar.
+As células usam editores integrados, sem cards numéricos. Permissão própria de
+página, edição com `crm.settings.manage`, RPC autenticada, RLS/ACL e revisão
+otimista protegem o salvamento. Erros e conflitos preservam o rascunho.
+
+O usuário autorizou a migration aditiva de armazenamento e catálogo após
+validação. Não há migração de dados de clientes nem integração com n8n.
+As verificações globais, pgTAP, fluxo de navegador e publicação seguem os gates
+existentes. Resultados efetivos e limites serão registrados em ATUALIZACOES.
+
 ## 2026-10-16: Integração Facebook Ads e console dedicado
 
 A implementação parte de `34517ba2`, em branch isolada `codex/facebook-ads-integracao`.

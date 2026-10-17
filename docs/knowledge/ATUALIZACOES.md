@@ -618,3 +618,41 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
   selecionados iguais aos revisados, sem ler fatos. Health03:55:48.744Z200/
   ok/b937. Coleta real corrigida e publicacao ainda pendentes. Fontes:
   GitHub/protecao/checks, Git/digests, recibos locais e projecao privada.
+
+## 2026-10-16: Abertura da aba Previsao em Gestao
+
+- Fonte: Git local e `git fetch origin`, consulta em 2026-10-17T02:21Z (16/10 em America/Sao_Paulo). Git comum confirmado; checkout inicialmente detached e limpo, SHA f10880465f80c8f1164a6db9aaea43907f14fdd1 igual a origin/main, merge do PR #243. Documentos de contexto/ferramentas lidos nessa base.
+- GET observacional https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 34517ba2b2e4022f52bec29260e071b9cf124cca. Versao publicada difere da base local/main; health nao prova publicacao desta demanda.
+- gh ausente no PATH e no caminho padrao. Conector GitHub consultado separadamente para metadados/CI; limites dos resultados devem ser preservados. Nenhum dado privado consultado.
+- Escopo solicitado: nova pagina Previsao em Gestao, tabela manual com Nome do corretor, Previsao e Realizado, inclusao/exclusao de linhas/colunas e Salvar. Prints sao referencias visuais. Novas migrations remotas permanecem condicionadas a autorizacao especifica.
+
+- Complemento da abertura: API publica GitHub confirmou main e PR #243 integrado; CI main 38988235307 concluida com success no SHA f10880465f80c8f1164a6db9aaea43907f14fdd1 (https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38988235307). O conector de workflow runs retorna apenas eventos pull_request e nao prova CI de main. Usuario autorizou explicitamente a migration aditiva da Previsao e permissao apos validacao; autorizacao limitada a esta entrega.
+
+## 2026-10-16: Implementação e validação da Previsão
+
+- Branch `codex/gestao-previsao`, base f1088046. Página e GET/PUT usam permissão
+  própria `crm.management.forecast.view`; escrita exige também settings.manage.
+  Tabela global manual, com equipe, colunas e linhas editáveis, sem cálculo ou
+  integração comercial. As referências visuais não fornecem registros iniciais.
+- Salvamento usa RPC com revisão otimista. RLS forçada e ausência de ACL direta
+  protegem a tabela; usuário, conta ativa, MFA e página ativa são verificados no
+  banco. Auditoria contém somente revisão/quantidades. Conflito e falha preservam
+  o rascunho. Limites agregados de 2 MB complementam os limites de células.
+- Build e tipos aprovados em Node 24.19.0/pnpm 11.20.0 Windows. Testes focais:
+  backend 51, acesso administrativo 65 e contratos/recursos 33 aprovados.
+  Navegador sintético: 5 aprovados, nove capturas em três temas e larguras
+  1440/390/320, axe sem violações; inspeção das capturas desktop/escuro e
+  celular/médio realizada. Isto não substitui uma sessão real de produção.
+- Primeira suite global Windows: 3765 passaram, 17 falharam, 94 skips. Falhas de
+  inventários/contagens foram corrigidas e retestadas; os demais timeouts e teste
+  de concorrência requerem repetição com menor paralelismo e confirmação na CI
+  Linux. Testes de banco locais não executados: Docker indisponível. Novo pgTAP
+  tem 61 assertions; inventário agregado passa a 1971 em 34 arquivos.
+- Projeto de produção confirmado pelo hostname do runtime e MCP:
+  hnncxuerlcsaahdxoswb. Conferência prévia somente leitura encontrou 27 páginas,
+  38 permissões, 146 vínculos de papel, 6 overrides e ausência da nova tabela,
+  RPCs, permissão e página. Backup privado de catálogo, ausência dos objetos,
+  histórico e hashes de preservação retido na VPS, modo 0600, SHA-256
+  45ec1a83f82b5c5377fdce656d3047a1d4c619bfa5e08a47b7dd678075f664ef.
+  Nenhuma migration aplicada nesta etapa. Reavaliar baseline imediatamente antes
+  da aplicação; publicar somente com CI completa e coordenador de release.

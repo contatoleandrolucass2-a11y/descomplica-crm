@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-16: Previsão no menu Gestão
+
+- Adiciona tabela manual de previsão e realizado por corretor, com título de
+  equipe, edição de cabeçalhos/células e inclusão/exclusão de linhas e colunas.
+- Salva no CRM com permissão própria, validação no servidor e banco e proteção
+  contra sobrescrita concorrente; falhas conservam as alterações locais.
+- Mantém a apresentação integrada da tabela, sem caixas numéricas destacadas.
+
 ## 2026-10-16: Facebook Ads nas integrações
 
 - Adiciona a conta Facebook Ads indicada ao painel Integrações, com logos SVG por tema.

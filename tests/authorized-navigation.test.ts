@@ -390,6 +390,36 @@ describe("authorized hierarchical navigation", () => {
     expect(isNavigationRootActive("/app/ranking/detalhe", simulationParent)).toBe(false);
   });
 
+  it("places the authorized forecast under Gestão and keeps its own breadcrumb", () => {
+    const management: NavigationItem = {
+      key: "crm.management",
+      path: "/app/gestao",
+      name: "Gestão",
+      description: "Gestão",
+      section: "management",
+      parentKey: null,
+      sortOrder: 50,
+    };
+    const forecast: NavigationItem = {
+      key: "crm.management.forecast",
+      path: "/app/gestao/previsao",
+      name: "Previsão",
+      description: "Previsão e realizado",
+      section: "management",
+      parentKey: management.key,
+      sortOrder: 15,
+    };
+    const source = [management, forecast];
+    const group = buildNavigationGroups(getPrimaryNavigation(source))[0]!;
+    expect(group.page.key).toBe(management.key);
+    expect(group.children).toEqual([forecast]);
+    expect(
+      buildBreadcrumbs(forecast.path, getBreadcrumbNavigation(source)).map((page) => page.name),
+    ).toEqual(["Gestão", "Previsão"]);
+    expect(isNavigationGroupActive(forecast.path, group)).toBe(true);
+    expect(buildNavigationGroups(getPrimaryNavigation([management]))[0]?.children).toEqual([]);
+  });
+
   it("presents authorized goals as Meta under Gestão and preserves the source catalog", () => {
     const management: NavigationItem = {
       key: "crm.management",

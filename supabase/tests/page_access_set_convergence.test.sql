@@ -4,8 +4,8 @@ select plan(12);
 
 select is(
   (select count(*) from public.app_pages),
-  27::bigint,
-  'the page catalog contains exactly the twenty-seven approved entries'
+  28::bigint,
+  'the page catalog contains exactly the twenty-eight approved entries'
 );
 
 select is(
@@ -23,6 +23,7 @@ select is(
     'admin.users|/admin/usuarios|users.view|true',
     'crm.dashboard|/app|crm.dashboard.view|true',
     'crm.management|/app/gestao|crm.management.view|true',
+    'crm.management.forecast|/app/gestao/previsao|crm.management.forecast.view|true',
     'crm.management.routine|/app/gestao/rotina|crm.management.routine.view|true',
     'crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view|true',
     'crm.ranking|/app/ranking|crm.ranking.view|true',
@@ -86,6 +87,7 @@ select is(
     'admin.users',
     'crm.dashboard',
     'crm.management',
+    'crm.management.forecast',
     'crm.management.routine',
     'crm.partnerships',
     'crm.ranking',
@@ -109,7 +111,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Master resolves the exact twenty-seven-page catalog set'
+  'Master resolves the exact twenty-eight-page catalog set'
 );
 
 select is(
@@ -134,6 +136,7 @@ select is(
     'admin.users',
     'crm.dashboard',
     'crm.management',
+    'crm.management.forecast',
     'crm.management.routine',
     'crm.partnerships',
     'crm.ranking',
@@ -157,7 +160,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Admin retains the exact twenty-seven-page inherited set including partnerships and simulators'
+  'Admin retains the exact twenty-eight-page inherited set including partnerships and simulators'
 );
 
 select is(
