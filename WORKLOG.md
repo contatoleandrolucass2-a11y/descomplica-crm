@@ -7517,3 +7517,10 @@ após46 assertions. A preparação do override de Admin retinha a identidade do
 corretor após RESET ROLE. Limpeza explícita do claim na fixture preserva o guard
 e as61 verificações. Teste focal release-candidate:21 aprovados; nova CI SQL
 necessária. Nenhuma migration ou publicação em produção realizada nesta etapa.
+
+## 2026-10-17: Banco validado e matriz autenticada da Previsão
+
+CI39032248476/tentativa2 aprovou1972 assertions de banco, restore isolado,
+advisors e build. O navegador sintético da Previsão passou; a matriz autenticada
+parou na comparação de páginas por perfil em local-rls-api.mjs. Ajuste da
+expectativa da nova página preserva as restrições de Master/Admin e os guards.

@@ -6,6 +6,7 @@ import ts from "typescript";
 import { describe, expect, it } from "vitest";
 
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
+import { PAGE_REGISTRY } from "@/lib/navigation/registry";
 
 // @ts-expect-error — SQL generation is tested without running the local QA harness.
 import { fixtureSetupSql } from "../scripts/qa/local-authenticated-visual.mjs";
@@ -288,6 +289,67 @@ describe("release-candidate activation defaults", () => {
         });
       } else {
         expect(roots.some((root: { name: string }) => root.name === "Gestão")).toBe(false);
+      }
+    }
+  });
+
+  it("keeps REST catalog visibility aligned with the released catalog and default roles", async () => {
+    const source = await readFile(
+      path.join(repositoryRoot, "scripts/qa/local-rls-api.mjs"),
+      "utf8",
+    );
+    const tree = ts.createSourceFile("local-rls-api.mjs", source, ts.ScriptTarget.Latest);
+    const names = new Set([
+      "pageKeysForPermissions",
+      "simulatorPageKeys",
+      "inheritedAnalyticalPageKeys",
+      "rankingPageKeys",
+      "partnershipPageKeys",
+      "administrativeCommercialPageKeys",
+      "masterAdministrativePageKeys",
+      "expectedPageKeysByRole",
+    ]);
+    const declarations = tree.statements
+      .filter((statement) =>
+        ts.isFunctionDeclaration(statement)
+          ? names.has(statement.name?.text ?? "")
+          : ts.isVariableStatement(statement) &&
+            statement.declarationList.declarations.some(
+              (declaration) =>
+                ts.isIdentifier(declaration.name) && names.has(declaration.name.text),
+            ),
+      )
+      .map((statement) => statement.getText(tree))
+      .join("\n");
+    const matrix = runInNewContext(
+      `${declarations}\nexpectedPageKeysByRole`,
+      { PAGE_REGISTRY },
+      { timeout: 1000 },
+    );
+    const operational = [
+      "master",
+      "admin",
+      "coordinator",
+      "manager_house",
+      "manager_imob",
+      "broker_house",
+      "broker_imob",
+    ];
+    for (const role of [...operational, "pending"]) {
+      const administrative = role === "master" || role === "admin";
+      expect(matrix[role].includes("crm.management.forecast"), role).toBe(administrative);
+      expect(new Set(matrix[role]).size, role).toBe(matrix[role].length);
+      if (administrative) {
+        expect(matrix[role], role).toEqual(
+          PAGE_REGISTRY.filter((page) => page.releaseEnabled && page.isNavigation)
+            .map((page) => page.pageKey)
+            .sort(),
+        );
+      } else if (role === "pending") {
+        expect(matrix[role]).toEqual([]);
+      } else {
+        expect(matrix[role], role).toContain("crm.management.routine");
+        expect(matrix[role], role).toContain("crm.management");
       }
     }
   });

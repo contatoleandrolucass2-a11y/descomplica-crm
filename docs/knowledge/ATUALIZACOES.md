@@ -680,3 +680,21 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
 - PR #247 ainda sem merge/publicacao; migrations remotas nao aplicadas. A
   autorizacao recebida permite aplicar as duas migrations desta entrega apos
   aprovacao integral dos gates e nova conferencia da baseline de producao.
+
+## 2026-10-17: Banco e restore aprovados; matriz autenticada da Previsao
+
+- CI39032248476, tentativa2, candidato f16b558f (merge sintetico794ded8a):
+  validate aprovado; restore isolado aprovado em2026-10-17T12:37Z. Fonte ITBI
+  retornou403 na primeira tentativa e respondeu normalmente na segunda.
+- Ensaio de64 migrations e34 arquivos pgTAP:1972 assertions aprovadas na
+  origem e no destino, incluindo61 da Previsao. Lint/advisors de seguranca e
+  performance aprovados; backup/restauracao logica e fingerprints de ACL/owner
+  preservados. Ambiente sintetico, sem restore remoto representativo.
+- Release-gates aprovou banco e build; parou em local-rls-api.mjs com
+  Application-page visibility does not match role permissions. Matriz de
+  paginas esperadas em revisao para incluir a nova permissao sem relaxar guards.
+  PR continua sem merge e producao sem mutacao desta tarefa.
+- Retomada apos pausa do host: em2026-10-17T13:34Z, fetch confirmou main ainda
+  61c9a6a8 e CI39007579400 success. GET publico api/health retornou ok/eff7f729.
+  Fontes: origin, GitHub via gh e endpoint publico; versao da Previsao continua
+  somente no PR. Matrizes QA corrigidas sem alterar acesso de runtime.

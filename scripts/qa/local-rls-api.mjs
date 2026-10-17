@@ -65,6 +65,7 @@ const administrativeCommercialPageKeys = pageKeysForPermissions(
   "crm.settings.view",
   "crm.settings.manage",
   "crm.repasse.view",
+  "crm.management.forecast.view",
 );
 const masterAdministrativePageKeys = pageKeysForPermissions(
   "admin.access",

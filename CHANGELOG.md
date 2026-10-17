@@ -2832,3 +2832,5 @@ pendente dos gates completos no SHA final.
 
 - Corrige a identidade da fixture pgTAP ao preparar overrides administrativos,
   preservando as61 verificações e os controles de autorização do banco.
+- Atualiza a matriz autenticada para conferir a nova página Previsão conforme
+  os perfis previstos no catálogo.

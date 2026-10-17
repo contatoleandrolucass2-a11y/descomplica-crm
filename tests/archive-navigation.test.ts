@@ -285,7 +285,7 @@ describe("archive navigation evidence gate", () => {
     expect(compact).toContain('"Entire hovered row must be gold with dark readable text"');
   });
 
-  it("matches the exact Gestão visual contract to the authorized presentation including Meta", () => {
+  it("matches the exact Gestão visual contract including Previsão and Meta", () => {
     const management: NavigationItem = {
       key: "crm.management",
       path: "/app/gestao",
@@ -301,7 +301,14 @@ describe("archive navigation evidence gate", () => {
       path: "/app/gestao/rotina",
       name: "Rotina",
       parentKey: management.key,
-      sortOrder: 20,
+      sortOrder: 10,
+    };
+    const forecast: NavigationItem = {
+      ...routine,
+      key: "crm.management.forecast",
+      path: "/app/gestao/previsao",
+      name: "Previsão",
+      sortOrder: 15,
     };
     const goals: NavigationItem = {
       ...management,
@@ -312,7 +319,9 @@ describe("archive navigation evidence gate", () => {
       parentKey: "crm.settings",
       sortOrder: 20,
     };
-    const group = buildNavigationGroups(getPrimaryNavigation([management, routine, goals]))[0]!;
+    const group = buildNavigationGroups(
+      getPrimaryNavigation([management, routine, forecast, goals]),
+    )[0]!;
     expect(archiveManagementNavigationContract).toEqual([
       ["Visão geral", management.path],
       ...group.children.map((page) => [page.name, page.path]),
@@ -320,6 +329,7 @@ describe("archive navigation evidence gate", () => {
     expect(archiveManagementNavigationContract).toEqual([
       ["Visão geral", "/app/gestao"],
       ["Rotina", "/app/gestao/rotina"],
+      ["Previsão", "/app/gestao/previsao"],
       ["Meta", "/app/configuracoes/metas"],
     ]);
   });
