@@ -7459,3 +7459,36 @@ scripts/release/salesforce-release-environment.node-test.mjs, linha 31; o códig
 atual já substitui esse valor por repetição explícita de "fixture". Nenhuma
 regra do scanner foi desativada ou ignorada para esta entrega.
 A conferência das fontes públicas de documentação também passou nesta rodada.
+
+## 2026-10-17: Correção publicada e diagnóstico de cobertura Qlik
+
+A correção urgente foi publicada no aplicativo `eff7f729c4386af14af16902fe4c761027df597a`,
+recibo `6a8e7f60-2847-4e32-8be3-9c6e1d23ed39`, em
+`2026-10-17T04:49:20.557Z`, depois dos quatro gates aprovados da CI `39000609517`.
+A imagem imutável foi conferida e a publicação coordenada com a integração Meta Ads.
+A migration do reader Qlik foi aplicada com backup, comparação da definição e
+exclusão mútua. A verificação autenticada confirmou House em Ranking e imobiliárias
+em Canal de Parcerias; a política de pontuação House continua pendente de aprovação.
+
+A primeira coleta do owner dessa revisão recusou o ciclo em
+`2026-10-17T04:51:47.508Z` com `coverage_limit`. A pendência
+`2bfb25a4-64cf-43b0-8ab8-263775e94d50` foi recuperada pelo coordenador. O recibo
+`c62805c6-cc4e-4f3a-861d-9bdbc3dbf400`, de `2026-10-17T04:52:55.374Z`,
+restaurou o owner anterior `17ab106f9951781cdfe50717317323b4ce6df355`, sem
+pendência e sem reverter o aplicativo ou a integração Meta.
+
+O novo diagnóstico distingue formato inválido, catálogo, listas e os quatro
+cubos por códigos fixos. Preserva os limites de 4.096 masters e 5.000 linhas,
+as seleções, a paginação, os pins, a conciliação, os prazos e a limpeza de sessão.
+Os testes exercitam cada rejeição no módulo e no coletor serializado, além da
+propagação permitida e da remoção de mensagens arbitrárias. O código não registra
+conteúdo comercial ou credenciais. A causa exata na origem, a primeira publicação
+real e um ciclo automático posterior continuam sem comprovação.
+
+A validação local desta alteração passou com 3.731 testes Vitest, 1.610
+operacionais e 723 do coordenador, totalizando 6.064 casos aprovados. Permanecem
+90 skips Vitest e 19 verificações operacionais/físicas não executáveis neste
+perfil macOS. Lint, tipos, build, formato e verificação das fontes documentais
+passaram. A aceitação de 5.000 linhas e a rejeição de 5.001 foram verificadas.
+A CI no SHA exato e a ativação protegida do owner ainda são necessárias; nenhuma
+nova publicação do aplicativo é exigida por esta mudança de diagnóstico.

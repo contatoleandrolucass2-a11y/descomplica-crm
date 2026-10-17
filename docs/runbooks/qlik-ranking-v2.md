@@ -73,6 +73,17 @@ Falhas podem incluir um codigo de lista fixa, sem mensagens brutas. Diagnostico
 so e preservado quando o loop aceita o resultado dentro do prazo; timeout,
 cancelamento ou relogio invalido nao reutilizam o motivo de uma coleta tardia.
 
+Os códigos de cobertura distinguem catálogo de masters, listas de seleção,
+calendário e cubos nativos ou de identidade de cada ranking. O limite continua
+em 4.096 itens de catálogo e 5.000 linhas por lista ou cubo. `page_size_invalid`
+indica tamanho ou coluna inválida; `master_catalog_shape` indica um catálogo
+sem array de itens. Os códigos não incluem campos, expressões, valores ou
+linhas da origem. `coverage_limit` continua aceito para recibos antigos.
+O monitor HTTP publica somente estado e horários, sem transportar esses
+códigos; este diagnóstico do owner é compatível com o aplicativo publicado.
+Um código identifica a etapa recusada, mas não autoriza ampliar o limite,
+truncar resultados ou afirmar que houve publicação completa.
+
 O coletor `browser-ranking.mjs` abre uma pagina dedicada por observacao e uma
 identidade QIX UUID distinta, fecha pagina/sessao antes da segunda coleta e
 mantem autenticacao/CSRF dentro do navegador. Nao exporta cookies nem usa CDP

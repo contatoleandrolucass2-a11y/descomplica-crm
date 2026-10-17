@@ -2812,3 +2812,10 @@ pendente dos gates completos no SHA final.
 - Preserva a última publicação válida quando a sessão expira ou a coleta falha.
 - Integra o corretivo de interoperabilidade QIX da PR #239 sem alterar os pins,
   o recorte aprovado, as duas observações independentes ou a reconciliação.
+
+## 2026-10-17: Diagnóstico de cobertura do coletor Qlik
+
+- Distingue falhas de catálogo, listas, calendário e cubos por códigos fixos,
+  sem registrar dados comerciais ou credenciais.
+- Preserva os limites de cobertura e a rejeição integral de coletas incompletas.
+- Mantém compatibilidade com o status do aplicativo e com recibos anteriores.

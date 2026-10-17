@@ -1303,7 +1303,7 @@ for (const [name, mutate, reason] of [
   [
     "oversized catalog",
     (value) => (value.qMeasureList.qItems = Array(4097).fill({})),
-    "coverage_limit",
+    "master_catalog_coverage_limit",
   ],
   ["reduced catalog", (value) => (value.qMeasureList.qIsReduced = true), "reduced_page"],
   [
@@ -1386,6 +1386,99 @@ test("alias catalog cleanup failure is sanitized and cannot produce collected fa
     reason: "cleanup_failed",
   });
 });
+
+for (const serialized of [false, true]) {
+  for (const role of ["imobs", "developments"]) {
+    for (const native of [false, true]) {
+      test(`coverage rejection identifies ${role}/${native ? "native" : "identity"}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value, context) {
+            if (method === "cubeLayout" && context.role === role && context.native === native)
+              value.qHyperCube.qSize.qcy = 5001;
+            return value;
+          },
+        });
+        const collect = serialized
+          ? runInNewContext(`(${collectQlikRanking.toString()})`, {
+              crypto: webcrypto,
+              TextEncoder,
+            })
+          : collectQlikRanking;
+        const result = JSON.parse(JSON.stringify(await collect(f.global, f.options)));
+        assert.deepEqual(result, {
+          status: "unavailable",
+          reason: `${role}_${native ? "native" : "identity"}_coverage_limit`,
+        });
+        assert.equal(f.state.sessions.size, 0);
+        assert.ok(
+          !f.state.calls.some(
+            (call) => call.method === "cubeData" && call.role === role && call.native === native,
+          ),
+        );
+      });
+    }
+  }
+  for (const calendar of [false, true]) {
+    test(`coverage rejection identifies ${calendar ? "calendar" : "selection"} list, serialized=${serialized}`, async () => {
+      const f = fixture({
+        hook(method, value, context) {
+          if (method === "listLayout" && (context.field === CALENDAR) === calendar)
+            value.qListObject.qSize.qcy = 5001;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: calendar ? "calendar_list_coverage_limit" : "selection_list_coverage_limit",
+      });
+      assert.equal(f.state.sessions.size, 0);
+      assert.ok(
+        !f.state.calls.some(
+          (call) => call.method === "listData" && (call.field === CALENDAR) === calendar,
+        ),
+      );
+    });
+  }
+  for (const invalid of [undefined, null, -1, 0.5, "synthetic-private-secret", Infinity]) {
+    test(`invalid page height ${String(invalid)} is not a row-limit rejection, serialized=${serialized}`, async () => {
+      const f = fixture({
+        hook(method, value) {
+          if (method === "listLayout") value.qListObject.qSize.qcy = invalid;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: "page_size_invalid",
+      });
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+  for (const invalid of [null, "synthetic-private-secret", {}]) {
+    test(`invalid catalog shape remains private, serialized=${serialized}, shape=${typeof invalid}`, async () => {
+      const f = aliasFixture({
+        hook(method, value) {
+          if (method === "catalog") value.qMeasureList.qItems = invalid;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: "master_catalog_shape",
+      });
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+}
 
 async function rejected(f, reason) {
   const result = await collectQlikRanking(f.global, f.options);
@@ -1695,16 +1788,18 @@ test("real Enigma 12.612 binds explicit aliases by pinned library IDs", async ()
   await assertSdkCollection(aliasFixture());
 });
 
-test("strict pagination covers 3001 IDs without reading unrelated native columns", async () => {
-  const f = fixture({ rows: 3001, periods: 1 });
-  const result = await collectQlikRanking(f.global, f.options);
-  assert.equal(result.status, "collected", JSON.stringify(result));
-  assert.equal(result.months[0].developments.rows.length, 3001);
-  assert.ok(
-    f.state.calls.some((call) => call.method === "cubeData" && call.pages[0].qTop === 2500),
-  );
-  assert.equal(f.state.sessions.size, 0);
-});
+for (const rows of [3001, 5000]) {
+  test(`strict pagination covers ${rows} IDs without reading unrelated native columns`, async () => {
+    const f = fixture({ rows, periods: 1 });
+    const result = await collectQlikRanking(f.global, f.options);
+    assert.equal(result.status, "collected", JSON.stringify(result));
+    assert.equal(result.months[0].developments.rows.length, rows);
+    assert.ok(
+      f.state.calls.some((call) => call.method === "cubeData" && call.pages[0].qTop === 2500),
+    );
+    assert.equal(f.state.sessions.size, 0);
+  });
+}
 
 for (const [name, mutate] of [
   [
@@ -2386,7 +2481,7 @@ for (const [name, hook, reason] of [
       if (method === "cubeLayout") value.qHyperCube.qSize.qcy = 5001;
       return value;
     },
-    "coverage_limit",
+    "imobs_native_coverage_limit",
   ],
   [
     "calculation error",
