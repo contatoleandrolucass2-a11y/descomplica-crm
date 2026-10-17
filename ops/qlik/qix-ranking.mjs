@@ -280,7 +280,8 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     const list = layout.qMeasureList;
     noError(list);
     check(!Object.hasOwn(list, "qIsReduced") || list.qIsReduced === false, "reduced_page");
-    check(Array.isArray(list.qItems) && list.qItems.length <= 4096, "coverage_limit");
+    check(Array.isArray(list.qItems), "master_catalog_shape");
+    check(list.qItems.length <= 4096, "master_catalog_coverage_limit");
     const ids = new Set();
     for (const item of list.qItems) {
       check(
@@ -459,15 +460,15 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     });
     return { model, cube, name, measures };
   }
-  async function pages(model, method, path, size, columns) {
+  async function pages(model, method, path, size, columns, coverageCode) {
     check(
       Number.isInteger(size?.qcx) &&
         Number.isInteger(size?.qcy) &&
         size.qcy >= 0 &&
-        size.qcy <= MAX_ROWS &&
         columns.every((column) => column >= 0 && column < size.qcx),
-      "coverage_limit",
+      "page_size_invalid",
     );
+    check(size.qcy <= MAX_ROWS, coverageCode);
     const rows = [];
     const height = Math.floor(10000 / columns.length);
     for (let top = 0; top < size.qcy; top += height) {
@@ -506,12 +507,19 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     }
     return rows;
   }
-  async function list(model) {
+  async function list(model, coverageCode = "selection_list_coverage_limit") {
     const before = (await stateLayout(model, "qListObject", "state_mismatch"))?.qListObject;
     noError(before);
     check(before.qStateName === "$" && before.qSize?.qcx === 1, "state_mismatch");
     noError(before.qDimensionInfo);
-    const rows = await pages(model, "getListObjectData", "/qListObjectDef", before.qSize, [0]);
+    const rows = await pages(
+      model,
+      "getListObjectData",
+      "/qListObjectDef",
+      before.qSize,
+      [0],
+      coverageCode,
+    );
     const after = (await stateLayout(model, "qListObject", "selection_changed"))?.qListObject;
     noError(after);
     check(
@@ -565,13 +573,20 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     );
     return cube;
   }
-  async function readCube(model, dimensions, measures, columns, totalIndices) {
+  async function readCube(model, dimensions, measures, columns, totalIndices, coverageCode) {
     const before = cubeLayout(
       await stateLayout(model, "qHyperCube", "cube_shape"),
       dimensions,
       measures,
     );
-    const rows = await pages(model, "getHyperCubeData", "/qHyperCubeDef", before.qSize, columns);
+    const rows = await pages(
+      model,
+      "getHyperCubeData",
+      "/qHyperCubeDef",
+      before.qSize,
+      columns,
+      coverageCode,
+    );
     const after = cubeLayout(
       await stateLayout(model, "qHyperCube", "cube_shape"),
       dimensions,
@@ -772,7 +787,12 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
     async function verifySelection(periods) {
       await selectedFields();
       for (let index = 0; index < 4; index++) {
-        const values = (await list(lists[index]))
+        const values = (
+          await list(
+            lists[index],
+            index === 3 ? "calendar_list_coverage_limit" : "selection_list_coverage_limit",
+          )
+        )
           .filter((cell) => cell.qState === "S")
           .map((cell) => cell.qText)
           .sort();
@@ -799,7 +819,7 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
           "selection_failed",
         );
       }
-      const calendar = await list(lists[3]);
+      const calendar = await list(lists[3], "calendar_list_coverage_limit");
       const values = periods.map((period) => {
         const matches = calendar.filter(
           (cell) => cell.qText === period.slice(0, 7).replace("-", ""),
@@ -830,8 +850,16 @@ export async function collectQlikRanking(global, { mapping, signal } = {}) {
         source.cube.qMeasures.length,
         [0, 1 + config.vgvMeasureIndex, 1 + config.contractsMeasureIndex],
         [config.vgvMeasureIndex, config.contractsMeasureIndex],
+        role === "imobs" ? "imobs_native_coverage_limit" : "developments_native_coverage_limit",
       );
-      const enriched = await readCube(source.idCube, 2, 2, [0, 1, 2, 3], [0, 1]);
+      const enriched = await readCube(
+        source.idCube,
+        2,
+        2,
+        [0, 1, 2, 3],
+        [0, 1],
+        role === "imobs" ? "imobs_identity_coverage_limit" : "developments_identity_coverage_limit",
+      );
       await pinned(config);
       const nativeNames = new Map();
       const nativeSum = zero();
