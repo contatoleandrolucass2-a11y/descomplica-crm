@@ -1,21 +1,38 @@
 # Worklog
 
-## 2026-10-16: Previsão editável em Gestão
+CI38995290171 concluiu verificacoes funcionais, RSC, acessibilidade e zoom.
+Revisadas11 alteracoes visuais /app, preservadas231 capturas de outras telas.
+Baseline atualizada com proveniencia do artefato12087754329; nova CI exigida.
 
-Base f1088046, branch `codex/gestao-previsao`. A abertura confirmou Git comum,
-main/CI e health publicado 34517ba2; estados distintos registrados em conhecimento.
-Os três prints fornecidos são dados de referência visual, sem nomes como seed.
+CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
+Teste RSC usa includeHidden para conferir selecao dentro do filtro fechado.
+Reproducao Chromium local confirma0 elementos no locator visivel e1 no oculto.
+Sem mudanca de produto nesta correcao; nova CI exigida antes de publicar.
 
-A nova página inclui tabela compartilhada manual com Nome do corretor, Previsão
-e Realizado, equipe editável, inclusão/exclusão de linhas e colunas e Salvar.
-As células usam editores integrados, sem cards numéricos. Permissão própria de
-página, edição com `crm.settings.manage`, RPC autenticada, RLS/ACL e revisão
-otimista protegem o salvamento. Erros e conflitos preservam o rascunho.
+## 2026-10-16: Grupos comparativos do dashboard
 
-O usuário autorizou a migration aditiva de armazenamento e catálogo após
-validação. Não há migração de dados de clientes nem integração com n8n.
-As verificações globais, pgTAP, fluxo de navegador e publicação seguem os gates
-existentes. Resultados efetivos e limites serão registrados em ATUALIZACOES.
+CI38972729758 aprovou validate, restore e jornada E2E; a matriz autenticada
+parou em dashboard-auto-refresh. O teste ainda exigia filtro aberto depois
+de clicar fora: agora exige fechamento e preservacao da selecao no refresh.
+Leitura de titulos da matriz ignora titulos dos dialogs fechados. Nova CI
+necessaria antes de revisar/promover referencias; nenhum baseline promovido.
+
+QA local concluido:200 verificacoes aprovadas nos tres temas e320 a1920px;
+3670 Vitest aprovados, build aprovado. Suite Node local bloqueada por ACL
+Windows temporaria de Salesforce, sem alterar permissoes; validate Linux
+aprovado. CI38970011556 aprovou restauracao, mas E2E ainda exigia secoes
+removidas. Jornada atualizada para13 funis,78 etapas e ordem3/5/5, preservando
+guards e navegacao das demais paginas. Nova CI necessaria; sem deploy.
+
+Implementa treze funis em grupos3/5/5: metas, periodos do mes vigente e
+historico com media por uma venda. Recorta semana anterior e ontem ao mes
+atual, preserva indisponibilidade e evita dividir por vendas nulas ou zero.
+Filtros fecham fora, por Escape e ao abrir outro filtro. Remove diagnostico,
+tabelas operacionais, equipe e ranking apenas deste dashboard; preserva roscas.
+Layout empilha funis no celular, sem exigir rolagem horizontal.
+Validacao parcial:13 testes de periodos,28 de apresentacao e fechamento dos
+filtros em Chromium desktop/mobile passaram. Lint e tipos passaram na retomada.
+Gates completos ainda em verificacao; nao publicado.
 
 ## 2026-10-16: Separação urgente entre Ranking House e Canal de Parcerias
 
@@ -7524,3 +7541,20 @@ CI39032248476/tentativa2 aprovou1972 assertions de banco, restore isolado,
 advisors e build. O navegador sintético da Previsão passou; a matriz autenticada
 parou na comparação de páginas por perfil em local-rls-api.mjs. Ajuste da
 expectativa da nova página preserva as restrições de Master/Admin e os guards.
+
+## 2026-10-16: Previsão editável em Gestão
+
+Base f1088046, branch `codex/gestao-previsao`. A abertura confirmou Git comum,
+main/CI e health publicado 34517ba2; estados distintos registrados em conhecimento.
+Os três prints fornecidos são dados de referência visual, sem nomes como seed.
+
+A nova página inclui tabela compartilhada manual com Nome do corretor, Previsão
+e Realizado, equipe editável, inclusão/exclusão de linhas e colunas e Salvar.
+As células usam editores integrados, sem cards numéricos. Permissão própria de
+página, edição com `crm.settings.manage`, RPC autenticada, RLS/ACL e revisão
+otimista protegem o salvamento. Erros e conflitos preservam o rascunho.
+
+O usuário autorizou a migration aditiva de armazenamento e catálogo após
+validação. Não há migração de dados de clientes nem integração com n8n.
+As verificações globais, pgTAP, fluxo de navegador e publicação seguem os gates
+existentes. Resultados efetivos e limites serão registrados em ATUALIZACOES.

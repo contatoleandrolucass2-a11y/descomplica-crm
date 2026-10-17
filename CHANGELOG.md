@@ -1,12 +1,17 @@
 # Changelog
 
-## 2026-10-16: Previsão no menu Gestão
+- Dashboard: referencias visuais revisadas para os grupos3/5/5 em desktop e mobile.
 
-- Adiciona tabela manual de previsão e realizado por corretor, com título de
-  equipe, edição de cabeçalhos/células e inclusão/exclusão de linhas e colunas.
-- Salva no CRM com permissão própria, validação no servidor e banco e proteção
-  contra sobrescrita concorrente; falhas conservam as alterações locais.
-- Mantém a apresentação integrada da tabela, sem caixas numéricas destacadas.
+- QA dashboard: confere selecao oculta apos fechamento do filtro no refresh RSC.
+
+## Em validacao: Grupos de funis do dashboard
+
+- Organiza metas, periodos do mes e historico em grupos3/5/5 no desktop,
+  com empilhamento legivel no celular nos tres temas.
+- Compara mes, semana anterior, esta semana, ontem e hoje dentro do mes vigente.
+- Inclui media anual normalizada por uma venda e preserva estados sem base.
+- Fecha filtros ao clicar fora, pressionar Escape ou abrir outro filtro.
+- Retira diagnostico, tabelas operacionais, equipe e ranking deste dashboard.
 
 ## 2026-10-16: Ranking House separado de Canal de Parcerias
 
@@ -2834,3 +2839,11 @@ pendente dos gates completos no SHA final.
   preservando as61 verificações e os controles de autorização do banco.
 - Atualiza a matriz autenticada para conferir a nova página Previsão conforme
   os perfis previstos no catálogo.
+
+## 2026-10-16: Previsão no menu Gestão
+
+- Adiciona tabela manual de previsão e realizado por corretor, com título de
+  equipe, edição de cabeçalhos/células e inclusão/exclusão de linhas e colunas.
+- Salva no CRM com permissão própria, validação no servidor e banco e proteção
+  contra sobrescrita concorrente; falhas conservam as alterações locais.
+- Mantém a apresentação integrada da tabela, sem caixas numéricas destacadas.

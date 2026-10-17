@@ -1,5 +1,109 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-17: Revisao visual do dashboard e retomada12:03Z
+
+- CI38995290171: funcional, RSC, acessibilidade e zoom aprovados;11 diferencas
+  intencionais /app revisadas,231 capturas preservadas. Baseline parcial
+  promovida com hashes e proveniencia no manifesto, sem reduzir tolerancias.
+- Git fetch: main61c9a6a8. GET /api/health12:03:55Z:200/ok, versaoeff7f729.
+  PR245 aberto, HEADf6698997. Nenhuma publicacao do dashboard realizada.
+- Incorporar base Qlik concorrente e repetir CI verify antes de merge/deploy.
+  Fontes: Actions38995290171, PR245, origin/main e health publico.
+
+## 2026-10-17: Locator de filtro fechado na verificacao RSC
+
+- CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
+  Refresh chegou a state-preservation; checkbox dentro de details fechado nao
+  e encontrado por getByRole padrao. Reproduzido em Chromium local:0 vs1 com
+  includeHidden, mantendo toBeChecked. Teste corrigido sem relaxar assercoes.
+- Producao e baseline permanecem inalteradas; nova CI e revisao visual exigidas.
+
+## 2026-10-17: Retomada do PR245 e base concorrente integrada
+
+- Consulta GitHub02:01Z: PR245 mergeable, HEAD73d37fee; CI38993263801 iniciada.
+  Mainf1088046 integrada preservando os registros Meta Ads e dashboard.
+- GET anonimo /api/health02:01:42Z: HTTP200, statusok, versao34517ba2.
+  Dashboard ainda nao publicado. Fontes: GitHub PR245/Actions38993263801 e
+  https://crm.descomplicapro.com.br/api/health.
+- Nao ativar integracoes ou servicos adicionais nesta entrega. Matriz local
+  aprovada nao substitui a CI autenticada, baseline revisada e gates de deploy.
+- Proximo criterio: CI funcional completa, revisao das diferencas visuais
+  intencionais e nova CI de verificacao antes de merge/publicacao.
+
+## 2026-10-16: Grupos de funis em validacao no PR245
+
+- CI38972729758 aprovou validate/restore/E2E; matriz autenticada interrompida
+  em dashboard-auto-refresh. Teste exigia filtro aberto depois de clique
+  externo; alinhado ao comportamento solicitado e mantida selecao/RSC.
+  Titulos de dialogs fechados excluidos da leitura de titulos visiveis.
+  Artefato incompleto nao promovido; nova CI necessaria, sem publicacao.
+
+- Resultado da CI38970011556: validate/restore aprovados,
+  mas E2E exigia report-diagnosis-title removido. Atualizado
+  e2e/release-candidate.spec.ts para exigir13 funis/78 etapas, ordem3/5/5
+  e ausencia das secoes removidas. Guards e demais paginas preservados;
+  nova CI obrigatoria antes de publicar. Comparacao visual autenticada nao rodou.
+
+- Fonte GitHub CI38970011556: validate e isolated-restore aprovados;
+  release-gates ainda em andamento. Base main34517ba2 integrada emc20d0dc7;
+  arvore coincide com merge de teste1be8d014 emd75318ac599d8dd0660a65d4ad2eab268376b77b.
+- GET observacional https://crm.descomplicapro.com.br/api/health em21:41:35Z:
+  HTTP200/statusok/version34517ba2b2e4022f52bec29260e071b9cf124cca.
+  Publicacao concorrente de Qlik; nao e a entrega dos grupos do dashboard.
+- QA local:200 verificacoes aprovadas nos tres temas,320/390/768/1440/1920px,
+  com dados sinteticos; build, lint, tipos e3670 testes Vitest aprovados.
+  pnpm test local parou depois por ACL temporaria Windows em testes de
+  publish-candidate Salesforce; sem relaxar permissoes. Comando completo
+  aprovado na CI Linux da arvore equivalente. Limite e evidencia no audit
+  docs/audits/dashboard-grupos-2026-10-16.md; reavaliar com gates finais.
+- Nenhum deploy desta entrega, migration ou workflow n8n executado.
+
+## 2026-10-16: Retomada dos grupos de funis
+
+- Fonte Git fetch origin e GitHub via gh na VPS: main69ae9839, CI38928064973
+  concluida/success; HEAD local1c91e0c no ramo codex/dashboard-grupos-periodos-20261016.
+  Health publico18:42:09Z HTTP200/ok/66ed7360; integrado, local e publicado distintos.
+- Escopo solicitado: grupos3/5/5, periodos limitados ao mes vigente, media anual
+  por uma venda, fechar filtros fora/Escape, remover diagnostico/tabelas/equipe/ranking.
+  Preservar metas por responsavel e roscas. Sem migrations ou workflows.
+- Retomada preservou edicoes locais. Treze testes de periodos e teste de filtros
+  em Chromium desktop/mobile passaram. Suite visual e gates globais em andamento;
+  nenhuma publicacao desta alteracao. Revisar capturas dos tres temas antes do deploy.
+
+## 2026-10-16: Conferencia autenticada dos tres temas
+
+- Complemento responsivo16/10: inspecao autenticada em viewports1920x1080,
+  1366x768,390x844 e360x800, alternando Claro/Medio/Escuro. Roscas, funis,
+  filtros abertos, historicos e tabelas nos trechos examinados sem sobreposicao
+  indevida. Medicao DOM nao encontrou overflow horizontal da pagina nem dos
+  textos folha visiveis avaliados. Tabelas moveis possuem overflow:auto local;
+  ultima coluna Hoje acessivel (scrollLeft233, largura343/conteudo576).
+  Historico movel rolavel, largura357 sem overflow horizontal, altura811 e
+  conteudo1188. Nao e teste em aparelho fisico nem garantia de toda combinacao.
+- Captura nativa inicial divergiu do viewport; captura documentada com clip
+  no scroll atual confirmou enquadramento correto. Evidencias JPG locais fora
+  do Git. Console capturado sem erros; coleta mostrada14:03BRT. Viewport
+  temporario removido, Claro restaurado, filtros limpos e dialogos fechados.
+  Nenhuma alteracao de codigo ou deploy; suites nao repetidas nesta inspecao.
+
+- Navegador de producao acessivel apos login pelo usuario. Claro, Medio e
+  Escuro inspecionados na largura atual do painel (304px), com roscas, funis,
+  metas e dialogos legiveis; nenhuma falha visual observada nos trechos vistos.
+  Nao equivale a uma nova matriz desktop/mobile. Console capturado sem erros.
+- Filtros de canal, gerente, responsavel e empresa exercitados; opcoes dependentes
+  e limpeza confirmadas. Um responsavel produziu metas27/8/4/1; esperado ate
+  hoje proporcional a16/31. Troca de tema preservou filtro e valores; limpeza
+  restaurou315 responsaveis. Historicos: janeiro-setembro, julho-setembro e
+  setembro, sem outubro ainda aberto. Fonte: UI autenticada, coleta13:33BRT.
+- Estado final: tema Claro, sem filtros ou dialogos. Nenhuma alteracao de
+  dados, integracao ou runtime. Health publico16:58:38Z ok/66ed7360; HEAD
+  local1c91e0c e versao publicada continuam distintos. Nova consulta gh
+  indisponivel no PATH; nao alegar nova validacao CI. Suites nao repetidas
+  nesta verificacao observacional. Evidencias visuais locais fora do Git.
+- Limite: disponibilidade de pastas aprovadas e metas nao definidas nao foi
+  alterada. Reavaliar apos mudanca de dados, layout ou regras. Registro local
+  de verificacao, sem nova publicacao de runtime.
+
 ## 2026-10-16: Sessão Meta Ads na página Integrações
 
 A etapa implementa a conta de anúncios `1080988750909489`, no business
@@ -698,3 +802,7 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
   61c9a6a8 e CI39007579400 success. GET publico api/health retornou ok/eff7f729.
   Fontes: origin, GitHub via gh e endpoint publico; versao da Previsao continua
   somente no PR. Matrizes QA corrigidas sem alterar acesso de runtime.
+- Em13:38Z main avancou para ca6c33cf, mergePR245/dashboard; CI39037162463 em
+  andamento. Integracao preservou dashboard e Previsao; conflitos restritos aos
+  prefixos de WORKLOG/CHANGELOG, conservando ambos os registros. Matriz RLS e
+  menu corrigidos passaram42 testes focais. Nova CI integrada necessaria.
