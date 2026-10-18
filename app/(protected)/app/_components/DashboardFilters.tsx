@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronDown, RotateCcw } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTransition } from "react";
 import {
@@ -31,7 +31,7 @@ function attachMenuDismissal(root: HTMLDivElement | null) {
   function dismissOutside(event: Event) {
     for (const menu of openMenus()) {
       if (event.target instanceof Node && !menu.contains(event.target)) {
-        if (menu.contains(document.activeElement)) menu.querySelector("summary")?.focus();
+        // Let the outside interaction own focus; focus() here re-enters focusin.
         menu.open = false;
       }
     }
@@ -42,7 +42,7 @@ function attachMenuDismissal(root: HTMLDivElement | null) {
     if (!menu) return;
     event.preventDefault();
     menu.open = false;
-    menu.querySelector("summary")?.focus();
+    menu.querySelector("summary")?.focus({ preventScroll: true });
   }
   function closeOtherMenus(event: Event) {
     const opened = event.target;
@@ -75,33 +75,20 @@ export function DashboardFilters({
   const router = useRouter();
   const query = useSearchParams();
   const [pending, startTransition] = useTransition();
-  const active = DASHBOARD_FILTER_KEYS.some((key) => values[key].length > 0);
-  function navigate(key?: DashboardFilterKey, value?: string) {
+  function navigate(key: DashboardFilterKey, value: string) {
     const next = new URLSearchParams(query.toString());
     next.delete("period");
-    if (!key) DASHBOARD_FILTER_KEYS.forEach((filter) => next.delete(filter));
-    else {
-      const selected = values[key].includes(value!)
-        ? values[key].filter((item) => item !== value)
-        : [...values[key], value!];
-      next.delete(key);
-      selected.forEach((item) => next.append(key, item));
-    }
+    const selected = values[key].includes(value)
+      ? values[key].filter((item) => item !== value)
+      : [...values[key], value];
+    next.delete(key);
+    selected.forEach((item) => next.append(key, item));
     startTransition(() => router.replace(`/app?${next}`, { scroll: false }));
   }
   return (
     <div ref={attachMenuDismissal} className={styles.filters} aria-busy={pending}>
       <div className={styles.heading}>
         <h2>Filtros</h2>
-        <button
-          type="button"
-          onClick={() => navigate()}
-          disabled={!active || pending}
-          aria-label="Limpar filtros"
-          title="Limpar filtros"
-        >
-          <RotateCcw size={17} />
-        </button>
       </div>
       <div className={styles.grid}>
         {DASHBOARD_FILTER_KEYS.map((key) => (

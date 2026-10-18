@@ -15,7 +15,7 @@ import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { DashboardReport } from "./_components/DashboardReport";
 import styles from "./_components/analytics/analytics.module.css";
 
-export const metadata = { title: "Dashboard comercial" };
+export const metadata = { title: "Dashboard | Resumo Geral" };
 
 export default async function AppHomePage({
   searchParams,

@@ -1,5 +1,62 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: Validacao do resumo geral compacto
+
+- PR254, HEAD f0329c03: matriz sintetica local aprovada,207 checks,
+  temas light/balanced/dark e larguras320/390/768/1440/1920. Conferencia
+  visual de capturas desktop/mobile nos tres temas sem cortes aparentes.
+  Relatorio: test-results/dashboard-report/report.json. Filtros, historico,
+  metas, navegacao, atualizacao automatica e piso de quantidades incluidos.
+- Vitest completo repetido com maxWorkers=2:3808 aprovados,95 skips;
+  os timeouts de Obsidian nao reapareceram. Suites operacionais Windows:
+  1593 aprovados,19 skips,3 falhas de requisitos POSIX Meta Ads. Suite
+  release Windows tambem falhou em requisitos de host e timeout Qlik.
+  Nenhum requisito de seguranca foi relaxado para aprovar no Windows.
+- CI Linux39093336285 aprovou validate no SHA exato, incluindo pnpm test,
+  fontes oficiais, auditoria e build. Restore e E2E autenticado aprovados.
+  Producao nao foi alterada. Revisao estatica independente
+  sem achados no diff fe1b343e..f0329c03; nao substitui os gates pendentes.
+- CI39093336285 reprovou apenas11 comparacoes de imagens /app, decorrentes
+  do layout solicitado. Gates funcionais,242 auditorias de acessibilidade,
+  zoom/teclado e canvas aprovados. Revisadas capturas desktop/mobile e temas;
+  promovidas11 referencias e preservadas231, sem reduzir tolerancias.
+  Artefato12124916025, SHA2568615a849aa566b93a8f05d48ca05cd82c7877b9b52bc0af8d026a6891918924d.
+  Tree do merge de captura ec9ae253 equivale ao HEAD f0329c03; fingerprint
+  recomposto com29 arquivos gerados. Manifesto guarda proveniencia completa.
+  Nova CI verify obrigatoria: promocao de baseline nao aprova o run anterior.
+
+## 2026-10-18: Abertura do resumo geral compacto
+
+- Git comum confirmado; branch codex/dashboard-resumo-compacto parte de
+  main fe1b343e. GitHub run 39088213591 terminou failure nesse SHA;
+  run 39084939569 aprovou o main anterior 36f3c317.
+- GET observacional de /api/health retornou status ok e version 840f0908.
+  Fonte: https://crm.descomplicapro.com.br/api/health e GitHub Actions,
+  consulta nesta retomada. Codigo integrado e publicado permanecem distintos.
+- Escopo: corrigir fechamento dos filtros, compactar cabecalho, remover
+  pulso/ritmo/reset, inteiros por piso nos funis e conferir a base dos relatorios.
+  Usuario confirmou manter funis com filtros e periodos. Validacao e nova
+  publicacao ainda pendentes; nenhuma alteracao de dados remotos autorizada aqui.
+
+- Conferencia de origem: ops/salesforce/transform.mjs deduplica a coleta;
+  connection-monitor publica diagnostics.sourceRows. analysis-transform.mjs
+  restringe os fatos aos dois canais definidos; analysis.ts recorta os periodos.
+  Usuario confirmou preservar essa restricao. Totais coletados desde janeiro
+  nao equivalem ao mes vigente. Sem mudanca de contrato, banco ou workflow.
+- Falha do main identificada em fonte oficial ITBI HTTP403. A verificacao
+  local scripts/verify-documentation-sources.mjs passou nesta retomada;
+  CI do candidato ainda deve comprovar acesso. Nao houve bypass do gate.
+- Correcao dos filtros remove focus() durante fechamento externo; regressao
+  reproduziu chamada indevida e passou nos quatro campos em desktop/mobile.
+  STATUS_BREAKPOINT nativo nao reproduzido: a relacao causal permanece inferida.
+  Typecheck/build aprovados; lint sem erros e dois avisos em test-results.
+  Testes focados de relatorio/paridade: 44 aprovados. Matriz visual em andamento.
+- pnpm test local: 3802 aprovados, 95 skips e seis falhas. Duas assercoes
+  antigas do reset foram corrigidas e os 44 testes focados passaram depois;
+  quatro timeouts/EBUSY em Obsidian estao sendo repetidos isoladamente.
+  Nao alterar timeouts ou tolerancias para mascarar concorrencia. CI Linux
+  completa do candidato permanece requisito antes de publicar.
+
 ## 2026-10-17: Dashboard3/5/5 publicado e validado em producao
 
 - PR250 integrou o ajuste do timeout no main840f0908. CI39061398333 aprovou

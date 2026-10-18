@@ -337,7 +337,7 @@ const repasseRoles = new Set<Role>(["master", "admin"]);
 const protectedSurfaces = [
   {
     path: "/app",
-    heading: "Relatório completo da equipe.",
+    heading: "Dashboard | Resumo Geral",
     allowed: activeOperationalRoles,
   },
   {
@@ -1513,7 +1513,7 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 }) => {
   await withRolePage(browser, "master", async (page) => {
     const surfaces = [
-      ["/app", "Relatório completo da equipe."],
+      ["/app", "Dashboard | Resumo Geral"],
       ["/app/etapas/oportunidades", "Oportunidades"],
       ["/app/etapas/agendamentos", "Agendamentos"],
       ["/app/etapas/visitas", "Visitas"],
@@ -1528,11 +1528,13 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
       if (pathname === "/app") {
-        for (const section of ["pulse", "monthly", "goals", "periods", "history"]) {
+        for (const section of ["monthly", "goals", "periods", "history"]) {
           await expect(page.locator(`#report-${section}-title`)).toBeVisible();
         }
         await expect(
-          page.locator("#report-operational-title, #report-diagnosis-title, #report-team-title"),
+          page.locator(
+            "#report-pulse-title, #report-operational-title, #report-diagnosis-title, #report-team-title",
+          ),
         ).toHaveCount(0);
         await expect(page.locator('[aria-labelledby="report-monthly-title"] figure')).toHaveCount(
           13,
@@ -1540,6 +1542,28 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
         await expect(
           page.locator('[aria-labelledby="report-monthly-title"] figure [data-stage]'),
         ).toHaveCount(78);
+        for (const [group, count] of [
+          ["goals", 3],
+          ["periods", 5],
+          ["history", 5],
+        ] as const) {
+          await expect(
+            page.locator(
+              `[aria-labelledby="report-${group}-title"] figure[aria-label^="Funil mensal:"]`,
+            ),
+          ).toHaveCount(count);
+        }
+        await expect(page.locator("main")).not.toContainText(
+          /Conversão por etapa|Ritmo de vendas|Parecer de ritmo/,
+        );
+        await expect(page.locator("[data-dashboard-source] figure circle")).toHaveCount(0);
+        for (const quantity of await page
+          .locator(
+            '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"] dd',
+          )
+          .allTextContents()) {
+          expect(quantity.trim()).toMatch(/^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/);
+        }
       }
       await expect(page.locator("html")).not.toHaveJSProperty("scrollWidth", Number.NaN);
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);
@@ -2489,7 +2513,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
       page.getByRole("button", { name: "Verificar e continuar", exact: true }).click(),
     ]);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Relatório completo da equipe." }),
+      page.getByRole("heading", { level: 1, name: "Dashboard | Resumo Geral" }),
     ).toBeVisible();
 
     await page.goto("/conta/seguranca");

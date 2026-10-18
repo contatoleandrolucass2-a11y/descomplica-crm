@@ -40,7 +40,7 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1")(
           import { createElement, StrictMode, useState } from "react";
           import { createRoot } from "react-dom/client";
           import { DashboardFilters } from "@/app/(protected)/app/_components/DashboardFilters";
-          const options = { channel: ["Canal A", "Canal B"], manager: ["Gerente A"], owner: [], company: [] };
+          const options = { channel: ["Canal A", "Canal B"], manager: ["Gerente A"], owner: ["Responsavel A"], company: ["Empresa A"] };
           function Fixture() {
             const [query, setQuery] = useState("keep=value&period=old");
             const [mounted, setMounted] = useState(true);
@@ -52,6 +52,7 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1")(
             return createElement("main", null,
               mounted && createElement(DashboardFilters, { values, options, available: true }),
               createElement("button", { id: "outside" }, "Outside"),
+              createElement("div", { id: "outside-static" }, "Outside static"),
               createElement("output", null, query));
           }
           createRoot(document.getElementById("root")).render(createElement(StrictMode, null, createElement(Fixture)));
@@ -84,6 +85,7 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1")(
         page.setDefaultTimeout(10_000);
         const errors: string[] = [];
         page.on("pageerror", (error) => errors.push(error.stack ?? error.message));
+        page.on("crash", () => errors.push("Browser page crashed"));
         await page.setContent(
           '<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body><div id="root"></div></body></html>',
         );
@@ -97,6 +99,49 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1")(
         const manager = menus.nth(1);
         const trigger = channel.locator("summary");
         const outside = page.locator("#outside");
+        // Dismiss with a checkbox focused, not only with the summary focused.
+        // Moving focus during pointerdown re-enters the document's focusin handler.
+        for (let index = 0; index < 4; index++) {
+          const menu = menus.nth(index);
+          const summary = menu.locator("summary");
+          await summary.click();
+          await menu.getByRole("checkbox").first().focus();
+          await summary.evaluate((element) => {
+            element.dataset.focusCalls = "0";
+            const original = element.focus.bind(element);
+            element.focus = (...args) => {
+              element.dataset.focusCalls = String(Number(element.dataset.focusCalls) + 1);
+              original(...args);
+            };
+          });
+          if (mobile) await outside.tap();
+          else await outside.click();
+          await browserExpect(menu).not.toHaveAttribute("open");
+          await browserExpect(outside).toBeFocused();
+          await browserExpect(summary).toHaveAttribute("data-focus-calls", "0");
+          await summary.click();
+          await menu.getByRole("checkbox").first().focus();
+          await page.keyboard.press("Escape");
+          await browserExpect(menu).not.toHaveAttribute("open");
+          await browserExpect(summary).toBeFocused();
+          await summary.click();
+          await menu.getByRole("checkbox").first().focus();
+          await page.locator("#outside-static").click();
+          await browserExpect(menu).not.toHaveAttribute("open");
+          await summary.click();
+          await menu.getByRole("checkbox").last().focus();
+          await page.keyboard.press("Tab");
+          await browserExpect(menu).not.toHaveAttribute("open");
+          const next = index < 3 ? menus.nth(index + 1).locator("summary") : outside;
+          await browserExpect(next).toBeFocused();
+          if (index < 3) {
+            await page.keyboard.press("Enter");
+            await browserExpect(menus.nth(index + 1)).toHaveAttribute("open", "");
+            await browserExpect(page.locator("details[open]")).toHaveCount(1);
+            await page.keyboard.press("Escape");
+          }
+        }
+        await browserExpect(page.getByRole("button", { name: "Limpar filtros" })).toHaveCount(0);
         await trigger.focus();
         await page.keyboard.press("Enter");
         await browserExpect(channel).toHaveAttribute("open", "");
