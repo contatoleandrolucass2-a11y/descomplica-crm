@@ -46,3 +46,7 @@ Validação: `tests/forecasts.test.ts`, `tests/forecast-api.test.ts`,
 `tests/forecast-settings.test.tsx`, `supabase/tests/crm_forecasts.test.sql`,
 catálogo, recursos e gates globais. A CI executa o fluxo de navegador sintético
 com `FORECAST_SETTINGS_BROWSER=1`; nunca inserir fixtures no banco de produção.
+
+## Apresentação visual
+
+A Previsão reutiliza o canvas e os tokens do dashboard /app nos temas Claro, Médio e Escuro. Cabeçalho compacto, separadores, superfícies e botão Salvar seguem a mesma linguagem. A tabela inicial de três colunas cabe no celular; tabelas ampliadas mantêm rolagem horizontal apenas na região da tabela. Edição, confirmação de exclusão, rascunho e controle de revisão permanecem iguais.

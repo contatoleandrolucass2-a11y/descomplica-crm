@@ -18,6 +18,10 @@ reprovou11 imagens do dashboard alterado; revisadas e promovidas apenas essas
 referencias do artefato12124916025, preservando231 imagens e tolerancias.
 Nova CI verify e publicacao pendentes nesta etapa.
 
+PR251 documental integrado em18/10/2026 às01:55:20Z (17/10,22:55 em São Paulo),
+commitfe1b343e, após CI39085264715 aprovada no head2e1c046a. Registros concorrentes
+preservados; sem alteração de runtime, migration ou reinício nesta conclusão.
+
 ## 2026-10-17: Dashboard publicado
 
 PR250 integrado no SHA840f0908. CI39061398333 aprovou validate, release-gates,
@@ -7603,3 +7607,9 @@ Coordenador publicou às21:10:01 de17/10 (America/Sao_Paulo), sem pendência.
 Health200/ok, API anônima401; tabela vazia, página ativa para Master/Admin.
 Prova da imagem, versões remotas, testes e limites estão em
 docs/audits/previsao-2026-10-17.md. Nenhuma fixture foi inserida em produção.
+
+## 2026-10-18 — Previsão no padrão visual do dashboard
+
+- Reutilizado o canvas visual de /app para a Previsão, com cores dos três temas, cabeçalho compacto, tabela fluida e Salvar destacado.
+- Mantidos API, permissões e salvamento compartilhado; nenhuma migration nova. A tabela padrão cabe em celular, e colunas extras usam rolagem interna.
+- Validação em andamento: navegador sintético, lint, tipos, testes e build. CI de main anterior falhou no gate externo de fontes documentais; não é evidência de regressão deste ajuste.
