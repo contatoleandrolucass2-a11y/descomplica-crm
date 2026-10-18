@@ -29,7 +29,7 @@ from (values
   (jsonb_set(pg_temp.grouped_forecast(),'{columns,1,id}','"x_one"'),'forecast prefix required'),
   (jsonb_set(pg_temp.grouped_forecast(),'{columns,2,id}','"a_other"'),'pair identity must match'),
   (jsonb_set(pg_temp.grouped_forecast(),'{columns,2,label}','"Other"'),'pair titles must match'),
-  (jsonb_set(pg_temp.grouped_forecast(),'{columns}',pg_temp.grouped_forecast()->'columns'-2),'half group rejected')
+  (jsonb_set(pg_temp.grouped_forecast(),'{columns}',(pg_temp.grouped_forecast()->'columns') - 2),'half group rejected')
 ) invalid(doc,reason);
 
 select throws_ok(format('select public.save_crm_forecast(%L::jsonb,1)',pg_temp.grouped_forecast(value)),

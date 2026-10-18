@@ -2879,3 +2879,5 @@ pendente dos gates completos no SHA final.
 - Sete empreendimentos iniciais com pares Previsão/Realizado e reordenação conjunta de cabeçalhos e valores.
 - Total por corretor, acumulados no rodapé, entrada numérica e tabela responsiva sem rolagem horizontal.
 - Compatibilidade de leitura do legado, validação de gravação na API/RPC e preservação de permissões, revisão e rascunho.
+
+- Corrigida a precedência da expressão JSON no teste de exclusão parcial de empreendimento, preservando as 36 verificações pgTAP.

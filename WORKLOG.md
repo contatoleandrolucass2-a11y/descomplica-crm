@@ -7625,3 +7625,7 @@ docs/audits/previsao-2026-10-17.md. Nenhuma fixture foi inserida em produção.
 Implementados sete grupos iniciais com Previsão/Realizado, inclusão em todas as linhas, reordenação por arraste e setas, corretor fixo à esquerda/alinhado à direita e Total calculado no final. Rodapé soma colunas e total geral. Valores numéricos com até duas casas decimais, totais em centésimos inteiros e preservação de conteúdo legado inválido para correção. Desktop compacto e celular sem rolagem horizontal, nos três temas.
 
 Contrato de gravação validado na API e migration da RPC sem reescrever dados nem modificar permissões. Inventário ampliado para 65 migrations e 2.008 testes pgTAP; aplicação remota depende de autorização específica. Testes locais e CI serão registrados no encerramento.
+
+### Correção da fixture SQL na CI
+
+A CI 39136448707 aprovou validate, mas o restore detectou uma expressão JSON sem parênteses no teste de grupos. A precedência de subtração causava 22P02 antes da segunda asserção. Corrigida somente a fixture, preservando as 36 verificações. Expressão antiga/corrigida reproduzida por SELECT de constantes, sem tabelas ou mutações. 67 testes focados aprovados; nova CI necessária.
