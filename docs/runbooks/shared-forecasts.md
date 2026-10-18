@@ -41,6 +41,13 @@ sem permissão de edição. Edições pendentes recebem proteção de saída.
 
 ## Banco e publicação
 
+Aplicação desta evolução confirmada em 18/10/2026, após autorização explícita
+para a migration e recuperação da função anterior. O arquivo local
+`20261018142142_crm_forecast_groups.sql` corresponde ao histórico remoto
+`20261018232900 / crm_forecast_groups`. Publicação em eeb42a45 confirmada pelo
+coordenador às23:29:19Z. Evidências, hashes e limites em ATUALIZACOES.md.
+Esta aplicação concluída não autoriza migrations futuras.
+
 A migration `20261018142142_crm_forecast_groups.sql` substitui apenas a validação
 da RPC de salvamento para exigir pares completos e números também no banco.
 Mantém assinatura, owner, ACL, RLS, autorização e controle de revisão. Não altera

@@ -997,3 +997,22 @@ Cenário sintético com cabeçalho antigo personalizado confirmou necessidade de
 ### Lint SQL após a correção da fixture
 
 CI 39137907096: validate aprovado incluindo a fonte documental que retornara403. A restauração avançou até o lint de banco e bloqueou por shadowed_variables/unused variable v_index na migration nova. FOR inteiro declara o índice implicitamente; removida a declaração externa redundante. Não houve mudança de regra, bypass de lint ou mutação remota. Nova CI necessária para comprovar pgTAP, lint e restore completos.
+
+### Integração e autorização da migration por empreendimento
+
+CI39138652862 no head ebd7ad414312895a778eb8d3f4b62c17e80c5d07 concluiu aprovada: validate, release-gates e isolated-restore; imagem é gerada apenas em push/main. Restore isolado comprovou65 migrations,35 arquivos pgTAP e2.008 testes na origem e no banco restaurado, lint/advisors aprovados e fingerprint correspondente. São dados sintéticos, não restauração de produção.
+
+Usuário autorizou expressamente aplicar apenas20261018142142_crm_forecast_groups.sql depois da CI completa e restaurar a função anterior se a publicação falhar. Backup privado da definição anterior tem SHA2563d82ce724bf05b02c2ea0ba663e847b761c78619faae39528fb905b441d35c11; nenhuma previsão de cliente integra esse backup. A autorização não abrange outras migrations ou mutações de dados.
+
+PR256 integrado em2026-10-18T15:51:32Z no SHA6b6e88fb33964e2ced5c2a07ecbf308e5f1875c5, sem bypass. CI push/main39142373485 iniciada. Consulta preliminar do coordenador: produção d919751a, deployment d2fc040b-ad09-4442-8fd3-8b1317463b65, publicada em2026-10-18T06:35:30.334Z, sem pendência. Migration e publicação ainda não realizadas; nova observação no minuto da promoção é obrigatória. Fontes: GitHub PR256/Actions, retorno do coordenador e autorização direta nesta conversa.
+
+Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f1792a650c09d49 (PR257, vagas no Associativo). Diff restrito a simulador/testes/documentação; Previsão e sua migration não mudaram. CI39165128618 push/main concluiu os quatro jobs aprovados em2026-10-18T21:38:38Z. Health observado HTTP200/ok/d919751a e ledger anterior sem pendência. Candidato atualizado para main atual; imagem6b6e88fb carregada mas nunca promovida. Autorização específica da migration segue válida para o mesmo SQL. Fontes: origin/main, GitHub Actions e coordenador.
+
+### Previsão por empreendimento publicada
+
+- Migration local `20261018142142_crm_forecast_groups.sql` aplicada via MCP ao projeto confirmado `hnncxuerlcsaahdxoswb`, sob autorização direta para aplicação e recuperação. Histórico remoto: `20261018232900 / crm_forecast_groups`. Somente a definição da RPC foi substituída; nenhuma previsão existente foi reescrita.
+- Antes: save MD5 `9bb11666b25feae744f2ab24d0405f24`; depois: `752c15eebf5553125667fbe6295a0744`. RPC get manteve MD5 `e088aa7c1c66909618b0e21c66c1c705`. Owner postgres, security definer, ACL e configurações preservados. Backup privado anterior conferido; recuperação não foi necessária.
+- CI final `39165128618`, push/main `eeb42a4522ec7767f16f19f47f1792a650c09d49`, quatro jobs aprovados. Artefato SHA256 `8d4d8d25d24cc2500180ec1e0a7cddcbce8b4a5043310b602c459d22f6e21bec`; config CI `6e6513a4f3d68594a81fbd0a38f9e431655f902f80386401455a5784b3f763ec`; manifesto local `a11cbf0a37dfca32954eb9bdbc259ab47fc379b6ec221e5a6ef51e5d97656348`. Cadeia OCI, 11 camadas, RootFS e linux/amd64 conferidos. image:prove aprovou os dois perfis na mesma imagem, sem segredos em saída.
+- Coordenador `release:production` publicou em `2026-10-18T23:29:19.335Z` (20:29:19 America/Sao_Paulo), deployment `4ecf1a6f-18a9-4ab7-9dfc-31bb39ab3f5b`, sem pendência. Baseline: deployment `d2fc040b-ad09-4442-8fd3-8b1317463b65`, SHA d919751a, publicação real `2026-10-18T06:35:30.334Z`. Consulta ao vivo, CI/main, travas e CAS foram executados pelo coordenador no minuto da troca.
+- Pós-publicação às 23:29:27Z: health público HTTP200/ok/eeb42a45; container healthy na imagem comprovada; acesso anônimo à página307 e API401. Testes funcionais autenticados usam fixtures sintéticas locais/CI; não foi feita gravação de teste em produção. Capturas desktop/celular são sintéticas, não evidência de uma sessão autenticada produtiva.
+- Fontes: PR256, CI39138652862/39142373485/39165128618, MCP Supabase, coordenador e https://crm.descomplicapro.com.br/api/health. Implementado, CI aprovada, integrado e publicado são estados confirmados separadamente. Alteração concorrente PR257 preservada no candidato atual.

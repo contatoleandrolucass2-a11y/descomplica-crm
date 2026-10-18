@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-18: Publicação da Previsão por empreendimento
+
+PR256 integrado após CI completa. A versão atual de main, eeb42a45, preserva
+também o PR257 e passou os quatro jobs da CI39165128618. Migration autorizada
+aplicada via MCP como20261018232900, sem reescrever previsões existentes.
+Imagem imutável conferida e publicada pelo coordenador às23:29:19Z, deployment
+4ecf1a6f-18a9-4ab7-9dfc-31bb39ab3f5b. Health200/ok/eeb42a45, container healthy,
+página anônima307 e API401. QA funcional autenticado somente sintético na CI;
+nenhuma fixture gravada em produção. Evidências completas em ATUALIZACOES.md.
+
 ## 2026-10-18: Resumo geral compacto
 
 Dashboard renomeado para Dashboard | Resumo Geral, cabecalho compacto e

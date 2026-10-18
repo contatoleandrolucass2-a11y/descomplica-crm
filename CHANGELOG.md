@@ -1,5 +1,9 @@
 # Changelog
 
+- Previsão por empreendimento publicada: sete grupos iniciais, pares numéricos
+  Previsão/Realizado, reordenação conjunta e totais automáticos. Migration
+  autorizada aplicada sem reescrever dados, CI completa e health confirmados.
+
 - QA do resumo geral: referencias visuais revisadas do dashboard nos tres
   temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
 
