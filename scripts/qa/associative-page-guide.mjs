@@ -785,14 +785,12 @@ export async function runSyntheticAssociativePageGuide(options) {
           .evaluate((element, value) => (element.dataset.theme = value), theme);
         for (const item of items.slice(0, 3)) {
           const label = `VAGA: ${item.parkingSpaces ?? "Não informada"}`;
-          const row = page
-            .getByRole("row")
-            .filter({
-              has: page.getByRole("button", {
-                name: `Iniciar proposta com ${item.identifier}`,
-                exact: true,
-              }),
-            });
+          const row = page.getByRole("row").filter({
+            has: page.getByRole("button", {
+              name: `Iniciar proposta com ${item.identifier}`,
+              exact: true,
+            }),
+          });
           await expect(row.locator(".investor-stock-parking")).toHaveText(label);
           await row.getByRole("button").click();
           await expect(

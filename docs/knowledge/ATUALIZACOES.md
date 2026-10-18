@@ -2,9 +2,11 @@
 
 ## 2026-10-18: Vagas no Associativo
 
-A linha de estoque e a descrição da unidade selecionada no Associativo exibem `VAGA: N`, usando `parkingSpaces` do estoque. Zero é preservado; valores ausentes ou inválidos exibem `VAGA: Não informada`. As variantes Investidor e Tabela Direta e os cálculos financeiros permanecem inalterados. Base: `d919751a51772dd0c57a582b9581e61412642ced`.
+A linha de estoque e a descrição da unidade selecionada no Associativo exibem `VAGA: N`, usando `parkingSpaces`. Zero é preservado; valores ausentes ou inválidos exibem `VAGA: Não informada`. As variantes Investidor e Tabela Direta e os cálculos financeiros permanecem inalterados. A branch foi reconciliada com `main` em `6b6e88fb`.
 
-Validação local: instalação com lockfile congelado; lint, typecheck, audit e 28 testes focados aprovados. A suíte completa falhou por timeouts e falhas de workers; a repetição com dois workers também não aprovou todos os testes. Testes operacionais Salesforce apresentaram timeout. O primeiro build falhou ao buscar fontes Google; a repetição de `pnpm build` passou sem modificar a configuração. A renderização isolada do JSX confirmou os três rótulos em 390 px; a captura de tela expirou, portanto não constitui validação da jornada autenticada. PR de rascunho; sem merge ou deploy.
+Na retomada, passaram formatação, lint, tipos, build, 3.861 testes Vitest (98 skips condicionais), 1.610 testes operacionais (cinco skips Linux) e 723 testes de release (14 skips Linux). A CI Ubuntu é obrigatória para os casos POSIX. O navegador isolado confirmou 18 seleções reais com vagas zero, um e ausentes em 390/1440 px e três temas. A matriz completa do guia passou em 1440/375/320 px, nos três temas e com/sem proposta, sem erros de console ou requisições externas. Capturas sintéticas foram inspecionadas. Isso não substitui autenticação/RLS e gates completos da CI.
+
+A CI anterior falhou na formatação documental e a segunda na formatação do novo teste de navegador, corrigidas sem relaxar gates. Produção consultada no ledger permanece em `d919751a`, publicada em `2026-10-18T06:35:30.334Z`. A `main` inclui o PR #256, cuja migration `20261018142142_crm_forecast_groups.sql` ainda não consta no banco produtivo e cuja RPC continua anterior. O runbook de Previsão exige autorização específica para essa aplicação remota; este PR não a executa. Merge, CI final e deploy permanecem etapas separadas, com DEPLOY-001 obrigatória.
 
 ## 2026-10-18: Validacao do resumo geral compacto
 
