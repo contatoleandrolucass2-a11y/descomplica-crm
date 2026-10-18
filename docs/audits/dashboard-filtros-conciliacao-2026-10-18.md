@@ -58,3 +58,29 @@ comparecimento e vendas data da venda. Pastas aprovadas continuam indisponiveis.
   Lint aprovado com exclusao CLI de test-results (artefatos locais nao versionados);
   tentativa integral interrompida ao percorrer artefatos acumulados. CI limpa
   mantem pnpm lint sem exclusao adicional. Suite completa, CI e deploy pendentes.
+
+## Rechecagem da carga e do navegador
+
+- Carga de 18/10/2026 11:02:59.121 America/Sao_Paulo, lida em11:20:48:
+  requestId fcface7b-335b-4829-a63d-c6ac38aff083, SHA256
+  0c65005002fc0b50d8e7e1e265be35e74c111b53fb585b5d0dd6dd2d092f17cd.
+  Mes ambos916/68/51/128/13; Imob259/26/33/103/10;
+  Direcional657/42/18/25/3. UI reaberta confirma ambos, sem filtros adicionais.
+  Diferenca da carga anterior: tres oportunidades no Direcional.
+- Relatorios brutos nao localizados nos caminhos examinados. Descoberta
+  encerrada sem exportar registros. Prova limitada a artefato coletado versus
+  UI; nao afirmar reconciliacao independente dos relatorios brutos.
+- Apos usuario reabrir a aba, quatro filtros abriram e fecharam por clique
+  externo sem crash nesta tentativa. Ainda era a versao publicada d919751a,
+  portanto essa observacao nao valida a mitigacao nova em producao.
+- Baseline isolada: Chrome155/Chromium151, oito casos imediatos e dois
+  pending controlados sem crash. Erros iniciais de harness preservados no
+  relatorio local. Causa nativa continua nao demonstrada.
+- Vitest completo:3808 aprovados/95 ignorados. Operacionais Windows:
+  1593 aprovados/3 falhas/19 ignorados; release:712 aprovados/11 falhas/14
+  ignorados, falhas de fixtures POSIX Meta Ads. CI Linux39135151478 aprovou
+  lint, tipos e testes completos, mas bloqueou na fonte ITBI HTTP403:
+  https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517.
+  Nenhum gate foi dispensado. PR255 ainda nao publicado.
+- Regressao de browser inicial excedeu240s globais no quarto contexto;
+  nao registrar como aprovada. Casos sendo separados sem reduzir assercoes.

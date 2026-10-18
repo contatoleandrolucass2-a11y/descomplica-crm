@@ -9,6 +9,14 @@ Conciliação da carga10:32 com a UI:913/68/51/128/13 no mes; ambos os canais
 apenas. Evidencias e limites em docs/audits/dashboard-filtros-conciliacao-2026-10-18.md.
 Validacao completa e publicacao desta correcao ainda pendentes.
 
+Rechecagem da coleta11:02: ambos916/68/51/128/13, com tres novas
+oportunidades no Direcional; UI coincide. Prova limitada ao candidato
+coletado, sem relatorios brutos independentes. Navegador reaberto respondeu
+ao clique externo nos quatro filtros da versao antiga, sem crash nessa rodada.
+CI39135151478 passou lint/tipos/testes Linux e parou na fonte ITBI HTTP403;
+repeticao solicitada sem dispensar gate. Teste prolongado sendo separado
+em quatro casos para evitar timeout acumulado, preservando as assercoes.
+
 ## 2026-10-18: Resumo geral em producao
 
 PR254 integrado no SHAd919751a; CI39100233037 aprovada apos repetir a

@@ -20,6 +20,16 @@
   Tipos/build e32 testes aprovados; QA207 checks nos tres temas e cinco larguras.
   Lint com exclusao de artefatos locais passou; CI integral/publicacao pendentes.
 
+- Rechecagem11:20: carga11:02:59.121 e UI coincidem916/68/51/128/13;
+  tres novas oportunidades Direcional. Brutos nao localizados; prova limitada
+  a artefato/UI. Usuario reabriu aba e quatro filtros fecharam por clique
+  externo sem crash nessa rodada, ainda na versao antiga d919751a.
+  CI39135151478 passou lint/tipos/testes Linux, falhou fonteITBI HTTP403;
+  repeticao solicitada sem bypass. Deploy permanece bloqueado ate CI completa.
+  Regressao inicial240s excedeu limite global; separar cenarios preservando
+  assercoes, nao registrar teste incompleto como aprovado. Reavaliar com
+  resultado por caso e CI do head atualizado. Fonte: PR255 e auditoria citada.
+
 ## 2026-10-18: Resumo geral publicado
 
 - PR254 integrado em d919751a51772dd0c57a582b9581e61412642ced.
