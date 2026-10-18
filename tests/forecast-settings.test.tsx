@@ -143,11 +143,18 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
 
     it("edits shape and values, saves with CAS and restores shared data on reload", async () => {
       await open();
+      await page.setViewportSize({ width: 390, height: 844 });
+      const tableRegion = page.getByRole("region", { name: "Tabela de previsão", exact: true });
+      expect(
+        await tableRegion.evaluate((element) => element.scrollWidth <= element.clientWidth),
+      ).toBe(true);
       await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
       await browserExpect(
         page.getByLabel("Nome do corretor, linha 1", { exact: true }),
       ).toBeFocused();
       await page.getByLabel("Nome do corretor, linha 1", { exact: true }).fill("Corretor QA");
+      await mkdir("test-results/forecast-preview", { recursive: true });
+      await page.screenshot({ path: "test-results/forecast-preview/previsao-editavel-390.png" });
       await page.getByLabel("Previsão, linha 1", { exact: true }).fill("12");
       await page.getByLabel("Nome da equipe", { exact: true }).fill("Equipe QA");
       await page.getByRole("button", { name: "Inserir coluna", exact: true }).click();
@@ -254,6 +261,11 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         );
         for (const width of [1440, 390, 320]) {
           await page.setViewportSize({ width, height: 900 });
+          expect(
+            await page
+              .getByRole("region", { name: "Tabela de previsão", exact: true })
+              .evaluate((element) => element.scrollWidth <= element.clientWidth),
+          ).toBe(true);
           await mkdir("test-results/forecast-preview", { recursive: true });
           await page.screenshot({
             path: `test-results/forecast-preview/previsao-${theme}-${width}.png`,
