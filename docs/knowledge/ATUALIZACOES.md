@@ -857,3 +857,12 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
   login. Edicao validada na CI/sintetico, sem gravacao com conta real de producao.
   Evidencias e limites em docs/audits/previsao-2026-10-17.md. Registro documental
   posterior nao exige reinicio do aplicativo nem reaplicacao das migrations.
+
+## 2026-10-17: Finalizacao do PR documental251
+
+- Retomada em2026-10-18T01:05Z (17/10 America/Sao_Paulo). GitHub confirmou
+  CI39081939465 aprovada no head d703d412, mas PR251 conflitante apos PR252
+  documental integrar main36f3c317. CI main39084939569 ainda em andamento.
+- GET publico api/health200/ok/840f0908, mesma versao publicada. Escopo desta
+  retomada: preservar ambos os registros, repetir CI no head integrado e fazer
+  merge somente apos aprovacao. Sem nova publicacao de runtime ou migration.
