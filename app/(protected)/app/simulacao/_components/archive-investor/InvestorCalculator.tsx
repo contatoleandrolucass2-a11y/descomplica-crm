@@ -739,6 +739,10 @@ function informationLabel(value?: string | null) {
   return value?.trim() || "Não informado";
 }
 
+function parkingSpacesLabel(value: number | null | undefined) {
+  return `VAGA: ${typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : "Não informada"}`;
+}
+
 const InvestorStockRow = memo(function InvestorStockRow({ item, selected, rowIndex }: { item: InventoryItem; selected: boolean; rowIndex: number }) {
   const canSelect = Boolean(item.finalPrice && item.completionDate);
   const unavailableReason = [
@@ -2354,7 +2358,7 @@ export function InvestorLearningManual({ directTable = false, associative = fals
   </section>;
 }
 
-function PropertySummary({ item, label, associative = false, sectionRef }: { item: InventoryItem; label: string; associative?: boolean; sectionRef?: Ref<HTMLElement> }) {
+function PropertySummary({ item, label, associative = false, showParking = false, sectionRef }: { item: InventoryItem; label: string; associative?: boolean; showParking?: boolean; sectionRef?: Ref<HTMLElement> }) {
   return <article ref={sectionRef} tabIndex={sectionRef ? -1 : undefined} className={`investor-selected-unit investor-property-summary${associative ? " is-associative" : ""}${sectionRef ? " investor-guided-scroll-target" : ""}`} aria-label={label} data-tour="property-summary" data-associative-motion-group={associative ? "property" : undefined}>
     <header>
       <div className="investor-unit-identity">
@@ -2365,6 +2369,7 @@ function PropertySummary({ item, label, associative = false, sectionRef }: { ite
           <strong>{compactProductDescription(item.product, item.project)}</strong>
           <span aria-hidden="true">|</span>
           <strong>{propertyAddress(item)}</strong>
+          {showParking ? <><span aria-hidden="true">|</span><strong>{parkingSpacesLabel(item.parkingSpaces)}</strong></> : null}
         </p>
       </div>
       <div className="investor-unit-price">
@@ -4189,7 +4194,7 @@ export function InvestorCalculator({
                 >
                   <td className="investor-stock-start-cell" data-label="Início"><button type="button" className="investor-stock-unit-button" disabled={!canSelect} aria-pressed={selected} onClick={(event) => { event.stopPropagation(); selectUnit(item); }} aria-label={canSelect ? `Iniciar proposta com ${item.identifier ?? item.product}` : `${item.identifier ?? item.product} ${unavailableReason}`}><span aria-hidden="true">{selected ? "✓" : "›"}</span></button></td>
                   <td data-label="Incorporadora">{item.businessUnit}</td>
-                  <td className="investor-stock-product" data-label="Produto"><span className="investor-stock-product-text">{item.product}</span></td>
+                  <td className="investor-stock-product" data-label="Produto">{annualMode ? <div className="investor-stock-product-with-parking"><span className="investor-stock-product-text" title={item.product}>{item.product}</span><span className="investor-stock-parking">{parkingSpacesLabel(item.parkingSpaces)}</span></div> : <span className="investor-stock-product-text">{item.product}</span>}</td>
                   <td data-label="Metragem">{item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "—"}</td>
                   <td data-label={annualMode ? "Data de término da obra" : "Data de Entrega"}>{formatDate(item.completionDate)}</td>
                   <td className="investor-stock-plant" data-label="Planta">{informationLabel(item.plant)}</td>
@@ -4206,7 +4211,7 @@ export function InvestorCalculator({
 
       </section>
 
-      {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
+      {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} showParking={annualMode} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
       {selectedUnit && annualMode && (associativeReportedProgress === null || !(selectedUnit.appraisal > 0)) ? <section className="investor-associative-unit-facts" aria-labelledby="investor-unit-facts-title">
         <div><h3 id="investor-unit-facts-title">Dados oficiais da unidade</h3><p>Há dados ausentes no estoque. Valores informados aqui valem somente para esta unidade nesta simulação.</p></div>
         {associativeReportedProgress === null ? <div className="investor-associative-unit-fact">
