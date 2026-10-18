@@ -841,3 +841,53 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
   andamento. Integracao preservou dashboard e Previsao; conflitos restritos aos
   prefixos de WORKLOG/CHANGELOG, conservando ambos os registros. Matriz RLS e
   menu corrigidos passaram42 testes focais. Nova CI integrada necessaria.
+
+## 2026-10-17: Previsao integrada e CI final aprovada
+
+- PR247 integrado em47f5d449ccc0ac5f2f4bf8c948a5736979f2daea apos CI39037358734
+  aprovar validate, restore e release-gates, incluindo navegador autenticado e
+  matriz visual. CI main39040316212 aprovou os quatro jobs, inclusive imagem.
+- Retomada em2026-10-17T19:11Z apos pausa do host: fetch confirmou main ainda
+  47f5d449; GitHub confirmou CI concluida/success. GET observacional api/health
+  HTTP200/ok/eff7f729c4386af14af16902fe4c761027df597a. A entrega esta integrada,
+  mas a versao publicada ainda e anterior. Migration ainda nao aplicada.
+- Preflight MCP14:32Z: somente nova pagina/permissao e dois grants Master/Admin;
+  conteudo e acesso das27 paginas existentes preservados. Trigger renova apenas
+  updated_at no snapshot. Backup privado14:01Z com checksum
+  522f2c436a99093fe5164fee474d4bdee6a0037c4e8f9857da528865de0b9a81.
+  Revalidar hashes e ausencia dos objetos antes da aplicacao autorizada.
+- Nova retomada em2026-10-18T00:06Z (17/10 America/Sao_Paulo): main840f0908
+  recebeu PR250, somente timeout da CI e documentos, sem mudanca de runtime.
+  CI39061398333 concluida/success; candidato atualizado para esse SHA exato.
+  Ledger ainda eff7f729/deployment6a8e7f60-2847-4e32-8be3-9c6e1d23ed39,
+  deployedAt2026-10-17T04:49:20.557Z, sem pendencia. Primeira transferencia
+  perdeu conexao SSH, mas arquivo47f5d449 chegou integro; nenhum deploy ocorreu.
+  Artefato840f0908 baixado separadamente e checksum aprovado; prova OCI em curso.
+
+## 2026-10-17: Previsao publicada e verificada
+
+- Publicacao em2026-10-18T00:10:01.373Z (17/10,21:10 America/Sao_Paulo),
+  SHA840f0908, CI39061398333 integralmente aprovada, deployment
+  fc04ef76-1350-4298-8692-aed95b1bb2f8. Coordenador unico confirmou deploy e
+  ausencia de pendencia; imagem imutavel com prova OCI e dois perfis aprovada.
+- Migrations MCP autorizadas: crm_forecasts/20261018000941 e
+  sync_page_catalog_forecast/20261018001010. Storage antes da promocao,
+  catalogo depois do runtime compativel. RLS forcada/ACL sem acesso direto,
+  tabela sem fixtures. Pagina ativa com grants somente Master/Admin.
+- Backup final00:09Z preservou8 overrides, incluindo dois criados externamente
+  durante a espera. Conferencia posterior confirmou hashes antigos de permissoes,
+  grants e overrides iguais;27 paginas antigas preservadas salvo updated_at
+  tecnico. Totais28 paginas/39 permissoes/148 grants/8 overrides.
+- Health publico apos catalogo200/ok/840f0908; API anonima401 e pagina307 para
+  login. Edicao validada na CI/sintetico, sem gravacao com conta real de producao.
+  Evidencias e limites em docs/audits/previsao-2026-10-17.md. Registro documental
+  posterior nao exige reinicio do aplicativo nem reaplicacao das migrations.
+
+## 2026-10-17: Finalizacao do PR documental251
+
+- Retomada em2026-10-18T01:05Z (17/10 America/Sao_Paulo). GitHub confirmou
+  CI39081939465 aprovada no head d703d412, mas PR251 conflitante apos PR252
+  documental integrar main36f3c317. CI main39084939569 ainda em andamento.
+- GET publico api/health200/ok/840f0908, mesma versao publicada. Escopo desta
+  retomada: preservar ambos os registros, repetir CI no head integrado e fazer
+  merge somente apos aprovacao. Sem nova publicacao de runtime ou migration.

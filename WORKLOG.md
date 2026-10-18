@@ -7575,3 +7575,13 @@ O usuário autorizou a migration aditiva de armazenamento e catálogo após
 validação. Não há migração de dados de clientes nem integração com n8n.
 As verificações globais, pgTAP, fluxo de navegador e publicação seguem os gates
 existentes. Resultados efetivos e limites serão registrados em ATUALIZACOES.
+
+## 2026-10-17: Publicação da Previsão
+
+PR247 integrado e validado; publicação no SHA840f0908, que inclui o ajuste
+posterior de tempo da CI do PR250. CI39061398333 aprovou os quatro jobs.
+Migrations autorizadas aplicadas pelo MCP, com backup e preservação de acessos.
+Coordenador publicou às21:10:01 de17/10 (America/Sao_Paulo), sem pendência.
+Health200/ok, API anônima401; tabela vazia, página ativa para Master/Admin.
+Prova da imagem, versões remotas, testes e limites estão em
+docs/audits/previsao-2026-10-17.md. Nenhuma fixture foi inserida em produção.
