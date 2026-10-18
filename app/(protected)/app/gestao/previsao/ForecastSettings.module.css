@@ -1,7 +1,6 @@
 .page {
   min-width: 0;
   color: var(--analytics-ink);
-  background: var(--analytics-page);
   font-family: var(--font-geist-sans), Arial, sans-serif;
   font-size: 14px;
   line-height: 1.5;
