@@ -7595,3 +7595,9 @@ docs/audits/previsao-2026-10-17.md. Nenhuma fixture foi inserida em produção.
 - Reutilizado o canvas visual de /app para a Previsão, com cores dos três temas, cabeçalho compacto, tabela fluida e Salvar destacado.
 - Mantidos API, permissões e salvamento compartilhado; nenhuma migration nova. A tabela padrão cabe em celular, e colunas extras usam rolagem interna.
 - Validação em andamento: navegador sintético, lint, tipos, testes e build. CI de main anterior falhou no gate externo de fontes documentais; não é evidência de regressão deste ajuste.
+
+### Encerramento da atualização visual da Previsão
+
+- PR253 integrado em f8ad7bbf com CI39092735520 aprovada. CI de main39095660275 aprovou os quatro jobs, incluindo imagem e matriz visual.
+- Publicado pelo coordenador em2026-10-18T04:51:47.145Z; deployment c4d5dc22-ad9d-4fa4-a5aa-d20184a5339c. Health200/ok/f8ad7bbf, imagem comprovada e healthy, sem pendência; acesso anônimo página307/API401.
+- Lint, tipos e build locais aprovados; cinco testes de navegador e três temas aprovados. Suíte geral local teve timeouts de infraestrutura; último timeout passou isoladamente. A suíte completa foi aprovada no Linux da CI. Sem alterações de banco ou fixtures em produção.

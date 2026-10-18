@@ -2866,3 +2866,5 @@ pendente dos gates completos no SHA final.
 
 - Página Previsão alinhada ao dashboard nos três temas, com tabela inicial adaptada ao celular e botão Salvar preservado.
 - Edição manual de linhas, colunas, cabeçalhos e valores mantém o salvamento compartilhado existente.
+
+- Publicação da atualização visual da Previsão confirmada em18/10/2026,01:51 America/Sao_Paulo, versão f8ad7bbf. PR253 e CI completa aprovados; tabela editável, controles de linhas/colunas e Salvar preservados.
