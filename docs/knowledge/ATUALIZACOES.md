@@ -36,6 +36,10 @@
   Corrigido seletor e ampliada verificacao autenticada de clique externo.
   Nenhum bypass: matriz visual/publicacao aguardam nova CI. Causa nativa
   STATUS_BREAKPOINT segue desconhecida; aprovacoes nao comprovam essa causa.
+- CI39138212029 aprovou E2E e parou em dashboard-auto-refresh por seletor
+  details/summary antigo. Helper atualizado para botao/grupo, preservando
+  selecao, scroll e refresh RSC. Nao relaxar timeout nem ignorar a etapa.
+  Revalidar matriz inteira no novo head antes de integrar ou publicar.
 
 ## 2026-10-18: Resumo geral publicado
 

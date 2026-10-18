@@ -20,6 +20,9 @@ Os quatro casos separados passaram. CI39136199536 passou dashboard/banco/
 restore, mas encontrou seletor summary obsoleto no E2E autenticado; atualizado
 para botoes acessiveis com verificacao de abertura/fechamento de cada filtro.
 Matriz visual final e publicacao continuam condicionadas a nova CI completa.
+CI39138212029 aprovou E2E; helper de auto-refresh ainda usava details/summary
+do filtro. Atualizado para botao/grupo sem remover provas de selecao, scroll
+e refresh RSC. Disclosure nativo das conversoes permanece intocado.
 
 ## 2026-10-18: Resumo geral em producao
 

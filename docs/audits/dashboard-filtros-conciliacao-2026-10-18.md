@@ -97,3 +97,8 @@ comparecimento e vendas data da venda. Pastas aprovadas continuam indisponiveis.
   Atualizado seletor e acrescentada abertura/fechamento externo dos quatro
   filtros no navegador autenticado. Nenhuma assercao comercial removida.
   Matriz visual completa nao executou nessa tentativa; nova CI obrigatoria.
+- CI39138212029 aprovou tambem E2E autenticado. Matriz parou no helper
+  dashboard-auto-refresh.mjs, que ainda usava details/summary para o filtro.
+  Migrado para botao/grupo, conferindo aria-expanded e visibilidade antes e
+  depois do refresh RSC. Preservadas selecao oculta, scroll, unica requisicao
+  concorrente e details nativo das conversoes, que nao mudou no produto.

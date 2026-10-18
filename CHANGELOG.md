@@ -4,6 +4,7 @@
   sem details/fieldset nativos; preserva selecoes, periodos e os dois canais.
 - QA: cenarios de filtros separados por dispositivo/transicao e E2E autenticado
   verifica botoes acessiveis e fechamento externo dos quatro filtros.
+- QA de refresh automatico preserva selecao oculta e scroll com os filtros React.
 
 - QA do resumo geral: referencias visuais revisadas do dashboard nos tres
   temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
