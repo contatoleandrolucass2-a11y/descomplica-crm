@@ -91,8 +91,7 @@ describe("complete visual composition on the scoped v3 read model", () => {
     const partnerships = source("app/(protected)/app/canal-de-parcerias/RankingDashboard.tsx");
 
     for (const label of [
-      "Relatório completo da equipe.",
-      "Conversão por etapa",
+      "Dashboard | Resumo Geral",
       "Funis comerciais",
       "Períodos do mês",
       "Histórico e média por venda",
@@ -102,6 +101,12 @@ describe("complete visual composition on the scoped v3 read model", () => {
     }
     expect(dashboard).not.toContain("Realizado e meta lado a lado");
     for (const removed of [
+      "DashboardPulse",
+      "ConversionDonut",
+      "report-pulse-title",
+      "Conversão por etapa",
+      "Ritmo de vendas",
+      "Parecer de ritmo",
       "Realizado Funil",
       "Eficiência do funil",
       "Corretores por gerente",

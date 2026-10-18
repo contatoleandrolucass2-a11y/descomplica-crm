@@ -1,5 +1,10 @@
 # Changelog
 
+- QA do resumo geral: referencias visuais revisadas do dashboard nos tres
+  temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
+
+- Dashboard | Resumo Geral: cabecalho compacto, funis com quantidades inteiras
+  arredondadas para baixo e remocao de Pulso do funil, Ritmo de vendas e reset.
 - Integra o registro documental da Previsão pelo PR251, após CI completa aprovada.
 
 - Dashboard: grupos3/5/5 publicados e conferidos em desktop/celular nos temas

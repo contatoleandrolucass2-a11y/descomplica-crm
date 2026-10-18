@@ -7,7 +7,6 @@ import {
 import type { DashboardReadModel } from "@/lib/crm/dashboard/data";
 import {
   buildMonthlyFunnelSnapshots,
-  buildPeriodFunnelReadings,
   calculateConversion,
   type FunnelReading,
 } from "@/lib/crm/dashboard/presentation";
@@ -20,7 +19,6 @@ import { buildDashboardManagementGoals } from "@/lib/crm/dashboard/management-go
 
 import { SalesforceRefreshButton } from "./SalesforceRefreshButton";
 import { DashboardAutoRefresh } from "./DashboardAutoRefresh";
-import { DashboardPulse } from "./DashboardPulse";
 import { DashboardFilters } from "./DashboardFilters";
 import { DashboardMonthlyHistory } from "./DashboardMonthlyHistory";
 import { AnalyticsCard, AnalyticsCanvas, SectionHeading } from "./analytics/DataDisplay";
@@ -43,7 +41,7 @@ export interface DashboardReportProps {
   today?: string;
 }
 
-const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const percentFormatter = new Intl.NumberFormat("pt-BR", {
   style: "percent",
   maximumFractionDigits: 1,
@@ -79,7 +77,11 @@ function emptyReadings(): FunnelReading[] {
 }
 
 function numberValue(value: number | null, reason = "Dados indisponíveis para este intervalo.") {
-  return value === null ? <UnavailableValue reason={reason} /> : numberFormatter.format(value);
+  return value === null ? (
+    <UnavailableValue reason={reason} />
+  ) : (
+    numberFormatter.format(Math.floor(value))
+  );
 }
 
 function ratioValue(value: number | null) {
@@ -146,7 +148,9 @@ function MonthlyFunnel({ label, readings }: { label: string; readings: FunnelRea
             <dt>{entry.label}</dt>
             <dd
               data-unavailable={entry.value === null}
-              data-long={entry.value !== null && numberFormatter.format(entry.value).length > 7}
+              data-long={
+                entry.value !== null && numberFormatter.format(Math.floor(entry.value)).length > 7
+              }
             >
               {numberValue(
                 entry.value,
@@ -209,7 +213,6 @@ function FunnelCard({
 export function DashboardReport({
   dashboard,
   selectedView,
-  selectedPeriod,
   canRefresh,
   analysis = null,
   filters = emptyDashboardFilters(),
@@ -217,10 +220,8 @@ export function DashboardReport({
 }: DashboardReportProps) {
   const staleMonth =
     !!today && !!dashboard && today.slice(0, 7) !== dashboard.referenceDate.slice(0, 7);
-  const staleDay = !!today && !!dashboard && today !== dashboard.referenceDate;
   const sourceMetrics = dashboard?.metrics[selectedView] ?? null;
   const metrics = staleMonth ? null : sourceMetrics;
-  const readings = metrics ? buildPeriodFunnelReadings(metrics, selectedPeriod) : emptyReadings();
   const managementGoals = dashboard
     ? buildDashboardManagementGoals({
         referenceDate: today ?? dashboard.referenceDate,
@@ -279,7 +280,7 @@ export function DashboardReport({
       <div className={styles.report} data-dashboard-source={dashboard?.source}>
         <div className={styles.heading}>
           <div>
-            <h1>Relatório completo da equipe.</h1>
+            <h1>Dashboard | Resumo Geral</h1>
           </div>
           <dl className={styles.metadata}>
             <div>
@@ -309,16 +310,6 @@ export function DashboardReport({
               : "Dados indisponíveis para esta visão."}
           </p>
         ) : null}
-
-        <section className={styles.section} aria-labelledby="report-pulse-title">
-          <SectionHeading
-            id="report-pulse-title"
-            kicker="Pulso do funil"
-            title="Conversão por etapa"
-            density="compact"
-          />
-          <DashboardPulse readings={readings} goals={goals} />
-        </section>
 
         <section className={styles.section} aria-labelledby="report-monthly-title">
           <SectionHeading id="report-monthly-title" title="Funis comerciais" density="compact" />
@@ -393,36 +384,6 @@ export function DashboardReport({
               ))}
             </div>
           </section>
-          <div className={styles.pace}>
-            <div>
-              <h3>Ritmo de vendas</h3>
-              <p>Realizado frente ao esperado no mês</p>
-            </div>
-            <dl className={styles.paceValues}>
-              <div>
-                <dt>Vendas realizadas</dt>
-                <dd>{numberValue(metrics?.sales.currentMonth ?? null)}</dd>
-              </div>
-              <div>
-                <dt>Esperado até hoje</dt>
-                <dd>
-                  {numberValue(expected?.sales ?? null, "Quantidade de corretores indisponível.")}
-                </dd>
-              </div>
-              <div>
-                <dt>Parecer de ritmo</dt>
-                <dd>
-                  {staleDay || expected?.sales == null || metrics?.sales.currentMonth == null ? (
-                    <UnavailableValue reason="Depende do esperado e realizado até hoje." />
-                  ) : metrics.sales.currentMonth >= expected.sales ? (
-                    "Dentro do esperado"
-                  ) : (
-                    "Abaixo do esperado"
-                  )}
-                </dd>
-              </div>
-            </dl>
-          </div>
         </section>
       </div>
     </AnalyticsCanvas>

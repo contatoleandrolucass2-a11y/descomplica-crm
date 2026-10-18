@@ -1342,9 +1342,8 @@ async function inspectRoute(
             )),
         dashboardReportReady:
           window.location.pathname !== "/app" ||
-          (["pulse", "monthly"].every((section) =>
-            document.querySelector(`#report-${section}-title`),
-          ) &&
+          (document.querySelector("main h1")?.textContent.trim() === "Dashboard | Resumo Geral" &&
+            ["monthly"].every((section) => document.querySelector(`#report-${section}-title`)) &&
             [
               ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
               ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
@@ -1366,10 +1365,17 @@ async function inspectRoute(
               );
             }) &&
             !document.querySelector(
-              "#report-operational-title, #report-diagnosis-title, #report-team-title",
+              "#report-pulse-title, #report-operational-title, #report-diagnosis-title, #report-team-title",
             ) &&
-            document.querySelectorAll('[aria-labelledby="report-pulse-title"] figure').length ===
-              5 &&
+            !/Conversão por etapa|Ritmo de vendas|Parecer de ritmo/.test(text) &&
+            document.querySelectorAll("[data-dashboard-source] figure circle").length === 0 &&
+            [
+              ...document.querySelectorAll(
+                '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"] dd',
+              ),
+            ].every((value) =>
+              /^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/.test(value.textContent.trim()),
+            ) &&
             document.querySelectorAll('[aria-labelledby="report-monthly-title"] details').length ===
               13 &&
             document.querySelectorAll('[aria-labelledby="report-monthly-title"] figure').length ===

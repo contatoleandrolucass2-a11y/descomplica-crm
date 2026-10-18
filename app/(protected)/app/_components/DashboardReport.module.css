@@ -22,7 +22,7 @@
 }
 
 .report h1 {
-  font-size: 1.75rem;
+  font-size: 1.375rem;
   line-height: 1.25;
   font-weight: 650;
 }
@@ -38,8 +38,8 @@
   flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
-  gap: 1rem 2rem;
-  padding-bottom: 1.25rem;
+  gap: 0.5rem 1rem;
+  padding-bottom: 0.5rem;
 }
 
 .heading > div,
@@ -64,6 +64,12 @@
 .metadata {
   max-width: 32rem;
   font-size: 0.8125rem;
+}
+
+.metadata > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
 }
 
 .metadata dt,
@@ -118,8 +124,8 @@
 
 .filters {
   display: grid;
-  gap: 1rem;
-  padding-block: 1.25rem;
+  gap: 0.625rem;
+  padding-block: 0.5rem 0.875rem;
   border-bottom: 1px solid var(--analytics-line);
 }
 
@@ -583,7 +589,7 @@
 
 @media (max-width: 48rem) {
   .report h1 {
-    font-size: 1.5rem;
+    font-size: 1.25rem;
   }
 
   .monthlyGrid,
