@@ -17,6 +17,7 @@ import {
 } from "@/app/(protected)/_components/ManagementCanvas";
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { hasPermission } from "@/lib/authorization/guards";
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import styles from "./ConfigurationCanvas.module.css";
 
@@ -98,6 +99,8 @@ function SettingsCard({ setting, canManage }: { setting: Setting; canManage: boo
 export default async function SettingsPage() {
   const context = await enforcePermission("crm.settings.view");
   const canManage = hasPermission(context, "crm.settings.manage");
+  const pages = await getAuthorizedNavigation(context);
+  const canOpen = (path: string) => pages.some((page) => page.path === path);
 
   return (
     <ManagementPage className={styles.canvas ?? ""}>
@@ -174,7 +177,7 @@ export default async function SettingsPage() {
         </div>
         <div className="grid gap-3 lg:grid-cols-3">
           {SETTINGS.map((setting) =>
-            canManage ? (
+            canOpen(setting.href) ? (
               <Link
                 key={setting.href}
                 href={setting.href}
@@ -192,7 +195,7 @@ export default async function SettingsPage() {
       </section>
 
       <section aria-label="Recurso de marketing">
-        {canManage ? (
+        {canOpen("/app/configuracoes/recurso-mkt") ? (
           <Link
             href="/app/configuracoes/recurso-mkt"
             prefetch={false}

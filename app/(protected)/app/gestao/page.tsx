@@ -8,8 +8,9 @@ import {
   ManagementStatusBadge,
   managementStyles,
 } from "@/app/(protected)/_components/ManagementCanvas";
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import styles from "../configuracoes/ConfigurationCanvas.module.css";
 import routineStyles from "./rotina/RoutineSettings.module.css";
@@ -17,9 +18,15 @@ import routineStyles from "./rotina/RoutineSettings.module.css";
 export const metadata = { title: "Gestão" };
 
 export default async function ManagementHubPage() {
-  await enforcePermission("crm.dashboard.view");
+  const context = await enforcePageAccess("/app/gestao");
   if (!getProtectedPageGate("/app/gestao")?.releaseEnabled) forbidden();
-  const routineReleased = getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true;
+  const pages = await getAuthorizedNavigation(context);
+  const routineReleased =
+    getProtectedPageGate("/app/gestao/rotina")?.releaseEnabled === true &&
+    pages.some((page) => page.path === "/app/gestao/rotina");
+  const forecastReleased =
+    getProtectedPageGate("/app/gestao/previsao")?.releaseEnabled === true &&
+    pages.some((page) => page.path === "/app/gestao/previsao");
   const routineCard = (
     <article
       className={`${styles.settingsCard} ${managementStyles.panel} h-full p-4 ${routineReleased ? "group-hover:border-cyan-500 group-focus-visible:border-cyan-500" : "opacity-70"}`}
@@ -57,7 +64,7 @@ export default async function ManagementHubPage() {
       <ManagementPageHeader
         eyebrow="Gestão"
         title="Gestão"
-        description="Rotinas comerciais"
+        description="Rotinas e previsão comercial"
         status={
           <ManagementStatusBadge tone={routineReleased ? "positive" : "warning"}>
             {routineReleased ? "Rotina liberada" : "Rotina indisponível"}
@@ -86,6 +93,27 @@ export default async function ManagementHubPage() {
           ) : (
             <div aria-disabled="true">{routineCard}</div>
           )}
+          {forecastReleased ? (
+            <Link
+              href="/app/gestao/previsao"
+              aria-label="Previsão"
+              prefetch={false}
+              className="group block rounded-lg no-underline focus-visible:outline-offset-4"
+            >
+              <article
+                className={`${styles.settingsCard} ${managementStyles.panel} h-full p-4 group-hover:border-cyan-500 group-focus-visible:border-cyan-500`}
+              >
+                <h3 className="text-xl font-semibold text-[var(--analytics-ink)]">Previsão</h3>
+                <p className="mt-2 text-sm leading-6 text-[var(--analytics-muted)]">
+                  Previsão e realizado do time. Edite linhas e colunas e salve no CRM.
+                </p>
+                <div className="mt-4 flex items-center justify-between border-t border-[var(--analytics-line)] pt-4 text-sm text-[var(--analytics-muted)]">
+                  <span>Tabela compartilhada</span>
+                  <ArrowRight size={17} aria-hidden="true" />
+                </div>
+              </article>
+            </Link>
+          ) : null}
         </div>
       </section>
     </ManagementPage>

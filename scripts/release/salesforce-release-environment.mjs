@@ -20,6 +20,26 @@ const keys = Object.freeze([
   "SALESFORCE_REFRESH_ENABLED",
 ]);
 const qlikKeys = Object.freeze(["QLIK_RANKING_V2_ENABLED", "QLIK_RANKING_V2_HMAC_SECRET"]);
+const metaAdsKeys = Object.freeze([
+  "META_ADS_STATUS_ENABLED",
+  "META_ADS_STATUS_SECRET",
+  "META_ADS_CONSOLE_ENABLED",
+  "META_ADS_CONSOLE_PASSWORD",
+]);
+const metaAdsSecretKeys = ["META_ADS_STATUS_SECRET", "META_ADS_CONSOLE_PASSWORD"];
+
+function validateMetaAdsSecrets(secrets) {
+  exactKeys(secrets, metaAdsSecretKeys);
+  if (
+    typeof secrets.META_ADS_STATUS_SECRET !== "string" ||
+    secrets.META_ADS_STATUS_SECRET.length < 32 ||
+    secrets.META_ADS_STATUS_SECRET.length > 256 ||
+    !/^[A-Za-z0-9._~+/-]+={0,2}$/u.test(secrets.META_ADS_STATUS_SECRET) ||
+    typeof secrets.META_ADS_CONSOLE_PASSWORD !== "string" ||
+    !/^[A-Za-z0-9._~+/-]{8}$/u.test(secrets.META_ADS_CONSOLE_PASSWORD)
+  )
+    fail("Meta Ads release secrets are invalid.");
+}
 
 function fail(message) {
   throw new Error(message);
@@ -225,6 +245,66 @@ export function transformQlikReleaseEnvironment(contents, expectedSha, targetSha
   return after;
 }
 
+export function metaAdsEnvironmentValues(contents) {
+  const entries = assignments(contents);
+  return Object.fromEntries(
+    metaAdsKeys.map((key) => {
+      const value = entries.has(key) ? literal(entries.get(key)) : "";
+      return [key, value || (key.endsWith("_ENABLED") ? "false" : "")];
+    }),
+  );
+}
+
+export function transformMetaAdsReleaseEnvironment(contents, expectedSha, targetSha, secrets) {
+  if (
+    typeof expectedSha !== "string" ||
+    typeof targetSha !== "string" ||
+    !sha.test(expectedSha) ||
+    !sha.test(targetSha) ||
+    expectedSha === targetSha ||
+    imageSha(contents) !== expectedSha
+  )
+    fail("Meta Ads configuration requires distinct exact release SHAs.");
+  validateMetaAdsSecrets(secrets);
+  const entries = assignments(contents);
+  for (const key of [
+    "SUPABASE_SECRET_KEY",
+    "SALESFORCE_INGEST_SECRET",
+    "SALESFORCE_STATUS_SECRET",
+    "SALESFORCE_REFRESH_SECRET",
+    "SALESFORCE_CONSOLE_PASSWORD",
+    "QLIK_RELAY_HMAC_SECRET",
+    "QLIK_RANKING_V2_HMAC_SECRET",
+  ]) {
+    if (entries.has(key) && Object.values(secrets).includes(literal(entries.get(key))))
+      fail("Meta Ads requires credentials separate from existing integrations.");
+  }
+  // Validate rollback literals before preparing any new configuration.
+  metaAdsEnvironmentValues(contents);
+  const replacements = {
+    IMAGE_TAG: targetSha,
+    META_ADS_STATUS_ENABLED: "true",
+    META_ADS_STATUS_SECRET: secrets.META_ADS_STATUS_SECRET,
+    META_ADS_CONSOLE_ENABLED: "true",
+    META_ADS_CONSOLE_PASSWORD: secrets.META_ADS_CONSOLE_PASSWORD,
+  };
+  let after = contents;
+  for (const edit of Object.entries(replacements)
+    .filter(([key]) => entries.has(key))
+    .map(([key, value]) => ({ ...entries.get(key), replacement: `${key}=${value}` }))
+    .sort((a, b) => b.offset - a.offset)) {
+    after = after.slice(0, edit.offset) + edit.replacement + after.slice(edit.offset + edit.length);
+  }
+  const newline = contents.includes("\r\n") ? "\r\n" : "\n";
+  for (const [key, value] of Object.entries(replacements)) {
+    if (entries.has(key)) continue;
+    if (after && !after.endsWith("\n")) after += newline;
+    after += `${key}=${value}${newline}`;
+  }
+  assignments(after);
+  return after;
+}
+
 function descriptor(backup) {
   return {
     backupId: backup.backupId,
@@ -246,7 +326,8 @@ function validateBackup(backup, change) {
   ]);
   if (
     ![1, 2].includes(backup.schemaVersion) ||
-    (backup.schemaVersion === 2 && backup.kind !== "qlik-ranking-v2") ||
+    (backup.schemaVersion === 2 &&
+      !["qlik-ranking-v2", "meta-ads-session"].includes(backup.kind)) ||
     backup.backupId !== change.backupId ||
     backup.beforeSha256 !== change.beforeSha256 ||
     backup.afterSha256 !== change.afterSha256 ||
@@ -256,6 +337,19 @@ function validateBackup(backup, change) {
     environmentSha256(backup.after) !== change.afterSha256
   )
     fail("Environment backup does not match its descriptor or digests.");
+  if (backup.kind === "meta-ads-session") {
+    const values = metaAdsEnvironmentValues(backup.after);
+    if (
+      transformMetaAdsReleaseEnvironment(
+        backup.before,
+        imageSha(backup.before),
+        imageSha(backup.after),
+        Object.fromEntries(metaAdsSecretKeys.map((key) => [key, values[key]])),
+      ) !== backup.after
+    )
+      fail("Meta Ads backup contains an unrelated transformation.");
+    return backup;
+  }
   if (backup.schemaVersion === 2) {
     const secret = qlikEnvironmentValues(backup.after).QLIK_RANKING_V2_HMAC_SECRET;
     if (
@@ -330,6 +424,15 @@ export function assertQlikContainerDigests(contents, digests) {
   const expected = qlikEnvironmentValues(contents);
   if (qlikKeys.some((key) => digests[key] !== environmentSha256(expected[key])))
     fail("Effective Qlik configuration differs from its recorded environment.");
+}
+
+export const metaAdsContainerDigestScript = `const {createHash}=require('node:crypto');const keys=${JSON.stringify(metaAdsKeys)};process.stdout.write(JSON.stringify(Object.fromEntries(keys.map(key=>[key,createHash('sha256').update(process.env[key]??(key.endsWith('_ENABLED')?'false':''),'utf8').digest('hex')]))));`;
+
+export function assertMetaAdsContainerDigests(contents, digests) {
+  exactKeys(digests, metaAdsKeys);
+  const expected = metaAdsEnvironmentValues(contents);
+  if (metaAdsKeys.some((key) => digests[key] !== environmentSha256(expected[key])))
+    fail("Effective Meta Ads configuration differs from its recorded environment.");
 }
 
 export async function readBoundedEnvironmentText(handle, maximum) {
@@ -416,6 +519,23 @@ export async function readQlikReleaseSecret() {
   return value;
 }
 
+export async function readMetaAdsReleaseSecrets() {
+  await validatePrivateDirectory(path.dirname(secretDirectory));
+  await validatePrivateDirectory(secretDirectory);
+  const secrets = {};
+  for (const [key, name, maximum] of [
+    ["META_ADS_STATUS_SECRET", "meta-ads-status-bearer", 258],
+    ["META_ADS_CONSOLE_PASSWORD", "meta-ads-console-password", 10],
+  ]) {
+    secrets[key] = (await readPrivateText(path.join(secretDirectory, name), maximum)).replace(
+      /\r?\n$/u,
+      "",
+    );
+  }
+  validateMetaAdsSecrets(secrets);
+  return secrets;
+}
+
 // The optional path/owner are for isolated POSIX fixtures. Production uses only defaults.
 export function salesforceEnvironmentBackupStore(directory = backupDirectory, owner = 0) {
   async function validateDirectory(create = false) {
@@ -459,10 +579,11 @@ export function salesforceEnvironmentBackupStore(directory = backupDirectory, ow
   }
 
   async function create(backupId, before, after, kind = "salesforce") {
-    if (!["salesforce", "qlik-ranking-v2"].includes(kind)) fail("Unknown environment change.");
+    if (!["salesforce", "qlik-ranking-v2", "meta-ads-session"].includes(kind))
+      fail("Unknown environment change.");
     const backup = {
       schemaVersion: kind === "salesforce" ? 1 : 2,
-      ...(kind === "qlik-ranking-v2" ? { kind } : {}),
+      ...(kind !== "salesforce" ? { kind } : {}),
       backupId,
       beforeSha256: environmentSha256(before),
       afterSha256: environmentSha256(after),

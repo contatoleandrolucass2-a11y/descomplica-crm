@@ -2,7 +2,7 @@ import Link from "next/link";
 import { forbidden, notFound } from "next/navigation";
 
 import { getAuthorizedDashboardViews } from "@/lib/authorization/dashboard-views";
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 import {
   DASHBOARD_PERIODS,
   DASHBOARD_VIEWS,
@@ -12,7 +12,7 @@ import {
   type DashboardStageKey,
   type DashboardViewKey,
 } from "@/lib/crm/dashboard/catalog";
-import { loadDashboardReadModel, type DashboardReadModel } from "@/lib/crm/dashboard/data";
+import { loadStageReadModel, type StageReadModel } from "@/lib/crm/dashboard/data";
 import {
   buildPeriodFunnelReadings,
   calculateConversion,
@@ -21,6 +21,7 @@ import {
 import { GOALS_UNAVAILABLE_LABEL, availableCommercialValue } from "@/lib/crm/source-availability";
 import { CRM_STAGES, getCrmStage, type CrmStage } from "@/lib/crm/stages/catalog";
 import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/presentation";
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import {
   AnalyticsCanvas,
@@ -86,24 +87,28 @@ function StageNavigation({
   stage,
   view,
   period,
+  authorizedPaths,
 }: {
   stage: CrmStage;
   view: DashboardViewKey;
   period: DashboardPeriodKey;
+  authorizedPaths: readonly string[];
 }) {
   return (
     <nav aria-label="Etapas do funil" className={styles.stageNavigation}>
-      {CRM_STAGES.map((item) => (
-        <Link
-          key={item.slug}
-          href={stageHref(item.slug, view, period)}
-          prefetch={false}
-          aria-current={item.slug === stage.slug ? "page" : undefined}
-          className={styles.stageNavigationLink}
-        >
-          {item.label}
-        </Link>
-      ))}
+      {CRM_STAGES.filter((item) => authorizedPaths.includes(`/app/etapas/${item.slug}`)).map(
+        (item) => (
+          <Link
+            key={item.slug}
+            href={stageHref(item.slug, view, period)}
+            prefetch={false}
+            aria-current={item.slug === stage.slug ? "page" : undefined}
+            className={styles.stageNavigationLink}
+          >
+            {item.label}
+          </Link>
+        ),
+      )}
     </nav>
   );
 }
@@ -152,7 +157,7 @@ function StageFilters({
 }
 
 function comparisonColumns(
-  dashboard: DashboardReadModel | null,
+  dashboard: StageReadModel | null,
 ): Array<AnalyticsColumn<StageComparison>> {
   const unavailableReason = "A janela não existe no snapshot validado atual.";
 
@@ -216,7 +221,7 @@ function comparisonColumns(
   ];
 }
 
-function generatedAtLabel(dashboard: DashboardReadModel | null) {
+function generatedAtLabel(dashboard: StageReadModel | null) {
   if (!dashboard) return DATA_UNAVAILABLE_LABEL;
 
   return new Intl.DateTimeFormat("pt-BR", {
@@ -226,7 +231,7 @@ function generatedAtLabel(dashboard: DashboardReadModel | null) {
   }).format(new Date(dashboard.generatedAt));
 }
 
-function StageMetadata({ dashboard }: { dashboard: DashboardReadModel | null }) {
+function StageMetadata({ dashboard }: { dashboard: StageReadModel | null }) {
   return (
     <dl className={styles.stageMetadata}>
       <div>
@@ -249,12 +254,14 @@ function StageComposition({
   period,
   dashboard,
   authorizedViews,
+  authorizedPaths,
 }: {
   stage: CrmStage;
   view: DashboardViewKey;
   period: DashboardPeriodKey;
-  dashboard: DashboardReadModel | null;
+  dashboard: StageReadModel | null;
   authorizedViews: readonly DashboardViewKey[];
+  authorizedPaths: readonly string[];
 }) {
   const periodConfig = DASHBOARD_PERIODS[period];
   const viewMetrics = dashboard?.metrics[view] ?? null;
@@ -270,8 +277,9 @@ function StageComposition({
   const stageIndex = CRM_STAGES.findIndex((item) => item.slug === stage.slug);
   const previousStage = stageIndex > 0 ? CRM_STAGES[stageIndex - 1] : null;
   const nextStage = stageIndex < CRM_STAGES.length - 1 ? CRM_STAGES[stageIndex + 1] : null;
-  const previousValue =
-    viewMetrics && previousStage ? viewMetrics[previousStage.key][periodConfig.currentField] : null;
+  const previousValue = previousStage
+    ? (viewMetrics?.[previousStage.key]?.[periodConfig.currentField] ?? null)
+    : null;
   const volumeRatio =
     current === null || previousValue === null ? null : calculateConversion(current, previousValue);
   const comparisons = metric ? buildStageComparisons(metric) : EMPTY_COMPARISONS;
@@ -293,7 +301,12 @@ function StageComposition({
           meta={<StageMetadata dashboard={dashboard} />}
         />
 
-        <StageNavigation stage={stage} view={view} period={period} />
+        <StageNavigation
+          stage={stage}
+          view={view}
+          period={period}
+          authorizedPaths={authorizedPaths}
+        />
 
         <StageFilters stage={stage} view={view} period={period} authorizedViews={authorizedViews} />
 
@@ -392,19 +405,19 @@ function StageComposition({
               </div>
             </dl>
             <nav aria-label="Etapas adjacentes" className={styles.stageAdjacentNavigation}>
-              {previousStage ? (
+              {previousStage && authorizedPaths.includes(`/app/etapas/${previousStage.slug}`) ? (
                 <Link href={stageHref(previousStage.slug, view, period)} prefetch={false}>
                   ← {previousStage.label}
                 </Link>
               ) : (
-                <span>Início do funil</span>
+                <span>{previousStage ? previousStage.label : "Início do funil"}</span>
               )}
-              {nextStage ? (
+              {nextStage && authorizedPaths.includes(`/app/etapas/${nextStage.slug}`) ? (
                 <Link href={stageHref(nextStage.slug, view, period)} prefetch={false}>
                   {nextStage.label} →
                 </Link>
               ) : (
-                <span>Fim do funil</span>
+                <span>{nextStage ? nextStage.label : "Fim do funil"}</span>
               )}
             </nav>
           </AnalyticsCard>
@@ -464,17 +477,24 @@ export default async function StagePage({
   params: Promise<{ stage: string }>;
   searchParams: Promise<{ view?: string | string[]; period?: string | string[] }>;
 }) {
-  const authorization = await enforcePermission("crm.stages.view");
   const [{ stage: slug }, query] = await Promise.all([params, searchParams]);
   const stage = getCrmStage(slug);
   if (!stage) notFound();
+  const authorization = await enforcePageAccess(`/app/etapas/${stage.slug}`);
 
   const authorizedViews = getAuthorizedDashboardViews(authorization.permissions);
   if (authorizedViews.length === 0) forbidden();
   if (isDashboardView(query.view) && !authorizedViews.includes(query.view)) forbidden();
   const view: DashboardViewKey = isDashboardView(query.view) ? query.view : authorizedViews[0]!;
   const period: DashboardPeriodKey = isDashboardPeriod(query.period) ? query.period : "month";
-  const result = await loadDashboardReadModel([view]);
+  const pages = await getAuthorizedNavigation(authorization);
+  const readableStages = CRM_STAGES.filter(
+    (item) =>
+      authorization.permissions.includes("crm.dashboard.view") ||
+      item.key === stage.key ||
+      pages.some((page) => page.path === `/app/etapas/${item.slug}`),
+  ).map((item) => item.key);
+  const result = await loadStageReadModel([view], readableStages);
 
   return (
     <StageComposition
@@ -483,6 +503,7 @@ export default async function StagePage({
       period={period}
       dashboard={result.status === "ready" ? result.dashboard : null}
       authorizedViews={authorizedViews}
+      authorizedPaths={pages.map((page) => page.path)}
     />
   );
 }

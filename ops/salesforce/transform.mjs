@@ -1,4 +1,6 @@
 import { createHash } from "node:crypto";
+import { buildDashboardAnalysis } from "./analysis-transform.mjs";
+import { MAX_SALESFORCE_INGESTION_BODY_BYTES } from "../../lib/crm/salesforce/transport.ts";
 
 const VIEW_KEYS = ["all", "with_canal_imob", "without_canal_imob"];
 const STAGE_KEYS = ["opportunities", "appointments", "visits", "folders", "sales"];
@@ -360,6 +362,7 @@ export function buildSalesforceSnapshot({
   generatedAt,
   requestId,
   goals,
+  analysisEnabled = false,
 }) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(referenceDate)) throw new Error("invalid reference date");
   if (!/^\d{4}-\d{2}-\d{2}T/.test(generatedAt)) throw new Error("invalid generated timestamp");
@@ -417,6 +420,29 @@ export function buildSalesforceSnapshot({
     },
     ranking: buildRanking(reports, referenceDate, generatedAt),
   };
+
+  if (analysisEnabled === true) {
+    payload.dashboard.analysis = buildDashboardAnalysis({
+      referenceDate,
+      views: VIEW_KEYS.map((viewKey) => ({
+        viewKey,
+        stages: Object.fromEntries(
+          STAGE_KEYS.map((stageKey) => [
+            stageKey,
+            byView(stages[stageKey], viewKey, imobAccounts).map((row) => ({
+              ...row,
+              date: row.date ? dateKey(row.date) : null,
+              approvedFolder: stageKey === "folders" && fold(row.status) === APPROVED_FOLDER_STATUS,
+            })),
+          ]),
+        ),
+      })),
+    });
+    // Match the publisher and API ceiling; never truncate facts or dictionaries.
+    if (Buffer.byteLength(JSON.stringify(payload), "utf8") > MAX_SALESFORCE_INGESTION_BODY_BYTES) {
+      throw new Error("Salesforce candidate payload exceeds 8 MiB");
+    }
+  }
 
   const appointmentCodes = new Set(
     reports.appointments.map((row) => text(row.appointmentCode)).filter(Boolean),

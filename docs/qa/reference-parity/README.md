@@ -2,6 +2,35 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Páginas e acessos individuais em 15/10/2026
+
+A captura Linux `38819023825` concluiu com sucesso no commit
+`ec191f6bf71d1940ffbfa6feb7a656e89a951211`, cuja árvore é idêntica ao candidato
+`d9775f0f2e547e8ffd0d95327bad6817a53e20ce`, sem alterações locais.
+Artefato `12013347524`, ZIP SHA-256
+`509804f1b79275a67b1c9fedcdf720bfebcda9d1aef6f510b807a784b67dc752`,
+conferido também com o digest publicado pela API do GitHub.
+
+Foram conferidos os 242 hashes e tamanhos. Mudaram onze imagens de Usuários e
+onze de Páginas; as outras 220 permaneceram idênticas. A revisão manual cobriu
+desktop e celular, nos temas claro e escuro. As regiões roláveis mantêm o acesso
+por teclado, as caixas individuais e o estado de herança. O diretório de pessoas
+continua mascarado somente na captura determinística.
+
+Passaram 154 verificações responsivas, 88 de temas, 242 de acessibilidade,
+110 de zoom, teclado e jornadas. O manifesto original da promoção transacional
+foi incorporado sem alterar seus dados, preservando o histórico e os hashes da
+referência anterior. Nenhum limiar foi ampliado. O workflow temporário de captura
+foi removido; a CI normal em modo de verificação permanece obrigatória antes da
+integração e publicação.
+
+Na reconciliação de 16/10 com `main` em `b5458ff5`, o manifesto passou a
+preservar as referências concorrentes de Meta e Ranking e a incorporar somente
+os registros de Usuários e Páginas da captura acima. A composição está
+documentada em `integrationProvenance`; os 242 arquivos mantêm os hashes e
+tamanhos de suas capturas de origem. Essa composição não representa uma nova
+captura nem dispensa a CI completa do candidato integrado.
+
 ## Usuários e presença em 15/10/2026
 
 A captura Linux `38766616330` concluiu com sucesso no commit

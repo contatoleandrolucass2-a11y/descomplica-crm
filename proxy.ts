@@ -76,6 +76,7 @@ import {
   type ProtectedPageGate,
 } from "@/lib/authorization/page-gates";
 import { NextResponse, type NextRequest } from "next/server";
+import { hasPersistedPageAccess } from "@/lib/navigation/page-access";
 
 interface AuthorizationContextRow {
   permissions?: unknown;
@@ -91,6 +92,7 @@ type EarlyPermissionGate = Pick<
   "permission" | "releaseEnabled" | "allowedRoles"
 > & {
   requireAuthenticated?: boolean;
+  path?: string;
 };
 
 function permissionRequiredBeforeStreaming(pathname: string): EarlyPermissionGate | null {
@@ -145,6 +147,10 @@ async function lacksEarlyPermission(
 
   const context = data[0] as AuthorizationContextRow;
   const permissions = context.permissions;
+  if (!Array.isArray(permissions) || typeof context.role_key !== "string") return true;
+  if (pageGate.path) {
+    return !(await hasPersistedPageAccess(supabase, pageGate.path, context.role_key, permissions));
+  }
   return (
     !Array.isArray(permissions) ||
     !permissions.includes(pageGate.permission) ||
@@ -188,7 +194,11 @@ export async function proxy(request: NextRequest) {
 
   // This probe reuses frozen gateway cookies. Its route checks identity, live
   // session, MFA and Master permission without refreshing tokens or cookies.
-  if (request.nextUrl.pathname === "/api/salesforce/console/authorize") {
+  if (
+    ["/api/salesforce/console/authorize", "/api/meta-ads/console/authorize"].includes(
+      request.nextUrl.pathname,
+    )
+  ) {
     const response = NextResponse.next({ request });
     applySecurityHeaders(response.headers, { isProd: isSecureProduction });
     response.headers.set("Cache-Control", "no-store");

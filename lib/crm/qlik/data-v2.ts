@@ -72,7 +72,7 @@ export type QlikRankingV2Data =
       availableYears: number[];
     };
 
-/** Session-scoped RPC only. The database enforces MFA and crm.ranking.view. */
+/** Session-scoped RPC only. The database enforces MFA and crm.partnerships.view. */
 export async function loadQlikRankingV2(year: number | null = null): Promise<QlikRankingV2Data> {
   if (year !== null && !yearSchema.safeParse(year).success) return { status: "unavailable" };
   try {

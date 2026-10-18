@@ -1,4 +1,4 @@
-import { enforcePermission } from "@/lib/authorization/enforce";
+import { enforcePageAccess } from "@/lib/authorization/enforce";
 
 import { FunnelGoalsPage } from "../_components/FunnelGoalsPage";
 
@@ -9,7 +9,7 @@ export default async function PartnershipGoalsPage({
 }: {
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
-  const authorization = await enforcePermission("crm.settings.manage");
+  const authorization = await enforcePageAccess("/app/configuracoes/metas/parcerias");
   // Match the database gate for commercial policy drafts, which remains Master-only.
   const canManageDraft =
     authorization.roleKey === "master" &&

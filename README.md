@@ -16,6 +16,18 @@ O estoque dos simuladores usa o relatório Salesforce ESTOQUE SPC quando a fonte
 oficial está configurada. O coletor executa os oito relatórios no ciclo automático
 de 30 minutos; o estoque atualiza a base comum dos quatro simuladores. Ver [operação do estoque](docs/runbooks/salesforce-inventory.md).
 
+O painel Integrações inclui o Qlik entre Salesforce e n8n, com evidência assinada
+do coletor e horários separados de coleta, publicação e atualização da fonte.
+O ranking usa duas observações conciliadas por ciclo e preserva a última base
+válida quando a coleta falha. A agenda horária na VPS depende da ativação
+protegida e da sessão Qlik; ver [operação do ranking Qlik](docs/runbooks/qlik-ranking-v2.md).
+
+O painel também inclui Facebook Ads para a conta `1080988750909489`, com
+navegador dedicado e console restrito ao master. O status confirma somente
+uma sessão recente na conta correta; a extração de métricas e a futura página
+comercial não estão habilitadas nesta etapa. Consulte a
+[operação do console Meta](docs/runbooks/meta-ads-vps-session.md).
+
 ## Pré-requisitos
 
 | Ferramenta                 | Versão validada | Uso                               |
@@ -172,3 +184,9 @@ As duas origens continuam recuperáveis por tags e bundles Git:
 - Bundles: diretório irmão `../source-checkpoints/` no pacote de entrega.
 
 Os ZIPs originais não são versionados e não devem ser enviados ao GitHub.
+
+## Cadastro de páginas e acessos
+
+O [cadastro único de páginas](docs/runbooks/page-catalog.md) mantém rotas, acessos administrativos e configurações sincronizados. Ao adicionar uma página, registre-a em `lib/navigation/registry.ts` e execute `pnpm pages:sync`. O build bloqueia registros ou migrations ausentes.
+
+Cada página tem sua própria caixa de acesso, exceto os simuladores agrupados. Admin e Master herdam novas páginas; a publicação preserva decisões existentes e exige a ordem de compatibilidade descrita no runbook.

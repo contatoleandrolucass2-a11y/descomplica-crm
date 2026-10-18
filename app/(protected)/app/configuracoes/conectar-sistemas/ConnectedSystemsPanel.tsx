@@ -26,6 +26,18 @@ import {
 
 import styles from "./ConnectedSystemsPanel.module.css";
 import { SalesforceConsoleDialog } from "./SalesforceConsoleDialog";
+import { QlikServiceCard, QlikStatusDetails } from "./QlikIntegration";
+import {
+  MetaAdsServiceCard,
+  MetaAdsStatusDetails,
+  useMetaAdsConnection,
+} from "./MetaAdsIntegration";
+import {
+  emptyQlikStatus,
+  qlikStatusSnapshotSchema,
+  QLIK_STATUS_PATH,
+  type QlikStatusSnapshot,
+} from "@/lib/crm/qlik/status-contract";
 
 const REPORTS = [
   { key: "opportunities", name: "Oportunidades", id: "00OU600000DrfDeMAJ" },
@@ -117,6 +129,8 @@ export function ConnectedSystemsPanel({
   statusConfigured,
   consoleAvailable = false,
   canReadSyncStatus = false,
+  metaAdsStatusConfigured = false,
+  metaAdsConsoleAvailable = false,
 }: {
   ingestLabel: string;
   refreshAvailable: boolean;
@@ -124,7 +138,16 @@ export function ConnectedSystemsPanel({
   statusConfigured: boolean;
   consoleAvailable?: boolean;
   canReadSyncStatus?: boolean;
+  metaAdsStatusConfigured?: boolean;
+  metaAdsConsoleAvailable?: boolean;
 }) {
+  const metaAds = useMetaAdsConnection(metaAdsStatusConfigured);
+  const [metaConsoleOpen, setMetaConsoleOpen] = useState(false);
+  const [metaConsoleError, setMetaConsoleError] = useState(false);
+  const closeMetaConsole = useCallback((credentialsFailed = false) => {
+    setMetaConsoleOpen(false);
+    setMetaConsoleError(credentialsFailed);
+  }, []);
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [consoleError, setConsoleError] = useState(false);
   const closeConsole = useCallback((credentialsFailed = false) => {
@@ -135,6 +158,7 @@ export function ConnectedSystemsPanel({
     emptySnapshot(statusConfigured ? "waiting" : "unconfigured"),
   );
   const [checking, setChecking] = useState(false);
+  const [qlikSnapshot, setQlikSnapshot] = useState<QlikStatusSnapshot>(() => emptyQlikStatus());
   const [integrationEvidence, setIntegrationEvidence] = useState<IntegrationEvidence | null>(null);
   const verifyRef = useRef<(() => void) | null>(null);
 
@@ -144,7 +168,7 @@ export function ConnectedSystemsPanel({
     let pollTimer: ReturnType<typeof setTimeout> | undefined;
     let timeoutTimer: ReturnType<typeof setTimeout> | undefined;
 
-    async function verify() {
+    async function verify(manual = false) {
       if (disposed || controller || document.hidden) return;
       clearTimeout(pollTimer);
       const request = new AbortController();
@@ -152,6 +176,7 @@ export function ConnectedSystemsPanel({
       setChecking(true);
       timeoutTimer = setTimeout(() => request.abort(), REQUEST_TIMEOUT_MS);
       async function verifySalesforce() {
+        if (!statusConfigured && !canReadSyncStatus && !manual) return;
         try {
           const response = await fetch("/api/salesforce/status", {
             cache: "no-store",
@@ -175,8 +200,24 @@ export function ConnectedSystemsPanel({
         if (!disposed) setIntegrationEvidence(evidence);
       }
 
+      async function verifyQlik() {
+        try {
+          const response = await fetch(QLIK_STATUS_PATH, {
+            cache: "no-store",
+            credentials: "same-origin",
+            headers: { accept: "application/json" },
+            signal: request.signal,
+          });
+          if (!response.ok) throw new Error("Status unavailable");
+          const body = qlikStatusSnapshotSchema.parse(await response.json());
+          if (!disposed && !request.signal.aborted) setQlikSnapshot(body);
+        } catch {
+          if (!disposed) setQlikSnapshot(emptyQlikStatus("unavailable"));
+        }
+      }
+
       try {
-        await Promise.all([verifySalesforce(), verifyIntegrations()]);
+        await Promise.all([verifySalesforce(), verifyIntegrations(), verifyQlik()]);
       } finally {
         clearTimeout(timeoutTimer);
         controller = null;
@@ -195,12 +236,13 @@ export function ConnectedSystemsPanel({
         state: statusConfigured ? "waiting" : "unconfigured",
       }));
       setIntegrationEvidence(null);
+      setQlikSnapshot(emptyQlikStatus());
       if (document.hidden) controller?.abort();
-      else if (statusConfigured || canReadSyncStatus) void verify();
+      else void verify();
     }
 
-    verifyRef.current = () => void verify();
-    if (statusConfigured || canReadSyncStatus) void verify();
+    verifyRef.current = () => void verify(true);
+    void verify();
     document.addEventListener("visibilitychange", onVisibilityChange);
     return () => {
       disposed = true;
@@ -248,13 +290,16 @@ export function ConnectedSystemsPanel({
             className={styles.iconButton}
             aria-label="Verificar conexão"
             title="Verificar evidências das integrações"
-            disabled={checking}
-            onClick={() => verifyRef.current?.()}
+            disabled={checking || metaAds.checking}
+            onClick={() => {
+              verifyRef.current?.();
+              metaAds.verify();
+            }}
           >
             <RefreshCw
               size={17}
               aria-hidden="true"
-              className={checking ? styles.spinning : undefined}
+              className={checking || metaAds.checking ? styles.spinning : undefined}
             />
           </button>
           <button
@@ -289,6 +334,14 @@ export function ConnectedSystemsPanel({
         </p>
       ) : null}
       {consoleOpen && consoleAvailable ? <SalesforceConsoleDialog onClose={closeConsole} /> : null}
+      {metaConsoleError ? (
+        <p role="alert" className={styles.consoleAlert}>
+          Não foi possível autorizar o console Meta Ads. Tente novamente.
+        </p>
+      ) : null}
+      {metaConsoleOpen && metaAdsConsoleAvailable ? (
+        <SalesforceConsoleDialog provider="meta-ads" onClose={closeMetaConsole} />
+      ) : null}
 
       <section className={styles.services} aria-labelledby="services-title">
         <div className={styles.servicesHeading}>
@@ -296,7 +349,7 @@ export function ConnectedSystemsPanel({
             <h2 id="services-title">Serviços</h2>
             <p>O estado só é afirmado quando existe uma fonte real de evidência.</p>
           </div>
-          <span>3 serviços</span>
+          <span>5 serviços</span>
         </div>
         <div className={styles.servicesGrid}>
           <article className={styles.serviceCard}>
@@ -321,6 +374,10 @@ export function ConnectedSystemsPanel({
               </small>
             </div>
           </article>
+
+          <QlikServiceCard snapshot={qlikSnapshot} />
+
+          <MetaAdsServiceCard snapshot={metaAds.snapshot} />
 
           <article className={styles.serviceCard}>
             <div className={styles.serviceLogoArea}>
@@ -409,6 +466,19 @@ export function ConnectedSystemsPanel({
           </article>
         </div>
       </section>
+
+      <QlikStatusDetails snapshot={qlikSnapshot} />
+
+      <MetaAdsStatusDetails
+        snapshot={metaAds.snapshot}
+        checking={metaAds.checking}
+        consoleAvailable={metaAdsConsoleAvailable}
+        onVerify={metaAds.verify}
+        onConnect={() => {
+          setMetaConsoleError(false);
+          setMetaConsoleOpen(true);
+        }}
+      />
 
       <section className={styles.salesforceDetails} aria-labelledby="salesforce-details-title">
         <div className={styles.salesforceDetailsHeading}>

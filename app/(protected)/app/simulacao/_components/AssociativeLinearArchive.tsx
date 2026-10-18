@@ -127,9 +127,9 @@ function AssociativeLinearCalculator({ executionEnabled }: { executionEnabled: b
     <div className="linearcalc-layout">
       <form className="doccalc-form linearcalc-form" onSubmit={submit} noValidate>
         <header>
-          <span>13</span>
+          <span aria-hidden="true">%</span>
           <div>
-            <p>WF-13 • motor homologado</p>
+            <p>Simulador Associativo • motor homologado</p>
             <h2>Entradas do fluxo linear</h2>
           </div>
         </header>
@@ -342,7 +342,7 @@ function AssociativeLinearCalculator({ executionEnabled }: { executionEnabled: b
         ) : !result.ok ? (
           <div className="doccalc-blocked">
             <span className="doccalc-status blocked">Cálculo bloqueado</span>
-            <h2>Revise os gates do WF-13</h2>
+            <h2>Revise os requisitos da simulação</h2>
             <ul>
               {result.errors.map((error) => (
                 <li key={error}>{error}</li>
@@ -502,7 +502,7 @@ export function AssociativeLinearArchive({ executionEnabled }: { executionEnable
               <span aria-hidden="true">/</span>
               <span>Simulador Associativo</span>
             </nav>
-            <p className="eyebrow">Tabela Associativo • WF13</p>
+            <p className="eyebrow">Tabela Associativo</p>
             <h1>Simulador Associativo</h1>
             <p>
               Simulação auditável do pró-soluto, divisão pré e pós-obra, anuais e parcela corrigida.
@@ -518,7 +518,7 @@ export function AssociativeLinearArchive({ executionEnabled }: { executionEnable
         <AssociativeLinearCalculator executionEnabled={executionEnabled} />
         <p className="simulation-disclaimer">
           Resultado preliminar sujeito à política comercial vigente, validação do estoque e
-          fechamento oficial no WF-13.
+          fechamento oficial da proposta.
         </p>
       </main>
     </div>

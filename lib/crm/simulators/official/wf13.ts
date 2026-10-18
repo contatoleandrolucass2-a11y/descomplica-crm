@@ -754,7 +754,7 @@ export function calculateWf13(input: Wf13Input, options: { today?: string } = {}
   const prePercentage = fractionToNumber(prePercentageFraction);
   const postPercentage = fractionToNumber(postPercentageFraction);
   const audit = [
-    { label: "Executor WF-13 e escopo Associativo | Fluxo Linear", ok: true },
+    { label: "Executor do fluxo linear associativo", ok: true },
     {
       label: "Empreendimento e produto com match oficial",
       ok: Boolean(input.development.trim() && input.product.trim() && input.stockMatch),

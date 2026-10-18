@@ -66,7 +66,7 @@ jobs:
   release-gates:
     needs: validate
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout
@@ -97,6 +97,11 @@ jobs:
         env:
           RANKING_V2_BROWSER: "1"
 
+      - name: Forecast table with synthetic edits and save conflicts
+        run: pnpm exec vitest run tests/forecast-settings.test.tsx --maxWorkers=1
+        env:
+          FORECAST_SETTINGS_BROWSER: "1"
+
       - name: Qlik login with synthetic corporate provider
         run: node --test ops/qlik/browser-login.node-test.mjs
         env:
@@ -106,6 +111,7 @@ jobs:
         run: |
           node scripts/qa/dashboard-report.mjs
           node --test scripts/qa/dashboard-report.node-test.mjs
+          DASHBOARD_FILTERS_BROWSER=1 pnpm exec vitest run tests/dashboard-filters-dismissal.test.ts --maxWorkers=1
 
       - name: Associative page guide with synthetic inventory
         run: node scripts/qa/reference-parity.mjs associative-page-guide

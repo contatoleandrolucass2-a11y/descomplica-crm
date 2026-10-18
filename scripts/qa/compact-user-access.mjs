@@ -5,11 +5,13 @@ import path from "node:path";
 import process from "node:process";
 import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
+import { rehearseCatalogAtomicity } from "./catalog-atomic-rehearsal.mjs";
 
 const execute = promisify(execFile);
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const image = "public.ecr.aws/supabase/postgres:17.6.1.159";
-const expectedAssertions = 115;
+const expectedPlans = [116, 8, 14, 27];
+const expectedAssertions = expectedPlans.reduce((sum, count) => sum + count, 0);
 const fixture = "tests/fixtures/compact-user-access/rehearsal.sql";
 const invocationId = randomUUID();
 const container = `descomplica-compact-users-${invocationId}`;
@@ -35,9 +37,9 @@ for (const signal of ["SIGINT", "SIGTERM"]) {
   process.once(signal, () => cancellation.abort(new Error(`Interrupted by ${signal}.`)));
 }
 
-async function docker(args, { cleanup = false, timeout = 60_000 } = {}) {
+async function docker(args, { cleanup = false, timeout = 60_000, input } = {}) {
   if (!cleanup) cancellation.signal.throwIfAborted();
-  const { stdout } = await execute("docker", args, {
+  const execution = execute("docker", args, {
     cwd: repositoryRoot,
     env: environment,
     encoding: "utf8",
@@ -45,6 +47,11 @@ async function docker(args, { cleanup = false, timeout = 60_000 } = {}) {
     timeout,
     ...(cleanup ? {} : { signal: cancellation.signal }),
   });
+  if (input !== undefined) {
+    execution.child.stdin.on("error", () => {});
+    execution.child.stdin.end(input);
+  }
+  const { stdout } = await execution;
   return stdout;
 }
 
@@ -102,16 +109,27 @@ async function waitForPostgres() {
   throw new Error("The isolated PostgreSQL container did not become ready within 60 seconds.");
 }
 
-function verifyTap(output) {
+function verifyTap(output, plansExpected = expectedPlans) {
+  const assertionsExpected = plansExpected.reduce((sum, count) => sum + count, 0);
   const plans = [...output.matchAll(/^1\.\.(\d+)\s*$/gm)];
   const assertions = [...output.matchAll(/^(ok|not ok) (\d+)\b.*$/gm)];
   if (
-    plans.length !== 1 ||
-    Number(plans[0][1]) !== expectedAssertions ||
-    assertions.length !== expectedAssertions ||
-    assertions.some(
-      (assertion, index) => assertion[1] !== "ok" || Number(assertion[2]) !== index + 1,
-    ) ||
+    plans.length !== plansExpected.length ||
+    assertions.length !== assertionsExpected ||
+    plans.some((plan, planIndex) => {
+      const suite = assertions.filter(
+        (assertion) =>
+          assertion.index > plan.index &&
+          assertion.index < (plans[planIndex + 1]?.index ?? output.length),
+      );
+      return (
+        Number(plan[1]) !== plansExpected[planIndex] ||
+        suite.length !== plansExpected[planIndex] ||
+        suite.some(
+          (assertion, index) => assertion[1] !== "ok" || Number(assertion[2]) !== index + 1,
+        )
+      );
+    }) ||
     /^Bail out!/im.test(output) ||
     /(?:^|\n)(?:psql:[^\n]*\s)?(?:ERROR|FATAL):/m.test(output)
   ) {
@@ -121,7 +139,7 @@ function verifyTap(output) {
       .slice(0, 8)
       .join("\n");
     throw new Error(
-      `Expected exactly ${expectedAssertions} passing compact pgTAP assertions; received ${assertions.length}.${failures ? `\n${failures}` : ""}`,
+      `Expected exactly ${assertionsExpected} passing compact pgTAP assertions; received ${assertions.length}.${failures ? `\n${failures}` : ""}`,
     );
   }
   return assertions.length;
@@ -215,10 +233,48 @@ try {
     "-f",
     `/work/${fixture}`,
   ]);
+  const assertions = verifyTap(output);
+  const atomicDatabase = `${database}_atomic`;
+  await docker([
+    "exec",
+    container,
+    "createdb",
+    "-h",
+    "127.0.0.1",
+    "-U",
+    "postgres",
+    "--template=template0",
+    atomicDatabase,
+  ]);
+  const atomicCatalog = await rehearseCatalogAtomicity({
+    repositoryRoot,
+    verifyTap,
+    executeSql: (input) =>
+      docker(
+        [
+          "exec",
+          "-i",
+          container,
+          "psql",
+          "-X",
+          "-qAt",
+          "-h",
+          "127.0.0.1",
+          "-U",
+          "postgres",
+          "-v",
+          "ON_ERROR_STOP=1",
+          "-d",
+          atomicDatabase,
+        ],
+        { input },
+      ),
+  });
   result = {
     status: "passed",
     image,
-    assertions: verifyTap(output),
+    assertions,
+    atomicCatalog,
     expectedAssertions,
     failedAssertions: 0,
     network: "none",

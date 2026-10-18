@@ -1,5 +1,142 @@
 # Changelog
 
+- QA do resumo geral: referencias visuais revisadas do dashboard nos tres
+  temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
+
+- Dashboard | Resumo Geral: cabecalho compacto, funis com quantidades inteiras
+  arredondadas para baixo e remocao de Pulso do funil, Ritmo de vendas e reset.
+- Integra o registro documental da Previsão pelo PR251, após CI completa aprovada.
+
+- Dashboard: grupos3/5/5 publicados e conferidos em desktop/celular nos temas
+  claro, medio e escuro, sem overflow horizontal ou textos visiveis cortados.
+
+- CI: amplia para 60 minutos o gate visual completo, preservando toda a matriz.
+
+- Dashboard: referencias visuais revisadas para os grupos3/5/5 em desktop e mobile.
+
+- QA dashboard: confere selecao oculta apos fechamento do filtro no refresh RSC.
+
+## Em validacao: Grupos de funis do dashboard
+
+- Organiza metas, periodos do mes e historico em grupos3/5/5 no desktop,
+  com empilhamento legivel no celular nos tres temas.
+- Compara mes, semana anterior, esta semana, ontem e hoje dentro do mes vigente.
+- Inclui media anual normalizada por uma venda e preserva estados sem base.
+- Fecha filtros ao clicar fora, pressionar Escape ou abrir outro filtro.
+- Retira diagnostico, tabelas operacionais, equipe e ranking deste dashboard.
+
+## 2026-10-16: Ranking House separado de Canal de Parcerias
+
+- Atualiza somente as 22 referências visuais de House e Parcerias após revisão da captura Linux, preservando as outras 220.
+- A captura E2E de estados valida seu overlay sintético sem confundi-lo com o estado real da página.
+- O E2E verifica os filtros da House na rota própria e os filtros Qlik em Canal de Parcerias.
+- Os testes de acesso distinguem a fonte Qlik de parcerias e mantêm o catálogo existente sincronizado.
+
+- Restaura a página Ranking para corretores e gerentes da House, preservando
+  sua fonte Salesforce e a política de pontuação existente.
+- Move o ranking Qlik de imobiliárias e empreendimentos para Canal de
+  Parcerias, com filtros na rota correta e autorização própria no banco.
+- Identifica a integração Qlik como fonte do Canal de Parcerias.
+
+## 2026-10-16: Prova do estado padrão do Qlik
+
+- Define explicitamente o estado padrão nos objetos temporários de coleta.
+- Aceita sua representação omitida ou vazia no layout somente após conferir
+  identidade, definição efetiva e estabilidade; estados alternativos e provas
+  ausentes continuam bloqueando a publicação do ranking.
+
+## 2026-10-16: Facebook Ads nas integrações
+
+- Adiciona a conta Facebook Ads indicada ao painel Integrações, com logos SVG por tema.
+- Prepara console remoto na VPS com perfil independente, restrito ao master,
+  autorização recorrente e acesso limitado a dez minutos.
+- Exibe evidência recente da sessão e distingue login necessário, conta incorreta,
+  indisponibilidade e monitor suspenso.
+- Mantém coleta de métricas e nova página comercial pendentes de definição.
+
+## 2026-10-16: Expressões multilinha no coletor Qlik
+
+- Aceita TAB, CR e LF nas expressões nativas das medidas, mantendo hashes
+  integrais, limites, validação dos demais controles e conciliação dos dados.
+- Cobre a regressão em medidas inline, masters referenciados e aliases,
+  sem alterar fórmulas, identificadores, permissões ou escopo da coleta.
+
+## 2026-10-15: Dashboard filtrado e metas por responsavel
+
+- Publica app66ed7360 com preparacao aditiva e ativacao atomica do catalogo,
+  preservando acessos existentes; coletor validado em dois ciclos automaticos,
+  com agregados dos novos filtros conciliados por hash com o banco.
+- Prepara a ativacao conjunta do catalogo autorizado com fontes fixadas por
+  hash, comparacao do backup e ensaio isolado de falha/rollback, sem executar
+  migrations pelo planejador nem alterar escolhas de acesso preexistentes.
+- Integra o catalogo de paginas mantendo leituras restritas por etapa e os
+  filtros completos somente no dashboard autorizado; preserva referencias administrativas.
+- Preserva a retirada de codigos internos dos simuladores integrada pela main,
+  sem substituir as referencias visuais das demais paginas.
+- Corrige disputa de foco ao abrir historicos em sequencia, preservando
+  retorno nativo, Escape e navegacao por teclado; adiciona teste de regressao.
+- Preserva o planejamento de metas integrado pela main e combina suas
+  referencias com as do dashboard, sem substituir telas de outros trabalhos.
+- Atualiza somente11 referencias visuais do dashboard apos revisao das
+  mudancas solicitadas; preserva231 capturas e registra proveniencia integral.
+- Integra o ranking Qlik v2 da main, preservando seus gates e referencias;
+  atualiza inventario combinado de migrations e assercoes de restore.
+- Adiciona filtros dependentes de canal, gerente, responsavel e empresa usando
+  dimensoes dos relatorios e apenas os dois canais definidos pelo usuario.
+- Preserva agregados diarios com RLS por visao e leitura coerente do snapshot.
+- Protege detalhes de empreendimentos por RPC e permissao de ranking, sem
+  impedir filtros e totais autorizados. Reagrupa fatos antes de ocultar a dimensao.
+- Limita o transporte Salesforce a8MiB no publicador, API e rota exata Nginx,
+  mantendo os limites dos demais endpoints e sem truncar cargas.
+- Mostra meses encerrados usados nas medias em pop-up com grafico; mes anterior
+  passa a ser integral na nova analise, sem alterar comparativos de outras telas.
+- Oculta o aviso de coleta pendente quando o historico mensal ja esta disponivel.
+- Corrige o tipo do literal de whitespace na fixture SQL de validacao.
+- Exercita revogacao do ranking com perfil autorizado, preservando a proibicao
+  existente de grants globais individuais.
+- Atualiza E2E para os controles gerenciais da raiz, mantendo verificacao dos
+  filtros de periodo/visao nas etapas e ranking.
+- Mantem o E2E valido quando ainda nao existe snapshot, sem depender do atributo
+  opcional que identifica a fonte da coleta.
+- Confere persistencia do novo filtro de canal no auto-refresh autenticado,
+  preservando as provas de resposta completa, rolagem e detalhes abertos.
+- Calcula metas mensais por responsavel unico e esperado proporcional ao dia;
+  atualiza a pagina na virada do dia de Sao Paulo.
+- Remove controles/textos indicados na raiz e resume tabelas em uma linha
+  Realizado com cinco periodos. CI aprovada; ativacao depende da preparacao
+  pendente do catalogo, migration/coleta e gates de publicacao.
+
+## 2026-10-15: Referências visuais de páginas e acessos
+
+- Incorpora a captura Linux aprovada `38819023825`: onze imagens de Usuários e onze de Páginas atualizadas, 220 imagens preservadas e 242 hashes conferidos. A matriz funcional e de acessibilidade passou sem ampliar os limites existentes.
+- Remove o workflow temporário de captura. A CI normal do commit final, a integração e a promoção continuam obrigatórias; esta revisão não publica o pacote de páginas.
+
+## 2026-10-15: Acessos individuais por página
+
+- Separa treze permissões antes compartilhadas por módulo, mantendo uma caixa por página e os simuladores juntos. Admin e Master herdam todos os acessos implantados; decisões existentes são copiadas na criação das novas chaves.
+- Consulta o catálogo persistido no Proxy e nos guards, bloqueando URLs negadas ou desativadas. Protege as APIs e RPCs de Rotina com o novo acesso específico.
+- Usa o catálogo autorizado também nos hubs e links entre etapas. A entrada compartilhada aceita uma única página concedida; login, retorno após MFA e acesso negado resolvem o início permitido para a conta.
+- Limita cada categoria de permissões a uma área rolável de 32 rem, acessível por teclado, para acomodar as caixas individuais sem alongar o painel inteiro.
+- Mantém as permissões de dados, operações, visões e a hierarquia. O runtime compatível deve ser publicado antes de ativar as chaves novas; a preparação e a ativação estão documentadas no runbook.
+
+## 2026-10-15: Herança completa do Master
+
+- Todos os usuários Master passam a herdar todas as permissões implantadas, incluindo RIVA e DIRECIONAL. A prévia local acompanha o catálogo completo; a interface de produção usa os padrões consultados no banco.
+- Preserva os padrões dos outros papéis, exceções individuais, hierarquia, MFA, estado das contas e gates de execução. A consulta anterior em produção encontrou 23 de 25 permissões no Master e nenhuma negação individual de Master. A aplicação separada em produção confirmou 25 de 25 padrões para os dois Master, sem permissão efetiva ausente, às 20:22 UTC; o recibo está na auditoria de páginas.
+
+## 2026-10-15: Catálogo único e rolagem contínua de páginas
+
+- Centraliza as 27 páginas liberadas em um registro compartilhado por guards, matriz de acessos e geração da migration. Inclui as dez páginas que antes eram acrescentadas somente à navegação.
+- Adiciona `pages:sync` e `pages:check`; build e testes impedem publicar uma rota sem cadastro ou com migration desatualizada. Preserva visibilidade existente, hierarquia, exceções individuais e o controle único dos simuladores.
+- Mostra as páginas vinculadas a cada acesso e permite encontrá-las na busca. Substitui a paginação do catálogo por uma região de rolagem contínua, acessível por teclado, com todos os resultados dos filtros.
+- Remove a reconstrução de páginas suplementares fora do banco, para que desativar uma página não a recrie no menu. Validação e publicação serão registradas após a conclusão dos gates.
+
+## 2026-10-15 — Simuladores sem códigos internos visíveis
+
+- Atualiza quatro referências visuais móveis do Hub após revisão da captura Linux limpa; preserva as outras 238 imagens e os gates de publicação.
+
+- Remove as referências WF da interface e da ajuda dos simuladores, mantendo os nomes comerciais, os estados de disponibilidade e as regras de cálculo.
+
 ## 2026-10-15: Correcao visual de Meta compilada
 
 - Mantem os percentuais dos donuts legiveis no tema escuro apos minificacao.
@@ -2621,6 +2758,23 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Snapshots e participantes do ranking protegidos por `crm.ranking.view`, sem fallback demonstrativo.
 - Ingestão limitada a 1 MB e 20 snapshots/minuto com secret key server-only; refresh protegido por mesma origem, permissão, lock, cooldown e timeout.
 
+### Leitura independente das páginas antes da publicação
+
+A revisão final reproduziu a dependência indevida dos dados de Etapas, Metas e
+Pontos em permissões dos módulos anteriores. A migration
+`20261016000120_individual_page_data_access.sql` altera somente cinco policies de
+leitura. Preserva canais, MFA, contas ativas, grants, escrita e os acessos
+preexistentes do Dashboard e Ranking. Uma etapa isolada consulta somente as
+etapas autorizadas, sem exigir ou expor resumos financeiros. Metas DV e Parcerias
+continuam separadas por perfil. A ativação ocorre na mesma transação das chaves
+individuais e das RPCs de Rotina.
+
+Os 27 novos testes pgTAP cobrem concessões e negações por etapa, canal e perfil,
+páginas desativadas, contas inativas, sessão de recuperação e ausência de escrita.
+A suíte completa passa a 1.468 testes e o contrato compacto a 165. O manifesto
+passa a 59 migrations. Esta nota descreve a implementação; publicação permanece
+pendente dos gates completos no SHA final.
+
 ## 2026-10-15: Guia Meta em Gestao
 
 - Adiciona Meta ao menu Gestao para quem ja possui acesso autorizado a metas.
@@ -2661,3 +2815,76 @@ Todas as alterações relevantes deste projeto serão registradas aqui.
 - Gestão > Meta disponível em produção, com planejamento completo, calendário legível e taxas fracionárias; permissões e rascunho inativo preservados.
 
 - O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
+## 2026-10-16 - Interoperabilidade do catalogo Qlik
+
+- Trata metadados opcionais ausentes/nulos e textos de medidas alheias ao
+  ranking, preservando identidade, cobertura, unicidade e pins selecionados.
+- Distingue recusas do catalogo por codigos fixos, sem dados ou erros brutos.
+- Registra CRM publicado em b937 e coleta real recusada por master_pin_mismatch;
+  owner recuperado pelo coordenador. Atualizacao de fatos ainda pendente.
+- Registra lint/tipos/build Windows aprovados; falhas locais de subprocessos
+  permanecem explicitas e a CI do corretivo ainda e obrigatoria.
+- Integra main concorrente de Meta, preservando ambos os registros e todas
+  as referencias existentes, sem alterar a interface nesta frente.
+- Aceita paginas QIX completas com group tails explicitamente zeradas,
+  mantendo limites, cobertura exata e rejeicao de qualquer cauda pendente.
+- Preserva main concorrente e separa ao final os registros deste ajuste,
+  evitando conflito manual de prefixo sem alterar a protecao de CI.
+
+## 2026-10-16: Integração Qlik e status do ranking
+
+- Inclui Qlik entre Salesforce e n8n, com logos SVG para os três temas.
+- Separa coleta, confirmação de publicação, recarga da fonte e próxima coleta.
+- Acrescenta status assinado do coletor, com expiração, limite de corpo, proteção
+  contra replay e leitura autorizada pela página Integrações.
+- Preserva a última publicação válida quando a sessão expira ou a coleta falha.
+- Integra o corretivo de interoperabilidade QIX da PR #239 sem alterar os pins,
+  o recorte aprovado, as duas observações independentes ou a reconciliação.
+
+## 2026-10-17: Diagnóstico de cobertura do coletor Qlik
+
+- Distingue falhas de catálogo, listas, calendário e cubos por códigos fixos,
+  sem registrar dados comerciais ou credenciais.
+- Preserva os limites de cobertura e a rejeição integral de coletas incompletas.
+- Mantém compatibilidade com o status do aplicativo e com recibos anteriores.
+
+## 2026-10-17: Validação de permissões da Previsão
+
+- Corrige a identidade da fixture pgTAP ao preparar overrides administrativos,
+  preservando as61 verificações e os controles de autorização do banco.
+- Atualiza a matriz autenticada para conferir a nova página Previsão conforme
+  os perfis previstos no catálogo.
+
+## 2026-10-16: Previsão no menu Gestão
+
+- Adiciona tabela manual de previsão e realizado por corretor, com título de
+  equipe, edição de cabeçalhos/células e inclusão/exclusão de linhas e colunas.
+- Salva no CRM com permissão própria, validação no servidor e banco e proteção
+  contra sobrescrita concorrente; falhas conservam as alterações locais.
+- Mantém a apresentação integrada da tabela, sem caixas numéricas destacadas.
+
+## 2026-10-17: Previsão publicada
+
+- Disponibiliza Gestão > Previsão para Master/Admin, com tabela manual
+  compartilhada, inclusão/exclusão de linhas e colunas e botão Salvar.
+- Publica o armazenamento e catálogo autorizados, com proteção de acesso e de
+  edição concorrente, preservando permissões e exceções existentes.
+
+## 2026-10-18 — Visual da Previsão
+
+- Página Previsão alinhada ao dashboard nos três temas, com tabela inicial adaptada ao celular e botão Salvar preservado.
+- Edição manual de linhas, colunas, cabeçalhos e valores mantém o salvamento compartilhado existente.
+
+- Publicação da atualização visual da Previsão confirmada em18/10/2026,01:51 America/Sao_Paulo, versão f8ad7bbf. PR253 e CI completa aprovados; tabela editável, controles de linhas/colunas e Salvar preservados.
+
+## 2026-10-18 — Previsão comparativa por empreendimento
+
+- Sete empreendimentos iniciais com pares Previsão/Realizado e reordenação conjunta de cabeçalhos e valores.
+- Total por corretor, acumulados no rodapé, entrada numérica e tabela responsiva sem rolagem horizontal.
+- Compatibilidade de leitura do legado, validação de gravação na API/RPC e preservação de permissões, revisão e rascunho.
+
+- Corrigida a precedência da expressão JSON no teste de exclusão parcial de empreendimento, preservando as 36 verificações pgTAP.
+
+- Preservado o foco de teclado ao inserir/excluir linhas em previsões com cabeçalhos antigos personalizados.
+
+- Removida declaração redundante do índice do laço na validação SQL de empreendimentos.

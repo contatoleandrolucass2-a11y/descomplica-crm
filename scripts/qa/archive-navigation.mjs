@@ -44,6 +44,7 @@ const dashboardLinks = [
 export const archiveManagementNavigationContract = [
   ["Visão geral", "/app/gestao"],
   ["Rotina", "/app/gestao/rotina"],
+  ["Previsão", "/app/gestao/previsao"],
   ["Meta", "/app/configuracoes/metas"],
 ];
 const administrationLinks = [

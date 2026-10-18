@@ -19,10 +19,12 @@ const sourceFiles = [
   "app/(protected)/app/_components/DashboardReport.tsx",
   "app/(protected)/app/_components/DashboardAutoRefresh.tsx",
   "app/(protected)/app/_components/DashboardReport.module.css",
-  "app/(protected)/app/_components/DashboardPulse.tsx",
-  "app/(protected)/app/_components/DashboardPulse.module.css",
   "app/(protected)/app/_components/DashboardComparisons.tsx",
   "app/(protected)/app/_components/DashboardComparisons.module.css",
+  "app/(protected)/app/_components/DashboardFilters.tsx",
+  "app/(protected)/app/_components/DashboardFilters.module.css",
+  "app/(protected)/app/_components/DashboardMonthlyHistory.tsx",
+  "app/(protected)/app/_components/DashboardMonthlyHistory.module.css",
   "app/(protected)/app/_components/analytics/analytics.module.css",
   "app/(protected)/app/_components/analytics/Charts.tsx",
   "app/(protected)/app/_components/analytics/DataDisplay.tsx",
@@ -33,15 +35,11 @@ const sourceFiles = [
   "app/globals.css",
   "lib/crm/dashboard/presentation.ts",
   "lib/crm/dashboard/catalog.ts",
+  "lib/crm/dashboard/analysis-contract.ts",
+  "lib/crm/dashboard/analysis.ts",
+  "lib/crm/dashboard/management-goals.ts",
 ];
-const sections = [
-  "Convers\u00e3o por etapa",
-  "Realizado e meta lado a lado",
-  "Ritmo",
-  "Efici\u00eancia do funil",
-  "Realizado Funil",
-  "Corretores por gerente",
-];
+const sections = ["Funis comerciais", "Metas", "Períodos do mês", "Histórico e média por venda"];
 
 // Only generated values enter this harness. No environment files, auth or data loaders.
 function syntheticDashboard() {
@@ -94,6 +92,43 @@ function syntheticDashboard() {
   };
 }
 
+function syntheticAnalysis() {
+  const facts = [];
+  for (let month = 1; month <= 10; month += 1) {
+    const date = `2026-${String(month).padStart(2, "0")}-${month === 10 ? "13" : "15"}`;
+    for (let owner = 0; owner < 2; owner += 1) {
+      for (const [stage, multiplier] of [10, 6, 3, 2, 1].entries()) {
+        const count = (month === 10 ? 2 : month) * (owner + 1) * multiplier;
+        facts.push([
+          stage,
+          date,
+          owner,
+          owner,
+          owner,
+          owner,
+          owner,
+          count,
+          stage === 4 ? count * 250000 : 0,
+          stage === 3 ? count / 2 : 0,
+        ]);
+      }
+    }
+  }
+  return {
+    version: 1,
+    viewKey: "all",
+    coverageStart: "2026-01-01",
+    referenceDate: "2026-10-13",
+    dimensions: {
+      managers: ["Gerencia sintetica Alfa", "Gerencia sintetica Beta"],
+      owners: ["Responsavel sintetico Alfa", "Responsavel sintetico Beta"],
+      companies: ["Empresa sintetica Alfa", "Empresa sintetica Beta"],
+      developments: ["Empreendimento sintetico Alfa", "Empreendimento sintetico Beta"],
+    },
+    facts,
+  };
+}
+
 function scenarios() {
   const dashboard = syntheticDashboard();
   const complete = {
@@ -137,10 +172,20 @@ function scenarios() {
   const overCapacity = structuredClone(complete);
   overCapacity.dashboard.metrics.all.visits.currentMonth = 45;
   overCapacity.dashboard.metrics.all.folders.currentMonth = 102;
+  const fractional = structuredClone(complete);
+  for (const metrics of Object.values(fractional.dashboard.metrics)) {
+    for (const [index, stage] of stages.entries()) {
+      for (const field of Object.keys(metrics[stage])) {
+        metrics[stage][field] = [2.9, 0.6, null, 0.6, 0.6][index];
+      }
+    }
+  }
   return {
     complete,
+    analysis: { ...complete, today: "2026-10-13" },
     zero,
     large,
+    fractional,
     "over-capacity": overCapacity,
     "no-goals": noGoals,
     unavailable: {
@@ -211,23 +256,48 @@ async function bundle() {
             return `const router = { refresh() {
               window.qaRefreshes = (window.qaRefreshes || 0) + 1;
               if (!window.qaDeferRefresh) window.qaApplyPublished?.();
+            }, replace(url, options) {
+              window.qaReplacements.push({url, options});
+              queueMicrotask(() => window.qaNavigate(url));
             } };
-            export function useRouter() { return router; }`;
+            export function useRouter() { return router; }
+            export function useSearchParams() { return new URLSearchParams(window.location.search); }`;
           if (id === entry)
             return `
               import { createRoot } from "react-dom/client";
               import { flushSync } from "react-dom";
               import { DashboardReport } from "@/app/(protected)/app/_components/DashboardReport";
+              import { analyzeDashboard, applyDashboardAnalysis, emptyDashboardFilters, parseDashboardFilters, DASHBOARD_FILTER_KEYS } from "@/lib/crm/dashboard/analysis";
+              import { dashboardAnalysisSliceSchema } from "@/lib/crm/dashboard/analysis-contract";
               import { ProtectedShellFrame } from "@/app/(protected)/_components/ProtectedShellFrame";
               import shellStyles from "@/app/(protected)/_components/ProtectedShell.module.css";
               import analyticsStyles from "@/app/(protected)/app/_components/analytics/analytics.module.css";
               import "@/app/globals.css";
               const fixtures = ${JSON.stringify(scenarios())};
+              const analysisSlice = dashboardAnalysisSliceSchema.parse(${JSON.stringify(syntheticAnalysis())});
               const root = createRoot(document.getElementById("root"));
               window.qaRefreshes = 0;
+              window.qaReplacements = [];
               window.qaRender = (scenario = "complete", overrides = {}) => {
                 if (!Object.hasOwn(fixtures, scenario)) throw new Error("Unknown synthetic scenario");
                 const props = { ...structuredClone(fixtures[scenario]), ...overrides };
+                if (scenario === "analysis") {
+                  props.filters = overrides.filters ?? emptyDashboardFilters();
+                  props.analysis = analyzeDashboard(analysisSlice, props.filters);
+                  props.dashboard = applyDashboardAnalysis(props.dashboard, props.analysis, props.selectedView);
+                } else if (props.dashboard) {
+                  props.analysis = analyzeDashboard(analysisSlice, emptyDashboardFilters());
+                  const metrics = props.dashboard.metrics[props.selectedView];
+                  for (const [period, field] of Object.entries({month: "currentMonth", "previous-week": "previousWeek", "current-week": "currentWeek", yesterday: "yesterday", today: "currentToday"})) {
+                    props.analysis.periodReadings[period] = props.analysis.periodReadings[period].map((reading, index, readings) => {
+                      const value = metrics?.[reading.key]?.[field] ?? null;
+                      const previous = index ? metrics?.[readings[index - 1].key]?.[field] ?? null : null;
+                      return {...reading, value, conversion: value !== null && previous > 0 ? value / previous : null};
+                    });
+                  }
+                  if (scenario === "no-goals") props.analysis.brokerCount = null;
+                  if (scenario === "zero") props.analysis.brokerCount = 0;
+                }
                 window.qaCurrentProps = props;
                 flushSync(() => root.render(
                   <ProtectedShellFrame shellClassName={shellStyles.shell} contentClassName={shellStyles.mainContent}
@@ -238,6 +308,16 @@ async function bundle() {
                   </ProtectedShellFrame>
                 ));
                 document.documentElement.dataset.scenario = scenario;
+              };
+              window.qaNavigate = (href) => {
+                const next = new URL(href, location.href);
+                if (next.origin !== location.origin || next.pathname !== "/app") throw new Error("Nonlocal harness navigation");
+                const filters = parseDashboardFilters(Object.fromEntries(DASHBOARD_FILTER_KEYS.map(key => [key, next.searchParams.getAll(key)])));
+                history.replaceState(null, "", next);
+                window.qaRender(document.documentElement.dataset.scenario, {
+                  ...window.qaCurrentProps, filters,
+                  selectedPeriod: next.searchParams.get("period") || "month",
+                });
               };
               window.qaApplyPublished = () => {
                 if (!window.qaNextDashboard) return;
@@ -251,6 +331,7 @@ async function bundle() {
               if (["month", "week", "today"].includes(query.get("period"))) overrides.selectedPeriod = query.get("period");
               if (fixtures[scenario]?.authorizedViews.includes(query.get("view"))) overrides.selectedView = query.get("view");
               if (${JSON.stringify(themes)}.includes(query.get("theme"))) document.documentElement.dataset.theme = query.get("theme");
+              if (scenario === "analysis") overrides.filters = parseDashboardFilters(Object.fromEntries(DASHBOARD_FILTER_KEYS.map(key => [key, query.getAll(key)])));
               window.qaRender(scenario, overrides);
             `;
         },
@@ -372,24 +453,51 @@ async function settle(page) {
     .toBe(0);
 }
 
-async function checkStructure(page) {
-  await expect(page.getByRole("heading", { level: 1 })).toHaveText(
-    "Relat\u00f3rio completo da equipe.",
-  );
+export async function checkStructure(page) {
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Dashboard | Resumo Geral");
   for (const name of sections) {
     await expect(page.getByRole("heading", { name: new RegExp(`^${name}`, "i") })).toHaveCount(1);
   }
   await expect(page.locator("main")).not.toContainText(/NaN|Infinity|undefined/);
   await expect(page.locator("main dt").filter({ hasText: /^Fonte$/ })).toHaveCount(0);
   await expect(page.locator("main")).not.toContainText("Salesforce Analytics Reports API");
-  await expect(page.locator('[aria-labelledby="report-pulse-title"] li[data-stage]')).toHaveCount(
-    5,
+  await expect(
+    page.locator('#report-pulse-title, [aria-labelledby="report-pulse-title"]'),
+  ).toHaveCount(0);
+  await expect(page.locator("main")).not.toContainText(
+    /Conversão por etapa|Ritmo de vendas|Parecer de ritmo/,
   );
-  await expect(page.locator('[aria-labelledby="report-pulse-title"] figure')).toHaveCount(5);
-  await expect(page.locator('[aria-labelledby="report-monthly-title"] article')).toHaveCount(6);
-  const funnels = page.locator('[aria-labelledby="report-monthly-title"] figure');
-  await expect(funnels).toHaveCount(6);
+  await expect(page.locator("[data-dashboard-source] figure circle")).toHaveCount(0);
+  const headingGeometry = await page.getByRole("heading", { level: 1 }).evaluate((heading) => ({
+    fontSize: parseFloat(getComputedStyle(heading).fontSize),
+    headerHeight: heading.parentElement.parentElement.getBoundingClientRect().height,
+  }));
+  assert.ok(headingGeometry.fontSize <= 24, "Compact dashboard heading");
+  assert.ok(headingGeometry.headerHeight <= 120, "Compact dashboard header including metadata");
+  await expect(
+    page.locator('[aria-labelledby="report-monthly-title"] article[data-tone]'),
+  ).toHaveCount(13);
+  const funnels = page.locator(
+    '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"]',
+  );
+  await expect(funnels).toHaveCount(13);
+  for (const [group, labels] of [
+    ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
+    ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
+    [
+      "history",
+      ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
+    ],
+  ]) {
+    const region = page.locator(`[aria-labelledby="report-${group}-title"]`);
+    await expect(region.locator("article[data-tone]")).toHaveCount(labels.length);
+    await expect(region.locator("h3:visible")).toHaveText(labels);
+    await expect(region.locator('figure[aria-label^="Funil mensal:"]')).toHaveCount(labels.length);
+  }
   for (const funnel of await funnels.all()) {
+    for (const quantity of await funnel.locator("dd").allTextContents()) {
+      assert.match(quantity.trim(), /^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/);
+    }
     await expect(funnel).toHaveAccessibleName(/^Funil mensal: /);
     await expect(funnel.locator("dt")).toHaveText([
       "Oportunidades",
@@ -413,9 +521,13 @@ async function checkStructure(page) {
       if (index > 0) assert.ok(steps[index].width < steps[index - 1].width, "Narrowing funnel");
     }
   }
-  const tables = page.locator('[aria-labelledby="report-operational-title"] table');
-  await expect(tables).toHaveCount(4);
-  for (const table of await tables.all()) await expect(table.locator("tbody tr")).toHaveCount(5);
+  await expect(
+    page.locator("#report-operational-title, #report-diagnosis-title, #report-team-title"),
+  ).toHaveCount(0);
+  await expect(page.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
+  for (const name of ["Mês", "Semana", "Hoje"])
+    await expect(page.getByRole("button", { name, exact: true })).toHaveCount(0);
+  await expect(page.locator('a[href*="/etapas/"]')).toHaveCount(0);
 }
 
 async function checkLayout(page) {
@@ -423,6 +535,14 @@ async function checkLayout(page) {
     const problems = [];
     if (document.documentElement.scrollWidth > innerWidth + 1)
       problems.push("document horizontal overflow");
+    for (const region of document.querySelectorAll(
+      "main section[aria-labelledby], main details[open]",
+    )) {
+      if (region.scrollWidth > region.clientWidth + 1)
+        problems.push(
+          `${region.getAttribute("aria-labelledby") || "open disclosure"}: horizontal overflow`,
+        );
+    }
     for (const element of document.querySelectorAll(
       "main h1, main h2, main h3, main a, main button, main summary, main dt, main dd, main td",
     )) {
@@ -463,10 +583,272 @@ async function checkLayout(page) {
   }));
 }
 
+export async function captureDashboardScreenshot(page, { path, section, dialog = false } = {}) {
+  if (dialog) {
+    // Modal dialogs belong to the current viewport, not a stitched full document.
+    await expect(page.locator("dialog[open]")).toBeVisible();
+    return page.screenshot({ path, fullPage: false });
+  }
+  // Locator screenshots scroll their targets into view and displace sticky chrome
+  // in subsequent full-page captures. Keep native CSS and capture from document zero.
+  await page.evaluate(() => window.scrollTo({ top: 0, left: 0, behavior: "instant" }));
+  await expect.poll(() => page.evaluate(() => [window.scrollX, window.scrollY])).toEqual([0, 0]);
+  const header = page.locator("[data-protected-shell] > header");
+  await expect(header).toHaveCSS("position", "sticky");
+  const headerBox = await header.boundingBox();
+  assert.ok(
+    headerBox && Math.abs(headerBox.y) <= 1,
+    "Native sticky header must be at document top",
+  );
+  const clip = section ? await section.boundingBox() : undefined;
+  if (section)
+    assert.ok(clip && clip.width > 0 && clip.height > 0, "Visible section bounds required");
+  return page.screenshot({ path, fullPage: true, ...(clip ? { clip } : {}) });
+}
+
+export async function verifyMonthlyHistory(page, { title, months, sales, screenshot } = {}) {
+  const trigger = page.getByRole("button", { name: `Ver histórico mensal: ${title}`, exact: true });
+  await trigger.focus();
+  await page.keyboard.press("Enter");
+  const dialog = page.getByRole("dialog", { name: `${title}: histórico mensal`, exact: true });
+  await expect(dialog).toBeVisible();
+  const close = dialog.getByRole("button", { name: "Fechar histórico mensal", exact: true });
+  await expect(close).toBeFocused();
+  await expect(
+    dialog.getByRole("heading", { name: `Meses considerados (${months.length})`, exact: true }),
+  ).toBeVisible();
+  assert.deepEqual(
+    await dialog
+      .locator("section ul time")
+      .evaluateAll((nodes) => nodes.map((node) => node.dateTime)),
+    months,
+  );
+  await expect(dialog.getByRole("figure")).toHaveCount(months.length ? 5 : 0);
+  if (sales) {
+    await expect(
+      dialog.getByRole("figure", { name: "Vendas", exact: true }).locator("li > span"),
+    ).toHaveText(
+      sales.map((value) =>
+        new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 }).format(value),
+      ),
+    );
+  }
+  for (const key of ["Tab", "Shift+Tab"]) {
+    await page.keyboard.press(key);
+    await expect(close).toBeFocused();
+  }
+  const layout = await dialog.evaluate((element) => {
+    const box = element.getBoundingClientRect();
+    const clipped = [...element.querySelectorAll("h2,h3,button,time,span,figcaption")]
+      .filter(
+        (node) =>
+          node.checkVisibility() && node.clientWidth && node.scrollWidth > node.clientWidth + 2,
+      )
+      .map((node) => node.textContent);
+    return {
+      left: box.left,
+      right: box.right,
+      viewport: innerWidth,
+      overflow: element.scrollWidth > element.clientWidth + 1,
+      clipped,
+    };
+  });
+  assert.ok(
+    layout.left >= 0 && layout.right <= layout.viewport + 1,
+    "History dialog must fit viewport",
+  );
+  assert.equal(layout.overflow, false, "History dialog horizontal overflow");
+  assert.deepEqual(layout.clipped, [], "History dialog clipped labels");
+  const axe = await new AxeBuilder({ page }).include("dialog[open]").analyze();
+  assert.deepEqual(
+    axe.violations.filter(({ impact }) => impact === "serious" || impact === "critical"),
+    [],
+    "History dialog axe",
+  );
+  if (screenshot) await captureDashboardScreenshot(page, { path: screenshot, dialog: true });
+  await page.keyboard.press("Escape");
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  await trigger.click();
+  await expect(dialog).toBeVisible();
+  await close.click();
+  await expect(dialog).not.toBeVisible();
+  await expect(trigger).toBeFocused();
+  return { months, focusReturned: true, escapeClosed: true, layout };
+}
+
+export async function verifyFilterDismissal(page) {
+  const summaries = page.locator('summary[aria-labelledby^="filter-"]');
+  await expect(summaries).toHaveCount(4);
+  const before = await page.evaluate(() => ({
+    url: location.href,
+    filters: window.qaCurrentProps.filters,
+  }));
+  for (const summary of await summaries.all()) {
+    const menu = summary.locator("..");
+    await summary.click();
+    await expect(menu).toHaveAttribute("open", "");
+    await checkLayout(page);
+    await page.getByRole("heading", { level: 1 }).click();
+    await expect(menu).not.toHaveAttribute("open", "");
+    await summary.focus();
+    await page.keyboard.press("Enter");
+    await expect(menu).toHaveAttribute("open", "");
+    await page.keyboard.press("Escape");
+    await expect(menu).not.toHaveAttribute("open", "");
+    await expect(summary).toBeFocused();
+  }
+  await summaries.nth(0).click();
+  await summaries.nth(1).focus();
+  await page.keyboard.press("Enter");
+  await expect(summaries.nth(0).locator("..")).not.toHaveAttribute("open", "");
+  await expect(summaries.nth(1).locator("..")).toHaveAttribute("open", "");
+  await summaries.nth(2).focus();
+  await expect(summaries.nth(1).locator("..")).not.toHaveAttribute("open", "");
+  assert.deepEqual(
+    await page.evaluate(() => ({ url: location.href, filters: window.qaCurrentProps.filters })),
+    before,
+  );
+  return {
+    outsidePointer: 4,
+    escape: 4,
+    focusReturn: true,
+    exclusiveMenu: true,
+    focusOutside: true,
+  };
+}
+
+export async function verifySaleNormalization(page) {
+  const values = () =>
+    page.getByRole("figure", { name: "Funil mensal: Média venda", exact: true }).locator("dd");
+  await expect(values()).toHaveText(["10", "6", "3", "2", "Indisponível", "1"]);
+  const original = await page.evaluate(() => window.qaCurrentProps);
+  try {
+    for (const sales of [0, null]) {
+      await page.evaluate((sales) => {
+        const props = structuredClone(window.qaCurrentProps);
+        props.dashboard.metrics.all.sales.yearClosedMonthsAverage = sales;
+        window.qaRender("complete", props);
+      }, sales);
+      await expect(values()).toHaveText(Array(6).fill("Indisponível"));
+      await expect(page.locator("main")).not.toContainText(/NaN|Infinity/);
+    }
+  } finally {
+    await page.evaluate((props) => window.qaRender("analysis", props), original);
+  }
+  return { perSale: [10, 6, 3, 2, null, 1], zeroAndMissingSales: "unavailable" };
+}
+
+export async function verifyAnalysisInteractions(page) {
+  await page.evaluate(() => {
+    history.replaceState(null, "", "/app?scenario=analysis&view=all&period=week");
+    window.qaReplacements = [];
+    window.qaRender("analysis", { selectedPeriod: "week" });
+  });
+  const value = (label, stage) =>
+    page
+      .getByRole("figure", { name: `Funil mensal: ${label}`, exact: true })
+      .locator(`[data-stage="${stage}"] dd`);
+  const select = async (key, label, checked = true) => {
+    const summary = page.locator(`summary[aria-labelledby="filter-${key} value-${key}"]`);
+    const menu = summary.locator("..");
+    if (!(await menu.evaluate((element) => element.open))) await summary.click();
+    await page.getByRole("checkbox", { name: label, exact: true }).setChecked(checked);
+    await expect(page.getByRole("checkbox", { name: label, exact: true })).toBeChecked({ checked });
+    if (await menu.evaluate((element) => element.open)) await summary.click();
+  };
+  await expect(value("Meta mês", "appointments")).toHaveText("54");
+  await expect(value("Meta mês", "visits")).toHaveText("16");
+  await expect(value("Meta mês", "sales")).toHaveText("2");
+  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0");
+  await expect(value("Mês atual", "sales")).toHaveText("6");
+  await expect(value("Média do ano", "sales")).toHaveText("15");
+  await expect(value("Média dos últimos 3 meses", "sales")).toHaveText("24");
+  await expect(value("Mês anterior", "sales")).toHaveText("27");
+  await verifySaleNormalization(page);
+  for (const [label, sales] of [
+    ["Mês (Períodos do mês)", "6"],
+    ["Semana anterior", "0"],
+    ["Esta semana", "6"],
+    ["Ontem", "0"],
+    ["Hoje", "6"],
+    ["Mês (Histórico)", "6"],
+  ]) {
+    await expect(value(label, "sales")).toHaveText(sales);
+  }
+  const year = Array.from(
+    { length: 9 },
+    (_, index) => `2026-${String(index + 1).padStart(2, "0")}`,
+  );
+  await verifyMonthlyHistory(page, {
+    title: "Média do ano",
+    months: year,
+    sales: [3, 6, 9, 12, 15, 18, 21, 24, 27],
+  });
+  await verifyMonthlyHistory(page, {
+    title: "Média dos últimos 3 meses",
+    months: year.slice(-3),
+    sales: [21, 24, 27],
+  });
+  await verifyMonthlyHistory(page, { title: "Mês anterior", months: year.slice(-1), sales: [27] });
+  await select("owner", "Responsavel sintetico Alfa");
+  await expect(value("Meta mês", "appointments")).toHaveText("27");
+  await expect(value("Meta mês", "visits")).toHaveText("8");
+  await expect(value("Meta mês", "folders")).toHaveText("4");
+  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0");
+  await expect(value("Mês atual", "sales")).toHaveText("2");
+  await expect(value("Média do ano", "sales")).toHaveText("5");
+  await expect(value("Mês anterior", "sales")).toHaveText("9");
+  await expect(value("Média venda", "sales")).toHaveText("1");
+  await expect(value("Média venda", "opportunities")).toHaveText("10");
+  const firstNavigation = await page.evaluate(() => window.qaReplacements.at(-1));
+  const query = new URL(firstNavigation.url, "http://127.0.0.1").searchParams;
+  assert.deepEqual(query.getAll("owner"), ["Responsavel sintetico Alfa"]);
+  assert.equal(query.get("view"), "all");
+  assert.equal(query.has("period"), false);
+  assert.deepEqual(firstNavigation.options, { scroll: false });
+  await verifyMonthlyHistory(page, {
+    title: "Média do ano",
+    months: year,
+    sales: [1, 2, 3, 4, 5, 6, 7, 8, 9],
+  });
+  await select("owner", "Responsavel sintetico Beta");
+  await expect(value("Meta mês", "sales")).toHaveText("2");
+  await expect(value("Mês atual", "sales")).toHaveText("6");
+  await select("manager", "Gerencia sintetica Beta");
+  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Mês atual", "sales")).toHaveText("4");
+  await select("manager", "Gerencia sintetica Beta", false);
+  await select("owner", "Responsavel sintetico Alfa", false);
+  await select("owner", "Responsavel sintetico Beta", false);
+  await expect(value("Meta mês", "sales")).toHaveText("2");
+  await expect(page.getByRole("button", { name: "Limpar filtros", exact: true })).toHaveCount(0);
+  await select("company", "Empresa sintetica Alfa");
+  await expect(value("Mês atual", "sales")).toHaveText("2");
+  await select("channel", "SPC - CANAL IMOB PJ");
+  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Mês atual", "sales")).toHaveText("2");
+  await select("channel", "SPC - CANAL IMOB PJ", false);
+  await select("company", "Empresa sintetica Alfa", false);
+  await expect(value("Mês atual", "sales")).toHaveText("6");
+  assert.deepEqual(await page.evaluate(() => window.qaCurrentProps.filters), {
+    channel: [],
+    manager: [],
+    owner: [],
+    company: [],
+  });
+  return {
+    months: year,
+    recalculatedBrokerCounts: [2, 1, 2, 1, 2, 1, 2],
+    navigation: firstNavigation,
+  };
+}
+
 async function keyboardDetails(page) {
   const details = page.locator("main details");
   const count = await details.count();
-  assert.ok(count > 0, "Authorized ranking must remain in a details disclosure");
+  assert.ok(count > 0, "Filters and conversion details remain keyboard accessible");
   for (let index = 0; index < count; index++) {
     const disclosure = details.nth(index);
     const summary = disclosure.locator(":scope > summary");
@@ -518,6 +900,7 @@ async function run() {
   let browser;
   let page;
   const check = async (name, action) => {
+    process.stdout.write(`Checking ${name}\n`);
     try {
       const details = await action();
       report.checks.push({ name, status: "passed", ...(details ? { details } : {}) });
@@ -550,7 +933,7 @@ async function run() {
     page.on("pageerror", (error) => report.pageErrors.push(error.message));
     await page.goto(server.origin);
     await checkStructure(page);
-    for (const scenario of ["complete", "unavailable"]) {
+    for (const scenario of ["complete", "unavailable", "analysis"]) {
       await page.evaluate((name) => window.qaRender(name), scenario);
       for (const theme of themes) {
         await page.evaluate((value) => {
@@ -558,12 +941,13 @@ async function run() {
         }, theme);
         for (const width of widths) {
           const label = `${scenario}/${theme}/${width}`;
+          process.stdout.write(`Viewport ${label}\n`);
           await page.setViewportSize({ width, height: 900 });
           await settle(page);
           if (scenario === "complete" && width === 1440) {
             report.themeSamples[theme] = await page.evaluate(() => {
               const card = document.querySelector(
-                '[aria-labelledby="report-pulse-title"] li[data-stage]',
+                '[aria-labelledby="report-goals-title"] article[data-tone]',
               );
               return {
                 background: getComputedStyle(card).backgroundColor,
@@ -589,19 +973,34 @@ async function run() {
             );
             return { violations: axe.violations.map(({ id, impact }) => ({ id, impact })) };
           });
-          await page.screenshot({
+          await captureDashboardScreenshot(page, {
             path: path.join(directory, `${scenario}-${theme}-${width}.png`),
-            fullPage: true,
           });
+          if (scenario === "analysis") {
+            await check(`${label}/filter-dismissal`, () => verifyFilterDismissal(page));
+            await check(`${label}/history-popup`, () =>
+              verifyMonthlyHistory(page, {
+                title: "Média do ano",
+                months: Array.from(
+                  { length: 9 },
+                  (_, index) => `2026-${String(index + 1).padStart(2, "0")}`,
+                ),
+                sales: [3, 6, 9, 12, 15, 18, 21, 24, 27],
+                screenshot: path.join(directory, `analysis-history-${theme}-${width}.png`),
+              }),
+            );
+          }
           if (scenario === "complete" && [320, 1440, 1920].includes(width)) {
-            for (const section of ["pulse", "diagnosis", "operational"]) {
-              await page.locator(`[aria-labelledby="report-${section}-title"]`).screenshot({
+            for (const section of ["goals", "periods", "history"]) {
+              await captureDashboardScreenshot(page, {
+                section: page.locator(`[aria-labelledby="report-${section}-title"]`),
                 path: path.join(directory, `${section}-${theme}-${width}.png`),
               });
             }
           }
           if (scenario === "complete" && width !== 768)
-            await page.locator('[aria-labelledby="report-monthly-title"]').screenshot({
+            await captureDashboardScreenshot(page, {
+              section: page.locator('[aria-labelledby="report-monthly-title"]'),
               path: path.join(directory, `funnels-${theme}-${width}.png`),
             });
         }
@@ -613,26 +1012,19 @@ async function run() {
         3,
       );
     });
+    await check("analysis/filters-history-goals-navigation", () =>
+      verifyAnalysisInteractions(page),
+    );
     await page.evaluate(() => window.qaRender("complete"));
     await check("keyboard/details", () => keyboardDetails(page));
-    await check("ranking/authorized", async () => {
+    await check("ranking/removed-from-dashboard", async () => {
       const ranking = page
         .locator("main details")
         .filter({ hasText: "Empreendimento sintetico Alfa" });
-      await expect(ranking).toHaveCount(1);
-      await ranking.locator(":scope > summary").focus();
-      await page.keyboard.press("Enter");
+      await expect(ranking).toHaveCount(0);
       await expect(
-        ranking.getByText("Empreendimento sintetico Alfa", { exact: true }),
-      ).toBeVisible();
-      await settle(page);
-      const axe = await new AxeBuilder({ page }).include("main details[open]").analyze();
-      assert.deepEqual(
-        axe.violations.filter(({ impact }) => impact === "serious" || impact === "critical"),
-        [],
-        "Opened ranking axe",
-      );
-      await page.screenshot({ path: path.join(directory, "ranking-open.png"), fullPage: true });
+        page.locator("#report-team-title, #report-diagnosis-title, #report-operational-title"),
+      ).toHaveCount(0);
     });
     await check("refresh/synthetic-only", async () => {
       await page.getByRole("button", { name: /atualizar/i }).click();
@@ -661,7 +1053,7 @@ async function run() {
           assert.equal(url.searchParams.get("view"), "with_canal_imob");
       }
     });
-    for (const scenario of ["zero", "no-goals", "large", "over-capacity"]) {
+    for (const scenario of ["zero", "no-goals", "large", "over-capacity", "fractional"]) {
       await page.evaluate((name) => window.qaRender(name), scenario);
       await check(`${scenario}/structure`, () => checkStructure(page));
       for (const width of widths) {
@@ -671,23 +1063,51 @@ async function run() {
       if (scenario === "large")
         await check("large/exact-values", async () => {
           await expect(
-            page
-              .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
-              .locator('[data-stage="sales"] dd'),
-          ).toHaveText("9.876.543,2");
+            page.locator('[aria-label="Funil mensal: Mês atual"] [data-stage="sales"] dd'),
+          ).toHaveText("9.876.543");
+        });
+      if (scenario === "fractional")
+        await check("fractional/floor-and-unrounded-conversion", async () => {
+          const current = page
+            .locator('[aria-labelledby="report-goals-title"] article')
+            .filter({ has: page.getByRole("heading", { name: "Mês atual", exact: true }) });
+          await expect(current.locator("figure dd")).toHaveText([
+            "2",
+            "0",
+            "Indisponível",
+            "0",
+            "Indisponível",
+            "0",
+          ]);
+          await current.locator("summary").click();
+          await expect(
+            current
+              .locator("details dl > div")
+              .filter({ has: page.locator("dt", { hasText: "Oportunidades para agendamentos" }) })
+              .locator("dd"),
+          ).toHaveText("20,7%");
+          await expect(
+            current
+              .locator("dl > div")
+              .filter({ has: page.locator("dt", { hasText: "Conversão total" }) })
+              .locator("dd"),
+          ).toHaveText("20,7%");
         });
       if (scenario === "over-capacity")
         await check("over-capacity/exact-ratio", async () => {
-          const figure = page.locator(
-            '[aria-labelledby="report-pulse-title"] li[data-stage="folders"] figure',
-          );
-          await expect(figure).toHaveAttribute("data-overflow", "true");
-          await expect(figure.locator("strong")).toHaveText("226,7%");
-          await expect(figure).toHaveAccessibleName(/226,7%.*acima de 100%/);
-          await expect(figure.locator("circle")).toHaveCount(3);
+          const current = page
+            .locator('[aria-labelledby="report-goals-title"] article')
+            .filter({ has: page.getByRole("heading", { name: "Mês atual", exact: true }) });
+          await current.locator("summary").click();
+          await expect(
+            current
+              .locator("details dl > div")
+              .filter({ has: page.locator("dt", { hasText: "Visitas para pastas" }) })
+              .locator("dd"),
+          ).toHaveText("226,7%");
         });
       await settle(page);
-      await page.screenshot({ path: path.join(directory, `${scenario}.png`), fullPage: true });
+      await captureDashboardScreenshot(page, { path: path.join(directory, `${scenario}.png`) });
     }
     await check("refresh/automatic-published-snapshot", async () => {
       const waitForStatusReads = await observeDashboardStatusReads(page);
@@ -717,20 +1137,20 @@ async function run() {
         const next = structuredClone(window.qaCurrentProps.dashboard);
         next.generatedAt = "2026-10-14T15:03:00.000Z";
         next.updatedAt = "2026-10-14T15:03:05.000Z";
-        next.metrics.all.sales.currentMonth = 321;
+        next.metrics.all.sales.currentWeek = 321;
         window.qaNextDashboard = next;
       });
       currentVersion = {
         generatedAt: "2026-10-14T15:03:00.000Z",
         updatedAt: "2026-10-14T15:03:05.000Z",
       };
-      const sales = page
-        .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
-        .locator('[data-stage="sales"] dd');
+      const sales = page.locator(
+        '[aria-label="Funil mensal: Esta semana"] [data-stage="sales"] dd',
+      );
       await page.clock.runFor(30_100);
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(1);
       await waitForStatusReads(statusReads);
-      await expect(sales).toHaveText("100");
+      await expect(sales).toHaveText("7");
       for (const event of ["focus", "online", "focus"]) {
         const previousReads = statusReads;
         await page.evaluate((type) => window.dispatchEvent(new Event(type)), event);
@@ -756,13 +1176,13 @@ async function run() {
       currentVersion = { ...currentVersion, updatedAt: "2026-10-14T15:04:00.000Z" };
       await page.evaluate(() => {
         window.qaNextDashboard.updatedAt = "2026-10-14T15:04:00.000Z";
-        window.qaNextDashboard.metrics.all.sales.currentMonth = 322;
+        window.qaNextDashboard.metrics.all.sales.currentWeek = 322;
         window.dispatchEvent(new Event("focus"));
       });
       await expect(sales).toHaveText("322");
       await expect.poll(() => page.evaluate(() => window.qaRefreshes)).toBe(2);
       await page.clock.resume();
-      return { statusReads, routerRefreshes: 2, finalMonthlySales: 322, period: "week" };
+      return { statusReads, routerRefreshes: 2, finalWeeklySales: 322, period: "week" };
     });
     await check("browser/errors-and-network", () => {
       assert.deepEqual(report.pageErrors, [], "pageerror");
@@ -783,7 +1203,7 @@ async function run() {
     report.error = error.stack;
     if (page)
       await page
-        .screenshot({ path: path.join(directory, "failure.png"), fullPage: true })
+        .screenshot({ path: path.join(directory, "failure.png"), fullPage: false })
         .catch(() => {});
   } finally {
     await browser?.close();

@@ -11,7 +11,7 @@ export async function verifyMfaViaRoute(
   void _previousState;
   const flow = formData.get("flow");
   const destination =
-    flow === "challenge" ? "/app" : flow === "enrollment" ? "/conta/seguranca?mfa=enabled" : null;
+    flow === "challenge" ? "/" : flow === "enrollment" ? "/conta/seguranca?mfa=enabled" : null;
   if (!destination) return { status: "error", message: GENERIC_MFA_ERROR };
 
   try {

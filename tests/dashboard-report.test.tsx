@@ -1,10 +1,32 @@
 import { parseFragment, type DefaultTreeAdapterMap } from "parse5";
-import { createElement, type ComponentProps } from "react";
+import {
+  createElement,
+  isValidElement,
+  type ComponentProps,
+  type ReactElement,
+  type ReactNode,
+} from "react";
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { DashboardMetric, DashboardReadModel } from "@/lib/crm/dashboard/data";
-import type { DashboardPeriodKey, DashboardStageKey } from "@/lib/crm/dashboard/catalog";
+import type { DashboardStageKey } from "@/lib/crm/dashboard/catalog";
+import {
+  analyzeDashboard,
+  applyDashboardAnalysis,
+  emptyDashboardFilters,
+  parseDashboardFilters,
+} from "@/lib/crm/dashboard/analysis";
+import {
+  DASHBOARD_CHANNELS,
+  type DashboardAnalysisFact,
+} from "@/lib/crm/dashboard/analysis-contract";
+
+const navigation = vi.hoisted(() => ({ query: "", replace: vi.fn(), refresh: vi.fn() }));
+vi.mock("react", async (original) => ({
+  ...(await original<typeof import("react")>()),
+  useTransition: () => [false, (callback: () => void) => callback()],
+}));
 
 vi.mock("next/link", () => ({
   default: ({ href, children, ...props }: ComponentProps<"a"> & { prefetch?: boolean }) => {
@@ -13,19 +35,22 @@ vi.mock("next/link", () => ({
     return createElement("a", { ...anchor, href }, children);
   },
 }));
-vi.mock("next/navigation", () => ({ useRouter: () => ({ refresh: vi.fn() }) }));
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ refresh: navigation.refresh, replace: navigation.replace }),
+  useSearchParams: () => new URLSearchParams(navigation.query),
+}));
 
 import { DashboardReport } from "@/app/(protected)/app/_components/DashboardReport";
+import { DashboardFilters } from "@/app/(protected)/app/_components/DashboardFilters";
+
+beforeEach(() => {
+  vi.clearAllMocks();
+  navigation.query = "";
+});
 
 type Node = DefaultTreeAdapterMap["node"];
 type Element = DefaultTreeAdapterMap["element"];
 type Props = ComponentProps<typeof DashboardReport>;
-
-const pulseUnavailable = {
-  quantity: "N/DQuantidade indisponível para este intervalo.",
-  goal: "N/DMeta indisponível para o período.",
-  progress: "N/DSem base suficiente para calcular o realizado da meta.",
-};
 
 function metric(overrides: Partial<DashboardMetric> = {}): DashboardMetric {
   return {
@@ -106,6 +131,28 @@ function fixture(): DashboardReadModel {
   };
 }
 
+function analysisFixture(brokers = 10) {
+  return analyzeDashboard(
+    {
+      version: 1,
+      viewKey: "all",
+      coverageStart: "2026-01-01",
+      referenceDate: "2026-10-13",
+      dimensions: {
+        managers: ["Gerente sintético"],
+        owners: Array.from({ length: brokers }, (_, index) => `Corretor sintético ${index + 1}`),
+        companies: ["Empresa sintética"],
+        developments: ["Empreendimento sintético"],
+      },
+      facts: Array.from(
+        { length: brokers },
+        (_, owner): DashboardAnalysisFact => [0, "2026-10-13", 0, owner, 0, owner % 2, 0, 1, 0, 0],
+      ),
+    },
+    emptyDashboardFilters(),
+  );
+}
+
 function render(overrides: Partial<Props> = {}) {
   const props: Props = {
     dashboard: fixture(),
@@ -143,6 +190,32 @@ function attribute(node: Element, name: string) {
   return node.attrs.find((attr) => attr.name === name)?.value;
 }
 
+function insideDialog(node: Node): boolean {
+  if (!("parentNode" in node) || !node.parentNode) return false;
+  return (
+    ("tagName" in node.parentNode && node.parentNode.tagName === "dialog") ||
+    insideDialog(node.parentNode)
+  );
+}
+
+function monthlyFigures(root: Node) {
+  return elements(root, "figure").filter((node) =>
+    attribute(node, "aria-label")?.startsWith("Funil mensal:"),
+  );
+}
+
+type InteractiveProps = {
+  children?: ReactNode;
+  onChange?: () => void;
+  onClick?: () => void;
+  checked?: boolean;
+};
+function interactiveElements(node: ReactNode, tag: string): Array<ReactElement<InteractiveProps>> {
+  if (Array.isArray(node)) return node.flatMap((child) => interactiveElements(child, tag));
+  if (!isValidElement<InteractiveProps>(node)) return [];
+  return [...(node.type === tag ? [node] : []), ...interactiveElements(node.props.children, tag)];
+}
+
 function only(nodes: Element[]): Element {
   expect(nodes).toHaveLength(1);
   return nodes[0]!;
@@ -162,64 +235,59 @@ function card(root: Node, title: string) {
   );
 }
 
-function pulseCard(root: Node, title: string) {
-  return only(
-    elements(section(root, "report-pulse-title"), "li").filter((node) =>
-      elements(node, "h3").some((heading) => text(heading) === title),
-    ),
-  );
-}
-
 function value(root: Node, label: string) {
   const term = only(elements(root, "dt").filter((node) => text(node) === label));
   expect(term.parentNode).not.toBeNull();
   return text(only(elements(term.parentNode!, "dd")));
 }
 
-function diagnosis(root: Node, title: string) {
-  const heading = only(
-    elements(section(root, "report-diagnosis-title"), "h3").filter((node) => text(node) === title),
-  );
-  return text(only(elements(heading.parentNode!, "strong")));
-}
-
 function structuralContract(root: Node) {
-  expect(elements(root, "h1").map(text)).toEqual(["Relat\u00f3rio completo da equipe."]);
+  expect(elements(root, "h1").map(text)).toEqual(["Dashboard | Resumo Geral"]);
   expect(elements(root, "h2").map(text)).toEqual(
     expect.arrayContaining([
-      "Convers\u00e3o por etapa",
-      "Realizado e meta lado a lado",
-      "Efici\u00eancia do funil",
-      "Realizado Funil",
-      "Corretores por gerente",
+      "Funis comerciais",
+      "Metas",
+      "Períodos do mês",
+      "Histórico e média por venda",
     ]),
   );
-  const pulse = section(root, "report-pulse-title");
-  expect(elements(pulse, "article")).toHaveLength(0);
-  expect(elements(pulse, "li")).toHaveLength(5);
-  expect(elements(pulse, "figure")).toHaveLength(5);
-  expect(elements(pulse, "h3").map(text)).toEqual([
-    "Oportunidades",
-    "Agendamentos",
-    "Visitas",
-    "Pastas",
-    "Vendas",
-  ]);
+  expect(
+    elements(root, "section").some(
+      (node) => attribute(node, "aria-labelledby") === "report-pulse-title",
+    ),
+  ).toBe(false);
+  expect(elements(root, "figure").flatMap((figure) => elements(figure, "circle"))).toHaveLength(0);
+  expect(text(root)).not.toMatch(/Conversão por etapa|Ritmo de vendas|Parecer de ritmo/);
   const monthly = section(root, "report-monthly-title");
-  expect(elements(monthly, "article")).toHaveLength(6);
-  expect(elements(monthly, "h3").map(text)).toEqual([
-    "M\u00e9dia do ano",
-    "M\u00e9dia dos \u00faltimos 3 meses",
-    "M\u00eas anterior",
-    "Meta atual",
+  const blocks = elements(monthly, "article").filter((node) => !insideDialog(node));
+  expect(blocks).toHaveLength(13);
+  expect(monthlyFigures(monthly)).toHaveLength(13);
+  expect(
+    elements(monthly, "h3")
+      .filter((node) => !insideDialog(node))
+      .map(text),
+  ).toEqual([
+    "Meta mês",
     "Meta esperada at\u00e9 hoje",
     "M\u00eas atual",
-    "Ritmo de vendas",
+    "Mês",
+    "Semana anterior",
+    "Esta semana",
+    "Ontem",
+    "Hoje",
+    "Média do ano",
+    "Média dos últimos 3 meses",
+    "Mês anterior",
+    "Mês",
+    "Média venda",
   ]);
-  for (const block of elements(monthly, "article")) {
-    const funnel = only(elements(block, "figure"));
-    expect(attribute(funnel, "aria-label")).toBe(
-      `Funil mensal: ${text(only(elements(block, "h3")))}`,
+  for (const block of blocks) {
+    const funnel = only(monthlyFigures(block));
+    const title = text(only(elements(block, "h3").filter((node) => !insideDialog(node))));
+    expect(attribute(funnel, "aria-label")).toMatch(
+      title === "Mês"
+        ? /^Funil mensal: Mês \((Períodos do mês|Histórico)\)$/
+        : new RegExp(`^Funil mensal: ${title}$`),
     );
     expect(elements(funnel, "dt").map(text)).toEqual([
       "Oportunidades",
@@ -238,42 +306,76 @@ function structuralContract(root: Node) {
       "sales",
     ]);
     expect(value(funnel, "Pastas aprovadas")).toBe("Indisponível");
-  }
-  const tables = elements(section(root, "report-operational-title"), "table");
-  expect(tables).toHaveLength(4);
-  expect(tables.map((table) => text(only(elements(table, "caption"))).split(":")[0])).toEqual([
-    "Agendamentos",
-    "Visitas",
-    "Pastas",
-    "Vendas",
-  ]);
-  for (const table of tables) {
-    expect(elements(only(elements(table, "thead")), "th").map(text)).toEqual([
-      "Intervalo",
-      "Anterior",
-      "Realizado",
-      "Varia\u00e7\u00e3o",
-      "Meta",
-      "% realizado da meta",
-    ]);
-    const rows = elements(only(elements(table, "tbody")), "tr");
-    expect(rows).toHaveLength(5);
-    expect(rows.map((row) => text(only(elements(row, "strong"))))).toEqual([
-      "M\u00eas",
-      "\u00daltimos 14 dias",
-      "\u00daltimos 7 dias",
-      "Semana",
-      "Dia",
-    ]);
-    for (const row of rows) {
-      expect(elements(row, "th")).toHaveLength(1);
-      expect(elements(row, "td")).toHaveLength(5);
+    for (const quantity of elements(funnel, "dd")) {
+      expect(text(quantity)).toMatch(/^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/);
     }
   }
+  for (const [id, count] of [
+    ["report-goals-title", 3],
+    ["report-periods-title", 5],
+    ["report-history-title", 5],
+  ] as const) {
+    expect(monthlyFigures(section(root, id))).toHaveLength(count);
+  }
+  expect(elements(root, "section").map((node) => attribute(node, "aria-labelledby"))).not.toEqual(
+    expect.arrayContaining(["report-diagnosis-title"]),
+  );
+  expect(text(root)).not.toMatch(
+    /Corretores por gerente|Realizado Funil|Ranking validado|Outros indicadores/,
+  );
   expect(text(root)).not.toMatch(/NaN|Infinity|undefined/);
 }
 
 describe("DashboardReport: regressao com dados sinteticos", () => {
+  it.each([0.6, 2.9, null])(
+    "exibe floor de %s em todos os periodos e historicos sem substituir nulo por zero",
+    (quantity) => {
+      const dashboard = fixture();
+      const analysis = analysisFixture();
+      for (const readings of Object.values(analysis.periodReadings)) {
+        for (const reading of readings) reading.value = quantity;
+      }
+      for (const stage of stagesForTest()) {
+        dashboard.metrics.all![stage].yearClosedMonthsAverage = quantity;
+        dashboard.metrics.all![stage].lastThreeClosedMonthsAverage = quantity;
+        dashboard.metrics.all![stage].previousMonth = quantity;
+      }
+      const root = render({ dashboard, analysis });
+      const expected = quantity === null ? "Indisponível" : String(Math.floor(quantity));
+      for (const group of ["report-periods-title", "report-history-title"]) {
+        for (const funnel of monthlyFigures(section(root, group))) {
+          const saleAverage = attribute(funnel, "aria-label") === "Funil mensal: Média venda";
+          for (const stage of elements(funnel, "div")) {
+            expect(text(only(elements(stage, "dd")))).toBe(
+              attribute(stage, "data-stage") === "approved-folders"
+                ? "Indisponível"
+                : saleAverage && quantity !== null
+                  ? "1"
+                  : expected,
+            );
+          }
+        }
+      }
+      expect(value(card(section(root, "report-goals-title"), "Mês atual"), "Vendas")).toBe(
+        expected,
+      );
+    },
+  );
+
+  it("calcula percentuais sobre valores fracionarios originais antes do floor visual", () => {
+    const dashboard = fixture();
+    for (const stage of stagesForTest()) dashboard.metrics.all![stage].previousMonth = 0.6;
+    dashboard.metrics.all!.opportunities.previousMonth = 2.9;
+    const root = render({ dashboard, analysis: analysisFixture() });
+    const previous = card(section(root, "report-history-title"), "Mês anterior");
+    expect(value(previous, "Oportunidades")).toBe("2");
+    expect(value(previous, "Agendamentos")).toBe("0");
+    expect(value(previous, "Oportunidades para agendamentos")).toBe("20,7%");
+    expect(value(previous, "Conversão total Vendas / oportunidades")).toBe("20,7%");
+    const expected = card(section(root, "report-goals-title"), "Meta esperada até hoje");
+    expect(value(expected, "Agendamentos para visitas")).toBe("29,6%");
+  });
+
   it("preserva os blocos completos com snapshot disponivel", () => structuralContract(render()));
 
   it("preserva a fonte no atributo sem Fonte, API ou contexto repetido no header", () => {
@@ -298,8 +400,12 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
   });
 
   it("desenha os funis com valores atuais, sem copiar numeros do print ou estimar aprovadas", () => {
-    const monthly = section(render(), "report-monthly-title");
-    expect(elements(monthly, "figure")).toHaveLength(6);
+    const analysis = analysisFixture();
+    analysis.periodReadings.month.forEach((reading) => {
+      reading.value = fixture().metrics.all![reading.key].currentMonth;
+    });
+    const monthly = section(render({ analysis }), "report-monthly-title");
+    expect(monthlyFigures(monthly)).toHaveLength(13);
     const current = only(elements(card(monthly, "Mês atual"), "figure"));
     expect(elements(current, "dd").map(text)).toEqual([
       "2.000",
@@ -315,12 +421,16 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
 
   it("preserva numeros longos no funil sem abreviar o indicador", () => {
     const dashboard = fixture();
-    dashboard.metrics.all!.sales.currentMonth = 9876543.2;
-    const current = card(section(render({ dashboard }), "report-monthly-title"), "Mês atual");
+    const analysis = analysisFixture();
+    analysis.periodReadings.month.find((reading) => reading.key === "sales")!.value = 9876543.2;
+    const current = card(
+      section(render({ dashboard, analysis }), "report-monthly-title"),
+      "Mês atual",
+    );
     const sales = only(
       elements(current, "div").filter((step) => attribute(step, "data-stage") === "sales"),
     );
-    expect(text(only(elements(sales, "dd")))).toBe("9.876.543,2");
+    expect(text(only(elements(sales, "dd")))).toBe("9.876.543");
     expect(attribute(only(elements(sales, "dd")), "data-long")).toBe("true");
   });
 
@@ -331,104 +441,265 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       teamUnavailableReason: "Equipe sintetica indisponivel.",
     });
     structuralContract(root);
-    for (const block of elements(section(root, "report-pulse-title"), "li")) {
-      expect(elements(block, "dd").map(text)).toEqual([
-        pulseUnavailable.quantity,
-        pulseUnavailable.goal,
-        pulseUnavailable.progress,
-      ]);
-    }
     expect(
       elements(section(root, "report-monthly-title"), "dd").every(
         (node) => text(node) === "Indispon\u00edvel",
       ),
     ).toBe(true);
-    for (const row of elements(section(root, "report-operational-title"), "tbody").flatMap((body) =>
-      elements(body, "tr"),
-    )) {
-      expect(elements(row, "td").map(text)).toEqual(Array(5).fill("Indispon\u00edvel"));
-    }
-    expect(diagnosis(root, "VGV do per\u00edodo")).toBe("Indispon\u00edvel");
-    expect(text(section(root, "report-team-title"))).toContain("Equipe sintetica indisponivel.");
   });
 
-  it.each([
-    ["month", "1.000", "50%", "62,5%", "R$ 42.000.000", "100"],
-    ["week", "70", "35%", "17,5%", "R$ 2.940.000", "43"],
-    ["today", "5", "25%", "6,3%", "R$ 0", "10"],
-  ] as const)(
-    "usa %s no pulso, VGV e gap; conversao difere do atingimento",
-    (period, quantity, conversion, progress, vgv, gap) => {
-      const root = render({ selectedPeriod: period });
-      const appointments = pulseCard(root, "Agendamentos");
-      expect(value(appointments, "Quantidade")).toBe(quantity);
-      expect(text(only(elements(appointments, "strong")))).toBe(conversion);
-      expect(text(only(elements(appointments, "figcaption")))).toBe("Da etapa anterior");
-      expect(attribute(only(elements(appointments, "figure")), "aria-label")).toBe(
-        `Oportunidades para agendamentos: ${conversion}`,
-      );
-      expect(value(appointments, "% realizado da meta")).toBe(progress);
-      expect(diagnosis(root, "VGV do per\u00edodo")).toBe(vgv);
-      expect(diagnosis(root, "Falta para a meta de vendas")).toBe(gap);
+  it.each([["month"], ["week"], ["today"]] as const)(
+    "preserva os funis mensais independentemente do periodo legado %s",
+    (period) => {
+      const root = render({ selectedPeriod: period, analysis: analysisFixture() });
+      structuralContract(root);
       expect(
         value(card(section(root, "report-monthly-title"), "M\u00eas atual"), "Agendamentos"),
-      ).toBe("1.000");
+      ).toBe("0");
     },
   );
 
-  it("usa os campos mensais reais sem derivar uma meta esperada", () => {
+  it("mantem historico e metas indisponiveis sem analysis mesmo com agregados legados", () => {
     const root = render();
     const monthly = section(root, "report-monthly-title");
     for (const [label, expected] of [
-      ["M\u00e9dia do ano", "600"],
-      ["M\u00e9dia dos \u00faltimos 3 meses", "700"],
-      ["M\u00eas anterior", "800"],
-      ["Meta atual", "1.600"],
-      ["M\u00eas atual", "1.000"],
+      ["M\u00e9dia do ano", "Indisponível"],
+      ["M\u00e9dia dos \u00faltimos 3 meses", "Indisponível"],
+      ["M\u00eas anterior", "Indisponível"],
+      ["Meta mês", "Indisponível"],
+      ["M\u00eas atual", "Indisponível"],
     ])
       expect(value(card(monthly, label!), "Agendamentos")).toBe(expected);
     const expected = card(monthly, "Meta esperada at\u00e9 hoje");
     expect(elements(expected, "dd").every((node) => text(node) === "Indispon\u00edvel")).toBe(true);
-    expect(value(monthly, "Esperado at\u00e9 hoje")).toBe("Indispon\u00edvel");
-    expect(value(monthly, "Parecer de ritmo")).toBe("Indispon\u00edvel");
-    expect(diagnosis(root, "Plano de a\u00e7\u00e3o")).toBe("Indispon\u00edvel");
-    for (const label of [
+    expect(elements(root, "fieldset").map((node) => attribute(node, "aria-label"))).toEqual([
       "Canal de vendas",
       "Gerente de Vendas",
-      "Respons\u00e1vel da conta",
+      "Responsável da conta",
       "Empresa",
-    ]) {
-      expect(value(root, label)).toBe("Indispon\u00edvel");
-    }
+    ]);
+    for (const fieldset of elements(root, "fieldset"))
+      expect(attribute(fieldset, "disabled")).toBe("");
+    for (const dialog of elements(root, "dialog")) expect(elements(dialog, "time")).toHaveLength(0);
   });
 
-  it("mantem as cinco janelas operacionais sem inventar metas de 7 ou 14 dias", () => {
-    const tables = elements(section(render(), "report-operational-title"), "table");
-    const rows = elements(only(elements(tables[0]!, "tbody")), "tr");
-    expect(rows.map((row) => elements(row, "td").map(text))).toEqual([
-      ["800", "1.000", "+25%", "1.600", "62,5%"],
-      ["140", "210", "+50%", "Indispon\u00edvel", "Indispon\u00edvel"],
-      ["56", "70", "+25%", "Indispon\u00edvel", "Indispon\u00edvel"],
-      ["42", "70", "+66,7%", "400", "17,5%"],
-      ["10", "5", "-50%", "80", "6,3%"],
+  it("renderiza cada janela a partir das leituras certificadas do periodo", () => {
+    const analysis = analysisFixture();
+    const keys = ["month", "previous-week", "current-week", "yesterday", "today"] as const;
+    keys.forEach((key, index) => {
+      analysis.periodReadings[key].forEach((reading, stage) => {
+        reading.value = (index + 1) * (stage + 1);
+      });
+    });
+    const root = render({ analysis });
+    expect(
+      monthlyFigures(section(root, "report-periods-title")).map((funnel) =>
+        value(funnel, "Agendamentos"),
+      ),
+    ).toEqual(["2", "4", "6", "8", "10"]);
+    expect(value(card(section(root, "report-goals-title"), "Mês atual"), "Agendamentos")).toBe("2");
+    expect(value(card(section(root, "report-history-title"), "Mês"), "Agendamentos")).toBe("2");
+  });
+
+  it("calcula metas mensais pelo cohort filtrado sem reutilizar metas ou equipe legados", () => {
+    const dashboard = fixture();
+    dashboard.goalsAvailable = false;
+    const root = render({
+      dashboard,
+      analysis: analysisFixture(),
+      team: { brokers: 999, managers: [] },
+    });
+    const monthly = section(root, "report-monthly-title");
+    const goals = card(monthly, "Meta mês");
+    expect(text(goals)).toContain("10 corretores no grupo");
+    expect(value(goals, "Oportunidades")).toBe("Indisponível");
+    expect(value(goals, "Agendamentos")).toBe("270");
+    expect(value(goals, "Visitas")).toBe("80");
+    expect(value(goals, "Pastas")).toBe("40");
+    expect(value(goals, "Pastas aprovadas")).toBe("Indisponível");
+    expect(value(goals, "Vendas")).toBe("10");
+    expect(value(card(monthly, "Meta esperada até hoje"), "Agendamentos")).toBe("113");
+    expect(value(card(monthly, "Meta esperada até hoje"), "Vendas")).toBe("4");
+  });
+
+  it("preserva o realizado no mesmo mes com coleta de outro dia", () => {
+    const dashboard = fixture();
+    const root = render({ dashboard, analysis: analysisFixture(), today: "2026-10-14" });
+    expect(value(card(section(root, "report-goals-title"), "Mês atual"), "Oportunidades")).toBe(
+      "10",
+    );
+    expect(text(root)).not.toContain("Parecer de ritmo");
+  });
+
+  it("oculta realizado e historico vencidos mantendo metas do mes vigente", () => {
+    const root = render({ analysis: analysisFixture(), today: "2026-11-02" });
+    expect(text(root)).toContain("Aguardando a coleta do mês vigente.");
+    for (const id of ["report-periods-title", "report-history-title"]) {
+      for (const funnel of monthlyFigures(section(root, id))) {
+        expect(elements(funnel, "dd").map(text)).toEqual(Array(6).fill("Indisponível"));
+      }
+    }
+    const goals = section(root, "report-goals-title");
+    expect(value(card(goals, "Meta mês"), "Vendas")).toBe("10");
+    expect(value(card(goals, "Meta esperada até hoje"), "Vendas")).toBe("0");
+    expect(value(card(goals, "Mês atual"), "Vendas")).toBe("Indisponível");
+  });
+
+  it("normaliza a media anual por uma venda antes de arredondar a exibicao", () => {
+    const analysis = analysisFixture();
+    const dashboard = fixture();
+    const totals = { opportunities: 101, appointments: 40, visits: 13, folders: 7, sales: 3 };
+    for (const stage of Object.keys(totals) as DashboardStageKey[]) {
+      dashboard.metrics.all![stage].yearClosedMonthsAverage = totals[stage] / 9;
+    }
+    const history = section(render({ dashboard, analysis }), "report-history-title");
+    const annual = only(monthlyFigures(card(history, "Média do ano")));
+    expect(elements(annual, "dd").map(text)).toEqual(["11", "4", "1", "0", "Indisponível", "0"]);
+    const average = card(history, "Média venda");
+    expect(elements(only(monthlyFigures(average)), "dd").map(text)).toEqual([
+      "33",
+      "13",
+      "4",
+      "2",
+      "Indisponível",
+      "1",
     ]);
+    expect(value(average, "Conversão total Vendas / oportunidades")).toBe("3%");
+  });
+
+  it.each([0, null])("mantem media por venda indisponivel com denominador anual %s", (sales) => {
+    const dashboard = fixture();
+    dashboard.metrics.all!.sales.yearClosedMonthsAverage = sales;
+    const root = render({ dashboard, analysis: analysisFixture() });
+    const average = card(section(root, "report-history-title"), "Média venda");
+    expect(elements(only(monthlyFigures(average)), "dd").map(text)).toEqual(
+      Array(6).fill("Indisponível"),
+    );
+    expect(value(average, "Conversão total Vendas / oportunidades")).toBe("Indisponível");
+    expect(elements(only(elements(average, "details")), "dd").map(text)).toEqual(
+      Array(4).fill("Indisponível"),
+    );
+    expect(text(root)).not.toMatch(/NaN|Infinity|undefined/);
+  });
+
+  it("nao usa equipe legada como fallback para cohort desconhecido", () => {
+    const root = render({ analysis: { ...analysisFixture(), brokerCount: null } });
+    expect(value(card(section(root, "report-goals-title"), "Meta mês"), "Agendamentos")).toBe(
+      "Indisponível",
+    );
+    expect(value(card(section(root, "report-monthly-title"), "Meta mês"), "Vendas")).toBe(
+      "Indisponível",
+    );
+    expect(
+      value(card(section(root, "report-goals-title"), "Meta esperada até hoje"), "Vendas"),
+    ).toBe("Indisponível");
+  });
+
+  it("exibe somente meses certificados de analysis e preserva historico zero", () => {
+    const analysis = analysisFixture();
+    const dashboard = applyDashboardAnalysis(fixture(), analysis, "all");
+    const root = render({ dashboard, analysis });
+    const monthly = section(root, "report-monthly-title");
+    const yearly = card(monthly, "Média do ano");
+    expect(value(yearly, "Oportunidades")).toBe("0");
+    expect(value(card(monthly, "Mês atual"), "Oportunidades")).toBe("10");
+    const dialog = only(elements(yearly, "dialog"));
+    expect(text(dialog)).not.toContain("Aguardando a coleta detalhada");
+    expect(elements(dialog, "figure")).toHaveLength(5);
+    expect(
+      elements(only(elements(dialog, "ul")), "time").map((node) => attribute(node, "datetime")),
+    ).toEqual([
+      "2026-01",
+      "2026-02",
+      "2026-03",
+      "2026-04",
+      "2026-05",
+      "2026-06",
+      "2026-07",
+      "2026-08",
+      "2026-09",
+    ]);
+    expect(elements(dialog, "time").some((node) => attribute(node, "datetime") === "2026-10")).toBe(
+      false,
+    );
+  });
+
+  it("renderiza os filtros reais com duas opcoes de canal e selecoes preservadas", () => {
+    const analysis = analysisFixture();
+    const filters = parseDashboardFilters({
+      channel: DASHBOARD_CHANNELS[0],
+      owner: "Corretor sintético 1",
+    });
+    const root = render({ analysis, filters });
+    const fieldsets = elements(root, "fieldset");
+    expect(fieldsets).toHaveLength(4);
+    for (const fieldset of fieldsets) expect(attribute(fieldset, "disabled")).toBeUndefined();
+    const channels = only(
+      fieldsets.filter((fieldset) => attribute(fieldset, "aria-label") === "Canal de vendas"),
+    );
+    expect(elements(channels, "label")).toHaveLength(2);
+    expect(new Set(elements(channels, "label").map(text))).toEqual(new Set(DASHBOARD_CHANNELS));
+    expect(
+      elements(root, "input").filter((input) => attribute(input, "checked") !== undefined),
+    ).toHaveLength(2);
+    expect(elements(root, "input").every((input) => attribute(input, "type") === "checkbox")).toBe(
+      true,
+    );
+  });
+
+  it("substitui a URL ao selecionar e remover filtros sem perder view ou parametros externos e nao exibe reset", () => {
+    navigation.query = "view=all&period=week&owner=Corretor+sintético+1&extra=keep";
+    const options = analysisFixture().options;
+    function changeOwner(values: ReturnType<typeof emptyDashboardFilters>, owner: string) {
+      const tree = DashboardFilters({ values, options, available: true });
+      const labels = interactiveElements(tree, "label").filter((label) =>
+        interactiveElements(label, "span").some((span) => span.props.children === owner),
+      );
+      expect(labels).toHaveLength(1);
+      interactiveElements(labels[0], "input")[0]!.props.onChange!();
+    }
+    changeOwner(parseDashboardFilters({ owner: "Corretor sintético 1" }), "Corretor sintético 2");
+    expect(navigation.replace).toHaveBeenCalledTimes(1);
+    let url = new URL(navigation.replace.mock.lastCall![0], "http://127.0.0.1");
+    expect(url.searchParams.getAll("owner")).toEqual([
+      "Corretor sintético 1",
+      "Corretor sintético 2",
+    ]);
+    expect(url.searchParams.get("view")).toBe("all");
+    expect(url.searchParams.get("extra")).toBe("keep");
+    expect(url.searchParams.has("period")).toBe(false);
+    expect(navigation.replace.mock.lastCall![1]).toEqual({ scroll: false });
+    navigation.query = url.searchParams.toString();
+    changeOwner(
+      parseDashboardFilters({ owner: url.searchParams.getAll("owner") }),
+      "Corretor sintético 1",
+    );
+    url = new URL(navigation.replace.mock.lastCall![0], "http://127.0.0.1");
+    expect(url.searchParams.getAll("owner")).toEqual(["Corretor sintético 2"]);
+    navigation.query = `${url.searchParams}&manager=Gerente+sintético&company=Empresa+sintética&channel=${encodeURIComponent(DASHBOARD_CHANNELS[0])}`;
+    const values = parseDashboardFilters({
+      owner: "Corretor sintético 2",
+      manager: "Gerente sintético",
+      company: "Empresa sintética",
+      channel: DASHBOARD_CHANNELS[0],
+    });
+    const tree = DashboardFilters({ values, options, available: true });
+    expect(interactiveElements(tree, "button")).toHaveLength(0);
+    expect(navigation.refresh).not.toHaveBeenCalled();
   });
 
   it("mantem metas indisponiveis quando goalsAvailable=false mesmo com numeros no snapshot", () => {
     const dashboard = fixture();
     dashboard.goalsAvailable = false;
     const root = render({ dashboard });
-    for (const block of elements(section(root, "report-pulse-title"), "li")) {
-      expect(value(block, "Meta")).toBe(pulseUnavailable.goal);
-      expect(value(block, "% realizado da meta")).toBe(pulseUnavailable.progress);
-      expect(text(block)).toContain("Meta indispon\u00edvel");
-    }
     expect(
-      elements(card(section(root, "report-monthly-title"), "Meta atual"), "dd").every(
+      value(card(section(root, "report-goals-title"), "Meta esperada até hoje"), "Vendas"),
+    ).toBe("Indisponível");
+    expect(
+      elements(card(section(root, "report-monthly-title"), "Meta mês"), "dd").every(
         (node) => text(node) === "Indispon\u00edvel",
       ),
     ).toBe(true);
-    expect(diagnosis(root, "Falta para a meta de vendas")).toBe("Indispon\u00edvel");
   });
 
   it("distingue zero realizado, historico ausente, denominador zero e meta zero", () => {
@@ -440,39 +711,40 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       goalMonth: 0,
     });
     dashboard.metrics.all!.visits.previousMonth = 0;
-    const root = render({ dashboard });
-    const appointments = pulseCard(root, "Agendamentos");
-    expect(value(appointments, "Quantidade")).toBe("0");
-    expect(value(appointments, "Meta")).toBe(pulseUnavailable.goal);
-    expect(value(appointments, "% realizado da meta")).toBe(pulseUnavailable.progress);
-    expect(text(only(elements(appointments, "strong")))).toBe("N/D");
-    expect(attribute(only(elements(appointments, "figure")), "aria-label")).toBe(
-      "Oportunidades para agendamentos: Sem base suficiente para calcular a relação.",
-    );
+    const root = render({ dashboard, analysis: analysisFixture(0) });
+    const current = card(section(root, "report-goals-title"), "Mês atual");
+    expect(value(current, "Agendamentos")).toBe("0");
+    expect(value(current, "Oportunidades para agendamentos")).toBe("Indisponível");
+    const zeroGoals = card(section(root, "report-monthly-title"), "Meta mês");
+    expect(value(zeroGoals, "Agendamentos")).toBe("0");
+    expect(value(zeroGoals, "Vendas")).toBe("0");
+    expect(value(zeroGoals, "Oportunidades")).toBe("Indisponível");
     const previous = card(section(root, "report-monthly-title"), "M\u00eas anterior");
     expect(value(previous, "Agendamentos")).toBe("Indispon\u00edvel");
     expect(value(previous, "Visitas")).toBe("0");
-    expect(diagnosis(root, "Convers\u00e3o total")).toBe("Indispon\u00edvel");
+    expect(value(zeroGoals, "Conversão total Vendas / oportunidades")).toBe("Indisponível");
     expect(text(root)).not.toMatch(/NaN|Infinity/);
   });
 
   it("mostra conversao zero com base positiva sem transforma-la em ausencia", () => {
     const dashboard = fixture();
     dashboard.metrics.all!.appointments.currentMonth = 0;
-    const appointments = pulseCard(render({ dashboard }), "Agendamentos");
-    expect(text(only(elements(appointments, "strong")))).toBe("0%");
-    expect(attribute(only(elements(appointments, "figure")), "aria-label")).toBe(
-      "Oportunidades para agendamentos: 0%",
+    const current = card(
+      section(render({ dashboard, analysis: analysisFixture() }), "report-goals-title"),
+      "Mês atual",
     );
-    expect(value(appointments, "% realizado da meta")).toBe("0%");
+    expect(value(current, "Oportunidades para agendamentos")).toBe("0%");
+    expect(value(current, "Conversão total Vendas / oportunidades")).toBe("0%");
   });
 
-  it("preserva atingimento acima de 100% e limita o gap a zero", () => {
+  it("preserva conversao acima de 100% nos funis historicos", () => {
     const dashboard = fixture();
-    dashboard.metrics.all!.sales.currentMonth = 300;
-    const root = render({ dashboard });
-    expect(value(pulseCard(root, "Vendas"), "% realizado da meta")).toBe("150%");
-    expect(diagnosis(root, "Falta para a meta de vendas")).toBe("0");
+    dashboard.metrics.all!.sales.previousMonth = 300;
+    dashboard.metrics.all!.folders.previousMonth = 200;
+    const root = render({ dashboard, analysis: analysisFixture(200) });
+    expect(
+      value(card(section(root, "report-history-title"), "Mês anterior"), "Pastas para vendas"),
+    ).toBe("150%");
   });
 
   it("nao usa outra visao como fallback quando o snapshot selecionado esta ausente", () => {
@@ -484,12 +756,13 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       selectedView: "with_canal_imob",
       authorizedViews: ["with_canal_imob"],
     });
-    expect(value(pulseCard(root, "Agendamentos"), "Quantidade")).toBe(pulseUnavailable.quantity);
-    expect(diagnosis(root, "VGV do per\u00edodo")).toBe("Indispon\u00edvel");
+    expect(value(card(section(root, "report-goals-title"), "Mês atual"), "Agendamentos")).toBe(
+      "Indisponível",
+    );
     structuralContract(root);
   });
 
-  it("preserva view e period nas etapas e limita links as visoes autorizadas", () => {
+  it("remove navegacao de etapas e periodos preservando o recorte autorizado", () => {
     const root = render({
       selectedView: "with_canal_imob",
       selectedPeriod: "week",
@@ -499,20 +772,13 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       (node) => new URL(attribute(node, "href")!, "http://127.0.0.1"),
     );
     const stageLinks = links.filter((url) => url.pathname.startsWith("/app/etapas/"));
-    expect(stageLinks).toHaveLength(5);
-    expect(new Set(stageLinks.map((url) => url.searchParams.get("period")))).toEqual(
-      new Set(["week"]),
-    );
-    expect(new Set(links.map((url) => url.searchParams.get("view")))).toEqual(
-      new Set(["with_canal_imob"]),
-    );
-    expect(
-      new Set(
-        links.filter((url) => url.pathname === "/app").map((url) => url.searchParams.get("period")),
-      ),
-    ).toEqual(new Set<DashboardPeriodKey>(["month", "week", "today"]));
+    expect(stageLinks).toHaveLength(0);
+    expect(links.filter((url) => url.pathname === "/app")).toHaveLength(0);
     expect(text(root)).not.toContain("Empreendimento sintetico Geral");
-    expect(text(root)).toContain("Empreendimento sintetico Canal");
+    expect(text(root)).not.toContain("Empreendimento sintetico Canal");
+    expect(value(card(section(root, "report-goals-title"), "Mês atual"), "Agendamentos")).toBe(
+      "Indisponível",
+    );
   });
 
   it("remove links de etapas, controle de refresh e ranking sem permissao", () => {
@@ -520,41 +786,24 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     expect(elements(root, "a").some((node) => attribute(node, "href")?.includes("/etapas/"))).toBe(
       false,
     );
-    expect(elements(root, "button")).toHaveLength(0);
+    expect(elements(root, "button").map(text)).not.toContain("Atualizar Salesforce");
+    expect(
+      elements(root, "button").some((node) => attribute(node, "aria-label") === "Limpar filtros"),
+    ).toBe(false);
     expect(text(root)).not.toMatch(
       /Empreendimento sintetico|Ranking validado|Oportunidades por empreendimento|Outros indicadores|Gerencia sintetica/,
     );
   });
 
-  it("mantem ranking autorizado dentro de details fechado", () => {
+  it("remove ranking e equipe mesmo autorizados, preservando refresh autorizado", () => {
     const root = render();
-    const details = only(
-      elements(root, "details").filter((node) =>
-        text(node).includes("Empreendimento sintetico Geral"),
-      ),
+    expect(text(root)).not.toMatch(
+      /Empreendimento sintetico|Gerencia sintetica|Ranking validado|Outros indicadores/,
     );
-    expect(attribute(details, "open")).toBeUndefined();
-    expect(text(only(elements(details, "summary")))).toBe("Outros indicadores");
-    expect(text(details)).toContain("Ranking validado");
-    expect(text(details)).toContain("Oportunidades por empreendimento");
     expect(elements(root, "button").map(text)).toContain("Atualizar Salesforce");
   });
-
-  it("mantem equipe por gerente, zero real e ausencia distintos sem divulgar outra visao", () => {
-    const team = section(render(), "report-team-title");
-    expect(value(card(team, "Gerencia sintetica Alfa"), "Corretores")).toBe("7");
-    expect(value(card(team, "Gerencia sintetica Alfa"), "Participa\u00e7\u00e3o na equipe")).toBe(
-      "58,3%",
-    );
-    const empty = section(render({ team: { brokers: 0, managers: [] } }), "report-team-title");
-    expect(value(empty, "Corretores")).toBe("0");
-    const missing = section(
-      render({ team: null, teamUnavailableReason: "Equipe sintetica indisponivel." }),
-      "report-team-title",
-    );
-    expect(text(missing)).toContain("Equipe sintetica indisponivel.");
-    expect(elements(missing, "dd")).toHaveLength(0);
-    const restricted = section(render({ selectedView: "with_canal_imob" }), "report-team-title");
-    expect(text(restricted)).not.toContain("Gerencia sintetica");
-  });
 });
+
+function stagesForTest(): DashboardStageKey[] {
+  return ["opportunities", "appointments", "visits", "folders", "sales"];
+}

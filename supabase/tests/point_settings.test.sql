@@ -129,6 +129,10 @@ values
     'deny',
     'point settings RPC test'
   );
+insert into public.user_permission_overrides (user_id,permission_key,effect,reason)
+select user_id,'crm.settings.points.view','deny','Deny independent point page'
+from public.user_permission_overrides where permission_key='crm.settings.manage';
+
 select set_config('request.jwt.claim.sub', '40000000-0000-0000-0000-000000000001', true);
 select set_config('request.jwt.claim.role', 'authenticated', true);
 set local role authenticated;
@@ -152,7 +156,7 @@ reset request.jwt.claim.sub;
 reset request.jwt.claim.role;
 delete from public.user_permission_overrides
 where user_id = '40000000-0000-0000-0000-000000000001'
-  and permission_key in ('crm.ranking.view', 'crm.settings.manage');
+  and permission_key in ('crm.ranking.view', 'crm.settings.manage', 'crm.settings.points.view');
 update public.profiles
 set is_active = false,
     access_status = 'suspended'

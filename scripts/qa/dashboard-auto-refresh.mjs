@@ -17,16 +17,29 @@ export async function checkDashboardAutoRefresh(page, origin) {
 
 async function verifyDashboardAutoRefresh(page, origin) {
   process.stdout.write("[dashboard-auto-refresh] initial-snapshot\n");
-  const pathname = "/app?view=with_canal_imob&period=week";
+  const selectedChannel = "SPC - CANAL IMOB PJ";
+  const pathname = `/app?view=with_canal_imob&channel=${encodeURIComponent(selectedChannel)}`;
   await page.goto(`${origin}${pathname}`, { waitUntil: "networkidle" });
   const statusResponse = await page.request.get(`${origin}/api/dashboard/status`);
   expect(statusResponse.status()).toBe(200);
   const status = await statusResponse.json();
   expect(status.generatedAt).toEqual(expect.any(String));
   expect(status.updatedAt).toEqual(expect.any(String));
+  const channelFilter = page
+    .getByRole("region", { name: "Filtros do relatório", exact: true })
+    .locator("details")
+    .first();
+  await channelFilter.locator("summary").click();
+  const channelSelection = channelFilter.getByRole("checkbox", {
+    name: selectedChannel,
+    exact: true,
+    includeHidden: true,
+  });
+  await expect(channelSelection).toBeChecked();
   const details = page.locator('[aria-labelledby="report-monthly-title"] details').first();
   await details.locator("summary").click();
   await expect(details).toHaveAttribute("open", "");
+  await expect(channelFilter).not.toHaveAttribute("open", "");
   const scrollBefore = await page.evaluate(() => window.scrollY);
   const urlBefore = page.url();
   const startedAt = await page.evaluate(() => performance.now());
@@ -110,11 +123,15 @@ async function verifyDashboardAutoRefresh(page, origin) {
       { timeout: 10_000 },
     );
     expect(page.url()).toBe(urlBefore);
+    process.stdout.write("[dashboard-auto-refresh] details-preservation\n");
     await expect(details).toHaveAttribute("open", "");
+    process.stdout.write("[dashboard-auto-refresh] scroll-preservation\n");
     expect(
       Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore),
     ).toBeLessThanOrEqual(2);
-    await expect(page.locator(`a[aria-current="page"][href="${pathname}"]`).first()).toBeVisible();
+    await expect(channelFilter).not.toHaveAttribute("open", "");
+    process.stdout.write("[dashboard-auto-refresh] hidden-selection-preservation\n");
+    await expect(channelSelection).toBeChecked();
     process.stdout.write("[dashboard-auto-refresh] passed\n");
     return {
       passed: true,
@@ -122,6 +139,7 @@ async function verifyDashboardAutoRefresh(page, origin) {
       responseComplete: true,
       completionGauge: "resource-timing",
       filters: true,
+      filterDismissed: true,
       scroll: true,
       openDetails: true,
     };

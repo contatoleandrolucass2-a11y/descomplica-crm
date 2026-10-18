@@ -337,7 +337,7 @@ const repasseRoles = new Set<Role>(["master", "admin"]);
 const protectedSurfaces = [
   {
     path: "/app",
-    heading: "Relatório completo da equipe.",
+    heading: "Dashboard | Resumo Geral",
     allowed: activeOperationalRoles,
   },
   {
@@ -372,7 +372,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/ranking",
-    heading: "Ranking das imobiliárias",
+    heading: "Ranking de corretores da House",
     allowed: rankingRoles,
   },
   {
@@ -412,6 +412,7 @@ const protectedSurfaces = [
   },
   { path: "/app/gestao", heading: "Gestão", allowed: activeOperationalRoles },
   { path: "/app/gestao/rotina", heading: "Rotina", allowed: activeOperationalRoles },
+  { path: "/app/gestao/previsao", heading: "Previsão", allowed: adminRoles },
   { path: "/app/simulacao", heading: "Hub de Simulação", allowed: activeOperationalRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
@@ -501,6 +502,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/repasse",
     ...settingsRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     ...simulatorRoutes,
     ...administrationRoutes,
   ]),
@@ -511,6 +513,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/repasse",
     ...settingsRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     ...simulatorRoutes,
     ...administrationRoutes,
   ]),
@@ -555,6 +558,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/repasse",
     "/app/simulacao",
     ...managementRoutes,
+    "/app/gestao/previsao",
     ...administrationNavigationRoutes,
     "/app/configuracoes/metas",
   ]),
@@ -565,6 +569,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/repasse",
     "/app/simulacao",
     ...managementRoutes,
+    "/app/gestao/previsao",
     ...administrationNavigationRoutes,
     "/app/configuracoes/metas",
   ]),
@@ -816,12 +821,12 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(27);
-  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(27);
+  expect(protectedSurfaces).toHaveLength(28);
+  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(28);
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 16 : activeOperationalRoles.has(role) ? 10 : 0,
+      adminRoles.has(role) ? 17 : activeOperationalRoles.has(role) ? 10 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
@@ -831,6 +836,10 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];
+    expect(directRoutes.includes("/app/gestao/previsao"), role).toBe(adminRoles.has(role));
+    expect(expectedHeaderRoutesByRole[role].includes("/app/gestao/previsao"), role).toBe(
+      adminRoles.has(role),
+    );
     for (const route of managementRoutes) {
       expect(directRoutes.includes(route), `${role}: ${route}`).toBe(
         activeOperationalRoles.has(role),
@@ -1504,13 +1513,13 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
 }) => {
   await withRolePage(browser, "master", async (page) => {
     const surfaces = [
-      ["/app", "Relatório completo da equipe."],
+      ["/app", "Dashboard | Resumo Geral"],
       ["/app/etapas/oportunidades", "Oportunidades"],
       ["/app/etapas/agendamentos", "Agendamentos"],
       ["/app/etapas/visitas", "Visitas"],
       ["/app/etapas/pastas", "Pastas"],
       ["/app/etapas/vendas", "Vendas"],
-      ["/app/ranking", "Ranking das imobiliárias"],
+      ["/app/ranking", "Ranking de corretores da House"],
       ["/app/canal-de-parcerias", "Ranking das imobiliárias"],
     ] as const;
 
@@ -1519,42 +1528,105 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
       if (pathname === "/app") {
-        for (const section of ["pulse", "monthly", "diagnosis", "operational", "team"]) {
+        for (const section of ["monthly", "goals", "periods", "history"]) {
           await expect(page.locator(`#report-${section}-title`)).toBeVisible();
         }
         await expect(
-          page.locator('[aria-labelledby="report-operational-title"] table'),
-        ).toHaveCount(4);
+          page.locator(
+            "#report-pulse-title, #report-operational-title, #report-diagnosis-title, #report-team-title",
+          ),
+        ).toHaveCount(0);
         await expect(page.locator('[aria-labelledby="report-monthly-title"] figure')).toHaveCount(
-          6,
+          13,
         );
         await expect(
           page.locator('[aria-labelledby="report-monthly-title"] figure [data-stage]'),
-        ).toHaveCount(36);
+        ).toHaveCount(78);
+        for (const [group, count] of [
+          ["goals", 3],
+          ["periods", 5],
+          ["history", 5],
+        ] as const) {
+          await expect(
+            page.locator(
+              `[aria-labelledby="report-${group}-title"] figure[aria-label^="Funil mensal:"]`,
+            ),
+          ).toHaveCount(count);
+        }
+        await expect(page.locator("main")).not.toContainText(
+          /Conversão por etapa|Ritmo de vendas|Parecer de ritmo/,
+        );
+        await expect(page.locator("[data-dashboard-source] figure circle")).toHaveCount(0);
+        for (const quantity of await page
+          .locator(
+            '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"] dd',
+          )
+          .allTextContents()) {
+          expect(quantity.trim()).toMatch(/^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/);
+        }
       }
       await expect(page.locator("html")).not.toHaveJSProperty("scrollWidth", Number.NaN);
       await expect(page.locator("body")).not.toContainText(/\b(?:NaN|undefined)\b/);
     }
 
-    await expect(page.getByText("Dado indisponível — integração pendente").first()).toBeVisible();
     await expect(
-      page.getByLabel("Visões e filtros do Canal de Parcerias", { exact: true }),
+      page.getByRole("heading", { name: "Nenhuma publicação disponível", exact: true }),
     ).toBeVisible();
+    await expect(page.getByLabel("Filtros do ranking de parcerias", { exact: true })).toBeVisible();
   });
 });
 
-test("dashboard filters retain selected state while partnership ranking stays unavailable", async ({
+test("dashboard uses management filters while stages retain selection and partnership ranking stays unavailable", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
+    for (const period of ["month", "week"]) {
+      const response = await page.goto(`/app?view=with_canal_imob&period=${period}`);
+      expect(response?.status()).toBe(200);
+      const report = page.getByRole("main");
+      const filters = report.getByRole("region", { name: "Filtros do relatório", exact: true });
+      await expect(filters.locator("summary")).toHaveCount(4);
+      for (const label of [
+        "Canal de vendas",
+        "Gerente de Vendas",
+        "Responsável da conta",
+        "Empresa",
+      ]) {
+        await expect(filters.getByText(label, { exact: true })).toBeVisible();
+      }
+      for (const label of [
+        "Com canal de imobiliárias",
+        "Sem canal de imobiliárias",
+        "Mês",
+        "Semana",
+        "Hoje",
+      ]) {
+        await expect(report.getByRole("link", { name: label, exact: true })).toHaveCount(0);
+      }
+      await expect(report.getByRole("heading", { name: "Mês atual", exact: true })).toBeVisible();
+      await expect(report.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
+      await expect(report.locator('[aria-labelledby="report-operational-title"]')).toHaveCount(0);
+      for (const [group, labels] of [
+        ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
+        ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
+        [
+          "history",
+          ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
+        ],
+      ] as const) {
+        const region = report.locator(`[aria-labelledby="report-${group}-title"]`);
+        await expect(region.getByRole("heading", { level: 3 })).toHaveText([...labels]);
+        await expect(region.getByRole("figure")).toHaveCount(labels.length);
+      }
+    }
     const cases = [
       {
-        pathname: "/app?view=with_canal_imob&period=month",
-        selectedHref: "/app?view=with_canal_imob&amp;period=month",
+        pathname: "/app/etapas/oportunidades?view=with_canal_imob&period=month",
+        selectedHref: "/app/etapas/oportunidades?view=with_canal_imob&amp;period=month",
       },
       {
-        pathname: "/app?view=with_canal_imob&period=week",
-        selectedHref: "/app?view=with_canal_imob&amp;period=week",
+        pathname: "/app/etapas/oportunidades?view=with_canal_imob&period=week",
+        selectedHref: "/app/etapas/oportunidades?view=with_canal_imob&amp;period=week",
       },
     ];
 
@@ -1570,25 +1642,59 @@ test("dashboard filters retain selected state while partnership ranking stays un
       );
     }
 
+    // House filters remain on their own route and never render partnership facts.
+    for (const period of ["month", "week"]) {
+      for (const scope of ["brokers", "managers"]) {
+        const response = await page.goto(`/app/ranking?period=${period}&scope=${scope}`);
+        expect(response?.status()).toBe(200);
+        await expect(
+          page.getByRole("heading", {
+            level: 1,
+            name:
+              scope === "brokers"
+                ? "Ranking de corretores da House"
+                : "Ranking de gerentes da House",
+            exact: true,
+          }),
+        ).toBeVisible();
+        const filters = page.getByLabel("Filtros autorizados do ranking", { exact: true });
+        await expect(
+          filters.getByRole("link", {
+            name: scope === "brokers" ? "Corretores" : "Gerentes",
+            exact: true,
+          }),
+        ).toHaveAttribute("aria-current", "page");
+        await expect(
+          filters.getByRole("link", {
+            name: period === "month" ? "Mês atual" : "Esta semana",
+            exact: true,
+          }),
+        ).toHaveAttribute("aria-current", "page");
+        await expect(page.getByRole("main")).not.toContainText(
+          /CANAL IMOB|Ranking das imobiliárias|Publicação Qlik/,
+        );
+      }
+    }
+
     // pgTAP rolls back its Qlik publications; this isolated runtime has no v2 dataset.
     for (const rankingCase of [
       {
-        pathname: "/app/ranking?period=latest&kind=imobs",
+        pathname: "/app/canal-de-parcerias?period=latest&kind=imobs",
         kind: "imobs",
         state: "Nenhuma publicação disponível",
       },
       {
-        pathname: "/app/ranking?period=latest&kind=developments",
+        pathname: "/app/canal-de-parcerias?period=latest&kind=developments",
         kind: "developments",
         state: "Nenhuma publicação disponível",
       },
       {
-        pathname: "/app/ranking?period=month&scope=managers",
+        pathname: "/app/canal-de-parcerias?period=month&scope=managers",
         kind: "imobs",
         state: "Filtros inválidos",
       },
       {
-        pathname: "/app/ranking?period=week&scope=managers",
+        pathname: "/app/canal-de-parcerias?period=week&scope=managers",
         kind: "imobs",
         state: "Filtros inválidos",
       },
@@ -1627,7 +1733,7 @@ test("dashboard filters retain selected state while partnership ranking stays un
       );
       await expect(page.getByRole("searchbox")).toBeDisabled();
       for (const [label, kind] of [
-        ["IMOBs", "imobs"],
+        ["Imobiliárias", "imobs"],
         ["Produtos", "developments"],
       ] as const) {
         const control = page.getByRole("radio", { name: label, exact: true });
@@ -2132,7 +2238,9 @@ test("login, logout and terminal state surfaces remain visually explicit", async
         wrapper.append(clone);
         document.body.append(wrapper);
       }, state);
-      await expect(rolePage.locator(`[data-variant="${state.variant}"]`)).toBeVisible();
+      const evidence = rolePage.locator('[data-qa-state-evidence="true"]');
+      await expect(evidence.locator(`[data-variant="${state.variant}"]`)).toBeVisible();
+      await expect(evidence.getByRole("heading", { name: state.title, exact: true })).toBeVisible();
       await captureState(rolePage, state.variant);
     }
 
@@ -2405,7 +2513,7 @@ test("MFA TOTP upgrades Master to AAL2 and remember-browser never bypasses it", 
       page.getByRole("button", { name: "Verificar e continuar", exact: true }).click(),
     ]);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Relatório completo da equipe." }),
+      page.getByRole("heading", { level: 1, name: "Dashboard | Resumo Geral" }),
     ).toBeVisible();
 
     await page.goto("/conta/seguranca");

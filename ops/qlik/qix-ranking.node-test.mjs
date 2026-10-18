@@ -149,7 +149,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       }
     return [...groups.values()];
   }
-  function cubeModel(role, native) {
+  function cubeModel(role, native, properties) {
     const matrix = () =>
       combined(role, native).map((row, index) =>
         native
@@ -169,12 +169,14 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
     return {
       getEffectiveProperties: async () =>
         invoke(
-          "properties",
-          {
-            qInfo: { qId: mapping.cubes[role].objectId },
-            qHyperCubeDef: structuredClone(cubes[role]),
-          },
-          { role },
+          native ? "properties" : "ownedProperties",
+          native
+            ? {
+                qInfo: { qId: mapping.cubes[role].objectId, qType: "table" },
+                qHyperCubeDef: structuredClone(cubes[role]),
+              }
+            : structuredClone(properties),
+          { role, native },
         ),
       getLayout: async () => {
         const items = combined(role, native);
@@ -183,6 +185,9 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
         return invoke(
           "cubeLayout",
           {
+            qInfo: native
+              ? { qId: mapping.cubes[role].objectId, qType: "table" }
+              : { ...properties.qInfo },
             qHyperCube: {
               qStateName: "$",
               qMode: "S",
@@ -298,8 +303,11 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       if (properties.qSelectionObjectDef) {
         assert.equal(properties.qSelectionObjectDef.qStateName, "$");
         return {
+          getEffectiveProperties: async () =>
+            invoke("ownedProperties", structuredClone(properties)),
           getLayout: async () =>
             invoke("selectionLayout", {
+              qInfo: { ...properties.qInfo },
               qSelectionObject: {
                 qStateName: "$",
                 qSelections: [
@@ -325,10 +333,13 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
       if (properties.qListObjectDef) {
         const field = properties.qListObjectDef.qDef.qFieldDefs[0];
         return {
+          getEffectiveProperties: async () =>
+            invoke("ownedProperties", structuredClone(properties), { field }),
           getLayout: async () =>
             invoke(
               "listLayout",
               {
+                qInfo: { ...properties.qInfo },
                 qListObject: {
                   qStateName: "$",
                   qSize: { qcx: 1, qcy: listValues(field).length },
@@ -379,7 +390,7 @@ function fixture({ hook = (_method, value) => value, rows = 2, periods = 2 } = {
         vgv.qLibraryId ? masters.get(vgv.qLibraryId).qMeasure.qDef : vgv.qDef.qDef,
         masters.get(`synthetic-${role}-vgv-master`).qMeasure.qDef,
       );
-      return cubeModel(role, false);
+      return cubeModel(role, false, properties);
     },
     destroySessionObject: async (id) => {
       assert.ok(state.created.includes(id));
@@ -452,6 +463,63 @@ function aliasFixture(options) {
   });
   config.cubeSha256 = hash(f.cubes.developments);
   return f;
+}
+
+function expressionFixture(kind, expression, repin = true) {
+  const f = kind === "alias" ? aliasFixture() : fixture();
+  const config = f.mapping.cubes.developments;
+  const properties = f.masters.get("synthetic-developments-vgv-master");
+  properties.qMeasure.qDef = expression;
+  if (kind === "inline") {
+    f.cubes.developments.qMeasures[1] = { qDef: structuredClone(properties.qMeasure) };
+    config.masterPins = config.masterPins.filter((pin) => pin.kind !== "measure");
+    if (repin) config.cubeSha256 = hash(f.cubes.developments);
+  } else if (repin && kind === "library") {
+    config.masterPins.find((pin) => pin.kind === "measure").sha256 = hash(properties.qMeasure);
+  } else if (repin) {
+    config.aliasPins.find((pin) => pin.alias === "VGV").propertiesSha256 = hash(properties);
+  }
+  return f;
+}
+
+for (const kind of ["inline", "library", "alias"]) {
+  for (const whitespace of ["\n", "\r\n", "\t", "\r\n\t"]) {
+    test(`pinned ${kind} expression preserves native whitespace ${JSON.stringify(whitespace)}`, async () => {
+      const expression = `Sum(${whitespace}[Synthetic.Amount]${whitespace})`;
+      const f = expressionFixture(kind, expression);
+      const native = structuredClone(f.cubes);
+      const masters = structuredClone([...f.masters]);
+      const collect = runInNewContext(`(${collectQlikRanking.toString()})`, {
+        crypto: webcrypto,
+        TextEncoder,
+      });
+      const result = await collect(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.deepEqual(f.cubes, native);
+      assert.deepEqual([...f.masters], masters);
+      assert.equal(f.state.sessions.size, 0);
+      assert.doesNotMatch(JSON.stringify(result), /Sum\(|Synthetic.Amount/);
+    });
+  }
+
+  test(`formatting changes still require a new ${kind} definition pin`, async () => {
+    const f = expressionFixture(kind, "Sum(\r\n\t[Synthetic.Amount]\r\n)", false);
+    await rejected(f, kind === "inline" ? "definition_changed" : "master_changed");
+  });
+
+  for (const invalid of ["\u0000", "\u000b", "\u000c", "\u001b", "\u007f", "\u0085", "\ud800"]) {
+    test(`pinned ${kind} expression rejects unsupported control ${JSON.stringify(invalid)}`, async () => {
+      await rejected(
+        expressionFixture(kind, `Sum(${invalid}[Synthetic.Amount])`),
+        "measure_unresolved",
+      );
+    });
+  }
+  for (const invalid of ["", " \t\r\n ", "x".repeat(16385)]) {
+    test(`pinned ${kind} expression rejects empty or oversized definition (${invalid.length})`, async () => {
+      await rejected(expressionFixture(kind, invalid), "measure_unresolved");
+    });
+  }
 }
 
 for (const serialized of [false, true]) {
@@ -646,7 +714,7 @@ test("label-only candidate without an approved native title remains blocked", as
   delete properties.qMetaDef.title;
   properties.qMeasure.qLabel = pin.alias;
   pin.propertiesSha256 = hash(properties);
-  await rejected(f, "master_pin_mismatch");
+  await rejected(f, "master_alias_identity");
 });
 
 test("whitespace in an unbound linked-master alias fails closed", async () => {
@@ -697,7 +765,287 @@ for (const serialized of [false, true]) {
   }
 }
 
+for (const serialized of [false, true]) {
+  for (const [name, qData] of [
+    ["absent qData", undefined],
+    ["null qData", null],
+    ["absent title and label", {}],
+    ["null title", { title: null, label: "Synthetic unrelated" }],
+    ["null label", { title: "Synthetic unrelated", label: null }],
+    ["null title and label", { title: null, label: null }],
+    ["multiline title", { title: "synthetic-private-title\nsecond line", label: "" }],
+    ["multiline label", { title: "", label: "synthetic-private-label\r\nsecond line" }],
+    ["control characters", { title: "synthetic-private-\u0000\u0007", label: "\u007f\u0085" }],
+    [
+      "long multiline text",
+      { title: "synthetic-private\n".repeat(1024), label: "\t".repeat(16384) },
+    ],
+  ]) {
+    test(`unrelated ${name} preserves facts without publishing text, serialized=${serialized}`, async () => {
+      const f = aliasFixture({
+        hook(method, value) {
+          if (method === "catalog")
+            value.qMeasureList.qItems.push({
+              qInfo: { qId: "synthetic-unrelated-optional", qType: "measure" },
+              ...(qData === undefined ? {} : { qData }),
+            });
+          return value;
+        },
+      });
+      const reference = aliasFixture();
+      const expected = await collectQlikRanking(reference.global, reference.options);
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      const result = await collect(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.deepEqual(JSON.parse(JSON.stringify(result)), expected);
+      assert.equal(f.state.sessions.size, 0);
+      assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+      assert.ok(!f.state.calls.some((call) => call.id === "synthetic-unrelated-optional"));
+      assert.doesNotMatch(JSON.stringify(result), /synthetic-private|qData|qMetaDef|qLabel/);
+    });
+  }
+  for (const label of [undefined, null, "x".repeat(256)]) {
+    test(`related optional label ${label === undefined ? "absent" : label === null ? "null" : "256 chars"} collects, serialized=${serialized}`, async () => {
+      const f = aliasFixture();
+      for (const pin of f.mapping.cubes.developments.aliasPins) {
+        const properties = f.masters.get(pin.id);
+        if (label === undefined) delete properties.qMeasure.qLabel;
+        else properties.qMeasure.qLabel = label;
+        pin.propertiesSha256 = hash(properties);
+      }
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      const result = await collect(f.global, f.options);
+      assert.equal(result.status, "collected", JSON.stringify(result));
+      assert.equal(f.state.sessions.size, 0);
+      assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+    });
+  }
+}
+
+for (const serialized of [false, true]) {
+  for (const projectedLabel of [undefined, null, ""]) {
+    test(`selected projected label ${JSON.stringify(projectedLabel)} preserves native properties and pins, serialized=${serialized}`, async () => {
+      const f = aliasFixture({
+        hook(method, value) {
+          if (method === "catalog") {
+            const item = value.qMeasureList.qItems.find(
+              (entry) => entry.qInfo.qId === "synthetic-developments-vgv-master",
+            );
+            if (projectedLabel === undefined) delete item.qData.label;
+            else item.qData.label = projectedLabel;
+          }
+          return value;
+        },
+      });
+      const pinsBefore = structuredClone(f.mapping.cubes.developments.aliasPins);
+      const propertiesBefore = structuredClone(f.masters.get(pinsBefore[1].id));
+      assert.notEqual(propertiesBefore.qMeasure.qLabel, "");
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      const result = await collect(f.global, f.options);
+      if (projectedLabel === "")
+        assert.deepEqual(JSON.parse(JSON.stringify(result)), {
+          status: "unavailable",
+          reason: "master_alias_identity",
+        });
+      else {
+        const reference = aliasFixture();
+        const expected = await collectQlikRanking(reference.global, reference.options);
+        assert.equal(result.status, "collected", JSON.stringify(result));
+        assert.deepEqual(JSON.parse(JSON.stringify(result)), expected);
+      }
+      assert.deepEqual(f.mapping.cubes.developments.aliasPins, pinsBefore);
+      assert.deepEqual(f.masters.get(pinsBefore[1].id), propertiesBefore);
+      assert.equal(hash(f.masters.get(pinsBefore[1].id)), pinsBefore[1].propertiesSha256);
+      assert.equal(f.state.sessions.size, 0);
+      assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+      assert.doesNotMatch(
+        JSON.stringify(result),
+        /qData|qLabel|propertiesSha256|Synthetic presentation/,
+      );
+    });
+  }
+  for (const [name, mutate, reason, projection = false] of [
+    [
+      "absent projected title",
+      (item) => {
+        delete item.qData.title;
+        item.qData.label = "VGV";
+      },
+      "master_alias_identity",
+      true,
+    ],
+    [
+      "null projected title",
+      (item) => {
+        item.qData.title = null;
+        item.qData.label = "VGV";
+      },
+      "master_alias_identity",
+      true,
+    ],
+    [
+      "wrong properties ID",
+      (_item, properties) => (properties.qInfo.qId = "synthetic-unapproved"),
+      "master_alias_identity",
+    ],
+    [
+      "wrong properties type",
+      (_item, properties) => (properties.qInfo.qType = "dimension"),
+      "master_alias_identity",
+    ],
+    [
+      "wrong native title",
+      (_item, properties) => (properties.qMetaDef.title = "OTHER"),
+      "master_alias_identity",
+    ],
+    [
+      "changed full properties",
+      (_item, properties) => (properties.qMetaDef.privateNote = "synthetic-private-secret"),
+      "master_changed",
+    ],
+    [
+      "changed native label",
+      (_item, properties) => (properties.qMeasure.qLabel = "synthetic-private-secret"),
+      "master_changed",
+    ],
+  ]) {
+    test(`optional projected label cannot bypass ${name}, serialized=${serialized}`, async () => {
+      const f = aliasFixture({
+        hook(method, value, context) {
+          if (method === "catalog") {
+            const item = value.qMeasureList.qItems.find(
+              (entry) => entry.qInfo.qId === "synthetic-developments-vgv-master",
+            );
+            item.qData.label = null;
+            if (projection) mutate(item);
+          }
+          if (
+            !projection &&
+            method === "master" &&
+            context.id === "synthetic-developments-vgv-master"
+          )
+            mutate(null, value);
+          return value;
+        },
+      });
+      const pinsBefore = structuredClone(f.mapping.cubes.developments.aliasPins);
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      const result = await collect(f.global, f.options);
+      assert.deepEqual(JSON.parse(JSON.stringify(result)), { status: "unavailable", reason });
+      assert.deepEqual(f.mapping.cubes.developments.aliasPins, pinsBefore);
+      assert.equal(f.state.sessions.size, 0);
+      assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+      assert.doesNotMatch(JSON.stringify(result), /synthetic-private|qData|qLabel|qMetaDef/);
+    });
+  }
+}
+
+for (const [name, item] of [
+  ["null item", null],
+  ["array item", []],
+  ["primitive item", "synthetic-private"],
+  ["absent qInfo", {}],
+  ["null qInfo", { qInfo: null }],
+  ["absent ID", { qInfo: { qType: "measure" } }],
+  ["empty ID", { qInfo: { qId: "", qType: "measure" } }],
+  ["non-string ID", { qInfo: { qId: 42, qType: "measure" } }],
+  ["long ID", { qInfo: { qId: "x".repeat(257), qType: "measure" } }],
+  ["unsafe ID", { qInfo: { qId: "synthetic\nprivate", qType: "measure" } }],
+  ["absent type", { qInfo: { qId: "synthetic-unrelated" } }],
+  ["wrong type", { qInfo: { qId: "synthetic-unrelated", qType: "dimension" } }],
+  ...[[], "synthetic-private", 42, false].map((qData) => [
+    `invalid qData ${JSON.stringify(qData)}`,
+    { qInfo: { qId: "synthetic-unrelated", qType: "measure" }, qData },
+  ]),
+]) {
+  test(`catalog rejects ${name} without leaking the item`, async () => {
+    const f = aliasFixture({
+      hook(method, value) {
+        if (method === "catalog") value.qMeasureList.qItems.push(item);
+        return value;
+      },
+    });
+    assert.deepEqual(await rejected(f, "master_catalog_item"), {
+      status: "unavailable",
+      reason: "master_catalog_item",
+    });
+  });
+}
+
+for (const [name, mutate] of [
+  ["different bound ID", (item) => (item.qInfo.qId = "synthetic-unapproved")],
+  ["absent candidate qData", (item) => delete item.qData],
+  ["null candidate qData", (item) => (item.qData = null)],
+]) {
+  test(`catalog rejects ${name} as a binding failure`, async () => {
+    const f = aliasFixture({
+      hook(method, value) {
+        if (method === "catalog")
+          mutate(
+            value.qMeasureList.qItems.find(
+              (item) => item.qInfo.qId === "synthetic-developments-vgv-master",
+            ),
+          );
+        return value;
+      },
+    });
+    assert.deepEqual(await rejected(f, "master_catalog_binding"), {
+      status: "unavailable",
+      reason: "master_catalog_binding",
+    });
+    assert.ok(!f.state.calls.some((call) => call.id === "synthetic-unapproved"));
+  });
+}
+
+test("catalog accepts exactly 4096 unique items with optional qData", async () => {
+  const f = aliasFixture({
+    hook(method, value) {
+      if (method === "catalog") {
+        const items = value.qMeasureList.qItems;
+        while (items.length < 4096)
+          items.push({ qInfo: { qId: `synthetic-unrelated-${items.length}`, qType: "measure" } });
+      }
+      return value;
+    },
+  });
+  assert.equal((await collectQlikRanking(f.global, f.options)).status, "collected");
+  assert.equal(f.state.sessions.size, 0);
+  assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+});
+
 for (const aliasField of ["title", "label"]) {
+  for (const invalid of [
+    "synthetic-private\ntext",
+    "synthetic-private\u0000",
+    "x".repeat(257),
+    42,
+  ]) {
+    test(`related ${aliasField} rejects unsafe companion ${JSON.stringify(invalid)}`, async () => {
+      const f = aliasFixture({
+        hook(method, value) {
+          if (method === "catalog") {
+            const item = value.qMeasureList.qItems.find(
+              (entry) => entry.qInfo.qId === "synthetic-developments-vgv-master",
+            );
+            item.qData = {
+              [aliasField]: "VGV",
+              [aliasField === "title" ? "label" : "title"]: invalid,
+            };
+          }
+          return value;
+        },
+      });
+      await rejected(f, "master_catalog_text");
+    });
+  }
   test(`catalog ${aliasField} alias keeps the other text bounded`, async () => {
     const f = aliasFixture({
       hook(method, value) {
@@ -710,7 +1058,7 @@ for (const aliasField of ["title", "label"]) {
         return value;
       },
     });
-    await rejected(f, "master_pin_mismatch");
+    await rejected(f, "master_catalog_text");
     assert.equal(f.state.sessions.size, 0);
   });
 
@@ -724,30 +1072,32 @@ for (const aliasField of ["title", "label"]) {
         qLabel: aliasField === "label" ? "VGV" : "y".repeat(16384),
       },
     });
-    await rejected(f, "master_pin_mismatch");
+    await rejected(f, "master_catalog_text");
     assert.equal(f.state.sessions.size, 0);
     assert.ok(!f.state.calls.some((call) => call.id === "synthetic-unapproved-collision"));
   });
 }
 
 for (const invalid of [42, {}, [], true]) {
-  test(`unrelated catalog text rejects type ${JSON.stringify(invalid)}`, async () => {
-    const f = aliasFixture({
-      hook(method, value) {
-        if (method === "catalog")
-          value.qMeasureList.qItems.push({
-            qInfo: { qId: "synthetic-unrelated-invalid", qType: "measure" },
-            qData: { title: invalid, label: "x".repeat(257) },
-          });
-        return value;
-      },
+  for (const field of ["title", "label"]) {
+    test(`unrelated catalog ${field} rejects type ${JSON.stringify(invalid)}`, async () => {
+      const f = aliasFixture({
+        hook(method, value) {
+          if (method === "catalog")
+            value.qMeasureList.qItems.push({
+              qInfo: { qId: "synthetic-unrelated-invalid", qType: "measure" },
+              qData: { title: "x".repeat(257), label: "y".repeat(257), [field]: invalid },
+            });
+          return value;
+        },
+      });
+      await rejected(f, "master_catalog_text");
+      assert.equal(f.state.sessions.size, 0);
     });
-    await rejected(f, "master_pin_mismatch");
-    assert.equal(f.state.sessions.size, 0);
-  });
+  }
 }
 
-for (const [name, mutate] of [
+for (const [name, mutate, reason = "master_pin_mismatch"] of [
   ["no pins", (f) => delete f.mapping.cubes.developments.aliasPins],
   ["partial pins", (f) => f.mapping.cubes.developments.aliasPins.pop()],
   [
@@ -760,6 +1110,7 @@ for (const [name, mutate] of [
   [
     "no master candidate, with no variable fallback",
     (f) => f.masters.delete(f.mapping.cubes.developments.aliasPins[0].id),
+    "master_catalog_binding",
   ],
   [
     "mismatched native alias",
@@ -777,12 +1128,13 @@ for (const [name, mutate] of [
       properties.qMeasure.qLabel = pin.alias;
       pin.propertiesSha256 = hash(properties);
     },
+    "master_alias_identity",
   ],
 ]) {
   test(`master aliases reject ${name}`, async () => {
     const f = aliasFixture();
     mutate(f);
-    await rejected(f, "master_pin_mismatch");
+    await rejected(f, reason);
   });
 }
 
@@ -909,7 +1261,7 @@ for (const match of ["title", "label"]) {
         return value;
       },
     });
-    await rejected(f, "master_pin_mismatch");
+    await rejected(f, "master_catalog_binding");
     assert.ok(!f.state.calls.some((call) => call.id === "synthetic-unapproved-collision"));
   });
 }
@@ -928,9 +1280,11 @@ for (const [name, mutate, reason] of [
   [
     "wrong ID",
     (properties) => (properties.qInfo.qId = "synthetic-unapproved"),
-    "master_pin_mismatch",
+    "master_alias_identity",
   ],
-  ["wrong type", (properties) => (properties.qInfo.qType = "variable"), "master_pin_mismatch"],
+  ["wrong type", (properties) => (properties.qInfo.qType = "variable"), "master_alias_identity"],
+  ["wrong title", (properties) => (properties.qMetaDef.title = "OTHER"), "master_alias_identity"],
+  ["wrong label", (properties) => (properties.qMeasure.qLabel = "OTHER"), "master_alias_identity"],
 ]) {
   test(`master alias rejects ${name} without exposing private properties`, async () => {
     const f = aliasFixture({
@@ -949,13 +1303,13 @@ for (const [name, mutate, reason] of [
   [
     "oversized catalog",
     (value) => (value.qMeasureList.qItems = Array(4097).fill({})),
-    "coverage_limit",
+    "master_catalog_coverage_limit",
   ],
   ["reduced catalog", (value) => (value.qMeasureList.qIsReduced = true), "reduced_page"],
   [
     "duplicate item",
     (value) => value.qMeasureList.qItems.push(value.qMeasureList.qItems[0]),
-    "master_pin_mismatch",
+    "master_catalog_item",
   ],
   [
     "wrong catalog identity",
@@ -997,7 +1351,7 @@ for (const checkpoint of ["catalog", "month", "annual"]) {
         return value;
       },
     });
-    await rejected(f, "master_pin_mismatch");
+    await rejected(f, "master_catalog_binding");
     assert.ok(changed);
   });
 }
@@ -1032,6 +1386,99 @@ test("alias catalog cleanup failure is sanitized and cannot produce collected fa
     reason: "cleanup_failed",
   });
 });
+
+for (const serialized of [false, true]) {
+  for (const role of ["imobs", "developments"]) {
+    for (const native of [false, true]) {
+      test(`coverage rejection identifies ${role}/${native ? "native" : "identity"}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value, context) {
+            if (method === "cubeLayout" && context.role === role && context.native === native)
+              value.qHyperCube.qSize.qcy = 5001;
+            return value;
+          },
+        });
+        const collect = serialized
+          ? runInNewContext(`(${collectQlikRanking.toString()})`, {
+              crypto: webcrypto,
+              TextEncoder,
+            })
+          : collectQlikRanking;
+        const result = JSON.parse(JSON.stringify(await collect(f.global, f.options)));
+        assert.deepEqual(result, {
+          status: "unavailable",
+          reason: `${role}_${native ? "native" : "identity"}_coverage_limit`,
+        });
+        assert.equal(f.state.sessions.size, 0);
+        assert.ok(
+          !f.state.calls.some(
+            (call) => call.method === "cubeData" && call.role === role && call.native === native,
+          ),
+        );
+      });
+    }
+  }
+  for (const calendar of [false, true]) {
+    test(`coverage rejection identifies ${calendar ? "calendar" : "selection"} list, serialized=${serialized}`, async () => {
+      const f = fixture({
+        hook(method, value, context) {
+          if (method === "listLayout" && (context.field === CALENDAR) === calendar)
+            value.qListObject.qSize.qcy = 5001;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: calendar ? "calendar_list_coverage_limit" : "selection_list_coverage_limit",
+      });
+      assert.equal(f.state.sessions.size, 0);
+      assert.ok(
+        !f.state.calls.some(
+          (call) => call.method === "listData" && (call.field === CALENDAR) === calendar,
+        ),
+      );
+    });
+  }
+  for (const invalid of [undefined, null, -1, 0.5, "synthetic-private-secret", Infinity]) {
+    test(`invalid page height ${String(invalid)} is not a row-limit rejection, serialized=${serialized}`, async () => {
+      const f = fixture({
+        hook(method, value) {
+          if (method === "listLayout") value.qListObject.qSize.qcy = invalid;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: "page_size_invalid",
+      });
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+  for (const invalid of [null, "synthetic-private-secret", {}]) {
+    test(`invalid catalog shape remains private, serialized=${serialized}, shape=${typeof invalid}`, async () => {
+      const f = aliasFixture({
+        hook(method, value) {
+          if (method === "catalog") value.qMeasureList.qItems = invalid;
+          return value;
+        },
+      });
+      const collect = serialized
+        ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+        : collectQlikRanking;
+      assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
+        status: "unavailable",
+        reason: "master_catalog_shape",
+      });
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+}
 
 async function rejected(f, reason) {
   const result = await collectQlikRanking(f.global, f.options);
@@ -1341,16 +1788,18 @@ test("real Enigma 12.612 binds explicit aliases by pinned library IDs", async ()
   await assertSdkCollection(aliasFixture());
 });
 
-test("strict pagination covers 3001 IDs without reading unrelated native columns", async () => {
-  const f = fixture({ rows: 3001, periods: 1 });
-  const result = await collectQlikRanking(f.global, f.options);
-  assert.equal(result.status, "collected", JSON.stringify(result));
-  assert.equal(result.months[0].developments.rows.length, 3001);
-  assert.ok(
-    f.state.calls.some((call) => call.method === "cubeData" && call.pages[0].qTop === 2500),
-  );
-  assert.equal(f.state.sessions.size, 0);
-});
+for (const rows of [3001, 5000]) {
+  test(`strict pagination covers ${rows} IDs without reading unrelated native columns`, async () => {
+    const f = fixture({ rows, periods: 1 });
+    const result = await collectQlikRanking(f.global, f.options);
+    assert.equal(result.status, "collected", JSON.stringify(result));
+    assert.equal(result.months[0].developments.rows.length, rows);
+    assert.ok(
+      f.state.calls.some((call) => call.method === "cubeData" && call.pages[0].qTop === 2500),
+    );
+    assert.equal(f.state.sessions.size, 0);
+  });
+}
 
 for (const [name, mutate] of [
   [
@@ -1493,12 +1942,153 @@ test("master changes during paging reject the whole observation", async () => {
   await rejected(f, "master_changed");
 });
 
+const stateCases = [
+  ["selectionLayout", "qSelectionObject", "selection_state_unproven", false],
+  ["listLayout", "qListObject", "list_state_unproven", false],
+  ["cubeLayout", "qHyperCube", "cube_state_unproven", false],
+  ["cubeLayout", "qHyperCube", "cube_state_unproven", true],
+];
+
+test("default state proof preserves ten-month reconciliation and explicit creation", async () => {
+  const f = fixture({
+    periods: 10,
+    hook(method, value, context) {
+      if (method === "create" && !context.properties.qMeasureListDef)
+        assert.equal(context.properties.qStateName, "$");
+      const entry = stateCases.find(([name]) => name === method);
+      if (entry) delete value[entry[1]].qStateName;
+      return value;
+    },
+  });
+  const result = await collectQlikRanking(f.global, f.options);
+  assert.equal(result.status, "collected", JSON.stringify(result));
+  assert.equal(f.state.sessions.size, 0);
+});
+
+test("explicit state after a default proof cannot bypass effective definition drift", async () => {
+  let reads = 0;
+  const f = fixture({
+    hook(method, value) {
+      if (method === "selectionLayout" && reads < 2) delete value.qSelectionObject.qStateName;
+      if (method === "ownedProperties" && value.qSelectionObjectDef) {
+        reads++;
+        if (reads > 2) value.syntheticChanged = true;
+      }
+      return value;
+    },
+  });
+  await rejected(f, "selection_state_unproven");
+});
+
 for (const serialized of [false, true]) {
+  for (const [methodName, key, proofCode, native] of stateCases) {
+    const matches = (method, context) =>
+      method === methodName && (method !== "cubeLayout" || context.native === native);
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    for (const omitted of [true, false]) {
+      test(`proves default state from effective properties: ${key}, native=${native}, omitted=${omitted}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value, context) {
+            if (matches(method, context)) {
+              if (omitted) delete value[key].qStateName;
+              else value[key].qStateName = "";
+            }
+            return value;
+          },
+        });
+        if (native) {
+          for (const role of ["imobs", "developments"]) {
+            delete f.cubes[role].qStateName;
+            f.mapping.cubes[role].cubeSha256 = hash(f.cubes[role]);
+          }
+        }
+        const result = await collect(f.global, f.options);
+        assert.equal(result.status, "collected", JSON.stringify(result));
+        assert.equal(f.state.sessions.size, 0);
+        assert.ok(
+          f.state.calls.some((call) => call.method === (native ? "properties" : "ownedProperties")),
+        );
+        assert.doesNotMatch(JSON.stringify(result), /qStateName|qHyperCubeDef|Synthetic.Amount/);
+      });
+    }
+    for (const mutation of [
+      "identity",
+      "type",
+      "root-alternate",
+      "root-null",
+      "definition-state",
+      "definition-change",
+      "extends",
+      "unstable",
+      "later-change",
+      "layout-identity",
+      "layout-state",
+    ]) {
+      test(`rejects unproven default ${mutation}: ${key}, native=${native}, serialized=${serialized}`, async () => {
+        let active = false;
+        let proofReads = 0;
+        const f = fixture({
+          hook(method, value, context) {
+            if (matches(method, context)) {
+              active = true;
+              delete value[key].qStateName;
+              if (mutation === "layout-identity") value.qInfo.qId = "synthetic-other";
+              if (mutation === "layout-state" && proofReads) value[key].qStateName = "alternate";
+            }
+            if (
+              active &&
+              method === (native ? "properties" : "ownedProperties") &&
+              value[`${key}Def`]
+            ) {
+              proofReads++;
+              if (mutation === "identity") value.qInfo.qId = "synthetic-other";
+              if (mutation === "type") value.qInfo.qType = "";
+              if (mutation === "root-alternate") value.qStateName = "alternate";
+              if (mutation === "root-null") value.qStateName = null;
+              if (mutation === "definition-state") value[`${key}Def`].qStateName = "alternate";
+              if (mutation === "definition-change") {
+                if (key === "qSelectionObject") value[`${key}Def`].qStateName = "";
+                else if (key === "qListObject")
+                  value[`${key}Def`].qDef.qFieldDefs = ["Synthetic.Other"];
+                else value[`${key}Def`].qDimensions = [];
+              }
+              if (mutation === "extends") value.qExtendsId = "synthetic-other";
+              if (mutation === "unstable") value.syntheticVersion = proofReads;
+              if (mutation === "later-change" && proofReads > 2) value.syntheticVersion = 1;
+            }
+            return value;
+          },
+        });
+        const result = JSON.parse(JSON.stringify(await collect(f.global, f.options)));
+        assert.deepEqual(result, { status: "unavailable", reason: proofCode });
+        assert.equal(f.state.sessions.size, 0);
+      });
+    }
+    for (const invalid of [null, false, 0, " ", "alternate"]) {
+      test(`rejects unsupported layout state ${JSON.stringify(invalid)}: ${key}, native=${native}, serialized=${serialized}`, async () => {
+        const f = fixture({
+          hook(method, value, context) {
+            if (matches(method, context)) value[key].qStateName = invalid;
+            return value;
+          },
+        });
+        const result = JSON.parse(JSON.stringify(await collect(f.global, f.options)));
+        assert.deepEqual(result, {
+          status: "unavailable",
+          reason: key === "qHyperCube" ? "cube_shape" : "state_mismatch",
+        });
+        assert.equal(f.state.sessions.size, 0);
+      });
+    }
+  }
   for (const state of ["missing", "alternate"]) {
     for (const phase of ["initial", "selected"]) {
-      test(`selection object rejects ${state} state at ${phase}, serialized=${serialized}`, async () => {
+      test(`selection object rejects ${state} state without effective proof at ${phase}, serialized=${serialized}`, async () => {
         const f = fixture({
           hook(method, value) {
+            if (state === "missing" && method === "ownedProperties") delete value.qStateName;
             if (
               method === "selectionLayout" &&
               (phase === "initial" || value.qSelectionObject.qSelections.length)
@@ -1517,7 +2107,7 @@ for (const serialized of [false, true]) {
           : collectQlikRanking;
         assert.deepEqual(JSON.parse(JSON.stringify(await collect(f.global, f.options))), {
           status: "unavailable",
-          reason: "state_mismatch",
+          reason: state === "missing" ? "selection_state_unproven" : "state_mismatch",
         });
         assert.equal(
           f.state.calls.some((call) => call.method === "cubeData"),
@@ -1688,6 +2278,55 @@ test("explicitly unreduced list and cube pages retain the reconciliation path", 
   assert.equal(f.state.sessions.size, 0);
 });
 
+for (const serialized of [false, true]) {
+  test(`zero group tails preserve complete native pages, serialized=${serialized}`, async () => {
+    const f = fixture({
+      hook(method, value) {
+        if (method === "cubeData" || method === "listData")
+          for (const page of value) page.qTails = [{ qUp: 0, qDown: 0 }];
+        return value;
+      },
+    });
+    const collect = serialized
+      ? runInNewContext(`(${collectQlikRanking.toString()})`, { crypto: webcrypto, TextEncoder })
+      : collectQlikRanking;
+    const result = await collect(f.global, f.options);
+    assert.equal(result.status, "collected", JSON.stringify(result));
+    assert.deepEqual(JSON.parse(JSON.stringify(result.months[0].imobs.nativeTotals)), {
+      vgv: "3.00",
+      contracts: 2,
+    });
+    assert.equal(f.state.sessions.size, 0);
+    assert.deepEqual([...f.state.created].sort(), [...f.state.destroyed].sort());
+  });
+}
+
+for (const method of ["listData", "cubeData"]) {
+  for (const tails of [
+    [{ qUp: 1, qDown: 0 }],
+    [{ qUp: 0, qDown: 1 }],
+    [{ qUp: -1, qDown: 0 }],
+    [{ qUp: 0, qDown: 0.5 }],
+    [{ qUp: "0", qDown: 0 }],
+    [{}],
+    [null],
+    { length: 0 },
+    false,
+    Array.from({ length: 100 }, () => ({ qUp: 0, qDown: 0 })),
+  ]) {
+    test(`invalid group tails reject ${method} ${JSON.stringify(tails)}`, async () => {
+      const f = fixture({
+        hook(actual, value) {
+          if (actual === method) value[0].qTails = structuredClone(tails);
+          return value;
+        },
+      });
+      await rejected(f, "incomplete_page");
+      assert.equal(f.state.sessions.size, 0);
+    });
+  }
+}
+
 for (const [name, mutate] of [
   ["missing page", (pages) => pages.pop()],
   ["short page", (pages) => pages[0].qMatrix.pop()],
@@ -1842,7 +2481,7 @@ for (const [name, hook, reason] of [
       if (method === "cubeLayout") value.qHyperCube.qSize.qcy = 5001;
       return value;
     },
-    "coverage_limit",
+    "imobs_native_coverage_limit",
   ],
   [
     "calculation error",

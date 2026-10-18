@@ -103,7 +103,7 @@
 
 .servicesGrid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -134,6 +134,10 @@
 .salesforceLogo {
   max-width: 74px;
   max-height: 52px;
+}
+
+.metaLogo {
+  max-height: 54px;
 }
 
 .logoDark {
@@ -184,6 +188,18 @@
   border-radius: 7px;
   background: var(--analytics-surface);
   padding: 0 16px 12px;
+}
+
+.qlikDetails,
+.metaDetails {
+  margin-bottom: 18px;
+}
+
+.metaActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding-top: 14px;
 }
 
 .salesforceDetailsHeading {
@@ -355,6 +371,7 @@
 }
 .status[data-state="unavailable"],
 .status[data-state="unconfigured"],
+.status[data-state="wrong_account"],
 .status[data-state="reauth_required"] {
   color: var(--analytics-danger-ink);
 }

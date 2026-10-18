@@ -117,6 +117,8 @@
         "app/(protected)/app/configuracoes/recurso-mkt/page.tsx",
         "app/(protected)/app/gestao/page.tsx",
         "app/(protected)/app/gestao/rotina/page.tsx",
+        "app/(protected)/app/gestao/previsao/page.tsx",
+        "app/api/forecasts/route.ts",
         "app/api/routines/route.ts",
         "app/api/routines/completions/route.ts",
         "app/(protected)/app/configuracoes/metas/page.tsx",
@@ -128,6 +130,9 @@
         "tests/marketing-resources.test.tsx",
         "tests/routine-settings.test.tsx",
         "tests/routine-api.test.ts",
+        "tests/forecast-settings.test.tsx",
+        "tests/forecast-api.test.ts",
+        "supabase/tests/crm_forecasts.test.sql",
         "tests/routine-completions-api.test.ts",
         "supabase/tests/crm_routine_completions.test.sql",
         "scripts/qa/marketing-resources.mjs",
@@ -179,12 +184,16 @@
         "app/(protected)/app/configuracoes/conectar-sistemas/page.tsx",
         "app/api/ingest/qlik/route.ts",
         "app/api/ingest/qlik/v2/route.ts",
+        "app/api/ingest/qlik/status/route.ts",
         "app/api/ingest/salesforce/route.ts",
         "app/api/refresh/salesforce/route.ts",
         "app/api/salesforce/status/route.ts",
         "app/api/salesforce/console/route.ts",
         "app/api/salesforce/console/authorize/route.ts",
-        "app/api/health/route.ts"
+        "app/api/health/route.ts",
+        "app/api/meta-ads/status/route.ts",
+        "app/api/meta-ads/console/route.ts",
+        "app/api/meta-ads/console/authorize/route.ts"
       ],
       "evidence": [
         "tests/connected-systems.test.tsx",
@@ -196,7 +205,10 @@
         "tests/ingestion.test.ts",
         "tests/health-route.test.ts",
         "docs/runbooks/salesforce-n8n-migration.md",
-        "docs/runbooks/qlik-ranking-ingestion.md"
+        "docs/runbooks/qlik-ranking-ingestion.md",
+        "tests/meta-ads-connection-status.test.ts",
+        "tests/meta-ads-console-api.test.ts",
+        "docs/runbooks/meta-ads-vps-session.md"
       ]
     }
   ]

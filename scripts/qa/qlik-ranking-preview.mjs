@@ -57,7 +57,7 @@ const built = await build({
           return 'export async function loadQlikRankingV2() { return { status: "unavailable" }; }';
         if (id === guard)
           return `export async function enforcePermission(key) {
-        if (key !== "crm.ranking.view") throw new Error("Unexpected preview permission");
+        if (key !== "crm.partnerships.view") throw new Error("Unexpected preview permission");
       }`;
         if (id === link)
           return `import { createElement } from "react";
@@ -67,7 +67,7 @@ const built = await build({
         if (id === entry)
           return `
         import { renderToStaticMarkup } from "react-dom/server";
-        import RankingPage from "@/app/(protected)/app/ranking/page";
+        import RankingPage from "@/app/(protected)/app/canal-de-parcerias/page";
         import "@/app/globals.css";
         export async function renderPreview(params = {}) {
           return renderToStaticMarkup(await RankingPage({ searchParams: Promise.resolve(params) }));
@@ -128,7 +128,7 @@ if (process.argv.includes("--check")) {
     if (request.headers.host !== host) return response.writeHead(403).end();
     if (!["GET", "HEAD"].includes(request.method)) return response.writeHead(405).end();
     const url = new URL(request.url, `http://${host}`);
-    if (["/", "/app/ranking"].includes(url.pathname)) {
+    if (["/", "/app/canal-de-parcerias"].includes(url.pathname)) {
       const requested = url.searchParams.get("theme");
       const theme = ["light", "balanced", "dark"].includes(requested) ? requested : "light";
       response.setHeader("Content-Type", "text/html; charset=utf-8");
@@ -150,7 +150,7 @@ if (process.argv.includes("--check")) {
     server.once("error", reject);
     server.listen(port, "127.0.0.1", resolve);
   });
-  console.log(`Ranking QA: http://127.0.0.1:${server.address().port}/app/ranking`);
+  console.log(`Ranking QA: http://127.0.0.1:${server.address().port}/app/canal-de-parcerias`);
   console.log("Themes: ?theme=light | balanced | dark. SSR only; no login, data or browser.");
   for (const signal of ["SIGINT", "SIGTERM"]) process.once(signal, () => server.close());
 }

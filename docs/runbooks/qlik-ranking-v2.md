@@ -2,13 +2,21 @@
 
 ## Escopo e estado
 
-Referencia: Canal de Parcerias. Destino: `/app/ranking`. Recorte fixo:
+Referencia: Canal de Parcerias. Destino: `/app/canal-de-parcerias`. Recorte fixo:
 Direcional / SP CAPITAL / CANAL IMOB. A audiencia autorizada e quem possui
-`crm.ranking.view`, com sessao e MFA validados no servidor e no banco.
+`crm.partnerships.view`, com sessao e MFA validados no servidor e no banco.
 
 Implementacao candidata em14/10/2026. A existencia destes arquivos nao comprova
 migration aplicada, autenticacao QIX, coleta, conciliacao, publicacao ou agenda.
 Nao ampliar para clientes, dados de fluxo, outras regionais ou Salesforce.
+
+A página `/app/ranking` permanece exclusiva da House, com o read model
+Salesforce e `crm.ranking.view`. A correção de rota não ativa pesos, bônus ou
+prêmios enquanto a política oficial não estiver aprovada. A migration
+`20261017003100_qlik_partnerships_reader_permission.sql` transfere somente o
+guard do reader Qlik para `crm.partnerships.view`, sem alterar dados, escritor
+ou grants diretos. Aplicá-la com backup da definição anterior e verificação
+pgTAP antes de ativar a coleta; conferir ambas as páginas após o deploy.
 
 ## Fronteiras
 
@@ -65,6 +73,17 @@ Falhas podem incluir um codigo de lista fixa, sem mensagens brutas. Diagnostico
 so e preservado quando o loop aceita o resultado dentro do prazo; timeout,
 cancelamento ou relogio invalido nao reutilizam o motivo de uma coleta tardia.
 
+Os códigos de cobertura distinguem catálogo de masters, listas de seleção,
+calendário e cubos nativos ou de identidade de cada ranking. O limite continua
+em 4.096 itens de catálogo e 5.000 linhas por lista ou cubo. `page_size_invalid`
+indica tamanho ou coluna inválida; `master_catalog_shape` indica um catálogo
+sem array de itens. Os códigos não incluem campos, expressões, valores ou
+linhas da origem. `coverage_limit` continua aceito para recibos antigos.
+O monitor HTTP publica somente estado e horários, sem transportar esses
+códigos; este diagnóstico do owner é compatível com o aplicativo publicado.
+Um código identifica a etapa recusada, mas não autoriza ampliar o limite,
+truncar resultados ou afirmar que houve publicação completa.
+
 O coletor `browser-ranking.mjs` abre uma pagina dedicada por observacao e uma
 identidade QIX UUID distinta, fecha pagina/sessao antes da segunda coleta e
 mantem autenticacao/CSRF dentro do navegador. Nao exporta cookies nem usa CDP
@@ -99,6 +118,28 @@ automaticamente. Cada definicao real ainda precisa de revisao. Referencias:
 [masters em expressoes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Measures/use-master-measures-expressions.htm)
 e [precedencia de nomes](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Expressions/references-fields-measures-variables.htm).
 
+Expressões nativas podem conter TAB, CR e LF, conforme o uso multilinha do
+[editor de expressões](https://help.qlik.com/en-US/cloud-services/Subsystems/Hub/Content/Sense_Hub/Expressions/work-with-expression-editor.htm).
+O coletor aceita esses três controles somente no corpo da expressão. O texto
+original permanece intacto no hash e na definição entregue ao QIX; não há
+normalização, substituição de fórmulas ou dispensa de pins. Outros controles,
+surrogates isolados, conteúdo apenas em branco e mais de 16.384 caracteres
+continuam recusados. Nomes, rótulos e identificadores mantêm regras separadas.
+
+Os objetos temporários solicitam `qStateName: "$"` na raiz e na definição.
+O [estado da seleção QIX](https://help.qlik.com/en-US/sense-developer/May2026/Subsystems/EngineJSONAPI/Content/models-selectionobject.htm)
+tem `$` como padrão. Um layout com estado omitido ou vazio só é aceito com
+prova adicional: propriedades efetivas do mesmo objeto antes e depois de uma
+nova leitura, identidade e tipo correspondentes, ausência de `qExtendsId`,
+estado padrão e definição solicitada preservada ou hash nativo aprovado.
+O fingerprint efetivo permanece estável nas leituras posteriores do mesmo
+modelo. `null`, booleanos, números, espaços, estados alternativos, mudança
+de identidade/definição ou método indisponível impedem a publicação. Os códigos
+`selection_state_unproven`, `list_state_unproven` e `cube_state_unproven`
+identificam somente a fronteira que não conseguiu comprovar o estado; não
+transportam valores de filtros, fórmulas ou dados. Essa compatibilidade não
+dispensa a verificação de seleções, cobertura e totais antes/depois dos dados.
+
 `ranking-mapping.mjs` rejeita definicao ausente ou nao revisada. A definicao
 produtiva agora contem os pins nativos da conferencia00:58 UTC16/10/2026,
 nao uma atestacao de coleta/publicacao. A factory deriva janeiro ate o mes corrente do
@@ -108,6 +149,19 @@ O launcher destaca/congela um snapshot por ciclo, valida sua serializacao antes
 do HMAC e o compartilha entre as duas sessoes. O ciclo seguinte recria o mapa.
 Motivos de falha QIX atravessam o browser somente pela allowlist versionada;
 nenhuma mensagem bruta do SDK, formula ou linha de dados entra no recibo.
+
+O catalogo de medidas trata qData/title/label opcionais sem transformar
+metadados alheios em requisito financeiro. IDs/tipos/duplicatas e limite4096
+continuam conferidos em toda a lista. Um alias so vincula o master aprovado,
+com titulo nativo, hash integral e unicidade; nenhum texto alheio e publicado.
+Codigos master_catalog_item, master_catalog_text, master_catalog_binding e
+master_alias_identity distinguem recusas sem incluir valores da fonte.
+
+Paginas completas podem conter qTails zeradas: [NxGroupTail](https://help.qlik.com/en-US/sense-developer/May2026/Subsystems/EngineJSONAPI/Content/models-nxgrouptail.htm)
+descreve contagens de elementos de grupos anteriores/seguintes. O coletor
+aceita somente zeros explicitos em array limitado pela largura do cubo;
+caudas nao-zero ou malformadas continuam recusadas. A area/matriz deve
+corresponder exatamente a cada pagina solicitada, sem reducao ou lacunas.
 
 Publicacoes sao preservadas por ano. O reader retorna atual/anterior sob um
 snapshot SQL. Falha ou fonte mais antiga nao substitui a ultima carga valida.
@@ -148,7 +202,34 @@ leitura atual do recibo, banco e pagina. Provar tambem um ciclo horario posterio
 Sessao expirada/MFA deve produzir reautenticacao necessaria, preservar dados e
 exigir acao autorizada, sem contornar controles do provedor.
 
-## Recuperacao
+## Status em Integrações
+
+O cartão Qlik aparece entre Salesforce e n8n, com SVGs vetoriais para os temas
+claro/médio e escuro. O painel separa o estado do último ciclo, o horário da
+coleta validada, a confirmação de publicação no CRM, a recarga da fonte e a
+próxima coleta prevista. Uma sessão do navegador aberta não comprova publicação.
+
+O owner de ranking envia um heartbeat a cada 30 segundos para
+`POST /api/ingest/qlik/status`, assinado pelo HMAC existente com domínio de rota
+próprio. O contrato aceita somente metadados operacionais; não transporta linhas,
+nomes comerciais, fórmulas, credenciais ou mensagens brutas de erro. O servidor
+limita o corpo a 8 KiB e cinco segundos, valida assinatura, idade, ordem e nonce.
+O `GET` exige acesso à página Integrações, incluindo as verificações existentes
+de sessão, MFA, aprovação e escopo. Nenhuma tabela ou ACL é modificada.
+
+Sem heartbeat por 90 segundos, o status expira. Um ciclo travado também expira
+mesmo recebendo heartbeat. Falha e reautenticação preservam os horários da última
+publicação confirmada durante a vida do owner. Reinício do servidor ou rotação
+da chave exige novo heartbeat; reinício do owner exige nova publicação antes de
+afirmar sucesso. Os dados duráveis do ranking continuam no banco existente.
+
+Falha na entrega do status não dispara nova coleta nem altera a publicação.
+O monitor não se sobrepõe; a interface consulta a cada 15 segundos e suspende
+consultas em abas ocultas. O intervalo comercial permanece de uma hora após o
+término do ciclo. Status e agenda previstos não substituem a prova de uma
+execução automática posterior, exigida na ativação controlada.
+
+## Recuperação operacional
 
 Configuracao do aplicativo usa backup privado versionado do env completo,
 CAS e `release:production recover` da tentativa exata. Nao apagar ledger/lock.

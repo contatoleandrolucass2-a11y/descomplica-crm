@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 import { PERMISSIONS } from "@/lib/authorization/permissions";
 
-const enforcePermission = vi.hoisted(() => vi.fn());
-vi.mock("@/lib/authorization/enforce", () => ({ enforcePermission }));
+const enforcePageAccess = vi.hoisted(() => vi.fn());
+vi.mock("@/lib/authorization/enforce", () => ({ enforcePageAccess }));
 vi.mock("@/app/(protected)/app/configuracoes/metas/_components/FunnelGoalsPage", () => ({
   FunnelGoalsPage: () => null,
 }));
@@ -24,9 +24,15 @@ describe.each([GoalsPage, PartnershipGoalsPage, PointGoalsPage])(
     ])(
       "keeps the database restriction for $roleKey with expected access $expected",
       async ({ roleKey, permissions, expected }) => {
-        enforcePermission.mockResolvedValue({ roleKey, permissions });
+        enforcePageAccess.mockResolvedValue({ roleKey, permissions });
         const result = await page({ searchParams: Promise.resolve({ saved: "1" }) });
-        expect(enforcePermission).toHaveBeenCalledWith("crm.settings.manage");
+        expect(enforcePageAccess).toHaveBeenCalledWith(
+          page === GoalsPage
+            ? "/app/configuracoes/metas"
+            : page === PartnershipGoalsPage
+              ? "/app/configuracoes/metas/parcerias"
+              : "/app/configuracoes/metas/pontos",
+        );
         expect(result.props.canManageDraft).toBe(expected);
         expect(result.props.notification).toBe(expected ? "saved" : undefined);
       },

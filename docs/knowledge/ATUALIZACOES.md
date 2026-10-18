@@ -1,5 +1,401 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: Validacao do resumo geral compacto
+
+- PR254, HEAD f0329c03: matriz sintetica local aprovada,207 checks,
+  temas light/balanced/dark e larguras320/390/768/1440/1920. Conferencia
+  visual de capturas desktop/mobile nos tres temas sem cortes aparentes.
+  Relatorio: test-results/dashboard-report/report.json. Filtros, historico,
+  metas, navegacao, atualizacao automatica e piso de quantidades incluidos.
+- Vitest completo repetido com maxWorkers=2:3808 aprovados,95 skips;
+  os timeouts de Obsidian nao reapareceram. Suites operacionais Windows:
+  1593 aprovados,19 skips,3 falhas de requisitos POSIX Meta Ads. Suite
+  release Windows tambem falhou em requisitos de host e timeout Qlik.
+  Nenhum requisito de seguranca foi relaxado para aprovar no Windows.
+- CI Linux39093336285 aprovou validate no SHA exato, incluindo pnpm test,
+  fontes oficiais, auditoria e build. Restore e E2E autenticado aprovados.
+  Producao nao foi alterada. Revisao estatica independente
+  sem achados no diff fe1b343e..f0329c03; nao substitui os gates pendentes.
+- CI39093336285 reprovou apenas11 comparacoes de imagens /app, decorrentes
+  do layout solicitado. Gates funcionais,242 auditorias de acessibilidade,
+  zoom/teclado e canvas aprovados. Revisadas capturas desktop/mobile e temas;
+  promovidas11 referencias e preservadas231, sem reduzir tolerancias.
+  Artefato12124916025, SHA2568615a849aa566b93a8f05d48ca05cd82c7877b9b52bc0af8d026a6891918924d.
+  Tree do merge de captura ec9ae253 equivale ao HEAD f0329c03; fingerprint
+  recomposto com29 arquivos gerados. Manifesto guarda proveniencia completa.
+  Nova CI verify obrigatoria: promocao de baseline nao aprova o run anterior.
+
+## 2026-10-18: Abertura do resumo geral compacto
+
+- Git comum confirmado; branch codex/dashboard-resumo-compacto parte de
+  main fe1b343e. GitHub run 39088213591 terminou failure nesse SHA;
+  run 39084939569 aprovou o main anterior 36f3c317.
+- GET observacional de /api/health retornou status ok e version 840f0908.
+  Fonte: https://crm.descomplicapro.com.br/api/health e GitHub Actions,
+  consulta nesta retomada. Codigo integrado e publicado permanecem distintos.
+- Escopo: corrigir fechamento dos filtros, compactar cabecalho, remover
+  pulso/ritmo/reset, inteiros por piso nos funis e conferir a base dos relatorios.
+  Usuario confirmou manter funis com filtros e periodos. Validacao e nova
+  publicacao ainda pendentes; nenhuma alteracao de dados remotos autorizada aqui.
+
+- Conferencia de origem: ops/salesforce/transform.mjs deduplica a coleta;
+  connection-monitor publica diagnostics.sourceRows. analysis-transform.mjs
+  restringe os fatos aos dois canais definidos; analysis.ts recorta os periodos.
+  Usuario confirmou preservar essa restricao. Totais coletados desde janeiro
+  nao equivalem ao mes vigente. Sem mudanca de contrato, banco ou workflow.
+- Falha do main identificada em fonte oficial ITBI HTTP403. A verificacao
+  local scripts/verify-documentation-sources.mjs passou nesta retomada;
+  CI do candidato ainda deve comprovar acesso. Nao houve bypass do gate.
+- Correcao dos filtros remove focus() durante fechamento externo; regressao
+  reproduziu chamada indevida e passou nos quatro campos em desktop/mobile.
+  STATUS_BREAKPOINT nativo nao reproduzido: a relacao causal permanece inferida.
+  Typecheck/build aprovados; lint sem erros e dois avisos em test-results.
+  Testes focados de relatorio/paridade: 44 aprovados. Matriz visual em andamento.
+- pnpm test local: 3802 aprovados, 95 skips e seis falhas. Duas assercoes
+  antigas do reset foram corrigidas e os 44 testes focados passaram depois;
+  quatro timeouts/EBUSY em Obsidian estao sendo repetidos isoladamente.
+  Nao alterar timeouts ou tolerancias para mascarar concorrencia. CI Linux
+  completa do candidato permanece requisito antes de publicar.
+
+## 2026-10-17: Dashboard3/5/5 publicado e validado em producao
+
+- PR250 integrou o ajuste do timeout no main840f0908. CI39061398333 aprovou
+  validate, release-gates, isolated-restore e promotable-image; a matriz visual
+  completa concluiu sem reduzir cobertura ou tolerancias.
+- Artefato12112195227: checksum/revision aprovados. Divergencia esperada entre
+  ID config da CI `fab39fbb` e manifesto local `0d2c7cd2` foi comprovada por
+  index/config OCI, plataforma linux/amd64, label da release,11 camadas iguais
+  no manifesto legado, OCI, diff_ids e RootFS, alem de image:prove2 perfis.
+- `release:production` registrou deployment
+  fc04ef76-1350-4298-8692-aed95b1bb2f8 no SHA840f0908, deployedAt
+  2026-10-18T00:10:01.373Z, sem pendencia. Health publico retornou200/ok e a
+  versao exata; container ficou healthy na imagem0d2c7cd2. GET anonimo /app
+  retornou307 para /login.
+- O comando deploy terminou com codigo1 e mensagem sanitizada depois de o
+  recibo final ja estar gravado. `status`, imagem do container, health e CAS
+  confirmaram conclusao; nao houve retry nem alteracao manual de ledger/lock.
+  Reavaliar se o retorno nao zero reaparecer em outra publicacao concluida.
+- Navegador autenticado:1440x900 e390x844 nos temas claro/medio/escuro,
+  13 funis/16 artigos, sem overflow horizontal. Somente spans acessiveis1x1
+  ficaram tecnicamente recortados por design; textos visiveis nao. Filtro de
+  gerente abriu e fechou ao clique externo. Viewport foi restaurado.
+- Fontes: PR250, Actions39061398333, artefato12112195227,
+  `release:production status`, Docker inspect, /api/health e navegador real.
+
+## 2026-10-17: Gate visual cancelado por limite global
+
+- CI39037162463 no merge ca6c33cf aprovou validate, isolated-restore,
+  promotable-image, E2E e todos os checks visuais registrados. A matriz ampla
+  foi cancelada pelo runner ao atingir o timeout do job, sem assercao visual
+  reprovada; o artefato nao foi promovido e producao permaneceu em eff7f729.
+- `release-gates` passa de45 para60 minutos, preservando etapas, cobertura e
+  tolerancias. Uma nova CI completa no `main` exato continua obrigatoria para
+  publicacao. Fontes: Actions39037162463 e `release:production status`.
+
+## 2026-10-17: Revisao visual do dashboard e retomada12:03Z
+
+- CI38995290171: funcional, RSC, acessibilidade e zoom aprovados;11 diferencas
+  intencionais /app revisadas,231 capturas preservadas. Baseline parcial
+  promovida com hashes e proveniencia no manifesto, sem reduzir tolerancias.
+- Git fetch: main61c9a6a8. GET /api/health12:03:55Z:200/ok, versaoeff7f729.
+  PR245 aberto, HEADf6698997. Nenhuma publicacao do dashboard realizada.
+- Incorporar base Qlik concorrente e repetir CI verify antes de merge/deploy.
+  Fontes: Actions38995290171, PR245, origin/main e health publico.
+
+## 2026-10-17: Locator de filtro fechado na verificacao RSC
+
+- CI38993369136 aprovou validate, restore, matriz sintetica e E2E autenticado.
+  Refresh chegou a state-preservation; checkbox dentro de details fechado nao
+  e encontrado por getByRole padrao. Reproduzido em Chromium local:0 vs1 com
+  includeHidden, mantendo toBeChecked. Teste corrigido sem relaxar assercoes.
+- Producao e baseline permanecem inalteradas; nova CI e revisao visual exigidas.
+
+## 2026-10-17: Retomada do PR245 e base concorrente integrada
+
+- Consulta GitHub02:01Z: PR245 mergeable, HEAD73d37fee; CI38993263801 iniciada.
+  Mainf1088046 integrada preservando os registros Meta Ads e dashboard.
+- GET anonimo /api/health02:01:42Z: HTTP200, statusok, versao34517ba2.
+  Dashboard ainda nao publicado. Fontes: GitHub PR245/Actions38993263801 e
+  https://crm.descomplicapro.com.br/api/health.
+- Nao ativar integracoes ou servicos adicionais nesta entrega. Matriz local
+  aprovada nao substitui a CI autenticada, baseline revisada e gates de deploy.
+- Proximo criterio: CI funcional completa, revisao das diferencas visuais
+  intencionais e nova CI de verificacao antes de merge/publicacao.
+
+## 2026-10-16: Grupos de funis em validacao no PR245
+
+- CI38972729758 aprovou validate/restore/E2E; matriz autenticada interrompida
+  em dashboard-auto-refresh. Teste exigia filtro aberto depois de clique
+  externo; alinhado ao comportamento solicitado e mantida selecao/RSC.
+  Titulos de dialogs fechados excluidos da leitura de titulos visiveis.
+  Artefato incompleto nao promovido; nova CI necessaria, sem publicacao.
+
+- Resultado da CI38970011556: validate/restore aprovados,
+  mas E2E exigia report-diagnosis-title removido. Atualizado
+  e2e/release-candidate.spec.ts para exigir13 funis/78 etapas, ordem3/5/5
+  e ausencia das secoes removidas. Guards e demais paginas preservados;
+  nova CI obrigatoria antes de publicar. Comparacao visual autenticada nao rodou.
+
+- Fonte GitHub CI38970011556: validate e isolated-restore aprovados;
+  release-gates ainda em andamento. Base main34517ba2 integrada emc20d0dc7;
+  arvore coincide com merge de teste1be8d014 emd75318ac599d8dd0660a65d4ad2eab268376b77b.
+- GET observacional https://crm.descomplicapro.com.br/api/health em21:41:35Z:
+  HTTP200/statusok/version34517ba2b2e4022f52bec29260e071b9cf124cca.
+  Publicacao concorrente de Qlik; nao e a entrega dos grupos do dashboard.
+- QA local:200 verificacoes aprovadas nos tres temas,320/390/768/1440/1920px,
+  com dados sinteticos; build, lint, tipos e3670 testes Vitest aprovados.
+  pnpm test local parou depois por ACL temporaria Windows em testes de
+  publish-candidate Salesforce; sem relaxar permissoes. Comando completo
+  aprovado na CI Linux da arvore equivalente. Limite e evidencia no audit
+  docs/audits/dashboard-grupos-2026-10-16.md; reavaliar com gates finais.
+- Nenhum deploy desta entrega, migration ou workflow n8n executado.
+
+## 2026-10-16: Retomada dos grupos de funis
+
+- Fonte Git fetch origin e GitHub via gh na VPS: main69ae9839, CI38928064973
+  concluida/success; HEAD local1c91e0c no ramo codex/dashboard-grupos-periodos-20261016.
+  Health publico18:42:09Z HTTP200/ok/66ed7360; integrado, local e publicado distintos.
+- Escopo solicitado: grupos3/5/5, periodos limitados ao mes vigente, media anual
+  por uma venda, fechar filtros fora/Escape, remover diagnostico/tabelas/equipe/ranking.
+  Preservar metas por responsavel e roscas. Sem migrations ou workflows.
+- Retomada preservou edicoes locais. Treze testes de periodos e teste de filtros
+  em Chromium desktop/mobile passaram. Suite visual e gates globais em andamento;
+  nenhuma publicacao desta alteracao. Revisar capturas dos tres temas antes do deploy.
+
+## 2026-10-16: Conferencia autenticada dos tres temas
+
+- Complemento responsivo16/10: inspecao autenticada em viewports1920x1080,
+  1366x768,390x844 e360x800, alternando Claro/Medio/Escuro. Roscas, funis,
+  filtros abertos, historicos e tabelas nos trechos examinados sem sobreposicao
+  indevida. Medicao DOM nao encontrou overflow horizontal da pagina nem dos
+  textos folha visiveis avaliados. Tabelas moveis possuem overflow:auto local;
+  ultima coluna Hoje acessivel (scrollLeft233, largura343/conteudo576).
+  Historico movel rolavel, largura357 sem overflow horizontal, altura811 e
+  conteudo1188. Nao e teste em aparelho fisico nem garantia de toda combinacao.
+- Captura nativa inicial divergiu do viewport; captura documentada com clip
+  no scroll atual confirmou enquadramento correto. Evidencias JPG locais fora
+  do Git. Console capturado sem erros; coleta mostrada14:03BRT. Viewport
+  temporario removido, Claro restaurado, filtros limpos e dialogos fechados.
+  Nenhuma alteracao de codigo ou deploy; suites nao repetidas nesta inspecao.
+
+- Navegador de producao acessivel apos login pelo usuario. Claro, Medio e
+  Escuro inspecionados na largura atual do painel (304px), com roscas, funis,
+  metas e dialogos legiveis; nenhuma falha visual observada nos trechos vistos.
+  Nao equivale a uma nova matriz desktop/mobile. Console capturado sem erros.
+- Filtros de canal, gerente, responsavel e empresa exercitados; opcoes dependentes
+  e limpeza confirmadas. Um responsavel produziu metas27/8/4/1; esperado ate
+  hoje proporcional a16/31. Troca de tema preservou filtro e valores; limpeza
+  restaurou315 responsaveis. Historicos: janeiro-setembro, julho-setembro e
+  setembro, sem outubro ainda aberto. Fonte: UI autenticada, coleta13:33BRT.
+- Estado final: tema Claro, sem filtros ou dialogos. Nenhuma alteracao de
+  dados, integracao ou runtime. Health publico16:58:38Z ok/66ed7360; HEAD
+  local1c91e0c e versao publicada continuam distintos. Nova consulta gh
+  indisponivel no PATH; nao alegar nova validacao CI. Suites nao repetidas
+  nesta verificacao observacional. Evidencias visuais locais fora do Git.
+- Limite: disponibilidade de pastas aprovadas e metas nao definidas nao foi
+  alterada. Reavaliar apos mudanca de dados, layout ou regras. Registro local
+  de verificacao, sem nova publicacao de runtime.
+
+## 2026-10-16: Sessão Meta Ads na página Integrações
+
+A etapa implementa a conta de anúncios `1080988750909489`, no business
+`310106776631136`, com console dedicado na VPS e status separado de Salesforce.
+Não há nova página comercial nem extração de métricas nesta entrega. A leitura
+exige acesso efetivo à página Integrações; o console exige também papel master.
+A prova de conexão combina URL, conta e interface visível após atualização
+controlada; URL ou sessão antiga isoladas não confirmam conexão.
+
+O monitor evita atualizar o navegador enquanto o console está ocupado, publica
+somente estado e horário e permite que a evidência expire após 120 segundos.
+Os perfis, portas e segredos são exclusivos. O instalador não inicia serviços e
+o coordenador aceita `deploy --meta-ads enable` e aplica a configuração com
+backup integral, lock compartilhado e comparação atômica.
+
+Build, formatação, testes locais e matriz sintética de navegador passaram; as
+auditorias de dependências e segredos não encontraram achados. Esses resultados
+não comprovam instalação, login na VPS, coleta ou publicação. Após login no
+navegador local, a interface real confirmou a conta e os seletores; parâmetros
+transitórios de navegação são aceitos com validação estrita, sem persistência.
+A configuração automática do Obsidian não está instalada neste Git
+comum. Fontes: código e testes desta branch, inspeção somente leitura da VPS e
+runbook `docs/runbooks/meta-ads-vps-session.md`. Revalidar SHA, CI e estado real
+antes de qualquer ativação.
+
+## 2026-10-15: Dashboard, filtros dependentes e metas
+
+- Aceite16/10/15:07Z: dois ciclos automaticos novos publicados e conciliados.
+  Ingestoes14:36:04.49803Z e15:06:30.629428Z succeeded; inventarios confirmados,
+  proximo ciclo15:30Z. Tres visoes presentes no banco, hashes dos fatos,
+  contagens e generatedAt identicos a cada carga; segunda carga ja apresentou
+  incremento real. Filtros dependentes, nove meses fechados do ano, julho-setembro
+  e metas individuais (27 agendamentos,8 visitas,4 pastas,1 venda em outubro)
+  conferidos usando codigo atual e agregados reais, sem exportar nomes/registros.
+  Falha inicial nao se repetiu nos dois ciclos seguintes; causa nao comprovada,
+  sem relaxar validacao. Reavaliar se houver recorrencia ou defasagem da coleta.
+  Validacao local repetida: lint Node24 com zero erros/tres warnings existentes,
+  tipos/build verdes,3654 Vitest/1181 Node/703 release, skips90/19/14.
+  Fonte: journal sanitizado, carga privada no host e consultas agregadas MCP.
+- Atualizacao16/10/14:24Z: coleta antiga retomou com ingestao14:06:19Z e
+  inventario confirmado; preflight passou. Coletor66ed7360 ativado14:10Z com
+  transacao preservada. Reload systemd reordenou dependencias sem mudar conjuntos
+  ou identidades: CAS pausou antes do start; comparacao canonica e retomada
+  restrita testadas91 Windows/90 Linux+1skip, mantendo bloqueio de drift real.
+  Primeiro ciclo novo falhou antes de publicar; diagnostico somente leitura
+  validou20230 oportunidades, mas nao comprova causa nem aceite integral.
+  Aguardar dois ciclos completos novos. Health200/ok/66ed7360 e acesso anonimo
+  redirecionado ao login; n8n inalterado, payload integral confirmado via MCP.
+- Publicacao16/10/13:24Z: PR238 integrado em66ed7360, CI38901994232 com os
+  quatro jobs verdes. Coordenador unico confirmou deploy69796520-5afb-4136-a8dd-9ffe0b907e97
+  em13:24:00.784Z, sem pendencia; health anonimo confirmou66ed7360/ok.
+  Preparacao aditiva do banco aplicada via MCP em13:23:14Z; trio do catalogo
+  aplicado em uma unica instrucao atomica em13:24:47Z, apos a imagem compativel.
+  Conferencias13:25Z e13:58Z preservaram permissoes antigas, overrides, papeis,
+  visibilidade, ACL/RLS e policies fora do escopo. Catalogo:27 paginas,
+  38 permissoes,146 vinculos de papeis,6 overrides e10 vinculos de usuarios.
+  Nginx validado/recarregado13:25:41Z:8m somente no endpoint Salesforce.
+- Coletor ainda antigo nesta conferencia: ciclo12:00Z deixou lock apos morte
+  do processo; falhas13:00Z e13:30Z antecedem a troca do coletor, ainda nao feita.
+  Owner morto, cgroup apenas com scheduler e ausencia de exportacao confirmados.
+  Em13:42:03Z o lock original foi movido intacto para backup privado, sob trava
+  de instalacao e CAS de identidade/metadados; nenhum dado ou credencial apagado.
+  Aguardar ciclo natural14:00Z com publicacao confirmada antes da atualizacao.
+  Guard de ciclo completo nao foi relaxado. Criterio final: dois ciclos reais
+  distintos do coletor novo e conciliacao dos agregados; health nao os comprova.
+  Browser de producao indisponivel por timeout de foco; matriz visual da CI
+  aprovada nao equivale a inspecao autenticada em producao. Fontes: GitHub,
+  coordenador, health anonimo, MCP Supabase e metadados/journal sanitizados.
+- Conferencia16/10/12:38Z apos interrupcao de transporte: Git fetch concluido,
+  PR238/25ec804 CLEAN/MERGEABLE, CI38892072377 verde em validate, release-gates
+  e isolated-restore. Matriz visual terminou12:00:23Z; imagem ignorada em PR,
+  conforme contrato. Ensaio PostgreSQL real do catalogo passou165+53 assertions,
+  incluindo falha tardia/rollback e ativacao normal. Restore sintetico passou
+  61 migrations/1910 assertions, preservando owners e privilegios efetivos.
+  Gates locais completos: lint/tipos/build/format verdes; testes3654 Vitest,
+  1181 Node e703 release, skips90/19/14. Health publico12:38:27Z200/ok/b5458ff;
+  nada aplicado ao banco, app, Nginx, coletor ou workflow. Fontes: GitHub Actions,
+  Git e GET anonimo. A aprovacao do PR nao substitui CI da main nem publicacao.
+- Catalogo autorizado16/10: planejador offline fixa hashes do trio PR235,
+  remove somente wrappers externos e produz uma unica instrucao DO em autocommit.
+  CAS e preservacao abrangem cinco tabelas, inclusive user_roles.40 testes locais
+  passaram; revisao independente sem bloqueio concreto. Ensaio compacto ampliado
+  mantem165 assertions e acrescenta53, com falha tardia P0235 e comparacao integral
+  antes/depois. PostgreSQL real ainda nao executado: Docker indisponivel neste
+  Windows; CI deve comprovar o resultado antes de qualquer aplicacao remota.
+  Lint global passou com tres warnings preexistentes; suite completa em andamento.
+  Backup privado BdFdKs salvo/releitura/hash conferidos, sem dados comerciais;
+  nao equivale a restore SQL e precisa novo snapshot/CAS antes da ativacao.
+- Retomada16/10/10:55Z: usuario autorizou explicitamente coordenar tambem a
+  atualizacao aditiva do catalogo, preservando acessos. A pendencia de autorizacao
+  abaixo esta resolvida; testes, backup, transacao atomica e coordenador continuam
+  obrigatorios. Git fetch confirma main2eae903 e HEAD2234298; PR238 aberto,
+  MERGEABLE/BLOCKED. CI38858636662 passou validate/restore, mas release-gates foi
+  cancelado, portanto ainda nao autoriza merge/publicacao do SHA atual.
+- GET anonimo10:54:59Z200/ok/b5458ff e coordenador status confirmam deploy
+  e42363ec-0f81-4084-9ced-aa405c263b09 de03:59:23.023Z, sem pendencia.
+  Historico MCP Supabase permanece sem migrations do catalogo novo, somente
+  master_all_permission_defaults apos o marco de preparacao. Fontes: GitHub/gh,
+  Git, health publico e Supabase; nenhuma mutacao remota nesta conferencia.
+- Encerramento16/10/05:54Z: PR238/cb3078f esta CLEAN/MERGEABLE e CI38854933173
+  verde em validate/release-gates/restore. Build e tipos locais verdes; suite
+  completa em componentes:3614 Vitest/1181 Node/703 release, skips90/19/14.
+  Vitest precisou dois workers por timeouts locais de Obsidian, sem aumentar
+  limites; CI Linux passou sem essa adaptacao. Worktree de codigo limpo.
+- Publicacao retida por dependencia do PR235, nao por falha do dashboard:
+  main2eae903 tem os quatro jobs verdes, mas health05:53:58.936Z ainda b5458ff.
+  Coordenador registra deploye42363ec-0f81-4084-9ced-aa405c263b09 em03:59:23.023Z,
+  sem pendencia. Supabase confirma17 paginas, ausencia da preparacao do catalogo
+  e das novas permissoes; somente defaults Master aplicados. Runtime novo exige
+  preparacao do catalogo para preservar acessos. Nao aplicar migrations alheias
+  sob autorizacao exclusiva da analise. Usuario consultado: aguardar responsavel
+  ou autorizar coordenacao aditiva do catalogo; sem resposta nesta verificacao.
+  Reavaliar quando catalogo/runtime forem conciliados ou houver autorizacao.
+- Nenhuma migration, app, Nginx, coletor ou workflow foi alterado por esta tarefa.
+  MCP n8n confirmou versao ativa dcffaf09-354c-4a82-817c-5e6ca9da1dd5,
+  payload integral e persistencia de execucoes desativada. Backup delimitado e
+  operador temporario preparados nao comprovam publicacao. Fonte: GitHub/gh,
+  GET anonimo, coordenador status, MCP Supabase/n8n; detalhes no audit.
+- CI38851076367/f36f9fa concluida verde nos tres jobs de PR. Merge posterior
+  2eae903 preserva restricao por etapa e analise somente no dashboard;156 testes
+  focais passaram, inventario61 migrations/1910 assertions.11 capturas do
+  dashboard e231 da main preservadas. Novos gates combinados ainda obrigatorios;
+  migrations de catalogo alheias nao estao autorizadas por esta demanda.
+- Retomada16/10/05:07Z: main2eae903 integrou PR235 de catalogo/permissoes,
+  exigindo merge da leitura de etapas, inventario e referencias. Health anonimo
+  05:07:33.837Z200/ok/b5458ff; GitHubPR238 conflitante. CI38851076367/f36f9fa
+  ainda na matriz visual; lint/tipos/test/build locais passaram na repeticao
+  (3556/1181/703, skips90/19/14). Primeira repeticao Windows teve dois timeouts,
+  ambos passaram isolados e na suite completa sem aumentar limites. Nova CI
+  combinada obrigatoria. Fontes Git fetch/GitHub/GET; nenhuma mutacao remota.
+- CI38846827500/7804c73 concluida com validate, release-gates e restore verdes;
+  imagem ignorada como previsto em PR. Merge posterior com cd004e4 requer nova
+  CI. Operador isolado Linux:84 testes aprovados,1 skip exclusivo de Windows,
+  sem mutacao de servicos ou dados. Nao substitui aceite real de dois ciclos.
+- Retomada16/10/04:22Z: maincd004e4 integrou PR237 dos simuladores; PR238
+  exige merge de documentos e manifesto. Preservadas11 entradas do dashboard
+  e231 da main, incluindo quatro novas referencias moveis dos simuladores.
+  Health anonimo04:22:48.788Z200/ok/b5458ff; CI38846827500/7804c73 ainda na
+  matriz visual, validate/restore aprovados. Fontes GitHub/gh, Git fetch e GET
+  publico; nenhuma ativacao remota desta tarefa. Nova CI combinada obrigatoria.
+- CI38845696585/2014576: validate passou; QA sintetico encontrou disputa de
+  foco ao abrir historicos em sequencia. Teste deterministico reproduziu:
+  onClose atrasado roubava foco do proximo botao apos close nativo. Removido
+  callback redundante; teste falhou antes/passou depois e quatro testes de
+  navegador passaram. Nova CI continua obrigatoria; sem ativacao remota.
+- Consulta16/10/03:28:58.816Z: health publico200/ok/b9377a1, atualizado por
+  outra publicacao; mainb5458ff e branch2014576 sao distintos. CI38845696585
+  em andamento no PR238. Fontes: GET anonimo, Git remoto e GitHub Actions.
+  Nenhuma ativacao de analise/DDL/coletor desta demanda foi executada.
+- Retomada16/10/03:27Z: mainb5458ff integrou PR231 de planejamento de metas.
+  PR238 precisou novo merge. Manifesto combinado por JSON:11 entradas do
+  dashboard preservadas e231 da main preservadas, todos os hashes conferidos.
+  66 testes de inventario/paridade/navegacao/metas passaram; CI nova obrigatoria.
+- CI38841091143/4fa4c5d: funcional/banco1883/restore/E2E aprovados. Matriz242
+  completa com11 diferencas apenas em /app; referencias revisadas e231 restantes
+  preservadas, incluindo Qlik. Hash/arvore/fingerprint comprovados no audit.
+  Nova CI verify exigida; sem migration, coletor ou app publicados. Preflight
+  Salesforce02:58Z confirmou Unidade de Negocio selecionada nas duas atividades.
+- Retomada16/10/02:33Z: origin/main b9377a1 incorporado, preservando ranking
+  Qlik v2 e suas referencias. Inventario combinado:56 migrations/1883 assercoes
+  pgTAP. PR238 estava DIRTY, sem CI para d08070d; resolucao preserva testes de
+  dashboard e ranking. Nova validacao obrigatoria antes de qualquer ativacao.
+- Merge4fa4c5d em PR238, CI38841091143 iniciada; formatacao/lint/tipos verdes
+  em02:35Z, restante pendente. Health anonimo02:35:49.765Z200/ok/d83c22d.
+  Fontes: GitHub Actions/PR238 via gh e GET publico; sem mutacao de runtime.
+- Verificacao local4fa4c5d: lint/tipos/test/build passaram,3547 Vitest/1181 Node/
+  703 release aprovados;90/19/14 skips registrados. CI Linux e provas reais
+  continuam obrigatorias. Revisao independente do merge sem achados no escopo.
+- CI38834121342/3f05de8: validate/banco/restore aprovados; E2E exige links
+  removidos da raiz e foi atualizado ao novo contrato, preservando as etapas.
+  Matriz visual/merge/ativacao pendentes. Health16/10/01:23Z200/ok/d83c22d.
+  Backup privado da funcao/ACL preparado, sem DDL ou dados de clientes;
+  [evidencias e limites](../audits/dashboard-filtros-metas-2026-10-15.md).
+- CI38836371948/270ccb3 repetiu banco/restore aprovados; E2E dependia de
+  atributo opcional ausente sem snapshot. Seletor corrigido; quatro casos
+  sinteticos passaram com/sem coleta. Matriz autenticada ainda pendente.
+- CI38838263880/01cea33: E2E autenticado aprovado. Matriz parou no helper de
+  auto-refresh que exigia link removido; atualizado para selecao real de canal,
+  sem reduzir provas de RSC/estado. Referencias e ativacao ainda pendentes.
+
+- Retomada18:36Z: maina7fdf92, CI38775901605 success; site200/ok/fae77f9.
+  Branch codex/dashboard-filtros-metas criada do main. PR234 documental tem
+  CI38773011324 verde, mas conflito com main; preservado sem integrar.
+- Usuario definiu colunas: Gerentes de vendas, Contato Corretor Proprietario,
+  Unidade de Negocio e Imobiliaria; canal limitado aos dois textos informados.
+  Novas regras de meses fechados, metas e comparativos requerem verificacao
+  do contrato completo. Confirmado depois: metas por responsavel unico dos
+  relatorios filtrados, dias uteis segunda-sexta com quinta valendo2.
+  Usuario autorizou explicitamente atualizacao aditiva do banco/coletor apos
+  testes. Autorizacao nao e evidencia de aplicacao. Fontes:
+  Git fetch/GitHub branches/main, PR234/Actions e health publico sem sessao.
+- Validacao posterior:284 focais,37 Node e185 checks visuais aprovados; revisao
+  isolou ranking via RPC protegida (68 testes). Global3245 aprovados/88skips,
+  texto removido corrigido; O_NOFOLLOW no Windows requer CI Linux. Transporte
+  Salesforce8MiB somente no endpoint exato, restante preservado. Nenhuma
+  migration, configuracao remota ou workflow alterado nesta etapa.
+- Main d83c22d integrado em b26ddaa; health16/10/2026 00:22:32Z200/ok/d83c22d.
+  Fetch posterior mostrou main17ab106, CI38829007559 em andamento. Fonte:
+  Git/GitHub via gh no host existente; versoes local/integrada/publicada distintas.
+
 ## 2026-10-16: Limite Qlik corrigido na fonte real
 
 - Main17ab106/CI38829007559 quatro success; imagem imutavel e dois perfis
@@ -344,3 +740,265 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
 - O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
 
 - 18/10/2026, 12:59 BRT: retomada do PR240 no SHA `bbc3fbd3`. A CI `38848589053` aprovou formatação, lint, tipos e 717 testes, mas falhou na consulta documental do ITBI por HTTP 403; os demais jobs foram ignorados. O PR está conflitante com a `main` `6b6e88f` e será reaplicado sobre essa base, preservando os registros posteriores. Health observado em `https://crm.descomplicapro.com.br/api/health`: HTTP 200, `status=ok`, versão `d919751`; essa versão publicada não corresponde ao ramo documental e não comprova a correção solicitada para edição de metas.
+## 2026-10-16: Publicacao app e recusa de fatos preservada
+
+- Main b937/CI38839240305 quatro success. ZIP12021130754 SHA3f37c0258cd1fe10d10bfbd032a0132011c7068ac1fe71cf2a7de5d98240269f,
+  OCI11 camadas e dois perfis comprovados. CRM a8a126eb-c373-4005-b68a-456012a6336b
+  publicado02:59:30.399Z pelo coordenador, Qlik v2 habilitado. Health03:00:08.353Z
+  200/ok/b937. Nao confundir endpoint habilitado com dados atualizados.
+- Owner e26cdcd3 interrompido apos backup; recuperado17ab/c8314c64 via comando
+  exato. Nova tentativa84cdd4c0 gerou recibo real03:02:41.093Z unavailable/
+  master_pin_mismatch, sem publicacao. Recuperada em28b9ffc9/17ab03:07:20.476Z.
+  Sem remover ledgers/travas, restaurar perfil automaticamente ou alterar ACL.
+- Banco produtivo MCP03:10:14.101Z:0observacoes/0publicacoes. Diagnostico do
+  artifact exige UID/GID997: tentativa root usou validador que compara gid do
+  processo e recusou a leitura; nao era ausencia de arquivo. Projetor como
+  usuario tecnico validou o recibo e imprimiu somente codigo fixo.
+- Corretivo focal separa metadados opcionais alheios dos aliases pinados e
+  acrescenta diagnosticos fixos de catalogo. Mecanismo local reproduzivel;
+  entrada exata da fonte nao observada. Novo canario necessario para confirmar
+  causa/resolucao, sem relaxar conciliacao, selecoes ou hashes. Interface intacta.
+  Fontes: GitHub, coordenador, artifact sanitizado e Supabase MCP.
+- Focais collector/artifact327:326 pass/1 skip POSIX, sem falhas. Label
+  projetado ausente nao vira propriedade vazia; titulo/ID/hash nativos continuam
+  obrigatorios. Alteracoes e colisoes seguem recusadas. Revisao independente
+  sem P1/P2 de binding nos cenarios, nao confirma entrada exata da fonte.
+- Lint/tipos/build Windows exit0 no corretivo. Teste completo registrou falhas
+  de subprocessos locais fora do Qlik; conjunto ainda em execucao e causa
+  nao isolada. Nao ocultar falhas ou reduzir cobertura. PR239 inicialmente
+  sem checks; push documental synchronize sera conferido, sem alegar CI verde.
+- Causa da ausencia de checks confirmada: PR239 CONFLICTING/DIRTY apos main
+  PR231/b5458ff. Nao era evidencia de credencial invalida. Merge preservou
+  secoes completas Meta/Qlik de CHANGELOG/WORKLOG; codigo e referencias main
+  sem ajuste manual. Conjunto integrado exige CI nova, sem trocar baselines.
+- Protocolo Qlik NxGroupTail permite qUp/qDown zero em paginas completas;
+  duas regressoes direta/VM falharam antes e passam apos tratamento estrito
+  de zeros. Array limitado por qSize.qcx, nao-zero/tipos invalidos recusados,
+  area/matriz/reducao/totais preservados.388 focais:387pass/1skip POSIX.
+  Nao atribuir o canario master_pin_mismatch a tails (fase posterior).
+- Revisao readonly de tails sem P1/P2;44 testes focados de paginacao/reducao
+  passaram. Nao substitui CI completa nem prova a coleta produtiva.
+
+## 2026-10-16: PR216 integrado; promocao e fatos ainda pendentes
+
+- Head8dd4a3e: lint/tipos/build Windows exit0; teste completo3334 vitest,
+  1164 ops e703 release aprovados (89/19/14 skips explicitos). CI38834764103
+  tentativa1 falhou por HTTP403 da fonte publica ITBI; tentativa2 concluiu
+  validate/restore/release success, sem alterar politica, fonte ou gate.
+- PR216 integrado normalmente02:12:36Z em b9377a1031865a01dccfbda4a87fa2d2dd84b2c5,
+  arvore identica ao head. MainCI38839240305 em andamento, nao e autorizacao
+  para baixar/promover imagem antes dos quatro jobs success. Captura adicional
+  38834764063 tambem concluiu success; nao houve nova mudanca visual.
+- Canonical b937 na VPS tem package/lock identicos a17ab,38123 dependencias
+  verificadas e probe UID997/Node24 com SDK/script/mapa aprovado. Probe privado
+  readonly do transform retornou complete/preparationAccepted true, sem revelar
+  ou escrever segredos; nao comprova autenticacao Supabase/RPC ou coleta QIX.
+- GET publico02:16:20.295Z200/ok/d83c22d. Coordenador confirma CRM72be7b10,
+  publicado15/10/19:15:11.541Z; owner933a111d/17ab,16/10/00:58:46.990Z.
+  Ambos sem pendencia. Nenhum servico alterado por esta preparacao.
+- Supabase MCP confirmou projeto hnncxuerlcsaahdxoswb, production ACTIVE_HEALTHY;
+  consulta01:34Z mostra0 observacoes/0 publicacoes. Writer presente com assinatura
+  de cinco argumentos igual migration, service_role permitido/anon negado;
+  probe inicial usou assinatura incorreta de dois argumentos, nao era ausencia.
+  Reader presente. Fontes: Git/GitHub, health, coordenador, probes e catalogos.
+
+## 2026-10-16: CI verde e nova base concorrente
+
+- CI38846173348/cf2b1c1 tres success; merge normal bloqueado depois de main
+  receber PR237/cd004e4. Conflitos somente documentais, sem codigo Qlik.
+  GitHub required_status_checks.strict=true em consulta readonly: cada
+  base nova exige checks novos. Nao mudar protecao ou alegar CI do SHA novo.
+- Cinco registros Qlik deste PR movidos ao final dos tres documentos com
+  hashes antes/depois iguais; conteudo restante preserva main, normalizando
+  somente linhas em branco. Evita conflito de prefixo, nao dispensa nova CI.
+  Ops/qlik e identico a cf2b1c1; nenhuma mudanca propria de interface.
+- Windows lint/tipos/build exit0; pnpm test com1worker passou3337/1248/703,
+  skips89/19/14. Timeouts anteriores nao reproduzidos, sem reduzir cobertura.
+  Execucao local atravessou merge; CI cf2b1c1 atesta o SHA imutavel anterior.
+- Metadata03:07:20.107Z/recarga02:14:57.356Z: pins de cubos, masters e aliases
+  selecionados iguais aos revisados, sem ler fatos. Health03:55:48.744Z200/
+  ok/b937. Coleta real corrigida e publicacao ainda pendentes. Fontes:
+  GitHub/protecao/checks, Git/digests, recibos locais e projecao privada.
+
+## 2026-10-16: Abertura da aba Previsao em Gestao
+
+- Fonte: Git local e `git fetch origin`, consulta em 2026-10-17T02:21Z (16/10 em America/Sao_Paulo). Git comum confirmado; checkout inicialmente detached e limpo, SHA f10880465f80c8f1164a6db9aaea43907f14fdd1 igual a origin/main, merge do PR #243. Documentos de contexto/ferramentas lidos nessa base.
+- GET observacional https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 34517ba2b2e4022f52bec29260e071b9cf124cca. Versao publicada difere da base local/main; health nao prova publicacao desta demanda.
+- gh ausente no PATH e no caminho padrao. Conector GitHub consultado separadamente para metadados/CI; limites dos resultados devem ser preservados. Nenhum dado privado consultado.
+- Escopo solicitado: nova pagina Previsao em Gestao, tabela manual com Nome do corretor, Previsao e Realizado, inclusao/exclusao de linhas/colunas e Salvar. Prints sao referencias visuais. Novas migrations remotas permanecem condicionadas a autorizacao especifica.
+
+- Complemento da abertura: API publica GitHub confirmou main e PR #243 integrado; CI main 38988235307 concluida com success no SHA f10880465f80c8f1164a6db9aaea43907f14fdd1 (https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38988235307). O conector de workflow runs retorna apenas eventos pull_request e nao prova CI de main. Usuario autorizou explicitamente a migration aditiva da Previsao e permissao apos validacao; autorizacao limitada a esta entrega.
+
+## 2026-10-16: Implementação e validação da Previsão
+
+- Branch `codex/gestao-previsao`, base f1088046. Página e GET/PUT usam permissão
+  própria `crm.management.forecast.view`; escrita exige também settings.manage.
+  Tabela global manual, com equipe, colunas e linhas editáveis, sem cálculo ou
+  integração comercial. As referências visuais não fornecem registros iniciais.
+- Salvamento usa RPC com revisão otimista. RLS forçada e ausência de ACL direta
+  protegem a tabela; usuário, conta ativa, MFA e página ativa são verificados no
+  banco. Auditoria contém somente revisão/quantidades. Conflito e falha preservam
+  o rascunho. Limites agregados de 2 MB complementam os limites de células.
+- Build e tipos aprovados em Node 24.19.0/pnpm 11.20.0 Windows. Testes focais:
+  backend 51, acesso administrativo 65 e contratos/recursos 33 aprovados.
+  Navegador sintético: 5 aprovados, nove capturas em três temas e larguras
+  1440/390/320, axe sem violações; inspeção das capturas desktop/escuro e
+  celular/médio realizada. Isto não substitui uma sessão real de produção.
+- Primeira suite global Windows: 3765 passaram, 17 falharam, 94 skips. Falhas de
+  inventários/contagens foram corrigidas e retestadas; os demais timeouts e teste
+  de concorrência requerem repetição com menor paralelismo e confirmação na CI
+  Linux. Testes de banco locais não executados: Docker indisponível. Novo pgTAP
+  tem 61 assertions; inventário agregado passa a 1971 em 34 arquivos.
+- Projeto de produção confirmado pelo hostname do runtime e MCP:
+  hnncxuerlcsaahdxoswb. Conferência prévia somente leitura encontrou 27 páginas,
+  38 permissões, 146 vínculos de papel, 6 overrides e ausência da nova tabela,
+  RPCs, permissão e página. Backup privado de catálogo, ausência dos objetos,
+  histórico e hashes de preservação retido na VPS, modo 0600, SHA-256
+  45ec1a83f82b5c5377fdce656d3047a1d4c619bfa5e08a47b7dd678075f664ef.
+  Nenhuma migration aplicada nesta etapa. Reavaliar baseline imediatamente antes
+  da aplicação; publicar somente com CI completa e coordenador de release.
+
+## 2026-10-17: Retomada, CI e publicacao pendente da Previsao
+
+- Fonte: PR #247 e CI https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/38996000303 no SHA 58ff617ea8f775ea5ecc396c61ffcd883c8340a0. Tentativas 1 e 2 aprovaram formatacao, lint, tipos e pnpm test completo Linux (incluindo suites operacionais e release); pararam na fonte externa https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517 com HTTP 403. Segunda falha observada em 2026-10-17T12:02:45Z. Gate preservado; banco, restore e imagem nao executaram nessas tentativas.
+- Fechamento local da base anterior: Vitest 3782 aprovados/94 skips, navegador sintetico 5 aprovados, formatacao/lint/tipos/build e Gitleaks aprovados. Suites Node Windows: operacionais 1386 aprovados/15 falhas/19 skips; release 711 aprovados/12 falhas/14 skips, com contratos POSIX e tempos do host, sem modificar assercoes para passar. Linux da CI aprovou 1419 operacionais (1 skip) e737 release. A validacao financeira externa passou localmente, inclusive em nova consulta desta retomada; isso nao substitui o gate da CI.
+- Estado externo mudou durante a espera: fetch confirmou origin/main 61c9a6a8fe2813831bc167d91e6d7e0ab9b3bab4, PR #248 integrado e CI main39007579400 verde. Health observacional em 2026-10-17T12:03:29Z retornou HTTP200/ok/eff7f729c4386af14af16902fe4c761027df597a. Esta versao e de outra entrega; Previsao segue sem publicacao, merge ou migration remota.
+- Integracao da main atual em andamento para manter o PR revisavel, preservando Qlik/House/Parcerias e suas referencias. Novo catalogo e restore devem somar as assertions recebidas da main e os61 testes da Previsao. Backup inicial e antigo e deve ser revalidado/refeito antes de qualquer aplicacao remota. A autorizacao especifica da migration permanece limitada a Previsao e seu catalogo, apos gates; nao inclui aplicar migrations Qlik de outra entrega.
+- Limite de publicacao: o403 externo impede promocao enquanto persistir; nao alterar fonte financeira, remover gate ou declarar banco/restauracao aprovados. Reavaliar em CI completa do candidato integrado. Nenhum dado de producao foi gravado por esta tarefa.
+
+## 2026-10-17: Validacao integrada da Previsao e correcao da fixture
+
+- CI39031197492 no candidato8fe43e72 aprovou validate completo, inclusive fonte
+  externa, lint, tipos, testes Linux, auditoria e build. Os cinco testes de
+  navegador da Previsao passaram. Local integrado: Vitest3787 aprovados/94 skips,
+  lint/tipos/build aprovados. O403 anterior deixou de ocorrer nesta execucao.
+- Restore isolado interrompeu o pgTAP apos46 de61 assertions da Previsao.
+  A fixture mantinha claim.sub do corretor depois de RESET ROLE e em seguida
+  preparava override de Admin, atingindo o guard de contas administrativas.
+  Corrigida somente a identidade da preparacao privilegiada;61 assertions e
+  controles de runtime preservados. Teste focal release-candidate:21 aprovados.
+  Confirmacao SQL depende da nova CI; Docker local permanece indisponivel.
+- PR #247 ainda sem merge/publicacao; migrations remotas nao aplicadas. A
+  autorizacao recebida permite aplicar as duas migrations desta entrega apos
+  aprovacao integral dos gates e nova conferencia da baseline de producao.
+
+## 2026-10-17: Banco e restore aprovados; matriz autenticada da Previsao
+
+- CI39032248476, tentativa2, candidato f16b558f (merge sintetico794ded8a):
+  validate aprovado; restore isolado aprovado em2026-10-17T12:37Z. Fonte ITBI
+  retornou403 na primeira tentativa e respondeu normalmente na segunda.
+- Ensaio de64 migrations e34 arquivos pgTAP:1972 assertions aprovadas na
+  origem e no destino, incluindo61 da Previsao. Lint/advisors de seguranca e
+  performance aprovados; backup/restauracao logica e fingerprints de ACL/owner
+  preservados. Ambiente sintetico, sem restore remoto representativo.
+- Release-gates aprovou banco e build; parou em local-rls-api.mjs com
+  Application-page visibility does not match role permissions. Matriz de
+  paginas esperadas em revisao para incluir a nova permissao sem relaxar guards.
+  PR continua sem merge e producao sem mutacao desta tarefa.
+- Retomada apos pausa do host: em2026-10-17T13:34Z, fetch confirmou main ainda
+  61c9a6a8 e CI39007579400 success. GET publico api/health retornou ok/eff7f729.
+  Fontes: origin, GitHub via gh e endpoint publico; versao da Previsao continua
+  somente no PR. Matrizes QA corrigidas sem alterar acesso de runtime.
+- Em13:38Z main avancou para ca6c33cf, mergePR245/dashboard; CI39037162463 em
+  andamento. Integracao preservou dashboard e Previsao; conflitos restritos aos
+  prefixos de WORKLOG/CHANGELOG, conservando ambos os registros. Matriz RLS e
+  menu corrigidos passaram42 testes focais. Nova CI integrada necessaria.
+
+## 2026-10-17: Previsao integrada e CI final aprovada
+
+- PR247 integrado em47f5d449ccc0ac5f2f4bf8c948a5736979f2daea apos CI39037358734
+  aprovar validate, restore e release-gates, incluindo navegador autenticado e
+  matriz visual. CI main39040316212 aprovou os quatro jobs, inclusive imagem.
+- Retomada em2026-10-17T19:11Z apos pausa do host: fetch confirmou main ainda
+  47f5d449; GitHub confirmou CI concluida/success. GET observacional api/health
+  HTTP200/ok/eff7f729c4386af14af16902fe4c761027df597a. A entrega esta integrada,
+  mas a versao publicada ainda e anterior. Migration ainda nao aplicada.
+- Preflight MCP14:32Z: somente nova pagina/permissao e dois grants Master/Admin;
+  conteudo e acesso das27 paginas existentes preservados. Trigger renova apenas
+  updated_at no snapshot. Backup privado14:01Z com checksum
+  522f2c436a99093fe5164fee474d4bdee6a0037c4e8f9857da528865de0b9a81.
+  Revalidar hashes e ausencia dos objetos antes da aplicacao autorizada.
+- Nova retomada em2026-10-18T00:06Z (17/10 America/Sao_Paulo): main840f0908
+  recebeu PR250, somente timeout da CI e documentos, sem mudanca de runtime.
+  CI39061398333 concluida/success; candidato atualizado para esse SHA exato.
+  Ledger ainda eff7f729/deployment6a8e7f60-2847-4e32-8be3-9c6e1d23ed39,
+  deployedAt2026-10-17T04:49:20.557Z, sem pendencia. Primeira transferencia
+  perdeu conexao SSH, mas arquivo47f5d449 chegou integro; nenhum deploy ocorreu.
+  Artefato840f0908 baixado separadamente e checksum aprovado; prova OCI em curso.
+
+## 2026-10-17: Previsao publicada e verificada
+
+- Publicacao em2026-10-18T00:10:01.373Z (17/10,21:10 America/Sao_Paulo),
+  SHA840f0908, CI39061398333 integralmente aprovada, deployment
+  fc04ef76-1350-4298-8692-aed95b1bb2f8. Coordenador unico confirmou deploy e
+  ausencia de pendencia; imagem imutavel com prova OCI e dois perfis aprovada.
+- Migrations MCP autorizadas: crm_forecasts/20261018000941 e
+  sync_page_catalog_forecast/20261018001010. Storage antes da promocao,
+  catalogo depois do runtime compativel. RLS forcada/ACL sem acesso direto,
+  tabela sem fixtures. Pagina ativa com grants somente Master/Admin.
+- Backup final00:09Z preservou8 overrides, incluindo dois criados externamente
+  durante a espera. Conferencia posterior confirmou hashes antigos de permissoes,
+  grants e overrides iguais;27 paginas antigas preservadas salvo updated_at
+  tecnico. Totais28 paginas/39 permissoes/148 grants/8 overrides.
+- Health publico apos catalogo200/ok/840f0908; API anonima401 e pagina307 para
+  login. Edicao validada na CI/sintetico, sem gravacao com conta real de producao.
+  Evidencias e limites em docs/audits/previsao-2026-10-17.md. Registro documental
+  posterior nao exige reinicio do aplicativo nem reaplicacao das migrations.
+
+## 2026-10-17: Finalizacao do PR documental251
+
+- Retomada em2026-10-18T01:05Z (17/10 America/Sao_Paulo). GitHub confirmou
+  CI39081939465 aprovada no head d703d412, mas PR251 conflitante apos PR252
+  documental integrar main36f3c317. CI main39084939569 ainda em andamento.
+- GET publico api/health200/ok/840f0908, mesma versao publicada. Escopo desta
+  retomada: preservar ambos os registros, repetir CI no head integrado e fazer
+  merge somente apos aprovacao. Sem nova publicacao de runtime ou migration.
+- Encerramento: CI39085264715 aprovada no head2e1c046a (validate, restore e
+  release-gates; imagem dispensada em PR). Merge normal confirmado pelo GitHub
+  em2026-10-18T01:55:20Z, commitfe1b343eeb1d5534f47779738b9fdbaf7d776d2f.
+  Conflitos documentais resolvidos preservando os dois registros; nenhum gate
+  dispensado. Health posterior200/ok/840f0908. PR251 concluido, sem novo deploy.
+
+## 2026-10-18: abertura do ajuste visual da Previsão
+
+- Consulta às 02:55 UTC: main remoto fe1b343e, checkout 1b75d003 com registro documental posterior. GitHub Actions 39088213591 de main falhou; causa ainda não inspecionada. CI anterior 39084939569 aprovada em 36f3c317.
+- GET observacional https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, versão 840f0908e9c3d5c06f5a4dbb4cdf161404b31753. A versão publicada difere de main por registros documentais.
+- Escopo autorizado: aplicar padrão visual do dashboard à Previsão, mantendo tabela editável e Salvar. Nenhuma alteração de banco prevista. Fonte: Git local/remoto, GitHub via gh e health público.
+
+## 2026-10-18: Previsão alinhada ao dashboard — integração
+
+- PR253 integrou em f8ad7bbfda9f22190018593266b1fa1769a1702f após CI39092735520 aprovar validate, isolated-restore e release-gates no head2e37ad71. Imagem é gerada apenas no push/main.
+- Reutilizados canvas e tokens de /app, cabeçalho compacto, superfícies e Salvar destacado. Tabela padrão sem rolagem lateral em1440/390/320 px; colunas extras usam rolagem interna. Nenhuma alteração de API, permissões ou banco.
+- Local: lint, typecheck e build aprovados; cinco testes de navegador aprovados, três temas e axe sem violações. Suíte geral teve três timeouts; repetição aprovou3803 testes e restou um timeout do Obsidian, aprovado isoladamente em13,56s. CI Linux aprovou a suíte completa; nenhum timeout ou asserção foi relaxado.
+- Conferência04:01 UTC: main f8ad7bbf, CI39095660275 iniciada. Health público HTTP200/ok/840f0908. Implementado e integrado; publicação ainda pendente da CI exata de main e prova da imagem.
+
+### Publicação confirmada
+
+- CI39095660275: push/main f8ad7bbf, quatro jobs aprovados. PR253 integrado e runtime publicado em2026-10-18T04:51:47.145Z pelo coordenador release:production, retorno0, deployment c4d5dc22-ad9d-4fa4-a5aa-d20184a5339c, sem pendência.
+- Baseline conferida às04:51:31Z: deployment fc04ef76-1350-4298-8692-aed95b1bb2f8, SHA840f0908, deployedAt2026-10-18T00:10:01.373Z. Coordenador executou consulta final, travas, backup e CAS no minuto da troca.
+- Artefato: checksum ad9134c2a60f31612d0d4f2770beeb4894377e48304a6fb03aed7bb86c4c131f; config CI6c9d9680 e manifesto local cdd72fbb comprovados pela cadeia OCI,11 camadas, RootFS, label e plataforma linux/amd64. image:prove aprovou dois perfis usando a mesma imagem, sem imprimir segredos.
+- Pós-publicação04:51:55Z: health público HTTP200/ok/f8ad7bbf; container healthy com imagem cdd72fbb. GET anônimo da página307 e API401. Nenhuma migration ou mutação de dados de negócio nesta entrega.
+- Limites: interface validada com fixtures sintéticas locais e na CI; não houve sessão autenticada de produção nesta verificação nem gravação de fixture no CRM real. pnpm test local parou no Vitest por timeout; as etapas Node subsequentes foram comprovadas pela CI Linux. O teste restante de Obsidian passou isoladamente, sem alterar limites ou asserções.
+- Fontes: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/253, Actions39092735520/39095660275, https://crm.descomplicapro.com.br/api/health, coordenador e provas locais. Reavaliar os timeouts locais apenas se reaparecerem isoladamente ou na CI.
+
+## 2026-10-18 — abertura: Previsão por empreendimento
+
+Consulta em 2026-10-18T14:16:41Z: GitHub main d919751a51772dd0c57a582b9581e61412642ced, CI 39100233037 aprovada; PR 253 integrado em f8ad7bbf. Health público HTTP 200, status ok, version d919751a. Branch codex/previsao-empreendimentos incorpora origin/main e preserva os registros locais de publicação. Fontes: GitHub via gh, origin/main e https://crm.descomplicapro.com.br/api/health. Nova demanda: sete grupos editáveis Previsão/Realizado, reordenação, números e totais calculados. Nenhuma alteração remota de dados realizada nesta abertura.
+
+### Validação da implementação por empreendimento
+
+Branch codex/previsao-empreendimentos: lint, typecheck e build aprovados; 45 testes de modelo e 46 de API aprovados. Navegador sintético: sete cenários funcionais aprovados, arraste real aprovado separadamente, matriz Claro/Médio/Escuro em 1440/390/320 sem overflow horizontal e axe sem violações. Capturas em test-results/forecast-preview (não versionadas). Suíte global inicial: 3.841 aprovados e sete falhas; quatro eram inventários atualizados nesta entrega e três eram timeouts locais. Após ajuste, os quatro arquivos de regressão passaram 75 testes; repetição global em andamento. Sem alterações de tolerância ou skips para ocultar falhas.
+
+Migration 20261018142142_crm_forecast_groups.sql preparada, não aplicada remotamente. Projeto de produção hnncxuerlcsaahdxoswb confirmado via URL do runtime e MCP; RPC anterior hash MD5 9bb11666b25feae744f2ab24d0405f24, backup de definição sem dados preparado fora do Git. CI pgTAP/restore e autorização específica continuam pendentes. Fonte: código, logs locais e consultas observacionais MCP. Limite: capturas sintéticas não representam escrita ou sessão autenticada na produção.
+
+### CI inicial e correção da fixture pgTAP
+
+CI 39136448707 no SHA cde0b99d: validate aprovado (inclui suíte completa Linux); isolated-restore falhou porque o novo teste usava operador JSON junto de subtração sem parênteses. A expressão avaliava columns como inteiro e causava 22P02 antes da segunda asserção. SELECTs somente de constantes confirmaram a causa e a correção. Fixture corrigida, plano36 preservado, 67 testes focados aprovados. Nova CI obrigatória antes de merge/aplicação. Na repetição local, Vitest passou 3.848 testes; etapa Node teve 1.593 aprovados, três falhas de permissões/caminhos POSIX em Meta Ads e 19 skips existentes. Não foram alterados skips, permissões ou testes para mascarar essas limitações; validate Linux aprovou o conjunto.
+
+### Revisão final do legado
+
+Cenário sintético com cabeçalho antigo personalizado confirmou necessidade de usar o nome acessível fixo ao focar novas linhas. Ajuste de duas chamadas e teste de inserção/exclusão aprovados em Chromium (15,10 s). A execução 39137287690 passou testes, mas a fonte documental Prefeitura SP retornou HTTP 403; repetição solicitada sem alterar ou dispensar o gate externo. Nenhuma aplicação remota ou merge realizado.
+
+### Lint SQL após a correção da fixture
+
+CI 39137907096: validate aprovado incluindo a fonte documental que retornara403. A restauração avançou até o lint de banco e bloqueou por shadowed_variables/unused variable v_index na migration nova. FOR inteiro declara o índice implicitamente; removida a declaração externa redundante. Não houve mudança de regra, bypass de lint ou mutação remota. Nova CI necessária para comprovar pgTAP, lint e restore completos.

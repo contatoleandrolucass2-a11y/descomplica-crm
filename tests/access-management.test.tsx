@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   requireAuthorization: vi.fn(),
   requirePermission: vi.fn(),
   loadReadModelV3: vi.fn(),
+  loadQlikRankingV2: vi.fn(async () => ({ status: "unavailable" })),
 }));
 
 vi.mock("next/navigation", () => ({
@@ -24,6 +25,10 @@ vi.mock("@/lib/authorization/guards", () => ({
 }));
 vi.mock("@/lib/crm/read-model-v3/data", () => ({
   loadReadModelV3: mocks.loadReadModelV3,
+}));
+
+vi.mock("@/lib/crm/qlik/data-v2", () => ({
+  loadQlikRankingV2: mocks.loadQlikRankingV2,
 }));
 
 import ForbiddenPage from "@/app/forbidden";
@@ -65,6 +70,7 @@ describe("experiência de acesso", () => {
 
     expect(markup).toContain("Você não possui acesso a esta página");
     expect(markup).toContain("Voltar ao início");
+    expect(markup).toContain('href="/"');
     expect(markup).toContain("AUTH-403");
     expect(markup).not.toContain("admin.access");
   });
@@ -99,8 +105,9 @@ describe("experiência de acesso", () => {
 
     expect(mocks.requirePermission).toHaveBeenCalledWith("crm.partnerships.view");
     expect(markup).toContain("Ranking das imobiliárias");
-    expect(markup).toContain("Aguardando conciliação das fontes");
-    expect(markup).toContain("Dado indisponível — integração pendente");
+    expect(markup).toContain("A leitura da fonte Qlik não pôde ser confirmada.");
+    expect(markup).toContain("Dados indisponíveis");
+    expect(mocks.loadQlikRankingV2).toHaveBeenCalledExactlyOnceWith(null);
     expect(markup).not.toContain("crm_imob_ranking");
     expect(mocks.loadReadModelV3).not.toHaveBeenCalled();
   });
@@ -213,7 +220,18 @@ describe("catálogo localizado de acesso", () => {
   });
 
   it("mantém a matriz visual dos papéis alinhada ao catálogo protegido", () => {
-    const baseNavigationPermissions = ["pages.view", "crm.dashboard.view", "crm.stages.view"];
+    const baseNavigationPermissions = [
+      "pages.view",
+      "crm.dashboard.view",
+      "crm.stages.view",
+      "crm.stage.opportunities.view",
+      "crm.stage.appointments.view",
+      "crm.stage.visits.view",
+      "crm.stage.folders.view",
+      "crm.stage.sales.view",
+      "crm.management.view",
+      "crm.management.routine.view",
+    ];
     const withCanalImobPermissions = [
       ...baseNavigationPermissions,
       "crm.dashboard.with_canal_imob.view",
@@ -229,21 +247,7 @@ describe("catálogo localizado de acesso", () => {
       "crm.simulators.execute",
     ];
 
-    expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(
-      Object.keys(PERMISSIONS).filter(
-        (permission) =>
-          ![
-            "crm.read_model_v3.view",
-            "crm.read_model_v3.ranking.view",
-            "crm.read_model_v3.partnerships.view",
-            "crm.read_model_v3.stock.view",
-            "crm.commercial_engine.execute",
-            "crm.inventory.riva.view",
-            "crm.inventory.direcional.view",
-          ].includes(permission),
-      ),
-    );
-    expect(ROLE_INHERITED_PERMISSIONS.master).toHaveLength(24);
+    expect(ROLE_INHERITED_PERMISSIONS.master).toEqual(Object.keys(PERMISSIONS));
     expect(ROLE_INHERITED_PERMISSIONS.admin).toEqual(Object.keys(PERMISSIONS));
     for (const roleKey of ["coordinator", "manager_imob", "broker_imob"] as const) {
       expect(ROLE_INHERITED_PERMISSIONS[roleKey]).toEqual(withCanalImobPermissions);
@@ -287,47 +291,48 @@ describe("catálogo localizado de acesso", () => {
     expect(downgrade.added).toEqual([]);
   });
 
-  it.each([false, true])(
-    "marca os padrões do Administrador e respeita negação individual: %s",
-    (denyRiva) => {
-      const markup = renderToStaticMarkup(
-        createElement(UserAccessManager, {
-          initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
-          users: [
-            {
-              inheritedPermissions: ROLE_INHERITED_PERMISSIONS["admin"],
-              permissionDetailsAvailable: true,
-              userId: "81000000-0000-4000-8000-000000000006",
-              email: "administrador@example.test",
-              isActive: true,
-              accessStatus: "approved",
-              roleKey: "admin",
-              isSelf: false,
-              isManageable: true,
-              overrides: denyRiva
-                ? [{ permissionKey: "crm.inventory.riva.view", effect: "deny", reason: null }]
-                : [],
-            },
-          ],
-          assignableRoles: ["admin"],
-          manageablePermissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"],
-          canManageRoles: true,
-          canManagePermissions: true,
-          isMasterPermissionManager: true,
-          canManageUsers: true,
-          canApproveUsers: false,
-          reportingScopes: [],
-        }),
+  it.each([
+    ["admin", false],
+    ["admin", true],
+    ["master", false],
+  ] as const)("marca os padrões de %s e respeita negação individual: %s", (roleKey, denyRiva) => {
+    const markup = renderToStaticMarkup(
+      createElement(UserAccessManager, {
+        initialRoleDefaults: ROLE_INHERITED_PERMISSIONS,
+        users: [
+          {
+            inheritedPermissions: ROLE_INHERITED_PERMISSIONS[roleKey],
+            permissionDetailsAvailable: true,
+            userId: "81000000-0000-4000-8000-000000000006",
+            email: "administrador@example.test",
+            isActive: true,
+            accessStatus: "approved",
+            roleKey,
+            isSelf: false,
+            isManageable: true,
+            overrides: denyRiva
+              ? [{ permissionKey: "crm.inventory.riva.view", effect: "deny", reason: null }]
+              : [],
+          },
+        ],
+        assignableRoles: ["admin"],
+        manageablePermissions: ["crm.inventory.riva.view", "crm.inventory.direcional.view"],
+        canManageRoles: true,
+        canManagePermissions: true,
+        isMasterPermissionManager: true,
+        canManageUsers: true,
+        canApproveUsers: false,
+        reportingScopes: [],
+      }),
+    );
+    const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
+    expect(checkboxes.length).toBeGreaterThan(0);
+    for (const checkbox of checkboxes) {
+      expect(checkbox.includes('checked=""')).toBe(
+        !(denyRiva && checkbox.includes('aria-label="Acesso a RIVA"')),
       );
-      const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-      expect(checkboxes.length).toBeGreaterThan(0);
-      for (const checkbox of checkboxes) {
-        expect(checkbox.includes('checked=""')).toBe(
-          !(denyRiva && checkbox.includes('aria-label="Acesso a RIVA"')),
-        );
-      }
-    },
-  );
+    }
+  });
 
   it("não mantém descrições de permissão em inglês na interface", () => {
     const visibleText = Object.values(PERMISSIONS)
@@ -469,7 +474,8 @@ describe("catálogo localizado de acesso", () => {
     expect(checkbox("DIRECIONAL")).not.toContain('checked=""');
     expect(checkbox("Gerenciar usuários")).toContain('disabled=""');
     expect(markup.match(/aria-label="Acessar simuladores"/g)).toHaveLength(1);
-    expect(markup).toContain("Permite visualizar e executar os simuladores disponíveis.");
+    expect(markup).toContain("Visualiza e executa os simuladores disponíveis:");
+    expect(markup).toContain("Páginas vinculadas: Dashboard.");
     expect(markup).not.toContain('aria-label="Acesso a Executar simuladores oficiais"');
     expect(markup).not.toContain("Visualizar read model v3");
     expect(markup).not.toContain("Visualizar dataset v3");
@@ -559,7 +565,7 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-    expect(checkboxes).toHaveLength(25);
+    expect(checkboxes).toHaveLength(38);
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toContain('checked=""');
       expect(checkbox).toContain('disabled=""');
@@ -741,8 +747,9 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toMatch(/Total de usuários<\/span><strong[^>]*>40<\/strong>/);
     expect(markup).toMatch(/Com acesso ativo<\/span><strong[^>]*>32<\/strong>/);
   });
-  it("não exibe nem oferece salvar módulos ausentes do catálogo de 25 chaves", () => {
+  it("não exibe nem oferece salvar módulos ausentes do catálogo de 38 chaves", () => {
     const absent = new Set([
+      "crm.management.forecast.view",
       "crm.read_model_v3.view",
       "crm.read_model_v3.ranking.view",
       "crm.read_model_v3.partnerships.view",
@@ -778,7 +785,9 @@ describe("catálogo localizado de acesso", () => {
         reportingScopes: [],
       }),
     );
-    expect(keys).toHaveLength(25);
+    expect(keys).toHaveLength(38);
+    expect(keys).not.toContain("crm.management.forecast.view");
+    expect(markup).not.toContain('aria-label="Acesso a Previsão"');
     expect(markup).not.toContain("Executar motores comerciais");
     expect(markup).not.toContain("Gerenciar políticas comerciais");
     expect(markup).not.toContain("read model v3");
@@ -787,7 +796,7 @@ describe("catálogo localizado de acesso", () => {
     const checkboxes = [...markup.matchAll(/<input[^>]*type="checkbox"[^>]*>/g)].map(
       ([input]) => input,
     );
-    expect(checkboxes).toHaveLength(23);
+    expect(checkboxes).toHaveLength(35);
     expect(checkboxes.every((input) => input.includes('checked=""'))).toBe(true);
   });
 });

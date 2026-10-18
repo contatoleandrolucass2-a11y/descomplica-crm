@@ -33,6 +33,10 @@ validadas; ausência de fonte deve aparecer como estado indisponível.
 - Os textos e traços mostrados nos canvases representam composição visual, não
   registros comerciais. Nenhum número, nome, status ou participante ilustrado
   pode virar dado real ou fixture produtiva.
+- O pedido de 15/10/2026 remove os códigos WF da apresentação comercial,
+  incluindo cards, cabeçalhos, mensagens, ajuda e resultados. Esses códigos
+  permanecem apenas nos identificadores e contratos internos. A referência
+  histórica não autoriza reintroduzi-los no texto visível.
 - O selo “Prévia visual · sem dados reais” só é válido em estado sintético ou
   comprovadamente sem fonte. Quando houver snapshot validado, a interface deve
   identificar honestamente a origem e o estado reais.
@@ -53,6 +57,16 @@ protegidas. A rotina segue no padrao visual da Tabela Associativo, com
 classificacao inicial de Gerente regional house e demais funcoes nulas. Os 22
 canvases originais continuam preservados; Recurso MKT, Gestao e Rotina possuem
 testes funcionais proprios.
+
+O pedido de 16/10/2026 acrescenta `/app/gestao/previsao`, elevando o inventário
+para 28 rotas protegidas. Os três prints enviados pelo usuário são referência
+para a entrada em Gestão e a tabela manual com Nome do corretor, Previsão e
+Realizado, sem os cards de entrada numérica. A tela permite incluir e excluir
+linhas e colunas e salvar. Esses prints não foram incorporados como baseline
+nem constituem uma comparação externa executada. A validação sintética prevista
+em `tests/forecast-settings.test.tsx`, com `FORECAST_SETTINGS_BROWSER=1`, cobre
+edição, salvamento e conflitos; seus resultados devem ser registrados após
+execução, sem alegar paridade visual antes dessa evidência.
 
 | Canvas                                 |   Região | Rota                                      |
 | -------------------------------------- | -------: | ----------------------------------------- |
@@ -127,3 +141,12 @@ diferencas inevitaveis entre canvas gerado e captura do navegador, como
 rasterizacao de fonte e altura de conteudo. A regressao pixel a pixel da
 aplicacao continua mais restritiva, com tolerancia de `1%` e diferenca maxima de
 `16` por canal.
+
+### Revisão dos códigos internos em 16/10/2026
+
+A captura Linux limpa da execução `38828948624`, artefato `12016679397`,
+validou a remoção dos códigos WF. Foram atualizadas somente as referências
+móveis do Hub em 320, 375 e 390 pixels, incluindo o tema escuro em 390 pixels.
+As outras 238 imagens foram preservadas. A proveniência está em
+`docs/qa/reference-parity/authenticated-results.json`; a integração com
+`main` em `b5458ff5` exige nova CI normal antes da publicação.

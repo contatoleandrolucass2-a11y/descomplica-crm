@@ -2,12 +2,16 @@ import type { ReactNode } from "react";
 
 import { enforceAnyPermission } from "@/lib/authorization/enforce";
 import type { PermissionKey } from "@/lib/authorization/permissions";
+import { PAGE_REGISTRY } from "@/lib/navigation/registry";
 
 // This check runs in the /app layout, outside the sibling loading.tsx
 // Suspense boundary. It prevents an unauthorized request from committing a
 // streamed HTTP 200 before the page-specific guard can return the real 403.
 // Page guards and RLS still enforce the exact permission for each child route.
 const APP_SURFACE_PERMISSIONS = [
+  ...PAGE_REGISTRY.filter((page) => page.releaseEnabled && page.path.startsWith("/app")).map(
+    (page) => page.permission,
+  ),
   "crm.dashboard.view",
   "crm.stages.view",
   "crm.ranking.view",
