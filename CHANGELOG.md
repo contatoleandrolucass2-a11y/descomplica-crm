@@ -5,6 +5,7 @@
 - QA: cenarios de filtros separados por dispositivo/transicao e E2E autenticado
   verifica botoes acessiveis e fechamento externo dos quatro filtros.
 - QA de refresh automatico preserva selecao oculta e scroll com os filtros React.
+- Associativo: exibe a quantidade de vagas na linha do estoque e na descrição do imóvel selecionado, distinguindo zero de informação ausente.
 
 - QA do resumo geral: referencias visuais revisadas do dashboard nos tres
   temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.

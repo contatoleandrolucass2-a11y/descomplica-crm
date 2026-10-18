@@ -1,5 +1,20 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: Autorizacao da migration e retomada da publicacao
+
+- Usuario autorizou explicitamente revisar e aplicar a migration de grupos da
+  Previsao, preservando dados e acessos. Em23:27Z, health publico200/ok/d919751a;
+  main remoto eeb42a45 inclui PR257 (vagas no Associativo). CI39143952391 passou
+  integralmente no head09dbca08, mas a base avancou. Integracao bloqueada por
+  conflitos documentais; preservar ambos os registros e repetir CI do conjunto.
+- Consulta MCP confirmou ausencia de crm_forecast_groups no historico remoto e
+  RPC anterior MD5 9bb11666b25feae744f2ab24d0405f24, owner postgres, EXECUTE apenas
+  postgres/authenticated, search_path vazio e limites10s/5s. Sem mutacao remota.
+  Aplicacao condicionada a imagem validada pronta, backup da definicao anterior,
+  reconferencia de ACL/RLS/dados e publicacao protegida. Fontes: PR255, Actions
+  39143952391, origin/main, health publico e metadados Supabase. A autorizacao
+  nao abrange outras migrations nem reescrita de previsoes existentes.
+
 ## 2026-10-18: Retomada de filtros e conciliacao Salesforce
 
 - Consulta em 10:54 America/Sao_Paulo: git fetch concluido; PR254 merged,
@@ -74,6 +89,14 @@
 - Limite: STATUS_BREAKPOINT original nao reproduzido; a sequencia de foco foi
   corrigida e validada, mas nao se afirma causa unica do crash nativo. Suite
   POSIX local Windows nao e comprovacao Linux: CI completa e a evidencia final.
+
+## 2026-10-18: Vagas no Associativo
+
+A linha de estoque e a descrição da unidade selecionada no Associativo exibem `VAGA: N`, usando `parkingSpaces`. Zero é preservado; valores ausentes ou inválidos exibem `VAGA: Não informada`. As variantes Investidor e Tabela Direta e os cálculos financeiros permanecem inalterados. A branch foi reconciliada com `main` em `6b6e88fb`.
+
+Na retomada, passaram formatação, lint, tipos, build, 3.861 testes Vitest (98 skips condicionais), 1.610 testes operacionais (cinco skips Linux) e 723 testes de release (14 skips Linux). A CI Ubuntu é obrigatória para os casos POSIX. O navegador isolado confirmou 18 seleções reais com vagas zero, um e ausentes em 390/1440 px e três temas. A matriz completa do guia passou em 1440/375/320 px, nos três temas e com/sem proposta, sem erros de console ou requisições externas. Capturas sintéticas foram inspecionadas. Isso não substitui autenticação/RLS e gates completos da CI.
+
+A CI anterior falhou na formatação documental e a segunda na formatação do novo teste de navegador, corrigidas sem relaxar gates. Produção consultada no ledger permanece em `d919751a`, publicada em `2026-10-18T06:35:30.334Z`. A `main` inclui o PR #256, cuja migration `20261018142142_crm_forecast_groups.sql` ainda não consta no banco produtivo e cuja RPC continua anterior. O runbook de Previsão exige autorização específica para essa aplicação remota; este PR não a executa. Merge, CI final e deploy permanecem etapas separadas, com DEPLOY-001 obrigatória.
 
 ## 2026-10-18: Validacao do resumo geral compacto
 
