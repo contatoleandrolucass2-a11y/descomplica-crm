@@ -1,5 +1,8 @@
 # Changelog
 
+- Dashboard: grupos3/5/5 publicados e conferidos em desktop/celular nos temas
+  claro, medio e escuro, sem overflow horizontal ou textos visiveis cortados.
+
 - CI: amplia para 60 minutos o gate visual completo, preservando toda a matriz.
 
 - Dashboard: referencias visuais revisadas para os grupos3/5/5 em desktop e mobile.
