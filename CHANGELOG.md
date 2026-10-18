@@ -1,5 +1,8 @@
 # Changelog
 
+- Dashboard: filtros controlados por React com fechamento externo e teclado,
+  sem details/fieldset nativos; preserva selecoes, periodos e os dois canais.
+
 - QA do resumo geral: referencias visuais revisadas do dashboard nos tres
   temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
 

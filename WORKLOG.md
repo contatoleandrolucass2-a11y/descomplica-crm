@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-18: Recorrencia dos filtros e conciliacao
+
+Video fornecido confirma STATUS_BREAKPOINT na versao publicada, portanto
+o smoke anterior nao comprovou a eliminacao do erro nativo. Filtros passam
+a disclosure controlado por React, preservando aparencia e selecoes.
+Conciliação da carga10:32 com a UI:913/68/51/128/13 no mes; ambos os canais
+apenas. Evidencias e limites em docs/audits/dashboard-filtros-conciliacao-2026-10-18.md.
+Validacao completa e publicacao desta correcao ainda pendentes.
+
+## 2026-10-18: Resumo geral em producao
+
+PR254 integrado no SHAd919751a; CI39100233037 aprovada apos repetir a
+indisponibilidade HTTP403 da fonte ITBI, sem bypass. Imagem imutavel validada
+por checksum, cadeia OCI11 camadas e dois perfis. Deployment d2fc040b concluido
+em03:35:30 America/Sao_Paulo, sem pendencia. Health confirmou versao exata;
+acesso anonimo negado. Navegador real conferido em1440x900/390x844 nos tres
+temas, sem overflow/cortes nos elementos medidos,13 funis e valores inteiros.
+Filtros fecham por clique externo. Conhecimento final sincronizado no Obsidian.
+
 ## 2026-10-18: Resumo geral compacto
 
 Dashboard renomeado para Dashboard | Resumo Geral, cabecalho compacto e

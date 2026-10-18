@@ -1,5 +1,51 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: Retomada de filtros e conciliacao Salesforce
+
+- Consulta em 10:54 America/Sao_Paulo: git fetch concluido; PR254 merged,
+  main d919751a51772dd0c57a582b9581e61412642ced com CI39100233037 success.
+  Health publico HTTP200/status ok/version identica. Fonte: GitHub PR254,
+  Actions39100233037 e https://crm.descomplicapro.com.br/api/health.
+- Checkout codex/dashboard-resumo-compacto em6380394e preserva notas locais
+  do encerramento anterior. Nova demanda: examinar video do erro recorrente
+  e conciliar funis com Salesforce nos dois canais e filtros selecionados.
+  A validacao anterior nao comprovou a causa nativa STATUS_BREAKPOINT;
+  numeros reais filtrados ainda exigem conciliacao atual. Sem mutacao remota.
+
+- Retomada: video confirma STATUS_BREAKPOINT; substituido caminho nativo dos
+  filtros por disclosure React. Nao afirmar causa interna do Chrome comprovada.
+  Carga13:32:48.967Z e UI conciliadas nos dois canais:913/68/51/128/13 no mes;
+  medias e periodos coincidentes. Sem coleta nova nem alteracao dos calculos.
+  Auditoria: docs/audits/dashboard-filtros-conciliacao-2026-10-18.md.
+  Tipos/build e32 testes aprovados; QA207 checks nos tres temas e cinco larguras.
+  Lint com exclusao de artefatos locais passou; CI integral/publicacao pendentes.
+
+## 2026-10-18: Resumo geral publicado
+
+- PR254 integrado em d919751a51772dd0c57a582b9581e61412642ced.
+  CI39100233037 aprovada em todos os jobs na segunda tentativa. A primeira
+  parou na fonte oficial ITBI HTTP403; repeticao sem alterar ou ignorar gate.
+  CI do PR39097282527 tambem aprovada, incluindo matriz autenticada completa.
+- Artefato12125739919: checksum975754d2bd3cead2ac35b527597b04f4e87159a909452c6166e1a56dc6aadacf,
+  revision exata, configuracao OCI4d00d36e e manifesto local66f822df com11
+  camadas verificadas. image:prove aprovou os dois perfis sem rebuild.
+- Producao anterior f8ad7bbf/deployment c4d5dc22, publicada por outra entrega,
+  foi preservada como baseline CAS. Coordenador retornou deployed/codigo0,
+  deployment d2fc040b-ad09-4442-8fd3-8b1317463b65, em2026-10-18T06:35:30.334Z
+  (03:35:30 America/Sao_Paulo), sem pendencia. Imagem anterior preservada.
+- GET publico /api/health em03:38 retornou200/ok e versao d919751a exata;
+  GET anonimo /app retornou307 para/login. Status do coordenador confirmou
+  recibo, imagem e ausencia de pendencia. Fontes: Actions39100233037,
+  release:production deploy/status, prova OCI e health publico.
+- Navegador autenticado em1440x900 e390x844 nos tres temas:13 funis visiveis,
+  nenhuma quantidade decimal, nenhum overflow horizontal; titulos, etapas,
+  valores e controles verificados sem corte. Filtro canal no desktop e gerente
+  no celular fecharam por clique externo sem erro. Tema escuro e viewport
+  original restaurados. Nao exportados dados privados ou credenciais.
+- Limite: STATUS_BREAKPOINT original nao reproduzido; a sequencia de foco foi
+  corrigida e validada, mas nao se afirma causa unica do crash nativo. Suite
+  POSIX local Windows nao e comprovacao Linux: CI completa e a evidencia final.
+
 ## 2026-10-18: Validacao do resumo geral compacto
 
 - PR254, HEAD f0329c03: matriz sintetica local aprovada,207 checks,
