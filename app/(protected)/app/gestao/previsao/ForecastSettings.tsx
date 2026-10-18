@@ -261,7 +261,7 @@ export function ForecastSettings() {
       cells: Object.fromEntries(document.columns.map((column) => [column.id, ""])),
     };
     change({ ...document, rows: [...document.rows, row] });
-    focusField(`${document.columns[0]!.label}, linha ${document.rows.length + 1}`);
+    focusField(`Nome do corretor, linha ${document.rows.length + 1}`);
   }
 
   function addColumn() {
@@ -281,9 +281,7 @@ export function ForecastSettings() {
       return;
     change({ ...document, rows: document.rows.filter((_, position) => position !== index) });
     if (document.rows.length > 1)
-      focusField(
-        `${document.columns[0]!.label}, linha ${Math.min(index + 1, document.rows.length - 1)}`,
-      );
+      focusField(`Nome do corretor, linha ${Math.min(index + 1, document.rows.length - 1)}`);
     else
       requestAnimationFrame(() =>
         root.current?.querySelector<HTMLButtonElement>("[data-add-row]")?.focus(),

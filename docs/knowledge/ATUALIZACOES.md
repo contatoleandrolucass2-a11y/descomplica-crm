@@ -989,3 +989,7 @@ Migration 20261018142142_crm_forecast_groups.sql preparada, não aplicada remota
 ### CI inicial e correção da fixture pgTAP
 
 CI 39136448707 no SHA cde0b99d: validate aprovado (inclui suíte completa Linux); isolated-restore falhou porque o novo teste usava operador JSON junto de subtração sem parênteses. A expressão avaliava columns como inteiro e causava 22P02 antes da segunda asserção. SELECTs somente de constantes confirmaram a causa e a correção. Fixture corrigida, plano36 preservado, 67 testes focados aprovados. Nova CI obrigatória antes de merge/aplicação. Na repetição local, Vitest passou 3.848 testes; etapa Node teve 1.593 aprovados, três falhas de permissões/caminhos POSIX em Meta Ads e 19 skips existentes. Não foram alterados skips, permissões ou testes para mascarar essas limitações; validate Linux aprovou o conjunto.
+
+### Revisão final do legado
+
+Cenário sintético com cabeçalho antigo personalizado confirmou necessidade de usar o nome acessível fixo ao focar novas linhas. Ajuste de duas chamadas e teste de inserção/exclusão aprovados em Chromium (15,10 s). A execução 39137287690 passou testes, mas a fonte documental Prefeitura SP retornou HTTP 403; repetição solicitada sem alterar ou dispensar o gate externo. Nenhuma aplicação remota ou merge realizado.

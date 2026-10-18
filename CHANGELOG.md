@@ -2881,3 +2881,5 @@ pendente dos gates completos no SHA final.
 - Compatibilidade de leitura do legado, validação de gravação na API/RPC e preservação de permissões, revisão e rascunho.
 
 - Corrigida a precedência da expressão JSON no teste de exclusão parcial de empreendimento, preservando as 36 verificações pgTAP.
+
+- Preservado o foco de teclado ao inserir/excluir linhas em previsões com cabeçalhos antigos personalizados.

@@ -446,7 +446,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
           revision: 3,
           updated_at: "2026-10-16T15:00:00Z",
           columns: [
-            { id: "broker", label: "Nome do corretor" },
+            { id: "broker", label: "Nome antigo personalizado" },
             { id: "forecast", label: "Previsão" },
             { id: "actual", label: "Realizado" },
           ],
@@ -468,6 +468,14 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await page.getByRole("button", { name: "Salvar", exact: true }).click();
       await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
       expect(puts[0]?.expected_revision).toBe(3);
+      await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 2", { exact: true }),
+      ).toBeFocused();
+      await page.getByRole("button", { name: "Excluir linha 2", exact: true }).click();
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 1", { exact: true }),
+      ).toBeFocused();
     });
   },
 );

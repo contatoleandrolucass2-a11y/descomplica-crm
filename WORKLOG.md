@@ -7629,3 +7629,7 @@ Contrato de gravação validado na API e migration da RPC sem reescrever dados n
 ### Correção da fixture SQL na CI
 
 A CI 39136448707 aprovou validate, mas o restore detectou uma expressão JSON sem parênteses no teste de grupos. A precedência de subtração causava 22P02 antes da segunda asserção. Corrigida somente a fixture, preservando as 36 verificações. Expressão antiga/corrigida reproduzida por SELECT de constantes, sem tabelas ou mutações. 67 testes focados aprovados; nova CI necessária.
+
+### Compatibilidade de foco na tabela antiga
+
+Corrigido o foco após inserir/excluir linhas quando o cabeçalho antigo do corretor era personalizado. O foco usa agora o nome acessível fixo da nova interface. Cenário de navegador legado passou incluindo as duas operações.
