@@ -23451,3 +23451,11 @@ body:has(.investor-page-shell) {
     min-height: 44px !important;
   }
 }
+
+/* Keep the parking count visible independently of the truncated product name. */
+.investor-stock-product-with-parking { display: flex; align-items: baseline; gap: 0.75rem; min-width: 0; }
+.investor-stock-product-with-parking .investor-stock-product-text { flex: 1; min-width: 0; }
+.investor-stock-parking { flex-shrink: 0; white-space: nowrap; }
+@media (max-width: 640px) {
+  .investor-stock-product-with-parking { flex-wrap: wrap; }
+}
