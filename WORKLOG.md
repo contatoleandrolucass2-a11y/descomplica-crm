@@ -6,7 +6,6 @@ A linha de estoque e a descrição da unidade selecionada no Associativo exibem 
 
 Validação local: instalação com lockfile congelado; lint, typecheck, audit e 28 testes focados aprovados. A suíte completa falhou por timeouts e falhas de workers; a repetição com dois workers também não aprovou todos os testes. Testes operacionais Salesforce apresentaram timeout. O primeiro build falhou ao buscar fontes Google; a repetição de `pnpm build` passou sem modificar a configuração. A renderização isolada do JSX confirmou os três rótulos em 390 px; a captura de tela expirou, portanto não constitui validação da jornada autenticada. PR de rascunho; sem merge ou deploy.
 
-
 ## 2026-10-18: Resumo geral compacto
 
 Dashboard renomeado para Dashboard | Resumo Geral, cabecalho compacto e

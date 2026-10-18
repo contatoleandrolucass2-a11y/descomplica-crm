@@ -693,7 +693,10 @@ export async function runSyntheticAssociativePageGuide(options) {
   const html = `<!doctype html><html lang="pt-BR" data-theme="light"><head><title>Associativo QA</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">${css.map((file) => `<link rel="stylesheet" href="${file}">`).join("")}</head><body><div id="root"></div><script src="/${script}"></script></body></html>`;
   const snapshot = JSON.parse(buildSyntheticDirectTableQaSnapshot());
   // A small slice exercises filters and selection without the unrelated full-stock matrix.
-  const items = snapshot.items.slice(0, 12);
+  const items = snapshot.items.slice(0, 12).map((item, index) => ({
+    ...item,
+    parkingSpaces: index === 1 ? null : item.parkingSpaces,
+  }));
   const inventory = {
     ...snapshot,
     count: items.length,
@@ -773,6 +776,36 @@ export async function runSyntheticAssociativePageGuide(options) {
         errors.push({ text: message.text(), url: message.location().url });
     });
     await page.goto(`${origin}${routePath}`, { waitUntil: "networkidle" });
+    // Exercise the real row selection and selected-unit summary for zero, one and unknown.
+    for (const width of [390, 1440]) {
+      await page.setViewportSize({ width, height: 900 });
+      for (const theme of ["light", "balanced", "dark"]) {
+        await page
+          .locator("html")
+          .evaluate((element, value) => (element.dataset.theme = value), theme);
+        for (const item of items.slice(0, 3)) {
+          const label = `VAGA: ${item.parkingSpaces ?? "Não informada"}`;
+          const row = page
+            .getByRole("row")
+            .filter({
+              has: page.getByRole("button", {
+                name: `Iniciar proposta com ${item.identifier}`,
+                exact: true,
+              }),
+            });
+          await expect(row.locator(".investor-stock-parking")).toHaveText(label);
+          await row.getByRole("button").click();
+          await expect(
+            page.locator(".investor-property-summary").getByText(label, { exact: true }),
+          ).toBeVisible();
+          await page.reload({ waitUntil: "networkidle" });
+          await page
+            .locator("html")
+            .evaluate((element, value) => (element.dataset.theme = value), theme);
+        }
+      }
+    }
+    process.stdout.write("Parking: 18 real row selections and property summaries passed.\n");
     const steps = await page.evaluate(() => window.qaPageGuideSteps);
     const initialViewport = await checkAssociativeFullStockInitialViewport(
       page,
