@@ -2873,3 +2873,9 @@ pendente dos gates completos no SHA final.
 - Edição manual de linhas, colunas, cabeçalhos e valores mantém o salvamento compartilhado existente.
 
 - Publicação da atualização visual da Previsão confirmada em18/10/2026,01:51 America/Sao_Paulo, versão f8ad7bbf. PR253 e CI completa aprovados; tabela editável, controles de linhas/colunas e Salvar preservados.
+
+## 2026-10-18 — Previsão comparativa por empreendimento
+
+- Sete empreendimentos iniciais com pares Previsão/Realizado e reordenação conjunta de cabeçalhos e valores.
+- Total por corretor, acumulados no rodapé, entrada numérica e tabela responsiva sem rolagem horizontal.
+- Compatibilidade de leitura do legado, validação de gravação na API/RPC e preservação de permissões, revisão e rascunho.

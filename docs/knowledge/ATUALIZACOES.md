@@ -975,3 +975,13 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
 - Pós-publicação04:51:55Z: health público HTTP200/ok/f8ad7bbf; container healthy com imagem cdd72fbb. GET anônimo da página307 e API401. Nenhuma migration ou mutação de dados de negócio nesta entrega.
 - Limites: interface validada com fixtures sintéticas locais e na CI; não houve sessão autenticada de produção nesta verificação nem gravação de fixture no CRM real. pnpm test local parou no Vitest por timeout; as etapas Node subsequentes foram comprovadas pela CI Linux. O teste restante de Obsidian passou isoladamente, sem alterar limites ou asserções.
 - Fontes: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/253, Actions39092735520/39095660275, https://crm.descomplicapro.com.br/api/health, coordenador e provas locais. Reavaliar os timeouts locais apenas se reaparecerem isoladamente ou na CI.
+
+## 2026-10-18 — abertura: Previsão por empreendimento
+
+Consulta em 2026-10-18T14:16:41Z: GitHub main d919751a51772dd0c57a582b9581e61412642ced, CI 39100233037 aprovada; PR 253 integrado em f8ad7bbf. Health público HTTP 200, status ok, version d919751a. Branch codex/previsao-empreendimentos incorpora origin/main e preserva os registros locais de publicação. Fontes: GitHub via gh, origin/main e https://crm.descomplicapro.com.br/api/health. Nova demanda: sete grupos editáveis Previsão/Realizado, reordenação, números e totais calculados. Nenhuma alteração remota de dados realizada nesta abertura.
+
+### Validação da implementação por empreendimento
+
+Branch codex/previsao-empreendimentos: lint, typecheck e build aprovados; 45 testes de modelo e 46 de API aprovados. Navegador sintético: sete cenários funcionais aprovados, arraste real aprovado separadamente, matriz Claro/Médio/Escuro em 1440/390/320 sem overflow horizontal e axe sem violações. Capturas em test-results/forecast-preview (não versionadas). Suíte global inicial: 3.841 aprovados e sete falhas; quatro eram inventários atualizados nesta entrega e três eram timeouts locais. Após ajuste, os quatro arquivos de regressão passaram 75 testes; repetição global em andamento. Sem alterações de tolerância ou skips para ocultar falhas.
+
+Migration 20261018142142_crm_forecast_groups.sql preparada, não aplicada remotamente. Projeto de produção hnncxuerlcsaahdxoswb confirmado via URL do runtime e MCP; RPC anterior hash MD5 9bb11666b25feae744f2ab24d0405f24, backup de definição sem dados preparado fora do Git. CI pgTAP/restore e autorização específica continuam pendentes. Fonte: código, logs locais e consultas observacionais MCP. Limite: capturas sintéticas não representam escrita ou sessão autenticada na produção.

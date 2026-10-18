@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { createForecastDocument } from "@/lib/crm/forecast-grid";
 import {
   forecastDocumentSchema,
   forecastSaveSchema,
@@ -54,7 +55,10 @@ describe("manual forecast contract", () => {
     ).toBe(false);
   });
   it("requires a safe compare-and-swap revision and explicit capability", () => {
-    expect(forecastSaveSchema.safeParse({ ...document, expected_revision: 0 }).success).toBe(true);
+    expect(
+      forecastSaveSchema.safeParse({ ...createForecastDocument(), expected_revision: 0 }).success,
+    ).toBe(true);
+    expect(forecastSaveSchema.safeParse({ ...document, expected_revision: 0 }).success).toBe(false);
     expect(
       forecastSaveSchema.safeParse({ ...document, expected_revision: Number.MAX_SAFE_INTEGER })
         .success,

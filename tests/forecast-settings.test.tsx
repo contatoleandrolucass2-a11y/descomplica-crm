@@ -8,21 +8,22 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { ForecastSettings } from "@/app/(protected)/app/gestao/previsao/ForecastSettings";
 import type { ForecastDocument, ForecastRecord } from "@/lib/crm/forecasts";
+import { createForecastDocument, getForecastGroups } from "@/lib/crm/forecast-grid";
 
 describe("Previsão", () => {
-  it("starts with three requested columns, empty data and safe loading state", () => {
+  it("starts with seven comparison groups, two rows, totals and safe loading state", () => {
     const markup = renderToStaticMarkup(<ForecastSettings />);
     for (const label of [
       "Nome do corretor",
       "Previsão",
       "Realizado",
-      "Nome da equipe",
+      "Empreendimento 7",
+      "Total geral",
       "Inserir linha",
       "Inserir coluna",
       "Salvar",
     ])
       expect(markup).toContain(label);
-    expect(markup).not.toContain('type="number"');
     expect(markup).toContain("Aguardando carregamento.");
     expect(markup.toLowerCase()).toContain("readonly");
   });
@@ -96,14 +97,19 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     }, 30_000);
 
     async function open(
-      options: { canEdit?: boolean; failLoad?: boolean; seed?: ForecastRecord } = {},
+      options: {
+        canEdit?: boolean;
+        failLoad?: boolean;
+        seed?: ForecastRecord;
+        convertedLegacy?: boolean;
+      } = {},
     ) {
       record = options.seed ?? null;
       canEdit = options.canEdit ?? true;
       failLoad = options.failLoad ?? false;
       conflict = false;
       puts = [];
-      const context = await browser.newContext();
+      const context = await browser.newContext({ hasTouch: true });
       page = await context.newPage();
       page.on("pageerror", (error) => console.error("Forecast fixture:", error.message));
       await page.route("https://forecast.test/**", async (route) => {
@@ -138,36 +144,103 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       });
       await page.goto("https://forecast.test/");
       if (!failLoad)
-        await browserExpect(page.getByRole("status")).toContainText("Tabela compartilhada");
+        await browserExpect(page.locator('p[role="status"]')).toContainText(
+          options.convertedLegacy ? "Alterações não salvas" : "Tabela compartilhada",
+        );
     }
 
-    it("edits shape and values, saves with CAS and restores shared data on reload", async () => {
+    async function expectNoTableOverflow(width: number) {
+      const dimensions = await page
+        .getByRole("region", { name: "Tabela de previsão", exact: true })
+        .evaluate((element) => ({
+          scroll: element.scrollWidth,
+          client: element.clientWidth,
+          overflowing: [...element.querySelectorAll("*")]
+            .filter(
+              (child) =>
+                child.getBoundingClientRect().right > element.getBoundingClientRect().right + 1,
+            )
+            .slice(0, 5)
+            .map((child) => `${child.tagName}.${child.className}`),
+        }));
+      expect(
+        dimensions.scroll,
+        `viewport=${width}; ${JSON.stringify(dimensions)}`,
+      ).toBeLessThanOrEqual(dimensions.client);
+    }
+
+    it("edits grouped comparisons, preserves rows during insertion and saves with CAS", async () => {
       await open();
       await page.setViewportSize({ width: 390, height: 844 });
       const tableRegion = page.getByRole("region", { name: "Tabela de previsão", exact: true });
       expect(
         await tableRegion.evaluate((element) => element.scrollWidth <= element.clientWidth),
       ).toBe(true);
-      await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
       await browserExpect(
-        page.getByLabel("Nome do corretor, linha 1", { exact: true }),
-      ).toBeFocused();
+        page.getByLabel("Nome do empreendimento 7", { exact: true }),
+      ).toBeVisible();
       await page.getByLabel("Nome do corretor, linha 1", { exact: true }).fill("Corretor QA");
+      await page.getByLabel("Nome do corretor, linha 2", { exact: true }).fill("Corretor QA 2");
+      await page.getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true }).fill("12");
+      await page.getByLabel("Empreendimento 1 — Realizado, linha 1", { exact: true }).fill("8");
+      await page.getByLabel("Empreendimento 2 — Previsão, linha 1", { exact: true }).fill("3");
+      await page.getByLabel("Empreendimento 1 — Realizado, linha 2", { exact: true }).fill("7");
+      await browserExpect(page.getByLabel("Total, linha 1", { exact: true })).toHaveText("23");
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30");
+      await browserExpect(page.locator('tfoot output[aria-label="Total geral"]')).toHaveText("30");
+      expect(
+        await page
+          .getByLabel("Nome do corretor, linha 1", { exact: true })
+          .evaluate((element) => getComputedStyle(element).textAlign),
+      ).toBe("right");
       await mkdir("test-results/forecast-preview", { recursive: true });
       await page.screenshot({ path: "test-results/forecast-preview/previsao-editavel-390.png" });
-      await page.getByLabel("Previsão, linha 1", { exact: true }).fill("12");
-      await page.getByLabel("Nome da equipe", { exact: true }).fill("Equipe QA");
-      await page.getByRole("button", { name: "Inserir coluna", exact: true }).click();
-      await browserExpect(page.getByLabel("Nome da coluna 4", { exact: true })).toBeFocused();
-      await page.getByLabel("Nome da coluna 4", { exact: true }).fill("Observação");
-      await page.getByRole("button", { name: "Salvar", exact: true }).click();
-      await browserExpect(page.getByRole("status")).toHaveText("Previsão salva no CRM.");
-      expect(puts[0]?.expected_revision).toBe(0);
-      expect(puts[0]?.rows[0]?.cells.forecast).toBe("12");
-      await page.reload();
-      await browserExpect(page.getByLabel("Nome da equipe", { exact: true })).toHaveValue(
-        "Equipe QA",
+      await page.getByRole("button", { name: "Inserir coluna", exact: true }).tap();
+      await browserExpect(
+        page.getByLabel("Nome do empreendimento 8", { exact: true }),
+      ).toBeFocused();
+      await page.getByLabel("Nome do empreendimento 8", { exact: true }).fill("Residencial QA");
+      await browserExpect(
+        page.getByLabel("Residencial QA — Previsão, linha 2", { exact: true }),
+      ).toHaveValue("");
+      await browserExpect(
+        page.getByLabel("Residencial QA — Realizado, linha 2", { exact: true }),
+      ).toHaveValue("");
+      await page.getByLabel("Residencial QA — Realizado, linha 2", { exact: true }).fill("0.25");
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30,25");
+      await page
+        .getByRole("button", { name: "Mover Empreendimento 1 para a direita", exact: true })
+        .focus();
+      await page.keyboard.press("Enter");
+      await browserExpect(page.getByLabel("Nome do empreendimento 1", { exact: true })).toHaveValue(
+        "Empreendimento 2",
       );
+      await browserExpect(page.getByLabel("Nome do empreendimento 2", { exact: true })).toHaveValue(
+        "Empreendimento 1",
+      );
+      await browserExpect(
+        page.getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true }),
+      ).toHaveValue("12");
+      await browserExpect(
+        page.getByLabel("Empreendimento 1 — Realizado, linha 2", { exact: true }),
+      ).toHaveValue("7");
+      expect(
+        await tableRegion.evaluate((element) => element.scrollWidth <= element.clientWidth),
+      ).toBe(true);
+      await page.getByRole("button", { name: "Salvar", exact: true }).click();
+      await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
+      expect(puts[0]?.expected_revision).toBe(0);
+      const saved = puts[0]!;
+      const groups = getForecastGroups(saved);
+      expect(groups).toHaveLength(8);
+      expect(groups[1]?.label).toBe("Empreendimento 1");
+      expect(saved.rows[0]?.cells[groups[1]!.forecastId]).toBe("12");
+      expect(saved.rows[1]?.cells[groups[7]!.actualId]).toBe("0.25");
+      await page.reload();
+      await browserExpect(page.getByLabel("Nome do empreendimento 8", { exact: true })).toHaveValue(
+        "Residencial QA",
+      );
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30,25");
       await browserExpect(
         page.getByLabel("Nome do corretor, linha 1", { exact: true }),
       ).toHaveValue("Corretor QA");
@@ -177,16 +250,63 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         page.getByLabel("Nome do corretor, linha 1", { exact: true }),
       ).toHaveValue("Corretor QA");
       page.once("dialog", (dialog) => dialog.accept());
-      await page.getByRole("button", { name: "Excluir coluna 4: Observação", exact: true }).click();
-      await browserExpect(page.getByLabel("Nome da coluna 4", { exact: true })).toHaveCount(0);
+      await page.getByRole("button", { name: "Excluir Residencial QA", exact: true }).click();
+      await browserExpect(page.getByLabel("Nome do empreendimento 8", { exact: true })).toHaveCount(
+        0,
+      );
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30");
       page.once("dialog", (dialog) => dialog.accept());
       await page.getByRole("button", { name: "Excluir linha 1", exact: true }).click();
-      await browserExpect(page.getByText("Nenhuma linha cadastrada.")).toBeVisible();
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 1", { exact: true }),
+      ).toHaveValue("Corretor QA 2");
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("7");
+      await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 2", { exact: true }),
+      ).toBeFocused();
+      await browserExpect(
+        page.getByLabel("Empreendimento 1 — Previsão, linha 2", { exact: true }),
+      ).toHaveValue("");
+    });
+
+    it("drags the complete desktop group with both columns and every row value", async () => {
+      const seed = createForecastDocument();
+      const groups = getForecastGroups(seed);
+      seed.rows[0]!.cells[groups[0]!.forecastId] = "12";
+      seed.rows[0]!.cells[groups[0]!.actualId] = "8";
+      seed.rows[1]!.cells[groups[0]!.forecastId] = "5";
+      seed.rows[1]!.cells[groups[0]!.actualId] = "7";
+      await open({ seed: { ...seed, revision: 2, updated_at: "2026-10-16T15:00:00Z" } });
+      await page.setViewportSize({ width: 1440, height: 900 });
+      const target = page
+        .locator("thead th")
+        .filter({ has: page.getByLabel("Nome do empreendimento 3", { exact: true }) });
+      await page.getByTitle("Arrastar Empreendimento 1", { exact: true }).dragTo(target);
+      await browserExpect(page.getByLabel("Nome do empreendimento 3", { exact: true })).toHaveValue(
+        "Empreendimento 1",
+      );
+      await browserExpect(
+        page.getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true }),
+      ).toHaveValue("12");
+      await browserExpect(
+        page.getByLabel("Empreendimento 1 — Realizado, linha 1", { exact: true }),
+      ).toHaveValue("8");
+      await browserExpect(
+        page.getByLabel("Empreendimento 1 — Previsão, linha 2", { exact: true }),
+      ).toHaveValue("5");
+      await browserExpect(
+        page.getByLabel("Empreendimento 1 — Realizado, linha 2", { exact: true }),
+      ).toHaveValue("7");
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("32");
+      await page.getByRole("button", { name: "Salvar", exact: true }).click();
+      await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
+      expect(getForecastGroups(puts[0]!)[2]?.id).toBe(groups[0]!.id);
+      expect(puts[0]!.rows).toEqual(seed.rows);
     });
 
     it("preserves drafts during conflicts and cancelled internal navigation", async () => {
       await open();
-      await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
       await page.getByLabel("Nome do corretor, linha 1", { exact: true }).fill("Rascunho QA");
       expect(
         await page.evaluate(() => {
@@ -216,7 +336,9 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await page
         .getByRole("button", { name: "Descartar rascunho e carregar versão salva" })
         .click();
-      await browserExpect(page.getByText("Nenhuma linha cadastrada.")).toBeVisible();
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 1", { exact: true }),
+      ).not.toHaveValue("Rascunho QA");
     });
 
     it("fails closed during load failure and retries", async () => {
@@ -233,18 +355,17 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     });
 
     it("supports read-only access, keyboard, three themes and mobile overflow", async () => {
+      const seed = createForecastDocument();
+      const groups = getForecastGroups(seed);
+      seed.rows[0]!.cells.broker = "Corretor QA";
+      seed.rows[0]!.cells[groups[0]!.forecastId] = "12";
+      seed.rows[0]!.cells[groups[0]!.actualId] = "8";
       await open({
         canEdit: false,
         seed: {
-          title: "Equipe QA",
+          ...seed,
           revision: 1,
           updated_at: "2026-10-16T15:00:00Z",
-          columns: [
-            { id: "broker", label: "Nome do corretor" },
-            { id: "forecast", label: "Previsão" },
-            { id: "actual", label: "Realizado" },
-          ],
-          rows: [{ id: "qa", cells: { broker: "Corretor QA", forecast: "12", actual: "8" } }],
         },
       });
       await browserExpect(
@@ -252,7 +373,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       ).toBeVisible();
       await browserExpect(page.getByRole("button", { name: "Salvar", exact: true })).toBeDisabled();
       expect(
-        await page.getByLabel("Nome da equipe", { exact: true }).getAttribute("readonly"),
+        await page.getByLabel("Nome do empreendimento 1", { exact: true }).getAttribute("readonly"),
       ).not.toBeNull();
       for (const theme of ["light", "balanced", "dark"]) {
         await page.evaluate(
@@ -261,14 +382,11 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         );
         for (const width of [1440, 390, 320]) {
           await page.setViewportSize({ width, height: 900 });
-          expect(
-            await page
-              .getByRole("region", { name: "Tabela de previsão", exact: true })
-              .evaluate((element) => element.scrollWidth <= element.clientWidth),
-          ).toBe(true);
+          await expectNoTableOverflow(width);
           await mkdir("test-results/forecast-preview", { recursive: true });
           await page.screenshot({
             path: `test-results/forecast-preview/previsao-${theme}-${width}.png`,
+            fullPage: true,
           });
           expect(
             await page.evaluate(
@@ -285,6 +403,71 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(
         page.getByRole("region", { name: "Tabela de previsão", exact: true }),
       ).toBeFocused();
+    });
+
+    it("rejects text in numeric cells and keeps eight groups usable at narrow widths", async () => {
+      await open();
+      await page.getByRole("button", { name: "Inserir coluna", exact: true }).click();
+      const numeric = page.getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true });
+      await numeric.focus();
+      await page.keyboard.insertText("texto");
+      await browserExpect(numeric).toHaveValue("");
+      await numeric.fill("12");
+      await page.keyboard.press("End");
+      await page.keyboard.insertText("abc");
+      await browserExpect(numeric).toHaveValue("12");
+      for (const width of [1440, 390, 320]) {
+        await page.setViewportSize({ width, height: 900 });
+        await expectNoTableOverflow(width);
+        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+          true,
+        );
+        await browserExpect(
+          page.getByLabel("Empreendimento 8 — Realizado, linha 2", { exact: true }),
+        ).toBeVisible();
+        await page.screenshot({
+          path: `test-results/forecast-preview/previsao-oito-grupos-${width}.png`,
+          fullPage: true,
+        });
+      }
+      await page
+        .getByRole("button", { name: "Mover Empreendimento 8 para a esquerda", exact: true })
+        .tap();
+      await browserExpect(page.getByLabel("Nome do empreendimento 7", { exact: true })).toHaveValue(
+        "Empreendimento 8",
+      );
+    });
+
+    it("preserves legacy text for correction without silently saving or dropping it", async () => {
+      await open({
+        convertedLegacy: true,
+        seed: {
+          title: "Legado QA",
+          revision: 3,
+          updated_at: "2026-10-16T15:00:00Z",
+          columns: [
+            { id: "broker", label: "Nome do corretor" },
+            { id: "forecast", label: "Previsão" },
+            { id: "actual", label: "Realizado" },
+          ],
+          rows: [
+            {
+              id: "legacy",
+              cells: { broker: "Corretor legado QA", forecast: "revisar", actual: "4" },
+            },
+          ],
+        },
+      });
+      const legacy = page.getByLabel("Legado QA — Previsão, linha 1", { exact: true });
+      await browserExpect(legacy).toHaveValue("revisar");
+      await browserExpect(legacy).toHaveAttribute("aria-invalid", "true");
+      await browserExpect(page.getByRole("button", { name: "Salvar", exact: true })).toBeDisabled();
+      expect(puts).toHaveLength(0);
+      await legacy.fill("6");
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("10");
+      await page.getByRole("button", { name: "Salvar", exact: true }).click();
+      await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
+      expect(puts[0]?.expected_revision).toBe(3);
     });
   },
 );

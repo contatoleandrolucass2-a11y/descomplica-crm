@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 64-version manifest", async () => {
+  it("keeps a unique, ordered 65-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(64);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(64);
+    expect(migrations).toHaveLength(65);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(65);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-10)).toEqual([
+    expect(migrations.slice(-11)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -61,9 +61,10 @@ describe("release-candidate migration train", () => {
       "20261017003100_qlik_partnerships_reader_permission.sql",
       "20261017022411_crm_forecasts.sql",
       "20261017022450_sync_page_catalog.sql",
+      "20261018142142_crm_forecast_groups.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261017022450_sync_page_catalog.sql");
+    expect(migrations.at(-1)).toBe("20261018142142_crm_forecast_groups.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -95,8 +96,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(34);
-    expect(plan.tests).toBe(1972);
+    expect(plan.files).toBe(35);
+    expect(plan.tests).toBe(2008);
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -377,7 +378,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 1972;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2008;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

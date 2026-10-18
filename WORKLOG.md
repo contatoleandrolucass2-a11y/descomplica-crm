@@ -7619,3 +7619,9 @@ docs/audits/previsao-2026-10-17.md. Nenhuma fixture foi inserida em produção.
 - PR253 integrado em f8ad7bbf com CI39092735520 aprovada. CI de main39095660275 aprovou os quatro jobs, incluindo imagem e matriz visual.
 - Publicado pelo coordenador em2026-10-18T04:51:47.145Z; deployment c4d5dc22-ad9d-4fa4-a5aa-d20184a5339c. Health200/ok/f8ad7bbf, imagem comprovada e healthy, sem pendência; acesso anônimo página307/API401.
 - Lint, tipos e build locais aprovados; cinco testes de navegador e três temas aprovados. Suíte geral local teve timeouts de infraestrutura; último timeout passou isoladamente. A suíte completa foi aprovada no Linux da CI. Sem alterações de banco ou fixtures em produção.
+
+## 2026-10-18 — Previsão por empreendimento
+
+Implementados sete grupos iniciais com Previsão/Realizado, inclusão em todas as linhas, reordenação por arraste e setas, corretor fixo à esquerda/alinhado à direita e Total calculado no final. Rodapé soma colunas e total geral. Valores numéricos com até duas casas decimais, totais em centésimos inteiros e preservação de conteúdo legado inválido para correção. Desktop compacto e celular sem rolagem horizontal, nos três temas.
+
+Contrato de gravação validado na API e migration da RPC sem reescrever dados nem modificar permissões. Inventário ampliado para 65 migrations e 2.008 testes pgTAP; aplicação remota depende de autorização específica. Testes locais e CI serão registrados no encerramento.

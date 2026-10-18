@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, GripVertical, Plus, Save, Trash2 } from "lucide-react";
 import {
   forecastDocumentSchema,
   forecastRecordSchema,
@@ -12,15 +12,23 @@ import {
 import analytics from "../../_components/analytics/analytics.module.css";
 import styles from "./ForecastSettings.module.css";
 
-const initialDocument = (): ForecastDocument => ({
-  title: "Equipe",
-  columns: [
-    { id: "broker", label: "Nome do corretor" },
-    { id: "forecast", label: "Previsão" },
-    { id: "actual", label: "Realizado" },
-  ],
-  rows: [],
-});
+import {
+  createForecastDocument,
+  normalizeForecastDocument,
+  getForecastGroups,
+  addForecastGroup,
+  removeForecastGroup,
+  moveForecastGroup,
+  renameForecastGroup,
+  forecastCellToCents,
+  formatForecastCents,
+  getForecastTotals,
+  getForecastInvalidCells,
+  FORECAST_MAX_GROUPS,
+  type ForecastGroup,
+} from "@/lib/crm/forecast-grid";
+
+const initialDocument = createForecastDocument;
 const documentOnly = (record: ForecastDocument): ForecastDocument => ({
   title: record.title,
   columns: record.columns,
@@ -47,7 +55,7 @@ type ForecastBrowserNavigation = {
 
 export function ForecastSettings() {
   const [document, setDocument] = useState<ForecastDocument>(initialDocument);
-  const [baseline, setBaseline] = useState(() => JSON.stringify(initialDocument()));
+  const [baseline, setBaseline] = useState(() => JSON.stringify(document));
   const [revision, setRevision] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
@@ -57,9 +65,13 @@ export function ForecastSettings() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const root = useRef<HTMLElement>(null);
+  const draggedGroup = useRef<string | null>(null);
   const mounted = useRef(false);
   const dirty = JSON.stringify(document) !== baseline;
   const editable = loaded && canEdit && !saving && !loading;
+  const groups = getForecastGroups(document);
+  const totals = getForecastTotals(document);
+  const invalidCells = getForecastInvalidCells(document);
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
@@ -69,9 +81,10 @@ export function ForecastSettings() {
       if (!response.ok) throw new Error();
       const snapshot = forecastSnapshotSchema.parse(await response.json());
       if (!mounted.current || signal?.aborted) return;
-      const next = snapshot.forecast ? documentOnly(snapshot.forecast) : initialDocument();
+      const original = snapshot.forecast ? documentOnly(snapshot.forecast) : initialDocument();
+      const next = normalizeForecastDocument(original);
       setDocument(next);
-      setBaseline(JSON.stringify(next));
+      setBaseline(JSON.stringify(snapshot.can_edit ? original : next));
       setRevision(snapshot.forecast?.revision ?? 0);
       setCanEdit(snapshot.can_edit);
       setLoaded(true);
@@ -228,7 +241,8 @@ export function ForecastSettings() {
   function focusField(label: string) {
     requestAnimationFrame(() => {
       const field = Array.from(
-        root.current?.querySelectorAll<HTMLTextAreaElement>("textarea") ?? [],
+        root.current?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea") ??
+          [],
       ).find((element) => element.getAttribute("aria-label") === label);
       field?.focus();
     });
@@ -251,14 +265,9 @@ export function ForecastSettings() {
   }
 
   function addColumn() {
-    if (!editable || document.columns.length >= 30) return;
-    const column = { id: crypto.randomUUID(), label: `Coluna ${document.columns.length + 1}` };
-    change({
-      ...document,
-      columns: [...document.columns, column],
-      rows: document.rows.map((row) => ({ ...row, cells: { ...row.cells, [column.id]: "" } })),
-    });
-    focusField(`Nome da coluna ${document.columns.length + 1}`);
+    if (!editable || groups.length >= FORECAST_MAX_GROUPS) return;
+    change(addForecastGroup(document));
+    focusField(`Nome do empreendimento ${groups.length + 1}`);
   }
 
   function removeRow(index: number) {
@@ -281,33 +290,58 @@ export function ForecastSettings() {
       );
   }
 
-  function removeColumn(index: number) {
-    if (!editable || document.columns.length <= 1) return;
-    const column = document.columns[index]!;
+  function removeGroup(group: ForecastGroup) {
+    if (!editable) return;
     if (
-      (column.label.trim() || document.rows.some((row) => row.cells[column.id]?.trim())) &&
+      document.rows.some(
+        (row) => row.cells[group.forecastId]?.trim() || row.cells[group.actualId]?.trim(),
+      ) &&
       !window.confirm(
-        `Excluir a coluna “${column.label}” e todo o seu conteúdo? Salve para confirmar a exclusão no CRM.`,
+        `Excluir “${group.label}”, Previsão, Realizado e todos os valores? Salve para confirmar a exclusão no CRM.`,
       )
     )
       return;
+    change(removeForecastGroup(document, group.id));
+    requestAnimationFrame(() =>
+      root.current?.querySelector<HTMLButtonElement>("[data-add-group]")?.focus(),
+    );
+  }
+
+  function moveGroup(groupId: string, targetIndex: number) {
+    if (!editable || targetIndex < 0 || targetIndex >= groups.length) return;
+    change(moveForecastGroup(document, groupId, targetIndex));
+    focusField(`Nome do empreendimento ${targetIndex + 1}`);
+    setNotice(`Empreendimento movido para a posição ${targetIndex + 1}. Alterações não salvas.`);
+  }
+
+  function changeCell(rowId: string, columnId: string, value: string) {
+    if (!editable) return;
+    if (columnId !== "broker" && forecastCellToCents(value) === null) {
+      setError(
+        "Previsão e Realizado aceitam somente números de 0 a 999.999.999,99, com até duas casas decimais.",
+      );
+      return;
+    }
     change({
       ...document,
-      columns: document.columns.filter((_, position) => position !== index),
-      rows: document.rows.map((row) => ({
-        ...row,
-        cells: Object.fromEntries(Object.entries(row.cells).filter(([id]) => id !== column.id)),
-      })),
+      rows: document.rows.map((row) =>
+        row.id === rowId ? { ...row, cells: { ...row.cells, [columnId]: value } } : row,
+      ),
     });
-    focusField(`Nome da coluna ${Math.min(index + 1, document.columns.length - 1)}`);
   }
 
   async function save() {
     if (!editable || conflict || !dirty) return;
+    if (invalidCells.length) {
+      setError(
+        "Corrija os valores destacados: Previsão e Realizado aceitam somente números não negativos com até duas casas decimais.",
+      );
+      return;
+    }
     const parsed = forecastDocumentSchema.safeParse(document);
     if (!parsed.success) {
       setError(
-        "Preencha o nome de todas as colunas antes de salvar. Respeite os limites da tabela.",
+        "Preencha o nome de todos os empreendimentos antes de salvar. Respeite os limites da tabela.",
       );
       return;
     }
@@ -379,7 +413,8 @@ export function ForecastSettings() {
               </button>
               <button
                 type="button"
-                disabled={!editable || document.columns.length >= 30}
+                data-add-group
+                disabled={!editable || groups.length >= FORECAST_MAX_GROUPS}
                 onClick={addColumn}
               >
                 <Plus size={16} aria-hidden="true" /> Inserir coluna
@@ -387,7 +422,7 @@ export function ForecastSettings() {
               <button
                 type="button"
                 className={styles.save}
-                disabled={!editable || !dirty || conflict}
+                disabled={!editable || !dirty || conflict || invalidCells.length > 0}
                 onClick={() => void save()}
               >
                 <Save size={16} aria-hidden="true" />
@@ -421,9 +456,16 @@ export function ForecastSettings() {
             </div>
           )}
           <p className={styles.help} id="forecast-help">
-            Edite diretamente na tabela. Até 200 linhas e 30 colunas; 120 caracteres nos títulos e
-            4.000 por célula. Use Salvar para compartilhar as alterações.
+            Cada empreendimento reúne Previsão e Realizado. Arraste pela alça ou use as setas para
+            mudar a ordem. Até 200 linhas e {FORECAST_MAX_GROUPS} empreendimentos. O Total soma
+            Previsão e Realizado. Use Salvar para compartilhar.
           </p>
+          {invalidCells.length > 0 && (
+            <p className={styles.error} role="alert">
+              Há {invalidCells.length} valor(es) antigo(s) que precisam ser corrigidos. Os dados
+              foram preservados; os totais afetados ficam indisponíveis até a correção.
+            </p>
+          )}
           <div
             className={styles.tableScroll}
             role="region"
@@ -432,109 +474,121 @@ export function ForecastSettings() {
             aria-describedby="forecast-help"
             aria-busy={loading}
           >
-            <table
-              className={styles.table}
-              style={{
-                minWidth:
-                  document.columns.length > 3 ? document.columns.length * 180 + 96 : undefined,
-              }}
-            >
+            <table className={styles.table}>
               <caption className={styles.srOnly}>
-                Previsão e realizado por corretor. Tabela editável.
+                Previsão e realizado por corretor, agrupados por empreendimento. Tabela editável.
               </caption>
+              <colgroup>
+                <col className={styles.brokerColumn} />
+                {groups.flatMap((group) => [
+                  <col key={group.forecastId} />,
+                  <col key={group.actualId} />,
+                ])}
+                <col className={styles.totalColumn} />
+              </colgroup>
               <thead>
                 <tr>
-                  <th scope="col" rowSpan={2} className={styles.rowNumber}>
-                    Linha
+                  <th scope="col" rowSpan={2} className={styles.brokerHeading}>
+                    Nome do corretor
                   </th>
-                  {document.columns.length > 1 ? (
-                    <>
-                      <th scope="col" rowSpan={2}>
-                        {columnHeading(0)}
-                      </th>
-                      <th scope="colgroup" colSpan={document.columns.length - 1}>
-                        <textarea
-                          aria-label="Nome da equipe"
-                          rows={1}
-                          maxLength={120}
-                          readOnly={!editable}
-                          value={document.title}
-                          onChange={(event) => change({ ...document, title: event.target.value })}
-                        />
-                      </th>
-                    </>
-                  ) : (
-                    <th scope="col">
-                      <textarea
-                        aria-label="Nome da equipe"
-                        rows={1}
-                        maxLength={120}
-                        readOnly={!editable}
-                        value={document.title}
-                        onChange={(event) => change({ ...document, title: event.target.value })}
-                      />
+                  {groups.map((group, index) => (
+                    <th
+                      key={group.id}
+                      scope="colgroup"
+                      colSpan={2}
+                      className={styles.groupHeading}
+                      onDragOver={(event) => {
+                        if (editable && draggedGroup.current) event.preventDefault();
+                      }}
+                      onDrop={(event) => {
+                        event.preventDefault();
+                        const id = draggedGroup.current;
+                        draggedGroup.current = null;
+                        if (id) moveGroup(id, index);
+                      }}
+                    >
+                      {groupHeading(group, index)}
                     </th>
-                  )}
-                  <th scope="col" rowSpan={2} className={styles.rowAction}>
-                    <span className={styles.srOnly}>Ações</span>
+                  ))}
+                  <th scope="col" rowSpan={2} className={styles.totalHeading}>
+                    Total
                   </th>
                 </tr>
-                <tr>
-                  {document.columns.map(
-                    (_, index) =>
-                      (document.columns.length === 1 || index > 0) && (
-                        <th key={document.columns[index]!.id} scope="col">
-                          {columnHeading(index)}
-                        </th>
-                      ),
-                  )}
+                <tr className={styles.metricHeadings}>
+                  {groups.flatMap((group) => [
+                    <th key={group.forecastId} scope="col">
+                      Previsão
+                    </th>,
+                    <th key={group.actualId} scope="col">
+                      Realizado
+                    </th>,
+                  ])}
                 </tr>
               </thead>
               <tbody>
                 {document.rows.map((row, index) => (
                   <tr key={row.id}>
-                    <th scope="row" className={styles.rowNumber}>
-                      {index + 1}
-                    </th>
-                    {document.columns.map((column) => (
-                      <td key={column.id}>
-                        <textarea
-                          aria-label={`${column.label || `Coluna ${document.columns.indexOf(column) + 1}`}, linha ${index + 1}`}
-                          rows={2}
+                    <th scope="row" className={styles.brokerCell}>
+                      <div className={styles.brokerContent}>
+                        <span className={styles.rowNumber}>{index + 1}</span>
+                        <input
+                          aria-label={`Nome do corretor, linha ${index + 1}`}
                           maxLength={4000}
                           readOnly={!editable}
-                          value={row.cells[column.id] ?? ""}
-                          onChange={(event) =>
-                            change({
-                              ...document,
-                              rows: document.rows.map((current) =>
-                                current.id === row.id
-                                  ? {
-                                      ...current,
-                                      cells: { ...current.cells, [column.id]: event.target.value },
-                                    }
-                                  : current,
-                              ),
-                            })
-                          }
+                          value={row.cells.broker ?? ""}
+                          dir="ltr"
+                          onChange={(event) => changeCell(row.id, "broker", event.target.value)}
                         />
-                      </td>
-                    ))}
-                    <td className={styles.rowAction}>
-                      {canEdit && (
-                        <button
-                          type="button"
-                          disabled={!editable}
-                          aria-label={`Excluir linha ${index + 1}`}
-                          onClick={() => removeRow(index)}
-                        >
-                          <Trash2 size={16} aria-hidden="true" />
-                        </button>
-                      )}
+                        {canEdit && (
+                          <button
+                            type="button"
+                            disabled={!editable}
+                            aria-label={`Excluir linha ${index + 1}`}
+                            onClick={() => removeRow(index)}
+                          >
+                            <Trash2 size={15} aria-hidden="true" />
+                          </button>
+                        )}
+                      </div>
+                    </th>
+                    {groups.flatMap((group) => [
+                      numericCell(row, index, group, "Previsão", group.forecastId),
+                      numericCell(row, index, group, "Realizado", group.actualId),
+                    ])}
+                    <td className={styles.totalCell}>
+                      <span className={styles.mobileLabel}>Total</span>
+                      <output aria-label={`Total, linha ${index + 1}`}>
+                        {totalText(totals.rows[row.id])}
+                      </output>
                     </td>
                   </tr>
                 ))}
               </tbody>
+              <tfoot>
+                <tr>
+                  <th scope="row" className={styles.footerLabel}>
+                    Total geral
+                  </th>
+                  {groups.flatMap((group) => [
+                    <td key={group.forecastId}>
+                      <span className={styles.mobileLabel}>{group.label} · Previsão</span>
+                      <output aria-label={`Total de ${group.label} — Previsão`}>
+                        {totalText(totals.columns[group.forecastId])}
+                      </output>
+                    </td>,
+                    <td key={group.actualId}>
+                      <span className={styles.mobileLabel}>{group.label} · Realizado</span>
+                      <output aria-label={`Total de ${group.label} — Realizado`}>
+                        {totalText(totals.columns[group.actualId])}
+                      </output>
+                    </td>,
+                  ])}
+                  <td className={styles.totalCell}>
+                    <span className={styles.mobileLabel}>Total</span>
+                    <output aria-label="Total geral">{totalText(totals.grandTotal)}</output>
+                  </td>
+                </tr>
+              </tfoot>
             </table>
             {loaded && document.rows.length === 0 && (
               <div className={styles.empty}>
@@ -548,34 +602,102 @@ export function ForecastSettings() {
     </section>
   );
 
-  function columnHeading(index: number) {
-    const column = document.columns[index]!;
+  function totalText(value: number | null | undefined) {
+    return value == null ? "—" : formatForecastCents(value);
+  }
+
+  function numericCell(
+    row: ForecastDocument["rows"][number],
+    index: number,
+    group: ForecastGroup,
+    metric: string,
+    columnId: string,
+  ) {
+    const value = row.cells[columnId] ?? "";
+    const invalid = forecastCellToCents(value) === null;
+    return (
+      <td key={columnId} className={styles.numericCell}>
+        <span className={styles.mobileLabel}>
+          {group.label} · {metric}
+        </span>
+        <input
+          type="text"
+          inputMode="decimal"
+          autoComplete="off"
+          spellCheck={false}
+          aria-label={`${group.label} — ${metric}, linha ${index + 1}`}
+          aria-invalid={invalid || undefined}
+          title={
+            invalid
+              ? "Corrija este valor: use somente números não negativos, com até duas casas decimais."
+              : value
+          }
+          readOnly={!editable}
+          value={value}
+          maxLength={invalid ? 4000 : 12}
+          onChange={(event) => changeCell(row.id, columnId, event.target.value)}
+        />
+      </td>
+    );
+  }
+
+  function groupHeading(group: ForecastGroup, index: number) {
     return (
       <div className={styles.columnHeading}>
         <textarea
-          aria-label={`Nome da coluna ${index + 1}`}
+          aria-label={`Nome do empreendimento ${index + 1}`}
           rows={2}
           maxLength={120}
           readOnly={!editable}
-          value={column.label}
-          onChange={(event) =>
-            change({
-              ...document,
-              columns: document.columns.map((current) =>
-                current.id === column.id ? { ...current, label: event.target.value } : current,
-              ),
-            })
-          }
+          value={group.label}
+          onChange={(event) => change(renameForecastGroup(document, group.id, event.target.value))}
         />
         {canEdit && (
-          <button
-            type="button"
-            aria-label={`Excluir coluna ${index + 1}: ${column.label}`}
-            disabled={!editable || document.columns.length <= 1}
-            onClick={() => removeColumn(index)}
-          >
-            <Trash2 size={15} aria-hidden="true" />
-          </button>
+          <div className={styles.groupActions}>
+            <span
+              className={styles.dragHandle}
+              draggable={editable}
+              title={`Arrastar ${group.label}`}
+              onDragStart={(event) => {
+                if (!editable) {
+                  event.preventDefault();
+                  return;
+                }
+                draggedGroup.current = group.id;
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", group.id);
+              }}
+              onDragEnd={() => {
+                draggedGroup.current = null;
+              }}
+            >
+              <GripVertical size={14} aria-hidden="true" />
+            </span>
+            <button
+              type="button"
+              aria-label={`Mover ${group.label} para a esquerda`}
+              disabled={!editable || index === 0}
+              onClick={() => moveGroup(group.id, index - 1)}
+            >
+              <ArrowLeft size={14} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Mover ${group.label} para a direita`}
+              disabled={!editable || index === groups.length - 1}
+              onClick={() => moveGroup(group.id, index + 1)}
+            >
+              <ArrowRight size={14} aria-hidden="true" />
+            </button>
+            <button
+              type="button"
+              aria-label={`Excluir ${group.label}`}
+              disabled={!editable || groups.length <= 1}
+              onClick={() => removeGroup(group)}
+            >
+              <Trash2 size={14} aria-hidden="true" />
+            </button>
+          </div>
         )}
       </div>
     );
