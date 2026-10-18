@@ -12,7 +12,6 @@ declare
   v_actor uuid := (select auth.uid());
   v_column jsonb;
   v_row jsonb;
-  v_index integer;
   v_pair jsonb;
   v_ids text[] := array[]::text[];
   v_row_ids text[] := array[]::text[];

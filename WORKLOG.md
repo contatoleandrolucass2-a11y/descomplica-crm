@@ -7633,3 +7633,7 @@ A CI 39136448707 aprovou validate, mas o restore detectou uma expressão JSON se
 ### Compatibilidade de foco na tabela antiga
 
 Corrigido o foco após inserir/excluir linhas quando o cabeçalho antigo do corretor era personalizado. O foco usa agora o nome acessível fixo da nova interface. Cenário de navegador legado passou incluindo as duas operações.
+
+### Lint SQL da migration
+
+A restauração na CI 39137907096 avançou além do pgTAP, mas o lint identificou a declaração v_index redundante: o laço FOR inteiro já declara o índice localmente. Removida somente a declaração externa, sem mudar o laço ou as validações. Nova execução completa obrigatória.

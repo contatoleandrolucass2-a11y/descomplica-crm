@@ -2883,3 +2883,5 @@ pendente dos gates completos no SHA final.
 - Corrigida a precedência da expressão JSON no teste de exclusão parcial de empreendimento, preservando as 36 verificações pgTAP.
 
 - Preservado o foco de teclado ao inserir/excluir linhas em previsões com cabeçalhos antigos personalizados.
+
+- Removida declaração redundante do índice do laço na validação SQL de empreendimentos.
