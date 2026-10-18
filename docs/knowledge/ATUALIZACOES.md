@@ -1003,3 +1003,9 @@ Cenário sintético com cabeçalho antigo personalizado confirmou necessidade de
 ### Lint SQL após a correção da fixture
 
 CI 39137907096: validate aprovado incluindo a fonte documental que retornara403. A restauração avançou até o lint de banco e bloqueou por shadowed_variables/unused variable v_index na migration nova. FOR inteiro declara o índice implicitamente; removida a declaração externa redundante. Não houve mudança de regra, bypass de lint ou mutação remota. Nova CI necessária para comprovar pgTAP, lint e restore completos.
+
+## 2026-10-18: Meta vazia editável
+
+- A referência pública confirma “Aplicar metas” no cabeçalho e controles numéricos editáveis na coluna Configuração. O preview local associava incorretamente `empty` a `canManageDraft=false`, gerando a imagem sem botão e com campos desabilitados.
+- Fixture corrigida: estado vazio e autorização são independentes. Perfil autorizado vazio vê a ação, edita a meta mensal e mantém projeções sem valores inventados; `readonly` preserva o bloqueio explícito. Preview Chromium: 30 telas aprovadas, desktop/mobile, três temas, axe e overflow.
+- Limite: a ação revisa e salva somente rascunho inativo; não ativa política comercial. A permissão Master-only existente foi preservada. Fonte: `https://descomplicapro.com.br/configuracoes/metas`, código e execução local em 18/10/2026.

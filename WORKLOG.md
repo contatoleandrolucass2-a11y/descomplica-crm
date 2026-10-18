@@ -7640,3 +7640,9 @@ Corrigido o foco após inserir/excluir linhas quando o cabeçalho antigo do corr
 ### Lint SQL da migration
 
 A restauração na CI 39137907096 avançou além do pgTAP, mas o lint identificou a declaração v_index redundante: o laço FOR inteiro já declara o índice localmente. Removida somente a declaração externa, sem mudar o laço ou as validações. Nova execução completa obrigatória.
+
+## 2026-10-18 — Meta sem configuração
+
+O preview confundia ausência de valores com ausência de autorização: `?empty=1` enviava `initialValues=null` e desabilitava todo o formulário. A fixture agora controla autorização separadamente com `?readonly=1`. O cenário vazio autorizado comprova “Aplicar metas”, campos habilitados e edição da meta mensal; o cenário somente leitura continua coberto sem ampliar permissões.
+
+Validação focal: preview Chromium aprovou 30 telas, temas e larguras, axe sem violações e sem requisições externas. Capturas locais em `test-results/goal-planning-preview`, não versionadas. A ação continua conduzindo à revisão e ao salvamento de rascunho inativo; ativação de política comercial permanece fora deste escopo.

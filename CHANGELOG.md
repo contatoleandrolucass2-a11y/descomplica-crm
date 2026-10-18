@@ -2889,3 +2889,8 @@ pendente dos gates completos no SHA final.
 - Preservado o foco de teclado ao inserir/excluir linhas em previsões com cabeçalhos antigos personalizados.
 
 - Removida declaração redundante do índice do laço na validação SQL de empreendimentos.
+
+## 2026-10-18 — Meta vazia editável na evidência visual
+
+- O cenário sem configuração mantém os campos numéricos editáveis e mostra “Aplicar metas” para o perfil autorizado.
+- O modo somente leitura passou a ser uma fixture explícita, preservando o bloqueio de segurança para perfis sem a permissão comercial.
