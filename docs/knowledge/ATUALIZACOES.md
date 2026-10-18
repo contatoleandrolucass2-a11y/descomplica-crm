@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-17: Dashboard3/5/5 publicado e validado em producao
+
+- PR250 integrou o ajuste do timeout no main840f0908. CI39061398333 aprovou
+  validate, release-gates, isolated-restore e promotable-image; a matriz visual
+  completa concluiu sem reduzir cobertura ou tolerancias.
+- Artefato12112195227: checksum/revision aprovados. Divergencia esperada entre
+  ID config da CI `fab39fbb` e manifesto local `0d2c7cd2` foi comprovada por
+  index/config OCI, plataforma linux/amd64, label da release,11 camadas iguais
+  no manifesto legado, OCI, diff_ids e RootFS, alem de image:prove2 perfis.
+- `release:production` registrou deployment
+  fc04ef76-1350-4298-8692-aed95b1bb2f8 no SHA840f0908, deployedAt
+  2026-10-18T00:10:01.373Z, sem pendencia. Health publico retornou200/ok e a
+  versao exata; container ficou healthy na imagem0d2c7cd2. GET anonimo /app
+  retornou307 para /login.
+- O comando deploy terminou com codigo1 e mensagem sanitizada depois de o
+  recibo final ja estar gravado. `status`, imagem do container, health e CAS
+  confirmaram conclusao; nao houve retry nem alteracao manual de ledger/lock.
+  Reavaliar se o retorno nao zero reaparecer em outra publicacao concluida.
+- Navegador autenticado:1440x900 e390x844 nos temas claro/medio/escuro,
+  13 funis/16 artigos, sem overflow horizontal. Somente spans acessiveis1x1
+  ficaram tecnicamente recortados por design; textos visiveis nao. Filtro de
+  gerente abriu e fechou ao clique externo. Viewport foi restaurado.
+- Fontes: PR250, Actions39061398333, artefato12112195227,
+  `release:production status`, Docker inspect, /api/health e navegador real.
+
 ## 2026-10-17: Gate visual cancelado por limite global
 
 - CI39037162463 no merge ca6c33cf aprovou validate, isolated-restore,

@@ -1,11 +1,7 @@
 # Changelog
 
-## 2026-10-17: Previsão publicada
-
-- Disponibiliza Gestão > Previsão para Master/Admin, com tabela manual
-  compartilhada, inclusão/exclusão de linhas e colunas e botão Salvar.
-- Publica o armazenamento e catálogo autorizados, com proteção de acesso e de
-  edição concorrente, preservando permissões e exceções existentes.
+- Dashboard: grupos3/5/5 publicados e conferidos em desktop/celular nos temas
+  claro, medio e escuro, sem overflow horizontal ou textos visiveis cortados.
 
 - CI: amplia para 60 minutos o gate visual completo, preservando toda a matriz.
 
@@ -2856,3 +2852,10 @@ pendente dos gates completos no SHA final.
 - Salva no CRM com permissão própria, validação no servidor e banco e proteção
   contra sobrescrita concorrente; falhas conservam as alterações locais.
 - Mantém a apresentação integrada da tabela, sem caixas numéricas destacadas.
+
+## 2026-10-17: Previsão publicada
+
+- Disponibiliza Gestão > Previsão para Master/Admin, com tabela manual
+  compartilhada, inclusão/exclusão de linhas e colunas e botão Salvar.
+- Publica o armazenamento e catálogo autorizados, com proteção de acesso e de
+  edição concorrente, preservando permissões e exceções existentes.
