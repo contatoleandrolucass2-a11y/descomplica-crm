@@ -9,7 +9,7 @@ import {
   type ForecastDocument,
 } from "@/lib/crm/forecasts";
 
-import "@/app/(protected)/app/simulacao/_components/archive-investor/investor-theme-tokens.css";
+import analytics from "../../_components/analytics/analytics.module.css";
 import styles from "./ForecastSettings.module.css";
 
 const initialDocument = (): ForecastDocument => ({
@@ -360,92 +360,111 @@ export function ForecastSettings() {
   }
 
   return (
-    <section ref={root} className={`${styles.page} investor-page-shell`} aria-label="Previsão">
-      <div className={`${styles.main} investor-main`}>
-        <header className={styles.header}>
-          <h1>Previsão</h1>
-          <div className={styles.actions}>
-            <button
-              type="button"
-              data-add-row
-              disabled={!editable || document.rows.length >= 200}
-              onClick={addRow}
-            >
-              <Plus size={16} aria-hidden="true" /> Inserir linha
-            </button>
-            <button
-              type="button"
-              disabled={!editable || document.columns.length >= 30}
-              onClick={addColumn}
-            >
-              <Plus size={16} aria-hidden="true" /> Inserir coluna
-            </button>
-            <button
-              type="button"
-              className={styles.save}
-              disabled={!editable || !dirty || conflict}
-              onClick={() => void save()}
-            >
-              <Save size={16} aria-hidden="true" />
-              {saving ? "Salvando…" : "Salvar"}
-            </button>
-          </div>
-        </header>
-        <p className={styles.status} role="status" aria-live="polite">
-          {loading
-            ? "Carregando previsão…"
-            : notice ||
-              (dirty
-                ? "Alterações não salvas."
-                : loaded
-                  ? "Tabela compartilhada no CRM."
-                  : "Aguardando carregamento.")}
-        </p>
-        {loaded && !canEdit && (
-          <p className={styles.notice}>Você tem acesso somente à leitura desta previsão.</p>
-        )}
-        {error && (
-          <div role="alert" className={styles.error}>
-            <p>{error}</p>
-            {(!loaded || conflict) && (
-              <button type="button" disabled={loading} onClick={reload}>
-                {conflict
-                  ? "Descartar rascunho e carregar versão salva"
-                  : "Tentar carregar novamente"}
+    <section ref={root} className={analytics.canvasMain} aria-label="Previsão">
+      <div className={`${analytics.canvas} ${styles.page}`}>
+        <div className={styles.main}>
+          <header className={styles.header}>
+            <div>
+              <h1>Previsão</h1>
+              <p className={styles.description}>Acompanhe a previsão e o realizado da equipe.</p>
+            </div>
+            <div className={styles.actions}>
+              <button
+                type="button"
+                data-add-row
+                disabled={!editable || document.rows.length >= 200}
+                onClick={addRow}
+              >
+                <Plus size={16} aria-hidden="true" /> Inserir linha
               </button>
-            )}
-          </div>
-        )}
-        <p className={styles.help} id="forecast-help">
-          Edite diretamente na tabela. Até 200 linhas e 30 colunas; 120 caracteres nos títulos e
-          4.000 por célula. Use Salvar para compartilhar as alterações.
-        </p>
-        <div
-          className={styles.tableScroll}
-          role="region"
-          aria-label="Tabela de previsão"
-          tabIndex={0}
-          aria-describedby="forecast-help"
-          aria-busy={loading}
-        >
-          <table
-            className={styles.table}
-            style={{ minWidth: Math.max(600, document.columns.length * 210 + 60) }}
+              <button
+                type="button"
+                disabled={!editable || document.columns.length >= 30}
+                onClick={addColumn}
+              >
+                <Plus size={16} aria-hidden="true" /> Inserir coluna
+              </button>
+              <button
+                type="button"
+                className={styles.save}
+                disabled={!editable || !dirty || conflict}
+                onClick={() => void save()}
+              >
+                <Save size={16} aria-hidden="true" />
+                {saving ? "Salvando…" : "Salvar"}
+              </button>
+            </div>
+          </header>
+          <p className={styles.status} data-dirty={dirty} role="status" aria-live="polite">
+            {loading
+              ? "Carregando previsão…"
+              : notice ||
+                (dirty
+                  ? "Alterações não salvas."
+                  : loaded
+                    ? "Tabela compartilhada no CRM."
+                    : "Aguardando carregamento.")}
+          </p>
+          {loaded && !canEdit && (
+            <p className={styles.notice}>Você tem acesso somente à leitura desta previsão.</p>
+          )}
+          {error && (
+            <div role="alert" className={styles.error}>
+              <p>{error}</p>
+              {(!loaded || conflict) && (
+                <button type="button" disabled={loading} onClick={reload}>
+                  {conflict
+                    ? "Descartar rascunho e carregar versão salva"
+                    : "Tentar carregar novamente"}
+                </button>
+              )}
+            </div>
+          )}
+          <p className={styles.help} id="forecast-help">
+            Edite diretamente na tabela. Até 200 linhas e 30 colunas; 120 caracteres nos títulos e
+            4.000 por célula. Use Salvar para compartilhar as alterações.
+          </p>
+          <div
+            className={styles.tableScroll}
+            role="region"
+            aria-label="Tabela de previsão"
+            tabIndex={0}
+            aria-describedby="forecast-help"
+            aria-busy={loading}
           >
-            <caption className={styles.srOnly}>
-              Previsão e realizado por corretor. Tabela editável.
-            </caption>
-            <thead>
-              <tr>
-                <th scope="col" rowSpan={2} className={styles.rowNumber}>
-                  Linha
-                </th>
-                {document.columns.length > 1 ? (
-                  <>
-                    <th scope="col" rowSpan={2}>
-                      {columnHeading(0)}
-                    </th>
-                    <th scope="colgroup" colSpan={document.columns.length - 1}>
+            <table
+              className={styles.table}
+              style={{
+                minWidth:
+                  document.columns.length > 3 ? document.columns.length * 180 + 96 : undefined,
+              }}
+            >
+              <caption className={styles.srOnly}>
+                Previsão e realizado por corretor. Tabela editável.
+              </caption>
+              <thead>
+                <tr>
+                  <th scope="col" rowSpan={2} className={styles.rowNumber}>
+                    Linha
+                  </th>
+                  {document.columns.length > 1 ? (
+                    <>
+                      <th scope="col" rowSpan={2}>
+                        {columnHeading(0)}
+                      </th>
+                      <th scope="colgroup" colSpan={document.columns.length - 1}>
+                        <textarea
+                          aria-label="Nome da equipe"
+                          rows={1}
+                          maxLength={120}
+                          readOnly={!editable}
+                          value={document.title}
+                          onChange={(event) => change({ ...document, title: event.target.value })}
+                        />
+                      </th>
+                    </>
+                  ) : (
+                    <th scope="col">
                       <textarea
                         aria-label="Nome da equipe"
                         rows={1}
@@ -455,86 +474,75 @@ export function ForecastSettings() {
                         onChange={(event) => change({ ...document, title: event.target.value })}
                       />
                     </th>
-                  </>
-                ) : (
-                  <th scope="col">
-                    <textarea
-                      aria-label="Nome da equipe"
-                      rows={1}
-                      maxLength={120}
-                      readOnly={!editable}
-                      value={document.title}
-                      onChange={(event) => change({ ...document, title: event.target.value })}
-                    />
+                  )}
+                  <th scope="col" rowSpan={2} className={styles.rowAction}>
+                    <span className={styles.srOnly}>Ações</span>
                   </th>
-                )}
-                <th scope="col" rowSpan={2} className={styles.rowAction}>
-                  <span className={styles.srOnly}>Ações</span>
-                </th>
-              </tr>
-              <tr>
-                {document.columns.map(
-                  (_, index) =>
-                    (document.columns.length === 1 || index > 0) && (
-                      <th key={document.columns[index]!.id} scope="col">
-                        {columnHeading(index)}
-                      </th>
-                    ),
-                )}
-              </tr>
-            </thead>
-            <tbody>
-              {document.rows.map((row, index) => (
-                <tr key={row.id}>
-                  <th scope="row" className={styles.rowNumber}>
-                    {index + 1}
-                  </th>
-                  {document.columns.map((column) => (
-                    <td key={column.id}>
-                      <textarea
-                        aria-label={`${column.label || `Coluna ${document.columns.indexOf(column) + 1}`}, linha ${index + 1}`}
-                        rows={2}
-                        maxLength={4000}
-                        readOnly={!editable}
-                        value={row.cells[column.id] ?? ""}
-                        onChange={(event) =>
-                          change({
-                            ...document,
-                            rows: document.rows.map((current) =>
-                              current.id === row.id
-                                ? {
-                                    ...current,
-                                    cells: { ...current.cells, [column.id]: event.target.value },
-                                  }
-                                : current,
-                            ),
-                          })
-                        }
-                      />
-                    </td>
-                  ))}
-                  <td className={styles.rowAction}>
-                    {canEdit && (
-                      <button
-                        type="button"
-                        disabled={!editable}
-                        aria-label={`Excluir linha ${index + 1}`}
-                        onClick={() => removeRow(index)}
-                      >
-                        <Trash2 size={16} aria-hidden="true" />
-                      </button>
-                    )}
-                  </td>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-          {loaded && document.rows.length === 0 && (
-            <div className={styles.empty}>
-              <p>Nenhuma linha cadastrada.</p>
-              {canEdit && <p>Use Inserir linha para começar sua previsão.</p>}
-            </div>
-          )}
+                <tr>
+                  {document.columns.map(
+                    (_, index) =>
+                      (document.columns.length === 1 || index > 0) && (
+                        <th key={document.columns[index]!.id} scope="col">
+                          {columnHeading(index)}
+                        </th>
+                      ),
+                  )}
+                </tr>
+              </thead>
+              <tbody>
+                {document.rows.map((row, index) => (
+                  <tr key={row.id}>
+                    <th scope="row" className={styles.rowNumber}>
+                      {index + 1}
+                    </th>
+                    {document.columns.map((column) => (
+                      <td key={column.id}>
+                        <textarea
+                          aria-label={`${column.label || `Coluna ${document.columns.indexOf(column) + 1}`}, linha ${index + 1}`}
+                          rows={2}
+                          maxLength={4000}
+                          readOnly={!editable}
+                          value={row.cells[column.id] ?? ""}
+                          onChange={(event) =>
+                            change({
+                              ...document,
+                              rows: document.rows.map((current) =>
+                                current.id === row.id
+                                  ? {
+                                      ...current,
+                                      cells: { ...current.cells, [column.id]: event.target.value },
+                                    }
+                                  : current,
+                              ),
+                            })
+                          }
+                        />
+                      </td>
+                    ))}
+                    <td className={styles.rowAction}>
+                      {canEdit && (
+                        <button
+                          type="button"
+                          disabled={!editable}
+                          aria-label={`Excluir linha ${index + 1}`}
+                          onClick={() => removeRow(index)}
+                        >
+                          <Trash2 size={16} aria-hidden="true" />
+                        </button>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {loaded && document.rows.length === 0 && (
+              <div className={styles.empty}>
+                <p>Nenhuma linha cadastrada.</p>
+                {canEdit && <p>Use Inserir linha para começar sua previsão.</p>}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </section>

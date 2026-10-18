@@ -7589,3 +7589,9 @@ Coordenador publicou às21:10:01 de17/10 (America/Sao_Paulo), sem pendência.
 Health200/ok, API anônima401; tabela vazia, página ativa para Master/Admin.
 Prova da imagem, versões remotas, testes e limites estão em
 docs/audits/previsao-2026-10-17.md. Nenhuma fixture foi inserida em produção.
+
+## 2026-10-18 — Previsão no padrão visual do dashboard
+
+- Reutilizado o canvas visual de /app para a Previsão, com cores dos três temas, cabeçalho compacto, tabela fluida e Salvar destacado.
+- Mantidos API, permissões e salvamento compartilhado; nenhuma migration nova. A tabela padrão cabe em celular, e colunas extras usam rolagem interna.
+- Validação em andamento: navegador sintético, lint, tipos, testes e build. CI de main anterior falhou no gate externo de fontes documentais; não é evidência de regressão deste ajuste.

@@ -2861,3 +2861,8 @@ pendente dos gates completos no SHA final.
   compartilhada, inclusão/exclusão de linhas e colunas e botão Salvar.
 - Publica o armazenamento e catálogo autorizados, com proteção de acesso e de
   edição concorrente, preservando permissões e exceções existentes.
+
+## 2026-10-18 — Visual da Previsão
+
+- Página Previsão alinhada ao dashboard nos três temas, com tabela inicial adaptada ao celular e botão Salvar preservado.
+- Edição manual de linhas, colunas, cabeçalhos e valores mantém o salvamento compartilhado existente.

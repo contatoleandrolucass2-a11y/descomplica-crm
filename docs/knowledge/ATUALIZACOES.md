@@ -896,3 +896,9 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
   em2026-10-18T01:55:20Z, commitfe1b343eeb1d5534f47779738b9fdbaf7d776d2f.
   Conflitos documentais resolvidos preservando os dois registros; nenhum gate
   dispensado. Health posterior200/ok/840f0908. PR251 concluido, sem novo deploy.
+
+## 2026-10-18: abertura do ajuste visual da Previsão
+
+- Consulta às 02:55 UTC: main remoto fe1b343e, checkout 1b75d003 com registro documental posterior. GitHub Actions 39088213591 de main falhou; causa ainda não inspecionada. CI anterior 39084939569 aprovada em 36f3c317.
+- GET observacional https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, versão 840f0908e9c3d5c06f5a4dbb4cdf161404b31753. A versão publicada difere de main por registros documentais.
+- Escopo autorizado: aplicar padrão visual do dashboard à Previsão, mantendo tabela editável e Salvar. Nenhuma alteração de banco prevista. Fonte: Git local/remoto, GitHub via gh e health público.
