@@ -1,15 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PUT } from "@/app/api/forecasts/route";
+import { createForecastDocument, getForecastGroups } from "@/lib/crm/forecast-grid";
 
 const mocks = vi.hoisted(() => ({ authorize: vi.fn(), client: vi.fn(), rpc: vi.fn() }));
 vi.mock("@/lib/security/route-auth", () => ({ authorizePageRoute: mocks.authorize }));
 vi.mock("@/lib/auth/supabase/server", () => ({ createClient: mocks.client }));
 
-const document = {
-  title: "Equipe",
-  columns: [{ id: "broker", label: "Nome do corretor" }],
-  rows: [{ id: "row1", cells: { broker: "Sintetico" } }],
-};
+const document = createForecastDocument();
+document.rows[0]!.cells.broker = "Corretor sintético";
+const firstGroup = getForecastGroups(document)[0]!;
+document.rows[0]!.cells[firstGroup.forecastId] = "12.50";
+document.rows[0]!.cells[firstGroup.actualId] = "8";
 const body = { ...document, expected_revision: 0 };
 const record = { ...document, revision: 1, updated_at: "2026-10-12T15:00:00Z" };
 function request(value: unknown = body, headers: Record<string, string> = {}) {
@@ -165,6 +166,15 @@ describe("shared forecast API", () => {
       p_expected_revision: 0,
     });
   });
+  it.each(["texto", "12 reais", "1e3", "-1", "NaN", "Infinity", "1.234", "1000000000", "<script>"])(
+    "rejects non-numeric or out-of-range comparison value %s before RPC",
+    async (value) => {
+      const invalid = structuredClone(body);
+      invalid.rows[0]!.cells[firstGroup.forecastId] = value;
+      await result(await PUT(request(invalid)), 400, { error: "invalid_forecast" });
+      expect(mocks.rpc).not.toHaveBeenCalled();
+    },
+  );
   it.each([
     ["40001", 409, "revision_conflict"],
     ["28000", 401, "unauthenticated"],

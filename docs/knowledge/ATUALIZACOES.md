@@ -959,3 +959,41 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
 - Consulta às 02:55 UTC: main remoto fe1b343e, checkout 1b75d003 com registro documental posterior. GitHub Actions 39088213591 de main falhou; causa ainda não inspecionada. CI anterior 39084939569 aprovada em 36f3c317.
 - GET observacional https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, versão 840f0908e9c3d5c06f5a4dbb4cdf161404b31753. A versão publicada difere de main por registros documentais.
 - Escopo autorizado: aplicar padrão visual do dashboard à Previsão, mantendo tabela editável e Salvar. Nenhuma alteração de banco prevista. Fonte: Git local/remoto, GitHub via gh e health público.
+
+## 2026-10-18: Previsão alinhada ao dashboard — integração
+
+- PR253 integrou em f8ad7bbfda9f22190018593266b1fa1769a1702f após CI39092735520 aprovar validate, isolated-restore e release-gates no head2e37ad71. Imagem é gerada apenas no push/main.
+- Reutilizados canvas e tokens de /app, cabeçalho compacto, superfícies e Salvar destacado. Tabela padrão sem rolagem lateral em1440/390/320 px; colunas extras usam rolagem interna. Nenhuma alteração de API, permissões ou banco.
+- Local: lint, typecheck e build aprovados; cinco testes de navegador aprovados, três temas e axe sem violações. Suíte geral teve três timeouts; repetição aprovou3803 testes e restou um timeout do Obsidian, aprovado isoladamente em13,56s. CI Linux aprovou a suíte completa; nenhum timeout ou asserção foi relaxado.
+- Conferência04:01 UTC: main f8ad7bbf, CI39095660275 iniciada. Health público HTTP200/ok/840f0908. Implementado e integrado; publicação ainda pendente da CI exata de main e prova da imagem.
+
+### Publicação confirmada
+
+- CI39095660275: push/main f8ad7bbf, quatro jobs aprovados. PR253 integrado e runtime publicado em2026-10-18T04:51:47.145Z pelo coordenador release:production, retorno0, deployment c4d5dc22-ad9d-4fa4-a5aa-d20184a5339c, sem pendência.
+- Baseline conferida às04:51:31Z: deployment fc04ef76-1350-4298-8692-aed95b1bb2f8, SHA840f0908, deployedAt2026-10-18T00:10:01.373Z. Coordenador executou consulta final, travas, backup e CAS no minuto da troca.
+- Artefato: checksum ad9134c2a60f31612d0d4f2770beeb4894377e48304a6fb03aed7bb86c4c131f; config CI6c9d9680 e manifesto local cdd72fbb comprovados pela cadeia OCI,11 camadas, RootFS, label e plataforma linux/amd64. image:prove aprovou dois perfis usando a mesma imagem, sem imprimir segredos.
+- Pós-publicação04:51:55Z: health público HTTP200/ok/f8ad7bbf; container healthy com imagem cdd72fbb. GET anônimo da página307 e API401. Nenhuma migration ou mutação de dados de negócio nesta entrega.
+- Limites: interface validada com fixtures sintéticas locais e na CI; não houve sessão autenticada de produção nesta verificação nem gravação de fixture no CRM real. pnpm test local parou no Vitest por timeout; as etapas Node subsequentes foram comprovadas pela CI Linux. O teste restante de Obsidian passou isoladamente, sem alterar limites ou asserções.
+- Fontes: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/253, Actions39092735520/39095660275, https://crm.descomplicapro.com.br/api/health, coordenador e provas locais. Reavaliar os timeouts locais apenas se reaparecerem isoladamente ou na CI.
+
+## 2026-10-18 — abertura: Previsão por empreendimento
+
+Consulta em 2026-10-18T14:16:41Z: GitHub main d919751a51772dd0c57a582b9581e61412642ced, CI 39100233037 aprovada; PR 253 integrado em f8ad7bbf. Health público HTTP 200, status ok, version d919751a. Branch codex/previsao-empreendimentos incorpora origin/main e preserva os registros locais de publicação. Fontes: GitHub via gh, origin/main e https://crm.descomplicapro.com.br/api/health. Nova demanda: sete grupos editáveis Previsão/Realizado, reordenação, números e totais calculados. Nenhuma alteração remota de dados realizada nesta abertura.
+
+### Validação da implementação por empreendimento
+
+Branch codex/previsao-empreendimentos: lint, typecheck e build aprovados; 45 testes de modelo e 46 de API aprovados. Navegador sintético: sete cenários funcionais aprovados, arraste real aprovado separadamente, matriz Claro/Médio/Escuro em 1440/390/320 sem overflow horizontal e axe sem violações. Capturas em test-results/forecast-preview (não versionadas). Suíte global inicial: 3.841 aprovados e sete falhas; quatro eram inventários atualizados nesta entrega e três eram timeouts locais. Após ajuste, os quatro arquivos de regressão passaram 75 testes; repetição global em andamento. Sem alterações de tolerância ou skips para ocultar falhas.
+
+Migration 20261018142142_crm_forecast_groups.sql preparada, não aplicada remotamente. Projeto de produção hnncxuerlcsaahdxoswb confirmado via URL do runtime e MCP; RPC anterior hash MD5 9bb11666b25feae744f2ab24d0405f24, backup de definição sem dados preparado fora do Git. CI pgTAP/restore e autorização específica continuam pendentes. Fonte: código, logs locais e consultas observacionais MCP. Limite: capturas sintéticas não representam escrita ou sessão autenticada na produção.
+
+### CI inicial e correção da fixture pgTAP
+
+CI 39136448707 no SHA cde0b99d: validate aprovado (inclui suíte completa Linux); isolated-restore falhou porque o novo teste usava operador JSON junto de subtração sem parênteses. A expressão avaliava columns como inteiro e causava 22P02 antes da segunda asserção. SELECTs somente de constantes confirmaram a causa e a correção. Fixture corrigida, plano36 preservado, 67 testes focados aprovados. Nova CI obrigatória antes de merge/aplicação. Na repetição local, Vitest passou 3.848 testes; etapa Node teve 1.593 aprovados, três falhas de permissões/caminhos POSIX em Meta Ads e 19 skips existentes. Não foram alterados skips, permissões ou testes para mascarar essas limitações; validate Linux aprovou o conjunto.
+
+### Revisão final do legado
+
+Cenário sintético com cabeçalho antigo personalizado confirmou necessidade de usar o nome acessível fixo ao focar novas linhas. Ajuste de duas chamadas e teste de inserção/exclusão aprovados em Chromium (15,10 s). A execução 39137287690 passou testes, mas a fonte documental Prefeitura SP retornou HTTP 403; repetição solicitada sem alterar ou dispensar o gate externo. Nenhuma aplicação remota ou merge realizado.
+
+### Lint SQL após a correção da fixture
+
+CI 39137907096: validate aprovado incluindo a fonte documental que retornara403. A restauração avançou até o lint de banco e bloqueou por shadowed_variables/unused variable v_index na migration nova. FOR inteiro declara o índice implicitamente; removida a declaração externa redundante. Não houve mudança de regra, bypass de lint ou mutação remota. Nova CI necessária para comprovar pgTAP, lint e restore completos.
