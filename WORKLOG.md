@@ -7365,15 +7365,15 @@ pendente dos gates completos no SHA final.
 - Meta publicada em16/10/2026 00:59 BRT: PR231, main b5458ff, CI38844155079 completa, imagem imutável comprovada, health e autenticação anônima verificados. Evidências em docs/audits/meta-2026-10-15.md.
 
 - O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
-A integração passou em lint, tipos, formato, build, auditoria de dependências e
-Gitleaks. Vitest concluiu 3.402 testes, com 86 skips; os testes Node concluíram
-1.178 casos, com cinco skips; o guard de publicação concluiu 703 casos, com
-14 verificações físicas reservadas ao Linux da CI. A execução inicial com
-concorrência livre excedeu prazos na máquina carregada e foi interrompida;
-a execução completa com dois workers passou sem ampliar nenhum timeout.
-O ensaio local de 60 migrations aprovou 1.722 asserções na origem e 1.722 no
-banco restaurado, preservando owners e privilégios. Manifesto:
-`4735639196c72ac139221706ba978654fcb781ec9107c9840fb801f50064edb6`.
+  A integração passou em lint, tipos, formato, build, auditoria de dependências e
+  Gitleaks. Vitest concluiu 3.402 testes, com 86 skips; os testes Node concluíram
+  1.178 casos, com cinco skips; o guard de publicação concluiu 703 casos, com
+  14 verificações físicas reservadas ao Linux da CI. A execução inicial com
+  concorrência livre excedeu prazos na máquina carregada e foi interrompida;
+  a execução completa com dois workers passou sem ampliar nenhum timeout.
+  O ensaio local de 60 migrations aprovou 1.722 asserções na origem e 1.722 no
+  banco restaurado, preservando owners e privilégios. Manifesto:
+  `4735639196c72ac139221706ba978654fcb781ec9107c9840fb801f50064edb6`.
 
 ## 2026-10-16: Preservação da remoção dos códigos WF
 
