@@ -9,7 +9,14 @@ precisao. Fechamento dos filtros em revisao com regressao de cliques externos.
 Usuario confirmou manter somente os dois canais comerciais existentes.
 Base dos funis ja deriva dos relatorios Salesforce normalizados, com filtros
 e periodos; totais de coleta cobrem uma janela maior que o mes vigente.
-Gates e publicacao pendentes nesta etapa.
+Matriz sintetica local:207 checks aprovados nos tres temas,320 a1920px.
+Vitest completo:3808 aprovados e95 skips com maxWorkers=2. CI39093336285
+aprovou validate no HEAD f0329c03, incluindo testes Linux e build; suites
+operacionais locais tem limitacoes POSIX registradas no conhecimento.
+CI39093336285 aprovou restore, E2E e gates funcionais. Comparacao visual
+reprovou11 imagens do dashboard alterado; revisadas e promovidas apenas essas
+referencias do artefato12124916025, preservando231 imagens e tolerancias.
+Nova CI verify e publicacao pendentes nesta etapa.
 
 ## 2026-10-17: Dashboard publicado
 

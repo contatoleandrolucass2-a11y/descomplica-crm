@@ -1,5 +1,8 @@
 # Changelog
 
+- QA do resumo geral: referencias visuais revisadas do dashboard nos tres
+  temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
+
 - Dashboard | Resumo Geral: cabecalho compacto, funis com quantidades inteiras
   arredondadas para baixo e remocao de Pulso do funil, Ritmo de vendas e reset.
 

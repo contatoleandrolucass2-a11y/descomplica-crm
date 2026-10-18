@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: Validacao do resumo geral compacto
+
+- PR254, HEAD f0329c03: matriz sintetica local aprovada,207 checks,
+  temas light/balanced/dark e larguras320/390/768/1440/1920. Conferencia
+  visual de capturas desktop/mobile nos tres temas sem cortes aparentes.
+  Relatorio: test-results/dashboard-report/report.json. Filtros, historico,
+  metas, navegacao, atualizacao automatica e piso de quantidades incluidos.
+- Vitest completo repetido com maxWorkers=2:3808 aprovados,95 skips;
+  os timeouts de Obsidian nao reapareceram. Suites operacionais Windows:
+  1593 aprovados,19 skips,3 falhas de requisitos POSIX Meta Ads. Suite
+  release Windows tambem falhou em requisitos de host e timeout Qlik.
+  Nenhum requisito de seguranca foi relaxado para aprovar no Windows.
+- CI Linux39093336285 aprovou validate no SHA exato, incluindo pnpm test,
+  fontes oficiais, auditoria e build. Restore e E2E autenticado aprovados.
+  Producao nao foi alterada. Revisao estatica independente
+  sem achados no diff fe1b343e..f0329c03; nao substitui os gates pendentes.
+- CI39093336285 reprovou apenas11 comparacoes de imagens /app, decorrentes
+  do layout solicitado. Gates funcionais,242 auditorias de acessibilidade,
+  zoom/teclado e canvas aprovados. Revisadas capturas desktop/mobile e temas;
+  promovidas11 referencias e preservadas231, sem reduzir tolerancias.
+  Artefato12124916025, SHA2568615a849aa566b93a8f05d48ca05cd82c7877b9b52bc0af8d026a6891918924d.
+  Tree do merge de captura ec9ae253 equivale ao HEAD f0329c03; fingerprint
+  recomposto com29 arquivos gerados. Manifesto guarda proveniencia completa.
+  Nova CI verify obrigatoria: promocao de baseline nao aprova o run anterior.
+
 ## 2026-10-18: Abertura do resumo geral compacto
 
 - Git comum confirmado; branch codex/dashboard-resumo-compacto parte de
