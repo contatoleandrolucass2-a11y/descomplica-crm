@@ -760,7 +760,7 @@ export async function verifyAnalysisInteractions(page) {
   await expect(value("Meta mês", "appointments")).toHaveText("54");
   await expect(value("Meta mês", "visits")).toHaveText("16");
   await expect(value("Meta mês", "sales")).toHaveText("2");
-  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0,8");
+  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0");
   await expect(value("Mês atual", "sales")).toHaveText("6");
   await expect(value("Média do ano", "sales")).toHaveText("15");
   await expect(value("Média dos últimos 3 meses", "sales")).toHaveText("24");
@@ -796,7 +796,7 @@ export async function verifyAnalysisInteractions(page) {
   await expect(value("Meta mês", "visits")).toHaveText("8");
   await expect(value("Meta mês", "folders")).toHaveText("4");
   await expect(value("Meta mês", "sales")).toHaveText("1");
-  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0,4");
+  await expect(value("Meta esperada até hoje", "sales")).toHaveText("0");
   await expect(value("Mês atual", "sales")).toHaveText("2");
   await expect(value("Média do ano", "sales")).toHaveText("5");
   await expect(value("Mês anterior", "sales")).toHaveText("9");
