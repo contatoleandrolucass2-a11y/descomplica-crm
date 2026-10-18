@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-17: Previsão publicada
+
+- Disponibiliza Gestão > Previsão para Master/Admin, com tabela manual
+  compartilhada, inclusão/exclusão de linhas e colunas e botão Salvar.
+- Publica o armazenamento e catálogo autorizados, com proteção de acesso e de
+  edição concorrente, preservando permissões e exceções existentes.
+
 - CI: amplia para 60 minutos o gate visual completo, preservando toda a matriz.
 
 - Dashboard: referencias visuais revisadas para os grupos3/5/5 em desktop e mobile.
