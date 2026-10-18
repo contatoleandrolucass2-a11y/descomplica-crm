@@ -1,5 +1,7 @@
 # Changelog
 
+- Associativo: exibe a quantidade de vagas na linha do estoque e na descrição do imóvel selecionado, distinguindo zero de informação ausente.
+
 - QA do resumo geral: referencias visuais revisadas do dashboard nos tres
   temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
 
