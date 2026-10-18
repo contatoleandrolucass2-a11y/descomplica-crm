@@ -1,5 +1,9 @@
 # Worklog
 
+PR251 documental integrado em18/10/2026 às01:55:20Z (17/10,22:55 em São Paulo),
+commitfe1b343e, após CI39085264715 aprovada no head2e1c046a. Registros concorrentes
+preservados; sem alteração de runtime, migration ou reinício nesta conclusão.
+
 ## 2026-10-17: Dashboard publicado
 
 PR250 integrado no SHA840f0908. CI39061398333 aprovou validate, release-gates,

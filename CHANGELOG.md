@@ -1,5 +1,7 @@
 # Changelog
 
+- Integra o registro documental da Previsão pelo PR251, após CI completa aprovada.
+
 - Dashboard: grupos3/5/5 publicados e conferidos em desktop/celular nos temas
   claro, medio e escuro, sem overflow horizontal ou textos visiveis cortados.
 

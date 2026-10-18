@@ -891,3 +891,8 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
 - GET publico api/health200/ok/840f0908, mesma versao publicada. Escopo desta
   retomada: preservar ambos os registros, repetir CI no head integrado e fazer
   merge somente apos aprovacao. Sem nova publicacao de runtime ou migration.
+- Encerramento: CI39085264715 aprovada no head2e1c046a (validate, restore e
+  release-gates; imagem dispensada em PR). Merge normal confirmado pelo GitHub
+  em2026-10-18T01:55:20Z, commitfe1b343eeb1d5534f47779738b9fdbaf7d776d2f.
+  Conflitos documentais resolvidos preservando os dois registros; nenhum gate
+  dispensado. Health posterior200/ok/840f0908. PR251 concluido, sem novo deploy.
