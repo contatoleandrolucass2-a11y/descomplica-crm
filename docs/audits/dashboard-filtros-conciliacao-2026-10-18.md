@@ -102,3 +102,8 @@ comparecimento e vendas data da venda. Pastas aprovadas continuam indisponiveis.
   Migrado para botao/grupo, conferindo aria-expanded e visibilidade antes e
   depois do refresh RSC. Preservadas selecao oculta, scroll, unica requisicao
   concorrente e details nativo das conversoes, que nao mudou no produto.
+- CI39140025155 aprovada integralmente no head4877dd76, inclusive matriz
+  autenticada. main recebeu PR256/6b6e88fb durante validacao; integrado
+  ao branch porque protecao exige base atualizada. Nova CI do conjunto e
+  ativacao coordenada da migration de Previsao pendentes. Health16:11Z ainda
+  d919751a; nao confundir aprovacao do PR com publicacao.
