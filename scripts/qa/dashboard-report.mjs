@@ -749,12 +749,12 @@ export async function verifyAnalysisInteractions(page) {
     page
       .getByRole("figure", { name: `Funil mensal: ${label}`, exact: true })
       .locator(`[data-stage="${stage}"] dd`);
-  const select = async (key, label) => {
+  const select = async (key, label, checked = true) => {
     const summary = page.locator(`summary[aria-labelledby="filter-${key} value-${key}"]`);
     const menu = summary.locator("..");
     if (!(await menu.evaluate((element) => element.open))) await summary.click();
-    await page.getByRole("checkbox", { name: label, exact: true }).check();
-    await expect(page.getByRole("checkbox", { name: label, exact: true })).toBeChecked();
+    await page.getByRole("checkbox", { name: label, exact: true }).setChecked(checked);
+    await expect(page.getByRole("checkbox", { name: label, exact: true })).toBeChecked({ checked });
     if (await menu.evaluate((element) => element.open)) await summary.click();
   };
   await expect(value("Meta mês", "appointments")).toHaveText("54");
@@ -819,15 +819,18 @@ export async function verifyAnalysisInteractions(page) {
   await select("manager", "Gerencia sintetica Beta");
   await expect(value("Meta mês", "sales")).toHaveText("1");
   await expect(value("Mês atual", "sales")).toHaveText("4");
-  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await select("manager", "Gerencia sintetica Beta", false);
+  await select("owner", "Responsavel sintetico Alfa", false);
+  await select("owner", "Responsavel sintetico Beta", false);
   await expect(value("Meta mês", "sales")).toHaveText("2");
-  await expect(page.getByRole("button", { name: "Limpar filtros", exact: true })).toBeDisabled();
+  await expect(page.getByRole("button", { name: "Limpar filtros", exact: true })).toHaveCount(0);
   await select("company", "Empresa sintetica Alfa");
   await expect(value("Mês atual", "sales")).toHaveText("2");
   await select("channel", "SPC - CANAL IMOB PJ");
   await expect(value("Meta mês", "sales")).toHaveText("1");
   await expect(value("Mês atual", "sales")).toHaveText("2");
-  await page.getByRole("button", { name: "Limpar filtros", exact: true }).click();
+  await select("channel", "SPC - CANAL IMOB PJ", false);
+  await select("company", "Empresa sintetica Alfa", false);
   await expect(value("Mês atual", "sales")).toHaveText("6");
   assert.deepEqual(await page.evaluate(() => window.qaCurrentProps.filters), {
     channel: [],
