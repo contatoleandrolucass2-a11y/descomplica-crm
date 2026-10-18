@@ -7646,3 +7646,5 @@ A restauração na CI 39137907096 avançou além do pgTAP, mas o lint identifico
 O preview confundia ausência de valores com ausência de autorização: `?empty=1` enviava `initialValues=null` e desabilitava todo o formulário. A fixture agora controla autorização separadamente com `?readonly=1`. O cenário vazio autorizado comprova “Aplicar metas”, campos habilitados e edição da meta mensal; o cenário somente leitura continua coberto sem ampliar permissões.
 
 Validação focal: preview Chromium aprovou 30 telas, temas e larguras, axe sem violações e sem requisições externas. Capturas locais em `test-results/goal-planning-preview`, não versionadas. A ação continua conduzindo à revisão e ao salvamento de rascunho inativo; ativação de política comercial permanece fora deste escopo.
+
+Lint, typecheck e build passaram com Node 24.19/pnpm 11.20. Vitest aprovou 3.848 testes e ignorou 98. A etapa Node aprovou 1.593, ignorou 19 e manteve três falhas locais de permissões/caminhos Windows em Meta Ads, fora do delta; a CI Linux deve validar o gate integral antes da integração.
