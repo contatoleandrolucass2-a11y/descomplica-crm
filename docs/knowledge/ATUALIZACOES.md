@@ -806,3 +806,18 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
   andamento. Integracao preservou dashboard e Previsao; conflitos restritos aos
   prefixos de WORKLOG/CHANGELOG, conservando ambos os registros. Matriz RLS e
   menu corrigidos passaram42 testes focais. Nova CI integrada necessaria.
+
+## 2026-10-17: Previsao integrada e CI final aprovada
+
+- PR247 integrado em47f5d449ccc0ac5f2f4bf8c948a5736979f2daea apos CI39037358734
+  aprovar validate, restore e release-gates, incluindo navegador autenticado e
+  matriz visual. CI main39040316212 aprovou os quatro jobs, inclusive imagem.
+- Retomada em2026-10-17T19:11Z apos pausa do host: fetch confirmou main ainda
+  47f5d449; GitHub confirmou CI concluida/success. GET observacional api/health
+  HTTP200/ok/eff7f729c4386af14af16902fe4c761027df597a. A entrega esta integrada,
+  mas a versao publicada ainda e anterior. Migration ainda nao aplicada.
+- Preflight MCP14:32Z: somente nova pagina/permissao e dois grants Master/Admin;
+  conteudo e acesso das27 paginas existentes preservados. Trigger renova apenas
+  updated_at no snapshot. Backup privado14:01Z com checksum
+  522f2c436a99093fe5164fee474d4bdee6a0037c4e8f9857da528865de0b9a81.
+  Revalidar hashes e ausencia dos objetos antes da aplicacao autorizada.
