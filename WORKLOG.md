@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-17: Dashboard publicado
+
+PR250 integrado no SHA840f0908. CI39061398333 aprovou validate, release-gates,
+isolated-restore e promotable-image. Artefato conferido por checksum, revision,
+manifesto/configuracao OCI,11 camadas e dois perfis de runtime.
+Coordenador registrou deployment fc04ef76 no SHA840f0908, sem pendencia;
+health publico e container confirmaram versao/imagem saudaveis. Acesso anonimo
+a /app redireciona para /login. Navegador autenticado validou1440x900 e390x844
+nos tres temas, sem overflow horizontal; filtro fecha ao clicar fora.
+O comando deploy retornou codigo1 apos o recibo concluido; status/health/CAS
+confirmaram conclusao e nenhum retry foi executado.
+
 CI39037162463 aprovou validate, restore, imagem, E2E e todos os checks visuais
 emitidos, mas o runner cancelou a matriz ampla no limite global de45 minutos.
 Timeout de release-gates ampliado para60 minutos, sem remover cobertura ou
