@@ -1,5 +1,37 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: Abertura do resumo geral compacto
+
+- Git comum confirmado; branch codex/dashboard-resumo-compacto parte de
+  main fe1b343e. GitHub run 39088213591 terminou failure nesse SHA;
+  run 39084939569 aprovou o main anterior 36f3c317.
+- GET observacional de /api/health retornou status ok e version 840f0908.
+  Fonte: https://crm.descomplicapro.com.br/api/health e GitHub Actions,
+  consulta nesta retomada. Codigo integrado e publicado permanecem distintos.
+- Escopo: corrigir fechamento dos filtros, compactar cabecalho, remover
+  pulso/ritmo/reset, inteiros por piso nos funis e conferir a base dos relatorios.
+  Usuario confirmou manter funis com filtros e periodos. Validacao e nova
+  publicacao ainda pendentes; nenhuma alteracao de dados remotos autorizada aqui.
+
+- Conferencia de origem: ops/salesforce/transform.mjs deduplica a coleta;
+  connection-monitor publica diagnostics.sourceRows. analysis-transform.mjs
+  restringe os fatos aos dois canais definidos; analysis.ts recorta os periodos.
+  Usuario confirmou preservar essa restricao. Totais coletados desde janeiro
+  nao equivalem ao mes vigente. Sem mudanca de contrato, banco ou workflow.
+- Falha do main identificada em fonte oficial ITBI HTTP403. A verificacao
+  local scripts/verify-documentation-sources.mjs passou nesta retomada;
+  CI do candidato ainda deve comprovar acesso. Nao houve bypass do gate.
+- Correcao dos filtros remove focus() durante fechamento externo; regressao
+  reproduziu chamada indevida e passou nos quatro campos em desktop/mobile.
+  STATUS_BREAKPOINT nativo nao reproduzido: a relacao causal permanece inferida.
+  Typecheck/build aprovados; lint sem erros e dois avisos em test-results.
+  Testes focados de relatorio/paridade: 44 aprovados. Matriz visual em andamento.
+- pnpm test local: 3802 aprovados, 95 skips e seis falhas. Duas assercoes
+  antigas do reset foram corrigidas e os 44 testes focados passaram depois;
+  quatro timeouts/EBUSY em Obsidian estao sendo repetidos isoladamente.
+  Nao alterar timeouts ou tolerancias para mascarar concorrencia. CI Linux
+  completa do candidato permanece requisito antes de publicar.
+
 ## 2026-10-17: Dashboard3/5/5 publicado e validado em producao
 
 - PR250 integrou o ajuste do timeout no main840f0908. CI39061398333 aprovou

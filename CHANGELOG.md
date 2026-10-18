@@ -1,5 +1,8 @@
 # Changelog
 
+- Dashboard | Resumo Geral: cabecalho compacto, funis com quantidades inteiras
+  arredondadas para baixo e remocao de Pulso do funil, Ritmo de vendas e reset.
+
 - Dashboard: grupos3/5/5 publicados e conferidos em desktop/celular nos temas
   claro, medio e escuro, sem overflow horizontal ou textos visiveis cortados.
 

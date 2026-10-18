@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-18: Resumo geral compacto
+
+Dashboard renomeado para Dashboard | Resumo Geral, cabecalho compacto e
+remocao de Pulso do funil, Ritmo de vendas e reset dos filtros. Quantidades
+dos treze funis exibidas com Math.floor; calculos e percentuais preservam
+precisao. Fechamento dos filtros em revisao com regressao de cliques externos.
+Usuario confirmou manter somente os dois canais comerciais existentes.
+Base dos funis ja deriva dos relatorios Salesforce normalizados, com filtros
+e periodos; totais de coleta cobrem uma janela maior que o mes vigente.
+Gates e publicacao pendentes nesta etapa.
+
 ## 2026-10-17: Dashboard publicado
 
 PR250 integrado no SHA840f0908. CI39061398333 aprovou validate, release-gates,
