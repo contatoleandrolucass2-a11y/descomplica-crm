@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { getForecastInvalidCells, isGroupedForecastDocument } from "./forecast-grid";
 
 export const FORECAST_MAX_COLUMNS = 30;
 export const FORECAST_MAX_ROWS = 200;
@@ -51,7 +52,12 @@ export const forecastSaveSchema = z
       .max(Number.MAX_SAFE_INTEGER - 1),
   })
   .strict()
-  .refine(validGrid);
+  .refine(validGrid)
+  .refine(isGroupedForecastDocument, "A previsão deve conter pares de empreendimento.")
+  .refine(
+    (value) => validGrid(value) && getForecastInvalidCells(value).length === 0,
+    "Previsão e realizado aceitam somente números não negativos com até duas casas decimais.",
+  );
 export const forecastSnapshotSchema = z
   .object({
     forecast: forecastRecordSchema.nullable(),

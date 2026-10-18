@@ -78,7 +78,7 @@
   opacity: 0.55;
   cursor: not-allowed;
 }
-.page :is(button, textarea, [tabindex]):focus-visible {
+.page :is(button, input, textarea, [tabindex]):focus-visible {
   outline: 2px solid var(--analytics-cyan-strong);
   outline-offset: 2px;
 }
@@ -117,7 +117,6 @@
 }
 .tableScroll {
   position: relative;
-  overflow: auto;
   max-width: 100%;
   border: 1px solid var(--analytics-line);
   border-radius: 8px;
@@ -129,83 +128,156 @@
   table-layout: fixed;
 }
 .table :is(th, td) {
+  min-width: 0;
   border-right: 1px solid var(--analytics-line);
   border-bottom: 1px solid var(--analytics-line);
   padding: 0;
   vertical-align: middle;
+  text-align: center;
 }
 .table tr > :last-child {
   border-right: 0;
 }
-.table thead th {
-  color: var(--analytics-ink);
+.table thead th,
+.table tfoot {
   background: var(--analytics-surface-muted);
   font-weight: 650;
 }
-.table tbody tr:last-child > * {
+.table tfoot tr > * {
   border-bottom: 0;
 }
 .table tbody tr:focus-within {
   background: var(--analytics-surface-muted);
 }
-.table tbody td {
-  font-variant-numeric: tabular-nums;
+.brokerColumn {
+  width: 17%;
 }
-.table .rowNumber {
-  width: 40px;
+.totalColumn {
+  width: 8%;
+}
+.brokerHeading {
+  padding: 10px !important;
+  text-align: right !important;
+}
+.totalHeading {
+  padding: 8px 3px !important;
+}
+.metricHeadings th {
+  padding: 10px 2px !important;
+  font-size: clamp(10px, 0.85vw, 13px);
+  overflow-wrap: anywhere;
+}
+.brokerContent {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+.rowNumber {
   color: var(--analytics-muted);
-  text-align: center;
-  font-size: 12px;
+  font-size: 10px;
+  padding-left: 5px;
 }
-.table .rowAction {
-  width: 48px;
-  text-align: center;
-}
-.rowAction button {
-  padding: 8px;
+.brokerContent button {
+  flex: 0 0 28px;
+  min-width: 0;
+  padding: 4px;
   border: 0;
   background: transparent;
 }
 .columnHeading {
-  display: flex;
+  min-width: 0;
+  padding: 4px 2px;
+}
+.groupActions {
+  display: grid;
+  grid-template-columns: 12px repeat(3, minmax(0, 1fr));
   align-items: center;
 }
-.columnHeading button {
-  flex-shrink: 0;
-  padding: 6px;
+.groupActions button {
+  min-width: 0;
+  padding: 4px 0;
+  min-height: 36px;
   border: 0;
+  border-radius: 3px;
   background: transparent;
-  min-width: 44px;
 }
-.page .main .table textarea {
+.groupActions svg {
+  flex-shrink: 0;
+}
+.dragHandle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 36px;
+  cursor: grab;
+  color: var(--analytics-muted);
+}
+.dragHandle:active {
+  cursor: grabbing;
+}
+.page .main .table :is(input, textarea) {
   display: block;
   box-sizing: border-box;
   width: 100%;
   min-width: 0;
-  min-height: 54px;
-  resize: vertical;
+  margin: 0;
   border: 0;
   border-radius: 0;
-  padding: 12px;
   background: transparent;
   box-shadow: none;
   color: inherit;
   font: inherit;
-  font-size: 14px;
-  line-height: 1.5;
   text-align: center;
 }
-:global(:root) .page .main .table thead textarea {
+.page .main .table input {
+  height: 56px;
+  padding: 8px 3px;
+  font-size: clamp(11px, 0.95vw, 14px);
+  font-variant-numeric: tabular-nums;
+}
+.page .main .table textarea {
+  padding: 6px 2px;
+  font-size: clamp(11px, 1vw, 14px);
+  line-height: 1.35;
+  resize: none;
   font-weight: 650;
 }
-.page .main .table textarea[readonly] {
+.page .main .table .brokerCell input {
+  text-align: right;
+  padding-right: 6px;
+  font-size: 13px;
+  font-weight: 400;
+}
+.page .main .table [readonly] {
   opacity: 1;
   -webkit-text-fill-color: currentColor;
-  resize: none;
 }
-.table td:focus-within {
+.page .main .table [aria-invalid="true"] {
+  outline: 2px solid var(--analytics-danger);
+  outline-offset: -2px;
+  color: var(--analytics-danger);
+}
+.table :is(td, th):focus-within {
   outline: 2px solid var(--analytics-cyan-strong);
   outline-offset: -2px;
+}
+.table output {
+  display: block;
+  padding: 12px 3px;
+  font-variant-numeric: tabular-nums;
+  font-size: clamp(11px, 0.95vw, 14px);
+  overflow-wrap: anywhere;
+}
+.totalCell {
+  font-weight: 700;
+  background: var(--analytics-surface-muted);
+}
+.footerLabel {
+  text-align: right !important;
+  padding: 12px 8px !important;
+}
+.mobileLabel {
+  display: none;
 }
 .empty {
   padding: 28px 16px;
@@ -221,6 +293,103 @@
   height: 1px;
   overflow: hidden;
   clip-path: inset(50%);
+}
+@media (max-width: 900px) {
+  .table,
+  .table thead,
+  .table tbody,
+  .table tfoot {
+    display: block;
+    width: 100%;
+  }
+  .table colgroup,
+  .table .metricHeadings,
+  .table .brokerHeading,
+  .table .totalHeading {
+    display: none;
+  }
+  .table thead > tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 10px;
+  }
+  .table .groupHeading {
+    display: block;
+    border: 1px solid var(--analytics-line);
+    border-radius: 6px;
+  }
+  .table .columnHeading {
+    padding: 4px;
+  }
+  .groupActions {
+    grid-template-columns: 16px repeat(3, minmax(0, 1fr));
+  }
+  .groupActions button {
+    min-height: 44px;
+  }
+  .table tbody > tr,
+  .table tfoot > tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin: 12px;
+    border: 1px solid var(--analytics-line);
+    border-radius: 6px;
+    overflow: hidden;
+  }
+  .table tbody tr > *,
+  .table tfoot tr > * {
+    display: block;
+    border-bottom: 1px solid var(--analytics-line);
+  }
+  .table :is(.brokerCell, .footerLabel, .totalCell) {
+    grid-column: 1 / -1;
+    border-right: 0;
+  }
+  .table .brokerCell {
+    background: var(--analytics-surface-muted);
+  }
+  .table .brokerContent {
+    min-height: 56px;
+  }
+  .brokerContent button {
+    flex-basis: 44px;
+    min-height: 44px;
+  }
+  .table .numericCell:nth-child(odd),
+  .table tfoot td:nth-child(odd) {
+    border-right: 0;
+  }
+  .mobileLabel {
+    display: block;
+    color: var(--analytics-muted);
+    font-size: 11px;
+    line-height: 1.4;
+    padding: 8px 6px 0;
+    text-align: center;
+  }
+  .table .totalCell {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 12px;
+    border-bottom: 0;
+  }
+  .table .totalCell .mobileLabel {
+    padding: 0;
+    font-size: 13px;
+  }
+  .page .main .table input {
+    height: 44px;
+    padding: 8px;
+    font-size: 16px;
+  }
+  .page .main .table textarea {
+    font-size: 13px;
+  }
+  .table output {
+    font-size: 14px;
+  }
 }
 @media (max-width: 640px) {
   .main {
@@ -244,22 +413,16 @@
   .header h1 {
     font-size: 24px;
   }
-  .table .rowNumber {
-    width: 30px;
-    font-size: 10px;
+  .table thead > tr {
+    grid-template-columns: minmax(0, 1fr);
   }
-  .table .rowAction {
-    width: 44px;
+  .columnHeading:has(.groupActions) {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 148px;
+    align-items: center;
   }
-  .columnHeading {
-    flex-direction: column;
-  }
-  .page .main .table textarea {
-    padding: 10px 5px;
-    font-size: 13px;
-    min-height: 68px;
-  }
-  .columnHeading button {
-    align-self: center;
+  .table tbody > tr,
+  .table tfoot > tr {
+    margin: 8px;
   }
 }

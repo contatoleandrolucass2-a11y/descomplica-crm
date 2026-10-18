@@ -7620,3 +7620,27 @@ docs/audits/previsao-2026-10-17.md. Nenhuma fixture foi inserida em produção.
 - Reutilizado o canvas visual de /app para a Previsão, com cores dos três temas, cabeçalho compacto, tabela fluida e Salvar destacado.
 - Mantidos API, permissões e salvamento compartilhado; nenhuma migration nova. A tabela padrão cabe em celular, e colunas extras usam rolagem interna.
 - Validação em andamento: navegador sintético, lint, tipos, testes e build. CI de main anterior falhou no gate externo de fontes documentais; não é evidência de regressão deste ajuste.
+
+### Encerramento da atualização visual da Previsão
+
+- PR253 integrado em f8ad7bbf com CI39092735520 aprovada. CI de main39095660275 aprovou os quatro jobs, incluindo imagem e matriz visual.
+- Publicado pelo coordenador em2026-10-18T04:51:47.145Z; deployment c4d5dc22-ad9d-4fa4-a5aa-d20184a5339c. Health200/ok/f8ad7bbf, imagem comprovada e healthy, sem pendência; acesso anônimo página307/API401.
+- Lint, tipos e build locais aprovados; cinco testes de navegador e três temas aprovados. Suíte geral local teve timeouts de infraestrutura; último timeout passou isoladamente. A suíte completa foi aprovada no Linux da CI. Sem alterações de banco ou fixtures em produção.
+
+## 2026-10-18 — Previsão por empreendimento
+
+Implementados sete grupos iniciais com Previsão/Realizado, inclusão em todas as linhas, reordenação por arraste e setas, corretor fixo à esquerda/alinhado à direita e Total calculado no final. Rodapé soma colunas e total geral. Valores numéricos com até duas casas decimais, totais em centésimos inteiros e preservação de conteúdo legado inválido para correção. Desktop compacto e celular sem rolagem horizontal, nos três temas.
+
+Contrato de gravação validado na API e migration da RPC sem reescrever dados nem modificar permissões. Inventário ampliado para 65 migrations e 2.008 testes pgTAP; aplicação remota depende de autorização específica. Testes locais e CI serão registrados no encerramento.
+
+### Correção da fixture SQL na CI
+
+A CI 39136448707 aprovou validate, mas o restore detectou uma expressão JSON sem parênteses no teste de grupos. A precedência de subtração causava 22P02 antes da segunda asserção. Corrigida somente a fixture, preservando as 36 verificações. Expressão antiga/corrigida reproduzida por SELECT de constantes, sem tabelas ou mutações. 67 testes focados aprovados; nova CI necessária.
+
+### Compatibilidade de foco na tabela antiga
+
+Corrigido o foco após inserir/excluir linhas quando o cabeçalho antigo do corretor era personalizado. O foco usa agora o nome acessível fixo da nova interface. Cenário de navegador legado passou incluindo as duas operações.
+
+### Lint SQL da migration
+
+A restauração na CI 39137907096 avançou além do pgTAP, mas o lint identificou a declaração v_index redundante: o laço FOR inteiro já declara o índice localmente. Removida somente a declaração externa, sem mudar o laço ou as validações. Nova execução completa obrigatória.
