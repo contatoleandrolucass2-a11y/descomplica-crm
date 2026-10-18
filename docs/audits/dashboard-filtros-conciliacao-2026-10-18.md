@@ -84,3 +84,16 @@ comparecimento e vendas data da venda. Pastas aprovadas continuam indisponiveis.
   Nenhum gate foi dispensado. PR255 ainda nao publicado.
 - Regressao de browser inicial excedeu240s globais no quarto contexto;
   nao registrar como aprovada. Casos sendo separados sem reduzir assercoes.
+
+## Regressao e CI do controle React
+
+- Casos separados no commit3dde464d: quatro aprovados,32 ciclos completos,
+  Chromium Windows/Node24.19.0; duracoes117,303/109,279/92,975/101,029s.
+  Desktop/celular com resposta imediata/pending, incluindo troca por toque.
+  Format e tipos aprovados. Nao prova causa interna do crash nativo.
+- CI39136199536 aprovou validate, restore, dashboard sintetico e banco.
+  E2E autenticado parou em e2e/release-candidate.spec.ts:1588 por procurar
+  quatro summary antigos; recebido zero porque agora sao botoes acessiveis.
+  Atualizado seletor e acrescentada abertura/fechamento externo dos quatro
+  filtros no navegador autenticado. Nenhuma assercao comercial removida.
+  Matriz visual completa nao executou nessa tentativa; nova CI obrigatoria.

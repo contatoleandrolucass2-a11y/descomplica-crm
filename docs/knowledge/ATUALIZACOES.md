@@ -30,6 +30,13 @@
   assercoes, nao registrar teste incompleto como aprovado. Reavaliar com
   resultado por caso e CI do head atualizado. Fonte: PR255 e auditoria citada.
 
+- Quatro cenarios isolados do controle React aprovados em3dde464d,32 ciclos
+  sem erro coletado. CI39136199536 aprovou validate/restore/dashboard/banco,
+  mas E2E ainda buscava summary antigo em release-candidate.spec.ts:1588.
+  Corrigido seletor e ampliada verificacao autenticada de clique externo.
+  Nenhum bypass: matriz visual/publicacao aguardam nova CI. Causa nativa
+  STATUS_BREAKPOINT segue desconhecida; aprovacoes nao comprovam essa causa.
+
 ## 2026-10-18: Resumo geral publicado
 
 - PR254 integrado em d919751a51772dd0c57a582b9581e61412642ced.

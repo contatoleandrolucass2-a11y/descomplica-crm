@@ -16,6 +16,10 @@ ao clique externo nos quatro filtros da versao antiga, sem crash nessa rodada.
 CI39135151478 passou lint/tipos/testes Linux e parou na fonte ITBI HTTP403;
 repeticao solicitada sem dispensar gate. Teste prolongado sendo separado
 em quatro casos para evitar timeout acumulado, preservando as assercoes.
+Os quatro casos separados passaram. CI39136199536 passou dashboard/banco/
+restore, mas encontrou seletor summary obsoleto no E2E autenticado; atualizado
+para botoes acessiveis com verificacao de abertura/fechamento de cada filtro.
+Matriz visual final e publicacao continuam condicionadas a nova CI completa.
 
 ## 2026-10-18: Resumo geral em producao
 
