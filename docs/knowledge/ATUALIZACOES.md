@@ -1,5 +1,15 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-17: Gate visual cancelado por limite global
+
+- CI39037162463 no merge ca6c33cf aprovou validate, isolated-restore,
+  promotable-image, E2E e todos os checks visuais registrados. A matriz ampla
+  foi cancelada pelo runner ao atingir o timeout do job, sem assercao visual
+  reprovada; o artefato nao foi promovido e producao permaneceu em eff7f729.
+- `release-gates` passa de45 para60 minutos, preservando etapas, cobertura e
+  tolerancias. Uma nova CI completa no `main` exato continua obrigatoria para
+  publicacao. Fontes: Actions39037162463 e `release:production status`.
+
 ## 2026-10-17: Revisao visual do dashboard e retomada12:03Z
 
 - CI38995290171: funcional, RSC, acessibilidade e zoom aprovados;11 diferencas

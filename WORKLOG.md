@@ -1,5 +1,10 @@
 # Worklog
 
+CI39037162463 aprovou validate, restore, imagem, E2E e todos os checks visuais
+emitidos, mas o runner cancelou a matriz ampla no limite global de45 minutos.
+Timeout de release-gates ampliado para60 minutos, sem remover cobertura ou
+relaxar assercoes. Nova CI completa obrigatoria antes da publicacao.
+
 CI38995290171 concluiu verificacoes funcionais, RSC, acessibilidade e zoom.
 Revisadas11 alteracoes visuais /app, preservadas231 capturas de outras telas.
 Baseline atualizada com proveniencia do artefato12087754329; nova CI exigida.
