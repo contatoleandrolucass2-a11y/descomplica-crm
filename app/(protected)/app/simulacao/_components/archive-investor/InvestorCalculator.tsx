@@ -737,8 +737,14 @@ function informationLabel(value?: string | null) {
   return value?.trim() || "Não informado";
 }
 
+function parkingSpacesValue(value: number | null | undefined) {
+  return typeof value === "number" && Number.isSafeInteger(value) && value >= 0
+    ? String(value)
+    : "Não informada";
+}
+
 function parkingSpacesLabel(value: number | null | undefined) {
-  return `VAGA: ${typeof value === "number" && Number.isSafeInteger(value) && value >= 0 ? value : "Não informada"}`;
+  return `VAGA: ${parkingSpacesValue(value)}`;
 }
 
 const InvestorStockRow = memo(function InvestorStockRow({ item, selected, rowIndex }: { item: InventoryItem; selected: boolean; rowIndex: number }) {
@@ -4136,6 +4142,7 @@ export function InvestorCalculator({
               <col className="investor-stock-col-start" />
               <col className="investor-stock-col-business" />
               <col className="investor-stock-col-product" />
+              {annualMode ? <col className="investor-stock-col-parking" /> : null}
               <col className="investor-stock-col-area" />
               <col className="investor-stock-col-date" />
               <col className="investor-stock-col-plant" />
@@ -4146,6 +4153,7 @@ export function InvestorCalculator({
                 <th className="investor-stock-start-heading">Início</th>
                 <th>Incorporadora</th>
                 <th>Produto</th>
+                {annualMode ? <th className="investor-stock-parking-heading">Vaga</th> : null}
                 <th>Metragem</th>
                 <th className={annualMode ? "investor-stock-completion-heading" : undefined}>{annualMode ? "Data de término da obra" : "Data de Entrega"}</th>
                 <th>Planta</th>
@@ -4153,9 +4161,9 @@ export function InvestorCalculator({
               </tr>
             </thead>
             <tbody onClick={directTable ? selectInventoryRow : undefined}>
-              {inventoryStatus === "loading" ? <tr><td className="investor-empty-result" colSpan={7}>Carregando unidades do estoque…</td></tr> : null}
-              {inventoryStatus === "error" ? <tr><td className="investor-empty-result" colSpan={7}>{directTable ? "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada." : "Estoque indisponível."} <button type="button" className="investor-stock-action-button investor-stock-retry-button" onClick={retryInventory}>Tentar novamente</button></td></tr> : null}
-              {inventoryTopSpacer > 0 ? <tr className="investor-stock-spacer" aria-hidden="true" style={{ "--investor-stock-spacer-height": `${inventoryTopSpacer}px` }}><td colSpan={7} /></tr> : null}
+              {inventoryStatus === "loading" ? <tr><td className="investor-empty-result" colSpan={annualMode ? 8 : 7}>Carregando unidades do estoque…</td></tr> : null}
+              {inventoryStatus === "error" ? <tr><td className="investor-empty-result" colSpan={annualMode ? 8 : 7}>{directTable ? "Arquivo oficial do estoque indisponível. Nenhuma fonte alternativa foi usada." : "Estoque indisponível."} <button type="button" className="investor-stock-action-button investor-stock-retry-button" onClick={retryInventory}>Tentar novamente</button></td></tr> : null}
+              {inventoryTopSpacer > 0 ? <tr className="investor-stock-spacer" aria-hidden="true" style={{ "--investor-stock-spacer-height": `${inventoryTopSpacer}px` }}><td colSpan={annualMode ? 8 : 7} /></tr> : null}
               {directTable ? visibleInventory.map((item, visibleIndex) => (
                 <InvestorStockRow
                   key={item.id}
@@ -4179,16 +4187,17 @@ export function InvestorCalculator({
                 >
                   <td className="investor-stock-start-cell" data-label="Início"><button type="button" className="investor-stock-unit-button" disabled={!canSelect} aria-pressed={selected} onClick={(event) => { event.stopPropagation(); selectUnit(item); }} aria-label={canSelect ? `Iniciar proposta com ${item.identifier ?? item.product}` : `${item.identifier ?? item.product} ${unavailableReason}`}><span aria-hidden="true">{selected ? "✓" : "›"}</span></button></td>
                   <td data-label="Incorporadora">{item.businessUnit}</td>
-                  <td className="investor-stock-product" data-label="Produto">{annualMode ? <div className="investor-stock-product-with-parking"><span className="investor-stock-product-text" title={item.product}>{item.product}</span><span className="investor-stock-parking">{parkingSpacesLabel(item.parkingSpaces)}</span></div> : <span className="investor-stock-product-text">{item.product}</span>}</td>
+                  <td className="investor-stock-product" data-label="Produto"><span className="investor-stock-product-text" title={annualMode ? item.product : undefined}>{item.product}</span></td>
+                  {annualMode ? <td className="investor-stock-parking" data-label="Vaga">{parkingSpacesValue(item.parkingSpaces)}</td> : null}
                   <td data-label="Metragem">{item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "—"}</td>
                   <td data-label={annualMode ? "Data de término da obra" : "Data de Entrega"}>{formatDate(item.completionDate)}</td>
                   <td className="investor-stock-plant" data-label="Planta">{informationLabel(item.plant)}</td>
                   <td className="investor-stock-price" data-label="Valor do imóvel">{item.finalPrice ? money.format(item.finalPrice) : "Não informado"}</td>
                 </tr>;
               })}
-              {inventoryBottomSpacer > 0 ? <tr className="investor-stock-spacer" aria-hidden="true" style={{ "--investor-stock-spacer-height": `${inventoryBottomSpacer}px` }}><td colSpan={7} /></tr> : null}
+              {inventoryBottomSpacer > 0 ? <tr className="investor-stock-spacer" aria-hidden="true" style={{ "--investor-stock-spacer-height": `${inventoryBottomSpacer}px` }}><td colSpan={annualMode ? 8 : 7} /></tr> : null}
               {inventoryStatus === "ready" && matchingInventory.length === 0 && (
-                <tr><td className="investor-empty-result" colSpan={7}>Nenhuma unidade encontrada com esses filtros.</td></tr>
+                <tr><td className="investor-empty-result" colSpan={annualMode ? 8 : 7}>Nenhuma unidade encontrada com esses filtros.</td></tr>
               )}
             </tbody>
           </table>

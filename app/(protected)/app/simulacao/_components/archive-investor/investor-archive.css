@@ -13424,8 +13424,8 @@ a {
   }
 }
 
-/* Final investor layout contract: eligible inventory, no garage column,
-   compact guide and one horizontal payment sequence per option. */
+/* Final investor layout contract: eligible inventory, compact guide and one
+   horizontal payment sequence per option. */
 .investor-page-shell .investor-filter-actions { position:relative; z-index:6; display:flex; align-items:center; justify-content:flex-end; gap:8px; min-width:0; }
 .investor-page-shell .investor-filter-actions>.investor-info-hint { flex:0 0 44px; width:44px; }
 .investor-page-shell .investor-filter-actions>button { min-height:44px; padding:0 16px; color:var(--inv-cyan); border:1px solid var(--inv-color-line, #2c6077); border-radius:9px; background:var(--inv-color-panel-muted, #0d3048); font:inherit; font-size:12px; font-weight:600; cursor:pointer; transition:color .18s ease,border-color .18s ease,background .18s ease; }
@@ -23425,10 +23425,19 @@ body:has(.investor-page-shell) {
   }
 }
 
-/* Keep the parking count visible independently of the truncated product name. */
-.investor-stock-product-with-parking { display: flex; align-items: baseline; gap: 0.75rem; min-width: 0; }
-.investor-stock-product-with-parking .investor-stock-product-text { flex: 1; min-width: 0; }
-.investor-stock-parking { flex-shrink: 0; white-space: nowrap; }
-@media (max-width: 640px) {
-  .investor-stock-product-with-parking { flex-wrap: wrap; }
+/* Associative inventory exposes parking as a real table column. */
+.investor-page-shell.investor-associative-table-page .investor-stock-col-parking {
+  width: 96px;
+}
+
+.investor-page-shell.investor-associative-table-page
+  .investor-stock-table
+  :is(.investor-stock-parking-heading, .investor-stock-parking) {
+  text-align: center;
+}
+
+@media (max-width: 1239px) {
+  .investor-page-shell.investor-associative-table-page .investor-stock-table {
+    min-width: 996px;
+  }
 }

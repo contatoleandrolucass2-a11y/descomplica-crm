@@ -776,6 +776,7 @@ export async function runSyntheticAssociativePageGuide(options) {
         errors.push({ text: message.text(), url: message.location().url });
     });
     await page.goto(`${origin}${routePath}`, { waitUntil: "networkidle" });
+    await expect(page.getByRole("columnheader", { name: "Vaga", exact: true })).toBeVisible();
     // Exercise the real row selection and selected-unit summary for zero, one and unknown.
     for (const width of [390, 1440]) {
       await page.setViewportSize({ width, height: 900 });
@@ -784,6 +785,7 @@ export async function runSyntheticAssociativePageGuide(options) {
           .locator("html")
           .evaluate((element, value) => (element.dataset.theme = value), theme);
         for (const item of items.slice(0, 3)) {
+          const parkingValue = `${item.parkingSpaces ?? "Não informada"}`;
           const label = `VAGA: ${item.parkingSpaces ?? "Não informada"}`;
           const row = page.getByRole("row").filter({
             has: page.getByRole("button", {
@@ -791,7 +793,12 @@ export async function runSyntheticAssociativePageGuide(options) {
               exact: true,
             }),
           });
-          await expect(row.locator(".investor-stock-parking")).toHaveText(label);
+          const parkingCell = row.locator(".investor-stock-parking");
+          await expect(parkingCell).toHaveText(parkingValue);
+          if (width >= 1240) {
+            await expect(parkingCell).toHaveCSS("border-left-style", "solid");
+            await expect(parkingCell).toHaveCSS("border-right-style", "solid");
+          }
           await row.getByRole("button").click();
           await expect(
             page.locator(".investor-property-summary").getByText(label, { exact: true }),

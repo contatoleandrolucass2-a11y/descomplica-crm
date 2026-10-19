@@ -2,6 +2,21 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Coluna de vaga do Associativo em 19/10/2026
+
+A CI `39301197819`, no head do PR #268, aprovou validate, restauração isolada,
+banco, build, jornada do Associativo, acessibilidade, teclado e navegação. Duas
+das 242 comparações excederam o limite de pixels: as capturas de 1024×768 e
+768×1024 do Associativo, alteradas pela coluna `VAGA` e suas divisórias.
+
+As duas imagens do artefato Linux `12214372820` foram inspecionadas e adotadas.
+O ZIP possui SHA-256
+`3d059db6e6c5ad6356b06429a2f5d9f030935794bd9f8f8da6fc277d6c687730`;
+as outras 240 referências foram preservadas. O manifesto mantém o flag de
+captura suja e distingue o head da implementação do merge-ref usado pelo
+GitHub. Os limites de 1%/16 não mudaram. Uma nova CI integral em modo de
+verificação permanece obrigatória antes de integrar ou publicar.
+
 ## Páginas e acessos individuais em 15/10/2026
 
 A captura Linux `38819023825` concluiu com sucesso no commit

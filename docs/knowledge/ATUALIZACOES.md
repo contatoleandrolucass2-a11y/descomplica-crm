@@ -17,6 +17,32 @@
 - Evidencias: CI completa, 5.432 cenarios de paridade documental, QA local com 17 etapas e impressao nos tres temas; revisao independente sem achados. Falhas anteriores: fixture com cidade ficticia corrigido somente na unidade principal; espera de rede ociosa no 503 substituida por DOM e asserts de resposta/UI; HTTP 403 transitorio da Prefeitura passou em nova consulta. Sem bypass de fontes ou gates.
 - Pendencia de publicacao desta anotacao inicial resolvida pela evidencia acima. Health anterior `ok`/`afb4a97df72a3c45a1982a8d520ef400eef2d985`. Nenhuma migration, alteracao de n8n ou mutacao de dados remotos autorizada/executada por esta tarefa.
 
+## 2026-10-19: coluna de vaga no estoque Associativo
+
+- Status: implementação e validação local concluídas; CI e publicação pendentes.
+- Fonte: captura e pedido do usuário, tabela real em `InvestorCalculator.tsx` e
+  estilos em `investor-archive.css`.
+- A vaga precisa ser uma célula própria entre Produto e Metragem. Usar apenas um
+  texto dentro de Produto não cria semântica de coluna nem a divisória visual.
+- O cabeçalho `Vaga` e a célula correspondente existem somente no Associativo;
+  estados vazios e espaçadores usam oito colunas nesse modo e sete nos demais.
+- A descrição da unidade mantém `VAGA: N`. Zero continua sendo valor conhecido;
+  ausência ou valor inválido aparece como `Não informada` e nunca vira zero.
+- Teste focal: 14 casos aprovados. A jornada sintética validou 18 seleções, as
+  divisórias no desktop e o guia completo em 1440/375/320 px, nos três temas,
+  sem erros de console, acesso externo ou violações axe. Lint, typecheck, build
+  de 57 rotas e suíte completa passaram; Vitest aprovou 3.952 testes com 102
+  skips condicionais, e os release gates locais aprovaram 723 com 14 skips.
+- Evidência local: `test-results/associative-page-guide/2026-10-19T18-07-25.052Z/result.json`.
+- CI `39301197819`: validate, restore, banco, build, guia, acessibilidade,
+  teclado e navegação aprovados. Apenas as referências de tablet 1024×768 e
+  768×1024 excederam o limite visual pela nova coluna solicitada.
+- As duas capturas do artefato Linux `12214372820` foram revisadas e adotadas;
+  SHA-256 do ZIP
+  `3d059db6e6c5ad6356b06429a2f5d9f030935794bd9f8f8da6fc277d6c687730`.
+  As outras 240 imagens e os limites de 1%/16 foram preservados. Nova CI
+  integral em modo de verificação é obrigatória antes de merge ou publicação.
+
 ## 2026-10-19: abertura - Associativo automatico
 
 - Reconferencia durante a espera da CI: producao avancou por outra publicacao para `afb4a97df72a3c45a1982a8d520ef400eef2d985`, com health publico `ok`. Esta tarefa permanece no PR #265, head `76dac1d2`, CI `39267222824` com validate/restore aprovados e matriz visual em andamento. Nao atribuir a atualizacao do site ao Associativo; consultar novo deployment ID antes da promocao.

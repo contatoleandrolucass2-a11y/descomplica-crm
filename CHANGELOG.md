@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-19 - Coluna de vaga no estoque Associativo
+
+- A quantidade de vagas passa a ocupar uma coluna própria, com cabeçalho `Vaga`
+  e divisórias alinhadas às demais colunas da tabela.
+- A descrição do imóvel selecionado mantém o texto completo `VAGA: N`; zero e
+  informação ausente continuam distintos.
+- Os demais simuladores e as regras de estoque, seleção e cálculo permanecem
+  inalterados.
+- A matriz autenticada preserva 240 referências e atualiza somente as duas
+  imagens de tablet do Associativo que mudaram pela nova coluna.
+
 ## 2026-10-19 - Associativo com documentacao automatica
 
 - Publicado em producao pelo PR #265, com CI integral, imagem imutavel, backup e verificacao posterior. Registro final de release sincronizado com o Obsidian; sem novo deploy para esta atualizacao documental.
