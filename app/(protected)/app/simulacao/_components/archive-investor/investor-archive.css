@@ -20471,7 +20471,7 @@ body:has(.investor-page-shell) {
 }
 
 .investor-page-shell .investor-direct-resource-actions.investor-associative-resource-actions {
-  grid-template-columns:repeat(5,minmax(0,1fr));
+  grid-template-columns:repeat(6,minmax(0,1fr));
 }
 .investor-page-shell .investor-direct-resource-actions:not(.investor-associative-resource-actions) {
   grid-template-columns:repeat(6,minmax(0,1fr));
@@ -23439,5 +23439,280 @@ body:has(.investor-page-shell) {
 @media (max-width: 1239px) {
   .investor-page-shell.investor-associative-table-page .investor-stock-table {
     min-width: 996px;
+  }
+}
+
+/* A4 exclusivo do Associativo: o botão seleciona somente um dos dois fluxos. */
+.investor-page-shell .investor-associative-print-sheet {
+  display: none;
+}
+
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 10mm;
+  }
+
+  body:has(.investor-associative-print-sheet) * {
+    visibility: hidden !important;
+  }
+
+  body:has(.investor-associative-print-sheet) .investor-associative-print-sheet,
+  body:has(.investor-associative-print-sheet) .investor-associative-print-sheet * {
+    visibility: visible !important;
+  }
+
+  .investor-page-shell .investor-associative-print-sheet {
+    position: fixed;
+    top: 0;
+    left: 0;
+    display: flex;
+    box-sizing: border-box;
+    width: 190mm;
+    min-height: 277mm;
+    flex-direction: column;
+    gap: 4mm;
+    margin: 0;
+    padding: 0;
+    color: #252e3a !important;
+    font-family: Arial, Helvetica, sans-serif;
+    background: #fff !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  .investor-associative-print-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    padding-bottom: 4mm;
+    border-bottom: 0.35mm solid #252e3a;
+  }
+
+  .investor-associative-print-header img {
+    width: 49mm;
+    height: auto;
+  }
+
+  .investor-associative-print-header > div {
+    display: grid;
+    gap: 1.5mm;
+    color: #66717f !important;
+    font-size: 7.5pt;
+    text-align: right;
+  }
+
+  .investor-associative-print-header strong {
+    color: #252e3a !important;
+    font-size: 8pt;
+  }
+
+  .investor-associative-print-title {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+
+  .investor-associative-print-title h1 {
+    margin: 0;
+    color: #252e3a !important;
+    font-size: 23pt;
+    line-height: 1.05;
+  }
+
+  .investor-associative-print-title p,
+  .investor-associative-print-title > span {
+    margin: 1.5mm 0 0;
+    color: #66717f !important;
+    font-size: 8pt;
+  }
+
+  .investor-associative-print-title > span {
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .investor-associative-print-property {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 52mm;
+    border: 0.25mm solid #d5dae0;
+    border-left: 1mm solid #c51f32;
+  }
+
+  .investor-associative-print-property > div {
+    display: grid;
+    gap: 2mm;
+    padding: 4mm;
+  }
+
+  .investor-associative-print-property > div + div {
+    border-left: 0.25mm solid #d5dae0;
+    text-align: right;
+  }
+
+  .investor-associative-print-property small,
+  .investor-associative-print-kpis small {
+    color: #66717f !important;
+    font-size: 6.5pt;
+    text-transform: uppercase;
+  }
+
+  .investor-associative-print-property strong {
+    color: #252e3a !important;
+    font-size: 12pt;
+  }
+
+  .investor-associative-print-kpis {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 3mm;
+  }
+
+  .investor-associative-print-kpis > div {
+    display: grid;
+    gap: 2mm;
+    padding: 4mm;
+    background: #f3f4f6 !important;
+  }
+
+  .investor-associative-print-kpis > .featured {
+    border-top: 0.75mm solid #c51f32;
+    background: #fff3f4 !important;
+  }
+
+  .investor-associative-print-kpis strong {
+    color: #252e3a !important;
+    font-size: 14pt;
+  }
+
+  .investor-associative-print-kpis .featured strong {
+    color: #c51f32 !important;
+  }
+
+  .investor-associative-print-section {
+    display: grid;
+    gap: 2.5mm;
+  }
+
+  .investor-associative-print-section h2 {
+    display: flex;
+    align-items: center;
+    gap: 3mm;
+    margin: 0;
+    color: #252e3a !important;
+    font-size: 11pt;
+  }
+
+  .investor-associative-print-section h2::after {
+    height: 0.25mm;
+    flex: 1;
+    background: #d5dae0 !important;
+    content: "";
+  }
+
+  .investor-associative-print-section h2 span {
+    color: #c51f32 !important;
+    font-size: 7pt;
+  }
+
+  .investor-associative-print-section dl {
+    display: grid;
+    margin: 0;
+  }
+
+  .investor-associative-print-section dl > div {
+    display: flex;
+    justify-content: space-between;
+    padding: 1.5mm 0;
+    border-bottom: 0.2mm solid #d5dae0;
+    color: #66717f !important;
+    font-size: 7.5pt;
+  }
+
+  .investor-associative-print-section dl :is(dt, dd) {
+    margin: 0;
+  }
+
+  .investor-associative-print-section dl .total {
+    padding: 2.5mm 3mm;
+    color: #252e3a !important;
+    font-weight: 700;
+    background: #f3f4f6 !important;
+  }
+
+  .investor-associative-print-flow table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+    font-size: 6.8pt;
+  }
+
+  .investor-associative-print-flow :is(th, td) {
+    padding: 1.6mm 2mm;
+    border: 0.2mm solid #d5dae0;
+    color: #252e3a !important;
+    text-align: left;
+    overflow-wrap: anywhere;
+  }
+
+  .investor-associative-print-flow thead th {
+    color: #66717f !important;
+    font-size: 6pt;
+    text-transform: uppercase;
+    background: #f3f4f6 !important;
+  }
+
+  .investor-associative-print-flow :is(th, td):nth-child(3) {
+    width: 13mm;
+    text-align: center;
+  }
+
+  .investor-associative-print-flow :is(th, td):nth-child(4),
+  .investor-associative-print-flow :is(th, td):nth-child(5) {
+    width: 31mm;
+    text-align: right;
+  }
+
+  .investor-associative-print-flow tbody th,
+  .investor-associative-print-flow tbody td:last-child {
+    color: #c51f32 !important;
+    font-weight: 700;
+  }
+
+  .investor-associative-print-flow tfoot th,
+  .investor-associative-print-flow tfoot td {
+    color: #fff !important;
+    font-weight: 700;
+    background: #252e3a !important;
+  }
+
+  .investor-associative-print-flow > p {
+    margin: 0;
+    color: #66717f !important;
+    font-size: 6.5pt;
+  }
+
+  .investor-associative-print-sheet footer {
+    display: grid;
+    gap: 2mm;
+    margin-top: auto;
+    color: #9a3944 !important;
+    font-size: 6pt;
+  }
+
+  .investor-associative-print-sheet footer > p {
+    margin: 0;
+  }
+
+  .investor-associative-print-sheet footer > div {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 2mm;
+    border-top: 0.2mm solid #d5dae0;
+    color: #66717f !important;
+  }
+
+  .investor-associative-print-sheet footer strong {
+    color: #252e3a !important;
   }
 }

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-19 - Impressão A4 do Associativo
+
+- Separa as ações `Imprimir linear` e `Imprimir escalonado` no resultado do
+  Associativo.
+- Gera uma folha A4 limpa com dados reais da proposta, valores sem e com
+  correção, sinais e anuais em linhas independentes.
+- Usa os quatro blocos oficiais de 40%, 30%, 20% e 10% no fluxo escalonado,
+  sem alterar o motor financeiro.
+
 ## 2026-10-19 - Coluna de vaga no estoque Associativo
 
 - A quantidade de vagas passa a ocupar uma coluna própria, com cabeçalho `Vaga`
