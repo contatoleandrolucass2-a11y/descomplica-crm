@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-18: Calendário e plano de ação da Previsão
+
+A página Previsão ganhou calendário mensal com destaque e contagem exclusiva de
+quinta-feira a domingo como dias validados. A tabela mantém os sete
+empreendimentos, passa a usar rolagem horizontal, reduz a coluna de corretor e
+limita os títulos dos empreendimentos a duas linhas. A coluna fixa Plano de ação
+fica depois do Total, aceita texto livre e acompanha o salvamento compartilhado.
+Breadcrumb, subtítulo e instruções visíveis foram removidos conforme solicitado.
+
+Validação local: lint, typecheck e build aprovados; Vitest aprovou 3.873 testes
+com 99 skips; navegador aprovou nove cenários em desktop/celular, três temas e
+axe; API aprovou 47 testes. A etapa operacional do `pnpm test` teve 1.593
+aprovações, 19 skips e três falhas já conhecidas de semântica POSIX no Windows.
+`test:release` encontrou 11 falhas na fixture Meta Ads já presente em main, todas
+por arquivo sintético ausente; o arquivo isolado reproduz a mesma limitação. A CI
+Linux deve distinguir portabilidade de regressão. pgTAP na restauração isolada e
+CI ainda são obrigatórios antes do merge. A migration
+`20261019004204_forecast_action_plan.sql` está preparada e não foi aplicada
+remotamente; exige autorização específica depois da CI completa.
+
 ## 2026-10-18: Publicação da Previsão por empreendimento
 
 PR256 integrado após CI completa. A versão atual de main, eeb42a45, preserva

@@ -1048,3 +1048,28 @@ Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f17
 - Coordenador `release:production` publicou em `2026-10-18T23:29:19.335Z` (20:29:19 America/Sao_Paulo), deployment `4ecf1a6f-18a9-4ab7-9dfc-31bb39ab3f5b`, sem pendência. Baseline: deployment `d2fc040b-ad09-4442-8fd3-8b1317463b65`, SHA d919751a, publicação real `2026-10-18T06:35:30.334Z`. Consulta ao vivo, CI/main, travas e CAS foram executados pelo coordenador no minuto da troca.
 - Pós-publicação às 23:29:27Z: health público HTTP200/ok/eeb42a45; container healthy na imagem comprovada; acesso anônimo à página307 e API401. Testes funcionais autenticados usam fixtures sintéticas locais/CI; não foi feita gravação de teste em produção. Capturas desktop/celular são sintéticas, não evidência de uma sessão autenticada produtiva.
 - Fontes: PR256, CI39138652862/39142373485/39165128618, MCP Supabase, coordenador e https://crm.descomplicapro.com.br/api/health. Implementado, CI aprovada, integrado e publicado são estados confirmados separadamente. Alteração concorrente PR257 preservada no candidato atual.
+
+## 2026-10-18: Calendário e Plano de ação da Previsão
+
+- Branch `codex/previsao-calendario-plano`, derivada de main `8eb023c1`. Abertura
+  observacional às 00:39Z: health HTTP 200/ok em `eeb42a45`; GitHub indicava a CI
+  39180111973 de main em andamento. Fontes: origin, GitHub via `gh` e health
+  público. A divergência era externa à página e foi preservada pelo merge.
+- Interface: botão Calendário e diálogo mensal destacam e contam exclusivamente
+  quinta a domingo como dias validados. Outubro de 2026 tem 19; no dia 18 são 12
+  passados e 7 restantes. Breadcrumb, subtítulo e instruções visíveis foram
+  removidos. A tabela usa rolagem horizontal, corretor compacto, títulos em duas
+  linhas e Plano de ação textual após Total.
+- Persistência: documentos anteriores são adaptados apenas em memória com
+  `action_plan` vazio; salvar persiste a nova coluna. A migration
+  `20261019004204_forecast_action_plan.sql` substitui somente a RPC de gravação,
+  sem reescrita de dados ou mudança de ACL/RLS. Ela ainda não foi aplicada e a
+  autorização anterior não a abrange. Imagem nova e RPC nova devem ser promovidas
+  juntas; a recuperação restaura primeiro a RPC anterior.
+- Evidência local: lint, typecheck e build aprovados; Vitest 3.873 aprovados e 99 skips;
+  API 47/47; navegador 9/9 em 1440/390/320, três temas e axe, com capturas
+  sintéticas inspecionadas. A etapa Node teve 1.593 aprovações, 19 skips e três
+  falhas POSIX conhecidas no Windows. `test:release` reproduziu 11 falhas da
+  fixture Meta Ads por arquivo sintético ausente, inclusive isoladamente; nenhum
+  arquivo dessa área foi alterado nesta entrega e nenhuma asserção foi relaxada.
+  pgTAP da restauração isolada e CI Linux permanecem pendentes antes do merge.

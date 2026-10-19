@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  FORECAST_ACTION_PLAN_ID,
   addForecastGroup,
   createForecastDocument,
   forecastCellToCents,
@@ -19,7 +20,8 @@ describe("grouped forecast grid", () => {
     const document = createForecastDocument();
     expect(getForecastGroups(document)).toHaveLength(7);
     expect(document.rows).toHaveLength(2);
-    expect(document.rows.every((row) => Object.keys(row.cells).length === 15)).toBe(true);
+    expect(document.columns.at(-1)).toEqual({ id: "action_plan", label: "Plano de ação" });
+    expect(document.rows.every((row) => Object.keys(row.cells).length === 16)).toBe(true);
     expect(forecastSaveSchema.safeParse({ ...document, expected_revision: 0 }).success).toBe(true);
     expect(normalizeForecastDocument(document)).toBe(document);
   });
@@ -29,12 +31,13 @@ describe("grouped forecast grid", () => {
     document.rows[0]!.cells[group.forecastId] = "12.34";
     document.rows[0]!.cells[group.actualId] = "56";
     document = addForecastGroup(document);
-    expect(document.rows.every((row) => Object.keys(row.cells).length === 17)).toBe(true);
+    expect(document.rows.every((row) => Object.keys(row.cells).length === 18)).toBe(true);
     document = renameForecastGroup(document, group.id, "Residencial");
     document = moveForecastGroup(document, group.id, 7);
     expect(getForecastGroups(document)[7]!.label).toBe("Residencial");
     expect(document.rows[0]!.cells[group.forecastId]).toBe("12.34");
     expect(document.rows[0]!.cells[group.actualId]).toBe("56");
+    expect(document.columns.at(-1)?.id).toBe(FORECAST_ACTION_PLAN_ID);
     document = removeForecastGroup(document, group.id);
     expect(document.rows[0]!.cells[group.forecastId]).toBeUndefined();
     expect(document.rows[0]!.cells[group.actualId]).toBeUndefined();
@@ -93,10 +96,13 @@ describe("grouped forecast grid", () => {
     document.rows[0]!.cells[group.forecastId] = "0.1";
     document.rows[0]!.cells[group.actualId] = "0,2";
     document.rows[1]!.cells[group.forecastId] = "1.23";
+    document.rows[0]!.cells[FORECAST_ACTION_PLAN_ID] = "Revisar carteira e fazer contato diário.";
     const totals = getForecastTotals(document);
     expect(totals.rows[document.rows[0]!.id]).toBe(30);
     expect(totals.columns[group.forecastId]).toBe(133);
     expect(totals.grandTotal).toBe(153);
+    expect(totals.columns).not.toHaveProperty(FORECAST_ACTION_PLAN_ID);
+    expect(getForecastInvalidCells(document)).toEqual([]);
     expect(formatForecastCents(153)).toBe("1,53");
     document.rows[1]!.cells[group.actualId] = "legacy text";
     expect(getForecastInvalidCells(document)).toEqual([
@@ -114,7 +120,11 @@ describe("grouped forecast grid", () => {
       cells: Object.fromEntries(
         document.columns.map((column) => [
           column.id,
-          column.id === "broker" ? "Pessoa" : "999999999.99",
+          column.id === "broker"
+            ? "Pessoa"
+            : column.id === FORECAST_ACTION_PLAN_ID
+              ? "Plano detalhado"
+              : "999999999.99",
         ]),
       ),
     }));
@@ -141,6 +151,36 @@ describe("grouped forecast grid", () => {
     });
     expect(getForecastInvalidCells(document)).toHaveLength(1);
     expect(legacy.rows[0]!.cells.actual).toBe("texto antigo");
+    expect(document.columns.at(-1)).toEqual({ id: "action_plan", label: "Plano de ação" });
+    expect(document.rows[0]!.cells.action_plan).toBe("");
+  });
+  it("adapts an old grouped document with an empty action plan without changing group IDs", () => {
+    const current = createForecastDocument();
+    const oldGrouped = {
+      ...current,
+      columns: current.columns.slice(0, -1),
+      rows: current.rows.map((row) => ({
+        ...row,
+        cells: Object.fromEntries(
+          Object.entries(row.cells).filter(([id]) => id !== FORECAST_ACTION_PLAN_ID),
+        ),
+      })),
+    };
+    const normalized = normalizeForecastDocument(oldGrouped);
+    expect(getForecastGroups(normalized).map((group) => group.id)).toEqual(
+      getForecastGroups(current).map((group) => group.id),
+    );
+    expect(normalized.rows.every((row) => row.cells.action_plan === "")).toBe(true);
+    expect(forecastSaveSchema.safeParse({ ...normalized, expected_revision: 1 }).success).toBe(
+      true,
+    );
+  });
+  it("accepts free action text up to 4000 characters and excludes it from numeric checks", () => {
+    const document = createForecastDocument();
+    document.rows[0]!.cells.action_plan = "A".repeat(4000);
+    expect(forecastSaveSchema.safeParse({ ...document, expected_revision: 1 }).success).toBe(true);
+    document.rows[0]!.cells.action_plan = "A".repeat(4001);
+    expect(forecastSaveSchema.safeParse({ ...document, expected_revision: 1 }).success).toBe(false);
   });
   it("preserves all legacy cells even when pairing requires an explicit limit correction", () => {
     const columns = Array.from({ length: 30 }, (_, index) => ({
@@ -157,7 +197,7 @@ describe("grouped forecast grid", () => {
         },
       ],
     });
-    expect(document.columns).toHaveLength(31);
+    expect(document.columns).toHaveLength(32);
     expect(Object.values(document.rows[0]!.cells).filter(Boolean)).toHaveLength(30);
     expect(forecastSaveSchema.safeParse({ ...document, expected_revision: 1 }).success).toBe(false);
   });
@@ -166,6 +206,13 @@ describe("grouped forecast grid", () => {
     for (const value of [
       { ...document, columns: [] },
       { ...document, columns: [document.columns[0]] },
+      { ...document, columns: document.columns.slice(0, -1) },
+      {
+        ...document,
+        columns: document.columns.map((column) =>
+          column.id === FORECAST_ACTION_PLAN_ID ? { ...column, label: "Outro" } : column,
+        ),
+      },
       { ...document, rows: [{ id: "r", cells: {} }] },
       {
         ...document,

@@ -11,8 +11,10 @@ cada um com Previsão e Realizado. Inserir coluna acrescenta um empreendimento
 com os dois campos em todas as linhas existentes. Os títulos dos empreendimentos
 são editáveis; a movimentação e a exclusão abrangem o par inteiro, preservando a
 associação dos valores com cada corretor. Nome do corretor e Total permanecem
-nas extremidades. Os nomes iniciais Corretor 1 e Corretor 2 são rascunhos genéricos,
-não cadastros ou dados importados de clientes.
+nas extremidades dos valores. A coluna fixa Plano de ação vem depois do Total,
+aceita até 4.000 caracteres de texto livre por corretor e não participa dos
+cálculos. Os nomes iniciais Corretor 1 e Corretor 2 são rascunhos genéricos, não
+cadastros ou dados importados de clientes.
 
 Previsão e Realizado aceitam valores não negativos, com até duas casas decimais
 e nove dígitos inteiros, usando vírgula ou ponto decimal. Campo vazio contribui
@@ -32,8 +34,8 @@ gera conflito; o rascunho permanece e não sobrescreve a versão de outro usuár
 Recarregar com alterações exige confirmação. Falha de rede não indica sucesso.
 O armazenamento compartilhado não usa localStorage.
 
-Limites: 14 empreendimentos (29 colunas armazenadas, incluindo o corretor), 200
-linhas, 120 caracteres por título, 4.000 por nome de corretor e corpo limitado a
+Limites: 14 empreendimentos (30 colunas armazenadas, incluindo corretor e Plano
+de ação), 200 linhas, 120 caracteres por título, 4.000 por célula e corpo limitado a
 2.000.000 bytes. Os identificadores estáveis preservam as células ao mover ou
 excluir um empreendimento intermediário. Documentos legados com mais pares que
 o limite são preservados para ajuste explícito antes de salvar. A tela apresenta carga, vazio, erro recuperável e leitura
@@ -47,6 +49,22 @@ para a migration e recuperação da função anterior. O arquivo local
 `20261018232900 / crm_forecast_groups`. Publicação em eeb42a45 confirmada pelo
 coordenador às23:29:19Z. Evidências, hashes e limites em ATUALIZACOES.md.
 Esta aplicação concluída não autoriza migrations futuras.
+
+A evolução Calendário e Plano de ação prepara a migration
+`20261019004204_forecast_action_plan.sql`. Ela substitui somente a validação da
+RPC de salvamento: exige Plano de ação como última coluna, preserva os pares
+Previsão/Realizado como números e permite texto livre apenas no corretor e no
+Plano de ação. Não reescreve documentos existentes, não muda ACL, RLS, owner,
+assinatura, autorização, auditoria ou controle de revisão. Documentos agrupados
+anteriores recebem a coluna vazia apenas em memória e só são persistidos por um
+salvamento explícito. A migration não foi aplicada remotamente e requer nova
+autorização específica após CI e restauração isolada aprovadas.
+
+A versão anterior da RPC rejeita o documento novo com número par de colunas; a
+RPC nova rejeita salvamentos sem Plano de ação. Portanto, a aplicação remota deve
+ocorrer imediatamente antes da promoção da imagem validada. Em recuperação,
+restaurar primeiro a definição anterior da RPC e só então reativar a imagem
+anterior. Nunca apagar a tabela nem reescrever previsões para recuperar.
 
 A migration `20261018142142_crm_forecast_groups.sql` substitui apenas a validação
 da RPC de salvamento para exigir pares completos e números também no banco.
@@ -92,8 +110,16 @@ com `FORECAST_SETTINGS_BROWSER=1`; nunca inserir fixtures no banco de produção
 
 A Previsão reutiliza o canvas e os tokens do dashboard /app nos temas Claro,
 Médio e Escuro. Cabeçalho, separadores, superfícies e botão Salvar seguem a mesma
-linguagem. A tabela distribui os empreendimentos na largura disponível no desktop.
-No celular, a apresentação adapta os grupos sem exigir rolagem horizontal.
+linguagem. A tabela usa rolagem horizontal própria no desktop e no celular para
+preservar os pares em linha única. A coluna do corretor é compacta e os nomes dos
+empreendimentos ocupam no máximo duas linhas. Plano de ação ajusta sua largura ao
+texto dentro dos limites da tabela.
 Os campos têm alinhamento vertical centralizado; o nome do corretor fica
 alinhado à direita, mantendo a ordem natural das letras em português. Edição,
 confirmação de exclusão, rascunho e controle de revisão permanecem iguais.
+
+O botão Calendário abre um diálogo mensal acessível. Somente quinta-feira,
+sexta-feira, sábado e domingo recebem destaque e entram em Total, Passados e
+Restantes; a interface os chama sempre de dias validados. A seleção de mês e ano
+recalcula os valores sem gravar estado no CRM. Escape, botão Fechar ou clique no
+fundo encerram o diálogo e devolvem o foco ao botão Calendário.
