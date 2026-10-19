@@ -15,7 +15,7 @@ import {
   distributeFunnelWeeks,
   projectGoalVolumes,
 } from "@/lib/crm/goals/planning";
-import { prepareFunnelGoalsDraftAction } from "../actions";
+import { prepareFunnelGoalsDraftAction, saveFunnelGoalsAction } from "../actions";
 import { ConfigurationDraftForm } from "./ConfigurationDraftForm";
 import styles from "./GoalPlanning.module.css";
 
@@ -61,6 +61,7 @@ function PanelHeader({
 export function GoalPlanning({
   profile,
   initialValues,
+  effectiveMonth,
   canManageDraft,
   revision,
   today,
@@ -68,10 +69,11 @@ export function GoalPlanning({
 }: {
   profile: GoalProfileKey;
   initialValues: FunnelGoals | null;
+  effectiveMonth: string;
   canManageDraft: boolean;
   revision: number;
   today: string;
-  notification?: "saved" | "validation" | "save" | undefined;
+  notification?: "saved" | "active-saved" | "validation" | "save" | "stale" | undefined;
 }) {
   const [values, setValues] = useState<Partial<Record<GoalInputKey, number | null>>>(() =>
     Object.fromEntries(
@@ -594,13 +596,24 @@ export function GoalPlanning({
               </div>
             </div>
             {canManageDraft ? (
-              <a
-                className="goal-save-button"
-                href="#meta-review"
-                title="Revisar metas e salvar um rascunho inativo"
-              >
-                <span aria-hidden="true">✓</span>Aplicar metas
-              </a>
+              profile === "dv" ? (
+                <button
+                  className="goal-save-button"
+                  type="submit"
+                  form="goal-configuration-form"
+                  title="Salvar as alterações da meta"
+                >
+                  <span aria-hidden="true">✓</span>Salvar alterações
+                </button>
+              ) : (
+                <a
+                  className="goal-save-button"
+                  href="#meta-review"
+                  title="Revisar metas e salvar um rascunho inativo"
+                >
+                  <span aria-hidden="true">✓</span>Aplicar metas
+                </a>
+              )
             ) : null}
           </div>
         </div>
@@ -609,7 +622,11 @@ export function GoalPlanning({
         <p role="status">
           {notification === "saved"
             ? "Rascunho inativo salvo."
-            : "Não foi possível concluir. Revise os campos e tente novamente."}
+            : notification === "active-saved"
+              ? "Alterações salvas."
+              : notification === "stale"
+                ? "O mês da configuração mudou. Recarregue a página antes de salvar."
+                : "Não foi possível concluir. Revise os campos e tente novamente."}
         </p>
       ) : null}
       {!initialValues ? (
@@ -618,14 +635,25 @@ export function GoalPlanning({
           foi aplicado.
         </p>
       ) : null}
-      <ConfigurationDraftForm
-        action={prepareFunnelGoalsDraftAction.bind(null, profile)}
-        enabled={canManageDraft}
-        saveLabel="Salvar rascunho de metas"
-        reviewId="meta-review"
-      >
-        {body}
-      </ConfigurationDraftForm>
+      {profile === "dv" && canManageDraft ? (
+        <form
+          id="goal-configuration-form"
+          action={saveFunnelGoalsAction.bind(null, profile)}
+          className="grid gap-3"
+        >
+          <input type="hidden" name="effectiveMonth" value={effectiveMonth} />
+          {body}
+        </form>
+      ) : (
+        <ConfigurationDraftForm
+          action={prepareFunnelGoalsDraftAction.bind(null, profile)}
+          enabled={canManageDraft}
+          saveLabel="Salvar rascunho de metas"
+          reviewId="meta-review"
+        >
+          {body}
+        </ConfigurationDraftForm>
+      )}
     </div>
   );
 }

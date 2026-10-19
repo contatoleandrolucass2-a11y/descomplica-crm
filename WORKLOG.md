@@ -1,5 +1,43 @@
 # Worklog
 
+## 2026-10-18: edição e salvamento em Gestão > Meta
+
+O formulário da rota `/app/configuracoes/metas` estava condicionado a
+`crm.commercial_policy.manage`, embora o acesso à própria página use
+`crm.settings.manage`. Administradores autorizados entravam na tela, mas viam
+os campos desabilitados e nenhum botão. A página foi realinhada à permissão de
+configuração já validada pelo servidor e pela RPC do banco.
+
+O cabeçalho agora contém **Salvar alterações**, associado ao formulário. A ação
+valida todos os campos, aceita somente o perfil `dv`, exige
+`crm.settings.manage` e chama `upsert_crm_funnel_goals`, que repete a permissão,
+normaliza o mês, grava os valores e registra auditoria. Parcerias e pontos não
+foram alterados. Passaram 17 testes focados, 3.864 testes Vitest (101 skips),
+typecheck, lint, build de 57 rotas e preview Chromium com 30 telas; a captura
+vazia confirma campos habilitados, edição da meta mensal e o botão visível. Na
+etapa operacional, 1.593 testes passaram e 19 foram ignorados; três verificações
+POSIX de Meta Ads falharam no Windows por permissões/caminhos de arquivos. Elas
+não exercitam esta alteração e permanecem condicionadas à CI Linux, sem bypass.
+A primeira CI Linux aprovou `validate` e `isolated-restore`, mas o E2E ainda
+exigia o antigo estado somente leitura do Administrador na própria página Meta.
+A asserção foi alinhada ao requisito atual: status editável, campo de venda
+habilitado e botão **Salvar alterações** visível, mantendo ausentes as ações de
+rascunho. Nenhuma outra rota foi alterada.
+
+A segunda CI, `39193353904`, aprovou `validate`, `isolated-restore` e todo o E2E
+autenticado. A matriz visual encontrou somente 11 referências da rota Meta com
+altura menor, efeito esperado da remoção do painel de rascunho. As capturas
+desktop e móvel foram revisadas e confirmam campos editáveis, botão visível e
+ausência de corte ou sobreposição. Foram promovidas exclusivamente essas 11
+imagens de Meta; uma nova CI integral permanece obrigatória.
+
+A revisão do PR encontrou dois casos na própria Meta antes da integração. A
+confirmação da gravação ativa agora informa **Alterações salvas**, sem chamá-la
+de rascunho. O formulário também envia o mês que foi carregado e rejeita a
+gravação quando a página atravessa uma virada de mês, pedindo recarga em vez de
+aplicar valores antigos ao período novo. A cobertura focada passou a 18 testes;
+typecheck, lint, build de 57 rotas e as 30 telas do preview passaram novamente.
+
 ## 2026-10-18: Calendário e plano de ação da Previsão
 
 A página Previsão ganhou calendário mensal com destaque e contagem exclusiva de

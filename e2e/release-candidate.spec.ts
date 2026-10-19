@@ -1488,10 +1488,18 @@ for (const role of expectedRoles) {
       if (role === "admin") {
         const settingsResponse = await page.goto("/app/configuracoes/metas");
         expect(settingsResponse?.status()).toBe(200);
-        await expect(page.getByText("Rascunho indisponível para este perfil")).toBeVisible();
+        await expect(
+          page.getByText("Configuração atual: editável · Salve para aplicar as alterações"),
+        ).toBeVisible();
+        await expect(
+          page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
+        ).toBeEnabled();
+        await expect(
+          page.getByRole("button", { name: "Salvar alterações", exact: true }),
+        ).toBeVisible();
         await expect(page.getByRole("button", { name: "Validar sem aplicar" })).toHaveCount(0);
         await expect(page.getByRole("button", { name: /Salvar rascunho/ })).toHaveCount(0);
-        reportProgress("settings-read-only");
+        reportProgress("settings-editable");
       }
 
       if (allowedSurface && deniedSurface) await assertRenderedSurface(deniedSurface);
