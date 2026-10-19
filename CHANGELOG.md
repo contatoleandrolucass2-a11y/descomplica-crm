@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-19 - Coluna de vaga no estoque Associativo
+
+- A quantidade de vagas passa a ocupar uma coluna própria, com cabeçalho `Vaga`
+  e divisórias alinhadas às demais colunas da tabela.
+- A descrição do imóvel selecionado mantém o texto completo `VAGA: N`; zero e
+  informação ausente continuam distintos.
+- Os demais simuladores e as regras de estoque, seleção e cálculo permanecem
+  inalterados.
+
 ## 2026-10-19 - Associativo com documentacao automatica
 
 - Documentacao estimada automaticamente pelo perfil e pela unidade, sem formulario fiscal obrigatorio; ITBI e os dois atos de registro mantem as tabelas vigentes e o aviso de estimativa.

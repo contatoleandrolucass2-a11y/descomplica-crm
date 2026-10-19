@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: coluna de vaga no estoque Associativo
+
+- Status: implementação e validação local concluídas; CI e publicação pendentes.
+- Fonte: captura e pedido do usuário, tabela real em `InvestorCalculator.tsx` e
+  estilos em `investor-archive.css`.
+- A vaga precisa ser uma célula própria entre Produto e Metragem. Usar apenas um
+  texto dentro de Produto não cria semântica de coluna nem a divisória visual.
+- O cabeçalho `Vaga` e a célula correspondente existem somente no Associativo;
+  estados vazios e espaçadores usam oito colunas nesse modo e sete nos demais.
+- A descrição da unidade mantém `VAGA: N`. Zero continua sendo valor conhecido;
+  ausência ou valor inválido aparece como `Não informada` e nunca vira zero.
+- Teste focal: 14 casos aprovados. A jornada sintética validou 18 seleções, as
+  divisórias no desktop e o guia completo em 1440/375/320 px, nos três temas,
+  sem erros de console, acesso externo ou violações axe. Lint, typecheck, build
+  de 57 rotas e suíte completa passaram; Vitest aprovou 3.952 testes com 102
+  skips condicionais, e os release gates locais aprovaram 723 com 14 skips.
+- Evidência local: `test-results/associative-page-guide/2026-10-19T18-07-25.052Z/result.json`.
+
 ## 2026-10-19: abertura - Associativo automatico
 
 - QA final local aprovado em `test-results/documentation-legal-preview/2026-10-19T14-10-08.769Z/result.json`: 17 etapas de continuidade, guia, movimento, impressao nos tres temas e nenhum erro inesperado. Reload do cenario 503 espera DOM e asserts especificos de resposta/UI. Revisao independente sem achados e equivalencia dos defaults de datas confirmada. CI `39266375201` aprovou validate; restore/navegador em andamento, sujeitos a nova execucao no commit final. Fontes fiscais reconferidas localmente com sucesso. Publicacao ainda pendente.

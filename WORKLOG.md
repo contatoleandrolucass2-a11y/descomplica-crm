@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-19: coluna de vaga no estoque Associativo
+
+Demanda: separar a quantidade de vagas do nome do produto e apresentá-la em uma
+coluna própria, com cabeçalho e divisórias iguais às demais colunas. A alteração
+é exclusiva do Associativo. A descrição da unidade selecionada preserva
+`VAGA: N`, e valores ausentes continuam aparecendo como não informados.
+
+Implementação em `codex/associativo-vaga-coluna`, baseada no SHA
+`f56236b3ada830cde0f17c4c205ef735bba77351`. O teste focal aprovou 14 casos para
+zero, um, múltiplas vagas, ausência, valores inválidos, cabeçalho e isolamento
+dos demais simuladores. A jornada sintética aprovou 18 seleções e toda a matriz
+do guia em 1440, 375 e 320 px, nos três temas, sem erro de console, acesso
+externo ou violação de acessibilidade. Lint, typecheck, build de 57 rotas e a
+suíte completa passaram: 3.952 testes Vitest aprovados, 102 skips condicionais;
+release gates locais com 723 aprovações e 14 skips condicionais. Evidência:
+`test-results/associative-page-guide/2026-10-19T18-07-25.052Z/result.json`.
+
 ## 2026-10-19: Associativo automatico
 
 Demanda: retirar status Salesforce e editor de datas; andamento ausente em 0%;
