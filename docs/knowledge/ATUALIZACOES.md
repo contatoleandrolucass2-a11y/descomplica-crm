@@ -1,5 +1,11 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: Gestão > Meta editável e com salvamento
+
+- Escopo exclusivo: `/app/configuracoes/metas`. O bloqueio visual vinha da divergência entre o gate da página (`crm.settings.manage`) e o gate Master-only do rascunho comercial. O formulário agora segue a permissão da própria página.
+- **Salvar alterações** submete o formulário do cabeçalho. A Server Action valida os 17 campos, restringe a operação ao perfil `dv` e usa a RPC existente `upsert_crm_funnel_goals`; a RPC exige novamente `crm.settings.manage` e registra `crm.funnel_goals.upserted` em auditoria.
+- Canal de Parcerias, Meta por pontos, motores comerciais e demais páginas do CRM não foram alterados. Testes focados: 17 aprovados; Vitest: 3.864 aprovados e 101 skips; etapa operacional: 1.593 aprovados, 19 skips e três falhas POSIX conhecidas de Meta Ads no Windows. Typecheck, lint, build e preview compilado com 30 telas aprovados. A CI Linux completa deve validar os casos dependentes do sistema operacional antes da publicação protegida.
+
 ## 2026-10-18: Autorizacao da migration e retomada da publicacao
 
 - CI39176647709 em5bb0d833 aprovou validate/restore, mas falhou no teste de

@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-18: edição e salvamento em Gestão > Meta
+
+O formulário da rota `/app/configuracoes/metas` estava condicionado a
+`crm.commercial_policy.manage`, embora o acesso à própria página use
+`crm.settings.manage`. Administradores autorizados entravam na tela, mas viam
+os campos desabilitados e nenhum botão. A página foi realinhada à permissão de
+configuração já validada pelo servidor e pela RPC do banco.
+
+O cabeçalho agora contém **Salvar alterações**, associado ao formulário. A ação
+valida todos os campos, aceita somente o perfil `dv`, exige
+`crm.settings.manage` e chama `upsert_crm_funnel_goals`, que repete a permissão,
+normaliza o mês, grava os valores e registra auditoria. Parcerias e pontos não
+foram alterados. Passaram 17 testes focados, 3.864 testes Vitest (101 skips),
+typecheck, lint, build de 57 rotas e preview Chromium com 30 telas; a captura
+vazia confirma campos habilitados, edição da meta mensal e o botão visível. Na
+etapa operacional, 1.593 testes passaram e 19 foram ignorados; três verificações
+POSIX de Meta Ads falharam no Windows por permissões/caminhos de arquivos. Elas
+não exercitam esta alteração e permanecem condicionadas à CI Linux, sem bypass.
+
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
 CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no

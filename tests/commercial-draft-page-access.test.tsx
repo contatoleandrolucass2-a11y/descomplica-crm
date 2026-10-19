@@ -18,8 +18,12 @@ describe.each([GoalsPage, PartnershipGoalsPage, PointGoalsPage])(
   "commercial draft page gate",
   (page) => {
     it.each([
-      { roleKey: "admin", permissions: Object.keys(PERMISSIONS), expected: false },
-      { roleKey: "master", permissions: ["crm.commercial_policy.manage"], expected: true },
+      { roleKey: "admin", permissions: Object.keys(PERMISSIONS), expected: true },
+      {
+        roleKey: "master",
+        permissions: ["crm.commercial_policy.manage", "crm.settings.manage"],
+        expected: true,
+      },
       { roleKey: "master", permissions: [], expected: false },
     ])(
       "keeps the database restriction for $roleKey with expected access $expected",
@@ -33,8 +37,9 @@ describe.each([GoalsPage, PartnershipGoalsPage, PointGoalsPage])(
               ? "/app/configuracoes/metas/parcerias"
               : "/app/configuracoes/metas/pontos",
         );
-        expect(result.props.canManageDraft).toBe(expected);
-        expect(result.props.notification).toBe(expected ? "saved" : undefined);
+        const pageExpected = page === GoalsPage ? expected : roleKey === "master" && expected;
+        expect(result.props.canManageDraft).toBe(pageExpected);
+        expect(result.props.notification).toBe(pageExpected ? "saved" : undefined);
       },
     );
   },

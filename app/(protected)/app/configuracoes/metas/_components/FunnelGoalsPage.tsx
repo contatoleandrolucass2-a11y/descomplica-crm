@@ -16,7 +16,9 @@ export async function FunnelGoalsPage({
 }) {
   const [result, draft] = await Promise.all([
     loadFunnelGoals(profile),
-    canManageDraft ? loadFunnelGoalsDraft(profile) : Promise.resolve(null),
+    profile === "partnerships" && canManageDraft
+      ? loadFunnelGoalsDraft(profile)
+      : Promise.resolve(null),
   ]);
   const values = draft
     ? funnelDraftValuesToGoals(draft.payload, draft.updatedAt)
@@ -36,7 +38,9 @@ export async function FunnelGoalsPage({
     >
       <p className="px-5 py-2 text-xs text-[var(--analytics-muted)]" role="status">
         {canManageDraft
-          ? "Base legada: somente leitura · Rascunho atual: editável"
+          ? profile === "dv"
+            ? "Configuração atual: editável · Salve para aplicar as alterações"
+            : "Base legada: somente leitura · Rascunho atual: editável"
           : "Base legada: somente leitura · Rascunho atual: indisponível"}
       </p>
       <GoalPlanning

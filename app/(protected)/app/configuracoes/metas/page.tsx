@@ -10,10 +10,7 @@ export default async function GoalsPage({
   searchParams: Promise<{ saved?: string; error?: string }>;
 }) {
   const authorization = await enforcePageAccess("/app/configuracoes/metas");
-  // Match the database gate for commercial policy drafts, which remains Master-only.
-  const canManageDraft =
-    authorization.roleKey === "master" &&
-    authorization.permissions.includes("crm.commercial_policy.manage");
+  const canManageDraft = authorization.permissions.includes("crm.settings.manage");
   const query = await searchParams;
   const notification =
     query.saved === "1"

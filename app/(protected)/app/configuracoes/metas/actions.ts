@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
 import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
@@ -57,6 +58,44 @@ function formValues(formData: FormData) {
 
 function failure(status: CommercialDraftActionState["status"], message: string) {
   return { status, message } satisfies CommercialDraftActionState;
+}
+
+export async function saveFunnelGoalsAction(
+  profileInput: string,
+  formData: FormData,
+): Promise<void> {
+  await requirePermission("crm.settings.manage");
+  if (profileInput !== "dv") redirect("/app/configuracoes/metas?error=validation");
+
+  const values = goalsInputSchema.safeParse(formValues(formData));
+  if (!values.success) redirect("/app/configuracoes/metas?error=validation");
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("upsert_crm_funnel_goals", {
+    p_profile_key: profileInput,
+    p_effective_month: getEffectiveMonth(),
+    p_sales: values.data.sales,
+    p_opportunities_rate: values.data.opportunitiesRate,
+    p_appointments_rate: values.data.appointmentsRate,
+    p_visits_rate: values.data.visitsRate,
+    p_folders_rate: values.data.foldersRate,
+    p_approved_folders_rate: values.data.approvedFoldersRate,
+    p_broker_minimum_month_1: values.data.brokerMinimumMonth1,
+    p_broker_minimum_month_2: values.data.brokerMinimumMonth2,
+    p_broker_minimum_month_3: values.data.brokerMinimumMonth3,
+    p_broker_minimum_month_4_plus: values.data.brokerMinimumMonth4Plus,
+    p_broker_weekly_appointments: values.data.brokerWeeklyAppointments,
+    p_broker_weekly_visits: values.data.brokerWeeklyVisits,
+    p_broker_weekly_folders: values.data.brokerWeeklyFolders,
+    p_productive_team_appointments: values.data.productiveTeamAppointments,
+    p_productive_team_visits: values.data.productiveTeamVisits,
+    p_productive_team_folders: values.data.productiveTeamFolders,
+    p_productive_team_sales: values.data.productiveTeamSales,
+  });
+
+  if (error) redirect("/app/configuracoes/metas?error=save");
+  revalidatePath("/app/configuracoes/metas");
+  redirect("/app/configuracoes/metas?saved=1");
 }
 
 export async function prepareFunnelGoalsDraftAction(

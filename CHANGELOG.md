@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-18 - Meta editável com salvamento
+
+- Gestão > Meta usa a permissão própria `crm.settings.manage`, habilita todos os campos de Configuração para quem acessa a página e exibe **Salvar alterações** no cabeçalho.
+- O salvamento valida os números no servidor e usa a RPC auditada `upsert_crm_funnel_goals`; Canal de Parcerias, Meta por pontos e demais páginas permanecem inalterados.
+- Preview compilado aprovou 30 telas, incluindo estado vazio editável e estado explícito somente leitura.
+
 - QA da Previsao aguarda o foco da insercao antes de testar entrada numerica.
 
 - Dashboard: filtros controlados por React com fechamento externo e teclado,

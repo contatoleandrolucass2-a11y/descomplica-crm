@@ -585,7 +585,7 @@ export async function runGoalPlanningPreview() {
           if (virtual.has(id)) return virtual.get(id).source;
           if (id === presenceId) return "export function UserPresenceHeartbeat(){return null;}";
           if (id === actionId)
-            return "export async function prepareFunnelGoalsDraftAction(){return {status:'error',message:'QA sintético: persistência desabilitada.'}}";
+            return "export async function prepareFunnelGoalsDraftAction(){return {status:'error',message:'QA sintético: persistência desabilitada.'}} export async function saveFunnelGoalsAction(){}";
           if (id === entry)
             return `
           import {createRoot} from 'react-dom/client';
@@ -849,7 +849,9 @@ export async function runGoalPlanningPreview() {
       await expect(
         page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
       ).toBeEnabled();
-      await expect(page.getByRole("link", { name: "Aplicar metas", exact: true })).toBeVisible();
+      await expect(
+        page.getByRole("button", { name: "Salvar alterações", exact: true }),
+      ).toBeVisible();
       await expect(page.locator(".goal-premium-stage output")).toHaveText([
         "—",
         "—",
@@ -871,11 +873,13 @@ export async function runGoalPlanningPreview() {
     await expect(
       page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
     ).toBeDisabled();
-    await expect(page.getByRole("link", { name: "Aplicar metas", exact: true })).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Salvar alterações", exact: true })).toHaveCount(
+      0,
+    );
     evidence.unconfiguredEditable =
-      "1440/390: no fabricated values; editable configuration; apply action visible";
+      "1440/390: no fabricated values; editable configuration; save action visible";
     evidence.unconfiguredReadOnly =
-      "explicit read-only fixture: disabled fields; apply action absent";
+      "explicit read-only fixture: disabled fields; save action absent";
     assert.deepEqual(evidence.consoleErrors, [], "Browser errors");
     assert.deepEqual(evidence.unexpectedRequests, [], "Unexpected local requests");
     assert.deepEqual(evidence.blockedExternalRequests, [], "External requests must not be needed");
