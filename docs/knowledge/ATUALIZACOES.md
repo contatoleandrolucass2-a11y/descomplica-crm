@@ -1,5 +1,49 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: Smoke autenticado dos filtros concluido
+
+- Usuario recarregou a aba; controle Chrome restabelecido. Dashboard publicado
+  testado em1440x900 e390x844, Claro/Medio/Escuro:24 ciclos de abertura e clique
+  externo dos quatro filtros. aria-expanded true/false confirmado em cada
+  ciclo; sem travamento e lista de erros de console vazia ao final. Nenhuma
+  selecao alterada. Tema escuro e viewport original restaurados.
+- Celular sem overflow horizontal (scrollWidth375/innerWidth390 nos tres
+  temas); desktop escuro1425/1440. Capturas desktop/celular inspecionadas.
+  Essa rodada resolve a pendencia de comunicacao do smoke anterior, mas nao
+  comprova causa interna do STATUS_BREAKPOINT nem ausencia permanente do erro.
+- Observacao separada: carga23:32 de18/10 exibe periodos curtos indisponiveis
+  apos virada do dia; valores mensais presentes. Nao investigado nem tratado
+  como numeracao conciliada nesta rodada, restrita ao fechamento dos filtros.
+
+## 2026-10-19: Dashboard integrado e preparacao final
+
+- Publicado pelo coordenador em2026-10-19T03:25:24.760Z (00:25 Sao Paulo),
+  deployment408dd275-79ba-4aac-9c88-ea8fd7e4b4ca, SHA59f1ee47, sem pendencia.
+  Imagem localc8b832be corresponde a configuracao CI82497d47 e arquivo
+  8a7a8b878808b470046b91a03d9544c06cf455470c1a1e46c510fb3b02879416;
+  cadeia OCI11 camadas e dois perfis aprovados. Backup/CAS/consulta final
+  executados pelo coordenador, sem bypass. Health03:25:57Z200/ok/SHAexato;
+  /app anonimo307. PR255 merged; CI main39189857296 integralmente aprovada.
+- Pos-publicacao: aba Chrome mudou durante espera; duas tentativas de adquirir
+  a aba atual expiraram na comunicacao do navegador. Isso nao comprova crash
+  do produto. Conferencia autenticada final pendente de reconexao do usuario;
+  testes locais/CI desktop/mobile/tres temas aprovados, nao confundir com essa
+  sessao real. Reavaliar assim que a aba responder. Nenhuma escrita de negocio,
+  coleta nova ou migration foi executada neste chat. Salesforce conciliado
+  anteriormente entre artefato coletado e UI, sem auditoria dos brutos originais.
+
+- PR255 integrado em72f1ed5a apos CI39182984344 aprovada; CI main39185820037
+  tambem aprovada. main avancou para59f1ee47 com ajuste de QA de outra entrega;
+  CI39189857296 aprovada em todos os jobs. Imagem deste SHA comprovada nos dois
+  perfis de runtime; verificacao completa da cadeia OCI ainda em andamento.
+- Reconferencia03:24Z: health200/ok/eeb42a45, deployment4ecf1a6f publicado pela
+  entrega concorrente em2026-10-18T23:29:19.335Z, sem pendencia. Migration de
+  grupos ja consta em20261018232900; corpo remoto confere exatamente com SQL
+  revisado, MD5 da definicao752c15eebf5553125667fbe6295a0744. Owner, ACL e
+  configuracoes preservados. Nao reaplicar nem atribuir essa aplicacao a este
+  chat. Fontes: MCP metadados, comparacao de corpo SQL, coordenador/status,
+  health publico e GitHub Actions. Nenhuma alteracao remota de banco feita aqui.
+
 ## 2026-10-18: Autorizacao da migration e retomada da publicacao
 
 - CI39176647709 em5bb0d833 aprovou validate/restore, mas falhou no teste de

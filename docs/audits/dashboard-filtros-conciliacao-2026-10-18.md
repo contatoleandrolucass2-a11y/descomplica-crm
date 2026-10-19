@@ -107,3 +107,26 @@ comparecimento e vendas data da venda. Pastas aprovadas continuam indisponiveis.
   ao branch porque protecao exige base atualizada. Nova CI do conjunto e
   ativacao coordenada da migration de Previsao pendentes. Health16:11Z ainda
   d919751a; nao confundir aprovacao do PR com publicacao.
+
+## Publicacao em 19/10
+
+- Smoke posterior a recarga do usuario:24 ciclos dos quatro filtros em desktop
+  1440x900 e celular390x844, nos tres temas, abriram e fecharam por clique
+  externo corretamente. Sem crash ou erro de console observado. Selecao,
+  tema escuro e dimensao original preservados/restaurados. Comunicacao com
+  Chrome restabelecida, encerrando a pendencia registrada abaixo.
+
+- PR255 merged em72f1ed5a, apos CI39182984344 aprovada. CI39185820037
+  aprovou a main integrada. Avanco concorrente59f1ee47 exigiu CI39189857296,
+  tambem integralmente aprovada, incluindo tres temas e desktop/mobile.
+- Deployment408dd275-79ba-4aac-9c88-ea8fd7e4b4ca concluido pelo coordenador
+  em2026-10-19T03:25:24.760Z, sem pendencia. SHA59f1ee4799652694e2d2fd92aa12451675b7b9c1.
+  Artefato verificado por checksum/cadeia OCI11 camadas e dois perfis, sem rebuild.
+  Health posterior200/ok/SHAexato, /app anonimo307.
+- Migration de grupos ja havia sido aplicada por entrega concorrente. Corpo
+  remoto coincide com SQL revisado, owner/ACL/configuracoes preservados; sem
+  aplicacao ou escrita de dados de negocio por este chat.
+- Limite: duas tentativas de reconectar a aba Chrome apos deploy expiraram.
+  Smoke autenticado desta publicacao pendente de reconexao; nao converter
+  indisponibilidade da ferramenta em prova de crash ou de ausencia de crash.
+  Causa interna de STATUS_BREAKPOINT permanece nao comprovada.
