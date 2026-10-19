@@ -90,3 +90,11 @@ legibilidade de rótulos, rankings completos, filtros independentes e ausência
 de rolagem horizontal/interna. Capturas em `test-results/appointments-preview`
 não contêm registros reais. Essa matriz isolada não substitui pgTAP nem smoke
 autenticado da implantação.
+
+A matriz autenticada geral usa uma fixture sem fatos analíticos e, portanto,
+valida o estado indisponível da página, o shell e as permissões; não comprova
+os sete gráficos preenchidos. As11 referências dessa página foram revisadas
+do artefato12162399175 da CI39196528870, preservando231 imagens de outras rotas.
+O manifesto mantém a comparação anterior, captura dirty e origem verify/falha;
+a adoção parcial exige uma nova CI integral. O preview rico isolado é evidência
+complementar e a conciliação da carga real v2 permanece obrigatória no rollout.

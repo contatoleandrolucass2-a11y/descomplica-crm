@@ -1,5 +1,7 @@
 # Changelog
 
+- QA de Agendamentos: atualiza somente as11 referências visuais da página após remoção dos blocos legados; preserva as231 demais imagens e registra proveniência e limite da fixture sem dados.
+
 - Leitura de agendamentos: auxiliar SQL marcada STABLE, coerente com a RPC somente de leitura e com o lint do banco.
 
 - QA de agendamentos: prepara overrides sintéticos sem identidade autenticada e inclui a nova RPC na lista auditada, preservando o bloqueio de contas Master.
