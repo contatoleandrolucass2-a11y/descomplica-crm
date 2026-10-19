@@ -117,10 +117,10 @@ describe("Associative learning manual", () => {
       "não tem outro imóvel residencial e não tem financiamento de moradia em andamento",
     );
     expect(firstProperty).toContain("Se tiver qualquer um deles, marque Não");
-    expect(firstProperty).toContain("ITBI (imposto sobre a compra)");
+    expect(firstProperty).toContain("ITBI e registro");
     expect(firstProperty).toContain("não prova, sozinha, que esta é a primeira compra");
     expect(firstProperty).toContain("não concede isenção ou desconto");
-    expect(firstProperty).toContain("dados fiscais confirmados na documentação");
+    expect(firstProperty).toContain("estimativa automática");
     expect(firstProperty).toContain("Banco, prefeitura e cartório precisam conferir");
   });
 
@@ -206,9 +206,9 @@ describe("Associative learning manual", () => {
       "Os descontos de registro dependem do contrato e não são somados entre si",
       "A declaração de isenção e o enquadramento precisam ser conferidos pelo cartório",
       "ITBI + Registro total + Despachante + Seguro Caixa",
-      "ITBI e registro exigem os dados fiscais conferidos",
-      "maior base aplicável entre preço, valor venal do IPTU e base do ITBI",
-      "a garantia considera o financiamento",
+      "estima automaticamente ITBI",
+      "o cartório confere também o valor venal do IPTU e a base do ITBI",
+      "o financiamento para a garantia",
       "o menor valor entre venda e avaliação × cota",
       "80% para MCMV e 90% para SBPE",
       "não são uma promessa de financiamento",

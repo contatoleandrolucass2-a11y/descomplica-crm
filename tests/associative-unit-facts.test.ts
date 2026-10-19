@@ -2,7 +2,12 @@ import { describe, expect, it } from "vitest";
 import { resolveAssociativeConstructionProgress } from "@/lib/archive-investor/associative-unit-facts";
 
 describe("official construction progress for missing inventory facts", () => {
-  it.each(["", " ", "-1", "100.0001", "NaN", "Infinity", "1e2", "15%", "0x10"])(
+  it.each([null, undefined])("defaults missing reported progress %s to zero", (reported) => {
+    for (const officialPercent of [null, undefined, "", " ", "\t\n"]) {
+      expect(resolveAssociativeConstructionProgress(reported, officialPercent)).toBe(0);
+    }
+  });
+  it.each(["-1", "100.0001", "NaN", "Infinity", "1e2", "15%", "0x10"])(
     "does not invent a percentage from %s",
     (value) => expect(resolveAssociativeConstructionProgress(null, value)).toBeNull(),
   );
@@ -16,12 +21,17 @@ describe("official construction progress for missing inventory facts", () => {
     expect(resolveAssociativeConstructionProgress(null, value)).toBe(expected),
   );
   it.each([0, 0.15, 1])("keeps the reported percentage %s authoritative", (value) => {
-    expect(resolveAssociativeConstructionProgress(value, "90")).toBe(value);
+    for (const officialPercent of [null, undefined, "", "90", "invalid"]) {
+      expect(resolveAssociativeConstructionProgress(value, officialPercent)).toBe(value);
+    }
   });
-  it.each([undefined, null, NaN, Infinity, -0.01, 1.01])(
+  it.each([NaN, Infinity, -Infinity, -0.01, 1.01])(
     "rejects invalid source %s without a manual fact",
     (value) => {
-      expect(resolveAssociativeConstructionProgress(value, "")).toBeNull();
+      for (const officialPercent of [null, undefined, "", " ", "invalid"]) {
+        expect(resolveAssociativeConstructionProgress(value, officialPercent)).toBeNull();
+      }
+      expect(resolveAssociativeConstructionProgress(value, "25")).toBe(0.25);
     },
   );
 });

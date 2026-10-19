@@ -14,6 +14,25 @@ tarifas publicas universais. Nenhuma regra do pro-soluto foi alterada.
 
 ## ITBI
 
+### Estimativa automatica no Associativo (19/10/2026)
+
+O Associativo nao exige formulario fiscal. O adapter usa o municipio identificado
+no estoque, os valores da proposta e o perfil para estimar os custos. A referencia
+e a tabela ARISP/2026 com ISS de 2%; pessoa fisica, uso residencial, SFH e preco
+de venda como base sao premissas, nao declaracoes confirmadas. O IPTU ausente
+continua desconhecido. Primeiro imovel e modalidade orientam beneficios estimados,
+sem comprovar historico de aquisicao ou enquadramento contratual.
+
+O resultado inclui `estimate.mode=automatic`, `basesConfirmed=false`, fontes,
+vigencia e premissas. A tela e a impressao identificam o total como estimativa.
+Municipio desconhecido/fora da capital, dados financeiros invalidos e vigencia
+expirada continuam sem valor calculado; nao aplicar regras paulistanas em outras
+cidades. Despachante, seguro, juros e vencimentos documentais foram preservados.
+
+O motor fiscal estrito e a pagina Calcular Documentacao continuam exigindo dados
+explicitamente conferidos. As exigencias de confirmacao descritas abaixo valem
+para esse caminho estrito, nao para a estimativa automatica do Associativo.
+
 - Municipio: Sao Paulo/SP. Outra cidade nao usa esta politica.
 - Pessoa fisica, uso exclusivamente residencial, valor ate R$ 245.527,77 e
   primeira aquisicao **ou** compra no MCMV: isencao de 2026. Nao exigir MCMV e

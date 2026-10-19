@@ -12,7 +12,6 @@ import { ASSOCIATIVE_FIELD_GUIDE_SECTION, ASSOCIATIVE_POLICY_TOPICS, ASSOCIATIVE
 import { ASSOCIATIVE_FAQ_REFERENCE, ASSOCIATIVE_FAQ_SECTIONS, type AssociativeFaqSection } from "./associative-faq-content";
 import { buildDirectTableAmortizationSchedule, buildDirectTablePreKeysSchedule, buildDirectTableProposalPreset, calculateDirectTableFileFlow, DIRECT_TABLE_PROPOSAL_OPTIONS, isDirectTableProposalPresetComplete } from "@/lib/archive-investor/direct-table-file-rules.mjs";
 import { calculateInvestorFlow, distributeSignalBalance } from "@/lib/archive-investor/investor-calculator-rules.mjs";
-import { buildAssociativeSignalDates } from "@/lib/archive-investor/associative-linear-calculator-rules.mjs";
 import { buildInvestorFilterOptions, isInvestorEligibleUnit, matchesInvestorFilters, reconcileInvestorFilters, sortInvestorInventoryBySalePrice } from "@/lib/archive-investor/investor-filter-options.mjs";
 import { loadInvestorInventory } from "@/lib/archive-investor/load-inventory";
 import { filterInventoryBySearch } from "@/lib/archive-investor/inventory-search";
@@ -23,7 +22,6 @@ import { ASSOCIATIVE_APPROVAL_TIERS, calculateAssociativeApproval, findAssociati
 import { buildAssociativeInstallmentMemory, buildAssociativePaymentComparison } from "@/lib/archive-investor/associative-installment-memory.mjs";
 import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
 import { calculateAssociativeDocumentationView, resolveAssociativeAppraisal } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
-import { DocumentationLegalFields, DocumentationLegalNotes, useDocumentationLegalContext } from "./DocumentationLegalFields";
 import { ASSOCIATIVE_COMMISSION_RATES, calculateAssociativeCommercialRemuneration } from "@/lib/archive-investor/associative-commercial-remuneration-rules.mjs";
 import { calculateAssociativeReleaseStatus } from "@/lib/archive-investor/associative-release-rules.mjs";
 import { buildAssociativeReadyProposal, buildAssociativeReadyProposalResponseRows, findAssociativeSeparatedCommissionRankingId } from "@/lib/archive-investor/associative-ready-proposal.mjs";
@@ -1100,12 +1098,6 @@ function AssociativeDocumentationPanel({
   const installmentsDialog = useRef<HTMLDialogElement>(null);
   const financingValue = currencyInputNumber(financing);
   const incomeValue = currencyInputNumber(income);
-  const { legalContext, onLegalChange } = useDocumentationLegalContext({
-    baseDate,
-    salePrice,
-    municipality,
-    reviewKey: JSON.stringify([baseDate, businessUnit, modality, manualModalityPreference, firstProperty, salePrice, reportedAppraisal, appraisalOverride, financingValue, incomeValue]),
-  });
   const documentationView = useMemo(() => calculateAssociativeDocumentationView({
     businessUnit,
     modality,
@@ -1117,8 +1109,8 @@ function AssociativeDocumentationPanel({
     financing: financingValue,
     income: incomeValue,
     baseDate,
-    legalContext,
-  }), [appraisalOverride, baseDate, businessUnit, financingValue, firstProperty, incomeValue, legalContext, manualModalityPreference, modality, reportedAppraisal, salePrice]);
+    municipality,
+  }), [appraisalOverride, baseDate, businessUnit, financingValue, firstProperty, incomeValue, municipality, manualModalityPreference, modality, reportedAppraisal, salePrice]);
   const { appraisalFromReport, appraisalValue, missingItems, result, status } = documentationView;
   const documentationInstallments = useMemo(() => result.ok
     ? buildDocumentationInstallmentSchedule({
@@ -1142,8 +1134,6 @@ function AssociativeDocumentationPanel({
       <div className="investor-associative-documentation-appraisal"><span aria-hidden="true">R$</span><MoneyInput id="investor-documentation-appraisal" label="Avaliação bancária" placeholder="Não informada" describedBy="investor-documentation-appraisal-help" value={appraisalOverride} onChange={onAppraisalOverrideChange} /></div>
       <small id="investor-documentation-appraisal-help">O relatório da unidade não trouxe este valor.</small>
     </section> : null}
-
-    <DocumentationLegalFields value={legalContext} onChange={onLegalChange} />
 
     {result.ok ? <>
       <div className="investor-associative-documentation-summary" data-associative-motion-group="documentation">
@@ -1169,10 +1159,10 @@ function AssociativeDocumentationPanel({
           </dl>
         </section>
       </div>
-      <DocumentationLegalNotes result={result} legalContext={legalContext} />
+      <p className="investor-associative-documentation-estimate" role="note">Estimativa automática com os dados da unidade e do seu perfil. Os valores finais dependem da prefeitura, do banco e do cartório.</p>
     </> : <section className="investor-associative-documentation-empty" role={missingItems.length > 0 ? "status" : "alert"} aria-live="polite">
       <span aria-hidden="true">{missingItems.length > 0 ? "…" : "!"}</span>
-      <div><h4>{missingItems.length > 0 ? "Documentação aguardando dados" : "Revise os dados da documentação"}</h4><p>{missingItems.length > 0 ? "A documentação será calculada após o preenchimento e a confirmação dos dados fiscais." : "Não foi possível calcular a documentação com os dados informados."}</p>
+      <div><h4>{missingItems.length > 0 ? "Documentação aguardando dados" : "Revise os dados da documentação"}</h4><p>{missingItems.length > 0 ? "Conclua o perfil e os valores da proposta acima. O cálculo da documentação é automático." : "Não foi possível calcular a documentação com os dados disponíveis."}</p>
         <ul>{[...new Set([...missingItems, ...result.errors])].map((item) => <li key={item}>{item}</li>)}</ul>
       </div>
     </section>}
@@ -2358,7 +2348,7 @@ export function InvestorLearningManual({ directTable = false, associative = fals
   </section>;
 }
 
-function PropertySummary({ item, label, associative = false, showParking = false, sectionRef }: { item: InventoryItem; label: string; associative?: boolean; showParking?: boolean; sectionRef?: Ref<HTMLElement> }) {
+function PropertySummary({ item, label, associative = false, showParking = false, assumeMissingProgressZero = false, hideSalesforceStatus = false, sectionRef }: { item: InventoryItem; label: string; associative?: boolean; showParking?: boolean; assumeMissingProgressZero?: boolean; hideSalesforceStatus?: boolean; sectionRef?: Ref<HTMLElement> }) {
   return <article ref={sectionRef} tabIndex={sectionRef ? -1 : undefined} className={`investor-selected-unit investor-property-summary${associative ? " is-associative" : ""}${sectionRef ? " investor-guided-scroll-target" : ""}`} aria-label={label} data-tour="property-summary" data-associative-motion-group={associative ? "property" : undefined}>
     <header>
       <div className="investor-unit-identity">
@@ -2379,11 +2369,11 @@ function PropertySummary({ item, label, associative = false, showParking = false
     </header>
     <dl>
       <div tabIndex={0}><dt>Incorporadora</dt><dd>{informationLabel(item.businessUnit)}</dd></div>
-      {item.status ? <div tabIndex={0}><dt>Status no Salesforce</dt><dd>{item.status}</dd></div> : null}
+      {!hideSalesforceStatus && item.status ? <div tabIndex={0}><dt>Status no Salesforce</dt><dd>{item.status}</dd></div> : null}
       <div tabIndex={0}><dt>Planta</dt><dd>{informationLabel(item.plant)}</dd></div>
       <div tabIndex={0}><dt>Metragem</dt><dd>{item.privateArea != null ? `${decimal.format(item.privateArea)} m²` : "Não informada"}</dd></div>
       <div tabIndex={0}><dt>Andar</dt><dd>{floorLabel(item.floor)}</dd></div>
-      <div tabIndex={0}><dt>Andamento da obra</dt><dd>{item.progress != null ? progressLabel(item.progress) : "Não informado"}</dd></div>
+      <div tabIndex={0}><dt>Andamento da obra</dt><dd>{item.progress != null ? progressLabel(item.progress) : assumeMissingProgressZero ? "0%" : "Não informado"}</dd></div>
       <div tabIndex={0}><dt>{associative ? "Data de término da obra" : "Data de Entrega"}</dt><dd>{formatDate(item.completionDate)}</dd></div>
       {associative ? <>
         <div tabIndex={0}><dt>Avaliação bancária</dt><dd>{item.appraisal != null ? money.format(item.appraisal) : "Não informada"}</dd></div>
@@ -2559,12 +2549,8 @@ export function InvestorCalculator({
   const [directIncomeNotice, setDirectIncomeNotice] = useState("");
   const [visibleScenarioCodes, setVisibleScenarioCodes] = useState<string[]>([]);
   const [todayDate] = useState(todayIso);
-  const [associativeCalculationDate, setAssociativeCalculationDate] = useState<string | null>(null);
-  const [associativeEntryDate, setAssociativeEntryDate] = useState<string | null>(null);
-  const baseDate = annualMode ? associativeCalculationDate ?? todayDate : todayDate;
-  const entryDate = annualMode ? associativeEntryDate ?? baseDate : baseDate;
-  const [associativeFirstInterestDate, setAssociativeFirstInterestDate] = useState<string | null>(null);
-  const [associativeFirstMonthlyDate, setAssociativeFirstMonthlyDate] = useState<string | null>(null);
+  const baseDate = todayDate;
+  const entryDate = baseDate;
   const signalInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const intermediaryInputRefs = useRef<Array<HTMLInputElement | null>>([]);
   const signalActionRef = useRef<HTMLButtonElement | null>(null);
@@ -2825,13 +2811,13 @@ export function InvestorCalculator({
     installments,
     annualMode,
     entryDate: annualMode ? entryDate : undefined,
-    firstInterestDate: annualMode ? associativeFirstInterestDate : undefined,
-    firstInstallmentDate: annualMode ? associativeFirstMonthlyDate : undefined,
+    firstInterestDate: annualMode ? null : undefined,
+    firstInstallmentDate: annualMode ? null : undefined,
     income,
     signals,
     intermediaries,
     approvalTierId: associativeApprovalTier,
-  }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, entryDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier, associativeFirstInterestDate, associativeFirstMonthlyDate]);
+  }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, entryDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier]);
   const directResult = result as DirectTableFlowResult;
   const directProposalOptionAvailability = useMemo(() => {
     if (!directTable || !selectedUnitId || result.context.valueReal <= 0) return new Map();
@@ -3649,8 +3635,7 @@ export function InvestorCalculator({
       annualMaximum: currencyInputNumber(income) * 0.5,
       currentEntry,
       currentSignals,
-      maximumSignalCount: associativeFirstMonthlyDate === null ? 3 : buildAssociativeSignalDates(entryDate)
-        .filter((date: string) => date && date < associativeFirstMonthlyDate).length,
+      maximumSignalCount: 3,
       maximumPaymentAdditional: Math.max(0, result.custom.balanceBeforeCorrection - 0.01),
       evaluate: (candidate: { installments: number; annuals: number[]; entry: number; signals: number[] }) => {
         const candidateEntry = candidate.entry.toFixed(2);
@@ -3674,8 +3659,8 @@ export function InvestorCalculator({
           installments: String(candidate.installments),
           annualMode: true,
           entryDate,
-          firstInterestDate: associativeFirstInterestDate,
-          firstInstallmentDate: associativeFirstMonthlyDate,
+          firstInterestDate: null,
+          firstInstallmentDate: null,
           income,
           signals: candidateSignals,
           intermediaries: candidateAnnuals,
@@ -4211,7 +4196,7 @@ export function InvestorCalculator({
 
       </section>
 
-      {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} showParking={annualMode} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
+      {selectedUnit ? <PropertySummary item={selectedUnit} label={directTable ? "Descrição do imóvel usado na proposta" : "Descrição do imóvel usado nos cenários"} associative={directTable || directVisualLayout} showParking={annualMode} assumeMissingProgressZero={annualMode} hideSalesforceStatus={annualMode} sectionRef={directTable ? directJourneySectionRef : undefined} /> : null}
       {selectedUnit && annualMode && (associativeReportedProgress === null || !(selectedUnit.appraisal > 0)) ? <section className="investor-associative-unit-facts" aria-labelledby="investor-unit-facts-title">
         <div><h3 id="investor-unit-facts-title">Dados oficiais da unidade</h3><p>Há dados ausentes no estoque. Valores informados aqui valem somente para esta unidade nesta simulação.</p></div>
         {associativeReportedProgress === null ? <div className="investor-associative-unit-fact">
@@ -4705,21 +4690,6 @@ export function InvestorCalculator({
                     />
                   </ol>
                 </div>
-                <details className="investor-associative-calendar">
-                  <summary>Datas do cálculo</summary>
-                  <div className="investor-associative-calendar-fields">
-                    <label>Data de término da obra<input type="date" aria-label="Data de término da obra" value={completionDate} readOnly /></label>
-                    <label>Data do cálculo<input type="date" aria-label="Data do cálculo" value={baseDate} onChange={(event) => setAssociativeCalculationDate(event.target.value)} /></label>
-                    <label>Data da entrada<input type="date" aria-label="Data da entrada" value={entryDate} onChange={(event) => setAssociativeEntryDate(event.target.value)} /></label>
-                    <label>Data do primeiro juro<input type="date" aria-label="Data do primeiro juro" value={associativeFirstInterestDate ?? result.custom.linear?.firstInterestDate ?? ""} onChange={(event) => setAssociativeFirstInterestDate(event.target.value)} /></label>
-                    <label>Primeira mensal<input type="date" aria-label="Primeira mensal" value={associativeFirstMonthlyDate ?? result.custom.linear?.firstInstallmentDate ?? ""} onChange={(event) => setAssociativeFirstMonthlyDate(event.target.value)} /></label>
-                  </div>
-                  <div className="investor-associative-calendar-status">
-                    <span className="investor-associative-calendar-periods">{result.custom.preInstallments} pré-obra · {result.custom.postInstallments} pós-obra · {result.custom.linear?.monthlyCorrectionMonths ?? 0} meses de correção inicial</span>
-                    <InvestorInfoHint label="datas do cálculo" title="Datas do cálculo" description="O término da obra vem do cadastro da unidade. O mês do término já usa juros pós-obra. Para conferir uma proposta antiga, use as mesmas datas de cálculo, entrada, primeiro juro e primeira mensal. A primeira mensal deve vir depois da entrada e dos sinais, no dia 5, 10 ou 15." />
-                    <button type="button" disabled={associativeCalculationDate === null && associativeEntryDate === null && associativeFirstInterestDate === null && associativeFirstMonthlyDate === null} onClick={() => { setAssociativeCalculationDate(null); setAssociativeEntryDate(null); setAssociativeFirstInterestDate(null); setAssociativeFirstMonthlyDate(null); }}>Restaurar datas automáticas</button>
-                  </div>
-                </details>
                 </div>
                 {associativeRankingUnlocked ? <div className={`investor-associative-results-stack${associativeApprovalDetailsUnlocked ? " is-complete" : " is-ranking-only"}`}>
                   <AssociativeApprovalPanel

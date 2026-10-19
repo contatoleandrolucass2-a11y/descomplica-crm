@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-19 - Associativo com documentacao automatica
+
+- Documentacao estimada automaticamente pelo perfil e pela unidade, sem formulario fiscal obrigatorio; ITBI e os dois atos de registro mantem as tabelas vigentes e o aviso de estimativa.
+- Andamento ausente parte de 0% na simulacao, sem alterar o estoque; valores explicitamente invalidos continuam bloqueados.
+- Remove status Salesforce do resumo e editor de datas. Calendario automatico, cronograma, regras de juros, despachante e seguro preservados.
+- Guia, ajuda e testes acompanham o novo fluxo. A calculadora fiscal independente permanece com confirmacao explicita.
+
 ## 2026-10-19 - Refinamento visual da Previsão
 
 - Publica Agendamentos no SHA integrado `afb4a97d`, com CI completa, artefato
@@ -16,6 +23,9 @@
   recebem realce no hover e a rolagem horizontal continua interna à tabela.
 - O salvamento do Plano de ação permanece condicionado à migration aditiva já
   validada; a RPC anterior é a causa do erro observado antes da publicação.
+
+## 2026-10-19 - Graficos de Agendamentos
+
 - Banco de Agendamentos: aplica as duas migrations aditivas autorizadas, preservando os três snapshots v1 e limitando a nova leitura ao usuário autenticado com permissões internas.
 - Integra as referências visuais de Meta e Agendamentos da `main` atual, mantendo242 imagens e recalculando o manifesto combinado.
 

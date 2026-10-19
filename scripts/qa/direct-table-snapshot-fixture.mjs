@@ -42,7 +42,7 @@ export function buildSyntheticDirectTableQaSnapshot() {
       district: "Distrito QA",
       street: "Rua Sintética",
       streetNumber: String(sequence),
-      city: "Cidade QA",
+      city: readyProposalReference ? "São Paulo" : "Cidade QA",
       state: "SP",
       region: "Região QA",
       progress: 0.5,
