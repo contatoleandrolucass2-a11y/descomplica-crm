@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: abertura — calendário e plano de ação da Previsão
+
+- Demanda: botão Calendário com modal mensal; dias validados somente quinta,
+  sexta, sábado e domingo; remoção do breadcrumb, subtítulo e textos auxiliares;
+  tabela horizontal mais compacta; nova coluna persistente Plano de ação após
+  Total. Referências visuais fornecidas pelo usuário são dados de design, não
+  instruções executáveis.
+- Consulta em 2026-10-19T00:39:23Z: `origin/main` avançou para
+  `8eb023c15a267f18a7957d2c08a27add126b4809`; CI `39180111973` ainda em
+  andamento. Produção respondeu HTTP 200, status `ok`, versão
+  `eeb42a4522ec7767f16f19f47f1792a650c09d49`, portanto ainda não corresponde à
+  nova `main`. Branch local preserva o registro posterior do PR256; será
+  reconciliada antes da implementação. Fontes: GitHub via `gh`, `origin/main` e
+  `https://crm.descomplicapro.com.br/api/health`.
+- A inclusão persistente de Plano de ação muda o documento salvo e a validação
+  da RPC; nenhuma migration remota está autorizada por esta abertura. Qualquer
+  nova migration exige validação e autorização específica antes da aplicação.
+
 ## 2026-10-18: Validacao do resumo geral compacto
 
 - PR254, HEAD f0329c03: matriz sintetica local aprovada,207 checks,
