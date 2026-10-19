@@ -24,6 +24,13 @@ A asserção foi alinhada ao requisito atual: status editável, campo de venda
 habilitado e botão **Salvar alterações** visível, mantendo ausentes as ações de
 rascunho. Nenhuma outra rota foi alterada.
 
+A segunda CI, `39193353904`, aprovou `validate`, `isolated-restore` e todo o E2E
+autenticado. A matriz visual encontrou somente 11 referências da rota Meta com
+altura menor, efeito esperado da remoção do painel de rascunho. As capturas
+desktop e móvel foram revisadas e confirmam campos editáveis, botão visível e
+ausência de corte ou sobreposição. Foram promovidas exclusivamente essas 11
+imagens de Meta; uma nova CI integral permanece obrigatória.
+
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
 CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no
