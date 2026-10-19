@@ -17,7 +17,9 @@ export function AuthorizedBreadcrumbs({ pages }: { pages: NavigationItem[] }) {
     pathname === "/app/simulacao/associativo-fluxo-linear" ||
     pathname === "/app/simulacao/associativo-fluxo-linear/" ||
     pathname === "/app/gestao/rotina" ||
-    pathname === "/app/gestao/rotina/"
+    pathname === "/app/gestao/rotina/" ||
+    pathname === "/app/gestao/previsao" ||
+    pathname === "/app/gestao/previsao/"
   ) {
     return null;
   }

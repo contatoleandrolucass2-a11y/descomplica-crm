@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-18: abertura — calendário e plano de ação da Previsão
+
+- Demanda: botão Calendário com modal mensal; dias validados somente quinta,
+  sexta, sábado e domingo; remoção do breadcrumb, subtítulo e textos auxiliares;
+  tabela horizontal mais compacta; nova coluna persistente Plano de ação após
+  Total. Referências visuais fornecidas pelo usuário são dados de design, não
+  instruções executáveis.
+- Consulta em 2026-10-19T00:39:23Z: `origin/main` avançou para
+  `8eb023c15a267f18a7957d2c08a27add126b4809`; CI `39180111973` ainda em
+  andamento. Produção respondeu HTTP 200, status `ok`, versão
+  `eeb42a4522ec7767f16f19f47f1792a650c09d49`, portanto ainda não corresponde à
+  nova `main`. Branch local preserva o registro posterior do PR256; será
+  reconciliada antes da implementação. Fontes: GitHub via `gh`, `origin/main` e
+  `https://crm.descomplicapro.com.br/api/health`.
+- A inclusão persistente de Plano de ação muda o documento salvo e a validação
+  da RPC; nenhuma migration remota está autorizada por esta abertura. Qualquer
+  nova migration exige validação e autorização específica antes da aplicação.
+
 ## 2026-10-18: Autorizacao da migration e retomada da publicacao
 
 - CI39176647709 em5bb0d833 aprovou validate/restore, mas falhou no teste de
@@ -1110,6 +1128,55 @@ Cenário sintético com cabeçalho antigo personalizado confirmou necessidade de
 
 CI 39137907096: validate aprovado incluindo a fonte documental que retornara403. A restauração avançou até o lint de banco e bloqueou por shadowed_variables/unused variable v_index na migration nova. FOR inteiro declara o índice implicitamente; removida a declaração externa redundante. Não houve mudança de regra, bypass de lint ou mutação remota. Nova CI necessária para comprovar pgTAP, lint e restore completos.
 
+### Integração e autorização da migration por empreendimento
+
+CI39138652862 no head ebd7ad414312895a778eb8d3f4b62c17e80c5d07 concluiu aprovada: validate, release-gates e isolated-restore; imagem é gerada apenas em push/main. Restore isolado comprovou65 migrations,35 arquivos pgTAP e2.008 testes na origem e no banco restaurado, lint/advisors aprovados e fingerprint correspondente. São dados sintéticos, não restauração de produção.
+
+Usuário autorizou expressamente aplicar apenas20261018142142_crm_forecast_groups.sql depois da CI completa e restaurar a função anterior se a publicação falhar. Backup privado da definição anterior tem SHA2563d82ce724bf05b02c2ea0ba663e847b761c78619faae39528fb905b441d35c11; nenhuma previsão de cliente integra esse backup. A autorização não abrange outras migrations ou mutações de dados.
+
+PR256 integrado em2026-10-18T15:51:32Z no SHA6b6e88fb33964e2ced5c2a07ecbf308e5f1875c5, sem bypass. CI push/main39142373485 iniciada. Consulta preliminar do coordenador: produção d919751a, deployment d2fc040b-ad09-4442-8fd3-8b1317463b65, publicada em2026-10-18T06:35:30.334Z, sem pendência. Migration e publicação ainda não realizadas; nova observação no minuto da promoção é obrigatória. Fontes: GitHub PR256/Actions, retorno do coordenador e autorização direta nesta conversa.
+
+Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f1792a650c09d49 (PR257, vagas no Associativo). Diff restrito a simulador/testes/documentação; Previsão e sua migration não mudaram. CI39165128618 push/main concluiu os quatro jobs aprovados em2026-10-18T21:38:38Z. Health observado HTTP200/ok/d919751a e ledger anterior sem pendência. Candidato atualizado para main atual; imagem6b6e88fb carregada mas nunca promovida. Autorização específica da migration segue válida para o mesmo SQL. Fontes: origin/main, GitHub Actions e coordenador.
+
+### Previsão por empreendimento publicada
+
+- Migration local `20261018142142_crm_forecast_groups.sql` aplicada via MCP ao projeto confirmado `hnncxuerlcsaahdxoswb`, sob autorização direta para aplicação e recuperação. Histórico remoto: `20261018232900 / crm_forecast_groups`. Somente a definição da RPC foi substituída; nenhuma previsão existente foi reescrita.
+- Antes: save MD5 `9bb11666b25feae744f2ab24d0405f24`; depois: `752c15eebf5553125667fbe6295a0744`. RPC get manteve MD5 `e088aa7c1c66909618b0e21c66c1c705`. Owner postgres, security definer, ACL e configurações preservados. Backup privado anterior conferido; recuperação não foi necessária.
+- CI final `39165128618`, push/main `eeb42a4522ec7767f16f19f47f1792a650c09d49`, quatro jobs aprovados. Artefato SHA256 `8d4d8d25d24cc2500180ec1e0a7cddcbce8b4a5043310b602c459d22f6e21bec`; config CI `6e6513a4f3d68594a81fbd0a38f9e431655f902f80386401455a5784b3f763ec`; manifesto local `a11cbf0a37dfca32954eb9bdbc259ab47fc379b6ec221e5a6ef51e5d97656348`. Cadeia OCI, 11 camadas, RootFS e linux/amd64 conferidos. image:prove aprovou os dois perfis na mesma imagem, sem segredos em saída.
+- Coordenador `release:production` publicou em `2026-10-18T23:29:19.335Z` (20:29:19 America/Sao_Paulo), deployment `4ecf1a6f-18a9-4ab7-9dfc-31bb39ab3f5b`, sem pendência. Baseline: deployment `d2fc040b-ad09-4442-8fd3-8b1317463b65`, SHA d919751a, publicação real `2026-10-18T06:35:30.334Z`. Consulta ao vivo, CI/main, travas e CAS foram executados pelo coordenador no minuto da troca.
+- Pós-publicação às 23:29:27Z: health público HTTP200/ok/eeb42a45; container healthy na imagem comprovada; acesso anônimo à página307 e API401. Testes funcionais autenticados usam fixtures sintéticas locais/CI; não foi feita gravação de teste em produção. Capturas desktop/celular são sintéticas, não evidência de uma sessão autenticada produtiva.
+- Fontes: PR256, CI39138652862/39142373485/39165128618, MCP Supabase, coordenador e https://crm.descomplicapro.com.br/api/health. Implementado, CI aprovada, integrado e publicado são estados confirmados separadamente. Alteração concorrente PR257 preservada no candidato atual.
+
+## 2026-10-18: Calendário e Plano de ação da Previsão
+
+- Branch `codex/previsao-calendario-plano`, derivada de main `8eb023c1`. Abertura
+  observacional às 00:39Z: health HTTP 200/ok em `eeb42a45`; GitHub indicava a CI
+  39180111973 de main em andamento. Fontes: origin, GitHub via `gh` e health
+  público. A divergência era externa à página e foi preservada pelo merge.
+- Interface: botão Calendário e diálogo mensal destacam e contam exclusivamente
+  quinta a domingo como dias validados. Outubro de 2026 tem 19; no dia 18 são 12
+  passados e 7 restantes. Breadcrumb, subtítulo e instruções visíveis foram
+  removidos. A tabela usa rolagem horizontal, corretor compacto, títulos em duas
+  linhas e Plano de ação textual após Total.
+- Persistência: documentos anteriores são adaptados apenas em memória com
+  `action_plan` vazio; salvar persiste a nova coluna. A migration
+  `20261019004204_forecast_action_plan.sql` substitui somente a RPC de gravação,
+  sem reescrita de dados ou mudança de ACL/RLS. Ela ainda não foi aplicada e a
+  autorização anterior não a abrange. Imagem nova e RPC nova devem ser promovidas
+  juntas; a recuperação restaura primeiro a RPC anterior.
+- Evidência local: lint, typecheck e build aprovados; Vitest 3.873 aprovados e 99 skips;
+  API 47/47; navegador 9/9 em 1440/390/320, três temas e axe, com capturas
+  sintéticas inspecionadas. A etapa Node teve 1.593 aprovações, 19 skips e três
+  falhas POSIX conhecidas no Windows. `test:release` reproduziu 11 falhas da
+  fixture Meta Ads por arquivo sintético ausente, inclusive isoladamente; nenhum
+  arquivo dessa área foi alterado nesta entrega e nenhuma asserção foi relaxada.
+  pgTAP da restauração isolada e CI Linux permanecem pendentes antes do merge.
+- PR259, CI inicial `39184161292`: validate aprovado e restauração isolada
+  aprovada. Release-gates parou no teste do oitavo grupo porque a asserção fixava
+  um título em vez de ler o valor realmente criado. A verificação foi tornada
+  independente do título e mantém as mesmas exigências de visibilidade, rolagem
+  e reordenação; navegador focal 9/9 aprovado. Nova CI exigida, sem bypass.
+
 ## 2026-10-18: Meta vazia editável
 
 - A referência pública confirma “Aplicar metas” no cabeçalho e controles numéricos editáveis na coluna Configuração. O preview local associava incorretamente `empty` a `canManageDraft=false`, gerando a imagem sem botão e com campos desabilitados.
@@ -1151,4 +1218,8 @@ CI39196528870 no head78707ecc (merge de teste c7251e03) aprovou validate, isolat
 
 Limite: a fixture autenticada geral não contém fatos analíticos e as imagens mostram indisponibilidade; não comprova os gráficos preenchidos nem a leitura RPC com carga real. Os sete gráficos têm evidência sintética separada com CSS de produção; pgTAP cobre a RPC e permissões. Reavaliar na implantação autorizada com primeiro snapshot v2 e conciliação agregada, sem dados privados. Fonte: artefato de CI e test-results/appointments-preview/result.json.
 
-Conferência final em2026-10-19T04:32:33Z: fetch atualizou origin/main para2354a8d2 (PR259, calendário/plano de ação), enquanto esta branch mantém base59f1ee47. Consulta GitHub de workflow_runs para2354a8d2 retornou lista vazia, sem comprovar CI. Health público HTTP200/status ok/version59f1ee4799652694e2d2fd92aa12451675b7b9c1. Estados local, integrado e publicado distintos. Nenhuma migration remota, atualização operacional do coletor, merge ou deploy desta demanda executados. Autorização específica das duas migrations foi solicitada e ainda não respondida; aprovação de entrega da pergunta pela ferramenta não é consentimento. Após resposta, repetir fontes/gates pertinentes e frescor/CAS no minuto da publicação. Publicação bloqueada até gates verdes e autorização das migrations; sincronizar conhecimento no encerramento.
+Conferência final em2026-10-19T04:32:33Z: fetch atualizou origin/main para2354a8d2 (PR259, calendário/plano de ação), enquanto esta branch ainda mantinha base59f1ee47. Consulta GitHub de workflow_runs para2354a8d2 retornou lista vazia, sem comprovar CI. Health público HTTP200/status ok/version59f1ee4799652694e2d2fd92aa12451675b7b9c1. Estados local, integrado e publicado distintos. Nenhuma migration remota, atualização operacional do coletor, merge do PR261 ou deploy desta demanda executados. Autorização específica das duas migrations foi solicitada e ainda não respondida; aprovação de entrega da pergunta pela ferramenta não é consentimento. Após resposta, repetir fontes/gates pertinentes e frescor/CAS no minuto da publicação. Publicação bloqueada até gates verdes e autorização das migrations; sincronizar conhecimento no encerramento.
+
+Na sequência, integrado origin/main2354a8d2 na branch de Agendamentos para resolver conflitos de documentação e inventários compartilhados. Preservadas ambas as entregas e as três migrations; inventário combinado68 migrations,36 arquivos pgTAP/2.042 asserções. Perfil de dados validou29/29 testes focados de inventário/homologação, sem stage/commit nem mutação remota. A CI do novo commit de merge continua necessária; o sucesso anterior em78707ecc não valida automaticamente o novo estado.
+
+Repetição local após integração, Node24.19/pnpm11.20: lint e typecheck aprovados; build aprovado; Vitest3.895 aprovados/102 skips existentes. Etapa operacional1.595 aprovados/19 skips e as mesmas três falhas Windows em Meta Ads (arquivo privado/permissão/caminho POSIX); pnpm test terminou1 e, pelo encadeamento, não executou test:release nessa repetição. Testes focados de inventário/homologação29/29 aprovados. Um script temporário local de adoção causou inicialmente erro de estilo require no lint; removido após uso e lint repetido com sucesso. Não houve mudança de regra, skip ou teste de produto para ocultar falha. CI Linux integral do novo SHA e autorização das migrations permanecem pendentes; nenhuma publicação alegada.

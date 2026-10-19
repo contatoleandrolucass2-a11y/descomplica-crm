@@ -77,8 +77,8 @@ select is((select count(*) from public.crm_forecasts), 0::bigint, 'no invented s
 
 create function pg_temp.forecast_doc(cell text default 'Synthetic', n integer default 1)
 returns jsonb language sql immutable as $$
-  select jsonb_build_object('title', 'Equipe', 'columns', '[{"id":"broker","label":"Nome do corretor"},{"id":"f_group1","label":"Empreendimento 1"},{"id":"a_group1","label":"Empreendimento 1"}]'::jsonb,
-    'rows', coalesce(jsonb_agg(jsonb_build_object('id', 'r'||i, 'cells', jsonb_build_object('broker',cell,'f_group1','','a_group1',''))), '[]'::jsonb))
+  select jsonb_build_object('title', 'Equipe', 'columns', '[{"id":"broker","label":"Nome do corretor"},{"id":"f_group1","label":"Empreendimento 1"},{"id":"a_group1","label":"Empreendimento 1"},{"id":"action_plan","label":"Plano de ação"}]'::jsonb,
+    'rows', coalesce(jsonb_agg(jsonb_build_object('id', 'r'||i, 'cells', jsonb_build_object('broker',cell,'f_group1','','a_group1','','action_plan',''))), '[]'::jsonb))
   from generate_series(1,n) i;
 $$;
 grant execute on function pg_temp.forecast_doc(text,integer) to authenticated;

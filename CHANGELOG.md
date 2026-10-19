@@ -1,5 +1,7 @@
 # Changelog
 
+- Integra Agendamentos à main atual, preservando a entrega de calendário/plano de ação e atualizando inventário combinado de migrations e testes SQL.
+
 - QA de Agendamentos: atualiza somente as11 referências visuais da página após remoção dos blocos legados; preserva as231 demais imagens e registra proveniência e limite da fixture sem dados.
 
 - Leitura de agendamentos: auxiliar SQL marcada STABLE, coerente com a RPC somente de leitura e com o lint do banco.
@@ -9,6 +11,15 @@
 - Agendamentos: sete gráficos com evolução diária, semanas do mês, meses por ano independente e rankings completos de gerente, responsável, loja e empreendimento. Grade responsiva de três colunas e remoção dos blocos legados indicados.
 - Salesforce: separa PDV de empreendimento no contrato analítico v2, preserva snapshots v1 e valida a coluna vigente de empreendimento em cada coleta. Nova leitura restrita à etapa e às visões autorizadas, sem acesso direto às tabelas.
 
+- Previsão: adiciona calendário de dias validados de quinta a domingo e coluna
+  textual Plano de ação depois do Total; compacta cabeçalhos e permite rolagem
+  horizontal da tabela em desktop e celular.
+- Previsão: remove breadcrumb, subtítulo e instruções visíveis da página, mantendo
+  mensagens operacionais acessíveis para leitores de tela.
+
+- Previsão por empreendimento publicada: sete grupos iniciais, pares numéricos
+  Previsão/Realizado, reordenação conjunta e totais automáticos. Migration
+  autorizada aplicada sem reescrever dados, CI completa e health confirmados.
 - QA da Previsao aguarda o foco da insercao antes de testar entrada numerica.
 
 - Dashboard: filtros controlados por React com fechamento externo e teclado,

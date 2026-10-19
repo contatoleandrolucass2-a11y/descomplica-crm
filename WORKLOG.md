@@ -2,6 +2,8 @@
 
 ## 2026-10-19: Gráficos de agendamentos
 
+Integrado origin/main2354a8d2 na branch para resolver a concorrência com o PR259, preservando calendário/plano de ação e Agendamentos. Inventário combinado:68 migrations,36 arquivos pgTAP/2.042 asserções; allowlist mantém as três novas migrations sem autorizar aplicação remota. Testes focados de inventário/homologação29/29.
+
 A CI39196528870 em78707ecc aprovou validate, restauração isolada, pgTAP/lint SQL e E2E. O gate visual falhou somente nas11 referências de Agendamentos com altura antiga; rotas154/154, temas88/88, acessibilidade242/242, teclado e zoom passaram. Revisadas e adotadas somente essas11 imagens, preservando231 e registrando origem verify/falha e captura dirty no manifesto. As imagens autenticadas mostram o estado indisponível; os sete gráficos com dados são cobertos separadamente pelo preview sintético. Integridade local:15 testes aprovados/1 opt-in ignorado. Nova CI integral obrigatória; migrations, primeira carga v2 e publicação continuam pendentes.
 
 A segunda execução aprovou pgTAP e avançou ao lint SQL, que identificou a volatilidade padrão da auxiliar de projeção. Marcada STABLE, pois apenas projeta JSON recebido com funções estáveis; a RPC de leitura permanece STABLE. Nenhuma regra ou asserção foi dispensada.
@@ -15,6 +17,42 @@ O relatório Salesforce já apresentava a coluna Nome do empreendimento, identif
 O contrato analítico v2 acrescenta índice de loja à tupla, mantendo posições anteriores, e usa a dimensão empreendimento para a coluna correta. Snapshots v1 continuam legíveis; seu PDV não é apresentado como empreendimento. Duas migrations aditivas preparadas: extensão v2 e RPC exclusiva da etapa, que filtra fatos e reindexa dicionários antes de retornar ao cliente. A leitura verifica duas vezes a geração do snapshot e recusa misturas. Permissões existentes de etapa, visão e ranking são preservadas. Aplicação remota das migrations e atualização operacional do coletor permanecem pendentes de autorização específica e CI; nenhum dado remoto foi alterado nesta implementação.
 
 Validação e evidências finais constam em docs/knowledge/ATUALIZACOES.md e docs/runbooks/appointments-charts.md. A validação local usa fixtures sintéticas; não representa reconciliação da próxima coleta real.
+
+## 2026-10-18: Calendário e plano de ação da Previsão
+
+A página Previsão ganhou calendário mensal com destaque e contagem exclusiva de
+quinta-feira a domingo como dias validados. A tabela mantém os sete
+empreendimentos, passa a usar rolagem horizontal, reduz a coluna de corretor e
+limita os títulos dos empreendimentos a duas linhas. A coluna fixa Plano de ação
+fica depois do Total, aceita texto livre e acompanha o salvamento compartilhado.
+Breadcrumb, subtítulo e instruções visíveis foram removidos conforme solicitado.
+
+Validação local: lint, typecheck e build aprovados; Vitest aprovou 3.873 testes
+com 99 skips; navegador aprovou nove cenários em desktop/celular, três temas e
+axe; API aprovou 47 testes. A etapa operacional do `pnpm test` teve 1.593
+aprovações, 19 skips e três falhas já conhecidas de semântica POSIX no Windows.
+`test:release` encontrou 11 falhas na fixture Meta Ads já presente em main, todas
+por arquivo sintético ausente; o arquivo isolado reproduz a mesma limitação. A CI
+Linux deve distinguir portabilidade de regressão. pgTAP na restauração isolada e
+CI ainda são obrigatórios antes do merge. A migration
+`20261019004204_forecast_action_plan.sql` está preparada e não foi aplicada
+remotamente; exige autorização específica depois da CI completa.
+
+A primeira CI do PR259 (`39184161292`) aprovou validate e a restauração isolada,
+mas o gate visual encontrou uma expectativa dependente do título do oitavo
+empreendimento. O teste agora lê o título realmente criado antes de validar a
+rolagem e a reordenação. A jornada Chromium corrigida passou 9/9 localmente; nova
+CI é obrigatória e nenhum comportamento de produção foi alterado nessa correção.
+
+## 2026-10-18: Publicação da Previsão por empreendimento
+
+PR256 integrado após CI completa. A versão atual de main, eeb42a45, preserva
+também o PR257 e passou os quatro jobs da CI39165128618. Migration autorizada
+aplicada via MCP como20261018232900, sem reescrever previsões existentes.
+Imagem imutável conferida e publicada pelo coordenador às23:29:19Z, deployment
+4ecf1a6f-18a9-4ab7-9dfc-31bb39ab3f5b. Health200/ok/eeb42a45, container healthy,
+página anônima307 e API401. QA funcional autenticado somente sintético na CI;
+nenhuma fixture gravada em produção. Evidências completas em ATUALIZACOES.md.
 
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
