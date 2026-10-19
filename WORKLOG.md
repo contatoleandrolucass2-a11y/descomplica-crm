@@ -1,5 +1,37 @@
 # Worklog
 
+## 2026-10-19: refinamento da Previsão
+
+O calendário foi reduzido em 30%, mantém-se aberto durante interações internas e
+agora destaca e contabiliza somente sexta-feira, sábado e domingo. Outubro de
+2026 totaliza 14 dias validados. O fechamento permanece disponível por Escape e
+pelo botão X, com restauração do foco ao acionador.
+
+Os nove nomes informados pelo usuário recebem quebras determinísticas em duas
+linhas quando já constam no documento compartilhado. Todos os grupos têm a mesma
+largura; cabeçalhos Previsão/Realizado, corretor, números, totais e Plano de ação
+usam 22 px de altura. O ponto sob o mouse ganha o mesmo realce de superfície dos
+botões, e a tabela conserva a rolagem horizontal própria.
+
+O erro de salvamento observado ocorre porque a interface com Plano de ação exige
+o contrato da migration `20261019004204_crm_forecast_action_plan.sql`, ainda não
+aplicada em produção. Nenhum fallback descarta o texto. A migration continua
+aditiva, sem reescrever previsões, e será solicitada novamente somente após a CI
+completa desta revisão e com a definição anterior da RPC preservada.
+
+Validação focal: 103 testes de modelo/API/componentes e 49 verificações focais
+com navegador aprovadas. As capturas sintéticas em 1440 e 390 px foram revistas;
+confirmam o calendário compacto, os títulos em duas linhas, a altura compacta e
+Total/Plano de ação acessíveis pela rolagem.
+
+Lint, typecheck e build de produção também passaram. A suíte Vitest completa
+aprovou 3.876 casos e ignorou 102; dois timeouts locais do Obsidian passaram na
+repetição isolada com 22/22. A etapa operacional e `test:release` reproduziram
+falhas e retenção de processo nos cenários de permissões e arquivos POSIX de
+Meta Ads no Windows, fora dos arquivos da Previsão. Nenhum teste foi alterado ou
+dispensado; a integração depende da CI Linux completa, inclusive restauração
+isolada e release gates.
+
 ## 2026-10-19: Gráficos de agendamentos
 
 Autorização específica recebida em 19/10/2026 com “continua e publica”. As duas migrations aditivas foram aplicadas via MCP no projeto Supabase de produção `descomplica-crm-production`: histórico remoto `20261019113232 appointments_analysis_stores` e `20261019113239 appointments_analysis_read`. Os três payloads existentes permaneceram v1. A RPC nova aceita apenas `authenticated`; `anon` e `service_role` permanecem sem execução. Advisors não trouxeram alteração de ACL/tabela causada pela entrega; o aviso da RPC autenticada corresponde ao contrato intencional com checagens internas. A primeira carga v2 e a atualização do coletor permanecem etapas posteriores ao CRM compatível publicado.
@@ -81,7 +113,7 @@ typecheck, lint, build de 57 rotas e as 30 telas do preview passaram novamente.
 ## 2026-10-18: Calendário e plano de ação da Previsão
 
 A página Previsão ganhou calendário mensal com destaque e contagem exclusiva de
-quinta-feira a domingo como dias validados. A tabela mantém os sete
+sexta-feira a domingo como dias validados. A tabela mantém os sete
 empreendimentos, passa a usar rolagem horizontal, reduz a coluna de corretor e
 limita os títulos dos empreendimentos a duas linhas. A coluna fixa Plano de ação
 fica depois do Total, aceita texto livre e acompanha o salvamento compartilhado.

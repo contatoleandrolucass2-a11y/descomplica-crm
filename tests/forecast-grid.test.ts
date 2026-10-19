@@ -175,6 +175,18 @@ describe("grouped forecast grid", () => {
       true,
     );
   });
+  it("preserves the requested two-line layout for the known development names", () => {
+    let document = createForecastDocument();
+    const [first, second] = getForecastGroups(document);
+    document = renameForecastGroup(document, first!.id, "Conquista Itaim Paulista");
+    document = renameForecastGroup(document, second!.id, "Mirante Jardim das Esmeraldas");
+    const normalized = normalizeForecastDocument(document);
+    expect(
+      getForecastGroups(normalized)
+        .slice(0, 2)
+        .map((group) => group.label),
+    ).toEqual(["Conquista\nItaim Paulista", "Mirante Jardim\ndas Esmeraldas"]);
+  });
   it("accepts free action text up to 4000 characters and excludes it from numeric checks", () => {
     const document = createForecastDocument();
     document.rows[0]!.cells.action_plan = "A".repeat(4000);

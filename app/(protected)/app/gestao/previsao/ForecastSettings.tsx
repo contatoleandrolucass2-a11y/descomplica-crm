@@ -642,7 +642,7 @@ export function ForecastSettings() {
                       <textarea
                         aria-label={`Plano de ação, linha ${index + 1}`}
                         cols={actionPlanColumns}
-                        rows={3}
+                        rows={1}
                         maxLength={4000}
                         readOnly={!editable}
                         value={row.cells[ACTION_PLAN_COLUMN_ID] ?? ""}
@@ -704,9 +704,6 @@ export function ForecastSettings() {
         aria-labelledby="forecast-calendar-title"
         aria-describedby="forecast-calendar-description"
         onClose={() => calendarButton.current?.focus()}
-        onMouseDown={(event) => {
-          if (event.target === event.currentTarget) closeCalendar();
-        }}
       >
         <div className={styles.calendarPanel}>
           <header className={styles.calendarHeader}>
@@ -732,7 +729,7 @@ export function ForecastSettings() {
               <strong>
                 {calendarMonths[calendarMonth]} de {calendarYear}
               </strong>
-              <p id="forecast-calendar-description">Quinta a domingo · somente dias validados</p>
+              <p id="forecast-calendar-description">Sexta a domingo · somente dias validados</p>
             </div>
             <span>{calendarSummary.total} dias validados</span>
           </div>

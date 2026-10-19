@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: retomada — refinamento da Previsão
+
+- Nova demanda sobre a entrega integrada no PR #259: calendário 30% menor e
+  estável durante a interação, dias validados restritos a sexta, sábado e
+  domingo, títulos dos nove empreendimentos com quebras prescritas, colunas de
+  mesma largura, linhas compactas de 22 px e realce no ponto sob o mouse.
+- `origin/main` em `32c7cbdff5147890d8e9a49e58ea31ed2c2965e5`, com CI push/main
+  `39211218104` aprovada. Produção observada em `2026-10-19T11:58:38Z`:
+  HTTP 200, status `ok`, versão `3002d578a2db346883e661c4ba568faa4ff99c26`.
+  A versão publicada não contém o PR #259; a captura do erro é evidência do
+  comportamento observado pelo usuário, sem provar a origem sozinha.
+- O contrato remoto continua anterior à migration local
+  `20261019004204_crm_forecast_action_plan.sql`. A autorização específica
+  solicitada para essa migration não foi concedida; nenhuma alteração remota
+  foi feita. O refinamento será integrado e validado antes de renovar a
+  solicitação de aplicação e recuperação.
+
 ## 2026-10-19: Gestão > Meta editável publicada
 
 - PR #260 integrado em `3002d578a2db346883e661c4ba568faa4ff99c26`. CI do PR `39198445488` aprovada; CI de `main` `39202510879` aprovada após repetir somente o job que falhou transitoriamente na consulta externa de taxas documentais. Nenhum gate foi removido ou ignorado.
@@ -1199,6 +1216,31 @@ Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f17
 - Fixture corrigida: estado vazio e autorização são independentes. Perfil autorizado vazio vê a ação, edita a meta mensal e mantém projeções sem valores inventados; `readonly` preserva o bloqueio explícito. Preview Chromium: 30 telas aprovadas, desktop/mobile, três temas, axe e overflow.
 - Limite: a ação revisa e salva somente rascunho inativo; não ativa política comercial. A permissão Master-only existente foi preservada. Fonte: `https://descomplicapro.com.br/configuracoes/metas`, código e execução local em 18/10/2026.
 - Validação local: lint, tipos e build aprovados em Node 24.19/pnpm 11.20; preview 30 telas e Vitest 3.861 aprovados. A etapa Node aprovou 1.593 e reteve três falhas Windows de Meta Ads já conhecidas, sem relação com o delta; integração exige CI Linux completa.
+
+## 2026-10-19: refinamento do calendário e da grade da Previsão
+
+- Base conferida às `2026-10-19T11:58:38Z`: `origin/main` em
+  `32c7cbdff5147890d8e9a49e58ea31ed2c2965e5`, CI push/main `39211218104`
+  aprovada. Health público HTTP 200/ok ainda em
+  `3002d578a2db346883e661c4ba568faa4ff99c26`; a diferença confirma que a
+  interface do PR259 não estava publicada. Fontes: Git/GitHub e
+  `https://crm.descomplicapro.com.br/api/health`.
+- O calendário foi reduzido em 30%, permanece aberto durante interações e conta
+  somente sexta, sábado e domingo. Os nove empreendimentos conhecidos recebem
+  as quebras solicitadas, largura uniforme e linhas de 22 px. Células recebem
+  realce no hover e a rolagem horizontal preserva Total e Plano de ação.
+- A falha de salvamento é incompatibilidade confirmada entre o documento com
+  `action_plan` e a RPC produtiva anterior. O código não remove o texto para
+  simular sucesso. A migration `20261019004204_crm_forecast_action_plan.sql`
+  continua não aplicada e exige autorização específica; imagem e RPC precisam
+  ser promovidas no mesmo ciclo protegido, com restauração da função anterior
+  se a publicação falhar.
+- Local: lint, typecheck, build, 103 testes de modelo/API/componentes, 49 focais
+  e navegador 9/9 aprovados. Vitest completo aprovou 3.876 e ignorou 102; dois
+  timeouts do Obsidian passaram isoladamente 22/22. Etapas Node/release
+  reproduziram falhas e retenção de processo em cenários POSIX de Meta Ads no
+  Windows, fora do delta. Nenhuma tolerância foi mudada; CI Linux completa é o
+  critério de integração.
 
 ## 2026-10-19: abertura dos gráficos de agendamentos
 
