@@ -110,6 +110,12 @@ comparecimento e vendas data da venda. Pastas aprovadas continuam indisponiveis.
 
 ## Publicacao em 19/10
 
+- Smoke posterior a recarga do usuario:24 ciclos dos quatro filtros em desktop
+  1440x900 e celular390x844, nos tres temas, abriram e fecharam por clique
+  externo corretamente. Sem crash ou erro de console observado. Selecao,
+  tema escuro e dimensao original preservados/restaurados. Comunicacao com
+  Chrome restabelecida, encerrando a pendencia registrada abaixo.
+
 - PR255 merged em72f1ed5a, apos CI39182984344 aprovada. CI39185820037
   aprovou a main integrada. Avanco concorrente59f1ee47 exigiu CI39189857296,
   tambem integralmente aprovada, incluindo tres temas e desktop/mobile.

@@ -1,5 +1,20 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: Smoke autenticado dos filtros concluido
+
+- Usuario recarregou a aba; controle Chrome restabelecido. Dashboard publicado
+  testado em1440x900 e390x844, Claro/Medio/Escuro:24 ciclos de abertura e clique
+  externo dos quatro filtros. aria-expanded true/false confirmado em cada
+  ciclo; sem travamento e lista de erros de console vazia ao final. Nenhuma
+  selecao alterada. Tema escuro e viewport original restaurados.
+- Celular sem overflow horizontal (scrollWidth375/innerWidth390 nos tres
+  temas); desktop escuro1425/1440. Capturas desktop/celular inspecionadas.
+  Essa rodada resolve a pendencia de comunicacao do smoke anterior, mas nao
+  comprova causa interna do STATUS_BREAKPOINT nem ausencia permanente do erro.
+- Observacao separada: carga23:32 de18/10 exibe periodos curtos indisponiveis
+  apos virada do dia; valores mensais presentes. Nao investigado nem tratado
+  como numeracao conciliada nesta rodada, restrita ao fechamento dos filtros.
+
 ## 2026-10-19: Dashboard integrado e preparacao final
 
 - Publicado pelo coordenador em2026-10-19T03:25:24.760Z (00:25 Sao Paulo),
