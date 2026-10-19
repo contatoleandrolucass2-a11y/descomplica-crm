@@ -1,5 +1,7 @@
 # Changelog
 
+- QA da Previsao aguarda o foco da insercao antes de testar entrada numerica.
+
 - Dashboard: filtros controlados por React com fechamento externo e teclado,
   sem details/fieldset nativos; preserva selecoes, periodos e os dois canais.
 - QA: cenarios de filtros separados por dispositivo/transicao e E2E autenticado

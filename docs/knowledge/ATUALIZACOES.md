@@ -2,6 +2,14 @@
 
 ## 2026-10-18: Autorizacao da migration e retomada da publicacao
 
+- CI39176647709 em5bb0d833 aprovou validate/restore, mas falhou no teste de
+  oito grupos da Previsao. Diagnostico com RAF atrasado confirmou redirecao de
+  foco ao titulo do grupo durante digitacao sintetica. Teste passa a aguardar
+  foco da insercao e confirmar foco numerico, preservando timeouts/assercoes.
+  Oito testes locais aprovados; sem mudanca de produto. Revisao independente
+  da migration sem bloqueadores estaticos. Backup somente da definicao anterior
+  preservado fora do Git, protegido no host; nenhuma migration/deploy aplicado.
+
 - Usuario autorizou explicitamente revisar e aplicar a migration de grupos da
   Previsao, preservando dados e acessos. Em23:27Z, health publico200/ok/d919751a;
   main remoto eeb42a45 inclui PR257 (vagas no Associativo). CI39143952391 passou

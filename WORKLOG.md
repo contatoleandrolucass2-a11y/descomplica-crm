@@ -2,6 +2,11 @@
 
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
+CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no
+teste da Previsao: RAF da insercao podia redirecionar a digitacao para o titulo
+do oitavo grupo. Teste aguarda foco esperado antes de digitar; sem alteracao
+de produto, timeout ou assercoes removidas. Oito testes locais aprovados.
+
 Video fornecido confirma STATUS_BREAKPOINT na versao publicada, portanto
 o smoke anterior nao comprovou a eliminacao do erro nativo. Filtros passam
 a disclosure controlado por React, preservando aparencia e selecoes.
