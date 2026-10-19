@@ -21,7 +21,9 @@ import {
 import { GOALS_UNAVAILABLE_LABEL, availableCommercialValue } from "@/lib/crm/source-availability";
 import { CRM_STAGES, getCrmStage, type CrmStage } from "@/lib/crm/stages/catalog";
 import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/presentation";
+import { loadAppointmentsReadModel } from "@/lib/crm/stages/data";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
+import { AppointmentsDashboard } from "../_components/AppointmentsDashboard";
 
 import {
   AnalyticsCanvas,
@@ -487,6 +489,20 @@ export default async function StagePage({
   if (isDashboardView(query.view) && !authorizedViews.includes(query.view)) forbidden();
   const view: DashboardViewKey = isDashboardView(query.view) ? query.view : authorizedViews[0]!;
   const period: DashboardPeriodKey = isDashboardPeriod(query.period) ? query.period : "month";
+  if (stage.key === "appointments") {
+    const appointments = await loadAppointmentsReadModel(view);
+    return (
+      <main className={styles.canvasMain}>
+        <AnalyticsCanvas kind="stage">
+          <AppointmentsDashboard
+            analysis={appointments.analysis}
+            generatedAt={appointments.generatedAt}
+            canViewDevelopmentRankings={authorization.permissions.includes("crm.ranking.view")}
+          />
+        </AnalyticsCanvas>
+      </main>
+    );
+  }
   const pages = await getAuthorizedNavigation(authorization);
   const readableStages = CRM_STAGES.filter(
     (item) =>

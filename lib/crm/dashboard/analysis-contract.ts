@@ -26,7 +26,7 @@ const index = z.number().int().min(-1).max(9_999);
 // Compact daily aggregates, never customer records. Indices address this view's
 // dictionaries only: stage, date, manager, owner, company, channel, development,
 // count, sales amount, approved folders.
-export const dashboardAnalysisFactSchema = z.tuple([
+const factFields = [
   z.number().int().min(0).max(4),
   date,
   index,
@@ -37,12 +37,23 @@ export const dashboardAnalysisFactSchema = z.tuple([
   z.number().int().min(1).max(1_000_000_000),
   z.number().finite().min(0).max(1_000_000_000_000_000),
   z.number().int().min(0).max(1_000_000_000),
+] as const;
+// Version 2 appends the store index; all existing metric positions stay fixed.
+export const dashboardAnalysisFactSchema = z.union([
+  z.tuple(factFields),
+  z.tuple([...factFields, index]),
 ]);
 export const dashboardAnalysisViewSchema = z
   .object({
     viewKey: z.enum(["all", "with_canal_imob", "without_canal_imob"]),
     dimensions: z
-      .object({ managers: labels, owners: labels, companies: labels, developments: labels })
+      .object({
+        managers: labels,
+        owners: labels,
+        companies: labels,
+        developments: labels,
+        stores: labels.optional(),
+      })
       .strict(),
     facts: z.array(dashboardAnalysisFactSchema).max(100_000),
   })
@@ -57,8 +68,11 @@ export const dashboardAnalysisViewSchema = z
         view.dimensions.developments.length,
       ];
       const indices = [fact[2], fact[3], fact[4], fact[6]];
-      const key = JSON.stringify(fact.slice(0, 7));
+      const key = JSON.stringify([...fact.slice(0, 7), fact[10] ?? -1]);
       if (
+        (view.dimensions.stores !== undefined) !== (fact.length === 11) ||
+        (fact[10] !== undefined && fact[10] >= (view.dimensions.stores?.length ?? 0)) ||
+        (fact[0] !== 1 && fact[10] !== undefined && fact[10] !== -1) ||
         indices.some((value, position) => value >= lengths[position]!) ||
         seen.has(key) ||
         fact[9] > fact[7] ||
@@ -73,7 +87,7 @@ export const dashboardAnalysisViewSchema = z
   });
 export const dashboardAnalysisSchema = z
   .object({
-    version: z.literal(1),
+    version: z.union([z.literal(1), z.literal(2)]),
     coverageStart: date,
     referenceDate: date,
     views: z.array(dashboardAnalysisViewSchema).length(3),
@@ -82,6 +96,9 @@ export const dashboardAnalysisSchema = z
   .superRefine((analysis, context) => {
     if (
       new Set(analysis.views.map((view) => view.viewKey)).size !== 3 ||
+      analysis.views.some(
+        (view) => (analysis.version === 2) !== (view.dimensions.stores !== undefined),
+      ) ||
       !validCoverage(analysis.coverageStart, analysis.referenceDate) ||
       analysis.views.some((view) =>
         view.facts.some(
@@ -98,13 +115,14 @@ export type DashboardAnalysisView = z.infer<typeof dashboardAnalysisViewSchema>;
 export type DashboardAnalysisFact = z.infer<typeof dashboardAnalysisFactSchema>;
 export const dashboardAnalysisSliceSchema = dashboardAnalysisViewSchema
   .safeExtend({
-    version: z.literal(1),
+    version: z.union([z.literal(1), z.literal(2)]),
     coverageStart: date,
     referenceDate: date,
   })
   .superRefine((slice, context) => {
     if (
       !validCoverage(slice.coverageStart, slice.referenceDate) ||
+      (slice.version === 2) !== (slice.dimensions.stores !== undefined) ||
       slice.facts.some((fact) => fact[1] < slice.coverageStart || fact[1] > slice.referenceDate)
     ) {
       context.addIssue({ code: "custom", message: "Invalid analysis coverage." });

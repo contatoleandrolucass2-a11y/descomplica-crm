@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-19: Gráficos de agendamentos
+
+A página de agendamentos recebe sete gráficos: barras por dia, por semana do mês e por mês, e rankings decrescentes de gerente, responsável, loja e empreendimento. O seletor de ano pertence somente ao gráfico mensal. Semanas seguem segunda a domingo, incluindo a terceira semana e até a sexta quando existente; meses e semanas sem registros não geram barras. Rankings preservam todos os nomes e contagens. O layout usa três colunas no desktop e reorganiza a grade em telas menores, sem rolagem interna. Removidos desta página o painel Posição no funil, a navegação/filtros legados e o breadcrumb.
+
+O relatório Salesforce já apresentava a coluna Nome do empreendimento, identificada pelo cabeçalho como Activity.Nome_do_empreendimento**c. Não houve edição da definição salva. A coleta valida sua identificação e label tanto no describe quanto no resultado a cada execução. PDV continua vindo de Activity.PDV**c.Name, em dimensão própria. Ausência ou ambiguidade bloqueia a coleta; valores vêm da exportação vigente, sem cache de nomes fixos.
+
+O contrato analítico v2 acrescenta índice de loja à tupla, mantendo posições anteriores, e usa a dimensão empreendimento para a coluna correta. Snapshots v1 continuam legíveis; seu PDV não é apresentado como empreendimento. Duas migrations aditivas preparadas: extensão v2 e RPC exclusiva da etapa, que filtra fatos e reindexa dicionários antes de retornar ao cliente. A leitura verifica duas vezes a geração do snapshot e recusa misturas. Permissões existentes de etapa, visão e ranking são preservadas. Aplicação remota das migrations e atualização operacional do coletor permanecem pendentes de autorização específica e CI; nenhum dado remoto foi alterado nesta implementação.
+
+Validação e evidências finais constam em docs/knowledge/ATUALIZACOES.md e docs/runbooks/appointments-charts.md. A validação local usa fixtures sintéticas; não representa reconciliação da próxima coleta real.
+
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
 CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no

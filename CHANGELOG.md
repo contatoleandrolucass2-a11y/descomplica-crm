@@ -1,5 +1,8 @@
 # Changelog
 
+- Agendamentos: sete gráficos com evolução diária, semanas do mês, meses por ano independente e rankings completos de gerente, responsável, loja e empreendimento. Grade responsiva de três colunas e remoção dos blocos legados indicados.
+- Salesforce: separa PDV de empreendimento no contrato analítico v2, preserva snapshots v1 e valida a coluna vigente de empreendimento em cada coleta. Nova leitura restrita à etapa e às visões autorizadas, sem acesso direto às tabelas.
+
 - QA da Previsao aguarda o foco da insercao antes de testar entrada numerica.
 
 - Dashboard: filtros controlados por React com fechamento externo e teclado,
