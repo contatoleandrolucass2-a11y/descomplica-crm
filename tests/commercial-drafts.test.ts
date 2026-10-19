@@ -86,14 +86,15 @@ describe("inactive commercial configuration drafts", () => {
     expect(parsed.blockers).toHaveLength(8);
   });
 
-  it("removes direct legacy writes from both configuration actions", () => {
+  it("saves funnel goals through the scoped settings RPC and keeps points on drafts", () => {
     const goalsAction = readFileSync("app/(protected)/app/configuracoes/metas/actions.ts", "utf8");
     const pointsAction = readFileSync(
       "app/(protected)/app/configuracoes/metas/pontos/actions.ts",
       "utf8",
     );
 
-    expect(goalsAction).not.toContain("upsert_crm_funnel_goals");
+    expect(goalsAction).toContain('requirePermission("crm.settings.manage")');
+    expect(goalsAction).toContain("upsert_crm_funnel_goals");
     expect(pointsAction).not.toContain("replace_crm_point_settings");
     expect(goalsAction).toContain("preview_crm_commercial_configuration_draft");
     expect(pointsAction).toContain("save_crm_commercial_configuration_draft");

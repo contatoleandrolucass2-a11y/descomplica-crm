@@ -12,11 +12,13 @@ export async function FunnelGoalsPage({
 }: {
   canManageDraft: boolean;
   profile: GoalProfileKey;
-  notification?: "saved" | "validation" | "save";
+  notification?: "saved" | "active-saved" | "validation" | "save" | "stale";
 }) {
   const [result, draft] = await Promise.all([
     loadFunnelGoals(profile),
-    canManageDraft ? loadFunnelGoalsDraft(profile) : Promise.resolve(null),
+    profile === "partnerships" && canManageDraft
+      ? loadFunnelGoalsDraft(profile)
+      : Promise.resolve(null),
   ]);
   const values = draft
     ? funnelDraftValuesToGoals(draft.payload, draft.updatedAt)
@@ -24,6 +26,8 @@ export async function FunnelGoalsPage({
       ? result.goals
       : null;
   const referenceDate = getGoalsReferenceDate();
+  const effectiveMonth =
+    result.status === "ready" ? result.goals.effectiveMonth : result.effectiveMonth;
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
@@ -36,12 +40,15 @@ export async function FunnelGoalsPage({
     >
       <p className="px-5 py-2 text-xs text-[var(--analytics-muted)]" role="status">
         {canManageDraft
-          ? "Base legada: somente leitura · Rascunho atual: editável"
+          ? profile === "dv"
+            ? "Configuração atual: editável · Salve para aplicar as alterações"
+            : "Base legada: somente leitura · Rascunho atual: editável"
           : "Base legada: somente leitura · Rascunho atual: indisponível"}
       </p>
       <GoalPlanning
         profile={profile}
         initialValues={values}
+        effectiveMonth={effectiveMonth}
         canManageDraft={canManageDraft}
         revision={draft?.revision ?? 0}
         today={today}

@@ -1,5 +1,21 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: Gestão > Meta editável publicada
+
+- PR #260 integrado em `3002d578a2db346883e661c4ba568faa4ff99c26`. CI do PR `39198445488` aprovada; CI de `main` `39202510879` aprovada após repetir somente o job que falhou transitoriamente na consulta externa de taxas documentais. Nenhum gate foi removido ou ignorado.
+- Artefato imutável `12164931560` conferido por checksum e revisão. `image:prove` aprovou dois perfis no ID local `sha256:efa0d85cb298c0b85fb839c2a462cffb0a6174257920927daeefd01eb99bb5e9`, sem rebuild.
+- Publicação protegida concluída em `2026-10-19T05:59:19.007Z`, deployment `2c8cfb30-b73a-4180-b7e7-56b2aa2c5df5`. Health público `ok`/`3002d578`, container `healthy`, rota anônima `/app/configuracoes/metas` com `307` para login e ledger sem pendência.
+- Escopo final restrito à página Meta e suas evidências. Não houve migration, mudança de Parcerias/Pontos, configuração de integração, mutação de dados remotos ou alteração de workflow n8n.
+
+## 2026-10-18: Gestão > Meta editável e com salvamento
+
+- Escopo exclusivo: `/app/configuracoes/metas`. O bloqueio visual vinha da divergência entre o gate da página (`crm.settings.manage`) e o gate Master-only do rascunho comercial. O formulário agora segue a permissão da própria página.
+- **Salvar alterações** submete o formulário do cabeçalho. A Server Action valida os 17 campos, restringe a operação ao perfil `dv` e usa a RPC existente `upsert_crm_funnel_goals`; a RPC exige novamente `crm.settings.manage` e registra `crm.funnel_goals.upserted` em auditoria.
+- Canal de Parcerias, Meta por pontos, motores comerciais e demais páginas do CRM não foram alterados. Testes focados: 17 aprovados; Vitest: 3.864 aprovados e 101 skips; etapa operacional: 1.593 aprovados, 19 skips e três falhas POSIX conhecidas de Meta Ads no Windows. Typecheck, lint, build e preview compilado com 30 telas aprovados. A CI Linux completa deve validar os casos dependentes do sistema operacional antes da publicação protegida.
+- CI 39191871009: `validate` e `isolated-restore` passaram; `release-gates` encontrou a asserção E2E antiga que ainda exigia Meta somente leitura para Administrador. O teste da própria rota foi atualizado para comprovar status editável, campo habilitado e botão **Salvar alterações**, sem modificar outras páginas. Nova CI integral obrigatória.
+- CI 39193353904: `validate`, `isolated-restore` e E2E autenticado passaram. A etapa visual apontou exclusivamente 11 capturas de `/app/configuracoes/metas` com dimensões alteradas pela remoção esperada do painel de rascunho. Desktop e móvel foram revisados sem corte ou sobreposição; somente essas referências foram promovidas. Nova CI integral obrigatória.
+- Revisão do PR #260: a confirmação da configuração ativa agora diz **Alterações salvas**. O mês carregado acompanha o formulário; se ele divergir do mês atual na submissão, a ação não chama a RPC e orienta recarregar a página. A cobertura focada inclui esse caso e passou com 18 testes; typecheck, lint, build e preview de 30 telas também passaram novamente.
+
 ## 2026-10-18: abertura — calendário e plano de ação da Previsão
 
 - Demanda: botão Calendário com modal mensal; dias validados somente quinta,
@@ -1223,3 +1239,11 @@ Conferência final em2026-10-19T04:32:33Z: fetch atualizou origin/main para2354a
 Na sequência, integrado origin/main2354a8d2 na branch de Agendamentos para resolver conflitos de documentação e inventários compartilhados. Preservadas ambas as entregas e as três migrations; inventário combinado68 migrations,36 arquivos pgTAP/2.042 asserções. Perfil de dados validou29/29 testes focados de inventário/homologação, sem stage/commit nem mutação remota. A CI do novo commit de merge continua necessária; o sucesso anterior em78707ecc não valida automaticamente o novo estado.
 
 Repetição local após integração, Node24.19/pnpm11.20: lint e typecheck aprovados; build aprovado; Vitest3.895 aprovados/102 skips existentes. Etapa operacional1.595 aprovados/19 skips e as mesmas três falhas Windows em Meta Ads (arquivo privado/permissão/caminho POSIX); pnpm test terminou1 e, pelo encadeamento, não executou test:release nessa repetição. Testes focados de inventário/homologação29/29 aprovados. Um script temporário local de adoção causou inicialmente erro de estilo require no lint; removido após uso e lint repetido com sucesso. Não houve mudança de regra, skip ou teste de produto para ocultar falha. CI Linux integral do novo SHA e autorização das migrations permanecem pendentes; nenhuma publicação alegada.
+
+### Autorização e aplicação das migrations de Agendamentos
+
+Em19/10/2026 o usuário respondeu “continua e publica”, autorizando continuar a publicação e as duas migrations específicas anteriormente apresentadas. A CI39200512469 no head7dbf0e77 aprovou validate, isolated-restore, release-gates, banco, navegador e referências; promotable-image foi corretamente ignorada por ser PR. Confirmado projeto Supabase `descomplica-crm-production`, ref `hnncxuerlcsaahdxoswb`, URL pública coincidente com o runtime e estado ACTIVE_HEALTHY. Definições anteriores registradas por hashes e histórico; nenhuma RPC de Agendamentos existia.
+
+Aplicadas via MCP somente as migrations aditivas autorizadas, registradas remotamente como `20261019113232 appointments_analysis_stores` e `20261019113239 appointments_analysis_read`. Verificação: três payloads existentes permanecem versão1; nova auxiliar/RPC presentes e STABLE; `anon=false`, `authenticated=true`, `service_role=false` para EXECUTE da RPC; sem acesso direto novo às tabelas. Advisors posteriores mantêm alertas preexistentes; o novo aviso de SECURITY DEFINER autenticada é esperado para a RPC pública, que valida `auth.uid`, permissão da etapa, visão e ranking internamente e passou pgTAP. Não corrigir avisos alheios nesta entrega. Rollback operacional mantém as funções/leitores v1/v2, sem apagar snapshots nem contrair schema.
+
+Antes de integrar PR261, `main` avançou ao SHA32c7cbdf pelos PR260/263, já publicado. O GitHub recusou merge por conflitos apenas em CHANGELOG, WORKLOG e manifesto visual. Integração local preservou ambas as notas e as referências de Meta e Agendamentos; manifesto combinado recalculado para242 imagens. `reference-parity`:15 aprovados/1 opt-in ignorado. Nova CI integral no SHA combinado continua obrigatória antes de merge/deploy. Nenhuma atualização do coletor, carga v2, merge ou deploy de Agendamentos ocorreu até este registro.

@@ -2,6 +2,10 @@
 
 ## 2026-10-19: Gráficos de agendamentos
 
+Autorização específica recebida em 19/10/2026 com “continua e publica”. As duas migrations aditivas foram aplicadas via MCP no projeto Supabase de produção `descomplica-crm-production`: histórico remoto `20261019113232 appointments_analysis_stores` e `20261019113239 appointments_analysis_read`. Os três payloads existentes permaneceram v1. A RPC nova aceita apenas `authenticated`; `anon` e `service_role` permanecem sem execução. Advisors não trouxeram alteração de ACL/tabela causada pela entrega; o aviso da RPC autenticada corresponde ao contrato intencional com checagens internas. A primeira carga v2 e a atualização do coletor permanecem etapas posteriores ao CRM compatível publicado.
+
+Antes da integração, `main` avançou novamente pelo PR263. O merge local preserva as referências visuais de Meta e Agendamentos; o manifesto combinado de242 imagens foi recalculado e15 testes de integridade passaram, com1 opt-in ignorado. Nova CI integral é obrigatória neste SHA combinado.
+
 Integrado origin/main2354a8d2 na branch para resolver a concorrência com o PR259, preservando calendário/plano de ação e Agendamentos. Inventário combinado:68 migrations,36 arquivos pgTAP/2.042 asserções; allowlist mantém as três novas migrations sem autorizar aplicação remota. Testes focados de inventário/homologação29/29.
 
 A CI39196528870 em78707ecc aprovou validate, restauração isolada, pgTAP/lint SQL e E2E. O gate visual falhou somente nas11 referências de Agendamentos com altura antiga; rotas154/154, temas88/88, acessibilidade242/242, teclado e zoom passaram. Revisadas e adotadas somente essas11 imagens, preservando231 e registrando origem verify/falha e captura dirty no manifesto. As imagens autenticadas mostram o estado indisponível; os sete gráficos com dados são cobertos separadamente pelo preview sintético. Integridade local:15 testes aprovados/1 opt-in ignorado. Nova CI integral obrigatória; migrations, primeira carga v2 e publicação continuam pendentes.
@@ -14,9 +18,65 @@ A página de agendamentos recebe sete gráficos: barras por dia, por semana do m
 
 O relatório Salesforce já apresentava a coluna Nome do empreendimento, identificada pelo cabeçalho como `Activity.Nome_do_empreendimento__c`. Não houve edição da definição salva. A coleta valida sua identificação e label tanto no describe quanto no resultado a cada execução. PDV continua vindo de `Activity.PDV__c.Name`, em dimensão própria. Ausência ou ambiguidade bloqueia a coleta; valores vêm da exportação vigente, sem cache de nomes fixos.
 
-O contrato analítico v2 acrescenta índice de loja à tupla, mantendo posições anteriores, e usa a dimensão empreendimento para a coluna correta. Snapshots v1 continuam legíveis; seu PDV não é apresentado como empreendimento. Duas migrations aditivas preparadas: extensão v2 e RPC exclusiva da etapa, que filtra fatos e reindexa dicionários antes de retornar ao cliente. A leitura verifica duas vezes a geração do snapshot e recusa misturas. Permissões existentes de etapa, visão e ranking são preservadas. Aplicação remota das migrations e atualização operacional do coletor permanecem pendentes de autorização específica e CI; nenhum dado remoto foi alterado nesta implementação.
+O contrato analítico v2 acrescenta índice de loja à tupla, mantendo posições anteriores, e usa a dimensão empreendimento para a coluna correta. Snapshots v1 continuam legíveis; seu PDV não é apresentado como empreendimento. Duas migrations aditivas implementam a extensão v2 e a RPC exclusiva da etapa, que filtra fatos e reindexa dicionários antes de retornar ao cliente. A leitura verifica duas vezes a geração do snapshot e recusa misturas. Permissões existentes de etapa, visão e ranking são preservadas. As migrations foram aplicadas após autorização específica; atualização operacional do coletor e primeira carga v2 continuam pendentes da publicação do CRM compatível e das verificações do runbook.
 
 Validação e evidências finais constam em docs/knowledge/ATUALIZACOES.md e docs/runbooks/appointments-charts.md. A validação local usa fixtures sintéticas; não representa reconciliação da próxima coleta real.
+
+## 2026-10-19: publicação da edição e salvamento de Meta
+
+O PR #260 foi integrado no SHA `3002d578a2db346883e661c4ba568faa4ff99c26`.
+A CI do PR `39198445488` e a CI de `main` `39202510879` aprovaram validação,
+restauração isolada, release gates e matriz visual; `main` também produziu a
+imagem imutável. A primeira tentativa de `main` encontrou falha transitória na
+fonte externa de taxas documentais; a repetição somente dos jobs falhos passou
+sem mudança ou bypass.
+
+O artefato `12164931560` teve checksum e revisão conferidos. A imagem foi
+carregada sem rebuild, e `image:prove` aprovou dois perfis com o ID local
+`sha256:efa0d85cb298c0b85fb839c2a462cffb0a6174257920927daeefd01eb99bb5e9`.
+O coordenador `release:production` publicou às `2026-10-19T05:59:19.007Z`,
+deployment `2c8cfb30-b73a-4180-b7e7-56b2aa2c5df5`. Health público retornou
+`ok` na versão exata, o container ficou `healthy`, a rota anônima de Meta
+respondeu `307` para login e o ledger terminou sem pendência. Nenhuma migration,
+configuração de integração, dado remoto ou workflow n8n foi alterado.
+
+## 2026-10-18: edição e salvamento em Gestão > Meta
+
+O formulário da rota `/app/configuracoes/metas` estava condicionado a
+`crm.commercial_policy.manage`, embora o acesso à própria página use
+`crm.settings.manage`. Administradores autorizados entravam na tela, mas viam
+os campos desabilitados e nenhum botão. A página foi realinhada à permissão de
+configuração já validada pelo servidor e pela RPC do banco.
+
+O cabeçalho agora contém **Salvar alterações**, associado ao formulário. A ação
+valida todos os campos, aceita somente o perfil `dv`, exige
+`crm.settings.manage` e chama `upsert_crm_funnel_goals`, que repete a permissão,
+normaliza o mês, grava os valores e registra auditoria. Parcerias e pontos não
+foram alterados. Passaram 17 testes focados, 3.864 testes Vitest (101 skips),
+typecheck, lint, build de 57 rotas e preview Chromium com 30 telas; a captura
+vazia confirma campos habilitados, edição da meta mensal e o botão visível. Na
+etapa operacional, 1.593 testes passaram e 19 foram ignorados; três verificações
+POSIX de Meta Ads falharam no Windows por permissões/caminhos de arquivos. Elas
+não exercitam esta alteração e permanecem condicionadas à CI Linux, sem bypass.
+A primeira CI Linux aprovou `validate` e `isolated-restore`, mas o E2E ainda
+exigia o antigo estado somente leitura do Administrador na própria página Meta.
+A asserção foi alinhada ao requisito atual: status editável, campo de venda
+habilitado e botão **Salvar alterações** visível, mantendo ausentes as ações de
+rascunho. Nenhuma outra rota foi alterada.
+
+A segunda CI, `39193353904`, aprovou `validate`, `isolated-restore` e todo o E2E
+autenticado. A matriz visual encontrou somente 11 referências da rota Meta com
+altura menor, efeito esperado da remoção do painel de rascunho. As capturas
+desktop e móvel foram revisadas e confirmam campos editáveis, botão visível e
+ausência de corte ou sobreposição. Foram promovidas exclusivamente essas 11
+imagens de Meta; uma nova CI integral permanece obrigatória.
+
+A revisão do PR encontrou dois casos na própria Meta antes da integração. A
+confirmação da gravação ativa agora informa **Alterações salvas**, sem chamá-la
+de rascunho. O formulário também envia o mês que foi carregado e rejeita a
+gravação quando a página atravessa uma virada de mês, pedindo recarga em vez de
+aplicar valores antigos ao período novo. A cobertura focada passou a 18 testes;
+typecheck, lint, build de 57 rotas e as 30 telas do preview passaram novamente.
 
 ## 2026-10-18: Calendário e plano de ação da Previsão
 

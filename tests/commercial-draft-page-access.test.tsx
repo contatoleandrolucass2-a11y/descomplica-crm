@@ -18,14 +18,20 @@ describe.each([GoalsPage, PartnershipGoalsPage, PointGoalsPage])(
   "commercial draft page gate",
   (page) => {
     it.each([
-      { roleKey: "admin", permissions: Object.keys(PERMISSIONS), expected: false },
-      { roleKey: "master", permissions: ["crm.commercial_policy.manage"], expected: true },
+      { roleKey: "admin", permissions: Object.keys(PERMISSIONS), expected: true },
+      {
+        roleKey: "master",
+        permissions: ["crm.commercial_policy.manage", "crm.settings.manage"],
+        expected: true,
+      },
       { roleKey: "master", permissions: [], expected: false },
     ])(
       "keeps the database restriction for $roleKey with expected access $expected",
       async ({ roleKey, permissions, expected }) => {
         enforcePageAccess.mockResolvedValue({ roleKey, permissions });
-        const result = await page({ searchParams: Promise.resolve({ saved: "1" }) });
+        const result = await page({
+          searchParams: Promise.resolve({ saved: page === GoalsPage ? "active" : "1" }),
+        });
         expect(enforcePageAccess).toHaveBeenCalledWith(
           page === GoalsPage
             ? "/app/configuracoes/metas"
@@ -33,8 +39,11 @@ describe.each([GoalsPage, PartnershipGoalsPage, PointGoalsPage])(
               ? "/app/configuracoes/metas/parcerias"
               : "/app/configuracoes/metas/pontos",
         );
-        expect(result.props.canManageDraft).toBe(expected);
-        expect(result.props.notification).toBe(expected ? "saved" : undefined);
+        const pageExpected = page === GoalsPage ? expected : roleKey === "master" && expected;
+        expect(result.props.canManageDraft).toBe(pageExpected);
+        expect(result.props.notification).toBe(
+          pageExpected ? (page === GoalsPage ? "active-saved" : "saved") : undefined,
+        );
       },
     );
   },
