@@ -503,8 +503,13 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     it("rejects text in numeric cells and keeps eight groups usable at narrow widths", async () => {
       await open();
       await page.getByRole("button", { name: "Inserir coluna", exact: true }).click();
+      // Insertion schedules focus on the new group name in requestAnimationFrame.
+      await browserExpect(
+        page.getByLabel("Nome do empreendimento 8", { exact: true }),
+      ).toBeFocused();
       const numeric = page.getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true });
       await numeric.focus();
+      await browserExpect(numeric).toBeFocused();
       await page.keyboard.insertText("texto");
       await browserExpect(numeric).toHaveValue("");
       await numeric.fill("12");

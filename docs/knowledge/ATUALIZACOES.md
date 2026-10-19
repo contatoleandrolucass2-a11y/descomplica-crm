@@ -18,6 +18,104 @@
   da RPC; nenhuma migration remota está autorizada por esta abertura. Qualquer
   nova migration exige validação e autorização específica antes da aplicação.
 
+## 2026-10-18: Autorizacao da migration e retomada da publicacao
+
+- CI39176647709 em5bb0d833 aprovou validate/restore, mas falhou no teste de
+  oito grupos da Previsao. Diagnostico com RAF atrasado confirmou redirecao de
+  foco ao titulo do grupo durante digitacao sintetica. Teste passa a aguardar
+  foco da insercao e confirmar foco numerico, preservando timeouts/assercoes.
+  Oito testes locais aprovados; sem mudanca de produto. Revisao independente
+  da migration sem bloqueadores estaticos. Backup somente da definicao anterior
+  preservado fora do Git, protegido no host; nenhuma migration/deploy aplicado.
+
+- Usuario autorizou explicitamente revisar e aplicar a migration de grupos da
+  Previsao, preservando dados e acessos. Em23:27Z, health publico200/ok/d919751a;
+  main remoto eeb42a45 inclui PR257 (vagas no Associativo). CI39143952391 passou
+  integralmente no head09dbca08, mas a base avancou. Integracao bloqueada por
+  conflitos documentais; preservar ambos os registros e repetir CI do conjunto.
+- Consulta MCP confirmou ausencia de crm_forecast_groups no historico remoto e
+  RPC anterior MD5 9bb11666b25feae744f2ab24d0405f24, owner postgres, EXECUTE apenas
+  postgres/authenticated, search_path vazio e limites10s/5s. Sem mutacao remota.
+  Aplicacao condicionada a imagem validada pronta, backup da definicao anterior,
+  reconferencia de ACL/RLS/dados e publicacao protegida. Fontes: PR255, Actions
+  39143952391, origin/main, health publico e metadados Supabase. A autorizacao
+  nao abrange outras migrations nem reescrita de previsoes existentes.
+
+## 2026-10-18: Retomada de filtros e conciliacao Salesforce
+
+- Consulta em 10:54 America/Sao_Paulo: git fetch concluido; PR254 merged,
+  main d919751a51772dd0c57a582b9581e61412642ced com CI39100233037 success.
+  Health publico HTTP200/status ok/version identica. Fonte: GitHub PR254,
+  Actions39100233037 e https://crm.descomplicapro.com.br/api/health.
+- Checkout codex/dashboard-resumo-compacto em6380394e preserva notas locais
+  do encerramento anterior. Nova demanda: examinar video do erro recorrente
+  e conciliar funis com Salesforce nos dois canais e filtros selecionados.
+  A validacao anterior nao comprovou a causa nativa STATUS_BREAKPOINT;
+  numeros reais filtrados ainda exigem conciliacao atual. Sem mutacao remota.
+
+- Retomada: video confirma STATUS_BREAKPOINT; substituido caminho nativo dos
+  filtros por disclosure React. Nao afirmar causa interna do Chrome comprovada.
+  Carga13:32:48.967Z e UI conciliadas nos dois canais:913/68/51/128/13 no mes;
+  medias e periodos coincidentes. Sem coleta nova nem alteracao dos calculos.
+  Auditoria: docs/audits/dashboard-filtros-conciliacao-2026-10-18.md.
+  Tipos/build e32 testes aprovados; QA207 checks nos tres temas e cinco larguras.
+  Lint com exclusao de artefatos locais passou; CI integral/publicacao pendentes.
+
+- Rechecagem11:20: carga11:02:59.121 e UI coincidem916/68/51/128/13;
+  tres novas oportunidades Direcional. Brutos nao localizados; prova limitada
+  a artefato/UI. Usuario reabriu aba e quatro filtros fecharam por clique
+  externo sem crash nessa rodada, ainda na versao antiga d919751a.
+  CI39135151478 passou lint/tipos/testes Linux, falhou fonteITBI HTTP403;
+  repeticao solicitada sem bypass. Deploy permanece bloqueado ate CI completa.
+  Regressao inicial240s excedeu limite global; separar cenarios preservando
+  assercoes, nao registrar teste incompleto como aprovado. Reavaliar com
+  resultado por caso e CI do head atualizado. Fonte: PR255 e auditoria citada.
+
+- Quatro cenarios isolados do controle React aprovados em3dde464d,32 ciclos
+  sem erro coletado. CI39136199536 aprovou validate/restore/dashboard/banco,
+  mas E2E ainda buscava summary antigo em release-candidate.spec.ts:1588.
+  Corrigido seletor e ampliada verificacao autenticada de clique externo.
+  Nenhum bypass: matriz visual/publicacao aguardam nova CI. Causa nativa
+  STATUS_BREAKPOINT segue desconhecida; aprovacoes nao comprovam essa causa.
+- CI39138212029 aprovou E2E e parou em dashboard-auto-refresh por seletor
+  details/summary antigo. Helper atualizado para botao/grupo, preservando
+  selecao, scroll e refresh RSC. Nao relaxar timeout nem ignorar a etapa.
+  Revalidar matriz inteira no novo head antes de integrar ou publicar.
+- CI39140025155 aprovada integralmente no head4877dd76: validate,
+  release-gates (incluindo matriz autenticada/refresh) e isolated-restore.
+  Em16:11Z, main avancou para6b6e88fb (PR256 Previsao por empreendimento),
+  enquanto health publico segue200/ok/d919751a. Protecao BEHIND impediu
+  merge normal do PR255; origin/main integrado sem descartar notas ou codigo.
+  Nova CI obrigatoria do head combinado. Migration20261018142142 da outra
+  entrega exige autorizacao propria e coordenacao de ativacao; nenhuma
+  migration aplicada aqui. Pergunta ao usuario pendente, sem ampliar escopo.
+
+## 2026-10-18: Resumo geral publicado
+
+- PR254 integrado em d919751a51772dd0c57a582b9581e61412642ced.
+  CI39100233037 aprovada em todos os jobs na segunda tentativa. A primeira
+  parou na fonte oficial ITBI HTTP403; repeticao sem alterar ou ignorar gate.
+  CI do PR39097282527 tambem aprovada, incluindo matriz autenticada completa.
+- Artefato12125739919: checksum975754d2bd3cead2ac35b527597b04f4e87159a909452c6166e1a56dc6aadacf,
+  revision exata, configuracao OCI4d00d36e e manifesto local66f822df com11
+  camadas verificadas. image:prove aprovou os dois perfis sem rebuild.
+- Producao anterior f8ad7bbf/deployment c4d5dc22, publicada por outra entrega,
+  foi preservada como baseline CAS. Coordenador retornou deployed/codigo0,
+  deployment d2fc040b-ad09-4442-8fd3-8b1317463b65, em2026-10-18T06:35:30.334Z
+  (03:35:30 America/Sao_Paulo), sem pendencia. Imagem anterior preservada.
+- GET publico /api/health em03:38 retornou200/ok e versao d919751a exata;
+  GET anonimo /app retornou307 para/login. Status do coordenador confirmou
+  recibo, imagem e ausencia de pendencia. Fontes: Actions39100233037,
+  release:production deploy/status, prova OCI e health publico.
+- Navegador autenticado em1440x900 e390x844 nos tres temas:13 funis visiveis,
+  nenhuma quantidade decimal, nenhum overflow horizontal; titulos, etapas,
+  valores e controles verificados sem corte. Filtro canal no desktop e gerente
+  no celular fecharam por clique externo sem erro. Tema escuro e viewport
+  original restaurados. Nao exportados dados privados ou credenciais.
+- Limite: STATUS_BREAKPOINT original nao reproduzido; a sequencia de foco foi
+  corrigida e validada, mas nao se afirma causa unica do crash nativo. Suite
+  POSIX local Windows nao e comprovacao Linux: CI completa e a evidencia final.
+
 ## 2026-10-18: Vagas no Associativo
 
 A linha de estoque e a descrição da unidade selecionada no Associativo exibem `VAGA: N`, usando `parkingSpaces`. Zero é preservado; valores ausentes ou inválidos exibem `VAGA: Não informada`. As variantes Investidor e Tabela Direta e os cálculos financeiros permanecem inalterados. A branch foi reconciliada com `main` em `6b6e88fb`.

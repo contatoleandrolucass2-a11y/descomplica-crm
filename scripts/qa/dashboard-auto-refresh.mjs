@@ -25,11 +25,16 @@ async function verifyDashboardAutoRefresh(page, origin) {
   const status = await statusResponse.json();
   expect(status.generatedAt).toEqual(expect.any(String));
   expect(status.updatedAt).toEqual(expect.any(String));
-  const channelFilter = page
-    .getByRole("region", { name: "Filtros do relatório", exact: true })
-    .locator("details")
-    .first();
-  await channelFilter.locator("summary").click();
+  const filters = page.getByRole("region", { name: "Filtros do relatório", exact: true });
+  const channelTrigger = filters.getByRole("button", { name: /^Canal de vendas / });
+  const channelFilter = filters.getByRole("group", {
+    name: "Canal de vendas",
+    exact: true,
+    includeHidden: true,
+  });
+  await channelTrigger.click();
+  await expect(channelTrigger).toHaveAttribute("aria-expanded", "true");
+  await expect(channelFilter).toBeVisible();
   const channelSelection = channelFilter.getByRole("checkbox", {
     name: selectedChannel,
     exact: true,
@@ -39,7 +44,8 @@ async function verifyDashboardAutoRefresh(page, origin) {
   const details = page.locator('[aria-labelledby="report-monthly-title"] details').first();
   await details.locator("summary").click();
   await expect(details).toHaveAttribute("open", "");
-  await expect(channelFilter).not.toHaveAttribute("open", "");
+  await expect(channelTrigger).toHaveAttribute("aria-expanded", "false");
+  await expect(channelFilter).toBeHidden();
   const scrollBefore = await page.evaluate(() => window.scrollY);
   const urlBefore = page.url();
   const startedAt = await page.evaluate(() => performance.now());
@@ -129,7 +135,8 @@ async function verifyDashboardAutoRefresh(page, origin) {
     expect(
       Math.abs((await page.evaluate(() => window.scrollY)) - scrollBefore),
     ).toBeLessThanOrEqual(2);
-    await expect(channelFilter).not.toHaveAttribute("open", "");
+    await expect(channelTrigger).toHaveAttribute("aria-expanded", "false");
+    await expect(channelFilter).toBeHidden();
     process.stdout.write("[dashboard-auto-refresh] hidden-selection-preservation\n");
     await expect(channelSelection).toBeChecked();
     process.stdout.write("[dashboard-auto-refresh] passed\n");

@@ -9,6 +9,13 @@
 - Previsão por empreendimento publicada: sete grupos iniciais, pares numéricos
   Previsão/Realizado, reordenação conjunta e totais automáticos. Migration
   autorizada aplicada sem reescrever dados, CI completa e health confirmados.
+- QA da Previsao aguarda o foco da insercao antes de testar entrada numerica.
+
+- Dashboard: filtros controlados por React com fechamento externo e teclado,
+  sem details/fieldset nativos; preserva selecoes, periodos e os dois canais.
+- QA: cenarios de filtros separados por dispositivo/transicao e E2E autenticado
+  verifica botoes acessiveis e fechamento externo dos quatro filtros.
+- QA de refresh automatico preserva selecao oculta e scroll com os filtros React.
 - Associativo: exibe a quantidade de vagas na linha do estoque e na descrição do imóvel selecionado, distinguindo zero de informação ausente.
 
 - QA do resumo geral: referencias visuais revisadas do dashboard nos tres

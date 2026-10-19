@@ -36,6 +36,49 @@ Imagem imutável conferida e publicada pelo coordenador às23:29:19Z, deployment
 página anônima307 e API401. QA funcional autenticado somente sintético na CI;
 nenhuma fixture gravada em produção. Evidências completas em ATUALIZACOES.md.
 
+## 2026-10-18: Recorrencia dos filtros e conciliacao
+
+CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no
+teste da Previsao: RAF da insercao podia redirecionar a digitacao para o titulo
+do oitavo grupo. Teste aguarda foco esperado antes de digitar; sem alteracao
+de produto, timeout ou assercoes removidas. Oito testes locais aprovados.
+
+Video fornecido confirma STATUS_BREAKPOINT na versao publicada, portanto
+o smoke anterior nao comprovou a eliminacao do erro nativo. Filtros passam
+a disclosure controlado por React, preservando aparencia e selecoes.
+Conciliação da carga10:32 com a UI:913/68/51/128/13 no mes; ambos os canais
+apenas. Evidencias e limites em docs/audits/dashboard-filtros-conciliacao-2026-10-18.md.
+Validacao completa e publicacao desta correcao ainda pendentes.
+
+Rechecagem da coleta11:02: ambos916/68/51/128/13, com tres novas
+oportunidades no Direcional; UI coincide. Prova limitada ao candidato
+coletado, sem relatorios brutos independentes. Navegador reaberto respondeu
+ao clique externo nos quatro filtros da versao antiga, sem crash nessa rodada.
+CI39135151478 passou lint/tipos/testes Linux e parou na fonte ITBI HTTP403;
+repeticao solicitada sem dispensar gate. Teste prolongado sendo separado
+em quatro casos para evitar timeout acumulado, preservando as assercoes.
+Os quatro casos separados passaram. CI39136199536 passou dashboard/banco/
+restore, mas encontrou seletor summary obsoleto no E2E autenticado; atualizado
+para botoes acessiveis com verificacao de abertura/fechamento de cada filtro.
+Matriz visual final e publicacao continuam condicionadas a nova CI completa.
+CI39138212029 aprovou E2E; helper de auto-refresh ainda usava details/summary
+do filtro. Atualizado para botao/grupo sem remover provas de selecao, scroll
+e refresh RSC. Disclosure nativo das conversoes permanece intocado.
+CI39140025155 integralmente aprovada em4877dd76. main avancou para6b6e88fb
+(PR256) durante a validacao; base integrada preservando entrega concorrente.
+Nova CI do conjunto obrigatoria. Ativacao da migration de Previsao precisa
+coordenacao/autorizacao especifica; nenhuma aplicacao remota feita aqui.
+
+## 2026-10-18: Resumo geral em producao
+
+PR254 integrado no SHAd919751a; CI39100233037 aprovada apos repetir a
+indisponibilidade HTTP403 da fonte ITBI, sem bypass. Imagem imutavel validada
+por checksum, cadeia OCI11 camadas e dois perfis. Deployment d2fc040b concluido
+em03:35:30 America/Sao_Paulo, sem pendencia. Health confirmou versao exata;
+acesso anonimo negado. Navegador real conferido em1440x900/390x844 nos tres
+temas, sem overflow/cortes nos elementos medidos,13 funis e valores inteiros.
+Filtros fecham por clique externo. Conhecimento final sincronizado no Obsidian.
+
 ## 2026-10-18: Vagas no Associativo
 
 A linha de estoque e a descrição da unidade selecionada no Associativo exibem `VAGA: N`, usando `parkingSpaces`. Zero é preservado; valores ausentes ou inválidos exibem `VAGA: Não informada`. As variantes Investidor e Tabela Direta e os cálculos financeiros permanecem inalterados. A branch foi reconciliada com `main` em `6b6e88fb`.
