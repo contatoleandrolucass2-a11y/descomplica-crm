@@ -40,6 +40,8 @@ const goalsInputSchema = z.object({
   productiveTeamSales: requiredNumber(100, true),
 });
 
+const effectiveMonthSchema = z.string().regex(/^\d{4}-(?:0[1-9]|1[0-2])-01$/);
+
 const commandSchema = z.object({
   draftIntent: z.enum(["preview", "save"]),
   draftReason: z.string().trim().min(8).max(500),
@@ -68,12 +70,18 @@ export async function saveFunnelGoalsAction(
   if (profileInput !== "dv") redirect("/app/configuracoes/metas?error=validation");
 
   const values = goalsInputSchema.safeParse(formValues(formData));
-  if (!values.success) redirect("/app/configuracoes/metas?error=validation");
+  const effectiveMonth = effectiveMonthSchema.safeParse(formData.get("effectiveMonth"));
+  if (!values.success || !effectiveMonth.success) {
+    redirect("/app/configuracoes/metas?error=validation");
+  }
+  if (effectiveMonth.data !== getEffectiveMonth()) {
+    redirect("/app/configuracoes/metas?error=stale");
+  }
 
   const supabase = await createClient();
   const { error } = await supabase.rpc("upsert_crm_funnel_goals", {
     p_profile_key: profileInput,
-    p_effective_month: getEffectiveMonth(),
+    p_effective_month: effectiveMonth.data,
     p_sales: values.data.sales,
     p_opportunities_rate: values.data.opportunitiesRate,
     p_appointments_rate: values.data.appointmentsRate,
@@ -95,7 +103,7 @@ export async function saveFunnelGoalsAction(
 
   if (error) redirect("/app/configuracoes/metas?error=save");
   revalidatePath("/app/configuracoes/metas");
-  redirect("/app/configuracoes/metas?saved=1");
+  redirect("/app/configuracoes/metas?saved=active");
 }
 
 export async function prepareFunnelGoalsDraftAction(

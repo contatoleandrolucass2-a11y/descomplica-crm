@@ -12,7 +12,7 @@ export async function FunnelGoalsPage({
 }: {
   canManageDraft: boolean;
   profile: GoalProfileKey;
-  notification?: "saved" | "validation" | "save";
+  notification?: "saved" | "active-saved" | "validation" | "save" | "stale";
 }) {
   const [result, draft] = await Promise.all([
     loadFunnelGoals(profile),
@@ -26,6 +26,8 @@ export async function FunnelGoalsPage({
       ? result.goals
       : null;
   const referenceDate = getGoalsReferenceDate();
+  const effectiveMonth =
+    result.status === "ready" ? result.goals.effectiveMonth : result.effectiveMonth;
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
     year: "numeric",
@@ -46,6 +48,7 @@ export async function FunnelGoalsPage({
       <GoalPlanning
         profile={profile}
         initialValues={values}
+        effectiveMonth={effectiveMonth}
         canManageDraft={canManageDraft}
         revision={draft?.revision ?? 0}
         today={today}

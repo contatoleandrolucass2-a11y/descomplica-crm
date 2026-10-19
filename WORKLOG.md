@@ -31,6 +31,13 @@ desktop e móvel foram revisadas e confirmam campos editáveis, botão visível 
 ausência de corte ou sobreposição. Foram promovidas exclusivamente essas 11
 imagens de Meta; uma nova CI integral permanece obrigatória.
 
+A revisão do PR encontrou dois casos na própria Meta antes da integração. A
+confirmação da gravação ativa agora informa **Alterações salvas**, sem chamá-la
+de rascunho. O formulário também envia o mês que foi carregado e rejeita a
+gravação quando a página atravessa uma virada de mês, pedindo recarga em vez de
+aplicar valores antigos ao período novo. A cobertura focada passou a 18 testes;
+typecheck, lint, build de 57 rotas e as 30 telas do preview passaram novamente.
+
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
 CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no

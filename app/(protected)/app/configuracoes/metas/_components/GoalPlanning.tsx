@@ -61,6 +61,7 @@ function PanelHeader({
 export function GoalPlanning({
   profile,
   initialValues,
+  effectiveMonth,
   canManageDraft,
   revision,
   today,
@@ -68,10 +69,11 @@ export function GoalPlanning({
 }: {
   profile: GoalProfileKey;
   initialValues: FunnelGoals | null;
+  effectiveMonth: string;
   canManageDraft: boolean;
   revision: number;
   today: string;
-  notification?: "saved" | "validation" | "save" | undefined;
+  notification?: "saved" | "active-saved" | "validation" | "save" | "stale" | undefined;
 }) {
   const [values, setValues] = useState<Partial<Record<GoalInputKey, number | null>>>(() =>
     Object.fromEntries(
@@ -620,7 +622,11 @@ export function GoalPlanning({
         <p role="status">
           {notification === "saved"
             ? "Rascunho inativo salvo."
-            : "Não foi possível concluir. Revise os campos e tente novamente."}
+            : notification === "active-saved"
+              ? "Alterações salvas."
+              : notification === "stale"
+                ? "O mês da configuração mudou. Recarregue a página antes de salvar."
+                : "Não foi possível concluir. Revise os campos e tente novamente."}
         </p>
       ) : null}
       {!initialValues ? (
@@ -635,6 +641,7 @@ export function GoalPlanning({
           action={saveFunnelGoalsAction.bind(null, profile)}
           className="grid gap-3"
         >
+          <input type="hidden" name="effectiveMonth" value={effectiveMonth} />
           {body}
         </form>
       ) : (

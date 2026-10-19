@@ -7,6 +7,7 @@
 - Canal de Parcerias, Meta por pontos, motores comerciais e demais páginas do CRM não foram alterados. Testes focados: 17 aprovados; Vitest: 3.864 aprovados e 101 skips; etapa operacional: 1.593 aprovados, 19 skips e três falhas POSIX conhecidas de Meta Ads no Windows. Typecheck, lint, build e preview compilado com 30 telas aprovados. A CI Linux completa deve validar os casos dependentes do sistema operacional antes da publicação protegida.
 - CI 39191871009: `validate` e `isolated-restore` passaram; `release-gates` encontrou a asserção E2E antiga que ainda exigia Meta somente leitura para Administrador. O teste da própria rota foi atualizado para comprovar status editável, campo habilitado e botão **Salvar alterações**, sem modificar outras páginas. Nova CI integral obrigatória.
 - CI 39193353904: `validate`, `isolated-restore` e E2E autenticado passaram. A etapa visual apontou exclusivamente 11 capturas de `/app/configuracoes/metas` com dimensões alteradas pela remoção esperada do painel de rascunho. Desktop e móvel foram revisados sem corte ou sobreposição; somente essas referências foram promovidas. Nova CI integral obrigatória.
+- Revisão do PR #260: a confirmação da configuração ativa agora diz **Alterações salvas**. O mês carregado acompanha o formulário; se ele divergir do mês atual na submissão, a ação não chama a RPC e orienta recarregar a página. A cobertura focada inclui esse caso e passou com 18 testes; typecheck, lint, build e preview de 30 telas também passaram novamente.
 
 ## 2026-10-18: Autorizacao da migration e retomada da publicacao
 

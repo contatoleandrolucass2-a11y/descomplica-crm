@@ -13,13 +13,15 @@ export default async function GoalsPage({
   const canManageDraft = authorization.permissions.includes("crm.settings.manage");
   const query = await searchParams;
   const notification =
-    query.saved === "1"
-      ? "saved"
+    query.saved === "active"
+      ? "active-saved"
       : query.error === "validation"
         ? "validation"
         : query.error === "save"
           ? "save"
-          : undefined;
+          : query.error === "stale"
+            ? "stale"
+            : undefined;
 
   return (
     <FunnelGoalsPage

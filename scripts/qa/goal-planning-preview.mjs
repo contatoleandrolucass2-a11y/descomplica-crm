@@ -599,7 +599,7 @@ export async function runGoalPlanningPreview() {
             const empty=query.has('empty');
             const readonly=query.has('readonly');
             const values=empty?null:{...${JSON.stringify(fixture)},profileKey:profile};
-            const content=<main><GoalPlanning profile={profile} initialValues={values} canManageDraft={!readonly} revision={0} today="2026-10-15" /></main>;
+            const content=<main><GoalPlanning profile={profile} initialValues={values} effectiveMonth="2026-10-01" canManageDraft={!readonly} revision={0} today="2026-10-15" /></main>;
             const shell=await ProtectedLayout({children:content});
             createRoot(document.getElementById('root')).render(<PathnameContext.Provider value={location.pathname}>{shell}</PathnameContext.Provider>);
           })();`;

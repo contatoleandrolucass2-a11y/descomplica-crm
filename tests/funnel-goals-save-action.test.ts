@@ -19,6 +19,7 @@ vi.mock("@/lib/auth/supabase/server", () => ({
 }));
 
 import { saveFunnelGoalsAction } from "@/app/(protected)/app/configuracoes/metas/actions";
+import { getEffectiveMonth } from "@/lib/crm/goals/catalog";
 
 function validGoals() {
   const formData = new FormData();
@@ -43,6 +44,7 @@ function validGoals() {
   })) {
     formData.set(key, String(value));
   }
+  formData.set("effectiveMonth", getEffectiveMonth());
   return formData;
 }
 
@@ -55,7 +57,7 @@ describe("saveFunnelGoalsAction", () => {
 
   it("saves the Meta page through the authorized goals RPC", async () => {
     await expect(saveFunnelGoalsAction("dv", validGoals())).rejects.toThrow(
-      "REDIRECT:/app/configuracoes/metas?saved=1",
+      "REDIRECT:/app/configuracoes/metas?saved=active",
     );
 
     expect(mocks.requirePermission).toHaveBeenCalledExactlyOnceWith("crm.settings.manage");
@@ -63,12 +65,23 @@ describe("saveFunnelGoalsAction", () => {
       "upsert_crm_funnel_goals",
       expect.objectContaining({
         p_profile_key: "dv",
+        p_effective_month: getEffectiveMonth(),
         p_sales: 12,
         p_opportunities_rate: 200,
         p_productive_team_sales: 11,
       }),
     );
     expect(mocks.revalidatePath).toHaveBeenCalledExactlyOnceWith("/app/configuracoes/metas");
+  });
+
+  it("rejects a form loaded for a previous month", async () => {
+    const formData = validGoals();
+    formData.set("effectiveMonth", "2026-09-01");
+
+    await expect(saveFunnelGoalsAction("dv", formData)).rejects.toThrow(
+      "REDIRECT:/app/configuracoes/metas?error=stale",
+    );
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
   it("rejects invalid values before calling the database", async () => {
