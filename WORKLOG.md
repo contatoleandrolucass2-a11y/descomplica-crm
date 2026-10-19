@@ -31,6 +31,7 @@ falhas e retenção de processo nos cenários de permissões e arquivos POSIX de
 Meta Ads no Windows, fora dos arquivos da Previsão. Nenhum teste foi alterado ou
 dispensado; a integração depende da CI Linux completa, inclusive restauração
 isolada e release gates.
+
 ## 2026-10-19: Gráficos de agendamentos
 
 Autorização específica recebida em 19/10/2026 com “continua e publica”. As duas migrations aditivas foram aplicadas via MCP no projeto Supabase de produção `descomplica-crm-production`: histórico remoto `20261019113232 appointments_analysis_stores` e `20261019113239 appointments_analysis_read`. Os três payloads existentes permaneceram v1. A RPC nova aceita apenas `authenticated`; `anon` e `service_role` permanecem sem execução. Advisors não trouxeram alteração de ACL/tabela causada pela entrega; o aviso da RPC autenticada corresponde ao contrato intencional com checagens internas. A primeira carga v2 e a atualização do coletor permanecem etapas posteriores ao CRM compatível publicado.

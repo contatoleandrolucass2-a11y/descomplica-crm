@@ -1241,6 +1241,7 @@ Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f17
   reproduziram falhas e retenção de processo em cenários POSIX de Meta Ads no
   Windows, fora do delta. Nenhuma tolerância foi mudada; CI Linux completa é o
   critério de integração.
+
 ## 2026-10-19: abertura dos gráficos de agendamentos
 
 Consulta às 00:10 BRT: checkout limpo e destacado em 59f1ee4799652694e2d2fd92aa12451675b7b9c1, origin/main no mesmo SHA após fetch. Health público https://crm.descomplicapro.com.br/api/health HTTP200/ok/eeb42a4522ec7767f16f19f47f1792a650c09d49; versão publicada difere do checkout. GitHub via conector retornou statuses vazio para o SHA local, sem comprovar CI; busca de PR por agendamentos retornou apenas PR71 histórico. gh ausente no PATH. Estado integrado e publicado ainda exige confronto antes da publicação. Demanda: gráficos diários, semanais e mensais e rankings de gerente, responsável, loja e empreendimento; manter validação de colunas da exportação Salesforce. Nenhuma mutação remota nesta abertura.
