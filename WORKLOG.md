@@ -34,6 +34,28 @@ isolada e release gates.
 
 ## 2026-10-19: Gráficos de agendamentos
 
+O PR #261 foi integrado e a publicação final usou o topo concorrente de `main`,
+`afb4a97df72a3c45a1982a8d520ef400eef2d985`, que já continha Agendamentos e o
+PR #264 de Previsão. A CI `39264769472` aprovou os quatro jobs. O artefato
+imutável `12192506863` teve checksum, revisão, manifesto/configuração, 11
+camadas e dois perfis de runtime comprovados sem rebuild. O coordenador
+`release:production` publicou às `2026-10-19T14:50:45.273Z`, deployment
+`0eebcfc6-83af-4e09-947f-fe737fc58a5d`, e o health público confirmou a versão
+exata. A rota anônima de Agendamentos continuou protegida por redirect ao login.
+
+O coletor foi movido por backup/CAS para o mesmo release, preservando serviço,
+credenciais, destinos, agenda, navegador, monitor e ledger. Após corrigir apenas
+a legibilidade das dependências pelo usuário dedicado, dois ciclos distintos
+publicaram o contrato v2 com sucesso. O snapshot vigente soma 1.097
+agendamentos em 846 fatos agregados, todos com a tupla v2, e mantém dicionários
+separados para 14 lojas e 33 empreendimentos. A reconciliação usou somente
+contagens: 248 dias, 10 meses, 23 gerentes e 118 responsáveis; nenhum nome ou
+registro individual foi copiado. N8n não foi editado.
+
+No registro final, lint, typecheck e build passaram; Vitest aprovou 3.900 casos
+com 102 skips. A etapa Node aprovou 1.595 e ignorou 19, mantendo as três falhas
+POSIX conhecidas de Meta Ads no Windows. A CI Linux de `main` permaneceu verde.
+
 Autorização específica recebida em 19/10/2026 com “continua e publica”. As duas migrations aditivas foram aplicadas via MCP no projeto Supabase de produção `descomplica-crm-production`: histórico remoto `20261019113232 appointments_analysis_stores` e `20261019113239 appointments_analysis_read`. Os três payloads existentes permaneceram v1. A RPC nova aceita apenas `authenticated`; `anon` e `service_role` permanecem sem execução. Advisors não trouxeram alteração de ACL/tabela causada pela entrega; o aviso da RPC autenticada corresponde ao contrato intencional com checagens internas. A primeira carga v2 e a atualização do coletor permanecem etapas posteriores ao CRM compatível publicado.
 
 Antes da integração, `main` avançou novamente pelo PR263. O merge local preserva as referências visuais de Meta e Agendamentos; o manifesto combinado de242 imagens foi recalculado e15 testes de integridade passaram, com1 opt-in ignorado. Nova CI integral é obrigatória neste SHA combinado.
