@@ -11,6 +11,12 @@
 
 ## 2026-10-19 - Refinamento visual da Previsão
 
+- Publica Agendamentos no SHA integrado `afb4a97d`, com CI completa, artefato
+  imutável comprovado, deploy protegido e health na versão exata.
+- Atualiza o coletor Salesforce para o contrato analítico v2 e confirma dois
+  ciclos distintos; loja e empreendimento passam a usar dicionários separados
+  com reconciliação somente por agregados.
+
 - Calendário 30% menor, estável durante cliques internos e com dias validados
   restritos a sexta-feira, sábado e domingo.
 - Empreendimentos conhecidos preservam as quebras de título solicitadas em duas
