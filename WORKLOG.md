@@ -10,6 +10,14 @@ Imagem imutável conferida e publicada pelo coordenador às23:29:19Z, deployment
 página anônima307 e API401. QA funcional autenticado somente sintético na CI;
 nenhuma fixture gravada em produção. Evidências completas em ATUALIZACOES.md.
 
+## 2026-10-18: Vagas no Associativo
+
+A linha de estoque e a descrição da unidade selecionada no Associativo exibem `VAGA: N`, usando `parkingSpaces`. Zero é preservado; valores ausentes ou inválidos exibem `VAGA: Não informada`. As variantes Investidor e Tabela Direta e os cálculos financeiros permanecem inalterados. A branch foi reconciliada com `main` em `6b6e88fb`.
+
+Na retomada, passaram formatação, lint, tipos, build, 3.861 testes Vitest (98 skips condicionais), 1.610 testes operacionais (cinco skips Linux) e 723 testes de release (14 skips Linux). A CI Ubuntu é obrigatória para os casos POSIX. O navegador isolado confirmou 18 seleções reais com vagas zero, um e ausentes em 390/1440 px e três temas. A matriz completa do guia passou em 1440/375/320 px, nos três temas e com/sem proposta, sem erros de console ou requisições externas. Capturas sintéticas foram inspecionadas. Isso não substitui autenticação/RLS e gates completos da CI.
+
+A CI anterior falhou na formatação documental e a segunda na formatação do novo teste de navegador, corrigidas sem relaxar gates. Produção consultada no ledger permanece em `d919751a`, publicada em `2026-10-18T06:35:30.334Z`. A `main` inclui o PR #256, cuja migration `20261018142142_crm_forecast_groups.sql` ainda não consta no banco produtivo e cuja RPC continua anterior. O runbook de Previsão exige autorização específica para essa aplicação remota; este PR não a executa. Merge, CI final e deploy permanecem etapas separadas, com DEPLOY-001 obrigatória.
+
 ## 2026-10-18: Resumo geral compacto
 
 Dashboard renomeado para Dashboard | Resumo Geral, cabecalho compacto e
@@ -7372,15 +7380,18 @@ pendente dos gates completos no SHA final.
 
 - Meta: revisa única divergência visual DV1024 (13px da legenda após corrigir calendário); mantém241referências e exige novaCI.
 
-A integração passou em lint, tipos, formato, build, auditoria de dependências e
-Gitleaks. Vitest concluiu 3.402 testes, com 86 skips; os testes Node concluíram
-1.178 casos, com cinco skips; o guard de publicação concluiu 703 casos, com
-14 verificações físicas reservadas ao Linux da CI. A execução inicial com
-concorrência livre excedeu prazos na máquina carregada e foi interrompida;
-a execução completa com dois workers passou sem ampliar nenhum timeout.
-O ensaio local de 60 migrations aprovou 1.722 asserções na origem e 1.722 no
-banco restaurado, preservando owners e privilégios. Manifesto:
-`4735639196c72ac139221706ba978654fcb781ec9107c9840fb801f50064edb6`.
+- Meta publicada em16/10/2026 00:59 BRT: PR231, main b5458ff, CI38844155079 completa, imagem imutável comprovada, health e autenticação anônima verificados. Evidências em docs/audits/meta-2026-10-15.md.
+
+- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
+  A integração passou em lint, tipos, formato, build, auditoria de dependências e
+  Gitleaks. Vitest concluiu 3.402 testes, com 86 skips; os testes Node concluíram
+  1.178 casos, com cinco skips; o guard de publicação concluiu 703 casos, com
+  14 verificações físicas reservadas ao Linux da CI. A execução inicial com
+  concorrência livre excedeu prazos na máquina carregada e foi interrompida;
+  a execução completa com dois workers passou sem ampliar nenhum timeout.
+  O ensaio local de 60 migrations aprovou 1.722 asserções na origem e 1.722 no
+  banco restaurado, preservando owners e privilégios. Manifesto:
+  `4735639196c72ac139221706ba978654fcb781ec9107c9840fb801f50064edb6`.
 
 ## 2026-10-16: Preservação da remoção dos códigos WF
 

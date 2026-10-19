@@ -18,6 +18,14 @@
   da RPC; nenhuma migration remota está autorizada por esta abertura. Qualquer
   nova migration exige validação e autorização específica antes da aplicação.
 
+## 2026-10-18: Vagas no Associativo
+
+A linha de estoque e a descrição da unidade selecionada no Associativo exibem `VAGA: N`, usando `parkingSpaces`. Zero é preservado; valores ausentes ou inválidos exibem `VAGA: Não informada`. As variantes Investidor e Tabela Direta e os cálculos financeiros permanecem inalterados. A branch foi reconciliada com `main` em `6b6e88fb`.
+
+Na retomada, passaram formatação, lint, tipos, build, 3.861 testes Vitest (98 skips condicionais), 1.610 testes operacionais (cinco skips Linux) e 723 testes de release (14 skips Linux). A CI Ubuntu é obrigatória para os casos POSIX. O navegador isolado confirmou 18 seleções reais com vagas zero, um e ausentes em 390/1440 px e três temas. A matriz completa do guia passou em 1440/375/320 px, nos três temas e com/sem proposta, sem erros de console ou requisições externas. Capturas sintéticas foram inspecionadas. Isso não substitui autenticação/RLS e gates completos da CI.
+
+A CI anterior falhou na formatação documental e a segunda na formatação do novo teste de navegador, corrigidas sem relaxar gates. Produção consultada no ledger permanece em `d919751a`, publicada em `2026-10-18T06:35:30.334Z`. A `main` inclui o PR #256, cuja migration `20261018142142_crm_forecast_groups.sql` ainda não consta no banco produtivo e cuja RPC continua anterior. O runbook de Previsão exige autorização específica para essa aplicação remota; este PR não a executa. Merge, CI final e deploy permanecem etapas separadas, com DEPLOY-001 obrigatória.
+
 ## 2026-10-18: Validacao do resumo geral compacto
 
 - PR254, HEAD f0329c03: matriz sintetica local aprovada,207 checks,
@@ -752,6 +760,12 @@ Historico integral: [arquivo de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-20
 ## 2026-10-15: Meta
 
 Implementação no PR231; integração concorrente de main b9377a1 em andamento, produção ainda d83c22d (health200/ok,16/10 02:16UTC). CI anterior passou validação/restauração/E2E; nova integração exige CI completa. [Histórico integral, testes e limites](../audits/meta-2026-10-15.md). O histórico desta seção foi movido integralmente para a auditoria após atingir o limite de exportação do runtime; nenhuma evidência foi descartada.
+
+- 16/10/2026,00:59 BRT: Gestão > Meta publicada em b5458ff, PR231 e CI38844155079 aprovados; health200/ok e barreira anônima307 confirmados. Deployment e42363ec-0f81-4084-9ced-aa405c263b09 sem pendência. Testes locais completos e242 comparações visuais aprovados. [Evidências, proveniência e limites](../audits/meta-2026-10-15.md#encerramento-publicação-verificada-em-16102026). Registro final somente documental, sem novo restart.
+
+- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
+
+- 18/10/2026, 12:59 BRT: retomada do PR240 no SHA `bbc3fbd3`. A CI `38848589053` aprovou formatação, lint, tipos e 717 testes, mas falhou na consulta documental do ITBI por HTTP 403; os demais jobs foram ignorados. O PR está conflitante com a `main` `6b6e88f` e será reaplicado sobre essa base, preservando os registros posteriores. Health observado em `https://crm.descomplicapro.com.br/api/health`: HTTP 200, `status=ok`, versão `d919751`; essa versão publicada não corresponde ao ramo documental e não comprova a correção solicitada para edição de metas.
 
 ## 2026-10-16: Publicacao app e recusa de fatos preservada
 

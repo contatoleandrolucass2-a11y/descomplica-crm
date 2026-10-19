@@ -3,6 +3,7 @@
 - Previsão por empreendimento publicada: sete grupos iniciais, pares numéricos
   Previsão/Realizado, reordenação conjunta e totais automáticos. Migration
   autorizada aplicada sem reescrever dados, CI completa e health confirmados.
+- Associativo: exibe a quantidade de vagas na linha do estoque e na descrição do imóvel selecionado, distinguindo zero de informação ausente.
 
 - QA do resumo geral: referencias visuais revisadas do dashboard nos tres
   temas e sete tamanhos, com proveniencia da CI e demais telas preservadas.
@@ -2815,6 +2816,10 @@ pendente dos gates completos no SHA final.
 - Permite validar e salvar rascunhos com taxas como1,67%, preservando o valor informado.
 
 - Meta: registra referência de calendário legível em1024px, sem alterar limiares deQA.
+
+- Gestão > Meta disponível em produção, com planejamento completo, calendário legível e taxas fracionárias; permissões e rascunho inativo preservados.
+
+- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
 
 ## 2026-10-16 - Interoperabilidade do catalogo Qlik
 
