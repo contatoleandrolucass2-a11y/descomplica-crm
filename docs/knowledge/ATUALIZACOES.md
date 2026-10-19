@@ -861,7 +861,7 @@ Implementação no PR231; integração concorrente de main b9377a1 em andamento,
 
 - 16/10/2026,00:59 BRT: Gestão > Meta publicada em b5458ff, PR231 e CI38844155079 aprovados; health200/ok e barreira anônima307 confirmados. Deployment e42363ec-0f81-4084-9ced-aa405c263b09 sem pendência. Testes locais completos e242 comparações visuais aprovados. [Evidências, proveniência e limites](../audits/meta-2026-10-15.md#encerramento-publicação-verificada-em-16102026). Registro final somente documental, sem novo restart.
 
-- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
+- 18/10/2026: PR240 integrado no SHA `8eb023c1` após a CI `39176723284` aprovar validação, restauração isolada e release gates sobre a `main` atualizada. O registro documental da publicação da Meta está concluído; não houve alteração de runtime ou restart.
 
 - 18/10/2026, 12:59 BRT: retomada do PR240 no SHA `bbc3fbd3`. A CI `38848589053` aprovou formatação, lint, tipos e 717 testes, mas falhou na consulta documental do ITBI por HTTP 403; os demais jobs foram ignorados. O PR está conflitante com a `main` `6b6e88f` e será reaplicado sobre essa base, preservando os registros posteriores. Health observado em `https://crm.descomplicapro.com.br/api/health`: HTTP 200, `status=ok`, versão `d919751`; essa versão publicada não corresponde ao ramo documental e não comprova a correção solicitada para edição de metas.
 
@@ -1176,3 +1176,10 @@ Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f17
   um título em vez de ler o valor realmente criado. A verificação foi tornada
   independente do título e mantém as mesmas exigências de visibilidade, rolagem
   e reordenação; navegador focal 9/9 aprovado. Nova CI exigida, sem bypass.
+
+## 2026-10-18: Meta vazia editável
+
+- A referência pública confirma “Aplicar metas” no cabeçalho e controles numéricos editáveis na coluna Configuração. O preview local associava incorretamente `empty` a `canManageDraft=false`, gerando a imagem sem botão e com campos desabilitados.
+- Fixture corrigida: estado vazio e autorização são independentes. Perfil autorizado vazio vê a ação, edita a meta mensal e mantém projeções sem valores inventados; `readonly` preserva o bloqueio explícito. Preview Chromium: 30 telas aprovadas, desktop/mobile, três temas, axe e overflow.
+- Limite: a ação revisa e salva somente rascunho inativo; não ativa política comercial. A permissão Master-only existente foi preservada. Fonte: `https://descomplicapro.com.br/configuracoes/metas`, código e execução local em 18/10/2026.
+- Validação local: lint, tipos e build aprovados em Node 24.19/pnpm 11.20; preview 30 telas e Vitest 3.861 aprovados. A etapa Node aprovou 1.593 e reteve três falhas Windows de Meta Ads já conhecidas, sem relação com o delta; integração exige CI Linux completa.

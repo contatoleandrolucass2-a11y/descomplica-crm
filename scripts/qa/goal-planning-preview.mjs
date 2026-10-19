@@ -595,9 +595,11 @@ export async function runGoalPlanningPreview() {
           import '@/app/globals.css';
           void(async()=>{
             const profile=location.pathname.endsWith('/parcerias')?'partnerships':'dv';
-            const empty=new URLSearchParams(location.search).has('empty');
+            const query=new URLSearchParams(location.search);
+            const empty=query.has('empty');
+            const readonly=query.has('readonly');
             const values=empty?null:{...${JSON.stringify(fixture)},profileKey:profile};
-            const content=<main><GoalPlanning profile={profile} initialValues={values} canManageDraft={!empty} revision={0} today="2026-10-15" /></main>;
+            const content=<main><GoalPlanning profile={profile} initialValues={values} canManageDraft={!readonly} revision={0} today="2026-10-15" /></main>;
             const shell=await ProtectedLayout({children:content});
             createRoot(document.getElementById('root')).render(<PathnameContext.Provider value={location.pathname}>{shell}</PathnameContext.Provider>);
           })();`;
@@ -846,7 +848,8 @@ export async function runGoalPlanningPreview() {
       ).toBeVisible();
       await expect(
         page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
-      ).toBeDisabled();
+      ).toBeEnabled();
+      await expect(page.getByRole("link", { name: "Aplicar metas", exact: true })).toBeVisible();
       await expect(page.locator(".goal-premium-stage output")).toHaveText([
         "—",
         "—",
@@ -855,16 +858,24 @@ export async function runGoalPlanningPreview() {
         "—",
         "—",
       ]);
+      await page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }).fill("2");
       await expect(
-        page.getByRole("button", { name: "Salvar rascunho de metas", exact: true }),
-      ).toHaveCount(0);
+        page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
+      ).toHaveValue("2");
       await page.screenshot({
-        path: path.join(outputRoot, `unconfigured-readonly-${width}.png`),
+        path: path.join(outputRoot, `unconfigured-editable-${width}.png`),
         fullPage: true,
       });
     }
+    await page.goto(`${origin}${goalsPath}?empty=1&readonly=1`);
+    await expect(
+      page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
+    ).toBeDisabled();
+    await expect(page.getByRole("link", { name: "Aplicar metas", exact: true })).toHaveCount(0);
+    evidence.unconfiguredEditable =
+      "1440/390: no fabricated values; editable configuration; apply action visible";
     evidence.unconfiguredReadOnly =
-      "1440/390: no fabricated values; disabled fields; no save button";
+      "explicit read-only fixture: disabled fields; apply action absent";
     assert.deepEqual(evidence.consoleErrors, [], "Browser errors");
     assert.deepEqual(evidence.unexpectedRequests, [], "Unexpected local requests");
     assert.deepEqual(evidence.blockedExternalRequests, [], "External requests must not be needed");
