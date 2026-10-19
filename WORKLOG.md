@@ -20,6 +20,12 @@ CI ainda são obrigatórios antes do merge. A migration
 `20261019004204_forecast_action_plan.sql` está preparada e não foi aplicada
 remotamente; exige autorização específica depois da CI completa.
 
+A primeira CI do PR259 (`39184161292`) aprovou validate e a restauração isolada,
+mas o gate visual encontrou uma expectativa dependente do título do oitavo
+empreendimento. O teste agora lê o título realmente criado antes de validar a
+rolagem e a reordenação. A jornada Chromium corrigida passou 9/9 localmente; nova
+CI é obrigatória e nenhum comportamento de produção foi alterado nessa correção.
+
 ## 2026-10-18: Publicação da Previsão por empreendimento
 
 PR256 integrado após CI completa. A versão atual de main, eeb42a45, preserva

@@ -1073,3 +1073,8 @@ Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f17
   fixture Meta Ads por arquivo sintético ausente, inclusive isoladamente; nenhum
   arquivo dessa área foi alterado nesta entrega e nenhuma asserção foi relaxada.
   pgTAP da restauração isolada e CI Linux permanecem pendentes antes do merge.
+- PR259, CI inicial `39184161292`: validate aprovado e restauração isolada
+  aprovada. Release-gates parou no teste do oitavo grupo porque a asserção fixava
+  um título em vez de ler o valor realmente criado. A verificação foi tornada
+  independente do título e mantém as mesmas exigências de visibilidade, rolagem
+  e reordenação; navegador focal 9/9 aprovado. Nova CI exigida, sem bypass.

@@ -511,11 +511,14 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await page.keyboard.press("End");
       await page.keyboard.insertText("abc");
       await browserExpect(numeric).toHaveValue("12");
+      const eighthHeading = page.getByLabel("Nome do empreendimento 8", { exact: true });
+      await browserExpect(eighthHeading).toBeVisible();
+      const eighthName = await eighthHeading.inputValue();
       for (const width of [1440, 390, 320]) {
         await page.setViewportSize({ width, height: 900 });
         await expectHorizontalTableScroll(width);
         await browserExpect(
-          page.getByLabel("Empreendimento 8 — Realizado, linha 2", { exact: true }),
+          page.getByLabel(`${eighthName} — Realizado, linha 2`, { exact: true }),
         ).toBeVisible();
         await page.screenshot({
           path: `test-results/forecast-preview/previsao-oito-grupos-${width}.png`,
@@ -523,10 +526,10 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         });
       }
       await page
-        .getByRole("button", { name: "Mover Empreendimento 8 para a esquerda", exact: true })
+        .getByRole("button", { name: `Mover ${eighthName} para a esquerda`, exact: true })
         .tap();
       await browserExpect(page.getByLabel("Nome do empreendimento 7", { exact: true })).toHaveValue(
-        "Empreendimento 8",
+        eighthName,
       );
     });
 
