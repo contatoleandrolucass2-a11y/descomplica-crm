@@ -6,10 +6,6 @@ import { chromium, expect } from "@playwright/test";
 import sharp from "sharp";
 import { checkAssociativeMotion } from "./associative-motion.mjs";
 import {
-  fillDocumentationLegalContext,
-  legalConfirmationLabel,
-} from "./documentation-legal-context.mjs";
-import {
   checkAssociativeCommissionGeometry,
   checkAssociativeSummaryGeometry,
   checkAssociativeWorkspaceGaps,
@@ -1060,9 +1056,19 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     await checkGuidanceContrast(page);
     result.commission = await checkAssociativeCommissionGeometry(commission);
     const documentation = page.locator(`${root} .investor-associative-documentation`);
-    await expect(documentation).toHaveClass(/waiting/);
-    result.legalContext = await fillDocumentationLegalContext(documentation);
     await expect(documentation).toHaveClass(/ready/);
+    await expect(documentation.locator("input, select, [data-documentation-legal]")).toHaveCount(0);
+    await expect(documentation.getByRole("note")).toContainText("Estimativa automática");
+    await expect(
+      page
+        .locator(`${root} .investor-property-summary dt`)
+        .filter({ hasText: /^Status no Salesforce$/i }),
+    ).toHaveCount(0);
+    await expect(
+      page.locator(`${root} .investor-associative-calendar, ${root} input[type="date"]`),
+    ).toHaveCount(0);
+    await expect(page.getByLabel("Andamento oficial da obra (%)", { exact: true })).toHaveCount(0);
+    result.automaticDocumentation = { ready: true, fiscalInputs: 0, confirmationRequired: false };
     await onState("summary");
     await commission.click();
     await expect(page.locator("#investor-associative-commission-dialog")).toBeVisible();
@@ -1097,11 +1103,8 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     stage = "rejection";
     result.rejection = await checkRejection(page);
     stage = "sequenced-motion";
-    await expect(
-      documentation.getByLabel(legalConfirmationLabel, { exact: true }),
-    ).not.toBeChecked();
-    await documentation.getByLabel(legalConfirmationLabel, { exact: true }).check();
     await expect(documentation).toHaveClass(/ready/);
+    await expect(documentation.locator("input, select, [data-documentation-legal]")).toHaveCount(0);
     result.sequencedMotion = await checkAssociativeMotion(page);
     stage = "complete";
     result.passed = true;

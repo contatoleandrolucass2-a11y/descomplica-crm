@@ -1,5 +1,43 @@
 # Worklog
 
+## 2026-10-19: Associativo automatico
+
+Demanda: retirar status Salesforce e editor de datas; andamento ausente em 0%;
+documentacao calculada pelas respostas existentes, sem novo formulario fiscal.
+A implementacao separa estimativa automatica de declaracoes fiscais confirmadas,
+preserva o motor estrito e nao modifica custos comerciais ou formulas pro-soluto.
+Guia e ajuda atualizados. Fontes de ITBI e registro conferidas novamente pelo
+verificador em 19/10/2026: limites municipais, PDF ARISP e 48 faixas do 5o RI
+coincidem com a politica versionada. Lint passou (quatro avisos em artefatos
+locais antigos ignorados pelo Git), typecheck e build passaram. A primeira
+execucao de `pnpm test` e uma repeticao limitada foram interrompidas apos
+timeouts no desktop; a execucao completa com dois workers terminou com 3.931
+testes aprovados e 99 skips preexistentes. Testes focados de guia/FAQ/andamento:
+72 aprovados. Paridade documental: 5.432 cenarios sem divergencia contra o
+motor estrito. Testes operacionais, QA final e CI/publicacao em andamento.
+
+Integrada main `0ba37461` preservando Agendamentos e seus registros de migracao
+autorizada, sem executar migracao nesta tarefa. PR #265 aberto. Operacionais
+Windows: 1.594 aprovados, 19 skips e tres falhas de caminhos/permissoes POSIX
+em Meta Ads, fora do diff. `test:release` interrompido apos ausencia de progresso;
+a CI Linux integral permanece obrigatoria. QA de continuidade corrigiu seletores
+e formato do zero; percentual explicitamente invalido continua exigindo correcao,
+sem ser tratado como dado ausente. A nota de estimativa tem preto/branco na
+impressao independentemente do tema.
+
+CI inicial aprovou validate/restore, mas a jornada guiada usava unidade de
+municipio ficticio. A unidade sintetica principal agora e de Sao Paulo; as
+demais continuam desconhecidas para preservar a cobertura de bloqueio fiscal.
+CI seguinte bloqueou na consulta municipal externa (HTTP 403), sem divergencia
+de valores. Nenhum gate foi ignorado e nao houve deploy.
+
+QA local final aprovado: 17 etapas de continuidade, resposta 503, reconciliacao
+das anuais, guia, movimento e impressao nos tres temas. O teste de indisponibilidade
+aguarda DOM e as respostas/UI esperadas, sem depender de networkidle. Revisao
+independente sem achados; datas equivalentes aos defaults anteriores e calculadora
+documental independente preservada. CI ef391dee passou validate; gates restantes
+precisam ser repetidos no commit final.
+
 ## 2026-10-19: refinamento da Previsão
 
 O calendário foi reduzido em 30%, mantém-se aberto durante interações internas e

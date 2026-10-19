@@ -484,13 +484,13 @@ describe("Associative defined scenario matrix", () => {
     expect(((model.correctedInstallment / income) * 100).toFixed(2)).toBe("12.85");
     expect(((expectedDecreasing / income) * 100).toFixed(2)).toBe("17.70");
 
-    // These supplied percentages are synthetic hypotheses, not recovered source facts.
-    for (const suppliedOfficialPercent of ["", "0", "15", "100"]) {
+    // These supplied percentages and the missing-value default are synthetic hypotheses.
+    for (const suppliedOfficialPercent of ["", "0", "15", "100", "invalid"]) {
       const progress = resolveAssociativeConstructionProgress(
         facts.progress,
         suppliedOfficialPercent,
       );
-      const hasProgress = suppliedOfficialPercent !== "";
+      const hasProgress = suppliedOfficialPercent !== "invalid";
       expect(progress).toBe(hasProgress ? Number(suppliedOfficialPercent) / 100 : null);
       const input = {
         monthlyDates,
@@ -659,18 +659,32 @@ describe("Associative defined scenario matrix", () => {
     },
   );
 
-  it.each(["", "0", "15", "100"])(
-    "passes explicit manual percent %s through the unit-facts helper",
+  it.each([null, undefined, "", " ", "0", "15", "100"])(
+    "resolves missing or explicit manual percent %s through the unit-facts helper",
     (officialPercent) => {
       const resolved = resolveAssociativeConstructionProgress(null, officialPercent);
-      expect(resolved).toBe(officialPercent === "" ? null : Number(officialPercent) / 100);
+      expect(resolved).toBe(Number(officialPercent ?? 0) / 100);
       expect(resolveAssociativeConstructionProgress(0.2, officialPercent)).toBe(0.2);
       const input = syntheticForecastInput({
         constructionProgress: resolved,
         completionDate: "2035-12-30",
       });
       expect(checkForecastScenario(input).mismatches).toEqual([]);
-      expect(oracleForecast(input).workEvolutionAvailable).toBe(officialPercent !== "");
+      expect(oracleForecast(input).workEvolutionAvailable).toBe(true);
+      const comparison = buildAssociativePaymentComparison(input);
+      const approval = calculateAssociativeApproval(
+        syntheticApprovalInput({
+          income: input.income,
+          linearInstallment: comparison.highestLinearPayment,
+          decreasingInstallment: comparison.highestDecreasingPayment,
+          linearMaximumIncomePayment: comparison.highestLinearTotal,
+          decreasingMaximumIncomePayment: comparison.highestDecreasingTotal,
+          installmentComparisonValid: comparison.installmentComparisonAvailable,
+          workEvolutionValid: comparison.workEvolutionAvailable,
+          paymentComparisonValid: comparison.comparisonAvailable,
+        }),
+      );
+      expect(approval.status).toBe("approved");
     },
   );
 

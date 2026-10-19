@@ -8,13 +8,11 @@ import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 import { checkDocumentationCalculator } from "./documentation-calculator.mjs";
-import {
-  checkDocumentationHiddenRequiredField,
-  fillDocumentationLegalContext,
-  legalConfirmationLabel,
-  openDocumentationLegalContext,
-} from "./documentation-legal-context.mjs";
+import { openDocumentationLegalContext } from "./documentation-legal-context.mjs";
 import { checkAssociativeDocumentationHandoff } from "./associative-motion.mjs";
+import { calculateAssociativeDocumentationView } from "../../lib/archive-investor/associative-documentation-adapter.mjs";
+import { checkAssociativeCalculationContinuity } from "./associative-calculation-continuity.mjs";
+import { checkAssociativeGuidance } from "./associative-guidance.mjs";
 
 const calculatorRoute = "/app/simulacao/calcular-documentacao";
 const associativeRoute = "/app/simulacao/associativo-fluxo-linear";
@@ -156,28 +154,72 @@ async function completeAssociativeProposal(page) {
 async function checkAssociativeLegalFlow(page, origin) {
   await page.goto(`${origin}${associativeRoute}`, { waitUntil: "networkidle" });
   await completeAssociativeProposal(page);
+  await expect(
+    page
+      .locator(`${associativeRoot} .investor-property-summary dt`)
+      .filter({ hasText: /^Status no Salesforce$/i }),
+  ).toHaveCount(0);
+  await expect(
+    page.locator(
+      `${associativeRoot} .investor-associative-calendar, ${associativeRoot} input[type="date"]`,
+    ),
+  ).toHaveCount(0);
   const documentation = page.locator(`${associativeRoot} .investor-associative-documentation`);
   const summary = documentation.locator(".investor-associative-documentation-summary");
   const installments = documentation.getByRole("button", { name: "Exibir parcelas", exact: true });
-  const confirm = documentation.getByLabel(legalConfirmationLabel, { exact: true });
-  await expect(documentation).toHaveClass(/waiting/);
-  await expect(summary).toHaveCount(0);
-  await expect(installments).toBeDisabled();
-  const disclosure = documentation.locator("details[data-documentation-legal]");
-  await expect(disclosure).toHaveJSProperty("open", false);
-  await expect(disclosure.locator(":scope > summary")).toBeVisible();
-  await expect(disclosure.locator(":scope > summary")).toContainText(/dados fiscais/i);
-  await expect(disclosure.getByRole("status")).toHaveText("Pendente");
-  await expect(documentation.getByLabel("Município do imóvel", { exact: true })).toBeHidden();
-  await checkDocumentationHiddenRequiredField(documentation);
-  await expect(
-    documentation.getByLabel("Tabela de registro conferida", { exact: true }),
-  ).toHaveValue("");
-  const legalContext = await fillDocumentationLegalContext(documentation, { itbiBase: 230000 });
-  await expect(documentation).toHaveClass(/ready/);
-  await expect(summary).toContainText("3.432,05");
-  await expect(disclosure.getByRole("status")).toHaveText("Confirmado");
-  await expect(installments).toBeEnabled();
+  const field = (label) =>
+    page.locator(`${associativeRoot} input`).and(page.getByLabel(label, { exact: true }));
+  const profile = page.locator(`${associativeRoot} .investor-associative-qualification`);
+  const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const input = {
+    businessUnit: "Direcional",
+    municipality: "sao-paulo-sp",
+    reportedAppraisal: 350000,
+    salePrice: 230000,
+    financing: 190000,
+    income: 5000,
+    firstProperty: "SIM",
+    modality: "MCMV",
+    manualModalityPreference: "MCMV",
+    baseDate: "2026-10-10",
+  };
+  const checks = [];
+  async function assertAutomatic(label) {
+    const view = calculateAssociativeDocumentationView(input);
+    assert.equal(view.result.ok, true, label);
+    assert.ok(view.estimate, "Automatic path must expose estimate metadata");
+    await expect(documentation).toHaveClass(/ready/);
+    await expect(
+      documentation.locator("[data-documentation-legal], select, input[type=checkbox]"),
+    ).toHaveCount(0);
+    await expect(
+      documentation.getByRole("region", { name: "Dados fiscais da documentação", exact: true }),
+    ).toHaveCount(0);
+    await expect(documentation.getByRole("note")).toContainText("Estimativa automática");
+    for (const [term, key] of [
+      ["ITBI", "itbi"],
+      ["Registro de compra e venda", "purchaseRegistration"],
+      ["Registro da alienação fiduciária", "lienRegistration"],
+      ["Despachante", "dispatchFee"],
+      ["Seguro Caixa", "caixaInsurance"],
+    ]) {
+      await expect(
+        documentation
+          .locator("dl > div")
+          .filter({ has: page.getByText(term, { exact: true }) })
+          .locator("dd"),
+      ).toHaveText(money.format(view.result[key]));
+    }
+    await expect(summary).toContainText(money.format(view.result.totalCash));
+    await expect(summary).toContainText(money.format(view.result.installmentValue));
+    await expect(installments).toBeEnabled();
+    checks.push({ label, totalCash: view.result.totalCash, estimate: view.estimate });
+    return view.result;
+  }
+  const initial = await assertAutomatic("initial-mcmv");
+  assert.equal(initial.totalCash, 3432.05, "MCMV/ARISP reference must remain unchanged");
+  await expect(documentation.locator("input")).toHaveCount(0);
+  await expect(summary.getByText("Registro conjunto", { exact: true })).toHaveCount(0);
   await installments.click();
   const dialog = page.locator("#investor-associative-documentation-installments");
   await expect(dialog).toBeVisible();
@@ -185,76 +227,87 @@ async function checkAssociativeLegalFlow(page, origin) {
   await page.keyboard.press("Escape");
   await expect(dialog).toBeHidden();
 
-  for (const unsupported of ["OTHER", ""]) {
-    await documentation
-      .getByLabel("Tabela de registro conferida", { exact: true })
-      .selectOption(unsupported);
-    await expect(confirm).not.toBeChecked();
-    await confirm.check();
-    await expect(documentation).toHaveClass(/blocked/);
-    await expect(documentation.getByRole("alert")).toContainText(/tabela/i);
-    await expect(summary).toHaveCount(0);
-    await expect(installments).toBeDisabled();
-  }
-  await fillDocumentationLegalContext(documentation, { itbiBase: 230000 });
-  await expect(summary).toContainText("3.432,05");
+  await profile.getByRole("button", { name: "SBPE", exact: true }).click();
+  input.modality = "SBPE";
+  input.manualModalityPreference = "SBPE";
+  const manualSbpe = await assertAutomatic("manual-modality-recalculation");
+  assert.equal(manualSbpe.effectiveModality, "SBPE");
+  assert.notEqual(manualSbpe.totalCash, initial.totalCash);
+  await profile.getByRole("button", { name: "MCMV", exact: true }).click();
+  input.modality = "MCMV";
+  input.manualModalityPreference = "MCMV";
+  await assertAutomatic("manual-modality-restored");
 
-  await confirm.uncheck();
+  await field("Financiamento").fill("10000000");
+  await field("Financiamento").blur();
+  input.financing = 100000;
+  const reducedFinancing = await assertAutomatic("financing-recalculation");
+  assert.notEqual(reducedFinancing.totalCash, initial.totalCash);
+  await field("Financiamento").fill("19000000");
+  await field("Financiamento").blur();
+  input.financing = 190000;
+  await assertAutomatic("financing-restored");
+
+  await profile.getByRole("radio", { name: "Não", exact: true }).check();
+  input.firstProperty = "NAO";
+  await assertAutomatic("first-property-recalculation");
+  await field("Renda Familiar").fill("1400000");
+  await field("Renda Familiar").blur();
+  input.income = 14000;
+  const sbpe = await assertAutomatic("income-forces-sbpe");
+  assert.equal(sbpe.effectiveModality, "SBPE");
+  assert.notEqual(sbpe.totalCash, initial.totalCash);
+  await field("Renda Familiar").fill("500000");
+  await field("Renda Familiar").blur();
+  await profile.getByRole("radio", { name: "Sim", exact: true }).check();
+  await profile.getByRole("button", { name: "MCMV", exact: true }).click();
+  input.income = 5000;
+  input.firstProperty = "SIM";
+  await assertAutomatic("profile-restored");
+
+  await page.getByRole("button", { name: "Iniciar proposta com QA-0007", exact: true }).click();
+  await expect(documentation).toHaveClass(/waiting/);
   await expect(summary).toHaveCount(0);
   await expect(installments).toBeDisabled();
-  await confirm.check();
-  await expect(summary).toContainText("3.432,05");
-  await documentation.getByLabel("Valor venal do IPTU (R$)", { exact: true }).fill("");
-  await confirm.check();
-  await expect(documentation).toHaveClass(/blocked/);
-  await expect(documentation.getByRole("alert")).toContainText("valor venal do IPTU");
+  await expect(
+    documentation.locator("[data-documentation-legal], select, input[type=checkbox]"),
+  ).toHaveCount(0);
+  await field("Avaliação bancária oficial da unidade").fill("35000000");
+  await field("Avaliação bancária oficial da unidade").blur();
+  input.salePrice = 256000;
+  input.reportedAppraisal = null;
+  input.appraisalOverride = 350000;
+  const changedUnit = await assertAutomatic("unit-recalculation");
+  assert.notEqual(changedUnit.totalCash, initial.totalCash);
+
+  await page
+    .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
+    .selectOption("Empreendimento QA 02");
+  await page.getByRole("button", { name: "Iniciar proposta com QA-0002", exact: true }).click();
+  await expect(documentation).not.toHaveClass(/ready/);
   await expect(summary).toHaveCount(0);
-  await documentation.getByLabel("Valor venal do IPTU (R$)", { exact: true }).fill("0");
-  await documentation
-    .getByLabel("Origem dos recursos do financiamento", { exact: true })
-    .selectOption("FGTS");
-  await expect(documentation.getByLabel("Primeira transmissão?", { exact: true })).toBeVisible();
-  await documentation.getByLabel("Primeira transmissão?", { exact: true }).selectOption("SIM");
-  await documentation.getByLabel("Programa habitacional", { exact: true }).selectOption("NONE");
-  await confirm.check();
-  await expect(documentation).toHaveClass(/blocked/);
-  await expect(documentation.getByRole("alert")).toContainText("FGTS fora do MCMV");
-  await expect(summary).toHaveCount(0);
-  await documentation.getByLabel("Programa habitacional", { exact: true }).selectOption("MCMV");
-  await confirm.check();
-  await expect(summary).toContainText("3.432,05");
-  await expect(summary.getByText("Registro conjunto", { exact: true })).toHaveCount(0);
-  await documentation.getByLabel("Município do imóvel", { exact: true }).selectOption("other");
-  await confirm.check();
-  await expect(documentation.getByRole("alert")).toContainText(
-    "somente para o município de São Paulo",
-  );
-  await expect(summary).toHaveCount(0);
-  await fillDocumentationLegalContext(documentation, { itbiBase: 230000 });
-  const financing = page
-    .locator(`${associativeRoot} input`)
-    .and(page.getByLabel("Financiamento", { exact: true }));
-  await financing.fill("18900000");
-  await financing.blur();
-  await expect(confirm).not.toBeChecked();
-  await expect(summary).toHaveCount(0);
-  await financing.fill("19000000");
-  await financing.blur();
-  await expect(confirm).not.toBeChecked();
-  await confirm.check();
-  await expect(summary).toContainText("3.432,05");
+  await expect(installments).toBeDisabled();
+  await expect(
+    documentation.locator("[data-documentation-legal], select, input[type=checkbox]"),
+  ).toHaveCount(0);
+  await page
+    .getByRole("combobox", { name: "Nome do Empreendimento", exact: true })
+    .selectOption("Empreendimento QA 01");
+  await page.getByRole("button", { name: "Iniciar proposta com QA-0001", exact: true }).click();
+  input.salePrice = 230000;
+  input.reportedAppraisal = 350000;
+  input.appraisalOverride = 0;
+  await assertAutomatic("unit-restored");
+  await expect(documentation.locator("input")).toHaveCount(0);
   return {
     passed: true,
-    legalContext,
-    incompleteBlocked: true,
-    legalDisclosureInitiallyClosed: true,
-    hiddenRequiredFieldRevealed: true,
-    explicitZeroIptu: true,
-    pendingFgtsBlocked: true,
+    checks,
+    automatic: true,
+    fiscalInputs: 0,
+    confirmationRequired: false,
     mcmvPrecedence: true,
     municipalityBlocked: true,
-    confirmationInvalidated: true,
-    registryTableRequired: true,
+    missingAppraisalBlocked: true,
     installments: 40,
   };
 }
@@ -284,7 +337,17 @@ async function captureFocusedLayouts(page, screen, artifactRoot, matrix, save) {
       process.stdout.write(`Documentation preview: ${screen} ${viewport.width}px ${theme}\n`);
       await setTheme(page, theme);
       await page.emulateMedia({ reducedMotion: "reduce" });
-      const geometry = await checkDocumentationLegalGeometry(scope);
+      let geometry;
+      if (screen === "calculator") geometry = await checkDocumentationLegalGeometry(scope);
+      else {
+        await expect(scope.locator("input, select, [data-documentation-legal]")).toHaveCount(0);
+        await expect(scope.getByRole("note")).toBeVisible();
+        geometry = await scope.evaluate((element) => ({
+          fields: element.querySelectorAll("input, select").length,
+          pageOverflow: document.documentElement.scrollWidth > innerWidth + 1,
+        }));
+        assert.equal(geometry.pageOverflow, false, "Automatic estimate must not overflow");
+      }
       const breakdown = await checkBreakdownGeometry(
         scope,
         screen === "calculator"
@@ -307,10 +370,12 @@ async function captureFocusedLayouts(page, screen, artifactRoot, matrix, save) {
         `${screen}/${theme}/${viewport.width}: accessibility`,
       );
       const prefix = `${screen}-${viewport.width}-${theme}`;
-      await capture(
-        scope.getByRole("region", { name: "Dados fiscais da documentação", exact: true }),
-        `${prefix}-fields.png`,
-      );
+      if (screen === "calculator") {
+        await capture(
+          scope.getByRole("region", { name: "Dados fiscais da documentação", exact: true }),
+          `${prefix}-fields.png`,
+        );
+      } else await capture(scope.getByRole("note"), `${prefix}-estimate.png`);
       await capture(scope, `${prefix}-complete.png`);
       matrix.push({
         viewport,
@@ -326,7 +391,99 @@ async function captureFocusedLayouts(page, screen, artifactRoot, matrix, save) {
   return matrix;
 }
 
-export async function runDocumentationLegalPreview() {
+async function checkAssociativePrintEstimate(page, artifactRoot) {
+  const checks = [];
+  await page.setViewportSize(viewports[0]);
+  for (const theme of Object.keys(themes)) {
+    await setTheme(page, theme);
+    await page.emulateMedia({ media: "print", reducedMotion: "reduce" });
+    try {
+      const note = page
+        .locator(`${associativeRoot} .investor-associative-documentation`)
+        .getByRole("note");
+      await expect(note).toBeVisible();
+      await expect(note).toContainText("Estimativa automática");
+      await expect(note).toContainText("prefeitura, do banco e do cartório");
+      const paint = await note.evaluate((element) => {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 1;
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        const rgba = (color) => {
+          context.clearRect(0, 0, 1, 1);
+          context.fillStyle = color;
+          context.fillRect(0, 0, 1, 1);
+          return [...context.getImageData(0, 0, 1, 1).data];
+        };
+        const style = getComputedStyle(element);
+        const foreground = rgba(style.webkitTextFillColor || style.color);
+        let background = [255, 255, 255, 255];
+        let opaque = true;
+        for (let parent = element; parent; parent = parent.parentElement) {
+          const parentStyle = getComputedStyle(parent);
+          opaque = opaque && Number(parentStyle.opacity) === 1;
+          const color = rgba(parentStyle.backgroundColor);
+          if (color[3] === 255) {
+            background = color;
+            break;
+          }
+        }
+        const luminance = (color) =>
+          color.slice(0, 3).reduce((sum, value, index) => {
+            const channel = value / 255;
+            return (
+              sum +
+              [0.2126, 0.7152, 0.0722][index] *
+                (channel <= 0.04045 ? channel / 12.92 : ((channel + 0.055) / 1.055) ** 2.4)
+            );
+          }, 0);
+        const light = luminance(foreground);
+        const dark = luminance(background);
+        const bounds = element.getBoundingClientRect();
+        const range = document.createRange();
+        range.selectNodeContents(element);
+        return {
+          foreground,
+          background,
+          opaque,
+          contrast: (Math.max(light, dark) + 0.05) / (Math.min(light, dark) + 0.05),
+          clipped: [...range.getClientRects()].some(
+            (rect) =>
+              rect.left < bounds.left - 1 ||
+              rect.right > bounds.right + 1 ||
+              rect.bottom > bounds.bottom + 1,
+          ),
+        };
+      });
+      assert.equal(paint.foreground[3], 255, "Printed estimate text must be opaque");
+      assert.deepEqual(
+        paint.foreground,
+        [0, 0, 0, 255],
+        "Print must retain black estimate text without background ink",
+      );
+      assert.deepEqual(
+        paint.background,
+        [255, 255, 255, 255],
+        "Printed estimate must use a white background in every theme",
+      );
+      assert.equal(paint.opaque, true, "Printed estimate must not fade into the paper");
+      assert.equal(paint.clipped, false, "Printed estimate must not clip");
+      assert.ok(paint.contrast >= 4.5, `Printed estimate contrast: ${paint.contrast}`);
+      await note.screenshot({
+        path: path.join(artifactRoot, `associative-print-${theme}-estimate.png`),
+        animations: "disabled",
+      });
+      checks.push({ theme, media: "print", visible: true, ...paint });
+    } finally {
+      await page.emulateMedia({ media: "screen" });
+    }
+  }
+  return checks;
+}
+
+export async function runDocumentationLegalPreview({
+  printOnly = false,
+  associativeOnly = false,
+} = {}) {
   const root = path.resolve(import.meta.dirname, "../..");
   const artifactRoot = path.join(
     root,
@@ -340,11 +497,22 @@ export async function runDocumentationLegalPreview() {
       "Real ProtectedLayout, navigation, account menu and breadcrumbs; synthetic session boundaries only",
     node: process.version,
     simulatedDate: "2026-10-10",
+    scope: printOnly
+      ? "associative-flow-and-print"
+      : associativeOnly
+        ? "associative-preview"
+        : "full-documentation-preview",
+    notExecuted: printOnly
+      ? ["standalone", "screen-geometry", "motion", "guidance", "continuity"]
+      : associativeOnly
+        ? ["standalone"]
+        : [],
     passed: false,
     screens: {},
     consoleErrors: [],
     blockedExternalRequests: [],
     unexpectedLocalRequests: [],
+    syntheticPresence: { requests: 0, persisted: false },
   };
   const save = () =>
     writeFile(path.join(artifactRoot, "result.json"), `${JSON.stringify(evidence, null, 2)}\n`);
@@ -461,7 +629,10 @@ export async function runDocumentationLegalPreview() {
     .map((file) => `<link rel="stylesheet" href="${file}">`)
     .join("")}</head><body><div id="root"></div><script src="/${script}"></script></body></html>`;
   const snapshot = JSON.parse(buildSyntheticDirectTableQaSnapshot());
-  const items = snapshot.items.slice(0, 12);
+  const items = snapshot.items.slice(0, 12).map((item) => ({
+    ...item,
+    city: item.project === "Empreendimento QA 01" ? "São Paulo" : item.city,
+  }));
   const inventory = { ...snapshot, count: items.length, items };
   const publicAssets = new Map(
     await Promise.all(
@@ -469,6 +640,8 @@ export async function runDocumentationLegalPreview() {
         ["information-at-mark.png", "image/png"],
         ["boravender-logo192.png", "image/png"],
         ["salesforce-no-type-logo.svg", "image/svg+xml"],
+        ["brand/descomplica-wordmark-light.svg", "image/svg+xml"],
+        ["brand/descomplica-wordmark-dark.svg", "image/svg+xml"],
       ].map(async ([name, type]) => [
         `/${name}`,
         { type, body: await readFile(path.join(root, "public", name)) },
@@ -477,6 +650,18 @@ export async function runDocumentationLegalPreview() {
   );
   const server = createServer((request, response) => {
     const url = new URL(request.url, "http://127.0.0.1");
+    // The preview's synthetic session has no database or persisted presence.
+    if (
+      url.pathname === "/api/presence" &&
+      request.method === "POST" &&
+      !url.search &&
+      request.headers.origin === `http://127.0.0.1:${server.address().port}` &&
+      !request.headers["transfer-encoding"] &&
+      Number(request.headers["content-length"] ?? 0) === 0
+    ) {
+      evidence.syntheticPresence.requests += 1;
+      return void response.writeHead(204, { "cache-control": "no-store" }).end();
+    }
     if (request.method !== "GET") {
       evidence.unexpectedLocalRequests.push(`${request.method} ${url.pathname}`);
       return void response.writeHead(405).end();
@@ -528,18 +713,24 @@ export async function runDocumentationLegalPreview() {
       evidence.blockedExternalRequests.push(route.request().url());
       return route.abort("blockedbyclient");
     });
-    for (const screen of ["calculator", "associative"]) {
+    for (const screen of printOnly || associativeOnly
+      ? ["associative"]
+      : ["calculator", "associative"]) {
       const page = await context.newPage();
       await page.clock.setFixedTime(new Date("2026-10-10T15:00:00Z"));
       page.setDefaultTimeout(15_000);
       page.on("pageerror", (error) => evidence.consoleErrors.push({ screen, text: error.message }));
+      const consoleMessages = new Map();
       page.on("console", (message) => {
-        if (message.type() === "error")
-          evidence.consoleErrors.push({
+        if (message.type() === "error") {
+          const entry = {
             screen,
             text: message.text(),
             url: message.location().url,
-          });
+          };
+          consoleMessages.set(message, entry);
+          evidence.consoleErrors.push(entry);
+        }
       });
       const result = (evidence.screens[screen] = { passed: false, matrix: [] });
       process.stdout.write(`Documentation preview: ${screen} flow\n`);
@@ -551,8 +742,15 @@ export async function runDocumentationLegalPreview() {
             path.join(artifactRoot, "calculator-existing-matrix"),
           );
         else result.flow = await checkAssociativeLegalFlow(page, origin);
+        if (printOnly) {
+          result.printEstimate = await checkAssociativePrintEstimate(page, artifactRoot);
+          result.passed = true;
+          continue;
+        }
         await captureFocusedLayouts(page, screen, artifactRoot, result.matrix, save);
         if (screen === "associative") {
+          result.printEstimate = await checkAssociativePrintEstimate(page, artifactRoot);
+          await save();
           result.motion = [];
           for (const viewport of viewports.slice(0, 2)) {
             await page.setViewportSize(viewport);
@@ -565,6 +763,31 @@ export async function runDocumentationLegalPreview() {
             result.motion.push({ viewport, ...(await checkAssociativeDocumentationHandoff(page)) });
             await save();
           }
+          await page.setViewportSize(viewports[0]);
+          for (const [name, check] of [
+            ["guidance", () => checkAssociativeGuidance(page)],
+            [
+              "continuity",
+              () =>
+                checkAssociativeCalculationContinuity(page, {
+                  onExpectedConsoleError(message) {
+                    const entry = consoleMessages.get(message);
+                    assert.ok(entry, "Injected 503 must match an observed console event");
+                    evidence.consoleErrors.splice(evidence.consoleErrors.indexOf(entry), 1);
+                  },
+                }),
+            ],
+          ]) {
+            process.stdout.write(`Documentation preview: ${name}\n`);
+            try {
+              result[name] = await check();
+            } catch (error) {
+              result[name] = { passed: false, error: error.stack ?? String(error) };
+            }
+            await save();
+          }
+          assert.equal(result.guidance.passed, true, result.guidance.error);
+          assert.equal(result.continuity.passed, true, result.continuity.error);
         }
         result.passed = true;
       } catch (error) {
@@ -602,4 +825,7 @@ export async function runDocumentationLegalPreview() {
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href)
-  await runDocumentationLegalPreview();
+  await runDocumentationLegalPreview({
+    printOnly: process.argv.includes("--print-only"),
+    associativeOnly: process.argv.includes("--associative-only"),
+  });

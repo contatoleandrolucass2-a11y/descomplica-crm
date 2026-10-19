@@ -12,7 +12,7 @@ export const ASSOCIATIVE_PROFILE_HELP = {
   firstProperty: {
     title: "Quando devo marcar Sim?",
     description:
-      "Marque Sim se o cliente não tem outro imóvel residencial e não tem financiamento de moradia em andamento. Se tiver qualquer um deles, marque Não. A resposta ajuda a escolher MCMV ou SBPE. Ela não prova, sozinha, que esta é a primeira compra e não concede isenção ou desconto. ITBI (imposto sobre a compra) e registro usam os dados fiscais confirmados na documentação. Banco, prefeitura e cartório precisam conferir as regras e os documentos.",
+      "Marque Sim se o cliente não tem outro imóvel residencial e não tem financiamento de moradia em andamento. Se tiver qualquer um deles, marque Não. A resposta ajuda a escolher MCMV ou SBPE e gera uma estimativa automática de ITBI e registro. Ela não prova, sozinha, que esta é a primeira compra e não concede isenção ou desconto. Banco, prefeitura e cartório precisam conferir as regras e os documentos.",
   },
 } as const;
 
@@ -43,7 +43,7 @@ export const ASSOCIATIVE_POLICY_TOPICS = [
     items: [
       ASSOCIATIVE_PROFILE_HELP.firstProperty.description,
       "Marcar Não direciona a triagem desta página para SBPE; isso não significa que o cliente está impedido de comprar ou financiar outro imóvel. Marcar Sim não aprova MCMV automaticamente: renda, unidade, histórico e demais requisitos ainda precisam ser analisados.",
-      "O cálculo de ITBI e registro usa os dados fiscais da documentação: cidade, datas, histórico de aquisição, uso do imóvel e condições do contrato. Primeiro imóvel e modalidade do perfil comercial não confirmam benefícios fiscais. ITBI é municipal; registro depende dos atos e emolumentos do cartório. Não há isenção nacional automática de ITBI por ser o primeiro imóvel.",
+      "A estimativa de ITBI e registro usa a cidade da unidade, o preço, o financiamento e as respostas do perfil. Não exige novo formulário. Primeiro imóvel e modalidade ajudam a estimar, mas não confirmam benefícios fiscais. ITBI é municipal; registro depende dos atos e emolumentos do cartório. Não há isenção nacional automática de ITBI por ser o primeiro imóvel.",
       "A pergunta simplifica a triagem comercial. Não possuir imóvel hoje não comprova que nunca houve aquisição anterior; informe o histórico completo na análise oficial. Confirme os benefícios aplicáveis, sem prometer documentação gratuita ou redução fixa sobre o total.",
       "Em São Paulo, em 2026, pessoa física que compra imóvel somente residencial pode ter isenção de ITBI até R$ 245.527,77 quando for sua primeira aquisição ou a compra estiver no MCMV. SBPE não elimina, sozinho, esse direito. Os descontos de registro dependem do contrato e não são somados entre si. A declaração de isenção e o enquadramento precisam ser conferidos pelo cartório.",
     ],
@@ -53,7 +53,7 @@ export const ASSOCIATIVE_POLICY_TOPICS = [
     items: [
       "Confira a unidade, incorporadora, valor com kit, B.A., folga de tabela, avaliação bancária e entrega. O valor real da venda parte do valor com kit menos B.A. e folga; um desconto comercial autorizado reduz a base seguinte. Preço de venda e avaliação bancária são bases diferentes.",
       "O valor e a avaliação influenciam o enquadramento, a capacidade estimada de financiamento e os custos documentais. Se a avaliação não vier do relatório, preencha Avaliação bancária no Resumo financeiro; não a substitua automaticamente pelo preço de venda. A instituição avalia a garantia e confirma o crédito.",
-      "O Resumo financeiro estima ITBI + Registro total + Despachante + Seguro Caixa. ITBI e registro exigem os dados fiscais conferidos. O registro de compra considera a maior base aplicável entre preço, valor venal do IPTU e base do ITBI; a garantia considera o financiamento. A avaliação bancária é separada. A data-base orienta o primeiro vencimento das parcelas. O total é uma estimativa, sujeita à validação do banco, município e cartório.",
+      "O Resumo financeiro estima automaticamente ITBI + Registro total + Despachante + Seguro Caixa. Usa o preço de venda como base estimada da compra e o financiamento para a garantia. Na cobrança final, o cartório confere também o valor venal do IPTU e a base do ITBI. A avaliação bancária é separada. A data-base orienta o primeiro vencimento. O total depende da confirmação do banco, município e cartório.",
       "O teto documental local considera o menor valor entre venda e avaliação × cota, usando 80% para MCMV e 90% para SBPE. Essas cotas parametrizadas não são uma promessa de financiamento: produto, imóvel, banco e análise de crédito podem impor condições diferentes. Um teto calculado pela avaliação não mede quanto a família consegue pagar por mês.",
       "Exibir parcelas em Resumo das parcelas mostra o cronograma comercial. Exibir parcelas em Resumo financeiro mostra somente a documentação. Some essas obrigações e as condições reais do banco ao analisar o orçamento; não confunda um quadro com o outro.",
     ],
@@ -195,7 +195,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Resumo das parcelas",
     location: "Quadro abaixo de Parâmetros de aprovação",
     detail:
-      "Compara o Linear com os quatro grupos do Decrescente. Mostra quantidade, valores antes e depois dos juros e datas de pagamento. Os dois usam o Saldo parcelado, já descontadas as anuais nominais. A regra usa 0,5% ao mês antes do mês de término da obra e 1,5% a partir desse mês. O término vem do cadastro da unidade. Em Datas do cálculo, confira também o primeiro juro e a primeira mensal. Essas não são as taxas do financiamento bancário. Exibir parcelas mostra o cronograma e os percentuais da renda.",
+      "Compara o Linear com os quatro grupos do Decrescente. Mostra quantidade, valores antes e depois dos juros e datas de pagamento. Os dois usam o Saldo parcelado, já descontadas as anuais nominais. A regra usa 0,5% ao mês antes do mês de término da obra e 1,5% a partir desse mês. O término vem do cadastro da unidade; o primeiro juro e a primeira mensal têm datas automáticas. Essas não são as taxas do financiamento bancário. Exibir parcelas mostra o cronograma e os percentuais da renda.",
   },
   {
     label: "Proposta pronta: Desconto, Valor de Contrato e B.A. da Unidade",
@@ -219,7 +219,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Composição da documentação",
     location: "Resumo financeiro, ao lado de Composição",
     detail:
-      "A conta é: ITBI + Registro total + Despachante + Seguro Caixa. Confira os dados fiscais antes do cálculo. O quadro separa compra e venda e alienação. Quando há dúvida entre cobrança conjunta e outro benefício, o cálculo fica pendente de confirmação do cartório. As regras, fontes e datas de vigência aparecem abaixo. Prefeitura e cartório precisam confirmar os impostos e os custos de registro. Exibir parcelas neste quadro mostra somente os pagamentos da documentação.",
+      "A conta automática é: ITBI + Registro total + Despachante + Seguro Caixa. O quadro separa compra e venda e alienação. Em São Paulo, usa a tabela referencial vigente e estima os benefícios a partir do perfil. Não confirma IPTU, contrato ou cartório. Prefeitura e cartório confirmam os impostos, benefícios e custos finais. Exibir parcelas neste quadro mostra somente os pagamentos da documentação.",
   },
 ] as const;
 

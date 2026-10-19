@@ -1,10 +1,8 @@
 import assert from "node:assert/strict";
 import { expect as baseExpect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
-import {
-  fillDocumentationLegalContext,
-  legalConfirmationLabel,
-} from "./documentation-legal-context.mjs";
+import { calculateInvestorFlow } from "../../lib/archive-investor/investor-calculator-rules.mjs";
+import { buildAssociativePaymentComparison } from "../../lib/archive-investor/associative-installment-memory.mjs";
 
 const root = ".investor-associative-table-page";
 const approval = `${root} .investor-associative-approval`;
@@ -26,6 +24,8 @@ function buildInventory(withProgress, withAppraisal) {
     id: `qa-continuity-reference-${index}`,
     identifier: `QA-CONT-${index + 1}`,
     project: "Empreendimento QA Continuidade",
+    city: "São Paulo",
+    state: "SP",
     product: `Apartamento QA-CONT-${index + 1} - Referencia QA`,
     finalWithKit: 340_000 + index * 20_000,
     finalPrice: 230_000 + index * 20_000,
@@ -36,7 +36,7 @@ function buildInventory(withProgress, withAppraisal) {
   const reference = {
     source: "ESTOQUE SPC.xlsx",
     sourceKind: "versioned-snapshot",
-    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v4" },
+    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v5" },
     count: items.length,
     items,
   };
@@ -69,7 +69,7 @@ export async function checkAssociativeCalculationContinuity(
     "Continuity QA requires a local synthetic application",
   );
   const result = {
-    contract: "associative-calculation-continuity-v4",
+    contract: "associative-calculation-continuity-v5",
     synthetic: true,
     passed: false,
     stages: [],
@@ -145,6 +145,11 @@ export async function checkAssociativeCalculationContinuity(
     return rawValue === "" ? null : Number(rawValue.replace(/\D/g, "")) / 100;
   };
   const money = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
+  const percent = new Intl.NumberFormat("pt-BR", {
+    style: "percent",
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 2,
+  });
   const selectUnit = (index) =>
     page
       .getByRole("button", {
@@ -209,41 +214,94 @@ export async function checkAssociativeCalculationContinuity(
   }
 
   async function assertCalendarForUnit(index) {
-    const calendar = page.locator(`${root} details.investor-associative-calendar`);
-    if ((await calendar.getAttribute("open")) === null) {
-      await calendar.locator(":scope > summary").click();
-    }
+    await expect(
+      page.locator(`${root} .investor-associative-calendar, ${root} input[type="date"]`),
+    ).toHaveCount(0);
     const completionDate = fixture.live.items[index].completionDate;
     assert.notEqual(completionDate, fixture.reference.items[index].completionDate);
-    await expect(field("Data de término da obra")).toHaveValue(completionDate);
-    await expect(field("Data de término da obra")).toHaveJSProperty("readOnly", true);
-    const firstMonthly = await field("Primeira mensal").inputValue();
-    assert.match(firstMonthly, /^\d{4}-\d{2}-(05|10|15)$/);
+    const baseDate = await page.evaluate(() => {
+      const date = new Date();
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+    });
+    const signals = [];
+    for (let signal = 1; signal <= 3; signal += 1) {
+      signals.push(
+        (await field(`Sinal ${signal}`).count()) ? await moneyValue(`Sinal ${signal}`) : 0,
+      );
+    }
+    const installments = Number(await field("Quantidade de parcelas").inputValue());
+    const engine = calculateInvestorFlow({
+      selectedUnitId: fixture.live.items[index].id,
+      baseDate,
+      completionDate,
+      salePrice: fixture.live.items[index].finalPrice,
+      propertyValue: fixture.live.items[index].finalWithKit,
+      unitBonus: fixture.live.items[index].unitBonus,
+      tableSlack: fixture.live.items[index].tableSlack,
+      financing: await moneyValue("Financiamento"),
+      subsidy: await moneyValue("Subsídio"),
+      fgts: await moneyValue("FGTS"),
+      housingCheck: await moneyValue("Cheque Moradia"),
+      entryValue: await moneyValue("Entrada"),
+      income: await moneyValue("Renda Familiar"),
+      installments: String(installments),
+      signals,
+      intermediaries: [],
+      annualMode: true,
+    });
+    await expect(installmentsButton).toBeEnabled();
+    await installmentsButton.click();
+    const dialog = page.locator("#investor-associative-installments");
+    await expect(dialog).toBeVisible();
+    const monthlyDates = await dialog
+      .locator("tbody tr.is-monthly time")
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("datetime")));
+    assert.equal(monthlyDates.length, installments);
+    assert.deepEqual(monthlyDates, engine.context.monthlyDates.slice(0, installments));
+    const comparison = buildAssociativePaymentComparison({
+      monthlyDates,
+      installments,
+      income: await moneyValue("Renda Familiar"),
+      constructionProgress:
+        fixture.live.items[index].progress ?? fixture.reference.items[index].progress ?? 0,
+      baseDate,
+      completionDate,
+    });
+    await expect(dialog.locator('tbody tr.is-monthly td[data-label="% Obra"]')).toHaveText(
+      comparison.rows.map((row) => percent.format(row.constructionProgress)),
+    );
+    await expect(dialog.locator('tbody tr.is-monthly td[data-label="Evolução Obra"]')).toHaveText(
+      comparison.rows.map((row) =>
+        row.workEvolution == null ? "—" : money.format(row.workEvolution),
+      ),
+    );
+    const firstMonthly = monthlyDates[0];
+    for (const date of monthlyDates) {
+      assert.match(date, /^\d{4}-\d{2}-(05|10|15)$/);
+      assert.equal(new Date(`${date}T12:00:00Z`).toISOString().slice(0, 10), date);
+    }
+    await expect(dialog.locator("tbody tr.is-entry time")).toHaveAttribute("datetime", baseDate);
+    const signalDates = await dialog
+      .locator("tbody tr.is-signal time")
+      .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("datetime")));
+    for (const date of signalDates) {
+      assert.match(date, /^\d{4}-\d{2}-(05|10|15)$/);
+      assert.ok(firstMonthly > date);
+    }
     const [completionYear, completionMonth] = completionDate.split("-").map(Number);
     const [monthlyYear, monthlyMonth] = firstMonthly.split("-").map(Number);
-    const installments = Number(await field("Quantidade de parcelas").inputValue());
     // The construction-end month belongs to post-construction, independently of its day.
     const pre = Math.min(
       installments,
       Math.max(0, (completionYear - monthlyYear) * 12 + completionMonth - monthlyMonth),
     );
     const post = installments - pre;
-    await expect(calendar.locator(".investor-associative-calendar-periods")).toContainText(
-      `${pre} pré-obra · ${post} pós-obra`,
+    await expect(dialog.locator(".investor-associative-dialog-summary")).toContainText(
+      `${installments} mensais: ${pre} parcelas pré-chaves e ${post} parcelas pós-chaves.`,
     );
-    return { completionDate, firstMonthly, pre, post };
-  }
-
-  async function assertCalendarBlocked() {
-    await expect(
-      page.locator(`${approval} .investor-associative-flow-status.approved`),
-    ).toHaveCount(0);
-    await expect(
-      page.locator(
-        `${root} button[aria-controls="investor-associative-installments"]:enabled, ` +
-          `${root} button[aria-controls="investor-associative-ready-proposal"]:enabled`,
-      ),
-    ).toHaveCount(0);
+    await page.keyboard.press("Escape");
+    await expect(dialog).toBeHidden();
+    return { baseDate, completionDate, firstMonthly, signalDates, pre, post };
   }
 
   async function completeProposal() {
@@ -304,6 +362,11 @@ export async function checkAssociativeCalculationContinuity(
   await page.route("**/*", handler);
   try {
     await reloadFixture();
+    await expect(
+      page
+        .locator(`${root} .investor-property-summary dt`)
+        .filter({ hasText: /^Status no Salesforce$/i }),
+    ).toHaveCount(0);
     await expect(unitFact("Avaliação bancária")).toHaveText(money.format(350_000));
     await expect(unitFact("Andamento da obra")).toContainText("50");
     await completeProposal();
@@ -338,151 +401,107 @@ export async function checkAssociativeCalculationContinuity(
       commitment: await assertPositivePercentages("% Comprometimento da Renda"),
     });
 
-    stage = "calendar-validation-and-recovery";
-    await page.getByRole("button", { name: "Inserir Sinal", exact: true }).click();
-    await field("Sinal 1").fill("50000");
-    await field("Sinal 1").blur();
-    await expect.poll(() => moneyValue("Sinal 1")).toBe(500);
-    const automaticCalendar = await assertCalendarForUnit(1);
-    const firstInterest = await field("Data do primeiro juro").inputValue();
-    const calculationDate = await field("Data do cálculo").inputValue();
-    const entryDate = await field("Data da entrada").inputValue();
-    const signalDate = await page
-      .locator(`${root} .payment-group-child-signal`)
-      .filter({ has: page.getByLabel("Sinal 1", { exact: true }) })
-      .locator("time")
-      .getAttribute("datetime");
-    assert.match(signalDate, /^\d{4}-\d{2}-(05|10|15)$/);
-    assert.ok(automaticCalendar.firstMonthly > signalDate);
-    await expect(installmentsButton).toBeEnabled();
-    const automaticStatus = await rule("Status da proposta").innerText();
-    const resetDates = page.getByRole("button", {
-      name: "Restaurar datas automáticas",
-      exact: true,
-    });
-    const invalidDates = [
-      { label: "Data do cálculo", value: "", reason: "missing-calculation-date" },
-      { label: "Data da entrada", value: "", reason: "missing-entry-date" },
-      {
-        label: "Primeira mensal",
-        value: `${automaticCalendar.firstMonthly.slice(0, 8)}06`,
-        reason: "invalid-payment-day",
-      },
-      { label: "Primeira mensal", value: signalDate, reason: "not-after-signal" },
-      { label: "Primeira mensal", value: "", reason: "missing-first-monthly" },
-      { label: "Data do primeiro juro", value: "", reason: "missing-first-interest" },
-      {
-        label: "Data do primeiro juro",
-        value: automaticCalendar.firstMonthly,
-        reason: "interest-not-before-monthly",
-      },
-    ];
-    for (const invalid of invalidDates) {
-      await field(invalid.label).fill(invalid.value);
-      await field(invalid.label).blur();
-      await expect(field(invalid.label)).toHaveValue(invalid.value);
-      await assertCalendarBlocked();
-      await resetDates.click();
-      await expect(field("Data do cálculo")).toHaveValue(calculationDate);
-      await expect(field("Data da entrada")).toHaveValue(entryDate);
-      await expect(field("Data do primeiro juro")).toHaveValue(firstInterest);
-      await expect(field("Primeira mensal")).toHaveValue(automaticCalendar.firstMonthly);
-      await expect(resetDates).toBeDisabled();
-      await expect(rule("Status da proposta")).toHaveText(automaticStatus, { useInnerText: true });
-      await expect(installmentsButton).toBeEnabled();
+    stage = "automatic-calendar-and-signals";
+    const beforeSignals = await assertCalendarForUnit(1);
+    for (let index = 1; index <= 3; index += 1) {
+      await page.getByRole("button", { name: "Inserir Sinal", exact: true }).click();
+      await field(`Sinal ${index}`).fill("50000");
+      await field(`Sinal ${index}`).blur();
+      await expect.poll(() => moneyValue(`Sinal ${index}`)).toBe(500);
+      const calendar = await assertCalendarForUnit(1);
+      assert.equal(calendar.signalDates.length, index);
+      assert.ok(calendar.firstMonthly > beforeSignals.firstMonthly);
+      await expect(rule("Status da proposta")).not.toContainText("PENDENTE");
+      result.stages.push({ stage, signalCount: index, calendar });
     }
-    const shiftedMonthly = new Date(`${automaticCalendar.firstMonthly}T00:00:00.000Z`);
-    shiftedMonthly.setUTCMonth(shiftedMonthly.getUTCMonth() + 1);
-    await field("Primeira mensal").fill(shiftedMonthly.toISOString().slice(0, 10));
-    await field("Primeira mensal").blur();
-    const shiftedCalendar = await assertCalendarForUnit(1);
-    assert.equal(shiftedCalendar.pre, automaticCalendar.pre - 1);
-    assert.equal(shiftedCalendar.post, automaticCalendar.post + 1);
-    await expect(installmentsButton).toBeEnabled();
-    await resetDates.click();
-    assert.deepEqual(await assertCalendarForUnit(1), automaticCalendar);
+    for (let index = 3; index >= 1; index -= 1) {
+      const hideLabel =
+        index === 3
+          ? `Ocultar Sinal ${index} e zerar valor`
+          : `Ocultar Sinal ${index} e os sinais seguintes; os valores serão zerados`;
+      await page.getByRole("button", { name: hideLabel, exact: true }).click();
+      await expect(field(`Sinal ${index}`)).toHaveCount(0);
+    }
+    assert.deepEqual(await assertCalendarForUnit(1), beforeSignals);
     await assertAnswers(6_000);
 
-    const historicalYear = Number(calculationDate.slice(0, 4)) - 1;
-    const historical = {
-      calculation: `${historicalYear}-01-16`,
-      entry: `${historicalYear}-01-20`,
-      interest: `${historicalYear - 1}-12-31`,
-      monthly: `${historicalYear}-03-15`,
-    };
-    for (const [label, value] of [
-      ["Data do cálculo", historical.calculation],
-      ["Data da entrada", historical.entry],
-      ["Data do primeiro juro", historical.interest],
-      ["Primeira mensal", historical.monthly],
-    ]) {
-      await field(label).fill(value);
-      await field(label).blur();
-      await expect(field(label)).toHaveValue(value);
-    }
-    const historicalCalendar = await assertCalendarForUnit(1);
-    assert.equal(historicalCalendar.firstMonthly, historical.monthly);
-    await expect(installmentsButton).toBeEnabled();
-    await expect(
-      page
-        .locator(`${root} .investor-associative-ledger li`)
-        .filter({ has: page.getByLabel("Entrada", { exact: true }) })
-        .locator("time"),
-    ).toHaveAttribute("datetime", historical.entry);
-    await resetDates.click();
-    assert.deepEqual(await assertCalendarForUnit(1), automaticCalendar);
-    await expect(field("Data do cálculo")).toHaveValue(calculationDate);
-    await expect(field("Data da entrada")).toHaveValue(entryDate);
-    result.stages.push({
-      stage,
-      invalidDatesBlocked: invalidDates.map(({ reason }) => reason),
-      automaticCalendar,
-      shiftedCalendar,
-      historicalCalendar,
-      restored: true,
-    });
-
-    stage = "missing-progress";
+    stage = "missing-progress-default-zero";
     fixture = buildInventory(false, true);
+    // Null and absent values must both resolve to zero without user input.
+    for (const source of ["reference", "live"]) delete fixture[source].items[1].progress;
     await reloadFixture();
-    await expect(unitFact("Andamento da obra")).toHaveText("Não informado");
     await completeProposal();
-    const commitment = await assertPositivePercentages("% Comprometimento da Renda");
-    for (const flow of ["Linear", "Decrescente"]) {
-      await expect(rule("% Máximo da renda mensal").locator(`td[data-label="${flow}"]`)).toHaveText(
-        "—",
+    for (let index = 0; index < 2; index += 1) {
+      await selectUnit(index);
+      await assertAnswers(5_000);
+      await expect(page.getByLabel("Andamento oficial da obra (%)", { exact: true })).toHaveCount(
+        0,
       );
-    }
-    await expect(
-      page.locator(`${approval} .investor-associative-flow-status.approved`),
-    ).toHaveCount(0);
-    result.stages.push({ stage, commitment, maximumAvailable: false, approved: false });
-
-    stage = "official-progress-recovery";
-    const progress = page.getByLabel("Andamento oficial da obra (%)", { exact: true });
-    for (const percentage of ["0", "15", "100"]) {
-      await progress.fill(percentage);
+      await expect(unitFact("Andamento da obra")).toHaveText("0%");
+      await assertPositivePercentages("% Comprometimento da Renda");
       await assertPositivePercentages("% Máximo da renda mensal");
       await expect(rule("Status da proposta")).not.toContainText("PENDENTE");
+      await assertCalendarForUnit(index);
+      await installmentsButton.click();
+      const dialog = page.locator("#investor-associative-installments");
+      await expect(dialog.locator(".investor-associative-comparison-formula")).toContainText(
+        `parte de ${percent.format(0)}`,
+      );
+      await page.keyboard.press("Escape");
     }
-    await progress.fill("101");
-    await expect(progress).toHaveAttribute("aria-invalid", "true");
-    await expect(rule("% Máximo da renda mensal").locator('td[data-label="Linear"]')).toHaveText(
-      "—",
-    );
-    await progress.fill("15");
-    await selectUnit(1);
-    await assertAnswers(5_000);
-    await expect(progress).toHaveValue("");
-    await expect(rule("% Máximo da renda mensal").locator('td[data-label="Linear"]')).toHaveText(
-      "—",
-    );
+    const zeroMaximum = await assertPositivePercentages("% Máximo da renda mensal");
+    await field("Renda Familiar").fill("600000");
+    await field("Renda Familiar").blur();
+    await assertAnswers(6_000);
+    const recalculatedMaximum = await assertPositivePercentages("% Máximo da renda mensal");
+    assert.notDeepEqual(recalculatedMaximum, zeroMaximum);
     result.stages.push({
       stage,
-      percentages: [0, 15, 100],
-      invalidBlocked: true,
+      defaultProgress: 0,
+      nullAndAbsent: true,
+      recalculated: true,
       unitIsolation: true,
     });
+
+    stage = "reported-progress-boundaries";
+    for (const progress of [0, 0.15, 1, 1.01]) {
+      fixture = buildInventory(true, true);
+      for (const source of ["reference", "live"]) {
+        fixture[source].items[0].progress = progress;
+        fixture[source].items[1].progress = null;
+      }
+      await reloadFixture();
+      await completeProposal();
+      await expect(page.getByLabel("Andamento oficial da obra (%)", { exact: true })).toHaveCount(
+        progress <= 1 ? 0 : 1,
+      );
+      if (progress <= 1) {
+        await assertPositivePercentages("% Máximo da renda mensal");
+        await expect(rule("Status da proposta")).not.toContainText("PENDENTE");
+        await installmentsButton.click();
+        await expect(
+          page.locator(
+            "#investor-associative-installments .investor-associative-comparison-formula",
+          ),
+        ).toContainText(`parte de ${percent.format(progress)}`);
+        await page.keyboard.press("Escape");
+      } else {
+        for (const flow of ["Linear", "Decrescente"]) {
+          await expect(
+            rule("% Máximo da renda mensal").locator(`td[data-label="${flow}"]`),
+          ).toHaveText("—");
+        }
+        await expect(
+          page.locator(`${approval} .investor-associative-flow-status.approved`),
+        ).toHaveCount(0);
+      }
+      await selectUnit(1);
+      await assertAnswers(5_000);
+      await expect(unitFact("Andamento da obra")).toHaveText("0%");
+      await assertPositivePercentages("% Máximo da renda mensal");
+      await expect(rule("Status da proposta")).not.toContainText("PENDENTE");
+      result.stages.push({ stage, progress, invalidBlocked: progress > 1, unitIsolation: true });
+    }
 
     stage = "missing-appraisal";
     fixture = buildInventory(true, false);
@@ -500,29 +519,27 @@ export async function checkAssociativeCalculationContinuity(
     const documentation = page.locator(`${root} .investor-associative-documentation`);
     await expect(documentation).toHaveClass(/waiting/);
     await field("Avaliação bancária oficial da unidade").fill("35000000");
-    await expect(documentation).toHaveClass(/waiting/);
-    await expect(documentation.locator(".investor-associative-documentation-summary")).toHaveCount(
-      0,
-    );
-    const legalContext = await fillDocumentationLegalContext(documentation);
     await expect(documentation).toHaveClass(/ready/);
+    await expect(
+      documentation.locator("[data-documentation-legal], select, input[type=checkbox]"),
+    ).toHaveCount(0);
+    await expect(documentation.getByRole("note")).toContainText("Estimativa automática");
     await expect(unitFact("Avaliação bancária")).toHaveText("Não informada");
     await selectUnit(1);
     await assertAnswers(5_000);
     await expect(field("Avaliação bancária oficial da unidade")).toHaveValue("");
     await expect(documentation).toHaveClass(/waiting/);
     await expect(
-      documentation.getByLabel(legalConfirmationLabel, { exact: true }),
-    ).not.toBeChecked();
+      documentation.locator("[data-documentation-legal], select, input[type=checkbox]"),
+    ).toHaveCount(0);
     await expect(documentation.locator(".investor-associative-documentation-summary")).toHaveCount(
       0,
     );
     result.stages.push({
       stage,
       calculationRecovered: true,
-      legalContext,
-      legalContextRequired: true,
-      legalConfirmationResetOnUnitChange: true,
+      automaticEstimate: true,
+      appraisalResetOnUnitChange: true,
       inventoryUnchanged: true,
       unitIsolation: true,
     });
@@ -613,7 +630,8 @@ export async function checkAssociativeCalculationContinuity(
     fixture = buildInventory(true, true);
     liveStatus = 503;
     page.on("console", onConsole);
-    await reloadPage();
+    // Inventory responses and unavailable UI below establish readiness without network idle.
+    await reloadPage("domcontentloaded");
     await expect.poll(() => inventoryResponses.reference).toBeGreaterThan(0);
     await expect.poll(() => inventoryResponses.live).toBeGreaterThan(0);
     await expect(page.locator(`${root} .investor-empty-result`)).toContainText(
@@ -660,9 +678,6 @@ export async function checkAssociativeCalculationContinuity(
     const originalProSoluto = await rule("% Pró-Soluto").innerText();
     const originalCommitment = await assertPositivePercentages("% Comprometimento da Renda");
     const originalMaximum = await assertPositivePercentages("% Máximo da renda mensal");
-    await fillDocumentationLegalContext(
-      page.locator(`${root} .investor-associative-documentation`),
-    );
     await expect(page.locator(`${root} .investor-associative-documentation`)).toHaveClass(/ready/);
     const documentationTotal = await page
       .locator(`${root} .investor-associative-documentation-summary`)

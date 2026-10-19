@@ -248,6 +248,8 @@ describe("Tabela Direta integral do arquivo anexado", () => {
         appraisal: number;
         completionDate: string;
         plant: string;
+        city: string;
+        state: string;
       }>;
     };
 
@@ -269,6 +271,9 @@ describe("Tabela Direta integral do arquivo anexado", () => {
     assert.equal(new Set(payload.items.map((item) => item.finalPrice)).size, 121);
 
     const selectedUnit = payload.items[0]!;
+    assert.equal(selectedUnit.city, "São Paulo");
+    assert.equal(selectedUnit.state, "SP");
+    assert.ok(payload.items.slice(1).every((item) => item.city === "Cidade QA"));
     assert.equal(selectedUnit.project, "Empreendimento QA 01");
     assert.deepEqual(
       {
