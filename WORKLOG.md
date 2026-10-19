@@ -25,6 +25,12 @@ e formato do zero; percentual explicitamente invalido continua exigindo correcao
 sem ser tratado como dado ausente. A nota de estimativa tem preto/branco na
 impressao independentemente do tema.
 
+CI inicial aprovou validate/restore, mas a jornada guiada usava unidade de
+municipio ficticio. A unidade sintetica principal agora e de Sao Paulo; as
+demais continuam desconhecidas para preservar a cobertura de bloqueio fiscal.
+CI seguinte bloqueou na consulta municipal externa (HTTP 403), sem divergencia
+de valores. Nenhum gate foi ignorado e nao houve deploy.
+
 ## 2026-10-19: refinamento da Previsão
 
 O calendário foi reduzido em 30%, mantém-se aberto durante interações internas e

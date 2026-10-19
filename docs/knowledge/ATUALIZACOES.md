@@ -2,6 +2,8 @@
 
 ## 2026-10-19: abertura - Associativo automatico
 
+- Retomada observacional: PR #265 em `a5b63ac410f0e0391d75049475263ecaee2322fb`, main `afb4a97df72a3c45a1982a8d520ef400eef2d985`, health `ok`/`3002d578a2db346883e661c4ba568faa4ff99c26`. CI `39265456036` bloqueada por HTTP 403 da fonte municipal, sem alteracao de valores ou bypass. Causa da jornada anterior confirmada: cidade ficticia no fixture; somente a unidade sintetica principal passa a Sao Paulo, preservando o bloqueio de municipios desconhecidos. QA local passou guia/visual/impressao; continuidade final ainda pendente por timeout de reload no cenario 503. Sem publicacao.
+
 - Fontes observacionais: origin/main em `32c7cbdff5147890d8e9a49e58ea31ed2c2965e5`, CI GitHub `39211218104` concluida com sucesso; health publico `https://crm.descomplicapro.com.br/api/health` com status `ok` e versao `3002d578a2db346883e661c4ba568faa4ff99c26`. Diferenca documental do PR #263; runtime anterior confirmado pela nota de publicacao.
 - Checkout limpo anterior em `codex/itbi-registro-publicacao`; trabalho novo em `codex/associativo-calculo-automatico`, baseado no main conferido. CONTEXTO.md e FERRAMENTAS.md de main consultados. Nenhuma alteracao funcional publicada nesta abertura.
 - Escopo solicitado: retirar status Salesforce e editor de datas; andamento ausente estimado em 0%; documentacao automatica a partir do perfil, sem formulario fiscal obrigatorio. Preservar tabelas vigentes e distinguir estimativa de confirmacao fiscal. Testes e publicacao pendentes.
