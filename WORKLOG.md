@@ -18,6 +18,11 @@ vazia confirma campos habilitados, edição da meta mensal e o botão visível. 
 etapa operacional, 1.593 testes passaram e 19 foram ignorados; três verificações
 POSIX de Meta Ads falharam no Windows por permissões/caminhos de arquivos. Elas
 não exercitam esta alteração e permanecem condicionadas à CI Linux, sem bypass.
+A primeira CI Linux aprovou `validate` e `isolated-restore`, mas o E2E ainda
+exigia o antigo estado somente leitura do Administrador na própria página Meta.
+A asserção foi alinhada ao requisito atual: status editável, campo de venda
+habilitado e botão **Salvar alterações** visível, mantendo ausentes as ações de
+rascunho. Nenhuma outra rota foi alterada.
 
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
