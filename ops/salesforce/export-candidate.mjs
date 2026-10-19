@@ -158,7 +158,13 @@ function project(key, rows, analysisEnabled = false) {
       managerName: field(row, "Activity.Gerente_de_Vendas__c"),
       realEstateName:
         field(row, "Activity.Imobiliaria__c.Name") || field(row, "Activity.Nome_da_imobiliaria__c"),
-      development: field(row, "Activity.PDV__c.Name"),
+      development:
+        key === "appointments" && analysisEnabled === true
+          ? field(row, "appointmentDevelopment")
+          : field(row, "Activity.PDV__c.Name"),
+      ...(key === "appointments" && analysisEnabled === true
+        ? { storeName: field(row, "Activity.PDV__c.Name") }
+        : {}),
       accountSource: field(row, "Activity.Account.AccountSource"),
       campaignName: field(row, "Activity.Account.Campanha__c.Name__lookup"),
       ...(analysisEnabled === true
@@ -220,6 +226,16 @@ export async function collectReport(sessionId, definition, startDate, endDate, o
       ? {
           ...definition,
           requiredColumns: [...definition.requiredColumns, "Activity.Unidade_de_negocio__c"],
+          ...(definition.key === "appointments"
+            ? {
+                requiredLabelColumns: {
+                  appointmentDevelopment: {
+                    label: "Nome do empreendimento",
+                    column: "Activity.Nome_do_empreendimento__c",
+                  },
+                },
+              }
+            : {}),
         }
       : definition;
   const rows = await collectReportRows(sessionId, requiredDefinition, startDate, endDate, options);

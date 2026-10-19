@@ -12,6 +12,8 @@ export function AuthorizedBreadcrumbs({ pages }: { pages: NavigationItem[] }) {
   if (
     pathname === "/app" ||
     pathname === "/app/" ||
+    pathname === "/app/etapas/agendamentos" ||
+    pathname === "/app/etapas/agendamentos/" ||
     pathname === "/app/simulacao/associativo-fluxo-linear" ||
     pathname === "/app/simulacao/associativo-fluxo-linear/" ||
     pathname === "/app/gestao/rotina" ||

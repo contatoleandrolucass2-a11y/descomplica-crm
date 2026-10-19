@@ -50,6 +50,47 @@ function view(analysis, viewKey = "all") {
   return analysis.views.find((entry) => entry.viewKey === viewKey);
 }
 
+test("v2 keeps store and true development separate without changing count positions", () => {
+  const source = input();
+  source.reports.appointments = [
+    { ...source.reports.appointments[0], storeName: "Store A", development: "Development A" },
+    {
+      ...source.reports.appointments[0],
+      appointmentCode: "AG-2",
+      storeName: "Store B",
+      development: "Development A",
+    },
+  ];
+  const analysis = buildSalesforceSnapshot(source).payload.dashboard.analysis;
+  assert.equal(analysis.version, 2);
+  const current = view(analysis);
+  assert.deepEqual(current.dimensions.stores, ["Store A", "Store B"]);
+  const appointments = current.facts.filter((fact) => fact[0] === 1);
+  assert.equal(appointments.length, 2);
+  assert.deepEqual(
+    appointments.map((fact) => fact[10]),
+    [0, 1],
+  );
+  assert.ok(
+    appointments.every((fact) => current.dimensions.developments[fact[6]] === "Development A"),
+  );
+  assert.equal(
+    appointments.reduce((sum, fact) => sum + fact[7], 0),
+    2,
+  );
+  assert.ok(current.facts.filter((fact) => fact[0] !== 1).every((fact) => fact[10] === -1));
+  const legacy = structuredClone(analysis);
+  legacy.version = 1;
+  for (const entry of legacy.views) {
+    delete entry.dimensions.stores;
+    entry.facts = entry.facts.filter((fact) => fact[0] !== 1).map((fact) => fact.slice(0, 10));
+  }
+  assert.equal(dashboardAnalysisSchema.safeParse(legacy).success, true);
+  const invalid = structuredClone(analysis);
+  invalid.views[0].facts.find((fact) => fact[0] === 1)[10] = 2;
+  assert.equal(dashboardAnalysisSchema.safeParse(invalid).success, false);
+});
+
 test("analysis is strictly opt-in and preserves every legacy field", () => {
   const source = input();
   const enabled = buildSalesforceSnapshot(source);
@@ -72,11 +113,11 @@ test("uses normalized deduplicated records and emits contract-valid daily counts
   assert.equal(analysis.coverageStart, "2025-10-01");
   assert.deepEqual(view(analysis).dimensions.companies, ["Empresa Internal"]);
   assert.deepEqual(view(analysis).facts, [
-    [0, "2026-01-15", 0, 0, 0, 1, 0, 1, 0, 0],
-    [1, "2025-10-01", 0, 0, 0, 1, 0, 1, 0, 0],
-    [2, "2025-12-31", 0, 0, 0, 1, 0, 1, 0, 0],
-    [3, "2026-01-15", 0, 0, 0, 1, 0, 2, 0, 1],
-    [4, "2026-01-15", 0, 0, 0, 1, 0, 2, 200, 0],
+    [0, "2026-01-15", 0, 0, 0, 1, 0, 1, 0, 0, -1],
+    [1, "2025-10-01", 0, 0, 0, 1, 0, 1, 0, 0, -1],
+    [2, "2025-12-31", 0, 0, 0, 1, 0, 1, 0, 0, -1],
+    [3, "2026-01-15", 0, 0, 0, 1, 0, 2, 0, 1, -1],
+    [4, "2026-01-15", 0, 0, 0, 1, 0, 2, 200, 0, -1],
   ]);
   assert.equal(result.diagnostics.duplicates.opportunities, 1);
   assert.equal(result.diagnostics.duplicates.sales, 1);
@@ -185,7 +226,7 @@ test("missing dimensions use -1 and empty views never inherit labels", () => {
   assert.deepEqual(view(analysis).facts[0].slice(2, 7), [-1, -1, -1, 1, -1]);
   assert.deepEqual(view(analysis, "with_canal_imob"), {
     viewKey: "with_canal_imob",
-    dimensions: { managers: [], owners: [], companies: [], developments: [] },
+    dimensions: { managers: [], owners: [], companies: [], developments: [], stores: [] },
     facts: [],
   });
 });

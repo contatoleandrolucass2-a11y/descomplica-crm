@@ -65,6 +65,44 @@ function validateMetadata(metadata, definition) {
   }
 }
 
+const normalizedLabel = (label) =>
+  label.normalize("NFD").replace(/\p{M}/gu, "").trim().replace(/\s+/g, " ").toLowerCase();
+
+// Resolve from this cycle's describe response, never from an inferred API name.
+// Additional columns affect only the execution instance, not the saved report.
+function resolveLabelColumns(describe, definition, metadata) {
+  const resolved = new Map();
+  for (const [alias, requirement] of Object.entries(definition.requiredLabelColumns ?? {})) {
+    const { label, column: expectedColumn } = requirement;
+    const candidates = new Map();
+    const sources = [describe.reportExtendedMetadata?.detailColumnInfo];
+    for (const category of describe.reportTypeMetadata?.categories ?? [])
+      sources.push(category.columns);
+    for (const source of sources) {
+      if (!object(source)) continue;
+      if (
+        Object.hasOwn(source, expectedColumn) &&
+        (!object(source[expectedColumn]) ||
+          typeof source[expectedColumn].label !== "string" ||
+          normalizedLabel(source[expectedColumn].label) !== normalizedLabel(label))
+      )
+        throw invalid();
+      for (const [column, information] of Object.entries(source)) {
+        if (!object(information) || typeof information.label !== "string") continue;
+        if (normalizedLabel(information.label) !== normalizedLabel(label)) continue;
+        if (!/^[a-zA-Z0-9_.:$]+$/.test(column)) throw invalid();
+        candidates.set(column, information);
+      }
+    }
+    if (candidates.size !== 1) throw invalid();
+    const column = candidates.keys().next().value;
+    if (column !== expectedColumn || column === "Activity.PDV__c.Name") throw invalid();
+    resolved.set(alias, column);
+    if (!metadata.detailColumns.includes(column)) metadata.detailColumns.push(column);
+  }
+  return resolved;
+}
+
 function rowCount(result) {
   const index = result.reportMetadata.aggregates.indexOf("RowCount");
   const value = result.factMap?.["T!T"]?.aggregates?.[index]?.value;
@@ -139,6 +177,7 @@ export async function collectReportRows(sessionId, definition, startDate, endDat
   const describe = await request(`${endpoint}/describe`);
   validateMetadata(describe.reportMetadata, definition);
   const metadata = structuredClone(describe.reportMetadata);
+  const labelColumns = resolveLabelColumns(describe, definition, metadata);
   // Request details/counts at instance creation; a later GET cannot add omitted details.
   metadata.hasDetailRows = true;
   metadata.hasRecordCount = true;
@@ -197,6 +236,17 @@ export async function collectReportRows(sessionId, definition, startDate, endDat
       if (!["New", "Running"].includes(status)) throw invalid();
     }
     validateMetadata(result.reportMetadata, definition);
+    for (const [alias, column] of labelColumns) {
+      const information = result.reportExtendedMetadata?.detailColumnInfo?.[column];
+      if (
+        !object(information) ||
+        typeof information.label !== "string" ||
+        normalizedLabel(information.label) !==
+          normalizedLabel(definition.requiredLabelColumns[alias].label)
+      ) {
+        throw invalid();
+      }
+    }
     if (
       typeof result.allData !== "boolean" ||
       result.hasDetailRows !== true ||
@@ -219,7 +269,10 @@ export async function collectReportRows(sessionId, definition, startDate, endDat
     rows.push(...rowsFrom(result));
   }
   if (rows.length !== expectedCount) throw invalid();
-  return rows;
+  return rows.map((row) => ({
+    ...row,
+    ...Object.fromEntries([...labelColumns].map(([alias, column]) => [alias, row[column]])),
+  }));
 }
 
 export function validateProjectedRows(key, rows) {

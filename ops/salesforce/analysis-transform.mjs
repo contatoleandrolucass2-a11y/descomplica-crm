@@ -10,6 +10,7 @@ const dimensions = {
   owners: "brokerName",
   companies: "businessUnit",
   developments: "development",
+  stores: "storeName",
 };
 
 function validateDate(value) {
@@ -57,7 +58,7 @@ export function buildDashboardAnalysis({ referenceDate, views }) {
         if (row.date < coverageStart || row.date > referenceDate) continue;
         const labels = Object.fromEntries(
           Object.entries(dimensions).map(([key, field]) => {
-            const value = row[field];
+            const value = key === "stores" && stageKey !== "appointments" ? "" : row[field];
             if (value !== undefined && value !== null && typeof value !== "string") throw invalid();
             return [key, (value ?? "").trim()];
           }),
@@ -99,8 +100,9 @@ export function buildDashboardAnalysis({ referenceDate, views }) {
         record.channel,
         index("developments"),
       ];
-      const encoded = JSON.stringify(key);
-      const fact = aggregates.get(encoded) ?? [...key, 0, 0, 0];
+      const store = index("stores");
+      const encoded = JSON.stringify([...key, store]);
+      const fact = aggregates.get(encoded) ?? [...key, 0, 0, 0, store];
       fact[7] += 1;
       fact[8] += record.amount;
       fact[9] += record.approved;
@@ -112,7 +114,7 @@ export function buildDashboardAnalysis({ referenceDate, views }) {
     return { viewKey, dimensions: dictionaries, facts };
   });
   const parsed = dashboardAnalysisSchema.safeParse({
-    version: 1,
+    version: 2,
     coverageStart,
     referenceDate,
     views: analysisViews,

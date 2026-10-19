@@ -402,8 +402,33 @@ describe("dashboard analysis contract", () => {
         }),
       ).success,
     ).toBe(true);
-    expect(dashboardAnalysisFactSchema.safeParse([...fact(), 0]).success).toBe(false);
+    expect(dashboardAnalysisFactSchema.safeParse([...fact(), 0]).success).toBe(true);
+    expect(dashboardAnalysisFactSchema.safeParse([...fact(), 0, 0]).success).toBe(false);
     expect(dashboardAnalysisFactSchema.safeParse(fact().slice(0, -1)).success).toBe(false);
+  });
+
+  it("requires v2 store dictionaries and tuples together while preserving v1", () => {
+    const value = slice();
+    value.version = 2;
+    value.dimensions.stores = ["Loja A", "Loja B"];
+    value.facts = [
+      [1, "2026-10-15", 0, 0, 0, 0, 0, 1, 0, 0, 0],
+      [1, "2026-10-15", 0, 0, 0, 0, 0, 1, 0, 0, 1],
+    ];
+    expect(dashboardAnalysisSliceSchema.safeParse(value).success).toBe(true);
+    expect(dashboardAnalysisSliceSchema.safeParse({ ...value, version: 1 }).success).toBe(false);
+    expect(
+      dashboardAnalysisSliceSchema.safeParse({ ...value, facts: [fact({ stage: 1 })] }).success,
+    ).toBe(false);
+    expect(
+      dashboardAnalysisSliceSchema.safeParse({ ...value, facts: [[...fact({ stage: 1 }), 2]] })
+        .success,
+    ).toBe(false);
+    expect(
+      dashboardAnalysisSliceSchema.safeParse({ ...value, facts: [[...fact({ stage: 0 }), 0]] })
+        .success,
+    ).toBe(false);
+    expect(dashboardAnalysisSliceSchema.safeParse(slice()).success).toBe(true);
   });
 
   it.each([2, 3, 4, 6])(
