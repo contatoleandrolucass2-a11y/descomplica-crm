@@ -1,5 +1,12 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: Gestão > Meta editável publicada
+
+- PR #260 integrado em `3002d578a2db346883e661c4ba568faa4ff99c26`. CI do PR `39198445488` aprovada; CI de `main` `39202510879` aprovada após repetir somente o job que falhou transitoriamente na consulta externa de taxas documentais. Nenhum gate foi removido ou ignorado.
+- Artefato imutável `12164931560` conferido por checksum e revisão. `image:prove` aprovou dois perfis no ID local `sha256:efa0d85cb298c0b85fb839c2a462cffb0a6174257920927daeefd01eb99bb5e9`, sem rebuild.
+- Publicação protegida concluída em `2026-10-19T05:59:19.007Z`, deployment `2c8cfb30-b73a-4180-b7e7-56b2aa2c5df5`. Health público `ok`/`3002d578`, container `healthy`, rota anônima `/app/configuracoes/metas` com `307` para login e ledger sem pendência.
+- Escopo final restrito à página Meta e suas evidências. Não houve migration, mudança de Parcerias/Pontos, configuração de integração, mutação de dados remotos ou alteração de workflow n8n.
+
 ## 2026-10-18: Gestão > Meta editável e com salvamento
 
 - Escopo exclusivo: `/app/configuracoes/metas`. O bloqueio visual vinha da divergência entre o gate da página (`crm.settings.manage`) e o gate Master-only do rascunho comercial. O formulário agora segue a permissão da própria página.
