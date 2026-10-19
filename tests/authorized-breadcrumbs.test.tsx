@@ -28,6 +28,8 @@ describe("authorized breadcrumbs", () => {
   it.each([
     "/app",
     "/app/",
+    "/app/etapas/agendamentos",
+    "/app/etapas/agendamentos/",
     "/app/simulacao/associativo-fluxo-linear",
     "/app/simulacao/associativo-fluxo-linear/",
     "/app/gestao/rotina",
