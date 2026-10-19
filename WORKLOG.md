@@ -7372,7 +7372,7 @@ pendente dos gates completos no SHA final.
 
 - Meta publicada em16/10/2026 00:59 BRT: PR231, main b5458ff, CI38844155079 completa, imagem imutável comprovada, health e autenticação anônima verificados. Evidências em docs/audits/meta-2026-10-15.md.
 
-- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
+- PR240 integrado no SHA `8eb023c1` após a CI `39176723284` aprovar `validate`, `isolated-restore` e `release-gates`. O registro documental da publicação da Meta está concluído; não houve mudança de runtime ou restart.
   A integração passou em lint, tipos, formato, build, auditoria de dependências e
   Gitleaks. Vitest concluiu 3.402 testes, com 86 skips; os testes Node concluíram
   1.178 casos, com cinco skips; o guard de publicação concluiu 703 casos, com
@@ -7655,4 +7655,4 @@ O preview confundia ausência de valores com ausência de autorização: `?empty
 
 Validação focal: preview Chromium aprovou 30 telas, temas e larguras, axe sem violações e sem requisições externas. Capturas locais em `test-results/goal-planning-preview`, não versionadas. A ação continua conduzindo à revisão e ao salvamento de rascunho inativo; ativação de política comercial permanece fora deste escopo.
 
-Lint, typecheck e build passaram com Node 24.19/pnpm 11.20. Vitest aprovou 3.848 testes e ignorou 98. A etapa Node aprovou 1.593, ignorou 19 e manteve três falhas locais de permissões/caminhos Windows em Meta Ads, fora do delta; a CI Linux deve validar o gate integral antes da integração.
+Lint, typecheck e build passaram com Node 24.19/pnpm 11.20. Vitest aprovou 3.861 testes e ignorou 98. A etapa Node aprovou 1.593, ignorou 19 e manteve três falhas locais de permissões/caminhos Windows em Meta Ads, fora do delta; a CI Linux deve validar o gate integral antes da integração.

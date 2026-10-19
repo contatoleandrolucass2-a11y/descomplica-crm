@@ -2816,7 +2816,7 @@ pendente dos gates completos no SHA final.
 
 - Gestão > Meta disponível em produção, com planejamento completo, calendário legível e taxas fracionárias; permissões e rascunho inativo preservados.
 
-- O registro final está no PR240 (somente documentação), aguardando os gates e integração. O repositório não permite merge automático; essa configuração foi preservada. Isso não bloqueia a Meta já publicada nem exige novo restart. Reavaliar a integração documental quando a CI240 concluir.
+- O registro documental final da Meta foi integrado pelo PR240 no SHA `8eb023c1`, após a CI `39176723284` aprovar validação, restauração e release gates. Mudança somente documental, sem restart.
 
 ## 2026-10-16 - Interoperabilidade do catalogo Qlik
 
