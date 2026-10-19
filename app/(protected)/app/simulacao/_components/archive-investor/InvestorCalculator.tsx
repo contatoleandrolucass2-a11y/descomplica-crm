@@ -4,7 +4,6 @@
 
 import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { Search, X } from "lucide-react";
-import Image from "next/image";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { AssociativePageGuide } from "./AssociativePageGuide";
 import { SimulationCanvasHeader } from "../SimulationCanvasHeader";
@@ -814,12 +813,13 @@ export function AssociativePrintSheet({
     aria-label={`Impressão do fluxo ${mode === "linear" ? "linear" : "escalonado"}`}
   >
     <header className="investor-associative-print-header">
-      <Image
+      {/* The print-only SVG must stay compatible with the standalone Vite QA harness. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
         src="/brand/descomplica-wordmark-light.svg"
         alt="Descomplica"
         width={1671}
         height={285}
-        priority
       />
       <div>
         <strong>SIMULAÇÃO IMOBILIÁRIA</strong>
