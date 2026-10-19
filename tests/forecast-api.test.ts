@@ -166,6 +166,24 @@ describe("shared forecast API", () => {
       p_expected_revision: 0,
     });
   });
+  it("passes the free-text action plan after Total without treating it as numeric", async () => {
+    const withActionPlan = structuredClone(body);
+    withActionPlan.rows[0]!.cells.action_plan =
+      "Revisar a abordagem comercial e retornar ao cliente na quinta-feira.";
+
+    await result(await PUT(request(withActionPlan)), 200, record);
+    expect(withActionPlan.columns.at(-1)).toEqual({
+      id: "action_plan",
+      label: "Plano de ação",
+    });
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("save_crm_forecast", {
+      p_document: {
+        ...document,
+        rows: withActionPlan.rows,
+      },
+      p_expected_revision: 0,
+    });
+  });
   it.each(["texto", "12 reais", "1e3", "-1", "NaN", "Infinity", "1.234", "1000000000", "<script>"])(
     "rejects non-numeric or out-of-range comparison value %s before RPC",
     async (value) => {

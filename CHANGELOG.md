@@ -1,5 +1,14 @@
 # Changelog
 
+- Previsão: adiciona calendário de dias validados de quinta a domingo e coluna
+  textual Plano de ação depois do Total; compacta cabeçalhos e permite rolagem
+  horizontal da tabela em desktop e celular.
+- Previsão: remove breadcrumb, subtítulo e instruções visíveis da página, mantendo
+  mensagens operacionais acessíveis para leitores de tela.
+
+- Previsão por empreendimento publicada: sete grupos iniciais, pares numéricos
+  Previsão/Realizado, reordenação conjunta e totais automáticos. Migration
+  autorizada aplicada sem reescrever dados, CI completa e health confirmados.
 - QA da Previsao aguarda o foco da insercao antes de testar entrada numerica.
 
 - Dashboard: filtros controlados por React com fechamento externo e teclado,

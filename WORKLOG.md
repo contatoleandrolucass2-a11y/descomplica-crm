@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-10-18: Calendário e plano de ação da Previsão
+
+A página Previsão ganhou calendário mensal com destaque e contagem exclusiva de
+quinta-feira a domingo como dias validados. A tabela mantém os sete
+empreendimentos, passa a usar rolagem horizontal, reduz a coluna de corretor e
+limita os títulos dos empreendimentos a duas linhas. A coluna fixa Plano de ação
+fica depois do Total, aceita texto livre e acompanha o salvamento compartilhado.
+Breadcrumb, subtítulo e instruções visíveis foram removidos conforme solicitado.
+
+Validação local: lint, typecheck e build aprovados; Vitest aprovou 3.873 testes
+com 99 skips; navegador aprovou nove cenários em desktop/celular, três temas e
+axe; API aprovou 47 testes. A etapa operacional do `pnpm test` teve 1.593
+aprovações, 19 skips e três falhas já conhecidas de semântica POSIX no Windows.
+`test:release` encontrou 11 falhas na fixture Meta Ads já presente em main, todas
+por arquivo sintético ausente; o arquivo isolado reproduz a mesma limitação. A CI
+Linux deve distinguir portabilidade de regressão. pgTAP na restauração isolada e
+CI ainda são obrigatórios antes do merge. A migration
+`20261019004204_forecast_action_plan.sql` está preparada e não foi aplicada
+remotamente; exige autorização específica depois da CI completa.
+
+A primeira CI do PR259 (`39184161292`) aprovou validate e a restauração isolada,
+mas o gate visual encontrou uma expectativa dependente do título do oitavo
+empreendimento. O teste agora lê o título realmente criado antes de validar a
+rolagem e a reordenação. A jornada Chromium corrigida passou 9/9 localmente; nova
+CI é obrigatória e nenhum comportamento de produção foi alterado nessa correção.
+
+## 2026-10-18: Publicação da Previsão por empreendimento
+
+PR256 integrado após CI completa. A versão atual de main, eeb42a45, preserva
+também o PR257 e passou os quatro jobs da CI39165128618. Migration autorizada
+aplicada via MCP como20261018232900, sem reescrever previsões existentes.
+Imagem imutável conferida e publicada pelo coordenador às23:29:19Z, deployment
+4ecf1a6f-18a9-4ab7-9dfc-31bb39ab3f5b. Health200/ok/eeb42a45, container healthy,
+página anônima307 e API401. QA funcional autenticado somente sintético na CI;
+nenhuma fixture gravada em produção. Evidências completas em ATUALIZACOES.md.
+
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
 CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no

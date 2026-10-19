@@ -30,14 +30,6 @@
   padding-bottom: 20px;
   border-bottom: 1px solid var(--analytics-line);
 }
-.header > div {
-  min-width: 0;
-}
-.description {
-  margin: 6px 0 0;
-  color: var(--analytics-muted);
-  font-size: 13px;
-}
 .header h1 {
   margin: 0;
   font-size: 28px;
@@ -82,23 +74,6 @@
   outline: 2px solid var(--analytics-cyan-strong);
   outline-offset: 2px;
 }
-.status,
-.help {
-  color: var(--analytics-muted);
-  font-size: 13px;
-  line-height: 1.5;
-}
-.status {
-  min-height: 20px;
-  margin: 12px 0 4px;
-}
-.status[data-dirty="true"] {
-  color: var(--analytics-cyan-strong);
-  font-weight: 600;
-}
-.help {
-  margin: 4px 0 14px;
-}
 .notice,
 .error {
   padding: 12px;
@@ -118,12 +93,15 @@
 .tableScroll {
   position: relative;
   max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
   border: 1px solid var(--analytics-line);
   border-radius: 8px;
   background: var(--analytics-surface);
 }
 .table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-spacing: 0;
   table-layout: fixed;
 }
@@ -150,10 +128,16 @@
   background: var(--analytics-surface-muted);
 }
 .brokerColumn {
-  width: 17%;
+  width: 180px;
+}
+.metricColumn {
+  width: 96px;
 }
 .totalColumn {
-  width: 8%;
+  width: 92px;
+}
+.actionPlanColumn {
+  width: auto;
 }
 .brokerHeading {
   padding: 10px !important;
@@ -162,10 +146,17 @@
 .totalHeading {
   padding: 8px 3px !important;
 }
+.actionPlanHeading {
+  min-width: 280px !important;
+  padding: 8px 12px !important;
+  white-space: nowrap;
+}
 .metricHeadings th {
-  padding: 10px 2px !important;
-  font-size: clamp(10px, 0.85vw, 13px);
-  overflow-wrap: anywhere;
+  min-width: 96px;
+  padding: 10px 6px !important;
+  font-size: 12px;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 .brokerContent {
   display: flex;
@@ -185,7 +176,7 @@
   background: transparent;
 }
 .columnHeading {
-  min-width: 0;
+  min-width: 192px;
   padding: 4px 2px;
 }
 .groupActions {
@@ -242,6 +233,14 @@
   resize: none;
   font-weight: 650;
 }
+.page .main .table .columnHeading textarea {
+  height: 50px;
+  overflow: hidden;
+  padding: 6px 8px 2px;
+  font-size: 13px;
+  line-height: 1.35;
+  text-wrap: balance;
+}
 .page .main .table .brokerCell input {
   text-align: right;
   padding-right: 6px;
@@ -272,6 +271,28 @@
   font-weight: 700;
   background: var(--analytics-surface-muted);
 }
+.actionPlanCell {
+  min-width: 280px !important;
+  max-width: 560px;
+  background: var(--analytics-surface);
+}
+.page .main .table .actionPlanCell textarea {
+  width: auto;
+  min-width: 280px;
+  max-width: 560px;
+  min-height: 74px;
+  padding: 10px 12px;
+  resize: horizontal;
+  overflow: auto;
+  text-align: left;
+  font-size: 13px;
+  font-weight: 400;
+  field-sizing: content;
+}
+.actionPlanFooter {
+  min-width: 280px;
+  color: var(--analytics-muted);
+}
 .footerLabel {
   text-align: right !important;
   padding: 12px 8px !important;
@@ -294,101 +315,193 @@
   overflow: hidden;
   clip-path: inset(50%);
 }
+.calendarDialog {
+  width: min(560px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--analytics-line);
+  border-radius: 14px;
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  box-shadow: 0 24px 70px rgb(0 0 0 / 35%);
+}
+.calendarDialog::backdrop {
+  background: rgb(3 15 24 / 72%);
+  backdrop-filter: blur(3px);
+}
+.calendarPanel {
+  padding: 20px;
+}
+.calendarHeader {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--analytics-line);
+}
+.calendarHeader span,
+.calendarFilters label > span {
+  display: block;
+  color: var(--analytics-muted);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+}
+.calendarHeader h2 {
+  margin: 2px 0 0;
+  font-size: 20px;
+  line-height: 1.2;
+}
+.calendarBadge {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  border: 1px solid var(--analytics-cyan-strong);
+  border-radius: 14px;
+  color: var(--analytics-cyan-strong);
+  font-size: 15px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.page .calendarClose {
+  width: 44px;
+  min-width: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.calendarTitleRow {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 0 6px;
+}
+.calendarTitleRow strong {
+  display: block;
+  font-size: 18px;
+}
+.calendarTitleRow p {
+  margin: 2px 0 0;
+  color: var(--analytics-muted);
+  font-size: 12px;
+}
+.calendarTitleRow > span {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  padding: 7px 10px;
+  background: var(--analytics-surface-strong);
+  color: var(--analytics-positive-ink);
+  font-size: 12px;
+  font-weight: 750;
+}
+.calendarFilters {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(100px, 1fr);
+  gap: 8px;
+  max-width: 290px;
+  margin: 0 0 10px auto;
+}
+.calendarFilters select {
+  width: 100%;
+  min-height: 40px;
+  margin-top: 3px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 8px;
+  padding: 6px 30px 6px 10px;
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  font: inherit;
+  font-weight: 650;
+}
+.calendarGrid {
+  display: grid;
+  gap: 7px;
+}
+.calendarGridRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(38px, 1fr));
+  gap: 7px;
+}
+.calendarWeekday {
+  padding: 5px 0;
+  color: var(--analytics-muted);
+  font-size: 10px;
+  font-weight: 800;
+  text-align: center;
+}
+.calendarDay,
+.calendarEmpty {
+  display: grid;
+  aspect-ratio: 1;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  font-size: 13px;
+  font-variant-numeric: tabular-nums;
+}
+.calendarDay {
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-muted);
+}
+.calendarDayValidated {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 16%, var(--analytics-surface));
+  color: var(--analytics-ink);
+  font-weight: 700;
+}
+.calendarDayCurrent {
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--analytics-cyan-strong) 42%, transparent);
+}
+.calendarSummary {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.55fr;
+  margin-top: 12px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 10px;
+  overflow: hidden;
+}
+.calendarSummary > div {
+  display: flex;
+  min-width: 0;
+  min-height: 112px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  padding: 10px;
+  border-right: 1px solid var(--analytics-line);
+  text-align: center;
+}
+.calendarSummary > div:last-child {
+  border-right: 0;
+}
+.calendarSummary span,
+.calendarSummary small {
+  color: var(--analytics-muted);
+  font-size: 11px;
+  line-height: 1.35;
+}
+.calendarSummary strong {
+  font-size: 24px;
+  line-height: 1.2;
+}
+.calendarSummary .calendarRhythm {
+  background: var(--analytics-surface-strong);
+}
+.calendarSummary .calendarRhythm strong {
+  font-size: 14px;
+}
 @media (max-width: 900px) {
-  .table,
-  .table thead,
-  .table tbody,
-  .table tfoot {
-    display: block;
-    width: 100%;
-  }
-  .table colgroup,
-  .table .metricHeadings,
-  .table .brokerHeading,
-  .table .totalHeading {
-    display: none;
-  }
-  .table thead > tr {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 8px;
-    padding: 10px;
-  }
-  .table .groupHeading {
-    display: block;
-    border: 1px solid var(--analytics-line);
+  .tableScroll {
     border-radius: 6px;
-  }
-  .table .columnHeading {
-    padding: 4px;
-  }
-  .groupActions {
-    grid-template-columns: 16px repeat(3, minmax(0, 1fr));
-  }
-  .groupActions button {
-    min-height: 44px;
-  }
-  .table tbody > tr,
-  .table tfoot > tr {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    margin: 12px;
-    border: 1px solid var(--analytics-line);
-    border-radius: 6px;
-    overflow: hidden;
-  }
-  .table tbody tr > *,
-  .table tfoot tr > * {
-    display: block;
-    border-bottom: 1px solid var(--analytics-line);
-  }
-  .table :is(.brokerCell, .footerLabel, .totalCell) {
-    grid-column: 1 / -1;
-    border-right: 0;
-  }
-  .table .brokerCell {
-    background: var(--analytics-surface-muted);
-  }
-  .table .brokerContent {
-    min-height: 56px;
-  }
-  .brokerContent button {
-    flex-basis: 44px;
-    min-height: 44px;
-  }
-  .table .numericCell:nth-child(odd),
-  .table tfoot td:nth-child(odd) {
-    border-right: 0;
-  }
-  .mobileLabel {
-    display: block;
-    color: var(--analytics-muted);
-    font-size: 11px;
-    line-height: 1.4;
-    padding: 8px 6px 0;
-    text-align: center;
-  }
-  .table .totalCell {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 12px;
-    border-bottom: 0;
-  }
-  .table .totalCell .mobileLabel {
-    padding: 0;
-    font-size: 13px;
   }
   .page .main .table input {
-    height: 44px;
-    padding: 8px;
     font-size: 16px;
-  }
-  .page .main .table textarea {
-    font-size: 13px;
-  }
-  .table output {
-    font-size: 14px;
   }
 }
 @media (max-width: 640px) {
@@ -408,21 +521,44 @@
     font-size: 12px;
   }
   .actions .save {
-    grid-column: 1 / -1;
+    grid-column: auto;
   }
   .header h1 {
     font-size: 24px;
   }
-  .table thead > tr {
-    grid-template-columns: minmax(0, 1fr);
+  .calendarPanel {
+    padding: 14px;
   }
-  .columnHeading:has(.groupActions) {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 148px;
-    align-items: center;
+  .calendarHeader h2 {
+    font-size: 17px;
   }
-  .table tbody > tr,
-  .table tfoot > tr {
-    margin: 8px;
+  .calendarTitleRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .calendarTitleRow > span {
+    align-self: flex-start;
+  }
+  .calendarFilters {
+    max-width: none;
+    margin-top: 4px;
+  }
+  .calendarGrid {
+    gap: 4px;
+  }
+  .calendarGridRow {
+    grid-template-columns: repeat(7, minmax(32px, 1fr));
+    gap: 4px;
+  }
+  .calendarSummary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .calendarSummary > div:nth-child(2) {
+    border-right: 0;
+  }
+  .calendarSummary .calendarRhythm {
+    grid-column: 1 / -1;
+    min-height: 88px;
+    border-top: 1px solid var(--analytics-line);
   }
 }

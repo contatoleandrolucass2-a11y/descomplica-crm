@@ -66,4 +66,16 @@ describe("manual forecast contract", () => {
     expect(forecastSnapshotSchema.parse({ forecast: null, can_edit: false }).forecast).toBeNull();
     expect(forecastSnapshotSchema.safeParse({ forecast: null }).success).toBe(false);
   });
+  it("requires action_plan as the final stored column", () => {
+    const current = createForecastDocument();
+    expect(current.columns).toHaveLength(16);
+    expect(current.columns.at(-1)).toEqual({ id: "action_plan", label: "Plano de ação" });
+    expect(
+      forecastSaveSchema.safeParse({
+        ...current,
+        columns: [current.columns.at(-1)!, ...current.columns.slice(0, -1)],
+        expected_revision: 0,
+      }).success,
+    ).toBe(false);
+  });
 });
