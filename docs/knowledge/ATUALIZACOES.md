@@ -2,6 +2,8 @@
 
 ## 2026-10-19: Associativo automatico publicado
 
+- Encerramento documental: registro final enviado ao PR #267, separado do runtime ja publicado. Em 16:21 UTC, CI documental `39284638442` aguardava runner; merge automatico nao e permitido pelo repositorio. Pendencia restrita a integracao desse registro apos CI aprovada, sem novo deploy. Obsidian sincronizado com o registro completo; nenhum teste ou protecao dispensado.
+
 - Publicacao protegida concluida em 2026-10-19T16:18:42.516Z (13:18:42 America/Sao_Paulo), deployment `e0b2e4b3-fcc5-444f-9e49-573006e97ecd`, SHA `f56236b3ada830cde0f17c4c205ef735bba77351`. CI main `39274507754` concluida com os quatro jobs aprovados; nao houve bypass apesar do atraso externo do GitHub.
 - Identidade do artefato conferida: checksum do arquivo, revisao, configuracao CI `sha256:40912c4e2cfbe68712624ebbbd639edb19c4a012aad78fa8308331ea66ca4cf0`, manifesto/ID local `sha256:1ca4f8db9541d54d527185e8ebabfcff495fc2a9f2678b75c976e0365f5dff19`, mesmas 11 camadas linux/amd64. `image:prove` aprovou os dois perfis; sem rebuild no servidor.
 - Backup privado verificado em `/var/backups/descomplica-crm/releases/f56236b3ada830cde0f17c4c205ef735bba77351.SuHatI`; conteudo nao exportado. Release anterior `afb4a97df72a3c45a1982a8d520ef400eef2d985`, deployment `0eebcfc6-83af-4e09-947f-fe737fc58a5d`, preservada para recuperacao.
