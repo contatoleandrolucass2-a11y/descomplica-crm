@@ -2,6 +2,8 @@
 
 ## 2026-10-19: Gráficos de agendamentos
 
+A CI inicial aprovou validate Linux e encontrou uma fixture que tentava alterar Master com identidade autenticada e uma lista de RPCs sem a função nova. Corrigidos somente o preparo privilegiado do teste e o inventário exato de grants; plan28 e proteções preservados. Nova CI exigida antes de integração.
+
 A página de agendamentos recebe sete gráficos: barras por dia, por semana do mês e por mês, e rankings decrescentes de gerente, responsável, loja e empreendimento. O seletor de ano pertence somente ao gráfico mensal. Semanas seguem segunda a domingo, incluindo a terceira semana e até a sexta quando existente; meses e semanas sem registros não geram barras. Rankings preservam todos os nomes e contagens. O layout usa três colunas no desktop e reorganiza a grade em telas menores, sem rolagem interna. Removidos desta página o painel Posição no funil, a navegação/filtros legados e o breadcrumb.
 
 O relatório Salesforce já apresentava a coluna Nome do empreendimento, identificada pelo cabeçalho como Activity.Nome_do_empreendimento**c. Não houve edição da definição salva. A coleta valida sua identificação e label tanto no describe quanto no resultado a cada execução. PDV continua vindo de Activity.PDV**c.Name, em dimensão própria. Ausência ou ambiguidade bloqueia a coleta; valores vêm da exportação vigente, sem cache de nomes fixos.

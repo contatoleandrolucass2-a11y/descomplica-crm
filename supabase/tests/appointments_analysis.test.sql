@@ -160,17 +160,25 @@ select is((select count(*) from public.read_crm_appointments_analysis(
   'stage read rejects JWT claims without a live session');
 reset role;
 reset request.jwt.claims;
+-- PostgreSQL prepares fixtures without impersonating an authenticated Master.
+select set_config('request.jwt.claim.sub','',true);
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason) values
   ('ac190000-0000-4000-8000-000000000001','crm.dashboard.all.view','deny','Synthetic view denial');
+select set_config('request.jwt.claim.sub','ac190000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;
 select is((select count(*) from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),0::bigint,
   'stage permission cannot bypass an explicitly denied view');
 reset role;
+reset request.jwt.claims;
+select set_config('request.jwt.claim.sub','',true);
 delete from public.user_permission_overrides
 where user_id='ac190000-0000-4000-8000-000000000001' and permission_key='crm.dashboard.all.view';
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason) values
   ('ac190000-0000-4000-8000-000000000001','crm.stage.appointments.view','deny','Synthetic immediate revocation');
+select set_config('request.jwt.claim.sub','ac190000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;
 select is((select count(*) from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),0::bigint,'stage permission revocation is immediate');
