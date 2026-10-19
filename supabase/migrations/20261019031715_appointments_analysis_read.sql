@@ -1,6 +1,6 @@
 -- Isolate appointment facts AND dictionaries before they cross the server boundary.
 create function private.project_crm_appointments_analysis(p_payload jsonb, p_can_rank boolean)
-returns jsonb language plpgsql set search_path = '' as $$
+returns jsonb language plpgsql stable set search_path = '' as $$
 declare
   v_payload jsonb := p_payload;
   v_facts jsonb;

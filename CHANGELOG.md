@@ -1,5 +1,7 @@
 # Changelog
 
+- Leitura de agendamentos: auxiliar SQL marcada STABLE, coerente com a RPC somente de leitura e com o lint do banco.
+
 - QA de agendamentos: prepara overrides sintéticos sem identidade autenticada e inclui a nova RPC na lista auditada, preservando o bloqueio de contas Master.
 
 - Agendamentos: sete gráficos com evolução diária, semanas do mês, meses por ano independente e rankings completos de gerente, responsável, loja e empreendimento. Grade responsiva de três colunas e remoção dos blocos legados indicados.
