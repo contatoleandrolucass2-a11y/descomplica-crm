@@ -17,6 +17,14 @@ suíte completa passaram: 3.952 testes Vitest aprovados, 102 skips condicionais;
 release gates locais com 723 aprovações e 14 skips condicionais. Evidência:
 `test-results/associative-page-guide/2026-10-19T18-07-25.052Z/result.json`.
 
+A CI `39301197819` aprovou validate, restauração isolada, banco, build, jornada
+do Associativo, acessibilidade, teclado e navegação. A etapa visual identificou
+somente duas diferenças intencionais, nas referências de 1024×768 e 768×1024.
+As duas capturas Linux foram inspecionadas e adotadas; as outras 240 imagens e
+os limites de comparação foram preservados. Artefato `12214372820`, SHA-256
+`3d059db6e6c5ad6356b06429a2f5d9f030935794bd9f8f8da6fc277d6c687730`.
+Uma nova CI integral em modo de verificação continua obrigatória antes do merge.
+
 ## 2026-10-19: Associativo automatico
 
 Demanda: retirar status Salesforce e editor de datas; andamento ausente em 0%;

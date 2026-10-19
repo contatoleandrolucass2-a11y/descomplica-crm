@@ -17,6 +17,14 @@
   de 57 rotas e suíte completa passaram; Vitest aprovou 3.952 testes com 102
   skips condicionais, e os release gates locais aprovaram 723 com 14 skips.
 - Evidência local: `test-results/associative-page-guide/2026-10-19T18-07-25.052Z/result.json`.
+- CI `39301197819`: validate, restore, banco, build, guia, acessibilidade,
+  teclado e navegação aprovados. Apenas as referências de tablet 1024×768 e
+  768×1024 excederam o limite visual pela nova coluna solicitada.
+- As duas capturas do artefato Linux `12214372820` foram revisadas e adotadas;
+  SHA-256 do ZIP
+  `3d059db6e6c5ad6356b06429a2f5d9f030935794bd9f8f8da6fc277d6c687730`.
+  As outras 240 imagens e os limites de 1%/16 foram preservados. Nova CI
+  integral em modo de verificação é obrigatória antes de merge ou publicação.
 
 ## 2026-10-19: abertura - Associativo automatico
 

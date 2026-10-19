@@ -8,6 +8,8 @@
   informação ausente continuam distintos.
 - Os demais simuladores e as regras de estoque, seleção e cálculo permanecem
   inalterados.
+- A matriz autenticada preserva 240 referências e atualiza somente as duas
+  imagens de tablet do Associativo que mudaram pela nova coluna.
 
 ## 2026-10-19 - Associativo com documentacao automatica
 
