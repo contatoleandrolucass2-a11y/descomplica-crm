@@ -100,7 +100,7 @@ async function productionCss(viteCss) {
   const transformed = postcss.parse(compiled);
   transformed.walkRules((rule) => {
     for (const [vite, next] of mappings)
-      rule.selector = rule.selector.replaceAll(`.${next}`, `.${vite}`);
+      rule.selector = rule.selector.replace(new RegExp(`\\.${next}(?![\\w-])`, "g"), `.${vite}`);
   });
   viteRules.walkRules((rule) => {
     if ([...mappings.keys()].some((name) => rule.selector.includes(`.${name}`))) rule.remove();
@@ -319,6 +319,30 @@ export async function runAppointmentsPreview() {
     }
     const daily = region("Agendamentos por dia");
     await expect(daily.getByRole("listitem")).toHaveCount(31);
+    const barGeometry = await daily.getByRole("listitem").evaluateAll((items) =>
+      items.map((item) => ({
+        trackHeight: item.firstElementChild.getBoundingClientRect().height,
+        barHeight: item.firstElementChild.firstElementChild.getBoundingClientRect().height,
+        barWidth: item.firstElementChild.firstElementChild.getBoundingClientRect().width,
+      })),
+    );
+    barGeometry.forEach((bar, index) => {
+      check(bar.barWidth > 0, `Daily bar ${index + 1} must be visible`);
+      check(
+        Math.abs(bar.barHeight / bar.trackHeight - ((index % 4) + 1) / 4) < 0.02,
+        `Daily bar ${index + 1} height must match exact relative count`,
+      );
+    });
+    const rankingBars = await region("Ranking por responsável")
+      .getByRole("listitem")
+      .evaluateAll((items) =>
+        items.map((item) => item.lastElementChild.firstElementChild.getBoundingClientRect().height),
+      );
+    check(
+      rankingBars.every((height) => height > 0),
+      "All horizontal ranking bars must have visible height",
+    );
+    evidence.barGeometry = { daily: barGeometry, ownerBarHeights: rankingBars };
     await expect(region("Agendamentos por semana").getByRole("listitem")).toHaveCount(6);
     assert.deepEqual(
       await daily
