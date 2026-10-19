@@ -26,6 +26,9 @@ const navigation = vi.hoisted(() => ({ query: "", replace: vi.fn(), refresh: vi.
 vi.mock("react", async (original) => ({
   ...(await original<typeof import("react")>()),
   useTransition: () => [false, (callback: () => void) => callback()],
+  useState: (initial: unknown) => [initial, vi.fn()],
+  useRef: (initial: unknown) => ({ current: initial }),
+  useEffect: () => undefined,
 }));
 
 vi.mock("next/link", () => ({
@@ -205,6 +208,7 @@ function monthlyFigures(root: Node) {
 }
 
 type InteractiveProps = {
+  type?: string;
   children?: ReactNode;
   onChange?: () => void;
   onClick?: () => void;
@@ -472,14 +476,14 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       expect(value(card(monthly, label!), "Agendamentos")).toBe(expected);
     const expected = card(monthly, "Meta esperada at\u00e9 hoje");
     expect(elements(expected, "dd").every((node) => text(node) === "Indispon\u00edvel")).toBe(true);
-    expect(elements(root, "fieldset").map((node) => attribute(node, "aria-label"))).toEqual([
+    const groups = elements(root, "div").filter((node) => attribute(node, "role") === "group");
+    expect(groups.map((node) => attribute(node, "aria-label"))).toEqual([
       "Canal de vendas",
       "Gerente de Vendas",
       "Responsável da conta",
       "Empresa",
     ]);
-    for (const fieldset of elements(root, "fieldset"))
-      expect(attribute(fieldset, "disabled")).toBe("");
+    for (const input of elements(root, "input")) expect(attribute(input, "disabled")).toBe("");
     for (const dialog of elements(root, "dialog")) expect(elements(dialog, "time")).toHaveLength(0);
   });
 
@@ -631,9 +635,9 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       owner: "Corretor sintético 1",
     });
     const root = render({ analysis, filters });
-    const fieldsets = elements(root, "fieldset");
+    const fieldsets = elements(root, "div").filter((node) => attribute(node, "role") === "group");
     expect(fieldsets).toHaveLength(4);
-    for (const fieldset of fieldsets) expect(attribute(fieldset, "disabled")).toBeUndefined();
+    for (const fieldset of fieldsets) expect(attribute(fieldset, "hidden")).toBe("");
     const channels = only(
       fieldsets.filter((fieldset) => attribute(fieldset, "aria-label") === "Canal de vendas"),
     );
@@ -684,7 +688,10 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       channel: DASHBOARD_CHANNELS[0],
     });
     const tree = DashboardFilters({ values, options, available: true });
-    expect(interactiveElements(tree, "button")).toHaveLength(0);
+    expect(interactiveElements(tree, "button")).toHaveLength(4);
+    expect(
+      interactiveElements(tree, "button").every((button) => button.props.type === "button"),
+    ).toBe(true);
     expect(navigation.refresh).not.toHaveBeenCalled();
   });
 
