@@ -1,6 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: Associativo automatico publicado
+
+- Publicacao protegida concluida em 2026-10-19T16:18:42.516Z (13:18:42 America/Sao_Paulo), deployment `e0b2e4b3-fcc5-444f-9e49-573006e97ecd`, SHA `f56236b3ada830cde0f17c4c205ef735bba77351`. CI main `39274507754` concluida com os quatro jobs aprovados; nao houve bypass apesar do atraso externo do GitHub.
+- Identidade do artefato conferida: checksum do arquivo, revisao, configuracao CI `sha256:40912c4e2cfbe68712624ebbbd639edb19c4a012aad78fa8308331ea66ca4cf0`, manifesto/ID local `sha256:1ca4f8db9541d54d527185e8ebabfcff495fc2a9f2678b75c976e0365f5dff19`, mesmas 11 camadas linux/amd64. `image:prove` aprovou os dois perfis; sem rebuild no servidor.
+- Backup privado verificado em `/var/backups/descomplica-crm/releases/f56236b3ada830cde0f17c4c205ef735bba77351.SuHatI`; conteudo nao exportado. Release anterior `afb4a97df72a3c45a1982a8d520ef400eef2d985`, deployment `0eebcfc6-83af-4e09-947f-fe737fc58a5d`, preservada para recuperacao.
+- Verificacao posterior: health publico HTTP 200/status ok/versao f56236b3, container healthy, rota Associativo anonima 307 e API de inventario anonima 401. Jornada afetada aprovada no navegador sintetico local e CI; nao foram exportados dados reais nem usada sessao de cliente. Ledger sem pendencia. Atualizacao final apenas documental, sem novo reinicio da aplicacao.
+
+- Bloqueio externo observado as 16:12 UTC: todas as etapas do job `118137596358` constam `success`, inclusive matriz visual e Complete job (15:52:22 UTC), mas job/run ainda constam `in_progress`. GitHub Status confirma incidente de Actions/Pages/Webhooks desde 15:49 UTC com atraso de processamento. Fonte: API Actions da CI `39274507754` e https://www.githubstatus.com. Nao publicar com status geral pendente, nao cancelar/repetir testes aprovados e nao dispensar o coordenador protegido. Criterio de revisao: execucao `push/main` no SHA exato concluida com os quatro jobs aprovados e nova consulta de main/health/ledger.
+
+- PR #265 integrado em `f56236b3ada830cde0f17c4c205ef735bba77351` apos CI `39267222824` aprovada em todos os jobs aplicaveis; imagem nao se aplica a PR. Sem atualizacao de baseline para forcar aprovacao. CI de main `39274507754` deve validar os quatro jobs e fornecer imagem imutavel antes da promocao.
+- Escopo: status Salesforce e editor de datas removidos apenas do Associativo; datas automaticas anteriores preservadas; andamento ausente usa 0% na simulacao, sem alterar estoque nem aceitar valor explicitamente invalido.
+- Documentacao automatica dispensa formulario fiscal, mas continua sendo estimativa. Dados ausentes nao se tornam declaracoes confirmadas; IPTU desconhecido permanece desconhecido nos metadados. Municipio fora da politica, vigencia vencida, avaliacao ou valores invalidos continuam bloqueados. Tabelas de ITBI/registro compartilhadas com motor estrito preservado. Despachante, seguro e juros sem alteracao.
+- Evidencias: CI completa, 5.432 cenarios de paridade documental, QA local com 17 etapas e impressao nos tres temas; revisao independente sem achados. Falhas anteriores: fixture com cidade ficticia corrigido somente na unidade principal; espera de rede ociosa no 503 substituida por DOM e asserts de resposta/UI; HTTP 403 transitorio da Prefeitura passou em nova consulta. Sem bypass de fontes ou gates.
+- Pendencia de publicacao desta anotacao inicial resolvida pela evidencia acima. Health anterior `ok`/`afb4a97df72a3c45a1982a8d520ef400eef2d985`. Nenhuma migration, alteracao de n8n ou mutacao de dados remotos autorizada/executada por esta tarefa.
+
 ## 2026-10-19: abertura - Associativo automatico
+
+- Reconferencia durante a espera da CI: producao avancou por outra publicacao para `afb4a97df72a3c45a1982a8d520ef400eef2d985`, com health publico `ok`. Esta tarefa permanece no PR #265, head `76dac1d2`, CI `39267222824` com validate/restore aprovados e matriz visual em andamento. Nao atribuir a atualizacao do site ao Associativo; consultar novo deployment ID antes da promocao.
 
 - QA final local aprovado em `test-results/documentation-legal-preview/2026-10-19T14-10-08.769Z/result.json`: 17 etapas de continuidade, guia, movimento, impressao nos tres temas e nenhum erro inesperado. Reload do cenario 503 espera DOM e asserts especificos de resposta/UI. Revisao independente sem achados e equivalencia dos defaults de datas confirmada. CI `39266375201` aprovou validate; restore/navegador em andamento, sujeitos a nova execucao no commit final. Fontes fiscais reconferidas localmente com sucesso. Publicacao ainda pendente.
 

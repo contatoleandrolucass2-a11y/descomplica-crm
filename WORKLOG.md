@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-19: validacao e publicacao do Associativo automatico
+
+PR #265 integrado em `f56236b3ada830cde0f17c4c205ef735bba77351` apos CI
+`39267222824` integralmente aprovada: validate, release-gates e isolated-restore.
+Sem promocao de baseline visual e sem afrouxar verificacoes. CI de main
+`39274507754` aprovada nos quatro jobs; o incidente externo do GitHub atrasou
+a conclusao do status, sem exigir repeticao dos testes ou bypass.
+Imagem imutavel conferida por checksum, revisao, manifesto/config OCI e 11
+camadas; `image:prove` aprovou os dois perfis no mesmo ID local.
+Publicacao protegida concluida as 16:18:42.516 UTC (13:18:42 America/Sao_Paulo),
+deployment `e0b2e4b3-fcc5-444f-9e49-573006e97ecd`. Backup privado conferido;
+health `ok`/`f56236b3`, container healthy, rota anonima 307 e inventario 401.
+Anterior: `afb4a97d`, deployment `0eebcfc6-83af-4e09-947f-fe737fc58a5d`.
+Nao houve migration, mutacao de dados remotos ou alteracao de workflow n8n.
+
 ## 2026-10-19: Associativo automatico
 
 Demanda: retirar status Salesforce e editor de datas; andamento ausente em 0%;

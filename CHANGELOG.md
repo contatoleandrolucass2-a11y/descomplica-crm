@@ -2,6 +2,8 @@
 
 ## 2026-10-19 - Associativo com documentacao automatica
 
+- Publicado em producao pelo PR #265, com CI integral, imagem imutavel, backup e verificacao posterior. Registro final de release sincronizado com o Obsidian; sem novo deploy para esta atualizacao documental.
+
 - Documentacao estimada automaticamente pelo perfil e pela unidade, sem formulario fiscal obrigatorio; ITBI e os dois atos de registro mantem as tabelas vigentes e o aviso de estimativa.
 - Andamento ausente parte de 0% na simulacao, sem alterar o estoque; valores explicitamente invalidos continuam bloqueados.
 - Remove status Salesforce do resumo e editor de datas. Calendario automatico, cronograma, regras de juros, despachante e seguro preservados.
