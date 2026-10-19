@@ -2,6 +2,8 @@
 
 ## 2026-10-19: abertura - Associativo automatico
 
+- QA final local aprovado em `test-results/documentation-legal-preview/2026-10-19T14-10-08.769Z/result.json`: 17 etapas de continuidade, guia, movimento, impressao nos tres temas e nenhum erro inesperado. Reload do cenario 503 espera DOM e asserts especificos de resposta/UI. Revisao independente sem achados e equivalencia dos defaults de datas confirmada. CI `39266375201` aprovou validate; restore/navegador em andamento, sujeitos a nova execucao no commit final. Fontes fiscais reconferidas localmente com sucesso. Publicacao ainda pendente.
+
 - Retomada observacional: PR #265 em `a5b63ac410f0e0391d75049475263ecaee2322fb`, main `afb4a97df72a3c45a1982a8d520ef400eef2d985`, health `ok`/`3002d578a2db346883e661c4ba568faa4ff99c26`. CI `39265456036` bloqueada por HTTP 403 da fonte municipal, sem alteracao de valores ou bypass. Causa da jornada anterior confirmada: cidade ficticia no fixture; somente a unidade sintetica principal passa a Sao Paulo, preservando o bloqueio de municipios desconhecidos. QA local passou guia/visual/impressao; continuidade final ainda pendente por timeout de reload no cenario 503. Sem publicacao.
 
 - Fontes observacionais: origin/main em `32c7cbdff5147890d8e9a49e58ea31ed2c2965e5`, CI GitHub `39211218104` concluida com sucesso; health publico `https://crm.descomplicapro.com.br/api/health` com status `ok` e versao `3002d578a2db346883e661c4ba568faa4ff99c26`. Diferenca documental do PR #263; runtime anterior confirmado pela nota de publicacao.

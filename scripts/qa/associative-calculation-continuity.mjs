@@ -630,7 +630,8 @@ export async function checkAssociativeCalculationContinuity(
     fixture = buildInventory(true, true);
     liveStatus = 503;
     page.on("console", onConsole);
-    await reloadPage();
+    // Inventory responses and unavailable UI below establish readiness without network idle.
+    await reloadPage("domcontentloaded");
     await expect.poll(() => inventoryResponses.reference).toBeGreaterThan(0);
     await expect.poll(() => inventoryResponses.live).toBeGreaterThan(0);
     await expect(page.locator(`${root} .investor-empty-result`)).toContainText(

@@ -31,6 +31,13 @@ demais continuam desconhecidas para preservar a cobertura de bloqueio fiscal.
 CI seguinte bloqueou na consulta municipal externa (HTTP 403), sem divergencia
 de valores. Nenhum gate foi ignorado e nao houve deploy.
 
+QA local final aprovado: 17 etapas de continuidade, resposta 503, reconciliacao
+das anuais, guia, movimento e impressao nos tres temas. O teste de indisponibilidade
+aguarda DOM e as respostas/UI esperadas, sem depender de networkidle. Revisao
+independente sem achados; datas equivalentes aos defaults anteriores e calculadora
+documental independente preservada. CI ef391dee passou validate; gates restantes
+precisam ser repetidos no commit final.
+
 ## 2026-10-19: refinamento da Previsão
 
 O calendário foi reduzido em 30%, mantém-se aberto durante interações internas e
