@@ -8,7 +8,12 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { ForecastSettings } from "@/app/(protected)/app/gestao/previsao/ForecastSettings";
 import type { ForecastDocument, ForecastRecord } from "@/lib/crm/forecasts";
-import { createForecastDocument, getForecastGroups } from "@/lib/crm/forecast-grid";
+import {
+  addForecastGroup,
+  createForecastDocument,
+  getForecastGroups,
+  renameForecastGroup,
+} from "@/lib/crm/forecast-grid";
 
 describe("Previsão", () => {
   it("starts with seven comparison groups, two rows, totals and safe loading state", () => {
@@ -187,6 +192,19 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       const actionPlanInput = page.getByLabel("Plano de ação, linha 1", { exact: true });
       await actionPlanInput.fill(actionPlan);
       await browserExpect(actionPlanInput).toHaveAttribute("cols", "60");
+      expect(
+        await page
+          .getByLabel("Nome do corretor, linha 1", { exact: true })
+          .evaluate((element) => getComputedStyle(element).height),
+      ).toBe("22px");
+      expect(
+        await page
+          .getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true })
+          .evaluate((element) => getComputedStyle(element).height),
+      ).toBe("22px");
+      expect(await actionPlanInput.evaluate((element) => getComputedStyle(element).height)).toBe(
+        "22px",
+      );
       await browserExpect(page.getByLabel("Total, linha 1", { exact: true })).toHaveText("23");
       await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30");
       await browserExpect(page.locator('tfoot output[aria-label="Total geral"]')).toHaveText("30");
@@ -359,7 +377,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       ).toBeEnabled();
     });
 
-    it("shows only Thursday through Sunday as validated calendar days and restores focus", async () => {
+    it("keeps the compact calendar open and validates only Friday through Sunday", async () => {
       await open();
       const calendarButton = page.getByRole("button", { name: "Calendário", exact: true });
       await calendarButton.click();
@@ -369,8 +387,8 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
 
       await page.getByLabel("Mês do calendário").selectOption({ label: "Outubro" });
       await page.getByLabel("Ano do calendário").selectOption("2026");
-      await browserExpect(dialog.getByText("19 dias validados", { exact: true })).toBeVisible();
-      await browserExpect(dialog.getByRole("gridcell", { name: /dia validado$/ })).toHaveCount(19);
+      await browserExpect(dialog.getByText("14 dias validados", { exact: true })).toBeVisible();
+      await browserExpect(dialog.getByRole("gridcell", { name: /dia validado$/ })).toHaveCount(14);
       await browserExpect(
         dialog.getByRole("gridcell", {
           name: "segunda-feira, 5 de outubro de 2026",
@@ -379,16 +397,23 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       ).toBeVisible();
       await browserExpect(
         dialog.getByRole("gridcell", {
-          name: "quinta-feira, 1 de outubro de 2026, dia validado",
+          name: "quinta-feira, 1 de outubro de 2026",
           exact: true,
         }),
       ).toBeVisible();
+      const friday = dialog.getByRole("gridcell", {
+        name: "sexta-feira, 2 de outubro de 2026, dia validado",
+        exact: true,
+      });
+      await friday.click();
+      await browserExpect(dialog).toBeVisible();
       for (const width of [1440, 390]) {
         await page.setViewportSize({ width, height: 900 });
         const box = await dialog.boundingBox();
         expect(box).not.toBeNull();
         expect(box!.x).toBeGreaterThanOrEqual(0);
         expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+        expect(box!.width).toBeLessThanOrEqual(400);
         await mkdir("test-results/forecast-preview", { recursive: true });
         await page.screenshot({
           path: `test-results/forecast-preview/previsao-calendario-${width}.png`,
@@ -397,10 +422,10 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       }
 
       await page.getByLabel("Mês do calendário").selectOption({ label: "Setembro" });
-      await browserExpect(dialog.getByText("16 dias validados", { exact: true })).toBeVisible();
+      await browserExpect(dialog.getByText("12 dias validados", { exact: true })).toBeVisible();
       await page.getByLabel("Mês do calendário").selectOption({ label: "Outubro" });
       await page.getByLabel("Ano do calendário").selectOption("2025");
-      await browserExpect(dialog.getByText("18 dias validados", { exact: true })).toBeVisible();
+      await browserExpect(dialog.getByText("13 dias validados", { exact: true })).toBeVisible();
 
       await page.keyboard.press("Escape");
       await browserExpect(dialog).toBeHidden();
@@ -408,7 +433,21 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     });
 
     it("supports read-only access, keyboard, three themes and mobile overflow", async () => {
-      const seed = createForecastDocument();
+      let seed = addForecastGroup(addForecastGroup(createForecastDocument()));
+      const requestedLabels = [
+        "Conquista Itaim Paulista",
+        "Conquista São Miguel",
+        "Terrasse Vila Ema",
+        "Conquista Sacomã",
+        "Alto Liviero",
+        "Raiz home Clube",
+        "Conquista Clube Butantã",
+        "Mirante Jardim das Esmeraldas",
+        "Empreendimentos Riva",
+      ];
+      getForecastGroups(seed).forEach((group, index) => {
+        seed = renameForecastGroup(seed, group.id, requestedLabels[index]!);
+      });
       const groups = getForecastGroups(seed);
       seed.rows[0]!.cells.broker = "Corretor QA";
       seed.rows[0]!.cells[groups[0]!.forecastId] = "12";
@@ -435,6 +474,21 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(
         page.getByLabel("Plano de ação, linha 1", { exact: true }),
       ).toHaveAttribute("readonly", "");
+      await browserExpect(page.getByLabel("Nome do empreendimento 1", { exact: true })).toHaveValue(
+        "Conquista\nItaim Paulista",
+      );
+      await browserExpect(page.getByLabel("Nome do empreendimento 9", { exact: true })).toHaveValue(
+        "Empreendimentos\nRiva",
+      );
+      const groupWidths = await page
+        .locator('thead th[scope="colgroup"]')
+        .evaluateAll((elements) =>
+          elements.map((element) => element.getBoundingClientRect().width),
+        );
+      expect(groupWidths).toHaveLength(9);
+      expect(new Set(groupWidths.map((width) => Math.round(width))).size).toBe(1);
+      expect(groupWidths[0]).toBeGreaterThanOrEqual(168);
+      expect(groupWidths[0]).toBeLessThanOrEqual(170);
       const topLevelHeadings = await page
         .locator("thead tr")
         .first()
