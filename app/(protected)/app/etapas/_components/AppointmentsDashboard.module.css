@@ -1,0 +1,243 @@
+.dashboard {
+  min-width: 0;
+  color: var(--analytics-ink);
+}
+.title {
+  margin: 0 0 1rem;
+  font-size: clamp(1.5rem, 2.5vw, 2rem);
+  line-height: 1.25;
+  color: var(--analytics-ink);
+}
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  background: var(--analytics-surface);
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+}
+.toolbar > div {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+}
+.toolbar p {
+  margin: 0;
+}
+.toolbar strong {
+  color: var(--analytics-cyan-strong);
+  font-size: 1.4rem;
+}
+.toolbar label,
+.yearControl label {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+.toolbar input,
+.yearControl select {
+  min-height: 44px;
+  max-width: 100%;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.5rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  color-scheme: light dark;
+}
+.toolbar input:focus-visible,
+.yearControl select:focus-visible {
+  outline: 3px solid var(--analytics-cyan-strong);
+  outline-offset: 3px;
+}
+.coverage {
+  margin: 0.75rem 0 1rem;
+  color: var(--analytics-muted);
+  font-size: 0.8125rem;
+  overflow-wrap: anywhere;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: start;
+  gap: 1rem;
+}
+.rankingsGrid {
+  margin-top: 1rem;
+}
+.rankingColumn {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+.card {
+  min-width: 0;
+  padding: 1rem;
+  background: var(--analytics-surface);
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+}
+.cardHeader {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+.card h2 {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.yearControl {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.empty {
+  display: grid;
+  align-content: center;
+  min-height: 220px;
+  margin: 0;
+  color: var(--analytics-muted);
+  line-height: 1.6;
+}
+.axis,
+.note {
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+  line-height: 1.5;
+}
+.axis {
+  margin: 0 0 0.5rem;
+}
+.note {
+  margin: 0.75rem 0 0;
+}
+.columns {
+  display: grid;
+  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
+  gap: clamp(2px, 0.45vw, 8px);
+  padding: 1.75rem 0 0;
+  margin: 0;
+  list-style: none;
+  background: repeating-linear-gradient(
+    to top,
+    transparent,
+    transparent 49px,
+    var(--analytics-line) 50px,
+    transparent 51px
+  );
+}
+.columns li {
+  min-width: 0;
+  text-align: center;
+}
+.columnTrack {
+  position: relative;
+  height: 180px;
+  display: flex;
+  align-items: end;
+  border-bottom: 1px solid var(--analytics-line);
+}
+.column {
+  position: relative;
+  width: 100%;
+  min-height: 2px;
+  background: var(--analytics-cyan-strong);
+  border-radius: 3px 3px 0 0;
+}
+.columnValue {
+  position: absolute;
+  bottom: var(--bar-height);
+  left: 50%;
+  transform: translateX(-50%);
+  padding-bottom: 0.3rem;
+  font-size: 0.75rem;
+  color: var(--analytics-ink);
+  font-weight: 700;
+  writing-mode: vertical-rl;
+}
+.columnLabel {
+  display: block;
+  margin-top: 0.5rem;
+  font-size: 0.75rem;
+  line-height: 1.3;
+  writing-mode: vertical-rl;
+  text-align: start;
+  margin-inline: auto;
+  min-height: 3.75rem;
+}
+.daily .columnLabel {
+  min-height: 1.75rem;
+  font-size: 0.6875rem;
+  margin-top: calc(0.5rem + var(--day-offset) * 2rem);
+}
+.daily .columnValue {
+  font-size: 0.625rem;
+  bottom: calc(100% + var(--value-space) - (var(--day-offset) + 1) * var(--value-height));
+}
+.daily .columnTrack::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: calc(-1 * var(--value-space) + (var(--day-offset) + 1) * var(--value-height));
+  bottom: var(--bar-height);
+  border-left: 1px dotted var(--analytics-line);
+}
+.ranking {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 1rem;
+}
+.ranking li {
+  min-width: 0;
+}
+.rankingHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+.rankingHeading > span {
+  overflow-wrap: anywhere;
+}
+.rank {
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+}
+.rankTrack {
+  height: 0.625rem;
+  margin-top: 0.4rem;
+  border-radius: 3px;
+  background: var(--analytics-surface-strong);
+}
+.rankBar {
+  height: 100%;
+  background: var(--analytics-cyan-strong);
+  border-radius: 3px;
+  min-width: 2px;
+}
+@media (max-width: 1050px) {
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 700px) {
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .card {
+    padding: 0.875rem;
+  }
+}

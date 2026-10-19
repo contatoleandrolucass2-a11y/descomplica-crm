@@ -1,5 +1,19 @@
 # Changelog
 
+- Banco de Agendamentos: aplica as duas migrations aditivas autorizadas, preservando os três snapshots v1 e limitando a nova leitura ao usuário autenticado com permissões internas.
+- Integra as referências visuais de Meta e Agendamentos da `main` atual, mantendo242 imagens e recalculando o manifesto combinado.
+
+- Integra Agendamentos à main atual, preservando a entrega de calendário/plano de ação e atualizando inventário combinado de migrations e testes SQL.
+
+- QA de Agendamentos: atualiza somente as11 referências visuais da página após remoção dos blocos legados; preserva as231 demais imagens e registra proveniência e limite da fixture sem dados.
+
+- Leitura de agendamentos: auxiliar SQL marcada STABLE, coerente com a RPC somente de leitura e com o lint do banco.
+
+- QA de agendamentos: prepara overrides sintéticos sem identidade autenticada e inclui a nova RPC na lista auditada, preservando o bloqueio de contas Master.
+
+- Agendamentos: sete gráficos com evolução diária, semanas do mês, meses por ano independente e rankings completos de gerente, responsável, loja e empreendimento. Grade responsiva de três colunas e remoção dos blocos legados indicados.
+- Salesforce: separa PDV de empreendimento no contrato analítico v2, preserva snapshots v1 e valida a coluna vigente de empreendimento em cada coleta. Nova leitura restrita à etapa e às visões autorizadas, sem acesso direto às tabelas.
+
 ## 2026-10-18 - Meta editável com salvamento
 
 - Gestão > Meta usa a permissão própria `crm.settings.manage`, habilita todos os campos de Configuração para quem acessa a página e exibe **Salvar alterações** no cabeçalho.

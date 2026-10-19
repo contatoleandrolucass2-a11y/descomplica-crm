@@ -39,9 +39,10 @@ function metadataFor(definition) {
     id: definition.id,
     reportFormat: "TABULAR",
     aggregates: ["RowCount"],
-    detailColumns: definition.requiredColumns.map((column) =>
-      Array.isArray(column) ? column[0] : column,
-    ),
+    detailColumns: [
+      ...definition.requiredColumns,
+      ...(definition.key === "appointments" ? ["Activity.Nome_do_empreendimento__c"] : []),
+    ].map((column) => (Array.isArray(column) ? column[0] : column)),
     standardDateFilter: {
       column: DATE_COLUMNS[definition.key] ?? "CreatedDate",
       durationValue: "THIS_YEAR",
@@ -75,6 +76,11 @@ function detailRow(definition, metadata, number = 1, date = REFERENCE) {
 
 function complete(definition, metadata, numbers = [1]) {
   return {
+    reportExtendedMetadata: {
+      detailColumnInfo: {
+        "Activity.Nome_do_empreendimento__c": { label: "Nome do empreendimento" },
+      },
+    },
     attributes: { status: "Success" },
     allData: true,
     hasDetailRows: true,
@@ -88,7 +94,7 @@ function complete(definition, metadata, numbers = [1]) {
   };
 }
 
-function client({ describeFor, resultFor, startFor } = {}) {
+function client({ describeFor, resultFor, startFor, metadataForResponse } = {}) {
   const calls = [];
   const instances = new Map();
   let time = 0;
@@ -103,7 +109,15 @@ function client({ describeFor, resultFor, startFor } = {}) {
       assert.ok(definition, "only the seven unchanged report IDs may be requested");
       if (url.endsWith("/describe")) {
         const described = metadataFor(definition);
-        return json({ reportMetadata: describeFor?.(described, definition) ?? described });
+        const response = {
+          reportMetadata: describeFor?.(described, definition) ?? described,
+          reportExtendedMetadata: {
+            detailColumnInfo: {
+              "Activity.Nome_do_empreendimento__c": { label: "Nome do empreendimento" },
+            },
+          },
+        };
+        return json(metadataForResponse?.(response) ?? response);
       }
       if (init.method === "POST") {
         const requested = JSON.parse(init.body).reportMetadata;
@@ -129,6 +143,88 @@ function client({ describeFor, resultFor, startFor } = {}) {
 function collect(key, fixture, start = REFERENCE, end = REFERENCE) {
   return collectReport("synthetic-sid", definitionFor(key), start, end, fixture.options);
 }
+
+test("appointment development metadata is checked each cycle and never substitutes PDV", async () => {
+  const column = "Activity.Nome_do_empreendimento__c";
+  const make = (overrides = {}) =>
+    client({
+      describeFor: (metadata) => ({
+        ...metadata,
+        detailColumns: [...metadata.detailColumns, "Activity.Unidade_de_negocio__c"],
+      }),
+      resultFor: (definition, metadata) => {
+        const result = complete(definition, metadata);
+        const row = result.factMap["T!T"].rows[0];
+        row.dataCells[metadata.detailColumns.indexOf(column)] = {
+          value: "Development Current",
+          label: "Development Current",
+        };
+        row.dataCells[metadata.detailColumns.indexOf("Activity.PDV__c.Name")] = {
+          value: "Store Current",
+          label: "Store Current",
+        };
+        return result;
+      },
+      ...overrides,
+    });
+  const run = (fixture) =>
+    collectReport("synthetic-sid", definitionFor("appointments"), REFERENCE, REFERENCE, {
+      ...fixture.options,
+      analysisEnabled: true,
+    });
+  const first = await run(make());
+  assert.equal(first[0].development, "Development Current");
+  assert.equal(first[0].storeName, "Store Current");
+  for (const change of [
+    (response) => {
+      delete response.reportExtendedMetadata;
+      return response;
+    },
+    (response) => {
+      response.reportExtendedMetadata.detailColumnInfo[column].label =
+        "PDV: Nome do Empreendimento";
+      return response;
+    },
+    (response) => {
+      response.reportExtendedMetadata.detailColumnInfo["Activity.Unverified__c"] = {
+        label: "Nome do empreendimento",
+      };
+      return response;
+    },
+  ])
+    await assert.rejects(run(make({ metadataForResponse: change })), {
+      code: "SALESFORCE_INVALID_REPORT",
+    });
+  await assert.rejects(
+    run(
+      make({
+        resultFor: (definition, metadata) => {
+          const result = complete(definition, metadata);
+          result.reportExtendedMetadata.detailColumnInfo[column].label = "Changed during execution";
+          return result;
+        },
+      }),
+    ),
+    { code: "SALESFORCE_INVALID_REPORT" },
+  );
+  const absent = make({
+    metadataForResponse: (response) => {
+      response.reportMetadata.detailColumns = response.reportMetadata.detailColumns.filter(
+        (key) => key !== column,
+      );
+      response.reportTypeMetadata = {
+        categories: [{ columns: { [column]: { label: "Nome do empreendimento" } } }],
+      };
+      return response;
+    },
+  });
+  assert.equal((await run(absent))[0].development, "Development Current");
+  assert.ok(
+    absent.calls
+      .filter((call) => call.method === "POST")
+      .every((call) => new URL(call.url).pathname.endsWith("/instances")),
+  );
+});
 
 test("analysis requires and projects the verified business-unit column for both activity reports only", async () => {
   const column = "Activity.Unidade_de_negocio__c";
@@ -469,7 +565,8 @@ test("rejects invalid dates, numeric amounts, missing activity identity and conf
     const fixture = client({
       resultFor: (definition, metadata) => {
         const result = complete(definition, metadata, [1, 1]);
-        result.factMap["T!T"].rows[1].dataCells.at(-1).label = "conflicting";
+        const projectedColumn = metadata.detailColumns.indexOf(definition.requiredColumns.at(-1));
+        result.factMap["T!T"].rows[1].dataCells[projectedColumn].label = "conflicting";
         if (key === "sales") result.factMap["T!T"].rows[1].dataCells.at(-1).value = 100_001;
         return result;
       },

@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-10-19: Gráficos de agendamentos
+
+Autorização específica recebida em 19/10/2026 com “continua e publica”. As duas migrations aditivas foram aplicadas via MCP no projeto Supabase de produção `descomplica-crm-production`: histórico remoto `20261019113232 appointments_analysis_stores` e `20261019113239 appointments_analysis_read`. Os três payloads existentes permaneceram v1. A RPC nova aceita apenas `authenticated`; `anon` e `service_role` permanecem sem execução. Advisors não trouxeram alteração de ACL/tabela causada pela entrega; o aviso da RPC autenticada corresponde ao contrato intencional com checagens internas. A primeira carga v2 e a atualização do coletor permanecem etapas posteriores ao CRM compatível publicado.
+
+Antes da integração, `main` avançou novamente pelo PR263. O merge local preserva as referências visuais de Meta e Agendamentos; o manifesto combinado de242 imagens foi recalculado e15 testes de integridade passaram, com1 opt-in ignorado. Nova CI integral é obrigatória neste SHA combinado.
+
+Integrado origin/main2354a8d2 na branch para resolver a concorrência com o PR259, preservando calendário/plano de ação e Agendamentos. Inventário combinado:68 migrations,36 arquivos pgTAP/2.042 asserções; allowlist mantém as três novas migrations sem autorizar aplicação remota. Testes focados de inventário/homologação29/29.
+
+A CI39196528870 em78707ecc aprovou validate, restauração isolada, pgTAP/lint SQL e E2E. O gate visual falhou somente nas11 referências de Agendamentos com altura antiga; rotas154/154, temas88/88, acessibilidade242/242, teclado e zoom passaram. Revisadas e adotadas somente essas11 imagens, preservando231 e registrando origem verify/falha e captura dirty no manifesto. As imagens autenticadas mostram o estado indisponível; os sete gráficos com dados são cobertos separadamente pelo preview sintético. Integridade local:15 testes aprovados/1 opt-in ignorado. Nova CI integral obrigatória; migrations, primeira carga v2 e publicação continuam pendentes.
+
+A segunda execução aprovou pgTAP e avançou ao lint SQL, que identificou a volatilidade padrão da auxiliar de projeção. Marcada STABLE, pois apenas projeta JSON recebido com funções estáveis; a RPC de leitura permanece STABLE. Nenhuma regra ou asserção foi dispensada.
+
+A CI inicial aprovou validate Linux e encontrou uma fixture que tentava alterar Master com identidade autenticada e uma lista de RPCs sem a função nova. Corrigidos somente o preparo privilegiado do teste e o inventário exato de grants; plan28 e proteções preservados. Nova CI exigida antes de integração.
+
+A página de agendamentos recebe sete gráficos: barras por dia, por semana do mês e por mês, e rankings decrescentes de gerente, responsável, loja e empreendimento. O seletor de ano pertence somente ao gráfico mensal. Semanas seguem segunda a domingo, incluindo a terceira semana e até a sexta quando existente; meses e semanas sem registros não geram barras. Rankings preservam todos os nomes e contagens. O layout usa três colunas no desktop e reorganiza a grade em telas menores, sem rolagem interna. Removidos desta página o painel Posição no funil, a navegação/filtros legados e o breadcrumb.
+
+O relatório Salesforce já apresentava a coluna Nome do empreendimento, identificada pelo cabeçalho como `Activity.Nome_do_empreendimento__c`. Não houve edição da definição salva. A coleta valida sua identificação e label tanto no describe quanto no resultado a cada execução. PDV continua vindo de `Activity.PDV__c.Name`, em dimensão própria. Ausência ou ambiguidade bloqueia a coleta; valores vêm da exportação vigente, sem cache de nomes fixos.
+
+O contrato analítico v2 acrescenta índice de loja à tupla, mantendo posições anteriores, e usa a dimensão empreendimento para a coluna correta. Snapshots v1 continuam legíveis; seu PDV não é apresentado como empreendimento. Duas migrations aditivas implementam a extensão v2 e a RPC exclusiva da etapa, que filtra fatos e reindexa dicionários antes de retornar ao cliente. A leitura verifica duas vezes a geração do snapshot e recusa misturas. Permissões existentes de etapa, visão e ranking são preservadas. As migrations foram aplicadas após autorização específica; atualização operacional do coletor e primeira carga v2 continuam pendentes da publicação do CRM compatível e das verificações do runbook.
+
+Validação e evidências finais constam em docs/knowledge/ATUALIZACOES.md e docs/runbooks/appointments-charts.md. A validação local usa fixtures sintéticas; não representa reconciliação da próxima coleta real.
+
 ## 2026-10-19: publicação da edição e salvamento de Meta
 
 O PR #260 foi integrado no SHA `3002d578a2db346883e661c4ba568faa4ff99c26`.

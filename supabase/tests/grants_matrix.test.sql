@@ -359,6 +359,7 @@ select is(
     'preview_crm_commercial_configuration_draft',
     'preview_crm_commercial_policy_import',
     'preview_crm_source_identity_mapping_import',
+    'read_crm_appointments_analysis',
     'read_crm_dashboard_analysis',
     'remove_user_permission_override',
     'replace_crm_point_settings',

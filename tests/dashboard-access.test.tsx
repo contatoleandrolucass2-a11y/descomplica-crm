@@ -11,6 +11,7 @@ const mocks = vi.hoisted(() => ({
   }),
   loadDashboardReadModel: vi.fn(),
   loadStageReadModel: vi.fn(),
+  loadAppointmentsReadModel: vi.fn(),
   loadDashboardTeam: vi.fn(),
   navigation: vi.fn(),
 }));
@@ -29,6 +30,9 @@ vi.mock("@/lib/crm/dashboard/team", () => ({
   loadDashboardTeam: mocks.loadDashboardTeam,
 }));
 vi.mock("@/lib/navigation/pages", () => ({ getAuthorizedNavigation: mocks.navigation }));
+vi.mock("@/lib/crm/stages/data", () => ({
+  loadAppointmentsReadModel: mocks.loadAppointmentsReadModel,
+}));
 vi.mock("@/lib/crm/dashboard/data", async (importOriginal) => {
   const original = await importOriginal<typeof import("@/lib/crm/dashboard/data")>();
   return {
@@ -47,6 +51,7 @@ describe("dashboard autorizado por visão", () => {
     vi.clearAllMocks();
     mocks.loadDashboardReadModel.mockResolvedValue({ status: "empty" });
     mocks.loadStageReadModel.mockResolvedValue({ status: "empty" });
+    mocks.loadAppointmentsReadModel.mockResolvedValue({ analysis: null });
     mocks.loadDashboardTeam.mockResolvedValue({ status: "unavailable", reason: "Sem equipe." });
     mocks.navigation.mockResolvedValue([]);
   });
@@ -224,6 +229,46 @@ describe("dashboard autorizado por visão", () => {
     );
     expect(mocks.loadDashboardReadModel).not.toHaveBeenCalled();
     expect(markup).not.toContain('href="/app/etapas/vendas');
+  });
+
+  it("loads appointments independently and removes the requested legacy blocks only there", async () => {
+    mocks.enforcePermission.mockResolvedValue({
+      permissions: [
+        "pages.view",
+        "crm.stage.appointments.view",
+        "crm.dashboard.with_canal_imob.view",
+      ],
+    });
+    const markup = renderToStaticMarkup(
+      await StagePage({
+        params: Promise.resolve({ stage: "agendamentos" }),
+        searchParams: Promise.resolve({}),
+      }),
+    );
+    expect(mocks.loadAppointmentsReadModel).toHaveBeenCalledExactlyOnceWith("with_canal_imob");
+    expect(mocks.loadStageReadModel).not.toHaveBeenCalled();
+    expect(mocks.loadDashboardReadModel).not.toHaveBeenCalled();
+    expect(markup).not.toContain("Posição no funil");
+    expect(markup).not.toContain("Filtros dimensionais indisponíveis");
+    expect(markup).not.toContain('aria-label="Etapas do funil"');
+    expect(markup).not.toContain("Funil completo");
+  });
+
+  it("rejects a foreign appointments view before fetching analytics", async () => {
+    mocks.enforcePermission.mockResolvedValue({
+      permissions: [
+        "pages.view",
+        "crm.stage.appointments.view",
+        "crm.dashboard.with_canal_imob.view",
+      ],
+    });
+    await expect(
+      StagePage({
+        params: Promise.resolve({ stage: "agendamentos" }),
+        searchParams: Promise.resolve({ view: "all" }),
+      }),
+    ).rejects.toThrow("FORBIDDEN_INTERRUPT");
+    expect(mocks.loadAppointmentsReadModel).not.toHaveBeenCalled();
   });
 
   it("keeps root links removed and only links authorized neighboring stages", async () => {
