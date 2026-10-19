@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-19: Publicacao da correcao dos filtros
+
+PR255 integrado em72f1ed5a. CI39189857296 aprovou a main atual59f1ee47,
+com imagem imutavel e matriz completa. Coordenador publicou em00:25 Sao Paulo,
+deployment408dd275, health200/ok/SHAexato e acesso anonimo307. Migration da
+Previsao ja aplicada por entrega concorrente; corpo SQL/ACL conferidos, sem
+reaplicacao. Chrome indisponivel em duas tentativas; smoke autenticado final
+aguarda reconexao. Nao afirmar causa interna STATUS_BREAKPOINT comprovada.
+
 ## 2026-10-18: Recorrencia dos filtros e conciliacao
 
 CI39176647709 aprovou validate e restore, mas encontrou corrida de foco no
