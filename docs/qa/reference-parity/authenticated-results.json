@@ -46725,35 +46725,35 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
-          "bytes": 42612,
-          "sha256": "9dbcbeffde09072baa56cdc1121651c0727497149cdae45f1256bb7531fdefd9"
+          "bytes": 42458,
+          "sha256": "32f1c3589101f0de5c8aa8b9a9f1f55a105bf142071b33aa3bd91d920f704c0c"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
-      "bytes": 42612,
-      "sha256": "9dbcbeffde09072baa56cdc1121651c0727497149cdae45f1256bb7531fdefd9",
+      "bytes": 42458,
+      "sha256": "32f1c3589101f0de5c8aa8b9a9f1f55a105bf142071b33aa3bd91d920f704c0c",
       "width": 1024,
       "height": 768,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 12035,
+        "changedPixels": 27765,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.015303293863932291,
+        "changedPixelRatio": 0.035305023193359375,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
           "tracked": true,
-          "bytes": 40432,
-          "sha256": "2648667cb87abbbc88b750ecfb2739b86fac43bf9f5c3d675f215ec5d2081f87"
+          "bytes": 42612,
+          "sha256": "9dbcbeffde09072baa56cdc1121651c0727497149cdae45f1256bb7531fdefd9"
         }
       },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T14:22:46.458Z",
-        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "capturedAt": "2026-10-19T19:05:34.129Z",
+        "captureCommit": "f3fca3b2f8065ba8f7fb421ec06cf85aac5e237f",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
-        "ciRunId": 38574613120,
-        "artifactId": 11901344067
+        "worktreeFingerprint": "8400318a58684b567ae202b4a73256ecc7a3e4ea2bd3a24755ef17042590d39b",
+        "ciRunId": 39301197819,
+        "artifactId": 12214372820
       }
     },
     {
@@ -47559,35 +47559,35 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
-          "bytes": 39866,
-          "sha256": "7116a08d2332cda77c4039cfe4d2d50758f6dbd3f15ea6704424ad0bc6a6fea7"
+          "bytes": 40032,
+          "sha256": "be9296c3553ec307f8c5a3bbd2703a831f5086524c4944d8746e6dde69af124d"
         }
       },
       "path": "target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
-      "bytes": 39866,
-      "sha256": "7116a08d2332cda77c4039cfe4d2d50758f6dbd3f15ea6704424ad0bc6a6fea7",
+      "bytes": 40032,
+      "sha256": "be9296c3553ec307f8c5a3bbd2703a831f5086524c4944d8746e6dde69af124d",
       "width": 768,
       "height": 1024,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 142132,
+        "changedPixels": 13240,
         "totalPixels": 786432,
-        "changedPixelRatio": 0.18073018391927084,
+        "changedPixelRatio": 0.016835530598958332,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
           "tracked": true,
-          "bytes": 37680,
-          "sha256": "ba5a5661413ad6f8bd159f92b9d7b7b017ce50e41b01339112b946a1ae61d8b5"
+          "bytes": 39866,
+          "sha256": "7116a08d2332cda77c4039cfe4d2d50758f6dbd3f15ea6704424ad0bc6a6fea7"
         }
       },
       "captureProvenance": {
-        "capturedAt": "2026-10-14T14:22:46.458Z",
-        "captureCommit": "35b8991b438b1681bb24f32beb7d2afee37bd108",
+        "capturedAt": "2026-10-19T19:05:34.129Z",
+        "captureCommit": "f3fca3b2f8065ba8f7fb421ec06cf85aac5e237f",
         "worktreeDirtyAtCapture": true,
-        "worktreeFingerprint": "5eb06cd6c775f31794e52aefd16aa04d117e6e6b5763e255c16312c16768a59a",
-        "ciRunId": 38574613120,
-        "artifactId": 11901344067
+        "worktreeFingerprint": "8400318a58684b567ae202b4a73256ecc7a3e4ea2bd3a24755ef17042590d39b",
+        "ciRunId": 39301197819,
+        "artifactId": 12214372820
       }
     },
     {
@@ -52825,8 +52825,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
         "tracked": true,
-        "bytes": 42612,
-        "sha256": "9dbcbeffde09072baa56cdc1121651c0727497149cdae45f1256bb7531fdefd9"
+        "bytes": 42458,
+        "sha256": "32f1c3589101f0de5c8aa8b9a9f1f55a105bf142071b33aa3bd91d920f704c0c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1280x720.webp",
@@ -52861,8 +52861,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp",
         "tracked": true,
-        "bytes": 39866,
-        "sha256": "7116a08d2332cda77c4039cfe4d2d50758f6dbd3f15ea6704424ad0bc6a6fea7"
+        "bytes": 40032,
+        "sha256": "be9296c3553ec307f8c5a3bbd2703a831f5086524c4944d8746e6dde69af124d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
@@ -53604,7 +53604,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "1f663c05f9b9b379ce635934db51e252655629105ce4e22d2df89d2839f3a6bd"
+    "manifestSha256": "fcb39db50ce16b83b5a257967a36563fe12db366a8b0febac8f64cb240a8f334"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -54652,6 +54652,37 @@
         "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp"
       ],
       "remainingImagesPreserved": 231,
+      "followUp": "Full verify-mode CI on the new head is required before merge; this adoption is not evidence that the failed candidate passed."
+    },
+    {
+      "reviewedAt": "2026-10-19T19:14:02.934Z",
+      "scope": "Associative inventory only: dedicated VAGA column and vertical dividers at the two tablet references changed beyond the pixel threshold.",
+      "ciRun": "https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39301197819",
+      "artifactId": 12214372820,
+      "artifactSha256": "3d059db6e6c5ad6356b06429a2f5d9f030935794bd9f8f8da6fc277d6c687730",
+      "candidateResultsSha256": "c87b057575d389b60b85f9635c1cc861dfbc1b0aa82a88cb38ad497aa0d136ab",
+      "headCommit": "1e8ac6b723072868455bb5df0ab4f265c47a0c81",
+      "capturedAt": "2026-10-19T19:05:34.129Z",
+      "captureCommit": "f3fca3b2f8065ba8f7fb421ec06cf85aac5e237f",
+      "worktreeDirtyAtCapture": true,
+      "worktreeFingerprint": "8400318a58684b567ae202b4a73256ecc7a3e4ea2bd3a24755ef17042590d39b",
+      "worktreeFingerprintAlgorithm": "sha256-git-diff-head-and-untracked-v1",
+      "candidateRunPassed": false,
+      "candidateMode": "verify",
+      "adoptionMethod": "Reviewed partial adoption of two Linux CI artifacts; not an update-baseline run. The other snapshots and historical top-level capture evidence were preserved.",
+      "limitations": "The dirty capture flag is preserved and does not claim a clean capture. The uploaded artifact contains generated QA outputs; the implementation head is identified separately from the GitHub merge-ref capture commit.",
+      "functionalChecksPassed": true,
+      "visualComparisonsBeforeAdoption": {
+        "passed": 240,
+        "reviewedChanges": 2
+      },
+      "previousManifestSha256": "1f663c05f9b9b379ce635934db51e252655629105ce4e22d2df89d2839f3a6bd",
+      "previousResultSha256": "0148ab4eed3367be5694ea3bf2027a4e50056d07a961d15006da0b709d217a9c",
+      "changedFiles": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-768x1024.webp"
+      ],
+      "remainingImagesPreserved": 240,
       "followUp": "Full verify-mode CI on the new head is required before merge; this adoption is not evidence that the failed candidate passed."
     }
   ],
