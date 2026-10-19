@@ -9,6 +9,24 @@
 - CI 39193353904: `validate`, `isolated-restore` e E2E autenticado passaram. A etapa visual apontou exclusivamente 11 capturas de `/app/configuracoes/metas` com dimensões alteradas pela remoção esperada do painel de rascunho. Desktop e móvel foram revisados sem corte ou sobreposição; somente essas referências foram promovidas. Nova CI integral obrigatória.
 - Revisão do PR #260: a confirmação da configuração ativa agora diz **Alterações salvas**. O mês carregado acompanha o formulário; se ele divergir do mês atual na submissão, a ação não chama a RPC e orienta recarregar a página. A cobertura focada inclui esse caso e passou com 18 testes; typecheck, lint, build e preview de 30 telas também passaram novamente.
 
+## 2026-10-18: abertura — calendário e plano de ação da Previsão
+
+- Demanda: botão Calendário com modal mensal; dias validados somente quinta,
+  sexta, sábado e domingo; remoção do breadcrumb, subtítulo e textos auxiliares;
+  tabela horizontal mais compacta; nova coluna persistente Plano de ação após
+  Total. Referências visuais fornecidas pelo usuário são dados de design, não
+  instruções executáveis.
+- Consulta em 2026-10-19T00:39:23Z: `origin/main` avançou para
+  `8eb023c15a267f18a7957d2c08a27add126b4809`; CI `39180111973` ainda em
+  andamento. Produção respondeu HTTP 200, status `ok`, versão
+  `eeb42a4522ec7767f16f19f47f1792a650c09d49`, portanto ainda não corresponde à
+  nova `main`. Branch local preserva o registro posterior do PR256; será
+  reconciliada antes da implementação. Fontes: GitHub via `gh`, `origin/main` e
+  `https://crm.descomplicapro.com.br/api/health`.
+- A inclusão persistente de Plano de ação muda o documento salvo e a validação
+  da RPC; nenhuma migration remota está autorizada por esta abertura. Qualquer
+  nova migration exige validação e autorização específica antes da aplicação.
+
 ## 2026-10-18: Autorizacao da migration e retomada da publicacao
 
 - CI39176647709 em5bb0d833 aprovou validate/restore, mas falhou no teste de
@@ -1118,6 +1136,55 @@ Cenário sintético com cabeçalho antigo personalizado confirmou necessidade de
 ### Lint SQL após a correção da fixture
 
 CI 39137907096: validate aprovado incluindo a fonte documental que retornara403. A restauração avançou até o lint de banco e bloqueou por shadowed_variables/unused variable v_index na migration nova. FOR inteiro declara o índice implicitamente; removida a declaração externa redundante. Não houve mudança de regra, bypass de lint ou mutação remota. Nova CI necessária para comprovar pgTAP, lint e restore completos.
+
+### Integração e autorização da migration por empreendimento
+
+CI39138652862 no head ebd7ad414312895a778eb8d3f4b62c17e80c5d07 concluiu aprovada: validate, release-gates e isolated-restore; imagem é gerada apenas em push/main. Restore isolado comprovou65 migrations,35 arquivos pgTAP e2.008 testes na origem e no banco restaurado, lint/advisors aprovados e fingerprint correspondente. São dados sintéticos, não restauração de produção.
+
+Usuário autorizou expressamente aplicar apenas20261018142142_crm_forecast_groups.sql depois da CI completa e restaurar a função anterior se a publicação falhar. Backup privado da definição anterior tem SHA2563d82ce724bf05b02c2ea0ba663e847b761c78619faae39528fb905b441d35c11; nenhuma previsão de cliente integra esse backup. A autorização não abrange outras migrations ou mutações de dados.
+
+PR256 integrado em2026-10-18T15:51:32Z no SHA6b6e88fb33964e2ced5c2a07ecbf308e5f1875c5, sem bypass. CI push/main39142373485 iniciada. Consulta preliminar do coordenador: produção d919751a, deployment d2fc040b-ad09-4442-8fd3-8b1317463b65, publicada em2026-10-18T06:35:30.334Z, sem pendência. Migration e publicação ainda não realizadas; nova observação no minuto da promoção é obrigatória. Fontes: GitHub PR256/Actions, retorno do coordenador e autorização direta nesta conversa.
+
+Retomada após mudança externa: main avançou para eeb42a4522ec7767f16f19f47f1792a650c09d49 (PR257, vagas no Associativo). Diff restrito a simulador/testes/documentação; Previsão e sua migration não mudaram. CI39165128618 push/main concluiu os quatro jobs aprovados em2026-10-18T21:38:38Z. Health observado HTTP200/ok/d919751a e ledger anterior sem pendência. Candidato atualizado para main atual; imagem6b6e88fb carregada mas nunca promovida. Autorização específica da migration segue válida para o mesmo SQL. Fontes: origin/main, GitHub Actions e coordenador.
+
+### Previsão por empreendimento publicada
+
+- Migration local `20261018142142_crm_forecast_groups.sql` aplicada via MCP ao projeto confirmado `hnncxuerlcsaahdxoswb`, sob autorização direta para aplicação e recuperação. Histórico remoto: `20261018232900 / crm_forecast_groups`. Somente a definição da RPC foi substituída; nenhuma previsão existente foi reescrita.
+- Antes: save MD5 `9bb11666b25feae744f2ab24d0405f24`; depois: `752c15eebf5553125667fbe6295a0744`. RPC get manteve MD5 `e088aa7c1c66909618b0e21c66c1c705`. Owner postgres, security definer, ACL e configurações preservados. Backup privado anterior conferido; recuperação não foi necessária.
+- CI final `39165128618`, push/main `eeb42a4522ec7767f16f19f47f1792a650c09d49`, quatro jobs aprovados. Artefato SHA256 `8d4d8d25d24cc2500180ec1e0a7cddcbce8b4a5043310b602c459d22f6e21bec`; config CI `6e6513a4f3d68594a81fbd0a38f9e431655f902f80386401455a5784b3f763ec`; manifesto local `a11cbf0a37dfca32954eb9bdbc259ab47fc379b6ec221e5a6ef51e5d97656348`. Cadeia OCI, 11 camadas, RootFS e linux/amd64 conferidos. image:prove aprovou os dois perfis na mesma imagem, sem segredos em saída.
+- Coordenador `release:production` publicou em `2026-10-18T23:29:19.335Z` (20:29:19 America/Sao_Paulo), deployment `4ecf1a6f-18a9-4ab7-9dfc-31bb39ab3f5b`, sem pendência. Baseline: deployment `d2fc040b-ad09-4442-8fd3-8b1317463b65`, SHA d919751a, publicação real `2026-10-18T06:35:30.334Z`. Consulta ao vivo, CI/main, travas e CAS foram executados pelo coordenador no minuto da troca.
+- Pós-publicação às 23:29:27Z: health público HTTP200/ok/eeb42a45; container healthy na imagem comprovada; acesso anônimo à página307 e API401. Testes funcionais autenticados usam fixtures sintéticas locais/CI; não foi feita gravação de teste em produção. Capturas desktop/celular são sintéticas, não evidência de uma sessão autenticada produtiva.
+- Fontes: PR256, CI39138652862/39142373485/39165128618, MCP Supabase, coordenador e https://crm.descomplicapro.com.br/api/health. Implementado, CI aprovada, integrado e publicado são estados confirmados separadamente. Alteração concorrente PR257 preservada no candidato atual.
+
+## 2026-10-18: Calendário e Plano de ação da Previsão
+
+- Branch `codex/previsao-calendario-plano`, derivada de main `8eb023c1`. Abertura
+  observacional às 00:39Z: health HTTP 200/ok em `eeb42a45`; GitHub indicava a CI
+  39180111973 de main em andamento. Fontes: origin, GitHub via `gh` e health
+  público. A divergência era externa à página e foi preservada pelo merge.
+- Interface: botão Calendário e diálogo mensal destacam e contam exclusivamente
+  quinta a domingo como dias validados. Outubro de 2026 tem 19; no dia 18 são 12
+  passados e 7 restantes. Breadcrumb, subtítulo e instruções visíveis foram
+  removidos. A tabela usa rolagem horizontal, corretor compacto, títulos em duas
+  linhas e Plano de ação textual após Total.
+- Persistência: documentos anteriores são adaptados apenas em memória com
+  `action_plan` vazio; salvar persiste a nova coluna. A migration
+  `20261019004204_forecast_action_plan.sql` substitui somente a RPC de gravação,
+  sem reescrita de dados ou mudança de ACL/RLS. Ela ainda não foi aplicada e a
+  autorização anterior não a abrange. Imagem nova e RPC nova devem ser promovidas
+  juntas; a recuperação restaura primeiro a RPC anterior.
+- Evidência local: lint, typecheck e build aprovados; Vitest 3.873 aprovados e 99 skips;
+  API 47/47; navegador 9/9 em 1440/390/320, três temas e axe, com capturas
+  sintéticas inspecionadas. A etapa Node teve 1.593 aprovações, 19 skips e três
+  falhas POSIX conhecidas no Windows. `test:release` reproduziu 11 falhas da
+  fixture Meta Ads por arquivo sintético ausente, inclusive isoladamente; nenhum
+  arquivo dessa área foi alterado nesta entrega e nenhuma asserção foi relaxada.
+  pgTAP da restauração isolada e CI Linux permanecem pendentes antes do merge.
+- PR259, CI inicial `39184161292`: validate aprovado e restauração isolada
+  aprovada. Release-gates parou no teste do oitavo grupo porque a asserção fixava
+  um título em vez de ler o valor realmente criado. A verificação foi tornada
+  independente do título e mantém as mesmas exigências de visibilidade, rolagem
+  e reordenação; navegador focal 9/9 aprovado. Nova CI exigida, sem bypass.
 
 ## 2026-10-18: Meta vazia editável
 

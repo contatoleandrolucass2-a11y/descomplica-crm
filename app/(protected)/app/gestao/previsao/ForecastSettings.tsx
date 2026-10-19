@@ -1,13 +1,23 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowLeft, ArrowRight, GripVertical, Plus, Save, Trash2 } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  CalendarDays,
+  GripVertical,
+  Plus,
+  Save,
+  Trash2,
+  X,
+} from "lucide-react";
 import {
   forecastDocumentSchema,
   forecastRecordSchema,
   forecastSnapshotSchema,
   type ForecastDocument,
 } from "@/lib/crm/forecasts";
+import { getForecastCalendar } from "@/lib/crm/forecast-calendar";
 
 import analytics from "../../_components/analytics/analytics.module.css";
 import styles from "./ForecastSettings.module.css";
@@ -29,6 +39,38 @@ import {
 } from "@/lib/crm/forecast-grid";
 
 const initialDocument = createForecastDocument;
+const ACTION_PLAN_COLUMN_ID = "action_plan";
+const calendarWeekdays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"];
+const calendarMonths = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+];
+const calendarDateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  weekday: "long",
+  day: "numeric",
+  month: "long",
+  year: "numeric",
+});
+function getCalendarDays(year: number, month: number) {
+  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
+  const leadingDays = new Date(Date.UTC(year, month, 1)).getUTCDay();
+  const days = [
+    ...Array.from({ length: leadingDays }, () => null),
+    ...Array.from({ length: daysInMonth }, (_, index) => index + 1),
+  ];
+  return [...days, ...Array.from({ length: (7 - (days.length % 7)) % 7 }, () => null)];
+}
+
 const documentOnly = (record: ForecastDocument): ForecastDocument => ({
   title: record.title,
   columns: record.columns,
@@ -65,13 +107,37 @@ export function ForecastSettings() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const root = useRef<HTMLElement>(null);
+  const calendarButton = useRef<HTMLButtonElement>(null);
+  const calendarDialog = useRef<HTMLDialogElement>(null);
+  const calendarCloseButton = useRef<HTMLButtonElement>(null);
   const draggedGroup = useRef<string | null>(null);
   const mounted = useRef(false);
+  const [today] = useState(() => new Date());
+  const [calendarMonth, setCalendarMonth] = useState(() => today.getMonth());
+  const [calendarYear, setCalendarYear] = useState(() => today.getFullYear());
   const dirty = JSON.stringify(document) !== baseline;
   const editable = loaded && canEdit && !saving && !loading;
   const groups = getForecastGroups(document);
   const totals = getForecastTotals(document);
   const invalidCells = getForecastInvalidCells(document);
+  const calendarDays = getCalendarDays(calendarYear, calendarMonth);
+  const calendarWeeks = Array.from({ length: calendarDays.length / 7 }, (_, index) =>
+    calendarDays.slice(index * 7, index * 7 + 7),
+  );
+  const calendarSummary = getForecastCalendar(calendarYear, calendarMonth + 1, today);
+  const validatedDays = new Set(calendarSummary.validatedDays);
+  const calendarYears = Array.from({ length: 21 }, (_, index) => today.getFullYear() - 5 + index);
+  const actionPlanColumns = Math.min(
+    60,
+    Math.max(
+      24,
+      ...document.rows.map((row) =>
+        Math.max(
+          ...(row.cells[ACTION_PLAN_COLUMN_ID] ?? "").split("\n").map((line) => line.length),
+        ),
+      ),
+    ),
+  );
 
   const load = useCallback(async (signal?: AbortSignal) => {
     setLoading(true);
@@ -314,7 +380,11 @@ export function ForecastSettings() {
 
   function changeCell(rowId: string, columnId: string, value: string) {
     if (!editable) return;
-    if (columnId !== "broker" && forecastCellToCents(value) === null) {
+    if (
+      columnId !== "broker" &&
+      columnId !== ACTION_PLAN_COLUMN_ID &&
+      forecastCellToCents(value) === null
+    ) {
       setError(
         "Previsão e Realizado aceitam somente números de 0 a 999.999.999,99, com até duas casas decimais.",
       );
@@ -391,15 +461,23 @@ export function ForecastSettings() {
     void load();
   }
 
+  function openCalendar() {
+    if (!calendarDialog.current?.open) {
+      calendarDialog.current?.showModal();
+      requestAnimationFrame(() => calendarCloseButton.current?.focus());
+    }
+  }
+
+  function closeCalendar() {
+    calendarDialog.current?.close();
+  }
+
   return (
     <section ref={root} className={analytics.canvasMain} aria-label="Previsão">
       <div className={`${analytics.canvas} ${styles.page}`}>
         <div className={styles.main}>
           <header className={styles.header}>
-            <div>
-              <h1>Previsão</h1>
-              <p className={styles.description}>Acompanhe a previsão e o realizado da equipe.</p>
-            </div>
+            <h1>Previsão</h1>
             <div className={styles.actions}>
               <button
                 type="button"
@@ -417,6 +495,9 @@ export function ForecastSettings() {
               >
                 <Plus size={16} aria-hidden="true" /> Inserir coluna
               </button>
+              <button ref={calendarButton} type="button" onClick={openCalendar}>
+                <CalendarDays size={16} aria-hidden="true" /> Calendário
+              </button>
               <button
                 type="button"
                 className={styles.save}
@@ -428,7 +509,7 @@ export function ForecastSettings() {
               </button>
             </div>
           </header>
-          <p className={styles.status} data-dirty={dirty} role="status" aria-live="polite">
+          <p className={styles.srOnly} data-dirty={dirty} role="status" aria-live="polite">
             {loading
               ? "Carregando previsão…"
               : notice ||
@@ -453,11 +534,6 @@ export function ForecastSettings() {
               )}
             </div>
           )}
-          <p className={styles.help} id="forecast-help">
-            Cada empreendimento reúne Previsão e Realizado. Arraste pela alça ou use as setas para
-            mudar a ordem. Até 200 linhas e {FORECAST_MAX_GROUPS} empreendimentos. O Total soma
-            Previsão e Realizado. Use Salvar para compartilhar.
-          </p>
           {invalidCells.length > 0 && (
             <p className={styles.error} role="alert">
               Há {invalidCells.length} valor(es) antigo(s) que precisam ser corrigidos. Os dados
@@ -469,7 +545,6 @@ export function ForecastSettings() {
             role="region"
             aria-label="Tabela de previsão"
             tabIndex={0}
-            aria-describedby="forecast-help"
             aria-busy={loading}
           >
             <table className={styles.table}>
@@ -479,10 +554,11 @@ export function ForecastSettings() {
               <colgroup>
                 <col className={styles.brokerColumn} />
                 {groups.flatMap((group) => [
-                  <col key={group.forecastId} />,
-                  <col key={group.actualId} />,
+                  <col key={group.forecastId} className={styles.metricColumn} />,
+                  <col key={group.actualId} className={styles.metricColumn} />,
                 ])}
                 <col className={styles.totalColumn} />
+                <col className={styles.actionPlanColumn} />
               </colgroup>
               <thead>
                 <tr>
@@ -510,6 +586,9 @@ export function ForecastSettings() {
                   ))}
                   <th scope="col" rowSpan={2} className={styles.totalHeading}>
                     Total
+                  </th>
+                  <th scope="col" rowSpan={2} className={styles.actionPlanHeading}>
+                    Plano de ação
                   </th>
                 </tr>
                 <tr className={styles.metricHeadings}>
@@ -559,6 +638,22 @@ export function ForecastSettings() {
                         {totalText(totals.rows[row.id])}
                       </output>
                     </td>
+                    <td className={styles.actionPlanCell}>
+                      <textarea
+                        aria-label={`Plano de ação, linha ${index + 1}`}
+                        cols={actionPlanColumns}
+                        rows={3}
+                        maxLength={4000}
+                        readOnly={!editable}
+                        value={row.cells[ACTION_PLAN_COLUMN_ID] ?? ""}
+                        placeholder={
+                          editable ? "Descreva ações para melhorar o desempenho" : undefined
+                        }
+                        onChange={(event) =>
+                          changeCell(row.id, ACTION_PLAN_COLUMN_ID, event.target.value)
+                        }
+                      />
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -585,6 +680,12 @@ export function ForecastSettings() {
                     <span className={styles.mobileLabel}>Total</span>
                     <output aria-label="Total geral">{totalText(totals.grandTotal)}</output>
                   </td>
+                  <td
+                    className={styles.actionPlanFooter}
+                    aria-label="Plano de ação não possui total"
+                  >
+                    —
+                  </td>
                 </tr>
               </tfoot>
             </table>
@@ -597,6 +698,134 @@ export function ForecastSettings() {
           </div>
         </div>
       </div>
+      <dialog
+        ref={calendarDialog}
+        className={styles.calendarDialog}
+        aria-labelledby="forecast-calendar-title"
+        aria-describedby="forecast-calendar-description"
+        onClose={() => calendarButton.current?.focus()}
+        onMouseDown={(event) => {
+          if (event.target === event.currentTarget) closeCalendar();
+        }}
+      >
+        <div className={styles.calendarPanel}>
+          <header className={styles.calendarHeader}>
+            <div className={styles.calendarBadge} aria-hidden="true">
+              {String(calendarSummary.remaining).padStart(2, "0")}
+            </div>
+            <div>
+              <span>CALENDÁRIO DO MÊS</span>
+              <h2 id="forecast-calendar-title">Dias validados estimados</h2>
+            </div>
+            <button
+              ref={calendarCloseButton}
+              type="button"
+              className={styles.calendarClose}
+              aria-label="Fechar calendário"
+              onClick={closeCalendar}
+            >
+              <X size={18} aria-hidden="true" />
+            </button>
+          </header>
+          <div className={styles.calendarTitleRow}>
+            <div>
+              <strong>
+                {calendarMonths[calendarMonth]} de {calendarYear}
+              </strong>
+              <p id="forecast-calendar-description">Quinta a domingo · somente dias validados</p>
+            </div>
+            <span>{calendarSummary.total} dias validados</span>
+          </div>
+          <div className={styles.calendarFilters}>
+            <label>
+              <span>MÊS</span>
+              <select
+                aria-label="Mês do calendário"
+                value={calendarMonth}
+                onChange={(event) => setCalendarMonth(Number(event.target.value))}
+              >
+                {calendarMonths.map((month, index) => (
+                  <option key={month} value={index}>
+                    {month}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <label>
+              <span>ANO</span>
+              <select
+                aria-label="Ano do calendário"
+                value={calendarYear}
+                onChange={(event) => setCalendarYear(Number(event.target.value))}
+              >
+                {calendarYears.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className={styles.calendarGrid} role="grid" aria-label="Dias do mês">
+            <div className={styles.calendarGridRow} role="row">
+              {calendarWeekdays.map((weekday) => (
+                <span key={weekday} className={styles.calendarWeekday} role="columnheader">
+                  {weekday}
+                </span>
+              ))}
+            </div>
+            {calendarWeeks.map((week, weekIndex) => (
+              <div className={styles.calendarGridRow} role="row" key={`week-${weekIndex}`}>
+                {week.map((day, dayIndex) => {
+                  if (day === null)
+                    return (
+                      <span
+                        key={`empty-${dayIndex}`}
+                        className={styles.calendarEmpty}
+                        aria-hidden="true"
+                      />
+                    );
+                  const date = new Date(calendarYear, calendarMonth, day);
+                  const validated = validatedDays.has(day);
+                  const current =
+                    day === today.getDate() &&
+                    calendarMonth === today.getMonth() &&
+                    calendarYear === today.getFullYear();
+                  const accessibleDate = calendarDateFormatter.format(date);
+                  return (
+                    <span
+                      key={day}
+                      role="gridcell"
+                      aria-label={`${accessibleDate}${validated ? ", dia validado" : ""}`}
+                      aria-current={current ? "date" : undefined}
+                      className={`${styles.calendarDay} ${validated ? styles.calendarDayValidated : ""} ${current ? styles.calendarDayCurrent : ""}`}
+                    >
+                      {day}
+                    </span>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <div className={styles.calendarSummary}>
+            <div>
+              <span>Total de dias validados</span>
+              <strong>{calendarSummary.total}</strong>
+              <small>no mês selecionado</small>
+            </div>
+            <div>
+              <span>Dias validados passados</span>
+              <strong>{calendarSummary.elapsed}</strong>
+              <small>{calendarSummary.remaining} restantes</small>
+            </div>
+            <div className={styles.calendarRhythm}>
+              <span>Ritmo por corretor</span>
+              <strong>1 por dia validado</strong>
+              <small>{calendarSummary.total} agendamentos no mês</small>
+            </div>
+          </div>
+        </div>
+      </dialog>
     </section>
   );
 

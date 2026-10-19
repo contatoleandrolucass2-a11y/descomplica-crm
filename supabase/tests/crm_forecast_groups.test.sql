@@ -1,16 +1,16 @@
 begin;
-select plan(36);
+select plan(42);
 
 insert into auth.users (id,email) values ('ac810000-0000-4000-8000-000000000001','forecast-groups@example.test');
 select public.bootstrap_master_user('ac810000-0000-4000-8000-000000000001');
 
-create function pg_temp.grouped_forecast(cell text default '') returns jsonb
+create function pg_temp.grouped_forecast(cell text default '', action_plan text default '') returns jsonb
 language sql immutable as $$
   select jsonb_build_object('title','Equipe','columns',
-    '[{"id":"broker","label":"Nome do corretor"},{"id":"f_one","label":"Empreendimento 1"},{"id":"a_one","label":"Empreendimento 1"}]'::jsonb,
-    'rows',jsonb_build_array(jsonb_build_object('id','r1','cells',jsonb_build_object('broker','Sintético','f_one',cell,'a_one',''))));
+    '[{"id":"broker","label":"Nome do corretor"},{"id":"f_one","label":"Empreendimento 1"},{"id":"a_one","label":"Empreendimento 1"},{"id":"action_plan","label":"Plano de ação"}]'::jsonb,
+    'rows',jsonb_build_array(jsonb_build_object('id','r1','cells',jsonb_build_object('broker','Sintético','f_one',cell,'a_one','','action_plan',action_plan))));
 $$;
-grant execute on function pg_temp.grouped_forecast(text) to authenticated;
+grant execute on function pg_temp.grouped_forecast(text,text) to authenticated;
 
 -- Existing records are not rewritten or made unreadable by the new validator.
 insert into public.crm_forecasts(singleton,document,revision) values (true,
@@ -29,7 +29,10 @@ from (values
   (jsonb_set(pg_temp.grouped_forecast(),'{columns,1,id}','"x_one"'),'forecast prefix required'),
   (jsonb_set(pg_temp.grouped_forecast(),'{columns,2,id}','"a_other"'),'pair identity must match'),
   (jsonb_set(pg_temp.grouped_forecast(),'{columns,2,label}','"Other"'),'pair titles must match'),
-  (jsonb_set(pg_temp.grouped_forecast(),'{columns}',(pg_temp.grouped_forecast()->'columns') - 2),'half group rejected')
+  (jsonb_set(pg_temp.grouped_forecast(),'{columns}',(pg_temp.grouped_forecast()->'columns') - 2),'half group rejected'),
+  (jsonb_set(pg_temp.grouped_forecast(),'{columns}',(pg_temp.grouped_forecast()->'columns') - 3),'missing action plan rejected'),
+  (jsonb_set(pg_temp.grouped_forecast(),'{columns,3,id}','"other"'),'fixed action plan ID required'),
+  (jsonb_set(pg_temp.grouped_forecast(),'{columns,3,label}','"Outro"'),'fixed action plan label required')
 ) invalid(doc,reason);
 
 select throws_ok(format('select public.save_crm_forecast(%L::jsonb,1)',pg_temp.grouped_forecast(value)),
@@ -45,10 +48,14 @@ select lives_ok($$select public.save_crm_forecast(pg_temp.grouped_forecast('0,20
 select lives_ok($$select public.save_crm_forecast(pg_temp.grouped_forecast('1,'),5)$$,'valid numeric value accepted: 1,');
 select lives_ok($$select public.save_crm_forecast(pg_temp.grouped_forecast('999999999.99'),6)$$,'valid numeric value accepted: 999999999.99');
 select is(public.get_crm_forecast()#>>'{forecast,rows,0,cells,f_one}','999999999.99','numeric wire strings remain unchanged');
+select lives_ok($$select public.save_crm_forecast(pg_temp.grouped_forecast('',repeat('A',4000)),7)$$,'action plan accepts 4000 free-text characters');
+select is(public.get_crm_forecast()#>>'{forecast,rows,0,cells,action_plan}',repeat('A',4000),'action plan remains unchanged');
+select throws_ok(format('select public.save_crm_forecast(%L::jsonb,8)',pg_temp.grouped_forecast('',repeat('A',4001))),
+  '22023','invalid_argument: invalid forecast','action plan rejects more than 4000 characters');
 
 -- Two complete groups can change order while their ID-keyed cells keep meaning.
 select lives_ok($$select public.save_crm_forecast(
-  '{"title":"Equipe","columns":[{"id":"broker","label":"Nome"},{"id":"f_two","label":"Dois"},{"id":"a_two","label":"Dois"},{"id":"f_one","label":"Um"},{"id":"a_one","label":"Um"}],"rows":[{"id":"r1","cells":{"broker":"Pessoa","f_one":"1","a_one":"2","f_two":"3","a_two":"4"}}]}',
+  '{"title":"Equipe","columns":[{"id":"broker","label":"Nome"},{"id":"f_two","label":"Dois"},{"id":"a_two","label":"Dois"},{"id":"f_one","label":"Um"},{"id":"a_one","label":"Um"},{"id":"action_plan","label":"Plano de ação"}],"rows":[{"id":"r1","cells":{"broker":"Pessoa","f_one":"1","a_one":"2","f_two":"3","a_two":"4","action_plan":"Melhorar contato"}}]}',
   (public.get_crm_forecast()#>>'{forecast,revision}')::bigint)$$,'complete groups can be reordered');
 select is(public.get_crm_forecast()#>>'{forecast,rows,0,cells,f_one}','1','reorder keeps associated cell');
 reset role;

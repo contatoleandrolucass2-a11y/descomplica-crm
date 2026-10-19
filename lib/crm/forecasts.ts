@@ -53,7 +53,10 @@ export const forecastSaveSchema = z
   })
   .strict()
   .refine(validGrid)
-  .refine(isGroupedForecastDocument, "A previsão deve conter pares de empreendimento.")
+  .refine(
+    isGroupedForecastDocument,
+    "A previsão deve conter o corretor, pares de empreendimento e o plano de ação.",
+  )
   .refine(
     (value) => validGrid(value) && getForecastInvalidCells(value).length === 0,
     "Previsão e realizado aceitam somente números não negativos com até duas casas decimais.",

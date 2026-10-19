@@ -21,9 +21,13 @@ describe("Previsão", () => {
       "Total geral",
       "Inserir linha",
       "Inserir coluna",
+      "Calendário",
       "Salvar",
+      "Plano de ação",
     ])
       expect(markup).toContain(label);
+    expect(markup).not.toContain("Acompanhe a previsão e o realizado da equipe.");
+    expect(markup).not.toContain("Cada empreendimento reúne Previsão e Realizado.");
     expect(markup).toContain("Aguardando carregamento.");
     expect(markup.toLowerCase()).toContain("readonly");
   });
@@ -149,33 +153,27 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         );
     }
 
-    async function expectNoTableOverflow(width: number) {
+    async function expectHorizontalTableScroll(width: number) {
       const dimensions = await page
         .getByRole("region", { name: "Tabela de previsão", exact: true })
         .evaluate((element) => ({
           scroll: element.scrollWidth,
           client: element.clientWidth,
-          overflowing: [...element.querySelectorAll("*")]
-            .filter(
-              (child) =>
-                child.getBoundingClientRect().right > element.getBoundingClientRect().right + 1,
-            )
-            .slice(0, 5)
-            .map((child) => `${child.tagName}.${child.className}`),
+          overflowX: getComputedStyle(element).overflowX,
         }));
-      expect(
-        dimensions.scroll,
-        `viewport=${width}; ${JSON.stringify(dimensions)}`,
-      ).toBeLessThanOrEqual(dimensions.client);
+      expect(dimensions.overflowX, `viewport=${width}; ${JSON.stringify(dimensions)}`).toBe("auto");
+      expect(dimensions.scroll, `viewport=${width}; ${JSON.stringify(dimensions)}`).toBeGreaterThan(
+        dimensions.client,
+      );
+      expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
+        true,
+      );
     }
 
     it("edits grouped comparisons, preserves rows during insertion and saves with CAS", async () => {
       await open();
       await page.setViewportSize({ width: 390, height: 844 });
-      const tableRegion = page.getByRole("region", { name: "Tabela de previsão", exact: true });
-      expect(
-        await tableRegion.evaluate((element) => element.scrollWidth <= element.clientWidth),
-      ).toBe(true);
+      await expectHorizontalTableScroll(390);
       await browserExpect(
         page.getByLabel("Nome do empreendimento 7", { exact: true }),
       ).toBeVisible();
@@ -185,6 +183,10 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await page.getByLabel("Empreendimento 1 — Realizado, linha 1", { exact: true }).fill("8");
       await page.getByLabel("Empreendimento 2 — Previsão, linha 1", { exact: true }).fill("3");
       await page.getByLabel("Empreendimento 1 — Realizado, linha 2", { exact: true }).fill("7");
+      const actionPlan = "Retomar contatos e revisar a abordagem comercial nesta semana.";
+      const actionPlanInput = page.getByLabel("Plano de ação, linha 1", { exact: true });
+      await actionPlanInput.fill(actionPlan);
+      await browserExpect(actionPlanInput).toHaveAttribute("cols", "60");
       await browserExpect(page.getByLabel("Total, linha 1", { exact: true })).toHaveText("23");
       await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30");
       await browserExpect(page.locator('tfoot output[aria-label="Total geral"]')).toHaveText("30");
@@ -224,9 +226,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(
         page.getByLabel("Empreendimento 1 — Realizado, linha 2", { exact: true }),
       ).toHaveValue("7");
-      expect(
-        await tableRegion.evaluate((element) => element.scrollWidth <= element.clientWidth),
-      ).toBe(true);
+      await expectHorizontalTableScroll(390);
       await page.getByRole("button", { name: "Salvar", exact: true }).click();
       await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
       expect(puts[0]?.expected_revision).toBe(0);
@@ -236,6 +236,8 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       expect(groups[1]?.label).toBe("Empreendimento 1");
       expect(saved.rows[0]?.cells[groups[1]!.forecastId]).toBe("12");
       expect(saved.rows[1]?.cells[groups[7]!.actualId]).toBe("0.25");
+      expect(saved.columns.at(-1)).toEqual({ id: "action_plan", label: "Plano de ação" });
+      expect(saved.rows[0]?.cells.action_plan).toBe(actionPlan);
       await page.reload();
       await browserExpect(page.getByLabel("Nome do empreendimento 8", { exact: true })).toHaveValue(
         "Residencial QA",
@@ -244,6 +246,9 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(
         page.getByLabel("Nome do corretor, linha 1", { exact: true }),
       ).toHaveValue("Corretor QA");
+      await browserExpect(page.getByLabel("Plano de ação, linha 1", { exact: true })).toHaveValue(
+        actionPlan,
+      );
       page.once("dialog", (dialog) => dialog.dismiss());
       await page.getByRole("button", { name: "Excluir linha 1", exact: true }).click();
       await browserExpect(
@@ -354,12 +359,61 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       ).toBeEnabled();
     });
 
+    it("shows only Thursday through Sunday as validated calendar days and restores focus", async () => {
+      await open();
+      const calendarButton = page.getByRole("button", { name: "Calendário", exact: true });
+      await calendarButton.click();
+      const dialog = page.getByRole("dialog", { name: "Dias validados estimados" });
+      await browserExpect(dialog).toBeVisible();
+      await browserExpect(page.getByRole("button", { name: "Fechar calendário" })).toBeFocused();
+
+      await page.getByLabel("Mês do calendário").selectOption({ label: "Outubro" });
+      await page.getByLabel("Ano do calendário").selectOption("2026");
+      await browserExpect(dialog.getByText("19 dias validados", { exact: true })).toBeVisible();
+      await browserExpect(dialog.getByRole("gridcell", { name: /dia validado$/ })).toHaveCount(19);
+      await browserExpect(
+        dialog.getByRole("gridcell", {
+          name: "segunda-feira, 5 de outubro de 2026",
+          exact: true,
+        }),
+      ).toBeVisible();
+      await browserExpect(
+        dialog.getByRole("gridcell", {
+          name: "quinta-feira, 1 de outubro de 2026, dia validado",
+          exact: true,
+        }),
+      ).toBeVisible();
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({ width, height: 900 });
+        const box = await dialog.boundingBox();
+        expect(box).not.toBeNull();
+        expect(box!.x).toBeGreaterThanOrEqual(0);
+        expect(box!.x + box!.width).toBeLessThanOrEqual(width + 1);
+        await mkdir("test-results/forecast-preview", { recursive: true });
+        await page.screenshot({
+          path: `test-results/forecast-preview/previsao-calendario-${width}.png`,
+          fullPage: true,
+        });
+      }
+
+      await page.getByLabel("Mês do calendário").selectOption({ label: "Setembro" });
+      await browserExpect(dialog.getByText("16 dias validados", { exact: true })).toBeVisible();
+      await page.getByLabel("Mês do calendário").selectOption({ label: "Outubro" });
+      await page.getByLabel("Ano do calendário").selectOption("2025");
+      await browserExpect(dialog.getByText("18 dias validados", { exact: true })).toBeVisible();
+
+      await page.keyboard.press("Escape");
+      await browserExpect(dialog).toBeHidden();
+      await browserExpect(calendarButton).toBeFocused();
+    });
+
     it("supports read-only access, keyboard, three themes and mobile overflow", async () => {
       const seed = createForecastDocument();
       const groups = getForecastGroups(seed);
       seed.rows[0]!.cells.broker = "Corretor QA";
       seed.rows[0]!.cells[groups[0]!.forecastId] = "12";
       seed.rows[0]!.cells[groups[0]!.actualId] = "8";
+      seed.rows[0]!.cells.action_plan = "Manter cadência sintética de acompanhamento.";
       await open({
         canEdit: false,
         seed: {
@@ -375,6 +429,21 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       expect(
         await page.getByLabel("Nome do empreendimento 1", { exact: true }).getAttribute("readonly"),
       ).not.toBeNull();
+      await browserExpect(page.getByLabel("Plano de ação, linha 1", { exact: true })).toHaveValue(
+        "Manter cadência sintética de acompanhamento.",
+      );
+      await browserExpect(
+        page.getByLabel("Plano de ação, linha 1", { exact: true }),
+      ).toHaveAttribute("readonly", "");
+      const topLevelHeadings = await page
+        .locator("thead tr")
+        .first()
+        .locator("th")
+        .allTextContents();
+      expect(topLevelHeadings.slice(-2).map((value) => value.trim())).toEqual([
+        "Total",
+        "Plano de ação",
+      ]);
       for (const theme of ["light", "balanced", "dark"]) {
         await page.evaluate(
           (value) => (globalThis.document.documentElement.dataset.theme = value),
@@ -382,12 +451,38 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         );
         for (const width of [1440, 390, 320]) {
           await page.setViewportSize({ width, height: 900 });
-          await expectNoTableOverflow(width);
+          await expectHorizontalTableScroll(width);
           await mkdir("test-results/forecast-preview", { recursive: true });
           await page.screenshot({
             path: `test-results/forecast-preview/previsao-${theme}-${width}.png`,
             fullPage: true,
           });
+          if (theme === "light" && (width === 1440 || width === 390)) {
+            const tableRegion = page.getByRole("region", {
+              name: "Tabela de previsão",
+              exact: true,
+            });
+            await tableRegion.evaluate((element) => {
+              element.scrollLeft = element.scrollWidth;
+            });
+            const regionBox = await tableRegion.boundingBox();
+            const actionHeadingBox = await page
+              .getByRole("columnheader", { name: "Plano de ação", exact: true })
+              .boundingBox();
+            expect(regionBox).not.toBeNull();
+            expect(actionHeadingBox).not.toBeNull();
+            expect(actionHeadingBox!.x + actionHeadingBox!.width).toBeLessThanOrEqual(
+              regionBox!.x + regionBox!.width + 1,
+            );
+            expect(actionHeadingBox!.x).toBeGreaterThanOrEqual(regionBox!.x - 1);
+            await page.screenshot({
+              path: `test-results/forecast-preview/previsao-total-plano-${width}.png`,
+              fullPage: true,
+            });
+            await tableRegion.evaluate((element) => {
+              element.scrollLeft = 0;
+            });
+          }
           expect(
             await page.evaluate(
               () => globalThis.document.documentElement.scrollWidth <= window.innerWidth,
@@ -421,14 +516,14 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await page.keyboard.press("End");
       await page.keyboard.insertText("abc");
       await browserExpect(numeric).toHaveValue("12");
+      const eighthHeading = page.getByLabel("Nome do empreendimento 8", { exact: true });
+      await browserExpect(eighthHeading).toBeVisible();
+      const eighthName = await eighthHeading.inputValue();
       for (const width of [1440, 390, 320]) {
         await page.setViewportSize({ width, height: 900 });
-        await expectNoTableOverflow(width);
-        expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(
-          true,
-        );
+        await expectHorizontalTableScroll(width);
         await browserExpect(
-          page.getByLabel("Empreendimento 8 — Realizado, linha 2", { exact: true }),
+          page.getByLabel(`${eighthName} — Realizado, linha 2`, { exact: true }),
         ).toBeVisible();
         await page.screenshot({
           path: `test-results/forecast-preview/previsao-oito-grupos-${width}.png`,
@@ -436,10 +531,10 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         });
       }
       await page
-        .getByRole("button", { name: "Mover Empreendimento 8 para a esquerda", exact: true })
+        .getByRole("button", { name: `Mover ${eighthName} para a esquerda`, exact: true })
         .tap();
       await browserExpect(page.getByLabel("Nome do empreendimento 7", { exact: true })).toHaveValue(
-        "Empreendimento 8",
+        eighthName,
       );
     });
 

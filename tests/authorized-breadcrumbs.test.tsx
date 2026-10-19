@@ -32,6 +32,8 @@ describe("authorized breadcrumbs", () => {
     "/app/simulacao/associativo-fluxo-linear/",
     "/app/gestao/rotina",
     "/app/gestao/rotina/",
+    "/app/gestao/previsao",
+    "/app/gestao/previsao/",
   ])("omits the compact workspace breadcrumb at %s", (pathname) => {
     mocks.pathname = pathname;
     expect(

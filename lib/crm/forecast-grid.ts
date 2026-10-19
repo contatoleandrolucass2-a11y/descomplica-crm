@@ -2,6 +2,8 @@ import type { ForecastDocument } from "./forecasts";
 
 export const FORECAST_MAX_GROUPS = 14;
 export const FORECAST_MAX_VALUE = 999_999_999.99;
+export const FORECAST_ACTION_PLAN_ID = "action_plan";
+export const FORECAST_ACTION_PLAN_LABEL = "Plano de ação";
 export type ForecastGroup = { id: string; label: string; forecastId: string; actualId: string };
 
 /** Integer hundredths keep all supported table totals exact (including 200 rows). */
@@ -19,7 +21,11 @@ export function formatForecastCents(cents: number): string {
 
 export function getForecastGroups(document: ForecastDocument): ForecastGroup[] {
   const groups: ForecastGroup[] = [];
-  for (let index = 1; index < document.columns.length; index += 2) {
+  const groupEnd =
+    document.columns.at(-1)?.id === FORECAST_ACTION_PLAN_ID
+      ? document.columns.length - 1
+      : document.columns.length;
+  for (let index = 1; index < groupEnd; index += 2) {
     const forecast = document.columns[index];
     const actual = document.columns[index + 1];
     if (forecast && actual)
@@ -33,19 +39,33 @@ export function getForecastGroups(document: ForecastDocument): ForecastGroup[] {
   return groups;
 }
 
-export function isGroupedForecastDocument(document: ForecastDocument): boolean {
-  if (
-    document.columns[0]?.id !== "broker" ||
-    document.columns.length < 3 ||
-    document.columns.length % 2 !== 1
-  )
-    return false;
+function hasValidForecastGroups(document: ForecastDocument): boolean {
   return getForecastGroups(document).every(
     (group) =>
       /^[A-Za-z0-9_-]{1,62}$/.test(group.id) &&
       group.forecastId === `f_${group.id}` &&
       group.actualId === `a_${group.id}` &&
       document.columns.find((column) => column.id === group.actualId)?.label === group.label,
+  );
+}
+
+function isLegacyGroupedForecastDocument(document: ForecastDocument): boolean {
+  return (
+    document.columns[0]?.id === "broker" &&
+    document.columns.length >= 3 &&
+    document.columns.length % 2 === 1 &&
+    hasValidForecastGroups(document)
+  );
+}
+
+export function isGroupedForecastDocument(document: ForecastDocument): boolean {
+  return (
+    document.columns[0]?.id === "broker" &&
+    document.columns.length >= 4 &&
+    document.columns.length % 2 === 0 &&
+    document.columns.at(-1)?.id === FORECAST_ACTION_PLAN_ID &&
+    document.columns.at(-1)?.label === FORECAST_ACTION_PLAN_LABEL &&
+    hasValidForecastGroups(document)
   );
 }
 
@@ -57,7 +77,11 @@ function appendGroup(document: ForecastDocument, label: string): ForecastDocumen
   ] as const;
   return {
     ...document,
-    columns: [...document.columns, ...columns],
+    columns: [
+      ...document.columns.filter((column) => column.id !== FORECAST_ACTION_PLAN_ID),
+      ...columns,
+      ...document.columns.filter((column) => column.id === FORECAST_ACTION_PLAN_ID),
+    ],
     rows: document.rows.map((row) => ({
       ...row,
       cells: { ...row.cells, [columns[0].id]: "", [columns[1].id]: "" },
@@ -68,10 +92,13 @@ function appendGroup(document: ForecastDocument, label: string): ForecastDocumen
 export function createForecastDocument(): ForecastDocument {
   let document: ForecastDocument = {
     title: "Equipe",
-    columns: [{ id: "broker", label: "Nome do corretor" }],
+    columns: [
+      { id: "broker", label: "Nome do corretor" },
+      { id: FORECAST_ACTION_PLAN_ID, label: FORECAST_ACTION_PLAN_LABEL },
+    ],
     rows: [1, 2].map((number) => ({
       id: crypto.randomUUID(),
-      cells: { broker: `Corretor ${number}` },
+      cells: { broker: `Corretor ${number}`, [FORECAST_ACTION_PLAN_ID]: "" },
     })),
   };
   for (let index = 1; index <= 7; index++)
@@ -82,13 +109,36 @@ export function createForecastDocument(): ForecastDocument {
 /** Converts only the in-memory draft. Never drops legacy cells, including invalid text. */
 export function normalizeForecastDocument(source: ForecastDocument): ForecastDocument {
   if (isGroupedForecastDocument(source)) return source;
+  if (isLegacyGroupedForecastDocument(source))
+    return {
+      ...source,
+      columns: [
+        ...source.columns,
+        { id: FORECAST_ACTION_PLAN_ID, label: FORECAST_ACTION_PLAN_LABEL },
+      ],
+      rows: source.rows.map((row) => ({
+        ...row,
+        cells: { ...row.cells, [FORECAST_ACTION_PLAN_ID]: "" },
+      })),
+    };
+  const hasActionPlan = source.columns.at(-1)?.id === FORECAST_ACTION_PLAN_ID;
+  const groupEnd = hasActionPlan ? source.columns.length - 1 : source.columns.length;
   const broker = source.columns[0]!;
   let document: ForecastDocument = {
     title: source.title,
-    columns: [{ id: "broker", label: broker.label }],
-    rows: source.rows.map((row) => ({ id: row.id, cells: { broker: row.cells[broker.id]! } })),
+    columns: [
+      { id: "broker", label: broker.label },
+      { id: FORECAST_ACTION_PLAN_ID, label: FORECAST_ACTION_PLAN_LABEL },
+    ],
+    rows: source.rows.map((row) => ({
+      id: row.id,
+      cells: {
+        broker: row.cells[broker.id]!,
+        [FORECAST_ACTION_PLAN_ID]: hasActionPlan ? row.cells[FORECAST_ACTION_PLAN_ID]! : "",
+      },
+    })),
   };
-  for (let index = 1; index < source.columns.length; index += 2) {
+  for (let index = 1; index < groupEnd; index += 2) {
     const first = source.columns[index]!;
     const second = source.columns[index + 1];
     const classic = first.label === "Previsão" && (!second || second.label === "Realizado");
@@ -155,6 +205,7 @@ export function moveForecastGroup(
     columns: [
       document.columns[0]!,
       ...groups.flatMap((entry) => [byId.get(entry.forecastId)!, byId.get(entry.actualId)!]),
+      byId.get(FORECAST_ACTION_PLAN_ID)!,
     ],
   };
 }
@@ -175,7 +226,7 @@ export function renameForecastGroup(
 export function getForecastInvalidCells(document: ForecastDocument) {
   return document.rows.flatMap((row) =>
     document.columns
-      .slice(1)
+      .filter((column) => column.id !== "broker" && column.id !== FORECAST_ACTION_PLAN_ID)
       .flatMap((column) =>
         forecastCellToCents(row.cells[column.id]) === null
           ? [{ rowId: row.id, columnId: column.id, value: row.cells[column.id] }]
@@ -191,12 +242,16 @@ export function getForecastTotals(document: ForecastDocument): {
 } {
   const rows: Record<string, number | null> = {};
   const columns: Record<string, number | null> = Object.fromEntries(
-    document.columns.slice(1).map((column) => [column.id, 0]),
+    document.columns
+      .filter((column) => column.id !== "broker" && column.id !== FORECAST_ACTION_PLAN_ID)
+      .map((column) => [column.id, 0]),
   );
   let grandTotal: number | null = 0;
   for (const row of document.rows) {
     let total: number | null = 0;
-    for (const column of document.columns.slice(1)) {
+    for (const column of document.columns.filter(
+      (entry) => entry.id !== "broker" && entry.id !== FORECAST_ACTION_PLAN_ID,
+    )) {
       const value = forecastCellToCents(row.cells[column.id]);
       total = total === null || value === null ? null : total + value;
       columns[column.id] =
