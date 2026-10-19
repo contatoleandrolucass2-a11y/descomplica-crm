@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-19: Associativo automatico
+
+Demanda: retirar status Salesforce e editor de datas; andamento ausente em 0%;
+documentacao calculada pelas respostas existentes, sem novo formulario fiscal.
+A implementacao separa estimativa automatica de declaracoes fiscais confirmadas,
+preserva o motor estrito e nao modifica custos comerciais ou formulas pro-soluto.
+Guia e ajuda atualizados. Fontes de ITBI e registro conferidas novamente pelo
+verificador em 19/10/2026: limites municipais, PDF ARISP e 48 faixas do 5o RI
+coincidem com a politica versionada. Lint passou (quatro avisos em artefatos
+locais antigos ignorados pelo Git), typecheck e build passaram. A primeira
+execucao de `pnpm test` e uma repeticao limitada foram interrompidas apos
+timeouts no desktop; a execucao completa com dois workers terminou com 3.931
+testes aprovados e 99 skips preexistentes. Testes focados de guia/FAQ/andamento:
+72 aprovados. Paridade documental: 5.432 cenarios sem divergencia contra o
+motor estrito. Testes operacionais, QA final e CI/publicacao em andamento.
+
 ## 2026-10-19: publicação da edição e salvamento de Meta
 
 O PR #260 foi integrado no SHA `3002d578a2db346883e661c4ba568faa4ff99c26`.

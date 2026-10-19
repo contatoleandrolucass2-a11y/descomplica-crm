@@ -1,5 +1,14 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-19: abertura - Associativo automatico
+
+- Fontes observacionais: origin/main em `32c7cbdff5147890d8e9a49e58ea31ed2c2965e5`, CI GitHub `39211218104` concluida com sucesso; health publico `https://crm.descomplicapro.com.br/api/health` com status `ok` e versao `3002d578a2db346883e661c4ba568faa4ff99c26`. Diferenca documental do PR #263; runtime anterior confirmado pela nota de publicacao.
+- Checkout limpo anterior em `codex/itbi-registro-publicacao`; trabalho novo em `codex/associativo-calculo-automatico`, baseado no main conferido. CONTEXTO.md e FERRAMENTAS.md de main consultados. Nenhuma alteracao funcional publicada nesta abertura.
+- Escopo solicitado: retirar status Salesforce e editor de datas; andamento ausente estimado em 0%; documentacao automatica a partir do perfil, sem formulario fiscal obrigatorio. Preservar tabelas vigentes e distinguir estimativa de confirmacao fiscal. Testes e publicacao pendentes.
+- Reconferencia durante a tarefa: origin/main avancou para `0ba37461c5615b290ac25b60f0970f0f9a3dcf2e` (Agendamentos, PR #261), CI `39252703894` em andamento. Health permanece `ok`/`3002d578a2db346883e661c4ba568faa4ff99c26`. Integrar main e validar novamente antes de publicar; esta nota nao atribui a nova versao ao site.
+- Implementacao local: Associativo usa estimativa documental automatica, sem transformar premissas em confirmacao fiscal (`basesConfirmed=false`). Motor fiscal estrito e calculadora independente preservados; cidade desconhecida/fora de Sao Paulo e vigencia invalida continuam bloqueadas. Andamento ausente usa 0% somente na simulacao; valores invalidos nao viram zero. Datas automaticas preservadas internamente, editor e status Salesforce removidos apenas do Associativo.
+- Evidencias Windows/Node 24.19.0/pnpm 11.20.0: lint, typecheck e build aprovados; Vitest completo com dois workers, 3.931 aprovados/99 skips. Duas execucoes anteriores interrompidas apos timeouts, sem afrouxar gates. Paridade documental de 5.432 cenarios e 72 testes de ajuda/guia/andamento aprovados. Fontes municipais, ARISP e 5o RI revalidadas. Capturas sinteticas desktop/mobile revisadas; QA final e CI Linux ainda pendentes. Nenhuma publicacao funcional nesta etapa.
+
 ## 2026-10-19: Gestão > Meta editável publicada
 
 - PR #260 integrado em `3002d578a2db346883e661c4ba568faa4ff99c26`. CI do PR `39198445488` aprovada; CI de `main` `39202510879` aprovada após repetir somente o job que falhou transitoriamente na consulta externa de taxas documentais. Nenhum gate foi removido ou ignorado.

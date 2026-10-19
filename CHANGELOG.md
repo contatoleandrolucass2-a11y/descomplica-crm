@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-19 - Associativo com documentacao automatica
+
+- Documentacao estimada automaticamente pelo perfil e pela unidade, sem formulario fiscal obrigatorio; ITBI e os dois atos de registro mantem as tabelas vigentes e o aviso de estimativa.
+- Andamento ausente parte de 0% na simulacao, sem alterar o estoque; valores explicitamente invalidos continuam bloqueados.
+- Remove status Salesforce do resumo e editor de datas. Calendario automatico, cronograma, regras de juros, despachante e seguro preservados.
+- Guia, ajuda e testes acompanham o novo fluxo. A calculadora fiscal independente permanece com confirmacao explicita.
+
 ## 2026-10-18 - Meta editável com salvamento
 
 - Gestão > Meta usa a permissão própria `crm.settings.manage`, habilita todos os campos de Configuração para quem acessa a página e exibe **Salvar alterações** no cabeçalho.

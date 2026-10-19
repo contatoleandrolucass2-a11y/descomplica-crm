@@ -64,7 +64,7 @@ export const ASSOCIATIVE_PAGE_GUIDE_STEPS: readonly [
     fallback: '[data-tour="property-summary"]',
     unavailable: "Os campos complementares só aparecem quando faltam dados oficiais da unidade.",
     description:
-      "Se o andamento da obra ou a avaliação bancária não vierem no estoque, a página pede esses dados. Use somente valores oficiais. Eles valem para esta simulação e não alteram o cadastro. Resultados que dependem deles aguardam o preenchimento.",
+      "Quando o andamento da obra não vem no estoque, a simulação começa em 0%. Se faltar a avaliação bancária, informe o valor do banco. Use somente valores oficiais para essa avaliação. Esses dados valem somente para a simulação e não alteram o cadastro.",
   },
   {
     id: "income",
@@ -169,11 +169,11 @@ export const ASSOCIATIVE_PAGE_GUIDE_STEPS: readonly [
   },
   {
     id: "dates",
-    title: "Confira as datas do cálculo",
-    selector: ".investor-associative-calendar",
+    title: "Confira as datas automáticas",
+    selector: ".investor-associative-payment-summary",
     fallback: proposal,
     description:
-      "Abra Datas do cálculo. O término da obra vem do estoque e não é editável aqui. Confira data do cálculo, entrada, primeiro juro e primeira mensal. Para comparar uma proposta antiga, use as mesmas datas. Restaurar datas automáticas volta ao calendário atual.",
+      "As datas são calculadas automaticamente. O término da obra vem do cadastro e separa os períodos antes e depois da obra. Confira a primeira e a última mensal no resumo e os vencimentos em Exibir parcelas.",
   },
   {
     id: "ranking",
@@ -263,7 +263,7 @@ export const ASSOCIATIVE_PAGE_GUIDE_STEPS: readonly [
     selector: ".investor-associative-documentation",
     fallback: proposal,
     description:
-      "O Resumo financeiro da documentação reúne ITBI, registro, despachante e seguro. Informe os dados bancários ausentes e confira os dados fiscais: cidade, datas, bases e condições do contrato. Sem essa conferência, o cálculo documental fica pendente. Confira os dois registros, as regras aplicadas, o total e o primeiro vencimento. Os botões desse quadro mostram as parcelas da documentação e permitem imprimir.",
+      "O Resumo financeiro calcula automaticamente a estimativa de ITBI, compra e venda, alienação, despachante e seguro com os dados da unidade e as respostas do perfil. Não é preciso preencher um formulário fiscal. Confira o total e o primeiro vencimento. Exibir parcelas mostra a documentação. Prefeitura, banco e cartório confirmam os valores finais.",
   },
   {
     id: "manual",

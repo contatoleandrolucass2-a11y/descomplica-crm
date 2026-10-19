@@ -8,47 +8,20 @@
   letter-spacing: 0;
 }
 
-.investor-associative-calendar {
-  margin-top: 12px;
-  font-size: 12px;
+.investor-page-shell .investor-associative-documentation-estimate {
+  margin: 12px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
 }
 
-.investor-associative-calendar summary {
-  cursor: pointer;
-  padding: 8px 0;
-  font-weight: 700;
-}
-
-.investor-associative-calendar-fields {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 180px), 1fr));
-  gap: 8px;
-}
-
-.investor-associative-calendar-fields label {
-  display: grid;
-  min-width: 0;
-  gap: 4px;
-}
-
-.investor-associative-calendar-fields input {
-  width: 100%;
-  min-width: 0;
-  min-height: 36px;
-  padding: 6px 8px;
-  border: 1px solid currentColor;
-  border-radius: 6px;
-  background: transparent;
-  color: inherit;
-  font: inherit;
-}
-
-.investor-associative-calendar-status {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 8px;
-  padding-top: 8px;
+@media print {
+  :root .investor-page-shell .investor-associative-documentation-estimate {
+    color: #000 !important;
+    -webkit-text-fill-color: #000 !important;
+    background: #fff !important;
+    text-shadow: none !important;
+  }
 }
 
 :root {
