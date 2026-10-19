@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-10-19: publicação da edição e salvamento de Meta
+
+O PR #260 foi integrado no SHA `3002d578a2db346883e661c4ba568faa4ff99c26`.
+A CI do PR `39198445488` e a CI de `main` `39202510879` aprovaram validação,
+restauração isolada, release gates e matriz visual; `main` também produziu a
+imagem imutável. A primeira tentativa de `main` encontrou falha transitória na
+fonte externa de taxas documentais; a repetição somente dos jobs falhos passou
+sem mudança ou bypass.
+
+O artefato `12164931560` teve checksum e revisão conferidos. A imagem foi
+carregada sem rebuild, e `image:prove` aprovou dois perfis com o ID local
+`sha256:efa0d85cb298c0b85fb839c2a462cffb0a6174257920927daeefd01eb99bb5e9`.
+O coordenador `release:production` publicou às `2026-10-19T05:59:19.007Z`,
+deployment `2c8cfb30-b73a-4180-b7e7-56b2aa2c5df5`. Health público retornou
+`ok` na versão exata, o container ficou `healthy`, a rota anônima de Meta
+respondeu `307` para login e o ledger terminou sem pendência. Nenhuma migration,
+configuração de integração, dado remoto ou workflow n8n foi alterado.
+
 ## 2026-10-18: edição e salvamento em Gestão > Meta
 
 O formulário da rota `/app/configuracoes/metas` estava condicionado a
