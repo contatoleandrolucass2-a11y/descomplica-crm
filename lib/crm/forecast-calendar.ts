@@ -9,7 +9,7 @@ export type ForecastCalendarSummary = {
   remaining: number;
 };
 
-const VALIDATED_WEEKDAYS = new Set([0, 4, 5, 6]);
+const VALIDATED_WEEKDAYS = new Set([0, 5, 6]);
 
 function localCalendarDate(date: Date): ForecastCalendarDate {
   return { year: date.getFullYear(), month: date.getMonth() + 1, day: date.getDate() };
@@ -19,7 +19,7 @@ function dateKey(date: ForecastCalendarDate): number {
   return date.year * 10_000 + date.month * 100 + date.day;
 }
 
-/** Counts only Thursday through Sunday. UTC generation keeps weekdays stable in every timezone. */
+/** Counts only Friday through Sunday. UTC generation keeps weekdays stable in every timezone. */
 export function getForecastCalendar(
   year: number,
   month: number,

@@ -4,7 +4,34 @@ export const FORECAST_MAX_GROUPS = 14;
 export const FORECAST_MAX_VALUE = 999_999_999.99;
 export const FORECAST_ACTION_PLAN_ID = "action_plan";
 export const FORECAST_ACTION_PLAN_LABEL = "Plano de ação";
+const FORECAST_PROJECT_LABEL_LAYOUTS = [
+  "Conquista\nItaim Paulista",
+  "Conquista\nSão Miguel",
+  "Terrasse\nVila Ema",
+  "Conquista\nSacomã",
+  "Alto\nLiviero",
+  "Raiz\nhome Clube",
+  "Conquista\nClube Butantã",
+  "Mirante Jardim\ndas Esmeraldas",
+  "Empreendimentos\nRiva",
+] as const;
 export type ForecastGroup = { id: string; label: string; forecastId: string; actualId: string };
+
+const defaultLabelLayout = new Map(
+  FORECAST_PROJECT_LABEL_LAYOUTS.map((label) => [label.replace(/\s+/g, " "), label]),
+);
+
+function layoutKnownGroupLabels(document: ForecastDocument): ForecastDocument {
+  let changed = false;
+  const columns = document.columns.map((column) => {
+    if (column.id === "broker" || column.id === FORECAST_ACTION_PLAN_ID) return column;
+    const label = defaultLabelLayout.get(column.label.replace(/\s+/g, " ").trim());
+    if (!label || label === column.label) return column;
+    changed = true;
+    return { ...column, label };
+  });
+  return changed ? { ...document, columns } : document;
+}
 
 /** Integer hundredths keep all supported table totals exact (including 200 rows). */
 export function forecastCellToCents(value: string | undefined): number | null {
@@ -108,9 +135,9 @@ export function createForecastDocument(): ForecastDocument {
 
 /** Converts only the in-memory draft. Never drops legacy cells, including invalid text. */
 export function normalizeForecastDocument(source: ForecastDocument): ForecastDocument {
-  if (isGroupedForecastDocument(source)) return source;
+  if (isGroupedForecastDocument(source)) return layoutKnownGroupLabels(source);
   if (isLegacyGroupedForecastDocument(source))
-    return {
+    return layoutKnownGroupLabels({
       ...source,
       columns: [
         ...source.columns,
@@ -120,7 +147,7 @@ export function normalizeForecastDocument(source: ForecastDocument): ForecastDoc
         ...row,
         cells: { ...row.cells, [FORECAST_ACTION_PLAN_ID]: "" },
       })),
-    };
+    });
   const hasActionPlan = source.columns.at(-1)?.id === FORECAST_ACTION_PLAN_ID;
   const groupEnd = hasActionPlan ? source.columns.length - 1 : source.columns.length;
   const broker = source.columns[0]!;
@@ -157,7 +184,7 @@ export function normalizeForecastDocument(source: ForecastDocument): ForecastDoc
   }
   while (getForecastGroups(document).length < 7)
     document = appendGroup(document, `Empreendimento ${getForecastGroups(document).length + 1}`);
-  return document;
+  return layoutKnownGroupLabels(document);
 }
 
 export function addForecastGroup(document: ForecastDocument): ForecastDocument {

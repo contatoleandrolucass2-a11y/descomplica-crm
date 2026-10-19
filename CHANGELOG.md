@@ -7,6 +7,17 @@
 - Remove status Salesforce do resumo e editor de datas. Calendario automatico, cronograma, regras de juros, despachante e seguro preservados.
 - Guia, ajuda e testes acompanham o novo fluxo. A calculadora fiscal independente permanece com confirmacao explicita.
 
+## 2026-10-19 - Refinamento visual da Previsão
+
+- Calendário 30% menor, estável durante cliques internos e com dias validados
+  restritos a sexta-feira, sábado e domingo.
+- Empreendimentos conhecidos preservam as quebras de título solicitadas em duas
+  linhas e todos os grupos usam a mesma largura.
+- Cabeçalhos Previsão/Realizado e linhas de valores passam a 22 px; células
+  recebem realce no hover e a rolagem horizontal continua interna à tabela.
+- O salvamento do Plano de ação permanece condicionado à migration aditiva já
+  validada; a RPC anterior é a causa do erro observado antes da publicação.
+
 ## 2026-10-19 - Graficos de Agendamentos
 
 - Banco de Agendamentos: aplica as duas migrations aditivas autorizadas, preservando os três snapshots v1 e limitando a nova leitura ao usuário autenticado com permissões internas.
@@ -30,7 +41,7 @@
 - A confirmação identifica a configuração ativa e uma página aberta durante a virada do mês exige recarga antes de salvar, evitando aplicar valores antigos ao período novo.
 - Preview compilado aprovou 30 telas, incluindo estado vazio editável e estado explícito somente leitura.
 
-- Previsão: adiciona calendário de dias validados de quinta a domingo e coluna
+- Previsão: adiciona calendário de dias validados de sexta a domingo e coluna
   textual Plano de ação depois do Total; compacta cabeçalhos e permite rolagem
   horizontal da tabela em desktop e celular.
 - Previsão: remove breadcrumb, subtítulo e instruções visíveis da página, mantendo

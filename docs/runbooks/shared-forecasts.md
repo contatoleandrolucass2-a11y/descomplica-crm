@@ -16,6 +16,13 @@ aceita até 4.000 caracteres de texto livre por corretor e não participa dos
 cálculos. Os nomes iniciais Corretor 1 e Corretor 2 são rascunhos genéricos, não
 cadastros ou dados importados de clientes.
 
+Quando o documento compartilhado contém os nove empreendimentos conhecidos,
+seus títulos são apresentados nestas duas linhas: Conquista / Itaim Paulista;
+Conquista / São Miguel; Terrasse / Vila Ema; Conquista / Sacomã; Alto / Liviero;
+Raiz / home Clube; Conquista / Clube Butantã; Mirante Jardim / das Esmeraldas;
+Empreendimentos / Riva. A normalização muda somente espaços e quebras desses
+nomes conhecidos e preserva IDs, ordem e valores.
+
 Previsão e Realizado aceitam valores não negativos, com até duas casas decimais
 e nove dígitos inteiros, usando vírgula ou ponto decimal. Campo vazio contribui
 com zero para a soma. O Total da linha soma Previsão e Realizado de todos os
@@ -112,14 +119,17 @@ A Previsão reutiliza o canvas e os tokens do dashboard /app nos temas Claro,
 Médio e Escuro. Cabeçalho, separadores, superfícies e botão Salvar seguem a mesma
 linguagem. A tabela usa rolagem horizontal própria no desktop e no celular para
 preservar os pares em linha única. A coluna do corretor é compacta e os nomes dos
-empreendimentos ocupam no máximo duas linhas. Plano de ação ajusta sua largura ao
-texto dentro dos limites da tabela.
+empreendimentos ocupam no máximo duas linhas, todos com a mesma largura. Plano de
+ação ajusta sua largura ao texto dentro dos limites da tabela. Cabeçalhos
+Previsão/Realizado e linhas de dados usam 22 px; a célula sob o mouse recebe o
+mesmo realce de superfície dos botões.
 Os campos têm alinhamento vertical centralizado; o nome do corretor fica
 alinhado à direita, mantendo a ordem natural das letras em português. Edição,
 confirmação de exclusão, rascunho e controle de revisão permanecem iguais.
 
-O botão Calendário abre um diálogo mensal acessível. Somente quinta-feira,
-sexta-feira, sábado e domingo recebem destaque e entram em Total, Passados e
-Restantes; a interface os chama sempre de dias validados. A seleção de mês e ano
-recalcula os valores sem gravar estado no CRM. Escape, botão Fechar ou clique no
-fundo encerram o diálogo e devolvem o foco ao botão Calendário.
+O botão Calendário abre um diálogo mensal acessível, 30% menor que a primeira
+versão. Somente sexta-feira, sábado e domingo recebem destaque e entram em Total,
+Passados e Restantes; a interface os chama sempre de dias validados. A seleção de
+mês e ano e cliques no conteúdo recalculam ou mantêm a visualização sem fechar o
+diálogo. Escape ou o botão Fechar encerram o diálogo e devolvem o foco ao botão
+Calendário.
