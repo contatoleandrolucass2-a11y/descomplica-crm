@@ -2,7 +2,7 @@
 
 import { ChevronDown } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import {
   DASHBOARD_FILTER_KEYS,
   type DashboardFilterKey,
@@ -24,45 +24,6 @@ const allLabels: Record<DashboardFilterKey, string> = {
   company: "Todas as empresas",
 };
 
-function attachMenuDismissal(root: HTMLDivElement | null) {
-  if (!root) return;
-  const document = root.ownerDocument;
-  const openMenus = () => root.querySelectorAll<HTMLDetailsElement>("details[open]");
-  function dismissOutside(event: Event) {
-    for (const menu of openMenus()) {
-      if (event.target instanceof Node && !menu.contains(event.target)) {
-        // Let the outside interaction own focus; focus() here re-enters focusin.
-        menu.open = false;
-      }
-    }
-  }
-  function dismissOnEscape(event: KeyboardEvent) {
-    if (event.key !== "Escape" || event.defaultPrevented) return;
-    const menu = openMenus()[0];
-    if (!menu) return;
-    event.preventDefault();
-    menu.open = false;
-    menu.querySelector("summary")?.focus({ preventScroll: true });
-  }
-  function closeOtherMenus(event: Event) {
-    const opened = event.target;
-    if (!(opened instanceof HTMLDetailsElement) || !opened.open) return;
-    for (const menu of openMenus()) {
-      if (menu !== opened) menu.open = false;
-    }
-  }
-  document.addEventListener("pointerdown", dismissOutside, true);
-  document.addEventListener("focusin", dismissOutside);
-  document.addEventListener("keydown", dismissOnEscape);
-  root.addEventListener("toggle", closeOtherMenus, true);
-  return () => {
-    document.removeEventListener("pointerdown", dismissOutside, true);
-    document.removeEventListener("focusin", dismissOutside);
-    document.removeEventListener("keydown", dismissOnEscape);
-    root.removeEventListener("toggle", closeOtherMenus, true);
-  };
-}
-
 export function DashboardFilters({
   values,
   options,
@@ -75,6 +36,43 @@ export function DashboardFilters({
   const router = useRouter();
   const query = useSearchParams();
   const [pending, startTransition] = useTransition();
+  const [openKey, setOpenKey] = useState<DashboardFilterKey | null>(null);
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const document = root.ownerDocument;
+    // Read committed disclosure state without resubscribing on each render.
+    const openTrigger = () => root.querySelector<HTMLButtonElement>('button[aria-expanded="true"]');
+    function dismissOutside(event: Event) {
+      const trigger = openTrigger();
+      if (
+        trigger &&
+        event.target instanceof Node &&
+        !trigger.parentElement?.contains(event.target)
+      ) {
+        setOpenKey(null);
+      }
+    }
+    function dismissOnEscape(event: KeyboardEvent) {
+      if (event.key !== "Escape" || event.defaultPrevented) return;
+      const trigger = openTrigger();
+      if (!trigger) return;
+      event.preventDefault();
+      setOpenKey(null);
+      trigger.focus({ preventScroll: true });
+    }
+    document.addEventListener("pointerdown", dismissOutside, true);
+    document.addEventListener("focusin", dismissOutside);
+    document.addEventListener("keydown", dismissOnEscape);
+    return () => {
+      document.removeEventListener("pointerdown", dismissOutside, true);
+      document.removeEventListener("focusin", dismissOutside);
+      document.removeEventListener("keydown", dismissOnEscape);
+    };
+  }, []);
+
   function navigate(key: DashboardFilterKey, value: string) {
     const next = new URLSearchParams(query.toString());
     next.delete("period");
@@ -86,7 +84,7 @@ export function DashboardFilters({
     startTransition(() => router.replace(`/app?${next}`, { scroll: false }));
   }
   return (
-    <div ref={attachMenuDismissal} className={styles.filters} aria-busy={pending}>
+    <div ref={rootRef} className={styles.filters} aria-busy={pending}>
       <div className={styles.heading}>
         <h2>Filtros</h2>
       </div>
@@ -94,8 +92,15 @@ export function DashboardFilters({
         {DASHBOARD_FILTER_KEYS.map((key) => (
           <div key={key} className={styles.field}>
             <span id={`filter-${key}`}>{labels[key]}</span>
-            <details className={styles.menu}>
-              <summary aria-labelledby={`filter-${key} value-${key}`}>
+            <div className={styles.menu}>
+              <button
+                type="button"
+                className={styles.trigger}
+                aria-labelledby={`filter-${key} value-${key}`}
+                aria-expanded={openKey === key}
+                aria-controls={`filter-panel-${key}`}
+                onClick={() => setOpenKey((current) => (current === key ? null : key))}
+              >
                 <span id={`value-${key}`}>
                   {!available
                     ? "Indisponível"
@@ -106,8 +111,14 @@ export function DashboardFilters({
                         : `${values[key].length} selecionados`}
                 </span>
                 <ChevronDown size={16} aria-hidden="true" />
-              </summary>
-              <fieldset disabled={!available || pending} aria-label={labels[key]}>
+              </button>
+              <div
+                id={`filter-panel-${key}`}
+                className={styles.panel}
+                role="group"
+                aria-label={labels[key]}
+                hidden={openKey !== key}
+              >
                 {[...new Set([...values[key], ...options[key]])].map((value) => (
                   <label key={value}>
                     <input
@@ -115,8 +126,10 @@ export function DashboardFilters({
                       checked={values[key].includes(value)}
                       onChange={() => navigate(key, value)}
                       disabled={
-                        !values[key].includes(value) &&
-                        (!options[key].includes(value) || values[key].length >= 50)
+                        !available ||
+                        pending ||
+                        (!values[key].includes(value) &&
+                          (!options[key].includes(value) || values[key].length >= 50))
                       }
                     />
                     <span>{value}</span>
@@ -129,8 +142,8 @@ export function DashboardFilters({
                       : "Aguardando atualização dos filtros."}
                   </p>
                 ) : null}
-              </fieldset>
-            </details>
+              </div>
+            </div>
           </div>
         ))}
       </div>

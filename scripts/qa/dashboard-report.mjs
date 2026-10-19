@@ -536,7 +536,7 @@ async function checkLayout(page) {
     if (document.documentElement.scrollWidth > innerWidth + 1)
       problems.push("document horizontal overflow");
     for (const region of document.querySelectorAll(
-      "main section[aria-labelledby], main details[open]",
+      'main section[aria-labelledby], main details[open], main [id^="filter-panel-"]:not([hidden])',
     )) {
       if (region.scrollWidth > region.clientWidth + 1)
         problems.push(
@@ -678,33 +678,32 @@ export async function verifyMonthlyHistory(page, { title, months, sales, screens
 }
 
 export async function verifyFilterDismissal(page) {
-  const summaries = page.locator('summary[aria-labelledby^="filter-"]');
+  const summaries = page.locator('button[aria-labelledby^="filter-"]');
   await expect(summaries).toHaveCount(4);
   const before = await page.evaluate(() => ({
     url: location.href,
     filters: window.qaCurrentProps.filters,
   }));
   for (const summary of await summaries.all()) {
-    const menu = summary.locator("..");
     await summary.click();
-    await expect(menu).toHaveAttribute("open", "");
+    await expect(summary).toHaveAttribute("aria-expanded", "true");
     await checkLayout(page);
     await page.getByRole("heading", { level: 1 }).click();
-    await expect(menu).not.toHaveAttribute("open", "");
+    await expect(summary).toHaveAttribute("aria-expanded", "false");
     await summary.focus();
     await page.keyboard.press("Enter");
-    await expect(menu).toHaveAttribute("open", "");
+    await expect(summary).toHaveAttribute("aria-expanded", "true");
     await page.keyboard.press("Escape");
-    await expect(menu).not.toHaveAttribute("open", "");
+    await expect(summary).toHaveAttribute("aria-expanded", "false");
     await expect(summary).toBeFocused();
   }
   await summaries.nth(0).click();
   await summaries.nth(1).focus();
   await page.keyboard.press("Enter");
-  await expect(summaries.nth(0).locator("..")).not.toHaveAttribute("open", "");
-  await expect(summaries.nth(1).locator("..")).toHaveAttribute("open", "");
+  await expect(summaries.nth(0)).toHaveAttribute("aria-expanded", "false");
+  await expect(summaries.nth(1)).toHaveAttribute("aria-expanded", "true");
   await summaries.nth(2).focus();
-  await expect(summaries.nth(1).locator("..")).not.toHaveAttribute("open", "");
+  await expect(summaries.nth(1)).toHaveAttribute("aria-expanded", "false");
   assert.deepEqual(
     await page.evaluate(() => ({ url: location.href, filters: window.qaCurrentProps.filters })),
     before,
@@ -750,12 +749,11 @@ export async function verifyAnalysisInteractions(page) {
       .getByRole("figure", { name: `Funil mensal: ${label}`, exact: true })
       .locator(`[data-stage="${stage}"] dd`);
   const select = async (key, label, checked = true) => {
-    const summary = page.locator(`summary[aria-labelledby="filter-${key} value-${key}"]`);
-    const menu = summary.locator("..");
-    if (!(await menu.evaluate((element) => element.open))) await summary.click();
+    const summary = page.locator(`button[aria-labelledby="filter-${key} value-${key}"]`);
+    if ((await summary.getAttribute("aria-expanded")) !== "true") await summary.click();
     await page.getByRole("checkbox", { name: label, exact: true }).setChecked(checked);
     await expect(page.getByRole("checkbox", { name: label, exact: true })).toBeChecked({ checked });
-    if (await menu.evaluate((element) => element.open)) await summary.click();
+    if ((await summary.getAttribute("aria-expanded")) === "true") await summary.click();
   };
   await expect(value("Meta mês", "appointments")).toHaveText("54");
   await expect(value("Meta mês", "visits")).toHaveText("16");
