@@ -473,7 +473,7 @@ export async function checkAssociativeCalculationContinuity(
       await reloadFixture();
       await completeProposal();
       await expect(page.getByLabel("Andamento oficial da obra (%)", { exact: true })).toHaveCount(
-        0,
+        progress <= 1 ? 0 : 1,
       );
       if (progress <= 1) {
         await assertPositivePercentages("% Máximo da renda mensal");

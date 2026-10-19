@@ -16,6 +16,15 @@ testes aprovados e 99 skips preexistentes. Testes focados de guia/FAQ/andamento:
 72 aprovados. Paridade documental: 5.432 cenarios sem divergencia contra o
 motor estrito. Testes operacionais, QA final e CI/publicacao em andamento.
 
+Integrada main `0ba37461` preservando Agendamentos e seus registros de migracao
+autorizada, sem executar migracao nesta tarefa. PR #265 aberto. Operacionais
+Windows: 1.594 aprovados, 19 skips e tres falhas de caminhos/permissoes POSIX
+em Meta Ads, fora do diff. `test:release` interrompido apos ausencia de progresso;
+a CI Linux integral permanece obrigatoria. QA de continuidade corrigiu seletores
+e formato do zero; percentual explicitamente invalido continua exigindo correcao,
+sem ser tratado como dado ausente. A nota de estimativa tem preto/branco na
+impressao independentemente do tema.
+
 ## 2026-10-19: Gráficos de agendamentos
 
 Autorização específica recebida em 19/10/2026 com “continua e publica”. As duas migrations aditivas foram aplicadas via MCP no projeto Supabase de produção `descomplica-crm-production`: histórico remoto `20261019113232 appointments_analysis_stores` e `20261019113239 appointments_analysis_read`. Os três payloads existentes permaneceram v1. A RPC nova aceita apenas `authenticated`; `anon` e `service_role` permanecem sem execução. Advisors não trouxeram alteração de ACL/tabela causada pela entrega; o aviso da RPC autenticada corresponde ao contrato intencional com checagens internas. A primeira carga v2 e a atualização do coletor permanecem etapas posteriores ao CRM compatível publicado.
