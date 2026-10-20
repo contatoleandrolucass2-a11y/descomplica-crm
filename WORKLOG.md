@@ -8,7 +8,12 @@ Sao Paulo; health publico confirmou o SHA. Registro consolidado vale
 tambem na documentacao A4 integrada dos PRs de impressao.
 Recibo, provas do artefato, timeouts locais e limite do smoke autenticado
 constam em docs/knowledge/ATUALIZACOES.md. Nenhuma migration aplicada.
-Este fechamento e documental e nao requer nova publicacao do runtime.
+O gate de auditoria do PR documental encontrou tres novos avisos altos
+no SDK do Next DevTools e no Vite do Vitest. Atualizados somente esses
+overrides e transitivas necessarias. Instalacao frozen, supply chain,
+protocolo dos DevTools e auditoria high aprovados; um moderado permanece.
+Este fechamento de documentos/ferramentas nao requer nova publicacao
+do runtime. Sem excecao no audit e sem ampliar permissoes dos MCPs.
 
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 

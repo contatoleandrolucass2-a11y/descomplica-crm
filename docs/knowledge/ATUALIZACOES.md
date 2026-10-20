@@ -47,8 +47,22 @@
   sua verificacao funcional e sintetica na CI/QA. Reavaliar esse limite
   quando houver sessao legitimamente disponivel. Health e ledger confirmam
   a publicacao, nao substituem essa verificacao da jornada.
-- Este fechamento altera apenas documentos. A publicacao deles no Git e
-  a sincronizacao no Obsidian nao exigem outro deploy ou reinicio do site.
+- O fechamento inicialmente documental encontrou bloqueio de auditoria na
+  CI `39505699301` do PR #284, em `2026-10-20T22:10Z`. Banco de advisories
+  passou a apontar tres altos: GHSA-22jm-h49p-29qw, GHSA-46jr-4wx8-v453
+  e GHSA-587h-7wmj-h5pm. Nao ignorar o gate nem atribuir falha ao calculo.
+  Override existente do SDK Next DevTools atualizado para 1.32.0 e Vite
+  da cadeia Vitest fixado em 8.2.4; transitivas exigidas atualizadas.
+  Mudancas incidentais de Browserslist foram excluidas do lockfile.
+  `pnpm why` confirma escopo de desenvolvimento, sem mudar dependencias
+  de runtime ou PostCSS/Nanoid de Next/Tailwind. Instalacao frozen e
+  supply-chain aprovadas, sem relaxar politicas. `devtools:check` passou
+  nos dois servidores com allowlists preservadas; `audit --audit-level high`
+  saiu 0, com apenas um moderado restante. Fontes e limites no runbook
+  local-devtools. CI completa ainda exigida para integrar o fechamento.
+- O fechamento altera documentos e ferramentas, sem efeito no runtime.
+  A publicacao no Git e a sincronizacao no Obsidian nao exigem outro deploy
+  ou reinicio do site. Preservar a imagem publicada ee451647.
 - Referencias:
   <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/280>,
   <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39482677925>,
