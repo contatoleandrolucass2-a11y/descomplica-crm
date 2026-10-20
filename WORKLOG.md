@@ -6,6 +6,8 @@ A referência promovida a partir do diagnóstico da CI preservou a marca de
 checkout alterado da execução de verificação. O workflow de candidato visual
 protegido agora também é acionado por mudanças no painel de Agendamentos, para
 gerar o mesmo conjunto em checkout limpo antes da promoção e da CI final.
+O run `39378381324` aprovou 242 referências com checkout limpo, baseline
+versionada e imutável durante a captura; o contrato local aprovou 15 testes.
 
 ## 2026-10-20: indicadores, rankings e tabela de Agendamentos
 

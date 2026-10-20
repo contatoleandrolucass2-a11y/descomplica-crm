@@ -9,6 +9,12 @@
 - O workflow isolado de candidato visual protegido passa a observar também o
   componente de Agendamentos. A promoção e a CI integral permanecem pendentes
   até uma nova captura registrar checkout limpo; nenhum gate foi reduzido.
+- O run `39378381324` concluiu com sucesso no merge SHA
+  `53a2d21fba1ee936464fab48f90ea16d50516147`: 242 referências,
+  `worktreeDirtyAtCapture=false`, baseline versionada e inalterada durante a
+  captura. O resultado limpo substituiu a proveniência anterior; o teste local
+  de paridade aprovou 15 casos, com um skip condicional. A CI integral do novo
+  commit continua obrigatória antes da integração.
 
 ## 2026-10-20: indicadores operacionais de Agendamentos — implementação local
 
