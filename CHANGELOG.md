@@ -16,6 +16,15 @@
 - Valida em cada coleta os campos vigentes dos relatórios Salesforce e mantém
   snapshots analíticos v1/v2 legíveis durante a adoção do contrato v3.
 
+## 2026-10-20 - Metas editáveis no Canal Parcerias
+
+- O Canal Parcerias usa o mesmo fluxo ativo da Direcional Vendas: campos
+  editáveis, botão `Salvar alterações`, validação e confirmação na própria rota.
+- O salvamento reutiliza a RPC versionada existente e preserva o recorte do funil
+  de parcerias, incluindo os campos ocultos fixados em zero pelo servidor.
+- A edição exige `crm.settings.manage`; perfis com acesso apenas de leitura
+  continuam vendo os campos bloqueados. Nenhuma outra página foi alterada.
+
 ## 2026-10-19 - Leitura horizontal dos gráficos de Agendamentos
 
 - Publicado pelo PR #270 no SHA `06a41f76`, com CI integral, artefato imutável, promoção protegida e health na versão exata.

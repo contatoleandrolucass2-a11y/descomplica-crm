@@ -726,6 +726,12 @@ export async function runGoalPlanningPreview() {
         }
         if (profile === "partnerships") {
           await expect(
+            page.getByRole("button", { name: "Salvar alterações", exact: true }),
+          ).toBeVisible();
+          await expect(
+            page.getByRole("spinbutton", { name: "Meta mensal de vendas", exact: true }),
+          ).toBeEnabled();
+          await expect(
             page.getByRole("heading", { name: "Imobiliárias por coordenador", exact: true }),
           ).toBeVisible();
           await expect(page.getByText("Meta por tempo de parceria", { exact: true })).toBeVisible();
