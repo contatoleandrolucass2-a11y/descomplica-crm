@@ -1,5 +1,20 @@
 # Changelog
 
+## 2026-10-19 - Impressão A4 do Associativo
+
+- Separa as ações `Imprimir linear` e `Imprimir escalonado` no resultado do
+  Associativo.
+- Gera uma folha A4 limpa com dados reais da proposta, valores sem e com
+  correção, sinais e anuais em linhas independentes.
+- Usa os quatro blocos oficiais de 40%, 30%, 20% e 10% no fluxo escalonado,
+  sem alterar o motor financeiro.
+
+## 2026-10-20 - Data opcional de comparecimento no coletor
+
+- Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da
+  validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
+  para valores inválidos.
+
 ## 2026-10-20 - Ajuste minimo e anuais do Associativo
 
 - Corrige desconto ignorado na sugestao e calcula os menores pagamentos
@@ -13,12 +28,6 @@
   um centavo e presenca obrigatoria dos dois resultados.
 - Torna a leitura do cabecalho do Tabelao no QA dependente de alinhamento
   estavel, com espera limitada e os mesmos criterios de geometria e hit-test.
-
-## 2026-10-20 - Data opcional de comparecimento no coletor
-
-- Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da
-  validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
-  para valores inválidos.
 
 ## 2026-10-20 - Previsão por final de semana e gerente
 

@@ -709,6 +709,7 @@ export async function runSyntheticAssociativePageGuide(options) {
         ["information-at-mark.png", "image/png"],
         ["boravender-logo192.png", "image/png"],
         ["salesforce-no-type-logo.svg", "image/svg+xml"],
+        ["brand/descomplica-wordmark-light.svg", "image/svg+xml"],
       ].map(async ([name, type]) => [
         `/${name}`,
         { type, body: await readFile(path.join(root, "public", name)) },

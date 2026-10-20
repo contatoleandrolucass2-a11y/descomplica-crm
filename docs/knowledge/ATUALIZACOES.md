@@ -1,5 +1,21 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: comparecimento opcional no relatório de Agendamentos
+
+- A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`
+  pela CI `39421287684` e pelo coordenador protegido, deployment
+  `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`; health público confirmou a versão.
+- Na atualização protegida do coletor, um lock órfão de `07:30Z`, sem PID vivo
+  ou descritor aberto, foi arquivado no backup privado
+  `20261020T131600Z-aa8b2d6d501e`. Unidade, ledger, credenciais e agenda foram
+  preservados; o diretório de trabalho passou ao SHA publicado.
+- O primeiro ciclo após a recuperação leu 20.384 oportunidades e 1.281
+  agendamentos, mas falhou fechado antes da publicação. A inspeção estrutural,
+  sem expor linhas, encontrou 774 datas opcionais representadas por `-`; os IDs
+  e rótulos Salesforce exigidos permanecem corretos e vigentes.
+- A correção normaliza somente esse marcador para ausência de comparecimento.
+  O aceite ainda exige CI, nova promoção e duas coletas reais distintas.
+
 ## 2026-10-20: correcao local do ajuste minimo do Associativo
 
 - Causa comprovada: a busca antiga desativava desconto no candidato e
@@ -65,6 +81,16 @@
   ausencia da tabela `crm_forecast_periods` e das RPCs de leitura/gravação
   no banco produtivo. A dependencia de Previsao impede publicar a versao
   combinada enquanto nao houver aplicacao autorizada; usuario consultado.
+- A CI `39451491884` concluiu com sucesso no SHA `698f4657`, inclusive matriz
+  visual, em `2026-10-20T16:41:35Z`. A primeira tentativa teve HTTP 403 na
+  fonte oficial de ITBI; a mesma consulta passou na reexecucao, sem mudar
+  fonte, valores ou gate. QA local do novo sincronismo aprovou 33 verificacoes;
+  desalinhamento permanente injetado foi rejeitado e recuperacao passou.
+- Antes do merge, main integrou PR #269 de impressao A4 em `50f11d32`.
+  Incorporacao automatica do componente/estilo/guia preserva ambos os trabalhos;
+  conflitos documentais resolvidos sem perda. Nova CI obrigatoria no SHA
+  combinado. Registros desta entrega reposicionados depois de uma secao
+  existente para evitar conflitos puramente aditivos no topo dos documentos.
 
 ## 2026-10-20: abertura da correcao de ajustes e anuais do Associativo
 
@@ -81,22 +107,6 @@
   a composicao visual de Registro. Diagnostico e testes ainda pendentes.
 - PR #269 de impressao do Associativo permanece separado e aberto; nao
   incorporar alteracoes nao integradas nem alterar regras de juros.
-
-## 2026-10-20: comparecimento opcional no relatório de Agendamentos
-
-- A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`
-  pela CI `39421287684` e pelo coordenador protegido, deployment
-  `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`; health público confirmou a versão.
-- Na atualização protegida do coletor, um lock órfão de `07:30Z`, sem PID vivo
-  ou descritor aberto, foi arquivado no backup privado
-  `20261020T131600Z-aa8b2d6d501e`. Unidade, ledger, credenciais e agenda foram
-  preservados; o diretório de trabalho passou ao SHA publicado.
-- O primeiro ciclo após a recuperação leu 20.384 oportunidades e 1.281
-  agendamentos, mas falhou fechado antes da publicação. A inspeção estrutural,
-  sem expor linhas, encontrou 774 datas opcionais representadas por `-`; os IDs
-  e rótulos Salesforce exigidos permanecem corretos e vigentes.
-- A correção normaliza somente esse marcador para ausência de comparecimento.
-  O aceite ainda exige CI, nova promoção e duas coletas reais distintas.
 
 ## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
 

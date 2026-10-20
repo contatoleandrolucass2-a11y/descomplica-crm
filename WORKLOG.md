@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-19 - Layouts de impressão do Associativo
+
+- Adicionados dois comandos de impressão: linear e escalonado.
+- A folha A4 usa somente resultados do motor vigente e preserva a separação de
+  entrada, cada sinal, cada anual e mensais.
+- O modo escalonado apresenta os blocos calculados de 40%, 30%, 20% e 10%.
+- Testes focados conferem ações, linhas independentes, fechamento dos blocos e
+  regras de impressão A4. Publicação depende de gates locais, PR, CI completa e
+  coordenador protegido.
+
+## 2026-10-20: marcador vazio de comparecimento no Salesforce
+
+A primeira coleta real do contrato v3 confirmou 1.281 agendamentos e bloqueou
+a publicação porque 774 registros ainda sem comparecimento usam o marcador
+visual `-` no relatório. Metadados, IDs de coluna, contagem e demais tipos
+estavam íntegros. O coletor passa a converter somente esse marcador de data
+opcional em string vazia antes da validação; valores preenchidos e inválidos
+continuam falhando fechados. O teste focal cobre a resposta real observada.
+
 ## 2026-10-20: ajuste minimo e anuais do Associativo
 
 Corrigida a busca de aprovacao que desconsiderava o desconto e exigia
@@ -25,15 +44,6 @@ tela nao foram alterados pelo Associativo. O QA passa a exigir duas leituras
 consecutivas aprovadas em ate dois segundos, preservando geometria, hit-test,
 reset e falha fechada, com diagnostico numerico de cada etapa. Nao muda a
 interface nem promove baseline.
-
-## 2026-10-20: marcador vazio de comparecimento no Salesforce
-
-A primeira coleta real do contrato v3 confirmou 1.281 agendamentos e bloqueou
-a publicação porque 774 registros ainda sem comparecimento usam o marcador
-visual `-` no relatório. Metadados, IDs de coluna, contagem e demais tipos
-estavam íntegros. O coletor passa a converter somente esse marcador de data
-opcional em string vazia antes da validação; valores preenchidos e inválidos
-continuam falhando fechados. O teste focal cobre a resposta real observada.
 
 ## 2026-10-20: previsão por período, segmento e gerente
 

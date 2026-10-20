@@ -51,7 +51,7 @@ Sem identificadores de cliente/unidade: preco 276900, desconto 27000,
 financiamento 126633,61, subsidio 23035, Cheque Moradia 16000, renda 2550,
 Entrada inicial 150, data 20/10/2026, obra 31/12/2029, progresso 15% e Prata.
 
-- Valor real 249900; saldo apos recursos 84231,39.
+- Valor do imovel apos desconto 249900; saldo apos recursos 84231,39.
 - Linear: Entrada + tres Sinais de 13269,73 cada.
 - Sinais em 15/11/2026, 15/12/2026 e 15/01/2027.
 - Anuais de 1275 em 15/12 de 2027, 2028 e 2029; nenhuma em 2026.
@@ -80,3 +80,9 @@ invalidas, teto estrito e reconciliacao nominal. O QA Playwright usa apenas
 estoque sintetico e verifica previa/aplicacao, datas, limite, composicao e
 impressoes. Resultados finais, CI, merge e versao publicada sao registrados
 separadamente em `docs/knowledge/ATUALIZACOES.md`.
+
+Integracao do PR #269 preserva a folha A4 exclusiva por fluxo. O QA combinado
+confere Linear/Escalonado nos tres temas, valores e blocos, legibilidade,
+logo carregado e ausencia da interface comercial no papel. O Registro
+consolidado continua sendo verificado na composicao em tela; a nova folha
+de fluxo nao imprime essa composicao de documentacao.

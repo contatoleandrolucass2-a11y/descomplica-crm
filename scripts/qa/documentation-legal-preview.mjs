@@ -417,23 +417,69 @@ async function checkAssociativePrintDocumentation(page, artifactRoot) {
   const documentation = page.locator(`${associativeRoot} .investor-associative-documentation`);
   const breakdown = documentation.locator(".investor-associative-documentation-breakdown");
   const screenValues = await breakdown.locator("dl > div > dd").allTextContents();
-  for (const theme of Object.keys(themes)) {
+  const sheet = page.locator(`${associativeRoot} .investor-associative-print-sheet`);
+  await page.evaluate(() => {
+    window.print = () => {};
+  });
+  for (const { theme, mode } of Object.keys(themes).flatMap((theme) =>
+    ["linear", "decreasing"].map((mode) => ({ theme, mode })),
+  )) {
     await setTheme(page, theme);
+    await page
+      .getByRole("button", {
+        name: mode === "linear" ? "Imprimir fluxo linear" : "Imprimir fluxo escalonado",
+        exact: true,
+      })
+      .click();
+    await expect(sheet).toHaveAttribute("data-print-flow", mode);
+    const flowValues = await sheet.locator("tbody tr").allTextContents();
     await page.emulateMedia({ media: "print", reducedMotion: "reduce" });
     try {
       await expect(documentation.getByRole("note")).toHaveCount(0);
       await expect(documentation.getByText(/Estimativa automática/)).toHaveCount(0);
       await expect(breakdown.locator("dl > div > dd")).toHaveText(screenValues);
-      const geometry = await checkBreakdownGeometry(
-        documentation,
-        ".investor-associative-documentation-breakdown",
-      );
-      const registration = breakdown
-        .locator("dl > div")
-        .filter({ has: page.getByText("Registro", { exact: true }) })
-        .locator("dd");
-      await expect(registration).toBeVisible();
-      const paint = await registration.evaluate((element) => {
+      await expect(documentation).not.toBeVisible();
+      await expect(sheet).toBeVisible();
+      await expect
+        .poll(() =>
+          sheet.locator("img").evaluate((image) => image.complete && image.naturalWidth > 0),
+        )
+        .toBe(true);
+      await expect(sheet.locator("tbody tr")).toHaveText(flowValues);
+      const monthlyRows = sheet.locator("tbody tr").filter({ hasText: "Mensais -" });
+      await expect(monthlyRows).toHaveCount(mode === "linear" ? 1 : 4);
+      if (mode === "decreasing") {
+        for (const percentage of ["40%", "30%", "20%", "10%"])
+          await expect(monthlyRows.filter({ hasText: percentage })).toHaveCount(1);
+      }
+      const geometry = await sheet.evaluate((element) => {
+        const box = element.getBoundingClientRect();
+        const rows = [...element.querySelectorAll("tr")].map((row) => row.getBoundingClientRect());
+        return {
+          width: box.width,
+          height: box.height,
+          rowsDoNotOverlap: rows.every(
+            (row, index) => index === 0 || row.top >= rows[index - 1].bottom - 1,
+          ),
+          valuesDoNotClip: [...element.querySelectorAll("td, th")].every((cell) => {
+            const bounds = cell.getBoundingClientRect();
+            const range = document.createRange();
+            range.selectNodeContents(cell);
+            return [...range.getClientRects()].every(
+              (rect) =>
+                rect.left >= bounds.left - 1 &&
+                rect.right <= bounds.right + 1 &&
+                rect.top >= bounds.top - 1 &&
+                rect.bottom <= bounds.bottom + 1,
+            );
+          }),
+        };
+      });
+      assert.equal(geometry.rowsDoNotOverlap, true);
+      assert.equal(geometry.valuesDoNotClip, true);
+      assert.ok(geometry.width > 0 && geometry.width <= 794);
+      assert.ok(geometry.height > 0 && geometry.height <= 1123);
+      const paint = await sheet.locator("tfoot td").evaluate((element) => {
         const canvas = document.createElement("canvas");
         canvas.width = canvas.height = 1;
         const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -483,19 +529,20 @@ async function checkAssociativePrintDocumentation(page, artifactRoot) {
           ),
         };
       });
-      assert.equal(paint.foreground[3], 255, "Printed registration text must be opaque");
-      assert.equal(paint.opaque, true, "Printed registration must not fade into the paper");
-      assert.equal(paint.clipped, false, "Printed registration must not clip");
-      assert.ok(paint.contrast >= 4.5, `Printed registration contrast: ${paint.contrast}`);
-      await breakdown.screenshot({
-        path: path.join(artifactRoot, `associative-print-${theme}-breakdown.png`),
+      assert.equal(paint.foreground[3], 255, "Printed total must be opaque");
+      assert.equal(paint.opaque, true, "Printed total must not fade into the paper");
+      assert.equal(paint.clipped, false, "Printed total must not clip");
+      assert.ok(paint.contrast >= 4.5, `Printed total contrast: ${paint.contrast}`);
+      await sheet.screenshot({
+        path: path.join(artifactRoot, `associative-print-${theme}-${mode}.png`),
         animations: "disabled",
       });
       checks.push({
         theme,
+        mode,
         media: "print",
         visible: true,
-        values: screenValues,
+        values: flowValues,
         geometry,
         ...paint,
       });
