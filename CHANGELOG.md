@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-20 - Evidencias da publicacao do Associativo
+
+- Registra a integracao do PR #280, CI completa, artefato imutavel,
+  publicacao protegida e verificacao de health do SHA ee451647.
+- Documenta limites da validacao local e do acesso autenticado, sem nova
+  alteracao de runtime, migration ou reinicio do site.
+
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
 - Impede a repetição da folha de impressão em uma segunda página, isolando o

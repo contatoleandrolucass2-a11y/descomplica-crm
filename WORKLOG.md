@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-20 - Publicacao do ajuste minimo do Associativo
+
+PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.
+O coordenador publicou a imagem imutavel em 20/10/2026 as 19:04:33 de
+Sao Paulo; health publico confirmou o SHA. Registro consolidado vale
+tambem na documentacao A4 integrada dos PRs de impressao.
+Recibo, provas do artefato, timeouts locais e limite do smoke autenticado
+constam em docs/knowledge/ATUALIZACOES.md. Nenhuma migration aplicada.
+Este fechamento e documental e nao requer nova publicacao do runtime.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas

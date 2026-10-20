@@ -1,5 +1,59 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: integracao final do ajuste do Associativo
+
+- Fonte GitHub: PR #280 integrado em `2026-10-20T20:09:56Z`, commit
+  `ee451647dc895dafe83be17604849e0cb163c1dc`. A CI `39482677925` aprovou
+  integralmente o head `cab7edb5f75cbb7acbc9c832ed2de491f8d0d153`,
+  incluindo release-gates e restauracao isolada.
+- CI de publicacao em main: `39489641763`, no commit integrado exato.
+  Conferida concluida/success em `2026-10-20T22:01Z`, com validate,
+  isolated-restore, release-gates e promotable-image aprovados.
+  Fetch confirmou main ainda no commit integrado.
+- Retomada antes de promover: health publico em `2026-10-20T22:01:35Z`
+  continua ok em `50f11d326cdd37b051db46f1dd1015076b85d545`. Ledger concorda,
+  deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, publicado em
+  `2026-10-20T17:51:11.098Z`, sem pendencia. Naquela consulta a publicacao
+  do Associativo ainda nao havia ocorrido; o frescor foi repetido na trava.
+- Publicado pelo coordenador `release:production deploy` em
+  `2026-10-20T22:04:33.591Z` (19:04:33 America/Sao_Paulo), deployment
+  `89e8f722-2bcf-4b65-9927-5a13f06fba22`, SHA
+  `ee451647dc895dafe83be17604849e0cb163c1dc`, sem pendencia.
+  GET publico `/api/health` em `22:04:38Z` retornou HTTP 200/ok e esse SHA.
+  Imagem anterior preservada; sem recovery, migration ou mudanca de config.
+- Artefato `promotable-image-ee451647dc895dafe83be17604849e0cb163c1dc`
+  da CI main: checksum e revision conferidos, sem rebuild. Digest de config
+  da CI `sha256:ed5b69c4d14c2dfaab837611866c649719fe6bfc5b2e89a74243d6e722405c52`;
+  ID local/manifesto OCI
+  `sha256:88e085d2cca93d0fb18faa3e582a266cd2c7580f947ecf45706bce94d9e18e64`.
+  Cadeia de hashes, plataforma linux/amd64 e 11 camadas comprovadas no
+  mesmo arquivo; `image:prove` aprovou homologacao e producao na mesma imagem.
+- Validacao local combinada: formatacao, lint, typecheck e build aprovados.
+  Vitest completo teve 4063 aprovados, 102 skips e tres timeouts no Windows;
+  a cadeia operacional nao foi executada nessa tentativa. Os dois testes
+  de DevTools passaram na repeticao focada. O teste financeiro restante
+  passou isoladamente em 3,82 s, sem mudar codigo, asserts ou prazo de 5 s.
+  A suite Linux integral passou no job validate da CI do head exato.
+  Limite: nao registrar a suite Windows como integralmente aprovada.
+  Reavaliar se o timeout persistir isoladamente ou aparecer na CI Linux.
+- Impressao combinada: 74 testes focais aprovados e QA dos dois fluxos nos
+  tres temas saiu 0, com Registro unico e valores iguais aos da tela.
+  Taxas, juros, ITBI, despachante e seguro preservados. Nenhuma migration,
+  workflow n8n ou dado remoto alterado. Usuario confirmou Previsao concluida
+  em outro chat e excluiu sua migration deste trabalho.
+- Pos-publicacao: nova aba do navegador abriu `/login`, sem sessao autenticada.
+  Nao houve contorno de login, renovacao da sessao existente ou mutacao de
+  proposta real. Jornada autenticada em producao nao foi reexecutada;
+  sua verificacao funcional e sintetica na CI/QA. Reavaliar esse limite
+  quando houver sessao legitimamente disponivel. Health e ledger confirmam
+  a publicacao, nao substituem essa verificacao da jornada.
+- Este fechamento altera apenas documentos. A publicacao deles no Git e
+  a sincronizacao no Obsidian nao exigem outro deploy ou reinicio do site.
+- Referencias:
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/280>,
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39482677925>,
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39489641763>.
+
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 
 - A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`
