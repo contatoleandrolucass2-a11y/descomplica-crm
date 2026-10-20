@@ -596,24 +596,14 @@ export function GoalPlanning({
               </div>
             </div>
             {canManageDraft ? (
-              profile === "dv" ? (
-                <button
-                  className="goal-save-button"
-                  type="submit"
-                  form="goal-configuration-form"
-                  title="Salvar as alterações da meta"
-                >
-                  <span aria-hidden="true">✓</span>Salvar alterações
-                </button>
-              ) : (
-                <a
-                  className="goal-save-button"
-                  href="#meta-review"
-                  title="Revisar metas e salvar um rascunho inativo"
-                >
-                  <span aria-hidden="true">✓</span>Aplicar metas
-                </a>
-              )
+              <button
+                className="goal-save-button"
+                type="submit"
+                form="goal-configuration-form"
+                title="Salvar as alterações da meta"
+              >
+                <span aria-hidden="true">✓</span>Salvar alterações
+              </button>
             ) : null}
           </div>
         </div>
@@ -635,7 +625,7 @@ export function GoalPlanning({
           foi aplicado.
         </p>
       ) : null}
-      {profile === "dv" && canManageDraft ? (
+      {canManageDraft ? (
         <form
           id="goal-configuration-form"
           action={saveFunnelGoalsAction.bind(null, profile)}

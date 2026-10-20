@@ -67,15 +67,16 @@ export async function saveFunnelGoalsAction(
   formData: FormData,
 ): Promise<void> {
   await requirePermission("crm.settings.manage");
-  if (profileInput !== "dv") redirect("/app/configuracoes/metas?error=validation");
+  if (!isGoalProfile(profileInput)) redirect("/app/configuracoes/metas?error=validation");
+  const profilePath = GOAL_PROFILES[profileInput].href;
 
   const values = goalsInputSchema.safeParse(formValues(formData));
   const effectiveMonth = effectiveMonthSchema.safeParse(formData.get("effectiveMonth"));
   if (!values.success || !effectiveMonth.success) {
-    redirect("/app/configuracoes/metas?error=validation");
+    redirect(`${profilePath}?error=validation`);
   }
   if (effectiveMonth.data !== getEffectiveMonth()) {
-    redirect("/app/configuracoes/metas?error=stale");
+    redirect(`${profilePath}?error=stale`);
   }
 
   const supabase = await createClient();
@@ -101,9 +102,9 @@ export async function saveFunnelGoalsAction(
     p_productive_team_sales: values.data.productiveTeamSales,
   });
 
-  if (error) redirect("/app/configuracoes/metas?error=save");
-  revalidatePath("/app/configuracoes/metas");
-  redirect("/app/configuracoes/metas?saved=active");
+  if (error) redirect(`${profilePath}?error=save`);
+  revalidatePath(profilePath);
+  redirect(`${profilePath}?saved=active`);
 }
 
 export async function prepareFunnelGoalsDraftAction(
