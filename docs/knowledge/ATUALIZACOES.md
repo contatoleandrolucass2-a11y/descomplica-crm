@@ -41,6 +41,12 @@
   `authorizedViews`. A matriz foi atualizada para o controle segmentado e os
   tres menus; quatro cenarios desktop/celular e navegacao imediata/pendente
   passaram localmente. Novo SHA e nova CI integral continuam obrigatorios.
+- CI `39373132967`: `validate`, `isolated-restore`, banco, build, relatorio
+  visual e teste auxiliar passaram. O E2E autenticado reteve a expectativa
+  remanescente de quatro menus. O contrato foi atualizado para Imob ativo no
+  perfil `with_canal_imob`, House inativo e tres menus; o clique externo usa o
+  titulo principal porque o titulo visual de filtros foi removido. Reexecutar
+  todos os gates no novo SHA antes de integrar.
 
 ## 2026-10-20: abertura do dashboard House e Imob
 

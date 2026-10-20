@@ -37,6 +37,12 @@ identificou o teste auxiliar de fechamento ainda montando o componente sem
 controle segmentado e conserva a matriz de foco/fechamento nos três menus. As
 quatro combinações desktop/celular e navegação imediata/pendente passaram.
 
+Na CI `39373132967`, `validate`, restauração isolada, banco, build e a matriz
+visual passaram. O E2E autenticado reteve a mesma suposição antiga de quatro
+menus. Ele agora exige Imob ativo no perfil `with_canal_imob`, House inativo e
+três menus; o fechamento usa o título principal, pois `Filtros` não é mais um
+título visual. Nova CI do SHA exato continua obrigatória.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o
