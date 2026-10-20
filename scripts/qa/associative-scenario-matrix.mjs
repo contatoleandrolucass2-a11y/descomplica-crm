@@ -105,6 +105,22 @@ function compound(value, rate, count) {
   return result;
 }
 
+function annualIncomeCeiling(income) {
+  if (!known(income) || Number(income) === 0) return 0;
+  const text = String(income).trim().toLowerCase();
+  if (!/^\+?\d+(?:\.\d*)?(?:e[+-]?\d+)?$/u.test(text)) return 0;
+  const [mantissa, exponent = "0"] = text.replace(/^\+/u, "").split("e");
+  const [whole, decimals = ""] = mantissa.split(".");
+  const centsPosition = whole.length + Number(exponent) + 2;
+  if (centsPosition <= 0) return 0;
+  // Truncate decimal digits to income cents, then integer-divide by two.
+  // floor(floor(income * 100) / 2) = floor(income * 100 / 2) for nonnegative income.
+  const incomeCents = BigInt(
+    `${whole}${decimals}`.padEnd(centsPosition, "0").slice(0, centsPosition),
+  );
+  return Number(incomeCents / 2n) / 100;
+}
+
 // A unit payment's present value, by cash-flow discounting, not the PMT formula.
 export function discountWeights(pre, post) {
   let discount = 1;
@@ -201,12 +217,14 @@ export function oracleLinear(input, today = input.calculationDate ?? input.entry
   if (signals.some((amount, index) => amount !== 0 && !usable[index]))
     causes.push("signals.sequence");
   const signalDates = [];
+  const initialPaymentMonths = [ordinal(input.entryDate)];
   let previous = input.entryDate;
   let chainValid = true;
   for (let index = 0; index < 3; index += 1) {
+    previous = lastPaymentDay(previous, 31);
+    if (signals[index] > 0) initialPaymentMonths.push(ordinal(previous));
     chainValid = chainValid && usable[index];
-    previous = chainValid ? lastPaymentDay(previous, 31) : "";
-    signalDates.push(previous);
+    signalDates.push(chainValid ? previous : "");
   }
   const graceMonths = signalDates.filter(Boolean).length;
   const first =
@@ -225,11 +243,22 @@ export function oracleLinear(input, today = input.calculationDate ?? input.entry
   const monthlyCorrectionMonths = first
     ? Math.max(0, ordinal(first) - ordinal(firstInterestDate) - 1)
     : 0;
+  const annualMaximum = input.income === undefined ? null : annualIncomeCeiling(input.income);
   const annuals = Array.from({ length: 5 }, (_, index) => {
     const dueDate = `${calculationDate.getUTCFullYear() + index}-12-15`;
     const amount = Number(input[`annual${index + 1}`]);
-    const valid = amount === 0 || (dueDate >= today && dueDate <= input.constructionEnd);
-    if (!valid) causes.push("annual.date");
+    const dueMonth = ordinal(dueDate);
+    const withinConstruction = dueDate >= today && dueDate <= input.constructionEnd;
+    const initialMonth = initialPaymentMonths.includes(dueMonth);
+    const afterInitialPayments = initialPaymentMonths.every((month) => dueMonth > month);
+    const withinIncome = annualMaximum === null || amount <= annualMaximum;
+    if (amount > 0) {
+      if (!withinConstruction) causes.push("annual.date");
+      if (initialMonth) causes.push("annual.initial_month");
+      else if (!afterInitialPayments) causes.push("annual.before_initial_end");
+      if (!withinIncome) causes.push("annual.income");
+    }
+    const valid = amount === 0 || (withinConstruction && afterInitialPayments && withinIncome);
     const months = Math.max(
       0,
       ordinal(dueDate) - ordinal(today) - Number(15 < calculationDate.getUTCDate()),

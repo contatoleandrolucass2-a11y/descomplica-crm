@@ -16,6 +16,121 @@
 - A correção normaliza somente esse marcador para ausência de comparecimento.
   O aceite ainda exige CI, nova promoção e duas coletas reais distintas.
 
+## 2026-10-20: correcao local do ajuste minimo do Associativo
+
+- Causa comprovada: a busca antiga desativava desconto no candidato e
+  aplicava os pagamentos ao saldo com desconto. Proposta e sugestao agora
+  compartilham `investorInput`. Previa usa datas e aprovacao do candidato.
+- Preferencia confirmada pelo usuario: menor valor por pagamento inicial,
+  dividido igualmente entre Entrada e ate tres Sinais. Busca por contagem
+  exata de sinais e centavos; recalcula as anuais disponiveis a cada candidato.
+  O empate usa menor soma inicial. Depois minimiza a anual igual necessaria.
+- Anual nao pode coincidir com mes/ano da Entrada ou de Sinal, nem ficar
+  entre sinais. Teto nominal de 50% da renda com truncamento decimal, sem
+  epsilon; juros preservados. O limite nao se refere a anual apos correcao.
+- Caso sintetico reproduzido: Linear com quatro pagamentos iniciais iguais
+  de 13269,73, tres anuais de 1275 a partir de 2027, saldo mensal 27327,47
+  e mensal de 459,00. Fronteira de um centavo e igualdade previa/aplicacao
+  verificadas. Registro visual consolidado; taxas internas inalteradas.
+- Vitest no Windows: 4051 aprovados, 99 skips condicionais; grade independente
+  de 7285 casos sem divergencias. A suite operacional teve 1595 aprovados,
+  19 skips e tres falhas de permissao POSIX/parent directory em testes Meta Ads.
+  Esses testes nao foram alterados; `pnpm test` local nao e integralmente verde.
+  Excecao limitada ao host Windows, a reavaliar na CI Linux obrigatoria do SHA
+  candidato. Nao flexibiliza gates nem autoriza deploy.
+- Lint, typecheck, build e formatacao tiveram execucoes locais aprovadas.
+  Regressao final focal: 38 testes aprovados. QA Playwright completo em
+  `2026-10-20T13-38-47.543Z` aprovou Associativo e calculadora avulsa,
+  guidance/continuity, impressao nos tres temas e desktop/mobile. Capturas
+  locais revisadas; nao exportadas nem usadas como prova de producao.
+  Integracao e publicacao desta demanda ainda pendentes. Fonte tecnica:
+  `docs/audits/associativo-ajuste-minimo-2026-10-20.md`.
+- Consulta observacional as 10:40 America/Sao_Paulo: main e health publico
+  concordam em `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`, HTTP 200/status ok.
+  CI main `39421287684` concluiu com sucesso. Deploy externo registrado em
+  `2026-10-20T13:12:50.271Z`, ID `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`,
+  sem pendencia. Isso nao comprova publicacao da correcao local.
+- PR #280, CI `39433482232`: validate e isolated-restore aprovados.
+  Release-gates bloqueou na expectativa antiga do E2E concorrente, que
+  exigia manter anual acima do teto no campo (`annual_limit_input_not_applied`).
+  O contrato agora verifica clamp exato, preservacao do centavo abaixo e
+  bloqueio do centavo acima, com os dois resultados montados. Nao foi removido
+  o gate; nova CI integral obrigatoria. Nenhuma publicacao nessa tentativa.
+- CI `39436153900`, SHA `b13e2a4f`: validate, restore e E2E concorrente
+  aprovados. A matriz visual aprovou Associativo, 242 comparacoes de imagem
+  e a navegacao, mas reprovou a fixacao do cabecalho do Tabelao em tres
+  medicoes de rolagem. Teste e runtime do Tabelao nao foram alterados neste
+  PR. Reexecucao do mesmo SHA solicitada para diagnosticar intermitencia;
+  nenhum gate removido e publicacao permanece bloqueada.
+- Durante a espera, `main` avancou para `dfe17463` com Previsao por periodo.
+  Incorporacao preserva ambas as entradas de CHANGELOG/WORKLOG; os conflitos
+  eram somente documentais. A migration desse trabalho independente nao e
+  autorizada por esta demanda. Conferir estado remoto antes de publicar a
+  versao combinada e manter CI integral do novo SHA como gate.
+- CI combinada `39443389525` passou validate, restore e E2E, mas repetiu
+  falha na leitura unica do cabecalho do Tabelao, agora em outros viewports.
+  O mesmo teste/runtime no main `dfe17463` passou na CI `39439539162`.
+  Reproducao isolada com componente real e CPU 4x aprovou 33 verificacoes;
+  nao comprovou a causa da falha Linux. Ajuste limitado ao sincronismo do QA:
+  aguarda duas leituras consecutivas do predicado original em ate 2s e
+  registra geometria inicial/final se falhar. Nenhuma tolerancia, criterio,
+  baseline ou runtime do Tabelao alterado. Nova CI integral continua obrigatoria.
+- Validacao local apos incorporar main: lint, typecheck e build aprovados;
+  Vitest 4060 aprovados/102 skips; mesma limitacao Windows nos tres testes
+  operacionais POSIX. Consulta MCP somente de metadados em 20/10/2026 confirmou
+  ausencia da tabela `crm_forecast_periods` e das RPCs de leitura/gravação
+  no banco produtivo. A dependencia de Previsao impede publicar a versao
+  combinada enquanto nao houver aplicacao autorizada; usuario consultado.
+- A CI `39451491884` concluiu com sucesso no SHA `698f4657`, inclusive matriz
+  visual, em `2026-10-20T16:41:35Z`. A primeira tentativa teve HTTP 403 na
+  fonte oficial de ITBI; a mesma consulta passou na reexecucao, sem mudar
+  fonte, valores ou gate. QA local do novo sincronismo aprovou 33 verificacoes;
+  desalinhamento permanente injetado foi rejeitado e recuperacao passou.
+- Antes do merge, main integrou PR #269 de impressao A4 em `50f11d32`.
+  Incorporacao automatica do componente/estilo/guia preserva ambos os trabalhos;
+  conflitos documentais resolvidos sem perda. Nova CI obrigatoria no SHA
+  combinado. Registros desta entrega reposicionados depois de uma secao
+  existente para evitar conflitos puramente aditivos no topo dos documentos.
+- Retomada observacional em `2026-10-20T18:43Z`: health publico HTTP 200/ok
+  e ledger concordam em `50f11d326cdd37b051db46f1dd1015076b85d545`,
+  deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, publicado por outra entrega
+  em `2026-10-20T17:51:11.098Z`, sem pendencia de deploy. Metadados Supabase
+  continuam sem tabela/RPCs de Previsao por periodo; nenhuma mutacao feita.
+  Reavaliacao do bloqueio anterior: esse runtime ja integra a baseline ativa.
+  O delta do Associativo nao introduz dependencia de banco nem muda Previsao;
+  sua promocao pode seguir os gates normais sem aplicar migration alheia.
+  A pendencia de Previsao continua aberta para o responsavel, nao e resolvida
+  nem autorizada por esta observacao. Reavaliar se novo delta exigir schema.
+- Usuario confirmou nesta retomada que concluiu Previsao em outro chat:
+  seguir apenas com Associativo, sem migrations ou alteracoes naquela tela.
+- CI `39475535962` aprovada no SHA `6ec276249b8876cb2793fe480fd01fb4ac77c98b`.
+  Antes do merge, main avancou para `c1e931d5` pelo PR #281. Integracao
+  preserva o portal de impressao e a documentacao A4 acrescentados ali;
+  aplica tambem ao papel a linha unica Registro e a retirada da nota,
+  conforme o pedido deste escopo. Teste compara os valores da tela e da
+  impressao. Novo SHA combinado exige novamente CI antes da integracao.
+- Validacao combinada: 74 testes focais aprovados; QA de impressao saiu 0
+  em `2026-10-20T19:16:46Z`, Linear/Escalonado nos tres temas, com igualdade
+  dos valores de documentacao, logo carregado, geometria e contraste validos.
+  Evidencias locais em `test-results/documentation-legal-preview/2026-10-20T19-16-46.990Z`.
+  Imagem do modo Escalonado conferida visualmente pelo coordenador.
+
+## 2026-10-20: abertura da correcao de ajustes e anuais do Associativo
+
+- Fonte: pedido do usuario, GitHub e GET publico de `/api/health`, consultados
+  em 20/10/2026 as 10:08 (America/Sao_Paulo). Git comum confirmado; checkout
+  inicial limpo. Branch `codex/associativo-ajuste-minimo-anuais` criada de
+  `origin/main` no SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`.
+- CI de main `39421287684` em andamento na consulta; ainda nao valida a nova
+  correcao. Health HTTP 200/status ok, publicado
+  `08d050f90c877009cd55140322b7c822e578d672`; integrado e publicado diferem.
+- Escopo autorizado: impedir anuais em meses ocupados por entrada/sinais,
+  corrigir sugestao para minimizar entrada/sinais respeitando os limites,
+  limitar anual a 50% da renda com arredondamento para baixo e simplificar
+  a composicao visual de Registro. Diagnostico e testes ainda pendentes.
+- PR #269 de impressao do Associativo permanece separado e aberto; nao
+  incorporar alteracoes nao integradas nem alterar regras de juros.
+
 ## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
 
 - A CI `39377861485` reprovou somente o contrato de proveniência da referência
