@@ -1,5 +1,25 @@
 # Worklog
 
+## 2026-10-20 - Correção da impressão comercial do Associativo
+
+Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
+páginas A4 idênticas, sem a seção de documentação, e usava o título `Simulação
+imobiliária`. A origem era a combinação do conteúdo normal da aplicação ainda
+ocupando espaço na impressão com a folha fixa, repetida pelo navegador em cada
+página.
+
+A folha passou a ser renderizada diretamente no corpo do documento por portal,
+enquanto os demais elementos são removidos do fluxo de impressão. A posição
+fixa foi substituída por layout relativo. O cabeçalho agora informa `Simulação
+comercial` e a seção de documentação usa o cálculo vigente da proposta para
+exibir plano, primeira parcela, avaliação, ITBI, registros, despachante, seguro
+Caixa e total estimado. Os modos linear e escalonado continuam separados.
+
+A validação em Chromium gerou uma única página A4 nos dois modos, sem conteúdo
+da tela subjacente e com a documentação completa. Lint, typecheck e build
+passaram. A suíte da aplicação aprovou 3.971 testes e ignorou 105; a suíte de
+operações e release aprovou 723 testes e ignorou 14, sem falhas.
+
 ## 2026-10-19 - Layouts de impressão do Associativo
 
 - Adicionados dois comandos de impressão: linear e escalonado.
