@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-20 - Dashboard House e Imob
+
+- Substitui a seleção múltipla de canal por dois botões exclusivos: `House`
+  para `DIRECIONAL VENDAS SPC` e `Imob` para `SPC - CANAL IMOB PJ`.
+- Abre o dashboard em House por padrão ou respeita o canal permitido pelo perfil
+  do usuário, mantendo somente uma opção ativa por vez.
+- Remove os títulos visuais redundantes de filtros e funis e reduz espaços entre
+  filtros, grupos, cards e detalhes para ampliar a área útil da página.
+- Passa a exibir `Pastas aprovadas` pela coluna `Status` do relatório de Pastas,
+  inclusive no histórico, sem substituir ausência de dado por zero comercial.
+- Calcula as metas House com a quantidade oficial de corretores ativos e os
+  objetivos por corretor 143/24/12/8/2/1; a meta esperada usa o dia atual sobre
+  o total de dias do mês. Metas Imob permanecem indisponíveis até configuração.
+- Preserva a coleta Salesforce a cada 30 minutos e não altera n8n, banco ou os
+  demais relatórios comerciais.
+
 ## 2026-10-20 - Metas editáveis no Canal Parcerias
 
 - Publicado pelo PR #272 no SHA `dac2e11a`, com CI integral, artefato imutável,

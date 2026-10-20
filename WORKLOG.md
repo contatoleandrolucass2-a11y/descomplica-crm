@@ -1,5 +1,81 @@
 # Worklog
 
+## 2026-10-20: contrato visual do dashboard após integração
+
+- A CI do PR #273 confirmou 154 rotas responsivas, 88 temas, 242 auditorias de
+  acessibilidade e 242 comparações integrais de baseline sem divergências.
+- O único bloqueio restante era a comparação estrutural histórica de `/app`:
+  distância de cor `23,88` contra limite global `23`, após os controles
+  House/Imob e a compactação solicitada.
+- Foi definido limite local `24` apenas para `/app`; o limite de bordas `52`,
+  as demais rotas e a comparação pixel a pixel completa permanecem inalterados.
+
+## 2026-10-20: Dashboard House e Imob
+
+Demanda: simplificar o filtro de canal da página `/app`, compactar o dashboard,
+usar o Status do relatório de Pastas para `Pastas aprovadas` e recalcular as
+metas House com a quantidade oficial de corretores ativos. A seleção agora é
+exclusiva entre House (`DIRECIONAL VENDAS SPC`) e Imob (`SPC - CANAL IMOB PJ`),
+com padrão compatível com o perfil autorizado. Os títulos visuais `Filtros` e
+`Funis comerciais` foram retirados e o espaçamento dos blocos foi reduzido.
+
+O sexto estágio do funil é calculado a partir da contagem aprovada já presente
+nos fatos do relatório de Pastas e foi propagado para período atual, histórico
+e comparativos. As metas House usam o cadastro oficial de corretores ativos do
+read model de ranking, alimentado pelo relatório Salesforce de corretores, e os
+valores por corretor 143 oportunidades, 24 agendamentos, 12 visitas, 8 pastas,
+2 pastas aprovadas e 1 venda. A meta esperada até hoje é proporcional ao dia do
+mês civil. Metas Imob ficam explicitamente indisponíveis até sua configuração.
+
+Validação local: lint e typecheck aprovados; build Next.js de 57 rotas aprovado;
+Vitest aprovou 3.958 testes e manteve 99 skips condicionais. A etapa Node aprovou
+1.595 testes, ignorou 19 e reproduziu três falhas conhecidas de Meta Ads ligadas
+a permissões/caminhos POSIX no host Windows, fora dos arquivos alterados. A CI
+Linux do SHA exato continua obrigatória antes de integrar e publicar. Nenhum
+workflow n8n, migration ou dado remoto foi modificado.
+
+O primeiro `release-gates` do PR #273 encontrou o contrato visual antigo que
+ainda exigia `Pastas aprovadas` indisponível. A fixture foi atualizada para House,
+seis etapas, três menus e os novos botões; o contraste do botão ativo no tema
+escuro também foi corrigido. A matriz local aprovou 207 verificações em 320,
+390, 768, 1440 e 1920 px, nos temas claro, médio e escuro, sem overflow,
+sobreposição ou violação séria de acessibilidade. Nova CI integral é obrigatória.
+
+A CI seguinte reteve primeiro a formatação do harness e, após sua correção,
+identificou o teste auxiliar de fechamento ainda montando o componente sem
+`authorizedViews` e esperando quatro menus. O teste agora trata House/Imob como
+controle segmentado e conserva a matriz de foco/fechamento nos três menus. As
+quatro combinações desktop/celular e navegação imediata/pendente passaram.
+
+Na CI `39373132967`, `validate`, restauração isolada, banco, build e a matriz
+visual passaram. O E2E autenticado reteve a mesma suposição antiga de quatro
+menus. Ele agora exige Imob ativo no perfil `with_canal_imob`, House inativo e
+três menus; o fechamento usa o título principal, pois `Filtros` não é mais um
+título visual. Nova CI do SHA exato continua obrigatória.
+
+Na CI `39375374003`, o E2E autenticado corrigido aprovou 19 cenários e ignorou
+um condicional. A etapa visual chegou ao verificador de atualização automática,
+que ainda tentava abrir o menu removido de canal e expirou antes de iniciar a
+prova RSC. O verificador agora confirma Imob ativo e House inativo antes e depois
+do refresh, preservando a exigência de uma única atualização, payload completo,
+URL, rolagem e seção aberta. Nova CI integral continua obrigatória.
+
+A CI `39378024224` comprovou o refresh corrigido: uma atualização, payload RSC
+completo, URL, rolagem, seção aberta e canal Imob preservados. `validate` e
+restauração isolada passaram; a matriz autenticada aprovou rotas, temas,
+acessibilidade, teclado e zoom, mas reteve 11 imagens do `/app` cuja altura caiu
+com a compactação solicitada. As capturas do artefato `12246700076` foram
+inspecionadas em desktop, celular e tema escuro. Promovidas somente essas 11,
+com a proveniência da CI; as outras 231 e os limiares foram preservados. Os 15
+testes de integridade passaram e um opt-in permaneceu ignorado. Nova CI integral
+é obrigatória antes de integrar ou publicar.
+
+Antes da CI verify, `main` avançou para `dac2e11a` com a edição das metas do
+Canal Parcerias. A integração preservou os dois códigos, os dois registros e os
+dois grupos disjuntos de 11 imagens. O manifesto combinado mantém 242 entradas;
+30 testes focados passaram, um opt-in foi ignorado e o typecheck passou. A CI do
+novo merge local é obrigatória e substitui qualquer resultado do SHA anterior.
+
 ## 2026-10-20: edição ativa das metas do Canal Parcerias
 
 Demanda limitada a `/app/configuracoes/metas/parcerias`: disponibilizar a mesma

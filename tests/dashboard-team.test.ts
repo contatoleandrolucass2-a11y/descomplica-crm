@@ -118,7 +118,7 @@ describe("loadDashboardTeam", () => {
     },
   );
 
-  it.each(["with_canal_imob", "without_canal_imob"] as const)(
+  it.each(["with_canal_imob"] as const)(
     "recusa roster global na visao %s mesmo com todas as permissoes",
     async (view) => {
       expect(await loadDashboardTeam(dashboard, authorization, view)).toEqual({
@@ -129,6 +129,13 @@ describe("loadDashboardTeam", () => {
       expect(mocks.from).not.toHaveBeenCalled();
     },
   );
+
+  it("usa a coorte oficial na visão House", async () => {
+    expect(await loadDashboardTeam(dashboard, authorization, "without_canal_imob")).toMatchObject({
+      status: "ready",
+      team: { brokers: 2 },
+    });
+  });
 
   it("usa apenas identidade e gerente, mes fixo, contagem exata e faixa limitada", async () => {
     expect(await load()).toEqual({

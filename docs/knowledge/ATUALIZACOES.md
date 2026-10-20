@@ -1,5 +1,114 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: PR #273 - ajuste final do contrato visual do dashboard
+
+- Fonte: GitHub Actions `39383414957`, artefato `12248076183`, SHA
+  `3a1590740a71deb7ab88b0b16a8990884fee5f65`.
+- Estado: os gates funcionais, de acessibilidade e as 242 comparações integrais
+  de baseline passaram. A única reprovação foi a referência estrutural
+  histórica de `/app`, com distância de cor `23,88` para limite global `23`.
+- Ajuste: tolerância local `24` somente para `/app`, necessária para a evolução
+  House/Imob e o layout compacto. O limite de bordas, as demais rotas e a
+  baseline autenticada completa não foram flexibilizados.
+- Pendente: repetir a CI no novo SHA; merge e publicação continuam bloqueados
+  até todos os gates do mesmo commit ficarem verdes.
+- A repetição `39387806447` aprovou `validate`, `isolated-restore` e
+  `release-gates` no SHA `8498ddb144bb9a6244fef1f8fbd7550b2d75eea3`. O
+  primeiro `validate` falhou transitoriamente na consulta pública das fontes de
+  documentação; a repetição passou sem mudança de código. Antes do merge, a
+  `main` avançou para `a4104a8d`; a integração preserva os dois históricos e
+  exige nova CI do SHA resultante.
+
+## 2026-10-20: implementacao do dashboard House e Imob
+
+- Status local: implementacao concluida na branch
+  `codex/dashboard-house-imob-metas`, baseada em `origin/main` no SHA
+  `2eb17cc052754519ebee1156060e394ea5728169`; PR, CI, merge e publicacao ainda
+  precisam ser registrados separadamente.
+- Canal comercial passa a ser uma escolha exclusiva. House corresponde a
+  `DIRECIONAL VENDAS SPC`; Imob corresponde a `SPC - CANAL IMOB PJ`. O perfil
+  autorizado define a opcao inicial quando so um canal e permitido; no perfil
+  amplo, House e o padrao na ausencia de uma selecao valida.
+- `Pastas aprovadas` nao exige novo coletor: o contrato analitico ja inclui no
+  fato de Pastas a contagem derivada de `Status = Analise aprovada`. A aplicacao
+  agora propaga esse sexto estagio para periodo, historico e funis realizados,
+  sem substituir ausencia de fonte por zero.
+- As metas House usam a equipe oficial de corretores ativos do read model de
+  ranking, alimentado pelo relatorio Salesforce `00OTT000009j0l32AA`. Nao usar
+  proprietarios observados nos fatos comerciais como numero de corretores.
+  Metas individuais vigentes nesta entrega: 143 oportunidades, 24 agendamentos,
+  12 visitas, 8 pastas, 2 pastas aprovadas e 1 venda. Meta esperada ate hoje e
+  `meta mensal / dias do mes * dia atual`, sem arredondamento intermediario.
+- Metas Imob permanecem indisponiveis ate configuracao explicita. Filtros de
+  responsavel ou empresa que nao permitem reconciliar a equipe oficial tambem
+  deixam a meta indisponivel, em vez de estimar um numero sem fonte.
+- Coleta Salesforce existente de 30 minutos preservada; nenhum workflow n8n,
+  migration ou dado remoto foi alterado. Validacao: lint, typecheck e build de
+  57 rotas aprovados; Vitest 3.958 aprovados/99 skips; Node 1.595 aprovados/19
+  skips e tres falhas POSIX conhecidas de Meta Ads no Windows, fora do diff.
+  CI Linux do SHA exato permanece obrigatoria para integracao e publicacao.
+- PR #273: a primeira CI `39369989647` aprovou `validate`, mas o gate visual
+  reteve uma expectativa anterior que exigia `Pastas aprovadas` indisponivel.
+  O harness passou a representar House explicitamente, seis etapas, tres menus
+  e os botoes exclusivos. O contraste ativo no tema escuro foi corrigido. QA
+  local final: 207 checks em cinco larguras e tres temas, sem overflow,
+  sobreposicao ou violacao seria de acessibilidade. Reexecutar CI no novo SHA;
+  essa correcao nao autoriza ignorar o gate anterior.
+- A CI `39371672568` reteve a formatacao antes dos testes. A CI seguinte
+  `39371885078` aprovou `validate` e o relatorio visual Linux com 207 checks,
+  mas reteve o teste auxiliar que ainda montava quatro menus e omitia
+  `authorizedViews`. A matriz foi atualizada para o controle segmentado e os
+  tres menus; quatro cenarios desktop/celular e navegacao imediata/pendente
+  passaram localmente. Novo SHA e nova CI integral continuam obrigatorios.
+- CI `39373132967`: `validate`, `isolated-restore`, banco, build, relatorio
+  visual e teste auxiliar passaram. O E2E autenticado reteve a expectativa
+  remanescente de quatro menus. O contrato foi atualizado para Imob ativo no
+  perfil `with_canal_imob`, House inativo e tres menus; o clique externo usa o
+  titulo principal porque o titulo visual de filtros foi removido. Reexecutar
+  todos os gates no novo SHA antes de integrar.
+- CI `39375374003`: `validate`, `isolated-restore`, banco, build, relatorio do
+  dashboard e E2E autenticado passaram; este ultimo aprovou 19 cenarios e
+  ignorou um condicional. A matriz visual reteve somente o verificador de
+  atualizacao automatica, ainda dependente do antigo menu de canal, e expirou
+  apos o snapshot inicial. O contrato passou a verificar os botoes House/Imob
+  antes e depois do refresh, mantendo prova de atualizacao unica, payload RSC
+  completo, URL, rolagem e secao aberta. Nova CI integral do SHA exato e
+  obrigatoria; o resultado anterior nao autoriza merge nem publicacao.
+- CI `39378024224`: o refresh atualizado passou com uma unica requisicao RSC,
+  resposta completa e preservacao de URL, rolagem, secao aberta e canal Imob.
+  `validate` e `isolated-restore` passaram. O gate visual aprovou os checks
+  funcionais, acessibilidade, teclado e zoom e reteve somente 11 referencias de
+  `/app` por `dimensions_changed`: a altura diminuiu de acordo com a compactacao
+  solicitada. Artefato `12246700076` inspecionado em desktop, celular e escuro;
+  adotadas apenas as 11 imagens do dashboard, com proveniencia da execucao,
+  mantendo as outras 231 e os limiares. Integridade local: 15 testes aprovados
+  e 1 opt-in ignorado. Nova CI verify e obrigatoria antes de merge/deploy.
+- Antes da CI verify, `origin/main` avancou para `dac2e11a` pela entrega de
+  Metas/Parcerias. A integracao preservou os dois codigos e os dois conjuntos
+  disjuntos de 11 referencias; o manifesto combinado continua com 242 imagens.
+  Testes focados combinados: 30 aprovados e 1 opt-in ignorado; typecheck
+  aprovado. Somente a CI do novo SHA de merge pode autorizar integracao.
+
+## 2026-10-20: abertura do dashboard House e Imob
+
+- Consulta de abertura em 2026-10-20: Git comum confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`; branch
+  `codex/dashboard-house-imob-metas` criada do `origin/main` no SHA
+  `2eb17cc052754519ebee1156060e394ea5728169`, sem alteracoes locais anteriores.
+- GitHub: a CI `39366805822` desse SHA falhou somente porque a fonte publica do
+  ITBI da Prefeitura de Sao Paulo respondeu HTTP 403 durante a verificacao
+  externa; o commit e apenas documental sobre Agendamentos. A CI anterior da
+  `main`, `39357425838`, aprovou o SHA `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+- Producao: `https://crm.descomplicapro.com.br/api/health` respondeu HTTP 200,
+  `status: ok`, `version: 06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+  Portanto, estado local/integrado e publicado estao separados nesta abertura.
+- Escopo solicitado: alternancia exclusiva House/Imob com padrao por perfil,
+  compactacao visual, funis derivados do campo Status, metas House calculadas
+  pela meta individual multiplicada pelos corretores e proporcionalizadas pelo
+  dia corrente, e atualizacao dos relatorios a cada 30 minutos. Fontes indicadas:
+  relatorios Salesforce `00OU600000EjufWMAR` e `00OTT000009j0l32AA`; nenhum
+  dado privado foi copiado para esta nota e nenhuma mutacao remota ocorreu.
+
 ## 2026-10-20: metas do Canal Parcerias editáveis e publicadas
 
 - Escopo restrito a `/app/configuracoes/metas/parcerias`. O canal deixou o

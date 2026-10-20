@@ -242,10 +242,14 @@ describe("dashboard complete closed-month calculations", () => {
     expect(result.history.previous).toEqual([
       {
         month: "2026-09",
-        readings: ANALYSIS_STAGE_KEYS.map((key) => ({
-          key,
-          value: key === "opportunities" ? 10 : 0,
-        })),
+        readings: [
+          ...ANALYSIS_STAGE_KEYS.slice(0, 4).map((key) => ({
+            key,
+            value: key === "opportunities" ? 10 : 0,
+          })),
+          { key: "approved-folders", value: 0 },
+          { key: "sales", value: 0 },
+        ],
       },
     ]);
   });
@@ -546,5 +550,24 @@ describe("dashboard analysis contract", () => {
           (issue) => issue.code === "too_big" && issue.path.join(".") === "facts",
         ),
       ).toBe(true);
+  });
+
+  it("uses the folder Status aggregate for approved folders in current and closed periods", () => {
+    const result = analyzeDashboard(
+      slice({
+        facts: [
+          fact({ stage: 3, date: "2026-09-10", count: 4, approved: 3 }),
+          fact({ stage: 3, date: "2026-10-13", count: 5, approved: 2 }),
+        ],
+      }),
+      emptyDashboardFilters(),
+    );
+    expect(
+      result.periodReadings.month.find((reading) => reading.key === "approved-folders")?.value,
+    ).toBe(2);
+    expect(
+      result.history.previous[0]?.readings.find((reading) => reading.key === "approved-folders")
+        ?.value,
+    ).toBe(3);
   });
 });

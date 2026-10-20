@@ -174,6 +174,9 @@ function render(overrides: Partial<Props> = {}) {
     },
     ...overrides,
   };
+  if ("analysis" in overrides && !("goalBrokerCount" in overrides)) {
+    props.goalBrokerCount = overrides.analysis?.brokerCount ?? null;
+  }
   return parseFragment(renderToStaticMarkup(createElement(DashboardReport, props)));
 }
 
@@ -309,7 +312,6 @@ function structuralContract(root: Node) {
       "approved-folders",
       "sales",
     ]);
-    expect(value(funnel, "Pastas aprovadas")).toBe("Indisponível");
     for (const quantity of elements(funnel, "dd")) {
       expect(text(quantity)).toMatch(/^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/);
     }
@@ -350,12 +352,9 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
         for (const funnel of monthlyFigures(section(root, group))) {
           const saleAverage = attribute(funnel, "aria-label") === "Funil mensal: Média venda";
           for (const stage of elements(funnel, "div")) {
+            if (attribute(stage, "data-stage") === "approved-folders") continue;
             expect(text(only(elements(stage, "dd")))).toBe(
-              attribute(stage, "data-stage") === "approved-folders"
-                ? "Indisponível"
-                : saleAverage && quantity !== null
-                  ? "1"
-                  : expected,
+              saleAverage && quantity !== null ? "1" : expected,
             );
           }
         }
@@ -377,7 +376,7 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     expect(value(previous, "Oportunidades para agendamentos")).toBe("20,7%");
     expect(value(previous, "Conversão total Vendas / oportunidades")).toBe("20,7%");
     const expected = card(section(root, "report-goals-title"), "Meta esperada até hoje");
-    expect(value(expected, "Agendamentos para visitas")).toBe("29,6%");
+    expect(value(expected, "Agendamentos para visitas")).toBe("50%");
   });
 
   it("preserva os blocos completos com snapshot disponivel", () => structuralContract(render()));
@@ -406,7 +405,8 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
   it("desenha os funis com valores atuais, sem copiar numeros do print ou estimar aprovadas", () => {
     const analysis = analysisFixture();
     analysis.periodReadings.month.forEach((reading) => {
-      reading.value = fixture().metrics.all![reading.key].currentMonth;
+      reading.value =
+        reading.key === "approved-folders" ? 125 : fixture().metrics.all![reading.key].currentMonth;
     });
     const monthly = section(render({ analysis }), "report-monthly-title");
     expect(monthlyFigures(monthly)).toHaveLength(13);
@@ -416,11 +416,9 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       "1.000",
       "500",
       "250",
-      "Indisponível",
+      "125",
       "100",
     ]);
-    const missing = only(elements(current, "span"));
-    expect(attribute(missing, "title")).toContain("série mensal separada");
   });
 
   it("preserva numeros longos no funil sem abreviar o indicador", () => {
@@ -478,7 +476,6 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     expect(elements(expected, "dd").every((node) => text(node) === "Indispon\u00edvel")).toBe(true);
     const groups = elements(root, "div").filter((node) => attribute(node, "role") === "group");
     expect(groups.map((node) => attribute(node, "aria-label"))).toEqual([
-      "Canal de vendas",
       "Gerente de Vendas",
       "Responsável da conta",
       "Empresa",
@@ -516,13 +513,13 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     const monthly = section(root, "report-monthly-title");
     const goals = card(monthly, "Meta mês");
     expect(text(goals)).toContain("10 corretores no grupo");
-    expect(value(goals, "Oportunidades")).toBe("Indisponível");
-    expect(value(goals, "Agendamentos")).toBe("270");
-    expect(value(goals, "Visitas")).toBe("80");
-    expect(value(goals, "Pastas")).toBe("40");
-    expect(value(goals, "Pastas aprovadas")).toBe("Indisponível");
+    expect(value(goals, "Oportunidades")).toBe("1.430");
+    expect(value(goals, "Agendamentos")).toBe("240");
+    expect(value(goals, "Visitas")).toBe("120");
+    expect(value(goals, "Pastas")).toBe("80");
+    expect(value(goals, "Pastas aprovadas")).toBe("20");
     expect(value(goals, "Vendas")).toBe("10");
-    expect(value(card(monthly, "Meta esperada até hoje"), "Agendamentos")).toBe("113");
+    expect(value(card(monthly, "Meta esperada até hoje"), "Agendamentos")).toBe("100");
     expect(value(card(monthly, "Meta esperada até hoje"), "Vendas")).toBe("4");
   });
 
@@ -558,14 +555,14 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     }
     const history = section(render({ dashboard, analysis }), "report-history-title");
     const annual = only(monthlyFigures(card(history, "Média do ano")));
-    expect(elements(annual, "dd").map(text)).toEqual(["11", "4", "1", "0", "Indisponível", "0"]);
+    expect(elements(annual, "dd").map(text)).toEqual(["11", "4", "1", "0", "0", "0"]);
     const average = card(history, "Média venda");
     expect(elements(only(monthlyFigures(average)), "dd").map(text)).toEqual([
       "33",
       "13",
       "4",
       "2",
-      "Indisponível",
+      "0",
       "1",
     ]);
     expect(value(average, "Conversão total Vendas / oportunidades")).toBe("3%");
@@ -581,7 +578,7 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     );
     expect(value(average, "Conversão total Vendas / oportunidades")).toBe("Indisponível");
     expect(elements(only(elements(average, "details")), "dd").map(text)).toEqual(
-      Array(4).fill("Indisponível"),
+      Array(5).fill("Indisponível"),
     );
     expect(text(root)).not.toMatch(/NaN|Infinity|undefined/);
   });
@@ -609,7 +606,7 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     expect(value(card(monthly, "Mês atual"), "Oportunidades")).toBe("10");
     const dialog = only(elements(yearly, "dialog"));
     expect(text(dialog)).not.toContain("Aguardando a coleta detalhada");
-    expect(elements(dialog, "figure")).toHaveLength(5);
+    expect(elements(dialog, "figure")).toHaveLength(6);
     expect(
       elements(only(elements(dialog, "ul")), "time").map((node) => attribute(node, "datetime")),
     ).toEqual([
@@ -636,16 +633,19 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     });
     const root = render({ analysis, filters });
     const fieldsets = elements(root, "div").filter((node) => attribute(node, "role") === "group");
-    expect(fieldsets).toHaveLength(4);
+    expect(fieldsets).toHaveLength(3);
     for (const fieldset of fieldsets) expect(attribute(fieldset, "hidden")).toBe("");
-    const channels = only(
-      fieldsets.filter((fieldset) => attribute(fieldset, "aria-label") === "Canal de vendas"),
+    const channelButtons = elements(root, "button").filter((button) =>
+      ["House", "Imob"].includes(text(button)),
     );
-    expect(elements(channels, "label")).toHaveLength(2);
-    expect(new Set(elements(channels, "label").map(text))).toEqual(new Set(DASHBOARD_CHANNELS));
+    expect(channelButtons.map(text)).toEqual(["House", "Imob"]);
+    expect(channelButtons.map((button) => attribute(button, "aria-pressed"))).toEqual([
+      "false",
+      "true",
+    ]);
     expect(
       elements(root, "input").filter((input) => attribute(input, "checked") !== undefined),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
     expect(elements(root, "input").every((input) => attribute(input, "type") === "checkbox")).toBe(
       true,
     );
@@ -655,7 +655,12 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     navigation.query = "view=all&period=week&owner=Corretor+sintético+1&extra=keep";
     const options = analysisFixture().options;
     function changeOwner(values: ReturnType<typeof emptyDashboardFilters>, owner: string) {
-      const tree = DashboardFilters({ values, options, available: true });
+      const tree = DashboardFilters({
+        values,
+        options,
+        available: true,
+        authorizedViews: ["all", "with_canal_imob", "without_canal_imob"],
+      });
       const labels = interactiveElements(tree, "label").filter((label) =>
         interactiveElements(label, "span").some((span) => span.props.children === owner),
       );
@@ -687,12 +692,35 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       company: "Empresa sintética",
       channel: DASHBOARD_CHANNELS[0],
     });
-    const tree = DashboardFilters({ values, options, available: true });
-    expect(interactiveElements(tree, "button")).toHaveLength(4);
+    const tree = DashboardFilters({
+      values,
+      options,
+      available: true,
+      authorizedViews: ["all", "with_canal_imob", "without_canal_imob"],
+    });
+    expect(interactiveElements(tree, "button")).toHaveLength(5);
     expect(
       interactiveElements(tree, "button").every((button) => button.props.type === "button"),
     ).toBe(true);
     expect(navigation.refresh).not.toHaveBeenCalled();
+  });
+
+  it("troca House e Imob como seleção exclusiva e ajusta a visão autorizada", () => {
+    navigation.query = `view=without_canal_imob&channel=${encodeURIComponent(DASHBOARD_CHANNELS[1])}`;
+    const tree = DashboardFilters({
+      values: parseDashboardFilters({ channel: DASHBOARD_CHANNELS[1] }),
+      options: analysisFixture().options,
+      available: true,
+      authorizedViews: ["all", "with_canal_imob", "without_canal_imob"],
+    });
+    const imob = interactiveElements(tree, "button").find(
+      (button) => button.props.children === "Imob",
+    );
+    expect(imob).toBeDefined();
+    imob!.props.onClick!();
+    const url = new URL(navigation.replace.mock.lastCall![0], "http://127.0.0.1");
+    expect(url.searchParams.getAll("channel")).toEqual([DASHBOARD_CHANNELS[0]]);
+    expect(url.searchParams.get("view")).toBe("with_canal_imob");
   });
 
   it("mantem metas indisponiveis quando goalsAvailable=false mesmo com numeros no snapshot", () => {
@@ -725,7 +753,7 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     const zeroGoals = card(section(root, "report-monthly-title"), "Meta mês");
     expect(value(zeroGoals, "Agendamentos")).toBe("0");
     expect(value(zeroGoals, "Vendas")).toBe("0");
-    expect(value(zeroGoals, "Oportunidades")).toBe("Indisponível");
+    expect(value(zeroGoals, "Oportunidades")).toBe("0");
     const previous = card(section(root, "report-monthly-title"), "M\u00eas anterior");
     expect(value(previous, "Agendamentos")).toBe("Indispon\u00edvel");
     expect(value(previous, "Visitas")).toBe("0");
@@ -748,9 +776,16 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
     const dashboard = fixture();
     dashboard.metrics.all!.sales.previousMonth = 300;
     dashboard.metrics.all!.folders.previousMonth = 200;
-    const root = render({ dashboard, analysis: analysisFixture(200) });
+    const analysis = analysisFixture(200);
+    analysis.history.previous[0]!.readings.find(
+      (reading) => reading.key === "approved-folders",
+    )!.value = 200;
+    const root = render({ dashboard, analysis });
     expect(
-      value(card(section(root, "report-history-title"), "Mês anterior"), "Pastas para vendas"),
+      value(
+        card(section(root, "report-history-title"), "Mês anterior"),
+        "Pastas aprovadas para vendas",
+      ),
     ).toBe("150%");
   });
 

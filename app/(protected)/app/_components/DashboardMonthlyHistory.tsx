@@ -3,13 +3,13 @@
 import { Info, X } from "lucide-react";
 import { useId, useRef } from "react";
 
-import { DASHBOARD_STAGES, type DashboardStageKey } from "@/lib/crm/dashboard/catalog";
+import { DASHBOARD_FUNNEL_STAGES, type DashboardFunnelKey } from "@/lib/crm/dashboard/presentation";
 
 import styles from "./DashboardMonthlyHistory.module.css";
 
 export interface DashboardMonthlyHistoryMonth {
   month: string;
-  readings: Array<{ key: DashboardStageKey; value: number | null }>;
+  readings: Array<{ key: DashboardFunnelKey; value: number | null }>;
 }
 
 export interface DashboardMonthlyHistoryProps {
@@ -26,14 +26,14 @@ const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "UTC",
 });
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
-const stageKeys = Object.keys(DASHBOARD_STAGES) as DashboardStageKey[];
+const stageKeys = DASHBOARD_FUNNEL_STAGES.map(({ key }) => key);
 
 function monthLabel(month: string) {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return month;
   return monthFormatter.format(new Date(`${month}-01T00:00:00Z`));
 }
 
-function readingValue(month: DashboardMonthlyHistoryMonth, key: DashboardStageKey) {
+function readingValue(month: DashboardMonthlyHistoryMonth, key: DashboardFunnelKey) {
   const value = month.readings.find((reading) => reading.key === key)?.value;
   return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : null;
 }
@@ -124,7 +124,9 @@ export function DashboardMonthlyHistory({
                 const maximum = Math.max(1, ...values.map((value) => value ?? 0));
                 return (
                   <figure className={styles.chart} key={key} aria-labelledby={`${id}-${key}`}>
-                    <figcaption id={`${id}-${key}`}>{DASHBOARD_STAGES[key].label}</figcaption>
+                    <figcaption id={`${id}-${key}`}>
+                      {DASHBOARD_FUNNEL_STAGES.find((stage) => stage.key === key)?.label}
+                    </figcaption>
                     <ol className={styles.readings}>
                       {orderedMonths.map((month, index) => {
                         const value = values[index] ?? null;

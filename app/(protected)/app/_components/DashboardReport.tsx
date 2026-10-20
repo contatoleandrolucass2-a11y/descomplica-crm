@@ -1,14 +1,11 @@
-import {
-  DASHBOARD_STAGES,
-  type DashboardPeriodKey,
-  type DashboardStageKey,
-  type DashboardViewKey,
-} from "@/lib/crm/dashboard/catalog";
+import { type DashboardPeriodKey, type DashboardViewKey } from "@/lib/crm/dashboard/catalog";
 import type { DashboardReadModel } from "@/lib/crm/dashboard/data";
 import {
   buildMonthlyFunnelSnapshots,
   calculateConversion,
-  type FunnelReading,
+  DASHBOARD_FUNNEL_STAGES,
+  type DashboardFunnelKey,
+  type DashboardFunnelReading,
 } from "@/lib/crm/dashboard/presentation";
 import {
   emptyDashboardFilters,
@@ -16,6 +13,7 @@ import {
   type DashboardFilters as FilterValues,
 } from "@/lib/crm/dashboard/analysis";
 import { buildDashboardManagementGoals } from "@/lib/crm/dashboard/management-goals";
+import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
 
 import { SalesforceRefreshButton } from "./SalesforceRefreshButton";
 import { DashboardAutoRefresh } from "./DashboardAutoRefresh";
@@ -37,6 +35,7 @@ export interface DashboardReportProps {
   team?: { brokers: number; managers: Array<{ name: string; total: number }> } | null;
   teamUnavailableReason?: string | undefined;
   analysis?: DashboardAnalysisResult | null;
+  goalBrokerCount?: number | null;
   filters?: FilterValues;
   today?: string;
 }
@@ -46,7 +45,6 @@ const percentFormatter = new Intl.NumberFormat("pt-BR", {
   style: "percent",
   maximumFractionDigits: 1,
 });
-const stages = Object.keys(DASHBOARD_STAGES) as DashboardStageKey[];
 const goalBlocks = [
   { key: "goal", label: "Meta mês", detail: "Meta mensal por corretor" },
   { key: "expected", label: "Meta esperada até hoje", detail: "Proporcional ao dia do mês" },
@@ -67,10 +65,10 @@ const historyBlocks = [
   { key: "sale-average", label: "Média venda", detail: "Média anual por venda" },
 ] as const;
 
-function emptyReadings(): FunnelReading[] {
-  return stages.map((key) => ({
+function emptyReadings(): DashboardFunnelReading[] {
+  return DASHBOARD_FUNNEL_STAGES.map(({ key, label }) => ({
     key,
-    label: DASHBOARD_STAGES[key].label,
+    label,
     value: null,
     conversion: null,
   }));
@@ -92,7 +90,7 @@ function ratioValue(value: number | null) {
   );
 }
 
-function totalConversion(readings: FunnelReading[]) {
+function totalConversion(readings: DashboardFunnelReading[]) {
   const opportunities = readings.find((reading) => reading.key === "opportunities")?.value ?? null;
   const sales = readings.find((reading) => reading.key === "sales")?.value ?? null;
   return opportunities === null || sales === null
@@ -113,7 +111,7 @@ function updatedAt(dashboard: DashboardReadModel | null) {
   }
 }
 
-function ConversionDetails({ readings }: { readings: FunnelReading[] }) {
+function ConversionDetails({ readings }: { readings: DashboardFunnelReading[] }) {
   return (
     <details className={styles.conversionDetails}>
       <summary>Conversões intermediárias</summary>
@@ -129,21 +127,11 @@ function ConversionDetails({ readings }: { readings: FunnelReading[] }) {
   );
 }
 
-function MonthlyFunnel({ label, readings }: { label: string; readings: FunnelReading[] }) {
-  // Approved folders have no monthly dashboard series; ranking totals are not interchangeable.
-  const entries = readings.flatMap((reading) =>
-    reading.key === "folders"
-      ? [
-          reading,
-          { key: "approved-folders", label: "Pastas aprovadas", value: null, conversion: null },
-        ]
-      : [reading],
-  );
-
+function MonthlyFunnel({ label, readings }: { label: string; readings: DashboardFunnelReading[] }) {
   return (
     <figure className={styles.monthlyFunnel} aria-label={`Funil mensal: ${label}`}>
       <dl>
-        {entries.map((entry) => (
+        {readings.map((entry) => (
           <div className={styles.funnelStep} key={entry.key} data-stage={entry.key}>
             <dt>{entry.label}</dt>
             <dd
@@ -152,12 +140,7 @@ function MonthlyFunnel({ label, readings }: { label: string; readings: FunnelRea
                 entry.value !== null && numberFormatter.format(Math.floor(entry.value)).length > 7
               }
             >
-              {numberValue(
-                entry.value,
-                entry.key === "approved-folders"
-                  ? "Pastas aprovadas não possuem uma série mensal separada no dashboard."
-                  : undefined,
-              )}
+              {numberValue(entry.value)}
             </dd>
           </div>
         ))}
@@ -176,7 +159,7 @@ function FunnelCard({
   label: string;
   context: string;
   detail: string;
-  readings: FunnelReading[];
+  readings: DashboardFunnelReading[];
   history?: DashboardAnalysisResult["history"]["year-average"] | undefined;
 }) {
   return (
@@ -214,7 +197,9 @@ export function DashboardReport({
   dashboard,
   selectedView,
   canRefresh,
+  authorizedViews,
   analysis = null,
+  goalBrokerCount = null,
   filters = emptyDashboardFilters(),
   today,
 }: DashboardReportProps) {
@@ -222,29 +207,33 @@ export function DashboardReport({
     !!today && !!dashboard && today.slice(0, 7) !== dashboard.referenceDate.slice(0, 7);
   const sourceMetrics = dashboard?.metrics[selectedView] ?? null;
   const metrics = staleMonth ? null : sourceMetrics;
+  const activeChannel =
+    DASHBOARD_CHANNELS.find((channel) => filters.channel[0] === channel) ?? DASHBOARD_CHANNELS[1];
   const managementGoals = dashboard
     ? buildDashboardManagementGoals({
         referenceDate: today ?? dashboard.referenceDate,
-        brokerCount: analysis?.brokerCount ?? null,
+        brokerCount: goalBrokerCount,
+        channel: activeChannel,
       })
     : null;
   const goals =
     managementGoals?.monthlyGoals ??
-    (Object.fromEntries(stages.map((stage) => [stage, null])) as Record<
-      DashboardStageKey,
+    (Object.fromEntries(DASHBOARD_FUNNEL_STAGES.map(({ key }) => [key, null])) as Record<
+      DashboardFunnelKey,
       number | null
     >);
   const expected = managementGoals?.expectedByToday;
   const monthly = sourceMetrics ? buildMonthlyFunnelSnapshots(sourceMetrics, false) : [];
-  const goalReadings = (
-    values: Record<DashboardStageKey, number | null> | undefined,
-  ): FunnelReading[] =>
-    stages.map((key, index) => {
+  const readingsFromValues = (
+    values: Record<DashboardFunnelKey, number | null> | undefined,
+  ): DashboardFunnelReading[] =>
+    DASHBOARD_FUNNEL_STAGES.map(({ key, label }, index) => {
       const value = values?.[key] ?? null;
-      const previous = index ? (values?.[stages[index - 1]!] ?? null) : null;
+      const previousKey = DASHBOARD_FUNNEL_STAGES[index - 1]?.key;
+      const previous = previousKey ? (values?.[previousKey] ?? null) : null;
       return {
         key,
-        label: DASHBOARD_STAGES[key].label,
+        label,
         value,
         conversion:
           value === null || previous === null ? null : calculateConversion(value, previous),
@@ -252,10 +241,27 @@ export function DashboardReport({
     });
   const periodReadings = (key: (typeof periodBlocks)[number]["key"]) =>
     staleMonth ? emptyReadings() : (analysis?.periodReadings[key] ?? emptyReadings());
-  const historicalReadings = (key: string) =>
-    analysis && !staleMonth
-      ? (monthly.find((snapshot) => snapshot.key === key)?.readings ?? emptyReadings())
-      : emptyReadings();
+  const historicalReadings = (key: keyof DashboardAnalysisResult["history"]) => {
+    if (!analysis || staleMonth) return emptyReadings();
+    const months = analysis.history[key];
+    const legacy = monthly.find((snapshot) => snapshot.key === key)?.readings ?? [];
+    const approved = months
+      .map(
+        (month) =>
+          month.readings.find((reading) => reading.key === "approved-folders")?.value ?? null,
+      )
+      .filter((value): value is number => value !== null);
+    const values = Object.fromEntries([
+      ...legacy.map((reading) => [reading.key, reading.value] as const),
+      [
+        "approved-folders",
+        approved.length === months.length && months.length
+          ? approved.reduce((sum, value) => sum + value, 0) / approved.length
+          : null,
+      ] as const,
+    ]) as Record<DashboardFunnelKey, number | null>;
+    return readingsFromValues(values);
+  };
   const annualReadings = historicalReadings("year-average");
   const annualSales = annualReadings.find((reading) => reading.key === "sales")?.value ?? null;
   const saleAverageReadings = annualReadings.map((reading) => {
@@ -295,6 +301,7 @@ export function DashboardReport({
             values={filters}
             options={analysis?.options ?? emptyDashboardFilters()}
             available={analysis !== null}
+            authorizedViews={authorizedViews}
           />
           {canRefresh ? (
             <div className={styles.refresh}>
@@ -312,7 +319,9 @@ export function DashboardReport({
         ) : null}
 
         <section className={styles.section} aria-labelledby="report-monthly-title">
-          <SectionHeading id="report-monthly-title" title="Funis comerciais" density="compact" />
+          <h2 id="report-monthly-title" className={styles.srOnly}>
+            Funis comerciais
+          </h2>
           <section className={styles.funnelGroup} aria-labelledby="report-goals-title">
             <SectionHeading id="report-goals-title" title="Metas" density="compact" />
             <div className={styles.monthlyGrid}>
@@ -322,15 +331,19 @@ export function DashboardReport({
                   label={block.label}
                   context="Metas"
                   detail={
-                    block.key === "goal" && analysis?.brokerCount != null
-                      ? `${numberFormatter.format(analysis.brokerCount)} corretores no grupo`
+                    block.key === "goal"
+                      ? activeChannel === DASHBOARD_CHANNELS[0]
+                        ? "Metas da Imob serão configuradas depois"
+                        : goalBrokerCount != null
+                          ? `${numberFormatter.format(goalBrokerCount)} corretores no grupo`
+                          : block.detail
                       : block.detail
                   }
                   readings={
                     block.key === "goal"
-                      ? goalReadings(goals)
+                      ? readingsFromValues(goals)
                       : block.key === "expected"
-                        ? goalReadings(expected)
+                        ? readingsFromValues(expected)
                         : periodReadings("month")
                   }
                 />

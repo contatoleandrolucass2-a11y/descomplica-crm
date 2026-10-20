@@ -9,6 +9,8 @@ import {
   type DashboardFilterOptions,
   type DashboardFilters as FilterValues,
 } from "@/lib/crm/dashboard/analysis";
+import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
+import type { DashboardViewKey } from "@/lib/crm/dashboard/catalog";
 import styles from "./DashboardFilters.module.css";
 
 const labels: Record<DashboardFilterKey, string> = {
@@ -28,10 +30,12 @@ export function DashboardFilters({
   values,
   options,
   available,
+  authorizedViews,
 }: {
   values: FilterValues;
   options: DashboardFilterOptions;
   available: boolean;
+  authorizedViews: readonly DashboardViewKey[];
 }) {
   const router = useRouter();
   const query = useSearchParams();
@@ -83,13 +87,51 @@ export function DashboardFilters({
     selected.forEach((item) => next.append(key, item));
     startTransition(() => router.replace(`/app?${next}`, { scroll: false }));
   }
+  function selectChannel(value: (typeof DASHBOARD_CHANNELS)[number]) {
+    const next = new URLSearchParams(query.toString());
+    next.delete("period");
+    next.delete("channel");
+    next.set("channel", value);
+    const preferredView =
+      value === DASHBOARD_CHANNELS[1] ? "without_canal_imob" : "with_canal_imob";
+    if (authorizedViews.includes(preferredView)) next.set("view", preferredView);
+    else if (authorizedViews.includes("all")) next.set("view", "all");
+    startTransition(() => router.replace(`/app?${next}`, { scroll: false }));
+  }
+  const canSelectChannel = (value: (typeof DASHBOARD_CHANNELS)[number]) => {
+    const view = value === DASHBOARD_CHANNELS[1] ? "without_canal_imob" : "with_canal_imob";
+    return available && (authorizedViews.includes(view) || authorizedViews.includes("all"));
+  };
   return (
     <div ref={rootRef} className={styles.filters} aria-busy={pending}>
-      <div className={styles.heading}>
-        <h2>Filtros</h2>
-      </div>
       <div className={styles.grid}>
-        {DASHBOARD_FILTER_KEYS.map((key) => (
+        <fieldset className={styles.channelField}>
+          <legend>Canal de vendas</legend>
+          <div className={styles.channelSwitch}>
+            {(
+              [
+                { label: "House", value: DASHBOARD_CHANNELS[1] },
+                { label: "Imob", value: DASHBOARD_CHANNELS[0] },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                aria-pressed={values.channel[0] === option.value}
+                disabled={pending || !canSelectChannel(option.value)}
+                title={
+                  canSelectChannel(option.value)
+                    ? undefined
+                    : "Este canal não está disponível para o seu perfil."
+                }
+                onClick={() => selectChannel(option.value)}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </fieldset>
+        {DASHBOARD_FILTER_KEYS.filter((key) => key !== "channel").map((key) => (
           <div key={key} className={styles.field}>
             <span id={`filter-${key}`}>{labels[key]}</span>
             <div className={styles.menu}>

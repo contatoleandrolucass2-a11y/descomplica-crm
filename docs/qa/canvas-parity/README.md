@@ -21,6 +21,12 @@ dados, permissões, políticas comerciais, fórmulas ou disponibilidade de
 motores. A aplicação continua exibindo somente dados provenientes de fontes
 validadas; ausência de fonte deve aparecer como estado indisponível.
 
+Em 20/10/2026, a rota `/app` recebeu os seletores exclusivos House/Imob e uma
+composição mais compacta solicitados pelo usuário. O canvas histórico de
+04/10 continua sendo a referência externa de composição; somente essa rota usa
+tolerância de distância de cor `24` (medição `23,88`), sem alterar o limite de
+bordas nem a comparação integral de pixels da baseline autenticada.
+
 ## Regras de implementação
 
 - Existe uma única navbar global. Páginas e simuladores não criam outro header
