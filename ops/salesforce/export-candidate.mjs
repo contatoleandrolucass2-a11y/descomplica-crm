@@ -131,6 +131,11 @@ function raw(row, name) {
   return row[name]?.raw ?? field(row, name);
 }
 
+function optionalDate(row, name) {
+  const value = raw(row, name);
+  return typeof value === "string" && value.trim() === "-" ? "" : value;
+}
+
 function recordId(row, name) {
   return row[name]?.recordId ?? "";
 }
@@ -156,8 +161,8 @@ function project(key, rows, analysisEnabled = false) {
             createdAt: raw(row, "Activity.CreatedDate"),
             ...(analysisEnabled === true
               ? {
-                  scheduledAt: raw(row, "appointmentTime"),
-                  attendedAt: raw(row, "appointmentAttendance"),
+                  scheduledAt: optionalDate(row, "appointmentTime"),
+                  attendedAt: optionalDate(row, "appointmentAttendance"),
                   visitPerformed: raw(row, "appointmentVisitPerformed"),
                   regionalManager: field(row, "appointmentRegional"),
                   accountName: field(row, "appointmentAccountName"),

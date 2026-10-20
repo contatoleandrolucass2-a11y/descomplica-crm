@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-20 - Data opcional de comparecimento no coletor
+
+- Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da
+  validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
+  para valores inválidos.
+
 ## 2026-10-20 - Previsão por final de semana e gerente
 
 - Separa previsões de sexta a domingo por período, House/Imob e gerente, com
