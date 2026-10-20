@@ -12,6 +12,7 @@
   preservando os seis estágios do House.
 - Restringe a leitura da meta de Parcerias aos usuários autorizados a visualizar
   o Dashboard Imob, sem ampliar permissões de escrita ou de outras metas.
+
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
 - Impede a repetição da folha de impressão em uma segunda página, isolando o

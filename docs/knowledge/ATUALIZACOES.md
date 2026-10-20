@@ -62,6 +62,7 @@
   Agendamentos de todos os funis e calcular Meta mes/Meta esperada com a meta
   ativa de Parcerias multiplicada pelos sete gerentes informados. Nao alterar
   dados remotos, disparar coleta ou mudar workflow n8n nesta abertura.
+
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 
 - A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`

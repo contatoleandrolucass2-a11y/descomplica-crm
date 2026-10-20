@@ -27,6 +27,7 @@ Linux, e o gate de release reproduz o mesmo limite em fixtures físicas do host;
 esses arquivos não pertencem ao escopo alterado. Restore isolado, 2.049
 asserções pgTAP e gates físicos Linux continuam obrigatórios na CI antes de
 aplicar a migration.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
