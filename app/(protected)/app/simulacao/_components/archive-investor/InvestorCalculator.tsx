@@ -2,7 +2,7 @@
 // @ts-nocheck -- Arquivo preservado da implementação oficial anexada.
 "use client";
 
-import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { memo, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
 import { createPortal } from "react-dom";
 import { Search, X } from "lucide-react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
@@ -896,8 +896,11 @@ export function AssociativePrintSheet({
   </article>;
 }
 
+const subscribeToClientRender = () => () => undefined;
+
 function AssociativePrintPortal(props: Parameters<typeof AssociativePrintSheet>[0]) {
-  if (typeof document === "undefined") return null;
+  const mounted = useSyncExternalStore(subscribeToClientRender, () => true, () => false);
+  if (!mounted || typeof document === "undefined") return null;
   return createPortal(<AssociativePrintSheet {...props} />, document.body);
 }
 
