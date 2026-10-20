@@ -12,6 +12,7 @@
   severidade detectado durante a repetição da CI.
 - Estabiliza o teste visual da grade de Previsão ao aguardar o fim da transição
   CSS antes de comparar as cores do grupo e da métrica ativa.
+
 ## 2026-10-20 - Evidencias da publicacao do Associativo
 
 - Registra a integracao do PR #280, CI completa, artefato imutavel,

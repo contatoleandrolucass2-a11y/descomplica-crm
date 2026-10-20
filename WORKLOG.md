@@ -27,6 +27,7 @@ Com Node 24.19.0, instalação congelada, audit sem alta/crítica, lint, typeche
 formatação, build de 57 rotas e os 12 cenários de navegador de Previsão passaram.
 A aplicação aprovou 4.063 testes; a suíte operacional aprovou 1.595 e repetiu
 somente as três limitações POSIX conhecidas do Meta Ads no Windows.
+
 ## 2026-10-20 - Publicacao do ajuste minimo do Associativo
 
 PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.
