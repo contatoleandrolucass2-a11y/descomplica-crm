@@ -11,6 +11,8 @@
   a nota visual solicitada, sem mudar taxas nem juros.
 - Alinha o E2E concorrente ao teto imediato das anuais, com fronteiras de
   um centavo e presenca obrigatoria dos dois resultados.
+- Torna a leitura do cabecalho do Tabelao no QA dependente de alinhamento
+  estavel, com espera limitada e os mesmos criterios de geometria e hit-test.
 
 ## 2026-10-20 - Previsão por final de semana e gerente
 

@@ -19,6 +19,13 @@ CI inicial do PR #280 aprovou validate e restore, mas o E2E concorrente ainda
 exigia reter anual acima do teto. Ajustado o contrato para verificar clamp
 exato, centavo abaixo preservado e centavo acima limitado, sem retirar o gate.
 
+As CIs `39436153900` e `39443389525` falharam na leitura unica do cabecalho
+do Tabelao apos rolagem, em viewports diferentes. Runtime e asserts dessa
+tela nao foram alterados pelo Associativo. O QA passa a exigir duas leituras
+consecutivas aprovadas em ate dois segundos, preservando geometria, hit-test,
+reset e falha fechada, com diagnostico numerico de cada etapa. Nao muda a
+interface nem promove baseline.
+
 ## 2026-10-20: previsão por período, segmento e gerente
 
 Demanda: congelar a identificação dos corretores na rolagem, compactar os

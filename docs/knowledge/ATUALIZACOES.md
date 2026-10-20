@@ -51,6 +51,20 @@
   eram somente documentais. A migration desse trabalho independente nao e
   autorizada por esta demanda. Conferir estado remoto antes de publicar a
   versao combinada e manter CI integral do novo SHA como gate.
+- CI combinada `39443389525` passou validate, restore e E2E, mas repetiu
+  falha na leitura unica do cabecalho do Tabelao, agora em outros viewports.
+  O mesmo teste/runtime no main `dfe17463` passou na CI `39439539162`.
+  Reproducao isolada com componente real e CPU 4x aprovou 33 verificacoes;
+  nao comprovou a causa da falha Linux. Ajuste limitado ao sincronismo do QA:
+  aguarda duas leituras consecutivas do predicado original em ate 2s e
+  registra geometria inicial/final se falhar. Nenhuma tolerancia, criterio,
+  baseline ou runtime do Tabelao alterado. Nova CI integral continua obrigatoria.
+- Validacao local apos incorporar main: lint, typecheck e build aprovados;
+  Vitest 4060 aprovados/102 skips; mesma limitacao Windows nos tres testes
+  operacionais POSIX. Consulta MCP somente de metadados em 20/10/2026 confirmou
+  ausencia da tabela `crm_forecast_periods` e das RPCs de leitura/gravação
+  no banco produtivo. A dependencia de Previsao impede publicar a versao
+  combinada enquanto nao houver aplicacao autorizada; usuario consultado.
 
 ## 2026-10-20: abertura da correcao de ajustes e anuais do Associativo
 

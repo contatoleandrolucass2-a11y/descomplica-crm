@@ -514,6 +514,26 @@ describe("Tabelão protegido", () => {
     ).toEqual(["3", "2", "1"]);
   });
 
+  it("aguarda alinhamento estavel sem retirar geometria ou hit-test do cabecalho", () => {
+    const script = readFileSync(
+      new URL("../scripts/qa/authenticated-visual.mjs", import.meta.url),
+      "utf8",
+    );
+    const scrolling = script.slice(
+      script.indexOf("function readTabelaoPinnedHeader("),
+      script.indexOf("async function checkTabelaoRegionOrderFixture("),
+    );
+    expect(scrolling).toContain("Math.abs(box.top - visibleTop) > 2");
+    expect(scrolling).toContain("document.elementFromPoint");
+    expect(scrolling).toContain("hit === header || header.contains(hit)");
+    expect(scrolling).toContain("consecutiveMatches = matches ? consecutiveMatches + 1 : 0");
+    expect(scrolling).toContain("consecutiveMatches >= 2");
+    expect(scrolling).toContain("timeout: 2_000");
+    expect(scrolling).toContain('waitForAlignment(readTabelaoPinnedHeader, "horizontal-end")');
+    expect(scrolling).toContain("finalGeometry: await page.evaluate(readGeometry)");
+    expect(scrolling).toContain("return pinned && reset");
+  });
+
   it("amplia as provas DOM sem alterar os vinte critérios publicados do Tabelão", () => {
     const script = readFileSync(
       new URL("../scripts/qa/authenticated-visual.mjs", import.meta.url),
