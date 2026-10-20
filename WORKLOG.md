@@ -34,6 +34,10 @@ A CI do SHA reconciliado aprovou formatação, lint, typecheck, aplicação e os
 atualizado de `1.31.0` para a versão corrigida `1.32.1`; `pnpm audit
 --audit-level high` passou, restando apenas dois avisos moderados.
 
+Durante a reconciliação final, o registro publicou também
+`GHSA-587h-7wmj-h5pm` para o Vite transitivo do Vitest. O override mínimo fixa
+`8.2.4`; a alteração permanece restrita à ferramenta de testes.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas

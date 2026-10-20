@@ -20,6 +20,9 @@
   os testes, mas foi bloqueada por `GHSA-22jm-h49p-29qw` no SDK transitivo do
   `next-devtools-mcp`. O override passou de `1.31.0` para `1.32.1`; o auditor
   nao encontra vulnerabilidade alta ou critica apos a atualizacao.
+- A reconciliacao posterior da `main` encontrou o novo aviso
+  `GHSA-587h-7wmj-h5pm` no Vite transitivo do Vitest. O override minimo passa a
+  usar `8.2.4`, sem alterar dependencias de runtime.
 
 ## 2026-10-20: implementacao local das metas Imob e referencia de coleta
 

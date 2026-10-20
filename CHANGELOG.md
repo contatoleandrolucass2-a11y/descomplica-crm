@@ -14,6 +14,8 @@
   o Dashboard Imob, sem ampliar permissões de escrita ou de outras metas.
 - Atualiza o SDK transitivo do Next DevTools para `1.32.1`, corrigindo o alerta
   de segurança `GHSA-22jm-h49p-29qw` sem adicionar dependência de runtime.
+- Atualiza o Vite transitivo do Vitest para `8.2.4`, corrigindo
+  `GHSA-587h-7wmj-h5pm` apenas na ferramenta de testes.
 
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
