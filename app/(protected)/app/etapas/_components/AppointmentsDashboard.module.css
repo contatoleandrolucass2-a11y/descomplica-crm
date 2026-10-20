@@ -71,14 +71,16 @@
 }
 .card {
   box-sizing: border-box;
-  display: flex;
-  flex-direction: column;
-  height: 40rem;
   min-width: 0;
   padding: 1rem;
   background: var(--analytics-surface);
   border: 1px solid var(--analytics-line);
   border-radius: 1rem;
+}
+.chartCard {
+  display: flex;
+  flex-direction: column;
+  height: 40rem;
 }
 .cardBody {
   min-height: 0;

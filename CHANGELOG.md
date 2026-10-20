@@ -6,6 +6,8 @@
   extensas em novas linhas dentro do gráfico.
 - Padroniza os sete cards pela altura do ranking de gerente e adiciona rolagem
   vertical interna quando o conteúdo excede a área disponível.
+- Aplica a altura uniforme somente aos cards que contêm gráficos, preservando o
+  estado de indisponibilidade com sua altura compacta.
 - Preserva contagens, filtros, ordenação dos rankings, temas e responsividade.
 
 ## 2026-10-19 - Coluna de vaga no estoque Associativo

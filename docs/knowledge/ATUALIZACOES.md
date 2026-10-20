@@ -1389,3 +1389,16 @@ skips e reproduziu três falhas POSIX conhecidas de Meta Ads no Windows;
 `test:release` reteve o grupo Meta Ads dependente da fixture privada POSIX. A CI
 Linux do SHA exato é o gate de integração e publicação. Fonte: código, execução
 local e `test-results/appointments-preview/result.json`.
+
+### Correção do estado sem dados após a primeira CI
+
+A CI 39347120702 do PR270 aprovou validate e isolated-restore; release-gates
+falhou somente em três comparações de Agendamentos. O artefato autenticado
+12233333433 confirmou que a fixture não possui análise: a altura de 40rem havia
+alterado as dimensões do estado indisponível em 1280 e 320px, e a captura balanced
+ficou vazia. A imagem vazia não foi adotada. A altura fixa passou a existir
+somente no componente Chart, mantendo o card sem dados compacto e preservando
+nos sete gráficos preenchidos a escrita horizontal, a igualdade de altura e a
+rolagem vertical. Repetir CI no novo SHA; o primeiro resultado não autoriza
+merge nem publicação. Fonte: GitHub Actions 39347120702, artefato 12233333433,
+capturas locais e código do componente.

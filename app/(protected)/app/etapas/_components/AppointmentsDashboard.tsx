@@ -25,7 +25,7 @@ function Chart({
 }) {
   const id = useId();
   return (
-    <section aria-labelledby={id} className={styles.card}>
+    <section aria-labelledby={id} className={`${styles.card} ${styles.chartCard}`}>
       <header className={styles.cardHeader}>
         <h2 id={id}>{title}</h2>
         {controls}
