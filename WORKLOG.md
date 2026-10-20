@@ -27,6 +27,17 @@ capturas de Parcerias, causada pela remoção do bloco de rascunho inativo. O
 artefato sanitizado `12241794237` foi inspecionado e somente essas 11 referências
 da rota foram atualizadas; nenhuma baseline de outra página foi aceita.
 
+A CI final do PR `39373968044` passou integralmente e o merge gerou
+`dac2e11a6332cc90472118b7b0bb96c29da01122`. A CI de `main` `39378619404`
+aprovou `validate`, `isolated-restore`, `release-gates` e `promotable-image`.
+O artefato imutável `12243944777` teve ZIP, imagem, revisão, índice/config OCI,
+11 camadas e `RootFS` conferidos; `image:prove` aprovou os dois perfis. A
+publicação protegida terminou em `2026-10-20T06:44:59.559Z`, deployment
+`c9e57458-9b9d-4023-911d-c4b2ecd6add7`. O pós-deploy confirmou ledger sem
+pendência, container healthy, health público `200/ok` na versão `dac2e11a` e
+rota anônima 307 para `/login`. Nenhuma migration ou mutação de dados integrou
+esta entrega; este registro documental não exige novo reinício da aplicação.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o

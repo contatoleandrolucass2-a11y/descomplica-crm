@@ -2,6 +2,9 @@
 
 ## 2026-10-20 - Metas editáveis no Canal Parcerias
 
+- Publicado pelo PR #272 no SHA `dac2e11a`, com CI integral, artefato imutável,
+  promoção protegida e health público confirmado na versão exata.
+
 - O Canal Parcerias usa o mesmo fluxo ativo da Direcional Vendas: campos
   editáveis, botão `Salvar alterações`, validação e confirmação na própria rota.
 - O salvamento reutiliza a RPC versionada existente e preserva o recorte do funil
