@@ -1818,3 +1818,7 @@ dependente da autorização específica aplicável.
   salvos permanecem históricos e editáveis. Nenhum usuário ou dado remoto foi
   alterado. Fontes: Git local após `fetch`, `/api/health`, catálogo e consultas
   somente leitura do Supabase de produção.
+- A primeira CI do PR #283 bloqueou no `pnpm audit` por
+  `@modelcontextprotocol/sdk` 1.31.0, dependência transitiva do diagnóstico local.
+  O override foi atualizado para 1.32.1, indicada como corrigida pelo advisory
+  GHSA-22jm-h49p-29qw; a auditoria local passou sem achados altos ou críticos.

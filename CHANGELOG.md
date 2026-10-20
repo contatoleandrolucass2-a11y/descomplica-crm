@@ -8,6 +8,8 @@
   de nomes e linhas.
 - Limita a lista automática às 200 linhas aceitas pela tabela e falha sem expor
   a fonte analítica quando o contrato não está disponível.
+- Atualiza o SDK MCP transitivo do diagnóstico local para a versão corrigida,
+  removendo o bloqueio de segurança encontrado pela CI.
 
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 

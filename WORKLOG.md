@@ -14,6 +14,11 @@ ausência de gerente no snapshot, autenticação e grants. A aplicação continu
 permitindo inserir, excluir e renomear linhas manualmente. A migration permanece
 pendente de CI e autorização específica para aplicação remota.
 
+A primeira execução da CI foi bloqueada por um alerta alto publicado para a
+dependência transitiva `@modelcontextprotocol/sdk` 1.31.0, usada somente pelo
+`next-devtools-mcp`. O override foi elevado para 1.32.1, versão corrigida, e o
+`pnpm audit --audit-level high` passou sem vulnerabilidades altas ou críticas.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
