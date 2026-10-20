@@ -7,7 +7,7 @@ import AxeBuilder from "@axe-core/playwright";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { ForecastSettings } from "@/app/(protected)/app/gestao/previsao/ForecastSettings";
-import type { ForecastDocument, ForecastRecord } from "@/lib/crm/forecasts";
+import type { ForecastDocument, ForecastRecord, ForecastSource } from "@/lib/crm/forecasts";
 import {
   addForecastGroup,
   createForecastDocument,
@@ -16,7 +16,7 @@ import {
 } from "@/lib/crm/forecast-grid";
 
 describe("Previsão", () => {
-  it("starts with seven comparison groups, two rows, totals and safe loading state", () => {
+  it("starts with seven comparison groups, ten rows, totals and safe loading state", () => {
     const markup = renderToStaticMarkup(<ForecastSettings />);
     for (const label of [
       "Nome do corretor",
@@ -34,13 +34,14 @@ describe("Previsão", () => {
     expect(markup).not.toContain("Acompanhe a previsão e o realizado da equipe.");
     expect(markup).not.toContain("Cada empreendimento reúne Previsão e Realizado.");
     expect(markup).toContain("Aguardando carregamento.");
+    expect(markup).toContain("Corretor 10");
     expect(markup.toLowerCase()).toContain("readonly");
   });
 });
 
 describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
   "Previsão no navegador sintético",
-  { timeout: 30_000 },
+  { timeout: 60_000 },
   () => {
     let browser: Browser;
     let page: Page;
@@ -50,7 +51,16 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     let canEdit: boolean;
     let failLoad: boolean;
     let conflict: boolean;
-    let puts: Array<ForecastDocument & { expected_revision: number }>;
+    let sections: ForecastSource[];
+    let gets: string[];
+    let puts: Array<
+      ForecastDocument & {
+        expected_revision: number;
+        date: string;
+        segment: "house" | "imob";
+        manager: string;
+      }
+    >;
 
     beforeAll(async () => {
       const require = createRequire(import.meta.url);
@@ -103,7 +113,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     });
     afterAll(async () => {
       await browser?.close();
-    }, 30_000);
+    }, 60_000);
 
     async function open(
       options: {
@@ -111,6 +121,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         failLoad?: boolean;
         seed?: ForecastRecord;
         convertedLegacy?: boolean;
+        sections?: ForecastSource[];
       } = {},
     ) {
       record = options.seed ?? null;
@@ -118,23 +129,56 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       failLoad = options.failLoad ?? false;
       conflict = false;
       puts = [];
+      gets = [];
+      sections = options.sections ?? [];
       const context = await browser.newContext({ hasTouch: true });
       page = await context.newPage();
       page.on("pageerror", (error) => console.error("Forecast fixture:", error.message));
       await page.route("https://forecast.test/**", async (route) => {
         const url = new URL(route.request().url());
         if (url.pathname === "/api/forecasts") {
-          if (route.request().method() === "GET")
+          if (route.request().method() === "GET") {
+            gets.push(url.search);
             return route.fulfill({
               status: failLoad ? 503 : 200,
               json: failLoad
                 ? { error: "forecast_unavailable" }
-                : { forecast: record, can_edit: canEdit },
+                : {
+                    forecast:
+                      url.searchParams.get("segment") === "general" || options.convertedLegacy
+                        ? null
+                        : record,
+                    sections: url.searchParams.get("segment") === "general" ? sections : [],
+                    template:
+                      options.convertedLegacy && record
+                        ? {
+                            title: record.title,
+                            columns: record.columns,
+                            rows: record.rows.map((row) => ({
+                              ...row,
+                              cells: Object.fromEntries(
+                                Object.keys(row.cells).map((columnId) => [
+                                  columnId,
+                                  columnId === "broker" ? row.cells[columnId] : "",
+                                ]),
+                              ),
+                            })),
+                          }
+                        : null,
+                    can_edit: url.searchParams.get("segment") === "general" ? false : canEdit,
+                    period: { start: "2026-10-23", end: "2026-10-25" },
+                    selection: {
+                      segment: url.searchParams.get("segment"),
+                      manager: url.searchParams.get("manager"),
+                    },
+                  },
             });
+          }
           if (conflict) return route.fulfill({ status: 409, json: { error: "revision_conflict" } });
           const body = route.request().postDataJSON();
           puts.push(body);
-          const { expected_revision, ...document } = body;
+          const { expected_revision } = body;
+          const document = { title: body.title, columns: body.columns, rows: body.rows };
           record = {
             ...document,
             revision: expected_revision + 1,
@@ -153,9 +197,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       });
       await page.goto("https://forecast.test/");
       if (!failLoad)
-        await browserExpect(page.locator('p[role="status"]')).toContainText(
-          options.convertedLegacy ? "Alterações não salvas" : "Tabela compartilhada",
-        );
+        await browserExpect(page.locator('p[role="status"]')).toContainText("Tabela compartilhada");
     }
 
     async function expectHorizontalTableScroll(width: number) {
@@ -286,11 +328,152 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("7");
       await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
       await browserExpect(
-        page.getByLabel("Nome do corretor, linha 2", { exact: true }),
+        page.getByLabel("Nome do corretor, linha 10", { exact: true }),
       ).toBeFocused();
       await browserExpect(
-        page.getByLabel("Empreendimento 1 — Previsão, linha 2", { exact: true }),
+        page.getByLabel("Empreendimento 1 — Previsão, linha 10", { exact: true }),
       ).toHaveValue("");
+    });
+
+    it("keeps broker context sticky and highlights only the active coordinate", async () => {
+      await open();
+      await page.setViewportSize({ width: 720, height: 760 });
+      const region = page.getByRole("region", { name: "Tabela de previsão", exact: true });
+      const broker = page.getByLabel("Nome do corretor, linha 1", { exact: true });
+      const footer = page.getByRole("rowheader", { name: "Total geral", exact: true });
+      const before = await broker.boundingBox();
+      const footerBefore = await footer.boundingBox();
+      await region.evaluate((element) => {
+        element.scrollLeft = 560;
+      });
+      const after = await broker.boundingBox();
+      const footerAfter = await footer.boundingBox();
+      expect(before).not.toBeNull();
+      expect(after).not.toBeNull();
+      expect(Math.abs(after!.x - before!.x)).toBeLessThanOrEqual(1);
+      expect(footerBefore).not.toBeNull();
+      expect(footerAfter).not.toBeNull();
+      expect(Math.abs(footerAfter!.x - footerBefore!.x)).toBeLessThanOrEqual(1);
+
+      const forecast = page.getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true });
+      const actual = page.getByLabel("Empreendimento 1 — Realizado, linha 1", { exact: true });
+      await actual.focus();
+      const actualHeader = page.locator("thead tr").nth(1).locator("th").nth(1);
+      const forecastHeader = page.locator("thead tr").nth(1).locator("th").nth(0);
+      const groupHeader = page.locator("thead tr").first().locator("th").nth(1);
+      const [
+        activeBackground,
+        siblingBackground,
+        brokerBackground,
+        actualHeaderBackground,
+        forecastHeaderBackground,
+        groupHeaderBackground,
+      ] = await Promise.all([
+        actual.evaluate((element) => getComputedStyle(element.closest("td")!).backgroundColor),
+        forecast.evaluate((element) => getComputedStyle(element.closest("td")!).backgroundColor),
+        broker.evaluate((element) => getComputedStyle(element.closest("th")!).backgroundColor),
+        actualHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
+        forecastHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
+        groupHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
+      ]);
+      expect(activeBackground).not.toBe(siblingBackground);
+      expect(brokerBackground).not.toBe(siblingBackground);
+      expect(actualHeaderBackground).not.toBe(forecastHeaderBackground);
+      expect(groupHeaderBackground).toBe(actualHeaderBackground);
+      await browserExpect(
+        page.getByLabel("Nome do empreendimento 1", { exact: true }),
+      ).toBeVisible();
+    });
+
+    it("switches segment, manager and weekend without losing an unconfirmed draft", async () => {
+      const grid = createForecastDocument();
+      const saved = { ...grid, revision: 1, updated_at: "2026-10-20T12:00:00Z" };
+      await open({
+        seed: saved,
+        sections: [{ segment: "house", manager: "amanda", forecast: saved }],
+      });
+      await browserExpect(page.getByRole("button", { name: "House", exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(
+        await page
+          .getByRole("group", { name: "Gerentes house" })
+          .getByRole("button")
+          .allTextContents(),
+      ).toEqual(["Amanda", "Cleber", "Messias", "Sidnei", "Stephanie"]);
+
+      await page
+        .getByLabel("Nome do corretor, linha 1", { exact: true })
+        .fill("Rascunho protegido");
+      page.once("dialog", (dialog) => dialog.dismiss());
+      await page.getByRole("button", { name: "Imob", exact: true }).click();
+      await browserExpect(page.getByRole("button", { name: "House", exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 1", { exact: true }),
+      ).toHaveValue("Rascunho protegido");
+
+      page.once("dialog", (dialog) => dialog.accept());
+      await page.getByRole("button", { name: "Imob", exact: true }).click();
+      await browserExpect(page.getByRole("button", { name: "Imob", exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      expect(
+        await page
+          .getByRole("group", { name: "Gerentes imob" })
+          .getByRole("button")
+          .allTextContents(),
+      ).toEqual(["Álvaro", "Fabricio", "Gustavo", "Jonathan", "Richard", "Thiago", "Thiago TG"]);
+      await page.getByRole("button", { name: "Gustavo", exact: true }).click();
+      await browserExpect(
+        page.getByRole("button", { name: "Gustavo", exact: true }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await browserExpect.poll(() => gets.at(-1)).toContain("segment=imob&manager=gustavo");
+
+      await page.getByRole("button", { name: "Geral", exact: true }).click();
+      await browserExpect(
+        page.getByRole("heading", { name: "House · Amanda", exact: true }),
+      ).toBeVisible();
+      await browserExpect(page.getByRole("button", { name: "Salvar", exact: true })).toBeDisabled();
+      await page.getByRole("button", { name: "Calendário", exact: true }).click();
+      await page.getByLabel("Mês do calendário").selectOption({ label: "Outubro" });
+      await page.getByLabel("Ano do calendário").selectOption("2026");
+      const saturday = page.getByRole("gridcell", {
+        name: "sábado, 3 de outubro de 2026, dia validado",
+        exact: true,
+      });
+      await saturday.click();
+      await browserExpect(
+        page.getByRole("dialog", { name: "Dias validados estimados" }),
+      ).toBeVisible();
+      await browserExpect(saturday).toHaveAttribute("aria-selected", "true");
+      await browserExpect(
+        page.getByRole("heading", {
+          name: "Previsão Final de semana dia 02/10/2026 até 04/10/2026",
+        }),
+      ).toBeVisible();
+      await browserExpect.poll(() => gets.at(-1)).toContain("date=2026-10-03&segment=general");
+    });
+
+    it("never labels the previous manager data as a failed new selection", async () => {
+      const grid = createForecastDocument();
+      grid.rows[0]!.cells.broker = "Dado exclusivo da Amanda";
+      await open({
+        seed: { ...grid, revision: 1, updated_at: "2026-10-20T12:00:00Z" },
+      });
+      const previousBroker = page.getByLabel("Nome do corretor, linha 1", { exact: true });
+      await browserExpect(previousBroker).toHaveValue("Dado exclusivo da Amanda");
+      failLoad = true;
+      await page.getByRole("button", { name: "Cleber", exact: true }).click();
+      await browserExpect(
+        page.getByRole("button", { name: "Cleber", exact: true }),
+      ).toHaveAttribute("aria-pressed", "true");
+      await browserExpect(page.getByRole("alert")).toContainText("Não foi possível carregar");
+      await browserExpect(previousBroker).toBeHidden();
     });
 
     it("drags the complete desktop group with both columns and every row value", async () => {
@@ -407,6 +590,14 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       });
       await friday.click();
       await browserExpect(dialog).toBeVisible();
+      const saturday = dialog.getByRole("gridcell", {
+        name: "sábado, 3 de outubro de 2026, dia validado",
+        exact: true,
+      });
+      await saturday.click();
+      await browserExpect(dialog).toBeVisible();
+      await browserExpect(saturday).toHaveAttribute("aria-selected", "true");
+      await browserExpect(friday).toHaveAttribute("aria-selected", "false");
       for (const width of [1440, 390]) {
         await page.setViewportSize({ width, height: 900 });
         const box = await dialog.boundingBox();
@@ -592,7 +783,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       );
     });
 
-    it("preserves legacy text for correction without silently saving or dropping it", async () => {
+    it("uses only the broker and titles from a previous-period template", async () => {
       await open({
         convertedLegacy: true,
         seed: {
@@ -613,15 +804,18 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         },
       });
       const legacy = page.getByLabel("Legado QA — Previsão, linha 1", { exact: true });
-      await browserExpect(legacy).toHaveValue("revisar");
-      await browserExpect(legacy).toHaveAttribute("aria-invalid", "true");
+      await browserExpect(legacy).toHaveValue("");
+      await browserExpect(legacy).not.toHaveAttribute("aria-invalid", "true");
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 1", { exact: true }),
+      ).toHaveValue("Corretor legado QA");
       await browserExpect(page.getByRole("button", { name: "Salvar", exact: true })).toBeDisabled();
       expect(puts).toHaveLength(0);
       await legacy.fill("6");
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("10");
+      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("6");
       await page.getByRole("button", { name: "Salvar", exact: true }).click();
       await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
-      expect(puts[0]?.expected_revision).toBe(3);
+      expect(puts[0]?.expected_revision).toBe(0);
       await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
       await browserExpect(
         page.getByLabel("Nome do corretor, linha 2", { exact: true }),

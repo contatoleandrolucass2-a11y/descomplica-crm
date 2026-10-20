@@ -6,15 +6,24 @@ O catálogo concede a nova permissão apenas a Master e Admin por padrão; os de
 acessos são configurados na administração existente. Editar e salvar exige também
 `crm.settings.manage`, como a edição da Rotina compartilhada.
 
-A tabela é global e manual. Começa com Nome do corretor e sete empreendimentos,
-cada um com Previsão e Realizado. Inserir coluna acrescenta um empreendimento
+A tabela é manual e separada por final de semana, segmento e gerente. Sexta,
+sábado e domingo do mesmo final de semana usam a sexta-feira como chave canônica.
+House possui Amanda, Cleber, Messias, Sidnei e Stephanie; Imob possui Álvaro,
+Fabricio, Gustavo, Jonathan, Richard, Thiago e Thiago TG. Geral reúne, em uma
+única página somente leitura, um bloco integral para cada gerente que salvou no
+período, sem fundir ou truncar estruturas customizadas.
+
+O rascunho inicial apresenta dez corretores e sete empreendimentos, cada um com
+Previsão e Realizado. Quando ainda não existe previsão no recorte selecionado,
+o servidor reutiliza a estrutura salva mais recentemente, limpa números e plano
+de ação e mantém somente o primeiro corretor. Inserir coluna acrescenta um empreendimento
 com os dois campos em todas as linhas existentes. Os títulos dos empreendimentos
 são editáveis; a movimentação e a exclusão abrangem o par inteiro, preservando a
 associação dos valores com cada corretor. Nome do corretor e Total permanecem
 nas extremidades dos valores. A coluna fixa Plano de ação vem depois do Total,
 aceita até 4.000 caracteres de texto livre por corretor e não participa dos
-cálculos. Os nomes iniciais Corretor 1 e Corretor 2 são rascunhos genéricos, não
-cadastros ou dados importados de clientes.
+cálculos. Os nomes iniciais Corretor 1 a Corretor 10 são rascunhos genéricos,
+não cadastros ou dados importados de clientes.
 
 Quando o documento compartilhado contém os nove empreendimentos conhecidos,
 seus títulos são apresentados nestas duas linhas: Conquista / Itaim Paulista;
@@ -36,8 +45,10 @@ Texto antigo em uma célula numérica permanece visível para correção; o tota
 afetado fica indisponível e o salvamento é bloqueado até a correção. A adaptação
 é persistida somente ao usar Salvar. Não há reescrita automática de dados remotos.
 
-Salvar envia o documento ao CRM, incluindo sua revisão. Outra edição já salva
-gera conflito; o rascunho permanece e não sobrescreve a versão de outro usuário.
+Salvar envia o documento, a data selecionada, o segmento e o gerente ao CRM,
+incluindo a revisão daquele recorte. Outra edição já salva no mesmo recorte gera
+conflito; edições de outro gerente ou final de semana possuem revisões independentes.
+O rascunho permanece e não sobrescreve a versão de outro usuário.
 Recarregar com alterações exige confirmação. Falha de rede não indica sucesso.
 O armazenamento compartilhado não usa localStorage.
 
@@ -67,11 +78,23 @@ anteriores recebem a coluna vazia apenas em memória e só são persistidos por 
 salvamento explícito. A migration não foi aplicada remotamente e requer nova
 autorização específica após CI e restauração isolada aprovadas.
 
-A versão anterior da RPC rejeita o documento novo com número par de colunas; a
-RPC nova rejeita salvamentos sem Plano de ação. Portanto, a aplicação remota deve
-ocorrer imediatamente antes da promoção da imagem validada. Em recuperação,
-restaurar primeiro a definição anterior da RPC e só então reativar a imagem
-anterior. Nunca apagar a tabela nem reescrever previsões para recuperar.
+A evolução por período prepara também a migration aditiva
+`20261020122216_forecast_period_scopes.sql`. Ela cria
+`crm_forecast_periods`, `get_crm_forecast_period` e
+`save_crm_forecast_period`, com chave por sexta-feira, segmento e gerente. A
+tabela usa RLS forçada e não concede acesso direto aos papéis da Data API; as
+RPCs repetem identidade, conta ativa, MFA, página, permissão de edição e CAS.
+O singleton legado permanece intacto e pode fornecer apenas o primeiro template
+limpo. A auditoria armazena período, recorte, revisão e contagens, sem conteúdo
+das células. Geral retorna seções completas e nunca aceita escrita. Esta
+migration também não foi aplicada remotamente e exige autorização específica.
+
+A versão anterior da RPC singleton rejeita o documento novo com número par de
+colunas. O runtime por período usa RPCs novas e não depende dessa assinatura
+para salvar. Na publicação, aplicar as migrations autorizadas na ordem
+versionada antes da promoção da imagem. Em recuperação, preservar
+`crm_forecast_periods` e seus dados; reativar a imagem anterior não exige apagar
+os recortes novos, que permanecem inacessíveis ao runtime antigo.
 
 A migration `20261018142142_crm_forecast_groups.sql` substitui apenas a validação
 da RPC de salvamento para exigir pares completos e números também no banco.
@@ -118,18 +141,26 @@ com `FORECAST_SETTINGS_BROWSER=1`; nunca inserir fixtures no banco de produção
 A Previsão reutiliza o canvas e os tokens do dashboard /app nos temas Claro,
 Médio e Escuro. Cabeçalho, separadores, superfícies e botão Salvar seguem a mesma
 linguagem. A tabela usa rolagem horizontal própria no desktop e no celular para
-preservar os pares em linha única. A coluna do corretor é compacta e os nomes dos
+preservar os pares em linha única. A coluna do corretor, inclusive cabeçalho,
+linhas e Total geral, permanece fixa durante essa rolagem. Os números de linha
+não quebram em múltiplas linhas. A coluna do corretor é compacta e os nomes dos
 empreendimentos ocupam no máximo duas linhas, todos com a mesma largura. Plano de
 ação ajusta sua largura ao texto dentro dos limites da tabela. Cabeçalhos
-Previsão/Realizado e linhas de dados usam 22 px; a célula sob o mouse recebe o
-mesmo realce de superfície dos botões.
+Previsão/Realizado e linhas de dados usam 22 px. Foco e passagem do mouse
+destacam juntos a célula, o corretor, Previsão ou Realizado e o respectivo
+empreendimento. Os controles compactos de reordenação e exclusão ficam junto às
+bordas superiores do grupo sem deslocar ou cobrir o título.
 Os campos têm alinhamento vertical centralizado; o nome do corretor fica
 alinhado à direita, mantendo a ordem natural das letras em português. Edição,
 confirmação de exclusão, rascunho e controle de revisão permanecem iguais.
 
+O título informa o intervalo no formato `Previsão Final de semana dia
+dd/mm/aaaa até dd/mm/aaaa`. Os botões Geral, House e Imob e os gerentes mudam o
+recorte; uma troca com rascunho exige confirmação de descarte.
+
 O botão Calendário abre um diálogo mensal acessível, 30% menor que a primeira
 versão. Somente sexta-feira, sábado e domingo recebem destaque e entram em Total,
 Passados e Restantes; a interface os chama sempre de dias validados. A seleção de
-mês e ano e cliques no conteúdo recalculam ou mantêm a visualização sem fechar o
-diálogo. Escape ou o botão Fechar encerram o diálogo e devolvem o foco ao botão
-Calendário.
+mês e ano e o clique em um dia validado carregam o recorte correspondente sem
+fechar o diálogo. O dia escolhido permanece identificado. Escape ou o botão
+Fechar encerram o diálogo e devolvem o foco ao botão Calendário.

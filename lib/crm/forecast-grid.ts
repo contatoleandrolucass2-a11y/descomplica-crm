@@ -123,7 +123,7 @@ export function createForecastDocument(): ForecastDocument {
       { id: "broker", label: "Nome do corretor" },
       { id: FORECAST_ACTION_PLAN_ID, label: FORECAST_ACTION_PLAN_LABEL },
     ],
-    rows: [1, 2].map((number) => ({
+    rows: Array.from({ length: 10 }, (_, index) => index + 1).map((number) => ({
       id: crypto.randomUUID(),
       cells: { broker: `Corretor ${number}`, [FORECAST_ACTION_PLAN_ID]: "" },
     })),
