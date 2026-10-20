@@ -96,6 +96,10 @@ export const forecastSourceSchema = z
     ({ segment, manager }) => (FORECAST_MANAGERS[segment] as readonly string[]).includes(manager),
     "A seção não pertence ao segmento informado.",
   );
+export const forecastBrokerListSchema = z
+  .array(z.string().trim().min(1).max(200))
+  .max(FORECAST_MAX_ROWS)
+  .refine((names) => new Set(names).size === names.length, "Os corretores devem ser únicos.");
 export const forecastSaveSchema = z
   .object({
     ...shape,
@@ -146,6 +150,7 @@ export const forecastSnapshotSchema = z
     forecast: forecastPeriodRecordSchema.nullable(),
     sections: z.array(forecastSourceSchema).max(12),
     template: forecastDocumentSchema.nullable(),
+    brokers: forecastBrokerListSchema.default([]),
     can_edit: z.boolean(),
     period: z.object({ start: forecastDateSchema, end: forecastDateSchema }).strict(),
     selection: z
@@ -193,24 +198,23 @@ export function getForecastPeriod(date: string): ForecastPeriod | null {
   return { start, end: parsed.toISOString().slice(0, 10) };
 }
 
-export function createForecastTemplate(source: ForecastDocument | null): ForecastDocument | null {
+export function createForecastTemplate(
+  source: ForecastDocument | null,
+  brokers: readonly string[] = [],
+): ForecastDocument | null {
   if (!source) return null;
   const first = source.rows[0];
   const brokerId = source.columns[0]?.id;
+  const brokerNames = brokers.length > 0 ? brokers : [first?.cells[brokerId ?? ""] || "Corretor 1"];
   return {
     ...source,
     columns: source.columns.map((column) => ({ ...column })),
-    rows: [
-      {
-        id: first?.id ?? "template_row",
-        cells: Object.fromEntries(
-          source.columns.map((column) => [
-            column.id,
-            column.id === brokerId ? first?.cells[column.id] || "Corretor 1" : "",
-          ]),
-        ),
-      },
-    ],
+    rows: brokerNames.map((broker, index) => ({
+      id: brokers.length > 0 ? `broker_${index + 1}` : (first?.id ?? "template_row"),
+      cells: Object.fromEntries(
+        source.columns.map((column) => [column.id, column.id === brokerId ? broker : ""]),
+      ),
+    })),
   };
 }
 

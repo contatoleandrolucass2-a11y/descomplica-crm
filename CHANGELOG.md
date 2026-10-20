@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-20 - Corretores automáticos na Previsão
+
+- Preenche períodos novos com os corretores já relacionados ao gerente no
+  snapshot analítico vigente do CRM, em House e Imob.
+- Mantém previsões salvas como histórico do período e conserva a edição manual
+  de nomes e linhas.
+- Limita a lista automática às 200 linhas aceitas pela tabela e falha sem expor
+  a fonte analítica quando o contrato não está disponível.
+
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
 - Impede a repetição da folha de impressão em uma segunda página, isolando o

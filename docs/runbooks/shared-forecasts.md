@@ -13,17 +13,19 @@ Fabricio, Gustavo, Jonathan, Richard, Thiago e Thiago TG. Geral reúne, em uma
 única página somente leitura, um bloco integral para cada gerente que salvou no
 período, sem fundir ou truncar estruturas customizadas.
 
-O rascunho inicial apresenta dez corretores e sete empreendimentos, cada um com
-Previsão e Realizado. Quando ainda não existe previsão no recorte selecionado,
-o servidor reutiliza a estrutura salva mais recentemente, limpa números e plano
-de ação e mantém somente o primeiro corretor. Inserir coluna acrescenta um empreendimento
+O rascunho inicial sem fonte apresenta dez corretores genéricos e sete
+empreendimentos, cada um com Previsão e Realizado. Quando ainda não existe
+previsão no recorte selecionado, o servidor reutiliza a estrutura salva mais
+recentemente, limpa números e plano de ação e preenche as linhas com os
+corretores relacionados ao gerente no snapshot analítico vigente. Inserir coluna acrescenta um empreendimento
 com os dois campos em todas as linhas existentes. Os títulos dos empreendimentos
 são editáveis; a movimentação e a exclusão abrangem o par inteiro, preservando a
 associação dos valores com cada corretor. Nome do corretor e Total permanecem
 nas extremidades dos valores. A coluna fixa Plano de ação vem depois do Total,
 aceita até 4.000 caracteres de texto livre por corretor e não participa dos
-cálculos. Os nomes iniciais Corretor 1 a Corretor 10 são rascunhos genéricos,
-não cadastros ou dados importados de clientes.
+cálculos. Se a fonte não contiver o gerente, permanece somente a primeira linha
+do template; sem qualquer template, Corretor 1 a Corretor 10 são usados como
+rascunho genérico.
 
 Quando o documento compartilhado contém os nove empreendimentos conhecidos,
 seus títulos são apresentados nestas duas linhas: Conquista / Itaim Paulista;
@@ -38,7 +40,8 @@ com zero para a soma. O Total da linha soma Previsão e Realizado de todos os
 empreendimentos; o rodapé soma cada coluna e o total geral. Não representa
 percentual de atingimento ou diferença entre previsto e realizado. Os cálculos
 usam centésimos inteiros para evitar resíduos de ponto flutuante e não são
-armazenados como células editáveis. Não há integração com ranking.
+armazenados como células editáveis. A lista inicial consulta somente os nomes
+por gerente do snapshot analítico; métricas do dashboard não são copiadas.
 
 Documentos antigos são adaptados em memória, preservando linhas e conteúdo.
 Texto antigo em uma célula numérica permanece visível para correção; o total
@@ -88,6 +91,14 @@ O singleton legado permanece intacto e pode fornecer apenas o primeiro template
 limpo. A auditoria armazena período, recorte, revisão e contagens, sem conteúdo
 das células. Geral retorna seções completas e nunca aceita escrita. Esta
 migration também não foi aplicada remotamente e exige autorização específica.
+
+A lista automática prepara a migration
+`20261020204500_forecast_broker_roster.sql`. Ela cria somente a RPC de leitura
+`get_crm_forecast_brokers`, sem alterar snapshots, usuários ou previsões. A RPC
+repete os guards de identidade, conta ativa, página e permissão, escolhe a visão
+House/Imob correspondente e retorna até 200 nomes distintos do snapshot mais
+recente. O acesso direto às tabelas analíticas continua revogado. A aplicação
+remota exige autorização específica depois da CI e da restauração isolada.
 
 A versão anterior da RPC singleton rejeita o documento novo com número par de
 colunas. O runtime por período usa RPCs novas e não depende dessa assinatura

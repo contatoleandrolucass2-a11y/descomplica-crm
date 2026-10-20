@@ -1802,3 +1802,19 @@ dependente da autorização específica aplicável.
   Windows. `test:release` reproduziu a fixture privada do mesmo módulo e um
   timeout Qlik isolado; o delta não altera essas áreas. A CI Linux no SHA exato,
   com pgTAP e restauração isolada, é obrigatória antes de merge e publicação.
+
+## 2026-10-20: Retomada para preencher corretores automaticamente na Previsão
+
+- A branch `codex/previsao-corretores-automaticos` iniciou no `origin/main`
+  `c1e931d5ad805f9f43766d67f1d7f297e99a31ae`, após a integração da Previsão
+  por período no merge `dfe174635fe4712670a36268b1f9cd5f9cb297a2`.
+- Às `2026-10-20T19:39:57.3530636Z`, o health público respondeu HTTP 200,
+  `status=ok` e `version=50f11d326cdd37b051db46f1dd1015076b85d545`.
+  A versão publicada não corresponde ao `main` atual e não comprova esta demanda.
+- A leitura observacional do banco confirmou que os nomes de corretores e seus
+  gerentes já existem no snapshot analítico do CRM. A grade ainda cria
+  `Corretor 1` a `Corretor 10` localmente e o contrato da Previsão não consome
+  essa fonte. O ajuste deve preencher somente rascunhos ainda não salvos; períodos
+  salvos permanecem históricos e editáveis. Nenhum usuário ou dado remoto foi
+  alterado. Fontes: Git local após `fetch`, `/api/health`, catálogo e consultas
+  somente leitura do Supabase de produção.

@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-20 - Corretores automáticos na Previsão
+
+A grade criava dez nomes genéricos mesmo quando o snapshot analítico do CRM já
+relacionava cada corretor ao gerente. Um RPC de leitura protegido passa a extrair
+até 200 nomes distintos do snapshot mais recente, usando House sem Canal Imob e
+Imob com Canal Imob. A API limpa os valores ao montar um período novo e entrega
+as linhas prontas; documentos já salvos continuam íntegros para preservar o
+histórico daquele fim de semana.
+
+Testes de contrato cobrem os dois segmentos, a grafia operacional de Jonathan,
+ausência de gerente no snapshot, autenticação e grants. A aplicação continua
+permitindo inserir, excluir e renomear linhas manualmente. A migration permanece
+pendente de CI e autorização específica para aplicação remota.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
