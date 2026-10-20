@@ -16,6 +16,7 @@ import {
   forecastRecordSchema,
   forecastSnapshotSchema,
   type ForecastDocument,
+  type ForecastRecord,
 } from "@/lib/crm/forecasts";
 import { getForecastCalendar } from "@/lib/crm/forecast-calendar";
 
@@ -61,6 +62,59 @@ const calendarDateFormatter = new Intl.DateTimeFormat("pt-BR", {
   month: "long",
   year: "numeric",
 });
+const periodDateFormatter = new Intl.DateTimeFormat("pt-BR", {
+  day: "2-digit",
+  month: "2-digit",
+  year: "numeric",
+});
+const forecastSegments = [
+  { id: "general", label: "Geral" },
+  { id: "house", label: "House" },
+  { id: "imob", label: "Imob" },
+] as const;
+type ForecastSegment = (typeof forecastSegments)[number]["id"];
+const forecastManagers = {
+  house: [
+    { id: "amanda", label: "Amanda" },
+    { id: "cleber", label: "Cleber" },
+    { id: "messias", label: "Messias" },
+    { id: "sidnei", label: "Sidnei" },
+    { id: "stephanie", label: "Stephanie" },
+  ],
+  imob: [
+    { id: "alvaro", label: "Álvaro" },
+    { id: "fabricio", label: "Fabricio" },
+    { id: "gustavo", label: "Gustavo" },
+    { id: "jonathan", label: "Jonathan" },
+    { id: "richard", label: "Richard" },
+    { id: "thiago", label: "Thiago" },
+    { id: "thiago-tg", label: "Thiago TG" },
+  ],
+} as const;
+
+function toDateKey(date: Date) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+}
+
+function dateFromKey(value: string) {
+  const [year, month, day] = value.split("-").map(Number);
+  return new Date(year!, month! - 1, day!);
+}
+
+function getForecastPeriod(date: Date) {
+  const day = date.getDay();
+  const start = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+  if (day === 6) start.setDate(start.getDate() - 1);
+  else if (day === 0) start.setDate(start.getDate() - 2);
+  else if (day !== 5) start.setDate(start.getDate() + ((5 - day + 7) % 7));
+  const end = new Date(start);
+  end.setDate(start.getDate() + 2);
+  return { start, end };
+}
+
+function getManagerLabel(segment: "house" | "imob", managerId: string) {
+  return forecastManagers[segment].find((manager) => manager.id === managerId)?.label ?? managerId;
+}
 function getCalendarDays(year: number, month: number) {
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const leadingDays = new Date(Date.UTC(year, month, 1)).getUTCDay();
@@ -95,6 +149,12 @@ type ForecastBrowserNavigation = {
   ) => void;
 };
 
+type ForecastSection = {
+  segment: "house" | "imob";
+  manager: string;
+  forecast: ForecastRecord;
+};
+
 export function ForecastSettings() {
   const [document, setDocument] = useState<ForecastDocument>(initialDocument);
   const [baseline, setBaseline] = useState(() => JSON.stringify(document));
@@ -106,6 +166,7 @@ export function ForecastSettings() {
   const [conflict, setConflict] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
+  const [sections, setSections] = useState<ForecastSection[]>([]);
   const root = useRef<HTMLElement>(null);
   const calendarButton = useRef<HTMLButtonElement>(null);
   const calendarDialog = useRef<HTMLDialogElement>(null);
@@ -113,10 +174,26 @@ export function ForecastSettings() {
   const draggedGroup = useRef<string | null>(null);
   const mounted = useRef(false);
   const [today] = useState(() => new Date());
+  const [segment, setSegment] = useState<ForecastSegment>("house");
+  const [managerBySegment, setManagerBySegment] = useState({
+    house: "amanda",
+    imob: "alvaro",
+  });
+  const [selectedPeriodStart, setSelectedPeriodStart] = useState(() =>
+    toDateKey(getForecastPeriod(today).start),
+  );
+  const [selectedCalendarDate, setSelectedCalendarDate] = useState(() =>
+    toDateKey(getForecastPeriod(today).start),
+  );
+  const [activeCell, setActiveCell] = useState<{
+    rowId?: string;
+    columnId?: string;
+    groupId?: string;
+  }>({});
   const [calendarMonth, setCalendarMonth] = useState(() => today.getMonth());
   const [calendarYear, setCalendarYear] = useState(() => today.getFullYear());
   const dirty = JSON.stringify(document) !== baseline;
-  const editable = loaded && canEdit && !saving && !loading;
+  const editable = loaded && canEdit && segment !== "general" && !saving && !loading;
   const groups = getForecastGroups(document);
   const totals = getForecastTotals(document);
   const invalidCells = getForecastInvalidCells(document);
@@ -127,6 +204,9 @@ export function ForecastSettings() {
   const calendarSummary = getForecastCalendar(calendarYear, calendarMonth + 1, today);
   const validatedDays = new Set(calendarSummary.validatedDays);
   const calendarYears = Array.from({ length: 21 }, (_, index) => today.getFullYear() - 5 + index);
+  const selectedManager = segment === "general" ? null : managerBySegment[segment];
+  const selectedPeriod = getForecastPeriod(dateFromKey(selectedPeriodStart));
+  const periodTitle = `Previsão Final de semana dia ${periodDateFormatter.format(selectedPeriod.start)} até ${periodDateFormatter.format(selectedPeriod.end)}`;
   const actionPlanColumns = Math.min(
     60,
     Math.max(
@@ -139,30 +219,43 @@ export function ForecastSettings() {
     ),
   );
 
-  const load = useCallback(async (signal?: AbortSignal) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await fetch("/api/forecasts", { cache: "no-store", signal: signal ?? null });
-      if (!response.ok) throw new Error();
-      const snapshot = forecastSnapshotSchema.parse(await response.json());
-      if (!mounted.current || signal?.aborted) return;
-      const original = snapshot.forecast ? documentOnly(snapshot.forecast) : initialDocument();
-      const next = normalizeForecastDocument(original);
-      setDocument(next);
-      setBaseline(JSON.stringify(snapshot.can_edit ? original : next));
-      setRevision(snapshot.forecast?.revision ?? 0);
-      setCanEdit(snapshot.can_edit);
-      setLoaded(true);
-      setConflict(false);
-      setNotice("");
-    } catch {
-      if (mounted.current && !signal?.aborted)
-        setError("Não foi possível carregar a previsão do CRM. Tente novamente.");
-    } finally {
-      if (mounted.current && !signal?.aborted) setLoading(false);
-    }
-  }, []);
+  const load = useCallback(
+    async (signal?: AbortSignal) => {
+      setLoading(true);
+      setError(null);
+      try {
+        const query = new URLSearchParams({ date: selectedCalendarDate, segment });
+        if (selectedManager) query.set("manager", selectedManager);
+        const response = await fetch(`/api/forecasts?${query}`, {
+          cache: "no-store",
+          signal: signal ?? null,
+        });
+        if (!response.ok) throw new Error();
+        const snapshot = forecastSnapshotSchema.parse(await response.json());
+        if (!mounted.current || signal?.aborted) return;
+        const original = snapshot.forecast
+          ? documentOnly(snapshot.forecast)
+          : snapshot.template
+            ? documentOnly(snapshot.template)
+            : initialDocument();
+        const next = normalizeForecastDocument(original);
+        setDocument(next);
+        setBaseline(JSON.stringify(snapshot.forecast && snapshot.can_edit ? original : next));
+        setRevision(snapshot.forecast?.revision ?? 0);
+        setCanEdit(snapshot.can_edit);
+        setSections(snapshot.sections);
+        setLoaded(true);
+        setConflict(false);
+        setNotice("");
+      } catch {
+        if (mounted.current && !signal?.aborted)
+          setError("Não foi possível carregar a previsão do CRM. Tente novamente.");
+      } finally {
+        if (mounted.current && !signal?.aborted) setLoading(false);
+      }
+    },
+    [segment, selectedManager, selectedCalendarDate],
+  );
 
   useEffect(() => {
     mounted.current = true;
@@ -320,6 +413,38 @@ export function ForecastSettings() {
     setError(null);
   }
 
+  function allowContextChange() {
+    return (
+      !dirty ||
+      window.confirm(
+        "Existem alterações não salvas nesta previsão. Descartar o rascunho e carregar outra seleção?",
+      )
+    );
+  }
+
+  function selectSegment(nextSegment: ForecastSegment) {
+    if (nextSegment === segment || !allowContextChange()) return;
+    setLoaded(false);
+    setSegment(nextSegment);
+    setActiveCell({});
+  }
+
+  function selectManager(nextManager: string) {
+    if (segment === "general" || nextManager === selectedManager || !allowContextChange()) return;
+    setLoaded(false);
+    setManagerBySegment((current) => ({ ...current, [segment]: nextManager }));
+    setActiveCell({});
+  }
+
+  function selectCalendarDay(day: number) {
+    if (!allowContextChange()) return;
+    const period = getForecastPeriod(new Date(calendarYear, calendarMonth, day));
+    setLoaded(false);
+    setSelectedPeriodStart(toDateKey(period.start));
+    setSelectedCalendarDate(toDateKey(new Date(calendarYear, calendarMonth, day)));
+    setActiveCell({});
+  }
+
   function addRow() {
     if (!editable || document.rows.length >= 200) return;
     const row = {
@@ -419,7 +544,13 @@ export function ForecastSettings() {
       const response = await fetch("/api/forecasts", {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...parsed.data, expected_revision: revision }),
+        body: JSON.stringify({
+          ...parsed.data,
+          expected_revision: revision,
+          date: selectedCalendarDate,
+          segment,
+          manager: selectedManager,
+        }),
       });
       if (response.status === 409) {
         setConflict(true);
@@ -477,7 +608,7 @@ export function ForecastSettings() {
       <div className={`${analytics.canvas} ${styles.page}`}>
         <div className={styles.main}>
           <header className={styles.header}>
-            <h1>Previsão</h1>
+            <h1>{periodTitle}</h1>
             <div className={styles.actions}>
               <button
                 type="button"
@@ -509,6 +640,38 @@ export function ForecastSettings() {
               </button>
             </div>
           </header>
+          <div className={styles.contextSelector}>
+            <div className={styles.segmentTabs} role="group" aria-label="Visão da previsão">
+              {forecastSegments.map((option) => (
+                <button
+                  key={option.id}
+                  type="button"
+                  className={segment === option.id ? styles.selectorActive : undefined}
+                  aria-pressed={segment === option.id}
+                  disabled={loading || saving}
+                  onClick={() => selectSegment(option.id)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
+            {segment !== "general" && (
+              <div className={styles.managerTabs} role="group" aria-label={`Gerentes ${segment}`}>
+                {forecastManagers[segment].map((manager) => (
+                  <button
+                    key={manager.id}
+                    type="button"
+                    className={selectedManager === manager.id ? styles.selectorActive : undefined}
+                    aria-pressed={selectedManager === manager.id}
+                    disabled={loading || saving}
+                    onClick={() => selectManager(manager.id)}
+                  >
+                    {manager.label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
           <p className={styles.srOnly} data-dirty={dirty} role="status" aria-live="polite">
             {loading
               ? "Carregando previsão…"
@@ -519,7 +682,10 @@ export function ForecastSettings() {
                     ? "Tabela compartilhada no CRM."
                     : "Aguardando carregamento.")}
           </p>
-          {loaded && !canEdit && (
+          {loaded && segment === "general" && (
+            <p className={styles.notice}>Geral compila House e Imob e é somente leitura.</p>
+          )}
+          {loaded && segment !== "general" && !canEdit && (
             <p className={styles.notice}>Você tem acesso somente à leitura desta previsão.</p>
           )}
           {error && (
@@ -540,12 +706,28 @@ export function ForecastSettings() {
               foram preservados; os totais afetados ficam indisponíveis até a correção.
             </p>
           )}
+          {segment === "general" && loaded && (
+            <div className={styles.generalSections} aria-label="Previsão geral por gerente">
+              {sections.map((section) => (
+                <GeneralForecastSection
+                  key={`${section.segment}-${section.manager}`}
+                  section={section}
+                />
+              ))}
+              {loaded && sections.length === 0 && (
+                <div className={styles.empty}>
+                  <p>Nenhuma previsão salva para este final de semana.</p>
+                </div>
+              )}
+            </div>
+          )}
           <div
             className={styles.tableScroll}
             role="region"
             aria-label="Tabela de previsão"
             tabIndex={0}
             aria-busy={loading}
+            hidden={segment === "general" || !loaded}
           >
             <table className={styles.table}>
               <caption className={styles.srOnly}>
@@ -570,7 +752,8 @@ export function ForecastSettings() {
                       key={group.id}
                       scope="colgroup"
                       colSpan={2}
-                      className={styles.groupHeading}
+                      className={`${styles.groupHeading} ${activeCell.groupId === group.id ? styles.activeGroup : ""}`}
+                      onPointerEnter={() => setActiveCell({ groupId: group.id })}
                       onDragOver={(event) => {
                         if (editable && draggedGroup.current) event.preventDefault();
                       }}
@@ -593,10 +776,28 @@ export function ForecastSettings() {
                 </tr>
                 <tr className={styles.metricHeadings}>
                   {groups.flatMap((group) => [
-                    <th key={group.forecastId} scope="col">
+                    <th
+                      key={group.forecastId}
+                      scope="col"
+                      className={
+                        activeCell.columnId === group.forecastId ? styles.activeMetric : undefined
+                      }
+                      onPointerEnter={() =>
+                        setActiveCell({ columnId: group.forecastId, groupId: group.id })
+                      }
+                    >
                       Previsão
                     </th>,
-                    <th key={group.actualId} scope="col">
+                    <th
+                      key={group.actualId}
+                      scope="col"
+                      className={
+                        activeCell.columnId === group.actualId ? styles.activeMetric : undefined
+                      }
+                      onPointerEnter={() =>
+                        setActiveCell({ columnId: group.actualId, groupId: group.id })
+                      }
+                    >
                       Realizado
                     </th>,
                   ])}
@@ -605,7 +806,10 @@ export function ForecastSettings() {
               <tbody>
                 {document.rows.map((row, index) => (
                   <tr key={row.id}>
-                    <th scope="row" className={styles.brokerCell}>
+                    <th
+                      scope="row"
+                      className={`${styles.brokerCell} ${activeCell.rowId === row.id ? styles.activeBroker : ""}`}
+                    >
                       <div className={styles.brokerContent}>
                         <span className={styles.rowNumber}>{index + 1}</span>
                         <input
@@ -615,6 +819,8 @@ export function ForecastSettings() {
                           value={row.cells.broker ?? ""}
                           dir="ltr"
                           onChange={(event) => changeCell(row.id, "broker", event.target.value)}
+                          onFocus={() => setActiveCell({ rowId: row.id })}
+                          onPointerEnter={() => setActiveCell({ rowId: row.id })}
                         />
                         {canEdit && (
                           <button
@@ -632,13 +838,19 @@ export function ForecastSettings() {
                       numericCell(row, index, group, "Previsão", group.forecastId),
                       numericCell(row, index, group, "Realizado", group.actualId),
                     ])}
-                    <td className={styles.totalCell}>
+                    <td
+                      className={styles.totalCell}
+                      onPointerEnter={() => setActiveCell({ rowId: row.id })}
+                    >
                       <span className={styles.mobileLabel}>Total</span>
                       <output aria-label={`Total, linha ${index + 1}`}>
                         {totalText(totals.rows[row.id])}
                       </output>
                     </td>
-                    <td className={styles.actionPlanCell}>
+                    <td
+                      className={styles.actionPlanCell}
+                      onPointerEnter={() => setActiveCell({ rowId: row.id })}
+                    >
                       <textarea
                         aria-label={`Plano de ação, linha ${index + 1}`}
                         cols={actionPlanColumns}
@@ -652,6 +864,7 @@ export function ForecastSettings() {
                         onChange={(event) =>
                           changeCell(row.id, ACTION_PLAN_COLUMN_ID, event.target.value)
                         }
+                        onFocus={() => setActiveCell({ rowId: row.id })}
                       />
                     </td>
                   </tr>
@@ -789,13 +1002,29 @@ export function ForecastSettings() {
                     calendarMonth === today.getMonth() &&
                     calendarYear === today.getFullYear();
                   const accessibleDate = calendarDateFormatter.format(date);
+                  const selected = toDateKey(date) === selectedCalendarDate;
+                  if (validated)
+                    return (
+                      <button
+                        key={day}
+                        type="button"
+                        role="gridcell"
+                        aria-label={`${accessibleDate}, dia validado`}
+                        aria-current={current ? "date" : undefined}
+                        aria-selected={selected}
+                        className={`${styles.calendarDay} ${styles.calendarDayValidated} ${current ? styles.calendarDayCurrent : ""} ${selected ? styles.calendarDaySelected : ""}`}
+                        onClick={() => selectCalendarDay(day)}
+                      >
+                        {day}
+                      </button>
+                    );
                   return (
                     <span
                       key={day}
                       role="gridcell"
-                      aria-label={`${accessibleDate}${validated ? ", dia validado" : ""}`}
+                      aria-label={accessibleDate}
                       aria-current={current ? "date" : undefined}
-                      className={`${styles.calendarDay} ${validated ? styles.calendarDayValidated : ""} ${current ? styles.calendarDayCurrent : ""}`}
+                      className={`${styles.calendarDay} ${current ? styles.calendarDayCurrent : ""}`}
                     >
                       {day}
                     </span>
@@ -840,7 +1069,11 @@ export function ForecastSettings() {
     const value = row.cells[columnId] ?? "";
     const invalid = forecastCellToCents(value) === null;
     return (
-      <td key={columnId} className={styles.numericCell}>
+      <td
+        key={columnId}
+        className={`${styles.numericCell} ${activeCell.rowId === row.id && activeCell.columnId === columnId ? styles.activeCell : ""}`}
+        onPointerEnter={() => setActiveCell({ rowId: row.id, columnId, groupId: group.id })}
+      >
         <span className={styles.mobileLabel}>
           {group.label} · {metric}
         </span>
@@ -860,6 +1093,7 @@ export function ForecastSettings() {
           value={value}
           maxLength={invalid ? 4000 : 12}
           onChange={(event) => changeCell(row.id, columnId, event.target.value)}
+          onFocus={() => setActiveCell({ rowId: row.id, columnId, groupId: group.id })}
         />
       </td>
     );
@@ -895,7 +1129,7 @@ export function ForecastSettings() {
                 draggedGroup.current = null;
               }}
             >
-              <GripVertical size={14} aria-hidden="true" />
+              <GripVertical size={11} aria-hidden="true" />
             </span>
             <button
               type="button"
@@ -903,7 +1137,7 @@ export function ForecastSettings() {
               disabled={!editable || index === 0}
               onClick={() => moveGroup(group.id, index - 1)}
             >
-              <ArrowLeft size={14} aria-hidden="true" />
+              <ArrowLeft size={11} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -911,7 +1145,7 @@ export function ForecastSettings() {
               disabled={!editable || index === groups.length - 1}
               onClick={() => moveGroup(group.id, index + 1)}
             >
-              <ArrowRight size={14} aria-hidden="true" />
+              <ArrowRight size={11} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -919,11 +1153,161 @@ export function ForecastSettings() {
               disabled={!editable || groups.length <= 1}
               onClick={() => removeGroup(group)}
             >
-              <Trash2 size={14} aria-hidden="true" />
+              <Trash2 size={11} aria-hidden="true" />
             </button>
           </div>
         )}
       </div>
     );
   }
+}
+
+function GeneralForecastSection({ section }: { section: ForecastSection }) {
+  const [activeCell, setActiveCell] = useState<{
+    rowId?: string;
+    columnId?: string;
+    groupId?: string;
+  }>({});
+  const document = normalizeForecastDocument(documentOnly(section.forecast));
+  const groups = getForecastGroups(document);
+  const totals = getForecastTotals(document);
+  const label = `${section.segment === "house" ? "House" : "Imob"} · ${getManagerLabel(section.segment, section.manager)}`;
+
+  return (
+    <section className={styles.generalSection} aria-label={label}>
+      <h2>{label}</h2>
+      <div
+        className={styles.tableScroll}
+        role="region"
+        aria-label={`Tabela de previsão — ${label}`}
+        tabIndex={0}
+      >
+        <table className={styles.table}>
+          <caption className={styles.srOnly}>{label}</caption>
+          <colgroup>
+            <col className={styles.brokerColumn} />
+            {groups.flatMap((group) => [
+              <col key={group.forecastId} className={styles.metricColumn} />,
+              <col key={group.actualId} className={styles.metricColumn} />,
+            ])}
+            <col className={styles.totalColumn} />
+            <col className={styles.actionPlanColumn} />
+          </colgroup>
+          <thead>
+            <tr>
+              <th scope="col" rowSpan={2} className={styles.brokerHeading}>
+                Nome do corretor
+              </th>
+              {groups.map((group) => (
+                <th
+                  key={group.id}
+                  scope="colgroup"
+                  colSpan={2}
+                  className={`${styles.groupHeading} ${activeCell.groupId === group.id ? styles.activeGroup : ""}`}
+                  onPointerEnter={() => setActiveCell({ groupId: group.id })}
+                >
+                  <span className={styles.sectionGroupTitle}>{group.label}</span>
+                </th>
+              ))}
+              <th scope="col" rowSpan={2} className={styles.totalHeading}>
+                Total
+              </th>
+              <th scope="col" rowSpan={2} className={styles.actionPlanHeading}>
+                Plano de ação
+              </th>
+            </tr>
+            <tr className={styles.metricHeadings}>
+              {groups.flatMap((group) => [
+                <th
+                  key={group.forecastId}
+                  scope="col"
+                  className={
+                    activeCell.columnId === group.forecastId ? styles.activeMetric : undefined
+                  }
+                  onPointerEnter={() =>
+                    setActiveCell({ columnId: group.forecastId, groupId: group.id })
+                  }
+                >
+                  Previsão
+                </th>,
+                <th
+                  key={group.actualId}
+                  scope="col"
+                  className={
+                    activeCell.columnId === group.actualId ? styles.activeMetric : undefined
+                  }
+                  onPointerEnter={() =>
+                    setActiveCell({ columnId: group.actualId, groupId: group.id })
+                  }
+                >
+                  Realizado
+                </th>,
+              ])}
+            </tr>
+          </thead>
+          <tbody>
+            {document.rows.map((row, rowIndex) => (
+              <tr key={row.id}>
+                <th
+                  scope="row"
+                  className={`${styles.brokerCell} ${activeCell.rowId === row.id ? styles.activeBroker : ""}`}
+                >
+                  <div className={styles.brokerContent}>
+                    <span className={styles.rowNumber}>{rowIndex + 1}</span>
+                    <span className={styles.readonlyBroker}>{row.cells.broker}</span>
+                  </div>
+                </th>
+                {groups.flatMap((group) =>
+                  ([group.forecastId, group.actualId] as const).map((columnId) => (
+                    <td
+                      key={columnId}
+                      className={`${styles.numericCell} ${activeCell.rowId === row.id && activeCell.columnId === columnId ? styles.activeCell : ""}`}
+                      tabIndex={0}
+                      onFocus={() => setActiveCell({ rowId: row.id, columnId, groupId: group.id })}
+                      onPointerEnter={() =>
+                        setActiveCell({ rowId: row.id, columnId, groupId: group.id })
+                      }
+                    >
+                      <output>{row.cells[columnId] || "0"}</output>
+                    </td>
+                  )),
+                )}
+                <td
+                  className={styles.totalCell}
+                  onPointerEnter={() => setActiveCell({ rowId: row.id })}
+                >
+                  <output>{formatForecastCents(totals.rows[row.id] ?? 0)}</output>
+                </td>
+                <td
+                  className={styles.actionPlanCell}
+                  onPointerEnter={() => setActiveCell({ rowId: row.id })}
+                >
+                  <span className={styles.readonlyPlan}>{row.cells[ACTION_PLAN_COLUMN_ID]}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <th scope="row" className={styles.footerLabel}>
+                Total geral
+              </th>
+              {groups.flatMap((group) => [
+                <td key={group.forecastId}>
+                  <output>{formatForecastCents(totals.columns[group.forecastId] ?? 0)}</output>
+                </td>,
+                <td key={group.actualId}>
+                  <output>{formatForecastCents(totals.columns[group.actualId] ?? 0)}</output>
+                </td>,
+              ])}
+              <td className={styles.totalCell}>
+                <output>{formatForecastCents(totals.grandTotal ?? 0)}</output>
+              </td>
+              <td className={styles.actionPlanFooter}>—</td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+    </section>
+  );
 }

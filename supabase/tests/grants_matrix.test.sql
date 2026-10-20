@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  43::bigint,
+  44::bigint,
   'all public tables retain RLS'
 );
 
@@ -33,6 +33,7 @@ select is(
     'crm_dashboard_top_developments',
     'crm_dashboard_views',
     'crm_developments',
+    'crm_forecast_periods',
     'crm_forecasts',
     'crm_funnel_goals',
     'crm_imob_ranking_developments',
@@ -83,6 +84,7 @@ select is(
   ),
   array[
     'crm_developments',
+    'crm_forecast_periods',
     'crm_forecasts',
     'crm_imob_ranking_developments',
     'crm_imob_ranking_entries',
@@ -341,6 +343,7 @@ select is(
     'get_compact_user_directory_page',
     'get_crm_commercial_configuration_draft',
     'get_crm_forecast',
+    'get_crm_forecast_period',
     'get_crm_read_model_v3',
     'get_crm_routine_completions',
     'get_crm_routines',
@@ -366,6 +369,7 @@ select is(
     'revoke_current_user_sessions_after_password_recovery',
     'save_crm_commercial_configuration_draft',
     'save_crm_forecast',
+    'save_crm_forecast_period',
     'save_crm_routine',
     'set_app_page_active',
     'set_crm_commercial_engine_gate',

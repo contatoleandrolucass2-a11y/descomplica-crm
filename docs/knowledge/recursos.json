@@ -133,6 +133,7 @@
         "tests/forecast-settings.test.tsx",
         "tests/forecast-api.test.ts",
         "supabase/tests/crm_forecasts.test.sql",
+        "supabase/tests/crm_forecast_periods.test.sql",
         "tests/routine-completions-api.test.ts",
         "supabase/tests/crm_routine_completions.test.sql",
         "scripts/qa/marketing-resources.mjs",
