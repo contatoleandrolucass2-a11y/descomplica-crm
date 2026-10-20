@@ -8,6 +8,8 @@ protegido agora também é acionado por mudanças no painel de Agendamentos, par
 gerar o mesmo conjunto em checkout limpo antes da promoção e da CI final.
 O run `39378381324` aprovou 242 referências com checkout limpo, baseline
 versionada e imutável durante a captura; o contrato local aprovou 15 testes.
+Após integrar `main` em `7bcb82d0`, o run `39382588927` regenerou o manifesto
+combinado de Metas e Agendamentos; 27 testes de catálogo/paridade passaram.
 
 ## 2026-10-20: indicadores, rankings e tabela de Agendamentos
 

@@ -17,6 +17,13 @@
   O resultado limpo substituiu a proveniência anterior; o teste local de
   paridade aprovou 15 casos, com um skip condicional. A CI integral do novo
   commit continua obrigatória antes da integração.
+- `origin/main` avançou para `dac2e11a` durante a captura. A branch integrou as
+  mudanças de Metas em `7bcb82d0`; o run reconciliado `39382588927` aprovou
+  novamente replay, build, E2E e 242 referências, com checkout limpo. Artefato
+  `12247556901`, digest
+  `sha256:f1751fad4f9a879ce190a1f945812a59f16db00507d08d75bbd8b5b8e01cb3d7`.
+  O manifesto combinado foi promovido e 27 testes locais de catálogo/paridade
+  passaram, com um skip condicional. A CI integral final continua obrigatória.
 
 ## 2026-10-20: indicadores operacionais de Agendamentos — implementação local
 
