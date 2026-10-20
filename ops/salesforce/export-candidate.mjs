@@ -152,7 +152,19 @@ function project(key, rows, analysisEnabled = false) {
     return rows.map((row) => ({
       appointmentCode: field(row, "Activity.Codigo_do_agendamento__c"),
       ...(key === "appointments"
-        ? { createdAt: raw(row, "Activity.CreatedDate") }
+        ? {
+            createdAt: raw(row, "Activity.CreatedDate"),
+            ...(analysisEnabled === true
+              ? {
+                  scheduledAt: raw(row, "appointmentTime"),
+                  attendedAt: raw(row, "appointmentAttendance"),
+                  visitPerformed: raw(row, "appointmentVisitPerformed"),
+                  regionalManager: field(row, "appointmentRegional"),
+                  accountName: field(row, "appointmentAccountName"),
+                  accountRanking: field(row, "appointmentAccountRanking"),
+                }
+              : {}),
+          }
         : { attendedAt: raw(row, "Activity.Data_de_comparecimento__c") }),
       brokerName: field(row, "Activity.Corretor__c.Name"),
       managerName: field(row, "Activity.Gerente_de_Vendas__c"),
@@ -232,6 +244,31 @@ export async function collectReport(sessionId, definition, startDate, endDate, o
                   appointmentDevelopment: {
                     label: "Nome do empreendimento",
                     column: "Activity.Nome_do_empreendimento__c",
+                  },
+                  appointmentRegional: {
+                    label: "Gerente Regional",
+                    column: "Activity.Gerente_Regional__c",
+                  },
+                  appointmentTime: {
+                    label: "Horário",
+                    column: "Activity.ActivityDateTime",
+                  },
+                  appointmentAttendance: {
+                    label: "Data de comparecimento",
+                    column: "Activity.Data_de_comparecimento__c",
+                  },
+                  appointmentVisitPerformed: {
+                    label: "Visita Realizada",
+                    column: "Activity.VisitaRealizada__c",
+                  },
+                  appointmentAccountName: {
+                    label: "Conta: Nome da conta",
+                    column: "Activity.Account.Name",
+                    allowSharedLabel: true,
+                  },
+                  appointmentAccountRanking: {
+                    label: "Conta: Ranking",
+                    column: "Activity.Account.Ranking__c",
                   },
                 },
               }

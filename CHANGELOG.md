@@ -1,5 +1,21 @@
 # Changelog
 
+## 2026-10-20 - Candidato visual protegido para Agendamentos
+
+- Inclui o painel de Agendamentos no workflow isolado que produz referências
+  visuais autenticadas com proveniência limpa antes da promoção.
+
+## 2026-10-20 - Indicadores e detalhamento de Agendamentos
+
+- Adiciona seis indicadores em uma linha, incluindo velocímetro da meta mensal
+  calculada pela quantidade vigente de corretores cadastrados.
+- Organiza o diário em largura total; abaixo, exibe previsto versus realizado,
+  semana e mês; em seguida, os rankings regional, gerente, responsável e conta.
+- Acrescenta a tabela filtrada com data, horário, comparecimento, realização,
+  responsáveis e conta, com cabeçalho fixo e rolagem vertical.
+- Valida em cada coleta os campos vigentes dos relatórios Salesforce e mantém
+  snapshots analíticos v1/v2 legíveis durante a adoção do contrato v3.
+
 ## 2026-10-20 - Dashboard House e Imob
 
 - Publicado pelo PR #273 no SHA `08d050f9`, com CI integral, imagem imutável,

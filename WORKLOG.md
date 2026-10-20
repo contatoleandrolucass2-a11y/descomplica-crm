@@ -1,5 +1,47 @@
 # Worklog
 
+## 2026-10-20: proveniência visual de Agendamentos
+
+A referência promovida a partir do diagnóstico da CI preservou a marca de
+checkout alterado da execução de verificação. O workflow de candidato visual
+protegido agora também é acionado por mudanças no painel de Agendamentos, para
+gerar o mesmo conjunto em checkout limpo antes da promoção e da CI final.
+O run `39378381324` aprovou 242 referências com checkout limpo, baseline
+versionada e imutável durante a captura; o contrato local aprovou 15 testes.
+Após integrar `main` em `7bcb82d0`, o run `39382588927` regenerou o manifesto
+combinado de Metas e Agendamentos; 27 testes de catálogo/paridade passaram.
+
+## 2026-10-20: indicadores, rankings e tabela de Agendamentos
+
+Demanda: reorganizar a página de Agendamentos com seis indicadores compactos,
+diário em largura total, dois grupos de gráficos e uma tabela detalhada. O
+velocímetro compara os agendamentos do mês selecionado com o total vigente de
+corretores; a média informa agendamentos por dia coberto. Hoje e ontem usam data
+de criação. Previsto e realizado usam, respectivamente, horário programado e
+visita realizada para a data de referência.
+
+O describe vigente dos relatórios `00OU600000ELaA6MAL` e
+`00OTT000009j0l32AA` confirmou os campos e tipos pedidos, sem extrair linhas.
+O coletor resolve e valida os rótulos a cada ciclo. O contrato v3 acrescenta a
+população de corretores e detalhes operacionais por visão; v1/v2 continuam
+legíveis. A RPC de etapa remove dados de outras etapas e apaga nome/ranking da
+conta quando falta `crm.ranking.view`; tabelas continuam sem SELECT direto.
+
+Testes focais de análise, interface, projeção Salesforce e release passaram.
+O preview sintético aprovou 12 combinações de tema/largura, sem overflow
+horizontal, colisão de rótulos, erro de navegador ou violação Axe. A validação
+pgTAP local ficou indisponível porque este host não possui Docker/Postgres local;
+a restauração isolada da CI permanece obrigatória antes de qualquer migration,
+integração ou publicação.
+
+Autorização específica confirmada em 20/10/2026. O Supabase MCP identificou o
+projeto produtivo `hnncxuerlcsaahdxoswb`, registrou hashes das definições v2 e
+aplicou atomicamente `appointments_operations_v3`. A migration aparece no
+histórico remoto como `20261020111524`; a verificação confirmou suporte v3,
+funções v2 preservadas, ingestão executável somente por `service_role` e
+ausência de leitura direta por `anon` ou `authenticated`. Os advisors não
+apontaram regressão ligada ao delta.
+
 ## 2026-10-20: publicação do dashboard House e Imob
 
 - PR #273 integrado no merge `08d050f90c877009cd55140322b7c822e578d672`.

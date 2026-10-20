@@ -424,6 +424,7 @@ export function buildSalesforceSnapshot({
   if (analysisEnabled === true) {
     payload.dashboard.analysis = buildDashboardAnalysis({
       referenceDate,
+      brokerCount: reports.brokers.length,
       views: VIEW_KEYS.map((viewKey) => ({
         viewKey,
         stages: Object.fromEntries(

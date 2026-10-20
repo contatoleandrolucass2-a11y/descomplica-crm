@@ -42,10 +42,24 @@ export function dashboardAnalysisCoverageStart(referenceDate) {
  * Unknown channels and dates outside coverage are excluded before dictionaries
  * are built; ambiguous channels and invalid data fail without exposing records.
  */
-export function buildDashboardAnalysis({ referenceDate, views }) {
+function timestamp(value, required = false) {
+  const raw = String(value ?? "").trim();
+  if (!raw) {
+    if (required) throw invalid();
+    return null;
+  }
+  const parsed = new Date(raw);
+  if (!Number.isFinite(parsed.getTime())) throw invalid();
+  return parsed.toISOString();
+}
+
+export function buildDashboardAnalysis({ referenceDate, views, brokerCount }) {
+  if (!Number.isSafeInteger(brokerCount) || brokerCount < 0 || brokerCount > 1_000_000)
+    throw invalid();
   const coverageStart = dashboardAnalysisCoverageStart(referenceDate);
   const analysisViews = views.map(({ viewKey, stages }) => {
     const records = [];
+    const appointments = [];
     for (const [stage, stageKey] of ANALYSIS_STAGE_KEYS.entries()) {
       for (const row of stages[stageKey]) {
         const realEstateName = String(row.realEstateName ?? "").toLowerCase();
@@ -74,6 +88,19 @@ export function buildDashboardAnalysis({ referenceDate, views }) {
           amount,
           approved: stageKey === "folders" && row.approvedFolder ? 1 : 0,
         });
+        if (stageKey === "appointments") {
+          appointments.push({
+            createdAt: timestamp(row.createdAt, true),
+            scheduledAt: timestamp(row.scheduledAt),
+            attendedAt: timestamp(row.attendedAt),
+            visitPerformed: row.visitPerformed,
+            regionalManager: String(row.regionalManager ?? "").trim(),
+            salesManager: String(row.managerName ?? "").trim(),
+            owner: String(row.brokerName ?? "").trim(),
+            accountName: String(row.accountName ?? "").trim(),
+            accountRanking: String(row.accountRanking ?? "").trim(),
+          });
+        }
       }
     }
     const dictionaries = Object.fromEntries(
@@ -111,12 +138,13 @@ export function buildDashboardAnalysis({ referenceDate, views }) {
     const facts = [...aggregates.entries()]
       .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
       .map(([, fact]) => fact);
-    return { viewKey, dimensions: dictionaries, facts };
+    return { viewKey, dimensions: dictionaries, facts, appointments };
   });
   const parsed = dashboardAnalysisSchema.safeParse({
-    version: 2,
+    version: 3,
     coverageStart,
     referenceDate,
+    brokerCount,
     views: analysisViews,
   });
   if (!parsed.success) throw invalid();
