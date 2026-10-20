@@ -73,7 +73,7 @@ const normalizedLabel = (label) =>
 function resolveLabelColumns(describe, definition, metadata) {
   const resolved = new Map();
   for (const [alias, requirement] of Object.entries(definition.requiredLabelColumns ?? {})) {
-    const { label, column: expectedColumn } = requirement;
+    const { label, column: expectedColumn, allowSharedLabel = false } = requirement;
     const candidates = new Map();
     const sources = [describe.reportExtendedMetadata?.detailColumnInfo];
     for (const category of describe.reportTypeMetadata?.categories ?? [])
@@ -94,8 +94,12 @@ function resolveLabelColumns(describe, definition, metadata) {
         candidates.set(column, information);
       }
     }
-    if (candidates.size !== 1) throw invalid();
-    const column = candidates.keys().next().value;
+    if (
+      (candidates.size !== 1 && !allowSharedLabel) ||
+      (allowSharedLabel && !candidates.has(expectedColumn))
+    )
+      throw invalid();
+    const column = allowSharedLabel ? expectedColumn : candidates.keys().next().value;
     if (column !== expectedColumn || column === "Activity.PDV__c.Name") throw invalid();
     resolved.set(alias, column);
     if (!metadata.detailColumns.includes(column)) metadata.detailColumns.push(column);
@@ -289,7 +293,10 @@ export function validateProjectedRows(key, rows) {
   const seen = new Map();
   for (const row of rows) {
     if (
-      Object.entries(row).some(([field, value]) => field !== "amount" && typeof value !== "string")
+      Object.entries(row).some(
+        ([field, value]) =>
+          !["amount", "visitPerformed"].includes(field) && typeof value !== "string",
+      )
     )
       throw invalid();
     const id = row[identity];
@@ -316,6 +323,22 @@ export function validateProjectedRows(key, rows) {
     if (
       key === "sales" &&
       (typeof row.amount !== "number" || !Number.isFinite(row.amount) || row.amount < 0)
+    )
+      throw invalid();
+    if (
+      key === "appointments" &&
+      Object.hasOwn(row, "visitPerformed") &&
+      typeof row.visitPerformed !== "boolean"
+    )
+      throw invalid();
+    if (
+      key === "appointments" &&
+      Object.hasOwn(row, "visitPerformed") &&
+      ["scheduledAt", "attendedAt"].some(
+        (field) =>
+          typeof row[field] !== "string" ||
+          (row[field].trim() !== "" && !Number.isFinite(Date.parse(row[field]))),
+      )
     )
       throw invalid();
     if (

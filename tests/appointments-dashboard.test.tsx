@@ -18,6 +18,27 @@ const legacy: DashboardAnalysisSlice = {
   facts: [[1, "2026-10-01", 0, 0, -1, 0, 0, 4, 0, 0]],
 };
 
+const current: DashboardAnalysisSlice = {
+  ...legacy,
+  version: 3,
+  brokerCount: 8,
+  dimensions: { ...legacy.dimensions, stores: ["Loja sintética"] },
+  facts: [[1, "2026-10-19", 0, 0, -1, 0, 0, 4, 0, 0, 0]],
+  appointments: [
+    {
+      createdAt: "2026-10-19T12:00:00Z",
+      scheduledAt: "2026-10-19T15:00:00Z",
+      attendedAt: "2026-10-19T16:00:00Z",
+      visitPerformed: true,
+      regionalManager: "Regional sintético",
+      salesManager: "Gerente sintético",
+      owner: "Responsável sintético",
+      accountName: "Conta sintética",
+      accountRanking: "Ouro",
+    },
+  ],
+};
+
 describe("appointment dashboard availability", () => {
   it("shows unavailable analysis instead of invented charts or zero", () => {
     const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={null} />);
@@ -27,23 +48,25 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain(">Agendamentos</h1>");
   });
 
-  it("renders all seven labeled charts, controls and explicit legacy development limitation", () => {
-    const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={legacy} />);
-    expect(markup.match(/<section/g)).toHaveLength(7);
-    expect(markup).toContain("Período dos gráficos e rankings");
+  it("renders six cards, ordered charts and the detailed table for v3", () => {
+    const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={current} />);
+    expect(markup).toContain("Período dos gráficos, indicadores e tabela");
     expect(markup).toContain(">Ano</label>");
-    expect(markup).toContain("Nome do empreendimento indisponível nesta atualização");
-    expect(markup).toContain("Loja sintética");
     expect(markup).toContain("Mês selecionado com cobertura parcial");
-    expect(markup).toContain("01/10/2026: 4 agendamentos");
+    expect(markup).toContain("Meta do mês");
+    expect(markup).toContain("Corretores cadastrados");
+    expect(markup).toContain("Previstos e realizados hoje");
+    expect(markup).toContain("Ranking por gerente regional");
+    expect(markup).toContain("Ranking das contas");
+    expect(markup).toContain("Detalhamento dos agendamentos");
+    expect(markup).toContain("Conta: Ranking");
+    expect(markup).toContain("Conta sintética");
   });
 
-  it("explains restricted store and development rankings instead of rendering concealed dimensions", () => {
+  it("redacts the account ranking chart for profiles without ranking permission", () => {
     const markup = renderToStaticMarkup(
-      <AppointmentsDashboard analysis={legacy} canViewDevelopmentRankings={false} />,
+      <AppointmentsDashboard analysis={current} canViewDevelopmentRankings={false} />,
     );
-    expect(markup).toContain("Ranking por loja indisponível para seu perfil de acesso");
-    expect(markup).toContain("Ranking por empreendimento indisponível para seu perfil de acesso");
-    expect(markup).not.toContain("Loja sintética");
+    expect(markup).toContain("Ranking das contas indisponível para seu perfil de acesso");
   });
 });

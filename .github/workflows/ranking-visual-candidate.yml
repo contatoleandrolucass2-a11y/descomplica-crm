@@ -1,4 +1,4 @@
-name: Ranking visual candidate
+name: Protected visual candidate
 
 on:
   pull_request:
@@ -6,6 +6,7 @@ on:
       - "app/(protected)/app/ranking/**"
       - "app/(protected)/app/canal-de-parcerias/**"
       - "app/(protected)/app/configuracoes/conectar-sistemas/**"
+      - "app/(protected)/app/etapas/_components/AppointmentsDashboard.*"
       - "lib/crm/qlik/**"
       - ".github/workflows/ranking-visual-candidate.yml"
 

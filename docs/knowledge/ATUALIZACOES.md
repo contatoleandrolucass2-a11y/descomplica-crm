@@ -1,5 +1,83 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
+
+- A CI `39377861485` reprovou somente o contrato de proveniência da referência
+  autenticada: o resultado promovido do diagnóstico mantinha
+  `worktreeDirtyAtCapture=true`. As imagens haviam sido revisadas, mas essa
+  evidência não satisfaz o requisito de captura limpa.
+- O workflow isolado de candidato visual protegido passa a observar também o
+  componente de Agendamentos. A promoção e a CI integral permanecem pendentes
+  até uma nova captura registrar checkout limpo; nenhum gate foi reduzido.
+- O run `39378381324` concluiu com sucesso no merge SHA
+  `53a2d21fba1ee936464fab48f90ea16d50516147`: 242 referências,
+  `worktreeDirtyAtCapture=false`, baseline versionada e inalterada durante a
+  captura. Artefato `12244764377`, digest
+  `sha256:6b484b4388972ffa2767fa9f179ce2c0741b905a60cff67751da8b095c4c84d2`.
+  O resultado limpo substituiu a proveniência anterior; o teste local de
+  paridade aprovou 15 casos, com um skip condicional. A CI integral do novo
+  commit continua obrigatória antes da integração.
+- `origin/main` avançou para `dac2e11a` durante a captura. A branch integrou as
+  mudanças de Metas em `7bcb82d0`; o run reconciliado `39382588927` aprovou
+  novamente replay, build, E2E e 242 referências, com checkout limpo. Artefato
+  `12247556901`, digest
+  `sha256:f1751fad4f9a879ce190a1f945812a59f16db00507d08d75bbd8b5b8e01cb3d7`.
+  O manifesto combinado foi promovido e 27 testes locais de catálogo/paridade
+  passaram, com um skip condicional. A CI integral final continua obrigatória.
+
+## 2026-10-20: indicadores operacionais de Agendamentos — implementação local
+
+- Status: implementação e validação local concluídas na branch
+  `codex/agendamentos-indicadores-tabela`; CI Linux, migration remota, integração
+  e publicação ainda pendentes. A abertura partiu de `origin/main`
+  `2eb17cc052754519ebee1156060e394ea5728169`; produção observada respondeu HTTP
+  200, `status=ok` e versão `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+- O contrato analítico v3 adiciona quantidade vigente de corretores e os
+  detalhes operacionais por agendamento. A coleta descreve os relatórios a cada
+  ciclo e exige os campos Salesforce exatos antes de publicar. A verificação
+  observacional de metadados confirmou `Gerente Regional`, `Gerente de Vendas`,
+  `Corretor: Nome completo`, `Horário`, `Data de comparecimento`,
+  `Visita Realizada`, `Conta: Nome da conta` (`Activity.Account.Name`) e
+  `Conta: Ranking`; nenhum registro comercial foi exportado durante a inspeção.
+- A página passa a exibir seis indicadores, evolução diária em largura total,
+  previstos/realizados, semanas, meses, três rankings nominais, ranking de
+  conta e tabela operacional. O período selecionado usa Data de criação; a
+  média é diária no mês, previsto usa Horário e realizado exige
+  `VisitaRealizada=true`. Rankings ficam em ordem decrescente e dados de conta
+  são omitidos pelo backend sem `crm.ranking.view`.
+- Evidências locais: lint, typecheck e build de 57 rotas aprovados; Vitest
+  aprovou 3.953 testes com 102 skips; 36 testes focados da coleta Salesforce e
+  53 testes dos gates alterados passaram. Preview com CSS compilado aprovou 12
+  combinações de largura/tema, inclusive 320 px, sem rolagem horizontal.
+- PR #274 aberto no SHA `984215e16ae927835ecb15371dbfec5f8b885d40`.
+  A CI `39373995762` aprovou validate e restore isolado, inclusive as 2.047
+  asserções pgTAP. O gate visual reprovou somente oito referências esperadas da
+  rota Agendamentos, em diferentes larguras/temas, devido ao novo espaçamento do
+  estado sem snapshot v3. O artefato Linux `12243582943` foi revisado; apenas
+  essas oito imagens foram promovidas, preservando as outras 234 referências.
+  Nova CI integral é obrigatória antes de integrar.
+- Limites do host: pgTAP não executou porque PostgreSQL/Docker local não está
+  disponível. Os testes físicos POSIX do monitor e release Meta Ads falham no
+  Windows por ACL/permissões e fixtures Linux; são alheios aos arquivos
+  funcionais desta mudança e permanecem obrigatórios na CI Ubuntu. A migration
+  `20261020050000_appointments_operations_v3.sql` não foi aplicada remotamente;
+  exige autorização específica, backup, restore isolado e pgTAP aprovado antes
+  da mutação. Nenhuma publicação ou alteração de dados remotos foi feita.
+
+### Migration v3 autorizada e aplicada
+
+- Em `2026-10-20T11:15Z`, a autorização específica foi confirmada. O Supabase
+  MCP identificou `descomplica-crm-production`, ref
+  `hnncxuerlcsaahdxoswb`, em estado `ACTIVE_HEALTHY` e URL correspondente ao
+  runtime. Antes da transação foram registrados hashes da constraint e das três
+  funções v2 substituídas ou envolvidas.
+- `appointments_operations_v3` foi aplicada atomicamente e registrada pelo MCP
+  como versão remota `20261020111524`. A conferência posterior confirmou a
+  constraint com versão 3, a função base v2 preservada, validator/projetor/RPC
+  vigentes, `service_role` com execução de ingestão e `anon`/`authenticated`
+  sem execução ou SELECT direto. Advisors não trouxeram finding novo ligado ao
+  delta. Coletor, duas cargas reais, merge e publicação continuam pendentes.
+
 ## 2026-10-20: dashboard House e Imob integrado e publicado
 
 - PR #273 integrado no merge `08d050f90c877009cd55140322b7c822e578d672`.
@@ -1589,6 +1667,30 @@ para `/login`. Nenhuma migration, dado remoto, integração ou workflow n8n foi
 modificado. A matriz com gráficos preenchidos é sintética; não houve acesso a
 sessão privada de produção. Fonte: PR270, GitHub Actions, artefato12234994906,
 coordenador de release, ledger e health público.
+
+### Abertura dos indicadores e da tabela de Agendamentos
+
+Em `2026-10-20T01:42:46-03:00`, o Git comum foi confirmado em
+`C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`. A branch
+`codex/agendamentos-indicadores-tabela` partiu de `origin/main`
+`2eb17cc052754519ebee1156060e394ea5728169`, sem mudanças locais. O health
+público retornou HTTP 200, `status=ok` e versão
+`06a41f767fc721d4e85ac10142697a92e0fee0e1`, que corresponde ao último runtime
+publicado. A CI de push mais recente de `main`, execução `39366805822`, terminou
+com falha no commit exclusivamente documental `2eb17cc0`; a CI anterior de
+`main`, execução `39357425838`, aprovou o runtime `06a41f76`. O cliente `gh` não
+está instalado; GitHub foi consultado pelo conector e Git por `fetch`.
+
+A demanda amplia o contrato de Agendamentos com seis indicadores, previsão e
+realização do dia, rankings regionais e de conta e uma tabela detalhada. O
+contrato vigente publica somente fatos agregados e não contém linhas
+individuais, horário, gerente regional, visita realizada nem ranking da conta.
+Esses campos devem ser resolvidos pelo metadado vigente do relatório Salesforce
+em cada coleta; nomes de API não serão inferidos, e dados pessoais ou linhas do
+relatório não serão registrados nesta nota. Fonte: código atual, relatórios
+`00OU600000ELaA6MAL` e `00OTT000009j0l32AA` indicados pelo usuário, GitHub
+Actions e health público. Alteração remota de schema, caso necessária, continua
+dependente da autorização específica aplicável.
 
 ## 2026-10-20: Abertura da edição de metas do Canal Parcerias
 
