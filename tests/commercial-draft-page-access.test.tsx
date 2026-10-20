@@ -29,8 +29,9 @@ describe.each([GoalsPage, PartnershipGoalsPage, PointGoalsPage])(
       "keeps the database restriction for $roleKey with expected access $expected",
       async ({ roleKey, permissions, expected }) => {
         enforcePageAccess.mockResolvedValue({ roleKey, permissions });
+        const usesActiveGoals = page === GoalsPage || page === PartnershipGoalsPage;
         const result = await page({
-          searchParams: Promise.resolve({ saved: page === GoalsPage ? "active" : "1" }),
+          searchParams: Promise.resolve({ saved: usesActiveGoals ? "active" : "1" }),
         });
         expect(enforcePageAccess).toHaveBeenCalledWith(
           page === GoalsPage
@@ -39,10 +40,10 @@ describe.each([GoalsPage, PartnershipGoalsPage, PointGoalsPage])(
               ? "/app/configuracoes/metas/parcerias"
               : "/app/configuracoes/metas/pontos",
         );
-        const pageExpected = page === GoalsPage ? expected : roleKey === "master" && expected;
+        const pageExpected = usesActiveGoals ? expected : roleKey === "master" && expected;
         expect(result.props.canManageDraft).toBe(pageExpected);
         expect(result.props.notification).toBe(
-          pageExpected ? (page === GoalsPage ? "active-saved" : "saved") : undefined,
+          pageExpected ? (usesActiveGoals ? "active-saved" : "saved") : undefined,
         );
       },
     );

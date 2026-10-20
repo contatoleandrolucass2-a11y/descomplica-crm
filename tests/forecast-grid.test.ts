@@ -16,10 +16,10 @@ import {
 import { forecastSaveSchema } from "@/lib/crm/forecasts";
 
 describe("grouped forecast grid", () => {
-  it("starts with seven complete groups, two rows and valid save payload", () => {
+  it("starts with seven complete groups, ten rows and valid save payload", () => {
     const document = createForecastDocument();
     expect(getForecastGroups(document)).toHaveLength(7);
-    expect(document.rows).toHaveLength(2);
+    expect(document.rows).toHaveLength(10);
     expect(document.columns.at(-1)).toEqual({ id: "action_plan", label: "Plano de ação" });
     expect(document.rows.every((row) => Object.keys(row.cells).length === 16)).toBe(true);
     expect(forecastSaveSchema.safeParse({ ...document, expected_revision: 0 }).success).toBe(true);

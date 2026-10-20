@@ -1,3 +1,4 @@
+import { DASHBOARD_CHANNELS } from "./analysis-contract";
 import type { DashboardStageKey } from "./catalog";
 
 export type DashboardManagementGoalKey = DashboardStageKey | "approved-folders";
@@ -18,8 +19,9 @@ export interface DashboardManagementGoals {
  * referenceDate is an explicit Gregorian local date (YYYY-MM-DD, years 0001-9999),
  * never a timestamp or the machine's current date. Holidays are not supplied:
  * appointments count Monday-Friday once and Thursday twice, for the whole month.
- * Per broker: visits = 8, folders = 4, sales = 1. No goals are configured for
- * opportunities or approved-folders, so both always remain null, even for zero brokers.
+ * House goals per broker: opportunities = 143, appointments = 24, visits = 12,
+ * folders = 8, approved folders = 2 and sales = 1. Imob goals are intentionally
+ * unavailable until that channel is configured.
  * A null brokerCount makes every goal unavailable; zero gives zero configured goals.
  * Expected values use elapsed calendar days including referenceDate, without rounding.
  * Throws RangeError for invalid dates, counts other than null/nonnegative safe
@@ -28,9 +30,11 @@ export interface DashboardManagementGoals {
 export function buildDashboardManagementGoals({
   referenceDate,
   brokerCount,
+  channel,
 }: {
   referenceDate: string;
   brokerCount: number | null;
+  channel: (typeof DASHBOARD_CHANNELS)[number];
 }): DashboardManagementGoals {
   const match =
     typeof referenceDate === "string" ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(referenceDate) : null;
@@ -49,24 +53,8 @@ export function buildDashboardManagementGoals({
     throw new RangeError("brokerCount must be null or a nonnegative safe integer.");
   }
 
-  // Gregorian 0001-01-01 was Monday. Integer calendar arithmetic avoids timezones
-  // and JavaScript Date's special treatment of years 00-99.
-  const previousYear = year - 1;
-  const daysBeforeYear =
-    365 * previousYear +
-    Math.floor(previousYear / 4) -
-    Math.floor(previousYear / 100) +
-    Math.floor(previousYear / 400);
-  const daysBeforeMonth = monthLengths.slice(0, month - 1).reduce((sum, days) => sum + days, 0);
-  const firstWeekday = (daysBeforeYear + daysBeforeMonth + 1) % 7;
-  let appointmentsPerBroker = 0;
-  for (let date = 1; date <= daysInMonth; date += 1) {
-    const weekday = (firstWeekday + date - 1) % 7;
-    if (weekday >= 1 && weekday <= 5) appointmentsPerBroker += weekday === 4 ? 2 : 1;
-  }
-
   function total(perBroker: number): number | null {
-    if (brokerCount === null) return null;
+    if (channel !== DASHBOARD_CHANNELS[1] || brokerCount === null) return null;
     const value = perBroker * brokerCount;
     if (!Number.isSafeInteger(value)) {
       throw new RangeError("Monthly goal exceeds the safe integer range.");
@@ -75,11 +63,11 @@ export function buildDashboardManagementGoals({
   }
 
   const monthlyGoals: DashboardManagementGoalValues = {
-    opportunities: null,
-    appointments: total(appointmentsPerBroker),
-    visits: total(8),
-    folders: total(4),
-    "approved-folders": null,
+    opportunities: total(143),
+    appointments: total(24),
+    visits: total(12),
+    folders: total(8),
+    "approved-folders": total(2),
     sales: total(1),
   };
   function expected(goal: number | null): number | null {
@@ -94,11 +82,11 @@ export function buildDashboardManagementGoals({
     elapsedDays: day,
     monthlyGoals,
     expectedByToday: {
-      opportunities: null,
+      opportunities: expected(monthlyGoals.opportunities),
       appointments: expected(monthlyGoals.appointments),
       visits: expected(monthlyGoals.visits),
       folders: expected(monthlyGoals.folders),
-      "approved-folders": null,
+      "approved-folders": expected(monthlyGoals["approved-folders"]),
       sales: expected(monthlyGoals.sales),
     },
   };

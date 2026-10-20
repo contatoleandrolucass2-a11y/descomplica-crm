@@ -10,6 +10,217 @@
   regras de impressão A4. Publicação depende de gates locais, PR, CI completa e
   coordenador protegido.
 
+## 2026-10-20: marcador vazio de comparecimento no Salesforce
+
+A primeira coleta real do contrato v3 confirmou 1.281 agendamentos e bloqueou
+a publicação porque 774 registros ainda sem comparecimento usam o marcador
+visual `-` no relatório. Metadados, IDs de coluna, contagem e demais tipos
+estavam íntegros. O coletor passa a converter somente esse marcador de data
+opcional em string vazia antes da validação; valores preenchidos e inválidos
+continuam falhando fechados. O teste focal cobre a resposta real observada.
+
+## 2026-10-20: previsão por período, segmento e gerente
+
+Demanda: congelar a identificação dos corretores na rolagem, compactar os
+controles dos empreendimentos, aplicar destaque cruzado na célula ativa, manter
+números de linha em uma linha, carregar previsões pelo calendário e separar
+Geral, House e Imob com os gerentes informados.
+
+O contrato deixou de depender do singleton para novas gravações. A migration
+`20261020122216_forecast_period_scopes.sql` cria armazenamento aditivo por
+sexta-feira, segmento e gerente, com RLS forçada, ausência de grants diretos,
+RPCs guardadas, revisão CAS por recorte e auditoria somente de metadados. O
+singleton anterior permanece intacto e serve apenas como possível origem do
+template limpo. Geral retorna cada documento integralmente em blocos somente
+leitura, evitando perda quando gerentes customizam estruturas diferentes.
+
+A interface informa sexta a domingo no título, seleciona dias validados no
+calendário sem fechar o diálogo, protege trocas com rascunho, apresenta os
+gerentes em ordem alfabética e mantém dez corretores no rascunho inicial. A
+primeira coluna fica fixa do cabeçalho ao Total geral; foco e hover destacam
+corretor, Previsão/Realizado e empreendimento relacionados.
+
+Validação local: lint, typecheck, build, catálogo, recursos, formatação e diff
+passaram; Vitest aprovou 3.965 casos e ignorou 105; 110 testes focados e 12
+cenários de navegador passaram. A etapa Node aprovou 1.595 casos e manteve três
+falhas conhecidas de permissões/caminhos POSIX do Meta Ads no Windows. O gate
+release reproduziu a fixture privada do Meta Ads e um timeout de subprocesso
+Qlik no Windows; nenhuma área falha foi alterada. A CI Linux no SHA exato é o
+gate conclusivo, incluindo pgTAP e restauração isolada. Aplicação remota,
+integração e publicação ainda não foram executadas neste registro.
+
+## 2026-10-20: proveniência visual de Agendamentos
+
+A referência promovida a partir do diagnóstico da CI preservou a marca de
+checkout alterado da execução de verificação. O workflow de candidato visual
+protegido agora também é acionado por mudanças no painel de Agendamentos, para
+gerar o mesmo conjunto em checkout limpo antes da promoção e da CI final.
+O run `39378381324` aprovou 242 referências com checkout limpo, baseline
+versionada e imutável durante a captura; o contrato local aprovou 15 testes.
+Após integrar `main` em `7bcb82d0`, o run `39382588927` regenerou o manifesto
+combinado de Metas e Agendamentos; 27 testes de catálogo/paridade passaram.
+
+## 2026-10-20: indicadores, rankings e tabela de Agendamentos
+
+Demanda: reorganizar a página de Agendamentos com seis indicadores compactos,
+diário em largura total, dois grupos de gráficos e uma tabela detalhada. O
+velocímetro compara os agendamentos do mês selecionado com o total vigente de
+corretores; a média informa agendamentos por dia coberto. Hoje e ontem usam data
+de criação. Previsto e realizado usam, respectivamente, horário programado e
+visita realizada para a data de referência.
+
+O describe vigente dos relatórios `00OU600000ELaA6MAL` e
+`00OTT000009j0l32AA` confirmou os campos e tipos pedidos, sem extrair linhas.
+O coletor resolve e valida os rótulos a cada ciclo. O contrato v3 acrescenta a
+população de corretores e detalhes operacionais por visão; v1/v2 continuam
+legíveis. A RPC de etapa remove dados de outras etapas e apaga nome/ranking da
+conta quando falta `crm.ranking.view`; tabelas continuam sem SELECT direto.
+
+Testes focais de análise, interface, projeção Salesforce e release passaram.
+O preview sintético aprovou 12 combinações de tema/largura, sem overflow
+horizontal, colisão de rótulos, erro de navegador ou violação Axe. A validação
+pgTAP local ficou indisponível porque este host não possui Docker/Postgres local;
+a restauração isolada da CI permanece obrigatória antes de qualquer migration,
+integração ou publicação.
+
+Autorização específica confirmada em 20/10/2026. O Supabase MCP identificou o
+projeto produtivo `hnncxuerlcsaahdxoswb`, registrou hashes das definições v2 e
+aplicou atomicamente `appointments_operations_v3`. A migration aparece no
+histórico remoto como `20261020111524`; a verificação confirmou suporte v3,
+funções v2 preservadas, ingestão executável somente por `service_role` e
+ausência de leitura direta por `anon` ou `authenticated`. Os advisors não
+apontaram regressão ligada ao delta.
+
+## 2026-10-20: publicação do dashboard House e Imob
+
+- PR #273 integrado no merge `08d050f90c877009cd55140322b7c822e578d672`.
+  A CI de `main` `39400193535` aprovou `validate`, `isolated-restore`,
+  `release-gates` e `promotable-image` no mesmo SHA.
+- Artefato `12253648907`: `image.tar.gz` SHA-256
+  `69440fb2c75469f7d6d8a54698cfe23ec628addc5f61c0b63dde1c57cf08e127`.
+  A prova OCI na VPS validou os dois perfis com image ID containerd
+  `sha256:2dd7eee90362d5c4a64e283777e151c66a06ed6f56cba235f498cf3932901aa0`.
+- O coordenador publicou às `2026-10-20T10:06:46.708Z`, deployment
+  `8f390bda-5020-48d4-8760-c848bac309eb`, sem pendência. Health local e público
+  retornaram a versão exata; acesso anônimo a `/app` retornou `307` para login.
+- Smoke autenticado no Chrome confirmou House ativo, Imob alternável, 32
+  corretores, metas House 4.576/768/384/256/64/32, proporcional diário e
+  `Pastas aprovadas` numérica. Imob manteve metas indisponíveis até configuração.
+
+## 2026-10-20: contrato visual do dashboard após integração
+
+- A CI do PR #273 confirmou 154 rotas responsivas, 88 temas, 242 auditorias de
+  acessibilidade e 242 comparações integrais de baseline sem divergências.
+- O único bloqueio restante era a comparação estrutural histórica de `/app`:
+  distância de cor `23,88` contra limite global `23`, após os controles
+  House/Imob e a compactação solicitada.
+- Foi definido limite local `24` apenas para `/app`; o limite de bordas `52`,
+  as demais rotas e a comparação pixel a pixel completa permanecem inalterados.
+
+## 2026-10-20: Dashboard House e Imob
+
+Demanda: simplificar o filtro de canal da página `/app`, compactar o dashboard,
+usar o Status do relatório de Pastas para `Pastas aprovadas` e recalcular as
+metas House com a quantidade oficial de corretores ativos. A seleção agora é
+exclusiva entre House (`DIRECIONAL VENDAS SPC`) e Imob (`SPC - CANAL IMOB PJ`),
+com padrão compatível com o perfil autorizado. Os títulos visuais `Filtros` e
+`Funis comerciais` foram retirados e o espaçamento dos blocos foi reduzido.
+
+O sexto estágio do funil é calculado a partir da contagem aprovada já presente
+nos fatos do relatório de Pastas e foi propagado para período atual, histórico
+e comparativos. As metas House usam o cadastro oficial de corretores ativos do
+read model de ranking, alimentado pelo relatório Salesforce de corretores, e os
+valores por corretor 143 oportunidades, 24 agendamentos, 12 visitas, 8 pastas,
+2 pastas aprovadas e 1 venda. A meta esperada até hoje é proporcional ao dia do
+mês civil. Metas Imob ficam explicitamente indisponíveis até sua configuração.
+
+Validação local: lint e typecheck aprovados; build Next.js de 57 rotas aprovado;
+Vitest aprovou 3.958 testes e manteve 99 skips condicionais. A etapa Node aprovou
+1.595 testes, ignorou 19 e reproduziu três falhas conhecidas de Meta Ads ligadas
+a permissões/caminhos POSIX no host Windows, fora dos arquivos alterados. A CI
+Linux do SHA exato continua obrigatória antes de integrar e publicar. Nenhum
+workflow n8n, migration ou dado remoto foi modificado.
+
+O primeiro `release-gates` do PR #273 encontrou o contrato visual antigo que
+ainda exigia `Pastas aprovadas` indisponível. A fixture foi atualizada para House,
+seis etapas, três menus e os novos botões; o contraste do botão ativo no tema
+escuro também foi corrigido. A matriz local aprovou 207 verificações em 320,
+390, 768, 1440 e 1920 px, nos temas claro, médio e escuro, sem overflow,
+sobreposição ou violação séria de acessibilidade. Nova CI integral é obrigatória.
+
+A CI seguinte reteve primeiro a formatação do harness e, após sua correção,
+identificou o teste auxiliar de fechamento ainda montando o componente sem
+`authorizedViews` e esperando quatro menus. O teste agora trata House/Imob como
+controle segmentado e conserva a matriz de foco/fechamento nos três menus. As
+quatro combinações desktop/celular e navegação imediata/pendente passaram.
+
+Na CI `39373132967`, `validate`, restauração isolada, banco, build e a matriz
+visual passaram. O E2E autenticado reteve a mesma suposição antiga de quatro
+menus. Ele agora exige Imob ativo no perfil `with_canal_imob`, House inativo e
+três menus; o fechamento usa o título principal, pois `Filtros` não é mais um
+título visual. Nova CI do SHA exato continua obrigatória.
+
+Na CI `39375374003`, o E2E autenticado corrigido aprovou 19 cenários e ignorou
+um condicional. A etapa visual chegou ao verificador de atualização automática,
+que ainda tentava abrir o menu removido de canal e expirou antes de iniciar a
+prova RSC. O verificador agora confirma Imob ativo e House inativo antes e depois
+do refresh, preservando a exigência de uma única atualização, payload completo,
+URL, rolagem e seção aberta. Nova CI integral continua obrigatória.
+
+A CI `39378024224` comprovou o refresh corrigido: uma atualização, payload RSC
+completo, URL, rolagem, seção aberta e canal Imob preservados. `validate` e
+restauração isolada passaram; a matriz autenticada aprovou rotas, temas,
+acessibilidade, teclado e zoom, mas reteve 11 imagens do `/app` cuja altura caiu
+com a compactação solicitada. As capturas do artefato `12246700076` foram
+inspecionadas em desktop, celular e tema escuro. Promovidas somente essas 11,
+com a proveniência da CI; as outras 231 e os limiares foram preservados. Os 15
+testes de integridade passaram e um opt-in permaneceu ignorado. Nova CI integral
+é obrigatória antes de integrar ou publicar.
+
+Antes da CI verify, `main` avançou para `dac2e11a` com a edição das metas do
+Canal Parcerias. A integração preservou os dois códigos, os dois registros e os
+dois grupos disjuntos de 11 imagens. O manifesto combinado mantém 242 entradas;
+30 testes focados passaram, um opt-in foi ignorado e o typecheck passou. A CI do
+novo merge local é obrigatória e substitui qualquer resultado do SHA anterior.
+
+## 2026-10-20: edição ativa das metas do Canal Parcerias
+
+Demanda limitada a `/app/configuracoes/metas/parcerias`: disponibilizar a mesma
+edição e o mesmo salvamento ativo já usados por Direcional Vendas. A rota deixou
+de condicionar a edição ao rascunho de política comercial e passou a conferir
+`crm.settings.manage`, alinhada à RPC `upsert_crm_funnel_goals`. O formulário
+agora carrega a meta ativa, mantém os campos específicos de Parcerias e salva na
+própria rota com proteção contra mudança do mês de referência.
+
+Testes focados aprovaram 32 casos de autorização, perfil inválido, mês obsoleto
+e os dois perfis na mesma RPC. `lint`, `typecheck`, `build` e `format:check`
+passaram; o build de produção aprovou 57 rotas. A suíte Vitest aprovou 3.954
+casos e ignorou 102. A suíte operacional Node aprovou 1.595 casos, ignorou 19 e
+manteve três falhas locais já conhecidas na emulação POSIX de arquivos privados
+do Meta Ads no Windows; a etapa `test:release` reproduziu a mesma limitação de
+fixture, portanto a CI Linux do SHA candidato permanece como gate obrigatório.
+Preview sintético com CSS compilado do Next aprovou 30 telas, cinco larguras e
+três temas para os dois canais, incluindo edição dos campos, ausência de
+overflow e zero violações Axe. Nenhuma migration, dado remoto, outra página ou
+workflow n8n foi alterado.
+
+A primeira CI do PR #272 aprovou `validate` e `isolated-restore`, mas o gate
+visual detectou corretamente a redução esperada da altura da página em 11
+capturas de Parcerias, causada pela remoção do bloco de rascunho inativo. O
+artefato sanitizado `12241794237` foi inspecionado e somente essas 11 referências
+da rota foram atualizadas; nenhuma baseline de outra página foi aceita.
+
+A CI final do PR `39373968044` passou integralmente e o merge gerou
+`dac2e11a6332cc90472118b7b0bb96c29da01122`. A CI de `main` `39378619404`
+aprovou `validate`, `isolated-restore`, `release-gates` e `promotable-image`.
+O artefato imutável `12243944777` teve ZIP, imagem, revisão, índice/config OCI,
+11 camadas e `RootFS` conferidos; `image:prove` aprovou os dois perfis. A
+publicação protegida terminou em `2026-10-20T06:44:59.559Z`, deployment
+`c9e57458-9b9d-4023-911d-c4b2ecd6add7`. O pós-deploy confirmou ledger sem
+pendência, container healthy, health público `200/ok` na versão `dac2e11a` e
+rota anônima 307 para `/login`. Nenhuma migration ou mutação de dados integrou
+esta entrega; este registro documental não exige novo reinício da aplicação.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o
@@ -7987,3 +8198,32 @@ balanced ficou vazia. Nenhuma referência vazia foi adotada. O estilo fixo foi
 limitado ao componente Chart; o estado sem análise recupera o layout compacto,
 enquanto os sete gráficos preenchidos preservam tamanho e rolagem uniformes.
 Nova CI integral é obrigatória antes da integração e publicação.
+
+### Publicação do ajuste visual de Agendamentos
+
+O PR270 foi integrado em `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+A CI de PR `39353605323` e a CI de main `39357425838` aprovaram validate,
+isolated-restore e release-gates; main aprovou também promotable-image. A matriz
+autenticada voltou a aprovar todas as referências sem adotar a captura vazia.
+
+O artefato `12234994906` teve ZIP SHA-256
+`a3a86cfd26942b039e81e59b51db283c486e97f18f1dc9f5fbc39fa2192fb036`
+e `image.tar.gz` SHA-256
+`a9b15a04c61660a050ae78f08cf0822263d17d4b594aafcfbd4d80ccd9281bc8`.
+Revision e config OCI apontam ao SHA exato. No destino containerd, o manifesto é
+`sha256:80422596d9ad160472fe0bae75662f68003a5c566632dab40cf608dc97096273`
+e a config é
+`sha256:5a6549c451697336ae9ff00366a5cba73334daf2cd975e4d8c11faca76fb440f`.
+Foram conferidos 13 descritores, 11 camadas, 11 diff IDs, plataforma linux/amd64,
+rootfs e os dois perfis de runtime, sem rebuild ou retag.
+
+Produção antes da troca: deployment
+`561b4861-7f6a-477c-95d9-6f46427921d8`, SHA `60ef87c7`, publicado em
+`2026-10-19T20:51:02.314Z`, sem pendência e health correspondente. O coordenador
+`release:production` publicou o candidato em `2026-10-20T02:57:56.421Z`
+(23:57:56 de 19/10 em America/Sao_Paulo), deployment
+`979fb2df-a353-4df4-9c8b-b28caf2a9cf3`. Verificação às02:58:08Z: ledger sem
+pendência, health HTTP200/ok na versão exata e `/app/etapas/agendamentos`
+anônimo retornou307 para `/login`. Nenhuma migration, dado, integração ou n8n
+foi alterado. A evidência preenchida permanece a matriz sintética; a produção
+não foi aberta com sessão privada nesta tarefa.

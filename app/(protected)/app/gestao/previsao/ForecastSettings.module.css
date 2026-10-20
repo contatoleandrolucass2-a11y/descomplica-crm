@@ -32,9 +32,33 @@
 }
 .header h1 {
   margin: 0;
-  font-size: 28px;
+  font-size: clamp(20px, 2vw, 28px);
   font-weight: 650;
   line-height: 1.25;
+}
+.contextSelector {
+  display: grid;
+  gap: 8px;
+  padding: 12px 0;
+}
+.segmentTabs,
+.managerTabs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.segmentTabs button,
+.managerTabs button {
+  min-height: 34px;
+  padding: 5px 13px;
+}
+.page .selectorActive,
+.page .selectorActive:hover:enabled {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 18%, var(--analytics-surface));
+  box-shadow: inset 0 -2px 0 var(--analytics-cyan-strong);
+  font-weight: 750;
 }
 .page button {
   display: inline-flex;
@@ -99,6 +123,22 @@
   border-radius: 8px;
   background: var(--analytics-surface);
 }
+.tableScroll[hidden] {
+  display: none;
+}
+.generalSections {
+  display: grid;
+  gap: 16px;
+}
+.generalSection {
+  min-width: 0;
+}
+.generalSection h2 {
+  margin: 0 0 6px;
+  color: var(--analytics-ink);
+  font-size: 15px;
+  font-weight: 750;
+}
 .table {
   width: max-content;
   min-width: 100%;
@@ -124,9 +164,6 @@
 .table tfoot tr > * {
   border-bottom: 0;
 }
-.table tbody tr:focus-within {
-  background: var(--analytics-surface-muted);
-}
 .brokerColumn {
   width: 180px;
 }
@@ -142,6 +179,21 @@
 .brokerHeading {
   padding: 10px !important;
   text-align: right !important;
+}
+.brokerHeading,
+.brokerCell,
+.footerLabel {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  background: var(--analytics-surface-muted);
+  box-shadow: 1px 0 0 var(--analytics-line);
+}
+.brokerHeading {
+  z-index: 6;
+}
+.brokerCell {
+  background: var(--analytics-surface);
 }
 .totalHeading {
   padding: 8px 3px !important;
@@ -168,9 +220,15 @@
   min-width: 0;
 }
 .rowNumber {
+  display: block;
+  flex: 0 0 22px;
+  min-width: 22px;
   color: var(--analytics-muted);
   font-size: 10px;
-  padding-left: 5px;
+  padding-left: 4px;
+  overflow-wrap: normal;
+  white-space: nowrap;
+  font-variant-numeric: tabular-nums;
 }
 .brokerContent button {
   flex: 0 0 22px;
@@ -182,21 +240,29 @@
   background: transparent;
 }
 .columnHeading {
+  position: relative;
   width: 168px;
   min-width: 168px;
-  padding: 4px 2px;
+  padding: 0;
 }
 .groupActions {
+  position: absolute;
+  top: 0;
+  left: 1px;
+  z-index: 2;
   display: grid;
-  grid-template-columns: 12px repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(4, 11px);
   align-items: center;
+  gap: 0;
 }
 .groupActions button {
-  min-width: 0;
-  padding: 4px 0;
-  min-height: 36px;
+  width: 11px;
+  min-width: 11px;
+  height: 11px;
+  min-height: 11px;
+  padding: 0;
   border: 0;
-  border-radius: 3px;
+  border-radius: 2px;
   background: transparent;
 }
 .groupActions svg {
@@ -206,7 +272,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 36px;
+  width: 11px;
+  height: 11px;
   cursor: grab;
   color: var(--analytics-muted);
 }
@@ -254,6 +321,35 @@
   font-size: 13px;
   font-weight: 400;
 }
+.readonlyBroker {
+  display: block;
+  min-width: 0;
+  flex: 1;
+  padding: 0 6px;
+  overflow: hidden;
+  text-align: right;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.readonlyPlan {
+  display: block;
+  min-width: 280px;
+  max-width: 560px;
+  min-height: 22px;
+  padding: 1px 8px;
+  overflow-wrap: anywhere;
+  text-align: left;
+  white-space: pre-wrap;
+}
+.sectionGroupTitle {
+  display: grid;
+  min-height: 50px;
+  padding: 6px 8px 2px;
+  place-items: center;
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: pre-line;
+}
 .page .main .table [readonly] {
   opacity: 1;
   -webkit-text-fill-color: currentColor;
@@ -266,6 +362,23 @@
 .table :is(td, th):focus-within {
   outline: 2px solid var(--analytics-cyan-strong);
   outline-offset: -2px;
+}
+.table .activeGroup,
+.table .activeMetric,
+.table .activeBroker,
+.table .activeCell {
+  background: color-mix(
+    in srgb,
+    var(--analytics-cyan-strong) 15%,
+    var(--analytics-surface)
+  ) !important;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--analytics-cyan-strong) 58%, transparent);
+}
+.table .activeGroup textarea,
+.table .activeMetric,
+.table .activeBroker input {
+  color: var(--analytics-ink);
+  font-weight: 700;
 }
 .table :is(thead th, tbody th, tbody td, tfoot th, tfoot td) {
   transition: background-color 140ms ease;
@@ -281,7 +394,8 @@
   line-height: 22px;
   font-variant-numeric: tabular-nums;
   font-size: clamp(11px, 0.95vw, 14px);
-  overflow-wrap: anywhere;
+  overflow-wrap: normal;
+  white-space: nowrap;
 }
 .totalCell {
   font-weight: 700;
@@ -474,6 +588,17 @@
   background: color-mix(in srgb, var(--analytics-cyan-strong) 16%, var(--analytics-surface));
   color: var(--analytics-ink);
   font-weight: 700;
+}
+.page .calendarDay {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+}
+.page .calendarDayValidated:hover:enabled,
+.calendarDaySelected {
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 30%, var(--analytics-surface));
+  box-shadow: inset 0 0 0 2px var(--analytics-cyan-strong);
 }
 .calendarDayCurrent {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--analytics-cyan-strong) 42%, transparent);

@@ -9,7 +9,77 @@
 - Usa os quatro blocos oficiais de 40%, 30%, 20% e 10% no fluxo escalonado,
   sem alterar o motor financeiro.
 
+## 2026-10-20 - Data opcional de comparecimento no coletor
+
+- Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da
+  validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
+  para valores inválidos.
+
+## 2026-10-20 - Previsão por final de semana e gerente
+
+- Separa previsões de sexta a domingo por período, House/Imob e gerente, com
+  revisão independente e seleção pelo calendário.
+- Adiciona Geral como leitura consolidada em blocos completos por gerente,
+  preservando estruturas customizadas sem truncar colunas ou linhas.
+- Mantém dez corretores no rascunho inicial; recortes novos reutilizam somente
+  títulos e o primeiro corretor do último template, com valores limpos.
+- Fixa a coluna Nome do corretor e Total geral na rolagem, impede quebra de
+  números de linha e destaca corretor, métrica e empreendimento da célula ativa.
+- Compacta os controles dos empreendimentos junto às bordas e inclui seletores
+  de Geral, House, Imob e seus gerentes.
+- Prepara armazenamento aditivo com RLS, RPCs por período, CAS e auditoria sem
+  conteúdo. A migration permanece pendente de CI e autorização remota específica.
+
+## 2026-10-20 - Candidato visual protegido para Agendamentos
+
+- Inclui o painel de Agendamentos no workflow isolado que produz referências
+  visuais autenticadas com proveniência limpa antes da promoção.
+
+## 2026-10-20 - Indicadores e detalhamento de Agendamentos
+
+- Adiciona seis indicadores em uma linha, incluindo velocímetro da meta mensal
+  calculada pela quantidade vigente de corretores cadastrados.
+- Organiza o diário em largura total; abaixo, exibe previsto versus realizado,
+  semana e mês; em seguida, os rankings regional, gerente, responsável e conta.
+- Acrescenta a tabela filtrada com data, horário, comparecimento, realização,
+  responsáveis e conta, com cabeçalho fixo e rolagem vertical.
+- Valida em cada coleta os campos vigentes dos relatórios Salesforce e mantém
+  snapshots analíticos v1/v2 legíveis durante a adoção do contrato v3.
+
+## 2026-10-20 - Dashboard House e Imob
+
+- Publicado pelo PR #273 no SHA `08d050f9`, com CI integral, imagem imutável,
+  promoção protegida e health público confirmado na versão exata.
+
+- Substitui a seleção múltipla de canal por dois botões exclusivos: `House`
+  para `DIRECIONAL VENDAS SPC` e `Imob` para `SPC - CANAL IMOB PJ`.
+- Abre o dashboard em House por padrão ou respeita o canal permitido pelo perfil
+  do usuário, mantendo somente uma opção ativa por vez.
+- Remove os títulos visuais redundantes de filtros e funis e reduz espaços entre
+  filtros, grupos, cards e detalhes para ampliar a área útil da página.
+- Passa a exibir `Pastas aprovadas` pela coluna `Status` do relatório de Pastas,
+  inclusive no histórico, sem substituir ausência de dado por zero comercial.
+- Calcula as metas House com a quantidade oficial de corretores ativos e os
+  objetivos por corretor 143/24/12/8/2/1; a meta esperada usa o dia atual sobre
+  o total de dias do mês. Metas Imob permanecem indisponíveis até configuração.
+- Preserva a coleta Salesforce a cada 30 minutos e não altera n8n, banco ou os
+  demais relatórios comerciais.
+
+## 2026-10-20 - Metas editáveis no Canal Parcerias
+
+- Publicado pelo PR #272 no SHA `dac2e11a`, com CI integral, artefato imutável,
+  promoção protegida e health público confirmado na versão exata.
+
+- O Canal Parcerias usa o mesmo fluxo ativo da Direcional Vendas: campos
+  editáveis, botão `Salvar alterações`, validação e confirmação na própria rota.
+- O salvamento reutiliza a RPC versionada existente e preserva o recorte do funil
+  de parcerias, incluindo os campos ocultos fixados em zero pelo servidor.
+- A edição exige `crm.settings.manage`; perfis com acesso apenas de leitura
+  continuam vendo os campos bloqueados. Nenhuma outra página foi alterada.
+
 ## 2026-10-19 - Leitura horizontal dos gráficos de Agendamentos
+
+- Publicado pelo PR #270 no SHA `06a41f76`, com CI integral, artefato imutável, promoção protegida e health na versão exata.
 
 - Mantém valores, dias, semanas e meses na horizontal, distribuindo séries
   extensas em novas linhas dentro do gráfico.

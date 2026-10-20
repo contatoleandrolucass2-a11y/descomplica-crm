@@ -84,6 +84,16 @@ describe("saveFunnelGoalsAction", () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
+  it("keeps the stale-month redirect inside the partnership page", async () => {
+    const formData = validGoals();
+    formData.set("effectiveMonth", "2026-09-01");
+
+    await expect(saveFunnelGoalsAction("partnerships", formData)).rejects.toThrow(
+      "REDIRECT:/app/configuracoes/metas/parcerias?error=stale",
+    );
+    expect(mocks.rpc).not.toHaveBeenCalled();
+  });
+
   it("rejects invalid values before calling the database", async () => {
     const formData = validGoals();
     formData.set("sales", "");
@@ -94,8 +104,25 @@ describe("saveFunnelGoalsAction", () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
 
-  it("does not widen the action to another goals page", async () => {
+  it("saves partnership goals through the same authorized RPC", async () => {
     await expect(saveFunnelGoalsAction("partnerships", validGoals())).rejects.toThrow(
+      "REDIRECT:/app/configuracoes/metas/parcerias?saved=active",
+    );
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith(
+      "upsert_crm_funnel_goals",
+      expect.objectContaining({
+        p_profile_key: "partnerships",
+        p_effective_month: getEffectiveMonth(),
+        p_sales: 12,
+      }),
+    );
+    expect(mocks.revalidatePath).toHaveBeenCalledExactlyOnceWith(
+      "/app/configuracoes/metas/parcerias",
+    );
+  });
+
+  it("rejects an unknown goals profile", async () => {
+    await expect(saveFunnelGoalsAction("unknown", validGoals())).rejects.toThrow(
       "REDIRECT:/app/configuracoes/metas?error=validation",
     );
     expect(mocks.rpc).not.toHaveBeenCalled();

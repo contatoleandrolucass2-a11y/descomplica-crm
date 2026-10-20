@@ -4,11 +4,13 @@ import { getAuthorizedDashboardViews } from "@/lib/authorization/dashboard-views
 import { enforcePermission } from "@/lib/authorization/enforce";
 import { isDashboardView, type DashboardViewKey } from "@/lib/crm/dashboard/catalog";
 import { loadDashboardReadModel } from "@/lib/crm/dashboard/data";
+import { loadDashboardTeam } from "@/lib/crm/dashboard/team";
 import {
   analyzeDashboard,
   applyDashboardAnalysis,
   parseDashboardFilters,
 } from "@/lib/crm/dashboard/analysis";
+import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
 import { getSalesforceRefreshConfiguration } from "@/lib/crm/salesforce/config";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
@@ -32,6 +34,10 @@ export default async function AppHomePage({
     ? query.view
     : authorizedViews[0]!;
   const filters = parseDashboardFilters(query);
+  const profileChannel =
+    selectedView === "with_canal_imob" ? DASHBOARD_CHANNELS[0] : DASHBOARD_CHANNELS[1];
+  filters.channel =
+    selectedView === "all" && filters.channel.length === 1 ? filters.channel : [profileChannel];
   const canViewRanking = authorization.permissions.includes("crm.ranking.view");
   const pages = await getAuthorizedNavigation(authorization);
   const result = await loadDashboardReadModel([selectedView], {
@@ -47,6 +53,18 @@ export default async function AppHomePage({
   }).format(new Date());
   const slice = sourceDashboard?.analysis?.[selectedView];
   const analysis = slice ? analyzeDashboard(slice, filters, today) : null;
+  const teamResult =
+    sourceDashboard && filters.channel[0] === DASHBOARD_CHANNELS[1]
+      ? await loadDashboardTeam(sourceDashboard, authorization, selectedView)
+      : { status: "unavailable" as const, reason: "Equipe indisponível neste canal." };
+  const goalBrokerCount =
+    teamResult.status === "ready" && filters.owner.length === 0 && filters.company.length === 0
+      ? filters.manager.length === 0
+        ? teamResult.team.brokers
+        : teamResult.team.managers
+            .filter((manager) => filters.manager.includes(manager.name))
+            .reduce((sum, manager) => sum + manager.total, 0)
+      : null;
   const dashboard =
     sourceDashboard && analysis
       ? applyDashboardAnalysis(sourceDashboard, analysis, selectedView)
@@ -64,6 +82,7 @@ export default async function AppHomePage({
         selectedView={selectedView}
         selectedPeriod="month"
         analysis={analysis}
+        goalBrokerCount={goalBrokerCount}
         filters={filters}
         today={today}
         authorizedViews={authorizedViews}
@@ -71,8 +90,8 @@ export default async function AppHomePage({
         authorizedStagePaths={pages.map((page) => page.path)}
         canViewRanking={canViewRanking}
         canRefresh={canRefresh}
-        team={null}
-        teamUnavailableReason="Aguardando a coleta detalhada da equipe."
+        team={teamResult.status === "ready" ? teamResult.team : null}
+        teamUnavailableReason={teamResult.status === "unavailable" ? teamResult.reason : undefined}
       />
     </main>
   );

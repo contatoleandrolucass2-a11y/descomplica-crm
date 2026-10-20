@@ -165,7 +165,7 @@ describe("complete visual composition on the scoped v3 read model", () => {
       expect(ranking).not.toMatch(/R\$|mappingSha256|batchId|requestId|schemaVersion/);
     }
     expect(funnel).toContain("Metas do funil de parcerias");
-    expect(funnel).toContain("Base legada: somente leitura · Rascunho atual: editável");
+    expect(funnel).toContain("Configuração atual: editável · Salve para aplicar as alterações");
     expect(points).toContain("Metas de pontos");
     expect(points).toContain("Base legada: somente leitura · Rascunho atual: editável");
     expect(draft).toContain("política ativa, ativação, permissões");

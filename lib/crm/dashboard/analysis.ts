@@ -5,8 +5,13 @@ import {
   type DashboardAnalysisSlice,
 } from "./analysis-contract";
 import type { DashboardMetric, DashboardReadModel } from "./data";
-import { DASHBOARD_STAGES, type DashboardStageKey } from "./catalog";
-import { calculateConversion, type FunnelReading } from "./presentation";
+import type { DashboardStageKey } from "./catalog";
+import {
+  calculateConversion,
+  DASHBOARD_FUNNEL_STAGES,
+  type DashboardFunnelKey,
+  type DashboardFunnelReading,
+} from "./presentation";
 
 export type DashboardFunnelPeriodKey =
   | "month"
@@ -14,7 +19,7 @@ export type DashboardFunnelPeriodKey =
   | "current-week"
   | "yesterday"
   | "today";
-export type DashboardPeriodReadings = Record<DashboardFunnelPeriodKey, FunnelReading[]>;
+export type DashboardPeriodReadings = Record<DashboardFunnelPeriodKey, DashboardFunnelReading[]>;
 
 export const DASHBOARD_FILTER_KEYS = ["channel", "manager", "owner", "company"] as const;
 export type DashboardFilterKey = (typeof DASHBOARD_FILTER_KEYS)[number];
@@ -28,7 +33,7 @@ export const emptyDashboardFilters = (): DashboardFilters => ({
 });
 export interface DashboardHistoryMonth {
   month: string;
-  readings: Array<{ key: DashboardStageKey; value: number | null }>;
+  readings: Array<{ key: DashboardFunnelKey; value: number | null }>;
 }
 
 export function parseDashboardFilters(
@@ -114,14 +119,25 @@ export function analyzeDashboard(
       : facts
           .filter((fact) => fact[0] === stage && fact[1] >= start && fact[1] <= end)
           .reduce((sum, fact) => sum + fact[7], 0);
+  const approvedCount = (start: string, end: string): number | null =>
+    start < coverageStart || end > referenceDate
+      ? null
+      : facts
+          .filter((fact) => fact[0] === 3 && fact[1] >= start && fact[1] <= end)
+          .reduce((sum, fact) => sum + fact[9], 0);
+  const valuesFor = (start: string, end: string) =>
+    Object.fromEntries([
+      ...ANALYSIS_STAGE_KEYS.map((key, stage) => [key, count(stage, start, end)] as const),
+      ["approved-folders", approvedCount(start, end)] as const,
+    ]) as Record<DashboardFunnelKey, number | null>;
   const history = (months: string[]): DashboardHistoryMonth[] =>
-    months.map((start) => ({
-      month: start.slice(0, 7),
-      readings: ANALYSIS_STAGE_KEYS.map((key, stage) => ({
-        key,
-        value: count(stage, start, monthEnd(start)),
-      })),
-    }));
+    months.map((start) => {
+      const values = valuesFor(start, monthEnd(start));
+      return {
+        month: start.slice(0, 7),
+        readings: DASHBOARD_FUNNEL_STAGES.map(({ key }) => ({ key, value: values[key] })),
+      };
+    });
   const metrics = Object.fromEntries(
     ANALYSIS_STAGE_KEYS.map((key, stage) => [
       key,
@@ -180,18 +196,31 @@ export function analyzeDashboard(
   }
   // These funnels are month-scoped; legacy metrics retain their original windows.
   const currentMonthStart = monthStart(referenceDate);
-  const periodReadingsFor = (start: string, end: string, fresh: boolean): FunnelReading[] => {
+  const periodReadingsFor = (
+    start: string,
+    end: string,
+    fresh: boolean,
+  ): DashboardFunnelReading[] => {
     const clippedStart = start < currentMonthStart ? currentMonthStart : start;
-    const values = ANALYSIS_STAGE_KEYS.map((_, stage) => {
-      if (!sameMonth || !fresh || clippedStart < coverageStart) return null;
-      return end < clippedStart ? 0 : count(stage, clippedStart, end);
-    });
-    return ANALYSIS_STAGE_KEYS.map((key, index) => {
-      const value = values[index]!;
-      const previous = values[index - 1] ?? null;
+    const values = Object.fromEntries(
+      DASHBOARD_FUNNEL_STAGES.map(({ key }) => [
+        key,
+        !sameMonth || !fresh || clippedStart < coverageStart
+          ? null
+          : end < clippedStart
+            ? 0
+            : key === "approved-folders"
+              ? approvedCount(clippedStart, end)
+              : count(ANALYSIS_STAGE_KEYS.indexOf(key), clippedStart, end),
+      ]),
+    ) as Record<DashboardFunnelKey, number | null>;
+    return DASHBOARD_FUNNEL_STAGES.map(({ key, label }, index) => {
+      const value = values[key];
+      const previousKey = DASHBOARD_FUNNEL_STAGES[index - 1]?.key;
+      const previous = previousKey ? values[previousKey] : null;
       return {
         key,
-        label: DASHBOARD_STAGES[key].label,
+        label,
         value,
         conversion:
           value === null || previous === null ? null : calculateConversion(value, previous),

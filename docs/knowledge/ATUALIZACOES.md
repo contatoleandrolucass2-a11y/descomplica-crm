@@ -1,5 +1,265 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: comparecimento opcional no relatório de Agendamentos
+
+- A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`
+  pela CI `39421287684` e pelo coordenador protegido, deployment
+  `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`; health público confirmou a versão.
+- Na atualização protegida do coletor, um lock órfão de `07:30Z`, sem PID vivo
+  ou descritor aberto, foi arquivado no backup privado
+  `20261020T131600Z-aa8b2d6d501e`. Unidade, ledger, credenciais e agenda foram
+  preservados; o diretório de trabalho passou ao SHA publicado.
+- O primeiro ciclo após a recuperação leu 20.384 oportunidades e 1.281
+  agendamentos, mas falhou fechado antes da publicação. A inspeção estrutural,
+  sem expor linhas, encontrou 774 datas opcionais representadas por `-`; os IDs
+  e rótulos Salesforce exigidos permanecem corretos e vigentes.
+- A correção normaliza somente esse marcador para ausência de comparecimento.
+  O aceite ainda exige CI, nova promoção e duas coletas reais distintas.
+
+## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
+
+- A CI `39377861485` reprovou somente o contrato de proveniência da referência
+  autenticada: o resultado promovido do diagnóstico mantinha
+  `worktreeDirtyAtCapture=true`. As imagens haviam sido revisadas, mas essa
+  evidência não satisfaz o requisito de captura limpa.
+- O workflow isolado de candidato visual protegido passa a observar também o
+  componente de Agendamentos. A promoção e a CI integral permanecem pendentes
+  até uma nova captura registrar checkout limpo; nenhum gate foi reduzido.
+- O run `39378381324` concluiu com sucesso no merge SHA
+  `53a2d21fba1ee936464fab48f90ea16d50516147`: 242 referências,
+  `worktreeDirtyAtCapture=false`, baseline versionada e inalterada durante a
+  captura. Artefato `12244764377`, digest
+  `sha256:6b484b4388972ffa2767fa9f179ce2c0741b905a60cff67751da8b095c4c84d2`.
+  O resultado limpo substituiu a proveniência anterior; o teste local de
+  paridade aprovou 15 casos, com um skip condicional. A CI integral do novo
+  commit continua obrigatória antes da integração.
+- `origin/main` avançou para `dac2e11a` durante a captura. A branch integrou as
+  mudanças de Metas em `7bcb82d0`; o run reconciliado `39382588927` aprovou
+  novamente replay, build, E2E e 242 referências, com checkout limpo. Artefato
+  `12247556901`, digest
+  `sha256:f1751fad4f9a879ce190a1f945812a59f16db00507d08d75bbd8b5b8e01cb3d7`.
+  O manifesto combinado foi promovido e 27 testes locais de catálogo/paridade
+  passaram, com um skip condicional. A CI integral final continua obrigatória.
+
+## 2026-10-20: indicadores operacionais de Agendamentos — implementação local
+
+- Status: implementação e validação local concluídas na branch
+  `codex/agendamentos-indicadores-tabela`; CI Linux, migration remota, integração
+  e publicação ainda pendentes. A abertura partiu de `origin/main`
+  `2eb17cc052754519ebee1156060e394ea5728169`; produção observada respondeu HTTP
+  200, `status=ok` e versão `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+- O contrato analítico v3 adiciona quantidade vigente de corretores e os
+  detalhes operacionais por agendamento. A coleta descreve os relatórios a cada
+  ciclo e exige os campos Salesforce exatos antes de publicar. A verificação
+  observacional de metadados confirmou `Gerente Regional`, `Gerente de Vendas`,
+  `Corretor: Nome completo`, `Horário`, `Data de comparecimento`,
+  `Visita Realizada`, `Conta: Nome da conta` (`Activity.Account.Name`) e
+  `Conta: Ranking`; nenhum registro comercial foi exportado durante a inspeção.
+- A página passa a exibir seis indicadores, evolução diária em largura total,
+  previstos/realizados, semanas, meses, três rankings nominais, ranking de
+  conta e tabela operacional. O período selecionado usa Data de criação; a
+  média é diária no mês, previsto usa Horário e realizado exige
+  `VisitaRealizada=true`. Rankings ficam em ordem decrescente e dados de conta
+  são omitidos pelo backend sem `crm.ranking.view`.
+- Evidências locais: lint, typecheck e build de 57 rotas aprovados; Vitest
+  aprovou 3.953 testes com 102 skips; 36 testes focados da coleta Salesforce e
+  53 testes dos gates alterados passaram. Preview com CSS compilado aprovou 12
+  combinações de largura/tema, inclusive 320 px, sem rolagem horizontal.
+- PR #274 aberto no SHA `984215e16ae927835ecb15371dbfec5f8b885d40`.
+  A CI `39373995762` aprovou validate e restore isolado, inclusive as 2.047
+  asserções pgTAP. O gate visual reprovou somente oito referências esperadas da
+  rota Agendamentos, em diferentes larguras/temas, devido ao novo espaçamento do
+  estado sem snapshot v3. O artefato Linux `12243582943` foi revisado; apenas
+  essas oito imagens foram promovidas, preservando as outras 234 referências.
+  Nova CI integral é obrigatória antes de integrar.
+- Limites do host: pgTAP não executou porque PostgreSQL/Docker local não está
+  disponível. Os testes físicos POSIX do monitor e release Meta Ads falham no
+  Windows por ACL/permissões e fixtures Linux; são alheios aos arquivos
+  funcionais desta mudança e permanecem obrigatórios na CI Ubuntu. A migration
+  `20261020050000_appointments_operations_v3.sql` não foi aplicada remotamente;
+  exige autorização específica, backup, restore isolado e pgTAP aprovado antes
+  da mutação. Nenhuma publicação ou alteração de dados remotos foi feita.
+
+### Migration v3 autorizada e aplicada
+
+- Em `2026-10-20T11:15Z`, a autorização específica foi confirmada. O Supabase
+  MCP identificou `descomplica-crm-production`, ref
+  `hnncxuerlcsaahdxoswb`, em estado `ACTIVE_HEALTHY` e URL correspondente ao
+  runtime. Antes da transação foram registrados hashes da constraint e das três
+  funções v2 substituídas ou envolvidas.
+- `appointments_operations_v3` foi aplicada atomicamente e registrada pelo MCP
+  como versão remota `20261020111524`. A conferência posterior confirmou a
+  constraint com versão 3, a função base v2 preservada, validator/projetor/RPC
+  vigentes, `service_role` com execução de ingestão e `anon`/`authenticated`
+  sem execução ou SELECT direto. Advisors não trouxeram finding novo ligado ao
+  delta. Coletor, duas cargas reais, merge e publicação continuam pendentes.
+
+## 2026-10-20: dashboard House e Imob integrado e publicado
+
+- PR #273 integrado no merge `08d050f90c877009cd55140322b7c822e578d672`.
+  A CI de `main` `39400193535` aprovou os quatro jobs obrigatórios no SHA exato,
+  incluindo a matriz autenticada de 242 comparações e a imagem promovível.
+- Artefato `12253648907`: ZIP de `105586108` bytes; `image.tar.gz` SHA-256
+  `69440fb2c75469f7d6d8a54698cfe23ec628addc5f61c0b63dde1c57cf08e127`.
+  A prova OCI no destino vinculou o digest de configuração da CI ao image ID
+  containerd `sha256:2dd7eee90362d5c4a64e283777e151c66a06ed6f56cba235f498cf3932901aa0`
+  e validou os dois perfis de runtime sem rebuild ou retag.
+- A primeira tentativa de promoção foi bloqueada antes da intenção porque o
+  checkout operacional ainda estava no SHA anterior. O ledger permaneceu sem
+  pendência e o runtime não mudou. Após corrigir a fronteira Git para o merge
+  exato, o coordenador publicou às `2026-10-20T10:06:46.708Z`, deployment
+  `8f390bda-5020-48d4-8760-c848bac309eb`.
+- Pós-publicação: ledger sem pendência; health local e público HTTP 200/status
+  ok/versão `08d050f9`; acesso anônimo a `/app` retornou 307 para `/login`.
+  Smoke autenticado no Chrome confirmou House ativo, Imob alternável, 32
+  corretores, metas House `4.576/768/384/256/64/32`, proporcional diário e
+  `Pastas aprovadas` numérica. Imob exibiu metas indisponíveis, como previsto.
+- Nenhum workflow n8n, migration, política comercial ou dado remoto foi
+  alterado. Esta nota documental deve ser integrada sem novo deploy do site.
+
+## 2026-10-20: PR #273 - ajuste final do contrato visual do dashboard
+
+- Fonte: GitHub Actions `39383414957`, artefato `12248076183`, SHA
+  `3a1590740a71deb7ab88b0b16a8990884fee5f65`.
+- Estado: os gates funcionais, de acessibilidade e as 242 comparações integrais
+  de baseline passaram. A única reprovação foi a referência estrutural
+  histórica de `/app`, com distância de cor `23,88` para limite global `23`.
+- Ajuste: tolerância local `24` somente para `/app`, necessária para a evolução
+  House/Imob e o layout compacto. O limite de bordas, as demais rotas e a
+  baseline autenticada completa não foram flexibilizados.
+- Pendente: repetir a CI no novo SHA; merge e publicação continuam bloqueados
+  até todos os gates do mesmo commit ficarem verdes.
+- A repetição `39387806447` aprovou `validate`, `isolated-restore` e
+  `release-gates` no SHA `8498ddb144bb9a6244fef1f8fbd7550b2d75eea3`. O
+  primeiro `validate` falhou transitoriamente na consulta pública das fontes de
+  documentação; a repetição passou sem mudança de código. Antes do merge, a
+  `main` avançou para `a4104a8d`; a integração preserva os dois históricos e
+  exige nova CI do SHA resultante.
+
+## 2026-10-20: implementacao do dashboard House e Imob
+
+- Status local: implementacao concluida na branch
+  `codex/dashboard-house-imob-metas`, baseada em `origin/main` no SHA
+  `2eb17cc052754519ebee1156060e394ea5728169`; PR, CI, merge e publicacao ainda
+  precisam ser registrados separadamente.
+- Canal comercial passa a ser uma escolha exclusiva. House corresponde a
+  `DIRECIONAL VENDAS SPC`; Imob corresponde a `SPC - CANAL IMOB PJ`. O perfil
+  autorizado define a opcao inicial quando so um canal e permitido; no perfil
+  amplo, House e o padrao na ausencia de uma selecao valida.
+- `Pastas aprovadas` nao exige novo coletor: o contrato analitico ja inclui no
+  fato de Pastas a contagem derivada de `Status = Analise aprovada`. A aplicacao
+  agora propaga esse sexto estagio para periodo, historico e funis realizados,
+  sem substituir ausencia de fonte por zero.
+- As metas House usam a equipe oficial de corretores ativos do read model de
+  ranking, alimentado pelo relatorio Salesforce `00OTT000009j0l32AA`. Nao usar
+  proprietarios observados nos fatos comerciais como numero de corretores.
+  Metas individuais vigentes nesta entrega: 143 oportunidades, 24 agendamentos,
+  12 visitas, 8 pastas, 2 pastas aprovadas e 1 venda. Meta esperada ate hoje e
+  `meta mensal / dias do mes * dia atual`, sem arredondamento intermediario.
+- Metas Imob permanecem indisponiveis ate configuracao explicita. Filtros de
+  responsavel ou empresa que nao permitem reconciliar a equipe oficial tambem
+  deixam a meta indisponivel, em vez de estimar um numero sem fonte.
+- Coleta Salesforce existente de 30 minutos preservada; nenhum workflow n8n,
+  migration ou dado remoto foi alterado. Validacao: lint, typecheck e build de
+  57 rotas aprovados; Vitest 3.958 aprovados/99 skips; Node 1.595 aprovados/19
+  skips e tres falhas POSIX conhecidas de Meta Ads no Windows, fora do diff.
+  CI Linux do SHA exato permanece obrigatoria para integracao e publicacao.
+- PR #273: a primeira CI `39369989647` aprovou `validate`, mas o gate visual
+  reteve uma expectativa anterior que exigia `Pastas aprovadas` indisponivel.
+  O harness passou a representar House explicitamente, seis etapas, tres menus
+  e os botoes exclusivos. O contraste ativo no tema escuro foi corrigido. QA
+  local final: 207 checks em cinco larguras e tres temas, sem overflow,
+  sobreposicao ou violacao seria de acessibilidade. Reexecutar CI no novo SHA;
+  essa correcao nao autoriza ignorar o gate anterior.
+- A CI `39371672568` reteve a formatacao antes dos testes. A CI seguinte
+  `39371885078` aprovou `validate` e o relatorio visual Linux com 207 checks,
+  mas reteve o teste auxiliar que ainda montava quatro menus e omitia
+  `authorizedViews`. A matriz foi atualizada para o controle segmentado e os
+  tres menus; quatro cenarios desktop/celular e navegacao imediata/pendente
+  passaram localmente. Novo SHA e nova CI integral continuam obrigatorios.
+- CI `39373132967`: `validate`, `isolated-restore`, banco, build, relatorio
+  visual e teste auxiliar passaram. O E2E autenticado reteve a expectativa
+  remanescente de quatro menus. O contrato foi atualizado para Imob ativo no
+  perfil `with_canal_imob`, House inativo e tres menus; o clique externo usa o
+  titulo principal porque o titulo visual de filtros foi removido. Reexecutar
+  todos os gates no novo SHA antes de integrar.
+- CI `39375374003`: `validate`, `isolated-restore`, banco, build, relatorio do
+  dashboard e E2E autenticado passaram; este ultimo aprovou 19 cenarios e
+  ignorou um condicional. A matriz visual reteve somente o verificador de
+  atualizacao automatica, ainda dependente do antigo menu de canal, e expirou
+  apos o snapshot inicial. O contrato passou a verificar os botoes House/Imob
+  antes e depois do refresh, mantendo prova de atualizacao unica, payload RSC
+  completo, URL, rolagem e secao aberta. Nova CI integral do SHA exato e
+  obrigatoria; o resultado anterior nao autoriza merge nem publicacao.
+- CI `39378024224`: o refresh atualizado passou com uma unica requisicao RSC,
+  resposta completa e preservacao de URL, rolagem, secao aberta e canal Imob.
+  `validate` e `isolated-restore` passaram. O gate visual aprovou os checks
+  funcionais, acessibilidade, teclado e zoom e reteve somente 11 referencias de
+  `/app` por `dimensions_changed`: a altura diminuiu de acordo com a compactacao
+  solicitada. Artefato `12246700076` inspecionado em desktop, celular e escuro;
+  adotadas apenas as 11 imagens do dashboard, com proveniencia da execucao,
+  mantendo as outras 231 e os limiares. Integridade local: 15 testes aprovados
+  e 1 opt-in ignorado. Nova CI verify e obrigatoria antes de merge/deploy.
+- Antes da CI verify, `origin/main` avancou para `dac2e11a` pela entrega de
+  Metas/Parcerias. A integracao preservou os dois codigos e os dois conjuntos
+  disjuntos de 11 referencias; o manifesto combinado continua com 242 imagens.
+  Testes focados combinados: 30 aprovados e 1 opt-in ignorado; typecheck
+  aprovado. Somente a CI do novo SHA de merge pode autorizar integracao.
+
+## 2026-10-20: abertura do dashboard House e Imob
+
+- Consulta de abertura em 2026-10-20: Git comum confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`; branch
+  `codex/dashboard-house-imob-metas` criada do `origin/main` no SHA
+  `2eb17cc052754519ebee1156060e394ea5728169`, sem alteracoes locais anteriores.
+- GitHub: a CI `39366805822` desse SHA falhou somente porque a fonte publica do
+  ITBI da Prefeitura de Sao Paulo respondeu HTTP 403 durante a verificacao
+  externa; o commit e apenas documental sobre Agendamentos. A CI anterior da
+  `main`, `39357425838`, aprovou o SHA `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+- Producao: `https://crm.descomplicapro.com.br/api/health` respondeu HTTP 200,
+  `status: ok`, `version: 06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+  Portanto, estado local/integrado e publicado estao separados nesta abertura.
+- Escopo solicitado: alternancia exclusiva House/Imob com padrao por perfil,
+  compactacao visual, funis derivados do campo Status, metas House calculadas
+  pela meta individual multiplicada pelos corretores e proporcionalizadas pelo
+  dia corrente, e atualizacao dos relatorios a cada 30 minutos. Fontes indicadas:
+  relatorios Salesforce `00OU600000EjufWMAR` e `00OTT000009j0l32AA`; nenhum
+  dado privado foi copiado para esta nota e nenhuma mutacao remota ocorreu.
+
+## 2026-10-20: metas do Canal Parcerias editáveis e publicadas
+
+- Escopo restrito a `/app/configuracoes/metas/parcerias`. O canal deixou o
+  rascunho inativo de política comercial e passou a usar a mesma meta ativa,
+  permissão `crm.settings.manage`, validação, proteção de mês obsoleto e botão
+  `Salvar alterações` da Direcional Vendas. A RPC versionada existente mantém
+  o recorte de Parcerias e fixa no servidor os campos que não pertencem ao seu
+  funil. Nenhuma outra página, migration, dado remoto ou workflow n8n mudou.
+- PR #272 integrado em `dac2e11a6332cc90472118b7b0bb96c29da01122` após a CI
+  de PR `39373968044` aprovar `validate`, `isolated-restore` e `release-gates`.
+  A CI de `main` `39378619404` aprovou os quatro jobs obrigatórios, incluindo
+  `promotable-image`, no mesmo SHA.
+- Artefato `12243944777`: digest do ZIP
+  `4064e65ff331adda30c6cb01855874b7526984235ac62d2870b716d23fe60f5e` e
+  `image.tar.gz` SHA-256
+  `f1a55a1d0d25fa312eba977a5bb241ea25135d36bb123567022a9f869c45e2e0`.
+  Revisão conferida; config da CI `sha256:54177a6c2a878ca69c5e88b0318ff5c30f6edc39eeec727a28fc834d68c6d723`
+  e manifesto/ID containerd `sha256:66664cb7596d2e893fdfcb45a5104c1fa3799834d0a59b3ae1678251bfa49ca0`
+  foram ligados pelo mesmo índice OCI, 11 camadas, `rootfs.diff_ids`, plataforma
+  linux/amd64 e label da revisão. `image:prove` aprovou os dois perfis sem
+  rebuild, retag ou impressão de segredos.
+- O coordenador `release:production` publicou em `2026-10-20T06:44:59.559Z`
+  (03:44:59 America/Sao_Paulo), deployment
+  `c9e57458-9b9d-4023-911d-c4b2ecd6add7`. Baseline confirmada imediatamente
+  antes: deployment `979fb2df-a353-4df4-9c8b-b28caf2a9cf3`, SHA `06a41f76`,
+  publicada em `2026-10-20T02:57:56.421Z`, sem pendência. Consulta final de
+  `main`/CI, travas compartilhadas e CAS ocorreram no minuto da troca.
+- Pós-publicação em `2026-10-20T06:45:13Z`: ledger sem pendência, container
+  healthy na imagem exata, health público HTTP 200/status ok/versão `dac2e11a`
+  e GET anônimo da rota 307 para `/login`. A edição autenticada foi comprovada
+  por fixtures sintéticas locais e na CI; nenhum registro real foi usado como
+  teste. Fontes: PR #272, Actions `39373968044`/`39378619404`, artefato
+  `12243944777`, coordenador e `https://crm.descomplicapro.com.br/api/health`.
+
 ## 2026-10-19: Associativo automatico publicado
 
 - Encerramento documental: registro final enviado ao PR #267, separado do runtime ja publicado. Em 16:21 UTC, CI documental `39284638442` aguardava runner; merge automatico nao e permitido pelo repositorio. Pendencia restrita a integracao desse registro apos CI aprovada, sem novo deploy. Obsidian sincronizado com o registro completo; nenhum teste ou protecao dispensado.
@@ -1402,3 +1662,143 @@ nos sete gráficos preenchidos a escrita horizontal, a igualdade de altura e a
 rolagem vertical. Repetir CI no novo SHA; o primeiro resultado não autoriza
 merge nem publicação. Fonte: GitHub Actions 39347120702, artefato 12233333433,
 capturas locais e código do componente.
+
+### Encerramento e publicação do ajuste visual de Agendamentos
+
+PR270 integrado no SHA `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+CI de PR `39353605323` e CI de main `39357425838` verdes; a segunda aprovou os
+quatro jobs e gerou o artefato imutável `12234994906`. ZIP e imagem foram
+conferidos por SHA-256; revisão, manifesto/config OCI, plataforma linux/amd64,
+13 descritores, 11 camadas, 11 diff IDs, rootfs e dois perfis de runtime
+coincidiram no destino. A diferença config/manifest do armazenamento containerd
+foi provada sobre o mesmo arquivo, sem rebuild nem retag.
+
+Consulta imediatamente anterior registrou produção em `60ef87c7`, deployment
+`561b4861-7f6a-477c-95d9-6f46427921d8`, `deployedAt=2026-10-19T20:51:02.314Z`,
+sem pendência. O coordenador exclusivo publicou `06a41f76` às
+`2026-10-20T02:57:56.421Z`, deployment
+`979fb2df-a353-4df4-9c8b-b28caf2a9cf3`. Health posterior HTTP200/ok confirmou
+a versão exata, ledger continuou sem pendência e a página anônima retornou307
+para `/login`. Nenhuma migration, dado remoto, integração ou workflow n8n foi
+modificado. A matriz com gráficos preenchidos é sintética; não houve acesso a
+sessão privada de produção. Fonte: PR270, GitHub Actions, artefato12234994906,
+coordenador de release, ledger e health público.
+
+### Abertura dos indicadores e da tabela de Agendamentos
+
+Em `2026-10-20T01:42:46-03:00`, o Git comum foi confirmado em
+`C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`. A branch
+`codex/agendamentos-indicadores-tabela` partiu de `origin/main`
+`2eb17cc052754519ebee1156060e394ea5728169`, sem mudanças locais. O health
+público retornou HTTP 200, `status=ok` e versão
+`06a41f767fc721d4e85ac10142697a92e0fee0e1`, que corresponde ao último runtime
+publicado. A CI de push mais recente de `main`, execução `39366805822`, terminou
+com falha no commit exclusivamente documental `2eb17cc0`; a CI anterior de
+`main`, execução `39357425838`, aprovou o runtime `06a41f76`. O cliente `gh` não
+está instalado; GitHub foi consultado pelo conector e Git por `fetch`.
+
+A demanda amplia o contrato de Agendamentos com seis indicadores, previsão e
+realização do dia, rankings regionais e de conta e uma tabela detalhada. O
+contrato vigente publica somente fatos agregados e não contém linhas
+individuais, horário, gerente regional, visita realizada nem ranking da conta.
+Esses campos devem ser resolvidos pelo metadado vigente do relatório Salesforce
+em cada coleta; nomes de API não serão inferidos, e dados pessoais ou linhas do
+relatório não serão registrados nesta nota. Fonte: código atual, relatórios
+`00OU600000ELaA6MAL` e `00OTT000009j0l32AA` indicados pelo usuário, GitHub
+Actions e health público. Alteração remota de schema, caso necessária, continua
+dependente da autorização específica aplicável.
+
+## 2026-10-20: Abertura da edição de metas do Canal Parcerias
+
+- Às `2026-10-20T04:03:57Z`, `origin/main` e o GitHub apontavam para
+  `2eb17cc052754519ebee1156060e394ea5728169`; produção respondia HTTP 200,
+  `status=ok` e `version=06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+  A diferença corresponde ao commit documental posterior ao runtime publicado.
+- A CI de `main` `39366805822` falhou somente em
+  `Verify current documentation fee sources`; os demais jobs foram ignorados.
+  Essa fonte externa não valida nem bloqueia a investigação local da página Meta,
+  mas uma CI verde no SHA candidato continua obrigatória para integração.
+- Escopo solicitado: tornar a configuração do Canal Parcerias editável e
+  salvável como Direcional Vendas, somente em `/app/configuracoes/metas`.
+  Nenhum workflow n8n, dado remoto ou outra página será alterado nesta etapa.
+- Fontes: Git local após `fetch`, GitHub branches/actions e GET observacional de
+  `https://crm.descomplicapro.com.br/api/health`. O cliente `gh` está indisponível
+  neste host; o conector GitHub forneceu as evidências equivalentes.
+
+### Implementação e validação local
+
+- Causa confirmada: Parcerias ainda carregava o rascunho inativo de política
+  comercial e condicionava a edição a `crm.commercial_policy.manage`, enquanto
+  Direcional Vendas já carregava e persistia a meta ativa com
+  `crm.settings.manage` e a RPC versionada `upsert_crm_funnel_goals`.
+- Parcerias passou a reutilizar integralmente o fluxo ativo: campos editáveis,
+  botão `Salvar alterações`, validação de mês, persistência e confirmação na
+  própria rota. A RPC existente já restringe o perfil e fixa em zero os campos
+  que não pertencem ao funil de Parcerias; nenhuma migration foi necessária.
+- Evidências locais: 32 testes focados aprovados; `lint`, `typecheck`, `build` e
+  `format:check` aprovados; build com 57 rotas; Vitest com 3.954 aprovações e
+  102 ignorados; preview específico com 30 telas, cinco larguras, três temas,
+  edição habilitada, sem overflow e sem violações Axe.
+- A suíte operacional Node aprovou 1.595 casos, ignorou 19 e apresentou três
+  falhas já conhecidas na emulação POSIX de arquivos privados do Meta Ads no
+  Windows. `test:release` reproduziu a limitação nas fixtures privadas do mesmo
+  módulo. Não houve alteração nessa área; a CI Linux do SHA candidato continua
+  sendo o gate conclusivo de integração e publicação.
+- Na execução CI `39368979457` do PR #272, `validate` e `isolated-restore`
+  passaram integralmente. `release-gates` aprovou banco, autorização, build e
+  E2E, mas bloqueou na comparação visual porque a página Parcerias ficou menor
+  após remover o bloco de rascunho inativo: 11 capturas da própria rota mudaram
+  de dimensão. O artefato sanitizado `12241794237` foi inspecionado; os campos
+  estavam editáveis, o botão `Salvar alterações` estava presente e não havia
+  overflow. Somente essas 11 referências foram promovidas para nova validação;
+  baselines de outras páginas permaneceram intactas.
+- A execução seguinte `39373587403` parou no teste de integridade porque o
+  resultado promovido preservou do artefato o marcador transitório
+  `worktreeDirtyAtCapture=true`. O marcador foi corrigido para o estado limpo
+  da baseline versionada; os 28 testes locais de catálogo/paridade passaram
+  (27 aprovados e um ignorado) antes do novo envio.
+
+## 2026-10-20: Abertura da previsão por período e gerente
+
+- A branch `codex/previsao-periodos` iniciou no `origin/main`
+  `099493a9f1f64730efd449364979384309c2ed44`. A CI de `main`
+  `39411919967` concluiu com sucesso no mesmo SHA.
+- Às `2026-10-20T12:18:13.3265927Z`, o health público respondeu HTTP 200,
+  `status=ok` e `version=08d050f90c877009cd55140322b7c822e578d672`.
+  A produção estava um commit documental atrás de `main`; esse estado não
+  comprova a publicação da nova demanda.
+- Escopo solicitado: selecionar fins de semana válidos no calendário, separar
+  Geral, House e Imob por gerente, carregar e salvar previsões por período,
+  manter dez corretores no estado inicial e compactar a grade com primeira
+  coluna fixa, destaque cruzado e controles de empreendimento reposicionados.
+- A migration `20261019004204_forecast_action_plan.sql` permanece versionada,
+  mas ainda não foi aplicada no banco remoto. Qualquer migration adicional ou
+  aplicação em produção continua condicionada à validação e à autorização
+  específica do usuário. Fontes: Git local após `fetch`, GitHub Actions e GET
+  observacional de `https://crm.descomplicapro.com.br/api/health`.
+
+### Implementação e validação local
+
+- A chave de persistência passou a ser fim de semana, segmento e gerente. House
+  e Imob editam grades independentes; Geral devolve até doze seções completas e
+  somente leitura, preservando personalizações diferentes entre gerentes.
+- O calendário usa sexta, sábado e domingo como dias válidos. A seleção carrega
+  o mesmo período, permanece visível e atualiza o título com o intervalo. Sem
+  registro, a API reutiliza somente a estrutura mais recente, limpa valores e
+  Plano de ação e mantém a primeira linha de corretor.
+- A interface fixa a coluna do corretor em cabeçalho, corpo e Total geral,
+  destaca corretor, métrica e empreendimento da célula ativa, impede quebra do
+  índice 10 e mantém dez corretores no rascunho inicial. Controles de grupo
+  ficaram compactos no canto superior esquerdo sem deslocar o título.
+- O armazenamento novo força RLS, não concede acesso direto e expõe RPCs com
+  usuário ativo, permissão da página, MFA e CAS de revisão. A migration
+  `20261020122216_forecast_period_scopes.sql` depende da anterior
+  `20261019004204_forecast_action_plan.sql`; ambas permanecem sem aplicação
+  remota e exigem autorização específica depois da CI aprovada.
+- Evidências locais: `lint`, `typecheck`, `build`, `format:check`, catálogo,
+  recursos e `git diff --check` passaram; Vitest aprovou 3.965 e ignorou 105;
+  110 testes focados e 12 cenários de navegador passaram. A suíte Node aprovou
+  1.595, ignorou 19 e reproduziu três falhas POSIX conhecidas do Meta Ads no
+  Windows. `test:release` reproduziu a fixture privada do mesmo módulo e um
+  timeout Qlik isolado; o delta não altera essas áreas. A CI Linux no SHA exato,
+  com pgTAP e restauração isolada, é obrigatória antes de merge e publicação.

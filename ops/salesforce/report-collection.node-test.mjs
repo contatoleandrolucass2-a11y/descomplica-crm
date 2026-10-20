@@ -33,6 +33,15 @@ const ID_COLUMNS = {
   brokers: ["Contact.Name", "003"],
   imobAccounts: ["Account.Name", "001"],
 };
+const APPOINTMENT_OPERATION_COLUMNS = {
+  "Activity.Nome_do_empreendimento__c": "Nome do empreendimento",
+  "Activity.Gerente_Regional__c": "Gerente Regional",
+  "Activity.ActivityDateTime": "Horário",
+  "Activity.Data_de_comparecimento__c": "Data de comparecimento",
+  "Activity.VisitaRealizada__c": "Visita Realizada",
+  "Activity.Account.Name": "Conta: Nome da conta",
+  "Activity.Account.Ranking__c": "Conta: Ranking",
+};
 
 function metadataFor(definition) {
   return {
@@ -41,7 +50,7 @@ function metadataFor(definition) {
     aggregates: ["RowCount"],
     detailColumns: [
       ...definition.requiredColumns,
-      ...(definition.key === "appointments" ? ["Activity.Nome_do_empreendimento__c"] : []),
+      ...(definition.key === "appointments" ? Object.keys(APPOINTMENT_OPERATION_COLUMNS) : []),
     ].map((column) => (Array.isArray(column) ? column[0] : column)),
     standardDateFilter: {
       column: DATE_COLUMNS[definition.key] ?? "CreatedDate",
@@ -67,6 +76,9 @@ function detailRow(definition, metadata, number = 1, date = REFERENCE) {
       if (column === "Opportunity.Valor_Real_de_Venda__c")
         return { value: 100_000, label: "100.000,00" };
       if (column === "Contact.Status_Corretor__c") return { value: "Ativo", label: "Ativo" };
+      if (column === "Activity.VisitaRealizada__c") return { value: true, label: "Sim" };
+      if (["Activity.ActivityDateTime", "Activity.Data_de_comparecimento__c"].includes(column))
+        return { value: `${date}T15:00:00Z`, label: `${date} 12:00` };
       if (column === "Avaliacao_credito__c.Status__c")
         return { value: "An\u00e1lise aprovada", label: "An\u00e1lise aprovada" };
       return { value: "Synthetic", label: "Synthetic" };
@@ -78,7 +90,12 @@ function complete(definition, metadata, numbers = [1]) {
   return {
     reportExtendedMetadata: {
       detailColumnInfo: {
-        "Activity.Nome_do_empreendimento__c": { label: "Nome do empreendimento" },
+        ...Object.fromEntries(
+          Object.entries(APPOINTMENT_OPERATION_COLUMNS).map(([column, label]) => [
+            column,
+            { label },
+          ]),
+        ),
       },
     },
     attributes: { status: "Success" },
@@ -113,7 +130,12 @@ function client({ describeFor, resultFor, startFor, metadataForResponse } = {}) 
           reportMetadata: describeFor?.(described, definition) ?? described,
           reportExtendedMetadata: {
             detailColumnInfo: {
-              "Activity.Nome_do_empreendimento__c": { label: "Nome do empreendimento" },
+              ...Object.fromEntries(
+                Object.entries(APPOINTMENT_OPERATION_COLUMNS).map(([column, label]) => [
+                  column,
+                  { label },
+                ]),
+              ),
             },
           },
         };
@@ -163,6 +185,10 @@ test("appointment development metadata is checked each cycle and never substitut
           value: "Store Current",
           label: "Store Current",
         };
+        row.dataCells[metadata.detailColumns.indexOf("Activity.Data_de_comparecimento__c")] = {
+          value: null,
+          label: "-",
+        };
         return result;
       },
       ...overrides,
@@ -175,6 +201,7 @@ test("appointment development metadata is checked each cycle and never substitut
   const first = await run(make());
   assert.equal(first[0].development, "Development Current");
   assert.equal(first[0].storeName, "Store Current");
+  assert.equal(first[0].attendedAt, "");
   for (const change of [
     (response) => {
       delete response.reportExtendedMetadata;

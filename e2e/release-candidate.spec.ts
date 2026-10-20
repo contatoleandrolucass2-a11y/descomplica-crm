@@ -1593,19 +1593,24 @@ test("dashboard uses management filters while stages retain selection and partne
       expect(response?.status()).toBe(200);
       const report = page.getByRole("main");
       const filters = report.getByRole("region", { name: "Filtros do relatório", exact: true });
-      await expect(filters.getByRole("button", { expanded: false })).toHaveCount(4);
-      for (const label of [
-        "Canal de vendas",
-        "Gerente de Vendas",
-        "Responsável da conta",
-        "Empresa",
-      ]) {
+      await expect(filters.getByRole("button", { expanded: false })).toHaveCount(3);
+      await expect(filters.getByRole("button", { name: "Imob", exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "true",
+      );
+      await expect(filters.getByRole("button", { name: "House", exact: true })).toHaveAttribute(
+        "aria-pressed",
+        "false",
+      );
+      for (const label of ["Gerente de Vendas", "Responsável da conta", "Empresa"]) {
         await expect(filters.getByText(label, { exact: true })).toBeVisible();
         const trigger = filters.getByRole("button", { name: new RegExp(`^${label} `) });
         await trigger.click();
         await expect(trigger).toHaveAttribute("aria-expanded", "true");
         await expect(filters.getByRole("group", { name: label, exact: true })).toBeVisible();
-        await filters.getByRole("heading", { name: "Filtros", exact: true }).click();
+        await report
+          .getByRole("heading", { name: "Dashboard | Resumo Geral", exact: true })
+          .click();
         await expect(trigger).toHaveAttribute("aria-expanded", "false");
         await expect(filters.getByRole("group", { name: label, exact: true })).toBeHidden();
       }
