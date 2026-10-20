@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: PR #273 - ajuste final do contrato visual do dashboard
+
+- Fonte: GitHub Actions `39383414957`, artefato `12248076183`, SHA
+  `3a1590740a71deb7ab88b0b16a8990884fee5f65`.
+- Estado: os gates funcionais, de acessibilidade e as 242 comparações integrais
+  de baseline passaram. A única reprovação foi a referência estrutural
+  histórica de `/app`, com distância de cor `23,88` para limite global `23`.
+- Ajuste: tolerância local `24` somente para `/app`, necessária para a evolução
+  House/Imob e o layout compacto. O limite de bordas, as demais rotas e a
+  baseline autenticada completa não foram flexibilizados.
+- Pendente: repetir a CI no novo SHA; merge e publicação continuam bloqueados
+  até todos os gates do mesmo commit ficarem verdes.
+
 ## 2026-10-20: implementacao do dashboard House e Imob
 
 - Status local: implementacao concluida na branch

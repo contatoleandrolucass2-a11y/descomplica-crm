@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-20: contrato visual do dashboard após integração
+
+- A CI do PR #273 confirmou 154 rotas responsivas, 88 temas, 242 auditorias de
+  acessibilidade e 242 comparações integrais de baseline sem divergências.
+- O único bloqueio restante era a comparação estrutural histórica de `/app`:
+  distância de cor `23,88` contra limite global `23`, após os controles
+  House/Imob e a compactação solicitada.
+- Foi definido limite local `24` apenas para `/app`; o limite de bordas `52`,
+  as demais rotas e a comparação pixel a pixel completa permanecem inalterados.
+
 ## 2026-10-20: Dashboard House e Imob
 
 Demanda: simplificar o filtro de canal da página `/app`, compactar o dashboard,

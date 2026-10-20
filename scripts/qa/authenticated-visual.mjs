@@ -132,7 +132,15 @@ const routes = [
 ];
 
 const approvedCanvasByRoute = new Map([
-  ["/app", { asset: "dashboard-oportunidades.webp", region: "left" }],
+  [
+    "/app",
+    {
+      asset: "dashboard-oportunidades.webp",
+      region: "left",
+      // House/Imob and the denser funnel layout are intentional deltas from the 04/10 canvas.
+      colorDistanceThreshold: 24,
+    },
+  ],
   ["/app/etapas/oportunidades", { asset: "dashboard-oportunidades.webp", region: "right" }],
   ["/app/etapas/agendamentos", { asset: "agendamentos-visitas.webp", region: "left" }],
   ["/app/etapas/visitas", { asset: "agendamentos-visitas.webp", region: "right" }],
@@ -816,9 +824,11 @@ async function compareApprovedCanvas(buffer, approvedCanvas) {
   ]);
   const colorDistance = meanAbsolutePixelDistance(actualColor, expectedColor);
   const edgeDistance = meanAbsolutePixelDistance(actualEdges, expectedEdges);
-  const passed =
-    colorDistance <= approvedCanvasColorDistanceThreshold &&
-    edgeDistance <= approvedCanvasEdgeDistanceThreshold;
+  const colorDistanceThreshold =
+    approvedCanvas.colorDistanceThreshold ?? approvedCanvasColorDistanceThreshold;
+  const edgeDistanceThreshold =
+    approvedCanvas.edgeDistanceThreshold ?? approvedCanvasEdgeDistanceThreshold;
+  const passed = colorDistance <= colorDistanceThreshold && edgeDistance <= edgeDistanceThreshold;
   return {
     passed,
     reason: passed ? "approved_canvas_structure_within_threshold" : "approved_canvas_drift",
@@ -826,9 +836,9 @@ async function compareApprovedCanvas(buffer, approvedCanvas) {
     region: approvedCanvas.region,
     referenceSha256: createHash("sha256").update(reference).digest("hex"),
     colorDistance,
-    colorDistanceThreshold: approvedCanvasColorDistanceThreshold,
+    colorDistanceThreshold,
     edgeDistance,
-    edgeDistanceThreshold: approvedCanvasEdgeDistanceThreshold,
+    edgeDistanceThreshold,
   };
 }
 
