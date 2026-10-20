@@ -20,6 +20,10 @@ create table public.crm_forecast_periods (
 );
 alter table public.crm_forecast_periods enable row level security;
 alter table public.crm_forecast_periods force row level security;
+create policy authenticated_session_mfa_gate on public.crm_forecast_periods
+  as restrictive for all to authenticated
+  using ((select private.current_session_satisfies_mfa()))
+  with check ((select private.current_session_satisfies_mfa()));
 revoke all privileges on table public.crm_forecast_periods from public, anon, authenticated, service_role;
 
 create function private._internal_validate_crm_forecast_document(p_document jsonb)
