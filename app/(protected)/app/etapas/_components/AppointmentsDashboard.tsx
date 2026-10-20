@@ -30,7 +30,9 @@ function Chart({
         <h2 id={id}>{title}</h2>
         {controls}
       </header>
-      {children}
+      <div className={styles.cardBody} tabIndex={0}>
+        {children}
+      </div>
     </section>
   );
 }
@@ -50,26 +52,13 @@ function Columns({
 }) {
   if (!buckets.length) return <Empty />;
   const max = Math.max(...buckets.map((item) => item.total));
-  const valueHeight = Math.max(...buckets.map((item) => number.format(item.total).length)) * 8 + 14;
   return (
     <>
       <p className={styles.axis}>Quantidade de agendamentos</p>
-      <ol
-        aria-label={label}
-        className={`${styles.columns} ${daily ? styles.daily : ""}`}
-        style={
-          {
-            "--columns": buckets.length,
-            "--value-height": `${valueHeight}px`,
-            "--value-space": `${valueHeight * (daily ? 3 : 1)}px`,
-            paddingTop: `${valueHeight * (daily ? 3 : 1)}px`,
-          } as CSSProperties
-        }
-      >
-        {buckets.map((item, index) => (
+      <ol aria-label={label} className={`${styles.columns} ${daily ? styles.daily : ""}`}>
+        {buckets.map((item) => (
           <li
             key={item.key}
-            style={{ "--day-offset": index % 3 } as CSSProperties}
             aria-label={`${daily ? displayDate(item.key) : item.label}: ${number.format(item.total)} agendamentos`}
           >
             <div
@@ -241,24 +230,13 @@ export function AppointmentsDashboard({
         </Chart>
       </div>
       <div className={`${styles.grid} ${styles.rankingsGrid}`}>
-        <div className={styles.rankingColumn}>
-          <Chart title="Ranking por gerente">
-            {monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <Ranking buckets={result.managers} />
-            )}
-          </Chart>
-          <Chart title="Ranking por empreendimento">
-            {!canViewDevelopmentRankings ? (
-              <Empty>Ranking por empreendimento indisponível para seu perfil de acesso.</Empty>
-            ) : monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <Ranking buckets={result.developments} />
-            )}
-          </Chart>
-        </div>
+        <Chart title="Ranking por gerente">
+          {monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <Ranking buckets={result.managers} />
+          )}
+        </Chart>
         <Chart title="Ranking por responsável">
           {monthUnavailable ? (
             <Empty>Período sem cobertura disponível.</Empty>
@@ -273,6 +251,15 @@ export function AppointmentsDashboard({
             <Empty>Período sem cobertura disponível.</Empty>
           ) : (
             <Ranking buckets={result.stores} />
+          )}
+        </Chart>
+        <Chart title="Ranking por empreendimento">
+          {!canViewDevelopmentRankings ? (
+            <Empty>Ranking por empreendimento indisponível para seu perfil de acesso.</Empty>
+          ) : monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <Ranking buckets={result.developments} />
           )}
         </Chart>
       </div>

@@ -1363,3 +1363,29 @@ O coletor existente foi atualizado sob `installation.lock`, backup e CAS, preser
 Dois ciclos reais distintos foram aceitos: requests `025566d7-7c58-4642-9f3d-ba6e7ab64daf` e `2211a2cb-5732-4551-aca8-c995ce1fe950`, ambos `succeeded`, 155 registros e sem sobreposição. Inventários publicados às `2026-10-19T15:01:10Z` e `2026-10-19T15:36:10Z`, ambos com 3.298 itens na geração final. O snapshot vigente, gerado em `2026-10-19T15:33:04.883Z`, é versão2: todos os846 fatos agregados de Agendamentos têm11 posições; total1.097 em248 dias/10 meses,23 gerentes,118 responsáveis,14 lojas e33 empreendimentos. As três visões possuem dicionário de loja v2; nenhuma dimensão nominal ou registro individual foi exportado na evidência. N8n não foi editado: transportou o contrato integral já normalizado.
 
 Validação local do registro final: lint, typecheck e build de57 rotas aprovados; Vitest3.900 aprovados/102 skips. A etapa Node aprovou1.595/19 skips e reproduziu somente as três falhas POSIX conhecidas de Meta Ads no Windows (arquivo privado e caminho absoluto), sem relação com o delta documental; a CI Linux completa `39264769472` permaneceu verde. Conferência posterior: ledger sem pendência e health HTTP200/ok ainda em `afb4a97d`. `origin/main` avançou depois do deploy para `f56236b3` pelo PR265; isso não altera o recibo da publicação concluída e deve ser integrado antes do PR documental.
+
+### Abertura do ajuste visual dos gráficos
+
+Em `2026-10-19T20:57:58-03:00`, o checkout foi atualizado para `origin/main`
+`197cd012ae4a2021de3e9889fa1770d66cdf29e5` na branch
+`codex/agendamentos-layout-uniforme`, sem mudanças locais. O GitHub público
+mostrou a CI de `main` #964 concluída com sucesso nesse SHA; o cliente `gh` não
+está instalado neste host. O health público retornou HTTP 200, `status=ok` e
+`version=60ef87c7d52b5c68603e696a4cfe59dce92c4554`, anterior apenas ao commit
+documental do topo. A demanda limita-se a manter rótulos e valores dos gráficos
+na horizontal, uniformizar a altura dos sete cards e permitir rolagem vertical
+interna quando o conteúdo exceder a área. Fonte: Git local/fetch, página pública
+de Actions e `https://crm.descomplicapro.com.br/api/health`. Nenhum dado remoto,
+contrato analítico, coletor ou workflow n8n será alterado.
+
+Implementação local: valores e rótulos de dia, semana e mês usam escrita
+horizontal e séries extensas quebram em linhas. Os sete cards têm 40 rem de
+altura e corpo com rolagem vertical acessível por teclado, sem overflow
+horizontal. Rankings, filtros e agregações permanecem inalterados. Preview com
+CSS compilado do Next aprovou 12 telas em quatro larguras e três temas, zero
+violações Axe, colisões ou diferenças de altura. Lint, typecheck e build de 57
+rotas passaram; Vitest aprovou 3.952/102 skips. A etapa Node aprovou 1.595/19
+skips e reproduziu três falhas POSIX conhecidas de Meta Ads no Windows;
+`test:release` reteve o grupo Meta Ads dependente da fixture privada POSIX. A CI
+Linux do SHA exato é o gate de integração e publicação. Fonte: código, execução
+local e `test-results/appointments-preview/result.json`.
