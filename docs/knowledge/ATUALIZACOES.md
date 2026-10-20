@@ -1,5 +1,46 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: Agendamentos v3 integrado, publicado e aceito em ciclos reais
+
+- O PR #274 foi integrado no merge
+  `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`. A CI de `main`
+  `39421287684` aprovou os quatro jobs obrigatorios e o coordenador publicou
+  esse SHA no deployment `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`.
+- O marcador Salesforce `-` em `Data de comparecimento` bloqueou corretamente
+  a primeira coleta v3 sem substituir o snapshot valido. O PR #279 normalizou
+  somente esse valor opcional para vazio e foi integrado no merge
+  `38e8c2af7a64a89e75bfb60a7fc6e21383baee1f`. A CI de `main`
+  `39448193292` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`.
+- O artefato promovivel `12277458475` teve ZIP
+  `sha256:a267a607a5d64b4b2a2a7d21cc36f3055b5af31614410e9ccb4c962aa4d488a7`
+  e `image.tar.gz`
+  `sha256:99edfb5fda1159533cd38e350892a8ac4dbf3ac20a9c0b5537b40b64c5ec4b82`.
+  A VPS carregou a imagem sem rebuild ou retag e `image:prove` validou os dois
+  perfis no image ID containerd
+  `sha256:c773025e48f9552966fd4c0a06ab502cc36f74a5d6e10813be019d953abeff5c`.
+- O coordenador publicou `38e8c2af` em `2026-10-20T16:11:22.558Z`, deployment
+  `b065193c-ea11-4a6b-b87f-08f6097f1f59`; health publico confirmou HTTP 200,
+  `status=ok` e a versao exata, e a rota anonima de Agendamentos manteve o
+  redirecionamento 307 para login.
+- A atualizacao do coletor ocorreu sob `installation.lock`, com backup privado
+  `20261020T161256Z-38e8c2af7a64`. Unidade, ledger, credenciais e agenda foram
+  preservados; o `WorkingDirectory` passou ao merge corretivo, o navegador
+  manteve o PID e o monitor legado permaneceu desabilitado.
+- O aceite exigia dois ciclos reais, mas quatro ciclos consecutivos foram
+  confirmados entre `16:35Z` e `18:05Z`, todos com requestIds distintos,
+  publicacao HTTP 201 e estoque concluido. As quatro runs mais recentes no
+  Supabase estavam `succeeded`, com 143 registros comerciais cada. O snapshot
+  vigente foi gerado em `2026-10-20T18:03:02.814Z`; a analise continha tres
+  visoes em versao 3, 32 corretores, 1.104 agendamentos normalizados e 9.320
+  fatos. A ultima carga de estoque confirmou 3.286 registros.
+- Durante o aceite, outro fluxo autorizado avancou `main` e producao para
+  `50f11d326cdd37b051db46f1dd1015076b85d545`, descendente de `38e8c2af`.
+  Em `2026-10-20T18:26:10Z`, o health publico confirmou essa versao; o ledger
+  registrava o deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, concluido em
+  `2026-10-20T17:51:11.098Z`, sem pendencia. A funcionalidade de Agendamentos
+  permanece contida na versao atualmente publicada.
+
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 
 - A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`

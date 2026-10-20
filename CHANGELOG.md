@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-20 - Publicacao e aceite de Agendamentos v3
+
+- Publica o painel e a normalizacao da data opcional por imagem imutavel, com
+  CI completa e coordenador protegido.
+- Confirma quatro ciclos reais consecutivos do coletor, com analise v3,
+  publicacao comercial e estoque concluidos.
+
 ## 2026-10-19 - Impressão A4 do Associativo
 
 - Separa as ações `Imprimir linear` e `Imprimir escalonado` no resultado do

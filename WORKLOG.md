@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-20: publicacao e aceite operacional de Agendamentos v3
+
+Os PRs #274 e #279 foram integrados com CI completa. A migration v3 foi
+aplicada pelo Supabase MCP e a imagem aprovada foi promovida sem rebuild. O
+coletor foi atualizado sob trava, com backup e CAS, preservando unidade,
+ledger, credenciais e agenda. Quatro ciclos reais consecutivos publicaram com
+HTTP 201 e requestIds distintos, seguidos de estoque confirmado. O Supabase
+registrou as quatro runs como `succeeded` e manteve tres visoes da analise em
+versao 3. A producao avancou depois para um SHA descendente que preserva a
+entrega; health e ledger foram conferidos sem pendencia.
+
 ## 2026-10-19 - Layouts de impressão do Associativo
 
 - Adicionados dois comandos de impressão: linear e escalonado.
