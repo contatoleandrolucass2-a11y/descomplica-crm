@@ -27,6 +27,11 @@ desempatando pelo nome, e preservam a lista completa. Ausência de nome fica
 explícita. Nenhum gráfico usa valores demonstrativos quando a fonte está ausente.
 Cobertura parcial é informada; períodos fora da cobertura não viram zero.
 
+Os sete cards usam a mesma altura. Valores e rótulos das colunas permanecem na
+horizontal; séries extensas quebram em novas linhas. Cada card oferece rolagem
+vertical própria quando o conteúdo ultrapassa a área, inclusive por teclado,
+sem criar rolagem horizontal.
+
 ## Contrato e permissões
 
 `dashboard.analysis.version=2` acrescenta `dimensions.stores` e índice de loja
@@ -87,7 +92,8 @@ as funções de compatibilidade enquanto houver leitores/cargas dependentes.
 `node scripts/qa/appointments-preview.mjs --production-css` executa a matriz
 sintética dos três temas e larguras 1440/1024/390/320, com acessibilidade,
 legibilidade de rótulos, rankings completos, filtros independentes e ausência
-de rolagem horizontal/interna. Capturas em `test-results/appointments-preview`
+de rolagem horizontal, com altura uniforme e rolagem vertical acessível quando
+necessária. Capturas em `test-results/appointments-preview`
 não contêm registros reais. Essa matriz isolada não substitui pgTAP nem smoke
 autenticado da implantação.
 
