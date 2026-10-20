@@ -35,6 +35,12 @@
   local final: 207 checks em cinco larguras e tres temas, sem overflow,
   sobreposicao ou violacao seria de acessibilidade. Reexecutar CI no novo SHA;
   essa correcao nao autoriza ignorar o gate anterior.
+- A CI `39371672568` reteve a formatacao antes dos testes. A CI seguinte
+  `39371885078` aprovou `validate` e o relatorio visual Linux com 207 checks,
+  mas reteve o teste auxiliar que ainda montava quatro menus e omitia
+  `authorizedViews`. A matriz foi atualizada para o controle segmentado e os
+  tres menus; quatro cenarios desktop/celular e navegacao imediata/pendente
+  passaram localmente. Novo SHA e nova CI integral continuam obrigatorios.
 
 ## 2026-10-20: abertura do dashboard House e Imob
 

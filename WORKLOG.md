@@ -31,6 +31,12 @@ escuro também foi corrigido. A matriz local aprovou 207 verificações em 320,
 390, 768, 1440 e 1920 px, nos temas claro, médio e escuro, sem overflow,
 sobreposição ou violação séria de acessibilidade. Nova CI integral é obrigatória.
 
+A CI seguinte reteve primeiro a formatação do harness e, após sua correção,
+identificou o teste auxiliar de fechamento ainda montando o componente sem
+`authorizedViews` e esperando quatro menus. O teste agora trata House/Imob como
+controle segmentado e conserva a matriz de foco/fechamento nos três menus. As
+quatro combinações desktop/celular e navegação imediata/pendente passaram.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o

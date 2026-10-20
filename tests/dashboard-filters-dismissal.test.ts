@@ -45,12 +45,12 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1").each([
           import { createElement, StrictMode, useState, startTransition } from "react";
           import { createRoot } from "react-dom/client";
           import { DashboardFilters } from "@/app/(protected)/app/_components/DashboardFilters";
-          const options = { channel: ["Canal A", "Canal B", "Direcional", "SPC"], manager: ["Gerente A"], owner: ["Responsavel A"], company: ["-", "Empresa A"] };
+          const options = { channel: ["SPC - CANAL IMOB PJ", "DIRECIONAL VENDAS SPC"], manager: ["Gerente A"], owner: ["Responsavel A"], company: ["-", "Empresa A"] };
           for (const key of Object.keys(options)) {
             options[key].push(...Array.from({ length: 500 }, (_, index) => key + " synthetic " + index));
           }
           function Fixture() {
-            const [query, setQuery] = useState("keep=value&period=old");
+            const [query, setQuery] = useState("keep=value&period=old&channel=DIRECIONAL+VENDAS+SPC");
             const [mounted, setMounted] = useState(true);
             const [dark, setDark] = useState(false);
             window.filterQuery = query;
@@ -63,7 +63,7 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1").each([
             const params = new URLSearchParams(query);
             const values = Object.fromEntries(Object.keys(options).map(key => [key, params.getAll(key)]));
             return createElement("main", { "data-theme": dark ? "dark" : "light", style: { color: dark ? "#fff" : "#222", background: dark ? "#222" : "#fff" } },
-              mounted && createElement(DashboardFilters, { values, options, available: true }),
+              mounted && createElement(DashboardFilters, { values, options, available: true, authorizedViews: ["all", "with_canal_imob", "without_canal_imob"] }),
               createElement("button", { id: "outside" }, "Outside"),
               createElement("div", { id: "outside-static" }, "Outside static"),
               createElement("button", { id: "theme", onClick: () => { setDark(!dark); document.documentElement.dataset.theme = dark ? "light" : "dark"; } }, "Theme"),
@@ -125,25 +125,27 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1").each([
       }, serverlike);
       await page.addScriptTag({ content: script });
       await page.waitForFunction(() => document.querySelector("button[aria-controls]") !== null);
-      await browserExpect(page.locator("details, fieldset")).toHaveCount(0);
+      await browserExpect(page.locator("details")).toHaveCount(0);
+      await browserExpect(page.locator("fieldset")).toHaveCount(1);
       expect(errors).toEqual([]);
       const triggers = page.locator("button[aria-controls]");
       const menus = page.locator("div:has(> button[aria-controls])");
-      const channel = menus.nth(0);
-      const manager = menus.nth(1);
-      const trigger = channel.locator("button[aria-controls]");
+      const manager = menus.nth(0);
+      const trigger = manager.locator("button[aria-controls]");
+      const house = page.getByRole("button", { name: "House", exact: true });
+      const imob = page.getByRole("button", { name: "Imob", exact: true });
       const outside = page.locator("#outside");
       // Dismiss with a checkbox focused, not only with the trigger focused.
       // Moving focus during pointerdown re-enters the document's focusin handler.
-      for (let index = 0; index < 4; index++) {
+      for (let index = 0; index < 3; index++) {
         const menu = menus.nth(index);
         const summary = menu.locator("button[aria-controls]");
         await browserExpect(summary).toHaveAttribute(
           "aria-controls",
-          `filter-panel-${["channel", "manager", "owner", "company"][index]}`,
+          `filter-panel-${["manager", "owner", "company"][index]}`,
         );
         await summary.click();
-        await browserExpect(menu.getByRole("checkbox")).toHaveCount([504, 501, 501, 502][index]!);
+        await browserExpect(menu.getByRole("checkbox")).toHaveCount([501, 501, 502][index]!);
         await menu.getByRole("checkbox").first().focus();
         await summary.evaluate((element) => {
           element.dataset.focusCalls = "0";
@@ -172,9 +174,9 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1").each([
         await menu.getByRole("checkbox").last().focus();
         await page.keyboard.press("Tab");
         await browserExpect(summary).toHaveAttribute("aria-expanded", "false");
-        const next = index < 3 ? triggers.nth(index + 1) : outside;
+        const next = index < 2 ? triggers.nth(index + 1) : outside;
         await browserExpect(next).toBeFocused();
-        if (index < 3) {
+        if (index < 2) {
           await page.keyboard.press("Enter");
           await browserExpect(triggers.nth(index + 1)).toHaveAttribute("aria-expanded", "true");
           await browserExpect(page.locator('button[aria-expanded="true"]')).toHaveCount(1);
@@ -182,52 +184,15 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1").each([
         }
       }
       await browserExpect(page.getByRole("button", { name: "Limpar filtros" })).toHaveCount(0);
-      await trigger.focus();
-      await page.keyboard.press("Enter");
-      await browserExpect(trigger).toHaveAttribute("aria-expanded", "true");
-      await page.keyboard.press("Tab");
-      await browserExpect(page.getByRole("checkbox", { name: "Canal A" })).toBeFocused();
-      await page.keyboard.press("Space");
-      await browserExpect(page.getByRole("checkbox", { name: "Canal A" })).toBeChecked();
-      await page.getByRole("checkbox", { name: "Canal B" }).click();
-      await browserExpect(trigger).toHaveAttribute("aria-expanded", "true");
-      await browserExpect(page.getByRole("checkbox", { name: "Canal A" })).toBeChecked();
-      await browserExpect(page.getByRole("checkbox", { name: "Canal B" })).toBeChecked();
-      await browserExpect(page.locator("output")).toHaveText(
-        "keep=value&channel=Canal+A&channel=Canal+B",
-      );
-      await page.keyboard.press("Escape");
-      await browserExpect(trigger).toHaveAttribute("aria-expanded", "false");
-      await browserExpect(trigger).toBeFocused();
-      await trigger.click();
-      if (mobile) await outside.tap();
-      else await outside.click();
-      await browserExpect(trigger).toHaveAttribute("aria-expanded", "false");
-      await browserExpect(outside).toBeFocused();
-      await trigger.click();
-      if (mobile) {
-        await manager.locator("button[aria-controls]").focus();
-        await page.keyboard.press("Enter");
-      } else {
-        await manager.locator("button[aria-controls]").click();
-      }
-      await browserExpect(trigger).toHaveAttribute("aria-expanded", "false");
-      await browserExpect(triggers.nth(1)).toHaveAttribute("aria-expanded", "true");
-      await browserExpect(triggers.nth(1)).toBeFocused();
-      if (mobile) {
-        // The preceding trigger stays above the open panel and is reachable by touch.
-        await trigger.tap();
-        await browserExpect(triggers.nth(1)).toHaveAttribute("aria-expanded", "false");
-        await browserExpect(trigger).toHaveAttribute("aria-expanded", "true");
-        await browserExpect(page.locator('button[aria-expanded="true"]')).toHaveCount(1);
-      }
-      await page.keyboard.press("Escape");
-      await trigger.click();
-      await browserExpect(page.getByRole("checkbox", { name: "Canal A" })).toBeChecked();
-      await page.getByRole("checkbox", { name: "Canal B" }).click();
-      await browserExpect(page.getByRole("checkbox", { name: "Canal B" })).not.toBeChecked();
-      await browserExpect(trigger).toHaveAttribute("aria-expanded", "true");
-      await browserExpect(page.locator("output")).toHaveText("keep=value&channel=Canal+A");
+      await browserExpect(house).toHaveAttribute("aria-pressed", "true");
+      await browserExpect(imob).toHaveAttribute("aria-pressed", "false");
+      await imob.click();
+      await browserExpect(imob).toHaveAttribute("aria-pressed", "true");
+      await browserExpect(house).toHaveAttribute("aria-pressed", "false");
+      await house.click();
+      await browserExpect(house).toHaveAttribute("aria-pressed", "true");
+      await browserExpect(imob).toHaveAttribute("aria-pressed", "false");
+      await browserExpect(page.locator("output")).toContainText("channel=DIRECIONAL+VENDAS+SPC");
       await outside.focus();
       await browserExpect(trigger).toHaveAttribute("aria-expanded", "false");
       // Click events without pointer/focus still enforce a single controlled panel.
@@ -237,7 +202,7 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1").each([
       await browserExpect(trigger).toHaveAttribute("aria-expanded", "false");
       await browserExpect(triggers.nth(1)).toHaveAttribute("aria-expanded", "true");
       await outside.click();
-      const companyTrigger = triggers.nth(3);
+      const companyTrigger = triggers.nth(2);
       const company = page.locator("#filter-panel-company");
       const dash = company.getByRole("checkbox", { name: "-", exact: true });
       for (let cycle = 0; cycle < 8; cycle++) {
@@ -272,18 +237,8 @@ it.runIf(process.env.DASHBOARD_FILTERS_BROWSER === "1").each([
         await page.keyboard.press("Tab");
         await browserExpect(outside).toBeFocused();
         await browserExpect(companyTrigger).toHaveAttribute("aria-expanded", "false");
-        await browserExpect(page.locator("output")).toHaveText("keep=value&channel=Canal+A");
-        await trigger.click();
-        for (const name of ["Direcional", "SPC"]) {
-          const checkbox = channel.getByRole("checkbox", { name, exact: true });
-          await checkbox.click();
-          await browserExpect(checkbox).toBeChecked();
-          await checkbox.press("Space");
-          await browserExpect(checkbox).not.toBeChecked();
-        }
-        await page.keyboard.press("Escape");
-        await browserExpect(trigger).toBeFocused();
-        await browserExpect(page.locator("output")).toHaveText("keep=value&channel=Canal+A");
+        await browserExpect(page.locator("output")).toContainText("channel=DIRECIONAL+VENDAS+SPC");
+        await browserExpect(house).toHaveAttribute("aria-pressed", "true");
       }
       await page.evaluate("window.unmountFilters()");
       await browserExpect(menus).toHaveCount(0);
