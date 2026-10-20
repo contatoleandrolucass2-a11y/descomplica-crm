@@ -105,6 +105,21 @@ describe("release-candidate migration train", () => {
     expect(plan.tests).toBe(2049);
   });
 
+  it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
+    const [fixture, harness] = await Promise.all([
+      readFile(
+        path.join(repositoryRoot, "tests/fixtures/compact-user-access/page-data.test.sql"),
+        "utf8",
+      ),
+      readFile(path.join(repositoryRoot, "scripts/qa/compact-user-access.mjs"), "utf8"),
+    ]);
+
+    expect(fixture).toContain(
+      "\\ir ../../../supabase/migrations/20261020130000_dashboard_imob_goals.sql",
+    );
+    expect(harness).toContain("const expectedPlans = [116, 8, 14, 29];");
+  });
+
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
     const sql = await readFile(
       path.join(repositoryRoot, "supabase/migrations", administratorProtectionMigration),
