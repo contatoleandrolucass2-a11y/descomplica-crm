@@ -24,6 +24,13 @@
   aprovou 3.953 testes com 102 skips; 36 testes focados da coleta Salesforce e
   53 testes dos gates alterados passaram. Preview com CSS compilado aprovou 12
   combinações de largura/tema, inclusive 320 px, sem rolagem horizontal.
+- PR #274 aberto no SHA `984215e16ae927835ecb15371dbfec5f8b885d40`.
+  A CI `39373995762` aprovou validate e restore isolado, inclusive as 2.047
+  asserções pgTAP. O gate visual reprovou somente oito referências esperadas da
+  rota Agendamentos, em diferentes larguras/temas, devido ao novo espaçamento do
+  estado sem snapshot v3. O artefato Linux `12243582943` foi revisado; apenas
+  essas oito imagens foram promovidas, preservando as outras 234 referências.
+  Nova CI integral é obrigatória antes de integrar.
 - Limites do host: pgTAP não executou porque PostgreSQL/Docker local não está
   disponível. Os testes físicos POSIX do monitor e release Meta Ads falham no
   Windows por ACL/permissões e fixtures Linux; são alheios aos arquivos
