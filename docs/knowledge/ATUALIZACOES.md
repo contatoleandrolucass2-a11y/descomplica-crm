@@ -61,6 +61,79 @@
   de navegador de Previsão aprovados. Vitest aprovou 4.063 testes. A suíte Node
   aprovou 1.595, ignorou 19 e repetiu somente as três falhas POSIX já conhecidas
   do Meta Ads no Windows; a CI Linux permanece como gate conclusivo.
+- A CI Linux `39508368548` aprovou integralmente o head `c6fa842c`, incluindo
+  validacao, release-gates e restauracao isolada. A primeira tentativa encontrou
+  HTTP 403 temporario na fonte oficial de ITBI; a repeticao respondeu e concluiu
+  todos os gates. A reconciliacao preservou estas evidencias junto das alteracoes
+  concorrentes de `main` em `22abfd7d`.
+
+## 2026-10-20: integracao final do ajuste do Associativo
+
+- Fonte GitHub: PR #280 integrado em `2026-10-20T20:09:56Z`, commit
+  `ee451647dc895dafe83be17604849e0cb163c1dc`. A CI `39482677925` aprovou
+  integralmente o head `cab7edb5f75cbb7acbc9c832ed2de491f8d0d153`,
+  incluindo release-gates e restauracao isolada.
+- CI de publicacao em main: `39489641763`, no commit integrado exato.
+  Conferida concluida/success em `2026-10-20T22:01Z`, com validate,
+  isolated-restore, release-gates e promotable-image aprovados.
+  Fetch confirmou main ainda no commit integrado.
+- Retomada antes de promover: health publico em `2026-10-20T22:01:35Z`
+  continua ok em `50f11d326cdd37b051db46f1dd1015076b85d545`. Ledger concorda,
+  deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, publicado em
+  `2026-10-20T17:51:11.098Z`, sem pendencia. Naquela consulta a publicacao
+  do Associativo ainda nao havia ocorrido; o frescor foi repetido na trava.
+- Publicado pelo coordenador `release:production deploy` em
+  `2026-10-20T22:04:33.591Z` (19:04:33 America/Sao_Paulo), deployment
+  `89e8f722-2bcf-4b65-9927-5a13f06fba22`, SHA
+  `ee451647dc895dafe83be17604849e0cb163c1dc`, sem pendencia.
+  GET publico `/api/health` em `22:04:38Z` retornou HTTP 200/ok e esse SHA.
+  Imagem anterior preservada; sem recovery, migration ou mudanca de config.
+- Artefato `promotable-image-ee451647dc895dafe83be17604849e0cb163c1dc`
+  da CI main: checksum e revision conferidos, sem rebuild. Digest de config
+  da CI `sha256:ed5b69c4d14c2dfaab837611866c649719fe6bfc5b2e89a74243d6e722405c52`;
+  ID local/manifesto OCI
+  `sha256:88e085d2cca93d0fb18faa3e582a266cd2c7580f947ecf45706bce94d9e18e64`.
+  Cadeia de hashes, plataforma linux/amd64 e 11 camadas comprovadas no
+  mesmo arquivo; `image:prove` aprovou homologacao e producao na mesma imagem.
+- Validacao local combinada: formatacao, lint, typecheck e build aprovados.
+  Vitest completo teve 4063 aprovados, 102 skips e tres timeouts no Windows;
+  a cadeia operacional nao foi executada nessa tentativa. Os dois testes
+  de DevTools passaram na repeticao focada. O teste financeiro restante
+  passou isoladamente em 3,82 s, sem mudar codigo, asserts ou prazo de 5 s.
+  A suite Linux integral passou no job validate da CI do head exato.
+  Limite: nao registrar a suite Windows como integralmente aprovada.
+  Reavaliar se o timeout persistir isoladamente ou aparecer na CI Linux.
+- Impressao combinada: 74 testes focais aprovados e QA dos dois fluxos nos
+  tres temas saiu 0, com Registro unico e valores iguais aos da tela.
+  Taxas, juros, ITBI, despachante e seguro preservados. Nenhuma migration,
+  workflow n8n ou dado remoto alterado. Usuario confirmou Previsao concluida
+  em outro chat e excluiu sua migration deste trabalho.
+- Pos-publicacao: nova aba do navegador abriu `/login`, sem sessao autenticada.
+  Nao houve contorno de login, renovacao da sessao existente ou mutacao de
+  proposta real. Jornada autenticada em producao nao foi reexecutada;
+  sua verificacao funcional e sintetica na CI/QA. Reavaliar esse limite
+  quando houver sessao legitimamente disponivel. Health e ledger confirmam
+  a publicacao, nao substituem essa verificacao da jornada.
+- O fechamento inicialmente documental encontrou bloqueio de auditoria na
+  CI `39505699301` do PR #284, em `2026-10-20T22:10Z`. Banco de advisories
+  passou a apontar tres altos: GHSA-22jm-h49p-29qw, GHSA-46jr-4wx8-v453
+  e GHSA-587h-7wmj-h5pm. Nao ignorar o gate nem atribuir falha ao calculo.
+  Override existente do SDK Next DevTools atualizado para 1.32.0 e Vite
+  da cadeia Vitest fixado em 8.2.4; transitivas exigidas atualizadas.
+  Mudancas incidentais de Browserslist foram excluidas do lockfile.
+  `pnpm why` confirma escopo de desenvolvimento, sem mudar dependencias
+  de runtime ou PostCSS/Nanoid de Next/Tailwind. Instalacao frozen e
+  supply-chain aprovadas, sem relaxar politicas. `devtools:check` passou
+  nos dois servidores com allowlists preservadas; `audit --audit-level high`
+  saiu 0, com apenas um moderado restante. Fontes e limites no runbook
+  local-devtools. CI completa ainda exigida para integrar o fechamento.
+- O fechamento altera documentos e ferramentas, sem efeito no runtime.
+  A publicacao no Git e a sincronizacao no Obsidian nao exigem outro deploy
+  ou reinicio do site. Preservar a imagem publicada ee451647.
+- Referencias:
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/280>,
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39482677925>,
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39489641763>.
 
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 

@@ -12,6 +12,15 @@
   severidade detectado durante a repetição da CI.
 - Estabiliza o teste visual da grade de Previsão ao aguardar o fim da transição
   CSS antes de comparar as cores do grupo e da métrica ativa.
+## 2026-10-20 - Evidencias da publicacao do Associativo
+
+- Registra a integracao do PR #280, CI completa, artefato imutavel,
+  publicacao protegida e verificacao de health do SHA ee451647.
+- Documenta limites da validacao local e do acesso autenticado, sem nova
+  alteracao de runtime, migration ou reinicio do site.
+- Atualiza SDK do Next DevTools para 1.32.0 e Vite do Vitest para 8.2.4,
+  resolvendo tres avisos altos que bloquearam a CI documental. Mantem
+  allowlists, politicas de instalacao e dependencias do runtime.
 
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 

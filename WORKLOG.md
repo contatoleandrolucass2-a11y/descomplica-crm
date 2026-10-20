@@ -27,6 +27,20 @@ Com Node 24.19.0, instalação congelada, audit sem alta/crítica, lint, typeche
 formatação, build de 57 rotas e os 12 cenários de navegador de Previsão passaram.
 A aplicação aprovou 4.063 testes; a suíte operacional aprovou 1.595 e repetiu
 somente as três limitações POSIX conhecidas do Meta Ads no Windows.
+## 2026-10-20 - Publicacao do ajuste minimo do Associativo
+
+PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.
+O coordenador publicou a imagem imutavel em 20/10/2026 as 19:04:33 de
+Sao Paulo; health publico confirmou o SHA. Registro consolidado vale
+tambem na documentacao A4 integrada dos PRs de impressao.
+Recibo, provas do artefato, timeouts locais e limite do smoke autenticado
+constam em docs/knowledge/ATUALIZACOES.md. Nenhuma migration aplicada.
+O gate de auditoria do PR documental encontrou tres novos avisos altos
+no SDK do Next DevTools e no Vite do Vitest. Atualizados somente esses
+overrides e transitivas necessarias. Instalacao frozen, supply chain,
+protocolo dos DevTools e auditoria high aprovados; um moderado permanece.
+Este fechamento de documentos/ferramentas nao requer nova publicacao
+do runtime. Sem excecao no audit e sem ampliar permissoes dos MCPs.
 
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
