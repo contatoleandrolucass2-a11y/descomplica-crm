@@ -38,6 +38,21 @@ Durante a reconciliação final, o registro publicou também
 `GHSA-587h-7wmj-h5pm` para o Vite transitivo do Vitest. O override mínimo fixa
 `8.2.4`; a alteração permanece restrita à ferramenta de testes.
 
+## 2026-10-20 - Publicacao do ajuste minimo do Associativo
+
+PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.
+O coordenador publicou a imagem imutavel em 20/10/2026 as 19:04:33 de
+Sao Paulo; health publico confirmou o SHA. Registro consolidado vale
+tambem na documentacao A4 integrada dos PRs de impressao.
+Recibo, provas do artefato, timeouts locais e limite do smoke autenticado
+constam em docs/knowledge/ATUALIZACOES.md. Nenhuma migration aplicada.
+O gate de auditoria do PR documental encontrou tres novos avisos altos
+no SDK do Next DevTools e no Vite do Vitest. Atualizados somente esses
+overrides e transitivas necessarias. Instalacao frozen, supply chain,
+protocolo dos DevTools e auditoria high aprovados; um moderado permanece.
+Este fechamento de documentos/ferramentas nao requer nova publicacao
+do runtime. Sem excecao no audit e sem ampliar permissoes dos MCPs.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas

@@ -187,6 +187,32 @@ allowlist foi ampliada. `pnpm devtools:check` aprovou initialize, tools/list e
 docs locais; 24 testes de DevTools aprovados com o novo SDK. Auditoria sem
 vulnerabilidades conhecidas. Validacao Linux segue exigida na CI do PR #156.
 
+## Revalidacao do SDK em 20/10/2026
+
+A CI do fechamento do Associativo encontrou novos advisories no banco npm
+apos a CI da aplicacao ja ter sido aprovada. O override do Next DevTools foi
+atualizado de SDK 1.31.0 para 1.32.0. `devtools:check` aprovou initialize,
+tools/list e docs locais com as mesmas allowlists; nenhum transporte HTTP
+foi habilitado. Os avisos oficiais descrevem isolamento de tarefas em
+servidores HTTP com taskStore e limite de validacao de entradas HTTP. O uso
+local permanece stdio, sem ampliar acesso ou alegar explorabilidade no CRM.
+
+Tambem foi fixado Vite 8.2.4 apenas na cadeia do Vitest, corrigindo o aviso
+Windows de launch-editor. Nao se adiciona Vite ao runtime Next.js.
+`pnpm why` confirmou as cadeias de desenvolvimento; PostCSS/Nanoid usados
+por Next e Tailwind ficaram intactos. Instalacao frozen aprovou politicas
+de supply chain sem novas excecoes. `pnpm audit --audit-level high` saiu 0:
+nenhum alto/critico e um moderado restante. Nao significa auditoria integral
+sem vulnerabilidades. A CI normal continua obrigatoria.
+
+Fontes oficiais consultadas em 20/10/2026:
+
+- [SDK: tarefas e sessoes](https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-22jm-h49p-29qw).
+- [SDK: validacao HTTP](https://github.com/modelcontextprotocol/typescript-sdk/security/advisories/GHSA-46jr-4wx8-v453).
+- [launch-editor: Windows](https://github.com/vitejs/launch-editor/security/advisories/GHSA-587h-7wmj-h5pm).
+- Registros npm exatos de `@modelcontextprotocol/sdk/1.32.0` e `vite/8.2.4`;
+  integrity SHA-512 correspondente no lockfile.
+
 ## Fontes
 
 - [npm: Next 0.4.0](https://registry.npmjs.org/next-devtools-mcp/0.4.0).
