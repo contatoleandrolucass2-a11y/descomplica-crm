@@ -15,6 +15,10 @@ despachante, seguro, calculadora avulsa ou workflows.
 Evidencias e limites em
 `docs/audits/associativo-ajuste-minimo-2026-10-20.md`.
 
+CI inicial do PR #280 aprovou validate e restore, mas o E2E concorrente ainda
+exigia reter anual acima do teto. Ajustado o contrato para verificar clamp
+exato, centavo abaixo preservado e centavo acima limitado, sem retirar o gate.
+
 ## 2026-10-20: proveniência visual de Agendamentos
 
 A referência promovida a partir do diagnóstico da CI preservou a marca de

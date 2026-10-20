@@ -9,6 +9,8 @@
 - Mostra datas e aprovacao reais da previa e preserva o saldo parcelado.
 - Simplifica a composicao para um valor dinamico de Registro e remove
   a nota visual solicitada, sem mudar taxas nem juros.
+- Alinha o E2E concorrente ao teto imediato das anuais, com fronteiras de
+  um centavo e presenca obrigatoria dos dois resultados.
 
 ## 2026-10-20 - Candidato visual protegido para Agendamentos
 

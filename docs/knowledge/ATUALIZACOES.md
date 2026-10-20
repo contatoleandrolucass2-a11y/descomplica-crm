@@ -34,6 +34,12 @@
   CI main `39421287684` concluiu com sucesso. Deploy externo registrado em
   `2026-10-20T13:12:50.271Z`, ID `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`,
   sem pendencia. Isso nao comprova publicacao da correcao local.
+- PR #280, CI `39433482232`: validate e isolated-restore aprovados.
+  Release-gates bloqueou na expectativa antiga do E2E concorrente, que
+  exigia manter anual acima do teto no campo (`annual_limit_input_not_applied`).
+  O contrato agora verifica clamp exato, preservacao do centavo abaixo e
+  bloqueio do centavo acima, com os dois resultados montados. Nao foi removido
+  o gate; nova CI integral obrigatoria. Nenhuma publicacao nessa tentativa.
 
 ## 2026-10-20: abertura da correcao de ajustes e anuais do Associativo
 
