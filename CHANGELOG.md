@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-20 - Data opcional de comparecimento no coletor
+
+- Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da
+  validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
+  para valores inválidos.
+
 ## 2026-10-20 - Candidato visual protegido para Agendamentos
 
 - Inclui o painel de Agendamentos no workflow isolado que produz referências
