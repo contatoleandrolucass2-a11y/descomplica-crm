@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-19 - Impressão A4 do Associativo
+
+- Separa as ações `Imprimir linear` e `Imprimir escalonado` no resultado do
+  Associativo.
+- Gera uma folha A4 limpa com dados reais da proposta, valores sem e com
+  correção, sinais e anuais em linhas independentes.
+- Usa os quatro blocos oficiais de 40%, 30%, 20% e 10% no fluxo escalonado,
+  sem alterar o motor financeiro.
+
 ## 2026-10-20 - Data opcional de comparecimento no coletor
 
 - Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da

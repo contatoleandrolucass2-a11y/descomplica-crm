@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-19 - Layouts de impressão do Associativo
+
+- Adicionados dois comandos de impressão: linear e escalonado.
+- A folha A4 usa somente resultados do motor vigente e preserva a separação de
+  entrada, cada sinal, cada anual e mensais.
+- O modo escalonado apresenta os blocos calculados de 40%, 30%, 20% e 10%.
+- Testes focados conferem ações, linhas independentes, fechamento dos blocos e
+  regras de impressão A4. Publicação depende de gates locais, PR, CI completa e
+  coordenador protegido.
+
 ## 2026-10-20: marcador vazio de comparecimento no Salesforce
 
 A primeira coleta real do contrato v3 confirmou 1.281 agendamentos e bloqueou
