@@ -80,9 +80,10 @@ describe("DashboardMonthlyHistory", () => {
       "Agendamentos",
       "Visitas",
       "Pastas",
+      "Pastas aprovadas",
       "Vendas",
     ]);
-    const sales = figures[4]!;
+    const sales = figures[5]!;
     expect(elements(sales, "span").map(text)).toEqual(["0", "Sem histórico", "20"]);
     expect(elements(sales, "svg").map((svg) => elements(svg, "rect").length)).toEqual([2, 1, 2]);
     expect(
@@ -98,7 +99,7 @@ describe("DashboardMonthlyHistory", () => {
         { month: "2026-02", readings: [{ key: "sales", value: 40 }] },
       ],
     });
-    const sales = elements(root, "figure")[4]!;
+    const sales = elements(root, "figure")[5]!;
     expect(
       elements(sales, "svg").map((svg) => attribute(elements(svg, "rect")[1]!, "width")),
     ).toEqual(["25", "100"]);
@@ -133,7 +134,7 @@ describe("DashboardMonthlyHistory", () => {
     expect(text(missing)).not.toMatch(/NaN|Infinity/);
     const zero = render({ months: [{ month: "2026-09", readings: [{ key: "sales", value: 0 }] }] });
     expect(text(zero)).not.toContain("Sem histórico mensal disponível.");
-    expect(elements(elements(zero, "figure")[4]!, "span").map(text)).toEqual(["0"]);
+    expect(elements(elements(zero, "figure")[5]!, "span").map(text)).toEqual(["0"]);
   });
 
   it("uses unique IDs for multiple cards and no inline CSS", () => {

@@ -87,11 +87,12 @@ export async function loadDashboardTeam(
 ): Promise<DashboardTeamResult> {
   if (
     !authorization.permissions.includes("crm.ranking.view") ||
-    !authorization.permissions.includes("crm.dashboard.all.view")
+    (!authorization.permissions.includes("crm.dashboard.all.view") &&
+      !authorization.permissions.includes("crm.dashboard.without_canal_imob.view"))
   ) {
     return unavailable("Sem acesso aos dados da equipe.");
   }
-  if (view !== "all") return unavailable("Equipe indisponivel nesta visao.");
+  if (view === "with_canal_imob") return unavailable("Equipe indisponivel nesta visao.");
 
   const expected = headerSchema.safeParse({
     id: dashboard.id,

@@ -23,8 +23,26 @@ export function clampPercentage(value: number | null): number {
 
 export type DashboardMetricMap = Record<DashboardStageKey, DashboardMetric>;
 
+export type DashboardFunnelKey = DashboardStageKey | "approved-folders";
+
+export const DASHBOARD_FUNNEL_STAGES = [
+  { key: "opportunities", label: "Oportunidades" },
+  { key: "appointments", label: "Agendamentos" },
+  { key: "visits", label: "Visitas" },
+  { key: "folders", label: "Pastas" },
+  { key: "approved-folders", label: "Pastas aprovadas" },
+  { key: "sales", label: "Vendas" },
+] as const satisfies ReadonlyArray<{ key: DashboardFunnelKey; label: string }>;
+
 export interface FunnelReading {
   key: DashboardStageKey;
+  label: string;
+  value: number | null;
+  conversion: number | null;
+}
+
+export interface DashboardFunnelReading {
+  key: DashboardFunnelKey;
   label: string;
   value: number | null;
   conversion: number | null;
