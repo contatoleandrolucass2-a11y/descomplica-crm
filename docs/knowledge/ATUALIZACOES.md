@@ -1,5 +1,39 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: metas do Canal Parcerias editáveis e publicadas
+
+- Escopo restrito a `/app/configuracoes/metas/parcerias`. O canal deixou o
+  rascunho inativo de política comercial e passou a usar a mesma meta ativa,
+  permissão `crm.settings.manage`, validação, proteção de mês obsoleto e botão
+  `Salvar alterações` da Direcional Vendas. A RPC versionada existente mantém
+  o recorte de Parcerias e fixa no servidor os campos que não pertencem ao seu
+  funil. Nenhuma outra página, migration, dado remoto ou workflow n8n mudou.
+- PR #272 integrado em `dac2e11a6332cc90472118b7b0bb96c29da01122` após a CI
+  de PR `39373968044` aprovar `validate`, `isolated-restore` e `release-gates`.
+  A CI de `main` `39378619404` aprovou os quatro jobs obrigatórios, incluindo
+  `promotable-image`, no mesmo SHA.
+- Artefato `12243944777`: digest do ZIP
+  `4064e65ff331adda30c6cb01855874b7526984235ac62d2870b716d23fe60f5e` e
+  `image.tar.gz` SHA-256
+  `f1a55a1d0d25fa312eba977a5bb241ea25135d36bb123567022a9f869c45e2e0`.
+  Revisão conferida; config da CI `sha256:54177a6c2a878ca69c5e88b0318ff5c30f6edc39eeec727a28fc834d68c6d723`
+  e manifesto/ID containerd `sha256:66664cb7596d2e893fdfcb45a5104c1fa3799834d0a59b3ae1678251bfa49ca0`
+  foram ligados pelo mesmo índice OCI, 11 camadas, `rootfs.diff_ids`, plataforma
+  linux/amd64 e label da revisão. `image:prove` aprovou os dois perfis sem
+  rebuild, retag ou impressão de segredos.
+- O coordenador `release:production` publicou em `2026-10-20T06:44:59.559Z`
+  (03:44:59 America/Sao_Paulo), deployment
+  `c9e57458-9b9d-4023-911d-c4b2ecd6add7`. Baseline confirmada imediatamente
+  antes: deployment `979fb2df-a353-4df4-9c8b-b28caf2a9cf3`, SHA `06a41f76`,
+  publicada em `2026-10-20T02:57:56.421Z`, sem pendência. Consulta final de
+  `main`/CI, travas compartilhadas e CAS ocorreram no minuto da troca.
+- Pós-publicação em `2026-10-20T06:45:13Z`: ledger sem pendência, container
+  healthy na imagem exata, health público HTTP 200/status ok/versão `dac2e11a`
+  e GET anônimo da rota 307 para `/login`. A edição autenticada foi comprovada
+  por fixtures sintéticas locais e na CI; nenhum registro real foi usado como
+  teste. Fontes: PR #272, Actions `39373968044`/`39378619404`, artefato
+  `12243944777`, coordenador e `https://crm.descomplicapro.com.br/api/health`.
+
 ## 2026-10-19: Associativo automatico publicado
 
 - Encerramento documental: registro final enviado ao PR #267, separado do runtime ja publicado. Em 16:21 UTC, CI documental `39284638442` aguardava runner; merge automatico nao e permitido pelo repositorio. Pendencia restrita a integracao desse registro apos CI aprovada, sem novo deploy. Obsidian sincronizado com o registro completo; nenhum teste ou protecao dispensado.
