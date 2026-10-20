@@ -1830,3 +1830,6 @@ dependente da autorização específica aplicável.
   o gate visual capturou os cabeçalhos ativo e de grupo em pontos diferentes da
   transição CSS. O contexto ativo passou a não animar a cor; hover comum mantém
   a transição e a indicação visual solicitada continua coordenada.
+- Antes do build da quarta CI, um advisory recém-publicado bloqueou Vite 8.2.0
+  a 8.2.3, dependência transitiva do Vitest. O projeto passou a forçar Vite
+  8.2.4, versão corrigida, sem trocar a versão do executor de testes.

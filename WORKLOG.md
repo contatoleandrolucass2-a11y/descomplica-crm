@@ -24,6 +24,9 @@ explicitamente esse acesso, sem ampliar grants.
 A CI visual ainda capturou os cabeçalhos ativo e de grupo em instantes distintos
 da transição de 140 ms. Os quatro elementos do contexto ativo agora recebem a
 mesma cor imediatamente, preservando a transição apenas para hover comum.
+Durante a execução seguinte, o audit passou a reportar o advisory
+GHSA-587h-7wmj-h5pm no Vite transitivo do Vitest. O override usa a correção
+8.2.4 e mantém o Vitest na versão já validada pelo projeto.
 
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 

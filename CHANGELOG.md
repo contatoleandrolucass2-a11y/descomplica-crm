@@ -10,6 +10,8 @@
   a fonte analítica quando o contrato não está disponível.
 - Atualiza o SDK MCP transitivo do diagnóstico local para a versão corrigida,
   removendo o bloqueio de segurança encontrado pela CI.
+- Fixa o Vite transitivo dos testes em 8.2.4 para corrigir o advisory publicado
+  durante a validação do PR.
 - Torna imediato o destaque coordenado de corretor, métrica e empreendimento,
   evitando estados intermediários durante a navegação pela tabela.
 
