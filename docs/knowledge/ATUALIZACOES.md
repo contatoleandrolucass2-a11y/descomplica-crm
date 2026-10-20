@@ -108,6 +108,7 @@
   dia corrente, e atualizacao dos relatorios a cada 30 minutos. Fontes indicadas:
   relatorios Salesforce `00OU600000EjufWMAR` e `00OTT000009j0l32AA`; nenhum
   dado privado foi copiado para esta nota e nenhuma mutacao remota ocorreu.
+
 ## 2026-10-20: metas do Canal Parcerias editáveis e publicadas
 
 - Escopo restrito a `/app/configuracoes/metas/parcerias`. O canal deixou o
