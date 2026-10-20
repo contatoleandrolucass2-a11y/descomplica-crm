@@ -55,6 +55,15 @@
   antes e depois do refresh, mantendo prova de atualizacao unica, payload RSC
   completo, URL, rolagem e secao aberta. Nova CI integral do SHA exato e
   obrigatoria; o resultado anterior nao autoriza merge nem publicacao.
+- CI `39378024224`: o refresh atualizado passou com uma unica requisicao RSC,
+  resposta completa e preservacao de URL, rolagem, secao aberta e canal Imob.
+  `validate` e `isolated-restore` passaram. O gate visual aprovou os checks
+  funcionais, acessibilidade, teclado e zoom e reteve somente 11 referencias de
+  `/app` por `dimensions_changed`: a altura diminuiu de acordo com a compactacao
+  solicitada. Artefato `12246700076` inspecionado em desktop, celular e escuro;
+  adotadas apenas as 11 imagens do dashboard, com proveniencia da execucao,
+  mantendo as outras 231 e os limiares. Integridade local: 15 testes aprovados
+  e 1 opt-in ignorado. Nova CI verify e obrigatoria antes de merge/deploy.
 
 ## 2026-10-20: abertura do dashboard House e Imob
 

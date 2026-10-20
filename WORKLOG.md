@@ -50,6 +50,16 @@ prova RSC. O verificador agora confirma Imob ativo e House inativo antes e depoi
 do refresh, preservando a exigência de uma única atualização, payload completo,
 URL, rolagem e seção aberta. Nova CI integral continua obrigatória.
 
+A CI `39378024224` comprovou o refresh corrigido: uma atualização, payload RSC
+completo, URL, rolagem, seção aberta e canal Imob preservados. `validate` e
+restauração isolada passaram; a matriz autenticada aprovou rotas, temas,
+acessibilidade, teclado e zoom, mas reteve 11 imagens do `/app` cuja altura caiu
+com a compactação solicitada. As capturas do artefato `12246700076` foram
+inspecionadas em desktop, celular e tema escuro. Promovidas somente essas 11,
+com a proveniência da CI; as outras 231 e os limiares foram preservados. Os 15
+testes de integridade passaram e um opt-in permaneceu ignorado. Nova CI integral
+é obrigatória antes de integrar ou publicar.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o
