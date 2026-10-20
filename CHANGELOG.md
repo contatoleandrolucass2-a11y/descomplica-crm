@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-20 - Indicadores e detalhamento de Agendamentos
+
+- Adiciona seis indicadores em uma linha, incluindo velocímetro da meta mensal
+  calculada pela quantidade vigente de corretores cadastrados.
+- Organiza o diário em largura total; abaixo, exibe previsto versus realizado,
+  semana e mês; em seguida, os rankings regional, gerente, responsável e conta.
+- Acrescenta a tabela filtrada com data, horário, comparecimento, realização,
+  responsáveis e conta, com cabeçalho fixo e rolagem vertical.
+- Valida em cada coleta os campos vigentes dos relatórios Salesforce e mantém
+  snapshots analíticos v1/v2 legíveis durante a adoção do contrato v3.
+
 ## 2026-10-19 - Leitura horizontal dos gráficos de Agendamentos
 
 - Publicado pelo PR #270 no SHA `06a41f76`, com CI integral, artefato imutável, promoção protegida e health na versão exata.

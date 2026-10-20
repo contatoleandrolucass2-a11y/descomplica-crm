@@ -72,6 +72,45 @@ describe("appointment chart analysis", () => {
     ]);
   });
 
+  it("derives the six indicators, operational comparison, rankings and table from v3", () => {
+    const input = slice({
+      version: 3,
+      brokerCount: 10,
+      appointments: [
+        {
+          createdAt: "2026-10-19T12:00:00Z",
+          scheduledAt: "2026-10-19T15:00:00Z",
+          attendedAt: "2026-10-19T15:30:00Z",
+          visitPerformed: true,
+          regionalManager: "Regional A",
+          salesManager: "Gerente A",
+          owner: "Responsável A",
+          accountName: "Conta A",
+          accountRanking: "Ouro",
+        },
+        {
+          createdAt: "2026-10-18T12:00:00Z",
+          scheduledAt: "2026-10-19T18:00:00Z",
+          attendedAt: null,
+          visitPerformed: false,
+          regionalManager: "Regional B",
+          salesManager: "Gerente B",
+          owner: "Responsável B",
+          accountName: "Conta B",
+          accountRanking: "Prata",
+        },
+      ],
+    });
+    const result = analyzeAppointments(input);
+    expect(result.brokerCount).toBe(10);
+    expect(result.plannedToday).toBe(2);
+    expect(result.performedToday).toBe(1);
+    expect(result.details).toHaveLength(2);
+    expect(result.regionalManagers?.map(({ label }) => label)).toEqual(["Regional A", "Regional B"]);
+    expect(result.accountRankings?.map(({ label }) => label)).toEqual(["Ouro", "Prata"]);
+    expect(result.dailyAverage).toBeCloseTo(13 / 19);
+  });
+
   it("keeps yearly monthly values independent of the other charts' selected month", () => {
     const result = analyzeAppointments(slice(), { month: "2026-09", year: "2026" });
     expect(result.total).toBe(10);

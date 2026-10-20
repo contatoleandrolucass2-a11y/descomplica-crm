@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-10-20: indicadores, rankings e tabela de Agendamentos
+
+Demanda: reorganizar a página de Agendamentos com seis indicadores compactos,
+diário em largura total, dois grupos de gráficos e uma tabela detalhada. O
+velocímetro compara os agendamentos do mês selecionado com o total vigente de
+corretores; a média informa agendamentos por dia coberto. Hoje e ontem usam data
+de criação. Previsto e realizado usam, respectivamente, horário programado e
+visita realizada para a data de referência.
+
+O describe vigente dos relatórios `00OU600000ELaA6MAL` e
+`00OTT000009j0l32AA` confirmou os campos e tipos pedidos, sem extrair linhas.
+O coletor resolve e valida os rótulos a cada ciclo. O contrato v3 acrescenta a
+população de corretores e detalhes operacionais por visão; v1/v2 continuam
+legíveis. A RPC de etapa remove dados de outras etapas e apaga nome/ranking da
+conta quando falta `crm.ranking.view`; tabelas continuam sem SELECT direto.
+
+Testes focais de análise, interface, projeção Salesforce e release passaram.
+O preview sintético aprovou 12 combinações de tema/largura, sem overflow
+horizontal, colisão de rótulos, erro de navegador ou violação Axe. A validação
+pgTAP local ficou indisponível porque este host não possui Docker/Postgres local;
+a restauração isolada da CI permanece obrigatória antes de qualquer migration,
+integração ou publicação.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o

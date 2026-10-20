@@ -20,7 +20,8 @@ const owners = Array.from(
     `Responsável sintético ${String(i + 1).padStart(2, "0")} Nome completo longo para validar leitura integral`,
 );
 const fixture = {
-  version: 2,
+  version: 3,
+  brokerCount: 120,
   viewKey: "all",
   coverageStart: "2025-10-01",
   referenceDate: "2026-03-31",
@@ -68,6 +69,29 @@ const fixture = {
     [1, "2025-12-22", 0, 0, 0, 1, 0, 13, 0, 0, 0],
     [0, "2026-03-01", 0, 0, 0, 1, 0, 99999, 0, 0, -1],
   ],
+  appointments: Array.from({ length: 31 }, (_, day) =>
+    Array.from({ length: (day % 4) + 1 }, (_, record) => ({
+      createdAt: `2026-03-${String(day + 1).padStart(2, "0")}T12:${String(record).padStart(2, "0")}:00Z`,
+      scheduledAt:
+        day === 30 ? `2026-03-31T15:${String(record).padStart(2, "0")}:00Z` : null,
+      attendedAt:
+        day === 30 && record % 2 === 0
+          ? `2026-03-31T16:${String(record).padStart(2, "0")}:00Z`
+          : null,
+      visitPerformed: day === 30 && record % 2 === 0,
+      regionalManager: `Regional sintético ${(day % 3) + 1}`,
+      salesManager: [
+        "Ana Gerente sintética com sobrenome extenso",
+        "Bruno Gerente sintético",
+        "Clara Gerente sintética",
+        "Davi Gerente sintético",
+        "Eva Gerente sintética",
+      ][day % 5],
+      owner: owners[day % owners.length],
+      accountName: `Conta sintética ${String(day + 1).padStart(2, "0")}`,
+      accountRanking: ["Ouro", "Prata", "Bronze"][day % 3],
+    })),
+  ).flat(),
 };
 
 async function productionCss(viteCss) {
@@ -158,7 +182,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.dimensions.stores;fixture.facts=fixture.facts.map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -269,7 +293,7 @@ export async function runAppointmentsPreview() {
               );
             })
             .map((element) => ({ tag: element.tagName, class: element.className })),
-          sections: [...document.querySelectorAll("section")].map((element) => ({
+          sections: [...document.querySelectorAll("[data-appointments-chart]")].map((element) => ({
             heading: element.querySelector("h2")?.textContent,
             x: element.getBoundingClientRect().x,
             y: element.getBoundingClientRect().y,
@@ -308,10 +332,13 @@ export async function runAppointmentsPreview() {
           `Horizontal internal scrollbar ${theme}/${width}`,
         );
         check(
-          geometry.sections.every(
-            (section) => Math.abs(section.height - geometry.sections[0].height) < 1,
-          ),
-          `Uniform chart heights ${theme}/${width}`,
+          geometry.sections.slice(1, 4).every(
+            (section) => Math.abs(section.height - geometry.sections[1].height) < 1,
+          ) &&
+            geometry.sections.slice(4).every(
+              (section) => Math.abs(section.height - geometry.sections[4].height) < 1,
+            ),
+          `Uniform grouped chart heights ${theme}/${width}`,
         );
         check(
           geometry.labelWritingModes.every((mode) => mode === "horizontal-tb"),
@@ -325,23 +352,22 @@ export async function runAppointmentsPreview() {
           !record.violations.length,
           `Axe violations ${theme}/${width}: ${record.violations.map((item) => item.id).join(",")}`,
         );
-        check(geometry.sections.length === 7, `Seven charts ${theme}/${width}`);
+        check(geometry.sections.length === 8, `Eight charts ${theme}/${width}`);
         if (width === 1440)
           check(
-            geometry.sections[0].y === geometry.sections[1].y &&
-              geometry.sections[1].y === geometry.sections[2].y,
+            geometry.sections[1].y === geometry.sections[2].y &&
+              geometry.sections[2].y === geometry.sections[3].y,
             "Three charts side by side at 1440",
           );
         if (width === 1440) {
-          check(geometry.sections[0].hasVerticalScroll, "Daily chart uses vertical overflow");
           check(
-            geometry.sections[4].hasVerticalScroll,
+            geometry.sections[6].hasVerticalScroll,
             "Long responsible ranking uses vertical overflow",
           );
         }
       }
     }
-    const daily = region("Agendamentos por dia");
+    const daily = region("Evolução de agendamentos por dia");
     await expect(daily.getByRole("listitem")).toHaveCount(31);
     const barGeometry = await daily.getByRole("listitem").evaluateAll((items) =>
       items.map((item) => ({
@@ -390,10 +416,8 @@ export async function runAppointmentsPreview() {
     for (const [title, field] of [
       ["Ranking por gerente", 2],
       ["Ranking por responsável", 3],
-      ["Agendamentos por loja", 10],
-      ["Ranking por empreendimento", 6],
     ]) {
-      const dimension = { 2: "managers", 3: "owners", 10: "stores", 6: "developments" }[field];
+      const dimension = { 2: "managers", 3: "owners" }[field];
       const totals = new Map();
       for (const fact of fixture.facts.filter(
         (fact) => fact[0] === 1 && fact[1].startsWith("2026-03"),
@@ -420,7 +444,7 @@ export async function runAppointmentsPreview() {
     await expect(region("Agendamentos por mês")).toContainText("Dezembro");
     assert.equal(await daily.innerText(), dailyBefore, "Exclusive year must preserve daily chart");
     const annualBefore = await region("Agendamentos por mês").innerText();
-    await page.getByLabel("Período dos gráficos e rankings").fill("2026-01");
+    await page.getByLabel("Período dos gráficos, indicadores e tabela").fill("2026-01");
     assert.equal(
       await region("Agendamentos por mês").innerText(),
       annualBefore,
@@ -432,7 +456,7 @@ export async function runAppointmentsPreview() {
       "2025 exclusive year keeps daily March unchanged; global January keeps annual 2025 unchanged; zero months/weeks absent";
     await page.goto(origin);
     await page.keyboard.press("Tab");
-    await expect(page.getByLabel("Período dos gráficos e rankings")).toBeFocused();
+    await expect(page.getByLabel("Período dos gráficos, indicadores e tabela")).toBeFocused();
     // Chromium month inputs contain native month/year segments and a calendar button.
     // Traverse those native stops before checking the next application control.
     let tabStops = 0;
@@ -440,7 +464,7 @@ export async function runAppointmentsPreview() {
       !(await page
         .getByLabel("Ano", { exact: true })
         .evaluate((element) => element === document.activeElement)) &&
-      tabStops < 5
+      tabStops < 20
     ) {
       await page.keyboard.press("Tab");
       tabStops++;
@@ -454,19 +478,17 @@ export async function runAppointmentsPreview() {
       ),
     ).toBeVisible();
     await page.goto(`${origin}/?legacy=1`);
-    await expect(region("Ranking por empreendimento")).toContainText(
-      "Nome do empreendimento indisponível nesta atualização",
+    await expect(region("Ranking por gerente regional")).toContainText(
+      "Dados indisponíveis nesta atualização",
     );
     evidence.states =
-      "Null slice shows unavailable state; v1 slice refuses fabricated development ranking";
+      "Null slice shows unavailable state; v1 slice refuses fabricated operational rankings";
     await page.goto(`${origin}/?restricted=1`);
     check(
-      !(await region("Agendamentos por loja").innerText()).includes("Loja sintética"),
-      "Restricted store chart must not disclose fixture store names",
-    );
-    check(
-      !(await region("Ranking por empreendimento").innerText()).includes("Residencial sintético"),
-      "Restricted development chart must not disclose fixture development names",
+      (await region("Ranking das contas").innerText()).includes(
+        "Ranking das contas indisponível para seu perfil de acesso",
+      ),
+      "Restricted account ranking must stay unavailable",
     );
     evidence.largeValues = [];
     for (const width of [1440, 320]) {

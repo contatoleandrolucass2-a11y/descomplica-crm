@@ -1,5 +1,37 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: indicadores operacionais de Agendamentos — implementação local
+
+- Status: implementação e validação local concluídas na branch
+  `codex/agendamentos-indicadores-tabela`; CI Linux, migration remota, integração
+  e publicação ainda pendentes. A abertura partiu de `origin/main`
+  `2eb17cc052754519ebee1156060e394ea5728169`; produção observada respondeu HTTP
+  200, `status=ok` e versão `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+- O contrato analítico v3 adiciona quantidade vigente de corretores e os
+  detalhes operacionais por agendamento. A coleta descreve os relatórios a cada
+  ciclo e exige os campos Salesforce exatos antes de publicar. A verificação
+  observacional de metadados confirmou `Gerente Regional`, `Gerente de Vendas`,
+  `Corretor: Nome completo`, `Horário`, `Data de comparecimento`,
+  `Visita Realizada`, `Conta: Nome da conta` (`Activity.Account.Name`) e
+  `Conta: Ranking`; nenhum registro comercial foi exportado durante a inspeção.
+- A página passa a exibir seis indicadores, evolução diária em largura total,
+  previstos/realizados, semanas, meses, três rankings nominais, ranking de
+  conta e tabela operacional. O período selecionado usa Data de criação; a
+  média é diária no mês, previsto usa Horário e realizado exige
+  `VisitaRealizada=true`. Rankings ficam em ordem decrescente e dados de conta
+  são omitidos pelo backend sem `crm.ranking.view`.
+- Evidências locais: lint, typecheck e build de 57 rotas aprovados; Vitest
+  aprovou 3.953 testes com 102 skips; 36 testes focados da coleta Salesforce e
+  53 testes dos gates alterados passaram. Preview com CSS compilado aprovou 12
+  combinações de largura/tema, inclusive 320 px, sem rolagem horizontal.
+- Limites do host: pgTAP não executou porque PostgreSQL/Docker local não está
+  disponível. Os testes físicos POSIX do monitor e release Meta Ads falham no
+  Windows por ACL/permissões e fixtures Linux; são alheios aos arquivos
+  funcionais desta mudança e permanecem obrigatórios na CI Ubuntu. A migration
+  `20261020050000_appointments_operations_v3.sql` não foi aplicada remotamente;
+  exige autorização específica, backup, restore isolado e pgTAP aprovado antes
+  da mutação. Nenhuma publicação ou alteração de dados remotos foi feita.
+
 ## 2026-10-19: Associativo automatico publicado
 
 - Encerramento documental: registro final enviado ao PR #267, separado do runtime ja publicado. Em 16:21 UTC, CI documental `39284638442` aguardava runner; merge automatico nao e permitido pelo repositorio. Pendencia restrita a integracao desse registro apos CI aprovada, sem novo deploy. Obsidian sincronizado com o registro completo; nenhum teste ou protecao dispensado.
@@ -1423,3 +1455,27 @@ para `/login`. Nenhuma migration, dado remoto, integração ou workflow n8n foi
 modificado. A matriz com gráficos preenchidos é sintética; não houve acesso a
 sessão privada de produção. Fonte: PR270, GitHub Actions, artefato12234994906,
 coordenador de release, ledger e health público.
+
+### Abertura dos indicadores e da tabela de Agendamentos
+
+Em `2026-10-20T01:42:46-03:00`, o Git comum foi confirmado em
+`C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`. A branch
+`codex/agendamentos-indicadores-tabela` partiu de `origin/main`
+`2eb17cc052754519ebee1156060e394ea5728169`, sem mudanças locais. O health
+público retornou HTTP 200, `status=ok` e versão
+`06a41f767fc721d4e85ac10142697a92e0fee0e1`, que corresponde ao último runtime
+publicado. A CI de push mais recente de `main`, execução `39366805822`, terminou
+com falha no commit exclusivamente documental `2eb17cc0`; a CI anterior de
+`main`, execução `39357425838`, aprovou o runtime `06a41f76`. O cliente `gh` não
+está instalado; GitHub foi consultado pelo conector e Git por `fetch`.
+
+A demanda amplia o contrato de Agendamentos com seis indicadores, previsão e
+realização do dia, rankings regionais e de conta e uma tabela detalhada. O
+contrato vigente publica somente fatos agregados e não contém linhas
+individuais, horário, gerente regional, visita realizada nem ranking da conta.
+Esses campos devem ser resolvidos pelo metadado vigente do relatório Salesforce
+em cada coleta; nomes de API não serão inferidos, e dados pessoais ou linhas do
+relatório não serão registrados nesta nota. Fonte: código atual, relatórios
+`00OU600000ELaA6MAL` e `00OTT000009j0l32AA` indicados pelo usuário, GitHub
+Actions e health público. Alteração remota de schema, caso necessária, continua
+dependente da autorização específica aplicável.

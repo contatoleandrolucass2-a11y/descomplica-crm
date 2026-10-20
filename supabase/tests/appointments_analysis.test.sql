@@ -1,6 +1,6 @@
 begin;
--- 22 single assertions plus two three-role ACL matrices.
-select plan(28);
+-- 27 single assertions plus two three-role ACL matrices.
+select plan(33);
 
 create function pg_temp.analysis_fixture()
 returns jsonb language sql as $$
@@ -78,7 +78,33 @@ create function pg_temp.appointment_analysis() returns jsonb language sql as $$
     'views',(select jsonb_agg(jsonb_set(pg_temp.appointment_slice()-array['version','coverageStart','referenceDate'],
       '{viewKey}',to_jsonb(v))) from unnest(array['all','with_canal_imob','without_canal_imob']) v));
 $$;
-grant execute on function pg_temp.appointment_slice(), pg_temp.appointment_analysis() to service_role;
+create function pg_temp.appointment_slice_v3() returns jsonb language sql as $$
+  select jsonb_set(jsonb_set(jsonb_set(
+    pg_temp.appointment_slice(),'{version}','3'::jsonb),
+    '{brokerCount}','8'::jsonb),
+    '{appointments}','[{
+      "createdAt":"2026-08-04T12:00:00.000Z",
+      "scheduledAt":"2026-08-04T15:00:00.000Z",
+      "attendedAt":"2026-08-04T16:00:00.000Z",
+      "visitPerformed":true,
+      "regionalManager":"Synthetic regional",
+      "salesManager":"Appointment manager",
+      "owner":"Appointment owner",
+      "accountName":"Protected account",
+      "accountRanking":"Gold"
+    }]'::jsonb);
+$$;
+create function pg_temp.appointment_analysis_v3() returns jsonb language sql as $$
+  select jsonb_build_object('version',3,'coverageStart','2026-01-01',
+    'referenceDate','2026-08-04','brokerCount',8,
+    'views',(select jsonb_agg(
+      jsonb_set(pg_temp.appointment_slice_v3()
+        - array['version','coverageStart','referenceDate','brokerCount'],
+        '{viewKey}',to_jsonb(v))
+    ) from unnest(array['all','with_canal_imob','without_canal_imob']) v));
+$$;
+grant execute on function pg_temp.appointment_slice(), pg_temp.appointment_analysis(),
+  pg_temp.appointment_slice_v3(), pg_temp.appointment_analysis_v3() to service_role;
 select lives_ok($$select private.validate_crm_dashboard_analysis(pg_temp.analysis_fixture(),'2026-08-04')$$,
   'legacy v1 ingestion remains valid');
 select lives_ok($$select private.validate_crm_dashboard_analysis(pg_temp.appointment_analysis(),'2026-08-04')$$,
@@ -95,6 +121,15 @@ select throws_ok($$select private.validate_crm_dashboard_analysis(
 select throws_ok($$select private.validate_crm_dashboard_analysis(
   jsonb_set(pg_temp.appointment_analysis(),'{views,0,facts,2,10}','0'),'2026-08-04')$$,
   '22023','invalid dashboard analysis','duplicate v2 aggregate keys fail');
+select lives_ok($$select private.validate_crm_dashboard_analysis(
+  pg_temp.appointment_analysis_v3(),'2026-08-04')$$,
+  'v3 validates broker population and operational rows');
+select is(private.project_crm_appointments_analysis(
+  pg_temp.appointment_slice_v3(),true)#>>'{appointments,0,accountName}',
+  'Protected account','ranking permission preserves requested account details');
+select is(private.project_crm_appointments_analysis(
+  pg_temp.appointment_slice_v3(),false)#>>'{appointments,0,accountName}',
+  '','missing ranking permission redacts account names');
 
 select is(private.project_crm_appointments_analysis(pg_temp.appointment_slice(),true)#>'{dimensions,managers}',
   '["Appointment manager"]'::jsonb,'projection removes other-stage manager labels');
@@ -128,6 +163,13 @@ select is(public.ingest_crm_salesforce_snapshot(jsonb_set(pg_temp.analysis_paylo
 reset role;
 select is((select payload->'version' from public.crm_dashboard_analysis where view_key='all'),
   '2'::jsonb,'stored slices preserve version 2');
+select is(public.ingest_crm_salesforce_snapshot(jsonb_set(
+  pg_temp.analysis_payload('ac000000-0000-4000-8000-000000000002','2026-08-04T07:00:00Z'),
+  '{dashboard,analysis}',pg_temp.appointment_analysis_v3()))->>'status',
+  'succeeded','machine RPC accepts v3');
+select is((select jsonb_build_object('version',payload->'version','brokerCount',payload->'brokerCount')
+  from public.crm_dashboard_analysis where view_key='all'),
+  '{"version":3,"brokerCount":8}'::jsonb,'stored v3 slices preserve broker population');
 select set_config('test.appointment_snapshot',(select id::text from public.crm_dashboard_snapshots
   where snapshot_key='analysis-test'),true);
 set local role authenticated;

@@ -32,7 +32,17 @@ function input() {
           createdAt: "2026-01-15",
         },
       ],
-      appointments: [{ ...labels, appointmentCode: "AG-1", createdAt: "2025-10-01" }],
+      appointments: [{
+        ...labels,
+        appointmentCode: "AG-1",
+        createdAt: "2025-10-01T15:00:00Z",
+        scheduledAt: "2026-01-15T16:00:00Z",
+        attendedAt: "",
+        visitPerformed: false,
+        regionalManager: "Regional Internal",
+        accountName: "Account Internal",
+        accountRanking: "A",
+      }],
       visits: [{ ...labels, appointmentCode: "AG-1", attendedAt: "2025-12-31" }],
       folders: [
         { ...labels, recordId: "F-1", createdAt: "2026-01-15", status: "An\u00e1lise aprovada" },
@@ -50,7 +60,7 @@ function view(analysis, viewKey = "all") {
   return analysis.views.find((entry) => entry.viewKey === viewKey);
 }
 
-test("v2 keeps store and true development separate without changing count positions", () => {
+test("v3 keeps store and true development separate and publishes operational details", () => {
   const source = input();
   source.reports.appointments = [
     { ...source.reports.appointments[0], storeName: "Store A", development: "Development A" },
@@ -62,7 +72,8 @@ test("v2 keeps store and true development separate without changing count positi
     },
   ];
   const analysis = buildSalesforceSnapshot(source).payload.dashboard.analysis;
-  assert.equal(analysis.version, 2);
+  assert.equal(analysis.version, 3);
+  assert.equal(analysis.brokerCount, 0);
   const current = view(analysis);
   assert.deepEqual(current.dimensions.stores, ["Store A", "Store B"]);
   const appointments = current.facts.filter((fact) => fact[0] === 1);
@@ -81,8 +92,10 @@ test("v2 keeps store and true development separate without changing count positi
   assert.ok(current.facts.filter((fact) => fact[0] !== 1).every((fact) => fact[10] === -1));
   const legacy = structuredClone(analysis);
   legacy.version = 1;
+  delete legacy.brokerCount;
   for (const entry of legacy.views) {
     delete entry.dimensions.stores;
+    delete entry.appointments;
     entry.facts = entry.facts.filter((fact) => fact[0] !== 1).map((fact) => fact.slice(0, 10));
   }
   assert.equal(dashboardAnalysisSchema.safeParse(legacy).success, true);
@@ -126,6 +139,7 @@ test("uses normalized deduplicated records and emits contract-valid daily counts
     /PRIVATE|OP-1|AG-1|F-1|S-1|customerId|phone|recordId/,
   );
   assert.deepEqual(Object.keys(analysis).sort(), [
+    "brokerCount",
     "coverageStart",
     "referenceDate",
     "version",
@@ -228,6 +242,7 @@ test("missing dimensions use -1 and empty views never inherit labels", () => {
     viewKey: "with_canal_imob",
     dimensions: { managers: [], owners: [], companies: [], developments: [], stores: [] },
     facts: [],
+    appointments: [],
   });
 });
 
@@ -254,6 +269,7 @@ test("helper rejects invalid aggregates and oversized labels without truncation"
   const make = (row) =>
     buildDashboardAnalysis({
       referenceDate: "2026-01-15",
+      brokerCount: 0,
       views: [
         { viewKey: "all", stages: { ...stages, sales: [row] } },
         { viewKey: "with_canal_imob", stages },
@@ -342,6 +358,17 @@ test("measures realistic synthetic daily histories against the 8 MiB envelope wi
               date,
               amount: stage === 4 ? 250_000 : 0,
               approvedFolder: stage === 3 && monthDay % 2 === 0,
+              ...(stage === 1
+                ? {
+                    createdAt: `${date}T12:00:00Z`,
+                    scheduledAt: `${date}T15:00:00Z`,
+                    attendedAt: monthDay % 2 === 0 ? `${date}T16:00:00Z` : "",
+                    visitPerformed: monthDay % 2 === 0,
+                    regionalManager: `Regional sintetico ${broker % 3}`,
+                    accountName: `Conta sintetica ${broker}`,
+                    accountRanking: ["Ouro", "Prata", "Bronze"][broker % 3],
+                  }
+                : {}),
             };
             views[0].stages[stageKeys[stage]].push(row);
             views[channel === 0 ? 1 : 2].stages[stageKeys[stage]].push(row);
@@ -349,7 +376,7 @@ test("measures realistic synthetic daily histories against the 8 MiB envelope wi
         }
       }
     }
-    const analysis = buildDashboardAnalysis({ referenceDate, views });
+    const analysis = buildDashboardAnalysis({ referenceDate, views, brokerCount });
     const baseline = buildSalesforceSnapshot({
       ...input(),
       referenceDate,
@@ -379,7 +406,7 @@ test("measures realistic synthetic daily histories against the 8 MiB envelope wi
       }),
     );
   }
-  assert.ok(sizes[0] < 1_048_576);
-  assert.ok(sizes.at(-1) > 1_048_576);
-  assert.ok(sizes.every((bytes) => bytes <= MAX_SALESFORCE_INGESTION_BODY_BYTES));
+  assert.ok(sizes[0] < 3_000_000);
+  assert.ok(sizes[1] < MAX_SALESFORCE_INGESTION_BODY_BYTES);
+  assert.ok(sizes.at(-1) > MAX_SALESFORCE_INGESTION_BODY_BYTES);
 });

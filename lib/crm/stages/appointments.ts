@@ -21,6 +21,23 @@ export const APPOINTMENT_MONTHS = [
   "Dezembro",
 ] as const;
 
+const saoPauloDate = (value: string) => {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(value));
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+};
+
+const previousDate = (value: string) => {
+  const date = new Date(`${value}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() - 1);
+  return date.toISOString().slice(0, 10);
+};
+
 export function appointmentWeekOfMonth(date: string): number {
   const firstWeekday = new Date(`${date.slice(0, 7)}-01T12:00:00Z`).getUTCDay();
   return Math.floor((Number(date.slice(8, 10)) - 1 + ((firstWeekday + 6) % 7)) / 7) + 1;
@@ -48,6 +65,9 @@ export function analyzeAppointments(
   const owners = new Map<string, number>();
   const stores = new Map<string, number>();
   const developments = new Map<string, number>();
+  let today = 0;
+  let yesterday = 0;
+  const previousReferenceDate = previousDate(slice.referenceDate);
   const add = (map: Map<string, number>, key: string, count: number) =>
     map.set(key, (map.get(key) ?? 0) + count);
   let total = 0;
@@ -57,6 +77,8 @@ export function analyzeAppointments(
     if (date < slice.coverageStart || date > slice.referenceDate) continue;
     // The annual chart intentionally ignores the selected month.
     if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7), fact[7]);
+    if (date === slice.referenceDate) today += fact[7];
+    if (date === previousReferenceDate) yesterday += fact[7];
     if (date.slice(0, 7) !== month) continue;
     const count = fact[7];
     total += count;
@@ -101,8 +123,53 @@ export function analyzeAppointments(
       : `${month}-01` < slice.coverageStart || end > slice.referenceDate
         ? ("partial" as const)
         : ("complete" as const);
+  const details =
+    slice.version === 3
+      ? (slice.appointments ?? [])
+          .filter((appointment) => saoPauloDate(appointment.createdAt).slice(0, 7) === month)
+          .sort((left, right) => right.createdAt.localeCompare(left.createdAt))
+      : null;
+  const operationRanking = (
+    field: "regionalManager" | "accountRanking",
+    fallback: string,
+  ): AppointmentBucket[] | null => {
+    if (details === null) return null;
+    const values = new Map<string, number>();
+    for (const appointment of details)
+      add(values, appointment[field] || fallback, 1);
+    return ranking(values);
+  };
+  const monthStart = `${month}-01`;
+  const coveredStart = monthStart < slice.coverageStart ? slice.coverageStart : monthStart;
+  const coveredEnd = end > slice.referenceDate ? slice.referenceDate : end;
+  const coveredDays =
+    coveredStart > coveredEnd
+      ? 0
+      : Math.floor(
+          (Date.parse(`${coveredEnd}T12:00:00Z`) -
+            Date.parse(`${coveredStart}T12:00:00Z`)) /
+            86_400_000,
+        ) + 1;
+  const todayOperations =
+    slice.version === 3
+      ? (slice.appointments ?? []).filter(
+          (appointment) =>
+            appointment.scheduledAt !== null &&
+            saoPauloDate(appointment.scheduledAt) === slice.referenceDate,
+        )
+      : null;
   return {
     total,
+    today,
+    yesterday,
+    dailyAverage: coveredDays > 0 ? total / coveredDays : null,
+    brokerCount: slice.version === 3 ? (slice.brokerCount ?? null) : null,
+    plannedToday: todayOperations?.length ?? null,
+    performedToday:
+      todayOperations?.filter((appointment) => appointment.visitPerformed).length ?? null,
+    details,
+    regionalManagers: operationRanking("regionalManager", "Gerente regional não informado"),
+    accountRankings: operationRanking("accountRanking", "Ranking não informado"),
     coverage,
     daily: chronological(daily, (date) => date.slice(8, 10)),
     weekly: chronological(weekly, (week) => `${week}ª semana`),

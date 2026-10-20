@@ -43,6 +43,21 @@ export const dashboardAnalysisFactSchema = z.union([
   z.tuple(factFields),
   z.tuple([...factFields, index]),
 ]);
+const appointmentTimestamp = z.string().datetime({ offset: true });
+const appointmentLabel = z.string().trim().max(200);
+export const dashboardAppointmentDetailSchema = z
+  .object({
+    createdAt: appointmentTimestamp,
+    scheduledAt: appointmentTimestamp.nullable(),
+    attendedAt: appointmentTimestamp.nullable(),
+    visitPerformed: z.boolean(),
+    regionalManager: appointmentLabel,
+    salesManager: appointmentLabel,
+    owner: appointmentLabel,
+    accountName: appointmentLabel,
+    accountRanking: appointmentLabel,
+  })
+  .strict();
 export const dashboardAnalysisViewSchema = z
   .object({
     viewKey: z.enum(["all", "with_canal_imob", "without_canal_imob"]),
@@ -56,6 +71,7 @@ export const dashboardAnalysisViewSchema = z
       })
       .strict(),
     facts: z.array(dashboardAnalysisFactSchema).max(100_000),
+    appointments: z.array(dashboardAppointmentDetailSchema).max(20_000).optional(),
   })
   .strict()
   .superRefine((view, context) => {
@@ -87,9 +103,10 @@ export const dashboardAnalysisViewSchema = z
   });
 export const dashboardAnalysisSchema = z
   .object({
-    version: z.union([z.literal(1), z.literal(2)]),
+    version: z.union([z.literal(1), z.literal(2), z.literal(3)]),
     coverageStart: date,
     referenceDate: date,
+    brokerCount: z.number().int().min(0).max(1_000_000).optional(),
     views: z.array(dashboardAnalysisViewSchema).length(3),
   })
   .strict()
@@ -97,7 +114,11 @@ export const dashboardAnalysisSchema = z
     if (
       new Set(analysis.views.map((view) => view.viewKey)).size !== 3 ||
       analysis.views.some(
-        (view) => (analysis.version === 2) !== (view.dimensions.stores !== undefined),
+        (view) => (analysis.version >= 2) !== (view.dimensions.stores !== undefined),
+      ) ||
+      (analysis.version === 3) !== (analysis.brokerCount !== undefined) ||
+      analysis.views.some(
+        (view) => (analysis.version === 3) !== (view.appointments !== undefined),
       ) ||
       !validCoverage(analysis.coverageStart, analysis.referenceDate) ||
       analysis.views.some((view) =>
@@ -115,18 +136,21 @@ export type DashboardAnalysisView = z.infer<typeof dashboardAnalysisViewSchema>;
 export type DashboardAnalysisFact = z.infer<typeof dashboardAnalysisFactSchema>;
 export const dashboardAnalysisSliceSchema = dashboardAnalysisViewSchema
   .safeExtend({
-    version: z.union([z.literal(1), z.literal(2)]),
+    version: z.union([z.literal(1), z.literal(2), z.literal(3)]),
     coverageStart: date,
     referenceDate: date,
+    brokerCount: z.number().int().min(0).max(1_000_000).optional(),
   })
   .superRefine((slice, context) => {
     if (
       !validCoverage(slice.coverageStart, slice.referenceDate) ||
-      (slice.version === 2) !== (slice.dimensions.stores !== undefined) ||
+      (slice.version >= 2) !== (slice.dimensions.stores !== undefined) ||
+      (slice.version === 3) !==
+        (slice.brokerCount !== undefined && slice.appointments !== undefined) ||
       slice.facts.some((fact) => fact[1] < slice.coverageStart || fact[1] > slice.referenceDate)
     ) {
       context.addIssue({ code: "custom", message: "Invalid analysis coverage." });
     }
   });
 export type DashboardAnalysisSlice = DashboardAnalysisView &
-  Pick<DashboardAnalysis, "version" | "coverageStart" | "referenceDate">;
+  Pick<DashboardAnalysis, "version" | "coverageStart" | "referenceDate" | "brokerCount">;
