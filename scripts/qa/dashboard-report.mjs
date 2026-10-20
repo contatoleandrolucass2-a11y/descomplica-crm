@@ -136,6 +136,12 @@ function scenarios() {
     selectedView: "all",
     selectedPeriod: "month",
     goalBrokerCount: 2,
+    partnershipGoals: {
+      visits: 12,
+      folders: 64,
+      "approved-folders": 32,
+      sales: 20,
+    },
     filters: {
       channel: ["DIRECIONAL VENDAS SPC"],
       manager: [],
@@ -208,6 +214,7 @@ function scenarios() {
       ...complete,
       selectedView: "with_canal_imob",
       goalBrokerCount: null,
+      today: "2026-10-20",
       filters: {
         channel: ["SPC - CANAL IMOB PJ"],
         manager: [],
@@ -518,14 +525,12 @@ export async function checkStructure(page) {
       assert.match(quantity.trim(), /^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/);
     }
     await expect(funnel).toHaveAccessibleName(/^Funil mensal: /);
-    await expect(funnel.locator("dt")).toHaveText([
-      "Oportunidades",
-      "Agendamentos",
-      "Visitas",
-      "Pastas",
-      "Pastas aprovadas",
-      "Vendas",
-    ]);
+    const stageCount = Number(await funnel.getAttribute("data-stage-count"));
+    const expectedStages =
+      stageCount === 4
+        ? ["Visitas", "Pastas", "Pastas aprovadas", "Vendas"]
+        : ["Oportunidades", "Agendamentos", "Visitas", "Pastas", "Pastas aprovadas", "Vendas"];
+    await expect(funnel.locator("dt")).toHaveText(expectedStages);
     const steps = await funnel.locator("[data-stage]").evaluateAll((entries) =>
       entries.map((entry) => ({
         width: entry.getBoundingClientRect().width,
@@ -533,7 +538,11 @@ export async function checkStructure(page) {
         fill: getComputedStyle(entry, "::before").backgroundColor,
       })),
     );
-    assert.equal(new Set(steps.map(({ fill }) => fill)).size, 6, "Six distinct funnel steps");
+    assert.equal(
+      new Set(steps.map(({ fill }) => fill)).size,
+      expectedStages.length,
+      "Distinct funnel steps",
+    );
     for (let index = 0; index < steps.length; index++) {
       assert.match(steps[index].shape, /^polygon\(/, "Trapezoidal funnel, not a plain list");
       if (index > 0) assert.ok(steps[index].width < steps[index - 1].width, "Narrowing funnel");
@@ -630,7 +639,10 @@ export async function captureDashboardScreenshot(page, { path, section, dialog =
   return page.screenshot({ path, fullPage: true, ...(clip ? { clip } : {}) });
 }
 
-export async function verifyMonthlyHistory(page, { title, months, sales, screenshot } = {}) {
+export async function verifyMonthlyHistory(
+  page,
+  { title, months, sales, screenshot, stageCount = 6 } = {},
+) {
   const trigger = page.getByRole("button", { name: `Ver histórico mensal: ${title}`, exact: true });
   await trigger.focus();
   await page.keyboard.press("Enter");
@@ -647,7 +659,7 @@ export async function verifyMonthlyHistory(page, { title, months, sales, screens
       .evaluateAll((nodes) => nodes.map((node) => node.dateTime)),
     months,
   );
-  await expect(dialog.getByRole("figure")).toHaveCount(months.length ? 6 : 0);
+  await expect(dialog.getByRole("figure")).toHaveCount(months.length ? stageCount : 0);
   if (sales) {
     await expect(
       dialog.getByRole("figure", { name: "Vendas", exact: true }).locator("li > span"),
@@ -849,8 +861,11 @@ export async function verifyAnalysisInteractions(page) {
   await select("company", "Empresa sintetica Alfa");
   await expect(value("Mês atual", "sales")).toHaveText("2");
   await page.getByRole("button", { name: "Imob", exact: true }).click();
-  await expect(value("Meta mês", "sales")).toHaveText("Indisponível");
+  await expect(value("Meta mês", "sales")).toHaveText("140");
   await expect(value("Mês atual", "sales")).toHaveText("0");
+  await expect(page.locator('[aria-labelledby="report-monthly-title"] [data-stage]')).toHaveCount(
+    52,
+  );
   await page.getByRole("button", { name: "House", exact: true }).click();
   await select("company", "Empresa sintetica Alfa", false);
   await expect(value("Mês atual", "sales")).toHaveText("6");
@@ -955,7 +970,7 @@ async function run() {
     page.on("pageerror", (error) => report.pageErrors.push(error.message));
     await page.goto(server.origin);
     await checkStructure(page);
-    for (const scenario of ["complete", "unavailable", "analysis"]) {
+    for (const scenario of ["complete", "unavailable", "analysis", "restricted"]) {
       await page.evaluate((name) => window.qaRender(name), scenario);
       for (const theme of themes) {
         await page.evaluate((value) => {
@@ -1009,6 +1024,20 @@ async function run() {
                 ),
                 sales: [3, 6, 9, 12, 15, 18, 21, 24, 27],
                 screenshot: path.join(directory, `analysis-history-${theme}-${width}.png`),
+              }),
+            );
+          }
+          if (scenario === "restricted") {
+            await check(`${label}/imob-history-popup`, () =>
+              verifyMonthlyHistory(page, {
+                title: "Média do ano",
+                months: Array.from(
+                  { length: 9 },
+                  (_, index) => `2026-${String(index + 1).padStart(2, "0")}`,
+                ),
+                sales: [3, 6, 9, 12, 15, 18, 21, 24, 27],
+                stageCount: 4,
+                screenshot: path.join(directory, `restricted-history-${theme}-${width}.png`),
               }),
             );
           }

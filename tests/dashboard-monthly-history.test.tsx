@@ -92,6 +92,19 @@ describe("DashboardMonthlyHistory", () => {
     expect(elements(figures[0]!, "span").map(text)).toEqual(Array(3).fill("Sem histórico"));
   });
 
+  it("limits the Imob history to the four authorized funnel stages", () => {
+    const figures = elements(
+      render({ stageKeys: ["visits", "folders", "approved-folders", "sales"] }),
+      "figure",
+    );
+    expect(figures.map((figure) => text(elements(figure, "figcaption")[0]!))).toEqual([
+      "Visitas",
+      "Pastas",
+      "Pastas aprovadas",
+      "Vendas",
+    ]);
+  });
+
   it("uses actual relative bar lengths for each stage", () => {
     const root = render({
       months: [

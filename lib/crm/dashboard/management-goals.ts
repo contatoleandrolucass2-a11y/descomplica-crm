@@ -3,6 +3,12 @@ import type { DashboardStageKey } from "./catalog";
 
 export type DashboardManagementGoalKey = DashboardStageKey | "approved-folders";
 export type DashboardManagementGoalValues = Record<DashboardManagementGoalKey, number | null>;
+export type DashboardPartnershipGoalValues = Record<
+  "visits" | "folders" | "approved-folders" | "sales",
+  number
+>;
+
+export const DASHBOARD_PARTNERSHIP_MANAGER_COUNT = 7;
 
 export interface DashboardManagementGoals {
   referenceDate: string;
@@ -20,8 +26,8 @@ export interface DashboardManagementGoals {
  * never a timestamp or the machine's current date. Holidays are not supplied:
  * appointments count Monday-Friday once and Thursday twice, for the whole month.
  * House goals per broker: opportunities = 143, appointments = 24, visits = 12,
- * folders = 8, approved folders = 2 and sales = 1. Imob goals are intentionally
- * unavailable until that channel is configured.
+ * folders = 8, approved folders = 2 and sales = 1. Imob uses the active
+ * partnership goal as a per-manager target for the seven confirmed managers.
  * A null brokerCount makes every goal unavailable; zero gives zero configured goals.
  * Expected values use elapsed calendar days including referenceDate, without rounding.
  * Throws RangeError for invalid dates, counts other than null/nonnegative safe
@@ -31,10 +37,12 @@ export function buildDashboardManagementGoals({
   referenceDate,
   brokerCount,
   channel,
+  partnershipGoals = null,
 }: {
   referenceDate: string;
   brokerCount: number | null;
   channel: (typeof DASHBOARD_CHANNELS)[number];
+  partnershipGoals?: DashboardPartnershipGoalValues | null;
 }): DashboardManagementGoals {
   const match =
     typeof referenceDate === "string" ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(referenceDate) : null;
@@ -53,6 +61,13 @@ export function buildDashboardManagementGoals({
     throw new RangeError("brokerCount must be null or a nonnegative safe integer.");
   }
 
+  if (
+    partnershipGoals !== null &&
+    Object.values(partnershipGoals).some((value) => !Number.isSafeInteger(value) || value < 0)
+  ) {
+    throw new RangeError("partnershipGoals must contain nonnegative safe integers.");
+  }
+
   function total(perBroker: number): number | null {
     if (channel !== DASHBOARD_CHANNELS[1] || brokerCount === null) return null;
     const value = perBroker * brokerCount;
@@ -62,14 +77,33 @@ export function buildDashboardManagementGoals({
     return value === 0 ? 0 : value;
   }
 
-  const monthlyGoals: DashboardManagementGoalValues = {
-    opportunities: total(143),
-    appointments: total(24),
-    visits: total(12),
-    folders: total(8),
-    "approved-folders": total(2),
-    sales: total(1),
-  };
+  function partnershipTotal(key: keyof DashboardPartnershipGoalValues): number | null {
+    if (channel !== DASHBOARD_CHANNELS[0] || partnershipGoals === null) return null;
+    const value = partnershipGoals[key] * DASHBOARD_PARTNERSHIP_MANAGER_COUNT;
+    if (!Number.isSafeInteger(value)) {
+      throw new RangeError("Monthly goal exceeds the safe integer range.");
+    }
+    return value;
+  }
+
+  const monthlyGoals: DashboardManagementGoalValues =
+    channel === DASHBOARD_CHANNELS[0]
+      ? {
+          opportunities: null,
+          appointments: null,
+          visits: partnershipTotal("visits"),
+          folders: partnershipTotal("folders"),
+          "approved-folders": partnershipTotal("approved-folders"),
+          sales: partnershipTotal("sales"),
+        }
+      : {
+          opportunities: total(143),
+          appointments: total(24),
+          visits: total(12),
+          folders: total(8),
+          "approved-folders": total(2),
+          sales: total(1),
+        };
   function expected(goal: number | null): number | null {
     if (goal === null || day === daysInMonth) return goal;
     return (goal * day) / daysInMonth;

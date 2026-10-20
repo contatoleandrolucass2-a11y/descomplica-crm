@@ -1,5 +1,5 @@
 begin;
-select plan(27);
+select plan(29);
 
 insert into auth.users (id,email) values ('d9200000-0000-4000-8000-000000000001','independent-reader@example.test');
 do $$ begin
@@ -77,10 +77,15 @@ select is((select count(*) from public.crm_point_metrics),0::bigint,'point denia
 reset role;
 select set_config('request.jwt.claim.sub','',true);
 delete from public.user_permission_overrides where user_id='d9200000-0000-4000-8000-000000000001' and permission_key='crm.dashboard.view';
+update public.user_permission_overrides set effect='deny' where user_id='d9200000-0000-4000-8000-000000000001' and permission_key='crm.settings.partnerships.view';
 update public.user_permission_overrides set effect='allow' where user_id='d9200000-0000-4000-8000-000000000001' and permission_key in ('crm.dashboard.with_canal_imob.view','crm.settings.points.view');
 select set_config('request.jwt.claim.sub','d9200000-0000-4000-8000-000000000001',true);
 set local role authenticated;
 select is((select count(*) from public.crm_dashboard_metrics),5::bigint,'Dashboard keeps its aggregate metrics within the allowed channel');
+select is((select array_agg(profile_key) from public.crm_funnel_goals),array['partnerships']::text[],'Imob Dashboard reads only its partnership goal without settings access');
+update public.user_permission_overrides set effect='deny' where user_id='d9200000-0000-4000-8000-000000000001' and permission_key='crm.dashboard.with_canal_imob.view';
+select is((select count(*) from public.crm_funnel_goals),0::bigint,'Dashboard without the Imob view cannot read partnership goals');
+update public.user_permission_overrides set effect='allow' where user_id='d9200000-0000-4000-8000-000000000001' and permission_key='crm.dashboard.with_canal_imob.view';
 select set_config('request.jwt.claims','{"sub":"d9200000-0000-4000-8000-000000000001","amr":[{"method":"recovery"}]}',true);
 select is((select count(*) from public.crm_dashboard_metrics),0::bigint,'recovery-only session cannot read stage or dashboard data');
 select is((select count(*) from public.crm_funnel_goals),0::bigint,'recovery-only session cannot read goals');

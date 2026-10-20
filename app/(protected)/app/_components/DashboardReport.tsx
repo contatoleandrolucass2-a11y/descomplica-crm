@@ -12,7 +12,11 @@ import {
   type DashboardAnalysisResult,
   type DashboardFilters as FilterValues,
 } from "@/lib/crm/dashboard/analysis";
-import { buildDashboardManagementGoals } from "@/lib/crm/dashboard/management-goals";
+import {
+  buildDashboardManagementGoals,
+  DASHBOARD_PARTNERSHIP_MANAGER_COUNT,
+  type DashboardPartnershipGoalValues,
+} from "@/lib/crm/dashboard/management-goals";
 import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
 
 import { SalesforceRefreshButton } from "./SalesforceRefreshButton";
@@ -36,6 +40,7 @@ export interface DashboardReportProps {
   teamUnavailableReason?: string | undefined;
   analysis?: DashboardAnalysisResult | null;
   goalBrokerCount?: number | null;
+  partnershipGoals?: DashboardPartnershipGoalValues | null;
   filters?: FilterValues;
   today?: string;
 }
@@ -65,15 +70,6 @@ const historyBlocks = [
   { key: "sale-average", label: "Média venda", detail: "Média anual por venda" },
 ] as const;
 
-function emptyReadings(): DashboardFunnelReading[] {
-  return DASHBOARD_FUNNEL_STAGES.map(({ key, label }) => ({
-    key,
-    label,
-    value: null,
-    conversion: null,
-  }));
-}
-
 function numberValue(value: number | null, reason = "Dados indisponíveis para este intervalo.") {
   return value === null ? (
     <UnavailableValue reason={reason} />
@@ -91,11 +87,9 @@ function ratioValue(value: number | null) {
 }
 
 function totalConversion(readings: DashboardFunnelReading[]) {
-  const opportunities = readings.find((reading) => reading.key === "opportunities")?.value ?? null;
+  const firstStage = readings[0]?.value ?? null;
   const sales = readings.find((reading) => reading.key === "sales")?.value ?? null;
-  return opportunities === null || sales === null
-    ? null
-    : calculateConversion(sales, opportunities);
+  return firstStage === null || sales === null ? null : calculateConversion(sales, firstStage);
 }
 
 function updatedAt(dashboard: DashboardReadModel | null) {
@@ -129,7 +123,11 @@ function ConversionDetails({ readings }: { readings: DashboardFunnelReading[] })
 
 function MonthlyFunnel({ label, readings }: { label: string; readings: DashboardFunnelReading[] }) {
   return (
-    <figure className={styles.monthlyFunnel} aria-label={`Funil mensal: ${label}`}>
+    <figure
+      className={styles.monthlyFunnel}
+      aria-label={`Funil mensal: ${label}`}
+      data-stage-count={readings.length}
+    >
       <dl>
         {readings.map((entry) => (
           <div className={styles.funnelStep} key={entry.key} data-stage={entry.key}>
@@ -162,12 +160,14 @@ function FunnelCard({
   readings: DashboardFunnelReading[];
   history?: DashboardAnalysisResult["history"]["year-average"] | undefined;
 }) {
+  const firstStageLabel = readings[0]?.label.toLocaleLowerCase("pt-BR") ?? "etapa inicial";
   return (
     <AnalyticsCard className={styles.card} density="compact">
       {history ? (
         <DashboardMonthlyHistory
           title={label}
           months={history}
+          stageKeys={readings.map((reading) => reading.key)}
           missingReason={
             history.length ? "" : "Aguardando a coleta detalhada dos meses encerrados."
           }
@@ -183,7 +183,7 @@ function FunnelCard({
       <dl className={styles.totalConversion}>
         <div>
           <dt>
-            Conversão total <span>Vendas / oportunidades</span>
+            Conversão total <span>Vendas / {firstStageLabel}</span>
           </dt>
           <dd>{ratioValue(totalConversion(readings))}</dd>
         </div>
@@ -200,6 +200,7 @@ export function DashboardReport({
   authorizedViews,
   analysis = null,
   goalBrokerCount = null,
+  partnershipGoals = null,
   filters = emptyDashboardFilters(),
   today,
 }: DashboardReportProps) {
@@ -209,11 +210,25 @@ export function DashboardReport({
   const metrics = staleMonth ? null : sourceMetrics;
   const activeChannel =
     DASHBOARD_CHANNELS.find((channel) => filters.channel[0] === channel) ?? DASHBOARD_CHANNELS[1];
+  const activeFunnelStages =
+    activeChannel === DASHBOARD_CHANNELS[0]
+      ? DASHBOARD_FUNNEL_STAGES.filter(({ key }) =>
+          ["visits", "folders", "approved-folders", "sales"].includes(key),
+        )
+      : DASHBOARD_FUNNEL_STAGES;
+  const emptyReadings = (): DashboardFunnelReading[] =>
+    activeFunnelStages.map(({ key, label }) => ({
+      key,
+      label,
+      value: null,
+      conversion: null,
+    }));
   const managementGoals = dashboard
     ? buildDashboardManagementGoals({
         referenceDate: today ?? dashboard.referenceDate,
         brokerCount: goalBrokerCount,
         channel: activeChannel,
+        partnershipGoals,
       })
     : null;
   const goals =
@@ -225,11 +240,11 @@ export function DashboardReport({
   const expected = managementGoals?.expectedByToday;
   const monthly = sourceMetrics ? buildMonthlyFunnelSnapshots(sourceMetrics, false) : [];
   const readingsFromValues = (
-    values: Record<DashboardFunnelKey, number | null> | undefined,
+    values: Partial<Record<DashboardFunnelKey, number | null>> | undefined,
   ): DashboardFunnelReading[] =>
-    DASHBOARD_FUNNEL_STAGES.map(({ key, label }, index) => {
+    activeFunnelStages.map(({ key, label }, index) => {
       const value = values?.[key] ?? null;
-      const previousKey = DASHBOARD_FUNNEL_STAGES[index - 1]?.key;
+      const previousKey = activeFunnelStages[index - 1]?.key;
       const previous = previousKey ? (values?.[previousKey] ?? null) : null;
       return {
         key,
@@ -240,7 +255,13 @@ export function DashboardReport({
       };
     });
   const periodReadings = (key: (typeof periodBlocks)[number]["key"]) =>
-    staleMonth ? emptyReadings() : (analysis?.periodReadings[key] ?? emptyReadings());
+    staleMonth
+      ? emptyReadings()
+      : readingsFromValues(
+          Object.fromEntries(
+            (analysis?.periodReadings[key] ?? []).map((reading) => [reading.key, reading.value]),
+          ),
+        );
   const historicalReadings = (key: keyof DashboardAnalysisResult["history"]) => {
     if (!analysis || staleMonth) return emptyReadings();
     const months = analysis.history[key];
@@ -333,7 +354,9 @@ export function DashboardReport({
                   detail={
                     block.key === "goal"
                       ? activeChannel === DASHBOARD_CHANNELS[0]
-                        ? "Metas da Imob serão configuradas depois"
+                        ? partnershipGoals
+                          ? `${DASHBOARD_PARTNERSHIP_MANAGER_COUNT} gerentes de vendas no grupo`
+                          : "Meta Imob indisponível para o mês"
                         : goalBrokerCount != null
                           ? `${numberFormatter.format(goalBrokerCount)} corretores no grupo`
                           : block.detail

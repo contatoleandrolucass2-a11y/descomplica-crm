@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-20 - Metas e funis do canal Imob
+
+- Faz o cartão Salesforce e as páginas de relatório exibirem a mesma referência
+  persistida da última coleta publicada no dashboard.
+- Carrega a meta ativa de Parcerias no Dashboard Imob e multiplica Visitas,
+  Pastas, Pastas aprovadas e Vendas pelos sete gerentes definidos para o canal.
+- Calcula a Meta esperada até hoje pela proporção de dias transcorridos no mês,
+  com os mesmos critérios usados pelo canal House.
+- Remove Oportunidades e Agendamentos dos 13 funis e dos históricos do Imob,
+  preservando os seis estágios do House.
+- Restringe a leitura da meta de Parcerias aos usuários autorizados a visualizar
+  o Dashboard Imob, sem ampliar permissões de escrita ou de outras metas.
+
 ## 2026-10-20 - Candidato visual protegido para Agendamentos
 
 - Inclui o painel de Agendamentos no workflow isolado que produz referências

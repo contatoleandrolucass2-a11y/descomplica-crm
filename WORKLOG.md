@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-20: metas e atualização sincronizada do Dashboard Imob
+
+O Dashboard Imob passou a carregar a meta ativa de Parcerias do mês vigente.
+Os valores por gerente são multiplicados pelos sete gerentes informados e a
+meta esperada usa a proporção do dia atual sobre os dias do mês. O recorte Imob
+exibe somente Visitas, Pastas, Pastas aprovadas e Vendas nos 13 funis e nos
+modais históricos; House mantém o contrato de seis estágios.
+
+O cartão Salesforce de Integrações deixou de usar o horário transitório da
+sondagem de conexão. Ele agora usa o `generatedAt` persistido do mesmo snapshot
+que alimenta o Dashboard e as páginas de relatório, com `lastExportAt` apenas
+como fallback da sessão. Salvar uma meta ativa também invalida `/app`.
+
+A migration aditiva amplia somente a policy SELECT de `crm_funnel_goals` para
+permitir que usuários com Dashboard e Imob leiam o perfil `partnerships`; as
+permissões existentes, escrita, demais perfis e gates de sessão/MFA permanecem.
+Os testes focais aprovaram 136 casos. O Vitest integral aprovou 3.963 testes,
+com 102 skips condicionais. A validação visual sintética aprovou 267 checks em
+cinco larguras e três temas, incluindo filtros, históricos, acessibilidade e
+colisões. Lint, typecheck e build de 57 rotas também passaram com Node 24.19.
+
+O pgTAP local não pôde ser executado porque o host não possui Docker ou Podman.
+O comando integral para após três testes Meta Ads dependentes de ACL/diretórios
+Linux, e o gate de release reproduz o mesmo limite em fixtures físicas do host;
+esses arquivos não pertencem ao escopo alterado. Restore isolado, 2.049
+asserções pgTAP e gates físicos Linux continuam obrigatórios na CI antes de
+aplicar a migration.
+
 ## 2026-10-20: proveniência visual de Agendamentos
 
 A referência promovida a partir do diagnóstico da CI preservou a marca de

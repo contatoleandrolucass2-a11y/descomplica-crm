@@ -1,5 +1,51 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: implementacao local das metas Imob e referencia de coleta
+
+- Status: implementacao local concluida na branch
+  `codex/dashboard-imob-goals-sync`, ainda sem migration remota, merge ou
+  publicacao. A base analisada foi `origin/main` em `aa8b2d6d`.
+- Todas as paginas de relatorio ja usam o `generated_at` persistido do snapshot.
+  O cartao Salesforce era a excecao: exibia `checkedAt`, que representa apenas
+  a sondagem de conexao. Agora ele usa o mesmo `generatedAt` persistido, com
+  `lastExportAt` como fallback de sessao.
+- A meta ativa de `partnerships` passa a alimentar o Dashboard Imob. Visitas,
+  Pastas, Pastas aprovadas e Vendas sao multiplicadas pelos sete gerentes
+  informados; Meta esperada ate hoje aplica a proporcao do dia corrente sobre
+  os dias do mes. O Dashboard arredonda as leituras exibidas para baixo.
+- Os 13 funis Imob e seus historicos exibem apenas quatro estagios. House segue
+  com seis. A conversao total Imob passa a representar Vendas sobre Visitas.
+- A migration `20261020130000_dashboard_imob_goals.sql` altera apenas a policy
+  SELECT de `crm_funnel_goals`: preserva acessos existentes e permite ler
+  somente `partnerships` quando Dashboard e Imob estiverem autorizados. Escrita,
+  grants e outros perfis nao mudam.
+- Evidencias locais: 136 testes focais e 3.963 testes Vitest aprovados, com 102
+  skips condicionais; lint, typecheck e build de 57 rotas aprovados com Node
+  24.19. O QA visual aprovou 267 checks em cinco larguras e tres temas, incluindo
+  filtros, historicos, Axe, overflow, cortes e sobreposicoes.
+- Limites do host: pgTAP indisponivel por ausencia de Docker ou Podman. O comando
+  integral para em tres testes Meta Ads dependentes de ACL/diretorios Linux; o
+  gate de release reproduz o limite em fixtures fisicas do host. Os arquivos
+  afetados nao pertencem a essa integracao. CI Ubuntu, restore isolado, 2.049
+  assercoes pgTAP e gates fisicos continuam obrigatorios antes da migration ou
+  publicacao.
+
+## 2026-10-20: abertura do ajuste de atualizacao e metas Imob
+
+- Checkout limpo criado de `origin/main` em
+  `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`, separado do branch documental
+  anterior. Git comum confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`.
+- Consulta `2026-10-20T12:22Z`: CI `39421287684` da `main` em andamento no SHA
+  `aa8b2d6d`; a anterior `39411919967` aprovou `099493a9`. Health publico
+  HTTP 200, `status=ok`, versao publicada `08d050f9`. Estados local, integrado,
+  CI e publicado permanecem distintos.
+- Escopo: fazer paginas baseadas nos relatorios Salesforce exibirem a mesma
+  referencia de atualizacao da integracao; em `Imob`, remover Oportunidades e
+  Agendamentos de todos os funis e calcular Meta mes/Meta esperada com a meta
+  ativa de Parcerias multiplicada pelos sete gerentes informados. Nao alterar
+  dados remotos, disparar coleta ou mudar workflow n8n nesta abertura.
+
 ## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
 
 - A CI `39377861485` reprovou somente o contrato de proveniência da referência
