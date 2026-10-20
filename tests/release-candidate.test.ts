@@ -106,17 +106,29 @@ describe("release-candidate migration train", () => {
   });
 
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
-    const [fixture, harness] = await Promise.all([
+    const [fixture, atomicFixture, atomicHarness, harness] = await Promise.all([
       readFile(
         path.join(repositoryRoot, "tests/fixtures/compact-user-access/page-data.test.sql"),
         "utf8",
       ),
+      readFile(
+        path.join(
+          repositoryRoot,
+          "tests/fixtures/compact-user-access/catalog-atomic-rehearsal.sql",
+        ),
+        "utf8",
+      ),
+      readFile(path.join(repositoryRoot, "scripts/qa/catalog-atomic-rehearsal.mjs"), "utf8"),
       readFile(path.join(repositoryRoot, "scripts/qa/compact-user-access.mjs"), "utf8"),
     ]);
 
     expect(fixture).toContain(
       "\\ir ../../../supabase/migrations/20261020130000_dashboard_imob_goals.sql",
     );
+    expect(atomicFixture).toContain(
+      "\\ir ../../../supabase/migrations/20261020130000_dashboard_imob_goals.sql",
+    );
+    expect(atomicHarness).toContain("verifyTap(output, [26, 29])");
     expect(harness).toContain("const expectedPlans = [116, 8, 14, 29];");
   });
 
