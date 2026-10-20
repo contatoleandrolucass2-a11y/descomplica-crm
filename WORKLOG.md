@@ -26,6 +26,15 @@ consecutivas aprovadas em ate dois segundos, preservando geometria, hit-test,
 reset e falha fechada, com diagnostico numerico de cada etapa. Nao muda a
 interface nem promove baseline.
 
+## 2026-10-20: marcador vazio de comparecimento no Salesforce
+
+A primeira coleta real do contrato v3 confirmou 1.281 agendamentos e bloqueou
+a publicação porque 774 registros ainda sem comparecimento usam o marcador
+visual `-` no relatório. Metadados, IDs de coluna, contagem e demais tipos
+estavam íntegros. O coletor passa a converter somente esse marcador de data
+opcional em string vazia antes da validação; valores preenchidos e inválidos
+continuam falhando fechados. O teste focal cobre a resposta real observada.
+
 ## 2026-10-20: previsão por período, segmento e gerente
 
 Demanda: congelar a identificação dos corretores na rolagem, compactar os
