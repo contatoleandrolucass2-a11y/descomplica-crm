@@ -50,6 +50,37 @@ estavam íntegros. O coletor passa a converter somente esse marcador de data
 opcional em string vazia antes da validação; valores preenchidos e inválidos
 continuam falhando fechados. O teste focal cobre a resposta real observada.
 
+## 2026-10-20: ajuste minimo e anuais do Associativo
+
+Corrigida a busca de aprovacao que desconsiderava o desconto e exigia
+pagamentos iniciais excessivos. Proposta, previa e aplicacao usam a mesma
+entrada do motor. Conforme preferencia confirmada pelo usuario, a sugestao
+minimiza o valor de pagamentos iguais entre Entrada e ate tres Sinais.
+Anuais respeitam mes/ano da Entrada e dos Sinais e teto nominal de 50% da
+renda, truncado em centavos. Composicao mostra somente Registro dinamico.
+
+Regressoes financeiras e QA sintetico cobrem o caso reportado, limites,
+calendarios, igualdade e previa/aplicacao. Sem alterar taxas, ITBI,
+despachante, seguro, calculadora avulsa ou workflows.
+Evidencias e limites em
+`docs/audits/associativo-ajuste-minimo-2026-10-20.md`.
+
+CI inicial do PR #280 aprovou validate e restore, mas o E2E concorrente ainda
+exigia reter anual acima do teto. Ajustado o contrato para verificar clamp
+exato, centavo abaixo preservado e centavo acima limitado, sem retirar o gate.
+
+As CIs `39436153900` e `39443389525` falharam na leitura unica do cabecalho
+do Tabelao apos rolagem, em viewports diferentes. Runtime e asserts dessa
+tela nao foram alterados pelo Associativo. O QA passa a exigir duas leituras
+consecutivas aprovadas em ate dois segundos, preservando geometria, hit-test,
+reset e falha fechada, com diagnostico numerico de cada etapa. Nao muda a
+interface nem promove baseline.
+
+Integracao da correcao de impressao do PR #281 preserva o portal no body e
+os novos dados da documentacao. Registro permanece consolidado tambem no
+papel, sem restaurar a nota removida. Testes comparam a composicao impressa
+com a da tela nos dois fluxos e nos tres temas.
+
 ## 2026-10-20: previsão por período, segmento e gerente
 
 Demanda: congelar a identificação dos corretores na rolagem, compactar os

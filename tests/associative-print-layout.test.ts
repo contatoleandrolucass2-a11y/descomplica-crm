@@ -157,14 +157,24 @@ describe("impressão A4 do Associativo", () => {
       "Documentação",
       "PLANO SUGERIDO",
       "ITBI",
-      "Registro de compra e venda",
-      "Registro da alienação fiduciária",
+      "Registro",
       "Despachante",
       "Seguro Caixa",
       "Total da documentação",
     ]) {
       expect(linear).toContain(documentationLabel);
       expect(escalonado).toContain(documentationLabel);
+    }
+    for (const markup of [linear, escalonado]) {
+      expect(markup).not.toContain("Registro de compra e venda");
+      expect(markup).not.toContain("Registro da alienação fiduciária");
+      expect(markup).not.toContain("Registro conjunto");
+      expect(markup).not.toContain("Estimativa automática");
+      const registration = new Intl.NumberFormat("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      }).format(printProps.documentation.result.totalRegistration);
+      expect(markup).toContain(`<dt>Registro</dt><dd>${registration}</dd>`);
     }
   });
 

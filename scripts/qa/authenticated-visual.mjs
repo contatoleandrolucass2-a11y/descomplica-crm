@@ -2715,6 +2715,58 @@ function readTabelaoPinnedHeader() {
 }
 
 async function checkTabelaoHeaderScrolling(page) {
+  const readGeometry = () => {
+    const table = document.querySelector(".investor-stock-table");
+    const results = document.querySelector(".investor-stock-results");
+    return {
+      scrollY,
+      scrollLeft: results?.scrollLeft,
+      scrollTop: results?.scrollTop,
+      navigationBottom: document.querySelector("[data-protected-topbar]")?.getBoundingClientRect()
+        .bottom,
+      tableTop: table?.getBoundingClientRect().top,
+      tableBottom: table?.getBoundingClientRect().bottom,
+      headerTops: [...(table?.querySelectorAll("thead th") ?? [])].map(
+        (header) => header.getBoundingClientRect().top,
+      ),
+    };
+  };
+  // Scroll events and the runtime RAF can settle after the two scheduling frames.
+  // Require the original geometry/hit-test contract twice, within a bounded wait.
+  const waitForAlignment = async (reader, stage) => {
+    let consecutiveMatches = 0;
+    let reads = 0;
+    let firstMismatch;
+    try {
+      await expect
+        .poll(
+          async () => {
+            const matches = await page.evaluate(reader);
+            reads += 1;
+            if (!matches && !firstMismatch) firstMismatch = await page.evaluate(readGeometry);
+            consecutiveMatches = matches ? consecutiveMatches + 1 : 0;
+            return consecutiveMatches >= 2;
+          },
+          { timeout: 2_000, intervals: [16, 32, 50], message: `Tabelao header ${stage}` },
+        )
+        .toBe(true);
+      if (firstMismatch)
+        process.stdout.write(
+          `Tabelão QA: alinhamento estabilizado ${JSON.stringify({ stage, reads, firstMismatch })}\n`,
+        );
+      return true;
+    } catch {
+      process.stdout.write(
+        `Tabelão QA: falha de alinhamento ${JSON.stringify({
+          stage,
+          reads,
+          firstMismatch,
+          finalGeometry: await page.evaluate(readGeometry),
+        })}\n`,
+      );
+      return false;
+    }
+  };
   let pinned = true;
   for (const fraction of [0.25, 0.65]) {
     await page.evaluate(async (position) => {
@@ -2722,25 +2774,25 @@ async function checkTabelaoHeaderScrolling(page) {
       window.scrollTo(0, scrollY + tableBox.top + tableBox.height * position);
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     }, fraction);
-    pinned = (await page.evaluate(readTabelaoPinnedHeader)) && pinned;
+    pinned = (await waitForAlignment(readTabelaoPinnedHeader, `vertical-${fraction}`)) && pinned;
   }
   await page.locator(".investor-stock-results").evaluate(async (results) => {
     results.scrollLeft = results.scrollWidth - results.clientWidth;
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
-  pinned = (await page.evaluate(readTabelaoPinnedHeader)) && pinned;
+  pinned = (await waitForAlignment(readTabelaoPinnedHeader, "horizontal-end")) && pinned;
   await page.evaluate(async () => {
     document.querySelector(".investor-stock-results").scrollLeft = 0;
     window.scrollTo(0, 0);
     await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
   });
-  const reset = await page.evaluate(() => {
+  const reset = await waitForAlignment(() => {
     const table = document.querySelector(".investor-stock-table");
     const top = table.tHead.getBoundingClientRect().top;
     return [...table.querySelectorAll("thead th")].every(
       (header) => Math.abs(header.getBoundingClientRect().top - top) <= 2,
     );
-  });
+  }, "reset");
   return pinned && reset;
 }
 

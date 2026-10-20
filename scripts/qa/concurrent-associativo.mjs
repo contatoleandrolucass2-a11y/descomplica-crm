@@ -299,21 +299,30 @@ async function checkAnnualIncomeLimit(page, index) {
   const annual = page.getByRole("textbox", { name: "Anual 1", exact: true });
   await page.getByRole("button", { name: "Inserir Anual", exact: true }).click();
   await annual.fill(String((income / 2 + 1) * 100));
-  // Require both statuses to exist: absent/unmounted results cannot pass a
-  // negative assertion. The input must actually retain the over-limit value.
-  check((await annual.inputValue()) === money(income / 2 + 1), "annual_limit_input_not_applied");
-  await page.waitForFunction(() => {
-    const input = document.querySelector('[aria-label="Anual 1"]');
-    const statuses = [...document.querySelectorAll(".investor-associative-flow-status")];
-    return (
-      input?.getAttribute("aria-invalid") === "true" &&
-      statuses.length === 2 &&
-      statuses.every(
-        (status) =>
-          !status.classList.contains("approved") && status.textContent?.trim() !== "APROVADO",
-      )
-    );
-  });
+  const capCents = Math.floor((income * 100) / 2);
+  // The form clamps before calculation. Missing results cannot satisfy the ceiling check.
+  check((await annual.inputValue()) === money(capCents / 100), "annual_ceiling_not_applied");
+  await page.waitForFunction(
+    (ceiling) => {
+      const input = document.querySelector('[aria-label="Anual 1"]');
+      const statuses = [...document.querySelectorAll(".investor-associative-flow-status")];
+      return (
+        input instanceof HTMLInputElement &&
+        input.value === ceiling &&
+        input.getAttribute("aria-invalid") !== "true" &&
+        statuses.length === 2 &&
+        statuses.every((status) => ["APROVADO", "REPROVADO"].includes(status.textContent?.trim()))
+      );
+    },
+    money(capCents / 100),
+  );
+  await annual.fill(String(capCents - 1));
+  check(
+    (await annual.inputValue()) === money((capCents - 1) / 100),
+    "annual_below_ceiling_changed",
+  );
+  await annual.fill(String(capCents + 1));
+  check((await annual.inputValue()) === money(capCents / 100), "annual_cent_over_ceiling");
   await page.getByRole("button", { name: "Ocultar Anual 1 e zerar valor", exact: true }).click();
 }
 
