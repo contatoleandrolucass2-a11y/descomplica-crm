@@ -16,6 +16,10 @@
   `20261020130000_dashboard_imob_goals.sql` vale somente para esta entrega. O
   coordenador protegido, o restore isolado, o artefato imutavel e a verificacao
   pos-publicacao permanecem obrigatorios.
+- A primeira CI do SHA reconciliado aprovou formatacao, lint, typecheck e todos
+  os testes, mas foi bloqueada por `GHSA-22jm-h49p-29qw` no SDK transitivo do
+  `next-devtools-mcp`. O override passou de `1.31.0` para `1.32.1`; o auditor
+  nao encontra vulnerabilidade alta ou critica apos a atualizacao.
 
 ## 2026-10-20: implementacao local das metas Imob e referencia de coleta
 

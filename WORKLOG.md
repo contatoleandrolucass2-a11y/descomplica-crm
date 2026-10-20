@@ -28,6 +28,12 @@ esses arquivos não pertencem ao escopo alterado. Restore isolado, 2.049
 asserções pgTAP e gates físicos Linux continuam obrigatórios na CI antes de
 aplicar a migration.
 
+A CI do SHA reconciliado aprovou formatação, lint, typecheck, aplicação e os
+3.975 testes, mas o registro de segurança passou a sinalizar
+`GHSA-22jm-h49p-29qw` no SDK transitivo do `next-devtools-mcp`. O override foi
+atualizado de `1.31.0` para a versão corrigida `1.32.1`; `pnpm audit
+--audit-level high` passou, restando apenas dois avisos moderados.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
