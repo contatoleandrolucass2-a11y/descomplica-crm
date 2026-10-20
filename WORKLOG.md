@@ -21,6 +21,12 @@ três temas para os dois canais, incluindo edição dos campos, ausência de
 overflow e zero violações Axe. Nenhuma migration, dado remoto, outra página ou
 workflow n8n foi alterado.
 
+A primeira CI do PR #272 aprovou `validate` e `isolated-restore`, mas o gate
+visual detectou corretamente a redução esperada da altura da página em 11
+capturas de Parcerias, causada pela remoção do bloco de rascunho inativo. O
+artefato sanitizado `12241794237` foi inspecionado e somente essas 11 referências
+da rota foram atualizadas; nenhuma baseline de outra página foi aceita.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o

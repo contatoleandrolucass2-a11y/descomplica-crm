@@ -1460,3 +1460,11 @@ coordenador de release, ledger e health público.
   Windows. `test:release` reproduziu a limitação nas fixtures privadas do mesmo
   módulo. Não houve alteração nessa área; a CI Linux do SHA candidato continua
   sendo o gate conclusivo de integração e publicação.
+- Na execução CI `39368979457` do PR #272, `validate` e `isolated-restore`
+  passaram integralmente. `release-gates` aprovou banco, autorização, build e
+  E2E, mas bloqueou na comparação visual porque a página Parcerias ficou menor
+  após remover o bloco de rascunho inativo: 11 capturas da própria rota mudaram
+  de dimensão. O artefato sanitizado `12241794237` foi inspecionado; os campos
+  estavam editáveis, o botão `Salvar alterações` estava presente e não havia
+  overflow. Somente essas 11 referências foram promovidas para nova validação;
+  baselines de outras páginas permaneceram intactas.
