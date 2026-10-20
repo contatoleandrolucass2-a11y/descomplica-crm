@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import path from "node:path";
 import { expect as baseExpect } from "@playwright/test";
 import { buildSyntheticDirectTableQaSnapshot } from "./direct-table-snapshot-fixture.mjs";
 import { calculateInvestorFlow } from "../../lib/archive-investor/investor-calculator-rules.mjs";
@@ -7,6 +8,8 @@ import { buildAssociativePaymentComparison } from "../../lib/archive-investor/as
 const root = ".investor-associative-table-page";
 const approval = `${root} .investor-associative-approval`;
 const expect = baseExpect.configure({ timeout: 30_000 });
+const simulatedDate = "2026-10-20";
+const simulatedYear = Number(simulatedDate.slice(0, 4));
 
 export function isExpectedInventoryUnavailableConsoleError(message, origin) {
   return (
@@ -31,12 +34,12 @@ function buildInventory(withProgress, withAppraisal) {
     finalPrice: 230_000 + index * 20_000,
     appraisal: withAppraisal ? 350_000 + index * 20_000 : null,
     progress: withProgress ? 0.5 + index * 0.05 : null,
-    completionDate: `${new Date().getFullYear() + 6}-12-31`,
+    completionDate: `${simulatedYear + 6}-12-31`,
   }));
   const reference = {
     source: "ESTOQUE SPC.xlsx",
     sourceKind: "versioned-snapshot",
-    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v5" },
+    qaFixture: { synthetic: true, contract: "associative-calculation-continuity-v6" },
     count: items.length,
     items,
   };
@@ -53,7 +56,7 @@ function buildInventory(withProgress, withAppraisal) {
         product: `Apartamento QA-CONT-${index + 1} - Estoque vivo QA`,
         appraisal: null,
         progress: null,
-        completionDate: `${new Date().getFullYear() + 3 + index}-12-31`,
+        completionDate: `${simulatedYear + 3 + index}-12-31`,
       })),
     },
   };
@@ -61,7 +64,7 @@ function buildInventory(withProgress, withAppraisal) {
 
 export async function checkAssociativeCalculationContinuity(
   page,
-  { onExpectedConsoleError = () => {} } = {},
+  { onExpectedConsoleError = () => {}, artifactRoot = null } = {},
 ) {
   const origin = new URL(page.url());
   assert.ok(
@@ -69,8 +72,9 @@ export async function checkAssociativeCalculationContinuity(
     "Continuity QA requires a local synthetic application",
   );
   const result = {
-    contract: "associative-calculation-continuity-v5",
+    contract: "associative-calculation-continuity-v6",
     synthetic: true,
+    simulatedDate,
     passed: false,
     stages: [],
     blockedExternalRequests: 0,
@@ -304,20 +308,24 @@ export async function checkAssociativeCalculationContinuity(
     return { baseDate, completionDate, firstMonthly, signalDates, pre, post };
   }
 
-  async function completeProposal() {
-    await field("Renda Familiar").fill("500000");
+  async function completeProposal({
+    income = 5_000,
+    proposalResources = resources,
+    tier = "bronze",
+  } = {}) {
+    await field("Renda Familiar").fill(String(Math.round(income * 100)));
     await field("Renda Familiar").blur();
     await qualification.getByRole("button", { name: "MCMV", exact: true }).click();
     await qualification.getByRole("radio", { name: "Sim", exact: true }).check();
     // Qualification moves focus asynchronously; finish that handoff before entering resources.
     await expect(field("Financiamento")).toBeFocused();
-    for (const { label, amount, next } of resources) {
+    for (const { label, amount, next } of proposalResources) {
       const input = field(label);
       await expect(input).toBeEnabled({ timeout: 60_000 });
       await expect
         .poll(
           async () => {
-            await input.fill(String(amount * 100));
+            await input.fill(String(Math.round(amount * 100)));
             await input.blur();
             return moneyValue(label);
           },
@@ -327,7 +335,7 @@ export async function checkAssociativeCalculationContinuity(
       await expect(field(next)).toBeEnabled({ timeout: 60_000 });
     }
     await field("Quantidade de parcelas").fill("84");
-    await ranking.selectOption("bronze");
+    await ranking.selectOption(tier);
   }
 
   async function assertAnswers(income) {
@@ -359,8 +367,318 @@ export async function checkAssociativeCalculationContinuity(
     return values;
   }
 
+  async function checkMinimumAdjustment(income) {
+    fixture = buildInventory(true, true);
+    for (const source of ["reference", "live"]) {
+      Object.assign(fixture[source].items[0], {
+        finalPrice: 276_900,
+        finalWithKit: 276_900,
+        unitBonus: 0,
+        tableSlack: 0,
+        cashBackSlack: 0,
+        progress: 0.15,
+      });
+    }
+    fixture.live.items[0].completionDate = "2029-12-31";
+    await reloadFixture();
+    const proposalResources = resources.map((resource, index) => ({
+      ...resource,
+      amount: [126_633.61, 23_035, 0, 16_000, 150][index],
+    }));
+    await completeProposal({ income, proposalResources, tier: "silver" });
+    await page.getByRole("button", { name: "Inserir Desconto", exact: true }).click();
+    await field("Desconto").fill("2700000");
+    await field("Desconto").blur();
+    const ledgerValue = (label) =>
+      page.locator(`${root} .investor-associative-ledger [aria-label^="${label}:"]`);
+    await expect(ledgerValue("Valor do imóvel")).toHaveAttribute(
+      "aria-label",
+      `Valor do imóvel: ${money.format(249_900)}`,
+    );
+    await expect(ledgerValue("Saldo após recursos")).toHaveAttribute(
+      "aria-label",
+      `Saldo após recursos: ${money.format(84_231.39)}`,
+    );
+    await expect(rule("Status da proposta").locator('td[data-label="Linear"]')).toHaveText(
+      "REPROVADO",
+    );
+    await page
+      .locator(`${approval} button[aria-controls="investor-associative-adjustments"]`)
+      .click();
+    const adjustments = page.locator("#investor-associative-adjustments");
+    const linear = adjustments.locator(".investor-associative-adjustment-options > .is-linear");
+    await expect(adjustments).toBeVisible();
+    await expect(linear.locator("header > strong")).toHaveText("APROVADO");
+    await expect(linear.locator("header > strong")).toHaveAttribute("data-approved", "true");
+    const badgeVisuals = [];
+    if (income === 2_550) {
+      const originalViewport = page.viewportSize();
+      const originalTheme = await page.locator("html").getAttribute("data-theme");
+      try {
+        for (const viewport of [
+          { width: 1440, height: 900 },
+          { width: 390, height: 844 },
+        ]) {
+          await page.setViewportSize(viewport);
+          for (const theme of ["light", "balanced", "dark"]) {
+            await page.keyboard.press("Escape");
+            await expect(adjustments).toBeHidden();
+            await restoreTheme(theme);
+            await page
+              .locator(`${approval} button[aria-controls="investor-associative-adjustments"]`)
+              .click();
+            await expect(adjustments).toBeVisible();
+            const badge = linear.locator("header > strong");
+            await expect(badge).toBeVisible();
+            const paint = await badge.evaluate((element) => {
+              const style = getComputedStyle(element);
+              const canvas = document.createElement("canvas");
+              canvas.width = canvas.height = 1;
+              const context = canvas.getContext("2d", { willReadFrequently: true });
+              const rgba = (color) => {
+                context.clearRect(0, 0, 1, 1);
+                context.fillStyle = color;
+                context.fillRect(0, 0, 1, 1);
+                return [...context.getImageData(0, 0, 1, 1).data];
+              };
+              const bounds = element.getBoundingClientRect();
+              const range = document.createRange();
+              range.selectNodeContents(element);
+              return {
+                foreground: rgba(style.color),
+                accent: rgba(style.getPropertyValue("--inv-color-accent").trim() || "#78d5fa"),
+                clipped: [...range.getClientRects()].some(
+                  (rect) =>
+                    rect.left < bounds.left - 1 ||
+                    rect.right > bounds.right + 1 ||
+                    rect.top < bounds.top - 1 ||
+                    rect.bottom > bounds.bottom + 1,
+                ),
+              };
+            });
+            assert.deepEqual(
+              paint.foreground,
+              paint.accent,
+              "Approved badge must use the accent color",
+            );
+            assert.ok(paint.foreground[2] > paint.foreground[0], "Approved badge must be blue");
+            assert.equal(paint.clipped, false, "Approved badge text must not clip");
+            if (artifactRoot) {
+              await linear.screenshot({
+                path: path.join(artifactRoot, `adjustment-linear-${viewport.width}-${theme}.png`),
+                animations: "disabled",
+              });
+            }
+            badgeVisuals.push({ viewport, theme, ...paint, passed: true });
+          }
+        }
+      } finally {
+        await page.keyboard.press("Escape");
+        await page.setViewportSize(originalViewport);
+        await restoreTheme(originalTheme);
+        await page
+          .locator(`${approval} button[aria-controls="investor-associative-adjustments"]`)
+          .click();
+        await expect(adjustments).toBeVisible();
+      }
+    }
+    const previewRows = await linear
+      .locator(".investor-associative-adjustment-ledger > div")
+      .evaluateAll((rows) =>
+        rows.map((row) => ({
+          label: row.querySelector("dt").textContent.trim(),
+          date: row.querySelector(".payment-date").textContent.trim(),
+          text: row.querySelector("dd").textContent.trim(),
+          currency: row.querySelector("dd").getAttribute("aria-label"),
+        })),
+      );
+    const preview = new Map(previewRows.map((row) => [row.label, row]));
+    assert.equal(preview.size, previewRows.length, "Preview labels must be unique");
+    const asCents = (text) => Number(text.replace(/[^\d-]/g, ""));
+    const previewCents = (label) => {
+      const row = preview.get(label);
+      assert.ok(row?.currency, `Preview must expose a currency value for ${label}`);
+      return asCents(row.currency);
+    };
+    const signalDates = ["15/11/2026", "15/12/2026", "15/01/2027"];
+    const annualRows = previewRows.filter(({ label }) => /^Anual \d+$/.test(label));
+    assert.deepEqual(
+      annualRows.map(({ label, date }) => ({ label, date })),
+      [
+        { label: "Anual 2", date: "15/12/2027" },
+        { label: "Anual 3", date: "15/12/2028" },
+        { label: "Anual 4", date: "15/12/2029" },
+      ],
+      "Annuals must exclude December 2026, occupied by an initial signal",
+    );
+    assert.equal(preview.get("Entrada sugerida")?.date, "20/10/2026");
+    assert.deepEqual(
+      previewRows.filter(({ label }) => /^Sinal \d+$/.test(label)).map(({ date }) => date),
+      signalDates,
+    );
+    assert.equal(preview.get("Qtd. de parcelas")?.text, "84");
+    assert.equal(previewCents("Maior mensal com correção"), 45_900);
+    assert.ok(previewCents("Saldo parcelado") > 2_000_000);
+    const annualLimitCents = Math.floor(Math.round(income * 100) / 2);
+    assert.equal(annualLimitCents, 127_500);
+    for (const row of annualRows) {
+      assert.equal(previewCents(row.label), annualLimitCents, "Annual cap must truncate odd cents");
+    }
+    const initialPayments = [
+      previewCents("Entrada sugerida"),
+      ...[1, 2, 3].map((index) => previewCents(`Sinal ${index}`)),
+    ];
+    assert.equal(new Set(initialPayments).size, 1, "Entry and all three signals must be equal");
+    if (income === 2_550) {
+      assert.deepEqual(initialPayments, [1_326_973, 1_326_973, 1_326_973, 1_326_973]);
+    }
+    assert.ok(initialPayments.every((value) => value >= 15_000 && value < 1_500_000));
+    assert.equal(
+      initialPayments.reduce((sum, value) => sum + value, 0) +
+        annualRows.reduce((sum, row) => sum + previewCents(row.label), 0) +
+        previewCents("Saldo parcelado"),
+      8_423_139,
+      "Preview must reconcile entry, signals, annuals and nominal balance in cents",
+    );
+    // Opening a preview must leave the edited proposal untouched until Apply.
+    await expect.poll(() => moneyValue("Entrada")).toBe(150);
+    for (let index = 1; index <= 3; index += 1) {
+      await expect(field(`Sinal ${index}`)).toHaveCount(0);
+    }
+    const evidence = {
+      stage,
+      income,
+      annualLimit: annualLimitCents / 100,
+      initialPayments: initialPayments.map((value) => value / 100),
+      badgeVisuals,
+      previewRows,
+      previewDoesNotMutate: true,
+      passed: false,
+    };
+    result.stages.push(evidence);
+    await linear
+      .getByRole("button", { name: "Aplicar estes valores no Fluxo Linear", exact: true })
+      .click();
+    await expect(adjustments).toBeHidden();
+    await expect(rule("Status da proposta").locator('td[data-label="Linear"]')).toHaveText(
+      "APROVADO",
+    );
+    await expect.poll(() => moneyValue("Entrada")).toBe(previewCents("Entrada sugerida") / 100);
+    for (let index = 1; index <= 3; index += 1) {
+      await expect
+        .poll(() => moneyValue(`Sinal ${index}`))
+        .toBe(previewCents(`Sinal ${index}`) / 100);
+    }
+    for (let index = 1; index <= 5; index += 1) {
+      const label = `Anual ${index}`;
+      if (preview.has(label)) {
+        await expect.poll(() => moneyValue(label)).toBe(previewCents(label) / 100);
+        await expect(field(label)).not.toHaveAttribute("aria-invalid", "true");
+      } else if (await field(label).count()) {
+        await expect.poll(() => moneyValue(label)).toBe(0);
+      }
+    }
+    await expect(field("Quantidade de parcelas")).toHaveValue(preview.get("Qtd. de parcelas").text);
+    await expect(ledgerValue("Saldo parcelado")).toHaveAttribute(
+      "aria-label",
+      `Saldo parcelado: ${preview.get("Saldo parcelado").currency}`,
+    );
+    for (const label of [
+      "% Pró-Soluto",
+      "% Comprometimento da Renda",
+      "% Máximo da renda mensal",
+    ]) {
+      await expect(rule(label).locator('td[data-label="Linear"]')).toHaveText(
+        preview.get(label).text,
+      );
+    }
+    for (const { label, amount } of proposalResources.filter(({ label }) => label !== "Entrada")) {
+      await expect.poll(() => moneyValue(label)).toBe(amount);
+    }
+    await expect.poll(() => moneyValue("Renda Familiar")).toBe(income);
+    await expect.poll(() => moneyValue("Desconto")).toBe(27_000);
+    await expect(ranking).toHaveValue("silver");
+    await expect(qualification.getByRole("button", { name: "MCMV", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    await expect(qualification.getByRole("radio", { name: "Sim", exact: true })).toBeChecked();
+
+    await installmentsButton.click();
+    const payments = page.locator("#investor-associative-installments");
+    await expect(payments).toBeVisible();
+    await payments.getByRole("button", { name: "Tabela Linear", exact: true }).click();
+    await expect(payments.locator("tbody tr.is-monthly")).toHaveCount(84);
+    await expect(payments.locator("tbody tr.is-entry time")).toHaveAttribute(
+      "datetime",
+      simulatedDate,
+    );
+    assert.deepEqual(
+      await payments
+        .locator("tbody tr.is-signal time")
+        .evaluateAll((nodes) => nodes.map((node) => node.getAttribute("datetime"))),
+      ["2026-11-15", "2026-12-15", "2027-01-15"],
+    );
+    const appliedInitialPayments = await payments
+      .locator(
+        'tbody tr.is-entry td[data-label="Parcela Linear"], tbody tr.is-signal td[data-label="Parcela Linear"]',
+      )
+      .allTextContents();
+    assert.deepEqual(appliedInitialPayments.map(asCents), initialPayments);
+    const monthly = await payments
+      .locator('tbody tr.is-monthly td[data-label="Parcela Linear"]')
+      .allTextContents();
+    assert.equal(Math.max(...monthly.map(asCents)), previewCents("Maior mensal com correção"));
+    const appliedAnnualDates = await payments
+      .locator("tbody tr")
+      .evaluateAll((rows) =>
+        rows
+          .filter((row) =>
+            /\d/.test(row.querySelector('td[data-label="Anual"]')?.textContent ?? ""),
+          )
+          .map((row) => row.querySelector("time").textContent.trim()),
+      );
+    assert.deepEqual(
+      appliedAnnualDates,
+      annualRows.map(({ date }) => date),
+    );
+    await page.keyboard.press("Escape");
+    await expect(payments).toBeHidden();
+    evidence.appliedMatchesPreview = true;
+    evidence.highestMonthly = Math.max(...monthly.map(asCents)) / 100;
+    evidence.installmentBalance = previewCents("Saldo parcelado") / 100;
+
+    if (Math.round(income * 100) % 2 === 1) {
+      await field("Anual 2").fill(String(annualLimitCents - 1));
+      await field("Anual 2").blur();
+      await expect.poll(() => moneyValue("Anual 2")).toBe((annualLimitCents - 1) / 100);
+      await field("Anual 2").fill(String(annualLimitCents + 1));
+      await field("Anual 2").blur();
+      // updateIntermediary clamps input immediately; the excess must never enter the ledger.
+      await expect.poll(() => moneyValue("Anual 2")).toBe(annualLimitCents / 100);
+      await expect(ledgerValue("Saldo parcelado")).toHaveAttribute(
+        "aria-label",
+        `Saldo parcelado: ${preview.get("Saldo parcelado").currency}`,
+      );
+      await field("Anual 2").fill(String(annualLimitCents));
+      await field("Anual 2").blur();
+      await expect(field("Anual 2")).not.toHaveAttribute("aria-invalid", "true");
+      await expect(page.locator("#investor-associative-annual-2-status")).toContainText(
+        "Anual válida",
+      );
+      await expect(rule("Status da proposta").locator('td[data-label="Linear"]')).toHaveText(
+        "APROVADO",
+      );
+      evidence.oneCentBelowAnnualCapAccepted = true;
+      evidence.oneCentAboveAnnualCapClamped = true;
+      evidence.annualCapPreservesApproval = true;
+    }
+    evidence.passed = true;
+  }
+
   await page.route("**/*", handler);
   try {
+    await page.clock.setFixedTime(new Date(`${simulatedDate}T15:00:00Z`));
     await reloadFixture();
     await expect(
       page
@@ -523,7 +841,8 @@ export async function checkAssociativeCalculationContinuity(
     await expect(
       documentation.locator("[data-documentation-legal], select, input[type=checkbox]"),
     ).toHaveCount(0);
-    await expect(documentation.getByRole("note")).toContainText("Estimativa automática");
+    await expect(documentation.getByRole("note")).toHaveCount(0);
+    await expect(documentation.getByText(/Estimativa automática/)).toHaveCount(0);
     await expect(unitFact("Avaliação bancária")).toHaveText("Não informada");
     await selectUnit(1);
     await assertAnswers(5_000);
@@ -646,6 +965,7 @@ export async function checkAssociativeCalculationContinuity(
     assert.equal(inventoryResponses.live, 1, "Exactly one synthetic 503 response is expected");
     page.off("console", onConsole);
     result.expectedNetworkErrorCount = expectedNetworkErrors.length;
+    for (const message of expectedNetworkErrors) onExpectedConsoleError(message);
     result.stages.push({ stage, liveStatus, snapshotFallback: false, calculationBlocked: true });
     liveStatus = 200;
 
@@ -739,8 +1059,11 @@ export async function checkAssociativeCalculationContinuity(
       documentationUnchanged: true,
       clearedAnnualsRestoreBalance: true,
     });
+    for (const income of [2_550, 2_550.01]) {
+      stage = income === 2_550 ? "minimum-linear-adjustment" : "odd-cent-annual-cap";
+      await checkMinimumAdjustment(income);
+    }
     assert.equal(result.blockedExternalRequests, 0, "Unexpected external requests were blocked");
-    for (const message of expectedNetworkErrors) onExpectedConsoleError(message);
     result.passed = true;
   } catch (error) {
     result.error = `${stage}: ${error instanceof Error ? error.message : String(error)}`;

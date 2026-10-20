@@ -424,6 +424,97 @@ describe("Associative defined scenario matrix", () => {
     },
   );
 
+  it.each([
+    { income: undefined, annual: 5001, valid: true },
+    { income: 5000.01, annual: 2500, valid: true },
+    { income: 5000.01, annual: 2500.0000000001, valid: false },
+    { income: 5000.01, annual: 2500.01, valid: false },
+    { income: 5000.02, annual: 2500.01, valid: true },
+    { income: "5000.019999999999999999999", annual: 2500.01, valid: false },
+    { income: 4999.999999999999, annual: 2500, valid: false },
+    { income: 1.16, annual: 0.58, valid: true },
+    { income: 1.16, annual: 0.59, valid: false },
+    { income: 0.01, annual: 0.01, valid: false },
+    { income: "1e-99999999", annual: 0.01, valid: false },
+    { income: null, annual: 0.01, valid: false },
+    { income: 0, annual: 0.01, valid: false },
+  ])(
+    "independently checks the nominal annual $annual against income $income without tolerance",
+    ({ income, annual, valid }) => {
+      const input = { ...syntheticLinearInput({ annual1: annual }), income };
+      const expected = oracleLinear(input);
+      expect(expected.ok).toBe(valid);
+      expect(expected.causes).toEqual(valid ? [] : ["annual.income"]);
+      expect(expected.metrics!.annualNominalTotal).toBe(valid ? annual : 0);
+      expect(checkLinearScenario(input)).toMatchObject({
+        outcome: valid ? "calculable" : "justified_block",
+        mismatches: [],
+      });
+    },
+  );
+
+  it.each([
+    { entryDate: "2026-12-01", signalCount: 0, cause: "annual.initial_month" },
+    { entryDate: "2026-12-15", signalCount: 0, cause: "annual.initial_month" },
+    { entryDate: "2026-10-20", signalCount: 0, cause: null },
+    { entryDate: "2026-10-20", signalCount: 1, cause: null },
+    { entryDate: "2026-10-20", signalCount: 2, cause: "annual.initial_month" },
+    { entryDate: "2026-10-20", signalCount: 3, cause: "annual.initial_month" },
+  ])(
+    "checks December against the entry month and $signalCount signals from $entryDate",
+    ({ entryDate, signalCount, cause }) => {
+      const input = syntheticLinearInput({
+        entryDate,
+        signal1: signalCount >= 1 ? 150 : 0,
+        signal2: signalCount >= 2 ? 150 : 0,
+        signal3: signalCount >= 3 ? 150 : 0,
+        annual1: 1000,
+        annual2: 1234.56,
+      });
+      const expected = oracleLinear(input);
+      expect(expected.causes).toEqual(cause ? [cause] : []);
+      expect(expected.metrics!.annualNominalTotal).toBe(cause ? 1234.56 : 2234.56);
+      expect(checkLinearScenario(input)).toMatchObject({
+        outcome: cause ? "justified_block" : "calculable",
+        mismatches: [],
+      });
+    },
+  );
+
+  it("blocks an annual before the initial sequence even without a same-month payment", () => {
+    const input = syntheticLinearInput({
+      calculationDate: "2026-10-20",
+      entryDate: "2027-01-10",
+      firstInstallmentDate: "2027-05-15",
+      signal1: 150,
+      signal2: 150,
+      signal3: 150,
+      annual1: 1000,
+      annual2: 1234.56,
+    });
+    expect(oracleLinear(input).causes).toEqual(["annual.before_initial_end"]);
+    expect(oracleLinear(input).metrics!.annualNominalTotal).toBe(1234.56);
+    expect(checkLinearScenario(input)).toMatchObject({
+      outcome: "justified_block",
+      mismatches: [],
+    });
+  });
+
+  it.each([
+    { constructionEnd: "2026-12-14", valid: false },
+    { constructionEnd: "2026-12-15", valid: true },
+  ])(
+    "keeps the exact construction boundary $constructionEnd for annual dates",
+    ({ constructionEnd, valid }) => {
+      const input = syntheticLinearInput({ constructionEnd, annual1: 1000 });
+      expect(oracleLinear(input).causes).toEqual(valid ? [] : ["annual.date"]);
+      expect(checkLinearScenario(input)).toMatchObject({
+        outcome: valid ? "calculable" : "justified_block",
+        mismatches: [],
+      });
+    },
+  );
+
   it("recalculates print commitments as 12.85% and 17.70% while preserving missing unit facts", () => {
     const facts = Object.freeze({ progress: null, appraisal: null });
     const raw = syntheticLinearInput({

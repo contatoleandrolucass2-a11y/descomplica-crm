@@ -40,6 +40,20 @@
   validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
   para valores inválidos.
 
+## 2026-10-20 - Ajuste minimo e anuais do Associativo
+
+- Corrige desconto ignorado na sugestao e calcula os menores pagamentos
+  iniciais iguais que aprovam o fluxo selecionado.
+- Impede anual no mes da Entrada ou de Sinal, ou entre Sinais; aplica
+  teto nominal de 50% da renda com arredondamento para baixo.
+- Mostra datas e aprovacao reais da previa e preserva o saldo parcelado.
+- Simplifica a composicao para um valor dinamico de Registro e remove
+  a nota visual solicitada, na tela e na folha A4, sem mudar taxas nem juros.
+- Alinha o E2E concorrente ao teto imediato das anuais, com fronteiras de
+  um centavo e presenca obrigatoria dos dois resultados.
+- Torna a leitura do cabecalho do Tabelao no QA dependente de alinhamento
+  estavel, com espera limitada e os mesmos criterios de geometria e hit-test.
+
 ## 2026-10-20 - Previsão por final de semana e gerente
 
 - Separa previsões de sexta a domingo por período, House/Imob e gerente, com
