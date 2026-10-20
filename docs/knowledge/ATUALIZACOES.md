@@ -40,6 +40,11 @@
   registrava o deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, concluido em
   `2026-10-20T17:51:11.098Z`, sem pendencia. A funcionalidade de Agendamentos
   permanece contida na versao atualmente publicada.
+- Ao reconciliar a nota final com `main`, a CI `39490513559` detectou o advisory
+  de alta severidade `GHSA-22jm-h49p-29qw` no
+  `@modelcontextprotocol/sdk@1.31.0`, transitivo do `next-devtools-mcp`. O pin
+  de desenvolvimento foi atualizado para a versao corrigida 1.32.1; a nova CI
+  permanece obrigatoria antes da integracao da evidencia.
 
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 

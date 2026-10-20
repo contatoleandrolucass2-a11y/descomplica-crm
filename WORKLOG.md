@@ -11,6 +11,10 @@ registrou as quatro runs como `succeeded` e manteve tres visoes da analise em
 versao 3. A producao avancou depois para um SHA descendente que preserva a
 entrega; health e ledger foram conferidos sem pendencia.
 
+A CI do registro final detectou o advisory `GHSA-22jm-h49p-29qw` no SDK MCP
+transitivo do `next-devtools-mcp`. O override foi atualizado de 1.31.0 para a
+versao corrigida 1.32.1, mantendo a dependencia apenas em desenvolvimento.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas

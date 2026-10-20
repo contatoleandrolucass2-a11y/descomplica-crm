@@ -6,6 +6,8 @@
   CI completa e coordenador protegido.
 - Confirma quatro ciclos reais consecutivos do coletor, com analise v3,
   publicacao comercial e estoque concluidos.
+- Atualiza o pin transitivo do SDK MCP para 1.32.1, corrigindo o advisory de
+  alta severidade detectado pela CI durante o registro final da entrega.
 
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
