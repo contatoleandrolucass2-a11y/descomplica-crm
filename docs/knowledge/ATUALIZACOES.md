@@ -1402,3 +1402,24 @@ nos sete gráficos preenchidos a escrita horizontal, a igualdade de altura e a
 rolagem vertical. Repetir CI no novo SHA; o primeiro resultado não autoriza
 merge nem publicação. Fonte: GitHub Actions 39347120702, artefato 12233333433,
 capturas locais e código do componente.
+
+### Encerramento e publicação do ajuste visual de Agendamentos
+
+PR270 integrado no SHA `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+CI de PR `39353605323` e CI de main `39357425838` verdes; a segunda aprovou os
+quatro jobs e gerou o artefato imutável `12234994906`. ZIP e imagem foram
+conferidos por SHA-256; revisão, manifesto/config OCI, plataforma linux/amd64,
+13 descritores, 11 camadas, 11 diff IDs, rootfs e dois perfis de runtime
+coincidiram no destino. A diferença config/manifest do armazenamento containerd
+foi provada sobre o mesmo arquivo, sem rebuild nem retag.
+
+Consulta imediatamente anterior registrou produção em `60ef87c7`, deployment
+`561b4861-7f6a-477c-95d9-6f46427921d8`, `deployedAt=2026-10-19T20:51:02.314Z`,
+sem pendência. O coordenador exclusivo publicou `06a41f76` às
+`2026-10-20T02:57:56.421Z`, deployment
+`979fb2df-a353-4df4-9c8b-b28caf2a9cf3`. Health posterior HTTP200/ok confirmou
+a versão exata, ledger continuou sem pendência e a página anônima retornou307
+para `/login`. Nenhuma migration, dado remoto, integração ou workflow n8n foi
+modificado. A matriz com gráficos preenchidos é sintética; não houve acesso a
+sessão privada de produção. Fonte: PR270, GitHub Actions, artefato12234994906,
+coordenador de release, ledger e health público.
