@@ -47,6 +47,14 @@
   perfil `with_canal_imob`, House inativo e tres menus; o clique externo usa o
   titulo principal porque o titulo visual de filtros foi removido. Reexecutar
   todos os gates no novo SHA antes de integrar.
+- CI `39375374003`: `validate`, `isolated-restore`, banco, build, relatorio do
+  dashboard e E2E autenticado passaram; este ultimo aprovou 19 cenarios e
+  ignorou um condicional. A matriz visual reteve somente o verificador de
+  atualizacao automatica, ainda dependente do antigo menu de canal, e expirou
+  apos o snapshot inicial. O contrato passou a verificar os botoes House/Imob
+  antes e depois do refresh, mantendo prova de atualizacao unica, payload RSC
+  completo, URL, rolagem e secao aberta. Nova CI integral do SHA exato e
+  obrigatoria; o resultado anterior nao autoriza merge nem publicacao.
 
 ## 2026-10-20: abertura do dashboard House e Imob
 

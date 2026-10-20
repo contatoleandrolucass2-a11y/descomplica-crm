@@ -43,6 +43,13 @@ menus. Ele agora exige Imob ativo no perfil `with_canal_imob`, House inativo e
 três menus; o fechamento usa o título principal, pois `Filtros` não é mais um
 título visual. Nova CI do SHA exato continua obrigatória.
 
+Na CI `39375374003`, o E2E autenticado corrigido aprovou 19 cenários e ignorou
+um condicional. A etapa visual chegou ao verificador de atualização automática,
+que ainda tentava abrir o menu removido de canal e expirou antes de iniciar a
+prova RSC. O verificador agora confirma Imob ativo e House inativo antes e depois
+do refresh, preservando a exigência de uma única atualização, payload completo,
+URL, rolagem e seção aberta. Nova CI integral continua obrigatória.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o
