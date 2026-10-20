@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-20 - Correção da impressão A4 do Associativo
+
+- Impede a repetição da folha de impressão em uma segunda página, isolando o
+  conteúdo impresso diretamente no corpo do documento.
+- Inclui na folha os valores calculados da documentação, como ITBI, registros,
+  despachante, seguro Caixa e total estimado.
+- Altera o cabeçalho e o rodapé para `Simulação comercial`.
+- Mantém as saídas linear e escalonada, com sinais e anuais em linhas
+  independentes e valores sem e com correção.
+
 ## 2026-10-19 - Impressão A4 do Associativo
 
 - Separa as ações `Imprimir linear` e `Imprimir escalonado` no resultado do
@@ -23,7 +33,7 @@
   teto nominal de 50% da renda com arredondamento para baixo.
 - Mostra datas e aprovacao reais da previa e preserva o saldo parcelado.
 - Simplifica a composicao para um valor dinamico de Registro e remove
-  a nota visual solicitada, sem mudar taxas nem juros.
+  a nota visual solicitada, na tela e na folha A4, sem mudar taxas nem juros.
 - Alinha o E2E concorrente ao teto imediato das anuais, com fronteiras de
   um centavo e presenca obrigatoria dos dois resultados.
 - Torna a leitura do cabecalho do Tabelao no QA dependente de alinhamento

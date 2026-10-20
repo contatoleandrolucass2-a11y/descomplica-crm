@@ -417,7 +417,8 @@ async function checkAssociativePrintDocumentation(page, artifactRoot) {
   const documentation = page.locator(`${associativeRoot} .investor-associative-documentation`);
   const breakdown = documentation.locator(".investor-associative-documentation-breakdown");
   const screenValues = await breakdown.locator("dl > div > dd").allTextContents();
-  const sheet = page.locator(`${associativeRoot} .investor-associative-print-sheet`);
+  const sheet = page.locator("body > .investor-associative-print-sheet");
+  const printedDocumentation = sheet.locator(".investor-associative-print-documentation");
   await page.evaluate(() => {
     window.print = () => {};
   });
@@ -440,6 +441,11 @@ async function checkAssociativePrintDocumentation(page, artifactRoot) {
       await expect(breakdown.locator("dl > div > dd")).toHaveText(screenValues);
       await expect(documentation).not.toBeVisible();
       await expect(sheet).toBeVisible();
+      await expect(printedDocumentation.locator("dl > div > dt")).toHaveText(
+        associativeBreakdownTerms,
+      );
+      await expect(printedDocumentation.locator("dl > div > dd")).toHaveText(screenValues);
+      await expect(sheet.getByText(/Estimativa automática/)).toHaveCount(0);
       await expect
         .poll(() =>
           sheet.locator("img").evaluate((image) => image.complete && image.naturalWidth > 0),

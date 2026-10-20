@@ -91,6 +91,29 @@
   conflitos documentais resolvidos sem perda. Nova CI obrigatoria no SHA
   combinado. Registros desta entrega reposicionados depois de uma secao
   existente para evitar conflitos puramente aditivos no topo dos documentos.
+- Retomada observacional em `2026-10-20T18:43Z`: health publico HTTP 200/ok
+  e ledger concordam em `50f11d326cdd37b051db46f1dd1015076b85d545`,
+  deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, publicado por outra entrega
+  em `2026-10-20T17:51:11.098Z`, sem pendencia de deploy. Metadados Supabase
+  continuam sem tabela/RPCs de Previsao por periodo; nenhuma mutacao feita.
+  Reavaliacao do bloqueio anterior: esse runtime ja integra a baseline ativa.
+  O delta do Associativo nao introduz dependencia de banco nem muda Previsao;
+  sua promocao pode seguir os gates normais sem aplicar migration alheia.
+  A pendencia de Previsao continua aberta para o responsavel, nao e resolvida
+  nem autorizada por esta observacao. Reavaliar se novo delta exigir schema.
+- Usuario confirmou nesta retomada que concluiu Previsao em outro chat:
+  seguir apenas com Associativo, sem migrations ou alteracoes naquela tela.
+- CI `39475535962` aprovada no SHA `6ec276249b8876cb2793fe480fd01fb4ac77c98b`.
+  Antes do merge, main avancou para `c1e931d5` pelo PR #281. Integracao
+  preserva o portal de impressao e a documentacao A4 acrescentados ali;
+  aplica tambem ao papel a linha unica Registro e a retirada da nota,
+  conforme o pedido deste escopo. Teste compara os valores da tela e da
+  impressao. Novo SHA combinado exige novamente CI antes da integracao.
+- Validacao combinada: 74 testes focais aprovados; QA de impressao saiu 0
+  em `2026-10-20T19:16:46Z`, Linear/Escalonado nos tres temas, com igualdade
+  dos valores de documentacao, logo carregado, geometria e contraste validos.
+  Evidencias locais em `test-results/documentation-legal-preview/2026-10-20T19-16-46.990Z`.
+  Imagem do modo Escalonado conferida visualmente pelo coordenador.
 
 ## 2026-10-20: abertura da correcao de ajustes e anuais do Associativo
 

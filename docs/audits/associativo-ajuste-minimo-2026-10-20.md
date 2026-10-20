@@ -81,8 +81,9 @@ estoque sintetico e verifica previa/aplicacao, datas, limite, composicao e
 impressoes. Resultados finais, CI, merge e versao publicada sao registrados
 separadamente em `docs/knowledge/ATUALIZACOES.md`.
 
-Integracao do PR #269 preserva a folha A4 exclusiva por fluxo. O QA combinado
+Integracao dos PRs #269 e #281 preserva a folha A4 exclusiva por fluxo e seu
+portal isolado no body. O QA combinado
 confere Linear/Escalonado nos tres temas, valores e blocos, legibilidade,
 logo carregado e ausencia da interface comercial no papel. O Registro
-consolidado continua sendo verificado na composicao em tela; a nova folha
-de fluxo nao imprime essa composicao de documentacao.
+consolidado e verificado na composicao em tela e na documentacao da folha
+A4, com igualdade entre seus valores. A nota removida nao retorna no papel.
