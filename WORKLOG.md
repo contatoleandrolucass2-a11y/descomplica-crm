@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-20: publicação do dashboard House e Imob
+
+- PR #273 integrado no merge `08d050f90c877009cd55140322b7c822e578d672`.
+  A CI de `main` `39400193535` aprovou `validate`, `isolated-restore`,
+  `release-gates` e `promotable-image` no mesmo SHA.
+- Artefato `12253648907`: `image.tar.gz` SHA-256
+  `69440fb2c75469f7d6d8a54698cfe23ec628addc5f61c0b63dde1c57cf08e127`.
+  A prova OCI na VPS validou os dois perfis com image ID containerd
+  `sha256:2dd7eee90362d5c4a64e283777e151c66a06ed6f56cba235f498cf3932901aa0`.
+- O coordenador publicou às `2026-10-20T10:06:46.708Z`, deployment
+  `8f390bda-5020-48d4-8760-c848bac309eb`, sem pendência. Health local e público
+  retornaram a versão exata; acesso anônimo a `/app` retornou `307` para login.
+- Smoke autenticado no Chrome confirmou House ativo, Imob alternável, 32
+  corretores, metas House 4.576/768/384/256/64/32, proporcional diário e
+  `Pastas aprovadas` numérica. Imob manteve metas indisponíveis até configuração.
+
 ## 2026-10-20: contrato visual do dashboard após integração
 
 - A CI do PR #273 confirmou 154 rotas responsivas, 88 temas, 242 auditorias de

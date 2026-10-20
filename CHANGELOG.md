@@ -2,6 +2,9 @@
 
 ## 2026-10-20 - Dashboard House e Imob
 
+- Publicado pelo PR #273 no SHA `08d050f9`, com CI integral, imagem imutável,
+  promoção protegida e health público confirmado na versão exata.
+
 - Substitui a seleção múltipla de canal por dois botões exclusivos: `House`
   para `DIRECIONAL VENDAS SPC` e `Imob` para `SPC - CANAL IMOB PJ`.
 - Abre o dashboard em House por padrão ou respeita o canal permitido pelo perfil

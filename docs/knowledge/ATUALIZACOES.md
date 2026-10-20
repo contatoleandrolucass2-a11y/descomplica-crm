@@ -1,5 +1,28 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: dashboard House e Imob integrado e publicado
+
+- PR #273 integrado no merge `08d050f90c877009cd55140322b7c822e578d672`.
+  A CI de `main` `39400193535` aprovou os quatro jobs obrigatórios no SHA exato,
+  incluindo a matriz autenticada de 242 comparações e a imagem promovível.
+- Artefato `12253648907`: ZIP de `105586108` bytes; `image.tar.gz` SHA-256
+  `69440fb2c75469f7d6d8a54698cfe23ec628addc5f61c0b63dde1c57cf08e127`.
+  A prova OCI no destino vinculou o digest de configuração da CI ao image ID
+  containerd `sha256:2dd7eee90362d5c4a64e283777e151c66a06ed6f56cba235f498cf3932901aa0`
+  e validou os dois perfis de runtime sem rebuild ou retag.
+- A primeira tentativa de promoção foi bloqueada antes da intenção porque o
+  checkout operacional ainda estava no SHA anterior. O ledger permaneceu sem
+  pendência e o runtime não mudou. Após corrigir a fronteira Git para o merge
+  exato, o coordenador publicou às `2026-10-20T10:06:46.708Z`, deployment
+  `8f390bda-5020-48d4-8760-c848bac309eb`.
+- Pós-publicação: ledger sem pendência; health local e público HTTP 200/status
+  ok/versão `08d050f9`; acesso anônimo a `/app` retornou 307 para `/login`.
+  Smoke autenticado no Chrome confirmou House ativo, Imob alternável, 32
+  corretores, metas House `4.576/768/384/256/64/32`, proporcional diário e
+  `Pastas aprovadas` numérica. Imob exibiu metas indisponíveis, como previsto.
+- Nenhum workflow n8n, migration, política comercial ou dado remoto foi
+  alterado. Esta nota documental deve ser integrada sem novo deploy do site.
+
 ## 2026-10-20: PR #273 - ajuste final do contrato visual do dashboard
 
 - Fonte: GitHub Actions `39383414957`, artefato `12248076183`, SHA
