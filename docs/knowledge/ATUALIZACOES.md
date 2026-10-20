@@ -1468,3 +1468,8 @@ coordenador de release, ledger e health público.
   estavam editáveis, o botão `Salvar alterações` estava presente e não havia
   overflow. Somente essas 11 referências foram promovidas para nova validação;
   baselines de outras páginas permaneceram intactas.
+- A execução seguinte `39373587403` parou no teste de integridade porque o
+  resultado promovido preservou do artefato o marcador transitório
+  `worktreeDirtyAtCapture=true`. O marcador foi corrigido para o estado limpo
+  da baseline versionada; os 28 testes locais de catálogo/paridade passaram
+  (27 aprovados e um ignorado) antes do novo envio.
