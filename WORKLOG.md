@@ -21,6 +21,9 @@ dependência transitiva `@modelcontextprotocol/sdk` 1.31.0, usada somente pelo
 A restauração isolada seguinte também confirmou que a nova RPC precisava entrar
 na allowlist global de funções autenticadas; o pgTAP foi corrigido para auditar
 explicitamente esse acesso, sem ampliar grants.
+A CI visual ainda capturou os cabeçalhos ativo e de grupo em instantes distintos
+da transição de 140 ms. Os quatro elementos do contexto ativo agora recebem a
+mesma cor imediatamente, preservando a transição apenas para hover comum.
 
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 

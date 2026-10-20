@@ -1826,3 +1826,7 @@ dependente da autorização específica aplicável.
   ainda não constava na allowlist nominal de funções executáveis por
   `authenticated`. A lista foi atualizada para auditar a permissão já concedida
   pela migration; nenhum grant adicional foi criado.
+- A terceira CI aprovou a restauração isolada e todos os 2.085 testes pgTAP, mas
+  o gate visual capturou os cabeçalhos ativo e de grupo em pontos diferentes da
+  transição CSS. O contexto ativo passou a não animar a cor; hover comum mantém
+  a transição e a indicação visual solicitada continua coordenada.

@@ -10,6 +10,8 @@
   a fonte analítica quando o contrato não está disponível.
 - Atualiza o SDK MCP transitivo do diagnóstico local para a versão corrigida,
   removendo o bloqueio de segurança encontrado pela CI.
+- Torna imediato o destaque coordenado de corretor, métrica e empreendimento,
+  evitando estados intermediários durante a navegação pela tabela.
 
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
