@@ -8,6 +8,8 @@
   publicacao comercial e estoque concluidos.
 - Atualiza o pin transitivo do SDK MCP para 1.32.1, corrigindo o advisory de
   alta severidade detectado pela CI durante o registro final da entrega.
+- Atualiza o Vite transitivo do Vitest para 8.2.4, corrigindo o advisory de alta
+  severidade detectado durante a repetição da CI.
 - Estabiliza o teste visual da grade de Previsão ao aguardar o fim da transição
   CSS antes de comparar as cores do grupo e da métrica ativa.
 

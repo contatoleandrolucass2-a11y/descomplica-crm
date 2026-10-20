@@ -20,6 +20,14 @@ a comparação capturava cores intermediarias durante a transição CSS de 140 m
 A asserção passou a aguardar as cores finais, preservando o criterio de igualdade
 e sem alterar a interface. Os 12 cenarios focados passaram apos o ajuste.
 
+Na repetição da CI, a fonte oficial de ITBI voltou a responder e o gate passou.
+Em seguida, o audit detectou o novo advisory `GHSA-587h-7wmj-h5pm` no Vite 8.2.0,
+transitivo do Vitest. O override foi elevado para a versão corrigida 8.2.4.
+Com Node 24.19.0, instalação congelada, audit sem alta/crítica, lint, typecheck,
+formatação, build de 57 rotas e os 12 cenários de navegador de Previsão passaram.
+A aplicação aprovou 4.063 testes; a suíte operacional aprovou 1.595 e repetiu
+somente as três limitações POSIX conhecidas do Meta Ads no Windows.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas

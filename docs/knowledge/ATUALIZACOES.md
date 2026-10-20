@@ -51,6 +51,16 @@
   apenas no sincronismo do teste: ele agora aguarda a igualdade final original.
   Os 12 cenarios focados passaram; runtime, estilos e criterios visuais nao
   foram alterados. Uma nova CI integral continua obrigatoria.
+- Na repetição da CI `39505860620`, a fonte oficial de ITBI respondeu e o gate
+  passou. O audit então detectou o advisory novo de alta severidade
+  `GHSA-587h-7wmj-h5pm` no Vite 8.2.0, transitivo do Vitest. O override foi
+  elevado para a versão corrigida 8.2.4; lockfile, audit e CI integral precisam
+  ser validados novamente antes da integração.
+- Validação local do Vite 8.2.4 com Node 24.19.0: instalação congelada, audit
+  sem alta/crítica, lint, typecheck, formatação, build de 57 rotas e 12 cenários
+  de navegador de Previsão aprovados. Vitest aprovou 4.063 testes. A suíte Node
+  aprovou 1.595, ignorou 19 e repetiu somente as três falhas POSIX já conhecidas
+  do Meta Ads no Windows; a CI Linux permanece como gate conclusivo.
 
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 
