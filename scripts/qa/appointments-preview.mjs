@@ -261,14 +261,11 @@ export async function runAppointmentsPreview() {
                   : [],
               );
           })(),
-          innerScrollbars: [...document.querySelectorAll("main *")]
+          horizontalScrollbars: [...document.querySelectorAll("main *")]
             .filter((element) => {
               const css = getComputedStyle(element);
               return (
-                (/(auto|scroll)/.test(css.overflowX) &&
-                  element.scrollWidth > element.clientWidth + 1) ||
-                (/(auto|scroll)/.test(css.overflowY) &&
-                  element.scrollHeight > element.clientHeight + 1)
+                /auto|scroll/.test(css.overflowX) && element.scrollWidth > element.clientWidth + 1
               );
             })
             .map((element) => ({ tag: element.tagName, class: element.className })),
@@ -276,7 +273,14 @@ export async function runAppointmentsPreview() {
             heading: element.querySelector("h2")?.textContent,
             x: element.getBoundingClientRect().x,
             y: element.getBoundingClientRect().y,
+            height: element.getBoundingClientRect().height,
+            hasVerticalScroll:
+              element.querySelector(":scope > div:last-child")?.scrollHeight >
+              element.querySelector(":scope > div:last-child")?.clientHeight + 1,
           })),
+          labelWritingModes: [
+            ...document.querySelectorAll('[class*="columnValue"], [class*="columnLabel"]'),
+          ].map((element) => getComputedStyle(element).writingMode),
         }));
         const axe = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
@@ -299,7 +303,20 @@ export async function runAppointmentsPreview() {
           geometry.scrollWidth <= width + 1,
           `Horizontal overflow ${theme}/${width}: ${geometry.scrollWidth}`,
         );
-        check(!geometry.innerScrollbars.length, `Internal scrollbar ${theme}/${width}`);
+        check(
+          !geometry.horizontalScrollbars.length,
+          `Horizontal internal scrollbar ${theme}/${width}`,
+        );
+        check(
+          geometry.sections.every(
+            (section) => Math.abs(section.height - geometry.sections[0].height) < 1,
+          ),
+          `Uniform chart heights ${theme}/${width}`,
+        );
+        check(
+          geometry.labelWritingModes.every((mode) => mode === "horizontal-tb"),
+          `Horizontal chart labels ${theme}/${width}`,
+        );
         check(
           !geometry.dailyLabelCollisions.length,
           `Daily label collisions ${theme}/${width}: ${geometry.dailyLabelCollisions.join(",")}`,
@@ -315,6 +332,13 @@ export async function runAppointmentsPreview() {
               geometry.sections[1].y === geometry.sections[2].y,
             "Three charts side by side at 1440",
           );
+        if (width === 1440) {
+          check(geometry.sections[0].hasVerticalScroll, "Daily chart uses vertical overflow");
+          check(
+            geometry.sections[4].hasVerticalScroll,
+            "Long responsible ranking uses vertical overflow",
+          );
+        }
       }
     }
     const daily = region("Agendamentos por dia");

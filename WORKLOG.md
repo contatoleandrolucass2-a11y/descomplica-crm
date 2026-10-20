@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-10-19: uniformização dos gráficos de Agendamentos
+
+Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o
+mesmo tamanho do ranking por gerente, usando rolagem vertical quando necessário.
+Os sete cards agora têm 40 rem de altura; o corpo rolável preserva o cabeçalho,
+aceita foco por teclado e bloqueia overflow horizontal. Colunas diárias, semanais
+e mensais quebram em linhas com texto horizontal; rankings continuam completos e
+ordenados. Nenhuma regra de contagem, contrato de dados, permissão, Salesforce,
+Supabase, coletor ou n8n foi alterada.
+
+Preview com CSS compilado do Next aprovou 12 combinações em 1440/1024/390/320,
+nos três temas, com zero violações Axe, zero colisões e alturas uniformes. A
+matriz verificou rolagem vertical nos conteúdos extensos, ausência de overflow
+horizontal, proporção das barras, filtros e rankings completos. Evidências locais
+em `test-results/appointments-preview`. Lint, typecheck e build de 57 rotas
+passaram; Vitest aprovou 3.952 testes e manteve 102 skips condicionais. A etapa
+Node aprovou 1.595, ignorou 19 e reproduziu as três falhas POSIX conhecidas de
+Meta Ads no Windows. `test:release` também reteve somente o grupo Meta Ads que
+depende da fixture privada POSIX neste host. Nenhum gate foi reduzido; a CI Linux
+do SHA exato permanece obrigatória para integrar e publicar.
+
 ## 2026-10-19: validacao e publicacao do Associativo automatico
 
 PR #265 integrado em `f56236b3ada830cde0f17c4c205ef735bba77351` apos CI
@@ -7945,3 +7966,14 @@ O preview confundia ausência de valores com ausência de autorização: `?empty
 Validação focal: preview Chromium aprovou 30 telas, temas e larguras, axe sem violações e sem requisições externas. Capturas locais em `test-results/goal-planning-preview`, não versionadas. A ação continua conduzindo à revisão e ao salvamento de rascunho inativo; ativação de política comercial permanece fora deste escopo.
 
 Lint, typecheck e build passaram com Node 24.19/pnpm 11.20. Vitest aprovou 3.861 testes e ignorou 98. A etapa Node aprovou 1.593, ignorou 19 e manteve três falhas locais de permissões/caminhos Windows em Meta Ads, fora do delta; a CI Linux deve validar o gate integral antes da integração.
+
+### Complemento da CI do ajuste visual de Agendamentos
+
+A primeira CI do PR270, execução 39347120702 no head e9aecaa6, aprovou validate e
+isolated-restore e bloqueou apenas na matriz visual autenticada. A fixture sem
+dados revelou que a altura de 40rem destinada aos gráficos também alcançava o
+card de indisponibilidade; duas imagens mudaram de dimensão e a captura do tema
+balanced ficou vazia. Nenhuma referência vazia foi adotada. O estilo fixo foi
+limitado ao componente Chart; o estado sem análise recupera o layout compacto,
+enquanto os sete gráficos preenchidos preservam tamanho e rolagem uniformes.
+Nova CI integral é obrigatória antes da integração e publicação.

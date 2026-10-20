@@ -69,17 +69,28 @@
 .rankingsGrid {
   margin-top: 1rem;
 }
-.rankingColumn {
-  display: grid;
-  gap: 1rem;
-  min-width: 0;
-}
 .card {
+  box-sizing: border-box;
   min-width: 0;
   padding: 1rem;
   background: var(--analytics-surface);
   border: 1px solid var(--analytics-line);
   border-radius: 1rem;
+}
+.chartCard {
+  display: flex;
+  flex-direction: column;
+  height: 40rem;
+}
+.cardBody {
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.cardBody:focus-visible {
+  outline: 3px solid var(--analytics-cyan-strong);
+  outline-offset: -3px;
 }
 .cardHeader {
   display: flex;
@@ -122,8 +133,8 @@
 }
 .columns {
   display: grid;
-  grid-template-columns: repeat(var(--columns), minmax(0, 1fr));
-  gap: clamp(2px, 0.45vw, 8px);
+  grid-template-columns: repeat(auto-fit, minmax(3.25rem, 1fr));
+  gap: 1rem clamp(0.35rem, 0.75vw, 0.75rem);
   padding: 1.75rem 0 0;
   margin: 0;
   list-style: none;
@@ -162,34 +173,23 @@
   font-size: 0.75rem;
   color: var(--analytics-ink);
   font-weight: 700;
-  writing-mode: vertical-rl;
+  white-space: nowrap;
+  writing-mode: horizontal-tb;
 }
 .columnLabel {
   display: block;
   margin-top: 0.5rem;
   font-size: 0.75rem;
   line-height: 1.3;
-  writing-mode: vertical-rl;
-  text-align: start;
-  margin-inline: auto;
-  min-height: 3.75rem;
+  overflow-wrap: anywhere;
+  writing-mode: horizontal-tb;
+  text-align: center;
 }
 .daily .columnLabel {
-  min-height: 1.75rem;
   font-size: 0.6875rem;
-  margin-top: calc(0.5rem + var(--day-offset) * 2rem);
 }
 .daily .columnValue {
-  font-size: 0.625rem;
-  bottom: calc(100% + var(--value-space) - (var(--day-offset) + 1) * var(--value-height));
-}
-.daily .columnTrack::after {
-  content: "";
-  position: absolute;
-  left: 50%;
-  top: calc(-1 * var(--value-space) + (var(--day-offset) + 1) * var(--value-height));
-  bottom: var(--bar-height);
-  border-left: 1px dotted var(--analytics-line);
+  font-size: 0.6875rem;
 }
 .ranking {
   margin: 0;
