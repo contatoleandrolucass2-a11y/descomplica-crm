@@ -1,5 +1,15 @@
 # Changelog
 
+## 2026-10-20 - Ajuste minimo e anuais do Associativo
+
+- Corrige desconto ignorado na sugestao e calcula os menores pagamentos
+  iniciais iguais que aprovam o fluxo selecionado.
+- Impede anual no mes da Entrada ou de Sinal, ou entre Sinais; aplica
+  teto nominal de 50% da renda com arredondamento para baixo.
+- Mostra datas e aprovacao reais da previa e preserva o saldo parcelado.
+- Simplifica a composicao para um valor dinamico de Registro e remove
+  a nota visual solicitada, sem mudar taxas nem juros.
+
 ## 2026-10-20 - Candidato visual protegido para Agendamentos
 
 - Inclui o painel de Agendamentos no workflow isolado que produz referências

@@ -17,6 +17,13 @@ import { checkAssociativeGuidance } from "./associative-guidance.mjs";
 const calculatorRoute = "/app/simulacao/calcular-documentacao";
 const associativeRoute = "/app/simulacao/associativo-fluxo-linear";
 const associativeRoot = ".investor-associative-table-page";
+const associativeBreakdownTerms = [
+  "ITBI",
+  "Registro",
+  "Despachante",
+  "Seguro Caixa",
+  "Total da documentação",
+];
 const themes = { light: "Claro", balanced: "Médio", dark: "Escuro" };
 const viewports = [
   { width: 1440, height: 900 },
@@ -114,7 +121,13 @@ async function checkBreakdownGeometry(scope, selector) {
       };
     }),
   );
-  assert.ok(rows.length >= 6, "Both registration acts and commercial charges must be visible");
+  if (selector === ".investor-associative-documentation-breakdown")
+    assert.deepEqual(
+      rows.map(({ name }) => name),
+      associativeBreakdownTerms,
+      "Associative documentation must show one combined registration row",
+    );
+  else assert.ok(rows.length >= 6, "Both registration acts and commercial charges must be visible");
   assert.ok(
     rows.every((row) => row.contained && !row.collision),
     `Breakdown geometry: ${JSON.stringify(rows)}`,
@@ -181,7 +194,7 @@ async function checkAssociativeLegalFlow(page, origin) {
     firstProperty: "SIM",
     modality: "MCMV",
     manualModalityPreference: "MCMV",
-    baseDate: "2026-10-10",
+    baseDate: "2026-10-20",
   };
   const checks = [];
   async function assertAutomatic(label) {
@@ -195,13 +208,15 @@ async function checkAssociativeLegalFlow(page, origin) {
     await expect(
       documentation.getByRole("region", { name: "Dados fiscais da documentação", exact: true }),
     ).toHaveCount(0);
-    await expect(documentation.getByRole("note")).toContainText("Estimativa automática");
+    await expect(documentation.getByRole("note")).toHaveCount(0);
+    await expect(documentation.getByText(/Estimativa automática/)).toHaveCount(0);
+    await expect(documentation.locator("dl > div > dt")).toHaveText(associativeBreakdownTerms);
     for (const [term, key] of [
       ["ITBI", "itbi"],
-      ["Registro de compra e venda", "purchaseRegistration"],
-      ["Registro da alienação fiduciária", "lienRegistration"],
+      ["Registro", "totalRegistration"],
       ["Despachante", "dispatchFee"],
       ["Seguro Caixa", "caixaInsurance"],
+      ["Total da documentação", "totalCash"],
     ]) {
       await expect(
         documentation
@@ -341,7 +356,8 @@ async function captureFocusedLayouts(page, screen, artifactRoot, matrix, save) {
       if (screen === "calculator") geometry = await checkDocumentationLegalGeometry(scope);
       else {
         await expect(scope.locator("input, select, [data-documentation-legal]")).toHaveCount(0);
-        await expect(scope.getByRole("note")).toBeVisible();
+        await expect(scope.getByRole("note")).toHaveCount(0);
+        await expect(scope.getByText(/Estimativa automática/)).toHaveCount(0);
         geometry = await scope.evaluate((element) => ({
           fields: element.querySelectorAll("input, select").length,
           pageOverflow: document.documentElement.scrollWidth > innerWidth + 1,
@@ -375,7 +391,11 @@ async function captureFocusedLayouts(page, screen, artifactRoot, matrix, save) {
           scope.getByRole("region", { name: "Dados fiscais da documentação", exact: true }),
           `${prefix}-fields.png`,
         );
-      } else await capture(scope.getByRole("note"), `${prefix}-estimate.png`);
+      } else
+        await capture(
+          scope.locator(".investor-associative-documentation-breakdown"),
+          `${prefix}-breakdown.png`,
+        );
       await capture(scope, `${prefix}-complete.png`);
       matrix.push({
         viewport,
@@ -391,20 +411,29 @@ async function captureFocusedLayouts(page, screen, artifactRoot, matrix, save) {
   return matrix;
 }
 
-async function checkAssociativePrintEstimate(page, artifactRoot) {
+async function checkAssociativePrintDocumentation(page, artifactRoot) {
   const checks = [];
   await page.setViewportSize(viewports[0]);
+  const documentation = page.locator(`${associativeRoot} .investor-associative-documentation`);
+  const breakdown = documentation.locator(".investor-associative-documentation-breakdown");
+  const screenValues = await breakdown.locator("dl > div > dd").allTextContents();
   for (const theme of Object.keys(themes)) {
     await setTheme(page, theme);
     await page.emulateMedia({ media: "print", reducedMotion: "reduce" });
     try {
-      const note = page
-        .locator(`${associativeRoot} .investor-associative-documentation`)
-        .getByRole("note");
-      await expect(note).toBeVisible();
-      await expect(note).toContainText("Estimativa automática");
-      await expect(note).toContainText("prefeitura, do banco e do cartório");
-      const paint = await note.evaluate((element) => {
+      await expect(documentation.getByRole("note")).toHaveCount(0);
+      await expect(documentation.getByText(/Estimativa automática/)).toHaveCount(0);
+      await expect(breakdown.locator("dl > div > dd")).toHaveText(screenValues);
+      const geometry = await checkBreakdownGeometry(
+        documentation,
+        ".investor-associative-documentation-breakdown",
+      );
+      const registration = breakdown
+        .locator("dl > div")
+        .filter({ has: page.getByText("Registro", { exact: true }) })
+        .locator("dd");
+      await expect(registration).toBeVisible();
+      const paint = await registration.evaluate((element) => {
         const canvas = document.createElement("canvas");
         canvas.width = canvas.height = 1;
         const context = canvas.getContext("2d", { willReadFrequently: true });
@@ -454,25 +483,22 @@ async function checkAssociativePrintEstimate(page, artifactRoot) {
           ),
         };
       });
-      assert.equal(paint.foreground[3], 255, "Printed estimate text must be opaque");
-      assert.deepEqual(
-        paint.foreground,
-        [0, 0, 0, 255],
-        "Print must retain black estimate text without background ink",
-      );
-      assert.deepEqual(
-        paint.background,
-        [255, 255, 255, 255],
-        "Printed estimate must use a white background in every theme",
-      );
-      assert.equal(paint.opaque, true, "Printed estimate must not fade into the paper");
-      assert.equal(paint.clipped, false, "Printed estimate must not clip");
-      assert.ok(paint.contrast >= 4.5, `Printed estimate contrast: ${paint.contrast}`);
-      await note.screenshot({
-        path: path.join(artifactRoot, `associative-print-${theme}-estimate.png`),
+      assert.equal(paint.foreground[3], 255, "Printed registration text must be opaque");
+      assert.equal(paint.opaque, true, "Printed registration must not fade into the paper");
+      assert.equal(paint.clipped, false, "Printed registration must not clip");
+      assert.ok(paint.contrast >= 4.5, `Printed registration contrast: ${paint.contrast}`);
+      await breakdown.screenshot({
+        path: path.join(artifactRoot, `associative-print-${theme}-breakdown.png`),
         animations: "disabled",
       });
-      checks.push({ theme, media: "print", visible: true, ...paint });
+      checks.push({
+        theme,
+        media: "print",
+        visible: true,
+        values: screenValues,
+        geometry,
+        ...paint,
+      });
     } finally {
       await page.emulateMedia({ media: "screen" });
     }
@@ -496,7 +522,7 @@ export async function runDocumentationLegalPreview({
     shell:
       "Real ProtectedLayout, navigation, account menu and breadcrumbs; synthetic session boundaries only",
     node: process.version,
-    simulatedDate: "2026-10-10",
+    simulatedDates: { calculator: "2026-10-10", associative: "2026-10-20" },
     scope: printOnly
       ? "associative-flow-and-print"
       : associativeOnly
@@ -717,7 +743,7 @@ export async function runDocumentationLegalPreview({
       ? ["associative"]
       : ["calculator", "associative"]) {
       const page = await context.newPage();
-      await page.clock.setFixedTime(new Date("2026-10-10T15:00:00Z"));
+      await page.clock.setFixedTime(new Date(`${evidence.simulatedDates[screen]}T15:00:00Z`));
       page.setDefaultTimeout(15_000);
       page.on("pageerror", (error) => evidence.consoleErrors.push({ screen, text: error.message }));
       const consoleMessages = new Map();
@@ -742,15 +768,26 @@ export async function runDocumentationLegalPreview({
             path.join(artifactRoot, "calculator-existing-matrix"),
           );
         else result.flow = await checkAssociativeLegalFlow(page, origin);
+        const checkPrint = async () => {
+          try {
+            result.printDocumentation = {
+              passed: true,
+              checks: await checkAssociativePrintDocumentation(page, artifactRoot),
+            };
+          } catch (error) {
+            result.printDocumentation = { passed: false, error: error.stack ?? String(error) };
+          }
+          await save();
+        };
         if (printOnly) {
-          result.printEstimate = await checkAssociativePrintEstimate(page, artifactRoot);
+          await checkPrint();
+          assert.equal(result.printDocumentation.passed, true, result.printDocumentation.error);
           result.passed = true;
           continue;
         }
         await captureFocusedLayouts(page, screen, artifactRoot, result.matrix, save);
         if (screen === "associative") {
-          result.printEstimate = await checkAssociativePrintEstimate(page, artifactRoot);
-          await save();
+          await checkPrint();
           result.motion = [];
           for (const viewport of viewports.slice(0, 2)) {
             await page.setViewportSize(viewport);
@@ -770,6 +807,7 @@ export async function runDocumentationLegalPreview({
               "continuity",
               () =>
                 checkAssociativeCalculationContinuity(page, {
+                  artifactRoot,
                   onExpectedConsoleError(message) {
                     const entry = consoleMessages.get(message);
                     assert.ok(entry, "Injected 503 must match an observed console event");
@@ -788,6 +826,7 @@ export async function runDocumentationLegalPreview({
           }
           assert.equal(result.guidance.passed, true, result.guidance.error);
           assert.equal(result.continuity.passed, true, result.continuity.error);
+          assert.equal(result.printDocumentation.passed, true, result.printDocumentation.error);
         }
         result.passed = true;
       } catch (error) {

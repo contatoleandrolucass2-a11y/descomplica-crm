@@ -1,5 +1,56 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: correcao local do ajuste minimo do Associativo
+
+- Causa comprovada: a busca antiga desativava desconto no candidato e
+  aplicava os pagamentos ao saldo com desconto. Proposta e sugestao agora
+  compartilham `investorInput`. Previa usa datas e aprovacao do candidato.
+- Preferencia confirmada pelo usuario: menor valor por pagamento inicial,
+  dividido igualmente entre Entrada e ate tres Sinais. Busca por contagem
+  exata de sinais e centavos; recalcula as anuais disponiveis a cada candidato.
+  O empate usa menor soma inicial. Depois minimiza a anual igual necessaria.
+- Anual nao pode coincidir com mes/ano da Entrada ou de Sinal, nem ficar
+  entre sinais. Teto nominal de 50% da renda com truncamento decimal, sem
+  epsilon; juros preservados. O limite nao se refere a anual apos correcao.
+- Caso sintetico reproduzido: Linear com quatro pagamentos iniciais iguais
+  de 13269,73, tres anuais de 1275 a partir de 2027, saldo mensal 27327,47
+  e mensal de 459,00. Fronteira de um centavo e igualdade previa/aplicacao
+  verificadas. Registro visual consolidado; taxas internas inalteradas.
+- Vitest no Windows: 4051 aprovados, 99 skips condicionais; grade independente
+  de 7285 casos sem divergencias. A suite operacional teve 1595 aprovados,
+  19 skips e tres falhas de permissao POSIX/parent directory em testes Meta Ads.
+  Esses testes nao foram alterados; `pnpm test` local nao e integralmente verde.
+  Excecao limitada ao host Windows, a reavaliar na CI Linux obrigatoria do SHA
+  candidato. Nao flexibiliza gates nem autoriza deploy.
+- Lint, typecheck, build e formatacao tiveram execucoes locais aprovadas.
+  Regressao final focal: 38 testes aprovados. QA Playwright completo em
+  `2026-10-20T13-38-47.543Z` aprovou Associativo e calculadora avulsa,
+  guidance/continuity, impressao nos tres temas e desktop/mobile. Capturas
+  locais revisadas; nao exportadas nem usadas como prova de producao.
+  Integracao e publicacao desta demanda ainda pendentes. Fonte tecnica:
+  `docs/audits/associativo-ajuste-minimo-2026-10-20.md`.
+- Consulta observacional as 10:40 America/Sao_Paulo: main e health publico
+  concordam em `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`, HTTP 200/status ok.
+  CI main `39421287684` concluiu com sucesso. Deploy externo registrado em
+  `2026-10-20T13:12:50.271Z`, ID `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`,
+  sem pendencia. Isso nao comprova publicacao da correcao local.
+
+## 2026-10-20: abertura da correcao de ajustes e anuais do Associativo
+
+- Fonte: pedido do usuario, GitHub e GET publico de `/api/health`, consultados
+  em 20/10/2026 as 10:08 (America/Sao_Paulo). Git comum confirmado; checkout
+  inicial limpo. Branch `codex/associativo-ajuste-minimo-anuais` criada de
+  `origin/main` no SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`.
+- CI de main `39421287684` em andamento na consulta; ainda nao valida a nova
+  correcao. Health HTTP 200/status ok, publicado
+  `08d050f90c877009cd55140322b7c822e578d672`; integrado e publicado diferem.
+- Escopo autorizado: impedir anuais em meses ocupados por entrada/sinais,
+  corrigir sugestao para minimizar entrada/sinais respeitando os limites,
+  limitar anual a 50% da renda com arredondamento para baixo e simplificar
+  a composicao visual de Registro. Diagnostico e testes ainda pendentes.
+- PR #269 de impressao do Associativo permanece separado e aberto; nao
+  incorporar alteracoes nao integradas nem alterar regras de juros.
+
 ## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
 
 - A CI `39377861485` reprovou somente o contrato de proveniência da referência

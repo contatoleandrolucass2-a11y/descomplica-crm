@@ -18,7 +18,9 @@ import { filterInventoryBySearch } from "@/lib/archive-investor/inventory-search
 import { completeMissingInventoryUnitFacts, inventoryIdentityKey, uniqueInventoryReferences } from "@/lib/archive-investor/inventory-reference";
 import { resolveAssociativeConstructionProgress } from "@/lib/archive-investor/associative-unit-facts";
 import { eligibleIntermediaryIndexes } from "@/lib/archive-investor/intermediary-fields";
-import { ASSOCIATIVE_APPROVAL_TIERS, calculateAssociativeApproval, findAssociativeApprovalPlan } from "@/lib/archive-investor/associative-approval-rules.mjs";
+import { ASSOCIATIVE_APPROVAL_TIERS, calculateAssociativeApproval } from "@/lib/archive-investor/associative-approval-rules.mjs";
+import { buildAssociativeApprovalSuggestion } from "@/lib/archive-investor/associative-approval-suggestion.mjs";
+import { floorMoney, getAssociativeAnnualLimit } from "@/lib/archive-investor/associative-annual-rules.mjs";
 import { buildAssociativeInstallmentMemory, buildAssociativePaymentComparison } from "@/lib/archive-investor/associative-installment-memory.mjs";
 import { buildDocumentationInstallmentSchedule } from "@/lib/archive-investor/documentation-calculator-rules.mjs";
 import { calculateAssociativeDocumentationView, resolveAssociativeAppraisal } from "@/lib/archive-investor/associative-documentation-adapter.mjs";
@@ -1154,18 +1156,13 @@ function AssociativeDocumentationPanel({
           <header><h4>Composição</h4><InvestorInfoHint label="Composição da documentação" title="De onde vem o total?" description={associativeHelp(`Some o ITBI (imposto da compra), o registro no cartório, o despachante e o Seguro Caixa. Modalidade usada: ${result.effectiveModality}.`, `Conta: ${money.format(result.itbi)} + ${money.format(result.totalRegistration)} + ${money.format(result.dispatchFee)} + ${money.format(result.caixaInsurance)} = ${money.format(result.totalCash)}.`, `Valor avaliado pelo banco: ${money.format(appraisalValue)}. Financiamento máximo estimado: ${money.format(result.maximumFinancing)}. ${result.itbiRule} Confirme os custos com banco, prefeitura e cartório.`)} /></header>
           <dl>
             <div><dt>ITBI</dt><dd>{money.format(result.itbi)}</dd></div>
-            {result.registrationCombined ? <div><dt>Registro conjunto</dt><dd>{money.format(result.totalRegistration)}</dd></div> : <>
-              <div><dt>Registro de compra e venda</dt><dd>{money.format(result.purchaseRegistration)}</dd></div>
-              <div><dt>Registro da alienação fiduciária</dt><dd>{money.format(result.lienRegistration)}</dd></div>
-              <div><dt>Subtotal de registro</dt><dd>{money.format(result.totalRegistration)}</dd></div>
-            </>}
+            <div><dt>Registro</dt><dd>{money.format(result.totalRegistration)}</dd></div>
             <div><dt>Despachante</dt><dd>{money.format(result.dispatchFee)}</dd></div>
             <div><dt>Seguro Caixa</dt><dd>{money.format(result.caixaInsurance)}</dd></div>
             <div className="total"><dt>Total da documentação</dt><dd>{money.format(result.totalCash)}</dd></div>
           </dl>
         </section>
       </div>
-      <p className="investor-associative-documentation-estimate" role="note">Estimativa automática com os dados da unidade e do seu perfil. Os valores finais dependem da prefeitura, do banco e do cartório.</p>
     </> : <section className="investor-associative-documentation-empty" role={missingItems.length > 0 ? "status" : "alert"} aria-live="polite">
       <span aria-hidden="true">{missingItems.length > 0 ? "…" : "!"}</span>
       <div><h4>{missingItems.length > 0 ? "Documentação aguardando dados" : "Revise os dados da documentação"}</h4><p>{missingItems.length > 0 ? "Conclua o perfil e os valores da proposta acima. O cálculo da documentação é automático." : "Não foi possível calcular a documentação com os dados disponíveis."}</p>
@@ -1326,12 +1323,6 @@ function AssociativeCommissionDialog({
   </dialog>;
 }
 
-type AssociativeAdjustmentPayment = {
-  label: string;
-  date?: string;
-  value: number;
-};
-
 type AssociativeFlow = "linear" | "decreasing";
 
 type AssociativeFlowSuggestion = {
@@ -1340,6 +1331,11 @@ type AssociativeFlowSuggestion = {
   entry: number;
   signals: number[];
   signalCount: number;
+  signalDates: string[];
+  annualDates: string[];
+  installmentBalance: number;
+  correctedInstallment: number;
+  approval: ReturnType<typeof calculateAssociativeApproval>;
 };
 
 type AssociativeAdjustmentRow = {
@@ -1373,8 +1369,6 @@ function AssociativeApprovalPanel({
   entryPending,
   entryRejected,
   currentEntryDate,
-  currentSignalPayments,
-  currentAnnualPayments,
   releaseStatus,
   onBuildFlowSuggestion,
   onApplyFlowSuggestion,
@@ -1401,8 +1395,6 @@ function AssociativeApprovalPanel({
   entryPending: boolean;
   entryRejected: boolean;
   currentEntryDate?: string;
-  currentSignalPayments: AssociativeAdjustmentPayment[];
-  currentAnnualPayments: AssociativeAdjustmentPayment[];
   releaseStatus: ReturnType<typeof calculateAssociativeReleaseStatus>;
   onBuildFlowSuggestion: (flow: AssociativeFlow) => AssociativeFlowSuggestion | null;
   onApplyFlowSuggestion: (flow: AssociativeFlow, suggestion: AssociativeFlowSuggestion) => void;
@@ -1462,10 +1454,10 @@ function AssociativeApprovalPanel({
     if (suggestion === undefined) return { summary: "Preparando a prévia exata do ajuste…", rows: [] };
     if (!suggestion) return { summary: "Nenhum ajuste automático válido foi encontrado para este fluxo.", rows: [] };
     const signalRows: AssociativeAdjustmentRow[] = suggestion.signals
-      .map((value, index) => ({ label: `Sinal ${index + 1}`, date: currentSignalPayments[index]?.date, value, currency: true }))
+      .map((value, index) => ({ label: `Sinal ${index + 1}`, date: suggestion.signalDates[index], value, currency: true }))
       .filter((row) => Number(row.value) > 0);
     const annualRows: AssociativeAdjustmentRow[] = suggestion.annuals
-      .map((value, index) => ({ label: `Anual ${index + 1}`, date: currentAnnualPayments[index]?.date, value, currency: true }))
+      .map((value, index) => ({ label: `Anual ${index + 1}`, date: suggestion.annualDates[index], value, currency: true }))
       .filter((row) => Number(row.value) > 0);
     return {
       summary: "",
@@ -1474,6 +1466,11 @@ function AssociativeApprovalPanel({
         { label: "Entrada sugerida", date: currentEntryDate, value: suggestion.entry, currency: true },
         ...signalRows,
         ...annualRows,
+        { label: "Saldo parcelado", value: suggestion.installmentBalance, currency: true },
+        { label: "Maior mensal com correção", value: suggestion.correctedInstallment, currency: true },
+        { label: "% Pró-Soluto", value: formatRate(suggestion.approval.proSolutoRate) },
+        { label: "% Comprometimento da Renda", value: formatRate(suggestion.approval.commitmentRate) },
+        { label: "% Máximo da renda mensal", value: formatRate(suggestion.approval.annualIncomeRate) },
       ] satisfies AssociativeAdjustmentRow[],
     };
   };
@@ -1586,12 +1583,12 @@ function AssociativeApprovalPanel({
           <div><p>Ajuste da proposta</p><h2 id="investor-associative-adjustments-title">Ajustes necessários</h2></div>
           <form method="dialog"><button type="submit" aria-label="Fechar ajustes">×</button></form>
         </header>
-        <p id="investor-associative-adjustments-description">Confira a prévia e escolha o fluxo. O sistema nunca diminui a Entrada, os Sinais ou as Anuais já informados: ele apenas acrescenta o que faltar. Ao aplicar, a janela fecha para você conferir o novo resultado.</p>
+        <p id="investor-associative-adjustments-description">Confira os novos valores antes de aplicar. A sugestão pode reduzir a Entrada, os Sinais e as Anuais já informados para chegar ao menor pagamento inicial que aprove o fluxo.</p>
         <div className="investor-associative-adjustment-options">
           {adjustmentOptions.map((option) => <section key={option.flow} className={`is-${option.flow}`}>
             <header>
               <div><span>{option.label}</span><small>Prévia exata do ajuste</small></div>
-              <strong>REPROVADO</strong>
+              <strong data-approved={option.suggestion?.approval.status === "approved"}>{option.suggestion?.approval.status === "approved" ? "APROVADO" : "SEM AJUSTE VÁLIDO"}</strong>
             </header>
             {option.details.summary ? <p className="investor-associative-adjustment-summary">{option.details.summary}</p> : null}
             {option.details.rows.length > 0 ? <dl className="investor-associative-adjustment-ledger">
@@ -1879,10 +1876,10 @@ const ASSOCIATIVE_PROPOSAL_GUIDE_STEPS = [
   { title: "Digite o Subsídio ou zero", description: "Se o cliente recebeu subsídio, informe o valor. Se não recebeu, digite zero. Assim, o campo FGTS será liberado.", note: "Nunca deixe o campo vazio: use zero para dizer ao sistema que não há subsídio." },
   { title: "Digite o FGTS ou zero", description: "Informe quanto do FGTS será usado na compra. Se o cliente não usar FGTS, digite zero. Depois, o Cheque Moradia será liberado.", note: "Use apenas o valor confirmado para esta proposta." },
   { title: "Digite o Cheque Moradia ou zero", description: "Informe o valor do benefício. Se não houver, digite zero. O sistema então libera a Entrada.", note: "Financiamento, Subsídio, FGTS e Cheque Moradia são descontados do valor do imóvel." },
-  { title: "Informe a Entrada", description: "Digite quanto o cliente pagará na data mostrada ao lado do campo. A entrada mínima é R$ 150,00.", note: "Ajustes necessários nunca diminuem a entrada já digitada. Eles preservam esse valor e acrescentam somente o que faltar." },
+  { title: "Informe a Entrada", description: "Digite quanto o cliente pagará na data mostrada ao lado do campo. A entrada mínima é R$ 150,00.", note: "Os ajustes recalculam Entrada e Sinais. Confira os novos valores antes de aplicar." },
   { title: "Escolha a quantidade de parcelas", description: "Digite um número inteiro entre 1 e o limite mostrado na tela. O sistema divide esse total entre o período antes e depois da entrega.", note: "Comece com 84 quando quiser a menor mensal possível. Se a quantidade não formar os 4 blocos, siga a mensagem de correção." },
   { title: "Selecione o Ranking", description: "Abra a lista à direita e escolha a classificação correta. O sistema compara os fluxos Linear e Decrescente com os limites desse Ranking.", note: "Sem Ranking, sinais, anuais, desconto e resultado de aprovação continuam bloqueados." },
-  { title: "Adicione Sinais somente se precisar", description: "Use Inserir Sinal para criar até 3 pagamentos extras. Preencha na ordem: Sinal 1, depois 2 e depois 3.", note: "Cada sinal precisa ter pelo menos R$ 150,00. Um ajuste automático preserva os sinais já informados e só aumenta o necessário." },
+  { title: "Adicione Sinais somente se precisar", description: "Use Inserir Sinal para criar até 3 pagamentos extras. Preencha na ordem: Sinal 1, depois 2 e depois 3.", note: "Cada sinal precisa ter pelo menos R$ 150,00. O ajuste automático redistribui a Entrada e até três Sinais para reduzir cada pagamento." },
   { title: "Adicione Anuais somente se precisar", description: "Use Inserir Anual para incluir pagamentos em 15 de dezembro, enquanto a obra estiver em andamento. Elas reduzem a base das mensais, mas nunca o Pró-Soluto.", note: "Cada anual pode chegar a 50% da renda familiar. O sistema preserva os valores já digitados e aplica a correção mostrada na ajuda." },
   { title: "Leia o resultado e os ajustes", description: "APROVADO significa que o fluxo está dentro do Ranking. REPROVADO mostra o botão Ver ajustes necessários, com uma prévia antes de qualquer mudança.", note: "Confira a prévia. Só clique em Aplicar estes valores se quiser substituir a proposta pelos valores mostrados." },
   { title: "Confira parcelas, documentos e impressão", description: "Abra Exibir parcelas para revisar valores e datas. Depois confira a documentação e imprima somente a proposta final.", note: "Antes de apresentar ao cliente, confirme unidade, renda, recursos, entrada, Ranking, datas e status de aprovação." },
@@ -2783,23 +2780,7 @@ export function InvestorCalculator({
   const selectedUnit = useMemo(() => inventory.find((item) => item.id === selectedUnitId) ?? null, [inventory, selectedUnitId]);
   const associativeConstructionProgress = resolveAssociativeConstructionProgress(selectedUnit?.progress, constructionProgressOverride);
   const associativeReportedProgress = resolveAssociativeConstructionProgress(selectedUnit?.progress, "");
-  const result = useMemo(() => directTable ? calculateDirectTableFileFlow({
-    selectedUnitId,
-    developmentName: selectedUnit?.project,
-    businessUnit: selectedUnit?.businessUnit,
-    product: selectedUnit?.product,
-    plant: selectedUnit?.plant,
-    description: selectedUnit?.description ?? selectedUnit?.classification,
-    baseDate,
-    completionDate,
-    salePrice,
-    discountAuthorized,
-    discount,
-    entryValue,
-    income,
-    signals,
-    intermediaries,
-  }) : calculateInvestorFlow({
+  const investorInput = useMemo(() => ({
     selectedUnitId,
     baseDate,
     completionDate,
@@ -2823,7 +2804,15 @@ export function InvestorCalculator({
     signals,
     intermediaries,
     approvalTierId: associativeApprovalTier,
-  }), [directTable, annualMode, selectedUnitId, selectedUnit, baseDate, entryDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier]);
+  }), [annualMode, selectedUnitId, selectedUnit, baseDate, entryDate, completionDate, salePrice, discountAuthorized, discount, financing, subsidy, fgts, housingCheck, entryValue, income, installments, signals, intermediaries, associativeApprovalTier]);
+  const result = useMemo(() => directTable ? calculateDirectTableFileFlow({
+    ...investorInput,
+    developmentName: selectedUnit?.project,
+    businessUnit: selectedUnit?.businessUnit,
+    product: selectedUnit?.product,
+    plant: selectedUnit?.plant,
+    description: selectedUnit?.description ?? selectedUnit?.classification,
+  }) : calculateInvestorFlow(investorInput), [directTable, investorInput, selectedUnit]);
   const directResult = result as DirectTableFlowResult;
   const directProposalOptionAvailability = useMemo(() => {
     if (!directTable || !selectedUnitId || result.context.valueReal <= 0) return new Map();
@@ -2937,7 +2926,7 @@ export function InvestorCalculator({
   const associativeApprovalRule = ASSOCIATIVE_APPROVAL_TIERS.find((item) => item.id === associativeApprovalTier) ?? null;
   const associativeIncomeValue = currencyInputNumber(income);
   const associativeAnnualIncomeLimitRate = 0.5;
-  const associativeAnnualIncomeLimit = associativeIncomeValue * associativeAnnualIncomeLimitRate;
+  const associativeAnnualIncomeLimit = getAssociativeAnnualLimit(associativeIncomeValue);
   const associativeAnnualIncomeFailure = annualMode && associativeIncomeValue > 0
     ? result.custom.intermediaries.find((item: { value: number }) => item.value > associativeAnnualIncomeLimit)
     : undefined;
@@ -3209,14 +3198,16 @@ export function InvestorCalculator({
 
   useEffect(() => {
     if (intermediaryFieldCount <= intermediaryIndexLimit && intermediaries
-      .every((value, index) => allowedIntermediaryIndexes.includes(index) || currencyInputNumber(value) === 0)) return;
+      .every((value, index) => (allowedIntermediaryIndexes.includes(index) || currencyInputNumber(value) === 0)
+        && (!annualMode || currencyInputNumber(value) <= associativeAnnualIncomeLimit))) return;
 
     const reconcileIntermediaryFields = window.setTimeout(() => {
       setIntermediaryFieldCount((current) => Math.min(current, intermediaryIndexLimit));
-      setIntermediaries((current) => current.map((value, index) => allowedIntermediaryIndexes.includes(index) ? value : "0"));
+      setIntermediaries((current) => current.map((value, index) => !allowedIntermediaryIndexes.includes(index) ? "0"
+        : annualMode && currencyInputNumber(value) > associativeAnnualIncomeLimit ? associativeAnnualIncomeLimit.toFixed(2) : value));
     }, 0);
     return () => window.clearTimeout(reconcileIntermediaryFields);
-  }, [intermediaries, intermediaryFieldCount, intermediaryIndexLimit, allowedIntermediaryIndexes]);
+  }, [intermediaries, intermediaryFieldCount, intermediaryIndexLimit, allowedIntermediaryIndexes, annualMode, associativeAnnualIncomeLimit]);
 
   useEffect(() => {
     if (!tourOpen) return;
@@ -3563,8 +3554,11 @@ export function InvestorCalculator({
 
   function updateIntermediary(index: number, value: string) {
     if (directTable) setDirectProposalDirty(true);
+    const boundedValue = annualMode && value !== ""
+      ? Math.min(floorMoney(currencyInputNumber(value)), associativeAnnualIncomeLimit).toFixed(2)
+      : value;
     setHiddenIntermediaryIndexes((current) => current.filter((item) => item !== index));
-    setIntermediaries((current) => current.map((item, itemIndex) => itemIndex === index ? value : item));
+    setIntermediaries((current) => current.map((item, itemIndex) => itemIndex === index ? boundedValue : item));
   }
 
   function toggleScenarioOption(code: string) {
@@ -3626,103 +3620,7 @@ export function InvestorCalculator({
 
   function buildAssociativeFlowSuggestion(flow: AssociativeFlow): AssociativeFlowSuggestion | null {
     if (!associativeApprovalRule || associativeApprovalRule.id === "not-eligible") return null;
-
-    const currentEntry = currencyInputNumber(entryValue);
-    const currentSignals = signals.map(currencyInputNumber);
-    const currentAnnuals = intermediaries.map(currencyInputNumber);
-    const annualEligible = result.custom.intermediaries.map((item: { date: string }) => Boolean(
-      item.date && baseDate && completionDate && item.date >= baseDate && item.date <= completionDate,
-    ));
-    return findAssociativeApprovalPlan({
-      currentInstallments: Math.trunc(currencyInputNumber(installments)) || 1,
-      maximumInstallments: Math.min(84, result.context.maxInstallments || 84),
-      currentAnnuals,
-      annualEligible,
-      annualMaximum: currencyInputNumber(income) * 0.5,
-      currentEntry,
-      currentSignals,
-      maximumSignalCount: 3,
-      maximumPaymentAdditional: Math.max(0, result.custom.balanceBeforeCorrection - 0.01),
-      evaluate: (candidate: { installments: number; annuals: number[]; entry: number; signals: number[] }) => {
-        const candidateEntry = candidate.entry.toFixed(2);
-        const candidateSignals = candidate.signals.map((value) => value.toFixed(2));
-        const candidateAnnuals = candidate.annuals.map((value) => value.toFixed(2));
-        const candidateResult = calculateInvestorFlow({
-          selectedUnitId,
-          baseDate,
-          completionDate,
-          salePrice,
-          propertyValue: selectedUnit?.finalWithKit ?? salePrice,
-          unitBonus: selectedUnit?.unitBonus ?? 0,
-          tableSlack: selectedUnit?.tableSlack ?? 0,
-          discountAuthorized: false,
-          discount: 0,
-          financing,
-          subsidy,
-          fgts,
-          housingCheck,
-          entryValue: candidateEntry,
-          installments: String(candidate.installments),
-          annualMode: true,
-          entryDate,
-          firstInterestDate: null,
-          firstInstallmentDate: null,
-          income,
-          signals: candidateSignals,
-          intermediaries: candidateAnnuals,
-          approvalTierId: associativeApprovalTier,
-        });
-        if (!candidateResult.custom.linear || !candidateResult.custom.decreasing?.ok) {
-          return { valid: false, approved: false };
-        }
-
-        const candidateLinearSchedule = buildAssociativeInstallmentMemory({
-          monthlyDates: candidateResult.context.monthlyDates,
-          preInstallments: candidateResult.custom.preInstallments,
-          postInstallments: candidateResult.custom.postInstallments,
-          adjustedPre: candidateResult.custom.linear.adjustedPre,
-          adjustedPost: candidateResult.custom.linear.adjustedPost,
-          prePayment: candidateResult.custom.linear.prePayment,
-          postPayment: candidateResult.custom.linear.postPayment,
-        });
-        const candidateComparison = buildAssociativePaymentComparison({
-          monthlyDates: candidateResult.context.monthlyDates,
-          installments: candidateResult.custom.desiredInstallments,
-          linearSchedule: candidateLinearSchedule,
-          decreasingBlocks: candidateResult.custom.decreasing.blocks,
-          income: currencyInputNumber(income),
-          constructionProgress: associativeConstructionProgress,
-          baseDate,
-          completionDate,
-          entryPayment: { kind: "entry", label: "Entrada", paymentDate: entryDate, value: candidate.entry },
-          signals: candidateResult.custom.signals
-            .filter((signal: { active: boolean; approved: boolean; value: number }) => signal.active && signal.approved && signal.value > 0)
-            .map((signal: { index: number; date: string; value: number }) => ({ kind: "signal", label: `Sinal ${signal.index}`, paymentDate: signal.date, value: signal.value })),
-          annuals: candidateResult.custom.intermediaries
-            .filter((annual: { value: number; approved: boolean; correctedValue: number }) => annual.value > 0 && annual.approved && annual.correctedValue > 0)
-            .map((annual: { index: number; date: string; correctedValue: number }) => ({ index: annual.index, paymentDate: annual.date, correctedValue: annual.correctedValue, approved: true })),
-        });
-        const candidateInstallment = flow === "linear" ? candidateComparison.highestLinearPayment : candidateComparison.highestDecreasingPayment;
-        const candidateMaximumIncomePayment = flow === "linear" ? candidateComparison.highestLinearTotal : candidateComparison.highestDecreasingTotal;
-        const candidateApproval = calculateAssociativeApproval({
-          tierId: associativeApprovalTier,
-          income: currencyInputNumber(income),
-          realSaleValue: candidateResult.context.valueReal,
-          proSoluto: candidateResult.custom.correctedProSoluto,
-          linearInstallment: candidateInstallment,
-          decreasingInstallment: candidateInstallment,
-          linearMaximumIncomePayment: candidateMaximumIncomePayment,
-          decreasingMaximumIncomePayment: candidateMaximumIncomePayment,
-          proposalValid: candidateResult.ok,
-          paymentComparisonValid: candidateComparison.comparisonAvailable,
-        });
-        const valid = candidateResult.ok && candidateComparison.comparisonAvailable;
-        return {
-          valid,
-          approved: valid && candidateApproval.status === "approved",
-        };
-      },
-    }) as AssociativeFlowSuggestion | null;
+    return buildAssociativeApprovalSuggestion(investorInput, associativeConstructionProgress, flow);
   }
 
   function applyAssociativeFlowSuggestion(_flow: AssociativeFlow, suggestion: AssociativeFlowSuggestion) {
@@ -4728,10 +4626,6 @@ export function InvestorCalculator({
                     entryPending={associativeEntryPending}
                     entryRejected={associativeEntryRejected}
                     currentEntryDate={entryDate}
-                    currentSignalPayments={result.custom.signals
-                      .map((item: { index: number; date: string; value: number }) => ({ label: `Sinal ${item.index}`, date: item.date, value: item.value }))}
-                    currentAnnualPayments={result.custom.intermediaries
-                      .map((item: { index: number; date: string; value: number }) => ({ label: `Anual ${item.index}`, date: item.date, value: item.value }))}
                     releaseStatus={associativeReleaseStatus}
                     onBuildFlowSuggestion={buildAssociativeFlowSuggestion}
                     onApplyFlowSuggestion={applyAssociativeFlowSuggestion}

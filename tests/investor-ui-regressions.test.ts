@@ -113,10 +113,13 @@ it("wires field errors and eligible indexes into the rendered proposal", async (
   expect(source).toContain(
     "allowedIntermediaryIndexes.find((index) => !visibleIntermediaryIndexes.includes(index))",
   );
-  expect(source).toContain('allowedIntermediaryIndexes.includes(index) ? value : "0"');
+  expect(source).toContain('!allowedIntermediaryIndexes.includes(index) ? "0"');
   expect(source).toContain("linearApproval.checks.some");
   expect(source).toContain("decreasingApproval.checks.some");
-  expect(source).toContain('approved: valid && candidateApproval.status === "approved"');
+  expect(source).toContain(
+    "buildAssociativeApprovalSuggestion(investorInput, associativeConstructionProgress, flow)",
+  );
+  expect(source).toContain("calculateInvestorFlow(investorInput)");
   expect(source).not.toMatch(/row\.(?:linearValue|decreasingValue) > row\.limit/u);
   expect(source).toContain(
     "if (directTable || annualMode) return;\n    const limit = result.context.maxInstallments;",

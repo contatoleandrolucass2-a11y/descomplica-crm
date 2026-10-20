@@ -53,7 +53,7 @@ export const ASSOCIATIVE_POLICY_TOPICS = [
     items: [
       "Confira a unidade, incorporadora, valor com kit, B.A., folga de tabela, avaliação bancária e entrega. O valor real da venda parte do valor com kit menos B.A. e folga; um desconto comercial autorizado reduz a base seguinte. Preço de venda e avaliação bancária são bases diferentes.",
       "O valor e a avaliação influenciam o enquadramento, a capacidade estimada de financiamento e os custos documentais. Se a avaliação não vier do relatório, preencha Avaliação bancária no Resumo financeiro; não a substitua automaticamente pelo preço de venda. A instituição avalia a garantia e confirma o crédito.",
-      "O Resumo financeiro estima automaticamente ITBI + Registro total + Despachante + Seguro Caixa. Usa o preço de venda como base estimada da compra e o financiamento para a garantia. Na cobrança final, o cartório confere também o valor venal do IPTU e a base do ITBI. A avaliação bancária é separada. A data-base orienta o primeiro vencimento. O total depende da confirmação do banco, município e cartório.",
+      "O Resumo financeiro estima automaticamente ITBI + Registro + Despachante + Seguro Caixa. Usa o preço de venda como base estimada da compra e o financiamento para a garantia. Na cobrança final, o cartório confere também o valor venal do IPTU e a base do ITBI. A avaliação bancária é separada. A data-base orienta o primeiro vencimento. O total depende da confirmação do banco, município e cartório.",
       "O teto documental local considera o menor valor entre venda e avaliação × cota, usando 80% para MCMV e 90% para SBPE. Essas cotas parametrizadas não são uma promessa de financiamento: produto, imóvel, banco e análise de crédito podem impor condições diferentes. Um teto calculado pela avaliação não mede quanto a família consegue pagar por mês.",
       "Exibir parcelas em Resumo das parcelas mostra o cronograma comercial. Exibir parcelas em Resumo financeiro mostra somente a documentação. Some essas obrigações e as condições reais do banco ao analisar o orçamento; não confunda um quadro com o outro.",
     ],
@@ -141,7 +141,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Entrada",
     location: "Monte a proposta, junto à data do pagamento",
     detail:
-      "É um pagamento obrigatório de pelo menos R$ 150,00 na data mostrada. Ele reduz o Pró-Soluto e o Saldo parcelado. Na ajuda, confira a data, o mínimo, se o valor foi aceito e quanto entrou na conta. Os ajustes sugeridos mantêm a entrada informada e só acrescentam o que falta.",
+      "É um pagamento obrigatório de pelo menos R$ 150,00 na data mostrada. Ele reduz o Pró-Soluto e o Saldo parcelado. Na ajuda, confira a data, o mínimo, se o valor foi aceito e quanto entrou na conta. Os ajustes sugeridos podem reduzir a entrada e os sinais para buscar o menor pagamento que aprove o fluxo escolhido.",
   },
   {
     label: "Sinal 1, Sinal 2 e Sinal 3",
@@ -153,7 +153,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Anual 1 a Anual 5",
     location: "Monte a proposta, após Inserir Anual",
     detail:
-      "São pagamentos opcionais em 15/12 até o término da obra. Cada anual pode ser de até 50% da renda mensal, antes da correção. O valor digitado sai do Saldo parcelado uma única vez. Os juros da anual aparecem no valor a pagar, sem tirar mais dinheiro da base das mensais. As anuais continuam dentro do Pró-Soluto: elas mudam a forma de pagar, sem reduzir esse total. Ao ocultar uma anual, seu valor é zerado.",
+      "São pagamentos opcionais em 15/12 até o término da obra, sempre depois do mês da Entrada e do último Sinal. Não podem coincidir com esses meses nem ficar entre sinais. Cada anual pode ser de até 50% da renda mensal, antes da correção, com arredondamento para baixo em centavos. O valor digitado sai do Saldo parcelado uma única vez. Os juros da anual aparecem no valor a pagar, sem tirar mais dinheiro da base das mensais. As anuais continuam dentro do Pró-Soluto: elas mudam a forma de pagar, sem reduzir esse total. Ao ocultar uma anual, seu valor é zerado.",
   },
   {
     label: "Saldo parcelado",
@@ -219,7 +219,7 @@ export const ASSOCIATIVE_FIELD_GUIDE = [
     label: "Composição da documentação",
     location: "Resumo financeiro, ao lado de Composição",
     detail:
-      "A conta automática é: ITBI + Registro total + Despachante + Seguro Caixa. O quadro separa compra e venda e alienação. Em São Paulo, usa a tabela referencial vigente e estima os benefícios a partir do perfil. Não confirma IPTU, contrato ou cartório. Prefeitura e cartório confirmam os impostos, benefícios e custos finais. Exibir parcelas neste quadro mostra somente os pagamentos da documentação.",
+      "A conta automática é: ITBI + Registro + Despachante + Seguro Caixa. Registro soma os atos de compra e venda e de alienação em um único valor, calculado para a proposta. Em São Paulo, usa a tabela referencial vigente e estima os benefícios a partir do perfil. Não confirma IPTU, contrato ou cartório. Prefeitura e cartório confirmam os impostos, benefícios e custos finais. Exibir parcelas neste quadro mostra somente os pagamentos da documentação.",
   },
 ] as const;
 

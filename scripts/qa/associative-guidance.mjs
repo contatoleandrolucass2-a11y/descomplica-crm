@@ -1058,7 +1058,11 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     const documentation = page.locator(`${root} .investor-associative-documentation`);
     await expect(documentation).toHaveClass(/ready/);
     await expect(documentation.locator("input, select, [data-documentation-legal]")).toHaveCount(0);
-    await expect(documentation.getByRole("note")).toContainText("Estimativa automática");
+    await expect(documentation.getByRole("note")).toHaveCount(0);
+    await expect(documentation.getByText(/Estimativa automática/)).toHaveCount(0);
+    await expect(
+      documentation.locator(".investor-associative-documentation-breakdown dl > div > dt"),
+    ).toHaveText(["ITBI", "Registro", "Despachante", "Seguro Caixa", "Total da documentação"]);
     await expect(
       page
         .locator(`${root} .investor-property-summary dt`)

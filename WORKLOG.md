@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-20: ajuste minimo e anuais do Associativo
+
+Corrigida a busca de aprovacao que desconsiderava o desconto e exigia
+pagamentos iniciais excessivos. Proposta, previa e aplicacao usam a mesma
+entrada do motor. Conforme preferencia confirmada pelo usuario, a sugestao
+minimiza o valor de pagamentos iguais entre Entrada e ate tres Sinais.
+Anuais respeitam mes/ano da Entrada e dos Sinais e teto nominal de 50% da
+renda, truncado em centavos. Composicao mostra somente Registro dinamico.
+
+Regressoes financeiras e QA sintetico cobrem o caso reportado, limites,
+calendarios, igualdade e previa/aplicacao. Sem alterar taxas, ITBI,
+despachante, seguro, calculadora avulsa ou workflows.
+Evidencias e limites em
+`docs/audits/associativo-ajuste-minimo-2026-10-20.md`.
+
 ## 2026-10-20: proveniência visual de Agendamentos
 
 A referência promovida a partir do diagnóstico da CI preservou a marca de
