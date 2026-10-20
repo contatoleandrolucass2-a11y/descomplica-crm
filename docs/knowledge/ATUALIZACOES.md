@@ -12,8 +12,10 @@
 - O run `39378381324` concluiu com sucesso no merge SHA
   `53a2d21fba1ee936464fab48f90ea16d50516147`: 242 referências,
   `worktreeDirtyAtCapture=false`, baseline versionada e inalterada durante a
-  captura. O resultado limpo substituiu a proveniência anterior; o teste local
-  de paridade aprovou 15 casos, com um skip condicional. A CI integral do novo
+  captura. Artefato `12244764377`, digest
+  `sha256:6b484b4388972ffa2767fa9f179ce2c0741b905a60cff67751da8b095c4c84d2`.
+  O resultado limpo substituiu a proveniência anterior; o teste local de
+  paridade aprovou 15 casos, com um skip condicional. A CI integral do novo
   commit continua obrigatória antes da integração.
 
 ## 2026-10-20: indicadores operacionais de Agendamentos — implementação local
