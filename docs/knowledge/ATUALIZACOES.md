@@ -1822,3 +1822,7 @@ dependente da autorização específica aplicável.
   `@modelcontextprotocol/sdk` 1.31.0, dependência transitiva do diagnóstico local.
   O override foi atualizado para 1.32.1, indicada como corrigida pelo advisory
   GHSA-22jm-h49p-29qw; a auditoria local passou sem achados altos ou críticos.
+- Na segunda CI, o teste 15 de `grants_matrix.test.sql` detectou que a RPC nova
+  ainda não constava na allowlist nominal de funções executáveis por
+  `authenticated`. A lista foi atualizada para auditar a permissão já concedida
+  pela migration; nenhum grant adicional foi criado.

@@ -18,6 +18,9 @@ A primeira execução da CI foi bloqueada por um alerta alto publicado para a
 dependência transitiva `@modelcontextprotocol/sdk` 1.31.0, usada somente pelo
 `next-devtools-mcp`. O override foi elevado para 1.32.1, versão corrigida, e o
 `pnpm audit --audit-level high` passou sem vulnerabilidades altas ou críticas.
+A restauração isolada seguinte também confirmou que a nova RPC precisava entrar
+na allowlist global de funções autenticadas; o pgTAP foi corrigido para auditar
+explicitamente esse acesso, sem ampliar grants.
 
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
