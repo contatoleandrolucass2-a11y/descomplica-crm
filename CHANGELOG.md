@@ -7,6 +7,16 @@
 - Confirma quatro ciclos reais consecutivos do coletor, com analise v3,
   publicacao comercial e estoque concluidos.
 
+## 2026-10-20 - Correção da impressão A4 do Associativo
+
+- Impede a repetição da folha de impressão em uma segunda página, isolando o
+  conteúdo impresso diretamente no corpo do documento.
+- Inclui na folha os valores calculados da documentação, como ITBI, registros,
+  despachante, seguro Caixa e total estimado.
+- Altera o cabeçalho e o rodapé para `Simulação comercial`.
+- Mantém as saídas linear e escalonada, com sinais e anuais em linhas
+  independentes e valores sem e com correção.
+
 ## 2026-10-19 - Impressão A4 do Associativo
 
 - Separa as ações `Imprimir linear` e `Imprimir escalonado` no resultado do

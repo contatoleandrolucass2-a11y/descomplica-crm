@@ -23443,7 +23443,7 @@ body:has(.investor-page-shell) {
 }
 
 /* A4 exclusivo do Associativo: o botão seleciona somente um dos dois fluxos. */
-.investor-page-shell .investor-associative-print-sheet {
+.investor-associative-print-sheet {
   display: none;
 }
 
@@ -23453,25 +23453,23 @@ body:has(.investor-page-shell) {
     margin: 10mm;
   }
 
-  body:has(.investor-associative-print-sheet) * {
-    visibility: hidden !important;
+  body:has(> .investor-associative-print-sheet) {
+    margin: 0 !important;
+    background: #fff !important;
   }
 
-  body:has(.investor-associative-print-sheet) .investor-associative-print-sheet,
-  body:has(.investor-associative-print-sheet) .investor-associative-print-sheet * {
-    visibility: visible !important;
+  body:has(> .investor-associative-print-sheet) > :not(.investor-associative-print-sheet) {
+    display: none !important;
   }
 
-  .investor-page-shell .investor-associative-print-sheet {
-    position: fixed;
-    top: 0;
-    left: 0;
+  body > .investor-associative-print-sheet {
+    position: relative;
     display: flex;
     box-sizing: border-box;
     width: 190mm;
     min-height: 277mm;
     flex-direction: column;
-    gap: 4mm;
+    gap: 3mm;
     margin: 0;
     padding: 0;
     color: #252e3a !important;
@@ -23690,6 +23688,60 @@ body:has(.investor-page-shell) {
     margin: 0;
     color: #66717f !important;
     font-size: 6.5pt;
+  }
+
+  .investor-associative-print-documentation {
+    gap: 2mm;
+  }
+
+  .investor-associative-print-documentation-grid {
+    display: grid;
+    grid-template-columns: 61mm minmax(0, 1fr);
+    gap: 3mm;
+  }
+
+  .investor-associative-print-documentation-plan {
+    display: grid;
+    align-content: start;
+    gap: 1.2mm;
+    padding: 2.5mm 3mm;
+    border-top: 0.75mm solid #c51f32;
+    background: #fff3f4 !important;
+  }
+
+  .investor-associative-print-documentation-plan small,
+  .investor-associative-print-documentation-plan span {
+    color: #66717f !important;
+    font-size: 6.2pt;
+  }
+
+  .investor-associative-print-documentation-plan strong {
+    color: #c51f32 !important;
+    font-size: 10pt;
+  }
+
+  .investor-associative-print-documentation dl > div {
+    padding: 0.8mm 0;
+    font-size: 6.3pt;
+  }
+
+  .investor-associative-print-documentation dl .total {
+    padding: 1.4mm 2mm;
+  }
+
+  .investor-associative-print-documentation > p,
+  .investor-associative-print-documentation-pending span {
+    margin: 0;
+    color: #66717f !important;
+    font-size: 6.2pt;
+  }
+
+  .investor-associative-print-documentation-pending {
+    display: grid;
+    gap: 1mm;
+    padding: 2.5mm 3mm;
+    border-left: 1mm solid #c51f32;
+    background: #fff3f4 !important;
   }
 
   .investor-associative-print-sheet footer {

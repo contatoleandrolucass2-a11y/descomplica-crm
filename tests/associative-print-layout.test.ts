@@ -22,6 +22,9 @@ const styles = readFileSync(
 const { calculateInvestorFlow } = createRequire(import.meta.url)(
   "../lib/archive-investor/investor-calculator-rules.mjs",
 );
+const { calculateAssociativeDocumentationView } = createRequire(import.meta.url)(
+  "../lib/archive-investor/associative-documentation-adapter.mjs",
+);
 const printProps = {
   businessUnit: "Direcional",
   project: "Residencial Exemplo",
@@ -94,6 +97,19 @@ const printProps = {
       lastInstallmentDate: "2033-10-15",
     },
   ],
+  documentation: calculateAssociativeDocumentationView({
+    businessUnit: "Direcional",
+    modality: "MCMV",
+    manualModalityPreference: "MCMV",
+    firstProperty: "SIM",
+    salePrice: 238_500,
+    reportedAppraisal: 377_000,
+    appraisalOverride: 0,
+    financing: 210_000,
+    income: 4_000,
+    baseDate: "2026-10-19",
+    municipality: "sao-paulo-sp",
+  }),
 };
 
 describe("impressão A4 do Associativo", () => {
@@ -122,6 +138,7 @@ describe("impressão A4 do Associativo", () => {
     );
 
     expect(linear).toContain("Associativo - Fluxo linear");
+    expect(linear).toContain("SIMULAÇÃO COMERCIAL");
     expect(linear).toContain("Mensais - Linear 100%");
     expect(linear).not.toContain("Mensais - Escalonado 40%");
     expect(linear.match(/Saldo após recursos/gu)).toHaveLength(1);
@@ -135,6 +152,19 @@ describe("impressão A4 do Associativo", () => {
     }
     for (const percentage of ["40%", "30%", "20%", "10%"]) {
       expect(escalonado).toContain(`Mensais - Escalonado ${percentage}`);
+    }
+    for (const documentationLabel of [
+      "Documentação",
+      "PLANO SUGERIDO",
+      "ITBI",
+      "Registro de compra e venda",
+      "Registro da alienação fiduciária",
+      "Despachante",
+      "Seguro Caixa",
+      "Total da documentação",
+    ]) {
+      expect(linear).toContain(documentationLabel);
+      expect(escalonado).toContain(documentationLabel);
     }
   });
 
@@ -170,10 +200,14 @@ describe("impressão A4 do Associativo", () => {
   });
 
   it("isola uma folha A4 e preserva cores na impressão", () => {
+    expect(source).toContain("createPortal(<AssociativePrintSheet {...props} />, document.body)");
     expect(styles).toMatch(/\.investor-associative-print-sheet\s*\{\s*display:\s*none;/u);
     expect(styles).toMatch(/@page\s*\{[\s\S]*?size:\s*A4 portrait;/u);
-    expect(styles).toContain("body:has(.investor-associative-print-sheet) *");
-    expect(styles).toContain("position: fixed;");
+    expect(styles).toContain(
+      "body:has(> .investor-associative-print-sheet) > :not(.investor-associative-print-sheet)",
+    );
+    expect(styles).toContain("body > .investor-associative-print-sheet");
+    expect(styles).toContain("position: relative;");
     expect(styles).toContain(
       ".investor-page-shell .investor-direct-resource-actions.investor-associative-resource-actions {\n  grid-template-columns:repeat(6,minmax(0,1fr));",
     );

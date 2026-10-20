@@ -2,7 +2,8 @@
 // @ts-nocheck -- Arquivo preservado da implementação oficial anexada.
 "use client";
 
-import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { memo, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { createPortal } from "react-dom";
 import { Search, X } from "lucide-react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { AssociativePageGuide } from "./AssociativePageGuide";
@@ -728,6 +729,7 @@ export function AssociativePrintSheet({
   linearFirstDate,
   linearLastDate,
   blocks,
+  documentation,
 }: {
   mode: AssociativePrintFlow;
   businessUnit: string;
@@ -756,6 +758,7 @@ export function AssociativePrintSheet({
   linearFirstDate: string;
   linearLastDate: string;
   blocks: AssociativeDecreasingBlockView[];
+  documentation: ReturnType<typeof calculateAssociativeDocumentationView>;
 }) {
   const fixedRows = [
     {
@@ -822,7 +825,7 @@ export function AssociativePrintSheet({
         height={285}
       />
       <div>
-        <strong>SIMULAÇÃO IMOBILIÁRIA</strong>
+        <strong>SIMULAÇÃO COMERCIAL</strong>
         <span>{formatDate(baseDate)}</span>
       </div>
     </header>
@@ -861,11 +864,44 @@ export function AssociativePrintSheet({
       </table>
       <p>Entrada e sinais não recebem correção. Anuais e mensais usam os valores calculados pelo motor do Associativo.</p>
     </section>
+    <section className="investor-associative-print-section investor-associative-print-documentation">
+      <h2><span>03</span> Documentação</h2>
+      {documentation.result.ok ? <div className="investor-associative-print-documentation-grid">
+        <div className="investor-associative-print-documentation-plan">
+          <small>PLANO SUGERIDO</small>
+          <strong>{documentation.result.installments}x de {money.format(documentation.result.installmentValue)}</strong>
+          <span>1ª parcela em {formatDate(documentation.result.firstInstallmentDate)}</span>
+          <span>Avaliação bancária: {money.format(documentation.appraisalValue)}</span>
+        </div>
+        <dl>
+          <div><dt>ITBI</dt><dd>{money.format(documentation.result.itbi)}</dd></div>
+          {documentation.result.registrationCombined ? <div><dt>Registro conjunto</dt><dd>{money.format(documentation.result.totalRegistration)}</dd></div> : <>
+            <div><dt>Registro de compra e venda</dt><dd>{money.format(documentation.result.purchaseRegistration)}</dd></div>
+            <div><dt>Registro da alienação fiduciária</dt><dd>{money.format(documentation.result.lienRegistration)}</dd></div>
+          </>}
+          <div><dt>Despachante</dt><dd>{money.format(documentation.result.dispatchFee)}</dd></div>
+          <div><dt>Seguro Caixa</dt><dd>{money.format(documentation.result.caixaInsurance)}</dd></div>
+          <div className="total"><dt>Total da documentação</dt><dd>{money.format(documentation.result.totalCash)}</dd></div>
+        </dl>
+      </div> : <div className="investor-associative-print-documentation-pending">
+        <strong>Documentação aguardando dados</strong>
+        <span>{[...new Set([...documentation.missingItems, ...documentation.result.errors])].join(" · ")}</span>
+      </div>}
+      <p>Estimativa automática. Os valores finais dependem da prefeitura, do banco e do cartório.</p>
+    </section>
     <footer>
       <p>Resultado preliminar sujeito à política comercial vigente.</p>
-      <div><strong>Descomplica - Resumo da simulação</strong><span>A4 - 210 x 297 mm</span><span>Página 1 de 1</span></div>
+      <div><strong>Descomplica - Simulação comercial</strong><span>A4 - 210 x 297 mm</span><span>Página 1 de 1</span></div>
     </footer>
   </article>;
+}
+
+const subscribeToClientRender = () => () => undefined;
+
+function AssociativePrintPortal(props: Parameters<typeof AssociativePrintSheet>[0]) {
+  const mounted = useSyncExternalStore(subscribeToClientRender, () => true, () => false);
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(<AssociativePrintSheet {...props} />, document.body);
 }
 
 const InvestorFilterOptions = memo(function InvestorFilterOptions({ options, currency = false }) {
@@ -3235,6 +3271,22 @@ export function InvestorCalculator({
     && !associativeInstallmentsRejected
     && Boolean(result.custom.decreasing?.ok)
     && result.custom.installmentValue > 0;
+  const associativePrintDocumentation = useMemo(() => calculateAssociativeDocumentationView({
+    businessUnit: selectedUnit?.businessUnit ?? "",
+    modality: associativeFinancingModality,
+    manualModalityPreference: associativeManualModalityPreference,
+    firstProperty: associativeFirstProperty,
+    salePrice: result.context.valueReal,
+    reportedAppraisal: selectedUnit?.appraisal ?? 0,
+    appraisalOverride: currencyInputNumber(documentationAppraisalOverride),
+    financing: result.custom.financing,
+    income: currencyInputNumber(income),
+    baseDate,
+    municipality: selectedUnit?.city?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase() === "sao paulo"
+      && selectedUnit?.state?.trim().toUpperCase() === "SP"
+      ? "sao-paulo-sp"
+      : "",
+  }), [associativeFinancingModality, associativeFirstProperty, associativeManualModalityPreference, baseDate, documentationAppraisalOverride, income, result.context.valueReal, result.custom.financing, selectedUnit?.appraisal, selectedUnit?.businessUnit, selectedUnit?.city, selectedUnit?.state]);
   const printAssociativeFlow = (mode: AssociativePrintFlow) => {
     setAssociativePrintMode(mode);
     window.requestAnimationFrame(() => {
@@ -5118,7 +5170,7 @@ export function InvestorCalculator({
             <DocumentationDialog type="pj" dialogRef={pjDocumentationDialog} />
           </>}
           {directPrintReady ? <DirectPrintComposition flow={directResult} baseDate={baseDate} policySummary={directParkingPolicySummary} discountAuthorized={discountAuthorized} /> : null}
-          {annualMode && associativePaymentSummaryAvailable && selectedUnit ? <AssociativePrintSheet
+          {annualMode && associativePaymentSummaryAvailable && selectedUnit ? <AssociativePrintPortal
             mode={associativePrintMode}
             businessUnit={selectedUnit.businessUnit}
             project={selectedUnit.project}
@@ -5140,6 +5192,7 @@ export function InvestorCalculator({
             linearFirstDate={firstInstallmentDate}
             linearLastDate={lastInstallmentDate}
             blocks={result.custom.decreasing?.blocks ?? []}
+            documentation={associativePrintDocumentation}
           /> : null}
           {!annualMode ? <details className="investor-audit investor-proposal-audit" data-tour="audit">
             <summary>Auditoria do cálculo</summary>
