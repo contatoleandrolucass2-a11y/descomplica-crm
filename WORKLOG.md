@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-10-20: edição ativa das metas do Canal Parcerias
+
+Demanda limitada a `/app/configuracoes/metas/parcerias`: disponibilizar a mesma
+edição e o mesmo salvamento ativo já usados por Direcional Vendas. A rota deixou
+de condicionar a edição ao rascunho de política comercial e passou a conferir
+`crm.settings.manage`, alinhada à RPC `upsert_crm_funnel_goals`. O formulário
+agora carrega a meta ativa, mantém os campos específicos de Parcerias e salva na
+própria rota com proteção contra mudança do mês de referência.
+
+Testes focados aprovaram 32 casos de autorização, perfil inválido, mês obsoleto
+e os dois perfis na mesma RPC. `lint`, `typecheck`, `build` e `format:check`
+passaram; o build de produção aprovou 57 rotas. A suíte Vitest aprovou 3.954
+casos e ignorou 102. A suíte operacional Node aprovou 1.595 casos, ignorou 19 e
+manteve três falhas locais já conhecidas na emulação POSIX de arquivos privados
+do Meta Ads no Windows; a etapa `test:release` reproduziu a mesma limitação de
+fixture, portanto a CI Linux do SHA candidato permanece como gate obrigatório.
+Preview sintético com CSS compilado do Next aprovou 30 telas, cinco larguras e
+três temas para os dois canais, incluindo edição dos campos, ausência de
+overflow e zero violações Axe. Nenhuma migration, dado remoto, outra página ou
+workflow n8n foi alterado.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o

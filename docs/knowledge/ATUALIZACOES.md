@@ -1423,3 +1423,40 @@ para `/login`. Nenhuma migration, dado remoto, integração ou workflow n8n foi
 modificado. A matriz com gráficos preenchidos é sintética; não houve acesso a
 sessão privada de produção. Fonte: PR270, GitHub Actions, artefato12234994906,
 coordenador de release, ledger e health público.
+
+## 2026-10-20: Abertura da edição de metas do Canal Parcerias
+
+- Às `2026-10-20T04:03:57Z`, `origin/main` e o GitHub apontavam para
+  `2eb17cc052754519ebee1156060e394ea5728169`; produção respondia HTTP 200,
+  `status=ok` e `version=06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+  A diferença corresponde ao commit documental posterior ao runtime publicado.
+- A CI de `main` `39366805822` falhou somente em
+  `Verify current documentation fee sources`; os demais jobs foram ignorados.
+  Essa fonte externa não valida nem bloqueia a investigação local da página Meta,
+  mas uma CI verde no SHA candidato continua obrigatória para integração.
+- Escopo solicitado: tornar a configuração do Canal Parcerias editável e
+  salvável como Direcional Vendas, somente em `/app/configuracoes/metas`.
+  Nenhum workflow n8n, dado remoto ou outra página será alterado nesta etapa.
+- Fontes: Git local após `fetch`, GitHub branches/actions e GET observacional de
+  `https://crm.descomplicapro.com.br/api/health`. O cliente `gh` está indisponível
+  neste host; o conector GitHub forneceu as evidências equivalentes.
+
+### Implementação e validação local
+
+- Causa confirmada: Parcerias ainda carregava o rascunho inativo de política
+  comercial e condicionava a edição a `crm.commercial_policy.manage`, enquanto
+  Direcional Vendas já carregava e persistia a meta ativa com
+  `crm.settings.manage` e a RPC versionada `upsert_crm_funnel_goals`.
+- Parcerias passou a reutilizar integralmente o fluxo ativo: campos editáveis,
+  botão `Salvar alterações`, validação de mês, persistência e confirmação na
+  própria rota. A RPC existente já restringe o perfil e fixa em zero os campos
+  que não pertencem ao funil de Parcerias; nenhuma migration foi necessária.
+- Evidências locais: 32 testes focados aprovados; `lint`, `typecheck`, `build` e
+  `format:check` aprovados; build com 57 rotas; Vitest com 3.954 aprovações e
+  102 ignorados; preview específico com 30 telas, cinco larguras, três temas,
+  edição habilitada, sem overflow e sem violações Axe.
+- A suíte operacional Node aprovou 1.595 casos, ignorou 19 e apresentou três
+  falhas já conhecidas na emulação POSIX de arquivos privados do Meta Ads no
+  Windows. `test:release` reproduziu a limitação nas fixtures privadas do mesmo
+  módulo. Não houve alteração nessa área; a CI Linux do SHA candidato continua
+  sendo o gate conclusivo de integração e publicação.

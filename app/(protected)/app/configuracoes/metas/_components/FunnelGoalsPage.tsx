@@ -1,5 +1,3 @@
-import { loadFunnelGoalsDraft } from "@/lib/crm/commercial-engine/draft-data";
-import { funnelDraftValuesToGoals } from "@/lib/crm/commercial-engine/drafts";
 import { type GoalProfileKey } from "@/lib/crm/goals/catalog";
 import { loadFunnelGoals } from "@/lib/crm/goals/data";
 import { getGoalsReferenceDate } from "@/lib/crm/goals/reference";
@@ -14,17 +12,8 @@ export async function FunnelGoalsPage({
   profile: GoalProfileKey;
   notification?: "saved" | "active-saved" | "validation" | "save" | "stale";
 }) {
-  const [result, draft] = await Promise.all([
-    loadFunnelGoals(profile),
-    profile === "partnerships" && canManageDraft
-      ? loadFunnelGoalsDraft(profile)
-      : Promise.resolve(null),
-  ]);
-  const values = draft
-    ? funnelDraftValuesToGoals(draft.payload, draft.updatedAt)
-    : result.status === "ready"
-      ? result.goals
-      : null;
+  const result = await loadFunnelGoals(profile);
+  const values = result.status === "ready" ? result.goals : null;
   const referenceDate = getGoalsReferenceDate();
   const effectiveMonth =
     result.status === "ready" ? result.goals.effectiveMonth : result.effectiveMonth;
@@ -40,17 +29,15 @@ export async function FunnelGoalsPage({
     >
       <p className="px-5 py-2 text-xs text-[var(--analytics-muted)]" role="status">
         {canManageDraft
-          ? profile === "dv"
-            ? "Configuração atual: editável · Salve para aplicar as alterações"
-            : "Base legada: somente leitura · Rascunho atual: editável"
-          : "Base legada: somente leitura · Rascunho atual: indisponível"}
+          ? "Configuração atual: editável · Salve para aplicar as alterações"
+          : "Configuração atual: somente leitura"}
       </p>
       <GoalPlanning
         profile={profile}
         initialValues={values}
         effectiveMonth={effectiveMonth}
         canManageDraft={canManageDraft}
-        revision={draft?.revision ?? 0}
+        revision={0}
         today={today}
         notification={notification}
       />
