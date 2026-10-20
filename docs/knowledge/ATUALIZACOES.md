@@ -28,6 +28,13 @@
   57 rotas aprovados; Vitest 3.958 aprovados/99 skips; Node 1.595 aprovados/19
   skips e tres falhas POSIX conhecidas de Meta Ads no Windows, fora do diff.
   CI Linux do SHA exato permanece obrigatoria para integracao e publicacao.
+- PR #273: a primeira CI `39369989647` aprovou `validate`, mas o gate visual
+  reteve uma expectativa anterior que exigia `Pastas aprovadas` indisponivel.
+  O harness passou a representar House explicitamente, seis etapas, tres menus
+  e os botoes exclusivos. O contraste ativo no tema escuro foi corrigido. QA
+  local final: 207 checks em cinco larguras e tres temas, sem overflow,
+  sobreposicao ou violacao seria de acessibilidade. Reexecutar CI no novo SHA;
+  essa correcao nao autoriza ignorar o gate anterior.
 
 ## 2026-10-20: abertura do dashboard House e Imob
 

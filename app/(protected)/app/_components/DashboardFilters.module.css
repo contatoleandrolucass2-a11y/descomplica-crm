@@ -43,7 +43,7 @@
   cursor: pointer;
 }
 .channelSwitch button[aria-pressed="true"] {
-  color: #fff;
+  color: var(--analytics-page);
   background: var(--analytics-cyan-strong);
 }
 .channelSwitch button:disabled {

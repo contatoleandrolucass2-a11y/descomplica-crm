@@ -105,7 +105,7 @@ function syntheticAnalysis() {
           owner,
           owner,
           owner,
-          owner,
+          1,
           owner,
           count,
           stage === 4 ? count * 250000 : 0,
@@ -135,6 +135,13 @@ function scenarios() {
     dashboard,
     selectedView: "all",
     selectedPeriod: "month",
+    goalBrokerCount: 2,
+    filters: {
+      channel: ["DIRECIONAL VENDAS SPC"],
+      manager: [],
+      owner: [],
+      company: [],
+    },
     authorizedViews: views,
     canViewStages: true,
     canViewRanking: true,
@@ -156,8 +163,10 @@ function scenarios() {
   for (const view of views) zero.dashboard.salesValue[view] = { month: 0, week: 0, today: 0 };
   zero.dashboard.topDevelopments = {};
   zero.team = { brokers: 0, managers: [] };
+  zero.goalBrokerCount = 0;
   const noGoals = structuredClone(complete);
   noGoals.dashboard.goalsAvailable = false;
+  noGoals.goalBrokerCount = null;
   for (const metrics of Object.values(noGoals.dashboard.metrics)) {
     for (const metric of Object.values(metrics)) {
       for (const key of Object.keys(metric)) {
@@ -198,6 +207,13 @@ function scenarios() {
     restricted: {
       ...complete,
       selectedView: "with_canal_imob",
+      goalBrokerCount: null,
+      filters: {
+        channel: ["SPC - CANAL IMOB PJ"],
+        manager: [],
+        owner: [],
+        company: [],
+      },
       authorizedViews: ["with_canal_imob"],
       canViewStages: false,
       canViewRanking: false,
@@ -282,7 +298,7 @@ async function bundle() {
                 if (!Object.hasOwn(fixtures, scenario)) throw new Error("Unknown synthetic scenario");
                 const props = { ...structuredClone(fixtures[scenario]), ...overrides };
                 if (scenario === "analysis") {
-                  props.filters = overrides.filters ?? emptyDashboardFilters();
+                  props.filters = overrides.filters ?? props.filters ?? emptyDashboardFilters();
                   props.analysis = analyzeDashboard(analysisSlice, props.filters);
                   props.dashboard = applyDashboardAnalysis(props.dashboard, props.analysis, props.selectedView);
                 } else if (props.dashboard) {
@@ -316,6 +332,9 @@ async function bundle() {
                 history.replaceState(null, "", next);
                 window.qaRender(document.documentElement.dataset.scenario, {
                   ...window.qaCurrentProps, filters,
+                  selectedView: window.qaCurrentProps.authorizedViews.includes(next.searchParams.get("view"))
+                    ? next.searchParams.get("view")
+                    : window.qaCurrentProps.selectedView,
                   selectedPeriod: next.searchParams.get("period") || "month",
                 });
               };
@@ -507,7 +526,6 @@ export async function checkStructure(page) {
       "Pastas aprovadas",
       "Vendas",
     ]);
-    await expect(funnel.locator('[data-stage="approved-folders"] dd')).toHaveText("Indisponível");
     const steps = await funnel.locator("[data-stage]").evaluateAll((entries) =>
       entries.map((entry) => ({
         width: entry.getBoundingClientRect().width,
@@ -549,9 +567,17 @@ async function checkLayout(page) {
       if (!element.checkVisibility()) continue;
       const bounds = element.getBoundingClientRect();
       if (!bounds.width || !bounds.height) continue;
+      const style = getComputedStyle(element);
+      if (
+        style.position === "absolute" &&
+        bounds.width <= 1 &&
+        bounds.height <= 1 &&
+        style.overflow === "hidden"
+      )
+        continue;
       const clipped =
         element.scrollWidth > element.clientWidth + 2 &&
-        getComputedStyle(element).display !== "inline";
+        style.display !== "inline";
       if (clipped)
         problems.push(`${element.tagName}: ${element.textContent.trim()} (clipped text)`);
     }
@@ -623,7 +649,7 @@ export async function verifyMonthlyHistory(page, { title, months, sales, screens
       .evaluateAll((nodes) => nodes.map((node) => node.dateTime)),
     months,
   );
-  await expect(dialog.getByRole("figure")).toHaveCount(months.length ? 5 : 0);
+  await expect(dialog.getByRole("figure")).toHaveCount(months.length ? 6 : 0);
   if (sales) {
     await expect(
       dialog.getByRole("figure", { name: "Vendas", exact: true }).locator("li > span"),
@@ -679,7 +705,7 @@ export async function verifyMonthlyHistory(page, { title, months, sales, screens
 
 export async function verifyFilterDismissal(page) {
   const summaries = page.locator('button[aria-labelledby^="filter-"]');
-  await expect(summaries).toHaveCount(4);
+  await expect(summaries).toHaveCount(3);
   const before = await page.evaluate(() => ({
     url: location.href,
     filters: window.qaCurrentProps.filters,
@@ -720,7 +746,7 @@ export async function verifyFilterDismissal(page) {
 export async function verifySaleNormalization(page) {
   const values = () =>
     page.getByRole("figure", { name: "Funil mensal: Média venda", exact: true }).locator("dd");
-  await expect(values()).toHaveText(["10", "6", "3", "2", "Indisponível", "1"]);
+  await expect(values()).toHaveText(["10", "6", "3", "2", "1", "1"]);
   const original = await page.evaluate(() => window.qaCurrentProps);
   try {
     for (const sales of [0, null]) {
@@ -755,8 +781,8 @@ export async function verifyAnalysisInteractions(page) {
     await expect(page.getByRole("checkbox", { name: label, exact: true })).toBeChecked({ checked });
     if ((await summary.getAttribute("aria-expanded")) === "true") await summary.click();
   };
-  await expect(value("Meta mês", "appointments")).toHaveText("54");
-  await expect(value("Meta mês", "visits")).toHaveText("16");
+  await expect(value("Meta mês", "appointments")).toHaveText("48");
+  await expect(value("Meta mês", "visits")).toHaveText("24");
   await expect(value("Meta mês", "sales")).toHaveText("2");
   await expect(value("Meta esperada até hoje", "sales")).toHaveText("0");
   await expect(value("Mês atual", "sales")).toHaveText("6");
@@ -790,10 +816,10 @@ export async function verifyAnalysisInteractions(page) {
   });
   await verifyMonthlyHistory(page, { title: "Mês anterior", months: year.slice(-1), sales: [27] });
   await select("owner", "Responsavel sintetico Alfa");
-  await expect(value("Meta mês", "appointments")).toHaveText("27");
-  await expect(value("Meta mês", "visits")).toHaveText("8");
-  await expect(value("Meta mês", "folders")).toHaveText("4");
-  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Meta mês", "appointments")).toHaveText("48");
+  await expect(value("Meta mês", "visits")).toHaveText("24");
+  await expect(value("Meta mês", "folders")).toHaveText("16");
+  await expect(value("Meta mês", "sales")).toHaveText("2");
   await expect(value("Meta esperada até hoje", "sales")).toHaveText("0");
   await expect(value("Mês atual", "sales")).toHaveText("2");
   await expect(value("Média do ano", "sales")).toHaveText("5");
@@ -815,7 +841,7 @@ export async function verifyAnalysisInteractions(page) {
   await expect(value("Meta mês", "sales")).toHaveText("2");
   await expect(value("Mês atual", "sales")).toHaveText("6");
   await select("manager", "Gerencia sintetica Beta");
-  await expect(value("Meta mês", "sales")).toHaveText("1");
+  await expect(value("Meta mês", "sales")).toHaveText("2");
   await expect(value("Mês atual", "sales")).toHaveText("4");
   await select("manager", "Gerencia sintetica Beta", false);
   await select("owner", "Responsavel sintetico Alfa", false);
@@ -824,14 +850,14 @@ export async function verifyAnalysisInteractions(page) {
   await expect(page.getByRole("button", { name: "Limpar filtros", exact: true })).toHaveCount(0);
   await select("company", "Empresa sintetica Alfa");
   await expect(value("Mês atual", "sales")).toHaveText("2");
-  await select("channel", "SPC - CANAL IMOB PJ");
-  await expect(value("Meta mês", "sales")).toHaveText("1");
-  await expect(value("Mês atual", "sales")).toHaveText("2");
-  await select("channel", "SPC - CANAL IMOB PJ", false);
+  await page.getByRole("button", { name: "Imob", exact: true }).click();
+  await expect(value("Meta mês", "sales")).toHaveText("Indisponível");
+  await expect(value("Mês atual", "sales")).toHaveText("0");
+  await page.getByRole("button", { name: "House", exact: true }).click();
   await select("company", "Empresa sintetica Alfa", false);
   await expect(value("Mês atual", "sales")).toHaveText("6");
   assert.deepEqual(await page.evaluate(() => window.qaCurrentProps.filters), {
-    channel: [],
+    channel: ["DIRECIONAL VENDAS SPC"],
     manager: [],
     owner: [],
     company: [],

@@ -24,6 +24,13 @@ a permissões/caminhos POSIX no host Windows, fora dos arquivos alterados. A CI
 Linux do SHA exato continua obrigatória antes de integrar e publicar. Nenhum
 workflow n8n, migration ou dado remoto foi modificado.
 
+O primeiro `release-gates` do PR #273 encontrou o contrato visual antigo que
+ainda exigia `Pastas aprovadas` indisponível. A fixture foi atualizada para House,
+seis etapas, três menus e os novos botões; o contraste do botão ativo no tema
+escuro também foi corrigido. A matriz local aprovou 207 verificações em 320,
+390, 768, 1440 e 1920 px, nos temas claro, médio e escuro, sem overflow,
+sobreposição ou violação séria de acessibilidade. Nova CI integral é obrigatória.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o
