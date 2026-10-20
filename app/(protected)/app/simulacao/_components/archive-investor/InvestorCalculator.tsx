@@ -2,7 +2,8 @@
 // @ts-nocheck -- Arquivo preservado da implementação oficial anexada.
 "use client";
 
-import { memo, useEffect, useId, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { memo, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode, type Ref } from "react";
+import { createPortal } from "react-dom";
 import { Search, X } from "lucide-react";
 import { AssociativeLearningManual } from "./AssociativeLearningManual";
 import { AssociativePageGuide } from "./AssociativePageGuide";
@@ -702,6 +703,205 @@ function AssociativePaymentSummary({
     aria-controls="investor-associative-commission-dialog"
     onClick={onShowCommission}
   ><span aria-hidden="true">$</span></button></div>;
+}
+
+type AssociativePrintFlow = "linear" | "decreasing";
+
+export function AssociativePrintSheet({
+  mode,
+  businessUnit,
+  project,
+  unit,
+  baseDate,
+  income,
+  valueReal,
+  financing,
+  subsidy,
+  fgts,
+  housingCheck,
+  balanceAfterResources,
+  entry,
+  signals,
+  annuals,
+  installments,
+  linearUncorrected,
+  linearCorrected,
+  linearFirstDate,
+  linearLastDate,
+  blocks,
+  documentation,
+}: {
+  mode: AssociativePrintFlow;
+  businessUnit: string;
+  project: string;
+  unit: string;
+  baseDate: string;
+  income: number;
+  valueReal: number;
+  financing: number;
+  subsidy: number;
+  fgts: number;
+  housingCheck: number;
+  balanceAfterResources: number;
+  entry: { date: string; value: number };
+  signals: Array<{ index: number; date: string; value: number; approved: boolean }>;
+  annuals: Array<{
+    index: number;
+    date: string;
+    value: number;
+    correctedValue: number;
+    approved: boolean;
+  }>;
+  installments: number;
+  linearUncorrected: number;
+  linearCorrected: number;
+  linearFirstDate: string;
+  linearLastDate: string;
+  blocks: AssociativeDecreasingBlockView[];
+  documentation: ReturnType<typeof calculateAssociativeDocumentationView>;
+}) {
+  const fixedRows = [
+    {
+      key: "entry",
+      label: "Entrada",
+      date: entry.date,
+      count: 1,
+      uncorrected: entry.value,
+      corrected: entry.value,
+    },
+    ...signals
+      .filter((payment) => payment.approved && payment.value > 0)
+      .map((payment) => ({
+        key: `signal-${payment.index}`,
+        label: `Sinal ${payment.index}`,
+        date: payment.date,
+        count: 1,
+        uncorrected: payment.value,
+        corrected: payment.value,
+      })),
+    ...annuals
+      .filter((payment) => payment.approved && payment.value > 0)
+      .map((payment) => ({
+        key: `annual-${payment.index}`,
+        label: `Anual ${payment.index}`,
+        date: payment.date,
+        count: 1,
+        uncorrected: payment.value,
+        corrected: payment.correctedValue,
+      })),
+  ];
+  const monthlyRows = mode === "linear"
+    ? [{
+        key: "linear",
+        label: "Mensais - Linear 100%",
+        date: `${formatDate(linearFirstDate)} a ${formatDate(linearLastDate)}`,
+        count: installments,
+        uncorrected: linearUncorrected,
+        corrected: linearCorrected,
+      }]
+    : blocks.map((block) => ({
+        key: `decreasing-${block.label}`,
+        label: `Mensais - Escalonado ${block.label}`,
+        date: `${formatDate(block.firstInstallmentDate)} a ${formatDate(block.lastInstallmentDate)}`,
+        count: block.count,
+        uncorrected: block.uncorrectedInstallment,
+        corrected: block.correctedInstallment,
+      }));
+  const rows = [...fixedRows, ...monthlyRows];
+  const correctedTotal = rows.reduce((total, row) => total + row.corrected * row.count, 0);
+
+  return <article
+    className="investor-associative-print-sheet"
+    data-print-flow={mode}
+    aria-label={`Impressão do fluxo ${mode === "linear" ? "linear" : "escalonado"}`}
+  >
+    <header className="investor-associative-print-header">
+      {/* The print-only SVG must stay compatible with the standalone Vite QA harness. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/brand/descomplica-wordmark-light.svg"
+        alt="Descomplica"
+        width={1671}
+        height={285}
+      />
+      <div>
+        <strong>SIMULAÇÃO COMERCIAL</strong>
+        <span>{formatDate(baseDate)}</span>
+      </div>
+    </header>
+    <section className="investor-associative-print-title">
+      <div><h1>Resumo da simulação</h1><p>Associativo - Fluxo {mode === "linear" ? "linear" : "escalonado"}</p></div>
+      <span>Valores calculados no CRM</span>
+    </section>
+    <section className="investor-associative-print-property">
+      <div><small>EMPREENDIMENTO - {businessUnit}</small><strong>{informationLabel(project)}</strong></div>
+      <div><small>UNIDADE</small><strong>{informationLabel(unit)}</strong></div>
+    </section>
+    <section className="investor-associative-print-kpis">
+      <div><small>VALOR REAL DA VENDA</small><strong>{money.format(valueReal)}</strong></div>
+      <div className="featured"><small>FINANCIAMENTO</small><strong>{money.format(financing)}</strong></div>
+      <div><small>RENDA FAMILIAR MENSAL</small><strong>{money.format(income)}</strong></div>
+    </section>
+    <section className="investor-associative-print-section">
+      <h2><span>01</span> Composição da compra</h2>
+      <dl>
+        <div><dt>Valor real da venda</dt><dd>{money.format(valueReal)}</dd></div>
+        <div><dt>Financiamento</dt><dd>- {money.format(financing)}</dd></div>
+        <div><dt>Subsídio</dt><dd>- {money.format(subsidy)}</dd></div>
+        <div><dt>FGTS</dt><dd>- {money.format(fgts)}</dd></div>
+        <div><dt>Cheque Moradia</dt><dd>- {money.format(housingCheck)}</dd></div>
+        <div className="total"><dt>Saldo após recursos</dt><dd>{money.format(balanceAfterResources)}</dd></div>
+      </dl>
+    </section>
+    <section className="investor-associative-print-section investor-associative-print-flow">
+      <h2><span>02</span> Fluxo de pagamentos do pró-soluto</h2>
+      <table>
+        <thead><tr><th>Tipo</th><th>Data</th><th>Quant.</th><th>Parcela sem correção</th><th>Parcela com correção</th></tr></thead>
+        <tbody>{rows.map((row) => <tr key={row.key}>
+          <th scope="row">{row.label}</th><td>{row.date.includes(" a ") ? row.date : formatDate(row.date)}</td><td>{row.count}x</td><td>{money.format(row.uncorrected)}</td><td>{money.format(row.corrected)}</td>
+        </tr>)}</tbody>
+        <tfoot><tr><th colSpan={4}>Total com correção</th><td>{money.format(correctedTotal)}</td></tr></tfoot>
+      </table>
+      <p>Entrada e sinais não recebem correção. Anuais e mensais usam os valores calculados pelo motor do Associativo.</p>
+    </section>
+    <section className="investor-associative-print-section investor-associative-print-documentation">
+      <h2><span>03</span> Documentação</h2>
+      {documentation.result.ok ? <div className="investor-associative-print-documentation-grid">
+        <div className="investor-associative-print-documentation-plan">
+          <small>PLANO SUGERIDO</small>
+          <strong>{documentation.result.installments}x de {money.format(documentation.result.installmentValue)}</strong>
+          <span>1ª parcela em {formatDate(documentation.result.firstInstallmentDate)}</span>
+          <span>Avaliação bancária: {money.format(documentation.appraisalValue)}</span>
+        </div>
+        <dl>
+          <div><dt>ITBI</dt><dd>{money.format(documentation.result.itbi)}</dd></div>
+          {documentation.result.registrationCombined ? <div><dt>Registro conjunto</dt><dd>{money.format(documentation.result.totalRegistration)}</dd></div> : <>
+            <div><dt>Registro de compra e venda</dt><dd>{money.format(documentation.result.purchaseRegistration)}</dd></div>
+            <div><dt>Registro da alienação fiduciária</dt><dd>{money.format(documentation.result.lienRegistration)}</dd></div>
+          </>}
+          <div><dt>Despachante</dt><dd>{money.format(documentation.result.dispatchFee)}</dd></div>
+          <div><dt>Seguro Caixa</dt><dd>{money.format(documentation.result.caixaInsurance)}</dd></div>
+          <div className="total"><dt>Total da documentação</dt><dd>{money.format(documentation.result.totalCash)}</dd></div>
+        </dl>
+      </div> : <div className="investor-associative-print-documentation-pending">
+        <strong>Documentação aguardando dados</strong>
+        <span>{[...new Set([...documentation.missingItems, ...documentation.result.errors])].join(" · ")}</span>
+      </div>}
+      <p>Estimativa automática. Os valores finais dependem da prefeitura, do banco e do cartório.</p>
+    </section>
+    <footer>
+      <p>Resultado preliminar sujeito à política comercial vigente.</p>
+      <div><strong>Descomplica - Simulação comercial</strong><span>A4 - 210 x 297 mm</span><span>Página 1 de 1</span></div>
+    </footer>
+  </article>;
+}
+
+const subscribeToClientRender = () => () => undefined;
+
+function AssociativePrintPortal(props: Parameters<typeof AssociativePrintSheet>[0]) {
+  const mounted = useSyncExternalStore(subscribeToClientRender, () => true, () => false);
+  if (!mounted || typeof document === "undefined") return null;
+  return createPortal(<AssociativePrintSheet {...props} />, document.body);
 }
 
 const InvestorFilterOptions = memo(function InvestorFilterOptions({ options, currency = false }) {
@@ -2554,6 +2754,7 @@ export function InvestorCalculator({
   const [directProposalDirty, setDirectProposalDirty] = useState(false);
   const [directIncomeNotice, setDirectIncomeNotice] = useState("");
   const [visibleScenarioCodes, setVisibleScenarioCodes] = useState<string[]>([]);
+  const [associativePrintMode, setAssociativePrintMode] = useState<AssociativePrintFlow>("linear");
   const [todayDate] = useState(todayIso);
   const baseDate = todayDate;
   const entryDate = baseDate;
@@ -3070,6 +3271,28 @@ export function InvestorCalculator({
     && !associativeInstallmentsRejected
     && Boolean(result.custom.decreasing?.ok)
     && result.custom.installmentValue > 0;
+  const associativePrintDocumentation = useMemo(() => calculateAssociativeDocumentationView({
+    businessUnit: selectedUnit?.businessUnit ?? "",
+    modality: associativeFinancingModality,
+    manualModalityPreference: associativeManualModalityPreference,
+    firstProperty: associativeFirstProperty,
+    salePrice: result.context.valueReal,
+    reportedAppraisal: selectedUnit?.appraisal ?? 0,
+    appraisalOverride: currencyInputNumber(documentationAppraisalOverride),
+    financing: result.custom.financing,
+    income: currencyInputNumber(income),
+    baseDate,
+    municipality: selectedUnit?.city?.normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase() === "sao paulo"
+      && selectedUnit?.state?.trim().toUpperCase() === "SP"
+      ? "sao-paulo-sp"
+      : "",
+  }), [associativeFinancingModality, associativeFirstProperty, associativeManualModalityPreference, baseDate, documentationAppraisalOverride, income, result.context.valueReal, result.custom.financing, selectedUnit?.appraisal, selectedUnit?.businessUnit, selectedUnit?.city, selectedUnit?.state]);
+  const printAssociativeFlow = (mode: AssociativePrintFlow) => {
+    setAssociativePrintMode(mode);
+    window.requestAnimationFrame(() => {
+      window.requestAnimationFrame(() => window.print());
+    });
+  };
   const scenarioOptions: Record<string, { plan: number; title: string; description: string | null }> = annualMode
     ? ASSOCIATIVE_SCENARIO_OPTIONS
     : STANDARD_SCENARIO_OPTIONS;
@@ -4918,7 +5141,8 @@ export function InvestorCalculator({
               <h2 id="investor-associative-resources-title" className="sr-only">Ajuda, documentação e impressão do Associativo</h2>
               <InvestorLearningManual associative />
               <button type="button" aria-haspopup="dialog" aria-controls="investor-documentation-pf" onClick={() => pfDocumentationDialog.current?.showModal()}>Doc Pessoa Física</button>
-              <button type="button" onClick={() => window.print()} aria-label="Imprimir a proposta associativa">Imprimir</button>
+              <button type="button" disabled={!associativePaymentSummaryAvailable} onClick={() => printAssociativeFlow("linear")} aria-label="Imprimir fluxo linear">Imprimir linear</button>
+              <button type="button" disabled={!associativePaymentSummaryAvailable} onClick={() => printAssociativeFlow("decreasing")} aria-label="Imprimir fluxo escalonado">Imprimir escalonado</button>
               <InvestorCommercialLinks />
             </section>
             <DocumentationDialog type="pf" dialogRef={pfDocumentationDialog} associative />
@@ -4946,6 +5170,30 @@ export function InvestorCalculator({
             <DocumentationDialog type="pj" dialogRef={pjDocumentationDialog} />
           </>}
           {directPrintReady ? <DirectPrintComposition flow={directResult} baseDate={baseDate} policySummary={directParkingPolicySummary} discountAuthorized={discountAuthorized} /> : null}
+          {annualMode && associativePaymentSummaryAvailable && selectedUnit ? <AssociativePrintPortal
+            mode={associativePrintMode}
+            businessUnit={selectedUnit.businessUnit}
+            project={selectedUnit.project}
+            unit={selectedUnit.product}
+            baseDate={baseDate}
+            income={currencyInputNumber(income)}
+            valueReal={result.context.valueReal}
+            financing={result.custom.financing}
+            subsidy={result.custom.subsidy}
+            fgts={result.custom.fgts}
+            housingCheck={result.custom.housingCheck}
+            balanceAfterResources={result.context.balanceAfterResources}
+            entry={{ date: entryDate, value: result.custom.actValue }}
+            signals={result.custom.signals}
+            annuals={result.custom.intermediaries}
+            installments={result.custom.desiredInstallments}
+            linearUncorrected={associativeLinearUncorrected}
+            linearCorrected={result.custom.installmentValue}
+            linearFirstDate={firstInstallmentDate}
+            linearLastDate={lastInstallmentDate}
+            blocks={result.custom.decreasing?.blocks ?? []}
+            documentation={associativePrintDocumentation}
+          /> : null}
           {!annualMode ? <details className="investor-audit investor-proposal-audit" data-tour="audit">
             <summary>Auditoria do cálculo</summary>
             <ul>{result.audit.map((item) => <li key={item.id} className={item.ok ? "ok" : "error"}><span>{item.ok ? "✓" : "×"}</span>{item.label}</li>)}</ul>

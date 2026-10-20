@@ -12,6 +12,45 @@
   preservando os seis estágios do House.
 - Restringe a leitura da meta de Parcerias aos usuários autorizados a visualizar
   o Dashboard Imob, sem ampliar permissões de escrita ou de outras metas.
+## 2026-10-20 - Correção da impressão A4 do Associativo
+
+- Impede a repetição da folha de impressão em uma segunda página, isolando o
+  conteúdo impresso diretamente no corpo do documento.
+- Inclui na folha os valores calculados da documentação, como ITBI, registros,
+  despachante, seguro Caixa e total estimado.
+- Altera o cabeçalho e o rodapé para `Simulação comercial`.
+- Mantém as saídas linear e escalonada, com sinais e anuais em linhas
+  independentes e valores sem e com correção.
+
+## 2026-10-19 - Impressão A4 do Associativo
+
+- Separa as ações `Imprimir linear` e `Imprimir escalonado` no resultado do
+  Associativo.
+- Gera uma folha A4 limpa com dados reais da proposta, valores sem e com
+  correção, sinais e anuais em linhas independentes.
+- Usa os quatro blocos oficiais de 40%, 30%, 20% e 10% no fluxo escalonado,
+  sem alterar o motor financeiro.
+
+## 2026-10-20 - Data opcional de comparecimento no coletor
+
+- Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da
+  validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
+  para valores inválidos.
+
+## 2026-10-20 - Previsão por final de semana e gerente
+
+- Separa previsões de sexta a domingo por período, House/Imob e gerente, com
+  revisão independente e seleção pelo calendário.
+- Adiciona Geral como leitura consolidada em blocos completos por gerente,
+  preservando estruturas customizadas sem truncar colunas ou linhas.
+- Mantém dez corretores no rascunho inicial; recortes novos reutilizam somente
+  títulos e o primeiro corretor do último template, com valores limpos.
+- Fixa a coluna Nome do corretor e Total geral na rolagem, impede quebra de
+  números de linha e destaca corretor, métrica e empreendimento da célula ativa.
+- Compacta os controles dos empreendimentos junto às bordas e inclui seletores
+  de Geral, House, Imob e seus gerentes.
+- Prepara armazenamento aditivo com RLS, RPCs por período, CAS e auditoria sem
+  conteúdo. A migration permanece pendente de CI e autorização remota específica.
 
 ## 2026-10-20 - Candidato visual protegido para Agendamentos
 

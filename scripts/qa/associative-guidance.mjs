@@ -1091,7 +1091,7 @@ export async function checkAssociativeGuidance(page, { onState = async () => {} 
     const footerActions = page
       .locator(`${root} .investor-associative-resource-actions`)
       .locator(":scope > button, :scope > a[href], :scope > .investor-learning-manual > button");
-    await expect(footerActions).toHaveCount(5);
+    await expect(footerActions).toHaveCount(6);
     result.footerEffects = [];
     for (const action of await footerActions.all()) {
       result.footerEffects.push({

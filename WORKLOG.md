@@ -27,6 +27,74 @@ Linux, e o gate de release reproduz o mesmo limite em fixtures físicas do host;
 esses arquivos não pertencem ao escopo alterado. Restore isolado, 2.049
 asserções pgTAP e gates físicos Linux continuam obrigatórios na CI antes de
 aplicar a migration.
+## 2026-10-20 - Correção da impressão comercial do Associativo
+
+Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
+páginas A4 idênticas, sem a seção de documentação, e usava o título `Simulação
+imobiliária`. A origem era a combinação do conteúdo normal da aplicação ainda
+ocupando espaço na impressão com a folha fixa, repetida pelo navegador em cada
+página.
+
+A folha passou a ser renderizada diretamente no corpo do documento por portal,
+enquanto os demais elementos são removidos do fluxo de impressão. A posição
+fixa foi substituída por layout relativo. O cabeçalho agora informa `Simulação
+comercial` e a seção de documentação usa o cálculo vigente da proposta para
+exibir plano, primeira parcela, avaliação, ITBI, registros, despachante, seguro
+Caixa e total estimado. Os modos linear e escalonado continuam separados.
+
+A validação em Chromium gerou uma única página A4 nos dois modos, sem conteúdo
+da tela subjacente e com a documentação completa. Lint, typecheck e build
+passaram. A suíte da aplicação aprovou 3.971 testes e ignorou 105; a suíte de
+operações e release aprovou 723 testes e ignorou 14, sem falhas.
+
+## 2026-10-19 - Layouts de impressão do Associativo
+
+- Adicionados dois comandos de impressão: linear e escalonado.
+- A folha A4 usa somente resultados do motor vigente e preserva a separação de
+  entrada, cada sinal, cada anual e mensais.
+- O modo escalonado apresenta os blocos calculados de 40%, 30%, 20% e 10%.
+- Testes focados conferem ações, linhas independentes, fechamento dos blocos e
+  regras de impressão A4. Publicação depende de gates locais, PR, CI completa e
+  coordenador protegido.
+
+## 2026-10-20: marcador vazio de comparecimento no Salesforce
+
+A primeira coleta real do contrato v3 confirmou 1.281 agendamentos e bloqueou
+a publicação porque 774 registros ainda sem comparecimento usam o marcador
+visual `-` no relatório. Metadados, IDs de coluna, contagem e demais tipos
+estavam íntegros. O coletor passa a converter somente esse marcador de data
+opcional em string vazia antes da validação; valores preenchidos e inválidos
+continuam falhando fechados. O teste focal cobre a resposta real observada.
+
+## 2026-10-20: previsão por período, segmento e gerente
+
+Demanda: congelar a identificação dos corretores na rolagem, compactar os
+controles dos empreendimentos, aplicar destaque cruzado na célula ativa, manter
+números de linha em uma linha, carregar previsões pelo calendário e separar
+Geral, House e Imob com os gerentes informados.
+
+O contrato deixou de depender do singleton para novas gravações. A migration
+`20261020122216_forecast_period_scopes.sql` cria armazenamento aditivo por
+sexta-feira, segmento e gerente, com RLS forçada, ausência de grants diretos,
+RPCs guardadas, revisão CAS por recorte e auditoria somente de metadados. O
+singleton anterior permanece intacto e serve apenas como possível origem do
+template limpo. Geral retorna cada documento integralmente em blocos somente
+leitura, evitando perda quando gerentes customizam estruturas diferentes.
+
+A interface informa sexta a domingo no título, seleciona dias validados no
+calendário sem fechar o diálogo, protege trocas com rascunho, apresenta os
+gerentes em ordem alfabética e mantém dez corretores no rascunho inicial. A
+primeira coluna fica fixa do cabeçalho ao Total geral; foco e hover destacam
+corretor, Previsão/Realizado e empreendimento relacionados.
+
+Validação local: lint, typecheck, build, catálogo, recursos, formatação e diff
+passaram; Vitest aprovou 3.965 casos e ignorou 105; 110 testes focados e 12
+cenários de navegador passaram. A etapa Node aprovou 1.595 casos e manteve três
+falhas conhecidas de permissões/caminhos POSIX do Meta Ads no Windows. O gate
+release reproduziu a fixture privada do Meta Ads e um timeout de subprocesso
+Qlik no Windows; nenhuma área falha foi alterada. A CI Linux no SHA exato é o
+gate conclusivo, incluindo pgTAP e restauração isolada. Aplicação remota,
+integração e publicação ainda não foram executadas neste registro.
 
 ## 2026-10-20: proveniência visual de Agendamentos
 

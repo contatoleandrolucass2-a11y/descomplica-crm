@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: reconciliacao final com a main para metas Imob
+
+- A branch `codex/dashboard-imob-goals-sync` integrou `origin/main` em
+  `c1e931d5ad805f9f43766d67f1d7f297e99a31ae`, preservando tanto as metas e os
+  quatro estagios Imob quanto as entregas posteriores de previsao e impressao.
+- O inventario reconciliado contem 71 migrations, 37 arquivos pgTAP e 2.079
+  assercoes esperadas. O teste focal do candidato de release aprovou 23 casos.
+- No Windows, lint, typecheck e build de 57 rotas foram aprovados. A suite
+  integral aprovou 3.975 testes e pulou 105; somente dois casos de I/O do
+  `obsidian-knowledge` excederam o timeout sob paralelismo. O mesmo arquivo,
+  executado isoladamente, aprovou os 22 casos. A CI Linux do SHA reconciliado
+  continua obrigatoria antes da integracao e publicacao.
+- A autorizacao explicita do usuario para aplicar a migration aditiva
+  `20261020130000_dashboard_imob_goals.sql` vale somente para esta entrega. O
+  coordenador protegido, o restore isolado, o artefato imutavel e a verificacao
+  pos-publicacao permanecem obrigatorios.
+
 ## 2026-10-20: implementacao local das metas Imob e referencia de coleta
 
 - Status: implementacao local concluida na branch
@@ -45,6 +62,21 @@
   Agendamentos de todos os funis e calcular Meta mes/Meta esperada com a meta
   ativa de Parcerias multiplicada pelos sete gerentes informados. Nao alterar
   dados remotos, disparar coleta ou mudar workflow n8n nesta abertura.
+## 2026-10-20: comparecimento opcional no relatório de Agendamentos
+
+- A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`
+  pela CI `39421287684` e pelo coordenador protegido, deployment
+  `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`; health público confirmou a versão.
+- Na atualização protegida do coletor, um lock órfão de `07:30Z`, sem PID vivo
+  ou descritor aberto, foi arquivado no backup privado
+  `20261020T131600Z-aa8b2d6d501e`. Unidade, ledger, credenciais e agenda foram
+  preservados; o diretório de trabalho passou ao SHA publicado.
+- O primeiro ciclo após a recuperação leu 20.384 oportunidades e 1.281
+  agendamentos, mas falhou fechado antes da publicação. A inspeção estrutural,
+  sem expor linhas, encontrou 774 datas opcionais representadas por `-`; os IDs
+  e rótulos Salesforce exigidos permanecem corretos e vigentes.
+- A correção normaliza somente esse marcador para ausência de comparecimento.
+  O aceite ainda exige CI, nova promoção e duas coletas reais distintas.
 
 ## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
 
@@ -1787,3 +1819,48 @@ dependente da autorização específica aplicável.
   `worktreeDirtyAtCapture=true`. O marcador foi corrigido para o estado limpo
   da baseline versionada; os 28 testes locais de catálogo/paridade passaram
   (27 aprovados e um ignorado) antes do novo envio.
+
+## 2026-10-20: Abertura da previsão por período e gerente
+
+- A branch `codex/previsao-periodos` iniciou no `origin/main`
+  `099493a9f1f64730efd449364979384309c2ed44`. A CI de `main`
+  `39411919967` concluiu com sucesso no mesmo SHA.
+- Às `2026-10-20T12:18:13.3265927Z`, o health público respondeu HTTP 200,
+  `status=ok` e `version=08d050f90c877009cd55140322b7c822e578d672`.
+  A produção estava um commit documental atrás de `main`; esse estado não
+  comprova a publicação da nova demanda.
+- Escopo solicitado: selecionar fins de semana válidos no calendário, separar
+  Geral, House e Imob por gerente, carregar e salvar previsões por período,
+  manter dez corretores no estado inicial e compactar a grade com primeira
+  coluna fixa, destaque cruzado e controles de empreendimento reposicionados.
+- A migration `20261019004204_forecast_action_plan.sql` permanece versionada,
+  mas ainda não foi aplicada no banco remoto. Qualquer migration adicional ou
+  aplicação em produção continua condicionada à validação e à autorização
+  específica do usuário. Fontes: Git local após `fetch`, GitHub Actions e GET
+  observacional de `https://crm.descomplicapro.com.br/api/health`.
+
+### Implementação e validação local
+
+- A chave de persistência passou a ser fim de semana, segmento e gerente. House
+  e Imob editam grades independentes; Geral devolve até doze seções completas e
+  somente leitura, preservando personalizações diferentes entre gerentes.
+- O calendário usa sexta, sábado e domingo como dias válidos. A seleção carrega
+  o mesmo período, permanece visível e atualiza o título com o intervalo. Sem
+  registro, a API reutiliza somente a estrutura mais recente, limpa valores e
+  Plano de ação e mantém a primeira linha de corretor.
+- A interface fixa a coluna do corretor em cabeçalho, corpo e Total geral,
+  destaca corretor, métrica e empreendimento da célula ativa, impede quebra do
+  índice 10 e mantém dez corretores no rascunho inicial. Controles de grupo
+  ficaram compactos no canto superior esquerdo sem deslocar o título.
+- O armazenamento novo força RLS, não concede acesso direto e expõe RPCs com
+  usuário ativo, permissão da página, MFA e CAS de revisão. A migration
+  `20261020122216_forecast_period_scopes.sql` depende da anterior
+  `20261019004204_forecast_action_plan.sql`; ambas permanecem sem aplicação
+  remota e exigem autorização específica depois da CI aprovada.
+- Evidências locais: `lint`, `typecheck`, `build`, `format:check`, catálogo,
+  recursos e `git diff --check` passaram; Vitest aprovou 3.965 e ignorou 105;
+  110 testes focados e 12 cenários de navegador passaram. A suíte Node aprovou
+  1.595, ignorou 19 e reproduziu três falhas POSIX conhecidas do Meta Ads no
+  Windows. `test:release` reproduziu a fixture privada do mesmo módulo e um
+  timeout Qlik isolado; o delta não altera essas áreas. A CI Linux no SHA exato,
+  com pgTAP e restauração isolada, é obrigatória antes de merge e publicação.

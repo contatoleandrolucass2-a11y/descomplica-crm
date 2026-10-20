@@ -185,6 +185,10 @@ test("appointment development metadata is checked each cycle and never substitut
           value: "Store Current",
           label: "Store Current",
         };
+        row.dataCells[metadata.detailColumns.indexOf("Activity.Data_de_comparecimento__c")] = {
+          value: null,
+          label: "-",
+        };
         return result;
       },
       ...overrides,
@@ -197,6 +201,7 @@ test("appointment development metadata is checked each cycle and never substitut
   const first = await run(make());
   assert.equal(first[0].development, "Development Current");
   assert.equal(first[0].storeName, "Store Current");
+  assert.equal(first[0].attendedAt, "");
   for (const change of [
     (response) => {
       delete response.reportExtendedMetadata;
