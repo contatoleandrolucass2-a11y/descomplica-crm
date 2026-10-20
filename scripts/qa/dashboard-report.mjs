@@ -575,9 +575,7 @@ async function checkLayout(page) {
         style.overflow === "hidden"
       )
         continue;
-      const clipped =
-        element.scrollWidth > element.clientWidth + 2 &&
-        style.display !== "inline";
+      const clipped = element.scrollWidth > element.clientWidth + 2 && style.display !== "inline";
       if (clipped)
         problems.push(`${element.tagName}: ${element.textContent.trim()} (clipped text)`);
     }
