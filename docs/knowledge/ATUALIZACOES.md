@@ -1,5 +1,54 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: implementacao do dashboard House e Imob
+
+- Status local: implementacao concluida na branch
+  `codex/dashboard-house-imob-metas`, baseada em `origin/main` no SHA
+  `2eb17cc052754519ebee1156060e394ea5728169`; PR, CI, merge e publicacao ainda
+  precisam ser registrados separadamente.
+- Canal comercial passa a ser uma escolha exclusiva. House corresponde a
+  `DIRECIONAL VENDAS SPC`; Imob corresponde a `SPC - CANAL IMOB PJ`. O perfil
+  autorizado define a opcao inicial quando so um canal e permitido; no perfil
+  amplo, House e o padrao na ausencia de uma selecao valida.
+- `Pastas aprovadas` nao exige novo coletor: o contrato analitico ja inclui no
+  fato de Pastas a contagem derivada de `Status = Analise aprovada`. A aplicacao
+  agora propaga esse sexto estagio para periodo, historico e funis realizados,
+  sem substituir ausencia de fonte por zero.
+- As metas House usam a equipe oficial de corretores ativos do read model de
+  ranking, alimentado pelo relatorio Salesforce `00OTT000009j0l32AA`. Nao usar
+  proprietarios observados nos fatos comerciais como numero de corretores.
+  Metas individuais vigentes nesta entrega: 143 oportunidades, 24 agendamentos,
+  12 visitas, 8 pastas, 2 pastas aprovadas e 1 venda. Meta esperada ate hoje e
+  `meta mensal / dias do mes * dia atual`, sem arredondamento intermediario.
+- Metas Imob permanecem indisponiveis ate configuracao explicita. Filtros de
+  responsavel ou empresa que nao permitem reconciliar a equipe oficial tambem
+  deixam a meta indisponivel, em vez de estimar um numero sem fonte.
+- Coleta Salesforce existente de 30 minutos preservada; nenhum workflow n8n,
+  migration ou dado remoto foi alterado. Validacao: lint, typecheck e build de
+  57 rotas aprovados; Vitest 3.958 aprovados/99 skips; Node 1.595 aprovados/19
+  skips e tres falhas POSIX conhecidas de Meta Ads no Windows, fora do diff.
+  CI Linux do SHA exato permanece obrigatoria para integracao e publicacao.
+
+## 2026-10-20: abertura do dashboard House e Imob
+
+- Consulta de abertura em 2026-10-20: Git comum confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`; branch
+  `codex/dashboard-house-imob-metas` criada do `origin/main` no SHA
+  `2eb17cc052754519ebee1156060e394ea5728169`, sem alteracoes locais anteriores.
+- GitHub: a CI `39366805822` desse SHA falhou somente porque a fonte publica do
+  ITBI da Prefeitura de Sao Paulo respondeu HTTP 403 durante a verificacao
+  externa; o commit e apenas documental sobre Agendamentos. A CI anterior da
+  `main`, `39357425838`, aprovou o SHA `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+- Producao: `https://crm.descomplicapro.com.br/api/health` respondeu HTTP 200,
+  `status: ok`, `version: 06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+  Portanto, estado local/integrado e publicado estao separados nesta abertura.
+- Escopo solicitado: alternancia exclusiva House/Imob com padrao por perfil,
+  compactacao visual, funis derivados do campo Status, metas House calculadas
+  pela meta individual multiplicada pelos corretores e proporcionalizadas pelo
+  dia corrente, e atualizacao dos relatorios a cada 30 minutos. Fontes indicadas:
+  relatorios Salesforce `00OU600000EjufWMAR` e `00OTT000009j0l32AA`; nenhum
+  dado privado foi copiado para esta nota e nenhuma mutacao remota ocorreu.
+
 ## 2026-10-19: Associativo automatico publicado
 
 - Encerramento documental: registro final enviado ao PR #267, separado do runtime ja publicado. Em 16:21 UTC, CI documental `39284638442` aguardava runner; merge automatico nao e permitido pelo repositorio. Pendencia restrita a integracao desse registro apos CI aprovada, sem novo deploy. Obsidian sincronizado com o registro completo; nenhum teste ou protecao dispensado.

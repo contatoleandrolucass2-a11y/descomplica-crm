@@ -2,30 +2,6 @@
   min-width: 0;
   width: 100%;
 }
-.heading {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-.heading h2 {
-  margin: 0;
-  font-size: 1rem;
-}
-.heading button {
-  display: grid;
-  place-items: center;
-  width: 2.25rem;
-  height: 2.25rem;
-  border: 1px solid var(--analytics-line);
-  border-radius: 6px;
-  color: inherit;
-  background: var(--analytics-surface);
-}
-.heading button:disabled {
-  opacity: 0.45;
-}
 .grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -34,11 +10,45 @@
 .field {
   min-width: 0;
 }
+.channelField {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.channelField legend,
 .field > span {
   display: block;
   font-size: 0.8125rem;
   margin-bottom: 0.5rem;
   color: var(--analytics-muted);
+}
+.channelSwitch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 2.75rem;
+  padding: 3px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 6px;
+  background: var(--analytics-surface);
+}
+.channelSwitch button {
+  min-width: 0;
+  border: 0;
+  border-radius: 4px;
+  color: var(--analytics-muted);
+  background: transparent;
+  font: inherit;
+  font-weight: 650;
+  cursor: pointer;
+}
+.channelSwitch button[aria-pressed="true"] {
+  color: #fff;
+  background: var(--analytics-cyan-strong);
+}
+.channelSwitch button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
 }
 .menu {
   position: relative;
@@ -106,7 +116,7 @@
   margin: 0.625rem 0 0;
 }
 .trigger:focus-visible,
-.heading button:focus-visible {
+.channelSwitch button:focus-visible {
   outline: 2px solid var(--analytics-cyan-strong);
   outline-offset: 3px;
 }

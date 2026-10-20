@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-10-20: Dashboard House e Imob
+
+Demanda: simplificar o filtro de canal da página `/app`, compactar o dashboard,
+usar o Status do relatório de Pastas para `Pastas aprovadas` e recalcular as
+metas House com a quantidade oficial de corretores ativos. A seleção agora é
+exclusiva entre House (`DIRECIONAL VENDAS SPC`) e Imob (`SPC - CANAL IMOB PJ`),
+com padrão compatível com o perfil autorizado. Os títulos visuais `Filtros` e
+`Funis comerciais` foram retirados e o espaçamento dos blocos foi reduzido.
+
+O sexto estágio do funil é calculado a partir da contagem aprovada já presente
+nos fatos do relatório de Pastas e foi propagado para período atual, histórico
+e comparativos. As metas House usam o cadastro oficial de corretores ativos do
+read model de ranking, alimentado pelo relatório Salesforce de corretores, e os
+valores por corretor 143 oportunidades, 24 agendamentos, 12 visitas, 8 pastas,
+2 pastas aprovadas e 1 venda. A meta esperada até hoje é proporcional ao dia do
+mês civil. Metas Imob ficam explicitamente indisponíveis até sua configuração.
+
+Validação local: lint e typecheck aprovados; build Next.js de 57 rotas aprovado;
+Vitest aprovou 3.958 testes e manteve 99 skips condicionais. A etapa Node aprovou
+1.595 testes, ignorou 19 e reproduziu três falhas conhecidas de Meta Ads ligadas
+a permissões/caminhos POSIX no host Windows, fora dos arquivos alterados. A CI
+Linux do SHA exato continua obrigatória antes de integrar e publicar. Nenhum
+workflow n8n, migration ou dado remoto foi modificado.
+
 ## 2026-10-19: uniformização dos gráficos de Agendamentos
 
 Demanda: corrigir valores e rótulos girados e deixar todos os gráficos com o

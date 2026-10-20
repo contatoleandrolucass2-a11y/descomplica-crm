@@ -10,7 +10,7 @@ import {
   type DashboardAnalysisFact,
   type DashboardAnalysisSlice,
 } from "@/lib/crm/dashboard/analysis-contract";
-import { DASHBOARD_STAGES } from "@/lib/crm/dashboard/catalog";
+import { DASHBOARD_FUNNEL_STAGES } from "@/lib/crm/dashboard/presentation";
 
 function fact(date: string, count = 1, stage = 0, dimension = 0): DashboardAnalysisFact {
   return [stage, date, dimension, dimension, dimension, dimension, -1, count, 0, 0];
@@ -186,11 +186,20 @@ describe("month-scoped dashboard period readings", () => {
       today: 10,
     });
     for (const readings of Object.values(result.periodReadings)) {
-      expect(readings.map((reading) => reading.key)).toEqual(ANALYSIS_STAGE_KEYS);
-      expect(readings.map((reading) => reading.label)).toEqual(
-        ANALYSIS_STAGE_KEYS.map((key) => DASHBOARD_STAGES[key].label),
+      expect(readings.map((reading) => reading.key)).toEqual(
+        DASHBOARD_FUNNEL_STAGES.map(({ key }) => key),
       );
-      expect(readings.map((reading) => reading.conversion)).toEqual([null, 0.5, 0, null, null]);
+      expect(readings.map((reading) => reading.label)).toEqual(
+        DASHBOARD_FUNNEL_STAGES.map(({ label }) => label),
+      );
+      expect(readings.map((reading) => reading.conversion)).toEqual([
+        null,
+        0.5,
+        0,
+        null,
+        null,
+        null,
+      ]);
     }
     expect(input).toEqual(original);
     const empty = analyzeDashboard(input, { ...filters, owner: ["Absent"] });

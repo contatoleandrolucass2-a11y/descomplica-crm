@@ -1,13 +1,13 @@
 import { describe, expect, it } from "vitest";
 
 import { buildDashboardManagementGoals } from "@/lib/crm/dashboard/management-goals";
+import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
 
 const calculate = (referenceDate: string, brokerCount: number | null = 1) =>
-  buildDashboardManagementGoals({ referenceDate, brokerCount });
+  buildDashboardManagementGoals({ referenceDate, brokerCount, channel: DASHBOARD_CHANNELS[1] });
 
 describe("buildDashboardManagementGoals", () => {
-  it("sums monthly goals per filtered broker, leaving unspecified goals null", () => {
-    // October 2026: 22 weekdays and 5 Thursdays, including holidays as weekdays.
+  it("sums every House goal from the approved per-broker reference", () => {
     const result = calculate("2026-10-15", 3);
     expect(result).toMatchObject({
       referenceDate: "2026-10-15",
@@ -15,37 +15,37 @@ describe("buildDashboardManagementGoals", () => {
       daysInMonth: 31,
       elapsedDays: 15,
       monthlyGoals: {
-        opportunities: null,
-        appointments: 81,
-        visits: 24,
-        folders: 12,
-        "approved-folders": null,
+        opportunities: 429,
+        appointments: 72,
+        visits: 36,
+        folders: 24,
+        "approved-folders": 6,
         sales: 3,
       },
     });
-    expect(result.expectedByToday.appointments).toBeCloseTo((81 * 15) / 31, 12);
-    expect(result.expectedByToday.visits).toBeCloseTo((24 * 15) / 31, 12);
-    expect(result.expectedByToday.folders).toBeCloseTo((12 * 15) / 31, 12);
+    expect(result.expectedByToday.opportunities).toBeCloseTo((429 * 15) / 31, 12);
+    expect(result.expectedByToday.appointments).toBeCloseTo((72 * 15) / 31, 12);
+    expect(result.expectedByToday.visits).toBeCloseTo((36 * 15) / 31, 12);
+    expect(result.expectedByToday.folders).toBeCloseTo((24 * 15) / 31, 12);
+    expect(result.expectedByToday["approved-folders"]).toBeCloseTo((6 * 15) / 31, 12);
     expect(result.expectedByToday.sales).toBeCloseTo((3 * 15) / 31, 12);
-    expect(result.expectedByToday.opportunities).toBeNull();
-    expect(result.expectedByToday["approved-folders"]).toBeNull();
   });
 
   it.each([
-    ["2026-02-01", 28, 24], // 20 weekdays + 4 Thursdays; starts on Sunday.
-    ["2024-02-01", 29, 26], // 21 weekdays + 5 Thursdays; leap day is Thursday.
-    ["2000-02-01", 29, 25], // Century divisible by 400 is a leap year.
-    ["1900-02-01", 28, 24], // Other centuries are not leap years.
-    ["2100-02-01", 28, 24],
-    ["2026-12-01", 31, 28],
-    ["2027-01-01", 31, 25],
-    ["0001-01-01", 31, 27], // No implicit conversion to 1901.
-    ["0099-02-01", 28, 24],
-    ["9999-12-01", 31, 28],
-  ])("uses the full supplied month for %s", (date, days, appointments) => {
+    ["2026-02-01", 28],
+    ["2024-02-01", 29],
+    ["2000-02-01", 29],
+    ["1900-02-01", 28],
+    ["2100-02-01", 28],
+    ["2026-12-01", 31],
+    ["2027-01-01", 31],
+    ["0001-01-01", 31],
+    ["0099-02-01", 28],
+    ["9999-12-01", 31],
+  ])("uses the full supplied month for %s", (date, days) => {
     const result = calculate(date);
     expect(result.daysInMonth).toBe(days);
-    expect(result.monthlyGoals.appointments).toBe(appointments);
+    expect(result.monthlyGoals.appointments).toBe(24);
     expect(result.expectedByToday.sales).toBe(1 / days);
   });
 
@@ -57,17 +57,17 @@ describe("buildDashboardManagementGoals", () => {
     expect(sunday.monthlyGoals).toEqual(friday.monthlyGoals);
     expect(saturday.expectedByToday.sales).toBe(3 / 31);
     expect(sunday.expectedByToday.sales).toBe(4 / 31);
-    expect(sunday.expectedByToday.appointments).toBeCloseTo((27 * 4) / 31, 12);
+    expect(sunday.expectedByToday.appointments).toBeCloseTo((24 * 4) / 31, 12);
   });
 
   it("does not double the elapsed-day fraction on Thursdays", () => {
     const wednesday = calculate("2026-10-14");
     const thursday = calculate("2026-10-15");
-    expect(wednesday.monthlyGoals.appointments).toBe(27);
-    expect(thursday.monthlyGoals.appointments).toBe(27);
+    expect(wednesday.monthlyGoals.appointments).toBe(24);
+    expect(thursday.monthlyGoals.appointments).toBe(24);
     expect(
       thursday.expectedByToday.appointments! - wednesday.expectedByToday.appointments!,
-    ).toBeCloseTo(27 / 31, 12);
+    ).toBeCloseTo(24 / 31, 12);
   });
 
   it.each(["2026-02-28", "2024-02-29", "2026-04-30", "2026-10-31", "2026-12-31"])(
@@ -81,10 +81,10 @@ describe("buildDashboardManagementGoals", () => {
   it("resets the calendar-day fraction across the year boundary", () => {
     const december = calculate("2026-12-31", 2);
     const january = calculate("2027-01-01", 2);
-    expect(december.monthlyGoals.appointments).toBe(56);
-    expect(december.expectedByToday.appointments).toBe(56);
-    expect(january.monthlyGoals.appointments).toBe(50);
-    expect(january.expectedByToday.appointments).toBeCloseTo(50 / 31, 12);
+    expect(december.monthlyGoals.appointments).toBe(48);
+    expect(december.expectedByToday.appointments).toBe(48);
+    expect(january.monthlyGoals.appointments).toBe(48);
+    expect(january.expectedByToday.appointments).toBeCloseTo(48 / 31, 12);
   });
 
   it("distinguishes unavailable cohort from an empty filtered cohort", () => {
@@ -93,14 +93,24 @@ describe("buildDashboardManagementGoals", () => {
     expect(Object.values(unavailable.expectedByToday)).toEqual(Array(6).fill(null));
     const empty = calculate("2026-10-15", 0);
     expect(empty.monthlyGoals).toEqual({
-      opportunities: null,
+      opportunities: 0,
       appointments: 0,
       visits: 0,
       folders: 0,
-      "approved-folders": null,
+      "approved-folders": 0,
       sales: 0,
     });
     expect(empty.expectedByToday).toEqual(empty.monthlyGoals);
+  });
+
+  it("keeps every Imob goal unavailable until that channel is configured", () => {
+    const result = buildDashboardManagementGoals({
+      referenceDate: "2026-10-15",
+      brokerCount: 315,
+      channel: DASHBOARD_CHANNELS[0],
+    });
+    expect(Object.values(result.monthlyGoals)).toEqual(Array(6).fill(null));
+    expect(Object.values(result.expectedByToday)).toEqual(Array(6).fill(null));
   });
 
   it.each([

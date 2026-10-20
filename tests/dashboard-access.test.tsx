@@ -151,7 +151,7 @@ describe("dashboard autorizado por visão", () => {
     expect(markup).toContain("Responsavel sintetico");
     expect(markup).toContain("Gerente sintetico");
     expect(markup).toContain("Empresa sintetica");
-    expect(markup).toContain("1 corretores no grupo");
+    expect(markup).toContain("Metas da Imob serão configuradas depois");
     expect(markup).not.toContain("Ranking validado");
     expect(markup).not.toContain("Oportunidades por empreendimento");
     expect(mocks.loadDashboardTeam).not.toHaveBeenCalled();
@@ -325,7 +325,12 @@ describe("dashboard autorizado por visão", () => {
     const markup = renderToStaticMarkup(
       await AppHomePage({ searchParams: Promise.resolve({ view: "all", period: "week" }) }),
     );
-    expect(mocks.loadDashboardTeam).not.toHaveBeenCalled();
+    expect(mocks.loadDashboardTeam).toHaveBeenCalledExactlyOnceWith(
+      dashboard,
+      authorization,
+      "all",
+    );
+    expect(markup).toContain("2 corretores no grupo");
     expect(markup).not.toContain("Gerente sintetico");
     expect(markup).not.toContain("Corretores por gerente");
     expect(markup).toContain("Filtros aguardando coleta detalhada dos relatórios.");
