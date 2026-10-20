@@ -11,18 +11,18 @@ existente. Data de criação é convertida para America/Sao_Paulo. O mês seleci
 controla indicadores, diário, semanas, rankings e tabela; o ano do gráfico mensal
 é exclusivo.
 
-| Bloco | Coluna ou cálculo |
-| --- | --- |
-| Meta mensal | Agendamentos criados no mês / contatos únicos no relatório de corretores |
-| Corretores cadastrados | `Contact.Name` distinto no relatório `00OTT000009j0l32AA` |
-| Média no mês | Agendamentos criados / dias cobertos do mês selecionado |
-| Hoje e ontem | `Activity.CreatedDate` |
-| Dia, semana e mês | `Activity.CreatedDate`; semanas de segunda a domingo |
-| Previsto e realizado hoje | `Activity.ActivityDateTime` e `Activity.VisitaRealizada__c` |
-| Gerente regional | `Activity.Gerente_Regional__c` |
-| Gerente e responsável | `Activity.Gerente_de_Vendas__c` e `Activity.Corretor__c.Name` |
-| Ranking das contas | `Activity.Account.Ranking__c` |
-| Tabela | criação, horário, comparecimento, realização, regional, gerente, corretor e conta |
+| Bloco                     | Coluna ou cálculo                                                                 |
+| ------------------------- | --------------------------------------------------------------------------------- |
+| Meta mensal               | Agendamentos criados no mês / contatos únicos no relatório de corretores          |
+| Corretores cadastrados    | `Contact.Name` distinto no relatório `00OTT000009j0l32AA`                         |
+| Média no mês              | Agendamentos criados / dias cobertos do mês selecionado                           |
+| Hoje e ontem              | `Activity.CreatedDate`                                                            |
+| Dia, semana e mês         | `Activity.CreatedDate`; semanas de segunda a domingo                              |
+| Previsto e realizado hoje | `Activity.ActivityDateTime` e `Activity.VisitaRealizada__c`                       |
+| Gerente regional          | `Activity.Gerente_Regional__c`                                                    |
+| Gerente e responsável     | `Activity.Gerente_de_Vendas__c` e `Activity.Corretor__c.Name`                     |
+| Ranking das contas        | `Activity.Account.Ranking__c`                                                     |
+| Tabela                    | criação, horário, comparecimento, realização, regional, gerente, corretor e conta |
 
 Rankings ordenam quantidade decrescente e usam o nome como desempate. Ausência
 de nome fica explícita. Cobertura ausente não vira zero; cobertura parcial é

@@ -114,7 +114,7 @@ export const dashboardAnalysisSchema = z
     if (
       new Set(analysis.views.map((view) => view.viewKey)).size !== 3 ||
       analysis.views.some(
-        (view) => (analysis.version >= 2) !== (view.dimensions.stores !== undefined),
+        (view) => analysis.version >= 2 !== (view.dimensions.stores !== undefined),
       ) ||
       (analysis.version === 3) !== (analysis.brokerCount !== undefined) ||
       analysis.views.some(
@@ -144,7 +144,7 @@ export const dashboardAnalysisSliceSchema = dashboardAnalysisViewSchema
   .superRefine((slice, context) => {
     if (
       !validCoverage(slice.coverageStart, slice.referenceDate) ||
-      (slice.version >= 2) !== (slice.dimensions.stores !== undefined) ||
+      slice.version >= 2 !== (slice.dimensions.stores !== undefined) ||
       (slice.version === 3) !==
         (slice.brokerCount !== undefined && slice.appointments !== undefined) ||
       slice.facts.some((fact) => fact[1] < slice.coverageStart || fact[1] > slice.referenceDate)

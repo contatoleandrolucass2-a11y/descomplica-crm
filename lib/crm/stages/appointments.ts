@@ -135,8 +135,7 @@ export function analyzeAppointments(
   ): AppointmentBucket[] | null => {
     if (details === null) return null;
     const values = new Map<string, number>();
-    for (const appointment of details)
-      add(values, appointment[field] || fallback, 1);
+    for (const appointment of details) add(values, appointment[field] || fallback, 1);
     return ranking(values);
   };
   const monthStart = `${month}-01`;
@@ -146,8 +145,7 @@ export function analyzeAppointments(
     coveredStart > coveredEnd
       ? 0
       : Math.floor(
-          (Date.parse(`${coveredEnd}T12:00:00Z`) -
-            Date.parse(`${coveredStart}T12:00:00Z`)) /
+          (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
             86_400_000,
         ) + 1;
   const todayOperations =

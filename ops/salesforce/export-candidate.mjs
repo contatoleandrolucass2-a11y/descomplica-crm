@@ -156,12 +156,12 @@ function project(key, rows, analysisEnabled = false) {
             createdAt: raw(row, "Activity.CreatedDate"),
             ...(analysisEnabled === true
               ? {
-            scheduledAt: raw(row, "appointmentTime"),
-            attendedAt: raw(row, "appointmentAttendance"),
-            visitPerformed: raw(row, "appointmentVisitPerformed"),
-            regionalManager: field(row, "appointmentRegional"),
-            accountName: field(row, "appointmentAccountName"),
-            accountRanking: field(row, "appointmentAccountRanking"),
+                  scheduledAt: raw(row, "appointmentTime"),
+                  attendedAt: raw(row, "appointmentAttendance"),
+                  visitPerformed: raw(row, "appointmentVisitPerformed"),
+                  regionalManager: field(row, "appointmentRegional"),
+                  accountName: field(row, "appointmentAccountName"),
+                  accountRanking: field(row, "appointmentAccountRanking"),
                 }
               : {}),
           }

@@ -106,7 +106,10 @@ describe("appointment chart analysis", () => {
     expect(result.plannedToday).toBe(2);
     expect(result.performedToday).toBe(1);
     expect(result.details).toHaveLength(2);
-    expect(result.regionalManagers?.map(({ label }) => label)).toEqual(["Regional A", "Regional B"]);
+    expect(result.regionalManagers?.map(({ label }) => label)).toEqual([
+      "Regional A",
+      "Regional B",
+    ]);
     expect(result.accountRankings?.map(({ label }) => label)).toEqual(["Ouro", "Prata"]);
     expect(result.dailyAverage).toBeCloseTo(13 / 19);
   });

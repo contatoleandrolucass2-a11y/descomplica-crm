@@ -72,8 +72,7 @@ const fixture = {
   appointments: Array.from({ length: 31 }, (_, day) =>
     Array.from({ length: (day % 4) + 1 }, (_, record) => ({
       createdAt: `2026-03-${String(day + 1).padStart(2, "0")}T12:${String(record).padStart(2, "0")}:00Z`,
-      scheduledAt:
-        day === 30 ? `2026-03-31T15:${String(record).padStart(2, "0")}:00Z` : null,
+      scheduledAt: day === 30 ? `2026-03-31T15:${String(record).padStart(2, "0")}:00Z` : null,
       attendedAt:
         day === 30 && record % 2 === 0
           ? `2026-03-31T16:${String(record).padStart(2, "0")}:00Z`
@@ -332,12 +331,12 @@ export async function runAppointmentsPreview() {
           `Horizontal internal scrollbar ${theme}/${width}`,
         );
         check(
-          geometry.sections.slice(1, 4).every(
-            (section) => Math.abs(section.height - geometry.sections[1].height) < 1,
-          ) &&
-            geometry.sections.slice(4).every(
-              (section) => Math.abs(section.height - geometry.sections[4].height) < 1,
-            ),
+          geometry.sections
+            .slice(1, 4)
+            .every((section) => Math.abs(section.height - geometry.sections[1].height) < 1) &&
+            geometry.sections
+              .slice(4)
+              .every((section) => Math.abs(section.height - geometry.sections[4].height) < 1),
           `Uniform grouped chart heights ${theme}/${width}`,
         );
         check(
