@@ -1757,3 +1757,48 @@ dependente da autorização específica aplicável.
   `worktreeDirtyAtCapture=true`. O marcador foi corrigido para o estado limpo
   da baseline versionada; os 28 testes locais de catálogo/paridade passaram
   (27 aprovados e um ignorado) antes do novo envio.
+
+## 2026-10-20: Abertura da previsão por período e gerente
+
+- A branch `codex/previsao-periodos` iniciou no `origin/main`
+  `099493a9f1f64730efd449364979384309c2ed44`. A CI de `main`
+  `39411919967` concluiu com sucesso no mesmo SHA.
+- Às `2026-10-20T12:18:13.3265927Z`, o health público respondeu HTTP 200,
+  `status=ok` e `version=08d050f90c877009cd55140322b7c822e578d672`.
+  A produção estava um commit documental atrás de `main`; esse estado não
+  comprova a publicação da nova demanda.
+- Escopo solicitado: selecionar fins de semana válidos no calendário, separar
+  Geral, House e Imob por gerente, carregar e salvar previsões por período,
+  manter dez corretores no estado inicial e compactar a grade com primeira
+  coluna fixa, destaque cruzado e controles de empreendimento reposicionados.
+- A migration `20261019004204_forecast_action_plan.sql` permanece versionada,
+  mas ainda não foi aplicada no banco remoto. Qualquer migration adicional ou
+  aplicação em produção continua condicionada à validação e à autorização
+  específica do usuário. Fontes: Git local após `fetch`, GitHub Actions e GET
+  observacional de `https://crm.descomplicapro.com.br/api/health`.
+
+### Implementação e validação local
+
+- A chave de persistência passou a ser fim de semana, segmento e gerente. House
+  e Imob editam grades independentes; Geral devolve até doze seções completas e
+  somente leitura, preservando personalizações diferentes entre gerentes.
+- O calendário usa sexta, sábado e domingo como dias válidos. A seleção carrega
+  o mesmo período, permanece visível e atualiza o título com o intervalo. Sem
+  registro, a API reutiliza somente a estrutura mais recente, limpa valores e
+  Plano de ação e mantém a primeira linha de corretor.
+- A interface fixa a coluna do corretor em cabeçalho, corpo e Total geral,
+  destaca corretor, métrica e empreendimento da célula ativa, impede quebra do
+  índice 10 e mantém dez corretores no rascunho inicial. Controles de grupo
+  ficaram compactos no canto superior esquerdo sem deslocar o título.
+- O armazenamento novo força RLS, não concede acesso direto e expõe RPCs com
+  usuário ativo, permissão da página, MFA e CAS de revisão. A migration
+  `20261020122216_forecast_period_scopes.sql` depende da anterior
+  `20261019004204_forecast_action_plan.sql`; ambas permanecem sem aplicação
+  remota e exigem autorização específica depois da CI aprovada.
+- Evidências locais: `lint`, `typecheck`, `build`, `format:check`, catálogo,
+  recursos e `git diff --check` passaram; Vitest aprovou 3.965 e ignorou 105;
+  110 testes focados e 12 cenários de navegador passaram. A suíte Node aprovou
+  1.595, ignorou 19 e reproduziu três falhas POSIX conhecidas do Meta Ads no
+  Windows. `test:release` reproduziu a fixture privada do mesmo módulo e um
+  timeout Qlik isolado; o delta não altera essas áreas. A CI Linux no SHA exato,
+  com pgTAP e restauração isolada, é obrigatória antes de merge e publicação.

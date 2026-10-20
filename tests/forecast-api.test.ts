@@ -11,8 +11,30 @@ document.rows[0]!.cells.broker = "Corretor sintético";
 const firstGroup = getForecastGroups(document)[0]!;
 document.rows[0]!.cells[firstGroup.forecastId] = "12.50";
 document.rows[0]!.cells[firstGroup.actualId] = "8";
-const body = { ...document, expected_revision: 0 };
+const body = {
+  ...document,
+  expected_revision: 0,
+  date: "2026-10-18",
+  segment: "house" as const,
+  manager: "amanda" as const,
+};
 const record = { ...document, revision: 1, updated_at: "2026-10-12T15:00:00Z" };
+const rpcSnapshot = {
+  forecasts: [{ segment: "house", manager: "amanda", forecast: record }],
+  template: document,
+  can_edit: true,
+};
+const snapshot = {
+  forecast: record,
+  sections: [],
+  template: null,
+  can_edit: true,
+  period: { start: "2026-10-16", end: "2026-10-18" },
+  selection: { segment: "house", manager: "amanda" },
+};
+function getRequest(query = "date=2026-10-18&segment=house&manager=amanda") {
+  return new Request(`http://forecast.test/api/forecasts?${query}`);
+}
 function request(value: unknown = body, headers: Record<string, string> = {}) {
   return new Request("http://forecast.test/api/forecasts", {
     method: "PUT",
@@ -34,13 +56,16 @@ beforeEach(() => {
     context: { permissions: ["crm.settings.manage"] },
   });
   mocks.client.mockResolvedValue({ rpc: mocks.rpc });
-  mocks.rpc.mockResolvedValue({ data: record, error: null });
+  mocks.rpc.mockImplementation(async (name: string) => ({
+    data: name === "get_crm_forecast_period" ? rpcSnapshot : record,
+    error: null,
+  }));
 });
 afterEach(() => vi.unstubAllEnvs());
 
 describe("shared forecast API", () => {
   it.each([401, 403])("preserves auth denial %i before accessing RPC", async (status) => {
-    for (const method of [GET, () => PUT(request())]) {
+    for (const method of [() => GET(getRequest()), () => PUT(request())]) {
       mocks.authorize.mockResolvedValueOnce({
         ok: false,
         response: Response.json(
@@ -57,10 +82,13 @@ describe("shared forecast API", () => {
   it.each([true, false])(
     "returns validated shared records and can_edit=%s without cache",
     async (can_edit) => {
-      const snapshot = { forecast: record, can_edit };
-      mocks.rpc.mockResolvedValue({ data: snapshot, error: null });
-      await result(await GET(), 200, snapshot);
-      expect(mocks.rpc).toHaveBeenCalledWith("get_crm_forecast");
+      mocks.rpc.mockResolvedValue({ data: { ...rpcSnapshot, can_edit }, error: null });
+      await result(await GET(getRequest()), 200, { ...snapshot, can_edit });
+      expect(mocks.rpc).toHaveBeenCalledWith("get_crm_forecast_period", {
+        p_weekend_start: "2026-10-16",
+        p_segment: "house",
+        p_manager_key: "amanda",
+      });
     },
   );
   it("does not allow routine page access to grant routine editing", async () => {
@@ -72,23 +100,71 @@ describe("shared forecast API", () => {
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
   it("accepts an empty database without inventing a saved default", async () => {
-    mocks.rpc.mockResolvedValue({ data: { forecast: null, can_edit: true }, error: null });
-    await result(await GET(), 200, { forecast: null, can_edit: true });
+    mocks.rpc.mockResolvedValue({
+      data: { forecasts: [], template: document, can_edit: true },
+      error: null,
+    });
+    const template = structuredClone(document);
+    template.rows = [template.rows[0]!];
+    for (const [key] of Object.entries(template.rows[0]!.cells))
+      if (key !== "broker") template.rows[0]!.cells[key] = "";
+    await result(await GET(getRequest()), 200, {
+      ...snapshot,
+      forecast: null,
+      template,
+    });
+  });
+  it("returns complete manager sections for the read-only General page", async () => {
+    const imobRecord = { ...record, title: "Imob" };
+    mocks.rpc.mockResolvedValue({
+      data: {
+        forecasts: [
+          { segment: "imob", manager: "alvaro", forecast: imobRecord },
+          { segment: "house", manager: "amanda", forecast: record },
+        ],
+        template: document,
+        can_edit: true,
+      },
+      error: null,
+    });
+    await result(await GET(getRequest("date=2026-10-17&segment=general")), 200, {
+      forecast: null,
+      sections: [
+        { segment: "house", manager: "amanda", forecast: record },
+        { segment: "imob", manager: "alvaro", forecast: imobRecord },
+      ],
+      template: null,
+      can_edit: false,
+      period: { start: "2026-10-16", end: "2026-10-18" },
+      selection: { segment: "general", manager: null },
+    });
+  });
+  it.each([
+    "date=2026-10-15&segment=house&manager=amanda",
+    "date=2026-10-18&segment=house&manager=alvaro",
+    "date=2026-10-18&segment=general&manager=amanda",
+  ])("rejects invalid selection before RPC: %s", async (query) => {
+    await result(await GET(getRequest(query)), 400, { error: "invalid_selection" });
+    expect(mocks.rpc).not.toHaveBeenCalled();
   });
   it.each([
     null,
     {},
-    { forecast: [record, record], can_edit: true },
-    { forecast: { ...record, revision: 0 }, can_edit: true },
+    { forecasts: [record, record], template: null, can_edit: true },
+    {
+      forecasts: [{ segment: "house", manager: "amanda", forecast: { ...record, revision: 0 } }],
+      template: null,
+      can_edit: true,
+    },
   ])("fails closed for malformed GET data: %j", async (data) => {
     mocks.rpc.mockResolvedValue({ data, error: null });
-    await result(await GET(), 503, { error: "forecast_unavailable" });
+    await result(await GET(getRequest()), 503, { error: "forecast_unavailable" });
   });
   it("sanitizes GET RPC failure and exceptions", async () => {
     mocks.rpc.mockResolvedValueOnce({ data: null, error: { message: "private diagnostic" } });
-    await result(await GET(), 503, { error: "forecast_unavailable" });
+    await result(await GET(getRequest()), 503, { error: "forecast_unavailable" });
     mocks.client.mockRejectedValueOnce(new Error("private diagnostic"));
-    await result(await GET(), 503, { error: "forecast_unavailable" });
+    await result(await GET(getRequest()), 503, { error: "forecast_unavailable" });
   });
   it.each(["", "null", "https://untrusted.test"])(
     "rejects missing or foreign origin %s",
@@ -161,9 +237,12 @@ describe("shared forecast API", () => {
   });
   it("passes role, rows and expected revision to the versioned RPC", async () => {
     await result(await PUT(request(body)), 200, record);
-    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("save_crm_forecast", {
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("save_crm_forecast_period", {
       p_document: document,
       p_expected_revision: 0,
+      p_weekend_start: "2026-10-16",
+      p_segment: "house",
+      p_manager_key: "amanda",
     });
   });
   it("passes the free-text action plan after Total without treating it as numeric", async () => {
@@ -176,12 +255,15 @@ describe("shared forecast API", () => {
       id: "action_plan",
       label: "Plano de ação",
     });
-    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("save_crm_forecast", {
+    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("save_crm_forecast_period", {
       p_document: {
         ...document,
         rows: withActionPlan.rows,
       },
       p_expected_revision: 0,
+      p_weekend_start: "2026-10-16",
+      p_segment: "house",
+      p_manager_key: "amanda",
     });
   });
   it.each(["texto", "12 reais", "1e3", "-1", "NaN", "Infinity", "1.234", "1000000000", "<script>"])(
@@ -208,7 +290,7 @@ describe("shared forecast API", () => {
     ["42501", 403, "forbidden"],
   ])("honors revoked database read authorization %s", async (code, status, error) => {
     mocks.rpc.mockResolvedValue({ data: null, error: { code, message: "private diagnostic" } });
-    await result(await GET(), Number(status), { error });
+    await result(await GET(getRequest()), Number(status), { error });
   });
   it("rejects invalid save records and catches RPC exceptions", async () => {
     mocks.rpc.mockResolvedValueOnce({ data: { ...record, revision: 0 }, error: null });

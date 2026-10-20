@@ -9,6 +9,36 @@ estavam íntegros. O coletor passa a converter somente esse marcador de data
 opcional em string vazia antes da validação; valores preenchidos e inválidos
 continuam falhando fechados. O teste focal cobre a resposta real observada.
 
+## 2026-10-20: previsão por período, segmento e gerente
+
+Demanda: congelar a identificação dos corretores na rolagem, compactar os
+controles dos empreendimentos, aplicar destaque cruzado na célula ativa, manter
+números de linha em uma linha, carregar previsões pelo calendário e separar
+Geral, House e Imob com os gerentes informados.
+
+O contrato deixou de depender do singleton para novas gravações. A migration
+`20261020122216_forecast_period_scopes.sql` cria armazenamento aditivo por
+sexta-feira, segmento e gerente, com RLS forçada, ausência de grants diretos,
+RPCs guardadas, revisão CAS por recorte e auditoria somente de metadados. O
+singleton anterior permanece intacto e serve apenas como possível origem do
+template limpo. Geral retorna cada documento integralmente em blocos somente
+leitura, evitando perda quando gerentes customizam estruturas diferentes.
+
+A interface informa sexta a domingo no título, seleciona dias validados no
+calendário sem fechar o diálogo, protege trocas com rascunho, apresenta os
+gerentes em ordem alfabética e mantém dez corretores no rascunho inicial. A
+primeira coluna fica fixa do cabeçalho ao Total geral; foco e hover destacam
+corretor, Previsão/Realizado e empreendimento relacionados.
+
+Validação local: lint, typecheck, build, catálogo, recursos, formatação e diff
+passaram; Vitest aprovou 3.965 casos e ignorou 105; 110 testes focados e 12
+cenários de navegador passaram. A etapa Node aprovou 1.595 casos e manteve três
+falhas conhecidas de permissões/caminhos POSIX do Meta Ads no Windows. O gate
+release reproduziu a fixture privada do Meta Ads e um timeout de subprocesso
+Qlik no Windows; nenhuma área falha foi alterada. A CI Linux no SHA exato é o
+gate conclusivo, incluindo pgTAP e restauração isolada. Aplicação remota,
+integração e publicação ainda não foram executadas neste registro.
+
 ## 2026-10-20: proveniência visual de Agendamentos
 
 A referência promovida a partir do diagnóstico da CI preservou a marca de
