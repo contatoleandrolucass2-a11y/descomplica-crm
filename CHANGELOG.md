@@ -2,6 +2,8 @@
 
 ## 2026-10-19 - Leitura horizontal dos gráficos de Agendamentos
 
+- Publicado pelo PR #270 no SHA `06a41f76`, com CI integral, artefato imutável, promoção protegida e health na versão exata.
+
 - Mantém valores, dias, semanas e meses na horizontal, distribuindo séries
   extensas em novas linhas dentro do gráfico.
 - Padroniza os sete cards pela altura do ranking de gerente e adiciona rolagem

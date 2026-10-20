@@ -7977,3 +7977,32 @@ balanced ficou vazia. Nenhuma referência vazia foi adotada. O estilo fixo foi
 limitado ao componente Chart; o estado sem análise recupera o layout compacto,
 enquanto os sete gráficos preenchidos preservam tamanho e rolagem uniformes.
 Nova CI integral é obrigatória antes da integração e publicação.
+
+### Publicação do ajuste visual de Agendamentos
+
+O PR270 foi integrado em `06a41f767fc721d4e85ac10142697a92e0fee0e1`.
+A CI de PR `39353605323` e a CI de main `39357425838` aprovaram validate,
+isolated-restore e release-gates; main aprovou também promotable-image. A matriz
+autenticada voltou a aprovar todas as referências sem adotar a captura vazia.
+
+O artefato `12234994906` teve ZIP SHA-256
+`a3a86cfd26942b039e81e59b51db283c486e97f18f1dc9f5fbc39fa2192fb036`
+e `image.tar.gz` SHA-256
+`a9b15a04c61660a050ae78f08cf0822263d17d4b594aafcfbd4d80ccd9281bc8`.
+Revision e config OCI apontam ao SHA exato. No destino containerd, o manifesto é
+`sha256:80422596d9ad160472fe0bae75662f68003a5c566632dab40cf608dc97096273`
+e a config é
+`sha256:5a6549c451697336ae9ff00366a5cba73334daf2cd975e4d8c11faca76fb440f`.
+Foram conferidos 13 descritores, 11 camadas, 11 diff IDs, plataforma linux/amd64,
+rootfs e os dois perfis de runtime, sem rebuild ou retag.
+
+Produção antes da troca: deployment
+`561b4861-7f6a-477c-95d9-6f46427921d8`, SHA `60ef87c7`, publicado em
+`2026-10-19T20:51:02.314Z`, sem pendência e health correspondente. O coordenador
+`release:production` publicou o candidato em `2026-10-20T02:57:56.421Z`
+(23:57:56 de 19/10 em America/Sao_Paulo), deployment
+`979fb2df-a353-4df4-9c8b-b28caf2a9cf3`. Verificação às02:58:08Z: ledger sem
+pendência, health HTTP200/ok na versão exata e `/app/etapas/agendamentos`
+anônimo retornou307 para `/login`. Nenhuma migration, dado, integração ou n8n
+foi alterado. A evidência preenchida permanece a matriz sintética; a produção
+não foi aberta com sessão privada nesta tarefa.
