@@ -45,6 +45,12 @@
   `@modelcontextprotocol/sdk@1.31.0`, transitivo do `next-devtools-mcp`. O pin
   de desenvolvimento foi atualizado para a versao corrigida 1.32.1; a nova CI
   permanece obrigatoria antes da integracao da evidencia.
+- A CI `39493034178` aprovou validacao, build e auditoria, mas o gate visual de
+  Previsão leu as cores do cabecalho durante a transição CSS de 140 ms. A falha
+  foi reproduzida localmente com valores intermediarios diferentes e corrigida
+  apenas no sincronismo do teste: ele agora aguarda a igualdade final original.
+  Os 12 cenarios focados passaram; runtime, estilos e criterios visuais nao
+  foram alterados. Uma nova CI integral continua obrigatoria.
 
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 

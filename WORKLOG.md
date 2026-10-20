@@ -15,6 +15,11 @@ A CI do registro final detectou o advisory `GHSA-22jm-h49p-29qw` no SDK MCP
 transitivo do `next-devtools-mcp`. O override foi atualizado de 1.31.0 para a
 versao corrigida 1.32.1, mantendo a dependencia apenas em desenvolvimento.
 
+O gate de navegador expôs uma intermitencia preexistente no teste de Previsão:
+a comparação capturava cores intermediarias durante a transição CSS de 140 ms.
+A asserção passou a aguardar as cores finais, preservando o criterio de igualdade
+e sem alterar a interface. Os 12 cenarios focados passaram apos o ajuste.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
