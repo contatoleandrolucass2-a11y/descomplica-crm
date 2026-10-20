@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-20 - Candidato visual protegido para Agendamentos
+
+- Inclui o painel de Agendamentos no workflow isolado que produz referências
+  visuais autenticadas com proveniência limpa antes da promoção.
+
 ## 2026-10-20 - Indicadores e detalhamento de Agendamentos
 
 - Adiciona seis indicadores em uma linha, incluindo velocímetro da meta mensal

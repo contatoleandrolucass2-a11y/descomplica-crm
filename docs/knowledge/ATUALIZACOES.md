@@ -1,5 +1,15 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
+
+- A CI `39377861485` reprovou somente o contrato de proveniência da referência
+  autenticada: o resultado promovido do diagnóstico mantinha
+  `worktreeDirtyAtCapture=true`. As imagens haviam sido revisadas, mas essa
+  evidência não satisfaz o requisito de captura limpa.
+- O workflow isolado de candidato visual protegido passa a observar também o
+  componente de Agendamentos. A promoção e a CI integral permanecem pendentes
+  até uma nova captura registrar checkout limpo; nenhum gate foi reduzido.
+
 ## 2026-10-20: indicadores operacionais de Agendamentos — implementação local
 
 - Status: implementação e validação local concluídas na branch
