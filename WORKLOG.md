@@ -46,6 +46,14 @@ testes e ignorou 105; dois testes sem relação com a Previsão excederam o temp
 sob carga local. A repetição isolada dos dois arquivos aprovou 251 testes. A CI
 Linux do SHA final continua sendo o gate de integração.
 
+A revisão automática identificou que `upper()` preservava diacríticos e poderia
+deixar vazias as equipes de Álvaro, Fabrício e Thiago de Araújo. A migration
+corretiva `20261020214500_forecast_broker_manager_accents.sql` passa a normalizar
+as letras acentuadas com `translate`, sem extensão adicional. O pgTAP cobre
+Álvaro e Fabrício acentuados. A expressão foi comprovada por consulta somente
+leitura em produção; a aplicação da correção permanece condicionada à CI e a
+nova autorização específica.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas

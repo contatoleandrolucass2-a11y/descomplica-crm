@@ -1865,3 +1865,11 @@ dependente da autorização específica aplicável.
   Vitest geral aprovou 3.970 e ignorou 105; dois testes independentes da
   Previsão excederam o timeout sob carga local. A repetição isolada aprovou os
   dois arquivos, com 251 testes, e a CI Linux do novo SHA permanece obrigatória.
+- A revisão do PR encontrou um caso funcional antes do merge: `upper()` não
+  remove acentos, portanto Álvaro, Fabrício e Thiago de Araújo poderiam não ser
+  localizados no snapshot. A migration corretiva
+  `20261020214500_forecast_broker_manager_accents.sql` normaliza os diacríticos
+  com `translate`, preserva ACL e guards e acrescenta pgTAP para os dois nomes
+  acentuados. Consulta somente leitura no Supabase confirmou as formas
+  `ALVARO`, `FABRICIO` e `THIAGO DE ARAUJO`. A migration corretiva não foi
+  aplicada e exige autorização específica após CI verde.

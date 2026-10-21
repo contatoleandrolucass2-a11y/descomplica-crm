@@ -92,13 +92,16 @@ limpo. A auditoria armazena período, recorte, revisão e contagens, sem conteú
 das células. Geral retorna seções completas e nunca aceita escrita. Esta
 migration também não foi aplicada remotamente e exige autorização específica.
 
-A lista automática prepara a migration
+A lista automática usa a migration
 `20261020204500_forecast_broker_roster.sql`. Ela cria somente a RPC de leitura
 `get_crm_forecast_brokers`, sem alterar snapshots, usuários ou previsões. A RPC
 repete os guards de identidade, conta ativa, página e permissão, escolhe a visão
 House/Imob correspondente e retorna até 200 nomes distintos do snapshot mais
-recente. O acesso direto às tabelas analíticas continua revogado. A aplicação
-remota exige autorização específica depois da CI e da restauração isolada.
+recente. O acesso direto às tabelas analíticas continua revogado. A migration
+corretiva `20261020214500_forecast_broker_manager_accents.sql` normaliza
+diacríticos na comparação do gerente, cobrindo nomes como Álvaro, Fabrício e
+Thiago de Araújo sem exigir extensão adicional do Postgres. A primeira migration
+foi aplicada em produção; a corretiva exige autorização específica após a CI.
 
 A versão anterior da RPC singleton rejeita o documento novo com número par de
 colunas. O runtime por período usa RPCs novas e não depende dessa assinatura

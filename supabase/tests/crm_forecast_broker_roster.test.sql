@@ -1,5 +1,5 @@
 begin;
-select plan(8);
+select plan(10);
 
 insert into auth.users (id,email) values
   ('ad920000-0000-4000-8000-000000000001','forecast-roster@example.test');
@@ -21,8 +21,8 @@ insert into public.crm_dashboard_analysis(snapshot_id,view_key,payload)
 select id,'with_canal_imob','{
   "version":1,"coverageStart":"2026-10-01","referenceDate":"2026-10-20",
   "viewKey":"with_canal_imob",
-  "dimensions":{"managers":["JHONNATA FRANCA DA SILVA"],"owners":["Bruno Corretor"],"companies":[],"developments":[]},
-  "facts":[[0,"2026-10-20",0,0,-1,0,-1,1,0,0]]
+  "dimensions":{"managers":["JHONNATA FRANCA DA SILVA","ÁLVARO DE SOUZA","FABRÍCIO LIMA"],"owners":["Bruno Corretor","Carla Corretora","Diego Corretor"],"companies":[],"developments":[]},
+  "facts":[[0,"2026-10-20",0,0,-1,0,-1,1,0,0],[1,"2026-10-20",1,1,-1,0,-1,1,0,0],[2,"2026-10-20",2,2,-1,0,-1,1,0,0]]
 }'::jsonb from public.crm_dashboard_snapshots where snapshot_key='forecast-roster';
 
 select ok(has_function_privilege('authenticated',
@@ -51,6 +51,10 @@ select is(public.get_crm_forecast_brokers('house','amanda'),
   'House returns distinct broker names in stable alphabetical order');
 select is(public.get_crm_forecast_brokers('imob','jonathan'),
   '["Bruno Corretor"]'::jsonb,'Imob accepts the operational Jhonnata spelling');
+select is(public.get_crm_forecast_brokers('imob','alvaro'),
+  '["Carla Corretora"]'::jsonb,'Imob matches an accented Alvaro manager name');
+select is(public.get_crm_forecast_brokers('imob','fabricio'),
+  '["Diego Corretor"]'::jsonb,'Imob matches an accented Fabricio manager name');
 select is(public.get_crm_forecast_brokers('house','cleber'),
   '[]'::jsonb,'a manager absent from the latest snapshot returns an empty roster');
 reset role;

@@ -16,6 +16,8 @@
   evitando estados intermediários durante a navegação pela tabela.
 - Aplica em produção os contratos versionados de Plano de ação, períodos e
   elenco automático, preservando o único documento legado sem alteração.
+- Normaliza acentos ao localizar o gerente no snapshot, para preencher também
+  equipes vinculadas a Álvaro, Fabrício e Thiago de Araújo.
 
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
