@@ -45,7 +45,7 @@ export const dashboardAnalysisFactSchema = z.union([
 ]);
 const appointmentTimestamp = z.string().datetime({ offset: true });
 const appointmentLabel = z.string().trim().max(200);
-export const dashboardAppointmentDetailSchema = z
+const dashboardAppointmentDetailV3Schema = z
   .object({
     createdAt: appointmentTimestamp,
     scheduledAt: appointmentTimestamp.nullable(),
@@ -58,6 +58,15 @@ export const dashboardAppointmentDetailSchema = z
     accountRanking: appointmentLabel,
   })
   .strict();
+const dashboardAppointmentDetailV4Schema = dashboardAppointmentDetailV3Schema.extend({
+  channel: z.number().int().min(0).max(1),
+  company: appointmentLabel,
+  registeredBroker: z.boolean(),
+});
+export const dashboardAppointmentDetailSchema = z.union([
+  dashboardAppointmentDetailV3Schema,
+  dashboardAppointmentDetailV4Schema,
+]);
 export type DashboardAppointmentDetail = z.infer<typeof dashboardAppointmentDetailSchema>;
 export const dashboardAnalysisViewSchema = z
   .object({
@@ -104,10 +113,11 @@ export const dashboardAnalysisViewSchema = z
   });
 export const dashboardAnalysisSchema = z
   .object({
-    version: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
     coverageStart: date,
     referenceDate: date,
     brokerCount: z.number().int().min(0).max(1_000_000).optional(),
+    brokerManagerCount: z.number().int().min(0).max(1_000_000).optional(),
     views: z.array(dashboardAnalysisViewSchema).length(3),
   })
   .strict()
@@ -117,9 +127,18 @@ export const dashboardAnalysisSchema = z
       analysis.views.some(
         (view) => analysis.version >= 2 !== (view.dimensions.stores !== undefined),
       ) ||
-      (analysis.version === 3) !== (analysis.brokerCount !== undefined) ||
-      analysis.views.some(
-        (view) => (analysis.version === 3) !== (view.appointments !== undefined),
+      analysis.version >= 3 !== (analysis.brokerCount !== undefined) ||
+      (analysis.version === 4) !== (analysis.brokerManagerCount !== undefined) ||
+      (analysis.brokerManagerCount ?? 0) > (analysis.brokerCount ?? 0) ||
+      analysis.views.some((view) => analysis.version >= 3 !== (view.appointments !== undefined)) ||
+      analysis.views.some((view) =>
+        (view.appointments ?? []).some(
+          (appointment) =>
+            (analysis.version === 4) !==
+            ("channel" in appointment &&
+              "company" in appointment &&
+              "registeredBroker" in appointment),
+        ),
       ) ||
       !validCoverage(analysis.coverageStart, analysis.referenceDate) ||
       analysis.views.some((view) =>
@@ -137,21 +156,34 @@ export type DashboardAnalysisView = z.infer<typeof dashboardAnalysisViewSchema>;
 export type DashboardAnalysisFact = z.infer<typeof dashboardAnalysisFactSchema>;
 export const dashboardAnalysisSliceSchema = dashboardAnalysisViewSchema
   .safeExtend({
-    version: z.union([z.literal(1), z.literal(2), z.literal(3)]),
+    version: z.union([z.literal(1), z.literal(2), z.literal(3), z.literal(4)]),
     coverageStart: date,
     referenceDate: date,
     brokerCount: z.number().int().min(0).max(1_000_000).optional(),
+    brokerManagerCount: z.number().int().min(0).max(1_000_000).optional(),
   })
   .superRefine((slice, context) => {
     if (
       !validCoverage(slice.coverageStart, slice.referenceDate) ||
       slice.version >= 2 !== (slice.dimensions.stores !== undefined) ||
-      (slice.version === 3) !==
+      slice.version >= 3 !==
         (slice.brokerCount !== undefined && slice.appointments !== undefined) ||
+      (slice.version === 4) !== (slice.brokerManagerCount !== undefined) ||
+      (slice.brokerManagerCount ?? 0) > (slice.brokerCount ?? 0) ||
+      (slice.appointments ?? []).some(
+        (appointment) =>
+          (slice.version === 4) !==
+          ("channel" in appointment &&
+            "company" in appointment &&
+            "registeredBroker" in appointment),
+      ) ||
       slice.facts.some((fact) => fact[1] < slice.coverageStart || fact[1] > slice.referenceDate)
     ) {
       context.addIssue({ code: "custom", message: "Invalid analysis coverage." });
     }
   });
 export type DashboardAnalysisSlice = DashboardAnalysisView &
-  Pick<DashboardAnalysis, "version" | "coverageStart" | "referenceDate" | "brokerCount">;
+  Pick<
+    DashboardAnalysis,
+    "version" | "coverageStart" | "referenceDate" | "brokerCount" | "brokerManagerCount"
+  >;

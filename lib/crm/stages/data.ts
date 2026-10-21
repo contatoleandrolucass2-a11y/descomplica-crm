@@ -63,7 +63,7 @@ export async function loadAppointmentsReadModel(
     if (
       analysis.viewKey !== view ||
       analysis.referenceDate !== before.reference_date ||
-      analysis.facts.some((fact) => fact[0] !== 1)
+      (analysis.version < 4 && analysis.facts.some((fact) => fact[0] !== 1))
     ) {
       throw new Error("A análise não corresponde ao snapshot de agendamentos.");
     }

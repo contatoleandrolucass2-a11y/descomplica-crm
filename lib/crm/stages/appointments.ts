@@ -11,9 +11,11 @@ export interface AppointmentBucket {
 export interface AppointmentFilters {
   createdDate?: string;
   week?: number;
+  channel?: 0 | 1;
   regionalManager?: string;
   manager?: string;
   owner?: string;
+  company?: string;
   accountRanking?: string;
 }
 
@@ -127,14 +129,23 @@ export function analyzeAppointments(
     return (
       (!filters.createdDate || date === filters.createdDate) &&
       (!filters.week || appointmentWeekOfMonth(date) === filters.week) &&
+      (filters.channel === undefined ||
+        ("channel" in appointment && appointment.channel === filters.channel)) &&
       (!filters.regionalManager || appointment.regionalManager === filters.regionalManager) &&
       (!filters.manager || appointment.salesManager === filters.manager) &&
       (!filters.owner || appointment.owner === filters.owner) &&
+      (!filters.company || ("company" in appointment && appointment.company === filters.company)) &&
       (!filters.accountRanking || appointment.accountRanking === filters.accountRanking)
     );
   };
+  const matchesSharedFactFilters = (fact: DashboardAnalysisSlice["facts"][number]) =>
+    (filters.channel === undefined || fact[5] === filters.channel) &&
+    (!filters.manager || slice.dimensions.managers[fact[2]] === filters.manager) &&
+    (!filters.owner || slice.dimensions.owners[fact[3]] === filters.owner) &&
+    (!filters.company || slice.dimensions.companies[fact[4]] === filters.company);
+  const sharedFacts = slice.facts.filter(matchesSharedFactFilters);
   const filteredOperations: DashboardAppointmentDetail[] | null =
-    slice.version === 3 ? (slice.appointments ?? []).filter(matchesFilters) : null;
+    slice.version >= 3 ? (slice.appointments ?? []).filter(matchesFilters) : null;
   const details =
     filteredOperations === null
       ? null
@@ -144,6 +155,16 @@ export function analyzeAppointments(
   let total = 0,
     today = 0,
     yesterday = 0;
+  const funnel = { opportunities: 0, appointments: 0, visits: 0, sales: 0 };
+  if (slice.version === 4) {
+    for (const fact of sharedFacts) {
+      if (fact[1].slice(0, 7) !== month) continue;
+      if (fact[0] === 0) funnel.opportunities += fact[7];
+      if (fact[0] === 1) funnel.appointments += fact[7];
+      if (fact[0] === 2) funnel.visits += fact[7];
+      if (fact[0] === 4) funnel.sales += fact[7];
+    }
+  }
 
   if (filteredOperations !== null) {
     for (const appointment of filteredOperations) {
@@ -162,7 +183,7 @@ export function analyzeAppointments(
       add(accountRankings, appointment.accountRanking || "Ranking não informado");
     }
   } else {
-    for (const fact of slice.facts) {
+    for (const fact of sharedFacts) {
       if (fact[0] !== 1) continue;
       const date = fact[1];
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
@@ -200,18 +221,54 @@ export function analyzeAppointments(
           (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
             86_400_000,
         ) + 1;
+  const productiveOwners =
+    slice.version === 4 && filteredOperations !== null
+      ? new Set(
+          filteredOperations
+            .filter(
+              (appointment) =>
+                saoPauloDate(appointment.createdAt).slice(0, 7) === month &&
+                "registeredBroker" in appointment &&
+                appointment.registeredBroker,
+            )
+            .map((appointment) => appointment.owner)
+            .filter(Boolean),
+        ).size
+      : null;
+  const productivePercent =
+    productiveOwners === null || slice.brokerCount === undefined
+      ? null
+      : slice.brokerCount === 0
+        ? 0
+        : (productiveOwners / slice.brokerCount) * 100;
+  const filterOptions = {
+    channels: [
+      { key: 1 as const, label: "House" },
+      { key: 0 as const, label: "Imob" },
+    ].filter(({ key }) => slice.facts.some((fact) => fact[5] === key)),
+    managers: slice.dimensions.managers,
+    owners: slice.dimensions.owners,
+    companies: slice.dimensions.companies,
+  };
 
   return {
     total,
     today,
     yesterday,
     dailyAverage: coveredDays > 0 ? total / coveredDays : null,
-    brokerCount: slice.version === 3 ? (slice.brokerCount ?? null) : null,
+    brokerCount: slice.version >= 3 ? (slice.brokerCount ?? null) : null,
     plannedToday: plannedAppointmentsForDate(
       slice.referenceDate,
-      slice.version === 3 ? (slice.brokerCount ?? null) : null,
+      slice.version >= 3 ? (slice.brokerCount ?? null) : null,
     ),
     performedToday: filteredOperations === null ? null : today,
+    filterOptions,
+    productiveBrokers: productiveOwners,
+    productivePercent,
+    registeredManagerCount: slice.version === 4 ? (slice.brokerManagerCount ?? null) : null,
+    funnel: slice.version === 4 ? funnel : null,
+    visitsPerformed: slice.version === 4 ? funnel.visits : null,
+    sales: slice.version === 4 ? funnel.sales : null,
     details,
     regionalManagers: filteredOperations === null ? null : ranking(regionalManagers),
     accountRankings: filteredOperations === null ? null : ranking(accountRankings),

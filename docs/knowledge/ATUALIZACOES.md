@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-21: abertura dos filtros e indicadores de Agendamentos
+
+- O trabalho iniciou na branch `codex/agendamentos-filtros-kpis`, criada sobre
+  `origin/main` `755659e9a467db2758f8a17dfd8ce126ddf8948a`. A CI da `main`
+  `39661432708` concluiu com sucesso para esse SHA. O health publico consultado
+  em `2026-10-21T17:54:48-03:00` respondeu HTTP 200, `status=ok` e a mesma
+  versao, portanto codigo integrado, CI e runtime estavam alinhados na abertura.
+- O escopo solicitado acrescenta os filtros Canal de vendas, Gerente de Vendas,
+  Responsavel da conta e Empresa; substitui o indicador de agendamentos no mes
+  por Equipe Produtiva; inclui conversoes do funil e contagens operacionais; e
+  compacta os graficos para leitura responsiva em zoom de 100%. A sexta metrica
+  repetida pelo pedido sera tratada como Vendas no periodo para completar o
+  funil, sem duplicar o card de visitas.
+- As fontes de corretores e gerentes continuam sendo o relatorio Salesforce
+  `00OTT000009j0l32AA`; as demais metricas devem usar somente fatos e dimensoes
+  vigentes do snapshot autorizado. Nenhuma alteracao remota, migration ou
+  publicacao foi executada nesta abertura.
+
+## 2026-10-21: implementacao local dos filtros e indicadores de Agendamentos
+
+- O contrato analitico v4 acrescenta Canal, Empresa, pertencimento ao elenco
+  oficial e a contagem distinta de gerentes do relatorio de corretores. A
+  coleta valida em cada ciclo o rotulo `Gerente de Vendas: Nome completo` e
+  falha fechada se o campo esperado deixar de corresponder ao relatorio.
+- A leitura autorizada projeta apenas contagens agregadas de Oportunidades,
+  Agendamentos, Visitas e Vendas. Pastas, valores financeiros e aprovacoes
+  permanecem fora do payload; snapshots v1, v2 e v3 continuam compativeis.
+- A interface recebeu os quatro filtros globais, Equipe Produtiva em rosca,
+  conversoes e razoes do funil, gerentes, visitas e vendas no periodo. O sexto
+  indicador repetido no pedido foi materializado como Vendas para completar o
+  funil. Ranking Score nao possui mais rolagem interna e o desktop conserva
+  tres graficos por linha.
+- Evidencia local: lint, typecheck, build, 47 testes focados, 39 testes da
+  coleta e 12 cenarios Chromium passaram. A suite integral aprovou 4.086 testes
+  Vitest e pulou 105. Os testes de host Meta Ads dependentes de permissoes POSIX
+  falham no Windows fora deste diff; a CI Linux do SHA integrado permanece o
+  criterio de publicacao. Migration, PR, CI, coletor e runtime ainda nao foram
+  alterados neste ponto.
+
 ## 2026-10-21: corretores automaticos da Previsao publicados
 
 - O PR #283 foi integrado na `main` em
