@@ -247,9 +247,18 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       expect(await actionPlanInput.evaluate((element) => getComputedStyle(element).height)).toBe(
         "22px",
       );
-      await browserExpect(page.getByLabel("Total, linha 1", { exact: true })).toHaveText("23");
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30");
-      await browserExpect(page.locator('tfoot output[aria-label="Total geral"]')).toHaveText("30");
+      await browserExpect(page.getByLabel("Total Previsão, linha 1", { exact: true })).toHaveText(
+        "15",
+      );
+      await browserExpect(page.getByLabel("Total Realizado, linha 1", { exact: true })).toHaveText(
+        "8",
+      );
+      await browserExpect(page.getByLabel("Total geral — Previsão", { exact: true })).toHaveText(
+        "15",
+      );
+      await browserExpect(page.getByLabel("Total geral — Realizado", { exact: true })).toHaveText(
+        "15",
+      );
       expect(
         await page
           .getByLabel("Nome do corretor, linha 1", { exact: true })
@@ -269,7 +278,9 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         page.getByLabel("Residencial QA — Realizado, linha 2", { exact: true }),
       ).toHaveValue("");
       await page.getByLabel("Residencial QA — Realizado, linha 2", { exact: true }).fill("0.25");
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30,25");
+      await browserExpect(page.getByLabel("Total geral — Realizado", { exact: true })).toHaveText(
+        "15,25",
+      );
       await page
         .getByRole("button", { name: "Mover Empreendimento 1 para a direita", exact: true })
         .focus();
@@ -302,7 +313,9 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(page.getByLabel("Nome do empreendimento 8", { exact: true })).toHaveValue(
         "Residencial QA",
       );
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30,25");
+      await browserExpect(page.getByLabel("Total geral — Realizado", { exact: true })).toHaveText(
+        "15,25",
+      );
       await browserExpect(
         page.getByLabel("Nome do corretor, linha 1", { exact: true }),
       ).toHaveValue("Corretor QA");
@@ -319,13 +332,17 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(page.getByLabel("Nome do empreendimento 8", { exact: true })).toHaveCount(
         0,
       );
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("30");
+      await browserExpect(page.getByLabel("Total geral — Realizado", { exact: true })).toHaveText(
+        "15",
+      );
       page.once("dialog", (dialog) => dialog.accept());
       await page.getByRole("button", { name: "Excluir linha 1", exact: true }).click();
       await browserExpect(
         page.getByLabel("Nome do corretor, linha 1", { exact: true }),
       ).toHaveValue("Corretor QA 2");
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("7");
+      await browserExpect(page.getByLabel("Total geral — Realizado", { exact: true })).toHaveText(
+        "7",
+      );
       await page.getByRole("button", { name: "Inserir linha", exact: true }).click();
       await browserExpect(
         page.getByLabel("Nome do corretor, linha 10", { exact: true }),
@@ -394,9 +411,24 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     it("switches segment, manager and weekend without losing an unconfirmed draft", async () => {
       const grid = createForecastDocument();
       const saved = { ...grid, revision: 1, updated_at: "2026-10-20T12:00:00Z" };
+      const imobGrid = createForecastDocument();
+      const houseGroup = getForecastGroups(saved)[0]!;
+      const imobGroup = getForecastGroups(imobGrid)[0]!;
+      saved.rows[0]!.cells[houseGroup.forecastId] = "5";
+      saved.rows[0]!.cells[houseGroup.actualId] = "2";
+      imobGrid.rows[0]!.cells[imobGroup.forecastId] = "7";
+      imobGrid.rows[0]!.cells[imobGroup.actualId] = "3";
+      const imobSaved = {
+        ...imobGrid,
+        revision: 1,
+        updated_at: "2026-10-20T12:00:00Z",
+      };
       await open({
         seed: saved,
-        sections: [{ segment: "house", manager: "amanda", forecast: saved }],
+        sections: [
+          { segment: "house", manager: "amanda", forecast: saved },
+          { segment: "imob", manager: "alvaro", forecast: imobSaved },
+        ],
       });
       await browserExpect(page.getByRole("button", { name: "House", exact: true })).toHaveAttribute(
         "aria-pressed",
@@ -442,8 +474,40 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
 
       await page.getByRole("button", { name: "Geral", exact: true }).click();
       await browserExpect(
-        page.getByRole("heading", { name: "House · Amanda", exact: true }),
+        page.getByRole("columnheader", { name: "Equipe Origem", exact: true }),
       ).toBeVisible();
+      await browserExpect(
+        page.getByRole("rowheader", { name: "House", exact: true }),
+      ).toBeVisible();
+      await browserExpect(page.getByRole("rowheader", { name: "Imob", exact: true })).toBeVisible();
+      await browserExpect(page.getByLabel("Total Previsão, House", { exact: true })).toHaveText(
+        "5",
+      );
+      await browserExpect(page.getByLabel("Total Realizado, House", { exact: true })).toHaveText(
+        "2",
+      );
+      await browserExpect(page.getByLabel("Total Previsão, Imob", { exact: true })).toHaveText("7");
+      await browserExpect(page.getByLabel("Total Realizado, Imob", { exact: true })).toHaveText(
+        "3",
+      );
+      const generalTable = page.getByRole("region", { name: "Tabela de previsão geral" });
+      await browserExpect(
+        generalTable.getByLabel("Total geral — Previsão", { exact: true }),
+      ).toHaveText("12");
+      await browserExpect(
+        generalTable.getByLabel("Total geral — Realizado", { exact: true }),
+      ).toHaveText("5");
+      await mkdir("test-results/forecast-preview", { recursive: true });
+      await page.setViewportSize({ width: 1440, height: 900 });
+      await page.screenshot({
+        path: "test-results/forecast-preview/previsao-geral-totais-desktop.png",
+        fullPage: true,
+      });
+      await page.setViewportSize({ width: 390, height: 844 });
+      await page.screenshot({
+        path: "test-results/forecast-preview/previsao-geral-totais-mobile.png",
+        fullPage: true,
+      });
       await browserExpect(page.getByRole("button", { name: "Salvar", exact: true })).toBeDisabled();
       await page.getByRole("button", { name: "Calendário", exact: true }).click();
       await page.getByLabel("Mês do calendário").selectOption({ label: "Outubro" });
@@ -510,7 +574,12 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(
         page.getByLabel("Empreendimento 1 — Realizado, linha 2", { exact: true }),
       ).toHaveValue("7");
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("32");
+      await browserExpect(page.getByLabel("Total geral — Previsão", { exact: true })).toHaveText(
+        "17",
+      );
+      await browserExpect(page.getByLabel("Total geral — Realizado", { exact: true })).toHaveText(
+        "15",
+      );
       await page.getByRole("button", { name: "Salvar", exact: true }).click();
       await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
       expect(getForecastGroups(puts[0]!)[2]?.id).toBe(groups[0]!.id);
@@ -682,10 +751,11 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         .evaluateAll((elements) =>
           elements.map((element) => element.getBoundingClientRect().width),
         );
-      expect(groupWidths).toHaveLength(9);
-      expect(new Set(groupWidths.map((width) => Math.round(width))).size).toBe(1);
+      expect(groupWidths).toHaveLength(10);
+      expect(new Set(groupWidths.slice(0, 9).map((width) => Math.round(width))).size).toBe(1);
       expect(groupWidths[0]).toBeGreaterThanOrEqual(168);
       expect(groupWidths[0]).toBeLessThanOrEqual(170);
+      expect(groupWidths[9]).toBeGreaterThanOrEqual(168);
       const topLevelHeadings = await page
         .locator("thead tr")
         .first()
@@ -818,7 +888,9 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(page.getByRole("button", { name: "Salvar", exact: true })).toBeDisabled();
       expect(puts).toHaveLength(0);
       await legacy.fill("6");
-      await browserExpect(page.getByLabel("Total geral", { exact: true })).toHaveText("6");
+      await browserExpect(page.getByLabel("Total geral — Previsão", { exact: true })).toHaveText(
+        "6",
+      );
       await page.getByRole("button", { name: "Salvar", exact: true }).click();
       await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
       expect(puts[0]?.expected_revision).toBe(0);

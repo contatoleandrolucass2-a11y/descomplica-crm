@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   FORECAST_ACTION_PLAN_ID,
   addForecastGroup,
+  aggregateGeneralForecast,
   createForecastDocument,
   forecastCellToCents,
   formatForecastCents,
@@ -107,8 +108,10 @@ describe("grouped forecast grid", () => {
     document.rows[0]!.cells[FORECAST_ACTION_PLAN_ID] = "Revisar carteira e fazer contato diário.";
     const totals = getForecastTotals(document);
     expect(totals.rows[document.rows[0]!.id]).toBe(30);
+    expect(totals.rowMetrics[document.rows[0]!.id]).toEqual({ forecast: 10, actual: 20 });
     expect(totals.columns[group.forecastId]).toBe(133);
     expect(totals.grandTotal).toBe(153);
+    expect(totals.metricTotals).toEqual({ forecast: 133, actual: 20 });
     expect(totals.columns).not.toHaveProperty(FORECAST_ACTION_PLAN_ID);
     expect(getForecastInvalidCells(document)).toEqual([]);
     expect(formatForecastCents(153)).toBe("1,53");
@@ -119,6 +122,33 @@ describe("grouped forecast grid", () => {
     expect(getForecastTotals(document).grandTotal).toBeNull();
     expect(getForecastTotals(document).rows[document.rows[0]!.id]).toBe(30);
     expect(getForecastTotals(document).columns[group.actualId]).toBeNull();
+    expect(getForecastTotals(document).metricTotals.actual).toBeNull();
+  });
+  it("compiles House and Imob by enterprise and keeps forecast separate from actual", () => {
+    const houseAmanda = createForecastDocument(["Amanda 1"]);
+    const houseCleber = createForecastDocument(["Cleber 1"]);
+    const imob = createForecastDocument(["Imob 1"]);
+    const houseGroup = getForecastGroups(houseAmanda)[0]!;
+    const cleberGroup = getForecastGroups(houseCleber)[0]!;
+    const imobGroup = getForecastGroups(imob)[0]!;
+    houseAmanda.rows[0]!.cells[houseGroup.forecastId] = "10";
+    houseAmanda.rows[0]!.cells[houseGroup.actualId] = "4";
+    houseCleber.rows[0]!.cells[cleberGroup.forecastId] = "2.5";
+    houseCleber.rows[0]!.cells[cleberGroup.actualId] = "1";
+    imob.rows[0]!.cells[imobGroup.forecastId] = "7";
+    imob.rows[0]!.cells[imobGroup.actualId] = "3";
+    const aggregate = aggregateGeneralForecast([
+      { segment: "house", forecast: houseAmanda },
+      { segment: "house", forecast: houseCleber },
+      { segment: "imob", forecast: imob },
+    ]);
+    const first = aggregate.groups[0]!;
+    expect(aggregate.groups).toHaveLength(7);
+    expect(aggregate.rows.house.cells[first.key]).toEqual({ forecast: 1250, actual: 500 });
+    expect(aggregate.rows.imob.cells[first.key]).toEqual({ forecast: 700, actual: 300 });
+    expect(aggregate.rows.house.totals).toEqual({ forecast: 1250, actual: 500 });
+    expect(aggregate.rows.imob.totals).toEqual({ forecast: 700, actual: 300 });
+    expect(aggregate.totals).toMatchObject({ forecast: 1950, actual: 800 });
   });
   it("keeps maximum permitted totals within safe integer range", () => {
     let document = createForecastDocument();

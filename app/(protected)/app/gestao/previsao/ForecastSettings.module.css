@@ -331,6 +331,14 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.readonlyOrigin {
+  display: block;
+  height: 22px;
+  padding: 0 8px;
+  line-height: 22px;
+  text-align: right;
+  white-space: nowrap;
+}
 .readonlyPlan {
   display: block;
   min-width: 280px;

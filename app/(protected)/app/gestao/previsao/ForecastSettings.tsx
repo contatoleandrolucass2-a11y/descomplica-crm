@@ -34,6 +34,7 @@ import {
   forecastCellToCents,
   formatForecastCents,
   getForecastTotals,
+  aggregateGeneralForecast,
   getForecastInvalidCells,
   FORECAST_MAX_GROUPS,
   type ForecastGroup,
@@ -112,9 +113,6 @@ function getForecastPeriod(date: Date) {
   return { start, end };
 }
 
-function getManagerLabel(segment: "house" | "imob", managerId: string) {
-  return forecastManagers[segment].find((manager) => manager.id === managerId)?.label ?? managerId;
-}
 function getCalendarDays(year: number, month: number) {
   const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
   const leadingDays = new Date(Date.UTC(year, month, 1)).getUTCDay();
@@ -707,14 +705,9 @@ export function ForecastSettings() {
             </p>
           )}
           {segment === "general" && loaded && (
-            <div className={styles.generalSections} aria-label="Previsão geral por gerente">
-              {sections.map((section) => (
-                <GeneralForecastSection
-                  key={`${section.segment}-${section.manager}`}
-                  section={section}
-                />
-              ))}
-              {loaded && sections.length === 0 && (
+            <div className={styles.generalSections} aria-label="Previsão geral por origem">
+              {sections.length > 0 && <GeneralForecastTable sections={sections} />}
+              {sections.length === 0 && (
                 <div className={styles.empty}>
                   <p>Nenhuma previsão salva para este final de semana.</p>
                 </div>
@@ -739,7 +732,8 @@ export function ForecastSettings() {
                   <col key={group.forecastId} className={styles.metricColumn} />,
                   <col key={group.actualId} className={styles.metricColumn} />,
                 ])}
-                <col className={styles.totalColumn} />
+                <col className={styles.metricColumn} />
+                <col className={styles.metricColumn} />
                 <col className={styles.actionPlanColumn} />
               </colgroup>
               <thead>
@@ -767,7 +761,7 @@ export function ForecastSettings() {
                       {groupHeading(group, index)}
                     </th>
                   ))}
-                  <th scope="col" rowSpan={2} className={styles.totalHeading}>
+                  <th scope="colgroup" colSpan={2} className={styles.totalHeading}>
                     Total
                   </th>
                   <th scope="col" rowSpan={2} className={styles.actionPlanHeading}>
@@ -801,6 +795,8 @@ export function ForecastSettings() {
                       Realizado
                     </th>,
                   ])}
+                  <th scope="col">Previsão</th>
+                  <th scope="col">Realizado</th>
                 </tr>
               </thead>
               <tbody>
@@ -838,15 +834,22 @@ export function ForecastSettings() {
                       numericCell(row, index, group, "Previsão", group.forecastId),
                       numericCell(row, index, group, "Realizado", group.actualId),
                     ])}
-                    <td
-                      className={styles.totalCell}
-                      onPointerEnter={() => setActiveCell({ rowId: row.id })}
-                    >
-                      <span className={styles.mobileLabel}>Total</span>
-                      <output aria-label={`Total, linha ${index + 1}`}>
-                        {totalText(totals.rows[row.id])}
-                      </output>
-                    </td>
+                    {(["forecast", "actual"] as const).map((metric) => (
+                      <td
+                        key={metric}
+                        className={styles.totalCell}
+                        onPointerEnter={() => setActiveCell({ rowId: row.id })}
+                      >
+                        <span className={styles.mobileLabel}>
+                          Total {metric === "forecast" ? "Previsão" : "Realizado"}
+                        </span>
+                        <output
+                          aria-label={`Total ${metric === "forecast" ? "Previsão" : "Realizado"}, linha ${index + 1}`}
+                        >
+                          {totalText(totals.rowMetrics[row.id]?.[metric])}
+                        </output>
+                      </td>
+                    ))}
                     <td
                       className={styles.actionPlanCell}
                       onPointerEnter={() => setActiveCell({ rowId: row.id })}
@@ -890,8 +893,16 @@ export function ForecastSettings() {
                     </td>,
                   ])}
                   <td className={styles.totalCell}>
-                    <span className={styles.mobileLabel}>Total</span>
-                    <output aria-label="Total geral">{totalText(totals.grandTotal)}</output>
+                    <span className={styles.mobileLabel}>Total Previsão</span>
+                    <output aria-label="Total geral — Previsão">
+                      {totalText(totals.metricTotals.forecast)}
+                    </output>
+                  </td>
+                  <td className={styles.totalCell}>
+                    <span className={styles.mobileLabel}>Total Realizado</span>
+                    <output aria-label="Total geral — Realizado">
+                      {totalText(totals.metricTotals.actual)}
+                    </output>
                   </td>
                   <td
                     className={styles.actionPlanFooter}
@@ -1162,54 +1173,62 @@ export function ForecastSettings() {
   }
 }
 
-function GeneralForecastSection({ section }: { section: ForecastSection }) {
+function formatTotal(value: number | null | undefined) {
+  return value == null ? "—" : formatForecastCents(value);
+}
+
+function GeneralForecastTable({ sections }: { sections: ForecastSection[] }) {
   const [activeCell, setActiveCell] = useState<{
-    rowId?: string;
-    columnId?: string;
+    rowId?: "house" | "imob";
+    columnId?: "forecast" | "actual";
     groupId?: string;
   }>({});
-  const document = normalizeForecastDocument(documentOnly(section.forecast));
-  const groups = getForecastGroups(document);
-  const totals = getForecastTotals(document);
-  const label = `${section.segment === "house" ? "House" : "Imob"} · ${getManagerLabel(section.segment, section.manager)}`;
+  const aggregate = aggregateGeneralForecast(
+    sections.map((section) => ({
+      segment: section.segment,
+      forecast: documentOnly(section.forecast),
+    })),
+  );
 
   return (
-    <section className={styles.generalSection} aria-label={label}>
-      <h2>{label}</h2>
+    <section className={styles.generalSection} aria-label="Previsão geral por origem">
       <div
         className={styles.tableScroll}
         role="region"
-        aria-label={`Tabela de previsão — ${label}`}
+        aria-label="Tabela de previsão geral"
         tabIndex={0}
       >
         <table className={styles.table}>
-          <caption className={styles.srOnly}>{label}</caption>
+          <caption className={styles.srOnly}>
+            Previsão e realizado compilados por equipe de origem. Tabela somente leitura.
+          </caption>
           <colgroup>
             <col className={styles.brokerColumn} />
-            {groups.flatMap((group) => [
-              <col key={group.forecastId} className={styles.metricColumn} />,
-              <col key={group.actualId} className={styles.metricColumn} />,
+            {aggregate.groups.flatMap((group) => [
+              <col key={`${group.key}-forecast`} className={styles.metricColumn} />,
+              <col key={`${group.key}-actual`} className={styles.metricColumn} />,
             ])}
-            <col className={styles.totalColumn} />
+            <col className={styles.metricColumn} />
+            <col className={styles.metricColumn} />
             <col className={styles.actionPlanColumn} />
           </colgroup>
           <thead>
             <tr>
               <th scope="col" rowSpan={2} className={styles.brokerHeading}>
-                Nome do corretor
+                Equipe Origem
               </th>
-              {groups.map((group) => (
+              {aggregate.groups.map((group) => (
                 <th
-                  key={group.id}
+                  key={group.key}
                   scope="colgroup"
                   colSpan={2}
-                  className={`${styles.groupHeading} ${activeCell.groupId === group.id ? styles.activeGroup : ""}`}
-                  onPointerEnter={() => setActiveCell({ groupId: group.id })}
+                  className={`${styles.groupHeading} ${activeCell.groupId === group.key ? styles.activeGroup : ""}`}
+                  onPointerEnter={() => setActiveCell({ groupId: group.key })}
                 >
                   <span className={styles.sectionGroupTitle}>{group.label}</span>
                 </th>
               ))}
-              <th scope="col" rowSpan={2} className={styles.totalHeading}>
+              <th scope="colgroup" colSpan={2} className={styles.totalHeading}>
                 Total
               </th>
               <th scope="col" rowSpan={2} className={styles.actionPlanHeading}>
@@ -1217,91 +1236,104 @@ function GeneralForecastSection({ section }: { section: ForecastSection }) {
               </th>
             </tr>
             <tr className={styles.metricHeadings}>
-              {groups.flatMap((group) => [
-                <th
-                  key={group.forecastId}
-                  scope="col"
-                  className={
-                    activeCell.columnId === group.forecastId ? styles.activeMetric : undefined
-                  }
-                  onPointerEnter={() =>
-                    setActiveCell({ columnId: group.forecastId, groupId: group.id })
-                  }
-                >
-                  Previsão
-                </th>,
-                <th
-                  key={group.actualId}
-                  scope="col"
-                  className={
-                    activeCell.columnId === group.actualId ? styles.activeMetric : undefined
-                  }
-                  onPointerEnter={() =>
-                    setActiveCell({ columnId: group.actualId, groupId: group.id })
-                  }
-                >
-                  Realizado
-                </th>,
-              ])}
+              {aggregate.groups.flatMap((group) =>
+                (["forecast", "actual"] as const).map((metric) => (
+                  <th
+                    key={`${group.key}-${metric}`}
+                    scope="col"
+                    className={
+                      activeCell.groupId === group.key && activeCell.columnId === metric
+                        ? styles.activeMetric
+                        : undefined
+                    }
+                    onPointerEnter={() => setActiveCell({ columnId: metric, groupId: group.key })}
+                  >
+                    {metric === "forecast" ? "Previsão" : "Realizado"}
+                  </th>
+                )),
+              )}
+              <th scope="col">Previsão</th>
+              <th scope="col">Realizado</th>
             </tr>
           </thead>
           <tbody>
-            {document.rows.map((row, rowIndex) => (
-              <tr key={row.id}>
-                <th
-                  scope="row"
-                  className={`${styles.brokerCell} ${activeCell.rowId === row.id ? styles.activeBroker : ""}`}
-                >
-                  <div className={styles.brokerContent}>
-                    <span className={styles.rowNumber}>{rowIndex + 1}</span>
-                    <span className={styles.readonlyBroker}>{row.cells.broker}</span>
-                  </div>
-                </th>
-                {groups.flatMap((group) =>
-                  ([group.forecastId, group.actualId] as const).map((columnId) => (
-                    <td
-                      key={columnId}
-                      className={`${styles.numericCell} ${activeCell.rowId === row.id && activeCell.columnId === columnId ? styles.activeCell : ""}`}
-                      tabIndex={0}
-                      onFocus={() => setActiveCell({ rowId: row.id, columnId, groupId: group.id })}
-                      onPointerEnter={() =>
-                        setActiveCell({ rowId: row.id, columnId, groupId: group.id })
-                      }
-                    >
-                      <output>{row.cells[columnId] || "0"}</output>
+            {(["house", "imob"] as const).map((segment) => {
+              const label = segment === "house" ? "House" : "Imob";
+              return (
+                <tr key={segment}>
+                  <th
+                    scope="row"
+                    className={`${styles.brokerCell} ${activeCell.rowId === segment ? styles.activeBroker : ""}`}
+                    onPointerEnter={() => setActiveCell({ rowId: segment })}
+                  >
+                    <span className={styles.readonlyOrigin}>{label}</span>
+                  </th>
+                  {aggregate.groups.flatMap((group) =>
+                    (["forecast", "actual"] as const).map((metric) => (
+                      <td
+                        key={`${group.key}-${metric}`}
+                        className={`${styles.numericCell} ${
+                          activeCell.rowId === segment &&
+                          activeCell.groupId === group.key &&
+                          activeCell.columnId === metric
+                            ? styles.activeCell
+                            : ""
+                        }`}
+                        tabIndex={0}
+                        onFocus={() =>
+                          setActiveCell({ rowId: segment, columnId: metric, groupId: group.key })
+                        }
+                        onPointerEnter={() =>
+                          setActiveCell({ rowId: segment, columnId: metric, groupId: group.key })
+                        }
+                      >
+                        <output
+                          aria-label={`${group.label} — ${metric === "forecast" ? "Previsão" : "Realizado"}, ${label}`}
+                        >
+                          {formatTotal(aggregate.rows[segment].cells[group.key]?.[metric])}
+                        </output>
+                      </td>
+                    )),
+                  )}
+                  {(["forecast", "actual"] as const).map((metric) => (
+                    <td key={metric} className={styles.totalCell}>
+                      <output
+                        aria-label={`Total ${metric === "forecast" ? "Previsão" : "Realizado"}, ${label}`}
+                      >
+                        {formatTotal(aggregate.rows[segment].totals[metric])}
+                      </output>
                     </td>
-                  )),
-                )}
-                <td
-                  className={styles.totalCell}
-                  onPointerEnter={() => setActiveCell({ rowId: row.id })}
-                >
-                  <output>{formatForecastCents(totals.rows[row.id] ?? 0)}</output>
-                </td>
-                <td
-                  className={styles.actionPlanCell}
-                  onPointerEnter={() => setActiveCell({ rowId: row.id })}
-                >
-                  <span className={styles.readonlyPlan}>{row.cells[ACTION_PLAN_COLUMN_ID]}</span>
-                </td>
-              </tr>
-            ))}
+                  ))}
+                  <td className={styles.actionPlanFooter}>—</td>
+                </tr>
+              );
+            })}
           </tbody>
           <tfoot>
             <tr>
               <th scope="row" className={styles.footerLabel}>
                 Total geral
               </th>
-              {groups.flatMap((group) => [
-                <td key={group.forecastId}>
-                  <output>{formatForecastCents(totals.columns[group.forecastId] ?? 0)}</output>
-                </td>,
-                <td key={group.actualId}>
-                  <output>{formatForecastCents(totals.columns[group.actualId] ?? 0)}</output>
-                </td>,
-              ])}
+              {aggregate.groups.flatMap((group) =>
+                (["forecast", "actual"] as const).map((metric) => (
+                  <td key={`${group.key}-${metric}`}>
+                    <output
+                      aria-label={`Total de ${group.label} — ${metric === "forecast" ? "Previsão" : "Realizado"}`}
+                    >
+                      {formatTotal(aggregate.totals.cells[group.key]?.[metric])}
+                    </output>
+                  </td>
+                )),
+              )}
               <td className={styles.totalCell}>
-                <output>{formatForecastCents(totals.grandTotal ?? 0)}</output>
+                <output aria-label="Total geral — Previsão">
+                  {formatTotal(aggregate.totals.forecast)}
+                </output>
+              </td>
+              <td className={styles.totalCell}>
+                <output aria-label="Total geral — Realizado">
+                  {formatTotal(aggregate.totals.actual)}
+                </output>
               </td>
               <td className={styles.actionPlanFooter}>—</td>
             </tr>

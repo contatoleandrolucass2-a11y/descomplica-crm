@@ -267,16 +267,22 @@ export function getForecastInvalidCells(document: ForecastDocument) {
 
 export function getForecastTotals(document: ForecastDocument): {
   rows: Record<string, number | null>;
+  rowMetrics: Record<string, { forecast: number | null; actual: number | null }>;
   columns: Record<string, number | null>;
   grandTotal: number | null;
+  metricTotals: { forecast: number | null; actual: number | null };
 } {
   const rows: Record<string, number | null> = {};
+  const rowMetrics: Record<string, { forecast: number | null; actual: number | null }> = {};
   const columns: Record<string, number | null> = Object.fromEntries(
     document.columns
       .filter((column) => column.id !== "broker" && column.id !== FORECAST_ACTION_PLAN_ID)
       .map((column) => [column.id, 0]),
   );
   let grandTotal: number | null = 0;
+  let forecastTotal: number | null = 0;
+  let actualTotal: number | null = 0;
+  const groups = getForecastGroups(document);
   for (const row of document.rows) {
     let total: number | null = 0;
     for (const column of document.columns.filter(
@@ -288,7 +294,129 @@ export function getForecastTotals(document: ForecastDocument): {
         columns[column.id] === null || value === null ? null : columns[column.id]! + value;
     }
     rows[row.id] = total;
+    const rowForecast = sumForecastColumns(
+      row,
+      groups.map((group) => group.forecastId),
+    );
+    const rowActual = sumForecastColumns(
+      row,
+      groups.map((group) => group.actualId),
+    );
+    rowMetrics[row.id] = { forecast: rowForecast, actual: rowActual };
+    forecastTotal = addForecastTotals(forecastTotal, rowForecast);
+    actualTotal = addForecastTotals(actualTotal, rowActual);
     grandTotal = grandTotal === null || total === null ? null : grandTotal + total;
   }
-  return { rows, columns, grandTotal };
+  return {
+    rows,
+    rowMetrics,
+    columns,
+    grandTotal,
+    metricTotals: { forecast: forecastTotal, actual: actualTotal },
+  };
+}
+
+function addForecastTotals(left: number | null, right: number | null) {
+  return left === null || right === null ? null : left + right;
+}
+
+function sumForecastColumns(
+  row: ForecastDocument["rows"][number],
+  columnIds: readonly string[],
+): number | null {
+  let total: number | null = 0;
+  for (const columnId of columnIds) {
+    total = addForecastTotals(total, forecastCellToCents(row.cells[columnId]));
+  }
+  return total;
+}
+
+export type GeneralForecastAggregate = {
+  groups: { key: string; label: string }[];
+  rows: Record<
+    "house" | "imob",
+    {
+      cells: Record<string, { forecast: number | null; actual: number | null }>;
+      totals: { forecast: number | null; actual: number | null };
+    }
+  >;
+  totals: {
+    cells: Record<string, { forecast: number | null; actual: number | null }>;
+    forecast: number | null;
+    actual: number | null;
+  };
+};
+
+/** Compiles manager documents into the read-only House/Imob comparison. */
+export function aggregateGeneralForecast(
+  sections: readonly {
+    segment: "house" | "imob";
+    forecast: ForecastDocument;
+  }[],
+): GeneralForecastAggregate {
+  const groups: GeneralForecastAggregate["groups"] = [];
+  const labels = new Map<string, string>();
+  const rows: GeneralForecastAggregate["rows"] = {
+    house: { cells: {}, totals: { forecast: 0, actual: 0 } },
+    imob: { cells: {}, totals: { forecast: 0, actual: 0 } },
+  };
+
+  for (const section of sections) {
+    const document = normalizeForecastDocument(section.forecast);
+    for (const group of getForecastGroups(document)) {
+      const key = group.label
+        .normalize("NFKC")
+        .replace(/\s+/g, " ")
+        .trim()
+        .toLocaleLowerCase("pt-BR");
+      if (!labels.has(key)) {
+        labels.set(key, group.label);
+        groups.push({ key, label: group.label });
+      }
+      const current = rows[section.segment].cells[key] ?? { forecast: 0, actual: 0 };
+      rows[section.segment].cells[key] = {
+        forecast: addForecastTotals(
+          current.forecast,
+          sumDocumentColumn(document, group.forecastId),
+        ),
+        actual: addForecastTotals(current.actual, sumDocumentColumn(document, group.actualId)),
+      };
+    }
+  }
+
+  for (const segment of ["house", "imob"] as const) {
+    for (const { key } of groups) rows[segment].cells[key] ??= { forecast: 0, actual: 0 };
+    rows[segment].totals = groups.reduce(
+      (totals, { key }) => ({
+        forecast: addForecastTotals(totals.forecast, rows[segment].cells[key]!.forecast),
+        actual: addForecastTotals(totals.actual, rows[segment].cells[key]!.actual),
+      }),
+      { forecast: 0 as number | null, actual: 0 as number | null },
+    );
+  }
+
+  const cells: GeneralForecastAggregate["totals"]["cells"] = {};
+  for (const { key } of groups) {
+    cells[key] = {
+      forecast: addForecastTotals(rows.house.cells[key]!.forecast, rows.imob.cells[key]!.forecast),
+      actual: addForecastTotals(rows.house.cells[key]!.actual, rows.imob.cells[key]!.actual),
+    };
+  }
+  return {
+    groups,
+    rows,
+    totals: {
+      cells,
+      forecast: addForecastTotals(rows.house.totals.forecast, rows.imob.totals.forecast),
+      actual: addForecastTotals(rows.house.totals.actual, rows.imob.totals.actual),
+    },
+  };
+}
+
+function sumDocumentColumn(document: ForecastDocument, columnId: string): number | null {
+  let total: number | null = 0;
+  for (const row of document.rows) {
+    total = addForecastTotals(total, forecastCellToCents(row.cells[columnId]));
+  }
+  return total;
 }
