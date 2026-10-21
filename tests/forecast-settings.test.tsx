@@ -367,19 +367,25 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         brokerBackground,
         actualHeaderBackground,
         forecastHeaderBackground,
-        groupHeaderBackground,
       ] = await Promise.all([
         actual.evaluate((element) => getComputedStyle(element.closest("td")!).backgroundColor),
         forecast.evaluate((element) => getComputedStyle(element.closest("td")!).backgroundColor),
         broker.evaluate((element) => getComputedStyle(element.closest("th")!).backgroundColor),
         actualHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
         forecastHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
-        groupHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
       ]);
       expect(activeBackground).not.toBe(siblingBackground);
       expect(brokerBackground).not.toBe(siblingBackground);
       expect(actualHeaderBackground).not.toBe(forecastHeaderBackground);
-      expect(groupHeaderBackground).toBe(actualHeaderBackground);
+      await browserExpect
+        .poll(async () => {
+          const [currentGroupBackground, currentActualBackground] = await Promise.all([
+            groupHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
+            actualHeader.evaluate((element) => getComputedStyle(element).backgroundColor),
+          ]);
+          return currentGroupBackground === currentActualBackground;
+        })
+        .toBe(true);
       await browserExpect(
         page.getByLabel("Nome do empreendimento 1", { exact: true }),
       ).toBeVisible();

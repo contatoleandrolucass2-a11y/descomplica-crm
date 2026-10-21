@@ -26,7 +26,6 @@ minimumReleaseAgeExclude:
 overrides:
   "@next/eslint-plugin-next@16.3.6>fast-glob": "-"
   "next-devtools-mcp>@modelcontextprotocol/sdk": 1.32.1
-  "vite@>=8.2.0 <8.2.4": 8.2.4
   "@babel/core@>=7.29.0 <7.29.6": 7.29.6
   "browserslist@<=4.28.6": 4.28.7
   "brace-expansion@<2": 1.1.21
@@ -37,6 +36,7 @@ overrides:
   "sharp@<0.35.5": 0.35.5
   "source-map-js@>=1.0.0 <1.2.2": 1.2.2
   "js-yaml@>=4.0.0 <4.3.2": 4.3.2
+  "vite@>=8.2.0 <=8.2.3": 8.2.4
 packageExtensions:
   "@next/eslint-plugin-next@16.3.6":
     dependencies:

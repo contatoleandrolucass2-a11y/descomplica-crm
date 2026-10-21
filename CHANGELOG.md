@@ -17,6 +17,19 @@
 - Atualiza o Vite transitivo do Vitest para `8.2.4`, corrigindo
   `GHSA-587h-7wmj-h5pm` apenas na ferramenta de testes.
 
+## 2026-10-20 - Publicacao e aceite de Agendamentos v3
+
+- Publica o painel e a normalizacao da data opcional por imagem imutavel, com
+  CI completa e coordenador protegido.
+- Confirma quatro ciclos reais consecutivos do coletor, com analise v3,
+  publicacao comercial e estoque concluidos.
+- Atualiza o pin transitivo do SDK MCP para 1.32.1, corrigindo o advisory de
+  alta severidade detectado pela CI durante o registro final da entrega.
+- Atualiza o Vite transitivo do Vitest para 8.2.4, corrigindo o advisory de alta
+  severidade detectado durante a repetição da CI.
+- Estabiliza o teste visual da grade de Previsão ao aguardar o fim da transição
+  CSS antes de comparar as cores do grupo e da métrica ativa.
+
 ## 2026-10-20 - Evidencias da publicacao do Associativo
 
 - Registra a integracao do PR #280, CI completa, artefato imutavel,

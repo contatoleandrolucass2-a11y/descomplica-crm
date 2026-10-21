@@ -38,6 +38,34 @@ Durante a reconciliação final, o registro publicou também
 `GHSA-587h-7wmj-h5pm` para o Vite transitivo do Vitest. O override mínimo fixa
 `8.2.4`; a alteração permanece restrita à ferramenta de testes.
 
+## 2026-10-20: publicacao e aceite operacional de Agendamentos v3
+
+Os PRs #274 e #279 foram integrados com CI completa. A migration v3 foi
+aplicada pelo Supabase MCP e a imagem aprovada foi promovida sem rebuild. O
+coletor foi atualizado sob trava, com backup e CAS, preservando unidade,
+ledger, credenciais e agenda. Quatro ciclos reais consecutivos publicaram com
+HTTP 201 e requestIds distintos, seguidos de estoque confirmado. O Supabase
+registrou as quatro runs como `succeeded` e manteve tres visoes da analise em
+versao 3. A producao avancou depois para um SHA descendente que preserva a
+entrega; health e ledger foram conferidos sem pendencia.
+
+A CI do registro final detectou o advisory `GHSA-22jm-h49p-29qw` no SDK MCP
+transitivo do `next-devtools-mcp`. O override foi atualizado de 1.31.0 para a
+versao corrigida 1.32.1, mantendo a dependencia apenas em desenvolvimento.
+
+O gate de navegador expôs uma intermitencia preexistente no teste de Previsão:
+a comparação capturava cores intermediarias durante a transição CSS de 140 ms.
+A asserção passou a aguardar as cores finais, preservando o criterio de igualdade
+e sem alterar a interface. Os 12 cenarios focados passaram apos o ajuste.
+
+Na repetição da CI, a fonte oficial de ITBI voltou a responder e o gate passou.
+Em seguida, o audit detectou o novo advisory `GHSA-587h-7wmj-h5pm` no Vite 8.2.0,
+transitivo do Vitest. O override foi elevado para a versão corrigida 8.2.4.
+Com Node 24.19.0, instalação congelada, audit sem alta/crítica, lint, typecheck,
+formatação, build de 57 rotas e os 12 cenários de navegador de Previsão passaram.
+A aplicação aprovou 4.063 testes; a suíte operacional aprovou 1.595 e repetiu
+somente as três limitações POSIX conhecidas do Meta Ads no Windows.
+
 ## 2026-10-20 - Publicacao do ajuste minimo do Associativo
 
 PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.
