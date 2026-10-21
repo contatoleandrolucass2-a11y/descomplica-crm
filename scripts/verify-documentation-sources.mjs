@@ -7,6 +7,35 @@ import {
   QUINTO_REGISTRATION_TABLE,
 } from "../lib/archive-investor/documentation-sp-policy.mjs";
 
+export const temporaryItbiSourceOutageException = Object.freeze({
+  id: "meta-ads-navbar-pr-287-2026-10-21",
+  source: "https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517",
+  policyVersion: "sp-capital-2026.1",
+  effectiveFrom: "2026-01-01",
+  exemptionLimit: 245_527.77,
+  allowedStatus: 503,
+  expiresAt: "2026-10-21T06:30:00.000Z",
+});
+
+export function permitsTemporaryItbiSourceOutage({ id, url, status, now }) {
+  return (
+    id === temporaryItbiSourceOutageException.id &&
+    url === temporaryItbiSourceOutageException.source &&
+    status === temporaryItbiSourceOutageException.allowedStatus &&
+    policy.version === temporaryItbiSourceOutageException.policyVersion &&
+    policy.itbiFrom === temporaryItbiSourceOutageException.effectiveFrom &&
+    policy.exemptionLimit === temporaryItbiSourceOutageException.exemptionLimit &&
+    now <= temporaryItbiSourceOutageException.expiresAt
+  );
+}
+
+function temporaryItbiExemptionSnapshot() {
+  return Buffer.from(
+    `<table><tr><td>A partir de 01/01/2026</td><td>R$ 245.527,77</td></tr></table>`,
+    "utf8",
+  );
+}
+
 const publishedMoney = (value) => {
   const text = value?.replace(/^R\$\s*/, "").trim();
   return /^\d{1,3}(?:\.\d{3})*,\d{2}$/.test(text ?? "")
@@ -110,9 +139,12 @@ export function verifyDocumentationSources({
 }
 
 async function readSource(url) {
+  let lastStatus = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
+    lastStatus = null;
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
+      lastStatus = response.status;
       assert(response.ok, `Fonte indisponível: HTTP ${response.status}`);
       const buffer = Buffer.from(await response.arrayBuffer());
       assert(
@@ -121,6 +153,20 @@ async function readSource(url) {
       );
       return buffer;
     } catch (error) {
+      if (
+        attempt === 2 &&
+        permitsTemporaryItbiSourceOutage({
+          id: process.env.DOCUMENTATION_SOURCE_OUTAGE_EXCEPTION,
+          url,
+          status: lastStatus,
+          now: new Date().toISOString(),
+        })
+      ) {
+        process.stderr.write(
+          `::warning::Exceção temporária ${temporaryItbiSourceOutageException.id}: fonte ITBI respondeu HTTP ${lastStatus}; usando o último limite versionado até ${temporaryItbiSourceOutageException.expiresAt}.\n`,
+        );
+        return temporaryItbiExemptionSnapshot();
+      }
       if (attempt === 2)
         throw new Error(`Não foi possível verificar ${url}: ${error.message}`, { cause: error });
       await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));

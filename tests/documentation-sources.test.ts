@@ -1,7 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QUINTO_REGISTRATION_TABLE } from "@/lib/archive-investor/documentation-sp-policy.mjs";
 // @ts-expect-error -- Standalone JavaScript CLI also exposes its pure verifier.
-import { verifyDocumentationSources } from "../scripts/verify-documentation-sources.mjs";
+import * as documentationSources from "../scripts/verify-documentation-sources.mjs";
+
+const {
+  permitsTemporaryItbiSourceOutage,
+  temporaryItbiSourceOutageException,
+  verifyDocumentationSources,
+} = documentationSources;
 
 const hashing = vi.hoisted(() => {
   const digest = vi.fn();
@@ -56,6 +62,22 @@ afterEach(() => {
 });
 
 describe("documentation source verification gate", () => {
+  it("limits the PR 287 outage exception to the exact source, status and validity window", () => {
+    const exact = {
+      id: temporaryItbiSourceOutageException.id,
+      url: temporaryItbiSourceOutageException.source,
+      status: 503,
+      now: "2026-10-21T06:29:59.999Z",
+    };
+    expect(permitsTemporaryItbiSourceOutage(exact)).toBe(true);
+    expect(permitsTemporaryItbiSourceOutage({ ...exact, id: "another-release" })).toBe(false);
+    expect(permitsTemporaryItbiSourceOutage({ ...exact, status: 403 })).toBe(false);
+    expect(permitsTemporaryItbiSourceOutage({ ...exact, url: "https://example.com" })).toBe(false);
+    expect(permitsTemporaryItbiSourceOutage({ ...exact, now: "2026-10-21T06:30:00.001Z" })).toBe(
+      false,
+    );
+  });
+
   it("parses current table rows with nested tags and nonbreaking whitespace", () => {
     expect(() => verifyDocumentationSources(input)).not.toThrow();
     expect(hashing.createHash).toHaveBeenCalledExactlyOnceWith("sha256");
