@@ -1,5 +1,64 @@
 # Worklog
 
+## 2026-10-20 - Corretores automáticos na Previsão
+
+A grade criava dez nomes genéricos mesmo quando o snapshot analítico do CRM já
+relacionava cada corretor ao gerente. Um RPC de leitura protegido passa a extrair
+até 200 nomes distintos do snapshot mais recente, usando House sem Canal Imob e
+Imob com Canal Imob. A API limpa os valores ao montar um período novo e entrega
+as linhas prontas; documentos já salvos continuam íntegros para preservar o
+histórico daquele fim de semana.
+
+Testes de contrato cobrem os dois segmentos, a grafia operacional de Jonathan,
+ausência de gerente no snapshot, autenticação e grants. A aplicação continua
+permitindo inserir, excluir e renomear linhas manualmente.
+
+Após autorização específica, as migrations de Plano de ação, períodos e elenco
+de corretores foram aplicadas no Supabase de produção como
+`20261021002706_forecast_action_plan`,
+`20261021002724_forecast_period_scopes` e
+`20261021002737_forecast_broker_roster`. A verificação posterior confirmou RLS
+forçado, ausência de grants diretos, RPC de elenco restrita a `authenticated`,
+nenhum período criado e preservação integral do registro legado (uma linha e
+digest `5a44047fd53a72f0bc5b9f72c3fa6bf92c136144859c5f3fc48ea7e0025c8e9b`).
+
+A primeira execução da CI foi bloqueada por um alerta alto publicado para a
+dependência transitiva `@modelcontextprotocol/sdk` 1.31.0, usada somente pelo
+`next-devtools-mcp`. O override foi elevado para 1.32.1, versão corrigida, e o
+`pnpm audit --audit-level high` passou sem vulnerabilidades altas ou críticas.
+A restauração isolada seguinte também confirmou que a nova RPC precisava entrar
+na allowlist global de funções autenticadas; o pgTAP foi corrigido para auditar
+explicitamente esse acesso, sem ampliar grants.
+A CI visual ainda capturou os cabeçalhos ativo e de grupo em instantes distintos
+da transição de 140 ms. Os quatro elementos do contexto ativo agora recebem a
+mesma cor imediatamente, preservando a transição apenas para hover comum.
+Durante a execução seguinte, o audit passou a reportar o advisory
+GHSA-587h-7wmj-h5pm no Vite transitivo do Vitest. O override usa a correção
+8.2.4 e mantém o Vitest na versão já validada pelo projeto.
+
+A execução CI `39506011102`, no SHA
+`3437f9a0c15786fee830b6de2fc3e8c562ad4d7d`, aprovou validação, restauração
+isolada e gates de release. Uma nova execução é obrigatória após este registro
+documental antes do merge.
+
+No Node 24.19, lint, typecheck e build passaram. A suíte geral aprovou 3.970
+testes e ignorou 105; dois testes sem relação com a Previsão excederam o tempo
+sob carga local. A repetição isolada dos dois arquivos aprovou 251 testes. A CI
+Linux do SHA final continua sendo o gate de integração.
+
+A revisão automática identificou que `upper()` preservava diacríticos e poderia
+deixar vazias as equipes de Álvaro, Fabrício e Thiago de Araújo. A migration
+corretiva `20261020214500_forecast_broker_manager_accents.sql` normaliza as
+letras acentuadas com `translate`, sem extensão adicional. O pgTAP cobre Álvaro
+e Fabrício acentuados. Após CI verde e autorização específica, a correção foi
+aplicada pelo Supabase MCP como
+`20261021021551_forecast_broker_manager_accents`, com SHA-256
+`0270b3926fa9c6e3badd6c7ea0a2e9fbc67169f064948846c90b497e15e4a62f`.
+O pós-check confirmou a função `STABLE SECURITY DEFINER`, owner `postgres`,
+`search_path` vazio, timeout de 10 segundos e execução exclusiva de
+`authenticated`; `anon` e `service_role` continuam sem acesso. A tabela de
+períodos segue vazia e o singleton legado mantém uma linha e revisão 5.
+
 ## 2026-10-20 — Painel inteligente de agendamentos
 
 - A meta individual passou a reproduzir a projeção da tela de Metas; o alvo do

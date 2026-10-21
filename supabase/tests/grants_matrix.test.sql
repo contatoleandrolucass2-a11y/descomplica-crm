@@ -343,6 +343,7 @@ select is(
     'get_compact_user_directory_page',
     'get_crm_commercial_configuration_draft',
     'get_crm_forecast',
+    'get_crm_forecast_brokers',
     'get_crm_forecast_period',
     'get_crm_read_model_v3',
     'get_crm_routine_completions',

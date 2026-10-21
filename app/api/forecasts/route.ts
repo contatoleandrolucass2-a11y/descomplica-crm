@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/auth/supabase/server";
 import {
   createForecastTemplate,
+  forecastBrokerListSchema,
   forecastPeriodRecordSchema,
   forecastPeriodQuerySchema,
   forecastPeriodRpcSchema,
@@ -44,13 +45,27 @@ export async function GET(request: Request) {
       selection.data.segment === "general" ? orderForecastSources(result.data.forecasts) : [];
     const forecast =
       selection.data.segment === "general" ? null : (result.data.forecasts[0]?.forecast ?? null);
+    let brokerNames: string[] = [];
+    if (selection.data.segment !== "general" && !forecast) {
+      const brokersResult = await supabase.rpc("get_crm_forecast_brokers", {
+        p_segment: selection.data.segment,
+        p_manager_key: selection.data.manager,
+      });
+      if (brokersResult.error?.code === "28000") return failure("unauthenticated", 401);
+      if (brokersResult.error?.code === "42501") return failure("forbidden", 403);
+      if (brokersResult.error?.code === "22023") return failure("invalid_selection", 400);
+      const brokers = forecastBrokerListSchema.safeParse(brokersResult.data);
+      if (brokersResult.error || !brokers.success) return failure("forecast_unavailable", 503);
+      brokerNames = brokers.data;
+    }
     const snapshot = forecastSnapshotSchema.safeParse({
       forecast,
       sections,
       template:
         selection.data.segment === "general" || forecast
           ? null
-          : createForecastTemplate(result.data.template),
+          : createForecastTemplate(result.data.template, brokerNames),
+      brokers: brokerNames,
       can_edit: selection.data.segment === "general" ? false : result.data.can_edit,
       period,
       selection: { segment: selection.data.segment, manager: selection.data.manager },

@@ -2182,6 +2182,91 @@ dependente da autorização específica aplicável.
   timeout Qlik isolado; o delta não altera essas áreas. A CI Linux no SHA exato,
   com pgTAP e restauração isolada, é obrigatória antes de merge e publicação.
 
+## 2026-10-20: Retomada para preencher corretores automaticamente na Previsão
+
+- A branch `codex/previsao-corretores-automaticos` iniciou no `origin/main`
+  `c1e931d5ad805f9f43766d67f1d7f297e99a31ae`, após a integração da Previsão
+  por período no merge `dfe174635fe4712670a36268b1f9cd5f9cb297a2`.
+- Às `2026-10-20T19:39:57.3530636Z`, o health público respondeu HTTP 200,
+  `status=ok` e `version=50f11d326cdd37b051db46f1dd1015076b85d545`.
+  A versão publicada não corresponde ao `main` atual e não comprova esta demanda.
+- A leitura observacional do banco confirmou que os nomes de corretores e seus
+  gerentes já existem no snapshot analítico do CRM. A grade ainda cria
+  `Corretor 1` a `Corretor 10` localmente e o contrato da Previsão não consome
+  essa fonte. O ajuste deve preencher somente rascunhos ainda não salvos; períodos
+  salvos permanecem históricos e editáveis. Nenhum usuário ou dado remoto foi
+  alterado. Fontes: Git local após `fetch`, `/api/health`, catálogo e consultas
+  somente leitura do Supabase de produção.
+- A primeira CI do PR #283 bloqueou no `pnpm audit` por
+  `@modelcontextprotocol/sdk` 1.31.0, dependência transitiva do diagnóstico local.
+  O override foi atualizado para 1.32.1, indicada como corrigida pelo advisory
+  GHSA-22jm-h49p-29qw; a auditoria local passou sem achados altos ou críticos.
+- Na segunda CI, o teste 15 de `grants_matrix.test.sql` detectou que a RPC nova
+  ainda não constava na allowlist nominal de funções executáveis por
+  `authenticated`. A lista foi atualizada para auditar a permissão já concedida
+  pela migration; nenhum grant adicional foi criado.
+- A terceira CI aprovou a restauração isolada e todos os 2.085 testes pgTAP, mas
+  o gate visual capturou os cabeçalhos ativo e de grupo em pontos diferentes da
+  transição CSS. O contexto ativo passou a não animar a cor; hover comum mantém
+  a transição e a indicação visual solicitada continua coordenada.
+- Antes do build da quarta CI, um advisory recém-publicado bloqueou Vite 8.2.0
+  a 8.2.3, dependência transitiva do Vitest. O projeto passou a forçar Vite
+  8.2.4, versão corrigida, sem trocar a versão do executor de testes.
+
+### CI aprovada e migrations autorizadas em produção
+
+- A execução CI `39506011102` aprovou `validate`, `isolated-restore` e
+  `release-gates` no SHA
+  `3437f9a0c15786fee830b6de2fc3e8c562ad4d7d`. O job de imagem promovível foi
+  corretamente ignorado por se tratar de PR.
+- Após autorização específica do usuário em 20/10/2026, o Supabase de produção
+  aplicou, nesta ordem, as migrations locais
+  `20261019004204_forecast_action_plan.sql`,
+  `20261020122216_forecast_period_scopes.sql` e
+  `20261020204500_forecast_broker_roster.sql`. O ledger remoto registrou
+  `20261021002706_forecast_action_plan`,
+  `20261021002724_forecast_period_scopes` e
+  `20261021002737_forecast_broker_roster`; a diferença de timestamp é do
+  aplicador remoto e não autoriza reparo ou reaplicação.
+- SHA-256 dos arquivos aplicados, na mesma ordem:
+  `bac79025080c09ce45500966c2ef5eb9237e796ab0d9cfce9a22b0a6d64d213f`,
+  `db1c688751b21d32aa84acd2ccb3c5bf752fad9d3aa88b929c6d6819f23808d8` e
+  `486ca992f3637b8ff82e792421a1bd6be030b29d43bba4f304162eddfbfb7586`.
+- O pós-check confirmou `crm_forecast_periods` vazia, RLS forçado, leitura e
+  gravação somente pelas RPCs autorizadas e o novo elenco executável apenas por
+  `authenticated`. O documento legado permaneceu com uma linha e digest
+  `5a44047fd53a72f0bc5b9f72c3fa6bf92c136144859c5f3fc48ea7e0025c8e9b`.
+- O advisor de segurança não apontou acesso anônimo novo. O advisor de
+  desempenho registrou como informativa a ausência de índice isolado na chave
+  `updated_by`; ela não participa das leituras do produto e não justifica uma
+  quarta migration neste escopo. Os demais avisos pertencem a objetos anteriores.
+- No runtime obrigatório Node 24.19, `lint`, `typecheck` e `build` passaram. O
+  Vitest geral aprovou 3.970 e ignorou 105; dois testes independentes da
+  Previsão excederam o timeout sob carga local. A repetição isolada aprovou os
+  dois arquivos, com 251 testes, e a CI Linux do novo SHA permanece obrigatória.
+- A revisão do PR encontrou um caso funcional antes do merge: `upper()` não
+  remove acentos, portanto Álvaro, Fabrício e Thiago de Araújo poderiam não ser
+  localizados no snapshot. A migration corretiva
+  `20261020214500_forecast_broker_manager_accents.sql` normaliza os diacríticos
+  com `translate`, preserva ACL e guards e acrescenta pgTAP para os dois nomes
+  acentuados. Consulta somente leitura no Supabase confirmou as formas
+  `ALVARO`, `FABRICIO` e `THIAGO DE ARAUJO`.
+- Após a CI `39524875107` aprovar `validate`, `isolated-restore` e
+  `release-gates` no SHA
+  `ff38d6a1c762ea790466906627936b320491f52c`, o usuário autorizou a aplicação e
+  a recuperação correspondente. O Supabase MCP aplicou somente a corretiva e o
+  ledger remoto registrou
+  `20261021021551_forecast_broker_manager_accents`. O arquivo aplicado tem
+  SHA-256
+  `0270b3926fa9c6e3badd6c7ea0a2e9fbc67169f064948846c90b497e15e4a62f`.
+- O pós-check confirmou `translate` e o mapa de diacríticos na definição,
+  função `STABLE SECURITY DEFINER`, owner `postgres`, `search_path` vazio,
+  timeout de 10 segundos e `EXECUTE` apenas para `authenticated`; `anon` e
+  `service_role` seguem bloqueados. `crm_forecast_periods` permanece vazia e o
+  singleton legado mantém uma linha e revisão 5. Os advisors não apontaram
+  acesso anônimo novo; permanece apenas o aviso informativo já registrado para
+  o índice de `crm_forecast_periods.updated_by` e avisos anteriores ao escopo.
+
 ## 2026-10-20: Abertura do painel inteligente de agendamentos
 
 - A branch `codex/agendamentos-interactive-dashboard` iniciou no `origin/main`

@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 72-version manifest", async () => {
+  it("keeps a unique, ordered 74-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(72);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(72);
+    expect(migrations).toHaveLength(74);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(74);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-18)).toEqual([
+    expect(migrations.slice(-20)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -68,6 +68,8 @@ describe("release-candidate migration train", () => {
       "20261020050000_appointments_operations_v3.sql",
       "20261020122216_forecast_period_scopes.sql",
       "20261020130000_dashboard_imob_goals.sql",
+      "20261020204500_forecast_broker_roster.sql",
+      "20261020214500_forecast_broker_manager_accents.sql",
       "20261020233000_appointments_goal_read.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
@@ -103,8 +105,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(37);
-    expect(plan.tests).toBe(2082);
+    expect(plan.files).toBe(38);
+    expect(plan.tests).toBe(2092);
   });
 
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
@@ -412,7 +414,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2082;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2092;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

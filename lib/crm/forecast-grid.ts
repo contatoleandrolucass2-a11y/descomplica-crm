@@ -116,16 +116,19 @@ function appendGroup(document: ForecastDocument, label: string): ForecastDocumen
   };
 }
 
-export function createForecastDocument(): ForecastDocument {
+export function createForecastDocument(brokers: readonly string[] = []): ForecastDocument {
   let document: ForecastDocument = {
     title: "Equipe",
     columns: [
       { id: "broker", label: "Nome do corretor" },
       { id: FORECAST_ACTION_PLAN_ID, label: FORECAST_ACTION_PLAN_LABEL },
     ],
-    rows: Array.from({ length: 10 }, (_, index) => index + 1).map((number) => ({
+    rows: (brokers.length > 0
+      ? brokers
+      : Array.from({ length: 10 }, (_, index) => `Corretor ${index + 1}`)
+    ).map((broker) => ({
       id: crypto.randomUUID(),
-      cells: { broker: `Corretor ${number}`, [FORECAST_ACTION_PLAN_ID]: "" },
+      cells: { broker, [FORECAST_ACTION_PLAN_ID]: "" },
     })),
   };
   for (let index = 1; index <= 7; index++)

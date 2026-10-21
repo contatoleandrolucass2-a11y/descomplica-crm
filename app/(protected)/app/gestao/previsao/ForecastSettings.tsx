@@ -237,7 +237,7 @@ export function ForecastSettings() {
           ? documentOnly(snapshot.forecast)
           : snapshot.template
             ? documentOnly(snapshot.template)
-            : initialDocument();
+            : initialDocument(snapshot.brokers);
         const next = normalizeForecastDocument(original);
         setDocument(next);
         setBaseline(JSON.stringify(snapshot.forecast && snapshot.can_edit ? original : next));
