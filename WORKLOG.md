@@ -1,5 +1,27 @@
 # Worklog
 
+## 2026-10-21 - Correção da navegação do iframe Meta Ads
+
+A navegação por fragmento relativo no documento `srcdoc` tentava carregar
+`/app/meta-ads#overview` como documento filho. A política de enquadramento do
+CRM bloqueava corretamente essa tentativa. A visão inicial agora é entregue
+como atributo do documento, com remontagem por submenu. A navegação interna
+e o atalho de acessibilidade não alteram mais a URL do iframe.
+
+A correção não altera cabeçalhos, guards, permissões, banco, outros dashboards,
+sessão do navegador Meta ou campanhas. O teste Chromium usa o componente e
+os assets reais com os cabeçalhos de produção, sem autenticação ou requisições
+externas. As quatro visões, recarga, trocas repetidas, navegação interna, foco
+do atalho e herança do tema passaram. A suíte autenticada também recebeu
+cobertura das quatro rotas pelo menu e após recarga; sua execução integra a CI.
+
+Validação local: lint, typecheck, build, formatação e `pnpm test` passaram;
+Vitest aprovou 4.082 testes, com 105 ignorados, e as suítes Node concluíram sem
+falhas. A conferência das fontes documentais, inclusive ITBI, passou sem exceção.
+
+Publicação depende da CI terminal do SHA integrado, imagem imutável, prova de
+runtime e coordenador protegido. Não há nova exceção de ITBI neste ajuste.
+
 ## 2026-10-21 - Publicacao e reconciliacao do painel de Agendamentos
 
 O PR #289 integrou o painel inteligente e a correcao de datas Salesforce. A

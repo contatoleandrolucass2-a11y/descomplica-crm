@@ -17,6 +17,10 @@ export function MetaAdsDashboardFrame({
 }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(MINIMUM_FRAME_HEIGHT);
+  const frameDocument = dashboardDocument.replace(
+    "<html ",
+    `<html data-crm-view="${initialView}" `,
+  );
 
   useEffect(() => {
     const frame = frameRef.current;
@@ -53,9 +57,6 @@ export function MetaAdsDashboardFrame({
       observer = new ResizeObserver(measure);
       observer.observe(frameDocument.documentElement);
       if (frameDocument.body) observer.observe(frameDocument.body);
-      if (iframe.contentWindow?.location.hash !== `#${initialView}`) {
-        iframe.contentWindow?.location.replace(`#${initialView}`);
-      }
       syncTheme();
       measure();
     }
@@ -78,9 +79,10 @@ export function MetaAdsDashboardFrame({
   return (
     <section className={styles.frameShell} aria-label="Dashboard Meta Ads">
       <iframe
+        key={initialView}
         ref={frameRef}
         className={styles.frame}
-        srcDoc={dashboardDocument}
+        srcDoc={frameDocument}
         style={{ height }}
         title="Descomplica Ads — desempenho de campanhas Meta"
         sandbox="allow-downloads allow-forms allow-modals allow-same-origin allow-scripts"

@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-21 - Navegação isolada do painel Meta Ads
+
+- Corrige a navegação relativa que carregava o próprio CRM dentro do iframe e
+  provocava a mensagem de conexão recusada.
+- Inicializa as quatro visões pelo documento embutido, mantendo navegação
+  interna, temas e acessibilidade sem alterar os outros dashboards.
+- Acrescenta regressão Chromium com os cabeçalhos de produção e cobertura
+  autenticada de submenus e recarga, sem relaxar as proteções do CRM.
+
 ## 2026-10-21 - Publicacao e reconciliacao do painel de Agendamentos
 
 - Publica o painel inteligente com meta mensal, velocimetro, filtros cruzados,

@@ -1,5 +1,19 @@
 # Réplica local do dashboard Meta Ads — 2026-10-20
 
+## Correção de navegação em 21/10/2026
+
+O documento embutido recebe a visão em `data-crm-view`, sem navegação relativa
+de `location`. Cada troca de submenu remonta somente o iframe Meta Ads. Os
+botões internos atualizam o estado local; o atalho de conteúdo move o foco sem
+alterar a URL. As proteções `X-Frame-Options: DENY` e `frame-ancestors 'none'`
+do CRM permanecem intactas.
+
+Regressão: `node scripts/qa/meta-ads-frame.mjs` exercita o componente real em
+Chromium, com cabeçalhos de produção, cargas iniciais, recargas, trocas de
+submenu, navegação interna, foco e tema. A suíte autenticada de release também
+verifica as quatro visões. Nenhuma consulta ou alteração no Gerenciador de
+Anúncios faz parte desses testes; os dados continuam demonstrativos/importados.
+
 ## Escopo autorizado
 
 Replicar localmente o dashboard entregue em

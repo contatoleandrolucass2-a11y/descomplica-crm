@@ -1554,6 +1554,36 @@ for (const role of expectedRoles) {
   });
 }
 
+test("Meta Ads keeps its four views inside srcdoc after submenu navigation and reload", async ({
+  browser,
+}) => {
+  await withRolePage(browser, "master", async (page) => {
+    await page.goto("/app/meta-ads");
+    const frame = page.frameLocator(
+      'iframe[title="Descomplica Ads — desempenho de campanhas Meta"]',
+    );
+    for (const [route, heading] of [
+      ["/app/meta-ads/campanhas", "Análise de campanhas e anúncios"],
+      ["/app/meta-ads/contas-de-anuncios", "Contas de anúncios"],
+      ["/app/meta-ads/relatorios", "Central de relatórios"],
+      ["/app/meta-ads", "Visão geral de anúncios"],
+    ] as const) {
+      await page.getByRole("button", { name: "Meta Ads", exact: true }).click();
+      await page.locator(`#authorized-navigation-crm-meta_ads a[href="${route}"]`).click();
+      await expect(page).toHaveURL(new RegExp(`${route}$`));
+      await expect(frame.locator("#page-title")).toHaveText(heading);
+      await page.reload();
+      await expect(frame.locator("#page-title")).toHaveText(heading);
+      expect(
+        page
+          .frames()
+          .filter((entry) => entry.parentFrame())
+          .map((entry) => entry.url()),
+      ).toEqual(["about:srcdoc"]);
+    }
+  });
+});
+
 test("Master traverses dashboard, five stages, ranking, partnerships and safe filters", async ({
   browser,
 }) => {
