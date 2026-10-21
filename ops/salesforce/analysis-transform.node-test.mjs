@@ -233,6 +233,18 @@ test("uses each source stage date in Sao Paulo, including UTC midnight boundarie
   assert.equal(facts.find((fact) => fact[0] === 4)[8], 74.5);
 });
 
+test("keeps date-only appointment details on the same Sao Paulo calendar day", () => {
+  const source = input();
+  source.referenceDate = "2026-10-20";
+  source.reports.appointments[0].createdAt = "2026-10-20";
+  source.reports.appointments[0].scheduledAt = "2026-10-20";
+  const analysis = buildSalesforceSnapshot(source).payload.dashboard.analysis;
+  const current = view(analysis);
+  assert.equal(current.facts.find((fact) => fact[0] === 1)[1], "2026-10-20");
+  assert.equal(current.appointments[0].createdAt, "2026-10-20T03:00:00.000Z");
+  assert.equal(current.appointments[0].scheduledAt, "2026-10-20T03:00:00.000Z");
+});
+
 test("missing dimensions use -1 and empty views never inherit labels", () => {
   const source = input();
   const row = source.reports.opportunities[0];

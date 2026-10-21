@@ -48,9 +48,23 @@ function timestamp(value, required = false) {
     if (required) throw invalid();
     return null;
   }
-  const parsed = new Date(raw);
+  // Salesforce date-only fields describe a Sao Paulo calendar day. Parsing
+  // YYYY-MM-DD directly would treat it as UTC and move it to the prior day
+  // when rendered in America/Sao_Paulo.
+  const parsed = new Date(/^\d{4}-\d{2}-\d{2}$/.test(raw) ? `${raw}T00:00:00-03:00` : raw);
   if (!Number.isFinite(parsed.getTime())) throw invalid();
   return parsed.toISOString();
+}
+
+function saoPauloDate(value) {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(new Date(value));
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
 }
 
 export function buildDashboardAnalysis({ referenceDate, views, brokerCount }) {
@@ -89,8 +103,10 @@ export function buildDashboardAnalysis({ referenceDate, views, brokerCount }) {
           approved: stageKey === "folders" && row.approvedFolder ? 1 : 0,
         });
         if (stageKey === "appointments") {
+          const createdAt = timestamp(row.createdAt, true);
+          if (saoPauloDate(createdAt) !== row.date) throw invalid();
           appointments.push({
-            createdAt: timestamp(row.createdAt, true),
+            createdAt,
             scheduledAt: timestamp(row.scheduledAt),
             attendedAt: timestamp(row.attendedAt),
             visitPerformed: row.visitPerformed,

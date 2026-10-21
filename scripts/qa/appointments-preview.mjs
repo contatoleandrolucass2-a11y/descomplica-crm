@@ -69,28 +69,47 @@ const fixture = {
     [1, "2025-12-22", 0, 0, 0, 1, 0, 13, 0, 0, 0],
     [0, "2026-03-01", 0, 0, 0, 1, 0, 99999, 0, 0, -1],
   ],
-  appointments: Array.from({ length: 31 }, (_, day) =>
-    Array.from({ length: (day % 4) + 1 }, (_, record) => ({
-      createdAt: `2026-03-${String(day + 1).padStart(2, "0")}T12:${String(record).padStart(2, "0")}:00Z`,
-      scheduledAt: day === 30 ? `2026-03-31T15:${String(record).padStart(2, "0")}:00Z` : null,
-      attendedAt:
-        day === 30 && record % 2 === 0
-          ? `2026-03-31T16:${String(record).padStart(2, "0")}:00Z`
-          : null,
-      visitPerformed: day === 30 && record % 2 === 0,
-      regionalManager: `Regional sintético ${(day % 3) + 1}`,
-      salesManager: [
-        "Ana Gerente sintética com sobrenome extenso",
-        "Bruno Gerente sintético",
-        "Clara Gerente sintética",
-        "Davi Gerente sintético",
-        "Eva Gerente sintética",
-      ][day % 5],
-      owner: owners[day % owners.length],
-      accountName: `Conta sintética ${String(day + 1).padStart(2, "0")}`,
-      accountRanking: ["Ouro", "Prata", "Bronze"][day % 3],
-    })),
-  ).flat(),
+  appointments: [
+    ...Array.from({ length: 31 }, (_, day) =>
+      Array.from({ length: (day % 4) + 1 }, (_, record) => ({
+        createdAt: `2026-03-${String(day + 1).padStart(2, "0")}T12:${String(record).padStart(2, "0")}:00Z`,
+        scheduledAt: day === 30 ? `2026-03-31T15:${String(record).padStart(2, "0")}:00Z` : null,
+        attendedAt:
+          day === 30 && record % 2 === 0
+            ? `2026-03-31T16:${String(record).padStart(2, "0")}:00Z`
+            : null,
+        visitPerformed: day === 30 && record % 2 === 0,
+        regionalManager: `Regional sintético ${(day % 3) + 1}`,
+        salesManager: [
+          "Ana Gerente sintética com sobrenome extenso",
+          "Bruno Gerente sintético",
+          "Clara Gerente sintética",
+          "Davi Gerente sintético",
+          "Eva Gerente sintética",
+        ][day % 5],
+        owner: owners[day % owners.length],
+        accountName: `Conta sintética ${String(day + 1).padStart(2, "0")}`,
+        accountRanking: ["Ouro", "Prata", "Bronze"][day % 3],
+      })),
+    ).flat(),
+    ...[
+      ["2026-01-12", 7],
+      ["2025-10-14", 9],
+      ["2025-12-22", 13],
+    ].flatMap(([date, count]) =>
+      Array.from({ length: count }, (_, index) => ({
+        createdAt: `${date}T12:${String(index).padStart(2, "0")}:00Z`,
+        scheduledAt: null,
+        attendedAt: null,
+        visitPerformed: false,
+        regionalManager: "Regional histórico",
+        salesManager: "Ana Gerente sintética com sobrenome extenso",
+        owner: owners[0],
+        accountName: "Conta histórica",
+        accountRanking: "Ouro",
+      })),
+    ),
+  ],
 };
 
 async function productionCss(viteCss) {
@@ -181,7 +200,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} individualGoal={24} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -271,7 +290,7 @@ export async function runAppointmentsPreview() {
             );
             const rects = [...list.children].map((item) => {
               const range = document.createRange();
-              range.selectNodeContents(item.lastElementChild);
+              range.selectNodeContents(item.querySelector('[class*="columnLabel"]'));
               return range.getBoundingClientRect();
             });
             return rects
@@ -335,7 +354,7 @@ export async function runAppointmentsPreview() {
             .slice(1, 4)
             .every((section) => Math.abs(section.height - geometry.sections[1].height) < 1) &&
             geometry.sections
-              .slice(4)
+              .slice(4, 7)
               .every((section) => Math.abs(section.height - geometry.sections[4].height) < 1),
           `Uniform grouped chart heights ${theme}/${width}`,
         );
@@ -370,9 +389,11 @@ export async function runAppointmentsPreview() {
     await expect(daily.getByRole("listitem")).toHaveCount(31);
     const barGeometry = await daily.getByRole("listitem").evaluateAll((items) =>
       items.map((item) => ({
-        trackHeight: item.firstElementChild.getBoundingClientRect().height,
-        barHeight: item.firstElementChild.firstElementChild.getBoundingClientRect().height,
-        barWidth: item.firstElementChild.firstElementChild.getBoundingClientRect().width,
+        trackHeight: item.firstElementChild.firstElementChild.getBoundingClientRect().height,
+        barHeight:
+          item.firstElementChild.firstElementChild.firstElementChild.getBoundingClientRect().height,
+        barWidth:
+          item.firstElementChild.firstElementChild.firstElementChild.getBoundingClientRect().width,
       })),
     );
     barGeometry.forEach((bar, index) => {
@@ -385,7 +406,11 @@ export async function runAppointmentsPreview() {
     const rankingBars = await region("Ranking por responsável")
       .getByRole("listitem")
       .evaluateAll((items) =>
-        items.map((item) => item.lastElementChild.firstElementChild.getBoundingClientRect().height),
+        items.map(
+          (item) =>
+            item.firstElementChild.lastElementChild.firstElementChild.getBoundingClientRect()
+              .height,
+        ),
       );
     check(
       rankingBars.every((height) => height > 0),
@@ -396,7 +421,9 @@ export async function runAppointmentsPreview() {
     assert.deepEqual(
       await daily
         .getByRole("listitem")
-        .evaluateAll((items) => items.map((item) => item.getAttribute("aria-label"))),
+        .evaluateAll((items) =>
+          items.map((item) => item.firstElementChild.getAttribute("aria-label")),
+        ),
       Array.from(
         { length: 31 },
         (_, index) =>
@@ -407,7 +434,9 @@ export async function runAppointmentsPreview() {
     assert.deepEqual(
       await region("Agendamentos por semana")
         .getByRole("listitem")
-        .evaluateAll((items) => items.map((item) => item.getAttribute("aria-label"))),
+        .evaluateAll((items) =>
+          items.map((item) => item.firstElementChild.getAttribute("aria-label")),
+        ),
       [1, 19, 16, 17, 18, 5].map((count, index) => `${index + 1}ª semana: ${count} agendamentos`),
       "Monday-to-Sunday weeks 1 through 6 and exact totals",
     );
@@ -454,22 +483,25 @@ export async function runAppointmentsPreview() {
     evidence.filters =
       "2025 exclusive year keeps daily March unchanged; global January keeps annual 2025 unchanged; zero months/weeks absent";
     await page.goto(origin);
+    const firstDay = region("Evolução de agendamentos por dia").getByRole("button").first();
+    await firstDay.click();
+    await expect(firstDay).toHaveAttribute("aria-pressed", "true");
+    await expect(page.getByRole("button", { name: "Limpar 1 filtro" })).toBeVisible();
+    await expect(page.getByText("1 registros no período")).toBeVisible();
+    await page.getByRole("button", { name: "Limpar 1 filtro" }).click();
+    const firstRow = page.locator("tbody tr").first();
+    await firstRow.focus();
+    await page.keyboard.press("Enter");
+    await expect(firstRow).toHaveAttribute("aria-selected", "true");
+    await expect(page.getByRole("button", { name: /Limpar \d+ filtros/ })).toBeVisible();
+    evidence.crossFilters =
+      "Daily column click filters every result; clear restores the page; Enter on a full table row applies its dimensions";
+    await page.getByRole("button", { name: /Limpar \d+ filtros/ }).click();
+    await page.goto(origin);
     await page.keyboard.press("Tab");
     await expect(page.getByLabel("Período dos gráficos, indicadores e tabela")).toBeFocused();
-    // Chromium month inputs contain native month/year segments and a calendar button.
-    // Traverse those native stops before checking the next application control.
-    let tabStops = 0;
-    while (
-      !(await page
-        .getByLabel("Ano", { exact: true })
-        .evaluate((element) => element === document.activeElement)) &&
-      tabStops < 20
-    ) {
-      await page.keyboard.press("Tab");
-      tabStops++;
-    }
-    await expect(page.getByLabel("Ano", { exact: true })).toBeFocused();
-    evidence.keyboard = `Tab reaches period then exclusive year after ${tabStops} native month-input stops`;
+    evidence.keyboard =
+      "Tab reaches the global period; chart buttons and rows use native keyboard controls";
     await page.goto(`${origin}/?empty=1`);
     await expect(
       page.getByText(
@@ -484,15 +516,15 @@ export async function runAppointmentsPreview() {
       "Null slice shows unavailable state; v1 slice refuses fabricated operational rankings";
     await page.goto(`${origin}/?restricted=1`);
     check(
-      (await region("Ranking das contas").innerText()).includes(
-        "Ranking das contas indisponível para seu perfil de acesso",
+      (await region("Ranking Score").innerText()).includes(
+        "Ranking Score indisponível para seu perfil de acesso",
       ),
       "Restricted account ranking must stay unavailable",
     );
     evidence.largeValues = [];
     for (const width of [1440, 320]) {
       await page.setViewportSize({ width, height: 900 });
-      await page.goto(`${origin}/?large=1`);
+      await page.goto(`${origin}/?large=1&legacy=1`);
       await expect(daily.getByRole("listitem")).toHaveCount(31);
       const collisions = await daily.evaluate((element) => {
         const list = element.querySelector("ol");
