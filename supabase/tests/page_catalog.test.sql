@@ -11,20 +11,20 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  37::bigint,
-  'thirty-seven platform and CRM permissions are seeded'
+  41::bigint,
+  'forty-one platform and CRM permissions are seeded'
 );
 
 select is(
   (select count(*) from public.app_pages),
-  28::bigint,
+  32::bigint,
   'the catalog contains exactly the approved production pages'
 );
 
 select is(
   (select count(*) from public.app_pages where is_active and is_navigation),
-  28::bigint,
-  'exactly the approved twenty-eight production pages are active navigation entries'
+  32::bigint,
+  'exactly the approved thirty-two production pages are active navigation entries'
 );
 
 select is(
@@ -367,7 +367,7 @@ select lives_ok(
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  28::bigint,
+  32::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 

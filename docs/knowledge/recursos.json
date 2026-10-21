@@ -76,6 +76,10 @@
       "skill": "descomplica-dados-integracoes",
       "routes": [
         "app/(protected)/app/page.tsx",
+        "app/(protected)/app/meta-ads/page.tsx",
+        "app/(protected)/app/meta-ads/campanhas/page.tsx",
+        "app/(protected)/app/meta-ads/contas-de-anuncios/page.tsx",
+        "app/(protected)/app/meta-ads/relatorios/page.tsx",
         "app/(protected)/app/repasse/page.tsx",
         "app/(protected)/app/etapas/[stage]/page.tsx",
         "app/(protected)/app/ranking/page.tsx",
@@ -84,6 +88,8 @@
       ],
       "evidence": [
         "tests/dashboard.test.ts",
+        "tests/meta-ads-dashboard.test.tsx",
+        "docs/audits/meta-ads-dashboard-local-2026-10-20.md",
         "tests/repasse.test.ts",
         "tests/repasse-action.test.ts",
         "scripts/qa/repasse.mjs",

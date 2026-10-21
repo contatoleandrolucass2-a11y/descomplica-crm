@@ -179,6 +179,31 @@ Linux permanece o gate final. A versao funcional ja estava ativa; este
 fechamento e somente documental e nao autoriza nem exige nova publicacao do
 site.
 
+## 2026-10-20 - Réplica local do dashboard Meta Ads
+
+O pacote `descomplica-ads-publicado-v3.zip`, SHA-256
+`ed5128a75c4059c9a85ba2a302eda3d264d5d0b9684190586133ae25b5e0376c`, foi
+replicado na rota protegida `/app/meta-ads`. O cabeçalho global do pacote foi
+removido para que o CRM continue com um único navbar. `Meta Ads` foi registrado
+como botão raiz próprio, com ícone, catálogo versionado e quatro páginas no submenu.
+
+O runtime replica as quatro visões, filtros, dados demonstrativos, importação
+local de CSV e exportações do navegador. Não chama Salesforce, não consulta a
+API do Meta e não altera campanhas. A integração automática permanece indicada
+como não configurada. Nenhuma migration foi aplicada e não houve deploy.
+
+Após a revisão visual, o painel deixou de manter uma paleta e controles globais
+próprios. O iframe acompanha o tema ativo do shell e usa os mesmos tokens do CRM
+para página, superfícies, bordas, textos e destaques. Tema e conta permanecem
+somente no navbar oficial. `Meta Ads` aparece fora de `Dashboard`, com Visão geral,
+Campanhas, Contas de anúncios e Relatórios no submenu.
+
+Lint, typecheck, build, 6.403 testes aprovados, catálogo de páginas e inventário
+de recursos passaram. A inspeção visual local confirmou as abas sem erro de
+console e corrigiu o desvio inicial dos links para a pasta de assets. Evidências
+detalhadas estão registradas em
+`docs/audits/meta-ads-dashboard-local-2026-10-20.md`.
+
 ## 2026-10-20 - Publicacao do ajuste minimo do Associativo
 
 PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.

@@ -786,7 +786,7 @@
   }
 }
 
-@media (min-width: 1181px) and (max-width: 1250px) {
+@media (min-width: 1181px) and (max-width: 1320px) {
   .navigationIcon {
     display: none;
   }

@@ -27,7 +27,7 @@ describe("protected commercial page set", () => {
     },
   );
 
-  it("matches the exact approved twenty-eight-page protected set", () => {
+  it("matches the exact approved thirty-two-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -41,6 +41,10 @@ describe("protected commercial page set", () => {
         "crm.management.routine|/app/gestao/rotina|crm.management.routine.view",
         "crm.management.forecast|/app/gestao/previsao|crm.management.forecast.view",
         "crm.management|/app/gestao|crm.management.view",
+        "crm.meta_ads.accounts|/app/meta-ads/contas-de-anuncios|crm.meta_ads.accounts.view",
+        "crm.meta_ads.campaigns|/app/meta-ads/campanhas|crm.meta_ads.campaigns.view",
+        "crm.meta_ads.reports|/app/meta-ads/relatorios|crm.meta_ads.reports.view",
+        "crm.meta_ads|/app/meta-ads|crm.meta_ads.view",
         "crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view",
         "crm.repasse|/app/repasse|crm.repasse.view",
         "crm.ranking|/app/ranking|crm.ranking.view",
@@ -74,10 +78,10 @@ describe("protected commercial page set", () => {
     ).toEqual([]);
   });
 
-  it("keeps the full twenty-eight-route smoke inventory unique", () => {
-    expect(PROTECTED_PAGE_GATES).toHaveLength(28);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(28);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(28);
+  it("keeps the full thirty-two-route smoke inventory unique", () => {
+    expect(PROTECTED_PAGE_GATES).toHaveLength(32);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(32);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(32);
   });
 
   it("keeps Repasse restricted to Master and Admin in addition to its permission", () => {
