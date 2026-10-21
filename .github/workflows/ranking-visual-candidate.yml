@@ -3,11 +3,13 @@ name: Protected visual candidate
 on:
   pull_request:
     paths:
+      - "app/(protected)/_components/**"
       - "app/(protected)/app/ranking/**"
       - "app/(protected)/app/canal-de-parcerias/**"
       - "app/(protected)/app/configuracoes/conectar-sistemas/**"
       - "app/(protected)/app/etapas/_components/AppointmentsDashboard.*"
       - "lib/crm/qlik/**"
+      - "lib/navigation/**"
       - ".github/workflows/ranking-visual-candidate.yml"
 
 permissions:
