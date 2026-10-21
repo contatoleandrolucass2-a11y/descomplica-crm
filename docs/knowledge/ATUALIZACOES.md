@@ -1,5 +1,75 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: reconciliacao final com a main para metas Imob
+
+- A branch `codex/dashboard-imob-goals-sync` integrou `origin/main` em
+  `c1e931d5ad805f9f43766d67f1d7f297e99a31ae`, preservando tanto as metas e os
+  quatro estagios Imob quanto as entregas posteriores de previsao e impressao.
+- O inventario reconciliado contem 71 migrations, 37 arquivos pgTAP e 2.079
+  assercoes esperadas. O teste focal do candidato de release aprovou 23 casos.
+- No Windows, lint, typecheck e build de 57 rotas foram aprovados. A suite
+  integral aprovou 3.975 testes e pulou 105; somente dois casos de I/O do
+  `obsidian-knowledge` excederam o timeout sob paralelismo. O mesmo arquivo,
+  executado isoladamente, aprovou os 22 casos. A CI Linux do SHA reconciliado
+  continua obrigatoria antes da integracao e publicacao.
+- A autorizacao explicita do usuario para aplicar a migration aditiva
+  `20261020130000_dashboard_imob_goals.sql` vale somente para esta entrega. O
+  coordenador protegido, o restore isolado, o artefato imutavel e a verificacao
+  pos-publicacao permanecem obrigatorios.
+- A primeira CI do SHA reconciliado aprovou formatacao, lint, typecheck e todos
+  os testes, mas foi bloqueada por `GHSA-22jm-h49p-29qw` no SDK transitivo do
+  `next-devtools-mcp`. O override passou de `1.31.0` para `1.32.1`; o auditor
+  nao encontra vulnerabilidade alta ou critica apos a atualizacao.
+- A reconciliacao posterior da `main` encontrou o novo aviso
+  `GHSA-587h-7wmj-h5pm` no Vite transitivo do Vitest. O override minimo passa a
+  usar `8.2.4`, sem alterar dependencias de runtime.
+
+## 2026-10-20: implementacao local das metas Imob e referencia de coleta
+
+- Status: implementacao local concluida na branch
+  `codex/dashboard-imob-goals-sync`, ainda sem migration remota, merge ou
+  publicacao. A base analisada foi `origin/main` em `aa8b2d6d`.
+- Todas as paginas de relatorio ja usam o `generated_at` persistido do snapshot.
+  O cartao Salesforce era a excecao: exibia `checkedAt`, que representa apenas
+  a sondagem de conexao. Agora ele usa o mesmo `generatedAt` persistido, com
+  `lastExportAt` como fallback de sessao.
+- A meta ativa de `partnerships` passa a alimentar o Dashboard Imob. Visitas,
+  Pastas, Pastas aprovadas e Vendas sao multiplicadas pelos sete gerentes
+  informados; Meta esperada ate hoje aplica a proporcao do dia corrente sobre
+  os dias do mes. O Dashboard arredonda as leituras exibidas para baixo.
+- Os 13 funis Imob e seus historicos exibem apenas quatro estagios. House segue
+  com seis. A conversao total Imob passa a representar Vendas sobre Visitas.
+- A migration `20261020130000_dashboard_imob_goals.sql` altera apenas a policy
+  SELECT de `crm_funnel_goals`: preserva acessos existentes e permite ler
+  somente `partnerships` quando Dashboard e Imob estiverem autorizados. Escrita,
+  grants e outros perfis nao mudam.
+- Evidencias locais: 136 testes focais e 3.963 testes Vitest aprovados, com 102
+  skips condicionais; lint, typecheck e build de 57 rotas aprovados com Node
+  24.19. O QA visual aprovou 267 checks em cinco larguras e tres temas, incluindo
+  filtros, historicos, Axe, overflow, cortes e sobreposicoes.
+- Limites do host: pgTAP indisponivel por ausencia de Docker ou Podman. O comando
+  integral para em tres testes Meta Ads dependentes de ACL/diretorios Linux; o
+  gate de release reproduz o limite em fixtures fisicas do host. Os arquivos
+  afetados nao pertencem a essa integracao. CI Ubuntu, restore isolado, 2.049
+  assercoes pgTAP e gates fisicos continuam obrigatorios antes da migration ou
+  publicacao.
+
+## 2026-10-20: abertura do ajuste de atualizacao e metas Imob
+
+- Checkout limpo criado de `origin/main` em
+  `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`, separado do branch documental
+  anterior. Git comum confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`.
+- Consulta `2026-10-20T12:22Z`: CI `39421287684` da `main` em andamento no SHA
+  `aa8b2d6d`; a anterior `39411919967` aprovou `099493a9`. Health publico
+  HTTP 200, `status=ok`, versao publicada `08d050f9`. Estados local, integrado,
+  CI e publicado permanecem distintos.
+- Escopo: fazer paginas baseadas nos relatorios Salesforce exibirem a mesma
+  referencia de atualizacao da integracao; em `Imob`, remover Oportunidades e
+  Agendamentos de todos os funis e calcular Meta mes/Meta esperada com a meta
+  ativa de Parcerias multiplicada pelos sete gerentes informados. Nao alterar
+  dados remotos, disparar coleta ou mudar workflow n8n nesta abertura.
+
 ## 2026-10-20: Agendamentos v3 integrado, publicado e aceito em ciclos reais
 
 - O PR #274 foi integrado no merge

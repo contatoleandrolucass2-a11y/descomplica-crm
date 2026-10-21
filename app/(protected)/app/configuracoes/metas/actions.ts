@@ -104,6 +104,7 @@ export async function saveFunnelGoalsAction(
 
   if (error) redirect(`${profilePath}?error=save`);
   revalidatePath(profilePath);
+  revalidatePath("/app");
   redirect(`${profilePath}?saved=active`);
 }
 

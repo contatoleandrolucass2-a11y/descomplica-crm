@@ -18,6 +18,7 @@ export interface DashboardMonthlyHistoryProps {
   months: DashboardMonthlyHistoryMonth[];
   missingReason?: string;
   coverage?: string;
+  stageKeys?: readonly DashboardFunnelKey[];
 }
 
 const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
@@ -26,7 +27,7 @@ const monthFormatter = new Intl.DateTimeFormat("pt-BR", {
   timeZone: "UTC",
 });
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 2 });
-const stageKeys = DASHBOARD_FUNNEL_STAGES.map(({ key }) => key);
+const allStageKeys = DASHBOARD_FUNNEL_STAGES.map(({ key }) => key);
 
 function monthLabel(month: string) {
   if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) return month;
@@ -43,6 +44,7 @@ export function DashboardMonthlyHistory({
   months,
   missingReason,
   coverage,
+  stageKeys = allStageKeys,
 }: DashboardMonthlyHistoryProps) {
   const id = useId();
   const dialogRef = useRef<HTMLDialogElement>(null);

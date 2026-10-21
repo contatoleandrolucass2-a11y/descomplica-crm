@@ -17,6 +17,7 @@ const syncStatusResponseSchema = z.object({
 
 export type IntegrationEvidence = {
   checkedAt: string;
+  generatedAt: string | null;
   ingestion: z.infer<typeof syncStatusResponseSchema>["ingestion"];
 };
 
@@ -40,7 +41,11 @@ export async function fetchIntegrationEvidence(
     ) {
       return null;
     }
-    return { checkedAt, ingestion: parsed.data.ingestion };
+    return {
+      checkedAt,
+      generatedAt: parsed.data.generatedAt,
+      ingestion: parsed.data.ingestion,
+    };
   } catch {
     return null;
   }

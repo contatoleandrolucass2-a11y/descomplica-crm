@@ -47,6 +47,7 @@ describe("integration service evidence", () => {
       },
       supabase: { label: "Leitura confirmada", timestamp: checkedAt },
     });
+    expect(evidence?.generatedAt).toBe(completedAt);
   });
 
   it("keeps an old receipt historical instead of claiming ongoing n8n availability", async () => {

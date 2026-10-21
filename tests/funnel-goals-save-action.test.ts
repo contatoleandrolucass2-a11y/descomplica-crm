@@ -71,7 +71,8 @@ describe("saveFunnelGoalsAction", () => {
         p_productive_team_sales: 11,
       }),
     );
-    expect(mocks.revalidatePath).toHaveBeenCalledExactlyOnceWith("/app/configuracoes/metas");
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(1, "/app/configuracoes/metas");
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, "/app");
   });
 
   it("rejects a form loaded for a previous month", async () => {
@@ -116,9 +117,8 @@ describe("saveFunnelGoalsAction", () => {
         p_sales: 12,
       }),
     );
-    expect(mocks.revalidatePath).toHaveBeenCalledExactlyOnceWith(
-      "/app/configuracoes/metas/parcerias",
-    );
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(1, "/app/configuracoes/metas/parcerias");
+    expect(mocks.revalidatePath).toHaveBeenNthCalledWith(2, "/app");
   });
 
   it("rejects an unknown goals profile", async () => {

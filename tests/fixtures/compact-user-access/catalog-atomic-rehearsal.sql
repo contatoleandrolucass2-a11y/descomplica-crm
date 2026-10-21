@@ -81,5 +81,6 @@ select is((select count(*) from qa_atomic.before_state, jsonb_array_elements(sta
 select is((select count(*) from qa_atomic.before_state, jsonb_array_elements(state->'policies') old_policy join jsonb_array_elements(qa_atomic.snapshot()->'policies') new_policy on old_policy->>'oid'=new_policy->>'oid' where old_policy is distinct from new_policy),5::bigint,'commit changes exactly five target policies');
 select * from finish();
 rollback;
+\ir ../../../supabase/migrations/20261020130000_dashboard_imob_goals.sql
 \ir ../../../supabase/tests/individual_page_data_access.test.sql
 \endif

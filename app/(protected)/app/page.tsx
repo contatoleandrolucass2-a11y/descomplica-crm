@@ -12,6 +12,7 @@ import {
 } from "@/lib/crm/dashboard/analysis";
 import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
 import { getSalesforceRefreshConfiguration } from "@/lib/crm/salesforce/config";
+import { loadFunnelGoals } from "@/lib/crm/goals/data";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
 import { DashboardReport } from "./_components/DashboardReport";
@@ -40,10 +41,15 @@ export default async function AppHomePage({
     selectedView === "all" && filters.channel.length === 1 ? filters.channel : [profileChannel];
   const canViewRanking = authorization.permissions.includes("crm.ranking.view");
   const pages = await getAuthorizedNavigation(authorization);
-  const result = await loadDashboardReadModel([selectedView], {
-    includeTopDevelopments: canViewRanking,
-    includeAnalysis: true,
-  });
+  const [result, partnershipGoalResult] = await Promise.all([
+    loadDashboardReadModel([selectedView], {
+      includeTopDevelopments: canViewRanking,
+      includeAnalysis: true,
+    }),
+    filters.channel[0] === DASHBOARD_CHANNELS[0]
+      ? loadFunnelGoals("partnerships")
+      : Promise.resolve(null),
+  ]);
   const sourceDashboard = result.status === "ready" ? result.dashboard : null;
   const today = new Intl.DateTimeFormat("en-CA", {
     timeZone: "America/Sao_Paulo",
@@ -74,6 +80,15 @@ export default async function AppHomePage({
   const canRefresh =
     authorization.permissions.includes("crm.salesforce.refresh") &&
     getSalesforceRefreshConfiguration().available;
+  const partnershipGoals =
+    partnershipGoalResult?.status === "ready"
+      ? {
+          visits: partnershipGoalResult.goals.visits,
+          folders: partnershipGoalResult.goals.folders,
+          "approved-folders": partnershipGoalResult.goals.approvedFolders,
+          sales: partnershipGoalResult.goals.sales,
+        }
+      : null;
 
   return (
     <main className={styles.canvasMain}>
@@ -83,6 +98,7 @@ export default async function AppHomePage({
         selectedPeriod="month"
         analysis={analysis}
         goalBrokerCount={goalBrokerCount}
+        partnershipGoals={partnershipGoals}
         filters={filters}
         today={today}
         authorizedViews={authorizedViews}
