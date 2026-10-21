@@ -96,6 +96,7 @@ overrides e transitivas necessarias. Instalacao frozen, supply chain,
 protocolo dos DevTools e auditoria high aprovados; um moderado permanece.
 Este fechamento de documentos/ferramentas nao requer nova publicacao
 do runtime. Sem excecao no audit e sem ampliar permissoes dos MCPs.
+
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
