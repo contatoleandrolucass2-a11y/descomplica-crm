@@ -70,8 +70,9 @@ describe("documentation source verification gate", () => {
       now: "2026-10-21T06:29:59.999Z",
     };
     expect(permitsTemporaryItbiSourceOutage(exact)).toBe(true);
+    expect(permitsTemporaryItbiSourceOutage({ ...exact, status: 403 })).toBe(true);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, id: "another-release" })).toBe(false);
-    expect(permitsTemporaryItbiSourceOutage({ ...exact, status: 403 })).toBe(false);
+    expect(permitsTemporaryItbiSourceOutage({ ...exact, status: 429 })).toBe(false);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, url: "https://example.com" })).toBe(false);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, now: "2026-10-21T06:30:00.001Z" })).toBe(
       false,

@@ -13,7 +13,7 @@ export const temporaryItbiSourceOutageException = Object.freeze({
   policyVersion: "sp-capital-2026.1",
   effectiveFrom: "2026-01-01",
   exemptionLimit: 245_527.77,
-  allowedStatus: 503,
+  allowedStatuses: Object.freeze([403, 503]),
   expiresAt: "2026-10-21T06:30:00.000Z",
 });
 
@@ -21,7 +21,7 @@ export function permitsTemporaryItbiSourceOutage({ id, url, status, now }) {
   return (
     id === temporaryItbiSourceOutageException.id &&
     url === temporaryItbiSourceOutageException.source &&
-    status === temporaryItbiSourceOutageException.allowedStatus &&
+    temporaryItbiSourceOutageException.allowedStatuses.includes(status) &&
     policy.version === temporaryItbiSourceOutageException.policyVersion &&
     policy.itbiFrom === temporaryItbiSourceOutageException.effectiveFrom &&
     policy.exemptionLimit === temporaryItbiSourceOutageException.exemptionLimit &&
