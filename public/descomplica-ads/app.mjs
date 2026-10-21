@@ -156,10 +156,11 @@ function render(){
   $$('.chart-point').forEach(el=>{el.addEventListener('pointermove',e=>showChartTooltip(e,Number(el.dataset.point)));el.addEventListener('pointerleave',()=>$('.chart-tooltip')?.remove());});
   comparisons.bind();
 }
-function go(view){state.view=['overview','campaigns','accounts','reports','integrations'].includes(view)?view:'overview';state.page=1;state.query='';if(location.hash!=='#'+state.view)location.hash=state.view;render();}
+function go(view){state.view=['overview','campaigns','accounts','reports','integrations'].includes(view)?view:'overview';state.page=1;state.query='';render();}
 function showChartTooltip(event,index){$('.chart-tooltip')?.remove();const p=chartSeries()[index];if(!p)return;const g=context(currentRows()).goal,health=costState(p,g.limit,rules),el=document.createElement('div');el.className='chart-tooltip '+health.level;el.innerHTML=`<strong>${date(p.date,{year:'numeric'})}${p.until?' – '+date(p.until):''}</strong><span>Investimento <b>${currency(p.spend)}</b></span><span>${esc(destination().result)} <b>${integer(p.conversions)}</b></span><span>${esc(destination().unit)} <b>${money(p.cpa)}</b></span><span>Teto <b>${currency(g.limit)}</b></span><small>${esc(health.label)}</small>`;document.body.append(el);el.style.left=Math.max(8,Math.min(event.clientX+15,window.innerWidth-el.offsetWidth-12))+'px';el.style.top=Math.max(8,Math.min(event.clientY+15,window.innerHeight-el.offsetHeight-12))+'px';}
 document.addEventListener('click',event=>{
   const el=event.target.closest('button,a');if(!el)return;
+  if(el.matches('a.skip-link')){event.preventDefault();$('#main').focus();$('#main').scrollIntoView();return;}
   if(el.hasAttribute('data-settings'))settingsModal();
   else if(el.hasAttribute('data-glossary'))glossaryModal();
   else if(el.hasAttribute('data-import'))importModal();
@@ -189,6 +190,5 @@ $('#reset-filters').addEventListener('click',()=>{Object.assign(state,{account:'
 $('#import-button').addEventListener('click',importModal);$('#csv-input').addEventListener('change',e=>{if(e.target.files.length)readFile(e.target.files[0]);});
 $('#export-button').addEventListener('click',()=>exportReport(state.view==='accounts'?'account':state.view==='campaigns'?state.level:'campaign'));
 $('#alerts-button').addEventListener('click',alertsModal);$('#connections-button').addEventListener('click',()=>go('integrations'));
-window.addEventListener('hashchange',()=>{state.view=['overview','campaigns','accounts','reports','integrations'].includes(location.hash.slice(1))?location.hash.slice(1):'overview';state.page=1;state.query='';render();});
-state.view=['overview','campaigns','accounts','reports','integrations'].includes(location.hash.slice(1))?location.hash.slice(1):'overview';
+state.view=['overview','campaigns','accounts','reports'].includes(document.documentElement.dataset.crmView)?document.documentElement.dataset.crmView:'overview';
 render();

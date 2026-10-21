@@ -128,7 +128,7 @@ describe("dashboard Meta Ads", () => {
       [MetaAdsReportsPage, "/app/meta-ads/relatorios", "reports"],
     ] as const;
 
-    for (const [renderPage, path] of routes) {
+    for (const [renderPage, path, view] of routes) {
       const page = await renderPage();
       const markup = renderToStaticMarkup(page);
 
@@ -136,13 +136,9 @@ describe("dashboard Meta Ads", () => {
       expect(markup).toContain('aria-label="Dashboard Meta Ads"');
       expect(markup).toContain('title="Descomplica Ads — desempenho de campanhas Meta"');
       expect(markup).toContain("srcDoc=");
+      expect(markup).toContain(`data-crm-view=&quot;${view}&quot;`);
     }
 
-    const frameSource = await readFile(
-      new URL("../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.tsx", import.meta.url),
-      "utf8",
-    );
-    expect(frameSource).toContain("location.replace(`#${initialView}`)");
     expect(routes.map(([, path, view]) => [path, view])).toEqual([
       ["/app/meta-ads", "overview"],
       ["/app/meta-ads/campanhas", "campaigns"],

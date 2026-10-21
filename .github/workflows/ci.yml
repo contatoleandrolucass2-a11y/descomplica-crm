@@ -92,6 +92,9 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Meta Ads iframe navigation with production security headers
+        run: node scripts/qa/meta-ads-frame.mjs
+
       - name: Salesforce console with synthetic RFB authentication and pixels
         run: node scripts/qa/connected-systems.mjs --synthetic
 
