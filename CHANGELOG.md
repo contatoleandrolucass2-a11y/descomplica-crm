@@ -1,5 +1,26 @@
 # Changelog
 
+## 2026-10-20 - Corretores automáticos na Previsão
+
+- Preenche períodos novos com os corretores já relacionados ao gerente no
+  snapshot analítico vigente do CRM, em House e Imob.
+- Mantém previsões salvas como histórico do período e conserva a edição manual
+  de nomes e linhas.
+- Limita a lista automática às 200 linhas aceitas pela tabela e falha sem expor
+  a fonte analítica quando o contrato não está disponível.
+- Atualiza o SDK MCP transitivo do diagnóstico local para a versão corrigida,
+  removendo o bloqueio de segurança encontrado pela CI.
+- Fixa o Vite transitivo dos testes em 8.2.4 para corrigir o advisory publicado
+  durante a validação do PR.
+- Torna imediato o destaque coordenado de corretor, métrica e empreendimento,
+  evitando estados intermediários durante a navegação pela tabela.
+- Aplica em produção os contratos versionados de Plano de ação, períodos e
+  elenco automático, preservando o único documento legado sem alteração.
+- Normaliza acentos ao localizar o gerente no snapshot, para preencher também
+  equipes vinculadas a Álvaro, Fabrício e Thiago de Araújo.
+- Aplica a correção de acentos no Supabase de produção preservando dados,
+  assinatura, owner, guards e privilégios da RPC de corretores.
+
 ## 2026-10-20 - Painel inteligente de agendamentos
 
 - Calcula a meta mensal pelo volume individual projetado no funil multiplicado
@@ -113,8 +134,8 @@
   números de linha e destaca corretor, métrica e empreendimento da célula ativa.
 - Compacta os controles dos empreendimentos junto às bordas e inclui seletores
   de Geral, House, Imob e seus gerentes.
-- Prepara armazenamento aditivo com RLS, RPCs por período, CAS e auditoria sem
-  conteúdo. A migration permanece pendente de CI e autorização remota específica.
+- Publica o armazenamento aditivo com RLS, RPCs por período, CAS e auditoria sem
+  conteúdo, mantendo o singleton legado e sem criar recortes automaticamente.
 
 ## 2026-10-20 - Candidato visual protegido para Agendamentos
 

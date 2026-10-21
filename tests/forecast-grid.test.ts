@@ -16,6 +16,14 @@ import {
 import { forecastSaveSchema } from "@/lib/crm/forecasts";
 
 describe("grouped forecast grid", () => {
+  it("starts a new draft with the supplied CRM broker roster", () => {
+    const document = createForecastDocument(["Ana Corretora", "Bruno Corretor"]);
+    expect(document.rows.map((row) => row.cells.broker)).toEqual([
+      "Ana Corretora",
+      "Bruno Corretor",
+    ]);
+    expect(document.rows.every((row) => row.cells.action_plan === "")).toBe(true);
+  });
   it("starts with seven complete groups, ten rows and valid save payload", () => {
     const document = createForecastDocument();
     expect(getForecastGroups(document)).toHaveLength(7);

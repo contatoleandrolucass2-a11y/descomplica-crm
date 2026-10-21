@@ -146,6 +146,17 @@ describe("manual forecast contract", () => {
         { segment: "house", manager: "amanda", forecast },
       ]).map(({ segment, manager }) => `${segment}:${manager}`),
     ).toEqual(["house:amanda", "imob:thiago-tg"]);
+    const rosterTemplate = createForecastTemplate(source, ["Ana Corretora", "Zélia Corretora"])!;
+    expect(rosterTemplate.rows.map((row) => row.cells.broker)).toEqual([
+      "Ana Corretora",
+      "Zélia Corretora",
+    ]);
+    expect(rosterTemplate.rows.map((row) => row.id)).toEqual(["broker_1", "broker_2"]);
+    expect(
+      rosterTemplate.rows.every((row) =>
+        Object.entries(row.cells).every(([key, value]) => key === "broker" || value === ""),
+      ),
+    ).toBe(true);
     expect(
       forecastSnapshotSchema.safeParse({
         forecast: null,
@@ -223,6 +234,7 @@ describe("manual forecast contract", () => {
       forecast: null,
       sections,
       template: null,
+      brokers: [],
       can_edit: false,
       period: { start: "2026-10-16", end: "2026-10-18" },
       selection: { segment: "general", manager: null },
