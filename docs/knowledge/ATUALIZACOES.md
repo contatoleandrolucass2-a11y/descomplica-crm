@@ -1,5 +1,41 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: metas Imob publicadas e validadas
+
+- O PR #285 foi integrado na `main` em
+  `0b7fc85fe898b9778ea5899fc222e50240692753`. A CI de PR `39522168474`, o
+  candidato visual `39522168518` e a CI de `main` `39527457177` aprovaram
+  formatacao, lint, tipos, testes, build, restore isolado, banco, autorizacao,
+  navegador e a matriz responsiva completa. O PR #278 ficou encerrado como
+  entrega substituida.
+- A migration de Previsao `forecast_period_scopes` ja constava no remoto como
+  `20261021002724`, aplicada pela entrega concorrente junto de
+  `forecast_action_plan` e `forecast_broker_roster`; por isso nao foi repetida.
+  A migration autorizada do Dashboard Imob foi aplicada via Supabase MCP como
+  `20261021021046 dashboard_imob_goals`. A policy resultante exige
+  `crm.dashboard.view` e `crm.dashboard.with_canal_imob.view`; os advisors
+  posteriores mantiveram somente avisos preexistentes fora do escopo.
+- O artefato promovivel `12313489767` teve ZIP
+  `sha256:d2c3f77c4700d7f540d09e0a5058b0da35a761c99a0f17908cae38d1a8638e0e`.
+  O arquivo interno passou no checksum, revisao e label. A diferenca esperada
+  entre config da CI `sha256:c443758f9df914b8b05df1aa7d7070cfab95b3cfc1baf540f9861bb2ae95354d`
+  e manifesto containerd
+  `sha256:76f51d2194893a1282abf07cfac5ca4ed64b7d90580bb0b536dddb0fca29790c`
+  foi ligada pelo mesmo indice OCI, 11 camadas e RootFS. `image:prove` aprovou
+  os dois perfis sem rebuild.
+- O coordenador protegido publicou o SHA em `2026-10-21T02:13:21.009Z`
+  (`20/10/2026 23:13:21` America/Sao_Paulo), deployment
+  `d94c84ea-8b89-44ed-8cc6-e19cb09e9462`, sem pendencia. Health publico retornou
+  HTTP 200/ok na versao exata e `/app` anonimo permaneceu em HTTP 307.
+- O relatorio visual autenticado do SHA publicado aprovou Dashboard em 320,
+  390, 768, 1440 e 1920 px nos temas claro, medio e escuro. `scrollWidth`
+  coincidiu com o viewport em todos os cenarios; filtros fecharam por clique
+  externo e Escape; historico Imob nao apresentou recorte; arredondamento para
+  baixo e funis restritos passaram. O controlador CUA da aba autenticada local
+  falhou ao inicializar por caminho ausente, portanto nao houve segunda captura
+  manual pos-publicacao nesta sessao; essa limitacao nao substitui nem invalida
+  a matriz protegida concluida no mesmo SHA.
+
 ## 2026-10-20: reconciliacao final com a main para metas Imob
 
 - A branch `codex/dashboard-imob-goals-sync` integrou `origin/main` em

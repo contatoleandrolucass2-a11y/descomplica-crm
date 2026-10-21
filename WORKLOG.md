@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-20: publicacao das metas e funis Imob
+
+O PR #285 foi integrado em `0b7fc85f` depois das CIs de PR e candidato visual
+aprovarem. A CI de `main` `39527457177` concluiu os quatro jobs obrigatorios,
+incluindo restore isolado, release-gates e imagem promovivel. A migration
+`dashboard_imob_goals` foi aplicada via Supabase MCP; `forecast_period_scopes`
+ja estava presente pela entrega concorrente e nao foi repetida.
+
+O artefato `12313489767` foi carregado sem rebuild, provado nos dois perfis e
+promovido exclusivamente por `release:production`. O deployment
+`d94c84ea-8b89-44ed-8cc6-e19cb09e9462` publicou o SHA `0b7fc85f` as 23:13:21
+de Sao Paulo, sem pendencia; health publico e redirect anonimo foram conferidos.
+A matriz visual do mesmo SHA aprovou os tres temas em 320, 390, 768, 1440 e
+1920 px, sem overflow horizontal, e confirmou fechamento externo dos filtros,
+historico Imob, arredondamento e acessibilidade. A captura manual autenticada
+nao foi repetida porque o controlador CUA local falhou ao inicializar.
+
 ## 2026-10-20: metas e atualização sincronizada do Dashboard Imob
 
 O Dashboard Imob passou a carregar a meta ativa de Parcerias do mês vigente.
