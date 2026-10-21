@@ -14,6 +14,8 @@
   durante a validação do PR.
 - Torna imediato o destaque coordenado de corretor, métrica e empreendimento,
   evitando estados intermediários durante a navegação pela tabela.
+- Aplica em produção os contratos versionados de Plano de ação, períodos e
+  elenco automático, preservando o único documento legado sem alteração.
 
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 

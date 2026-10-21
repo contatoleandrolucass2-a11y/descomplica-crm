@@ -1833,3 +1833,35 @@ dependente da autorização específica aplicável.
 - Antes do build da quarta CI, um advisory recém-publicado bloqueou Vite 8.2.0
   a 8.2.3, dependência transitiva do Vitest. O projeto passou a forçar Vite
   8.2.4, versão corrigida, sem trocar a versão do executor de testes.
+
+### CI aprovada e migrations autorizadas em produção
+
+- A execução CI `39506011102` aprovou `validate`, `isolated-restore` e
+  `release-gates` no SHA
+  `3437f9a0c15786fee830b6de2fc3e8c562ad4d7d`. O job de imagem promovível foi
+  corretamente ignorado por se tratar de PR.
+- Após autorização específica do usuário em 20/10/2026, o Supabase de produção
+  aplicou, nesta ordem, as migrations locais
+  `20261019004204_forecast_action_plan.sql`,
+  `20261020122216_forecast_period_scopes.sql` e
+  `20261020204500_forecast_broker_roster.sql`. O ledger remoto registrou
+  `20261021002706_forecast_action_plan`,
+  `20261021002724_forecast_period_scopes` e
+  `20261021002737_forecast_broker_roster`; a diferença de timestamp é do
+  aplicador remoto e não autoriza reparo ou reaplicação.
+- SHA-256 dos arquivos aplicados, na mesma ordem:
+  `bac79025080c09ce45500966c2ef5eb9237e796ab0d9cfce9a22b0a6d64d213f`,
+  `db1c688751b21d32aa84acd2ccb3c5bf752fad9d3aa88b929c6d6819f23808d8` e
+  `486ca992f3637b8ff82e792421a1bd6be030b29d43bba4f304162eddfbfb7586`.
+- O pós-check confirmou `crm_forecast_periods` vazia, RLS forçado, leitura e
+  gravação somente pelas RPCs autorizadas e o novo elenco executável apenas por
+  `authenticated`. O documento legado permaneceu com uma linha e digest
+  `5a44047fd53a72f0bc5b9f72c3fa6bf92c136144859c5f3fc48ea7e0025c8e9b`.
+- O advisor de segurança não apontou acesso anônimo novo. O advisor de
+  desempenho registrou como informativa a ausência de índice isolado na chave
+  `updated_by`; ela não participa das leituras do produto e não justifica uma
+  quarta migration neste escopo. Os demais avisos pertencem a objetos anteriores.
+- No runtime obrigatório Node 24.19, `lint`, `typecheck` e `build` passaram. O
+  Vitest geral aprovou 3.970 e ignorou 105; dois testes independentes da
+  Previsão excederam o timeout sob carga local. A repetição isolada aprovou os
+  dois arquivos, com 251 testes, e a CI Linux do novo SHA permanece obrigatória.
