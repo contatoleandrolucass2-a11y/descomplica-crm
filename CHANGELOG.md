@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-21 - Publicacao da Previsao por gerente
+
+- Publica o preenchimento automatico de corretores por gerente na Previsao,
+  preservando a edicao manual e o historico dos periodos salvos.
+- Confirma em producao o SHA integrado, as migrations autorizadas e os guards
+  de pagina e API, sem pendencia de release.
+
 ## 2026-10-20 - Corretores automáticos na Previsão
 
 - Preenche períodos novos com os corretores já relacionados ao gerente no

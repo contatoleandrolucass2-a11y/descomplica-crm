@@ -1,5 +1,40 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-21: corretores automaticos da Previsao publicados
+
+- O PR #283 foi integrado na `main` em
+  `9dcd80286ee5a5819b65f8104873f7f9df0d24bf`. A CI final do PR
+  `39541633316` aprovou validacao, restore isolado e gates de release. A CI da
+  `main` `39544892670` aprovou os mesmos gates e gerou o artefato promovivel
+  `12320948464`; o verificador documental precisou apenas de nova tentativa
+  depois de a fonte publica da Prefeitura de Sao Paulo responder HTTP 503.
+- O ZIP do artefato conferiu com
+  `sha256:7bd9c0137262eaa041683b911cbbb7d8c76e26439e58af2d8ec3254a70205ad3`
+  e a imagem interna com
+  `sha256:2309df8f667cb3cd28d6a7d582d580acebfa8ac8e78357cc90383d9fce736167`.
+  A diferenca esperada entre a config da CI
+  `sha256:7009060378af4f3729fabd6d1681949aa028a1f851abd9ec4c3182b7cc0f9892`
+  e o manifesto containerd
+  `sha256:ea534e46426cbe5d345e1d3ed8c0d1273fad804053581587b5fcbca8d26fc9d9`
+  foi comprovada pelo indice OCI, hashes dos blobs, manifesto legado, onze
+  camadas, RootFS, plataforma linux/amd64 e label da revisao. `image:prove`
+  aprovou os dois perfis de runtime sem rebuild.
+- A consulta protegida encontrou o candidato exato ja ativo em
+  `2026-10-21T05:32:50.804Z`, deployment
+  `a451a387-e13b-4ea0-84da-7288e8d2df3f`, sem pendencia; por isso nao houve
+  republicacao. A verificacao de `2026-10-21T05:39:50Z` confirmou health HTTP
+  200/`ok` na versao exata, redirecionamento anonimo da pagina de Previsao para
+  login em HTTP 307 e API de previsoes anonima em HTTP 401.
+- As migrations autorizadas permanecem registradas no Supabase: Plano de acao
+  `20261021002706`, periodos `20261021002724`, elenco `20261021002737` e
+  normalizacao dos gerentes `20261021021551`. O pos-check manteve zero periodos,
+  uma previsao legada na revisao 5, RPC restrita a `authenticated` e somente o
+  aviso informativo de indice para a FK `crm_forecast_periods.updated_by`.
+- O registro documental final passou em lint, typecheck e build de 57 rotas com
+  Node 24.19/pnpm 11.20. A suite integral aprovou 4.064 testes, pulou 105 e teve
+  oito timeouts sob carga local; os cinco arquivos repetidos aprovaram 97 de 98,
+  e o unico timeout restante aprovou os 13 casos ao ser executado isoladamente.
+
 ## 2026-10-20: metas Imob publicadas e validadas
 
 - O PR #285 foi integrado na `main` em
