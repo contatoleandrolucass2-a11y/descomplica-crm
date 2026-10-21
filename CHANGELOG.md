@@ -51,6 +51,15 @@
 - Estabiliza o teste visual da grade de Previsão ao aguardar o fim da transição
   CSS antes de comparar as cores do grupo e da métrica ativa.
 
+## 2026-10-20 - Conferencia final das regras do Associativo
+
+- Registra a verificacao autenticada dos menores pagamentos iguais nos fluxos
+  Linear e Decrescente com o cenario de referencia.
+- Confirma que o teto de 50% das anuais considera somente o valor nominal,
+  truncado em centavos, sem considerar a correcao futura por juros.
+- Documenta a prova de fronteira de um centavo, as datas anuais elegiveis e os
+  80 testes focados aprovados, sem alterar o runtime ou republicar o site.
+
 ## 2026-10-20 - Evidencias da publicacao do Associativo
 
 - Registra a integracao do PR #280, CI completa, artefato imutavel,

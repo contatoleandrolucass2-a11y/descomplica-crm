@@ -125,6 +125,24 @@ formatação, build de 57 rotas e os 12 cenários de navegador de Previsão pass
 A aplicação aprovou 4.063 testes; a suíte operacional aprovou 1.595 e repetiu
 somente as três limitações POSIX conhecidas do Meta Ads no Windows.
 
+## 2026-10-20 - Conferencia final das regras do Associativo
+
+O cenario de referencia foi reproduzido na interface autenticada publicada.
+Linear aprovou com Entrada e tres Sinais iguais de R$ 13.269,73; Decrescente
+aprovou com quatro pagamentos iguais de R$ 14.508,87. Em ambos, reduzir um
+centavo de cada pagamento inicial reprovou o fluxo correspondente.
+
+As anuais nominais ficaram em R$ 1.275,00, somente em dezembro de 2027, 2028
+e 2029. Dezembro de 2026 permaneceu inelegivel por coincidir com um Sinal. O
+usuario confirmou que o teto de 50% incide apenas sobre o valor nominal, sem
+considerar a correcao futura por juros. Os tres arquivos de testes focados
+aprovaram 80 testes. Lint, typecheck e build passaram. A suite completa teve
+12 timeouts locais sob saturacao depois de 4.054 testes aprovados; os quatro
+arquivos afetados passaram 74 testes ao serem repetidos com um worker. A CI
+Linux permanece o gate final. A versao funcional ja estava ativa; este
+fechamento e somente documental e nao autoriza nem exige nova publicacao do
+site.
+
 ## 2026-10-20 - Publicacao do ajuste minimo do Associativo
 
 PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.
