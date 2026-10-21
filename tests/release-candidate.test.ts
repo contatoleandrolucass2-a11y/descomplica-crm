@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 77-version manifest", async () => {
+  it("keeps a unique, ordered 78-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(77);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(77);
+    expect(migrations).toHaveLength(78);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(78);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-23)).toEqual([
+    expect(migrations.slice(-24)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -73,6 +73,7 @@ describe("release-candidate migration train", () => {
       "20261020233000_appointments_goal_read.sql",
       "20261020235022_sync_page_catalog.sql",
       "20261021011101_sync_page_catalog.sql",
+      "20261021191533_coordinator_dashboard_v3_projection.sql",
       "20261021210000_appointments_filters_kpis_v4.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
@@ -109,7 +110,7 @@ describe("release-candidate migration train", () => {
       { timeout: 1000 },
     );
     expect(plan.files).toBe(38);
-    expect(plan.tests).toBe(2098);
+    expect(plan.tests).toBe(2104);
   });
 
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
@@ -419,7 +420,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2098;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2104;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {
