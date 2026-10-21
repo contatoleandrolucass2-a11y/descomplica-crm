@@ -205,7 +205,7 @@ describe("Associative learning manual", () => {
       "até R$ 245.527,77 quando for sua primeira aquisição ou a compra estiver no MCMV",
       "Os descontos de registro dependem do contrato e não são somados entre si",
       "A declaração de isenção e o enquadramento precisam ser conferidos pelo cartório",
-      "ITBI + Registro total + Despachante + Seguro Caixa",
+      "ITBI + Registro + Despachante + Seguro Caixa",
       "estima automaticamente ITBI",
       "o cartório confere também o valor venal do IPTU e a base do ITBI",
       "o financiamento para a garantia",

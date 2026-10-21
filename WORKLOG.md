@@ -54,6 +54,48 @@ as letras acentuadas com `translate`, sem extensão adicional. O pgTAP cobre
 leitura em produção; a aplicação da correção permanece condicionada à CI e a
 nova autorização específica.
 
+## 2026-10-20: publicacao e aceite operacional de Agendamentos v3
+
+Os PRs #274 e #279 foram integrados com CI completa. A migration v3 foi
+aplicada pelo Supabase MCP e a imagem aprovada foi promovida sem rebuild. O
+coletor foi atualizado sob trava, com backup e CAS, preservando unidade,
+ledger, credenciais e agenda. Quatro ciclos reais consecutivos publicaram com
+HTTP 201 e requestIds distintos, seguidos de estoque confirmado. O Supabase
+registrou as quatro runs como `succeeded` e manteve tres visoes da analise em
+versao 3. A producao avancou depois para um SHA descendente que preserva a
+entrega; health e ledger foram conferidos sem pendencia.
+
+A CI do registro final detectou o advisory `GHSA-22jm-h49p-29qw` no SDK MCP
+transitivo do `next-devtools-mcp`. O override foi atualizado de 1.31.0 para a
+versao corrigida 1.32.1, mantendo a dependencia apenas em desenvolvimento.
+
+O gate de navegador expôs uma intermitencia preexistente no teste de Previsão:
+a comparação capturava cores intermediarias durante a transição CSS de 140 ms.
+A asserção passou a aguardar as cores finais, preservando o criterio de igualdade
+e sem alterar a interface. Os 12 cenarios focados passaram apos o ajuste.
+
+Na repetição da CI, a fonte oficial de ITBI voltou a responder e o gate passou.
+Em seguida, o audit detectou o novo advisory `GHSA-587h-7wmj-h5pm` no Vite 8.2.0,
+transitivo do Vitest. O override foi elevado para a versão corrigida 8.2.4.
+Com Node 24.19.0, instalação congelada, audit sem alta/crítica, lint, typecheck,
+formatação, build de 57 rotas e os 12 cenários de navegador de Previsão passaram.
+A aplicação aprovou 4.063 testes; a suíte operacional aprovou 1.595 e repetiu
+somente as três limitações POSIX conhecidas do Meta Ads no Windows.
+
+## 2026-10-20 - Publicacao do ajuste minimo do Associativo
+
+PR #280 integrado em ee451647 com CI completa aprovada no PR e no main.
+O coordenador publicou a imagem imutavel em 20/10/2026 as 19:04:33 de
+Sao Paulo; health publico confirmou o SHA. Registro consolidado vale
+tambem na documentacao A4 integrada dos PRs de impressao.
+Recibo, provas do artefato, timeouts locais e limite do smoke autenticado
+constam em docs/knowledge/ATUALIZACOES.md. Nenhuma migration aplicada.
+O gate de auditoria do PR documental encontrou tres novos avisos altos
+no SDK do Next DevTools e no Vite do Vitest. Atualizados somente esses
+overrides e transitivas necessarias. Instalacao frozen, supply chain,
+protocolo dos DevTools e auditoria high aprovados; um moderado permanece.
+Este fechamento de documentos/ferramentas nao requer nova publicacao
+do runtime. Sem excecao no audit e sem ampliar permissoes dos MCPs.
 ## 2026-10-20 - Correção da impressão comercial do Associativo
 
 Os dois PDFs fornecidos reproduziram o defeito: cada arquivo possuía duas
@@ -92,6 +134,37 @@ visual `-` no relatório. Metadados, IDs de coluna, contagem e demais tipos
 estavam íntegros. O coletor passa a converter somente esse marcador de data
 opcional em string vazia antes da validação; valores preenchidos e inválidos
 continuam falhando fechados. O teste focal cobre a resposta real observada.
+
+## 2026-10-20: ajuste minimo e anuais do Associativo
+
+Corrigida a busca de aprovacao que desconsiderava o desconto e exigia
+pagamentos iniciais excessivos. Proposta, previa e aplicacao usam a mesma
+entrada do motor. Conforme preferencia confirmada pelo usuario, a sugestao
+minimiza o valor de pagamentos iguais entre Entrada e ate tres Sinais.
+Anuais respeitam mes/ano da Entrada e dos Sinais e teto nominal de 50% da
+renda, truncado em centavos. Composicao mostra somente Registro dinamico.
+
+Regressoes financeiras e QA sintetico cobrem o caso reportado, limites,
+calendarios, igualdade e previa/aplicacao. Sem alterar taxas, ITBI,
+despachante, seguro, calculadora avulsa ou workflows.
+Evidencias e limites em
+`docs/audits/associativo-ajuste-minimo-2026-10-20.md`.
+
+CI inicial do PR #280 aprovou validate e restore, mas o E2E concorrente ainda
+exigia reter anual acima do teto. Ajustado o contrato para verificar clamp
+exato, centavo abaixo preservado e centavo acima limitado, sem retirar o gate.
+
+As CIs `39436153900` e `39443389525` falharam na leitura unica do cabecalho
+do Tabelao apos rolagem, em viewports diferentes. Runtime e asserts dessa
+tela nao foram alterados pelo Associativo. O QA passa a exigir duas leituras
+consecutivas aprovadas em ate dois segundos, preservando geometria, hit-test,
+reset e falha fechada, com diagnostico numerico de cada etapa. Nao muda a
+interface nem promove baseline.
+
+Integracao da correcao de impressao do PR #281 preserva o portal no body e
+os novos dados da documentacao. Registro permanece consolidado tambem no
+papel, sem restaurar a nota removida. Testes comparam a composicao impressa
+com a da tela nos dois fluxos e nos tres temas.
 
 ## 2026-10-20: previsão por período, segmento e gerente
 

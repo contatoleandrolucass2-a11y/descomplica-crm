@@ -19,6 +19,28 @@
 - Normaliza acentos ao localizar o gerente no snapshot, para preencher também
   equipes vinculadas a Álvaro, Fabrício e Thiago de Araújo.
 
+## 2026-10-20 - Publicacao e aceite de Agendamentos v3
+
+- Publica o painel e a normalizacao da data opcional por imagem imutavel, com
+  CI completa e coordenador protegido.
+- Confirma quatro ciclos reais consecutivos do coletor, com analise v3,
+  publicacao comercial e estoque concluidos.
+- Atualiza o pin transitivo do SDK MCP para 1.32.1, corrigindo o advisory de
+  alta severidade detectado pela CI durante o registro final da entrega.
+- Atualiza o Vite transitivo do Vitest para 8.2.4, corrigindo o advisory de alta
+  severidade detectado durante a repetição da CI.
+- Estabiliza o teste visual da grade de Previsão ao aguardar o fim da transição
+  CSS antes de comparar as cores do grupo e da métrica ativa.
+
+## 2026-10-20 - Evidencias da publicacao do Associativo
+
+- Registra a integracao do PR #280, CI completa, artefato imutavel,
+  publicacao protegida e verificacao de health do SHA ee451647.
+- Documenta limites da validacao local e do acesso autenticado, sem nova
+  alteracao de runtime, migration ou reinicio do site.
+- Atualiza SDK do Next DevTools para 1.32.0 e Vite do Vitest para 8.2.4,
+  resolvendo tres avisos altos que bloquearam a CI documental. Mantem
+  allowlists, politicas de instalacao e dependencias do runtime.
 ## 2026-10-20 - Correção da impressão A4 do Associativo
 
 - Impede a repetição da folha de impressão em uma segunda página, isolando o
@@ -43,6 +65,20 @@
 - Normaliza o marcador vazio `-` do Salesforce para ausência de data antes da
   validação dos detalhes de Agendamentos, preservando datas reais e o bloqueio
   para valores inválidos.
+
+## 2026-10-20 - Ajuste minimo e anuais do Associativo
+
+- Corrige desconto ignorado na sugestao e calcula os menores pagamentos
+  iniciais iguais que aprovam o fluxo selecionado.
+- Impede anual no mes da Entrada ou de Sinal, ou entre Sinais; aplica
+  teto nominal de 50% da renda com arredondamento para baixo.
+- Mostra datas e aprovacao reais da previa e preserva o saldo parcelado.
+- Simplifica a composicao para um valor dinamico de Registro e remove
+  a nota visual solicitada, na tela e na folha A4, sem mudar taxas nem juros.
+- Alinha o E2E concorrente ao teto imediato das anuais, com fronteiras de
+  um centavo e presenca obrigatoria dos dois resultados.
+- Torna a leitura do cabecalho do Tabelao no QA dependente de alinhamento
+  estavel, com espera limitada e os mesmos criterios de geometria e hit-test.
 
 ## 2026-10-20 - Previsão por final de semana e gerente
 

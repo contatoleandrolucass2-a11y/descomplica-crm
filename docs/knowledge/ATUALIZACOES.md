@@ -1,5 +1,140 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-20: Agendamentos v3 integrado, publicado e aceito em ciclos reais
+
+- O PR #274 foi integrado no merge
+  `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`. A CI de `main`
+  `39421287684` aprovou os quatro jobs obrigatorios e o coordenador publicou
+  esse SHA no deployment `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`.
+- O marcador Salesforce `-` em `Data de comparecimento` bloqueou corretamente
+  a primeira coleta v3 sem substituir o snapshot valido. O PR #279 normalizou
+  somente esse valor opcional para vazio e foi integrado no merge
+  `38e8c2af7a64a89e75bfb60a7fc6e21383baee1f`. A CI de `main`
+  `39448193292` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`.
+- O artefato promovivel `12277458475` teve ZIP
+  `sha256:a267a607a5d64b4b2a2a7d21cc36f3055b5af31614410e9ccb4c962aa4d488a7`
+  e `image.tar.gz`
+  `sha256:99edfb5fda1159533cd38e350892a8ac4dbf3ac20a9c0b5537b40b64c5ec4b82`.
+  A VPS carregou a imagem sem rebuild ou retag e `image:prove` validou os dois
+  perfis no image ID containerd
+  `sha256:c773025e48f9552966fd4c0a06ab502cc36f74a5d6e10813be019d953abeff5c`.
+- O coordenador publicou `38e8c2af` em `2026-10-20T16:11:22.558Z`, deployment
+  `b065193c-ea11-4a6b-b87f-08f6097f1f59`; health publico confirmou HTTP 200,
+  `status=ok` e a versao exata, e a rota anonima de Agendamentos manteve o
+  redirecionamento 307 para login.
+- A atualizacao do coletor ocorreu sob `installation.lock`, com backup privado
+  `20261020T161256Z-38e8c2af7a64`. Unidade, ledger, credenciais e agenda foram
+  preservados; o `WorkingDirectory` passou ao merge corretivo, o navegador
+  manteve o PID e o monitor legado permaneceu desabilitado.
+- O aceite exigia dois ciclos reais, mas quatro ciclos consecutivos foram
+  confirmados entre `16:35Z` e `18:05Z`, todos com requestIds distintos,
+  publicacao HTTP 201 e estoque concluido. As quatro runs mais recentes no
+  Supabase estavam `succeeded`, com 143 registros comerciais cada. O snapshot
+  vigente foi gerado em `2026-10-20T18:03:02.814Z`; a analise continha tres
+  visoes em versao 3, 32 corretores, 1.104 agendamentos normalizados e 9.320
+  fatos. A ultima carga de estoque confirmou 3.286 registros.
+- Durante o aceite, outro fluxo autorizado avancou `main` e producao para
+  `50f11d326cdd37b051db46f1dd1015076b85d545`, descendente de `38e8c2af`.
+  Em `2026-10-20T18:26:10Z`, o health publico confirmou essa versao; o ledger
+  registrava o deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, concluido em
+  `2026-10-20T17:51:11.098Z`, sem pendencia. A funcionalidade de Agendamentos
+  permanece contida na versao atualmente publicada.
+- Ao reconciliar a nota final com `main`, a CI `39490513559` detectou o advisory
+  de alta severidade `GHSA-22jm-h49p-29qw` no
+  `@modelcontextprotocol/sdk@1.31.0`, transitivo do `next-devtools-mcp`. O pin
+  de desenvolvimento foi atualizado para a versao corrigida 1.32.1; a nova CI
+  permanece obrigatoria antes da integracao da evidencia.
+- A CI `39493034178` aprovou validacao, build e auditoria, mas o gate visual de
+  Previsão leu as cores do cabecalho durante a transição CSS de 140 ms. A falha
+  foi reproduzida localmente com valores intermediarios diferentes e corrigida
+  apenas no sincronismo do teste: ele agora aguarda a igualdade final original.
+  Os 12 cenarios focados passaram; runtime, estilos e criterios visuais nao
+  foram alterados. Uma nova CI integral continua obrigatoria.
+- Na repetição da CI `39505860620`, a fonte oficial de ITBI respondeu e o gate
+  passou. O audit então detectou o advisory novo de alta severidade
+  `GHSA-587h-7wmj-h5pm` no Vite 8.2.0, transitivo do Vitest. O override foi
+  elevado para a versão corrigida 8.2.4; lockfile, audit e CI integral precisam
+  ser validados novamente antes da integração.
+- Validação local do Vite 8.2.4 com Node 24.19.0: instalação congelada, audit
+  sem alta/crítica, lint, typecheck, formatação, build de 57 rotas e 12 cenários
+  de navegador de Previsão aprovados. Vitest aprovou 4.063 testes. A suíte Node
+  aprovou 1.595, ignorou 19 e repetiu somente as três falhas POSIX já conhecidas
+  do Meta Ads no Windows; a CI Linux permanece como gate conclusivo.
+- A CI Linux `39508368548` aprovou integralmente o head `c6fa842c`, incluindo
+  validacao, release-gates e restauracao isolada. A primeira tentativa encontrou
+  HTTP 403 temporario na fonte oficial de ITBI; a repeticao respondeu e concluiu
+  todos os gates. A reconciliacao preservou estas evidencias junto das alteracoes
+  concorrentes de `main` em `22abfd7d`.
+
+## 2026-10-20: integracao final do ajuste do Associativo
+
+- Fonte GitHub: PR #280 integrado em `2026-10-20T20:09:56Z`, commit
+  `ee451647dc895dafe83be17604849e0cb163c1dc`. A CI `39482677925` aprovou
+  integralmente o head `cab7edb5f75cbb7acbc9c832ed2de491f8d0d153`,
+  incluindo release-gates e restauracao isolada.
+- CI de publicacao em main: `39489641763`, no commit integrado exato.
+  Conferida concluida/success em `2026-10-20T22:01Z`, com validate,
+  isolated-restore, release-gates e promotable-image aprovados.
+  Fetch confirmou main ainda no commit integrado.
+- Retomada antes de promover: health publico em `2026-10-20T22:01:35Z`
+  continua ok em `50f11d326cdd37b051db46f1dd1015076b85d545`. Ledger concorda,
+  deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, publicado em
+  `2026-10-20T17:51:11.098Z`, sem pendencia. Naquela consulta a publicacao
+  do Associativo ainda nao havia ocorrido; o frescor foi repetido na trava.
+- Publicado pelo coordenador `release:production deploy` em
+  `2026-10-20T22:04:33.591Z` (19:04:33 America/Sao_Paulo), deployment
+  `89e8f722-2bcf-4b65-9927-5a13f06fba22`, SHA
+  `ee451647dc895dafe83be17604849e0cb163c1dc`, sem pendencia.
+  GET publico `/api/health` em `22:04:38Z` retornou HTTP 200/ok e esse SHA.
+  Imagem anterior preservada; sem recovery, migration ou mudanca de config.
+- Artefato `promotable-image-ee451647dc895dafe83be17604849e0cb163c1dc`
+  da CI main: checksum e revision conferidos, sem rebuild. Digest de config
+  da CI `sha256:ed5b69c4d14c2dfaab837611866c649719fe6bfc5b2e89a74243d6e722405c52`;
+  ID local/manifesto OCI
+  `sha256:88e085d2cca93d0fb18faa3e582a266cd2c7580f947ecf45706bce94d9e18e64`.
+  Cadeia de hashes, plataforma linux/amd64 e 11 camadas comprovadas no
+  mesmo arquivo; `image:prove` aprovou homologacao e producao na mesma imagem.
+- Validacao local combinada: formatacao, lint, typecheck e build aprovados.
+  Vitest completo teve 4063 aprovados, 102 skips e tres timeouts no Windows;
+  a cadeia operacional nao foi executada nessa tentativa. Os dois testes
+  de DevTools passaram na repeticao focada. O teste financeiro restante
+  passou isoladamente em 3,82 s, sem mudar codigo, asserts ou prazo de 5 s.
+  A suite Linux integral passou no job validate da CI do head exato.
+  Limite: nao registrar a suite Windows como integralmente aprovada.
+  Reavaliar se o timeout persistir isoladamente ou aparecer na CI Linux.
+- Impressao combinada: 74 testes focais aprovados e QA dos dois fluxos nos
+  tres temas saiu 0, com Registro unico e valores iguais aos da tela.
+  Taxas, juros, ITBI, despachante e seguro preservados. Nenhuma migration,
+  workflow n8n ou dado remoto alterado. Usuario confirmou Previsao concluida
+  em outro chat e excluiu sua migration deste trabalho.
+- Pos-publicacao: nova aba do navegador abriu `/login`, sem sessao autenticada.
+  Nao houve contorno de login, renovacao da sessao existente ou mutacao de
+  proposta real. Jornada autenticada em producao nao foi reexecutada;
+  sua verificacao funcional e sintetica na CI/QA. Reavaliar esse limite
+  quando houver sessao legitimamente disponivel. Health e ledger confirmam
+  a publicacao, nao substituem essa verificacao da jornada.
+- O fechamento inicialmente documental encontrou bloqueio de auditoria na
+  CI `39505699301` do PR #284, em `2026-10-20T22:10Z`. Banco de advisories
+  passou a apontar tres altos: GHSA-22jm-h49p-29qw, GHSA-46jr-4wx8-v453
+  e GHSA-587h-7wmj-h5pm. Nao ignorar o gate nem atribuir falha ao calculo.
+  Override existente do SDK Next DevTools atualizado para 1.32.0 e Vite
+  da cadeia Vitest fixado em 8.2.4; transitivas exigidas atualizadas.
+  Mudancas incidentais de Browserslist foram excluidas do lockfile.
+  `pnpm why` confirma escopo de desenvolvimento, sem mudar dependencias
+  de runtime ou PostCSS/Nanoid de Next/Tailwind. Instalacao frozen e
+  supply-chain aprovadas, sem relaxar politicas. `devtools:check` passou
+  nos dois servidores com allowlists preservadas; `audit --audit-level high`
+  saiu 0, com apenas um moderado restante. Fontes e limites no runbook
+  local-devtools. CI completa ainda exigida para integrar o fechamento.
+- O fechamento altera documentos e ferramentas, sem efeito no runtime.
+  A publicacao no Git e a sincronizacao no Obsidian nao exigem outro deploy
+  ou reinicio do site. Preservar a imagem publicada ee451647.
+- Referencias:
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/pull/280>,
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39482677925>,
+  <https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/39489641763>.
+
 ## 2026-10-20: comparecimento opcional no relatório de Agendamentos
 
 - A publicação do painel chegou ao SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`
@@ -15,6 +150,121 @@
   e rótulos Salesforce exigidos permanecem corretos e vigentes.
 - A correção normaliza somente esse marcador para ausência de comparecimento.
   O aceite ainda exige CI, nova promoção e duas coletas reais distintas.
+
+## 2026-10-20: correcao local do ajuste minimo do Associativo
+
+- Causa comprovada: a busca antiga desativava desconto no candidato e
+  aplicava os pagamentos ao saldo com desconto. Proposta e sugestao agora
+  compartilham `investorInput`. Previa usa datas e aprovacao do candidato.
+- Preferencia confirmada pelo usuario: menor valor por pagamento inicial,
+  dividido igualmente entre Entrada e ate tres Sinais. Busca por contagem
+  exata de sinais e centavos; recalcula as anuais disponiveis a cada candidato.
+  O empate usa menor soma inicial. Depois minimiza a anual igual necessaria.
+- Anual nao pode coincidir com mes/ano da Entrada ou de Sinal, nem ficar
+  entre sinais. Teto nominal de 50% da renda com truncamento decimal, sem
+  epsilon; juros preservados. O limite nao se refere a anual apos correcao.
+- Caso sintetico reproduzido: Linear com quatro pagamentos iniciais iguais
+  de 13269,73, tres anuais de 1275 a partir de 2027, saldo mensal 27327,47
+  e mensal de 459,00. Fronteira de um centavo e igualdade previa/aplicacao
+  verificadas. Registro visual consolidado; taxas internas inalteradas.
+- Vitest no Windows: 4051 aprovados, 99 skips condicionais; grade independente
+  de 7285 casos sem divergencias. A suite operacional teve 1595 aprovados,
+  19 skips e tres falhas de permissao POSIX/parent directory em testes Meta Ads.
+  Esses testes nao foram alterados; `pnpm test` local nao e integralmente verde.
+  Excecao limitada ao host Windows, a reavaliar na CI Linux obrigatoria do SHA
+  candidato. Nao flexibiliza gates nem autoriza deploy.
+- Lint, typecheck, build e formatacao tiveram execucoes locais aprovadas.
+  Regressao final focal: 38 testes aprovados. QA Playwright completo em
+  `2026-10-20T13-38-47.543Z` aprovou Associativo e calculadora avulsa,
+  guidance/continuity, impressao nos tres temas e desktop/mobile. Capturas
+  locais revisadas; nao exportadas nem usadas como prova de producao.
+  Integracao e publicacao desta demanda ainda pendentes. Fonte tecnica:
+  `docs/audits/associativo-ajuste-minimo-2026-10-20.md`.
+- Consulta observacional as 10:40 America/Sao_Paulo: main e health publico
+  concordam em `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`, HTTP 200/status ok.
+  CI main `39421287684` concluiu com sucesso. Deploy externo registrado em
+  `2026-10-20T13:12:50.271Z`, ID `6e1e1f3e-2158-49a8-b4b7-21c979f19f9d`,
+  sem pendencia. Isso nao comprova publicacao da correcao local.
+- PR #280, CI `39433482232`: validate e isolated-restore aprovados.
+  Release-gates bloqueou na expectativa antiga do E2E concorrente, que
+  exigia manter anual acima do teto no campo (`annual_limit_input_not_applied`).
+  O contrato agora verifica clamp exato, preservacao do centavo abaixo e
+  bloqueio do centavo acima, com os dois resultados montados. Nao foi removido
+  o gate; nova CI integral obrigatoria. Nenhuma publicacao nessa tentativa.
+- CI `39436153900`, SHA `b13e2a4f`: validate, restore e E2E concorrente
+  aprovados. A matriz visual aprovou Associativo, 242 comparacoes de imagem
+  e a navegacao, mas reprovou a fixacao do cabecalho do Tabelao em tres
+  medicoes de rolagem. Teste e runtime do Tabelao nao foram alterados neste
+  PR. Reexecucao do mesmo SHA solicitada para diagnosticar intermitencia;
+  nenhum gate removido e publicacao permanece bloqueada.
+- Durante a espera, `main` avancou para `dfe17463` com Previsao por periodo.
+  Incorporacao preserva ambas as entradas de CHANGELOG/WORKLOG; os conflitos
+  eram somente documentais. A migration desse trabalho independente nao e
+  autorizada por esta demanda. Conferir estado remoto antes de publicar a
+  versao combinada e manter CI integral do novo SHA como gate.
+- CI combinada `39443389525` passou validate, restore e E2E, mas repetiu
+  falha na leitura unica do cabecalho do Tabelao, agora em outros viewports.
+  O mesmo teste/runtime no main `dfe17463` passou na CI `39439539162`.
+  Reproducao isolada com componente real e CPU 4x aprovou 33 verificacoes;
+  nao comprovou a causa da falha Linux. Ajuste limitado ao sincronismo do QA:
+  aguarda duas leituras consecutivas do predicado original em ate 2s e
+  registra geometria inicial/final se falhar. Nenhuma tolerancia, criterio,
+  baseline ou runtime do Tabelao alterado. Nova CI integral continua obrigatoria.
+- Validacao local apos incorporar main: lint, typecheck e build aprovados;
+  Vitest 4060 aprovados/102 skips; mesma limitacao Windows nos tres testes
+  operacionais POSIX. Consulta MCP somente de metadados em 20/10/2026 confirmou
+  ausencia da tabela `crm_forecast_periods` e das RPCs de leitura/gravação
+  no banco produtivo. A dependencia de Previsao impede publicar a versao
+  combinada enquanto nao houver aplicacao autorizada; usuario consultado.
+- A CI `39451491884` concluiu com sucesso no SHA `698f4657`, inclusive matriz
+  visual, em `2026-10-20T16:41:35Z`. A primeira tentativa teve HTTP 403 na
+  fonte oficial de ITBI; a mesma consulta passou na reexecucao, sem mudar
+  fonte, valores ou gate. QA local do novo sincronismo aprovou 33 verificacoes;
+  desalinhamento permanente injetado foi rejeitado e recuperacao passou.
+- Antes do merge, main integrou PR #269 de impressao A4 em `50f11d32`.
+  Incorporacao automatica do componente/estilo/guia preserva ambos os trabalhos;
+  conflitos documentais resolvidos sem perda. Nova CI obrigatoria no SHA
+  combinado. Registros desta entrega reposicionados depois de uma secao
+  existente para evitar conflitos puramente aditivos no topo dos documentos.
+- Retomada observacional em `2026-10-20T18:43Z`: health publico HTTP 200/ok
+  e ledger concordam em `50f11d326cdd37b051db46f1dd1015076b85d545`,
+  deployment `2ab11987-4b0e-4843-baad-75e90de6319c`, publicado por outra entrega
+  em `2026-10-20T17:51:11.098Z`, sem pendencia de deploy. Metadados Supabase
+  continuam sem tabela/RPCs de Previsao por periodo; nenhuma mutacao feita.
+  Reavaliacao do bloqueio anterior: esse runtime ja integra a baseline ativa.
+  O delta do Associativo nao introduz dependencia de banco nem muda Previsao;
+  sua promocao pode seguir os gates normais sem aplicar migration alheia.
+  A pendencia de Previsao continua aberta para o responsavel, nao e resolvida
+  nem autorizada por esta observacao. Reavaliar se novo delta exigir schema.
+- Usuario confirmou nesta retomada que concluiu Previsao em outro chat:
+  seguir apenas com Associativo, sem migrations ou alteracoes naquela tela.
+- CI `39475535962` aprovada no SHA `6ec276249b8876cb2793fe480fd01fb4ac77c98b`.
+  Antes do merge, main avancou para `c1e931d5` pelo PR #281. Integracao
+  preserva o portal de impressao e a documentacao A4 acrescentados ali;
+  aplica tambem ao papel a linha unica Registro e a retirada da nota,
+  conforme o pedido deste escopo. Teste compara os valores da tela e da
+  impressao. Novo SHA combinado exige novamente CI antes da integracao.
+- Validacao combinada: 74 testes focais aprovados; QA de impressao saiu 0
+  em `2026-10-20T19:16:46Z`, Linear/Escalonado nos tres temas, com igualdade
+  dos valores de documentacao, logo carregado, geometria e contraste validos.
+  Evidencias locais em `test-results/documentation-legal-preview/2026-10-20T19-16-46.990Z`.
+  Imagem do modo Escalonado conferida visualmente pelo coordenador.
+
+## 2026-10-20: abertura da correcao de ajustes e anuais do Associativo
+
+- Fonte: pedido do usuario, GitHub e GET publico de `/api/health`, consultados
+  em 20/10/2026 as 10:08 (America/Sao_Paulo). Git comum confirmado; checkout
+  inicial limpo. Branch `codex/associativo-ajuste-minimo-anuais` criada de
+  `origin/main` no SHA `aa8b2d6d501ef1f15fe91b7bf95ba78f024a6526`.
+- CI de main `39421287684` em andamento na consulta; ainda nao valida a nova
+  correcao. Health HTTP 200/status ok, publicado
+  `08d050f90c877009cd55140322b7c822e578d672`; integrado e publicado diferem.
+- Escopo autorizado: impedir anuais em meses ocupados por entrada/sinais,
+  corrigir sugestao para minimizar entrada/sinais respeitando os limites,
+  limitar anual a 50% da renda com arredondamento para baixo e simplificar
+  a composicao visual de Registro. Diagnostico e testes ainda pendentes.
+- PR #269 de impressao do Associativo permanece separado e aberto; nao
+  incorporar alteracoes nao integradas nem alterar regras de juros.
 
 ## 2026-10-20: candidato visual de Agendamentos com proveniência limpa
 

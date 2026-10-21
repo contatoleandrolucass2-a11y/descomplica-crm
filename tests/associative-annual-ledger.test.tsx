@@ -108,6 +108,7 @@ describe("Associativo annual ledger and nominal monthly principal", () => {
       );
       const result = calculateInvestorFlow({
         ...fixture,
+        baseDate: "2026-06-05",
         completionDate: "2031-12-31",
         intermediaries: annuals,
         signals: [500.01, 400.02, 300.03],
@@ -126,9 +127,9 @@ describe("Associativo annual ledger and nominal monthly principal", () => {
       );
       const monthlyPrincipal = (4344422 - 600000 - 150000 - 120006 - annualCents) / 100;
       expect(result.custom.installmentBalanceBeforeCorrection).toBeCloseTo(monthlyPrincipal, 8);
-      expect(result.custom.linear.firstInstallmentDate).toBe("2027-01-15");
-      expect(result.custom.linear.monthlyCorrectionMonths).toBe(3);
-      expect(result.custom.balance).toBeCloseTo(monthlyPrincipal * 1.005 ** 3, 8);
+      expect(result.custom.linear.firstInstallmentDate).toBe("2026-10-05");
+      expect(result.custom.linear.monthlyCorrectionMonths).toBe(4);
+      expect(result.custom.balance).toBeCloseTo(monthlyPrincipal * 1.005 ** 4, 8);
     },
   );
 
@@ -149,7 +150,11 @@ describe("Associativo annual ledger and nominal monthly principal", () => {
     const cleared = calculateInvestorFlow({ ...fixture, intermediaries: [0, 0, 0, 0, 0] });
     expect(cleared.custom.installmentNominalBalance).toBe(41944.22);
     expect(cleared.custom.balance).toBeCloseTo(41944.22, 8);
-    const exceeded = calculateInvestorFlow({ ...fixture, intermediaries: [0, 50000, 0, 0, 0] });
+    const exceeded = calculateInvestorFlow({
+      ...fixture,
+      income: 100000,
+      intermediaries: [0, 50000, 0, 0, 0],
+    });
     expect(exceeded.ok).toBe(false);
     expect(exceeded.custom.installmentNominalBalance).toBe(0);
   });
