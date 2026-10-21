@@ -80,6 +80,22 @@
 - Documenta a prova de fronteira de um centavo, as datas anuais elegiveis e os
   80 testes focados aprovados, sem alterar o runtime ou republicar o site.
 
+## 2026-10-20 - Réplica local do dashboard Meta Ads
+
+- Incorpora o dashboard recebido em ZIP na rota protegida `/app/meta-ads`.
+- Mantém um único navbar do CRM e adiciona `Meta Ads` como botão próprio, fora
+  de `Dashboard`, com Visão geral, Campanhas, Contas de anúncios e Relatórios.
+- Alinha página, superfícies, bordas, textos, estados e tipografia aos tokens
+  oficiais do CRM e sincroniza automaticamente os temas Claro, Médio e Escuro.
+- Remove do conteúdo incorporado o seletor de tema e o avatar duplicados; o
+  shell protegido continua sendo o único responsável por essas ações globais.
+- Preserva os dados de demonstração, a importação local de CSV e as exportações
+  no navegador, sem conexão ou conciliação com Salesforce e sem escrita no Meta.
+- Adiciona permissões próprias para as quatro páginas, inicialmente disponíveis
+  apenas para os papéis administrativos pelo catálogo versionado.
+- Implementação e migration permanecem locais; nenhuma publicação ou alteração
+  remota foi executada.
+
 ## 2026-10-20 - Evidencias da publicacao do Associativo
 
 - Registra a integracao do PR #280, CI completa, artefato imutavel,

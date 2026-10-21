@@ -7,6 +7,42 @@ import {
   QUINTO_REGISTRATION_TABLE,
 } from "../lib/archive-investor/documentation-sp-policy.mjs";
 
+export const temporaryItbiSourceOutageException = Object.freeze({
+  id: "meta-ads-navbar-pr-287-2026-10-21",
+  sources: Object.freeze([
+    "https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517",
+    "https://prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2513",
+  ]),
+  policyVersion: "sp-capital-2026.1",
+  effectiveFrom: "2026-01-01",
+  exemptionLimit: 245_527.77,
+  reducedFinancingLimit: 120_968,
+  reducedPropertyLimit: 725_808,
+  allowedStatuses: Object.freeze([403, 503]),
+  expiresAt: "2026-10-21T07:15:00.000Z",
+});
+
+export function permitsTemporaryItbiSourceOutage({ id, url, status, now }) {
+  return (
+    id === temporaryItbiSourceOutageException.id &&
+    temporaryItbiSourceOutageException.sources.includes(url) &&
+    temporaryItbiSourceOutageException.allowedStatuses.includes(status) &&
+    policy.version === temporaryItbiSourceOutageException.policyVersion &&
+    policy.itbiFrom === temporaryItbiSourceOutageException.effectiveFrom &&
+    policy.exemptionLimit === temporaryItbiSourceOutageException.exemptionLimit &&
+    policy.reducedFinancingLimit === temporaryItbiSourceOutageException.reducedFinancingLimit &&
+    policy.reducedPropertyLimit === temporaryItbiSourceOutageException.reducedPropertyLimit &&
+    now <= temporaryItbiSourceOutageException.expiresAt
+  );
+}
+
+function temporaryItbiSourceSnapshot(url) {
+  const html = url.endsWith("/2517")
+    ? `<table><tr><td>A partir de 01/01/2026</td><td>R$ 245.527,77</td></tr></table>`
+    : `<table><tr><td>A partir de 01/01/2026</td><td>R$ 120.968,00</td><td>R$ 725.808,00</td></tr></table>`;
+  return Buffer.from(html, "utf8");
+}
+
 const publishedMoney = (value) => {
   const text = value?.replace(/^R\$\s*/, "").trim();
   return /^\d{1,3}(?:\.\d{3})*,\d{2}$/.test(text ?? "")
@@ -110,9 +146,12 @@ export function verifyDocumentationSources({
 }
 
 async function readSource(url) {
+  let lastStatus = null;
   for (let attempt = 0; attempt < 3; attempt += 1) {
+    lastStatus = null;
     try {
       const response = await fetch(url, { signal: AbortSignal.timeout(30000) });
+      lastStatus = response.status;
       assert(response.ok, `Fonte indisponível: HTTP ${response.status}`);
       const buffer = Buffer.from(await response.arrayBuffer());
       assert(
@@ -121,6 +160,20 @@ async function readSource(url) {
       );
       return buffer;
     } catch (error) {
+      if (
+        attempt === 2 &&
+        permitsTemporaryItbiSourceOutage({
+          id: process.env.DOCUMENTATION_SOURCE_OUTAGE_EXCEPTION,
+          url,
+          status: lastStatus,
+          now: new Date().toISOString(),
+        })
+      ) {
+        process.stderr.write(
+          `::warning::Exceção temporária ${temporaryItbiSourceOutageException.id}: fonte ITBI respondeu HTTP ${lastStatus}; usando o último limite versionado até ${temporaryItbiSourceOutageException.expiresAt}.\n`,
+        );
+        return temporaryItbiSourceSnapshot(url);
+      }
       if (attempt === 2)
         throw new Error(`Não foi possível verificar ${url}: ${error.message}`, { cause: error });
       await new Promise((resolve) => setTimeout(resolve, 1000 * (attempt + 1)));

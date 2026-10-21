@@ -1,0 +1,20 @@
+.frameShell {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  background: var(--analytics-page);
+}
+
+.frame {
+  display: block;
+  width: 100%;
+  min-height: 760px;
+  border: 0;
+  background: var(--analytics-page);
+}
+
+@media (max-width: 720px) {
+  .frame {
+    min-height: 680px;
+  }
+}

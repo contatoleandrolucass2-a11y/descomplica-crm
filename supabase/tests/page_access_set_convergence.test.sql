@@ -4,8 +4,8 @@ select plan(12);
 
 select is(
   (select count(*) from public.app_pages),
-  28::bigint,
-  'the page catalog contains exactly the twenty-eight approved entries'
+  32::bigint,
+  'the page catalog contains exactly the thirty-two approved entries'
 );
 
 select is(
@@ -25,6 +25,10 @@ select is(
     'crm.management|/app/gestao|crm.management.view|true',
     'crm.management.forecast|/app/gestao/previsao|crm.management.forecast.view|true',
     'crm.management.routine|/app/gestao/rotina|crm.management.routine.view|true',
+    'crm.meta_ads|/app/meta-ads|crm.meta_ads.view|true',
+    'crm.meta_ads.accounts|/app/meta-ads/contas-de-anuncios|crm.meta_ads.accounts.view|true',
+    'crm.meta_ads.campaigns|/app/meta-ads/campanhas|crm.meta_ads.campaigns.view|true',
+    'crm.meta_ads.reports|/app/meta-ads/relatorios|crm.meta_ads.reports.view|true',
     'crm.partnerships|/app/canal-de-parcerias|crm.partnerships.view|true',
     'crm.ranking|/app/ranking|crm.ranking.view|true',
     'crm.repasse|/app/repasse|crm.repasse.view|true',
@@ -89,6 +93,10 @@ select is(
     'crm.management',
     'crm.management.forecast',
     'crm.management.routine',
+    'crm.meta_ads',
+    'crm.meta_ads.accounts',
+    'crm.meta_ads.campaigns',
+    'crm.meta_ads.reports',
     'crm.partnerships',
     'crm.ranking',
     'crm.repasse',
@@ -111,7 +119,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Master resolves the exact twenty-eight-page catalog set'
+  'Master resolves the exact thirty-two-page catalog set'
 );
 
 select is(
@@ -138,6 +146,10 @@ select is(
     'crm.management',
     'crm.management.forecast',
     'crm.management.routine',
+    'crm.meta_ads',
+    'crm.meta_ads.accounts',
+    'crm.meta_ads.campaigns',
+    'crm.meta_ads.reports',
     'crm.partnerships',
     'crm.ranking',
     'crm.repasse',
@@ -160,7 +172,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Admin retains the exact twenty-eight-page inherited set including partnerships and simulators'
+  'Admin retains the exact thirty-two-page inherited set including Meta Ads, partnerships and simulators'
 );
 
 select is(

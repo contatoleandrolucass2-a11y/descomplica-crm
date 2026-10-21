@@ -73,6 +73,7 @@ function getManagementGoals(pages: NavigationItem[]): NavigationItem | undefined
 
 const ROOT_NAVIGATION_ORDER = new Map([
   ["/app", 10],
+  ["/app/meta-ads", 15],
   ["/app/simulacao", 20],
   ["/app/ranking", 30],
   ["/app/canal-de-parcerias", 40],

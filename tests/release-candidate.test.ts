@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 74-version manifest", async () => {
+  it("keeps a unique, ordered 76-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(74);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(74);
+    expect(migrations).toHaveLength(76);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(76);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-20)).toEqual([
+    expect(migrations.slice(-22)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -71,9 +71,11 @@ describe("release-candidate migration train", () => {
       "20261020204500_forecast_broker_roster.sql",
       "20261020214500_forecast_broker_manager_accents.sql",
       "20261020233000_appointments_goal_read.sql",
+      "20261020235022_sync_page_catalog.sql",
+      "20261021011101_sync_page_catalog.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261020233000_appointments_goal_read.sql");
+    expect(migrations.at(-1)).toBe("20261021011101_sync_page_catalog.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -218,6 +220,7 @@ describe("release-candidate activation defaults", () => {
       "rankingRoles",
       "partnershipRoles",
       "repasseRoles",
+      "metaAdsRoutes",
       "protectedSurfaces",
       "operationalRoutes",
       "connectedSystemsRoute",
@@ -255,8 +258,8 @@ describe("release-candidate activation defaults", () => {
       { timeout: 1000 },
     );
     const surfacePaths = matrix.protectedSurfaces.map((surface: { path: string }) => surface.path);
-    expect(surfacePaths).toHaveLength(28);
-    expect(new Set(surfacePaths).size).toBe(28);
+    expect(surfacePaths).toHaveLength(32);
+    expect(new Set(surfacePaths).size).toBe(32);
     expect([...surfacePaths].sort()).toEqual(
       PROTECTED_PAGE_GATES.filter((gate) => gate.releaseEnabled)
         .map((gate) => gate.path)
@@ -293,17 +296,18 @@ describe("release-candidate activation defaults", () => {
       ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(17);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(21);
         expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
+          "Meta Ads",
           "Simulação",
           "Ranking",
           "Canal de Parcerias",
           "Gestão",
           "Administração",
         ]);
-        expect(roots[4]).toEqual({
+        expect(roots[5]).toEqual({
           name: "Gestão",
           tag: "BUTTON",
           href: null,
