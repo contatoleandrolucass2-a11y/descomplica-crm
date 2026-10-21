@@ -17,6 +17,25 @@ A matriz visual do mesmo SHA aprovou os tres temas em 320, 390, 768, 1440 e
 historico Imob, arredondamento e acessibilidade. A captura manual autenticada
 nao foi repetida porque o controlador CUA local falhou ao inicializar.
 
+## 2026-10-20 — Painel inteligente de agendamentos
+
+- A meta individual passou a reproduzir a projeção da tela de Metas; o alvo do
+  card é essa projeção multiplicada pelos corretores do snapshot.
+- O painel ganhou velocímetro com ponteiro, KPIs centralizados, layout compacto,
+  Ranking Score, três rankings lado a lado e gráfico mensal estendido antes da
+  tabela.
+- Barras, rankings, meses e linhas inteiras da tabela funcionam como filtros
+  cruzados acessíveis. O detalhamento permanece ordenado pela criação mais
+  recente.
+- A divergência 78 contra 74 foi localizada na interpretação UTC de datas
+  Salesforce sem horário. A transformação agora fixa o calendário de São Paulo
+  e rejeita qualquer detalhe cujo dia não corresponda ao fato agregado.
+- Validação local: lint, typecheck e build aprovados; Vitest com 4.071 aprovações
+  e 105 ignorados; preview com 12 telas, Axe e filtros aprovado. A suíte Node
+  aprovou 1.596, ignorou 19 e reproduziu três falhas POSIX conhecidas do Meta Ads
+  no Windows. O pgTAP local ficou indisponível por ausência de Docker/Podman; a
+  restauração isolada Linux da CI é obrigatória.
+
 ## 2026-10-20: metas e atualização sincronizada do Dashboard Imob
 
 O Dashboard Imob passou a carregar a meta ativa de Parcerias do mês vigente.
@@ -82,6 +101,24 @@ Com Node 24.19.0, instalação congelada, audit sem alta/crítica, lint, typeche
 formatação, build de 57 rotas e os 12 cenários de navegador de Previsão passaram.
 A aplicação aprovou 4.063 testes; a suíte operacional aprovou 1.595 e repetiu
 somente as três limitações POSIX conhecidas do Meta Ads no Windows.
+
+## 2026-10-20 - Conferencia final das regras do Associativo
+
+O cenario de referencia foi reproduzido na interface autenticada publicada.
+Linear aprovou com Entrada e tres Sinais iguais de R$ 13.269,73; Decrescente
+aprovou com quatro pagamentos iguais de R$ 14.508,87. Em ambos, reduzir um
+centavo de cada pagamento inicial reprovou o fluxo correspondente.
+
+As anuais nominais ficaram em R$ 1.275,00, somente em dezembro de 2027, 2028
+e 2029. Dezembro de 2026 permaneceu inelegivel por coincidir com um Sinal. O
+usuario confirmou que o teto de 50% incide apenas sobre o valor nominal, sem
+considerar a correcao futura por juros. Os tres arquivos de testes focados
+aprovaram 80 testes. Lint, typecheck e build passaram. A suite completa teve
+12 timeouts locais sob saturacao depois de 4.054 testes aprovados; os quatro
+arquivos afetados passaram 74 testes ao serem repetidos com um worker. A CI
+Linux permanece o gate final. A versao funcional ja estava ativa; este
+fechamento e somente documental e nao autoriza nem exige nova publicacao do
+site.
 
 ## 2026-10-20 - Publicacao do ajuste minimo do Associativo
 

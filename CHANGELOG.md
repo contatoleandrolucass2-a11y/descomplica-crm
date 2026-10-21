@@ -1,5 +1,18 @@
 # Changelog
 
+## 2026-10-20 - Painel inteligente de agendamentos
+
+- Calcula a meta mensal pelo volume individual projetado no funil multiplicado
+  pelos corretores cadastrados e exibe velocímetro, percentual e saldo.
+- Reorganiza e compacta os gráficos, centraliza indicadores e mantém os três
+  rankings de pessoas na mesma linha com rolagem vertical interna.
+- Aplica filtros cruzados por dia, semana, mês, score, rankings e linha completa
+  da tabela, com limpeza explícita e operação por teclado.
+- Corrige datas Salesforce sem horário para o calendário de São Paulo, fazendo
+  o detalhamento, o total mensal e os registros do dia usarem a mesma origem.
+- Calcula o previsto de segunda a quarta e sexta por corretor, dobra às quintas
+  e usa os agendamentos criados no dia como realizado.
+
 ## 2026-10-20 - Metas e funis do canal Imob
 
 - Faz o cartão Salesforce e as páginas de relatório exibirem a mesma referência
@@ -29,6 +42,15 @@
   severidade detectado durante a repetição da CI.
 - Estabiliza o teste visual da grade de Previsão ao aguardar o fim da transição
   CSS antes de comparar as cores do grupo e da métrica ativa.
+
+## 2026-10-20 - Conferencia final das regras do Associativo
+
+- Registra a verificacao autenticada dos menores pagamentos iguais nos fluxos
+  Linear e Decrescente com o cenario de referencia.
+- Confirma que o teto de 50% das anuais considera somente o valor nominal,
+  truncado em centavos, sem considerar a correcao futura por juros.
+- Documenta a prova de fronteira de um centavo, as datas anuais elegiveis e os
+  80 testes focados aprovados, sem alterar o runtime ou republicar o site.
 
 ## 2026-10-20 - Evidencias da publicacao do Associativo
 
