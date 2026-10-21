@@ -354,6 +354,22 @@
   width: 60%;
 }
 
+.monthlyFunnel[data-stage-count="4"] .funnelStep[data-stage="visits"] {
+  width: 100%;
+}
+
+.monthlyFunnel[data-stage-count="4"] .funnelStep[data-stage="folders"] {
+  width: 87%;
+}
+
+.monthlyFunnel[data-stage-count="4"] .funnelStep[data-stage="approved-folders"] {
+  width: 74%;
+}
+
+.monthlyFunnel[data-stage-count="4"] .funnelStep[data-stage="sales"] {
+  width: 61%;
+}
+
 .monthlyFunnel dt {
   max-width: 100%;
   font-size: 0.75rem;

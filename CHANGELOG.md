@@ -21,6 +21,23 @@
 - Aplica a correção de acentos no Supabase de produção preservando dados,
   assinatura, owner, guards e privilégios da RPC de corretores.
 
+## 2026-10-20 - Metas e funis do canal Imob
+
+- Faz o cartão Salesforce e as páginas de relatório exibirem a mesma referência
+  persistida da última coleta publicada no dashboard.
+- Carrega a meta ativa de Parcerias no Dashboard Imob e multiplica Visitas,
+  Pastas, Pastas aprovadas e Vendas pelos sete gerentes definidos para o canal.
+- Calcula a Meta esperada até hoje pela proporção de dias transcorridos no mês,
+  com os mesmos critérios usados pelo canal House.
+- Remove Oportunidades e Agendamentos dos 13 funis e dos históricos do Imob,
+  preservando os seis estágios do House.
+- Restringe a leitura da meta de Parcerias aos usuários autorizados a visualizar
+  o Dashboard Imob, sem ampliar permissões de escrita ou de outras metas.
+- Atualiza o SDK transitivo do Next DevTools para `1.32.1`, corrigindo o alerta
+  de segurança `GHSA-22jm-h49p-29qw` sem adicionar dependência de runtime.
+- Atualiza o Vite transitivo do Vitest para `8.2.4`, corrigindo
+  `GHSA-587h-7wmj-h5pm` apenas na ferramenta de testes.
+
 ## 2026-10-20 - Publicacao e aceite de Agendamentos v3
 
 - Publica o painel e a normalizacao da data opcional por imagem imutavel, com

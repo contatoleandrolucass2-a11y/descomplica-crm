@@ -59,6 +59,44 @@ O pós-check confirmou a função `STABLE SECURITY DEFINER`, owner `postgres`,
 `authenticated`; `anon` e `service_role` continuam sem acesso. A tabela de
 períodos segue vazia e o singleton legado mantém uma linha e revisão 5.
 
+## 2026-10-20: metas e atualização sincronizada do Dashboard Imob
+
+O Dashboard Imob passou a carregar a meta ativa de Parcerias do mês vigente.
+Os valores por gerente são multiplicados pelos sete gerentes informados e a
+meta esperada usa a proporção do dia atual sobre os dias do mês. O recorte Imob
+exibe somente Visitas, Pastas, Pastas aprovadas e Vendas nos 13 funis e nos
+modais históricos; House mantém o contrato de seis estágios.
+
+O cartão Salesforce de Integrações deixou de usar o horário transitório da
+sondagem de conexão. Ele agora usa o `generatedAt` persistido do mesmo snapshot
+que alimenta o Dashboard e as páginas de relatório, com `lastExportAt` apenas
+como fallback da sessão. Salvar uma meta ativa também invalida `/app`.
+
+A migration aditiva amplia somente a policy SELECT de `crm_funnel_goals` para
+permitir que usuários com Dashboard e Imob leiam o perfil `partnerships`; as
+permissões existentes, escrita, demais perfis e gates de sessão/MFA permanecem.
+Os testes focais aprovaram 136 casos. O Vitest integral aprovou 3.963 testes,
+com 102 skips condicionais. A validação visual sintética aprovou 267 checks em
+cinco larguras e três temas, incluindo filtros, históricos, acessibilidade e
+colisões. Lint, typecheck e build de 57 rotas também passaram com Node 24.19.
+
+O pgTAP local não pôde ser executado porque o host não possui Docker ou Podman.
+O comando integral para após três testes Meta Ads dependentes de ACL/diretórios
+Linux, e o gate de release reproduz o mesmo limite em fixtures físicas do host;
+esses arquivos não pertencem ao escopo alterado. Restore isolado, 2.049
+asserções pgTAP e gates físicos Linux continuam obrigatórios na CI antes de
+aplicar a migration.
+
+A CI do SHA reconciliado aprovou formatação, lint, typecheck, aplicação e os
+3.975 testes, mas o registro de segurança passou a sinalizar
+`GHSA-22jm-h49p-29qw` no SDK transitivo do `next-devtools-mcp`. O override foi
+atualizado de `1.31.0` para a versão corrigida `1.32.1`; `pnpm audit
+--audit-level high` passou, restando apenas dois avisos moderados.
+
+Durante a reconciliação final, o registro publicou também
+`GHSA-587h-7wmj-h5pm` para o Vite transitivo do Vitest. O override mínimo fixa
+`8.2.4`; a alteração permanece restrita à ferramenta de testes.
+
 ## 2026-10-20: publicacao e aceite operacional de Agendamentos v3
 
 Os PRs #274 e #279 foram integrados com CI completa. A migration v3 foi

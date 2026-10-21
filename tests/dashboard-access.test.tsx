@@ -13,6 +13,7 @@ const mocks = vi.hoisted(() => ({
   loadStageReadModel: vi.fn(),
   loadAppointmentsReadModel: vi.fn(),
   loadDashboardTeam: vi.fn(),
+  loadFunnelGoals: vi.fn(),
   navigation: vi.fn(),
 }));
 
@@ -28,6 +29,9 @@ vi.mock("@/lib/authorization/enforce", () => ({
 }));
 vi.mock("@/lib/crm/dashboard/team", () => ({
   loadDashboardTeam: mocks.loadDashboardTeam,
+}));
+vi.mock("@/lib/crm/goals/data", () => ({
+  loadFunnelGoals: mocks.loadFunnelGoals,
 }));
 vi.mock("@/lib/navigation/pages", () => ({ getAuthorizedNavigation: mocks.navigation }));
 vi.mock("@/lib/crm/stages/data", () => ({
@@ -53,6 +57,7 @@ describe("dashboard autorizado por visão", () => {
     mocks.loadStageReadModel.mockResolvedValue({ status: "empty" });
     mocks.loadAppointmentsReadModel.mockResolvedValue({ analysis: null });
     mocks.loadDashboardTeam.mockResolvedValue({ status: "unavailable", reason: "Sem equipe." });
+    mocks.loadFunnelGoals.mockResolvedValue({ status: "empty", effectiveMonth: "2026-10-01" });
     mocks.navigation.mockResolvedValue([]);
   });
 
@@ -76,6 +81,7 @@ describe("dashboard autorizado por visão", () => {
       includeTopDevelopments: false,
       includeAnalysis: true,
     });
+    expect(mocks.loadFunnelGoals).toHaveBeenCalledExactlyOnceWith("partnerships");
     expect(markup).not.toContain('href="/app?view=');
     expect(markup).not.toContain("Sem canal de imobiliárias");
     expect(markup).not.toContain(">Geral<");
@@ -151,10 +157,46 @@ describe("dashboard autorizado por visão", () => {
     expect(markup).toContain("Responsavel sintetico");
     expect(markup).toContain("Gerente sintetico");
     expect(markup).toContain("Empresa sintetica");
-    expect(markup).toContain("Metas da Imob serão configuradas depois");
+    expect(markup).toContain("Meta Imob indisponível para o mês");
     expect(markup).not.toContain("Ranking validado");
     expect(markup).not.toContain("Oportunidades por empreendimento");
     expect(mocks.loadDashboardTeam).not.toHaveBeenCalled();
+  });
+
+  it("uses the active partnership goal in the Imob dashboard", async () => {
+    mocks.enforcePermission.mockResolvedValue({
+      permissions: ["crm.dashboard.view", "crm.dashboard.with_canal_imob.view"],
+    });
+    mocks.loadFunnelGoals.mockResolvedValue({
+      status: "ready",
+      goals: {
+        visits: 12,
+        folders: 64,
+        approvedFolders: 32,
+        sales: 20,
+      },
+    });
+    const dashboard: DashboardReadModel = {
+      id: 11,
+      snapshotKey: "global",
+      referenceDate: "2026-10-20",
+      generatedAt: "2026-10-20T12:00:00Z",
+      updatedAt: "2026-10-20T12:01:00Z",
+      timezone: "America/Sao_Paulo",
+      source: "Fixture sintetica",
+      goalsAvailable: true,
+      metrics: {},
+      salesValue: {},
+      topDevelopments: {},
+    };
+    mocks.loadDashboardReadModel.mockResolvedValue({ status: "ready", dashboard });
+
+    const markup = renderToStaticMarkup(await AppHomePage({ searchParams: Promise.resolve({}) }));
+
+    expect(markup).toContain("7 gerentes de vendas no grupo");
+    expect(markup).toContain("Visitas");
+    expect(markup).not.toContain("Oportunidades");
+    expect(markup).not.toContain("Agendamentos");
   });
 
   it("responde 403 antes de consultar dados quando a visão conhecida não é autorizada", async () => {

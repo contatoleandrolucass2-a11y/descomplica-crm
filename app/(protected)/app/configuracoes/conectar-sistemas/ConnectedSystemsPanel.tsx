@@ -370,7 +370,10 @@ export function ConnectedSystemsPanel({
                 {salesforceLabel}
               </span>
               <small>
-                <Timestamp value={snapshot.checkedAt} empty="Sem verificação" />
+                <Timestamp
+                  value={integrationEvidence?.generatedAt ?? snapshot.lastExportAt}
+                  empty="Sem relatório publicado"
+                />
               </small>
             </div>
           </article>
