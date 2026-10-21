@@ -5,6 +5,13 @@ import {
 } from "../../lib/crm/dashboard/analysis-contract.ts";
 
 const invalid = () => new Error("Invalid Salesforce dashboard analysis.");
+const identity = (value) =>
+  String(value ?? "")
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLowerCase();
 const dimensions = {
   managers: "managerName",
   owners: "brokerName",
@@ -67,9 +74,24 @@ function saoPauloDate(value) {
   return `${values.year}-${values.month}-${values.day}`;
 }
 
-export function buildDashboardAnalysis({ referenceDate, views, brokerCount }) {
+export function buildDashboardAnalysis({
+  referenceDate,
+  views,
+  brokerCount,
+  registeredBrokerNames = [],
+  brokerManagerCount = 0,
+}) {
   if (!Number.isSafeInteger(brokerCount) || brokerCount < 0 || brokerCount > 1_000_000)
     throw invalid();
+  if (
+    !Number.isSafeInteger(brokerManagerCount) ||
+    brokerManagerCount < 0 ||
+    brokerManagerCount > brokerCount ||
+    !Array.isArray(registeredBrokerNames) ||
+    registeredBrokerNames.some((name) => typeof name !== "string")
+  )
+    throw invalid();
+  const registeredBrokers = new Set(registeredBrokerNames.map(identity).filter(Boolean));
   const coverageStart = dashboardAnalysisCoverageStart(referenceDate);
   const analysisViews = views.map(({ viewKey, stages }) => {
     const records = [];
@@ -115,6 +137,9 @@ export function buildDashboardAnalysis({ referenceDate, views, brokerCount }) {
             owner: String(row.brokerName ?? "").trim(),
             accountName: String(row.accountName ?? "").trim(),
             accountRanking: String(row.accountRanking ?? "").trim(),
+            channel: matches[0],
+            company: labels.companies,
+            registeredBroker: registeredBrokers.has(identity(row.brokerName)),
           });
         }
       }
@@ -157,10 +182,11 @@ export function buildDashboardAnalysis({ referenceDate, views, brokerCount }) {
     return { viewKey, dimensions: dictionaries, facts, appointments };
   });
   const parsed = dashboardAnalysisSchema.safeParse({
-    version: 3,
+    version: 4,
     coverageStart,
     referenceDate,
     brokerCount,
+    brokerManagerCount,
     views: analysisViews,
   });
   if (!parsed.success) throw invalid();

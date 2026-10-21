@@ -20,8 +20,9 @@ const owners = Array.from(
     `Responsável sintético ${String(i + 1).padStart(2, "0")} Nome completo longo para validar leitura integral`,
 );
 const fixture = {
-  version: 3,
+  version: 4,
   brokerCount: 120,
+  brokerManagerCount: 5,
   viewKey: "all",
   coverageStart: "2025-10-01",
   referenceDate: "2026-03-31",
@@ -68,6 +69,8 @@ const fixture = {
     [1, "2025-10-14", 0, 0, 0, 1, 0, 9, 0, 0, 0],
     [1, "2025-12-22", 0, 0, 0, 1, 0, 13, 0, 0, 0],
     [0, "2026-03-01", 0, 0, 0, 1, 0, 99999, 0, 0, -1],
+    [2, "2026-03-31", 0, 0, 0, 1, 0, 33, 0, 0, -1],
+    [4, "2026-03-31", 0, 0, 0, 1, 0, 5, 0, 0, -1],
   ],
   appointments: [
     ...Array.from({ length: 31 }, (_, day) =>
@@ -90,6 +93,9 @@ const fixture = {
         owner: owners[day % owners.length],
         accountName: `Conta sintética ${String(day + 1).padStart(2, "0")}`,
         accountRanking: ["Ouro", "Prata", "Bronze"][day % 3],
+        channel: 1,
+        company: "Empresa sintética",
+        registeredBroker: true,
       })),
     ).flat(),
     ...[
@@ -107,6 +113,9 @@ const fixture = {
         owner: owners[0],
         accountName: "Conta histórica",
         accountRanking: "Ouro",
+        channel: 1,
+        company: "Empresa sintética",
+        registeredBroker: true,
       })),
     ),
   ],
@@ -200,7 +209,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} individualGoal={24} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} individualGoal={24} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -320,6 +329,14 @@ export async function runAppointmentsPreview() {
               element.querySelector(":scope > div:last-child")?.scrollHeight >
               element.querySelector(":scope > div:last-child")?.clientHeight + 1,
           })),
+          scoreSingleRow: (() => {
+            const section = [...document.querySelectorAll("[data-appointments-chart]")].find(
+              (element) => element.querySelector("h2")?.textContent === "Ranking Score",
+            );
+            const items = [...(section?.querySelectorAll("ol > li") ?? [])];
+            const tops = items.map((item) => Math.round(item.getBoundingClientRect().top));
+            return items.length > 0 && new Set(tops).size === 1;
+          })(),
           labelWritingModes: [
             ...document.querySelectorAll('[class*="columnValue"], [class*="columnLabel"]'),
           ].map((element) => getComputedStyle(element).writingMode),
@@ -371,11 +388,17 @@ export async function runAppointmentsPreview() {
           `Axe violations ${theme}/${width}: ${record.violations.map((item) => item.id).join(",")}`,
         );
         check(geometry.sections.length === 8, `Eight charts ${theme}/${width}`);
-        if (width === 1440)
+        const score = geometry.sections.find((section) => section.heading === "Ranking Score");
+        check(score && !score.hasVerticalScroll, `Ranking Score vertical scroll ${theme}/${width}`);
+        check(
+          geometry.scoreSingleRow,
+          `Ranking Score must keep every bar on one row ${theme}/${width}`,
+        );
+        if (width >= 1024)
           check(
             geometry.sections[1].y === geometry.sections[2].y &&
               geometry.sections[2].y === geometry.sections[3].y,
-            "Three charts side by side at 1440",
+            `Three charts side by side at ${width}`,
           );
         if (width === 1440) {
           check(
@@ -386,6 +409,11 @@ export async function runAppointmentsPreview() {
       }
     }
     const daily = region("Evolução de agendamentos por dia");
+    await expect(
+      page.getByRole("region", { name: "Filtros do painel de agendamentos" }),
+    ).toBeVisible();
+    await expect(page.locator("article h2")).toHaveCount(12);
+    await expect(page.getByRole("img", { name: /24 de 120 corretores/ })).toBeVisible();
     await expect(daily.getByRole("listitem")).toHaveCount(31);
     const barGeometry = await daily.getByRole("listitem").evaluateAll((items) =>
       items.map((item) => ({
@@ -483,6 +511,29 @@ export async function runAppointmentsPreview() {
     evidence.filters =
       "2025 exclusive year keeps daily March unchanged; global January keeps annual 2025 unchanged; zero months/weeks absent";
     await page.goto(origin);
+    await page.getByRole("button", { name: "House", exact: true }).click();
+    await page
+      .getByLabel("Gerente de Vendas")
+      .selectOption("Ana Gerente sintética com sobrenome extenso");
+    await page.getByLabel("Responsável da conta").selectOption(owners[0]);
+    await page.getByLabel("Empresa").selectOption("Empresa sintética");
+    await expect(page.getByRole("button", { name: "Limpar 4 filtros" })).toBeVisible();
+    const composedRow = page.locator("tbody tr").first();
+    await composedRow.focus();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("button", { name: /Limpar 8 filtros/ })).toBeVisible();
+    await page.keyboard.press("Enter");
+    await expect(page.getByRole("button", { name: "Limpar 4 filtros" })).toBeVisible();
+    await expect(page.getByLabel("Gerente de Vendas")).toHaveValue(
+      "Ana Gerente sintética com sobrenome extenso",
+    );
+    await expect(page.getByRole("button", { name: "House", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    evidence.dimensionFilters =
+      "House, manager, responsible and company compose; selecting and toggling a full row preserves the four global filters";
+    await page.getByRole("button", { name: "Limpar 4 filtros" }).click();
     const firstDay = region("Evolução de agendamentos por dia").getByRole("button").first();
     await firstDay.click();
     await expect(firstDay).toHaveAttribute("aria-pressed", "true");

@@ -152,6 +152,166 @@ function Kpi({ label, value, detail }: { label: string; value: string | null; de
   );
 }
 
+function ProductiveTeamCard({
+  productive,
+  brokers,
+  percent,
+}: {
+  productive: number | null;
+  brokers: number | null;
+  percent: number | null;
+}) {
+  const progress = Math.min(Math.max(percent ?? 0, 0), 100);
+  return (
+    <article className={`${styles.card} ${styles.kpiCard} ${styles.productiveCard}`}>
+      <h2>Equipe Produtiva</h2>
+      <div
+        className={styles.donut}
+        style={{ "--donut-progress": `${progress * 3.6}deg` } as CSSProperties}
+        role="img"
+        aria-label={
+          productive === null || brokers === null || percent === null
+            ? "Equipe produtiva indisponível"
+            : `${number.format(productive)} de ${number.format(brokers)} corretores, ${decimal.format(percent)} por cento da equipe`
+        }
+      >
+        <strong>{percent === null ? "—" : `${decimal.format(percent)}%`}</strong>
+      </div>
+      <p>
+        {productive === null || brokers === null
+          ? "Aguardando o elenco vigente de corretores"
+          : `${number.format(productive)} de ${number.format(brokers)} corretores com agendamento`}
+      </p>
+    </article>
+  );
+}
+
+function ConversionKpi({
+  title,
+  source,
+  target,
+  sourceUnit,
+  targetUnit,
+}: {
+  title: string;
+  source: number | null;
+  target: number | null;
+  sourceUnit: string;
+  targetUnit: string;
+}) {
+  const percent = source !== null && target !== null && source > 0 ? (target / source) * 100 : null;
+  const ratio = source !== null && target !== null && target > 0 ? source / target : null;
+  return (
+    <article className={`${styles.card} ${styles.conversionCard}`}>
+      <h2>{title}</h2>
+      {source === null || target === null ? (
+        <strong>Indisponível</strong>
+      ) : (
+        <div className={styles.conversionResult}>
+          <strong>
+            {number.format(source)} <span aria-hidden="true">→</span> {number.format(target)}
+          </strong>
+          <span>{percent === null ? "—" : `${decimal.format(percent)}%`}</span>
+        </div>
+      )}
+      <p>
+        {ratio === null
+          ? "Sem conversão no período selecionado"
+          : `${decimal.format(ratio)} ${sourceUnit} para 1 ${targetUnit}`}
+      </p>
+    </article>
+  );
+}
+
+function DashboardFilters({
+  filters,
+  options,
+  onChange,
+}: {
+  filters: AppointmentFilters;
+  options: {
+    channels: { key: 0 | 1; label: string }[];
+    managers: string[];
+    owners: string[];
+    companies: string[];
+  };
+  onChange: <K extends keyof AppointmentFilters>(
+    key: K,
+    value: AppointmentFilters[K] | undefined,
+  ) => void;
+}) {
+  const selects = [
+    {
+      key: "manager" as const,
+      label: "Gerente de Vendas",
+      empty: "Todos os gerentes",
+      values: options.managers,
+    },
+    {
+      key: "owner" as const,
+      label: "Responsável da conta",
+      empty: "Todos os responsáveis",
+      values: options.owners,
+    },
+    {
+      key: "company" as const,
+      label: "Empresa",
+      empty: "Todas as empresas",
+      values: options.companies,
+    },
+  ];
+  const channelOptions = [
+    { key: 1 as const, label: "House" },
+    { key: 0 as const, label: "Imob" },
+  ];
+  return (
+    <section className={styles.filters} aria-label="Filtros do painel de agendamentos">
+      <fieldset className={styles.channelField}>
+        <legend>Canal de vendas</legend>
+        <div className={styles.channelSwitch}>
+          {channelOptions.map((option) => {
+            const available = options.channels.some((item) => item.key === option.key);
+            return (
+              <button
+                key={option.key}
+                type="button"
+                aria-pressed={filters.channel === option.key}
+                disabled={!available}
+                title={available ? undefined : "Canal indisponível neste recorte"}
+                onClick={() =>
+                  onChange("channel", filters.channel === option.key ? undefined : option.key)
+                }
+              >
+                {option.label}
+              </button>
+            );
+          })}
+        </div>
+      </fieldset>
+      {selects.map((filter) => {
+        const id = `appointment-filter-${filter.key}`;
+        return (
+          <label key={filter.key} className={styles.filterField} htmlFor={id}>
+            <span>{filter.label}</span>
+            <select
+              id={id}
+              value={filters[filter.key] ?? ""}
+              onChange={(event) => onChange(filter.key, event.target.value || undefined)}
+            >
+              <option value="">{filter.empty}</option>
+              {filter.values.map((value) => (
+                <option key={value} value={value}>
+                  {value}
+                </option>
+              ))}
+            </select>
+          </label>
+        );
+      })}
+    </section>
+  );
+}
+
 function GoalGauge({ current, goal }: { current: number; goal: number | null }) {
   const ratio = goal && goal > 0 ? current / goal : null;
   const percent = ratio === null ? null : ratio * 100;
@@ -305,6 +465,7 @@ export function AppointmentsDashboard({
   const [yearChoice, setSelectedYear] = useState("");
   const [filters, setFilters] = useState<AppointmentFilters>({});
   const [selectedRow, setSelectedRow] = useState("");
+  const [rowBaseFilters, setRowBaseFilters] = useState<AppointmentFilters | null>(null);
   const selectedMonth = monthChoice || analysis?.referenceDate.slice(0, 7) || "";
   const selectedYear = yearChoice || analysis?.referenceDate.slice(0, 4) || "";
   const result = useMemo(
@@ -326,15 +487,31 @@ export function AppointmentsDashboard({
   const years = appointmentYears(analysis);
   const monthUnavailable = result.coverage === "unavailable";
   const monthlyGoal = appointmentMonthlyGoal(individualGoal, result.brokerCount);
-  const activeFilterCount = Object.values(filters).filter(Boolean).length;
+  const activeFilterCount = Object.values(filters).filter(
+    (value) => value !== undefined && value !== "",
+  ).length;
   const toggleFilter = <K extends keyof AppointmentFilters>(
     key: K,
     value: AppointmentFilters[K],
   ) => {
     setSelectedRow("");
+    setRowBaseFilters(null);
     setFilters((current) => {
       const next = { ...current };
       if (current[key] === value) delete next[key];
+      else next[key] = value;
+      return next;
+    });
+  };
+  const setDimensionFilter = <K extends keyof AppointmentFilters>(
+    key: K,
+    value: AppointmentFilters[K] | undefined,
+  ) => {
+    setSelectedRow("");
+    setRowBaseFilters(null);
+    setFilters((current) => {
+      const next = { ...current };
+      if (value === undefined || value === "") delete next[key];
       else next[key] = value;
       return next;
     });
@@ -359,7 +536,11 @@ export function AppointmentsDashboard({
             max={analysis.referenceDate.slice(0, 7)}
             value={selectedMonth}
             onChange={(event) => {
-              if (/^\d{4}-\d{2}$/.test(event.target.value)) setSelectedMonth(event.target.value);
+              if (/^\d{4}-\d{2}$/.test(event.target.value)) {
+                setSelectedMonth(event.target.value);
+                setSelectedRow("");
+                setRowBaseFilters(null);
+              }
             }}
           />
         </div>
@@ -379,6 +560,7 @@ export function AppointmentsDashboard({
             onClick={() => {
               setFilters({});
               setSelectedRow("");
+              setRowBaseFilters(null);
             }}
           >
             Limpar {activeFilterCount} {activeFilterCount === 1 ? "filtro" : "filtros"}
@@ -411,6 +593,12 @@ export function AppointmentsDashboard({
         )}
       </p>
 
+      <DashboardFilters
+        filters={filters}
+        options={result.filterOptions}
+        onChange={setDimensionFilter}
+      />
+
       <div className={styles.kpiGrid}>
         <article className={`${styles.card} ${styles.gaugeCard}`}>
           <h2>Meta do mês</h2>
@@ -421,6 +609,11 @@ export function AppointmentsDashboard({
               : `${number.format(individualGoal)} por corretor × ${number.format(result.brokerCount)} corretores`}
           </span>
         </article>
+        <ProductiveTeamCard
+          productive={result.productiveBrokers}
+          brokers={result.brokerCount}
+          percent={result.productivePercent}
+        />
         <Kpi
           label="Corretores cadastrados"
           value={result.brokerCount === null ? null : number.format(result.brokerCount)}
@@ -432,11 +625,6 @@ export function AppointmentsDashboard({
           detail="Média diária no mês selecionado"
         />
         <Kpi
-          label="Agendamentos no mês"
-          value={number.format(result.total)}
-          detail="Período selecionado"
-        />
-        <Kpi
           label="Agendamentos ontem"
           value={number.format(result.yesterday)}
           detail="Pela data de criação"
@@ -445,6 +633,49 @@ export function AppointmentsDashboard({
           label="Agendamentos hoje"
           value={number.format(result.today)}
           detail="Pela data de criação"
+        />
+      </div>
+
+      <div className={`${styles.kpiGrid} ${styles.secondaryKpiGrid}`}>
+        <ConversionKpi
+          title="Oportunidade x Agendamento"
+          source={result.funnel?.opportunities ?? null}
+          target={result.funnel?.appointments ?? null}
+          sourceUnit="oportunidades"
+          targetUnit="agendamento"
+        />
+        <ConversionKpi
+          title="Agendamento x Visita"
+          source={result.funnel?.appointments ?? null}
+          target={result.funnel?.visits ?? null}
+          sourceUnit="agendamentos"
+          targetUnit="visita"
+        />
+        <ConversionKpi
+          title="Agendamento x Venda"
+          source={result.funnel?.appointments ?? null}
+          target={result.funnel?.sales ?? null}
+          sourceUnit="agendamentos"
+          targetUnit="venda"
+        />
+        <Kpi
+          label="Gerentes cadastrados"
+          value={
+            result.registeredManagerCount === null
+              ? null
+              : number.format(result.registeredManagerCount)
+          }
+          detail="Gerentes de Vendas vinculados aos corretores"
+        />
+        <Kpi
+          label="Visitas realizadas"
+          value={result.visitsPerformed === null ? null : number.format(result.visitsPerformed)}
+          detail="Período selecionado"
+        />
+        <Kpi
+          label="Vendas no período"
+          value={result.sales === null ? null : number.format(result.sales)}
+          detail="Período selecionado"
         />
       </div>
 
@@ -556,7 +787,11 @@ export function AppointmentsDashboard({
               <select
                 id={yearId}
                 value={selectedYear}
-                onChange={(event) => setSelectedYear(event.target.value)}
+                onChange={(event) => {
+                  setSelectedYear(event.target.value);
+                  setSelectedRow("");
+                  setRowBaseFilters(null);
+                }}
               >
                 {years.map((year) => (
                   <option key={year} value={year}>
@@ -573,6 +808,8 @@ export function AppointmentsDashboard({
             onSelect={(bucket) => {
               const nextMonth = `${selectedYear}-${bucket.key}`;
               setSelectedMonth(nextMonth);
+              setSelectedRow("");
+              setRowBaseFilters(null);
               setFilters((current) => {
                 const next = { ...current };
                 delete next.createdDate;
@@ -598,10 +835,13 @@ export function AppointmentsDashboard({
           onSelect={(rowFilters, key) => {
             if (selectedRow === key) {
               setSelectedRow("");
-              setFilters({});
+              setFilters(rowBaseFilters ?? {});
+              setRowBaseFilters(null);
             } else {
+              const baseFilters = rowBaseFilters ?? filters;
+              setRowBaseFilters(baseFilters);
               setSelectedRow(key);
-              setFilters(rowFilters);
+              setFilters({ ...baseFilters, ...rowFilters });
             }
           }}
         />

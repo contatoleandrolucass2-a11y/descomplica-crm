@@ -19,7 +19,10 @@ const slice = {
   dimensions: { managers: [], owners: [], companies: [], developments: [] },
   facts: [[1, "2026-10-19", -1, -1, -1, 0, -1, 2, 0, 0]],
 };
-const result = (payload = slice) => ({ data: [{ view_key: "all", payload }], error: null });
+const result = (payload: unknown = slice) => ({
+  data: [{ view_key: "all", payload }],
+  error: null,
+});
 let headers: Array<{ data: unknown; error: unknown }>;
 
 beforeEach(() => {
@@ -99,6 +102,42 @@ describe("appointments snapshot read", () => {
     await expect(loadAppointmentsReadModel("all")).rejects.toThrow("snapshot");
     mocks.rpc.mockResolvedValue({ data: [...result().data, ...result().data], error: null });
     await expect(loadAppointmentsReadModel("all")).rejects.toThrow("visão");
+  });
+
+  it("accepts the v4 aggregate funnel while preserving the authorized view", async () => {
+    const v4 = {
+      ...slice,
+      version: 4,
+      brokerCount: 2,
+      brokerManagerCount: 1,
+      dimensions: { ...slice.dimensions, companies: ["Empresa A"], stores: ["Loja A"] },
+      facts: [
+        [0, "2026-10-19", -1, -1, 0, 1, -1, 9, 0, 0, -1],
+        [1, "2026-10-19", -1, -1, 0, 1, -1, 1, 0, 0, 0],
+        [2, "2026-10-19", -1, -1, 0, 1, -1, 1, 0, 0, -1],
+        [4, "2026-10-19", -1, -1, 0, 1, -1, 1, 0, 0, -1],
+      ],
+      appointments: [
+        {
+          createdAt: "2026-10-19T12:00:00-03:00",
+          scheduledAt: null,
+          attendedAt: null,
+          visitPerformed: false,
+          regionalManager: "",
+          salesManager: "",
+          owner: "",
+          accountName: "",
+          accountRanking: "",
+          channel: 1,
+          company: "Empresa A",
+          registeredBroker: false,
+        },
+      ],
+    };
+    mocks.rpc.mockImplementation(async (name: string) =>
+      name === "read_crm_appointments_goal" ? { data: 24, error: null } : result(v4),
+    );
+    expect((await loadAppointmentsReadModel("all")).analysis).toEqual(v4);
   });
 
   it("retries when ingestion changes even the PostgreSQL microsecond version", async () => {

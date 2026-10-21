@@ -42,6 +42,9 @@ const APPOINTMENT_OPERATION_COLUMNS = {
   "Activity.Account.Name": "Conta: Nome da conta",
   "Activity.Account.Ranking__c": "Conta: Ranking",
 };
+const BROKER_MANAGER_COLUMN = {
+  "Contact.Gerente_de_Vendas__c.Name": "Gerente de Vendas: Nome completo",
+};
 
 function metadataFor(definition) {
   return {
@@ -96,6 +99,9 @@ function complete(definition, metadata, numbers = [1]) {
             { label },
           ]),
         ),
+        ...Object.fromEntries(
+          Object.entries(BROKER_MANAGER_COLUMN).map(([column, label]) => [column, { label }]),
+        ),
       },
     },
     attributes: { status: "Success" },
@@ -135,6 +141,9 @@ function client({ describeFor, resultFor, startFor, metadataForResponse } = {}) 
                   column,
                   { label },
                 ]),
+              ),
+              ...Object.fromEntries(
+                Object.entries(BROKER_MANAGER_COLUMN).map(([column, label]) => [column, { label }]),
               ),
             },
           },
@@ -251,6 +260,30 @@ test("appointment development metadata is checked each cycle and never substitut
       .filter((call) => call.method === "POST")
       .every((call) => new URL(call.url).pathname.endsWith("/instances")),
   );
+});
+
+test("broker manager label is verified and projected on every broker collection", async () => {
+  const column = "Contact.Gerente_de_Vendas__c.Name";
+  const fixture = client({
+    resultFor: (definition, metadata) => {
+      const result = complete(definition, metadata);
+      result.factMap["T!T"].rows[0].dataCells[metadata.detailColumns.indexOf(column)] = {
+        value: "Gerente cadastrado",
+        label: "Gerente cadastrado",
+      };
+      return result;
+    },
+  });
+  assert.equal((await collect("brokers", fixture))[0].managerName, "Gerente cadastrado");
+  const drifted = client({
+    metadataForResponse: (response) => {
+      response.reportExtendedMetadata.detailColumnInfo[column].label = "Gerente alterado";
+      return response;
+    },
+  });
+  await assert.rejects(collect("brokers", drifted), {
+    code: "SALESFORCE_INVALID_REPORT",
+  });
 });
 
 test("analysis requires and projects the verified business-unit column for both activity reports only", async () => {

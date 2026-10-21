@@ -425,6 +425,10 @@ export function buildSalesforceSnapshot({
     payload.dashboard.analysis = buildDashboardAnalysis({
       referenceDate,
       brokerCount: reports.brokers.length,
+      registeredBrokerNames: reports.brokers.map((broker) => broker.name),
+      brokerManagerCount: new Set(
+        reports.brokers.map((broker) => fold(broker.managerName)).filter(Boolean),
+      ).size,
       views: VIEW_KEYS.map((viewKey) => ({
         viewKey,
         stages: Object.fromEntries(

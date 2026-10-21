@@ -62,6 +62,76 @@
   font-size: 0.8125rem;
   overflow-wrap: anywhere;
 }
+.filters {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding: 0.9rem;
+  background: var(--analytics-surface);
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+}
+.channelField,
+.filterField {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+.channelField legend,
+.filterField > span {
+  display: block;
+  margin: 0 0 0.4rem;
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+  line-height: 1.3;
+}
+.channelSwitch {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  min-height: 44px;
+  padding: 0.2rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.55rem;
+  background: var(--analytics-surface-muted);
+}
+.channelSwitch button {
+  min-width: 0;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--analytics-muted);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.channelSwitch button[aria-pressed="true"] {
+  background: var(--analytics-cyan-strong);
+  color: var(--analytics-surface);
+}
+.channelSwitch button:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.filterField select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.55rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+  padding: 0.5rem 2rem 0.5rem 0.65rem;
+  font: inherit;
+  font-size: 0.82rem;
+  text-overflow: ellipsis;
+}
+.channelSwitch button:focus-visible,
+.filterField select:focus-visible {
+  outline: 3px solid var(--analytics-cyan-strong);
+  outline-offset: 2px;
+}
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -80,6 +150,7 @@
 }
 .rankingGrid .chartCard {
   height: 32rem;
+  min-height: 32rem;
 }
 .rankingGrid .cardBody {
   overflow-y: auto;
@@ -99,14 +170,17 @@
 .chartCard {
   display: flex;
   flex-direction: column;
-  height: 24rem;
+  height: 20rem;
+  min-height: 20rem;
 }
 .wideChart {
-  height: 20rem;
+  height: 18rem;
+  min-height: 18rem;
 }
 .cardBody {
   min-height: 0;
   overflow-x: hidden;
+  overflow-y: hidden;
 }
 .cardHeader {
   display: flex;
@@ -137,6 +211,71 @@
   color: var(--analytics-cyan-strong);
 }
 .kpiCard p {
+  margin: 0;
+  color: var(--analytics-muted);
+  font-size: 0.72rem;
+  line-height: 1.35;
+}
+.secondaryKpiGrid {
+  margin-top: -0.25rem;
+}
+.productiveCard {
+  justify-content: flex-start;
+}
+.donut {
+  display: grid;
+  place-items: center;
+  width: 5.4rem;
+  aspect-ratio: 1;
+  margin: auto 0 0.35rem;
+  border-radius: 50%;
+  background:
+    radial-gradient(circle at center, var(--analytics-surface) 55%, transparent 57%),
+    conic-gradient(
+      var(--analytics-cyan-strong) 0 var(--donut-progress),
+      var(--analytics-surface-strong) var(--donut-progress) 360deg
+    );
+}
+.donut strong {
+  margin: 0;
+  color: var(--analytics-ink);
+  font-size: 1.1rem;
+}
+.conversionCard {
+  min-height: 10rem;
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.conversionCard > strong {
+  margin: auto 0 0.5rem;
+  color: var(--analytics-muted);
+  font-size: 0.82rem;
+}
+.conversionResult {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: auto 0 0.5rem;
+}
+.conversionResult strong {
+  color: var(--analytics-ink);
+  font-size: clamp(1rem, 1.35vw, 1.35rem);
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.conversionResult > span {
+  flex: none;
+  padding: 0.35rem 0.5rem;
+  border: 1px solid var(--analytics-cyan-strong);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 14%, transparent);
+  color: var(--analytics-cyan-strong);
+  font-size: 0.75rem;
+  font-weight: 700;
+}
+.conversionCard p {
   margin: 0;
   color: var(--analytics-muted);
   font-size: 0.72rem;
@@ -215,9 +354,9 @@
 }
 .columns {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(3.25rem, 1fr));
-  gap: 1rem clamp(0.35rem, 0.75vw, 0.75rem);
-  padding: 1.2rem 0 0;
+  grid-template-columns: repeat(var(--column-count), minmax(0, 1fr));
+  gap: 0.75rem clamp(0.2rem, 0.55vw, 0.55rem);
+  padding: 0.85rem 0 0;
   margin: 0;
   list-style: none;
   background: repeating-linear-gradient(
@@ -259,7 +398,7 @@
 }
 .columnTrack {
   position: relative;
-  height: 150px;
+  height: 138px;
   display: flex;
   align-items: end;
   border-bottom: 1px solid var(--analytics-line);
@@ -285,7 +424,7 @@
 .columnLabel {
   display: block;
   margin-top: 0.5rem;
-  font-size: 0.75rem;
+  font-size: clamp(0.58rem, 0.72vw, 0.75rem);
   line-height: 1.3;
   overflow-wrap: anywhere;
   text-align: center;
@@ -305,11 +444,11 @@
   padding: 0;
   list-style: none;
   display: grid;
-  gap: 1rem;
+  gap: 0.7rem;
 }
 .rankingButton {
   min-height: 44px;
-  padding: 0.2rem;
+  padding: 0.1rem;
 }
 .rankingHeading {
   display: grid;
@@ -400,11 +539,14 @@
   }
 }
 @media (max-width: 1050px) {
+  .filters {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
   .grid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .rankingGrid {
-    grid-template-columns: minmax(0, 1fr);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .tableViewport table {
     font-size: 0.68rem;
@@ -416,6 +558,11 @@
   }
 }
 @media (max-width: 700px) {
+  .filters,
+  .grid,
+  .rankingGrid {
+    grid-template-columns: minmax(0, 1fr);
+  }
   .kpiGrid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }

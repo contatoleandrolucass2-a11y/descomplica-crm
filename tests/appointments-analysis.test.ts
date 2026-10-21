@@ -23,6 +23,17 @@ function fact(
   return [1, date, manager, owner, -1, 0, development, count, 0, 0, store];
 }
 
+function stageFact(
+  stage: 0 | 1 | 2 | 4,
+  count: number,
+  manager = 0,
+  owner = 0,
+  company = 0,
+  channel: 0 | 1 = 1,
+): DashboardAnalysisFact {
+  return [stage, "2026-10-19", manager, owner, company, channel, 0, count, 0, 0, -1];
+}
+
 function slice(overrides: Partial<DashboardAnalysisSlice> = {}): DashboardAnalysisSlice {
   return {
     version: 2,
@@ -160,6 +171,94 @@ describe("appointment chart analysis", () => {
     expect(result.details?.map((row) => row.accountName)).toEqual(["Conta A"]);
     expect(result.managers).toEqual([{ key: "Gerente A", label: "Gerente A", total: 1 }]);
     expect(result.accountRankings).toEqual([{ key: "Ouro", label: "Ouro", total: 1 }]);
+  });
+
+  it("combines the four dashboard filters across funnel, productive team and details in v4", () => {
+    const appointment = (
+      owner: string,
+      salesManager: string,
+      company: string,
+      channel: 0 | 1,
+      registeredBroker = true,
+    ) => ({
+      createdAt: "2026-10-19T12:00:00-03:00",
+      scheduledAt: null,
+      attendedAt: null,
+      visitPerformed: false,
+      regionalManager: "Regional A",
+      salesManager,
+      owner,
+      accountName: `Conta ${owner}`,
+      accountRanking: "Ouro",
+      channel,
+      company,
+      registeredBroker,
+    });
+    const input = slice({
+      version: 4,
+      brokerCount: 4,
+      brokerManagerCount: 2,
+      dimensions: {
+        managers: ["Gerente A", "Gerente B"],
+        owners: ["Responsável A", "Responsável B"],
+        companies: ["Empresa A", "Empresa B"],
+        developments: ["Residencial A"],
+        stores: ["Loja A"],
+      },
+      facts: [
+        stageFact(0, 9),
+        stageFact(1, 3),
+        stageFact(2, 2),
+        stageFact(4, 1),
+        stageFact(0, 20, 1, 1, 1, 0),
+        stageFact(1, 8, 1, 1, 1, 0),
+        stageFact(2, 4, 1, 1, 1, 0),
+        stageFact(4, 2, 1, 1, 1, 0),
+      ],
+      appointments: [
+        appointment("Responsável A", "Gerente A", "Empresa A", 1),
+        appointment("Responsável A", "Gerente A", "Empresa A", 1),
+        appointment("Responsável B", "Gerente B", "Empresa B", 0),
+      ],
+    });
+    const result = analyzeAppointments(input, {
+      filters: {
+        channel: 1,
+        manager: "Gerente A",
+        owner: "Responsável A",
+        company: "Empresa A",
+      },
+    });
+    expect(result.total).toBe(2);
+    expect(result.details).toHaveLength(2);
+    expect(result.funnel).toEqual({ opportunities: 9, appointments: 3, visits: 2, sales: 1 });
+    expect(result.productiveBrokers).toBe(1);
+    expect(result.productivePercent).toBe(25);
+    expect(result.registeredManagerCount).toBe(2);
+    expect(result.visitsPerformed).toBe(2);
+    expect(result.sales).toBe(1);
+    expect(result.filterOptions.channels).toEqual([
+      { key: 1, label: "House" },
+      { key: 0, label: "Imob" },
+    ]);
+  });
+
+  it("returns finite zero funnel indicators when no source or destination exists", () => {
+    const result = analyzeAppointments(
+      slice({
+        version: 4,
+        brokerCount: 0,
+        brokerManagerCount: 0,
+        dimensions: { ...slice().dimensions, stores: ["Loja A", "Loja B"] },
+        facts: [],
+        appointments: [],
+      }),
+    );
+    expect(result.funnel).toEqual({ opportunities: 0, appointments: 0, visits: 0, sales: 0 });
+    expect(result.productiveBrokers).toBe(0);
+    expect(result.productivePercent).toBe(0);
+    expect(result.visitsPerformed).toBe(0);
+    expect(result.sales).toBe(0);
   });
 
   it("keeps yearly monthly values independent of the other charts' selected month", () => {
