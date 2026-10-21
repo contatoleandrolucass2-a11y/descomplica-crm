@@ -91,6 +91,18 @@ describe("dashboard Meta Ads", () => {
     expect(document).toContain('id="alerts-button"');
   });
 
+  it("le o documento por caminho textual compativel com o runtime empacotado", async () => {
+    const pageSource = await readFile(
+      new URL("../app/(protected)/app/meta-ads/MetaAdsPage.tsx", import.meta.url),
+      "utf8",
+    );
+
+    expect(pageSource).toContain(
+      'join(process.cwd(), "app", "(protected)", "app", "meta-ads", "dashboard-frame.html")',
+    );
+    expect(pageSource).not.toContain('readFile(new URL("./dashboard-frame.html"');
+  });
+
   it("herda os tres temas e os tokens visuais do shell protegido", async () => {
     const [frameSource, dashboardStyles] = await Promise.all([
       readFile(

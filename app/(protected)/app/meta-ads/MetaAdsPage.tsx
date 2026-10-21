@@ -1,4 +1,5 @@
 import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 
 import { forbidden } from "next/navigation";
 
@@ -8,7 +9,10 @@ import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 import { MetaAdsDashboardFrame, type MetaAdsDashboardView } from "./MetaAdsDashboardFrame";
 
 async function readDashboardDocument() {
-  return readFile(new URL("./dashboard-frame.html", import.meta.url), "utf8");
+  return readFile(
+    join(process.cwd(), "app", "(protected)", "app", "meta-ads", "dashboard-frame.html"),
+    "utf8",
+  );
 }
 
 export async function MetaAdsPage({ path, view }: { path: string; view: MetaAdsDashboardView }) {
