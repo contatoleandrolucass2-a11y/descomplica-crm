@@ -1,6 +1,6 @@
 begin;
--- 30 single assertions plus two three-role ACL matrices.
-select plan(36);
+-- 36 existing assertions plus six v4 contract/projection assertions.
+select plan(42);
 
 create function pg_temp.analysis_fixture()
 returns jsonb language sql as $$
@@ -103,8 +103,28 @@ create function pg_temp.appointment_analysis_v3() returns jsonb language sql as 
         '{viewKey}',to_jsonb(v))
     ) from unnest(array['all','with_canal_imob','without_canal_imob']) v));
 $$;
+create function pg_temp.appointment_slice_v4() returns jsonb language sql as $$
+  select jsonb_set(jsonb_set(jsonb_set(jsonb_set(
+    pg_temp.appointment_slice_v3(),'{version}','4'::jsonb),
+    '{brokerManagerCount}','2'::jsonb),
+    '{appointments,0}',(pg_temp.appointment_slice_v3()#>'{appointments,0}')
+      || '{"channel":0,"company":"Appointment company","registeredBroker":true}'::jsonb),
+    '{facts}',(pg_temp.appointment_slice_v3()->'facts')
+      || '[[3,"2026-08-04",0,0,0,0,0,1,0,1,-1],
+           [4,"2026-08-04",0,0,0,0,0,1,999999,0,-1]]'::jsonb);
+$$;
+create function pg_temp.appointment_analysis_v4() returns jsonb language sql as $$
+  select jsonb_build_object('version',4,'coverageStart','2026-01-01',
+    'referenceDate','2026-08-04','brokerCount',8,'brokerManagerCount',2,
+    'views',(select jsonb_agg(
+      jsonb_set(pg_temp.appointment_slice_v4()
+        - array['version','coverageStart','referenceDate','brokerCount','brokerManagerCount'],
+        '{viewKey}',to_jsonb(v))
+    ) from unnest(array['all','with_canal_imob','without_canal_imob']) v));
+$$;
 grant execute on function pg_temp.appointment_slice(), pg_temp.appointment_analysis(),
-  pg_temp.appointment_slice_v3(), pg_temp.appointment_analysis_v3() to service_role;
+  pg_temp.appointment_slice_v3(), pg_temp.appointment_analysis_v3(),
+  pg_temp.appointment_slice_v4(), pg_temp.appointment_analysis_v4() to service_role;
 select lives_ok($$select private.validate_crm_dashboard_analysis(pg_temp.analysis_fixture(),'2026-08-04')$$,
   'legacy v1 ingestion remains valid');
 select lives_ok($$select private.validate_crm_dashboard_analysis(pg_temp.appointment_analysis(),'2026-08-04')$$,
@@ -130,6 +150,23 @@ select is(private.project_crm_appointments_analysis(
 select is(private.project_crm_appointments_analysis(
   pg_temp.appointment_slice_v3(),false)#>>'{appointments,0,accountName}',
   '','missing ranking permission redacts account names');
+select lives_ok($$select private.validate_crm_dashboard_analysis(
+  pg_temp.appointment_analysis_v4(),'2026-08-04')$$,
+  'v4 validates official manager population and productive broker marker');
+select throws_ok($$select private.validate_crm_dashboard_analysis(
+  jsonb_set(pg_temp.appointment_analysis_v4(),'{brokerManagerCount}','9'::jsonb),
+  '2026-08-04')$$,'22023','invalid dashboard analysis',
+  'v4 manager population cannot exceed registered brokers');
+select ok((select sum((fact->>7)::int) filter (where fact->>0='0') = 9
+    and count(*) filter (where fact->>0='4') = 1
+    and count(*) filter (where fact->>0='3') = 0
+    and bool_and((fact->>8)::numeric = 0 and (fact->>9)::numeric = 0)
+  from jsonb_array_elements(
+    private.project_crm_appointments_analysis(pg_temp.appointment_slice_v4(),true)->'facts'
+  ) fact),'v4 projection exposes only aggregate funnel counts without VGV or folder approval');
+select is(private.project_crm_appointments_analysis(
+  pg_temp.appointment_slice_v4(),false)#>>'{appointments,0,accountName}',
+  '','v4 preserves account redaction while exposing aggregate funnel facts');
 
 select is(private.project_crm_appointments_analysis(pg_temp.appointment_slice(),true)#>'{dimensions,managers}',
   '["Appointment manager"]'::jsonb,'projection removes other-stage manager labels');
@@ -174,6 +211,18 @@ select is(public.ingest_crm_salesforce_snapshot(jsonb_set(
 select is((select jsonb_build_object('version',payload->'version','brokerCount',payload->'brokerCount')
   from public.crm_dashboard_analysis where view_key='all'),
   '{"version":3,"brokerCount":8}'::jsonb,'stored v3 slices preserve broker population');
+set local role service_role;
+select is(public.ingest_crm_salesforce_snapshot(jsonb_set(
+  pg_temp.analysis_payload('ac000000-0000-4000-8000-000000000003','2026-08-04T08:00:00Z'),
+  '{dashboard,analysis}',pg_temp.appointment_analysis_v4()))->>'status',
+  'succeeded','machine RPC accepts v4');
+reset role;
+select is((select jsonb_build_object(
+    'version',payload->'version','brokerCount',payload->'brokerCount',
+    'brokerManagerCount',payload->'brokerManagerCount')
+  from public.crm_dashboard_analysis where view_key='all'),
+  '{"version":4,"brokerCount":8,"brokerManagerCount":2}'::jsonb,
+  'stored v4 slices preserve official broker and manager populations');
 select set_config('test.appointment_snapshot',(select id::text from public.crm_dashboard_snapshots
   where snapshot_key='analysis-test'),true);
 set local role authenticated;

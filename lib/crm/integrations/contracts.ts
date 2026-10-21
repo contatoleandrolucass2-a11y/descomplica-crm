@@ -128,6 +128,7 @@ export const salesforceBrokerSourceRowSchema = z
     contactId: salesforceId,
     name: requiredSourceText,
     status: requiredSourceText,
+    managerName: sourceText.optional(),
   })
   .strict();
 

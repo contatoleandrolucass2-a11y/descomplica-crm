@@ -15,6 +15,35 @@ origens e mantém Previsão e Realizado separados.
 Não houve mudança de API, banco, RLS, permissão ou migration. A API vigente já
 fornece as doze seções autorizadas do período para a visão Geral.
 
+## 2026-10-21 - Filtros, produtividade e conversões de Agendamentos
+
+O painel de Agendamentos recebeu os quatro filtros do Dashboard Geral: Canal de
+vendas, Gerente de Vendas, Responsável da conta e Empresa. O recorte compõe com
+as barras e linhas clicáveis existentes. Ao retirar a seleção de uma linha, os
+filtros globais anteriores são restaurados.
+
+O contrato analítico v4 marca quais responsáveis pertencem ao elenco oficial,
+inclui Canal e Empresa no detalhe e registra a quantidade distinta de gerentes
+da coluna `Gerente de Vendas: Nome completo` do relatório de corretores. A
+projeção autorizada fornece somente contagens agregadas de Oportunidades,
+Agendamentos, Visitas e Vendas; Pastas, VGV e aprovação não são expostos.
+Snapshots v1, v2 e v3 continuam legíveis.
+
+A primeira linha mantém seis cards e troca Agendamentos no mês por Equipe
+Produtiva com rosca. A segunda linha reúne três conversões com percentual e
+razão, gerentes cadastrados, visitas realizadas e vendas. O sexto pedido,
+repetido como visitas, foi implementado como Vendas no período para completar o
+funil. O layout conserva três gráficos por linha em desktop, remove a rolagem do
+Ranking Score e mantém rankings extensos contidos.
+
+Validação focada: 47 testes Vitest, 39 testes Node da coleta, typecheck, lint,
+Prettier, diff-check, build de produção e 12 combinações visuais em Chromium
+passaram. A prévia sintética cobriu 1440, 1024, 768 e 320 px, três temas, Axe,
+teclado, filtros compostos e ausência de overflow horizontal. A suíte integral
+aprovou 4.086 testes Vitest e pulou 105. Os testes de host Meta Ads que simulam
+permissões POSIX permanecem incompatíveis com Windows; a CI Linux do SHA exato
+é o gate obrigatório antes da integração e da publicação.
+
 ## 2026-10-21 - Correção da navegação do iframe Meta Ads
 
 A navegação por fragmento relativo no documento `srcdoc` tentava carregar

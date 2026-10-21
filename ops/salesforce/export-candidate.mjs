@@ -108,6 +108,12 @@ export const REPORTS = [
     id: "00OTT000009j0l32AA",
     dated: false,
     requiredColumns: ["Contact.Name", "Contact.Status_Corretor__c"],
+    requiredLabelColumns: {
+      brokerManager: {
+        label: "Gerente de Vendas: Nome completo",
+        column: "Contact.Gerente_de_Vendas__c.Name",
+      },
+    },
   },
   {
     key: "imobAccounts",
@@ -228,6 +234,7 @@ function project(key, rows, analysisEnabled = false) {
       contactId: recordId(row, "Contact.Name"),
       name: field(row, "Contact.Name"),
       status: field(row, "Contact.Status_Corretor__c"),
+      managerName: field(row, "brokerManager"),
     }));
   }
   return rows.map((row) => ({

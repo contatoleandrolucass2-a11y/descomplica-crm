@@ -20,10 +20,20 @@ const legacy: DashboardAnalysisSlice = {
 
 const current: DashboardAnalysisSlice = {
   ...legacy,
-  version: 3,
+  version: 4,
   brokerCount: 8,
-  dimensions: { ...legacy.dimensions, stores: ["Loja sintética"] },
-  facts: [[1, "2026-10-19", 0, 0, -1, 0, 0, 4, 0, 0, 0]],
+  brokerManagerCount: 1,
+  dimensions: {
+    ...legacy.dimensions,
+    companies: ["Empresa sintética"],
+    stores: ["Loja sintética"],
+  },
+  facts: [
+    [0, "2026-10-19", 0, 0, 0, 1, 0, 9, 0, 0, -1],
+    [1, "2026-10-19", 0, 0, 0, 1, 0, 1, 0, 0, 0],
+    [2, "2026-10-19", 0, 0, 0, 1, 0, 1, 0, 0, -1],
+    [4, "2026-10-19", 0, 0, 0, 1, 0, 1, 0, 0, -1],
+  ],
   appointments: [
     {
       createdAt: "2026-10-19T12:00:00Z",
@@ -35,6 +45,9 @@ const current: DashboardAnalysisSlice = {
       owner: "Responsável sintético",
       accountName: "Conta sintética",
       accountRanking: "Ouro",
+      channel: 1,
+      company: "Empresa sintética",
+      registeredBroker: true,
     },
   ],
 };
@@ -48,7 +61,7 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain(">Agendamentos</h1>");
   });
 
-  it("renders six cards, ordered charts and the detailed table for v3", () => {
+  it("renders the four filters, twelve cards, ordered charts and detailed table for v4", () => {
     const markup = renderToStaticMarkup(
       <AppointmentsDashboard analysis={current} individualGoal={24} />,
     );
@@ -56,7 +69,21 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain(">Ano</label>");
     expect(markup).toContain("Mês selecionado com cobertura parcial");
     expect(markup).toContain("Meta do mês");
+    expect(markup).toContain("Filtros do painel de agendamentos");
+    expect(markup).toContain("Canal de vendas");
+    expect(markup).toContain("Gerente de Vendas");
+    expect(markup).toContain("Responsável da conta");
+    expect(markup).toContain(">Empresa</span>");
+    expect(markup).toContain("Equipe Produtiva");
+    expect(markup).toContain("1 de 8 corretores, 12,5 por cento da equipe");
     expect(markup).toContain("Corretores cadastrados");
+    expect(markup).toContain("Oportunidade x Agendamento");
+    expect(markup).toContain("Agendamento x Visita");
+    expect(markup).toContain("Agendamento x Venda");
+    expect(markup).toContain("Gerentes cadastrados");
+    expect(markup).toContain("Visitas realizadas");
+    expect(markup).toContain("Vendas no período");
+    expect(markup).toContain("9 oportunidades para 1 agendamento");
     expect(markup).toContain("Previstos e realizados hoje");
     expect(markup).toContain("Ranking por gerente regional");
     expect(markup).toContain("Ranking Score");
@@ -65,6 +92,14 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Detalhamento dos agendamentos");
     expect(markup).toContain("Conta: Ranking");
     expect(markup).toContain("Conta sintética");
+  });
+
+  it("renders zero conversions without Infinity or NaN", () => {
+    const empty: DashboardAnalysisSlice = { ...current, facts: [], appointments: [] };
+    const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={empty} />);
+    expect(markup).toContain("Sem conversão no período selecionado");
+    expect(markup).not.toContain("Infinity");
+    expect(markup).not.toContain("NaN");
   });
 
   it("redacts the account ranking chart for profiles without ranking permission", () => {

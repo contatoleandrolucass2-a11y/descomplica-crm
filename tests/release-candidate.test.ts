@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 76-version manifest", async () => {
+  it("keeps a unique, ordered 77-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(76);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(76);
+    expect(migrations).toHaveLength(77);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(77);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-22)).toEqual([
+    expect(migrations.slice(-23)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -73,9 +73,10 @@ describe("release-candidate migration train", () => {
       "20261020233000_appointments_goal_read.sql",
       "20261020235022_sync_page_catalog.sql",
       "20261021011101_sync_page_catalog.sql",
+      "20261021210000_appointments_filters_kpis_v4.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261021011101_sync_page_catalog.sql");
+    expect(migrations.at(-1)).toBe("20261021210000_appointments_filters_kpis_v4.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -108,7 +109,7 @@ describe("release-candidate migration train", () => {
       { timeout: 1000 },
     );
     expect(plan.files).toBe(38);
-    expect(plan.tests).toBe(2092);
+    expect(plan.tests).toBe(2098);
   });
 
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
@@ -418,7 +419,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2092;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2098;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

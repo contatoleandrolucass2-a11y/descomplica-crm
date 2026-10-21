@@ -62,7 +62,7 @@ function view(analysis, viewKey = "all") {
   return analysis.views.find((entry) => entry.viewKey === viewKey);
 }
 
-test("v3 keeps store and true development separate and publishes operational details", () => {
+test("v4 keeps store and true development separate and publishes operational details", () => {
   const source = input();
   source.reports.appointments = [
     { ...source.reports.appointments[0], storeName: "Store A", development: "Development A" },
@@ -74,7 +74,7 @@ test("v3 keeps store and true development separate and publishes operational det
     },
   ];
   const analysis = buildSalesforceSnapshot(source).payload.dashboard.analysis;
-  assert.equal(analysis.version, 3);
+  assert.equal(analysis.version, 4);
   assert.equal(analysis.brokerCount, 0);
   const current = view(analysis);
   assert.deepEqual(current.dimensions.stores, ["Store A", "Store B"]);
@@ -95,6 +95,7 @@ test("v3 keeps store and true development separate and publishes operational det
   const legacy = structuredClone(analysis);
   legacy.version = 1;
   delete legacy.brokerCount;
+  delete legacy.brokerManagerCount;
   for (const entry of legacy.views) {
     delete entry.dimensions.stores;
     delete entry.appointments;
@@ -104,6 +105,31 @@ test("v3 keeps store and true development separate and publishes operational det
   const invalid = structuredClone(analysis);
   invalid.views[0].facts.find((fact) => fact[0] === 1)[10] = 2;
   assert.equal(dashboardAnalysisSchema.safeParse(invalid).success, false);
+});
+
+test("v4 marks registered productive brokers and counts managers from the broker report", () => {
+  const source = input();
+  source.reports.brokers = [
+    {
+      contactId: "003000000000001AAA",
+      name: "Broker Internal",
+      status: "Ativo",
+      managerName: "Manager Roster",
+    },
+    {
+      contactId: "003000000000002AAA",
+      name: "Broker without activity",
+      status: "Ativo",
+      managerName: "Manager Roster",
+    },
+  ];
+  const analysis = buildSalesforceSnapshot(source).payload.dashboard.analysis;
+  assert.equal(analysis.version, 4);
+  assert.equal(analysis.brokerCount, 2);
+  assert.equal(analysis.brokerManagerCount, 1);
+  assert.equal(view(analysis).appointments[0].registeredBroker, true);
+  assert.equal(view(analysis).appointments[0].channel, 1);
+  assert.equal(view(analysis).appointments[0].company, "Empresa Internal");
 });
 
 test("analysis is strictly opt-in and preserves every legacy field", () => {
@@ -142,6 +168,7 @@ test("uses normalized deduplicated records and emits contract-valid daily counts
   );
   assert.deepEqual(Object.keys(analysis).sort(), [
     "brokerCount",
+    "brokerManagerCount",
     "coverageStart",
     "referenceDate",
     "version",

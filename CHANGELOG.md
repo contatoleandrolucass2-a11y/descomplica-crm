@@ -8,6 +8,17 @@
 - Preserva a ordem dos empreendimentos, a coluna inicial congelada, a rolagem
   horizontal e a indicação de totais indisponíveis quando existe valor inválido.
 
+## 2026-10-21 - Filtros e indicadores do painel de Agendamentos
+
+- Acrescenta filtros de Canal, Gerente de Vendas, Responsável e Empresa que
+  atualizam indicadores, gráficos e tabela no mesmo recorte.
+- Substitui o card mensal por Equipe Produtiva com rosca e inclui conversões do
+  funil, gerentes cadastrados, visitas realizadas e vendas no período.
+- Compacta os gráficos para três colunas no desktop e remove a rolagem interna
+  do Ranking Score, preservando leitura responsiva e acessível.
+- Evolui a coleta para validar o gerente oficial do relatório de corretores e
+  entrega à página somente contagens agregadas necessárias ao funil.
+
 ## 2026-10-21 - Navegação isolada do painel Meta Ads
 
 - Corrige a navegação relativa que carregava o próprio CRM dentro do iframe e
