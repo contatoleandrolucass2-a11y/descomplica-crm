@@ -1589,6 +1589,8 @@ export async function checkArchiveNavigation(
           await page.keyboard.press("Tab");
           await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
           await page.keyboard.press("Tab");
+          await assertNavigationControlFocused(metaAds, "authorized-navigation-crm-meta_ads");
+          await page.keyboard.press("Tab");
           await assertNavigationLinkFocused(simulation, "/app/simulacao");
           await page.setViewportSize({ width: 1181, height: 900 });
           await assertNavigationLinkFocused(simulation, "/app/simulacao");
