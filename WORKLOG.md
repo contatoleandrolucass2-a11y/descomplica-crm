@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-21 - Publicacao dos corretores automaticos da Previsao
+
+O PR #283 foi integrado no SHA `9dcd80286ee5a5819b65f8104873f7f9df0d24bf`.
+As CIs finais do PR e da `main` aprovaram validacao, restore isolado e gates de
+release. O artefato imutavel da CI da `main` foi verificado e provado no host de
+producao, incluindo a equivalencia entre o digest da configuracao gerado na CI
+e o manifesto OCI atribuido pelo containerd.
+
+O coordenador de producao encontrou esse mesmo SHA e image ID ja registrados
+como ativos no deployment `a451a387-e13b-4ea0-84da-7288e8d2df3f`, sem estado
+pendente, e evitou uma troca redundante. Health publico, redirecionamento da
+pagina protegida e rejeicao da API anonima passaram na verificacao posterior.
+
 ## 2026-10-20 - Corretores automáticos na Previsão
 
 A grade criava dez nomes genéricos mesmo quando o snapshot analítico do CRM já
