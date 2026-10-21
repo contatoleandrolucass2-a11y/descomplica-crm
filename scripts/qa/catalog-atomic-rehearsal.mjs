@@ -89,7 +89,7 @@ export async function rehearseCatalogAtomicity({ repositoryRoot, executeSql, ver
   const output = await executeSql(
     `\\set baseline false\n\\ir ${fixtureDirectory}/catalog-atomic-rehearsal.sql`,
   );
-  const assertions = verifyTap(output, [26, 27]);
+  const assertions = verifyTap(output, [26, 29]);
   return {
     status: "passed",
     rollbackComponents: Object.keys(before),

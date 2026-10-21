@@ -381,6 +381,53 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
 
   it("preserva os blocos completos com snapshot disponivel", () => structuralContract(render()));
 
+  it("renders every Imob funnel with four stages and the active goal multiplied by seven", () => {
+    const root = render({
+      analysis: analysisFixture(),
+      filters: parseDashboardFilters({ channel: DASHBOARD_CHANNELS[0] }),
+      partnershipGoals: {
+        visits: 12,
+        folders: 64,
+        "approved-folders": 32,
+        sales: 20,
+      },
+      today: "2026-10-20",
+    });
+    const monthly = section(root, "report-monthly-title");
+    const figures = monthlyFigures(monthly);
+    expect(figures).toHaveLength(13);
+    for (const funnel of figures) {
+      expect(attribute(funnel, "data-stage-count")).toBe("4");
+      expect(elements(funnel, "dt").map(text)).toEqual([
+        "Visitas",
+        "Pastas",
+        "Pastas aprovadas",
+        "Vendas",
+      ]);
+      expect(elements(funnel, "div").map((step) => attribute(step, "data-stage"))).toEqual([
+        "visits",
+        "folders",
+        "approved-folders",
+        "sales",
+      ]);
+    }
+    const goals = card(section(root, "report-goals-title"), "Meta mês");
+    expect(text(goals)).toContain("7 gerentes de vendas no grupo");
+    expect(value(goals, "Visitas")).toBe("84");
+    expect(value(goals, "Pastas")).toBe("448");
+    expect(value(goals, "Pastas aprovadas")).toBe("224");
+    expect(value(goals, "Vendas")).toBe("140");
+    expect(value(goals, "Conversão total Vendas / visitas")).toBe("166,7%");
+    const expected = card(section(root, "report-goals-title"), "Meta esperada até hoje");
+    expect(value(expected, "Visitas")).toBe("54");
+    expect(value(expected, "Pastas")).toBe("289");
+    expect(value(expected, "Pastas aprovadas")).toBe("144");
+    expect(value(expected, "Vendas")).toBe("90");
+    const historyDialog = only(elements(card(monthly, "Média do ano"), "dialog"));
+    expect(text(historyDialog)).not.toMatch(/Oportunidades|Agendamentos/);
+    expect(elements(historyDialog, "figure")).toHaveLength(4);
+  });
+
   it("preserva a fonte no atributo sem Fonte, API ou contexto repetido no header", () => {
     const dashboard = fixture();
     dashboard.source = "API";

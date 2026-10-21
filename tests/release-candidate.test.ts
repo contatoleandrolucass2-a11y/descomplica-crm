@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 70-version manifest", async () => {
+  it("keeps a unique, ordered 71-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(70);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(70);
+    expect(migrations).toHaveLength(71);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(71);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-16)).toEqual([
+    expect(migrations.slice(-17)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -67,9 +67,10 @@ describe("release-candidate migration train", () => {
       "20261019031715_appointments_analysis_read.sql",
       "20261020050000_appointments_operations_v3.sql",
       "20261020122216_forecast_period_scopes.sql",
+      "20261020130000_dashboard_imob_goals.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261020122216_forecast_period_scopes.sql");
+    expect(migrations.at(-1)).toBe("20261020130000_dashboard_imob_goals.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -102,7 +103,34 @@ describe("release-candidate migration train", () => {
       { timeout: 1000 },
     );
     expect(plan.files).toBe(37);
-    expect(plan.tests).toBe(2077);
+    expect(plan.tests).toBe(2079);
+  });
+
+  it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
+    const [fixture, atomicFixture, atomicHarness, harness] = await Promise.all([
+      readFile(
+        path.join(repositoryRoot, "tests/fixtures/compact-user-access/page-data.test.sql"),
+        "utf8",
+      ),
+      readFile(
+        path.join(
+          repositoryRoot,
+          "tests/fixtures/compact-user-access/catalog-atomic-rehearsal.sql",
+        ),
+        "utf8",
+      ),
+      readFile(path.join(repositoryRoot, "scripts/qa/catalog-atomic-rehearsal.mjs"), "utf8"),
+      readFile(path.join(repositoryRoot, "scripts/qa/compact-user-access.mjs"), "utf8"),
+    ]);
+
+    expect(fixture).toContain(
+      "\\ir ../../../supabase/migrations/20261020130000_dashboard_imob_goals.sql",
+    );
+    expect(atomicFixture).toContain(
+      "\\ir ../../../supabase/migrations/20261020130000_dashboard_imob_goals.sql",
+    );
+    expect(atomicHarness).toContain("verifyTap(output, [26, 29])");
+    expect(harness).toContain("const expectedPlans = [116, 8, 14, 29];");
   });
 
   it("keeps Administrator protection compatible with compact and scoped schemas", async () => {
@@ -383,7 +411,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2077;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2079;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

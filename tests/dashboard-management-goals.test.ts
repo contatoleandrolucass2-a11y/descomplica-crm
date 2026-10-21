@@ -103,7 +103,7 @@ describe("buildDashboardManagementGoals", () => {
     expect(empty.expectedByToday).toEqual(empty.monthlyGoals);
   });
 
-  it("keeps every Imob goal unavailable until that channel is configured", () => {
+  it("keeps every Imob goal unavailable without an active partnership goal", () => {
     const result = buildDashboardManagementGoals({
       referenceDate: "2026-10-15",
       brokerCount: 315,
@@ -111,6 +111,61 @@ describe("buildDashboardManagementGoals", () => {
     });
     expect(Object.values(result.monthlyGoals)).toEqual(Array(6).fill(null));
     expect(Object.values(result.expectedByToday)).toEqual(Array(6).fill(null));
+  });
+
+  it("multiplies the active Imob goal by the seven confirmed managers", () => {
+    const result = buildDashboardManagementGoals({
+      referenceDate: "2026-10-20",
+      brokerCount: null,
+      channel: DASHBOARD_CHANNELS[0],
+      partnershipGoals: {
+        visits: 12,
+        folders: 64,
+        "approved-folders": 32,
+        sales: 20,
+      },
+    });
+    expect(result.monthlyGoals).toEqual({
+      opportunities: null,
+      appointments: null,
+      visits: 84,
+      folders: 448,
+      "approved-folders": 224,
+      sales: 140,
+    });
+    expect(result.expectedByToday.visits).toBeCloseTo((84 * 20) / 31, 12);
+    expect(result.expectedByToday.folders).toBeCloseTo((448 * 20) / 31, 12);
+    expect(result.expectedByToday["approved-folders"]).toBeCloseTo((224 * 20) / 31, 12);
+    expect(result.expectedByToday.sales).toBeCloseTo((140 * 20) / 31, 12);
+  });
+
+  it("rejects malformed or unsafe Imob goal values", () => {
+    expect(() =>
+      buildDashboardManagementGoals({
+        referenceDate: "2026-10-20",
+        brokerCount: null,
+        channel: DASHBOARD_CHANNELS[0],
+        partnershipGoals: {
+          visits: -1,
+          folders: 64,
+          "approved-folders": 32,
+          sales: 20,
+        },
+      }),
+    ).toThrow("partnershipGoals must contain nonnegative safe integers.");
+    expect(() =>
+      buildDashboardManagementGoals({
+        referenceDate: "2026-10-20",
+        brokerCount: null,
+        channel: DASHBOARD_CHANNELS[0],
+        partnershipGoals: {
+          visits: 12,
+          folders: 64,
+          "approved-folders": 32,
+          sales: Number.MAX_SAFE_INTEGER,
+        },
+      }),
+    ).toThrow("Monthly goal exceeds the safe integer range.");
   });
 
   it.each([

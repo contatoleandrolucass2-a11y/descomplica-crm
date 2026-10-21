@@ -9,4 +9,5 @@ do $$ declare table_name text; begin
   end loop;
 end $$;
 \ir ../../../supabase/migrations/20261016000120_individual_page_data_access.sql
+\ir ../../../supabase/migrations/20261020130000_dashboard_imob_goals.sql
 \ir ../../../supabase/tests/individual_page_data_access.test.sql
