@@ -25,12 +25,11 @@
   republicacao. A verificacao de `2026-10-21T05:39:50Z` confirmou health HTTP
   200/`ok` na versao exata, redirecionamento anonimo da pagina de Previsao para
   login em HTTP 307 e API de previsoes anonima em HTTP 401.
-- As migrations autorizadas permanecem registradas no Supabase como
-  `20261021002706 forecast_action_plan`, `20261021002724
-  forecast_period_scopes`, `20261021002737 forecast_broker_roster` e
-  `20261021021551 forecast_broker_manager_accents`. O pos-check manteve zero
-  periodos, uma previsao legada na revisao 5, RPC restrita a `authenticated` e
-  somente o aviso informativo de indice para a FK `crm_forecast_periods.updated_by`.
+- As migrations autorizadas permanecem registradas no Supabase: Plano de acao
+  `20261021002706`, periodos `20261021002724`, elenco `20261021002737` e
+  normalizacao dos gerentes `20261021021551`. O pos-check manteve zero periodos,
+  uma previsao legada na revisao 5, RPC restrita a `authenticated` e somente o
+  aviso informativo de indice para a FK `crm_forecast_periods.updated_by`.
 - O registro documental final passou em lint, typecheck e build de 57 rotas com
   Node 24.19/pnpm 11.20. A suite integral aprovou 4.064 testes, pulou 105 e teve
   oito timeouts sob carga local; os cinco arquivos repetidos aprovaram 97 de 98,
