@@ -35,6 +35,56 @@
   oito timeouts sob carga local; os cinco arquivos repetidos aprovaram 97 de 98,
   e o unico timeout restante aprovou os 13 casos ao ser executado isoladamente.
 
+## 2026-10-21: painel inteligente de Agendamentos publicado e reconciliado
+
+- O PR #289 integrou o painel interativo no commit
+  `1c015d61c040549d4028b5e3f6905d36fd6c2d5c`. A publicacao preservou a
+  entrega concorrente de Previsao e promoveu o `main` final
+  `9dcd80286ee5a5819b65f8104873f7f9df0d24bf`, cuja CI
+  `39544892670` aprovou `validate`, `release-gates`,
+  `isolated-restore` e `promotable-image`.
+- A pagina passou a calcular a meta mensal pela projecao individual do funil
+  multiplicada pelos corretores cadastrados, exibir velocimetro, previsao por
+  dia da semana, rankings reorganizados, tabela decrescente e filtros cruzados
+  acionaveis por barras e linhas. O QA especifico aprovou 12 combinacoes de
+  tema/largura, sem overflow ou violacao Axe; lint, typecheck, build de 57
+  rotas, 4.071 testes Vitest e as suites Linux protegidas passaram.
+- A migration aditiva `appointments_goal_read` foi aplicada via Supabase MCP.
+  A RPC e `SECURITY DEFINER`, estavel, usa `search_path` vazio, concede
+  EXECUTE somente a `authenticated` e devolve nulo sem sessao. O artefato
+  promovivel `12320948464` teve `image.tar.gz`
+  `sha256:2309df8f667cb3cd28d6a7d582d580acebfa8ac8e78357cc90383d9fce736167`.
+  A equivalencia entre config CI
+  `sha256:7009060378af4f3729fabd6d1681949aa028a1f851abd9ec4c3182b7cc0f9892`
+  e manifesto containerd
+  `sha256:ea534e46426cbe5d345e1d3ed8c0d1273fad804053581587b5fcbca8d26fc9d9`
+  foi comprovada pelo indice OCI, 11 camadas, RootFS e revisao exata.
+- O coordenador publicou em `2026-10-21T05:32:50.804Z`
+  (`21/10/2026 02:32:50` America/Sao_Paulo), deployment
+  `a451a387-e13b-4ea0-84da-7288e8d2df3f`, sem pendencia. Health publico
+  retornou HTTP 200/ok na versao exata e a rota anonima de Agendamentos
+  continuou em HTTP 307 para `/login`.
+- A divergencia 78 versus 74 estava no detalhamento: datas Salesforce sem
+  horario eram interpretadas em UTC e recuavam um dia em Sao Paulo. O coletor
+  foi atualizado sob `installation.lock`, com backup privado e CAS, de
+  `38e8c2af7a64a89e75bfb60a7fc6e21383baee1f` para `9dcd8028`.
+  No primeiro ciclo corrigido, requestId
+  `f3240d78-cec7-47e8-af54-5300dfb419aa`, outubro reconciliou 78 fatos com
+  78 linhas e 20/10 reconciliou 9 com 9; a ultima data detalhada avancou para
+  20/10. O segundo ciclo distinto, requestId
+  `df398e0c-1a34-4d8f-b2a6-6df68156713a`, publicou HTTP 201 em
+  `2026-10-21T06:05:34.300Z` e concluiu o inventario de 3.283 itens em
+  `2026-10-21T06:06:00.474Z`. Conferencia posterior do snapshot corrente
+  manteve 32 corretores, 78 fatos versus 78 linhas em outubro e 9 versus 9
+  em 20/10, sem duplicidade ou regressao apos ciclos adicionais.
+- Na conferencia de encerramento, `origin/main` e o health publico coincidiram
+  em `0b2f107e4c706653141b22fb54d2d37e367f2255`, apos uma publicacao
+  concorrente de Meta Ads; a CI Linux `39558061100` passou. Sobre esse `main`,
+  lint, typecheck, build de 61 rotas e 4.081 testes Vitest passaram localmente.
+  A suite Node aprovou 1.596 e ignorou 19; tres fixtures de ACL/POSIX exclusivas
+  do Meta Ads continuam incompativeis com Windows, fora deste escopo e verdes
+  na CI Linux citada.
+
 ## 2026-10-20: metas Imob publicadas e validadas
 
 - O PR #285 foi integrado na `main` em

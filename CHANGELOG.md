@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-21 - Publicacao e reconciliacao do painel de Agendamentos
+
+- Publica o painel inteligente com meta mensal, velocimetro, filtros cruzados,
+  rankings, previsao diaria e detalhamento decrescente.
+- Corrige a conversao de datas Salesforce sem horario e reconcilia 78 fatos com
+  78 linhas detalhadas em dois ciclos independentes do coletor.
+- Confirma a meta individual de 24, 32 corretores cadastrados e meta mensal de
+  768, com migration de leitura restrita a usuarios autenticados.
+
 ## 2026-10-21 - Publicacao da Previsao por gerente
 
 - Publica o preenchimento automatico de corretores por gerente na Previsao,

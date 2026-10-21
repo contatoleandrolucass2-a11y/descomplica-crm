@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-21 - Publicacao e reconciliacao do painel de Agendamentos
+
+O PR #289 integrou o painel inteligente e a correcao de datas Salesforce. A
+imagem imutavel foi publicada pelo coordenador protegido no deployment
+`a451a387-e13b-4ea0-84da-7288e8d2df3f`, com health na revisao publicada,
+migration aditiva aplicada via Supabase MCP e rota protegida preservada.
+
+A divergencia de 78 fatos para 74 linhas estava no detalhamento: datas sem
+horario recuavam um dia ao serem interpretadas como UTC. Depois da atualizacao
+do coletor, dois ciclos distintos reconciliaram outubro em 78 fatos e 78 linhas
+e o dia 20 em 9 fatos e 9 linhas. O snapshot confirmou 32 corretores; a meta
+individual vigente e 24 e a meta mensal calculada e 768.
+
+Lint, typecheck, build, 4.081 testes Vitest e todos os gates Linux passaram. A
+suite Node local aprovou 1.596 e ignorou 19; tres fixtures de ACL/POSIX do Meta
+Ads permanecem exclusivas do Windows e passaram na CI Linux.
+
 ## 2026-10-21 - Publicacao dos corretores automaticos da Previsao
 
 O PR #283 foi integrado no SHA `9dcd80286ee5a5819b65f8104873f7f9df0d24bf`.
