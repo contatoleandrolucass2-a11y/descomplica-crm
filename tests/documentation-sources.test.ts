@@ -65,11 +65,17 @@ describe("documentation source verification gate", () => {
   it("limits the PR 287 outage exception to the exact source, status and validity window", () => {
     const exact = {
       id: temporaryItbiSourceOutageException.id,
-      url: temporaryItbiSourceOutageException.source,
+      url: temporaryItbiSourceOutageException.sources[0],
       status: 503,
       now: "2026-10-21T06:29:59.999Z",
     };
     expect(permitsTemporaryItbiSourceOutage(exact)).toBe(true);
+    expect(
+      permitsTemporaryItbiSourceOutage({
+        ...exact,
+        url: temporaryItbiSourceOutageException.sources[1],
+      }),
+    ).toBe(true);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, status: 403 })).toBe(true);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, id: "another-release" })).toBe(false);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, status: 429 })).toBe(false);

@@ -250,10 +250,11 @@
   nesta abertura.
 - Após quatro execuções do PR serem bloqueadas exclusivamente por HTTP 503 na
   fonte municipal de isenção de ITBI, o usuário autorizou uma exceção única para
-  esta publicação. Ela aceita somente HTTP 403 ou 503 nessa URL, somente no PR
-  #287 e em seu merge para `main`, conserva o último limite já versionado e expira em
-  `2026-10-21T06:30:00Z`. Todas as outras fontes e gates continuam obrigatórios;
-  a exceção não integra o runtime nem altera qualquer dashboard.
+  esta publicação. Ela aceita somente HTTP 403 ou 503 nas duas páginas
+  municipais de ITBI, somente no PR #287 e em seu merge para `main`, conserva
+  os três limites já versionados e expira em `2026-10-21T06:30:00Z`. ARISP,
+  5º RI, todas as outras fontes e gates continuam obrigatórios; a exceção não
+  integra o runtime nem altera qualquer dashboard.
 
 ## 2026-10-20: réplica local do dashboard Meta Ads
 

@@ -9,10 +9,15 @@ import {
 
 export const temporaryItbiSourceOutageException = Object.freeze({
   id: "meta-ads-navbar-pr-287-2026-10-21",
-  source: "https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517",
+  sources: Object.freeze([
+    "https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517",
+    "https://prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2513",
+  ]),
   policyVersion: "sp-capital-2026.1",
   effectiveFrom: "2026-01-01",
   exemptionLimit: 245_527.77,
+  reducedFinancingLimit: 120_968,
+  reducedPropertyLimit: 725_808,
   allowedStatuses: Object.freeze([403, 503]),
   expiresAt: "2026-10-21T06:30:00.000Z",
 });
@@ -20,20 +25,22 @@ export const temporaryItbiSourceOutageException = Object.freeze({
 export function permitsTemporaryItbiSourceOutage({ id, url, status, now }) {
   return (
     id === temporaryItbiSourceOutageException.id &&
-    url === temporaryItbiSourceOutageException.source &&
+    temporaryItbiSourceOutageException.sources.includes(url) &&
     temporaryItbiSourceOutageException.allowedStatuses.includes(status) &&
     policy.version === temporaryItbiSourceOutageException.policyVersion &&
     policy.itbiFrom === temporaryItbiSourceOutageException.effectiveFrom &&
     policy.exemptionLimit === temporaryItbiSourceOutageException.exemptionLimit &&
+    policy.reducedFinancingLimit === temporaryItbiSourceOutageException.reducedFinancingLimit &&
+    policy.reducedPropertyLimit === temporaryItbiSourceOutageException.reducedPropertyLimit &&
     now <= temporaryItbiSourceOutageException.expiresAt
   );
 }
 
-function temporaryItbiExemptionSnapshot() {
-  return Buffer.from(
-    `<table><tr><td>A partir de 01/01/2026</td><td>R$ 245.527,77</td></tr></table>`,
-    "utf8",
-  );
+function temporaryItbiSourceSnapshot(url) {
+  const html = url.endsWith("/2517")
+    ? `<table><tr><td>A partir de 01/01/2026</td><td>R$ 245.527,77</td></tr></table>`
+    : `<table><tr><td>A partir de 01/01/2026</td><td>R$ 120.968,00</td><td>R$ 725.808,00</td></tr></table>`;
+  return Buffer.from(html, "utf8");
 }
 
 const publishedMoney = (value) => {
@@ -165,7 +172,7 @@ async function readSource(url) {
         process.stderr.write(
           `::warning::Exceção temporária ${temporaryItbiSourceOutageException.id}: fonte ITBI respondeu HTTP ${lastStatus}; usando o último limite versionado até ${temporaryItbiSourceOutageException.expiresAt}.\n`,
         );
-        return temporaryItbiExemptionSnapshot();
+        return temporaryItbiSourceSnapshot(url);
       }
       if (attempt === 2)
         throw new Error(`Não foi possível verificar ${url}: ${error.message}`, { cause: error });
