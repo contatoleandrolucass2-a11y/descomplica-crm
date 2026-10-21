@@ -11,6 +11,9 @@ const deploymentId = process.env.DEPLOYMENT_VERSION;
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  outputFileTracingIncludes: {
+    "/app/meta-ads": ["./app/(protected)/app/meta-ads/dashboard-frame.html"],
+  },
   ...(deploymentId ? { deploymentId } : {}),
   experimental: {
     authInterrupts: true,

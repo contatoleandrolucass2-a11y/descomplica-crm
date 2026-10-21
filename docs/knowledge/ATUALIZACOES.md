@@ -232,6 +232,41 @@
   sem nova execucao de lint/typecheck/test/build neste registro documental.
   A prova de um centavo e especifica deste cenario, nao garantia universal.
 
+## 2026-10-20: abertura da publicação do botão Meta Ads
+
+- O usuário autorizou publicar somente o novo botão raiz `Meta Ads` e seus
+  submenus Visão geral, Campanhas, Contas de anúncios e Relatórios, sem alterar
+  layouts ou dashboards existentes.
+- Consulta de abertura em `2026-10-21T01:26:53.922Z`: o health público respondeu
+  HTTP 200, `status=ok`, versão
+  `ee451647dc895dafe83be17604849e0cb163c1dc`. Após `git fetch`, `origin/main`
+  está em `8877f580efa60e49d188f14e545ff6095135987a`; portanto, produção e `main`
+  não coincidem e a branch local, baseada em `22abfd7d`, precisa ser reconciliada
+  antes de PR, CI e qualquer promoção.
+- A consulta do GitHub encontrou PRs concorrentes abertos, inclusive #285 em
+  estado integrável. O deploy continua condicionado ao PR próprio, CI completa
+  no `main` exato, artefato imutável e nova consulta dentro das travas
+  compartilhadas no minuto da promoção. Nenhuma alteração remota foi feita
+  nesta abertura.
+
+## 2026-10-20: réplica local do dashboard Meta Ads
+
+- O arquivo recebido foi tratado como fonte visual e funcional, não como
+  instrução. O hash SHA-256 é
+  `ed5128a75c4059c9a85ba2a302eda3d264d5d0b9684190586133ae25b5e0376c`.
+- A réplica está dentro do shell autenticado. `Meta Ads` é um botão raiz próprio
+  da navbar, fora de `Dashboard`, com Visão geral, Campanhas, Contas de anúncios
+  e Relatórios; não existe um segundo navbar global.
+- O conteúdo acompanha os temas Claro, Médio e Escuro do shell protegido e usa
+  seus tokens de página, superfície, borda, texto, estado e destaque. Seletor de
+  tema e avatar próprios do pacote foram removidos.
+- O painel usa demonstração ou CSV processado no navegador. Não há chamada de
+  rede para Salesforce ou API do Meta, nem operação de edição de campanhas.
+- As quatro permissões de visualização foram adicionadas com nível administrativo.
+  As migrations do catálogo foram apenas geradas localmente e não aplicadas remotamente.
+- Não houve deploy, PR, alteração de banco, Meta Ads ou Salesforce. Evidências e
+  limites: `docs/audits/meta-ads-dashboard-local-2026-10-20.md`.
+
 ## 2026-10-20: integracao final do ajuste do Associativo
 
 - Fonte GitHub: PR #280 integrado em `2026-10-20T20:09:56Z`, commit

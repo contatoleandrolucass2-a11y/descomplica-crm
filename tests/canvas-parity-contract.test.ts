@@ -25,18 +25,26 @@ describe("approved canvas parity contract", () => {
       ({ path }) => path,
     );
     const canvasPaths = releasedPaths.filter(
-      (path) => !["/app/repasse", "/app/configuracoes/conectar-sistemas"].includes(path),
+      (path) =>
+        !path.startsWith("/app/meta-ads") &&
+        !["/app/repasse", "/app/configuracoes/conectar-sistemas"].includes(path),
+    );
+    const metaAdsAudit = readFileSync(
+      new URL("../../audits/meta-ads-dashboard-local-2026-10-20.md", root),
+      "utf8",
     );
     const repasseReadme = readFileSync(new URL("../repasse/README.md", root), "utf8");
     const systemsReadme = readFileSync(new URL("../connected-systems/README.md", root), "utf8");
 
-    expect(releasedPaths).toHaveLength(28);
+    expect(releasedPaths).toHaveLength(32);
     expect(canvasPaths).toHaveLength(26);
     for (const path of canvasPaths) expect(readme).toContain(`\`${path}\``);
     expect(repasseReadme).toContain("`/app/repasse`");
     expect(repasseReadme).toContain("Claro, Médio e Escuro");
     expect(systemsReadme).toContain("`/app/configuracoes/conectar-sistemas`");
     expect(systemsReadme).toContain("Claro, Médio e Escuro");
+    expect(metaAdsAudit).toContain("`/app/meta-ads`");
+    expect(metaAdsAudit).toContain("um único navbar global do CRM");
     expect(readme).toContain("Existe uma única navbar global");
     expect(readme).toContain("crm.simulators.view");
     expect(readme).toContain("motor, endpoint de cálculo, submissão e aprovação");

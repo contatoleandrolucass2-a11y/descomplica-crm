@@ -77,6 +77,26 @@ export const PERMISSIONS = {
     description: "Consulta a página de repasses.",
     minLevel: 80,
   },
+  "crm.meta_ads.view": {
+    label: "Visualizar Meta Ads",
+    description: "Consulta o dashboard de desempenho das campanhas Meta Ads.",
+    minLevel: 80,
+  },
+  "crm.meta_ads.campaigns.view": {
+    label: "Visualizar campanhas do Meta Ads",
+    description: "Consulta a análise de campanhas do Meta Ads.",
+    minLevel: 80,
+  },
+  "crm.meta_ads.accounts.view": {
+    label: "Visualizar contas de anúncios do Meta Ads",
+    description: "Consulta a análise de contas de anúncios do Meta Ads.",
+    minLevel: 80,
+  },
+  "crm.meta_ads.reports.view": {
+    label: "Visualizar relatórios do Meta Ads",
+    description: "Consulta os relatórios consolidados do Meta Ads.",
+    minLevel: 80,
+  },
   "crm.stage.opportunities.view": {
     label: "Visualizar Oportunidades",
     description: "Consulta a página de oportunidades.",
