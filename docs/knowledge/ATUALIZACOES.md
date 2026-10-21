@@ -2266,3 +2266,47 @@ dependente da autorização específica aplicável.
   singleton legado mantém uma linha e revisão 5. Os advisors não apontaram
   acesso anônimo novo; permanece apenas o aviso informativo já registrado para
   o índice de `crm_forecast_periods.updated_by` e avisos anteriores ao escopo.
+
+## 2026-10-20: Abertura do painel inteligente de agendamentos
+
+- A branch `codex/agendamentos-interactive-dashboard` iniciou no `origin/main`
+  `0b7fc85fe898b9778ea5899fc222e50240692753`. O health público consultado em
+  `2026-10-20T23:11:03-03:00` respondeu HTTP 200, `status=ok` e versão
+  `ee451647dc895dafe83be17604849e0cb163c1dc`; essa versão ainda não contém a
+  demanda atual.
+- O snapshot vigente tinha 32 corretores, 78 agendamentos agregados no mês e
+  74 linhas operacionais. A divergência foi reproduzida: datas Salesforce no
+  formato `YYYY-MM-DD` eram preservadas nos fatos, mas convertidas como UTC no
+  detalhamento, deslocando-as para o dia anterior em `America/Sao_Paulo`.
+- A meta individual vigente reproduzirá o volume de Agendamentos projetado pela
+  tela de Metas a partir da meta de Vendas e das taxas entre etapas; nenhum campo
+  isolado de taxa ou contagem será tratado como esse volume. A meta mensal
+  solicitada é a projeção individual multiplicada pelos corretores do snapshot.
+- Escopo: corrigir a transformação na origem, expor somente a meta necessária
+  com autorização da página, compactar e reorganizar gráficos, implementar
+  filtros cruzados acessíveis e reconciliar tabela e indicadores. Fontes: Git
+  local/remoto, health público, código versionado e leitura agregada sanitizada
+  do snapshot; nenhuma linha de cliente foi registrada.
+
+### Implementação e validação local
+
+- A leitura da meta expõe somente o volume projetado de Agendamentos e exige
+  `crm.stage.appointments.view`; anon e service role não executam a RPC. O
+  cálculo replica a sequência de taxas da tela de Metas e o card multiplica o
+  resultado pelos corretores cadastrados.
+- Datas Salesforce sem horário agora recebem o offset de São Paulo antes da
+  normalização. A coleta rejeita detalhes cujo calendário de criação divirja do
+  fato diário, eliminando a causa do total 78 contra 74 e dos registros de hoje
+  deslocados para ontem.
+- O painel usa as linhas operacionais reconciliadas para indicadores, gráficos,
+  rankings e tabela; ordena criação de forma decrescente e aplica filtros
+  cruzados por clique ou teclado. O previsto diário usa um por corretor de
+  segunda a quarta e sexta, dois na quinta e zero no fim de semana.
+- `lint`, `typecheck` e `build` passaram. Vitest aprovou 4.071 e ignorou 105; 50
+  testes focados e 13 cenários da transformação passaram. O preview aprovou 12
+  combinações de largura/tema, sem overflow ou violações Axe, incluindo filtros
+  de gráfico e linha completa da tabela.
+- A suíte Node aprovou 1.596, ignorou 19 e reproduziu três limitações POSIX já
+  conhecidas do Meta Ads no Windows, fora do delta. O pgTAP local não executou
+  porque Docker/Podman não está instalado; a CI Linux, incluindo restauração
+  isolada das 72 migrations e 2.082 asserções pgTAP, permanece gate obrigatório.

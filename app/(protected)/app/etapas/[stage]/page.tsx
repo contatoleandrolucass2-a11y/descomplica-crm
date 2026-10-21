@@ -497,6 +497,7 @@ export default async function StagePage({
           <AppointmentsDashboard
             analysis={appointments.analysis}
             generatedAt={appointments.generatedAt}
+            individualGoal={appointments.individualGoal}
             canViewDevelopmentRankings={authorization.permissions.includes("crm.ranking.view")}
           />
         </AnalyticsCanvas>

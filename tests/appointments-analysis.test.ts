@@ -6,8 +6,10 @@ import type {
 } from "@/lib/crm/dashboard/analysis-contract";
 import {
   analyzeAppointments,
+  appointmentMonthlyGoal,
   appointmentWeekOfMonth,
   appointmentYears,
+  plannedAppointmentsForDate,
 } from "@/lib/crm/stages/appointments";
 
 function fact(
@@ -103,7 +105,7 @@ describe("appointment chart analysis", () => {
     });
     const result = analyzeAppointments(input);
     expect(result.brokerCount).toBe(10);
-    expect(result.plannedToday).toBe(2);
+    expect(result.plannedToday).toBe(10);
     expect(result.performedToday).toBe(1);
     expect(result.details).toHaveLength(2);
     expect(result.regionalManagers?.map(({ label }) => label)).toEqual([
@@ -111,7 +113,53 @@ describe("appointment chart analysis", () => {
       "Regional B",
     ]);
     expect(result.accountRankings?.map(({ label }) => label)).toEqual(["Ouro", "Prata"]);
-    expect(result.dailyAverage).toBeCloseTo(13 / 19);
+    expect(result.dailyAverage).toBeCloseTo(2 / 19);
+  });
+
+  it("calculates the monthly goal and weekday plan from registered brokers", () => {
+    expect(appointmentMonthlyGoal(24, 32)).toBe(768);
+    expect(appointmentMonthlyGoal(null, 32)).toBeNull();
+    expect(plannedAppointmentsForDate("2026-10-19", 32)).toBe(32);
+    expect(plannedAppointmentsForDate("2026-10-22", 32)).toBe(64);
+    expect(plannedAppointmentsForDate("2026-10-24", 32)).toBe(0);
+  });
+
+  it("applies combined chart filters to every operational result", () => {
+    const input = slice({
+      version: 3,
+      brokerCount: 2,
+      appointments: [
+        {
+          createdAt: "2026-10-19T12:00:00-03:00",
+          scheduledAt: null,
+          attendedAt: null,
+          visitPerformed: false,
+          regionalManager: "Regional A",
+          salesManager: "Gerente A",
+          owner: "Responsável A",
+          accountName: "Conta A",
+          accountRanking: "Ouro",
+        },
+        {
+          createdAt: "2026-10-18T12:00:00-03:00",
+          scheduledAt: null,
+          attendedAt: null,
+          visitPerformed: false,
+          regionalManager: "Regional B",
+          salesManager: "Gerente B",
+          owner: "Responsável B",
+          accountName: "Conta B",
+          accountRanking: "Prata",
+        },
+      ],
+    });
+    const result = analyzeAppointments(input, {
+      filters: { regionalManager: "Regional A", owner: "Responsável A" },
+    });
+    expect(result.total).toBe(1);
+    expect(result.details?.map((row) => row.accountName)).toEqual(["Conta A"]);
+    expect(result.managers).toEqual([{ key: "Gerente A", label: "Gerente A", total: 1 }]);
+    expect(result.accountRankings).toEqual([{ key: "Ouro", label: "Ouro", total: 1 }]);
   });
 
   it("keeps yearly monthly values independent of the other charts' selected month", () => {

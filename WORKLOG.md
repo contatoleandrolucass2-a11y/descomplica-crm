@@ -59,6 +59,25 @@ O pós-check confirmou a função `STABLE SECURITY DEFINER`, owner `postgres`,
 `authenticated`; `anon` e `service_role` continuam sem acesso. A tabela de
 períodos segue vazia e o singleton legado mantém uma linha e revisão 5.
 
+## 2026-10-20 — Painel inteligente de agendamentos
+
+- A meta individual passou a reproduzir a projeção da tela de Metas; o alvo do
+  card é essa projeção multiplicada pelos corretores do snapshot.
+- O painel ganhou velocímetro com ponteiro, KPIs centralizados, layout compacto,
+  Ranking Score, três rankings lado a lado e gráfico mensal estendido antes da
+  tabela.
+- Barras, rankings, meses e linhas inteiras da tabela funcionam como filtros
+  cruzados acessíveis. O detalhamento permanece ordenado pela criação mais
+  recente.
+- A divergência 78 contra 74 foi localizada na interpretação UTC de datas
+  Salesforce sem horário. A transformação agora fixa o calendário de São Paulo
+  e rejeita qualquer detalhe cujo dia não corresponda ao fato agregado.
+- Validação local: lint, typecheck e build aprovados; Vitest com 4.071 aprovações
+  e 105 ignorados; preview com 12 telas, Axe e filtros aprovado. A suíte Node
+  aprovou 1.596, ignorou 19 e reproduziu três falhas POSIX conhecidas do Meta Ads
+  no Windows. O pgTAP local ficou indisponível por ausência de Docker/Podman; a
+  restauração isolada Linux da CI é obrigatória.
+
 ## 2026-10-20: metas e atualização sincronizada do Dashboard Imob
 
 O Dashboard Imob passou a carregar a meta ativa de Parcerias do mês vigente.

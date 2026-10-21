@@ -19,6 +19,7 @@ const headerSchema = z.object({
 export interface AppointmentsReadModel {
   analysis: DashboardAnalysisSlice | null;
   generatedAt?: string;
+  individualGoal: number | null;
 }
 
 /** Read only the authorized stage. A concurrent ingestion invalidates the whole read. */
@@ -38,7 +39,7 @@ export async function loadAppointmentsReadModel(
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const before = await header();
-    if (!before) return { analysis: null };
+    if (!before) return { analysis: null, individualGoal: null };
     const response = await supabase.rpc("read_crm_appointments_analysis", {
       p_snapshot_id: before.id,
       p_view_keys: [view],
@@ -47,13 +48,14 @@ export async function loadAppointmentsReadModel(
     if (!after || JSON.stringify(before) !== JSON.stringify(after)) continue;
     // Additive rollout: the page can precede the migration without fabricating data.
     if (response.error) {
-      if (["PGRST202", "42883"].includes(response.error.code)) return { analysis: null };
+      if (["PGRST202", "42883"].includes(response.error.code))
+        return { analysis: null, individualGoal: null };
       throw new Error("Não foi possível carregar os gráficos de agendamentos.");
     }
     const rows = z
       .array(z.object({ view_key: z.string(), payload: z.unknown() }))
       .parse(response.data);
-    if (rows.length === 0) return { analysis: null };
+    if (rows.length === 0) return { analysis: null, individualGoal: null };
     if (rows.length !== 1 || rows[0]!.view_key !== view) {
       throw new Error("A análise não corresponde à visão autorizada.");
     }
@@ -65,7 +67,17 @@ export async function loadAppointmentsReadModel(
     ) {
       throw new Error("A análise não corresponde ao snapshot de agendamentos.");
     }
-    return { analysis, generatedAt: before.generated_at };
+    const goalResponse = await supabase.rpc("read_crm_appointments_goal", {
+      p_reference_date: before.reference_date,
+    });
+    let individualGoal: number | null = null;
+    if (!goalResponse.error) {
+      const parsedGoal = z.number().int().nonnegative().safeParse(goalResponse.data);
+      individualGoal = parsedGoal.success ? parsedGoal.data : null;
+    } else if (!["PGRST202", "42883"].includes(goalResponse.error.code)) {
+      throw new Error("Não foi possível carregar a meta de agendamentos.");
+    }
+    return { analysis, generatedAt: before.generated_at, individualGoal };
   }
   throw new Error("Os agendamentos foram atualizados durante a leitura. Tente novamente.");
 }

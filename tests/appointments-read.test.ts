@@ -31,16 +31,25 @@ beforeEach(() => {
     maybeSingle: vi.fn(async () => headers.shift()),
   }));
   mocks.createClient.mockResolvedValue({ from: mocks.from, rpc: mocks.rpc });
-  mocks.rpc.mockResolvedValue(result());
+  mocks.rpc.mockImplementation(async (name: string) =>
+    name === "read_crm_appointments_goal" ? { data: 24, error: null } : result(),
+  );
 });
 
 describe("appointments snapshot read", () => {
   it("uses the stage RPC and only the authorized view, without querying other commercial tables", async () => {
     const actual = await loadAppointmentsReadModel("all");
-    expect(actual).toEqual({ analysis: slice, generatedAt: snapshot.generated_at });
-    expect(mocks.rpc).toHaveBeenCalledExactlyOnceWith("read_crm_appointments_analysis", {
+    expect(actual).toEqual({
+      analysis: slice,
+      generatedAt: snapshot.generated_at,
+      individualGoal: 24,
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_analysis", {
       p_snapshot_id: 1,
       p_view_keys: ["all"],
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_goal", {
+      p_reference_date: snapshot.reference_date,
     });
     expect(mocks.from.mock.calls.every(([table]) => table === "crm_dashboard_snapshots")).toBe(
       true,
@@ -49,18 +58,27 @@ describe("appointments snapshot read", () => {
 
   it("does not fabricate a series for missing snapshots or inaccessible analysis", async () => {
     headers[0] = { data: null, error: null };
-    expect(await loadAppointmentsReadModel("all")).toEqual({ analysis: null });
+    expect(await loadAppointmentsReadModel("all")).toEqual({
+      analysis: null,
+      individualGoal: null,
+    });
     expect(mocks.rpc).not.toHaveBeenCalled();
     headers[0] = { data: snapshot, error: null };
     mocks.rpc.mockResolvedValue({ data: [], error: null });
-    expect(await loadAppointmentsReadModel("all")).toEqual({ analysis: null });
+    expect(await loadAppointmentsReadModel("all")).toEqual({
+      analysis: null,
+      individualGoal: null,
+    });
   });
 
   it.each(["PGRST202", "42883"])(
     "handles only the missing additive RPC as unavailable: %s",
     async (code) => {
       mocks.rpc.mockResolvedValue({ data: null, error: { code } });
-      expect(await loadAppointmentsReadModel("all")).toEqual({ analysis: null });
+      expect(await loadAppointmentsReadModel("all")).toEqual({
+        analysis: null,
+        individualGoal: null,
+      });
     },
   );
 
@@ -87,7 +105,7 @@ describe("appointments snapshot read", () => {
     const next = { ...snapshot, updated_at: "2026-10-19T00:00:00.123457Z" };
     headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(slice);
-    expect(mocks.rpc).toHaveBeenCalledTimes(2);
+    expect(mocks.rpc).toHaveBeenCalledTimes(3);
   });
 
   it("fails instead of returning mixed generations after repeated concurrent ingestion", async () => {

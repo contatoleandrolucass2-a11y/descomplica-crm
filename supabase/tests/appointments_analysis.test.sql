@@ -1,6 +1,6 @@
 begin;
--- 27 single assertions plus two three-role ACL matrices.
-select plan(33);
+-- 30 single assertions plus two three-role ACL matrices.
+select plan(36);
 
 create function pg_temp.analysis_fixture()
 returns jsonb language sql as $$
@@ -149,6 +149,10 @@ select ok(has_function_privilege('authenticated','public.read_crm_appointments_a
   and not has_function_privilege('anon','public.read_crm_appointments_analysis(bigint,text[])','execute')
   and not has_function_privilege('service_role','public.read_crm_appointments_analysis(bigint,text[])','execute'),
   'only authenticated can invoke the stage read RPC');
+select ok(has_function_privilege('authenticated','public.read_crm_appointments_goal(date)','execute')
+  and not has_function_privilege('anon','public.read_crm_appointments_goal(date)','execute')
+  and not has_function_privilege('service_role','public.read_crm_appointments_goal(date)','execute'),
+  'only authenticated can invoke the appointment goal RPC');
 select ok(not has_function_privilege(role_name,'private.project_crm_appointments_analysis(jsonb,boolean)','execute'),
   role_name || ' cannot bypass stage authorization through the private projector')
 from unnest(array['anon','authenticated','service_role']) role_name;
@@ -175,7 +179,19 @@ select set_config('test.appointment_snapshot',(select id::text from public.crm_d
 set local role authenticated;
 select is((select count(*) from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),0::bigint,'missing identity yields no stage data');
+select is(public.read_crm_appointments_goal('2026-08-04'),null::bigint,
+  'missing identity yields no appointment goal');
 reset role;
+insert into public.crm_funnel_goals(
+  profile_key,effective_month,sales,approved_folders_rate,folders_rate,visits_rate,appointments_rate
+)
+values ('dv','2026-08-01',1,150,500,154,204)
+on conflict (profile_key,effective_month) do update set
+  sales=excluded.sales,
+  approved_folders_rate=excluded.approved_folders_rate,
+  folders_rate=excluded.folders_rate,
+  visits_rate=excluded.visits_rate,
+  appointments_rate=excluded.appointments_rate;
 insert into auth.users(id,email) values ('ac190000-0000-4000-8000-000000000001','appointments@example.test');
 select public.bootstrap_master_user('ac190000-0000-4000-8000-000000000001');
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason) values
@@ -187,6 +203,8 @@ set local role authenticated;
 select is((select count(*) from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),1::bigint,
   'stage-only access works without dashboard permission');
+select is(public.read_crm_appointments_goal('2026-08-04'),24::bigint,
+  'stage-only access reads only the active appointment volume');
 select is((select payload#>'{dimensions,developments}' from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),'[]'::jsonb,
   'stage-only RPC cannot bypass ranking protection');

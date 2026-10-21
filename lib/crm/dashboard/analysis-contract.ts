@@ -58,6 +58,7 @@ export const dashboardAppointmentDetailSchema = z
     accountRanking: appointmentLabel,
   })
   .strict();
+export type DashboardAppointmentDetail = z.infer<typeof dashboardAppointmentDetailSchema>;
 export const dashboardAnalysisViewSchema = z
   .object({
     viewKey: z.enum(["all", "with_canal_imob", "without_canal_imob"]),
