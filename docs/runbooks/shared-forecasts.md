@@ -78,8 +78,8 @@ Previsão/Realizado como números e permite texto livre apenas no corretor e no
 Plano de ação. Não reescreve documentos existentes, não muda ACL, RLS, owner,
 assinatura, autorização, auditoria ou controle de revisão. Documentos agrupados
 anteriores recebem a coluna vazia apenas em memória e só são persistidos por um
-salvamento explícito. A migration não foi aplicada remotamente e requer nova
-autorização específica após CI e restauração isolada aprovadas.
+salvamento explícito. A migration foi aplicada em produção em 20/10/2026 após
+CI, restauração isolada e autorização específica.
 
 A evolução por período prepara também a migration aditiva
 `20261020122216_forecast_period_scopes.sql`. Ela cria
@@ -90,7 +90,7 @@ RPCs repetem identidade, conta ativa, MFA, página, permissão de edição e CAS
 O singleton legado permanece intacto e pode fornecer apenas o primeiro template
 limpo. A auditoria armazena período, recorte, revisão e contagens, sem conteúdo
 das células. Geral retorna seções completas e nunca aceita escrita. Esta
-migration também não foi aplicada remotamente e exige autorização específica.
+migration foi aplicada em produção em 20/10/2026 após autorização específica.
 
 A lista automática usa a migration
 `20261020204500_forecast_broker_roster.sql`. Ela cria somente a RPC de leitura
@@ -100,8 +100,9 @@ House/Imob correspondente e retorna até 200 nomes distintos do snapshot mais
 recente. O acesso direto às tabelas analíticas continua revogado. A migration
 corretiva `20261020214500_forecast_broker_manager_accents.sql` normaliza
 diacríticos na comparação do gerente, cobrindo nomes como Álvaro, Fabrício e
-Thiago de Araújo sem exigir extensão adicional do Postgres. A primeira migration
-foi aplicada em produção; a corretiva exige autorização específica após a CI.
+Thiago de Araújo sem exigir extensão adicional do Postgres. As duas migrations
+foram aplicadas em produção; a corretiva consta no ledger remoto como
+`20261021021551_forecast_broker_manager_accents`.
 
 A versão anterior da RPC singleton rejeita o documento novo com número par de
 colunas. O runtime por período usa RPCs novas e não depende dessa assinatura

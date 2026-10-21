@@ -48,11 +48,16 @@ Linux do SHA final continua sendo o gate de integração.
 
 A revisão automática identificou que `upper()` preservava diacríticos e poderia
 deixar vazias as equipes de Álvaro, Fabrício e Thiago de Araújo. A migration
-corretiva `20261020214500_forecast_broker_manager_accents.sql` passa a normalizar
-as letras acentuadas com `translate`, sem extensão adicional. O pgTAP cobre
-Álvaro e Fabrício acentuados. A expressão foi comprovada por consulta somente
-leitura em produção; a aplicação da correção permanece condicionada à CI e a
-nova autorização específica.
+corretiva `20261020214500_forecast_broker_manager_accents.sql` normaliza as
+letras acentuadas com `translate`, sem extensão adicional. O pgTAP cobre Álvaro
+e Fabrício acentuados. Após CI verde e autorização específica, a correção foi
+aplicada pelo Supabase MCP como
+`20261021021551_forecast_broker_manager_accents`, com SHA-256
+`0270b3926fa9c6e3badd6c7ea0a2e9fbc67169f064948846c90b497e15e4a62f`.
+O pós-check confirmou a função `STABLE SECURITY DEFINER`, owner `postgres`,
+`search_path` vazio, timeout de 10 segundos e execução exclusiva de
+`authenticated`; `anon` e `service_role` continuam sem acesso. A tabela de
+períodos segue vazia e o singleton legado mantém uma linha e revisão 5.
 
 ## 2026-10-20: publicacao e aceite operacional de Agendamentos v3
 

@@ -18,6 +18,8 @@
   elenco automático, preservando o único documento legado sem alteração.
 - Normaliza acentos ao localizar o gerente no snapshot, para preencher também
   equipes vinculadas a Álvaro, Fabrício e Thiago de Araújo.
+- Aplica a correção de acentos no Supabase de produção preservando dados,
+  assinatura, owner, guards e privilégios da RPC de corretores.
 
 ## 2026-10-20 - Publicacao e aceite de Agendamentos v3
 
@@ -93,8 +95,8 @@
   números de linha e destaca corretor, métrica e empreendimento da célula ativa.
 - Compacta os controles dos empreendimentos junto às bordas e inclui seletores
   de Geral, House, Imob e seus gerentes.
-- Prepara armazenamento aditivo com RLS, RPCs por período, CAS e auditoria sem
-  conteúdo. A migration permanece pendente de CI e autorização remota específica.
+- Publica o armazenamento aditivo com RLS, RPCs por período, CAS e auditoria sem
+  conteúdo, mantendo o singleton legado e sem criar recortes automaticamente.
 
 ## 2026-10-20 - Candidato visual protegido para Agendamentos
 

@@ -2121,5 +2121,19 @@ dependente da autorização específica aplicável.
   `20261020214500_forecast_broker_manager_accents.sql` normaliza os diacríticos
   com `translate`, preserva ACL e guards e acrescenta pgTAP para os dois nomes
   acentuados. Consulta somente leitura no Supabase confirmou as formas
-  `ALVARO`, `FABRICIO` e `THIAGO DE ARAUJO`. A migration corretiva não foi
-  aplicada e exige autorização específica após CI verde.
+  `ALVARO`, `FABRICIO` e `THIAGO DE ARAUJO`.
+- Após a CI `39524875107` aprovar `validate`, `isolated-restore` e
+  `release-gates` no SHA
+  `ff38d6a1c762ea790466906627936b320491f52c`, o usuário autorizou a aplicação e
+  a recuperação correspondente. O Supabase MCP aplicou somente a corretiva e o
+  ledger remoto registrou
+  `20261021021551_forecast_broker_manager_accents`. O arquivo aplicado tem
+  SHA-256
+  `0270b3926fa9c6e3badd6c7ea0a2e9fbc67169f064948846c90b497e15e4a62f`.
+- O pós-check confirmou `translate` e o mapa de diacríticos na definição,
+  função `STABLE SECURITY DEFINER`, owner `postgres`, `search_path` vazio,
+  timeout de 10 segundos e `EXECUTE` apenas para `authenticated`; `anon` e
+  `service_role` seguem bloqueados. `crm_forecast_periods` permanece vazia e o
+  singleton legado mantém uma linha e revisão 5. Os advisors não apontaram
+  acesso anônimo novo; permanece apenas o aviso informativo já registrado para
+  o índice de `crm_forecast_periods.updated_by` e avisos anteriores ao escopo.
