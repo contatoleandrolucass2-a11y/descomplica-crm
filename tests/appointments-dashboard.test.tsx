@@ -49,7 +49,9 @@ describe("appointment dashboard availability", () => {
   });
 
   it("renders six cards, ordered charts and the detailed table for v3", () => {
-    const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={current} />);
+    const markup = renderToStaticMarkup(
+      <AppointmentsDashboard analysis={current} individualGoal={24} />,
+    );
     expect(markup).toContain("Período dos gráficos, indicadores e tabela");
     expect(markup).toContain(">Ano</label>");
     expect(markup).toContain("Mês selecionado com cobertura parcial");
@@ -57,7 +59,9 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Corretores cadastrados");
     expect(markup).toContain("Previstos e realizados hoje");
     expect(markup).toContain("Ranking por gerente regional");
-    expect(markup).toContain("Ranking das contas");
+    expect(markup).toContain("Ranking Score");
+    expect(markup).toContain("1 de 192");
+    expect(markup).toContain("24 por corretor × 8 corretores");
     expect(markup).toContain("Detalhamento dos agendamentos");
     expect(markup).toContain("Conta: Ranking");
     expect(markup).toContain("Conta sintética");
@@ -67,6 +71,6 @@ describe("appointment dashboard availability", () => {
     const markup = renderToStaticMarkup(
       <AppointmentsDashboard analysis={current} canViewDevelopmentRankings={false} />,
     );
-    expect(markup).toContain("Ranking das contas indisponível para seu perfil de acesso");
+    expect(markup).toContain("Ranking Score indisponível para seu perfil de acesso");
   });
 });
