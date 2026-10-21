@@ -19,7 +19,7 @@ export const temporaryItbiSourceOutageException = Object.freeze({
   reducedFinancingLimit: 120_968,
   reducedPropertyLimit: 725_808,
   allowedStatuses: Object.freeze([403, 503]),
-  expiresAt: "2026-10-21T06:30:00.000Z",
+  expiresAt: "2026-10-21T07:15:00.000Z",
 });
 
 export function permitsTemporaryItbiSourceOutage({ id, url, status, now }) {

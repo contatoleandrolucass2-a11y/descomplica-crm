@@ -252,7 +252,7 @@
   fonte municipal de isenção de ITBI, o usuário autorizou uma exceção única para
   esta publicação. Ela aceita somente HTTP 403 ou 503 nas duas páginas
   municipais de ITBI, somente no PR #287 e em seu merge para `main`, conserva
-  os três limites já versionados e expira em `2026-10-21T06:30:00Z`. ARISP,
+  os três limites já versionados e expira em `2026-10-21T07:15:00Z`. ARISP,
   5º RI, todas as outras fontes e gates continuam obrigatórios; a exceção não
   integra o runtime nem altera qualquer dashboard.
 
