@@ -67,6 +67,65 @@
   todos os gates. A reconciliacao preservou estas evidencias junto das alteracoes
   concorrentes de `main` em `22abfd7d`.
 
+## 2026-10-20: confirmacao do teto nominal das anuais
+
+- Fonte: pedido direto do usuario nesta continuacao. O teto da anual considera
+  somente seu valor nominal, nunca o valor final corrigido com juros. Esta
+  confirmacao resolve a ressalva da verificacao autenticada abaixo; nao altera
+  taxas, correcao, limites de aprovacao ou outros simuladores.
+- Codigo existente confirmado: getAssociativeAnnualLimit divide a renda por
+  dois com truncamento decimal em centavos; o otimizador usa esse teto nominal.
+  Nenhuma alteracao de runtime foi necessaria.
+- Recalculo direto dos dois fluxos com o cenario dos prints: Linear
+  4 x 13269.73, saldo 27327.47; Decrescente 4 x 14508.87, saldo 22370.91.
+  Anuais nominais 1275.00 em dezembro de 2027/2028/2029. Ambos aprovados e ambos
+  reprovados ao reduzir em 0.01 cada pagamento inicial. Resultado igual ao
+  teste autenticado anterior, sem alegar nova sessao de navegador.
+- Vitest focado executado: associative-approval-suggestion,
+  associative-annual-limits e associative-annual-ledger; 3 arquivos, 80 testes
+  aprovados. Na finalizacao documental, lint passou sem erros e com quatro
+  avisos preexistentes em test-results; typecheck e build passaram. A primeira
+  execucao completa de pnpm test teve 4.054 testes aprovados, 102 ignorados e
+  12 timeouts em quatro arquivos sob saturacao local. Os quatro arquivos foram
+  repetidos com um worker e passaram 74 testes, com 1 skip previsto. Como a
+  cadeia pnpm test para no Vitest, testes operacionais e test:release nao foram
+  executados localmente nessa tentativa; a CI Linux permanece o gate final.
+- GET publico /api/health em 2026-10-21T00:39:23Z: HTTP 200/ok, versao
+  ee451647dc895dafe83be17604849e0cb163c1dc, ja contendo a regra confirmada.
+  Nao houve novo deploy: candidato funcional ja ativo, sem mudanca de runtime.
+  Registro local sincronizado ao Obsidian; esta nota nao representa novo merge.
+
+## 2026-10-20: verificacao autenticada do Associativo no Chrome
+
+- Fonte: interface publicada, em aba separada autorizada pelo usuario, em
+  20/10/2026 (America/Sao_Paulo; consulta health 2026-10-21T00:31Z).
+  Health HTTP 200/ok em `ee451647dc895dafe83be17604849e0cb163c1dc`.
+  GitHub confirmou PR #280 integrado e CI main `39489641763` success no mesmo
+  SHA. Fetch mostrou origin/main em `8877f580efa60e49d188f14e545ff6095135987a`;
+  checkout em `4f787a3cbfe85c5619f5f48b8aebb9633653e1e0`. Estados distintos.
+- Cenario dos prints reproduzido pela UI: venda 276900, desconto 27000,
+  financiamento 126633.61, subsidio 23035, FGTS zero, cheque moradia 16000,
+  renda 2550, MCMV, primeiro imovel, Prata, 84 meses, obra 15%, termino
+  31/12/2029, entrada inicial 150 e data 20/10/2026.
+- Previa e aplicacao coincidiram: Linear com Entrada + 3 Sinais iguais de
+  13269.73, saldo mensal 27327.47 e maior mensal corrigida 459.00; Decrescente
+  com quatro pagamentos iguais de 14508.87, saldo 22370.91 e maior mensal
+  corrigida 459.00. Reduzir cada pagamento em 0.01 reprovou o respectivo fluxo.
+- Anuais nominais 1275.00 em 15/12/2027, 15/12/2028 e 15/12/2029, sem anual
+  entre os sinais ou em dezembro/2026. Inserir Anual ficou desabilitado apos
+  ocupar as tres datas validas. Tentativa de 1275.01 foi limitada a 1275.00
+  tanto com renda 2550.00 quanto com renda 2550.01 (arredondamento para baixo).
+- Limite importante: o teto de 50% e nominal. A interface informa anuais
+  corrigidas de 1367.21, 1451.54 e 1541.06. Isso nao comprova teto de 50% sobre
+  o desembolso corrigido; eventual requisito nesse sentido exige revisao
+  especifica, sem alterar juros silenciosamente. Repasse permanece bloqueado
+  ate 15/01/2027, independente da aprovacao financeira.
+- Nenhuma proposta foi salva/enviada, nenhum dado remoto foi alterado e nao
+  houve deploy. Aba original preservada; aba de teste mantida no Decrescente.
+  Evidencia visual local ignorada pelo Git em test-results. Verificacao manual,
+  sem nova execucao de lint/typecheck/test/build neste registro documental.
+  A prova de um centavo e especifica deste cenario, nao garantia universal.
+
 ## 2026-10-20: integracao final do ajuste do Associativo
 
 - Fonte GitHub: PR #280 integrado em `2026-10-20T20:09:56Z`, commit
