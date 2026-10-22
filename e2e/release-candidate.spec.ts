@@ -878,7 +878,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 21 : activeOperationalRoles.has(role) ? 10 : 0,
+      adminRoles.has(role) ? 21 : activeOperationalRoles.has(role) ? 11 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
