@@ -17,6 +17,13 @@
   Chromium aprovou as quatro visoes, os doze dialogos e 60 combinacoes da barra
   superior. Merge, CI do `main`, imagem e publicacao ainda nao estavam
   comprovados neste registro.
+- A CI do PR detectou dois contratos visuais antigos: Integracoes ainda
+  procurava a caixa/console Meta removida, e a navegacao arquivada ignorava o
+  novo sino na ordem de teclado. O gate foi atualizado para exigir o card
+  API-only, ausencia dos controles legados e a sequencia tema, alerta, perfil.
+  Em 1.181 px, o espacamento do cabecalho foi reduzido de 16 para 12 px para
+  eliminar nove pixels de overflow interno sem remover itens ou alterar outros
+  dashboards. Os 39 testes focados passaram antes da nova CI.
 
 ## 2026-10-22: diagnostico e correcao da visao Geral vazia da Previsao
 

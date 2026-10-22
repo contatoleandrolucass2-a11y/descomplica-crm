@@ -23,6 +23,14 @@ O QA Chromium verificou as quatro visões, os doze diálogos e 60 combinações
 responsivas da barra superior. CI Linux, merge, imagem imutável e publicação
 permanecem gates separados.
 
+Na primeira CI do PR, o gate de release ainda procurava a seção e o console
+Meta removidos. O contrato visual foi atualizado para exigir o card API-only e
+a ausência desses controles. A repetição identificou também que o novo sino
+entrou corretamente na ordem de teclado, mas o teste legado não o considerava,
+e que o desktop de 1.181 px precisava de 12 px adicionais para a navegação.
+O teste agora percorre tema, alerta e perfil nessa ordem; o espaçamento reduzido
+mantém todos os controles dentro do cabeçalho. Os 39 testes focados passaram.
+
 ## 2026-10-22 - Atualização de segurança do Next.js
 
 O gate de auditoria identificou uma vulnerabilidade crítica e uma alta no

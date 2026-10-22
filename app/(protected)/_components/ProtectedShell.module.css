@@ -843,6 +843,10 @@
 }
 
 @media (min-width: 1181px) and (max-width: 1320px) {
+  .topbarInner {
+    gap: 12px;
+  }
+
   .navigationIcon {
     display: none;
   }
