@@ -382,9 +382,7 @@ describe("release-candidate activation defaults", () => {
     ];
     for (const role of [...operational, "pending"]) {
       const administrative = role === "master" || role === "admin";
-      expect(matrix[role].includes("crm.management.forecast"), role).toBe(
-        role !== "pending",
-      );
+      expect(matrix[role].includes("crm.management.forecast"), role).toBe(role !== "pending");
       expect(new Set(matrix[role]).size, role).toBe(matrix[role].length);
       if (administrative) {
         expect(matrix[role], role).toEqual(
