@@ -27,6 +27,24 @@ const metaAdsKeys = Object.freeze([
   "META_ADS_CONSOLE_PASSWORD",
 ]);
 const metaAdsSecretKeys = ["META_ADS_STATUS_SECRET", "META_ADS_CONSOLE_PASSWORD"];
+const metaAdsApiKeys = Object.freeze([
+  "META_ADS_API_ENABLED",
+  "META_ADS_ACCESS_TOKEN",
+  "META_ADS_ACCOUNT_ID",
+  "META_ADS_API_VERSION",
+]);
+const metaAdsApiAccountId = "1080988750909489";
+const metaAdsApiVersion = "v26.0";
+
+function validateMetaAdsApiToken(token) {
+  if (
+    typeof token !== "string" ||
+    token.length < 40 ||
+    token.length > maximumSecretBytes ||
+    !/^[A-Za-z0-9._~-]+$/u.test(token)
+  )
+    fail("Meta Ads API credential is invalid.");
+}
 
 function validateMetaAdsSecrets(secrets) {
   exactKeys(secrets, metaAdsSecretKeys);
@@ -305,6 +323,66 @@ export function transformMetaAdsReleaseEnvironment(contents, expectedSha, target
   return after;
 }
 
+export function metaAdsApiEnvironmentValues(contents) {
+  const entries = assignments(contents);
+  return Object.fromEntries(
+    metaAdsApiKeys.map((key) => {
+      const value = entries.has(key) ? literal(entries.get(key)) : "";
+      return [key, value || (key === "META_ADS_API_ENABLED" ? "false" : "")];
+    }),
+  );
+}
+
+export function transformMetaAdsApiReleaseEnvironment(contents, expectedSha, targetSha, token) {
+  if (
+    typeof expectedSha !== "string" ||
+    typeof targetSha !== "string" ||
+    !sha.test(expectedSha) ||
+    !sha.test(targetSha) ||
+    expectedSha === targetSha ||
+    imageSha(contents) !== expectedSha
+  )
+    fail("Meta Ads API configuration requires distinct exact release SHAs.");
+  validateMetaAdsApiToken(token);
+  const entries = assignments(contents);
+  for (const key of [
+    "SUPABASE_SECRET_KEY",
+    "SALESFORCE_INGEST_SECRET",
+    "SALESFORCE_STATUS_SECRET",
+    "SALESFORCE_REFRESH_SECRET",
+    "SALESFORCE_CONSOLE_PASSWORD",
+    "QLIK_RELAY_HMAC_SECRET",
+    "QLIK_RANKING_V2_HMAC_SECRET",
+    ...metaAdsSecretKeys,
+  ]) {
+    if (entries.has(key) && literal(entries.get(key)) === token)
+      fail("Meta Ads API requires a credential separate from existing integrations.");
+  }
+  metaAdsApiEnvironmentValues(contents);
+  const replacements = {
+    IMAGE_TAG: targetSha,
+    META_ADS_API_ENABLED: "true",
+    META_ADS_ACCESS_TOKEN: token,
+    META_ADS_ACCOUNT_ID: metaAdsApiAccountId,
+    META_ADS_API_VERSION: metaAdsApiVersion,
+  };
+  let after = contents;
+  for (const edit of Object.entries(replacements)
+    .filter(([key]) => entries.has(key))
+    .map(([key, value]) => ({ ...entries.get(key), replacement: `${key}=${value}` }))
+    .sort((a, b) => b.offset - a.offset)) {
+    after = after.slice(0, edit.offset) + edit.replacement + after.slice(edit.offset + edit.length);
+  }
+  const newline = contents.includes("\r\n") ? "\r\n" : "\n";
+  for (const [key, value] of Object.entries(replacements)) {
+    if (entries.has(key)) continue;
+    if (after && !after.endsWith("\n")) after += newline;
+    after += `${key}=${value}${newline}`;
+  }
+  assignments(after);
+  return after;
+}
+
 function descriptor(backup) {
   return {
     backupId: backup.backupId,
@@ -327,7 +405,7 @@ function validateBackup(backup, change) {
   if (
     ![1, 2].includes(backup.schemaVersion) ||
     (backup.schemaVersion === 2 &&
-      !["qlik-ranking-v2", "meta-ads-session"].includes(backup.kind)) ||
+      !["qlik-ranking-v2", "meta-ads-session", "meta-ads-api"].includes(backup.kind)) ||
     backup.backupId !== change.backupId ||
     backup.beforeSha256 !== change.beforeSha256 ||
     backup.afterSha256 !== change.afterSha256 ||
@@ -348,6 +426,19 @@ function validateBackup(backup, change) {
       ) !== backup.after
     )
       fail("Meta Ads backup contains an unrelated transformation.");
+    return backup;
+  }
+  if (backup.kind === "meta-ads-api") {
+    const values = metaAdsApiEnvironmentValues(backup.after);
+    if (
+      transformMetaAdsApiReleaseEnvironment(
+        backup.before,
+        imageSha(backup.before),
+        imageSha(backup.after),
+        values.META_ADS_ACCESS_TOKEN,
+      ) !== backup.after
+    )
+      fail("Meta Ads API backup contains an unrelated transformation.");
     return backup;
   }
   if (backup.schemaVersion === 2) {
@@ -433,6 +524,15 @@ export function assertMetaAdsContainerDigests(contents, digests) {
   const expected = metaAdsEnvironmentValues(contents);
   if (metaAdsKeys.some((key) => digests[key] !== environmentSha256(expected[key])))
     fail("Effective Meta Ads configuration differs from its recorded environment.");
+}
+
+export const metaAdsApiContainerDigestScript = `const {createHash}=require('node:crypto');const keys=${JSON.stringify(metaAdsApiKeys)};process.stdout.write(JSON.stringify(Object.fromEntries(keys.map(key=>[key,createHash('sha256').update(process.env[key]??(key==='META_ADS_API_ENABLED'?'false':''),'utf8').digest('hex')]))));`;
+
+export function assertMetaAdsApiContainerDigests(contents, digests) {
+  exactKeys(digests, metaAdsApiKeys);
+  const expected = metaAdsApiEnvironmentValues(contents);
+  if (metaAdsApiKeys.some((key) => digests[key] !== environmentSha256(expected[key])))
+    fail("Effective Meta Ads API configuration differs from its recorded environment.");
 }
 
 export async function readBoundedEnvironmentText(handle, maximum) {
@@ -536,6 +636,19 @@ export async function readMetaAdsReleaseSecrets() {
   return secrets;
 }
 
+export async function readMetaAdsApiReleaseToken() {
+  await validatePrivateDirectory(path.dirname(secretDirectory));
+  await validatePrivateDirectory(secretDirectory);
+  const token = (
+    await readPrivateText(
+      path.join(secretDirectory, "meta-ads-api-access-token"),
+      maximumSecretBytes + 2,
+    )
+  ).replace(/\r?\n$/u, "");
+  validateMetaAdsApiToken(token);
+  return token;
+}
+
 // The optional path/owner are for isolated POSIX fixtures. Production uses only defaults.
 export function salesforceEnvironmentBackupStore(directory = backupDirectory, owner = 0) {
   async function validateDirectory(create = false) {
@@ -579,7 +692,7 @@ export function salesforceEnvironmentBackupStore(directory = backupDirectory, ow
   }
 
   async function create(backupId, before, after, kind = "salesforce") {
-    if (!["salesforce", "qlik-ranking-v2", "meta-ads-session"].includes(kind))
+    if (!["salesforce", "qlik-ranking-v2", "meta-ads-session", "meta-ads-api"].includes(kind))
       fail("Unknown environment change.");
     const backup = {
       schemaVersion: kind === "salesforce" ? 1 : 2,

@@ -1,5 +1,35 @@
 # Worklog
 
+## 2026-10-21 - Integração oficial Meta Ads somente leitura
+
+O aplicativo `Descomplica Ads Analytics` foi configurado no portfólio
+`BM MÃE 2` com usuário de sistema empregado e somente `ads_read`. A conta
+`1080988750909489` foi atribuída apenas com `Ver desempenho`. Não foram
+concedidas permissões de gerenciamento, faturamento, páginas ou publicação.
+
+O CRM recebeu um cliente estritamente servidor para a Meta Marketing API
+`v26.0`. O endpoint autenticado `/api/meta-ads/data` consulta no máximo 120 dias
+de insights diários no nível anúncio, pagina com limites, rejeita redirecionamento
+de paginação fora de `graph.facebook.com`, aplica timeout e nunca devolve o token.
+O dashboard usa a fonte oficial por padrão; falhas geram estado indisponível e
+não são substituídas silenciosamente pela demonstração. CSV e demonstração
+continuam disponíveis apenas por escolha explícita do operador.
+
+O status de Integrações passa a comprovar a API por uma leitura leve da conta.
+A interface informa conexão somente leitura e registra que não publica, edita,
+pausa nem remove anúncios. Salesforce, banco, navbar e demais dashboards não
+foram alterados.
+
+O coordenador de produção recebeu `--meta-ads-api enable`. Ele lê o token apenas
+de `/etc/descomplica-crm/secrets/meta-ads-api-access-token`, exige arquivo
+privado, preserva o ambiente integral, cria backup `meta-ads-api`, usa CAS e
+verifica os quatro valores efetivos no container por hash. O token não aparece
+em argumentos, saídas ou arquivos versionados.
+
+Validação focal: 36 testes Vitest e 52 testes Node passaram; lint e typecheck
+também passaram. A suíte integral, build, CI Linux, imagem imutável, promoção
+coordenada e prova autenticada de produção permanecem gates separados.
+
 ## 2026-10-21 - Filtros, produtividade e conversões de Agendamentos
 
 O painel de Agendamentos recebeu os quatro filtros do Dashboard Geral: Canal de

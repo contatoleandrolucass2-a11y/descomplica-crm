@@ -11,6 +11,10 @@ import {
   metaAdsEnvironmentValues,
   selectEnvironmentChange,
   transformMetaAdsReleaseEnvironment,
+  assertMetaAdsApiContainerDigests,
+  metaAdsApiContainerDigestScript,
+  metaAdsApiEnvironmentValues,
+  transformMetaAdsApiReleaseEnvironment,
 } from "./salesforce-release-environment.mjs";
 
 const oldSha = "a".repeat(40);
@@ -226,7 +230,7 @@ test("CLI accepts only explicit protected deploy activation, excludes mixed opti
   );
   for (const invalid of ["true", "false", "disable", secrets.META_ADS_STATUS_SECRET])
     assert.throws(() => parseReleaseArguments([...args, "--meta-ads", invalid]));
-  for (const flag of ["salesforce-ingestion", "qlik-ranking", "meta-ads"])
+  for (const flag of ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api"])
     assert.throws(() =>
       parseReleaseArguments([...args, "--meta-ads", "enable", `--${flag}`, "enable"]),
     );
@@ -242,4 +246,76 @@ test("CLI accepts only explicit protected deploy activation, excludes mixed opti
   assert.throws(() =>
     parseReleaseArguments([...args, "--meta-ads-status-secret", secrets.META_ADS_STATUS_SECRET]),
   );
+});
+
+test("Meta Ads API activation stores only the read-only credential and fixed account contract", () => {
+  const token = `EAA${"a1B2".repeat(30)}`;
+  const apiAfter = transformMetaAdsApiReleaseEnvironment(before, oldSha, newSha, token);
+  assert.equal(
+    apiAfter,
+    before.replace(oldSha, newSha) +
+      `META_ADS_API_ENABLED=true\nMETA_ADS_ACCESS_TOKEN=${token}\nMETA_ADS_ACCOUNT_ID=1080988750909489\nMETA_ADS_API_VERSION=v26.0\n`,
+  );
+  assert.deepEqual(metaAdsApiEnvironmentValues(before), {
+    META_ADS_API_ENABLED: "false",
+    META_ADS_ACCESS_TOKEN: "",
+    META_ADS_ACCOUNT_ID: "",
+    META_ADS_API_VERSION: "",
+  });
+  for (const invalid of ["short", "x".repeat(4097), "x y".repeat(20), "x$y".repeat(20)])
+    assert.throws(
+      () => transformMetaAdsApiReleaseEnvironment(before, oldSha, newSha, invalid),
+      /credential is invalid/u,
+    );
+  const apiChange = {
+    backupId: "aaaaaaaa-2222-4333-8444-555555555555",
+    beforeSha256: environmentSha256(before),
+    afterSha256: environmentSha256(apiAfter),
+  };
+  const apiBackup = {
+    schemaVersion: 2,
+    kind: "meta-ads-api",
+    ...apiChange,
+    before,
+    after: apiAfter,
+  };
+  assert.equal(
+    selectEnvironmentChange(before, apiBackup, apiChange, {
+      expectedCurrentSha: oldSha,
+      targetSha: newSha,
+    }),
+    apiAfter,
+  );
+  const output = execFileSync(process.execPath, ["--eval", metaAdsApiContainerDigestScript], {
+    env: metaAdsApiEnvironmentValues(apiAfter),
+    encoding: "utf8",
+  });
+  assertMetaAdsApiContainerDigests(apiAfter, JSON.parse(output));
+  assert.equal(output.includes(token), false);
+});
+
+test("CLI isolates official Meta Ads API activation from every other integration", () => {
+  const args = [
+    "deploy",
+    "--expected-deployment-id",
+    change.backupId,
+    "--expected-sha",
+    oldSha,
+    "--sha",
+    newSha,
+    "--image-id",
+    `sha256:${"1".repeat(64)}`,
+    "--ci-run-id",
+    "123",
+  ];
+  assert.equal(
+    parseReleaseArguments([...args, "--meta-ads-api", "enable"]).values["meta-ads-api"],
+    "enable",
+  );
+  for (const flag of ["salesforce-ingestion", "qlik-ranking", "meta-ads"])
+    assert.throws(() =>
+      parseReleaseArguments([...args, "--meta-ads-api", "enable", `--${flag}`, "enable"]),
+    );
+  for (const invalid of ["true", "false", "disable"])
+    assert.throws(() => parseReleaseArguments([...args, "--meta-ads-api", invalid]));
 });
