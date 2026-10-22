@@ -286,6 +286,39 @@ test("broker manager label is verified and projected on every broker collection"
   });
 });
 
+test("broker manager grouping is removed only from the execution instance before projection", async () => {
+  const managerColumn = "Account.Comissionado_generico_3__c.Name";
+  const activityColumn = "Contact.Atividade__c";
+  const fixture = client({
+    describeFor: (metadata) => ({
+      ...metadata,
+      reportFormat: "SUMMARY",
+      groupingsDown: [
+        { name: managerColumn, sortOrder: "Asc" },
+        { name: activityColumn, sortOrder: "Asc" },
+      ],
+      groupingsAcross: [],
+    }),
+    resultFor: (definition, metadata) => {
+      const result = complete(definition, metadata);
+      result.factMap["T!T"].rows[0].dataCells[metadata.detailColumns.indexOf(managerColumn)] = {
+        value: "Gerente cadastrado",
+        label: "Gerente cadastrado",
+      };
+      return result;
+    },
+  });
+
+  assert.equal((await collect("brokers", fixture))[0].managerName, "Gerente cadastrado");
+  const requested = JSON.parse(
+    fixture.calls.find((call) => call.method === "POST").body,
+  ).reportMetadata;
+  assert.equal(requested.reportFormat, "SUMMARY");
+  assert.deepEqual(requested.groupingsDown, [{ name: activityColumn, sortOrder: "Asc" }]);
+  assert.deepEqual(requested.groupingsAcross, []);
+  assert.ok(requested.detailColumns.includes(managerColumn));
+});
+
 test("analysis requires and projects the verified business-unit column for both activity reports only", async () => {
   const column = "Activity.Unidade_de_negocio__c";
   for (const key of ["appointments", "visits"]) {
@@ -513,7 +546,12 @@ test("polling deadline bounds repeatedly running instances", async () => {
 test("collects summary/matrix detail facts and validates grand total before dedupe", async () => {
   for (const format of ["SUMMARY", "MATRIX"]) {
     const fixture = client({
-      describeFor: (metadata) => ({ ...metadata, reportFormat: format }),
+      describeFor: (metadata) => ({
+        ...metadata,
+        reportFormat: format,
+        groupingsDown: [{ name: "Contact.Atividade__c", sortOrder: "Asc" }],
+        groupingsAcross: [],
+      }),
       resultFor: (definition, metadata) => {
         const result = complete(definition, metadata, [1, 2]);
         const rows = result.factMap["T!T"].rows;
