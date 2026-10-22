@@ -1,5 +1,28 @@
 # Worklog
 
+## 2026-10-22 - Modais responsivos e interface API-only do Meta Ads
+
+Os doze fluxos de diálogo do painel Meta Ads agora recebem do shell a fatia
+realmente visível do iframe e limitam largura e altura a essa área. A página do
+CRM não precisa ser rolada para encontrar cabeçalho, conteúdo ou ações; quando
+um diálogo excede a altura disponível, somente seu conteúdo interno possui
+rolagem. A sincronização é refeita ao abrir o diálogo, redimensionar a janela e
+alterar a área visível do iframe.
+
+O sino de alertas foi movido para a barra superior, entre os temas e o perfil.
+O servidor só o renderiza quando a página `crm.meta_ads` e a permissão
+`crm.meta_ads.view` estão autorizadas. A página de Integrações mantém apenas o
+card superior da API oficial e remove da interface os controles e o diálogo do
+console legado. Nenhuma rota de escrita no Meta, migration, dado remoto,
+Salesforce ou outro dashboard foi alterado.
+
+Validação local do runtime: `pnpm verify` passou com lint, typecheck, build,
+4.102 testes Vitest aprovados e 106 ignorados. As suítes Node aprovaram 1.616
+testes, com cinco ignorados, e o gate de release aprovou 727, com 14 ignorados.
+O QA Chromium verificou as quatro visões, os doze diálogos e 60 combinações
+responsivas da barra superior. CI Linux, merge, imagem imutável e publicação
+permanecem gates separados.
+
 ## 2026-10-22 - Atualização de segurança do Next.js
 
 O gate de auditoria identificou uma vulnerabilidade crítica e uma alta no
