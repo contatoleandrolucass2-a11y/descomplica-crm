@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-22 - Compatibilidade com agrupamento do gerente dos corretores
+
+O relatório de corretores mantém `Gerente de Vendas: Nome completo` como um
+agrupamento. O Salesforce rejeita com HTTP 400 a mesma chave quando ela também é
+incluída na lista de detalhes da execução. A coleta agora remove somente esse
+agrupamento da instância temporária, preserva os demais agrupamentos e solicita a
+coluna como detalhe para associar cada corretor ao gerente vigente. O relatório
+salvo não é alterado.
+
+A validação continua falhando de forma fechada quando o rótulo, a chave, os
+agrupamentos ou o resultado devolvido mudam. A regressão cobre o formato SUMMARY
+real do relatório e a projeção do gerente por corretor.
+
 ## 2026-10-21 - Totais separados e compilação Geral da Previsão
 
 A tabela da Previsão agora exibe o grupo Total com duas métricas independentes:
