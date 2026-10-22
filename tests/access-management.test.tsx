@@ -413,9 +413,23 @@ describe("catálogo localizado de acesso", () => {
 
     expect(markup).toContain("Buscar pessoas");
     expect(markup).toContain('role="tablist" aria-label="Categorias de acesso"');
-    expect(markup.match(/role="tab"/g)).toHaveLength(4);
-    expect(markup.match(/role="tabpanel"/g)).toHaveLength(4);
-    expect(markup.match(/role="tabpanel" tabindex="-1" hidden=""/g)).toHaveLength(3);
+    expect(markup.match(/role="tab"/g)).toHaveLength(5);
+    expect(markup.match(/role="tabpanel"/g)).toHaveLength(5);
+    expect(markup.match(/role="tabpanel" tabindex="-1" hidden=""/g)).toHaveLength(4);
+    expect(markup).toContain("Meta ADS<span>4</span>");
+    const metaPanel = markup.match(
+      /<section[^>]*id="access-panel-[^"]+-meta-ads"[^>]*>([\s\S]*?)<\/section>/,
+    )?.[1];
+    const commercialPanel = markup.match(
+      /<section[^>]*id="access-panel-[^"]+-commercial"[^>]*>([\s\S]*?)<\/section>/,
+    )?.[1];
+    expect(metaPanel).toBeDefined();
+    expect(commercialPanel).toBeDefined();
+    for (const [key, permission] of Object.entries(PERMISSIONS)) {
+      if (!key.startsWith("crm.meta_ads.")) continue;
+      expect(metaPanel).toContain(permission.label);
+      expect(commercialPanel).not.toContain(permission.label);
+    }
     expect(markup).toContain('aria-label="Filtrar pessoas por status"');
     expect(markup).toContain("resultado do papel e das exceções individuais");
     expect(markup).toContain("O que pode acessar");

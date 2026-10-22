@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-22 - Guia Meta ADS nos acessos efetivos
+
+A tela `/admin/usuarios` passa a agrupar as quatro permissões `crm.meta_ads.*`
+na guia **Meta ADS**, posicionada após Comercial. A busca, os contadores, a
+navegação por teclado e os controles de herança e exceção utilizam o mecanismo
+existente. A mudança reorganiza a apresentação; não concede nem remove acessos.
+
+Validação local: `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build`
+aprovados. Vitest: 4.101 aprovados e 107 ignorados. Os testes operacionais
+e de release terminaram sem falhas; verificações físicas exclusivas de Linux
+permanecem dependentes da CI. Não houve deploy nesta etapa.
+
 ## 2026-10-22 - Atualização de segurança do Next.js
 
 O gate de auditoria identificou uma vulnerabilidade crítica e uma alta no

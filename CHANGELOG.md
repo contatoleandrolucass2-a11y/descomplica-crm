@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-22 - Guia Meta ADS nos acessos efetivos
+
+A tela `/admin/usuarios` passa a agrupar as quatro permissões `crm.meta_ads.*`
+na guia **Meta ADS**, posicionada após Comercial. A busca, os contadores, a
+navegação por teclado e os controles de herança e exceção utilizam o mecanismo
+existente. A mudança reorganiza a apresentação; não concede nem remove acessos.
+
 ## 2026-10-22 - Preenchimento da Previsão por perfis comerciais
 
 - Libera a página e o preenchimento dos valores da Previsão para Coordenador,
