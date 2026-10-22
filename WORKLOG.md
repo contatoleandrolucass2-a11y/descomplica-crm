@@ -66,6 +66,26 @@ falhas. A conferência das fontes documentais, inclusive ITBI, passou sem exceç
 Publicação depende da CI terminal do SHA integrado, imagem imutável, prova de
 runtime e coordenador protegido. Não há nova exceção de ITBI neste ajuste.
 
+## 2026-10-21 - Correcao do Dashboard v3 e v4 sem Ranking
+
+O código de suporte `1462476213` foi correlacionado no runtime de produção com
+`ZodError: Invalid or duplicate daily aggregate.` O RPC geral do Dashboard
+tratava o índice de loja somente para snapshots v2; ao ocultar Ranking de um
+perfil Coordenador, a projeção v3 emitia fatos com dez campos enquanto mantinha
+a dimensão de lojas. A aplicação recusava o payload antes de renderizar `/app`.
+
+A migration torna a projeção compatível com v2, v3 e v4, preserva as onze posições,
+reagrupa séries protegidas após anonimizar empreendimento e loja e remove nome e
+classificação da conta em agendamentos sem permissão de Ranking. O teste pgTAP
+cobre leitura v3/v4, totais, forma, unicidade, dicionários e campos protegidos.
+
+Nenhuma permissão foi ampliada. Após reconciliar o Dashboard v4 publicado por
+outro desenvolvedor, duas instâncias isoladas de PostgreSQL 17 restauraram as 78
+migrations e aprovaram 2.104 testes pgTAP, lint e advisors sem divergência.
+O teste focal do manifesto passou 23 de 23; typecheck e formatação também
+passaram. CI integral do SHA reconciliado, integração, migration remota e
+publicação permanecem etapas distintas até suas evidências finais.
+
 ## 2026-10-21 - Publicacao e reconciliacao do painel de Agendamentos
 
 O PR #289 integrou o painel inteligente e a correcao de datas Salesforce. A
