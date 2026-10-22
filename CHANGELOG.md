@@ -13,7 +13,7 @@
 
 ## 2026-10-22 - Espelho oficial das fontes municipais de ITBI
 
-- Atualiza o verificador documental para o espelho Smart Sampa da própria
+- Atualiza o verificador documental para o host legado oficial da própria
   Prefeitura de São Paulo, preservando as mesmas páginas e tabelas de ITBI.
 - Mantém inalterados vigência, limites, alíquotas e regras de cálculo.
 

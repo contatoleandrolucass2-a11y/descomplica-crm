@@ -34,7 +34,7 @@ coordenada e prova autenticada de produção permanecem gates separados.
 
 A página principal da Prefeitura de São Paulo passou a responder HTTP 403 aos
 runners do GitHub no gate de documentação. As duas fontes de ITBI da política
-foram atualizadas para o espelho oficial `smartsampa.prefeitura.sp.gov.br`, que
+foram atualizadas para o host legado oficial `www2.prefeitura.sp.gov.br`, que
 publica as mesmas páginas municipais de isenção e cálculo. A conferência em
 22/10/2026 encontrou os mesmos limites de 2026; nenhuma taxa, vigência, fórmula
 ou regra comercial foi alterada.
