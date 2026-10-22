@@ -102,6 +102,20 @@ function resolveLabelColumns(describe, definition, metadata) {
     const column = allowSharedLabel ? expectedColumn : candidates.keys().next().value;
     if (column !== expectedColumn || column === "Activity.PDV__c.Name") throw invalid();
     resolved.set(alias, column);
+    for (const groupingKey of ["groupingsDown", "groupingsAcross"]) {
+      const groupings = metadata[groupingKey];
+      if (groupings === undefined || groupings === null) continue;
+      if (!Array.isArray(groupings) || groupings.some((grouping) => !object(grouping))) {
+        throw invalid();
+      }
+      metadata[groupingKey] = groupings.filter((grouping) => grouping.name !== column);
+    }
+    if (
+      (metadata.groupingsDown?.length ?? 0) === 0 &&
+      (metadata.groupingsAcross?.length ?? 0) === 0
+    ) {
+      metadata.reportFormat = "TABULAR";
+    }
     if (!metadata.detailColumns.includes(column)) metadata.detailColumns.push(column);
   }
   return resolved;
@@ -259,6 +273,8 @@ export async function collectReportRows(sessionId, definition, startDate, endDat
         typeof result.hasExceededTabularRowLimit !== "boolean") ||
       result.reportMetadata.reportFormat !== requested.reportFormat ||
       !isDeepStrictEqual(result.reportMetadata.detailColumns, requested.detailColumns) ||
+      !isDeepStrictEqual(result.reportMetadata.groupingsDown, requested.groupingsDown) ||
+      !isDeepStrictEqual(result.reportMetadata.groupingsAcross, requested.groupingsAcross) ||
       (range &&
         !isDeepStrictEqual(result.reportMetadata.standardDateFilter, requested.standardDateFilter))
     )

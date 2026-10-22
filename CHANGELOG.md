@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-22 - Coleta do gerente agrupado no relatório de corretores
+
+- Trata `Gerente de Vendas: Nome completo` como agrupamento do relatório de
+  corretores e o projeta como detalhe somente na instância temporária da coleta.
+- Preserva os demais agrupamentos e o relatório salvo no Salesforce, mantendo a
+  validação estrita do rótulo e da chave em cada atualização.
+
 ## 2026-10-21 - Totais separados e visão Geral da Previsão
 
 - Separa o total de cada linha e do rodapé entre Previsão e Realizado.
