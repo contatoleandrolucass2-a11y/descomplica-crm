@@ -43,7 +43,7 @@ const APPOINTMENT_OPERATION_COLUMNS = {
   "Activity.Account.Ranking__c": "Conta: Ranking",
 };
 const BROKER_MANAGER_COLUMN = {
-  "Contact.Gerente_de_Vendas__c.Name": "Gerente de Vendas: Nome completo",
+  "Account.Comissionado_generico_3__c.Name": "Gerente de Vendas: Nome completo",
 };
 
 function metadataFor(definition) {
@@ -263,7 +263,7 @@ test("appointment development metadata is checked each cycle and never substitut
 });
 
 test("broker manager label is verified and projected on every broker collection", async () => {
-  const column = "Contact.Gerente_de_Vendas__c.Name";
+  const column = "Account.Comissionado_generico_3__c.Name";
   const fixture = client({
     resultFor: (definition, metadata) => {
       const result = complete(definition, metadata);
