@@ -33,8 +33,8 @@ const STATES = {
     icon: CircleHelp,
   },
   connected: {
-    label: "Sessão conectada",
-    note: "Sessão da conta de anúncios confirmada no navegador dedicado da VPS.",
+    label: "Conectado",
+    note: "Acesso somente leitura à conta de anúncios confirmado.",
     icon: CircleCheck,
   },
   reauth_required: {
@@ -128,7 +128,7 @@ export function MetaAdsServiceCard({ snapshot }: { snapshot: MetaAdsConnectionSn
         />
       </div>
       <h3>Meta Ads · Facebook Ads</h3>
-      <p>Conexão com a conta de anúncios no Gerenciador de Anúncios.</p>
+      <p>Conexão oficial somente leitura com a conta de anúncios.</p>
       <div className={styles.serviceHealth} aria-live="polite">
         <MetaAdsState snapshot={snapshot} />
         <small>
@@ -160,7 +160,7 @@ export function MetaAdsStatusDetails({
       <header className={styles.salesforceDetailsHeading}>
         <div>
           <h2 id="meta-ads-details-title">Meta Ads e conta de anúncios</h2>
-          <p>Sessão dedicada na VPS para o Gerenciador de Anúncios do Facebook.</p>
+          <p>API oficial da Meta com permissão exclusiva de leitura de anúncios.</p>
         </div>
         <div role="status" aria-live="polite">
           <MetaAdsState snapshot={snapshot} />
@@ -169,9 +169,7 @@ export function MetaAdsStatusDetails({
       <div className={styles.connection}>
         <div className={styles.connectionCopy}>
           <p>{STATES[snapshot.state].note}</p>
-          <span className={styles.muted}>
-            Login, MFA e verificações são concluídos pelo operador.
-          </span>
+          <span className={styles.muted}>O CRM não publica, edita, pausa nem remove anúncios.</span>
         </div>
       </div>
       <dl className={styles.metrics}>
@@ -184,14 +182,14 @@ export function MetaAdsStatusDetails({
           <dd>{META_ADS_BUSINESS_ID}</dd>
         </div>
         <div>
-          <dt>Última verificação da sessão</dt>
+          <dt>Última verificação</dt>
           <dd>
             <Timestamp value={snapshot.checkedAt} />
           </dd>
         </div>
         <div>
           <dt>Coleta de métricas</dt>
-          <dd>Não configurada</dd>
+          <dd>{snapshot.state === "connected" ? "Ativa · somente leitura" : "Indisponível"}</dd>
         </div>
       </dl>
       <div className={styles.metaActions}>
@@ -224,8 +222,8 @@ export function MetaAdsStatusDetails({
       </div>
       <footer className={styles.footer}>
         <span>
-          A conexão confirma apenas a sessão. A coleta de métricas e sua página no CRM serão
-          configuradas em uma próxima etapa.
+          A integração consulta desempenho e estrutura das campanhas. Nenhuma operação de escrita é
+          executada no Gerenciador de Anúncios.
         </span>
       </footer>
     </section>

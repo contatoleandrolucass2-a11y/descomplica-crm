@@ -91,6 +91,18 @@ describe("dashboard Meta Ads", () => {
     expect(document).toContain('id="alerts-button"');
   });
 
+  it("carrega a fonte oficial sem substituir falhas por demonstracao", async () => {
+    const application = await readFile(
+      new URL("../public/descomplica-ads/app.mjs", import.meta.url),
+      "utf8",
+    );
+    expect(application).toContain("fetch('/api/meta-ads/data'");
+    expect(application).toContain("sourceKind='api'");
+    expect(application).toContain("Nenhum dado de demonstração foi exibido");
+    expect(application).toContain("Meta API · somente leitura");
+    expect(application).not.toContain("let isDemo=!imported");
+  });
+
   it("le o documento por caminho textual compativel com o runtime empacotado", async () => {
     const pageSource = await readFile(
       new URL("../app/(protected)/app/meta-ads/MetaAdsPage.tsx", import.meta.url),

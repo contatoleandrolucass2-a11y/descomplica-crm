@@ -1,5 +1,18 @@
 # Réplica local do dashboard Meta Ads — 2026-10-20
 
+## Migração para API oficial em 21/10/2026
+
+O estado descrito abaixo é histórico. O painel agora consulta a Meta Marketing
+API `v26.0` exclusivamente no servidor, com a permissão `ads_read`, conta
+`1080988750909489` e token de usuário de sistema mantido fora do Git. A fonte
+real é carregada por `/api/meta-ads/data`; indisponibilidade não ativa dados
+fictícios automaticamente.
+
+A leitura cobre insights diários no nível anúncio e metadados de status. O CRM
+não chama endpoints de criação, atualização ou exclusão. A atribuição Meta foi
+mantida como configuração unificada do conjunto de anúncios e o painel não
+concilia dados com Salesforce neste incremento.
+
 ## Correção de navegação em 21/10/2026
 
 O documento embutido recebe a visão em `data-crm-view`, sem navegação relativa

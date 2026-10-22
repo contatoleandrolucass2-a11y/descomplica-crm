@@ -64,6 +64,51 @@ const html = `<!doctype html><html data-theme="dark"><head>${css
   .join(
     "",
   )}</head><body><div id="root"></div><script type="module" src="/${script}"></script></body></html>`;
+const apiFixture = JSON.stringify({
+  source: "meta_marketing_api",
+  accountId: "1080988750909489",
+  accountName: "Conta Meta QA",
+  currency: "BRL",
+  fetchedAt: "2026-10-21T12:00:00.000Z",
+  range: { start: "2026-06-24", end: "2026-10-21" },
+  rows: [
+    {
+      rowId: "2026-10-20|1080988750909489|11|22|33",
+      date: "2026-10-20",
+      accountId: "1080988750909489",
+      account: "Conta Meta QA",
+      campaignId: "11",
+      campaign: "Empreendimento QA | WhatsApp",
+      adsetId: "22",
+      adset: "Público QA",
+      adId: "33",
+      ad: "Criativo QA",
+      project: "Empreendimento QA",
+      destination: "whatsapp",
+      status: "active",
+      event: "conversation",
+      attribution: "Configuração unificada do conjunto de anúncios",
+      spend: 100,
+      conversions: 5,
+      clicks: 20,
+      impressions: 1000,
+      reach: 700,
+      formOpens: null,
+      sessions: null,
+      convertedSessions: null,
+      waClicks: 20,
+      messageClicks: 5,
+      crmContacts: null,
+      qualifiedLeads: null,
+      sales: null,
+      cohortMature: false,
+      crmDeduplicated: false,
+      qualityRanking: null,
+      engagementRanking: null,
+      conversionRanking: null,
+    },
+  ],
+});
 for (const name of await readdir(path.join(root, "public/descomplica-ads"))) {
   files.set(
     `/descomplica-ads/${name}`,
@@ -81,12 +126,19 @@ const mime = {
 const server = createServer((request, response) => {
   const pathname = new URL(request.url, "http://127.0.0.1").pathname;
   for (const [name, value] of headers) response.setHeader(name, value);
-  const body = pathname === "/app/meta-ads" ? html : files.get(pathname);
+  const body =
+    pathname === "/app/meta-ads"
+      ? html
+      : pathname === "/api/meta-ads/data"
+        ? apiFixture
+        : files.get(pathname);
   response.writeHead(body === undefined ? 404 : 200, {
     "Content-Type":
       pathname === "/app/meta-ads"
         ? "text/html"
-        : mime[path.extname(pathname)] || "application/octet-stream",
+        : pathname === "/api/meta-ads/data"
+          ? "application/json"
+          : mime[path.extname(pathname)] || "application/octet-stream",
   });
   response.end(body ?? "Not found");
 });
@@ -120,6 +172,7 @@ try {
   };
   async function check(view) {
     await expect(frame.locator("#page-title")).toHaveText(titles[view]);
+    await expect(frame.locator("#data-badge")).toContainText("Meta API · somente leitura");
     assert.equal(page.frames()[1].url(), "about:srcdoc");
     await expect(frame.locator("html")).toHaveAttribute("data-crm-view", view);
   }

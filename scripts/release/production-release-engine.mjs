@@ -51,12 +51,16 @@ export async function executeRelease(options, io) {
     fail("Qlik ranking requires an explicit enable request.");
   if (options.metaAds !== undefined && options.metaAds !== true)
     fail("Meta Ads requires an explicit enable request.");
+  if (options.metaAdsApi !== undefined && options.metaAdsApi !== true)
+    fail("Meta Ads API requires an explicit enable request.");
   if (
-    [options.salesforceIngestion, options.qlikRanking, options.metaAds].filter(Boolean).length > 1
+    [options.salesforceIngestion, options.qlikRanking, options.metaAds, options.metaAdsApi].filter(
+      Boolean,
+    ).length > 1
   )
     fail("Integration configurations require separate releases.");
   const configurationRequested =
-    options.salesforceIngestion || options.qlikRanking || options.metaAds;
+    options.salesforceIngestion || options.qlikRanking || options.metaAds || options.metaAdsApi;
   const releaseOptions = {
     operation: options.operation,
     expectedDeploymentId: options.expectedDeploymentId,
@@ -67,6 +71,7 @@ export async function executeRelease(options, io) {
     ...(options.salesforceIngestion ? { salesforceIngestion: true } : {}),
     ...(options.qlikRanking ? { qlikRanking: true } : {}),
     ...(options.metaAds ? { metaAds: true } : {}),
+    ...(options.metaAdsApi ? { metaAdsApi: true } : {}),
   };
   const { operation, expectedDeploymentId, expectedSha, targetSha, targetImageId, ciRunId } =
     releaseOptions;

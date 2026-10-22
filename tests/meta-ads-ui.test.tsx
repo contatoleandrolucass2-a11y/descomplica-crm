@@ -13,7 +13,7 @@ import {
 } from "@/lib/crm/meta-ads/connection-contract";
 
 describe("Meta Ads integration presentation", () => {
-  it("distinguishes a connected account session from metric collection", () => {
+  it("presents the official read-only connection and metric collection", () => {
     const markup = renderToStaticMarkup(
       <MetaAdsStatusDetails
         snapshot={{
@@ -27,9 +27,10 @@ describe("Meta Ads integration presentation", () => {
         onVerify={() => {}}
       />,
     );
-    expect(markup).toContain("Sessão conectada");
+    expect(markup).toContain("Conectado");
     expect(markup).toContain("Coleta de métricas");
-    expect(markup).toContain("Não configurada");
+    expect(markup).toContain("Ativa · somente leitura");
+    expect(markup).toContain("não publica, edita, pausa nem remove anúncios");
     expect(markup).toContain("1080988750909489");
     expect(markup).toContain("310106776631136");
     expect(markup).toContain(META_ADS_MANAGER_URL.replaceAll("&", "&amp;"));
