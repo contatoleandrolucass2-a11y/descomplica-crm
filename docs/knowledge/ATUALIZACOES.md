@@ -20,7 +20,20 @@
   um timeout concorrente do simulador associativo, cujo arquivo aprovou 13/13
   isoladamente. Os testes Node e de release preservaram falhas locais de
   permissoes POSIX e arquivos privados no Windows, fora deste diff. A CI Ubuntu,
-  merge e publicacao continuam como etapas separadas a registrar no encerramento.
+  merge e publicacao foram comprovados no encerramento.
+- O PR #303 teve a CI `39781264990` aprovada e foi integrado no SHA de `main`
+  `877966a71d28923f82258f6f053990844a7c6f35`. A CI de `main` `39787672222`
+  concluiu com sucesso, inclusive o artefato promocional. O arquivo do artefato
+  teve SHA-256 `f538673e2990ac85e9f540b76bc3998af538ed26b522a849ff49cad227a0ec76`;
+  a imagem foi comprovada nos perfis de homologacao e producao pelo manifest
+  `sha256:af4041db9035a707e09289ab69cfd6a6070dc6e35aaa0b07dea0cd2db1784fdf`.
+- O coordenador protegido publicou o SHA exato no deployment
+  `17ecee4a-16cf-4753-871f-9d506b40e7b6`, registrado em
+  `2026-10-22T14:38:30.076Z`. A verificacao posterior confirmou o container em
+  execucao e o health publico HTTP 200, `status=ok`,
+  `version=877966a71d28923f82258f6f053990844a7c6f35`. A pagina anonima
+  redirecionou para `/login` e a API anonima respondeu HTTP 401. Nenhuma
+  migration ou mutacao direta de dados foi necessaria nesta correcao.
 
 ## 2026-10-21: abertura dos filtros e indicadores de Agendamentos
 
