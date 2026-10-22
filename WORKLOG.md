@@ -30,6 +30,21 @@ Validação focal: 36 testes Vitest e 52 testes Node passaram; lint e typecheck
 também passaram. A suíte integral, build, CI Linux, imagem imutável, promoção
 coordenada e prova autenticada de produção permanecem gates separados.
 
+## 2026-10-21 - Totais separados e compilação Geral da Previsão
+
+A tabela da Previsão agora exibe o grupo Total com duas métricas independentes:
+Previsão e Realizado. O cálculo usa centavos inteiros e mantém o travessão para
+totais afetados por dados antigos inválidos, sem converter falha em zero.
+
+A visão Geral foi reduzida a uma única tabela somente leitura. A primeira coluna
+é `Equipe Origem`, com as linhas House e Imob; cada célula soma os documentos dos
+gerentes da origem por título normalizado do empreendimento. IDs internos não
+são usados para conciliar documentos diferentes. O rodapé consolida as duas
+origens e mantém Previsão e Realizado separados.
+
+Não houve mudança de API, banco, RLS, permissão ou migration. A API vigente já
+fornece as doze seções autorizadas do período para a visão Geral.
+
 ## 2026-10-21 - Filtros, produtividade e conversões de Agendamentos
 
 O painel de Agendamentos recebeu os quatro filtros do Dashboard Geral: Canal de

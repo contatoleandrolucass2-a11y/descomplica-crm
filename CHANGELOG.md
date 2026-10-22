@@ -11,6 +11,14 @@
 - Acrescenta ativação protegida `--meta-ads-api enable`, segredo privado,
   backup integral, CAS, rollback e verificação por hash no coordenador de deploy.
 
+## 2026-10-21 - Totais separados e visão Geral da Previsão
+
+- Separa o total de cada linha e do rodapé entre Previsão e Realizado.
+- Compila a visão Geral em uma tabela somente leitura com as linhas House e
+  Imob, somando cada empreendimento entre os gerentes da respectiva origem.
+- Preserva a ordem dos empreendimentos, a coluna inicial congelada, a rolagem
+  horizontal e a indicação de totais indisponíveis quando existe valor inválido.
+
 ## 2026-10-21 - Fonte vigente do gerente dos corretores
 
 - Corrige a chave Salesforce associada ao rótulo
