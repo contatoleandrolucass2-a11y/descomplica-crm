@@ -5,6 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import styles from "./MetaAdsDashboardFrame.module.css";
 
 const MINIMUM_FRAME_HEIGHT = 760;
+const OPEN_ALERTS_EVENT = "descomplica:meta-ads-open-alerts";
+const OPEN_ALERTS_AFTER_NAVIGATION_KEY = "descomplica-meta-ads-open-alerts";
 
 export function getVisibleFrameViewport(
   frame: Pick<DOMRect, "height" | "top">,
@@ -79,6 +81,20 @@ export function MetaAdsDashboardFrame({
       syncVisibleViewport();
     }
 
+    function openAlerts() {
+      iframe.contentWindow?.postMessage({ type: OPEN_ALERTS_EVENT }, "*");
+    }
+
+    function openRequestedAlerts() {
+      try {
+        if (window.sessionStorage.getItem(OPEN_ALERTS_AFTER_NAVIGATION_KEY) !== "1") return;
+        window.sessionStorage.removeItem(OPEN_ALERTS_AFTER_NAVIGATION_KEY);
+      } catch {
+        return;
+      }
+      openAlerts();
+    }
+
     function syncTheme() {
       const frameDocument = iframe.contentDocument;
       if (!frameDocument) return;
@@ -110,12 +126,14 @@ export function MetaAdsDashboardFrame({
       syncTheme();
       measure();
       syncVisibleViewport();
+      openRequestedAlerts();
     }
 
     iframe.addEventListener("load", observeDocument);
     document.addEventListener("scroll", scheduleViewportSync, true);
     window.addEventListener("resize", scheduleViewportSync);
     window.addEventListener("message", handleFrameMessage);
+    window.addEventListener(OPEN_ALERTS_EVENT, openAlerts);
     window.visualViewport?.addEventListener("resize", scheduleViewportSync);
     window.visualViewport?.addEventListener("scroll", scheduleViewportSync);
     themeObserver = new MutationObserver(syncTheme);
@@ -130,6 +148,7 @@ export function MetaAdsDashboardFrame({
       document.removeEventListener("scroll", scheduleViewportSync, true);
       window.removeEventListener("resize", scheduleViewportSync);
       window.removeEventListener("message", handleFrameMessage);
+      window.removeEventListener(OPEN_ALERTS_EVENT, openAlerts);
       window.visualViewport?.removeEventListener("resize", scheduleViewportSync);
       window.visualViewport?.removeEventListener("scroll", scheduleViewportSync);
       cancelAnimationFrame(viewportFrame);

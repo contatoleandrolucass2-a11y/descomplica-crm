@@ -31,12 +31,18 @@ const built = await build({
       enforce: "pre",
       resolveId(id) {
         if (id === entry) return entry;
+        if (id === "next/navigation") return "\0meta-ads-next-navigation";
       },
       load(id) {
+        if (id === "\0meta-ads-next-navigation") {
+          return `export const usePathname = () => "/app/meta-ads";
+            export const useRouter = () => ({ push() {} });`;
+        }
         if (id !== entry) return;
         return `
         import {useState} from "react";
         import {createRoot} from "react-dom/client";
+        import {MetaAdsAlertButton} from "@/app/(protected)/_components/MetaAdsAlertButton";
         import {MetaAdsDashboardFrame} from "@/app/(protected)/app/meta-ads/MetaAdsDashboardFrame";
         const views = ["overview", "campaigns", "accounts", "reports"];
         function App() {
@@ -44,6 +50,7 @@ const built = await build({
           return <><nav aria-label="Fixture Meta Ads">
             {views.map(value => <button key={value} onClick={() => setView(value)}>{value}</button>)}
             <button onClick={() => {document.documentElement.dataset.theme="balanced"}}>theme</button>
+            <MetaAdsAlertButton />
           </nav><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></>;
         }
         createRoot(document.getElementById("root")).render(<App/>);
@@ -223,8 +230,18 @@ try {
   }
   await page.getByRole("button", { name: "overview", exact: true }).click();
   await check("overview");
+  await page.frames()[1].evaluate(() => {
+    window.parent.postMessage(
+      { type: "descomplica:meta-ads-alert-state", count: 2, severity: "danger" },
+      "*",
+    );
+  });
+  await expect(page.locator("[data-meta-ads-alert-button]")).toHaveAttribute(
+    "aria-label",
+    "Alertas do Meta Ads: 2 não lidos",
+  );
   await checkModal("Central de alertas", () =>
-    frame.getByRole("button", { name: /Ver alertas/ }).click(),
+    page.getByRole("button", { name: "Alertas do Meta Ads: 2 não lidos" }).click(),
   );
   await checkModal("Importar mídia e resultados", () =>
     frame.getByRole("button", { name: "Importar dados" }).click(),

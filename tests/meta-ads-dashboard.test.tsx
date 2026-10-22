@@ -89,7 +89,8 @@ describe("dashboard Meta Ads", () => {
     expect(document).toContain('src="/descomplica-ads/app.mjs"');
     expect(document).not.toContain('aria-label="Visões do dashboard Meta Ads"');
     expect(document).not.toContain("data-nav=");
-    expect(document).toContain('id="alerts-button"');
+    expect(document).not.toContain('id="alerts-button"');
+    expect(document).not.toContain('class="dashboard-toolbar"');
   });
 
   it("carrega a fonte oficial sem substituir falhas por demonstracao", async () => {
@@ -158,7 +159,21 @@ describe("dashboard Meta Ads", () => {
     expect(dashboardStyles).toContain("height: var(--crm-visible-frame-height, 100dvh)");
     expect(dashboardStyles).toContain("overflow-y: auto");
     expect(frameSource).toContain('event.data?.type !== "descomplica:meta-ads-modal-open"');
+    expect(frameSource).toContain("window.addEventListener(OPEN_ALERTS_EVENT, openAlerts)");
     expect(modalSource).toContain("postMessage({type:'descomplica:meta-ads-modal-open'},'*')");
+  });
+
+  it("leva o estado dos alertas ao sino global e aceita apenas a abertura pedida pelo pai", async () => {
+    const application = await readFile(
+      new URL("../public/descomplica-ads/app.mjs", import.meta.url),
+      "utf8",
+    );
+
+    expect(application).toContain("type:'descomplica:meta-ads-alert-state'");
+    expect(application).toContain(
+      "event.source===window.parent&&event.data?.type==='descomplica:meta-ads-open-alerts'",
+    );
+    expect(application).not.toContain("$('#alerts-button').addEventListener");
   });
 
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {

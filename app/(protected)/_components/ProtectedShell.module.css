@@ -389,6 +389,62 @@
   min-width: 0;
   align-items: center;
   justify-content: flex-end;
+  gap: 4px;
+}
+
+.metaAdsAlertButton {
+  position: relative;
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  place-items: center;
+  box-sizing: border-box;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--header-muted);
+  cursor: pointer;
+}
+
+.metaAdsAlertButton:hover {
+  background: var(--header-hover);
+  color: var(--header-text);
+}
+
+.metaAdsAlertButton[data-severity="danger"] {
+  color: #d84b61;
+}
+
+.metaAdsAlertButton[data-severity="warning"] {
+  color: #b56a00;
+}
+
+:global(:root[data-theme="dark"]) .metaAdsAlertButton[data-severity="danger"] {
+  color: #ff9caf;
+}
+
+:global(:root[data-theme="dark"]) .metaAdsAlertButton[data-severity="warning"] {
+  color: #ffc26f;
+}
+
+.metaAdsAlertCount {
+  position: absolute;
+  top: 1px;
+  right: 0;
+  display: grid;
+  min-width: 17px;
+  height: 17px;
+  place-items: center;
+  box-sizing: border-box;
+  border: 2px solid var(--header-bg);
+  border-radius: 999px;
+  background: #d84b61;
+  padding-inline: 3px;
+  color: #ffffff;
+  font-size: 8px;
+  font-weight: 800;
+  line-height: 1;
 }
 
 .accountMenu {
@@ -794,7 +850,7 @@
 
 @media (max-width: 1180px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px auto 44px;
+    grid-template-columns: minmax(0, 1fr) 44px auto auto;
     gap: 12px;
     padding-inline: 20px;
   }
@@ -942,15 +998,15 @@
 
 @media (max-width: 600px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px 44px 44px;
-    gap: 5px;
+    grid-template-columns: minmax(0, 1fr) 44px 88px 44px;
+    gap: 3px;
     padding-inline: 12px;
   }
 
   .brandMark {
-    width: 140px;
-    height: 25px;
-    flex-basis: 140px;
+    width: 110px;
+    height: 20px;
+    flex-basis: 110px;
   }
 
   .navigationRoot {
@@ -967,6 +1023,10 @@
   .accountTrigger {
     max-width: 44px;
     padding: 4px;
+  }
+
+  .actions {
+    gap: 0;
   }
 
   .accountChevron {
@@ -1031,7 +1091,7 @@
 
 @media (max-width: 340px) {
   .topbarInner {
-    grid-template-columns: minmax(0, 1fr) 44px 44px 44px;
+    grid-template-columns: minmax(0, 1fr) 44px 88px 44px;
     gap: 2px;
     padding-inline: 4px;
   }
@@ -1055,9 +1115,9 @@
   }
 
   .brandMark {
-    width: 118px;
-    height: 21px;
-    flex-basis: 118px;
+    width: 110px;
+    height: 20px;
+    flex-basis: 110px;
   }
 }
 

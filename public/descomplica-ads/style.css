@@ -119,15 +119,6 @@ html[data-theme=medium]{--red:#ff9ba5;--red-bg:#513544;--red-border:#8f5b68}
 @media print{.comparison-toolbar,.comparison-actions{display:none!important}.comparison-chart-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.comparison-panel{background:#fff!important;border-color:#ccd8e0!important;break-inside:avoid}.comparison-svg{min-width:0;min-height:0}.comparison-svg-scroll{overflow:visible}.comparison-campaign,.comparison-chart-head h3{color:#10273a!important}.comparison-section{break-before:page}}
 @media print{.topbar,.heading-actions,.filter-bar,.footer,.modal-backdrop,.toast,.table-tools,.insights-strip,.panel-link{display:none!important}body{background:#fff;color:#10273a}.main-shell{max-width:none;padding:15px}.panel,.metric-card{background:#fff;border-color:#ccd8e0;break-inside:avoid}h1,h2,.metric-number,td{color:#10273a}.charts-grid{grid-template-columns:2fr 1fr}.metric-top,.panel-head p{color:#567}.badge-demo{color:#765b26}.table-scroll{overflow:visible}th,td{font-size:9px;padding:9px}.chart-wrap{height:190px}}
 
-/* Embedded in the CRM protected shell: one global navbar, local dashboard views only. */
-.dashboard-toolbar{display:flex;align-items:center;justify-content:flex-end;gap:18px;margin-bottom:24px;padding:9px 10px;border:1px solid var(--border);border-radius:10px;background:var(--panel)}
-.dashboard-navigation{height:auto;min-width:0;flex-wrap:wrap}
-.dashboard-navigation .nav-item.active:after{bottom:-9px}
-.dashboard-actions{margin-left:0;gap:10px}
-.dashboard-actions .notification-dot{outline-color:var(--panel)}
-@media(max-width:800px){.dashboard-toolbar{align-items:flex-start;flex-wrap:wrap}.dashboard-navigation{order:0;width:auto;height:auto;margin-top:0;justify-content:flex-start}.dashboard-actions{margin-left:auto}.dashboard-navigation .nav-item.active:after{bottom:-9px}}
-@media(max-width:540px){.dashboard-toolbar{padding:10px}.dashboard-navigation{width:100%;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}.dashboard-navigation .nav-item{justify-content:flex-start}.dashboard-navigation .nav-item[data-nav=accounts] span{font-size:10px}.dashboard-navigation .nav-item[data-nav=accounts] span:after{content:none}.dashboard-actions{width:100%;justify-content:flex-end}.main-shell{padding-top:14px}}
-
 /* CRM design-system alignment. The protected shell owns global navigation and theme selection. */
 :root {
   --bg: #061f35;
@@ -219,68 +210,6 @@ body {
   padding: 28px 24px 0;
 }
 
-.dashboard-toolbar {
-  align-items: center;
-  margin-bottom: 24px;
-  border-color: var(--border);
-  border-radius: 6px;
-  background: var(--panel);
-  box-shadow: none;
-}
-
-.dashboard-navigation {
-  gap: 4px;
-}
-
-.dashboard-navigation .nav-item,
-.dashboard-alert {
-  min-height: 40px;
-  border: 1px solid transparent;
-  border-radius: 4px;
-  padding: 8px 11px;
-  color: var(--muted);
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.dashboard-navigation .nav-item:hover,
-.dashboard-alert:hover {
-  border-color: transparent;
-  background: var(--panel-hover);
-  color: var(--text);
-}
-
-.dashboard-navigation .nav-item.active {
-  border-color: transparent;
-  background: var(--accent-bg);
-  color: var(--accent);
-}
-
-.dashboard-navigation .nav-item.active::after {
-  content: none;
-}
-
-.dashboard-alert {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  background: transparent;
-}
-
-.dashboard-alert .notification-dot {
-  outline-color: var(--panel);
-}
-
-.dashboard-alert .alert-count {
-  position: static;
-  min-width: 19px;
-  height: 19px;
-  border: 0;
-  background: var(--red);
-  color: var(--accent-dark);
-}
-
 .panel,
 .metric-card,
 .filter-bar,
@@ -293,28 +222,11 @@ body {
   .main-shell {
     padding-inline: 16px;
   }
-
-  .dashboard-alert {
-    margin-left: auto;
-  }
 }
 
 @media (max-width: 540px) {
   .main-shell {
     padding-inline: 12px;
-  }
-
-  .dashboard-toolbar {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
-  }
-
-  .dashboard-navigation {
-    grid-column: 1 / -1;
-  }
-
-  .dashboard-alert {
-    grid-column: 2;
   }
 }
 
