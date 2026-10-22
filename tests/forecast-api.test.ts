@@ -24,6 +24,7 @@ const rpcSnapshot = {
   forecasts: [{ segment: "house", manager: "amanda", forecast: record }],
   template: document,
   can_edit: true,
+  can_manage_structure: true,
 };
 const brokerRoster = ["Ana Corretora", "Bruno Corretor"];
 const snapshot = {
@@ -32,6 +33,7 @@ const snapshot = {
   template: null,
   brokers: [],
   can_edit: true,
+  can_manage_structure: true,
   period: { start: "2026-10-16", end: "2026-10-18" },
   selection: { segment: "house", manager: "amanda" },
 };
@@ -90,11 +92,19 @@ describe("shared forecast API", () => {
     expect(mocks.authorize).toHaveBeenNthCalledWith(2, "/app/gestao/previsao");
     expect(mocks.client).not.toHaveBeenCalled();
   });
-  it.each([true, false])(
-    "returns validated shared records and can_edit=%s without cache",
-    async (can_edit) => {
-      mockGet({ ...rpcSnapshot, can_edit });
-      await result(await GET(getRequest()), 200, { ...snapshot, can_edit });
+  it.each([
+    [true, true],
+    [true, false],
+    [false, false],
+  ])(
+    "returns validated capabilities can_edit=%s, can_manage_structure=%s without cache",
+    async (can_edit, can_manage_structure) => {
+      mockGet({ ...rpcSnapshot, can_edit, can_manage_structure });
+      await result(await GET(getRequest()), 200, {
+        ...snapshot,
+        can_edit,
+        can_manage_structure,
+      });
       expect(mocks.rpc).toHaveBeenCalledWith("get_crm_forecast_period", {
         p_weekend_start: "2026-10-16",
         p_segment: "house",
@@ -111,8 +121,23 @@ describe("shared forecast API", () => {
     await result(await PUT(request()), 403, { error: "forbidden" });
     expect(mocks.rpc).not.toHaveBeenCalled();
   });
+  it("allows value-edit permission to reach the structure-protected database RPC", async () => {
+    mocks.authorize.mockResolvedValue({
+      ok: true,
+      context: {
+        permissions: ["crm.management.forecast.view", "crm.management.forecast.values.edit"],
+      },
+    });
+    await result(await PUT(request()), 200, record);
+    expect(mocks.rpc).toHaveBeenCalledWith("save_crm_forecast_period", expect.anything());
+  });
   it("accepts an empty database without inventing a saved default", async () => {
-    mockGet({ forecasts: [], template: document, can_edit: true });
+    mockGet({
+      forecasts: [],
+      template: document,
+      can_edit: true,
+      can_manage_structure: true,
+    });
     const template = structuredClone(document);
     template.rows = brokerRoster.map((broker, index) => ({
       id: `broker_${index + 1}`,
@@ -140,6 +165,7 @@ describe("shared forecast API", () => {
       ],
       template: document,
       can_edit: true,
+      can_manage_structure: true,
     });
     await result(await GET(getRequest("date=2026-10-17&segment=general")), 200, {
       forecast: null,
@@ -150,12 +176,18 @@ describe("shared forecast API", () => {
       template: null,
       brokers: [],
       can_edit: false,
+      can_manage_structure: false,
       period: { start: "2026-10-16", end: "2026-10-18" },
       selection: { segment: "general", manager: null },
     });
   });
   it("returns the latest clean template when General has no saved period", async () => {
-    mockGet({ forecasts: [], template: document, can_edit: true });
+    mockGet({
+      forecasts: [],
+      template: document,
+      can_edit: true,
+      can_manage_structure: true,
+    });
     const template = createForecastTemplate(document);
     await result(await GET(getRequest("date=2026-10-17&segment=general")), 200, {
       forecast: null,
@@ -163,6 +195,7 @@ describe("shared forecast API", () => {
       template,
       brokers: [],
       can_edit: false,
+      can_manage_structure: false,
       period: { start: "2026-10-16", end: "2026-10-18" },
       selection: { segment: "general", manager: null },
     });
@@ -178,11 +211,17 @@ describe("shared forecast API", () => {
   it.each([
     null,
     {},
-    { forecasts: [record, record], template: null, can_edit: true },
+    {
+      forecasts: [record, record],
+      template: null,
+      can_edit: true,
+      can_manage_structure: true,
+    },
     {
       forecasts: [{ segment: "house", manager: "amanda", forecast: { ...record, revision: 0 } }],
       template: null,
       can_edit: true,
+      can_manage_structure: true,
     },
   ])("fails closed for malformed GET data: %j", async (data) => {
     mockGet(data);

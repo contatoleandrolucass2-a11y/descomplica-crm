@@ -12,6 +12,8 @@ const BASE_NAVIGATION_PERMISSIONS = [
   "crm.stage.sales.view",
   "crm.management.view",
   "crm.management.routine.view",
+  "crm.management.forecast.view",
+  "crm.management.forecast.values.edit",
 ] as const satisfies readonly PermissionKey[];
 
 export const SIMULATOR_ACCESS_PERMISSIONS = [

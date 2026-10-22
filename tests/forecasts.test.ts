@@ -78,6 +78,7 @@ describe("manual forecast contract", () => {
         sections: [],
         template: null,
         can_edit: false,
+        can_manage_structure: false,
         period: { start: "2026-10-16", end: "2026-10-18" },
         selection: { segment: "general", manager: null },
       }).forecast,
@@ -163,6 +164,7 @@ describe("manual forecast contract", () => {
         sections: [{ segment: "house", manager: "alvaro", forecast }],
         template: null,
         can_edit: false,
+        can_manage_structure: false,
         period: { start: "2026-10-16", end: "2026-10-18" },
         selection: { segment: "general", manager: null },
       }).success,
@@ -236,6 +238,7 @@ describe("manual forecast contract", () => {
       template: null,
       brokers: [],
       can_edit: false,
+      can_manage_structure: false,
       period: { start: "2026-10-16", end: "2026-10-18" },
       selection: { segment: "general", manager: null },
     };

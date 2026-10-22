@@ -159,6 +159,7 @@ export function ForecastSettings() {
   const [revision, setRevision] = useState(0);
   const [loaded, setLoaded] = useState(false);
   const [canEdit, setCanEdit] = useState(false);
+  const [canManageStructure, setCanManageStructure] = useState(false);
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
   const [conflict, setConflict] = useState(false);
@@ -193,6 +194,7 @@ export function ForecastSettings() {
   const [calendarYear, setCalendarYear] = useState(() => today.getFullYear());
   const dirty = JSON.stringify(document) !== baseline;
   const editable = loaded && canEdit && segment !== "general" && !saving && !loading;
+  const structureEditable = editable && canManageStructure;
   const groups = getForecastGroups(document);
   const totals = getForecastTotals(document);
   const invalidCells = getForecastInvalidCells(document);
@@ -242,6 +244,7 @@ export function ForecastSettings() {
         setBaseline(JSON.stringify(snapshot.forecast && snapshot.can_edit ? original : next));
         setRevision(snapshot.forecast?.revision ?? 0);
         setCanEdit(snapshot.can_edit);
+        setCanManageStructure(snapshot.can_manage_structure);
         setSections(snapshot.sections);
         setGeneralTemplate(segment === "general" ? snapshot.template : null);
         setLoaded(true);
@@ -446,7 +449,7 @@ export function ForecastSettings() {
   }
 
   function addRow() {
-    if (!editable || document.rows.length >= 200) return;
+    if (!structureEditable || document.rows.length >= 200) return;
     const row = {
       id: crypto.randomUUID(),
       cells: Object.fromEntries(document.columns.map((column) => [column.id, ""])),
@@ -456,13 +459,13 @@ export function ForecastSettings() {
   }
 
   function addColumn() {
-    if (!editable || groups.length >= FORECAST_MAX_GROUPS) return;
+    if (!structureEditable || groups.length >= FORECAST_MAX_GROUPS) return;
     change(addForecastGroup(document));
     focusField(`Nome do empreendimento ${groups.length + 1}`);
   }
 
   function removeRow(index: number) {
-    if (!editable) return;
+    if (!structureEditable) return;
     if (
       Object.values(document.rows[index]!.cells).some((cell) => cell.trim()) &&
       !window.confirm(
@@ -480,7 +483,7 @@ export function ForecastSettings() {
   }
 
   function removeGroup(group: ForecastGroup) {
-    if (!editable) return;
+    if (!structureEditable) return;
     if (
       document.rows.some(
         (row) => row.cells[group.forecastId]?.trim() || row.cells[group.actualId]?.trim(),
@@ -497,14 +500,14 @@ export function ForecastSettings() {
   }
 
   function moveGroup(groupId: string, targetIndex: number) {
-    if (!editable || targetIndex < 0 || targetIndex >= groups.length) return;
+    if (!structureEditable || targetIndex < 0 || targetIndex >= groups.length) return;
     change(moveForecastGroup(document, groupId, targetIndex));
     focusField(`Nome do empreendimento ${targetIndex + 1}`);
     setNotice(`Empreendimento movido para a posição ${targetIndex + 1}. Alterações não salvas.`);
   }
 
   function changeCell(rowId: string, columnId: string, value: string) {
-    if (!editable) return;
+    if (!editable || (columnId === "broker" && !canManageStructure)) return;
     if (
       columnId !== "broker" &&
       columnId !== ACTION_PLAN_COLUMN_ID &&
@@ -610,22 +613,26 @@ export function ForecastSettings() {
           <header className={styles.header}>
             <h1>{periodTitle}</h1>
             <div className={styles.actions}>
-              <button
-                type="button"
-                data-add-row
-                disabled={!editable || document.rows.length >= 200}
-                onClick={addRow}
-              >
-                <Plus size={16} aria-hidden="true" /> Inserir linha
-              </button>
-              <button
-                type="button"
-                data-add-group
-                disabled={!editable || groups.length >= FORECAST_MAX_GROUPS}
-                onClick={addColumn}
-              >
-                <Plus size={16} aria-hidden="true" /> Inserir coluna
-              </button>
+              {(!loaded || canManageStructure) && (
+                <>
+                  <button
+                    type="button"
+                    data-add-row
+                    disabled={!structureEditable || document.rows.length >= 200}
+                    onClick={addRow}
+                  >
+                    <Plus size={16} aria-hidden="true" /> Inserir linha
+                  </button>
+                  <button
+                    type="button"
+                    data-add-group
+                    disabled={!structureEditable || groups.length >= FORECAST_MAX_GROUPS}
+                    onClick={addColumn}
+                  >
+                    <Plus size={16} aria-hidden="true" /> Inserir coluna
+                  </button>
+                </>
+              )}
               <button ref={calendarButton} type="button" onClick={openCalendar}>
                 <CalendarDays size={16} aria-hidden="true" /> Calendário
               </button>
@@ -687,6 +694,11 @@ export function ForecastSettings() {
           )}
           {loaded && segment !== "general" && !canEdit && (
             <p className={styles.notice}>Você tem acesso somente à leitura desta previsão.</p>
+          )}
+          {loaded && segment !== "general" && canEdit && !canManageStructure && (
+            <p className={styles.notice}>
+              Você pode preencher valores. Linhas, colunas e identificações são protegidas.
+            </p>
           )}
           {error && (
             <div role="alert" className={styles.error}>
@@ -815,14 +827,14 @@ export function ForecastSettings() {
                         <input
                           aria-label={`Nome do corretor, linha ${index + 1}`}
                           maxLength={4000}
-                          readOnly={!editable}
+                          readOnly={!structureEditable}
                           value={row.cells.broker ?? ""}
                           dir="ltr"
                           onChange={(event) => changeCell(row.id, "broker", event.target.value)}
                           onFocus={() => setActiveCell({ rowId: row.id })}
                           onPointerEnter={() => setActiveCell({ rowId: row.id })}
                         />
-                        {canEdit && (
+                        {canManageStructure && (
                           <button
                             type="button"
                             disabled={!editable}
@@ -1121,18 +1133,18 @@ export function ForecastSettings() {
           aria-label={`Nome do empreendimento ${index + 1}`}
           rows={2}
           maxLength={120}
-          readOnly={!editable}
+          readOnly={!structureEditable}
           value={group.label}
           onChange={(event) => change(renameForecastGroup(document, group.id, event.target.value))}
         />
-        {canEdit && (
+        {canManageStructure && (
           <div className={styles.groupActions}>
             <span
               className={styles.dragHandle}
-              draggable={editable}
+              draggable={structureEditable}
               title={`Arrastar ${group.label}`}
               onDragStart={(event) => {
-                if (!editable) {
+                if (!structureEditable) {
                   event.preventDefault();
                   return;
                 }
@@ -1149,7 +1161,7 @@ export function ForecastSettings() {
             <button
               type="button"
               aria-label={`Mover ${group.label} para a esquerda`}
-              disabled={!editable || index === 0}
+              disabled={!structureEditable || index === 0}
               onClick={() => moveGroup(group.id, index - 1)}
             >
               <ArrowLeft size={11} aria-hidden="true" />
@@ -1157,7 +1169,7 @@ export function ForecastSettings() {
             <button
               type="button"
               aria-label={`Mover ${group.label} para a direita`}
-              disabled={!editable || index === groups.length - 1}
+              disabled={!structureEditable || index === groups.length - 1}
               onClick={() => moveGroup(group.id, index + 1)}
             >
               <ArrowRight size={11} aria-hidden="true" />
@@ -1165,7 +1177,7 @@ export function ForecastSettings() {
             <button
               type="button"
               aria-label={`Excluir ${group.label}`}
-              disabled={!editable || groups.length <= 1}
+              disabled={!structureEditable || groups.length <= 1}
               onClick={() => removeGroup(group)}
             >
               <Trash2 size={11} aria-hidden="true" />

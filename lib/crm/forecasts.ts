@@ -152,6 +152,7 @@ export const forecastSnapshotSchema = z
     template: forecastDocumentSchema.nullable(),
     brokers: forecastBrokerListSchema.default([]),
     can_edit: z.boolean(),
+    can_manage_structure: z.boolean(),
     period: z.object({ start: forecastDateSchema, end: forecastDateSchema }).strict(),
     selection: z
       .object({ segment: forecastSegmentSchema, manager: forecastManagerSchema.nullable() })
@@ -179,6 +180,7 @@ export const forecastPeriodRpcSchema = z
     forecasts: z.array(forecastSourceSchema).max(12),
     template: forecastDocumentSchema.nullable(),
     can_edit: z.boolean(),
+    can_manage_structure: z.boolean(),
   })
   .strict();
 

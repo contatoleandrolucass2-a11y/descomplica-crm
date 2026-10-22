@@ -8733,3 +8733,22 @@ A conferência posterior encontrou ledger sem pendência, health HTTP 200/`ok`
 na versão `c50d2070a92d6522e052f955301aa436be22563a` e redirecionamento anônimo
 HTTP 307 da página `/app/gestao/previsao` para `/login`. Esta entrega não
 alterou migrations, dados remotos ou integrações n8n.
+
+## 2026-10-22: Preenchimento restrito da Previsão por perfis comerciais
+
+Demanda: liberar a Previsão para Coordenador, Gerente House, Gerente Imob,
+Corretor House e Corretor Imob preencherem valores, sem permitir inclusão ou
+exclusão de linhas e colunas. A implementação cria a permissão específica
+`crm.management.forecast.values.edit`, concede também a página aos cinco papéis
+e mantém `crm.settings.manage` como capacidade estrutural.
+
+Interface separa `can_edit` de `can_manage_structure`: os perfis comerciais
+editam Previsão, Realizado e Plano de ação; nomes de corretores e empreendimentos
+ficam somente leitura, e controles de inserir, excluir, mover ou renomear não são
+oferecidos. API aceita a nova permissão; banco compara estrutura e identificações
+com o documento salvo ou o modelo inicial antes de aceitar o salvamento. Testes
+focais de modelo/API aprovaram 110 casos e o navegador sintético aprovou 14 casos,
+incluindo o novo perfil restrito. A validação local integral aprovou lint,
+typecheck, build, 4.101 casos Vitest, 727 casos Node e 2.113 asserções pgTAP em
+Supabase isolado, sem falhas. Migration e alteração ainda não foram publicadas;
+nenhum dado remoto ou produção foi alterado nesta etapa.

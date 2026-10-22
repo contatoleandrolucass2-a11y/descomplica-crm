@@ -92,7 +92,7 @@ select set_config('request.jwt.claim.sub','ac710000-0000-4000-8000-000000000008'
 select throws_ok($$select public.get_crm_forecast()$$,'42501','forbidden: actor is not approved','pending account cannot read');
 select throws_ok($$select public.save_crm_forecast(pg_temp.forecast_doc(),0)$$,'42501','forbidden: actor is not approved','pending account cannot save');
 select set_config('request.jwt.claim.sub','ac710000-0000-4000-8000-000000000006',true);
-select throws_ok($$select public.get_crm_forecast()$$,'42501','forbidden: forecast page unavailable','default broker cannot read independent page');
+select is(public.get_crm_forecast()->>'can_edit','false','default broker can read but cannot use the legacy structural editor');
 select set_config('request.jwt.claim.sub','ac710000-0000-4000-8000-000000000002',true);
 select is(public.get_crm_forecast(),'{"forecast":null,"can_edit":true}'::jsonb,'empty snapshot has explicit edit capability');
 select is(public.save_crm_forecast(pg_temp.forecast_doc(),0)->>'revision','1','first save creates singleton');
