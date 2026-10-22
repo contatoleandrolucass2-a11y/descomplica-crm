@@ -68,6 +68,17 @@ export function MetaAdsDashboardFrame({
       viewportFrame = requestAnimationFrame(syncVisibleViewport);
     }
 
+    function handleFrameMessage(event: MessageEvent) {
+      if (
+        event.source !== iframe.contentWindow ||
+        event.origin !== window.location.origin ||
+        event.data?.type !== "descomplica:meta-ads-modal-open"
+      ) {
+        return;
+      }
+      syncVisibleViewport();
+    }
+
     function syncTheme() {
       const frameDocument = iframe.contentDocument;
       if (!frameDocument) return;
@@ -104,6 +115,7 @@ export function MetaAdsDashboardFrame({
     iframe.addEventListener("load", observeDocument);
     document.addEventListener("scroll", scheduleViewportSync, true);
     window.addEventListener("resize", scheduleViewportSync);
+    window.addEventListener("message", handleFrameMessage);
     window.visualViewport?.addEventListener("resize", scheduleViewportSync);
     window.visualViewport?.addEventListener("scroll", scheduleViewportSync);
     themeObserver = new MutationObserver(syncTheme);
@@ -117,6 +129,7 @@ export function MetaAdsDashboardFrame({
       iframe.removeEventListener("load", observeDocument);
       document.removeEventListener("scroll", scheduleViewportSync, true);
       window.removeEventListener("resize", scheduleViewportSync);
+      window.removeEventListener("message", handleFrameMessage);
       window.visualViewport?.removeEventListener("resize", scheduleViewportSync);
       window.visualViewport?.removeEventListener("scroll", scheduleViewportSync);
       cancelAnimationFrame(viewportFrame);

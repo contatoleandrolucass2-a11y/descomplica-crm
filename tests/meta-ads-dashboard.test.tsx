@@ -134,12 +134,13 @@ describe("dashboard Meta Ads", () => {
   });
 
   it("mantem os modais dentro da area visivel do iframe com rolagem interna", async () => {
-    const [frameSource, dashboardStyles] = await Promise.all([
+    const [frameSource, dashboardStyles, modalSource] = await Promise.all([
       readFile(
         new URL("../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.tsx", import.meta.url),
         "utf8",
       ),
       readFile(new URL("../public/descomplica-ads/style.css", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads/ui.mjs", import.meta.url), "utf8"),
     ]);
 
     expect(getVisibleFrameViewport({ height: 2400, top: 300 } as DOMRect, 0, 1000)).toEqual({
@@ -156,6 +157,8 @@ describe("dashboard Meta Ads", () => {
     expect(dashboardStyles).toContain("top: var(--crm-visible-frame-top, 0)");
     expect(dashboardStyles).toContain("height: var(--crm-visible-frame-height, 100dvh)");
     expect(dashboardStyles).toContain("overflow-y: auto");
+    expect(frameSource).toContain('event.data?.type !== "descomplica:meta-ads-modal-open"');
+    expect(modalSource).toContain("postMessage({type:'descomplica:meta-ads-modal-open'},'*')");
   });
 
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {

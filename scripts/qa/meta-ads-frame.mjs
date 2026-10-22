@@ -176,8 +176,7 @@ try {
     assert.equal(page.frames()[1].url(), "about:srcdoc");
     await expect(frame.locator("html")).toHaveAttribute("data-crm-view", view);
   }
-  async function checkModal(title, open) {
-    await open();
+  async function checkOpenModal(title) {
     const dialog = frame.getByRole("dialog", { name: title });
     await expect(dialog).toBeVisible();
 
@@ -202,6 +201,11 @@ try {
       await page.waitForTimeout(250);
       await page.screenshot({ path: process.env.META_ADS_QA_SCREENSHOT });
     }
+    return dialog;
+  }
+  async function checkModal(title, open) {
+    await open();
+    const dialog = await checkOpenModal(title);
     await frame.getByRole("button", { name: "Fechar janela" }).click();
     await expect(dialog).toBeHidden();
   }
@@ -228,10 +232,51 @@ try {
   await checkModal("Metas e alertas", () =>
     frame.getByRole("button", { name: "Metas e alertas" }).click(),
   );
+  await checkModal("Escolher período", () =>
+    frame.locator("#period-filter").selectOption("custom"),
+  );
+  await checkModal("Alcance consolidado do recorte", () =>
+    frame.getByRole("button", { name: /Informar alcance do recorte/ }).click(),
+  );
+  await checkModal("Atribuição", () =>
+    frame.getByRole("button", { name: "Entender Regra de crédito dos resultados" }).click(),
+  );
+
+  await frame.getByRole("button", { name: "Guia de métricas" }).click();
+  const glossaryDialog = await checkOpenModal("Guia de métricas");
+  await glossaryDialog
+    .getByRole("button", { name: /Ver exemplo e interpretação/ })
+    .first()
+    .click();
+  const definitionDialog = await checkOpenModal("Atribuição");
+  await frame.getByRole("button", { name: "Fechar janela" }).click();
+  await expect(definitionDialog).toBeHidden();
+  await expect(glossaryDialog).toBeVisible();
+  await frame.getByRole("button", { name: "Fechar janela" }).click();
+  await expect(glossaryDialog).toBeHidden();
+
+  await frame.locator('button.campaign-name[data-entity="campaign"]').first().click();
+  const entityDialog = await checkOpenModal("Empreendimento QA | WhatsApp");
+  await entityDialog.getByRole("button", { name: /Alterar teto/ }).click();
+  await expect(entityDialog).toBeHidden();
+  await checkOpenModal("Teto específico por resultado");
+  await frame.getByRole("button", { name: "Fechar janela" }).click();
+
   await page.getByRole("button", { name: "campaigns", exact: true }).click();
   await check("campaigns");
   await checkModal("Selecionar campanhas para comparar", () =>
     frame.getByRole("button", { name: /Selecionar campanhas/ }).click(),
+  );
+  await page.getByRole("button", { name: "overview", exact: true }).click();
+  await check("overview");
+  await page.getByRole("button", { name: "accounts", exact: true }).click();
+  await check("accounts");
+  await checkModal("Limite mensal de gasto", () =>
+    frame.getByRole("button", { name: /Limite mensal/ }).click(),
+  );
+  await frame.locator("#connections-button").click();
+  await checkModal("Usar demonstração?", () =>
+    frame.getByRole("button", { name: "Usar demonstração" }).click(),
   );
   await page.getByRole("button", { name: "overview", exact: true }).click();
   await check("overview");
@@ -247,7 +292,7 @@ try {
   assert.deepEqual(forbidden, [], "No external requests or nested document navigation");
   assert.deepEqual(errors, [], "No browser runtime errors");
   console.log(
-    "Meta Ads: four views and four responsive dialogs, cold load, reload, repeated submenu transitions, internal navigation, skip link and theme passed with production security headers.",
+    "Meta Ads: four views and all twelve dialog flows, cold load, reload, repeated submenu transitions, internal navigation, skip link and theme passed with production security headers.",
   );
 } finally {
   await browser?.close();

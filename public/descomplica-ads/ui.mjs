@@ -11,6 +11,7 @@ let toastTimer,lastFocus,stack=[];
 export function notify(message){$('#toast').textContent=message;$('#toast').classList.add('visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('#toast').classList.remove('visible'),4500);}
 export function openModal(title,subtitle,body,footer='',wide=false,nested=false){
   const root=$('#modal-root');
+  window.parent.postMessage({type:'descomplica:meta-ads-modal-open'},'*');
   if(nested&&root.firstElementChild)stack.push({node:root.firstElementChild,focus:document.activeElement});else{stack=[];lastFocus=document.activeElement;}
   root.replaceChildren();
   root.innerHTML=`<div class="modal-backdrop"><section class="modal ${wide?'modal-wide':''}" role="dialog" aria-modal="true" aria-labelledby="modal-title" tabindex="-1"><div class="modal-header"><div><h2 id="modal-title">${title}</h2><p>${subtitle}</p></div><button class="icon-button" data-close-modal aria-label="Fechar janela">${icon('close')}</button></div><div class="modal-body">${body}</div>${footer?`<div class="modal-footer">${footer}</div>`:''}</section></div>`;
