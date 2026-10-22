@@ -670,7 +670,7 @@ describe("legal policy transitions and evidence", () => {
     expect(result.legalPolicyVersion).toBe("sp-capital-2026.1");
     expect(result.legalSources).toEqual(
       expect.arrayContaining([
-        "https://prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2513",
+        "https://www2.prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2513",
         "https://arisp.com.br/wp-content/uploads/2026/01/2.pdf",
       ]),
     );
