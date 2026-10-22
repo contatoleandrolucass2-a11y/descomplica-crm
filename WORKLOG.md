@@ -17,6 +17,17 @@ testes e teve um timeout concorrente fora deste escopo, que aprovou seus 13 caso
 isoladamente. Os testes Node e de release mantiveram falhas locais já conhecidas
 em contratos POSIX/arquivos privados no Windows; a CI Ubuntu permanece o gate.
 
+O PR #303 foi aprovado e integrado no SHA
+`877966a71d28923f82258f6f053990844a7c6f35`. A CI de `main` `39787672222`
+concluiu todos os gates com sucesso e gerou a imagem imutável comprovada pelo
+manifest `sha256:af4041db9035a707e09289ab69cfd6a6070dc6e35aaa0b07dea0cd2db1784fdf`.
+O coordenador protegido publicou essa imagem no deployment
+`17ecee4a-16cf-4753-871f-9d506b40e7b6` em `2026-10-22T14:38:30.076Z`.
+Depois da publicação, o health respondeu HTTP 200, `status=ok`, na versão exata
+do merge; o contêiner permaneceu em execução e os acessos anônimos continuaram
+protegidos por redirecionamento ao login e HTTP 401 na API. Esta correção não
+exigiu migration nem mutação direta de dados.
+
 ## 2026-10-21 - Integração oficial Meta Ads somente leitura
 
 O aplicativo `Descomplica Ads Analytics` foi configurado no portfólio

@@ -6,6 +6,8 @@
   não possui lançamentos, usando somente a estrutura limpa do último modelo salvo.
 - Mantém os empreendimentos mais recentes, os totais zerados e o modo somente
   leitura, sem reaproveitar valores ou planos de ação de períodos anteriores.
+- Publicado em produção no SHA `877966a71d28923f82258f6f053990844a7c6f35`,
+  com CI de `main` aprovada e health alinhado à mesma versão.
 
 ## 2026-10-22 - Publicação dos totais e da visão Geral da Previsão
 
