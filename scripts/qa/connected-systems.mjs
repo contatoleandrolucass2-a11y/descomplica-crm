@@ -730,8 +730,8 @@ async function runSynthetic() {
     const metaDetails = page.locator('[aria-labelledby="meta-ads-details-title"]');
     const metaState = metaDetails.getByRole("status");
     const metaVerify = page.getByRole("button", { name: "Verificar Meta Ads", exact: true });
-    await expect(metaState).toHaveText("Sessão conectada");
-    await expect(metaDetails.getByText("Não configurada", { exact: true })).toBeVisible();
+    await expect(metaState).toHaveText("Conectado");
+    await expect(metaDetails.getByText("Ativa · somente leitura", { exact: true })).toBeVisible();
     await expect(metaDetails.getByText(metaBase.accountId, { exact: true })).toBeVisible();
     await expect(metaDetails.getByText(metaBase.businessId, { exact: true })).toBeVisible();
     const managerUrl = new URL(await metaDetails.getByRole("link").getAttribute("href"));
@@ -753,7 +753,7 @@ async function runSynthetic() {
       await expect(metaState).toHaveText(label);
       await expect(status).toHaveText("Conectado");
       assert.equal(requests, beforeSalesforce, "Meta verification must not query Salesforce");
-      await expect(metaDetails.getByText("Não configurada", { exact: true })).toBeVisible();
+      await expect(metaDetails.getByText("Indisponível", { exact: true })).toBeVisible();
     }
     for (const invalid of [
       { ...metaBase, accountId: "another-account" },
@@ -769,7 +769,7 @@ async function runSynthetic() {
     metaStatusCode = 200;
     metaSnapshot = metaBase;
     await metaVerify.click();
-    await expect(metaState).toHaveText("Sessão conectada");
+    await expect(metaState).toHaveText("Conectado");
     for (const [state, label] of [
       ["reauth_required", "Login necessário"],
       ["unavailable", "Atualização indisponível"],

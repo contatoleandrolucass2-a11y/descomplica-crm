@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-const mocks = vi.hoisted(() => ({ authorize: vi.fn() }));
+const mocks = vi.hoisted(() => ({ authorize: vi.fn(), probeApi: vi.fn() }));
 vi.mock("@/lib/security/route-auth", () => ({ authorizePageRoute: mocks.authorize }));
+vi.mock("@/lib/crm/meta-ads/marketing-api", () => ({ probeMetaAdsApi: mocks.probeApi }));
 import { GET, POST } from "@/app/api/meta-ads/status/route";
 import { getMetaAdsStatusConfiguration } from "@/lib/crm/meta-ads/config";
 import { MetaAdsConnectionState } from "@/lib/crm/meta-ads/connection-state";
@@ -37,7 +38,9 @@ beforeEach(() => {
   secret += "x";
   vi.stubEnv("META_ADS_STATUS_ENABLED", "true");
   vi.stubEnv("META_ADS_STATUS_SECRET", secret);
+  vi.stubEnv("META_ADS_API_ENABLED", "false");
   mocks.authorize.mockResolvedValue({ ok: true, context: {} });
+  mocks.probeApi.mockResolvedValue({ accountName: "Superitendente Leandro", currency: "BRL" });
 });
 afterEach(() => {
   vi.unstubAllEnvs();
@@ -118,6 +121,21 @@ describe("Meta Ads session evidence", () => {
 });
 
 describe("Meta Ads status API", () => {
+  it("reports connected from the official read-only API when it is enabled", async () => {
+    vi.stubEnv("META_ADS_API_ENABLED", "true");
+    vi.stubEnv("META_ADS_ACCESS_TOKEN", "t".repeat(80));
+    vi.stubEnv("META_ADS_ACCOUNT_ID", META_ADS_ACCOUNT_ID);
+    const response = await GET();
+    expect(response.status).toBe(200);
+    expect(mocks.probeApi).toHaveBeenCalledOnce();
+    expect(await response.json()).toMatchObject({
+      state: "connected",
+      accountId: META_ADS_ACCOUNT_ID,
+      businessId: META_ADS_BUSINESS_ID,
+      checkedAt: new Date(now).toISOString(),
+      receivedAt: new Date(now).toISOString(),
+    });
+  });
   it.each([401, 403])("requires management permission for read (%s)", async (status) => {
     mocks.authorize.mockResolvedValue({
       ok: false,

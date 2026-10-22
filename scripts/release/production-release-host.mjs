@@ -29,6 +29,10 @@ import {
   metaAdsContainerDigestScript,
   readMetaAdsReleaseSecrets,
   transformMetaAdsReleaseEnvironment,
+  assertMetaAdsApiContainerDigests,
+  metaAdsApiContainerDigestScript,
+  readMetaAdsApiReleaseToken,
+  transformMetaAdsApiReleaseEnvironment,
 } from "./salesforce-release-environment.mjs";
 
 const exec = promisify(execFile);
@@ -169,6 +173,24 @@ async function assertRuntimeEnvironment(
     }
     assertMetaAdsContainerDigests(contents, metaAdsDigests);
   }
+  if (kind === "meta-ads-api") {
+    let metaAdsApiDigests;
+    try {
+      metaAdsApiDigests = JSON.parse(
+        await docker([
+          "exec",
+          container.containerId,
+          "node",
+          "--input-type=commonjs",
+          "--eval",
+          metaAdsApiContainerDigestScript,
+        ]),
+      );
+    } catch {
+      throw new Error("Effective Meta Ads API configuration is unavailable.");
+    }
+    assertMetaAdsApiContainerDigests(contents, metaAdsApiDigests);
+  }
   if (
     !isDeepStrictEqual(await containerVersion(), container) ||
     (await readValidatedEnvironment()) !== contents
@@ -247,11 +269,18 @@ export function productionHost(lock) {
       await assertHeldLock(lock);
       if (
         options.operation !== "deploy" ||
-        [options.salesforceIngestion, options.qlikRanking, options.metaAds].some(
-          (value) => value !== undefined && value !== true,
-        ) ||
-        [options.salesforceIngestion, options.qlikRanking, options.metaAds].filter(Boolean)
-          .length !== 1
+        [
+          options.salesforceIngestion,
+          options.qlikRanking,
+          options.metaAds,
+          options.metaAdsApi,
+        ].some((value) => value !== undefined && value !== true) ||
+        [
+          options.salesforceIngestion,
+          options.qlikRanking,
+          options.metaAds,
+          options.metaAdsApi,
+        ].filter(Boolean).length !== 1
       ) {
         throw new Error("Integration configuration requires an explicit protected deployment.");
       }
@@ -278,17 +307,26 @@ export function productionHost(lock) {
               options.targetSha,
               await readMetaAdsReleaseSecrets(),
             )
-          : transformSalesforceReleaseEnvironment(
-              before,
-              options.expectedSha,
-              options.targetSha,
-              await readSalesforceReleaseSecrets(),
-            );
+          : options.metaAdsApi
+            ? transformMetaAdsApiReleaseEnvironment(
+                before,
+                options.expectedSha,
+                options.targetSha,
+                await readMetaAdsApiReleaseToken(),
+              )
+            : transformSalesforceReleaseEnvironment(
+                before,
+                options.expectedSha,
+                options.targetSha,
+                await readSalesforceReleaseSecrets(),
+              );
       const kind = options.qlikRanking
         ? "qlik-ranking-v2"
         : options.metaAds
           ? "meta-ads-session"
-          : "salesforce";
+          : options.metaAdsApi
+            ? "meta-ads-api"
+            : "salesforce";
       await assertRuntimeEnvironment(before, options.expectedSha, state.release.imageId, kind);
       await assertHeldLock(lock);
       const change = await environmentBackups.create(deploymentId, before, after, kind);

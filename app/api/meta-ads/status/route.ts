@@ -1,9 +1,13 @@
-import { getMetaAdsStatusConfiguration } from "@/lib/crm/meta-ads/config";
+import {
+  getMetaAdsApiConfiguration,
+  getMetaAdsStatusConfiguration,
+} from "@/lib/crm/meta-ads/config";
 import {
   emptyMetaAdsConnectionSnapshot,
   metaAdsObservationSchema,
 } from "@/lib/crm/meta-ads/connection-contract";
 import { metaAdsConnectionState } from "@/lib/crm/meta-ads/connection-state";
+import { probeMetaAdsApi } from "@/lib/crm/meta-ads/marketing-api";
 import { noStoreHeaders, secretsMatch } from "@/lib/security/api";
 import { authorizePageRoute } from "@/lib/security/route-auth";
 
@@ -14,6 +18,30 @@ const MAX_STATUS_BYTES = 4_096;
 export async function GET() {
   const authorization = await authorizePageRoute("/app/configuracoes/conectar-sistemas");
   if (!authorization.ok) return authorization.response;
+  const api = getMetaAdsApiConfiguration();
+  if (api.enabled) {
+    if (!api.available) {
+      return Response.json(emptyMetaAdsConnectionSnapshot("unavailable"), {
+        headers: noStoreHeaders(),
+      });
+    }
+    try {
+      await probeMetaAdsApi(api);
+      const checkedAt = new Date().toISOString();
+      return Response.json(
+        {
+          ...emptyMetaAdsConnectionSnapshot("connected"),
+          checkedAt,
+          receivedAt: checkedAt,
+        },
+        { headers: noStoreHeaders() },
+      );
+    } catch {
+      return Response.json(emptyMetaAdsConnectionSnapshot("unavailable"), {
+        headers: noStoreHeaders(),
+      });
+    }
+  }
   const config = getMetaAdsStatusConfiguration();
   const snapshot = config.available
     ? metaAdsConnectionState.snapshot(config.statusSecret)

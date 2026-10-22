@@ -30,7 +30,7 @@ export function parseReleaseArguments(args) {
   const required = operations[operation];
   const optional =
     operation === "deploy"
-      ? ["salesforce-ingestion", "qlik-ranking", "meta-ads"]
+      ? ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api"]
       : operation === "qlik-deploy"
         ? ["ranking"]
         : [];
@@ -58,9 +58,15 @@ export function parseReleaseArguments(args) {
     throw new Error("Only explicit Qlik ranking enable is supported.");
   if (values["meta-ads"] && values["meta-ads"] !== "enable")
     throw new Error("Only explicit Meta Ads enable is supported.");
+  if (values["meta-ads-api"] && values["meta-ads-api"] !== "enable")
+    throw new Error("Only explicit Meta Ads API enable is supported.");
   if (values.ranking && values.ranking !== "enable")
     throw new Error("Only explicit Qlik owner ranking enable is supported.");
-  if (["salesforce-ingestion", "qlik-ranking", "meta-ads"].filter((key) => values[key]).length > 1)
+  if (
+    ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api"].filter(
+      (key) => values[key],
+    ).length > 1
+  )
     throw new Error("Integration configurations require separate releases.");
   if (
     values["ci-run-id"] &&
@@ -149,6 +155,7 @@ async function main(args) {
         ...(values["salesforce-ingestion"] === "enable" ? { salesforceIngestion: true } : {}),
         ...(values["qlik-ranking"] === "enable" ? { qlikRanking: true } : {}),
         ...(values["meta-ads"] === "enable" ? { metaAds: true } : {}),
+        ...(values["meta-ads-api"] === "enable" ? { metaAdsApi: true } : {}),
       },
       io,
     );

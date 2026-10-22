@@ -9,6 +9,17 @@
 - Mantém a página protegida por autenticação e registra que esta entrega não
   alterou migrations, dados remotos ou integrações n8n.
 
+## 2026-10-21 - Meta Ads por API oficial somente leitura
+
+- Substitui a fonte demonstrativa padrão do painel pela Meta Marketing API
+  `v26.0`, usando exclusivamente a permissão `ads_read` no servidor.
+- Consolida desempenho diário por anúncio, campanhas, conjuntos, contas,
+  conversas iniciadas e status, sem qualquer operação de escrita no Meta Ads.
+- Exibe estados explícitos de carregamento e indisponibilidade, sem apresentar
+  dados fictícios quando a API real falha.
+- Acrescenta ativação protegida `--meta-ads-api enable`, segredo privado,
+  backup integral, CAS, rollback e verificação por hash no coordenador de deploy.
+
 ## 2026-10-22 - Coleta do gerente agrupado no relatório de corretores
 
 - Trata `Gerente de Vendas: Nome completo` como agrupamento do relatório de

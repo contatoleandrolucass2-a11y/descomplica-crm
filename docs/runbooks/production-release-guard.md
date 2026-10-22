@@ -200,6 +200,28 @@ Meta Ads, login humano, validação da conta e uma futura coleta de campanhas
 são etapas separadas; o deploy não comprova sessão autenticada nem extração de
 dados. Consultar o [runbook Meta Ads](meta-ads-vps-session.md).
 
+### Ativar a API oficial do Meta Ads
+
+Para a integração oficial de leitura, usar `--meta-ads-api enable` em um novo
+SHA aprovado. Esta opção é mutuamente exclusiva com Salesforce, Qlik e o antigo
+console Meta no mesmo deploy. O coordenador lê exclusivamente o arquivo:
+
+- `/etc/descomplica-crm/secrets/meta-ads-api-access-token`: token de usuário de
+  sistema com 40 a 4096 caracteres ASCII seguros, `root:root 0600`.
+
+O token deve possuir somente `ads_read`. A conta é fixada em
+`1080988750909489` e a versão em `v26.0` pelo código aprovado; não aceitar
+identificadores ou credenciais pela linha de comando. Sob as três travas, a
+mudança atualiza somente `IMAGE_TAG`, `META_ADS_API_ENABLED=true`,
+`META_ADS_ACCESS_TOKEN`, `META_ADS_ACCOUNT_ID` e `META_ADS_API_VERSION`.
+
+O backup privado `kind: meta-ads-api` preserva o ambiente completo anterior e
+proposto. A promoção e a recuperação usam CAS integral. A verificação compara
+por hash os quatro valores efetivos dentro do container e nunca imprime o
+token. Depois da promoção, comprovar `/api/health`, a página Integrações como
+`Conectado` e as quatro rotas Meta Ads com dados reais. Não usar health ou o
+status visual como substitutos da conferência dos valores e das métricas.
+
 ## Falha e recuperação
 
 ### Owner Qlik separado

@@ -244,6 +244,7 @@ const environmentChange = {
 for (const [option, label] of [
   ["qlikRanking", "Qlik"],
   ["metaAds", "Meta Ads"],
+  ["metaAdsApi", "Meta Ads API"],
 ]) {
   test(`${label} configuration uses the same durable intent and verification gates`, async () => {
     const system = harness();
