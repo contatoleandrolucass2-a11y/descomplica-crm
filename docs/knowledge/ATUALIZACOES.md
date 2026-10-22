@@ -2512,3 +2512,35 @@ dependente da autorização específica aplicável.
   conhecidas do Meta Ads no Windows, fora do delta. O pgTAP local não executou
   porque Docker/Podman não está instalado; a CI Linux, incluindo restauração
   isolada das 72 migrations e 2.082 asserções pgTAP, permanece gate obrigatório.
+
+## 2026-10-21: Abertura dos totais separados e da visão Geral da Previsão
+
+- A branch `codex/previsao-totais-geral` iniciou no `origin/main`
+  `755659e9a467db2758f8a17dfd8ce126ddf8948a`, após `git fetch origin --prune`.
+  O Git comum foi confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git` e o checkout
+  estava limpo. O GitHub registrava os PRs #294 e #295 como mudanças abertas
+  pertinentes a outros módulos; a consulta de runs de `main` pelo conector não
+  retornou execução associada ao SHA, portanto esse resultado não comprova CI.
+- O health público consultado em `2026-10-21T21:45:48.7472710Z` respondeu HTTP
+  200, `status=ok` e versão
+  `755659e9a467db2758f8a17dfd8ce126ddf8948a`, alinhada ao `origin/main` dessa
+  abertura. A demanda ainda não estava implementada.
+- Escopo solicitado: separar o Total em Previsão e Realizado e transformar a
+  visão Geral em tabela somente leitura com `Equipe Origem`, linhas House e
+  Imob e somatórios por empreendimento. A investigação inicial permanece local
+  e sem migration, escrita remota ou acesso a dados privados.
+- A implementação manteve o contrato da API e agregou localmente os documentos
+  já autorizados. Empreendimentos são conciliados pelo título NFKC, com espaços
+  normalizados e acentos preservados; IDs internos de grupos não são
+  compartilhados entre gerentes. Dado numérico inválido propaga total
+  indisponível, sem ser convertido em zero.
+- Testes focais aprovaram 88 casos de cálculo/API/componente e 12 cenários de
+  navegador, incluindo desktop e celular. `lint`, `typecheck` e `build` passaram
+  no Node 24.19/pnpm 11.20. O Vitest geral aprovou 4.082 testes e ignorou 105,
+  mas o teste anterior do Associativo em
+  `associative-approval-suggestion.test.ts` excedeu 5 segundos duas vezes sob
+  carga; isolado, o arquivo aprovou 13/13. As suítes Node mantiveram três falhas
+  POSIX conhecidas do Meta Ads no Windows, e `test:release` também reproduziu
+  falhas do host Meta Ads em fixtures de arquivos privados. Nenhuma asserção foi
+  relaxada; a CI Linux do SHA candidato permanece o gate para integração.
