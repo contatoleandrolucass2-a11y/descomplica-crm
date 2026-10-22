@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-22 - Next.js 16.4.1 com correções de segurança
+
+- Atualiza o Next.js de `16.3.8` para `16.4.1`, versão corrigida para os avisos
+  `GHSA-2464-fhr4-w9xw` e `GHSA-p3m5-59mp-jv5r`.
+- Mantém React, App Router e a arquitetura standalone sem mudança funcional.
+- Preserva o gate `pnpm audit --audit-level high`; vulnerabilidades altas ou
+  críticas continuam bloqueando integração e publicação.
+
 ## 2026-10-22 - Fallback da visão Geral da Previsão
 
 - Exibe a tabela Geral com as linhas House e Imob quando o final de semana ainda

@@ -2335,16 +2335,17 @@ test("login, logout and terminal state surfaces remain visually explicit", async
     await rolePage.goto("/app");
     await rolePage.evaluate(() => {
       const card = document.querySelector<HTMLElement>('article[data-tone="default"]');
-      const cardClass = [...(card?.classList ?? [])].find((className) =>
-        className.endsWith("__card"),
+      const cardClass = [...(card?.classList ?? [])].find(
+        (className) => className.endsWith("__card") || className.endsWith("_card"),
       );
       if (!cardClass) throw new Error("compiled analytics card class missing");
-      const analyticsPrefix = cardClass.slice(0, -"__card".length);
+      const separator = cardClass.endsWith("__card") ? "__" : "_";
+      const analyticsPrefix = cardClass.slice(0, -`${separator}card`.length);
       const classes = {
-        skeleton: `${analyticsPrefix}__skeleton`,
-        line: `${analyticsPrefix}__skeletonLine`,
-        value: `${analyticsPrefix}__skeletonValue`,
-        chart: `${analyticsPrefix}__skeletonChart`,
+        skeleton: `${analyticsPrefix}${separator}skeleton`,
+        line: `${analyticsPrefix}${separator}skeletonLine`,
+        value: `${analyticsPrefix}${separator}skeletonValue`,
+        chart: `${analyticsPrefix}${separator}skeletonChart`,
       };
       document.querySelector("[data-qa-state-evidence]")?.remove();
       const wrapper = document.createElement("main");

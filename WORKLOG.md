@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-22 - Atualização de segurança do Next.js
+
+O gate de auditoria identificou uma vulnerabilidade crítica e uma alta no
+Next.js `16.3.8`. A dependência e o lockfile foram atualizados para `16.4.1`,
+primeira versão corrigida indicada pelos avisos `GHSA-2464-fhr4-w9xw` e
+`GHSA-p3m5-59mp-jv5r`. A atualização não altera rotas, dados, permissões nem o
+contrato de execução standalone.
+
+Foram aprovados `pnpm audit --audit-level high`, lint, typecheck, testes e build
+com Node 24.19.x. A auditoria mantém apenas avisos moderados e retorna sucesso;
+os gates de PR e de `main` permanecem obrigatórios antes da publicação.
+
 ## 2026-10-22 - Estrutura da visão Geral sem lançamentos no período
 
 A rota de previsões descartava o modelo mais recente sempre que a seleção era

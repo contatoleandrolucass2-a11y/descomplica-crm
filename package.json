@@ -78,7 +78,7 @@
     "@supabase/supabase-js": "2.112.0",
     "enigma.js": "2.15.0",
     "lucide-react": "1.48.0",
-    "next": "16.3.8",
+    "next": "16.4.1",
     "parse5": "8.0.1",
     "postgres": "3.4.9",
     "react": "19.2.8",
