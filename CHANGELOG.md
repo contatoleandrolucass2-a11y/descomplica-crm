@@ -11,6 +11,13 @@
 - Acrescenta ativação protegida `--meta-ads-api enable`, segredo privado,
   backup integral, CAS, rollback e verificação por hash no coordenador de deploy.
 
+## 2026-10-21 - Fonte vigente do gerente dos corretores
+
+- Corrige a chave Salesforce associada ao rótulo
+  `Gerente de Vendas: Nome completo` no relatório de corretores.
+- Mantém a validação do rótulo e da coluna em toda coleta, com falha fechada
+  quando o relatório mudar novamente.
+
 ## 2026-10-21 - Filtros e indicadores do painel de Agendamentos
 
 - Acrescenta filtros de Canal, Gerente de Vendas, Responsável e Empresa que
