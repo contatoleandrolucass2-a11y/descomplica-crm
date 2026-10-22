@@ -2544,3 +2544,34 @@ dependente da autorização específica aplicável.
   POSIX conhecidas do Meta Ads no Windows, e `test:release` também reproduziu
   falhas do host Meta Ads em fixtures de arquivos privados. Nenhuma asserção foi
   relaxada; a CI Linux do SHA candidato permanece o gate para integração.
+
+## 2026-10-22: Totais separados e visão Geral da Previsão publicados
+
+- O PR #296 foi integrado na `main` pelo commit
+  `c50d2070a92d6522e052f955301aa436be22563a`. A revisão automática identificou
+  que títulos `__proto__` e `constructor` poderiam atingir propriedades do
+  protótipo durante a agregação; o armazenamento passou a usar objetos sem
+  protótipo e ganhou regressão dedicada. A thread foi resolvida somente depois
+  do teste passar.
+- A proteção de branch recusou corretamente resultados antigos quando a `main`
+  avançou duas vezes durante as matrizes longas. As integrações concorrentes
+  foram incorporadas e a CI final do PR `39710170718` aprovou `validate`,
+  `isolated-restore` e `release-gates` no SHA atualizado, sem reduzir gates.
+- A CI de `push/main` `39714940532` aprovou também `promotable-image`. O artefato
+  `12398148502` conferiu com
+  `sha256:209eb85df458f1be22e6a92fc5951eda163697b1e944f6a941bf2a49bf126f7e`.
+  A diferença esperada entre a config da CI
+  `sha256:9653c0a8dee24e9f71791ae4464287e668fd5ccecd4ad750c83ea79e954149b7`
+  e o manifesto containerd
+  `sha256:fa464f8e188c587f0ecc19cd45f9364bbe621849b9d997f8036238b41cd8ae56`
+  foi comprovada pelo índice OCI, hashes dos blobs, onze camadas, RootFS,
+  plataforma `linux/amd64`, label da revisão e `image:prove` nos dois perfis.
+- O coordenador exclusivo `pnpm release:production deploy` publicou o deployment
+  `085edb7e-f7ca-4453-bb34-1cab1b6a7d67` em
+  `2026-10-22T03:50:24.306Z`, usando o deployment anterior
+  `f21451fd-2a4a-431c-8edf-df1a8d1190bf` como CAS. O ledger final confirmou a
+  versão `c50d2070`, o manifesto homologado e nenhuma pendência.
+- A observação externa de `2026-10-22T03:52:05.3546957Z` confirmou HTTP 200,
+  `status=ok` e a versão exata. A rota anônima `/app/gestao/previsao` respondeu
+  HTTP 307 para `/login`. Esta entrega não criou migration, não alterou n8n e
+  não acessou dados privados de produção.

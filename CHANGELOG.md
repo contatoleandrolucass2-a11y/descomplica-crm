@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-22 - Publicação dos totais e da visão Geral da Previsão
+
+- Publica os totais separados de Previsão e Realizado e a visão Geral compilada
+  por origem, com as linhas House e Imob.
+- Confirma os gates de PR e de `main`, o artefato OCI imutável e o health de
+  produção no SHA `c50d2070a92d6522e052f955301aa436be22563a`.
+- Mantém a página protegida por autenticação e registra que esta entrega não
+  alterou migrations, dados remotos ou integrações n8n.
+
 ## 2026-10-21 - Meta Ads por API oficial somente leitura
 
 - Substitui a fonte demonstrativa padrão do painel pela Meta Marketing API
