@@ -62,9 +62,14 @@ contagens brutas das conversões foram removidas e os rótulos mensais ganharam
 tamanho e espaço para nomes completos. O QA sintético cobre calendário, foco,
 teclado, filtros compostos, recência, temas e larguras entre 320 e 1.440 px.
 
-Lint, typecheck e build de 61 rotas passaram com Node 24.19. A suíte Vitest
+Após a revisão do PR, o gráfico anual passou a ignorar recortes de dia e semana,
+mantendo apenas ano e dimensões. Selecionar dias agora substitui a semana ativa;
+a região acessível anuncia cobertura parcial e conversões sem base deixam de ser
+anunciadas como zero por cento.
+
+Lint, typecheck e build de 61 rotas passaram com Node 24.19 e Next.js 16.4.1. A suíte Vitest
 integral, limitada a quatro workers para evitar disputa de CPU no host Windows,
-aprovou 4.101 testes e ignorou 106. O preview com o CSS compilado de produção
+aprovou 4.102 testes e ignorou 106. O preview com o CSS compilado de produção
 aprovou 12 combinações de tema e largura, sem overflow, colisão ou violação Axe.
 O comando agregado sem limite de workers atingiu apenas o timeout de cinco
 segundos de um teste do Associativo, que passou isolado e na suíte limitada; os

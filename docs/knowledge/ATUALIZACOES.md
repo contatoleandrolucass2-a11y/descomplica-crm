@@ -49,12 +49,16 @@
   faixas 0-7, 8-14 e 15 dias ou mais antes do grafico mensal. A tabela usa a data
   da linha como parte do filtro composto, sem duplicar semana e dia.
 - Lint, typecheck e build de 61 rotas passaram com Node 24.19. Vitest aprovou
-  4.101 testes e ignorou 106 com quatro workers. O preview sobre o CSS compilado
+  4.102 testes e ignorou 106 após a atualização para Next.js 16.4.1. O preview sobre o CSS compilado
   de producao aprovou 12 combinacoes de tema e largura, sem overflow, colisoes ou
   violacoes Axe. O comando agregado sem limite de workers excedeu apenas o
-  timeout de um teste do Associativo que passou isolado e na suite limitada; os
-  tres testes Node POSIX conhecidos permanecem incompatíveis com Windows e
-  devem ser confirmados pela CI Linux antes da integracao.
+  timeout de um teste do Associativo que passou isolado e na suite limitada; na
+  composição final, os três testes Node POSIX conhecidos permanecem incompatíveis
+  com Windows e devem ser confirmados pela CI Linux antes da integração.
+- A revisão do PR confirmou e corrigiu quatro limites: o gráfico anual usa ano e
+  dimensões sem herdar dias/semana; dias do calendário substituem a semana ativa;
+  cobertura parcial continua anunciada por `aria-live`; e conversão sem base não
+  é anunciada como zero por cento. Os testes focados aprovaram 18 casos.
 
 ## 2026-10-22: filtros e indicadores de Agendamentos publicados
 
