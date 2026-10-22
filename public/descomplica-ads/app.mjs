@@ -18,6 +18,7 @@ let rules;try{rules=validatedRules(readStore('descomplica-ads-rules',{}));}catch
 let budgets=readStore('descomplica-ads-budgets',{}),reachSnapshots=readStore('descomplica-ads-reach',{}),readAlerts=readStore('descomplica-ads-read-alerts',{});
 let pendingImport=null,contextCache=new Map(),alertCache=null;
 const palette=['#73d8ea','#6595e8','#aa9af2','#63c6b0','#d9a576','#c886bb'];
+const viewTitles={overview:['Visão geral de anúncios','Do investimento ao lead: encontre o ponto que merece atenção.'],campaigns:['Análise de campanhas e anúncios','Aprofunde da conta até o criativo, com metas e diagnóstico em cada nível.'],accounts:['Contas de anúncios','Controle de investimento, custo por resultado e limites por conta.'],reports:['Central de relatórios','Exporte os números, as metas e as hipóteses de diagnóstico.'],integrations:['Dados e integrações','Dados de mídia, etapas de conversão e qualidade comercial.']};
 const state={view:'overview',account:'all',destination:rows.some(r=>r.destination==='form')?'form':rows[0].destination,campaign:'all',adset:'all',ad:'all',status:'all',period:'month',start:'',end:'',query:'',level:'campaign',sort:'spend',direction:-1,page:1,chartMode:'daily',chartMetric:'cpl'};
 const endpoints=()=>({start:rows.reduce((s,r)=>!s||r.date<s?r.date:s,''),end:rows.reduce((s,r)=>r.date>s?r.date:s,'')});
 const currentRows=(search=false)=>filterRows(rows,{...state,query:search?state.query:''});
@@ -36,9 +37,9 @@ function groupsFor(data,level=state.level){const key={account:'accountId',campai
 function statusBadge(data){const statuses=[...new Set(data.map(r=>r.status))],s=statuses.length>1?'mixed':statuses[0];return `<span class="status ${s!=='active'?'paused':''}"><span class="dot"></span>${{active:'Ativa',paused:'Pausada',mixed:'Mista'}[s]||'Não informado'}</span>`;}
 function stateBadge(status){return `<span class="health-badge ${status.level}"><span class="dot"></span>${esc(status.label)}</span>`;}
 function clearCaches(){contextCache=new Map();alertCache=null;}
+function updateViewHeading(){const [title,desc]=viewTitles[state.view]||viewTitles.overview;$('#page-title').textContent=title;$('#page-description').textContent=desc;document.title=`Descomplica Ads · ${title}`;}
 function updateShell(){
-  const titles={overview:['Visão geral de anúncios','Do investimento ao lead: encontre o ponto que merece atenção.'],campaigns:['Análise de campanhas e anúncios','Aprofunde da conta até o criativo, com metas e diagnóstico em cada nível.'],accounts:['Contas de anúncios','Controle de investimento, custo por resultado e limites por conta.'],reports:['Central de relatórios','Exporte os números, as metas e as hipóteses de diagnóstico.'],integrations:['Dados e integrações','Dados de mídia, etapas de conversão e qualidade comercial.']};
-  const [title,desc]=titles[state.view]||titles.overview;$('#page-title').textContent=title;$('#page-description').textContent=desc;document.title=`Descomplica Ads · ${title}`;
+  updateViewHeading();
   $$('.nav-item').forEach(el=>{const on=el.dataset.nav===state.view;el.classList.toggle('active',on);if(on)el.setAttribute('aria-current','page');else el.removeAttribute('aria-current');});
   $('#account-filter').innerHTML='<option value="all">Todas as contas</option>'+accounts().map(a=>`<option value="${esc(a.id)}">${esc(a.name)}</option>`).join('');$('#account-filter').value=state.account;$('#period-filter').value=state.period;$('#status-filter').value=state.status;
   const sourceLabel=sourceKind==='api'?'Meta API · somente leitura':isDemo?'Demonstração':'CSV importado';
@@ -150,6 +151,7 @@ function exportReport(type='campaign'){
 function restoreDemo(){if(isDemo){notify('Você já está usando a demonstração.');return;}openModal('Usar demonstração?','Os dados oficiais deixam de ser exibidos nesta sessão.','<p>Seus limites e metas permanecem. Recarregue a página para consultar novamente a API oficial.</p>','<button class="button secondary" data-close-modal>Manter dados oficiais</button><button class="button primary" id="confirm-demo">Usar demonstração</button>');$('#confirm-demo').addEventListener('click',()=>{rows=createDemo();sourceKind='demo';isDemo=true;sourceName='';imported=null;resetScope();Object.assign(state,{account:'all',destination:'form',status:'all'});selectPeriod('month');closeModal();render();notify('Demonstração ativada somente nesta sessão.');});}
 const comparisons=createComparisonPanel({state,currentRows,previousRows,searchedGroups,context,destination,render,entityModal,isDemo:()=>isDemo,sourceName:()=>sourceName});
 function render(){
+  updateViewHeading();
   if(sourceKind==='loading'||sourceKind==='error'){
     const loading=sourceKind==='loading';
     $('#data-badge').className='badge badge-demo';$('#data-badge').innerHTML=`<span class="dot"></span>${loading?'Conectando':'Indisponível'}`;
