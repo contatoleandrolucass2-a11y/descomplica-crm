@@ -11,6 +11,12 @@
 - Acrescenta ativação protegida `--meta-ads-api enable`, segredo privado,
   backup integral, CAS, rollback e verificação por hash no coordenador de deploy.
 
+## 2026-10-22 - Espelho oficial das fontes municipais de ITBI
+
+- Atualiza o verificador documental para o host legado oficial da própria
+  Prefeitura de São Paulo, preservando as mesmas páginas e tabelas de ITBI.
+- Mantém inalterados vigência, limites, alíquotas e regras de cálculo.
+
 ## 2026-10-22 - Coleta do gerente agrupado no relatório de corretores
 
 - Trata `Gerente de Vendas: Nome completo` como agrupamento do relatório de

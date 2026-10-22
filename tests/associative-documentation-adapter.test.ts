@@ -129,7 +129,7 @@ describe("automatic Associativo documentation estimates", () => {
         mode: "automatic",
         basesConfirmed: false,
         policyVersion: "sp-capital-2026.1",
-        sourceVerifiedAt: "2026-10-10",
+        sourceVerifiedAt: "2026-10-22",
         inputs: { iptuValue: null, registryTable: "ARISP_2", itbiBase: 240000 },
       },
       result: {
