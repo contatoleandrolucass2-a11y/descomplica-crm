@@ -356,9 +356,11 @@ export function aggregateGeneralForecast(
 ): GeneralForecastAggregate {
   const groups: GeneralForecastAggregate["groups"] = [];
   const labels = new Map<string, string>();
+  const createCells = () =>
+    Object.create(null) as Record<string, { forecast: number | null; actual: number | null }>;
   const rows: GeneralForecastAggregate["rows"] = {
-    house: { cells: {}, totals: { forecast: 0, actual: 0 } },
-    imob: { cells: {}, totals: { forecast: 0, actual: 0 } },
+    house: { cells: createCells(), totals: { forecast: 0, actual: 0 } },
+    imob: { cells: createCells(), totals: { forecast: 0, actual: 0 } },
   };
 
   for (const section of sections) {
@@ -395,7 +397,7 @@ export function aggregateGeneralForecast(
     );
   }
 
-  const cells: GeneralForecastAggregate["totals"]["cells"] = {};
+  const cells: GeneralForecastAggregate["totals"]["cells"] = createCells();
   for (const { key } of groups) {
     cells[key] = {
       forecast: addForecastTotals(rows.house.cells[key]!.forecast, rows.imob.cells[key]!.forecast),

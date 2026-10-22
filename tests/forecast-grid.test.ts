@@ -150,6 +150,27 @@ describe("grouped forecast grid", () => {
     expect(aggregate.rows.imob.totals).toEqual({ forecast: 700, actual: 300 });
     expect(aggregate.totals).toMatchObject({ forecast: 1950, actual: 800 });
   });
+  it("aggregates enterprise labels that match object prototype properties", () => {
+    let house = createForecastDocument(["House"]);
+    let imob = createForecastDocument(["Imob"]);
+    const houseGroup = getForecastGroups(house)[0]!;
+    const imobGroup = getForecastGroups(imob)[0]!;
+    house = renameForecastGroup(house, houseGroup.id, "__proto__");
+    imob = renameForecastGroup(imob, imobGroup.id, "constructor");
+    const renamedHouseGroup = getForecastGroups(house)[0]!;
+    const renamedImobGroup = getForecastGroups(imob)[0]!;
+    house.rows[0]!.cells[renamedHouseGroup.forecastId] = "2";
+    imob.rows[0]!.cells[renamedImobGroup.actualId] = "3";
+
+    const aggregate = aggregateGeneralForecast([
+      { segment: "house", forecast: house },
+      { segment: "imob", forecast: imob },
+    ]);
+
+    expect(aggregate.rows.house.cells.__proto__).toEqual({ forecast: 200, actual: 0 });
+    expect(aggregate.rows.imob.cells.constructor).toEqual({ forecast: 0, actual: 300 });
+    expect(aggregate.totals).toMatchObject({ forecast: 200, actual: 300 });
+  });
   it("keeps maximum permitted totals within safe integer range", () => {
     let document = createForecastDocument();
     for (let i = 0; i < 7; i++) document = addForecastGroup(document);
