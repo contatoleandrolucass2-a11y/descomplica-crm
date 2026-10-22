@@ -162,6 +162,12 @@ export const PERMISSIONS = {
     description: "Consulta a previsão e o realizado do time na tabela compartilhada.",
     minLevel: 10,
   },
+  "crm.management.forecast.values.edit": {
+    label: "Preencher valores da Previsão",
+    description:
+      "Altera valores das células da previsão sem modificar linhas, colunas ou identificações.",
+    minLevel: 10,
+  },
   "crm.stages.view": {
     label: "Visualizar etapas",
     description: "Consulta oportunidades, agendamentos, visitas, pastas e vendas.",

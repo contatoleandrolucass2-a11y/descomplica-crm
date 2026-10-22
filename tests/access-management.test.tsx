@@ -231,6 +231,8 @@ describe("catálogo localizado de acesso", () => {
       "crm.stage.sales.view",
       "crm.management.view",
       "crm.management.routine.view",
+      "crm.management.forecast.view",
+      "crm.management.forecast.values.edit",
     ];
     const withCanalImobPermissions = [
       ...baseNavigationPermissions,
@@ -565,7 +567,7 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-    expect(checkboxes).toHaveLength(42);
+    expect(checkboxes).toHaveLength(43);
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toContain('checked=""');
       expect(checkbox).toContain('disabled=""');
@@ -750,6 +752,7 @@ describe("catálogo localizado de acesso", () => {
   it("não exibe nem oferece salvar módulos ausentes do catálogo de 42 chaves", () => {
     const absent = new Set([
       "crm.management.forecast.view",
+      "crm.management.forecast.values.edit",
       "crm.read_model_v3.view",
       "crm.read_model_v3.ranking.view",
       "crm.read_model_v3.partnerships.view",

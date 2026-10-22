@@ -194,6 +194,7 @@ select is(
   array[
     'crm.dashboard',
     'crm.management',
+    'crm.management.forecast',
     'crm.management.routine',
     'crm.ranking',
     'crm.simulation',
@@ -231,6 +232,7 @@ select is(
   array[
     'crm.dashboard',
     'crm.management',
+    'crm.management.forecast',
     'crm.management.routine',
     'crm.partnerships',
     'crm.simulation',
@@ -268,6 +270,7 @@ select is(
   array[
     'crm.dashboard',
     'crm.management',
+    'crm.management.forecast',
     'crm.management.routine',
     'crm.partnerships',
     'crm.simulation',
@@ -305,6 +308,7 @@ select is(
   array[
     'crm.dashboard',
     'crm.management',
+    'crm.management.forecast',
     'crm.management.routine',
     'crm.ranking',
     'crm.simulation',
@@ -342,6 +346,7 @@ select is(
   array[
     'crm.dashboard',
     'crm.management',
+    'crm.management.forecast',
     'crm.management.routine',
     'crm.partnerships',
     'crm.simulation',
