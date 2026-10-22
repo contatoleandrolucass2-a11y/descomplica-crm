@@ -147,7 +147,7 @@ let browser;
 try {
   const origin = `http://127.0.0.1:${server.address().port}`;
   browser = await chromium.launch();
-  const context = await browser.newContext();
+  const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const forbidden = [];
   await context.route("**/*", (route) => {
     const request = route.request();
@@ -176,6 +176,35 @@ try {
     assert.equal(page.frames()[1].url(), "about:srcdoc");
     await expect(frame.locator("html")).toHaveAttribute("data-crm-view", view);
   }
+  async function checkModal(title, open) {
+    await open();
+    const dialog = frame.getByRole("dialog", { name: title });
+    await expect(dialog).toBeVisible();
+
+    const [frameBox, dialogBox, bodyOverflow] = await Promise.all([
+      page.locator("iframe").boundingBox(),
+      dialog.boundingBox(),
+      dialog.locator(".modal-body").evaluate((element) => getComputedStyle(element).overflowY),
+    ]);
+    assert.ok(frameBox && dialogBox, `${title}: iframe and dialog must have layout boxes`);
+    const visibleFrameTop = Math.max(frameBox.y, 0);
+    const visibleFrameBottom = Math.min(frameBox.y + frameBox.height, 900);
+    assert.ok(
+      dialogBox.y >= visibleFrameTop - 1,
+      `${title}: dialog must start inside the visible iframe`,
+    );
+    assert.ok(
+      dialogBox.y + dialogBox.height <= visibleFrameBottom + 1,
+      `${title}: dialog actions must remain inside the visible iframe`,
+    );
+    assert.equal(bodyOverflow, "auto", `${title}: long content must scroll inside the dialog`);
+    if (process.env.META_ADS_QA_SCREENSHOT && title === "Metas e alertas") {
+      await page.waitForTimeout(250);
+      await page.screenshot({ path: process.env.META_ADS_QA_SCREENSHOT });
+    }
+    await frame.getByRole("button", { name: "Fechar janela" }).click();
+    await expect(dialog).toBeHidden();
+  }
   for (const view of Object.keys(titles)) {
     await page.goto(`${origin}/app/meta-ads?view=${view}`);
     await check(view);
@@ -190,6 +219,22 @@ try {
   }
   await page.getByRole("button", { name: "overview", exact: true }).click();
   await check("overview");
+  await checkModal("Central de alertas", () =>
+    frame.getByRole("button", { name: /Ver alertas/ }).click(),
+  );
+  await checkModal("Importar mídia e resultados", () =>
+    frame.getByRole("button", { name: "Importar dados" }).click(),
+  );
+  await checkModal("Metas e alertas", () =>
+    frame.getByRole("button", { name: "Metas e alertas" }).click(),
+  );
+  await page.getByRole("button", { name: "campaigns", exact: true }).click();
+  await check("campaigns");
+  await checkModal("Selecionar campanhas para comparar", () =>
+    frame.getByRole("button", { name: /Selecionar campanhas/ }).click(),
+  );
+  await page.getByRole("button", { name: "overview", exact: true }).click();
+  await check("overview");
   await frame.locator('[data-view="accounts"]').first().click();
   await expect(frame.locator("#page-title")).toHaveText(titles.accounts);
   assert.equal(page.frames()[1].url(), "about:srcdoc");
@@ -202,7 +247,7 @@ try {
   assert.deepEqual(forbidden, [], "No external requests or nested document navigation");
   assert.deepEqual(errors, [], "No browser runtime errors");
   console.log(
-    "Meta Ads: four views, cold load, reload, repeated submenu transitions, internal navigation, skip link and theme passed with production security headers.",
+    "Meta Ads: four views and four responsive dialogs, cold load, reload, repeated submenu transitions, internal navigation, skip link and theme passed with production security headers.",
   );
 } finally {
   await browser?.close();

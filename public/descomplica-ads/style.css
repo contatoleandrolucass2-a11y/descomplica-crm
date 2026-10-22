@@ -317,3 +317,38 @@ body {
     grid-column: 2;
   }
 }
+
+/* Keep dialogs inside the portion of the auto-sized CRM iframe that is visible. */
+.modal-backdrop {
+  --modal-vertical-gap: 44px;
+  position: absolute;
+  inset: auto 0 auto;
+  top: var(--crm-visible-frame-top, 0);
+  height: var(--crm-visible-frame-height, 100dvh);
+}
+
+.modal {
+  display: flex;
+  max-height: calc(
+    var(--crm-visible-frame-height, 100dvh) - var(--modal-vertical-gap)
+  );
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.modal-header,
+.modal-footer {
+  flex: none;
+}
+
+.modal-body {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (max-width: 480px) {
+  .modal-backdrop {
+    --modal-vertical-gap: 24px;
+  }
+}

@@ -22,6 +22,7 @@ import MetaAdsDashboardPage from "@/app/(protected)/app/meta-ads/page";
 import MetaAdsCampaignsPage from "@/app/(protected)/app/meta-ads/campanhas/page";
 import MetaAdsAccountsPage from "@/app/(protected)/app/meta-ads/contas-de-anuncios/page";
 import MetaAdsReportsPage from "@/app/(protected)/app/meta-ads/relatorios/page";
+import { getVisibleFrameViewport } from "@/app/(protected)/app/meta-ads/MetaAdsDashboardFrame";
 
 const dashboardDocumentUrl = new URL(
   "../app/(protected)/app/meta-ads/dashboard-frame.html",
@@ -130,6 +131,31 @@ describe("dashboard Meta Ads", () => {
     expect(dashboardStyles).toContain("--panel: #0a2b47;");
     expect(dashboardStyles).toContain("--accent: #5ce5f1;");
     expect(dashboardStyles).not.toContain("fonts.googleapis.com");
+  });
+
+  it("mantem os modais dentro da area visivel do iframe com rolagem interna", async () => {
+    const [frameSource, dashboardStyles] = await Promise.all([
+      readFile(
+        new URL("../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.tsx", import.meta.url),
+        "utf8",
+      ),
+      readFile(new URL("../public/descomplica-ads/style.css", import.meta.url), "utf8"),
+    ]);
+
+    expect(getVisibleFrameViewport({ height: 2400, top: 300 } as DOMRect, 0, 1000)).toEqual({
+      height: 700,
+      top: 0,
+    });
+    expect(getVisibleFrameViewport({ height: 2400, top: -500 } as DOMRect, 58, 1000)).toEqual({
+      height: 942,
+      top: 558,
+    });
+    expect(frameSource).toContain(
+      'document.addEventListener("scroll", scheduleViewportSync, true)',
+    );
+    expect(dashboardStyles).toContain("top: var(--crm-visible-frame-top, 0)");
+    expect(dashboardStyles).toContain("height: var(--crm-visible-frame-height, 100dvh)");
+    expect(dashboardStyles).toContain("overflow-y: auto");
   });
 
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {
