@@ -8638,3 +8638,19 @@ agora exige a chave confirmada na fonte atual; nenhuma publicação parcial foi
 aceita. Os 39 testes focados do coletor, lint, tipos e build passaram. O Vitest
 geral aprovou 4.085 testes e teve um timeout alheio no Associativo, que passou
 isolado com 13 testes. CI Linux integral e nova publicação são obrigatórias.
+
+## 2026-10-22: Publicação dos totais e da visão Geral da Previsão
+
+O PR #296 foi integrado em `c50d2070a92d6522e052f955301aa436be22563a`.
+A CI final do PR (`39710170718`) e a CI de `main` (`39714940532`) aprovaram
+`validate`, `isolated-restore` e `release-gates`; a execução de `main` também
+aprovou `promotable-image`. O artefato `12398148502` foi validado como OCI
+linux/amd64 para o SHA exato, com manifesto containerd
+`sha256:fa464f8e188c587f0ecc19cd45f9364bbe621849b9d997f8036238b41cd8ae56`.
+
+O coordenador `release:production` publicou o deployment
+`085edb7e-f7ca-4453-bb34-1cab1b6a7d67` em `2026-10-22T03:50:24.306Z`.
+A conferência posterior encontrou ledger sem pendência, health HTTP 200/`ok`
+na versão `c50d2070a92d6522e052f955301aa436be22563a` e redirecionamento anônimo
+HTTP 307 da página `/app/gestao/previsao` para `/login`. Esta entrega não
+alterou migrations, dados remotos ou integrações n8n.
