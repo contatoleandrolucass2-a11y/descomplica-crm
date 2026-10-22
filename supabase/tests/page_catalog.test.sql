@@ -11,8 +11,8 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  41::bigint,
-  'forty-one platform and CRM permissions are seeded'
+  42::bigint,
+  'forty-two platform and CRM permissions are seeded'
 );
 
 select is(
@@ -291,6 +291,7 @@ select is(
     'crm.dashboard',
     'crm.management.routine',
     'crm.simulation',
+    'crm.management.forecast',
     'crm.simulation.wf13',
     'crm.stage.opportunities',
     'crm.simulation.wf14',
@@ -305,7 +306,7 @@ select is(
     'crm.ranking',
     'crm.simulation.caixa'
   ]::text[],
-  'scoped Gerente House sees its sixteen inherited pages including simulators'
+  'scoped Gerente House sees its seventeen inherited pages including Previsão and simulators'
 );
 
 select throws_ok(
@@ -381,6 +382,7 @@ select is(
     'crm.dashboard',
     'crm.management.routine',
     'crm.simulation',
+    'crm.management.forecast',
     'crm.simulation.wf13',
     'crm.stage.opportunities',
     'crm.simulation.wf14',

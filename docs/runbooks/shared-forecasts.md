@@ -2,9 +2,13 @@
 
 A página `/app/gestao/previsao` aparece em Gestão conforme o catálogo autorizado.
 A permissão própria `crm.management.forecast.view` controla página, API e RPC.
-O catálogo concede a nova permissão apenas a Master e Admin por padrão; os demais
-acessos são configurados na administração existente. Editar e salvar exige também
-`crm.settings.manage`, como a edição da Rotina compartilhada.
+Master e Admin mantêm edição completa por `crm.settings.manage`. Coordenador,
+Gerente House, Gerente Imob, Corretor House e Corretor Imob recebem a página e a
+permissão `crm.management.forecast.values.edit`: podem preencher Previsão,
+Realizado e Plano de ação, mas não alteram nomes, ordem, inclusão ou exclusão de
+linhas e colunas. A interface esconde os controles estruturais e a RPC repete a
+restrição comparando títulos, colunas, IDs de linha e nomes de corretores com a
+estrutura salva ou com o modelo inicial gerado pelo servidor.
 
 A tabela é manual e separada por final de semana, segmento e gerente. Sexta,
 sábado e domingo do mesmo final de semana usam a sexta-feira como chave canônica.
@@ -63,6 +67,15 @@ o limite são preservados para ajuste explícito antes de salvar. A tela apresen
 sem permissão de edição. Edições pendentes recebem proteção de saída.
 
 ## Banco e publicação
+
+A evolução de preenchimento por perfis comerciais prepara a migration
+`20261022184500_forecast_value_edit_roles.sql`. Ela cadastra a permissão restrita,
+concede página e preenchimento aos cinco papéis comerciais atuais e separa
+`can_edit` de `can_manage_structure`. A RPC aceita mudanças de valores desses
+papéis somente quando a estrutura coincide integralmente com a referência do
+recorte. Master e Admin preservam a edição estrutural existente. A migration não
+reescreve previsões, não concede acesso direto às tabelas e ainda depende dos
+gates e da publicação versionada antes de qualquer efeito remoto.
 
 Aplicação desta evolução confirmada em 18/10/2026, após autorização explícita
 para a migration e recuperação da função anterior. O arquivo local

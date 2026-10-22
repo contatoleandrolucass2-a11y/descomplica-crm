@@ -61,6 +61,7 @@ const simulatorPageKeys = pageKeysForPermissions("crm.simulators.view");
 const inheritedAnalyticalPageKeys = pageKeysForPermissions("crm.dashboard.view", "crm.stages.view");
 const rankingPageKeys = pageKeysForPermissions("crm.ranking.view");
 const partnershipPageKeys = pageKeysForPermissions("crm.partnerships.view");
+const forecastPageKeys = pageKeysForPermissions("crm.management.forecast.view");
 const administrativeCommercialPageKeys = pageKeysForPermissions(
   "crm.settings.view",
   "crm.settings.manage",
@@ -69,7 +70,6 @@ const administrativeCommercialPageKeys = pageKeysForPermissions(
   "crm.meta_ads.campaigns.view",
   "crm.meta_ads.accounts.view",
   "crm.meta_ads.reports.view",
-  "crm.management.forecast.view",
 );
 const masterAdministrativePageKeys = pageKeysForPermissions(
   "admin.access",
@@ -80,6 +80,7 @@ const expectedPageKeysByRole = {
   master: [
     ...masterAdministrativePageKeys,
     ...inheritedAnalyticalPageKeys,
+    ...forecastPageKeys,
     ...rankingPageKeys,
     ...administrativeCommercialPageKeys,
     ...partnershipPageKeys,
@@ -88,6 +89,7 @@ const expectedPageKeysByRole = {
   admin: [
     ...masterAdministrativePageKeys,
     ...inheritedAnalyticalPageKeys,
+    ...forecastPageKeys,
     ...rankingPageKeys,
     ...administrativeCommercialPageKeys,
     ...partnershipPageKeys,
@@ -95,18 +97,31 @@ const expectedPageKeysByRole = {
   ].sort(),
   coordinator: [
     ...inheritedAnalyticalPageKeys,
+    ...forecastPageKeys,
     ...partnershipPageKeys,
     ...simulatorPageKeys,
   ].sort(),
-  manager_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys, ...simulatorPageKeys].sort(),
+  manager_house: [
+    ...inheritedAnalyticalPageKeys,
+    ...forecastPageKeys,
+    ...rankingPageKeys,
+    ...simulatorPageKeys,
+  ].sort(),
   manager_imob: [
     ...inheritedAnalyticalPageKeys,
+    ...forecastPageKeys,
     ...partnershipPageKeys,
     ...simulatorPageKeys,
   ].sort(),
-  broker_house: [...inheritedAnalyticalPageKeys, ...rankingPageKeys, ...simulatorPageKeys].sort(),
+  broker_house: [
+    ...inheritedAnalyticalPageKeys,
+    ...forecastPageKeys,
+    ...rankingPageKeys,
+    ...simulatorPageKeys,
+  ].sort(),
   broker_imob: [
     ...inheritedAnalyticalPageKeys,
+    ...forecastPageKeys,
     ...partnershipPageKeys,
     ...simulatorPageKeys,
   ].sort(),

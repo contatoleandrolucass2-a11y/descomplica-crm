@@ -49,6 +49,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     let css: string;
     let record: ForecastRecord | null;
     let canEdit: boolean;
+    let canManageStructure: boolean;
     let failLoad: boolean;
     let conflict: boolean;
     let sections: ForecastSource[];
@@ -118,6 +119,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     async function open(
       options: {
         canEdit?: boolean;
+        canManageStructure?: boolean;
         failLoad?: boolean;
         seed?: ForecastRecord;
         convertedLegacy?: boolean;
@@ -127,6 +129,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
     ) {
       record = options.seed ?? null;
       canEdit = options.canEdit ?? true;
+      canManageStructure = options.canManageStructure ?? canEdit;
       failLoad = options.failLoad ?? false;
       conflict = false;
       puts = [];
@@ -169,6 +172,8 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
                             }
                           : null,
                     can_edit: url.searchParams.get("segment") === "general" ? false : canEdit,
+                    can_manage_structure:
+                      url.searchParams.get("segment") === "general" ? false : canManageStructure,
                     period: { start: "2026-10-23", end: "2026-10-25" },
                     selection: {
                       segment: url.searchParams.get("segment"),
@@ -848,6 +853,38 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
       await browserExpect(
         page.getByRole("region", { name: "Tabela de previsão", exact: true }),
       ).toBeFocused();
+    });
+
+    it("lets operational roles fill values without changing rows, columns or identifications", async () => {
+      await open({ canEdit: true, canManageStructure: false });
+      await browserExpect(
+        page.getByText(
+          "Você pode preencher valores. Linhas, colunas e identificações são protegidas.",
+        ),
+      ).toBeVisible();
+      await browserExpect(
+        page.getByRole("button", { name: "Inserir linha", exact: true }),
+      ).toHaveCount(0);
+      await browserExpect(
+        page.getByRole("button", { name: "Inserir coluna", exact: true }),
+      ).toHaveCount(0);
+      await browserExpect(page.getByRole("button", { name: /^Excluir linha/ })).toHaveCount(0);
+      await browserExpect(page.getByRole("button", { name: /^Mover .* para a/ })).toHaveCount(0);
+      await browserExpect(
+        page.getByLabel("Nome do corretor, linha 1", { exact: true }),
+      ).toHaveAttribute("readonly", "");
+      await browserExpect(
+        page.getByLabel("Nome do empreendimento 1", { exact: true }),
+      ).toHaveAttribute("readonly", "");
+
+      await page.getByLabel("Empreendimento 1 — Previsão, linha 1", { exact: true }).fill("9");
+      await page.getByLabel("Plano de ação, linha 1", { exact: true }).fill("Acompanhar retorno.");
+      await page.getByRole("button", { name: "Salvar", exact: true }).click();
+      await browserExpect(page.locator('p[role="status"]')).toHaveText("Previsão salva no CRM.");
+      expect(puts).toHaveLength(1);
+      expect(puts[0]!.rows).toHaveLength(10);
+      expect(puts[0]!.columns).toHaveLength(16);
+      expect(puts[0]!.rows[0]!.cells.broker).toBe("Corretor 1");
     });
 
     it("rejects text in numeric cells and keeps eight groups usable at narrow widths", async () => {

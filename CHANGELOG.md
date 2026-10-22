@@ -11,6 +11,15 @@
 - Preserva os demais dashboards, Salesforce e operações do Gerenciador de
   Anúncios; a integração continua estritamente somente leitura.
 
+## 2026-10-22 - Preenchimento da Previsão por perfis comerciais
+
+- Libera a página e o preenchimento dos valores da Previsão para Coordenador,
+  Gerente House, Gerente Imob, Corretor House e Corretor Imob.
+- Mantém inclusão, exclusão, renomeação e movimentação de linhas e colunas
+  restritas a quem possui `crm.settings.manage`.
+- Repete a separação de capacidades na API e no banco; requisições diretas dos
+  perfis comerciais não conseguem alterar a estrutura nem as identificações.
+
 ## 2026-10-22 - Next.js 16.4.1 com correções de segurança
 
 - Atualiza o Next.js de `16.3.8` para `16.4.1`, versão corrigida para os avisos

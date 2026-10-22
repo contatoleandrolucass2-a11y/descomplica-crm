@@ -96,8 +96,12 @@ export function isGroupedForecastDocument(document: ForecastDocument): boolean {
   );
 }
 
-function appendGroup(document: ForecastDocument, label: string): ForecastDocument {
-  const id = crypto.randomUUID();
+function appendGroup(
+  document: ForecastDocument,
+  label: string,
+  stableId?: string,
+): ForecastDocument {
+  const id = stableId ?? crypto.randomUUID();
   const columns = [
     { id: `f_${id}`, label },
     { id: `a_${id}`, label },
@@ -126,13 +130,13 @@ export function createForecastDocument(brokers: readonly string[] = []): Forecas
     rows: (brokers.length > 0
       ? brokers
       : Array.from({ length: 10 }, (_, index) => `Corretor ${index + 1}`)
-    ).map((broker) => ({
-      id: crypto.randomUUID(),
+    ).map((broker, index) => ({
+      id: `broker_${index + 1}`,
       cells: { broker, [FORECAST_ACTION_PLAN_ID]: "" },
     })),
   };
   for (let index = 1; index <= 7; index++)
-    document = appendGroup(document, `Empreendimento ${index}`);
+    document = appendGroup(document, `Empreendimento ${index}`, `group_${index}`);
   return document;
 }
 

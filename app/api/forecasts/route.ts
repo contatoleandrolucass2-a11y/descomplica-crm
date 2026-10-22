@@ -67,6 +67,8 @@ export async function GET(request: Request) {
           : createForecastTemplate(result.data.template, brokerNames),
       brokers: brokerNames,
       can_edit: selection.data.segment === "general" ? false : result.data.can_edit,
+      can_manage_structure:
+        selection.data.segment === "general" ? false : result.data.can_manage_structure,
       period,
       selection: { segment: selection.data.segment, manager: selection.data.manager },
     });
@@ -80,7 +82,10 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   const authorization = await authorizePageRoute("/app/gestao/previsao");
   if (!authorization.ok) return authorization.response;
-  if (!authorization.context.permissions.includes("crm.settings.manage"))
+  if (
+    !authorization.context.permissions.includes("crm.settings.manage") &&
+    !authorization.context.permissions.includes("crm.management.forecast.values.edit")
+  )
     return failure("forbidden", 403);
   if (!isSameOriginRequest(request, process.env.APP_ORIGIN)) return failure("invalid_origin", 403);
   if (!request.headers.get("content-type")?.startsWith("application/json"))
