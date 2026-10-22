@@ -2,49 +2,33 @@ import { readFileSync } from "node:fs";
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
-import {
-  MetaAdsServiceCard,
-  MetaAdsStatusDetails,
-} from "@/app/(protected)/app/configuracoes/conectar-sistemas/MetaAdsIntegration";
-import { SalesforceConsoleDialog } from "@/app/(protected)/app/configuracoes/conectar-sistemas/SalesforceConsoleDialog";
-import {
-  emptyMetaAdsConnectionSnapshot,
-  META_ADS_MANAGER_URL,
-} from "@/lib/crm/meta-ads/connection-contract";
+import { MetaAdsServiceCard } from "@/app/(protected)/app/configuracoes/conectar-sistemas/MetaAdsIntegration";
+import { emptyMetaAdsConnectionSnapshot } from "@/lib/crm/meta-ads/connection-contract";
 
 describe("Meta Ads integration presentation", () => {
-  it("presents the official read-only connection and metric collection", () => {
+  it("keeps only the official read-only API status card", () => {
     const markup = renderToStaticMarkup(
-      <MetaAdsStatusDetails
+      <MetaAdsServiceCard
         snapshot={{
           ...emptyMetaAdsConnectionSnapshot("connected"),
           checkedAt: "2026-10-16T15:00:00Z",
           receivedAt: "2026-10-16T15:00:01Z",
         }}
-        checking={false}
-        consoleAvailable={false}
-        onConnect={() => {}}
-        onVerify={() => {}}
       />,
     );
     expect(markup).toContain("Conectado");
-    expect(markup).toContain("Coleta de métricas");
-    expect(markup).toContain("Ativa · somente leitura");
-    expect(markup).toContain("não publica, edita, pausa nem remove anúncios");
-    expect(markup).toContain("1080988750909489");
-    expect(markup).toContain("310106776631136");
-    expect(markup).toContain(META_ADS_MANAGER_URL.replaceAll("&", "&amp;"));
-    expect(markup).not.toContain("redirect_session_id");
-    expect(markup).toContain('disabled=""');
-    expect(markup).not.toContain('type="password"');
+    expect(markup).toContain("API oficial somente leitura");
+    expect(markup).not.toContain("Conectar Meta Ads");
+    expect(markup).not.toContain("Verificar Meta Ads");
+    expect(markup).not.toContain("console");
   });
 
   it.each([
     ["unconfigured", "Não configurado"],
-    ["waiting", "Não verificado"],
-    ["reauth_required", "Login necessário"],
-    ["unavailable", "Não conectado"],
-    ["stale", "Sem confirmação recente"],
+    ["waiting", "Verificando"],
+    ["reauth_required", "Autorização necessária"],
+    ["unavailable", "Indisponível"],
+    ["stale", "Sem verificação recente"],
     ["wrong_account", "Conta divergente"],
   ] as const)("renders %s without fabricating session dates", (state, label) => {
     const markup = renderToStaticMarkup(
@@ -54,17 +38,6 @@ describe("Meta Ads integration presentation", () => {
     expect(markup).toContain("Sem verificação");
     expect(markup).not.toContain("<time");
     expect(markup).not.toContain("Sessão conectada");
-  });
-
-  it("gives the Meta console its own accessible title and viewport", () => {
-    const markup = renderToStaticMarkup(
-      <SalesforceConsoleDialog provider="meta-ads" onClose={() => {}} />,
-    );
-    expect(markup).toContain('aria-labelledby="meta-ads-console-title"');
-    expect(markup).toContain("Meta Ads · Facebook Ads");
-    expect(markup).toContain("data-meta-ads-console-screen");
-    expect(markup).not.toContain("data-salesforce-console-screen");
-    expect(markup).not.toContain('type="password"');
   });
 
   it("preserves the supplied vector contours and blue symbol across logo themes", () => {

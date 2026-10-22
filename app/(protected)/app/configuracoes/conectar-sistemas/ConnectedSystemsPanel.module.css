@@ -190,16 +190,8 @@
   padding: 0 16px 12px;
 }
 
-.qlikDetails,
-.metaDetails {
+.qlikDetails {
   margin-bottom: 18px;
-}
-
-.metaActions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  padding-top: 14px;
 }
 
 .salesforceDetailsHeading {
