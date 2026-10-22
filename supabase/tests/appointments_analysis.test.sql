@@ -1,6 +1,6 @@
 begin;
--- 36 existing assertions plus six v4 contract/projection assertions.
-select plan(42);
+-- 42 existing assertions plus six dashboard redaction assertions.
+select plan(48);
 
 create function pg_temp.analysis_fixture()
 returns jsonb language sql as $$
@@ -204,12 +204,13 @@ select is(public.ingest_crm_salesforce_snapshot(jsonb_set(pg_temp.analysis_paylo
 reset role;
 select is((select payload->'version' from public.crm_dashboard_analysis where view_key='all'),
   '2'::jsonb,'stored slices preserve version 2');
-select is(public.ingest_crm_salesforce_snapshot(jsonb_set(
+select is(public.ingest_crm_salesforce_snapshot(jsonb_set(jsonb_set(
   pg_temp.analysis_payload('ac000000-0000-4000-8000-000000000002','2026-08-04T07:00:00Z'),
+  '{dashboard,snapshotKey}','"analysis-test-v3"'::jsonb),
   '{dashboard,analysis}',pg_temp.appointment_analysis_v3()))->>'status',
   'succeeded','machine RPC accepts v3');
 select is((select jsonb_build_object('version',payload->'version','brokerCount',payload->'brokerCount')
-  from public.crm_dashboard_analysis where view_key='all'),
+  from public.crm_dashboard_analysis where view_key='all' and payload->'version'='3'::jsonb),
   '{"version":3,"brokerCount":8}'::jsonb,'stored v3 slices preserve broker population');
 set local role service_role;
 select is(public.ingest_crm_salesforce_snapshot(jsonb_set(
@@ -220,11 +221,13 @@ reset role;
 select is((select jsonb_build_object(
     'version',payload->'version','brokerCount',payload->'brokerCount',
     'brokerManagerCount',payload->'brokerManagerCount')
-  from public.crm_dashboard_analysis where view_key='all'),
+  from public.crm_dashboard_analysis where view_key='all' and payload->'version'='4'::jsonb),
   '{"version":4,"brokerCount":8,"brokerManagerCount":2}'::jsonb,
   'stored v4 slices preserve official broker and manager populations');
-select set_config('test.appointment_snapshot',(select id::text from public.crm_dashboard_snapshots
-  where snapshot_key='analysis-test'),true);
+select set_config('test.appointment_snapshot',(select s.id::text
+  from public.crm_dashboard_snapshots s
+  join public.crm_dashboard_analysis a on a.snapshot_id=s.id and a.view_key='all'
+  where s.snapshot_key='analysis-test-v3' and a.payload->'version'='3'::jsonb),true);
 set local role authenticated;
 select is((select count(*) from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),0::bigint,'missing identity yields no stage data');
@@ -244,8 +247,67 @@ on conflict (profile_key,effective_month) do update set
 insert into auth.users(id,email) values ('ac190000-0000-4000-8000-000000000001','appointments@example.test');
 select public.bootstrap_master_user('ac190000-0000-4000-8000-000000000001');
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason) values
-  ('ac190000-0000-4000-8000-000000000001','crm.dashboard.view','deny','Synthetic stage-only test'),
   ('ac190000-0000-4000-8000-000000000001','crm.ranking.view','deny','Synthetic ranking protection');
+select set_config('request.jwt.claim.sub','ac190000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.role','authenticated',true);
+set local role authenticated;
+select is((select count(*) from public.read_crm_dashboard_analysis(
+  current_setting('test.appointment_snapshot')::bigint,array['all'])),1::bigint,
+  'v3 dashboard remains readable without ranking permission');
+select is((select payload->'facts' from public.read_crm_dashboard_analysis(
+  current_setting('test.appointment_snapshot')::bigint,array['all'])),
+  '[[0,"2026-08-04",0,0,0,0,-1,9,0,0,-1],[1,"2026-08-04",1,1,1,0,-1,5,0,0,-1]]'::jsonb,
+  'v3 dashboard preserves eleven-field facts and exact totals after redaction');
+select is((select jsonb_build_object(
+    'developments',payload#>'{dimensions,developments}',
+    'stores',payload#>'{dimensions,stores}')
+  from public.read_crm_dashboard_analysis(
+    current_setting('test.appointment_snapshot')::bigint,array['all'])),
+  '{"developments":[],"stores":[]}'::jsonb,
+  'v3 dashboard removes both protected dictionaries');
+select is((select jsonb_build_object(
+    'accountName',payload#>'{appointments,0,accountName}',
+    'accountRanking',payload#>'{appointments,0,accountRanking}')
+  from public.read_crm_dashboard_analysis(
+    current_setting('test.appointment_snapshot')::bigint,array['all'])),
+  '{"accountName":"","accountRanking":""}'::jsonb,
+  'v3 dashboard redacts protected appointment account fields');
+select ok(not exists (
+  select 1
+  from public.read_crm_dashboard_analysis(
+    current_setting('test.appointment_snapshot')::bigint,array['all']) analysis,
+    lateral jsonb_array_elements(analysis.payload->'facts') fact
+  group by jsonb_build_array(fact->0,fact->1,fact->2,fact->3,fact->4,fact->5,fact->6,fact->10)
+  having count(*) > 1 or bool_or(jsonb_array_length(fact) <> 11)
+), 'v3 redaction preserves tuple shape and aggregate uniqueness');
+reset role;
+select set_config('request.jwt.claim.sub','',true);
+select set_config('test.appointment_snapshot',(select s.id::text
+  from public.crm_dashboard_snapshots s
+  join public.crm_dashboard_analysis a on a.snapshot_id=s.id and a.view_key='all'
+  where s.snapshot_key='analysis-test' and a.payload->'version'='4'::jsonb),true);
+select set_config('request.jwt.claim.sub','ac190000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.role','authenticated',true);
+set local role authenticated;
+select ok((select payload->'version'='4'::jsonb
+    and payload#>'{dimensions,developments}'='[]'::jsonb
+    and payload#>'{dimensions,stores}'='[]'::jsonb
+    and payload#>>'{appointments,0,accountName}'=''
+    and payload#>>'{appointments,0,accountRanking}'=''
+    and not exists (
+      select 1 from jsonb_array_elements(payload->'facts') fact
+      group by jsonb_build_array(
+        fact->0,fact->1,fact->2,fact->3,fact->4,fact->5,fact->6,fact->10
+      )
+      having count(*) > 1 or bool_or(jsonb_array_length(fact) <> 11)
+    )
+  from public.read_crm_dashboard_analysis(
+    current_setting('test.appointment_snapshot')::bigint,array['all'])),
+  'v4 dashboard preserves shape, uniqueness and protected-field redaction');
+reset role;
+select set_config('request.jwt.claim.sub','',true);
+insert into public.user_permission_overrides(user_id,permission_key,effect,reason) values
+  ('ac190000-0000-4000-8000-000000000001','crm.dashboard.view','deny','Synthetic stage-only test');
 select set_config('request.jwt.claim.sub','ac190000-0000-4000-8000-000000000001',true);
 select set_config('request.jwt.claim.role','authenticated',true);
 set local role authenticated;

@@ -20,6 +20,14 @@
 - Acrescenta regressão Chromium com os cabeçalhos de produção e cobertura
   autenticada de submenus e recarga, sem relaxar as proteções do CRM.
 
+## 2026-10-21 - Dashboard v3 e v4 para perfis sem Ranking
+
+- Mantém o Dashboard disponível para Coordenador, Gerente Imob e Corretor Imob
+  ao projetar snapshots v3 e v4 com o índice de loja exigido pelo contrato.
+- Reagrupa empreendimentos e lojas protegidos sem alterar totais e remove nomes
+  e classificações de contas dos agendamentos quando Ranking não é autorizado.
+- Acrescenta regressão pgTAP para formato, unicidade, totais, ACL e redação.
+
 ## 2026-10-21 - Publicacao e reconciliacao do painel de Agendamentos
 
 - Publica o painel inteligente com meta mensal, velocimetro, filtros cruzados,
