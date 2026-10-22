@@ -328,7 +328,13 @@ export function metaAdsApiEnvironmentValues(contents) {
   return Object.fromEntries(
     metaAdsApiKeys.map((key) => {
       const value = entries.has(key) ? literal(entries.get(key)) : "";
-      return [key, value || (key === "META_ADS_API_ENABLED" ? "false" : "")];
+      const fallback =
+        key === "META_ADS_API_ENABLED"
+          ? "false"
+          : key === "META_ADS_API_VERSION"
+            ? metaAdsApiVersion
+            : "";
+      return [key, value || fallback];
     }),
   );
 }
