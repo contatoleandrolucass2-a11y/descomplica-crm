@@ -260,8 +260,17 @@ test("Meta Ads API activation stores only the read-only credential and fixed acc
     META_ADS_API_ENABLED: "false",
     META_ADS_ACCESS_TOKEN: "",
     META_ADS_ACCOUNT_ID: "",
-    META_ADS_API_VERSION: "",
+    META_ADS_API_VERSION: "v26.0",
   });
+  const disabledOutput = execFileSync(
+    process.execPath,
+    ["--eval", metaAdsApiContainerDigestScript],
+    {
+      env: metaAdsApiEnvironmentValues(before),
+      encoding: "utf8",
+    },
+  );
+  assertMetaAdsApiContainerDigests(before, JSON.parse(disabledOutput));
   for (const invalid of ["short", "x".repeat(4097), "x y".repeat(20), "x$y".repeat(20)])
     assert.throws(
       () => transformMetaAdsApiReleaseEnvironment(before, oldSha, newSha, invalid),
