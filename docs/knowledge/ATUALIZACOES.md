@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-22: diagnostico e correcao da visao Geral vazia da Previsao
+
+- A abertura ocorreu na branch `codex/previsao-geral-fallback`, baseada em
+  `origin/main` `9c655968f2a1032b4f015d48021659438538eae3`. O health publico consultado
+  em 22/10/2026 respondeu HTTP 200, `status=ok`, na versao publicada
+  `a031980b55979d5dfa10983bc2c4e6b1cf9fff5e`; portanto a producao continha a
+  entrega anterior da visao Geral, mas ainda nao esta correcao.
+- A causa confirmada estava na rota `GET /api/forecasts`: a RPC retornava o
+  ultimo modelo salvo, mas a rota o descartava para `segment=general`. Em um
+  final de semana sem registros, a resposta mantinha `sections=[]` e a tela
+  mostrava apenas a mensagem vazia.
+- O fallback agora devolve uma copia limpa do modelo somente quando o periodo
+  nao possui secoes. A tabela Geral preserva os nomes dos empreendimentos e
+  apresenta House, Imob, Previsao, Realizado e totais com zero; valores, nomes de
+  corretores e planos de acao de periodos anteriores nao sao reutilizados.
+- Evidencia local: 108 testes de API e dominio, 13 cenarios Chromium, lint,
+  typecheck e build passaram. A suite Vitest integral aprovou 4.098 testes e teve
+  um timeout concorrente do simulador associativo, cujo arquivo aprovou 13/13
+  isoladamente. Os testes Node e de release preservaram falhas locais de
+  permissoes POSIX e arquivos privados no Windows, fora deste diff. A CI Ubuntu,
+  merge e publicacao continuam como etapas separadas a registrar no encerramento.
+
 ## 2026-10-21: abertura dos filtros e indicadores de Agendamentos
 
 - O trabalho iniciou na branch `codex/agendamentos-filtros-kpis`, criada sobre

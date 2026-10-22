@@ -122,6 +122,7 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         seed?: ForecastRecord;
         convertedLegacy?: boolean;
         sections?: ForecastSource[];
+        template?: ForecastDocument | null;
       } = {},
     ) {
       record = options.seed ?? null;
@@ -150,21 +151,23 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
                         : record,
                     sections: url.searchParams.get("segment") === "general" ? sections : [],
                     template:
-                      options.convertedLegacy && record
-                        ? {
-                            title: record.title,
-                            columns: record.columns,
-                            rows: record.rows.map((row) => ({
-                              ...row,
-                              cells: Object.fromEntries(
-                                Object.keys(row.cells).map((columnId) => [
-                                  columnId,
-                                  columnId === "broker" ? row.cells[columnId] : "",
-                                ]),
-                              ),
-                            })),
-                          }
-                        : null,
+                      url.searchParams.get("segment") === "general"
+                        ? (options.template ?? null)
+                        : options.convertedLegacy && record
+                          ? {
+                              title: record.title,
+                              columns: record.columns,
+                              rows: record.rows.map((row) => ({
+                                ...row,
+                                cells: Object.fromEntries(
+                                  Object.keys(row.cells).map((columnId) => [
+                                    columnId,
+                                    columnId === "broker" ? row.cells[columnId] : "",
+                                  ]),
+                                ),
+                              })),
+                            }
+                          : null,
                     can_edit: url.searchParams.get("segment") === "general" ? false : canEdit,
                     period: { start: "2026-10-23", end: "2026-10-25" },
                     selection: {
@@ -527,6 +530,32 @@ describe.runIf(process.env.FORECAST_SETTINGS_BROWSER === "1")(
         }),
       ).toBeVisible();
       await browserExpect.poll(() => gets.at(-1)).toContain("date=2026-10-03&segment=general");
+    });
+
+    it("shows the latest enterprise structure in General before the period has saves", async () => {
+      let template = createForecastDocument(["Corretor de referência"]);
+      const firstGroup = getForecastGroups(template)[0]!;
+      template = renameForecastGroup(template, firstGroup.id, "Conquista Itaim Paulista");
+      await open({ template });
+
+      await page.getByRole("button", { name: "Geral", exact: true }).click();
+
+      await browserExpect(
+        page.getByRole("columnheader", { name: "Conquista Itaim Paulista", exact: true }),
+      ).toBeVisible();
+      await browserExpect(
+        page.getByRole("rowheader", { name: "House", exact: true }),
+      ).toBeVisible();
+      await browserExpect(page.getByRole("rowheader", { name: "Imob", exact: true })).toBeVisible();
+      await browserExpect(page.getByLabel("Total Previsão, House", { exact: true })).toHaveText(
+        "0",
+      );
+      await browserExpect(page.getByLabel("Total Realizado, Imob", { exact: true })).toHaveText(
+        "0",
+      );
+      await browserExpect(
+        page.getByText("Nenhuma previsão salva para este final de semana.", { exact: true }),
+      ).toHaveCount(0);
     });
 
     it("never labels the previous manager data as a failed new selection", async () => {

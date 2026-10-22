@@ -62,7 +62,7 @@ export async function GET(request: Request) {
       forecast,
       sections,
       template:
-        selection.data.segment === "general" || forecast
+        forecast || sections.length > 0
           ? null
           : createForecastTemplate(result.data.template, brokerNames),
       brokers: brokerNames,

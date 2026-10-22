@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-22 - Estrutura da visão Geral sem lançamentos no período
+
+A rota de previsões descartava o modelo mais recente sempre que a seleção era
+`general`. Como a agregação recebe apenas previsões efetivamente salvas no fim de
+semana, um período novo resultava em `sections=[]` e a interface ocultava toda a
+tabela. A rota agora devolve uma cópia limpa do último modelo somente quando não
+há nenhuma seção no período. A interface usa essa estrutura para renderizar
+House e Imob com valores e totais zerados, sem copiar dados de outro período.
+
+A regressão cobre o contrato da API e o cenário real no Chromium. Foram aprovados
+108 testes de domínio/API e 13 cenários da página, incluindo a ausência da
+mensagem vazia e a presença dos empreendimentos, das duas origens e dos totais.
+Lint, typecheck e build também passaram. A suíte Vitest integral aprovou 4.098
+testes e teve um timeout concorrente fora deste escopo, que aprovou seus 13 casos
+isoladamente. Os testes Node e de release mantiveram falhas locais já conhecidas
+em contratos POSIX/arquivos privados no Windows; a CI Ubuntu permanece o gate.
+
 ## 2026-10-21 - Integração oficial Meta Ads somente leitura
 
 O aplicativo `Descomplica Ads Analytics` foi configurado no portfólio

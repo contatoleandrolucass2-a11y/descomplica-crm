@@ -165,6 +165,7 @@ export function ForecastSettings() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState("");
   const [sections, setSections] = useState<ForecastSection[]>([]);
+  const [generalTemplate, setGeneralTemplate] = useState<ForecastDocument | null>(null);
   const root = useRef<HTMLElement>(null);
   const calendarButton = useRef<HTMLButtonElement>(null);
   const calendarDialog = useRef<HTMLDialogElement>(null);
@@ -242,6 +243,7 @@ export function ForecastSettings() {
         setRevision(snapshot.forecast?.revision ?? 0);
         setCanEdit(snapshot.can_edit);
         setSections(snapshot.sections);
+        setGeneralTemplate(segment === "general" ? snapshot.template : null);
         setLoaded(true);
         setConflict(false);
         setNotice("");
@@ -706,8 +708,10 @@ export function ForecastSettings() {
           )}
           {segment === "general" && loaded && (
             <div className={styles.generalSections} aria-label="Previsão geral por origem">
-              {sections.length > 0 && <GeneralForecastTable sections={sections} />}
-              {sections.length === 0 && (
+              {(sections.length > 0 || generalTemplate) && (
+                <GeneralForecastTable sections={sections} fallback={generalTemplate} />
+              )}
+              {sections.length === 0 && !generalTemplate && (
                 <div className={styles.empty}>
                   <p>Nenhuma previsão salva para este final de semana.</p>
                 </div>
@@ -1177,17 +1181,27 @@ function formatTotal(value: number | null | undefined) {
   return value == null ? "—" : formatForecastCents(value);
 }
 
-function GeneralForecastTable({ sections }: { sections: ForecastSection[] }) {
+function GeneralForecastTable({
+  sections,
+  fallback,
+}: {
+  sections: ForecastSection[];
+  fallback: ForecastDocument | null;
+}) {
   const [activeCell, setActiveCell] = useState<{
     rowId?: "house" | "imob";
     columnId?: "forecast" | "actual";
     groupId?: string;
   }>({});
   const aggregate = aggregateGeneralForecast(
-    sections.map((section) => ({
-      segment: section.segment,
-      forecast: documentOnly(section.forecast),
-    })),
+    sections.length > 0
+      ? sections.map((section) => ({
+          segment: section.segment,
+          forecast: documentOnly(section.forecast),
+        }))
+      : fallback
+        ? (["house", "imob"] as const).map((segment) => ({ segment, forecast: fallback }))
+        : [],
   );
 
   return (
