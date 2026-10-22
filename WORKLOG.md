@@ -30,6 +30,15 @@ Validação focal: 36 testes Vitest e 52 testes Node passaram; lint e typecheck
 também passaram. A suíte integral, build, CI Linux, imagem imutável, promoção
 coordenada e prova autenticada de produção permanecem gates separados.
 
+## 2026-10-22 - Fonte oficial acessível para o gate documental
+
+A página principal da Prefeitura de São Paulo passou a responder HTTP 403 aos
+runners do GitHub no gate de documentação. As duas fontes de ITBI da política
+foram atualizadas para o espelho oficial `smartsampa.prefeitura.sp.gov.br`, que
+publica as mesmas páginas municipais de isenção e cálculo. A conferência em
+22/10/2026 encontrou os mesmos limites de 2026; nenhuma taxa, vigência, fórmula
+ou regra comercial foi alterada.
+
 ## 2026-10-22 - Compatibilidade com agrupamento do gerente dos corretores
 
 O relatório de corretores mantém `Gerente de Vendas: Nome completo` como um
