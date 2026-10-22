@@ -1,13 +1,13 @@
 "use client";
 
-import { useId, useMemo, useState, type CSSProperties, type ReactNode } from "react";
+import { useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { CalendarDays, X } from "lucide-react";
 
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 import {
   analyzeAppointments,
   appointmentMonthlyGoal,
   appointmentYears,
-  appointmentWeekOfMonth,
   saoPauloDate,
   type AppointmentBucket,
   type AppointmentFilters,
@@ -18,6 +18,25 @@ import styles from "./AppointmentsDashboard.module.css";
 const number = new Intl.NumberFormat("pt-BR");
 const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
 const displayDate = (date: string) => date.split("-").reverse().join("/");
+const calendarDate = new Intl.DateTimeFormat("pt-BR", {
+  dateStyle: "long",
+  timeZone: "UTC",
+});
+const monthNames = [
+  "Janeiro",
+  "Fevereiro",
+  "Março",
+  "Abril",
+  "Maio",
+  "Junho",
+  "Julho",
+  "Agosto",
+  "Setembro",
+  "Outubro",
+  "Novembro",
+  "Dezembro",
+] as const;
+const weekDays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"] as const;
 
 function Chart({
   title,
@@ -59,6 +78,7 @@ function Columns({
   selected,
   isSelected,
   onSelect,
+  monthly = false,
 }: {
   buckets: AppointmentBucket[];
   label: string;
@@ -66,6 +86,7 @@ function Columns({
   selected?: string | undefined;
   isSelected?: ((bucket: AppointmentBucket) => boolean) | undefined;
   onSelect?: (bucket: AppointmentBucket) => void;
+  monthly?: boolean;
 }) {
   if (!buckets.length) return <Empty />;
   const max = Math.max(1, ...buckets.map((item) => item.total));
@@ -74,7 +95,7 @@ function Columns({
       <p className={styles.axis}>Quantidade de agendamentos</p>
       <ol
         aria-label={label}
-        className={`${styles.columns} ${daily ? styles.daily : ""}`}
+        className={`${styles.columns} ${daily ? styles.daily : ""} ${monthly ? styles.monthly : ""}`}
         style={{ "--column-count": buckets.length } as CSSProperties}
       >
         {buckets.map((item) => (
@@ -207,12 +228,12 @@ function ConversionKpi({
       {source === null || target === null ? (
         <strong>Indisponível</strong>
       ) : (
-        <div className={styles.conversionResult}>
-          <strong>
-            {number.format(source)} <span aria-hidden="true">→</span> {number.format(target)}
-          </strong>
-          <span>{percent === null ? "—" : `${decimal.format(percent)}%`}</span>
-        </div>
+        <strong
+          className={styles.conversionPercent}
+          aria-label={`${decimal.format(percent ?? 0)} por cento de aproveitamento`}
+        >
+          {percent === null ? "—" : `${decimal.format(percent)}%`}
+        </strong>
       )}
       <p>
         {ratio === null
@@ -223,10 +244,197 @@ function ConversionKpi({
   );
 }
 
+function CalendarFilter({
+  month,
+  years,
+  coverageStart,
+  referenceDate,
+  selectedDates,
+  onMonthChange,
+  onToggleDate,
+  onSelectWholeMonth,
+}: {
+  month: string;
+  years: string[];
+  coverageStart: string;
+  referenceDate: string;
+  selectedDates: string[];
+  onMonthChange: (month: string) => void;
+  onToggleDate: (date: string) => void;
+  onSelectWholeMonth: () => void;
+}) {
+  const dialog = useRef<HTMLDialogElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const close = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
+  const descriptionId = useId();
+  const [year, monthNumber] = month.split("-").map(Number) as [number, number];
+  const dayCount = new Date(Date.UTC(year, monthNumber, 0)).getUTCDate();
+  const leadingDays = new Date(Date.UTC(year, monthNumber - 1, 1)).getUTCDay();
+  const cells = Array.from({ length: Math.ceil((leadingDays + dayCount) / 7) * 7 }, (_, index) => {
+    const day = index - leadingDays + 1;
+    return day > 0 && day <= dayCount ? day : null;
+  });
+  const weeks = Array.from({ length: cells.length / 7 }, (_, index) =>
+    cells.slice(index * 7, index * 7 + 7),
+  );
+  const selected = new Set(selectedDates);
+  const summary =
+    selectedDates.length === 0
+      ? `${monthNames[monthNumber - 1]} de ${year}`
+      : selectedDates.length === 1
+        ? displayDate(selectedDates[0]!)
+        : `${selectedDates.length} dias selecionados`;
+  const setMonthPart = (nextYear: number, nextMonth: number) =>
+    onMonthChange(`${nextYear}-${String(nextMonth).padStart(2, "0")}`);
+  const setCalendarYear = (nextYear: number) => {
+    const candidate = `${nextYear}-${String(monthNumber).padStart(2, "0")}`;
+    const firstMonth = coverageStart.slice(0, 7);
+    const lastMonth = referenceDate.slice(0, 7);
+    onMonthChange(
+      candidate < firstMonth ? firstMonth : candidate > lastMonth ? lastMonth : candidate,
+    );
+  };
+  const open = () => {
+    if (!dialog.current?.open) {
+      dialog.current?.showModal();
+      requestAnimationFrame(() => close.current?.focus());
+    }
+  };
+  return (
+    <div className={styles.calendarField}>
+      <span>Período</span>
+      <button
+        ref={trigger}
+        type="button"
+        className={styles.calendarTrigger}
+        aria-haspopup="dialog"
+        onClick={open}
+      >
+        <CalendarDays size={18} aria-hidden="true" />
+        <span>{summary}</span>
+      </button>
+      <dialog
+        ref={dialog}
+        className={styles.calendarDialog}
+        aria-labelledby={titleId}
+        aria-describedby={descriptionId}
+        onClose={() => trigger.current?.focus()}
+      >
+        <div className={styles.calendarPanel}>
+          <header className={styles.calendarHeader}>
+            <div>
+              <span>CALENDÁRIO</span>
+              <h2 id={titleId}>Selecione o período</h2>
+            </div>
+            <button
+              ref={close}
+              type="button"
+              className={styles.calendarClose}
+              aria-label="Fechar calendário"
+              onClick={() => dialog.current?.close()}
+            >
+              <X size={20} aria-hidden="true" />
+            </button>
+          </header>
+          <p id={descriptionId} className={styles.calendarDescription}>
+            Escolha o mês inteiro ou selecione um ou vários dias.
+          </p>
+          <div className={styles.calendarControls}>
+            <label>
+              <span>Mês</span>
+              <select
+                aria-label="Mês do calendário"
+                value={monthNumber}
+                onChange={(event) => setMonthPart(year, Number(event.target.value))}
+              >
+                {monthNames.map((name, index) => {
+                  const value = `${year}-${String(index + 1).padStart(2, "0")}`;
+                  const unavailable =
+                    value < coverageStart.slice(0, 7) || value > referenceDate.slice(0, 7);
+                  return (
+                    <option key={name} value={index + 1} disabled={unavailable}>
+                      {name}
+                    </option>
+                  );
+                })}
+              </select>
+            </label>
+            <label>
+              <span>Ano</span>
+              <select
+                aria-label="Ano do calendário"
+                value={year}
+                onChange={(event) => setCalendarYear(Number(event.target.value))}
+              >
+                {years.map((item) => (
+                  <option key={item} value={item}>
+                    {item}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+          <div className={styles.calendarGrid} role="grid" aria-label="Dias do mês">
+            <div className={styles.calendarGridRow} role="row">
+              {weekDays.map((day) => (
+                <span key={day} role="columnheader" className={styles.calendarWeekday}>
+                  {day}
+                </span>
+              ))}
+            </div>
+            {weeks.map((week, weekIndex) => (
+              <div className={styles.calendarGridRow} role="row" key={`week-${weekIndex}`}>
+                {week.map((day, dayIndex) => {
+                  if (day === null)
+                    return <span key={`empty-${weekIndex}-${dayIndex}`} aria-hidden="true" />;
+                  const key = `${month}-${String(day).padStart(2, "0")}`;
+                  const unavailable = key < coverageStart || key > referenceDate;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      role="gridcell"
+                      aria-label={calendarDate.format(new Date(`${key}T12:00:00Z`))}
+                      aria-current={key === referenceDate ? "date" : undefined}
+                      aria-selected={selected.has(key)}
+                      disabled={unavailable}
+                      className={styles.calendarDay}
+                      onClick={() => onToggleDate(key)}
+                    >
+                      {day}
+                    </button>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+          <footer className={styles.calendarFooter}>
+            <span aria-live="polite">{summary}</span>
+            <button type="button" onClick={onSelectWholeMonth}>
+              Selecionar mês inteiro
+            </button>
+          </footer>
+        </div>
+      </dialog>
+    </div>
+  );
+}
+
 function DashboardFilters({
   filters,
   options,
   onChange,
+  month,
+  years,
+  coverageStart,
+  referenceDate,
+  selectedDates,
+  onMonthChange,
+  onToggleDate,
+  onSelectWholeMonth,
+  activeFilterCount,
+  onClear,
 }: {
   filters: AppointmentFilters;
   options: {
@@ -239,6 +447,16 @@ function DashboardFilters({
     key: K,
     value: AppointmentFilters[K] | undefined,
   ) => void;
+  month: string;
+  years: string[];
+  coverageStart: string;
+  referenceDate: string;
+  selectedDates: string[];
+  onMonthChange: (month: string) => void;
+  onToggleDate: (date: string) => void;
+  onSelectWholeMonth: () => void;
+  activeFilterCount: number;
+  onClear: () => void;
 }) {
   const selects = [
     {
@@ -308,6 +526,65 @@ function DashboardFilters({
           </label>
         );
       })}
+      <CalendarFilter
+        month={month}
+        years={years}
+        coverageStart={coverageStart}
+        referenceDate={referenceDate}
+        selectedDates={selectedDates}
+        onMonthChange={onMonthChange}
+        onToggleDate={onToggleDate}
+        onSelectWholeMonth={onSelectWholeMonth}
+      />
+      <div className={styles.clearField}>
+        <span aria-hidden="true">Filtros</span>
+        <button
+          type="button"
+          className={styles.clearFilters}
+          disabled={activeFilterCount === 0}
+          onClick={onClear}
+        >
+          {activeFilterCount === 0
+            ? "Limpar filtros"
+            : `Limpar ${activeFilterCount} ${activeFilterCount === 1 ? "filtro" : "filtros"}`}
+        </button>
+      </div>
+    </section>
+  );
+}
+
+type RecencyItem = {
+  owner: string;
+  manager: string;
+  lastAppointmentDate: string;
+  daysSinceLastAppointment: number;
+};
+
+function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] }) {
+  const id = useId();
+  return (
+    <section className={`${styles.card} ${styles.recencyCard}`} aria-labelledby={id}>
+      <header className={styles.recencyHeader}>
+        <h2 id={id}>{title}</h2>
+        <span>{number.format(items.length)} corretores</span>
+      </header>
+      {items.length === 0 ? (
+        <Empty>Nenhum corretor nesta faixa.</Empty>
+      ) : (
+        <ol className={styles.recencyList}>
+          {items.map((item) => (
+            <li key={item.owner}>
+              <strong>{item.owner}</strong>
+              <span>{item.manager || "Gerente não informado"}</span>
+              <b>
+                {item.daysSinceLastAppointment === 0
+                  ? "Hoje"
+                  : `${number.format(item.daysSinceLastAppointment)} ${item.daysSinceLastAppointment === 1 ? "dia" : "dias"}`}
+              </b>
+            </li>
+          ))}
+        </ol>
+      )}
     </section>
   );
 }
@@ -402,8 +679,7 @@ function AppointmentTable({
                 const select = () =>
                   onSelect(
                     {
-                      createdDate: saoPauloDate(row.createdAt),
-                      week: appointmentWeekOfMonth(saoPauloDate(row.createdAt)),
+                      createdDates: [saoPauloDate(row.createdAt)],
                       regionalManager: row.regionalManager,
                       manager: row.salesManager,
                       owner: row.owner,
@@ -450,7 +726,6 @@ function AppointmentTable({
 
 export function AppointmentsDashboard({
   analysis,
-  generatedAt,
   individualGoal = null,
   timezone = "America/Sao_Paulo",
   canViewDevelopmentRankings = true,
@@ -476,7 +751,6 @@ export function AppointmentsDashboard({
     [analysis, filters, selectedMonth, selectedYear],
   );
   const yearId = useId();
-  const monthId = useId();
   if (!analysis || !result)
     return (
       <section className={styles.card}>
@@ -485,11 +759,16 @@ export function AppointmentsDashboard({
       </section>
     );
   const years = appointmentYears(analysis);
+  const referenceMonth = analysis.referenceDate.slice(0, 7);
+  const selectedDates = filters.createdDates ?? [];
   const monthUnavailable = result.coverage === "unavailable";
   const monthlyGoal = appointmentMonthlyGoal(individualGoal, result.brokerCount);
-  const activeFilterCount = Object.values(filters).filter(
-    (value) => value !== undefined && value !== "",
-  ).length;
+  const calendarActive = selectedMonth !== referenceMonth || selectedDates.length > 0;
+  const activeFilterCount =
+    Object.entries(filters).filter(
+      ([key, value]) =>
+        key !== "createdDates" && value !== undefined && value !== "" && value !== null,
+    ).length + (calendarActive ? 1 : 0);
   const toggleFilter = <K extends keyof AppointmentFilters>(
     key: K,
     value: AppointmentFilters[K],
@@ -516,6 +795,52 @@ export function AppointmentsDashboard({
       return next;
     });
   };
+  const selectMonth = (month: string) => {
+    setSelectedMonth(month);
+    setSelectedYear(month.slice(0, 4));
+    setSelectedRow("");
+    setRowBaseFilters(null);
+    setFilters((current) => {
+      const next = { ...current };
+      delete next.createdDate;
+      delete next.createdDates;
+      delete next.week;
+      return next;
+    });
+  };
+  const toggleCalendarDate = (date: string) => {
+    setSelectedRow("");
+    setRowBaseFilters(null);
+    setFilters((current) => {
+      const currentDates = current.createdDates ?? [];
+      const nextDates = currentDates.includes(date)
+        ? currentDates.filter((item) => item !== date)
+        : [...currentDates, date].sort();
+      const next = { ...current };
+      delete next.createdDate;
+      if (nextDates.length === 0) delete next.createdDates;
+      else next.createdDates = nextDates;
+      return next;
+    });
+  };
+  const selectWholeMonth = () => {
+    setSelectedRow("");
+    setRowBaseFilters(null);
+    setFilters((current) => {
+      const next = { ...current };
+      delete next.createdDate;
+      delete next.createdDates;
+      delete next.week;
+      return next;
+    });
+  };
+  const clearAllFilters = () => {
+    setSelectedMonth("");
+    setSelectedYear("");
+    setFilters({});
+    setSelectedRow("");
+    setRowBaseFilters(null);
+  };
   const paired =
     result.plannedToday === null || result.performedToday === null
       ? []
@@ -526,77 +851,26 @@ export function AppointmentsDashboard({
   return (
     <div className={styles.dashboard}>
       <h1 className={styles.title}>Agendamentos</h1>
-      <div className={styles.toolbar}>
-        <div>
-          <label htmlFor={monthId}>Período dos gráficos, indicadores e tabela</label>
-          <input
-            id={monthId}
-            type="month"
-            min={analysis.coverageStart.slice(0, 7)}
-            max={analysis.referenceDate.slice(0, 7)}
-            value={selectedMonth}
-            onChange={(event) => {
-              if (/^\d{4}-\d{2}$/.test(event.target.value)) {
-                setSelectedMonth(event.target.value);
-                setSelectedRow("");
-                setRowBaseFilters(null);
-              }
-            }}
-          />
-        </div>
-        <p aria-live="polite">
-          {monthUnavailable ? (
-            "Período fora da cobertura disponível"
-          ) : (
-            <>
-              <strong>{number.format(result.total)}</strong> agendamentos no período
-            </>
-          )}
-        </p>
-        {activeFilterCount > 0 && (
-          <button
-            type="button"
-            className={styles.clearFilters}
-            onClick={() => {
-              setFilters({});
-              setSelectedRow("");
-              setRowBaseFilters(null);
-            }}
-          >
-            Limpar {activeFilterCount} {activeFilterCount === 1 ? "filtro" : "filtros"}
-          </button>
-        )}
-      </div>
       <p className="sr-only" aria-live="polite">
-        {activeFilterCount > 0
-          ? `${activeFilterCount} filtros ativos. ${result.total} registros encontrados.`
-          : "Nenhum filtro de gráfico ativo."}
-      </p>
-      <p className={styles.coverage}>
-        Cobertura da fonte: {displayDate(analysis.coverageStart)} a{" "}
-        {displayDate(analysis.referenceDate)}.
-        {result.coverage === "partial" &&
-          " Mês selecionado com cobertura parcial; somente dias disponíveis são exibidos."}
-        {generatedAt && (
-          <>
-            {" "}
-            Atualização:{" "}
-            <time dateTime={generatedAt}>
-              {new Intl.DateTimeFormat("pt-BR", {
-                dateStyle: "short",
-                timeStyle: "short",
-                timeZone: timezone,
-              }).format(new Date(generatedAt))}
-            </time>
-            .
-          </>
-        )}
+        {monthUnavailable
+          ? "Período fora da cobertura disponível."
+          : `${activeFilterCount} ${activeFilterCount === 1 ? "filtro ativo" : "filtros ativos"}. ${result.total} registros encontrados.`}
       </p>
 
       <DashboardFilters
         filters={filters}
         options={result.filterOptions}
         onChange={setDimensionFilter}
+        month={selectedMonth}
+        years={years}
+        coverageStart={analysis.coverageStart}
+        referenceDate={analysis.referenceDate}
+        selectedDates={selectedDates}
+        onMonthChange={selectMonth}
+        onToggleDate={toggleCalendarDate}
+        onSelectWholeMonth={selectWholeMonth}
+        activeFilterCount={activeFilterCount}
+        onClear={clearAllFilters}
       />
 
       <div className={styles.kpiGrid}>
@@ -688,8 +962,10 @@ export function AppointmentsDashboard({
               buckets={result.daily}
               label="Agendamentos por dia do mês selecionado"
               daily
-              selected={filters.createdDate}
-              onSelect={(bucket) => toggleFilter("createdDate", bucket.key)}
+              isSelected={(bucket) =>
+                filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
+              }
+              onSelect={(bucket) => toggleCalendarDate(bucket.key)}
             />
           )}
         </Chart>
@@ -703,8 +979,14 @@ export function AppointmentsDashboard({
             <Columns
               buckets={paired}
               label="Agendamentos previstos e realizados hoje"
-              isSelected={() => filters.createdDate === analysis.referenceDate}
-              onSelect={() => toggleFilter("createdDate", analysis.referenceDate)}
+              isSelected={() => selectedDates.includes(analysis.referenceDate)}
+              onSelect={() => {
+                if (selectedMonth !== referenceMonth) selectMonth(referenceMonth);
+                setFilters((current) => ({
+                  ...current,
+                  createdDates: [analysis.referenceDate],
+                }));
+              }}
             />
           )}
         </Chart>
@@ -777,6 +1059,21 @@ export function AppointmentsDashboard({
         </Chart>
       </div>
 
+      <div className={styles.recencyGrid}>
+        <RecencyPanel
+          title="Último agendamento: até 7 dias"
+          items={result.brokerRecency.upTo7Days}
+        />
+        <RecencyPanel
+          title="Último agendamento: de 8 a 14 dias"
+          items={result.brokerRecency.from8To14Days}
+        />
+        <RecencyPanel
+          title="Último agendamento: 15 dias ou mais"
+          items={result.brokerRecency.from15Days}
+        />
+      </div>
+
       <div className={styles.fullRow}>
         <Chart
           title="Agendamentos por mês"
@@ -805,17 +1102,10 @@ export function AppointmentsDashboard({
           <Columns
             buckets={result.monthly}
             label={`Agendamentos por mês de ${selectedYear}`}
+            monthly
             onSelect={(bucket) => {
               const nextMonth = `${selectedYear}-${bucket.key}`;
-              setSelectedMonth(nextMonth);
-              setSelectedRow("");
-              setRowBaseFilters(null);
-              setFilters((current) => {
-                const next = { ...current };
-                delete next.createdDate;
-                delete next.week;
-                return next;
-              });
+              selectMonth(nextMonth);
             }}
           />
           <p className={styles.note}>Somente meses com agendamentos são exibidos.</p>

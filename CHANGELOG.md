@@ -28,6 +28,15 @@
 - Preserva o gate `pnpm audit --audit-level high`; vulnerabilidades altas ou
   críticas continuam bloqueando integração e publicação.
 
+## 2026-10-22 - Calendário e recência em Agendamentos
+
+- Move o período para a barra de filtros e adiciona calendário acessível com
+  seleção de mês, um dia ou vários dias não consecutivos.
+- Recalcula indicadores, funil, gráficos, rankings e tabela no período escolhido,
+  centraliza os números e percentuais e mantém os nomes dos meses legíveis.
+- Inclui três painéis responsivos de recência por corretor, com gerente e dias
+  desde o último agendamento, antes do gráfico anual.
+
 ## 2026-10-22 - Agendamentos responsivo publicado
 
 - Publica quatro filtros globais, Equipe Produtiva em rosca, conversoes do funil

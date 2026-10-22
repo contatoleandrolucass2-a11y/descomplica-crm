@@ -64,7 +64,8 @@
 }
 .filters {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(10rem, 0.85fr) auto;
+  align-items: end;
   gap: 0.75rem;
   margin-bottom: 1rem;
   padding: 0.9rem;
@@ -73,14 +74,18 @@
   border-radius: 1rem;
 }
 .channelField,
-.filterField {
+.filterField,
+.calendarField,
+.clearField {
   min-width: 0;
   margin: 0;
   padding: 0;
   border: 0;
 }
 .channelField legend,
-.filterField > span {
+.filterField > span,
+.calendarField > span,
+.clearField > span {
   display: block;
   margin: 0 0 0.4rem;
   color: var(--analytics-muted);
@@ -128,9 +133,178 @@
   text-overflow: ellipsis;
 }
 .channelSwitch button:focus-visible,
-.filterField select:focus-visible {
+.filterField select:focus-visible,
+.calendarTrigger:focus-visible,
+.calendarClose:focus-visible,
+.calendarControls select:focus-visible,
+.calendarDay:focus-visible,
+.calendarFooter button:focus-visible {
   outline: 3px solid var(--analytics-cyan-strong);
   outline-offset: 2px;
+}
+.calendarTrigger {
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.55rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+  padding: 0.5rem 0.65rem;
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.calendarTrigger span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.calendarDialog {
+  width: min(31rem, calc(100vw - 1.5rem));
+  max-height: calc(100dvh - 1.5rem);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 35%);
+}
+.calendarDialog::backdrop {
+  background: rgb(3 15 24 / 68%);
+  backdrop-filter: blur(3px);
+}
+.calendarPanel {
+  padding: 1rem;
+}
+.calendarHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--analytics-line);
+}
+.calendarHeader > div > span,
+.calendarControls label > span {
+  display: block;
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.calendarHeader h2 {
+  margin: 0.15rem 0 0;
+  font-size: 1.1rem;
+}
+.calendarClose {
+  display: grid;
+  width: 44px;
+  min-height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.calendarDescription {
+  margin: 0.75rem 0;
+  color: var(--analytics-muted);
+  font-size: 0.82rem;
+}
+.calendarControls {
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(6.5rem, 1fr);
+  gap: 0.75rem;
+  margin-bottom: 0.9rem;
+}
+.calendarControls select {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 0.25rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.5rem;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+  padding: 0.5rem 1.75rem 0.5rem 0.6rem;
+  font: inherit;
+}
+.calendarGrid {
+  display: grid;
+  gap: 0.35rem;
+}
+.calendarGridRow {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 0.35rem;
+}
+.calendarWeekday {
+  padding: 0.3rem 0;
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-align: center;
+}
+.calendarDay {
+  display: grid;
+  min-width: 0;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+  font: inherit;
+  font-size: 0.82rem;
+  cursor: pointer;
+}
+.calendarDay:hover:enabled {
+  border-color: var(--analytics-cyan-strong);
+}
+.calendarDay[aria-selected="true"] {
+  border-color: var(--analytics-cyan-strong);
+  background: var(--analytics-cyan-strong);
+  color: var(--analytics-surface);
+  font-weight: 800;
+}
+.calendarDay[aria-current="date"] {
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--analytics-cyan-strong) 45%, transparent);
+}
+.calendarDay:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
+}
+.calendarFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--analytics-line);
+  color: var(--analytics-muted);
+  font-size: 0.78rem;
+}
+.calendarFooter button {
+  min-height: 44px;
+  border: 1px solid var(--analytics-cyan-strong);
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--analytics-cyan-strong);
+  padding: 0.5rem 0.75rem;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.clearField {
+  width: max-content;
 }
 .kpiGrid {
   display: grid;
@@ -204,8 +378,14 @@
   align-items: center;
   text-align: center;
 }
+.kpiCard {
+  justify-content: center;
+}
+.kpiCard h2 {
+  margin-bottom: 0.65rem;
+}
 .kpiCard strong {
-  margin: auto 0 0.4rem;
+  margin: 0.25rem 0 0.4rem;
   font-size: clamp(1.55rem, 2.2vw, 2.35rem);
   line-height: 1;
   color: var(--analytics-cyan-strong);
@@ -220,14 +400,14 @@
   margin-top: -0.25rem;
 }
 .productiveCard {
-  justify-content: flex-start;
+  justify-content: center;
 }
 .donut {
   display: grid;
   place-items: center;
   width: 5.4rem;
   aspect-ratio: 1;
-  margin: auto 0 0.35rem;
+  margin: 0 0 0.35rem;
   border-radius: 50%;
   background:
     radial-gradient(circle at center, var(--analytics-surface) 55%, transparent 57%),
@@ -245,12 +425,14 @@
   min-height: 10rem;
   display: flex;
   flex-direction: column;
-  text-align: left;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
 }
 .conversionCard > strong {
-  margin: auto 0 0.5rem;
-  color: var(--analytics-muted);
-  font-size: 0.82rem;
+  margin: 0.35rem 0 0.6rem;
+  color: var(--analytics-cyan-strong);
+  font-size: clamp(1.35rem, 2vw, 2rem);
 }
 .conversionResult {
   display: flex;
@@ -280,6 +462,16 @@
   color: var(--analytics-muted);
   font-size: 0.72rem;
   line-height: 1.35;
+}
+.conversionPercent {
+  display: block;
+  width: fit-content;
+  min-width: 4.5rem;
+  padding: 0.45rem 0.75rem;
+  border: 1px solid var(--analytics-cyan-strong);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 14%, transparent);
+  text-align: center;
 }
 .gaugeCard {
   padding-bottom: 0.65rem;
@@ -439,6 +631,15 @@
 .daily .columnValue {
   font-size: 0.6875rem;
 }
+.monthly .columnLabel {
+  font-size: clamp(0.9rem, 1vw, 1rem);
+  line-height: 1.25;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+.monthly .columnTrack {
+  height: 120px;
+}
 .ranking {
   margin: 0;
   padding: 0;
@@ -509,6 +710,64 @@
   font-weight: 700;
   cursor: pointer;
 }
+.clearFilters:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+.recencyGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  margin: 1rem 0;
+}
+.recencyCard {
+  padding: 0;
+  overflow: hidden;
+}
+.recencyHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 1rem;
+  border-bottom: 1px solid var(--analytics-line);
+}
+.recencyHeader span {
+  flex: none;
+  color: var(--analytics-muted);
+  font-size: 0.72rem;
+}
+.recencyList {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.recencyList li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.65rem;
+  min-height: 3.5rem;
+  padding: 0.65rem 1rem;
+  border-bottom: 1px solid var(--analytics-line);
+  font-size: 0.76rem;
+}
+.recencyList li:last-child {
+  border-bottom: 0;
+}
+.recencyList strong,
+.recencyList span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.recencyList span {
+  color: var(--analytics-muted);
+}
+.recencyList b {
+  color: var(--analytics-cyan-strong);
+  white-space: nowrap;
+}
 .tableViewport table {
   width: 100%;
   table-layout: fixed;
@@ -531,6 +790,15 @@
   color: var(--analytics-ink);
 }
 @media (max-width: 1200px) {
+  .filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .clearField {
+    width: 100%;
+  }
+  .clearFilters {
+    width: 100%;
+  }
   .kpiGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
@@ -560,7 +828,8 @@
 @media (max-width: 700px) {
   .filters,
   .grid,
-  .rankingGrid {
+  .rankingGrid,
+  .recencyGrid {
     grid-template-columns: minmax(0, 1fr);
   }
   .kpiGrid {
@@ -579,6 +848,20 @@
   .tableViewport td {
     padding: 0.45rem 0.25rem;
   }
+  .calendarFooter {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .calendarFooter button {
+    width: 100%;
+  }
+  .recencyList li {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+  .recencyList span {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
 }
 @media (max-width: 420px) {
   .kpiGrid {
@@ -587,5 +870,17 @@
   .daily .columnLabel,
   .daily .columnValue {
     font-size: 0.48rem;
+  }
+  .calendarPanel {
+    padding: 0.75rem;
+  }
+  .calendarGrid {
+    gap: 0.2rem;
+  }
+  .calendarGridRow {
+    gap: 0.2rem;
+  }
+  .calendarDay {
+    min-height: 38px;
   }
 }

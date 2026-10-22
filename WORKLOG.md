@@ -43,6 +43,34 @@ Foram aprovados `pnpm audit --audit-level high`, lint, typecheck, testes e build
 com Node 24.19.x. A auditoria mantém apenas avisos moderados e retorna sucesso;
 os gates de PR e de `main` permanecem obrigatórios antes da publicação.
 
+## 2026-10-22 - Calendário multisseleção e recência de Agendamentos
+
+O período passou a integrar a mesma barra de Canal, Gerente, Responsável e
+Empresa, com calendário modal acessível, mês vigente como padrão, seleção de um
+ou vários dias, troca de mês e ano e limpeza única. A faixa separada de período,
+total e cobertura deixou de ocupar espaço visual; o estado continua anunciado
+por região `aria-live`.
+
+O recorte de datas agora alcança detalhes e fatos do funil. Os totais cadastrais
+continuam globais porque o contrato v4 conserva essas métricas agregadas. Três
+painéis mostram corretores cadastrados com agendamento nas faixas de até sete,
+oito a quatorze e quinze dias ou mais, usando o gerente do registro mais recente
+até a data-base escolhida.
+
+Os valores dos cartões e os percentuais de conversão foram centralizados, as
+contagens brutas das conversões foram removidas e os rótulos mensais ganharam
+tamanho e espaço para nomes completos. O QA sintético cobre calendário, foco,
+teclado, filtros compostos, recência, temas e larguras entre 320 e 1.440 px.
+
+Lint, typecheck e build de 61 rotas passaram com Node 24.19. A suíte Vitest
+integral, limitada a quatro workers para evitar disputa de CPU no host Windows,
+aprovou 4.101 testes e ignorou 106. O preview com o CSS compilado de produção
+aprovou 12 combinações de tema e largura, sem overflow, colisão ou violação Axe.
+O comando agregado sem limite de workers atingiu apenas o timeout de cinco
+segundos de um teste do Associativo, que passou isolado e na suíte limitada; os
+três testes Node POSIX já conhecidos continuam incompatíveis com Windows e
+permanecem sob validação obrigatória da CI Linux.
+
 ## 2026-10-22 - Publicacao dos filtros e indicadores de Agendamentos
 
 Os filtros de Canal, Gerente, Responsavel e Empresa, a Equipe Produtiva em

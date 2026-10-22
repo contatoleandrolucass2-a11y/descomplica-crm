@@ -10,6 +10,7 @@ import {
   appointmentWeekOfMonth,
   appointmentYears,
   plannedAppointmentsForDate,
+  normalizeAppointmentCreatedDates,
 } from "@/lib/crm/stages/appointments";
 
 function fact(
@@ -241,6 +242,146 @@ describe("appointment chart analysis", () => {
       { key: 1, label: "House" },
       { key: 0, label: "Imob" },
     ]);
+  });
+
+  it("normalizes multiple selected days and applies them to details and funnel facts", () => {
+    expect(
+      normalizeAppointmentCreatedDates(
+        ["2026-10-19", "invalid", "2026-10-18", "2026-10-19", "2026-10-20"],
+        "2026-10-01",
+        "2026-10-19",
+      ),
+    ).toEqual(["2026-10-18", "2026-10-19"]);
+    const appointment = (date: string) => ({
+      createdAt: `${date}T12:00:00-03:00`,
+      scheduledAt: null,
+      attendedAt: null,
+      visitPerformed: false,
+      regionalManager: "Regional A",
+      salesManager: "Gerente A",
+      owner: "Responsável A",
+      accountName: "Conta A",
+      accountRanking: "Ouro",
+      channel: 1 as const,
+      company: "Empresa A",
+      registeredBroker: true,
+    });
+    const input = slice({
+      version: 4,
+      brokerCount: 10,
+      brokerManagerCount: 3,
+      dimensions: {
+        managers: ["Gerente A"],
+        owners: ["Responsável A"],
+        companies: ["Empresa A"],
+        developments: ["Residencial A"],
+        stores: ["Loja A"],
+      },
+      facts: [
+        [0, "2026-10-17", 0, 0, 0, 1, 0, 90, 0, 0, -1],
+        [0, "2026-10-18", 0, 0, 0, 1, 0, 18, 0, 0, -1],
+        [1, "2026-10-18", 0, 0, 0, 1, 0, 8, 0, 0, -1],
+        [2, "2026-10-19", 0, 0, 0, 1, 0, 4, 0, 0, -1],
+        [4, "2026-10-17", 0, 0, 0, 1, 0, 3, 0, 0, -1],
+      ],
+      appointments: [appointment("2026-10-17"), appointment("2026-10-18")],
+    });
+    const result = analyzeAppointments(input, {
+      filters: { createdDates: ["2026-10-19", "2026-10-18", "2026-10-18"] },
+    });
+    expect(result.total).toBe(1);
+    expect(result.details?.map((row) => row.createdAt.slice(0, 10))).toEqual(["2026-10-18"]);
+    expect(result.funnel).toEqual({ opportunities: 18, appointments: 8, visits: 4, sales: 0 });
+    expect(result.dailyAverage).toBe(0.5);
+    expect(result.brokerCount).toBe(10);
+    expect(result.registeredManagerCount).toBe(3);
+  });
+
+  it("classifies registered brokers by civil-day recency without truncating history to selected days", () => {
+    const appointment = (
+      owner: string,
+      manager: string,
+      date: string,
+      company = "Empresa A",
+      registeredBroker = true,
+    ) => ({
+      createdAt: `${date}T23:30:00-03:00`,
+      scheduledAt: null,
+      attendedAt: null,
+      visitPerformed: false,
+      regionalManager: "Regional A",
+      salesManager: manager,
+      owner,
+      accountName: `Conta ${owner}`,
+      accountRanking: "Ouro",
+      channel: 1 as const,
+      company,
+      registeredBroker,
+    });
+    const input = slice({
+      version: 4,
+      coverageStart: "2026-09-01",
+      referenceDate: "2026-10-22",
+      brokerCount: 6,
+      brokerManagerCount: 3,
+      dimensions: {
+        managers: ["Gerente A", "Gerente B", "Gerente C"],
+        owners: ["Limite 7", "Limite 8", "Limite 14", "Limite 15"],
+        companies: ["Empresa A", "Empresa B"],
+        developments: [],
+        stores: [],
+      },
+      facts: [],
+      appointments: [
+        appointment("Limite 7", "Gerente antigo", "2026-10-01"),
+        appointment("Limite 7", "Gerente A", "2026-10-13"),
+        appointment("Limite 8", "Gerente B", "2026-10-12"),
+        appointment("Limite 14", "Gerente B", "2026-10-06"),
+        appointment("Limite 15", "Gerente C", "2026-10-05"),
+        appointment("Outro filtro", "Gerente D", "2026-10-19", "Empresa B"),
+        appointment("Não cadastrado", "Gerente E", "2026-10-19", "Empresa A", false),
+      ],
+    });
+    const result = analyzeAppointments(input, {
+      filters: {
+        createdDates: ["2026-10-20"],
+        company: "Empresa A",
+        channel: 1,
+      },
+    });
+    expect(result.details).toEqual([]);
+    expect(result.brokerRecency).toEqual({
+      upTo7Days: [
+        {
+          owner: "Limite 7",
+          manager: "Gerente A",
+          lastAppointmentDate: "2026-10-13",
+          daysSinceLastAppointment: 7,
+        },
+      ],
+      from8To14Days: [
+        {
+          owner: "Limite 14",
+          manager: "Gerente B",
+          lastAppointmentDate: "2026-10-06",
+          daysSinceLastAppointment: 14,
+        },
+        {
+          owner: "Limite 8",
+          manager: "Gerente B",
+          lastAppointmentDate: "2026-10-12",
+          daysSinceLastAppointment: 8,
+        },
+      ],
+      from15Days: [
+        {
+          owner: "Limite 15",
+          manager: "Gerente C",
+          lastAppointmentDate: "2026-10-05",
+          daysSinceLastAppointment: 15,
+        },
+      ],
+    });
   });
 
   it("returns finite zero funnel indicators when no source or destination exists", () => {

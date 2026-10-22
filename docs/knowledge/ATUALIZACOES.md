@@ -25,6 +25,37 @@
   eliminar nove pixels de overflow interno sem remover itens ou alterar outros
   dashboards. Os 39 testes focados passaram antes da nova CI.
 
+## 2026-10-22: abertura do calendario e da recencia de Agendamentos
+
+- A nova etapa iniciou sobre `origin/main`
+  `920d2d7f82c667addfef1a0d40021ba242171344`, com o registro documental da
+  entrega anterior ainda no PR #302. O health publico consultado em
+  `2026-10-22T13:34:56-03:00` respondeu HTTP 200, `status=ok`, na versao
+  `877966a71d28923f82258f6f053990844a7c6f35`; o runtime publicado contem a
+  correcao concorrente da Previsao e as funcionalidades anteriores de
+  Agendamentos.
+- O escopo acrescenta calendario acessivel com selecao de um ou varios dias,
+  move período e limpeza para a barra de filtros, recalcula o painel no mesmo
+  recorte, centraliza os indicadores, melhora os nomes dos meses e inclui tres
+  paineis de recencia por corretor antes do grafico mensal.
+- O contrato v4 possui data, corretor e gerente nos agendamentos, mas conserva
+  apenas totais cadastrais agregados. A recencia sera limitada aos corretores
+  cadastrados com agendamento na cobertura validada; o gerente sera o do registro
+  mais recente. Totais cadastrais nao serao convertidos em atividade para
+  aparentar uma segmentacao inexistente. Nenhum dado remoto foi alterado nesta
+  abertura.
+- A implementacao aplica datas descontinuas aos detalhes e aos fatos do funil,
+  preserva o historico necessario para calcular o ultimo agendamento e exibe as
+  faixas 0-7, 8-14 e 15 dias ou mais antes do grafico mensal. A tabela usa a data
+  da linha como parte do filtro composto, sem duplicar semana e dia.
+- Lint, typecheck e build de 61 rotas passaram com Node 24.19. Vitest aprovou
+  4.101 testes e ignorou 106 com quatro workers. O preview sobre o CSS compilado
+  de producao aprovou 12 combinacoes de tema e largura, sem overflow, colisoes ou
+  violacoes Axe. O comando agregado sem limite de workers excedeu apenas o
+  timeout de um teste do Associativo que passou isolado e na suite limitada; os
+  tres testes Node POSIX conhecidos permanecem incompatíveis com Windows e
+  devem ser confirmados pela CI Linux antes da integracao.
+
 ## 2026-10-22: filtros e indicadores de Agendamentos publicados
 
 - Os PRs #295, #298, #299 e #301 entregaram o painel, corrigiram a origem e o
@@ -55,8 +86,9 @@
   1.130 agendamentos, 532 visitas, 738 vendas e 32 corretores. O segundo
   inventario conteve 3.277 itens e SHA-256
   `30e8f131e213e8a42a358464af262a13ee9202d4e9f62c379c9b38686009867e`.
-- Lint, typecheck e build passaram localmente; 187 testes documentais e a CI
-  Linux integral passaram. A suite local aprovou 4.088 testes Vitest e 1.599
+- Typecheck e build passaram localmente; o lint local excedeu a memoria do host,
+  enquanto 187 testes documentais e a CI Linux integral passaram. A suite local
+  aprovou 4.088 testes Vitest e 1.599
   testes Node, com 105 e 19 ignorados. Permanecem somente tres incompatibilidades
   POSIX conhecidas dos testes Meta Ads no Windows; os mesmos gates passaram no
   Linux. Nenhum workflow n8n foi alterado.
