@@ -111,7 +111,7 @@ export const REPORTS = [
     requiredLabelColumns: {
       brokerManager: {
         label: "Gerente de Vendas: Nome completo",
-        column: "Contact.Gerente_de_Vendas__c.Name",
+        column: "Account.Comissionado_generico_3__c.Name",
       },
     },
   },

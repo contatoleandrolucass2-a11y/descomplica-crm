@@ -8613,3 +8613,15 @@ pendência, health HTTP200/ok na versão exata e `/app/etapas/agendamentos`
 anônimo retornou307 para `/login`. Nenhuma migration, dado, integração ou n8n
 foi alterado. A evidência preenchida permanece a matriz sintética; a produção
 não foi aberta com sessão privada nesta tarefa.
+
+## 2026-10-21: Correção da fonte do gerente no relatório de corretores
+
+A primeira coleta v4 em produção parou antes de publicar porque o rótulo
+`Gerente de Vendas: Nome completo` está associado, na metadata vigente do
+relatório `00OTT000009j0l32AA`, a
+`Account.Comissionado_generico_3__c.Name`. O contrato esperava uma chave antiga
+do contato. A coleta continua resolvendo e validando o rótulo a cada ciclo e
+agora exige a chave confirmada na fonte atual; nenhuma publicação parcial foi
+aceita. Os 39 testes focados do coletor, lint, tipos e build passaram. O Vitest
+geral aprovou 4.085 testes e teve um timeout alheio no Associativo, que passou
+isolado com 13 testes. CI Linux integral e nova publicação são obrigatórias.
