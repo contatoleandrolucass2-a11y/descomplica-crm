@@ -727,49 +727,17 @@ async function runSynthetic() {
     await expect.poll(() => requests).toBe(2);
     assert.equal(refreshes, 0, "Checking the session never triggers ingestion");
     await expect(verify).toBeEnabled();
-    const metaDetails = page.locator('[aria-labelledby="meta-ads-details-title"]');
-    const metaState = metaDetails.getByRole("status");
-    const metaVerify = page.getByRole("button", { name: "Verificar Meta Ads", exact: true });
-    await expect(metaState).toHaveText("Conectado");
-    await expect(metaDetails.getByText("Ativa · somente leitura", { exact: true })).toBeVisible();
-    await expect(metaDetails.getByText(metaBase.accountId, { exact: true })).toBeVisible();
-    await expect(metaDetails.getByText(metaBase.businessId, { exact: true })).toBeVisible();
-    const managerUrl = new URL(await metaDetails.getByRole("link").getAttribute("href"));
-    assert.equal(managerUrl.hostname, "adsmanager.facebook.com");
-    assert.equal(managerUrl.searchParams.get("act"), metaBase.accountId);
-    assert.equal(managerUrl.searchParams.get("business_id"), metaBase.businessId);
-    assert.equal(managerUrl.searchParams.has("redirect_session_id"), false);
-    for (const [state, label] of [
-      ["waiting", "Não verificado"],
-      ["unconfigured", "Não configurado"],
-      ["reauth_required", "Login necessário"],
-      ["unavailable", "Não conectado"],
-      ["stale", "Sem confirmação recente"],
-      ["wrong_account", "Conta divergente"],
-    ]) {
-      metaSnapshot = { ...metaBase, state };
-      const beforeSalesforce = requests;
-      await metaVerify.click();
-      await expect(metaState).toHaveText(label);
-      await expect(status).toHaveText("Conectado");
-      assert.equal(requests, beforeSalesforce, "Meta verification must not query Salesforce");
-      await expect(metaDetails.getByText("Indisponível", { exact: true })).toBeVisible();
-    }
-    for (const invalid of [
-      { ...metaBase, accountId: "another-account" },
-      { ...metaBase, checkedAt: null },
-    ]) {
-      metaSnapshot = invalid;
-      await metaVerify.click();
-      await expect(metaState).toHaveText("Não conectado");
-    }
-    metaStatusCode = 503;
-    await metaVerify.click();
-    await expect(metaState).toHaveText("Não conectado");
-    metaStatusCode = 200;
-    metaSnapshot = metaBase;
-    await metaVerify.click();
-    await expect(metaState).toHaveText("Conectado");
+    const metaCard = page.locator("[data-meta-ads-service]");
+    await expect(metaCard.locator('[data-state="connected"]')).toHaveText("Conectado");
+    await expect(metaCard.getByText("API oficial somente leitura", { exact: false })).toBeVisible();
+    await expect(page.locator('[aria-labelledby="meta-ads-details-title"]')).toHaveCount(0);
+    await expect(page.getByRole("button", { name: "Conectar Meta Ads", exact: true })).toHaveCount(
+      0,
+    );
+    await expect(page.getByRole("button", { name: "Verificar Meta Ads", exact: true })).toHaveCount(
+      0,
+    );
+    await expect(page.getByRole("link", { name: /Gerenciador de Anúncios/ })).toHaveCount(0);
     for (const [state, label] of [
       ["reauth_required", "Login necessário"],
       ["unavailable", "Atualização indisponível"],
@@ -959,16 +927,6 @@ async function runSynthetic() {
       },
       consoleFixture,
     );
-    const metaConsoleChecks = await checkSyntheticConsole(
-      page,
-      directory,
-      () => {
-        metaSnapshot = { ...metaBase, state: "reauth_required" };
-      },
-      consoleFixture,
-      "meta-ads",
-    );
-
     for (const [state, label] of [
       ["waiting", "Não verificado"],
       ["reauth_required", "Não conectado"],
@@ -1067,8 +1025,7 @@ async function runSynthetic() {
         states: 6,
         polling: "no overlap; timeout; hidden; cleanup",
         console: consoleChecks,
-        metaConsole: metaConsoleChecks,
-        metaStates: 7,
+        metaApiOnly: true,
         screenshots: directory,
       }) + "\n",
     );
