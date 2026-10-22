@@ -413,6 +413,17 @@ describe("appointment chart analysis", () => {
     expect(appointmentYears(slice())).toEqual(["2026", "2025"]);
   });
 
+  it("keeps the annual chart independent of selected calendar days and weeks", () => {
+    const result = analyzeAppointments(slice(), {
+      year: "2026",
+      filters: { createdDates: ["2026-10-19"], week: 3 },
+    });
+    expect(result.monthly.map(({ label, total }) => [label, total])).toEqual([
+      ["Setembro", 10],
+      ["Outubro", 13],
+    ]);
+  });
+
   it("treats legacy dimension 6 as store and explicitly leaves development unavailable", () => {
     const legacy = slice({
       version: 1,

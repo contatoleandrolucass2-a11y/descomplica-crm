@@ -192,15 +192,19 @@ export function analyzeAppointments(
     const date = saoPauloDate(appointment.createdAt);
     return matchesSelectedPeriod(date) && matchesAppointmentDimensions(appointment);
   };
-  const matchesSharedFactFilters = (fact: DashboardAnalysisSlice["facts"][number]) =>
-    matchesSelectedPeriod(fact[1]) &&
+  const matchesFactDimensions = (fact: DashboardAnalysisSlice["facts"][number]) =>
     (filters.channel === undefined || fact[5] === filters.channel) &&
     (!filters.manager || slice.dimensions.managers[fact[2]] === filters.manager) &&
     (!filters.owner || slice.dimensions.owners[fact[3]] === filters.owner) &&
     (!filters.company || slice.dimensions.companies[fact[4]] === filters.company);
-  const sharedFacts = slice.facts.filter(matchesSharedFactFilters);
+  const dimensionFacts = slice.facts.filter(matchesFactDimensions);
+  const sharedFacts = dimensionFacts.filter((fact) => matchesSelectedPeriod(fact[1]));
+  const dimensionFilteredOperations: DashboardAppointmentDetail[] | null =
+    slice.version >= 3 ? (slice.appointments ?? []).filter(matchesAppointmentDimensions) : null;
   const filteredOperations: DashboardAppointmentDetail[] | null =
-    slice.version >= 3 ? (slice.appointments ?? []).filter(matchesFilters) : null;
+    dimensionFilteredOperations === null
+      ? null
+      : dimensionFilteredOperations.filter(matchesFilters);
   const details =
     filteredOperations === null
       ? null
@@ -221,11 +225,25 @@ export function analyzeAppointments(
     }
   }
 
+  if (dimensionFilteredOperations !== null) {
+    for (const appointment of dimensionFilteredOperations) {
+      const date = saoPauloDate(appointment.createdAt);
+      if (date < slice.coverageStart || date > slice.referenceDate) continue;
+      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7));
+    }
+  } else {
+    for (const fact of dimensionFacts) {
+      if (fact[0] !== 1) continue;
+      const date = fact[1];
+      if (date < slice.coverageStart || date > slice.referenceDate) continue;
+      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7), fact[7]);
+    }
+  }
+
   if (filteredOperations !== null) {
     for (const appointment of filteredOperations) {
       const date = saoPauloDate(appointment.createdAt);
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
-      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7));
       if (date === slice.referenceDate) today += 1;
       if (date === previousReferenceDate) yesterday += 1;
       if (date.slice(0, 7) !== month) continue;
@@ -242,7 +260,6 @@ export function analyzeAppointments(
       if (fact[0] !== 1) continue;
       const date = fact[1];
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
-      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7), fact[7]);
       if (date === slice.referenceDate) today += fact[7];
       if (date === previousReferenceDate) yesterday += fact[7];
       if (date.slice(0, 7) !== month) continue;

@@ -67,6 +67,7 @@ describe("appointment dashboard availability", () => {
     );
     expect(markup).not.toContain("Período dos gráficos, indicadores e tabela");
     expect(markup).not.toContain("Cobertura da fonte");
+    expect(markup).toContain("Cobertura parcial entre 01/10/2026 e 19/10/2026");
     expect(markup).toContain(">Ano</label>");
     expect(markup).toContain("Meta do mês");
     expect(markup).toContain("Filtros do painel de agendamentos");
@@ -112,6 +113,7 @@ describe("appointment dashboard availability", () => {
     const empty: DashboardAnalysisSlice = { ...current, facts: [], appointments: [] };
     const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={empty} />);
     expect(markup).toContain("Sem conversão no período selecionado");
+    expect(markup).toContain("Aproveitamento indisponível no período selecionado");
     expect(markup).not.toContain("Infinity");
     expect(markup).not.toContain("NaN");
   });

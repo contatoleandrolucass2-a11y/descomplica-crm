@@ -230,7 +230,11 @@ function ConversionKpi({
       ) : (
         <strong
           className={styles.conversionPercent}
-          aria-label={`${decimal.format(percent ?? 0)} por cento de aproveitamento`}
+          aria-label={
+            percent === null
+              ? "Aproveitamento indisponível no período selecionado"
+              : `${decimal.format(percent)} por cento de aproveitamento`
+          }
         >
           {percent === null ? "—" : `${decimal.format(percent)}%`}
         </strong>
@@ -818,6 +822,7 @@ export function AppointmentsDashboard({
         : [...currentDates, date].sort();
       const next = { ...current };
       delete next.createdDate;
+      delete next.week;
       if (nextDates.length === 0) delete next.createdDates;
       else next.createdDates = nextDates;
       return next;
@@ -854,7 +859,11 @@ export function AppointmentsDashboard({
       <p className="sr-only" aria-live="polite">
         {monthUnavailable
           ? "Período fora da cobertura disponível."
-          : `${activeFilterCount} ${activeFilterCount === 1 ? "filtro ativo" : "filtros ativos"}. ${result.total} registros encontrados.`}
+          : `${activeFilterCount} ${activeFilterCount === 1 ? "filtro ativo" : "filtros ativos"}. ${result.total} registros encontrados.${
+              result.coverage === "partial"
+                ? ` Cobertura parcial entre ${displayDate(analysis.coverageStart)} e ${displayDate(analysis.referenceDate)}.`
+                : ""
+            }`}
       </p>
 
       <DashboardFilters
