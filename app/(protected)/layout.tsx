@@ -39,6 +39,7 @@ import { AppPageIcon } from "./_components/AppPageIcon";
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
 import { AuthorizedBreadcrumbs } from "./_components/AuthorizedBreadcrumbs";
 import { DescomplicaBrandMark } from "./_components/DescomplicaBrandMark";
+import { MetaAdsAlertButton } from "./_components/MetaAdsAlertButton";
 import { PROTECTED_CONTENT_ID, ProtectedShellFrame } from "./_components/ProtectedShellFrame";
 import styles from "./_components/ProtectedShell.module.css";
 import { ThemeSwitch } from "./_components/ThemeSwitch";
@@ -57,6 +58,9 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
   const breadcrumbPages = getBreadcrumbNavigation(pages);
   const settingsPages = getAuthorizedSettingsNavigation(pages);
   const navigationHome = getNavigationHome(pages);
+  const canViewMetaAds =
+    context.permissions.includes("crm.meta_ads.view") &&
+    pages.some((page) => page.key === "crm.meta_ads" && page.permissionKey === "crm.meta_ads.view");
   const identity = user?.email ?? "Usuário autenticado";
   const role = getRoleLabel(context.roleKey);
   const brand = <DescomplicaBrandMark className={styles.brandMark} />;
@@ -86,6 +90,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
           <AuthorizedNavigation pages={navigationPages} disabledItems={disabledItems} />
           <ThemeSwitch canPersist={cookieConsent?.categories.functional === true} />
           <div className={styles.actions}>
+            {canViewMetaAds ? <MetaAdsAlertButton /> : null}
             <AccountMenu identity={identity} displayName={user?.user_metadata?.name} role={role}>
               <Link href="/conta/seguranca" prefetch={false} className={styles.accountLink}>
                 <ShieldCheck aria-hidden="true" size={18} />

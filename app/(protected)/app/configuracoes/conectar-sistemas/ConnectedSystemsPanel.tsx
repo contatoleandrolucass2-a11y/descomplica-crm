@@ -27,11 +27,7 @@ import {
 import styles from "./ConnectedSystemsPanel.module.css";
 import { SalesforceConsoleDialog } from "./SalesforceConsoleDialog";
 import { QlikServiceCard, QlikStatusDetails } from "./QlikIntegration";
-import {
-  MetaAdsServiceCard,
-  MetaAdsStatusDetails,
-  useMetaAdsConnection,
-} from "./MetaAdsIntegration";
+import { MetaAdsServiceCard, useMetaAdsConnection } from "./MetaAdsIntegration";
 import {
   emptyQlikStatus,
   qlikStatusSnapshotSchema,
@@ -130,7 +126,6 @@ export function ConnectedSystemsPanel({
   consoleAvailable = false,
   canReadSyncStatus = false,
   metaAdsStatusConfigured = false,
-  metaAdsConsoleAvailable = false,
 }: {
   ingestLabel: string;
   refreshAvailable: boolean;
@@ -139,15 +134,8 @@ export function ConnectedSystemsPanel({
   consoleAvailable?: boolean;
   canReadSyncStatus?: boolean;
   metaAdsStatusConfigured?: boolean;
-  metaAdsConsoleAvailable?: boolean;
 }) {
   const metaAds = useMetaAdsConnection(metaAdsStatusConfigured);
-  const [metaConsoleOpen, setMetaConsoleOpen] = useState(false);
-  const [metaConsoleError, setMetaConsoleError] = useState(false);
-  const closeMetaConsole = useCallback((credentialsFailed = false) => {
-    setMetaConsoleOpen(false);
-    setMetaConsoleError(credentialsFailed);
-  }, []);
   const [consoleOpen, setConsoleOpen] = useState(false);
   const [consoleError, setConsoleError] = useState(false);
   const closeConsole = useCallback((credentialsFailed = false) => {
@@ -334,15 +322,6 @@ export function ConnectedSystemsPanel({
         </p>
       ) : null}
       {consoleOpen && consoleAvailable ? <SalesforceConsoleDialog onClose={closeConsole} /> : null}
-      {metaConsoleError ? (
-        <p role="alert" className={styles.consoleAlert}>
-          Não foi possível autorizar o console Meta Ads. Tente novamente.
-        </p>
-      ) : null}
-      {metaConsoleOpen && metaAdsConsoleAvailable ? (
-        <SalesforceConsoleDialog provider="meta-ads" onClose={closeMetaConsole} />
-      ) : null}
-
       <section className={styles.services} aria-labelledby="services-title">
         <div className={styles.servicesHeading}>
           <div>
@@ -471,17 +450,6 @@ export function ConnectedSystemsPanel({
       </section>
 
       <QlikStatusDetails snapshot={qlikSnapshot} />
-
-      <MetaAdsStatusDetails
-        snapshot={metaAds.snapshot}
-        checking={metaAds.checking}
-        consoleAvailable={metaAdsConsoleAvailable}
-        onVerify={metaAds.verify}
-        onConnect={() => {
-          setMetaConsoleError(false);
-          setMetaConsoleOpen(true);
-        }}
-      />
 
       <section className={styles.salesforceDetails} aria-labelledby="salesforce-details-title">
         <div className={styles.salesforceDetailsHeading}>

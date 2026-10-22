@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-22: modais e alertas globais do Meta Ads
+
+- Os doze dialogos do dashboard agora respeitam a area realmente visivel do
+  iframe dentro do CRM. A pagina externa nao precisa rolar; conteudo maior usa
+  somente a rolagem interna do dialogo.
+- O alerta do Meta Ads foi movido para a barra superior e depende, no servidor,
+  da pagina `crm.meta_ads` e da permissao `crm.meta_ads.view`. A comunicacao com
+  o iframe atualiza contagem e abre a central sem expor o recurso a outros
+  perfis.
+- Integracoes exibe somente o card superior da API oficial do Meta Ads. Os
+  controles e o dialogo do console antigo foram removidos da interface, sem
+  alterar Salesforce, outros dashboards, banco ou o Gerenciador de Anuncios.
+- Evidencia local: `pnpm verify` passou; Vitest aprovou 4.102 testes e ignorou
+  106; suites Node aprovaram 1.616/5 ignorados e release 727/14 ignorados. O QA
+  Chromium aprovou as quatro visoes, os doze dialogos e 60 combinacoes da barra
+  superior. Merge, CI do `main`, imagem e publicacao ainda nao estavam
+  comprovados neste registro.
+- A CI do PR detectou dois contratos visuais antigos: Integracoes ainda
+  procurava a caixa/console Meta removida, e a navegacao arquivada ignorava o
+  novo sino na ordem de teclado. O gate foi atualizado para exigir o card
+  API-only, ausencia dos controles legados e a sequencia tema, alerta, perfil.
+  Em 1.181 px, o espacamento do cabecalho foi reduzido de 16 para 12 px para
+  eliminar nove pixels de overflow interno sem remover itens ou alterar outros
+  dashboards. Os 39 testes focados passaram antes da nova CI.
+
 ## 2026-10-22: diagnostico e correcao da visao Geral vazia da Previsao
 
 - A abertura ocorreu na branch `codex/previsao-geral-fallback`, baseada em
