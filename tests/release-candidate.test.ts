@@ -275,7 +275,7 @@ describe("release-candidate activation defaults", () => {
         matrix.expectedDirectRoutesByRole[role],
         matrix.expectedHeaderRoutesByRole[role],
       ]) {
-        expect(routes.includes("/app/gestao/previsao"), role).toBe(administrative);
+        expect(routes.includes("/app/gestao/previsao"), role).toBe(operational);
       }
       expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(
         "/app/gestao/previsao",
@@ -317,7 +317,7 @@ describe("release-candidate activation defaults", () => {
           controls: "authorized-navigation-crm-management",
         });
       } else if (operational) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(10);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(11);
         expect(matrix.expectedAccountSettingsRoutesForRole(role)).toEqual([]);
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",

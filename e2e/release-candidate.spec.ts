@@ -438,7 +438,11 @@ const protectedSurfaces = [
   },
   { path: "/app/gestao", heading: "Gestão", allowed: activeOperationalRoles },
   { path: "/app/gestao/rotina", heading: "Rotina", allowed: activeOperationalRoles },
-  { path: "/app/gestao/previsao", heading: "Previsão", allowed: adminRoles },
+  {
+    path: "/app/gestao/previsao",
+    heading: "Previsão",
+    allowed: activeOperationalRoles,
+  },
   { path: "/app/simulacao", heading: "Hub de Simulação", allowed: activeOperationalRoles },
   {
     path: "/app/simulacao/associativo-fluxo-linear",
@@ -548,30 +552,35 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
   coordinator: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/canal-de-parcerias",
     ...simulatorRoutes,
   ]),
   manager_house: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/ranking",
     ...simulatorRoutes,
   ]),
   manager_imob: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/canal-de-parcerias",
     ...simulatorRoutes,
   ]),
   broker_house: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/ranking",
     ...simulatorRoutes,
   ]),
   broker_imob: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/canal-de-parcerias",
     ...simulatorRoutes,
   ]),
@@ -607,11 +616,13 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...operationalRoutes,
     "/app/simulacao",
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/canal-de-parcerias",
   ]),
   manager_house: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/ranking",
     "/app/simulacao",
   ]),
@@ -619,11 +630,13 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...operationalRoutes,
     "/app/simulacao",
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/canal-de-parcerias",
   ]),
   broker_house: sortedRouteSet([
     ...operationalRoutes,
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/ranking",
     "/app/simulacao",
   ]),
@@ -631,6 +644,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     ...operationalRoutes,
     "/app/simulacao",
     ...managementRoutes,
+    "/app/gestao/previsao",
     "/app/canal-de-parcerias",
   ]),
   pending: [],
@@ -874,9 +888,11 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];
-    expect(directRoutes.includes("/app/gestao/previsao"), role).toBe(adminRoles.has(role));
+    expect(directRoutes.includes("/app/gestao/previsao"), role).toBe(
+      activeOperationalRoles.has(role),
+    );
     expect(expectedHeaderRoutesByRole[role].includes("/app/gestao/previsao"), role).toBe(
-      adminRoles.has(role),
+      activeOperationalRoles.has(role),
     );
     for (const route of managementRoutes) {
       expect(directRoutes.includes(route), `${role}: ${route}`).toBe(
