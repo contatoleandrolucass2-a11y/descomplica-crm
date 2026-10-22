@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-22 - Agendamentos responsivo publicado
+
+- Publica quatro filtros globais, Equipe Produtiva em rosca, conversoes do funil
+  e contagens de gerentes, visitas e vendas no periodo.
+- Mantem graficos e rankings compactos em zoom de 100%, sem rolagem interna no
+  Ranking Score, com filtros cruzados aplicados a toda a pagina.
+- Atualiza o snapshot pelo coletor Salesforce validado em cada ciclo e confirma
+  o runtime no SHA `a031980b55979d5dfa10983bc2c4e6b1cf9fff5e`.
+
 ## 2026-10-22 - Fallback da visão Geral da Previsão
 
 - Exibe a tabela Geral com as linhas House e Imob quando o final de semana ainda

@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-22 - Publicacao dos filtros e indicadores de Agendamentos
+
+Os filtros de Canal, Gerente, Responsavel e Empresa, a Equipe Produtiva em
+rosca, as conversoes do funil, gerentes, visitas, vendas e o layout responsivo
+foram integrados pelos PRs #295, #298, #299 e #301. A migration v4 foi aplicada
+como `20261022002223_appointments_filters_kpis_v4` e a CI de `main`
+`39732189784` aprovou os quatro gates obrigatorios no SHA
+`a031980b55979d5dfa10983bc2c4e6b1cf9fff5e`.
+
+O artefato OCI `12405607281` foi conferido por hash e promovido sem rebuild. O
+coordenador protegido publicou o deployment
+`db4cfa82-ea62-4c71-be17-38bfe6df2645` em `2026-10-22T06:57:55.202Z`, com
+ledger sem pendencia, health 200/ok na versao exata e redirecionamento anonimo
+da pagina para login.
+
+O coletor foi instalado sob os locks de producao, com backup
+`20261022T065926Z-a031980b5597`, e executou dois ciclos completos. Os request IDs
+`e43c8402-f50b-41f9-a4dd-4a474ab4004d` e
+`f7e54207-a279-4802-b585-6d94e913fd22` publicaram HTTP 201; a leitura vigente
+registrou 20.508 oportunidades, 1.130 agendamentos, 532 visitas, 738 vendas e 32
+corretores. O snapshot v4 final confirmou cinco gerentes, 1.117 agendamentos e
+9.397 fatos. Nenhum workflow n8n foi alterado.
+
+Lint, typecheck, build, 187 testes documentais e toda a CI Linux passaram. A
+suite local aprovou 4.088 testes Vitest e 1.599 testes Node; as tres falhas
+restantes sao as incompatibilidades POSIX conhecidas dos testes Meta Ads no
+Windows e passaram nos gates Linux.
+
 ## 2026-10-22 - Estrutura da visão Geral sem lançamentos no período
 
 A rota de previsões descartava o modelo mais recente sempre que a seleção era

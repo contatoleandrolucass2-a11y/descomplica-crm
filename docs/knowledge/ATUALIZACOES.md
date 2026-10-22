@@ -1,5 +1,41 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-22: filtros e indicadores de Agendamentos publicados
+
+- Os PRs #295, #298, #299 e #301 entregaram o painel, corrigiram a origem e o
+  formato agrupado do gerente dos corretores e trocaram as fontes municipais do
+  gate documental pelo espelho oficial acessivel. A entrega de runtime foi
+  integrada na `main` em
+  `a031980b55979d5dfa10983bc2c4e6b1cf9fff5e`.
+- A migration aplicada no projeto Supabase de producao esta registrada como
+  `20261022002223_appointments_filters_kpis_v4`. A leitura v4 confirmou 32
+  corretores, cinco gerentes distintos, 1.117 agendamentos e 9.397 fatos, sem
+  ampliar o payload autorizado alem das contagens e dimensoes do painel.
+- A CI de `main` `39732189784` aprovou `validate`, `release-gates`,
+  `isolated-restore` e `promotable-image`. O artefato `12405607281` conferiu com
+  SHA-256
+  `8e2e584083629e99b18a06c13df4e1832d3474e1b616e8a09c1fde1e3b9ea355`;
+  a imagem promovida tem ID
+  `sha256:c0a7ce9b0d0d8c8ce7071e4c3445e073dff8e12f3205a9ad6dcbffa0e292047d`.
+- O coordenador `release:production` publicou o deployment
+  `db4cfa82-ea62-4c71-be17-38bfe6df2645` em
+  `2026-10-22T06:57:55.202Z`. O ledger permaneceu sem pendencia, o health
+  publico respondeu HTTP 200/`ok` na versao exata e a rota anonima de
+  Agendamentos redirecionou para `/login` em HTTP 307.
+- O servico do coletor passou a executar a partir do checkout imutavel desse
+  SHA, com backup privado
+  `20261022T065926Z-a031980b5597`. Dois ciclos consecutivos publicaram com HTTP
+  201 e request IDs `e43c8402-f50b-41f9-a4dd-4a474ab4004d` e
+  `f7e54207-a279-4802-b585-6d94e913fd22`; ambos leram 20.508 oportunidades,
+  1.130 agendamentos, 532 visitas, 738 vendas e 32 corretores. O segundo
+  inventario conteve 3.277 itens e SHA-256
+  `30e8f131e213e8a42a358464af262a13ee9202d4e9f62c379c9b38686009867e`.
+- Lint, typecheck e build passaram localmente; 187 testes documentais e a CI
+  Linux integral passaram. A suite local aprovou 4.088 testes Vitest e 1.599
+  testes Node, com 105 e 19 ignorados. Permanecem somente tres incompatibilidades
+  POSIX conhecidas dos testes Meta Ads no Windows; os mesmos gates passaram no
+  Linux. Nenhum workflow n8n foi alterado.
+
 ## 2026-10-22: diagnostico e correcao da visao Geral vazia da Previsao
 
 - A abertura ocorreu na branch `codex/previsao-geral-fallback`, baseada em
