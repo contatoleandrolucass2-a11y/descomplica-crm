@@ -8,7 +8,7 @@ import {
 } from "../lib/archive-investor/documentation-sp-policy.mjs";
 
 export const temporaryItbiSourceOutageException = Object.freeze({
-  id: "meta-ads-navbar-pr-287-2026-10-21",
+  id: "meta-ads-api-next-16-4-1-pr-306-2026-10-22",
   sources: Object.freeze([
     "https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517",
     "https://prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2513",
@@ -19,7 +19,7 @@ export const temporaryItbiSourceOutageException = Object.freeze({
   reducedFinancingLimit: 120_968,
   reducedPropertyLimit: 725_808,
   allowedStatuses: Object.freeze([403, 503]),
-  expiresAt: "2026-10-21T07:15:00.000Z",
+  expiresAt: "2026-10-22T22:00:00.000Z",
 });
 
 export function permitsTemporaryItbiSourceOutage({ id, url, status, now }) {
