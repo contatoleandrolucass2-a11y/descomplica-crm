@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { GET, PUT } from "@/app/api/forecasts/route";
 import { createForecastDocument, getForecastGroups } from "@/lib/crm/forecast-grid";
+import { createForecastTemplate } from "@/lib/crm/forecasts";
 
 const mocks = vi.hoisted(() => ({ authorize: vi.fn(), client: vi.fn(), rpc: vi.fn() }));
 vi.mock("@/lib/security/route-auth", () => ({ authorizePageRoute: mocks.authorize }));
@@ -147,6 +148,19 @@ describe("shared forecast API", () => {
         { segment: "imob", manager: "alvaro", forecast: imobRecord },
       ],
       template: null,
+      brokers: [],
+      can_edit: false,
+      period: { start: "2026-10-16", end: "2026-10-18" },
+      selection: { segment: "general", manager: null },
+    });
+  });
+  it("returns the latest clean template when General has no saved period", async () => {
+    mockGet({ forecasts: [], template: document, can_edit: true });
+    const template = createForecastTemplate(document);
+    await result(await GET(getRequest("date=2026-10-17&segment=general")), 200, {
+      forecast: null,
+      sections: [],
+      template,
       brokers: [],
       can_edit: false,
       period: { start: "2026-10-16", end: "2026-10-18" },

@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-22 - Fallback da visão Geral da Previsão
+
+- Exibe a tabela Geral com as linhas House e Imob quando o final de semana ainda
+  não possui lançamentos, usando somente a estrutura limpa do último modelo salvo.
+- Mantém os empreendimentos mais recentes, os totais zerados e o modo somente
+  leitura, sem reaproveitar valores ou planos de ação de períodos anteriores.
+
 ## 2026-10-22 - Publicação dos totais e da visão Geral da Previsão
 
 - Publica os totais separados de Previsão e Realizado e a visão Geral compilada
