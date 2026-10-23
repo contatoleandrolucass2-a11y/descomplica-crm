@@ -340,6 +340,54 @@ export async function runAppointmentsPreview() {
           labelWritingModes: [
             ...document.querySelectorAll('[class*="columnValue"], [class*="columnLabel"]'),
           ].map((element) => getComputedStyle(element).writingMode),
+          kpiCenters: [...document.querySelectorAll('article[class*="kpiCard"]')].map((card) => {
+            const value = card.querySelector("strong");
+            const cardRect = card.getBoundingClientRect();
+            const valueRect = value?.getBoundingClientRect();
+            return {
+              label: card.querySelector("h2")?.textContent,
+              delta: valueRect
+                ? Math.abs(
+                    valueRect.left + valueRect.width / 2 - (cardRect.left + cardRect.width / 2),
+                  )
+                : null,
+            };
+          }),
+          conversionCenters: [...document.querySelectorAll('[class*="conversionPercent"]')].map(
+            (value) => {
+              const card = value.closest("article");
+              const cardRect = card.getBoundingClientRect();
+              const valueRect = value.getBoundingClientRect();
+              return {
+                label: card.querySelector("h2")?.textContent,
+                delta: Math.abs(
+                  valueRect.left + valueRect.width / 2 - (cardRect.left + cardRect.width / 2),
+                ),
+              };
+            },
+          ),
+          recency: [...document.querySelectorAll('[class*="recencyCard"]')].map((element) => ({
+            heading: element.querySelector("h2")?.textContent,
+            x: Math.round(element.getBoundingClientRect().x),
+            y: Math.round(element.getBoundingClientRect().y),
+            bottom: Math.round(element.getBoundingClientRect().bottom),
+          })),
+          monthly: (() => {
+            const section = [...document.querySelectorAll("[data-appointments-chart]")].find(
+              (element) => element.querySelector("h2")?.textContent === "Agendamentos por mês",
+            );
+            const labels = [...(section?.querySelectorAll('[class*="columnLabel"]') ?? [])];
+            return {
+              y: Math.round(section?.getBoundingClientRect().y ?? 0),
+              labels: labels.map((label) => ({
+                text: label.textContent,
+                clientWidth: label.clientWidth,
+                scrollWidth: label.scrollWidth,
+                fontSize: Number.parseFloat(getComputedStyle(label).fontSize),
+                whiteSpace: getComputedStyle(label).whiteSpace,
+              })),
+            };
+          })(),
         }));
         const axe = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
@@ -387,6 +435,30 @@ export async function runAppointmentsPreview() {
           !record.violations.length,
           `Axe violations ${theme}/${width}: ${record.violations.map((item) => item.id).join(",")}`,
         );
+        check(
+          geometry.kpiCenters.every((item) => item.delta !== null && item.delta <= 1),
+          `KPI values not centered ${theme}/${width}: ${JSON.stringify(geometry.kpiCenters)}`,
+        );
+        check(
+          geometry.conversionCenters.length === 3 &&
+            geometry.conversionCenters.every((item) => item.delta <= 1),
+          `Conversion percentages not centered ${theme}/${width}: ${JSON.stringify(geometry.conversionCenters)}`,
+        );
+        check(geometry.recency.length === 3, `Three recency panels ${theme}/${width}`);
+        check(
+          geometry.recency.every((item) => item.bottom <= geometry.monthly.y + 1),
+          `Recency panels must precede monthly chart ${theme}/${width}`,
+        );
+        check(
+          geometry.monthly.labels.length > 0 &&
+            geometry.monthly.labels.every(
+              (label) =>
+                label.scrollWidth <= label.clientWidth + 1 &&
+                label.fontSize >= 12.48 &&
+                label.whiteSpace === "nowrap",
+            ),
+          `Monthly labels clipped or too small ${theme}/${width}: ${JSON.stringify(geometry.monthly.labels)}`,
+        );
         check(geometry.sections.length === 8, `Eight charts ${theme}/${width}`);
         const score = geometry.sections.find((section) => section.heading === "Ranking Score");
         check(score && !score.hasVerticalScroll, `Ranking Score vertical scroll ${theme}/${width}`);
@@ -400,6 +472,18 @@ export async function runAppointmentsPreview() {
               geometry.sections[2].y === geometry.sections[3].y,
             `Three charts side by side at ${width}`,
           );
+        if (width >= 1024)
+          check(
+            new Set(geometry.recency.map((item) => item.y)).size === 1,
+            `Three recency panels side by side at ${width}`,
+          );
+        if (width <= 390)
+          check(
+            geometry.recency.every(
+              (item, index, items) => index === 0 || item.y > items[index - 1].y,
+            ),
+            `Recency panels must stack at ${width}`,
+          );
         if (width === 1440) {
           check(
             geometry.sections[6].hasVerticalScroll,
@@ -408,11 +492,24 @@ export async function runAppointmentsPreview() {
         }
       }
     }
+    await page.setViewportSize({ width: 1440, height: 900 });
+    await page.goto(origin);
     const daily = region("Evolução de agendamentos por dia");
     await expect(
       page.getByRole("region", { name: "Filtros do painel de agendamentos" }),
     ).toBeVisible();
     await expect(page.locator("article h2")).toHaveCount(12);
+    await expect(page.getByText("Cobertura da fonte:")).toHaveCount(0);
+    await expect(page.getByText(/agendamentos no período$/)).toHaveCount(0);
+    await expect(
+      page.getByRole("heading", { name: "Último agendamento: até 7 dias" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Último agendamento: de 8 a 14 dias" }),
+    ).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Último agendamento: 15 dias ou mais" }),
+    ).toBeVisible();
     await expect(page.getByRole("img", { name: /24 de 120 corretores/ })).toBeVisible();
     await expect(daily.getByRole("listitem")).toHaveCount(31);
     const barGeometry = await daily.getByRole("listitem").evaluateAll((items) =>
@@ -500,16 +597,71 @@ export async function runAppointmentsPreview() {
     await expect(region("Agendamentos por mês")).toContainText("Dezembro");
     assert.equal(await daily.innerText(), dailyBefore, "Exclusive year must preserve daily chart");
     const annualBefore = await region("Agendamentos por mês").innerText();
-    await page.getByLabel("Período dos gráficos, indicadores e tabela").fill("2026-01");
+    const filtersRegion = page.getByRole("region", {
+      name: "Filtros do painel de agendamentos",
+      exact: true,
+    });
+    const calendarTrigger = filtersRegion.getByRole("button", { name: "Março de 2026" });
+    const filterOrder = await filtersRegion.evaluate((element) => {
+      const company = element.querySelector('select[aria-label="Empresa"], select[id$="company"]');
+      const calendar = [...element.querySelectorAll("button")].find((button) =>
+        button.textContent?.includes("Março de 2026"),
+      );
+      const clear = [...element.querySelectorAll("button")].find((button) =>
+        button.textContent?.includes("Limpar filtros"),
+      );
+      return {
+        companyRight: company?.getBoundingClientRect().right ?? 0,
+        calendarLeft: calendar?.getBoundingClientRect().left ?? 0,
+        calendarRight: calendar?.getBoundingClientRect().right ?? 0,
+        clearLeft: clear?.getBoundingClientRect().left ?? 0,
+      };
+    });
+    check(
+      filterOrder.companyRight <= filterOrder.calendarLeft + 1 &&
+        filterOrder.calendarRight <= filterOrder.clearLeft + 1,
+      `Calendar and clear controls must follow Empresa: ${JSON.stringify(filterOrder)}`,
+    );
+    await calendarTrigger.click();
+    const calendar = page.getByRole("dialog", { name: "Selecione o período" });
+    await expect(calendar).toBeVisible();
+    await expect(calendar.getByLabel("Mês do calendário")).toHaveValue("3");
+    await expect(calendar.getByLabel("Ano do calendário")).toHaveValue("2026");
+    await calendar.getByRole("gridcell", { name: "1 de março de 2026", exact: true }).click();
+    await calendar.getByRole("gridcell", { name: "2 de março de 2026", exact: true }).click();
+    await expect(calendar.getByText("2 dias selecionados", { exact: true })).toBeVisible();
+    await expect(page.locator('p[aria-live="polite"]')).toContainText("3 registros encontrados");
+    await expect(daily.getByRole("listitem")).toHaveCount(2);
+    await expect(region("Agendamentos por semana").getByRole("listitem")).toHaveCount(2);
+    await calendar.getByRole("button", { name: "Fechar calendário" }).click();
+    await expect(calendar).toBeHidden();
+    await expect(filtersRegion.getByRole("button", { name: "2 dias selecionados" })).toBeFocused();
+    await filtersRegion.getByRole("button", { name: "2 dias selecionados" }).click();
+    await expect(calendar).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(calendar).toBeHidden();
+    await expect(filtersRegion.getByRole("button", { name: "2 dias selecionados" })).toBeFocused();
+    await filtersRegion.getByRole("button", { name: "2 dias selecionados" }).click();
+    await calendar.getByLabel("Ano do calendário").selectOption("2025");
+    await expect(calendar.getByLabel("Mês do calendário")).toHaveValue("10");
+    await calendar.getByLabel("Mês do calendário").selectOption("12");
+    await expect(
+      calendar.getByRole("gridcell", { name: "22 de dezembro de 2025", exact: true }),
+    ).toBeEnabled();
+    await calendar.getByRole("button", { name: "Selecionar mês inteiro" }).click();
+    await calendar.getByRole("button", { name: "Fechar calendário" }).click();
+    await expect(filtersRegion.getByRole("button", { name: "Dezembro de 2025" })).toBeVisible();
     assert.equal(
       await region("Agendamentos por mês").innerText(),
       annualBefore,
-      "Global month must preserve exclusive annual chart",
+      "Global calendar month must preserve exclusive annual chart",
     );
     await expect(daily.getByRole("listitem")).toHaveCount(1);
     await expect(region("Agendamentos por semana").getByRole("listitem")).toHaveCount(1);
     evidence.filters =
-      "2025 exclusive year keeps daily March unchanged; global January keeps annual 2025 unchanged; zero months/weeks absent";
+      "Calendar defaults to the current source month; supports multiple days, close button, Escape, year/month changes and whole-month selection; exclusive annual chart remains independent";
+    await filtersRegion.getByRole("button", { name: "Limpar 1 filtro" }).click();
+    await expect(filtersRegion.getByRole("button", { name: "Março de 2026" })).toBeVisible();
     await page.goto(origin);
     await page.getByRole("button", { name: "House", exact: true }).click();
     await page
@@ -521,7 +673,7 @@ export async function runAppointmentsPreview() {
     const composedRow = page.locator("tbody tr").first();
     await composedRow.focus();
     await page.keyboard.press("Enter");
-    await expect(page.getByRole("button", { name: /Limpar 8 filtros/ })).toBeVisible();
+    await expect(page.getByRole("button", { name: /Limpar 7 filtros/ })).toBeVisible();
     await page.keyboard.press("Enter");
     await expect(page.getByRole("button", { name: "Limpar 4 filtros" })).toBeVisible();
     await expect(page.getByLabel("Gerente de Vendas")).toHaveValue(
@@ -550,9 +702,9 @@ export async function runAppointmentsPreview() {
     await page.getByRole("button", { name: /Limpar \d+ filtros/ }).click();
     await page.goto(origin);
     await page.keyboard.press("Tab");
-    await expect(page.getByLabel("Período dos gráficos, indicadores e tabela")).toBeFocused();
+    await expect(page.getByRole("button", { name: "House", exact: true })).toBeFocused();
     evidence.keyboard =
-      "Tab reaches the global period; chart buttons and rows use native keyboard controls";
+      "Tab reaches the first global filter; calendar dialog restores focus after close/Escape; chart buttons and rows use native keyboard controls";
     await page.goto(`${origin}/?empty=1`);
     await expect(
       page.getByText(
