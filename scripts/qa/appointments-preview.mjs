@@ -356,10 +356,10 @@ export async function runAppointmentsPreview() {
               width: card.getBoundingClientRect().width,
               height: card.getBoundingClientRect().height,
             })),
-          metricFontSizes: [...document.querySelectorAll('[class*="metricValue"]')].map(
-            (element) => Number.parseFloat(getComputedStyle(element).fontSize),
+          metricFontSizes: [...document.querySelectorAll('[class*="metricValue"]')].map((element) =>
+            Number.parseFloat(getComputedStyle(element).fontSize),
           ),
-          cardTitleFontSizes: [...document.querySelectorAll('article h2')].map((element) =>
+          cardTitleFontSizes: [...document.querySelectorAll("article h2")].map((element) =>
             Number.parseFloat(getComputedStyle(element).fontSize),
           ),
           kpiCenters: [...document.querySelectorAll('article[class*="kpiCard"]')].map((card) => {
@@ -778,9 +778,8 @@ export async function runAppointmentsPreview() {
     assert.ok(tiltBounds, "First KPI card must have measurable bounds");
     await page.mouse.move(tiltBounds.x + 8, tiltBounds.y + 8);
     check(
-      (await tiltCard.evaluate((element) =>
-        element.style.getPropertyValue("--card-tilt-y"),
-      )) !== "0deg",
+      (await tiltCard.evaluate((element) => element.style.getPropertyValue("--card-tilt-y"))) !==
+        "0deg",
       "KPI card must tilt toward the pointer",
     );
     const secondTiltBounds = await page.locator("article").nth(1).boundingBox();
