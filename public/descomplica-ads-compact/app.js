@@ -396,7 +396,7 @@ function campaignTable(list) {
   return `<div class="table-wrap"><table><thead><tr><th>Campanha</th><th>Investimento</th><th>${resultName()}</th><th>${costName()}</th><th>Teto ${metricInfo("cap")}</th><th>Situação</th><th></th></tr></thead><tbody>${list
     .map((c) => {
       const [label, tone] = status(c);
-      return `<tr class="clickable" data-open="${c.id}"><td>${dot(c)}<button class="link-button" title="${c.name}" data-open="${c.id}">${c.name}</button></td><td>${comparisonCell(c, "spend", money)}</td><td>${comparisonCell(c, "leads", num)}</td><td class="${c.cap != null && c.cpl > c.cap ? "bad" : ""}">${comparisonCell(c, "cpl", money)}</td><td>${money(c.cap)}</td><td><span class="badge ${tone}">${label}</span></td><td>›</td></tr>`;
+      return `<tr class="clickable" data-open="${c.id}"><td>${dot(c)}<button class="link-button" title="${c.name}" data-open="${c.id}">${c.name}</button>${deliveryBadge(c)}</td><td>${comparisonCell(c, "spend", money)}</td><td>${comparisonCell(c, "leads", num)}</td><td class="${c.cap != null && c.cpl > c.cap ? "bad" : ""}">${comparisonCell(c, "cpl", money)}</td><td>${money(c.cap)}</td><td><span class="badge ${tone}">${label}</span></td><td>›</td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }

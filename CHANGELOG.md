@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-23 - Histórico de campanhas excluídas no Meta Ads
+
+- Consulta os estados históricos dos anúncios na API oficial e identifica
+  campanhas excluídas e arquivadas sem remover suas métricas anteriores.
+- Adiciona filtros para campanhas excluídas e arquivadas, com identificação
+  visual na lista, na tabela e na análise detalhada.
+- Mantém campanhas ativas como seleção inicial do dashboard.
+
 ## 2026-10-23 - Dashboard Meta Ads completo
 
 - Substitui o conteúdo do dashboard pelo layout local aprovado, com dados oficiais, comparação de períodos, aprofundamento por conjunto/anúncio, gráficos configuráveis e expansíveis.

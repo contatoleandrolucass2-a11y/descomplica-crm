@@ -580,6 +580,20 @@ tbody tr.clickable:hover {
   background: #fff0f3;
   color: #d92343;
 }
+.delivery-status {
+  margin-left: 7px;
+  background: #e8eef6;
+  color: #435a73;
+  vertical-align: middle;
+}
+.delivery-status.deleted {
+  background: #f7e9ed;
+  color: #a13e5a;
+}
+.delivery-status.archived {
+  background: #eeeaf8;
+  color: #65528e;
+}
 .foot {
   display: flex;
   justify-content: space-between;

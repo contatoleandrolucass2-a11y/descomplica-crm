@@ -7,6 +7,20 @@ const MAX_PAGES = 25;
 const MAX_ROWS = 50_000;
 const REQUEST_TIMEOUT_MS = 20_000;
 const CACHE_TTL_MS = 5 * 60_000;
+const AD_EFFECTIVE_STATUSES = [
+  "ACTIVE",
+  "PAUSED",
+  "DELETED",
+  "ARCHIVED",
+  "CAMPAIGN_PAUSED",
+  "ADSET_PAUSED",
+  "IN_PROCESS",
+  "WITH_ISSUES",
+  "PENDING_REVIEW",
+  "PREAPPROVED",
+  "DISAPPROVED",
+  "PENDING_BILLING_INFO",
+] as const;
 
 type MetaAction = { action_type?: unknown; value?: unknown };
 type MetaInsight = Record<string, unknown> & { actions?: MetaAction[] };
@@ -25,7 +39,7 @@ export type MetaAdsDashboardRow = {
   ad: string;
   project: string;
   destination: "form" | "site" | "whatsapp" | "unknown";
-  status: "active" | "paused" | "unknown";
+  status: "active" | "paused" | "deleted" | "archived" | "unknown";
   event: "lead" | "conversation" | "conversion";
   attribution: string;
   spend: number;
@@ -108,7 +122,10 @@ const LINK_CLICK_ACTIONS = ["link_click"] as const;
 function normalizeStatus(value: unknown): MetaAdsDashboardRow["status"] {
   const status = text(value).toUpperCase();
   if (status === "ACTIVE") return "active";
-  if (status) return "paused";
+  if (status === "PAUSED" || status === "CAMPAIGN_PAUSED" || status === "ADSET_PAUSED")
+    return "paused";
+  if (status === "DELETED") return "deleted";
+  if (status === "ARCHIVED") return "archived";
   return "unknown";
 }
 
@@ -321,6 +338,7 @@ export async function fetchMetaAdsDashboardData(
 
   const adsUrl = graphUrl(configuration, `act_${configuration.accountId}/ads`);
   adsUrl.searchParams.set("fields", "id,effective_status");
+  adsUrl.searchParams.set("effective_status", JSON.stringify(AD_EFFECTIVE_STATUSES));
   adsUrl.searchParams.set("limit", "500");
   const ads = await graphPages<MetaAd>(adsUrl, configuration, fetcher);
   const statuses = new Map(

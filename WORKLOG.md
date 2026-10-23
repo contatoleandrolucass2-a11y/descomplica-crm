@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-23 - Campanhas excluídas preservadas no Meta Ads
+
+O cliente somente leitura da API Meta passa a solicitar também anúncios
+excluídos e arquivados. O estado efetivo recebido é preservado em cada linha
+histórica, permitindo que campanhas removidas continuem acessíveis por filtro,
+sem misturá-las à visão inicial. O dashboard abre em campanhas ativas e mostra
+o estado de veiculação na seleção de campanhas, na tabela e na visão detalhada.
+
+Testes focados cobrem a consulta do estado `DELETED`, a preservação das métricas
+históricas, a agregação isolada das campanhas excluídas e o padrão ativo. O QA
+de navegador inclui uma campanha excluída e comprova filtro, identificação e
+totais históricos antes de retornar à seleção ativa.
+
 ## 2026-10-23 - Integração completa do layout local Meta Ads
 
 O usuário esclareceu que a entrega inclui todo o dashboard local, e não apenas a lateral. A integração substitui o artefato de análise, preservando sessão, guards e consulta oficial somente leitura. O modelo agrega linhas diárias reais; os controles, o PDF e o histórico de alertas acompanham os filtros. Não há dados geográficos individuais na origem: o mapa não inventa distribuição.
