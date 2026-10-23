@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-23 - Segundo desbloqueio de segurança da publicação
+
+- Atualiza `body-parser` transitivo para `2.4.0`, corrigindo
+  `GHSA-27r3-jxmh-p828` sem alterar o dashboard de Agendamentos.
+
 ## 2026-10-23 - Correção do gate de segurança para publicar Agendamentos
 
 - Atualiza Zod para `4.6.7`, corrigindo `GHSA-mrhx-c7xc-m3w5`.

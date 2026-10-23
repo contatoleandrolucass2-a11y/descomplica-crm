@@ -2845,3 +2845,12 @@ dependente da autorização específica aplicável.
   as ferramentas Next e Chrome. Dois refinamentos explícitos preservaram os
   limites UTF-16 existentes; 72 testes dos contratos afetados passaram. A
   publicação segue condicionada aos demais gates e ao coordenador oficial.
+
+## 2026-10-23: segundo advisory no fechamento da publicação de Agendamentos
+
+- O PR #315 foi integrado no `main` como
+  `b88122c7dddadd1d14ef4dc8cfeb033c0c57c8d1`, após CI `40029289783` e
+  candidato visual `40029289690` aprovados.
+- Durante a CI do `main` (`40035073028`), o registry passou a reportar o novo
+  `GHSA-27r3-jxmh-p828` em `body-parser@2.3.0`, transitivo do Next DevTools. O
+  pacote foi fixado em `2.4.0`; não houve mudança funcional em Agendamentos.
