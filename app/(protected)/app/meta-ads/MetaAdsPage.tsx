@@ -29,8 +29,12 @@ export async function MetaAdsPage({ path, view }: { path: string; view: MetaAdsD
 
   return (
     <div className={styles.workspace}>
-      <MetaAdsSidebar pages={pages} path={path} />
-      <MetaAdsDashboardFrame document={await readDashboardDocument()} initialView={view} />
+      <MetaAdsSidebar pages={pages} path={path} view={view} />
+      <MetaAdsDashboardFrame
+        document={await readDashboardDocument()}
+        initialView={view}
+        storageScope={authorization.userId}
+      />
     </div>
   );
 }

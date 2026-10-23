@@ -200,6 +200,7 @@
         "app/api/health/route.ts",
         "app/api/meta-ads/status/route.ts",
         "app/api/meta-ads/data/route.ts",
+        "app/api/meta-ads/tiles/[z]/[x]/[y]/route.ts",
         "app/api/meta-ads/console/route.ts",
         "app/api/meta-ads/console/authorize/route.ts"
       ],

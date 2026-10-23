@@ -1574,22 +1574,67 @@ test("Meta Ads keeps its four views inside srcdoc after submenu navigation and r
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
+    // Keep navigation independent of external Meta credentials while rendering
+    // the official source's valid empty state, never demonstration campaigns.
+    await page.route("**/api/meta-ads/data**", (route) =>
+      route.fulfill({
+        json: {
+          source: "meta_marketing_api",
+          accountId: "1000000000000000",
+          accountName: "Conta isolada de navegação",
+          currency: "BRL",
+          fetchedAt: "2026-10-21T12:00:00.000Z",
+          range: { start: "2026-06-24", end: "2026-10-21" },
+          rows: [],
+        },
+      }),
+    );
     await page.goto("/app/meta-ads");
     const frame = page.frameLocator(
       'iframe[title="Descomplica Ads — desempenho de campanhas Meta"]',
     );
-    for (const [route, heading] of [
-      ["/app/meta-ads/campanhas", "Análise de campanhas e anúncios"],
-      ["/app/meta-ads/contas-de-anuncios", "Contas de anúncios"],
-      ["/app/meta-ads/relatorios", "Central de relatórios"],
-      ["/app/meta-ads", "Visão geral de anúncios"],
+    for (const [route, heading, view] of [
+      ["/app/meta-ads/campanhas", "Análise da campanha", "campaigns"],
+      ["/app/meta-ads/contas-de-anuncios", "Ajustes", "accounts"],
+      ["/app/meta-ads/relatorios", "Relatórios", "reports"],
+      ["/app/meta-ads", "Comparar campanhas", "overview"],
     ] as const) {
       await page.getByRole("button", { name: "Meta Ads", exact: true }).click();
       await page.locator(`#authorized-navigation-crm-meta_ads a[href="${route}"]`).click();
       await expect(page).toHaveURL(new RegExp(`${route}$`));
-      await expect(frame.locator("#page-title")).toHaveText(heading);
+      await expect(
+        frame.getByRole("heading", { level: 1, name: heading, exact: true }),
+      ).toBeVisible();
+      await expect(frame.locator("html")).toHaveAttribute("data-crm-view", view);
       await page.reload();
-      await expect(frame.locator("#page-title")).toHaveText(heading);
+      await expect(
+        frame.getByRole("heading", { level: 1, name: heading, exact: true }),
+      ).toBeVisible();
+      await expect(frame.locator("html")).toHaveAttribute("data-crm-view", view);
+      expect(
+        page
+          .frames()
+          .filter((entry) => entry.parentFrame())
+          .map((entry) => entry.url()),
+      ).toEqual(["about:srcdoc"]);
+    }
+    for (const [panel, heading] of [
+      ["map", "Mapa de São Paulo"],
+      ["settings", "Ajustes"],
+    ] as const) {
+      await page
+        .getByRole("navigation", { name: "Visões do Meta Ads" })
+        .getByRole("link", { name: heading, exact: true })
+        .click();
+      await expect(page).toHaveURL(new URL(`/app/meta-ads?panel=${panel}`, page.url()).href);
+      await expect(
+        frame.getByRole("heading", { level: 1, name: heading, exact: true }),
+      ).toBeVisible();
+      await page.reload();
+      await expect(
+        frame.getByRole("heading", { level: 1, name: heading, exact: true }),
+      ).toBeVisible();
+      await expect(frame.locator("html")).toHaveAttribute("data-crm-view", panel);
       expect(
         page
           .frames()

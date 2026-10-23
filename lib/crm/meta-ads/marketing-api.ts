@@ -278,16 +278,43 @@ function dateRange(now: Date, days: number) {
   return { start: isoDate(start), end: isoDate(end) };
 }
 
+export function validateMetaAdsRange(start: string | null, end: string | null) {
+  if (!start && !end) return undefined;
+  if (!start || !end || !/^\d{4}-\d{2}-\d{2}$/u.test(start) || !/^\d{4}-\d{2}-\d{2}$/u.test(end)) {
+    throw new MetaAdsApiError("invalid_data", 400);
+  }
+  const first = new Date(`${start}T00:00:00Z`);
+  const last = new Date(`${end}T00:00:00Z`);
+  const days = (last.getTime() - first.getTime()) / 86_400_000 + 1;
+  if (
+    !Number.isFinite(days) ||
+    days < 1 ||
+    days > 732 ||
+    isoDate(first) !== start ||
+    isoDate(last) !== end
+  ) {
+    throw new MetaAdsApiError("invalid_data", 400);
+  }
+  return { start, end };
+}
+
 let cache: { key: string; expiresAt: number; data: MetaAdsDashboardData } | null = null;
 
 export async function fetchMetaAdsDashboardData(
   configuration: MetaAdsApiConfiguration,
-  options: { fetcher?: typeof fetch; now?: Date; bypassCache?: boolean } = {},
+  options: {
+    fetcher?: typeof fetch;
+    now?: Date;
+    bypassCache?: boolean;
+    range?: { start: string; end: string };
+  } = {},
 ): Promise<MetaAdsDashboardData> {
   if (!configuration.available) throw new MetaAdsApiError("configuration", 503);
   const now = options.now || new Date();
-  const range = dateRange(now, 120);
-  const key = `${configuration.apiVersion}:${configuration.accountId}:${range.end}`;
+  const range = options.range
+    ? validateMetaAdsRange(options.range.start, options.range.end)!
+    : dateRange(now, 120);
+  const key = `${configuration.apiVersion}:${configuration.accountId}:${range.start}:${range.end}`;
   if (!options.bypassCache && cache?.key === key && cache.expiresAt > now.getTime())
     return cache.data;
   const fetcher = options.fetcher || fetch;
@@ -330,8 +357,8 @@ export async function fetchMetaAdsDashboardData(
   const rows = insights
     .map((insight) => mapInsight(insight, statuses, destinations))
     .filter((row): row is MetaAdsDashboardRow => row !== null);
-  if (!rows.length) throw new MetaAdsApiError("invalid_data", 502);
-  const accountName = rows[0]!.account;
+  if (rows.length !== insights.length) throw new MetaAdsApiError("invalid_data", 502);
+  const accountName = rows[0]?.account || configuration.accountId;
   const data: MetaAdsDashboardData = {
     source: "meta_marketing_api",
     accountId: configuration.accountId,
