@@ -4,6 +4,15 @@ Fontes: relatórios Salesforce `00OU600000ELaA6MAL` e
 `00OTT000009j0l32AA`, página `/app/etapas/agendamentos`. O estado operacional
 deve ser conferido em `docs/knowledge/ATUALIZACOES.md`, PR/CI e health.
 
+## Elenco filtrado
+
+Os cards de corretores e gerentes cadastrados usam a coorte mensal de
+`crm_ranking_participants`, conciliada com o mesmo snapshot global do painel.
+Filtros por gerente e responsável contam identidades cadastradas, inclusive sem
+agendamento no período. Se a coorte estiver inacessível, incompleta ou mudar
+durante a leitura, esses totais filtrados ficam indisponíveis; fatos de atividade
+nunca substituem o elenco oficial.
+
 ## Definições
 
 Os gráficos históricos contam códigos de agendamento únicos após a deduplicação
@@ -28,11 +37,19 @@ Rankings ordenam quantidade decrescente e usam o nome como desempate. Ausência
 de nome fica explícita. Cobertura ausente não vira zero; cobertura parcial é
 informada.
 
-Os seis indicadores ocupam uma linha em telas largas. O diário usa toda a
-largura sem rolagem horizontal. Os três gráficos temporais e os quatro rankings
-mantêm altura uniforme por grupo; conteúdos extensos usam rolagem vertical
-acessível por teclado. A tabela usa largura fixa, quebra texto, cabeçalho aderente
-e rolagem apenas vertical.
+Os 12 indicadores têm dimensões, títulos, números e textos auxiliares uniformes.
+Em telas largas, formam seis colunas por duas linhas; o movimento sutil segue o
+ponteiro e respeita a preferência por movimento reduzido. Os cinco gráficos
+principais mantêm a mesma altura em uma grade compacta. Ranking Score escreve os
+rótulos de baixo para cima. Os três rankings e as três faixas de recência formam
+uma grade 3 × 2; conteúdos extensos usam rolagem vertical acessível por teclado.
+A tabela usa largura fixa, quebra texto, cabeçalho aderente e rolagem apenas
+vertical. Barras, rótulos, rankings e linhas da tabela recebem realce no hover.
+
+Filtros dimensionais de canal, regional, gerente, responsável, empresa e ranking
+recortam também o elenco cadastrado. A meta, a equipe produtiva e a contagem de
+gerentes usam esse elenco filtrado. O período continua recortando as métricas
+operacionais sem transformar o cadastro vigente em uma contagem de atividade.
 
 ## Contrato e permissões
 

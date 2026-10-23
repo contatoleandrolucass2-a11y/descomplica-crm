@@ -11,6 +11,11 @@ const snapshot = {
   generated_at: "2026-10-19T00:00:00.123456Z",
   updated_at: "2026-10-19T00:00:00.123456Z",
 };
+const rankingSnapshot = { ...snapshot, id: 2 };
+const roster = [
+  { broker_key: "broker-a", broker_name: "Responsável A", manager_name: "Gerente A" },
+  { broker_key: "broker-b", broker_name: "Responsável B", manager_name: "Gerente B" },
+];
 const slice = {
   version: 1,
   viewKey: "all",
@@ -24,14 +29,26 @@ const result = (payload: unknown = slice) => ({
   error: null,
 });
 let headers: Array<{ data: unknown; error: unknown }>;
+let rankingHeaders: Array<{ data: unknown; error: unknown }>;
+let participantResponses: Array<{ data: unknown; count: number | null; error: unknown }>;
 
 beforeEach(() => {
   vi.resetAllMocks();
   headers = Array.from({ length: 4 }, () => ({ data: snapshot, error: null }));
-  mocks.from.mockImplementation(() => ({
+  rankingHeaders = Array.from({ length: 10 }, () => ({ data: rankingSnapshot, error: null }));
+  participantResponses = Array.from({ length: 5 }, () => ({
+    data: roster,
+    count: roster.length,
+    error: null,
+  }));
+  mocks.from.mockImplementation((table: string) => ({
     select: vi.fn().mockReturnThis(),
     eq: vi.fn().mockReturnThis(),
-    maybeSingle: vi.fn(async () => headers.shift()),
+    order: vi.fn().mockReturnThis(),
+    range: vi.fn(async () => participantResponses.shift()),
+    maybeSingle: vi.fn(async () =>
+      table === "crm_dashboard_snapshots" ? headers.shift() : rankingHeaders.shift(),
+    ),
   }));
   mocks.createClient.mockResolvedValue({ from: mocks.from, rpc: mocks.rpc });
   mocks.rpc.mockImplementation(async (name: string) =>
@@ -44,6 +61,10 @@ describe("appointments snapshot read", () => {
     const actual = await loadAppointmentsReadModel("all");
     expect(actual).toEqual({
       analysis: slice,
+      brokerRoster: [
+        { key: "broker-a", owner: "Responsável A", manager: "Gerente A" },
+        { key: "broker-b", owner: "Responsável B", manager: "Gerente B" },
+      ],
       generatedAt: snapshot.generated_at,
       individualGoal: 24,
     });
@@ -54,15 +75,20 @@ describe("appointments snapshot read", () => {
     expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_goal", {
       p_reference_date: snapshot.reference_date,
     });
-    expect(mocks.from.mock.calls.every(([table]) => table === "crm_dashboard_snapshots")).toBe(
-      true,
-    );
+    expect(mocks.from.mock.calls.map(([table]) => table)).toEqual([
+      "crm_dashboard_snapshots",
+      "crm_ranking_snapshots",
+      "crm_ranking_participants",
+      "crm_ranking_snapshots",
+      "crm_dashboard_snapshots",
+    ]);
   });
 
   it("does not fabricate a series for missing snapshots or inaccessible analysis", async () => {
     headers[0] = { data: null, error: null };
     expect(await loadAppointmentsReadModel("all")).toEqual({
       analysis: null,
+      brokerRoster: null,
       individualGoal: null,
     });
     expect(mocks.rpc).not.toHaveBeenCalled();
@@ -70,6 +96,7 @@ describe("appointments snapshot read", () => {
     mocks.rpc.mockResolvedValue({ data: [], error: null });
     expect(await loadAppointmentsReadModel("all")).toEqual({
       analysis: null,
+      brokerRoster: null,
       individualGoal: null,
     });
   });
@@ -80,6 +107,7 @@ describe("appointments snapshot read", () => {
       mocks.rpc.mockResolvedValue({ data: null, error: { code } });
       expect(await loadAppointmentsReadModel("all")).toEqual({
         analysis: null,
+        brokerRoster: null,
         individualGoal: null,
       });
     },
@@ -138,6 +166,14 @@ describe("appointments snapshot read", () => {
       name === "read_crm_appointments_goal" ? { data: 24, error: null } : result(v4),
     );
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(v4);
+  });
+
+  it("keeps the page available but marks a filtered roster unavailable when it cannot prove it", async () => {
+    participantResponses[0] = { data: roster.slice(0, 1), count: 2, error: null };
+    expect(await loadAppointmentsReadModel("all")).toMatchObject({
+      analysis: slice,
+      brokerRoster: null,
+    });
   });
 
   it("retries when ingestion changes even the PostgreSQL microsecond version", async () => {

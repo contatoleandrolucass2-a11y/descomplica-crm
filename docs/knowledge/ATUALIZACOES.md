@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-23: layout e filtros exclusivos de Agendamentos
+
+- A entrega permanece limitada a `/app/etapas/agendamentos`: uniformiza os 12
+  cards, compacta cinco gráficos, organiza seis rankings/recências em 3 por 2,
+  verticaliza os rótulos de score e adiciona realce de hover e inclinação sutil.
+- A revisão identificou que atividade não comprova elenco cadastrado. Os filtros
+  por gerente e responsável passaram a usar a coorte mensal oficial em
+  `crm_ranking_participants`, conciliada antes e depois da leitura com o snapshot
+  do dashboard. Corretores sem atividade permanecem no denominador; divergência,
+  paginação incompleta ou falta de acesso resulta em valor indisponível.
+- Os filtros de canal, empresa, data e gráficos continuam aplicados às métricas
+  operacionais. Eles não alteram contagens cadastrais quando a fonte oficial não
+  contém a dimensão correspondente.
+
 ## 2026-10-23: regra maxima de escopo exclusivo por chat
 
 - Pedido direto do usuario em 23/10/2026: cada chat do DESCOMPLICA-CRM deve
@@ -2764,3 +2778,70 @@ dependente da autorização específica aplicável.
   `/app/etapas/agendamentos` respondeu HTTP 307 para `/login`. Nenhuma outra
   página foi alterada nesta etapa de publicação; não houve migration, mudança
   de n8n, DNS, cobrança ou mutação de dados remotos.
+
+## 2026-10-23: abertura dos ajustes visuais e filtros de Agendamentos
+
+- A branch `codex/agendamentos-layout-filtros-v6` iniciou no `origin/main`
+  `c80a39d92d5ecfcada4241076d58cd874df35096`, após a integração documental do
+  PR #314 com CI `39911972202` aprovada. O health público consultado em
+  `2026-10-23T13:58:28.0362540Z` respondeu HTTP 200, `status=ok` e versão
+  `f3b512dce5e725f9002b06b3c9382213466824e6`; a diferença é exclusivamente o
+  registro documental integrado depois do último deploy e não exige reinício.
+- Escopo exclusivo: somente `/app/etapas/agendamentos` e seus componentes e
+  cálculos diretos. A demanda uniformiza doze indicadores e cinco gráficos,
+  organiza seis rankings/recências em duas linhas, melhora rótulos, hover e
+  inclinação dos cards e faz todos os indicadores respeitarem os filtros,
+  incluindo a contagem de gerentes no recorte selecionado. Nenhuma outra página,
+  migration, n8n ou dado remoto será alterado.
+
+## 2026-10-23: implementação local dos ajustes de Agendamentos
+
+- Os 12 indicadores usam uma grade única, altura uniforme, tipografia comum e
+  conteúdo centralizado. A inclinação limitada acompanha o ponteiro e respeita
+  `prefers-reduced-motion`. Os cinco gráficos principais têm a mesma altura; os
+  três rankings e as três faixas de recência formam uma grade 3 × 2. Ranking
+  Score exibe os nomes na vertical, de baixo para cima. Barras, rótulos,
+  rankings, recências e linhas da tabela recebem realce no hover.
+- Filtros dimensionais passam a recortar o elenco registrado antes de calcular
+  corretores, gerentes, meta prevista e equipe produtiva. A regressão comprova
+  que um gerente filtrado resulta em um gerente, um corretor registrado, meta
+  diária de um e equipe produtiva de 100% na fixture. Filtros de período mantêm
+  o cadastro vigente e recortam somente as métricas operacionais.
+- Evidência local: lint, typecheck, build e 18 testes focados aprovados. O QA com
+  CSS compilado aprovou 12 combinações de tema/largura, zoom de layout, axe,
+  filtros, hover, inclinação, dimensões e overflow. O Vitest geral aprovou 4.107
+  testes e ignorou 107; o estágio Node do `pnpm test` falhou em três testes
+  Windows do Meta Ads, externos ao escopo (ACL de segredo e diretório de perfil
+  dedicado). Nenhum arquivo dessa área foi alterado. CI, merge e publicação
+  ainda não ocorreram e permanecem estados separados.
+
+## 2026-10-23: bloqueio externo de integração dos ajustes de Agendamentos
+
+- O PR #315 chegou ao SHA `63da2f4db520c61a68b97f991510447373a6af34`
+  com CI `40009497577` e candidato visual `40009497616` aprovados. Após a
+  integração externa do PR #317, a branch incorporou `origin/main`
+  `f8799dbc5f5d280979be261699018186be616037` sem conflito funcional e passou ao
+  SHA `bde9bbd39ff4af83284b51ae00c2336cb54d3313`.
+- A CI da própria `main` (`40022552767`) e duas tentativas do job `validate` do
+  PR (`40023399660`) falharam exclusivamente em `pnpm audit --audit-level high`.
+  A reprodução local do mesmo comando terminou com código 0. O candidato visual
+  `40023399816` não substitui o gate obrigatório. Pela regra máxima de escopo,
+  nenhuma dependência ou área externa foi alterada; merge e publicação ficam
+  bloqueados até o gate da `main` voltar a aprovar ou receber correção em chat
+  próprio.
+- A observação final de `2026-10-23T18:09:47-03:00` confirmou HTTP 200,
+  `status=ok` e versão publicada
+  `74b76c248c67e62b5cfad5e721389f1c81431a43`; portanto, o conteúdo do PR #315
+  ainda não está em produção.
+
+## 2026-10-23: correção comprovada do gate de auditoria do PR #315
+
+- A reprodução no Ubuntu com Node `24.19.0` e pnpm `11.20.0` identificou
+  `GHSA-mrhx-c7xc-m3w5`: Zod menor que `4.6.6`, inclusive o `3.25.76` fixado pelo
+  `next-devtools-mcp@0.4.0`. O Windows não reproduzia o advisory.
+- Zod foi atualizado para `4.6.7` e o DevTools passou a reutilizar essa versão.
+  `pnpm audit --audit-level high --json` no Ubuntu terminou com código 0, sem
+  vulnerabilidade alta ou crítica. `pnpm devtools:check` aprovou o protocolo e
+  as ferramentas Next e Chrome. Dois refinamentos explícitos preservaram os
+  limites UTF-16 existentes; 72 testes dos contratos afetados passaram. A
+  publicação segue condicionada aos demais gates e ao coordenador oficial.
