@@ -6,6 +6,10 @@ import { forbidden } from "next/navigation";
 import { enforcePageAccess } from "@/lib/authorization/enforce";
 import { getProtectedPageGate } from "@/lib/authorization/page-gates";
 
+import { getAuthorizedNavigation } from "@/lib/navigation/pages";
+
+import styles from "./MetaAdsDashboardFrame.module.css";
+import { MetaAdsSidebar } from "./MetaAdsSidebar";
 import { MetaAdsDashboardFrame, type MetaAdsDashboardView } from "./MetaAdsDashboardFrame";
 
 async function readDashboardDocument() {
@@ -16,8 +20,17 @@ async function readDashboardDocument() {
 }
 
 export async function MetaAdsPage({ path, view }: { path: string; view: MetaAdsDashboardView }) {
-  await enforcePageAccess(path);
+  const authorization = await enforcePageAccess(path);
   if (!getProtectedPageGate(path)?.releaseEnabled) forbidden();
 
-  return <MetaAdsDashboardFrame document={await readDashboardDocument()} initialView={view} />;
+  const pages = (await getAuthorizedNavigation(authorization)).filter(
+    (page) => page.path === "/app/meta-ads" || page.parentKey === "crm.meta_ads",
+  );
+
+  return (
+    <div className={styles.workspace}>
+      <MetaAdsSidebar pages={pages} path={path} />
+      <MetaAdsDashboardFrame document={await readDashboardDocument()} initialView={view} />
+    </div>
+  );
 }
