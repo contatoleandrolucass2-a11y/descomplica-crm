@@ -253,6 +253,22 @@ const metricLabels = {
   cpc: "CPC",
   cpm: "CPM",
 };
+function chartLabelLines(value, limit = 14) {
+  const full = String(value || "—").trim();
+  const compact = full.replace(/^campanha\s+/i, "");
+  const words = compact.split(/\s+/).filter(Boolean);
+  const lines = [""];
+  for (const word of words) {
+    const current = lines.at(-1);
+    if (!current || `${current} ${word}`.length <= limit) lines[lines.length - 1] = current ? `${current} ${word}` : word;
+    else if (lines.length < 2) lines.push(word);
+    else {
+      lines[1] += "…";
+      break;
+    }
+  }
+  return lines.map((line) => (line.length > limit ? `${line.slice(0, limit - 1)}…` : line));
+}
 function defaultBarChart(list, metric = state.metric) {
   if (!list.length) return '<div class="empty">Sem campanhas selecionadas.</div>';
   const before = list.map(previousData),
@@ -263,15 +279,17 @@ function defaultBarChart(list, metric = state.metric) {
         ...(state.compare ? before.map((c) => c[metric] || 0) : []),
         ...(metric === "cpl" ? list.map((c) => c.cap) : []),
       ) * 1.3,
-    step = 480 / list.length;
+    chartWidth = Math.max(560, 80 + list.length * 82),
+    chartRight = chartWidth - 10,
+    step = (chartRight - 45) / list.length;
   const format = (v) => (metric === "ctr" ? pct(v) : metric === "leads" ? num(v) : money(v));
   let svg =
-    '<svg class="chart" viewBox="0 0 560 230" role="img" aria-label="Comparação por campanha"><text x="4" y="12">' +
+    `<div class="chart-scroll"><svg class="chart" style="min-width:${chartWidth}px" viewBox="0 0 ${chartWidth} 250" role="img" aria-label="Comparação por campanha"><text x="4" y="12">` +
     (metric === "ctr" ? "%" : metric === "leads" ? resultName() : "R$") +
     "</text>";
   for (let i = 0; i < 5; i++) {
     const y = 170 - i * 35;
-    svg += `<line class="grid" x1="45" x2="550" y1="${y}" y2="${y}"/><text x="40" y="${y + 4}" text-anchor="end">${num((max * i) / 4)}</text>`;
+    svg += `<line class="grid" x1="45" x2="${chartRight}" y1="${y}" y2="${y}"/><text x="40" y="${y + 4}" text-anchor="end">${num((max * i) / 4)}</text>`;
   }
   list.forEach((c, i) => {
     const x = 45 + i * step + step / 2;
@@ -284,11 +302,13 @@ function defaultBarChart(list, metric = state.metric) {
       const cy = 170 - (c.cap / max) * 140;
       svg += `<line x1="${x - step * 0.35}" x2="${x + step * 0.35}" y1="${cy}" y2="${cy}" stroke="#c92049" stroke-dasharray="4 3"/><text x="${x}" y="${cy - 5}" text-anchor="middle">Teto ${money(c.cap)}</text>`;
     }
-    svg += `<text x="${x}" y="189" text-anchor="middle">${AdsData.escape((c.label || c.name).slice(0, 10))}…</text><text style="fill:${metric === "cpl" && c.cap != null && c.cpl > c.cap ? "#e51c3c" : "var(--text)"}" x="${x}" y="204" text-anchor="middle">${format(c[metric])}${state.compare ? " · " + changeLabel(c[metric], before[i][metric]) : ""}</text>`;
+    const label = c.label || c.name,
+      lines = chartLabelLines(label);
+    svg += `<text ${chartHint([label])} x="${x}" y="187" text-anchor="middle">${lines.map((line, index) => `<tspan x="${x}" dy="${index ? 13 : 0}">${AdsData.escape(line)}</tspan>`).join("")}</text><text style="fill:${metric === "cpl" && c.cap != null && c.cpl > c.cap ? "#e51c3c" : "var(--text)"}" x="${x}" y="218" text-anchor="middle">${format(c[metric])}${state.compare ? " · " + changeLabel(c[metric], before[i][metric]) : ""}</text>`;
   });
   return (
     svg +
-    `<text x="45" y="225">${state.compare ? "Claro: anterior · Cor sólida: atual · " : ""}Tracejado vermelho: teto</text></svg>`
+    `<text x="45" y="242">${state.compare ? "Claro: anterior · Cor sólida: atual · " : ""}Tracejado vermelho: teto</text></svg></div>`
   );
 }
 function defaultTrend(list, cost = false) {
@@ -385,11 +405,11 @@ function defaultScatter(list) {
   list.forEach((c, i) => {
     const [x, y] = point(c),
       [px, py] = point(prev[i]);
-    svg += `${state.compare ? `<line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="${c.color}" opacity=".6"/><circle ${scatterHint(prev[i], true)} cx="${px}" cy="${py}" r="6" fill="white" stroke="${c.color}" stroke-width="2"/>` : ""}<line x1="45" y1="${y}" x2="${x}" y2="${y}" stroke="${c.color}" opacity=".3" stroke-dasharray="3 3"/><line x1="${x}" y1="${y}" x2="${x}" y2="170" stroke="${c.color}" opacity=".3" stroke-dasharray="3 3"/><circle ${scatterHint(c, false)} cx="${x}" cy="${y}" r="6" fill="${c.color}"/><text x="${x + 9}" y="${y - 8}">${AdsData.escape((c.label || c.name).slice(0, 14))}…</text>`;
+    svg += `${state.compare ? `<line x1="${px}" y1="${py}" x2="${x}" y2="${y}" stroke="${c.color}" opacity=".6"/><circle ${scatterHint(prev[i], true)} cx="${px}" cy="${py}" r="6" fill="white" stroke="${c.color}" stroke-width="2"/>` : ""}<line x1="45" y1="${y}" x2="${x}" y2="${y}" stroke="${c.color}" opacity=".3" stroke-dasharray="3 3"/><line x1="${x}" y1="${y}" x2="${x}" y2="170" stroke="${c.color}" opacity=".3" stroke-dasharray="3 3"/><circle ${scatterHint(c, false)} cx="${x}" cy="${y}" r="6" fill="${c.color}"/>`;
   });
   return (
     svg +
-    `<text x="290" y="207" text-anchor="middle">Investimento (R$)</text><text x="45" y="225">${state.compare ? "Vazio: anterior · Preenchido: atual · Linha liga a mesma campanha" : "Resultados do período selecionado"}</text></svg>`
+    `<text x="290" y="207" text-anchor="middle">Investimento (R$)</text><text x="45" y="225">${state.compare ? "Vazio: anterior · Preenchido: atual · Linha liga a mesma campanha" : "Resultados do período selecionado"}</text></svg><div class="legend chart-campaign-legend">${list.map((c) => `<span title="${AdsData.escape(c.name)}"><i style="--c:${c.color}"></i>${AdsData.escape(c.label || c.name)}</span>`).join("")}</div>`
   );
 }
 function campaignTable(list) {

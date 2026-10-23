@@ -188,6 +188,20 @@ describe("dashboard Meta Ads", () => {
     expect(application).not.toContain("$('#alerts-button').addEventListener");
   });
 
+  it("evita nomes aglomerados nos gráficos de comparação", async () => {
+    const [application, styles] = await Promise.all([
+      readFile(new URL("../public/descomplica-ads-compact/app.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/style.css", import.meta.url), "utf8"),
+    ]);
+
+    expect(application).toContain("function chartLabelLines");
+    expect(application).toContain('class="chart-scroll"');
+    expect(application).toContain('class="legend chart-campaign-legend"');
+    expect(application).not.toContain('x="${x + 9}" y="${y - 8}"');
+    expect(styles).toContain(".chart-campaign-legend");
+    expect(styles).toContain("overflow-x: auto");
+  });
+
   it("omite destinos que não foram autorizados no catálogo", async () => {
     mocks.getAuthorizedNavigation.mockReturnValueOnce([]);
     const markup = renderToStaticMarkup(await MetaAdsDashboardPage());
