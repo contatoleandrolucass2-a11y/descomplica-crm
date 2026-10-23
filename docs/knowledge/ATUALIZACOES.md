@@ -2814,3 +2814,18 @@ dependente da autorização específica aplicável.
   Windows do Meta Ads, externos ao escopo (ACL de segredo e diretório de perfil
   dedicado). Nenhum arquivo dessa área foi alterado. CI, merge e publicação
   ainda não ocorreram e permanecem estados separados.
+
+## 2026-10-23: bloqueio externo de integração dos ajustes de Agendamentos
+
+- O PR #315 chegou ao SHA `63da2f4db520c61a68b97f991510447373a6af34`
+  com CI `40009497577` e candidato visual `40009497616` aprovados. Após a
+  integração externa do PR #317, a branch incorporou `origin/main`
+  `f8799dbc5f5d280979be261699018186be616037` sem conflito funcional e passou ao
+  SHA `bde9bbd39ff4af83284b51ae00c2336cb54d3313`.
+- A CI da própria `main` (`40022552767`) e duas tentativas do job `validate` do
+  PR (`40023399660`) falharam exclusivamente em `pnpm audit --audit-level high`.
+  A reprodução local do mesmo comando terminou com código 0. O candidato visual
+  `40023399816` não substitui o gate obrigatório. Pela regra máxima de escopo,
+  nenhuma dependência ou área externa foi alterada; merge e publicação ficam
+  bloqueados até o gate da `main` voltar a aprovar ou receber correção em chat
+  próprio.
