@@ -12,10 +12,12 @@ export function MetaAdsSidebar({
   path: string;
   view?: string;
 }) {
-  const links = pages.map((page) => ({
-    ...page,
-    name: page.path === "/app/meta-ads" ? "Visão macro" : page.name,
-  }));
+  const links = pages
+    .filter((page) => page.path !== "/app/meta-ads/contas-de-anuncios")
+    .map((page) => ({
+      ...page,
+      name: page.path === "/app/meta-ads" ? "Visão macro" : page.name,
+    }));
   if (pages.some((page) => page.path === "/app/meta-ads")) {
     links.splice(
       Math.min(2, links.length),
@@ -25,9 +27,11 @@ export function MetaAdsSidebar({
     );
   }
   const activePath =
-    path === "/app/meta-ads" && (view === "map" || view === "settings")
-      ? `${path}?panel=${view}`
-      : path;
+    view === "accounts"
+      ? "/app/meta-ads?panel=settings"
+      : path === "/app/meta-ads" && (view === "map" || view === "settings")
+        ? `${path}?panel=${view}`
+        : path;
   return (
     <aside className={styles.sidebar} aria-label="Navegação lateral Meta Ads">
       <div className={styles.brand}>
@@ -51,9 +55,7 @@ export function MetaAdsSidebar({
                     ? "▦"
                     : page.path.endsWith("/campanhas")
                       ? "▣"
-                      : page.path.endsWith("/contas-de-anuncios")
-                        ? "▤"
-                        : "▥"}
+                      : "▥"}
             </span>
             {page.name}
           </Link>
