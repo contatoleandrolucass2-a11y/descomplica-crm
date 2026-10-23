@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-23 - Escopo exclusivo por chat
+
+- Define que cada chat altera somente o escopo explicitamente solicitado.
+- Trata conhecimento anterior como contexto, sem ampliar a autorização atual.
+- Exige apenas o relato de gates alheios ao pedido, sem corrigir outras páginas
+  ou atualizar seus baselines dentro da mesma entrega.
+
 ## 2026-10-22 - Responsividade e navegação global do Meta Ads
 
 - Mantém os doze diálogos do painel Meta Ads dentro da área visível do CRM,
