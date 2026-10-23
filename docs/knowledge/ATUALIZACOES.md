@@ -13,6 +13,13 @@
   pagina Documentacao durante a entrega de Agendamentos, foi encerrado sem merge
   e removido dos artefatos do chat. A entrega funcional permanece limitada a
   `/app/etapas/agendamentos`; o bloqueio global alheio permanece apenas relatado.
+- A regra foi versionada no PR #312, commit
+  `e2549916d95ff7f2dd7931bcf0fdd4457c652622`, e sincronizada no Obsidian com
+  `status=synced`. `lint`, `typecheck` e `build` passaram no Node 24.19.0.
+  `pnpm test` aprovou 4.106 testes, ignorou 107 e encontrou um timeout no teste
+  existente do Associativo; a repeticao isolada manteve o mesmo timeout. Nenhum
+  arquivo do simulador foi alterado, pois ele esta fora do escopo deste chat.
+  Esta mudanca e somente documental e nao requer deploy do CRM.
 
 ## 2026-10-22: modais e alertas globais do Meta Ads
 
