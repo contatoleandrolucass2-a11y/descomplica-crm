@@ -496,6 +496,7 @@ export default async function StagePage({
         <AnalyticsCanvas kind="stage">
           <AppointmentsDashboard
             analysis={appointments.analysis}
+            brokerRoster={appointments.brokerRoster}
             generatedAt={appointments.generatedAt}
             individualGoal={appointments.individualGoal}
             canViewDevelopmentRankings={authorization.permissions.includes("crm.ranking.view")}

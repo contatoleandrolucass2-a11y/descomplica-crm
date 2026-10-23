@@ -33,6 +33,12 @@ export interface AppointmentBrokerRecencyBuckets {
   from15Days: AppointmentBrokerRecency[];
 }
 
+export interface AppointmentBrokerRosterEntry {
+  key: string;
+  owner: string;
+  manager: string;
+}
+
 export const APPOINTMENT_MONTHS = [
   "Janeiro",
   "Fevereiro",
@@ -143,7 +149,13 @@ export function analyzeAppointments(
     month = slice.referenceDate.slice(0, 7),
     year = slice.referenceDate.slice(0, 4),
     filters = {},
-  }: { month?: string; year?: string; filters?: AppointmentFilters } = {},
+    brokerRoster = null,
+  }: {
+    month?: string;
+    year?: string;
+    filters?: AppointmentFilters;
+    brokerRoster?: AppointmentBrokerRosterEntry[] | null;
+  } = {},
 ) {
   const daily = new Map<string, number>(),
     weekly = new Map<string, number>(),
@@ -205,6 +217,35 @@ export function analyzeAppointments(
     dimensionFilteredOperations === null
       ? null
       : dimensionFilteredOperations.filter(matchesFilters);
+  const hasMappableRosterFilter = Boolean(filters.manager) || Boolean(filters.owner);
+  const filteredRoster =
+    hasMappableRosterFilter && brokerRoster !== null
+      ? brokerRoster.filter(
+          (broker) =>
+            (!filters.manager ||
+              appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
+            (!filters.owner ||
+              appointmentIdentity(broker.owner) === appointmentIdentity(filters.owner)),
+        )
+      : brokerRoster;
+  const filteredBrokerCount =
+    slice.version < 3
+      ? null
+      : hasMappableRosterFilter
+        ? filteredRoster === null
+          ? null
+          : new Set(filteredRoster.map((broker) => broker.key)).size
+        : (slice.brokerCount ?? null);
+  const filteredManagerCount =
+    slice.version !== 4
+      ? null
+      : hasMappableRosterFilter
+        ? filteredRoster === null
+          ? null
+          : new Set(
+              filteredRoster.map((broker) => appointmentIdentity(broker.manager)).filter(Boolean),
+            ).size
+        : (slice.brokerManagerCount ?? null);
   const details =
     filteredOperations === null
       ? null
@@ -312,11 +353,11 @@ export function analyzeAppointments(
         ).size
       : null;
   const productivePercent =
-    productiveOwners === null || slice.brokerCount === undefined
+    productiveOwners === null || filteredBrokerCount === null
       ? null
-      : slice.brokerCount === 0
+      : filteredBrokerCount === 0
         ? 0
-        : (productiveOwners / slice.brokerCount) * 100;
+        : (productiveOwners / filteredBrokerCount) * 100;
   const recencyBaseDate = selectedDates.at(-1) ?? (coveredStart <= coveredEnd ? coveredEnd : null);
   const latestRegisteredAppointments = new Map<string, DashboardAppointmentDetail>();
   if (slice.version === 4 && recencyBaseDate) {
@@ -374,16 +415,13 @@ export function analyzeAppointments(
     today,
     yesterday,
     dailyAverage: selectedCoveredDays > 0 ? total / selectedCoveredDays : null,
-    brokerCount: slice.version >= 3 ? (slice.brokerCount ?? null) : null,
-    plannedToday: plannedAppointmentsForDate(
-      slice.referenceDate,
-      slice.version >= 3 ? (slice.brokerCount ?? null) : null,
-    ),
+    brokerCount: filteredBrokerCount,
+    plannedToday: plannedAppointmentsForDate(slice.referenceDate, filteredBrokerCount),
     performedToday: filteredOperations === null ? null : today,
     filterOptions,
     productiveBrokers: productiveOwners,
     productivePercent,
-    registeredManagerCount: slice.version === 4 ? (slice.brokerManagerCount ?? null) : null,
+    registeredManagerCount: filteredManagerCount,
     funnel: slice.version === 4 ? funnel : null,
     visitsPerformed: slice.version === 4 ? funnel.visits : null,
     sales: slice.version === 4 ? funnel.sales : null,

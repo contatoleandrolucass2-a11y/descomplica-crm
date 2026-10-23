@@ -1,5 +1,45 @@
 # Worklog
 
+## 2026-10-23 - Desbloqueio da publicação de Agendamentos
+
+O advisory Linux `GHSA-mrhx-c7xc-m3w5` passou a classificar o Zod anterior como
+alto risco e bloqueou a CI da `main` e do PR #315. A dependência direta e o Zod
+transitivo do `next-devtools-mcp` foram consolidados em `4.6.7`. A reprodução no
+Ubuntu com Node 24.19.0 e pnpm 11.20.0 passou sem vulnerabilidades altas ou
+críticas, e `pnpm devtools:check` confirmou os servidores Next e Chrome.
+Refinamentos explícitos preservam a contagem UTF-16 usada pelos limites de texto
+de previsões e conclusões de rotinas; os 72 testes desses contratos passaram.
+
+## 2026-10-23 - Ajustes visuais e filtros de Agendamentos
+
+A página `/app/etapas/agendamentos` recebeu uma grade única de 12 indicadores,
+todos com a dimensão do card Meta do mês, tipografia numérica e títulos
+uniformes e alinhamento central. O movimento dos cards acompanha o ponteiro com
+inclinação limitada e é desativado quando o sistema solicita movimento reduzido.
+
+Os cinco gráficos principais agora usam a mesma altura. Ranking Score apresenta
+os nomes de baixo para cima, sem quebrar palavras. Os três rankings e as três
+faixas de último agendamento formam duas linhas com três painéis; listas longas
+mantêm rolagem vertical e acesso por teclado. Barras, rótulos, rankings e linhas
+da tabela recebem realce ao passar o ponteiro.
+
+Os filtros de gerente e responsável agora recortam também a quantidade de
+corretores e de gerentes cadastrados, a meta projetada e a porcentagem da equipe
+produtiva. O denominador vem da coorte mensal oficial do relatório de corretores
+e inclui cadastrados sem agendamento. Um gerente selecionado resulta em um
+gerente cadastrado e usa somente seus corretores registrados. Se os snapshots
+não puderem ser conciliados, os totais filtrados ficam indisponíveis. Os demais
+filtros recortam as métricas operacionais sem converter atividade em cadastro.
+
+Validação concluída no escopo: lint, typecheck, build e 29 testes focados
+aprovados. O QA com CSS do build percorreu três temas em 1.440, 1.024, 390 e
+320 px, além do zoom de layout, sem overflow, violação axe ou falha de interação.
+O Vitest geral aprovou 4.109 testes e ignorou 107. O estágio Node do comando
+`pnpm test` reproduziu três falhas Windows fora desta página, todas no Meta Ads:
+duas validações de ACL do segredo de status e uma validação do diretório do
+perfil dedicado. Nenhuma asserção ou arquivo dessa outra área foi alterado; a CI
+Linux do SHA candidato permanece o gate independente para integração.
+
 ## 2026-10-23 - Integração completa do layout local Meta Ads
 
 O usuário esclareceu que a entrega inclui todo o dashboard local, e não apenas a lateral. A integração substitui o artefato de análise, preservando sessão, guards e consulta oficial somente leitura. O modelo agrega linhas diárias reais; os controles, o PDF e o histórico de alertas acompanham os filtros. Não há dados geográficos individuais na origem: o mapa não inventa distribuição.

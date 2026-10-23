@@ -1,5 +1,25 @@
 # Changelog
 
+## 2026-10-23 - Correção do gate de segurança para publicar Agendamentos
+
+- Atualiza Zod para `4.6.7`, corrigindo `GHSA-mrhx-c7xc-m3w5`.
+- Faz o Next DevTools reutilizar a versão corrigida e mantém seu protocolo MCP
+  validado pelo diagnóstico do projeto.
+- Preserva os limites de 4.000 unidades UTF-16 dos contratos de previsão e
+  conclusão de rotinas.
+
+## 2026-10-23 - Layout compacto e filtros completos em Agendamentos
+
+- Uniformiza os 12 indicadores, com conteúdo centralizado e inclinação sutil
+  acompanhando o ponteiro.
+- Organiza os cinco gráficos principais com a mesma altura e os seis painéis de
+  rankings e recência em uma grade 3 × 2.
+- Exibe os rótulos do Ranking Score na vertical e destaca barras, nomes e linhas
+  da tabela ao passar o ponteiro.
+- Faz as contagens de corretores, gerentes, meta e equipe produtiva respeitarem
+  os filtros de gerente e responsável usando o elenco oficial, inclusive
+  corretores cadastrados sem agendamento no período.
+
 ## 2026-10-23 - Dashboard Meta Ads completo
 
 - Substitui o conteúdo do dashboard pelo layout local aprovado, com dados oficiais, comparação de períodos, aprofundamento por conjunto/anúncio, gráficos configuráveis e expansíveis.
