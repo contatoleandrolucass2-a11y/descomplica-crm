@@ -8,6 +8,20 @@ import { buildNavigationGroups, getPrimaryNavigation } from "@/lib/navigation/pr
 
 const mocks = vi.hoisted(() => ({
   enforcePageAccess: vi.fn(),
+  getAuthorizedNavigation: vi.fn(() =>
+    PAGE_REGISTRY.filter(
+      (page) => page.pageKey === "crm.meta_ads" || page.parentKey === "crm.meta_ads",
+    ).map((page) => ({
+      key: page.pageKey,
+      path: page.path,
+      name: page.name,
+      parentKey: page.parentKey,
+    })),
+  ),
+}));
+
+vi.mock("@/lib/navigation/pages", () => ({
+  getAuthorizedNavigation: mocks.getAuthorizedNavigation,
 }));
 
 vi.mock("@/lib/authorization/enforce", () => ({
@@ -176,6 +190,13 @@ describe("dashboard Meta Ads", () => {
     expect(application).not.toContain("$('#alerts-button').addEventListener");
   });
 
+  it("omite destinos que não foram autorizados no catálogo", async () => {
+    mocks.getAuthorizedNavigation.mockReturnValueOnce([]);
+    const markup = renderToStaticMarkup(await MetaAdsDashboardPage());
+    expect(markup).not.toContain('href="/app/meta-ads/campanhas"');
+    expect(markup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
+  });
+
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {
     const routes = [
       [MetaAdsDashboardPage, "/app/meta-ads", "overview"],
@@ -192,6 +213,9 @@ describe("dashboard Meta Ads", () => {
       expect(markup).toContain('aria-label="Dashboard Meta Ads"');
       expect(markup).toContain('title="Descomplica Ads — desempenho de campanhas Meta"');
       expect(markup).toContain("srcDoc=");
+      expect(markup).toContain('aria-label="Navegação lateral Meta Ads"');
+      expect(markup).toContain(`href="${path}"`);
+      expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
       expect(markup).toContain(`data-crm-view=&quot;${view}&quot;`);
     }
 

@@ -31,9 +31,12 @@ const built = await build({
       enforce: "pre",
       resolveId(id) {
         if (id === entry) return entry;
+        if (id === "next/link") return "\0meta-ads-next-link";
         if (id === "next/navigation") return "\0meta-ads-next-navigation";
       },
       load(id) {
+        if (id === "\0meta-ads-next-link")
+          return `import React from "react"; export default function Link({prefetch,children,...props}) { return React.createElement("a",props,children); }`;
         if (id === "\0meta-ads-next-navigation") {
           return `export const usePathname = () => "/app/meta-ads";
             export const useRouter = () => ({ push() {} });`;
@@ -44,6 +47,9 @@ const built = await build({
         import {createRoot} from "react-dom/client";
         import {MetaAdsAlertButton} from "@/app/(protected)/_components/MetaAdsAlertButton";
         import {MetaAdsDashboardFrame} from "@/app/(protected)/app/meta-ads/MetaAdsDashboardFrame";
+        import {MetaAdsSidebar} from "@/app/(protected)/app/meta-ads/MetaAdsSidebar";
+        import styles from "@/app/(protected)/app/meta-ads/MetaAdsDashboardFrame.module.css";
+        const pages = [{key:"overview",path:"/app/meta-ads",name:"Visão geral"},{key:"campaigns",path:"/app/meta-ads/campanhas",name:"Campanhas"},{key:"accounts",path:"/app/meta-ads/contas-de-anuncios",name:"Contas de anúncios"},{key:"reports",path:"/app/meta-ads/relatorios",name:"Relatórios"}];
         const views = ["overview", "campaigns", "accounts", "reports"];
         function App() {
           const [view, setView] = useState(new URLSearchParams(location.search).get("view") || "overview");
@@ -51,7 +57,7 @@ const built = await build({
             {views.map(value => <button key={value} onClick={() => setView(value)}>{value}</button>)}
             <button onClick={() => {document.documentElement.dataset.theme="balanced"}}>theme</button>
             <MetaAdsAlertButton />
-          </nav><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></>;
+          </nav><div className={styles.workspace}><MetaAdsSidebar pages={pages} path={pages[views.indexOf(view)].path}/><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></div></>;
         }
         createRoot(document.getElementById("root")).render(<App/>);
       `;
@@ -63,6 +69,13 @@ const built = await build({
 const output = (Array.isArray(built) ? built : [built]).flatMap((result) => result.output);
 const files = new Map(
   output.map((file) => [`/${file.fileName}`, file.type === "chunk" ? file.code : file.source]),
+);
+files.set(
+  "/crm-shell.css",
+  (await readFile(path.join(root, "app/globals.css"), "utf8")).replace(
+    '@import "tailwindcss";',
+    "",
+  ),
 );
 const script = output.find((file) => file.type === "chunk" && file.isEntry).fileName;
 const css = [...files.keys()].filter((file) => file.endsWith(".css"));
@@ -219,6 +232,18 @@ try {
   for (const view of Object.keys(titles)) {
     await page.goto(`${origin}/app/meta-ads?view=${view}`);
     await check(view);
+    await expect(
+      page.getByRole("navigation", { name: "Visões do Meta Ads" }).getByRole("link"),
+    ).toHaveCount(4);
+    await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
+    if (view === "overview") {
+      await page.screenshot({ path: "/tmp/meta-sidebar-overview.png" });
+      await page.setViewportSize({ width: 390, height: 844 });
+      await expect(page.getByRole("navigation", { name: "Visões do Meta Ads" })).toBeVisible();
+      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
+      await page.screenshot({ path: "/tmp/meta-sidebar-mobile.png" });
+      await page.setViewportSize({ width: 1440, height: 900 });
+    }
     await page.reload();
     await check(view);
   }

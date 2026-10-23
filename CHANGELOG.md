@@ -12,6 +12,12 @@
   os filtros de gerente e responsável usando o elenco oficial, inclusive
   corretores cadastrados sem agendamento no período.
 
+## 2026-10-23 - Navegação lateral do Meta Ads
+
+- Adiciona uma barra lateral compacta com Visão geral, Campanhas, Contas de anúncios e Relatórios, conforme o catálogo autorizado de cada usuário.
+- Mantém a página ativa destacada e adapta a navegação para uma faixa horizontal em telas menores.
+- Preserva a consulta oficial somente leitura e os estados de indisponibilidade, sem substituir falhas por dados fictícios.
+
 ## 2026-10-23 - Escopo exclusivo por chat
 
 - Define que cada chat altera somente o escopo explicitamente solicitado.
