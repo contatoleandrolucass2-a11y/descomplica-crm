@@ -49312,13 +49312,13 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
           "tracked": true,
-          "bytes": 195358,
-          "sha256": "88b16d0736233c170fea86e3c071ee9cf8fa2535d58079c32cd16fe5b1821b02"
+          "bytes": 194854,
+          "sha256": "f14eaa63e1ddeddcb27e12727b16076ac01efaa2a29edf491c7a1689345b9340"
         }
       },
       "path": "target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
-      "bytes": 195358,
-      "sha256": "88b16d0736233c170fea86e3c071ee9cf8fa2535d58079c32cd16fe5b1821b02",
+      "bytes": 194854,
+      "sha256": "f14eaa63e1ddeddcb27e12727b16076ac01efaa2a29edf491c7a1689345b9340",
       "width": 1280,
       "height": 1191,
       "previousBaselineComparison": {
@@ -49330,8 +49330,8 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
           "tracked": true,
-          "bytes": 195358,
-          "sha256": "88b16d0736233c170fea86e3c071ee9cf8fa2535d58079c32cd16fe5b1821b02"
+          "bytes": 194854,
+          "sha256": "f14eaa63e1ddeddcb27e12727b16076ac01efaa2a29edf491c7a1689345b9340"
         }
       }
     },
@@ -49534,13 +49534,13 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
           "tracked": true,
-          "bytes": 98358,
-          "sha256": "724a82011c5c1eee89c3586e81669fe897fa2854de628cbb9f866972cb883e93"
+          "bytes": 98772,
+          "sha256": "987fef34765b0fab09d367f8348f6c8d7e12afe76d0cecdfaf8d0a09813bc165"
         }
       },
       "path": "target-authenticated/admin-usuarios-1280x720.webp",
-      "bytes": 98358,
-      "sha256": "724a82011c5c1eee89c3586e81669fe897fa2854de628cbb9f866972cb883e93",
+      "bytes": 98772,
+      "sha256": "987fef34765b0fab09d367f8348f6c8d7e12afe76d0cecdfaf8d0a09813bc165",
       "width": 1280,
       "height": 1549,
       "previousBaselineComparison": {
@@ -49552,8 +49552,8 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
           "tracked": true,
-          "bytes": 98358,
-          "sha256": "724a82011c5c1eee89c3586e81669fe897fa2854de628cbb9f866972cb883e93"
+          "bytes": 98772,
+          "sha256": "987fef34765b0fab09d367f8348f6c8d7e12afe76d0cecdfaf8d0a09813bc165"
         }
       }
     },
@@ -54581,8 +54581,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1280x720.webp",
         "tracked": true,
-        "bytes": 98358,
-        "sha256": "724a82011c5c1eee89c3586e81669fe897fa2854de628cbb9f866972cb883e93"
+        "bytes": 98772,
+        "sha256": "987fef34765b0fab09d367f8348f6c8d7e12afe76d0cecdfaf8d0a09813bc165"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-1440x900.webp",
@@ -55253,8 +55253,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1280x720.webp",
         "tracked": true,
-        "bytes": 195358,
-        "sha256": "88b16d0736233c170fea86e3c071ee9cf8fa2535d58079c32cd16fe5b1821b02"
+        "bytes": 194854,
+        "sha256": "f14eaa63e1ddeddcb27e12727b16076ac01efaa2a29edf491c7a1689345b9340"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1440x900.webp",
