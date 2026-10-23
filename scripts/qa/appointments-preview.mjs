@@ -19,6 +19,17 @@ const owners = Array.from(
   (_, i) =>
     `Responsável sintético ${String(i + 1).padStart(2, "0")} Nome completo longo para validar leitura integral`,
 );
+const brokerRoster = Array.from({ length: 120 }, (_, index) => ({
+  key: `broker-${String(index + 1).padStart(3, "0")}`,
+  owner: owners[index] ?? `Corretor cadastrado sem atividade ${String(index + 1).padStart(3, "0")}`,
+  manager: [
+    "Ana Gerente sintética com sobrenome extenso",
+    "Bruno Gerente sintético",
+    "Clara Gerente sintética",
+    "Davi Gerente sintético",
+    "Eva Gerente sintética",
+  ][index % 5],
+}));
 const fixture = {
   version: 4,
   brokerCount: 120,
@@ -213,7 +224,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} individualGoal={24} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -719,6 +730,10 @@ export async function runAppointmentsPreview() {
       .locator("article")
       .filter({ has: page.getByRole("heading", { name: "Gerentes cadastrados", exact: true }) });
     await expect(managerKpi.locator("strong")).toHaveText("1");
+    const brokerKpi = page
+      .locator("article")
+      .filter({ has: page.getByRole("heading", { name: "Corretores cadastrados", exact: true }) });
+    await expect(brokerKpi.locator("strong")).toHaveText("24");
     await page.getByLabel("Responsável da conta").selectOption(owners[0]);
     await page.getByLabel("Empresa").selectOption("Empresa sintética");
     await expect(page.getByRole("button", { name: "Limpar 4 filtros" })).toBeVisible();
@@ -736,7 +751,7 @@ export async function runAppointmentsPreview() {
       "true",
     );
     evidence.dimensionFilters =
-      "House, manager, responsible and company compose; selecting one manager scopes the manager KPI to 1; selecting and toggling a full row preserves the four global filters";
+      "House, manager, responsible and company compose; selecting one manager scopes the manager KPI to 1 and the official roster to 24 including inactive brokers; selecting and toggling a full row preserves the four global filters";
     await page.getByRole("button", { name: "Limpar 4 filtros" }).click();
     const firstDay = region("Evolução de agendamentos por dia").getByRole("button").first();
     await firstDay.click();

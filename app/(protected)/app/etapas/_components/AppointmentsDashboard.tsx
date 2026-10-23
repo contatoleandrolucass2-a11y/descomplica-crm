@@ -17,6 +17,7 @@ import {
   appointmentMonthlyGoal,
   appointmentYears,
   saoPauloDate,
+  type AppointmentBrokerRosterEntry,
   type AppointmentBucket,
   type AppointmentFilters,
 } from "@/lib/crm/stages/appointments";
@@ -766,11 +767,13 @@ function AppointmentTable({
 
 export function AppointmentsDashboard({
   analysis,
+  brokerRoster = null,
   individualGoal = null,
   timezone = "America/Sao_Paulo",
   canViewDevelopmentRankings = true,
 }: {
   analysis: DashboardAnalysisSlice | null;
+  brokerRoster?: AppointmentBrokerRosterEntry[] | null | undefined;
   generatedAt?: string | undefined;
   individualGoal?: number | null | undefined;
   timezone?: string | undefined;
@@ -786,9 +789,14 @@ export function AppointmentsDashboard({
   const result = useMemo(
     () =>
       analysis
-        ? analyzeAppointments(analysis, { month: selectedMonth, year: selectedYear, filters })
+        ? analyzeAppointments(analysis, {
+            month: selectedMonth,
+            year: selectedYear,
+            filters,
+            brokerRoster,
+          })
         : null,
-    [analysis, filters, selectedMonth, selectedYear],
+    [analysis, brokerRoster, filters, selectedMonth, selectedYear],
   );
   const yearId = useId();
   if (!analysis || !result)

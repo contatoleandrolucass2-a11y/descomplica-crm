@@ -13,16 +13,18 @@ faixas de último agendamento formam duas linhas com três painéis; listas long
 mantêm rolagem vertical e acesso por teclado. Barras, rótulos, rankings e linhas
 da tabela recebem realce ao passar o ponteiro.
 
-Os filtros dimensionais agora recortam também a quantidade de corretores e de
-gerentes cadastrados, a meta projetada e a porcentagem da equipe produtiva. Um
-gerente selecionado resulta em um gerente cadastrado e usa somente seus
-corretores registrados no denominador. Filtros de período preservam o conceito
-de elenco cadastrado e recortam as métricas operacionais do período.
+Os filtros de gerente e responsável agora recortam também a quantidade de
+corretores e de gerentes cadastrados, a meta projetada e a porcentagem da equipe
+produtiva. O denominador vem da coorte mensal oficial do relatório de corretores
+e inclui cadastrados sem agendamento. Um gerente selecionado resulta em um
+gerente cadastrado e usa somente seus corretores registrados. Se os snapshots
+não puderem ser conciliados, os totais filtrados ficam indisponíveis. Os demais
+filtros recortam as métricas operacionais sem converter atividade em cadastro.
 
-Validação concluída no escopo: lint, typecheck, build e 18 testes focados
+Validação concluída no escopo: lint, typecheck, build e 29 testes focados
 aprovados. O QA com CSS do build percorreu três temas em 1.440, 1.024, 390 e
 320 px, além do zoom de layout, sem overflow, violação axe ou falha de interação.
-O Vitest geral aprovou 4.107 testes e ignorou 107. O estágio Node do comando
+O Vitest geral aprovou 4.109 testes e ignorou 107. O estágio Node do comando
 `pnpm test` reproduziu três falhas Windows fora desta página, todas no Meta Ads:
 duas validações de ACL do segredo de status e uma validação do diretório do
 perfil dedicado. Nenhuma asserção ou arquivo dessa outra área foi alterado; a CI

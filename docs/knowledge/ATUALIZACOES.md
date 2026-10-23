@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-23: layout e filtros exclusivos de Agendamentos
+
+- A entrega permanece limitada a `/app/etapas/agendamentos`: uniformiza os 12
+  cards, compacta cinco gráficos, organiza seis rankings/recências em 3 por 2,
+  verticaliza os rótulos de score e adiciona realce de hover e inclinação sutil.
+- A revisão identificou que atividade não comprova elenco cadastrado. Os filtros
+  por gerente e responsável passaram a usar a coorte mensal oficial em
+  `crm_ranking_participants`, conciliada antes e depois da leitura com o snapshot
+  do dashboard. Corretores sem atividade permanecem no denominador; divergência,
+  paginação incompleta ou falta de acesso resulta em valor indisponível.
+- Os filtros de canal, empresa, data e gráficos continuam aplicados às métricas
+  operacionais. Eles não alteram contagens cadastrais quando a fonte oficial não
+  contém a dimensão correspondente.
+
 ## 2026-10-23: regra maxima de escopo exclusivo por chat
 
 - Pedido direto do usuario em 23/10/2026: cada chat do DESCOMPLICA-CRM deve

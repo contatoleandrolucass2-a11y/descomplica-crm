@@ -4,6 +4,15 @@ Fontes: relatórios Salesforce `00OU600000ELaA6MAL` e
 `00OTT000009j0l32AA`, página `/app/etapas/agendamentos`. O estado operacional
 deve ser conferido em `docs/knowledge/ATUALIZACOES.md`, PR/CI e health.
 
+## Elenco filtrado
+
+Os cards de corretores e gerentes cadastrados usam a coorte mensal de
+`crm_ranking_participants`, conciliada com o mesmo snapshot global do painel.
+Filtros por gerente e responsável contam identidades cadastradas, inclusive sem
+agendamento no período. Se a coorte estiver inacessível, incompleta ou mudar
+durante a leitura, esses totais filtrados ficam indisponíveis; fatos de atividade
+nunca substituem o elenco oficial.
+
 ## Definições
 
 Os gráficos históricos contam códigos de agendamento únicos após a deduplicação

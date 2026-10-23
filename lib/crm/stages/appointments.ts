@@ -33,6 +33,12 @@ export interface AppointmentBrokerRecencyBuckets {
   from15Days: AppointmentBrokerRecency[];
 }
 
+export interface AppointmentBrokerRosterEntry {
+  key: string;
+  owner: string;
+  manager: string;
+}
+
 export const APPOINTMENT_MONTHS = [
   "Janeiro",
   "Fevereiro",
@@ -143,7 +149,13 @@ export function analyzeAppointments(
     month = slice.referenceDate.slice(0, 7),
     year = slice.referenceDate.slice(0, 4),
     filters = {},
-  }: { month?: string; year?: string; filters?: AppointmentFilters } = {},
+    brokerRoster = null,
+  }: {
+    month?: string;
+    year?: string;
+    filters?: AppointmentFilters;
+    brokerRoster?: AppointmentBrokerRosterEntry[] | null;
+  } = {},
 ) {
   const daily = new Map<string, number>(),
     weekly = new Map<string, number>(),
@@ -205,38 +217,34 @@ export function analyzeAppointments(
     dimensionFilteredOperations === null
       ? null
       : dimensionFilteredOperations.filter(matchesFilters);
-  const hasRosterDimensionFilter =
-    filters.channel !== undefined ||
-    Boolean(filters.regionalManager) ||
-    Boolean(filters.manager) ||
-    Boolean(filters.owner) ||
-    Boolean(filters.company) ||
-    Boolean(filters.accountRanking);
-  const registeredRoster =
-    slice.version === 4 && dimensionFilteredOperations !== null
-      ? dimensionFilteredOperations.filter(
-          (appointment) => "registeredBroker" in appointment && appointment.registeredBroker,
+  const hasMappableRosterFilter = Boolean(filters.manager) || Boolean(filters.owner);
+  const filteredRoster =
+    hasMappableRosterFilter && brokerRoster !== null
+      ? brokerRoster.filter(
+          (broker) =>
+            (!filters.manager ||
+              appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
+            (!filters.owner ||
+              appointmentIdentity(broker.owner) === appointmentIdentity(filters.owner)),
         )
-      : null;
+      : brokerRoster;
   const filteredBrokerCount =
     slice.version < 3
       ? null
-      : hasRosterDimensionFilter && registeredRoster !== null
-        ? new Set(
-            registeredRoster
-              .map((appointment) => appointmentIdentity(appointment.owner))
-              .filter(Boolean),
-          ).size
+      : hasMappableRosterFilter
+        ? filteredRoster === null
+          ? null
+          : new Set(filteredRoster.map((broker) => broker.key)).size
         : (slice.brokerCount ?? null);
   const filteredManagerCount =
     slice.version !== 4
       ? null
-      : hasRosterDimensionFilter && registeredRoster !== null
-        ? new Set(
-            registeredRoster
-              .map((appointment) => appointmentIdentity(appointment.salesManager))
-              .filter(Boolean),
-          ).size
+      : hasMappableRosterFilter
+        ? filteredRoster === null
+          ? null
+          : new Set(
+              filteredRoster.map((broker) => appointmentIdentity(broker.manager)).filter(Boolean),
+            ).size
         : (slice.brokerManagerCount ?? null);
   const details =
     filteredOperations === null

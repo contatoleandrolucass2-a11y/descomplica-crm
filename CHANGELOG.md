@@ -9,7 +9,8 @@
 - Exibe os rótulos do Ranking Score na vertical e destaca barras, nomes e linhas
   da tabela ao passar o ponteiro.
 - Faz as contagens de corretores, gerentes, meta e equipe produtiva respeitarem
-  os filtros dimensionais aplicados ao painel.
+  os filtros de gerente e responsável usando o elenco oficial, inclusive
+  corretores cadastrados sem agendamento no período.
 
 ## 2026-10-23 - Escopo exclusivo por chat
 

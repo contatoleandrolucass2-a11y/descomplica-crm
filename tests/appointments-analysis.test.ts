@@ -229,6 +229,12 @@ describe("appointment chart analysis", () => {
         owner: "Responsável A",
         company: "Empresa A",
       },
+      brokerRoster: [
+        { key: "broker-a", owner: "Responsável A", manager: "Gerente A" },
+        { key: "broker-a-inativo", owner: "Responsável sem atividade", manager: "Gerente A" },
+        { key: "broker-b", owner: "Responsável B", manager: "Gerente B" },
+        { key: "broker-b-inativo", owner: "Outro sem atividade", manager: "Gerente B" },
+      ],
     });
     expect(result.total).toBe(2);
     expect(result.details).toHaveLength(2);
@@ -244,6 +250,32 @@ describe("appointment chart analysis", () => {
       { key: 1, label: "House" },
       { key: 0, label: "Imob" },
     ]);
+
+    const managerOnly = analyzeAppointments(input, {
+      filters: { manager: "Gerente A" },
+      brokerRoster: [
+        { key: "broker-a", owner: "Responsável A", manager: "Gerente A" },
+        { key: "broker-a-inativo", owner: "Responsável sem atividade", manager: "Gerente A" },
+        { key: "broker-b", owner: "Responsável B", manager: "Gerente B" },
+      ],
+    });
+    expect(managerOnly.brokerCount).toBe(2);
+    expect(managerOnly.registeredManagerCount).toBe(1);
+    expect(managerOnly.productiveBrokers).toBe(1);
+    expect(managerOnly.productivePercent).toBe(50);
+  });
+
+  it("does not infer a filtered registered roster from appointment activity", () => {
+    const input = slice({
+      version: 4,
+      brokerCount: 4,
+      brokerManagerCount: 2,
+      dimensions: { ...slice().dimensions, companies: [], stores: [] },
+      appointments: [],
+    });
+    const result = analyzeAppointments(input, { filters: { manager: "Gerente A" } });
+    expect(result.brokerCount).toBeNull();
+    expect(result.registeredManagerCount).toBeNull();
   });
 
   it("normalizes multiple selected days and applies them to details and funnel facts", () => {
