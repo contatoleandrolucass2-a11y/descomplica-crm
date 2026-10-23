@@ -188,11 +188,37 @@ describe("dashboard Meta Ads", () => {
     expect(application).not.toContain("$('#alerts-button').addEventListener");
   });
 
+  it("evita nomes aglomerados nos gráficos de comparação", async () => {
+    const [application, styles] = await Promise.all([
+      readFile(new URL("../public/descomplica-ads-compact/app.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/style.css", import.meta.url), "utf8"),
+    ]);
+
+    expect(application).toContain("function chartLabelLines");
+    expect(application).toContain('class="chart-scroll"');
+    expect(application).toContain('class="legend chart-campaign-legend"');
+    expect(application).not.toContain('x="${x + 9}" y="${y - 8}"');
+    expect(styles).toContain(".chart-campaign-legend");
+    expect(styles).toContain("overflow-x: auto");
+  });
+
   it("omite destinos que não foram autorizados no catálogo", async () => {
     mocks.getAuthorizedNavigation.mockReturnValueOnce([]);
     const markup = renderToStaticMarkup(await MetaAdsDashboardPage());
     expect(markup).not.toContain('href="/app/meta-ads/campanhas"');
     expect(markup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
+  });
+
+  it("concentra contas de anúncios em Ajustes sem duplicar a navegação lateral", async () => {
+    const overviewMarkup = renderToStaticMarkup(await MetaAdsDashboardPage());
+    expect(overviewMarkup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
+    expect(overviewMarkup).toContain('href="/app/meta-ads?panel=settings"');
+
+    const legacyMarkup = renderToStaticMarkup(await MetaAdsAccountsPage());
+    expect(legacyMarkup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
+    expect(legacyMarkup).toMatch(
+      /<a(?=[^>]*href="\/app\/meta-ads\?panel=settings")(?=[^>]*aria-current="page")[^>]*>/,
+    );
   });
 
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {
@@ -212,7 +238,9 @@ describe("dashboard Meta Ads", () => {
       expect(markup).toContain('title="Descomplica Ads — desempenho de campanhas Meta"');
       expect(markup).toContain("srcDoc=");
       expect(markup).toContain('aria-label="Navegação lateral Meta Ads"');
-      expect(markup).toContain(`href="${path}"`);
+      expect(markup).toContain(
+        view === "accounts" ? 'href="/app/meta-ads?panel=settings"' : `href="${path}"`,
+      );
       expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
       expect(markup).toContain(`data-crm-view=&quot;${view}&quot;`);
     }
