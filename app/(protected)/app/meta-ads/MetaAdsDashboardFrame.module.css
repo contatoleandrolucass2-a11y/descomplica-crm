@@ -31,7 +31,7 @@
   top: 80px;
   padding: 24px 12px;
   color: var(--analytics-ink);
-  font-family: var(--font-geist-sans), Arial, sans-serif;
+  font-family: var(--font-geist-sans, Arial), sans-serif;
   background: var(--analytics-surface);
   border-right: 1px solid var(--analytics-line);
   min-height: calc(100dvh - 80px);

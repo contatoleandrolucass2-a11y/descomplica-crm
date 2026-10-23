@@ -8845,9 +8845,8 @@ typecheck, build, 4.101 casos Vitest, 727 casos Node e 2.113 asserções pgTAP e
 Supabase isolado, sem falhas. Migration e alteração ainda não foram publicadas;
 nenhum dado remoto ou produção foi alterado nesta etapa.
 
-
 ## 2026-10-23 - Navegação lateral do Meta Ads
 
 Implementada a navegação lateral aprovada na prévia, adaptada às quatro rotas existentes do CRM. O servidor fornece somente os destinos do catálogo autorizado. As páginas mantêm seus guards próprios e a fonte oficial da API, sem importar dados simulados ou o mapa demonstrativo. A navegação identifica a página corrente, respeita os três temas e usa uma faixa horizontal em janelas menores.
 
-Leitura observacional na VPS confirmou resposta HTTP 200 da API oficial com agregado de 16 a 22/10/2026; nenhuma credencial foi registrada. Essa leitura confirma a disponibilidade naquele instante, não a publicação desta mudança. Validação e release serão registradas após conclusão.
+Leitura observacional na VPS confirmou resposta HTTP 200 da API oficial com agregado de 16 a 22/10/2026; nenhuma credencial foi registrada. Essa leitura confirma a disponibilidade naquele instante, não a publicação desta mudança. Lint, typecheck e build passaram. A suíte Vitest aprovou 4.108 testes com dois workers após encerramento inesperado de um worker na primeira tentativa. As suítes Node aprovaram 1.616 testes operacionais e 727 de release, com skips de plataforma explicitamente mantidos para execução obrigatória em Linux na CI. O navegador aprovou quatro visões, doze diálogos e a navegação responsiva. Merge e release dependem da CI terminal no SHA exato.
