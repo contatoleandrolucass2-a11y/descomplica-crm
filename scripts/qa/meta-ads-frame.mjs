@@ -306,6 +306,27 @@ try {
   await page.reload();
   await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("0,00");
   await expect(frame.locator('[data-kpi="cpl"] strong')).toHaveText("—");
+  const navigationPage = await browser.newPage();
+  const navigationFrame = navigationPage.frameLocator("iframe");
+  for (const [view, heading] of [
+    ["campaigns", "Análise da campanha"],
+    ["accounts", "Ajustes"],
+    ["reports", "Relatórios"],
+    ["overview", "Comparar campanhas"],
+    ["map", "Mapa de São Paulo"],
+    ["settings", "Ajustes"],
+  ]) {
+    await navigationPage.goto(new URL(`?view=${view}`, page.url()).href);
+    await expect(
+      navigationFrame.getByRole("heading", { level: 1, name: heading, exact: true }),
+    ).toBeVisible();
+    await navigationPage.reload();
+    await expect(
+      navigationFrame.getByRole("heading", { level: 1, name: heading, exact: true }),
+    ).toBeVisible();
+    await expect(navigationFrame.locator("html")).toHaveAttribute("data-crm-view", view);
+  }
+  await navigationPage.close();
   apiMode = "error";
   await page.reload();
   await expect(frame.locator("#main")).toContainText("Dados oficiais indisponíveis");
