@@ -10,6 +10,7 @@ export const routineCompletionSchema = z
       .string()
       .min(1)
       .max(4000)
+      .refine((text) => text.length <= 4000, "The activity text exceeds the UTF-16 storage limit.")
       .refine((text) => text.trim().length > 0),
   })
   .strict();
