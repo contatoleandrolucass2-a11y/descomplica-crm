@@ -7,8 +7,6 @@
 - Adiciona filtros para campanhas excluídas e arquivadas, com identificação
   visual na lista, na tabela e na análise detalhada.
 - Mantém campanhas ativas como seleção inicial do dashboard.
-- Atualiza o Zod para 4.6.7, inclusive no utilitário transitivo de desenvolvimento,
-  corrigindo o bloqueio de segurança `GHSA-mrhx-c7xc-m3w5` da CI.
 
 ## 2026-10-23 - Dashboard Meta Ads completo
 
