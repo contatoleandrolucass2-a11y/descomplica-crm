@@ -43,6 +43,67 @@ Foram aprovados `pnpm audit --audit-level high`, lint, typecheck, testes e build
 com Node 24.19.x. A auditoria mantém apenas avisos moderados e retorna sucesso;
 os gates de PR e de `main` permanecem obrigatórios antes da publicação.
 
+## 2026-10-22 - Calendário multisseleção e recência de Agendamentos
+
+O período passou a integrar a mesma barra de Canal, Gerente, Responsável e
+Empresa, com calendário modal acessível, mês vigente como padrão, seleção de um
+ou vários dias, troca de mês e ano e limpeza única. A faixa separada de período,
+total e cobertura deixou de ocupar espaço visual; o estado continua anunciado
+por região `aria-live`.
+
+O recorte de datas agora alcança detalhes e fatos do funil. Os totais cadastrais
+continuam globais porque o contrato v4 conserva essas métricas agregadas. Três
+painéis mostram corretores cadastrados com agendamento nas faixas de até sete,
+oito a quatorze e quinze dias ou mais, usando o gerente do registro mais recente
+até a data-base escolhida.
+
+Os valores dos cartões e os percentuais de conversão foram centralizados, as
+contagens brutas das conversões foram removidas e os rótulos mensais ganharam
+tamanho e espaço para nomes completos. O QA sintético cobre calendário, foco,
+teclado, filtros compostos, recência, temas e larguras entre 320 e 1.440 px.
+
+Após a revisão do PR, o gráfico anual passou a ignorar recortes de dia e semana,
+mantendo apenas ano e dimensões. Selecionar dias agora substitui a semana ativa;
+a região acessível anuncia cobertura parcial e conversões sem base deixam de ser
+anunciadas como zero por cento.
+
+Lint, typecheck e build de 61 rotas passaram com Node 24.19 e Next.js 16.4.1. A suíte Vitest
+integral, limitada a quatro workers para evitar disputa de CPU no host Windows,
+aprovou 4.102 testes e ignorou 106. O preview com o CSS compilado de produção
+aprovou 12 combinações de tema e largura, sem overflow, colisão ou violação Axe.
+O comando agregado sem limite de workers atingiu apenas o timeout de cinco
+segundos de um teste do Associativo, que passou isolado e na suíte limitada; os
+três testes Node POSIX já conhecidos continuam incompatíveis com Windows e
+permanecem sob validação obrigatória da CI Linux.
+
+## 2026-10-22 - Publicacao dos filtros e indicadores de Agendamentos
+
+Os filtros de Canal, Gerente, Responsavel e Empresa, a Equipe Produtiva em
+rosca, as conversoes do funil, gerentes, visitas, vendas e o layout responsivo
+foram integrados pelos PRs #295, #298, #299 e #301. A migration v4 foi aplicada
+como `20261022002223_appointments_filters_kpis_v4` e a CI de `main`
+`39732189784` aprovou os quatro gates obrigatorios no SHA
+`a031980b55979d5dfa10983bc2c4e6b1cf9fff5e`.
+
+O artefato OCI `12405607281` foi conferido por hash e promovido sem rebuild. O
+coordenador protegido publicou o deployment
+`db4cfa82-ea62-4c71-be17-38bfe6df2645` em `2026-10-22T06:57:55.202Z`, com
+ledger sem pendencia, health 200/ok na versao exata e redirecionamento anonimo
+da pagina para login.
+
+O coletor foi instalado sob os locks de producao, com backup
+`20261022T065926Z-a031980b5597`, e executou dois ciclos completos. Os request IDs
+`e43c8402-f50b-41f9-a4dd-4a474ab4004d` e
+`f7e54207-a279-4802-b585-6d94e913fd22` publicaram HTTP 201; a leitura vigente
+registrou 20.508 oportunidades, 1.130 agendamentos, 532 visitas, 738 vendas e 32
+corretores. O snapshot v4 final confirmou cinco gerentes, 1.117 agendamentos e
+9.397 fatos. Nenhum workflow n8n foi alterado.
+
+Lint, typecheck, build, 187 testes documentais e toda a CI Linux passaram. A
+suite local aprovou 4.088 testes Vitest e 1.599 testes Node; as tres falhas
+restantes sao as incompatibilidades POSIX conhecidas dos testes Meta Ads no
+Windows e passaram nos gates Linux.
+
 ## 2026-10-22 - Estrutura da visão Geral sem lançamentos no período
 
 A rota de previsões descartava o modelo mais recente sempre que a seleção era

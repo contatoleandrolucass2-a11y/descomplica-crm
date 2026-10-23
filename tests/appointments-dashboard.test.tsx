@@ -61,19 +61,27 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain(">Agendamentos</h1>");
   });
 
-  it("renders the four filters, twelve cards, ordered charts and detailed table for v4", () => {
+  it("renders dimension and calendar filters, cards, recency panels and details for v4", () => {
     const markup = renderToStaticMarkup(
       <AppointmentsDashboard analysis={current} individualGoal={24} />,
     );
-    expect(markup).toContain("Período dos gráficos, indicadores e tabela");
+    expect(markup).not.toContain("Período dos gráficos, indicadores e tabela");
+    expect(markup).not.toContain("Cobertura da fonte");
+    expect(markup).toContain("Cobertura parcial entre 01/10/2026 e 19/10/2026");
     expect(markup).toContain(">Ano</label>");
-    expect(markup).toContain("Mês selecionado com cobertura parcial");
     expect(markup).toContain("Meta do mês");
     expect(markup).toContain("Filtros do painel de agendamentos");
     expect(markup).toContain("Canal de vendas");
     expect(markup).toContain("Gerente de Vendas");
     expect(markup).toContain("Responsável da conta");
     expect(markup).toContain(">Empresa</span>");
+    expect(markup).toContain(">Período</span>");
+    expect(markup).toContain("Outubro de 2026");
+    expect(markup).toContain("Selecione o período");
+    expect(markup).toContain("Escolha o mês inteiro ou selecione um ou vários dias.");
+    expect(markup).toContain('aria-label="Dias do mês"');
+    expect(markup).toContain('disabled=""');
+    expect(markup).toContain("Limpar filtros");
     expect(markup).toContain("Equipe Produtiva");
     expect(markup).toContain("1 de 8 corretores, 12,5 por cento da equipe");
     expect(markup).toContain("Corretores cadastrados");
@@ -84,9 +92,16 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Visitas realizadas");
     expect(markup).toContain("Vendas no período");
     expect(markup).toContain("9 oportunidades para 1 agendamento");
+    expect(markup).not.toContain("9 → 1");
+    expect(markup).toContain("11,1%<");
     expect(markup).toContain("Previstos e realizados hoje");
     expect(markup).toContain("Ranking por gerente regional");
     expect(markup).toContain("Ranking Score");
+    expect(markup).toContain("Último agendamento: até 7 dias");
+    expect(markup).toContain("Último agendamento: de 8 a 14 dias");
+    expect(markup).toContain("Último agendamento: 15 dias ou mais");
+    expect(markup).toContain("Responsável sintético");
+    expect(markup).toContain("Hoje");
     expect(markup).toContain("1 de 192");
     expect(markup).toContain("24 por corretor × 8 corretores");
     expect(markup).toContain("Detalhamento dos agendamentos");
@@ -98,6 +113,7 @@ describe("appointment dashboard availability", () => {
     const empty: DashboardAnalysisSlice = { ...current, facts: [], appointments: [] };
     const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={empty} />);
     expect(markup).toContain("Sem conversão no período selecionado");
+    expect(markup).toContain("Aproveitamento indisponível no período selecionado");
     expect(markup).not.toContain("Infinity");
     expect(markup).not.toContain("NaN");
   });

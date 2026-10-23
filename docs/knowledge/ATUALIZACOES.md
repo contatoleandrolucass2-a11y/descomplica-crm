@@ -25,6 +25,78 @@
   eliminar nove pixels de overflow interno sem remover itens ou alterar outros
   dashboards. Os 39 testes focados passaram antes da nova CI.
 
+## 2026-10-22: abertura do calendario e da recencia de Agendamentos
+
+- A nova etapa iniciou sobre `origin/main`
+  `920d2d7f82c667addfef1a0d40021ba242171344`, com o registro documental da
+  entrega anterior ainda no PR #302. O health publico consultado em
+  `2026-10-22T13:34:56-03:00` respondeu HTTP 200, `status=ok`, na versao
+  `877966a71d28923f82258f6f053990844a7c6f35`; o runtime publicado contem a
+  correcao concorrente da Previsao e as funcionalidades anteriores de
+  Agendamentos.
+- O escopo acrescenta calendario acessivel com selecao de um ou varios dias,
+  move período e limpeza para a barra de filtros, recalcula o painel no mesmo
+  recorte, centraliza os indicadores, melhora os nomes dos meses e inclui tres
+  paineis de recencia por corretor antes do grafico mensal.
+- O contrato v4 possui data, corretor e gerente nos agendamentos, mas conserva
+  apenas totais cadastrais agregados. A recencia sera limitada aos corretores
+  cadastrados com agendamento na cobertura validada; o gerente sera o do registro
+  mais recente. Totais cadastrais nao serao convertidos em atividade para
+  aparentar uma segmentacao inexistente. Nenhum dado remoto foi alterado nesta
+  abertura.
+- A implementacao aplica datas descontinuas aos detalhes e aos fatos do funil,
+  preserva o historico necessario para calcular o ultimo agendamento e exibe as
+  faixas 0-7, 8-14 e 15 dias ou mais antes do grafico mensal. A tabela usa a data
+  da linha como parte do filtro composto, sem duplicar semana e dia.
+- Lint, typecheck e build de 61 rotas passaram com Node 24.19. Vitest aprovou
+  4.102 testes e ignorou 106 após a atualização para Next.js 16.4.1. O preview sobre o CSS compilado
+  de producao aprovou 12 combinacoes de tema e largura, sem overflow, colisoes ou
+  violacoes Axe. O comando agregado sem limite de workers excedeu apenas o
+  timeout de um teste do Associativo que passou isolado e na suite limitada; na
+  composição final, os três testes Node POSIX conhecidos permanecem incompatíveis
+  com Windows e devem ser confirmados pela CI Linux antes da integração.
+- A revisão do PR confirmou e corrigiu quatro limites: o gráfico anual usa ano e
+  dimensões sem herdar dias/semana; dias do calendário substituem a semana ativa;
+  cobertura parcial continua anunciada por `aria-live`; e conversão sem base não
+  é anunciada como zero por cento. Os testes focados aprovaram 18 casos.
+
+## 2026-10-22: filtros e indicadores de Agendamentos publicados
+
+- Os PRs #295, #298, #299 e #301 entregaram o painel, corrigiram a origem e o
+  formato agrupado do gerente dos corretores e trocaram as fontes municipais do
+  gate documental pelo espelho oficial acessivel. A entrega de runtime foi
+  integrada na `main` em
+  `a031980b55979d5dfa10983bc2c4e6b1cf9fff5e`.
+- A migration aplicada no projeto Supabase de producao esta registrada como
+  `20261022002223_appointments_filters_kpis_v4`. A leitura v4 confirmou 32
+  corretores, cinco gerentes distintos, 1.117 agendamentos e 9.397 fatos, sem
+  ampliar o payload autorizado alem das contagens e dimensoes do painel.
+- A CI de `main` `39732189784` aprovou `validate`, `release-gates`,
+  `isolated-restore` e `promotable-image`. O artefato `12405607281` conferiu com
+  SHA-256
+  `8e2e584083629e99b18a06c13df4e1832d3474e1b616e8a09c1fde1e3b9ea355`;
+  a imagem promovida tem ID
+  `sha256:c0a7ce9b0d0d8c8ce7071e4c3445e073dff8e12f3205a9ad6dcbffa0e292047d`.
+- O coordenador `release:production` publicou o deployment
+  `db4cfa82-ea62-4c71-be17-38bfe6df2645` em
+  `2026-10-22T06:57:55.202Z`. O ledger permaneceu sem pendencia, o health
+  publico respondeu HTTP 200/`ok` na versao exata e a rota anonima de
+  Agendamentos redirecionou para `/login` em HTTP 307.
+- O servico do coletor passou a executar a partir do checkout imutavel desse
+  SHA, com backup privado
+  `20261022T065926Z-a031980b5597`. Dois ciclos consecutivos publicaram com HTTP
+  201 e request IDs `e43c8402-f50b-41f9-a4dd-4a474ab4004d` e
+  `f7e54207-a279-4802-b585-6d94e913fd22`; ambos leram 20.508 oportunidades,
+  1.130 agendamentos, 532 visitas, 738 vendas e 32 corretores. O segundo
+  inventario conteve 3.277 itens e SHA-256
+  `30e8f131e213e8a42a358464af262a13ee9202d4e9f62c379c9b38686009867e`.
+- Typecheck e build passaram localmente; o lint local excedeu a memoria do host,
+  enquanto 187 testes documentais e a CI Linux integral passaram. A suite local
+  aprovou 4.088 testes Vitest e 1.599
+  testes Node, com 105 e 19 ignorados. Permanecem somente tres incompatibilidades
+  POSIX conhecidas dos testes Meta Ads no Windows; os mesmos gates passaram no
+  Linux. Nenhum workflow n8n foi alterado.
+
 ## 2026-10-22: diagnostico e correcao da visao Geral vazia da Previsao
 
 - A abertura ocorreu na branch `codex/previsao-geral-fallback`, baseada em

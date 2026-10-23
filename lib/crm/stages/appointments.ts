@@ -10,6 +10,7 @@ export interface AppointmentBucket {
 }
 export interface AppointmentFilters {
   createdDate?: string;
+  createdDates?: string[];
   week?: number;
   channel?: 0 | 1;
   regionalManager?: string;
@@ -17,6 +18,19 @@ export interface AppointmentFilters {
   owner?: string;
   company?: string;
   accountRanking?: string;
+}
+
+export interface AppointmentBrokerRecency {
+  owner: string;
+  manager: string;
+  lastAppointmentDate: string;
+  daysSinceLastAppointment: number;
+}
+
+export interface AppointmentBrokerRecencyBuckets {
+  upTo7Days: AppointmentBrokerRecency[];
+  from8To14Days: AppointmentBrokerRecency[];
+  from15Days: AppointmentBrokerRecency[];
 }
 
 export const APPOINTMENT_MONTHS = [
@@ -50,6 +64,33 @@ const previousDate = (value: string) => {
   date.setUTCDate(date.getUTCDate() - 1);
   return date.toISOString().slice(0, 10);
 };
+
+const validCalendarDate = (value: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const parsed = new Date(`${value}T12:00:00Z`);
+  return Number.isFinite(parsed.getTime()) && parsed.toISOString().slice(0, 10) === value;
+};
+
+export function normalizeAppointmentCreatedDates(
+  values: readonly string[] | undefined,
+  coverageStart: string,
+  referenceDate: string,
+): string[] {
+  return [...new Set(values ?? [])]
+    .filter((value) => validCalendarDate(value) && value >= coverageStart && value <= referenceDate)
+    .sort();
+}
+
+const calendarDaysBetween = (start: string, end: string) =>
+  Math.floor((Date.parse(`${end}T12:00:00Z`) - Date.parse(`${start}T12:00:00Z`)) / 86_400_000);
+
+const appointmentIdentity = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/\p{M}/gu, "")
+    .trim()
+    .replace(/\s+/g, " ")
+    .toLocaleLowerCase("pt-BR");
 
 export function appointmentWeekOfMonth(date: string): number {
   const firstWeekday = new Date(`${date.slice(0, 7)}-01T12:00:00Z`).getUTCDay();
@@ -124,28 +165,46 @@ export function analyzeAppointments(
         ? ("partial" as const)
         : ("complete" as const);
 
+  const selectedDates = normalizeAppointmentCreatedDates(
+    filters.createdDates?.length
+      ? filters.createdDates
+      : filters.createdDate
+        ? [filters.createdDate]
+        : undefined,
+    slice.coverageStart,
+    slice.referenceDate,
+  );
+  const selectedDateSet = new Set(selectedDates);
+  const matchesSelectedPeriod = (date: string) =>
+    (selectedDateSet.size === 0 || selectedDateSet.has(date)) &&
+    (!filters.week || appointmentWeekOfMonth(date) === filters.week);
+
+  const matchesAppointmentDimensions = (appointment: DashboardAppointmentDetail) =>
+    (filters.channel === undefined ||
+      ("channel" in appointment && appointment.channel === filters.channel)) &&
+    (!filters.regionalManager || appointment.regionalManager === filters.regionalManager) &&
+    (!filters.manager || appointment.salesManager === filters.manager) &&
+    (!filters.owner || appointment.owner === filters.owner) &&
+    (!filters.company || ("company" in appointment && appointment.company === filters.company)) &&
+    (!filters.accountRanking || appointment.accountRanking === filters.accountRanking);
+
   const matchesFilters = (appointment: DashboardAppointmentDetail) => {
     const date = saoPauloDate(appointment.createdAt);
-    return (
-      (!filters.createdDate || date === filters.createdDate) &&
-      (!filters.week || appointmentWeekOfMonth(date) === filters.week) &&
-      (filters.channel === undefined ||
-        ("channel" in appointment && appointment.channel === filters.channel)) &&
-      (!filters.regionalManager || appointment.regionalManager === filters.regionalManager) &&
-      (!filters.manager || appointment.salesManager === filters.manager) &&
-      (!filters.owner || appointment.owner === filters.owner) &&
-      (!filters.company || ("company" in appointment && appointment.company === filters.company)) &&
-      (!filters.accountRanking || appointment.accountRanking === filters.accountRanking)
-    );
+    return matchesSelectedPeriod(date) && matchesAppointmentDimensions(appointment);
   };
-  const matchesSharedFactFilters = (fact: DashboardAnalysisSlice["facts"][number]) =>
+  const matchesFactDimensions = (fact: DashboardAnalysisSlice["facts"][number]) =>
     (filters.channel === undefined || fact[5] === filters.channel) &&
     (!filters.manager || slice.dimensions.managers[fact[2]] === filters.manager) &&
     (!filters.owner || slice.dimensions.owners[fact[3]] === filters.owner) &&
     (!filters.company || slice.dimensions.companies[fact[4]] === filters.company);
-  const sharedFacts = slice.facts.filter(matchesSharedFactFilters);
+  const dimensionFacts = slice.facts.filter(matchesFactDimensions);
+  const sharedFacts = dimensionFacts.filter((fact) => matchesSelectedPeriod(fact[1]));
+  const dimensionFilteredOperations: DashboardAppointmentDetail[] | null =
+    slice.version >= 3 ? (slice.appointments ?? []).filter(matchesAppointmentDimensions) : null;
   const filteredOperations: DashboardAppointmentDetail[] | null =
-    slice.version >= 3 ? (slice.appointments ?? []).filter(matchesFilters) : null;
+    dimensionFilteredOperations === null
+      ? null
+      : dimensionFilteredOperations.filter(matchesFilters);
   const details =
     filteredOperations === null
       ? null
@@ -166,11 +225,25 @@ export function analyzeAppointments(
     }
   }
 
+  if (dimensionFilteredOperations !== null) {
+    for (const appointment of dimensionFilteredOperations) {
+      const date = saoPauloDate(appointment.createdAt);
+      if (date < slice.coverageStart || date > slice.referenceDate) continue;
+      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7));
+    }
+  } else {
+    for (const fact of dimensionFacts) {
+      if (fact[0] !== 1) continue;
+      const date = fact[1];
+      if (date < slice.coverageStart || date > slice.referenceDate) continue;
+      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7), fact[7]);
+    }
+  }
+
   if (filteredOperations !== null) {
     for (const appointment of filteredOperations) {
       const date = saoPauloDate(appointment.createdAt);
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
-      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7));
       if (date === slice.referenceDate) today += 1;
       if (date === previousReferenceDate) yesterday += 1;
       if (date.slice(0, 7) !== month) continue;
@@ -187,7 +260,6 @@ export function analyzeAppointments(
       if (fact[0] !== 1) continue;
       const date = fact[1];
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
-      if (date.slice(0, 4) === year) add(monthly, date.slice(5, 7), fact[7]);
       if (date === slice.referenceDate) today += fact[7];
       if (date === previousReferenceDate) yesterday += fact[7];
       if (date.slice(0, 7) !== month) continue;
@@ -221,6 +293,10 @@ export function analyzeAppointments(
           (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
             86_400_000,
         ) + 1;
+  const selectedCoveredDays =
+    selectedDateSet.size === 0
+      ? coveredDays
+      : [...selectedDateSet].filter((date) => date >= coveredStart && date <= coveredEnd).length;
   const productiveOwners =
     slice.version === 4 && filteredOperations !== null
       ? new Set(
@@ -241,6 +317,48 @@ export function analyzeAppointments(
       : slice.brokerCount === 0
         ? 0
         : (productiveOwners / slice.brokerCount) * 100;
+  const recencyBaseDate = selectedDates.at(-1) ?? (coveredStart <= coveredEnd ? coveredEnd : null);
+  const latestRegisteredAppointments = new Map<string, DashboardAppointmentDetail>();
+  if (slice.version === 4 && recencyBaseDate) {
+    for (const appointment of slice.appointments ?? []) {
+      if (!("registeredBroker" in appointment) || !appointment.registeredBroker) continue;
+      if (!matchesAppointmentDimensions(appointment)) continue;
+      const ownerKey = appointmentIdentity(appointment.owner);
+      if (!ownerKey) continue;
+      const date = saoPauloDate(appointment.createdAt);
+      if (date < slice.coverageStart || date > recencyBaseDate) continue;
+      const current = latestRegisteredAppointments.get(ownerKey);
+      if (!current || Date.parse(appointment.createdAt) > Date.parse(current.createdAt)) {
+        latestRegisteredAppointments.set(ownerKey, appointment);
+      }
+    }
+  }
+  const brokerRecency: AppointmentBrokerRecencyBuckets = {
+    upTo7Days: [],
+    from8To14Days: [],
+    from15Days: [],
+  };
+  for (const appointment of latestRegisteredAppointments.values()) {
+    const lastAppointmentDate = saoPauloDate(appointment.createdAt);
+    const item: AppointmentBrokerRecency = {
+      owner: appointment.owner,
+      manager: appointment.salesManager || "Gerente não informado",
+      lastAppointmentDate,
+      daysSinceLastAppointment: calendarDaysBetween(lastAppointmentDate, recencyBaseDate!),
+    };
+    if (item.daysSinceLastAppointment <= 7) brokerRecency.upTo7Days.push(item);
+    else if (item.daysSinceLastAppointment <= 14) brokerRecency.from8To14Days.push(item);
+    else brokerRecency.from15Days.push(item);
+  }
+  const sortRecency = (items: AppointmentBrokerRecency[]) =>
+    items.sort(
+      (left, right) =>
+        right.daysSinceLastAppointment - left.daysSinceLastAppointment ||
+        left.owner.localeCompare(right.owner, "pt-BR"),
+    );
+  sortRecency(brokerRecency.upTo7Days);
+  sortRecency(brokerRecency.from8To14Days);
+  sortRecency(brokerRecency.from15Days);
   const filterOptions = {
     channels: [
       { key: 1 as const, label: "House" },
@@ -255,7 +373,7 @@ export function analyzeAppointments(
     total,
     today,
     yesterday,
-    dailyAverage: coveredDays > 0 ? total / coveredDays : null,
+    dailyAverage: selectedCoveredDays > 0 ? total / selectedCoveredDays : null,
     brokerCount: slice.version >= 3 ? (slice.brokerCount ?? null) : null,
     plannedToday: plannedAppointmentsForDate(
       slice.referenceDate,
@@ -269,6 +387,7 @@ export function analyzeAppointments(
     funnel: slice.version === 4 ? funnel : null,
     visitsPerformed: slice.version === 4 ? funnel.visits : null,
     sales: slice.version === 4 ? funnel.sales : null,
+    brokerRecency,
     details,
     regionalManagers: filteredOperations === null ? null : ranking(regionalManagers),
     accountRankings: filteredOperations === null ? null : ranking(accountRankings),
