@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-23 - Layout compacto e filtros completos em Agendamentos
+
+- Uniformiza os 12 indicadores, com conteúdo centralizado e inclinação sutil
+  acompanhando o ponteiro.
+- Organiza os cinco gráficos principais com a mesma altura e os seis painéis de
+  rankings e recência em uma grade 3 × 2.
+- Exibe os rótulos do Ranking Score na vertical e destaca barras, nomes e linhas
+  da tabela ao passar o ponteiro.
+- Faz as contagens de corretores, gerentes, meta e equipe produtiva respeitarem
+  os filtros dimensionais aplicados ao painel.
+
 ## 2026-10-23 - Escopo exclusivo por chat
 
 - Define que cada chat altera somente o escopo explicitamente solicitado.

@@ -233,9 +233,11 @@ describe("appointment chart analysis", () => {
     expect(result.total).toBe(2);
     expect(result.details).toHaveLength(2);
     expect(result.funnel).toEqual({ opportunities: 9, appointments: 3, visits: 2, sales: 1 });
+    expect(result.brokerCount).toBe(1);
+    expect(result.plannedToday).toBe(1);
     expect(result.productiveBrokers).toBe(1);
-    expect(result.productivePercent).toBe(25);
-    expect(result.registeredManagerCount).toBe(2);
+    expect(result.productivePercent).toBe(100);
+    expect(result.registeredManagerCount).toBe(1);
     expect(result.visitsPerformed).toBe(2);
     expect(result.sales).toBe(1);
     expect(result.filterOptions.channels).toEqual([

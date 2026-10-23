@@ -2764,3 +2764,39 @@ dependente da autorização específica aplicável.
   `/app/etapas/agendamentos` respondeu HTTP 307 para `/login`. Nenhuma outra
   página foi alterada nesta etapa de publicação; não houve migration, mudança
   de n8n, DNS, cobrança ou mutação de dados remotos.
+
+## 2026-10-23: abertura dos ajustes visuais e filtros de Agendamentos
+
+- A branch `codex/agendamentos-layout-filtros-v6` iniciou no `origin/main`
+  `c80a39d92d5ecfcada4241076d58cd874df35096`, após a integração documental do
+  PR #314 com CI `39911972202` aprovada. O health público consultado em
+  `2026-10-23T13:58:28.0362540Z` respondeu HTTP 200, `status=ok` e versão
+  `f3b512dce5e725f9002b06b3c9382213466824e6`; a diferença é exclusivamente o
+  registro documental integrado depois do último deploy e não exige reinício.
+- Escopo exclusivo: somente `/app/etapas/agendamentos` e seus componentes e
+  cálculos diretos. A demanda uniformiza doze indicadores e cinco gráficos,
+  organiza seis rankings/recências em duas linhas, melhora rótulos, hover e
+  inclinação dos cards e faz todos os indicadores respeitarem os filtros,
+  incluindo a contagem de gerentes no recorte selecionado. Nenhuma outra página,
+  migration, n8n ou dado remoto será alterado.
+
+## 2026-10-23: implementação local dos ajustes de Agendamentos
+
+- Os 12 indicadores usam uma grade única, altura uniforme, tipografia comum e
+  conteúdo centralizado. A inclinação limitada acompanha o ponteiro e respeita
+  `prefers-reduced-motion`. Os cinco gráficos principais têm a mesma altura; os
+  três rankings e as três faixas de recência formam uma grade 3 × 2. Ranking
+  Score exibe os nomes na vertical, de baixo para cima. Barras, rótulos,
+  rankings, recências e linhas da tabela recebem realce no hover.
+- Filtros dimensionais passam a recortar o elenco registrado antes de calcular
+  corretores, gerentes, meta prevista e equipe produtiva. A regressão comprova
+  que um gerente filtrado resulta em um gerente, um corretor registrado, meta
+  diária de um e equipe produtiva de 100% na fixture. Filtros de período mantêm
+  o cadastro vigente e recortam somente as métricas operacionais.
+- Evidência local: lint, typecheck, build e 18 testes focados aprovados. O QA com
+  CSS compilado aprovou 12 combinações de tema/largura, zoom de layout, axe,
+  filtros, hover, inclinação, dimensões e overflow. O Vitest geral aprovou 4.107
+  testes e ignorou 107; o estágio Node do `pnpm test` falhou em três testes
+  Windows do Meta Ads, externos ao escopo (ACL de segredo e diretório de perfil
+  dedicado). Nenhum arquivo dessa área foi alterado. CI, merge e publicação
+  ainda não ocorreram e permanecem estados separados.

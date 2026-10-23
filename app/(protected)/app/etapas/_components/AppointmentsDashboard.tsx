@@ -1,6 +1,14 @@
 "use client";
 
-import { useId, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import {
+  useId,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent,
+  type ReactNode,
+} from "react";
 import { CalendarDays, X } from "lucide-react";
 
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
@@ -71,6 +79,30 @@ function Empty({ children = "Nenhum agendamento no período coberto." }: { child
   return <p className={styles.empty}>{children}</p>;
 }
 
+function TiltCard({ className, children }: { className: string | undefined; children: ReactNode }) {
+  const move = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType === "touch") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
+    event.currentTarget.style.setProperty("--card-tilt-x", `${vertical * -4}deg`);
+    event.currentTarget.style.setProperty("--card-tilt-y", `${horizontal * 8}deg`);
+  };
+  const reset = (event: PointerEvent<HTMLElement>) => {
+    event.currentTarget.style.setProperty("--card-tilt-x", "0deg");
+    event.currentTarget.style.setProperty("--card-tilt-y", "0deg");
+  };
+  return (
+    <article
+      className={[styles.card, styles.tiltCard, className].filter(Boolean).join(" ")}
+      onPointerMove={move}
+      onPointerLeave={reset}
+    >
+      {children}
+    </article>
+  );
+}
+
 function Columns({
   buckets,
   label,
@@ -79,6 +111,7 @@ function Columns({
   isSelected,
   onSelect,
   monthly = false,
+  verticalLabels = false,
 }: {
   buckets: AppointmentBucket[];
   label: string;
@@ -87,6 +120,7 @@ function Columns({
   isSelected?: ((bucket: AppointmentBucket) => boolean) | undefined;
   onSelect?: (bucket: AppointmentBucket) => void;
   monthly?: boolean;
+  verticalLabels?: boolean;
 }) {
   if (!buckets.length) return <Empty />;
   const max = Math.max(1, ...buckets.map((item) => item.total));
@@ -95,7 +129,7 @@ function Columns({
       <p className={styles.axis}>Quantidade de agendamentos</p>
       <ol
         aria-label={label}
-        className={`${styles.columns} ${daily ? styles.daily : ""} ${monthly ? styles.monthly : ""}`}
+        className={`${styles.columns} ${daily ? styles.daily : ""} ${monthly ? styles.monthly : ""} ${verticalLabels ? styles.verticalLabels : ""}`}
         style={{ "--column-count": buckets.length } as CSSProperties}
       >
         {buckets.map((item) => (
@@ -165,11 +199,11 @@ function Ranking({
 
 function Kpi({ label, value, detail }: { label: string; value: string | null; detail: string }) {
   return (
-    <article className={`${styles.card} ${styles.kpiCard}`}>
+    <TiltCard className={styles.kpiCard}>
       <h2>{label}</h2>
-      <strong>{value ?? "Indisponível"}</strong>
+      <strong className={styles.metricValue}>{value ?? "Indisponível"}</strong>
       <p>{detail}</p>
-    </article>
+    </TiltCard>
   );
 }
 
@@ -184,7 +218,7 @@ function ProductiveTeamCard({
 }) {
   const progress = Math.min(Math.max(percent ?? 0, 0), 100);
   return (
-    <article className={`${styles.card} ${styles.kpiCard} ${styles.productiveCard}`}>
+    <TiltCard className={`${styles.kpiCard} ${styles.productiveCard}`}>
       <h2>Equipe Produtiva</h2>
       <div
         className={styles.donut}
@@ -196,14 +230,16 @@ function ProductiveTeamCard({
             : `${number.format(productive)} de ${number.format(brokers)} corretores, ${decimal.format(percent)} por cento da equipe`
         }
       >
-        <strong>{percent === null ? "—" : `${decimal.format(percent)}%`}</strong>
+        <strong className={styles.metricValue}>
+          {percent === null ? "—" : `${decimal.format(percent)}%`}
+        </strong>
       </div>
       <p>
         {productive === null || brokers === null
           ? "Aguardando o elenco vigente de corretores"
           : `${number.format(productive)} de ${number.format(brokers)} corretores com agendamento`}
       </p>
-    </article>
+    </TiltCard>
   );
 }
 
@@ -223,13 +259,13 @@ function ConversionKpi({
   const percent = source !== null && target !== null && source > 0 ? (target / source) * 100 : null;
   const ratio = source !== null && target !== null && target > 0 ? source / target : null;
   return (
-    <article className={`${styles.card} ${styles.conversionCard}`}>
+    <TiltCard className={styles.conversionCard}>
       <h2>{title}</h2>
       {source === null || target === null ? (
-        <strong>Indisponível</strong>
+        <strong className={styles.metricValue}>Indisponível</strong>
       ) : (
         <strong
-          className={styles.conversionPercent}
+          className={`${styles.conversionPercent} ${styles.metricValue}`}
           aria-label={
             percent === null
               ? "Aproveitamento indisponível no período selecionado"
@@ -244,7 +280,7 @@ function ConversionKpi({
           ? "Sem conversão no período selecionado"
           : `${decimal.format(ratio)} ${sourceUnit} para 1 ${targetUnit}`}
       </p>
-    </article>
+    </TiltCard>
   );
 }
 
@@ -575,7 +611,7 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
       {items.length === 0 ? (
         <Empty>Nenhum corretor nesta faixa.</Empty>
       ) : (
-        <ol className={styles.recencyList}>
+        <ol className={styles.recencyList} tabIndex={0} aria-label={title}>
           {items.map((item) => (
             <li key={item.owner}>
               <strong>{item.owner}</strong>
@@ -620,7 +656,7 @@ function GoalGauge({ current, goal }: { current: number; goal: number | null }) 
         </g>
         <circle className={styles.gaugeHub} cx="120" cy="112" r="10" />
       </svg>
-      <strong>
+      <strong className={styles.metricValue}>
         {goal === null
           ? "Meta indisponível"
           : `${number.format(current)} de ${number.format(goal)}`}
@@ -883,7 +919,7 @@ export function AppointmentsDashboard({
       />
 
       <div className={styles.kpiGrid}>
-        <article className={`${styles.card} ${styles.gaugeCard}`}>
+        <TiltCard className={styles.gaugeCard}>
           <h2>Meta do mês</h2>
           <GoalGauge current={result.total} goal={monthlyGoal} />
           <span className={styles.goalFormula}>
@@ -891,7 +927,7 @@ export function AppointmentsDashboard({
               ? "Meta individual ou corretores indisponíveis"
               : `${number.format(individualGoal)} por corretor × ${number.format(result.brokerCount)} corretores`}
           </span>
-        </article>
+        </TiltCard>
         <ProductiveTeamCard
           productive={result.productiveBrokers}
           brokers={result.brokerCount}
@@ -917,9 +953,6 @@ export function AppointmentsDashboard({
           value={number.format(result.today)}
           detail="Pela data de criação"
         />
-      </div>
-
-      <div className={`${styles.kpiGrid} ${styles.secondaryKpiGrid}`}>
         <ConversionKpi
           title="Oportunidade x Agendamento"
           source={result.funnel?.opportunities ?? null}
@@ -962,8 +995,8 @@ export function AppointmentsDashboard({
         />
       </div>
 
-      <div className={styles.fullRow}>
-        <Chart title="Evolução de agendamentos por dia" wide>
+      <div className={styles.overviewGrid}>
+        <Chart title="Evolução de agendamentos por dia">
           {monthUnavailable ? (
             <Empty>Período sem cobertura disponível.</Empty>
           ) : (
@@ -978,9 +1011,6 @@ export function AppointmentsDashboard({
             />
           )}
         </Chart>
-      </div>
-
-      <div className={styles.grid}>
         <Chart title="Previstos e realizados hoje">
           {result.plannedToday === null ? (
             <Empty>Dados operacionais indisponíveis nesta atualização.</Empty>
@@ -1027,12 +1057,46 @@ export function AppointmentsDashboard({
               label="Ranking Score"
               selected={filters.accountRanking}
               onSelect={(bucket) => toggleFilter("accountRanking", bucket.key)}
+              verticalLabels
             />
           )}
         </Chart>
+        <Chart
+          title="Agendamentos por mês"
+          controls={
+            <div className={styles.yearControl}>
+              <label htmlFor={yearId}>Ano</label>
+              <select
+                id={yearId}
+                value={selectedYear}
+                onChange={(event) => {
+                  setSelectedYear(event.target.value);
+                  setSelectedRow("");
+                  setRowBaseFilters(null);
+                }}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          }
+        >
+          <Columns
+            buckets={result.monthly}
+            label={`Agendamentos por mês de ${selectedYear}`}
+            monthly
+            onSelect={(bucket) => {
+              const nextMonth = `${selectedYear}-${bucket.key}`;
+              selectMonth(nextMonth);
+            }}
+          />
+        </Chart>
       </div>
 
-      <div className={`${styles.grid} ${styles.rankingGrid}`}>
+      <div className={styles.insightGrid}>
         <Chart title="Ranking por gerente regional">
           {monthUnavailable ? (
             <Empty>Período sem cobertura disponível.</Empty>
@@ -1066,9 +1130,6 @@ export function AppointmentsDashboard({
             />
           )}
         </Chart>
-      </div>
-
-      <div className={styles.recencyGrid}>
         <RecencyPanel
           title="Último agendamento: até 7 dias"
           items={result.brokerRecency.upTo7Days}
@@ -1081,44 +1142,6 @@ export function AppointmentsDashboard({
           title="Último agendamento: 15 dias ou mais"
           items={result.brokerRecency.from15Days}
         />
-      </div>
-
-      <div className={styles.fullRow}>
-        <Chart
-          title="Agendamentos por mês"
-          wide
-          controls={
-            <div className={styles.yearControl}>
-              <label htmlFor={yearId}>Ano</label>
-              <select
-                id={yearId}
-                value={selectedYear}
-                onChange={(event) => {
-                  setSelectedYear(event.target.value);
-                  setSelectedRow("");
-                  setRowBaseFilters(null);
-                }}
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          }
-        >
-          <Columns
-            buckets={result.monthly}
-            label={`Agendamentos por mês de ${selectedYear}`}
-            monthly
-            onSelect={(bucket) => {
-              const nextMonth = `${selectedYear}-${bucket.key}`;
-              selectMonth(nextMonth);
-            }}
-          />
-          <p className={styles.note}>Somente meses com agendamentos são exibidos.</p>
-        </Chart>
       </div>
 
       {result.details === null ? (

@@ -205,6 +205,39 @@ export function analyzeAppointments(
     dimensionFilteredOperations === null
       ? null
       : dimensionFilteredOperations.filter(matchesFilters);
+  const hasRosterDimensionFilter =
+    filters.channel !== undefined ||
+    Boolean(filters.regionalManager) ||
+    Boolean(filters.manager) ||
+    Boolean(filters.owner) ||
+    Boolean(filters.company) ||
+    Boolean(filters.accountRanking);
+  const registeredRoster =
+    slice.version === 4 && dimensionFilteredOperations !== null
+      ? dimensionFilteredOperations.filter(
+          (appointment) => "registeredBroker" in appointment && appointment.registeredBroker,
+        )
+      : null;
+  const filteredBrokerCount =
+    slice.version < 3
+      ? null
+      : hasRosterDimensionFilter && registeredRoster !== null
+        ? new Set(
+            registeredRoster
+              .map((appointment) => appointmentIdentity(appointment.owner))
+              .filter(Boolean),
+          ).size
+        : (slice.brokerCount ?? null);
+  const filteredManagerCount =
+    slice.version !== 4
+      ? null
+      : hasRosterDimensionFilter && registeredRoster !== null
+        ? new Set(
+            registeredRoster
+              .map((appointment) => appointmentIdentity(appointment.salesManager))
+              .filter(Boolean),
+          ).size
+        : (slice.brokerManagerCount ?? null);
   const details =
     filteredOperations === null
       ? null
@@ -312,11 +345,11 @@ export function analyzeAppointments(
         ).size
       : null;
   const productivePercent =
-    productiveOwners === null || slice.brokerCount === undefined
+    productiveOwners === null || filteredBrokerCount === null
       ? null
-      : slice.brokerCount === 0
+      : filteredBrokerCount === 0
         ? 0
-        : (productiveOwners / slice.brokerCount) * 100;
+        : (productiveOwners / filteredBrokerCount) * 100;
   const recencyBaseDate = selectedDates.at(-1) ?? (coveredStart <= coveredEnd ? coveredEnd : null);
   const latestRegisteredAppointments = new Map<string, DashboardAppointmentDetail>();
   if (slice.version === 4 && recencyBaseDate) {
@@ -374,16 +407,13 @@ export function analyzeAppointments(
     today,
     yesterday,
     dailyAverage: selectedCoveredDays > 0 ? total / selectedCoveredDays : null,
-    brokerCount: slice.version >= 3 ? (slice.brokerCount ?? null) : null,
-    plannedToday: plannedAppointmentsForDate(
-      slice.referenceDate,
-      slice.version >= 3 ? (slice.brokerCount ?? null) : null,
-    ),
+    brokerCount: filteredBrokerCount,
+    plannedToday: plannedAppointmentsForDate(slice.referenceDate, filteredBrokerCount),
     performedToday: filteredOperations === null ? null : today,
     filterOptions,
     productiveBrokers: productiveOwners,
     productivePercent,
-    registeredManagerCount: slice.version === 4 ? (slice.brokerManagerCount ?? null) : null,
+    registeredManagerCount: filteredManagerCount,
     funnel: slice.version === 4 ? funnel : null,
     visitsPerformed: slice.version === 4 ? funnel.visits : null,
     sales: slice.version === 4 ? funnel.sales : null,

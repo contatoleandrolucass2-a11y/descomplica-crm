@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-23 - Ajustes visuais e filtros de Agendamentos
+
+A página `/app/etapas/agendamentos` recebeu uma grade única de 12 indicadores,
+todos com a dimensão do card Meta do mês, tipografia numérica e títulos
+uniformes e alinhamento central. O movimento dos cards acompanha o ponteiro com
+inclinação limitada e é desativado quando o sistema solicita movimento reduzido.
+
+Os cinco gráficos principais agora usam a mesma altura. Ranking Score apresenta
+os nomes de baixo para cima, sem quebrar palavras. Os três rankings e as três
+faixas de último agendamento formam duas linhas com três painéis; listas longas
+mantêm rolagem vertical e acesso por teclado. Barras, rótulos, rankings e linhas
+da tabela recebem realce ao passar o ponteiro.
+
+Os filtros dimensionais agora recortam também a quantidade de corretores e de
+gerentes cadastrados, a meta projetada e a porcentagem da equipe produtiva. Um
+gerente selecionado resulta em um gerente cadastrado e usa somente seus
+corretores registrados no denominador. Filtros de período preservam o conceito
+de elenco cadastrado e recortam as métricas operacionais do período.
+
+Validação concluída no escopo: lint, typecheck, build e 18 testes focados
+aprovados. O QA com CSS do build percorreu três temas em 1.440, 1.024, 390 e
+320 px, além do zoom de layout, sem overflow, violação axe ou falha de interação.
+O Vitest geral aprovou 4.107 testes e ignorou 107. O estágio Node do comando
+`pnpm test` reproduziu três falhas Windows fora desta página, todas no Meta Ads:
+duas validações de ACL do segredo de status e uma validação do diretório do
+perfil dedicado. Nenhuma asserção ou arquivo dessa outra área foi alterado; a CI
+Linux do SHA candidato permanece o gate independente para integração.
+
 ## 2026-10-23 - Escopo exclusivo por chat
 
 Foi registrada como regra máxima do projeto a execução exclusiva do pedido de

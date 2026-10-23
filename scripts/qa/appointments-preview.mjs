@@ -140,7 +140,11 @@ async function productionCss(viteCss) {
   ).join("\n");
   const viteRules = postcss.parse(viteCss);
   const mappings = new Map();
-  for (const match of compiled.matchAll(/\.([\w-]*AppointmentsDashboard[\w-]*__([\w-]+))\b/g)) {
+  const moduleAnchor = compiled.match(/\.([\w-]+)_verticalLabels\b/);
+  assert.ok(moduleAnchor, "Compiled AppointmentsDashboard CSS module must exist");
+  const modulePrefix = moduleAnchor[1];
+  const compiledClass = new RegExp(`\\.(${modulePrefix}_([\\w-]+))\\b`, "g");
+  for (const match of compiled.matchAll(compiledClass)) {
     const vite = [...viteCss.matchAll(/\.([\w-]+)\b/g)].find((item) =>
       item[1].includes(`_${match[2]}_`),
     );
@@ -337,9 +341,27 @@ export async function runAppointmentsPreview() {
             const tops = items.map((item) => Math.round(item.getBoundingClientRect().top));
             return items.length > 0 && new Set(tops).size === 1;
           })(),
-          labelWritingModes: [
-            ...document.querySelectorAll('[class*="columnValue"], [class*="columnLabel"]'),
-          ].map((element) => getComputedStyle(element).writingMode),
+          scoreLabelWritingModes: (() => {
+            const section = [...document.querySelectorAll("[data-appointments-chart]")].find(
+              (element) => element.querySelector("h2")?.textContent === "Ranking Score",
+            );
+            return [...(section?.querySelectorAll('[class*="columnLabel"]') ?? [])].map(
+              (element) => getComputedStyle(element).writingMode,
+            );
+          })(),
+          kpiCards: [...document.querySelectorAll("article")]
+            .filter((card) => card.querySelector("h2"))
+            .map((card) => ({
+              label: card.querySelector("h2")?.textContent,
+              width: card.getBoundingClientRect().width,
+              height: card.getBoundingClientRect().height,
+            })),
+          metricFontSizes: [...document.querySelectorAll('[class*="metricValue"]')].map(
+            (element) => Number.parseFloat(getComputedStyle(element).fontSize),
+          ),
+          cardTitleFontSizes: [...document.querySelectorAll('article h2')].map((element) =>
+            Number.parseFloat(getComputedStyle(element).fontSize),
+          ),
           kpiCenters: [...document.querySelectorAll('article[class*="kpiCard"]')].map((card) => {
             const value = card.querySelector("strong");
             const cardRect = card.getBoundingClientRect();
@@ -416,16 +438,23 @@ export async function runAppointmentsPreview() {
         );
         check(
           geometry.sections
-            .slice(1, 4)
-            .every((section) => Math.abs(section.height - geometry.sections[1].height) < 1) &&
-            geometry.sections
-              .slice(4, 7)
-              .every((section) => Math.abs(section.height - geometry.sections[4].height) < 1),
-          `Uniform grouped chart heights ${theme}/${width}`,
+            .slice(0, 5)
+            .every((section) => Math.abs(section.height - geometry.sections[0].height) < 1),
+          `Five overview charts have equal heights ${theme}/${width}`,
         );
         check(
-          geometry.labelWritingModes.every((mode) => mode === "horizontal-tb"),
-          `Horizontal chart labels ${theme}/${width}`,
+          geometry.sections
+            .slice(5, 8)
+            .every((section) => Math.abs(section.height - geometry.sections[5].height) < 1) &&
+            geometry.recency.every(
+              (section) => Math.abs(section.bottom - section.y - geometry.sections[5].height) < 1,
+            ),
+          `Six insight panels have equal heights ${theme}/${width}`,
+        );
+        check(
+          geometry.scoreLabelWritingModes.length > 0 &&
+            geometry.scoreLabelWritingModes.every((mode) => mode === "vertical-rl"),
+          `Ranking Score labels must run vertically bottom-to-top ${theme}/${width}`,
         );
         check(
           !geometry.dailyLabelCollisions.length,
@@ -444,11 +473,28 @@ export async function runAppointmentsPreview() {
             geometry.conversionCenters.every((item) => item.delta <= 1),
           `Conversion percentages not centered ${theme}/${width}: ${JSON.stringify(geometry.conversionCenters)}`,
         );
-        check(geometry.recency.length === 3, `Three recency panels ${theme}/${width}`);
         check(
-          geometry.recency.every((item) => item.bottom <= geometry.monthly.y + 1),
-          `Recency panels must precede monthly chart ${theme}/${width}`,
+          geometry.kpiCards.length === 12 &&
+            geometry.kpiCards.every(
+              (card) => Math.abs(card.height - geometry.kpiCards[0].height) < 1,
+            ),
+          `Twelve KPI cards must have equal heights ${theme}/${width}`,
         );
+        check(
+          geometry.metricFontSizes.length === 12 &&
+            geometry.metricFontSizes.every(
+              (size) => Math.abs(size - geometry.metricFontSizes[0]) < 0.1,
+            ),
+          `KPI numbers must share one font size ${theme}/${width}`,
+        );
+        check(
+          geometry.cardTitleFontSizes.length === 12 &&
+            geometry.cardTitleFontSizes.every(
+              (size) => Math.abs(size - geometry.cardTitleFontSizes[0]) < 0.1,
+            ),
+          `KPI titles must share one font size ${theme}/${width}`,
+        );
+        check(geometry.recency.length === 3, `Three recency panels ${theme}/${width}`);
         check(
           geometry.monthly.labels.length > 0 &&
             geometry.monthly.labels.every(
@@ -466,16 +512,18 @@ export async function runAppointmentsPreview() {
           geometry.scoreSingleRow,
           `Ranking Score must keep every bar on one row ${theme}/${width}`,
         );
-        if (width >= 1024)
+        if (width >= 1201)
           check(
-            geometry.sections[1].y === geometry.sections[2].y &&
-              geometry.sections[2].y === geometry.sections[3].y,
-            `Three charts side by side at ${width}`,
+            new Set(geometry.sections.slice(0, 3).map((section) => section.y)).size === 1 &&
+              new Set(geometry.sections.slice(3, 5).map((section) => section.y)).size === 1,
+            `Five overview charts use a compact 3 plus 2 layout at ${width}`,
           );
         if (width >= 1024)
           check(
-            new Set(geometry.recency.map((item) => item.y)).size === 1,
-            `Three recency panels side by side at ${width}`,
+            new Set(geometry.sections.slice(5, 8).map((item) => item.y)).size === 1 &&
+              new Set(geometry.recency.map((item) => item.y)).size === 1 &&
+              geometry.recency[0].y > geometry.sections[5].y,
+            `Six insight panels use a 3 by 2 layout at ${width}`,
           );
         if (width <= 390)
           check(
@@ -667,6 +715,10 @@ export async function runAppointmentsPreview() {
     await page
       .getByLabel("Gerente de Vendas")
       .selectOption("Ana Gerente sintética com sobrenome extenso");
+    const managerKpi = page
+      .locator("article")
+      .filter({ has: page.getByRole("heading", { name: "Gerentes cadastrados", exact: true }) });
+    await expect(managerKpi.locator("strong")).toHaveText("1");
     await page.getByLabel("Responsável da conta").selectOption(owners[0]);
     await page.getByLabel("Empresa").selectOption("Empresa sintética");
     await expect(page.getByRole("button", { name: "Limpar 4 filtros" })).toBeVisible();
@@ -684,7 +736,7 @@ export async function runAppointmentsPreview() {
       "true",
     );
     evidence.dimensionFilters =
-      "House, manager, responsible and company compose; selecting and toggling a full row preserves the four global filters";
+      "House, manager, responsible and company compose; selecting one manager scopes the manager KPI to 1; selecting and toggling a full row preserves the four global filters";
     await page.getByRole("button", { name: "Limpar 4 filtros" }).click();
     const firstDay = region("Evolução de agendamentos por dia").getByRole("button").first();
     await firstDay.click();
@@ -700,6 +752,54 @@ export async function runAppointmentsPreview() {
     evidence.crossFilters =
       "Daily column click filters every result; clear restores the page; Enter on a full table row applies its dimensions";
     await page.getByRole("button", { name: /Limpar \d+ filtros/ }).click();
+    await page.emulateMedia({ reducedMotion: "no-preference" });
+    const firstChartButton = daily.getByRole("button").first();
+    const firstChartBar = firstChartButton.locator('div[class*="column"]').last();
+    const chartColorBefore = await firstChartBar.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    await firstChartButton.hover();
+    await page.waitForTimeout(220);
+    const chartColorAfter = await firstChartBar.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    check(chartColorBefore !== chartColorAfter, "Chart bar hover must change color");
+    const hoverRow = page.locator("tbody tr").first();
+    const rowColorBefore = await hoverRow.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    await hoverRow.hover();
+    const rowColorAfter = await hoverRow.evaluate(
+      (element) => getComputedStyle(element).backgroundColor,
+    );
+    check(rowColorBefore !== rowColorAfter, "Table row hover must change color");
+    const tiltCard = page.locator("article").first();
+    const tiltBounds = await tiltCard.boundingBox();
+    assert.ok(tiltBounds, "First KPI card must have measurable bounds");
+    await page.mouse.move(tiltBounds.x + 8, tiltBounds.y + 8);
+    check(
+      (await tiltCard.evaluate((element) =>
+        element.style.getPropertyValue("--card-tilt-y"),
+      )) !== "0deg",
+      "KPI card must tilt toward the pointer",
+    );
+    const secondTiltBounds = await page.locator("article").nth(1).boundingBox();
+    assert.ok(secondTiltBounds, "Second KPI card must have measurable bounds");
+    await page.mouse.move(
+      secondTiltBounds.x + secondTiltBounds.width / 2,
+      secondTiltBounds.y + secondTiltBounds.height / 2,
+    );
+    await page.waitForTimeout(50);
+    const restedTilt = await tiltCard.evaluate((element) =>
+      element.style.getPropertyValue("--card-tilt-y"),
+    );
+    check(
+      restedTilt === "" || restedTilt === "0deg",
+      `KPI card must return to rest after pointer leave: ${restedTilt}`,
+    );
+    evidence.hoverAndMotion =
+      "Chart bars and table rows change color on hover; KPI cards tilt toward the pointer and return to rest";
+    await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(origin);
     await page.keyboard.press("Tab");
     await expect(page.getByRole("button", { name: "House", exact: true })).toBeFocused();
