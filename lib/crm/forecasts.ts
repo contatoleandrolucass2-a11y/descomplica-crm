@@ -43,9 +43,14 @@ const id = z
   .regex(/^[A-Za-z0-9_-]{1,64}$/)
   .refine((value) => !["__proto__", "prototype", "constructor"].includes(value));
 const column = z.object({ id, label: z.string().trim().min(1).max(120) }).strict();
-const row = z
-  .object({ id, cells: z.record(id, z.string().max(FORECAST_MAX_CELL_LENGTH)) })
-  .strict();
+const forecastCell = z
+  .string()
+  .max(FORECAST_MAX_CELL_LENGTH)
+  .refine(
+    (value) => value.length <= FORECAST_MAX_CELL_LENGTH,
+    "The cell exceeds the UTF-16 storage limit.",
+  );
+const row = z.object({ id, cells: z.record(id, forecastCell) }).strict();
 const shape = {
   title: z.string().max(120),
   columns: z.array(column).min(1).max(FORECAST_MAX_COLUMNS),
