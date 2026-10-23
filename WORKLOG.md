@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-23 - Escopo exclusivo por chat
+
+Foi registrada como regra máxima do projeto a execução exclusiva do pedido de
+cada chat. Fontes anteriores e o Obsidian continuam sendo consultados para
+contexto e evidência, sem autorizar alterações adicionais. Falhas de gates em
+outras páginas passam a ser reportadas como bloqueios externos, sem correção ou
+atualização de baseline dentro da entrega corrente.
+
+O PR #311, aberto para uma referência visual da página Documentação durante a
+entrega de Agendamentos, foi encerrado sem merge. Nenhum arquivo dessa página
+foi integrado ou publicado por esse PR.
+
 ## 2026-10-22 - Guia Meta ADS nos acessos efetivos
 
 A tela `/admin/usuarios` passa a agrupar as quatro permissões `crm.meta_ads.*`

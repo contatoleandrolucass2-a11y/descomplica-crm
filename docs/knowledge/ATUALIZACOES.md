@@ -1,5 +1,32 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-23: regra maxima de escopo exclusivo por chat
+
+- Pedido direto do usuario em 23/10/2026: cada chat do DESCOMPLICA-CRM deve
+  executar somente os ajustes explicitamente solicitados naquele chat. A regra
+  vale para novos chats e retomadas; conhecimento do Obsidian, GitHub, site ou
+  repositorio serve como contexto verificavel e nao amplia o pedido.
+- Falha de CI, teste ou gate em outra pagina deve ser reportada como bloqueio
+  externo. Nao corrigir outra area, atualizar sua referencia visual ou agregar
+  melhoria alheia para obter verde. Esse trabalho depende de pedido proprio.
+- Aplicacao nesta demanda: o PR #311, que atualizava uma referencia visual da
+  pagina Documentacao durante a entrega de Agendamentos, foi encerrado sem merge
+  e removido dos artefatos do chat. A entrega funcional permanece limitada a
+  `/app/etapas/agendamentos`; o bloqueio global alheio permanece apenas relatado.
+- A regra foi versionada no PR #312, commit
+  `e2549916d95ff7f2dd7931bcf0fdd4457c652622`, e sincronizada no Obsidian com
+  `status=synced`. `lint`, `typecheck` e `build` passaram no Node 24.19.0.
+  `pnpm test` aprovou 4.106 testes, ignorou 107 e encontrou um timeout no teste
+  existente do Associativo; a repeticao isolada manteve o mesmo timeout. Nenhum
+  arquivo do simulador foi alterado, pois ele esta fora do escopo deste chat.
+  Esta mudanca e somente documental e nao requer deploy do CRM.
+- Na conferencia final de 23/10/2026 00:48 BRT, `origin/main` permanecia em
+  `de07674bf40f6053ccc7da0fff6a0bf178983125`; o health publico respondeu HTTP
+  200, `status=ok`, na versao ainda publicada
+  `db78b3c89b849d62932d3e6871884ace2a440afe`. O PR #312 estava aberto e ainda
+  sem checks reportados no GitHub. Portanto, a regra ja esta ativa na memoria e
+  no Obsidian, mas sua integracao na `main` permanece pendente dos gates.
+
 ## 2026-10-22: modais e alertas globais do Meta Ads
 
 - Os doze dialogos do dashboard agora respeitam a area realmente visivel do
