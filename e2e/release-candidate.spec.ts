@@ -1590,6 +1590,11 @@ test("Meta Ads keeps its four views inside srcdoc after submenu navigation and r
       }),
     );
     await page.goto("/app/meta-ads");
+    await expect(
+      page
+        .getByRole("navigation", { name: "Visões do Meta Ads" })
+        .getByRole("link", { name: "Contas de anúncios", exact: true }),
+    ).toHaveCount(0);
     const frame = page.frameLocator(
       'iframe[title="Descomplica Ads — desempenho de campanhas Meta"]',
     );

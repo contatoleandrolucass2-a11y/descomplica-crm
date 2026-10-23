@@ -195,6 +195,18 @@ describe("dashboard Meta Ads", () => {
     expect(markup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
   });
 
+  it("concentra contas de anúncios em Ajustes sem duplicar a navegação lateral", async () => {
+    const overviewMarkup = renderToStaticMarkup(await MetaAdsDashboardPage());
+    expect(overviewMarkup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
+    expect(overviewMarkup).toContain('href="/app/meta-ads?panel=settings"');
+
+    const legacyMarkup = renderToStaticMarkup(await MetaAdsAccountsPage());
+    expect(legacyMarkup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
+    expect(legacyMarkup).toMatch(
+      /<a(?=[^>]*href="\/app\/meta-ads\?panel=settings")(?=[^>]*aria-current="page")[^>]*>/,
+    );
+  });
+
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {
     const routes = [
       [MetaAdsDashboardPage, "/app/meta-ads", "overview"],
@@ -212,7 +224,9 @@ describe("dashboard Meta Ads", () => {
       expect(markup).toContain('title="Descomplica Ads — desempenho de campanhas Meta"');
       expect(markup).toContain("srcDoc=");
       expect(markup).toContain('aria-label="Navegação lateral Meta Ads"');
-      expect(markup).toContain(`href="${path}"`);
+      expect(markup).toContain(
+        view === "accounts" ? 'href="/app/meta-ads?panel=settings"' : `href="${path}"`,
+      );
       expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
       expect(markup).toContain(`data-crm-view=&quot;${view}&quot;`);
     }
