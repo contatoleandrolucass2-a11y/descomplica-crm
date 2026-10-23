@@ -8,15 +8,19 @@ export const routineRoleSchema = z.enum([
   "coordenador-parcerias",
   "corretor",
 ]);
+const routineTextSchema = z
+  .string()
+  .max(4000)
+  .refine((value) => value.length <= 4000, "The routine text exceeds the UTF-16 storage limit.");
 export const routineRowSchema = z
   .object({
-    "Segunda-feira": z.string().max(4000),
-    "Terça-feira": z.string().max(4000),
-    "Quarta-feira": z.string().max(4000),
-    "Quinta-feira": z.string().max(4000),
-    "Sexta-feira": z.string().max(4000),
-    Sábado: z.string().max(4000),
-    Domingo: z.string().max(4000),
+    "Segunda-feira": routineTextSchema,
+    "Terça-feira": routineTextSchema,
+    "Quarta-feira": routineTextSchema,
+    "Quinta-feira": routineTextSchema,
+    "Sexta-feira": routineTextSchema,
+    Sábado: routineTextSchema,
+    Domingo: routineTextSchema,
   })
   .strict();
 export const routineRowsSchema = z.array(routineRowSchema).max(200);

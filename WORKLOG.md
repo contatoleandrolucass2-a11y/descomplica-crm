@@ -14,7 +14,7 @@ de navegador inclui uma campanha excluída e comprova filtro, identificação e
 totais históricos antes de retornar à seleção ativa.
 
 Após autorização explícita do usuário para corrigir o bloqueio e seguir com a
-publicação, o Zod direto e transitivo foi fixado em 4.6.6. O ajuste remove o
+publicação, o Zod direto e transitivo foi fixado em 4.6.7. O ajuste remove o
 aviso alto `GHSA-mrhx-c7xc-m3w5`; o servidor `next-devtools-mcp` continua
 aprovando inicialização e descoberta das ferramentas com a versão corrigida.
 Dados simulados permanecem restritos aos testes e ao harness local de QA. A
