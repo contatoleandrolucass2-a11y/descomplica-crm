@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-22 - Guia Meta ADS nos acessos efetivos
+
+A tela `/admin/usuarios` passa a agrupar as quatro permissões `crm.meta_ads.*`
+na guia **Meta ADS**, posicionada após Comercial. A busca, os contadores, a
+navegação por teclado e os controles de herança e exceção utilizam o mecanismo
+existente. A mudança reorganiza a apresentação; não concede nem remove acessos.
+
+Validação local: `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build`
+aprovados. Vitest: 4.101 aprovados e 107 ignorados. Os testes operacionais
+e de release terminaram sem falhas; verificações físicas exclusivas de Linux
+permanecem dependentes da CI. Não houve deploy nesta etapa.
+
+Após integrar `origin/main`, a CI encontrou deriva visual de 1,011% em
+`/admin/usuarios` e 1,002% em `/app/simulacao/calcular-documentacao`. As duas
+capturas foram inspecionadas: a primeira mostra corretamente a guia Meta ADS;
+a segunda reflete a navbar Meta Ads, Gestão e alertas já integrada em `main`.
+Sem corte, overflow ou falha de acessibilidade, ambas as referências foram
+atualizadas a partir do artefato candidato da CI para nova validação integral.
+
 ## 2026-10-22 - Modais responsivos e interface API-only do Meta Ads
 
 Os doze fluxos de diálogo do painel Meta Ads agora recebem do shell a fatia
@@ -8854,3 +8873,7 @@ Leitura observacional na VPS confirmou resposta HTTP 200 da API oficial com agre
 ### Reconciliação visual necessária para o release
 
 A primeira CI do PR #313 (`39897599409`) falhou somente na comparação de Documentação em 1280×720: referência antiga da navbar, desvio de 1,0019154%. A mesma falha existia no main-base (`39886289396`), com 1,0021778%. As duas imagens foram inspecionadas; a referência aprovada ainda não incluía a navegação global já publicada. Atualizada somente essa imagem, com hash conferido e procedência preservada no manifesto. Nenhum código de Documentação ou limiar de teste foi alterado. Nova CI completa exigida antes de merge e deploy.
+
+### Reconciliação com a entrega concorrente #310
+
+Durante a validação, `main` avançou para `13f169a` com a guia de permissões Meta ADS e referências visuais atualizadas. O merge local preservou integralmente a implementação concorrente e adotou o manifesto e a imagem de Documentação da nova `main`, substituindo a atualização intermediária desta branch. O diff final mantém a navegação lateral; não altera as referências visuais da nova base. A CI será executada novamente no candidato reconciliado.

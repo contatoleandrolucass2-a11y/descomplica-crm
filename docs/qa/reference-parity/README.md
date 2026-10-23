@@ -2,12 +2,6 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
-## Reconciliação da navbar na referência de Documentação em 23/10/2026
-
-A CI `39897599409` do PR #313 aprovou os testes funcionais, de banco, autorização e acessibilidade; apenas uma comparação visual falhou. A referência de Documentação em 1280×720 ainda mostrava a navbar anterior, sem Meta Ads e Gestão. O mesmo desvio já ocorria na CI `39886289396` da base `de07674`, antes desta entrega.
-
-A imagem Linux revisada foi incorporada seletivamente após conferir o layout, os controles e os hashes: `1a83d3fb81f4976bcdaed73e3a9d54b98a6567f6cbb899d8962ca7beb263788f`. O manifesto preserva o head `61e54f5`, o merge-ref `c3fb948`, o estado original da captura e a comparação anterior (1,0019154%). Todas as demais imagens permanecem idênticas. Não houve alteração no simulador, nos limiares de 1%/16 ou na CI. A atualização da referência não significa aprovação da entrega; uma nova CI completa em modo de verificação é obrigatória.
-
 ## Coluna de vaga do Associativo em 19/10/2026
 
 A CI `39301197819`, no head do PR #268, aprovou validate, restauração isolada,

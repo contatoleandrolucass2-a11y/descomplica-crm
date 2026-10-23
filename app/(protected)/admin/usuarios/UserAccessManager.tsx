@@ -134,6 +134,11 @@ const PERMISSION_GROUPS: PermissionGroup[] = [
       key.startsWith("crm.read_model_v3."),
   },
   {
+    id: "meta-ads",
+    label: "Meta ADS",
+    matches: (key) => key.startsWith("crm.meta_ads."),
+  },
+  {
     id: "simulators",
     label: "Simuladores",
     description:
