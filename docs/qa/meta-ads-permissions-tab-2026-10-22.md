@@ -19,3 +19,10 @@ Validação local: lint, typecheck, testes e build aprovados. Vitest: 4.101
 aprovados e 107 ignorados. Os testes Node e de release terminaram sem falhas.
 Verificações exclusivas de Linux continuam dependentes da CI. Não foi
 executada uma sessão autenticada no navegador nem um deploy nesta etapa.
+
+Após sincronizar a branch com `main`, o gate visual encontrou deriva de 1,011%
+em `/admin/usuarios` e 1,002% na tela de documentação. A inspeção das capturas
+confirmou a nova guia e a navegação Meta Ads, Gestão e alertas já integrada em
+`main`, sem corte ou overflow. As duas referências de 1280 × 720 foram
+atualizadas usando o artefato candidato da própria CI; a repetição integral
+continua obrigatória antes do merge.

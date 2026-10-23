@@ -12,6 +12,13 @@ aprovados. Vitest: 4.101 aprovados e 107 ignorados. Os testes operacionais
 e de release terminaram sem falhas; verificações físicas exclusivas de Linux
 permanecem dependentes da CI. Não houve deploy nesta etapa.
 
+Após integrar `origin/main`, a CI encontrou deriva visual de 1,011% em
+`/admin/usuarios` e 1,002% em `/app/simulacao/calcular-documentacao`. As duas
+capturas foram inspecionadas: a primeira mostra corretamente a guia Meta ADS;
+a segunda reflete a navbar Meta Ads, Gestão e alertas já integrada em `main`.
+Sem corte, overflow ou falha de acessibilidade, ambas as referências foram
+atualizadas a partir do artefato candidato da CI para nova validação integral.
+
 ## 2026-10-22 - Modais responsivos e interface API-only do Meta Ads
 
 Os doze fluxos de diálogo do painel Meta Ads agora recebem do shell a fatia

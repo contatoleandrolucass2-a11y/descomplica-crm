@@ -6,6 +6,8 @@ A tela `/admin/usuarios` passa a agrupar as quatro permissões `crm.meta_ads.*`
 na guia **Meta ADS**, posicionada após Comercial. A busca, os contadores, a
 navegação por teclado e os controles de herança e exceção utilizam o mecanismo
 existente. A mudança reorganiza a apresentação; não concede nem remove acessos.
+- Atualiza as referências visuais de Usuários e da Documentação para o catálogo
+  agrupado e a navegação Meta Ads já integrada em `main`.
 
 ## 2026-10-22 - Responsividade e navegação global do Meta Ads
 
