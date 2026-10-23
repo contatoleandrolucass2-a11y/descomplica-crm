@@ -514,6 +514,24 @@ input[type="checkbox"] {
   stroke: var(--line);
   stroke-width: 1;
 }
+.chart-scroll {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scrollbar-width: thin;
+}
+.chart-campaign-legend {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  justify-content: stretch;
+  max-height: 64px;
+  margin-top: 6px;
+  overflow-y: auto;
+}
+.chart-campaign-legend span {
+  min-width: 0;
+  text-align: left;
+}
 .legend {
   display: flex;
   gap: 14px;
