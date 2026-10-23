@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-23 - Correção do gate de segurança do Meta Ads
+
+- Atualiza o `body-parser` transitivo para `2.4.0`, corrigindo
+  `GHSA-27r3-jxmh-p828` no ambiente de desenvolvimento.
+- Mantém o protocolo MCP do Next DevTools validado após a atualização.
+
 ## 2026-10-23 - Histórico de campanhas excluídas no Meta Ads
 
 - Consulta os estados históricos dos anúncios na API oficial e identifica
