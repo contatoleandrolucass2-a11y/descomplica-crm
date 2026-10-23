@@ -50,14 +50,14 @@ const built = await build({
         import {MetaAdsSidebar} from "@/app/(protected)/app/meta-ads/MetaAdsSidebar";
         import styles from "@/app/(protected)/app/meta-ads/MetaAdsDashboardFrame.module.css";
         const pages = [{key:"overview",path:"/app/meta-ads",name:"Visão geral"},{key:"campaigns",path:"/app/meta-ads/campanhas",name:"Campanhas"},{key:"accounts",path:"/app/meta-ads/contas-de-anuncios",name:"Contas de anúncios"},{key:"reports",path:"/app/meta-ads/relatorios",name:"Relatórios"}];
-        const views = ["overview", "campaigns", "accounts", "reports"];
+        const views = ["overview", "campaigns", "accounts", "reports", "map", "settings"];
         function App() {
           const [view, setView] = useState(new URLSearchParams(location.search).get("view") || "overview");
           return <><nav aria-label="Fixture Meta Ads">
             {views.map(value => <button key={value} onClick={() => setView(value)}>{value}</button>)}
             <button onClick={() => {document.documentElement.dataset.theme="balanced"}}>theme</button>
             <MetaAdsAlertButton />
-          </nav><div className={styles.workspace}><MetaAdsSidebar pages={pages} path={pages[views.indexOf(view)].path}/><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></div></>;
+          </nav><div className={styles.workspace}><MetaAdsSidebar view={view} pages={pages} path={pages[views.indexOf(view)]?.path || "/app/meta-ads"}/><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></div></>;
         }
         createRoot(document.getElementById("root")).render(<App/>);
       `;
@@ -129,12 +129,43 @@ const apiFixture = JSON.stringify({
     },
   ],
 });
-for (const name of await readdir(path.join(root, "public/descomplica-ads"))) {
-  files.set(
-    `/descomplica-ads/${name}`,
-    await readFile(path.join(root, "public/descomplica-ads", name)),
-  );
+const apiSample = JSON.parse(apiFixture);
+const primary = apiSample.rows[0];
+apiSample.rows.push({
+  ...primary,
+  rowId: "previous",
+  date: "2026-10-01",
+  spend: 40,
+  conversions: 2,
+});
+for (let i = 0; i < 7; i++)
+  apiSample.rows.push({
+    ...primary,
+    rowId: "extra" + i,
+    campaignId: String(100 + i),
+    campaign: "Residencial São Paulo / campanha " + i + " com nome longo para leitura",
+    adsetId: String(200 + i),
+    adId: String(300 + i),
+    spend: 10,
+    conversions: 1,
+  });
+apiSample.rows.push({
+  ...primary,
+  rowId: "form",
+  campaignId: "999",
+  destination: "form",
+  spend: 900,
+  conversions: 90,
+});
+let apiMode = "valid";
+async function serveAssets(dir, url) {
+  for (const entry of await readdir(dir, { withFileTypes: true })) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) await serveAssets(full, url + "/" + entry.name);
+    else files.set(url + "/" + entry.name, await readFile(full));
+  }
 }
+await serveAssets(path.join(root, "public/descomplica-ads-compact"), "/descomplica-ads-compact");
 const headers = new Headers();
 applySecurityHeaders(headers, { isProd: true });
 const mime = {
@@ -142,6 +173,7 @@ const mime = {
   ".mjs": "text/javascript",
   ".css": "text/css",
   ".svg": "image/svg+xml",
+  ".json": "application/json",
 };
 const server = createServer((request, response) => {
   const pathname = new URL(request.url, "http://127.0.0.1").pathname;
@@ -150,7 +182,9 @@ const server = createServer((request, response) => {
     pathname === "/app/meta-ads"
       ? html
       : pathname === "/api/meta-ads/data"
-        ? apiFixture
+        ? JSON.stringify(
+            apiMode === "empty" ? { ...apiSample, rows: [] } : apiMode === "error" ? {} : apiSample,
+          )
         : files.get(pathname);
   response.writeHead(body === undefined ? 404 : 200, {
     "Content-Type":
@@ -178,163 +212,108 @@ try {
       forbidden.push(request.url());
       return route.abort();
     }
+    if (request.url().includes("/api/meta-ads/tiles/"))
+      return route.fulfill({
+        status: 200,
+        contentType: "image/png",
+        body: Buffer.from(
+          "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=",
+          "base64",
+        ),
+      });
     return route.continue();
   });
   const page = await context.newPage();
   const errors = [];
-  page.on("pageerror", (error) => errors.push(error.message));
-  const frame = page.frameLocator("iframe");
-  const titles = {
-    overview: "Visão geral de anúncios",
-    campaigns: "Análise de campanhas e anúncios",
-    accounts: "Contas de anúncios",
-    reports: "Central de relatórios",
-  };
-  async function check(view) {
-    await expect(frame.locator("#page-title")).toHaveText(titles[view]);
-    await expect(frame.locator("#data-badge")).toContainText("Meta API · somente leitura");
-    assert.equal(page.frames()[1].url(), "about:srcdoc");
-    await expect(frame.locator("html")).toHaveAttribute("data-crm-view", view);
-  }
-  async function checkOpenModal(title) {
-    const dialog = frame.getByRole("dialog", { name: title });
-    await expect(dialog).toBeVisible();
-
-    const [frameBox, dialogBox, bodyOverflow] = await Promise.all([
-      page.locator("iframe").boundingBox(),
-      dialog.boundingBox(),
-      dialog.locator(".modal-body").evaluate((element) => getComputedStyle(element).overflowY),
-    ]);
-    assert.ok(frameBox && dialogBox, `${title}: iframe and dialog must have layout boxes`);
-    const visibleFrameTop = Math.max(frameBox.y, 0);
-    const visibleFrameBottom = Math.min(frameBox.y + frameBox.height, 900);
-    assert.ok(
-      dialogBox.y >= visibleFrameTop - 1,
-      `${title}: dialog must start inside the visible iframe`,
-    );
-    assert.ok(
-      dialogBox.y + dialogBox.height <= visibleFrameBottom + 1,
-      `${title}: dialog actions must remain inside the visible iframe`,
-    );
-    assert.equal(bodyOverflow, "auto", `${title}: long content must scroll inside the dialog`);
-    if (process.env.META_ADS_QA_SCREENSHOT && title === "Metas e alertas") {
-      await page.waitForTimeout(250);
-      await page.screenshot({ path: process.env.META_ADS_QA_SCREENSHOT });
-    }
-    return dialog;
-  }
-  async function checkModal(title, open) {
-    await open();
-    const dialog = await checkOpenModal(title);
-    await frame.getByRole("button", { name: "Fechar janela" }).click();
-    await expect(dialog).toBeHidden();
-  }
-  for (const view of Object.keys(titles)) {
-    await page.goto(`${origin}/app/meta-ads?view=${view}`);
-    await check(view);
-    await expect(
-      page.getByRole("navigation", { name: "Visões do Meta Ads" }).getByRole("link"),
-    ).toHaveCount(4);
-    await expect(page.locator('[aria-current="page"]')).toHaveCount(1);
-    if (view === "overview") {
-      await page.screenshot({ path: "/tmp/meta-sidebar-overview.png" });
-      await page.setViewportSize({ width: 390, height: 844 });
-      await expect(page.getByRole("navigation", { name: "Visões do Meta Ads" })).toBeVisible();
-      assert.ok(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth));
-      await page.screenshot({ path: "/tmp/meta-sidebar-mobile.png" });
-      await page.setViewportSize({ width: 1440, height: 900 });
-    }
-    await page.reload();
-    await check(view);
-  }
-  for (let pass = 0; pass < 3; pass++) {
-    for (const view of Object.keys(titles)) {
-      await page.getByRole("button", { name: view, exact: true }).click();
-      await check(view);
-    }
-  }
-  await page.getByRole("button", { name: "overview", exact: true }).click();
-  await check("overview");
-  await page.frames()[1].evaluate(() => {
-    window.parent.postMessage(
-      { type: "descomplica:meta-ads-alert-state", count: 2, severity: "danger" },
-      "*",
-    );
+  page.on("pageerror", (error) => (errors.push(error.message), console.error(error.message)));
+  page.on("console", (msg) => {
+    if (msg.type() === "error") console.error(msg.text());
   });
-  await expect(page.locator("[data-meta-ads-alert-button]")).toHaveAttribute(
+  const frame = page.frameLocator("iframe");
+  await page.goto(origin + "/app/meta-ads");
+  await expect(frame.getByRole("heading", { name: "Comparar campanhas" })).toBeVisible();
+  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
+  await expect(frame.locator('[data-kpi="leads"] strong')).toHaveText("12");
+  await expect(frame.locator("#compare-period")).not.toBeChecked();
+  await frame.locator("#compare-period").check();
+  await expect(frame.locator(".period-comparison").first()).toBeVisible();
+  await expect(frame.locator('[data-kpi="spend"] small')).toContainText("325%");
+  await frame.locator("#compare-period").uncheck();
+  await frame.locator("#period").selectOption("custom");
+  await frame.locator("#date-start").fill("2026-10-20");
+  await frame.locator("#date-end").fill("2026-10-20");
+  await frame.getByRole("button", { name: "Aplicar período" }).click();
+  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
+  await frame.locator("#date-start").fill("2026-10-08");
+  await frame.locator("#date-end").fill("2026-10-21");
+  await frame.getByRole("button", { name: "Aplicar período" }).click();
+  await frame.locator('[data-panel="trend"] [data-chart-tip]').first().hover();
+  await expect(frame.locator("#chart-tooltip")).toContainText("08/10/2026");
+
+  await frame.locator('[data-expand-chart="bars"]').click();
+  await expect(frame.locator(".chart-expanded #period")).toBeVisible();
+  await frame.locator('[data-expand-chart="bars"]').click();
+  await frame.locator('[data-panel="bars"] .graph-type-menu summary').click();
+  await frame.getByRole("button", { name: "Barras deitadas", exact: true }).click();
+  await expect(frame.locator('[data-panel="bars"] svg')).toHaveAttribute(
     "aria-label",
-    "Alertas do Meta Ads: 2 não lidos",
+    "Barras deitadas",
   );
-  await checkModal("Central de alertas", () =>
-    page.getByRole("button", { name: "Alertas do Meta Ads: 2 não lidos" }).click(),
-  );
-  await checkModal("Importar mídia e resultados", () =>
-    frame.getByRole("button", { name: "Importar dados" }).click(),
-  );
-  await checkModal("Metas e alertas", () =>
-    frame.getByRole("button", { name: "Metas e alertas" }).click(),
-  );
-  await checkModal("Escolher período", () =>
-    frame.locator("#period-filter").selectOption("custom"),
-  );
-  await checkModal("Alcance consolidado do recorte", () =>
-    frame.getByRole("button", { name: /Informar alcance do recorte/ }).click(),
-  );
-  await checkModal("Atribuição", () =>
-    frame.getByRole("button", { name: "Entender Regra de crédito dos resultados" }).click(),
-  );
-
-  await frame.getByRole("button", { name: "Guia de métricas" }).click();
-  const glossaryDialog = await checkOpenModal("Guia de métricas");
-  await glossaryDialog
-    .getByRole("button", { name: /Ver exemplo e interpretação/ })
-    .first()
-    .click();
-  const definitionDialog = await checkOpenModal("Atribuição");
-  await frame.getByRole("button", { name: "Fechar janela" }).click();
-  await expect(definitionDialog).toBeHidden();
-  await expect(glossaryDialog).toBeVisible();
-  await frame.getByRole("button", { name: "Fechar janela" }).click();
-  await expect(glossaryDialog).toBeHidden();
-
-  await frame.locator('button.campaign-name[data-entity="campaign"]').first().click();
-  const entityDialog = await checkOpenModal("Empreendimento QA | WhatsApp");
-  await entityDialog.getByRole("button", { name: /Alterar teto/ }).click();
-  await expect(entityDialog).toBeHidden();
-  await checkOpenModal("Teto específico por resultado");
-  await frame.getByRole("button", { name: "Fechar janela" }).click();
-
-  await page.getByRole("button", { name: "campaigns", exact: true }).click();
-  await check("campaigns");
-  await checkModal("Selecionar campanhas para comparar", () =>
-    frame.getByRole("button", { name: /Selecionar campanhas/ }).click(),
-  );
+  await expect(frame.locator(".graph-type-menu[open]")).toHaveCount(0);
+  await frame.locator('[data-open="11"]').first().click();
+  await expect(frame.getByRole("heading", { name: "Conjuntos de anúncios" })).toBeVisible();
+  await frame.locator('[data-real-drill="22"]').click();
+  await expect(frame.locator('[data-panel="sets"]')).toContainText("Criativo QA");
+  await page.getByRole("button", { name: "settings", exact: true }).click();
+  await expect(frame.getByRole("heading", { name: "Ajustes", exact: true })).toBeVisible();
+  await frame.locator('[name="cap:whatsapp|campaign|11"]').fill("10");
+  await frame.locator('[name="sample"]').fill("1");
+  await frame.locator('[name="clickSample"]').fill("1");
+  await frame.getByRole("button", { name: "Salvar ajustes" }).click();
   await page.getByRole("button", { name: "overview", exact: true }).click();
-  await check("overview");
-  await page.getByRole("button", { name: "accounts", exact: true }).click();
-  await check("accounts");
-  await checkModal("Limite mensal de gasto", () =>
-    frame.getByRole("button", { name: /Limite mensal/ }).click(),
-  );
-  await frame.locator("#connections-button").click();
-  await checkModal("Usar demonstração?", () =>
-    frame.getByRole("button", { name: "Usar demonstração" }).click(),
-  );
+  await expect(frame.locator('[data-open="11"] td.bad')).toContainText("20,00");
+  await page.getByRole("button", { name: /Alertas do Meta Ads/ }).click();
+  await expect(frame.locator("#dialog")).toContainText("Recebido em");
+  await frame.getByRole("button", { name: "Marcar todas como lidas" }).click();
+  await expect(frame.locator("#dialog")).toContainText("0 não lidos");
+  await frame.locator("#close-dialog").click();
+  await page.reload();
+  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
+  await page.getByRole("button", { name: "map", exact: true }).click();
+  await expect(
+    frame.getByRole("heading", { name: "Mapa de São Paulo", exact: true }),
+  ).toBeVisible();
+  await frame.getByRole("button", { name: "Bairros de São Paulo", exact: true }).click();
+  await expect(frame.locator("#neighborhood-search")).toBeVisible();
+  await frame.locator("#neighborhood-search").fill("Butantã");
+  await expect(frame.locator("#neighborhood-results")).toContainText("Butantã");
+  await expect(frame.locator(".map-note")).toContainText("Nenhum volume é distribuído");
   await page.getByRole("button", { name: "overview", exact: true }).click();
-  await check("overview");
-  await frame.locator('[data-view="accounts"]').first().click();
-  await expect(frame.locator("#page-title")).toHaveText(titles.accounts);
-  assert.equal(page.frames()[1].url(), "about:srcdoc");
-  await frame.locator("a.skip-link").focus();
-  await page.keyboard.press("Enter");
-  await expect(frame.locator("#main")).toBeFocused();
-  assert.equal(page.frames()[1].url(), "about:srcdoc");
+  const downloadPromise = page.waitForEvent("download");
+  await frame.locator("#download-report").click();
+  const download = await downloadPromise;
+  await download.saveAs("/tmp/descomplica-compact-qa.pdf");
+  await page.screenshot({ path: "/tmp/descomplica-compact-qa.png", fullPage: true });
   await page.getByRole("button", { name: "theme", exact: true }).click();
-  await expect(frame.locator("html")).toHaveAttribute("data-theme", "medium");
-  assert.deepEqual(forbidden, [], "No external requests or nested document navigation");
+  await expect(frame.locator("body")).toHaveAttribute("data-theme", "medium");
+  await page.setViewportSize({ width: 720, height: 900 });
+  assert.equal(
+    await page.frames()[1].evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+    true,
+    "No horizontal document overflow",
+  );
+  apiMode = "empty";
+  await page.reload();
+  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("0,00");
+  await expect(frame.locator('[data-kpi="cpl"] strong')).toHaveText("—");
+  apiMode = "error";
+  await page.reload();
+  await expect(frame.locator("#main")).toContainText("Dados oficiais indisponíveis");
+  await expect(frame.locator("[data-kpi]")).toHaveCount(0);
+  assert.deepEqual(forbidden, [], "No external requests");
   assert.deepEqual(errors, [], "No browser runtime errors");
   console.log(
-    "Meta Ads: four views and all twelve dialog flows, cold load, reload, repeated submenu transitions, internal navigation, skip link and theme passed with production security headers.",
+    "Complete Meta Ads dashboard: real-row aggregation, comparison, chart controls, expansion, drilldown, caps, alert read history, map and PDF passed.",
   );
 } finally {
   await browser?.close();

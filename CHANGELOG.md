@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-23 - Dashboard Meta Ads completo
+
+- Substitui o conteúdo do dashboard pelo layout local aprovado, com dados oficiais, comparação de períodos, aprofundamento por conjunto/anúncio, gráficos configuráveis e expansíveis.
+- Inclui ajustes, histórico de alertas com leitura e PDF por seções.
+- Mantém o mapa navegável, sinalizando a ausência de localização de leads na fonte atual.
+
 ## 2026-10-23 - Navegação lateral do Meta Ads
 
 - Adiciona uma barra lateral compacta com Visão geral, Campanhas, Contas de anúncios e Relatórios, conforme o catálogo autorizado de cada usuário.
