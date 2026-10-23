@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-22 - Correção do gate visual da publicação de Agendamentos
+
+A CI de `push/main` confirmou todos os gates funcionais, de banco, build e E2E,
+mas a captura de Documentação em 1.280 x 720 excedeu o limite visual por 0,0022
+ponto percentual. A inspeção comparou a referência e o candidato e confirmou a
+navegação vigente adicionada por entregas concorrentes (`Meta Ads`, `Gestão` e
+alerta), sem regressão na página de Agendamentos. A referência canônica e seu
+manifesto foram promovidos somente para essa captura; a matriz completa continua
+obrigatória antes da publicação.
+
 ## 2026-10-22 - Modais responsivos e interface API-only do Meta Ads
 
 Os doze fluxos de diálogo do painel Meta Ads agora recebem do shell a fatia

@@ -1,5 +1,10 @@
 # Changelog
 
+## 2026-10-22 - Referência visual após navegação concorrente
+
+- Atualiza a referência autenticada de Documentação em 1.280 px para a navegação
+  vigente da `main`, preservando o limite visual e a matriz integral de release.
+
 ## 2026-10-22 - Responsividade e navegação global do Meta Ads
 
 - Mantém os doze diálogos do painel Meta Ads dentro da área visível do CRM,

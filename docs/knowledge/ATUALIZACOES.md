@@ -1,5 +1,20 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-22: bloqueio visual antes da publicacao de Agendamentos
+
+- A CI de `push/main` `39886289396`, no merge
+  `de07674bf40f6053ccc7da0fff6a0bf178983125`, aprovou validate,
+  isolated-restore, imagem promovivel, banco, build e E2E, mas bloqueou a
+  publicacao na matriz visual.
+- O unico desvio foi a captura de Documentacao em 1.280 x 720: 1,0022% dos
+  pixels contra limite de 1%. A comparacao visual confirmou a navegacao vigente
+  de entregas concorrentes (`Meta Ads`, `Gestao` e alerta), sem falha funcional
+  ou regressao de Agendamentos.
+- A referencia canônica foi atualizada somente para essa captura, com manifesto
+  recalculado a partir do diagnostico sanitizado da CI. Uma nova CI completa do
+  `main` exato permanece obrigatoria; producao continuou no SHA `db78b3c8`, sem
+  tentativa de deploy ou pendencia no coordenador.
+
 ## 2026-10-22: modais e alertas globais do Meta Ads
 
 - Os doze dialogos do dashboard agora respeitam a area realmente visivel do
