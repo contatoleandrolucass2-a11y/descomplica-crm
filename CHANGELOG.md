@@ -6,6 +6,13 @@
 - Mantém a página ativa destacada e adapta a navegação para uma faixa horizontal em telas menores.
 - Preserva a consulta oficial somente leitura e os estados de indisponibilidade, sem substituir falhas por dados fictícios.
 
+## 2026-10-23 - Escopo exclusivo por chat
+
+- Define que cada chat altera somente o escopo explicitamente solicitado.
+- Trata conhecimento anterior como contexto, sem ampliar a autorização atual.
+- Exige apenas o relato de gates alheios ao pedido, sem corrigir outras páginas
+  ou atualizar seus baselines dentro da mesma entrega.
+
 ## 2026-10-22 - Guia Meta ADS nos acessos efetivos
 
 A tela `/admin/usuarios` passa a agrupar as quatro permissões `crm.meta_ads.*`

@@ -4,6 +4,20 @@
 
 Este repositório consolida o sistema de login e o Descomplica CRM. O login Next.js/Supabase é a base arquitetural. Migre funcionalidades do CRM em incrementos pequenos, sem reintroduzir Cloudflare, D1, Vinext, Vite ou Wrangler.
 
+### Regra máxima de escopo por chat
+
+- Cada chat é uma demanda exclusiva. Alterar somente páginas, comportamentos,
+  arquivos e dados explicitamente solicitados no chat atual.
+- Conhecimento recuperado do repositório, GitHub, site ou Obsidian fornece
+  contexto e evidência; nunca amplia o escopo nem autoriza mudanças adicionais.
+- Falhas de gates causadas por outra página ou funcionalidade devem ser
+  registradas e reportadas como bloqueio externo ao escopo. Não corrigir,
+  atualizar baseline ou incluir essa outra área para liberar a entrega atual.
+- Trabalho fora do pedido exige uma solicitação explícita do usuário em chat
+  próprio. Correções obrigatórias para preservar segurança ou integridade devem
+  interromper somente a ação dependente e ser apresentadas ao usuário, sem
+  implementação incidental.
+
 ## Regras obrigatórias
 
 - Use Node 24.19.x e pnpm 11.20.x. Não crie `package-lock.json` nem `yarn.lock`.
