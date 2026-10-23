@@ -2734,3 +2734,33 @@ dependente da autorização específica aplicável.
   `status=ok` e a versão exata. A rota anônima `/app/gestao/previsao` respondeu
   HTTP 307 para `/login`. Esta entrega não criou migration, não alterou n8n e
   não acessou dados privados de produção.
+
+## 2026-10-23: Agendamentos publicado e regra de escopo registrada
+
+- O dashboard de Agendamentos integrado pelo PR #307 permaneceu como o único
+  escopo funcional desta conversa. O PR #312 registrou no repositório a regra
+  permanente de tratar cada chat como exclusivo à demanda solicitada, sem
+  aproveitar a execução para alterar outras páginas.
+- A `main` exata `f3b512dce5e725f9002b06b3c9382213466824e6` foi validada pela
+  CI `39906486242`: `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image` concluíram com sucesso. O artefato imutável `12480374065`
+  teve digest ZIP
+  `sha256:3fdf17851f6fc691a2d41b243973b041c09510b7a7e088310bd7ca4d40489a7d`.
+- `image.tar.gz`, `revision.txt` e o checksum foram conferidos. A configuração
+  registrada pela CI foi
+  `sha256:00f4e162b3f33d37bf4bd5f5197a5d240ac4fd1b97a633ec8e68d27d860dda61`;
+  o manifesto carregado no Docker containerd foi
+  `sha256:316b1503187abe6eaa858808a0ef62e5dfd9415420a05915166e664bdc0036b2`.
+  Índice, hashes do manifesto e da configuração, plataforma `linux/amd64`,
+  revisão OCI, 11 camadas, 11 `diff_ids` e `image:prove` nos dois perfis foram
+  aprovados, sem rebuild ou retag.
+- O coordenador `pnpm release:production deploy` publicou o deployment
+  `aed84f63-8ccb-49bc-a8e5-88280edb65ef` em
+  `2026-10-23T06:29:59.711Z` (`03:29:59` em America/Sao_Paulo), usando o
+  deployment anterior `9e38c7e0-a2f5-4a08-8512-3b92a3e7429b` como CAS. O
+  ledger final confirmou o SHA e a imagem homologada, sem pendência.
+- A observação externa de `2026-10-23T06:30:07.9946224Z` confirmou HTTP 200,
+  `status=ok` e a versão exata. A rota anônima
+  `/app/etapas/agendamentos` respondeu HTTP 307 para `/login`. Nenhuma outra
+  página foi alterada nesta etapa de publicação; não houve migration, mudança
+  de n8n, DNS, cobrança ou mutação de dados remotos.
