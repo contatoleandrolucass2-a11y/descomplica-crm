@@ -227,7 +227,7 @@ async function downloadAdsReport() {
           text(num(value), 150, cursor, 9);
           cursor += 7;
         }
-        paragraph("Clique → resultado: " + pct(AdsData.ratio(c.leads, c.clicks, 100)));
+        paragraph("Conversão de cliques em resultados: " + pct(AdsData.ratio(c.leads, c.clicks, 100)));
       }
     }
     if (selected.origin) {
