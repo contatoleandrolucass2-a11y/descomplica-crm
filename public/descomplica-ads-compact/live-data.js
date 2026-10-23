@@ -242,6 +242,13 @@ async function loadSource(range) {
     if (request !== sourceRequest) return;
     const first = !state.endDate;
     sourceData = payload;
+    save(
+      "ads-live-compact-colors",
+      AdsData.registerCampaigns(
+        payload.rows.map((r) => r.campaignId),
+        read("ads-live-compact-colors", {}),
+      ),
+    );
     if (first) {
       state.endDate = payload.range.end;
       state.startDate = AdsData.shift(state.endDate, -13);

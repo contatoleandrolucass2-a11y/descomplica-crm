@@ -16,8 +16,35 @@ const AdsData = (() => {
       (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c],
     );
   const ratio = (a, b, m = 1) => (a != null && b > 0 ? (a / b) * m : null);
-  const color = (id) =>
-    palette[[...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0) % palette.length];
+  let campaignColors = {};
+  function registerCampaigns(ids, stored = {}) {
+    campaignColors = Object.fromEntries(
+      Object.entries(stored).filter(
+        ([id, index]) => /^\d+$/.test(id) && Number.isInteger(index) && index >= 0 && index < 10000,
+      ),
+    );
+    let next = Math.max(-1, ...Object.values(campaignColors)) + 1;
+    for (const id of [...new Set(ids)].sort())
+      if (campaignColors[id] === undefined) campaignColors[id] = next++;
+    return { ...campaignColors };
+  }
+  const color = (id) => {
+    const index =
+      campaignColors[id] ??
+      [...id].reduce((h, c) => (h * 31 + c.charCodeAt(0)) >>> 0, 0) % palette.length;
+    if (index < palette.length) return palette[index];
+    const angle = (index * 137.508 * Math.PI) / 180;
+    return (
+      "#" +
+      [0, 2, 4]
+        .map((offset) =>
+          Math.round(130 + 80 * Math.cos(angle + (offset * Math.PI) / 3))
+            .toString(16)
+            .padStart(2, "0"),
+        )
+        .join("")
+    );
+  };
   const shift = (date, days) => {
     const d = new Date(date + "T00:00:00Z");
     d.setUTCDate(d.getUTCDate() + days);
@@ -93,5 +120,17 @@ const AdsData = (() => {
       return cost ? a.cpl : a.leads;
     });
   }
-  return { escape, ratio, color, shift, days, filter, aggregate, groups, selectEntity, daily };
+  return {
+    registerCampaigns,
+    escape,
+    ratio,
+    color,
+    shift,
+    days,
+    filter,
+    aggregate,
+    groups,
+    selectEntity,
+    daily,
+  };
 })();

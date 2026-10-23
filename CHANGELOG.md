@@ -5,6 +5,7 @@
 - Substitui o conteúdo do dashboard pelo layout local aprovado, com dados oficiais, comparação de períodos, aprofundamento por conjunto/anúncio, gráficos configuráveis e expansíveis.
 - Inclui ajustes, histórico de alertas com leitura e PDF por seções.
 - Mantém o mapa navegável, sinalizando a ausência de localização de leads na fonte atual.
+- Distingue recorte válido vazio de resposta malformada da API, interrompendo a análise quando há linhas inválidas.
 
 ## 2026-10-23 - Navegação lateral do Meta Ads
 

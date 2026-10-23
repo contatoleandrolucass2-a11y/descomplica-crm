@@ -83,6 +83,15 @@ describe("compact real-data model", () => {
     ]);
     expect(model.groups(rows, "ad").map((e: { id: string }) => e.id)).toEqual(["4", "5"]);
   });
+  it("preserves distinct campaign colors across filtering and reloads", () => {
+    const saved = model.registerCampaigns(["11", "19"]);
+    const colors = [model.color("11"), model.color("19")];
+    expect(colors[0]).not.toBe(colors[1]);
+    model.registerCampaigns(["19", "27"], saved);
+    expect([model.color("11"), model.color("19")]).toEqual(colors);
+    expect(model.color("27")).not.toBe(colors[0]);
+  });
+
   it("keeps zero-result costs undefined", () => {
     expect(model.aggregate([])).toMatchObject({ spend: 0, leads: 0, cpl: null, ctr: null });
   });

@@ -284,7 +284,7 @@ function defaultBarChart(list, metric = state.metric) {
       const cy = 170 - (c.cap / max) * 140;
       svg += `<line x1="${x - step * 0.35}" x2="${x + step * 0.35}" y1="${cy}" y2="${cy}" stroke="#c92049" stroke-dasharray="4 3"/><text x="${x}" y="${cy - 5}" text-anchor="middle">Teto ${money(c.cap)}</text>`;
     }
-    svg += `<text x="${x}" y="189" text-anchor="middle">${AdsData.escape((c.label || c.name).slice(0, 10))}…</text><text x="${x}" y="204" text-anchor="middle">${format(c[metric])}${state.compare ? " · " + changeLabel(c[metric], before[i][metric]) : ""}</text>`;
+    svg += `<text x="${x}" y="189" text-anchor="middle">${AdsData.escape((c.label || c.name).slice(0, 10))}…</text><text style="fill:${metric === "cpl" && c.cap != null && c.cpl > c.cap ? "#e51c3c" : "var(--text)"}" x="${x}" y="204" text-anchor="middle">${format(c[metric])}${state.compare ? " · " + changeLabel(c[metric], before[i][metric]) : ""}</text>`;
   });
   return (
     svg +

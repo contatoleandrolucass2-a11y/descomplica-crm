@@ -107,7 +107,7 @@ function barChart(list, metric = state.metric) {
       (state.compare ? [prior[i], c] : [c]).forEach((v, j) => {
         const old = state.compare && j === 0,
           yy = y + (old ? 0 : state.compare ? 17 : 5);
-        svg += `<rect ${chartHint([(c.label || c.name) + " · " + (old ? "Anterior" : "Atual"), rangeLabel(old ? previousRange() : selectedRange()), metricLabels[metric] + ": " + format(v[metric])])} x="125" y="${yy}" width="${((v[metric] || 0) / max) * 310}" height="13" fill="${c.color}" opacity="${old ? 0.3 : 1}"/><text x="${130 + ((v[metric] || 0) / max) * 310}" y="${yy + 10}">${format(v[metric])}</text>`;
+        svg += `<rect ${chartHint([(c.label || c.name) + " · " + (old ? "Anterior" : "Atual"), rangeLabel(old ? previousRange() : selectedRange()), metricLabels[metric] + ": " + format(v[metric])])} x="125" y="${yy}" width="${((v[metric] || 0) / max) * 310}" height="13" fill="${c.color}" opacity="${old ? 0.3 : 1}"/><text style="fill:${metric === "cpl" && c.cap != null && v.cpl > c.cap ? "#e51c3c" : "var(--text)"}" x="${130 + ((v[metric] || 0) / max) * 310}" y="${yy + 10}">${format(v[metric])}</text>`;
       });
       if (metric === "cpl" && c.cap != null) {
         const x = 125 + (c.cap / max) * 310;

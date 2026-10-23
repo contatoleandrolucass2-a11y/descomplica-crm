@@ -4,7 +4,7 @@
 
 O usuário esclareceu que a entrega inclui todo o dashboard local, e não apenas a lateral. A integração substitui o artefato de análise, preservando sessão, guards e consulta oficial somente leitura. O modelo agrega linhas diárias reais; os controles, o PDF e o histórico de alertas acompanham os filtros. Não há dados geográficos individuais na origem: o mapa não inventa distribuição.
 
-Validação local: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build` aprovados. Vitest: 4.125 aprovados e 107 ignorados; suites operacionais e de release sem falhas. O harness do dashboard passou com oito campanhas e verificações de erro/vazio. O PDF de nove páginas foi renderizado para conferência.
+Validação local: `pnpm format:check`, `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build` aprovados. Vitest: 4.127 aprovados e 107 ignorados; suites operacionais e de release sem falhas. O harness do dashboard passou com oito campanhas e verificações de erro/vazio. O PDF de nove páginas foi renderizado para conferência. Uma verificação adicional confirmou mapa em tela cheia, busca e camadas. As cores permanecem distintas e estáveis entre filtros e recargas, e os custos acima do teto recebem destaque vermelho. Um teste adicional diferencia recorte vazio válido de resposta malformada da origem; linhas inválidas bloqueiam a análise.
 
 Detalhes e limites: `docs/audits/meta-ads-full-local-layout-2026-10-23.md`.
 

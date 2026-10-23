@@ -357,6 +357,7 @@ export async function fetchMetaAdsDashboardData(
   const rows = insights
     .map((insight) => mapInsight(insight, statuses, destinations))
     .filter((row): row is MetaAdsDashboardRow => row !== null);
+  if (rows.length !== insights.length) throw new MetaAdsApiError("invalid_data", 502);
   const accountName = rows[0]?.account || configuration.accountId;
   const data: MetaAdsDashboardData = {
     source: "meta_marketing_api",
