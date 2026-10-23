@@ -13,6 +13,13 @@ históricas, a agregação isolada das campanhas excluídas e o padrão ativo. O
 de navegador inclui uma campanha excluída e comprova filtro, identificação e
 totais históricos antes de retornar à seleção ativa.
 
+Após autorização explícita do usuário para corrigir o bloqueio e seguir com a
+publicação, o Zod direto e transitivo foi fixado em 4.6.6. O ajuste remove o
+aviso alto `GHSA-mrhx-c7xc-m3w5`; o servidor `next-devtools-mcp` continua
+aprovando inicialização e descoberta das ferramentas com a versão corrigida.
+Dados simulados permanecem restritos aos testes e ao harness local de QA. A
+aplicação continua consumindo somente a fonte oficial configurada da Meta.
+
 ## 2026-10-23 - Integração completa do layout local Meta Ads
 
 O usuário esclareceu que a entrega inclui todo o dashboard local, e não apenas a lateral. A integração substitui o artefato de análise, preservando sessão, guards e consulta oficial somente leitura. O modelo agrega linhas diárias reais; os controles, o PDF e o histórico de alertas acompanham os filtros. Não há dados geográficos individuais na origem: o mapa não inventa distribuição.
