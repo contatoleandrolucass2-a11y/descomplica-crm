@@ -8844,3 +8844,10 @@ incluindo o novo perfil restrito. A validação local integral aprovou lint,
 typecheck, build, 4.101 casos Vitest, 727 casos Node e 2.113 asserções pgTAP em
 Supabase isolado, sem falhas. Migration e alteração ainda não foram publicadas;
 nenhum dado remoto ou produção foi alterado nesta etapa.
+
+
+## 2026-10-23 - Navegação lateral do Meta Ads
+
+Implementada a navegação lateral aprovada na prévia, adaptada às quatro rotas existentes do CRM. O servidor fornece somente os destinos do catálogo autorizado. As páginas mantêm seus guards próprios e a fonte oficial da API, sem importar dados simulados ou o mapa demonstrativo. A navegação identifica a página corrente, respeita os três temas e usa uma faixa horizontal em janelas menores.
+
+Leitura observacional na VPS confirmou resposta HTTP 200 da API oficial com agregado de 16 a 22/10/2026; nenhuma credencial foi registrada. Essa leitura confirma a disponibilidade naquele instante, não a publicação desta mudança. Validação e release serão registradas após conclusão.
