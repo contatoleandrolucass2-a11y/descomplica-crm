@@ -675,6 +675,7 @@ export async function assertHeaderGeometry(page, compact) {
   const geometry = await header.evaluate(async (element, isCompact) => {
     const brand = element.querySelector("[data-protected-brand]");
     const themes = element.querySelector('[role="group"][aria-label="Aparência da página"]');
+    const metaAdsAlert = element.querySelector("[data-meta-ads-alert-button]");
     const account = element.querySelector('button[aria-controls="protected-account-menu"]');
     const control = element.querySelector('button[aria-controls="authorized-navigation"]');
     const nav = element.querySelector("#authorized-navigation");
@@ -716,6 +717,7 @@ export async function assertHeaderGeometry(page, compact) {
       brand,
       themes,
       ...themeButtons,
+      ...(metaAdsAlert ? [metaAdsAlert] : []),
       account,
       ...(isCompact ? [control] : rootControls),
     ];
@@ -725,6 +727,7 @@ export async function assertHeaderGeometry(page, compact) {
     const headerControlsContained = fixedControls.every((node) => containedInHeader(node));
     const focusTargets = [
       ...themeButtons.map((button, index) => [`theme-${index + 1}`, button]),
+      ...(metaAdsAlert ? [["meta-ads-alert", metaAdsAlert]] : []),
       ["account", account],
       ...(isCompact
         ? [["mobile-trigger", control]]
@@ -1154,6 +1157,7 @@ export async function checkArchiveNavigation(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-admin-home"]',
           );
           const themes = appearance(page);
+          const metaAdsAlert = page.locator("[data-meta-ads-alert-button]");
           const compactThemeSwitch = viewport.width <= 600;
           stage = "load:shell";
           await expect(page.locator("[data-protected-shell]")).toHaveCount(1);
@@ -1187,6 +1191,8 @@ export async function checkArchiveNavigation(
                 ).toBeFocused();
               }
             }
+            await page.keyboard.press("Tab");
+            await expect(metaAdsAlert).toBeFocused();
             await page.keyboard.press("Tab");
             await expect(accountTrigger(page)).toBeFocused();
             assert.equal(

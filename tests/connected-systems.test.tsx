@@ -8,6 +8,8 @@ const mocks = vi.hoisted(() => ({
   refresh: vi.fn(),
   status: vi.fn(),
   console: vi.fn(),
+  metaApi: vi.fn(),
+  metaStatus: vi.fn(),
 }));
 
 vi.mock("@/lib/authorization/enforce", () => ({ enforcePageAccess: mocks.enforce }));
@@ -19,6 +21,10 @@ vi.mock("@/lib/crm/salesforce/config", () => ({
   getSalesforceIngestConfiguration: mocks.ingest,
   getSalesforceRefreshConfiguration: mocks.refresh,
   getSalesforceStatusConfiguration: mocks.status,
+}));
+vi.mock("@/lib/crm/meta-ads/config", () => ({
+  getMetaAdsApiConfiguration: mocks.metaApi,
+  getMetaAdsStatusConfiguration: mocks.metaStatus,
 }));
 
 import ConnectedSystemsPage from "@/app/(protected)/app/configuracoes/conectar-sistemas/page";
@@ -32,6 +38,8 @@ beforeEach(() => {
   mocks.refresh.mockReturnValue({ enabled: false, available: false });
   mocks.status.mockReturnValue({ enabled: true, available: true });
   mocks.console.mockReturnValue({ available: false });
+  mocks.metaApi.mockReturnValue({ enabled: false, available: false });
+  mocks.metaStatus.mockReturnValue({ enabled: false, available: false });
 });
 
 describe("connected systems", () => {
@@ -43,6 +51,8 @@ describe("connected systems", () => {
     expect(mocks.refresh).not.toHaveBeenCalled();
     expect(mocks.status).not.toHaveBeenCalled();
     expect(mocks.console).not.toHaveBeenCalled();
+    expect(mocks.metaApi).not.toHaveBeenCalled();
+    expect(mocks.metaStatus).not.toHaveBeenCalled();
   });
 
   it("does not expose secrets or imply a connected session from configuration alone", async () => {
@@ -101,8 +111,29 @@ describe("connected systems", () => {
       statusConfigured: true,
       consoleAvailable: false,
       metaAdsStatusConfigured: false,
-      metaAdsConsoleAvailable: false,
     });
+  });
+
+  it("keeps Meta Ads only in the upper service card when the official API is enabled", async () => {
+    mocks.metaApi.mockReturnValue({
+      enabled: true,
+      available: true,
+      accessToken: "private-meta-token",
+      accountId: "1080988750909489",
+      apiVersion: "v26.0",
+    });
+
+    const page = await ConnectedSystemsPage();
+    const markup = renderToStaticMarkup(page);
+
+    expect(page.props.metaAdsStatusConfigured).toBe(true);
+    expect(markup).toContain("Meta Ads · Facebook Ads");
+    expect(markup).toContain("API oficial somente leitura");
+    expect(markup).not.toContain("private-meta-token");
+    expect(markup).not.toContain("Conectar Meta Ads");
+    expect(markup).not.toContain("Verificar Meta Ads");
+    expect(markup).not.toContain("Meta Ads e conta de anúncios");
+    expect(markup).not.toContain("console Meta Ads");
   });
 
   it.each([

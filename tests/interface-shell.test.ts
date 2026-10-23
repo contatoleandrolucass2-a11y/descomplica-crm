@@ -123,10 +123,10 @@ describe("protected interface shell", () => {
       /@media \(min-width: 1181px\) and \(max-width: 1320px\) \{[\s\S]*\.navigationIcon \{[\s\S]*display: none/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 1180px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px auto 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*\.actions \{[\s\S]*grid-column: 4[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 3/,
+      /@media \(max-width: 1180px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px auto auto[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*\.actions \{[\s\S]*grid-column: 4[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 3/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(max-width: 600px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px 44px 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 4[\s\S]*grid-row: 1[\s\S]*\.actions \{[\s\S]*grid-column: 3[\s\S]*grid-row: 1[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 2[\s\S]*grid-row: 1/,
+      /@media \(max-width: 600px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px 88px 44px[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 4[\s\S]*grid-row: 1[\s\S]*\.actions \{[\s\S]*grid-column: 3[\s\S]*grid-row: 1[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 2[\s\S]*grid-row: 1/,
     );
     expect(shellStylesheet).toMatch(
       /@media \(max-width: 600px\) \{[\s\S]*\.themeOptions \{[\s\S]*display: none[\s\S]*\.mobileThemeCycle \{[\s\S]*display: grid[\s\S]*width: 44px[\s\S]*height: 44px/,

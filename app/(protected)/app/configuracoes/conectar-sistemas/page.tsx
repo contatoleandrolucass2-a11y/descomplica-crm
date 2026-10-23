@@ -8,7 +8,7 @@ import {
 } from "@/lib/crm/salesforce/config";
 
 import {
-  getMetaAdsConsoleConfiguration,
+  getMetaAdsApiConfiguration,
   getMetaAdsStatusConfiguration,
 } from "@/lib/crm/meta-ads/config";
 
@@ -21,6 +21,8 @@ export default async function ConnectedSystemsPage() {
   const ingest = getSalesforceIngestConfiguration();
   const refresh = getSalesforceRefreshConfiguration();
   const status = getSalesforceStatusConfiguration();
+  const metaAdsApi = getMetaAdsApiConfiguration();
+  const metaAdsStatus = getMetaAdsStatusConfiguration();
 
   return (
     <ConnectedSystemsPanel
@@ -31,10 +33,7 @@ export default async function ConnectedSystemsPage() {
       canRefresh={hasPermission(context, "crm.salesforce.refresh")}
       statusConfigured={status.available}
       {...(hasPermission(context, "crm.dashboard.view") ? { canReadSyncStatus: true } : {})}
-      metaAdsStatusConfigured={getMetaAdsStatusConfiguration().available}
-      metaAdsConsoleAvailable={
-        context.roleKey === "master" && getMetaAdsConsoleConfiguration().available
-      }
+      metaAdsStatusConfigured={metaAdsApi.enabled || metaAdsStatus.enabled}
       consoleAvailable={
         context.roleKey === "master" && getSalesforceConsoleConfiguration().available
       }

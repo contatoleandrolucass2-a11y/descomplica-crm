@@ -22,6 +22,7 @@ import MetaAdsDashboardPage from "@/app/(protected)/app/meta-ads/page";
 import MetaAdsCampaignsPage from "@/app/(protected)/app/meta-ads/campanhas/page";
 import MetaAdsAccountsPage from "@/app/(protected)/app/meta-ads/contas-de-anuncios/page";
 import MetaAdsReportsPage from "@/app/(protected)/app/meta-ads/relatorios/page";
+import { getVisibleFrameViewport } from "@/app/(protected)/app/meta-ads/MetaAdsDashboardFrame";
 
 const dashboardDocumentUrl = new URL(
   "../app/(protected)/app/meta-ads/dashboard-frame.html",
@@ -88,7 +89,8 @@ describe("dashboard Meta Ads", () => {
     expect(document).toContain('src="/descomplica-ads/app.mjs"');
     expect(document).not.toContain('aria-label="Visões do dashboard Meta Ads"');
     expect(document).not.toContain("data-nav=");
-    expect(document).toContain('id="alerts-button"');
+    expect(document).not.toContain('id="alerts-button"');
+    expect(document).not.toContain('class="dashboard-toolbar"');
   });
 
   it("carrega a fonte oficial sem substituir falhas por demonstracao", async () => {
@@ -130,6 +132,48 @@ describe("dashboard Meta Ads", () => {
     expect(dashboardStyles).toContain("--panel: #0a2b47;");
     expect(dashboardStyles).toContain("--accent: #5ce5f1;");
     expect(dashboardStyles).not.toContain("fonts.googleapis.com");
+  });
+
+  it("mantem os modais dentro da area visivel do iframe com rolagem interna", async () => {
+    const [frameSource, dashboardStyles, modalSource] = await Promise.all([
+      readFile(
+        new URL("../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.tsx", import.meta.url),
+        "utf8",
+      ),
+      readFile(new URL("../public/descomplica-ads/style.css", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads/ui.mjs", import.meta.url), "utf8"),
+    ]);
+
+    expect(getVisibleFrameViewport({ height: 2400, top: 300 } as DOMRect, 0, 1000)).toEqual({
+      height: 700,
+      top: 0,
+    });
+    expect(getVisibleFrameViewport({ height: 2400, top: -500 } as DOMRect, 58, 1000)).toEqual({
+      height: 942,
+      top: 558,
+    });
+    expect(frameSource).toContain(
+      'document.addEventListener("scroll", scheduleViewportSync, true)',
+    );
+    expect(dashboardStyles).toContain("top: var(--crm-visible-frame-top, 0)");
+    expect(dashboardStyles).toContain("height: var(--crm-visible-frame-height, 100dvh)");
+    expect(dashboardStyles).toContain("overflow-y: auto");
+    expect(frameSource).toContain('event.data?.type !== "descomplica:meta-ads-modal-open"');
+    expect(frameSource).toContain("window.addEventListener(OPEN_ALERTS_EVENT, openAlerts)");
+    expect(modalSource).toContain("postMessage({type:'descomplica:meta-ads-modal-open'},'*')");
+  });
+
+  it("leva o estado dos alertas ao sino global e aceita apenas a abertura pedida pelo pai", async () => {
+    const application = await readFile(
+      new URL("../public/descomplica-ads/app.mjs", import.meta.url),
+      "utf8",
+    );
+
+    expect(application).toContain("type:'descomplica:meta-ads-alert-state'");
+    expect(application).toContain(
+      "event.source===window.parent&&event.data?.type==='descomplica:meta-ads-open-alerts'",
+    );
+    expect(application).not.toContain("$('#alerts-button').addEventListener");
   });
 
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {

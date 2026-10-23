@@ -7,6 +7,17 @@ na guia **Meta ADS**, posicionada após Comercial. A busca, os contadores, a
 navegação por teclado e os controles de herança e exceção utilizam o mecanismo
 existente. A mudança reorganiza a apresentação; não concede nem remove acessos.
 
+## 2026-10-22 - Responsividade e navegação global do Meta Ads
+
+- Mantém os doze diálogos do painel Meta Ads dentro da área visível do CRM,
+  usando rolagem somente no conteúdo interno quando necessária.
+- Move o sino de alertas para a barra superior, entre o seletor de tema e o
+  perfil, visível apenas para usuários autorizados a acessar o Meta Ads.
+- Simplifica a página de Integrações para apresentar o Meta Ads somente no card
+  superior da API oficial, sem botões ou referências ao console legado.
+- Preserva os demais dashboards, Salesforce e operações do Gerenciador de
+  Anúncios; a integração continua estritamente somente leitura.
+
 ## 2026-10-22 - Preenchimento da Previsão por perfis comerciais
 
 - Libera a página e o preenchimento dos valores da Previsão para Coordenador,

@@ -14,7 +14,10 @@ vi.mock("next/headers", () => ({ cookies: mocks.cookies }));
 vi.mock("next/image", () => ({
   default: (props: ComponentProps<"img">) => createElement("img", props),
 }));
-vi.mock("next/navigation", () => ({ usePathname: () => "/app" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/app",
+  useRouter: () => ({ push: vi.fn() }),
+}));
 vi.mock("@/lib/auth/actions/logout", () => ({ logoutAction: "/logout" }));
 vi.mock("@/lib/authorization/enforce", () => ({
   enforceAuthorization: mocks.enforceAuthorization,
@@ -38,6 +41,16 @@ const dashboard = {
   sortOrder: 10,
   isNavigation: true,
   isActive: true,
+};
+
+const metaAds = {
+  ...dashboard,
+  key: "crm.meta_ads",
+  path: "/app/meta-ads",
+  name: "Meta Ads",
+  description: "Desempenho de campanhas",
+  permissionKey: "crm.meta_ads.view" as const,
+  sortOrder: 20,
 };
 
 beforeEach(() => {
@@ -90,6 +103,30 @@ describe("protected shell navigation", () => {
     expect(markup).not.toContain('href="/admin/usuarios"');
     expect(markup).not.toMatch(/Administração|Gerenciar usuários|Gerenciar páginas/);
     expect(markup).not.toContain("Usuários indevidos");
+    expect(markup).not.toContain("data-meta-ads-alert-button");
     expect(markup).toContain("Conteúdo autorizado");
+  });
+
+  it("places the Meta Ads alert between themes and profile only for an authorized user", async () => {
+    mocks.getCurrentUser.mockResolvedValue({ email: "meta.qa@example.invalid" });
+    mocks.enforceAuthorization.mockResolvedValue({
+      userId: "10000000-0000-4000-8000-000000000001",
+      roleKey: "user",
+      level: 10,
+      permissions: ["pages.view", "crm.dashboard.view", "crm.meta_ads.view"],
+    });
+    mocks.getAuthorizedNavigation.mockResolvedValue([dashboard, metaAds]);
+
+    const markup = renderToStaticMarkup(
+      await ProtectedLayout({ children: createElement("main", null, "Meta Ads autorizado") }),
+    );
+    const themeIndex = markup.indexOf('aria-label="Aparência da página"');
+    const alertIndex = markup.indexOf("data-meta-ads-alert-button");
+    const accountIndex = markup.indexOf('aria-controls="protected-account-menu"');
+
+    expect(themeIndex).toBeGreaterThan(-1);
+    expect(alertIndex).toBeGreaterThan(themeIndex);
+    expect(accountIndex).toBeGreaterThan(alertIndex);
+    expect(markup).toContain('aria-label="Alertas do Meta Ads"');
   });
 });

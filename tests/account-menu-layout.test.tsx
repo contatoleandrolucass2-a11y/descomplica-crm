@@ -5,11 +5,15 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it, vi } from "vitest";
 import { checkProtectedTopbar } from "../scripts/qa/associative-compact-layout.mjs";
 
-vi.mock("next/navigation", () => ({ usePathname: () => "/app" }));
+vi.mock("next/navigation", () => ({
+  usePathname: () => "/app",
+  useRouter: () => ({ push: vi.fn() }),
+}));
 
 import { AccountMenu } from "../app/(protected)/_components/AccountMenu";
 import { AuthorizedNavigation } from "../app/(protected)/_components/AuthorizedNavigation";
 import { DescomplicaBrandMark } from "../app/(protected)/_components/DescomplicaBrandMark";
+import { MetaAdsAlertButton } from "../app/(protected)/_components/MetaAdsAlertButton";
 import { ThemeSwitch } from "../app/(protected)/_components/ThemeSwitch";
 import styles from "../app/(protected)/_components/ProtectedShell.module.css";
 
@@ -79,6 +83,7 @@ function fixture(displayName: string) {
         <AuthorizedNavigation pages={pages} />
         <ThemeSwitch canPersist={false} />
         <div className={styles.actions}>
+          <MetaAdsAlertButton />
           <AccountMenu
             identity="qa.account@example.invalid"
             displayName={displayName}
@@ -96,7 +101,7 @@ function fixture(displayName: string) {
 
 function pointerTargetsReachable(header: HTMLElement) {
   const controls = header.querySelectorAll<HTMLElement>(
-    '[data-navigation-root-control], [aria-label="Aparência da página"] button, [aria-controls="protected-account-menu"]',
+    '[data-navigation-root-control], [aria-label="Aparência da página"] button, [data-meta-ads-alert-button], [aria-controls="protected-account-menu"]',
   );
   return Array.from(controls).every((control) => {
     const box = control.getBoundingClientRect();
