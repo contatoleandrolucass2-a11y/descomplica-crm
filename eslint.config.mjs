@@ -15,6 +15,8 @@ const eslintConfig = defineConfig([
     ".wrangler/**",
     "supabase/.temp/**",
     "next-env.d.ts",
+    "public/descomplica-ads-compact/assets/leaflet/**",
+    "public/descomplica-ads-compact/assets/jspdf/**",
   ]),
 ]);
 

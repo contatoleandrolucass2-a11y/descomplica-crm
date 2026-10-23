@@ -7,7 +7,7 @@ import { PAGE_REGISTRY } from "@/lib/navigation/registry";
 import { buildNavigationGroups, getPrimaryNavigation } from "@/lib/navigation/presentation";
 
 const mocks = vi.hoisted(() => ({
-  enforcePageAccess: vi.fn(),
+  enforcePageAccess: vi.fn().mockResolvedValue({ userId: "qa-user" }),
   getAuthorizedNavigation: vi.fn(() =>
     PAGE_REGISTRY.filter(
       (page) => page.pageKey === "crm.meta_ads" || page.parentKey === "crm.meta_ads",
@@ -100,7 +100,7 @@ describe("dashboard Meta Ads", () => {
     expect(document).not.toContain('aria-label="Aparência"');
     expect(document).not.toContain('id="profile-button"');
     expect(document).not.toContain("<base ");
-    expect(document).toContain('src="/descomplica-ads/app.mjs"');
+    expect(document).toContain('src="/descomplica-ads-compact/live-data.js"');
     expect(document).not.toContain('aria-label="Visões do dashboard Meta Ads"');
     expect(document).not.toContain("data-nav=");
     expect(document).not.toContain('id="alerts-button"');
@@ -109,11 +109,11 @@ describe("dashboard Meta Ads", () => {
 
   it("carrega a fonte oficial sem substituir falhas por demonstracao", async () => {
     const application = await readFile(
-      new URL("../public/descomplica-ads/app.mjs", import.meta.url),
+      new URL("../public/descomplica-ads-compact/live-data.js", import.meta.url),
       "utf8",
     );
-    expect(application).toContain("fetch('/api/meta-ads/data'");
-    expect(application).toContain("sourceKind='api'");
+    expect(application).toContain('fetch("/api/meta-ads/data"');
+    expect(application).toContain('payload.source !== "meta_marketing_api"');
     expect(application).toContain("Nenhum dado de demonstração foi exibido");
     expect(application).toContain("Meta API · somente leitura");
     expect(application).not.toContain("let isDemo=!imported");
@@ -137,14 +137,14 @@ describe("dashboard Meta Ads", () => {
         new URL("../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.tsx", import.meta.url),
         "utf8",
       ),
-      readFile(new URL("../public/descomplica-ads/style.css", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/style.css", import.meta.url), "utf8"),
     ]);
 
     expect(frameSource).toContain('crmTheme === "balanced" ? "medium" : "light"');
     expect(frameSource).toContain('attributeFilter: ["data-theme"]');
-    expect(dashboardStyles).toContain("--bg: #061f35;");
-    expect(dashboardStyles).toContain("--panel: #0a2b47;");
-    expect(dashboardStyles).toContain("--accent: #5ce5f1;");
+    expect(dashboardStyles).toContain("--bg: #0e1d2c;");
+    expect(dashboardStyles).toContain("--card: #162b40;");
+    expect(dashboardStyles).toContain("body[data-theme");
     expect(dashboardStyles).not.toContain("fonts.googleapis.com");
   });
 
@@ -154,8 +154,8 @@ describe("dashboard Meta Ads", () => {
         new URL("../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.tsx", import.meta.url),
         "utf8",
       ),
-      readFile(new URL("../public/descomplica-ads/style.css", import.meta.url), "utf8"),
-      readFile(new URL("../public/descomplica-ads/ui.mjs", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/style.css", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/app.js", import.meta.url), "utf8"),
     ]);
 
     expect(getVisibleFrameViewport({ height: 2400, top: 300 } as DOMRect, 0, 1000)).toEqual({
@@ -169,24 +169,22 @@ describe("dashboard Meta Ads", () => {
     expect(frameSource).toContain(
       'document.addEventListener("scroll", scheduleViewportSync, true)',
     );
-    expect(dashboardStyles).toContain("top: var(--crm-visible-frame-top, 0)");
+    expect(dashboardStyles).toContain("top: var(--crm-visible-frame-top, 0px)");
     expect(dashboardStyles).toContain("height: var(--crm-visible-frame-height, 100dvh)");
     expect(dashboardStyles).toContain("overflow-y: auto");
     expect(frameSource).toContain('event.data?.type !== "descomplica:meta-ads-modal-open"');
     expect(frameSource).toContain("window.addEventListener(OPEN_ALERTS_EVENT, openAlerts)");
-    expect(modalSource).toContain("postMessage({type:'descomplica:meta-ads-modal-open'},'*')");
+    expect(modalSource).toContain('type: "descomplica:meta-ads-modal-open"');
   });
 
   it("leva o estado dos alertas ao sino global e aceita apenas a abertura pedida pelo pai", async () => {
     const application = await readFile(
-      new URL("../public/descomplica-ads/app.mjs", import.meta.url),
+      new URL("../public/descomplica-ads-compact/live-data.js", import.meta.url),
       "utf8",
     );
 
-    expect(application).toContain("type:'descomplica:meta-ads-alert-state'");
-    expect(application).toContain(
-      "event.source===window.parent&&event.data?.type==='descomplica:meta-ads-open-alerts'",
-    );
+    expect(application).toContain('type: "descomplica:meta-ads-alert-state"');
+    expect(application).toContain("event.source === window.parent");
     expect(application).not.toContain("$('#alerts-button').addEventListener");
   });
 

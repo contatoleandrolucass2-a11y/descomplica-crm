@@ -19,20 +19,28 @@ export function getVisibleFrameViewport(
   return { height: Math.max(bottom - top, 0), top };
 }
 
-export type MetaAdsDashboardView = "overview" | "campaigns" | "accounts" | "reports";
+export type MetaAdsDashboardView =
+  | "overview"
+  | "campaigns"
+  | "accounts"
+  | "reports"
+  | "map"
+  | "settings";
 
 export function MetaAdsDashboardFrame({
   document: dashboardDocument,
   initialView,
+  storageScope = "isolated-preview",
 }: {
   document: string;
   initialView: MetaAdsDashboardView;
+  storageScope?: string;
 }) {
   const frameRef = useRef<HTMLIFrameElement>(null);
   const [height, setHeight] = useState(MINIMUM_FRAME_HEIGHT);
   const frameDocument = dashboardDocument.replace(
     "<html ",
-    `<html data-crm-view="${initialView}" `,
+    `<html data-crm-view="${initialView}" data-storage-scope="${encodeURIComponent(storageScope)}" `,
   );
 
   useEffect(() => {
@@ -101,6 +109,8 @@ export function MetaAdsDashboardFrame({
       const crmTheme = document.documentElement.dataset.theme;
       frameDocument.documentElement.dataset.theme =
         crmTheme === "dark" ? "dark" : crmTheme === "balanced" ? "medium" : "light";
+      if (frameDocument.body)
+        frameDocument.body.dataset.theme = frameDocument.documentElement.dataset.theme;
     }
 
     function measure() {
@@ -108,8 +118,7 @@ export function MetaAdsDashboardFrame({
       if (!frameDocument) return;
       const nextHeight = Math.max(
         MINIMUM_FRAME_HEIGHT,
-        frameDocument.documentElement.scrollHeight,
-        frameDocument.body?.scrollHeight ?? 0,
+        Math.ceil(frameDocument.getElementById("main")?.getBoundingClientRect().height ?? 0),
       );
       iframe.style.height = `${nextHeight}px`;
       setHeight(nextHeight);
@@ -155,7 +164,7 @@ export function MetaAdsDashboardFrame({
       observer?.disconnect();
       themeObserver?.disconnect();
     };
-  }, [dashboardDocument, initialView]);
+  }, [dashboardDocument, initialView, storageScope]);
 
   return (
     <section className={styles.frameShell} aria-label="Dashboard Meta Ads">
@@ -167,6 +176,7 @@ export function MetaAdsDashboardFrame({
         style={{ height }}
         title="Descomplica Ads — desempenho de campanhas Meta"
         sandbox="allow-downloads allow-forms allow-modals allow-same-origin allow-scripts"
+        allowFullScreen
       />
     </section>
   );

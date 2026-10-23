@@ -153,6 +153,20 @@ describe("Meta Marketing API read-only client", () => {
     );
   });
 
+  it("distinguishes an empty period from malformed upstream rows", async () => {
+    const empty = vi.fn<typeof fetch>().mockImplementation(async () => json({ data: [] }));
+    await expect(
+      fetchMetaAdsDashboardData(configuration, { fetcher: empty, bypassCache: true }),
+    ).resolves.toMatchObject({ rows: [] });
+    const invalid = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(json({ data: [] }))
+      .mockResolvedValueOnce(json({ data: [{ date_start: "invalid" }] }));
+    await expect(
+      fetchMetaAdsDashboardData(configuration, { fetcher: invalid, bypassCache: true }),
+    ).rejects.toMatchObject({ code: "invalid_data", status: 502 });
+  });
+
   it("probes only the configured account", async () => {
     const fetcher = vi.fn<typeof fetch>().mockResolvedValue(
       json({
