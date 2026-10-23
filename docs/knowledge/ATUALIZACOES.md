@@ -20,6 +20,12 @@
   existente do Associativo; a repeticao isolada manteve o mesmo timeout. Nenhum
   arquivo do simulador foi alterado, pois ele esta fora do escopo deste chat.
   Esta mudanca e somente documental e nao requer deploy do CRM.
+- Na conferencia final de 23/10/2026 00:48 BRT, `origin/main` permanecia em
+  `de07674bf40f6053ccc7da0fff6a0bf178983125`; o health publico respondeu HTTP
+  200, `status=ok`, na versao ainda publicada
+  `db78b3c89b849d62932d3e6871884ace2a440afe`. O PR #312 estava aberto e ainda
+  sem checks reportados no GitHub. Portanto, a regra ja esta ativa na memoria e
+  no Obsidian, mas sua integracao na `main` permanece pendente dos gates.
 
 ## 2026-10-22: modais e alertas globais do Meta Ads
 
