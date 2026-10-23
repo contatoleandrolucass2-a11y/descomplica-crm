@@ -2829,3 +2829,7 @@ dependente da autorização específica aplicável.
   nenhuma dependência ou área externa foi alterada; merge e publicação ficam
   bloqueados até o gate da `main` voltar a aprovar ou receber correção em chat
   próprio.
+- A observação final de `2026-10-23T18:09:47-03:00` confirmou HTTP 200,
+  `status=ok` e versão publicada
+  `74b76c248c67e62b5cfad5e721389f1c81431a43`; portanto, o conteúdo do PR #315
+  ainda não está em produção.
