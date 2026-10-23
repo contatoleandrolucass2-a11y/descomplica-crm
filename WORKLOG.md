@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-23 - Desbloqueio da publicação de Agendamentos
+
+O advisory Linux `GHSA-mrhx-c7xc-m3w5` passou a classificar o Zod anterior como
+alto risco e bloqueou a CI da `main` e do PR #315. A dependência direta e o Zod
+transitivo do `next-devtools-mcp` foram consolidados em `4.6.6`. A reprodução no
+Ubuntu com Node 24.19.0 e pnpm 11.20.0 passou sem vulnerabilidades altas ou
+críticas, e `pnpm devtools:check` confirmou os servidores Next e Chrome.
+Refinamentos explícitos preservam a contagem UTF-16 usada pelos limites de texto
+de previsões e conclusões de rotinas; os 72 testes desses contratos passaram.
+
 ## 2026-10-23 - Ajustes visuais e filtros de Agendamentos
 
 A página `/app/etapas/agendamentos` recebeu uma grade única de 12 indicadores,

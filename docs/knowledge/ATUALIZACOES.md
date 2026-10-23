@@ -2833,3 +2833,15 @@ dependente da autorização específica aplicável.
   `status=ok` e versão publicada
   `74b76c248c67e62b5cfad5e721389f1c81431a43`; portanto, o conteúdo do PR #315
   ainda não está em produção.
+
+## 2026-10-23: correção comprovada do gate de auditoria do PR #315
+
+- A reprodução no Ubuntu com Node `24.19.0` e pnpm `11.20.0` identificou
+  `GHSA-mrhx-c7xc-m3w5`: Zod menor que `4.6.6`, inclusive o `3.25.76` fixado pelo
+  `next-devtools-mcp@0.4.0`. O Windows não reproduzia o advisory.
+- Zod foi atualizado para `4.6.6` e o DevTools passou a reutilizar essa versão.
+  `pnpm audit --audit-level high --json` no Ubuntu terminou com código 0, sem
+  vulnerabilidade alta ou crítica. `pnpm devtools:check` aprovou o protocolo e
+  as ferramentas Next e Chrome. Dois refinamentos explícitos preservaram os
+  limites UTF-16 existentes; 72 testes dos contratos afetados passaram. A
+  publicação segue condicionada aos demais gates e ao coordenador oficial.
