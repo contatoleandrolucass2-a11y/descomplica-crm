@@ -127,7 +127,7 @@ describe("dashboard Meta Ads", () => {
       "utf8",
     );
     expect(application).toContain('status: "active"');
-    expect(application).toContain('["deleted", "Excluídas"]');
+    expect(application).toContain('["archived", "Excluídas/arquivadas (Meta)"]');
     expect(application).toContain("deliveryBadge(c)");
     expect(application).toContain('"ads-filters:v2:"');
   });

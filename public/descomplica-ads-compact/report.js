@@ -22,7 +22,7 @@ async function downloadAdsReport() {
         active: "Ativas",
         paused: "Pausadas",
         deleted: "Excluídas",
-        archived: "Arquivadas",
+        archived: "Excluídas/arquivadas (Meta)",
         unknown: "Status não informado",
       }[state.status],
       list.length + " campanhas",
