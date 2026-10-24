@@ -8,6 +8,9 @@
   configurações versionadas e auditoria com permissões independentes.
 - Cria schema próprio com RLS, grants mínimos, RPCs idempotentes, catálogo de
   páginas e testes de autorização, contratos e operações.
+- Isola o escopo do módulo em workspaces próprios de Lead, com associação
+  explícita de usuários, sem depender do modelo organizacional ainda ausente no
+  banco produtivo legado.
 - Prepara `pg_cron` no banco temporário correto durante o ensaio isolado, para
   restaurar o backup integral sem dispensar a retenção automática de prévias.
 - Inclui o novo menu Lead no contrato exato de navegação e teclado usado pelo

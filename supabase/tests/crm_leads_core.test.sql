@@ -10,6 +10,12 @@ insert into public.crm_organizations (id, organization_key, name, kind)
 values
   ('1ead1000-0000-4000-8000-000000000001','lead-core-test','Lead Core Test','house'),
   ('1ead1000-0000-4000-8000-000000000002','lead-hidden-test','Lead Hidden Test','real_estate');
+insert into public.crm_lead_workspaces (id, workspace_key, name, kind)
+values
+  ('1ead1000-0000-4000-8000-000000000001','lead-core-test','Lead Core Test','house'),
+  ('1ead1000-0000-4000-8000-000000000002','lead-hidden-test','Lead Hidden Test','real_estate');
+insert into public.crm_lead_workspace_members (workspace_id, user_id)
+values ('1ead1000-0000-4000-8000-000000000001','1ead0000-0000-4000-8000-000000000002');
 insert into public.crm_teams (id, organization_id, team_key, name)
 values ('1ead2000-0000-4000-8000-000000000001','1ead1000-0000-4000-8000-000000000001','lead-core-test','Lead Core Test');
 insert into public.crm_people (id, person_key, display_name, auth_user_id)
@@ -35,6 +41,7 @@ select is((select count(*) from public.role_permissions where role_key in ('mast
   'crm.leads.close','crm.leads.archive')),18::bigint,'master and admin receive every action permission');
 select is((select count(*) from public.crm_lead_stages),6::bigint,'canonical funnel stages are seeded');
 select ok((select bool_and(relrowsecurity and relforcerowsecurity) from pg_class where oid in (
+  'public.crm_lead_workspaces'::regclass,'public.crm_lead_workspace_members'::regclass,
   'public.crm_lead_sources'::regclass,'public.crm_lead_channels'::regclass,
   'public.crm_lead_lost_reasons'::regclass,'public.crm_lead_stages'::regclass,
   'public.crm_lead_customers'::regclass,'public.crm_lead_interests'::regclass,
@@ -44,7 +51,7 @@ select ok((select bool_and(relrowsecurity and relforcerowsecurity) from pg_class
   'public.crm_lead_audit_events'::regclass)), 'all lead tables enable and force RLS');
 select ok(not exists (
   select 1 from (values('anon'),('authenticated'),('service_role')) r(name)
-  cross join (values('public.crm_leads'),('public.crm_lead_customers'),('public.crm_lead_messages'),('public.crm_lead_audit_events')) t(name)
+  cross join (values('public.crm_lead_workspaces'),('public.crm_lead_workspace_members'),('public.crm_leads'),('public.crm_lead_customers'),('public.crm_lead_messages'),('public.crm_lead_audit_events')) t(name)
   cross join (values('SELECT'),('INSERT'),('UPDATE'),('DELETE'),('TRUNCATE'),('REFERENCES'),('TRIGGER')) p(name)
   where has_table_privilege(r.name,t.name,p.name)
 ),'API roles have no direct lead table privileges');

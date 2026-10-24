@@ -20,7 +20,7 @@ select role_key,permission_key from (values('master'),('admin')) r(role_key)
 cross join (values('crm.leads.distribution.view'),('crm.leads.reports.view'),('crm.leads.settings.view'),('crm.leads.audit.view'),('crm.leads.import.view'),('crm.leads.distribution.manage'),('crm.leads.distribution.assign'),('crm.leads.reports.export'),('crm.leads.import.manage'),('crm.leads.export'),('crm.leads.settings.manage')) p(permission_key) on conflict do nothing;
 
 create table public.crm_lead_distribution_queues(
- id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_organizations(id) on delete cascade,
+ id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_lead_workspaces(id) on delete cascade,
  key text not null,name text not null check(char_length(btrim(name)) between 1 and 120),algorithm text not null default 'weighted_round_robin' check(algorithm='weighted_round_robin'),
  is_active boolean not null default true,revision bigint not null default 1 check(revision>0),created_at timestamptz not null default now(),updated_at timestamptz not null default now(),unique(organization_id,key));
 create table public.crm_lead_distribution_members(
@@ -28,29 +28,29 @@ create table public.crm_lead_distribution_members(
  capacity integer not null default 20 check(capacity between 1 and 10000),weight integer not null default 1 check(weight between 1 and 1000),is_active boolean not null default true,is_available boolean not null default false,
  checked_in_at timestamptz,checked_out_at timestamptz,assigned_count bigint not null default 0 check(assigned_count>=0),last_assigned_at timestamptz,updated_at timestamptz not null default now(),primary key(queue_id,user_id));
 create table public.crm_lead_distribution_memory(
- organization_id uuid not null references public.crm_organizations(id) on delete cascade,user_id uuid not null references auth.users(id) on delete cascade,
+ organization_id uuid not null references public.crm_lead_workspaces(id) on delete cascade,user_id uuid not null references auth.users(id) on delete cascade,
  assigned_count bigint not null default 0 check(assigned_count>=0),last_assigned_at timestamptz,primary key(organization_id,user_id));
 create table public.crm_lead_distribution_rules(
- id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_organizations(id) on delete cascade,queue_id uuid not null references public.crm_lead_distribution_queues(id) on delete cascade,
+ id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_lead_workspaces(id) on delete cascade,queue_id uuid not null references public.crm_lead_distribution_queues(id) on delete cascade,
  fallback_queue_id uuid references public.crm_lead_distribution_queues(id) on delete set null,name text not null check(char_length(btrim(name)) between 1 and 120),priority integer not null check(priority between 0 and 10000),
  criteria jsonb not null default '{}' check(jsonb_typeof(criteria)='object'),is_active boolean not null default true,created_at timestamptz not null default now(),updated_at timestamptz not null default now(),unique(organization_id,priority));
 create table public.crm_lead_distribution_events(
- id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_organizations(id) on delete restrict,lead_id uuid not null references public.crm_leads(id) on delete cascade,
+ id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_lead_workspaces(id) on delete restrict,lead_id uuid not null references public.crm_leads(id) on delete cascade,
  queue_id uuid references public.crm_lead_distribution_queues(id) on delete set null,rule_id uuid references public.crm_lead_distribution_rules(id) on delete set null,assigned_user_id uuid references auth.users(id) on delete set null,
  actor_id uuid not null references auth.users(id) on delete restrict,outcome text not null check(outcome in('assigned','fallback','unassigned')),explanation jsonb not null check(jsonb_typeof(explanation)='object'),idempotency_key text not null,
  command_digest text not null check(command_digest~'^[0-9a-f]{64}$'),created_at timestamptz not null default now(),unique(organization_id,actor_id,idempotency_key));
 create table public.crm_lead_operation_settings(
- organization_id uuid primary key references public.crm_organizations(id) on delete cascade,document jsonb not null check(jsonb_typeof(document)='object'),revision bigint not null default 1 check(revision>0),
+ organization_id uuid primary key references public.crm_lead_workspaces(id) on delete cascade,document jsonb not null check(jsonb_typeof(document)='object'),revision bigint not null default 1 check(revision>0),
  reason text not null check(char_length(btrim(reason)) between 8 and 500),updated_by uuid not null references auth.users(id) on delete restrict,updated_at timestamptz not null default now());
 create table public.crm_lead_import_batches(
- id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_organizations(id) on delete cascade,file_hash text not null check(file_hash~'^[0-9a-f]{64}$'),mapping jsonb not null check(jsonb_typeof(mapping)='object'),
+ id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_lead_workspaces(id) on delete cascade,file_hash text not null check(file_hash~'^[0-9a-f]{64}$'),mapping jsonb not null check(jsonb_typeof(mapping)='object'),
  plan_hash text not null check(plan_hash~'^[0-9a-f]{64}$'),status text not null check(status in('previewed','applied','expired')),total_rows integer not null check(total_rows between 1 and 5000),valid_rows integer not null,duplicate_rows integer not null,invalid_rows integer not null,
  created_by uuid not null references auth.users(id) on delete restrict,created_at timestamptz not null default now(),expires_at timestamptz not null,applied_by uuid references auth.users(id),applied_at timestamptz,unique(organization_id,file_hash));
 create table public.crm_lead_import_rows(
  batch_id uuid not null references public.crm_lead_import_batches(id) on delete cascade,row_number integer not null check(row_number between 1 and 5000),normalized jsonb not null check(jsonb_typeof(normalized)='object'),
  dedupe_key text not null,row_status text not null check(row_status in('valid','duplicate','invalid')),error_codes text[] not null default '{}',primary key(batch_id,row_number));
 create table public.crm_lead_operations_audit(
- id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_organizations(id) on delete restrict,actor_id uuid not null references auth.users(id) on delete restrict,
+ id uuid primary key default gen_random_uuid(),organization_id uuid not null references public.crm_lead_workspaces(id) on delete restrict,actor_id uuid not null references auth.users(id) on delete restrict,
  action text not null,entity_type text not null,entity_id uuid,revision bigint,reason text,metadata jsonb not null default '{}' check(jsonb_typeof(metadata)='object'),created_at timestamptz not null default now());
 create index crm_lead_distribution_rules_match_idx on public.crm_lead_distribution_rules(organization_id,is_active,priority);
 create index crm_lead_distribution_members_pick_idx on public.crm_lead_distribution_members(queue_id,is_active,is_available,assigned_count,last_assigned_at);
@@ -61,7 +61,7 @@ create or replace function private.crm_lead_ops_actor(p_permission text,p_organi
 declare v_actor uuid:=(select auth.uid());begin
  if v_actor is null then raise exception 'unauthorized: authenticated user required' using errcode='28000';end if;perform public._internal_assert_actor_active(v_actor);
  if not public._internal_has_permission(v_actor,p_permission) then raise exception 'forbidden: missing lead operations permission' using errcode='42501';end if;
- if p_organization_id is null or not private.can_read_organization(p_organization_id) then raise exception 'forbidden: organization unavailable' using errcode='42501';end if;return v_actor;
+ if p_organization_id is null or not private.crm_lead_user_can_access_organization(v_actor,p_organization_id) then raise exception 'forbidden: organization unavailable' using errcode='42501';end if;return v_actor;
 end$$;
 
 create or replace function public.get_crm_lead_report_v1(p_organization_id uuid,p_report text,p_from date,p_to date,p_filters jsonb default '{}') returns jsonb language plpgsql stable security definer set search_path='' as $$
@@ -94,7 +94,7 @@ create or replace function public.get_crm_lead_settings_v1(p_organization_id uui
 declare v_row public.crm_lead_operation_settings%rowtype;begin perform private.crm_lead_ops_actor('crm.leads.settings.view',p_organization_id);select * into v_row from public.crm_lead_operation_settings where organization_id=p_organization_id;
  return jsonb_build_object('revision',coalesce(v_row.revision,0),'document',coalesce(v_row.document,'{"sources":[],"channels":[],"stages":[],"lostReasons":[],"tags":[],"alerts":{},"adjustments":{}}'::jsonb),'updatedAt',v_row.updated_at);end$$;
 create or replace function public.save_crm_lead_settings_v1(p_organization_id uuid,p_expected_revision bigint,p_document jsonb,p_reason text) returns jsonb language plpgsql security definer set search_path='' as $$
-declare v_actor uuid;v_current bigint;v_saved public.crm_lead_operation_settings%rowtype;begin v_actor:=private.crm_lead_ops_actor('crm.leads.settings.manage',p_organization_id);perform 1 from public.crm_organizations where id=p_organization_id for update;
+declare v_actor uuid;v_current bigint;v_saved public.crm_lead_operation_settings%rowtype;begin v_actor:=private.crm_lead_ops_actor('crm.leads.settings.manage',p_organization_id);perform 1 from public.crm_lead_workspaces where id=p_organization_id for update;
  if jsonb_typeof(p_document)<>'object' or jsonb_typeof(p_document->'sources')<>'array' or jsonb_typeof(p_document->'channels')<>'array' or jsonb_typeof(p_document->'stages')<>'array' or jsonb_typeof(p_document->'lostReasons')<>'array' or jsonb_typeof(p_document->'tags')<>'array' or jsonb_typeof(p_document->'alerts')<>'object' or jsonb_typeof(p_document->'adjustments')<>'object' or char_length(btrim(coalesce(p_reason,''))) not between 8 and 500 or jsonb_array_length(p_document->'tags')>200 then raise exception 'invalid_argument: invalid settings' using errcode='22023';end if;
  select coalesce(revision,0) into v_current from public.crm_lead_operation_settings where organization_id=p_organization_id for update;if p_expected_revision<>coalesce(v_current,0) then raise exception 'conflict: settings revision changed' using errcode='40001';end if;
  insert into public.crm_lead_operation_settings(organization_id,document,revision,reason,updated_by) values(p_organization_id,p_document,p_expected_revision+1,btrim(p_reason),v_actor) on conflict(organization_id) do update set document=excluded.document,revision=excluded.revision,reason=excluded.reason,updated_by=excluded.updated_by,updated_at=now() returning * into v_saved;
@@ -103,7 +103,7 @@ declare v_actor uuid;v_current bigint;v_saved public.crm_lead_operation_settings
 
 create or replace function public.preview_crm_lead_import_v1(p_organization_id uuid,p_file_hash text,p_mapping jsonb,p_rows jsonb) returns jsonb language plpgsql security definer set search_path='' as $$
 declare v_actor uuid;v_batch public.crm_lead_import_batches%rowtype;v_row jsonb;v_number integer:=0;v_norm jsonb;v_key text;v_errors text[];v_plan text;v_valid integer;v_dup integer;v_invalid integer;begin
- v_actor:=private.crm_lead_ops_actor('crm.leads.import.manage',p_organization_id);perform 1 from public.crm_organizations where id=p_organization_id for update;
+ v_actor:=private.crm_lead_ops_actor('crm.leads.import.manage',p_organization_id);perform 1 from public.crm_lead_workspaces where id=p_organization_id for update;
  delete from public.crm_lead_import_batches where organization_id=p_organization_id and status='previewed' and expires_at<=now();
  if p_file_hash!~'^[0-9a-f]{64}$' or jsonb_typeof(p_mapping)<>'object' or jsonb_typeof(p_rows)<>'array' or jsonb_array_length(p_rows) not between 1 and 5000 then raise exception 'invalid_argument: invalid import preview' using errcode='22023';end if;
  select * into v_batch from public.crm_lead_import_batches where organization_id=p_organization_id and file_hash=p_file_hash;
@@ -152,14 +152,14 @@ declare v_items jsonb;v_total bigint;begin perform private.crm_lead_ops_actor('c
  return jsonb_build_object('items',v_items,'total',v_total,'limit',p_limit,'offset',p_offset);end$$;
 
 create or replace function public.purge_crm_lead_import_staging_v1(p_organization_id uuid) returns jsonb language plpgsql security definer set search_path='' as $$
-declare v_actor uuid;v_purged integer;begin v_actor:=private.crm_lead_ops_actor('crm.leads.import.manage',p_organization_id);perform 1 from public.crm_organizations where id=p_organization_id for update;delete from public.crm_lead_import_batches where organization_id=p_organization_id and status='previewed' and expires_at<=now();get diagnostics v_purged=row_count;if v_purged>0 then insert into public.crm_lead_operations_audit(organization_id,actor_id,action,entity_type,metadata) values(p_organization_id,v_actor,'import.staging.purged','import',jsonb_build_object('purgedBatches',v_purged));end if;return jsonb_build_object('purgedBatches',v_purged);end$$;
+declare v_actor uuid;v_purged integer;begin v_actor:=private.crm_lead_ops_actor('crm.leads.import.manage',p_organization_id);perform 1 from public.crm_lead_workspaces where id=p_organization_id for update;delete from public.crm_lead_import_batches where organization_id=p_organization_id and status='previewed' and expires_at<=now();get diagnostics v_purged=row_count;if v_purged>0 then insert into public.crm_lead_operations_audit(organization_id,actor_id,action,entity_type,metadata) values(p_organization_id,v_actor,'import.staging.purged','import',jsonb_build_object('purgedBatches',v_purged));end if;return jsonb_build_object('purgedBatches',v_purged);end$$;
 
 create or replace function public.save_crm_lead_distribution_v1(p_organization_id uuid,p_expected_revision bigint,p_document jsonb,p_reason text)
 returns jsonb language plpgsql security definer set search_path='' set lock_timeout='5s' as $$
 declare v_actor uuid;v_current bigint;v_revision bigint;v_q jsonb;v_m jsonb;v_r jsonb;v_qid uuid;v_map jsonb:='{}'::jsonb;begin
  v_actor:=private.crm_lead_ops_actor('crm.leads.distribution.manage',p_organization_id);
  if jsonb_typeof(p_document)<>'object' or jsonb_typeof(p_document->'queues')<>'array' or jsonb_typeof(p_document->'rules')<>'array' or jsonb_array_length(p_document->'queues')>50 or jsonb_array_length(p_document->'rules')>200 or char_length(btrim(coalesce(p_reason,''))) not between 8 and 500 then raise exception 'invalid_argument: invalid distribution document' using errcode='22023';end if;
- perform 1 from public.crm_organizations where id=p_organization_id for update;select coalesce(max(revision),0) into v_current from public.crm_lead_distribution_queues where organization_id=p_organization_id;
+ perform 1 from public.crm_lead_workspaces where id=p_organization_id for update;select coalesce(max(revision),0) into v_current from public.crm_lead_distribution_queues where organization_id=p_organization_id;
  if p_expected_revision<>v_current then raise exception 'conflict: distribution revision changed' using errcode='40001';end if;v_revision:=v_current+1;
  delete from public.crm_lead_distribution_queues where organization_id=p_organization_id;
  for v_q in select value from jsonb_array_elements(p_document->'queues') loop

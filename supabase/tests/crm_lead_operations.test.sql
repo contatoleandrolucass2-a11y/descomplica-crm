@@ -5,6 +5,9 @@ select public.bootstrap_master_user('2ead0000-0000-4000-8000-000000000001');
 insert into public.crm_organizations(id,organization_key,name,kind) values
 ('2ead1000-0000-4000-8000-000000000001','lead-ops-test','Lead Ops Test','house'),
 ('2ead1000-0000-4000-8000-000000000002','lead-ops-second','Lead Ops Second','real_estate');
+insert into public.crm_lead_workspaces(id,workspace_key,name,kind) values
+('2ead1000-0000-4000-8000-000000000001','lead-ops-test','Lead Ops Test','house'),
+('2ead1000-0000-4000-8000-000000000002','lead-ops-second','Lead Ops Second','real_estate');
 
 select is((select count(*) from public.permissions where key in('crm.leads.distribution.view','crm.leads.reports.view','crm.leads.settings.view','crm.leads.audit.view','crm.leads.import.view','crm.leads.distribution.manage','crm.leads.distribution.assign','crm.leads.reports.export','crm.leads.import.manage','crm.leads.export','crm.leads.settings.manage')),11::bigint,'five view and six action permissions exist');
 select is((select count(*) from public.role_permissions where role_key in('master','admin') and permission_key in('crm.leads.distribution.view','crm.leads.reports.view','crm.leads.settings.view','crm.leads.audit.view','crm.leads.import.view','crm.leads.distribution.manage','crm.leads.distribution.assign','crm.leads.reports.export','crm.leads.import.manage','crm.leads.export','crm.leads.settings.manage')),22::bigint,'master and admin inherit operations permissions');
