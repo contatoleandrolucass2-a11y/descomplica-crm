@@ -9,6 +9,7 @@ overrides:
   next-devtools-mcp>@modelcontextprotocol/sdk: 1.32.1
   next-devtools-mcp>zod: 4.6.7
   body-parser@>=2.0.0 <2.4.0: 2.4.0
+  undici@>=7.18.0 <7.30.1: 7.30.1
   '@babel/core@>=7.29.0 <7.29.6': 7.29.6
   browserslist@<=4.28.6: 4.28.7
   brace-expansion@<2: 1.1.21
@@ -2767,8 +2768,8 @@ packages:
   undici-types@7.16.0:
     resolution: {integrity: sha512-Zz+aZWSj8LE6zoxD+xrjh4VfkIG8Ya6LvYkZqtUQGJPZjYl53ypCaUwWqo7eI0x66KBGeRo+mlBEkMSeSZ38Nw==}
 
-  undici@7.30.0:
-    resolution: {integrity: sha512-dkrQXeHSaoamnItlYbmzG0wFYrM0ZwDxCIg0A7aKjTyyhh9svRzCNFEzV+Vm05/yehjCzjDZ31KXfGEjYSztDQ==}
+  undici@7.30.1:
+    resolution: {integrity: sha512-03KrMbjIFDWQR5RNPrSw3bd1r12JpyFQl9/yxjUbJtqkjmllqC5lFjZh6ujeuJCKr8EOQvRW872Oy/az+nLYxg==}
     engines: {node: '>=20.18.1'}
 
   unicorn-magic@0.3.0:
@@ -4996,7 +4997,7 @@ snapshots:
       '@modelcontextprotocol/sdk': 1.32.1(supports-color@7.2.0)(zod@4.6.7)
       find-process: 2.0.0
       pid-port: 2.0.0
-      undici: 7.30.0
+      undici: 7.30.1
       zod: 4.6.7
     transitivePeerDependencies:
       - '@cfworker/json-schema'
@@ -5634,7 +5635,7 @@ snapshots:
 
   undici-types@7.16.0: {}
 
-  undici@7.30.0: {}
+  undici@7.30.1: {}
 
   unicorn-magic@0.3.0: {}
 

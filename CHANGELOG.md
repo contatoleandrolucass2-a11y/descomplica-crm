@@ -3386,3 +3386,7 @@ pendente dos gates completos no SHA final.
 
 - O cenário sem configuração mantém os campos numéricos editáveis e mostra “Aplicar metas” para o perfil autorizado.
 - O modo somente leitura passou a ser uma fixture explícita, preservando o bloqueio de segurança para perfis sem a permissão comercial.
+
+## 2026-10-24 — Dependência de suporte do release
+
+- Atualizado `undici` transitivo do Next DevTools para `7.30.1`, eliminando o advisory alto `GHSA-xjj6-f33q-929c` que bloqueava a publicação já validada de Agendamentos.
