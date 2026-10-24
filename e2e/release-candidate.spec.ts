@@ -620,7 +620,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     ...leadRoutes,
-    ...metaAdsRoutes,
+    metaAdsRoutes[0],
     "/app/simulacao",
     ...managementRoutes,
     "/app/gestao/previsao",
@@ -633,7 +633,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/canal-de-parcerias",
     "/app/repasse",
     ...leadRoutes,
-    ...metaAdsRoutes,
+    metaAdsRoutes[0],
     "/app/simulacao",
     ...managementRoutes,
     "/app/gestao/previsao",
@@ -721,9 +721,9 @@ function expectedPrimaryNavigationRootsForRole(role: Role) {
   if (authorizedRoutes.has("/app/meta-ads")) {
     roots.push({
       name: "Meta Ads",
-      tag: "BUTTON",
-      href: null,
-      controls: "authorized-navigation-crm-meta_ads",
+      tag: "A",
+      href: "/app/meta-ads",
+      controls: null,
     });
   }
   if (authorizedRoutes.has("/app/simulacao")) {
@@ -914,7 +914,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 30 : activeOperationalRoles.has(role) ? 11 : 0,
+      adminRoles.has(role) ? 27 : activeOperationalRoles.has(role) ? 11 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
@@ -1606,7 +1606,7 @@ for (const role of expectedRoles) {
   });
 }
 
-test("Meta Ads keeps its four views inside srcdoc after submenu navigation and reload", async ({
+test("Meta Ads keeps its four views inside srcdoc after sidebar navigation and reload", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -1634,14 +1634,22 @@ test("Meta Ads keeps its four views inside srcdoc after submenu navigation and r
     const frame = page.frameLocator(
       'iframe[title="Descomplica Ads — desempenho de campanhas Meta"]',
     );
-    for (const [route, heading, view] of [
-      ["/app/meta-ads/campanhas", "Análise da campanha", "campaigns"],
-      ["/app/meta-ads/contas-de-anuncios", "Ajustes", "accounts"],
-      ["/app/meta-ads/relatorios", "Relatórios", "reports"],
-      ["/app/meta-ads", "Comparar campanhas", "overview"],
+    for (const [route, heading, view, sidebarLabel] of [
+      ["/app/meta-ads/campanhas", "Análise da campanha", "campaigns", "Campanhas"],
+      ["/app/meta-ads/contas-de-anuncios", "Ajustes", "accounts", null],
+      ["/app/meta-ads/relatorios", "Relatórios", "reports", "Relatórios"],
+      ["/app/meta-ads", "Comparar campanhas", "overview", null],
     ] as const) {
-      await page.getByRole("button", { name: "Meta Ads", exact: true }).click();
-      await page.locator(`#authorized-navigation-crm-meta_ads a[href="${route}"]`).click();
+      if (sidebarLabel) {
+        await page
+          .getByRole("navigation", { name: "Visões do Meta Ads" })
+          .getByRole("link", { name: sidebarLabel, exact: true })
+          .click();
+      } else if (route === "/app/meta-ads") {
+        await page.getByRole("link", { name: "Meta Ads", exact: true }).click();
+      } else {
+        await page.goto(route);
+      }
       await expect(page).toHaveURL(new RegExp(`${route}$`));
       await expect(
         frame.getByRole("heading", { level: 1, name: heading, exact: true }),

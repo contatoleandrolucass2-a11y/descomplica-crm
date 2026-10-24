@@ -19,7 +19,9 @@ export function AuthorizedBreadcrumbs({ pages }: { pages: NavigationItem[] }) {
     pathname === "/app/gestao/rotina" ||
     pathname === "/app/gestao/rotina/" ||
     pathname === "/app/gestao/previsao" ||
-    pathname === "/app/gestao/previsao/"
+    pathname === "/app/gestao/previsao/" ||
+    pathname === "/app/meta-ads" ||
+    pathname.startsWith("/app/meta-ads/")
   ) {
     return null;
   }
