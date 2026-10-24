@@ -9,6 +9,7 @@ overrides:
   body-parser@>=2.0.0 <2.4.0: 2.4.0
   next-devtools-mcp>@modelcontextprotocol/sdk: 1.32.1
   next-devtools-mcp>zod: 4.6.7
+  body-parser@>=2.0.0 <2.4.0: 2.4.0
   '@babel/core@>=7.29.0 <7.29.6': 7.29.6
   browserslist@<=4.28.6: 4.28.7
   brace-expansion@<2: 1.1.21

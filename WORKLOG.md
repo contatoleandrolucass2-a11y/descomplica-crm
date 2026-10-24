@@ -1,13 +1,5 @@
 # Worklog
 
-## 2026-10-23 - Desbloqueio da publicação do Meta Ads
-
-O advisory `GHSA-27r3-jxmh-p828`, divulgado após a primeira validação do PR,
-classificou o `body-parser` transitivo do Next DevTools como vulnerabilidade de
-alto risco. O override substitui somente versões vulneráveis por `2.4.0`.
-`pnpm audit --audit-level high` não encontra vulnerabilidades altas ou críticas,
-e o diagnóstico MCP confirma os servidores Next e Chrome após a atualização.
-
 ## 2026-10-23 - Campanhas excluídas preservadas no Meta Ads
 
 O cliente somente leitura da API Meta passa a solicitar também anúncios
@@ -20,6 +12,12 @@ Testes focados cobrem a consulta do estado `DELETED`, a preservação das métri
 históricas, a agregação isolada das campanhas excluídas e o padrão ativo. O QA
 de navegador inclui uma campanha excluída e comprova filtro, identificação e
 totais históricos antes de retornar à seleção ativa.
+
+## 2026-10-23 - Advisory novo durante a publicação de Agendamentos
+
+Após o merge do PR #315, o registry publicou `GHSA-27r3-jxmh-p828` e a CI do
+`main` bloqueou `body-parser@2.3.0`, transitivo do Next DevTools. O override para
+`2.4.0` remove o risco alto sem modificar código ou comportamento do dashboard.
 
 ## 2026-10-23 - Desbloqueio da publicação de Agendamentos
 
