@@ -246,6 +246,25 @@ try {
   });
   const frame = page.frameLocator("iframe");
   await page.goto(origin + "/app/meta-ads");
+  const sidebar = page.getByRole("complementary", { name: "Navegação lateral Meta Ads" });
+  await expect(sidebar).toBeVisible();
+  assert.equal(Math.round((await sidebar.boundingBox()).width), 190, "Sidebar starts expanded");
+  const sidebarColors = await sidebar.evaluate((element) => {
+    const brand = element.querySelector("div");
+    const ads = brand?.querySelector("strong");
+    return {
+      brand: brand ? getComputedStyle(brand).color : null,
+      ads: ads ? getComputedStyle(ads).color : null,
+    };
+  });
+  assert.equal(sidebarColors.ads, sidebarColors.brand, "Descomplica Ads uses one text color");
+  await page.getByRole("button", { name: "Recolher menu lateral" }).click();
+  await expect(page.getByRole("button", { name: "Expandir menu lateral" })).toBeVisible();
+  await expect.poll(async () => Math.round((await sidebar.boundingBox()).width)).toBe(64);
+  await expect(page.getByRole("link", { name: "Visão macro" })).toBeVisible();
+  await page.getByRole("button", { name: "Expandir menu lateral" }).click();
+  await expect(page.getByRole("button", { name: "Recolher menu lateral" })).toBeVisible();
+  await expect.poll(async () => Math.round((await sidebar.boundingBox()).width)).toBe(190);
   await expect(frame.getByRole("heading", { name: "Comparar campanhas" })).toBeVisible();
   await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
   await expect(frame.locator('[data-kpi="leads"] strong')).toHaveText("12");
