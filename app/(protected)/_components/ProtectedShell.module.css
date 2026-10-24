@@ -844,7 +844,23 @@
 
 @media (min-width: 1181px) and (max-width: 1320px) {
   .topbarInner {
-    gap: 12px;
+    gap: 6px;
+  }
+
+  .navigationList {
+    gap: 0;
+  }
+
+  .navigationLink,
+  .navigationTrigger {
+    gap: 4px;
+    padding-inline: 3px;
+    font-size: 11px;
+  }
+
+  .brandMark {
+    width: 128px;
+    flex-basis: 128px;
   }
 
   .navigationIcon {

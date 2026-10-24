@@ -36,6 +36,13 @@ arquivadas ainda enumerava os sete itens anteriores da navegação. O baseline e
 as sequências de teclado agora incluem `Lead` entre Dashboard e Meta Ads, sem
 alterar conteúdo ou comportamento dos simuladores arquivados.
 
+A matriz completa seguinte aprovou todos os tamanhos compactos e o desktop de
+1440 px, mas encontrou contenção insuficiente exatamente em 1181 px após o
+oitavo destino. A faixa desktop estreita agora reduz apenas espaços, tipografia
+da navegação e largura visual da marca; os controles conservam altura mínima de
+44 px, nomes acessíveis e ordem de teclado. Os 49 contratos focados de
+navegação, shell e candidato de release passaram antes da nova CI.
+
 ## 2026-10-24 - Estrutura protegida do menu Lead
 
 O primeiro incremento implementa `/app/leads` como raiz da navegação e cria

@@ -12,6 +12,9 @@
   restaurar o backup integral sem dispensar a retenção automática de prévias.
 - Inclui o novo menu Lead no contrato exato de navegação e teclado usado pelo
   QA visual das páginas protegidas arquivadas.
+- Compacta somente a faixa desktop estreita de 1181 a 1320 px para manter os
+  oito destinos autorizados, os alvos de 44 px e os anéis de foco dentro do
+  cabeçalho.
 - Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
   opcionais fora deste corte.
 
