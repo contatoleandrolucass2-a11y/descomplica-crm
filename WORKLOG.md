@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-10-24 - Detalhamento dos funis do Dashboard Geral
+
+As etapas dos três grupos de funis passaram a abrir um único diálogo de
+detalhamento. O recorte reutiliza os fatos diários autorizados do snapshot
+Salesforce, aplica os filtros globais antes da fronteira cliente e monta
+dinamicamente apenas as colunas dimensionais disponíveis. Pastas aprovadas usa
+o mesmo relatório de Pastas com a contagem certificada de aprovação.
+
+O diálogo permite refinar canal, gerente, responsável, empresa e empreendimento,
+pagina 50 combinações por vez e soma a quantidade do recorte. Metas, esperado
+até hoje e médias informam que são cálculos; nesses cards, a tabela é apresentada
+como realizado de referência. O cliente não recebe identificadores de registros,
+nomes de conta/oportunidade, valores individuais ou outras colunas descartadas
+pelo contrato seguro do snapshot.
+
+No navegador automatizado, o fluxo passou em 320, 390 e 1440 px nos temas
+claro, médio e escuro, incluindo abertura por clique, filtro, Escape, clique no
+fundo, restauração de foco e ausência de rolagem horizontal da página. Lint,
+typecheck e build passaram; 107 testes focados passaram. O Vitest integral
+aprovou 4.181 testes, ignorou 108 e teve cinco timeouts externos ao dashboard;
+os 50 casos desses arquivos passaram isolados com janela ampliada. As suítes
+Node e release repetiram falhas Windows/POSIX preexistentes do Meta Ads já
+documentadas e, por isso, a CI Linux permanece o gate autoritativo da entrega.
+
 ## 2026-10-24 - Núcleo operacional do CRM de leads
 
 O menu `Lead` passou do primeiro estado vazio para um núcleo operacional com

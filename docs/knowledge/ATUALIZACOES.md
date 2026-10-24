@@ -1,5 +1,50 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-24: detalhamento seguro e responsivo dos funis implementado
+
+- Implementado em `codex/dashboard-stage-details`: cada etapa autorizada dos 13
+  funis abre um diálogo com período, filtros por coluna, soma do recorte e
+  paginação visual de 50 combinações. No celular, as linhas viram cartões e não
+  exigem rolagem lateral da página.
+- O detalhamento reutiliza os fatos agregados do snapshot autorizado e preserva
+  a allowlist do coletor. Não expõe IDs, contas, nomes de oportunidade/pasta,
+  valores individuais ou registros de clientes. Colunas adicionais descartadas
+  pelo contrato atual não são apresentadas como se estivessem disponíveis.
+- Canal, gerente, responsável, empresa e empreendimento só entram quando
+  disponíveis após filtros e redações do servidor. A permissão da página da
+  etapa controla o botão; `approved-folders` compartilha a permissão e a fonte
+  de Pastas. Meta mensal, esperado até hoje e médias explicam que a tabela mostra
+  o realizado usado como referência, não linhas constituintes da meta.
+- Evidência no Node 24.19.0: lint, typecheck e build passaram. Os 107 testes
+  focados passaram. A matriz Playwright passou em 320, 390 e 1440 px nos temas
+  `light`, `balanced` e `dark`, incluindo clique/teclado, filtros, Escape,
+  backdrop, restauração de foco e contenção horizontal.
+- O Vitest integral aprovou 4.181 casos, ignorou 108 e teve cinco timeouts em
+  testes antigos; os três arquivos envolvidos aprovaram 50 casos e ignoraram um
+  quando repetidos isoladamente com 120 s. As suítes Node/release repetiram
+  falhas Windows/POSIX preexistentes do Meta Ads descritas no Worklog. Nenhum
+  arquivo Meta Ads foi alterado. A CI Linux deve decidir o gate antes de merge e
+  publicação.
+
+## 2026-10-24: abertura do detalhamento dinamico dos funis
+
+- Escopo solicitado: ao selecionar uma etapa dos funis do Dashboard Geral,
+  abrir um pop-up que respeite os filtros ativos e apresente dinamicamente as
+  colunas exportadas pelo relatorio Salesforce correspondente, sem fixar uma
+  grade unica para todas as etapas.
+- Abertura em 24/10/2026 19:32 BRT: Git comum confirmado; branch
+  `codex/dashboard-stage-details` criada limpa a partir de `origin/main` no SHA
+  `b8aca02928351f0d18f3fee4cb40f30c9c007ac5`. O checkout antigo continha uma
+  alteracao documental alheia e foi preservado sem modificacao.
+- O health publico respondeu HTTP 200, `status=ok`, versao
+  `bc227b62d39628a447d8637d5f8b3503c9e3cbcf`; portanto, producao e `main`
+  permanecem em estados distintos. O conector GitHub nao retornou workflow run
+  ou status associado ao SHA exato da `main`; CI atual fica indisponivel nesta
+  abertura e nao sera presumida como aprovada.
+- Nenhum dado remoto, coleta Salesforce, schema ou permissao foi alterado. A
+  implementacao deve reutilizar o snapshot autorizado, preservar os dois canais
+  definidos e evitar persistir registros ou identidades reais em testes.
+
 ## 2026-10-24: continuidade autorizada ate concluir o modulo Lead
 
 - Pedido direto do usuario: continuar a implementacao e somente encerrar quando

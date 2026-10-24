@@ -25,6 +25,16 @@ export const DASHBOARD_FILTER_KEYS = ["channel", "manager", "owner", "company"] 
 export type DashboardFilterKey = (typeof DASHBOARD_FILTER_KEYS)[number];
 export type DashboardFilters = Record<DashboardFilterKey, string[]>;
 export type DashboardFilterOptions = Record<DashboardFilterKey, string[]>;
+export interface DashboardStageDetailRow {
+  stage: DashboardFunnelKey;
+  date: string;
+  channel: string;
+  manager: string;
+  owner: string;
+  company: string;
+  development: string;
+  quantity: number;
+}
 export const emptyDashboardFilters = (): DashboardFilters => ({
   channel: [],
   manager: [],
@@ -290,6 +300,43 @@ export function analyzeDashboard(
       .slice(0, 5)
       .map(([name, total], index) => ({ name, total, rank: index + 1 })),
   };
+}
+
+export function buildDashboardStageDetailRows(
+  slice: DashboardAnalysisSlice,
+  filters: DashboardFilters,
+  authorizedStages: ReadonlySet<DashboardFunnelKey>,
+): DashboardStageDetailRow[] {
+  const { dimensions } = slice;
+  const valueFor = (fact: DashboardAnalysisFact, key: DashboardFilterKey) => {
+    if (key === "channel") return DASHBOARD_CHANNELS[fact[5]] ?? "";
+    if (key === "manager") return dimensions.managers[fact[2]] ?? "";
+    if (key === "owner") return dimensions.owners[fact[3]] ?? "";
+    return dimensions.companies[fact[4]] ?? "";
+  };
+  const matches = (fact: DashboardAnalysisFact) =>
+    DASHBOARD_FILTER_KEYS.every(
+      (key) => filters[key].length === 0 || filters[key].includes(valueFor(fact, key)),
+    );
+  const rows: DashboardStageDetailRow[] = [];
+  for (const fact of slice.facts) {
+    if (!matches(fact)) continue;
+    const stage = ANALYSIS_STAGE_KEYS[fact[0]];
+    if (!stage || !authorizedStages.has(stage)) continue;
+    const common = {
+      date: fact[1],
+      channel: DASHBOARD_CHANNELS[fact[5]] ?? "",
+      manager: dimensions.managers[fact[2]] ?? "",
+      owner: dimensions.owners[fact[3]] ?? "",
+      company: dimensions.companies[fact[4]] ?? "",
+      development: dimensions.developments[fact[6]] ?? "",
+    };
+    rows.push({ stage, ...common, quantity: fact[7] });
+    if (stage === "folders" && fact[9] > 0 && authorizedStages.has("approved-folders")) {
+      rows.push({ stage: "approved-folders", ...common, quantity: fact[9] });
+    }
+  }
+  return rows;
 }
 
 export type DashboardAnalysisResult = ReturnType<typeof analyzeDashboard>;

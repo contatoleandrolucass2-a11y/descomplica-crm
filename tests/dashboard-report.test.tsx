@@ -381,6 +381,32 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
 
   it("preserva os blocos completos com snapshot disponivel", () => structuralContract(render()));
 
+  it("offers one authorized dialog trigger per funnel stage and hides unauthorized stages", () => {
+    const root = render({
+      authorizedStagePaths: ["/app/etapas/vendas"],
+      stageDetails: [
+        {
+          stage: "sales",
+          date: "2026-10-13",
+          channel: DASHBOARD_CHANNELS[1],
+          manager: "Gerente sintético",
+          owner: "Corretor sintético",
+          company: "Empresa sintética",
+          development: "Empreendimento sintético",
+          quantity: 1,
+        },
+      ],
+    });
+    const triggers = elements(root, "button").filter(
+      (button) => attribute(button, "aria-label")?.startsWith("Abrir detalhes de "),
+    );
+    expect(triggers).toHaveLength(13);
+    expect(triggers.every((button) => attribute(button, "aria-label")?.includes("Vendas"))).toBe(
+      true,
+    );
+    expect(elements(root, "dialog")).toHaveLength(4);
+  });
+
   it("renders every Imob funnel with four stages and the active goal multiplied by seven", () => {
     const root = render({
       analysis: analysisFixture(),
