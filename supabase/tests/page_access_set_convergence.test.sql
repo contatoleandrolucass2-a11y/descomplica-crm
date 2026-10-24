@@ -4,8 +4,8 @@ select plan(12);
 
 select is(
   (select count(*) from public.app_pages),
-  32::bigint,
-  'the page catalog contains exactly the thirty-two approved entries'
+  41::bigint,
+  'the page catalog contains exactly the forty-one approved entries'
 );
 
 select is(
@@ -22,6 +22,15 @@ select is(
     'admin.pages|/admin/paginas|pages.manage|true',
     'admin.users|/admin/usuarios|users.view|true',
     'crm.dashboard|/app|crm.dashboard.view|true',
+    'crm.leads|/app/leads|crm.leads.view|true',
+    'crm.leads.activities|/app/leads/atividades|crm.leads.activities.view|true',
+    'crm.leads.audit|/app/leads/auditoria|crm.leads.audit.view|true',
+    'crm.leads.distribution|/app/leads/distribuicao|crm.leads.distribution.view|true',
+    'crm.leads.import|/app/leads/importacao|crm.leads.import.view|true',
+    'crm.leads.list|/app/leads/lista|crm.leads.list.view|true',
+    'crm.leads.pipeline|/app/leads/funil|crm.leads.pipeline.view|true',
+    'crm.leads.reports|/app/leads/relatorios|crm.leads.reports.view|true',
+    'crm.leads.settings|/app/leads/configuracoes|crm.leads.settings.view|true',
     'crm.management|/app/gestao|crm.management.view|true',
     'crm.management.forecast|/app/gestao/previsao|crm.management.forecast.view|true',
     'crm.management.routine|/app/gestao/rotina|crm.management.routine.view|true',
@@ -90,6 +99,15 @@ select is(
     'admin.pages',
     'admin.users',
     'crm.dashboard',
+    'crm.leads',
+    'crm.leads.activities',
+    'crm.leads.audit',
+    'crm.leads.distribution',
+    'crm.leads.import',
+    'crm.leads.list',
+    'crm.leads.pipeline',
+    'crm.leads.reports',
+    'crm.leads.settings',
     'crm.management',
     'crm.management.forecast',
     'crm.management.routine',
@@ -119,7 +137,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Master resolves the exact thirty-two-page catalog set'
+  'Master resolves the exact forty-one-page catalog set'
 );
 
 select is(
@@ -143,6 +161,15 @@ select is(
     'admin.pages',
     'admin.users',
     'crm.dashboard',
+    'crm.leads',
+    'crm.leads.activities',
+    'crm.leads.audit',
+    'crm.leads.distribution',
+    'crm.leads.import',
+    'crm.leads.list',
+    'crm.leads.pipeline',
+    'crm.leads.reports',
+    'crm.leads.settings',
     'crm.management',
     'crm.management.forecast',
     'crm.management.routine',
@@ -172,7 +199,7 @@ select is(
     'crm.stage.sales',
     'crm.stage.visits'
   ]::text[],
-  'Admin retains the exact thirty-two-page inherited set including Meta Ads, partnerships and simulators'
+  'Admin retains the exact forty-one-page inherited set including Lead, Meta Ads, partnerships and simulators'
 );
 
 select is(

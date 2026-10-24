@@ -1,5 +1,39 @@
 # Changelog
 
+## 2026-10-24 - Núcleo operacional completo do menu Lead
+
+- Implementa cadastro, busca, filtros, detalhe, histórico, atividades,
+  etiquetas, favoritos, encaminhamento, funil e encerramento de leads.
+- Adiciona distribuição por filas e regras, relatórios, importação e exportação,
+  configurações versionadas e auditoria com permissões independentes.
+- Cria schema próprio com RLS, grants mínimos, RPCs idempotentes, catálogo de
+  páginas e testes de autorização, contratos e operações.
+- Prepara `pg_cron` no banco temporário correto durante o ensaio isolado, para
+  restaurar o backup integral sem dispensar a retenção automática de prévias.
+- Inclui o novo menu Lead no contrato exato de navegação e teclado usado pelo
+  QA visual das páginas protegidas arquivadas.
+- Compacta somente a faixa desktop estreita de 1181 a 1320 px para manter os
+  oito destinos autorizados, os alvos de 44 px e os anéis de foco dentro do
+  cabeçalho.
+- Atualiza as 19 referências autenticadas cuja única diferença aprovada é o
+  cabeçalho com o novo oitavo destino, sem alterar limiares de comparação.
+- Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
+  opcionais fora deste corte.
+
+## 2026-10-24 - Primeiro incremento do menu Lead
+
+- Adiciona o menu raiz `Lead` e as áreas Lista de leads, Atividades e Funil.
+- Protege as quatro rotas com permissões independentes e catálogo versionado.
+- Apresenta estados vazios explícitos enquanto a fonte oficial não estiver
+  configurada, sem contatos, métricas ou etapas fictícias.
+
+## 2026-10-24 - Referencia funcional do C2S
+
+- Documenta o inventario do C2S que orientara o futuro menu `Lead`.
+- Separa Gestor de Leads, CRM Imob, C2Sgo, Vetra e modulos opcionais.
+- Registra fluxos, entidades, API, autorizacao, privacidade, arquitetura e
+  pendencias sem iniciar a implementacao.
+
 ## 2026-10-24 - Agendamentos publicado
 
 - Publica o layout compacto, os filtros completos e as métricas dinâmicas de

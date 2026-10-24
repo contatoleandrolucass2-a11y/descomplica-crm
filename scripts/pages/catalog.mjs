@@ -164,10 +164,13 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
       ) {
         await writeFile(path.join(result.directory, result.latest), result.sql);
       } else {
-        execFileSync("pnpm", ["exec", "supabase", "migration", "new", "sync_page_catalog"], {
-          cwd: root,
-          stdio: "inherit",
-        });
+        const pnpmCli = process.env.npm_execpath;
+        if (!pnpmCli) throw new Error("pnpm execution path is unavailable.");
+        execFileSync(
+          process.execPath,
+          [pnpmCli, "exec", "supabase", "migration", "new", "sync_page_catalog"],
+          { cwd: root, stdio: "inherit" },
+        );
         const latest = (await readdir(result.directory))
           .filter((name) => name.endsWith("_sync_page_catalog.sql"))
           .sort()

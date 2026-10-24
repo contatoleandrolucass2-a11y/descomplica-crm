@@ -1,5 +1,91 @@
 # Worklog
 
+## 2026-10-24 - Núcleo operacional do CRM de leads
+
+O menu `Lead` passou do primeiro estado vazio para um núcleo operacional com
+nove páginas protegidas: hub, lista, atividades, funil, distribuição,
+relatórios, importação, configurações e auditoria. A exportação é servida por
+rota autenticada própria. O banco do DESCOMPLICA-CRM é a fonte autoritativa; não
+há sincronização ou dependência de dados do C2S.
+
+As migrations criam o domínio normalizado de leads, histórico, atividades,
+mensagens internas, etiquetas, etapas, filas, regras, membros, presença,
+memória, importações, configurações e auditoria. As operações sensíveis usam
+RPCs autorizadas e idempotentes, RLS forçada e grants mínimos. Distribuição
+considera regras, prioridade, peso, capacidade, presença, memória do cliente e
+fallback. Importações CSV têm limite, prévia temporária, hash e deduplicação;
+exportações neutralizam fórmulas de planilha.
+
+A revisão independente de segurança confirmou as correções de isolamento por
+organização, leitura mínima por permissão, retenção do staging e idempotência de
+criação, alteração, mensagens, atividades e distribuição. Os testes Vitest
+aprovaram 4.180 casos e ignoraram 107; lint, typecheck, build, catálogo de 41
+páginas, inventário de 76 rotas e Gitleaks passaram. A suíte Node mantém três
+falhas Windows preexistentes do Meta Ads, e `test:release` mantém onze falhas do
+mesmo host por arquivo sintético ausente; ambos são externos ao menu Lead. O
+pgTAP será comprovado pela CI Linux porque este host não possui Supabase local.
+
+Na CI, as 83 migrations e os 2.238 testes pgTAP concluíram. O primeiro ensaio
+de restauração revelou que `pg_cron` só pode ser instalado no banco definido
+por `cron.database_name`; o alvo descartável agora configura esse banco,
+reinicia apenas o contêiner isolado, aguarda prontidão e pré-instala a extensão
+antes do `pg_restore`. O dump e a comparação canônica continuam integrais.
+
+O candidato visual seguinte revelou que o contrato exato das páginas
+arquivadas ainda enumerava os sete itens anteriores da navegação. O baseline e
+as sequências de teclado agora incluem `Lead` entre Dashboard e Meta Ads, sem
+alterar conteúdo ou comportamento dos simuladores arquivados.
+
+A matriz completa seguinte aprovou todos os tamanhos compactos e o desktop de
+1440 px, mas encontrou contenção insuficiente exatamente em 1181 px após o
+oitavo destino. A faixa desktop estreita agora reduz apenas espaços, tipografia
+da navegação e largura visual da marca; os controles conservam altura mínima de
+44 px, nomes acessíveis e ordem de teclado. Os 49 contratos focados de
+navegação, shell e candidato de release passaram antes da nova CI.
+
+O candidato subsequente aprovou integralmente os contratos funcionais,
+acessibilidade, teclado, zoom e as 40 combinações da navegação arquivada. O gate
+visual permaneceu vermelho porque 19 referências ainda continham o cabeçalho
+anterior com sete destinos; os desvios ficaram entre 1,005% e 1,471%. Foram
+promovidas somente essas imagens a partir do artefato autenticado do próprio
+SHA, mantendo o limiar de 1%, os demais baselines e todas as verificações.
+
+## 2026-10-24 - Estrutura protegida do menu Lead
+
+O primeiro incremento implementa `/app/leads` como raiz da navegação e cria
+Lista de leads, Atividades e Funil como páginas filhas. Cada destino possui
+permissão e guard próprios; a migration gerada concede as chaves novas somente
+a Admin e Master. O hub mostra apenas áreas autorizadas.
+
+Ainda não existe fonte operacional definida. Por isso, busca, filtros e ações
+permanecem desabilitados e a interface informa indisponibilidade, sem dados de
+demonstração, contagens zeradas ou etapas inventadas. Integração, banco,
+cadastro, distribuição, WhatsApp e mutações permanecem fora deste incremento.
+
+Lint e typecheck passaram; o build gerou as 65 rotas, incluindo as quatro novas.
+O Vitest aprovou 4.139 testes e ignorou 107; os 127 contratos focados do catálogo
+e os quatro testes da interface passaram. A suíte Node repetiu as três falhas
+Windows preexistentes do Meta Ads. `test:release` também ficou bloqueado por 11
+casos do host Meta Ads que não encontram o arquivo sintético no Windows. Esses
+arquivos e contratos externos ao menu Lead não foram alterados para liberar o
+gate.
+
+Durante o encerramento, `origin/main` avançou de `b403071c` para `9c0ab96c` com
+uma correção concorrente de dependência. O trabalho Lead permanece baseado no
+SHA anterior e não foi mesclado, commitado ou publicado enquanto os gates locais
+estão falhos e a CI da nova `main` ainda não concluiu o gate final.
+
+## 2026-10-24 - Descoberta do futuro menu Lead
+
+Foi concluido o levantamento funcional do C2S antes de qualquer implementacao.
+A pesquisa combinou fontes oficiais publicas, documentacao da API e navegacao
+autenticada somente leitura. O inventario cobre jornada do lead, funil,
+distribuicao, atendimento, relatorios, administracao, dados, integracoes,
+autorizacao e limites de privacidade. Nenhuma credencial ou dado pessoal foi
+persistido e o menu `Lead` ainda nao foi criado. Lint, tipos, build, catalogos e
+Gitleaks passaram. A suite integral ficou bloqueada por tres testes POSIX do
+Meta Ads no Windows, fora do escopo; a CI atual de `main` tambem estava falha.
+
 ## 2026-10-24 - Publicação final dos ajustes de Agendamentos
 
 O PR #315 integrou os ajustes funcionais exclusivos de

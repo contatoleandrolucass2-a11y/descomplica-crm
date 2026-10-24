@@ -73,12 +73,13 @@ function getManagementGoals(pages: NavigationItem[]): NavigationItem | undefined
 
 const ROOT_NAVIGATION_ORDER = new Map([
   ["/app", 10],
-  ["/app/meta-ads", 15],
-  ["/app/simulacao", 20],
-  ["/app/ranking", 30],
-  ["/app/canal-de-parcerias", 40],
-  ["/app/gestao", 50],
-  [ADMIN_ROOT_PATH, 60],
+  ["/app/leads", 15],
+  ["/app/meta-ads", 20],
+  ["/app/simulacao", 30],
+  ["/app/ranking", 40],
+  ["/app/canal-de-parcerias", 50],
+  ["/app/gestao", 60],
+  [ADMIN_ROOT_PATH, 70],
 ]);
 
 function comparePages(left: NavigationItem, right: NavigationItem) {

@@ -1,5 +1,105 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-24: continuidade autorizada ate concluir o modulo Lead
+
+- Pedido direto do usuario: continuar a implementacao e somente encerrar quando
+  o modulo Lead estiver integralmente concluido. A autorizacao cobre a replica
+  funcional estudada, mantendo os limites de seguranca, privacidade, dados
+  remotos, publicacao e integracoes ja registrados.
+- Retomada em 24/10/2026 02:53 BRT: a branch
+  `codex/lead-c2s-discovery` permanece no SHA
+  `b403071c1b749476f638bd6a36dcaedfcce033be`, com o primeiro incremento local
+  nao commitado. `origin/main` esta em
+  `9c0ab96c35d03c278860da4bb814f21420c3febf`.
+- Na CI `40065913388` da `main`, `validate`, `promotable-image` e
+  `isolated-restore` continuam aprovados e `release-gates` segue em andamento.
+  O health publico respondeu HTTP 200, `status=ok`, versao
+  `74b76c248c67e62b5cfad5e721389f1c81431a43`; portanto, a versao publicada
+  permanece distinta da branch local e da `main`.
+
+## 2026-10-24: primeiro incremento protegido do menu Lead
+
+- Escopo implementado: menu raiz `/app/leads`, hub e filhos
+  `/app/leads/lista`, `/app/leads/atividades` e `/app/leads/funil`.
+- As quatro páginas possuem chaves `crm.leads.*`, permissões independentes,
+  guards de servidor derivados do registro e concessão inicial somente a Admin
+  e Master. O catálogo versionado passou de 32 para 36 páginas na migration
+  `20261024053147_sync_page_catalog.sql`; preferências e exceções existentes
+  permanecem preservadas pelo gerador oficial.
+- A interface reutiliza os componentes e temas do CRM. Enquanto a fonte oficial
+  não for definida, exibe `Fonte não configurada`, mantém busca, filtros e ações
+  desabilitados e não apresenta leads, valores, zeros ou etapas fictícias.
+- Limites mantidos: nenhum banco de leads, RLS, integração C2S, token, webhook,
+  cadastro, edição, distribuição, importação, exportação, WhatsApp ou mutação
+  remota foi criado. Esses itens dependem de incrementos próprios.
+- Evidência local no Node 24.19.0 e pnpm 11.20.0: lint sem erros e com os 32
+  avisos preexistentes do protótipo Meta Ads; typecheck, build de 65 rotas,
+  `pages:check` (36 páginas), `resources:check` (10 áreas/70 rotas), Gitleaks e
+  `git diff --check` passaram. O Vitest integral aprovou 4.139 testes e ignorou
+  107; a repetição isolada do timeout do Next DevTools aprovou 24/24.
+- O comando `pnpm test` não conclui verde no Windows: a etapa Node aprovou 1.599,
+  ignorou 19 e repetiu três falhas preexistentes de ACL/perfil POSIX do Meta Ads.
+  `pnpm test:release` também falhou em 11 de 12 casos do host Meta Ads por
+  ausência de arquivo sintético. Nenhum arquivo Meta Ads foi alterado, pois é
+  área externa ao pedido. Esses gates impedem PR, merge e publicação.
+- Encerramento em 24/10/2026 02:49 BRT: `origin/main` avançou externamente para
+  `9c0ab96c35d03c278860da4bb814f21420c3febf` (PR #322, correção do `undici`),
+  enquanto a branch Lead permanece baseada em
+  `b403071c1b749476f638bd6a36dcaedfcce033be`. Na CI `40065913388` da nova
+  `main`, `validate`, `promotable-image` e `isolated-restore` estavam aprovados;
+  `release-gates` seguia em andamento. O health público respondeu HTTP 200,
+  `status=ok`, versão `74b76c248c67e62b5cfad5e721389f1c81431a43`, que não
+  corresponde ao checkout nem à `main` atual. A divergência foi preservada e a
+  entrega não foi mesclada ou publicada.
+
+## 2026-10-24: abertura do levantamento do CRM C2S
+
+- Escopo solicitado: estudar o Contact2Sale/C2S e a conta fornecida pelo usuario
+  antes de iniciar qualquer implementacao do novo menu `Lead`. A credencial
+  recebida nao foi transcrita nem persistida; telas e dados autenticados serao
+  tratados como fonte de conhecimento, sem exportar leads ou dados pessoais.
+- Em 24/10/2026 02:05 BRT, o checkout estava limpo, em `HEAD` destacado no SHA
+  `b403071c1b749476f638bd6a36dcaedfcce033be`, igual a `origin/main` depois de
+  `git fetch origin --prune`. O GitHub confirmou `main` protegida no mesmo SHA.
+- A CI do `main` no run `40061774780` terminou com falha no job `validate`, etapa
+  `Audit high and critical vulnerabilities`; `promotable-image`,
+  `isolated-restore` e `release-gates` foram ignorados. Esta falha preexistente
+  nao sera corrigida neste levantamento, pois esta fora do escopo do chat.
+- O health publico `https://crm.descomplicapro.com.br/api/health` respondeu HTTP
+  200, `status=ok`, versao
+  `74b76c248c67e62b5cfad5e721389f1c81431a43`. A versao publicada diverge do
+  `main` atual, portanto o SHA local/integrado nao esta comprovado como publicado.
+- Fontes: Git remoto e conector GitHub em 24/10/2026; health observacional sem
+  autenticacao em 24/10/2026 02:05 BRT. O CLI `gh` estava indisponivel neste
+  host, mas a consulta equivalente de leitura pelo conector GitHub funcionou.
+- O levantamento foi concluido antes da implementacao e registrado em
+  `docs/audits/c2s-leads-discovery-2026-10-24.md`. A conta autenticada confirmou
+  navegacao, cadastro e filtros de leads, funil Kanban/analise/consultores,
+  filas com auditoria/captacao/check-in, relatorios, administracao e modulos
+  opcionais. Fontes publicas oficiais completaram modelo de dados, API,
+  distribuicao, webhooks e limites de LGPD.
+- A pesquisa preservou a fronteira entre Gestor de Leads, CRM Imob, C2Sgo,
+  Vetra e recursos contratados. Nenhuma credencial, token, lead, proposta,
+  contato de cliente ou identidade de colaborador foi persistida. Nenhuma
+  mutacao remota foi executada e o menu `Lead` ainda nao foi criado.
+- Pendencias para iniciar codigo: aprovar o conjunto do primeiro incremento,
+  definir fonte autoritativa, permissoes, canais, deduplicacao, retencao e
+  auditoria. O dashboard novo permaneceu em carregamento na sessao observada e
+  nao foi usado como evidencia funcional.
+- Validacao no Node 24.19.0 e pnpm 11.20.0: `lint` passou com 32 avisos
+  preexistentes no prototipo Meta Ads; `typecheck`, `build`, `pages:check`,
+  `resources:check`, `security:secrets` e `git diff --check` passaram. O Vitest
+  aprovou 4.131 testes e ignorou 107. A suite Node aprovou 1.599, ignorou 19 e
+  falhou em tres testes de permissoes POSIX do Meta Ads no Windows, fora do
+  escopo: dois do destino privado de status e um do diretorio de perfil.
+- Encerramento em 24/10/2026 02:19 BRT: branch local
+  `codex/lead-c2s-discovery`, ainda sem commit, baseada no SHA
+  `b403071c1b749476f638bd6a36dcaedfcce033be`, igual a `origin/main`. A CI
+  `40061774780` desse SHA continuava falha e o health permaneceu HTTP 200,
+  `status=ok`, versao `74b76c248c67e62b5cfad5e721389f1c81431a43`.
+  Publicacao documental bloqueada pelos gates falhos; nenhuma correcao fora do
+  escopo, PR, merge, deploy ou reinicio foi executado.
+
 ## 2026-10-24: publicação final dos ajustes exclusivos de Agendamentos
 
 - O PR #315 integrou somente os ajustes funcionais pedidos para
@@ -2887,3 +2987,27 @@ dependente da autorização específica aplicável.
   terminou sem severidade alta ou crítica. Esta correção não altera a página de
   Agendamentos nem qualquer outra funcionalidade; ela existe somente para
   restabelecer o gate obrigatório de publicação.
+
+## 2026-10-24: núcleo operacional do menu Lead concluído localmente
+
+- O banco próprio do DESCOMPLICA-CRM é a fonte autoritativa do corte. Foram
+  implementadas nove páginas protegidas e a rota autenticada de exportação,
+  cobrindo cadastro, lista, detalhe, atividades, mensagens internas, etiquetas,
+  favoritos, funil, distribuição, relatórios, importação, configurações e
+  auditoria. C2S permanece apenas como referência funcional; nenhuma credencial
+  ou informação de cliente foi copiada.
+- Duas migrations funcionais adicionam o domínio normalizado e operações por
+  RPC com RLS forçada, grants mínimos, permissões por página e ação,
+  idempotência vinculada a organização, ator e comando, retenção automática de
+  prévias de importação e auditoria sem PII. A migration do catálogo registra
+  as 41 páginas protegidas atuais.
+- Evidência local em Node 24.19 e pnpm 11.20: lint sem erros, typecheck e build
+  aprovados; Vitest com 4.179 aprovados e 107 ignorados; `pages:check`,
+  `resources:check`, Gitleaks e verificação de diff aprovados. Os 72 testes
+  pgTAP do núcleo e 53 das operações dependem da CI Linux porque não há
+  Docker, Podman ou Supabase local neste host.
+- Limite externo: `pnpm test` mantém três falhas Windows preexistentes do Meta
+  Ads, e `pnpm test:release` mantém onze falhas do mesmo host por arquivo
+  sintético ausente. Esses arquivos não foram alterados, conforme a regra de
+  escopo exclusivo. Integrações externas, WhatsApp, CRM imobiliário,
+  financeiro e produtos opcionais não fazem parte desta entrega.

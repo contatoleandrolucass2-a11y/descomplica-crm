@@ -19,7 +19,7 @@ import { patchLocalSupabaseConfig } from "./supabase-config.mjs";
 
 const repositoryRoot = path.resolve(import.meta.dirname, "../..");
 const sourceSupabaseRoot = path.join(repositoryRoot, "supabase");
-const expectedPgTapTests = 2113;
+const expectedPgTapTests = 2238;
 const applicationSchemas = ["commercial_engine", "private", "public", "qlik_relay"];
 const applicationRoles = ["crm_commercial_engine", "crm_qlik_relay"];
 const excludedServices = [
@@ -75,16 +75,20 @@ function sanitizeDiagnostic(value) {
 }
 
 function commandFailure(command, result, label) {
-  const diagnostic = sanitizeDiagnostic(
+  const sanitized = sanitizeDiagnostic(
     `${result.stderr?.toString?.() ?? result.stderr ?? ""}\n${
       result.stdout?.toString?.() ?? result.stdout ?? ""
-    }`,
-  )
-    .trim()
-    .split("\n")
-    .slice(-12)
+    }\nspawn_error=${result.error?.message ?? "none"} exit_status=${String(result.status)} signal=${String(result.signal)}`,
+  ).trim();
+  const lines = sanitized.split("\n");
+  const relevant = lines.filter((line) =>
+    /\b(?:error|fatal|panic|failed|failure|invalid|timeout|unhealthy|denied|conflict)\b/i.test(
+      line,
+    ),
+  );
+  const diagnostic = [...new Set([...relevant.slice(-120), ...lines.slice(-20)])]
     .join("\n")
-    .slice(-2_000);
+    .slice(-20_000);
   return new Error(
     `${label ?? command} failed in the isolated local rehearsal.${
       diagnostic ? `\n${diagnostic}` : ""
@@ -337,7 +341,39 @@ function exactDatabaseContainer(projectId) {
   return names[0];
 }
 
-function dockerDatabase(container, database, sql) {
+function failedSupabaseDatabaseDiagnostic(projectId) {
+  const discovery = runUnchecked(
+    "docker",
+    [
+      "ps",
+      "-a",
+      "--filter",
+      `label=com.supabase.cli.project=${projectId}`,
+      "--format",
+      "{{.Names}}\t{{.Status}}",
+    ],
+    { cwd: repositoryRoot },
+  );
+  const rows = String(discovery.stdout ?? "")
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const database = rows.find((row) => row.startsWith(`supabase_db_${projectId}\t`));
+  if (!database) return "isolated_database_container=missing";
+  const [name, status] = database.split("\t");
+  const logs = runUnchecked("docker", ["logs", "--tail", "240", name], {
+    cwd: repositoryRoot,
+  });
+  const relevant = sanitizeDiagnostic(`${logs.stderr ?? ""}\n${logs.stdout ?? ""}`)
+    .split("\n")
+    .filter((line) => /\b(?:ERROR|FATAL|PANIC|DETAIL|HINT|STATEMENT|failed)\b/i.test(line))
+    .slice(-24)
+    .join("\n")
+    .slice(-4_000);
+  return `isolated_database_container=${name} status=${status}${relevant ? `\n${relevant}` : ""}`;
+}
+
+function dockerDatabase(container, database, sql, username = "postgres") {
   return run(
     "docker",
     [
@@ -353,7 +389,7 @@ function dockerDatabase(container, database, sql) {
       "--tuples-only",
       "--no-align",
       "--username",
-      "postgres",
+      username,
       "--dbname",
       database,
     ],
@@ -412,6 +448,41 @@ function createRestoreDatabase(container, database) {
       database,
     ],
     { label: "isolated restore database creation" },
+  );
+}
+
+function waitForDatabase(container, database) {
+  const pause = new Int32Array(new SharedArrayBuffer(4));
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const readiness = runUnchecked(
+      "docker",
+      ["exec", container, "pg_isready", "--username", "postgres", "--dbname", database],
+      { cwd: repositoryRoot },
+    );
+    if (readiness.status === 0) return;
+    Atomics.wait(pause, 0, 0, 500);
+  }
+  throw new Error("Isolated restore database did not become ready after pg_cron restart.");
+}
+
+function preparePgCronRestore(container, database) {
+  if (!/^rc_restore_[a-f0-9]{10}$/u.test(database)) {
+    throw new Error("Unsafe isolated restore database name.");
+  }
+  dockerDatabase(
+    container,
+    "postgres",
+    `alter system set cron.database_name = '${database}';`,
+    "supabase_admin",
+  );
+  run("docker", ["restart", "--time", "10", container], {
+    label: "isolated pg_cron target restart",
+  });
+  waitForDatabase(container, database);
+  dockerDatabase(
+    container,
+    database,
+    "create extension if not exists pg_cron with schema pg_catalog;",
   );
 }
 
@@ -1248,11 +1319,17 @@ async function main() {
     ]);
 
     sourceAttempted = true;
-    runSupabase(
-      sourceProjectRoot,
-      ["start", "--exclude", excludedServices, "--yes"],
-      "isolated source Supabase start",
-    );
+    try {
+      runSupabase(
+        sourceProjectRoot,
+        ["start", "--exclude", excludedServices, "--yes", "--debug"],
+        "isolated source Supabase start",
+      );
+    } catch (error) {
+      throw new Error(
+        `${error instanceof Error ? error.message : "Isolated source Supabase start failed."}\n${failedSupabaseDatabaseDiagnostic(sourceProjectId)}`,
+      );
+    }
     const sourceContainer = exactDatabaseContainer(sourceProjectId);
     runSupabase(
       sourceProjectRoot,
@@ -1285,6 +1362,7 @@ async function main() {
     }
     bootstrapApplicationRoles(targetContainer);
     createRestoreDatabase(targetContainer, restoreDatabase);
+    preparePgCronRestore(targetContainer, restoreDatabase);
 
     const dump = logicalDump(sourceContainer);
     const dumpSha256 = sha256(dump);

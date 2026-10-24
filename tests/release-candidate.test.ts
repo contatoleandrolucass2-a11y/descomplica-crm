@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 79-version manifest", async () => {
+  it("keeps a unique, ordered 83-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(79);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(79);
+    expect(migrations).toHaveLength(83);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(83);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-25)).toEqual([
+    expect(migrations.slice(-29)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -76,9 +76,13 @@ describe("release-candidate migration train", () => {
       "20261021191533_coordinator_dashboard_v3_projection.sql",
       "20261021210000_appointments_filters_kpis_v4.sql",
       "20261022184500_forecast_value_edit_roles.sql",
+      "20261024053147_sync_page_catalog.sql",
+      "20261024055603_crm_leads_core.sql",
+      "20261024061135_crm_lead_operations.sql",
+      "20261024062318_sync_page_catalog.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261022184500_forecast_value_edit_roles.sql");
+    expect(migrations.at(-1)).toBe("20261024062318_sync_page_catalog.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -110,8 +114,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(38);
-    expect(plan.tests).toBe(2113);
+    expect(plan.files).toBe(40);
+    expect(plan.tests).toBe(2238);
   });
 
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
@@ -224,6 +228,7 @@ describe("release-candidate activation defaults", () => {
       "partnershipRoles",
       "repasseRoles",
       "metaAdsRoutes",
+      "leadRoutes",
       "protectedSurfaces",
       "operationalRoutes",
       "connectedSystemsRoute",
@@ -261,8 +266,8 @@ describe("release-candidate activation defaults", () => {
       { timeout: 1000 },
     );
     const surfacePaths = matrix.protectedSurfaces.map((surface: { path: string }) => surface.path);
-    expect(surfacePaths).toHaveLength(32);
-    expect(new Set(surfacePaths).size).toBe(32);
+    expect(surfacePaths).toHaveLength(41);
+    expect(new Set(surfacePaths).size).toBe(41);
     expect([...surfacePaths].sort()).toEqual(
       PROTECTED_PAGE_GATES.filter((gate) => gate.releaseEnabled)
         .map((gate) => gate.path)
@@ -299,10 +304,11 @@ describe("release-candidate activation defaults", () => {
       ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(21);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(30);
         expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
+          "Lead",
           "Meta Ads",
           "Simulação",
           "Ranking",
@@ -310,7 +316,7 @@ describe("release-candidate activation defaults", () => {
           "Gestão",
           "Administração",
         ]);
-        expect(roots[5]).toEqual({
+        expect(roots[6]).toEqual({
           name: "Gestão",
           tag: "BUTTON",
           href: null,
@@ -422,7 +428,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2113;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2238;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {
@@ -515,6 +521,19 @@ describe("representative production restore evidence", () => {
 });
 
 describe("isolated restore evidence", () => {
+  it("prepares environment-bound pg_cron in the isolated restore database", async () => {
+    const script = await readFile(
+      path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"),
+      "utf8",
+    );
+
+    expect(script).toContain("alter system set cron.database_name");
+    expect(script).toContain('"supabase_admin"');
+    expect(script).toContain("create extension if not exists pg_cron with schema pg_catalog");
+    expect(script).toContain("preparePgCronRestore(targetContainer, restoreDatabase)");
+    expect(script).toContain("pg_isready");
+  });
+
   it("proves a clean local cross-cluster restore without authorizing remote work", async () => {
     const evidence = JSON.parse(
       await readFile(

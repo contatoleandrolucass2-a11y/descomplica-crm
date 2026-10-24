@@ -340,12 +340,36 @@ const metaAdsRoutes = [
   "/app/meta-ads/contas-de-anuncios",
   "/app/meta-ads/relatorios",
 ] as const;
+const leadRoutes = [
+  "/app/leads",
+  "/app/leads/lista",
+  "/app/leads/atividades",
+  "/app/leads/funil",
+  "/app/leads/distribuicao",
+  "/app/leads/relatorios",
+  "/app/leads/importacao",
+  "/app/leads/configuracoes",
+  "/app/leads/auditoria",
+] as const;
 const protectedSurfaces = [
   {
     path: "/app",
     heading: "Dashboard | Resumo Geral",
     allowed: activeOperationalRoles,
   },
+  { path: "/app/leads", heading: "Lead", allowed: adminRoles },
+  { path: "/app/leads/lista", heading: "Lista de leads", allowed: adminRoles },
+  { path: "/app/leads/atividades", heading: "Atividades", allowed: adminRoles },
+  { path: "/app/leads/funil", heading: "Funil", allowed: adminRoles },
+  { path: "/app/leads/distribuicao", heading: "Distribuição", allowed: adminRoles },
+  { path: "/app/leads/relatorios", heading: "Relatórios", allowed: adminRoles },
+  {
+    path: "/app/leads/importacao",
+    heading: "Importação e exportação",
+    allowed: adminRoles,
+  },
+  { path: "/app/leads/configuracoes", heading: "Configurações", allowed: adminRoles },
+  { path: "/app/leads/auditoria", heading: "Auditoria", allowed: adminRoles },
   {
     path: "/app/repasse",
     heading: "Consulta de repasses",
@@ -530,6 +554,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    ...leadRoutes,
     ...metaAdsRoutes,
     ...settingsRoutes,
     ...managementRoutes,
@@ -542,6 +567,7 @@ const expectedDirectRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    ...leadRoutes,
     ...metaAdsRoutes,
     ...settingsRoutes,
     ...managementRoutes,
@@ -593,6 +619,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    ...leadRoutes,
     ...metaAdsRoutes,
     "/app/simulacao",
     ...managementRoutes,
@@ -605,6 +632,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
+    ...leadRoutes,
     ...metaAdsRoutes,
     "/app/simulacao",
     ...managementRoutes,
@@ -680,6 +708,14 @@ function expectedPrimaryNavigationRootsForRole(role: Role) {
       tag: "BUTTON",
       href: null,
       controls: "authorized-navigation-crm-dashboard",
+    });
+  }
+  if (authorizedRoutes.has("/app/leads")) {
+    roots.push({
+      name: "Lead",
+      tag: "BUTTON",
+      href: null,
+      controls: "authorized-navigation-crm-leads",
     });
   }
   if (authorizedRoutes.has("/app/meta-ads")) {
@@ -873,18 +909,18 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(32);
-  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(32);
+  expect(protectedSurfaces).toHaveLength(41);
+  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(41);
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 21 : activeOperationalRoles.has(role) ? 11 : 0,
+      adminRoles.has(role) ? 30 : activeOperationalRoles.has(role) ? 11 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
     );
     expect(expectedPrimaryNavigationRootsForRole(role), role).toHaveLength(
-      adminRoles.has(role) ? 7 : activeOperationalRoles.has(role) ? 4 : 0,
+      adminRoles.has(role) ? 8 : activeOperationalRoles.has(role) ? 4 : 0,
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];
