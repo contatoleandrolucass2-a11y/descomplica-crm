@@ -338,7 +338,10 @@ export async function fetchMetaAdsDashboardData(
 
   const adsUrl = graphUrl(configuration, `act_${configuration.accountId}/ads`);
   adsUrl.searchParams.set("fields", "id,effective_status");
-  adsUrl.searchParams.set("effective_status", JSON.stringify(AD_EFFECTIVE_STATUSES));
+  adsUrl.searchParams.set(
+    "filtering",
+    JSON.stringify([{ field: "effective_status", operator: "IN", value: AD_EFFECTIVE_STATUSES }]),
+  );
   adsUrl.searchParams.set("limit", "500");
   const ads = await graphPages<MetaAd>(adsUrl, configuration, fetcher);
   const statuses = new Map(
