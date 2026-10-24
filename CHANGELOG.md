@@ -15,6 +15,8 @@
 - Compacta somente a faixa desktop estreita de 1181 a 1320 px para manter os
   oito destinos autorizados, os alvos de 44 px e os anéis de foco dentro do
   cabeçalho.
+- Atualiza as 19 referências autenticadas cuja única diferença aprovada é o
+  cabeçalho com o novo oitavo destino, sem alterar limiares de comparação.
 - Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
   opcionais fora deste corte.
 

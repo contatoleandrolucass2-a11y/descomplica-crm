@@ -43,6 +43,13 @@ da navegação e largura visual da marca; os controles conservam altura mínima 
 44 px, nomes acessíveis e ordem de teclado. Os 49 contratos focados de
 navegação, shell e candidato de release passaram antes da nova CI.
 
+O candidato subsequente aprovou integralmente os contratos funcionais,
+acessibilidade, teclado, zoom e as 40 combinações da navegação arquivada. O gate
+visual permaneceu vermelho porque 19 referências ainda continham o cabeçalho
+anterior com sete destinos; os desvios ficaram entre 1,005% e 1,471%. Foram
+promovidas somente essas imagens a partir do artefato autenticado do próprio
+SHA, mantendo o limiar de 1%, os demais baselines e todas as verificações.
+
 ## 2026-10-24 - Estrutura protegida do menu Lead
 
 O primeiro incremento implementa `/app/leads` como raiz da navegação e cria
