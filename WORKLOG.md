@@ -8963,3 +8963,11 @@ A primeira CI do PR #313 (`39897599409`) falhou somente na comparação de Docum
 ### Reconciliação com a entrega concorrente #310
 
 Durante a validação, `main` avançou para `13f169a` com a guia de permissões Meta ADS e referências visuais atualizadas. O merge local preservou integralmente a implementação concorrente e adotou o manifesto e a imagem de Documentação da nova `main`, substituindo a atualização intermediária desta branch. O diff final mantém a navegação lateral; não altera as referências visuais da nova base. A CI será executada novamente no candidato reconciliado.
+
+## 2026-10-24 — Desbloqueio final do release de Agendamentos
+
+A CI `40061774780` do `main` integrado falhou somente porque o registry passou a
+reportar `GHSA-xjj6-f33q-929c` em `undici@7.30.0`, dependência transitiva do
+`next-devtools-mcp`. O override mínimo fixa `7.30.1`; `pnpm audit --audit-level
+high` passou sem vulnerabilidades altas ou críticas. Nenhum comportamento ou
+página do CRM foi alterado por esta correção de gate.
