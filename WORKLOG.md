@@ -16,6 +16,15 @@ considera regras, prioridade, peso, capacidade, presença, memória do cliente e
 fallback. Importações CSV têm limite, prévia temporária, hash e deduplicação;
 exportações neutralizam fórmulas de planilha.
 
+O preflight remoto posterior ao merge identificou que o banco produtivo legado
+não possui `crm_organizations` nem o modelo de escopos correspondente. A
+tentativa de migration foi transacional e não criou objetos. Para não importar
+migrations antigas ou módulos fora do pedido, Lead passou a manter
+`crm_lead_workspaces` e associações próprias. Master e Admin acessam os
+workspaces ativos; os demais usuários exigem associação explícita. O contrato
+externo `organizationId` foi preservado para compatibilidade da interface e das
+RPCs.
+
 A revisão independente de segurança confirmou as correções de isolamento por
 organização, leitura mínima por permissão, retenção do staging e idempotência de
 criação, alteração, mensagens, atividades e distribuição. Os testes Vitest

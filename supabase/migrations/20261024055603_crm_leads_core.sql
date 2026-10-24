@@ -84,9 +84,29 @@ insert into public.crm_lead_stages (key, name, position, color, is_terminal, is_
   ('won', 'Ganho', 90, '#16a34a', true, true),
   ('lost', 'Perdido', 100, '#dc2626', true, false);
 
+create table public.crm_lead_workspaces (
+  id uuid primary key default gen_random_uuid(),
+  workspace_key text not null unique check (workspace_key ~ '^[a-z0-9][a-z0-9_-]{0,63}$'),
+  name text not null check (char_length(btrim(name)) between 1 and 160),
+  kind text not null default 'organization' check (char_length(kind) between 1 and 40),
+  is_active boolean not null default true,
+  created_at timestamptz not null default now()
+);
+
+create table public.crm_lead_workspace_members (
+  workspace_id uuid not null references public.crm_lead_workspaces(id) on delete cascade,
+  user_id uuid not null references auth.users(id) on delete cascade,
+  is_active boolean not null default true,
+  created_at timestamptz not null default now(),
+  primary key (workspace_id, user_id)
+);
+
+insert into public.crm_lead_workspaces (id, workspace_key, name)
+values ('00000000-0000-4000-8000-000000000001', 'descomplica', 'Descomplica');
+
 create table public.crm_lead_customers (
   id uuid primary key default gen_random_uuid(),
-  organization_id uuid not null references public.crm_organizations(id) on delete restrict,
+  organization_id uuid not null references public.crm_lead_workspaces(id) on delete restrict,
   full_name text not null check (char_length(btrim(full_name)) between 2 and 180),
   email text check (email is null or char_length(email) <= 320),
   phone text check (phone is null or char_length(phone) between 7 and 32),
@@ -99,7 +119,7 @@ create table public.crm_lead_customers (
 
 create table public.crm_lead_interests (
   id uuid primary key default gen_random_uuid(),
-  organization_id uuid not null references public.crm_organizations(id) on delete restrict,
+  organization_id uuid not null references public.crm_lead_workspaces(id) on delete restrict,
   title text check (title is null or char_length(title) <= 180),
   reference_code text check (reference_code is null or char_length(reference_code) <= 100),
   transaction_kind text check (transaction_kind is null or transaction_kind in ('buy', 'rent', 'invest', 'other')),
@@ -116,7 +136,7 @@ create table public.crm_lead_interests (
 
 create table public.crm_leads (
   id uuid primary key default gen_random_uuid(),
-  organization_id uuid not null references public.crm_organizations(id) on delete restrict,
+  organization_id uuid not null references public.crm_lead_workspaces(id) on delete restrict,
   customer_id uuid not null references public.crm_lead_customers(id) on delete restrict,
   interest_id uuid references public.crm_lead_interests(id) on delete set null,
   stage_id uuid not null references public.crm_lead_stages(id) on delete restrict,
@@ -186,7 +206,7 @@ create table public.crm_lead_messages (
 
 create table public.crm_lead_tags (
   id uuid primary key default gen_random_uuid(),
-  organization_id uuid not null references public.crm_organizations(id) on delete cascade,
+  organization_id uuid not null references public.crm_lead_workspaces(id) on delete cascade,
   name text not null check (char_length(btrim(name)) between 1 and 80),
   color text not null default '#64748b' check (color ~ '^#[0-9A-Fa-f]{6}$'),
   created_by uuid not null references auth.users(id) on delete restrict,
@@ -205,7 +225,7 @@ create table public.crm_lead_tag_links (
 create table public.crm_lead_audit_events (
   id uuid primary key default gen_random_uuid(),
   lead_id uuid not null references public.crm_leads(id) on delete cascade,
-  organization_id uuid not null references public.crm_organizations(id) on delete restrict,
+  organization_id uuid not null references public.crm_lead_workspaces(id) on delete restrict,
   actor_id uuid not null references auth.users(id) on delete restrict,
   action text not null check (char_length(action) between 1 and 100),
   changed_fields text[] not null default '{}',
@@ -235,18 +255,11 @@ create or replace function private.crm_lead_user_can_access_organization(
   select p_user_id is not null and p_organization_id is not null
     and exists (select 1 from public.profiles p where p.user_id = p_user_id
       and p.is_active and p.access_status = 'approved')
+    and exists (select 1 from public.crm_lead_workspaces w where w.id = p_organization_id and w.is_active)
     and (
-      exists (select 1 from public.user_roles r where r.user_id = p_user_id and r.role_key = 'master')
-      or exists (
-        select 1 from public.crm_user_reporting_scope_grants g
-        join public.crm_reporting_scopes s on s.id = g.reporting_scope_id and s.is_active
-        left join public.crm_teams t on t.id = s.team_id and t.is_active
-        left join public.crm_portfolio_organizations po on po.portfolio_id = s.portfolio_id
-          and po.valid_from <= now() and (po.valid_until is null or po.valid_until > now())
-        where g.user_id = p_user_id and g.revoked_at is null
-          and g.valid_from <= now() and (g.valid_until is null or g.valid_until > now())
-          and coalesce(s.organization_id, t.organization_id, po.organization_id) = p_organization_id
-      )
+      exists (select 1 from public.user_roles r where r.user_id = p_user_id and r.role_key in ('master','admin'))
+      or exists (select 1 from public.crm_lead_workspace_members m
+        where m.user_id = p_user_id and m.workspace_id = p_organization_id and m.is_active)
     );
 $$;
 
@@ -264,7 +277,7 @@ begin
   if not public._internal_has_permission(v_actor, p_permission) then
     raise exception 'forbidden: missing lead permission' using errcode = '42501';
   end if;
-  if p_organization_id is null or not private.can_read_organization(p_organization_id) then
+  if p_organization_id is null or not private.crm_lead_user_can_access_organization(v_actor, p_organization_id) then
     raise exception 'forbidden: organization unavailable' using errcode = '42501';
   end if;
   return v_actor;
@@ -293,14 +306,14 @@ begin
   end if;
   select coalesce(jsonb_agg(jsonb_build_object(
     'id', organization.id,
-    'key', organization.organization_key,
+    'key', organization.workspace_key,
     'name', organization.name,
     'kind', organization.kind
   ) order by organization.name, organization.id), '[]'::jsonb)
   into v_scopes
-  from public.crm_organizations organization
+  from public.crm_lead_workspaces organization
   where organization.is_active
-    and private.can_read_organization(organization.id);
+    and private.crm_lead_user_can_access_organization(v_actor, organization.id);
   return v_scopes;
 end;
 $$;
@@ -319,7 +332,7 @@ begin
     or public._internal_has_permission(v_actor, 'crm.leads.list.view')
     or public._internal_has_permission(v_actor, 'crm.leads.pipeline.view')
     or public._internal_has_permission(v_actor, 'crm.leads.activities.view')
-  ) or not private.can_read_organization(p_organization_id) then
+  ) or not private.crm_lead_user_can_access_organization(v_actor, p_organization_id) then
     raise exception 'forbidden: lead catalogs unavailable' using errcode = '42501';
   end if;
   return jsonb_build_object(
@@ -356,7 +369,7 @@ begin
   perform public._internal_assert_actor_active(v_actor);
   if not public._internal_has_permission(v_actor, 'crm.leads.list.view') then
     raise exception 'forbidden: missing lead read permission' using errcode = '42501'; end if;
-  if v_organization is null or not private.can_read_organization(v_organization) then
+  if v_organization is null or not private.crm_lead_user_can_access_organization(v_actor, v_organization) then
     raise exception 'forbidden: organization unavailable' using errcode = '42501';
   end if;
 
@@ -424,7 +437,7 @@ begin
   exception when invalid_text_representation then raise exception 'invalid_argument: invalid organization' using errcode='22023'; end;
   if v_actor is null then raise exception 'unauthorized: authenticated user required' using errcode='28000'; end if;
   perform public._internal_assert_actor_active(v_actor);
-  if not public._internal_has_permission(v_actor,'crm.leads.activities.view') or not private.can_read_organization(v_org) then
+  if not public._internal_has_permission(v_actor,'crm.leads.activities.view') or not private.crm_lead_user_can_access_organization(v_actor, v_org) then
     raise exception 'forbidden: lead activities unavailable' using errcode='42501'; end if;
   if v_bucket not in ('all','overdue','today','upcoming','completed') then raise exception 'invalid_argument: invalid activity bucket' using errcode='22023'; end if;
   select count(*) into v_total from public.crm_lead_activities a join public.crm_leads l on l.id=a.lead_id
@@ -468,7 +481,7 @@ declare v_actor uuid := (select auth.uid()); v_stages jsonb; v_total bigint; v_f
 begin
   if v_actor is null then raise exception 'unauthorized: authenticated user required' using errcode='28000'; end if;
   perform public._internal_assert_actor_active(v_actor);
-  if not public._internal_has_permission(v_actor,'crm.leads.pipeline.view') or not private.can_read_organization(p_organization_id) then
+  if not public._internal_has_permission(v_actor,'crm.leads.pipeline.view') or not private.crm_lead_user_can_access_organization(v_actor, p_organization_id) then
     raise exception 'forbidden: lead funnel unavailable' using errcode='42501'; end if;
   if nullif(btrim(p_filters->>'query'),'') is not null
     and not public._internal_has_permission(v_actor,'crm.leads.list.view') then
@@ -513,7 +526,7 @@ begin
   if not public._internal_has_permission(v_actor, 'crm.leads.list.view') then
     raise exception 'forbidden: missing lead read permission' using errcode = '42501'; end if;
   select * into v_lead from public.crm_leads where id = p_lead_id;
-  if v_lead.id is null or not private.can_read_organization(v_lead.organization_id) then
+  if v_lead.id is null or not private.crm_lead_user_can_access_organization(v_actor, v_lead.organization_id) then
     raise exception 'not_found: lead unavailable' using errcode = 'P0002'; end if;
   select jsonb_build_object(
     'lead', (select to_jsonb(x) - 'created_idempotency_key' - 'source_record_id' from (
@@ -762,6 +775,8 @@ exception when invalid_text_representation or check_violation or not_null_violat
 end;
 $$;
 
+alter table public.crm_lead_workspaces enable row level security; alter table public.crm_lead_workspaces force row level security;
+alter table public.crm_lead_workspace_members enable row level security; alter table public.crm_lead_workspace_members force row level security;
 alter table public.crm_lead_sources enable row level security; alter table public.crm_lead_sources force row level security;
 alter table public.crm_lead_channels enable row level security; alter table public.crm_lead_channels force row level security;
 alter table public.crm_lead_lost_reasons enable row level security; alter table public.crm_lead_lost_reasons force row level security;
@@ -781,6 +796,7 @@ declare
   v_table text;
 begin
   foreach v_table in array array[
+    'crm_lead_workspaces', 'crm_lead_workspace_members',
     'crm_lead_sources', 'crm_lead_channels', 'crm_lead_lost_reasons',
     'crm_lead_stages', 'crm_lead_customers', 'crm_lead_interests',
     'crm_leads', 'crm_lead_stage_history', 'crm_lead_activities',
@@ -796,6 +812,7 @@ end
 $mfa_policies$;
 
 revoke all privileges on table
+  public.crm_lead_workspaces, public.crm_lead_workspace_members,
   public.crm_lead_sources, public.crm_lead_channels, public.crm_lead_lost_reasons,
   public.crm_lead_stages, public.crm_lead_customers, public.crm_lead_interests,
   public.crm_leads, public.crm_lead_stage_history, public.crm_lead_activities,
