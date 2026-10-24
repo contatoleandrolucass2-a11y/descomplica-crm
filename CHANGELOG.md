@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-24 - Correção adicional do gate de segurança
+
+- Atualiza o `undici` transitivo do Next DevTools para `7.30.1`, corrigindo
+  `GHSA-xjj6-f33q-929c`.
+- Mantém o protocolo MCP validado após a atualização.
+
 ## 2026-10-23 - Histórico de campanhas excluídas no Meta Ads
 
 - Consulta os estados históricos dos anúncios na API oficial e identifica

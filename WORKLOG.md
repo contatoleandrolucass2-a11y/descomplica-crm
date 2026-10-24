@@ -1,5 +1,12 @@
 # Worklog
 
+## 2026-10-24 - Advisory adicional durante a publicação do Meta Ads
+
+O registry publicou `GHSA-xjj6-f33q-929c` para o `undici@7.30.0`, transitivo do
+Next DevTools, depois que o SHA anterior havia passado. O override isolado para
+`7.30.1` elimina a vulnerabilidade alta. A auditoria mantém somente achados
+moderados ou baixos, e o diagnóstico MCP confirma os servidores Next e Chrome.
+
 ## 2026-10-23 - Campanhas excluídas preservadas no Meta Ads
 
 O cliente somente leitura da API Meta passa a solicitar também anúncios
