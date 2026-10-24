@@ -76,9 +76,9 @@ function sanitizeDiagnostic(value) {
 
 function commandFailure(command, result, label) {
   const diagnostic = sanitizeDiagnostic(
-    `${result.error?.message ?? ""}\nexit_status=${String(result.status)} signal=${String(result.signal)}\n${result.stderr?.toString?.() ?? result.stderr ?? ""}\n${
+    `${result.stderr?.toString?.() ?? result.stderr ?? ""}\n${
       result.stdout?.toString?.() ?? result.stdout ?? ""
-    }`,
+    }\nspawn_error=${result.error?.message ?? "none"} exit_status=${String(result.status)} signal=${String(result.signal)}`,
   )
     .trim()
     .split("\n")
