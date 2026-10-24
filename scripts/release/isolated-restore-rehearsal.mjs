@@ -1283,7 +1283,7 @@ async function main() {
     try {
       runSupabase(
         sourceProjectRoot,
-        ["start", "--exclude", excludedServices, "--yes"],
+        ["start", "--exclude", excludedServices, "--yes", "--debug"],
         "isolated source Supabase start",
       );
     } catch (error) {
