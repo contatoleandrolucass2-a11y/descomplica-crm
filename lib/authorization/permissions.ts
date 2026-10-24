@@ -117,6 +117,106 @@ export const PERMISSIONS = {
     description: "Consulta a organização dos leads por etapa do funil.",
     minLevel: 80,
   },
+  "crm.leads.create": {
+    label: "Criar leads",
+    description: "Cria leads e os cadastros de cliente e interesse associados.",
+    minLevel: 80,
+  },
+  "crm.leads.edit": {
+    label: "Editar leads",
+    description: "Altera dados comerciais de leads existentes.",
+    minLevel: 80,
+  },
+  "crm.leads.assign": {
+    label: "Atribuir leads",
+    description: "Atribui ou remove o responsável de um lead.",
+    minLevel: 80,
+  },
+  "crm.leads.stage.move": {
+    label: "Mover leads no funil",
+    description: "Move leads entre etapas não terminais do funil.",
+    minLevel: 80,
+  },
+  "crm.leads.activities.manage": {
+    label: "Gerenciar atividades de leads",
+    description: "Registra atividades de atendimento em leads.",
+    minLevel: 80,
+  },
+  "crm.leads.messages.manage": {
+    label: "Gerenciar mensagens de leads",
+    description: "Registra mensagens trocadas em leads.",
+    minLevel: 80,
+  },
+  "crm.leads.tags.manage": {
+    label: "Gerenciar etiquetas de leads",
+    description: "Gerencia etiquetas vinculadas aos leads.",
+    minLevel: 80,
+  },
+  "crm.leads.close": {
+    label: "Fechar leads",
+    description: "Fecha leads como ganhos ou perdidos.",
+    minLevel: 80,
+  },
+  "crm.leads.archive": {
+    label: "Arquivar leads",
+    description: "Arquiva e resgata leads sem apagar o histórico.",
+    minLevel: 80,
+  },
+  "crm.leads.distribution.view": {
+    label: "Visualizar distribuição de leads",
+    description: "Consulta filas, regras, presença e histórico de distribuição de leads.",
+    minLevel: 80,
+  },
+  "crm.leads.distribution.manage": {
+    label: "Gerenciar distribuição de leads",
+    description: "Configura filas, regras, membros e presença da distribuição de leads.",
+    minLevel: 80,
+  },
+  "crm.leads.distribution.assign": {
+    label: "Distribuir leads",
+    description: "Executa a atribuição autorizada e auditada de leads.",
+    minLevel: 80,
+  },
+  "crm.leads.reports.view": {
+    label: "Visualizar relatórios de leads",
+    description: "Consulta indicadores operacionais e comerciais de leads.",
+    minLevel: 80,
+  },
+  "crm.leads.reports.export": {
+    label: "Exportar relatórios de leads",
+    description: "Exporta relatórios de leads com os filtros autorizados.",
+    minLevel: 80,
+  },
+  "crm.leads.import.view": {
+    label: "Visualizar importações de leads",
+    description: "Consulta prévias e históricos de importação e exportação de leads.",
+    minLevel: 80,
+  },
+  "crm.leads.import.manage": {
+    label: "Importar leads",
+    description: "Valida e aplica lotes idempotentes de importação de leads.",
+    minLevel: 80,
+  },
+  "crm.leads.export": {
+    label: "Exportar leads",
+    description: "Exporta dados mínimos de leads conforme filtros e escopo autorizados.",
+    minLevel: 80,
+  },
+  "crm.leads.settings.view": {
+    label: "Visualizar configurações de leads",
+    description: "Consulta catálogos, alertas e ajustes do módulo Lead.",
+    minLevel: 80,
+  },
+  "crm.leads.settings.manage": {
+    label: "Gerenciar configurações de leads",
+    description: "Altera catálogos, alertas e ajustes do módulo Lead com auditoria.",
+    minLevel: 80,
+  },
+  "crm.leads.audit.view": {
+    label: "Visualizar auditoria de leads",
+    description: "Consulta eventos operacionais do módulo Lead sem expor conteúdo pessoal.",
+    minLevel: 80,
+  },
   "crm.stage.opportunities.view": {
     label: "Visualizar Oportunidades",
     description: "Consulta a página de oportunidades.",

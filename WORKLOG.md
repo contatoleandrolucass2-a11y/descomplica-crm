@@ -1,5 +1,30 @@
 # Worklog
 
+## 2026-10-24 - Núcleo operacional do CRM de leads
+
+O menu `Lead` passou do primeiro estado vazio para um núcleo operacional com
+nove páginas protegidas: hub, lista, atividades, funil, distribuição,
+relatórios, importação, configurações e auditoria. A exportação é servida por
+rota autenticada própria. O banco do DESCOMPLICA-CRM é a fonte autoritativa; não
+há sincronização ou dependência de dados do C2S.
+
+As migrations criam o domínio normalizado de leads, histórico, atividades,
+mensagens internas, etiquetas, etapas, filas, regras, membros, presença,
+memória, importações, configurações e auditoria. As operações sensíveis usam
+RPCs autorizadas e idempotentes, RLS forçada e grants mínimos. Distribuição
+considera regras, prioridade, peso, capacidade, presença, memória do cliente e
+fallback. Importações CSV têm limite, prévia temporária, hash e deduplicação;
+exportações neutralizam fórmulas de planilha.
+
+A revisão independente de segurança confirmou as correções de isolamento por
+organização, leitura mínima por permissão, retenção do staging e idempotência de
+criação, alteração, mensagens, atividades e distribuição. Os testes Vitest
+aprovaram 4.176 casos e ignoraram 107; lint, typecheck, build, catálogo de 41
+páginas, inventário de 76 rotas e Gitleaks passaram. A suíte Node mantém três
+falhas Windows preexistentes do Meta Ads, e `test:release` mantém onze falhas do
+mesmo host por arquivo sintético ausente; ambos são externos ao menu Lead. O
+pgTAP será comprovado pela CI Linux porque este host não possui Supabase local.
+
 ## 2026-10-24 - Estrutura protegida do menu Lead
 
 O primeiro incremento implementa `/app/leads` como raiz da navegação e cria

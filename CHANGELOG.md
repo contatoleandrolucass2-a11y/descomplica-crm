@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-24 - Núcleo operacional completo do menu Lead
+
+- Implementa cadastro, busca, filtros, detalhe, histórico, atividades,
+  etiquetas, favoritos, encaminhamento, funil e encerramento de leads.
+- Adiciona distribuição por filas e regras, relatórios, importação e exportação,
+  configurações versionadas e auditoria com permissões independentes.
+- Cria schema próprio com RLS, grants mínimos, RPCs idempotentes, catálogo de
+  páginas e testes de autorização, contratos e operações.
+- Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
+  opcionais fora deste corte.
+
 ## 2026-10-24 - Primeiro incremento do menu Lead
 
 - Adiciona o menu raiz `Lead` e as áreas Lista de leads, Atividades e Funil.

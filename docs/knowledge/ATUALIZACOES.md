@@ -2965,3 +2965,27 @@ dependente da autorização específica aplicável.
   terminou sem severidade alta ou crítica. Esta correção não altera a página de
   Agendamentos nem qualquer outra funcionalidade; ela existe somente para
   restabelecer o gate obrigatório de publicação.
+
+## 2026-10-24: núcleo operacional do menu Lead concluído localmente
+
+- O banco próprio do DESCOMPLICA-CRM é a fonte autoritativa do corte. Foram
+  implementadas nove páginas protegidas e a rota autenticada de exportação,
+  cobrindo cadastro, lista, detalhe, atividades, mensagens internas, etiquetas,
+  favoritos, funil, distribuição, relatórios, importação, configurações e
+  auditoria. C2S permanece apenas como referência funcional; nenhuma credencial
+  ou informação de cliente foi copiada.
+- Duas migrations funcionais adicionam o domínio normalizado e operações por
+  RPC com RLS forçada, grants mínimos, permissões por página e ação,
+  idempotência vinculada a organização, ator e comando, retenção automática de
+  prévias de importação e auditoria sem PII. A migration do catálogo registra
+  as 41 páginas protegidas atuais.
+- Evidência local em Node 24.19 e pnpm 11.20: lint sem erros, typecheck e build
+  aprovados; Vitest com 4.176 aprovados e 107 ignorados; `pages:check`,
+  `resources:check`, Gitleaks e verificação de diff aprovados. Os 72 testes
+  pgTAP do núcleo e 53 das operações dependem da CI Linux porque não há
+  Docker, Podman ou Supabase local neste host.
+- Limite externo: `pnpm test` mantém três falhas Windows preexistentes do Meta
+  Ads, e `pnpm test:release` mantém onze falhas do mesmo host por arquivo
+  sintético ausente. Esses arquivos não foram alterados, conforme a regra de
+  escopo exclusivo. Integrações externas, WhatsApp, CRM imobiliário,
+  financeiro e produtos opcionais não fazem parte desta entrega.

@@ -5,7 +5,12 @@ import { managementStyles } from "@/app/(protected)/_components/ManagementCanvas
 import { enforcePageAccess } from "@/lib/authorization/enforce";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 
-import { LeadPageShell, LeadSourceNotice } from "./_components/LeadWorkspace";
+import {
+  LeadPageShell,
+  LeadSourceNotice,
+  LeadUnavailableMetric,
+  leadStyles,
+} from "./_components/LeadWorkspace";
 
 export const metadata = { title: "Lead" };
 
@@ -48,6 +53,25 @@ export default async function LeadsHubPage() {
       description="Central de acompanhamento dos contatos e oportunidades comerciais."
     >
       <LeadSourceNotice />
+
+      <section aria-labelledby="lead-overview-title" className="grid gap-3">
+        <div className={managementStyles.sectionHeader}>
+          <div>
+            <h2 id="lead-overview-title" className={managementStyles.sectionTitle}>
+              Resumo da operação
+            </h2>
+            <p className={managementStyles.sectionDescription}>
+              Ausência de dados não é convertida em zero.
+            </p>
+          </div>
+        </div>
+        <div className={leadStyles.summaryGrid}>
+          <LeadUnavailableMetric label="Leads ativos" />
+          <LeadUnavailableMetric label="A fazer hoje" />
+          <LeadUnavailableMetric label="Visitas agendadas" />
+          <LeadUnavailableMetric label="Conversão" />
+        </div>
+      </section>
 
       <section aria-labelledby="lead-areas-title" className="grid gap-3 pt-1">
         <div className={managementStyles.sectionHeader}>

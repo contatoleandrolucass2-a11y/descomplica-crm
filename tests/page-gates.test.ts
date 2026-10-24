@@ -13,6 +13,11 @@ describe("protected commercial page set", () => {
     ["leads/lista", "crm.leads.list.view"],
     ["leads/atividades", "crm.leads.activities.view"],
     ["leads/funil", "crm.leads.pipeline.view"],
+    ["leads/distribuicao", "crm.leads.distribution.view"],
+    ["leads/relatorios", "crm.leads.reports.view"],
+    ["leads/importacao", "crm.leads.import.view"],
+    ["leads/configuracoes", "crm.leads.settings.view"],
+    ["leads/auditoria", "crm.leads.audit.view"],
   ])("keeps %s behind its independent Lead page guard", (route, permission) => {
     const source = readFileSync(
       new URL(`../app/(protected)/app/${route}/page.tsx`, import.meta.url),
@@ -42,7 +47,7 @@ describe("protected commercial page set", () => {
     },
   );
 
-  it("matches the exact approved thirty-six-page protected set", () => {
+  it("matches the exact approved forty-one-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -54,8 +59,13 @@ describe("protected commercial page set", () => {
         "admin.users|/admin/usuarios|users.view",
         "crm.dashboard|/app|crm.dashboard.view",
         "crm.leads.activities|/app/leads/atividades|crm.leads.activities.view",
+        "crm.leads.audit|/app/leads/auditoria|crm.leads.audit.view",
+        "crm.leads.distribution|/app/leads/distribuicao|crm.leads.distribution.view",
+        "crm.leads.import|/app/leads/importacao|crm.leads.import.view",
         "crm.leads.list|/app/leads/lista|crm.leads.list.view",
         "crm.leads.pipeline|/app/leads/funil|crm.leads.pipeline.view",
+        "crm.leads.reports|/app/leads/relatorios|crm.leads.reports.view",
+        "crm.leads.settings|/app/leads/configuracoes|crm.leads.settings.view",
         "crm.leads|/app/leads|crm.leads.view",
         "crm.management.routine|/app/gestao/rotina|crm.management.routine.view",
         "crm.management.forecast|/app/gestao/previsao|crm.management.forecast.view",
@@ -97,10 +107,10 @@ describe("protected commercial page set", () => {
     ).toEqual([]);
   });
 
-  it("keeps the full thirty-six-route smoke inventory unique", () => {
-    expect(PROTECTED_PAGE_GATES).toHaveLength(36);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(36);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(36);
+  it("keeps the full forty-one-route smoke inventory unique", () => {
+    expect(PROTECTED_PAGE_GATES).toHaveLength(41);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(41);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(41);
   });
 
   it("keeps Repasse restricted to Master and Admin in addition to its permission", () => {

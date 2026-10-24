@@ -1,6 +1,6 @@
 # Descoberta funcional do C2S para o futuro menu Lead
 
-status: pesquisa concluida; primeiro incremento de navegacao implementado
+status: pesquisa concluida; nucleo operacional do menu Lead implementado
 data: 2026-10-24
 escopo: gestor de leads C2S observado na conta autorizada e fontes publicas
 
@@ -30,9 +30,12 @@ As fontes atuais descrevem produtos e modulos diferentes:
 Nao se deve combinar automaticamente esses produtos em um unico escopo. O
 primeiro incremento do menu `Lead` precisa ter uma lista de capacidades aprovada.
 
-Em 24/10/2026, o primeiro corte foi limitado ao hub, Lista de leads, Atividades
-e Funil em modo seguro sem fonte configurada. Ele não cria banco, integração,
-cadastro, distribuição ou comunicação e não altera as demais etapas deste plano.
+Em 24/10/2026, o corte aprovado passou a usar o banco proprio do
+DESCOMPLICA-CRM como fonte autoritativa. O nucleo implementado cobre hub, lista,
+atividades, funil, distribuicao, relatorios, importacao, exportacao,
+configuracoes e auditoria. Integracoes externas, webhooks, comunicacao por
+WhatsApp, CRM imobiliario, financeiro e produtos opcionais continuam fora do
+escopo porque dependem de contratacao, consentimento ou autorizacao separados.
 
 ## Inventario observado na conta
 
@@ -244,37 +247,41 @@ DESCOMPLICA-CRM como autoridade e aplicar:
 Perfis amplos de master e usuario comum nao substituem a matriz granular do
 DESCOMPLICA-CRM. A existencia de um item no menu nao concede acesso ao dado.
 
-## Arquitetura futura no DESCOMPLICA-CRM
+## Arquitetura implementada no DESCOMPLICA-CRM
 
-O menu deve nascer como raiz `Lead`, rota `/app/leads`, chave `crm.leads` e
-permissao propria. Cada capacidade aprovada deve ser um filho com rota e
-permissao independentes. A ordem sugerida para entrega incremental e:
+O menu nasceu como raiz `Lead`, rota `/app/leads`, chave `crm.leads` e permissao
+propria. Cada capacidade aprovada possui rota, permissao e guard de servidor
+independentes. O corte implementado inclui:
 
-1. Hub Lead, lista, busca, filtros, vazio e detalhe somente leitura.
-2. Cadastro, edicao, historico, atividades, etiquetas e encerramento.
-3. Funil Kanban e analitico.
-4. Filas, regras, atribuicao e auditoria.
-5. Relatorios e dashboards.
-6. Importacao/exportacao.
-7. Integracoes, webhooks e canais de comunicacao.
-8. Modulos opcionais somente apos aprovacao individual.
+1. Hub Lead, lista, busca, filtros, paginacao e detalhe.
+2. Cadastro, edicao, historico, atividades, mensagens internas, etiquetas,
+   favoritos, encaminhamento, arquivamento, resgate e fechamento.
+3. Funil Kanban com etapas versionadas e movimentacao autorizada.
+4. Filas, regras, pesos, capacidade, presenca, memoria do cliente, fallback,
+   atribuicao deterministica e explicacao da distribuicao.
+5. Relatorios operacionais com periodo e escopo autorizados.
+6. Importacao CSV com previa temporaria, idempotencia e deduplicacao; exportacao
+   protegida e neutralizacao de formulas de planilha.
+7. Configuracoes versionadas com controle de concorrencia e motivo obrigatorio.
+8. Auditoria sem dados pessoais no payload de consulta.
 
 Cada nova pagina exige registro em `lib/navigation/registry.ts`, permissao em
 `lib/authorization/permissions.ts`, guard de servidor, `pages:sync`, migration
 do catalogo e entrada em `docs/knowledge/recursos.json`. Tabelas novas exigem
 migration, RLS, grants minimos e pgTAP.
 
-## Pendencias antes da implementacao
+## Limites e proximas decisoes
 
-- Definir quais modulos fazem parte da primeira entrega.
-- Definir fonte autoritativa dos leads: banco proprio, Salesforce, C2S ou
-  conciliacao versionada.
-- Definir papeis e permissoes por pagina e acao.
-- Definir canais permitidos e requisitos de consentimento.
-- Definir retencao, deduplicacao, identidade do contato e auditoria.
-- Confirmar comportamento mobile e diferencas entre web e aplicativo.
-- Confirmar os campos customizados e modulos efetivamente contratados.
-- Projetar estados de indisponibilidade sem transformar ausencia em zero.
+- A integracao com C2S, Salesforce, portais ou webhooks nao foi conectada; o
+  banco proprio e a unica autoridade deste corte.
+- Envio de e-mail, telefone ou WhatsApp nao foi implementado. Mensagens no
+  historico sao anotacoes internas, sem disparo externo.
+- CRM imobiliario, C2Sgo, Vetra, Bolsao, Leads Turbo e Financeiro permanecem
+  excluidos ate pedido individual.
+- Campos customizados, aplicativo movel e canais contratados exigem descoberta
+  e aceite proprios antes de ampliar o dominio.
+- As migrations e os testes pgTAP precisam ser executados no ambiente Linux da
+  CI, pois este host Windows nao possui Docker, Podman ou Supabase local.
 
 ## Fontes
 
