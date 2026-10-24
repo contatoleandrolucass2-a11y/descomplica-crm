@@ -23,7 +23,8 @@ migrations antigas ou módulos fora do pedido, Lead passou a manter
 `crm_lead_workspaces` e associações próprias. Master e Admin acessam os
 workspaces ativos; os demais usuários exigem associação explícita. O contrato
 externo `organizationId` foi preservado para compatibilidade da interface e das
-RPCs.
+RPCs. A matriz global de grants passou a inventariar os 68 objetos públicos com
+RLS e inclui os dois workspaces na lista de tabelas com RLS forçada.
 
 A revisão independente de segurança confirmou as correções de isolamento por
 organização, leitura mínima por permissão, retenção do staging e idempotência de

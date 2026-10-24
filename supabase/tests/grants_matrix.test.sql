@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  66::bigint,
+  68::bigint,
   'all public tables retain RLS'
 );
 
@@ -61,6 +61,8 @@ select is(
     'crm_lead_stages',
     'crm_lead_tag_links',
     'crm_lead_tags',
+    'crm_lead_workspace_members',
+    'crm_lead_workspaces',
     'crm_leads',
     'crm_locations',
     'crm_organizations',
@@ -132,6 +134,8 @@ select is(
     'crm_lead_stages',
     'crm_lead_tag_links',
     'crm_lead_tags',
+    'crm_lead_workspace_members',
+    'crm_lead_workspaces',
     'crm_leads',
     'crm_locations',
     'crm_organizations',
