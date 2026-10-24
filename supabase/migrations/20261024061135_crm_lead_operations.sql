@@ -156,7 +156,7 @@ declare v_actor uuid;v_purged integer;begin v_actor:=private.crm_lead_ops_actor(
 
 create or replace function public.save_crm_lead_distribution_v1(p_organization_id uuid,p_expected_revision bigint,p_document jsonb,p_reason text)
 returns jsonb language plpgsql security definer set search_path='' set lock_timeout='5s' as $$
-declare v_actor uuid;v_current bigint;v_revision bigint;v_q jsonb;v_m jsonb;v_r jsonb;v_qid uuid;v_map jsonb:='{}';begin
+declare v_actor uuid;v_current bigint;v_revision bigint;v_q jsonb;v_m jsonb;v_r jsonb;v_qid uuid;v_map jsonb:='{}'::jsonb;begin
  v_actor:=private.crm_lead_ops_actor('crm.leads.distribution.manage',p_organization_id);
  if jsonb_typeof(p_document)<>'object' or jsonb_typeof(p_document->'queues')<>'array' or jsonb_typeof(p_document->'rules')<>'array' or jsonb_array_length(p_document->'queues')>50 or jsonb_array_length(p_document->'rules')>200 or char_length(btrim(coalesce(p_reason,''))) not between 8 and 500 then raise exception 'invalid_argument: invalid distribution document' using errcode='22023';end if;
  perform 1 from public.crm_organizations where id=p_organization_id for update;select coalesce(max(revision),0) into v_current from public.crm_lead_distribution_queues where organization_id=p_organization_id;
