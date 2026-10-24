@@ -52,6 +52,15 @@ const current: DashboardAnalysisSlice = {
   ],
 };
 
+const conversionGoals = {
+  dv: { opportunityAppointment: 9, appointmentVisit: 3, appointmentSale: 12 },
+  partnerships: {
+    opportunityAppointment: null,
+    appointmentVisit: null,
+    appointmentSale: null,
+  },
+};
+
 describe("appointment dashboard availability", () => {
   it("shows unavailable analysis instead of invented charts or zero", () => {
     const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={null} />);
@@ -63,7 +72,11 @@ describe("appointment dashboard availability", () => {
 
   it("renders dimension and calendar filters, cards, recency panels and details for v4", () => {
     const markup = renderToStaticMarkup(
-      <AppointmentsDashboard analysis={current} individualGoal={24} />,
+      <AppointmentsDashboard
+        analysis={current}
+        individualGoal={24}
+        conversionGoals={conversionGoals}
+      />,
     );
     expect(markup).not.toContain("Período dos gráficos, indicadores e tabela");
     expect(markup).not.toContain("Cobertura da fonte");
@@ -94,6 +107,9 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("9 oportunidades para 1 agendamento");
     expect(markup).not.toContain("9 → 1");
     expect(markup).toContain("11,1%<");
+    expect(markup).toContain('data-goal-status="negative"');
+    expect(markup).toContain('data-goal-status="positive"');
+    expect(markup).toContain("Dentro da meta: 9 para 1; limite 9 para 1");
     expect(markup).toContain("Previstos e realizados hoje");
     expect(markup).toContain("Ranking por gerente regional");
     expect(markup).toContain("Ranking Score");
@@ -107,6 +123,15 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Detalhamento dos agendamentos");
     expect(markup).toContain("Conta: Ranking");
     expect(markup).toContain("Conta sintética");
+    expect(markup.indexOf("Evolução de agendamentos por dia")).toBeLessThan(
+      markup.indexOf("Previstos e realizados hoje"),
+    );
+    expect(markup.indexOf("Ranking por responsável")).toBeLessThan(
+      markup.indexOf("Ranking por gerente regional"),
+    );
+    expect(markup.indexOf("Último agendamento: até 7 dias")).toBeLessThan(
+      markup.indexOf("Agendamentos por mês"),
+    );
   });
 
   it("renders zero conversions without Infinity or NaN", () => {

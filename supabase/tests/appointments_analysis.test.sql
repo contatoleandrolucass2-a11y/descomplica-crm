@@ -1,6 +1,7 @@
 begin;
--- 42 existing assertions plus six dashboard redaction assertions.
-select plan(48);
+-- 42 existing assertions, six dashboard redaction assertions and four
+-- conversion-goal contract assertions.
+select plan(52);
 
 create function pg_temp.analysis_fixture()
 returns jsonb language sql as $$
@@ -190,6 +191,10 @@ select ok(has_function_privilege('authenticated','public.read_crm_appointments_g
   and not has_function_privilege('anon','public.read_crm_appointments_goal(date)','execute')
   and not has_function_privilege('service_role','public.read_crm_appointments_goal(date)','execute'),
   'only authenticated can invoke the appointment goal RPC');
+select ok(has_function_privilege('authenticated','public.read_crm_appointments_conversion_goals(date)','execute')
+  and not has_function_privilege('anon','public.read_crm_appointments_conversion_goals(date)','execute')
+  and not has_function_privilege('service_role','public.read_crm_appointments_conversion_goals(date)','execute'),
+  'only authenticated can invoke the appointment conversion goal RPC');
 select ok(not has_function_privilege(role_name,'private.project_crm_appointments_analysis(jsonb,boolean)','execute'),
   role_name || ' cannot bypass stage authorization through the private projector')
 from unnest(array['anon','authenticated','service_role']) role_name;
@@ -233,12 +238,18 @@ select is((select count(*) from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),0::bigint,'missing identity yields no stage data');
 select is(public.read_crm_appointments_goal('2026-08-04'),null::bigint,
   'missing identity yields no appointment goal');
+select is(public.read_crm_appointments_conversion_goals('2026-08-04'),null::jsonb,
+  'missing identity yields no appointment conversion goals');
 reset role;
 insert into public.crm_funnel_goals(
-  profile_key,effective_month,sales,approved_folders_rate,folders_rate,visits_rate,appointments_rate
+  profile_key,effective_month,opportunities,appointments,visits,sales,
+  approved_folders_rate,folders_rate,visits_rate,appointments_rate
 )
-values ('dv','2026-08-01',1,150,500,154,204)
+values ('dv','2026-08-01',216,24,12,1,150,500,154,204)
 on conflict (profile_key,effective_month) do update set
+  opportunities=excluded.opportunities,
+  appointments=excluded.appointments,
+  visits=excluded.visits,
   sales=excluded.sales,
   approved_folders_rate=excluded.approved_folders_rate,
   folders_rate=excluded.folders_rate,
@@ -316,6 +327,10 @@ select is((select count(*) from public.read_crm_appointments_analysis(
   'stage-only access works without dashboard permission');
 select is(public.read_crm_appointments_goal('2026-08-04'),24::bigint,
   'stage-only access reads only the active appointment volume');
+select is(public.read_crm_appointments_conversion_goals('2026-08-04')#>>'{dv,opportunityAppointment}',
+  '9','stage-only access reads the active House opportunity-to-appointment limit');
+select is(public.read_crm_appointments_conversion_goals('2026-08-04')#>'{partnerships,appointmentVisit}',
+  'null'::jsonb,'partnership appointment conversions remain unavailable instead of fabricated');
 select is((select payload#>'{dimensions,developments}' from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),'[]'::jsonb,
   'stage-only RPC cannot bypass ranking protection');

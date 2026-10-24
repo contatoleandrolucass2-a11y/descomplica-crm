@@ -309,26 +309,45 @@
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-auto-rows: 17.5rem;
+  grid-auto-rows: calc(17.5rem - 10px);
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 .overviewGrid,
-.insightGrid {
+.insightGrid,
+.recencyGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   gap: 1rem;
   margin-bottom: 1rem;
 }
+.featureChartRow,
+.monthlyChartRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  margin-bottom: 1rem;
+}
 .overviewGrid .chartCard,
 .insightGrid .chartCard,
-.insightGrid .recencyCard {
-  height: 20rem;
-  min-height: 20rem;
+.recencyGrid .recencyCard {
+  height: 17rem;
+  min-height: 17rem;
+}
+.overviewGrid .axis {
+  margin-bottom: 0.2rem;
+}
+.overviewGrid .columns {
+  padding-top: 0.35rem;
+}
+.overviewGrid .columnTrack {
+  height: 90px;
+}
+.overviewGrid .note {
+  margin-top: 0.35rem;
 }
 .insightGrid .cardBody,
-.insightGrid .recencyList {
+.recencyGrid .recencyList {
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
@@ -343,6 +362,10 @@
 .tiltCard {
   --card-tilt-x: 0deg;
   --card-tilt-y: 0deg;
+  --frame-color-a: transparent;
+  --frame-color-b: transparent;
+  position: relative;
+  isolation: isolate;
   transform: perspective(900px) rotateX(var(--card-tilt-x)) rotateY(var(--card-tilt-y));
   transform-style: preserve-3d;
   transition:
@@ -351,9 +374,65 @@
     box-shadow 160ms ease-out;
   will-change: transform;
 }
+.tiltCard::before {
+  content: "";
+  position: absolute;
+  z-index: 2;
+  inset: -2px;
+  padding: 2px;
+  border-radius: calc(1rem + 2px);
+  background: linear-gradient(
+    115deg,
+    transparent 18%,
+    var(--frame-color-a) 42%,
+    var(--frame-color-b) 52%,
+    transparent 76%
+  );
+  background-size: 260% 260%;
+  pointer-events: none;
+  opacity: 0;
+  mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.tiltCard > * {
+  position: relative;
+  z-index: 3;
+}
+.tiltCard[data-goal-status="positive"] {
+  --frame-color-a: #1b74c8;
+  --frame-color-b: #63d5ff;
+}
+.tiltCard[data-goal-status="negative"] {
+  --frame-color-a: #b8223d;
+  --frame-color-b: #ff6b78;
+}
+.tiltCard[data-goal-status="positive"]::before,
+.tiltCard[data-goal-status="negative"]::before {
+  opacity: 1;
+  animation: indicator-frame-flow 4.8s linear infinite;
+}
+.tiltCard[data-goal-status="positive"] {
+  box-shadow: 0 0 1.1rem color-mix(in srgb, #2f8fdc 13%, transparent);
+}
+.tiltCard[data-goal-status="negative"] {
+  box-shadow: 0 0 1.1rem color-mix(in srgb, #e13d55 14%, transparent);
+}
+.tiltCard[data-goal-status="positive"]:hover::before,
+.tiltCard[data-goal-status="negative"]:hover::before {
+  animation-duration: 2.2s;
+}
 .tiltCard:hover {
-  border-color: var(--analytics-cyan-strong);
-  box-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--analytics-cyan-strong) 14%, transparent);
+  box-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--analytics-cyan-strong) 18%, transparent);
+}
+@keyframes indicator-frame-flow {
+  0% {
+    background-position: 100% 100%;
+  }
+  100% {
+    background-position: -100% -100%;
+  }
 }
 .chartCard {
   display: flex;
@@ -387,7 +466,7 @@
 .kpiCard,
 .gaugeCard {
   height: 100%;
-  min-height: 17.5rem;
+  min-height: calc(17.5rem - 10px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -448,7 +527,7 @@
 }
 .conversionCard {
   height: 100%;
-  min-height: 17.5rem;
+  min-height: calc(17.5rem - 10px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -486,10 +565,9 @@
   display: block;
   width: fit-content;
   min-width: 4.5rem;
-  padding: 0.45rem 0.75rem;
-  border: 1px solid var(--analytics-cyan-strong);
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--analytics-cyan-strong) 14%, transparent);
+  padding: 0;
+  border: 0;
+  background: transparent;
   text-align: center;
 }
 .gaugeCard {
@@ -606,8 +684,8 @@
 .chartButton:focus-visible .column,
 .rankingButton:hover .rankBar,
 .rankingButton:focus-visible .rankBar {
-  background: var(--analytics-lime);
-  filter: saturate(1.2) brightness(1.05);
+  background: #1767a4;
+  filter: saturate(1.08) brightness(0.96);
 }
 .chartButton:hover .columnLabel,
 .chartButton:hover .columnValue,
@@ -628,7 +706,7 @@
 }
 .columnTrack {
   position: relative;
-  height: 138px;
+  height: 124px;
   display: flex;
   align-items: end;
   border-bottom: 1px solid var(--analytics-line);
@@ -682,14 +760,14 @@
   height: 120px;
 }
 .verticalLabels {
-  padding-bottom: 0.25rem;
+  padding-bottom: 0;
 }
 .verticalLabels .columnTrack {
-  height: 92px;
+  height: 80px;
 }
 .verticalLabels .columnLabel {
-  height: 4.8rem;
-  margin: 0.45rem auto 0;
+  height: 4.1rem;
+  margin: 0.25rem auto 0;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   overflow-wrap: normal;
@@ -870,9 +948,6 @@
   .kpiGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .overviewGrid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
 }
 @media (max-width: 1050px) {
   .filters {
@@ -896,11 +971,16 @@
   .tiltCard {
     transform: none;
   }
+  .tiltCard::before {
+    animation: none !important;
+    background-position: 50% 50%;
+  }
 }
 @media (max-width: 700px) {
   .filters,
   .overviewGrid,
-  .insightGrid {
+  .insightGrid,
+  .recencyGrid {
     grid-template-columns: minmax(0, 1fr);
   }
   .kpiGrid {

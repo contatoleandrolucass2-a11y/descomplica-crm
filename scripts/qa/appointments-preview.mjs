@@ -199,6 +199,8 @@ export async function runAppointmentsPreview() {
       `${componentDirectory}/AppointmentsDashboard.tsx`,
       `${componentDirectory}/AppointmentsDashboard.module.css`,
       "lib/crm/stages/appointments.ts",
+      "lib/crm/stages/data.ts",
+      "supabase/migrations/20261024223147_appointments_conversion_goals_read.sql",
     ].map(async (file) => ({
       file,
       sha256: createHash("sha256")
@@ -224,7 +226,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentSale:24},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentSale:null}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} conversionGoals={conversionGoals} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -448,17 +450,18 @@ export async function runAppointmentsPreview() {
           `Horizontal internal scrollbar ${theme}/${width}`,
         );
         check(
-          geometry.sections
-            .slice(0, 5)
-            .every((section) => Math.abs(section.height - geometry.sections[0].height) < 1),
-          `Five overview charts have equal heights ${theme}/${width}`,
+          Math.abs(geometry.sections[0].height - geometry.sections[7].height) < 1 &&
+            geometry.sections
+              .slice(1, 4)
+              .every((section) => Math.abs(section.height - geometry.sections[1].height) < 1),
+          `Wide charts match and the three overview charts have equal heights ${theme}/${width}`,
         );
         check(
           geometry.sections
-            .slice(5, 8)
-            .every((section) => Math.abs(section.height - geometry.sections[5].height) < 1) &&
+            .slice(4, 7)
+            .every((section) => Math.abs(section.height - geometry.sections[4].height) < 1) &&
             geometry.recency.every(
-              (section) => Math.abs(section.bottom - section.y - geometry.sections[5].height) < 1,
+              (section) => Math.abs(section.bottom - section.y - geometry.sections[4].height) < 1,
             ),
           `Six insight panels have equal heights ${theme}/${width}`,
         );
@@ -525,16 +528,17 @@ export async function runAppointmentsPreview() {
         );
         if (width >= 1201)
           check(
-            new Set(geometry.sections.slice(0, 3).map((section) => section.y)).size === 1 &&
-              new Set(geometry.sections.slice(3, 5).map((section) => section.y)).size === 1,
-            `Five overview charts use a compact 3 plus 2 layout at ${width}`,
+            new Set(geometry.sections.slice(1, 4).map((section) => section.y)).size === 1 &&
+              geometry.sections[0].y < geometry.sections[1].y,
+            `Evolution is isolated above the three overview charts at ${width}`,
           );
         if (width >= 1024)
           check(
-            new Set(geometry.sections.slice(5, 8).map((item) => item.y)).size === 1 &&
+            new Set(geometry.sections.slice(4, 7).map((item) => item.y)).size === 1 &&
               new Set(geometry.recency.map((item) => item.y)).size === 1 &&
-              geometry.recency[0].y > geometry.sections[5].y,
-            `Six insight panels use a 3 by 2 layout at ${width}`,
+              geometry.recency[0].y > geometry.sections[4].y &&
+              geometry.monthly.y > geometry.recency[0].y,
+            `Rankings, recency and monthly chart follow the requested rows at ${width}`,
           );
         if (width <= 390)
           check(
@@ -545,7 +549,7 @@ export async function runAppointmentsPreview() {
           );
         if (width === 1440) {
           check(
-            geometry.sections[6].hasVerticalScroll,
+            geometry.sections[4].hasVerticalScroll,
             "Long responsible ranking uses vertical overflow",
           );
         }

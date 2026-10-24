@@ -499,6 +499,7 @@ export default async function StagePage({
             brokerRoster={appointments.brokerRoster}
             generatedAt={appointments.generatedAt}
             individualGoal={appointments.individualGoal}
+            conversionGoals={appointments.conversionGoals}
             canViewDevelopmentRankings={authorization.permissions.includes("crm.ranking.view")}
           />
         </AnalyticsCanvas>
