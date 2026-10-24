@@ -106,6 +106,7 @@ select is(public.list_crm_lead_scopes_v1()#>>'{0,id}','1ead1000-0000-4000-8000-0
 select throws_ok($$select public.get_crm_lead_catalogs_v1('1ead1000-0000-4000-8000-000000000002')$$,
   '42501','forbidden: lead catalogs unavailable','catalog RPC rejects organization outside actor scope');
 
+reset role;
 select set_config('request.jwt.claim.sub','1ead0000-0000-4000-8000-000000000001',true);
 select is(jsonb_array_length(public.get_crm_lead_catalogs_v1('1ead1000-0000-4000-8000-000000000001')->'stages'),
   6,'catalog RPC returns canonical stages for authorized scope');

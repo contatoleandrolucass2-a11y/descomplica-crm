@@ -23,7 +23,7 @@ reset role;
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason,granted_by)
 select '2ead0000-0000-4000-8000-000000000001',permission_key,'deny','Synthetic action denial','2ead0000-0000-4000-8000-000000000001'
 from (values('crm.leads.distribution.manage'),('crm.leads.reports.export'),('crm.leads.settings.manage'),('crm.leads.import.manage')) denied(permission_key);
-set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select is(public.get_crm_lead_distribution_v1('2ead1000-0000-4000-8000-000000000001')->>'revision','0','distribution getter uses view permission without manage action');
 select is(public.get_crm_lead_report_v1('2ead1000-0000-4000-8000-000000000001','general',current_date,current_date)->>'available','true','report getter uses report view without export action');
 select is(public.get_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001')->>'revision','0','settings getter uses settings view without manage action');
@@ -31,7 +31,7 @@ select is(public.list_crm_lead_operations_audit_v1('2ead1000-0000-4000-8000-0000
 select is(public.list_crm_lead_imports_v1('2ead1000-0000-4000-8000-000000000001')#>>'{total}','0','import history getter uses import view permission');
 select throws_ok($$select public.save_crm_lead_distribution_v1('2ead1000-0000-4000-8000-000000000001',0,'{"queues":[],"rules":[]}','Denied mutation reason')$$,'42501','forbidden: missing lead operations permission','view permission does not authorize distribution mutation');
 reset role;select set_config('request.jwt.claim.sub','',true);delete from public.user_permission_overrides where user_id='2ead0000-0000-4000-8000-000000000001' and permission_key in('crm.leads.distribution.manage','crm.leads.reports.export','crm.leads.settings.manage','crm.leads.import.manage');
-set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select is(public.get_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001')->>'revision','0','settings start at revision zero');
 select is(public.save_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001',0,'{"sources":[],"channels":[],"stages":[],"lostReasons":[],"tags":[{"name":"VIP","color":"#112233"}],"alerts":{},"adjustments":{}}','Synthetic settings save')->>'revision','1','settings save uses CAS');
 select throws_ok($$select public.save_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001',0,'{"sources":[],"channels":[],"stages":[],"lostReasons":[],"tags":[],"alerts":{},"adjustments":{}}','Synthetic stale save')$$,'40001','conflict: settings revision changed','stale settings save is denied');
@@ -44,7 +44,7 @@ select is(public.get_crm_lead_distribution_v1('2ead1000-0000-4000-8000-000000000
 reset role;
 insert into public.crm_lead_customers(id,organization_id,full_name,email,phone) values('2ead2000-0000-4000-8000-000000000001','2ead1000-0000-4000-8000-000000000001','=cmd','safe@example.test','61999999999');
 insert into public.crm_leads(id,organization_id,customer_id,stage_id,source_id,channel_id,created_idempotency_key,created_payload_hash,created_by,updated_by) values('2ead3000-0000-4000-8000-000000000001','2ead1000-0000-4000-8000-000000000001','2ead2000-0000-4000-8000-000000000001',(select id from public.crm_lead_stages where key='new'),(select id from public.crm_lead_sources where key='manual'),(select id from public.crm_lead_channels where key='other'),'ops-fixture-create',repeat('0',64),'2ead0000-0000-4000-8000-000000000001','2ead0000-0000-4000-8000-000000000001');
-set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select is(public.assign_crm_lead_v1('2ead3000-0000-4000-8000-000000000001',null,'ops-assign-001')->>'outcome','assigned','deterministic assignment selects available member');
 select is(public.assign_crm_lead_v1('2ead3000-0000-4000-8000-000000000001',null,'ops-assign-001')->>'replayed','true','assignment is idempotent');
 select throws_ok(format(
@@ -63,7 +63,7 @@ insert into public.crm_lead_customers(id,organization_id,full_name) values
 insert into public.crm_leads(id,organization_id,customer_id,stage_id,created_idempotency_key,created_payload_hash,created_by,updated_by) values
 ('2ead3000-0000-4000-8000-000000000002','2ead1000-0000-4000-8000-000000000001','2ead2000-0000-4000-8000-000000000002',(select id from public.crm_lead_stages where key='new'),'ops-second-create',repeat('1',64),'2ead0000-0000-4000-8000-000000000001','2ead0000-0000-4000-8000-000000000001'),
 ('2ead3000-0000-4000-8000-000000000003','2ead1000-0000-4000-8000-000000000002','2ead2000-0000-4000-8000-000000000003',(select id from public.crm_lead_stages where key='new'),'ops-cross-create',repeat('2',64),'2ead0000-0000-4000-8000-000000000001','2ead0000-0000-4000-8000-000000000001');
-set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select throws_ok($$select public.assign_crm_lead_v1('2ead3000-0000-4000-8000-000000000002',null,'ops-assign-001')$$,'40001','conflict: assignment idempotency key reused','same organization key rejects a different lead command');
 select is(public.assign_crm_lead_v1('2ead3000-0000-4000-8000-000000000003',null,'ops-assign-001')->>'outcome','unassigned','same actor and key execute independently in another organization');
 
@@ -72,23 +72,23 @@ select is(public.preview_crm_lead_import_v1('2ead1000-0000-4000-8000-00000000000
 select is(public.apply_crm_lead_import_v1((select id from public.crm_lead_import_batches where file_hash=repeat('a',64)),(select plan_hash from public.crm_lead_import_batches where file_hash=repeat('a',64)))->>'created','1','matching plan applies import');
 select is((select count(*) from public.crm_lead_import_rows),0::bigint,'staging rows are removed after apply');
 select is(public.preview_crm_lead_import_v1('2ead1000-0000-4000-8000-000000000001',repeat('b',64),'{}','[{"name":"Expirado"}]')->>'status','previewed','second preview creates expiring staging');
-reset role;update public.crm_lead_import_batches set expires_at=now()-interval '1 minute' where file_hash=repeat('b',64);set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+reset role;update public.crm_lead_import_batches set expires_at=now()-interval '1 minute' where file_hash=repeat('b',64);select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select is(public.list_crm_lead_imports_v1('2ead1000-0000-4000-8000-000000000001')#>>'{total}','1','history hides expired preview');
 select is(public.apply_crm_lead_import_v1((select id from public.crm_lead_import_batches where file_hash=repeat('b',64)),(select plan_hash from public.crm_lead_import_batches where file_hash=repeat('b',64)))->>'status','expired','expired apply returns domain failure after purge');
 select is((select count(*) from public.crm_lead_import_batches where file_hash=repeat('b',64)),0::bigint,'expired apply removes batch and staging');
 select is(public.preview_crm_lead_import_v1('2ead1000-0000-4000-8000-000000000001',repeat('c',64),'{}','[{"name":"Para purgar"}]')->>'status','previewed','third preview creates explicit purge fixture');
-reset role;update public.crm_lead_import_batches set expires_at=now()-interval '25 hours' where file_hash=repeat('c',64);set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+reset role;update public.crm_lead_import_batches set expires_at=now()-interval '25 hours' where file_hash=repeat('c',64);select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select is(public.purge_crm_lead_import_staging_v1('2ead1000-0000-4000-8000-000000000001')->>'purgedBatches','1','explicit purge is scoped and idempotent');
 select is(public.purge_crm_lead_import_staging_v1('2ead1000-0000-4000-8000-000000000001')->>'purgedBatches','0','repeated explicit purge is a no-op');
 select is(public.preview_crm_lead_import_v1('2ead1000-0000-4000-8000-000000000001',repeat('d',64),'{}','[{"name":"Preview antigo"}]')->>'status','previewed','preview purge fixture is created');
-reset role;update public.crm_lead_import_batches set expires_at=now()-interval '25 hours' where file_hash=repeat('d',64);set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+reset role;update public.crm_lead_import_batches set expires_at=now()-interval '25 hours' where file_hash=repeat('d',64);select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select is(public.preview_crm_lead_import_v1('2ead1000-0000-4000-8000-000000000001',repeat('e',64),'{}','[{"name":"Preview novo"}]')->>'status','previewed','new preview triggers scoped retention cleanup');
 select is((select count(*) from public.crm_lead_import_batches where file_hash=repeat('d',64)),0::bigint,'preview entry purges staging older than 24 hours');
 select is(public.preview_crm_lead_import_v1('2ead1000-0000-4000-8000-000000000001',repeat('f',64),'{}','[{"name":"Cron fixture"}]')->>'status','previewed','cron retention fixture is created');
 reset role;update public.crm_lead_import_batches set expires_at=now()-interval '25 hours' where file_hash=repeat('f',64);
 select lives_ok((select command from cron.job where jobname='crm-lead-import-staging-retention'),'scheduled retention SQL executes');
 select is((select count(*) from public.crm_lead_import_batches where file_hash=repeat('f',64)),0::bigint,'scheduled retention physically deletes expired batch and cascades staging');
-set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
+select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select ok(not exists(select 1 from public.crm_lead_operations_audit where metadata::text like '%import@example.test%' or metadata::text like '%=cmd%'),'operations audit excludes PII');
 select is((select count(*) from public.crm_lead_operations_audit where organization_id='2ead1000-0000-4000-8000-000000000001'),14::bigint,'mutations and retention create scoped audit events');
 select * from finish();rollback;
