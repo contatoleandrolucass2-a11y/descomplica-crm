@@ -133,11 +133,13 @@ describe("Meta Marketing API read-only client", () => {
       );
     }
     expect(JSON.stringify(result)).not.toContain(configuration.accessToken);
-    const requestedStatuses = JSON.parse(
-      new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get("effective_status")!,
-    );
-    expect(requestedStatuses).toContain("ARCHIVED");
-    expect(requestedStatuses).not.toContain("DELETED");
+    const adsUrl = new URL(String(fetcher.mock.calls[0]?.[0]));
+    expect(adsUrl.searchParams.has("effective_status")).toBe(false);
+    expect(JSON.parse(adsUrl.searchParams.get("filtering")!)).toContainEqual({
+      field: "effective_status",
+      operator: "IN",
+      value: expect.arrayContaining(["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"]),
+    });
   });
 
   it("keeps Meta-archived ads identifiable while preserving their historical insights", async () => {
