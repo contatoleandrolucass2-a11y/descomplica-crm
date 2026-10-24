@@ -132,6 +132,28 @@ describe("dashboard Meta Ads", () => {
     expect(application).toContain('"ads-filters:v2:"');
   });
 
+  it("oferece selecionar todos nos filtros multiplos e fecha os menus fora da area", async () => {
+    const [application, dashboard, styles] = await Promise.all([
+      readFile(new URL("../public/descomplica-ads-compact/live-data.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/app.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/style.css", import.meta.url), "utf8"),
+    ]);
+
+    expect(application).toContain('data-filter-all="${key}"');
+    expect(application).toContain('data-filter-option="${key}"');
+    expect(application).toContain("Selecionar todos");
+    expect(application).toContain('key: "account"');
+    expect(application).toContain('key: "campaigns"');
+    expect(application).toContain('key: "status"');
+    expect(application).toContain('key: "destination"');
+    expect(application).toContain("closeFilterMenus()");
+    expect(application).toContain('!e.target.closest("#choose-campaigns")');
+    expect(application).toContain('window.addEventListener("blur", () => closeFilterMenus())');
+    expect(application).toContain("master.indeterminate");
+    expect(dashboard).toContain('e.key === "Escape"');
+    expect(styles).toContain(".filter-select-all");
+  });
+
   it("le o documento por caminho textual compativel com o runtime empacotado", async () => {
     const pageSource = await readFile(
       new URL("../app/(protected)/app/meta-ads/MetaAdsPage.tsx", import.meta.url),

@@ -9067,3 +9067,9 @@ reportar `GHSA-xjj6-f33q-929c` em `undici@7.30.0`, dependência transitiva do
 `next-devtools-mcp`. O override mínimo fixa `7.30.1`; `pnpm audit --audit-level
 high` passou sem vulnerabilidades altas ou críticas. Nenhum comportamento ou
 página do CRM foi alterado por esta correção de gate.
+
+## 2026-10-24 — Correção da tabela de campanhas do Meta Ads
+
+- O status de veiculação passa a ocupar uma linha própria dentro da coluna
+  Campanha. A geometria automatizada confirma que o selo termina antes da
+  coluna Investimento, inclusive com nomes longos.

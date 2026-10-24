@@ -249,15 +249,31 @@ try {
   await expect(frame.getByRole("heading", { name: "Comparar campanhas" })).toBeVisible();
   await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
   await expect(frame.locator('[data-kpi="leads"] strong')).toHaveText("12");
-  await expect(frame.locator("#status")).toHaveValue("active");
-  await frame.locator("#status").selectOption("archived");
+  const campaignRow = frame.locator('tr[data-open="11"]'),
+    campaignStatusBox = await campaignRow.locator(".delivery-status").boundingBox(),
+    investmentCellBox = await campaignRow.locator("td").nth(1).boundingBox();
+  assert.ok(campaignStatusBox && investmentCellBox, "Campaign row geometry is available");
+  assert.ok(
+    campaignStatusBox.x + campaignStatusBox.width <= investmentCellBox.x,
+    "Campaign delivery status stays inside the campaign column",
+  );
+  const activeStatus = frame.locator('[data-filter-option="status"][value="active"]'),
+    archivedStatus = frame.locator('[data-filter-option="status"][value="archived"]'),
+    allStatuses = frame.locator('[data-filter-all="status"]');
+  await expect(activeStatus).toBeChecked();
+  await expect(allStatuses).not.toBeChecked();
+  assert.equal(await allStatuses.evaluate((input) => input.indeterminate), true);
+  await frame.locator('[data-filter="status"] summary').click();
+  await activeStatus.uncheck();
+  await archivedStatus.check();
   const deletedCampaignRow = frame.locator('tr[data-open="777"]');
   await expect(deletedCampaignRow).toContainText("Campanha excluída QA");
   await expect(deletedCampaignRow.locator(".delivery-status")).toHaveText(
     "Excluída/arquivada (Meta)",
   );
   await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("71,83");
-  await frame.locator("#status").selectOption("active");
+  await archivedStatus.uncheck();
+  await activeStatus.check();
   await expect(frame.locator("#compare-period")).not.toBeChecked();
   await frame.locator("#compare-period").check();
   await expect(frame.locator(".period-comparison").first()).toBeVisible();

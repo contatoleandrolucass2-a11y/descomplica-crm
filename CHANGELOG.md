@@ -3441,3 +3441,9 @@ pendente dos gates completos no SHA final.
 ## 2026-10-24 — Dependência de suporte do release
 
 - Atualizado `undici` transitivo do Next DevTools para `7.30.1`, eliminando o advisory alto `GHSA-xjj6-f33q-929c` que bloqueava a publicação já validada de Agendamentos.
+
+## 2026-10-24 — Status da campanha separado do investimento
+
+- Reorganiza a identidade da campanha na tabela do Meta Ads para manter o status
+  de veiculação abaixo do nome, dentro da primeira coluna, sem cobrir o valor
+  investido.

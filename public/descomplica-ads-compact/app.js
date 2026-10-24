@@ -48,15 +48,15 @@ const info = (text) =>
   `<button class="info" title="${text}" aria-label="${text}" data-info="${text}">ⓘ</button>`;
 const dot = (c) => `<span class="dot" style="--c:${c.color}"></span>`;
 const resultName = () =>
-  state.destination === "whatsapp"
+  destinationFilterKey() === "whatsapp"
     ? "Conversas iniciadas"
-    : state.destination === "unknown"
+    : ["unknown", "mixed"].includes(destinationFilterKey())
       ? "Resultados"
       : "Cadastros";
 const costName = () =>
-  state.destination === "whatsapp"
+  destinationFilterKey() === "whatsapp"
     ? "Custo por conversa"
-    : state.destination === "unknown"
+    : ["unknown", "mixed"].includes(destinationFilterKey())
       ? "Custo por resultado"
       : "Custo por cadastro";
 const isoDate = (d) => d.toISOString().slice(0, 10);
@@ -95,7 +95,7 @@ function dateControls() {
   return `<div class="comparison-strip"><label class="compare-toggle"><input type="checkbox" id="compare-period" ${state.compare ? "checked" : ""}> Comparar com período anterior</label>${state.compare ? `<span>${comparisonLabel()}</span>` : ""}${state.periodMode === "custom" ? `<form id="custom-period-form"><label>De <input type="date" id="date-start" aria-label="Data inicial" value="${selectedRange().start}" required></label><label>Até <input type="date" id="date-end" aria-label="Data final" value="${selectedRange().end}" required></label><button type="submit">Aplicar período</button><span id="date-error" role="alert"></span></form>` : ""}<small>Meta API · somente leitura</small></div>`;
 }
 function alertKey(c) {
-  return [c.id, state.destination, selectedRange().start, selectedRange().end, status(c)[1]].join(
+  return [c.id, destinationFilterKey(), selectedRange().start, selectedRange().end, status(c)[1]].join(
     "|",
   );
 }
@@ -105,7 +105,7 @@ function syncAlertHistory() {
     observed = read("ads-live-compact-alert-observed", {});
   for (const c of current()) {
     const [label, tone] = status(c),
-      id = c.id + "|" + state.destination,
+      id = c.id + "|" + destinationFilterKey(),
       signature = label + "|" + c.cap + "|" + budgetFor(c)?.limit;
     const changed = observed[id] !== signature;
     observed[id] = signature;
@@ -117,7 +117,8 @@ function syncAlertHistory() {
         campaignId: c.id,
         name: c.label || c.name,
         color: c.color,
-        destination: state.destination,
+        destination: destinationFilterKey(),
+        destinations: [...selectedDestinations()],
         ...selectedRange(),
         tone,
         label,
@@ -205,28 +206,37 @@ function kpis(list) {
 const grip = (kind, id) =>
   `<button class="grip" draggable="true" data-drag-kind="${kind}" data-drag-id="${id}" aria-label="Arrastar ${id}" title="Arraste para reorganizar. Alt + seta move pelo teclado.">⠿</button>`;
 function panel(id, title, body, controls = "", full = false) {
-  return `<section class="panel draggable ${expandedChart === id ? "chart-expanded" : ""} ${full ? "full" : ""}" data-panel="${id}" ${expandedChart === id ? 'role="dialog" aria-modal="true" aria-label="Gráfico expandido"' : ""}><div class="panel-head"><div class="panel-title">${grip("panel", id)}<h2>${title}</h2></div><div class="graph-controls">${controls}${graphMenu(id)}${expandChartButton(id)}</div></div><div class="panel-body">${expandedChart === id ? `<p class="expanded-period">${period()} · ${state.destination}${state.compare ? " · " + comparisonLabel() : ""}</p>` : ""}${body}</div></section>`;
+  return `<section class="panel draggable ${expandedChart === id ? "chart-expanded" : ""} ${full ? "full" : ""}" data-panel="${id}" ${expandedChart === id ? 'role="dialog" aria-modal="true" aria-label="Gráfico expandido"' : ""}><div class="panel-head"><div class="panel-title">${grip("panel", id)}<h2>${title}</h2></div><div class="graph-controls">${controls}${graphMenu(id)}${expandChartButton(id)}</div></div><div class="panel-body">${expandedChart === id ? `<p class="expanded-period">${period()} · ${destinationLabel()}${state.compare ? " · " + comparisonLabel() : ""}</p>` : ""}${body}</div></section>`;
 }
 function funnel(c) {
-  const prev = previousData(c);
+  const prev = previousData(c),
+    destination = destinationFilterKey();
   const priorStages =
-    state.destination === "whatsapp"
+    destination === "whatsapp"
       ? [prev.clicks, prev.leads, null]
-      : [prev.clicks, prev.opens, prev.leads, prev.qualified];
+      : ["form", "site"].includes(destination)
+        ? [prev.clicks, prev.opens, prev.leads, prev.qualified]
+        : [prev.clicks, prev.leads, prev.qualified];
   const stages =
-    state.destination === "whatsapp"
+    destination === "whatsapp"
       ? [
           ["Cliques", c.clicks],
           ["Conversas", c.leads],
           ["Qualificados", null],
         ]
-      : [
-          ["Cliques", c.clicks],
-          [state.destination === "site" ? "Visitas" : "Aberturas", c.opens],
-          ["Cadastros", c.leads],
-          ["Qualificados", c.qualified],
-        ];
-  return `<article class="funnel draggable" data-funnel="${c.id}" style="--c:${c.color}"><div class="funnel-head">${grip("funnel", c.id)}${dot(c)}<select data-swap="${c.id}" aria-label="Campanha do funil ${c.name}">${campaigns.map((a) => `<option value="${a.id}" ${a.id === c.id ? "selected" : ""}>${a.name}</option>`).join("")}</select></div>${stages.map(([n, v], i) => `<div class="funnel-row"><span>${n}</span><div><div class="funnel-bar" style="min-width:0;width:${v == null ? 0 : Math.min(100, Math.max(4, c.clicks ? (v / c.clicks) * 100 : 0))}%"></div></div><b>${num(v)}${state.compare ? `<small class="funnel-previous">ant. ${num(priorStages[i])}</small>` : ""}</b></div>`).join("")}<div class="funnel-foot">Clique → ${state.destination === "whatsapp" ? "conversa" : "cadastro"} <b>${pct(AdsData.ratio(c.leads, c.clicks, 100))}</b></div></article>`;
+      : ["form", "site"].includes(destination)
+        ? [
+            ["Cliques", c.clicks],
+            [destination === "site" ? "Visitas" : "Aberturas", c.opens],
+            ["Cadastros", c.leads],
+            ["Qualificados", c.qualified],
+          ]
+        : [
+            ["Cliques", c.clicks],
+            ["Resultados", c.leads],
+            ["Qualificados", c.qualified],
+          ];
+  return `<article class="funnel draggable" data-funnel="${c.id}" style="--c:${c.color}"><div class="funnel-head">${grip("funnel", c.id)}${dot(c)}<select data-swap="${c.id}" aria-label="Campanha do funil ${c.name}">${campaigns.map((a) => `<option value="${a.id}" ${a.id === c.id ? "selected" : ""}>${a.name}</option>`).join("")}</select></div>${stages.map(([n, v], i) => `<div class="funnel-row"><span>${n}</span><div><div class="funnel-bar" style="min-width:0;width:${v == null ? 0 : Math.min(100, Math.max(4, c.clicks ? (v / c.clicks) * 100 : 0))}%"></div></div><b>${num(v)}${state.compare ? `<small class="funnel-previous">ant. ${num(priorStages[i])}</small>` : ""}</b></div>`).join("")}<div class="funnel-foot">Clique → ${destination === "whatsapp" ? "conversa" : "resultado"} <b>${pct(AdsData.ratio(c.leads, c.clicks, 100))}</b></div></article>`;
 }
 function funnels(list) {
   if (!list.length) return '<div class="empty">Selecione pelo menos uma campanha.</div>';
@@ -236,7 +246,7 @@ function funnels(list) {
   if (state.matrix)
     return `<div class="table-wrap"><table><thead><tr><th>Etapa</th>${ordered.map((c) => `<th>${dot(c)}${c.name}</th>`).join("")}</tr></thead><tbody>${[
       ["Cliques", "clicks"],
-      [state.destination === "whatsapp" ? "Conversas iniciadas" : "Cadastros", "leads"],
+      [resultName(), "leads"],
       ["Qualificados", "qualified"],
     ]
       .map(
@@ -416,7 +426,7 @@ function campaignTable(list) {
   return `<div class="table-wrap"><table><thead><tr><th>Campanha</th><th>Investimento</th><th>${resultName()}</th><th>${costName()}</th><th>Teto ${metricInfo("cap")}</th><th>Situação</th><th></th></tr></thead><tbody>${list
     .map((c) => {
       const [label, tone] = status(c);
-      return `<tr class="clickable" data-open="${c.id}"><td>${dot(c)}<button class="link-button" title="${c.name}" data-open="${c.id}">${c.name}</button>${deliveryBadge(c)}</td><td>${comparisonCell(c, "spend", money)}</td><td>${comparisonCell(c, "leads", num)}</td><td class="${c.cap != null && c.cpl > c.cap ? "bad" : ""}">${comparisonCell(c, "cpl", money)}</td><td>${money(c.cap)}</td><td><span class="badge ${tone}">${label}</span></td><td>›</td></tr>`;
+      return `<tr class="clickable" data-open="${c.id}"><td class="campaign-table-cell"><div class="campaign-table-identity">${dot(c)}<button class="link-button" title="${c.name}" data-open="${c.id}">${c.name}</button>${deliveryBadge(c)}</div></td><td>${comparisonCell(c, "spend", money)}</td><td>${comparisonCell(c, "leads", num)}</td><td class="${c.cap != null && c.cpl > c.cap ? "bad" : ""}">${comparisonCell(c, "cpl", money)}</td><td>${money(c.cap)}</td><td><span class="badge ${tone}">${label}</span></td><td>›</td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }
@@ -490,7 +500,7 @@ function mapPage() {
           `<div class="rank-row" data-municipality="${r.name}" tabindex="0" role="button"><div class="row"><span>${r.name}</span><b>${num(r.value)} <small>· ${located ? pct((r.value / located) * 100) : "—"}</small></b></div><div class="rank-track"><i style="width:${located ? (r.value / located) * 100 : 0}%"></i></div></div>`,
       )
       .join(""),
-  )}<div id="municipality-detail"></div><div class="map-note">ⓘ Origem: município informado no cadastro${state.destination === "whatsapp" ? " ou na conversa" : ""}. Não representa a segmentação geográfica do anúncio.<br><a href="https://github.com/tbrugz/geodata-br" target="_blank" rel="noreferrer">Malha municipal: geodata-br</a> · recorte ilustrativo.<br>A fonte atual não fornece localização dos leads. Registros sem localização ficam fora do mapa.</div></div></div>`;
+  )}<div id="municipality-detail"></div><div class="map-note">ⓘ Origem: município informado no cadastro${destinationFilterKey() === "whatsapp" ? " ou na conversa" : ""}. Não representa a segmentação geográfica do anúncio.<br><a href="https://github.com/tbrugz/geodata-br" target="_blank" rel="noreferrer">Malha municipal: geodata-br</a> · recorte ilustrativo.<br>A fonte atual não fornece localização dos leads. Registros sem localização ficam fora do mapa.</div></div></div>`;
 }
 function paintMap() {
   if (state.mapLevel === "neighborhoods") {
@@ -632,6 +642,7 @@ function render() {
     }
   }
   if (expandedChart) mountExpandedFilters();
+  syncFilterMasters();
   window.parent.postMessage(
     { type: "descomplica:meta-ads-modal-open" },
     new URL(document.baseURI).origin,
@@ -703,6 +714,15 @@ document.addEventListener("dragend", () => {
   $$(".dragging,.drop-target").forEach((a) => a.classList.remove("dragging", "drop-target"));
 });
 document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    const openFilter = e.target.closest("details.filter-multiselect[open]");
+    if (openFilter) {
+      e.preventDefault();
+      openFilter.open = false;
+      openFilter.querySelector("summary")?.focus();
+      return;
+    }
+  }
   if (["Enter", " "].includes(e.key) && e.target.matches("[data-neighborhood]")) {
     e.preventDefault();
     focusNeighborhood(e.target.dataset.neighborhood);
@@ -837,7 +857,15 @@ document.addEventListener("click", (e) => {
   if (alertOpen) {
     const record = readAlertHistory()[alertOpen.dataset.alertRecord];
     if (record) {
-      state.destination = record.destination;
+      state.destinations = Array.isArray(record.destinations)
+        ? [...record.destinations]
+        : [record.destination].filter((destination) => destination && destination !== "mixed");
+      state.destination =
+        state.destinations.length === 1
+          ? state.destinations[0]
+          : state.destinations.length
+            ? "mixed"
+            : "unknown";
       state.startDate = record.start;
       state.endDate = record.end;
       state.days = Math.round((parseDate(record.end) - parseDate(record.start)) / 86400000) + 1;
