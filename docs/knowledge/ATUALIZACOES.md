@@ -2980,7 +2980,7 @@ dependente da autorização específica aplicável.
   prévias de importação e auditoria sem PII. A migration do catálogo registra
   as 41 páginas protegidas atuais.
 - Evidência local em Node 24.19 e pnpm 11.20: lint sem erros, typecheck e build
-  aprovados; Vitest com 4.176 aprovados e 107 ignorados; `pages:check`,
+  aprovados; Vitest com 4.179 aprovados e 107 ignorados; `pages:check`,
   `resources:check`, Gitleaks e verificação de diff aprovados. Os 72 testes
   pgTAP do núcleo e 53 das operações dependem da CI Linux porque não há
   Docker, Podman ou Supabase local neste host.

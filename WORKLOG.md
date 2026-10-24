@@ -19,7 +19,7 @@ exportações neutralizam fórmulas de planilha.
 A revisão independente de segurança confirmou as correções de isolamento por
 organização, leitura mínima por permissão, retenção do staging e idempotência de
 criação, alteração, mensagens, atividades e distribuição. Os testes Vitest
-aprovaram 4.176 casos e ignoraram 107; lint, typecheck, build, catálogo de 41
+aprovaram 4.179 casos e ignoraram 107; lint, typecheck, build, catálogo de 41
 páginas, inventário de 76 rotas e Gitleaks passaram. A suíte Node mantém três
 falhas Windows preexistentes do Meta Ads, e `test:release` mantém onze falhas do
 mesmo host por arquivo sintético ausente; ambos são externos ao menu Lead. O
