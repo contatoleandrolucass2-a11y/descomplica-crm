@@ -8,6 +8,8 @@
   controle acessível no rodapé e ícones preservados.
 - Removidos a cor divergente do nome Ads e o breadcrumb redundante, fazendo o
   dashboard começar imediatamente abaixo da barra superior.
+- Matriz E2E atualizada para tratar Meta Ads como link direto e manter as rotas
+  detalhadas disponíveis pela lateral ou por acesso autorizado.
 
 ## 2026-10-24 - Núcleo operacional do CRM de leads
 
