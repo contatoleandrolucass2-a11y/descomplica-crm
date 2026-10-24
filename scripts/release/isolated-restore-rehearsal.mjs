@@ -75,16 +75,20 @@ function sanitizeDiagnostic(value) {
 }
 
 function commandFailure(command, result, label) {
-  const diagnostic = sanitizeDiagnostic(
+  const sanitized = sanitizeDiagnostic(
     `${result.stderr?.toString?.() ?? result.stderr ?? ""}\n${
       result.stdout?.toString?.() ?? result.stdout ?? ""
     }\nspawn_error=${result.error?.message ?? "none"} exit_status=${String(result.status)} signal=${String(result.signal)}`,
-  )
-    .trim()
-    .split("\n")
-    .slice(-12)
+  ).trim();
+  const lines = sanitized.split("\n");
+  const relevant = lines.filter((line) =>
+    /\b(?:error|fatal|panic|failed|failure|invalid|timeout|unhealthy|denied|conflict)\b/i.test(
+      line,
+    ),
+  );
+  const diagnostic = [...new Set([...relevant.slice(-20), ...lines.slice(-10)])]
     .join("\n")
-    .slice(-2_000);
+    .slice(-4_000);
   return new Error(
     `${label ?? command} failed in the isolated local rehearsal.${
       diagnostic ? `\n${diagnostic}` : ""
