@@ -8,6 +8,8 @@
   configurações versionadas e auditoria com permissões independentes.
 - Cria schema próprio com RLS, grants mínimos, RPCs idempotentes, catálogo de
   páginas e testes de autorização, contratos e operações.
+- Prepara `pg_cron` no banco temporário correto durante o ensaio isolado, para
+  restaurar o backup integral sem dispensar a retenção automática de prévias.
 - Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
   opcionais fora deste corte.
 

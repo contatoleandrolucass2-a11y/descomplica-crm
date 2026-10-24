@@ -521,6 +521,18 @@ describe("representative production restore evidence", () => {
 });
 
 describe("isolated restore evidence", () => {
+  it("prepares environment-bound pg_cron in the isolated restore database", async () => {
+    const script = await readFile(
+      path.join(repositoryRoot, "scripts/release/isolated-restore-rehearsal.mjs"),
+      "utf8",
+    );
+
+    expect(script).toContain("alter system set cron.database_name");
+    expect(script).toContain("create extension if not exists pg_cron with schema pg_catalog");
+    expect(script).toContain("preparePgCronRestore(targetContainer, restoreDatabase)");
+    expect(script).toContain("pg_isready");
+  });
+
   it("proves a clean local cross-cluster restore without authorizing remote work", async () => {
     const evidence = JSON.parse(
       await readFile(

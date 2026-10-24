@@ -451,6 +451,36 @@ function createRestoreDatabase(container, database) {
   );
 }
 
+function waitForDatabase(container, database) {
+  const pause = new Int32Array(new SharedArrayBuffer(4));
+  for (let attempt = 0; attempt < 60; attempt += 1) {
+    const readiness = runUnchecked(
+      "docker",
+      ["exec", container, "pg_isready", "--username", "postgres", "--dbname", database],
+      { cwd: repositoryRoot },
+    );
+    if (readiness.status === 0) return;
+    Atomics.wait(pause, 0, 0, 500);
+  }
+  throw new Error("Isolated restore database did not become ready after pg_cron restart.");
+}
+
+function preparePgCronRestore(container, database) {
+  if (!/^rc_restore_[a-f0-9]{10}$/u.test(database)) {
+    throw new Error("Unsafe isolated restore database name.");
+  }
+  dockerDatabase(container, "postgres", `alter system set cron.database_name = '${database}';`);
+  run("docker", ["restart", "--time", "10", container], {
+    label: "isolated pg_cron target restart",
+  });
+  waitForDatabase(container, database);
+  dockerDatabase(
+    container,
+    database,
+    "create extension if not exists pg_cron with schema pg_catalog;",
+  );
+}
+
 function logicalDump(container) {
   return runBuffer(
     "docker",
@@ -1327,6 +1357,7 @@ async function main() {
     }
     bootstrapApplicationRoles(targetContainer);
     createRestoreDatabase(targetContainer, restoreDatabase);
+    preparePgCronRestore(targetContainer, restoreDatabase);
 
     const dump = logicalDump(sourceContainer);
     const dumpSha256 = sha256(dump);

@@ -19,11 +19,17 @@ exportações neutralizam fórmulas de planilha.
 A revisão independente de segurança confirmou as correções de isolamento por
 organização, leitura mínima por permissão, retenção do staging e idempotência de
 criação, alteração, mensagens, atividades e distribuição. Os testes Vitest
-aprovaram 4.179 casos e ignoraram 107; lint, typecheck, build, catálogo de 41
+aprovaram 4.180 casos e ignoraram 107; lint, typecheck, build, catálogo de 41
 páginas, inventário de 76 rotas e Gitleaks passaram. A suíte Node mantém três
 falhas Windows preexistentes do Meta Ads, e `test:release` mantém onze falhas do
 mesmo host por arquivo sintético ausente; ambos são externos ao menu Lead. O
 pgTAP será comprovado pela CI Linux porque este host não possui Supabase local.
+
+Na CI, as 83 migrations e os 2.238 testes pgTAP concluíram. O primeiro ensaio
+de restauração revelou que `pg_cron` só pode ser instalado no banco definido
+por `cron.database_name`; o alvo descartável agora configura esse banco,
+reinicia apenas o contêiner isolado, aguarda prontidão e pré-instala a extensão
+antes do `pg_restore`. O dump e a comparação canônica continuam integrais.
 
 ## 2026-10-24 - Estrutura protegida do menu Lead
 
