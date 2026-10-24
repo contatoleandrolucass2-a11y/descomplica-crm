@@ -32,6 +32,11 @@ passou a depender de `is_active` e do guard central `_internal_assert_actor_acti
 sem importar a migration ampla de governança de usuários. Um contrato estático
 impede reintroduzir dependências em `access_status` ou `crm_organizations`.
 
+Após as três migrations passarem na produção, os advisors confirmaram RLS
+forçada, MFA e grants mínimos, mas apontaram 34 chaves estrangeiras Lead sem
+índice de cobertura. A migration incremental de índices cobre exatamente essas
+relações, com timeout de lock e de statement, sem alterar dados ou contratos.
+
 A revisão independente de segurança confirmou as correções de isolamento por
 organização, leitura mínima por permissão, retenção do staging e idempotência de
 criação, alteração, mensagens, atividades e distribuição. Os testes Vitest

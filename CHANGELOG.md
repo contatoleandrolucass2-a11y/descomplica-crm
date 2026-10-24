@@ -22,6 +22,8 @@
   cabeçalho com o novo oitavo destino, sem alterar limiares de comparação.
 - Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
   opcionais fora deste corte.
+- Adiciona índices de cobertura para as 34 chaves estrangeiras do domínio Lead
+  identificadas pelo advisor de performance após a migration produtiva.
 
 ## 2026-10-24 - Primeiro incremento do menu Lead
 
