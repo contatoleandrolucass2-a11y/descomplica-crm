@@ -1,5 +1,11 @@
 # Worklog
 
+## 2026-10-23 - Advisory novo durante a publicação de Agendamentos
+
+Após o merge do PR #315, o registry publicou `GHSA-27r3-jxmh-p828` e a CI do
+`main` bloqueou `body-parser@2.3.0`, transitivo do Next DevTools. O override para
+`2.4.0` remove o risco alto sem modificar código ou comportamento do dashboard.
+
 ## 2026-10-23 - Desbloqueio da publicação de Agendamentos
 
 O advisory Linux `GHSA-mrhx-c7xc-m3w5` passou a classificar o Zod anterior como
