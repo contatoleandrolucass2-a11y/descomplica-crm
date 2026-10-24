@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-24 — Navegação compacta do Meta Ads
+
+- Transformado o item Meta Ads da navbar em acesso direto, sem o submenu das
+  páginas já disponíveis na lateral.
+- Menu lateral configurado para abrir expandido e recolher para 64 px, com
+  controle acessível no rodapé e ícones preservados.
+- Removidos a cor divergente do nome Ads e o breadcrumb redundante, fazendo o
+  dashboard começar imediatamente abaixo da barra superior.
+- Matriz E2E atualizada para tratar Meta Ads como link direto e manter as rotas
+  detalhadas disponíveis pela lateral ou por acesso autorizado.
+
 ## 2026-10-24 - Núcleo operacional do CRM de leads
 
 O menu `Lead` passou do primeiro estado vazio para um núcleo operacional com
