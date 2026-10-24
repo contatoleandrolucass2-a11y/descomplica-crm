@@ -87,7 +87,7 @@ try {
   for (const key of filterFields) if (stored[key] !== undefined) state[key] = stored[key];
   if (!Array.isArray(stored.destinations))
     state.destinations = stored.destination ? [stored.destination] : ["whatsapp"];
-  if (!Array.isArray(stored.statuses))
+  if (!Array.isArray(stored.statuses) && stored.status !== undefined)
     state.statuses = stored.status && stored.status !== "all" ? [stored.status] : null;
   if (!Array.isArray(stored.accountIds))
     state.accountIds = stored.account && stored.account !== "all" ? [stored.account] : null;
