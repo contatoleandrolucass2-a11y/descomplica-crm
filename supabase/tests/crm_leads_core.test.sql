@@ -83,6 +83,7 @@ select throws_ok(format(
   jsonb_build_object('organizationId','1ead1000-0000-4000-8000-000000000001','customer',jsonb_build_object('name','Cliente Bloqueado'))
 ), '42501','forbidden: missing lead permission','scoped broker without action permission cannot create');
 reset role;
+select set_config('request.jwt.claim.sub','',true);
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason,granted_by)
 select '1ead0000-0000-4000-8000-000000000002',permission_key,'allow','Synthetic non-list page access','1ead0000-0000-4000-8000-000000000001'
 from (values('crm.leads.view'),('crm.leads.pipeline.view'),('crm.leads.activities.view')) permissions(permission_key);
@@ -97,6 +98,7 @@ select is(public.get_crm_lead_funnel_v1('1ead1000-0000-4000-8000-000000000001')#
 select throws_ok($$select public.get_crm_lead_funnel_v1('1ead1000-0000-4000-8000-000000000001','{"query":"private@example.test"}')$$,
   '42501','forbidden: nominal funnel search requires list permission','pipeline-only actor cannot probe customer PII through search');
 reset role;
+select set_config('request.jwt.claim.sub','',true);
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason,granted_by)
 values ('1ead0000-0000-4000-8000-000000000002','crm.leads.list.view','allow','Synthetic scope read','1ead0000-0000-4000-8000-000000000001');
 set local role authenticated;

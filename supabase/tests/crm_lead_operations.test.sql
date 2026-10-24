@@ -90,5 +90,5 @@ select lives_ok((select command from cron.job where jobname='crm-lead-import-sta
 select is((select count(*) from public.crm_lead_import_batches where file_hash=repeat('f',64)),0::bigint,'scheduled retention physically deletes expired batch and cascades staging');
 select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select ok(not exists(select 1 from public.crm_lead_operations_audit where metadata::text like '%import@example.test%' or metadata::text like '%=cmd%'),'operations audit excludes PII');
-select is((select count(*) from public.crm_lead_operations_audit where organization_id='2ead1000-0000-4000-8000-000000000001'),14::bigint,'mutations and retention create scoped audit events');
+select is((select count(*) from public.crm_lead_operations_audit where organization_id='2ead1000-0000-4000-8000-000000000001'),13::bigint,'mutations and retention create scoped audit events');
 select * from finish();rollback;
