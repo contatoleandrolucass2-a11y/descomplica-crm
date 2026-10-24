@@ -30,7 +30,7 @@ select is(public.get_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001'
 select is(public.list_crm_lead_operations_audit_v1('2ead1000-0000-4000-8000-000000000001')#>>'{total}','0','audit getter uses audit view permission');
 select is(public.list_crm_lead_imports_v1('2ead1000-0000-4000-8000-000000000001')#>>'{total}','0','import history getter uses import view permission');
 select throws_ok($$select public.save_crm_lead_distribution_v1('2ead1000-0000-4000-8000-000000000001',0,'{"queues":[],"rules":[]}','Denied mutation reason')$$,'42501','forbidden: missing lead operations permission','view permission does not authorize distribution mutation');
-reset role;delete from public.user_permission_overrides where user_id='2ead0000-0000-4000-8000-000000000001' and permission_key in('crm.leads.distribution.manage','crm.leads.reports.export','crm.leads.settings.manage','crm.leads.import.manage');
+reset role;select set_config('request.jwt.claim.sub','',true);delete from public.user_permission_overrides where user_id='2ead0000-0000-4000-8000-000000000001' and permission_key in('crm.leads.distribution.manage','crm.leads.reports.export','crm.leads.settings.manage','crm.leads.import.manage');
 set local role authenticated;select set_config('request.jwt.claim.sub','2ead0000-0000-4000-8000-000000000001',true);
 select is(public.get_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001')->>'revision','0','settings start at revision zero');
 select is(public.save_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001',0,'{"sources":[],"channels":[],"stages":[],"lostReasons":[],"tags":[{"name":"VIP","color":"#112233"}],"alerts":{},"adjustments":{}}','Synthetic settings save')->>'revision','1','settings save uses CAS');

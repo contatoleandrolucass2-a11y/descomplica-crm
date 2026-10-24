@@ -80,7 +80,7 @@ select throws_ok($$select public.save_crm_lead_v1(null,null,'{}','missing-uid-co
 select set_config('request.jwt.claim.sub','1ead0000-0000-4000-8000-000000000002',true);
 select throws_ok(format(
   'select public.save_crm_lead_v1(null,null,%L::jsonb,''broker-create-001'')',
-  jsonb_build_object('organizationId','1ead1000-0000-4000-8000-000000000001','stageId',(select id from public.crm_lead_stages where key='new'),'customer',jsonb_build_object('name','Cliente Bloqueado'))
+  jsonb_build_object('organizationId','1ead1000-0000-4000-8000-000000000001','customer',jsonb_build_object('name','Cliente Bloqueado'))
 ), '42501','forbidden: missing lead permission','scoped broker without action permission cannot create');
 reset role;
 insert into public.user_permission_overrides(user_id,permission_key,effect,reason,granted_by)
