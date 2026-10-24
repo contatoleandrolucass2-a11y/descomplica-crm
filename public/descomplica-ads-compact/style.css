@@ -2320,15 +2320,36 @@ body #main:fullscreen {
   font-size: 11px;
 }
 .table-wrap td:first-child {
-  max-width: 170px;
+  max-width: 240px;
 }
-.table-wrap td:first-child .link-button {
-  display: inline-block;
-  max-width: 145px;
-  vertical-align: middle;
+.campaign-table-identity {
+  display: grid;
+  grid-template-columns: 10px minmax(0, 1fr);
+  grid-template-areas:
+    "marker name"
+    ". status";
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 5px;
+  min-width: 0;
+}
+.campaign-table-identity > .dot {
+  grid-area: marker;
+  margin: 0;
+}
+.campaign-table-identity > .link-button {
+  grid-area: name;
+  display: block;
+  max-width: 100%;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: left;
+}
+.campaign-table-identity > .delivery-status {
+  grid-area: status;
+  justify-self: start;
+  margin: 0;
 }
 .legend span {
   max-width: 100%;
