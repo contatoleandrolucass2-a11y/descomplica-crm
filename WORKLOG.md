@@ -26,6 +26,12 @@ externo `organizationId` foi preservado para compatibilidade da interface e das
 RPCs. A matriz global de grants passou a inventariar os 68 objetos públicos com
 RLS e inclui os dois workspaces na lista de tabelas com RLS forçada.
 
+O preflight de colunas também confirmou que esse banco ainda usa o contrato
+legado de `profiles`, sem `access_status`. A elegibilidade dos workspaces Lead
+passou a depender de `is_active` e do guard central `_internal_assert_actor_active`,
+sem importar a migration ampla de governança de usuários. Um contrato estático
+impede reintroduzir dependências em `access_status` ou `crm_organizations`.
+
 A revisão independente de segurança confirmou as correções de isolamento por
 organização, leitura mínima por permissão, retenção do staging e idempotência de
 criação, alteração, mensagens, atividades e distribuição. Os testes Vitest
