@@ -107,7 +107,7 @@ const deliveryStatusLabels = {
   active: "Ativa",
   paused: "Pausada",
   deleted: "Excluída",
-  archived: "Arquivada",
+  archived: "Excluída/arquivada (Meta)",
   unknown: "Status não informado",
 };
 function deliveryBadge(entity) {
@@ -313,7 +313,7 @@ function filters() {
     ["active", "Ativas"],
     ["paused", "Pausadas"],
     ["deleted", "Excluídas"],
-    ["archived", "Arquivadas"],
+    ["archived", "Excluídas/arquivadas (Meta)"],
     ["unknown", "Não informado"],
   ]
     .map(
