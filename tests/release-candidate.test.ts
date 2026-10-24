@@ -528,6 +528,7 @@ describe("isolated restore evidence", () => {
     );
 
     expect(script).toContain("alter system set cron.database_name");
+    expect(script).toContain('"supabase_admin"');
     expect(script).toContain("create extension if not exists pg_cron with schema pg_catalog");
     expect(script).toContain("preparePgCronRestore(targetContainer, restoreDatabase)");
     expect(script).toContain("pg_isready");

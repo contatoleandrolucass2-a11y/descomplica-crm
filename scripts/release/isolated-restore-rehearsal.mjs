@@ -373,7 +373,7 @@ function failedSupabaseDatabaseDiagnostic(projectId) {
   return `isolated_database_container=${name} status=${status}${relevant ? `\n${relevant}` : ""}`;
 }
 
-function dockerDatabase(container, database, sql) {
+function dockerDatabase(container, database, sql, username = "postgres") {
   return run(
     "docker",
     [
@@ -389,7 +389,7 @@ function dockerDatabase(container, database, sql) {
       "--tuples-only",
       "--no-align",
       "--username",
-      "postgres",
+      username,
       "--dbname",
       database,
     ],
@@ -469,7 +469,12 @@ function preparePgCronRestore(container, database) {
   if (!/^rc_restore_[a-f0-9]{10}$/u.test(database)) {
     throw new Error("Unsafe isolated restore database name.");
   }
-  dockerDatabase(container, "postgres", `alter system set cron.database_name = '${database}';`);
+  dockerDatabase(
+    container,
+    "postgres",
+    `alter system set cron.database_name = '${database}';`,
+    "supabase_admin",
+  );
   run("docker", ["restart", "--time", "10", container], {
     label: "isolated pg_cron target restart",
   });
