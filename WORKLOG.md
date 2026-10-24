@@ -31,6 +31,11 @@ por `cron.database_name`; o alvo descartável agora configura esse banco,
 reinicia apenas o contêiner isolado, aguarda prontidão e pré-instala a extensão
 antes do `pg_restore`. O dump e a comparação canônica continuam integrais.
 
+O candidato visual seguinte revelou que o contrato exato das páginas
+arquivadas ainda enumerava os sete itens anteriores da navegação. O baseline e
+as sequências de teclado agora incluem `Lead` entre Dashboard e Meta Ads, sem
+alterar conteúdo ou comportamento dos simuladores arquivados.
+
 ## 2026-10-24 - Estrutura protegida do menu Lead
 
 O primeiro incremento implementa `/app/leads` como raiz da navegação e cria

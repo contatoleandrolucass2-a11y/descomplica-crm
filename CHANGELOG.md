@@ -10,6 +10,8 @@
   páginas e testes de autorização, contratos e operações.
 - Prepara `pg_cron` no banco temporário correto durante o ensaio isolado, para
   restaurar o backup integral sem dispensar a retenção automática de prévias.
+- Inclui o novo menu Lead no contrato exato de navegação e teclado usado pelo
+  QA visual das páginas protegidas arquivadas.
 - Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
   opcionais fora deste corte.
 
