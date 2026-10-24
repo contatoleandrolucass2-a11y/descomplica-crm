@@ -510,11 +510,11 @@ export function DashboardReport({
                           : {
                               label: "Registros dos meses considerados no cálculo",
                               months: historyMonths(block.key),
-                            ...(block.key === "previous"
-                              ? {}
-                              : {
-                                  note: "O valor do funil é uma média; a tabela apresenta os registros dos meses usados no cálculo.",
-                                }),
+                              ...(block.key === "previous"
+                                ? {}
+                                : {
+                                    note: "O valor do funil é uma média; a tabela apresenta os registros dos meses usados no cálculo.",
+                                  }),
                             }
                     }
                     authorizedStages={authorizedStages}

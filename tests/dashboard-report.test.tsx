@@ -397,8 +397,8 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
         },
       ],
     });
-    const triggers = elements(root, "button").filter(
-      (button) => attribute(button, "aria-label")?.startsWith("Abrir detalhes de "),
+    const triggers = elements(root, "button").filter((button) =>
+      attribute(button, "aria-label")?.startsWith("Abrir detalhes de "),
     );
     expect(triggers).toHaveLength(13);
     expect(triggers.every((button) => attribute(button, "aria-label")?.includes("Vendas"))).toBe(

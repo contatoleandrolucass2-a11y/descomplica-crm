@@ -72,7 +72,11 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
           },
         },
       ],
-      build: { write: false, minify: false, lib: { entry, name: "StageDetailsQa", formats: ["iife"] } },
+      build: {
+        write: false,
+        minify: false,
+        lib: { entry, name: "StageDetailsQa", formats: ["iife"] },
+      },
     });
     type BundleFile =
       | { type: "chunk"; code: string }
@@ -106,7 +110,9 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
           await browserExpect(dialog.getByText("5 registros no recorte")).toBeVisible();
           await dialog.getByLabel("Gerente de vendas").selectOption("Gerente Alfa");
           await browserExpect(dialog.getByText("2 registros no recorte")).toBeVisible();
-          expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1)).toBe(true);
+          expect(
+            await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+          ).toBe(true);
           await page.keyboard.press("Escape");
           await browserExpect(dialog).not.toBeVisible();
           await browserExpect(trigger).toBeFocused();
