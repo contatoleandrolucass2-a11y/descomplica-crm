@@ -6,7 +6,6 @@ settings:
 
 overrides:
   '@next/eslint-plugin-next@16.3.6>fast-glob': '-'
-  body-parser@>=2.0.0 <2.4.0: 2.4.0
   next-devtools-mcp>@modelcontextprotocol/sdk: 1.32.1
   next-devtools-mcp>zod: 4.6.7
   body-parser@>=2.0.0 <2.4.0: 2.4.0
