@@ -2954,3 +2954,14 @@ dependente da autorização específica aplicável.
 - Durante a CI do `main` (`40035073028`), o registry passou a reportar o novo
   `GHSA-27r3-jxmh-p828` em `body-parser@2.3.0`, transitivo do Next DevTools. O
   pacote foi fixado em `2.4.0`; não houve mudança funcional em Agendamentos.
+
+## 2026-10-24: terceiro advisory no fechamento da publicação de Agendamentos
+
+- A CI de `push/main` `40061774780`, no SHA
+  `b403071c1b749476f638bd6a36dcaedfcce033be`, aprovou testes e documentação,
+  mas bloqueou no audit porque o registry passou a reportar
+  `GHSA-xjj6-f33q-929c` em `undici@7.30.0`, transitivo do Next DevTools.
+- O override mínimo para `undici@7.30.1` atualizou o lockfile. A auditoria local
+  terminou sem severidade alta ou crítica. Esta correção não altera a página de
+  Agendamentos nem qualquer outra funcionalidade; ela existe somente para
+  restabelecer o gate obrigatório de publicação.
