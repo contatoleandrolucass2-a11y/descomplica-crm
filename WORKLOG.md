@@ -61,6 +61,23 @@ persistido e o menu `Lead` ainda nao foi criado. Lint, tipos, build, catalogos e
 Gitleaks passaram. A suite integral ficou bloqueada por tres testes POSIX do
 Meta Ads no Windows, fora do escopo; a CI atual de `main` tambem estava falha.
 
+## 2026-10-24 - Publicação final dos ajustes de Agendamentos
+
+O PR #315 integrou os ajustes funcionais exclusivos de
+`/app/etapas/agendamentos`. Os PRs #320 e #322 atualizaram somente dependências
+transitivas bloqueadas por advisories publicados durante o fechamento. A CI da
+`main` `40069497659`, tentativa 2, aprovou `validate`, `isolated-restore`,
+`release-gates` e `promotable-image` no SHA exato
+`a6d139e2871fddbec1a4ca0685b5810e8a940b37`.
+
+O artefato `12551435375` foi conferido pelo digest ZIP
+`sha256:ce8e9cf61b8c56ee91f7bf7ba88e52d73955e1f58c6b0df5a1e377144088f511`,
+revisão OCI e `image:prove` nos perfis de homologação e produção. O coordenador
+oficial publicou o deployment `190d0766-34aa-406d-98f9-da7c46023b3a` em
+`2026-10-24T07:13:38.177Z`, sem pendência. A verificação externa confirmou
+health HTTP 200/`ok` na versão exata e HTTP 307 para `/login` no acesso anônimo
+à rota. Não houve migration, alteração de n8n, DNS, cobrança ou mutação de dados.
+
 ## 2026-10-23 - Campanhas excluídas preservadas no Meta Ads
 
 O cliente somente leitura da API Meta passa a solicitar também anúncios

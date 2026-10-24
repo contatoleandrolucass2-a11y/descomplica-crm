@@ -25,6 +25,15 @@
 - Registra fluxos, entidades, API, autorizacao, privacidade, arquitetura e
   pendencias sem iniciar a implementacao.
 
+## 2026-10-24 - Agendamentos publicado
+
+- Publica o layout compacto, os filtros completos e as métricas dinâmicas de
+  `/app/etapas/agendamentos` no SHA `a6d139e2871fddbec1a4ca0685b5810e8a940b37`.
+- Mantém as demais páginas sem alteração funcional desta entrega; as atualizações
+  de Zod, `body-parser` e `undici` foram correções mínimas dos gates obrigatórios.
+- Confirma health público na versão exata e proteção anônima da rota com
+  redirecionamento para login.
+
 ## 2026-10-23 - Histórico de campanhas excluídas no Meta Ads
 
 - Consulta os estados históricos dos anúncios na API oficial e identifica

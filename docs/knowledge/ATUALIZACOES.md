@@ -100,6 +100,28 @@
   Publicacao documental bloqueada pelos gates falhos; nenhuma correcao fora do
   escopo, PR, merge, deploy ou reinicio foi executado.
 
+## 2026-10-24: publicação final dos ajustes exclusivos de Agendamentos
+
+- O PR #315 integrou somente os ajustes funcionais pedidos para
+  `/app/etapas/agendamentos`. Os PRs #320 e #322 corrigiram, respectivamente,
+  `body-parser` e `undici` transitivos para restabelecer gates obrigatórios;
+  nenhuma outra página recebeu mudança funcional por esta entrega.
+- A `main` exata `a6d139e2871fddbec1a4ca0685b5810e8a940b37` foi aprovada pela
+  CI `40069497659`, tentativa 2, nos quatro jobs obrigatórios. O artefato
+  imutável `12551435375` apresentou digest ZIP
+  `sha256:ce8e9cf61b8c56ee91f7bf7ba88e52d73955e1f58c6b0df5a1e377144088f511`,
+  revisão correspondente e a mesma imagem nos perfis de homologação e produção.
+- O coordenador `pnpm release:production` registrou o deployment
+  `190d0766-34aa-406d-98f9-da7c46023b3a` em `2026-10-24T07:13:38.177Z`
+  (`04:13:38` em America/Sao_Paulo), sem `pendingDeploymentId`. Às
+  `2026-10-24T07:14:57Z`, o health público respondeu HTTP 200, `status=ok` e a
+  versão exata; a rota anônima respondeu HTTP 307 para `/login`.
+- Duas tentativas anteriores foram interrompidas antes de mutação: uma por
+  argumento contaminado por retorno de carro e outra porque a `main` avançou
+  durante a validação. O CAS preservou a produção. A integração concorrente do
+  PR #318 foi mantida, sem ser modificada neste trabalho. Não houve migration,
+  mudança de n8n, DNS, cobrança ou mutação de dados remotos.
+
 ## 2026-10-23: layout e filtros exclusivos de Agendamentos
 
 - A entrega permanece limitada a `/app/etapas/agendamentos`: uniformiza os 12
