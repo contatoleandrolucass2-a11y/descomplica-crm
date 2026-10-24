@@ -327,9 +327,9 @@ select is((select count(*) from public.read_crm_appointments_analysis(
   'stage-only access works without dashboard permission');
 select is(public.read_crm_appointments_goal('2026-08-04'),24::bigint,
   'stage-only access reads only the active appointment volume');
-select is(public.read_crm_appointments_conversion_goals('2026-08-04')#>>'{dv,opportunityAppointment}',
-  '9','stage-only access reads the active House opportunity-to-appointment limit');
-select is(public.read_crm_appointments_conversion_goals('2026-08-04')#>'{partnerships,appointmentVisit}',
+select is((public.read_crm_appointments_conversion_goals('2026-08-04')#>>'{dv,opportunityAppointment}')::numeric,
+  9::numeric,'stage-only access reads the active House opportunity-to-appointment limit');
+select is(public.read_crm_appointments_conversion_goals('2026-08-04')#>'{partnerships}',
   'null'::jsonb,'partnership appointment conversions remain unavailable instead of fabricated');
 select is((select payload#>'{dimensions,developments}' from public.read_crm_appointments_analysis(
   current_setting('test.appointment_snapshot')::bigint,array['all'])),'[]'::jsonb,
