@@ -95,6 +95,35 @@ describe("compact real-data model", () => {
   it("keeps zero-result costs undefined", () => {
     expect(model.aggregate([])).toMatchObject({ spend: 0, leads: 0, cpl: null, ctr: null });
   });
+  it("separates deleted campaign history and identifies its delivery status", () => {
+    const deletedRows = [
+      {
+        date: "2026-10-02",
+        accountId: "1",
+        campaignId: "7",
+        campaign: "Campanha excluída",
+        adsetId: "8",
+        adset: "Conjunto excluído",
+        adId: "9",
+        ad: "Anúncio excluído",
+        destination: "whatsapp",
+        status: "deleted",
+        spend: 30,
+        conversions: 3,
+        clicks: 12,
+        impressions: 600,
+      },
+    ];
+    const deleted = model.filter(
+      deletedRows,
+      { ...state, status: "deleted" },
+      { start: "2026-10-01", end: "2026-10-02" },
+    );
+    expect(model.groups(deleted)).toEqual([
+      expect.objectContaining({ id: "7", deliveryStatus: "deleted" }),
+    ]);
+    expect(model.aggregate(deleted)).toMatchObject({ spend: 30, leads: 3 });
+  });
   it.each([
     ["2026-02-30", "2026-03-01"],
     ["2026-10-02", "2026-10-01"],

@@ -61,6 +61,19 @@ persistido e o menu `Lead` ainda nao foi criado. Lint, tipos, build, catalogos e
 Gitleaks passaram. A suite integral ficou bloqueada por tres testes POSIX do
 Meta Ads no Windows, fora do escopo; a CI atual de `main` tambem estava falha.
 
+## 2026-10-23 - Campanhas excluídas preservadas no Meta Ads
+
+O cliente somente leitura da API Meta passa a solicitar também anúncios
+excluídos e arquivados. O estado efetivo recebido é preservado em cada linha
+histórica, permitindo que campanhas removidas continuem acessíveis por filtro,
+sem misturá-las à visão inicial. O dashboard abre em campanhas ativas e mostra
+o estado de veiculação na seleção de campanhas, na tabela e na visão detalhada.
+
+Testes focados cobrem a consulta do estado `DELETED`, a preservação das métricas
+históricas, a agregação isolada das campanhas excluídas e o padrão ativo. O QA
+de navegador inclui uma campanha excluída e comprova filtro, identificação e
+totais históricos antes de retornar à seleção ativa.
+
 ## 2026-10-23 - Advisory novo durante a publicação de Agendamentos
 
 Após o merge do PR #315, o registry publicou `GHSA-27r3-jxmh-p828` e a CI do

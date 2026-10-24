@@ -25,6 +25,14 @@
 - Registra fluxos, entidades, API, autorizacao, privacidade, arquitetura e
   pendencias sem iniciar a implementacao.
 
+## 2026-10-23 - Histórico de campanhas excluídas no Meta Ads
+
+- Consulta os estados históricos dos anúncios na API oficial e identifica
+  campanhas excluídas e arquivadas sem remover suas métricas anteriores.
+- Adiciona filtros para campanhas excluídas e arquivadas, com identificação
+  visual na lista, na tabela e na análise detalhada.
+- Mantém campanhas ativas como seleção inicial do dashboard.
+
 ## 2026-10-23 - Segundo desbloqueio de segurança da publicação
 
 - Atualiza `body-parser` transitivo para `2.4.0`, corrigindo

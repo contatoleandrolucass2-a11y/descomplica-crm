@@ -133,6 +133,56 @@ describe("Meta Marketing API read-only client", () => {
       );
     }
     expect(JSON.stringify(result)).not.toContain(configuration.accessToken);
+    expect(
+      JSON.parse(new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get("effective_status")!),
+    ).toContain("DELETED");
+  });
+
+  it("keeps deleted ads identifiable while preserving their historical insights", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(json({ data: [{ id: "99", effective_status: "DELETED" }] }))
+      .mockResolvedValueOnce(
+        json({
+          data: [
+            {
+              date_start: "2026-10-08",
+              account_id: configuration.accountId,
+              account_name: "Superitendente Leandro",
+              campaign_id: "11",
+              campaign_name: "Campanha nova Leandro",
+              adset_id: "22",
+              adset_name: "campanha nova Leandro",
+              ad_id: "99",
+              ad_name: "Anuncio Leandro",
+              spend: "71.83",
+              impressions: "1659",
+              actions: [
+                { action_type: "link_click", value: "189" },
+                {
+                  action_type: "onsite_conversion.messaging_conversation_started_7d",
+                  value: "38",
+                },
+              ],
+            },
+          ],
+        }),
+      );
+
+    const result = await fetchMetaAdsDashboardData(configuration, {
+      fetcher,
+      bypassCache: true,
+    });
+
+    expect(result.rows).toEqual([
+      expect.objectContaining({
+        campaign: "Campanha nova Leandro",
+        ad: "Anuncio Leandro",
+        status: "deleted",
+        spend: 71.83,
+        conversions: 38,
+      }),
+    ]);
   });
 
   it("rejects untrusted pagination and classifies expired tokens", async () => {

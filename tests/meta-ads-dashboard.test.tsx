@@ -121,6 +121,17 @@ describe("dashboard Meta Ads", () => {
     expect(application).not.toContain("let isDemo=!imported");
   });
 
+  it("inicia com campanhas ativas e permite consultar o historico das excluidas", async () => {
+    const application = await readFile(
+      new URL("../public/descomplica-ads-compact/live-data.js", import.meta.url),
+      "utf8",
+    );
+    expect(application).toContain('status: "active"');
+    expect(application).toContain('["deleted", "Excluídas"]');
+    expect(application).toContain("deliveryBadge(c)");
+    expect(application).toContain('"ads-filters:v2:"');
+  });
+
   it("le o documento por caminho textual compativel com o runtime empacotado", async () => {
     const pageSource = await readFile(
       new URL("../app/(protected)/app/meta-ads/MetaAdsPage.tsx", import.meta.url),
