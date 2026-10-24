@@ -166,7 +166,7 @@ apiSample.rows.push({
   adset: "Conjunto excluído QA",
   adId: "779",
   ad: "Anúncio excluído QA",
-  status: "deleted",
+  status: "archived",
   spend: 71.83,
   conversions: 38,
   clicks: 189,
@@ -250,10 +250,12 @@ try {
   await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
   await expect(frame.locator('[data-kpi="leads"] strong')).toHaveText("12");
   await expect(frame.locator("#status")).toHaveValue("active");
-  await frame.locator("#status").selectOption("deleted");
+  await frame.locator("#status").selectOption("archived");
   const deletedCampaignRow = frame.locator('tr[data-open="777"]');
   await expect(deletedCampaignRow).toContainText("Campanha excluída QA");
-  await expect(deletedCampaignRow.locator(".delivery-status")).toHaveText("Excluída");
+  await expect(deletedCampaignRow.locator(".delivery-status")).toHaveText(
+    "Excluída/arquivada (Meta)",
+  );
   await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("71,83");
   await frame.locator("#status").selectOption("active");
   await expect(frame.locator("#compare-period")).not.toBeChecked();

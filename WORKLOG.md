@@ -1,17 +1,17 @@
 # Worklog
 
-## 2026-10-23 - Campanhas excluídas preservadas no Meta Ads
+## 2026-10-24 - Campanhas excluídas preservadas no Meta Ads
 
-O cliente somente leitura da API Meta passa a solicitar também anúncios
-excluídos e arquivados. O estado efetivo recebido é preservado em cada linha
-histórica, permitindo que campanhas removidas continuem acessíveis por filtro,
-sem misturá-las à visão inicial. O dashboard abre em campanhas ativas e mostra
-o estado de veiculação na seleção de campanhas, na tabela e na visão detalhada.
+O cliente somente leitura passa a solicitar também anúncios `ARCHIVED`. A API
+oficial retorna esse estado para a campanha excluída observada no Gerenciador;
+ela rejeita `DELETED` como parâmetro de `effective_status`. O CRM preserva o
+valor oficial e apresenta a categoria honesta `Excluídas/arquivadas (Meta)`,
+sem inventar uma distinção que a fonte não fornece. O dashboard abre em
+campanhas ativas e mantém as métricas históricas acessíveis pelo filtro.
 
-Testes focados cobrem a consulta do estado `DELETED`, a preservação das métricas
-históricas, a agregação isolada das campanhas excluídas e o padrão ativo. O QA
-de navegador inclui uma campanha excluída e comprova filtro, identificação e
-totais históricos antes de retornar à seleção ativa.
+Testes focados cobrem a consulta aceita pela API, a preservação das métricas, a
+agregação isolada da categoria e o padrão ativo. O QA de navegador comprova
+filtro, identificação e totais históricos antes de retornar à seleção ativa.
 
 ## 2026-10-23 - Advisory novo durante a publicação de Agendamentos
 

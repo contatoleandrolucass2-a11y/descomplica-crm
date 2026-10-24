@@ -133,15 +133,17 @@ describe("Meta Marketing API read-only client", () => {
       );
     }
     expect(JSON.stringify(result)).not.toContain(configuration.accessToken);
-    expect(
-      JSON.parse(new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get("effective_status")!),
-    ).toContain("DELETED");
+    const requestedStatuses = JSON.parse(
+      new URL(String(fetcher.mock.calls[0]?.[0])).searchParams.get("effective_status")!,
+    );
+    expect(requestedStatuses).toContain("ARCHIVED");
+    expect(requestedStatuses).not.toContain("DELETED");
   });
 
-  it("keeps deleted ads identifiable while preserving their historical insights", async () => {
+  it("keeps Meta-archived ads identifiable while preserving their historical insights", async () => {
     const fetcher = vi
       .fn<typeof fetch>()
-      .mockResolvedValueOnce(json({ data: [{ id: "99", effective_status: "DELETED" }] }))
+      .mockResolvedValueOnce(json({ data: [{ id: "99", effective_status: "ARCHIVED" }] }))
       .mockResolvedValueOnce(
         json({
           data: [
@@ -178,7 +180,7 @@ describe("Meta Marketing API read-only client", () => {
       expect.objectContaining({
         campaign: "Campanha nova Leandro",
         ad: "Anuncio Leandro",
-        status: "deleted",
+        status: "archived",
         spend: 71.83,
         conversions: 38,
       }),

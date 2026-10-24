@@ -1,11 +1,11 @@
 # Changelog
 
-## 2026-10-23 - Histórico de campanhas excluídas no Meta Ads
+## 2026-10-24 - Histórico de campanhas excluídas no Meta Ads
 
-- Consulta os estados históricos dos anúncios na API oficial e identifica
-  campanhas excluídas e arquivadas sem remover suas métricas anteriores.
-- Adiciona filtros para campanhas excluídas e arquivadas, com identificação
-  visual na lista, na tabela e na análise detalhada.
+- Consulta o estado `ARCHIVED` aceito pela API oficial, usado também para a
+  campanha excluída observada no Gerenciador de Anúncios, sem remover métricas.
+- Adiciona o filtro e a identificação `Excluídas/arquivadas (Meta)` na lista,
+  na tabela e na análise detalhada.
 - Mantém campanhas ativas como seleção inicial do dashboard.
 
 ## 2026-10-23 - Segundo desbloqueio de segurança da publicação
