@@ -37,8 +37,11 @@ let state = {
   periodMode: "14",
   compare: false,
   destination: "whatsapp",
+  destinations: ["whatsapp"],
   account: "all",
+  accountIds: null,
   status: "active",
+  statuses: ["active"],
   organize: false,
   order: read("ads-live-compact-order", defaultOrder),
   funnelOrder: [],
@@ -49,6 +52,7 @@ let state = {
   zoom: 1,
   detail: "sets",
   setIndex: 0,
+  settingDestination: null,
   mapLevel: "municipalities",
   mapDisplay: "points",
   neighborhood: "Butantã",
@@ -64,8 +68,11 @@ const filterFields = [
   "endDate",
   "periodMode",
   "destination",
+  "destinations",
   "account",
+  "accountIds",
   "status",
+  "statuses",
   "metric",
   "mapMetric",
   "mapLevel",
@@ -78,6 +85,12 @@ try {
   );
   restoredIds = Array.isArray(stored.ids) ? stored.ids : null;
   for (const key of filterFields) if (stored[key] !== undefined) state[key] = stored[key];
+  if (!Array.isArray(stored.destinations))
+    state.destinations = stored.destination ? [stored.destination] : ["whatsapp"];
+  if (!Array.isArray(stored.statuses) && stored.status !== undefined)
+    state.statuses = stored.status && stored.status !== "all" ? [stored.status] : null;
+  if (!Array.isArray(stored.accountIds))
+    state.accountIds = stored.account && stored.account !== "all" ? [stored.account] : null;
 } catch {}
 function persistFilters() {
   try {
@@ -100,8 +113,43 @@ const destinationLabels = {
   whatsapp: "WhatsApp",
   unknown: "Não informado",
 };
+const statusFilterOptions = [
+  ["active", "Ativas"],
+  ["paused", "Pausadas"],
+  ["deleted", "Excluídas"],
+  ["archived", "Excluídas/arquivadas (Meta)"],
+  ["unknown", "Não informado"],
+];
+function selectedDestinations() {
+  return Array.isArray(state.destinations) ? state.destinations : [state.destination].filter(Boolean);
+}
+function destinationFilterKey() {
+  const selected = selectedDestinations();
+  return selected.length === 1 ? selected[0] : "mixed";
+}
 function destinationLabel() {
-  return destinationLabels[state.destination] || "Não informado";
+  const selected = selectedDestinations();
+  if (!selected.length) return "Nenhum destino";
+  if (selected.length === Object.keys(destinationLabels).length) return "Todos os destinos";
+  if (selected.length === 1) return destinationLabels[selected[0]] || "Não informado";
+  return `${selected.length} destinos`;
+}
+function statusFilterLabel() {
+  const selected = Array.isArray(state.statuses) ? state.statuses : [];
+  if (!selected.length) return "Nenhum status";
+  if (selected.length === statusFilterOptions.length) return "Todos os status";
+  if (selected.length === 1)
+    return statusFilterOptions.find(([id]) => id === selected[0])?.[1] || "Não informado";
+  return `${selected.length} status`;
+}
+function accountFilterLabel() {
+  const selected = Array.isArray(state.accountIds) ? state.accountIds : [],
+    accounts = [...new Map((sourceData?.rows || []).map((row) => [row.accountId, row.account]))];
+  if (!selected.length) return "Nenhuma conta";
+  if (selected.length === accounts.length) return "Todas as contas";
+  if (selected.length === 1)
+    return accounts.find(([id]) => id === selected[0])?.[1] || "Conta não informada";
+  return `${selected.length} contas`;
 }
 const deliveryStatusLabels = {
   active: "Ativa",
@@ -117,8 +165,8 @@ function deliveryBadge(entity) {
 function filteredRows(old = false) {
   return AdsData.filter(sourceData?.rows || [], state, old ? previousRange() : selectedRange());
 }
-function capKey(level, id) {
-  return [state.destination, level, id].join("|");
+function capKey(level, id, destination = destinationFilterKey()) {
+  return [destination, level, id].join("|");
 }
 function capFor(entity) {
   const ids = [
@@ -198,12 +246,7 @@ function status(c) {
 function rebuildCampaigns() {
   const old = campaigns.map((c) => c.id),
     all = AdsData.groups(
-      sourceData.rows.filter(
-        (r) =>
-          (state.account === "all" || r.accountId === state.account) &&
-          r.destination === state.destination &&
-          (state.status === "all" || r.status === state.status),
-      ),
+      sourceData.rows.filter((r) => AdsData.matchesSelections(r, state)),
     );
   campaigns = all;
   const requested = old.length ? state.ids : restoredIds;
@@ -263,9 +306,35 @@ async function loadSource(range) {
     if (first) {
       state.endDate = payload.range.end;
       state.startDate = AdsData.shift(state.endDate, -13);
-      const destinations = [...new Set(payload.rows.map((r) => r.destination))];
-      if (!destinations.includes(state.destination)) state.destination = destinations[0] || "form";
+      const availableDestinations = [...new Set(payload.rows.map((r) => r.destination))],
+        requestedDestinations = selectedDestinations();
+      state.destinations = requestedDestinations.filter((id) =>
+        availableDestinations.includes(id),
+      );
+      if (requestedDestinations.length && !state.destinations.length && availableDestinations.length)
+        state.destinations = [availableDestinations[0]];
     }
+    const availableAccounts = [...new Set(payload.rows.map((r) => r.accountId))];
+    state.accountIds = Array.isArray(state.accountIds)
+      ? state.accountIds.filter((id) => availableAccounts.includes(id))
+      : availableAccounts;
+    const availableStatuses = statusFilterOptions.map(([id]) => id);
+    state.statuses = Array.isArray(state.statuses)
+      ? state.statuses.filter((id) => availableStatuses.includes(id))
+      : availableStatuses;
+    state.account =
+      state.accountIds.length === availableAccounts.length
+        ? "all"
+        : state.accountIds.length === 1
+          ? state.accountIds[0]
+          : "multiple";
+    state.status =
+      state.statuses.length === availableStatuses.length
+        ? "all"
+        : state.statuses.length === 1
+          ? state.statuses[0]
+          : "multiple";
+    state.destination = state.destinations[0] || "unknown";
     if (state.startDate < payload.range.start || state.endDate > payload.range.end) {
       sourceLoading = false;
       return refreshRange();
@@ -293,9 +362,71 @@ function refreshRange() {
     return loadSource({ start, end: state.endDate });
   render();
 }
+function filterSummary(selected, total, allLabel) {
+  if (!selected.length) return "0 selecionados";
+  if (selected.length === total) return allLabel;
+  return `${selected.length} selecionado${selected.length === 1 ? "" : "s"}`;
+}
+function multiFilter({ key, label, options, selected, allLabel, campaign = false }) {
+  const optionRows = options.length
+    ? options
+        .map(
+          ({ id, name, color, suffix = "" }) =>
+            `<label class="filter-option"><input type="checkbox" data-filter-option="${key}" value="${AdsData.escape(id)}" ${selected.includes(id) ? "checked" : ""}>${color ? `<span class="dot" style="--c:${color}"></span>` : ""}<span class="filter-option-name">${AdsData.escape(name)}</span>${suffix}</label>`,
+        )
+        .join("")
+    : '<p class="filter-empty">Sem opções neste recorte.</p>';
+  return `<details class="field filter-multiselect ${campaign ? "campaign-filter" : ""}" data-filter="${key}"><summary><span>${label}</span><b>${filterSummary(selected, options.length, allLabel)}⌄</b></summary><div class="filter-options"><label class="filter-option filter-select-all"><input type="checkbox" data-filter-all="${key}" ${options.length && selected.length === options.length ? "checked" : ""}><strong>Selecionar todos</strong></label><div class="filter-divider"></div>${optionRows}</div></details>`;
+}
+function syncFilterMasters(root = document) {
+  root.querySelectorAll("[data-filter-all]").forEach((master) => {
+    const menu = master.closest("[data-filter]"),
+      key = master.dataset.filterAll,
+      options = [...menu.querySelectorAll(`[data-filter-option="${key}"]`)],
+      checked = options.filter((option) => option.checked).length;
+    master.checked = options.length > 0 && checked === options.length;
+    master.indeterminate = checked > 0 && checked < options.length;
+  });
+}
+function closeFilterMenus(except = null) {
+  document.querySelectorAll("details.filter-multiselect[open]").forEach((menu) => {
+    if (menu !== except) menu.open = false;
+  });
+}
+function updateFilterSelection(key, values) {
+  if (key === "campaigns") {
+    state.ids = values;
+    return;
+  }
+  if (key === "account") {
+    state.accountIds = values;
+    const total = new Set(sourceData.rows.map((row) => row.accountId)).size;
+    state.account = values.length === total ? "all" : values.length === 1 ? values[0] : "multiple";
+  }
+  if (key === "status") {
+    state.statuses = values;
+    state.status =
+      values.length === statusFilterOptions.length
+        ? "all"
+        : values.length === 1
+          ? values[0]
+          : "multiple";
+  }
+  if (key === "destination") {
+    state.destinations = values;
+    state.destination = values.length === 1 ? values[0] : values.length ? "mixed" : "unknown";
+  }
+  rebuildCampaigns();
+}
 function filters() {
   const accounts = [...new Map(sourceData.rows.map((r) => [r.accountId, r.account])).entries()];
-  return `<div class="filters"><div class="field"><label for="account">Conta de anúncios</label><select id="account">${[["all", "Todas as contas"], ...accounts].map(([id, name]) => `<option value="${id}" ${state.account === id ? "selected" : ""}>${AdsData.escape(name)}</option>`).join("")}</select></div><div class="field"><label for="period">Período</label><select id="period">${[
+  return `<div class="filters">${multiFilter({
+    key: "account",
+    label: "Conta de anúncios",
+    options: accounts.map(([id, name]) => ({ id, name })),
+    selected: state.accountIds || [],
+    allLabel: "Todas as contas",
+  })}<div class="field"><label for="period">Período</label><select id="period">${[
     ["7", "Últimos 7 dias"],
     ["14", "Últimos 14 dias"],
     ["30", "Últimos 30 dias"],
@@ -308,30 +439,31 @@ function filters() {
     )
     .join(
       "",
-    )}</select></div><details class="field campaign-filter"><summary>Campanhas<br><b>${state.ids.length} selecionadas⌄</b></summary><div class="campaign-options">${campaigns.length ? campaigns.map((c) => `<label><input type="checkbox" data-campaign="${c.id}" ${state.ids.includes(c.id) ? "checked" : ""}>${dot(c)}${c.name}${deliveryBadge(c)}</label>`).join("") : "Sem campanhas neste recorte."}</div></details><div class="field"><label for="status">Status</label><select id="status">${[
-    ["all", "Todos"],
-    ["active", "Ativas"],
-    ["paused", "Pausadas"],
-    ["deleted", "Excluídas"],
-    ["archived", "Excluídas/arquivadas (Meta)"],
-    ["unknown", "Não informado"],
-  ]
-    .map(
-      ([id, label]) =>
-        `<option value="${id}" ${state.status === id ? "selected" : ""}>${label}</option>`,
-    )
-    .join(
-      "",
-    )}</select></div><div class="field"><label for="destination">Destino da conversão</label><select id="destination">${Object.entries(
-    destinationLabels,
-  )
-    .map(
-      ([id, label]) =>
-        `<option value="${id}" ${state.destination === id ? "selected" : ""}>${label}</option>`,
-    )
-    .join(
-      "",
-    )}</select></div></div>${dateControls()}<div class="source-state"><span>Meta API · somente leitura · ${period()}</span><small>Atualizado em ${new Date(sourceData.fetchedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} · São Paulo</small></div>`;
+    )}</select></div>${multiFilter({
+    key: "campaigns",
+    label: "Campanhas",
+    options: campaigns.map((c) => ({
+      id: c.id,
+      name: c.label || c.name,
+      color: c.color,
+      suffix: deliveryBadge(c),
+    })),
+    selected: state.ids,
+    allLabel: `Todas (${campaigns.length})`,
+    campaign: true,
+  })}${multiFilter({
+    key: "status",
+    label: "Status",
+    options: statusFilterOptions.map(([id, name]) => ({ id, name })),
+    selected: state.statuses || [],
+    allLabel: "Todos os status",
+  })}${multiFilter({
+    key: "destination",
+    label: "Destino da conversão",
+    options: Object.entries(destinationLabels).map(([id, name]) => ({ id, name })),
+    selected: selectedDestinations(),
+    allLabel: "Todos os destinos",
+  })}</div>${dateControls()}<div class="source-state"><span>Meta API · somente leitura · ${period()}</span><small>Atualizado em ${new Date(sourceData.fetchedAt).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" })} · São Paulo</small></div>`;
 }
 function micro() {
   const c = data(campaigns.find((a) => a.id === state.selected));
@@ -397,22 +529,27 @@ function updateAlertCounter(history = readAlertHistory()) {
     new URL(document.baseURI).origin,
   );
 }
-function suggestedCap() {
+function suggestedCap(destination = destinationFilterKey()) {
   if (AdsData.shift(state.startDate, -settings.history) < sourceData.range.start) return null;
-  const rows = AdsData.filter(sourceData.rows, state, {
+  const rows = AdsData.filter(
+      sourceData.rows,
+      { ...state, destination, destinations: [destination] },
+      {
       start: AdsData.shift(state.startDate, -settings.history),
       end: AdsData.shift(state.startDate, -1),
-    }),
+      },
+    ),
     a = AdsData.aggregate(rows);
   return a.leads >= settings.sample && a.clicks >= settings.clickSample ? a.cpl : null;
 }
 function settingsPage() {
   const level = state.settingLevel || "campaign",
+    settingsDestination = state.settingDestination || selectedDestinations()[0] || "whatsapp",
     entities =
       level === "account"
         ? [{ id: sourceData.accountId, name: AdsData.escape(sourceData.accountName) }]
         : AdsData.groups(
-            sourceData.rows.filter((r) => r.destination === state.destination),
+            sourceData.rows.filter((r) => r.destination === settingsDestination),
             level,
           );
   return `<form id="settings-form"><div class="page-head"><div><h1>Ajustes</h1><p>Referências de análise salvas por usuário neste navegador.</p></div><div class="actions"><button type="button" id="discard">Descartar</button><button class="primary" type="submit">Salvar ajustes</button></div></div><div class="settings-scope"><label>Destino <select id="settings-destination">${Object.entries(
@@ -420,7 +557,7 @@ function settingsPage() {
   )
     .map(
       ([id, label]) =>
-        `<option value="${id}" ${state.destination === id ? "selected" : ""}>${label}</option>`,
+        `<option value="${id}" ${settingsDestination === id ? "selected" : ""}>${label}</option>`,
     )
     .join("")}</select></label><label>Nível <select id="setting-level">${[
     ["account", "Conta"],
@@ -434,9 +571,9 @@ function settingsPage() {
     .join("")}</select></label></div><div class="settings-grid">${panel(
     "limits",
     "Metas e orçamento",
-    `<p>Meta sugerida pelo histórico: <b>${money(suggestedCap())}</b> ${metricInfo("cap")}</p><small>Sugestão calculada com a amostra mínima. Sem base suficiente: —. Campo vazio herda o teto do nível superior.</small><div class="table-wrap"><table><thead><tr><th>${level === "account" ? "Conta" : "Item"}</th><th>Teto por resultado (R$)</th><th>Limite de investimento no período (R$)</th></tr></thead><tbody>${entities
+    `<p>Meta sugerida pelo histórico: <b>${money(suggestedCap(settingsDestination))}</b> ${metricInfo("cap")}</p><small>Sugestão calculada com a amostra mínima. Sem base suficiente: —. Campo vazio herda o teto do nível superior.</small><div class="table-wrap"><table><thead><tr><th>${level === "account" ? "Conta" : "Item"}</th><th>Teto por resultado (R$)</th><th>Limite de investimento no período (R$)</th></tr></thead><tbody>${entities
       .map((e) => {
-        const key = capKey(level, e.id);
+        const key = capKey(level, e.id, settingsDestination);
         return `<tr><td>${e.name}</td><td><input aria-label="Teto ${e.name}" name="cap:${key}" type="number" min="0.01" max="10000000" step="0.01" value="${settings.caps[key] ?? ""}" placeholder="Herdar"></td><td><input aria-label="Investimento ${e.name}" name="budget:${key}" type="number" min="0.01" max="10000000" step="0.01" value="${settings.budgets[key] ?? ""}" placeholder="Sem limite"></td></tr>`;
       })
       .join(
@@ -518,19 +655,28 @@ document.addEventListener("change", (e) => {
     } else render();
     return;
   }
-  if (["account", "status", "destination", "settings-destination"].includes(id)) {
-    state[id === "settings-destination" ? "destination" : id] = e.target.value;
-    campaigns = [];
-    rebuildCampaigns();
+  if (id === "settings-destination") {
+    state.settingDestination = e.target.value;
     render();
     return;
   }
-  if (e.target.dataset.campaign) {
-    state.ids = e.target.checked
-      ? [...new Set([...state.ids, e.target.dataset.campaign])]
-      : state.ids.filter((id) => id !== e.target.dataset.campaign);
+  const allFilter = e.target.dataset.filterAll;
+  const optionFilter = e.target.dataset.filterOption;
+  if (allFilter || optionFilter) {
+    const key = allFilter || optionFilter,
+      menu = e.target.closest("[data-filter]"),
+      options = [...menu.querySelectorAll(`[data-filter-option="${key}"]`)],
+      values = allFilter
+        ? e.target.checked
+          ? options.map((option) => option.value)
+          : []
+        : options.filter((option) => option.checked).map((option) => option.value);
+    updateFilterSelection(key, values);
     render();
-    $(".campaign-filter").open = true;
+    const reopened = document.querySelector(`[data-filter="${key}"]`);
+    if (reopened) reopened.open = true;
+    syncFilterMasters();
+    return;
   }
   if (id === "metric") {
     state.metric = e.target.value;
@@ -566,6 +712,9 @@ document.addEventListener("change", (e) => {
   }
 });
 document.addEventListener("click", (e) => {
+  const filterMenu = e.target.closest("details.filter-multiselect");
+  if (!filterMenu && !e.target.closest("#choose-campaigns")) closeFilterMenus();
+  else if (e.target.closest("summary")) closeFilterMenus(filterMenu);
   if (e.target.closest("#reload-source")) loadSource();
   const drill = e.target.closest("[data-real-drill]");
   if (drill) {
@@ -574,6 +723,7 @@ document.addEventListener("click", (e) => {
     render();
   }
 });
+window.addEventListener("blur", () => closeFilterMenus());
 window.addEventListener("message", (event) => {
   if (
     event.source === window.parent &&
