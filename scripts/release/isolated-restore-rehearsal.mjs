@@ -337,6 +337,38 @@ function exactDatabaseContainer(projectId) {
   return names[0];
 }
 
+function failedSupabaseDatabaseDiagnostic(projectId) {
+  const discovery = runUnchecked(
+    "docker",
+    [
+      "ps",
+      "-a",
+      "--filter",
+      `label=com.supabase.cli.project=${projectId}`,
+      "--format",
+      "{{.Names}}\t{{.Status}}",
+    ],
+    { cwd: repositoryRoot },
+  );
+  const rows = String(discovery.stdout ?? "")
+    .trim()
+    .split("\n")
+    .filter(Boolean);
+  const database = rows.find((row) => row.startsWith(`supabase_db_${projectId}\t`));
+  if (!database) return "isolated_database_container=missing";
+  const [name, status] = database.split("\t");
+  const logs = runUnchecked("docker", ["logs", "--tail", "240", name], {
+    cwd: repositoryRoot,
+  });
+  const relevant = sanitizeDiagnostic(`${logs.stderr ?? ""}\n${logs.stdout ?? ""}`)
+    .split("\n")
+    .filter((line) => /\b(?:ERROR|FATAL|PANIC|DETAIL|HINT|STATEMENT|failed)\b/i.test(line))
+    .slice(-24)
+    .join("\n")
+    .slice(-4_000);
+  return `isolated_database_container=${name} status=${status}${relevant ? `\n${relevant}` : ""}`;
+}
+
 function dockerDatabase(container, database, sql) {
   return run(
     "docker",
@@ -1248,11 +1280,17 @@ async function main() {
     ]);
 
     sourceAttempted = true;
-    runSupabase(
-      sourceProjectRoot,
-      ["start", "--exclude", excludedServices, "--yes"],
-      "isolated source Supabase start",
-    );
+    try {
+      runSupabase(
+        sourceProjectRoot,
+        ["start", "--exclude", excludedServices, "--yes"],
+        "isolated source Supabase start",
+      );
+    } catch (error) {
+      throw new Error(
+        `${error instanceof Error ? error.message : "Isolated source Supabase start failed."}\n${failedSupabaseDatabaseDiagnostic(sourceProjectId)}`,
+      );
+    }
     const sourceContainer = exactDatabaseContainer(sourceProjectId);
     runSupabase(
       sourceProjectRoot,
