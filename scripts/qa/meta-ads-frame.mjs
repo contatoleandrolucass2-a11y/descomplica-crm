@@ -157,6 +157,21 @@ apiSample.rows.push({
   spend: 900,
   conversions: 90,
 });
+apiSample.rows.push({
+  ...primary,
+  rowId: "deleted",
+  campaignId: "777",
+  campaign: "Campanha excluída QA",
+  adsetId: "778",
+  adset: "Conjunto excluído QA",
+  adId: "779",
+  ad: "Anúncio excluído QA",
+  status: "deleted",
+  spend: 71.83,
+  conversions: 38,
+  clicks: 189,
+  impressions: 1659,
+});
 let apiMode = "valid";
 async function serveAssets(dir, url) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
@@ -234,6 +249,13 @@ try {
   await expect(frame.getByRole("heading", { name: "Comparar campanhas" })).toBeVisible();
   await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
   await expect(frame.locator('[data-kpi="leads"] strong')).toHaveText("12");
+  await expect(frame.locator("#status")).toHaveValue("active");
+  await frame.locator("#status").selectOption("deleted");
+  const deletedCampaignRow = frame.locator('tr[data-open="777"]');
+  await expect(deletedCampaignRow).toContainText("Campanha excluída QA");
+  await expect(deletedCampaignRow.locator(".delivery-status")).toHaveText("Excluída");
+  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("71,83");
+  await frame.locator("#status").selectOption("active");
   await expect(frame.locator("#compare-period")).not.toBeChecked();
   await frame.locator("#compare-period").check();
   await expect(frame.locator(".period-comparison").first()).toBeVisible();

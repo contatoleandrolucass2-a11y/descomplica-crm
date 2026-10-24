@@ -21,6 +21,8 @@ async function downloadAdsReport() {
         all: "Todos os status",
         active: "Ativas",
         paused: "Pausadas",
+        deleted: "Excluídas",
+        archived: "Arquivadas",
         unknown: "Status não informado",
       }[state.status],
       list.length + " campanhas",

@@ -103,7 +103,13 @@ const AdsData = (() => {
         });
       groups.get(id).rows.push(row);
     }
-    return [...groups.values()];
+    return [...groups.values()].map((group) => ({
+      ...group,
+      deliveryStatus:
+        ["active", "paused", "deleted", "archived"].find((status) =>
+          group.rows.some((row) => row.status === status),
+        ) || "unknown",
+    }));
   }
   function selectEntity(rows, entity) {
     return rows.filter((r) => r[(entity.level || "campaign") + "Id"] === entity.id);

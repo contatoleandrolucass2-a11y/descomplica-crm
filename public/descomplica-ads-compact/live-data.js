@@ -38,7 +38,7 @@ let state = {
   compare: false,
   destination: "whatsapp",
   account: "all",
-  status: "all",
+  status: "active",
   organize: false,
   order: read("ads-live-compact-order", defaultOrder),
   funnelOrder: [],
@@ -74,7 +74,7 @@ const filterFields = [
 ];
 try {
   const stored = JSON.parse(
-    sessionStorage.getItem("ads-filters:" + document.documentElement.dataset.storageScope) || "{}",
+    sessionStorage.getItem("ads-filters:v2:" + document.documentElement.dataset.storageScope) || "{}",
   );
   restoredIds = Array.isArray(stored.ids) ? stored.ids : null;
   for (const key of filterFields) if (stored[key] !== undefined) state[key] = stored[key];
@@ -82,7 +82,7 @@ try {
 function persistFilters() {
   try {
     sessionStorage.setItem(
-      "ads-filters:" + document.documentElement.dataset.storageScope,
+      "ads-filters:v2:" + document.documentElement.dataset.storageScope,
       JSON.stringify(Object.fromEntries(filterFields.map((k) => [k, state[k]]))),
     );
   } catch {}
@@ -102,6 +102,17 @@ const destinationLabels = {
 };
 function destinationLabel() {
   return destinationLabels[state.destination] || "Não informado";
+}
+const deliveryStatusLabels = {
+  active: "Ativa",
+  paused: "Pausada",
+  deleted: "Excluída",
+  archived: "Arquivada",
+  unknown: "Status não informado",
+};
+function deliveryBadge(entity) {
+  const deliveryStatus = entity.deliveryStatus || "unknown";
+  return `<span class="badge delivery-status ${deliveryStatus}">${deliveryStatusLabels[deliveryStatus]}</span>`;
 }
 function filteredRows(old = false) {
   return AdsData.filter(sourceData?.rows || [], state, old ? previousRange() : selectedRange());
@@ -297,10 +308,12 @@ function filters() {
     )
     .join(
       "",
-    )}</select></div><details class="field campaign-filter"><summary>Campanhas<br><b>${state.ids.length} selecionadas⌄</b></summary><div class="campaign-options">${campaigns.length ? campaigns.map((c) => `<label><input type="checkbox" data-campaign="${c.id}" ${state.ids.includes(c.id) ? "checked" : ""}>${dot(c)}${c.name}</label>`).join("") : "Sem campanhas neste recorte."}</div></details><div class="field"><label for="status">Status</label><select id="status">${[
+    )}</select></div><details class="field campaign-filter"><summary>Campanhas<br><b>${state.ids.length} selecionadas⌄</b></summary><div class="campaign-options">${campaigns.length ? campaigns.map((c) => `<label><input type="checkbox" data-campaign="${c.id}" ${state.ids.includes(c.id) ? "checked" : ""}>${dot(c)}${c.name}${deliveryBadge(c)}</label>`).join("") : "Sem campanhas neste recorte."}</div></details><div class="field"><label for="status">Status</label><select id="status">${[
     ["all", "Todos"],
     ["active", "Ativas"],
     ["paused", "Pausadas"],
+    ["deleted", "Excluídas"],
+    ["archived", "Arquivadas"],
     ["unknown", "Não informado"],
   ]
     .map(
@@ -333,7 +346,7 @@ function micro() {
       c.cap != null && c.cpl > c.cap
         ? "Investigar custo acima do teto. Compare entrega, cliques e conversão."
         : "Compare cliques e resultados entre conjuntos e períodos equivalentes.";
-  return `<button class="back" data-page="macro">← Voltar à visão macro</button><div class="page-head"><div><h1>${dot(c)}${c.name}</h1><p>${destinationLabel()} · ${period()}</p></div><select id="micro-campaign" aria-label="Campanha analisada">${campaigns.map((a) => `<option value="${a.id}" ${c.id === a.id ? "selected" : ""}>${a.name}</option>`).join("")}</select></div>${filters()}${kpis([c])}<div class="banner"><span>${message} <small>Hipótese, não causa confirmada.</small></span><button id="evidence">Ver detalhes ›</button></div><div class="workspace">${panel("sets", state.detail === "sets" ? "Conjuntos de anúncios" : "Anúncios · " + (selectedSet?.name || "—"), barChart(shown, "cpl") + `<div class="table-wrap"><table><thead><tr><th>${state.detail === "sets" ? "Conjunto" : "Anúncio"}</th><th>Investimento</th><th>${resultName()}</th><th>Custo</th></tr></thead><tbody>${shown.map((a) => `<tr><td><button class="link-button" ${state.detail === "sets" ? `data-real-drill="${a.id}"` : ""}>${a.name}${state.detail === "sets" ? " ›" : ""}</button></td><td>${comparisonCell(a, "spend", money)}</td><td>${comparisonCell(a, "leads", num)}</td><td class="${a.cap != null && a.cpl > a.cap ? "bad" : ""}">${comparisonCell(a, "cpl", money)}</td></tr>`).join("")}</tbody></table></div>`, `<div class="segment"><button data-detail="sets" class="${state.detail === "sets" ? "on" : ""}">Conjuntos</button><button data-detail="ads" class="${state.detail === "ads" ? "on" : ""}">Anúncios</button></div>`)}${panel("funnel", "Funil da campanha", funnel(c) + "<small>Etapas não fornecidas pela fonte aparecem como —.</small>")}${panel("cost", "Evolução do custo", trend([c], true))}${
+  return `<button class="back" data-page="macro">← Voltar à visão macro</button><div class="page-head"><div><h1>${dot(c)}${c.name}${deliveryBadge(c)}</h1><p>${destinationLabel()} · ${period()}</p></div><select id="micro-campaign" aria-label="Campanha analisada">${campaigns.map((a) => `<option value="${a.id}" ${c.id === a.id ? "selected" : ""}>${a.name}</option>`).join("")}</select></div>${filters()}${kpis([c])}<div class="banner"><span>${message} <small>Hipótese, não causa confirmada.</small></span><button id="evidence">Ver detalhes ›</button></div><div class="workspace">${panel("sets", state.detail === "sets" ? "Conjuntos de anúncios" : "Anúncios · " + (selectedSet?.name || "—"), barChart(shown, "cpl") + `<div class="table-wrap"><table><thead><tr><th>${state.detail === "sets" ? "Conjunto" : "Anúncio"}</th><th>Investimento</th><th>${resultName()}</th><th>Custo</th></tr></thead><tbody>${shown.map((a) => `<tr><td><button class="link-button" ${state.detail === "sets" ? `data-real-drill="${a.id}"` : ""}>${a.name}${state.detail === "sets" ? " ›" : ""}</button></td><td>${comparisonCell(a, "spend", money)}</td><td>${comparisonCell(a, "leads", num)}</td><td class="${a.cap != null && a.cpl > a.cap ? "bad" : ""}">${comparisonCell(a, "cpl", money)}</td></tr>`).join("")}</tbody></table></div>`, `<div class="segment"><button data-detail="sets" class="${state.detail === "sets" ? "on" : ""}">Conjuntos</button><button data-detail="ads" class="${state.detail === "ads" ? "on" : ""}">Anúncios</button></div>`)}${panel("funnel", "Funil da campanha", funnel(c) + "<small>Etapas não fornecidas pela fonte aparecem como —.</small>")}${panel("cost", "Evolução do custo", trend([c], true))}${
     state.compare
       ? panel(
           "previous",
