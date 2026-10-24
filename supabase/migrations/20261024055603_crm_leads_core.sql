@@ -254,7 +254,7 @@ create or replace function private.crm_lead_user_can_access_organization(
 ) returns boolean language sql stable security definer set search_path = '' as $$
   select p_user_id is not null and p_organization_id is not null
     and exists (select 1 from public.profiles p where p.user_id = p_user_id
-      and p.is_active and p.access_status = 'approved')
+      and p.is_active)
     and exists (select 1 from public.crm_lead_workspaces w where w.id = p_organization_id and w.is_active)
     and (
       exists (select 1 from public.user_roles r where r.user_id = p_user_id and r.role_key in ('master','admin'))
@@ -341,7 +341,7 @@ begin
     'channels', coalesce((select jsonb_agg(jsonb_build_object('id',id,'key',key,'name',name) order by name) from public.crm_lead_channels where is_active),'[]'::jsonb),
     'lostReasons', coalesce((select jsonb_agg(jsonb_build_object('id',id,'key',key,'name',name) order by name) from public.crm_lead_lost_reasons where is_active),'[]'::jsonb),
     'responsibles', coalesce((select jsonb_agg(jsonb_build_object('id',p.user_id,'label',case when public._internal_has_permission(v_actor,'crm.leads.list.view') then coalesce(p.email,p.user_id::text) else 'Responsavel '||left(p.user_id::text,8) end) order by p.user_id)
-      from public.profiles p where p.is_active and p.access_status='approved'
+      from public.profiles p where p.is_active
         and private.crm_lead_user_can_access_organization(p.user_id,p_organization_id)),'[]'::jsonb)
   );
 end;
