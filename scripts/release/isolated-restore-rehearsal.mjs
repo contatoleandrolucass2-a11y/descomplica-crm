@@ -86,9 +86,9 @@ function commandFailure(command, result, label) {
       line,
     ),
   );
-  const diagnostic = [...new Set([...relevant.slice(-20), ...lines.slice(-10)])]
+  const diagnostic = [...new Set([...relevant.slice(-120), ...lines.slice(-20)])]
     .join("\n")
-    .slice(-4_000);
+    .slice(-20_000);
   return new Error(
     `${label ?? command} failed in the isolated local rehearsal.${
       diagnostic ? `\n${diagnostic}` : ""

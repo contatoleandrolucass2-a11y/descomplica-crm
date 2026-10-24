@@ -776,6 +776,25 @@ alter table public.crm_lead_tags enable row level security; alter table public.c
 alter table public.crm_lead_tag_links enable row level security; alter table public.crm_lead_tag_links force row level security;
 alter table public.crm_lead_audit_events enable row level security; alter table public.crm_lead_audit_events force row level security;
 
+do $mfa_policies$
+declare
+  v_table text;
+begin
+  foreach v_table in array array[
+    'crm_lead_sources', 'crm_lead_channels', 'crm_lead_lost_reasons',
+    'crm_lead_stages', 'crm_lead_customers', 'crm_lead_interests',
+    'crm_leads', 'crm_lead_stage_history', 'crm_lead_activities',
+    'crm_lead_messages', 'crm_lead_tags', 'crm_lead_tag_links',
+    'crm_lead_audit_events'
+  ] loop
+    execute format(
+      'create policy authenticated_session_mfa_gate on public.%I as restrictive for all to authenticated using ((select private.current_session_satisfies_mfa())) with check ((select private.current_session_satisfies_mfa()))',
+      v_table
+    );
+  end loop;
+end
+$mfa_policies$;
+
 revoke all privileges on table
   public.crm_lead_sources, public.crm_lead_channels, public.crm_lead_lost_reasons,
   public.crm_lead_stages, public.crm_lead_customers, public.crm_lead_interests,

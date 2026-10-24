@@ -232,6 +232,24 @@ alter table public.crm_lead_operation_settings enable row level security;alter t
 alter table public.crm_lead_import_batches enable row level security;alter table public.crm_lead_import_batches force row level security;
 alter table public.crm_lead_import_rows enable row level security;alter table public.crm_lead_import_rows force row level security;
 alter table public.crm_lead_operations_audit enable row level security;alter table public.crm_lead_operations_audit force row level security;
+do $mfa_policies$
+declare
+  v_table text;
+begin
+  foreach v_table in array array[
+    'crm_lead_distribution_queues', 'crm_lead_distribution_members',
+    'crm_lead_distribution_memory', 'crm_lead_distribution_rules',
+    'crm_lead_distribution_events', 'crm_lead_operation_settings',
+    'crm_lead_import_batches', 'crm_lead_import_rows',
+    'crm_lead_operations_audit'
+  ] loop
+    execute format(
+      'create policy authenticated_session_mfa_gate on public.%I as restrictive for all to authenticated using ((select private.current_session_satisfies_mfa())) with check ((select private.current_session_satisfies_mfa()))',
+      v_table
+    );
+  end loop;
+end
+$mfa_policies$;
 revoke all privileges on table public.crm_lead_distribution_queues,public.crm_lead_distribution_members,public.crm_lead_distribution_memory,public.crm_lead_distribution_rules,public.crm_lead_distribution_events,public.crm_lead_operation_settings,public.crm_lead_import_batches,public.crm_lead_import_rows,public.crm_lead_operations_audit from public,anon,authenticated,service_role;
 revoke all privileges on function public.get_crm_lead_distribution_v1(uuid),public.save_crm_lead_distribution_v1(uuid,bigint,jsonb,text),public.set_crm_lead_presence_v1(uuid,boolean,integer),public.assign_crm_lead_v1(uuid,uuid,text),public.get_crm_lead_report_v1(uuid,text,date,date,jsonb),public.export_crm_leads_v1(uuid,jsonb,integer),public.get_crm_lead_settings_v1(uuid),public.save_crm_lead_settings_v1(uuid,bigint,jsonb,text),public.preview_crm_lead_import_v1(uuid,text,jsonb,jsonb),public.apply_crm_lead_import_v1(uuid,text),public.list_crm_lead_operations_audit_v1(uuid,jsonb,integer,integer),public.list_crm_lead_imports_v1(uuid,integer,integer),public.purge_crm_lead_import_staging_v1(uuid) from public,anon,authenticated,service_role;
 grant execute on function public.get_crm_lead_distribution_v1(uuid),public.save_crm_lead_distribution_v1(uuid,bigint,jsonb,text),public.set_crm_lead_presence_v1(uuid,boolean,integer),public.assign_crm_lead_v1(uuid,uuid,text),public.get_crm_lead_report_v1(uuid,text,date,date,jsonb),public.export_crm_leads_v1(uuid,jsonb,integer),public.get_crm_lead_settings_v1(uuid),public.save_crm_lead_settings_v1(uuid,bigint,jsonb,text),public.preview_crm_lead_import_v1(uuid,text,jsonb,jsonb),public.apply_crm_lead_import_v1(uuid,text),public.list_crm_lead_operations_audit_v1(uuid,jsonb,integer,integer),public.list_crm_lead_imports_v1(uuid,integer,integer),public.purge_crm_lead_import_staging_v1(uuid) to authenticated;
