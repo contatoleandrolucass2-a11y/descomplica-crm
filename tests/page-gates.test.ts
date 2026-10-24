@@ -8,6 +8,21 @@ import {
 } from "@/lib/authorization/page-gates";
 
 describe("protected commercial page set", () => {
+  it.each([
+    ["leads", "crm.leads.view"],
+    ["leads/lista", "crm.leads.list.view"],
+    ["leads/atividades", "crm.leads.activities.view"],
+    ["leads/funil", "crm.leads.pipeline.view"],
+  ])("keeps %s behind its independent Lead page guard", (route, permission) => {
+    const source = readFileSync(
+      new URL(`../app/(protected)/app/${route}/page.tsx`, import.meta.url),
+      "utf8",
+    );
+
+    expect(source).toContain(`enforcePageAccess("/app/${route}")`);
+    expect(getProtectedPageGate(`/app/${route}`)?.permission).toBe(permission);
+  });
+
   it.each(["gestao", "gestao/rotina", "gestao/previsao"])(
     "keeps %s readable behind its independent page guard",
     (route) => {
@@ -27,7 +42,7 @@ describe("protected commercial page set", () => {
     },
   );
 
-  it("matches the exact approved thirty-two-page protected set", () => {
+  it("matches the exact approved thirty-six-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -38,6 +53,10 @@ describe("protected commercial page set", () => {
         "admin.pages|/admin/paginas|pages.manage",
         "admin.users|/admin/usuarios|users.view",
         "crm.dashboard|/app|crm.dashboard.view",
+        "crm.leads.activities|/app/leads/atividades|crm.leads.activities.view",
+        "crm.leads.list|/app/leads/lista|crm.leads.list.view",
+        "crm.leads.pipeline|/app/leads/funil|crm.leads.pipeline.view",
+        "crm.leads|/app/leads|crm.leads.view",
         "crm.management.routine|/app/gestao/rotina|crm.management.routine.view",
         "crm.management.forecast|/app/gestao/previsao|crm.management.forecast.view",
         "crm.management|/app/gestao|crm.management.view",
@@ -78,10 +97,10 @@ describe("protected commercial page set", () => {
     ).toEqual([]);
   });
 
-  it("keeps the full thirty-two-route smoke inventory unique", () => {
-    expect(PROTECTED_PAGE_GATES).toHaveLength(32);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(32);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(32);
+  it("keeps the full thirty-six-route smoke inventory unique", () => {
+    expect(PROTECTED_PAGE_GATES).toHaveLength(36);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(36);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(36);
   });
 
   it("keeps Repasse restricted to Master and Admin in addition to its permission", () => {

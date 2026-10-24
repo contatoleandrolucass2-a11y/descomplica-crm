@@ -87,9 +87,11 @@ describe("dashboard Meta Ads", () => {
       "crm.meta_ads.accounts",
       "crm.meta_ads.reports",
     ]);
-    expect(groups.findIndex((group) => group.page.key === "crm.meta_ads")).toBe(
-      groups.findIndex((group) => group.page.key === "crm.dashboard") + 1,
-    );
+    const dashboardIndex = groups.findIndex((group) => group.page.key === "crm.dashboard");
+    const leadIndex = groups.findIndex((group) => group.page.key === "crm.leads");
+    const metaAdsIndex = groups.findIndex((group) => group.page.key === "crm.meta_ads");
+    expect(leadIndex).toBe(dashboardIndex + 1);
+    expect(metaAdsIndex).toBe(leadIndex + 1);
   });
 
   it("remove navegacao duplicada do artefato porque as visoes pertencem a navbar", async () => {

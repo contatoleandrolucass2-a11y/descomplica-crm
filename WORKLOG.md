@@ -1,5 +1,41 @@
 # Worklog
 
+## 2026-10-24 - Estrutura protegida do menu Lead
+
+O primeiro incremento implementa `/app/leads` como raiz da navegação e cria
+Lista de leads, Atividades e Funil como páginas filhas. Cada destino possui
+permissão e guard próprios; a migration gerada concede as chaves novas somente
+a Admin e Master. O hub mostra apenas áreas autorizadas.
+
+Ainda não existe fonte operacional definida. Por isso, busca, filtros e ações
+permanecem desabilitados e a interface informa indisponibilidade, sem dados de
+demonstração, contagens zeradas ou etapas inventadas. Integração, banco,
+cadastro, distribuição, WhatsApp e mutações permanecem fora deste incremento.
+
+Lint e typecheck passaram; o build gerou as 65 rotas, incluindo as quatro novas.
+O Vitest aprovou 4.139 testes e ignorou 107; os 127 contratos focados do catálogo
+e os quatro testes da interface passaram. A suíte Node repetiu as três falhas
+Windows preexistentes do Meta Ads. `test:release` também ficou bloqueado por 11
+casos do host Meta Ads que não encontram o arquivo sintético no Windows. Esses
+arquivos e contratos externos ao menu Lead não foram alterados para liberar o
+gate.
+
+Durante o encerramento, `origin/main` avançou de `b403071c` para `9c0ab96c` com
+uma correção concorrente de dependência. O trabalho Lead permanece baseado no
+SHA anterior e não foi mesclado, commitado ou publicado enquanto os gates locais
+estão falhos e a CI da nova `main` ainda não concluiu o gate final.
+
+## 2026-10-24 - Descoberta do futuro menu Lead
+
+Foi concluido o levantamento funcional do C2S antes de qualquer implementacao.
+A pesquisa combinou fontes oficiais publicas, documentacao da API e navegacao
+autenticada somente leitura. O inventario cobre jornada do lead, funil,
+distribuicao, atendimento, relatorios, administracao, dados, integracoes,
+autorizacao e limites de privacidade. Nenhuma credencial ou dado pessoal foi
+persistido e o menu `Lead` ainda nao foi criado. Lint, tipos, build, catalogos e
+Gitleaks passaram. A suite integral ficou bloqueada por tres testes POSIX do
+Meta Ads no Windows, fora do escopo; a CI atual de `main` tambem estava falha.
+
 ## 2026-10-23 - Advisory novo durante a publicação de Agendamentos
 
 Após o merge do PR #315, o registry publicou `GHSA-27r3-jxmh-p828` e a CI do

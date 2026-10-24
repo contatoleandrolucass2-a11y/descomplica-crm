@@ -99,6 +99,22 @@
       ]
     },
     {
+      "name": "Leads",
+      "agent": "crm-dados",
+      "skill": "descomplica-dados-integracoes",
+      "routes": [
+        "app/(protected)/app/leads/page.tsx",
+        "app/(protected)/app/leads/lista/page.tsx",
+        "app/(protected)/app/leads/atividades/page.tsx",
+        "app/(protected)/app/leads/funil/page.tsx"
+      ],
+      "evidence": [
+        "tests/page-registry.test.ts",
+        "tests/page-gates.test.ts",
+        "tests/authorized-navigation.test.ts"
+      ]
+    },
+    {
       "name": "Read model v3",
       "agent": "crm-dados",
       "skill": "descomplica-dados-integracoes",

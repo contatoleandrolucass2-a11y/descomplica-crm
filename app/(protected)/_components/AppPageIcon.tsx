@@ -2,6 +2,7 @@ import { ClipboardList } from "lucide-react";
 
 function iconCategory(pageKey: string) {
   if (pageKey.startsWith("crm.simulation")) return "calculator";
+  if (pageKey.startsWith("crm.leads")) return "lead";
   if (pageKey.startsWith("crm.settings")) return "settings";
   if (pageKey.startsWith("crm.stage")) return "funnel";
   if (pageKey === "crm.repasse") return "repasse";
@@ -55,6 +56,12 @@ export function AppPageIcon({ pageKey }: { pageKey: string }) {
         <>
           <path d="M4 13V9l12-4v12L4 13Z" />
           <path d="m7 14 2 6h3l-2-6M19 8v6" />
+        </>
+      ) : null}
+      {category === "lead" ? (
+        <>
+          <circle cx="9" cy="8" r="3" />
+          <path d="M3.5 20v-1.5A5.5 5.5 0 0 1 9 13h1a5.5 5.5 0 0 1 5.5 5.5V20M17 8v6M14 11h6" />
         </>
       ) : null}
       {category === "shield" ? (

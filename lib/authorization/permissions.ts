@@ -97,6 +97,26 @@ export const PERMISSIONS = {
     description: "Consulta os relatórios consolidados do Meta Ads.",
     minLevel: 80,
   },
+  "crm.leads.view": {
+    label: "Visualizar Lead",
+    description: "Acessa o hub do módulo de leads.",
+    minLevel: 80,
+  },
+  "crm.leads.list.view": {
+    label: "Visualizar lista de leads",
+    description: "Consulta a lista de leads quando uma fonte autorizada estiver configurada.",
+    minLevel: 80,
+  },
+  "crm.leads.activities.view": {
+    label: "Visualizar atividades de leads",
+    description: "Consulta atividades relacionadas a leads autorizados.",
+    minLevel: 80,
+  },
+  "crm.leads.pipeline.view": {
+    label: "Visualizar funil de leads",
+    description: "Consulta a organização dos leads por etapa do funil.",
+    minLevel: 80,
+  },
   "crm.stage.opportunities.view": {
     label: "Visualizar Oportunidades",
     description: "Consulta a página de oportunidades.",

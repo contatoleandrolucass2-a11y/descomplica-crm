@@ -70,6 +70,10 @@ const administrativeCommercialPageKeys = pageKeysForPermissions(
   "crm.meta_ads.campaigns.view",
   "crm.meta_ads.accounts.view",
   "crm.meta_ads.reports.view",
+  "crm.leads.view",
+  "crm.leads.list.view",
+  "crm.leads.activities.view",
+  "crm.leads.pipeline.view",
 );
 const masterAdministrativePageKeys = pageKeysForPermissions(
   "admin.access",

@@ -1,5 +1,19 @@
 # Changelog
 
+## 2026-10-24 - Primeiro incremento do menu Lead
+
+- Adiciona o menu raiz `Lead` e as áreas Lista de leads, Atividades e Funil.
+- Protege as quatro rotas com permissões independentes e catálogo versionado.
+- Apresenta estados vazios explícitos enquanto a fonte oficial não estiver
+  configurada, sem contatos, métricas ou etapas fictícias.
+
+## 2026-10-24 - Referencia funcional do C2S
+
+- Documenta o inventario do C2S que orientara o futuro menu `Lead`.
+- Separa Gestor de Leads, CRM Imob, C2Sgo, Vetra e modulos opcionais.
+- Registra fluxos, entidades, API, autorizacao, privacidade, arquitetura e
+  pendencias sem iniciar a implementacao.
+
 ## 2026-10-23 - Segundo desbloqueio de segurança da publicação
 
 - Atualiza `body-parser` transitivo para `2.4.0`, corrigindo
