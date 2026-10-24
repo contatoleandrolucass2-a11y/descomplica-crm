@@ -15,7 +15,7 @@ select ok(not has_function_privilege('anon','public.get_crm_lead_distribution_v1
 select ok(not has_function_privilege('authenticated','private.crm_lead_ops_actor(text,uuid)','EXECUTE') and not has_function_privilege('authenticated','private.crm_lead_csv_safe(text)','EXECUTE'),'internal helpers remain private');
 select ok(exists(select 1 from pg_extension where extname='pg_cron'),'pg_cron extension is versioned');
 select is((select count(*) from cron.job where jobname='crm-lead-import-staging-retention'),1::bigint,'retention schedule is idempotently unique');
-select like((select command from cron.job where jobname='crm-lead-import-staging-retention'),'%delete from public.crm_lead_import_batches%','retention job deletes expired preview batches');
+select ok((select command like '%delete from public.crm_lead_import_batches%' from cron.job where jobname='crm-lead-import-staging-retention'),'retention job deletes expired preview batches');
 
 set local role authenticated;select set_config('request.jwt.claim.role','authenticated',true);select set_config('request.jwt.claim.sub','',true);
 select throws_ok($$select public.get_crm_lead_settings_v1('2ead1000-0000-4000-8000-000000000001')$$,'28000','unauthorized: authenticated user required','missing UID is denied');

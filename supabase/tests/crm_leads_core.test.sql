@@ -12,8 +12,12 @@ values
   ('1ead1000-0000-4000-8000-000000000002','lead-hidden-test','Lead Hidden Test','real_estate');
 insert into public.crm_teams (id, organization_id, team_key, name)
 values ('1ead2000-0000-4000-8000-000000000001','1ead1000-0000-4000-8000-000000000001','lead-core-test','Lead Core Test');
-insert into public.crm_reporting_scopes (id, scope_key, scope_type, team_id)
-values ('1ead3000-0000-4000-8000-000000000001','lead-core-team','team','1ead2000-0000-4000-8000-000000000001');
+insert into public.crm_people (id, person_key, display_name, auth_user_id)
+values ('1ead2100-0000-4000-8000-000000000001','lead-core-broker','Lead Core Broker','1ead0000-0000-4000-8000-000000000002');
+insert into public.crm_team_memberships (team_id, person_id, membership_role, valid_from, valid_until)
+values ('1ead2000-0000-4000-8000-000000000001','1ead2100-0000-4000-8000-000000000001','broker',now()-interval '1 minute',now()+interval '1 day');
+insert into public.crm_reporting_scopes (id, scope_key, scope_type, person_id)
+values ('1ead3000-0000-4000-8000-000000000001','lead-core-broker','person','1ead2100-0000-4000-8000-000000000001');
 insert into public.crm_user_reporting_scope_grants(user_id,reporting_scope_id,granted_by,reason)
 values ('1ead0000-0000-4000-8000-000000000002','1ead3000-0000-4000-8000-000000000001','1ead0000-0000-4000-8000-000000000001','Synthetic lead fixture');
 update public.user_roles set role_key='broker_house',assigned_by='1ead0000-0000-4000-8000-000000000001'
