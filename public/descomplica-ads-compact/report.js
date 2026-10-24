@@ -9,22 +9,15 @@ async function downloadAdsReport() {
     const list = (
       state.page === "micro" ? [data(campaigns.find((c) => c.id === state.selected))] : current()
     ).filter(Boolean);
-    const reportDestination = state.destination;
+    const reportDestination = destinationFilterKey();
     const range = { ...selectedRange() },
       comparison = state.compare,
       previousLabel = rangeLabel(previousRange());
     const pageName = state.page === "micro" ? "Análise da campanha" : "Análise de campanhas";
     const filtersText = [
-      sourceData.accountName,
+      accountFilterLabel(),
       destinationLabel(),
-      {
-        all: "Todos os status",
-        active: "Ativas",
-        paused: "Pausadas",
-        deleted: "Excluídas",
-        archived: "Excluídas/arquivadas (Meta)",
-        unknown: "Status não informado",
-      }[state.status],
+      statusFilterLabel(),
       list.length + " campanhas",
     ].join(" | ");
     const updated = new Date(sourceData.fetchedAt).toLocaleString("pt-BR", {
@@ -218,12 +211,18 @@ async function downloadAdsReport() {
                 ["Conversas iniciadas", c.leads],
                 ["Qualificados", c.qualified],
               ]
-            : [
-                ["Cliques", c.clicks],
-                [reportDestination === "site" ? "Visitas" : "Aberturas", c.opens],
-                ["Cadastros", c.leads],
-                ["Qualificados", c.qualified],
-              ];
+            : ["form", "site"].includes(reportDestination)
+              ? [
+                  ["Cliques", c.clicks],
+                  [reportDestination === "site" ? "Visitas" : "Aberturas", c.opens],
+                  ["Cadastros", c.leads],
+                  ["Qualificados", c.qualified],
+                ]
+              : [
+                  ["Cliques", c.clicks],
+                  ["Resultados", c.leads],
+                  ["Qualificados", c.qualified],
+                ];
         for (const [label, value] of stages) {
           text(label, 14, cursor, 9);
           text(num(value), 150, cursor, 9);

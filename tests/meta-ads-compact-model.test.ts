@@ -70,6 +70,29 @@ describe("compact real-data model", () => {
     expect(a.ctr).toBeCloseTo((25 / 1500) * 100);
     expect(a.geo).toEqual([null, null, null, null, null]);
   });
+  it("combines multi-select filters and treats an empty selection as no rows", () => {
+    const range = { start: "2026-09-30", end: "2026-10-02" };
+    expect(
+      model
+        .filter(
+          rows,
+          {
+            accountIds: ["1"],
+            destinations: ["whatsapp", "form"],
+            statuses: ["active", "paused"],
+          },
+          range,
+        )
+        .map((row: { campaignId: string }) => row.campaignId),
+    ).toEqual(["2", "2", "6"]);
+    expect(
+      model.filter(
+        rows,
+        { accountIds: ["1"], destinations: [], statuses: ["active", "paused"] },
+        range,
+      ),
+    ).toEqual([]);
+  });
   it("uses observed daily rows and preserves missing cost rather than invented interpolation", () => {
     const entity = model.groups(rows)[0];
     expect(entity.name).toBe("Campanha &lt;script&gt;");

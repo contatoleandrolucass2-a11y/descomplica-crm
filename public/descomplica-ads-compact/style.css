@@ -273,36 +273,80 @@ select {
   border: 0;
   font-size: 12px;
 }
-.campaign-filter {
+.filter-multiselect {
   position: relative;
-  flex: 1.2;
   min-width: 160px;
 }
-.campaign-filter summary {
+.campaign-filter {
+  flex: 1.2;
+}
+.filter-multiselect summary {
   cursor: pointer;
   list-style: none;
   font-size: 12px;
   padding-top: 3px;
 }
-.campaign-options {
+.filter-multiselect summary::-webkit-details-marker {
+  display: none;
+}
+.filter-multiselect summary span {
+  display: block;
+  color: var(--muted);
+  font-size: 10px;
+  margin-bottom: 2px;
+}
+.filter-multiselect summary b {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.filter-options {
   position: absolute;
   z-index: 12;
   background: var(--card);
-  padding: 12px;
-  top: 59px;
+  padding: 6px 12px 12px;
+  top: calc(100% + 8px);
   left: 0;
-  min-width: 220px;
+  min-width: max(100%, 250px);
+  max-width: min(360px, 90vw);
   border: 1px solid var(--line);
   box-shadow: var(--shadow);
   border-radius: 8px;
 }
-.campaign-options label {
+.filters .field:nth-last-child(-n + 2) .filter-options {
+  left: auto;
+  right: 0;
+}
+.filter-option {
   display: flex;
   gap: 10px;
   align-items: center;
   font-size: 12px;
   margin: 10px 0;
   color: var(--text);
+  cursor: pointer;
+}
+.filter-option-name {
+  min-width: 0;
+  flex: 1;
+  overflow-wrap: anywhere;
+}
+.filter-select-all {
+  position: sticky;
+  top: -6px;
+  z-index: 1;
+  background: var(--card);
+  padding: 10px 0 8px;
+  margin: 0;
+}
+.filter-divider {
+  height: 1px;
+  background: var(--line);
+}
+.filter-empty {
+  color: var(--muted);
+  font-size: 12px;
 }
 input[type="checkbox"] {
   width: 15px;
@@ -2216,7 +2260,7 @@ body #main {
   gap: 6px;
   min-width: 180px;
 }
-.campaign-options {
+.filter-options {
   max-height: 350px;
   overflow-y: auto;
 }

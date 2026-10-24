@@ -51,14 +51,26 @@ const AdsData = (() => {
     return d.toISOString().slice(0, 10);
   };
   const days = (start, end) => Math.round((new Date(end) - new Date(start)) / 86400000) + 1;
+  function selection(state, plural, singular, allValue = "all") {
+    if (Array.isArray(state[plural])) return state[plural];
+    return state[singular] === allValue ? null : [state[singular]];
+  }
+  function matchesSelections(row, state) {
+    const accounts = selection(state, "accountIds", "account");
+    const statuses = selection(state, "statuses", "status");
+    const destinations = selection(state, "destinations", "destination", "");
+    return (
+      (!accounts || accounts.includes(row.accountId)) &&
+      (!statuses || statuses.includes(row.status)) &&
+      (!destinations || destinations.includes(row.destination))
+    );
+  }
   function filter(rows, state, range) {
     return rows.filter(
       (r) =>
         r.date >= range.start &&
         r.date <= range.end &&
-        (state.account === "all" || r.accountId === state.account) &&
-        (state.status === "all" || r.status === state.status) &&
-        r.destination === state.destination,
+        matchesSelections(r, state),
     );
   }
   function aggregate(rows) {
@@ -69,7 +81,17 @@ const AdsData = (() => {
       leads = sum("conversions"),
       clicks = sum("clicks"),
       impressions = sum("impressions");
-    const opens = nullable(rows[0]?.destination === "site" ? "sessions" : "formOpens");
+    const opens =
+      rows.length &&
+      rows.every((row) =>
+        Number.isFinite(row.destination === "site" ? row.sessions : row.formOpens),
+      )
+        ? rows.reduce(
+            (total, row) =>
+              total + (row.destination === "site" ? row.sessions : row.formOpens),
+            0,
+          )
+        : null;
     return {
       spend,
       leads,
@@ -134,6 +156,7 @@ const AdsData = (() => {
     shift,
     days,
     filter,
+    matchesSelections,
     aggregate,
     groups,
     selectEntity,
