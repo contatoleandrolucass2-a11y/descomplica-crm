@@ -1,7 +1,7 @@
 begin;
 -- 42 existing assertions, six dashboard redaction assertions and four
 -- conversion-goal contract assertions.
-select plan(52);
+select plan(53);
 
 create function pg_temp.analysis_fixture()
 returns jsonb language sql as $$
@@ -160,11 +160,12 @@ select throws_ok($$select private.validate_crm_dashboard_analysis(
   'v4 manager population cannot exceed registered brokers');
 select ok((select sum((fact->>7)::int) filter (where fact->>0='0') = 9
     and count(*) filter (where fact->>0='4') = 1
-    and count(*) filter (where fact->>0='3') = 0
-    and bool_and((fact->>8)::numeric = 0 and (fact->>9)::numeric = 0)
+    and count(*) filter (where fact->>0='3') = 1
+    and sum((fact->>8)::numeric) filter (where fact->>0='4') = 999999
+    and sum((fact->>9)::numeric) filter (where fact->>0='3') = 1
   from jsonb_array_elements(
     private.project_crm_appointments_analysis(pg_temp.appointment_slice_v4(),true)->'facts'
-  ) fact),'v4 projection exposes only aggregate funnel counts without VGV or folder approval');
+  ) fact),'v4 projection exposes the complete aggregate funnel without customer records');
 select is(private.project_crm_appointments_analysis(
   pg_temp.appointment_slice_v4(),false)#>>'{appointments,0,accountName}',
   '','v4 preserves account redaction while exposing aggregate funnel facts');
@@ -242,14 +243,16 @@ select is(public.read_crm_appointments_conversion_goals('2026-08-04'),null::json
   'missing identity yields no appointment conversion goals');
 reset role;
 insert into public.crm_funnel_goals(
-  profile_key,effective_month,opportunities,appointments,visits,sales,
+  profile_key,effective_month,opportunities,appointments,visits,folders,approved_folders,sales,
   approved_folders_rate,folders_rate,visits_rate,appointments_rate
 )
-values ('dv','2026-08-01',216,24,12,1,150,500,154,204)
+values ('dv','2026-08-01',216,24,12,8,2,1,150,500,154,204)
 on conflict (profile_key,effective_month) do update set
   opportunities=excluded.opportunities,
   appointments=excluded.appointments,
   visits=excluded.visits,
+  folders=excluded.folders,
+  approved_folders=excluded.approved_folders,
   sales=excluded.sales,
   approved_folders_rate=excluded.approved_folders_rate,
   folders_rate=excluded.folders_rate,
@@ -329,6 +332,9 @@ select is(public.read_crm_appointments_goal('2026-08-04'),24::bigint,
   'stage-only access reads only the active appointment volume');
 select is((public.read_crm_appointments_conversion_goals('2026-08-04')#>>'{dv,opportunityAppointment}')::numeric,
   9::numeric,'stage-only access reads the active House opportunity-to-appointment limit');
+select is(public.read_crm_appointments_conversion_goals('2026-08-04')#>'{dv,monthlyFunnel}',
+  '{"opportunities":216,"appointments":24,"visits":12,"folders":8,"approvedFolders":2,"sales":1}'::jsonb,
+  'stage-only access reads the complete configured funnel goal');
 select is(public.read_crm_appointments_conversion_goals('2026-08-04')#>'{partnerships}',
   'null'::jsonb,'partnership appointment conversions remain unavailable instead of fabricated');
 select is((select payload#>'{dimensions,developments}' from public.read_crm_appointments_analysis(

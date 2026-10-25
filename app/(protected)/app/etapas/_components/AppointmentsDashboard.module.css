@@ -3,9 +3,16 @@
   color: var(--analytics-ink);
 }
 .title {
-  margin: 0 0 1rem;
+  margin: 0;
   font-size: clamp(1.5rem, 2.5vw, 2rem);
   line-height: 1.25;
+}
+.titleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 .toolbar {
   display: flex;
@@ -64,7 +71,7 @@
 }
 .filters {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) minmax(10rem, 0.85fr) auto;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: end;
   gap: 0.75rem;
   margin-bottom: 1rem;
@@ -303,19 +310,17 @@
   font-weight: 700;
   cursor: pointer;
 }
-.clearField {
-  width: max-content;
-}
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-auto-rows: calc(17.5rem - 10px);
+  grid-auto-rows: clamp(10.75rem, calc((100dvh - 18rem) / 2), 12.5rem);
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
 .overviewGrid,
 .insightGrid,
-.recencyGrid {
+.recencyGrid,
+.conversionRankingGrid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
@@ -330,6 +335,7 @@
 }
 .overviewGrid .chartCard,
 .insightGrid .chartCard,
+.conversionRankingGrid .chartCard,
 .recencyGrid .recencyCard {
   height: 17rem;
   min-height: 17rem;
@@ -347,6 +353,7 @@
   margin-top: 0.35rem;
 }
 .insightGrid .cardBody,
+.conversionRankingGrid .cardBody,
 .recencyGrid .recencyList {
   overflow-y: auto;
   scrollbar-gutter: stable;
@@ -466,7 +473,7 @@
 .kpiCard,
 .gaugeCard {
   height: 100%;
-  min-height: calc(17.5rem - 10px);
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -475,10 +482,10 @@
 }
 .kpiGrid .card h2 {
   display: grid;
-  min-height: 3.25rem;
+  min-height: 2.5rem;
   place-items: center;
-  margin-bottom: 0.55rem;
-  font-size: 1rem;
+  margin-bottom: 0.25rem;
+  font-size: 0.9rem;
   line-height: 1.3;
 }
 .kpiCard strong {
@@ -489,11 +496,11 @@
 .kpiGrid .card p,
 .kpiGrid .goalFormula {
   display: grid;
-  min-height: 2.8rem;
+  min-height: 2.2rem;
   place-items: center;
   margin: 0;
   color: var(--analytics-muted);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   line-height: 1.35;
   text-align: center;
 }
@@ -501,7 +508,7 @@
 .conversionCard .metricValue,
 .goalGauge .metricValue,
 .donut .metricValue {
-  font-size: clamp(1.7rem, 2vw, 2.15rem);
+  font-size: clamp(1.45rem, 1.7vw, 1.85rem);
   line-height: 1;
 }
 .productiveCard {
@@ -510,7 +517,7 @@
 .donut {
   display: grid;
   place-items: center;
-  width: 5.4rem;
+  width: 4.25rem;
   aspect-ratio: 1;
   margin: 0 0 0.35rem;
   border-radius: 50%;
@@ -527,7 +534,7 @@
 }
 .conversionCard {
   height: 100%;
-  min-height: calc(17.5rem - 10px);
+  min-height: 0;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -580,7 +587,7 @@
 }
 .goalGauge svg {
   display: block;
-  width: min(100%, 13rem);
+  width: min(100%, 8rem);
   margin: 0 auto -0.5rem;
   overflow: visible;
 }
@@ -617,7 +624,7 @@
   display: block;
   margin: 0.25rem 0 0;
   color: var(--analytics-muted);
-  font-size: 0.78rem;
+  font-size: 0.7rem;
   line-height: 1.3;
 }
 .empty {
@@ -780,6 +787,126 @@
   display: grid;
   gap: 0.7rem;
 }
+.conversionRanking {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.conversionRanking li {
+  padding: 0.35rem;
+  border-radius: 0.5rem;
+  transition: background-color 160ms ease-out;
+}
+.conversionRanking li:hover {
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 12%, transparent);
+}
+.conversionRankingHeading {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.75rem;
+  align-items: start;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+.conversionRankingHeading strong {
+  color: var(--analytics-cyan-strong);
+}
+.conversionRanking p {
+  margin: 0.2rem 0 0;
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
+}
+.funnelComparison {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding: 1.25rem;
+}
+.funnelComparison > article {
+  min-width: 0;
+}
+.funnelComparison h2 {
+  margin: 0;
+  font-size: 1rem;
+}
+.funnelComparison article > p {
+  margin: 0.25rem 0 0.85rem;
+  color: var(--analytics-muted);
+  font-size: 0.75rem;
+}
+.funnelDivider {
+  width: 1px;
+  min-height: 100%;
+  background: var(--analytics-line);
+}
+.funnelPanel {
+  display: grid;
+  grid-template-columns: minmax(12rem, 0.9fr) minmax(13rem, 1.1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+.funnelPanelReversed {
+  grid-template-columns: minmax(13rem, 1.1fr) minmax(12rem, 0.9fr);
+}
+.funnel,
+.funnelConversions {
+  display: grid;
+  align-content: start;
+  gap: 0.35rem;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.funnel li {
+  display: grid;
+  width: calc(100% - var(--funnel-level) * 7%);
+  min-height: 3.05rem;
+  place-items: center;
+  margin-inline: auto;
+  padding: 0.4rem 1rem;
+  clip-path: polygon(4% 0, 96% 0, 88% 100%, 12% 100%);
+  background: hsl(
+    calc(207deg - var(--funnel-level) * 4deg) 68% calc(24% + var(--funnel-level) * 1%)
+  );
+  color: #fff;
+  text-align: center;
+}
+.funnel li span {
+  font-size: 0.68rem;
+  font-weight: 700;
+}
+.funnel li strong {
+  font-size: 1.15rem;
+}
+.funnelConversions li {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.15rem 0.5rem;
+  min-height: 3.05rem;
+  align-content: center;
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.55rem;
+  background: color-mix(in srgb, var(--analytics-surface-strong) 45%, transparent);
+}
+.funnelConversions li > span {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.funnelConversions li > strong {
+  color: var(--analytics-cyan-strong);
+  font-size: 0.82rem;
+}
+.funnelConversions small {
+  grid-column: 1 / -1;
+  color: var(--analytics-muted);
+  font-size: 0.64rem;
+  line-height: 1.3;
+}
 .rankingButton {
   min-height: 44px;
   padding: 0.35rem;
@@ -939,14 +1066,14 @@
   .filters {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-  .clearField {
-    width: 100%;
-  }
-  .clearFilters {
-    width: 100%;
-  }
   .kpiGrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 1400px) {
+  .funnelPanel,
+  .funnelPanelReversed {
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 @media (max-width: 1050px) {
@@ -980,6 +1107,7 @@
   .filters,
   .overviewGrid,
   .insightGrid,
+  .conversionRankingGrid,
   .recencyGrid {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -988,6 +1116,20 @@
   }
   .card {
     padding: 0.875rem;
+  }
+  .titleRow {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .titleRow .clearFilters {
+    width: 100%;
+  }
+  .funnelComparison {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .funnelDivider {
+    width: 100%;
+    min-height: 1px;
   }
   .daily {
     gap: 0.12rem;
@@ -1045,9 +1187,14 @@
   .wideChart,
   .overviewGrid .chartCard,
   .insightGrid .chartCard,
+  .conversionRankingGrid .chartCard,
   .recencyGrid .recencyCard {
     height: var(--appointments-panel-height);
     min-height: var(--appointments-panel-height);
+  }
+
+  .kpiGrid .card {
+    padding: clamp(0.55rem, 1.2dvh, 0.85rem);
   }
 
   .chartCard {

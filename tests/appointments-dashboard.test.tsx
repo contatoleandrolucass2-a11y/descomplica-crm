@@ -32,6 +32,7 @@ const current: DashboardAnalysisSlice = {
     [0, "2026-10-19", 0, 0, 0, 1, 0, 9, 0, 0, -1],
     [1, "2026-10-19", 0, 0, 0, 1, 0, 1, 0, 0, 0],
     [2, "2026-10-19", 0, 0, 0, 1, 0, 1, 0, 0, -1],
+    [3, "2026-10-19", 0, 0, 0, 1, 0, 1, 0, 1, -1],
     [4, "2026-10-19", 0, 0, 0, 1, 0, 1, 0, 0, -1],
   ],
   appointments: [
@@ -53,11 +54,35 @@ const current: DashboardAnalysisSlice = {
 };
 
 const conversionGoals = {
-  dv: { opportunityAppointment: 9, appointmentVisit: 3, appointmentSale: 12 },
+  dv: {
+    opportunityAppointment: 9,
+    appointmentVisit: 3,
+    appointmentFolder: 4,
+    appointmentApprovedFolder: 12,
+    appointmentSale: 12,
+    monthlyFunnel: {
+      opportunities: 143,
+      appointments: 24,
+      visits: 12,
+      folders: 8,
+      approvedFolders: 2,
+      sales: 1,
+    },
+  },
   partnerships: {
     opportunityAppointment: null,
     appointmentVisit: null,
+    appointmentFolder: null,
+    appointmentApprovedFolder: null,
     appointmentSale: null,
+    monthlyFunnel: {
+      opportunities: 0,
+      appointments: 0,
+      visits: 4,
+      folders: 2,
+      approvedFolders: 1,
+      sales: 1,
+    },
   },
 };
 
@@ -85,6 +110,8 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Meta do mês");
     expect(markup).toContain("Filtros do painel de agendamentos");
     expect(markup).toContain("Canal de vendas");
+    expect(markup).toContain("Gerente Regional");
+    expect(markup).toContain("Todos os gerentes regionais");
     expect(markup).toContain("Gerente de Vendas");
     expect(markup).toContain("Responsável da conta");
     expect(markup).toContain(">Empresa</span>");
@@ -101,6 +128,11 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Oportunidade x Agendamento");
     expect(markup).toContain("Agendamento x Visita");
     expect(markup).toContain("Agendamento x Venda");
+    expect(markup).toContain("Funil esperado no período");
+    expect(markup).toContain("Realizado até o momento");
+    expect(markup).toContain("Agendamento x Pasta");
+    expect(markup).toContain("Agendamento x Pasta Aprovada");
+    expect(markup).toContain("Pastas aprovadas");
     expect(markup).toContain("Gerentes cadastrados");
     expect(markup).toContain("Visitas realizadas");
     expect(markup).toContain("Vendas no período");
@@ -112,6 +144,9 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Dentro da meta: 9 para 1; limite 9 para 1");
     expect(markup).toContain("Previstos e realizados hoje");
     expect(markup).toContain("Ranking por gerente regional");
+    expect(markup).toContain("Melhor responsável: Agendamento x Visita");
+    expect(markup).toContain("Melhor gerente: Agendamento x Visita");
+    expect(markup).toContain("Melhor gerente regional: Agendamento x Visita");
     expect(markup).toContain("Ranking Score");
     expect(markup).toContain("Último agendamento: até 7 dias");
     expect(markup).toContain("Último agendamento: de 8 a 14 dias");

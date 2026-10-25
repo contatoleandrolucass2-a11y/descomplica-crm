@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-10-25 — Funis e filtro regional em Agendamentos
+
+A entrega ficou restrita à página `/app/etapas/agendamentos` e ao read model
+autorizado que a alimenta. O filtro Gerente Regional usa a vinculação regional
+mais recente de cada Gerente de Vendas e passa a afetar indicadores, funis,
+rankings, gráficos e tabela. O botão de limpeza foi levado para a linha do título.
+
+O RPC preserva agora as seis etapas agregadas, inclusive Pasta e Pasta Aprovada,
+sem expor registros comerciais nem ampliar grants. A mesma leitura retorna as
+metas vigentes House/Parcerias necessárias à projeção proporcional do período.
+Foram adicionados dois funis espelhados e três rankings de conversão positiva.
+
+Validação visual local: 18 combinações de tema e viewport, incluindo 1024x720 e
+1440x720, sem overflow horizontal, corte, falha Axe ou regressão de zoom 200%.
+Os 53 testes focais, lint, typecheck e build passaram com Node 24.19.0. O Vitest
+integral aprovou 4.194 testes e ignorou 108; o trecho Node manteve somente três
+falhas Windows preexistentes de permissão/caminho em Meta Ads, reservadas à CI
+Linux e sem alteração por esta entrega.
+
 ## 2026-10-25 - Escala no hover e filtros do detalhamento
 
 O acionador da etapa voltou a ser totalmente transparente. O destaque visual

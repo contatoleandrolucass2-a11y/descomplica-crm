@@ -36,7 +36,19 @@ const conversionGoalSchema = z
   .object({
     opportunityAppointment: z.number().finite().nonnegative().nullable(),
     appointmentVisit: z.number().finite().nonnegative().nullable(),
+    appointmentFolder: z.number().finite().nonnegative().nullable(),
+    appointmentApprovedFolder: z.number().finite().nonnegative().nullable(),
     appointmentSale: z.number().finite().nonnegative().nullable(),
+    monthlyFunnel: z
+      .object({
+        opportunities: z.number().int().nonnegative(),
+        appointments: z.number().int().nonnegative(),
+        visits: z.number().int().nonnegative(),
+        folders: z.number().int().nonnegative(),
+        approvedFolders: z.number().int().nonnegative(),
+        sales: z.number().int().nonnegative(),
+      })
+      .strict(),
   })
   .strict();
 

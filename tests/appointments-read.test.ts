@@ -29,11 +29,35 @@ const result = (payload: unknown = slice) => ({
   error: null,
 });
 const conversionGoals = {
-  dv: { opportunityAppointment: 9, appointmentVisit: 3, appointmentSale: 12 },
+  dv: {
+    opportunityAppointment: 9,
+    appointmentVisit: 3,
+    appointmentFolder: 4,
+    appointmentApprovedFolder: 12,
+    appointmentSale: 12,
+    monthlyFunnel: {
+      opportunities: 143,
+      appointments: 24,
+      visits: 12,
+      folders: 8,
+      approvedFolders: 2,
+      sales: 1,
+    },
+  },
   partnerships: {
     opportunityAppointment: null,
     appointmentVisit: null,
+    appointmentFolder: null,
+    appointmentApprovedFolder: null,
     appointmentSale: null,
+    monthlyFunnel: {
+      opportunities: 0,
+      appointments: 0,
+      visits: 4,
+      folders: 2,
+      approvedFolders: 1,
+      sales: 1,
+    },
   },
 };
 let headers: Array<{ data: unknown; error: unknown }>;

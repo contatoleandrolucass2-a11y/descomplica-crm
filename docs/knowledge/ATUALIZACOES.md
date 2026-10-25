@@ -1,5 +1,34 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: abertura dos funis e filtro regional de Agendamentos
+
+- A branch `codex/agendamentos-funis-gerente-regional-v9` iniciou limpa sobre
+  `origin/main` `fa1124e9caa70cbcbe6dad274ce5aa13c7706137`. O conector do GitHub nao
+  retornou workflow de PR nem status combinado para esse commit; portanto a CI
+  desse SHA permanece sem evidencia observavel nesta abertura.
+- O health publico consultado em `2026-10-25T17:50:56.7406463Z` respondeu HTTP
+  200, `status=ok`, na versao `c2c823e1284f19322da0da36e0cb8146bf7ec497`.
+  A versao publicada e distinta da `main` usada como base.
+- Escopo exclusivo: compactar os 12 indicadores; adicionar Gerente Regional
+  antes de Gerente de Vendas; mover a limpeza para a linha do titulo; criar os
+  funis esperado e realizado com cinco conversoes; e incluir rankings positivos
+  de conversao Agendamento para Visita por responsavel, gerente e gerente
+  regional. Todos devem respeitar os filtros da pagina. Outras paginas, dados
+  remotos, n8n e regras nao citadas permanecem fora do escopo.
+- Implementacao local concluida: a projecao autorizada preserva as seis etapas
+  agregadas e a RPC de metas entrega o funil mensal vigente para House e
+  Parcerias. O filtro regional deriva a vinculacao mais recente por gerente e
+  restringe cards, funis, rankings, graficos e tabela sem ampliar grants.
+- Validacao em Node 24.19.0: 53 testes focais aprovados; lint sem erros (36
+  avisos preexistentes fora do escopo); typecheck e build aprovados. O Vitest
+  integral aprovou 4.194 testes e ignorou 108. O trecho Node aprovou 1.599,
+  ignorou 19 e manteve tres falhas Windows preexistentes de permissao/caminho
+  em Meta Ads; a CI Linux permanece o gate definitivo. O pgTAP local ficou
+  indisponivel por ausencia de Docker/Podman e sera executado no restore isolado.
+- Evidencia visual local: 18 combinacoes de tema e viewport, incluindo 1024x720,
+  1440x720, mobile e zoom 200%, sem overflow horizontal, corte ou falha Axe.
+  PR, CI, merge e publicacao ainda nao estavam concluidos neste registro.
+
 ## 2026-10-25: hover ampliado e filtros herdados no detalhamento dos funis
 
 - A nova demanda parte de `origin/main` no SHA
