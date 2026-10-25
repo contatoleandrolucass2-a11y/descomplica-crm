@@ -1,5 +1,41 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: indicadores e ordem de Agendamentos publicados
+
+- O PR #334 integrou os ajustes exclusivos de `/app/etapas/agendamentos` no
+  commit `1a1029ce020c4107e2fb390d5319056742e50e87`. A `main` final publicada foi
+  `e8d362b22d139d9c8c2ba3f4001c3f7708a3f61e`; a diferença posterior ao merge
+  contém somente documentação concorrente do módulo Lead e não altera o runtime
+  de Agendamentos.
+- A CI final `40159944573` aprovou `validate`, `isolated-restore`,
+  `promotable-image` e `release-gates` no SHA publicado. O artefato
+  `12586701087` tem digest ZIP
+  `sha256:4880737f6c1db23832fbf26bed3c0c95a392137279d2b228bbc2a32926e1a3cf`
+  e imagem compactada
+  `sha256:84cb41313e4fa176399306b309714e64e133c0ab372beaeb5c0cb06fd9062fb7`.
+  O destino comprovou os dois perfis OCI sobre a imagem containerd
+  `sha256:dce8c568fd785756c5add57fd2a3a1bc5e2c38fd07860d38b7f5d53858acd88a`,
+  sem rebuild.
+- A migration `appointments_conversion_goals_read` foi aplicada por MCP no
+  projeto `hnncxuerlcsaahdxoswb` sob a versão remota `20261025025956`. A RPC
+  permaneceu `SECURITY DEFINER`, com `search_path` vazio e ACL restrita a
+  `postgres` e `authenticated`; não há execução para `anon` ou `service_role`.
+- O coordenador `pnpm release:production` publicou o deployment
+  `f4fd67bc-8a4b-48a3-b908-78b913e9e21c` em
+  `2026-10-25T04:42:59.565Z` (`25/10/2026 01:42:59` em
+  America/Sao_Paulo), substituindo
+  `d2025a28-18c1-4f1d-a6a9-7df37a00d145` no SHA `94c6f73e...`. O ledger final
+  não possui pendência; o health público respondeu HTTP 200, `status=ok` e a
+  versão exata, e o acesso anônimo a `/app/etapas/agendamentos` respondeu HTTP
+  307 para `/login`.
+- Uma tentativa anterior encontrou HTTP 403 transitório na consulta externa de
+  ITBI; o rerun passou integralmente. A primeira promoção foi bloqueada
+  corretamente quando a `main` avançou durante a preparação, sem criar
+  deployment pendente; o candidato final foi refeito sobre o SHA exato.
+- Limites preservados: nenhuma outra página, workflow n8n, DNS, cobrança ou dado
+  comercial foi alterado. O perfil Parcerias mantém os três indicadores de
+  conversão neutros enquanto o schema vigente não fornecer metas dessas etapas.
+
 ## 2026-10-24: detalhamento seguro e responsivo dos funis implementado
 
 - Implementado em `codex/dashboard-stage-details`: cada etapa autorizada dos 13
