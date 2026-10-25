@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   analyzeDashboard,
+  dashboardCurrentMonthPeriod,
   emptyDashboardFilters,
   type DashboardPeriodReadings,
 } from "@/lib/crm/dashboard/analysis";
@@ -38,6 +39,21 @@ function values(readings: DashboardPeriodReadings) {
 }
 
 describe("month-scoped dashboard period readings", () => {
+  it("uses the same current-month clipping for funnel readings and detail dialogs", () => {
+    expect(dashboardCurrentMonthPeriod("2026-10-01", "yesterday")).toEqual({
+      start: "2026-10-01",
+      end: "2026-09-30",
+    });
+    expect(dashboardCurrentMonthPeriod("2026-10-04", "current-week")).toEqual({
+      start: "2026-10-01",
+      end: "2026-10-04",
+    });
+    expect(dashboardCurrentMonthPeriod("2026-10-05", "previous-week")).toEqual({
+      start: "2026-10-01",
+      end: "2026-10-04",
+    });
+  });
+
   it("clips a Monday-Sunday week at month start without changing legacy metrics", () => {
     const result = analyzeDashboard(
       slice("2026-10-04", [fact("2026-09-30", 100), fact("2026-10-01", 2), fact("2026-10-04", 3)]),

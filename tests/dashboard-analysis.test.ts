@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   analyzeDashboard,
+  buildDashboardStageDetailRows,
   emptyDashboardFilters,
   parseDashboardFilters,
   type DashboardFilterKey,
@@ -82,6 +83,30 @@ function analysis(): DashboardAnalysis {
 }
 
 describe("dashboard analysis filters and aggregation", () => {
+  it("projects only authorized stage buckets after applying the active dashboard filters", () => {
+    const rows = buildDashboardStageDetailRows(
+      slice({
+        facts: [
+          fact({ stage: 0, date: "2026-10-01", count: 2 }),
+          fact({ stage: 3, date: "2026-10-02", approved: 3, count: 5 }),
+          fact({ stage: 4, date: "2026-10-03", channel: 1, count: 7, amount: 10 }),
+        ],
+      }),
+      parseDashboardFilters({ channel: DASHBOARD_CHANNELS[0] }),
+      new Set(["folders", "approved-folders", "sales"]),
+    );
+
+    expect(rows).toEqual([
+      expect.objectContaining({ stage: "folders", date: "2026-10-02", quantity: 5 }),
+      expect.objectContaining({
+        stage: "approved-folders",
+        date: "2026-10-02",
+        quantity: 3,
+      }),
+    ]);
+    expect(JSON.stringify(rows)).not.toMatch(/recordId|accountName|amount/);
+  });
+
   it("accepts exactly the two official channels, trims and deduplicates selections", () => {
     expect(DASHBOARD_CHANNELS).toEqual(["SPC - CANAL IMOB PJ", "DIRECIONAL VENDAS SPC"]);
     expect(
