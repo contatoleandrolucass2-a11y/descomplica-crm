@@ -297,8 +297,15 @@ export async function runAppointmentsPreview() {
       if (message.type() === "error") evidence.browserErrors.push(message.text());
     });
     const region = (name) => page.getByRole("region", { name, exact: true });
-    for (const width of [1440, 1024, 390, 320]) {
-      await page.setViewportSize({ width, height: 900 });
+    for (const { width, height } of [
+      { width: 1440, height: 900 },
+      { width: 1440, height: 720 },
+      { width: 1024, height: 900 },
+      { width: 1024, height: 720 },
+      { width: 390, height: 900 },
+      { width: 320, height: 900 },
+    ]) {
+      await page.setViewportSize({ width, height });
       await page.goto(origin);
       await expect(page.getByRole("heading", { name: "Ranking por responsável" })).toBeVisible();
       for (const theme of ["light", "balanced", "dark"]) {
@@ -309,6 +316,7 @@ export async function runAppointmentsPreview() {
         await page.waitForTimeout(200);
         const geometry = await page.evaluate(() => ({
           width: innerWidth,
+          height: innerHeight,
           scrollWidth: document.documentElement.scrollWidth,
           dailyLabelCollisions: (() => {
             const list = document.querySelector(
@@ -341,6 +349,7 @@ export async function runAppointmentsPreview() {
             heading: element.querySelector("h2")?.textContent,
             x: element.getBoundingClientRect().x,
             y: element.getBoundingClientRect().y,
+            bottom: element.getBoundingClientRect().bottom,
             height: element.getBoundingClientRect().height,
             hasVerticalScroll:
               element.querySelector(":scope > div:last-child")?.scrollHeight >
@@ -407,6 +416,34 @@ export async function runAppointmentsPreview() {
             y: Math.round(element.getBoundingClientRect().y),
             bottom: Math.round(element.getBoundingClientRect().bottom),
           })),
+          twoRowSpans: (() => {
+            const sections = [...document.querySelectorAll("[data-appointments-chart]")].map(
+              (element) => element.getBoundingClientRect(),
+            );
+            const recency = [...document.querySelectorAll('[class*="recencyCard"]')].map(
+              (element) => element.getBoundingClientRect(),
+            );
+            return sections.length === 8 && recency.length === 3
+              ? [
+                  sections[1].bottom - sections[0].top,
+                  sections[4].bottom - sections[1].top,
+                  recency[0].bottom - sections[4].top,
+                  sections[7].bottom - recency[0].top,
+                ]
+              : [];
+          })(),
+          table: (() => {
+            const viewport = document.querySelector('[class*="tableViewport"]');
+            const card = viewport?.closest("section");
+            return {
+              cardHeight: card?.getBoundingClientRect().height ?? 0,
+              viewportHeight: viewport?.getBoundingClientRect().height ?? 0,
+              hasVerticalScroll: Boolean(
+                viewport && viewport.scrollHeight > viewport.clientHeight + 1,
+              ),
+              overflowY: viewport ? getComputedStyle(viewport).overflowY : "",
+            };
+          })(),
           monthly: (() => {
             const section = [...document.querySelectorAll("[data-appointments-chart]")].find(
               (element) => element.querySelector("h2")?.textContent === "Agendamentos por mês",
@@ -427,7 +464,7 @@ export async function runAppointmentsPreview() {
         const axe = await new AxeBuilder({ page })
           .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
           .analyze();
-        const screenshot = path.join(outputRoot, `${theme}-${width}.png`);
+        const screenshot = path.join(outputRoot, `${theme}-${width}x${height}.png`);
         await page.screenshot({ path: screenshot, fullPage: true });
         const record = {
           width,
@@ -520,6 +557,20 @@ export async function runAppointmentsPreview() {
           `Monthly labels clipped or too small ${theme}/${width}: ${JSON.stringify(geometry.monthly.labels)}`,
         );
         check(geometry.sections.length === 8, `Eight charts ${theme}/${width}`);
+        if (width >= 1024) {
+          check(
+            geometry.twoRowSpans.length === 4 &&
+              geometry.twoRowSpans.every((span) => span <= geometry.height + 1),
+            `Two adjacent chart rows must fit one viewport ${theme}/${width}x${height}: ${geometry.twoRowSpans.join(",")}`,
+          );
+          check(
+            geometry.table.cardHeight <= geometry.height - 111 &&
+              geometry.table.viewportHeight > 0 &&
+              geometry.table.hasVerticalScroll &&
+              geometry.table.overflowY === "auto",
+            `Table must fit the viewport with internal vertical scroll ${theme}/${width}x${height}: ${JSON.stringify(geometry.table)}`,
+          );
+        }
         const score = geometry.sections.find((section) => section.heading === "Ranking Score");
         check(score && !score.hasVerticalScroll, `Ranking Score vertical scroll ${theme}/${width}`);
         check(
