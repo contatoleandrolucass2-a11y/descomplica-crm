@@ -21,20 +21,30 @@
 
 .workspace {
   display: grid;
-  grid-template-columns: 190px minmax(0, 1fr);
+  grid-template-columns: auto minmax(0, 1fr);
   align-items: start;
   background: var(--analytics-page);
 }
 
 .sidebar {
   position: sticky;
-  top: 80px;
+  top: 58px;
+  display: flex;
+  width: 190px;
+  flex-direction: column;
+  box-sizing: border-box;
   padding: 24px 12px;
   color: var(--analytics-ink);
   font-family: var(--font-geist-sans, Arial), sans-serif;
   background: var(--analytics-surface);
   border-right: 1px solid var(--analytics-line);
-  min-height: calc(100dvh - 80px);
+  min-height: calc(100dvh - 58px);
+  transition: width 160ms ease-out;
+}
+
+.sidebar[data-collapsed="true"] {
+  width: 64px;
+  padding-inline: 8px;
 }
 
 .brand {
@@ -43,7 +53,7 @@
   font-weight: 750;
 }
 .brand strong {
-  color: var(--analytics-danger);
+  color: inherit;
 }
 .sidebar nav {
   display: grid;
@@ -73,13 +83,56 @@
   outline-offset: 2px;
 }
 .navigationIcon {
+  display: grid;
+  width: 22px;
   font-size: 18px;
   flex-shrink: 0;
+  place-items: center;
 }
 .sourceNote {
   margin: 28px 8px 0;
   color: var(--analytics-muted);
   font-size: 12px;
+}
+
+.sidebarToggle {
+  display: flex;
+  min-height: 40px;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  padding: 9px 10px;
+  color: var(--analytics-muted);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sidebarToggle:hover {
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+}
+
+.sidebarToggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.sidebar[data-collapsed="true"] .brand,
+.sidebar[data-collapsed="true"] .navigationLabel,
+.sidebar[data-collapsed="true"] .sourceNote,
+.sidebar[data-collapsed="true"] .sidebarToggle span {
+  display: none;
+}
+
+.sidebar[data-collapsed="true"] .navigationLink,
+.sidebar[data-collapsed="true"] .sidebarToggle {
+  justify-content: center;
+  padding-inline: 8px;
 }
 
 @media (max-width: 900px) {
@@ -88,13 +141,15 @@
   }
   .sidebar {
     position: static;
+    width: auto;
     min-height: auto;
     padding: 12px;
     border-right: 0;
     border-bottom: 1px solid var(--analytics-line);
   }
   .brand,
-  .sourceNote {
+  .sourceNote,
+  .sidebarToggle {
     display: none;
   }
   .sidebar nav {
@@ -103,5 +158,20 @@
   }
   .navigationLink {
     white-space: nowrap;
+  }
+
+  .sidebar[data-collapsed="true"] {
+    width: auto;
+    padding-inline: 12px;
+  }
+
+  .sidebar[data-collapsed="true"] .navigationLabel {
+    display: inline;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sidebar {
+    transition: none;
   }
 }
