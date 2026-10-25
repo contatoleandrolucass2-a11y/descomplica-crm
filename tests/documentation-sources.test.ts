@@ -62,12 +62,12 @@ afterEach(() => {
 });
 
 describe("documentation source verification gate", () => {
-  it("limits the PR 329 outage exception to the exact source, status and validity window", () => {
+  it("limits the PR 340 outage exception to the exact source, status and validity window", () => {
     const exact = {
       id: temporaryItbiSourceOutageException.id,
       url: temporaryItbiSourceOutageException.sources[0],
       status: 503,
-      now: "2026-10-25T02:59:59.999Z",
+      now: "2026-10-26T02:59:59.999Z",
     };
     expect(permitsTemporaryItbiSourceOutage(exact)).toBe(true);
     expect(
@@ -80,7 +80,7 @@ describe("documentation source verification gate", () => {
     expect(permitsTemporaryItbiSourceOutage({ ...exact, id: "another-release" })).toBe(false);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, status: 429 })).toBe(false);
     expect(permitsTemporaryItbiSourceOutage({ ...exact, url: "https://example.com" })).toBe(false);
-    expect(permitsTemporaryItbiSourceOutage({ ...exact, now: "2026-10-25T03:00:00.001Z" })).toBe(
+    expect(permitsTemporaryItbiSourceOutage({ ...exact, now: "2026-10-26T03:00:00.001Z" })).toBe(
       false,
     );
   });

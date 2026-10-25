@@ -52,7 +52,7 @@ jobs:
         run: pnpm documentation:verify-sources
         env:
           DOCUMENTATION_SOURCE_OUTAGE_EXCEPTION: >-
-            ${{ ((github.event_name == 'pull_request' && github.head_ref == 'codex/meta-ads-collapsible-sidebar') || (github.event_name == 'push' && github.ref_name == 'main' && contains(github.event.head_commit.message, '#329'))) && 'meta-ads-navigation-pr-329-2026-10-24' || '' }}
+            ${{ ((github.event_name == 'pull_request' && github.head_ref == 'codex/previsao-edicao-todos-usuarios') || (github.event_name == 'push' && github.ref_name == 'main' && contains(github.event.head_commit.message, '#340'))) && 'forecast-page-users-edit-pr-340-2026-10-25' || '' }}
 
       - name: Audit high and critical vulnerabilities
         run: pnpm audit --audit-level high

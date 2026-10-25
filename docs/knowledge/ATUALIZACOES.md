@@ -38,6 +38,12 @@
 - **Pendente:** CI independente, merge, autorizacao especifica e aplicacao da
   migration, publicacao coordenada e verificacao autenticada sem gravar dados
   reais.
+- **Excecao de fonte:** a primeira CI do PR #340 aprovou a suite completa, mas
+  a Prefeitura de Sao Paulo respondeu HTTP 403 na fonte publica de ITBI. A
+  excecao fail-closed existente foi renovada somente para a branch/merge do PR
+  #340, somente para as duas URLs e status 403/503 ja previstos, usando o ultimo
+  snapshot versionado e com expiracao em `2026-10-26T03:00:00Z`. Mudanca de
+  valores, URL, status, politica ou prazo continua bloqueando a CI.
 
 ## 2026-10-25: detalhamento dos funis integrado e publicado
 
