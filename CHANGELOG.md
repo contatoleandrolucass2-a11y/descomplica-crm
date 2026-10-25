@@ -13,6 +13,15 @@
 - Troca o realce verde das barras por azul-escuro e preserva acessibilidade,
   responsividade e redução de movimento.
 
+## 2026-10-24 — Navegação compacta do Meta Ads
+
+- O botão Meta Ads da barra superior abre diretamente o dashboard, sem submenu
+  duplicado.
+- A navegação lateral abre expandida e pode ser recolhida por uma seta no canto
+  inferior esquerdo, mantendo os ícones acessíveis.
+- O título Descomplica Ads usa uma única cor e o breadcrumb redundante foi
+  removido das telas do Meta Ads.
+
 ## 2026-10-24 - Núcleo operacional completo do menu Lead
 
 - Implementa cadastro, busca, filtros, detalhe, histórico, atividades,

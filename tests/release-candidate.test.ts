@@ -306,7 +306,7 @@ describe("release-candidate activation defaults", () => {
       ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(30);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(27);
         expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
@@ -318,6 +318,12 @@ describe("release-candidate activation defaults", () => {
           "Gestão",
           "Administração",
         ]);
+        expect(roots[2]).toEqual({
+          name: "Meta Ads",
+          tag: "A",
+          href: "/app/meta-ads",
+          controls: null,
+        });
         expect(roots[6]).toEqual({
           name: "Gestão",
           tag: "BUTTON",
