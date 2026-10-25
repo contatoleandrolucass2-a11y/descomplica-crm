@@ -17,7 +17,9 @@ pelo contrato seguro do snapshot.
 
 No navegador automatizado, o fluxo passou em 320, 390 e 1440 px nos temas
 claro, médio e escuro, incluindo abertura por clique, filtro, Escape, clique no
-fundo, restauração de foco e ausência de rolagem horizontal da página. Lint,
+fundo, restauração de foco e ausência de rolagem horizontal da página. O botão
+absoluto permanece dentro do `<dt>`, mantendo cada grupo do `<dl>` válido; o
+teste focado executa Axe sobre essa estrutura para impedir regressão. Lint,
 typecheck e build passaram; 107 testes focados passaram. O Vitest integral
 aprovou 4.181 testes, ignorou 108 e teve cinco timeouts externos ao dashboard;
 os 50 casos desses arquivos passaram isolados com janela ampliada. As suítes

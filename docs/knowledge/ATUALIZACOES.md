@@ -23,8 +23,12 @@
   testes antigos; os três arquivos envolvidos aprovaram 50 casos e ignoraram um
   quando repetidos isoladamente com 120 s. As suítes Node/release repetiram
   falhas Windows/POSIX preexistentes do Meta Ads descritas no Worklog. Nenhum
-  arquivo Meta Ads foi alterado. A CI Linux deve decidir o gate antes de merge e
-  publicação.
+  arquivo Meta Ads foi alterado. No PR #333, `validate` e `isolated-restore`
+  aprovaram; o primeiro `release-gates` detectou corretamente que o botão
+  absoluto havia virado terceiro filho do grupo `<dl>`. O botão foi movido para
+  dentro do `<dt>`, preservando a área clicável e restaurando a semântica. O
+  teste de navegador agora executa Axe sobre essa estrutura; merge e publicação
+  continuam condicionados à nova CI Linux.
 
 ## 2026-10-24: abertura do detalhamento dinamico dos funis
 

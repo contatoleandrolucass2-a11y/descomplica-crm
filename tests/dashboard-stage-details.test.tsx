@@ -2,6 +2,7 @@ import { createRequire } from "node:module";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
+import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect as browserExpect } from "@playwright/test";
 import { expect, it } from "vitest";
 
@@ -60,12 +61,16 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
               const rows = ${JSON.stringify(rows)};
               createRoot(document.getElementById("root")).render(
                 createElement(DashboardStageDetailsProvider, { rows },
-                  createElement("div", { style: { position: "relative", width: "300px", height: "100px" } },
-                    createElement(DashboardStageDetailTrigger, {
-                      stage: "sales", stageLabel: "Vendas", cardLabel: "Mês atual",
-                      period: { label: "Registros realizados no período", start: "2026-10-01", end: "2026-10-31" }
-                    }),
-                    createElement("span", null, "Vendas 5")
+                  createElement("dl", null,
+                    createElement("div", { style: { position: "relative", width: "300px", height: "100px" } },
+                      createElement("dt", null, "Vendas",
+                        createElement(DashboardStageDetailTrigger, {
+                          stage: "sales", stageLabel: "Vendas", cardLabel: "Mês atual",
+                          period: { label: "Registros realizados no período", start: "2026-10-01", end: "2026-10-31" }
+                        })
+                      ),
+                      createElement("dd", null, "5")
+                    )
                   )
                 )
               );`;
@@ -91,7 +96,8 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
       .join("\n");
     const browser = await chromium.launch({ headless: true });
     try {
-      const page = await browser.newPage();
+      const context = await browser.newContext();
+      const page = await context.newPage();
       const errors: string[] = [];
       page.on("pageerror", (error) => errors.push(error.message));
       await page.setContent(
@@ -101,6 +107,16 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
       await page.addScriptTag({ content: script });
       const trigger = page.getByRole("button", { name: "Abrir detalhes de Vendas: Mês atual" });
       const dialog = page.getByRole("dialog");
+      expect(
+        await page
+          .locator("dl > div")
+          .evaluateAll((groups) =>
+            groups.every((group) =>
+              Array.from(group.children).every((child) => ["DT", "DD"].includes(child.tagName)),
+            ),
+          ),
+      ).toBe(true);
+      expect((await new AxeBuilder({ page }).include("dl").analyze()).violations).toEqual([]);
       for (const theme of ["light", "balanced", "dark"]) {
         await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
         for (const width of [320, 390, 1440]) {
@@ -122,6 +138,7 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
       await page.mouse.click(1, 1);
       await browserExpect(dialog).not.toBeVisible();
       expect(errors).toEqual([]);
+      await context.close();
     } finally {
       await browser.close();
     }

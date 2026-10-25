@@ -148,7 +148,17 @@ function MonthlyFunnel({
       <dl>
         {readings.map((entry) => (
           <div className={styles.funnelStep} key={entry.key} data-stage={entry.key}>
-            <dt>{entry.label}</dt>
+            <dt>
+              {entry.label}
+              {authorizedStages.has(entry.key) ? (
+                <DashboardStageDetailTrigger
+                  stage={entry.key}
+                  stageLabel={entry.label}
+                  cardLabel={label}
+                  period={detailPeriod}
+                />
+              ) : null}
+            </dt>
             <dd
               data-unavailable={entry.value === null}
               data-long={
@@ -157,14 +167,6 @@ function MonthlyFunnel({
             >
               {numberValue(entry.value)}
             </dd>
-            {authorizedStages.has(entry.key) ? (
-              <DashboardStageDetailTrigger
-                stage={entry.key}
-                stageLabel={entry.label}
-                cardLabel={label}
-                period={detailPeriod}
-              />
-            ) : null}
           </div>
         ))}
       </dl>
