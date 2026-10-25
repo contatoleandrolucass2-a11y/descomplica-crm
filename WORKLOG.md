@@ -13,6 +13,15 @@ typecheck e build passaram. O Vitest completo aprovou 4.194 testes e ignorou 108
 o trecho Node do `pnpm test` manteve três falhas Windows preexistentes de
 permissão/caminho em Meta Ads, que permanecem dependentes da CI Linux.
 
+## 2026-10-25 — Previsão editável por usuários autorizados
+
+- Reproduzido em produção: o endpoint autenticado de Previsão respondeu
+  `forecast_unavailable`.
+- Confirmada divergência entre aplicação e banco: a migration
+  `20261022184500_forecast_value_edit_roles` não constava no ledger remoto.
+- Preparada a migration corretiva `20261025114724_forecast_page_users_edit`,
+  mantendo os guards e permitindo valores e estrutura a quem já acessa a página.
+
 ## 2026-10-25 - Dimensoes responsivas em Agendamentos
 
 O ajuste ficou restrito ao CSS da pagina `/app/etapas/agendamentos` e ao teste

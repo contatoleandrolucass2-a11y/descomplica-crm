@@ -2,13 +2,12 @@
 
 A página `/app/gestao/previsao` aparece em Gestão conforme o catálogo autorizado.
 A permissão própria `crm.management.forecast.view` controla página, API e RPC.
-Master e Admin mantêm edição completa por `crm.settings.manage`. Coordenador,
-Gerente House, Gerente Imob, Corretor House e Corretor Imob recebem a página e a
-permissão `crm.management.forecast.values.edit`: podem preencher Previsão,
-Realizado e Plano de ação, mas não alteram nomes, ordem, inclusão ou exclusão de
-linhas e colunas. A interface esconde os controles estruturais e a RPC repete a
-restrição comparando títulos, colunas, IDs de linha e nomes de corretores com a
-estrutura salva ou com o modelo inicial gerado pelo servidor.
+Todo usuário ativo e autenticado que possui acesso efetivo à página pode
+preencher Previsão, Realizado e Plano de ação e também alterar nomes, ordem,
+inclusão ou exclusão de linhas e colunas. A visão Geral permanece somente
+leitura. Negar a permissão da página, desativá-la no catálogo ou reprovar a conta
+bloqueia leitura e escrita no servidor. Nenhum papel da Data API recebe acesso
+direto às tabelas.
 
 A tabela é manual e separada por final de semana, segmento e gerente. Sexta,
 sábado e domingo do mesmo final de semana usam a sexta-feira como chave canônica.
@@ -68,14 +67,14 @@ sem permissão de edição. Edições pendentes recebem proteção de saída.
 
 ## Banco e publicação
 
-A evolução de preenchimento por perfis comerciais prepara a migration
-`20261022184500_forecast_value_edit_roles.sql`. Ela cadastra a permissão restrita,
-concede página e preenchimento aos cinco papéis comerciais atuais e separa
-`can_edit` de `can_manage_structure`. A RPC aceita mudanças de valores desses
-papéis somente quando a estrutura coincide integralmente com a referência do
-recorte. Master e Admin preservam a edição estrutural existente. A migration não
-reescreve previsões, não concede acesso direto às tabelas e ainda depende dos
-gates e da publicação versionada antes de qualquer efeito remoto.
+A migration `20261022184500_forecast_value_edit_roles.sql` introduziu o contrato
+com `can_edit` e `can_manage_structure`, mas não foi aplicada no banco de
+produção junto da versão da aplicação que passou a exigir esses campos. A
+migration corretiva `20261025114724_forecast_page_users_edit.sql` recompõe o
+contrato e usa `crm.management.forecast.view` como autorização única de edição
+dos recortes House e Imob. Ela preserva autenticação, conta ativa, MFA, catálogo,
+validação do documento, CAS, auditoria, RLS e ACL; não reescreve previsões nem
+libera `anon` ou `service_role`.
 
 Aplicação desta evolução confirmada em 18/10/2026, após autorização explícita
 para a migration e recuperação da função anterior. O arquivo local

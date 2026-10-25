@@ -113,15 +113,15 @@ describe("shared forecast API", () => {
       expect(mocks.rpc).not.toHaveBeenCalledWith("get_crm_forecast_brokers", expect.anything());
     },
   );
-  it("does not allow routine page access to grant routine editing", async () => {
+  it("allows every user authorized for the forecast page to save", async () => {
     mocks.authorize.mockResolvedValue({
       ok: true,
       context: { permissions: ["crm.management.forecast.view"] },
     });
-    await result(await PUT(request()), 403, { error: "forbidden" });
-    expect(mocks.rpc).not.toHaveBeenCalled();
+    await result(await PUT(request()), 200, record);
+    expect(mocks.rpc).toHaveBeenCalledWith("save_crm_forecast_period", expect.anything());
   });
-  it("allows value-edit permission to reach the structure-protected database RPC", async () => {
+  it("keeps legacy value-edit users compatible with the page-authorized database RPC", async () => {
     mocks.authorize.mockResolvedValue({
       ok: true,
       context: {

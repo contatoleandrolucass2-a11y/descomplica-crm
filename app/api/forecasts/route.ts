@@ -82,11 +82,6 @@ export async function GET(request: Request) {
 export async function PUT(request: Request) {
   const authorization = await authorizePageRoute("/app/gestao/previsao");
   if (!authorization.ok) return authorization.response;
-  if (
-    !authorization.context.permissions.includes("crm.settings.manage") &&
-    !authorization.context.permissions.includes("crm.management.forecast.values.edit")
-  )
-    return failure("forbidden", 403);
   if (!isSameOriginRequest(request, process.env.APP_ORIGIN)) return failure("invalid_origin", 403);
   if (!request.headers.get("content-type")?.startsWith("application/json"))
     return failure("invalid_content_type", 415);
