@@ -25,14 +25,15 @@ function fact(
 }
 
 function stageFact(
-  stage: 0 | 1 | 2 | 4,
+  stage: 0 | 1 | 2 | 3 | 4,
   count: number,
   manager = 0,
   owner = 0,
   company = 0,
   channel: 0 | 1 = 1,
+  approved = 0,
 ): DashboardAnalysisFact {
-  return [stage, "2026-10-19", manager, owner, company, channel, 0, count, 0, 0, -1];
+  return [stage, "2026-10-19", manager, owner, company, channel, 0, count, 0, approved, -1];
 }
 
 function slice(overrides: Partial<DashboardAnalysisSlice> = {}): DashboardAnalysisSlice {
@@ -174,7 +175,7 @@ describe("appointment chart analysis", () => {
     expect(result.accountRankings).toEqual([{ key: "Ouro", label: "Ouro", total: 1 }]);
   });
 
-  it("combines the four dashboard filters across funnel, productive team and details in v4", () => {
+  it("combines all dashboard filters across funnel, productive team and details in v4", () => {
     const appointment = (
       owner: string,
       salesManager: string,
@@ -186,7 +187,7 @@ describe("appointment chart analysis", () => {
       scheduledAt: null,
       attendedAt: null,
       visitPerformed: false,
-      regionalManager: "Regional A",
+      regionalManager: salesManager === "Gerente A" ? "Regional A" : "Regional B",
       salesManager,
       owner,
       accountName: `Conta ${owner}`,
@@ -210,10 +211,12 @@ describe("appointment chart analysis", () => {
         stageFact(0, 9),
         stageFact(1, 3),
         stageFact(2, 2),
+        stageFact(3, 2, 0, 0, 0, 1, 1),
         stageFact(4, 1),
         stageFact(0, 20, 1, 1, 1, 0),
         stageFact(1, 8, 1, 1, 1, 0),
         stageFact(2, 4, 1, 1, 1, 0),
+        stageFact(3, 3, 1, 1, 1, 0, 1),
         stageFact(4, 2, 1, 1, 1, 0),
       ],
       appointments: [
@@ -225,6 +228,7 @@ describe("appointment chart analysis", () => {
     const result = analyzeAppointments(input, {
       filters: {
         channel: 1,
+        regionalManager: "Regional A",
         manager: "Gerente A",
         owner: "Responsável A",
         company: "Empresa A",
@@ -238,7 +242,14 @@ describe("appointment chart analysis", () => {
     });
     expect(result.total).toBe(2);
     expect(result.details).toHaveLength(2);
-    expect(result.funnel).toEqual({ opportunities: 9, appointments: 3, visits: 2, sales: 1 });
+    expect(result.funnel).toEqual({
+      opportunities: 9,
+      appointments: 3,
+      visits: 2,
+      folders: 2,
+      approvedFolders: 1,
+      sales: 1,
+    });
     expect(result.brokerCount).toBe(1);
     expect(result.plannedToday).toBe(1);
     expect(result.productiveBrokers).toBe(1);
@@ -246,6 +257,17 @@ describe("appointment chart analysis", () => {
     expect(result.registeredManagerCount).toBe(1);
     expect(result.visitsPerformed).toBe(2);
     expect(result.sales).toBe(1);
+    expect(result.filterOptions.regionalManagers).toEqual(["Regional A", "Regional B"]);
+    expect(result.conversionRankings.owners[0]).toMatchObject({
+      label: "Responsável A",
+      appointments: 3,
+      visits: 2,
+    });
+    expect(result.conversionRankings.regionalManagers[0]).toMatchObject({
+      label: "Regional A",
+      appointments: 3,
+      visits: 2,
+    });
     expect(result.filterOptions.channels).toEqual([
       { key: 1, label: "House" },
       { key: 0, label: "Imob" },
@@ -325,7 +347,14 @@ describe("appointment chart analysis", () => {
     });
     expect(result.total).toBe(1);
     expect(result.details?.map((row) => row.createdAt.slice(0, 10))).toEqual(["2026-10-18"]);
-    expect(result.funnel).toEqual({ opportunities: 18, appointments: 8, visits: 4, sales: 0 });
+    expect(result.funnel).toEqual({
+      opportunities: 18,
+      appointments: 8,
+      visits: 4,
+      folders: 0,
+      approvedFolders: 0,
+      sales: 0,
+    });
     expect(result.dailyAverage).toBe(0.5);
     expect(result.brokerCount).toBe(10);
     expect(result.registeredManagerCount).toBe(3);
@@ -429,7 +458,14 @@ describe("appointment chart analysis", () => {
         appointments: [],
       }),
     );
-    expect(result.funnel).toEqual({ opportunities: 0, appointments: 0, visits: 0, sales: 0 });
+    expect(result.funnel).toEqual({
+      opportunities: 0,
+      appointments: 0,
+      visits: 0,
+      folders: 0,
+      approvedFolders: 0,
+      sales: 0,
+    });
     expect(result.productiveBrokers).toBe(0);
     expect(result.productivePercent).toBe(0);
     expect(result.visitsPerformed).toBe(0);

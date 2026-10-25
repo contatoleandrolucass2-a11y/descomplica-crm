@@ -226,7 +226,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentSale:24},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentSale:null}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} conversionGoals={conversionGoals} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentFolder:3,appointmentApprovedFolder:12,appointmentSale:24,monthlyFunnel:{opportunities:143,appointments:24,visits:12,folders:8,approvedFolders:2,sales:1}},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentFolder:null,appointmentApprovedFolder:null,appointmentSale:null,monthlyFunnel:{opportunities:0,appointments:0,visits:4,folders:2,approvedFolders:1,sales:1}}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} conversionGoals={conversionGoals} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -371,18 +371,16 @@ export async function runAppointmentsPreview() {
               (element) => getComputedStyle(element).writingMode,
             );
           })(),
-          kpiCards: [...document.querySelectorAll("article")]
-            .filter((card) => card.querySelector("h2"))
-            .map((card) => ({
-              label: card.querySelector("h2")?.textContent,
-              width: card.getBoundingClientRect().width,
-              height: card.getBoundingClientRect().height,
-            })),
+          kpiCards: [...document.querySelectorAll('[class*="kpiGrid"] > article')].map((card) => ({
+            label: card.querySelector("h2")?.textContent,
+            width: card.getBoundingClientRect().width,
+            height: card.getBoundingClientRect().height,
+          })),
           metricFontSizes: [...document.querySelectorAll('[class*="metricValue"]')].map((element) =>
             Number.parseFloat(getComputedStyle(element).fontSize),
           ),
-          cardTitleFontSizes: [...document.querySelectorAll("article h2")].map((element) =>
-            Number.parseFloat(getComputedStyle(element).fontSize),
+          cardTitleFontSizes: [...document.querySelectorAll('[class*="kpiGrid"] > article h2')].map(
+            (element) => Number.parseFloat(getComputedStyle(element).fontSize),
           ),
           kpiCenters: [...document.querySelectorAll('article[class*="kpiCard"]')].map((card) => {
             const value = card.querySelector("strong");
@@ -423,12 +421,13 @@ export async function runAppointmentsPreview() {
             const recency = [...document.querySelectorAll('[class*="recencyCard"]')].map(
               (element) => element.getBoundingClientRect(),
             );
-            return sections.length === 8 && recency.length === 3
+            return sections.length === 11 && recency.length === 3
               ? [
                   sections[1].bottom - sections[0].top,
-                  sections[4].bottom - sections[1].top,
-                  recency[0].bottom - sections[4].top,
-                  sections[7].bottom - recency[0].top,
+                  sections[6].bottom - sections[4].top,
+                  sections[9].bottom - sections[7].top,
+                  recency[0].bottom - sections[7].top,
+                  sections[10].bottom - recency[0].top,
                 ]
               : [];
           })(),
@@ -487,7 +486,7 @@ export async function runAppointmentsPreview() {
           `Horizontal internal scrollbar ${theme}/${width}`,
         );
         check(
-          Math.abs(geometry.sections[0].height - geometry.sections[7].height) < 1 &&
+          Math.abs(geometry.sections[0].height - geometry.sections[10].height) < 1 &&
             geometry.sections
               .slice(1, 4)
               .every((section) => Math.abs(section.height - geometry.sections[1].height) < 1),
@@ -556,10 +555,10 @@ export async function runAppointmentsPreview() {
             ),
           `Monthly labels clipped or too small ${theme}/${width}: ${JSON.stringify(geometry.monthly.labels)}`,
         );
-        check(geometry.sections.length === 8, `Eight charts ${theme}/${width}`);
+        check(geometry.sections.length === 11, `Eleven charts ${theme}/${width}`);
         if (width >= 1024) {
           check(
-            geometry.twoRowSpans.length === 4 &&
+            geometry.twoRowSpans.length === 5 &&
               geometry.twoRowSpans.every((span) => span <= geometry.height + 1),
             `Two adjacent chart rows must fit one viewport ${theme}/${width}x${height}: ${geometry.twoRowSpans.join(",")}`,
           );
@@ -612,7 +611,7 @@ export async function runAppointmentsPreview() {
     await expect(
       page.getByRole("region", { name: "Filtros do painel de agendamentos" }),
     ).toBeVisible();
-    await expect(page.locator("article h2")).toHaveCount(12);
+    await expect(page.locator('[class*="kpiGrid"] > article h2')).toHaveCount(12);
     await expect(page.getByText("Cobertura da fonte:")).toHaveCount(0);
     await expect(page.getByText(/agendamentos no período$/)).toHaveCount(0);
     await expect(
@@ -721,20 +720,14 @@ export async function runAppointmentsPreview() {
       const calendar = [...element.querySelectorAll("button")].find((button) =>
         button.textContent?.includes("Março de 2026"),
       );
-      const clear = [...element.querySelectorAll("button")].find((button) =>
-        button.textContent?.includes("Limpar filtros"),
-      );
       return {
         companyRight: company?.getBoundingClientRect().right ?? 0,
         calendarLeft: calendar?.getBoundingClientRect().left ?? 0,
-        calendarRight: calendar?.getBoundingClientRect().right ?? 0,
-        clearLeft: clear?.getBoundingClientRect().left ?? 0,
       };
     });
     check(
-      filterOrder.companyRight <= filterOrder.calendarLeft + 1 &&
-        filterOrder.calendarRight <= filterOrder.clearLeft + 1,
-      `Calendar and clear controls must follow Empresa: ${JSON.stringify(filterOrder)}`,
+      filterOrder.companyRight <= filterOrder.calendarLeft + 1,
+      `Calendar must follow Empresa: ${JSON.stringify(filterOrder)}`,
     );
     await calendarTrigger.click();
     const calendar = page.getByRole("dialog", { name: "Selecione o período" });
@@ -774,7 +767,7 @@ export async function runAppointmentsPreview() {
     await expect(region("Agendamentos por semana").getByRole("listitem")).toHaveCount(1);
     evidence.filters =
       "Calendar defaults to the current source month; supports multiple days, close button, Escape, year/month changes and whole-month selection; exclusive annual chart remains independent";
-    await filtersRegion.getByRole("button", { name: "Limpar 1 filtro" }).click();
+    await page.getByRole("button", { name: "Limpar 1 filtro" }).click();
     await expect(filtersRegion.getByRole("button", { name: "Março de 2026" })).toBeVisible();
     await page.goto(origin);
     await page.getByRole("button", { name: "House", exact: true }).click();

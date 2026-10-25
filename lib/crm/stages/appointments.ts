@@ -8,6 +8,12 @@ export interface AppointmentBucket {
   label: string;
   total: number;
 }
+export interface AppointmentConversionBucket extends AppointmentBucket {
+  appointments: number;
+  visits: number;
+  percent: number;
+  ratio: number;
+}
 export interface AppointmentFilters {
   createdDate?: string;
   createdDates?: string[];
@@ -191,10 +197,26 @@ export function analyzeAppointments(
     (selectedDateSet.size === 0 || selectedDateSet.has(date)) &&
     (!filters.week || appointmentWeekOfMonth(date) === filters.week);
 
+  const regionalManagerByManager = new Map<string, { name: string; createdAt: number }>();
+  for (const appointment of slice.appointments ?? []) {
+    const manager = appointmentIdentity(appointment.salesManager);
+    const regionalManager = appointment.regionalManager.trim();
+    if (!manager || !regionalManager) continue;
+    const createdAt = Date.parse(appointment.createdAt);
+    const current = regionalManagerByManager.get(manager);
+    if (!current || createdAt > current.createdAt) {
+      regionalManagerByManager.set(manager, { name: regionalManager, createdAt });
+    }
+  }
+  const managerBelongsToRegion = (manager: string, region: string) =>
+    regionalManagerByManager.get(appointmentIdentity(manager))?.name === region;
+  const regionForManager = (manager: string) =>
+    regionalManagerByManager.get(appointmentIdentity(manager))?.name ?? null;
   const matchesAppointmentDimensions = (appointment: DashboardAppointmentDetail) =>
     (filters.channel === undefined ||
       ("channel" in appointment && appointment.channel === filters.channel)) &&
-    (!filters.regionalManager || appointment.regionalManager === filters.regionalManager) &&
+    (!filters.regionalManager ||
+      managerBelongsToRegion(appointment.salesManager, filters.regionalManager)) &&
     (!filters.manager || appointment.salesManager === filters.manager) &&
     (!filters.owner || appointment.owner === filters.owner) &&
     (!filters.company || ("company" in appointment && appointment.company === filters.company)) &&
@@ -206,6 +228,8 @@ export function analyzeAppointments(
   };
   const matchesFactDimensions = (fact: DashboardAnalysisSlice["facts"][number]) =>
     (filters.channel === undefined || fact[5] === filters.channel) &&
+    (!filters.regionalManager ||
+      managerBelongsToRegion(slice.dimensions.managers[fact[2]] ?? "", filters.regionalManager)) &&
     (!filters.manager || slice.dimensions.managers[fact[2]] === filters.manager) &&
     (!filters.owner || slice.dimensions.owners[fact[3]] === filters.owner) &&
     (!filters.company || slice.dimensions.companies[fact[4]] === filters.company);
@@ -217,11 +241,14 @@ export function analyzeAppointments(
     dimensionFilteredOperations === null
       ? null
       : dimensionFilteredOperations.filter(matchesFilters);
-  const hasMappableRosterFilter = Boolean(filters.manager) || Boolean(filters.owner);
+  const hasMappableRosterFilter =
+    Boolean(filters.regionalManager) || Boolean(filters.manager) || Boolean(filters.owner);
   const filteredRoster =
     hasMappableRosterFilter && brokerRoster !== null
       ? brokerRoster.filter(
           (broker) =>
+            (!filters.regionalManager ||
+              managerBelongsToRegion(broker.manager, filters.regionalManager)) &&
             (!filters.manager ||
               appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
             (!filters.owner ||
@@ -255,13 +282,24 @@ export function analyzeAppointments(
   let total = 0,
     today = 0,
     yesterday = 0;
-  const funnel = { opportunities: 0, appointments: 0, visits: 0, sales: 0 };
+  const funnel = {
+    opportunities: 0,
+    appointments: 0,
+    visits: 0,
+    folders: 0,
+    approvedFolders: 0,
+    sales: 0,
+  };
   if (slice.version === 4) {
     for (const fact of sharedFacts) {
       if (fact[1].slice(0, 7) !== month) continue;
       if (fact[0] === 0) funnel.opportunities += fact[7];
       if (fact[0] === 1) funnel.appointments += fact[7];
       if (fact[0] === 2) funnel.visits += fact[7];
+      if (fact[0] === 3) {
+        funnel.folders += fact[7];
+        funnel.approvedFolders += fact[9];
+      }
       if (fact[0] === 4) funnel.sales += fact[7];
     }
   }
@@ -400,11 +438,63 @@ export function analyzeAppointments(
   sortRecency(brokerRecency.upTo7Days);
   sortRecency(brokerRecency.from8To14Days);
   sortRecency(brokerRecency.from15Days);
+  const conversionGroups = {
+    owners: new Map<string, { appointments: number; visits: number }>(),
+    managers: new Map<string, { appointments: number; visits: number }>(),
+    regionalManagers: new Map<string, { appointments: number; visits: number }>(),
+  };
+  const addConversion = (
+    map: Map<string, { appointments: number; visits: number }>,
+    key: string | null,
+    stage: number,
+    count: number,
+  ) => {
+    if (!key) return;
+    const current = map.get(key) ?? { appointments: 0, visits: 0 };
+    if (stage === 1) current.appointments += count;
+    if (stage === 2) current.visits += count;
+    map.set(key, current);
+  };
+  for (const fact of sharedFacts) {
+    if (fact[1].slice(0, 7) !== month || (fact[0] !== 1 && fact[0] !== 2)) continue;
+    const manager = slice.dimensions.managers[fact[2]] ?? "Gerente não informado";
+    addConversion(
+      conversionGroups.owners,
+      slice.dimensions.owners[fact[3]] ?? "Responsável não informado",
+      fact[0],
+      fact[7],
+    );
+    addConversion(conversionGroups.managers, manager, fact[0], fact[7]);
+    addConversion(conversionGroups.regionalManagers, regionForManager(manager), fact[0], fact[7]);
+  }
+  const conversionRanking = (
+    map: Map<string, { appointments: number; visits: number }>,
+  ): AppointmentConversionBucket[] =>
+    [...map]
+      .filter(([, value]) => value.appointments > 0 && value.visits > 0)
+      .map(([label, value]) => ({
+        key: label,
+        label,
+        total: (value.visits / value.appointments) * 100,
+        appointments: value.appointments,
+        visits: value.visits,
+        percent: (value.visits / value.appointments) * 100,
+        ratio: value.appointments / value.visits,
+      }))
+      .sort(
+        (left, right) =>
+          right.percent - left.percent ||
+          right.visits - left.visits ||
+          left.label.localeCompare(right.label, "pt-BR"),
+      );
   const filterOptions = {
     channels: [
       { key: 1 as const, label: "House" },
       { key: 0 as const, label: "Imob" },
     ].filter(({ key }) => slice.facts.some((fact) => fact[5] === key)),
+    regionalManagers: [
+      ...new Set([...regionalManagerByManager.values()].map(({ name }) => name)),
+    ].sort((left, right) => left.localeCompare(right, "pt-BR")),
     managers: slice.dimensions.managers,
     owners: slice.dimensions.owners,
     companies: slice.dimensions.companies,
@@ -426,6 +516,13 @@ export function analyzeAppointments(
     visitsPerformed: slice.version === 4 ? funnel.visits : null,
     sales: slice.version === 4 ? funnel.sales : null,
     brokerRecency,
+    conversionRankings: {
+      owners: conversionRanking(conversionGroups.owners),
+      managers: conversionRanking(conversionGroups.managers),
+      regionalManagers: conversionRanking(conversionGroups.regionalManagers),
+    },
+    selectedCoveredDays,
+    daysInMonth: Number(end.slice(8, 10)),
     details,
     regionalManagers: filteredOperations === null ? null : ranking(regionalManagers),
     accountRankings: filteredOperations === null ? null : ranking(accountRankings),

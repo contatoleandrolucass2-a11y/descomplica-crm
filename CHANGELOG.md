@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-25 - Funis e filtro regional em Agendamentos
+
+- Compacta os 12 indicadores para duas linhas visíveis no viewport de PC.
+- Adiciona Gerente Regional antes de Gerente de Vendas e move a limpeza para a
+  linha do título.
+- Inclui funis esperado e realizado com seis etapas e cinco conversões, além de
+  rankings positivos de Agendamento x Visita por responsável, gerente e regional.
+- Preserva Pasta, Pasta Aprovada e metas oficiais na projeção autorizada da página.
+
 ## 2026-10-25 - Realce sem borda nas etapas dos funis
 
 - Substitui o contorno retangular exibido ao passar o mouse por um realce

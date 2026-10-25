@@ -20,6 +20,7 @@ import {
   saoPauloDate,
   type AppointmentBrokerRosterEntry,
   type AppointmentBucket,
+  type AppointmentConversionBucket,
   type AppointmentFilters,
 } from "@/lib/crm/stages/appointments";
 
@@ -48,6 +49,14 @@ const monthNames = [
 ] as const;
 const weekDays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"] as const;
 type GoalStatus = "positive" | "negative" | "neutral";
+type FunnelValues = {
+  opportunities: number;
+  appointments: number;
+  visits: number;
+  folders: number;
+  approvedFolders: number;
+  sales: number;
+};
 
 function atLeastStatus(value: number | null, goal: number | null): GoalStatus {
   if (value === null || goal === null || goal <= 0) return "neutral";
@@ -220,6 +229,130 @@ function Ranking({
         </li>
       ))}
     </ol>
+  );
+}
+
+function ConversionRanking({ buckets }: { buckets: AppointmentConversionBucket[] }) {
+  if (!buckets.length) return <Empty>Nenhuma conversão maior que zero no período.</Empty>;
+  const max = Math.max(...buckets.map((item) => item.percent));
+  return (
+    <ol className={styles.conversionRanking}>
+      {buckets.map((item, index) => (
+        <li key={item.key}>
+          <div className={styles.conversionRankingHeading}>
+            <span>
+              <span className={styles.rank}>{index + 1}.</span> {item.label}
+            </span>
+            <strong>{decimal.format(item.percent)}%</strong>
+          </div>
+          <p>
+            {number.format(item.appointments)} agendamentos → {number.format(item.visits)} visitas ·{" "}
+            {decimal.format(item.ratio)} para 1
+          </p>
+          <div aria-hidden="true" className={styles.rankTrack}>
+            <div className={styles.rankBar} style={{ width: `${(item.percent / max) * 100}%` }} />
+          </div>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+const funnelStages: Array<{ key: keyof FunnelValues; label: string }> = [
+  { key: "opportunities", label: "Oportunidades" },
+  { key: "appointments", label: "Agendamentos" },
+  { key: "visits", label: "Visitas" },
+  { key: "folders", label: "Pastas" },
+  { key: "approvedFolders", label: "Pastas aprovadas" },
+  { key: "sales", label: "Vendas" },
+];
+
+function FunnelGraphic({ values, label }: { values: FunnelValues | null; label: string }) {
+  if (!values) return <Empty>Meta do funil indisponível para este recorte.</Empty>;
+  return (
+    <ol className={styles.funnel} aria-label={label}>
+      {funnelStages.map((stage, index) => (
+        <li key={stage.key} style={{ "--funnel-level": index } as CSSProperties}>
+          <span>{stage.label}</span>
+          <strong>{number.format(Math.round(values[stage.key]))}</strong>
+        </li>
+      ))}
+    </ol>
+  );
+}
+
+function FunnelConversions({ values }: { values: FunnelValues | null }) {
+  if (!values) return <Empty>Conversões indisponíveis para este recorte.</Empty>;
+  const rows: Array<[string, number, number, string, string]> = [
+    [
+      "Oportunidade x agendamento",
+      values.opportunities,
+      values.appointments,
+      "oportunidades",
+      "agendamento",
+    ],
+    ["Agendamento x visita", values.appointments, values.visits, "agendamentos", "visita"],
+    ["Agendamento x Pasta", values.appointments, values.folders, "agendamentos", "Pasta"],
+    [
+      "Agendamento x Pasta Aprovada",
+      values.appointments,
+      values.approvedFolders,
+      "agendamentos",
+      "Pasta Aprovada",
+    ],
+    ["Agendamento x Venda", values.appointments, values.sales, "agendamentos", "Venda"],
+  ];
+  return (
+    <ol className={styles.funnelConversions}>
+      {rows.map(([label, source, target, sourceUnit, targetUnit]) => {
+        const percent = source > 0 ? (target / source) * 100 : null;
+        const ratio = target > 0 ? source / target : null;
+        return (
+          <li key={label}>
+            <span>{label}</span>
+            <strong>{percent === null ? "—" : `${decimal.format(percent)}%`}</strong>
+            <small>
+              {ratio === null
+                ? "Sem conversão no período"
+                : `${decimal.format(ratio)} ${sourceUnit} para 1 ${targetUnit}`}
+            </small>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function FunnelComparison({
+  expected,
+  realized,
+}: {
+  expected: FunnelValues | null;
+  realized: FunnelValues | null;
+}) {
+  return (
+    <section
+      className={`${styles.card} ${styles.funnelComparison}`}
+      aria-label="Funis esperado e realizado"
+    >
+      <article>
+        <h2>Funil esperado no período</h2>
+        <p>Projeção proporcional da meta para os dias e filtros selecionados.</p>
+        <div className={styles.funnelPanel}>
+          <FunnelConversions values={expected} />
+          <FunnelGraphic values={expected} label="Funil esperado no período" />
+        </div>
+      </article>
+      <div className={styles.funnelDivider} aria-hidden="true" />
+      <article>
+        <h2>Realizado até o momento</h2>
+        <p>Resultados consolidados no período e filtros selecionados.</p>
+        <div className={`${styles.funnelPanel} ${styles.funnelPanelReversed}`}>
+          <FunnelGraphic values={realized} label="Funil realizado no período" />
+          <FunnelConversions values={realized} />
+        </div>
+      </article>
+    </section>
   );
 }
 
@@ -531,12 +664,11 @@ function DashboardFilters({
   onMonthChange,
   onToggleDate,
   onSelectWholeMonth,
-  activeFilterCount,
-  onClear,
 }: {
   filters: AppointmentFilters;
   options: {
     channels: { key: 0 | 1; label: string }[];
+    regionalManagers: string[];
     managers: string[];
     owners: string[];
     companies: string[];
@@ -553,10 +685,14 @@ function DashboardFilters({
   onMonthChange: (month: string) => void;
   onToggleDate: (date: string) => void;
   onSelectWholeMonth: () => void;
-  activeFilterCount: number;
-  onClear: () => void;
 }) {
   const selects = [
+    {
+      key: "regionalManager" as const,
+      label: "Gerente Regional",
+      empty: "Todos os gerentes regionais",
+      values: options.regionalManagers,
+    },
     {
       key: "manager" as const,
       label: "Gerente de Vendas",
@@ -634,19 +770,6 @@ function DashboardFilters({
         onToggleDate={onToggleDate}
         onSelectWholeMonth={onSelectWholeMonth}
       />
-      <div className={styles.clearField}>
-        <span aria-hidden="true">Filtros</span>
-        <button
-          type="button"
-          className={styles.clearFilters}
-          disabled={activeFilterCount === 0}
-          onClick={onClear}
-        >
-          {activeFilterCount === 0
-            ? "Limpar filtros"
-            : `Limpar ${activeFilterCount} ${activeFilterCount === 1 ? "filtro" : "filtros"}`}
-        </button>
-      </div>
     </section>
   );
 }
@@ -889,6 +1012,25 @@ export function AppointmentsDashboard({
       ([key, value]) =>
         key !== "createdDates" && value !== undefined && value !== "" && value !== null,
     ).length + (calendarActive ? 1 : 0);
+  const goalCohort =
+    selectedChannel === 1
+      ? result.brokerCount
+      : selectedChannel === 0
+        ? result.registeredManagerCount
+        : null;
+  const expectedFunnel: FunnelValues | null = (() => {
+    const monthly = activeConversionGoals?.monthlyFunnel;
+    if (!monthly || goalCohort === null || result.daysInMonth <= 0) return null;
+    const factor = goalCohort * (result.selectedCoveredDays / result.daysInMonth);
+    return {
+      opportunities: monthly.opportunities * factor,
+      appointments: monthly.appointments * factor,
+      visits: monthly.visits * factor,
+      folders: monthly.folders * factor,
+      approvedFolders: monthly.approvedFolders * factor,
+      sales: monthly.sales * factor,
+    };
+  })();
   const toggleFilter = <K extends keyof AppointmentFilters>(
     key: K,
     value: AppointmentFilters[K],
@@ -971,7 +1113,19 @@ export function AppointmentsDashboard({
         ];
   return (
     <div className={styles.dashboard}>
-      <h1 className={styles.title}>Agendamentos</h1>
+      <div className={styles.titleRow}>
+        <h1 className={styles.title}>Agendamentos</h1>
+        <button
+          type="button"
+          className={styles.clearFilters}
+          disabled={activeFilterCount === 0}
+          onClick={clearAllFilters}
+        >
+          {activeFilterCount === 0
+            ? "Limpar filtros"
+            : `Limpar ${activeFilterCount} ${activeFilterCount === 1 ? "filtro" : "filtros"}`}
+        </button>
+      </div>
       <p className="sr-only" aria-live="polite">
         {monthUnavailable
           ? "Período fora da cobertura disponível."
@@ -994,8 +1148,6 @@ export function AppointmentsDashboard({
         onMonthChange={selectMonth}
         onToggleDate={toggleCalendarDate}
         onSelectWholeMonth={selectWholeMonth}
-        activeFilterCount={activeFilterCount}
-        onClear={clearAllFilters}
       />
 
       <div className={styles.kpiGrid}>
@@ -1107,6 +1259,8 @@ export function AppointmentsDashboard({
         />
       </div>
 
+      <FunnelComparison expected={expectedFunnel} realized={result.funnel} />
+
       <div className={styles.featureChartRow}>
         <Chart title="Evolução de agendamentos por dia" wide>
           {monthUnavailable ? (
@@ -1211,6 +1365,21 @@ export function AppointmentsDashboard({
               onSelect={(bucket) => toggleFilter("regionalManager", bucket.key)}
             />
           )}
+        </Chart>
+      </div>
+
+      <div
+        className={styles.conversionRankingGrid}
+        data-appointments-chart-group="conversion-rankings"
+      >
+        <Chart title="Melhor responsável: Agendamento x Visita">
+          <ConversionRanking buckets={result.conversionRankings.owners} />
+        </Chart>
+        <Chart title="Melhor gerente: Agendamento x Visita">
+          <ConversionRanking buckets={result.conversionRankings.managers} />
+        </Chart>
+        <Chart title="Melhor gerente regional: Agendamento x Visita">
+          <ConversionRanking buckets={result.conversionRankings.regionalManagers} />
         </Chart>
       </div>
 
