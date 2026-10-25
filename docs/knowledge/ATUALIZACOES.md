@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: abertura do erro de carregamento e edicao da Previsao
+
+- A demanda iniciou na branch `codex/previsao-edicao-todos-usuarios`, criada
+  sobre `origin/main` `6cf298414ba0a7541386db433ab04f76822a7ae5`. A CI de
+  `main` `40196635124` estava em andamento para esse SHA; a execucao anterior
+  `40168434992` passou no SHA `8e8271abe344129455773cce7b65da5671d24aa2`.
+- O health publico consultado em `2026-10-25T08:43:06-03:00` respondeu HTTP
+  200, `status=ok`, `version=8e8271abe344129455773cce7b65da5671d24aa2`.
+  Portanto a producao observada ainda correspondia ao ultimo SHA aprovado e nao
+  a `main` mais recente. A captura fornecida comprova o erro visivel de carga na
+  selecao House/Amanda, mas ainda nao identifica a causa tecnica.
+- O escopo autorizado e corrigir carga, edicao e salvamento para qualquer
+  usuario que ja possua acesso a pagina Previsao. A autorizacao da pagina
+  continua obrigatoria no servidor; nenhuma ampliacao anonima ou contorno de
+  RLS sera presumido. Nenhuma mutacao remota foi executada nesta abertura.
+
+### Implementacao e validacao local
+
+- **Causa confirmada:** o endpoint autenticado de producao respondeu
+  `forecast_unavailable`; o ledger remoto nao contem
+  `20261022184500_forecast_value_edit_roles`, enquanto a aplicacao publicada
+  valida `can_edit` e `can_manage_structure`. As funcoes remotas tambem nao
+  continham esses campos, conforme inspecao de definicao e ACL.
+- **Correcao preparada:** `20261025114724_forecast_page_users_edit.sql`
+  recompoe o contrato e autoriza valores e estrutura somente quando
+  `crm.management.forecast.view` ja foi aprovada. API, RPC, conta ativa, MFA,
+  pagina ativa, validacao, CAS, auditoria, RLS e ACL permanecem obrigatorios;
+  Geral continua somente leitura.
+- **Testes:** 74 testes focados da Previsao passaram; os 85 testes focados de
+  API e manifestos passaram; `pnpm lint` passou com 36 avisos preexistentes,
+  `pnpm typecheck` passou e `pnpm build` passou em Node 24.19.0. A suite
+  integral executou 4.192 testes aprovados e teve um unico timeout preexistente
+  do Associativo; o mesmo teste passou isolado (13/13, 3,48 s). PgTAP local
+  ficou indisponivel porque o host nao possui Docker ou Podman; a CI de
+  restauracao isolada permanece obrigatoria antes da migration.
+- **Pendente:** CI independente, merge, autorizacao especifica e aplicacao da
+  migration, publicacao coordenada e verificacao autenticada sem gravar dados
+  reais.
+
 ## 2026-10-25: detalhamento dos funis integrado e publicado
 
 - O PR #333 foi integrado no SHA

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-25
+
+- Corrige o carregamento da Previsão quando o runtime já exige as capacidades do
+  contrato novo e libera valores e estrutura para todo usuário com acesso
+  efetivo à página; a visão Geral continua somente leitura.
+
 ## 2026-10-25 - Detalhamento dos funis publicado
 
 - Publica o diálogo responsivo de etapas dos 13 funis no SHA `cc13a3d7`.

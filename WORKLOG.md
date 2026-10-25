@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-25 — Previsão editável por usuários autorizados
+
+- Reproduzido em produção: o endpoint autenticado de Previsão respondeu
+  `forecast_unavailable`.
+- Confirmada divergência entre aplicação e banco: a migration
+  `20261022184500_forecast_value_edit_roles` não constava no ledger remoto.
+- Preparada a migration corretiva `20261025114724_forecast_page_users_edit`,
+  mantendo os guards e permitindo valores e estrutura a quem já acessa a página.
+
 ## 2026-10-25 - Detalhamento dos funis publicado
 
 O PR #333 foi integrado em `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`.
