@@ -82,7 +82,6 @@
   implementacao deve reutilizar o snapshot autorizado, preservar os dois canais
   definidos e evitar persistir registros ou identidades reais em testes.
 
-
 ## 2026-10-24: modulo Lead concluido e publicado
 
 - O nucleo funcional do menu `Lead` foi integrado pelos PRs #323, #330, #331

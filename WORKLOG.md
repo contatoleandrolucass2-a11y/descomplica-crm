@@ -47,7 +47,6 @@ com janela ampliada. As suítes
 Node e release repetiram falhas Windows/POSIX preexistentes do Meta Ads já
 documentadas e, por isso, a CI Linux permanece o gate autoritativo da entrega.
 
-
 ## 2026-10-24 - Fechamento e publicacao do modulo Lead
 
 Os PRs #323, #330, #331 e #332 integraram o modulo Lead completo. A CI final

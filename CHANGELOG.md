@@ -23,7 +23,6 @@
 - Adapta o detalhamento para cartões no celular, sem rolagem lateral da página,
   e valida os temas claro, médio e escuro.
 
-
 ## 2026-10-24 - Menu Lead publicado
 
 - Publica as nove paginas protegidas do modulo Lead e a exportacao autenticada
