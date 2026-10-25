@@ -8,8 +8,10 @@ import { loadDashboardTeam } from "@/lib/crm/dashboard/team";
 import {
   analyzeDashboard,
   applyDashboardAnalysis,
+  buildDashboardStageDetailRows,
   parseDashboardFilters,
 } from "@/lib/crm/dashboard/analysis";
+import type { DashboardFunnelKey } from "@/lib/crm/dashboard/presentation";
 import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
 import { getSalesforceRefreshConfiguration } from "@/lib/crm/salesforce/config";
 import { loadFunnelGoals } from "@/lib/crm/goals/data";
@@ -89,6 +91,21 @@ export default async function AppHomePage({
           sales: partnershipGoalResult.goals.sales,
         }
       : null;
+  const authorizedStagePaths = pages.map((page) => page.path);
+  const stagePath: Record<DashboardFunnelKey, string> = {
+    opportunities: "/app/etapas/oportunidades",
+    appointments: "/app/etapas/agendamentos",
+    visits: "/app/etapas/visitas",
+    folders: "/app/etapas/pastas",
+    "approved-folders": "/app/etapas/pastas",
+    sales: "/app/etapas/vendas",
+  };
+  const authorizedStages = new Set(
+    (Object.keys(stagePath) as DashboardFunnelKey[]).filter((stage) =>
+      authorizedStagePaths.includes(stagePath[stage]),
+    ),
+  );
+  const stageDetails = slice ? buildDashboardStageDetailRows(slice, filters, authorizedStages) : [];
 
   return (
     <main className={styles.canvasMain}>
@@ -103,7 +120,8 @@ export default async function AppHomePage({
         today={today}
         authorizedViews={authorizedViews}
         canViewStages={pages.some((page) => page.path.startsWith("/app/etapas/"))}
-        authorizedStagePaths={pages.map((page) => page.path)}
+        authorizedStagePaths={authorizedStagePaths}
+        stageDetails={stageDetails}
         canViewRanking={canViewRanking}
         canRefresh={canRefresh}
         team={teamResult.status === "ready" ? teamResult.team : null}
