@@ -34,6 +34,22 @@ com janela ampliada. As suítes
 Node e release repetiram falhas Windows/POSIX preexistentes do Meta Ads já
 documentadas e, por isso, a CI Linux permanece o gate autoritativo da entrega.
 
+## 2026-10-24 - Fechamento e publicacao do modulo Lead
+
+Os PRs #323, #330, #331 e #332 integraram o modulo Lead completo. A CI final
+`40143354357` aprovou os quatro jobs obrigatorios no SHA
+`b46b8a0e5203dde0a1bc0d77ad8e835bb6fedf5a`. As quatro migrations Lead foram
+aplicadas na producao e a verificacao confirmou 24 tabelas com RLS forcada, 24
+politicas MFA, grants minimos, 24 permissoes, nove paginas, zero FK sem indice e
+nenhum registro de lead ou cliente criado.
+
+O artefato promovivel `12578864673` foi conferido por checksum, revisao, label
+OCI e `image:prove`, sem rebuild. O coordenador de producao concluiu o deployment
+`1d79e00b-89f5-481f-8a9b-39f2a54e856b` em
+`2026-10-25T00:31:00.530Z`; o status ficou sem pendencia, o health publico
+retornou a versao exata e `/app/leads` redirecionou o acesso anonimo ao login.
+Nenhum workflow n8n, dado do C2S, DNS ou cobranca foi alterado.
+
 ## 2026-10-24 - Indicadores de meta e ordem visual de Agendamentos
 
 A entrega altera exclusivamente `/app/etapas/agendamentos`. Os 12 indicadores
