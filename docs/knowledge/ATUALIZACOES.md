@@ -1,5 +1,28 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: abertura do ajuste visual no hover dos funis
+
+- O Git comum foi confirmado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`. A demanda
+  parte de `origin/main` no SHA `6cf298414ba0a7541386db433ab04f76822a7ae5`;
+  a CI desse `push/main` ainda estava em execução no run `40196635124` durante
+  a abertura.
+- O health público respondeu HTTP 200, `status=ok`, versão
+  `8e8271abe344129455773cce7b65da5671d24aa2`. Essa versão inclui o popup dos
+  funis e antecede somente o registro documental atual de `main`.
+- Escopo solicitado: retirar o contorno retangular do hover das etapas
+  clicáveis e preservar um realce visual discreto, sem alterar foco de teclado,
+  valores, filtros, popup, permissões ou dados.
+- A causa era o `box-shadow` interno de 3 px no acionador absoluto do popup. A
+  correção troca somente o hover por uma camada translúcida de 14% da cor de
+  destaque; o `outline` de `:focus-visible` permanece para usuários de teclado.
+- Evidência local em Node 24.19.0 e pnpm 11.20.0: teste focado 2/2 nos temas
+  claro, médio e escuro e larguras 320, 390 e 1440 px; lint sem erros, typecheck
+  e build aprovados. O Vitest completo aprovou 4.194 e ignorou 108. O comando
+  `pnpm test` terminou com as três falhas Windows preexistentes de Meta Ads
+  relacionadas a arquivo privado e caminho POSIX; a CI Linux continua sendo o
+  critério de integração, sem redução de gate ou alteração desses testes.
+
 ## 2026-10-25: detalhamento dos funis integrado e publicado
 
 - O PR #333 foi integrado no SHA
