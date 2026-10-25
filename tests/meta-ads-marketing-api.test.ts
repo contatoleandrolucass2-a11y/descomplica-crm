@@ -44,7 +44,26 @@ describe("Meta Marketing API read-only client", () => {
       .mockResolvedValueOnce(
         json({
           data: [
-            { id: "77", effective_status: "ACTIVE" },
+            {
+              id: "77",
+              effective_status: "ACTIVE",
+              adset: {
+                id: "22",
+                targeting: {
+                  geo_locations: {
+                    cities: [
+                      {
+                        key: "2441677",
+                        name: "São Paulo",
+                        region: "São Paulo",
+                        country_name: "Brasil",
+                      },
+                    ],
+                    regions: [{ key: "454", name: "São Paulo" }],
+                  },
+                },
+              },
+            },
             { id: "88", effective_status: "ADSET_PAUSED" },
           ],
         }),
@@ -90,6 +109,36 @@ describe("Meta Marketing API read-only client", () => {
             },
           ],
         }),
+      )
+      .mockResolvedValueOnce(
+        json({
+          data: [
+            {
+              date_start: "2026-10-20",
+              account_id: configuration.accountId,
+              campaign_id: "11",
+              adset_id: "22",
+              ad_id: "77",
+              region: "São Paulo",
+              actions: [
+                {
+                  action_type: "onsite_conversion.messaging_conversation_started_7d",
+                  value: "8",
+                },
+              ],
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(
+        json({
+          id: `act_${configuration.accountId}`,
+          name: "Superitendente Leandro",
+          currency: "BRL",
+          balance: "12345",
+          amount_spent: "987654",
+          spend_cap: "2500000",
+        }),
       );
     const result = await fetchMetaAdsDashboardData(configuration, {
       fetcher,
@@ -101,6 +150,9 @@ describe("Meta Marketing API read-only client", () => {
       accountId: configuration.accountId,
       accountName: "Superitendente Leandro",
       currency: "BRL",
+      accountBalance: 123.45,
+      amountSpent: 9876.54,
+      spendCap: 25000,
       range: { start: "2026-06-24", end: "2026-10-21" },
     });
     expect(result.rows).toEqual([
@@ -115,6 +167,10 @@ describe("Meta Marketing API read-only client", () => {
         reach: 1800,
         waClicks: 42,
         messageClicks: 8,
+        targetLocations: expect.arrayContaining([
+          expect.objectContaining({ type: "city", name: "São Paulo" }),
+          expect.objectContaining({ type: "region", name: "São Paulo" }),
+        ]),
       }),
       expect.objectContaining({
         date: "2026-10-19",
@@ -123,6 +179,14 @@ describe("Meta Marketing API read-only client", () => {
         spend: 10,
         waClicks: 2,
         messageClicks: 0,
+      }),
+    ]);
+    expect(result.regionalResults).toEqual([
+      expect.objectContaining({
+        region: "São Paulo",
+        campaignId: "11",
+        destination: "whatsapp",
+        conversions: 8,
       }),
     ]);
     for (const call of fetcher.mock.calls) {
@@ -134,12 +198,18 @@ describe("Meta Marketing API read-only client", () => {
     }
     expect(JSON.stringify(result)).not.toContain(configuration.accessToken);
     const adsUrl = new URL(String(fetcher.mock.calls[0]?.[0]));
+    expect(adsUrl.searchParams.get("fields")).toContain("adset{id,targeting}");
     expect(adsUrl.searchParams.has("effective_status")).toBe(false);
     expect(JSON.parse(adsUrl.searchParams.get("filtering")!)).toContainEqual({
       field: "effective_status",
       operator: "IN",
       value: expect.arrayContaining(["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"]),
     });
+    const regionalUrl = new URL(String(fetcher.mock.calls[2]?.[0]));
+    expect(regionalUrl.searchParams.get("breakdowns")).toBe("region");
+    const accountUrl = new URL(String(fetcher.mock.calls[3]?.[0]));
+    expect(accountUrl.pathname).toContain(`/act_${configuration.accountId}`);
+    expect(accountUrl.searchParams.get("fields")).toContain("balance");
   });
 
   it("keeps Meta-archived ads identifiable while preserving their historical insights", async () => {
@@ -170,6 +240,18 @@ describe("Meta Marketing API read-only client", () => {
               ],
             },
           ],
+        }),
+      )
+      .mockResolvedValueOnce(
+        json({
+          data: [],
+        }),
+      )
+      .mockResolvedValueOnce(
+        json({
+          id: `act_${configuration.accountId}`,
+          name: "Superitendente Leandro",
+          currency: "BRL",
         }),
       );
 

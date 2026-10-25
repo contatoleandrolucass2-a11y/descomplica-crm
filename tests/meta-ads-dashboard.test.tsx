@@ -113,6 +113,10 @@ describe("dashboard Meta Ads", () => {
     expect(sidebarSource).toContain('aria-label={collapsed ? "Expandir menu lateral"');
     expect(sidebarSource).toContain("<ChevronLeft");
     expect(sidebarSource).toContain("<ChevronRight");
+    expect(sidebarSource).toContain("return MapPinned");
+    expect(sidebarSource).toContain("return SlidersHorizontal");
+    expect(sidebarSource).toContain("return Megaphone");
+    expect(sidebarSource).toContain("<Icon size={19}");
     expect(styles).toContain('.sidebar[data-collapsed="true"]');
     expect(styles).toContain("width: 64px");
     expect(styles).toContain("top: 58px");
@@ -157,6 +161,25 @@ describe("dashboard Meta Ads", () => {
     expect(application).toContain('["archived", "Excluídas/arquivadas (Meta)"]');
     expect(application).toContain("deliveryBadge(c)");
     expect(application).toContain('"ads-filters:v2:"');
+  });
+
+  it("separa segmentacao geografica da origem indisponivel dos leads e mostra saldo oficial", async () => {
+    const [application, dashboard] = await Promise.all([
+      readFile(new URL("../public/descomplica-ads-compact/live-data.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/descomplica-ads-compact/app.js", import.meta.url), "utf8"),
+    ]);
+
+    expect(application).toContain("row.targetLocations");
+    expect(application).toContain("Saldo total informado pela Meta");
+    expect(application).toContain("sourceData.accountBalance");
+    expect(dashboard).toContain("Segmentação geográfica configurada nas campanhas");
+    expect(dashboard).toContain("origem dos leads indisponível");
+    expect(dashboard).toContain("Resultados por região · Meta");
+    expect(dashboard).toContain("Nenhum dado vem do CRM");
+    expect(dashboard).toContain(
+      "A Meta não fornece município, bairro ou coordenada de origem de cada lead",
+    );
+    expect(dashboard).not.toContain("Origem informada pelos leads");
   });
 
   it("oferece selecionar todos nos filtros multiplos e fecha os menus fora da area", async () => {

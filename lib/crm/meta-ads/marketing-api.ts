@@ -24,7 +24,17 @@ const AD_EFFECTIVE_STATUSES = [
 
 type MetaAction = { action_type?: unknown; value?: unknown };
 type MetaInsight = Record<string, unknown> & { actions?: MetaAction[] };
-type MetaAd = Record<string, unknown>;
+type MetaAd = Record<string, unknown> & {
+  adset?: { id?: unknown; targeting?: unknown };
+};
+
+export type MetaAdsTargetLocation = {
+  type: "country" | "region" | "city" | "zip";
+  key: string;
+  name: string;
+  region: string | null;
+  country: string | null;
+};
 
 export type MetaAdsDashboardRow = {
   rowId: string;
@@ -60,6 +70,7 @@ export type MetaAdsDashboardRow = {
   qualityRanking: null;
   engagementRanking: null;
   conversionRanking: null;
+  targetLocations: MetaAdsTargetLocation[];
 };
 
 export type MetaAdsDashboardData = {
@@ -67,9 +78,26 @@ export type MetaAdsDashboardData = {
   accountId: string;
   accountName: string;
   currency: string;
+  accountBalance: number | null;
+  amountSpent: number | null;
+  spendCap: number | null;
   fetchedAt: string;
   range: { start: string; end: string };
   rows: MetaAdsDashboardRow[];
+  regionalResults: MetaAdsRegionalResult[];
+};
+
+export type MetaAdsRegionalResult = {
+  rowId: string;
+  date: string;
+  accountId: string;
+  campaignId: string;
+  adsetId: string;
+  adId: string;
+  region: string;
+  destination: MetaAdsDashboardRow["destination"];
+  status: MetaAdsDashboardRow["status"];
+  conversions: number;
 };
 
 export class MetaAdsApiError extends Error {
@@ -100,6 +128,53 @@ function number(value: unknown) {
 function nullableNumber(value: unknown) {
   if (value === null || value === undefined || value === "") return null;
   return number(value);
+}
+
+function moneyFromMinorUnits(value: unknown) {
+  if (value === null || value === undefined || value === "") return null;
+  const parsed = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(parsed) && parsed >= 0 ? parsed / 100 : null;
+}
+
+function targetLocations(value: unknown): MetaAdsTargetLocation[] {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return [];
+  const targeting = value as Record<string, unknown>;
+  const included = targeting.geo_locations;
+  if (!included || typeof included !== "object" || Array.isArray(included)) return [];
+  const geo = included as Record<string, unknown>;
+  const output: MetaAdsTargetLocation[] = [];
+  const add = (type: MetaAdsTargetLocation["type"], item: unknown, fallbackName = "") => {
+    if (!item || typeof item !== "object" || Array.isArray(item)) return;
+    const record = item as Record<string, unknown>;
+    const key = text(record.key) || text(record.id) || text(record.name) || fallbackName;
+    const name = text(record.name) || fallbackName || key;
+    if (!key || !name) return;
+    output.push({
+      type,
+      key,
+      name,
+      region: text(record.region) || null,
+      country: text(record.country_name) || text(record.country) || null,
+    });
+  };
+  for (const [field, type] of [
+    ["regions", "region"],
+    ["cities", "city"],
+    ["zips", "zip"],
+  ] as const) {
+    const rows = geo[field];
+    if (Array.isArray(rows)) for (const row of rows) add(type, row);
+  }
+  const countries = geo.countries;
+  if (Array.isArray(countries)) {
+    for (const country of countries) {
+      const code = text(country);
+      if (code)
+        output.push({ type: "country", key: code, name: code, region: null, country: code });
+      else add("country", country);
+    }
+  }
+  return output;
 }
 
 function actionValue(actions: MetaAction[] | undefined, names: readonly string[]) {
@@ -133,6 +208,7 @@ function mapInsight(
   insight: MetaInsight,
   adStatuses: ReadonlyMap<string, MetaAdsDashboardRow["status"]>,
   adDestinations: ReadonlyMap<string, MetaAdsDashboardRow["destination"]>,
+  adsetTargets: ReadonlyMap<string, MetaAdsTargetLocation[]>,
 ): MetaAdsDashboardRow | null {
   const date = text(insight.date_start);
   const accountId = text(insight.account_id);
@@ -189,6 +265,47 @@ function mapInsight(
     qualityRanking: null,
     engagementRanking: null,
     conversionRanking: null,
+    targetLocations: adsetTargets.get(adsetId) || [],
+  };
+}
+
+function mapRegionalInsight(
+  insight: MetaInsight,
+  adStatuses: ReadonlyMap<string, MetaAdsDashboardRow["status"]>,
+  adDestinations: ReadonlyMap<string, MetaAdsDashboardRow["destination"]>,
+): MetaAdsRegionalResult | null {
+  const date = text(insight.date_start);
+  const accountId = text(insight.account_id);
+  const campaignId = text(insight.campaign_id);
+  const adsetId = text(insight.adset_id);
+  const adId = text(insight.ad_id);
+  const region = text(insight.region);
+  if (
+    !/^\d{4}-\d{2}-\d{2}$/u.test(date) ||
+    !accountId ||
+    !campaignId ||
+    !adsetId ||
+    !adId ||
+    !region
+  ) {
+    return null;
+  }
+  const destination = adDestinations.get(adId) || "unknown";
+  const conversions =
+    destination === "whatsapp"
+      ? actionValue(insight.actions, MESSAGE_ACTIONS)
+      : actionValue(insight.actions, LEAD_ACTIONS);
+  return {
+    rowId: [date, accountId, campaignId, adsetId, adId, region].join("|"),
+    date,
+    accountId,
+    campaignId,
+    adsetId,
+    adId,
+    region,
+    destination,
+    status: adStatuses.get(adId) || "unknown",
+    conversions,
   };
 }
 
@@ -337,7 +454,7 @@ export async function fetchMetaAdsDashboardData(
   const fetcher = options.fetcher || fetch;
 
   const adsUrl = graphUrl(configuration, `act_${configuration.accountId}/ads`);
-  adsUrl.searchParams.set("fields", "id,effective_status");
+  adsUrl.searchParams.set("fields", "id,effective_status,adset{id,targeting}");
   adsUrl.searchParams.set(
     "filtering",
     JSON.stringify([{ field: "effective_status", operator: "IN", value: AD_EFFECTIVE_STATUSES }]),
@@ -349,6 +466,14 @@ export async function fetchMetaAdsDashboardData(
       .map((ad) => [text(ad.id), normalizeStatus(ad.effective_status)] as const)
       .filter(([id]) => Boolean(id)),
   );
+  const adsetTargets = new Map<string, MetaAdsTargetLocation[]>();
+  for (const ad of ads) {
+    const adsetId = text(ad.adset?.id);
+    const locations = targetLocations(ad.adset?.targeting);
+    if (adsetId && (!adsetTargets.has(adsetId) || locations.length)) {
+      adsetTargets.set(adsetId, locations);
+    }
+  }
 
   const insightsUrl = graphUrl(configuration, `act_${configuration.accountId}/insights`);
   insightsUrl.searchParams.set("level", "ad");
@@ -376,18 +501,46 @@ export async function fetchMetaAdsDashboardData(
       destinations.set(adId, "form");
   }
   const rows = insights
-    .map((insight) => mapInsight(insight, statuses, destinations))
+    .map((insight) => mapInsight(insight, statuses, destinations, adsetTargets))
     .filter((row): row is MetaAdsDashboardRow => row !== null);
   if (rows.length !== insights.length) throw new MetaAdsApiError("invalid_data", 502);
-  const accountName = rows[0]?.account || configuration.accountId;
+  const regionalUrl = graphUrl(configuration, `act_${configuration.accountId}/insights`);
+  regionalUrl.searchParams.set("level", "ad");
+  regionalUrl.searchParams.set("time_increment", "1");
+  regionalUrl.searchParams.set("breakdowns", "region");
+  regionalUrl.searchParams.set(
+    "time_range",
+    JSON.stringify({ since: range.start, until: range.end }),
+  );
+  regionalUrl.searchParams.set("use_unified_attribution_setting", "true");
+  regionalUrl.searchParams.set("limit", "500");
+  regionalUrl.searchParams.set(
+    "fields",
+    "date_start,account_id,campaign_id,adset_id,ad_id,actions",
+  );
+  const regionalInsights = await graphPages<MetaInsight>(regionalUrl, configuration, fetcher);
+  const regionalResults = regionalInsights
+    .map((insight) => mapRegionalInsight(insight, statuses, destinations))
+    .filter((row): row is MetaAdsRegionalResult => row !== null);
+  if (regionalResults.length !== regionalInsights.length) {
+    throw new MetaAdsApiError("invalid_data", 502);
+  }
+  const accountUrl = graphUrl(configuration, `act_${configuration.accountId}`);
+  accountUrl.searchParams.set("fields", "id,name,currency,balance,amount_spent,spend_cap");
+  const account = await graphObject(accountUrl, configuration, fetcher);
+  const accountName = text(account.name) || rows[0]?.account || configuration.accountId;
   const data: MetaAdsDashboardData = {
     source: "meta_marketing_api",
     accountId: configuration.accountId,
     accountName,
-    currency: "BRL",
+    currency: text(account.currency) || "BRL",
+    accountBalance: moneyFromMinorUnits(account.balance),
+    amountSpent: moneyFromMinorUnits(account.amount_spent),
+    spendCap: moneyFromMinorUnits(account.spend_cap),
     fetchedAt: now.toISOString(),
     range,
     rows,
+    regionalResults,
   };
   cache = { key, expiresAt: now.getTime() + CACHE_TTL_MS, data };
   return data;
