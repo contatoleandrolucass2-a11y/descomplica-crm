@@ -20,8 +20,8 @@
   claro, médio e escuro e larguras 320, 390 e 1440 px; lint sem erros, typecheck
   e build aprovados. O Vitest completo aprovou 4.194 e ignorou 108. O comando
   `pnpm test` terminou com as três falhas Windows preexistentes de Meta Ads
-relacionadas a arquivo privado e caminho POSIX; a CI Linux continua sendo o
-critério de integração, sem redução de gate ou alteração desses testes.
+  relacionadas a arquivo privado e caminho POSIX; a CI Linux continua sendo o
+  critério de integração, sem redução de gate ou alteração desses testes.
 
 ## 2026-10-25: abertura do erro de carregamento e edicao da Previsao
 
