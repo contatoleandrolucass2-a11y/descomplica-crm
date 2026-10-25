@@ -1,5 +1,36 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: Previsao corrigida e publicada para usuarios autorizados
+
+- O PR #340 foi integrado no `main` como
+  `b2a6a17284e030796819f6f6f2ec989aba682e85`. A CI de `main`
+  [40206513995](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40206513995)
+  concluiu com sucesso `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image` no SHA exato.
+- Com autorizacao especifica do usuario, somente a migration
+  `20261025114724_forecast_page_users_edit.sql` foi aplicada ao projeto
+  `hnncxuerlcsaahdxoswb`; o ledger remoto registrou
+  `20261025155920 / forecast_page_users_edit`. Nenhuma migration pendente
+  anterior foi aplicada e nenhuma previsao foi reescrita.
+- A verificacao posterior confirmou owner `postgres`, `SECURITY DEFINER`,
+  `search_path` fixo, `anon=false`, `authenticated=true` e
+  `service_role=false` nas duas RPCs. O guard da pagina permanece e o guard
+  legado de edicao foi removido. Os advisors nao introduziram achado novo
+  especifico desta migration; avisos preexistentes permanecem fora do escopo.
+- O artefato `12603254883` conferiu `revision.txt` e SHA-256
+  `e47a28db7ff5fa9f7132b5688226decdd5212b0daa90caf5cdabfb4e7a22aa71`.
+  Na VPS, `image:prove` aprovou os dois perfis com a imagem
+  `sha256:bd65e93cd9252c155402cfe8b0d294e27b0862e3c0cee69c0748f2aee45bd22f`,
+  sem rebuild.
+- O coordenador protegido concluiu o deployment
+  `f9701ac1-a9a8-4da5-a5d7-2cac9d2fe559` em
+  `2026-10-25T16:20:35.009Z`, sem pendencia. Health publico confirmou
+  HTTP 200, `status=ok` e a versao exata; a API anonima permaneceu em HTTP 401.
+- Smoke autenticado na selecao House/Amanda carregou a tabela sem a mensagem
+  de erro. Inserir linha e coluna ficaram habilitados, e os campos de corretor,
+  Previsao, Realizado e Plano de acao foram expostos como editaveis. Nenhum
+  valor real foi alterado ou salvo durante a verificacao.
+
 ## 2026-10-25: abertura do erro de carregamento e edicao da Previsao
 
 - A demanda iniciou na branch `codex/previsao-edicao-todos-usuarios`, criada

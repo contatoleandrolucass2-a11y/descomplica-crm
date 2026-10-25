@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-25 — Previsao publicada para usuarios autorizados
+
+- PR #340 integrado no SHA `b2a6a172`; CI de `main` `40206513995` aprovada.
+- Migration corretiva aplicada isoladamente como
+  `20261025155920 / forecast_page_users_edit`, sem reescrita de previsoes.
+- Deployment protegido `f9701ac1-a9a8-4da5-a5d7-2cac9d2fe559` concluido na
+  imagem homologada, com health na versao exata e sem pendencia.
+- Smoke autenticado carregou House/Amanda e confirmou controles e celulas
+  editaveis; nenhum dado real foi salvo no teste.
+
 ## 2026-10-25 — Previsão editável por usuários autorizados
 
 - Reproduzido em produção: o endpoint autenticado de Previsão respondeu
