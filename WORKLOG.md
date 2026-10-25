@@ -8,6 +8,18 @@
   `20261022184500_forecast_value_edit_roles` não constava no ledger remoto.
 - Preparada a migration corretiva `20261025114724_forecast_page_users_edit`,
   mantendo os guards e permitindo valores e estrutura a quem já acessa a página.
+## 2026-10-25 - Dimensoes responsivas em Agendamentos
+
+O ajuste ficou restrito ao CSS da pagina `/app/etapas/agendamentos` e ao teste
+visual correspondente. Em desktops, os paineis agora calculam a altura pelo
+viewport; quatro pares de linhas consecutivas ocupam 560 px em telas de 720 px.
+A tabela ocupa a altura util e conserva apenas sua rolagem vertical interna.
+
+A validacao visual da folha de estilos de producao aprovou 18 cenarios nos tres
+temas, sem overflow horizontal, colisao de rotulos ou falha de acessibilidade.
+Os 29 testes focais, lint, typecheck e build passaram. A suite global passou nos
+4.193 testes Vitest e teve tres falhas ambientais, fora do escopo, nos testes
+Node do Meta Ads em Windows; nenhuma outra pagina foi alterada para contorna-las.
 
 ## 2026-10-25 - Detalhamento dos funis publicado
 
