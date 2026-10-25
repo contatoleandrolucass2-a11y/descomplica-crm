@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-25 - Hover ampliado e filtros herdados nos funis
+
+- Remove qualquer pintura de fundo no hover e amplia suavemente a etapa inteira
+  do funil, preservando o foco visível de teclado e movimento reduzido.
+- O detalhamento passa a abrir com canal, gerente, responsável e empresa já
+  selecionados conforme os filtros ativos na página, inclusive seleções múltiplas.
+
 ## 2026-10-25 - Realce sem borda nas etapas dos funis
 
 - Substitui o contorno retangular exibido ao passar o mouse por um realce

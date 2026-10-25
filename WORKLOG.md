@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-25 - Escala no hover e filtros do detalhamento
+
+O acionador da etapa voltou a ser totalmente transparente. O destaque visual
+agora pertence à própria faixa do funil, que recebe escala de 3,5% sem alterar o
+fluxo do layout; usuários com movimento reduzido não recebem transição. O foco
+de teclado continua com contorno acessível.
+
+O provedor do pop-up recebe os filtros efetivos da página e os aplica ao abrir.
+Seleções únicas aparecem diretamente no campo correspondente; seleções múltiplas
+preservam todos os valores e mostram sua contagem até o usuário escolher outro
+recorte ou “Todos”. O teste de navegador cobre os três temas e 320, 390 e 1440 px.
+Lint, typecheck e build passaram; a suíte completa preservou as três falhas
+ambientais Meta Ads já conhecidas no Windows, cuja validação final ocorre na CI Linux.
+
 ## 2026-10-25 — Previsao publicada para usuarios autorizados
 
 - PR #340 integrado no SHA `b2a6a172`; CI de `main` `40206513995` aprovada.

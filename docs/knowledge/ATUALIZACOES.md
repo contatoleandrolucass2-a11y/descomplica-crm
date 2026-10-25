@@ -1,5 +1,28 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: hover ampliado e filtros herdados no detalhamento dos funis
+
+- A nova demanda parte de `origin/main` no SHA
+  `fa1124e9caa70cbcbe6dad274ce5aa13c7706137`. O ajuste anterior estava
+  publicado e saudável, mas o realce translúcido ainda pintava a faixa ao
+  passar o mouse, contrariando a preferência visual apresentada.
+- O hover agora mantém o acionador transparente e aplica `scale(1.035)` à etapa
+  completa, sem mudança de layout. O foco de teclado permanece independente e
+  `prefers-reduced-motion` elimina a transição.
+- O pop-up antes zerava todos os seus filtros em cada abertura. O provedor agora
+  recebe os filtros efetivos da página e inicializa canal, gerente, responsável
+  e empresa com esses valores. O estado interno aceita múltiplos valores e
+  preserva a semântica “Todos” quando o usuário limpa o recorte no diálogo.
+- Evidência focal em Node 24.19.0: 2/2 testes aprovados, incluindo Chromium nos
+  temas claro, médio e escuro e larguras 320, 390 e 1440 px; foram confirmados
+  fundo transparente, escala da etapa, filtro herdado, alteração para “Todos”,
+  fechamento por Escape/clique externo, foco e ausência de overflow horizontal.
+- `pnpm lint`, `pnpm typecheck` e `pnpm build` passaram. A suíte Vitest passou
+  com 4.194 testes e 108 ignorados; a etapa Node passou 1.599 testes e manteve
+  três falhas ambientais conhecidas dos utilitários Meta Ads que exigem
+  permissões POSIX indisponíveis no Windows. A CI Linux permanece o gate de
+  integração sem qualquer redução ou desativação desses testes.
+
 ## 2026-10-25: Previsao corrigida e publicada para usuarios autorizados
 
 - O PR #340 foi integrado no `main` como

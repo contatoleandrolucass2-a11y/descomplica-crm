@@ -30,7 +30,7 @@ const rows = [
   },
 ];
 
-it("highlights funnel stages on pointer hover without drawing a border", () => {
+it("enlarges funnel stages on pointer hover without painting a background or border", () => {
   const css = readFileSync(
     resolve("app/(protected)/app/_components/DashboardStageDetails.module.css"),
     "utf8",
@@ -38,8 +38,14 @@ it("highlights funnel stages on pointer hover without drawing a border", () => {
   const hover = css.match(/\.trigger:hover\s*\{([^}]*)\}/)?.[1] ?? "";
   const keyboardFocus = css.match(/\.trigger:focus-visible\s*\{([^}]*)\}/)?.[1] ?? "";
 
-  expect(hover).toContain("background-color:");
+  expect(hover).toContain("background: transparent");
   expect(hover).not.toMatch(/border|box-shadow|outline/);
+  const reportCss = readFileSync(
+    resolve("app/(protected)/app/_components/DashboardReport.module.css"),
+    "utf8",
+  );
+  const stageHover = reportCss.match(/\.funnelStep:has\([^}]+\)\s*\{([^}]*)\}/)?.[1] ?? "";
+  expect(stageHover).toContain("transform: scale(");
   expect(keyboardFocus).toContain("outline:");
 });
 
@@ -72,11 +78,12 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
               import { createRoot } from "react-dom/client";
               import "@/app/globals.css";
               import { DashboardStageDetailsProvider, DashboardStageDetailTrigger } from "@/app/(protected)/app/_components/DashboardStageDetails";
+              import reportStyles from "@/app/(protected)/app/_components/DashboardReport.module.css";
               const rows = ${JSON.stringify(rows)};
               createRoot(document.getElementById("root")).render(
-                createElement(DashboardStageDetailsProvider, { rows },
+                createElement(DashboardStageDetailsProvider, { rows, initialFilters: { manager: ["Gerente Alfa"] } },
                   createElement("dl", null,
-                    createElement("div", { style: { position: "relative", width: "300px", height: "100px" } },
+                    createElement("div", { className: reportStyles.funnelStep, style: { position: "relative", width: "300px", height: "100px" } },
                       createElement("dt", null, "Vendas",
                         createElement(DashboardStageDetailTrigger, {
                           stage: "sales", stageLabel: "Vendas", cardLabel: "Mês atual",
@@ -139,15 +146,22 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
           await trigger.hover();
           const hoverPaint = await trigger.evaluate((element) => {
             const style = getComputedStyle(element);
-            return { backgroundColor: style.backgroundColor, boxShadow: style.boxShadow };
+            const stage = element.closest("dl > div");
+            return {
+              backgroundColor: style.backgroundColor,
+              boxShadow: style.boxShadow,
+              transform: stage ? getComputedStyle(stage).transform : "none",
+            };
           });
-          expect(hoverPaint.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+          expect(hoverPaint.backgroundColor).toBe("rgba(0, 0, 0, 0)");
           expect(hoverPaint.boxShadow).toBe("none");
+          expect(hoverPaint.transform).not.toBe("none");
           await trigger.click();
           await browserExpect(dialog).toBeVisible();
-          await browserExpect(dialog.getByText("5 registros no recorte")).toBeVisible();
-          await dialog.getByLabel("Gerente de vendas").selectOption("Gerente Alfa");
+          await browserExpect(dialog.getByLabel("Gerente de vendas")).toHaveValue("Gerente Alfa");
           await browserExpect(dialog.getByText("2 registros no recorte")).toBeVisible();
+          await dialog.getByLabel("Gerente de vendas").selectOption("");
+          await browserExpect(dialog.getByText("5 registros no recorte")).toBeVisible();
           expect(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
           ).toBe(true);
