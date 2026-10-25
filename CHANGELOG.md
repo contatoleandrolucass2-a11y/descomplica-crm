@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-25 - Estado publicado do Lead confirmado
+
+- Confirma que o deployment concorrente `94c6f73e...` descende diretamente do
+  runtime Lead `b46b8a0e...` e preserva o modulo integralmente em producao.
+- Registra health saudavel e ausencia de deployment pendente, sem novo restart
+  para a atualizacao exclusivamente documental.
+
 ## 2026-10-24 - Menu Lead publicado
 
 - Publica as nove paginas protegidas do modulo Lead e a exportacao autenticada

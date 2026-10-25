@@ -1,5 +1,13 @@
 # Worklog
 
+## 2026-10-25 - Estado final concorrente preserva Lead
+
+A publicacao posterior `94c6f73e8d389c330c595e15fe838a321bd78118`, deployment
+`d2025a28-18c1-4f1d-a6a9-7df37a00d145`, e descendente direta do runtime Lead
+`b46b8a0e...`. O health final confirmou essa versao e o coordenador nao possui
+pendencia. Portanto, a entrega concorrente de Meta Ads manteve o modulo Lead
+publicado; nenhum novo deploy foi necessario para o registro documental.
+
 ## 2026-10-24 - Fechamento e publicacao do modulo Lead
 
 Os PRs #323, #330, #331 e #332 integraram o modulo Lead completo. A CI final

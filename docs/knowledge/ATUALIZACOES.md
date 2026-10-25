@@ -1,5 +1,19 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: estado publicado apos entrega concorrente
+
+- Na conferencia final de `2026-10-25T03:06:13Z`, o coordenador de producao
+  registrou o deployment concorrente `d2025a28-18c1-4f1d-a6a9-7df37a00d145`,
+  sem pendencia, no SHA `94c6f73e8d389c330c595e15fe838a321bd78118` e imagem
+  `sha256:34d82fc1e00a1bc3b18b5b6490573a7028c2c123732eba8dbda9b60bac0c5884`.
+  O health publico respondeu HTTP 200, `status=ok` e a mesma versao.
+- O Git confirmou que `94c6f73e...` tem `b46b8a0e...` como pai direto. Assim,
+  a publicacao posterior de Meta Ads preserva integralmente o modulo Lead ja
+  publicado; ela apenas substitui o recibo de deployment ativo. A `main`
+  documental esta em `e8d362b22d139d9c8c2ba3f4001c3f7708a3f61e`, com a CI
+  `40159944573` aprovada nos quatro jobs obrigatorios e sem novo restart por ser
+  somente documentacao.
+
 ## 2026-10-24: modulo Lead concluido e publicado
 
 - O nucleo funcional do menu `Lead` foi integrado pelos PRs #323, #330, #331
