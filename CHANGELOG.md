@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-25 - Detalhamento dos funis publicado
+
+- Publica o diálogo responsivo de etapas dos 13 funis no SHA `cc13a3d7`.
+- Confirma CI integral, imagem imutável, promoção protegida e health na versão
+  exata, sem migration ou alteração das integrações e dos dados Salesforce.
+- Mantém no pop-up somente filtros e colunas dimensionais preservados pelo
+  snapshot seguro, respeitando permissões e o período efetivo de cada funil.
+
 ## 2026-10-24 - Detalhamento interativo dos funis
 
 - Torna cada etapa autorizada dos 13 funis do Dashboard Geral selecionável.

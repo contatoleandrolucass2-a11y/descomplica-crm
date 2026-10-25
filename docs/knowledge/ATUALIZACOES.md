@@ -1,5 +1,36 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: detalhamento dos funis integrado e publicado
+
+- O PR #333 foi integrado no SHA
+  `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`. A CI de `push/main`
+  `40164155042` aprovou `validate`, `isolated-restore`, `release-gates` e
+  `promotable-image` no mesmo SHA. O gate de navegador aprovou o Dashboard com
+  dados sinteticos, autorização, clique e teclado, responsividade, temas,
+  zoom, acessibilidade e contenção horizontal.
+- O artefato imutável `12587144483` teve digest ZIP
+  `sha256:15cbe433b6d5c45b5d55c175b05836dbb4d2cd2bce204621166661230d07d74e`.
+  `revision.txt` e o checksum de `image.tar.gz`
+  `sha256:1de219ab3bc025c9d08541c74061a279e6885df0372bff1de59f070eebbc138b`
+  foram conferidos antes da transferência. A imagem foi carregada sem rebuild
+  ou retag; `image:prove` aprovou os dois perfis no image ID local
+  `sha256:c1bce48364b366a8f594566aa419539d2374af5d0bb266a23f26549da1d248e9`.
+- O coordenador `pnpm release:production` publicou o deployment
+  `f3ee0965-d7ff-4f75-9e5f-b5b15450eff7` em
+  `2026-10-25T05:54:16.400Z`, usando como CAS o deployment
+  `f4fd67bc-8a4b-48a3-b908-78b913e9e21c` no SHA `e8d362b2...`. O ledger final
+  ficou sem pendência, o container permaneceu `healthy` e o health público
+  respondeu HTTP 200, `status=ok` e a versão exata `cc13a3d7...`.
+- O acesso anônimo a `/app` respondeu HTTP 307 para `/login`. O smoke
+  autenticado manual em produção não foi forçado: o controlador visual do
+  Windows interrompeu a sessão por não conseguir confirmar a URL do navegador
+  com segurança. A evidência autenticada desta entrega é a CI Linux aprovada;
+  reavaliar o smoke manual somente com uma janela cuja URL possa ser confirmada.
+- Nenhuma migration, mutação de dados Salesforce, alteração de coleta, n8n,
+  DNS, cobrança ou política comercial integrou esta publicação. O diálogo
+  continua limitado às colunas dimensionais preservadas no snapshot seguro;
+  colunas descartadas pelo contrato não são simuladas nem expostas.
+
 ## 2026-10-24: detalhamento seguro e responsivo dos funis implementado
 
 - Implementado em `codex/dashboard-stage-details`: cada etapa autorizada dos 13
