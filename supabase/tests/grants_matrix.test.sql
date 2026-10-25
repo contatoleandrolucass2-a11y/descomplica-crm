@@ -429,6 +429,7 @@ select is(
     'preview_crm_source_identity_mapping_import',
     'purge_crm_lead_import_staging_v1',
     'read_crm_appointments_analysis',
+    'read_crm_appointments_conversion_goals',
     'read_crm_appointments_goal',
     'read_crm_dashboard_analysis',
     'remove_user_permission_override',

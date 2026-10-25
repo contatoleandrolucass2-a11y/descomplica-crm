@@ -32,11 +32,29 @@ const rosterSchema = z.array(
     .strict(),
 );
 
+const conversionGoalSchema = z
+  .object({
+    opportunityAppointment: z.number().finite().nonnegative().nullable(),
+    appointmentVisit: z.number().finite().nonnegative().nullable(),
+    appointmentSale: z.number().finite().nonnegative().nullable(),
+  })
+  .strict();
+
+const appointmentConversionGoalsSchema = z
+  .object({
+    dv: conversionGoalSchema.nullable(),
+    partnerships: conversionGoalSchema.nullable(),
+  })
+  .strict();
+
+export type AppointmentConversionGoals = z.infer<typeof appointmentConversionGoalsSchema>;
+
 export interface AppointmentsReadModel {
   analysis: DashboardAnalysisSlice | null;
   brokerRoster: AppointmentBrokerRosterEntry[] | null;
   generatedAt?: string;
   individualGoal: number | null;
+  conversionGoals: AppointmentConversionGoals | null;
 }
 
 /** Read only the authorized stage. A concurrent ingestion invalidates the whole read. */
@@ -107,7 +125,8 @@ export async function loadAppointmentsReadModel(
 
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const before = await header();
-    if (!before) return { analysis: null, brokerRoster: null, individualGoal: null };
+    if (!before)
+      return { analysis: null, brokerRoster: null, individualGoal: null, conversionGoals: null };
     const response = await supabase.rpc("read_crm_appointments_analysis", {
       p_snapshot_id: before.id,
       p_view_keys: [view],
@@ -118,13 +137,14 @@ export async function loadAppointmentsReadModel(
     // Additive rollout: the page can precede the migration without fabricating data.
     if (response.error) {
       if (["PGRST202", "42883"].includes(response.error.code))
-        return { analysis: null, brokerRoster: null, individualGoal: null };
+        return { analysis: null, brokerRoster: null, individualGoal: null, conversionGoals: null };
       throw new Error("Não foi possível carregar os gráficos de agendamentos.");
     }
     const rows = z
       .array(z.object({ view_key: z.string(), payload: z.unknown() }))
       .parse(response.data);
-    if (rows.length === 0) return { analysis: null, brokerRoster: null, individualGoal: null };
+    if (rows.length === 0)
+      return { analysis: null, brokerRoster: null, individualGoal: null, conversionGoals: null };
     if (rows.length !== 1 || rows[0]!.view_key !== view) {
       throw new Error("A análise não corresponde à visão autorizada.");
     }
@@ -146,7 +166,23 @@ export async function loadAppointmentsReadModel(
     } else if (!["PGRST202", "42883"].includes(goalResponse.error.code)) {
       throw new Error("Não foi possível carregar a meta de agendamentos.");
     }
-    return { analysis, brokerRoster: roster, generatedAt: before.generated_at, individualGoal };
+    const conversionResponse = await supabase.rpc("read_crm_appointments_conversion_goals", {
+      p_reference_date: before.reference_date,
+    });
+    let conversionGoals: AppointmentConversionGoals | null = null;
+    if (!conversionResponse.error) {
+      const parsedGoals = appointmentConversionGoalsSchema.safeParse(conversionResponse.data);
+      conversionGoals = parsedGoals.success ? parsedGoals.data : null;
+    } else if (!["PGRST202", "42883"].includes(conversionResponse.error.code)) {
+      throw new Error("Não foi possível carregar as metas de conversão dos agendamentos.");
+    }
+    return {
+      analysis,
+      brokerRoster: roster,
+      generatedAt: before.generated_at,
+      individualGoal,
+      conversionGoals,
+    };
   }
   throw new Error("Os agendamentos foram atualizados durante a leitura. Tente novamente.");
 }

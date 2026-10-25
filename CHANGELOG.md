@@ -11,6 +11,19 @@
 - Mantem C2S apenas como referencia funcional; nao importa dados, nao persiste
   credenciais e nao altera n8n ou integracoes externas.
 
+## 2026-10-24 - Indicadores e ordem visual de Agendamentos
+
+- Uniformiza e reduz a altura dos 12 indicadores, amplia a inclinação conforme
+  o ponteiro e adiciona molduras animadas azul/vermelha conforme cada meta.
+- Usa as metas de conversão House vigentes para avaliar Oportunidade,
+  Agendamento, Visita e Venda; mantém o estado neutro quando a configuração de
+  Parcerias não possui essas etapas.
+- Reorganiza os gráficos de `/app/etapas/agendamentos` na ordem solicitada, com
+  Evolução diária e Agendamentos por mês em linhas exclusivas e os demais
+  painéis em grupos compactos de três.
+- Troca o realce verde das barras por azul-escuro e preserva acessibilidade,
+  responsividade e redução de movimento.
+
 ## 2026-10-24 — Navegação compacta do Meta Ads
 
 - O botão Meta Ads da barra superior abre diretamente o dashboard, sem submenu
