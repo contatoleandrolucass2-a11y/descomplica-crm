@@ -13,6 +13,19 @@ typecheck e build passaram. O Vitest completo aprovou 4.194 testes e ignorou 108
 o trecho Node do `pnpm test` manteve três falhas Windows preexistentes de
 permissão/caminho em Meta Ads, que permanecem dependentes da CI Linux.
 
+## 2026-10-25 - Dimensoes responsivas em Agendamentos
+
+O ajuste ficou restrito ao CSS da pagina `/app/etapas/agendamentos` e ao teste
+visual correspondente. Em desktops, os paineis agora calculam a altura pelo
+viewport; quatro pares de linhas consecutivas ocupam 560 px em telas de 720 px.
+A tabela ocupa a altura util e conserva apenas sua rolagem vertical interna.
+
+A validacao visual da folha de estilos de producao aprovou 18 cenarios nos tres
+temas, sem overflow horizontal, colisao de rotulos ou falha de acessibilidade.
+Os 29 testes focais, lint, typecheck e build passaram. A suite global passou nos
+4.193 testes Vitest e teve tres falhas ambientais, fora do escopo, nos testes
+Node do Meta Ads em Windows; nenhuma outra pagina foi alterada para contorna-las.
+
 ## 2026-10-25 - Detalhamento dos funis publicado
 
 O PR #333 foi integrado em `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`.

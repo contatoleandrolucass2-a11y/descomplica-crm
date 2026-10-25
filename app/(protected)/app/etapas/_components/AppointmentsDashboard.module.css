@@ -1035,3 +1035,61 @@
     min-height: 38px;
   }
 }
+
+@media (min-width: 701px) {
+  .dashboard {
+    --appointments-panel-height: clamp(12.5rem, calc((100dvh - 7.5rem) / 2), 17rem);
+  }
+
+  .chartCard,
+  .wideChart,
+  .overviewGrid .chartCard,
+  .insightGrid .chartCard,
+  .recencyGrid .recencyCard {
+    height: var(--appointments-panel-height);
+    min-height: var(--appointments-panel-height);
+  }
+
+  .chartCard {
+    padding: clamp(0.75rem, 2dvh, 1rem);
+  }
+
+  .chartCard .cardHeader {
+    margin-bottom: clamp(0.45rem, 1.5dvh, 1rem);
+  }
+
+  .columnTrack {
+    height: clamp(4rem, 14dvh, 7.75rem);
+  }
+
+  .overviewGrid .columnTrack {
+    height: clamp(3rem, 9dvh, 5.625rem);
+  }
+
+  .monthly .columnTrack {
+    height: clamp(4rem, 14dvh, 7.5rem);
+  }
+
+  .verticalLabels .columnTrack {
+    height: clamp(3rem, 10dvh, 5rem);
+  }
+
+  .tableCard {
+    display: flex;
+    height: calc(100dvh - 8rem);
+    min-height: 26rem;
+    max-height: calc(100dvh - 8rem);
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .tableCard .cardHeader {
+    flex: 0 0 auto;
+  }
+
+  .tableViewport {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+  }
+}

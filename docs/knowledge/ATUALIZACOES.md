@@ -23,6 +23,33 @@
   relacionadas a arquivo privado e caminho POSIX; a CI Linux continua sendo o
   critério de integração, sem redução de gate ou alteração desses testes.
 
+## 2026-10-25: dimensoes responsivas de Agendamentos validadas
+
+- Implementado somente em `/app/etapas/agendamentos`: alturas responsivas dos
+  graficos e tabela ajustada ao viewport com rolagem vertical interna.
+- Evidencia local: QA da folha de estilos de producao aprovou 18 combinacoes de
+  1440x900, 1440x720, 1024x900, 1024x720, 390x900 e 320x900 nos tres temas. Em
+  1024x720, cada par de linhas mede 560 px e a tabela mede 608 px.
+- `pnpm lint`, `pnpm typecheck`, build e 29 testes focais passaram. O Vitest
+  global aprovou 4.193 testes; a etapa Node encontrou tres falhas ambientais de
+  permissao/path do Meta Ads no Windows, externas ao escopo. A CI Linux do SHA
+  da entrega permanece o gate integral para publicacao.
+- Nao foram alterados metricas, filtros, dados, cores, outras paginas ou n8n.
+
+## 2026-10-25: abertura do ajuste de dimensoes em Agendamentos
+
+- A branch `codex/agendamentos-graficos-tabela-v8` iniciou limpa em
+  `origin/main` no SHA `6cf298414ba0a7541386db433ab04f76822a7ae5`. Esse
+  commit e documental e nao possui checks proprios associados na consulta; o
+  estado publicado observado permanece distinto da `main`.
+- O health publico consultado em `25/10/2026 08:39` BRT respondeu HTTP 200,
+  `status=ok` e versao `8e8271abe344129455773cce7b65da5671d24aa2`.
+- Escopo exclusivo: alterar somente alturas, espacamentos e comportamento
+  responsivo dos graficos e da tabela em `/app/etapas/agendamentos`, para que
+  cada linha superior e inferior caiba integralmente no viewport de PCs e para
+  que a tabela ocupe a area visivel com rolagem apenas interna. Metricas,
+  filtros, cores, dados, outras paginas e n8n ficam fora do escopo.
+
 ## 2026-10-25: detalhamento dos funis integrado e publicado
 
 - O PR #333 foi integrado no SHA
