@@ -16,6 +16,19 @@ dados de negócio. O smoke autenticado manual não foi forçado porque o control
 visual não conseguiu confirmar a URL da janela; a CI autenticada permanece a
 evidência funcional desta publicação.
 
+## 2026-10-25 - Estado final concorrente preserva Lead
+
+A publicacao posterior `94c6f73e8d389c330c595e15fe838a321bd78118`, deployment
+`d2025a28-18c1-4f1d-a6a9-7df37a00d145`, e descendente direta do runtime Lead
+`b46b8a0e...`. O health final confirmou essa versao e o coordenador nao possui
+pendencia. Portanto, a entrega concorrente de Meta Ads manteve o modulo Lead
+publicado; nenhum novo deploy foi necessario para o registro documental.
+
+Uma nova leitura observacional confirmou o deployment
+`f4fd67bc-8a4b-48a3-b908-78b913e9e21c`, no SHA `e8d362b2...`, ainda sem
+pendencia. O health respondeu HTTP 200 nessa versao e o Git comprovou que ela
+descende de `b46b8a0e...`; o modulo Lead permanece publicado integralmente.
+
 ## 2026-10-24 - Detalhamento dos funis do Dashboard Geral
 
 As etapas dos três grupos de funis passaram a abrir um único diálogo de

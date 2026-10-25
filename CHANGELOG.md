@@ -8,6 +8,15 @@
 - Mantém no pop-up somente filtros e colunas dimensionais preservados pelo
   snapshot seguro, respeitando permissões e o período efetivo de cada funil.
 
+## 2026-10-25 - Estado publicado do Lead confirmado
+
+- Confirma que o deployment concorrente `94c6f73e...` descende diretamente do
+  runtime Lead `b46b8a0e...` e preserva o modulo integralmente em producao.
+- Atualiza a conferencia para o deployment posterior `f4fd67bc...`, no SHA
+  `e8d362b2...`, igualmente descendente do runtime Lead e com health saudavel.
+- Registra health saudavel e ausencia de deployment pendente, sem novo restart
+  para a atualizacao exclusivamente documental.
+
 ## 2026-10-24 - Detalhamento interativo dos funis
 
 - Torna cada etapa autorizada dos 13 funis do Dashboard Geral selecionável.

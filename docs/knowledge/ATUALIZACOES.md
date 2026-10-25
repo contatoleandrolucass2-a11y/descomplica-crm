@@ -31,6 +31,31 @@
   continua limitado às colunas dimensionais preservadas no snapshot seguro;
   colunas descartadas pelo contrato não são simuladas nem expostas.
 
+## 2026-10-25: estado publicado apos entrega concorrente
+
+- Na conferencia final de `2026-10-25T03:06:13Z`, o coordenador de producao
+  registrou o deployment concorrente `d2025a28-18c1-4f1d-a6a9-7df37a00d145`,
+  sem pendencia, no SHA `94c6f73e8d389c330c595e15fe838a321bd78118` e imagem
+  `sha256:34d82fc1e00a1bc3b18b5b6490573a7028c2c123732eba8dbda9b60bac0c5884`.
+  O health publico respondeu HTTP 200, `status=ok` e a mesma versao.
+- O Git confirmou que `94c6f73e...` tem `b46b8a0e...` como pai direto. Assim,
+  a publicacao posterior de Meta Ads preserva integralmente o modulo Lead ja
+  publicado; ela apenas substitui o recibo de deployment ativo. Naquela
+  conferencia, a `main` documental estava em
+  `e8d362b22d139d9c8c2ba3f4001c3f7708a3f61e`, com a CI
+  `40159944573` aprovada nos quatro jobs obrigatorios e sem novo restart por ser
+  somente documentacao.
+- Durante a integracao do registro final, a `main` avancou para
+  `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`, com a entrega independente de
+  detalhes interativos do Dashboard. Esse SHA foi incorporado ao PR #337 sem
+  ampliar o escopo do Lead e continua descendendo do runtime `b46b8a0e...`.
+- Na nova conferencia de `2026-10-25T03:37:01Z`, o coordenador registrou o
+  deployment `f4fd67bc-8a4b-48a3-b908-78b913e9e21c`, sem pendencia, no SHA
+  `e8d362b22d139d9c8c2ba3f4001c3f7708a3f61e` e imagem
+  `sha256:dce8c568fd785756c5add57fd2a3a1bc5e2c38fd07860d38b7f5d53858acd88a`.
+  O health sem cache respondeu HTTP 200, `status=ok` e a mesma versao; o Git
+  confirmou que esse SHA descende de `b46b8a0e...`, preservando o Lead.
+
 ## 2026-10-24: detalhamento seguro e responsivo dos funis implementado
 
 - Implementado em `codex/dashboard-stage-details`: cada etapa autorizada dos 13

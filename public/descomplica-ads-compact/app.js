@@ -465,16 +465,17 @@ function macro() {
 const municipalities = ["São Paulo", "Guarulhos", "Santo André", "Osasco", "São Bernardo do Campo"];
 function mapPage() {
   if (state.mapLevel === "neighborhoods") return neighborhoodPage();
-  const list = current(),
-    rows = geographyRows(),
-    total = list.reduce((a, c) => a + c.leads, 0),
-    located = rows.reduce((a, r) => a + r.value, 0),
-    top = [...rows].sort((a, b) => b.value - a.value)[0];
-  return `<div class="page-head"><div><h1>Mapa de São Paulo</h1><p>Origem informada pelos leads • Grande São Paulo</p></div><div class="actions"><div class="segment"><button data-map-level="municipalities" class="on">Municípios</button><button data-map-level="neighborhoods">Bairros de São Paulo</button></div><select id="map-metric" aria-label="Métrica do mapa"><option value="leads" ${state.mapMetric === "leads" ? "selected" : ""}>${resultName()}</option><option value="share" ${state.mapMetric === "share" ? "selected" : ""}>Participação (%)</option></select></div></div>${filters()}<div class="kpis map-stats">${[
-    ["Total", num(total)],
-    ["Localizados", "—"],
-    ["Sem localização", num(total - located)],
-    ["Maior volume", top && top.value ? `${top.name} · ${num(top.value)}` : "—"],
+  const rows = geographyRows(),
+    locations = campaignTargetLocations(),
+    regionalResults = metaRegionalResults(),
+    regionalTotal = regionalResults.reduce((total, row) => total + row.value, 0),
+    cities = locations.filter((location) => location.type === "city"),
+    targeted = rows.reduce((total, row) => total + row.value, 0);
+  return `<div class="page-head"><div><h1>Mapa de São Paulo</h1><p>Segmentação geográfica configurada nas campanhas • origem dos leads indisponível</p></div><div class="actions"><div class="segment"><button data-map-level="municipalities" class="on">Municípios</button><button data-map-level="neighborhoods">Bairros de São Paulo</button></div></div></div>${filters()}<div class="kpis map-stats">${[
+    ["Resultados com região Meta", num(regionalTotal)],
+    ["Regiões de resultado", num(regionalResults.length)],
+    ["Municípios segmentados", num(cities.length)],
+    ["Origem municipal/bairro", "—"],
   ]
     .map(
       ([k, v]) =>
@@ -482,25 +483,36 @@ function mapPage() {
     )
     .join(
       "",
-    )}</div><div class="map-layout"><div class="map-surface"><div id="map-drawing"></div><div class="map-heading">${state.mapMetric === "leads" ? resultName() : "Participação"} por município</div><div class="map-tools"><button data-zoom="in" aria-label="Aproximar mapa">+</button><button data-zoom="out" aria-label="Afastar mapa">−</button><button data-zoom="reset" aria-label="Redefinir mapa">⌖</button></div><div class="map-legend"><b>Intensidade</b>${[
-    ["#fbd6dd", state.mapMetric === "leads" ? "1–25" : "0–10%"],
-    ["#f6a0af", state.mapMetric === "leads" ? "26–50" : "10–20%"],
-    ["#eb617d", state.mapMetric === "leads" ? "51–100" : "20–40%"],
-    ["#c92049", state.mapMetric === "leads" ? "> 100" : "> 40%"],
+    )}</div><div class="map-layout"><div class="map-surface"><div id="map-drawing"></div><div class="map-heading">Campanhas segmentadas por município</div><div class="map-tools"><button data-zoom="in" aria-label="Aproximar mapa">+</button><button data-zoom="out" aria-label="Afastar mapa">−</button><button data-zoom="reset" aria-label="Redefinir mapa">⌖</button></div><div class="map-legend"><b>Campanhas</b>${[
+    ["#fbd6dd", "1"],
+    ["#f6a0af", "2"],
+    ["#eb617d", "3"],
+    ["#c92049", "4 ou mais"],
     ["#bccbd7", "Sem dados"],
   ]
     .map(([c, l]) => `<span><i style="background:${c}"></i>${l}</span>`)
     .join("")}</div></div><div class="map-side">${panel(
     "ranking",
-    "De onde vêm os leads",
+    "Resultados por região · Meta",
+    regionalResults.length
+      ? regionalResults
+          .map(
+            (row) =>
+              `<div class="rank-row"><div class="row"><span>${AdsData.escape(row.name)}</span><b>${num(row.value)} <small>· ${regionalTotal ? pct((row.value / regionalTotal) * 100) : "—"}</small></b></div><div class="rank-track"><i style="width:${regionalTotal ? (row.value / regionalTotal) * 100 : 0}%"></i></div></div>`,
+          )
+          .join("")
+      : '<p class="muted">— Sem breakdown regional para os filtros atuais.</p>',
+  )}${panel(
+    "targeting",
+    "Segmentação na Grande São Paulo",
     rows
       .sort((a, b) => b.value - a.value)
       .map(
         (r) =>
-          `<div class="rank-row" data-municipality="${r.name}" tabindex="0" role="button"><div class="row"><span>${r.name}</span><b>${num(r.value)} <small>· ${located ? pct((r.value / located) * 100) : "—"}</small></b></div><div class="rank-track"><i style="width:${located ? (r.value / located) * 100 : 0}%"></i></div></div>`,
+          `<div class="rank-row" data-municipality="${r.name}" tabindex="0" role="button"><div class="row"><span>${r.name}</span><b>${num(r.value)} <small>campanha${r.value === 1 ? "" : "s"}</small></b></div><div class="rank-track"><i style="width:${targeted ? (r.value / Math.max(...rows.map((row) => row.value), 1)) * 100 : 0}%"></i></div></div>`,
       )
       .join(""),
-  )}<div id="municipality-detail"></div><div class="map-note">ⓘ Origem: município informado no cadastro${destinationFilterKey() === "whatsapp" ? " ou na conversa" : ""}. Não representa a segmentação geográfica do anúncio.<br><a href="https://github.com/tbrugz/geodata-br" target="_blank" rel="noreferrer">Malha municipal: geodata-br</a> · recorte ilustrativo.<br>A fonte atual não fornece localização dos leads. Registros sem localização ficam fora do mapa.</div></div></div>`;
+  )}<div id="municipality-detail"></div><div class="map-note">ⓘ “Resultados por região” usa o breakdown <code>region</code> da Meta. O mapa mostra cidades incluídas na segmentação dos conjuntos selecionados. Nenhum dado vem do CRM.<br>A Meta não fornece município, bairro ou coordenada de origem de cada lead neste endpoint.<br>${locations.length ? `${locations.length} localizações de segmentação retornadas pela Meta para o filtro atual.` : "A Meta não retornou segmentação geográfica detalhada para o filtro atual."}<br><a href="https://github.com/tbrugz/geodata-br" target="_blank" rel="noreferrer">Malha municipal: geodata-br</a>.</div></div></div>`;
 }
 function paintMap() {
   if (state.mapLevel === "neighborhoods") {
@@ -518,7 +530,7 @@ function paintMunicipality() {
     state.municipality,
     idx < 0
       ? '<p class="muted">— Sem dados para este município.</p>'
-      : `<table><thead><tr><th>Campanha</th><th>${resultName()}</th></tr></thead><tbody>${list.map((c) => `<tr><td>${dot(c)}${c.name}</td><td>${num(c.geo[idx])}</td></tr>`).join("")}</tbody></table>${state.municipality === "São Paulo" ? '<button class="primary" data-map-level="neighborhoods" style="margin-top:12px">Explorar bairros de São Paulo ›</button>' : ""}`,
+      : `<table><thead><tr><th>Campanha</th><th>Segmentação</th></tr></thead><tbody>${list.map((c) => `<tr><td>${dot(c)}${c.name}</td><td>${(c.rows || []).some((row) => (row.targetLocations || []).some((location) => location.type === "city" && location.name.localeCompare(state.municipality, "pt-BR", { sensitivity: "base" }) === 0)) ? "Incluída" : "—"}</td></tr>`).join("")}</tbody></table>${state.municipality === "São Paulo" ? '<button class="primary" data-map-level="neighborhoods" style="margin-top:12px">Explorar bairros de São Paulo ›</button>' : ""}`,
   );
 }
 let neighborhoods = [];
