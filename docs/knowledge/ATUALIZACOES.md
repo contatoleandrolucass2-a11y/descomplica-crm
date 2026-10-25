@@ -9,10 +9,73 @@
   O health publico respondeu HTTP 200, `status=ok` e a mesma versao.
 - O Git confirmou que `94c6f73e...` tem `b46b8a0e...` como pai direto. Assim,
   a publicacao posterior de Meta Ads preserva integralmente o modulo Lead ja
-  publicado; ela apenas substitui o recibo de deployment ativo. A `main`
-  documental esta em `e8d362b22d139d9c8c2ba3f4001c3f7708a3f61e`, com a CI
+  publicado; ela apenas substitui o recibo de deployment ativo. Naquela
+  conferencia, a `main` documental estava em
+  `e8d362b22d139d9c8c2ba3f4001c3f7708a3f61e`, com a CI
   `40159944573` aprovada nos quatro jobs obrigatorios e sem novo restart por ser
   somente documentacao.
+- Durante a integracao do registro final, a `main` avancou para
+  `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`, com a entrega independente de
+  detalhes interativos do Dashboard. Esse SHA foi incorporado ao PR #337 sem
+  ampliar o escopo do Lead e continua descendendo do runtime `b46b8a0e...`.
+
+## 2026-10-24: detalhamento seguro e responsivo dos funis implementado
+
+- Implementado em `codex/dashboard-stage-details`: cada etapa autorizada dos 13
+  funis abre um diálogo com período, filtros por coluna, soma do recorte e
+  paginação visual de 50 combinações. No celular, as linhas viram cartões e não
+  exigem rolagem lateral da página.
+- O detalhamento reutiliza os fatos agregados do snapshot autorizado e preserva
+  a allowlist do coletor. Não expõe IDs, contas, nomes de oportunidade/pasta,
+  valores individuais ou registros de clientes. Colunas adicionais descartadas
+  pelo contrato atual não são apresentadas como se estivessem disponíveis.
+- Canal, gerente, responsável, empresa e empreendimento só entram quando
+  disponíveis após filtros e redações do servidor. A permissão da página da
+  etapa controla o botão; `approved-folders` compartilha a permissão e a fonte
+  de Pastas. Meta mensal, esperado até hoje e médias explicam que a tabela mostra
+  o realizado usado como referência, não linhas constituintes da meta.
+- A revisão do PR #333 passou a usar uma única função para recortar tanto o
+  número do funil quanto seu detalhamento ao mês vigente. Períodos que começam
+  no mês anterior não vazam linhas para o diálogo. O acionador também só é
+  exibido quando a coleta certifica a etapa e o período de referência; ausência
+  de snapshot ou de cobertura permanece indisponível, nunca como zero confirmado.
+- Evidência no Node 24.19.0: lint, typecheck e build passaram. Os 107 testes
+  focados passaram. A matriz Playwright passou em 320, 390 e 1440 px nos temas
+  `light`, `balanced` e `dark`, incluindo clique/teclado, filtros, Escape,
+  backdrop, restauração de foco e contenção horizontal.
+- O Vitest integral mais recente aprovou 4.189 casos, ignorou 108 e teve três
+  timeouts em testes antigos de DevTools/paridade; os dois arquivos envolvidos
+  aprovaram 39 casos e ignoraram um quando repetidos isoladamente com 120 s. As
+  suítes Node/release da execução anterior repetiram
+  falhas Windows/POSIX preexistentes do Meta Ads descritas no Worklog. Nenhum
+  arquivo Meta Ads foi alterado. No PR #333, `validate` e `isolated-restore`
+  aprovaram; o primeiro `release-gates` detectou corretamente que o botão
+  absoluto havia virado terceiro filho do grupo `<dl>`. O botão foi movido para
+  dentro do `<dt>`, preservando a área clicável e restaurando a semântica. O
+  teste de navegador agora executa Axe sobre essa estrutura. Após os ajustes de
+  revisão, 122 testes focados aprovaram, incluindo a regra compartilhada de
+  recorte e a ausência de acionador sem cobertura; merge e publicação continuam
+  condicionados à nova CI Linux do SHA final.
+
+## 2026-10-24: abertura do detalhamento dinamico dos funis
+
+- Escopo solicitado: ao selecionar uma etapa dos funis do Dashboard Geral,
+  abrir um pop-up que respeite os filtros ativos e apresente dinamicamente as
+  colunas exportadas pelo relatorio Salesforce correspondente, sem fixar uma
+  grade unica para todas as etapas.
+- Abertura em 24/10/2026 19:32 BRT: Git comum confirmado; branch
+  `codex/dashboard-stage-details` criada limpa a partir de `origin/main` no SHA
+  `b8aca02928351f0d18f3fee4cb40f30c9c007ac5`. O checkout antigo continha uma
+  alteracao documental alheia e foi preservado sem modificacao.
+- O health publico respondeu HTTP 200, `status=ok`, versao
+  `bc227b62d39628a447d8637d5f8b3503c9e3cbcf`; portanto, producao e `main`
+  permanecem em estados distintos. O conector GitHub nao retornou workflow run
+  ou status associado ao SHA exato da `main`; CI atual fica indisponivel nesta
+  abertura e nao sera presumida como aprovada.
+- Nenhum dado remoto, coleta Salesforce, schema ou permissao foi alterado. A
+  implementacao deve reutilizar o snapshot autorizado, preservar os dois canais
+  definidos e evitar persistir registros ou identidades reais em testes.
+
 
 ## 2026-10-24: modulo Lead concluido e publicado
 
