@@ -29,6 +29,37 @@
   1440x720, mobile e zoom 200%, sem overflow horizontal, corte ou falha Axe.
   PR, CI, merge e publicacao ainda nao estavam concluidos neste registro.
 
+### Integracao, migration e publicacao verificadas
+
+- O PR #347 foi integrado em `main` no SHA
+  `ec98b41aedc721c22fff4f28dca9b31bc6317373`. A CI de `main`
+  [40229956828](https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40229956828)
+  aprovou `validate`, `release-gates`, `isolated-restore` e `promotable-image` no
+  SHA exato. O artefato `12611779563` teve checksum
+  `bf69ed8a0441034d5dd6f12b20e17216d373d89c1ddb1e70fd73ffd60d51ae12`.
+- Com a autorizacao especifica do usuario para fazer o necessario e publicar,
+  somente a migration aditiva desta entrega foi aplicada ao projeto Supabase
+  `hnncxuerlcsaahdxoswb`, registrada como
+  `20261025211241 / appointments_funnels_regional_filter`. A verificacao
+  confirmou `anon=false`, `authenticated=true` e `service_role=false` na RPC
+  publica; a funcao privada permanece sem EXECUTE externo. Advisors posteriores
+  mantiveram somente achados preexistentes ou o aviso esperado da RPC autenticada.
+- O artefato foi carregado sem rebuild. A equivalencia entre o digest de
+  configuracao da CI
+  `sha256:009cefaafc2d1e5320efe583d95b5aba1feb3d0dc59321f3509afc1b78a78dc4`
+  e o manifesto containerd
+  `sha256:ffc69336a9e5c31d3eaacd7c696f4bfa9caafd2bff6aa3c8d781e9e98e3768e6`
+  foi comprovada pelo indice OCI, plataforma, label, manifesto legado e 11
+  camadas. `image:prove` aprovou os dois perfis de runtime.
+- O coordenador protegido concluiu o deployment
+  `1b484b04-19ac-4513-8cd0-985c464d41fa` em
+  `2026-10-25T21:16:08.906Z`, usando a imagem
+  `sha256:ffc69336a9e5c31d3eaacd7c696f4bfa9caafd2bff6aa3c8d781e9e98e3768e6`.
+  O ledger ficou sem pendencia. O health publico confirmou HTTP 200,
+  `status=ok` e a versao exata; a pagina anonima preservou HTTP 307 para
+  `/login`. Nenhuma outra pagina, migration, workflow n8n ou dado remoto foi
+  alterado.
+
 ## 2026-10-25: hover ampliado e filtros herdados no detalhamento dos funis
 
 - A nova demanda parte de `origin/main` no SHA
