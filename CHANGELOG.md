@@ -4,6 +4,8 @@
 
 - Confirma que o deployment concorrente `94c6f73e...` descende diretamente do
   runtime Lead `b46b8a0e...` e preserva o modulo integralmente em producao.
+- Atualiza a conferencia para o deployment posterior `f4fd67bc...`, no SHA
+  `e8d362b2...`, igualmente descendente do runtime Lead e com health saudavel.
 - Registra health saudavel e ausencia de deployment pendente, sem novo restart
   para a atualizacao exclusivamente documental.
 

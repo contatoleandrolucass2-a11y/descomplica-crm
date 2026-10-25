@@ -18,6 +18,12 @@
   `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`, com a entrega independente de
   detalhes interativos do Dashboard. Esse SHA foi incorporado ao PR #337 sem
   ampliar o escopo do Lead e continua descendendo do runtime `b46b8a0e...`.
+- Na nova conferencia de `2026-10-25T03:37:01Z`, o coordenador registrou o
+  deployment `f4fd67bc-8a4b-48a3-b908-78b913e9e21c`, sem pendencia, no SHA
+  `e8d362b22d139d9c8c2ba3f4001c3f7708a3f61e` e imagem
+  `sha256:dce8c568fd785756c5add57fd2a3a1bc5e2c38fd07860d38b7f5d53858acd88a`.
+  O health sem cache respondeu HTTP 200, `status=ok` e a mesma versao; o Git
+  confirmou que esse SHA descende de `b46b8a0e...`, preservando o Lead.
 
 ## 2026-10-24: detalhamento seguro e responsivo dos funis implementado
 
