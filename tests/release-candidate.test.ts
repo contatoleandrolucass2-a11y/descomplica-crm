@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 85-version manifest", async () => {
+  it("keeps a unique, ordered 86-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(85);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(85);
+    expect(migrations).toHaveLength(86);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(86);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-31)).toEqual([
+    expect(migrations.slice(-32)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -82,9 +82,10 @@ describe("release-candidate migration train", () => {
       "20261024062318_sync_page_catalog.sql",
       "20261024223147_appointments_conversion_goals_read.sql",
       "20261024224500_crm_lead_foreign_key_indexes.sql",
+      "20261025114724_forecast_page_users_edit.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261024224500_crm_lead_foreign_key_indexes.sql");
+    expect(migrations.at(-1)).toBe("20261025114724_forecast_page_users_edit.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {

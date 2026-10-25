@@ -177,17 +177,28 @@ select throws_ok(format(
   pg_temp.period_doc('',repeat('A',4001))
 ), '22023','invalid_argument: invalid forecast','period RPC validates action plan length itself');
 
+reset role;
+insert into public.user_permission_overrides(
+  user_id, permission_key, effect, reason, granted_by
+) values (
+  'ad910000-0000-4000-8000-000000000002',
+  'crm.management.forecast.values.edit',
+  'deny',
+  'Synthetic proof that page access alone authorizes editing',
+  'ad910000-0000-4000-8000-000000000001'
+);
+set local role authenticated;
 select set_config('request.jwt.claim.sub','ad910000-0000-4000-8000-000000000002',true);
 select is(public.get_crm_forecast_period('2026-10-16','house','amanda')->>'can_edit',
-  'true','manager can edit forecast values');
+  'true','page-authorized manager can edit without the legacy value permission');
 select is(public.get_crm_forecast_period('2026-10-16','house','amanda')->>'can_manage_structure',
-  'false','manager cannot manage forecast structure');
+  'true','page-authorized manager can manage forecast structure');
 select is(public.save_crm_forecast_period(
   '2026-10-16','house','amanda',pg_temp.period_doc_two_groups('7'),2
 )->>'revision','3','manager can save cell values');
-select throws_ok(format(
-  'select public.save_crm_forecast_period(''2026-10-16'',''house'',''amanda'',%L::jsonb,3)',
-  jsonb_set(
+select is((select public.save_crm_forecast_period(
+  '2026-10-16','house','amanda',document,3
+)->>'revision' from (select jsonb_set(
     pg_temp.period_doc_two_groups('8'),
     '{rows}',
     pg_temp.period_doc_two_groups('8')->'rows' ||
@@ -196,15 +207,14 @@ select throws_ok(format(
           'broker','Corretor 2','f_one','','a_one','','f_two','','a_two','','action_plan',''
         )
       ))
-  )
-), '42501','forbidden: forecast structure is read only','manager cannot insert rows');
-select throws_ok(format(
-  'select public.save_crm_forecast_period(''2026-10-16'',''house'',''amanda'',%L::jsonb,3)',
-  jsonb_set(pg_temp.period_doc_two_groups('8'),'{rows}','[]'::jsonb)
-), '42501','forbidden: forecast structure is read only','manager cannot delete rows');
-select throws_ok(format(
-  'select public.save_crm_forecast_period(''2026-10-16'',''house'',''amanda'',%L::jsonb,3)',
-  jsonb_build_object(
+  ) document) candidate), '4', 'page-authorized manager can insert rows');
+select is(public.save_crm_forecast_period(
+  '2026-10-16','house','amanda',
+  jsonb_set(pg_temp.period_doc_two_groups('8'),'{rows}','[]'::jsonb),4
+)->>'revision', '5', 'page-authorized manager can delete rows');
+select is((select public.save_crm_forecast_period(
+  '2026-10-16','house','amanda',document,5
+)->>'revision' from (select jsonb_build_object(
     'title','Equipe',
     'columns','[{"id":"broker","label":"Nome do corretor"},{"id":"f_one","label":"Empreendimento 1"},{"id":"a_one","label":"Empreendimento 1"},{"id":"f_two","label":"Empreendimento 2"},{"id":"a_two","label":"Empreendimento 2"},{"id":"f_three","label":"Empreendimento 3"},{"id":"a_three","label":"Empreendimento 3"},{"id":"action_plan","label":"Plano de ação"}]'::jsonb,
     'rows',jsonb_build_array(jsonb_build_object(
@@ -213,18 +223,16 @@ select throws_ok(format(
         'f_three','','a_three','','action_plan','Ação'
       )
     ))
-  )
-), '42501','forbidden: forecast structure is read only','manager cannot insert columns');
-select throws_ok(format(
-  'select public.save_crm_forecast_period(''2026-10-16'',''house'',''amanda'',%L::jsonb,3)',
-  pg_temp.period_doc('8','Ação')
-), '42501','forbidden: forecast structure is read only','manager cannot delete columns');
+  ) document) candidate), '6', 'page-authorized manager can insert columns');
+select is(public.save_crm_forecast_period(
+  '2026-10-16','house','amanda',pg_temp.period_doc('8','Ação'),6
+)->>'revision', '7', 'page-authorized manager can delete columns');
 select is(public.get_crm_forecast_period('2026-10-16','house','amanda')#>>'{forecasts,0,forecast,revision}',
-  '3','rejected structure changes preserve saved revision');
+  '7','authorized structure changes advance the saved revision');
 reset role;
 
 select is((select count(*) from public.audit_logs where action='crm.forecast.period.saved'),
-  4::bigint,'only successful scoped saves create audit events');
+  8::bigint,'only successful scoped saves create audit events');
 select ok(not exists (select 1 from public.audit_logs where action='crm.forecast.period.saved'
   and (before ? 'document' or after ? 'document')),
   'period audit stores metadata without forecast contents');
