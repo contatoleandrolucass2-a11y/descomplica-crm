@@ -88,7 +88,7 @@ function renderStreetMap() {
         const notice = document.createElement("div");
         notice.className = "map-network-warning";
         notice.textContent =
-          "Base de ruas indisponível. Verifique a internet; os leads continuam visíveis.";
+          "Base de ruas indisponível. Verifique a internet; a segmentação continua visível.";
         host.parentElement.appendChild(notice);
       }
     });
@@ -144,12 +144,14 @@ function updateStreetOverlays() {
       "São Bernardo do Campo": [-23.7, -46.56],
     };
     if (mapLayers.points)
-      geographyRows().forEach((r) =>
-        addLeadMarker(coords[r.name], r.name, r.value, false, () => {
-          state.municipality = r.name;
-          paintMunicipality();
-        }),
-      );
+      geographyRows()
+        .filter((row) => row.value > 0)
+        .forEach((r) =>
+          addLeadMarker(coords[r.name], r.name, r.value, false, () => {
+            state.municipality = r.name;
+            paintMunicipality();
+          }),
+        );
   } else {
     const d = neighborhoodData(),
       located = d.total - d.unknown;
@@ -223,7 +225,7 @@ function addLeadMarker(coords, name, value, neighborhood, onClick) {
     icon,
     zIndexOffset: selected ? 1100 : 1000,
     keyboard: true,
-    title: `${name}: ${display} ${resultName().toLowerCase()}`,
+    title: `${name}: ${display} campanha${value === 1 ? "" : "s"} segmentada${value === 1 ? "" : "s"}`,
   }).addTo(streetOverlays);
   marker.on("click", onClick);
 }
@@ -235,8 +237,8 @@ function ensureMapDisplayControl() {
   control.open = false;
   control.innerHTML = `<summary>▱ Camadas <span>⌄</span></summary><div class="layers-body"><p>Escolha o que aparece no mapa</p>
  ${[
-   ["points", "Pontos de leads"],
-   ["heat", "Mapa de calor"],
+   ["points", "Pontos de segmentação"],
+   ["heat", "Densidade de campanhas"],
    ["names", "Nomes dos marcadores"],
    ["borders", "Limites municipais"],
    ["unknown", "Localidades sem dados"],

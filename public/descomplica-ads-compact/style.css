@@ -815,6 +815,24 @@ tbody tr.clickable:hover {
   grid-template-columns: 1.2fr 1fr;
   gap: 16px;
 }
+.account-balance-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.account-balance-grid > div {
+  display: grid;
+  gap: 5px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card-2);
+}
+.account-balance-grid strong { font-size: 20px; }
+@media (max-width: 720px) {
+  .account-balance-grid { grid-template-columns: 1fr; }
+}
 .settings-grid .panel-body {
   display: grid;
   gap: 15px;
