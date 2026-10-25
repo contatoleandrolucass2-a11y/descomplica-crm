@@ -10,8 +10,8 @@ import {
 export const temporaryItbiSourceOutageException = Object.freeze({
   id: "forecast-page-users-edit-pr-340-2026-10-25",
   sources: Object.freeze([
-    "https://prefeitura.sp.gov.br/fazenda/w/servicos/itbi/2517",
-    "https://prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2513",
+    "https://www2.prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2517",
+    "https://www2.prefeitura.sp.gov.br/web/fazenda/w/servicos/itbi/2513",
   ]),
   policyVersion: "sp-capital-2026.1",
   effectiveFrom: "2026-01-01",

@@ -44,6 +44,10 @@
   #340, somente para as duas URLs e status 403/503 ja previstos, usando o ultimo
   snapshot versionado e com expiracao em `2026-10-26T03:00:00Z`. Mudanca de
   valores, URL, status, politica ou prazo continua bloqueando a CI.
+- **Correcao da excecao:** a segunda CI confirmou que as duas URLs cadastradas
+  na excecao antiga nao coincidiam com os enderecos `www2` versionados na
+  politica; por isso o fallback nunca era elegivel. O cadastro foi alinhado
+  literalmente aos dois URLs da politica, sem ampliar dominio ou caminho.
 
 ## 2026-10-25: detalhamento dos funis integrado e publicado
 
