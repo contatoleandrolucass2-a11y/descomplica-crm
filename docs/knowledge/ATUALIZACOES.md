@@ -49,6 +49,21 @@
   politica; por isso o fallback nunca era elegivel. O cadastro foi alinhado
   literalmente aos dois URLs da politica, sem ampliar dominio ou caminho.
 
+## 2026-10-25: dimensoes de Agendamentos publicadas
+
+- O PR #341 foi integrado no SHA
+  `13a0e6009beace9ed16b6ef56329eee348f03c9b`; o `main` concorrente
+  `b2a6a17284e030796819f6f6f2ec989aba682e85` o preserva como ancestral.
+- A CI de `main` `40206513995` aprovou `validate`, `promotable-image`,
+  `isolated-restore` e `release-gates`. O artefato teve checksum, revisao,
+  label e os dois perfis de runtime conferidos antes da promocao.
+- O deployment concorrente `f9701ac1-a9a8-4da5-a5d7-2cac9d2fe559` publicou a
+  versao em `2026-10-25T16:20:35.009Z`; o coordenador confirmou `noop`, sem
+  segundo swap e sem deployment pendente.
+- O health publico respondeu HTTP 200 na versao exata e o acesso anonimo a
+  `/app/etapas/agendamentos` respondeu HTTP 307 para `/login`. Nao houve
+  migration, mudanca de dados, filtros, metricas, n8n ou outra pagina.
+
 ## 2026-10-25: dimensoes responsivas de Agendamentos validadas
 
 - Implementado somente em `/app/etapas/agendamentos`: alturas responsivas dos

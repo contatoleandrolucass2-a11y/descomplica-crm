@@ -6,12 +6,13 @@
   contrato novo e libera valores e estrutura para todo usuário com acesso
   efetivo à página; a visão Geral continua somente leitura.
 
-## 2026-10-25 - Dimensoes responsivas em Agendamentos
+## 2026-10-25 - Dimensoes responsivas em Agendamentos publicadas
 
 - Ajusta somente as alturas dos graficos de Agendamentos para que duas linhas
   consecutivas caibam integralmente no viewport de PCs.
 - Faz a tabela ocupar a area visivel e mantem a rolagem vertical dentro dela.
 - Valida 18 combinacoes de resolucao e tema, incluindo 1024x720 e 1440x720.
+- Publica o ajuste pelo PR #341; o runtime final `b2a6a172` preserva a entrega.
 
 ## 2026-10-25 - Detalhamento dos funis publicado
 
