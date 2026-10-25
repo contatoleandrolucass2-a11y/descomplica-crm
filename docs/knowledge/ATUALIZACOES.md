@@ -22,6 +22,24 @@
   `pnpm test` terminou com as três falhas Windows preexistentes de Meta Ads
   relacionadas a arquivo privado e caminho POSIX; a CI Linux continua sendo o
   critério de integração, sem redução de gate ou alteração desses testes.
+- O PR #342 foi integrado em `c2c823e1284f19322da0da36e0cb8146bf7ec497`.
+  A CI de `push/main` `40212842274` aprovou `validate`, `isolated-restore`,
+  `release-gates` e `promotable-image`, incluindo o Dashboard nos três temas e
+  viewports e a matriz de responsividade, zoom e teclado.
+- O artefato `12606950613` corresponde ao SHA exato. O digest ZIP
+  `sha256:6df8e27fd874c2cdb547129eb7350517ba529afd8c7eb8910bab4f398a3a0391`,
+  o checksum interno
+  `sha256:b96be853e672e37f8329c201f1ce922c7c096d0b40ff82af46e0c33175b6195c`
+  e `revision.txt` foram conferidos. A imagem foi carregada sem rebuild; o
+  manifesto containerd `sha256:fdb0ba67fe8bac837c1dba50029a0bc284304069f5ab6c4b309bf80e9cf1ebe5`
+  preservou a revisão OCI e passou no `image:prove` para os dois perfis.
+- O coordenador `release:production deploy` publicou o deployment
+  `ea33fe65-fba7-4b8d-87a3-ef014fc51c75` em `2026-10-25T17:36:48.826Z`, usando
+  o deployment anterior `f9701ac1-a9a8-4da5-a5d7-2cac9d2fe559` como CAS. O
+  ledger final ficou sem pendência; em `2026-10-25T17:37:00.5996772Z`, o health
+  público respondeu HTTP 200/`ok` na versão exata e `/app` anônimo preservou o
+  redirecionamento HTTP 307 para `/login`. Não houve migration, alteração de
+  dados, n8n, DNS ou configuração de integração nesta entrega.
 
 ## 2026-10-25: abertura do erro de carregamento e edicao da Previsao
 
