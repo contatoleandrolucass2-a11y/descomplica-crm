@@ -1,4 +1,5 @@
 import { createRequire } from "node:module";
+import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 
@@ -28,6 +29,19 @@ const rows = [
     quantity: 3,
   },
 ];
+
+it("highlights funnel stages on pointer hover without drawing a border", () => {
+  const css = readFileSync(
+    resolve("app/(protected)/app/_components/DashboardStageDetails.module.css"),
+    "utf8",
+  );
+  const hover = css.match(/\.trigger:hover\s*\{([^}]*)\}/)?.[1] ?? "";
+  const keyboardFocus = css.match(/\.trigger:focus-visible\s*\{([^}]*)\}/)?.[1] ?? "";
+
+  expect(hover).toContain("background-color:");
+  expect(hover).not.toMatch(/border|box-shadow|outline/);
+  expect(keyboardFocus).toContain("outline:");
+});
 
 it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
   "opens, filters and closes the stage detail dialog without horizontal page overflow in all themes",
@@ -121,6 +135,14 @@ it.runIf(process.env.DASHBOARD_STAGE_DETAILS_BROWSER === "1")(
         await page.evaluate((value) => (document.documentElement.dataset.theme = value), theme);
         for (const width of [320, 390, 1440]) {
           await page.setViewportSize({ width, height: 844 });
+          await trigger.evaluate((element) => (element as HTMLElement).blur());
+          await trigger.hover();
+          const hoverPaint = await trigger.evaluate((element) => {
+            const style = getComputedStyle(element);
+            return { backgroundColor: style.backgroundColor, boxShadow: style.boxShadow };
+          });
+          expect(hoverPaint.backgroundColor).not.toBe("rgba(0, 0, 0, 0)");
+          expect(hoverPaint.boxShadow).toBe("none");
           await trigger.click();
           await browserExpect(dialog).toBeVisible();
           await browserExpect(dialog.getByText("5 registros no recorte")).toBeVisible();

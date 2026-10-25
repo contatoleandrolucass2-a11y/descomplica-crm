@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-25 - Realce sem borda nas etapas dos funis
+
+- Substitui o contorno retangular exibido ao passar o mouse por um realce
+  translúcido da própria etapa.
+- Preserva o foco visível de teclado, a abertura do detalhamento e os três temas.
+
 ## 2026-10-25
 
 - Publica a correcao da Previsao no SHA `b2a6a172`, com migration isolada,
