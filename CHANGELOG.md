@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-24 - Menu Lead publicado
+
+- Publica as nove paginas protegidas do modulo Lead e a exportacao autenticada
+  no SHA `b46b8a0e5203dde0a1bc0d77ad8e835bb6fedf5a`.
+- Aplica o schema operacional, o catalogo de paginas e os 34 indices de chaves
+  estrangeiras com RLS forcada, MFA e grants minimos validados.
+- Confirma CI integral, artefato imutavel, deployment protegido, health na
+  versao exata e redirecionamento anonimo de `/app/leads` para o login.
+- Mantem C2S apenas como referencia funcional; nao importa dados, nao persiste
+  credenciais e nao altera n8n ou integracoes externas.
+
 ## 2026-10-24 - Núcleo operacional completo do menu Lead
 
 - Implementa cadastro, busca, filtros, detalhe, histórico, atividades,
