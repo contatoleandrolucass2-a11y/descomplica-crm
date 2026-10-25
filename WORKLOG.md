@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-25 - Detalhamento dos funis publicado
+
+O PR #333 foi integrado em `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`.
+A CI de `main` `40164155042` aprovou os quatro jobs obrigatórios, inclusive a
+matriz autenticada de responsividade, temas, zoom, teclado e acessibilidade. O
+artefato `12587144483` foi conferido por checksum e revisão, carregado sem
+rebuild e aprovado por `image:prove` nos dois perfis.
+
+O coordenador protegido publicou o deployment
+`f3ee0965-d7ff-4f75-9e5f-b5b15450eff7` em `2026-10-25T05:54:16.400Z`. Ledger,
+container e health público confirmaram o SHA e a imagem exatos, sem pendência.
+Não houve migration, alteração de integração, coleta Salesforce, n8n, DNS ou
+dados de negócio. O smoke autenticado manual não foi forçado porque o controle
+visual não conseguiu confirmar a URL da janela; a CI autenticada permanece a
+evidência funcional desta publicação.
+
 ## 2026-10-25 - Estado final concorrente preserva Lead
 
 A publicacao posterior `94c6f73e8d389c330c595e15fe838a321bd78118`, deployment
