@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-25 - Hover das etapas dos funis
+
+O acionador transparente do popup usava um `box-shadow` interno de 3 px, que
+produzia o retângulo apontado. O hover agora usa somente uma camada translúcida
+da cor de destaque. O `outline` permanece restrito ao `:focus-visible`, para não
+retirar a indicação acessível de teclado.
+
+O teste focado passou nos temas claro, médio e escuro em 320, 390 e 1440 px,
+confirmando realce visível, ausência de sombra, popup e foco preservados. Lint,
+typecheck e build passaram. O Vitest completo aprovou 4.194 testes e ignorou 108;
+o trecho Node do `pnpm test` manteve três falhas Windows preexistentes de
+permissão/caminho em Meta Ads, que permanecem dependentes da CI Linux.
+
 ## 2026-10-25 — Previsão editável por usuários autorizados
 
 - Reproduzido em produção: o endpoint autenticado de Previsão respondeu
