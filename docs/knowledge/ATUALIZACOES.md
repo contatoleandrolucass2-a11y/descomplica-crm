@@ -28,6 +28,11 @@
   não possui pendência; o health público respondeu HTTP 200, `status=ok` e a
   versão exata, e o acesso anônimo a `/app/etapas/agendamentos` respondeu HTTP
   307 para `/login`.
+- Na conferência final de `25/10/2026 07:56` em America/Sao_Paulo, o health
+  permaneceu HTTP 200 e `status=ok`, já na versão posterior
+  `8e8271abe344129455773cce7b65da5671d24aa2`. O histórico Git confirma que essa
+  versão contém o merge de Agendamentos; a atualização posterior pertence a
+  Meta Ads e não removeu a entrega desta página.
 - Uma tentativa anterior encontrou HTTP 403 transitório na consulta externa de
   ITBI; o rerun passou integralmente. A primeira promoção foi bloqueada
   corretamente quando a `main` avançou durante a preparação, sem criar
