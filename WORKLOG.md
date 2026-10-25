@@ -34,6 +34,36 @@ com janela ampliada. As suítes
 Node e release repetiram falhas Windows/POSIX preexistentes do Meta Ads já
 documentadas e, por isso, a CI Linux permanece o gate autoritativo da entrega.
 
+## 2026-10-24 - Indicadores de meta e ordem visual de Agendamentos
+
+A entrega altera exclusivamente `/app/etapas/agendamentos`. Os 12 indicadores
+passam a compartilhar a mesma altura, 10 px menor, e acompanham o ponteiro em
+um arco total de 45 graus. Meta do mês, Equipe Produtiva, média, ontem, hoje e
+as três conversões recebem uma moldura animada azul ou vermelha conforme a
+regra pedida; usuários com redução de movimento mantêm a informação por cor e
+texto acessível sem animação.
+
+Uma RPC de leitura mínima expõe somente as três razões derivadas das metas de
+funil vigentes. House usa os volumes configurados na página de metas. Parcerias
+não configura Oportunidade nem Agendamento no modelo vigente, portanto esses
+indicadores permanecem neutros em vez de fabricar um limite. A função exige a
+permissão da página de Agendamentos, valida identidade e concede execução apenas
+ao papel autenticado.
+
+Evolução diária ocupa uma linha exclusiva; abaixo ficam, em grupos de três,
+Previstos/realizados, Semana e Score, depois os rankings na ordem Responsável,
+Gerente e Gerente Regional, seguidos pelos três painéis de recência. O gráfico
+mensal fecha o bloco em linha exclusiva. As barras usam azul-escuro no hover.
+
+A validação focada aprovou 58 testes de interface, leitura, inventário e
+homologação. O preview de produção aprovou 12 combinações de tema, largura,
+zoom e estados, sem falhas; lint, typecheck e build também passaram. A suíte
+integral aprovou 4.179 testes e teve cinco timeouts sob concorrência em quatro
+arquivos externos ao escopo; os 106 testes desses arquivos passaram em série.
+`test:release` mantém as falhas Windows já registradas do fixture sintético de
+Meta Ads, cuja validação autoritativa permanece na CI Linux. A CI do SHA
+candidato é o gate definitivo antes da publicação.
+
 ## 2026-10-24 — Navegação compacta do Meta Ads
 
 - Transformado o item Meta Ads da navbar em acesso direto, sem o submenu das

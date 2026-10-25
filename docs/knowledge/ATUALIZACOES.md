@@ -57,6 +57,49 @@
   implementacao deve reutilizar o snapshot autorizado, preservar os dois canais
   definidos e evitar persistir registros ou identidades reais em testes.
 
+## 2026-10-24: abertura dos indicadores e da ordem visual de Agendamentos
+
+- A branch `codex/agendamentos-indicadores-layout-v7` iniciou no `origin/main`
+  `b8aca02928351f0d18f3fee4cb40f30c9c007ac5`. A CI de `main`
+  `40135665115` tinha `validate`, `isolated-restore` e `promotable-image`
+  aprovados, com `release-gates` ainda em execução na consulta de abertura.
+- O health público respondeu HTTP 200, `status=ok` e versão
+  `bc227b62d39628a447d8637d5f8b3503c9e3cbcf`; portanto, a versão publicada e a
+  `main` integrada estavam distintas no início desta demanda.
+- Escopo funcional exclusivo: `/app/etapas/agendamentos`. A demanda reduz e
+  uniformiza os 12 cards, amplia a inclinação conforme o ponteiro, adiciona
+  bordas indicativas de meta, usa metas dinâmicas House/Imob nas três conversões
+  e reorganiza os gráficos na ordem solicitada, sem alterar outras páginas,
+  n8n ou dados remotos. A implementação exige uma migration aditiva e estreita
+  para expor somente as três razões de conversão autorizadas à página.
+
+## 2026-10-24: implementação dos indicadores e da ordem visual de Agendamentos
+
+- Os 12 indicadores têm altura uniforme 10 px menor e inclinação por ponteiro
+  em um arco total de 45 graus. A moldura animada local usa azul para condição
+  positiva e vermelho para condição negativa, com texto acessível e alternativa
+  sem animação para `prefers-reduced-motion`.
+- Meta do mês compara total e projeção; Equipe Produtiva compara com 100%; média,
+  ontem e hoje comparam com a quantidade filtrada de corretores. As conversões
+  comparam a razão exibida com a meta vigente do perfil, considerando razão
+  igual ou menor como positiva conforme a solicitação.
+- A RPC `read_crm_appointments_conversion_goals(date)` retorna apenas três
+  razões derivadas, exige `crm.stage.appointments.view`, usa `search_path` vazio
+  e concede execução somente a `authenticated`. House usa a meta `dv`; o perfil
+  Parcerias permanece neutro porque o schema vigente obriga Oportunidades e
+  Agendamentos a zero nesse perfil.
+- A ordem visual passa a ser: Evolução diária isolada; três gráficos operacionais;
+  rankings Responsável, Gerente e Gerente Regional; três painéis de recência;
+  Agendamentos por mês isolado. O hover das barras usa azul-escuro.
+- Evidência local: 58 testes focados aprovados; lint e typecheck aprovados;
+  build Next.js aprovado; preview com CSS de produção aprovou 12 cenários em
+  temas, larguras, zoom e estados, sem falhas. A suíte integral aprovou 4.179
+  testes e registrou cinco timeouts concorrentes externos ao escopo; os 106
+  testes dos quatro arquivos afetados passaram em série. O `test:release`
+  preserva falhas Windows conhecidas do fixture sintético de Meta Ads; a CI
+  Linux, merge e publicação são estados posteriores e não são afirmados por
+  este registro.
+
 ## 2026-10-24: continuidade autorizada ate concluir o modulo Lead
 
 - Pedido direto do usuario: continuar a implementacao e somente encerrar quando

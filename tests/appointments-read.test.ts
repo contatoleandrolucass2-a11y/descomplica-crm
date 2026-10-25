@@ -28,6 +28,14 @@ const result = (payload: unknown = slice) => ({
   data: [{ view_key: "all", payload }],
   error: null,
 });
+const conversionGoals = {
+  dv: { opportunityAppointment: 9, appointmentVisit: 3, appointmentSale: 12 },
+  partnerships: {
+    opportunityAppointment: null,
+    appointmentVisit: null,
+    appointmentSale: null,
+  },
+};
 let headers: Array<{ data: unknown; error: unknown }>;
 let rankingHeaders: Array<{ data: unknown; error: unknown }>;
 let participantResponses: Array<{ data: unknown; count: number | null; error: unknown }>;
@@ -51,9 +59,12 @@ beforeEach(() => {
     ),
   }));
   mocks.createClient.mockResolvedValue({ from: mocks.from, rpc: mocks.rpc });
-  mocks.rpc.mockImplementation(async (name: string) =>
-    name === "read_crm_appointments_goal" ? { data: 24, error: null } : result(),
-  );
+  mocks.rpc.mockImplementation(async (name: string) => {
+    if (name === "read_crm_appointments_goal") return { data: 24, error: null };
+    if (name === "read_crm_appointments_conversion_goals")
+      return { data: conversionGoals, error: null };
+    return result();
+  });
 });
 
 describe("appointments snapshot read", () => {
@@ -67,12 +78,16 @@ describe("appointments snapshot read", () => {
       ],
       generatedAt: snapshot.generated_at,
       individualGoal: 24,
+      conversionGoals,
     });
     expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_analysis", {
       p_snapshot_id: 1,
       p_view_keys: ["all"],
     });
     expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_goal", {
+      p_reference_date: snapshot.reference_date,
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_conversion_goals", {
       p_reference_date: snapshot.reference_date,
     });
     expect(mocks.from.mock.calls.map(([table]) => table)).toEqual([
@@ -90,6 +105,7 @@ describe("appointments snapshot read", () => {
       analysis: null,
       brokerRoster: null,
       individualGoal: null,
+      conversionGoals: null,
     });
     expect(mocks.rpc).not.toHaveBeenCalled();
     headers[0] = { data: snapshot, error: null };
@@ -98,6 +114,7 @@ describe("appointments snapshot read", () => {
       analysis: null,
       brokerRoster: null,
       individualGoal: null,
+      conversionGoals: null,
     });
   });
 
@@ -109,6 +126,7 @@ describe("appointments snapshot read", () => {
         analysis: null,
         brokerRoster: null,
         individualGoal: null,
+        conversionGoals: null,
       });
     },
   );
@@ -162,9 +180,12 @@ describe("appointments snapshot read", () => {
         },
       ],
     };
-    mocks.rpc.mockImplementation(async (name: string) =>
-      name === "read_crm_appointments_goal" ? { data: 24, error: null } : result(v4),
-    );
+    mocks.rpc.mockImplementation(async (name: string) => {
+      if (name === "read_crm_appointments_goal") return { data: 24, error: null };
+      if (name === "read_crm_appointments_conversion_goals")
+        return { data: conversionGoals, error: null };
+      return result(v4);
+    });
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(v4);
   });
 
@@ -180,7 +201,7 @@ describe("appointments snapshot read", () => {
     const next = { ...snapshot, updated_at: "2026-10-19T00:00:00.123457Z" };
     headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(slice);
-    expect(mocks.rpc).toHaveBeenCalledTimes(3);
+    expect(mocks.rpc).toHaveBeenCalledTimes(4);
   });
 
   it("fails instead of returning mixed generations after repeated concurrent ingestion", async () => {
