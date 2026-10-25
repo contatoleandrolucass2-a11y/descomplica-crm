@@ -15,20 +15,28 @@
   etapa controla o botão; `approved-folders` compartilha a permissão e a fonte
   de Pastas. Meta mensal, esperado até hoje e médias explicam que a tabela mostra
   o realizado usado como referência, não linhas constituintes da meta.
+- A revisão do PR #333 passou a usar uma única função para recortar tanto o
+  número do funil quanto seu detalhamento ao mês vigente. Períodos que começam
+  no mês anterior não vazam linhas para o diálogo. O acionador também só é
+  exibido quando a coleta certifica a etapa e o período de referência; ausência
+  de snapshot ou de cobertura permanece indisponível, nunca como zero confirmado.
 - Evidência no Node 24.19.0: lint, typecheck e build passaram. Os 107 testes
   focados passaram. A matriz Playwright passou em 320, 390 e 1440 px nos temas
   `light`, `balanced` e `dark`, incluindo clique/teclado, filtros, Escape,
   backdrop, restauração de foco e contenção horizontal.
-- O Vitest integral aprovou 4.181 casos, ignorou 108 e teve cinco timeouts em
-  testes antigos; os três arquivos envolvidos aprovaram 50 casos e ignoraram um
-  quando repetidos isoladamente com 120 s. As suítes Node/release repetiram
+- O Vitest integral mais recente aprovou 4.189 casos, ignorou 108 e teve três
+  timeouts em testes antigos de DevTools/paridade; os dois arquivos envolvidos
+  aprovaram 39 casos e ignoraram um quando repetidos isoladamente com 120 s. As
+  suítes Node/release da execução anterior repetiram
   falhas Windows/POSIX preexistentes do Meta Ads descritas no Worklog. Nenhum
   arquivo Meta Ads foi alterado. No PR #333, `validate` e `isolated-restore`
   aprovaram; o primeiro `release-gates` detectou corretamente que o botão
   absoluto havia virado terceiro filho do grupo `<dl>`. O botão foi movido para
   dentro do `<dt>`, preservando a área clicável e restaurando a semântica. O
-  teste de navegador agora executa Axe sobre essa estrutura; merge e publicação
-  continuam condicionados à nova CI Linux.
+  teste de navegador agora executa Axe sobre essa estrutura. Após os ajustes de
+  revisão, 122 testes focados aprovaram, incluindo a regra compartilhada de
+  recorte e a ausência de acionador sem cobertura; merge e publicação continuam
+  condicionados à nova CI Linux do SHA final.
 
 ## 2026-10-24: abertura do detalhamento dinamico dos funis
 

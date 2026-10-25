@@ -7,6 +7,8 @@
   relatório e paginação de 50 combinações por página.
 - Mantém metas e médias identificadas como cálculos e mostra o realizado do
   período apenas como referência, sem sugerir linhas individuais inexistentes.
+- Usa o mesmo recorte do mês vigente nos valores e no diálogo, sem incluir dias
+  do mês anterior, e oculta o acionador quando a cobertura não está disponível.
 - Preserva as permissões específicas de cada etapa e não expõe IDs, contas,
   nomes de oportunidades, valores individuais ou registros de clientes.
 - Adapta o detalhamento para cartões no celular, sem rolagem lateral da página,

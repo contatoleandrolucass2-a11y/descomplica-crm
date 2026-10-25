@@ -20,6 +20,10 @@ export type DashboardFunnelPeriodKey =
   | "yesterday"
   | "today";
 export type DashboardPeriodReadings = Record<DashboardFunnelPeriodKey, DashboardFunnelReading[]>;
+export interface DashboardCurrentMonthPeriod {
+  start: string;
+  end: string;
+}
 
 export const DASHBOARD_FILTER_KEYS = ["channel", "manager", "owner", "company"] as const;
 export type DashboardFilterKey = (typeof DASHBOARD_FILTER_KEYS)[number];
@@ -68,6 +72,28 @@ export function parseDashboardFilters(
 const shiftDate = (date: string, days: number) =>
   new Date(Date.parse(`${date}T12:00:00Z`) + days * 86_400_000).toISOString().slice(0, 10);
 const monthStart = (date: string) => `${date.slice(0, 7)}-01`;
+
+export function dashboardCurrentMonthPeriod(
+  referenceDate: string,
+  key: DashboardFunnelPeriodKey,
+): DashboardCurrentMonthPeriod {
+  const currentMonthStart = monthStart(referenceDate);
+  const weekday = new Date(`${referenceDate}T12:00:00Z`).getUTCDay();
+  const weekStart = shiftDate(referenceDate, -((weekday + 6) % 7));
+  const ranges: Record<DashboardFunnelPeriodKey, readonly [string, string]> = {
+    month: [currentMonthStart, referenceDate],
+    "previous-week": [shiftDate(weekStart, -7), shiftDate(weekStart, -1)],
+    "current-week": [weekStart, referenceDate],
+    yesterday: [shiftDate(referenceDate, -1), shiftDate(referenceDate, -1)],
+    today: [referenceDate, referenceDate],
+  };
+  const [requestedStart, end] = ranges[key];
+  return {
+    start: requestedStart < currentMonthStart ? currentMonthStart : requestedStart,
+    end,
+  };
+}
+
 function shiftMonth(date: string, months: number) {
   const value = new Date(`${monthStart(date)}T12:00:00Z`);
   value.setUTCMonth(value.getUTCMonth() + months);
@@ -205,23 +231,21 @@ export function analyzeDashboard(
     }
   }
   // These funnels are month-scoped; legacy metrics retain their original windows.
-  const currentMonthStart = monthStart(referenceDate);
   const periodReadingsFor = (
-    start: string,
-    end: string,
+    key: DashboardFunnelPeriodKey,
     fresh: boolean,
   ): DashboardFunnelReading[] => {
-    const clippedStart = start < currentMonthStart ? currentMonthStart : start;
+    const { start, end } = dashboardCurrentMonthPeriod(referenceDate, key);
     const values = Object.fromEntries(
       DASHBOARD_FUNNEL_STAGES.map(({ key }) => [
         key,
-        !sameMonth || !fresh || clippedStart < coverageStart
+        !sameMonth || !fresh || start < coverageStart
           ? null
-          : end < clippedStart
+          : end < start
             ? 0
             : key === "approved-folders"
-              ? approvedCount(clippedStart, end)
-              : count(ANALYSIS_STAGE_KEYS.indexOf(key), clippedStart, end),
+              ? approvedCount(start, end)
+              : count(ANALYSIS_STAGE_KEYS.indexOf(key), start, end),
       ]),
     ) as Record<DashboardFunnelKey, number | null>;
     return DASHBOARD_FUNNEL_STAGES.map(({ key, label }, index) => {
@@ -238,19 +262,11 @@ export function analyzeDashboard(
     });
   };
   const periodReadings: DashboardPeriodReadings = {
-    month: periodReadingsFor(currentMonthStart, referenceDate, sameMonth),
-    "previous-week": periodReadingsFor(
-      shiftDate(weekStart, -7),
-      shiftDate(weekStart, -1),
-      sameWeek,
-    ),
-    "current-week": periodReadingsFor(weekStart, referenceDate, sameWeek),
-    yesterday: periodReadingsFor(
-      shiftDate(referenceDate, -1),
-      shiftDate(referenceDate, -1),
-      sameDay,
-    ),
-    today: periodReadingsFor(referenceDate, referenceDate, sameDay),
+    month: periodReadingsFor("month", sameMonth),
+    "previous-week": periodReadingsFor("previous-week", sameWeek),
+    "current-week": periodReadingsFor("current-week", sameWeek),
+    yesterday: periodReadingsFor("yesterday", sameDay),
+    today: periodReadingsFor("today", sameDay),
   };
   const owners = new Set(facts.filter((fact) => fact[3] >= 0).map((fact) => fact[3]));
   const managerOwners = new Map<string, Set<number>>();

@@ -15,14 +15,22 @@ como realizado de referência. O cliente não recebe identificadores de registro
 nomes de conta/oportunidade, valores individuais ou outras colunas descartadas
 pelo contrato seguro do snapshot.
 
+O intervalo do diálogo e o cálculo do funil agora reutilizam a mesma função de
+recorte ao mês vigente. Isso impede que Ontem, Semana anterior ou Esta semana
+incluam linhas do mês anterior. O botão de detalhamento só aparece quando a
+leitura da etapa possui cobertura certificada; snapshot ausente ou intervalo
+indisponível não é apresentado como zero confirmado.
+
 No navegador automatizado, o fluxo passou em 320, 390 e 1440 px nos temas
 claro, médio e escuro, incluindo abertura por clique, filtro, Escape, clique no
 fundo, restauração de foco e ausência de rolagem horizontal da página. O botão
 absoluto permanece dentro do `<dt>`, mantendo cada grupo do `<dl>` válido; o
 teste focado executa Axe sobre essa estrutura para impedir regressão. Lint,
-typecheck e build passaram; 107 testes focados passaram. O Vitest integral
-aprovou 4.181 testes, ignorou 108 e teve cinco timeouts externos ao dashboard;
-os 50 casos desses arquivos passaram isolados com janela ampliada. As suítes
+typecheck e build passaram; após os ajustes da revisão, 122 testes focados
+passaram. O Vitest integral mais recente
+aprovou 4.189 testes, ignorou 108 e teve três timeouts externos ao dashboard;
+os dois arquivos envolvidos aprovaram 39 casos e ignoraram um quando repetidos
+com janela ampliada. As suítes
 Node e release repetiram falhas Windows/POSIX preexistentes do Meta Ads já
 documentadas e, por isso, a CI Linux permanece o gate autoritativo da entrega.
 

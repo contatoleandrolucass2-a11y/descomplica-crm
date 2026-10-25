@@ -383,6 +383,7 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
 
   it("offers one authorized dialog trigger per funnel stage and hides unauthorized stages", () => {
     const root = render({
+      analysis: analysisFixture(),
       authorizedStagePaths: ["/app/etapas/vendas"],
       stageDetails: [
         {
@@ -405,6 +406,28 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       true,
     );
     expect(elements(root, "dialog")).toHaveLength(4);
+  });
+
+  it("does not offer stage details when the certified period is unavailable", () => {
+    const analysis = analysisFixture();
+    for (const readings of Object.values(analysis.periodReadings)) {
+      for (const reading of readings) reading.value = null;
+    }
+    const root = render({
+      analysis,
+      authorizedStagePaths: ["/app/etapas/vendas"],
+    });
+    const triggers = elements(root, "button").filter((button) =>
+      attribute(button, "aria-label")?.startsWith("Abrir detalhes de "),
+    );
+    expect(triggers).toHaveLength(4);
+    expect(
+      triggers.every((button) =>
+        ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Média venda"].some((label) =>
+          attribute(button, "aria-label")?.endsWith(label),
+        ),
+      ),
+    ).toBe(true);
   });
 
   it("renders every Imob funnel with four stages and the active goal multiplied by seven", () => {
