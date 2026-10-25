@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-25 - Dimensoes responsivas em Agendamentos
+
+- Ajusta somente as alturas dos graficos de Agendamentos para que duas linhas
+  consecutivas caibam integralmente no viewport de PCs.
+- Faz a tabela ocupar a area visivel e mantem a rolagem vertical dentro dela.
+- Valida 18 combinacoes de resolucao e tema, incluindo 1024x720 e 1440x720.
+
 ## 2026-10-25 - Detalhamento dos funis publicado
 
 - Publica o diálogo responsivo de etapas dos 13 funis no SHA `cc13a3d7`.
