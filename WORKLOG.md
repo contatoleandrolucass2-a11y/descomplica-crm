@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-25 - Publicacao do hover e dos filtros herdados
+
+O PR #346 foi integrado em `c6de29d4`; a `main` publicada avancou para
+`ec98b41a`, que contem a correcao. A CI `40229956828` aprovou os quatro gates e
+o deployment `1b484b04-19ac-4513-8cd0-985c464d41fa` ativou a imagem homologada
+sem rebuild. Health publico e ledger confirmaram a versao exata e ausencia de
+pendencia.
+
+No smoke autenticado, o CSS publicado manteve o acionador transparente e
+ampliou a etapa em 3,5%. O filtro Empresa `Direcional` da pagina foi herdado no
+pop-up, junto do canal `DIRECIONAL VENDAS SPC`, com dez registros no recorte.
+Nenhum registro comercial foi modificado. O sync final do Obsidian foi tentado
+e ficou pendente porque o documento de atualizacoes excedeu o limite atual do
+exportador; o registro versionado permanece completo.
+
 ## 2026-10-25 — Funis e filtro regional em Agendamentos
 
 A entrega ficou restrita à página `/app/etapas/agendamentos` e ao read model

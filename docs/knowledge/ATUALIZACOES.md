@@ -1,5 +1,35 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: publicacao do hover ampliado e filtros herdados dos funis
+
+- O PR #346 integrou a correcao no merge
+  `c6de29d42d92451375562544b74b7a8151435334`. A CI do PR
+  `40220666085` aprovou `validate`, `isolated-restore` e `release-gates`.
+  Antes da publicacao, `main` avancou para
+  `ec98b41aedc721c22fff4f28dca9b31bc6317373`, que contem esse merge.
+- A CI de `push/main` `40229956828` aprovou `validate`, `release-gates`,
+  `isolated-restore` e `promotable-image`. O artefato `12611779563` foi
+  conferido na revisao exata; o ZIP tem digest
+  `sha256:bf69ed8a0441034d5dd6f12b20e17216d373d89c1ddb1e70fd73ffd60d51ae12`
+  e a imagem publicada tem ID
+  `sha256:ffc69336a9e5c31d3eaacd7c696f4bfa9caafd2bff6aa3c8d781e9e98e3768e6`.
+  Os dois perfis passaram no `image:prove`, sem rebuild.
+- A producao registrou o deployment
+  `1b484b04-19ac-4513-8cd0-985c464d41fa` em
+  `2026-10-25T21:16:08.906Z`. O ledger ficou sem pendencia. A verificacao de
+  `2026-10-25T21:18:45.7307378Z` confirmou `/api/health` HTTP 200,
+  `status=ok`, versao exata, e `/app` anonimo em HTTP 307 para `/login`.
+- O smoke autenticado na versao publicada confirmou no CSS carregado o
+  acionador transparente e `scale(1.035)` no hover da etapa. Com Empresa
+  `Direcional` selecionada na pagina, o pop-up abriu com `Direcional` e
+  `DIRECIONAL VENDAS SPC` pre-selecionados e exibiu dez registros no recorte.
+  Nenhum dado foi alterado. A verificacao deixou o dashboard aberto.
+- O `knowledge:sync` final foi executado, mas o exportador recusou
+  `ATUALIZACOES.md` porque o documento excede o limite de exportacao. O
+  conhecimento completo permanece versionado neste arquivo; a sincronizacao
+  com o Obsidian fica pendente ate o limite ou a estrategia de particionamento
+  ser revisada em tarefa propria.
+
 ## 2026-10-25: abertura dos funis e filtro regional de Agendamentos
 
 - A branch `codex/agendamentos-funis-gerente-regional-v9` iniciou limpa sobre
