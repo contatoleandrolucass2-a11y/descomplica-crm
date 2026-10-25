@@ -1,6 +1,14 @@
 "use client";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  BarChart3,
+  ChevronLeft,
+  ChevronRight,
+  FileChartColumn,
+  MapPinned,
+  Megaphone,
+  SlidersHorizontal,
+} from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -37,6 +45,13 @@ export function MetaAdsSidebar({
       : path === "/app/meta-ads" && (view === "map" || view === "settings")
         ? `${path}?panel=${view}`
         : path;
+  const iconFor = (page: (typeof links)[number]) => {
+    if (page.key === "map-panel") return MapPinned;
+    if (page.key === "settings-panel") return SlidersHorizontal;
+    if (page.path === "/app/meta-ads") return BarChart3;
+    if (page.path.endsWith("/campanhas")) return Megaphone;
+    return FileChartColumn;
+  };
   return (
     <aside
       className={styles.sidebar}
@@ -47,30 +62,25 @@ export function MetaAdsSidebar({
         Descomplica <strong>Ads</strong>
       </div>
       <nav id="meta-ads-sidebar-navigation" aria-label="Visões do Meta Ads">
-        {links.map((page) => (
-          <Link
-            key={page.key}
-            href={page.path}
-            prefetch={false}
-            aria-current={page.path === activePath ? "page" : undefined}
-            aria-label={page.name}
-            title={collapsed ? page.name : undefined}
-            className={styles.navigationLink}
-          >
-            <span aria-hidden="true" className={styles.navigationIcon}>
-              {page.key === "map-panel"
-                ? "⌖"
-                : page.key === "settings-panel"
-                  ? "⚙"
-                  : page.path === "/app/meta-ads"
-                    ? "▦"
-                    : page.path.endsWith("/campanhas")
-                      ? "▣"
-                      : "▥"}
-            </span>
-            <span className={styles.navigationLabel}>{page.name}</span>
-          </Link>
-        ))}
+        {links.map((page) => {
+          const Icon = iconFor(page);
+          return (
+            <Link
+              key={page.key}
+              href={page.path}
+              prefetch={false}
+              aria-current={page.path === activePath ? "page" : undefined}
+              aria-label={page.name}
+              title={collapsed ? page.name : undefined}
+              className={styles.navigationLink}
+            >
+              <span aria-hidden="true" className={styles.navigationIcon}>
+                <Icon size={19} strokeWidth={1.9} />
+              </span>
+              <span className={styles.navigationLabel}>{page.name}</span>
+            </Link>
+          );
+        })}
       </nav>
       <p className={styles.sourceNote}>Meta Ads · análise de campanhas</p>
       <button

@@ -498,7 +498,63 @@ function micro() {
   }</div>`;
 }
 function geographyRows() {
-  return municipalities.map((name) => ({ name, value: null }));
+  const normalize = (value) =>
+    String(value || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  const selectedCampaigns = current();
+  return municipalities.map((name) => {
+    const expected = normalize(name);
+    const campaigns = selectedCampaigns.filter((campaign) =>
+      campaign.rows.some((row) =>
+        (row.targetLocations || []).some(
+          (location) => location.type === "city" && normalize(location.name) === expected,
+        ),
+      ),
+    );
+    return { name, value: campaigns.length };
+  });
+}
+function campaignTargetLocations() {
+  const locations = new Map();
+  for (const campaign of current()) {
+    const seen = new Set();
+    for (const row of campaign.rows) {
+      for (const location of row.targetLocations || []) {
+        const key = [location.type, location.key, location.name].join("|");
+        if (seen.has(key)) continue;
+        seen.add(key);
+        const currentLocation = locations.get(key) || { ...location, campaigns: new Set() };
+        currentLocation.campaigns.add(campaign.id);
+        locations.set(key, currentLocation);
+      }
+    }
+  }
+  return [...locations.values()].map((location) => ({
+    ...location,
+    campaignCount: location.campaigns.size,
+  }));
+}
+function metaRegionalResults() {
+  const selectedCampaigns = new Set(state.ids || []);
+  const selectedAccounts = new Set(state.accountIds || []);
+  const selectedStatuses = new Set(state.statuses || []);
+  const selectedDestinationsSet = new Set(selectedDestinations());
+  const totals = new Map();
+  for (const row of sourceData.regionalResults || []) {
+    if (
+      row.date < state.startDate ||
+      row.date > state.endDate ||
+      !selectedCampaigns.has(row.campaignId) ||
+      !selectedAccounts.has(row.accountId) ||
+      !selectedStatuses.has(row.status) ||
+      !selectedDestinationsSet.has(row.destination)
+    )
+      continue;
+    totals.set(row.region, (totals.get(row.region) || 0) + row.conversions);
+  }
+  return [...totals].map(([name, value]) => ({ name, value })).sort((a, b) => b.value - a.value);
 }
 function neighborhoodData() {
   return {
@@ -552,7 +608,12 @@ function settingsPage() {
             sourceData.rows.filter((r) => r.destination === settingsDestination),
             level,
           );
-  return `<form id="settings-form"><div class="page-head"><div><h1>Ajustes</h1><p>Referências de análise salvas por usuário neste navegador.</p></div><div class="actions"><button type="button" id="discard">Descartar</button><button class="primary" type="submit">Salvar ajustes</button></div></div><div class="settings-scope"><label>Destino <select id="settings-destination">${Object.entries(
+  const accountValues = [
+    ["Saldo total informado pela Meta", sourceData.accountBalance],
+    ["Total gasto pela conta", sourceData.amountSpent],
+    ["Limite total de gasto", sourceData.spendCap],
+  ];
+  return `<form id="settings-form"><div class="page-head"><div><h1>Ajustes</h1><p>Referências de análise salvas por usuário neste navegador.</p></div><div class="actions"><button type="button" id="discard">Descartar</button><button class="primary" type="submit">Salvar ajustes</button></div></div>${panel("account-balance", "Saldo da conta de anúncios", `<div class="account-balance-grid">${accountValues.map(([label, value]) => `<div><small>${label}</small><strong>${money(value)}</strong></div>`).join("")}</div><small>Valores financeiros oficiais da conta ${AdsData.escape(sourceData.accountName)} em ${AdsData.escape(sourceData.currency)}. “Saldo” segue o campo financeiro retornado pela Meta; — significa que a API não forneceu o valor.</small>`)}<div class="settings-scope"><label>Destino <select id="settings-destination">${Object.entries(
     destinationLabels,
   )
     .map(
