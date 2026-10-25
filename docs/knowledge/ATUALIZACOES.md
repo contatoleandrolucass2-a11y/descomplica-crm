@@ -1,5 +1,48 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-24: modulo Lead concluido e publicado
+
+- O nucleo funcional do menu `Lead` foi integrado pelos PRs #323, #330, #331
+  e #332. A `main` final de runtime e
+  `b46b8a0e5203dde0a1bc0d77ad8e835bb6fedf5a`; a CI `40143354357` aprovou
+  `validate`, `isolated-restore`, `promotable-image` e `release-gates` no mesmo
+  SHA. O escopo inclui nove paginas protegidas e a rota autenticada de
+  exportacao, sem sincronizacao de dados ou dependencia de runtime do C2S.
+- O banco remoto recebeu somente as quatro migrations Lead:
+  `20261024224326 crm_leads_core`, `20261024224340 crm_lead_operations`,
+  `20261024224356 sync_page_catalog_leads` e
+  `20261024234616 crm_lead_foreign_key_indexes`. A primeira tentativa da
+  migration principal falhou atomicamente por depender de
+  `crm_organizations`; nao deixou residuo. O modelo final usa workspaces
+  proprios e `profiles.is_active`, compativel com o schema produtivo observado.
+- A verificacao remota final confirmou 24 tabelas Lead com RLS e FORCE RLS, 24
+  politicas MFA, zero grant DML direto para `anon`, `authenticated` ou
+  `service_role`, 24 permissoes, nove paginas e zero chave estrangeira Lead sem
+  indice. A base permaneceu vazia: zero leads e zero clientes foram criados.
+  Os advisors mantem somente os avisos esperados de RPCs `SECURITY DEFINER`
+  autenticadas, que executam guards internos, e de indices novos ainda sem uso.
+- O artefato `12578864673` apresentou digest ZIP
+  `sha256:460930509425dccc931ac9edd180ec61a559a32b5d756ff3ea40ce7463c04649`,
+  digest da imagem compactada
+  `sha256:9563b56f5d7b37e627555a3af34aa37af23b8b8c0e2583b6cdd0cafafa1e5532`
+  e revisao exata. No Docker containerd do destino, `image:prove` validou os
+  dois perfis sobre a imagem local
+  `sha256:56b14a773b73842536a5025741b8efdd80de5c971ad52dfd13cd29698154d72b`,
+  sem rebuild ou retag.
+- O coordenador `pnpm release:production` publicou o deployment
+  `1d79e00b-89f5-481f-8a9b-39f2a54e856b` em
+  `2026-10-25T00:31:00.530Z` (`24/10/2026 21:31:00` em
+  America/Sao_Paulo), substituindo o deployment
+  `878399cb-0bce-472f-a808-da78e58ea311` no SHA `bc227b62...`. O status final
+  nao possui pendencia; o health publico respondeu HTTP 200, `status=ok` e a
+  versao exata, e o acesso anonimo a `/app/leads` respondeu HTTP 307 para
+  `/login`.
+- Limites preservados: nenhuma credencial recebida foi persistida ou exibida,
+  nenhum dado do C2S foi importado, nenhum workflow n8n foi alterado e nao
+  houve mudanca de DNS, cobranca ou dados comerciais existentes. O aviso
+  `MODULE_TYPELESS_PACKAGE_JSON` emitido pelo coordenador e apenas de
+  performance do carregamento Node; nao alterou o resultado da publicacao.
+
 ## 2026-10-24: abertura dos indicadores e da ordem visual de Agendamentos
 
 - A branch `codex/agendamentos-indicadores-layout-v7` iniciou no `origin/main`
