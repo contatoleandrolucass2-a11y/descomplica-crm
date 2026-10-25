@@ -338,7 +338,7 @@ describe("archive navigation evidence gate", () => {
     expect(archiveRootNavigationContract).toEqual([
       { name: "Dashboard", tag: "BUTTON", href: null },
       { name: "Lead", tag: "BUTTON", href: null },
-      { name: "Meta Ads", tag: "BUTTON", href: null },
+      { name: "Meta Ads", tag: "A", href: "/app/meta-ads" },
       { name: "Simulação", tag: "A", href: "/app/simulacao" },
       { name: "Ranking", tag: "A", href: "/app/ranking" },
       { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },

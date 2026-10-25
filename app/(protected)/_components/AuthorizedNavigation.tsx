@@ -329,7 +329,8 @@ function AuthorizedNavigationState({
       >
         <ul className={styles.navigationList}>
           {groups.map((group) => {
-            const directToHub = group.page.key === "crm.simulation";
+            const directToHub =
+              group.page.key === "crm.simulation" || group.page.key === "crm.meta_ads";
             const hasDisabledChildren = disabledItems.some(
               (item) => item.parentKey === group.page.key && item.section === group.page.section,
             );

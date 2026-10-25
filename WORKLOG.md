@@ -26,6 +26,17 @@ os 50 casos desses arquivos passaram isolados com janela ampliada. As suítes
 Node e release repetiram falhas Windows/POSIX preexistentes do Meta Ads já
 documentadas e, por isso, a CI Linux permanece o gate autoritativo da entrega.
 
+## 2026-10-24 — Navegação compacta do Meta Ads
+
+- Transformado o item Meta Ads da navbar em acesso direto, sem o submenu das
+  páginas já disponíveis na lateral.
+- Menu lateral configurado para abrir expandido e recolher para 64 px, com
+  controle acessível no rodapé e ícones preservados.
+- Removidos a cor divergente do nome Ads e o breadcrumb redundante, fazendo o
+  dashboard começar imediatamente abaixo da barra superior.
+- Matriz E2E atualizada para tratar Meta Ads como link direto e manter as rotas
+  detalhadas disponíveis pela lateral ou por acesso autorizado.
+
 ## 2026-10-24 - Núcleo operacional do CRM de leads
 
 O menu `Lead` passou do primeiro estado vazio para um núcleo operacional com
@@ -57,6 +68,11 @@ legado de `profiles`, sem `access_status`. A elegibilidade dos workspaces Lead
 passou a depender de `is_active` e do guard central `_internal_assert_actor_active`,
 sem importar a migration ampla de governança de usuários. Um contrato estático
 impede reintroduzir dependências em `access_status` ou `crm_organizations`.
+
+Após as três migrations passarem na produção, os advisors confirmaram RLS
+forçada, MFA e grants mínimos, mas apontaram 34 chaves estrangeiras Lead sem
+índice de cobertura. A migration incremental de índices cobre exatamente essas
+relações, com timeout de lock e de statement, sem alterar dados ou contratos.
 
 A revisão independente de segurança confirmou as correções de isolamento por
 organização, leitura mínima por permissão, retenção do staging e idempotência de

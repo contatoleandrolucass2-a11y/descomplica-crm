@@ -1,0 +1,41 @@
+begin;
+
+set local lock_timeout = '5s';
+set local statement_timeout = '30s';
+
+create index if not exists crm_lead_activities_created_by_idx on public.crm_lead_activities(created_by);
+create index if not exists crm_lead_audit_actor_idx on public.crm_lead_audit_events(actor_id);
+create index if not exists crm_lead_customers_org_idx on public.crm_lead_customers(organization_id);
+create index if not exists crm_lead_dist_events_actor_idx on public.crm_lead_distribution_events(actor_id);
+create index if not exists crm_lead_dist_events_assignee_idx on public.crm_lead_distribution_events(assigned_user_id);
+create index if not exists crm_lead_dist_events_lead_idx on public.crm_lead_distribution_events(lead_id);
+create index if not exists crm_lead_dist_events_queue_idx on public.crm_lead_distribution_events(queue_id);
+create index if not exists crm_lead_dist_events_rule_idx on public.crm_lead_distribution_events(rule_id);
+create index if not exists crm_lead_dist_members_user_idx on public.crm_lead_distribution_members(user_id);
+create index if not exists crm_lead_dist_memory_user_idx on public.crm_lead_distribution_memory(user_id);
+create index if not exists crm_lead_dist_rules_fallback_idx on public.crm_lead_distribution_rules(fallback_queue_id);
+create index if not exists crm_lead_dist_rules_queue_idx on public.crm_lead_distribution_rules(queue_id);
+create index if not exists crm_lead_import_batches_applied_by_idx on public.crm_lead_import_batches(applied_by);
+create index if not exists crm_lead_import_batches_created_by_idx on public.crm_lead_import_batches(created_by);
+create index if not exists crm_lead_interests_org_idx on public.crm_lead_interests(organization_id);
+create index if not exists crm_lead_messages_channel_idx on public.crm_lead_messages(channel_id);
+create index if not exists crm_lead_messages_created_by_idx on public.crm_lead_messages(created_by);
+create index if not exists crm_lead_settings_updated_by_idx on public.crm_lead_operation_settings(updated_by);
+create index if not exists crm_lead_ops_audit_actor_idx on public.crm_lead_operations_audit(actor_id);
+create index if not exists crm_lead_history_changed_by_idx on public.crm_lead_stage_history(changed_by);
+create index if not exists crm_lead_history_from_stage_idx on public.crm_lead_stage_history(from_stage_id);
+create index if not exists crm_lead_history_to_stage_idx on public.crm_lead_stage_history(to_stage_id);
+create index if not exists crm_lead_tag_links_created_by_idx on public.crm_lead_tag_links(created_by);
+create index if not exists crm_lead_tag_links_tag_idx on public.crm_lead_tag_links(tag_id);
+create index if not exists crm_lead_tags_created_by_idx on public.crm_lead_tags(created_by);
+create index if not exists crm_lead_workspace_members_user_idx on public.crm_lead_workspace_members(user_id);
+create index if not exists crm_leads_channel_idx on public.crm_leads(channel_id);
+create index if not exists crm_leads_created_by_idx on public.crm_leads(created_by);
+create index if not exists crm_leads_interest_idx on public.crm_leads(interest_id);
+create index if not exists crm_leads_lost_reason_idx on public.crm_leads(lost_reason_id);
+create index if not exists crm_leads_responsible_idx on public.crm_leads(responsible_user_id);
+create index if not exists crm_leads_source_idx on public.crm_leads(source_id);
+create index if not exists crm_leads_stage_idx on public.crm_leads(stage_id);
+create index if not exists crm_leads_updated_by_idx on public.crm_leads(updated_by);
+
+commit;

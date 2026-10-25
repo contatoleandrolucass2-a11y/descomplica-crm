@@ -12,6 +12,15 @@
 - Adapta o detalhamento para cartões no celular, sem rolagem lateral da página,
   e valida os temas claro, médio e escuro.
 
+## 2026-10-24 — Navegação compacta do Meta Ads
+
+- O botão Meta Ads da barra superior abre diretamente o dashboard, sem submenu
+  duplicado.
+- A navegação lateral abre expandida e pode ser recolhida por uma seta no canto
+  inferior esquerdo, mantendo os ícones acessíveis.
+- O título Descomplica Ads usa uma única cor e o breadcrumb redundante foi
+  removido das telas do Meta Ads.
+
 ## 2026-10-24 - Núcleo operacional completo do menu Lead
 
 - Implementa cadastro, busca, filtros, detalhe, histórico, atividades,
@@ -34,6 +43,8 @@
   cabeçalho com o novo oitavo destino, sem alterar limiares de comparação.
 - Mantém integrações externas, WhatsApp, CRM imobiliário, financeiro e produtos
   opcionais fora deste corte.
+- Adiciona índices de cobertura para as 34 chaves estrangeiras do domínio Lead
+  identificadas pelo advisor de performance após a migration produtiva.
 
 ## 2026-10-24 - Primeiro incremento do menu Lead
 

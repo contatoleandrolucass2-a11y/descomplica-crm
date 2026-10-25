@@ -36,6 +36,8 @@ describe("authorized breadcrumbs", () => {
     "/app/gestao/rotina/",
     "/app/gestao/previsao",
     "/app/gestao/previsao/",
+    "/app/meta-ads",
+    "/app/meta-ads/campanhas",
   ])("omits the compact workspace breadcrumb at %s", (pathname) => {
     mocks.pathname = pathname;
     expect(

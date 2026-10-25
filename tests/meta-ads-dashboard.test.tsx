@@ -44,7 +44,7 @@ const dashboardDocumentUrl = new URL(
 );
 
 describe("dashboard Meta Ads", () => {
-  it("fica em um botao proprio da navbar com as quatro visoes solicitadas", () => {
+  it("fica em um link proprio da navbar e deixa as visoes no menu lateral", () => {
     expect(PAGE_REGISTRY).toContainEqual(
       expect.objectContaining({
         pageKey: "crm.meta_ads",
@@ -92,6 +92,33 @@ describe("dashboard Meta Ads", () => {
     const metaAdsIndex = groups.findIndex((group) => group.page.key === "crm.meta_ads");
     expect(leadIndex).toBe(dashboardIndex + 1);
     expect(metaAdsIndex).toBe(leadIndex + 1);
+  });
+
+  it("abre o menu lateral expandido e permite recolher somente no desktop", async () => {
+    const [sidebarSource, styles] = await Promise.all([
+      readFile(
+        new URL("../app/(protected)/app/meta-ads/MetaAdsSidebar.tsx", import.meta.url),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.module.css",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ]);
+
+    expect(sidebarSource).toContain("useState(false)");
+    expect(sidebarSource).toContain('aria-label={collapsed ? "Expandir menu lateral"');
+    expect(sidebarSource).toContain("<ChevronLeft");
+    expect(sidebarSource).toContain("<ChevronRight");
+    expect(styles).toContain('.sidebar[data-collapsed="true"]');
+    expect(styles).toContain("width: 64px");
+    expect(styles).toContain("top: 58px");
+    expect(styles).toContain("min-height: calc(100dvh - 58px)");
+    expect(styles).toContain(".brand strong");
+    expect(styles).toContain("color: inherit");
   });
 
   it("remove navegacao duplicada do artefato porque as visoes pertencem a navbar", async () => {
