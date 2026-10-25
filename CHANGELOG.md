@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-25 - Publicacao validada do detalhamento dos funis
+
+- Registra o merge, a CI completa, o artefato imutavel e o deployment que
+  publicaram o hover ampliado e os filtros herdados pelo pop-up.
+- Confirma em producao o fundo transparente, a escala da etapa e a
+  pre-selecao dos filtros ativos da pagina.
+
 ## 2026-10-25 - Funis e filtro regional em Agendamentos
 
 - Compacta os 12 indicadores para duas linhas visíveis no viewport de PC.
