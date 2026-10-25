@@ -380,7 +380,7 @@ export function DashboardReport({
   const monthDetailAvailability = availableStagesFromReadings(periodReadings("month"));
 
   return (
-    <DashboardStageDetailsProvider rows={stageDetails}>
+    <DashboardStageDetailsProvider rows={stageDetails} initialFilters={filters}>
       <AnalyticsCanvas kind="dashboard">
         <DashboardAutoRefresh
           referenceDay={today}

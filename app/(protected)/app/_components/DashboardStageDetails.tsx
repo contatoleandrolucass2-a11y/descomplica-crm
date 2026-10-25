@@ -41,6 +41,15 @@ const pageSize = 50;
 const numberFormatter = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 0 });
 const dateFormatter = new Intl.DateTimeFormat("pt-BR", { timeZone: "UTC" });
 const filterFields = ["channel", "manager", "owner", "company", "development"] as const;
+type FilterField = (typeof filterFields)[number];
+type DetailFilters = Record<FilterField, string[]>;
+const emptyFilters = (): DetailFilters => ({
+  channel: [],
+  manager: [],
+  owner: [],
+  company: [],
+  development: [],
+});
 const labels = {
   date: "Data",
   channel: "Canal de vendas",
@@ -64,22 +73,18 @@ function inPeriod(row: DashboardStageDetailRow, period: DashboardStageDetailPeri
 
 export function DashboardStageDetailsProvider({
   rows,
+  initialFilters = emptyFilters(),
   children,
 }: {
   rows: readonly DashboardStageDetailRow[];
+  initialFilters?: Partial<DetailFilters>;
   children: ReactNode;
 }) {
   const id = useId();
   const dialog = useRef<HTMLDialogElement>(null);
   const closeButton = useRef<HTMLButtonElement>(null);
   const [selection, setSelection] = useState<Selection | null>(null);
-  const [filters, setFilters] = useState<Record<(typeof filterFields)[number], string>>({
-    channel: "",
-    manager: "",
-    owner: "",
-    company: "",
-    development: "",
-  });
+  const [filters, setFilters] = useState<DetailFilters>(emptyFilters);
   const [page, setPage] = useState(1);
 
   useEffect(() => {
@@ -109,7 +114,9 @@ export function DashboardStageDetailsProvider({
   );
   const visibleFields = filterFields.filter((field) => options[field].length > 0);
   const filteredRows = scopedRows.filter((row) =>
-    filterFields.every((field) => !filters[field] || row[field] === filters[field]),
+    filterFields.every(
+      (field) => filters[field].length === 0 || filters[field].includes(row[field]),
+    ),
   );
   const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
   const visibleRows = filteredRows.slice((page - 1) * pageSize, page * pageSize);
@@ -124,7 +131,7 @@ export function DashboardStageDetailsProvider({
     <StageDetailsContext.Provider
       value={{
         open: (next) => {
-          setFilters({ channel: "", manager: "", owner: "", company: "", development: "" });
+          setFilters({ ...emptyFilters(), ...initialFilters });
           setPage(1);
           setSelection(next);
         },
@@ -174,13 +181,27 @@ export function DashboardStageDetailsProvider({
                   <label key={field}>
                     <span>{labels[field]}</span>
                     <select
-                      value={filters[field]}
+                      value={
+                        filters[field].length === 1
+                          ? filters[field][0]
+                          : filters[field].length > 1
+                            ? "__multiple__"
+                            : ""
+                      }
                       onChange={(event) => {
-                        setFilters((current) => ({ ...current, [field]: event.target.value }));
+                        setFilters((current) => ({
+                          ...current,
+                          [field]: event.target.value ? [event.target.value] : [],
+                        }));
                         setPage(1);
                       }}
                     >
                       <option value="">Todos</option>
+                      {filters[field].length > 1 ? (
+                        <option value="__multiple__" disabled>
+                          {filters[field].length} selecionados na página
+                        </option>
+                      ) : null}
                       {options[field].map((option) => (
                         <option key={option} value={option}>
                           {option}
