@@ -5,6 +5,7 @@
 - Corrige o carregamento da Previsão quando o runtime já exige as capacidades do
   contrato novo e libera valores e estrutura para todo usuário com acesso
   efetivo à página; a visão Geral continua somente leitura.
+
 ## 2026-10-25 - Dimensoes responsivas em Agendamentos
 
 - Ajusta somente as alturas dos graficos de Agendamentos para que duas linhas

@@ -48,6 +48,7 @@
   na excecao antiga nao coincidiam com os enderecos `www2` versionados na
   politica; por isso o fallback nunca era elegivel. O cadastro foi alinhado
   literalmente aos dois URLs da politica, sem ampliar dominio ou caminho.
+
 ## 2026-10-25: dimensoes responsivas de Agendamentos validadas
 
 - Implementado somente em `/app/etapas/agendamentos`: alturas responsivas dos
