@@ -1,5 +1,26 @@
 # Worklog
 
+## 2026-10-26 — Publicacao final da experiencia de Agendamentos
+
+O PR #355 foi integrado na `main` como
+`4e6c8a9da91fbc4acfeaaa40669dc09cb95caedc`. A CI do PR
+`40310161183`, a captura protegida `40310161276` e a CI de `main`
+`40315829223` passaram. O artefato imutavel `12647366432` foi conferido por
+revisao, checksum, manifesto, configuracao e onze camadas; `image:prove`
+aprovou dois perfis de runtime sobre a mesma imagem.
+
+O coordenador protegido publicou o deployment
+`5857651f-3e10-45c6-b513-3c9114cfb426` as 09:33:39 de Sao Paulo. Health
+posterior retornou `ok` na versao exata e a rota anonima preservou o redirect
+para login. Smoke autenticado em producao aprovou desktop 1440x900 e celular
+390x844 nos temas claro, medio e escuro, incluindo sidebar, filtros, calendario,
+cards, pop-ups, funis, guias, tabela e rodape. Nao houve overflow da pagina,
+corte, sobreposicao ou erro no console. House voltou a abrir como canal inicial.
+
+A alteracao permanece exclusiva de `/app/etapas/agendamentos`, sem migration ou
+mutacao de dados. O sync do Obsidian foi tentado e segue pendente pelo limite de
+exportacao preexistente, preservado em ATUALIZACOES.
+
 ## 2026-10-26 — Canvas configurável e superfície reduzida do Meta Ads
 
 O protótipo local aprovado foi incorporado ao dashboard oficial sem alterar a

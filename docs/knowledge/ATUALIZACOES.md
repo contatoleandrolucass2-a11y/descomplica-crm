@@ -1,5 +1,43 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-26: refinamento final de Agendamentos publicado
+
+- Escopo funcional restrito a `/app/etapas/agendamentos`. O PR #355 foi
+  integrado na `main` como `4e6c8a9da91fbc4acfeaaa40669dc09cb95caedc`.
+  Nenhuma migration, workflow n8n, regra comercial ou outra pagina integrou
+  esta entrega.
+- A CI do PR (`40310161183`) aprovou `validate`, `release-gates` e
+  `isolated-restore`; a captura autenticada protegida (`40310161276`) tambem
+  concluiu com sucesso. A CI da `main` (`40315829223`) aprovou os quatro jobs:
+  `validate`, `release-gates`, `isolated-restore` e `promotable-image`.
+- Artefato promovido `12647366432`, arquivo SHA256
+  `e35cc564a726ff3742394f6838728dd7e47b9ca0f2f7feb2ab04222e90acca31`,
+  ID da configuracao OCI
+  `sha256:085258b057eb4626a248fbf9535d92a050e6f2a313f8625c60a9e0a88ec52bec`
+  e ID local apos carga
+  `sha256:3444974924930cc7fdf6ee6a8493ca13aa210031899d3edfcfaf9ebfe60ce2eb`.
+  Revisao, configuracao, onze camadas e dois perfis de runtime foram
+  comprovados; nenhum rebuild ou segredo impresso.
+- O coordenador `release:production` concluiu o deployment
+  `5857651f-3e10-45c6-b513-3c9114cfb426` em
+  `2026-10-26T12:33:39.908Z` (09:33:39 America/Sao_Paulo), sem deployment
+  pendente. O estado anterior foi preservado para rollback. Health publico
+  posterior retornou HTTP 200, `status=ok` e a versao completa exata da
+  `main`; acesso anonimo a rota retornou 307 para `/login`.
+- Smoke autenticado em producao: desktop 1440x900 e celular 390x844 nos temas
+  claro, medio e escuro. Nao houve rolagem horizontal da pagina, corte ou
+  sobreposicao visivel. Foram exercitados sidebar recolhida/expandida e clique
+  externo, calendario e seus nove atalhos, dias circulares, House/Imob, filtro
+  regional, cards e dialogos, funis lado a lado, guias sequenciais, tabela e
+  rodape. O calendario mobile ficou integralmente no viewport (337x810 px);
+  a tabela inclui `Qnt. de dias`, nao possui rolagem vertical interna e adapta
+  as linhas ao celular. House voltou a ser o canal inicial apos recarga, o tema
+  medio foi restaurado e o override de viewport removido. Console sem erros.
+- O sync final do Obsidian foi tentado, mas permanece pendente pela falha
+  preexistente `Documento excede o limite de exportacao.` O registro versionado
+  e a evidencia permanecem validos; nao truncar o historico nem alterar o
+  exportador fora de uma demanda propria.
+
 ## 2026-10-26: abertura do refinamento visual de Agendamentos
 
 - Escopo exclusivo de `/app/etapas/agendamentos`: navegacao compacta, calendario,
