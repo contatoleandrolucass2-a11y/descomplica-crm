@@ -62,6 +62,8 @@ com concorrência limitada. A CI de 0ab2a93c passou 4.241 testes e detectou o
 caso de teto de taxa, corrigido e comprovado nos 64 testes locais posteriores.
 CI final, comparação autenticada, merge e publicação permanecem pendentes.
 
+## 2026-10-25 — Validação complementar de Agendamentos
+
 Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
 
 ## 2026-10-25 - Espacamento dos valores das barras de agendamentos
@@ -9438,3 +9440,14 @@ resumo de 390 px. O layout passa a empilhar selo/rótulo, preservando quantias
 inteiras sem corte ou reticências. A regressão confere fragmentos de texto e
 contenção dos valores, além das auditorias de contraste e transbordamento.
 Nova captura autenticada e CI continuam obrigatórias antes da publicação.
+
+### Captura autenticada CAIXA aprovada
+
+Run `40263953439`, artifact `12626398223`, origem `051fb2ee` e captura
+`2c3e6d8c408bd6402a9a3653757c2da9f1a702f1`, em 26/10/2026 às 03:54:26 UTC:
+build, E2E e matriz funcional/Axe/zoom aprovados. Revisão independente das 11
+imagens sem achados. Incorporadas somente essas imagens e as 38 entradas da
+rota; referências e dados das demais páginas preservados. A CI `40263953550`
+aprovou 4.290 testes, mas encontrou HTTP 403 na fonte de ITBI de Documentação.
+Nova CI deve revalidar essa fonte sem exceção, mudança de script ou baseline
+de outra página. Nenhum merge/deploy executado nesta etapa.

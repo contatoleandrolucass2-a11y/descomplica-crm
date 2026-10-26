@@ -3,6 +3,7 @@
 ## 2026-10-26 — Contraste completo do Simulador CAIXA
 
 - Mantém quantias completas em uma linha no resumo móvel, reorganizando rótulos e selos.
+- Atualiza somente as 11 referências visuais CAIXA após captura autenticada aprovada e revisão independente.
 - Corrige contraste de estados claros/escuros e a interpolação herdada de cor/fundo na página CAIXA.
 - Audita resultados, documentos, diagnóstico e utilitários nos três temas, incluindo controles habilitados.
 - Preserva limites de teste, cenários, shell global e demais páginas.
@@ -21,6 +22,8 @@
 - Valida parâmetros confirmados e conserva avisos de cálculos parciais.
 - Documenta fórmulas e proveniência oficial; mantém APIs e autorização existentes.
 - Acrescenta testes financeiros, fluxos no navegador e acessibilidade móvel.
+
+## 2026-10-25 — Ajuste de altura em Agendamentos
 
 - Ajusta a altura das barras do Ranking Score para eliminar a rolagem residual de 4px em 1024px com sidebar aberta, somente em Agendamentos.
 
