@@ -295,10 +295,13 @@ function Ranking({
 function ConversionRanking({
   buckets,
   total,
+  available,
 }: {
   buckets: AppointmentConversionBucket[];
   total: number;
+  available: boolean;
 }) {
+  if (!available) return <Empty>Conversão indisponível para o filtro de Ranking Score.</Empty>;
   if (!buckets.length) return <Empty>Nenhuma conversão maior que zero no período.</Empty>;
   const max = Math.max(...buckets.map((item) => item.percent));
   return (
@@ -943,9 +946,11 @@ function GoalGauge({ current, goal }: { current: number; goal: number | null }) 
           : `${number.format(current)} de ${number.format(goal)}`}
       </strong>
       <p>
-        {percent === null
-          ? "Aguardando a meta individual vigente"
-          : `${decimal.format(percent)}% da meta · ${current >= goal! ? "meta atingida" : `faltam ${number.format(goal! - current)}`}`}
+        {goal === 0
+          ? "Meta cadastrada: 0 · meta atingida"
+          : percent === null
+            ? "Aguardando a meta individual vigente"
+            : `${decimal.format(percent)}% da meta · ${current >= goal! ? "meta atingida" : `faltam ${number.format(goal! - current)}`}`}
       </p>
     </div>
   );
@@ -1305,34 +1310,34 @@ export function AppointmentsDashboard({
         <Kpi
           label="Média de agendamentos"
           value={result.dailyAverage === null ? null : decimal.format(result.dailyAverage)}
-          detail="Média diária no mês selecionado"
-          goalStatus={atLeastStatus(result.dailyAverage, result.brokerCount)}
+          detail="Média diária no período selecionado"
+          goalStatus={atLeastStatus(result.dailyAverage, result.dailyAverageGoal)}
           statusLabel={
-            result.dailyAverage === null || result.brokerCount === null
+            result.dailyAverage === null || result.dailyAverageGoal === null
               ? "Comparação com a meta indisponível"
-              : `${result.dailyAverage >= result.brokerCount ? "Meta atingida" : "Abaixo da meta"}: média ${decimal.format(result.dailyAverage)} para ${number.format(result.brokerCount)} corretores`
+              : `${result.dailyAverage >= result.dailyAverageGoal ? "Meta atingida" : "Abaixo da meta"}: média ${decimal.format(result.dailyAverage)} para meta diária média ${decimal.format(result.dailyAverageGoal)}`
           }
         />
         <Kpi
           label="Agendamentos ontem"
           value={number.format(result.yesterday)}
           detail="Pela data de criação"
-          goalStatus={atLeastStatus(result.yesterday, result.brokerCount)}
+          goalStatus={atLeastStatus(result.yesterday, result.yesterdayGoal)}
           statusLabel={
-            result.brokerCount === null
+            result.yesterdayGoal === null
               ? "Comparação com a meta indisponível"
-              : `${result.yesterday >= result.brokerCount ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.yesterday)} para ${number.format(result.brokerCount)} corretores`
+              : `${result.yesterday >= result.yesterdayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.yesterday)} para meta ${number.format(result.yesterdayGoal)}`
           }
         />
         <Kpi
           label="Agendamentos hoje"
           value={number.format(result.today)}
           detail="Pela data de criação"
-          goalStatus={atLeastStatus(result.today, result.brokerCount)}
+          goalStatus={atLeastStatus(result.today, result.todayGoal)}
           statusLabel={
-            result.brokerCount === null
+            result.todayGoal === null
               ? "Comparação com a meta indisponível"
-              : `${result.today >= result.brokerCount ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para ${number.format(result.brokerCount)} corretores`
+              : `${result.today >= result.todayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para meta ${number.format(result.todayGoal)}`
           }
         />
         <ConversionKpi
@@ -1501,13 +1506,22 @@ export function AppointmentsDashboard({
           data-appointments-chart-group="conversion-rankings"
         >
           <Chart title="Melhor responsável: Agendamento x Visita">
-            <ConversionRanking buckets={result.conversionRankings.owners} total={result.total} />
+            <ConversionRanking
+              buckets={result.conversionRankings.owners}
+              total={result.total}
+              available={result.conversionAvailable}
+            />
           </Chart>
           <Chart title="Melhor gerente: Agendamento x Visita">
-            <ConversionRanking buckets={result.conversionRankings.managers} total={result.total} />
+            <ConversionRanking
+              buckets={result.conversionRankings.managers}
+              total={result.total}
+              available={result.conversionAvailable}
+            />
           </Chart>
           <Chart title="Melhor gerente regional: Agendamento x Visita">
             <ConversionRanking
+              available={result.conversionAvailable}
               buckets={result.conversionRankings.regionalManagers}
               total={result.total}
             />

@@ -87,6 +87,18 @@ const conversionGoals = {
 };
 
 describe("appointment dashboard availability", () => {
+  it("uses the doubled Thursday goal in today's KPI and preserves a configured zero monthly goal", () => {
+    const markup = renderToStaticMarkup(
+      <AppointmentsDashboard
+        analysis={{ ...current, viewKey: "without_canal_imob", referenceDate: "2026-10-22" }}
+        individualGoal={0}
+      />,
+    );
+    expect(markup).toContain("Meta cadastrada: 0 · meta atingida");
+    expect(markup).not.toContain("Aguardando a meta individual vigente");
+    expect(markup).toContain("Abaixo da meta: 0 para meta 16");
+  });
+
   it("shows unavailable analysis instead of invented charts or zero", () => {
     const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={null} />);
     expect(markup).toContain("Dados analíticos indisponíveis");

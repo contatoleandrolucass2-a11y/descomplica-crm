@@ -17,12 +17,18 @@ agendamentos e permanece nulo, sem classificacao de produtividade presumida.
 Nao ha migration ou alteracao de registros comerciais nesta entrega.
 
 Validacao local: lint sem erros (36 avisos preexistentes), typecheck, build e
-74 testes especificos aprovados. As fontes publicas da politica documental
+79 testes especificos aprovados. As fontes publicas da politica documental
 tambem passaram. A suite completa no Windows encontrou restricoes POSIX nos
 testes operacionais e de release; a CI Linux continua obrigatoria. Um timeout
 isolado de teste associativo durante carga concorrente passou na repeticao,
 sem modificar essa funcionalidade. Publicacao ainda depende dos gates do PR e
 da main exata; nenhum dado remoto ou permissao foi alterado.
+
+Na revisao final, a representatividade passou a sinalizar conversao indisponivel
+quando Ranking Score nao pode ser mapeado nos fatos agregados. A media diaria
+usa somente os dias cobertos pelo filtro, inclusive semana. KPIs de hoje/ontem
+usam as metas diarias correspondentes e meta mensal zero permanece um valor
+cadastrado. Reordenacao deve preservar a ordem de leitura e o foco no DOM.
 
 ## 2026-10-25 - Publicacao do hover e dos filtros herdados
 

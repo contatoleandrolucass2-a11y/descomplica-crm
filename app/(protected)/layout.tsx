@@ -39,6 +39,7 @@ import { AppPageIcon } from "./_components/AppPageIcon";
 import { AuthorizedNavigation } from "./_components/AuthorizedNavigation";
 import { AuthorizedBreadcrumbs } from "./_components/AuthorizedBreadcrumbs";
 import { DescomplicaBrandMark } from "./_components/DescomplicaBrandMark";
+import { DashboardShell } from "./_components/DashboardShell";
 import { MetaAdsAlertButton } from "./_components/MetaAdsAlertButton";
 import { PROTECTED_CONTENT_ID, ProtectedShellFrame } from "./_components/ProtectedShellFrame";
 import styles from "./_components/ProtectedShell.module.css";
@@ -164,7 +165,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
       shellClassName={styles.shell}
       contentClassName={styles.mainContent}
       chrome={chrome}
-      pages={navigationPages}
+      wrapContent={(content) => <DashboardShell pages={navigationPages}>{content}</DashboardShell>}
     >
       <UserPresenceHeartbeat />
       {children}

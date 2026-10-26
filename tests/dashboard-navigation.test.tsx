@@ -1,10 +1,12 @@
 import { renderToStaticMarkup } from "react-dom/server";
+import { readFileSync } from "node:fs";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PAGE_REGISTRY } from "../lib/navigation/registry";
 
 const route = vi.hoisted(() => ({ pathname: "/app" }));
 vi.mock("next/navigation", () => ({ usePathname: () => route.pathname }));
 import { DashboardShell } from "../app/(protected)/_components/DashboardShell";
+import { ProtectedShellFrame } from "../app/(protected)/_components/ProtectedShellFrame";
 
 const pages = PAGE_REGISTRY.filter(
   (page) => page.pageKey === "crm.dashboard" || page.parentKey === "crm.dashboard",
@@ -15,6 +17,39 @@ beforeEach(() => {
 });
 
 describe("Dashboard sidebar navigation", () => {
+  it("keeps the default frame pure and preserves its original markup", () => {
+    const source = readFileSync(
+      new URL("../app/(protected)/_components/ProtectedShellFrame.tsx", import.meta.url),
+      "utf8",
+    );
+    expect(source.match(/^import(?!\s+type\b).*$/gm) ?? []).toEqual([]);
+    expect(
+      renderToStaticMarkup(
+        <ProtectedShellFrame shellClassName="shell" contentClassName="content" chrome={<header />}>
+          Conteúdo
+        </ProtectedShellFrame>,
+      ),
+    ).toBe(
+      '<div class="shell" data-protected-shell="true"><header></header><div id="protected-main-content" class="content" data-protected-main-content="true" tabindex="-1">Conteúdo</div></div>',
+    );
+  });
+
+  it("allows the layout to wrap only the content with authorized dashboard navigation", () => {
+    const markup = renderToStaticMarkup(
+      <ProtectedShellFrame
+        shellClassName="shell"
+        chrome={<header>Chrome</header>}
+        wrapContent={(content) => <DashboardShell pages={pages}>{content}</DashboardShell>}
+      >
+        Conteúdo
+      </ProtectedShellFrame>,
+    );
+    expect(markup).toContain('<header>Chrome</header>');
+    expect(markup).toContain('aria-label="Agendamentos" aria-current="page"');
+    expect(markup.match(/id="protected-main-content"/g)).toHaveLength(1);
+    expect(markup).toContain('tabindex="-1">Conteúdo</div>');
+  });
+
   it("uses catalog order and only one active destination", () => {
     route.pathname = "/app/etapas/agendamentos";
     const markup = renderToStaticMarkup(
@@ -69,6 +104,19 @@ describe("Dashboard sidebar navigation", () => {
     route.pathname = pathname;
     expect(renderToStaticMarkup(<DashboardShell pages={pages}>Conteúdo</DashboardShell>)).toBe(
       "Conteúdo",
+    );
+    const frameProps = { shellClassName: "shell", chrome: <header /> };
+    expect(
+      renderToStaticMarkup(
+        <ProtectedShellFrame
+          {...frameProps}
+          wrapContent={(content) => <DashboardShell pages={pages}>{content}</DashboardShell>}
+        >
+          Conteúdo
+        </ProtectedShellFrame>,
+      ),
+    ).toBe(
+      renderToStaticMarkup(<ProtectedShellFrame {...frameProps}>Conteúdo</ProtectedShellFrame>),
     );
   });
 

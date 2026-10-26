@@ -1,10 +1,15 @@
 "use client";
 
 import {
+  Children,
+  cloneElement,
   createContext,
+  Fragment,
+  isValidElement,
   useContext,
   useEffect,
   useId,
+  useLayoutEffect,
   useRef,
   useState,
   type ReactNode,
@@ -42,6 +47,27 @@ function reconcile(saved: string[], ids: string[]) {
   return [...new Set([...saved.filter((id) => available.has(id)), ...ids])];
 }
 
+type ChartEntry = { id: string; node: ReactNode };
+
+// Chart/RecencyPanel are opaque React components identified by title; direct
+// ChartTile children use id. Split presentation groups without invoking child
+// components, retaining their ancestor classes and their original element keys.
+function chartEntries(children: ReactNode, ids: Set<string>): ChartEntry[] {
+  return Children.toArray(children).flatMap((child): ChartEntry[] => {
+    if (!isValidElement<{ id?: string; title?: string; children?: ReactNode }>(child)) return [];
+    const id = child.props.id ?? child.props.title;
+    if (id && ids.has(id)) return [{ id, node: child }];
+    if (child.type === Fragment) return chartEntries(child.props.children, ids);
+    if (typeof child.type === "string") {
+      return chartEntries(child.props.children, ids).map((entry) => ({
+        id: entry.id,
+        node: cloneElement(child, undefined, entry.node),
+      }));
+    }
+    throw new Error("ChartBoard children must have an id or title present in ids.");
+  });
+}
+
 export function ChartBoard({ children, ids, storageKey }: ChartBoardProps) {
   const [saved, setSaved] = useState<{ key: string | undefined; ids: string[] }>({
     key: storageKey,
@@ -50,6 +76,22 @@ export function ChartBoard({ children, ids, storageKey }: ChartBoardProps) {
   const [announcement, setAnnouncement] = useState("");
   const order = reconcile(saved.key === storageKey ? saved.ids : [], ids);
   const key = storageKey ? `crm:chart-board:v1:${storageKey}` : undefined;
+  const entries = new Map(
+    chartEntries(children, new Set(ids)).map((entry) => [entry.id, entry.node]),
+  );
+  const pendingFocus = useRef<{ element: HTMLElement; tile: HTMLElement | null } | null>(null);
+
+  useLayoutEffect(() => {
+    const pending = pendingFocus.current;
+    pendingFocus.current = null;
+    if (!pending?.element.isConnected) return;
+    // Moving a keyed subtree can blur it. An edge move also disables its arrow
+    // button, so retain keyboard continuity on that tile's reorder handle.
+    const target = pending.element.matches(":disabled")
+      ? pending.tile?.querySelector<HTMLElement>("[data-chart-reorder-handle]")
+      : pending.element;
+    target?.focus({ preventScroll: true });
+  }, [order]);
 
   useEffect(() => {
     if (!key) return;
@@ -77,6 +119,11 @@ export function ChartBoard({ children, ids, storageKey }: ChartBoardProps) {
     const next = [...order];
     next.splice(from, 1);
     next.splice(target, 0, id);
+    const active = document.activeElement;
+    if (active instanceof HTMLElement) {
+      const tile = active.closest<HTMLElement>("[data-appointments-chart]");
+      if (tile?.dataset.appointmentsChart === id) pendingFocus.current = { element: active, tile };
+    }
     setSaved({ key: storageKey, ids: next });
     setAnnouncement(`${title}: posição ${target + 1} de ${next.length}.`);
     if (key) {
@@ -91,7 +138,9 @@ export function ChartBoard({ children, ids, storageKey }: ChartBoardProps) {
   return (
     <Board.Provider value={{ order, move }}>
       <div className={styles.board} data-chart-board>
-        {children}
+        {order.map((id) => (
+          <Fragment key={id}>{entries.get(id)}</Fragment>
+        ))}
       </div>
       <p className={styles.srOnly} role="status" aria-live="polite" aria-atomic="true">
         {announcement}
@@ -173,6 +222,7 @@ export function ChartTile({
             <button
               type="button"
               className={`${styles.button} ${styles.handle}`}
+              data-chart-reorder-handle
               disabled={expanded}
               aria-label={`Reordenar ${title}`}
               aria-describedby={helpId}

@@ -243,6 +243,9 @@ export function analyzeAppointments(
     (!filters.company || slice.dimensions.companies[fact[4]] === filters.company);
   const dimensionFacts = slice.facts.filter(matchesFactDimensions);
   const sharedFacts = dimensionFacts.filter((fact) => matchesSelectedPeriod(fact[1]));
+  // Aggregated stage facts have no account-ranking dimension. Do not combine
+  // their unfiltered conversions with ranking-filtered appointment details.
+  const conversionAvailable = !filters.accountRanking;
   const dimensionFilteredOperations: DashboardAppointmentDetail[] | null =
     slice.version >= 3 ? (slice.appointments ?? []).filter(matchesAppointmentDimensions) : null;
   const filteredOperations: DashboardAppointmentDetail[] | null =
@@ -298,7 +301,7 @@ export function analyzeAppointments(
     approvedFolders: 0,
     sales: 0,
   };
-  if (slice.version === 4) {
+  if (slice.version === 4 && conversionAvailable) {
     for (const fact of sharedFacts) {
       if (fact[1].slice(0, 7) !== month) continue;
       if (fact[0] === 0) funnel.opportunities += fact[7];
@@ -380,10 +383,12 @@ export function analyzeAppointments(
           (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
             86_400_000,
         ) + 1;
-  const selectedCoveredDays =
-    selectedDateSet.size === 0
-      ? coveredDays
-      : [...selectedDateSet].filter((date) => date >= coveredStart && date <= coveredEnd).length;
+  const selectedCoveredDates = Array.from({ length: coveredDays }, (_, index) => {
+    const date = new Date(`${coveredStart}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  }).filter(matchesSelectedPeriod);
+  const selectedCoveredDays = selectedCoveredDates.length;
   const productiveOwners =
     slice.version === 4 && filteredOperations !== null
       ? new Set(
@@ -464,6 +469,7 @@ export function analyzeAppointments(
     map.set(key, current);
   };
   for (const fact of sharedFacts) {
+    if (!conversionAvailable) continue;
     if (fact[1].slice(0, 7) !== month || (fact[0] !== 1 && fact[0] !== 2)) continue;
     const manager = slice.dimensions.managers[fact[2]] ?? "Gerente não informado";
     addConversion(
@@ -583,15 +589,26 @@ export function analyzeAppointments(
   const todayGoal = matchesSelectedPeriod(slice.referenceDate)
     ? dailyGoalFor(slice.referenceDate)
     : null;
+  const yesterdayGoal =
+    previousReferenceDate >= slice.coverageStart && matchesSelectedPeriod(previousReferenceDate)
+      ? dailyGoalFor(previousReferenceDate)
+      : null;
+  const dailyAverageGoal =
+    selectedCoveredDays === 0 || goalBrokerCount === null
+      ? null
+      : selectedCoveredDates.reduce((sum, date) => sum + dailyGoalFor(date)!, 0) /
+        selectedCoveredDays;
 
   return {
     total,
     today,
     yesterday,
     dailyAverage: selectedCoveredDays > 0 ? total / selectedCoveredDays : null,
+    dailyAverageGoal,
     brokerCount: filteredBrokerCount,
     plannedToday: todayGoal,
     todayGoal,
+    yesterdayGoal,
     monthlyGoal: monthlyGoalFor(month),
     goalBrokerCount,
     performedToday: filteredOperations === null ? null : today,
@@ -599,9 +616,10 @@ export function analyzeAppointments(
     productiveBrokers: productiveOwners,
     productivePercent,
     registeredManagerCount: filteredManagerCount,
-    funnel: slice.version === 4 ? funnel : null,
-    visitsPerformed: slice.version === 4 ? funnel.visits : null,
-    sales: slice.version === 4 ? funnel.sales : null,
+    funnel: slice.version === 4 && conversionAvailable ? funnel : null,
+    visitsPerformed: slice.version === 4 && conversionAvailable ? funnel.visits : null,
+    sales: slice.version === 4 && conversionAvailable ? funnel.sales : null,
+    conversionAvailable,
     brokerRecency,
     conversionRankings: {
       owners: conversionRanking(conversionGroups.owners),

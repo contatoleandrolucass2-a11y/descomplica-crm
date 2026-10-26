@@ -769,6 +769,56 @@ export async function runAppointmentsPreview() {
     const firstTile = page.locator('[data-appointments-chart="Evolução de agendamentos por dia"]');
     const secondTile = page.locator('[data-appointments-chart="Previstos e realizados hoje"]');
     await expect(page.locator("section[data-appointments-chart]")).toHaveCount(14);
+    const readDomOrder = () =>
+      page
+        .locator("section[data-appointments-chart]")
+        .evaluateAll((elements) => elements.map((element) => element.dataset.appointmentsChart));
+    const initialDomOrder = await readDomOrder();
+    const movedDomOrder = [initialDomOrder[1], initialDomOrder[0], ...initialDomOrder.slice(2)];
+    const firstHandle = firstTile.getByRole("button", {
+      name: "Reordenar Evolução de agendamentos por dia",
+      exact: true,
+    });
+    await page.evaluate(() => {
+      window.__qaBoardNodes = [
+        ...document.querySelectorAll("section[data-appointments-chart]"),
+      ].map((tile) => ({
+        tile,
+        dialog: tile.querySelector("dialog"),
+        controls: [...tile.querySelectorAll("button, select, input")],
+      }));
+    });
+    const assertBoardIdentity = async () => {
+      assert.equal(
+        await page.evaluate(() =>
+          window.__qaBoardNodes.every(
+            ({ tile, dialog, controls }) =>
+              document
+                .querySelectorAll("section[data-appointments-chart]")
+                .values()
+                .some((node) => node === tile) &&
+              tile.querySelector("dialog") === dialog &&
+              controls.every((control) => tile.contains(control)),
+          ),
+        ),
+        true,
+        "Reordering preserves tile, native dialog and control nodes",
+      );
+      assert.equal(
+        await page.locator("section[data-appointments-chart]").evaluateAll((tiles) =>
+          tiles.every((tile) => {
+            let wrapper = tile.parentElement;
+            while (wrapper && !wrapper.hasAttribute("data-chart-board")) {
+              if (getComputedStyle(wrapper).display !== "contents") return false;
+              wrapper = wrapper.parentElement;
+            }
+            return Boolean(wrapper);
+          }),
+        ),
+        true,
+        "Cloned presentation wrappers retain display: contents with production CSS",
+      );
+    };
     const readOrder = (tile) => tile.evaluate((element) => Number(getComputedStyle(element).order));
     await page.evaluate(() => {
       window.__qaDragEvents = [];
@@ -798,10 +848,23 @@ export async function runAppointmentsPreview() {
       })
       .click();
     assert.equal(await readOrder(firstTile), 1, "Move button changes visual order");
+    assert.deepEqual(await readDomOrder(), movedDomOrder, "Move button changes real DOM order");
+    await expect(
+      firstTile.getByRole("button", {
+        name: "Mover Evolução de agendamentos por dia para depois",
+        exact: true,
+      }),
+    ).toBeFocused();
+    await assertBoardIdentity();
+    await secondTile.getByRole("button").last().focus();
+    await page.keyboard.press("Tab");
+    await expect(firstHandle).toBeFocused();
     await firstTile
       .getByRole("button", { name: "Reordenar Evolução de agendamentos por dia", exact: true })
       .press("ArrowUp");
     assert.equal(await readOrder(firstTile), 0, "Arrow key restores visual order");
+    assert.deepEqual(await readDomOrder(), initialDomOrder, "Arrow key restores DOM order");
+    await expect(firstHandle).toBeFocused();
     await firstTile
       .getByRole("button", { name: "Reordenar Evolução de agendamentos por dia", exact: true })
       .dragTo(secondTile);
@@ -810,6 +873,9 @@ export async function runAppointmentsPreview() {
       firstTile,
       `Handle drag changes visual order: ${JSON.stringify(evidence.dragEvents)}`,
     ).toHaveCSS("order", "1");
+    assert.deepEqual(await readDomOrder(), movedDomOrder, "Handle drag changes real DOM order");
+    await expect(firstHandle).toBeFocused();
+    await assertBoardIdentity();
     const persisted = await page.evaluate(() =>
       JSON.parse(localStorage.getItem("crm:chart-board:v1:appointments")),
     );
@@ -821,6 +887,7 @@ export async function runAppointmentsPreview() {
     assert.ok(persisted.every((id) => typeof id === "string"));
     await page.reload();
     await expect(firstTile).toHaveCSS("order", "1");
+    assert.deepEqual(await readDomOrder(), movedDomOrder, "Reload restores real DOM order");
     assert.ok(
       (await secondTile.boundingBox()).y <= (await firstTile.boundingBox()).y,
       "DOM wrappers do not prevent visual reordering",
@@ -828,6 +895,7 @@ export async function runAppointmentsPreview() {
     await page.evaluate(() => localStorage.removeItem("crm:chart-board:v1:appointments"));
     await page.reload();
     await expect(firstTile).toHaveCSS("order", "0");
+    assert.deepEqual(await readDomOrder(), initialDomOrder, "Cleared storage restores DOM order");
     evidence.reordering =
       "Buttons, arrow keys, handle drag and reload persistence passed; initial order restored for functional assertions";
     const daily = region("Evolução de agendamentos por dia");

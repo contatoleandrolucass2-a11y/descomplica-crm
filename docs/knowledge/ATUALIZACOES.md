@@ -2,6 +2,13 @@
 
 ## 2026-10-25: validacao local da pagina de agendamentos
 
+- Revisao posterior ao primeiro commit do PR #350: a reordenacao agora altera
+  a arvore React com chaves estaveis e restaura foco; teste isolado DOM aprovado.
+  Conversoes sem dimensao Ranking Score ficam indisponiveis sob esse filtro,
+  evitando numerador e denominador de bases distintas. Media diaria considera
+  os dias do filtro de semana; KPIs diarios usam as metas das datas respectivas.
+  Suite especifica atualizada: 79 testes aprovados; nova rodada de build e QA
+  de producao em execucao antes de publicar o SHA revisado.
 - Escopo efetivo restrito a `/app/etapas/agendamentos`; componentes do shell
   compartilham arquivos, mas o comportamento novo exige a rota exata. Testes
   de regressao preservam navegacao nas demais paginas.

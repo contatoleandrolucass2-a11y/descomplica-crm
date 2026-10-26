@@ -242,6 +242,123 @@ describe("appointment chart analysis", () => {
     ]);
   });
 
+  it("uses the same covered date/week intersection for actual and goal averages", () => {
+    const appointment = {
+      createdAt: "2026-10-19T12:00:00Z",
+      scheduledAt: null,
+      attendedAt: null,
+      visitPerformed: false,
+      regionalManager: "Regional A",
+      salesManager: "Gerente A",
+      owner: "Responsável A",
+      accountName: "Conta A",
+      accountRanking: "Ouro",
+      channel: 1 as const,
+      company: "Empresa A",
+      registeredBroker: true,
+    };
+    const input = goalSlice({ referenceDate: "2026-10-25", appointments: [appointment] });
+    const week = analyzeAppointments(input, { ...goalOptions, filters: { week: 4 } });
+    expect(week.selectedCoveredDays).toBe(7);
+    expect(week.dailyAverage).toBeCloseTo(1 / 7);
+    expect(week.dailyAverageGoal).toBeCloseTo(12 / 7);
+    const intersection = analyzeAppointments(input, {
+      ...goalOptions,
+      filters: { week: 4, createdDates: ["2026-10-15", "2026-10-19", "2026-10-22", "2026-10-24"] },
+    });
+    expect(intersection.selectedCoveredDays).toBe(3);
+    expect(intersection.dailyAverage).toBeCloseTo(1 / 3);
+    expect(intersection.dailyAverageGoal).toBe(2); // (2 + 4 + 0) / 3.
+    const partial = analyzeAppointments(
+      { ...input, referenceDate: "2026-10-19" },
+      {
+        ...goalOptions,
+        filters: { week: 4 },
+      },
+    );
+    expect(partial.selectedCoveredDays).toBe(1);
+    expect(partial.dailyAverageGoal).toBe(2);
+    expect(partial.weekly[0]?.goal).toBe(12); // Week target still includes future weekdays.
+  });
+
+  it("keeps empty/unknown average goals null and known weekend or empty-roster goals zero", () => {
+    const empty = analyzeAppointments(goalSlice(), { ...goalOptions, filters: { week: 5 } });
+    expect(empty.dailyAverage).toBeNull();
+    expect(empty.dailyAverageGoal).toBeNull();
+    expect(
+      analyzeAppointments(goalSlice({ viewKey: "with_canal_imob" }), goalOptions).dailyAverageGoal,
+    ).toBeNull();
+    expect(
+      analyzeAppointments(goalSlice(), { ...goalOptions, filters: { company: "Empresa A" } })
+        .dailyAverageGoal,
+    ).toBeNull();
+    expect(
+      analyzeAppointments(goalSlice(), { ...goalOptions, brokerRoster: [] }).dailyAverageGoal,
+    ).toBe(0);
+    expect(
+      analyzeAppointments(goalSlice(), {
+        ...goalOptions,
+        filters: { createdDates: ["2026-10-18"] },
+      }).dailyAverageGoal,
+    ).toBe(0);
+  });
+
+  it("resolves yesterday's Thursday/weekend target and respects filters and coverage", () => {
+    expect(
+      analyzeAppointments(goalSlice({ referenceDate: "2026-10-23" }), goalOptions).yesterdayGoal,
+    ).toBe(4);
+    expect(analyzeAppointments(goalSlice(), goalOptions).yesterdayGoal).toBe(0);
+    expect(
+      analyzeAppointments(goalSlice(), {
+        ...goalOptions,
+        filters: { createdDates: ["2026-10-19"] },
+      }).yesterdayGoal,
+    ).toBeNull();
+    expect(
+      analyzeAppointments(goalSlice({ coverageStart: "2026-10-19" }), goalOptions).yesterdayGoal,
+    ).toBeNull();
+    expect(
+      analyzeAppointments(goalSlice({ viewKey: "with_canal_imob" }), goalOptions).yesterdayGoal,
+    ).toBeNull();
+  });
+
+  it("never divides unfiltered conversions by ranking-filtered appointments", () => {
+    const appointment = (accountRanking: string) => ({
+      createdAt: "2026-10-19T12:00:00Z",
+      scheduledAt: null,
+      attendedAt: null,
+      visitPerformed: true,
+      regionalManager: "Regional A",
+      salesManager: "Gerente A",
+      owner: "Responsável A",
+      accountName: "Conta A",
+      accountRanking,
+      channel: 1 as const,
+      company: "Empresa A",
+      registeredBroker: true,
+    });
+    const input = goalSlice({
+      facts: [stageFact(1, 2), stageFact(2, 2), stageFact(4, 1)],
+      appointments: [appointment("Ouro"), appointment("Prata")],
+    });
+    const filtered = analyzeAppointments(input, {
+      ...goalOptions,
+      filters: { accountRanking: "Ouro" },
+    });
+    expect(filtered.total).toBe(1);
+    expect(filtered.details).toHaveLength(1);
+    expect(filtered.performedToday).toBe(1);
+    expect(filtered.conversionAvailable).toBe(false);
+    expect(filtered.funnel).toBeNull();
+    expect(filtered.visitsPerformed).toBeNull();
+    expect(filtered.sales).toBeNull();
+    expect(filtered.conversionRankings).toEqual({ owners: [], managers: [], regionalManagers: [] });
+    const unfiltered = analyzeAppointments(input, goalOptions);
+    expect(unfiltered.conversionAvailable).toBe(true);
+    expect(unfiltered.visitsPerformed).toBe(2);
+    expect(unfiltered.conversionRankings.owners[0]?.percent).toBe(100);
+  });
+
   it("derives the six indicators, operational comparison, rankings and table from v3", () => {
     const input = slice({
       version: 3,
