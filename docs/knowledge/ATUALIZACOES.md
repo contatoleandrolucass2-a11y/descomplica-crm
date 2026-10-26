@@ -3422,3 +3422,16 @@ dependente da autorização específica aplicável.
   sintético ausente. Esses arquivos não foram alterados, conforme a regra de
   escopo exclusivo. Integrações externas, WhatsApp, CRM imobiliário,
   financeiro e produtos opcionais não fazem parte desta entrega.
+
+## 2026-10-25 — Abertura: paridade do Simulador CAIXA
+
+- Escopo: exclusivamente /app/simulacao/caixa; referencia https://descomplicapro.com.br/simulacao/caixa somente leitura; validar regras em fontes oficiais CAIXA.
+- Git comum confirmado; checkout inicialmente detached/limpo em 6a0f678eee50bd1f8178cd11de9301b016d9bd99; origin/main no mesmo SHA apos fetch em 2026-10-26 UTC (25/10 America/Sao_Paulo). Branch de trabalho codex/simulador-caixa-paridade.
+- Health https://crm.descomplicapro.com.br/api/health consultado sem autenticacao em 2026-10-26T00:37:00Z: HTTP 200, status ok, version ec98b41aedc721c22fff4f28dca9b31bc6317373. Versao publicada difere do checkout documental; nao comprova entrega desta demanda.
+- CONTEXTO.md/FERRAMENTAS.md lidos. Runtime instalado context/search falhou com Documento excede o limite de exportacao; ATUALIZACOES.md ja possuia 259205 bytes (limite 256000). Nao reduzir protecao nem alterar ferramenta fora do escopo. Sync sera tentado e eventual pendencia registrada. Reavaliar com manutencao especifica do arquivo de conhecimento.
+- gh ausente no PATH; consultas GitHub pelo conector. Pagina de referencia acessivel por leitura web. URLs /home e /simulacao do simulador oficial retornaram 404 na ferramenta web; investigar acesso publico normal e fontes oficiais alternativas, sem presumir regras.
+
+### Abertura CAIXA — complemento de fonte GitHub
+
+- Conector confirmou main como branch padrão. Consulta observacional via gh instalado na VPS confirmou CI push/main 40240265203 concluída com sucesso no SHA local 6a0f678eee50bd1f8178cd11de9301b016d9bd99; fonte https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40240265203. Não há PR aberto da demanda CAIXA; PRs antigos de migração registravam apenas canário/visual, não validação financeira atual. Branch remota atualizada por fetch. Não executar suites na VPS compartilhada.
+- Sync inicial tentado e recusado por limite de exportação; o mesmo problema preexistente consta no registro documental anterior de main. Mantida pendência, sem ampliar escopo para corrigir a infraestrutura do conhecimento.

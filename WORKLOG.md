@@ -9307,3 +9307,13 @@ página do CRM foi alterado por esta correção de gate.
 - O status de veiculação passa a ocupar uma linha própria dentro da coluna
   Campanha. A geometria automatizada confirma que o selo termina antes da
   coluna Investimento, inclusive com nomes longos.
+
+## 2026-10-25 — Simulador CAIXA: réplica e regras verificadas
+
+Página /app/simulacao/caixa recebe jornada dedicada baseada na referência pública,
+com Simulador, Documentos, Diagnóstico e Utilitários. Motor indicativo isolado
+usa faixas/taxas oficiais consultadas em 25/10/2026, corrige datas, cotas SBPE e
+FGTS sobreposto. Subsídio, seguros e taxa SBPE exigem parâmetros confirmados;
+incertezas são explícitas. Autorização de servidor e APIs bancárias preservadas.
+Origem, fórmulas, diferenças necessárias e limites em docs/simulators/CAIXA.md.
+Validação e publicação serão registradas com evidências ao concluir os gates.
