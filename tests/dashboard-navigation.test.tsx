@@ -44,7 +44,7 @@ describe("Dashboard sidebar navigation", () => {
         Conteúdo
       </ProtectedShellFrame>,
     );
-    expect(markup).toContain('<header>Chrome</header>');
+    expect(markup).toContain("<header>Chrome</header>");
     expect(markup).toContain('aria-label="Agendamentos" aria-current="page"');
     expect(markup.match(/id="protected-main-content"/g)).toHaveLength(1);
     expect(markup).toContain('tabindex="-1">Conteúdo</div>');
