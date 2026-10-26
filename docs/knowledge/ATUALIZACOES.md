@@ -2,6 +2,15 @@
 
 ## 2026-10-25: validacao local da pagina de agendamentos
 
+- Candidate autenticado `40251775496` aprovado; artefato `12622015999`, captura
+  do merge sintetico `cdb9a3c5` cujo head e `32b65849`. Incorporacao restrita a
+  11 imagens e 38 entradas de `/app/etapas/agendamentos`, com proveniencia
+  parcial no manifesto. Outras 231 imagens e 56.733 nos JSON preservados.
+  Reference-parity: 15 testes aprovados e um condicional nao executado.
+  Capturas autenticadas cobrem shell/sidebar e estado sem dados; QA sintetico
+  com CSS de producao cobre graficos preenchidos em 18 telas, aprovado apos
+  revisao de ordem DOM/foco. CI `40251775493`: validate/isolated-restore verdes;
+  o novo commit de referencias requer nova CI antes de merge/publicacao.
 - Revisao posterior ao primeiro commit do PR #350: a reordenacao agora altera
   a arvore React com chaves estaveis e restaura foco; teste isolado DOM aprovado.
   Conversoes sem dimensao Ranking Score ficam indisponiveis sob esse filtro,

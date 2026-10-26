@@ -30,6 +30,16 @@ usa somente os dias cobertos pelo filtro, inclusive semana. KPIs de hoje/ontem
 usam as metas diarias correspondentes e meta mensal zero permanece um valor
 cadastrado. Reordenacao deve preservar a ordem de leitura e o foco no DOM.
 
+Validacao revisada: 18 combinacoes com CSS de producao aprovadas, incluindo
+ordem DOM/foco, sem erros JavaScript. Regressao do shell em connected-systems
+aprovada em nove combinacoes; Frame permanece puro e o wrapper e composto no
+layout. CI `40251775493` aprovou validate e isolated-restore no SHA `32b65849`.
+Candidate `40251775496` aprovado: revisadas e incorporadas somente 11 capturas
+de Agendamentos e 38 entradas da rota. Outras 231 imagens e 56.733 nos JSON
+preservados byte a byte. Esse lote cobre sidebar/estado sem dados; graficos
+preenchidos foram validados no QA sintetico. Reference-parity: 15 testes
+aprovados, um condicional nao executado. Publicacao aguarda CI do novo commit.
+
 ## 2026-10-25 - Publicacao do hover e dos filtros herdados
 
 O PR #346 foi integrado em `c6de29d4`; a `main` publicada avancou para
