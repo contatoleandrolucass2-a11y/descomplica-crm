@@ -78,6 +78,13 @@ com concorrência limitada. A CI de 0ab2a93c passou 4.241 testes e detectou o
 caso de teto de taxa, corrigido e comprovado nos 64 testes locais posteriores.
 CI final, comparação autenticada, merge e publicação permanecem pendentes.
 
+## 2026-10-26 - Publicacao de Agendamentos
+
+PR #350 publicado no SHA 5ed62606, CI main 40263238224 aprovada.
+42 cenarios visuais locais e smoke autenticado desktop/celular nos tres temas
+concluidos. Deployment d04aed32-b1af-4ff7-a768-4d5f7e4189d9, 01:04 Brasilia.
+Evidencias e limite de sincronizacao Obsidian em docs/knowledge/ATUALIZACOES.md.
+
 ## 2026-10-25 — Validação complementar de Agendamentos
 
 Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
