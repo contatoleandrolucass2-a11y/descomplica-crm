@@ -296,6 +296,19 @@ describe("dashboard Meta Ads", () => {
     expect(styles).toContain("overflow-x: auto");
   });
 
+  it("mantém valores legíveis e deixa o filtro ultrapassar os limites do card", async () => {
+    const [canvasApplication, canvasStyles] = await Promise.all([
+      readFile(new URL("../public/canvas/app.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/canvas/merged.css", import.meta.url), "utf8"),
+    ]);
+
+    expect(canvasApplication).not.toContain("value.toExponential");
+    expect(canvasApplication).toContain("value.toLocaleString('pt-BR'");
+    expect(canvasStyles).toContain(":has(>.card-controls:not([hidden])){overflow:visible");
+    expect(canvasStyles).toContain("width:min(520px,calc(100vw - 36px))");
+    expect(canvasStyles).toContain("max-height:min(480px,calc(100vh - 80px))");
+  });
+
   it("omite destinos que não foram autorizados no catálogo", async () => {
     mocks.getAuthorizedNavigation.mockReturnValueOnce([]);
     const markup = renderToStaticMarkup(await MetaAdsDashboardPage());
