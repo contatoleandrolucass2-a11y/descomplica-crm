@@ -32,33 +32,20 @@ values
   ('ad710000-0000-4000-8000-000000000001', 'canvas-one@example.test'),
   ('ad710000-0000-4000-8000-000000000002', 'canvas-two@example.test');
 
-insert into public.profiles (
-  user_id,
-  email,
-  is_active,
-  profile_completed,
-  access_status
-)
-values
-  (
-    'ad710000-0000-4000-8000-000000000001',
-    'canvas-one@example.test',
-    true,
-    true,
-    'approved'
-  ),
-  (
-    'ad710000-0000-4000-8000-000000000002',
-    'canvas-two@example.test',
-    true,
-    true,
-    'approved'
-  );
+update public.profiles
+set is_active = true,
+    profile_completed = true,
+    access_status = 'approved'
+where user_id in (
+  'ad710000-0000-4000-8000-000000000001',
+  'ad710000-0000-4000-8000-000000000002'
+);
 
 insert into public.user_roles (user_id, role_key)
 values
   ('ad710000-0000-4000-8000-000000000001', 'master'),
-  ('ad710000-0000-4000-8000-000000000002', 'master');
+  ('ad710000-0000-4000-8000-000000000002', 'master')
+on conflict (user_id) do update set role_key = excluded.role_key;
 
 insert into auth.sessions (id, user_id, aal, not_after)
 values
