@@ -846,6 +846,17 @@
     font-size: 12px;
   }
 
+  .topbar:has([data-appointments-navigation="true"]) .navigationList {
+    gap: 4px;
+  }
+
+  .topbar:has([data-appointments-navigation="true"])
+    :is(.navigationLink, .navigationTrigger) {
+    min-height: 44px;
+    padding-inline: 4px;
+    font-size: 12px;
+  }
+
   .brandMark {
     width: 154px;
     height: 27px;

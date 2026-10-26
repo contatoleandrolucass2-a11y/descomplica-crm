@@ -47,6 +47,13 @@ aprovou 1.599 e repetiu três falhas Windows preexistentes em Meta Ads, por
 contratos de arquivo privado e perfil Linux; esses arquivos não foram alterados.
 CI Linux e publicação ainda dependem das etapas seguintes deste mesmo trabalho.
 
+A primeira matriz autenticada Linux do candidato concluiu todas as 242 capturas
+e isolou uma colisão do cabeçalho em 1440 px: a regra de espaçamento exclusiva
+de Agendamentos prevalecia sobre o breakpoint compacto e aproximava
+“Administração” de “Claro”. O breakpoint da mesma rota passou a usar 4 px entre
+itens, 4 px de padding lateral e 44 px de altura mínima, preservando ícones e
+sem alterar o shell das demais páginas. A matriz local focada permaneceu 21/21.
+
 ## 2026-10-26 — CAIXA: contraste de estados nos três temas
 
 O job Linux 121370107375 do run 40259598078 identificou contraste transitório

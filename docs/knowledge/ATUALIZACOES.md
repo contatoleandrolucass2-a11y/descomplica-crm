@@ -28,6 +28,11 @@
   grandes e estados indisponiveis/restritos foram exercitados.
 - Evidencia: `test-results/appointments-preview/result.json`, `passed: true`,
   21 telas. Artefatos sao sinteticos e locais; nao contem dados de clientes.
+- A matriz Linux do run `40290352317` completou 154 rotas, 88 variacoes de tema,
+  242 auditorias Axe e 242 capturas. O unico bloqueio funcional ficou no
+  cabecalho de Agendamentos em 1440 px: navegacao sem geometria suficiente e
+  alvo `Tema claro` sobreposto. A compactacao do breakpoint foi corrigida apenas
+  para essa rota; a QA local focada voltou a aprovar 21/21 antes da nova CI.
 - Lint passou sem erros (38 avisos preexistentes fora do escopo); typecheck e
   build passaram. Vitest: 4.293 aprovados e 110 condicionais ignorados. Node:
   1.599 aprovados, 19 ignorados e tres falhas Windows preexistentes em Meta Ads
