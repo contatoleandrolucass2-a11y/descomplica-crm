@@ -8,6 +8,7 @@
 - Separa desconto complemento FGTS de aporte MCMV Cidades e valida o desconto mínimo de R$ 1.500.
 - Corrige o cenário de obra para atingir 100% da liberação no último mês.
 - Amplia a regressão financeira, responsiva e de acessibilidade com cenários fictícios confrontados na fonte oficial.
+- Atualiza somente as cinco referências visuais CAIXA alteradas, a partir da captura protegida aprovada.
 
 ## 2026-10-26 — Refinamento final de Agendamentos publicado
 

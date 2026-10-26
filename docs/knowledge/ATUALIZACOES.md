@@ -3741,3 +3741,28 @@ dependente da autorização específica aplicável.
   mostrava o novo estado correto `seguros de referência`. Os 15 cenários
   anteriores passaram. A expectativa CAIXA foi atualizada sem reduzir o gate;
   nova CI/captura é obrigatória.
+
+### CAIXA — captura protegida e referências visuais
+
+- CI `40331622292`: validate e restauração isolada aprovados. O release gate
+  aprovou cálculo CAIXA, temas, Axe, banco, build e E2E; recusou apenas cinco
+  comparações visuais esperadas da própria rota, sem falha financeira.
+- A primeira tentativa da captura `40331622478` atingiu o limite de 45 minutos
+  durante a matriz global, depois de E2E aprovado. A repetição exata concluiu
+  com sucesso, sem mudança de workflow ou redução de gate.
+- Artefato aprovado `12660573871`, digest
+  `35990d8d37adcd201cda2d161859ca92ec4ad0392943c40b5bf32dfca93812b1`;
+  head `0a301c77e66be38361df9d7b1667ecc49360be7d`, capture commit
+  `bbe3748a4c32a354d18bc578b55b2ad49cb2067e`, capturado em
+  `2026-10-26T15:01:33.668Z`.
+- Onze imagens CAIXA revisadas em resolução original: formulário completo e
+  legível, sem corte, sobreposição ou overflow horizontal nas sete larguras,
+  três temas desktop e escuro móvel. Incorporadas somente as cinco imagens
+  materialmente alteradas e os registros da rota; demais páginas e metadados
+  globais preservados. Nova CI do head integrado continua obrigatória.
+- Validação final local em Node 24.19.0/pnpm 11.20.0: lint sem erros e com os
+  mesmos 44 warnings Meta preexistentes; typecheck e build aprovados; Vitest
+  aprovou 4.302 testes e pulou 111. A etapa Node aprovou 1.599 e pulou 19, mas
+  três testes de ACL/perfil privado Meta falharam no host Windows. Não houve
+  correção fora do escopo nem dispensa do gate; a suíte Linux da nova CI deve
+  aprovar integralmente antes de merge/publicação.

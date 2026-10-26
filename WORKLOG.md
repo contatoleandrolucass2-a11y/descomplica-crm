@@ -22,6 +22,12 @@ Testes unitários cobrem as novas fronteiras, a base de avaliação e uma fixtur
 da calculadora pública. O navegador sintético confirma o fluxo SBPE, os campos
 exclusivos MCMV, valores sem truncamento, responsividade e acessibilidade.
 
+A captura protegida `40331622478` foi aprovada na segunda execução, com todos
+os gates funcionais, Axe e zoom. O artefato imutável `12660573871` alterou
+somente cinco imagens CAIXA; as onze capturas da rota foram revisadas em sete
+larguras, três temas desktop e escuro móvel. A incorporação preserva as demais
+rotas e os metadados globais.
+
 ## 2026-10-26 — Publicacao final da experiencia de Agendamentos
 
 O PR #355 foi integrado na `main` como
