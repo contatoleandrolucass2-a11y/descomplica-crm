@@ -63,6 +63,7 @@ const initialForm = {
   operatingFee: "",
   cityLimit: "",
   propertyCondition: "new",
+  middleClass: false,
   incomeLimitPercent: "30",
   constructionMonths: "",
 };
@@ -90,15 +91,25 @@ function housingInput(form: Form, baseDate: string): HousingInput {
     inConstruction: form.inConstruction,
     fgts: Number(form.fgts),
     propertyCondition: form.propertyCondition as "new" | "used",
+    middleClass: form.product === "mcmv" && form.middleClass,
     incomeLimitPercent: Number(form.incomeLimitPercent),
     asOf: baseDate,
   };
-  for (const key of ["approvedPayment", "confirmedSubsidy", "nominalRate", "mipMonthly", "dfiMonthly", "operatingFee", "cityLimit"] as const) {
+  for (const key of [
+    "approvedPayment",
+    "confirmedSubsidy",
+    "nominalRate",
+    "mipMonthly",
+    "dfiMonthly",
+    "operatingFee",
+    "cityLimit",
+  ] as const) {
     const value = optionalNumber(form[key]);
     if (value !== undefined) input[key] = value;
   }
   const constructionMonths = optionalNumber(form.constructionMonths);
-  if (form.inConstruction && constructionMonths !== undefined) input.constructionMonths = constructionMonths;
+  if (form.inConstruction && constructionMonths !== undefined)
+    input.constructionMonths = constructionMonths;
   return input;
 }
 
@@ -461,7 +472,7 @@ export function CaixaClient({
   const simulationText = result?.ok
     ? [
         "SIMULAÇÃO CAIXA — DESCOMPLICA CRM",
-        `${result.product.toUpperCase()} · ${result.system.toUpperCase()} · ${result.term} meses`,
+        `${result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} · ${result.system.toUpperCase()} · ${result.term} meses`,
         `Valor do imóvel: ${money.format(result.propertyValue)}`,
         `Potencial de financiamento indicativo: ${money.format(result.financing)}`,
         `Subsídio: ${result.subsidyConfirmed ? money.format(result.subsidy) : "a confirmar; não incluído"}`,
@@ -520,6 +531,7 @@ export function CaixaClient({
             key={key}
             className={tab === key ? "active" : ""}
             aria-current={tab === key ? "page" : undefined}
+            aria-label={`${number} ${label}`}
             onClick={() => setTab(key)}
           >
             <span>{number}</span>
@@ -731,6 +743,16 @@ export function CaixaClient({
                     <MoneyInput value={form.fgts} onChange={(value) => update("fgts", value)} />
                   </Field>
                 )}
+                {form.product === "mcmv" && (
+                  <label className="caixa-middle-class-option">
+                    <input
+                      type="checkbox"
+                      checked={form.middleClass}
+                      onChange={(event) => update("middleClass", event.target.checked)}
+                    />
+                    Simular MCMV Classe Média (sem subsídio)
+                  </label>
+                )}
                 <Field label="Subsídio confirmado pela CAIXA">
                   <MoneyInput
                     value={form.confirmedSubsidy}
@@ -859,7 +881,8 @@ export function CaixaClient({
                       <p className="caixa-result-plan-caption">
                         1º encargo estimado
                         {result.insuranceKnown ? "" : " parcial; seguros não confirmados"} ·{" "}
-                        {result.product.toUpperCase()} · {result.system.toUpperCase()}
+                        {result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} ·{" "}
+                        {result.system.toUpperCase()}
                       </p>
                       <div className="caixa-result-plan-total">
                         <span>Financiamento indicativo</span>
@@ -898,10 +921,10 @@ export function CaixaClient({
                     </section>
                   </div>
                   <p className="caixa-result-note">
-                    {result.product.toUpperCase()} · {result.system.toUpperCase()} · taxa nominal de{" "}
-                    {result.rate.toFixed(4)}% a.a. · taxa efetiva de{" "}
-                    {result.effectiveRate.toFixed(4)}% a.a. · comprometimento estimado de{" "}
-                    {result.commitment.toFixed(1)}%.
+                    {result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} ·{" "}
+                    {result.system.toUpperCase()} · taxa nominal de {result.rate.toFixed(4)}% a.a. ·
+                    taxa efetiva de {result.effectiveRate.toFixed(4)}% a.a. · comprometimento
+                    estimado de {result.commitment.toFixed(1)}%.
                   </p>
                   {result.warnings.length > 0 && (
                     <div className="caixa-notice">
@@ -967,7 +990,10 @@ export function CaixaClient({
                           key={index}
                           onClick={() => {
                             setForm(item.form);
-                          setConstruction((previous) => ({ ...previous, months: item.form.constructionMonths || "36" }));
+                            setConstruction((previous) => ({
+                              ...previous,
+                              months: item.form.constructionMonths || "36",
+                            }));
                             setResult(item.result);
                             setSubmitted(true);
                           }}
@@ -982,7 +1008,13 @@ export function CaixaClient({
                   {form.inConstruction && (
                     <section className="caixa-construction">
                       <h3>Estimativa de juros de obra</h3>
-                      {construction.months !== form.constructionMonths && <p className="caixa-reference-notice">O prazo deste cenário é uma hipótese independente e não altera o prazo total usado na conferência da idade. Para recalcular essa conferência, ajuste o prazo previsto nos parâmetros e calcule novamente.</p>}
+                      {construction.months !== form.constructionMonths && (
+                        <p className="caixa-reference-notice">
+                          O prazo deste cenário é uma hipótese independente e não altera o prazo
+                          total usado na conferência da idade. Para recalcular essa conferência,
+                          ajuste o prazo previsto nos parâmetros e calcule novamente.
+                        </p>
+                      )}
                       <div className="caixa-form-grid">
                         {(
                           [
@@ -1164,7 +1196,7 @@ export function CaixaClient({
                       </select>
                     </Field>
                     {profile.product === "mcmv" &&
-                  Number(profile.income) <= 4000 &&
+                      Number(profile.income) <= 4000 &&
                       profiles.length === 1 && (
                         <Field label="Fator Social">
                           <select
@@ -1298,7 +1330,7 @@ export function CaixaClient({
                   key={key}
                   className={diagnosis.reason === key ? "active" : ""}
                   aria-pressed={diagnosis.reason === key}
-                    onClick={() => setDiagnosis((previous) => ({ ...previous, reason: key ?? "" }))}
+                  onClick={() => setDiagnosis((previous) => ({ ...previous, reason: key ?? "" }))}
                 >
                   {label}
                 </button>
@@ -1598,8 +1630,14 @@ export function CaixaClient({
               </div>
               {showPeriodResult && (
                 <div className={`caixa-fgts-result${fgtsResult.eligible ? "eligible" : ""}`}>
-                {fgtsResult.invalid && <p role="alert">Confira os períodos: datas devem ser válidas, o fim não pode anteceder o início nem ultrapassar a data-base. O resultado não comprova o requisito de tempo.</p>}
-                <span>Tempo total sem duplicar sobreposições</span>
+                  {fgtsResult.invalid && (
+                    <p role="alert">
+                      Confira os períodos: datas devem ser válidas, o fim não pode anteceder o
+                      início nem ultrapassar a data-base. O resultado não comprova o requisito de
+                      tempo.
+                    </p>
+                  )}
+                  <span>Tempo total sem duplicar sobreposições</span>
                   <strong>{fgtsResult.days} dias</strong>
                   <h3>
                     {fgtsResult.eligible ? "36 MESES ATINGIDOS NA ESTIMATIVA" : "TEMPO A CONFERIR"}

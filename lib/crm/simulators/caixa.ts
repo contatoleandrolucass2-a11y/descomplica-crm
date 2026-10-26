@@ -28,6 +28,7 @@ export interface HousingInput {
   populationFactor?: number;
   constructionMonths?: number;
   incomeLimitPercent?: number;
+  middleClass?: boolean;
   asOf?: string | Date;
 }
 
@@ -134,11 +135,14 @@ export function getHousingRate({
   hasFgts36 = false,
   previousSubsidy = false,
   nominalRate,
+  middleClass = false,
+  propertyValue = 0,
 }: Partial<HousingInput> & { income: number }) {
   if (nominalRate !== undefined) return finiteNonnegative(nominalRate) ? nominalRate : NaN;
   if (product === "sbpe" || previousSubsidy || income <= 0 || income > 13000 || !STATES.has(state))
     return NaN;
   const row = MCMV_RATES.find(([maximum]) => income <= maximum);
+  if (middleClass || propertyValue > 400000 || income > 9600) return 10;
   if (!row) return NaN;
   return row[NORTH_NORTHEAST.has(state) ? 1 : 2] - (hasFgts36 && income <= 9600 ? 0.5 : 0);
 }
@@ -185,12 +189,15 @@ export interface HousingSuccess {
   subsidyConfirmed: boolean;
   financingQuota: number;
   sources: typeof CAIXA_SOURCES;
+  middleClass: boolean;
 }
 export type HousingResult = HousingSuccess | { ok: false; errors: string[] };
 export function calculateHousingSimulation(input: HousingInput): HousingResult {
   const { income, propertyValue } = input;
   const product = input.product ?? "mcmv",
     system = input.system ?? "price";
+  const middleClass =
+    product === "mcmv" && (input.middleClass === true || income > 9600 || propertyValue > 400000);
   const errors: string[] = [],
     warnings: string[] = [];
   if (!Number.isFinite(income) || income <= 0) errors.push("Informe uma renda familiar válida.");
@@ -229,9 +236,10 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
   if (product === "mcmv") {
     if (income > 13000)
       errors.push("Renda acima do MCMV. Selecione SBPE e informe a taxa da simulação oficial.");
-    const ceiling = income <= 5000 ? (input.cityLimit ?? 210000) : income <= 9600 ? 400000 : 600000;
+    const ceiling = middleClass ? 600000 : income <= 5000 ? (input.cityLimit ?? 210000) : 400000;
     if (
       input.cityLimit !== undefined &&
+      !middleClass &&
       income <= 5000 &&
       (input.cityLimit < 210000 || input.cityLimit > 275000)
     )
@@ -240,12 +248,12 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
       );
     if (propertyValue > ceiling)
       errors.push(
-        income <= 5000 && input.cityLimit === undefined
+        !middleClass && income <= 5000 && input.cityLimit === undefined
           ? "Confirme o limite municipal oficial do imóvel nas faixas 1 e 2 (R$ 210 mil a R$ 275 mil)."
           : "Valor do imóvel acima do limite do MCMV para a faixa informada.",
       );
   }
-  const rate = getHousingRate({ ...input, product });
+  const rate = getHousingRate({ ...input, product, middleClass });
   if (!Number.isFinite(rate) || rate < 0 || rate > 100)
     errors.push("Informe a taxa nominal anual confirmada na CAIXA para este produto e perfil.");
   const subsidy = input.confirmedSubsidy ?? 0;
@@ -256,7 +264,7 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     errors.push(
       "Subsídio informado ultrapassa o teto regional. Confirme o desconto complemento na CAIXA.",
     );
-  if (subsidy > 0 && (product !== "mcmv" || input.previousSubsidy || income > 4000))
+  if (subsidy > 0 && (product !== "mcmv" || middleClass || input.previousSubsidy || income > 4000))
     errors.push("Subsídio incompatível com o perfil informado. Confirme o enquadramento na CAIXA.");
   const fgts = input.hasFgts36 ? (input.fgts ?? 0) : 0,
     ownFunds = input.ownFunds ?? 0;
@@ -292,7 +300,7 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     product === "sbpe" ? (system === "sac" ? 0.8 : 0.7) : system === "sac" ? 0.9 : 0.8;
   if (
     product === "mcmv" &&
-    income > 9600 &&
+    middleClass &&
     input.propertyCondition === "used" &&
     SOUTH_SOUTHEAST.has(input.state)
   )
@@ -305,17 +313,21 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     warnings.push(
       "Tarifa administrativa não informada e não incluída; confirme o encargo total na CAIXA.",
     );
-  if (input.confirmedSubsidy === undefined && product === "mcmv")
+  if (input.confirmedSubsidy === undefined && product === "mcmv" && !middleClass)
     warnings.push(
       "Subsídio a confirmar: nenhum desconto foi abatido. A fórmula municipal não foi presumida.",
     );
-  if (product === "mcmv" && income <= 5000 && input.cityLimit === undefined)
+  if (product === "mcmv" && !middleClass && income <= 5000 && input.cityLimit === undefined)
     warnings.push(
       "Limite municipal não confirmado: utilizado o teto conservador de R$ 210 mil, sujeito ao município.",
     );
   if (input.inConstruction && !input.constructionMonths)
     warnings.push(
       "Prazo de obra não informado: limite etário não desconta a fase de construção; confirme o prazo total na CAIXA.",
+    );
+  if (middleClass)
+    warnings.push(
+      "Enquadramento indicativo MCMV Classe Média, sem subsídio complemento: renda até R$ 13 mil, taxa nominal de referência 10% e imóvel até R$ 600 mil, sujeito à confirmação da CAIXA.",
     );
   warnings.push(
     "Cenário sem atualização futura pela TR, variação dos seguros, análise de crédito ou CET. Cotas e comprometimento são tetos indicativos; a CAIXA pode aprovar valores menores.",
@@ -373,6 +385,7 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     insuranceKnown,
     subsidyConfirmed: input.confirmedSubsidy !== undefined,
     financingQuota,
+    middleClass,
     sources: CAIXA_SOURCES,
   };
 }

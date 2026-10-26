@@ -84,6 +84,51 @@ confirmado)`. Recursos próprios informados já são parte da entrada.
 
 ## Diferenças necessárias frente à referência
 
+### Fórmula operacional do desconto complemento
+
+MFOM v034, pp. 131–133, §§3.1.1–3.1.2. A expressão exige dados oficiais que
+o formulário de referência não coleta; por isso é documentada, sem calcular
+um subsídio aparentemente exato com valores presumidos:
+
+```text
+D = Frenda × [1 + (FDr + FDfin + FUH)/100] × Fpop
+Frenda = a(R − RDmax)² + b(R − RDmax) + Dmax
+a = −b / [2(RDmin − RDmax)]
+b = 2Dmax(Dmin/Dmax − 1) / (RDmin − RDmax)
+Dmax = 50000; Dmin = 1900; RDmax = 1750; RDmin = 3700
+
+Dfin = 0,25R × [(1+j)^420 − 1] / [(1+j)^420 × j]
+FDfin = 10 − 40(Dfin/VVI − 0,5)
+VVI = min(valor de venda/investimento, 0,675 × teto do Anexo I)
+
+FUH apartamento = 10(A − 39)/(59 − 39)
+FUH casa = 10(A − 46)/(66 − 46)
+```
+
+`R` é renda familiar mensal bruta; `j` é a taxa mensal da tabela pertinente.
+O coeficiente 0,25 nessa fórmula não define aprovação a 25% da renda.
+`FDr` vem do Anexo III; `Fpop`, do Anexo IV (tabela A ou B para Norte).
+Os fatores têm peso limitado a dez pontos; `FUH` é limitado entre zero e dez.
+`A` corresponde à área definida pelo manual: privativa real coberta para
+condomínio conforme NBR 12721/2006; isolado usa área construída com exclusões
+de áreas de padrão diferente, beirais e garagens. Não substituir por uma área
+comercial sem conferir sua definição.
+
+Além da expressão, aplicam-se condições e redutores: renda até R$ 4 mil,
+resultado mínimo R$ 1.500, teto regional R$ 55 mil/R$ 65 mil e teto próprio de
+R$ 49.500 para pronto CCI. Terreno próprio reduz 20% (com exceção prevista para
+doação pública); família unipessoal reduz 70%, restando 30%; imóvel usado
+reduz 50%; retomado pode reduzir 30% somente nas condições do §3.1.2.4. Se o
+resultado exceder o teto, o redutor incide sobre o teto. Unipessoal pode acumular
+com outros redutores. Não confundir um proponente com família unipessoal:
+esta definição exige indivíduo sem dependentes. A exceção histórica de usado
+com contratação/trâmite até 01/12/2023 não se aplica a uma operação nova em 2026.
+
+O ponto de renda RDmin=3700 da curva não substitui o limite de elegibilidade
+R$ 4000. Também não se deve substituir esse limite pelo de R$ 5000, referente
+ao conjunto de descontos. Esses detalhes e a falta de FUH/município explicam
+por que copiar a fórmula reduzida da referência não comprova o desconto real.
+
 Não forçar Price, migrar automaticamente para SBPE ou aceitar nascimento
 inválido/menor como adulto. Não inventar um mês de prazo quando o limite é zero.
 Não subtrair 36 meses de qualquer obra. Não somar períodos sobrepostos do FGTS.
@@ -92,6 +137,15 @@ sem prova. Diagnóstico é orientação informativa com resultado bancário já
 informado pelo usuário, sem decidir crédito nem garantir aprovação.
 
 ## Segurança e validação
+
+A [IN17 compilada, alterada pela IN4 de 08/04/2026](https://www.gov.br/cidades/pt-br/acesso-a-informacao/institucional/base-juridica/instrucoes-normativas/20260409_InstruoNormativan.17_Compilada.pdf),
+art. 3, define Classe Média com renda limitada a R$ 13 mil, sem piso de
+R$ 9.600. Por isso a página permite selecionar esse enquadramento inclusive
+para renda menor, sem subsídio complemento, com taxa de referência de 10%.
+Imóvel acima de R$ 400 mil ou renda acima de R$ 9.600 identificam esse cenário
+expressamente no resultado, respeitando o teto de R$ 600 mil e a cota de usado
+Sul/Sudeste. Não declarar uma família inelegível a todas as modalidades MCMV
+apenas por superar o teto de imóvel da Faixa 3.
 
 Os guards de servidor, catálogo e permissão compartilhada dos simuladores
 permanecem. APIs official/commercial continuam fechadas para CAIXA: o cálculo

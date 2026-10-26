@@ -116,7 +116,29 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
         city: "Salvador",
       }).financingQuota,
     ).toBe(0.8);
-    expect(calculateHousingSimulation({ ...base, propertyValue: 400000.01 }).ok).toBe(false);
+    expect(success({ propertyValue: 450000 })).toMatchObject({
+      middleClass: true,
+      rate: 10,
+      subsidy: 0,
+    });
+    expect(
+      success({
+        income: 3000,
+        propertyValue: 300000,
+        middleClass: true,
+        propertyCondition: "used",
+      }),
+    ).toMatchObject({ middleClass: true, rate: 10, financingQuota: 0.6 });
+    expect(calculateHousingSimulation({ ...base, propertyValue: 600000.01 }).ok).toBe(false);
+    expect(
+      calculateHousingSimulation({
+        ...base,
+        income: 3000,
+        propertyValue: 300000,
+        middleClass: true,
+        confirmedSubsidy: 10000,
+      }).ok,
+    ).toBe(false);
   });
   it("does not guess municipal ceilings, subsidy or insurance", () => {
     expect(calculateHousingSimulation({ ...base, income: 5000, propertyValue: 240000 }).ok).toBe(
@@ -193,6 +215,9 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
 });
 describe("CAIXA utilities with synthetic data", () => {
   it("rejects insurance above the cap, impossible subsidy, overflow and exact-age excess", () => {
+    expect(calculateHousingSimulation({ ...base, middleClass: true, nominalRate: 10.01 }).ok).toBe(
+      false,
+    );
     expect(calculateHousingSimulation({ ...base, city: "Salvador", state: "SP" }).ok).toBe(false);
     expect(calculateHousingSimulation({ ...base, approvedPayment: 50 }).ok).toBe(false);
     expect(

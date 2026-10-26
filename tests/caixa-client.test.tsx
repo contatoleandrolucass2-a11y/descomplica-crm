@@ -35,6 +35,7 @@ describe("CAIXA dedicated client", () => {
       "Seguro MIP",
       "Seguro DFI",
       "Teto indicativo de renda",
+      "Simular MCMV Classe Média (sem subsídio)",
       "Não substitui proposta bancária",
     ])
       expect(markup).toContain(label);
@@ -180,6 +181,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByText("A confirmar · não incluído", { exact: true }),
       ).toBeVisible();
       await browserExpect(page.getByText(/seguros não confirmados/).first()).toBeVisible();
+      await page
+        .getByRole("checkbox", { name: "Simular MCMV Classe Média (sem subsídio)", exact: true })
+        .check();
+      await page.getByRole("button", { name: "Calcular simulação", exact: true }).click();
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
+        "MCMV Classe Média",
+      );
       await page.getByLabel("Renda familiar bruta", { exact: false }).fill("700000");
       await browserExpect(
         page.getByRole("heading", { name: "Resumo financeiro", exact: true }),
@@ -218,7 +226,10 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;
           }, theme);
-          await page.screenshot({path: resolve(directory, `caixa-${width}-${theme}.png`), fullPage:true});
+          await page.screenshot({
+            path: resolve(directory, `caixa-${width}-${theme}.png`),
+            fullPage: true,
+          });
           expect(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
             `${width}/${theme}`,

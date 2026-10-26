@@ -2509,9 +2509,70 @@
     display: none !important;
   }
 }
-.caixa-page-shell .caixa-qualification-badge { color: #084251; background: #e0f5f3; }
-.caixa-page-shell .caixa-money-input > b { color: var(--ink); background: transparent; }
-.caixa-page-shell .caixa-toggle button.active { color: #ffffff; background: #087583; }
-.caixa-page-shell .caixa-money-input > b { min-width: 22px; width: auto; flex: none; white-space: nowrap; }
-.caixa-page-shell :is(button,input,select,summary), .caixa-page-shell .caixa-actions a { min-height: 44px !important; }
-.caixa-page-shell .caixa-city-picker > button { position: absolute; inset: 0 0 0 auto; width: 32px; height: 100%; transform: none; }
+.caixa-page-shell .caixa-qualification-badge {
+  color: #084251;
+  background: #e0f5f3;
+}
+.caixa-page-shell .caixa-money-input > b {
+  color: var(--ink);
+  background: transparent;
+}
+.caixa-page-shell .caixa-toggle button.active {
+  color: #ffffff;
+  background: #087583;
+}
+.caixa-page-shell .caixa-money-input > b {
+  min-width: 22px;
+  width: auto;
+  flex: none;
+  white-space: nowrap;
+}
+.caixa-page-shell :is(button, input, select, summary),
+.caixa-page-shell .caixa-actions a {
+  min-height: 44px !important;
+}
+.caixa-page-shell .caixa-city-picker > button {
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 32px;
+  height: 100%;
+  transform: none;
+}
+@media (max-width: 620px) {
+  .caixa-page-shell .caixa-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .caixa-page-shell .caixa-tabs button {
+    white-space: nowrap;
+  }
+  .caixa-page-shell .caixa-full-form .caixa-primary-grid > .caixa-field {
+    width: 100%;
+  }
+}
+:root[data-theme="dark"] .caixa-page-shell {
+  color-scheme: dark;
+}
+.caixa-page-shell .caixa-middle-class-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+  font-size: 0.85rem;
+}
+.caixa-page-shell .caixa-middle-class-option input {
+  flex: none;
+  width: 20px;
+}
+@media (max-width: 620px) {
+  .caixa-page-shell .caixa-tabs {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+  .caixa-page-shell .caixa-tabs button {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    font-size: 0;
+  }
+  .caixa-page-shell .caixa-tabs button > span {
+    font-size: 0.8rem;
+  }
+}
