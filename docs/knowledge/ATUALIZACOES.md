@@ -3694,3 +3694,75 @@ dependente da autorização específica aplicável.
 
 - CI documental `40276795962` aprovada no head `d620621c40ad4156524d16f0215caa507a7d97e9`. Antes da integração, main avançou para `bebbb2adbb0fe345f8535e7918fd6fa293edc267`, PR #353 de Meta Ads. Houve conflito somente nos registros iniciais de CHANGELOG/WORKLOG; preservados integralmente os dois textos e o código concorrente. A demanda CAIXA continua com quatro arquivos documentais no diff contra a nova base, sem alteração de runtime.
 - Reconferência em `2026-10-26T06:44:15.295Z`: health HTTP 200/status ok/version `54eb7cdd7460130fc8c70d71fb956cb801b8d12c`. CI push/main `40280448260` da entrega concorrente em execução; a CI runtime CAIXA `40270504690` já estava concluída com sucesso. Nova validação do registro reconciliado é exigida pela proteção de branch; a aplicação CAIXA já publicada mantém suas evidências e não será reiniciada por esta alteração documental. Sync permanece pendente pelo limite de exportação já registrado.
+
+## 2026-10-26 — Abertura: revisão cirúrgica das cotas SBPE
+
+- Escopo exclusivo: revisar `/app/simulacao/caixa`, aplicar a regra solicitada de
+  cota SBPE de 90% no SAC e 80% no Price e confrontar as demais regras do motor
+  com fontes oficiais e simulações sintéticas, sem alterar outras páginas,
+  dados remotos, n8n ou a referência pública.
+- Git comum confirmado. Branch `codex/caixa-sbpe-cotas` criada sobre
+  `origin/main` `4e6c8a9da91fbc4acfeaaa40669dc09cb95caedc`; CI de `push/main`
+  `40315829223` aprovada. Health público observado em
+  `2026-10-26T12:33:23.7747568Z`: HTTP 200, `status=ok`, versão publicada
+  `ef91f3ec277adf490991e6d477a96da10a9fbe69`. Código publicado e `main` serão
+  distinguidos durante a validação.
+- `knowledge:context`, `knowledge:search` e sincronização continuam bloqueados
+  pela falha preexistente `Documento excede o limite de exportacao.`. A
+  indisponibilidade não autoriza reduzir o documento ou omitir a conferência
+  direta de código, fontes, CI e site; reavaliar em manutenção própria.
+
+### CAIXA — regras implementadas e validação local
+
+- SBPE configurado com teto de 90% no SAC e 80% no Price. A cota passou a
+  incidir sobre o menor entre compra e avaliação CAIXA; cota individual
+  confirmada pode apenas reduzir o teto. Aporte MCMV Cidades foi separado do
+  desconto complemento FGTS, que agora rejeita valor positivo inferior a
+  R$ 1.500. O último mês do cenário de obra atinge 100% da liberação.
+- Calculadora rápida pública exercitada em 26/10/2026 somente com dados
+  fictícios, sem CPF, telefone, consentimento ou proposta: cenários de renda
+  R$ 3 mil, R$ 6 mil e R$ 20 mil, imóveis de R$ 210 mil, R$ 300 mil e
+  R$ 500 mil, idades de 35 e 70 anos. Recurso público identificou versão
+  1.16.0.2/data 06/07/2026 #1 e parâmetros de taxa, MIP, DFI e tarifa. Eles
+  entram apenas como estimativa identificada quando valores confirmados faltam;
+  proposta individual prevalece. SBPE não reutiliza taxas MCMV de renda baixa.
+- Validação focada: 51 testes financeiros aprovados; cinco jornadas completas
+  de navegador aprovadas, incluindo três temas, desktop/celular, Axe, overflow,
+  quantias completas e fluxo SBPE SAC 90%. Capturas sintéticas revisadas em
+  `private-data/caixa-qa`, sem dados de clientes.
+- Gates em Node 24.19.0/pnpm 11.20.0: lint sem erros (44 warnings preexistentes
+  em assets Meta fora do escopo), typecheck e build aprovados. `pnpm test`
+  aprovou 4.298 testes e encontrou três timeouts de host em Associativo e
+  DevTools; os dois arquivos exatos foram reexecutados isoladamente com um
+  worker e aprovaram 37/37 sem alteração fora do escopo. CI remota continua
+  obrigatória antes de merge/publicação.
+- Primeira captura protegida `40329412235` interrompeu no E2E porque a asserção
+  ainda exigia o texto antigo `seguros não confirmados`; a própria evidência
+  mostrava o novo estado correto `seguros de referência`. Os 15 cenários
+  anteriores passaram. A expectativa CAIXA foi atualizada sem reduzir o gate;
+  nova CI/captura é obrigatória.
+
+### CAIXA — captura protegida e referências visuais
+
+- CI `40331622292`: validate e restauração isolada aprovados. O release gate
+  aprovou cálculo CAIXA, temas, Axe, banco, build e E2E; recusou apenas cinco
+  comparações visuais esperadas da própria rota, sem falha financeira.
+- A primeira tentativa da captura `40331622478` atingiu o limite de 45 minutos
+  durante a matriz global, depois de E2E aprovado. A repetição exata concluiu
+  com sucesso, sem mudança de workflow ou redução de gate.
+- Artefato aprovado `12660573871`, digest
+  `35990d8d37adcd201cda2d161859ca92ec4ad0392943c40b5bf32dfca93812b1`;
+  head `0a301c77e66be38361df9d7b1667ecc49360be7d`, capture commit
+  `bbe3748a4c32a354d18bc578b55b2ad49cb2067e`, capturado em
+  `2026-10-26T15:01:33.668Z`.
+- Onze imagens CAIXA revisadas em resolução original: formulário completo e
+  legível, sem corte, sobreposição ou overflow horizontal nas sete larguras,
+  três temas desktop e escuro móvel. Incorporadas somente as cinco imagens
+  materialmente alteradas e os registros da rota; demais páginas e metadados
+  globais preservados. Nova CI do head integrado continua obrigatória.
+- Validação final local em Node 24.19.0/pnpm 11.20.0: lint sem erros e com os
+  mesmos 44 warnings Meta preexistentes; typecheck e build aprovados; Vitest
+  aprovou 4.302 testes e pulou 111. A etapa Node aprovou 1.599 e pulou 19, mas
+  três testes de ACL/perfil privado Meta falharam no host Windows. Não houve
+  correção fora do escopo nem dispensa do gate; a suíte Linux da nova CI deve
+  aprovar integralmente antes de merge/publicação.

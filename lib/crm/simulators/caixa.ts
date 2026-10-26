@@ -5,6 +5,7 @@ export type HousingSystem = "price" | "sac";
 export interface HousingInput {
   income: number;
   propertyValue: number;
+  appraisalValue?: number;
   birthDate: string;
   state: string;
   city?: string;
@@ -20,6 +21,9 @@ export interface HousingInput {
   inConstruction?: boolean;
   propertyCondition?: "new" | "used";
   confirmedSubsidy?: number;
+  confirmedPublicContribution?: number;
+  approvedFinancingQuotaPercent?: number;
+  officialQuickEstimate?: boolean;
   nominalRate?: number;
   mipMonthly?: number;
   dfiMonthly?: number;
@@ -59,6 +63,38 @@ const MCMV_RATES = [
   [9600, 8.16, 8.16],
   [13000, 10, 10],
 ] as const;
+export const CAIXA_QUICK_REFERENCE = {
+  version: "1.16.0.2",
+  date: "06/07/2026",
+  operatingFee: 25,
+  dfiMonthlyPercent: 0.0066,
+  mipMonthlyPercent: [
+    [25, 0.0093],
+    [30, 0.0096],
+    [35, 0.0116],
+    [40, 0.0154],
+    [45, 0.0252],
+    [50, 0.0386],
+    [55, 0.0676],
+    [60, 0.1533],
+    [65, 0.2731],
+    [70, 0.3259],
+    [75, 0.4894],
+    [80, 0.5312],
+  ] as const,
+  effectiveAnnualRates: [
+    [2160, 4.8548],
+    [2850, 5.1162],
+    [3200, 5.3782],
+    [3500, 5.6408],
+    [4000, 6.1678],
+    [5000, 7.229],
+    [9600, 8.4722],
+    [13000, 10.47],
+    [77500, 11.49],
+    [Infinity, 13.4],
+  ] as const,
+} as const;
 const finiteNonnegative = (value: number) => Number.isFinite(value) && value >= 0;
 const cents = (value: number) => Math.round((value + Number.EPSILON) * 100) / 100;
 const floorCents = (value: number) => Math.floor((value + 1e-8) * 100) / 100;
@@ -156,6 +192,16 @@ export function calculatePrice(principal: number, annualRate: number, term: numb
 export function calculateSacFirst(principal: number, annualRate: number, term: number) {
   return !principal || !term ? 0 : principal / term + (principal * annualRate) / 1200;
 }
+function effectiveToNominalAnnual(effectiveAnnualPercent: number) {
+  return (Math.pow(1 + effectiveAnnualPercent / 100, 1 / 12) - 1) * 1200;
+}
+function quickSbpeEffectiveRate(income: number) {
+  return income <= 77500 ? 11.49 : 13.4;
+}
+function quickMipMonthlyRate(age: number) {
+  const percent = CAIXA_QUICK_REFERENCE.mipMonthlyPercent.find(([maximum]) => age <= maximum)?.[1];
+  return percent === undefined ? NaN : percent / 100;
+}
 export interface HousingSuccess {
   ok: true;
   product: HousingProduct;
@@ -170,10 +216,13 @@ export interface HousingSuccess {
   maximumPaymentByIncome: number;
   approvedPayment: number;
   propertyValue: number;
+  appraisalValue?: number;
+  quotaBaseValue: number;
   financing: number;
   maximumFinancingByIncome: number;
   quotaFinancing: number;
   subsidy: number;
+  publicContribution: number;
   fgts: number;
   ownFunds: number;
   totalResources: number;
@@ -181,11 +230,17 @@ export interface HousingSuccess {
   firstPayment: number;
   principalPayment: number;
   insurance: number;
+  mipMonthly: number;
+  dfiMonthly: number;
   operatingFee: number;
   commitment: number;
   fitsProperty: boolean;
   warnings: string[];
   insuranceKnown: boolean;
+  insuranceEstimated: boolean;
+  operatingFeeKnown: boolean;
+  operatingFeeEstimated: boolean;
+  rateEstimated: boolean;
   subsidyConfirmed: boolean;
   financingQuota: number;
   sources: typeof CAIXA_SOURCES;
@@ -220,10 +275,13 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
       `Prazo deve ser inteiro entre 1 e ${maximumTerm} meses, sujeito à análise da CAIXA.`,
     );
   for (const key of [
+    "appraisalValue",
     "ownFunds",
     "fgts",
     "approvedPayment",
     "confirmedSubsidy",
+    "confirmedPublicContribution",
+    "approvedFinancingQuotaPercent",
     "mipMonthly",
     "dfiMonthly",
     "operatingFee",
@@ -233,6 +291,8 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     if (input[key] !== undefined && (!finiteNonnegative(input[key]!) || input[key]! > 1e10))
       errors.push(`Valor inválido: ${key}.`);
   }
+  if (input.appraisalValue !== undefined && input.appraisalValue <= 0)
+    errors.push("Avaliação CAIXA deve ser maior que zero.");
   if (product === "mcmv") {
     if (income > 13000)
       errors.push("Renda acima do MCMV. Selecione SBPE e informe a taxa da simulação oficial.");
@@ -253,12 +313,18 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
           : "Valor do imóvel acima do limite do MCMV para a faixa informada.",
       );
   }
-  const rate = getHousingRate({ ...input, product, middleClass });
+  const configuredRate = getHousingRate({ ...input, product, middleClass });
+  const rateEstimated =
+    product === "sbpe" && input.nominalRate === undefined && input.officialQuickEstimate === true;
+  const rate = rateEstimated
+    ? effectiveToNominalAnnual(quickSbpeEffectiveRate(income))
+    : configuredRate;
   if (product === "mcmv" && rate > 10)
     errors.push("A taxa nominal anual do MCMV não pode superar o teto de 10%.");
   if (!Number.isFinite(rate) || rate < 0 || rate > 100)
     errors.push("Informe a taxa nominal anual confirmada na CAIXA para este produto e perfil.");
   const subsidy = input.confirmedSubsidy ?? 0;
+  const publicContribution = input.confirmedPublicContribution ?? 0;
   const maximumSubsidy = new Set(["AC", "AM", "AP", "PA", "RO", "RR", "TO"]).has(input.state)
     ? 65000
     : 55000;
@@ -268,12 +334,16 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     );
   if (subsidy > 0 && (product !== "mcmv" || middleClass || input.previousSubsidy || income > 4000))
     errors.push("Subsídio incompatível com o perfil informado. Confirme o enquadramento na CAIXA.");
+  if (subsidy > 0 && subsidy < 1500)
+    errors.push("Desconto complemento FGTS confirmado deve ser zero ou de pelo menos R$ 1.500.");
+  if (publicContribution > 0 && product !== "mcmv")
+    errors.push("Aporte MCMV Cidades só pode compor uma operação MCMV confirmada.");
   const fgts = input.hasFgts36 ? (input.fgts ?? 0) : 0,
     ownFunds = input.ownFunds ?? 0;
   if ((input.fgts ?? 0) > 0 && !input.hasFgts36)
     errors.push("Confirme o requisito de tempo de FGTS antes de incluir o saldo.");
-  if (fgts + ownFunds + subsidy > propertyValue)
-    errors.push("Recursos e subsídio não podem superar o valor do imóvel.");
+  if (fgts + ownFunds + subsidy + publicContribution > propertyValue)
+    errors.push("Recursos, desconto e aporte público não podem superar o valor do imóvel.");
   const incomeLimitPercent = input.incomeLimitPercent ?? 30;
   if (!Number.isFinite(incomeLimitPercent) || incomeLimitPercent <= 0 || incomeLimitPercent > 30)
     errors.push("Teto indicativo de comprometimento deve ser maior que zero e no máximo 30%.");
@@ -287,33 +357,66 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     errors.push(
       `A prestação informada ultrapassa ${incomeLimitPercent}% da renda. Teto indicativo: R$ ${maximumPaymentByIncome.toFixed(2)}.`,
     );
-  if (errors.length) return { ok: false, errors };
-  const insuranceKnown = input.mipMonthly !== undefined && input.dfiMonthly !== undefined;
-  const insurance = (input.mipMonthly ?? 0) + (input.dfiMonthly ?? 0),
-    operatingFee = input.operatingFee ?? 0;
-  if (insurance + operatingFee > (approvedPayment || maximumPaymentByIncome))
-    return {
-      ok: false,
-      errors: [
-        "Seguros e tarifa ultrapassam a prestação disponível. Não há capacidade para este cenário.",
-      ],
-    };
-  let financingQuota =
-    product === "sbpe" ? (system === "sac" ? 0.8 : 0.7) : system === "sac" ? 0.9 : 0.8;
+  const quotaBaseValue = Math.min(propertyValue, input.appraisalValue ?? propertyValue);
+  let maximumFinancingQuota = system === "sac" ? 0.9 : 0.8;
   if (
     product === "mcmv" &&
     middleClass &&
     input.propertyCondition === "used" &&
     SOUTH_SOUTHEAST.has(input.state)
   )
-    financingQuota = 0.6;
-  if (!insuranceKnown)
+    maximumFinancingQuota = 0.6;
+  if (
+    input.approvedFinancingQuotaPercent !== undefined &&
+    (input.approvedFinancingQuotaPercent <= 0 ||
+      input.approvedFinancingQuotaPercent > maximumFinancingQuota * 100)
+  )
+    errors.push(
+      `Cota aprovada deve ser maior que zero e no máximo ${maximumFinancingQuota * 100}% neste cenário.`,
+    );
+  if (errors.length) return { ok: false, errors };
+  const financingQuota =
+    input.approvedFinancingQuotaPercent !== undefined
+      ? input.approvedFinancingQuotaPercent / 100
+      : maximumFinancingQuota;
+  const useQuickEstimate = input.officialQuickEstimate === true;
+  const insuranceKnown = input.mipMonthly !== undefined && input.dfiMonthly !== undefined;
+  const insuranceEstimated =
+    useQuickEstimate && (input.mipMonthly === undefined || input.dfiMonthly === undefined);
+  const mipRate = input.mipMonthly === undefined && useQuickEstimate ? quickMipMonthlyRate(age) : 0;
+  const dfiMonthly =
+    input.dfiMonthly ??
+    (useQuickEstimate ? (quotaBaseValue * CAIXA_QUICK_REFERENCE.dfiMonthlyPercent) / 100 : 0);
+  const fixedInsurance = (input.mipMonthly ?? 0) + dfiMonthly;
+  const operatingFeeKnown = input.operatingFee !== undefined;
+  const operatingFeeEstimated = useQuickEstimate && !operatingFeeKnown;
+  const operatingFee =
+    input.operatingFee ?? (useQuickEstimate ? CAIXA_QUICK_REFERENCE.operatingFee : 0);
+  if (!insuranceKnown && !insuranceEstimated)
     warnings.push(
       "MIP e DFI não confirmados: prestação e capacidade parciais, sem os seguros ausentes. Não representam o encargo total.",
     );
+  if (insuranceEstimated)
+    warnings.push(
+      `MIP e/ou DFI ausentes foram estimados pelos coeficientes da calculadora rápida CAIXA ${CAIXA_QUICK_REFERENCE.version}; substitua pelos seguros da proposta completa.`,
+    );
   if (input.operatingFee === undefined)
     warnings.push(
-      "Tarifa administrativa não informada e não incluída; confirme o encargo total na CAIXA.",
+      useQuickEstimate
+        ? `Tarifa mensal ausente estimada em R$ ${CAIXA_QUICK_REFERENCE.operatingFee.toFixed(2).replace(".", ",")} pela calculadora rápida CAIXA ${CAIXA_QUICK_REFERENCE.version} (${CAIXA_QUICK_REFERENCE.date}); substitua pelo valor da proposta completa.`
+        : "Tarifa administrativa não informada e não incluída; confirme o encargo total na CAIXA.",
+    );
+  if (rateEstimated)
+    warnings.push(
+      `Taxa SBPE estimada pela calculadora rápida CAIXA ${CAIXA_QUICK_REFERENCE.version}; a taxa individual confirmada prevalece.`,
+    );
+  if (input.appraisalValue === undefined)
+    warnings.push(
+      "Avaliação CAIXA não informada: a cota usa provisoriamente o valor de compra. A base oficial é o menor entre compra e avaliação.",
+    );
+  if (input.socialFactor)
+    warnings.push(
+      "Fator social registrado apenas para conferência documental; ele não altera esta estimativa sem valor oficial confirmado.",
     );
   if (input.confirmedSubsidy === undefined && product === "mcmv" && !middleClass)
     warnings.push(
@@ -340,21 +443,37 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
       : calculateSacFirst(1, rate, input.term);
   const incomeFinancing = Math.max(
     0,
-    ((approvedPayment || maximumPaymentByIncome) - insurance - operatingFee) / factor,
+    ((approvedPayment || maximumPaymentByIncome) - fixedInsurance - operatingFee) /
+      (factor + mipRate),
   );
-  const quotaFinancing = floorCents(propertyValue * financingQuota);
+  if (fixedInsurance + operatingFee > (approvedPayment || maximumPaymentByIncome))
+    return {
+      ok: false,
+      errors: [
+        "Seguros e tarifa ultrapassam a prestação disponível. Não há capacidade para este cenário.",
+      ],
+    };
+  const quotaFinancing = floorCents(quotaBaseValue * financingQuota);
   const financing = Math.max(
     0,
     floorCents(
-      Math.min(propertyValue - ownFunds - fgts - subsidy, quotaFinancing, incomeFinancing),
+      Math.min(
+        propertyValue - ownFunds - fgts - subsidy - publicContribution,
+        quotaFinancing,
+        incomeFinancing,
+      ),
     ),
   );
   const principalPayment =
     system === "price"
       ? calculatePrice(financing, rate, input.term)
       : calculateSacFirst(financing, rate, input.term);
+  const mipMonthly = input.mipMonthly ?? (insuranceEstimated ? financing * mipRate : 0);
+  const insurance = mipMonthly + dfiMonthly;
   const firstPayment = cents(principalPayment + insurance + operatingFee),
-    entryNeeded = cents(Math.max(0, propertyValue - financing - ownFunds - fgts - subsidy));
+    entryNeeded = cents(
+      Math.max(0, propertyValue - financing - ownFunds - fgts - subsidy - publicContribution),
+    );
   return {
     ok: true,
     product,
@@ -369,10 +488,13 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     maximumPaymentByIncome,
     approvedPayment,
     propertyValue,
+    ...(input.appraisalValue !== undefined ? { appraisalValue: input.appraisalValue } : {}),
+    quotaBaseValue,
     financing,
     maximumFinancingByIncome: floorCents(incomeFinancing),
     quotaFinancing,
     subsidy,
+    publicContribution,
     fgts,
     ownFunds,
     totalResources: cents(ownFunds + fgts),
@@ -380,11 +502,17 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     firstPayment,
     principalPayment: cents(principalPayment),
     insurance: cents(insurance),
-    operatingFee,
+    mipMonthly: cents(mipMonthly),
+    dfiMonthly: cents(dfiMonthly),
+    operatingFee: cents(operatingFee),
     commitment: (firstPayment / income) * 100,
     fitsProperty: entryNeeded <= 0.01,
     warnings,
     insuranceKnown,
+    insuranceEstimated,
+    operatingFeeKnown,
+    operatingFeeEstimated,
+    rateEstimated,
     subsidyConfirmed: input.confirmedSubsidy !== undefined,
     financingQuota,
     middleClass,
@@ -536,7 +664,7 @@ export function estimateConstructionInterest({
       ],
     };
   const installments = Array.from({ length: months }, (_, index) => {
-    const progress = currentProgress / 100 + ((1 - currentProgress / 100) * index) / months;
+    const progress = currentProgress / 100 + ((1 - currentProgress / 100) * (index + 1)) / months;
     const releasedBalance = financing * progress;
     const interest = (releasedBalance * annualRate) / 1200;
     const correction = releasedBalance * (Math.pow(1 + trAnnual / 100, 1 / 12) - 1);

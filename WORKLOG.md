@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-26 — Precisão financeira do Simulador CAIXA
+
+A página CAIXA passou a usar 90% como cota máxima do SBPE SAC e 80% no
+SBPE Price. A base é o menor entre preço de compra e avaliação CAIXA; uma cota
+individual confirmada pode reduzir, mas não aumentar, o teto. O formulário agora
+coleta avaliação, cota aprovada e aporte MCMV Cidades separadamente do desconto
+complemento FGTS.
+
+A calculadora rápida pública foi confrontada com quatro cenários fictícios de
+renda, imóvel e idade. Seus parâmetros públicos da versão 1.16.0.2 foram
+incorporados como estimativa opcional e identificada para taxa SBPE, MIP, DFI e
+tarifa quando faltarem valores da proposta. Parâmetros confirmados sempre
+prevalecem; a simulação completa não foi submetida porque exige CPF, celular,
+consentimento e verificação. O simulador continua sem prometer crédito, CET ou
+TR futura.
+
+Também foram corrigidos o mínimo de R$ 1.500 do desconto complemento, a separação
+do aporte público e o último mês da evolução de obra, que agora chega a 100%.
+Testes unitários cobrem as novas fronteiras, a base de avaliação e uma fixture
+da calculadora pública. O navegador sintético confirma o fluxo SBPE, os campos
+exclusivos MCMV, valores sem truncamento, responsividade e acessibilidade.
+
+A captura protegida `40331622478` foi aprovada na segunda execução, com todos
+os gates funcionais, Axe e zoom. O artefato imutável `12660573871` alterou
+somente cinco imagens CAIXA; as onze capturas da rota foram revisadas em sete
+larguras, três temas desktop e escuro móvel. A incorporação preserva as demais
+rotas e os metadados globais.
+
 ## 2026-10-26 — Publicacao final da experiencia de Agendamentos
 
 O PR #355 foi integrado na `main` como

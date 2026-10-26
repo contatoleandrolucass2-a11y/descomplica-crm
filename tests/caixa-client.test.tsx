@@ -63,10 +63,13 @@ describe("CAIXA dedicated client", () => {
       "Sistema",
       "Tem 36+ meses de FGTS?",
       "Já recebeu subsídio?",
-      "Tem Fator Social?",
+      "Tem fator social? (informativo)",
       "Imóvel na planta?",
       "Calcular simulação",
-      "Subsídio confirmado pela CAIXA",
+      "Avaliação confirmada pela CAIXA",
+      "Desconto complemento FGTS confirmado",
+      "Aporte MCMV Cidades confirmado",
+      "Cota aprovada pela CAIXA",
       "Seguro MIP",
       "Seguro DFI",
       "Teto indicativo de renda",
@@ -295,8 +298,8 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
                   ];
                 }),
               );
-            expect(amounts.some((amount) => amount.text.includes("240.000,00"))).toBe(true);
-            expect(amounts.some((amount) => amount.text.includes("60.000,00"))).toBe(true);
+            expect(amounts.some((amount) => amount.text.includes("239.287,18"))).toBe(true);
+            expect(amounts.some((amount) => amount.text.includes("60.712,82"))).toBe(true);
             expect(
               amounts.filter(
                 (amount) =>
@@ -341,7 +344,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(
         page.getByText("A confirmar · não incluído", { exact: true }),
       ).toBeVisible();
-      await browserExpect(page.getByText(/seguros não confirmados/).first()).toBeVisible();
+      await browserExpect(page.getByText(/seguros de referência/).first()).toBeVisible();
       await auditCurrentTab("resultado");
       await page
         .getByRole("checkbox", { name: "Simular MCMV Classe Média (sem subsídio)", exact: true })
@@ -387,6 +390,21 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByRole("button", { name: "Remover", exact: true }).first(),
       ).toBeEnabled();
       await auditCurrentTab("utilitarios");
+      expect(errors).toEqual([]);
+    });
+    it("applies the SBPE SAC ceiling and removes MCMV-only values", async () => {
+      await open();
+      await fillMain();
+      await page.locator(".caixa-product-system-field select").nth(0).selectOption("sbpe");
+      await page.locator(".caixa-product-system-field select").nth(1).selectOption("sac");
+      await browserExpect(
+        page.getByLabel("Desconto complemento FGTS confirmado", { exact: true }),
+      ).toHaveCount(0);
+      await page.getByRole("button", { name: "Calcular simulação", exact: true }).click();
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText("90,00% sobre");
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
+        "taxa efetiva de 11,4900% a.a. (estimada)",
+      );
       expect(errors).toEqual([]);
     });
     it("has no horizontal overflow and passes axe in three themes on desktop and mobile", async () => {
