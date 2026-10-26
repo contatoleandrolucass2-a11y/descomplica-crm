@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-10-25 — CAIXA: correções da captura autenticada
+
+A captura 40254914307, do merge de teste bb059246/branch 203754ae, identificou
+somente falhas da CAIXA: ausência de elemento main e transbordamento em
+1024 px. As outras páginas, auditorias Axe e comparações com canvases passaram.
+Nenhuma referência externa ao escopo foi atualizada. O Archive real agora
+possui main; as tracks do formulário usam mínimos zero e três colunas na
+faixa de tablet, mantendo as regras existentes de celular.
+
+O teste local foi corrigido para renderizar o Archive real com os estilos
+globais, sem fabricar um main no harness. Reproduziu o erro de 1024 antes da
+correção. O artefato formatado passou 4/4 testes, 12 combinações de largura/tema
+e seis auditorias adicionais, sem transbordamento, falhas Axe ou console.
+Os 64 testes financeiros/guards também passaram. Os utilitários rejeitam
+valores monetários extremos antes de produzir Infinity/NaN, e o override de
+taxa MCMV respeita o teto publicado de 10%. A nova CI e captura autenticada
+ainda são necessárias antes de promover as imagens e publicar.
+
 ## 2026-10-25 — CAIXA: validação da réplica e enquadramento
 
 O código formatado preserva agora classes completas dos estados de cidade,

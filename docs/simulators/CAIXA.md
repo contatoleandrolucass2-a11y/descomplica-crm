@@ -158,6 +158,9 @@ explícita do usuário; não enviar nomes/documentos automaticamente a terceiros
 
 Testes financeiros cobrem limites de faixa/taxa, idade/datas, cotas, recursos,
 subsídio, finitude, prestação, Price/SAC, amortização, FGTS e cenário de obra.
+Entradas monetárias extremas são recusadas também nos utilitários, antes de
+gerar resultados não finitos; esses limites são proteções técnicas, não
+ofertas ou limites comerciais. Taxas manuais MCMV não podem ultrapassar 10%.
 A validação visual deve confrontar a nova página com a referência viva e
 verificar desktop/celular, três temas, teclado, zoom, nomes acessíveis e estados
 de erro. CI/merge/publicação são estados separados, registrados em ATUALIZACOES.

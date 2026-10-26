@@ -10,10 +10,10 @@ export function CaixaArchive() {
   }).format(new Date());
 
   return (
-    <div className="goal-page-shell caixa-page-shell" data-canvas-layout="caixa">
+    <main className="goal-page-shell caixa-page-shell" data-canvas-layout="caixa">
       <div className="caixa-main">
         <CaixaClient baseDate={baseDate} />
       </div>
-    </div>
+    </main>
   );
 }

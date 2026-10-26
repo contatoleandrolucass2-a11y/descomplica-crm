@@ -215,6 +215,7 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
 });
 describe("CAIXA utilities with synthetic data", () => {
   it("rejects insurance above the cap, impossible subsidy, overflow and exact-age excess", () => {
+    expect(calculateHousingSimulation({ ...base, nominalRate: 10.01 }).ok).toBe(false);
     expect(calculateHousingSimulation({ ...base, middleClass: true, nominalRate: 10.01 }).ok).toBe(
       false,
     );
@@ -241,6 +242,9 @@ describe("CAIXA utilities with synthetic data", () => {
     expect(getMaximumTerm({ birthDate: "1946-05-01", asOf: "2026-10-25" })).toBe(0);
   });
   it("compares extra amortization against a zero-contribution baseline", () => {
+    expect(
+      calculateExtraAmortization({ balance: 1e308, annualRate: 12, remainingTerm: 420 }).ok,
+    ).toBe(false);
     const result = calculateExtraAmortization({
       balance: 100000,
       annualRate: 12,
@@ -302,6 +306,9 @@ describe("CAIXA utilities with synthetic data", () => {
     expect(calculateFgtsTime([{ start: "2020-01-01" }], "2026-10-25").eligible).toBe(true);
   });
   it("makes construction progress and TR an explicit scenario, with no hidden 2% cap", () => {
+    expect(estimateConstructionInterest({ financing: 1e308, annualRate: 12, months: 420 }).ok).toBe(
+      false,
+    );
     const result = estimateConstructionInterest({
       financing: 200000,
       annualRate: 12,

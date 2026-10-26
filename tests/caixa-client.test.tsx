@@ -7,10 +7,13 @@ import AxeBuilder from "@axe-core/playwright";
 import { renderToStaticMarkup } from "react-dom/server";
 import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { CaixaClient } from "@/app/(protected)/app/simulacao/_components/CaixaClient";
+import { CaixaArchive } from "@/app/(protected)/app/simulacao/_components/CaixaArchive";
 
 describe("CAIXA dedicated client", () => {
   it("preserves the reference form and makes unknown financial parameters explicit", () => {
-    const markup = renderToStaticMarkup(<CaixaClient baseDate="2026-10-25" />);
+    const markup = renderToStaticMarkup(<CaixaArchive />);
+    expect(markup.match(/<main\b/g)).toHaveLength(1);
+    expect(markup).toContain('data-canvas-layout="caixa"');
     for (const label of [
       "Crédito habitacional",
       "Simulação CAIXA",
@@ -114,7 +117,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             },
             load(id: string) {
               if (id === entry)
-                return `import {createElement} from "react";import {createRoot} from "react-dom/client";import {CaixaClient} from "@/app/(protected)/app/simulacao/_components/CaixaClient";import "@/app/(protected)/app/simulacao/_components/caixa.css";createRoot(document.getElementById("root")).render(createElement(CaixaClient,{baseDate:"2026-10-25"}));`;
+                return `import {createElement} from "react";import {createRoot} from "react-dom/client";import "@/app/globals.css";import "@/app/(protected)/app/simulacao/_components/archive-investor/canvas-layout.css";import {CaixaArchive} from "@/app/(protected)/app/simulacao/_components/CaixaArchive";createRoot(document.getElementById("root")).render(createElement(CaixaArchive));`;
             },
           },
         ],
@@ -153,13 +156,15 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           return route.fulfill({ contentType: "text/css", body: css });
         return route.fulfill({
           contentType: "text/html",
-          body: '<!doctype html><html lang="pt-BR" data-theme="light"><head><meta charset="utf-8"><title>CAIXA QA</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body style="margin:0;font-family:Arial,sans-serif"><main id="root" class="caixa-page-shell"></main><script src="/fixture.js"></script></body></html>',
+          body: '<!doctype html><html lang="pt-BR" data-theme="light"><head><meta charset="utf-8"><title>CAIXA QA</title><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="stylesheet" href="/fixture.css"></head><body><div id="root"></div><script src="/fixture.js"></script></body></html>',
         });
       });
       await page.goto("https://caixa.test/");
       await browserExpect(
         page.getByRole("heading", { name: "Simulação CAIXA", exact: true }),
       ).toBeVisible();
+      await browserExpect(page.getByRole("main")).toHaveCount(1);
+      await browserExpect(page.locator('main[data-canvas-layout="caixa"]')).toHaveCount(1);
     }
     async function fillMain() {
       await page.getByLabel("Renda familiar bruta", { exact: false }).fill("600000");
@@ -267,8 +272,11 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await open();
       const directory = resolve("private-data/caixa-qa");
       await mkdir(directory, { recursive: true });
-      for (const width of [1440, 390, 320]) {
-        await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
+      for (const width of [1440, 1024, 390, 320]) {
+        await page.setViewportSize({
+          width,
+          height: width === 1440 ? 900 : width === 1024 ? 768 : 844,
+        });
         for (const theme of ["light", "balanced", "dark"]) {
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;
@@ -281,6 +289,28 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth),
             `${width}/${theme}`,
           ).toBe(true);
+          const formBounds = await page.locator("form.caixa-form").evaluate((form) => {
+            const box = form.getBoundingClientRect();
+            return Array.from(form.children).map((child) => {
+              const bounds = child.getBoundingClientRect();
+              return {
+                class: child.className,
+                contained: bounds.left >= box.left - 1 && bounds.right <= box.right + 1,
+              };
+            });
+          });
+          expect(
+            formBounds.filter((child) => !child.contained),
+            `${width}/${theme}`,
+          ).toEqual([]);
+          const clearBounds = await page
+            .getByRole("button", { name: "Limpar", exact: true })
+            .evaluate((button) => {
+              const form = button.closest("form")!.getBoundingClientRect();
+              const box = button.getBoundingClientRect();
+              return box.left >= form.left && box.right <= form.right;
+            });
+          expect(clearBounds, `${width}/${theme}: Limpar stays inside the form`).toBe(true);
           const axe = await new AxeBuilder({ page })
             .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
             .analyze();
@@ -291,10 +321,6 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             })),
             `${width}/${theme}`,
           ).toEqual([]);
-          await page.screenshot({
-            path: resolve(directory, `caixa-${width}-${theme}.png`),
-            fullPage: true,
-          });
         }
       }
       expect(errors).toEqual([]);

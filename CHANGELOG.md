@@ -2,6 +2,9 @@
 
 ## 2026-10-25 — Simulação CAIXA com regras verificadas
 
+- Corrige a área principal da página e o formulário em tablet, com regressão usando o Archive real.
+- Rejeita valores extremos nos utilitários e taxas MCMV acima do teto publicado.
+
 - Preserva estilos dos estados abertos/elegíveis após o formatador, com regressão no navegador.
 - Confere no E2E autenticado o cálculo local CAIXA e a API bancária fechada.
 - Recaptura o candidato visual quando o contrato E2E autenticado muda.
