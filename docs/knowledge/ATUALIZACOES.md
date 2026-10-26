@@ -47,6 +47,14 @@
   390 px no tema escuro, sem dados de clientes. PR, CI, merge e publicacao ainda
   devem ser registrados separadamente. O sync do Obsidian permanece impedido por
   `Documento excede o limite de exportacao.` e nao deve ser tratado como concluido.
+- No PR #362, `validate` e `isolated-restore` passaram. A primeira execucao de
+  `release-gates` aprovou os 56 testes CAIXA, 154 rotas, 88 variacoes de tema e
+  242 auditorias Axe, mas bloqueou por divergencia esperada das referencias que
+  ainda mostravam o estado anterior. O workflow protegido `40395287053` aprovou
+  a captura e produziu o artefato `12688461833`, digest
+  `sha256:0eb0c26e3ea48ef329d3a701950479d5bef31863f12c5a053496f3770361b10c`.
+  Somente os arquivos listados pela proveniencia protegida foram incorporados;
+  uma nova CI deve comprovar a convergencia antes do merge.
 
 ## 2026-10-26: refinamento final de Agendamentos publicado
 

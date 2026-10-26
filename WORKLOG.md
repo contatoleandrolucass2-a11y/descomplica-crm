@@ -54,6 +54,10 @@ golden de SBPE SAC 90%, Price 80%, base pela menor avaliação, datas, renda e
 entradas inválidas. A matriz de navegador cobre cálculo, quatro abas, três temas,
 desktop e celular, overflow e Axe.
 
+O workflow protegido `40395287053` aprovou a captura autenticada e gerou o
+artefato `12688461833`. As referências revisadas do hub, catálogo administrativo
+e CAIXA foram incorporadas desse artefato, sem captura manual ou dados reais.
+
 ## 2026-10-26 — Precisão financeira do Simulador CAIXA
 
 A página CAIXA passou a usar 90% como cota máxima do SBPE SAC e 80% no
