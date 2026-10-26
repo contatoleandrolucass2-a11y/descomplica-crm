@@ -7,7 +7,12 @@ import { PAGE_REGISTRY } from "@/lib/navigation/registry";
 import { buildNavigationGroups, getPrimaryNavigation } from "@/lib/navigation/presentation";
 
 const mocks = vi.hoisted(() => ({
-  enforcePageAccess: vi.fn().mockResolvedValue({ userId: "qa-user" }),
+  enforcePageAccess: vi.fn().mockResolvedValue({
+    userId: "qa-user",
+    roleKey: "master",
+    level: 100,
+    permissions: [],
+  }),
   getAuthorizedNavigation: vi.fn(() =>
     PAGE_REGISTRY.filter(
       (page) => page.pageKey === "crm.meta_ads" || page.parentKey === "crm.meta_ads",
@@ -304,6 +309,46 @@ describe("dashboard Meta Ads", () => {
     expect(legacyMarkup).toMatch(
       /<a(?=[^>]*href="\/app\/meta-ads\?panel=settings")(?=[^>]*aria-current="page")[^>]*>/,
     );
+  });
+
+  it("mantém o mapa visível para Master com cadeado e aviso de manutenção", async () => {
+    const markup = renderToStaticMarkup(
+      await MetaAdsDashboardPage({ searchParams: Promise.resolve({ panel: "map" }) }),
+    );
+
+    expect(markup).toContain('href="/app/meta-ads?panel=map"');
+    expect(markup).toContain("Mapa temporariamente desabilitado para melhorias");
+    expect(markup).toContain("A visualização permanece disponível para Master");
+    expect(markup).toContain("data-crm-view=&quot;map&quot;");
+  });
+
+  it("mostra o botão bloqueado do mapa para papéis abaixo de Master", async () => {
+    mocks.enforcePageAccess.mockResolvedValueOnce({
+      userId: "qa-admin",
+      roleKey: "admin",
+      level: 80,
+      permissions: [],
+    });
+    const markup = renderToStaticMarkup(await MetaAdsDashboardPage());
+
+    expect(markup).toContain('aria-disabled="true"');
+    expect(markup).toContain("Página temporariamente desabilitada para melhorias");
+    expect(markup).not.toContain('href="/app/meta-ads?panel=map"');
+  });
+
+  it("impede acesso direto ao painel do mapa para papéis abaixo de Master", async () => {
+    mocks.enforcePageAccess.mockResolvedValueOnce({
+      userId: "qa-admin",
+      roleKey: "admin",
+      level: 80,
+      permissions: [],
+    });
+
+    await expect(
+      MetaAdsDashboardPage({ searchParams: Promise.resolve({ panel: "map" }) }),
+    ).rejects.toMatchObject({
+      digest: expect.stringContaining("NEXT_REDIRECT;replace;/app/meta-ads"),
+    });
   });
 
   it("protege cada rota e abre a visao correspondente no mesmo dashboard", async () => {

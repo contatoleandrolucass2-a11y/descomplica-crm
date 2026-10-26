@@ -26,6 +26,42 @@
   background: var(--analytics-page);
 }
 
+.frameColumn {
+  min-width: 0;
+}
+
+.maintenanceNotice {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin: 16px 20px 0;
+  border: 1px solid color-mix(in srgb, var(--analytics-danger) 42%, var(--analytics-line));
+  border-radius: 10px;
+  padding: 14px 16px;
+  color: var(--analytics-ink);
+  background: color-mix(in srgb, var(--analytics-danger) 9%, var(--analytics-surface));
+}
+
+.maintenanceNotice > svg {
+  flex: 0 0 auto;
+  color: var(--analytics-danger);
+}
+
+.maintenanceNotice div {
+  display: grid;
+  gap: 4px;
+}
+
+.maintenanceNotice strong {
+  font-size: 14px;
+}
+
+.maintenanceNotice span {
+  color: var(--analytics-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
 .sidebar {
   position: sticky;
   top: 58px;
@@ -68,6 +104,43 @@
   color: var(--analytics-muted);
   text-decoration: none;
   font-size: 14px;
+}
+.navigationButton {
+  width: 100%;
+  border: 0;
+  text-align: left;
+  font: inherit;
+  background: transparent;
+}
+.navigationDisabled {
+  position: relative;
+  cursor: not-allowed;
+  opacity: 0.72;
+}
+.navigationDisabled:hover::after,
+.navigationDisabled:focus-visible::after {
+  position: absolute;
+  z-index: 20;
+  top: 50%;
+  left: calc(100% + 10px);
+  width: 250px;
+  transform: translateY(-50%);
+  border: 1px solid var(--analytics-line);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: var(--analytics-ink);
+  background: var(--analytics-surface);
+  box-shadow: 0 12px 28px rgb(15 23 42 / 18%);
+  content: attr(data-tooltip);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.4;
+  white-space: normal;
+}
+.navigationLock {
+  margin-left: auto;
+  flex: 0 0 auto;
+  color: var(--analytics-danger);
 }
 .navigationLink:hover {
   background: var(--analytics-surface-muted);
@@ -158,6 +231,13 @@
   }
   .navigationLink {
     white-space: nowrap;
+  }
+
+  .navigationDisabled:hover::after,
+  .navigationDisabled:focus-visible::after {
+    top: calc(100% + 8px);
+    left: 0;
+    transform: none;
   }
 
   .sidebar[data-collapsed="true"] {

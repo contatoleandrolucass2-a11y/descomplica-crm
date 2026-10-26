@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-26 — Bloqueio temporário do Mapa de São Paulo
+
+- Mantém o Mapa de São Paulo visível para Master, com cadeado e aviso de manutenção.
+- Exibe o botão bloqueado e a explicação de indisponibilidade para os demais papéis.
+- Impede acesso direto ao painel do mapa por usuários abaixo da hierarquia Master.
+- Preserva as demais páginas, permissões e integrações do Meta Ads.
+
 ## 2026-10-26 — Contraste completo do Simulador CAIXA
 
 - Mantém quantias completas em uma linha no resumo móvel, reorganizando rótulos e selos.

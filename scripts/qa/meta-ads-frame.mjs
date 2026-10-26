@@ -57,7 +57,7 @@ const built = await build({
             {views.map(value => <button key={value} onClick={() => setView(value)}>{value}</button>)}
             <button onClick={() => {document.documentElement.dataset.theme="balanced"}}>theme</button>
             <MetaAdsAlertButton />
-          </nav><div className={styles.workspace}><MetaAdsSidebar view={view} pages={pages} path={pages[views.indexOf(view)]?.path || "/app/meta-ads"}/><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></div></>;
+          </nav><div className={styles.workspace}><MetaAdsSidebar view={view} pages={pages} path={pages[views.indexOf(view)]?.path || "/app/meta-ads"} isMaster/><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></div></>;
         }
         createRoot(document.getElementById("root")).render(<App/>);
       `;
