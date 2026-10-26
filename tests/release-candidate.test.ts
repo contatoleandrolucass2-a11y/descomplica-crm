@@ -39,6 +39,17 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
+  it("checks live documentation sources only when their policy scope changes", async () => {
+    const workflow = await readFile(path.join(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
+
+    expect(workflow).toContain("fetch-depth: 2");
+    expect(workflow).toContain("id: documentation_source_scope");
+    expect(workflow).toContain("git diff --name-only -z HEAD^ HEAD");
+    expect(workflow).toContain("lib/archive-investor/*");
+    expect(workflow).toContain("scripts/verify-documentation-sources.mjs");
+    expect(workflow).toContain("if: steps.documentation_source_scope.outputs.required == 'true'");
+  });
+
   it("keeps a unique, ordered 90-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
