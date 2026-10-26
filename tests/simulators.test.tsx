@@ -50,13 +50,14 @@ describe("simulator visual catalog", () => {
     expect(hub).toContain('title: "Tabelão"');
     expect(hub).toContain('title="Hub de Simulação"');
     expect(hub).toContain('subtitle="Ferramentas comerciais em um só lugar"');
+    expect(hub).not.toContain("engineBlocked");
     expect(hub).not.toContain("Da entrada ao resultado validado");
     expect(hub).toContain('authorizedJourneyCount === 1 ? "jornada autorizada"');
     expect(hub).toContain("<LockKeyhole");
     expect(hub).not.toContain("🔒");
   });
 
-  it("keeps the CAIXA journey compact without exposing its unavailable result panel", () => {
+  it("keeps the legacy catalog preview compact without changing the released CAIXA client", () => {
     const stylesheet = readFileSync(
       new URL("../app/(protected)/app/simulacao/simulators.module.css", import.meta.url),
       "utf8",
