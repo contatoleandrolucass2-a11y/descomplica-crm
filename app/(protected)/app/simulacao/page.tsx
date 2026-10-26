@@ -41,11 +41,9 @@ function CalculatorIcon() {
 function SimulatorCardContent({
   simulator,
   releaseEnabled,
-  engineBlocked = false,
 }: {
   simulator: HubSimulator;
   releaseEnabled: boolean;
-  engineBlocked?: boolean;
 }) {
   return (
     <>
@@ -56,12 +54,10 @@ function SimulatorCardContent({
         <h2>{simulator.title}</h2>
         <p>{simulator.description}</p>
         {simulator.badge ? <span className={styles.hubCode}>{simulator.badge}</span> : null}
-        {!releaseEnabled || engineBlocked ? (
-          <span className={styles.hubBlocked}>Aguardando autorização</span>
-        ) : null}
+        {!releaseEnabled ? <span className={styles.hubBlocked}>Aguardando autorização</span> : null}
       </span>
       <span className={styles.hubArrow} aria-hidden="true">
-        {releaseEnabled && !engineBlocked ? "↗" : <LockKeyhole size={18} strokeWidth={1.8} />}
+        {releaseEnabled ? "↗" : <LockKeyhole size={18} strokeWidth={1.8} />}
       </span>
     </>
   );
@@ -129,7 +125,6 @@ export default async function SimulationHubPage() {
           </h2>
           <div className={styles.hubGrid}>
             {hubCards.map(({ simulator, releaseEnabled }) => {
-              const engineBlocked = simulator.slug === "caixa";
               return releaseEnabled ? (
                 <Link
                   className={styles.hubCard}
@@ -137,11 +132,7 @@ export default async function SimulationHubPage() {
                   prefetch={false}
                   key={simulator.slug}
                 >
-                  <SimulatorCardContent
-                    simulator={simulator}
-                    releaseEnabled
-                    engineBlocked={engineBlocked}
-                  />
+                  <SimulatorCardContent simulator={simulator} releaseEnabled />
                 </Link>
               ) : (
                 <article

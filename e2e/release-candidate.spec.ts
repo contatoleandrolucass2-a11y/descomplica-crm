@@ -480,7 +480,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/simulacao/caixa",
-    heading: "Simulação CAIXA",
+    heading: "Simulador CAIXA",
     allowed: activeOperationalRoles,
   },
   {
@@ -2046,7 +2046,7 @@ test("isolated homologation exposes its safety controls without sharing producti
   });
 });
 
-test("released simulator pages respect explicit inventory access while the CAIXA engine stays blocked", async ({
+test("released simulator pages respect explicit inventory access while CAIXA calculation stays local", async ({
   browser,
 }) => {
   await withRolePage(browser, "master", async (page) => {
@@ -2122,7 +2122,7 @@ test("released simulator pages respect explicit inventory access while the CAIXA
     const caixa = await page.goto("/app/simulacao/caixa");
     expect(caixa?.status()).toBe(200);
     await expect(
-      page.getByRole("heading", { level: 1, name: "Simulação CAIXA", exact: true }),
+      page.getByRole("heading", { level: 1, name: "Simulador CAIXA", exact: true }),
     ).toBeVisible();
     await expect(page.getByRole("navigation", { name: "Ferramentas Caixa" })).toBeVisible();
     await expect(page.getByText("Motor CAIXA bloqueado.", { exact: true })).toHaveCount(0);

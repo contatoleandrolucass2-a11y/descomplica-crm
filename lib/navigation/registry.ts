@@ -447,7 +447,7 @@ export const PAGE_REGISTRY = [
     permission: "crm.simulators.view",
     releaseEnabled: true,
     name: "CAIXA",
-    description: "Consulte a jornada visual; cálculo e envio permanecem bloqueados.",
+    description: "Simule o financiamento habitacional com as regras validadas da CAIXA.",
     section: "simulation",
     parentKey: "crm.simulation",
     sortOrder: 70,

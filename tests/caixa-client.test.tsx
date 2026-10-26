@@ -48,13 +48,13 @@ describe("CAIXA dedicated client", () => {
     expect(markup).toContain('data-canvas-layout="caixa"');
     for (const label of [
       "Crédito habitacional",
-      "Simulação CAIXA",
-      "Cliente e imóvel",
+      "Simulador CAIXA",
+      "DADOS DO CLIENTE E DO IMÓVEL",
       "Renda familiar bruta",
       "Prestação aprovada",
       "Valor do imóvel",
       "Recursos próprios",
-      "Qnt de proponentes",
+      "Quantidade de proponentes",
       "Data de nascimento",
       "Cidade",
       "Estado",
@@ -196,7 +196,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       });
       await page.goto("https://caixa.test/");
       await browserExpect(
-        page.getByRole("heading", { name: "Simulação CAIXA", exact: true }),
+        page.getByRole("heading", { name: "Simulador CAIXA", exact: true }),
       ).toBeVisible();
       await browserExpect(page.getByRole("main")).toHaveCount(1);
       await browserExpect(page.locator('main[data-canvas-layout="caixa"]')).toHaveCount(1);
@@ -357,7 +357,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(
         page.getByRole("heading", { name: "Resumo financeiro", exact: true }),
       ).toHaveCount(0);
-      await page.getByRole("button", { name: "03 Documentos", exact: true }).click();
+      await page.getByRole("button", { name: "02 Documentos", exact: true }).click();
       await page.getByLabel("Tipo de vínculo / renda", { exact: false }).selectOption("clt");
       await page.getByRole("button", { name: "Gerar documentos da Fase 1", exact: true }).click();
       await browserExpect(page.getByText("Contracheques", { exact: true })).toBeVisible();
@@ -368,12 +368,12 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByText("Certidão de estado civil", { exact: true }),
       ).toBeVisible();
       await auditCurrentTab("documentos");
-      await page.getByRole("button", { name: "04 Diagnóstico", exact: true }).click();
+      await page.getByRole("button", { name: "03 Diagnóstico", exact: true }).click();
       await page.getByRole("button", { name: "Reprovado", exact: true }).click();
       await page.getByRole("button", { name: "Pontuação (rating)", exact: true }).click();
       await browserExpect(page.getByRole("heading", { name: /pontuação/i })).toBeVisible();
       await auditCurrentTab("diagnostico");
-      await page.getByRole("button", { name: "+ Utilitários", exact: true }).click();
+      await page.getByRole("button", { name: "04 Utilitários", exact: true }).click();
       await page.getByRole("button", { name: "Tempo de FGTS", exact: true }).click();
       await page.getByLabel("Data início", { exact: true }).fill("2020-01-01");
       await page.getByLabel("Data fim (vazio = atual)", { exact: true }).fill("2024-01-01");
