@@ -50,12 +50,41 @@ insert into auth.users (id, email) values
   ('ad810000-0000-4000-8000-000000000001', 'dashboard-profile-one@example.test'),
   ('ad810000-0000-4000-8000-000000000002', 'dashboard-profile-two@example.test');
 select public.bootstrap_master_user('ad810000-0000-4000-8000-000000000001');
+insert into public.crm_organizations (id, organization_key, name, kind)
+values (
+  'ad820000-0000-4000-8000-000000000001',
+  'dashboard-profiles-test',
+  'Synthetic Dashboard Profiles',
+  'house'
+);
+insert into public.crm_teams (id, organization_id, team_key, name)
+values (
+  'ad830000-0000-4000-8000-000000000001',
+  'ad820000-0000-4000-8000-000000000001',
+  'dashboard-profiles-test',
+  'Synthetic Dashboard Profiles'
+);
+insert into public.crm_reporting_scopes (id, scope_key, scope_type, team_id)
+values (
+  'ad840000-0000-4000-8000-000000000001',
+  'dashboard-profiles-team',
+  'team',
+  'ad830000-0000-4000-8000-000000000001'
+);
+insert into public.crm_user_reporting_scope_grants (
+  user_id, reporting_scope_id, granted_by, reason
+) values (
+  'ad810000-0000-4000-8000-000000000002',
+  'ad840000-0000-4000-8000-000000000001',
+  'ad810000-0000-4000-8000-000000000001',
+  'Synthetic dashboard profile isolation fixture'
+);
+update public.user_roles
+set role_key = 'broker_house', assigned_by = 'ad810000-0000-4000-8000-000000000001'
+where user_id = 'ad810000-0000-4000-8000-000000000002';
 update public.profiles
 set is_active = true, access_status = 'approved', approved_at = clock_timestamp(),
     approved_by = 'ad810000-0000-4000-8000-000000000001'
-where user_id = 'ad810000-0000-4000-8000-000000000002';
-update public.user_roles
-set role_key = 'broker_house', assigned_by = 'ad810000-0000-4000-8000-000000000001'
 where user_id = 'ad810000-0000-4000-8000-000000000002';
 insert into public.user_permission_overrides (
   user_id, permission_key, effect, reason, granted_by
