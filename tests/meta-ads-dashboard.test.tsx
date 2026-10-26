@@ -401,6 +401,11 @@ describe("dashboard Meta Ads", () => {
     expect(canvas).toContain("requested-macro-default-v2");
     expect(canvas).toContain("standard.name==='Padrão'");
     expect(canvas).toContain("sameFactoryLayout(standard.cards,legacyFactoryDefinitions)");
+    expect(canvas).toContain("/api/meta-ads/canvas-profiles?scope=");
+    expect(canvas).toContain("method:'PUT'");
+    expect(canvas).toContain("Layout salvo no seu perfil");
+    expect(merge).toContain("fetch('/api/meta-ads/data',{cache:'no-store'})");
+    expect(merge).not.toContain("fetch('/api/meta-ads/data?'+new URLSearchParams(selectedRange())");
     expect(merge).toContain("/canvas/index.html?v=requested-default-1");
     expect(exportControls).toContain('canvas: "Gráficos do canvas (com filtros próprios)"');
   });

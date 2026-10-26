@@ -29,7 +29,7 @@ main>#canvas{min-height:450px!important}main>#empty{width:100%}
 .card[data-chart-type="kpi"] .metric-heading h2{margin:0}
 .card[data-chart-type="kpi"] .metric-heading .metric-info{height:20px}
 #canvas .card[data-chart-type="kpi"] .metric-tile,#expanded .card[data-chart-type="kpi"] .metric-tile{justify-content:center;align-items:flex-start;padding:4px 6px;gap:8px}
-.card[data-chart-type="kpi"] .metric-tile strong{font-size:40px;font-weight:700;line-height:1.12;font-variant-numeric:tabular-nums}
+.card[data-chart-type="kpi"] .metric-tile strong{font-size:clamp(22px,4.6cqi,32px);font-weight:700;line-height:1.12;font-variant-numeric:tabular-nums}
 .card[data-chart-type="kpi"] .metric-tile small{font-size:11px;line-height:14px}
 
 /* Identical title, toolbar, value and date tracks keep indicator baselines aligned. */
@@ -111,23 +111,23 @@ body .card-controls .chart-filter-field[hidden]{display:none}
 #canvas .card.duplicate-highlight{outline:3px solid #5bbaff;outline-offset:-3px;box-shadow:0 0 0 4px #5bbaff40}
 .card[data-chart-type="table"] .legend{display:none}
 .card[data-chart-type="table"] .chart{overflow:auto!important;display:block}
-.card[data-chart-type="table"] table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:560px;font-size:12px;color:inherit}
-.card[data-chart-type="table"] th:nth-child(2){width:85px}
-.card[data-chart-type="table"] th:nth-child(3){width:78px}
-.card[data-chart-type="table"] th:nth-child(4){width:90px}
-.card[data-chart-type="table"] th:nth-child(5){width:60px}
-.card[data-chart-type="table"] th:nth-child(6){width:88px}
-.card[data-chart-type="table"] th:nth-child(7){width:20px}
-.card[data-chart-type="table"] :is(th,td){padding:7px 6px;text-align:left;border-bottom:1px solid var(--filter-line);vertical-align:middle;line-height:1.15}
+.card[data-chart-type="table"] table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:500px;font-size:11px;color:inherit}
+.card[data-chart-type="table"] th:nth-child(2){width:74px}
+.card[data-chart-type="table"] th:nth-child(3){width:63px}
+.card[data-chart-type="table"] th:nth-child(4){width:72px}
+.card[data-chart-type="table"] th:nth-child(5){width:72px}
+.card[data-chart-type="table"] th:nth-child(6){width:82px}
+.card[data-chart-type="table"] th:nth-child(7){width:14px}
+.card[data-chart-type="table"] :is(th,td){padding:5px 4px;text-align:left;border-bottom:1px solid color-mix(in srgb,var(--filter-line) 62%,transparent);vertical-align:middle;line-height:1.12}
 .card[data-chart-type="table"] th{position:sticky;top:0;z-index:1;background:var(--filter-input);font-size:11px;color:var(--filter-muted)}
-.card[data-chart-type="table"] th .info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:2px;padding:0!important;border:0!important;border-radius:50%;background:transparent!important;font-size:11px;line-height:1;vertical-align:-1px}
+.card[data-chart-type="table"] th .info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:2px;padding:0!important;border:0!important;border-radius:50%;background:transparent!important;font-size:10px;line-height:1;vertical-align:-1px}
 .card[data-chart-type="table"] .campaign-table-identity{display:grid;grid-template-columns:9px minmax(0,1fr) auto;grid-template-areas:"marker name status";align-items:center;column-gap:6px;max-width:300px;min-width:0}
 .card[data-chart-type="table"] .campaign-table-identity>.dot{grid-area:marker}
 .card[data-chart-type="table"] .campaign-table-identity>.link-button{grid-area:name;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card[data-chart-type="table"] .campaign-table-identity>.delivery-status{grid-area:status;margin:0;white-space:nowrap}
 .card[data-chart-type="table"] .link-button{padding:0;border:0;background:transparent!important;text-align:left;font-weight:600;white-space:normal}
 .card[data-chart-type="table"] .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);flex-shrink:0}
-.card[data-chart-type="table"] .badge,.card[data-chart-type="table"] .delivery-badge{font-size:10px;padding:2px 5px;border-radius:10px;background:var(--filter-input);white-space:nowrap}
+.card[data-chart-type="table"] .badge,.card[data-chart-type="table"] .delivery-badge{font-size:9px;padding:2px 4px;border-radius:10px;background:var(--filter-input);white-space:normal;line-height:1.05;display:inline-block}
 .card[data-chart-type="table"] td:nth-child(6) .badge.red{background:#fff0f3;color:#d92343}
 .card[data-chart-type="table"] td:nth-child(6) .badge.warn{background:#fff5e2;color:#a96f00}
 .card[data-chart-type="table"] td:nth-child(6) .badge.good{background:#e8f7ef;color:#14816c}
@@ -138,6 +138,10 @@ body[data-theme="dark"] .card[data-chart-type="table"] td:nth-child(6) .badge.go
 .card[data-chart-type="table"] .period-comparison{display:block;font-size:10px;color:var(--filter-muted);margin-top:4px}
 .card[data-chart-type="table"] .clickable{cursor:pointer}
 .card[data-chart-type="table"] .clickable:hover{background:var(--filter-input)}
+
+/* Grid lines stay subordinate to values and campaign marks. */
+#canvas .chart svg .grid,#expanded .chart svg .grid{stroke-opacity:.34;stroke-width:.75}
+#canvas .chart svg text[aria-label],#expanded .chart svg text[aria-label]{font-weight:650;paint-order:stroke;stroke:var(--filter-surface);stroke-width:2px;stroke-linejoin:round}
 /* Up to nine funnels fit in complete rows; larger selections retain scrolling. */
 .card[data-chart-type="funnel"] .legend{display:none}
 .card[data-chart-type="funnel"] .merged-funnels{grid-template-columns:repeat(var(--funnel-columns,3),minmax(0,1fr));gap:10px;padding:6px!important}

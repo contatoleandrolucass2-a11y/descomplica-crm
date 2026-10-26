@@ -72,7 +72,11 @@ function decoratePlot(card,size,markup){
   const grid=[...svg.querySelectorAll('line.grid')];if(grid.length){const bottom=Number(grid[0].getAttribute('y1')),top=Number(grid.at(-1).getAttribute('y1'));[...new Set(references.filter(v=>v>0))].forEach(cap=>{const y=bottom-cap/max*(bottom-top);lines.push(`<line x1="${grid[0].getAttribute('x1')}" x2="${W-18}" y1="${y}" y2="${y}" stroke="#d33a54" stroke-dasharray="5 3"><title>Teto: ${fmt(cap,card.metric)}</title></line>`);});}
  }
  svg.insertAdjacentHTML('beforeend',lines.join(''));
- return decorateComparison(card,size,template.innerHTML)+`<small class="cap-reference">${card.metric==='cpl'?'Teto por resultado':'Limite de investimento'}: ${ids.map((i,j)=>escapeLabel(campaigns[i].name)+' '+fmt(references[j],card.metric)).join(' · ')} · leitura</small>`;
+ const [start,end]=range(card),periodDays=Math.round((date(end)-date(start))/86400000)+1;
+ const referenceLabel=card.metric==='cpl'
+  ?`Teto médio: ${ids.map((i,j)=>escapeLabel(campaigns[i].name)+' '+fmt(references[j],card.metric)).join(' · ')} · acumulado do período: ${ids.map((i,j)=>escapeLabel(campaigns[i].name)+' '+fmt(references[j]*periodDays,card.metric)).join(' · ')} (${periodDays} dia${periodDays===1?'':'s'})`
+  :`Limite de investimento: ${ids.map((i,j)=>escapeLabel(campaigns[i].name)+' '+fmt(references[j],card.metric)).join(' · ')}`;
+ return decorateComparison(card,size,template.innerHTML)+`<small class="cap-reference">${referenceLabel} · referência de leitura</small>`;
 }
 
 function previousChartMax(card){

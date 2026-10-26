@@ -66,8 +66,58 @@ if(!profileState||!Array.isArray(profileState.items)||!profileState.items.length
  profileState.activeId=active.id;cards=cloneCards(active.cards);
  if(!profileState.items.some(item=>item.id===profileState.defaultId))profileState.defaultId=active.id;
 }
-function saveProfiles(){localStorage.setItem(profileKey,JSON.stringify(profileState));}
+let profilesHydrated=false,profilesHydrating=false,profileSaveTimer=0;
+function profileScope(){return integration.view==='macro'?'macro':integration.view==='micro-ads'?'micro-ads':'micro-sets';}
+function saveProfiles(){
+ localStorage.setItem(profileKey,JSON.stringify(profileState));
+ if(!profilesHydrated)return;
+ clearTimeout(profileSaveTimer);
+ profileSaveTimer=setTimeout(async()=>{
+  try{
+   const response=await fetch('/api/meta-ads/canvas-profiles',{method:'PUT',cache:'no-store',headers:{'content-type':'application/json'},body:JSON.stringify({scope:profileScope(),state:profileState})});
+   if(!response.ok)throw new Error('save_failed');
+   const status=$('#save-status');if(status)status.textContent='Layout salvo no seu perfil';
+  }catch{const status=$('#save-status');if(status)status.textContent='Salvo neste dispositivo; sincronização pendente';}
+ },450);
+}
 function activeProfile(){return profileState.items.find(item=>item.id===profileState.activeId)||profileState.items[0];}
+function upgradeRemoteDefault(){
+ if(integration.view!=='macro')return false;
+ const standard=profileState.items.find(item=>item.id===profileState.defaultId);
+ const legacyStandard=standard&&standard.name==='Padrão'&&Array.isArray(standard.cards)&&standard.cards.length===legacyFactoryDefinitions.length&&standard.cards.every((card,index)=>{
+  const expected=legacyFactoryDefinitions[index];
+  return ['metric','type','period','group'].every(field=>card[field]===expected[field]);
+ });
+ if(!legacyStandard)return false;
+ standard.cards=cloneCards(materialize(requestedMacroDefinitions));
+ if(profileState.activeId===standard.id)cards=cloneCards(standard.cards);
+ return true;
+}
+async function hydrateProfilesFromServer(){
+ if(profilesHydrating)return;profilesHydrating=true;
+ try{
+  const response=await fetch('/api/meta-ads/canvas-profiles?scope='+encodeURIComponent(profileScope()),{cache:'no-store'});
+  if(!response.ok)throw new Error('load_failed');
+  const payload=await response.json();
+  let shouldSync=!payload.profile?.state;
+  if(payload.profile?.state){
+   profileState=payload.profile.state;
+   const active=profileState.items.find(item=>item.id===profileState.activeId)||profileState.items[0];
+   profileState.activeId=active.id;cards=cloneCards(active.cards);
+   if(!profileState.items.some(item=>item.id===profileState.defaultId))profileState.defaultId=active.id;
+   shouldSync=upgradeRemoteDefault();
+   localStorage.setItem(profileKey,JSON.stringify(profileState));
+   localStorage.setItem(key,JSON.stringify(cards));
+  }
+  profilesHydrated=true;
+  render(false);
+  if(shouldSync){saveProfiles();const status=$('#save-status');if(status)status.textContent='Sincronizando layout com seu perfil…';}
+  else{const status=$('#save-status');if(status)status.textContent='Layout salvo no seu perfil';}
+ }catch{
+  const status=$('#save-status');if(status)status.textContent='Perfil remoto indisponível; layout local preservado';
+  setTimeout(hydrateProfilesFromServer,10000);
+ }finally{profilesHydrating=false;}
+}
 // A primeira versão publicada criou no navegador o perfil de fábrica antigo.
 // Troque somente esse perfil ainda intacto. Perfis e layouts personalizados
 // permanecem preservados.
@@ -137,7 +187,7 @@ function range(c){return integratedRange(c)}
 function rows(c){return integratedRows(c)}
 function hourlyRows(){return []}
 function aggregate(rs,m){return integratedAggregate(rs,m)}
-function persist(){try{localStorage.setItem(key,JSON.stringify(cards));const active=activeProfile();if(active){active.cards=cloneCards(cards);saveProfiles();}$('#save-status').textContent='Layout salvo neste navegador'}catch{$('#save-status').textContent='Não foi possível salvar neste navegador'}}
+function persist(){try{localStorage.setItem(key,JSON.stringify(cards));const active=activeProfile();if(active){active.cards=cloneCards(cards);saveProfiles();}$('#save-status').textContent=profilesHydrated?'Salvando no seu perfil…':'Layout preservado neste dispositivo'}catch{$('#save-status').textContent='Não foi possível salvar o layout'}}
 function updateHistoryButtons(){$('#undo').disabled=!history.length;$('#redo').disabled=!future.length;}
 function recordChange(snapshot){history.push(snapshot);if(history.length>30)history.shift();future=[];updateHistoryButtons();}
 function checkpoint(){recordChange(JSON.stringify(cards));}
@@ -471,6 +521,7 @@ function canvasPitch(){const grid=$('#canvas'),style=getComputedStyle(grid);retu
 let packedWidth=0;
 new ResizeObserver(()=>{const width=$('#canvas').clientWidth;$('#canvas').style.setProperty('--column-pitch',canvasPitch()+'px');if(width!==packedWidth){packedWidth=width;packCanvas();fitRenderedCharts();}}).observe($('#canvas'));
 render();
+hydrateProfilesFromServer();
 
 function plot(c,size={}){const markup=decoratePlot(c,size,basePlot(c,size));return comparablePeriodCards(c).length>1?markup+'<small class="scale-reference">Escala compartilhada entre períodos · referência: maior valor</small>':markup;}
 

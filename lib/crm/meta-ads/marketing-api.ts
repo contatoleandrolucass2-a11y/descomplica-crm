@@ -186,6 +186,18 @@ function actionValue(actions: MetaAction[] | undefined, names: readonly string[]
   );
 }
 
+// Meta may return the generic lead action together with a destination-specific
+// alias for the same conversion. Ads Manager treats those as one result; adding
+// aliases inflates campaign totals. Keep the largest compatible counter instead.
+function leadActionValue(actions: MetaAction[] | undefined) {
+  if (!Array.isArray(actions)) return 0;
+  const accepted = new Set<string>(LEAD_ACTIONS);
+  return Math.max(
+    0,
+    ...actions.map((action) => (accepted.has(text(action.action_type)) ? number(action.value) : 0)),
+  );
+}
+
 const MESSAGE_ACTIONS = ["onsite_conversion.messaging_conversation_started_7d"] as const;
 const LEAD_ACTIONS = [
   "lead",
@@ -219,7 +231,7 @@ function mapInsight(
     return null;
   }
   const messageConversions = actionValue(insight.actions, MESSAGE_ACTIONS);
-  const leadConversions = actionValue(insight.actions, LEAD_ACTIONS);
+  const leadConversions = leadActionValue(insight.actions);
   const destination =
     messageConversions > 0
       ? "whatsapp"
@@ -294,7 +306,7 @@ function mapRegionalInsight(
   const conversions =
     destination === "whatsapp"
       ? actionValue(insight.actions, MESSAGE_ACTIONS)
-      : actionValue(insight.actions, LEAD_ACTIONS);
+      : leadActionValue(insight.actions);
   return {
     rowId: [date, accountId, campaignId, adsetId, adId, region].join("|"),
     date,
@@ -405,8 +417,19 @@ function isoDate(date: Date) {
   return date.toISOString().slice(0, 10);
 }
 
+function saoPauloDate(now: Date) {
+  const parts = new Intl.DateTimeFormat("en-US", {
+    timeZone: "America/Sao_Paulo",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(now);
+  const values = Object.fromEntries(parts.map((part) => [part.type, part.value]));
+  return `${values.year}-${values.month}-${values.day}`;
+}
+
 function dateRange(now: Date, days: number) {
-  const end = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+  const end = new Date(`${saoPauloDate(now)}T00:00:00Z`);
   const start = new Date(end);
   start.setUTCDate(start.getUTCDate() - (days - 1));
   return { start: isoDate(start), end: isoDate(end) };
@@ -494,10 +517,7 @@ export async function fetchMetaAdsDashboardData(
     const adId = text(insight.ad_id);
     if (!adId) continue;
     if (actionValue(insight.actions, MESSAGE_ACTIONS) > 0) destinations.set(adId, "whatsapp");
-    else if (
-      actionValue(insight.actions, LEAD_ACTIONS) > 0 &&
-      destinations.get(adId) !== "whatsapp"
-    )
+    else if (leadActionValue(insight.actions) > 0 && destinations.get(adId) !== "whatsapp")
       destinations.set(adId, "form");
   }
   const rows = insights

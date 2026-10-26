@@ -423,10 +423,12 @@ function defaultScatter(list) {
   );
 }
 function campaignTable(list) {
+  const selected = selectedRange(), periodDays = Math.round((parseDate(selected.end) - parseDate(selected.start)) / 86400000) + 1;
   return `<div class="table-wrap"><table><thead><tr><th>Campanha</th><th>Investimento</th><th>${resultName()}</th><th>${costName()}</th><th>Teto ${metricInfo("cap")}</th><th>Situação</th><th></th></tr></thead><tbody>${list
     .map((c) => {
       const [label, tone] = status(c);
-      return `<tr class="clickable" data-open="${c.id}"><td class="campaign-table-cell"><div class="campaign-table-identity">${dot(c)}<button class="link-button" title="${c.name}" data-open="${c.id}">${c.name}</button>${deliveryBadge(c)}</div></td><td>${comparisonCell(c, "spend", money)}</td><td>${comparisonCell(c, "leads", num)}</td><td class="${c.cap != null && c.cpl > c.cap ? "bad" : ""}">${comparisonCell(c, "cpl", money)}</td><td>${money(c.cap)}</td><td><span class="badge ${tone}">${label}</span></td><td>›</td></tr>`;
+      const periodCap = c.cap == null ? null : c.cap * periodDays;
+      return `<tr class="clickable" data-open="${c.id}"><td class="campaign-table-cell"><div class="campaign-table-identity">${dot(c)}<button class="link-button" title="${c.name}" data-open="${c.id}">${c.name}</button>${deliveryBadge(c)}</div></td><td>${comparisonCell(c, "spend", money)}</td><td>${comparisonCell(c, "leads", num)}</td><td class="${c.cap != null && c.cpl > c.cap ? "bad" : ""}">${comparisonCell(c, "cpl", money)}</td><td>${money(periodCap)}${c.cap == null ? "" : `<small class="period-comparison">${money(c.cap)}/dia · ${periodDays} dia${periodDays === 1 ? "" : "s"}</small>`}</td><td><span class="badge ${tone}">${label}</span></td><td>›</td></tr>`;
     })
     .join("")}</tbody></table></div>`;
 }
