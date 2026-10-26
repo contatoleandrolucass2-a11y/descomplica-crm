@@ -95,10 +95,53 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
     expect(calculatePrice(120000, 0, 120)).toBe(1000);
   });
   it("preserves SBPE quotas and does not force a product switch", () => {
-    expect(success({ product: "sbpe", nominalRate: 11, system: "sac" }).financingQuota).toBe(0.8);
-    expect(success({ product: "sbpe", nominalRate: 11 }).financingQuota).toBe(0.7);
+    expect(success({ product: "sbpe", nominalRate: 11, system: "sac" }).financingQuota).toBe(0.9);
+    expect(success({ product: "sbpe", nominalRate: 11 }).financingQuota).toBe(0.8);
     expect(calculateHousingSimulation({ ...base, income: 13000.01 }).ok).toBe(false);
     expect(calculateHousingSimulation({ ...base, product: "sbpe" }).ok).toBe(false);
+  });
+  it("uses the lower of purchase and CAIXA appraisal for the quota base", () => {
+    expect(
+      success({
+        product: "sbpe",
+        nominalRate: 11,
+        system: "sac",
+        income: 50000,
+        propertyValue: 500000,
+        appraisalValue: 450000,
+        ownFunds: 0,
+      }),
+    ).toMatchObject({ quotaBaseValue: 450000, quotaFinancing: 405000, financing: 405000 });
+    expect(
+      success({
+        product: "sbpe",
+        nominalRate: 11,
+        system: "price",
+        income: 50000,
+        propertyValue: 500000,
+        appraisalValue: 550000,
+        ownFunds: 0,
+      }).quotaFinancing,
+    ).toBe(400000);
+  });
+  it("accepts a smaller approved quota but never one above the product ceiling", () => {
+    expect(
+      success({
+        product: "sbpe",
+        nominalRate: 11,
+        system: "sac",
+        approvedFinancingQuotaPercent: 75,
+      }).financingQuota,
+    ).toBe(0.75);
+    expect(
+      calculateHousingSimulation({
+        ...base,
+        product: "sbpe",
+        nominalRate: 11,
+        system: "price",
+        approvedFinancingQuotaPercent: 80.01,
+      }).ok,
+    ).toBe(false);
   });
   it("enforces class middle used-property quota and income limits", () => {
     expect(
@@ -158,6 +201,66 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
     expect(result.insuranceKnown).toBe(false);
     expect(result.warnings.join(" ")).toContain("Subsídio a confirmar");
     expect(result.warnings.join(" ")).toContain("sem os seguros ausentes");
+  });
+  it("keeps public contribution separate and enforces the minimum FGTS complement", () => {
+    const subsidyProfile = {
+      income: 3000,
+      propertyValue: 210000,
+      cityLimit: 210000,
+    };
+    expect(
+      calculateHousingSimulation({ ...base, ...subsidyProfile, confirmedSubsidy: 1499.99 }).ok,
+    ).toBe(false);
+    expect(success({ ...subsidyProfile, confirmedSubsidy: 1500 }).subsidy).toBe(1500);
+    expect(
+      success({
+        income: 3000,
+        propertyValue: 210000,
+        cityLimit: 210000,
+        confirmedSubsidy: 55000,
+        confirmedPublicContribution: 30000,
+      }).publicContribution,
+    ).toBe(30000);
+  });
+  it("tracks the public quick-calculator parameters without presenting them as confirmed", () => {
+    const result = success({
+      income: 6000,
+      propertyValue: 300000,
+      ownFunds: 0,
+      approvedPayment: undefined,
+      mipMonthly: undefined,
+      dfiMonthly: undefined,
+      operatingFee: undefined,
+      officialQuickEstimate: true,
+      birthDate: "1991-03-15",
+      asOf: "2026-10-26",
+    });
+    expect(result.financing).toBeCloseTo(239295.3, -2);
+    expect(result.firstPayment).toBe(1800);
+    expect(result.effectiveRate).toBeCloseTo(8.4722, 3);
+    expect(result).toMatchObject({
+      insuranceKnown: false,
+      insuranceEstimated: true,
+      operatingFeeKnown: false,
+      operatingFeeEstimated: true,
+    });
+  });
+  it("uses the public SBPE quick rate when a confirmed individual rate is absent", () => {
+    const standard = success({
+      product: "sbpe",
+      nominalRate: undefined,
+      officialQuickEstimate: true,
+    });
+    expect(standard.rateEstimated).toBe(true);
+    expect(standard.effectiveRate).toBeCloseTo(11.49, 10);
+    expect(
+      success({
+        product: "sbpe",
+        income: 80000,
+        nominalRate: undefined,
+        officialQuickEstimate: true,
+      }).effectiveRate,
+    ).toBeCloseTo(13.4, 10);
   });
   it("respects income ceiling after fees and never rounds financing upward", () => {
     const result = success({ approvedPayment: 1000, ownFunds: 0 });
@@ -318,12 +421,13 @@ describe("CAIXA utilities with synthetic data", () => {
     });
     expect(result.ok).toBe(true);
     if (!result.ok) return;
-    expect(result.installments[0]).toMatchObject({ releasedBalance: 100000, interest: 1000 });
+    expect(result.installments[0]).toMatchObject({ releasedBalance: 108333.33, interest: 1083.33 });
     expect(result.installments[0]!.correction).toBeCloseTo(
-      Math.round(100000 * (1.03 ** (1 / 12) - 1) * 100) / 100,
+      Math.round(108333.33333333333 * (1.03 ** (1 / 12) - 1) * 100) / 100,
       2,
     );
     expect(result.lastPayment).toBeGreaterThan(result.firstPayment);
+    expect(result.installments.at(-1)?.releasedBalance).toBe(200000);
     expect(estimateConstructionInterest({ financing: 200000, annualRate: 12, months: 0 }).ok).toBe(
       false,
     );

@@ -1,5 +1,16 @@
 # Changelog
 
+## 2026-10-26 — Cotas e precisão do Simulador CAIXA
+
+- Atualiza o SBPE para cota máxima de 90% no SAC e 80% no Price, aceitando cota individual confirmada menor.
+- Aplica a cota sobre o menor valor entre compra e avaliação da CAIXA.
+- Acrescenta estimativa versionada de taxa SBPE, MIP, DFI e tarifa da calculadora rápida pública, sem substituir valores confirmados.
+- Separa desconto complemento FGTS de aporte MCMV Cidades e valida o desconto mínimo de R$ 1.500.
+- Corrige o cenário de obra para atingir 100% da liberação no último mês.
+- Amplia a regressão financeira, responsiva e de acessibilidade com cenários fictícios confrontados na fonte oficial.
+- Atualiza somente as cinco referências visuais CAIXA alteradas, a partir da captura protegida aprovada.
+- Publica o merge `24d9bc81` após CI integral e confirma em produção, com dados fictícios, os tetos de 80% no Price e 90% no SAC.
+
 ## 2026-10-26 — Refinamento final de Agendamentos publicado
 
 - Publica exclusivamente `/app/etapas/agendamentos` com sidebar compacta,
