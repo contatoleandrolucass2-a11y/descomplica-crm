@@ -23,6 +23,13 @@
 - Documenta fórmulas e proveniência oficial; mantém APIs e autorização existentes.
 - Acrescenta testes financeiros, fluxos no navegador e acessibilidade móvel.
 
+## 2026-10-26 - Publicacao de Agendamentos
+
+PR #350 publicado no SHA 5ed62606, CI main 40263238224 aprovada.
+42 cenarios visuais locais e smoke autenticado desktop/celular nos tres temas
+concluidos. Deployment d04aed32-b1af-4ff7-a768-4d5f7e4189d9, 01:04 Brasilia.
+Evidencias e limite de sincronizacao Obsidian em docs/knowledge/ATUALIZACOES.md.
+
 ## 2026-10-25 — Ajuste de altura em Agendamentos
 
 - Ajusta a altura das barras do Ranking Score para eliminar a rolagem residual de 4px em 1024px com sidebar aberta, somente em Agendamentos.
