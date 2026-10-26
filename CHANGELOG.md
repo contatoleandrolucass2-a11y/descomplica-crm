@@ -23,6 +23,17 @@
 - Impede acesso direto ao painel do mapa por usuários abaixo da hierarquia Master.
 - Preserva as demais páginas, permissões e integrações do Meta Ads.
 
+## 2026-10-26 — Experiência guiada em Agendamentos
+
+- Refina exclusivamente `/app/etapas/agendamentos` com menu lateral compacto, recolhimento por clique externo, ícones e guias sequenciais entre as seções.
+- Amplia o calendário com atalhos de período, ano e trimestres; mantém House como canal inicial exclusivo e fecha os pop-ups ao clicar fora.
+- Reordena e compacta os indicadores, abre detalhes em pop-up e compara os funis realizado/esperado com cores orientadas pelas metas de conversão.
+- Exibe datas de recência, dias desde o último agendamento e uma tabela responsiva sem rolagem lateral no celular.
+- Ajusta os gráficos à meta diária, semanal e mensal, preservando Imob sem classificação quando não existe meta de agendamentos.
+- Compacta o cabeçalho desta rota entre 1181 e 1500 px para manter navegação, temas e conta separados, com alvos de interação acessíveis.
+- Atualiza somente as 11 referências visuais autenticadas de Agendamentos após revisão dos três temas e de sete larguras responsivas.
+- Adiciona rodapé de suporte e validação visual/interativa em 21 combinações de tema e viewport.
+
 ## 2026-10-26 — Contraste completo do Simulador CAIXA
 
 - Mantém quantias completas em uma linha no resumo móvel, reorganizando rótulos e selos.
@@ -45,6 +56,13 @@
 - Valida parâmetros confirmados e conserva avisos de cálculos parciais.
 - Documenta fórmulas e proveniência oficial; mantém APIs e autorização existentes.
 - Acrescenta testes financeiros, fluxos no navegador e acessibilidade móvel.
+
+## 2026-10-26 - Publicacao de Agendamentos
+
+PR #350 publicado no SHA 5ed62606, CI main 40263238224 aprovada.
+42 cenarios visuais locais e smoke autenticado desktop/celular nos tres temas
+concluidos. Deployment d04aed32-b1af-4ff7-a768-4d5f7e4189d9, 01:04 Brasilia.
+Evidencias e limite de sincronizacao Obsidian em docs/knowledge/ATUALIZACOES.md.
 
 ## 2026-10-25 — Ajuste de altura em Agendamentos
 

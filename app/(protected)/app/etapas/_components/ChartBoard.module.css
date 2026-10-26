@@ -7,13 +7,14 @@
 
 .tile {
   min-width: 0;
-  height: 17rem;
+  height: clamp(22rem, calc(100dvh - 29rem), 26rem);
+  scroll-margin-top: 4.75rem;
 }
 .wide {
   grid-column: 1 / -1;
 }
 .tile.wide {
-  height: 26rem;
+  height: clamp(30rem, calc(100dvh - 9rem), 38rem);
 }
 
 .card {
@@ -42,23 +43,8 @@
 .yellow {
   box-shadow:
     var(--analytics-shadow),
-    inset 0 0 0 2px color-mix(in srgb, var(--frame) 18%, transparent);
-  animation: frameGlow 3.5s ease-in-out infinite alternate;
-}
-
-@keyframes frameGlow {
-  from {
-    box-shadow:
-      var(--analytics-shadow),
-      0 0 0 1px color-mix(in srgb, var(--frame) 24%, transparent),
-      inset 0 0 12px color-mix(in srgb, var(--frame) 8%, transparent);
-  }
-  to {
-    box-shadow:
-      var(--analytics-shadow),
-      0 0 16px color-mix(in srgb, var(--frame) 35%, transparent),
-      inset 0 0 18px color-mix(in srgb, var(--frame) 16%, transparent);
-  }
+    0 0 12px color-mix(in srgb, var(--frame) 28%, transparent),
+    inset 0 0 14px color-mix(in srgb, var(--frame) 12%, transparent);
 }
 
 .blue {
@@ -74,7 +60,7 @@
 .header {
   display: flex;
   flex-wrap: wrap;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 0.25rem 0.5rem;
   flex-shrink: 0;
@@ -88,8 +74,10 @@
 }
 .actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
   gap: 0.125rem;
+  margin: -0.5rem -0.5rem 0 auto;
 }
 .button {
   display: inline-flex;
@@ -100,7 +88,7 @@
   padding: 0.35rem;
   border: 1px solid transparent;
   border-radius: 0.5rem;
-  background: var(--analytics-surface-muted);
+  background: transparent;
   color: var(--analytics-ink);
   cursor: pointer;
 }
@@ -202,7 +190,10 @@
     grid-template-columns: minmax(0, 1fr);
   }
   .tile {
-    height: 19rem;
+    height: 24rem;
+  }
+  .tile.wide {
+    height: 28rem;
   }
   .card:modal {
     width: calc(100vw - 1rem);

@@ -130,10 +130,16 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain(">Período</span>");
     expect(markup).toContain("Outubro de 2026");
     expect(markup).toContain("Selecione o período");
-    expect(markup).toContain("Escolha o mês inteiro ou selecione um ou vários dias.");
+    expect(markup).toContain(
+      "Use um atalho, escolha o mês inteiro ou selecione um ou vários dias.",
+    );
+    expect(markup).toContain("Hoje");
+    expect(markup).toContain("Semana passada");
+    expect(markup).toContain("4º Trimestre");
     expect(markup).toContain('aria-label="Dias do mês"');
     expect(markup).toContain('disabled=""');
-    expect(markup).toContain("Limpar filtros");
+    expect(markup).toContain("Limpar 1 filtro");
+    expect(markup).toContain('aria-pressed="true">House</button>');
     expect(markup).toContain("Equipe Produtiva");
     expect(markup).toContain("1 de 8 corretores, 12,5 por cento da equipe");
     expect(markup).toContain("Corretores cadastrados");
@@ -148,6 +154,8 @@ describe("appointment dashboard availability", () => {
     expect(markup).toContain("Gerentes cadastrados");
     expect(markup).toContain("Visitas realizadas");
     expect(markup).toContain("Vendas no período");
+    expect(markup).toContain("Qnt. de dias");
+    expect(markup).toContain("Desenvolvido e gerenciado por Leandro Lucas");
     expect(markup).toContain("9 oportunidades para 1 agendamento");
     expect(markup).not.toContain("9 → 1");
     expect(markup).toContain("11,1%<");

@@ -1,5 +1,102 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-26: abertura do refinamento visual de Agendamentos
+
+- Escopo exclusivo de `/app/etapas/agendamentos`: navegacao compacta, calendario,
+  filtros, cards, funis, guias por secao, graficos, recencia, detalhamento e
+  rodape. Nenhuma regra ou pagina CAIXA integra esta demanda.
+- GitHub consultado em 26/10/2026 02:52 -03: `origin/main` e o site publicado
+  apontam para `54eb7cdd7460130fc8c70d71fb956cb801b8d12c`, entrega concorrente da
+  pagina CAIXA posterior ao PR #350. Health publico: HTTP 200, status `ok`.
+- O registro documental do PR #350 foi reconciliado sobre a nova `main` no
+  commit `7f9fe12f`; PR #352 permanece aberto enquanto a CI da base atual roda.
+- `knowledge:context`, `knowledge:search` e `knowledge:sync` permanecem
+  indisponiveis com `Documento excede o limite de exportacao.` A fonte
+  versionada foi preservada; nao apagar ou truncar historico para contornar.
+
+### Implementacao e evidencia local do refinamento
+
+- Escopo mantido exclusivamente na pagina de Agendamentos: sidebar contextual,
+  periodos, filtros, cards, funis, graficos, recencia, tabela e rodape. Nenhuma
+  migration, workflow n8n, regra CAIXA ou outra rota foi alterada.
+- House abre selecionado e exclusivo; Imob e manual. As metas diarias House
+  seguem 1 por dia util e 2 as quintas. Imob permanece sem classificacao de
+  produtividade de agendamentos quando a meta nao existe.
+- QA de producao local aprovada: 21 capturas em cinco viewports e tres temas,
+  zero falhas, Axe, overflow ou colisao. Fluxos de calendario, clique externo,
+  filtros compostos, pop-ups, tabela, teclado, reordenacao, hover, 200%, valores
+  grandes e estados indisponiveis/restritos foram exercitados.
+- Evidencia: `test-results/appointments-preview/result.json`, `passed: true`,
+  21 telas. Artefatos sao sinteticos e locais; nao contem dados de clientes.
+- A matriz Linux do run `40290352317` completou 154 rotas, 88 variacoes de tema,
+  242 auditorias Axe e 242 capturas. O unico bloqueio funcional ficou no
+  cabecalho de Agendamentos em 1440 px: navegacao sem geometria suficiente e
+  alvo `Tema claro` sobreposto. A compactacao do breakpoint foi corrigida apenas
+  para essa rota; a QA local focada voltou a aprovar 21/21 antes da nova CI.
+- Lint passou sem erros (38 avisos preexistentes fora do escopo); typecheck e
+  build passaram. Vitest: 4.293 aprovados e 110 condicionais ignorados. Node:
+  1.599 aprovados, 19 ignorados e tres falhas Windows preexistentes em Meta Ads
+  (`connection-monitor` e `vps/session`) por contratos POSIX/arquivo privado;
+  nenhum arquivo Meta Ads foi alterado. A CI Linux e a autoridade para esses
+  contratos. Merge e publicacao ainda serao registrados separadamente. O sync
+  segue impedido pelo limite preexistente do exportador e nao deve ser descrito
+  como concluido.
+
+### Captura autenticada do refinamento aprovada
+
+- Run protegido `40298568730`, artifact `12640948998`, head
+  `b5c80df99422364bd01926b523b54aa0efec6be1` e captura de merge
+  `90dcbe04b389ea144890bb1d5b82658333fc0f38`, em
+  `2026-10-26T09:53:37.533Z`. SHA256 do arquivo:
+  `6ce308fe31b8a8464b155b0818630cfee3bc92f8f2ad8dd6812f7b02436f9010`.
+- Build, E2E e matriz autenticada funcional/Axe/zoom passaram. Revisadas as 11
+  imagens de Agendamentos: sete larguras, tres temas desktop e dark mobile, sem
+  corte, sobreposicao ou overflow visivel. O estado autenticado sintetico sem
+  dados valida shell e layout; a QA local 21/21 valida o conteudo preenchido.
+- Incorporadas somente as 11 imagens, 11 entradas de screenshot, uma entrada
+  responsiva, uma de zoom e uma proveniencia. Outras rotas e matrizes foram
+  preservadas. Os testes de paridade aprovaram 27 casos e ignoraram um
+  condicional. CI completa, merge e publicacao ainda sao obrigatorios.
+
+## 2026-10-26: publicacao da pagina de Agendamentos
+
+- Escopo comportamental exclusivo de `/app/etapas/agendamentos`: sidebar, funis,
+  nomes compactos, participacao, expansao/reordenacao e metas. Nenhuma migration
+  ou workflow n8n alterado. Demais rotas mantem a navegacao existente.
+- PR #350 integrado em `5ed6260600f22cbaab348eb67f900bbbe653f932`.
+  CI PR `40259124348` e CI push/main `40263238224` aprovadas. Na main passaram
+  validate, release-gates, isolated-restore e promotable-image.
+- Validacao final: 79 testes especificos, lint/typecheck/build; QA sintetica
+  com CSS de producao 18/18 e composicao sidebar 24/24 nos tres temas.
+  Zero colisoes eixo/valor e zero overflow do Ranking Score nos cenarios.
+- Artefato imutavel: arquivo SHA256
+  `0961a1074ec37eb879a5816bed868822c319474edb6a223765c01acfaa85f8f6`.
+  ID CI `sha256:073125eb98bf424b325f777ec2926a2f3465849c5502401a901c90ba3b7e0053`;
+  ID local `sha256:a2d421bbf725296dce309e031647963409af7473673fcb684e57e33bf8a2df8d`.
+  Equivalencia comprovada por indice OCI, manifesto, configuracao, 11 camadas,
+  RootFS, plataforma e label; image:prove aprovou os dois perfis, sem rebuild.
+- Coordenador `release:production` concluiu deployment
+  `d04aed32-b1af-4ff7-a768-4d5f7e4189d9` em `2026-10-26T04:04:22.711Z`
+  (01:04:22 America/Sao_Paulo), sem pendencia. Backup privado preservado em
+  `/etc/descomplica-crm/backups/appointments-5ed62606-20261026`; imagem anterior
+  `ec98b41a` preservada. Consulta/CAS/CI/main dentro do coordenador obrigatorio.
+- Health publico em 26/10/2026 01:07:57 -03:00: status ok e versao exata
+  `5ed6260600f22cbaab348eb67f900bbbe653f932`. GET anonimo da rota retornou 307
+  para login. Fontes: `/api/health`, ledger do coordenador e GitHub Actions.
+- Smoke autenticado em producao: desktop 1440x900 e celular 390x844 nos tres
+  temas, sidebar aberta/recolhida, popup, ordem DOM ao mover/restaurar e filtro
+  House/Imob. Sem overflow horizontal da pagina nos tamanhos verificados;
+  popup mobile com largura interna 370/370 px. Sem erros no console observado.
+  House exibiu metas diarias 32/64/0 para dias uteis/quintas/fins de semana;
+  semanas 96/192 conforme datas reais; meta mensal 768. Imob sem meta e sem
+  classificacao de produtividade. Estado restaurado para House e tema medio;
+  override de viewport removido. Prova visual local em test-results, nao exportada.
+- Limite: QA com dados sinteticos nao constitui conciliacao Salesforce; smoke
+  confirma a jornada publicada. Nenhuma alteracao fora do pedido para liberar gates.
+- Obsidian: sync novamente tentado; falha preexistente `Documento excede o limite
+de exportacao.` Registro versionado preservado; sincronizacao pendente ate
+  correcao autorizada do exportador/limite em demanda propria. Nao truncar historico.
+
 Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
 
 ## 2026-10-25: validacao local da pagina de agendamentos

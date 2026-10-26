@@ -304,7 +304,11 @@ function AuthorizedNavigationState({
   }
 
   return (
-    <div className={styles.navigationRoot} ref={rootRef}>
+    <div
+      className={styles.navigationRoot}
+      ref={rootRef}
+      data-appointments-navigation={pathname === "/app/etapas/agendamentos" || undefined}
+    >
       <button
         ref={mobileTriggerRef}
         className={styles.mobileTrigger}
