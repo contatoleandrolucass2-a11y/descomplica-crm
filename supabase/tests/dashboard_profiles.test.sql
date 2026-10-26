@@ -126,6 +126,8 @@ returns jsonb language sql immutable as $$
   ));
 $$;
 
+grant execute on function pg_temp.dashboard_cards(text, text) to authenticated;
+
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config(

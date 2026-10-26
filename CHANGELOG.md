@@ -1,5 +1,7 @@
 # Changelog
 
+- Corrige o ensaio pgTAP dos perfis de canvas ao conceder acesso autenticado à função temporária do teste e ordenar a matriz auditada de RPCs.
+
 ## 2026-10-26 — Canvas analítico em Visão Geral e Agendamentos
 
 - Transforma os gráficos de `/app` e `/app/etapas/agendamentos` em cards configuráveis sobre grade responsiva de 12 colunas.

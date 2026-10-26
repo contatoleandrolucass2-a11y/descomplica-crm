@@ -1,5 +1,7 @@
 # Worklog
 
+- 2026-10-26: corrigidos os dois desvios restantes do ensaio isolado dos perfis de canvas: permissão da função temporária do fixture e ordenação da matriz de RPCs autenticadas.
+
 ## 2026-10-26 — Canvas analítico de Visão Geral e Agendamentos
 
 Foi criado um núcleo compartilhado de canvas para as páginas `/app` e
