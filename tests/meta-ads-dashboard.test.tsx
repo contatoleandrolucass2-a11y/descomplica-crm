@@ -385,6 +385,15 @@ describe("dashboard Meta Ads", () => {
     expect(canvas).toContain("Perfis · ");
     expect(canvas).toContain("Este gráfico já existe");
     expect(canvas).toContain("Escolha outro período");
+    expect(canvas).toContain("const requestedMacroDefinitions=[");
+    expect(canvas).toContain("...['spend','results','cpc','ctr','cpl','cpm']");
+    expect(canvas).toContain("...['today','week','month'].map(period=>({metric:'spend',type:'bars'");
+    expect(canvas).toContain("...['today','week','month'].map(period=>({metric:'results',type:'horizontal'");
+    expect(canvas).toContain("...['today','week','month'].map(period=>({metric:'results',type:'table'");
+    expect(canvas).toContain("{metric:'ctr',type:'radar',period:'global',span:12,height:384");
+    expect(canvas).toContain("requested-macro-default-v1");
+    expect(canvas).toContain("sameFactoryLayout(standard.cards,legacyFactoryDefinitions)");
+    expect(merge).toContain("/canvas/index.html?v=requested-default-1");
     expect(exportControls).toContain('canvas: "Gráficos do canvas (com filtros próprios)"');
   });
 });
