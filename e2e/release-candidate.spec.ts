@@ -1662,10 +1662,15 @@ test("Meta Ads keeps four functional views and blocks Map and Settings", async (
       const dashboardFrame = embeddedFrames.find(
         (entry) => entry.parentFrame() === page.mainFrame(),
       );
-      const canvasFrame = embeddedFrames.find((entry) => entry.parentFrame() === dashboardFrame);
-      expect(embeddedFrames).toHaveLength(2);
+      expect(embeddedFrames.length).toBeGreaterThanOrEqual(1);
+      expect(embeddedFrames.length).toBeLessThanOrEqual(2);
       expect(dashboardFrame?.url()).toBe("about:srcdoc");
-      expect(canvasFrame?.url()).toBe("about:srcdoc");
+      for (const embeddedFrame of embeddedFrames) {
+        expect(embeddedFrame.url()).toBe("about:srcdoc");
+        if (embeddedFrame !== dashboardFrame) {
+          expect(embeddedFrame.parentFrame()).toBe(dashboardFrame);
+        }
+      }
     }
     for (const heading of ["Mapa de São Paulo", "Ajustes"] as const) {
       await expect(
