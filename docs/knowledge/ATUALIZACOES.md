@@ -1,5 +1,39 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-25: validacao local da pagina de agendamentos
+
+- Escopo efetivo restrito a `/app/etapas/agendamentos`; componentes do shell
+  compartilham arquivos, mas o comportamento novo exige a rota exata. Testes
+  de regressao preservam navegacao nas demais paginas.
+- Build, typecheck, lint sem erros e 74 testes especificos aprovados.
+  QA com CSS de producao: 18 combinacoes de viewport/tema, zero falhas e
+  zero erros JavaScript; expansao, reordenacao e emulacao de layout a 200%
+  verificadas com fixtures sinteticas. Evidencia local em
+  `test-results/appointments-preview/result.json`.
+- Suite completa Windows: restricoes POSIX nos testes operacionais/release;
+  CI Linux continua gate obrigatorio. Timeout associativo isolado passou ao
+  repetir sem build concorrente, sem alteracao fora do escopo. Fontes publicas
+  da politica documental aprovadas. Merge e publicacao ainda pendentes.
+- Obsidian permanece pendente por limite de exportacao do documento; nao
+  alterar o exportador nem apagar historico para liberar esta entrega.
+
+## 2026-10-25: abertura da revisao de navegacao e graficos de agendamentos
+
+- Refinamento direto de escopo: todas as mudancas de comportamento, inclusive
+  navegacao lateral, limitadas a `/app/etapas/agendamentos`. Demais rotas devem
+  preservar a interface anterior. Meta diaria House confirmada em 1 por dia
+  util e 2 as quintas por corretor; Imob permanece nulo.
+
+- Base conferida: origin/main `6a0f678e`, PR #349 integrado no GitHub.
+  Health publico consultado em 2026-10-25T23:55Z: HTTP 200, status ok,
+  versao `ec98b41a`. A diferenca corresponde ao fechamento documental.
+- Escopo solicitado: sidebar Dashboard recolhivel, organizacao e expansao dos
+  graficos de agendamentos, nomes compactos, participacao no total filtrado,
+  alertas de recencia e metas exatas por dia, semana e mes.
+- Context e search do runtime de conhecimento falharam por documento acima do
+  limite de exportacao. A fonte versionada permanece disponivel; sincronizacao
+  pendente, sem alterar limites ou apagar historico para contornar a falha.
+
 ## 2026-10-25: publicacao do hover ampliado e filtros herdados dos funis
 
 - O PR #346 integrou a correcao no merge

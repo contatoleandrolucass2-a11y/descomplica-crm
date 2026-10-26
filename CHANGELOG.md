@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-25 - Navegacao lateral e comparacao de agendamentos
+
+- Exclusivamente em Agendamentos, Dashboard abre Visao Geral e usa menu lateral recolhivel com destinos autorizados. As demais paginas preservam a navegacao existente.
+- Coloca realizado a esquerda e esperado a direita, com conversoes e funis lado a lado no desktop.
+- Permite mover e ampliar graficos, compacta nomes e mostra participacao no total filtrado.
+- Destaca as faixas de ultimo agendamento em azul, amarelo e vermelho; faixas vazias ficam azuis.
+- Compara barras House com metas diarias de 1 por corretor em dias uteis e 2 as quintas; semanas somam os dias reais do mes. Metas mensais usam o cadastro de cada mes. Imob permanece sem meta de agendamentos.
+
 ## 2026-10-25 - Publicacao validada do detalhamento dos funis
 
 - Registra o merge, a CI completa, o artefato imutavel e o deployment que

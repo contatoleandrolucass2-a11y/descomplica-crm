@@ -1161,3 +1161,158 @@
     background: #ffffff;
   }
 }
+
+.dashboardShell {
+  display: grid;
+  grid-template-columns: 210px minmax(0, 1fr);
+  align-items: start;
+  min-width: 0;
+}
+
+.dashboardShell[data-collapsed="true"] {
+  grid-template-columns: 64px minmax(0, 1fr);
+}
+
+.dashboardSidebar {
+  position: sticky;
+  top: 70px;
+  z-index: 3;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid var(--analytics-line);
+  border-left: 0;
+  border-radius: 0 8px 8px 0;
+  background: var(--analytics-surface);
+  padding: 8px;
+  color: var(--analytics-ink);
+}
+
+.dashboardToggle,
+.dashboardLink {
+  position: relative;
+  display: flex;
+  width: 100%;
+  min-height: 44px;
+  align-items: center;
+  gap: 10px;
+  box-sizing: border-box;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  padding: 10px;
+  color: inherit;
+  font: inherit;
+  font-size: 13px;
+  text-align: left;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.dashboardToggle {
+  margin-bottom: 8px;
+  font-weight: 700;
+}
+
+.dashboardToggle > svg,
+.dashboardIcon {
+  flex: 0 0 20px;
+}
+
+.dashboardIcon {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+}
+
+.dashboardIcon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.dashboardLinks {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.dashboardLink:hover,
+.dashboardToggle:hover,
+.dashboardLink[aria-current="page"] {
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-cyan-strong);
+}
+
+.dashboardLink[aria-current="page"] {
+  box-shadow: inset 3px 0 var(--analytics-cyan-strong);
+  font-weight: 700;
+}
+
+.dashboardSidebar :is(a, button):focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
+.dashboardLabel {
+  overflow-wrap: anywhere;
+}
+
+.dashboardShell[data-collapsed="true"] .dashboardLabel {
+  display: none;
+}
+
+.dashboardShell[data-collapsed="true"] :is(.dashboardLink, .dashboardToggle) {
+  justify-content: center;
+}
+
+.dashboardTooltip {
+  position: absolute;
+  z-index: 4;
+  left: calc(100% + 12px);
+  display: none;
+  width: max-content;
+  max-width: 180px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 6px;
+  background: var(--analytics-surface);
+  padding: 8px 12px;
+  color: var(--analytics-ink);
+  box-shadow: 0 4px 12px #00000020;
+  pointer-events: none;
+}
+
+.dashboardLink:is(:hover, :focus-visible) .dashboardTooltip {
+  display: block;
+}
+
+.dashboardContent {
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .dashboardShell {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .dashboardSidebar {
+    position: static;
+    border-radius: 0;
+  }
+
+  .dashboardShell:not([data-collapsed="true"]) .dashboardLinks {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media print {
+  .dashboardShell,
+  .dashboardShell[data-collapsed="true"] {
+    display: block;
+  }
+
+  .dashboardSidebar {
+    display: none;
+  }
+}

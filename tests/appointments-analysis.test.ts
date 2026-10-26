@@ -63,6 +63,161 @@ function slice(overrides: Partial<DashboardAnalysisSlice> = {}): DashboardAnalys
 }
 
 describe("appointment chart analysis", () => {
+  const goalRoster = [
+    { key: "a", owner: "Responsável A", manager: "Gerente A" },
+    { key: "b", owner: "Responsável B", manager: "Gerente B" },
+  ];
+  const goalSlice = (overrides: Partial<DashboardAnalysisSlice> = {}) =>
+    slice({
+      version: 4,
+      viewKey: "without_canal_imob",
+      brokerCount: 99,
+      appointments: [],
+      facts: [],
+      ...overrides,
+    });
+  const goalOptions = {
+    brokerRoster: goalRoster,
+    goalsByMonth: { "2026-09": 17, "2026-10": 29 },
+  };
+
+  it("sums real Monday-Sunday dates, including partial boundary weeks and zero-actual days", () => {
+    const result = analyzeAppointments(goalSlice(), goalOptions);
+    expect(result.daily).toHaveLength(19);
+    expect(result.daily.find(({ key }) => key === "2026-10-01")).toMatchObject({
+      total: 0,
+      goal: 4,
+    });
+    expect(result.daily.find(({ key }) => key === "2026-10-03")?.goal).toBe(0);
+    expect(result.weekly.map(({ goal }) => goal)).toEqual([6, 12, 12, 12]);
+    expect(result.todayGoal).toBe(2);
+    expect(result.plannedToday).toBe(2);
+    expect(result.monthlyGoal).toBe(58);
+    expect(result.goalBrokerCount).toBe(2);
+    expect(result.monthly.map(({ key, goal }) => [key, goal])).toEqual([
+      ["09", 34],
+      ["10", 58],
+    ]);
+    expect(result.daily.reduce((sum, bucket) => sum + bucket.goal!, 0)).toBe(32);
+  });
+
+  it("intersects date/week filters and uses the deduplicated filtered roster", () => {
+    const result = analyzeAppointments(goalSlice(), {
+      ...goalOptions,
+      brokerRoster: [...goalRoster, goalRoster[0]!],
+      filters: {
+        manager: "Gerente A",
+        week: 2,
+        createdDates: ["2026-10-05", "2026-10-08", "2026-10-15"],
+      },
+    });
+    expect(result.daily.map(({ key, goal }) => [key, goal])).toEqual([
+      ["2026-10-05", 1],
+      ["2026-10-08", 2],
+    ]);
+    expect(result.weekly).toEqual([{ key: "2", label: "2ª semana", total: 0, goal: 3 }]);
+    expect(result.todayGoal).toBeNull();
+    expect(result.monthlyGoal).toBe(29);
+    expect(result.monthly.map(({ goal }) => goal)).toEqual([17, 29]);
+  });
+
+  it.each([
+    ["2024-02", 29, [6, 12, 12, 12, 10]],
+    ["2026-02", 28, [0, 12, 12, 12, 12]],
+    ["2026-03", 31, [0, 12, 12, 12, 12, 4]],
+  ])("handles leap years and six-week months: %s", (month, days, expected) => {
+    const result = analyzeAppointments(
+      goalSlice({ coverageStart: `${month}-01`, referenceDate: `${month}-${days}` }),
+      {
+        ...goalOptions,
+        goalsByMonth: { [month]: 31 },
+      },
+    );
+    expect(result.daily).toHaveLength(days);
+    expect(result.weekly.map(({ goal }) => goal)).toEqual(expected);
+  });
+
+  it("keeps missing, Imob, mixed-channel and unmappable cohort goals null", () => {
+    for (const filters of [
+      { channel: 0 as const },
+      { company: "Empresa A" },
+      { accountRanking: "Ouro" },
+    ]) {
+      const result = analyzeAppointments(goalSlice(), { ...goalOptions, filters });
+      expect(result.monthlyGoal).toBeNull();
+      expect(result.todayGoal).toBeNull();
+    }
+    expect(analyzeAppointments(goalSlice(), { brokerRoster: goalRoster }).monthlyGoal).toBeNull();
+    expect(analyzeAppointments(goalSlice({ viewKey: "all" }), goalOptions).monthlyGoal).toBeNull();
+    expect(
+      analyzeAppointments(goalSlice({ viewKey: "with_canal_imob" }), goalOptions).todayGoal,
+    ).toBeNull();
+    expect(
+      analyzeAppointments(goalSlice({ viewKey: "all" }), {
+        ...goalOptions,
+        filters: { channel: 1 },
+      }).monthlyGoal,
+    ).toBe(58);
+    expect(
+      analyzeAppointments(goalSlice(), {
+        goalsByMonth: goalOptions.goalsByMonth,
+        filters: { owner: "Responsável A" },
+      }).todayGoal,
+    ).toBeNull();
+  });
+
+  it("preserves configured zero and empty roster while never backfilling missing month policies", () => {
+    const zero = analyzeAppointments(goalSlice(), { ...goalOptions, brokerRoster: [] });
+    expect(zero.todayGoal).toBe(0);
+    expect(zero.monthlyGoal).toBe(0);
+    const missing = analyzeAppointments(goalSlice(), {
+      ...goalOptions,
+      goalsByMonth: { "2026-09": 0 },
+    });
+    expect(missing.monthlyGoal).toBeNull();
+    expect(missing.todayGoal).toBe(2);
+    expect(missing.monthly).toEqual([{ key: "09", label: "Setembro", total: 0, goal: 0 }]);
+  });
+  it("uses the authorized daily policy without a monthly registration and never paints future days", () => {
+    const result = analyzeAppointments(goalSlice(), { brokerRoster: goalRoster });
+    expect(result.monthlyGoal).toBeNull();
+    expect(result.todayGoal).toBe(2);
+    expect(result.plannedToday).toBe(2);
+    expect(result.daily.at(-1)?.key).toBe("2026-10-19");
+    expect(result.daily.some(({ key }) => key > "2026-10-19")).toBe(false);
+    expect(result.weekly.map(({ key, goal }) => [key, goal])).toEqual([
+      ["1", 6],
+      ["2", 12],
+      ["3", 12],
+      ["4", 12],
+    ]);
+  });
+
+  it("keeps the full boundary week target on the first Thursday but no later weeks", () => {
+    const result = analyzeAppointments(goalSlice({ referenceDate: "2026-10-01" }), goalOptions);
+    expect(result.daily).toEqual([{ key: "2026-10-01", label: "01", total: 0, goal: 4 }]);
+    expect(result.todayGoal).toBe(4);
+    expect(result.weekly).toEqual([{ key: "1", label: "1ª semana", total: 0, goal: 6 }]);
+  });
+
+  it("clips daily coverage but sums the entire intersecting week within the month", () => {
+    const input = goalSlice({ coverageStart: "2026-10-21", referenceDate: "2026-10-22" });
+    const result = analyzeAppointments(input, goalOptions);
+    expect(result.daily.map(({ key, goal }) => [key, goal])).toEqual([
+      ["2026-10-21", 2],
+      ["2026-10-22", 4],
+    ]);
+    expect(result.weekly).toEqual([{ key: "4", label: "4ª semana", total: 0, goal: 12 }]);
+    const selected = analyzeAppointments(input, {
+      ...goalOptions,
+      filters: { createdDates: ["2026-10-22"], week: 4 },
+    });
+    expect(selected.weekly[0]?.goal).toBe(4);
+    expect(analyzeAppointments(input, { ...goalOptions, filters: { week: 5 } }).weekly).toEqual([]);
+    expect(analyzeAppointments(input, { ...goalOptions, month: "2026-11" }).daily).toEqual([]);
+    expect(analyzeAppointments(input, { ...goalOptions, month: "2026-11" }).weekly).toEqual([]);
+  });
+
   it("counts only appointments, sums quantities and sorts all four dimensions descending", () => {
     const result = analyzeAppointments(slice());
     expect(result.total).toBe(13);
@@ -118,7 +273,7 @@ describe("appointment chart analysis", () => {
     });
     const result = analyzeAppointments(input);
     expect(result.brokerCount).toBe(10);
-    expect(result.plannedToday).toBe(10);
+    expect(result.plannedToday).toBeNull(); // No authorized monthly goal/channel supplied.
     expect(result.performedToday).toBe(1);
     expect(result.details).toHaveLength(2);
     expect(result.regionalManagers?.map(({ label }) => label)).toEqual([
@@ -251,7 +406,7 @@ describe("appointment chart analysis", () => {
       sales: 1,
     });
     expect(result.brokerCount).toBe(1);
-    expect(result.plannedToday).toBe(1);
+    expect(result.plannedToday).toBeNull(); // Company cannot be mapped to the registered roster.
     expect(result.productiveBrokers).toBe(1);
     expect(result.productivePercent).toBe(100);
     expect(result.registeredManagerCount).toBe(1);

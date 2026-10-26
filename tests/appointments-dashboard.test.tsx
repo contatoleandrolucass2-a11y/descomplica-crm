@@ -98,7 +98,7 @@ describe("appointment dashboard availability", () => {
   it("renders dimension and calendar filters, cards, recency panels and details for v4", () => {
     const markup = renderToStaticMarkup(
       <AppointmentsDashboard
-        analysis={current}
+        analysis={{ ...current, viewKey: "without_canal_imob" }}
         individualGoal={24}
         conversionGoals={conversionGoals}
       />,

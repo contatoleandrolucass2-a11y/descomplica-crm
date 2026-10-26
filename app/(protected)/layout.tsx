@@ -164,6 +164,7 @@ export default async function ProtectedLayout({ children }: { children: ReactNod
       shellClassName={styles.shell}
       contentClassName={styles.mainContent}
       chrome={chrome}
+      pages={navigationPages}
     >
       <UserPresenceHeartbeat />
       {children}

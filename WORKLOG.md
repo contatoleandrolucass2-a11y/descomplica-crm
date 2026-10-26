@@ -1,5 +1,29 @@
 # Worklog
 
+## 2026-10-25 - Sidebar e graficos de agendamentos
+
+Exclusivamente na rota `/app/etapas/agendamentos`, a navegacao Dashboard passa
+a um link para a Visao Geral e a uma sidebar recolhivel baseada no catalogo
+autorizado. As demais paginas mantem seu comportamento. Os graficos de agendamentos ganham
+reordenacao acessivel, expansao sem duplicar o conteudo, nomes compactos e
+percentual do total filtrado. As identidades completas continuam nos valores
+dos filtros e nos titulos. Realizado fica a esquerda do esperado no desktop.
+
+O usuario confirmou nesta entrega a regra diaria House: 1 por corretor em
+dias uteis, 2 as quintas e nenhum no fim de semana. Semanas usam a soma dos
+dias reais dentro do mes e dos filtros; a meta mensal continua independente,
+lida pelo contrato autorizado para cada mes. Imob nao possui meta de
+agendamentos e permanece nulo, sem classificacao de produtividade presumida.
+Nao ha migration ou alteracao de registros comerciais nesta entrega.
+
+Validacao local: lint sem erros (36 avisos preexistentes), typecheck, build e
+74 testes especificos aprovados. As fontes publicas da politica documental
+tambem passaram. A suite completa no Windows encontrou restricoes POSIX nos
+testes operacionais e de release; a CI Linux continua obrigatoria. Um timeout
+isolado de teste associativo durante carga concorrente passou na repeticao,
+sem modificar essa funcionalidade. Publicacao ainda depende dos gates do PR e
+da main exata; nenhum dado remoto ou permissao foi alterado.
+
 ## 2026-10-25 - Publicacao do hover e dos filtros herdados
 
 O PR #346 foi integrado em `c6de29d4`; a `main` publicada avancou para

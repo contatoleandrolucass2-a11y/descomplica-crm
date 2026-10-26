@@ -769,7 +769,7 @@
 .verticalLabels {
   padding-bottom: 0;
 }
-.verticalLabels .columnTrack {
+.overviewGrid .verticalLabels .columnTrack {
   height: 80px;
 }
 .verticalLabels .columnLabel {
@@ -786,6 +786,15 @@
   list-style: none;
   display: grid;
   gap: 0.7rem;
+}
+.rankingLabels {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+  padding: 0 0.35rem;
+  color: var(--analytics-muted);
+  font-size: 0.68rem;
 }
 .conversionRanking {
   display: grid;
@@ -804,7 +813,7 @@
 }
 .conversionRankingHeading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 0.75rem;
   align-items: start;
   font-size: 0.82rem;
@@ -819,11 +828,29 @@
   font-size: 0.68rem;
 }
 .funnelComparison {
+  position: relative;
   display: grid;
   grid-template-columns: minmax(0, 1fr) 1px minmax(0, 1fr);
   gap: 1rem;
   margin-bottom: 1rem;
-  padding: 1.25rem;
+  padding: 3rem 1rem 1rem;
+}
+.swapFunnels {
+  position: absolute;
+  right: 1rem;
+  top: 0.4rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-height: 36px;
+  border: 0;
+  border-radius: 0.4rem;
+  background: transparent;
+  color: var(--analytics-cyan-strong);
+  cursor: pointer;
+}
+.swapFunnels:focus-visible {
+  outline: 2px solid var(--analytics-cyan-strong);
 }
 .funnelComparison > article {
   min-width: 0;
@@ -844,12 +871,12 @@
 }
 .funnelPanel {
   display: grid;
-  grid-template-columns: minmax(12rem, 0.9fr) minmax(13rem, 1.1fr);
-  gap: 1rem;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 0.65rem;
   align-items: stretch;
 }
 .funnelPanelReversed {
-  grid-template-columns: minmax(13rem, 1.1fr) minmax(12rem, 0.9fr);
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 .funnel,
 .funnelConversions {
@@ -867,7 +894,7 @@
   min-height: 3.05rem;
   place-items: center;
   margin-inline: auto;
-  padding: 0.4rem 1rem;
+  padding: 0.4rem 10%;
   clip-path: polygon(4% 0, 96% 0, 88% 100%, 12% 100%);
   background: hsl(
     calc(207deg - var(--funnel-level) * 4deg) 68% calc(24% + var(--funnel-level) * 1%)
@@ -915,7 +942,7 @@
 }
 .rankingHeading {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-columns: minmax(0, 1fr) auto auto;
   gap: 0.75rem;
   align-items: start;
   font-size: 0.82rem;
@@ -1070,7 +1097,7 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
-@media (max-width: 1400px) {
+@media (max-width: 480px) {
   .funnelPanel,
   .funnelPanelReversed {
     grid-template-columns: minmax(0, 1fr);
@@ -1217,8 +1244,10 @@
     height: clamp(4rem, 14dvh, 7.5rem);
   }
 
-  .verticalLabels .columnTrack {
-    height: clamp(3rem, 10dvh, 5rem);
+  /* At the production 14px root size, the 17rem tile leaves 162px for
+     content. Reserve room for the axis, controls and full vertical labels. */
+  .overviewGrid .verticalLabels .columnTrack {
+    height: clamp(3rem, 8dvh, 4rem);
   }
 
   .tableCard {
@@ -1239,4 +1268,31 @@
     min-height: 0;
     max-height: none;
   }
+}
+.featureChartRow,
+.overviewGrid,
+.insightGrid,
+.conversionRankingGrid,
+.recencyGrid,
+.monthlyChartRow {
+  display: contents !important;
+}
+.goalLine {
+  position: absolute;
+  inset-inline: -0.3rem;
+  border-top: 2px dashed var(--analytics-muted);
+  z-index: 2;
+  pointer-events: none;
+}
+
+.column[data-goal-status="negative"] {
+  background: var(--analytics-danger);
+}
+
+.column[data-goal-status="positive"] {
+  background: var(--analytics-cyan-strong);
+}
+
+.column[data-goal-status="unavailable"] {
+  background: var(--analytics-muted);
 }

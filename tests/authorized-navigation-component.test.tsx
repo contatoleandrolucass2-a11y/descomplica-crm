@@ -1,14 +1,42 @@
 import { renderToStaticMarkup } from "react-dom/server";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { PAGE_REGISTRY } from "../lib/navigation/registry";
 
+const route = vi.hoisted(() => ({ pathname: "/app/etapas/agendamentos" }));
 vi.mock("next/navigation", () => ({
-  usePathname: () => "/app/etapas/visitas",
+  usePathname: () => route.pathname,
 }));
+beforeEach(() => {
+  route.pathname = "/app/etapas/agendamentos";
+});
 
 import { AuthorizedNavigation } from "../app/(protected)/_components/AuthorizedNavigation";
 
 describe("authorized navigation component", () => {
-  it("renders native buttons and marks only the current authorized child", () => {
+  it.each([
+    "/app",
+    "/app/etapas/oportunidades",
+    "/app/etapas/visitas",
+    "/app/etapas/pastas",
+    "/app/etapas/vendas",
+    "/app/repasse",
+    "/app/meta-ads",
+    "/app/etapas/agendamentos/detalhe",
+    "/app/etapas/agendamentos/",
+  ])("preserves the original Dashboard disclosure at %s", (pathname) => {
+    route.pathname = pathname;
+    const pages = PAGE_REGISTRY.filter(
+      (page) => page.pageKey === "crm.dashboard" || page.parentKey === "crm.dashboard",
+    ).map((page) => ({ ...page, key: page.pageKey }));
+    const markup = renderToStaticMarkup(<AuthorizedNavigation pages={pages} />);
+    expect(markup).toContain('aria-controls="authorized-navigation-crm-dashboard"');
+    expect(markup).toContain('id="authorized-navigation-crm-dashboard"');
+    for (const page of pages) expect(markup).toContain(`href="${page.path}"`);
+    if (pathname === "/app/meta-ads") expect(markup).not.toContain('data-navigation-active="true"');
+    else if (pages.some((page) => page.path === pathname))
+      expect(markup).toContain('data-navigation-active="true"');
+  });
+  it("links Dashboard directly to its overview without a dropdown or stage links", () => {
     const markup = renderToStaticMarkup(
       <AuthorizedNavigation
         pages={[
@@ -44,13 +72,12 @@ describe("authorized navigation component", () => {
     );
 
     expect(markup).toContain('id="authorized-navigation"');
-    expect(markup).toContain('<button type="button"');
-    expect(markup).toContain('aria-controls="authorized-navigation-crm-dashboard"');
+    expect(markup).toContain('href="/app"');
+    expect(markup).not.toContain('aria-controls="authorized-navigation-crm-dashboard"');
     expect(markup).toContain('aria-expanded="false"');
-    expect(markup).toContain('id="authorized-navigation-crm-dashboard"');
+    expect(markup).not.toContain('id="authorized-navigation-crm-dashboard"');
     expect(markup).toContain("<svg");
-    expect(markup).toContain("contém a página atual");
-    expect(markup).toContain('aria-current="page" href="/app/etapas/visitas"');
+    expect(markup).not.toContain('href="/app/etapas/visitas"');
     expect(markup).not.toContain("Não autorizada");
   });
 
