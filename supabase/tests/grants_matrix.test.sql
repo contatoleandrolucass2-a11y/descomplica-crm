@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  68::bigint,
+  69::bigint,
   'all public tables retain RLS'
 );
 
@@ -87,6 +87,7 @@ select is(
     'crm_team_memberships',
     'crm_teams',
     'crm_user_reporting_scope_grants',
+    'meta_ads_canvas_profiles',
     'permissions',
     'profiles',
     'role_permissions',
@@ -155,7 +156,8 @@ select is(
     'crm_source_identities',
     'crm_team_memberships',
     'crm_teams',
-    'crm_user_reporting_scope_grants'
+    'crm_user_reporting_scope_grants',
+    'meta_ads_canvas_profiles'
   ]::name[],
   'new scoped and Qlik tables force RLS even for their owner'
 );
@@ -206,6 +208,7 @@ select is(
     'crm_team_memberships:crm_team_memberships_select_scoped',
     'crm_teams:crm_teams_select_scoped',
     'crm_user_reporting_scope_grants:crm_user_reporting_scope_grants_select_self_or_scoped_manager',
+    'meta_ads_canvas_profiles:meta_ads_canvas_profiles_owner',
     'permissions:permissions_select_authenticated',
     'profiles:profiles_select_self_or_scoped_manager',
     'role_permissions:role_permissions_select_authenticated',
@@ -406,6 +409,7 @@ select is(
     'get_crm_routine_completions',
     'get_crm_routines',
     'get_crm_sync_status',
+    'get_meta_ads_canvas_profile',
     'get_qlik_ranking_v2',
     'get_qlik_relay_health',
     'get_role_level',
@@ -442,6 +446,7 @@ select is(
     'save_crm_lead_settings_v1',
     'save_crm_lead_v1',
     'save_crm_routine',
+    'save_meta_ads_canvas_profile',
     'set_app_page_active',
     'set_crm_commercial_engine_gate',
     'set_crm_lead_presence_v1',

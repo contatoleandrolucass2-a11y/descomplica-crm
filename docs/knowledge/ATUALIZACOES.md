@@ -1,5 +1,24 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-26: persistencia e reconciliacao do Canvas Meta Ads
+
+- O perfil do Canvas passa a ter fonte autoritativa por usuário no banco, com
+  RLS proprietária e escopos separados para macro, conjuntos e anúncios. O
+  cache do navegador não comprova mais persistência; GET/PUT autenticados e a
+  conferência em outro dispositivo são evidências distintas.
+- A consulta automática preserva a janela oficial completa. Gráficos de hoje,
+  semana e mês não podem reutilizar acidentalmente o mesmo recorte após 60 s.
+- O dia padrão segue `America/Sao_Paulo`. Aliases equivalentes de lead da Meta
+  não são somados entre si; o maior contador compatível representa o resultado
+  único do Gerenciador. A comparação real da campanha reportada será registrada
+  somente após QA autenticada em produção.
+- O teto acumulado é `teto diário × dias inclusivos`; a cor de CPL continua
+  comparando a média do período com o teto diário. Isso distingue limite total
+  de referência média sem multiplicar o custo por lead.
+- Formato, lint, tipos, build, 4.311 testes Vitest, 2.343 testes Node/release e
+  65 testes focados passaram localmente. O Docker local indisponível impediu
+  executar pgTAP; a CI Linux `isolated-restore` permanece bloqueante.
+
 ## 2026-10-26: refinamento final de Agendamentos publicado
 
 - Escopo funcional restrito a `/app/etapas/agendamentos`. O PR #355 foi

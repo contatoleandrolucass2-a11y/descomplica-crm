@@ -34,7 +34,10 @@ window.CanvasHost = {
     state.selected=id;state.page='micro';state.detail='sets';state.organize=false;render();window.scrollTo(0,0);
   },
   async refresh(){
-    const response=await fetch('/api/meta-ads/data?'+new URLSearchParams(selectedRange()),{cache:'no-store'});
+    // Keep the complete API envelope. Individual cards filter their own day,
+    // week, month or custom range; replacing it with the global slice made
+    // those cards repeat today's values after the first 60-second refresh.
+    const response=await fetch('/api/meta-ads/data',{cache:'no-store'});
     if(!response.ok)throw new Error('Fonte indisponível');
     const next=await response.json();if(!Array.isArray(next.rows)||!next.range)throw new Error('Resposta inválida');
     if(JSON.stringify(next.rows)===JSON.stringify(sourceData.rows))return false;
