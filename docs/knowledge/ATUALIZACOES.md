@@ -1,5 +1,44 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-26: publicacao da pagina de Agendamentos
+
+- Escopo comportamental exclusivo de `/app/etapas/agendamentos`: sidebar, funis,
+  nomes compactos, participacao, expansao/reordenacao e metas. Nenhuma migration
+  ou workflow n8n alterado. Demais rotas mantem a navegacao existente.
+- PR #350 integrado em `5ed6260600f22cbaab348eb67f900bbbe653f932`.
+  CI PR `40259124348` e CI push/main `40263238224` aprovadas. Na main passaram
+  validate, release-gates, isolated-restore e promotable-image.
+- Validacao final: 79 testes especificos, lint/typecheck/build; QA sintetica
+  com CSS de producao 18/18 e composicao sidebar 24/24 nos tres temas.
+  Zero colisoes eixo/valor e zero overflow do Ranking Score nos cenarios.
+- Artefato imutavel: arquivo SHA256
+  `0961a1074ec37eb879a5816bed868822c319474edb6a223765c01acfaa85f8f6`.
+  ID CI `sha256:073125eb98bf424b325f777ec2926a2f3465849c5502401a901c90ba3b7e0053`;
+  ID local `sha256:a2d421bbf725296dce309e031647963409af7473673fcb684e57e33bf8a2df8d`.
+  Equivalencia comprovada por indice OCI, manifesto, configuracao, 11 camadas,
+  RootFS, plataforma e label; image:prove aprovou os dois perfis, sem rebuild.
+- Coordenador `release:production` concluiu deployment
+  `d04aed32-b1af-4ff7-a768-4d5f7e4189d9` em `2026-10-26T04:04:22.711Z`
+  (01:04:22 America/Sao_Paulo), sem pendencia. Backup privado preservado em
+  `/etc/descomplica-crm/backups/appointments-5ed62606-20261026`; imagem anterior
+  `ec98b41a` preservada. Consulta/CAS/CI/main dentro do coordenador obrigatorio.
+- Health publico em 26/10/2026 01:07:57 -03:00: status ok e versao exata
+  `5ed6260600f22cbaab348eb67f900bbbe653f932`. GET anonimo da rota retornou 307
+  para login. Fontes: `/api/health`, ledger do coordenador e GitHub Actions.
+- Smoke autenticado em producao: desktop 1440x900 e celular 390x844 nos tres
+  temas, sidebar aberta/recolhida, popup, ordem DOM ao mover/restaurar e filtro
+  House/Imob. Sem overflow horizontal da pagina nos tamanhos verificados;
+  popup mobile com largura interna 370/370 px. Sem erros no console observado.
+  House exibiu metas diarias 32/64/0 para dias uteis/quintas/fins de semana;
+  semanas 96/192 conforme datas reais; meta mensal 768. Imob sem meta e sem
+  classificacao de produtividade. Estado restaurado para House e tema medio;
+  override de viewport removido. Prova visual local em test-results, nao exportada.
+- Limite: QA com dados sinteticos nao constitui conciliacao Salesforce; smoke
+  confirma a jornada publicada. Nenhuma alteracao fora do pedido para liberar gates.
+- Obsidian: sync novamente tentado; falha preexistente `Documento excede o limite
+de exportacao.` Registro versionado preservado; sincronizacao pendente ate
+  correcao autorizada do exportador/limite em demanda propria. Nao truncar historico.
+
 Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
 
 ## 2026-10-25: validacao local da pagina de agendamentos
