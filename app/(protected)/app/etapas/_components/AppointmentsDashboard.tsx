@@ -9,25 +9,49 @@ import {
   type PointerEvent,
   type ReactNode,
 } from "react";
-import { CalendarDays, X } from "lucide-react";
+import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 import type { AppointmentConversionGoals } from "@/lib/crm/stages/data";
 import {
   analyzeAppointments,
-  appointmentMonthlyGoal,
   appointmentYears,
   saoPauloDate,
   type AppointmentBrokerRosterEntry,
   type AppointmentBucket,
   type AppointmentConversionBucket,
   type AppointmentFilters,
+  type AppointmentGoalsByMonth,
 } from "@/lib/crm/stages/appointments";
 
 import styles from "./AppointmentsDashboard.module.css";
+import { ChartBoard, ChartTile } from "./ChartBoard";
+
+const chartIds = [
+  "Evolução de agendamentos por dia",
+  "Previstos e realizados hoje",
+  "Agendamentos por semana",
+  "Ranking Score",
+  "Ranking por responsável",
+  "Ranking por gerente",
+  "Ranking por gerente regional",
+  "Melhor responsável: Agendamento x Visita",
+  "Melhor gerente: Agendamento x Visita",
+  "Melhor gerente regional: Agendamento x Visita",
+  "Último agendamento: até 7 dias",
+  "Último agendamento: de 8 a 14 dias",
+  "Último agendamento: 15 dias ou mais",
+  "Agendamentos por mês",
+];
 
 const number = new Intl.NumberFormat("pt-BR");
 const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+// Keep full identities as filter keys; compact only the visible label.
+function shortName(value: string) {
+  if (/não informad|sem responsável|sem gerente/i.test(value)) return value;
+  const parts = value.trim().split(/\s+/);
+  return parts.length > 2 ? `${parts[0]} ${parts[parts.length - 1]}` : value;
+}
 const displayDate = (date: string) => date.split("-").reverse().join("/");
 const calendarDate = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "long",
@@ -79,21 +103,12 @@ function Chart({
   controls?: ReactNode;
   wide?: boolean;
 }) {
-  const id = useId();
   return (
-    <section
-      aria-labelledby={id}
-      data-appointments-chart
-      className={`${styles.card} ${styles.chartCard} ${wide ? styles.wideChart : ""}`}
-    >
-      <header className={styles.cardHeader}>
-        <h2 id={id}>{title}</h2>
-        {controls}
-      </header>
+    <ChartTile id={title} title={title} controls={controls} wide={wide}>
       <div className={styles.cardBody} tabIndex={0}>
         {children}
       </div>
-    </section>
+    </ChartTile>
   );
 }
 
@@ -148,7 +163,7 @@ function Columns({
   monthly = false,
   verticalLabels = false,
 }: {
-  buckets: AppointmentBucket[];
+  buckets: (AppointmentBucket & { goal?: number | null })[];
   label: string;
   daily?: boolean;
   selected?: string | undefined;
@@ -158,7 +173,7 @@ function Columns({
   verticalLabels?: boolean;
 }) {
   if (!buckets.length) return <Empty />;
-  const max = Math.max(1, ...buckets.map((item) => item.total));
+  const max = Math.max(1, ...buckets.flatMap((item) => [item.total, item.goal ?? 0]));
   return (
     <>
       <p className={styles.axis}>Quantidade de agendamentos</p>
@@ -172,7 +187,7 @@ function Columns({
             <button
               type="button"
               aria-pressed={isSelected ? isSelected(item) : selected === item.key}
-              aria-label={`${daily ? displayDate(item.key) : item.label}: ${number.format(item.total)} agendamentos`}
+              aria-label={`${daily ? displayDate(item.key) : item.label}: ${number.format(item.total)} agendamentos${item.goal == null ? "" : `; meta ${number.format(item.goal)}; ${item.total >= item.goal ? "meta atingida" : "abaixo da meta"}`}`}
               className={styles.chartButton}
               onClick={() => onSelect?.(item)}
             >
@@ -180,7 +195,26 @@ function Columns({
                 className={styles.columnTrack}
                 style={{ "--bar-height": `${(item.total / max) * 100}%` } as CSSProperties}
               >
-                <div className={styles.column} style={{ height: "var(--bar-height)" }} />
+                {item.goal != null && (
+                  <span
+                    className={styles.goalLine}
+                    style={{ bottom: `${(item.goal / max) * 100}%` }}
+                    title={`Meta: ${number.format(item.goal)}`}
+                  />
+                )}
+                <div
+                  className={styles.column}
+                  data-goal-status={
+                    item.goal == null
+                      ? "goal" in item
+                        ? "unavailable"
+                        : "neutral"
+                      : item.total >= item.goal
+                        ? "positive"
+                        : "negative"
+                  }
+                  style={{ height: "var(--bar-height)" }}
+                />
                 <span className={styles.columnValue}>{number.format(item.total)}</span>
               </div>
               <span className={styles.columnLabel}>{item.label}</span>
@@ -188,17 +222,29 @@ function Columns({
           </li>
         ))}
       </ol>
+      {buckets.some((item) => item.goal != null) && (
+        <p className={styles.axis}>
+          Vermelho: abaixo da meta · Azul: meta atingida · Traço: meta do período
+        </p>
+      )}
+      {buckets.some((item) => "goal" in item) && buckets.every((item) => item.goal == null) && (
+        <p className={styles.axis}>
+          Meta não definida para este recorte · Sem classificação de produtividade
+        </p>
+      )}
     </>
   );
 }
 
 function Ranking({
   buckets,
+  total,
   unavailable = "Dados indisponíveis nesta atualização.",
   selected,
   onSelect,
 }: {
   buckets: AppointmentBucket[] | null;
+  total: number;
   unavailable?: string;
   selected?: string | undefined;
   onSelect?: (bucket: AppointmentBucket) => void;
@@ -207,54 +253,91 @@ function Ranking({
   if (!buckets.length) return <Empty />;
   const max = buckets[0]!.total;
   return (
-    <ol className={styles.ranking}>
-      {buckets.map((item, index) => (
-        <li key={item.key}>
-          <button
-            type="button"
-            aria-pressed={selected === item.key}
-            className={styles.rankingButton}
-            onClick={() => onSelect?.(item)}
-          >
-            <div className={styles.rankingHeading}>
-              <span>
-                <span className={styles.rank}>{index + 1}.</span> {item.label}
-              </span>
-              <strong>{number.format(item.total)}</strong>
-            </div>
-            <div aria-hidden="true" className={styles.rankTrack}>
-              <div className={styles.rankBar} style={{ width: `${(item.total / max) * 100}%` }} />
-            </div>
-          </button>
-        </li>
-      ))}
-    </ol>
+    <>
+      <div className={styles.rankingLabels} aria-hidden="true">
+        <span>Nome</span>
+        <span>Qtd.</span>
+        <span>% do total</span>
+      </div>
+      <ol className={styles.ranking}>
+        {buckets.map((item, index) => (
+          <li key={item.key}>
+            <button
+              type="button"
+              aria-pressed={selected === item.key}
+              className={styles.rankingButton}
+              onClick={() => onSelect?.(item)}
+            >
+              <div className={styles.rankingHeading}>
+                <span>
+                  <span className={styles.rank}>{index + 1}.</span>{" "}
+                  <span title={item.label}>{shortName(item.label)}</span>
+                </span>
+                <strong>{number.format(item.total)}</strong>
+                <strong
+                  title="Participação no total filtrado"
+                  aria-label={`Participação no total: ${total > 0 ? decimal.format((item.total / total) * 100) : "0"}%`}
+                >
+                  {total > 0 ? decimal.format((item.total / total) * 100) : "0"}%
+                </strong>
+              </div>
+              <div aria-hidden="true" className={styles.rankTrack}>
+                <div className={styles.rankBar} style={{ width: `${(item.total / max) * 100}%` }} />
+              </div>
+            </button>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }
 
-function ConversionRanking({ buckets }: { buckets: AppointmentConversionBucket[] }) {
+function ConversionRanking({
+  buckets,
+  total,
+  available,
+}: {
+  buckets: AppointmentConversionBucket[];
+  total: number;
+  available: boolean;
+}) {
+  if (!available) return <Empty>Conversão indisponível para o filtro de Ranking Score.</Empty>;
   if (!buckets.length) return <Empty>Nenhuma conversão maior que zero no período.</Empty>;
   const max = Math.max(...buckets.map((item) => item.percent));
   return (
-    <ol className={styles.conversionRanking}>
-      {buckets.map((item, index) => (
-        <li key={item.key}>
-          <div className={styles.conversionRankingHeading}>
-            <span>
-              <span className={styles.rank}>{index + 1}.</span> {item.label}
-            </span>
-            <strong>{decimal.format(item.percent)}%</strong>
-          </div>
-          <p>
-            {number.format(item.appointments)} agendamentos → {number.format(item.visits)} visitas ·{" "}
-            {decimal.format(item.ratio)} para 1
-          </p>
-          <div aria-hidden="true" className={styles.rankTrack}>
-            <div className={styles.rankBar} style={{ width: `${(item.percent / max) * 100}%` }} />
-          </div>
-        </li>
-      ))}
-    </ol>
+    <>
+      <div className={styles.rankingLabels} aria-hidden="true">
+        <span>Nome</span>
+        <span>Conversão</span>
+        <span>% do total</span>
+      </div>
+      <ol className={styles.conversionRanking}>
+        {buckets.map((item, index) => (
+          <li key={item.key}>
+            <div className={styles.conversionRankingHeading}>
+              <span>
+                <span className={styles.rank}>{index + 1}.</span>{" "}
+                <span title={item.label}>{shortName(item.label)}</span>
+              </span>
+              <strong>{decimal.format(item.percent)}%</strong>
+              <strong
+                title="Participação dos agendamentos no total filtrado"
+                aria-label={`Participação no total: ${total > 0 ? decimal.format((item.appointments / total) * 100) : "0"}%`}
+              >
+                {total > 0 ? decimal.format((item.appointments / total) * 100) : "0"}%
+              </strong>
+            </div>
+            <p>
+              {number.format(item.appointments)} agendamentos → {number.format(item.visits)} visitas
+              · {decimal.format(item.ratio)} para 1
+            </p>
+            <div aria-hidden="true" className={styles.rankTrack}>
+              <div className={styles.rankBar} style={{ width: `${(item.percent / max) * 100}%` }} />
+            </div>
+          </li>
+        ))}
+      </ol>
+    </>
   );
 }
 
@@ -330,12 +413,22 @@ function FunnelComparison({
   expected: FunnelValues | null;
   realized: FunnelValues | null;
 }) {
+  const [swapped, setSwapped] = useState(false);
   return (
     <section
       className={`${styles.card} ${styles.funnelComparison}`}
       aria-label="Funis esperado e realizado"
     >
-      <article>
+      <button
+        type="button"
+        className={styles.swapFunnels}
+        onClick={() => setSwapped(!swapped)}
+        aria-label="Trocar posição dos funis"
+        title="Trocar posição dos funis"
+      >
+        <ArrowLeftRight size={16} aria-hidden="true" /> Trocar posição
+      </button>
+      <article style={{ order: swapped ? 0 : 2 }}>
         <h2>Funil esperado no período</h2>
         <p>Projeção proporcional da meta para os dias e filtros selecionados.</p>
         <div className={styles.funnelPanel}>
@@ -343,8 +436,8 @@ function FunnelComparison({
           <FunnelGraphic values={expected} label="Funil esperado no período" />
         </div>
       </article>
-      <div className={styles.funnelDivider} aria-hidden="true" />
-      <article>
+      <div className={styles.funnelDivider} style={{ order: 1 }} aria-hidden="true" />
+      <article style={{ order: swapped ? 2 : 0 }}>
         <h2>Realizado até o momento</h2>
         <p>Resultados consolidados no período e filtros selecionados.</p>
         <div className={`${styles.funnelPanel} ${styles.funnelPanelReversed}`}>
@@ -753,7 +846,7 @@ function DashboardFilters({
               <option value="">{filter.empty}</option>
               {filter.values.map((value) => (
                 <option key={value} value={value}>
-                  {value}
+                  {filter.key === "company" ? value : shortName(value)}
                 </option>
               ))}
             </select>
@@ -782,21 +875,31 @@ type RecencyItem = {
 };
 
 function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] }) {
-  const id = useId();
+  const tone =
+    items.length === 0
+      ? "blue"
+      : title.includes("15 dias")
+        ? "red"
+        : title.includes("8 a 14")
+          ? "yellow"
+          : "blue";
   return (
-    <section className={`${styles.card} ${styles.recencyCard}`} aria-labelledby={id}>
-      <header className={styles.recencyHeader}>
-        <h2 id={id}>{title}</h2>
-        <span>{number.format(items.length)} corretores</span>
-      </header>
+    <ChartTile
+      id={title}
+      title={title}
+      tone={tone}
+      controls={<span>{number.format(items.length)} corretores</span>}
+    >
       {items.length === 0 ? (
         <Empty>Nenhum corretor nesta faixa.</Empty>
       ) : (
         <ol className={styles.recencyList} tabIndex={0} aria-label={title}>
           {items.map((item) => (
             <li key={item.owner}>
-              <strong>{item.owner}</strong>
-              <span>{item.manager || "Gerente não informado"}</span>
+              <strong title={item.owner}>{shortName(item.owner)}</strong>
+              <span title={item.manager}>
+                {item.manager ? shortName(item.manager) : "Gerente não informado"}
+              </span>
               <b>
                 {item.daysSinceLastAppointment === 0
                   ? "Hoje"
@@ -806,7 +909,7 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
           ))}
         </ol>
       )}
-    </section>
+    </ChartTile>
   );
 }
 
@@ -843,9 +946,11 @@ function GoalGauge({ current, goal }: { current: number; goal: number | null }) 
           : `${number.format(current)} de ${number.format(goal)}`}
       </strong>
       <p>
-        {percent === null
-          ? "Aguardando a meta individual vigente"
-          : `${decimal.format(percent)}% da meta · ${current >= goal! ? "meta atingida" : `faltam ${number.format(goal! - current)}`}`}
+        {goal === 0
+          ? "Meta cadastrada: 0 · meta atingida"
+          : percent === null
+            ? "Aguardando a meta individual vigente"
+            : `${decimal.format(percent)}% da meta · ${current >= goal! ? "meta atingida" : `faltam ${number.format(goal! - current)}`}`}
       </p>
     </div>
   );
@@ -888,7 +993,7 @@ function AppointmentTable({
                 <th>Visita Realizada</th>
                 <th>Gerente Regional</th>
                 <th>Gerente de Vendas</th>
-                <th>Corretor: Nome completo</th>
+                <th>Corretor</th>
                 <th>Conta: Nome da conta</th>
                 <th>Conta: Ranking</th>
               </tr>
@@ -929,9 +1034,9 @@ function AppointmentTable({
                       {row.attendedAt ? date.format(new Date(row.attendedAt)) : "Não informado"}
                     </td>
                     <td>{row.visitPerformed ? "Sim" : "Não"}</td>
-                    <td>{value(row.regionalManager)}</td>
-                    <td>{value(row.salesManager)}</td>
-                    <td>{value(row.owner)}</td>
+                    <td title={row.regionalManager}>{value(shortName(row.regionalManager))}</td>
+                    <td title={row.salesManager}>{value(shortName(row.salesManager))}</td>
+                    <td title={row.owner}>{value(shortName(row.owner))}</td>
                     <td>{value(row.accountName)}</td>
                     <td>{value(row.accountRanking)}</td>
                   </tr>
@@ -949,6 +1054,7 @@ export function AppointmentsDashboard({
   analysis,
   brokerRoster = null,
   individualGoal = null,
+  goalsByMonth,
   conversionGoals = null,
   timezone = "America/Sao_Paulo",
   canViewDevelopmentRankings = true,
@@ -957,6 +1063,7 @@ export function AppointmentsDashboard({
   brokerRoster?: AppointmentBrokerRosterEntry[] | null | undefined;
   generatedAt?: string | undefined;
   individualGoal?: number | null | undefined;
+  goalsByMonth?: AppointmentGoalsByMonth | undefined;
   conversionGoals?: AppointmentConversionGoals | null | undefined;
   timezone?: string | undefined;
   canViewDevelopmentRankings?: boolean | undefined;
@@ -968,6 +1075,11 @@ export function AppointmentsDashboard({
   const [rowBaseFilters, setRowBaseFilters] = useState<AppointmentFilters | null>(null);
   const selectedMonth = monthChoice || analysis?.referenceDate.slice(0, 7) || "";
   const selectedYear = yearChoice || analysis?.referenceDate.slice(0, 4) || "";
+  const resolvedGoals = useMemo(
+    () =>
+      goalsByMonth ?? (analysis ? { [analysis.referenceDate.slice(0, 7)]: individualGoal } : {}),
+    [goalsByMonth, analysis, individualGoal],
+  );
   const result = useMemo(
     () =>
       analysis
@@ -976,9 +1088,10 @@ export function AppointmentsDashboard({
             year: selectedYear,
             filters,
             brokerRoster,
+            goalsByMonth: resolvedGoals,
           })
         : null,
-    [analysis, brokerRoster, filters, selectedMonth, selectedYear],
+    [analysis, brokerRoster, filters, selectedMonth, selectedYear, resolvedGoals],
   );
   const yearId = useId();
   if (!analysis || !result)
@@ -992,7 +1105,7 @@ export function AppointmentsDashboard({
   const referenceMonth = analysis.referenceDate.slice(0, 7);
   const selectedDates = filters.createdDates ?? [];
   const monthUnavailable = result.coverage === "unavailable";
-  const monthlyGoal = appointmentMonthlyGoal(individualGoal, result.brokerCount);
+  const monthlyGoal = result.monthlyGoal;
   const selectedChannel =
     filters.channel ??
     (result.filterOptions.channels.length === 1
@@ -1105,11 +1218,25 @@ export function AppointmentsDashboard({
     setRowBaseFilters(null);
   };
   const paired =
-    result.plannedToday === null || result.performedToday === null
+    result.performedToday === null
       ? []
       : [
-          { key: "planned", label: "Previstos hoje", total: result.plannedToday },
-          { key: "performed", label: "Realizados", total: result.performedToday },
+          ...(result.plannedToday === null
+            ? []
+            : [
+                {
+                  key: "planned",
+                  label: "Previstos hoje",
+                  total: result.plannedToday,
+                  goal: result.todayGoal,
+                },
+              ]),
+          {
+            key: "performed",
+            label: "Realizados",
+            total: result.performedToday,
+            goal: result.todayGoal,
+          },
         ];
   return (
     <div className={styles.dashboard}>
@@ -1163,9 +1290,11 @@ export function AppointmentsDashboard({
           <h2>Meta do mês</h2>
           <GoalGauge current={result.total} goal={monthlyGoal} />
           <span className={styles.goalFormula}>
-            {individualGoal === null || result.brokerCount === null
+            {monthlyGoal === null ||
+            resolvedGoals[selectedMonth] == null ||
+            result.goalBrokerCount === null
               ? "Meta individual ou corretores indisponíveis"
-              : `${number.format(individualGoal)} por corretor × ${number.format(result.brokerCount)} corretores`}
+              : `${number.format(resolvedGoals[selectedMonth]!)} por corretor × ${number.format(result.goalBrokerCount)} corretores`}
           </span>
         </TiltCard>
         <ProductiveTeamCard
@@ -1181,34 +1310,34 @@ export function AppointmentsDashboard({
         <Kpi
           label="Média de agendamentos"
           value={result.dailyAverage === null ? null : decimal.format(result.dailyAverage)}
-          detail="Média diária no mês selecionado"
-          goalStatus={atLeastStatus(result.dailyAverage, result.brokerCount)}
+          detail="Média diária no período selecionado"
+          goalStatus={atLeastStatus(result.dailyAverage, result.dailyAverageGoal)}
           statusLabel={
-            result.dailyAverage === null || result.brokerCount === null
+            result.dailyAverage === null || result.dailyAverageGoal === null
               ? "Comparação com a meta indisponível"
-              : `${result.dailyAverage >= result.brokerCount ? "Meta atingida" : "Abaixo da meta"}: média ${decimal.format(result.dailyAverage)} para ${number.format(result.brokerCount)} corretores`
+              : `${result.dailyAverage >= result.dailyAverageGoal ? "Meta atingida" : "Abaixo da meta"}: média ${decimal.format(result.dailyAverage)} para meta diária média ${decimal.format(result.dailyAverageGoal)}`
           }
         />
         <Kpi
           label="Agendamentos ontem"
           value={number.format(result.yesterday)}
           detail="Pela data de criação"
-          goalStatus={atLeastStatus(result.yesterday, result.brokerCount)}
+          goalStatus={atLeastStatus(result.yesterday, result.yesterdayGoal)}
           statusLabel={
-            result.brokerCount === null
+            result.yesterdayGoal === null
               ? "Comparação com a meta indisponível"
-              : `${result.yesterday >= result.brokerCount ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.yesterday)} para ${number.format(result.brokerCount)} corretores`
+              : `${result.yesterday >= result.yesterdayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.yesterday)} para meta ${number.format(result.yesterdayGoal)}`
           }
         />
         <Kpi
           label="Agendamentos hoje"
           value={number.format(result.today)}
           detail="Pela data de criação"
-          goalStatus={atLeastStatus(result.today, result.brokerCount)}
+          goalStatus={atLeastStatus(result.today, result.todayGoal)}
           statusLabel={
-            result.brokerCount === null
+            result.todayGoal === null
               ? "Comparação com a meta indisponível"
-              : `${result.today >= result.brokerCount ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para ${number.format(result.brokerCount)} corretores`
+              : `${result.today >= result.todayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para meta ${number.format(result.todayGoal)}`
           }
         />
         <ConversionKpi
@@ -1261,180 +1390,196 @@ export function AppointmentsDashboard({
 
       <FunnelComparison expected={expectedFunnel} realized={result.funnel} />
 
-      <div className={styles.featureChartRow}>
-        <Chart title="Evolução de agendamentos por dia" wide>
-          {monthUnavailable ? (
-            <Empty>Período sem cobertura disponível.</Empty>
-          ) : (
-            <Columns
-              buckets={result.daily}
-              label="Agendamentos por dia do mês selecionado"
-              daily
-              isSelected={(bucket) =>
-                filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
-              }
-              onSelect={(bucket) => toggleCalendarDate(bucket.key)}
-            />
-          )}
-        </Chart>
-      </div>
+      <ChartBoard ids={chartIds} storageKey="appointments">
+        <div className={styles.featureChartRow}>
+          <Chart title="Evolução de agendamentos por dia" wide>
+            {monthUnavailable ? (
+              <Empty>Período sem cobertura disponível.</Empty>
+            ) : (
+              <Columns
+                buckets={result.daily}
+                label="Agendamentos por dia do mês selecionado"
+                daily
+                isSelected={(bucket) =>
+                  filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
+                }
+                onSelect={(bucket) => toggleCalendarDate(bucket.key)}
+              />
+            )}
+          </Chart>
+        </div>
 
-      <div className={styles.overviewGrid}>
-        <Chart title="Previstos e realizados hoje">
-          {result.plannedToday === null ? (
-            <Empty>Dados operacionais indisponíveis nesta atualização.</Empty>
-          ) : (
+        <div className={styles.overviewGrid}>
+          <Chart title="Previstos e realizados hoje">
+            {result.performedToday === null ? (
+              <Empty>Dados operacionais indisponíveis nesta atualização.</Empty>
+            ) : (
+              <Columns
+                buckets={paired}
+                label="Agendamentos previstos e realizados hoje"
+                isSelected={() => selectedDates.includes(analysis.referenceDate)}
+                onSelect={() => {
+                  if (selectedMonth !== referenceMonth) selectMonth(referenceMonth);
+                  setFilters((current) => ({
+                    ...current,
+                    createdDates: [analysis.referenceDate],
+                  }));
+                }}
+              />
+            )}
+          </Chart>
+          <Chart title="Agendamentos por semana">
+            {monthUnavailable ? (
+              <Empty>Período sem cobertura disponível.</Empty>
+            ) : (
+              <>
+                <Columns
+                  buckets={result.weekly}
+                  label="Agendamentos por semana do mês selecionado"
+                  selected={filters.week ? String(filters.week) : undefined}
+                  onSelect={(bucket) => toggleFilter("week", Number(bucket.key))}
+                />
+                <p className={styles.note}>
+                  Semanas do mês: segunda a domingo. A primeira pode ser parcial.
+                </p>
+              </>
+            )}
+          </Chart>
+          <Chart title="Ranking Score">
+            {!canViewDevelopmentRankings ? (
+              <Empty>Ranking Score indisponível para seu perfil de acesso.</Empty>
+            ) : monthUnavailable ? (
+              <Empty>Período sem cobertura disponível.</Empty>
+            ) : (
+              <Columns
+                buckets={result.accountRankings ?? []}
+                label="Ranking Score"
+                selected={filters.accountRanking}
+                onSelect={(bucket) => toggleFilter("accountRanking", bucket.key)}
+                verticalLabels
+              />
+            )}
+          </Chart>
+        </div>
+
+        <div className={styles.insightGrid}>
+          <Chart title="Ranking por responsável">
+            {monthUnavailable ? (
+              <Empty>Período sem cobertura disponível.</Empty>
+            ) : (
+              <Ranking
+                buckets={result.owners}
+                total={result.total}
+                selected={filters.owner}
+                onSelect={(bucket) => toggleFilter("owner", bucket.key)}
+              />
+            )}
+          </Chart>
+          <Chart title="Ranking por gerente">
+            {monthUnavailable ? (
+              <Empty>Período sem cobertura disponível.</Empty>
+            ) : (
+              <Ranking
+                buckets={result.managers}
+                total={result.total}
+                selected={filters.manager}
+                onSelect={(bucket) => toggleFilter("manager", bucket.key)}
+              />
+            )}
+          </Chart>
+          <Chart title="Ranking por gerente regional">
+            {monthUnavailable ? (
+              <Empty>Período sem cobertura disponível.</Empty>
+            ) : (
+              <Ranking
+                buckets={result.regionalManagers}
+                total={result.total}
+                selected={filters.regionalManager}
+                onSelect={(bucket) => toggleFilter("regionalManager", bucket.key)}
+              />
+            )}
+          </Chart>
+        </div>
+
+        <div
+          className={styles.conversionRankingGrid}
+          data-appointments-chart-group="conversion-rankings"
+        >
+          <Chart title="Melhor responsável: Agendamento x Visita">
+            <ConversionRanking
+              buckets={result.conversionRankings.owners}
+              total={result.total}
+              available={result.conversionAvailable}
+            />
+          </Chart>
+          <Chart title="Melhor gerente: Agendamento x Visita">
+            <ConversionRanking
+              buckets={result.conversionRankings.managers}
+              total={result.total}
+              available={result.conversionAvailable}
+            />
+          </Chart>
+          <Chart title="Melhor gerente regional: Agendamento x Visita">
+            <ConversionRanking
+              available={result.conversionAvailable}
+              buckets={result.conversionRankings.regionalManagers}
+              total={result.total}
+            />
+          </Chart>
+        </div>
+
+        <div className={styles.recencyGrid}>
+          <RecencyPanel
+            title="Último agendamento: até 7 dias"
+            items={result.brokerRecency.upTo7Days}
+          />
+          <RecencyPanel
+            title="Último agendamento: de 8 a 14 dias"
+            items={result.brokerRecency.from8To14Days}
+          />
+          <RecencyPanel
+            title="Último agendamento: 15 dias ou mais"
+            items={result.brokerRecency.from15Days}
+          />
+        </div>
+
+        <div className={styles.monthlyChartRow}>
+          <Chart
+            title="Agendamentos por mês"
+            wide
+            controls={
+              <div className={styles.yearControl}>
+                <label htmlFor={yearId}>Ano</label>
+                <select
+                  id={yearId}
+                  value={selectedYear}
+                  onChange={(event) => {
+                    setSelectedYear(event.target.value);
+                    setSelectedRow("");
+                    setRowBaseFilters(null);
+                  }}
+                >
+                  {years.map((year) => (
+                    <option key={year} value={year}>
+                      {year}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            }
+          >
             <Columns
-              buckets={paired}
-              label="Agendamentos previstos e realizados hoje"
-              isSelected={() => selectedDates.includes(analysis.referenceDate)}
-              onSelect={() => {
-                if (selectedMonth !== referenceMonth) selectMonth(referenceMonth);
-                setFilters((current) => ({
-                  ...current,
-                  createdDates: [analysis.referenceDate],
-                }));
+              buckets={result.monthly}
+              label={`Agendamentos por mês de ${selectedYear}`}
+              monthly
+              onSelect={(bucket) => {
+                const nextMonth = `${selectedYear}-${bucket.key}`;
+                selectMonth(nextMonth);
               }}
             />
-          )}
-        </Chart>
-        <Chart title="Agendamentos por semana">
-          {monthUnavailable ? (
-            <Empty>Período sem cobertura disponível.</Empty>
-          ) : (
-            <>
-              <Columns
-                buckets={result.weekly}
-                label="Agendamentos por semana do mês selecionado"
-                selected={filters.week ? String(filters.week) : undefined}
-                onSelect={(bucket) => toggleFilter("week", Number(bucket.key))}
-              />
-              <p className={styles.note}>
-                Semanas do mês: segunda a domingo. A primeira pode ser parcial.
-              </p>
-            </>
-          )}
-        </Chart>
-        <Chart title="Ranking Score">
-          {!canViewDevelopmentRankings ? (
-            <Empty>Ranking Score indisponível para seu perfil de acesso.</Empty>
-          ) : monthUnavailable ? (
-            <Empty>Período sem cobertura disponível.</Empty>
-          ) : (
-            <Columns
-              buckets={result.accountRankings ?? []}
-              label="Ranking Score"
-              selected={filters.accountRanking}
-              onSelect={(bucket) => toggleFilter("accountRanking", bucket.key)}
-              verticalLabels
-            />
-          )}
-        </Chart>
-      </div>
-
-      <div className={styles.insightGrid}>
-        <Chart title="Ranking por responsável">
-          {monthUnavailable ? (
-            <Empty>Período sem cobertura disponível.</Empty>
-          ) : (
-            <Ranking
-              buckets={result.owners}
-              selected={filters.owner}
-              onSelect={(bucket) => toggleFilter("owner", bucket.key)}
-            />
-          )}
-        </Chart>
-        <Chart title="Ranking por gerente">
-          {monthUnavailable ? (
-            <Empty>Período sem cobertura disponível.</Empty>
-          ) : (
-            <Ranking
-              buckets={result.managers}
-              selected={filters.manager}
-              onSelect={(bucket) => toggleFilter("manager", bucket.key)}
-            />
-          )}
-        </Chart>
-        <Chart title="Ranking por gerente regional">
-          {monthUnavailable ? (
-            <Empty>Período sem cobertura disponível.</Empty>
-          ) : (
-            <Ranking
-              buckets={result.regionalManagers}
-              selected={filters.regionalManager}
-              onSelect={(bucket) => toggleFilter("regionalManager", bucket.key)}
-            />
-          )}
-        </Chart>
-      </div>
-
-      <div
-        className={styles.conversionRankingGrid}
-        data-appointments-chart-group="conversion-rankings"
-      >
-        <Chart title="Melhor responsável: Agendamento x Visita">
-          <ConversionRanking buckets={result.conversionRankings.owners} />
-        </Chart>
-        <Chart title="Melhor gerente: Agendamento x Visita">
-          <ConversionRanking buckets={result.conversionRankings.managers} />
-        </Chart>
-        <Chart title="Melhor gerente regional: Agendamento x Visita">
-          <ConversionRanking buckets={result.conversionRankings.regionalManagers} />
-        </Chart>
-      </div>
-
-      <div className={styles.recencyGrid}>
-        <RecencyPanel
-          title="Último agendamento: até 7 dias"
-          items={result.brokerRecency.upTo7Days}
-        />
-        <RecencyPanel
-          title="Último agendamento: de 8 a 14 dias"
-          items={result.brokerRecency.from8To14Days}
-        />
-        <RecencyPanel
-          title="Último agendamento: 15 dias ou mais"
-          items={result.brokerRecency.from15Days}
-        />
-      </div>
-
-      <div className={styles.monthlyChartRow}>
-        <Chart
-          title="Agendamentos por mês"
-          wide
-          controls={
-            <div className={styles.yearControl}>
-              <label htmlFor={yearId}>Ano</label>
-              <select
-                id={yearId}
-                value={selectedYear}
-                onChange={(event) => {
-                  setSelectedYear(event.target.value);
-                  setSelectedRow("");
-                  setRowBaseFilters(null);
-                }}
-              >
-                {years.map((year) => (
-                  <option key={year} value={year}>
-                    {year}
-                  </option>
-                ))}
-              </select>
-            </div>
-          }
-        >
-          <Columns
-            buckets={result.monthly}
-            label={`Agendamentos por mês de ${selectedYear}`}
-            monthly
-            onSelect={(bucket) => {
-              const nextMonth = `${selectedYear}-${bucket.key}`;
-              selectMonth(nextMonth);
-            }}
-          />
-        </Chart>
-      </div>
-
+          </Chart>
+        </div>
+      </ChartBoard>
       {result.details === null ? (
         <section className={`${styles.card} ${styles.tableCard}`}>
           <h2>Detalhamento dos agendamentos</h2>

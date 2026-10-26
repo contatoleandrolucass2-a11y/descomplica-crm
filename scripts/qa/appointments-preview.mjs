@@ -134,7 +134,12 @@ const fixture = {
 
 async function productionCss(viteCss) {
   const buildTime = await stat(path.join(root, ".next/BUILD_ID"));
-  for (const name of ["AppointmentsDashboard.tsx", "AppointmentsDashboard.module.css"])
+  for (const name of [
+    "AppointmentsDashboard.tsx",
+    "AppointmentsDashboard.module.css",
+    "ChartBoard.tsx",
+    "ChartBoard.module.css",
+  ])
     assert.ok(
       (await stat(path.join(root, componentDirectory, name))).mtimeMs <= buildTime.mtimeMs,
       "Next production build is stale; run pnpm build before production CSS QA",
@@ -156,13 +161,23 @@ async function productionCss(viteCss) {
   const modulePrefix = moduleAnchor[1];
   const compiledClass = new RegExp(`\\.(${modulePrefix}_([\\w-]+))\\b`, "g");
   for (const match of compiled.matchAll(compiledClass)) {
-    const vite = [...viteCss.matchAll(/\.([\w-]+)\b/g)].find((item) =>
-      item[1].includes(`_${match[2]}_`),
+    const vite = [...viteCss.matchAll(/\.([\w-]+)\b/g)].find(
+      (item) =>
+        item[1].startsWith("AppointmentsDashboard_module_") && item[1].includes(`_${match[2]}_`),
     );
     assert.ok(vite, `Vite class for ${match[2]} must exist`);
     mappings.set(vite[1], match[1]);
   }
   assert.ok(mappings.size > 10, "Scoped Next AppointmentsDashboard CSS must exist");
+  const boardAnchor = compiled.match(/\.([\w-]+)_board\b/);
+  assert.ok(boardAnchor, "Compiled ChartBoard CSS module must exist");
+  for (const match of compiled.matchAll(new RegExp(`\\.(${boardAnchor[1]}_([\\w-]+))\\b`, "g"))) {
+    const vite = [...viteCss.matchAll(/\.([\w-]+)\b/g)].find(
+      (item) => item[1].startsWith("ChartBoard_module_") && item[1].includes(`_${match[2]}_`),
+    );
+    assert.ok(vite, `Vite ChartBoard class for ${match[2]} must exist`);
+    mappings.set(vite[1], match[1]);
+  }
   const transformed = postcss.parse(compiled);
   transformed.walkRules((rule) => {
     for (const [vite, next] of mappings)
@@ -198,6 +213,8 @@ export async function runAppointmentsPreview() {
     [
       `${componentDirectory}/AppointmentsDashboard.tsx`,
       `${componentDirectory}/AppointmentsDashboard.module.css`,
+      `${componentDirectory}/ChartBoard.tsx`,
+      `${componentDirectory}/ChartBoard.module.css`,
       "lib/crm/stages/appointments.ts",
       "lib/crm/stages/data.ts",
       "supabase/migrations/20261024223147_appointments_conversion_goals_read.sql",
@@ -217,6 +234,12 @@ export async function runAppointmentsPreview() {
     define: { "process.env.NODE_ENV": JSON.stringify("production"), "process.env": "{}" },
     resolve: { alias: { "@": root } },
     oxc: { jsx: { runtime: "automatic" } },
+    css: {
+      modules: {
+        generateScopedName: (name, filename) =>
+          `${path.basename(filename, ".css").replaceAll(".", "_")}_${name}_qa`,
+      },
+    },
     plugins: [
       {
         name: "appointments-synthetic-preview",
@@ -226,7 +249,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentFolder:3,appointmentApprovedFolder:12,appointmentSale:24,monthlyFunnel:{opportunities:143,appointments:24,visits:12,folders:8,approvedFolders:2,sales:1}},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentFolder:null,appointmentApprovedFolder:null,appointmentSale:null,monthlyFunnel:{opportunities:0,appointments:0,visits:4,folders:2,approvedFolders:1,sales:1}}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} conversionGoals={conversionGoals} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentFolder:3,appointmentApprovedFolder:12,appointmentSale:24,monthlyFunnel:{opportunities:143,appointments:24,visits:12,folders:8,approvedFolders:2,sales:1}},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentFolder:null,appointmentApprovedFolder:null,appointmentSale:null,monthlyFunnel:{opportunities:0,appointments:0,visits:4,folders:2,approvedFolders:1,sales:1}}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} goalsByMonth={{"2026-03":24,"2026-01":20,"2025-10":18,"2025-12":22}} conversionGoals={conversionGoals} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -297,27 +320,135 @@ export async function runAppointmentsPreview() {
       if (message.type() === "error") evidence.browserErrors.push(message.text());
     });
     const region = (name) => page.getByRole("region", { name, exact: true });
-    for (const { width, height } of [
-      { width: 1440, height: 900 },
-      { width: 1440, height: 720 },
-      { width: 1024, height: 900 },
-      { width: 1024, height: 720 },
-      { width: 390, height: 900 },
-      { width: 320, height: 900 },
-    ]) {
+    evidence.chartBoard = [];
+    for (const { width, height } of process.argv.includes("--interactions-only")
+      ? []
+      : [
+          { width: 1440, height: 900 },
+          { width: 1440, height: 720 },
+          { width: 1024, height: 900 },
+          { width: 1024, height: 720 },
+          { width: 390, height: 900 },
+          { width: 320, height: 900 },
+        ]) {
       await page.setViewportSize({ width, height });
       await page.goto(origin);
       await expect(page.getByRole("heading", { name: "Ranking por responsável" })).toBeVisible();
+      // The fixture is mixed; configured monthly targets require explicit House.
+      await page.getByRole("button", { name: "House", exact: true }).click();
       for (const theme of ["light", "balanced", "dark"]) {
         await page.evaluate(
           (value) => document.documentElement.setAttribute("data-theme", value),
           theme,
         );
         await page.waitForTimeout(200);
+        const recencyFrames = await page
+          .locator('[data-appointments-chart^="Último agendamento"] > dialog')
+          .evaluateAll((elements) =>
+            elements.map((element) => ({
+              border: getComputedStyle(element).borderTopColor,
+              animation: getComputedStyle(element).animationName,
+            })),
+          );
+        check(
+          new Set(recencyFrames.map((frame) => frame.border)).size === 3,
+          `Permanent blue/yellow/red frames ${theme}/${width}`,
+        );
+        check(
+          recencyFrames.every((frame) => frame.animation === "none"),
+          `Reduced-motion keeps static frames ${theme}/${width}`,
+        );
+        const monthlyTile = page.locator('[data-appointments-chart="Agendamentos por mês"]');
+        const yearControl = monthlyTile.getByLabel("Ano", { exact: true });
+        await yearControl.evaluate((element) => {
+          window.__qaYearControl = element;
+        });
+        const yearBefore = await yearControl.inputValue();
+        await monthlyTile
+          .getByRole("button", { name: "Expandir Agendamentos por mês", exact: true })
+          .click();
+        const popup = page.getByRole("dialog", { name: "Agendamentos por mês", exact: true });
+        await expect(popup).toBeVisible();
+        const expandedChild = popup.locator('[class*="content"] > *').first();
+        await expect(expandedChild).toHaveCSS("max-height", "none");
+        await expect(expandedChild).toHaveCSS("overflow-y", "visible");
+        await expect(
+          popup.getByRole("button", { name: "Fechar Agendamentos por mês", exact: true }),
+        ).toBeFocused();
+        assert.equal(
+          await yearControl.evaluate((element) => element === window.__qaYearControl),
+          true,
+          "Expansion preserves the exact control node",
+        );
+        assert.equal(
+          await yearControl.inputValue(),
+          yearBefore,
+          "Expansion preserves selected year",
+        );
+        await expect(page.getByLabel("Ano", { exact: true })).toHaveCount(1);
+        assert.deepEqual(
+          await page.locator("[id]").evaluateAll((elements) => {
+            const ids = elements.map((element) => element.id);
+            return ids.filter((id, index) => ids.indexOf(id) !== index);
+          }),
+          [],
+          "Expansion never duplicates IDs",
+        );
+        const modalBounds = await popup.boundingBox();
+        check(
+          modalBounds && modalBounds.width <= width && modalBounds.height <= height,
+          `Popup fits viewport ${theme}/${width}x${height}`,
+        );
+        const modalAxe = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+          .analyze();
+        check(
+          !modalAxe.violations.length,
+          `Popup axe ${theme}/${width}: ${modalAxe.violations.map(({ id }) => id).join(",")}`,
+        );
+        await page.keyboard.press("Escape");
+        await expect(page.locator("dialog:modal")).toHaveCount(0);
+        await expect(
+          monthlyTile.getByRole("button", { name: "Expandir Agendamentos por mês", exact: true }),
+        ).toBeFocused();
+        assert.equal(
+          await yearControl.evaluate((element) => element === window.__qaYearControl),
+          true,
+          "Closing preserves the exact control node",
+        );
+        evidence.chartBoard.push({
+          width,
+          height,
+          theme,
+          expansion: true,
+          uniqueControl: true,
+          focusRestored: true,
+          modalBounds,
+        });
         const geometry = await page.evaluate(() => ({
           width: innerWidth,
           height: innerHeight,
           scrollWidth: document.documentElement.scrollWidth,
+          axisValueCollisions: [...document.querySelectorAll('ol[class*="columns"]')].flatMap(
+            (list) => {
+              const axis = list.previousElementSibling;
+              if (axis?.textContent !== "Quantidade de agendamentos") return [];
+              const axisRect = axis.getBoundingClientRect();
+              return [...list.querySelectorAll('[class*="columnValue"]')].flatMap((value) => {
+                const rect = value.getBoundingClientRect();
+                return rect.width > 0 && rect.top < axisRect.bottom + 1
+                  ? [
+                      {
+                        chart: list.getAttribute("aria-label"),
+                        value: value.textContent,
+                        axisBottom: axisRect.bottom,
+                        valueTop: rect.top,
+                      },
+                    ]
+                  : [];
+              });
+            },
+          ),
           dailyLabelCollisions: (() => {
             const list = document.querySelector(
               'ol[aria-label="Agendamentos por dia do mês selecionado"]',
@@ -345,28 +476,50 @@ export async function runAppointmentsPreview() {
               );
             })
             .map((element) => ({ tag: element.tagName, class: element.className })),
-          sections: [...document.querySelectorAll("[data-appointments-chart]")].map((element) => ({
-            heading: element.querySelector("h2")?.textContent,
+          sections: [
+            ...document.querySelectorAll(
+              '[data-appointments-chart]:not([data-appointments-chart^="Último agendamento"])',
+            ),
+          ].map((element) => ({
+            heading: element.querySelector("h2, h3")?.textContent,
             x: element.getBoundingClientRect().x,
             y: element.getBoundingClientRect().y,
             bottom: element.getBoundingClientRect().bottom,
             height: element.getBoundingClientRect().height,
             hasVerticalScroll:
-              element.querySelector(":scope > div:last-child")?.scrollHeight >
-              element.querySelector(":scope > div:last-child")?.clientHeight + 1,
+              element.querySelector('dialog > [class*="content"]')?.scrollHeight >
+              element.querySelector('dialog > [class*="content"]')?.clientHeight + 1,
           })),
           scoreSingleRow: (() => {
-            const section = [...document.querySelectorAll("[data-appointments-chart]")].find(
-              (element) => element.querySelector("h2")?.textContent === "Ranking Score",
-            );
+            const section = [
+              ...document.querySelectorAll(
+                '[data-appointments-chart]:not([data-appointments-chart^="Último agendamento"])',
+              ),
+            ].find((element) => element.querySelector("h2, h3")?.textContent === "Ranking Score");
             const items = [...(section?.querySelectorAll("ol > li") ?? [])];
             const tops = items.map((item) => Math.round(item.getBoundingClientRect().top));
             return items.length > 0 && new Set(tops).size === 1;
           })(),
+          scoreStyles: (() => {
+            const tile = document.querySelector('[data-appointments-chart="Ranking Score"]');
+            const content = tile?.querySelector('dialog > [class*="content"]');
+            const track = tile?.querySelector('[class*="columnTrack"]');
+            const label = tile?.querySelector('[class*="columnLabel"]');
+            return {
+              rootFont: getComputedStyle(document.documentElement).fontSize,
+              tileHeight: tile?.getBoundingClientRect().height,
+              contentHeight: content?.clientHeight,
+              contentScrollHeight: content?.scrollHeight,
+              trackHeight: track ? getComputedStyle(track).height : null,
+              labelHeight: label ? getComputedStyle(label).height : null,
+            };
+          })(),
           scoreLabelWritingModes: (() => {
-            const section = [...document.querySelectorAll("[data-appointments-chart]")].find(
-              (element) => element.querySelector("h2")?.textContent === "Ranking Score",
-            );
+            const section = [
+              ...document.querySelectorAll(
+                '[data-appointments-chart]:not([data-appointments-chart^="Último agendamento"])',
+              ),
+            ].find((element) => element.querySelector("h2, h3")?.textContent === "Ranking Score");
             return [...(section?.querySelectorAll('[class*="columnLabel"]') ?? [])].map(
               (element) => getComputedStyle(element).writingMode,
             );
@@ -408,19 +561,23 @@ export async function runAppointmentsPreview() {
               };
             },
           ),
-          recency: [...document.querySelectorAll('[class*="recencyCard"]')].map((element) => ({
-            heading: element.querySelector("h2")?.textContent,
+          recency: [
+            ...document.querySelectorAll('[data-appointments-chart^="Último agendamento"]'),
+          ].map((element) => ({
+            heading: element.querySelector("h2, h3")?.textContent,
             x: Math.round(element.getBoundingClientRect().x),
             y: Math.round(element.getBoundingClientRect().y),
             bottom: Math.round(element.getBoundingClientRect().bottom),
           })),
           twoRowSpans: (() => {
-            const sections = [...document.querySelectorAll("[data-appointments-chart]")].map(
-              (element) => element.getBoundingClientRect(),
-            );
-            const recency = [...document.querySelectorAll('[class*="recencyCard"]')].map(
-              (element) => element.getBoundingClientRect(),
-            );
+            const sections = [
+              ...document.querySelectorAll(
+                '[data-appointments-chart]:not([data-appointments-chart^="Último agendamento"])',
+              ),
+            ].map((element) => element.getBoundingClientRect());
+            const recency = [
+              ...document.querySelectorAll('[data-appointments-chart^="Último agendamento"]'),
+            ].map((element) => element.getBoundingClientRect());
             return sections.length === 11 && recency.length === 3
               ? [
                   sections[1].bottom - sections[0].top,
@@ -444,12 +601,30 @@ export async function runAppointmentsPreview() {
             };
           })(),
           monthly: (() => {
-            const section = [...document.querySelectorAll("[data-appointments-chart]")].find(
-              (element) => element.querySelector("h2")?.textContent === "Agendamentos por mês",
+            const section = [
+              ...document.querySelectorAll(
+                '[data-appointments-chart]:not([data-appointments-chart^="Último agendamento"])',
+              ),
+            ].find(
+              (element) => element.querySelector("h2, h3")?.textContent === "Agendamentos por mês",
             );
             const labels = [...(section?.querySelectorAll('[class*="columnLabel"]') ?? [])];
+            const viewport = section?.querySelector('dialog > [class*="content"]');
             return {
               y: Math.round(section?.getBoundingClientRect().y ?? 0),
+              initiallyVisible: Boolean(
+                viewport &&
+                viewport.scrollHeight <= viewport.clientHeight + 1 &&
+                [
+                  ...viewport.querySelectorAll(
+                    '[class*="columnLabel"], [class*="axis"], div[data-goal-status]',
+                  ),
+                ].every(
+                  (element) =>
+                    element.getBoundingClientRect().bottom <=
+                    viewport.getBoundingClientRect().bottom + 1,
+                ),
+              ),
               labels: labels.map((label) => ({
                 text: label.textContent,
                 clientWidth: label.clientWidth,
@@ -480,6 +655,10 @@ export async function runAppointmentsPreview() {
         check(
           geometry.scrollWidth <= width + 1,
           `Horizontal overflow ${theme}/${width}: ${geometry.scrollWidth}`,
+        );
+        check(
+          !geometry.axisValueCollisions.length,
+          `Quantity axis/value collisions ${theme}/${width}: ${JSON.stringify(geometry.axisValueCollisions)}`,
         );
         check(
           !geometry.horizontalScrollbars.length,
@@ -546,6 +725,10 @@ export async function runAppointmentsPreview() {
         );
         check(geometry.recency.length === 3, `Three recency panels ${theme}/${width}`);
         check(
+          geometry.monthly.initiallyVisible,
+          `Monthly bars, labels and legend fit without scrolling ${theme}/${width}`,
+        );
+        check(
           geometry.monthly.labels.length > 0 &&
             geometry.monthly.labels.every(
               (label) =>
@@ -607,6 +790,138 @@ export async function runAppointmentsPreview() {
     }
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(origin);
+    const firstTile = page.locator('[data-appointments-chart="Evolução de agendamentos por dia"]');
+    const secondTile = page.locator('[data-appointments-chart="Previstos e realizados hoje"]');
+    await expect(page.locator("section[data-appointments-chart]")).toHaveCount(14);
+    const readDomOrder = () =>
+      page
+        .locator("section[data-appointments-chart]")
+        .evaluateAll((elements) => elements.map((element) => element.dataset.appointmentsChart));
+    const initialDomOrder = await readDomOrder();
+    const movedDomOrder = [initialDomOrder[1], initialDomOrder[0], ...initialDomOrder.slice(2)];
+    const firstHandle = firstTile.getByRole("button", {
+      name: "Reordenar Evolução de agendamentos por dia",
+      exact: true,
+    });
+    await page.evaluate(() => {
+      window.__qaBoardNodes = [
+        ...document.querySelectorAll("section[data-appointments-chart]"),
+      ].map((tile) => ({
+        tile,
+        dialog: tile.querySelector("dialog"),
+        controls: [...tile.querySelectorAll("button, select, input")],
+      }));
+    });
+    const assertBoardIdentity = async () => {
+      assert.equal(
+        await page.evaluate(() =>
+          window.__qaBoardNodes.every(
+            ({ tile, dialog, controls }) =>
+              document
+                .querySelectorAll("section[data-appointments-chart]")
+                .values()
+                .some((node) => node === tile) &&
+              tile.querySelector("dialog") === dialog &&
+              controls.every((control) => tile.contains(control)),
+          ),
+        ),
+        true,
+        "Reordering preserves tile, native dialog and control nodes",
+      );
+      assert.equal(
+        await page.locator("section[data-appointments-chart]").evaluateAll((tiles) =>
+          tiles.every((tile) => {
+            let wrapper = tile.parentElement;
+            while (wrapper && !wrapper.hasAttribute("data-chart-board")) {
+              if (getComputedStyle(wrapper).display !== "contents") return false;
+              wrapper = wrapper.parentElement;
+            }
+            return Boolean(wrapper);
+          }),
+        ),
+        true,
+        "Cloned presentation wrappers retain display: contents with production CSS",
+      );
+    };
+    const readOrder = (tile) => tile.evaluate((element) => Number(getComputedStyle(element).order));
+    await page.evaluate(() => {
+      window.__qaDragEvents = [];
+      for (const type of [
+        "mousedown",
+        "mouseup",
+        "dragstart",
+        "dragenter",
+        "dragover",
+        "drop",
+        "dragend",
+      ])
+        document.addEventListener(type, (event) => {
+          if (window.__qaDragEvents.length < 50)
+            window.__qaDragEvents.push({
+              type,
+              tile: event.target
+                .closest("[data-appointments-chart]")
+                ?.getAttribute("data-appointments-chart"),
+            });
+        });
+    });
+    await firstTile
+      .getByRole("button", {
+        name: "Mover Evolução de agendamentos por dia para depois",
+        exact: true,
+      })
+      .click();
+    assert.equal(await readOrder(firstTile), 1, "Move button changes visual order");
+    assert.deepEqual(await readDomOrder(), movedDomOrder, "Move button changes real DOM order");
+    await expect(
+      firstTile.getByRole("button", {
+        name: "Mover Evolução de agendamentos por dia para depois",
+        exact: true,
+      }),
+    ).toBeFocused();
+    await assertBoardIdentity();
+    await secondTile.getByRole("button").last().focus();
+    await page.keyboard.press("Tab");
+    await expect(firstHandle).toBeFocused();
+    await firstTile
+      .getByRole("button", { name: "Reordenar Evolução de agendamentos por dia", exact: true })
+      .press("ArrowUp");
+    assert.equal(await readOrder(firstTile), 0, "Arrow key restores visual order");
+    assert.deepEqual(await readDomOrder(), initialDomOrder, "Arrow key restores DOM order");
+    await expect(firstHandle).toBeFocused();
+    await firstTile
+      .getByRole("button", { name: "Reordenar Evolução de agendamentos por dia", exact: true })
+      .dragTo(secondTile);
+    evidence.dragEvents = await page.evaluate(() => window.__qaDragEvents);
+    await expect(
+      firstTile,
+      `Handle drag changes visual order: ${JSON.stringify(evidence.dragEvents)}`,
+    ).toHaveCSS("order", "1");
+    assert.deepEqual(await readDomOrder(), movedDomOrder, "Handle drag changes real DOM order");
+    await expect(firstHandle).toBeFocused();
+    await assertBoardIdentity();
+    const persisted = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem("crm:chart-board:v1:appointments")),
+    );
+    assert.equal(
+      persisted[1],
+      "Evolução de agendamentos por dia",
+      "Versioned preference contains only tile IDs",
+    );
+    assert.ok(persisted.every((id) => typeof id === "string"));
+    await page.reload();
+    await expect(firstTile).toHaveCSS("order", "1");
+    assert.deepEqual(await readDomOrder(), movedDomOrder, "Reload restores real DOM order");
+    assert.ok(
+      (await secondTile.boundingBox()).y <= (await firstTile.boundingBox()).y,
+      "DOM wrappers do not prevent visual reordering",
+    );
+    await page.evaluate(() => localStorage.removeItem("crm:chart-board:v1:appointments"));
+    await page.reload();
+    await expect(firstTile).toHaveCSS("order", "0");
+    assert.deepEqual(await readDomOrder(), initialDomOrder, "Cleared storage restores DOM order");
+    evidence.reordering =
+      "Buttons, arrow keys, handle drag and reload persistence passed; initial order restored for functional assertions";
     const daily = region("Evolução de agendamentos por dia");
     await expect(
       page.getByRole("region", { name: "Filtros do painel de agendamentos" }),
@@ -628,10 +943,8 @@ export async function runAppointmentsPreview() {
     const barGeometry = await daily.getByRole("listitem").evaluateAll((items) =>
       items.map((item) => ({
         trackHeight: item.firstElementChild.firstElementChild.getBoundingClientRect().height,
-        barHeight:
-          item.firstElementChild.firstElementChild.firstElementChild.getBoundingClientRect().height,
-        barWidth:
-          item.firstElementChild.firstElementChild.firstElementChild.getBoundingClientRect().width,
+        barHeight: item.querySelector("div[data-goal-status]").getBoundingClientRect().height,
+        barWidth: item.querySelector("div[data-goal-status]").getBoundingClientRect().width,
       })),
     );
     barGeometry.forEach((bar, index) => {
@@ -660,7 +973,7 @@ export async function runAppointmentsPreview() {
       await daily
         .getByRole("listitem")
         .evaluateAll((items) =>
-          items.map((item) => item.firstElementChild.getAttribute("aria-label")),
+          items.map((item) => item.firstElementChild.getAttribute("aria-label").split("; meta")[0]),
         ),
       Array.from(
         { length: 31 },
@@ -673,7 +986,7 @@ export async function runAppointmentsPreview() {
       await region("Agendamentos por semana")
         .getByRole("listitem")
         .evaluateAll((items) =>
-          items.map((item) => item.firstElementChild.getAttribute("aria-label")),
+          items.map((item) => item.firstElementChild.getAttribute("aria-label").split("; meta")[0]),
         ),
       [1, 19, 16, 17, 18, 5].map((count, index) => `${index + 1}ª semana: ${count} agendamentos`),
       "Monday-to-Sunday weeks 1 through 6 and exact totals",
@@ -694,13 +1007,20 @@ export async function runAppointmentsPreview() {
       const expected = [...totals].sort(
         ([a, ac], [b, bc]) => bc - ac || a.localeCompare(b, "pt-BR"),
       );
-      const actual = await region(title).getByRole("listitem").allTextContents();
+      const actual = await region(title)
+        .getByRole("listitem")
+        .evaluateAll((items) =>
+          items.map((item) => ({
+            label: item.querySelector("span[title]")?.getAttribute("title"),
+            total: item.querySelector("strong")?.textContent,
+          })),
+        );
       expected.forEach(([label, total], index) => {
         check(
-          actual[index]?.includes(label),
+          actual[index]?.label === label,
           `${title}: full label and descending order row ${index + 1}`,
         );
-        check(actual[index]?.endsWith(String(total)), `${title}: total row ${index + 1}`);
+        check(actual[index]?.total === String(total), `${title}: total row ${index + 1}`);
       });
     }
     const dailyBefore = await daily.innerText();
@@ -737,7 +1057,9 @@ export async function runAppointmentsPreview() {
     await calendar.getByRole("gridcell", { name: "1 de março de 2026", exact: true }).click();
     await calendar.getByRole("gridcell", { name: "2 de março de 2026", exact: true }).click();
     await expect(calendar.getByText("2 dias selecionados", { exact: true })).toBeVisible();
-    await expect(page.locator('p[aria-live="polite"]')).toContainText("3 registros encontrados");
+    await expect(
+      page.locator('p[aria-live="polite"]').filter({ hasText: "registros encontrados" }),
+    ).toContainText("3 registros encontrados");
     await expect(daily.getByRole("listitem")).toHaveCount(2);
     await expect(region("Agendamentos por semana").getByRole("listitem")).toHaveCount(2);
     await calendar.getByRole("button", { name: "Fechar calendário" }).click();
@@ -801,7 +1123,10 @@ export async function runAppointmentsPreview() {
     evidence.dimensionFilters =
       "House, manager, responsible and company compose; selecting one manager scopes the manager KPI to 1 and the official roster to 24 including inactive brokers; selecting and toggling a full row preserves the four global filters";
     await page.getByRole("button", { name: "Limpar 4 filtros" }).click();
-    const firstDay = region("Evolução de agendamentos por dia").getByRole("button").first();
+    const firstDay = region("Evolução de agendamentos por dia")
+      .getByRole("listitem")
+      .getByRole("button")
+      .first();
     await firstDay.click();
     await expect(firstDay).toHaveAttribute("aria-pressed", "true");
     await expect(page.getByRole("button", { name: "Limpar 1 filtro" })).toBeVisible();
@@ -816,7 +1141,7 @@ export async function runAppointmentsPreview() {
       "Daily column click filters every result; clear restores the page; Enter on a full table row applies its dimensions";
     await page.getByRole("button", { name: /Limpar \d+ filtros/ }).click();
     await page.emulateMedia({ reducedMotion: "no-preference" });
-    const firstChartButton = daily.getByRole("button").first();
+    const firstChartButton = daily.getByRole("listitem").getByRole("button").first();
     const firstChartBar = firstChartButton.locator('div[class*="column"]').last();
     const chartColorBefore = await firstChartBar.evaluate(
       (element) => getComputedStyle(element).backgroundColor,

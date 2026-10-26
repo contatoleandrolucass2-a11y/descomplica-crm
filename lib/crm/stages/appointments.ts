@@ -8,6 +8,12 @@ export interface AppointmentBucket {
   label: string;
   total: number;
 }
+export interface AppointmentGoalBucket extends AppointmentBucket {
+  goal: number | null;
+}
+
+/** House projected individual monthly targets, resolved by the authorized RPC per month. */
+export type AppointmentGoalsByMonth = Record<string, number | null>;
 export interface AppointmentConversionBucket extends AppointmentBucket {
   appointments: number;
   visits: number;
@@ -156,11 +162,13 @@ export function analyzeAppointments(
     year = slice.referenceDate.slice(0, 4),
     filters = {},
     brokerRoster = null,
+    goalsByMonth = {},
   }: {
     month?: string;
     year?: string;
     filters?: AppointmentFilters;
     brokerRoster?: AppointmentBrokerRosterEntry[] | null;
+    goalsByMonth?: AppointmentGoalsByMonth;
   } = {},
 ) {
   const daily = new Map<string, number>(),
@@ -235,6 +243,9 @@ export function analyzeAppointments(
     (!filters.company || slice.dimensions.companies[fact[4]] === filters.company);
   const dimensionFacts = slice.facts.filter(matchesFactDimensions);
   const sharedFacts = dimensionFacts.filter((fact) => matchesSelectedPeriod(fact[1]));
+  // Aggregated stage facts have no account-ranking dimension. Do not combine
+  // their unfiltered conversions with ranking-filtered appointment details.
+  const conversionAvailable = !filters.accountRanking;
   const dimensionFilteredOperations: DashboardAppointmentDetail[] | null =
     slice.version >= 3 ? (slice.appointments ?? []).filter(matchesAppointmentDimensions) : null;
   const filteredOperations: DashboardAppointmentDetail[] | null =
@@ -290,7 +301,7 @@ export function analyzeAppointments(
     approvedFolders: 0,
     sales: 0,
   };
-  if (slice.version === 4) {
+  if (slice.version === 4 && conversionAvailable) {
     for (const fact of sharedFacts) {
       if (fact[1].slice(0, 7) !== month) continue;
       if (fact[0] === 0) funnel.opportunities += fact[7];
@@ -372,10 +383,12 @@ export function analyzeAppointments(
           (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
             86_400_000,
         ) + 1;
-  const selectedCoveredDays =
-    selectedDateSet.size === 0
-      ? coveredDays
-      : [...selectedDateSet].filter((date) => date >= coveredStart && date <= coveredEnd).length;
+  const selectedCoveredDates = Array.from({ length: coveredDays }, (_, index) => {
+    const date = new Date(`${coveredStart}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  }).filter(matchesSelectedPeriod);
+  const selectedCoveredDays = selectedCoveredDates.length;
   const productiveOwners =
     slice.version === 4 && filteredOperations !== null
       ? new Set(
@@ -456,6 +469,7 @@ export function analyzeAppointments(
     map.set(key, current);
   };
   for (const fact of sharedFacts) {
+    if (!conversionAvailable) continue;
     if (fact[1].slice(0, 7) !== month || (fact[0] !== 1 && fact[0] !== 2)) continue;
     const manager = slice.dimensions.managers[fact[2]] ?? "Gerente não informado";
     addConversion(
@@ -500,21 +514,112 @@ export function analyzeAppointments(
     companies: slice.dimensions.companies,
   };
 
+  // The registered roster is House-only. Company/ranking cannot be mapped to
+  // that roster; mixed/Imob views have no configured appointment target.
+  const houseOnly =
+    slice.viewKey !== "with_canal_imob" &&
+    (filters.channel === 1 ||
+      (filters.channel === undefined && slice.viewKey === "without_canal_imob"));
+  const goalBrokerCount =
+    !houseOnly || filters.company || filters.accountRanking
+      ? null
+      : filteredRoster !== null
+        ? new Set(filteredRoster.map((broker) => broker.key)).size
+        : hasMappableRosterFilter
+          ? null
+          : filteredBrokerCount;
+  const monthlyGoalFor = (targetMonth: string) =>
+    appointmentMonthlyGoal(goalsByMonth[targetMonth] ?? null, goalBrokerCount);
+  // User-confirmed House daily policy: one per weekday, two on Thursdays.
+  // Independent of the configured monthly funnel target, which may be absent.
+  const dailyGoalFor = (date: string) => plannedAppointmentsForDate(date, goalBrokerCount);
+  const dailyGoals = new Map<string, number | null>();
+  const weeklyGoals = new Map<string, number | null>();
+  const coveredWeeks = new Set<string>();
+  if (coverage !== "unavailable") {
+    for (let day = 1; day <= Number(end.slice(8, 10)); day += 1) {
+      const date = `${month}-${String(day).padStart(2, "0")}`;
+      const week = String(appointmentWeekOfMonth(date));
+      const covered = date >= coveredStart && date <= coveredEnd;
+      if (covered) coveredWeeks.add(week);
+      if (!matchesSelectedPeriod(date)) continue;
+      const goal = dailyGoalFor(date);
+      if (covered) dailyGoals.set(date, goal);
+      const accumulated = weeklyGoals.get(week);
+      weeklyGoals.set(
+        week,
+        goal === null || accumulated === null ? null : (accumulated ?? 0) + goal,
+      );
+    }
+    // Show only weeks intersecting coverage, but retain their full target
+    // within the selected month/filters, including future days of that week.
+    for (const week of weeklyGoals.keys()) {
+      if (!coveredWeeks.has(week)) weeklyGoals.delete(week);
+    }
+  }
+  function withGoals(
+    actual: AppointmentBucket[],
+    goals: Map<string, number | null>,
+    label: (key: string) => string,
+  ): AppointmentGoalBucket[] {
+    const buckets = new Map(
+      actual.map((bucket) => [bucket.key, { ...bucket, goal: goals.get(bucket.key) ?? null }]),
+    );
+    // Include zero-actual periods only when their target is known. Unknown
+    // targets preserve the legacy sparse series rather than inventing data.
+    for (const [key, goal] of goals) {
+      if (goal !== null && !buckets.has(key))
+        buckets.set(key, { key, label: label(key), total: 0, goal });
+    }
+    return [...buckets.values()].sort((a, b) =>
+      a.key.localeCompare(b.key, "pt-BR", { numeric: true }),
+    );
+  }
+  const monthGoals = new Map<string, number | null>();
+  for (let index = 1; index <= 12; index += 1) {
+    const key = String(index).padStart(2, "0");
+    const targetMonth = `${year}-${key}`;
+    if (
+      targetMonth < slice.coverageStart.slice(0, 7) ||
+      targetMonth > slice.referenceDate.slice(0, 7)
+    )
+      continue;
+    monthGoals.set(key, monthlyGoalFor(targetMonth));
+  }
+  const todayGoal = matchesSelectedPeriod(slice.referenceDate)
+    ? dailyGoalFor(slice.referenceDate)
+    : null;
+  const yesterdayGoal =
+    previousReferenceDate >= slice.coverageStart && matchesSelectedPeriod(previousReferenceDate)
+      ? dailyGoalFor(previousReferenceDate)
+      : null;
+  const dailyAverageGoal =
+    selectedCoveredDays === 0 || goalBrokerCount === null
+      ? null
+      : selectedCoveredDates.reduce((sum, date) => sum + dailyGoalFor(date)!, 0) /
+        selectedCoveredDays;
+
   return {
     total,
     today,
     yesterday,
     dailyAverage: selectedCoveredDays > 0 ? total / selectedCoveredDays : null,
+    dailyAverageGoal,
     brokerCount: filteredBrokerCount,
-    plannedToday: plannedAppointmentsForDate(slice.referenceDate, filteredBrokerCount),
+    plannedToday: todayGoal,
+    todayGoal,
+    yesterdayGoal,
+    monthlyGoal: monthlyGoalFor(month),
+    goalBrokerCount,
     performedToday: filteredOperations === null ? null : today,
     filterOptions,
     productiveBrokers: productiveOwners,
     productivePercent,
     registeredManagerCount: filteredManagerCount,
-    funnel: slice.version === 4 ? funnel : null,
-    visitsPerformed: slice.version === 4 ? funnel.visits : null,
-    sales: slice.version === 4 ? funnel.sales : null,
+    funnel: slice.version === 4 && conversionAvailable ? funnel : null,
+    visitsPerformed: slice.version === 4 && conversionAvailable ? funnel.visits : null,
+    sales: slice.version === 4 && conversionAvailable ? funnel.sales : null,
+    conversionAvailable,
     brokerRecency,
     conversionRankings: {
       owners: conversionRanking(conversionGroups.owners),
@@ -527,9 +632,21 @@ export function analyzeAppointments(
     regionalManagers: filteredOperations === null ? null : ranking(regionalManagers),
     accountRankings: filteredOperations === null ? null : ranking(accountRankings),
     coverage,
-    daily: chronological(daily, (date) => date.slice(8, 10)),
-    weekly: chronological(weekly, (week) => `${week}ª semana`),
-    monthly: chronological(monthly, (key) => APPOINTMENT_MONTHS[Number(key) - 1]!),
+    daily: withGoals(
+      chronological(daily, (date) => date.slice(8, 10)),
+      dailyGoals,
+      (date) => date.slice(8, 10),
+    ),
+    weekly: withGoals(
+      chronological(weekly, (week) => `${week}ª semana`),
+      weeklyGoals,
+      (week) => `${week}ª semana`,
+    ),
+    monthly: withGoals(
+      chronological(monthly, (key) => APPOINTMENT_MONTHS[Number(key) - 1]!),
+      monthGoals,
+      (key) => APPOINTMENT_MONTHS[Number(key) - 1]!,
+    ),
     managers: ranking(managers),
     owners: ranking(owners),
     stores: ranking(stores),
