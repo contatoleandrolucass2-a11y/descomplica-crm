@@ -32,20 +32,8 @@ values
   ('ad710000-0000-4000-8000-000000000001', 'canvas-one@example.test'),
   ('ad710000-0000-4000-8000-000000000002', 'canvas-two@example.test');
 
-update public.profiles
-set is_active = true,
-    profile_completed = true,
-    access_status = 'approved'
-where user_id in (
-  'ad710000-0000-4000-8000-000000000001',
-  'ad710000-0000-4000-8000-000000000002'
-);
-
-insert into public.user_roles (user_id, role_key)
-values
-  ('ad710000-0000-4000-8000-000000000001', 'master'),
-  ('ad710000-0000-4000-8000-000000000002', 'master')
-on conflict (user_id) do update set role_key = excluded.role_key;
+select public.bootstrap_master_user('ad710000-0000-4000-8000-000000000001');
+select public.bootstrap_master_user('ad710000-0000-4000-8000-000000000002');
 
 insert into auth.sessions (id, user_id, aal, not_after)
 values
