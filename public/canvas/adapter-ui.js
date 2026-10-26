@@ -17,7 +17,7 @@ function addColumnBorderMagic(chart){
 $('#period').value='custom';$('#start').value=integration.range.start;$('#end').value=integration.range.end;
 document.body.dataset.theme=integration.theme;
 const subtitle=document.createElement('p');subtitle.className='integration-note';subtitle.textContent=integration.source+' · filtros gerais acima · tetos configurados em Limites';$('.heading').after(subtitle);
-function notifyHeight(){window.parent.postMessage({type:'canvas:height',height:document.querySelector('main').scrollHeight+24},location.origin);}
+function notifyHeight(){window.parent.postMessage({type:'canvas:height',height:document.querySelector('main').scrollHeight+24},'*');}
 const canvasMain=document.querySelector('main');
 if(canvasMain)new ResizeObserver(notifyHeight).observe(canvasMain);
 const parentBody=window.parent.document.body;
@@ -28,7 +28,7 @@ if(parentBody){
 for(const dialog of document.querySelectorAll('dialog')){
  new MutationObserver(()=>{
   const open=Boolean(document.querySelector('dialog[open]'));
-  window.parent.postMessage({type:'canvas:modal',open},location.origin);
+  window.parent.postMessage({type:'canvas:modal',open},'*');
  }).observe(dialog,{attributes:true,attributeFilter:['open']});
 }
 const refreshNote=document.createElement('small');refreshNote.className='integration-refresh';refreshNote.textContent='Consultado às '+new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})+' · 60 s';
@@ -40,14 +40,14 @@ function publishCanvasStatus(){
    key:button.id||button.dataset.groupMove&&'group-'+button.dataset.groupMove||button.hasAttribute('data-group-clear')&&'group-clear',
    label:button.textContent.trim(),disabled:button.disabled,primary:button.classList.contains('primary')
   })).filter(control=>control.key);
- window.parent.postMessage({type:'canvas:status',count,refresh:refreshNote.textContent,controls},location.origin);
+ window.parent.postMessage({type:'canvas:status',count,refresh:refreshNote.textContent,controls},'*');
 }
 const statusCount=$('#count');
 const statusActions=document.querySelector('.heading .actions');
 if(statusCount)new MutationObserver(publishCanvasStatus).observe(statusCount,{childList:true,characterData:true,subtree:true});
 if(statusActions)new MutationObserver(publishCanvasStatus).observe(statusActions,{attributes:true,childList:true,characterData:true,subtree:true,attributeFilter:['disabled','hidden','class']});
 window.addEventListener('message',event=>{
- if(event.origin!==location.origin||event.source!==window.parent||event.data?.type!=='canvas:command')return;
+ if(event.source!==window.parent||event.data?.type!=='canvas:command')return;
  const key=event.data.key;
  const target=key==='group-up'?document.querySelector('[data-group-move="up"]'):
   key==='group-down'?document.querySelector('[data-group-move="down"]'):

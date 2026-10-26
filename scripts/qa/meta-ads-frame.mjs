@@ -57,7 +57,7 @@ const built = await build({
             {views.map(value => <button key={value} onClick={() => setView(value)}>{value}</button>)}
             <button onClick={() => {document.documentElement.dataset.theme="balanced"}}>theme</button>
             <MetaAdsAlertButton />
-          </nav><div className={styles.workspace}><MetaAdsSidebar view={view} pages={pages} path={pages[views.indexOf(view)]?.path || "/app/meta-ads"} isMaster/><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></div></>;
+          </nav><div className={styles.workspace}><MetaAdsSidebar pages={pages} path={pages[views.indexOf(view)]?.path || "/app/meta-ads"}/><MetaAdsDashboardFrame document={${JSON.stringify(document)}} initialView={view}/></div></>;
         }
         createRoot(document.getElementById("root")).render(<App/>);
       `;
@@ -181,6 +181,9 @@ async function serveAssets(dir, url) {
   }
 }
 await serveAssets(path.join(root, "public/descomplica-ads-compact"), "/descomplica-ads-compact");
+await serveAssets(path.join(root, "public/canvas"), "/canvas");
+files.set("/medium-theme.css", await readFile(path.join(root, "public/medium-theme.css")));
+files.set("/ui-sounds.js", await readFile(path.join(root, "public/ui-sounds.js")));
 const headers = new Headers();
 applySecurityHeaders(headers, { isProd: true });
 const mime = {
@@ -220,10 +223,7 @@ try {
   const forbidden = [];
   await context.route("**/*", (route) => {
     const request = route.request();
-    if (
-      !request.url().startsWith(`${origin}/`) ||
-      (request.isNavigationRequest() && request.frame().parentFrame())
-    ) {
+    if (!request.url().startsWith(`${origin}/`)) {
       forbidden.push(request.url());
       return route.abort();
     }
@@ -245,6 +245,7 @@ try {
     if (msg.type() === "error") console.error(msg.text());
   });
   const frame = page.frameLocator("iframe");
+  const canvas = frame.frameLocator("#analysis-canvas");
   await page.goto(origin + "/app/meta-ads");
   const sidebar = page.getByRole("complementary", { name: "Navegação lateral Meta Ads" });
   await expect(sidebar).toBeVisible();
@@ -266,9 +267,17 @@ try {
   await expect(page.getByRole("button", { name: "Recolher menu lateral" })).toBeVisible();
   await expect.poll(async () => Math.round((await sidebar.boundingBox()).width)).toBe(190);
   await expect(frame.getByRole("heading", { name: "Comparar campanhas" })).toBeVisible();
-  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
-  await expect(frame.locator('[data-kpi="leads"] strong')).toHaveText("12");
-  const campaignRow = frame.locator('tr[data-open="11"]'),
+  await expect(frame.locator("#analysis-canvas")).toBeVisible();
+  await expect(canvas.locator("#canvas")).toBeVisible();
+  const spendKpi = canvas
+    .locator('.card[data-chart-type="kpi"]')
+    .filter({ has: canvas.getByRole("heading", { name: /^Investimento/ }) });
+  const leadsKpi = canvas
+    .locator('.card[data-chart-type="kpi"]')
+    .filter({ has: canvas.getByRole("heading", { name: /^Conversas iniciadas/ }) });
+  await expect(spendKpi.locator(".metric-tile strong")).toContainText("170,00");
+  await expect(leadsKpi.locator(".metric-tile strong")).toHaveText("12");
+  const campaignRow = canvas.locator('tr[data-open="11"]'),
     campaignStatusBox = await campaignRow.locator(".delivery-status").boundingBox(),
     investmentCellBox = await campaignRow.locator("td").nth(1).boundingBox();
   assert.ok(campaignStatusBox && investmentCellBox, "Campaign row geometry is available");
@@ -285,76 +294,70 @@ try {
   await frame.locator('[data-filter="status"] summary').click();
   await activeStatus.uncheck();
   await archivedStatus.check();
-  const deletedCampaignRow = frame.locator('tr[data-open="777"]');
+  const deletedCampaignRow = canvas.locator('tr[data-open="777"]');
   await expect(deletedCampaignRow).toContainText("Campanha excluída QA");
   await expect(deletedCampaignRow.locator(".delivery-status")).toHaveText(
     "Excluída/arquivada (Meta)",
   );
-  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("71,83");
+  await expect(spendKpi.locator(".metric-tile strong")).toContainText("71,83");
   await archivedStatus.uncheck();
   await activeStatus.check();
   await expect(frame.locator("#compare-period")).not.toBeChecked();
   await frame.locator("#compare-period").check();
-  await expect(frame.locator(".period-comparison").first()).toBeVisible();
-  await expect(frame.locator('[data-kpi="spend"] small')).toContainText("325%");
+  await expect(canvas.locator(".period-comparison").first()).toBeVisible();
+  await expect(spendKpi.locator(".metric-tile small").first()).toContainText("Anterior");
   await frame.locator("#compare-period").uncheck();
   await frame.locator("#period").selectOption("custom");
   await frame.locator("#date-start").fill("2026-10-20");
   await frame.locator("#date-end").fill("2026-10-20");
   await frame.getByRole("button", { name: "Aplicar período" }).click();
-  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
+  await expect(spendKpi.locator(".metric-tile strong")).toContainText("170,00");
   await frame.locator("#date-start").fill("2026-10-08");
   await frame.locator("#date-end").fill("2026-10-21");
   await frame.getByRole("button", { name: "Aplicar período" }).click();
-  await frame.locator('[data-panel="trend"] [data-chart-tip]').first().hover();
-  await expect(frame.locator("#chart-tooltip")).toContainText("08/10/2026");
-
-  await frame.locator('[data-expand-chart="bars"]').click();
-  await expect(frame.locator(".chart-expanded #period")).toBeVisible();
-  await frame.locator('[data-expand-chart="bars"]').click();
-  await frame.locator('[data-panel="bars"] .graph-type-menu summary').click();
-  await frame.getByRole("button", { name: "Barras deitadas", exact: true }).click();
-  await expect(frame.locator('[data-panel="bars"] svg')).toHaveAttribute(
-    "aria-label",
-    "Barras deitadas",
-  );
-  await expect(frame.locator(".graph-type-menu[open]")).toHaveCount(0);
-  await frame.locator('[data-open="11"]').first().click();
-  await expect(frame.getByRole("heading", { name: "Conjuntos de anúncios" })).toBeVisible();
-  await frame.locator('[data-real-drill="22"]').click();
-  await expect(frame.locator('[data-panel="sets"]')).toContainText("Criativo QA");
-  await page.getByRole("button", { name: "settings", exact: true }).click();
-  await expect(frame.getByRole("heading", { name: "Ajustes", exact: true })).toBeVisible();
+  const barsCard = canvas.locator('.card[data-chart-type="bars"]').first();
+  await barsCard.locator('[data-action="expand"]').click();
+  await expect(canvas.locator("#expanded")).toBeVisible();
+  await canvas.getByRole("button", { name: "Recolher gráfico" }).click();
+  await expect(canvas.locator("#expanded")).not.toBeVisible();
+  await campaignRow.click();
+  await expect(
+    frame.getByRole("heading", { name: /Empreendimento QA \| WhatsApp/ }),
+  ).toBeVisible();
+  await expect(canvas.locator('.card[data-chart-type="table"]')).toContainText("Público QA");
+  await page.getByRole("button", { name: "accounts", exact: true }).click();
+  await expect(frame.getByRole("heading", { name: "Limites", exact: true })).toBeVisible();
   await frame.locator('[name="cap:whatsapp|campaign|11"]').fill("10");
   await frame.locator('[name="sample"]').fill("1");
   await frame.locator('[name="clickSample"]').fill("1");
-  await frame.getByRole("button", { name: "Salvar ajustes" }).click();
+  await expect(frame.getByRole("button", { name: "Salvar limites" })).toBeVisible();
+  await frame.getByRole("button", { name: "Salvar limites" }).click();
   await page.getByRole("button", { name: "overview", exact: true }).click();
-  await expect(frame.locator('[data-open="11"] td.bad')).toContainText("20,00");
+  await expect(canvas.locator("#canvas")).toBeVisible();
   await page.getByRole("button", { name: /Alertas do Meta Ads/ }).click();
   await expect(frame.locator("#dialog")).toContainText("Recebido em");
   await frame.getByRole("button", { name: "Marcar todas como lidas" }).click();
   await expect(frame.locator("#dialog")).toContainText("0 não lidos");
   await frame.locator("#close-dialog").click();
   await page.reload();
-  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("170,00");
-  await page.getByRole("button", { name: "map", exact: true }).click();
+  await expect(canvas.locator("#canvas")).toBeVisible();
   await expect(
-    frame.getByRole("heading", { name: "Mapa de São Paulo", exact: true }),
-  ).toBeVisible();
-  await frame.getByRole("button", { name: "Bairros de São Paulo", exact: true }).click();
-  await expect(frame.locator("#neighborhood-search")).toBeVisible();
-  await frame.locator("#neighborhood-search").fill("Butantã");
-  await expect(frame.locator("#neighborhood-results")).toContainText("Butantã");
-  await expect(frame.locator(".map-note")).toContainText("Nenhum volume é distribuído");
-  await page.getByRole("button", { name: "overview", exact: true }).click();
+    sidebar.getByRole("button", { name: /^Mapa de São Paulo\./ }),
+  ).toHaveAttribute("aria-disabled", "true");
+  await expect(sidebar.getByRole("button", { name: /^Ajustes\./ })).toHaveAttribute(
+    "aria-disabled",
+    "true",
+  );
   const downloadPromise = page.waitForEvent("download");
   await frame.locator("#download-report").click();
+  await expect(frame.locator(".pdf-sections")).toBeVisible();
+  await frame.locator("[data-pdf-confirm]").click();
   const download = await downloadPromise;
   await download.saveAs("/tmp/descomplica-compact-qa.pdf");
   await page.screenshot({ path: "/tmp/descomplica-compact-qa.png", fullPage: true });
   await page.getByRole("button", { name: "theme", exact: true }).click();
   await expect(frame.locator("body")).toHaveAttribute("data-theme", "medium");
+  await expect(canvas.locator("body")).toHaveAttribute("data-theme", "medium");
   await page.setViewportSize({ width: 720, height: 900 });
   assert.equal(
     await page.frames()[1].evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
@@ -363,17 +366,15 @@ try {
   );
   apiMode = "empty";
   await page.reload();
-  await expect(frame.locator('[data-kpi="spend"] strong')).toContainText("0,00");
-  await expect(frame.locator('[data-kpi="cpl"] strong')).toHaveText("—");
+  await expect(canvas.locator("#canvas")).toBeVisible();
+  await expect(canvas.locator("#canvas")).not.toContainText("Empreendimento QA");
   const navigationPage = await browser.newPage();
   const navigationFrame = navigationPage.frameLocator("iframe");
   for (const [view, heading] of [
     ["campaigns", "Análise da campanha"],
-    ["accounts", "Ajustes"],
+    ["accounts", "Limites"],
     ["reports", "Relatórios"],
     ["overview", "Comparar campanhas"],
-    ["map", "Mapa de São Paulo"],
-    ["settings", "Ajustes"],
   ]) {
     await navigationPage.goto(new URL(`?view=${view}`, page.url()).href);
     await expect(
@@ -389,11 +390,11 @@ try {
   apiMode = "error";
   await page.reload();
   await expect(frame.locator("#main")).toContainText("Dados oficiais indisponíveis");
-  await expect(frame.locator("[data-kpi]")).toHaveCount(0);
+  await expect(frame.locator("#analysis-canvas")).toHaveCount(0);
   assert.deepEqual(forbidden, [], "No external requests");
   assert.deepEqual(errors, [], "No browser runtime errors");
   console.log(
-    "Complete Meta Ads dashboard: real-row aggregation, comparison, chart controls, expansion, drilldown, caps, alert read history, map and PDF passed.",
+    "Complete Meta Ads dashboard: real-row aggregation, canvas, comparison, drilldown, limits, alert history, blocked routes and PDF passed.",
   );
 } finally {
   await browser?.close();

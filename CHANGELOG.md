@@ -8,6 +8,7 @@
 - Mantém somente Visão macro, Campanhas, Relatórios e Limites como páginas funcionais na navegação lateral.
 - Bloqueia Mapa de São Paulo e Ajustes para todos os papéis, inclusive por acesso direto; Limites reutiliza a página autorizada de metas, tetos e investimento.
 - Preserva integralmente a barra de navegação global do CRM e mantém a integração Meta Ads somente leitura.
+- Carrega o canvas por documento interno, sem flexibilizar `X-Frame-Options: DENY` nem a política CSP do CRM.
 
 ## 2026-10-26 — Bloqueio temporário do Mapa de São Paulo
 

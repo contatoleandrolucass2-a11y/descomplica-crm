@@ -49,7 +49,7 @@ function mergedCanvasPage(html, micro) {
   template.content.querySelectorAll('.kpis,.layout-help,#organize,#reset-layout').forEach(el=>el.remove());
   const workspace=template.content.querySelector('.workspace');
   if(!workspace)return html;
-  const frame=document.createElement('iframe');frame.id='analysis-canvas';frame.title='Canvas editável de análise';frame.src='/canvas/index.html';frame.style.cssText='display:block;width:100%;height:900px;border:0;margin:12px 0;background:transparent';
+  const frame=document.createElement('iframe');frame.id='analysis-canvas';frame.title='Canvas editável de análise';frame.style.cssText='display:block;width:100%;height:900px;border:0;margin:12px 0;background:transparent';
   if(micro)workspace.before(frame);else template.content.querySelector('.foot')?.before(frame);
   workspace.remove();
   const fixed=document.createElement('div');fixed.className='merged-fixed-filters';
@@ -61,8 +61,8 @@ macro=()=>mergedCanvasPage(originalMacro(),false);
 micro=()=>mergedCanvasPage(originalMicro(),true);
 window.addEventListener('message',event=>{
   const frame=document.querySelector('#analysis-canvas');
-  if(event.origin!==location.origin||event.source!==frame?.contentWindow)return;
-  if(event.data?.type==='canvas:modal'){frame.classList.toggle('canvas-modal-open',event.data.open);window.parent.postMessage({type:'descomplica:meta-ads-modal-open'},location.origin);}
+  if(event.source!==frame?.contentWindow)return;
+  if(event.data?.type==='canvas:modal'){frame.classList.toggle('canvas-modal-open',event.data.open);window.parent.postMessage({type:'descomplica:meta-ads-modal-open'},'*');}
   if(event.data?.type==='canvas:height')frame.style.height=Math.max(600,Math.min(20000,event.data.height))+'px';
   if(event.data?.type==='canvas:status'){
     const actions=document.querySelector('.merged-fixed-filters .page-head .actions');
@@ -76,11 +76,27 @@ window.addEventListener('message',event=>{
     }
   }
 });
+let canvasDocumentPromise;
+function hydrateCanvasFrame(){
+  const frame=document.querySelector('#analysis-canvas');
+  if(!frame||frame.dataset.documentLoading)return;
+  frame.dataset.documentLoading='true';
+  canvasDocumentPromise??=fetch('/canvas/index.html',{cache:'force-cache'}).then(response=>{
+    if(!response.ok)throw new Error('Canvas indisponível');
+    return response.text();
+  }).then(html=>html.replace(/\b(href|src)="(?!\/|https?:|#)([^"]+)"/g,'$1="/canvas/$2"'));
+  canvasDocumentPromise.then(html=>{if(frame.isConnected)frame.srcdoc=html;}).catch(()=>{
+    frame.removeAttribute('data-document-loading');
+    frame.replaceWith(Object.assign(document.createElement('p'),{className:'banner error',textContent:'Não foi possível carregar o canvas de análise.'}));
+  });
+}
+new MutationObserver(hydrateCanvasFrame).observe(document.querySelector('#main'),{childList:true,subtree:true});
 document.addEventListener('click',event=>{
   const command=event.target.closest('[data-canvas-command]');if(!command)return;
-  document.querySelector('#analysis-canvas')?.contentWindow?.postMessage({type:'canvas:command',key:command.dataset.canvasCommand},location.origin);
+  document.querySelector('#analysis-canvas')?.contentWindow?.postMessage({type:'canvas:command',key:command.dataset.canvasCommand},'*');
 });
 if(sourceData)render();
+hydrateCanvasFrame();
 
 const canvasStyles=document.createElement('style');canvasStyles.textContent='#analysis-canvas.canvas-modal-open{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:9999;background:var(--bg,#f2f6fa)!important}';document.head.append(canvasStyles);
 
