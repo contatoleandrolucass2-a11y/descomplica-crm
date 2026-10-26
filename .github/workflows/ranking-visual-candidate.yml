@@ -11,6 +11,7 @@ on:
       - "app/(protected)/app/simulacao/_components/Caixa*"
       - "app/(protected)/app/simulacao/_components/caixa.css"
       - "lib/crm/simulators/caixa*"
+      - "e2e/release-candidate.spec.ts"
       - "lib/crm/qlik/**"
       - "lib/navigation/**"
       - ".github/workflows/ranking-visual-candidate.yml"

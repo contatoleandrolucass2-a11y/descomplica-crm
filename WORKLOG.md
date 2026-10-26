@@ -11,6 +11,8 @@ O E2E autenticado foi alinhado exclusivamente à nova jornada CAIXA: verifica
 cálculo local com dados sintéticos e aviso de encargos ausentes, mantendo a
 asserção de endpoint oficial fechado. A antiga expectativa de motor visual
 bloqueado deixou de representar o comportamento solicitado nesta página.
+O workflow Protected visual candidate também recaptura quando esse contrato
+E2E muda, para não reutilizar uma captura que executou expectativas anteriores.
 
 Os 64 testes de cálculo/guards passaram; o cliente passou quatro testes,
 nove combinações de largura/tema e seis auditorias adicionais das abas em

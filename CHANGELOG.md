@@ -4,6 +4,7 @@
 
 - Preserva estilos dos estados abertos/elegíveis após o formatador, com regressão no navegador.
 - Confere no E2E autenticado o cálculo local CAIXA e a API bancária fechada.
+- Recaptura o candidato visual quando o contrato E2E autenticado muda.
 
 - Reproduz as quatro abas da referência pública exclusivamente na página CAIXA.
 - Corrige faixas, cotas, datas, FGTS sobreposto e enquadramento Classe Média.
