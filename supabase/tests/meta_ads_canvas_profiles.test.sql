@@ -1,6 +1,6 @@
 begin;
 
-select plan(12);
+select plan(15);
 
 select ok(
   (select relrowsecurity and relforcerowsecurity
@@ -10,15 +10,15 @@ select ok(
 select is(
   (select count(*) from pg_policy
    where polrelid = 'public.meta_ads_canvas_profiles'::regclass),
-  1::bigint,
-  'canvas profiles have one owner policy'
+  2::bigint,
+  'canvas profiles have an owner policy and the restrictive session gate'
 );
 select ok(
-  has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'SELECT')
-  and has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'INSERT')
-  and has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'UPDATE')
-  and has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'DELETE'),
-  'authenticated users receive only the required data operations'
+  not has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'SELECT')
+  and not has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'INSERT')
+  and not has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'UPDATE')
+  and not has_table_privilege('authenticated', 'public.meta_ads_canvas_profiles', 'DELETE'),
+  'authenticated users receive no direct table operations'
 );
 select ok(
   not has_table_privilege('anon', 'public.meta_ads_canvas_profiles', 'SELECT')
@@ -32,76 +32,99 @@ values
   ('ad710000-0000-4000-8000-000000000001', 'canvas-one@example.test'),
   ('ad710000-0000-4000-8000-000000000002', 'canvas-two@example.test');
 
+select public.bootstrap_master_user('ad710000-0000-4000-8000-000000000001');
+select public.bootstrap_master_user('ad710000-0000-4000-8000-000000000002');
+
+insert into auth.sessions (id, user_id, aal, not_after)
+values
+  (
+    'ad740000-0000-4000-8000-000000000001',
+    'ad710000-0000-4000-8000-000000000001',
+    'aal1',
+    now() + interval '1 hour'
+  ),
+  (
+    'ad740000-0000-4000-8000-000000000002',
+    'ad710000-0000-4000-8000-000000000002',
+    'aal1',
+    now() + interval '1 hour'
+  );
+
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad710000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',
+  '{"sub":"ad710000-0000-4000-8000-000000000001","role":"authenticated","session_id":"ad740000-0000-4000-8000-000000000001","aal":"aal1"}',
   true
 );
 
 select lives_ok(
-  $$insert into public.meta_ads_canvas_profiles (user_id, scope, state)
-    values (
-      'ad710000-0000-4000-8000-000000000001',
+  $$select public.save_meta_ads_canvas_profile(
       'macro',
       '{"activeId":"22222222-2222-4222-8222-222222222222","defaultId":"22222222-2222-4222-8222-222222222222","items":[]}'::jsonb
     )$$,
   'owner can create a canvas profile'
 );
 select is(
-  (select count(*) from public.meta_ads_canvas_profiles),
+  (select public.get_meta_ads_canvas_profile('macro') #>> '{state,activeId}'),
+  '22222222-2222-4222-8222-222222222222',
+  'owner reads the own profile through the audited RPC'
+);
+select is(
+  (select (public.get_meta_ads_canvas_profile('macro') ->> 'revision')::bigint),
   1::bigint,
-  'owner reads only the own profile'
+  'a new profile starts at revision one'
 );
 select lives_ok(
-  $$update public.meta_ads_canvas_profiles
-    set state = jsonb_set(state, '{items}', '[{"name":"Meu layout"}]'::jsonb)
-    where scope = 'macro'$$,
+  $$select public.save_meta_ads_canvas_profile(
+      'macro',
+      '{"activeId":"22222222-2222-4222-8222-222222222222","defaultId":"22222222-2222-4222-8222-222222222222","items":[{"name":"Meu layout"}]}'::jsonb
+    )$$,
   'owner can update the own profile'
 );
 select is(
-  (select state #>> '{items,0,name}' from public.meta_ads_canvas_profiles where scope = 'macro'),
+  (select public.get_meta_ads_canvas_profile('macro') #>> '{state,items,0,name}'),
   'Meu layout',
   'owner update is persisted'
 );
-select throws_ok(
-  $$insert into public.meta_ads_canvas_profiles (user_id, scope, state)
-    values ('ad710000-0000-4000-8000-000000000002', 'macro', '{}'::jsonb)$$,
-  '42501',
-  'new row violates row-level security policy for table "meta_ads_canvas_profiles"',
-  'owner cannot create a profile for another user'
+select is(
+  (select (public.get_meta_ads_canvas_profile('macro') ->> 'revision')::bigint),
+  2::bigint,
+  'an update increments the profile revision'
 );
 select throws_ok(
-  $$insert into public.meta_ads_canvas_profiles (user_id, scope, state)
-    values ('ad710000-0000-4000-8000-000000000001', 'invalid', '{}'::jsonb)$$,
-  '23514',
-  null,
+  $$select * from public.meta_ads_canvas_profiles$$,
+  '42501',
+  'permission denied for table meta_ads_canvas_profiles',
+  'the browser role cannot bypass the RPC contract with direct reads'
+);
+select throws_ok(
+  $$select public.save_meta_ads_canvas_profile('invalid', '{}'::jsonb)$$,
+  '22023',
+  'invalid_argument: unknown canvas scope',
   'invalid scope is rejected'
 );
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad710000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}',
+  '{"sub":"ad710000-0000-4000-8000-000000000002","role":"authenticated","session_id":"ad740000-0000-4000-8000-000000000002","aal":"aal1"}',
   true
 );
 select is(
-  (select count(*) from public.meta_ads_canvas_profiles),
-  0::bigint,
+  public.get_meta_ads_canvas_profile('macro'),
+  null::jsonb,
   'another user cannot read the first user profile'
 );
-select is(
-  (select count(*) from public.meta_ads_canvas_profiles
-   where user_id = 'ad710000-0000-4000-8000-000000000001'),
-  0::bigint,
-  'explicit owner predicate cannot bypass RLS'
+select lives_ok(
+  $$select public.save_meta_ads_canvas_profile('micro-sets', '{"items":[]}'::jsonb)$$,
+  'another user can create an isolated profile'
 );
 
 reset role;
 select is(
   (select count(*) from public.meta_ads_canvas_profiles),
-  1::bigint,
-  'database owner sees the preserved row for fixture verification'
+  2::bigint,
+  'database owner sees both isolated rows for fixture verification'
 );
 
 select * from finish();

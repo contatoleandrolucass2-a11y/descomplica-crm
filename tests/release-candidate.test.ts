@@ -121,7 +121,7 @@ describe("release-candidate migration train", () => {
       { timeout: 1000 },
     );
     expect(plan.files).toBe(41);
-    expect(plan.tests).toBe(2255);
+    expect(plan.tests).toBe(2258);
   });
 
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
@@ -440,7 +440,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2255;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2258;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

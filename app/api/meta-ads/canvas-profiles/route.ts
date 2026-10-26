@@ -21,12 +21,9 @@ export async function GET(request: Request) {
   if (!scope.success) return failure("invalid_scope", 400);
   try {
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("meta_ads_canvas_profiles")
-      .select("scope,state,revision,updated_at")
-      .eq("user_id", authorization.context.userId)
-      .eq("scope", scope.data)
-      .maybeSingle();
+    const { data, error } = await supabase.rpc("get_meta_ads_canvas_profile", {
+      p_scope: scope.data,
+    });
     if (error) return failure("canvas_profiles_unavailable", 503);
     if (!data) return Response.json({ profile: null }, { headers: noStoreHeaders() });
     const profile = metaAdsCanvasRecordSchema.safeParse(data);
@@ -51,19 +48,10 @@ export async function PUT(request: Request) {
     const parsed = metaAdsCanvasSaveSchema.safeParse(JSON.parse(body));
     if (!parsed.success) return failure("invalid_canvas_profiles", 400);
     const supabase = await createClient();
-    const { data, error } = await supabase
-      .from("meta_ads_canvas_profiles")
-      .upsert(
-        {
-          user_id: authorization.context.userId,
-          scope: parsed.data.scope,
-          state: parsed.data.state,
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: "user_id,scope" },
-      )
-      .select("scope,state,revision,updated_at")
-      .single();
+    const { data, error } = await supabase.rpc("save_meta_ads_canvas_profile", {
+      p_scope: parsed.data.scope,
+      p_state: parsed.data.state,
+    });
     if (error) return failure("canvas_profiles_unavailable", 503);
     const profile = metaAdsCanvasRecordSchema.safeParse(data);
     if (!profile.success) return failure("canvas_profiles_unavailable", 503);
