@@ -5,6 +5,7 @@ import {
   ChevronLeft,
   ChevronRight,
   FileChartColumn,
+  LockKeyhole,
   MapPinned,
   Megaphone,
   SlidersHorizontal,
@@ -18,10 +19,12 @@ import styles from "./MetaAdsDashboardFrame.module.css";
 export function MetaAdsSidebar({
   pages,
   path,
+  isMaster,
   view = "overview",
 }: {
   pages: Pick<AppPage, "key" | "path" | "name">[];
   path: string;
+  isMaster: boolean;
   view?: string;
 }) {
   const [collapsed, setCollapsed] = useState(false);
@@ -64,6 +67,28 @@ export function MetaAdsSidebar({
       <nav id="meta-ads-sidebar-navigation" aria-label="Visões do Meta Ads">
         {links.map((page) => {
           const Icon = iconFor(page);
+          const isMapMaintenance = page.key === "map-panel";
+          const maintenanceMessage =
+            "Página temporariamente desabilitada para melhorias. Consulte o desenvolvedor para mais informações.";
+          if (isMapMaintenance && !isMaster) {
+            return (
+              <button
+                key={page.key}
+                type="button"
+                aria-disabled="true"
+                aria-label={`${page.name}. ${maintenanceMessage}`}
+                title={maintenanceMessage}
+                data-tooltip={maintenanceMessage}
+                className={`${styles.navigationLink} ${styles.navigationButton} ${styles.navigationDisabled}`}
+              >
+                <span aria-hidden="true" className={styles.navigationIcon}>
+                  <Icon size={19} strokeWidth={1.9} />
+                </span>
+                <span className={styles.navigationLabel}>{page.name}</span>
+                <LockKeyhole aria-hidden="true" className={styles.navigationLock} size={15} />
+              </button>
+            );
+          }
           return (
             <Link
               key={page.key}
@@ -78,6 +103,9 @@ export function MetaAdsSidebar({
                 <Icon size={19} strokeWidth={1.9} />
               </span>
               <span className={styles.navigationLabel}>{page.name}</span>
+              {isMapMaintenance ? (
+                <LockKeyhole aria-hidden="true" className={styles.navigationLock} size={15} />
+              ) : null}
             </Link>
           );
         })}
