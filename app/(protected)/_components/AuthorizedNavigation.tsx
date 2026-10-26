@@ -329,13 +329,19 @@ function AuthorizedNavigationState({
       >
         <ul className={styles.navigationList}>
           {groups.map((group) => {
+            const dashboardSidebarActive =
+              pathname === "/app/etapas/agendamentos" && group.page.key === "crm.dashboard";
             const directToHub =
-              group.page.key === "crm.simulation" || group.page.key === "crm.meta_ads";
+              dashboardSidebarActive ||
+              group.page.key === "crm.simulation" ||
+              group.page.key === "crm.meta_ads";
             const hasDisabledChildren = disabledItems.some(
               (item) => item.parentKey === group.page.key && item.section === group.page.section,
             );
             const hasChildren = !directToHub && (group.children.length > 0 || hasDisabledChildren);
-            const activeRoot = isNavigationRootActive(pathname, group.page);
+            const activeRoot = dashboardSidebarActive
+              ? isNavigationGroupActive(pathname, group)
+              : isNavigationRootActive(pathname, group.page);
 
             return (
               <li className={styles.navigationItem} key={group.page.key}>

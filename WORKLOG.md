@@ -1,5 +1,56 @@
 # Worklog
 
+Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
+
+## 2026-10-25 - Espacamento dos valores das barras de agendamentos
+
+A composicao preenchida com sidebar encontrou colisao entre o eixo e o valor
+maximo em 1024px. O CSS reserva espaco acima das barras e compensa a altura
+do track, preservando os cards. Assert de nao sobreposicao incorporado ao QA.
+Composite com Vite CSS: 24/24 aprovado, sem cortes ou scrollbar no Score.
+Build de producao, formatacao e lint direcionado aprovados; repeticao com
+CSS de producao em andamento antes de publicar. Alteracao somente nesta pagina.
+
+## 2026-10-25 - Sidebar e graficos de agendamentos
+
+Exclusivamente na rota `/app/etapas/agendamentos`, a navegacao Dashboard passa
+a um link para a Visao Geral e a uma sidebar recolhivel baseada no catalogo
+autorizado. As demais paginas mantem seu comportamento. Os graficos de agendamentos ganham
+reordenacao acessivel, expansao sem duplicar o conteudo, nomes compactos e
+percentual do total filtrado. As identidades completas continuam nos valores
+dos filtros e nos titulos. Realizado fica a esquerda do esperado no desktop.
+
+O usuario confirmou nesta entrega a regra diaria House: 1 por corretor em
+dias uteis, 2 as quintas e nenhum no fim de semana. Semanas usam a soma dos
+dias reais dentro do mes e dos filtros; a meta mensal continua independente,
+lida pelo contrato autorizado para cada mes. Imob nao possui meta de
+agendamentos e permanece nulo, sem classificacao de produtividade presumida.
+Nao ha migration ou alteracao de registros comerciais nesta entrega.
+
+Validacao local: lint sem erros (36 avisos preexistentes), typecheck, build e
+79 testes especificos aprovados. As fontes publicas da politica documental
+tambem passaram. A suite completa no Windows encontrou restricoes POSIX nos
+testes operacionais e de release; a CI Linux continua obrigatoria. Um timeout
+isolado de teste associativo durante carga concorrente passou na repeticao,
+sem modificar essa funcionalidade. Publicacao ainda depende dos gates do PR e
+da main exata; nenhum dado remoto ou permissao foi alterado.
+
+Na revisao final, a representatividade passou a sinalizar conversao indisponivel
+quando Ranking Score nao pode ser mapeado nos fatos agregados. A media diaria
+usa somente os dias cobertos pelo filtro, inclusive semana. KPIs de hoje/ontem
+usam as metas diarias correspondentes e meta mensal zero permanece um valor
+cadastrado. Reordenacao deve preservar a ordem de leitura e o foco no DOM.
+
+Validacao revisada: 18 combinacoes com CSS de producao aprovadas, incluindo
+ordem DOM/foco, sem erros JavaScript. Regressao do shell em connected-systems
+aprovada em nove combinacoes; Frame permanece puro e o wrapper e composto no
+layout. CI `40251775493` aprovou validate e isolated-restore no SHA `32b65849`.
+Candidate `40251775496` aprovado: revisadas e incorporadas somente 11 capturas
+de Agendamentos e 38 entradas da rota. Outras 231 imagens e 56.733 nos JSON
+preservados byte a byte. Esse lote cobre sidebar/estado sem dados; graficos
+preenchidos foram validados no QA sintetico. Reference-parity: 15 testes
+aprovados, um condicional nao executado. Publicacao aguarda CI do novo commit.
+
 ## 2026-10-25 - Publicacao do hover e dos filtros herdados
 
 O PR #346 foi integrado em `c6de29d4`; a `main` publicada avancou para

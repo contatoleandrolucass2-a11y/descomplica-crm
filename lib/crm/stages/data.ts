@@ -9,7 +9,7 @@ import {
 } from "@/lib/crm/dashboard/analysis-contract";
 import type { DashboardViewKey } from "@/lib/crm/dashboard/catalog";
 
-import type { AppointmentBrokerRosterEntry } from "./appointments";
+import type { AppointmentBrokerRosterEntry, AppointmentGoalsByMonth } from "./appointments";
 
 const MAX_BROKER_ROSTER = 1_000;
 
@@ -66,6 +66,7 @@ export interface AppointmentsReadModel {
   brokerRoster: AppointmentBrokerRosterEntry[] | null;
   generatedAt?: string;
   individualGoal: number | null;
+  goalsByMonth: AppointmentGoalsByMonth;
   conversionGoals: AppointmentConversionGoals | null;
 }
 
@@ -138,7 +139,13 @@ export async function loadAppointmentsReadModel(
   for (let attempt = 0; attempt < 2; attempt += 1) {
     const before = await header();
     if (!before)
-      return { analysis: null, brokerRoster: null, individualGoal: null, conversionGoals: null };
+      return {
+        analysis: null,
+        brokerRoster: null,
+        individualGoal: null,
+        goalsByMonth: {},
+        conversionGoals: null,
+      };
     const response = await supabase.rpc("read_crm_appointments_analysis", {
       p_snapshot_id: before.id,
       p_view_keys: [view],
@@ -149,14 +156,26 @@ export async function loadAppointmentsReadModel(
     // Additive rollout: the page can precede the migration without fabricating data.
     if (response.error) {
       if (["PGRST202", "42883"].includes(response.error.code))
-        return { analysis: null, brokerRoster: null, individualGoal: null, conversionGoals: null };
+        return {
+          analysis: null,
+          brokerRoster: null,
+          individualGoal: null,
+          goalsByMonth: {},
+          conversionGoals: null,
+        };
       throw new Error("Não foi possível carregar os gráficos de agendamentos.");
     }
     const rows = z
       .array(z.object({ view_key: z.string(), payload: z.unknown() }))
       .parse(response.data);
     if (rows.length === 0)
-      return { analysis: null, brokerRoster: null, individualGoal: null, conversionGoals: null };
+      return {
+        analysis: null,
+        brokerRoster: null,
+        individualGoal: null,
+        goalsByMonth: {},
+        conversionGoals: null,
+      };
     if (rows.length !== 1 || rows[0]!.view_key !== view) {
       throw new Error("A análise não corresponde à visão autorizada.");
     }
@@ -168,15 +187,34 @@ export async function loadAppointmentsReadModel(
     ) {
       throw new Error("A análise não corresponde ao snapshot de agendamentos.");
     }
-    const goalResponse = await supabase.rpc("read_crm_appointments_goal", {
-      p_reference_date: before.reference_date,
-    });
-    let individualGoal: number | null = null;
-    if (!goalResponse.error) {
-      const parsedGoal = z.number().int().nonnegative().safeParse(goalResponse.data);
-      individualGoal = parsedGoal.success ? parsedGoal.data : null;
-    } else if (!["PGRST202", "42883"].includes(goalResponse.error.code)) {
-      throw new Error("Não foi possível carregar a meta de agendamentos.");
+    async function readGoal(referenceDate: string): Promise<number | null> {
+      const response = await supabase.rpc("read_crm_appointments_goal", {
+        p_reference_date: referenceDate,
+      });
+      if (response.error) {
+        if (["PGRST202", "42883"].includes(response.error.code)) return null;
+        throw new Error("Não foi possível carregar a meta de agendamentos.");
+      }
+      const parsed = z.number().int().nonnegative().safeParse(response.data);
+      return parsed.success ? parsed.data : null;
+    }
+    const individualGoal = await readGoal(before.reference_date);
+    const referenceMonth = before.reference_date.slice(0, 7);
+    const goalsByMonth: AppointmentGoalsByMonth = { [referenceMonth]: individualGoal };
+    // Resolve each historical month through the same permission-checked RPC.
+    // Never copy today's policy backwards or query the private policy table.
+    const historicalMonths: string[] = [];
+    const cursor = new Date(`${analysis.coverageStart.slice(0, 7)}-01T12:00:00Z`);
+    while (cursor.toISOString().slice(0, 7) < referenceMonth) {
+      historicalMonths.push(cursor.toISOString().slice(0, 7));
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+    }
+    for (let offset = 0; offset < historicalMonths.length; offset += 6) {
+      await Promise.all(
+        historicalMonths.slice(offset, offset + 6).map(async (month) => {
+          goalsByMonth[month] = await readGoal(`${month}-01`);
+        }),
+      );
     }
     const conversionResponse = await supabase.rpc("read_crm_appointments_conversion_goals", {
       p_reference_date: before.reference_date,
@@ -193,6 +231,7 @@ export async function loadAppointmentsReadModel(
       brokerRoster: roster,
       generatedAt: before.generated_at,
       individualGoal,
+      goalsByMonth,
       conversionGoals,
     };
   }

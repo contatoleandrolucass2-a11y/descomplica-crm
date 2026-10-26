@@ -1,5 +1,63 @@
 # Aprendizados e atualizacoes
 
+Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
+
+## 2026-10-25: validacao local da pagina de agendamentos
+
+- QA complementar da composicao preenchida com sidebar detectou colisao
+  eixo/valor em 1024px. Correcao restrita ao CSS de Agendamentos reserva espaco
+  superior e compensa a altura das barras, sem aumentar cards. Vite CSS: 24/24
+  aprovado. Build producao e lint direcionado aprovados; QA de producao 18+24
+  em andamento. Referencias autenticadas sem dados nao substituem esse teste
+  da composicao preenchida. Nenhuma baseline de outra rota foi modificada.
+- Candidate autenticado `40251775496` aprovado; artefato `12622015999`, captura
+  do merge sintetico `cdb9a3c5` cujo head e `32b65849`. Incorporacao restrita a
+  11 imagens e 38 entradas de `/app/etapas/agendamentos`, com proveniencia
+  parcial no manifesto. Outras 231 imagens e 56.733 nos JSON preservados.
+  Reference-parity: 15 testes aprovados e um condicional nao executado.
+  Capturas autenticadas cobrem shell/sidebar e estado sem dados; QA sintetico
+  com CSS de producao cobre graficos preenchidos em 18 telas, aprovado apos
+  revisao de ordem DOM/foco. CI `40251775493`: validate/isolated-restore verdes;
+  o novo commit de referencias requer nova CI antes de merge/publicacao.
+- Revisao posterior ao primeiro commit do PR #350: a reordenacao agora altera
+  a arvore React com chaves estaveis e restaura foco; teste isolado DOM aprovado.
+  Conversoes sem dimensao Ranking Score ficam indisponiveis sob esse filtro,
+  evitando numerador e denominador de bases distintas. Media diaria considera
+  os dias do filtro de semana; KPIs diarios usam as metas das datas respectivas.
+  Suite especifica atualizada: 79 testes aprovados; nova rodada de build e QA
+  de producao em execucao antes de publicar o SHA revisado.
+- Escopo efetivo restrito a `/app/etapas/agendamentos`; componentes do shell
+  compartilham arquivos, mas o comportamento novo exige a rota exata. Testes
+  de regressao preservam navegacao nas demais paginas.
+- Build, typecheck, lint sem erros e 74 testes especificos aprovados.
+  QA com CSS de producao: 18 combinacoes de viewport/tema, zero falhas e
+  zero erros JavaScript; expansao, reordenacao e emulacao de layout a 200%
+  verificadas com fixtures sinteticas. Evidencia local em
+  `test-results/appointments-preview/result.json`.
+- Suite completa Windows: restricoes POSIX nos testes operacionais/release;
+  CI Linux continua gate obrigatorio. Timeout associativo isolado passou ao
+  repetir sem build concorrente, sem alteracao fora do escopo. Fontes publicas
+  da politica documental aprovadas. Merge e publicacao ainda pendentes.
+- Obsidian permanece pendente por limite de exportacao do documento; nao
+  alterar o exportador nem apagar historico para liberar esta entrega.
+
+## 2026-10-25: abertura da revisao de navegacao e graficos de agendamentos
+
+- Refinamento direto de escopo: todas as mudancas de comportamento, inclusive
+  navegacao lateral, limitadas a `/app/etapas/agendamentos`. Demais rotas devem
+  preservar a interface anterior. Meta diaria House confirmada em 1 por dia
+  util e 2 as quintas por corretor; Imob permanece nulo.
+
+- Base conferida: origin/main `6a0f678e`, PR #349 integrado no GitHub.
+  Health publico consultado em 2026-10-25T23:55Z: HTTP 200, status ok,
+  versao `ec98b41a`. A diferenca corresponde ao fechamento documental.
+- Escopo solicitado: sidebar Dashboard recolhivel, organizacao e expansao dos
+  graficos de agendamentos, nomes compactos, participacao no total filtrado,
+  alertas de recencia e metas exatas por dia, semana e mes.
+- Context e search do runtime de conhecimento falharam por documento acima do
+  limite de exportacao. A fonte versionada permanece disponivel; sincronizacao
+  pendente, sem alterar limites ou apagar historico para contornar a falha.
+
 ## 2026-10-25: publicacao do hover ampliado e filtros herdados dos funis
 
 - O PR #346 integrou a correcao no merge

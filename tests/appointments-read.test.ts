@@ -92,6 +92,51 @@ beforeEach(() => {
 });
 
 describe("appointments snapshot read", () => {
+  it("resolves policy separately for every month, preserving missing and zero targets", async () => {
+    mocks.rpc.mockImplementation(async (name: string, args: { p_reference_date?: string }) => {
+      if (name === "read_crm_appointments_goal") {
+        const month = args.p_reference_date?.slice(0, 7);
+        return { data: month === "2026-10" ? 29 : month === "2026-09" ? 0 : null, error: null };
+      }
+      if (name === "read_crm_appointments_conversion_goals")
+        return { data: conversionGoals, error: null };
+      return result();
+    });
+    const actual = await loadAppointmentsReadModel("all");
+    expect(actual.individualGoal).toBe(29);
+    expect(actual.goalsByMonth).toMatchObject({
+      "2026-01": null,
+      "2026-08": null,
+      "2026-09": 0,
+      "2026-10": 29,
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_goal", {
+      p_reference_date: "2026-09-01",
+    });
+    expect(mocks.from.mock.calls.some(([table]) => table === "crm_funnel_goals")).toBe(false);
+  });
+
+  it.each(["PGRST202", "42883", "42501"])(
+    "handles historical goal RPC failure without substituting today's target: %s",
+    async (code) => {
+      mocks.rpc.mockImplementation(async (name: string, args: { p_reference_date?: string }) => {
+        if (name === "read_crm_appointments_goal")
+          return args.p_reference_date === snapshot.reference_date
+            ? { data: 29, error: null }
+            : { data: null, error: { code } };
+        if (name === "read_crm_appointments_conversion_goals")
+          return { data: conversionGoals, error: null };
+        return result();
+      });
+      if (code === "42501")
+        await expect(loadAppointmentsReadModel("all")).rejects.toThrow("meta de agendamentos");
+      else
+        expect((await loadAppointmentsReadModel("all")).goalsByMonth).toMatchObject({
+          "2026-09": null,
+          "2026-10": 29,
+        });
+    },
+  );
   it("uses the stage RPC and only the authorized view, without querying other commercial tables", async () => {
     const actual = await loadAppointmentsReadModel("all");
     expect(actual).toEqual({
@@ -102,6 +147,12 @@ describe("appointments snapshot read", () => {
       ],
       generatedAt: snapshot.generated_at,
       individualGoal: 24,
+      goalsByMonth: Object.fromEntries(
+        Array.from({ length: 10 }, (_, index) => [
+          `2026-${String(index + 1).padStart(2, "0")}`,
+          24,
+        ]),
+      ),
       conversionGoals,
     });
     expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_analysis", {
@@ -129,6 +180,7 @@ describe("appointments snapshot read", () => {
       analysis: null,
       brokerRoster: null,
       individualGoal: null,
+      goalsByMonth: {},
       conversionGoals: null,
     });
     expect(mocks.rpc).not.toHaveBeenCalled();
@@ -138,6 +190,7 @@ describe("appointments snapshot read", () => {
       analysis: null,
       brokerRoster: null,
       individualGoal: null,
+      goalsByMonth: {},
       conversionGoals: null,
     });
   });
@@ -150,6 +203,7 @@ describe("appointments snapshot read", () => {
         analysis: null,
         brokerRoster: null,
         individualGoal: null,
+        goalsByMonth: {},
         conversionGoals: null,
       });
     },
@@ -225,7 +279,7 @@ describe("appointments snapshot read", () => {
     const next = { ...snapshot, updated_at: "2026-10-19T00:00:00.123457Z" };
     headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(slice);
-    expect(mocks.rpc).toHaveBeenCalledTimes(4);
+    expect(mocks.rpc).toHaveBeenCalledTimes(13);
   });
 
   it("fails instead of returning mixed generations after repeated concurrent ingestion", async () => {
