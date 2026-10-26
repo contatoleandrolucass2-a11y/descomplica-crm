@@ -3,6 +3,7 @@
 ## 2026-10-25 — Simulação CAIXA com regras verificadas
 
 - Preserva estilos dos estados abertos/elegíveis após o formatador, com regressão no navegador.
+- Confere no E2E autenticado o cálculo local CAIXA e a API bancária fechada.
 
 - Reproduz as quatro abas da referência pública exclusivamente na página CAIXA.
 - Corrige faixas, cotas, datas, FGTS sobreposto e enquadramento Classe Média.

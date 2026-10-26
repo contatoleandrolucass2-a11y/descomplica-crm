@@ -71,9 +71,11 @@ confirmado)`. Recursos próprios informados já são parte da entrada.
 - MIP e DFI são valores mensais confirmados, não coeficientes universais. Sem
   ambos, o resultado é parcial e deve indicar os encargos ausentes. Tarifa
   ausente também não é presumida como zero contratual. TR futura não é prevista.
-- Amortização extraordinária compara preservar prazo ou prestação financeira,
-  com saldo reduzido pelo aporte, sem TR, seguros ou tarifas futuros. Não é
-  uma autorização de amortização do contrato real.
+- Amortização extraordinária compara preservar prazo ou a dinâmica financeira
+  original, com saldo reduzido pelo aporte. Ao reduzir prazo, Price preserva
+  a prestação financeira; SAC preserva a amortização original `P/n`, enquanto
+  os juros incidem sobre o novo saldo. Não há TR, seguros ou tarifas futuros
+  incluídos, nem autorização de amortização do contrato real.
 - Obra: cenário de liberação linear a partir do progresso informado; juros
   mensais sobre saldo liberado. TR anual hipotética convertida por
   `(1+TR_anual)^(1/12)−1`, separada dos juros. Não é medição real nem cobrança

@@ -7,6 +7,11 @@ métrica e FGTS; regressões no navegador verificam a lista aberta e o resultado
 de tempo. O fluxo com seis auditorias adicionais passou após a formatação.
 O build final local também passou. Não há novos achados na revisão específica.
 
+O E2E autenticado foi alinhado exclusivamente à nova jornada CAIXA: verifica
+cálculo local com dados sintéticos e aviso de encargos ausentes, mantendo a
+asserção de endpoint oficial fechado. A antiga expectativa de motor visual
+bloqueado deixou de representar o comportamento solicitado nesta página.
+
 Os 64 testes de cálculo/guards passaram; o cliente passou quatro testes,
 nove combinações de largura/tema e seis auditorias adicionais das abas em
 desktop/celular. A revisão independente corrigiu cidade/UF, prazo de obra,
