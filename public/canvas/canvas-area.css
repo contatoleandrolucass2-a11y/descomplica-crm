@@ -1,0 +1,11 @@
+/* The grid fills the workspace below its fixed filter area. */
+body main,.collapsed main{max-width:none!important;padding:0!important}
+.canvas-fixed-controls{position:sticky;top:64px;z-index:35;background:#edf2f6;padding:14px 16px 10px;border-bottom:1px solid #cedce7}
+body>header{z-index:40}.canvas-fixed-controls .heading{margin-bottom:12px}.canvas-fixed-controls .filters{margin-bottom:0}
+main>.canvas-info,main>.live-bar,main>.integration-note,main>.heading{margin-left:12px!important;margin-right:12px!important}
+#canvas{border-radius:0!important;border-left:0!important;border-right:0!important;width:100%;min-height:calc(100vh - var(--canvas-controls-height,240px));padding-bottom:40px}
+@media(max-width:700px){.canvas-fixed-controls{top:58px;padding:10px}.canvas-fixed-controls .heading>div:first-child{display:none}.canvas-fixed-controls .filters{gap:6px;padding:8px}.canvas-fixed-controls .filters label:first-child{grid-column:auto}}
+
+.card .menu{max-height:min(320px,calc(100% - 58px));overflow-y:auto;overscroll-behavior:contain;scrollbar-width:thin;min-height:0;align-content:start}
+.card .card-controls{max-height:min(340px,calc(100% - 60px));overscroll-behavior:contain;scrollbar-width:thin;min-height:0}
+.canvas-fixed-controls{padding:8px 12px 6px}.canvas-fixed-controls .heading{margin-bottom:7px}.canvas-fixed-controls .heading h1{font-size:23px}.canvas-fixed-controls .heading p{margin:3px 0;font-size:11px}.canvas-fixed-controls .filters{padding:8px 10px;gap:8px}.canvas-fixed-controls .actions button{padding:7px 10px}.canvas-info{padding:8px 0!important}.live-bar{margin-top:6px!important;padding:7px 10px}

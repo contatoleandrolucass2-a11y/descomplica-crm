@@ -84,7 +84,7 @@ describe("dashboard Meta Ads", () => {
     });
     expect(metaAds?.children.map((child) => [child.name, child.path])).toEqual([
       ["Campanhas", "/app/meta-ads/campanhas"],
-      ["Contas de anúncios", "/app/meta-ads/contas-de-anuncios"],
+      ["Limites", "/app/meta-ads/contas-de-anuncios"],
       ["Relatórios", "/app/meta-ads/relatorios"],
     ]);
     expect(metaAds?.children.map((child) => child.key)).toEqual([
@@ -121,6 +121,8 @@ describe("dashboard Meta Ads", () => {
     expect(sidebarSource).toContain("return MapPinned");
     expect(sidebarSource).toContain("return SlidersHorizontal");
     expect(sidebarSource).toContain("return Megaphone");
+    expect(sidebarSource).toContain('page.key === "map-panel" || page.key === "settings-panel"');
+    expect(sidebarSource).toContain('localStorage.setItem("descomplica-ui-sounds-muted"');
     expect(sidebarSource).toContain("<Icon size={19}");
     expect(styles).toContain('.sidebar[data-collapsed="true"]');
     expect(styles).toContain("width: 64px");
@@ -139,6 +141,8 @@ describe("dashboard Meta Ads", () => {
     expect(document).not.toContain('id="profile-button"');
     expect(document).not.toContain("<base ");
     expect(document).toContain('src="/descomplica-ads-compact/live-data.js"');
+    expect(document).toContain('src="/descomplica-ads-compact/canvas-merge.js"');
+    expect(document).toContain('src="/ui-sounds.js"');
     expect(document).not.toContain('aria-label="Visões do dashboard Meta Ads"');
     expect(document).not.toContain("data-nav=");
     expect(document).not.toContain('id="alerts-button"');
@@ -299,53 +303,33 @@ describe("dashboard Meta Ads", () => {
     expect(markup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
   });
 
-  it("concentra contas de anúncios em Ajustes sem duplicar a navegação lateral", async () => {
+  it("expõe Limites como página própria e mantém Ajustes bloqueado", async () => {
     const overviewMarkup = renderToStaticMarkup(await MetaAdsDashboardPage());
-    expect(overviewMarkup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
-    expect(overviewMarkup).toContain('href="/app/meta-ads?panel=settings"');
+    expect(overviewMarkup).toContain('href="/app/meta-ads/contas-de-anuncios"');
+    expect(overviewMarkup).toContain("Ajustes");
+    expect(overviewMarkup).not.toContain('href="/app/meta-ads?panel=settings"');
 
     const legacyMarkup = renderToStaticMarkup(await MetaAdsAccountsPage());
-    expect(legacyMarkup).not.toContain('href="/app/meta-ads/contas-de-anuncios"');
+    expect(legacyMarkup).toContain("Limites");
     expect(legacyMarkup).toMatch(
-      /<a(?=[^>]*href="\/app\/meta-ads\?panel=settings")(?=[^>]*aria-current="page")[^>]*>/,
+      /<a(?=[^>]*href="\/app\/meta-ads\/contas-de-anuncios")(?=[^>]*aria-current="page")[^>]*>/,
     );
   });
 
-  it("mantém o mapa visível para Master com cadeado e aviso de manutenção", async () => {
-    const markup = renderToStaticMarkup(
-      await MetaAdsDashboardPage({ searchParams: Promise.resolve({ panel: "map" }) }),
-    );
-
-    expect(markup).toContain('href="/app/meta-ads?panel=map"');
-    expect(markup).toContain("Mapa temporariamente desabilitado para melhorias");
-    expect(markup).toContain("A visualização permanece disponível para Master");
-    expect(markup).toContain("data-crm-view=&quot;map&quot;");
-  });
-
-  it("mostra o botão bloqueado do mapa para papéis abaixo de Master", async () => {
-    mocks.enforcePageAccess.mockResolvedValueOnce({
-      userId: "qa-admin",
-      roleKey: "admin",
-      level: 80,
-      permissions: [],
-    });
+  it("mostra Mapa e Ajustes bloqueados para todos os papéis", async () => {
     const markup = renderToStaticMarkup(await MetaAdsDashboardPage());
 
-    expect(markup).toContain('aria-disabled="true"');
+    expect(markup.match(/aria-disabled="true"/g)).toHaveLength(2);
+    expect(markup).toContain("Mapa de São Paulo");
+    expect(markup).toContain("Ajustes");
     expect(markup).toContain("Página temporariamente desabilitada para melhorias");
     expect(markup).not.toContain('href="/app/meta-ads?panel=map"');
+    expect(markup).not.toContain('href="/app/meta-ads?panel=settings"');
   });
 
-  it("impede acesso direto ao painel do mapa para papéis abaixo de Master", async () => {
-    mocks.enforcePageAccess.mockResolvedValueOnce({
-      userId: "qa-admin",
-      roleKey: "admin",
-      level: 80,
-      permissions: [],
-    });
-
+  it.each(["map", "settings"])("impede acesso direto ao painel %s", async (panel) => {
     await expect(
-      MetaAdsDashboardPage({ searchParams: Promise.resolve({ panel: "map" }) }),
+      MetaAdsDashboardPage({ searchParams: Promise.resolve({ panel }) }),
     ).rejects.toMatchObject({
       digest: expect.stringContaining("NEXT_REDIRECT;replace;/app/meta-ads"),
     });
@@ -368,9 +352,7 @@ describe("dashboard Meta Ads", () => {
       expect(markup).toContain('title="Descomplica Ads — desempenho de campanhas Meta"');
       expect(markup).toContain("srcDoc=");
       expect(markup).toContain('aria-label="Navegação lateral Meta Ads"');
-      expect(markup).toContain(
-        view === "accounts" ? 'href="/app/meta-ads?panel=settings"' : `href="${path}"`,
-      );
+      expect(markup).toContain(`href="${path}"`);
       expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
       expect(markup).toContain(`data-crm-view=&quot;${view}&quot;`);
     }
@@ -381,5 +363,28 @@ describe("dashboard Meta Ads", () => {
       ["/app/meta-ads/contas-de-anuncios", "accounts"],
       ["/app/meta-ads/relatorios", "reports"],
     ]);
+  });
+
+  it("integra o canvas configurável sem dados demonstrativos", async () => {
+    const [merge, adapter, canvas, exportControls] = await Promise.all([
+      readFile(
+        new URL("../public/descomplica-ads-compact/canvas-merge.js", import.meta.url),
+        "utf8",
+      ),
+      readFile(new URL("../public/canvas/adapter-ui.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/canvas/app.js", import.meta.url), "utf8"),
+      readFile(
+        new URL("../public/descomplica-ads-compact/export-controls.js", import.meta.url),
+        "utf8",
+      ),
+    ]);
+
+    expect(merge).toContain("Meta Marketing API · somente leitura");
+    expect(merge).not.toContain("Demonstração local");
+    expect(adapter).toContain("Meta Marketing API");
+    expect(canvas).toContain("Perfis · ");
+    expect(canvas).toContain("Este gráfico já existe");
+    expect(canvas).toContain("Escolha outro período");
+    expect(exportControls).toContain('canvas: "Gráficos do canvas (com filtros próprios)"');
   });
 });

@@ -460,7 +460,7 @@ function macro() {
       true,
     ),
   };
-  return `<div class="page-head"><div><h1>Comparar campanhas</h1><p>Uma visão. Todas as campanhas. Seu jeito de comparar.</p></div><div class="actions"><button id="organize" aria-pressed="${state.organize}" class="${state.organize ? "primary" : ""}">⠿ ${state.organize ? "Concluir organização" : "Organizar layout"}</button><button id="reset-layout" class="reset">↺ Redefinir layout</button></div></div>${state.organize ? '<div class="layout-help">Arraste pelas alças ⠿ para mover blocos e funis. Métricas ficam restritas à faixa superior. Pelo teclado: Alt + setas. Alterações salvas neste navegador.</div>' : ""}${filters()}${kpis(list)}<div class="workspace ${state.organize ? "organizing" : ""}">${state.order.map((id) => blocks[id]).join("")}</div><div class="foot"><span>Dados oficiais • ${destinationLabel()} • ${period()}</span><span>Metas e limites somente para leitura. Configure em Ajustes.</span></div>`;
+  return `<div class="page-head"><div><h1>Comparar campanhas</h1><p>Uma visão. Todas as campanhas. Seu jeito de comparar.</p></div><div class="actions"><button id="organize" aria-pressed="${state.organize}" class="${state.organize ? "primary" : ""}">⠿ ${state.organize ? "Concluir organização" : "Organizar layout"}</button><button id="reset-layout" class="reset">↺ Redefinir layout</button></div></div>${state.organize ? '<div class="layout-help">Arraste pelas alças ⠿ para mover blocos e funis. Métricas ficam restritas à faixa superior. Pelo teclado: Alt + setas. Alterações salvas neste navegador.</div>' : ""}${filters()}${kpis(list)}<div class="workspace ${state.organize ? "organizing" : ""}">${state.order.map((id) => blocks[id]).join("")}</div><div class="foot"><span>Dados oficiais • ${destinationLabel()} • ${period()}</span><span>Metas e limites somente para leitura. Configure em Limites.</span></div>`;
 }
 const municipalities = ["São Paulo", "Guarulhos", "Santo André", "Osasco", "São Bernardo do Campo"];
 function mapPage() {
@@ -618,7 +618,7 @@ function render() {
   hideChartTip();
   document.title =
     "Descomplica Ads · " +
-    { macro: "Comparação", micro: "Campanha", map: "Mapa de São Paulo", settings: "Ajustes" }[
+    { macro: "Comparação", micro: "Campanha", map: "Mapa de São Paulo", settings: "Limites" }[
       state.page
     ];
   $$("aside [data-page]").forEach((b) =>
@@ -649,7 +649,6 @@ function render() {
       exportGroup.className = "pdf-export-group";
       exportGroup.appendChild(button);
       exportGroup.insertAdjacentHTML("beforeend", pdfSectionControls());
-      button.disabled = !Object.values(pdfSections).some(Boolean);
       actions.appendChild(exportGroup);
     }
   }

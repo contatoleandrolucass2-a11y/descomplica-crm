@@ -1,5 +1,6 @@
 "use strict";
 const pdfSectionLabels = {
+  canvas: "Gráficos do canvas (com filtros próprios)",
   summary: "Resumo de indicadores",
   table: "Tabela de campanhas",
   origin: "Origem dos leads",
@@ -10,6 +11,7 @@ const pdfSectionLabels = {
   guide: "Explicações das métricas",
 };
 let pdfSections = {
+  canvas: true,
   summary: true,
   table: true,
   origin: true,
@@ -24,26 +26,26 @@ try {
     JSON.parse(preferenceStore.getItem("ads-live-compact-pdf-guide") || "false") === true;
 } catch {}
 function pdfSectionControls() {
-  return `<details class="pdf-sections"><summary>Seções do PDF</summary><div class="pdf-section-options"><strong>Incluir no relatório</strong>${Object.entries(
+  return `<div class="pdf-sections" hidden role="dialog" aria-label="Selecionar conteúdo do PDF"><div class="pdf-section-options"><strong>O que incluir no PDF?</strong>${Object.entries(
     pdfSectionLabels,
   )
     .map(
       ([key, label]) =>
         `<label><input type="checkbox" ${key === "guide" ? 'id="pdf-include-guide"' : ""} data-pdf-section="${key}" ${pdfSections[key] ? "checked" : ""}> ${label}</label>`,
     )
-    .join("")}<small>Selecione pelo menos uma seção.</small></div></details>`;
+    .join("")}<small>O período e os filtros atuais serão mantidos.</small><div class="pdf-section-actions"><button type="button" data-pdf-cancel>Cancelar</button><button type="button" class="primary" data-pdf-confirm>Gerar PDF</button></div></div></div>`;
 }
 document.addEventListener("change", (e) => {
   const key = e.target.dataset.pdfSection;
   if (key) {
     pdfSections[key] = e.target.checked;
-    const button = document.querySelector("#download-report");
-    if (button) button.disabled = !Object.values(pdfSections).some(Boolean);
+    const confirm = document.querySelector("[data-pdf-confirm]");
+    if (confirm) confirm.disabled = !Object.values(pdfSections).some(Boolean);
   }
 });
 document.addEventListener("click", (e) => {
   if (!e.target.closest(".pdf-sections"))
-    document.querySelectorAll(".pdf-sections[open]").forEach((item) => (item.open = false));
+    document.querySelectorAll(".pdf-sections:not([hidden])").forEach((item) => (item.hidden = true));
 });
 let expandedChart = null;
 function expandChartButton(id) {

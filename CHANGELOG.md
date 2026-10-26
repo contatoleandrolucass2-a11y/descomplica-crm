@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-26 — Canvas configurável do Meta Ads
+
+- Substitui o conteúdo analítico das visões macro e de campanha por um canvas configurável alimentado exclusivamente pela Meta Marketing API.
+- Permite adicionar, remover, duplicar, redimensionar e reorganizar gráficos, salvar perfis de layout por usuário e manter filtros próprios por gráfico.
+- Preserva funis, indicadores, tabelas, comparação de períodos, limites, alertas, pop-ups e exportação PDF com seleção de seções no momento do download.
+- Mantém somente Visão macro, Campanhas, Relatórios e Limites como páginas funcionais na navegação lateral.
+- Bloqueia Mapa de São Paulo e Ajustes para todos os papéis, inclusive por acesso direto; Limites reutiliza a página autorizada de metas, tetos e investimento.
+- Preserva integralmente a barra de navegação global do CRM e mantém a integração Meta Ads somente leitura.
+
 ## 2026-10-26 — Bloqueio temporário do Mapa de São Paulo
 
 - Mantém o Mapa de São Paulo visível para Master, com cadeado e aviso de manutenção.

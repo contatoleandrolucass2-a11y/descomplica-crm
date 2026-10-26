@@ -1,0 +1,195 @@
+body{background:transparent!important;padding:0!important;margin:0!important}body>header,body>aside,main>.filters,.heading>div:first-child{display:none!important}body main,.collapsed main{margin:0!important;padding:0 2px!important;max-width:none!important}.heading{display:flex!important;flex-direction:row!important;justify-content:flex-end;margin:0!important}.integration-note{font:12px/1.5 system-ui;color:#637d90;margin:10px 0}.canvas-info{gap:12px;flex-wrap:wrap}.integration-refresh{margin-left:auto}#canvas{margin:0}.chart{display:flex;flex-direction:column;overflow:auto!important}.chart>svg{flex:1;min-height:0}.cap-reference{font:10px/1.4 system-ui;color:#9e2640;padding:4px 6px;flex:none}.chart svg text.above-cap{fill:#b91c3a!important}.metric-tile{display:flex;flex-direction:column;justify-content:center;gap:12px;height:100%;padding:12px 20px}.metric-tile>span{font-size:14px;color:#607e94}.metric-tile strong{font-size:clamp(22px,7cqi,44px);overflow-wrap:anywhere;font-variant-numeric:tabular-nums}.metric-tile small{color:#607e94;font-size:12px}.merged-funnels{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;padding:8px}.merged-funnels article{padding:12px;border:1px solid #d7e2eb;border-radius:10px}.merged-funnels strong{display:block;font-size:13px;line-height:1.4;overflow-wrap:break-word;margin-bottom:14px;color:var(--campaign-color)}.merged-funnel-row{display:grid;grid-template-columns:1fr auto;gap:5px;margin:12px 0;font-size:12px}.merged-funnel-row i{height:7px;grid-column:1/-1;background:var(--campaign-color);border-radius:2px}.merged-funnels small{font-size:11px;color:#647c8e}.card .empty-chart{text-align:center;padding:20px;line-height:1.5}#expanded{max-height:90vh}#expanded .card{height:65vh!important}
+body[data-theme="dark"],body[data-theme="medium"]{color:#e7eff8}body[data-theme="dark"] :is(.card,dialog,.menu,button,input,select),body[data-theme="medium"] :is(.card,dialog,.menu,button,input,select){background:#172c40;color:#e7eff8;border-color:#345167}body[data-theme="dark"] #canvas,body[data-theme="medium"] #canvas{background-color:#102132;border-color:#345167}body[data-theme="dark"] .chart svg text,body[data-theme="medium"] .chart svg text{fill:#e7eff8!important}body[data-theme="dark"] :is(.subtitle,.legend,.integration-note,.metric-tile span,.metric-tile small),body[data-theme="medium"] :is(.subtitle,.legend,.integration-note,.metric-tile span,.metric-tile small){color:#b8cbdb!important}
+.card[data-chart-type="kpi"] .subtitle,.card[data-chart-type="kpi"] .legend,.metric-tile>span{display:none}.card[data-chart-type="kpi"] .metric-tile{padding:8px 18px}.card[data-chart-type="kpi"] .metric-tile strong{font-size:clamp(20px,6cqi,36px)}
+
+body main{padding:0!important}#canvas{border-radius:0!important}.heading{padding-top:8px}.integration-note{margin-left:12px}
+
+body main{display:block}
+main>.heading{display:none!important}
+main>.heading .actions{gap:6px}main>.heading button{padding:7px 10px;font-size:12px}
+main>.integration-note{display:none}
+main>.canvas-info{display:none!important}
+main>.canvas-info #save-status{display:none}.integration-refresh{margin-left:0;font-size:10px}
+main>#canvas{min-height:450px!important}main>#empty{width:100%}
+
+/* Prioritize values while keeping all editing controls reachable. */
+#canvas .card .chart,#expanded .card .chart{padding:2px 4px}
+#canvas .card .legend,#expanded .card .legend{padding:5px 8px;gap:4px 10px}
+#canvas .card[data-chart-type="kpi"] .card-top,#expanded .card[data-chart-type="kpi"] .card-top{display:flex;flex-wrap:wrap;padding:6px 6px 2px;gap:2px;min-height:0}
+.card[data-chart-type="kpi"] .metric-heading{order:-1;flex:1 0 100%;min-height:28px}
+#canvas .card[data-chart-type="kpi"] h2,#expanded .card[data-chart-type="kpi"] h2{font-size:clamp(12px,4cqi,17px)!important;word-break:normal;overflow-wrap:normal}
+.card[data-chart-type="kpi"] .card-top>.icon{height:24px;width:24px;padding:2px}
+#canvas .card[data-chart-type="kpi"] .metric-tile,#expanded .card[data-chart-type="kpi"] .metric-tile{padding:2px 4px;gap:6px;min-width:0;box-sizing:border-box}
+.card[data-chart-type="kpi"] .metric-tile strong{white-space:nowrap;overflow-wrap:normal;line-height:1.08;letter-spacing:0}
+.card[data-chart-type="kpi"] .metric-tile small{font-size:11px;line-height:1.25}
+
+/* Shared typography and aligned baselines across all indicator tiles. */
+#canvas .card[data-chart-type="kpi"] h2,#expanded .card[data-chart-type="kpi"] h2{font-size:14px!important;line-height:18px}
+.card[data-chart-type="kpi"] .metric-heading{height:36px;align-items:flex-start}
+.card[data-chart-type="kpi"] .metric-heading h2{margin:0}
+.card[data-chart-type="kpi"] .metric-heading .metric-info{height:20px}
+#canvas .card[data-chart-type="kpi"] .metric-tile,#expanded .card[data-chart-type="kpi"] .metric-tile{justify-content:center;align-items:flex-start;padding:4px 6px;gap:8px}
+.card[data-chart-type="kpi"] .metric-tile strong{font-size:40px;font-weight:700;line-height:1.12;font-variant-numeric:tabular-nums}
+.card[data-chart-type="kpi"] .metric-tile small{font-size:11px;line-height:14px}
+
+/* Identical title, toolbar, value and date tracks keep indicator baselines aligned. */
+#canvas .card[data-chart-type="kpi"] .card-top,
+#expanded .card[data-chart-type="kpi"] .card-top{
+ display:grid;grid-template-columns:repeat(5,24px);grid-template-rows:36px 24px;
+ align-content:start;align-items:start;justify-content:start;gap:2px;
+ height:70px;min-height:70px;max-height:70px;flex:0 0 70px;box-sizing:border-box;
+ padding:6px 6px 2px;
+}
+.card[data-chart-type="kpi"] .metric-heading{
+ grid-column:1/-1;grid-row:1;position:absolute;left:6px;right:6px;top:6px;
+ height:36px;min-height:36px;max-height:36px;align-items:flex-start;
+}
+#canvas .card[data-chart-type="kpi"] h2,
+#expanded .card[data-chart-type="kpi"] h2{
+ display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:2;
+ overflow:hidden;line-height:18px;max-height:36px;
+}
+.card[data-chart-type="kpi"] .card-top>.icon{grid-row:2}
+#canvas .card[data-chart-type="kpi"] .metric-tile,
+#expanded .card[data-chart-type="kpi"] .metric-tile{
+ display:grid;grid-template-columns:minmax(0,1fr);grid-template-rows:45px 14px auto;
+ align-content:center;align-items:end;justify-content:stretch;gap:8px;
+}
+.card[data-chart-type="kpi"] .metric-tile strong{grid-row:1;align-self:end}
+.card[data-chart-type="kpi"] .metric-tile small:last-child{grid-row:2;align-self:start}
+.card[data-chart-type="kpi"] .metric-tile small:not(:last-child){grid-row:3;align-self:start}
+
+/* Reserve each toolbar slot so hovering never shifts indicator content. */
+.card[data-chart-type="kpi"] .card-top>.handle{grid-column:1}
+.card[data-chart-type="kpi"] .card-top>[data-action="filters"]{grid-column:2}
+.card[data-chart-type="kpi"] .card-top>[data-action="type"]{grid-column:3}
+.card[data-chart-type="kpi"] .card-top>[data-action="expand"]{grid-column:4}
+.card[data-chart-type="kpi"] .card-top>[data-action="menu"]{grid-column:5}
+@media(hover:hover) and (pointer:fine){
+ .card[data-chart-type="kpi"] .card-top>.icon{opacity:0;pointer-events:none;transition:opacity 150ms ease}
+ .card[data-chart-type="kpi"]:is(:hover,:focus-within,.card-selected,.dragging) .card-top>.icon{opacity:1;pointer-events:auto}
+}
+@media(prefers-reduced-motion:reduce){.card[data-chart-type="kpi"] .card-top>.icon{transition:none}}
+
+/* KPI tiles use their compact resize minimum on every viewport. */
+#canvas .card[data-chart-type="kpi"]{height:var(--height);min-height:164px}
+
+/* Chart filter popovers use one coherent surface and readable control colors. */
+body{--filter-surface:#fff;--filter-input:#f8fafc;--filter-text:#20394e;--filter-muted:#415b70;--filter-line:#cedce7;--filter-accent:#24668f}
+body[data-theme="medium"]{--filter-surface:#edf2f6;--filter-input:#e4ecf2;--filter-text:#21364a;--filter-muted:#4e6477;--filter-line:#b6c5d2;--filter-accent:#24668f}
+body[data-theme="dark"]{--filter-surface:#172c40;--filter-input:#102132;--filter-text:#e7eff8;--filter-muted:#b8cbdb;--filter-line:#456178;--filter-accent:#76caff}
+body .card .card-controls{background:var(--filter-surface);color:var(--filter-text);border-color:var(--filter-line);box-shadow:0 10px 30px #07172640}
+body .card .card-controls :is(label,legend,.chart-campaigns,.campaign-checks){color:var(--filter-text)}
+body .card .card-controls .follow-global{color:var(--filter-muted)}
+body .card .card-controls .chart-campaigns{border-color:var(--filter-line)}
+body .card .card-controls :is(select,input:not([type="checkbox"])){background:var(--filter-input);color:var(--filter-text);border-color:var(--filter-line)}
+body .card .card-controls input[type="checkbox"]{accent-color:var(--filter-accent)}
+body[data-theme="dark"] .card-controls{color-scheme:dark}
+body[data-theme="medium"] .card-controls,body[data-theme="light"] .card-controls{color-scheme:light}
+body .card .card-controls :is(input,select):focus-visible{outline:2px solid var(--filter-accent);outline-offset:2px}
+
+/* A compact, structured filter panel anchored to the chart toolbar. */
+body .card .card-controls{left:auto;right:10px;top:48px;width:min(520px,calc(100% - 20px));box-sizing:border-box;padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:calc(100% - 60px)}
+body .card .card-controls[hidden]{display:none!important}
+.chart-filter-header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--filter-line);font-size:13px}
+body .card-controls .chart-filter-field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11px;font-weight:600}
+body .card-controls .chart-filter-field:first-of-type{grid-column:1/-1}
+body .card-controls .chart-filter-field select{height:32px;font-size:12px;width:100%}
+body .card .chart-campaigns{margin:2px 0 0;padding:8px 0 0;grid-column:1/-1}
+body .card .chart-campaigns legend{font-size:12px;font-weight:600;padding-right:8px}
+.campaign-selection-actions{display:flex;flex-wrap:wrap;gap:4px 16px;padding:0 0 8px;border-bottom:1px solid var(--filter-line)}
+body .card .campaign-selection-actions label{font-size:11px;margin:0;gap:7px}
+body .card .campaign-checks{display:flex;flex-direction:column;gap:2px;margin-top:6px;max-height:160px;overflow:auto;overscroll-behavior:contain}
+body .card .campaign-checks label{display:grid;grid-template-columns:16px 8px minmax(0,1fr);align-items:center;gap:8px;padding:7px 4px;margin:0;font-size:12px;line-height:1.4;border-radius:5px}
+body .card .campaign-checks label:hover{background:var(--filter-input)}
+body .card .campaign-checks label span{min-width:0;overflow-wrap:break-word}
+body .card .campaign-checks i{width:7px;height:7px;border-radius:50%}
+@container(max-width:300px){body .card .card-controls{grid-template-columns:minmax(0,1fr)}.campaign-selection-actions{flex-direction:column;gap:0}}
+body .card-controls .chart-filter-field[hidden]{display:none}
+.fixed-chart-analysis{font-size:12px;padding:8px;border:1px solid var(--filter-line);border-radius:6px;background:var(--filter-input)}
+.chart-filter-field small{font-size:11px;font-weight:400;line-height:1.4;color:var(--filter-muted)}
+#canvas .card.duplicate-highlight{outline:3px solid #5bbaff;outline-offset:-3px;box-shadow:0 0 0 4px #5bbaff40}
+.card[data-chart-type="table"] .legend{display:none}
+.card[data-chart-type="table"] .chart{overflow:auto!important;display:block}
+.card[data-chart-type="table"] table{border-collapse:collapse;table-layout:fixed;width:100%;min-width:560px;font-size:12px;color:inherit}
+.card[data-chart-type="table"] th:nth-child(2){width:85px}
+.card[data-chart-type="table"] th:nth-child(3){width:78px}
+.card[data-chart-type="table"] th:nth-child(4){width:90px}
+.card[data-chart-type="table"] th:nth-child(5){width:60px}
+.card[data-chart-type="table"] th:nth-child(6){width:88px}
+.card[data-chart-type="table"] th:nth-child(7){width:20px}
+.card[data-chart-type="table"] :is(th,td){padding:7px 6px;text-align:left;border-bottom:1px solid var(--filter-line);vertical-align:middle;line-height:1.15}
+.card[data-chart-type="table"] th{position:sticky;top:0;z-index:1;background:var(--filter-input);font-size:11px;color:var(--filter-muted)}
+.card[data-chart-type="table"] th .info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;margin-left:2px;padding:0!important;border:0!important;border-radius:50%;background:transparent!important;font-size:11px;line-height:1;vertical-align:-1px}
+.card[data-chart-type="table"] .campaign-table-identity{display:grid;grid-template-columns:9px minmax(0,1fr) auto;grid-template-areas:"marker name status";align-items:center;column-gap:6px;max-width:300px;min-width:0}
+.card[data-chart-type="table"] .campaign-table-identity>.dot{grid-area:marker}
+.card[data-chart-type="table"] .campaign-table-identity>.link-button{grid-area:name;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card[data-chart-type="table"] .campaign-table-identity>.delivery-status{grid-area:status;margin:0;white-space:nowrap}
+.card[data-chart-type="table"] .link-button{padding:0;border:0;background:transparent!important;text-align:left;font-weight:600;white-space:normal}
+.card[data-chart-type="table"] .dot{display:inline-block;width:9px;height:9px;border-radius:50%;background:var(--c);flex-shrink:0}
+.card[data-chart-type="table"] .badge,.card[data-chart-type="table"] .delivery-badge{font-size:10px;padding:2px 5px;border-radius:10px;background:var(--filter-input);white-space:nowrap}
+.card[data-chart-type="table"] td:nth-child(6) .badge.red{background:#fff0f3;color:#d92343}
+.card[data-chart-type="table"] td:nth-child(6) .badge.warn{background:#fff5e2;color:#a96f00}
+.card[data-chart-type="table"] td:nth-child(6) .badge.good{background:#e8f7ef;color:#14816c}
+body[data-theme="dark"] .card[data-chart-type="table"] td:nth-child(6) .badge.red{background:#4b1e2a;color:#ff7894}
+body[data-theme="dark"] .card[data-chart-type="table"] td:nth-child(6) .badge.warn{background:#4a3718;color:#ffc45c}
+body[data-theme="dark"] .card[data-chart-type="table"] td:nth-child(6) .badge.good{background:#173d34;color:#63d2ad}
+.card[data-chart-type="table"] .bad,.card[data-chart-type="table"] .red{color:#ef5275}
+.card[data-chart-type="table"] .period-comparison{display:block;font-size:10px;color:var(--filter-muted);margin-top:4px}
+.card[data-chart-type="table"] .clickable{cursor:pointer}
+.card[data-chart-type="table"] .clickable:hover{background:var(--filter-input)}
+/* Up to nine funnels fit in complete rows; larger selections retain scrolling. */
+.card[data-chart-type="funnel"] .legend{display:none}
+.card[data-chart-type="funnel"] .merged-funnels{grid-template-columns:repeat(var(--funnel-columns,3),minmax(0,1fr));gap:10px;padding:6px!important}
+.card[data-chart-type="funnel"] .merged-funnels>article{padding:10px;min-width:0;box-sizing:border-box;min-height:200px}
+.card[data-chart-type="funnel"] .merged-funnels strong{font-size:12px;line-height:16px;height:32px;margin:0 0 6px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card[data-chart-type="funnel"] .merged-funnel-row{margin:4px 0;font-size:11px;line-height:14px;gap:3px}
+.card[data-chart-type="funnel"] .merged-funnel-row i{height:5px}
+.card[data-chart-type="funnel"] .merged-funnels small{font-size:10px;line-height:14px;display:block;margin-top:8px}
+.card[data-chart-type="funnel"].funnel-all-visible .chart{overflow:hidden!important}
+#expanded .card[data-chart-type="funnel"].funnel-all-visible{height:auto!important;min-height:65vh}
+
+.card[data-chart-type="funnel"] .merged-funnels>article{min-height:var(--funnel-tile-height,140px)}
+
+/* Shared stage tracks preserve comparison alignment when one campaign has no data. */
+.card[data-chart-type="funnel"] .merged-funnel-row{height:22px;grid-template-rows:14px 5px;box-sizing:border-box}
+.card[data-chart-type="funnel"] .merged-funnel-row>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.card[data-chart-type="funnel"] .funnel-stage-empty{visibility:hidden}
+
+/* Keep an easy resize target while drawing only a fine rounded corner. */
+#canvas .card .resize{
+ position:absolute;right:0;bottom:0;width:28px;height:28px;padding:0;
+ border:0!important;border-radius:0;background:transparent!important;
+ box-shadow:none!important;color:transparent!important;font-size:0;
+ cursor:nwse-resize;touch-action:none;z-index:5;
+}
+#canvas .card .resize::after{
+ content:'';position:absolute;right:3px;bottom:3px;width:15px;height:15px;
+ border-right:2px solid #fff;border-bottom:2px solid #fff;
+ border-bottom-right-radius:10px;pointer-events:none;opacity:.85;
+ filter:drop-shadow(0 0 1px #10213280);
+}
+#canvas .card .resize:hover::after,#canvas .card .resize:focus-visible::after{opacity:1}
+#canvas .card .resize:focus-visible{outline:1px solid #fff;outline-offset:-2px;border-radius:0 0 12px 0}
+.group-toolbar{display:flex;align-items:center;gap:6px;padding:4px 8px;border:1px solid var(--filter-accent);border-radius:8px;background:var(--filter-surface);color:var(--filter-text);font-size:12px}
+.group-toolbar[hidden]{display:none}
+.group-select{opacity:0;color:var(--filter-muted)!important;border:1px solid var(--filter-line)!important;flex-shrink:0}
+.card:hover .group-select,.card:focus-within .group-select,.group-select[aria-pressed="true"]{opacity:1}
+.group-select[aria-pressed="true"]{background:var(--filter-accent)!important;color:var(--filter-input)!important}
+#canvas .card[data-chart-type="kpi"] .card-top{grid-template-columns:repeat(6,24px)}
+#canvas .card[data-chart-type="kpi"] .card-top>.group-select{grid-column:6;grid-row:2}
+@media(hover:none){.group-select{opacity:1}}
+.duplicate-period-menu strong{font-size:13px}
+.duplicate-period-menu small{color:#688093;line-height:1.35;margin-bottom:3px}
+body[data-theme="dark"] .duplicate-period-menu small,body[data-theme="medium"] .duplicate-period-menu small{color:#b8cbdb}
+.scale-reference{display:block;flex:none;padding:2px 6px 4px;color:#637d90;font:9px/1.3 system-ui}
+body[data-theme="dark"] .scale-reference,body[data-theme="medium"] .scale-reference{color:#b8cbdb}
+#profiles-dialog{width:min(720px,92vw)}
+#profile-list{display:grid;gap:8px;margin:14px 0}
+.profile-row{display:grid;grid-template-columns:minmax(150px,1fr) auto repeat(4,auto);align-items:center;gap:7px;padding:9px;border:1px solid var(--filter-line,#d6e2eb);border-radius:9px}
+.profile-row input{min-width:0;width:100%;padding:7px 9px}
+.profile-row small{font-size:10px;color:var(--filter-muted,#688093)}
+.profile-row button{padding:7px 9px;font-size:11px;white-space:nowrap}
+.profile-create{display:flex;gap:8px;padding-top:12px;border-top:1px solid var(--filter-line,#d6e2eb)}
+.profile-create input{flex:1;min-width:0}
+@media(max-width:620px){.profile-row{grid-template-columns:1fr 1fr}.profile-row input{grid-column:1/-1}.profile-create{flex-direction:column}}

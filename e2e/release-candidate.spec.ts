@@ -387,7 +387,7 @@ const protectedSurfaces = [
   },
   {
     path: "/app/meta-ads/contas-de-anuncios",
-    heading: "Contas de anúncios",
+    heading: "Limites",
     allowed: adminRoles,
   },
   {
@@ -1606,9 +1606,7 @@ for (const role of expectedRoles) {
   });
 }
 
-test("Meta Ads keeps its four views inside srcdoc after sidebar navigation and reload", async ({
-  browser,
-}) => {
+test("Meta Ads keeps four functional views and blocks Map and Settings", async ({ browser }) => {
   await withRolePage(browser, "master", async (page) => {
     // Keep navigation independent of external Meta credentials while rendering
     // the official source's valid empty state, never demonstration campaigns.
@@ -1628,7 +1626,7 @@ test("Meta Ads keeps its four views inside srcdoc after sidebar navigation and r
     await page.goto("/app/meta-ads");
     await expect(
       page
-        .getByRole("navigation", { name: "Visões do Meta Ads" })
+        .getByRole("navigation", { name: "Navegação lateral Meta Ads" })
         .getByRole("link", { name: "Contas de anúncios", exact: true }),
     ).toHaveCount(0);
     const frame = page.frameLocator(
@@ -1636,13 +1634,13 @@ test("Meta Ads keeps its four views inside srcdoc after sidebar navigation and r
     );
     for (const [route, heading, view, sidebarLabel] of [
       ["/app/meta-ads/campanhas", "Análise da campanha", "campaigns", "Campanhas"],
-      ["/app/meta-ads/contas-de-anuncios", "Ajustes", "accounts", null],
+      ["/app/meta-ads/contas-de-anuncios", "Limites", "accounts", "Limites"],
       ["/app/meta-ads/relatorios", "Relatórios", "reports", "Relatórios"],
       ["/app/meta-ads", "Comparar campanhas", "overview", null],
     ] as const) {
       if (sidebarLabel) {
         await page
-          .getByRole("navigation", { name: "Visões do Meta Ads" })
+          .getByRole("navigation", { name: "Navegação lateral Meta Ads" })
           .getByRole("link", { name: sidebarLabel, exact: true })
           .click();
       } else if (route === "/app/meta-ads") {
@@ -1667,29 +1665,17 @@ test("Meta Ads keeps its four views inside srcdoc after sidebar navigation and r
           .map((entry) => entry.url()),
       ).toEqual(["about:srcdoc"]);
     }
-    for (const [panel, heading] of [
-      ["map", "Mapa de São Paulo"],
-      ["settings", "Ajustes"],
-    ] as const) {
-      await page
-        .getByRole("navigation", { name: "Visões do Meta Ads" })
-        .getByRole("link", { name: heading, exact: true })
-        .click();
-      await expect(page).toHaveURL(new URL(`/app/meta-ads?panel=${panel}`, page.url()).href);
+    for (const heading of ["Mapa de São Paulo", "Ajustes"] as const) {
       await expect(
-        frame.getByRole("heading", { level: 1, name: heading, exact: true }),
-      ).toBeVisible();
-      await page.reload();
-      await expect(
-        frame.getByRole("heading", { level: 1, name: heading, exact: true }),
-      ).toBeVisible();
-      await expect(frame.locator("html")).toHaveAttribute("data-crm-view", panel);
-      expect(
         page
-          .frames()
-          .filter((entry) => entry.parentFrame())
-          .map((entry) => entry.url()),
-      ).toEqual(["about:srcdoc"]);
+          .getByRole("navigation", { name: "Navegação lateral Meta Ads" })
+          .getByRole("button", { name: new RegExp(`^${heading}\\.`) }),
+      ).toBeDisabled();
+    }
+    for (const panel of ["map", "settings"] as const) {
+      await page.goto(`/app/meta-ads?panel=${panel}`);
+      await expect(page).toHaveURL(/\/app\/meta-ads$/);
+      await expect(frame.locator("html")).toHaveAttribute("data-crm-view", "overview");
     }
   });
 });
