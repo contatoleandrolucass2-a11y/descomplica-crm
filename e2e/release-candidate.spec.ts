@@ -1786,20 +1786,38 @@ test("dashboard uses management filters while stages retain selection and partne
       ]) {
         await expect(report.getByRole("link", { name: label, exact: true })).toHaveCount(0);
       }
-      await expect(report.getByRole("heading", { name: "Mês atual", exact: true })).toBeVisible();
-      await expect(report.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
+      const canvas = report.locator('[aria-label="Funis comerciais configuráveis: cards"]');
+      await expect(
+        canvas.locator('[data-dashboard-card-id="overview-current-month"]'),
+      ).toBeVisible();
+      await expect(canvas.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
       await expect(report.locator('[aria-labelledby="report-operational-title"]')).toHaveCount(0);
-      for (const [group, labels] of [
-        ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
-        ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
+      for (const cards of [
         [
-          "history",
-          ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
+          ["overview-goal-month", "Meta mês"],
+          ["overview-goal-expected", "Meta esperada até hoje"],
+          ["overview-current-month", "Mês atual"],
+        ],
+        [
+          ["overview-period-month", "Mês"],
+          ["overview-period-previous-week", "Semana anterior"],
+          ["overview-period-current-week", "Esta semana"],
+          ["overview-period-yesterday", "Ontem"],
+          ["overview-period-today", "Hoje"],
+        ],
+        [
+          ["overview-history-year-average", "Média do ano"],
+          ["overview-history-three-month-average", "Média dos últimos 3 meses"],
+          ["overview-history-previous", "Mês anterior"],
+          ["overview-history-current", "Mês"],
+          ["overview-history-sale-average", "Média venda"],
         ],
       ] as const) {
-        const region = report.locator(`[aria-labelledby="report-${group}-title"]`);
-        await expect(region.getByRole("heading", { level: 3 })).toHaveText([...labels]);
-        await expect(region.getByRole("figure")).toHaveCount(labels.length);
+        for (const [cardId, label] of cards) {
+          const card = canvas.locator(`[data-dashboard-card-id="${cardId}"]`);
+          await expect(card).toContainText(label);
+          await expect(card.getByRole("figure")).toHaveCount(1);
+        }
       }
     }
     const cases = [
