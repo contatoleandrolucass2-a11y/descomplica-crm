@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-26 — Publicação validada do Simulador CAIXA
+
+- Registra merge, CI completa, artefato imutável, backup e publicação da nova página CAIXA.
+- Confirma health, proteção anônima e cálculo sintético nas quatro abas publicadas.
+- Esclarece o limite operacional da expressão de subsídio transcrita do MFOM034.
+
 ## 2026-10-26 — Contraste completo do Simulador CAIXA
 
 - Mantém quantias completas em uma linha no resumo móvel, reorganizando rótulos e selos.
