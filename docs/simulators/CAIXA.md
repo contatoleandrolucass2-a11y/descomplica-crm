@@ -1,6 +1,7 @@
 # Simulação CAIXA: referência, matemática e limites
 
-Consulta: 25/10/2026, America/Sao_Paulo. Escopo exclusivo: `/app/simulacao/caixa`.
+Consultas: 25 e 26/10/2026, America/Sao_Paulo. Escopo exclusivo:
+`/app/simulacao/caixa`.
 A origem `https://descomplicapro.com.br/simulacao/caixa` foi consultada somente
 por leitura pública. Nenhum arquivo ou configuração daquele site foi alterado.
 
@@ -40,20 +41,62 @@ O motor novo é isolado em `lib/crm/simulators/caixa.ts`. O motor legado órfão
    podendo haver tetos menores (pronto CCI R$ 49.500). O código não presume
    esses parâmetros: usa somente complemento informado como confirmado, com
    validações básicas de renda/teto; a conferência específica continua oficial.
-5. [CAIXA: SBPE, 09/12/2025](https://caixanoticias.caixa.gov.br/Paginas/Not%C3%ADcias/2025/12-DEZEMBRO/CAIXA-volta-a-permitir-mais-de-um-financiamento--imobiliario-pelo-SBPE.aspx):
-   cotas até 80% SAC/70% Price; juros efetivos a partir de 10,99% a.a.
-   Não converter uma taxa mínima divulgada em taxa nominal individual fixa.
-6. [CAIXA: perguntas frequentes de financiamento](https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx):
+5. [CAIXA: perguntas frequentes de financiamento](https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx),
+   consultada em 26/10/2026: cota de financiamento de até 90%, variável conforme
+   modalidade, recursos e sistema; valor do imóvel para a operação corresponde ao
+   menor entre compra/venda e avaliação da engenharia CAIXA. A regra comercial
+   solicitada para esta página é 90% no SAC e 80% no Price para SBPE. A cota
+   aprovada, quando informada, só pode reduzir esses tetos.
+6. [CAIXA: SBPE, 09/12/2025](https://caixanoticias.caixa.gov.br/Paginas/Not%C3%ADcias/2025/12-DEZEMBRO/CAIXA-volta-a-permitir-mais-de-um-financiamento--imobiliario-pelo-SBPE.aspx):
+   registro histórico de cotas 80% SAC/70% Price e juros efetivos a partir de
+   10,99% a.a. Não foi usado para contrariar a configuração vigente solicitada;
+   permanece documentado para evidenciar que condições comerciais mudam.
+7. Mesma FAQ da CAIXA:
    MIP depende de idade e participação de renda, DFI da avaliação. Não reutilizar
    a tabela de seguros fixa da referência como apólice universal.
-7. [CAIXA: lote urbanizado/FAQ geral](https://www.caixa.gov.br/voce/habitacao/lote-urbanizado/Paginas/default.aspx)
+8. [CAIXA: lote urbanizado/FAQ geral](https://www.caixa.gov.br/voce/habitacao/lote-urbanizado/Paginas/default.aspx)
    e [Cartilha PF construção v12/dezembro de 2025](https://www.caixa.gov.br/Downloads/habitacao-documentos-gerais/cartilha-habitacao-PF-construcao-conclusao-reforma-ampliacao-de-unidades-habitacionais.pdf):
    proponente mais velho, obra e amortização dentro de 80 anos e seis meses;
    comprometimento até 30%, conforme produto e análise. Não foi comprovado
    limite universal de 360 meses no SBPE Price ou 25% fixos para todo Price.
-8. [Simulador oficial](https://simuladorhabitacao.caixa.gov.br/).
+9. [Simulador oficial](https://simuladorhabitacao.caixa.gov.br/).
    `/home` e `/simulacao` retornaram HTTP 404 contendo shell Angular; a raiz
-   retornou HTTP 200. Não foram acessados dados privados ou contratada operação.
+   retornou HTTP 200. A calculadora rápida pública foi exercitada apenas com dados
+   fictícios; a simulação completa exige CPF, celular, consentimento e código de
+   verificação, portanto não foi submetida. Não foram acessados dados privados nem
+   contratada operação.
+
+### Referência pública da calculadora rápida
+
+O recurso público carregado pela calculadora em 26/10/2026 identificou a versão
+`1.16.0.2`, data `06/07/2026 #1`, prazo de 35 anos, tarifa de referência de R$ 25,
+DFI de referência de 0,0066% ao mês e coeficientes MIP por idade. As taxas efetivas
+por renda observadas no recurso são mantidas numa tabela versionada no motor. Elas
+só preenchem lacunas quando a opção de estimativa rápida estiver marcada; valores
+confirmados na proposta sempre prevalecem.
+Ao selecionar SBPE, a estimativa usa 11,49% efetivos a.a. até renda de R$ 77.500
+e 13,40% acima desse valor. As taxas menores da tabela rápida correspondem ao
+enquadramento MCMV escolhido automaticamente pelo site e não são reutilizadas
+como taxa SBPE de famílias com renda menor.
+
+Cenários fictícios observados na interface pública, em 26/10/2026:
+
+- nascimento 15/03/1991, renda R$ 6.000, imóvel R$ 300.000: entrada mínima
+  R$ 60.704,70, financiamento R$ 239.295,30, taxa efetiva 8,47% a.a., Price,
+  primeira parcela R$ 1.800 e 420 meses;
+- nascimento 15/03/1991, renda R$ 20.000, imóvel R$ 500.000: entrada R$ 100.000,
+  financiamento R$ 400.000, taxa efetiva 11,49% a.a., SAC, primeira parcela
+  R$ 4.698,75 e 420 meses;
+- nascimento 15/03/1956, mesma renda e imóvel: financiamento R$ 286.573,66,
+  taxa efetiva 11,49% a.a., SAC, primeira parcela R$ 6.000 e 119 meses;
+- nascimento 15/03/1991, renda R$ 3.000, imóvel R$ 210.000: financiamento
+  R$ 161.859,07, taxa efetiva 5,38% a.a., Price, primeira parcela R$ 900 e
+  420 meses.
+
+A calculadora pública declara que são parâmetros médios e que a condição final
+depende da simulação completa e análise. Por isso fixtures de regressão aceitam a
+diferença de arredondamento do cálculo público, enquanto uma proposta individual
+só pode ser reproduzida exatamente com seus valores confirmados.
 
 ## Memória matemática
 
@@ -63,20 +106,28 @@ Para principal `P`, taxa nominal anual percentual `j` e prazo `n`:
 - Price: `A = P × i / (1 − (1+i)^(-n))`; com `i=0`, `A=P/n`.
 - SAC: amortização mensal `P/n`; primeira parcela financeira `P/n + P×i`.
 - Efetiva anual matemática `(1+i)^12 − 1`, sem confundir com CET.
-- Capacidade indicativa: `(prestação limite − seguros informados − tarifa) /
-fator financeiro`; limitar por quota e necessidade de recursos. Financiamento
+- Capacidade indicativa com encargos confirmados: `(prestação limite − seguros −
+tarifa) / fator financeiro`. Quando a estimativa rápida está ativa e o MIP depende
+  do saldo, divide-se por `fator financeiro + coeficiente MIP`; limitar por quota e
+  necessidade de recursos. Financiamento
   arredondado para baixo no centavo; exibição monetária em centavos.
-- Entrada adicional: `max(0, imóvel − financiamento − recursos − FGTS − subsídio
-confirmado)`. Recursos próprios informados já são parte da entrada.
-- MIP e DFI são valores mensais confirmados, não coeficientes universais. Sem
-  ambos, o resultado é parcial e deve indicar os encargos ausentes. Tarifa
-  ausente também não é presumida como zero contratual. TR futura não é prevista.
+- A quota incide sobre `min(valor de compra, avaliação CAIXA)`. Sem avaliação, a
+  página usa provisoriamente o preço e exibe a pendência. SBPE usa teto de 90% SAC
+  e 80% Price; uma cota individual confirmada pode ser menor.
+- Entrada adicional: `max(0, imóvel − financiamento − recursos − FGTS − desconto
+complemento − aporte público confirmado)`. Desconto FGTS e aporte MCMV Cidades são
+  campos distintos; recursos próprios informados já são parte da entrada.
+- MIP, DFI e tarifa confirmados prevalecem. Se ausentes e a opção rápida estiver
+  ativa, o resultado os identifica como estimados pela referência versionada; se
+  a opção for desligada, permanecem ausentes e o resultado é parcial. TR futura
+  não é prevista.
 - Amortização extraordinária compara preservar prazo ou a dinâmica financeira
   original, com saldo reduzido pelo aporte. Ao reduzir prazo, Price preserva
   a prestação financeira; SAC preserva a amortização original `P/n`, enquanto
   os juros incidem sobre o novo saldo. Não há TR, seguros ou tarifas futuros
   incluídos, nem autorização de amortização do contrato real.
-- Obra: cenário de liberação linear a partir do progresso informado; juros
+- Obra: cenário de liberação linear a partir do progresso informado; o primeiro
+  mês representa a primeira evolução e o último atinge 100% da liberação; juros
   mensais sobre saldo liberado. TR anual hipotética convertida por
   `(1+TR_anual)^(1/12)−1`, separada dos juros. Não é medição real nem cobrança
   contratual; não se aplica a regra de evolução de obra do Associativo.

@@ -3656,3 +3656,45 @@ dependente da autorização específica aplicável.
 
 - CI documental `40276795962` aprovada no head `d620621c40ad4156524d16f0215caa507a7d97e9`. Antes da integração, main avançou para `bebbb2adbb0fe345f8535e7918fd6fa293edc267`, PR #353 de Meta Ads. Houve conflito somente nos registros iniciais de CHANGELOG/WORKLOG; preservados integralmente os dois textos e o código concorrente. A demanda CAIXA continua com quatro arquivos documentais no diff contra a nova base, sem alteração de runtime.
 - Reconferência em `2026-10-26T06:44:15.295Z`: health HTTP 200/status ok/version `54eb7cdd7460130fc8c70d71fb956cb801b8d12c`. CI push/main `40280448260` da entrega concorrente em execução; a CI runtime CAIXA `40270504690` já estava concluída com sucesso. Nova validação do registro reconciliado é exigida pela proteção de branch; a aplicação CAIXA já publicada mantém suas evidências e não será reiniciada por esta alteração documental. Sync permanece pendente pelo limite de exportação já registrado.
+
+## 2026-10-26 — Abertura: revisão cirúrgica das cotas SBPE
+
+- Escopo exclusivo: revisar `/app/simulacao/caixa`, aplicar a regra solicitada de
+  cota SBPE de 90% no SAC e 80% no Price e confrontar as demais regras do motor
+  com fontes oficiais e simulações sintéticas, sem alterar outras páginas,
+  dados remotos, n8n ou a referência pública.
+- Git comum confirmado. Branch `codex/caixa-sbpe-cotas` criada sobre
+  `origin/main` `4e6c8a9da91fbc4acfeaaa40669dc09cb95caedc`; CI de `push/main`
+  `40315829223` aprovada. Health público observado em
+  `2026-10-26T12:33:23.7747568Z`: HTTP 200, `status=ok`, versão publicada
+  `ef91f3ec277adf490991e6d477a96da10a9fbe69`. Código publicado e `main` serão
+  distinguidos durante a validação.
+- `knowledge:context`, `knowledge:search` e sincronização continuam bloqueados
+  pela falha preexistente `Documento excede o limite de exportacao.`. A
+  indisponibilidade não autoriza reduzir o documento ou omitir a conferência
+  direta de código, fontes, CI e site; reavaliar em manutenção própria.
+
+### CAIXA — regras implementadas e validação local
+
+- SBPE configurado com teto de 90% no SAC e 80% no Price. A cota passou a
+  incidir sobre o menor entre compra e avaliação CAIXA; cota individual
+  confirmada pode apenas reduzir o teto. Aporte MCMV Cidades foi separado do
+  desconto complemento FGTS, que agora rejeita valor positivo inferior a
+  R$ 1.500. O último mês do cenário de obra atinge 100% da liberação.
+- Calculadora rápida pública exercitada em 26/10/2026 somente com dados
+  fictícios, sem CPF, telefone, consentimento ou proposta: cenários de renda
+  R$ 3 mil, R$ 6 mil e R$ 20 mil, imóveis de R$ 210 mil, R$ 300 mil e
+  R$ 500 mil, idades de 35 e 70 anos. Recurso público identificou versão
+  1.16.0.2/data 06/07/2026 #1 e parâmetros de taxa, MIP, DFI e tarifa. Eles
+  entram apenas como estimativa identificada quando valores confirmados faltam;
+  proposta individual prevalece. SBPE não reutiliza taxas MCMV de renda baixa.
+- Validação focada: 51 testes financeiros aprovados; cinco jornadas completas
+  de navegador aprovadas, incluindo três temas, desktop/celular, Axe, overflow,
+  quantias completas e fluxo SBPE SAC 90%. Capturas sintéticas revisadas em
+  `private-data/caixa-qa`, sem dados de clientes.
+- Gates em Node 24.19.0/pnpm 11.20.0: lint sem erros (44 warnings preexistentes
+  em assets Meta fora do escopo), typecheck e build aprovados. `pnpm test`
+  aprovou 4.298 testes e encontrou três timeouts de host em Associativo e
+  DevTools; os dois arquivos exatos foram reexecutados isoladamente com um
+  worker e aprovaram 37/37 sem alteração fora do escopo. CI remota continua
+  obrigatória antes de merge/publicação.

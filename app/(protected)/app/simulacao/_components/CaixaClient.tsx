@@ -24,6 +24,10 @@ const decimal = new Intl.NumberFormat("pt-BR", {
   minimumFractionDigits: 2,
   maximumFractionDigits: 2,
 });
+const rate = new Intl.NumberFormat("pt-BR", {
+  minimumFractionDigits: 4,
+  maximumFractionDigits: 4,
+});
 const states =
   "AC.AL.AP.AM.BA.CE.DF.ES.GO.MA.MT.MS.MG.PA.PB.PR.PE.PI.RJ.RN.RS.RO.RR.SC.SP.SE.TO".split(".");
 const normalize = (value: string) =>
@@ -44,6 +48,7 @@ const initialForm = {
   income: "",
   approvedPayment: "",
   propertyValue: "",
+  appraisalValue: "",
   ownFunds: "",
   birthDate: "",
   city: "",
@@ -57,6 +62,9 @@ const initialForm = {
   inConstruction: true,
   fgts: "",
   confirmedSubsidy: "",
+  confirmedPublicContribution: "",
+  approvedFinancingQuotaPercent: "",
+  officialQuickEstimate: true,
   nominalRate: "",
   mipMonthly: "",
   dfiMonthly: "",
@@ -78,6 +86,7 @@ function housingInput(form: Form, baseDate: string): HousingInput {
   const input: HousingInput = {
     income: Number(form.income),
     propertyValue: Number(form.propertyValue),
+    officialQuickEstimate: form.officialQuickEstimate,
     ownFunds: Number(form.ownFunds),
     birthDate: form.birthDate,
     state: form.state,
@@ -97,7 +106,10 @@ function housingInput(form: Form, baseDate: string): HousingInput {
   };
   for (const key of [
     "approvedPayment",
+    "appraisalValue",
     "confirmedSubsidy",
+    "confirmedPublicContribution",
+    "approvedFinancingQuotaPercent",
     "nominalRate",
     "mipMonthly",
     "dfiMonthly",
@@ -423,11 +435,11 @@ export function CaixaClient({
             currentProgress: Number(construction.progress),
             trAnnual: Number(construction.tr),
             operatingFee: result.operatingFee,
-            mipMonthly: Number(form.mipMonthly),
-            dfiMonthly: Number(form.dfiMonthly),
+            mipMonthly: result.mipMonthly,
+            dfiMonthly: result.dfiMonthly,
           })
         : null,
-    [result, construction, form.mipMonthly, form.dfiMonthly],
+    [result, construction],
   );
   function update<Key extends keyof Form>(key: Key, value: Form[Key]) {
     setForm((previous) => ({ ...previous, [key]: value }));
@@ -474,12 +486,17 @@ export function CaixaClient({
         "SIMULAÇÃO CAIXA — DESCOMPLICA CRM",
         `${result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} · ${result.system.toUpperCase()} · ${result.term} meses`,
         `Valor do imóvel: ${money.format(result.propertyValue)}`,
+        `Base da cota (menor entre compra e avaliação): ${money.format(result.quotaBaseValue)}`,
         `Potencial de financiamento indicativo: ${money.format(result.financing)}`,
         `Subsídio: ${result.subsidyConfirmed ? money.format(result.subsidy) : "a confirmar; não incluído"}`,
+        ...(result.publicContribution > 0
+          ? [`Aporte MCMV Cidades: ${money.format(result.publicContribution)}`]
+          : []),
         `FGTS + recursos próprios: ${money.format(result.totalResources)}`,
+        `Cota aplicada: ${decimal.format(result.financingQuota * 100)}%`,
         `Complemento de entrada: ${money.format(result.entryNeeded)}`,
-        `Primeiro encargo estimado${result.insuranceKnown ? "" : " parcial; seguros não confirmados"}: ${money.format(result.firstPayment)}`,
-        `Taxa nominal: ${result.rate.toFixed(4)}% a.a.`,
+        `Primeiro encargo estimado${result.insuranceEstimated ? " com seguros de referência" : result.insuranceKnown ? "" : " parcial; seguros não confirmados"}: ${money.format(result.firstPayment)}`,
+        `Taxa nominal: ${rate.format(result.rate)}% a.a.`,
         "Simulação indicativa, sem atualização futura por TR e sem aprovação de crédito. Confirme valores e elegibilidade com a CAIXA.",
         ...result.warnings,
       ].join("\n")
@@ -683,7 +700,22 @@ export function CaixaClient({
                   <Field label="Produto">
                     <select
                       value={form.product}
-                      onChange={(event) => update("product", event.target.value)}
+                      onChange={(event) => {
+                        const product = event.target.value;
+                        setForm((previous) => ({
+                          ...previous,
+                          product,
+                          ...(product === "sbpe"
+                            ? {
+                                middleClass: false,
+                                confirmedSubsidy: "",
+                                confirmedPublicContribution: "",
+                                cityLimit: "",
+                              }
+                            : {}),
+                        }));
+                        setSubmitted(false);
+                      }}
                     >
                       <option value="mcmv">MCMV</option>
                       <option value="sbpe">SBPE</option>
@@ -719,7 +751,7 @@ export function CaixaClient({
                   onChange={(value) => update("previousSubsidy", value)}
                 />
                 <Toggle
-                  label="Tem Fator Social?"
+                  label="Tem fator social? (informativo)"
                   value={form.socialFactor}
                   onChange={(value) => update("socialFactor", value)}
                 />
@@ -733,9 +765,9 @@ export function CaixaClient({
             <details className="caixa-confirmed-parameters">
               <summary>Parâmetros confirmados e valores opcionais</summary>
               <p>
-                Preencha com os valores da simulação oficial. Sem confirmação, subsídio e seguros
-                não são presumidos. Ter 36 meses de FGTS não garante a elegibilidade para usar o
-                saldo.
+                Preencha com os valores da simulação oficial. A base da cota é o menor entre valor
+                de compra e avaliação da CAIXA. Ter 36 meses de FGTS não garante a elegibilidade
+                para usar o saldo.
               </p>
               <div className="caixa-form-grid">
                 {form.hasFgts36 && (
@@ -753,18 +785,35 @@ export function CaixaClient({
                     Simular MCMV Classe Média (sem subsídio)
                   </label>
                 )}
-                <Field label="Subsídio confirmado pela CAIXA">
+                <Field label="Avaliação confirmada pela CAIXA">
                   <MoneyInput
-                    value={form.confirmedSubsidy}
-                    onChange={(value) => update("confirmedSubsidy", value)}
+                    value={form.appraisalValue}
+                    onChange={(value) => update("appraisalValue", value)}
                   />
+                  <small>Se ficar vazio, o valor de compra será usado provisoriamente.</small>
                 </Field>
-                <Field label="Limite municipal confirmado do imóvel">
-                  <MoneyInput
-                    value={form.cityLimit}
-                    onChange={(value) => update("cityLimit", value)}
-                  />
-                </Field>
+                {form.product === "mcmv" && (
+                  <>
+                    <Field label="Desconto complemento FGTS confirmado">
+                      <MoneyInput
+                        value={form.confirmedSubsidy}
+                        onChange={(value) => update("confirmedSubsidy", value)}
+                      />
+                    </Field>
+                    <Field label="Aporte MCMV Cidades confirmado">
+                      <MoneyInput
+                        value={form.confirmedPublicContribution}
+                        onChange={(value) => update("confirmedPublicContribution", value)}
+                      />
+                    </Field>
+                    <Field label="Limite municipal confirmado do imóvel">
+                      <MoneyInput
+                        value={form.cityLimit}
+                        onChange={(value) => update("cityLimit", value)}
+                      />
+                    </Field>
+                  </>
+                )}
                 <Field label="Condição do imóvel">
                   <select
                     value={form.propertyCondition}
@@ -784,7 +833,25 @@ export function CaixaClient({
                     value={form.nominalRate}
                     onChange={(event) => update("nominalRate", event.target.value)}
                   />
-                  <small>Obrigatória para SBPE e recebimento anterior de subsídio.</small>
+                  <small>
+                    Se ausente no SBPE, a estimativa rápida usa a taxa pública por faixa de renda.
+                  </small>
+                </Field>
+                <Field label="Cota aprovada pela CAIXA (%)">
+                  <input
+                    type="number"
+                    min="0.01"
+                    max={form.system === "sac" ? "90" : "80"}
+                    step="0.01"
+                    value={form.approvedFinancingQuotaPercent}
+                    onChange={(event) =>
+                      update("approvedFinancingQuotaPercent", event.target.value)
+                    }
+                  />
+                  <small>
+                    Opcional. Teto aplicado: {form.system === "sac" ? "90% no SAC" : "80% no Price"}
+                    .
+                  </small>
                 </Field>
                 <Field label="Teto indicativo de renda (%)">
                   <input
@@ -828,6 +895,14 @@ export function CaixaClient({
                     onChange={(value) => update("operatingFee", value)}
                   />
                 </Field>
+                <label className="caixa-middle-class-option">
+                  <input
+                    type="checkbox"
+                    checked={form.officialQuickEstimate}
+                    onChange={(event) => update("officialQuickEstimate", event.target.checked)}
+                  />
+                  Estimar taxa SBPE, MIP, DFI e tarifa ausentes com a calculadora rápida CAIXA
+                </label>
               </div>
             </details>
             <footer className="caixa-step-actions caixa-full-form-actions">
@@ -880,9 +955,13 @@ export function CaixaClient({
                       </p>
                       <p className="caixa-result-plan-caption">
                         1º encargo estimado
-                        {result.insuranceKnown ? "" : " parcial; seguros não confirmados"} ·{" "}
-                        {result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} ·{" "}
-                        {result.system.toUpperCase()}
+                        {result.insuranceEstimated
+                          ? " com seguros de referência"
+                          : result.insuranceKnown
+                            ? ""
+                            : " parcial; seguros não confirmados"}{" "}
+                        · {result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()}{" "}
+                        · {result.system.toUpperCase()}
                       </p>
                       <div className="caixa-result-plan-total">
                         <span>Financiamento indicativo</span>
@@ -899,6 +978,7 @@ export function CaixaClient({
                       <dl>
                         {[
                           ["Valor do imóvel", money.format(result.propertyValue)],
+                          ["Base da cota", money.format(result.quotaBaseValue)],
                           ["Financiamento", money.format(result.financing)],
                           [
                             "Subsídio",
@@ -906,12 +986,19 @@ export function CaixaClient({
                               ? money.format(result.subsidy)
                               : "A confirmar · não incluído",
                           ],
+                          ...(result.publicContribution > 0
+                            ? [["Aporte MCMV Cidades", money.format(result.publicContribution)]]
+                            : []),
                           ["FGTS + recursos", money.format(result.totalResources)],
                           ["Complemento de entrada", money.format(result.entryNeeded)],
-                        ].map(([label, value], index) => (
+                        ].map(([label, value]) => (
                           <div
                             key={label}
-                            className={index === 4 ? "caixa-result-composition-total" : undefined}
+                            className={
+                              label === "Complemento de entrada"
+                                ? "caixa-result-composition-total"
+                                : undefined
+                            }
                           >
                             <dt>{label}</dt>
                             <dd>{value}</dd>
@@ -922,9 +1009,10 @@ export function CaixaClient({
                   </div>
                   <p className="caixa-result-note">
                     {result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} ·{" "}
-                    {result.system.toUpperCase()} · taxa nominal de {result.rate.toFixed(4)}% a.a. ·
-                    taxa efetiva de {result.effectiveRate.toFixed(4)}% a.a. · comprometimento
-                    estimado de {result.commitment.toFixed(1)}%.
+                    {result.system.toUpperCase()} · taxa nominal de {rate.format(result.rate)}% a.a.
+                    · taxa efetiva de {rate.format(result.effectiveRate)}% a.a.
+                    {result.rateEstimated ? " (estimada)" : ""} · comprometimento estimado de{" "}
+                    {result.commitment.toFixed(1)}%.
                   </p>
                   {result.warnings.length > 0 && (
                     <div className="caixa-notice">
@@ -943,21 +1031,29 @@ export function CaixaClient({
                         value={money.format(result.principalPayment)}
                       />
                       <Metric
-                        label="Seguro MIP + DFI"
+                        label={`Seguro MIP + DFI${result.insuranceEstimated ? " (estimativa rápida)" : ""}`}
                         value={
                           result.insuranceKnown
                             ? `${money.format(result.insurance)}/mês`
-                            : "Não informado; não incluído"
+                            : result.insuranceEstimated
+                              ? `${money.format(result.insurance)}/mês`
+                              : "Não informado; não incluído"
                         }
                       />
                       <Metric
-                        label="Tarifa operacional"
-                        value={`${money.format(result.operatingFee)}/mês`}
+                        label={`Tarifa operacional${result.operatingFeeEstimated ? " (estimativa rápida)" : ""}`}
+                        value={
+                          result.operatingFeeKnown
+                            ? `${money.format(result.operatingFee)}/mês`
+                            : result.operatingFeeEstimated
+                              ? `${money.format(result.operatingFee)}/mês`
+                              : "Não informada; não incluída"
+                        }
                       />
                       <Metric label="Prazo" value={`${result.term} meses`} />
                       <Metric
                         label="Quota de financiamento"
-                        value={`${(result.financingQuota * 100).toFixed(0)}%`}
+                        value={`${decimal.format(result.financingQuota * 100)}% sobre ${money.format(result.quotaBaseValue)}`}
                       />
                       <Metric label="TR futura" value="Não projetada na amortização" />
                     </div>
@@ -1686,7 +1782,7 @@ export function CaixaClient({
           >
             Regras e taxas MCMV
           </a>
-          . Consulta de regras em 25/10/2026. Data-base desta simulação:{" "}
+          . Consulta de regras em 26/10/2026. Data-base desta simulação:{" "}
           {baseDate.split("-").reverse().join("/")}.
         </p>
       </footer>
