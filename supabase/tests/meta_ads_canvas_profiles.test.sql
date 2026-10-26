@@ -32,11 +32,26 @@ values
   ('ad710000-0000-4000-8000-000000000001', 'canvas-one@example.test'),
   ('ad710000-0000-4000-8000-000000000002', 'canvas-two@example.test');
 
+insert into auth.sessions (id, user_id, aal, not_after)
+values
+  (
+    'ad740000-0000-4000-8000-000000000001',
+    'ad710000-0000-4000-8000-000000000001',
+    'aal1',
+    now() + interval '1 hour'
+  ),
+  (
+    'ad740000-0000-4000-8000-000000000002',
+    'ad710000-0000-4000-8000-000000000002',
+    'aal1',
+    now() + interval '1 hour'
+  );
+
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad710000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',
+  '{"sub":"ad710000-0000-4000-8000-000000000001","role":"authenticated","session_id":"ad740000-0000-4000-8000-000000000001","aal":"aal1"}',
   true
 );
 
@@ -89,7 +104,7 @@ select throws_ok(
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad710000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}',
+  '{"sub":"ad710000-0000-4000-8000-000000000002","role":"authenticated","session_id":"ad740000-0000-4000-8000-000000000002","aal":"aal1"}',
   true
 );
 select is(
