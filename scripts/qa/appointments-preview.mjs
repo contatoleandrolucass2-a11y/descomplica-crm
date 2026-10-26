@@ -1275,10 +1275,24 @@ export async function runAppointmentsPreview() {
     const zoomOverflow = await zoomPage.evaluate(() => ({
       viewport: innerWidth,
       document: document.documentElement.scrollWidth,
+      offenders: Array.from(document.querySelectorAll("body *"))
+        .map((element) => {
+          const rect = element.getBoundingClientRect();
+          return {
+            tag: element.tagName.toLowerCase(),
+            className: typeof element.className === "string" ? element.className : "",
+            left: rect.left,
+            right: rect.right,
+            width: rect.width,
+          };
+        })
+        .filter(({ left, right }) => left < -1 || right > innerWidth + 1)
+        .sort((a, b) => b.right - a.right)
+        .slice(0, 12),
     }));
     check(
       zoomOverflow.document <= zoomOverflow.viewport + 1,
-      "Horizontal overflow at 200% layout emulation",
+      `Horizontal overflow at 200% layout emulation: ${JSON.stringify(zoomOverflow.offenders)}`,
     );
     const zoomAxe = await new AxeBuilder({ page: zoomPage })
       .withTags(["wcag2a", "wcag2aa", "wcag21aa"])

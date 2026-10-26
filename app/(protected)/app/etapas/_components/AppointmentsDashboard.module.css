@@ -1268,10 +1268,10 @@
   gap: 0.25rem;
   margin-top: 1rem;
   padding: 1rem 0.25rem 0;
+  overflow: hidden;
   border-top: 1px solid var(--analytics-line);
   color: var(--analytics-muted);
   text-align: right;
-  animation: footer-enter 420ms ease-out both;
 }
 .pageFooter p {
   margin: 0;
@@ -1280,6 +1280,10 @@
 .pageFooter strong {
   color: var(--analytics-ink);
   font-size: 0.8rem;
+}
+.pageFooter p,
+.pageFooter strong {
+  animation: footer-enter 420ms ease-out both;
 }
 @keyframes footer-enter {
   from {
@@ -1337,7 +1341,8 @@
     animation: none !important;
     background-position: 50% 50%;
   }
-  .pageFooter,
+  .pageFooter p,
+  .pageFooter strong,
   .calendarPresets button,
   .calendarDay,
   .filterField select,
