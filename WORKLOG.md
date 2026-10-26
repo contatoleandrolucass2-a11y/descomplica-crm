@@ -31,6 +31,37 @@ conta. O catálogo de páginas foi sincronizado por migration. Os testes focados
 do Meta Ads aprovaram 19 cenários e o navegador automatizado completo; os gates integrais e a publicação protegida
 continuam obrigatórios antes da conclusão.
 
+## 2026-10-26 — Simulador CAIXA publicado
+
+PR #351 integrado como `54eb7cdd7460130fc8c70d71fb956cb801b8d12c`.
+CI de `push/main` `40270504690` aprovada nos quatro jobs: validate,
+release-gates, isolated-restore e promotable-image. Suíte Linux: 4.290 testes
+aprovados e 110 condicionais não executados; os navegadores de release,
+E2E, banco, restauração e matriz visual também passaram.
+
+Artifact `12627897001` validado por checksum, revisão, manifesto OCI,
+configuração, onze camadas e identidade Docker. A prova local confirmou dois
+perfis de runtime sobre a mesma imagem, sem imprimir segredos. Backup privado
+de configuração/ledger e imagem anterior verificados. Somente o coordenador
+`release:production` promoveu, com consulta ao vivo, trava e CAS, às
+`2026-10-26T05:40:32.386Z` (02:40:32 de São Paulo), deployment
+`042fc7e9-ab92-4f96-a45f-b3eed91e184b`, sem pendência.
+
+Health público confirmou HTTP 200/status ok/SHA publicado; acesso anônimo à
+CAIXA retornou 307 para `/login`. Smoke autenticado em produção percorreu as
+quatro abas e calculou cenário sintético: renda R$ 6 mil, imóvel R$ 300 mil,
+PRICE/420 meses, financiamento indicativo R$ 240 mil, complemento de entrada
+R$ 60 mil e primeiro encargo parcial R$ 1.732,59. Avisos de seguros, tarifa,
+subsídio e obra não confirmados permaneceram visíveis. Formulário limpo ao
+final; nenhum envio, proposta ou registro remoto criado. Captura local em
+`private-data/caixa-qa/caixa-production-54eb7cdd.png`, sem dados de clientes.
+
+Referência pública permaneceu somente leitura. O registro final é documental,
+com a lacuna de domínio de Frenda explicitada; o cálculo de complemento segue
+como valor confirmado, sem expressão presumida. Obsidian permanece pendente
+pelo limite de exportação preexistente, registrado com causa e critério de
+reavaliação em ATUALIZACOES.
+
 ## 2026-10-26 — Mapa Meta Ads temporariamente restrito ao Master
 
 O botão Mapa de São Paulo permanece na navegação lateral do Meta Ads para todos

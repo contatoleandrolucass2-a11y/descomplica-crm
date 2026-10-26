@@ -131,6 +131,15 @@ R$ 4000. Também não se deve substituir esse limite pelo de R$ 5000, referente
 ao conjunto de descontos. Esses detalhes e a falta de FUH/município explicam
 por que copiar a fórmula reduzida da referência não comprova o desconto real.
 
+A expressão de `Frenda` acima é a transcrição do MFOM034, p. 131, §3.1.1.1.
+Nas pp. 131–133 consultadas não foi localizada regra explícita de saturação de
+`R`/`Frenda` ou função por faixas após `RDmin`. A expressão literal atinge seu
+mínimo em R$ 3.700 e volta a crescer acima desse ponto; o limite de concessão
+de R$ 4.000, no §3.1.1.8, não esclarece essa lacuna operacional. Não presumir
+congelamento, extensão monotônica ou piso da curva. Esta memória matemática
+não constitui especificação executável de subsídio; a página utiliza somente
+o complemento confirmado e suas validações básicas, sem executar a expressão.
+
 Não forçar Price, migrar automaticamente para SBPE ou aceitar nascimento
 inválido/menor como adulto. Não inventar um mês de prazo quando o limite é zero.
 Não subtrair 36 meses de qualquer obra. Não somar períodos sobrepostos do FGTS.

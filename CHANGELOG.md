@@ -10,6 +10,12 @@
 - Preserva integralmente a barra de navegação global do CRM e mantém a integração Meta Ads somente leitura.
 - Carrega o canvas por documento interno, sem flexibilizar `X-Frame-Options: DENY` nem a política CSP do CRM.
 
+## 2026-10-26 — Publicação validada do Simulador CAIXA
+
+- Registra merge, CI completa, artefato imutável, backup e publicação da nova página CAIXA.
+- Confirma health, proteção anônima e cálculo sintético nas quatro abas publicadas.
+- Esclarece o limite operacional da expressão de subsídio transcrita do MFOM034.
+
 ## 2026-10-26 — Bloqueio temporário do Mapa de São Paulo
 
 - Mantém o Mapa de São Paulo visível para Master, com cadeado e aviso de manutenção.
