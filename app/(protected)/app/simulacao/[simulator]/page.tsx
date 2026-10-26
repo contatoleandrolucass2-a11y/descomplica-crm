@@ -55,24 +55,18 @@ export default async function SimulatorPage({
   const pageGate = getProtectedPageGate(`/app/simulacao/${simulator}`);
   if (!pageGate?.releaseEnabled) forbidden();
 
+  if (simulator === "caixa") return <CaixaArchive />;
+
   const configuration = getOfficialSimulatorRuntimeConfiguration();
   const officialSlug = isOfficialSimulatorSlug(simulator) ? simulator : null;
-  const visualOnly = simulator === "caixa";
   const runtimeEnabled =
-    !visualOnly &&
-    officialSlug !== null &&
-    officialSimulatorRuntimeIsEnabled(configuration, officialSlug);
+    officialSlug !== null && officialSimulatorRuntimeIsEnabled(configuration, officialSlug);
   const executionEnabled =
-    !visualOnly &&
     officialSlug !== null &&
     officialSimulatorExecutionIsEnabled(configuration, officialSlug, authorization);
-  const executionReason = visualOnly
-    ? "A jornada CAIXA foi liberada somente para revisão visual; motor e integração bancária permanecem indisponíveis"
-    : runtimeEnabled
-      ? "Disponível para contas com acesso aos simuladores."
-      : "Cálculo temporariamente indisponível — regra aguardando validação";
-
-  if (simulator === "caixa") return <CaixaArchive />;
+  const executionReason = runtimeEnabled
+    ? "Disponível para contas com acesso aos simuladores."
+    : "Cálculo temporariamente indisponível — regra aguardando validação";
 
   if (simulator === "associativo-fluxo-linear") {
     return <AssociativeTableArchive />;

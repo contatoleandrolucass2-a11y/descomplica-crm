@@ -19,6 +19,22 @@ aprovação. Campos adicionais permitem registrar parâmetros confirmados na CAI
 O motor novo é isolado em `lib/crm/simulators/caixa.ts`. O motor legado órfão
 `lib/archive-investor/caixa-rules.mjs` não é utilizado pela página.
 
+## Interface e acesso
+
+Desde 26/10/2026, a página usa a mesma linguagem visual compacta dos simuladores
+Associativo e Tabela Direta: painéis de contorno azul, etapas numeradas, campos em
+grade e resultado no fluxo vertical. Os temas claro, médio e escuro compartilham
+a mesma estrutura e mantêm contraste, teclado, zoom e adaptação móvel.
+
+O cálculo é local ao navegador, não envia proposta e não persiste os dados do
+formulário. Ele está disponível a todos os papéis operacionais ativos que possuem
+`crm.simulators.view`. A rota continua protegida por sessão, catálogo, permissão,
+estado da conta, escopo e overrides individuais; contas pendentes, inativas ou com
+negação explícita não recebem acesso. A API de simulador oficial da CAIXA permanece
+fechada porque não possui contrato de entrada/saída nem calculadora server-side.
+Essa separação impede que a liberação da interface seja interpretada como uma
+integração bancária ou aprovação de crédito.
+
 ## Autoridades consultadas
 
 1. [Portaria MCID 333, de 30/03/2026, DOU 01/04/2026](https://www.gov.br/cidades/pt-br/acesso-a-informacao/acoes-e-programas/habitacao/programa-minha-casa-minha-vida/arquivos/PORTARIAMCIDN333DE30DEMARODE2026PORTARIAMCIDN333DE30DEMARODE2026DOUImprensaNacional.pdf).

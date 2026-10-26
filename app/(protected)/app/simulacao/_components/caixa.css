@@ -2716,3 +2716,453 @@
   margin: 4px 0;
   font-size: 1.5rem;
 }
+
+/* Layout 2026-10: alinha a jornada CAIXA à família visual dos simuladores. */
+.goal-page-shell.caixa-page-shell {
+  --caixa-layout-page: #f3f6fa;
+  --caixa-layout-panel: #ffffff;
+  --caixa-layout-input: #ffffff;
+  --caixa-layout-line: #7f95ad;
+  --caixa-layout-accent: #0754a6;
+  --caixa-layout-action: #0754a6;
+  --caixa-layout-accent-strong: #06498f;
+  --caixa-layout-ink: #182a40;
+  --caixa-layout-muted: #566b82;
+  min-height: calc(100vh - var(--protected-header-height, 58px));
+  padding: 8px 16px 28px;
+  color: var(--caixa-layout-ink);
+  background: var(--caixa-layout-page);
+}
+
+:root[data-theme="balanced"] .goal-page-shell.caixa-page-shell {
+  --caixa-layout-page: #d9e1eb;
+  --caixa-layout-panel: #e7edf5;
+  --caixa-layout-input: #f0f4f9;
+  --caixa-layout-line: #7890aa;
+  --caixa-layout-accent: #084b92;
+  --caixa-layout-action: #084b92;
+  --caixa-layout-accent-strong: #073f7a;
+  --caixa-layout-ink: #14283f;
+  --caixa-layout-muted: #4b6178;
+}
+
+:root[data-theme="dark"] .goal-page-shell.caixa-page-shell {
+  --caixa-layout-page: #061f35;
+  --caixa-layout-panel: #0a2b47;
+  --caixa-layout-input: #071a31;
+  --caixa-layout-line: #3d7898;
+  --caixa-layout-accent: #7dd3fc;
+  --caixa-layout-action: #0754a6;
+  --caixa-layout-accent-strong: #06498f;
+  --caixa-layout-ink: #f3fbff;
+  --caixa-layout-muted: #b9d1e2;
+}
+
+.caixa-page-shell .caixa-main,
+.caixa-page-shell .caixa-workspace {
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.caixa-page-shell .caixa-workspace {
+  display: grid;
+  gap: 12px;
+}
+
+.caixa-page-shell .caixa-workspace-heading {
+  min-height: 64px;
+  padding: 0 2px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  color: var(--caixa-layout-ink);
+  border: 0;
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-workspace-heading > div {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.caixa-page-shell .caixa-workspace-heading h1 {
+  margin: 0;
+  color: var(--caixa-layout-ink);
+  font-size: clamp(1.8rem, 2.3vw, 2.25rem);
+  font-weight: 500;
+  letter-spacing: -0.035em;
+}
+
+.caixa-page-shell .caixa-workspace-heading span,
+.caixa-page-shell .caixa-workspace-heading > p {
+  margin: 0;
+  color: var(--caixa-layout-muted);
+  font-size: 0.86rem;
+}
+
+.caixa-page-shell .caixa-tabs {
+  min-height: 50px;
+  padding: 6px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  border: 1px solid var(--caixa-layout-accent);
+  border-radius: 10px;
+  background: var(--caixa-layout-panel);
+  box-shadow: none;
+}
+
+.caixa-page-shell .caixa-tabs button {
+  min-height: 38px !important;
+  padding: 4px 10px;
+  grid-template-columns: 32px minmax(0, 1fr);
+  justify-content: start;
+  color: var(--caixa-layout-ink);
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  box-shadow: none;
+  font-size: 0.8rem;
+}
+
+.caixa-page-shell .caixa-tabs button::after {
+  display: none;
+}
+
+.caixa-page-shell .caixa-tabs button > span {
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  color: var(--caixa-layout-accent);
+  border: 1px solid color-mix(in srgb, var(--caixa-layout-accent) 45%, transparent);
+  border-radius: 7px;
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-tabs button:is(:hover, .active) {
+  color: var(--caixa-layout-ink);
+  border-color: var(--caixa-layout-accent);
+  background: color-mix(in srgb, var(--caixa-layout-accent) 7%, var(--caixa-layout-panel));
+}
+
+.caixa-page-shell .caixa-tabs button.active > span {
+  color: #ffffff;
+  background: var(--caixa-layout-action);
+}
+
+.caixa-page-shell .caixa-simulator-layout,
+.caixa-page-shell .caixa-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.caixa-page-shell .caixa-panel,
+.caixa-page-shell .caixa-confirmed-parameters,
+.caixa-page-shell .caixa-full-form-actions {
+  color: var(--caixa-layout-ink);
+  border: 1px solid var(--caixa-layout-accent);
+  border-radius: 10px;
+  background: var(--caixa-layout-panel);
+  box-shadow: none;
+}
+
+.caixa-page-shell .caixa-form-section {
+  padding: 0;
+  overflow: visible;
+}
+
+.caixa-page-shell .caixa-section-heading,
+.caixa-page-shell .caixa-result-placeholder {
+  min-height: 62px;
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.caixa-page-shell .caixa-section-heading {
+  border-bottom: 1px solid var(--caixa-layout-line);
+}
+
+.caixa-page-shell .caixa-section-heading > span,
+.caixa-page-shell .caixa-result-placeholder > span,
+.caixa-page-shell .caixa-result-step {
+  width: 38px;
+  height: 38px;
+  flex: 0 0 38px;
+  display: grid;
+  place-items: center;
+  color: var(--caixa-layout-accent);
+  border: 1px solid var(--caixa-layout-accent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--caixa-layout-accent) 5%, var(--caixa-layout-panel));
+  font-size: 0.9rem;
+  font-weight: 800;
+}
+
+.caixa-page-shell .caixa-section-heading p,
+.caixa-page-shell .caixa-result-placeholder p {
+  margin: 0 0 2px;
+  color: var(--caixa-layout-accent);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+}
+
+.caixa-page-shell .caixa-section-heading h2,
+.caixa-page-shell .caixa-result-placeholder h2 {
+  margin: 0;
+  color: var(--caixa-layout-ink);
+  font-size: 0.86rem;
+  font-weight: 500;
+}
+
+.caixa-page-shell .caixa-form-section-content {
+  padding: 12px 16px 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.caixa-page-shell .caixa-primary-grid {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-secondary-grid {
+  grid-template-columns: 1.1fr 1.4fr 0.65fr 0.75fr 1.35fr;
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-binary-grid {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-primary-grid > .caixa-field,
+.caixa-page-shell .caixa-secondary-grid > .caixa-field,
+.caixa-page-shell .caixa-secondary-grid > .caixa-field-pair,
+.caixa-page-shell .caixa-binary-grid > .caixa-field {
+  min-width: 0;
+  width: auto;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.caixa-page-shell .caixa-field > span,
+.caixa-page-shell .caixa-qualification-item > span {
+  min-height: 18px;
+  color: var(--caixa-layout-ink);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.caixa-page-shell .caixa-field small {
+  color: var(--caixa-layout-muted);
+}
+
+.caixa-page-shell
+  :is(
+    .caixa-field input,
+    .caixa-field select,
+    .caixa-money-input,
+    .caixa-participant-control input
+  ),
+.caixa-page-shell .caixa-toggle-card {
+  color: var(--caixa-layout-ink);
+  border-color: var(--caixa-layout-line);
+  border-radius: 7px;
+  background: var(--caixa-layout-input);
+  box-shadow: none;
+}
+
+.caixa-page-shell .caixa-money-input > b {
+  color: var(--caixa-layout-ink);
+  border-right-color: color-mix(in srgb, var(--caixa-layout-line) 45%, transparent);
+}
+
+.caixa-page-shell .caixa-field-pair {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.caixa-page-shell .caixa-toggle-card {
+  padding: 3px;
+}
+
+.caixa-page-shell .caixa-toggle button {
+  min-height: 36px !important;
+  color: var(--caixa-layout-ink);
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-toggle button[aria-pressed="true"] {
+  color: #ffffff;
+  border-color: var(--caixa-layout-action);
+  background: var(--caixa-layout-action);
+}
+
+.caixa-page-shell .caixa-confirmed-parameters {
+  padding: 0;
+  overflow: hidden;
+}
+
+.caixa-page-shell .caixa-confirmed-parameters > summary {
+  min-height: 46px !important;
+  padding: 10px 16px;
+  color: var(--caixa-layout-ink);
+  background: color-mix(in srgb, var(--caixa-layout-accent) 4%, var(--caixa-layout-panel));
+}
+
+.caixa-page-shell .caixa-full-form-actions {
+  min-height: 64px;
+  margin: 0;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.caixa-page-shell .caixa-access-status {
+  margin-right: auto;
+  color: var(--caixa-layout-muted);
+  font-size: 0.78rem;
+}
+
+.caixa-page-shell .caixa-access-status::before {
+  content: "i";
+  width: 22px;
+  height: 22px;
+  margin-right: 8px;
+  display: inline-grid;
+  place-items: center;
+  color: var(--caixa-layout-accent);
+  border: 1px solid var(--caixa-layout-accent);
+  border-radius: 50%;
+  font-weight: 800;
+}
+
+.caixa-page-shell .caixa-step-actions :is(.ghost, .primary) {
+  min-width: 132px;
+  min-height: 44px !important;
+  border-radius: 7px;
+}
+
+.caixa-page-shell .caixa-step-actions .ghost {
+  color: var(--caixa-layout-accent);
+  border-color: var(--caixa-layout-accent);
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-text-button {
+  color: var(--caixa-layout-accent);
+}
+
+.caixa-page-shell .caixa-step-actions .primary {
+  color: #ffffff;
+  border-color: var(--caixa-layout-action);
+  background: var(--caixa-layout-action);
+}
+
+.caixa-page-shell .caixa-step-actions .primary:not(:disabled):hover {
+  background: var(--caixa-layout-accent-strong);
+}
+
+.caixa-page-shell .caixa-result-placeholder {
+  min-height: 66px;
+}
+
+.caixa-page-shell .caixa-result-panel {
+  --ink: #f4fbff;
+  --ink-soft: #a9bfd2;
+  color: #f4fbff;
+  background: #071a31;
+}
+
+.caixa-page-shell .caixa-result-summary-heading {
+  border-bottom-color: var(--caixa-layout-line);
+}
+
+:root[data-theme="dark"]
+  .goal-page-shell.caixa-page-shell
+  .caixa-toggle
+  button[aria-pressed="false"] {
+  color: #a9bfd2;
+  background: #102a42;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-panel .caixa-construction .caixa-field > span {
+  color: #dbe9f3;
+}
+
+@media (max-width: 1100px) {
+  .caixa-page-shell .caixa-primary-grid,
+  .caixa-page-shell .caixa-secondary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .caixa-page-shell .caixa-binary-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell {
+    padding: 8px 10px 24px;
+  }
+
+  .caixa-page-shell .caixa-workspace-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+    padding: 8px 2px;
+  }
+
+  .caixa-page-shell .caixa-tabs button {
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    font-size: 0;
+  }
+
+  .caixa-page-shell .caixa-tabs button > span {
+    font-size: 0.8rem;
+  }
+
+  .caixa-page-shell .caixa-primary-grid,
+  .caixa-page-shell .caixa-secondary-grid,
+  .caixa-page-shell .caixa-binary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .caixa-page-shell .caixa-full-form-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .caixa-page-shell .caixa-access-status {
+    margin: 0 0 4px;
+  }
+
+  .caixa-page-shell .caixa-step-actions :is(.ghost, .primary) {
+    width: 100%;
+  }
+}

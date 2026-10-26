@@ -529,18 +529,18 @@ export function CaixaClient({
     <section className="caixa-workspace" aria-label="Simulador CAIXA">
       <div className="caixa-workspace-heading">
         <div>
-          <span>Crédito habitacional</span>
-          <h1>Simulação CAIXA</h1>
+          <h1>Simulador CAIXA</h1>
+          <span>Crédito habitacional com regras atualizadas</span>
         </div>
-        <p>Preencha, calcule e avance.</p>
+        <p>Preencha os dados, confira as condições e calcule.</p>
       </div>
       <nav className="caixa-tabs" aria-label="Ferramentas Caixa">
         {(
           [
-            ["simulador", "02", "Simulador"],
-            ["documentos", "03", "Documentos"],
-            ["diagnostico", "04", "Diagnóstico"],
-            ["utilitarios", "+", "Utilitários"],
+            ["simulador", "01", "Simulador"],
+            ["documentos", "02", "Documentos"],
+            ["diagnostico", "03", "Diagnóstico"],
+            ["utilitarios", "04", "Utilitários"],
           ] as const
         ).map(([key, number, label]) => (
           <button
@@ -558,208 +558,223 @@ export function CaixaClient({
       </nav>
       {tab === "simulador" && (
         <div className="caixa-simulator-layout">
-          <form className="caixa-panel caixa-form caixa-full-form" onSubmit={submit}>
-            <div className="caixa-panel-heading">
-              <div>
-                <p>Preenchimento único</p>
-                <h2>Cliente e imóvel</h2>
-              </div>
-              <button type="button" className="caixa-text-button" onClick={clear}>
-                Limpar
-              </button>
-            </div>
+          <form className="caixa-form caixa-full-form" onSubmit={submit}>
             <section
-              className="caixa-form-section caixa-qualification-section"
-              aria-label="Cliente e imóvel"
+              className="caixa-panel caixa-form-section caixa-qualification-section"
+              aria-labelledby="caixa-client-property-title"
             >
-              <div className="caixa-form-grid caixa-qualification-grid caixa-primary-grid">
-                <Field
-                  className="caixa-qualification-item caixa-income-field"
-                  label={
-                    <>
-                      Renda familiar bruta *{" "}
-                      <small className="caixa-qualification-badge">
-                        {getMcmvBand(Number(form.income))}
-                      </small>
-                    </>
-                  }
-                >
-                  <MoneyInput
-                    required
-                    value={form.income}
-                    onChange={(value) => update("income", value)}
-                  />
-                </Field>
-                <Field
-                  className="caixa-qualification-item caixa-approved-field"
-                  label={
-                    <>
-                      Prestação aprovada <small>opcional</small>
-                    </>
-                  }
-                >
-                  <MoneyInput
-                    value={form.approvedPayment}
-                    onChange={(value) => update("approvedPayment", value)}
-                  />
-                </Field>
-                <Field
-                  className="caixa-qualification-item caixa-property-field"
-                  label="Valor do imóvel *"
-                >
-                  <MoneyInput
-                    required
-                    value={form.propertyValue}
-                    onChange={(value) => update("propertyValue", value)}
-                  />
-                </Field>
-                <Field
-                  className="caixa-qualification-item caixa-own-funds-field"
-                  label={
-                    <>
-                      Recursos próprios <small>opcional</small>
-                    </>
-                  }
-                >
-                  <MoneyInput
-                    value={form.ownFunds}
-                    onChange={(value) => update("ownFunds", value)}
-                  />
-                </Field>
-                <Field
-                  className="caixa-qualification-item caixa-participants-field"
-                  label="Qnt de proponentes"
-                >
-                  <div className="caixa-participant-control">
-                    <input
-                      aria-label="Quantidade de proponentes"
-                      type="number"
-                      min="1"
-                      max="4"
-                      step="1"
-                      value={participants}
-                      onChange={(event) => {
-                        setParticipants(
-                          Math.max(1, Math.min(4, Math.floor(Number(event.target.value)) || 1)),
-                        );
-                        setSubmitted(false);
-                      }}
+              <div className="caixa-section-heading">
+                <span aria-hidden="true">01</span>
+                <div>
+                  <p>DADOS DO CLIENTE E DO IMÓVEL</p>
+                  <h2 id="caixa-client-property-title">
+                    Informe os dados do proponente e do imóvel
+                  </h2>
+                </div>
+              </div>
+              <div className="caixa-form-section-content">
+                <div className="caixa-form-grid caixa-qualification-grid caixa-primary-grid">
+                  <Field
+                    className="caixa-qualification-item caixa-income-field"
+                    label={
+                      <>
+                        Renda familiar bruta *{" "}
+                        <small className="caixa-qualification-badge">
+                          {getMcmvBand(Number(form.income))}
+                        </small>
+                      </>
+                    }
+                  >
+                    <MoneyInput
+                      required
+                      value={form.income}
+                      onChange={(value) => update("income", value)}
                     />
-                  </div>
-                </Field>
+                  </Field>
+                  <Field
+                    className="caixa-qualification-item caixa-approved-field"
+                    label={
+                      <>
+                        Prestação aprovada <small>opcional</small>
+                      </>
+                    }
+                  >
+                    <MoneyInput
+                      value={form.approvedPayment}
+                      onChange={(value) => update("approvedPayment", value)}
+                    />
+                  </Field>
+                  <Field
+                    className="caixa-qualification-item caixa-property-field"
+                    label="Valor do imóvel *"
+                  >
+                    <MoneyInput
+                      required
+                      value={form.propertyValue}
+                      onChange={(value) => update("propertyValue", value)}
+                    />
+                  </Field>
+                  <Field
+                    className="caixa-qualification-item caixa-own-funds-field"
+                    label={
+                      <>
+                        Recursos próprios <small>opcional</small>
+                      </>
+                    }
+                  >
+                    <MoneyInput
+                      value={form.ownFunds}
+                      onChange={(value) => update("ownFunds", value)}
+                    />
+                  </Field>
+                  <Field
+                    className="caixa-qualification-item caixa-participants-field"
+                    label="Quantidade de proponentes"
+                  >
+                    <div className="caixa-participant-control">
+                      <input
+                        aria-label="Quantidade de proponentes"
+                        type="number"
+                        min="1"
+                        max="4"
+                        step="1"
+                        value={participants}
+                        onChange={(event) => {
+                          setParticipants(
+                            Math.max(1, Math.min(4, Math.floor(Number(event.target.value)) || 1)),
+                          );
+                          setSubmitted(false);
+                        }}
+                      />
+                    </div>
+                  </Field>
+                </div>
               </div>
             </section>
             <section
-              className="caixa-form-section caixa-financing-section"
-              aria-label="Financiamento"
+              className="caixa-panel caixa-form-section caixa-financing-section"
+              aria-labelledby="caixa-financing-title"
             >
-              <div className="caixa-form-grid caixa-secondary-grid">
-                <Field className="caixa-date-field" label="Data de nascimento *">
-                  <input
-                    required
-                    type="date"
-                    max={baseDate}
-                    value={form.birthDate}
-                    onChange={(event) => update("birthDate", event.target.value)}
-                  />
-                  <small>Informe a data do proponente mais velho.</small>
-                </Field>
-                <CityPicker
-                  value={form.city}
-                  state={form.state}
-                  onChange={(city, state) => {
-                    setForm((previous) => ({ ...previous, city, ...(state ? { state } : {}) }));
-                    setSubmitted(false);
-                  }}
-                />
-                <Field className="caixa-state-field" label="Estado *">
-                  <select
-                    value={form.state}
-                    onChange={(event) => {
-                      setForm((previous) => ({ ...previous, state: event.target.value, city: "" }));
+              <div className="caixa-section-heading">
+                <span aria-hidden="true">02</span>
+                <div>
+                  <p>CONDIÇÕES DO FINANCIAMENTO</p>
+                  <h2 id="caixa-financing-title">Defina a localização e as condições desejadas</h2>
+                </div>
+              </div>
+              <div className="caixa-form-section-content">
+                <div className="caixa-form-grid caixa-secondary-grid">
+                  <Field className="caixa-date-field" label="Data de nascimento *">
+                    <input
+                      required
+                      type="date"
+                      max={baseDate}
+                      value={form.birthDate}
+                      onChange={(event) => update("birthDate", event.target.value)}
+                    />
+                    <small>Informe a data do proponente mais velho.</small>
+                  </Field>
+                  <CityPicker
+                    value={form.city}
+                    state={form.state}
+                    onChange={(city, state) => {
+                      setForm((previous) => ({ ...previous, city, ...(state ? { state } : {}) }));
                       setSubmitted(false);
                     }}
-                  >
-                    {states.map((state) => (
-                      <option key={state}>{state}</option>
-                    ))}
-                  </select>
-                </Field>
-                <Field className="caixa-term-field" label="Prazo em meses *">
-                  <input
-                    required
-                    type="number"
-                    min="1"
-                    max="420"
-                    step="1"
-                    value={form.term}
-                    onChange={(event) => update("term", event.target.value)}
                   />
-                </Field>
-                <div className="caixa-field-pair caixa-product-system-field">
-                  <Field label="Produto">
+                  <Field className="caixa-state-field" label="Estado *">
                     <select
-                      value={form.product}
+                      value={form.state}
                       onChange={(event) => {
-                        const product = event.target.value;
                         setForm((previous) => ({
                           ...previous,
-                          product,
-                          ...(product === "sbpe"
-                            ? {
-                                middleClass: false,
-                                confirmedSubsidy: "",
-                                confirmedPublicContribution: "",
-                                cityLimit: "",
-                              }
-                            : {}),
+                          state: event.target.value,
+                          city: "",
                         }));
                         setSubmitted(false);
                       }}
                     >
-                      <option value="mcmv">MCMV</option>
-                      <option value="sbpe">SBPE</option>
+                      {states.map((state) => (
+                        <option key={state}>{state}</option>
+                      ))}
                     </select>
                   </Field>
-                  <Field label="Sistema">
-                    <select
-                      value={form.system}
-                      onChange={(event) => update("system", event.target.value)}
-                    >
-                      <option value="price">PRICE</option>
-                      <option value="sac">SAC</option>
-                    </select>
+                  <Field className="caixa-term-field" label="Prazo em meses *">
+                    <input
+                      required
+                      type="number"
+                      min="1"
+                      max="420"
+                      step="1"
+                      value={form.term}
+                      onChange={(event) => update("term", event.target.value)}
+                    />
                   </Field>
+                  <div className="caixa-field-pair caixa-product-system-field">
+                    <Field label="Produto">
+                      <select
+                        value={form.product}
+                        onChange={(event) => {
+                          const product = event.target.value;
+                          setForm((previous) => ({
+                            ...previous,
+                            product,
+                            ...(product === "sbpe"
+                              ? {
+                                  middleClass: false,
+                                  confirmedSubsidy: "",
+                                  confirmedPublicContribution: "",
+                                  cityLimit: "",
+                                }
+                              : {}),
+                          }));
+                          setSubmitted(false);
+                        }}
+                      >
+                        <option value="mcmv">MCMV</option>
+                        <option value="sbpe">SBPE</option>
+                      </select>
+                    </Field>
+                    <Field label="Sistema">
+                      <select
+                        value={form.system}
+                        onChange={(event) => update("system", event.target.value)}
+                      >
+                        <option value="price">PRICE</option>
+                        <option value="sac">SAC</option>
+                      </select>
+                    </Field>
+                  </div>
                 </div>
-              </div>
-              <div className="caixa-form-grid caixa-binary-grid">
-                <Toggle
-                  label="Tem 36+ meses de FGTS?"
-                  value={form.hasFgts36}
-                  onChange={(value) => {
-                    setForm((previous) => ({
-                      ...previous,
-                      hasFgts36: value,
-                      fgts: value ? previous.fgts : "",
-                    }));
-                    setSubmitted(false);
-                  }}
-                />
-                <Toggle
-                  label="Já recebeu subsídio?"
-                  value={form.previousSubsidy}
-                  onChange={(value) => update("previousSubsidy", value)}
-                />
-                <Toggle
-                  label="Tem fator social? (informativo)"
-                  value={form.socialFactor}
-                  onChange={(value) => update("socialFactor", value)}
-                />
-                <Toggle
-                  label="Imóvel na planta?"
-                  value={form.inConstruction}
-                  onChange={(value) => update("inConstruction", value)}
-                />
+                <div className="caixa-form-grid caixa-binary-grid">
+                  <Toggle
+                    label="Tem 36+ meses de FGTS?"
+                    value={form.hasFgts36}
+                    onChange={(value) => {
+                      setForm((previous) => ({
+                        ...previous,
+                        hasFgts36: value,
+                        fgts: value ? previous.fgts : "",
+                      }));
+                      setSubmitted(false);
+                    }}
+                  />
+                  <Toggle
+                    label="Já recebeu subsídio?"
+                    value={form.previousSubsidy}
+                    onChange={(value) => update("previousSubsidy", value)}
+                  />
+                  <Toggle
+                    label="Tem fator social? (informativo)"
+                    value={form.socialFactor}
+                    onChange={(value) => update("socialFactor", value)}
+                  />
+                  <Toggle
+                    label="Imóvel na planta?"
+                    value={form.inConstruction}
+                    onChange={(value) => update("inConstruction", value)}
+                  />
+                </div>
               </div>
             </section>
             <details className="caixa-confirmed-parameters">
@@ -906,11 +921,26 @@ export function CaixaClient({
               </div>
             </details>
             <footer className="caixa-step-actions caixa-full-form-actions">
+              <span className="caixa-access-status">
+                Acesso liberado para todos os perfis autorizados
+              </span>
+              <button type="button" className="ghost" onClick={clear}>
+                Limpar
+              </button>
               <button className="primary" type="submit" disabled={!complete}>
                 Calcular simulação
               </button>
             </footer>
           </form>
+          {!submitted && (
+            <section className="caixa-panel caixa-result-placeholder" aria-label="Resultado">
+              <span aria-hidden="true">03</span>
+              <div>
+                <p>RESULTADO</p>
+                <h2>O resultado será exibido após o cálculo</h2>
+              </div>
+            </section>
+          )}
           {submitted && result && (
             <aside
               ref={resultRef}

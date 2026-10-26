@@ -197,9 +197,8 @@ describe("protected commercial page set", () => {
     expect(dynamicPage.indexOf("if (!pageGate?.releaseEnabled) forbidden()")).toBeLessThan(
       dynamicPage.indexOf('if (simulator === "caixa") return <CaixaArchive />'),
     );
-    expect(dynamicPage).toContain('const visualOnly = simulator === "caixa"');
-    expect(dynamicPage.match(/!visualOnly &&/gu)).toHaveLength(2);
-    expect(dynamicPage).toContain("motor e integração bancária permanecem indisponíveis");
+    expect(dynamicPage).not.toContain('const visualOnly = simulator === "caixa"');
+    expect(dynamicPage).not.toContain("motor e integração bancária permanecem indisponíveis");
     expect(tabelaoPage).toContain('await enforcePermission("crm.simulators.view")');
     expect(tabelaoPage).toContain('getProtectedPageGate("/app/simulacao/tabelao")?.releaseEnabled');
     expect(tabelaoPage).toContain("forbidden()");

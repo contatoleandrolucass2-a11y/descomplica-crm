@@ -19,6 +19,43 @@
   65 testes focados passaram localmente. O Docker local indisponível impediu
   executar pgTAP; a CI Linux `isolated-restore` permanece bloqueante.
 
+## 2026-10-26: implementacao local do layout e acesso do Simulador CAIXA
+
+- O motor local da rota `/app/simulacao/caixa` deixou de ser substituido pelo
+  aviso visual de integracao bancaria. O desbloqueio preserva autenticacao,
+  `enforcePermission`, status da conta, MFA, overrides e a permissao compartilhada
+  dos simuladores. O endpoint oficial permanece fechado quando nao configurado.
+- O card CAIXA no hub deixou de exibir o cadeado artificial. A migration de
+  catalogo `20261026200621_sync_page_catalog.sql` sincroniza apenas a descricao;
+  as permissoes `crm.simulators.view` e `crm.simulators.execute` continuam sendo
+  concedidas aos sete perfis operacionais pela migration vigente, sem ACL nova.
+- A interface foi alinhada ao padrao visual dos simuladores Associativo e Tabela
+  Direta: fluxo numerado, paineis compactos, acao principal persistente, resultado
+  no mesmo contexto e temas claro, medio e escuro. Formulas, taxas, SAC, Price,
+  SBPE, comprometimento de renda e regras financeiras nao foram alteradas.
+- Validacao focada: 189 testes aprovados e 3 condicionais ignorados; validacao
+  browser: 56 aprovados com calculo, desktop, celular, tres temas, Axe e overflow.
+  `pages:check`, `resources:check`, `security:secrets`, lint, typecheck e build
+  passaram. O lint manteve 44 avisos preexistentes nos ativos Meta Ads.
+- A suite global aprovou 204 arquivos Vitest, 4.302 testes e manteve 111 testes
+  condicionais ignorados. O runner Node aprovou 1.599, ignorou 19 e repetiu tres
+  falhas Windows preexistentes de contratos POSIX/arquivo privado em Meta Ads;
+  nenhum arquivo dessa area foi alterado. `db:test` ficou indisponivel porque o
+  Postgres local/Docker nao estava ativo em `127.0.0.1:54322`; a CI Linux isolada
+  permanece obrigatoria antes de integrar e publicar.
+- As capturas sinteticas locais foram revisadas em 1440 px nos tres temas e em
+  390 px no tema escuro, sem dados de clientes. PR, CI, merge e publicacao ainda
+  devem ser registrados separadamente. O sync do Obsidian permanece impedido por
+  `Documento excede o limite de exportacao.` e nao deve ser tratado como concluido.
+- No PR #362, `validate` e `isolated-restore` passaram. A primeira execucao de
+  `release-gates` aprovou os 56 testes CAIXA, 154 rotas, 88 variacoes de tema e
+  242 auditorias Axe, mas bloqueou por divergencia esperada das referencias que
+  ainda mostravam o estado anterior. O workflow protegido `40395287053` aprovou
+  a captura e produziu o artefato `12688461833`, digest
+  `sha256:0eb0c26e3ea48ef329d3a701950479d5bef31863f12c5a053496f3770361b10c`.
+  Somente os arquivos listados pela proveniencia protegida foram incorporados;
+  uma nova CI deve comprovar a convergencia antes do merge.
+
 ## 2026-10-26: refinamento final de Agendamentos publicado
 
 - Escopo funcional restrito a `/app/etapas/agendamentos`. O PR #355 foi
@@ -3841,3 +3878,22 @@ dependente da autorização específica aplicável.
   pela falha preexistente `Documento excede o limite de exportacao.`. Não houve
   redução do documento, alteração do vault ou alegação de sincronização; a
   pendência deve ser tratada em manutenção própria do conhecimento.
+
+## 2026-10-26 — Abertura: layout e acesso do Simulador CAIXA
+
+- Escopo aprovado: alinhar `/app/simulacao/caixa` ao padrão visual dos
+  simuladores Associativo e Tabela Direta nos temas claro, médio e escuro, além
+  de liberar o motor CAIXA para todos os perfis autenticados do CRM. Fórmulas,
+  cotas, taxas e demais regras financeiras permanecem fora do escopo de mudança.
+- Git comum confirmado. A branch `codex/caixa-layout-acesso` foi criada sobre
+  `origin/main` `443e6fc6deb0a75ad6d57462e2f756cbb2760c4f`; checkout iniciou limpo.
+  O GitHub CLI está indisponível neste host, portanto PR e CI serão consultados
+  por conector ou alternativa disponível antes da publicação.
+- Health público observado em 26/10/2026: HTTP 200, `status=ok`, versão
+  `24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`. A versão publicada contém as
+  cotas SBPE anteriores, mas não contém esta nova alteração de interface/acesso.
+- `knowledge:context`, `knowledge:search` e a sincronização inicial foram
+  tentados e continuam bloqueados pela falha preexistente
+  `Documento excede o limite de exportacao.`. A indisponibilidade não autoriza
+  reduzir a autoridade documental nem dispensa a conferência direta do código,
+  dos testes, do GitHub/CI e do site.
