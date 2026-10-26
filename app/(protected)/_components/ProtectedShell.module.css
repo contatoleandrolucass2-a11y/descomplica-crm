@@ -160,11 +160,12 @@
 }
 
 .topbar:has([data-appointments-navigation="true"]) .navigationList {
-  gap: 10px;
+  gap: 8px;
 }
 
 .topbar:has([data-appointments-navigation="true"]) :is(.navigationLink, .navigationTrigger) {
   min-height: 48px;
+  padding-inline: 9px;
   padding-block: 10px 7px;
 }
 
