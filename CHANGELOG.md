@@ -1,5 +1,14 @@
 # Changelog
 
+## 2026-10-26 — Canvas analítico em Visão Geral e Agendamentos
+
+- Transforma os gráficos de `/app` e `/app/etapas/agendamentos` em cards configuráveis sobre grade responsiva de 12 colunas.
+- Adiciona movimentação e redimensionamento com snap, reflow, teclado, cancelamento, seleção múltipla e desfazer/refazer.
+- Permite adicionar, editar, remover, expandir e exportar seletivamente os cards em PDF com a imagem real de cada visualização.
+- Prepara perfis privados por usuário, página e escopo, com salvamento automático, versão otimista, conflito explícito e cache local apenas como contingência.
+- Preserva as fórmulas, filtros globais, fontes e permissões existentes nas duas páginas.
+- Inclui migration e pgTAP versionados, sem aplicação remota nem publicação, conforme o limite expresso da especificação.
+
 ## 2026-10-26 — Cotas e precisão do Simulador CAIXA
 
 - Atualiza o SBPE para cota máxima de 90% no SAC e 80% no Price, aceitando cota individual confirmada menor.

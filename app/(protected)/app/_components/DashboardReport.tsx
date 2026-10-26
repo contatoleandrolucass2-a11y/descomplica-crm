@@ -20,6 +20,8 @@ import {
   type DashboardPartnershipGoalValues,
 } from "@/lib/crm/dashboard/management-goals";
 import { DASHBOARD_CHANNELS } from "@/lib/crm/dashboard/analysis-contract";
+import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas";
+import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 
 import { SalesforceRefreshButton } from "./SalesforceRefreshButton";
 import { DashboardAutoRefresh } from "./DashboardAutoRefresh";
@@ -30,8 +32,15 @@ import {
   DashboardStageDetailTrigger,
   type DashboardStageDetailPeriod,
 } from "./DashboardStageDetails";
-import { AnalyticsCard, AnalyticsCanvas, SectionHeading } from "./analytics/DataDisplay";
+import { AnalyticsCanvas } from "./analytics/DataDisplay";
 import { UnavailableValue } from "./analytics/DataState";
+import {
+  OVERVIEW_CANVAS_CATALOG,
+  OVERVIEW_CANVAS_COMPATIBILITY,
+  OVERVIEW_CANVAS_DEFAULT_CARDS,
+  OVERVIEW_CANVAS_GROUPS,
+  OVERVIEW_CANVAS_PAGE_KEY,
+} from "./dashboard-canvas-config";
 import styles from "./DashboardReport.module.css";
 
 export interface DashboardReportProps {
@@ -186,6 +195,7 @@ function FunnelCard({
   detailPeriod,
   authorizedStages,
   detailAvailableStages,
+  groupKey,
 }: {
   label: string;
   context: string;
@@ -195,10 +205,16 @@ function FunnelCard({
   detailPeriod: DashboardStageDetailPeriod;
   authorizedStages: ReadonlySet<DashboardFunnelKey>;
   detailAvailableStages: ReadonlySet<DashboardFunnelKey>;
+  groupKey: (typeof OVERVIEW_CANVAS_GROUPS)[number]["key"];
 }) {
   const firstStageLabel = readings[0]?.label.toLocaleLowerCase("pt-BR") ?? "etapa inicial";
   return (
-    <AnalyticsCard className={styles.card} density="compact">
+    <div
+      className={styles.card}
+      data-density="compact"
+      data-dashboard-group={groupKey}
+      aria-describedby={`overview-canvas-group-${groupKey}`}
+    >
       {history ? (
         <DashboardMonthlyHistory
           title={label}
@@ -209,7 +225,9 @@ function FunnelCard({
           }
         />
       ) : (
-        <h3>{label}</h3>
+        <h3 className={styles.cardTitle} aria-hidden="true">
+          {label}
+        </h3>
       )}
       <p className={styles.blockDetail}>{detail}</p>
       <MonthlyFunnel
@@ -228,7 +246,7 @@ function FunnelCard({
         </div>
       </dl>
       <ConversionDetails readings={readings} />
-    </AnalyticsCard>
+    </div>
   );
 }
 
@@ -378,6 +396,134 @@ export function DashboardReport({
     note: "O valor do funil é uma meta calculada. A tabela apresenta o realizado no mês como referência.",
   };
   const monthDetailAvailability = availableStagesFromReadings(periodReadings("month"));
+  const goalContent = goalBlocks.map((block, index) => {
+    const metric = OVERVIEW_CANVAS_GROUPS[0].metricKeys[index]!;
+    return [
+      metric,
+      {
+        funnel: (
+          <FunnelCard
+            label={block.label}
+            context="Metas"
+            detail={
+              block.key === "goal"
+                ? activeChannel === DASHBOARD_CHANNELS[0]
+                  ? partnershipGoals
+                    ? `${DASHBOARD_PARTNERSHIP_MANAGER_COUNT} gerentes de vendas no grupo`
+                    : "Meta Imob indisponível para o mês"
+                  : goalBrokerCount != null
+                    ? `${numberFormatter.format(goalBrokerCount)} corretores no grupo`
+                    : block.detail
+                : block.detail
+            }
+            readings={
+              block.key === "goal"
+                ? readingsFromValues(goals)
+                : block.key === "expected"
+                  ? readingsFromValues(expected)
+                  : periodReadings("month")
+            }
+            detailPeriod={block.key === "current" ? periodDetail("month") : goalDetail}
+            authorizedStages={authorizedStages}
+            detailAvailableStages={monthDetailAvailability}
+            groupKey="goals"
+          />
+        ),
+      },
+    ] as const;
+  });
+  const periodContent = periodBlocks.map((block, index) => {
+    const metric = OVERVIEW_CANVAS_GROUPS[1].metricKeys[index]!;
+    const readings = periodReadings(block.key);
+    return [
+      metric,
+      {
+        funnel: (
+          <FunnelCard
+            label={block.label}
+            context="Períodos do mês"
+            detail="Realizado no mês vigente"
+            readings={readings}
+            detailPeriod={periodDetail(block.key)}
+            authorizedStages={authorizedStages}
+            detailAvailableStages={availableStagesFromReadings(readings)}
+            groupKey="periods"
+          />
+        ),
+      },
+    ] as const;
+  });
+  const historyContent = historyBlocks.map((block, index) => {
+    const metric = OVERVIEW_CANVAS_GROUPS[2].metricKeys[index]!;
+    const readings =
+      block.key === "current"
+        ? periodReadings("month")
+        : block.key === "sale-average"
+          ? saleAverageReadings
+          : historicalReadings(block.key);
+    const months =
+      block.key === "current"
+        ? []
+        : historyMonths(block.key === "sale-average" ? "year-average" : block.key);
+    const detailAvailableStages =
+      block.key === "current" || months.length > 0
+        ? availableStagesFromReadings(readings)
+        : new Set<DashboardFunnelKey>();
+    return [
+      metric,
+      {
+        funnel: (
+          <FunnelCard
+            label={block.label}
+            context="Histórico"
+            detail={block.detail}
+            readings={readings}
+            history={
+              block.key === "year-average" ||
+              block.key === "three-month-average" ||
+              block.key === "previous"
+                ? staleMonth
+                  ? []
+                  : (analysis?.history[block.key] ?? [])
+                : undefined
+            }
+            detailPeriod={
+              block.key === "current"
+                ? periodDetail("month")
+                : block.key === "sale-average"
+                  ? {
+                      label: "Registros dos meses encerrados usados na média anual",
+                      months: historyMonths("year-average"),
+                      note: "O valor do funil é uma razão média por venda; as linhas exibem o realizado que compõe a base anual.",
+                    }
+                  : {
+                      label: "Registros dos meses considerados no cálculo",
+                      months: historyMonths(block.key),
+                      ...(block.key === "previous"
+                        ? {}
+                        : {
+                            note: "O valor do funil é uma média; a tabela apresenta os registros dos meses usados no cálculo.",
+                          }),
+                    }
+            }
+            authorizedStages={authorizedStages}
+            detailAvailableStages={detailAvailableStages}
+            groupKey="history"
+          />
+        ),
+      },
+    ] as const;
+  });
+  const contentByMetricAndType = Object.fromEntries([
+    ...goalContent,
+    ...periodContent,
+    ...historyContent,
+  ]) as DashboardContentByMetricAndType;
+  const exportFilters = Object.entries(filters)
+    .flatMap(([key, values]) => values.map((value) => `${key}: ${value}`))
+    .join("; ");
+  const scopeKey =
+    activeChannel === DASHBOARD_CHANNELS[0] ? "channel.partnerships" : "channel.house";
 
   return (
     <DashboardStageDetailsProvider rows={stageDetails} initialFilters={filters}>
@@ -426,123 +572,31 @@ export function DashboardReport({
             <h2 id="report-monthly-title" className={styles.srOnly}>
               Funis comerciais
             </h2>
-            <section className={styles.funnelGroup} aria-labelledby="report-goals-title">
-              <SectionHeading id="report-goals-title" title="Metas" density="compact" />
-              <div className={styles.monthlyGrid}>
-                {goalBlocks.map((block) => (
-                  <FunnelCard
-                    key={block.key}
-                    label={block.label}
-                    context="Metas"
-                    detail={
-                      block.key === "goal"
-                        ? activeChannel === DASHBOARD_CHANNELS[0]
-                          ? partnershipGoals
-                            ? `${DASHBOARD_PARTNERSHIP_MANAGER_COUNT} gerentes de vendas no grupo`
-                            : "Meta Imob indisponível para o mês"
-                          : goalBrokerCount != null
-                            ? `${numberFormatter.format(goalBrokerCount)} corretores no grupo`
-                            : block.detail
-                        : block.detail
-                    }
-                    readings={
-                      block.key === "goal"
-                        ? readingsFromValues(goals)
-                        : block.key === "expected"
-                          ? readingsFromValues(expected)
-                          : periodReadings("month")
-                    }
-                    detailPeriod={block.key === "current" ? periodDetail("month") : goalDetail}
-                    authorizedStages={authorizedStages}
-                    detailAvailableStages={monthDetailAvailability}
-                  />
-                ))}
-              </div>
-            </section>
-            <section className={styles.funnelGroup} aria-labelledby="report-periods-title">
-              <SectionHeading id="report-periods-title" title="Períodos do mês" density="compact" />
-              <div className={styles.fiveColumnGrid}>
-                {periodBlocks.map((block) => {
-                  const readings = periodReadings(block.key);
-                  return (
-                    <FunnelCard
-                      key={block.key}
-                      label={block.label}
-                      context="Períodos do mês"
-                      detail="Realizado no mês vigente"
-                      readings={readings}
-                      detailPeriod={periodDetail(block.key)}
-                      authorizedStages={authorizedStages}
-                      detailAvailableStages={availableStagesFromReadings(readings)}
-                    />
-                  );
-                })}
-              </div>
-            </section>
-            <section className={styles.funnelGroup} aria-labelledby="report-history-title">
-              <SectionHeading
-                id="report-history-title"
-                title="Histórico e média por venda"
-                density="compact"
-              />
-              <div className={styles.fiveColumnGrid}>
-                {historyBlocks.map((block) => {
-                  const readings =
-                    block.key === "current"
-                      ? periodReadings("month")
-                      : block.key === "sale-average"
-                        ? saleAverageReadings
-                        : historicalReadings(block.key);
-                  const months =
-                    block.key === "current"
-                      ? []
-                      : historyMonths(block.key === "sale-average" ? "year-average" : block.key);
-                  const detailAvailableStages =
-                    block.key === "current" || months.length > 0
-                      ? availableStagesFromReadings(readings)
-                      : new Set<DashboardFunnelKey>();
-                  return (
-                    <FunnelCard
-                      key={block.key}
-                      label={block.label}
-                      context="Histórico"
-                      detail={block.detail}
-                      readings={readings}
-                      history={
-                        block.key === "year-average" ||
-                        block.key === "three-month-average" ||
-                        block.key === "previous"
-                          ? staleMonth
-                            ? []
-                            : (analysis?.history[block.key] ?? [])
-                          : undefined
-                      }
-                      detailPeriod={
-                        block.key === "current"
-                          ? periodDetail("month")
-                          : block.key === "sale-average"
-                            ? {
-                                label: "Registros dos meses encerrados usados na média anual",
-                                months: historyMonths("year-average"),
-                                note: "O valor do funil é uma razão média por venda; as linhas exibem o realizado que compõe a base anual.",
-                              }
-                            : {
-                                label: "Registros dos meses considerados no cálculo",
-                                months: historyMonths(block.key),
-                                ...(block.key === "previous"
-                                  ? {}
-                                  : {
-                                      note: "O valor do funil é uma média; a tabela apresenta os registros dos meses usados no cálculo.",
-                                    }),
-                              }
-                      }
-                      authorizedStages={authorizedStages}
-                      detailAvailableStages={detailAvailableStages}
-                    />
-                  );
-                })}
-              </div>
-            </section>
+            <div className={styles.canvasGroups} aria-label="Grupos dos funis comerciais">
+              {OVERVIEW_CANVAS_GROUPS.map((group) => (
+                <div key={group.key}>
+                  <h2 id={`overview-canvas-group-${group.key}`}>{group.label}</h2>
+                  <span>{group.metricKeys.length} cards</span>
+                </div>
+              ))}
+            </div>
+            <ConfigurableDashboardCanvas
+              className={styles.configurableCanvas!}
+              initialCards={OVERVIEW_CANVAS_DEFAULT_CARDS}
+              catalog={OVERVIEW_CANVAS_CATALOG}
+              compatibility={OVERVIEW_CANVAS_COMPATIBILITY}
+              contentByMetricAndType={contentByMetricAndType}
+              pageKey={OVERVIEW_CANVAS_PAGE_KEY}
+              scopeKey={scopeKey}
+              ariaLabel="Funis comerciais configuráveis"
+              exportContext={{
+                title: "Dashboard | Resumo Geral",
+                context: activeChannel === DASHBOARD_CHANNELS[0] ? "Imob" : "House",
+                ...(exportFilters ? { filters: exportFilters } : {}),
+                ...(dashboard?.source ? { source: dashboard.source } : {}),
+                ...(dashboard?.generatedAt ? { generatedAt: dashboard.generatedAt } : {}),
+              }}
+            />
           </section>
         </div>
       </AnalyticsCanvas>

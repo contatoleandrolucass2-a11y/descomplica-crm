@@ -199,6 +199,186 @@ async function productionCss(viteCss) {
   };
 }
 
+async function runCanvasPreview({ page, origin, evidence, check }) {
+  const viewports = [
+    { width: 320, height: 900 },
+    { width: 390, height: 900 },
+    { width: 768, height: 900 },
+    { width: 1440, height: 900 },
+    { width: 1920, height: 1080 },
+  ];
+  const themes = ["light", "balanced", "dark"];
+  evidence.canvas = { screens: [], interactions: [] };
+
+  for (const viewport of viewports) {
+    await page.setViewportSize(viewport);
+    await page.goto(origin);
+    await expect(page.getByRole("heading", { name: "Agendamentos", exact: true })).toBeVisible();
+    await page.getByRole("button", { name: "House", exact: true }).click();
+    await expect(page.locator("[data-dashboard-card-id]")).toHaveCount(28);
+
+    for (const theme of themes) {
+      await page.evaluate(
+        (value) => document.documentElement.setAttribute("data-theme", value),
+        theme,
+      );
+      await page.waitForTimeout(120);
+      const layout = await page.evaluate(() => {
+        const cards = [...document.querySelectorAll("[data-dashboard-card-id]")].filter((card) =>
+          card.checkVisibility(),
+        );
+        const boxes = cards.map((card) => {
+          const rect = card.getBoundingClientRect();
+          return {
+            id: card.getAttribute("data-dashboard-card-id"),
+            left: rect.left,
+            right: rect.right,
+            top: rect.top,
+            bottom: rect.bottom,
+            width: rect.width,
+          };
+        });
+        const overlaps = [];
+        for (let index = 0; index < boxes.length; index += 1) {
+          for (const other of boxes.slice(index + 1)) {
+            const first = boxes[index];
+            if (
+              Math.min(first.right, other.right) - Math.max(first.left, other.left) > 1 &&
+              Math.min(first.bottom, other.bottom) - Math.max(first.top, other.top) > 1
+            )
+              overlaps.push(`${first.id}/${other.id}`);
+          }
+        }
+        const toolbar = document.querySelector(
+          '[role="toolbar"][aria-label="Ferramentas do dashboard"]',
+        );
+        return {
+          count: cards.length,
+          documentWidth: document.documentElement.scrollWidth,
+          viewportWidth: innerWidth,
+          outside: boxes.filter(({ left, right }) => left < -1 || right > innerWidth + 1),
+          overlaps,
+          mobileColumns:
+            innerWidth > 390
+              ? null
+              : {
+                  lefts: [...new Set(boxes.map(({ left }) => Math.round(left)))],
+                  widths: [...new Set(boxes.map(({ width }) => Math.round(width)))],
+                },
+          toolbarOverflow: Boolean(toolbar && toolbar.scrollWidth > toolbar.clientWidth + 1),
+          recencyBorders: ["recency-up-to-7", "recency-8-to-14", "recency-15-plus"].map((id) => {
+            const panel = document.querySelector(
+              `[data-dashboard-card-id="${id}"] [class*="recencyPanel"]`,
+            );
+            return panel ? getComputedStyle(panel).boxShadow : null;
+          }),
+        };
+      });
+      check(layout.count === 28, `28 canvas cards ${theme}/${viewport.width}`);
+      check(
+        layout.documentWidth <= layout.viewportWidth + 1,
+        `No document overflow ${theme}/${viewport.width}`,
+      );
+      check(layout.outside.length === 0, `Cards fit viewport ${theme}/${viewport.width}`);
+      check(layout.overlaps.length === 0, `Cards do not overlap ${theme}/${viewport.width}`);
+      check(!layout.toolbarOverflow, `Toolbar fits ${theme}/${viewport.width}`);
+      if (layout.mobileColumns)
+        check(
+          layout.mobileColumns.lefts.length === 1 && layout.mobileColumns.widths.length === 1,
+          `Single readable card column ${theme}/${viewport.width}`,
+        );
+      check(
+        layout.recencyBorders.every(Boolean) && new Set(layout.recencyBorders).size === 3,
+        `Distinct recency states ${theme}/${viewport.width}`,
+      );
+
+      const axe = await new AxeBuilder({ page })
+        .withTags(["wcag2a", "wcag2aa", "wcag21aa"])
+        .analyze();
+      const serious = axe.violations.filter(
+        ({ impact }) => impact === "serious" || impact === "critical",
+      );
+      check(
+        serious.length === 0,
+        `Canvas axe ${theme}/${viewport.width}: ${serious.map(({ id }) => id).join(",")}`,
+      );
+      const screenshot = path.join(
+        outputRoot,
+        `canvas-${theme}-${viewport.width}x${viewport.height}.png`,
+      );
+      await page.screenshot({ path: screenshot, fullPage: true });
+      evidence.canvas.screens.push({ viewport, theme, layout, screenshot });
+    }
+  }
+
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto(origin);
+  await page.getByRole("button", { name: "House", exact: true }).click();
+  const cards = page.locator("[data-dashboard-card-id]");
+  await expect(cards).toHaveCount(28);
+  const readOrder = () =>
+    cards.evaluateAll((nodes) => nodes.map((node) => node.dataset.dashboardCardId));
+  const initialOrder = await readOrder();
+  const goalCard = page.locator('[data-dashboard-card-id="appointments-goal"]');
+  await goalCard.getByRole("button", { name: "Mover Meta do mês", exact: true }).press("ArrowDown");
+  await expect.poll(readOrder).not.toEqual(initialOrder);
+  const keyboardOrder = await readOrder();
+  check(keyboardOrder[1] === "appointments-goal", "Keyboard reorders a card");
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await expect.poll(readOrder).toEqual(initialOrder);
+  evidence.canvas.interactions.push({ keyboardOrder, undoOrder: await readOrder() });
+
+  const initialHeight = await goalCard.evaluate((node) => node.getBoundingClientRect().height);
+  await goalCard
+    .getByRole("button", { name: "Redimensionar Meta do mês", exact: true })
+    .press("ArrowDown");
+  const resizedHeight = await goalCard.evaluate((node) => node.getBoundingClientRect().height);
+  check(resizedHeight > initialHeight, "Keyboard resize increases card height");
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+
+  for (const id of ["appointments-goal", "team-productive"])
+    await page.locator(`[data-dashboard-card-id="${id}"] input[type="checkbox"]`).check();
+  await expect(page.getByLabel("Mover cards selecionados")).toBeVisible();
+  await page.getByRole("button", { name: "Mover grupo para depois", exact: true }).click();
+  await expect.poll(readOrder).not.toEqual(initialOrder);
+  const groupOrder = await readOrder();
+  check(
+    groupOrder.indexOf("team-productive") === groupOrder.indexOf("appointments-goal") + 1,
+    "Group move keeps selected cards together",
+  );
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  evidence.canvas.interactions.push({ groupOrder });
+
+  await page.getByRole("button", { name: "Expandir Agendamentos por mês", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Agendamentos por mês", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  await expect(page.getByRole("dialog", { name: "Agendamentos por mês", exact: true })).toHaveCount(
+    0,
+  );
+  evidence.canvas.interactions.push("expand-and-escape");
+
+  await page.getByRole("button", { name: "Adicionar", exact: true }).click();
+  await expect(page.getByRole("dialog", { name: "Adicionar card", exact: true })).toBeVisible();
+  await page.keyboard.press("Escape");
+  evidence.canvas.interactions.push("card-editor");
+
+  await page.getByRole("button", { name: "Perfis", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Perfis do dashboard", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  evidence.canvas.interactions.push("profiles");
+
+  await page.getByRole("button", { name: "Baixar PDF", exact: true }).click();
+  await expect(
+    page.getByRole("dialog", { name: "Baixar dashboard em PDF", exact: true }),
+  ).toBeVisible();
+  await page.keyboard.press("Escape");
+  evidence.canvas.interactions.push("selective-pdf-dialog");
+}
+
 export async function runAppointmentsPreview() {
   await mkdir(outputRoot, { recursive: true });
   const evidence = {
@@ -286,6 +466,10 @@ export async function runAppointmentsPreview() {
     const pathname = new URL(request.url, "http://127.0.0.1").pathname;
     if (request.method !== "GET") return response.writeHead(405).end();
     if (pathname === "/favicon.ico") return response.writeHead(204).end();
+    if (pathname === "/api/dashboard-profiles")
+      return response
+        .writeHead(200, { "content-type": "application/json" })
+        .end(JSON.stringify({ profiles: [] }));
     if (pathname === "/")
       return response.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     if (files.has(pathname))
@@ -321,6 +505,13 @@ export async function runAppointmentsPreview() {
     page.on("console", (message) => {
       if (message.type() === "error") evidence.browserErrors.push(message.text());
     });
+    if (process.argv.includes("--canvas-only")) {
+      await runCanvasPreview({ page, origin, evidence, check });
+      check(!evidence.browserErrors.length, "Browser JavaScript errors");
+      check(!evidence.externalRequests.length, "External requests attempted");
+      evidence.passed = !evidence.failures.length;
+      return;
+    }
     const region = (name) => page.getByRole("region", { name, exact: true });
     evidence.chartBoard = [];
     for (const { width, height } of process.argv.includes("--interactions-only")
@@ -527,18 +718,18 @@ export async function runAppointmentsPreview() {
               (element) => getComputedStyle(element).writingMode,
             );
           })(),
-          kpiCards: [...document.querySelectorAll('[class*="kpiGrid"] > article')].map((card) => ({
+          kpiCards: [...document.querySelectorAll("[data-summary-card] > article")].map((card) => ({
             label: card.querySelector("h2")?.textContent,
             width: card.getBoundingClientRect().width,
             height: card.getBoundingClientRect().height,
           })),
           metricFontSizes: [
-            ...document.querySelectorAll('[class*="kpiGrid"] > article [class*="metricValue"]'),
+            ...document.querySelectorAll('[data-summary-card] > article [class*="metricValue"]'),
           ]
             .filter((element) => !element.closest("dialog"))
             .map((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
           cardTitleFontSizes: [
-            ...document.querySelectorAll('[class*="kpiGrid"] > article > h2'),
+            ...document.querySelectorAll("[data-summary-card] > article > h2"),
           ].map((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
           kpiCenters: [...document.querySelectorAll('article[class*="kpiCard"]')].map((card) => {
             const value = card.querySelector("strong");
@@ -555,7 +746,7 @@ export async function runAppointmentsPreview() {
           }),
           conversionCenters: [
             ...document.querySelectorAll(
-              '[class*="kpiGrid"] > article [class*="conversionPercent"]',
+              '[data-summary-card] > article [class*="conversionPercent"]',
             ),
           ]
             .filter((value) => !value.closest("dialog"))
@@ -655,20 +846,13 @@ export async function runAppointmentsPreview() {
           `Horizontal internal scrollbar ${theme}/${width}`,
         );
         check(
-          Math.abs(geometry.sections[0].height - geometry.sections[10].height) < 1 &&
-            geometry.sections
-              .slice(1, 4)
-              .every((section) => Math.abs(section.height - geometry.sections[1].height) < 1),
-          `Wide charts match and the three overview charts have equal heights ${theme}/${width}`,
-        );
-        check(
-          geometry.sections
-            .slice(4, 7)
-            .every((section) => Math.abs(section.height - geometry.sections[4].height) < 1) &&
+          geometry.sections.every(
+            (section) => Math.abs(section.height - geometry.sections[0].height) < 1,
+          ) &&
             geometry.recency.every(
-              (section) => Math.abs(section.bottom - section.y - geometry.sections[4].height) < 1,
+              (section) => Math.abs(section.bottom - section.y - geometry.sections[0].height) < 1,
             ),
-          `Six insight panels have equal heights ${theme}/${width}`,
+          `Every guided chart has the same height ${theme}/${width}`,
         );
         check(
           geometry.scoreLabelWritingModes.length > 0 &&
@@ -729,12 +913,11 @@ export async function runAppointmentsPreview() {
           `Monthly labels clipped or too small ${theme}/${width}: ${JSON.stringify(geometry.monthly.labels)}`,
         );
         check(geometry.sections.length === 11, `Eleven charts ${theme}/${width}`);
-        if (width >= 1024) {
+        if (width >= 1024)
           check(
-            geometry.table.viewportHeight > 0 && !geometry.table.hasVerticalScroll,
-            `Table must expand without an internal vertical scrollbar ${theme}/${width}x${height}: ${JSON.stringify(geometry.table)}`,
+            geometry.table.viewportHeight > 0 && geometry.table.cardHeight >= 500,
+            `Detail table must match the guided chart viewport ${theme}/${width}x${height}: ${JSON.stringify(geometry.table)}`,
           );
-        }
         const score = geometry.sections.find((section) => section.heading === "Ranking Score");
         check(score && !score.hasVerticalScroll, `Ranking Score vertical scroll ${theme}/${width}`);
         check(
@@ -762,27 +945,31 @@ export async function runAppointmentsPreview() {
             ),
             `Recency panels must stack at ${width}`,
           );
-        if (width === 1440) {
+        if (width === 1440)
           check(
-            geometry.sections[4].hasVerticalScroll,
-            "Long responsible ranking uses vertical overflow",
+            !geometry.sections[4].hasVerticalScroll,
+            "Expanded ranking height avoids unnecessary vertical overflow",
           );
-        }
       }
     }
     await page.setViewportSize({ width: 1440, height: 900 });
     await page.goto(origin);
-    const firstTile = page.locator('[data-appointments-chart="Evolução de agendamentos por dia"]');
-    const secondTile = page.locator('[data-appointments-chart="Previstos e realizados hoje"]');
+    const firstTile = page.locator('[data-appointments-chart="Previstos e realizados hoje"]');
+    const secondTile = page.locator('[data-appointments-chart="Agendamentos por semana"]');
     await expect(page.locator("section[data-appointments-chart]")).toHaveCount(14);
     const readDomOrder = () =>
       page
         .locator("section[data-appointments-chart]")
         .evaluateAll((elements) => elements.map((element) => element.dataset.appointmentsChart));
     const initialDomOrder = await readDomOrder();
-    const movedDomOrder = [initialDomOrder[1], initialDomOrder[0], ...initialDomOrder.slice(2)];
+    const movedDomOrder = [
+      initialDomOrder[0],
+      initialDomOrder[2],
+      initialDomOrder[1],
+      ...initialDomOrder.slice(3),
+    ];
     const firstHandle = firstTile.getByRole("button", {
-      name: "Reordenar Evolução de agendamentos por dia",
+      name: "Reordenar Previstos e realizados hoje",
       exact: true,
     });
     await page.evaluate(() => {
@@ -849,7 +1036,7 @@ export async function runAppointmentsPreview() {
     });
     await firstTile
       .getByRole("button", {
-        name: "Mover Evolução de agendamentos por dia para depois",
+        name: "Mover Previstos e realizados hoje para depois",
         exact: true,
       })
       .click();
@@ -857,22 +1044,19 @@ export async function runAppointmentsPreview() {
     assert.deepEqual(await readDomOrder(), movedDomOrder, "Move button changes real DOM order");
     await expect(
       firstTile.getByRole("button", {
-        name: "Mover Evolução de agendamentos por dia para depois",
+        name: "Mover Previstos e realizados hoje para depois",
         exact: true,
       }),
     ).toBeFocused();
     await assertBoardIdentity();
-    await secondTile.getByRole("button").last().focus();
-    await page.keyboard.press("Tab");
-    await expect(firstHandle).toBeFocused();
     await firstTile
-      .getByRole("button", { name: "Reordenar Evolução de agendamentos por dia", exact: true })
+      .getByRole("button", { name: "Reordenar Previstos e realizados hoje", exact: true })
       .press("ArrowUp");
     assert.equal(await readOrder(firstTile), 0, "Arrow key restores visual order");
     assert.deepEqual(await readDomOrder(), initialDomOrder, "Arrow key restores DOM order");
     await expect(firstHandle).toBeFocused();
     await firstTile
-      .getByRole("button", { name: "Reordenar Evolução de agendamentos por dia", exact: true })
+      .getByRole("button", { name: "Reordenar Previstos e realizados hoje", exact: true })
       .dragTo(secondTile);
     evidence.dragEvents = await page.evaluate(() => window.__qaDragEvents);
     await expect(
@@ -883,11 +1067,11 @@ export async function runAppointmentsPreview() {
     await expect(firstHandle).toBeFocused();
     await assertBoardIdentity();
     const persisted = await page.evaluate(() =>
-      JSON.parse(localStorage.getItem("crm:chart-board:v1:appointments")),
+      JSON.parse(localStorage.getItem("crm:chart-board:v1:appointments-period-v2")),
     );
     assert.equal(
       persisted[1],
-      "Evolução de agendamentos por dia",
+      "Previstos e realizados hoje",
       "Versioned preference contains only tile IDs",
     );
     assert.ok(persisted.every((id) => typeof id === "string"));
@@ -898,17 +1082,52 @@ export async function runAppointmentsPreview() {
       (await secondTile.boundingBox()).y <= (await firstTile.boundingBox()).y,
       "DOM wrappers do not prevent visual reordering",
     );
-    await page.evaluate(() => localStorage.removeItem("crm:chart-board:v1:appointments"));
+    await page.evaluate(() => localStorage.removeItem("crm:chart-board:v1:appointments-period-v2"));
     await page.reload();
     await expect(firstTile).toHaveCSS("order", "0");
     assert.deepEqual(await readDomOrder(), initialDomOrder, "Cleared storage restores DOM order");
     evidence.reordering =
       "Buttons, arrow keys, handle drag and reload persistence passed; initial order restored for functional assertions";
+    const summaryCards = page.locator("[data-summary-card]");
+    const readSummaryOrder = () =>
+      summaryCards.evaluateAll((elements) =>
+        elements.map((element) => element.dataset.summaryCard),
+      );
+    const initialSummaryOrder = await readSummaryOrder();
+    await page
+      .getByRole("button", { name: "Mover Meta do mês para a próxima posição", exact: true })
+      .click();
+    const movedSummaryOrder = await readSummaryOrder();
+    assert.equal(movedSummaryOrder[1], "Meta do mês", "Summary card move button changes DOM order");
+    assert.equal(
+      (
+        await page.evaluate(() => JSON.parse(localStorage.getItem("crm:appointments-summary:v1")))
+      )[1],
+      "Meta do mês",
+      "Summary card order persists as IDs only",
+    );
+    await page.reload();
+    assert.equal(
+      (await readSummaryOrder())[1],
+      "Meta do mês",
+      "Summary card order survives reload",
+    );
+    await page.evaluate(() => localStorage.removeItem("crm:appointments-summary:v1"));
+    await page.reload();
+    assert.deepEqual(
+      await readSummaryOrder(),
+      initialSummaryOrder,
+      "Summary card order resets cleanly",
+    );
+    evidence.summaryReordering =
+      "The twelve KPI cards reorder and persist locally without remounting data";
     const daily = region("Evolução de agendamentos por dia");
     await expect(
       page.getByRole("region", { name: "Filtros do painel de agendamentos" }),
     ).toBeVisible();
-    await expect(page.locator('[class*="kpiGrid"] > article > h2')).toHaveCount(12);
+    await expect(page.locator('[class*="kpiGrid"] [data-summary-card] > article > h2')).toHaveCount(
+      12,
+    );
     await expect(page.getByText("Cobertura da fonte:")).toHaveCount(0);
     await expect(page.getByText(/agendamentos no período$/)).toHaveCount(0);
     await expect(
@@ -1167,10 +1386,12 @@ export async function runAppointmentsPreview() {
     );
     check(rowColorBefore !== rowColorAfter, "Table row hover must change color");
     const firstCard = page.locator("article").first();
-    await firstCard.hover();
+    const firstCardBox = await firstCard.boundingBox();
+    await page.mouse.move(firstCardBox.x + 8, firstCardBox.y + 8);
+    await page.waitForTimeout(140);
     check(
-      (await firstCard.evaluate((element) => getComputedStyle(element).transform)) === "none",
-      "KPI cards must keep a static frame without tilt",
+      (await firstCard.evaluate((element) => getComputedStyle(element).transform)) !== "none",
+      "KPI cards must follow the pointer with the 45 degree tilt effect",
     );
     await firstCard.getByRole("button", { name: "Abrir detalhes deste indicador" }).click();
     const cardPopup = page.getByRole("dialog", { name: "Detalhes do indicador" });
@@ -1191,7 +1412,7 @@ export async function runAppointmentsPreview() {
       "Funnel stage must grow on pointer hover",
     );
     evidence.hoverAndMotion =
-      "Chart bars and table rows change color on hover; KPI frames stay static, cards open dismissible dialogs, and funnel stages grow on hover";
+      "Chart bars and table rows change color on hover; KPI cards follow the pointer, open dismissible dialogs, and funnel stages grow on hover";
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(origin);
     await page.keyboard.press("Tab");

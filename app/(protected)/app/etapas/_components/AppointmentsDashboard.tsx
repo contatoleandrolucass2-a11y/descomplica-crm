@@ -7,10 +7,13 @@ import {
   useRef,
   useState,
   type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
   type ReactNode,
 } from "react";
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
+import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
+import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 import type { AppointmentConversionGoals } from "@/lib/crm/stages/data";
 import {
@@ -25,25 +28,13 @@ import {
 } from "@/lib/crm/stages/appointments";
 
 import styles from "./AppointmentsDashboard.module.css";
-import { ChartBoard, ChartTile } from "./ChartBoard";
+import {
+  APPOINTMENTS_CANVAS_CATALOG,
+  APPOINTMENTS_CANVAS_COMPATIBILITY,
+  APPOINTMENTS_CANVAS_DEFAULT_CARDS,
+  APPOINTMENTS_CANVAS_PAGE_KEY,
+} from "./appointments-canvas-config";
 import { useDashboardSidebar } from "../../../_components/DashboardShell";
-
-const chartIds = [
-  "Evolução de agendamentos por dia",
-  "Previstos e realizados hoje",
-  "Agendamentos por semana",
-  "Ranking Score",
-  "Ranking por responsável",
-  "Ranking por gerente",
-  "Ranking por gerente regional",
-  "Melhor responsável: Agendamento x Visita",
-  "Melhor gerente: Agendamento x Visita",
-  "Melhor gerente regional: Agendamento x Visita",
-  "Último agendamento: até 7 dias",
-  "Último agendamento: de 8 a 14 dias",
-  "Último agendamento: 15 dias ou mais",
-  "Agendamentos por mês",
-];
 
 const number = new Intl.NumberFormat("pt-BR");
 const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -98,21 +89,24 @@ function Chart({
   title,
   children,
   controls,
-  sectionName,
-  wide = false,
 }: {
   title: string;
   children: ReactNode;
   controls?: ReactNode;
-  sectionName?: string;
-  wide?: boolean;
 }) {
   return (
-    <ChartTile id={title} title={title} controls={controls} sectionName={sectionName} wide={wide}>
-      <div className={styles.cardBody} tabIndex={0}>
+    <section className={styles.canvasChart} aria-label={title}>
+      <h2 className="sr-only">{title}</h2>
+      {controls ? <div className={styles.canvasChartControls}>{controls}</div> : null}
+      <div
+        className={styles.cardBody}
+        tabIndex={0}
+        role="region"
+        aria-label={`Conteúdo de ${title}`}
+      >
         {children}
       </div>
-    </ChartTile>
+    </section>
   );
 }
 
@@ -135,10 +129,25 @@ function TiltCard({
   const trigger = useRef<HTMLButtonElement>(null);
   const close = useRef<HTMLButtonElement>(null);
   const titleId = useId();
+  const move = (event: ReactPointerEvent<HTMLElement>) => {
+    if (event.pointerType === "touch") return;
+    const bounds = event.currentTarget.getBoundingClientRect();
+    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
+    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
+    event.currentTarget.style.setProperty("--card-tilt-x", `${vertical * -45}deg`);
+    event.currentTarget.style.setProperty("--card-tilt-y", `${horizontal * 45}deg`);
+  };
+  const reset = (event: ReactPointerEvent<HTMLElement>) => {
+    event.currentTarget.style.setProperty("--card-tilt-x", "0deg");
+    event.currentTarget.style.setProperty("--card-tilt-y", "0deg");
+  };
   return (
     <article
       className={[styles.card, styles.tiltCard, className].filter(Boolean).join(" ")}
       data-goal-status={goalStatus}
+      onPointerMove={move}
+      onPointerLeave={reset}
+      onPointerCancel={reset}
     >
       {statusLabel ? <span className="sr-only">{statusLabel}</span> : null}
       {children}
@@ -457,41 +466,59 @@ function FunnelComparison({
   realizedStatuses: FunnelGoalStatuses;
 }) {
   const [swapped, setSwapped] = useState(false);
+  const swapControl = (side: "left" | "right") => (
+    <button
+      type="button"
+      className={styles.swapFunnels}
+      onClick={() => setSwapped((current) => !current)}
+      aria-label={`Trocar os conjuntos de funil a partir do lado ${side === "left" ? "esquerdo" : "direito"}`}
+      title="Trocar posição dos conjuntos"
+    >
+      <ArrowLeftRight size={16} aria-hidden="true" /> Trocar posição
+    </button>
+  );
+  const expectedPanel = (
+    <article key="expected">
+      <header className={styles.funnelHeading}>
+        <div>
+          <h2>Funil esperado no período</h2>
+          <p>Projeção proporcional da meta para os dias e filtros selecionados.</p>
+        </div>
+        {swapControl(swapped ? "left" : "right")}
+      </header>
+      <div className={styles.funnelPanel}>
+        <FunnelConversions values={expected} />
+        <FunnelGraphic values={expected} label="Funil esperado no período" />
+      </div>
+    </article>
+  );
+  const realizedPanel = (
+    <article key="realized">
+      <header className={styles.funnelHeading}>
+        <div>
+          <h2>Realizado até o momento</h2>
+          <p>Resultados consolidados no período e filtros selecionados.</p>
+        </div>
+        {swapControl(swapped ? "right" : "left")}
+      </header>
+      <div className={`${styles.funnelPanel} ${styles.funnelPanelReversed}`}>
+        <FunnelGraphic
+          values={realized}
+          label="Funil realizado no período"
+          statuses={realizedStatuses}
+        />
+        <FunnelConversions values={realized} />
+      </div>
+    </article>
+  );
   return (
     <section
       className={`${styles.card} ${styles.funnelComparison}`}
       aria-label="Funis esperado e realizado"
     >
-      <button
-        type="button"
-        className={styles.swapFunnels}
-        onClick={() => setSwapped(!swapped)}
-        aria-label="Trocar posição dos funis"
-        title="Trocar posição dos funis"
-      >
-        <ArrowLeftRight size={16} aria-hidden="true" /> Trocar posição
-      </button>
-      <article style={{ order: swapped ? 0 : 2 }}>
-        <h2>Funil esperado no período</h2>
-        <p>Projeção proporcional da meta para os dias e filtros selecionados.</p>
-        <div className={styles.funnelPanel}>
-          <FunnelConversions values={expected} />
-          <FunnelGraphic values={expected} label="Funil esperado no período" />
-        </div>
-      </article>
-      <div className={styles.funnelDivider} style={{ order: 1 }} aria-hidden="true" />
-      <article style={{ order: swapped ? 2 : 0 }}>
-        <h2>Realizado até o momento</h2>
-        <p>Resultados consolidados no período e filtros selecionados.</p>
-        <div className={`${styles.funnelPanel} ${styles.funnelPanelReversed}`}>
-          <FunnelGraphic
-            values={realized}
-            label="Funil realizado no período"
-            statuses={realizedStatuses}
-          />
-          <FunnelConversions values={realized} />
-        </div>
-      </article>
+      {swapped ? expectedPanel : realizedPanel}
+      <div className={styles.funnelDivider} aria-hidden="true" />
+      {swapped ? realizedPanel : expectedPanel}
     </section>
   );
 }
@@ -1015,15 +1042,7 @@ type RecencyItem = {
   daysSinceLastAppointment: number;
 };
 
-function RecencyPanel({
-  title,
-  items,
-  sectionName,
-}: {
-  title: string;
-  items: RecencyItem[];
-  sectionName?: string;
-}) {
+function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] }) {
   const tone =
     items.length === 0
       ? "blue"
@@ -1033,13 +1052,9 @@ function RecencyPanel({
           ? "yellow"
           : "blue";
   return (
-    <ChartTile
-      id={title}
-      title={title}
-      tone={tone}
-      sectionName={sectionName}
-      controls={<span>{number.format(items.length)} corretores</span>}
-    >
+    <section className={styles.recencyPanel} data-tone={tone} aria-label={title}>
+      <h2 className="sr-only">{title}</h2>
+      <span className={styles.recencyCount}>{number.format(items.length)} corretores</span>
       {items.length === 0 ? (
         <Empty>Nenhum corretor nesta faixa.</Empty>
       ) : (
@@ -1060,7 +1075,7 @@ function RecencyPanel({
           ))}
         </ol>
       )}
-    </ChartTile>
+    </section>
   );
 }
 
@@ -1499,6 +1514,453 @@ export function AppointmentsDashboard({
             goal: result.todayGoal,
           },
         ];
+  const productiveStatus = atLeastStatus(result.productivePercent, 100);
+  const contentByMetricAndType: DashboardContentByMetricAndType = {
+    "appointments.goal": {
+      kpi: (
+        <TiltCard
+          className={styles.gaugeCard}
+          goalStatus={atLeastStatus(result.total, monthlyGoal)}
+          statusLabel={
+            monthlyGoal === null
+              ? "Meta mensal indisponível"
+              : `${result.total >= monthlyGoal ? "Meta mensal atingida" : "Abaixo da meta mensal"}: ${number.format(result.total)} de ${number.format(monthlyGoal)}`
+          }
+        >
+          <h2>Meta do mês</h2>
+          <GoalGauge current={result.total} goal={monthlyGoal} />
+          <span className={styles.goalFormula}>
+            {monthlyGoal === null ||
+            resolvedGoals[selectedMonth] == null ||
+            result.goalBrokerCount === null
+              ? "Meta individual ou corretores indisponíveis"
+              : `${number.format(resolvedGoals[selectedMonth]!)} por corretor × ${number.format(result.goalBrokerCount)} corretores`}
+          </span>
+        </TiltCard>
+      ),
+    },
+    "team.productive": {
+      donut: (
+        <ProductiveTeamCard
+          productive={result.productiveBrokers}
+          brokers={result.brokerCount}
+          percent={result.productivePercent}
+        />
+      ),
+      kpi: (
+        <Kpi
+          label="Equipe produtiva"
+          value={
+            result.productivePercent === null
+              ? null
+              : `${decimal.format(result.productivePercent)}%`
+          }
+          detail={
+            result.productiveBrokers === null || result.brokerCount === null
+              ? "Aguardando o elenco vigente de corretores"
+              : `${number.format(result.productiveBrokers)} de ${number.format(result.brokerCount)} corretores com agendamento`
+          }
+          goalStatus={productiveStatus}
+          statusLabel={
+            result.productivePercent === null
+              ? "Meta de equipe produtiva indisponível"
+              : `${productiveStatus === "positive" ? "Meta atingida" : "Abaixo da meta"}: ${decimal.format(result.productivePercent)}% de 100%`
+          }
+        />
+      ),
+    },
+    "brokers.total": {
+      kpi: (
+        <Kpi
+          label="Corretores cadastrados"
+          value={result.brokerCount === null ? null : number.format(result.brokerCount)}
+          detail="Total vigente do relatório de corretores"
+        />
+      ),
+    },
+    "managers.total": {
+      kpi: (
+        <Kpi
+          label="Gerentes cadastrados"
+          value={
+            result.registeredManagerCount === null
+              ? null
+              : number.format(result.registeredManagerCount)
+          }
+          detail="Gerentes de Vendas vinculados aos corretores"
+        />
+      ),
+    },
+    "visits.total": {
+      kpi: (
+        <Kpi
+          label="Visitas realizadas"
+          value={result.visitsPerformed === null ? null : number.format(result.visitsPerformed)}
+          detail="Período selecionado"
+        />
+      ),
+    },
+    "sales.total": {
+      kpi: (
+        <Kpi
+          label="Vendas no período"
+          value={result.sales === null ? null : number.format(result.sales)}
+          detail="Período selecionado"
+        />
+      ),
+    },
+    "conversion.opportunity-appointment": {
+      kpi: (
+        <ConversionKpi
+          title="Oportunidade x Agendamento"
+          source={result.funnel?.opportunities ?? null}
+          target={result.funnel?.appointments ?? null}
+          sourceUnit="oportunidades"
+          targetUnit="agendamento"
+          goal={activeConversionGoals?.opportunityAppointment ?? null}
+          goalContext={goalContext}
+        />
+      ),
+    },
+    "conversion.appointment-visit": {
+      kpi: (
+        <ConversionKpi
+          title="Agendamento x Visita"
+          source={result.funnel?.appointments ?? null}
+          target={result.funnel?.visits ?? null}
+          sourceUnit="agendamentos"
+          targetUnit="visita"
+          goal={activeConversionGoals?.appointmentVisit ?? null}
+          goalContext={goalContext}
+        />
+      ),
+    },
+    "conversion.appointment-sale": {
+      kpi: (
+        <ConversionKpi
+          title="Agendamento x Venda"
+          source={result.funnel?.appointments ?? null}
+          target={result.funnel?.sales ?? null}
+          sourceUnit="agendamentos"
+          targetUnit="venda"
+          goal={activeConversionGoals?.appointmentSale ?? null}
+          goalContext={goalContext}
+        />
+      ),
+    },
+    "appointments.rate": {
+      kpi: (
+        <Kpi
+          label="Média de agendamentos"
+          value={result.dailyAverage === null ? null : decimal.format(result.dailyAverage)}
+          detail="Média diária no período selecionado"
+          goalStatus={atLeastStatus(result.dailyAverage, result.dailyAverageGoal)}
+          statusLabel={
+            result.dailyAverage === null || result.dailyAverageGoal === null
+              ? "Comparação com a meta indisponível"
+              : `${result.dailyAverage >= result.dailyAverageGoal ? "Meta atingida" : "Abaixo da meta"}: média ${decimal.format(result.dailyAverage)} para meta diária média ${decimal.format(result.dailyAverageGoal)}`
+          }
+        />
+      ),
+    },
+    "appointments.yesterday": {
+      kpi: (
+        <Kpi
+          label="Agendamentos ontem"
+          value={number.format(result.yesterday)}
+          detail="Pela data de criação"
+          goalStatus={atLeastStatus(result.yesterday, result.yesterdayGoal)}
+          statusLabel={
+            result.yesterdayGoal === null
+              ? "Comparação com a meta indisponível"
+              : `${result.yesterday >= result.yesterdayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.yesterday)} para meta ${number.format(result.yesterdayGoal)}`
+          }
+        />
+      ),
+    },
+    "appointments.today": {
+      kpi: (
+        <Kpi
+          label="Agendamentos hoje"
+          value={number.format(result.today)}
+          detail="Pela data de criação"
+          goalStatus={atLeastStatus(result.today, result.todayGoal)}
+          statusLabel={
+            result.todayGoal === null
+              ? "Comparação com a meta indisponível"
+              : `${result.today >= result.todayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para meta ${number.format(result.todayGoal)}`
+          }
+        />
+      ),
+    },
+    "appointments.funnel-comparison": {
+      funnel: (
+        <FunnelComparison
+          expected={expectedFunnel}
+          realized={result.funnel}
+          realizedStatuses={realizedStatuses}
+        />
+      ),
+    },
+    "appointments.daily": {
+      bars: (
+        <Chart title="Evolução de agendamentos por dia">
+          {monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <Columns
+              buckets={result.daily}
+              label="Agendamentos por dia do mês selecionado"
+              daily
+              isSelected={(bucket) =>
+                filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
+              }
+              onSelect={(bucket) => toggleCalendarDate(bucket.key)}
+            />
+          )}
+        </Chart>
+      ),
+    },
+    "appointments.today-comparison": {
+      bars: (
+        <Chart title="Previstos e realizados hoje">
+          {result.performedToday === null ? (
+            <Empty>Dados operacionais indisponíveis nesta atualização.</Empty>
+          ) : (
+            <Columns
+              buckets={paired}
+              label="Agendamentos previstos e realizados hoje"
+              isSelected={() => selectedDates.includes(analysis.referenceDate)}
+              onSelect={() => {
+                if (selectedMonth !== referenceMonth) selectMonth(referenceMonth);
+                setFilters((current) => ({
+                  ...current,
+                  createdDates: [analysis.referenceDate],
+                }));
+              }}
+            />
+          )}
+        </Chart>
+      ),
+    },
+    "appointments.weekly": {
+      bars: (
+        <Chart title="Agendamentos por semana">
+          {monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <>
+              <Columns
+                buckets={result.weekly}
+                label="Agendamentos por semana do mês selecionado"
+                selected={filters.week ? String(filters.week) : undefined}
+                onSelect={(bucket) => toggleFilter("week", Number(bucket.key))}
+              />
+              <p className={styles.note}>
+                Semanas do mês: segunda a domingo. A primeira pode ser parcial.
+              </p>
+            </>
+          )}
+        </Chart>
+      ),
+    },
+    "ranking.score": {
+      bars: (
+        <Chart title="Ranking Score">
+          {!canViewDevelopmentRankings ? (
+            <Empty>Ranking Score indisponível para seu perfil de acesso.</Empty>
+          ) : monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <Columns
+              buckets={result.accountRankings ?? []}
+              label="Ranking Score"
+              selected={filters.accountRanking}
+              onSelect={(bucket) => toggleFilter("accountRanking", bucket.key)}
+              verticalLabels
+            />
+          )}
+        </Chart>
+      ),
+    },
+    "ranking.owner": {
+      "horizontal-bars": (
+        <Chart title="Ranking por responsável">
+          {monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <Ranking
+              buckets={result.owners}
+              total={result.total}
+              selected={filters.owner}
+              onSelect={(bucket) => toggleFilter("owner", bucket.key)}
+            />
+          )}
+        </Chart>
+      ),
+    },
+    "ranking.manager": {
+      "horizontal-bars": (
+        <Chart title="Ranking por gerente">
+          {monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <Ranking
+              buckets={result.managers}
+              total={result.total}
+              selected={filters.manager}
+              onSelect={(bucket) => toggleFilter("manager", bucket.key)}
+            />
+          )}
+        </Chart>
+      ),
+    },
+    "ranking.regional-manager": {
+      "horizontal-bars": (
+        <Chart title="Ranking por gerente regional">
+          {monthUnavailable ? (
+            <Empty>Período sem cobertura disponível.</Empty>
+          ) : (
+            <Ranking
+              buckets={result.regionalManagers}
+              total={result.total}
+              selected={filters.regionalManager}
+              onSelect={(bucket) => toggleFilter("regionalManager", bucket.key)}
+            />
+          )}
+        </Chart>
+      ),
+    },
+    "conversion-ranking.owner": {
+      "horizontal-bars": (
+        <Chart title="Melhor responsável: Agendamento x Visita">
+          <ConversionRanking
+            buckets={result.conversionRankings.owners}
+            total={result.total}
+            available={result.conversionAvailable}
+          />
+        </Chart>
+      ),
+    },
+    "conversion-ranking.manager": {
+      "horizontal-bars": (
+        <Chart title="Melhor gerente: Agendamento x Visita">
+          <ConversionRanking
+            buckets={result.conversionRankings.managers}
+            total={result.total}
+            available={result.conversionAvailable}
+          />
+        </Chart>
+      ),
+    },
+    "conversion-ranking.regional-manager": {
+      "horizontal-bars": (
+        <Chart title="Melhor gerente regional: Agendamento x Visita">
+          <ConversionRanking
+            buckets={result.conversionRankings.regionalManagers}
+            total={result.total}
+            available={result.conversionAvailable}
+          />
+        </Chart>
+      ),
+    },
+    "recency.up-to-7-days": {
+      table: (
+        <RecencyPanel
+          title="Último agendamento: até 7 dias"
+          items={result.brokerRecency.upTo7Days}
+        />
+      ),
+    },
+    "recency.8-to-14-days": {
+      table: (
+        <RecencyPanel
+          title="Último agendamento: de 8 a 14 dias"
+          items={result.brokerRecency.from8To14Days}
+        />
+      ),
+    },
+    "recency.15-plus-days": {
+      table: (
+        <RecencyPanel
+          title="Último agendamento: 15 dias ou mais"
+          items={result.brokerRecency.from15Days}
+        />
+      ),
+    },
+    "appointments.monthly": {
+      bars: (
+        <Chart
+          title="Agendamentos por mês"
+          controls={
+            <div className={styles.yearControl}>
+              <label htmlFor={yearId}>Ano</label>
+              <select
+                id={yearId}
+                value={selectedYear}
+                onChange={(event) => {
+                  setSelectedYear(event.target.value);
+                  setSelectedRow("");
+                  setRowBaseFilters(null);
+                }}
+              >
+                {years.map((year) => (
+                  <option key={year} value={year}>
+                    {year}
+                  </option>
+                ))}
+              </select>
+            </div>
+          }
+        >
+          <Columns
+            buckets={result.monthly}
+            label={`Agendamentos por mês de ${selectedYear}`}
+            monthly
+            onSelect={(bucket) => selectMonth(`${selectedYear}-${bucket.key}`)}
+          />
+        </Chart>
+      ),
+    },
+    "appointments.details": {
+      table:
+        result.details === null ? (
+          <section className={`${styles.card} ${styles.tableCard}`}>
+            <h2>Detalhamento dos agendamentos</h2>
+            <Empty>Detalhamento indisponível nesta atualização.</Empty>
+          </section>
+        ) : (
+          <AppointmentTable
+            rows={result.details}
+            timezone={timezone}
+            selectedKey={selectedRow}
+            onSelect={(rowFilters, key) => {
+              if (selectedRow === key) {
+                setSelectedRow("");
+                setFilters(rowBaseFilters ?? { channel: 1 });
+                setRowBaseFilters(null);
+              } else {
+                const baseFilters = rowBaseFilters ?? filters;
+                setRowBaseFilters(baseFilters);
+                setSelectedRow(key);
+                setFilters({ ...baseFilters, ...rowFilters });
+              }
+            }}
+          />
+        ),
+    },
+  };
+  const canvasScopeKey = selectedChannel === 0 ? "channel.partnerships" : "channel.house";
+  const filterSummary = [
+    `Canal: ${selectedChannel === 0 ? "Imob / Parcerias" : "House"}`,
+    periodLabel || `Mês: ${selectedMonth}`,
+    filters.regionalManager ? `Regional: ${shortName(filters.regionalManager)}` : "",
+    filters.manager ? `Gerente: ${shortName(filters.manager)}` : "",
+    filters.owner ? `Responsável: ${shortName(filters.owner)}` : "",
+    filters.company ? `Empresa: ${filters.company}` : "",
+  ]
+    .filter(Boolean)
+    .join(" · ");
   return (
     <div className={styles.dashboard}>
       <div className={styles.titleRow}>
@@ -1540,350 +2002,24 @@ export function AppointmentsDashboard({
         onSelectRange={selectRange}
       />
 
-      <div
-        className={styles.kpiGrid}
-        data-appointments-section
-        data-section-name="Resumo"
-        tabIndex={-1}
-      >
-        <TiltCard
-          className={styles.gaugeCard}
-          goalStatus={atLeastStatus(result.total, monthlyGoal)}
-          statusLabel={
-            monthlyGoal === null
-              ? "Meta mensal indisponível"
-              : `${result.total >= monthlyGoal ? "Meta mensal atingida" : "Abaixo da meta mensal"}: ${number.format(result.total)} de ${number.format(monthlyGoal)}`
-          }
-        >
-          <h2>Meta do mês</h2>
-          <GoalGauge current={result.total} goal={monthlyGoal} />
-          <span className={styles.goalFormula}>
-            {monthlyGoal === null ||
-            resolvedGoals[selectedMonth] == null ||
-            result.goalBrokerCount === null
-              ? "Meta individual ou corretores indisponíveis"
-              : `${number.format(resolvedGoals[selectedMonth]!)} por corretor × ${number.format(result.goalBrokerCount)} corretores`}
-          </span>
-        </TiltCard>
-        <ProductiveTeamCard
-          productive={result.productiveBrokers}
-          brokers={result.brokerCount}
-          percent={result.productivePercent}
-        />
-        <Kpi
-          label="Corretores cadastrados"
-          value={result.brokerCount === null ? null : number.format(result.brokerCount)}
-          detail="Total vigente do relatório de corretores"
-        />
-        <Kpi
-          label="Gerentes cadastrados"
-          value={
-            result.registeredManagerCount === null
-              ? null
-              : number.format(result.registeredManagerCount)
-          }
-          detail="Gerentes de Vendas vinculados aos corretores"
-        />
-        <Kpi
-          label="Visitas realizadas"
-          value={result.visitsPerformed === null ? null : number.format(result.visitsPerformed)}
-          detail="Período selecionado"
-        />
-        <Kpi
-          label="Vendas no período"
-          value={result.sales === null ? null : number.format(result.sales)}
-          detail="Período selecionado"
-        />
-        <ConversionKpi
-          title="Oportunidade x Agendamento"
-          source={result.funnel?.opportunities ?? null}
-          target={result.funnel?.appointments ?? null}
-          sourceUnit="oportunidades"
-          targetUnit="agendamento"
-          goal={activeConversionGoals?.opportunityAppointment ?? null}
-          goalContext={goalContext}
-        />
-        <ConversionKpi
-          title="Agendamento x Visita"
-          source={result.funnel?.appointments ?? null}
-          target={result.funnel?.visits ?? null}
-          sourceUnit="agendamentos"
-          targetUnit="visita"
-          goal={activeConversionGoals?.appointmentVisit ?? null}
-          goalContext={goalContext}
-        />
-        <ConversionKpi
-          title="Agendamento x Venda"
-          source={result.funnel?.appointments ?? null}
-          target={result.funnel?.sales ?? null}
-          sourceUnit="agendamentos"
-          targetUnit="venda"
-          goal={activeConversionGoals?.appointmentSale ?? null}
-          goalContext={goalContext}
-        />
-        <Kpi
-          label="Média de agendamentos"
-          value={result.dailyAverage === null ? null : decimal.format(result.dailyAverage)}
-          detail="Média diária no período selecionado"
-          goalStatus={atLeastStatus(result.dailyAverage, result.dailyAverageGoal)}
-          statusLabel={
-            result.dailyAverage === null || result.dailyAverageGoal === null
-              ? "Comparação com a meta indisponível"
-              : `${result.dailyAverage >= result.dailyAverageGoal ? "Meta atingida" : "Abaixo da meta"}: média ${decimal.format(result.dailyAverage)} para meta diária média ${decimal.format(result.dailyAverageGoal)}`
-          }
-        />
-        <Kpi
-          label="Agendamentos ontem"
-          value={number.format(result.yesterday)}
-          detail="Pela data de criação"
-          goalStatus={atLeastStatus(result.yesterday, result.yesterdayGoal)}
-          statusLabel={
-            result.yesterdayGoal === null
-              ? "Comparação com a meta indisponível"
-              : `${result.yesterday >= result.yesterdayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.yesterday)} para meta ${number.format(result.yesterdayGoal)}`
-          }
-        />
-        <Kpi
-          label="Agendamentos hoje"
-          value={number.format(result.today)}
-          detail="Pela data de criação"
-          goalStatus={atLeastStatus(result.today, result.todayGoal)}
-          statusLabel={
-            result.todayGoal === null
-              ? "Comparação com a meta indisponível"
-              : `${result.today >= result.todayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para meta ${number.format(result.todayGoal)}`
-          }
-        />
-      </div>
-
-      <div data-appointments-section data-section-name="Funis" tabIndex={-1}>
-        <FunnelComparison
-          expected={expectedFunnel}
-          realized={result.funnel}
-          realizedStatuses={realizedStatuses}
-        />
-      </div>
-
-      <ChartBoard ids={chartIds} storageKey="appointments">
-        <div className={styles.featureChartRow}>
-          <Chart title="Evolução de agendamentos por dia" sectionName="Evolução diária" wide>
-            {monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <Columns
-                buckets={result.daily}
-                label="Agendamentos por dia do mês selecionado"
-                daily
-                isSelected={(bucket) =>
-                  filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
-                }
-                onSelect={(bucket) => toggleCalendarDate(bucket.key)}
-              />
-            )}
-          </Chart>
-        </div>
-
-        <div className={styles.overviewGrid}>
-          <Chart title="Previstos e realizados hoje" sectionName="Visão do período">
-            {result.performedToday === null ? (
-              <Empty>Dados operacionais indisponíveis nesta atualização.</Empty>
-            ) : (
-              <Columns
-                buckets={paired}
-                label="Agendamentos previstos e realizados hoje"
-                isSelected={() => selectedDates.includes(analysis.referenceDate)}
-                onSelect={() => {
-                  if (selectedMonth !== referenceMonth) selectMonth(referenceMonth);
-                  setFilters((current) => ({
-                    ...current,
-                    createdDates: [analysis.referenceDate],
-                  }));
-                }}
-              />
-            )}
-          </Chart>
-          <Chart title="Agendamentos por semana">
-            {monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <>
-                <Columns
-                  buckets={result.weekly}
-                  label="Agendamentos por semana do mês selecionado"
-                  selected={filters.week ? String(filters.week) : undefined}
-                  onSelect={(bucket) => toggleFilter("week", Number(bucket.key))}
-                />
-                <p className={styles.note}>
-                  Semanas do mês: segunda a domingo. A primeira pode ser parcial.
-                </p>
-              </>
-            )}
-          </Chart>
-          <Chart title="Ranking Score">
-            {!canViewDevelopmentRankings ? (
-              <Empty>Ranking Score indisponível para seu perfil de acesso.</Empty>
-            ) : monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <Columns
-                buckets={result.accountRankings ?? []}
-                label="Ranking Score"
-                selected={filters.accountRanking}
-                onSelect={(bucket) => toggleFilter("accountRanking", bucket.key)}
-                verticalLabels
-              />
-            )}
-          </Chart>
-        </div>
-
-        <div className={styles.insightGrid}>
-          <Chart title="Ranking por responsável" sectionName="Rankings">
-            {monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <Ranking
-                buckets={result.owners}
-                total={result.total}
-                selected={filters.owner}
-                onSelect={(bucket) => toggleFilter("owner", bucket.key)}
-              />
-            )}
-          </Chart>
-          <Chart title="Ranking por gerente">
-            {monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <Ranking
-                buckets={result.managers}
-                total={result.total}
-                selected={filters.manager}
-                onSelect={(bucket) => toggleFilter("manager", bucket.key)}
-              />
-            )}
-          </Chart>
-          <Chart title="Ranking por gerente regional">
-            {monthUnavailable ? (
-              <Empty>Período sem cobertura disponível.</Empty>
-            ) : (
-              <Ranking
-                buckets={result.regionalManagers}
-                total={result.total}
-                selected={filters.regionalManager}
-                onSelect={(bucket) => toggleFilter("regionalManager", bucket.key)}
-              />
-            )}
-          </Chart>
-        </div>
-
-        <div
-          className={styles.conversionRankingGrid}
-          data-appointments-chart-group="conversion-rankings"
-        >
-          <Chart title="Melhor responsável: Agendamento x Visita" sectionName="Conversões">
-            <ConversionRanking
-              buckets={result.conversionRankings.owners}
-              total={result.total}
-              available={result.conversionAvailable}
-            />
-          </Chart>
-          <Chart title="Melhor gerente: Agendamento x Visita">
-            <ConversionRanking
-              buckets={result.conversionRankings.managers}
-              total={result.total}
-              available={result.conversionAvailable}
-            />
-          </Chart>
-          <Chart title="Melhor gerente regional: Agendamento x Visita">
-            <ConversionRanking
-              available={result.conversionAvailable}
-              buckets={result.conversionRankings.regionalManagers}
-              total={result.total}
-            />
-          </Chart>
-        </div>
-
-        <div className={styles.recencyGrid}>
-          <RecencyPanel
-            title="Último agendamento: até 7 dias"
-            items={result.brokerRecency.upTo7Days}
-            sectionName="Recência"
-          />
-          <RecencyPanel
-            title="Último agendamento: de 8 a 14 dias"
-            items={result.brokerRecency.from8To14Days}
-          />
-          <RecencyPanel
-            title="Último agendamento: 15 dias ou mais"
-            items={result.brokerRecency.from15Days}
-          />
-        </div>
-
-        <div className={styles.monthlyChartRow}>
-          <Chart
-            title="Agendamentos por mês"
-            sectionName="Evolução mensal"
-            wide
-            controls={
-              <div className={styles.yearControl}>
-                <label htmlFor={yearId}>Ano</label>
-                <select
-                  id={yearId}
-                  value={selectedYear}
-                  onChange={(event) => {
-                    setSelectedYear(event.target.value);
-                    setSelectedRow("");
-                    setRowBaseFilters(null);
-                  }}
-                >
-                  {years.map((year) => (
-                    <option key={year} value={year}>
-                      {year}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            }
-          >
-            <Columns
-              buckets={result.monthly}
-              label={`Agendamentos por mês de ${selectedYear}`}
-              monthly
-              onSelect={(bucket) => {
-                const nextMonth = `${selectedYear}-${bucket.key}`;
-                selectMonth(nextMonth);
-              }}
-            />
-          </Chart>
-        </div>
-      </ChartBoard>
-      {result.details === null ? (
-        <div data-appointments-section data-section-name="Detalhamento" tabIndex={-1}>
-          <section className={`${styles.card} ${styles.tableCard}`}>
-            <h2>Detalhamento dos agendamentos</h2>
-            <Empty>Detalhamento indisponível nesta atualização.</Empty>
-          </section>
-        </div>
-      ) : (
-        <div data-appointments-section data-section-name="Detalhamento" tabIndex={-1}>
-          <AppointmentTable
-            rows={result.details}
-            timezone={timezone}
-            selectedKey={selectedRow}
-            onSelect={(rowFilters, key) => {
-              if (selectedRow === key) {
-                setSelectedRow("");
-                setFilters(rowBaseFilters ?? { channel: 1 });
-                setRowBaseFilters(null);
-              } else {
-                const baseFilters = rowBaseFilters ?? filters;
-                setRowBaseFilters(baseFilters);
-                setSelectedRow(key);
-                setFilters({ ...baseFilters, ...rowFilters });
-              }
-            }}
-          />
-        </div>
-      )}
+      <ConfigurableDashboardCanvas
+        key={canvasScopeKey}
+        initialCards={APPOINTMENTS_CANVAS_DEFAULT_CARDS}
+        catalog={APPOINTMENTS_CANVAS_CATALOG}
+        compatibility={APPOINTMENTS_CANVAS_COMPATIBILITY}
+        contentByMetricAndType={contentByMetricAndType}
+        pageKey={APPOINTMENTS_CANVAS_PAGE_KEY}
+        scopeKey={canvasScopeKey}
+        exportContext={{
+          title: "Dashboard de agendamentos",
+          context: goalContext,
+          filters: filterSummary,
+          source: "Análise agregada do CRM",
+          ...(generatedAtLabel ? { generatedAt: generatedAtLabel } : {}),
+        }}
+        ariaLabel={`Dashboard de agendamentos — ${goalContext}`}
+        className={styles.configurableCanvas!}
+      />
       <footer className={styles.pageFooter}>
         <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>
         <strong>Desenvolvido e gerenciado por Leandro Lucas</strong>

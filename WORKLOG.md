@@ -1,5 +1,33 @@
 # Worklog
 
+## 2026-10-26 — Canvas analítico de Visão Geral e Agendamentos
+
+Foi criado um núcleo compartilhado de canvas para as páginas `/app` e
+`/app/etapas/agendamentos`. O documento de cada card é serializável e versionado;
+a grade de 12 colunas usa Pointer Events, captura de ponteiro, placeholder,
+snap, reflow determinístico, animação de reposicionamento, ResizeObserver,
+limites por tipo, teclado e cancelamento com `Esc`. Seleção múltipla,
+desfazer/refazer e duplicidade são tratados no mesmo estado transacional.
+
+Os 13 funis da Visão Geral e os 28 componentes analíticos de Agendamentos foram
+adaptados sem trocar seus leitores, filtros, regras de House/Imob, cálculos ou
+permissões. O catálogo de cada página restringe o editor às combinações que têm
+efeito real no conteúdo atual, evitando controles decorativos. A visualização
+ampliada reutiliza o mesmo componente do card.
+
+Perfis privados foram preparados com migration, RLS/MFA, grants mínimos e RPCs
+versionadas. As rotas validam sessão, permissão da página, escopo, catálogo,
+tamanho e versão otimista; `409` representa conflito real. O cliente salva após
+700 ms e só lê o cache local quando o servidor está indisponível. Nenhuma
+migration foi aplicada remotamente.
+
+A exportação permite escolher os cards na ordem atual. O PDF registra título,
+contexto, filtros, fonte e horário, além de capturar cada card selecionado como
+PNG para preservar o gráfico. Foram adicionados testes de layout, migração de
+schema, reducer, compatibilidade, integração das duas páginas, API e segurança
+do perfil. A especificação proíbe publicação sem autorização separada; por isso
+esta entrega permanece local até novo pedido explícito.
+
 ## 2026-10-26 — Precisão financeira do Simulador CAIXA
 
 A página CAIXA passou a usar 90% como cota máxima do SBPE SAC e 80% no
