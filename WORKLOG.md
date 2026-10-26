@@ -54,6 +54,18 @@ de Agendamentos prevalecia sobre o breakpoint compacto e aproximava
 itens, 4 px de padding lateral e 44 px de altura mínima, preservando ícones e
 sem alterar o shell das demais páginas. A matriz local focada permaneceu 21/21.
 
+A captura autenticada protegida `40298568730` aprovou build, E2E e toda a matriz
+funcional/Axe/zoom. O artefato `12640948998` foi conferido pelo SHA256
+`6ce308fe31b8a8464b155b0818630cfee3bc92f8f2ad8dd6812f7b02436f9010`.
+Foram revisadas em resolução original as três variações desktop de tema, o tema
+escuro móvel e as sete larguras responsivas, sem corte, sobreposição ou overflow
+visível. Incorporadas somente as 11 imagens e os registros correspondentes de
+Agendamentos, mais uma entrada de proveniência; as demais rotas e matrizes foram
+preservadas. A fixture autenticada exibe o estado sem dados analíticos, enquanto
+a QA sintética 21/21 cobre cards, funis, gráficos e tabela preenchidos. Os 27
+testes de paridade passaram, com um caso condicional ignorado. Nova CI completa
+é obrigatória antes do merge e da publicação.
+
 ## 2026-10-26 — CAIXA: contraste de estados nos três temas
 
 O job Linux 121370107375 do run 40259598078 identificou contraste transitório

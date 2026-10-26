@@ -15,6 +15,7 @@
 - Exibe datas de recência, dias desde o último agendamento e uma tabela responsiva sem rolagem lateral no celular.
 - Ajusta os gráficos à meta diária, semanal e mensal, preservando Imob sem classificação quando não existe meta de agendamentos.
 - Compacta o cabeçalho desta rota entre 1181 e 1500 px para manter navegação, temas e conta separados, com alvos de interação acessíveis.
+- Atualiza somente as 11 referências visuais autenticadas de Agendamentos após revisão dos três temas e de sete larguras responsivas.
 - Adiciona rodapé de suporte e validação visual/interativa em 21 combinações de tema e viewport.
 
 ## 2026-10-26 — Contraste completo do Simulador CAIXA

@@ -42,6 +42,22 @@
   segue impedido pelo limite preexistente do exportador e nao deve ser descrito
   como concluido.
 
+### Captura autenticada do refinamento aprovada
+
+- Run protegido `40298568730`, artifact `12640948998`, head
+  `b5c80df99422364bd01926b523b54aa0efec6be1` e captura de merge
+  `90dcbe04b389ea144890bb1d5b82658333fc0f38`, em
+  `2026-10-26T09:53:37.533Z`. SHA256 do arquivo:
+  `6ce308fe31b8a8464b155b0818630cfee3bc92f8f2ad8dd6812f7b02436f9010`.
+- Build, E2E e matriz autenticada funcional/Axe/zoom passaram. Revisadas as 11
+  imagens de Agendamentos: sete larguras, tres temas desktop e dark mobile, sem
+  corte, sobreposicao ou overflow visivel. O estado autenticado sintetico sem
+  dados valida shell e layout; a QA local 21/21 valida o conteudo preenchido.
+- Incorporadas somente as 11 imagens, 11 entradas de screenshot, uma entrada
+  responsiva, uma de zoom e uma proveniencia. Outras rotas e matrizes foram
+  preservadas. Os testes de paridade aprovaram 27 casos e ignoraram um
+  condicional. CI completa, merge e publicacao ainda sao obrigatorios.
+
 ## 2026-10-26: publicacao da pagina de Agendamentos
 
 - Escopo comportamental exclusivo de `/app/etapas/agendamentos`: sidebar, funis,
