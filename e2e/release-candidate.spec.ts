@@ -2465,11 +2465,13 @@ test("login, logout and terminal state surfaces remain visually explicit", async
 
     await rolePage.goto("/app");
     await rolePage.evaluate(() => {
-      const card = document.querySelector<HTMLElement>('article[data-tone="default"]');
+      const card = document.querySelector<HTMLElement>(
+        '[data-dashboard-card-id] [data-density="compact"]',
+      );
       const cardClass = [...(card?.classList ?? [])].find(
         (className) => className.endsWith("__card") || className.endsWith("_card"),
       );
-      if (!cardClass) throw new Error("compiled analytics card class missing");
+      if (!cardClass) throw new Error("compiled analytics inner card class missing");
       const separator = cardClass.endsWith("__card") ? "__" : "_";
       const analyticsPrefix = cardClass.slice(0, -`${separator}card`.length);
       const classes = {
