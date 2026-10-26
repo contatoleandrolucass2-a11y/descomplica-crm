@@ -2576,3 +2576,39 @@
     font-size: 0.8rem;
   }
 }
+.caixa-page-shell .caixa-workspace > *,
+.caixa-page-shell .caixa-panel,
+.caixa-page-shell .caixa-guide > header > div {
+  min-width: 0;
+}
+.caixa-page-shell .caixa-diagnosis-subfilters > span,
+.caixa-page-shell .caixa-diagnosis-subfilters button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+.caixa-page-shell .caixa-utilities .caixa-save {
+  color: #ffffff;
+  background: #087583;
+  border: 1px solid #087583;
+}
+.caixa-page-shell .caixa-fgts-tool > p {
+  color: var(--ink-soft);
+  line-height: 1.5;
+}
+.caixa-page-shell .caixa-fgts-result {
+  margin-top: 16px;
+  padding: 16px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface-soft);
+  color: var(--ink);
+  line-height: 1.5;
+}
+.caixa-page-shell .caixa-fgts-result > span,
+.caixa-page-shell .caixa-fgts-result > strong {
+  display: block;
+}
+.caixa-page-shell .caixa-fgts-result > strong {
+  margin: 4px 0;
+  font-size: 1.5rem;
+}

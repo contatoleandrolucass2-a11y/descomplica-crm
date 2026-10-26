@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-25 — Simulação CAIXA com regras verificadas
+
+- Reproduz as quatro abas da referência pública exclusivamente na página CAIXA.
+- Corrige faixas, cotas, datas, FGTS sobreposto e enquadramento Classe Média.
+- Valida parâmetros confirmados e conserva avisos de cálculos parciais.
+- Documenta fórmulas e proveniência oficial; mantém APIs e autorização existentes.
+- Acrescenta testes financeiros, fluxos no navegador e acessibilidade móvel.
+
 ## 2026-10-25 - Publicacao validada do detalhamento dos funis
 
 - Registra o merge, a CI completa, o artefato imutavel e o deployment que

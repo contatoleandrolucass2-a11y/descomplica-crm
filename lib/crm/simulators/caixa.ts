@@ -254,6 +254,8 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
       );
   }
   const rate = getHousingRate({ ...input, product, middleClass });
+  if (middleClass && rate > 10)
+    errors.push("A taxa nominal anual do MCMV Classe Média não pode superar 10%.");
   if (!Number.isFinite(rate) || rate < 0 || rate > 100)
     errors.push("Informe a taxa nominal anual confirmada na CAIXA para este produto e perfil.");
   const subsidy = input.confirmedSubsidy ?? 0;

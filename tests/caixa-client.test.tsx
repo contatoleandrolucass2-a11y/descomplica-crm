@@ -170,6 +170,48 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await page.getByText("Parâmetros confirmados e valores opcionais", { exact: true }).click();
       await page.getByLabel("Condição do imóvel", { exact: false }).selectOption("new");
     }
+    async function auditCurrentTab(name: string) {
+      const directory = resolve("private-data/caixa-qa");
+      await mkdir(directory, { recursive: true });
+      for (const width of [1440, 390]) {
+        await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
+        await page.screenshot({
+          path: resolve(directory, `caixa-${name}-${width}.png`),
+          fullPage: true,
+        });
+        const dimensions = await page.evaluate(() => ({
+          width: innerWidth,
+          scroll: document.documentElement.scrollWidth,
+          overflow: [...document.querySelectorAll("*")]
+            .filter((element) => element.getBoundingClientRect().right > innerWidth + 1)
+            .slice(0, 12)
+            .map((element) => ({
+              tag: element.tagName,
+              class: element.className,
+              width: element.getBoundingClientRect().width,
+            })),
+        }));
+        expect(
+          dimensions.scroll <= dimensions.width,
+          `${name}/${width}: ${JSON.stringify(dimensions)}`,
+        ).toBe(true);
+        const axe = await new AxeBuilder({ page })
+          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+          .analyze();
+        expect(
+          axe.violations.map((violation) => ({
+            id: violation.id,
+            nodes: violation.nodes.map((node) => node.target),
+          })),
+          `${name}/${width}`,
+        ).toEqual([]);
+        await page.screenshot({
+          path: resolve(directory, `caixa-${name}-${width}.png`),
+          fullPage: true,
+        });
+      }
+      await page.setViewportSize({ width: 1440, height: 900 });
+    }
     it("calculates, invalidates stale output and preserves all reference tabs", async () => {
       await open();
       await fillMain();
@@ -202,10 +244,12 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(
         page.getByText("Certidão de estado civil", { exact: true }),
       ).toBeVisible();
+      await auditCurrentTab("documentos");
       await page.getByRole("button", { name: "04 Diagnóstico", exact: true }).click();
       await page.getByRole("button", { name: "Reprovado", exact: true }).click();
       await page.getByRole("button", { name: "Pontuação (rating)", exact: true }).click();
       await browserExpect(page.getByRole("heading", { name: /pontuação/i })).toBeVisible();
+      await auditCurrentTab("diagnostico");
       await page.getByRole("button", { name: "+ Utilitários", exact: true }).click();
       await page.getByRole("button", { name: "Tempo de FGTS", exact: true }).click();
       await page.getByLabel("Data início", { exact: true }).fill("2020-01-01");
@@ -214,6 +258,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(
         page.getByRole("heading", { name: "36 MESES ATINGIDOS NA ESTIMATIVA", exact: true }),
       ).toBeVisible();
+      await auditCurrentTab("utilitarios");
       expect(errors).toEqual([]);
     });
     it("has no horizontal overflow and passes axe in three themes on desktop and mobile", async () => {

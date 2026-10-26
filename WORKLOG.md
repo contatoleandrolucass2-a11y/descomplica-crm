@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-25 — CAIXA: validação da réplica e enquadramento
+
+Os 64 testes de cálculo/guards passaram; o cliente passou quatro testes,
+nove combinações de largura/tema e seis auditorias adicionais das abas em
+desktop/celular. A revisão independente corrigiu cidade/UF, prazo de obra,
+data-limite etária, valores não finitos, seguros acima da prestação e teto de
+subsídio. A IN17/IN4 confirmou Classe Média sem piso de renda de R$ 9.600;
+enquadramento, ausência de complemento e taxa nominal máxima de 10% estão
+explícitos. Fórmula completa do complemento documentada sem presumir anexos.
+Lint e typecheck locais passaram (36 warnings preexistentes); build inicial
+passou. Suite Windows apresentou timeouts em áreas externas e foi repetida
+com concorrência limitada. A CI de 0ab2a93c passou 4.241 testes e detectou o
+caso de teto de taxa, corrigido e comprovado nos 64 testes locais posteriores.
+CI final, comparação autenticada, merge e publicação permanecem pendentes.
+
 ## 2026-10-25 - Publicacao do hover e dos filtros herdados
 
 O PR #346 foi integrado em `c6de29d4`; a `main` publicada avancou para
