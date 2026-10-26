@@ -32,6 +32,34 @@ values
   ('ad710000-0000-4000-8000-000000000001', 'canvas-one@example.test'),
   ('ad710000-0000-4000-8000-000000000002', 'canvas-two@example.test');
 
+insert into public.profiles (
+  user_id,
+  email,
+  is_active,
+  profile_completed,
+  access_status
+)
+values
+  (
+    'ad710000-0000-4000-8000-000000000001',
+    'canvas-one@example.test',
+    true,
+    true,
+    'approved'
+  ),
+  (
+    'ad710000-0000-4000-8000-000000000002',
+    'canvas-two@example.test',
+    true,
+    true,
+    'approved'
+  );
+
+insert into public.user_roles (user_id, role_key)
+values
+  ('ad710000-0000-4000-8000-000000000001', 'master'),
+  ('ad710000-0000-4000-8000-000000000002', 'master');
+
 insert into auth.sessions (id, user_id, aal, not_after)
 values
   (
