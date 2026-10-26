@@ -321,9 +321,7 @@ try {
   await canvas.getByRole("button", { name: "Recolher gráfico" }).click();
   await expect(canvas.locator("#expanded")).not.toBeVisible();
   await campaignRow.click();
-  await expect(
-    frame.getByRole("heading", { name: /Empreendimento QA \| WhatsApp/ }),
-  ).toBeVisible();
+  await expect(frame.getByRole("heading", { name: /Empreendimento QA \| WhatsApp/ })).toBeVisible();
   await expect(canvas.locator('.card[data-chart-type="table"]')).toContainText("Público QA");
   await page.getByRole("button", { name: "accounts", exact: true }).click();
   await expect(frame.getByRole("heading", { name: "Limites", exact: true })).toBeVisible();
@@ -341,9 +339,10 @@ try {
   await frame.locator("#close-dialog").click();
   await page.reload();
   await expect(canvas.locator("#canvas")).toBeVisible();
-  await expect(
-    sidebar.getByRole("button", { name: /^Mapa de São Paulo\./ }),
-  ).toHaveAttribute("aria-disabled", "true");
+  await expect(sidebar.getByRole("button", { name: /^Mapa de São Paulo\./ })).toHaveAttribute(
+    "aria-disabled",
+    "true",
+  );
   await expect(sidebar.getByRole("button", { name: /^Ajustes\./ })).toHaveAttribute(
     "aria-disabled",
     "true",
