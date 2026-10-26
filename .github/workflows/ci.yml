@@ -108,6 +108,11 @@ jobs:
         env:
           FORECAST_SETTINGS_BROWSER: "1"
 
+      - name: CAIXA calculator with synthetic data, themes and accessibility
+        run: pnpm exec vitest run tests/caixa-client.test.tsx tests/caixa-calculator.test.ts --maxWorkers=1
+        env:
+          CAIXA_BROWSER: "1"
+
       - name: Qlik login with synthetic corporate provider
         run: node --test ops/qlik/browser-login.node-test.mjs
         env:

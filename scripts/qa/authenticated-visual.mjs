@@ -212,6 +212,7 @@ const archiveSimulatorRoutes = new Set([
 const dedicatedSimulatorRoutes = new Set([
   ...archiveSimulatorRoutes,
   "/app/simulacao/calcular-documentacao",
+  "/app/simulacao/caixa",
 ]);
 
 function expectedEnabledSimulatorRoutes() {

@@ -1,5 +1,69 @@
 # Worklog
 
+## 2026-10-26 — CAIXA: contraste de estados nos três temas
+
+O job Linux 121370107375 do run 40259598078 identificou contraste transitório
+insuficiente em botões inativos claros e no diagnóstico ativo. A transição
+global de cor/fundo de 160 ms interpolava primeiro plano e fundo por um estado
+de baixo contraste. A correção está limitada à página CAIXA: cores opacas e
+remoção dessa interpolação nos controles, preservando borda/sombra e o restante
+da aplicação. Estados escuros de avisos, fases, contadores, FGTS e remoção foram
+conferidos e corrigidos quando necessário.
+
+O artefato formatado passou 4/4 testes em 61,52 s: 12 combinações do formulário
+e 24 auditorias de estados (Resumo Parcial, Documentos, Diagnóstico e Utilitários,
+três temas, 1440/390). Inclui Remover habilitado com dois períodos. Zero Axe,
+transbordamento ou console; timeout de 90 s preservado. Os relatórios agora
+incluem cores calculadas e razões reais de contraste em caso de falha. A nova
+CI/captura autenticada permanece obrigatória antes da promoção de referências.
+
+## 2026-10-25 — CAIXA: correções da captura autenticada
+
+A captura 40254914307, do merge de teste bb059246/branch 203754ae, identificou
+somente falhas da CAIXA: ausência de elemento main e transbordamento em
+1024 px. As outras páginas, auditorias Axe e comparações com canvases passaram.
+Nenhuma referência externa ao escopo foi atualizada. O Archive real agora
+possui main; as tracks do formulário usam mínimos zero e três colunas na
+faixa de tablet, mantendo as regras existentes de celular.
+
+O teste local foi corrigido para renderizar o Archive real com os estilos
+globais, sem fabricar um main no harness. Reproduziu o erro de 1024 antes da
+correção. O artefato formatado passou 4/4 testes, 12 combinações de largura/tema
+e seis auditorias adicionais, sem transbordamento, falhas Axe ou console.
+Os 64 testes financeiros/guards também passaram. Os utilitários rejeitam
+valores monetários extremos antes de produzir Infinity/NaN, e o override de
+taxa MCMV respeita o teto publicado de 10%. A nova CI e captura autenticada
+ainda são necessárias antes de promover as imagens e publicar.
+
+## 2026-10-25 — CAIXA: validação da réplica e enquadramento
+
+O código formatado preserva agora classes completas dos estados de cidade,
+métrica e FGTS; regressões no navegador verificam a lista aberta e o resultado
+de tempo. O fluxo com seis auditorias adicionais passou após a formatação.
+O build final local também passou. Não há novos achados na revisão específica.
+
+O E2E autenticado foi alinhado exclusivamente à nova jornada CAIXA: verifica
+cálculo local com dados sintéticos e aviso de encargos ausentes, mantendo a
+asserção de endpoint oficial fechado. A antiga expectativa de motor visual
+bloqueado deixou de representar o comportamento solicitado nesta página.
+O workflow Protected visual candidate também recaptura quando esse contrato
+E2E muda, para não reutilizar uma captura que executou expectativas anteriores.
+
+Os 64 testes de cálculo/guards passaram; o cliente passou quatro testes,
+nove combinações de largura/tema e seis auditorias adicionais das abas em
+desktop/celular. A revisão independente corrigiu cidade/UF, prazo de obra,
+data-limite etária, valores não finitos, seguros acima da prestação e teto de
+subsídio. A IN17/IN4 confirmou Classe Média sem piso de renda de R$ 9.600;
+enquadramento, ausência de complemento e taxa nominal máxima de 10% estão
+explícitos. Fórmula completa do complemento documentada sem presumir anexos.
+Lint e typecheck locais passaram (36 warnings preexistentes); build inicial
+passou. Suite Windows apresentou timeouts em áreas externas e foi repetida
+com concorrência limitada. A CI de 0ab2a93c passou 4.241 testes e detectou o
+caso de teto de taxa, corrigido e comprovado nos 64 testes locais posteriores.
+CI final, comparação autenticada, merge e publicação permanecem pendentes.
+
+## 2026-10-25 — Validação complementar de Agendamentos
+
 Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
 
 ## 2026-10-25 - Espacamento dos valores das barras de agendamentos
@@ -9358,3 +9422,32 @@ página do CRM foi alterado por esta correção de gate.
 - O status de veiculação passa a ocupar uma linha própria dentro da coluna
   Campanha. A geometria automatizada confirma que o selo termina antes da
   coluna Investimento, inclusive com nomes longos.
+
+## 2026-10-25 — Simulador CAIXA: réplica e regras verificadas
+
+Página /app/simulacao/caixa recebe jornada dedicada baseada na referência pública,
+com Simulador, Documentos, Diagnóstico e Utilitários. Motor indicativo isolado
+usa faixas/taxas oficiais consultadas em 25/10/2026, corrige datas, cotas SBPE e
+FGTS sobreposto. Subsídio, seguros e taxa SBPE exigem parâmetros confirmados;
+incertezas são explícitas. Autorização de servidor e APIs bancárias preservadas.
+Origem, fórmulas, diferenças necessárias e limites em docs/simulators/CAIXA.md.
+Validação e publicação serão registradas com evidências ao concluir os gates.
+
+### 2026-10-26 — Revisão do resultado CAIXA em celular
+
+A revisão independente identificou a última casa decimal quebrando linha no
+resumo de 390 px. O layout passa a empilhar selo/rótulo, preservando quantias
+inteiras sem corte ou reticências. A regressão confere fragmentos de texto e
+contenção dos valores, além das auditorias de contraste e transbordamento.
+Nova captura autenticada e CI continuam obrigatórias antes da publicação.
+
+### Captura autenticada CAIXA aprovada
+
+Run `40263953439`, artifact `12626398223`, origem `051fb2ee` e captura
+`2c3e6d8c408bd6402a9a3653757c2da9f1a702f1`, em 26/10/2026 às 03:54:26 UTC:
+build, E2E e matriz funcional/Axe/zoom aprovados. Revisão independente das 11
+imagens sem achados. Incorporadas somente essas imagens e as 38 entradas da
+rota; referências e dados das demais páginas preservados. A CI `40263953550`
+aprovou 4.290 testes, mas encontrou HTTP 403 na fonte de ITBI de Documentação.
+Nova CI deve revalidar essa fonte sem exceção, mudança de script ou baseline
+de outra página. Nenhum merge/deploy executado nesta etapa.

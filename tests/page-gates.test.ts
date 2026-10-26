@@ -190,6 +190,13 @@ describe("protected commercial page set", () => {
     expect(layout).toContain('await enforcePermission("crm.simulators.view")');
     expect(dynamicPage).toContain('await enforcePermission("crm.simulators.view")');
     expect(dynamicPage).toContain("if (!pageGate?.releaseEnabled) forbidden()");
+    expect(dynamicPage).toContain('if (simulator === "caixa") return <CaixaArchive />');
+    expect(dynamicPage.indexOf('await enforcePermission("crm.simulators.view")')).toBeLessThan(
+      dynamicPage.indexOf('if (simulator === "caixa") return <CaixaArchive />'),
+    );
+    expect(dynamicPage.indexOf("if (!pageGate?.releaseEnabled) forbidden()")).toBeLessThan(
+      dynamicPage.indexOf('if (simulator === "caixa") return <CaixaArchive />'),
+    );
     expect(dynamicPage).toContain('const visualOnly = simulator === "caixa"');
     expect(dynamicPage.match(/!visualOnly &&/gu)).toHaveLength(2);
     expect(dynamicPage).toContain("motor e integração bancária permanecem indisponíveis");

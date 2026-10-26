@@ -2121,10 +2121,28 @@ test("released simulator pages respect explicit inventory access while the CAIXA
     await expect(
       page.getByRole("heading", { level: 1, name: "Simulação CAIXA", exact: true }),
     ).toBeVisible();
-    await expect(page.getByText("Motor CAIXA bloqueado.", { exact: true })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Ferramentas Caixa" })).toBeVisible();
+    await expect(page.getByText("Motor CAIXA bloqueado.", { exact: true })).toHaveCount(0);
     await expect(
       page.getByRole("button", { name: "Calcular simulação", exact: true }),
     ).toBeDisabled();
+    // Indicative local mathematics is available to the already authorized user;
+    // the separate official bank endpoint remains closed below.
+    await page.getByLabel("Renda familiar bruta", { exact: false }).fill("600000");
+    await page.getByLabel("Valor do imóvel *", { exact: false }).fill("30000000");
+    await page.getByLabel("Data de nascimento *", { exact: false }).fill("1991-03-15");
+    await page.getByRole("combobox", { name: "Cidade *" }).fill("São Paulo");
+    await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
+    await page.getByText("Parâmetros confirmados e valores opcionais", { exact: true }).click();
+    await page.getByLabel("Condição do imóvel", { exact: false }).selectOption("new");
+    await expect(
+      page.getByRole("button", { name: "Calcular simulação", exact: true }),
+    ).toBeEnabled();
+    await page.getByRole("button", { name: "Calcular simulação", exact: true }).click();
+    await expect(
+      page.getByRole("heading", { name: "Resumo financeiro", exact: true }),
+    ).toBeVisible();
+    await expect(page.locator("#caixa-simulation-result")).toContainText("seguros não confirmados");
     const caixaStatus = await page.request.get("/api/official-simulator/caixa");
     expect(caixaStatus.status()).toBe(200);
     expect(await caixaStatus.json()).toMatchObject({

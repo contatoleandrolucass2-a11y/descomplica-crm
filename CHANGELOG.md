@@ -1,5 +1,30 @@
 # Changelog
 
+## 2026-10-26 — Contraste completo do Simulador CAIXA
+
+- Mantém quantias completas em uma linha no resumo móvel, reorganizando rótulos e selos.
+- Atualiza somente as 11 referências visuais CAIXA após captura autenticada aprovada e revisão independente.
+- Corrige contraste de estados claros/escuros e a interpolação herdada de cor/fundo na página CAIXA.
+- Audita resultados, documentos, diagnóstico e utilitários nos três temas, incluindo controles habilitados.
+- Preserva limites de teste, cenários, shell global e demais páginas.
+
+## 2026-10-25 — Simulação CAIXA com regras verificadas
+
+- Corrige a área principal da página e o formulário em tablet, com regressão usando o Archive real.
+- Rejeita valores extremos nos utilitários e taxas MCMV acima do teto publicado.
+
+- Preserva estilos dos estados abertos/elegíveis após o formatador, com regressão no navegador.
+- Confere no E2E autenticado o cálculo local CAIXA e a API bancária fechada.
+- Recaptura o candidato visual quando o contrato E2E autenticado muda.
+
+- Reproduz as quatro abas da referência pública exclusivamente na página CAIXA.
+- Corrige faixas, cotas, datas, FGTS sobreposto e enquadramento Classe Média.
+- Valida parâmetros confirmados e conserva avisos de cálculos parciais.
+- Documenta fórmulas e proveniência oficial; mantém APIs e autorização existentes.
+- Acrescenta testes financeiros, fluxos no navegador e acessibilidade móvel.
+
+## 2026-10-25 — Ajuste de altura em Agendamentos
+
 - Ajusta a altura das barras do Ranking Score para eliminar a rolagem residual de 4px em 1024px com sidebar aberta, somente em Agendamentos.
 
 ## 2026-10-25 - Navegacao lateral e comparacao de agendamentos
@@ -3573,3 +3598,13 @@ pendente dos gates completos no SHA final.
 - Reorganiza a identidade da campanha na tabela do Meta Ads para manter o status
   de veiculação abaixo do nome, dentro da primeira coluna, sem cobrir o valor
   investido.
+
+## 2026-10-25 — Simulador CAIXA: réplica e regras verificadas
+
+Página /app/simulacao/caixa recebe jornada dedicada baseada na referência pública,
+com Simulador, Documentos, Diagnóstico e Utilitários. Motor indicativo isolado
+usa faixas/taxas oficiais consultadas em 25/10/2026, corrige datas, cotas SBPE e
+FGTS sobreposto. Subsídio, seguros e taxa SBPE exigem parâmetros confirmados;
+incertezas são explícitas. Autorização de servidor e APIs bancárias preservadas.
+Origem, fórmulas, diferenças necessárias e limites em docs/simulators/CAIXA.md.
+Validação e publicação serão registradas com evidências ao concluir os gates.

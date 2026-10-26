@@ -16,6 +16,7 @@ import { AssociativeTableArchive } from "../_components/AssociativeTableArchive"
 import { DirectTableArchive } from "../_components/DirectTableArchive";
 import { InvestorTableArchive } from "../_components/InvestorTableArchive";
 import { DocumentationArchive } from "../_components/DocumentationArchive";
+import { CaixaArchive } from "../_components/CaixaArchive";
 
 export const dynamic = "force-dynamic";
 
@@ -39,6 +40,7 @@ export async function generateMetadata({
   if (simulator === "calcular-documentacao") {
     return { title: "Calcular documentação" };
   }
+  if (simulator === "caixa") return { title: "Simulação CAIXA" };
   return { title: "Simulação comercial" };
 }
 
@@ -69,6 +71,8 @@ export default async function SimulatorPage({
     : runtimeEnabled
       ? "Disponível para contas com acesso aos simuladores."
       : "Cálculo temporariamente indisponível — regra aguardando validação";
+
+  if (simulator === "caixa") return <CaixaArchive />;
 
   if (simulator === "associativo-fluxo-linear") {
     return <AssociativeTableArchive />;
