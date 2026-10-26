@@ -2,6 +2,8 @@
 
 ## 2026-10-25 — Simulação CAIXA com regras verificadas
 
+- Preserva estilos dos estados abertos/elegíveis após o formatador, com regressão no navegador.
+
 - Reproduz as quatro abas da referência pública exclusivamente na página CAIXA.
 - Corrige faixas, cotas, datas, FGTS sobreposto e enquadramento Classe Média.
 - Valida parâmetros confirmados e conserva avisos de cálculos parciais.

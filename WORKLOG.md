@@ -2,6 +2,11 @@
 
 ## 2026-10-25 — CAIXA: validação da réplica e enquadramento
 
+O código formatado preserva agora classes completas dos estados de cidade,
+métrica e FGTS; regressões no navegador verificam a lista aberta e o resultado
+de tempo. O fluxo com seis auditorias adicionais passou após a formatação.
+O build final local também passou. Não há novos achados na revisão específica.
+
 Os 64 testes de cálculo/guards passaram; o cliente passou quatro testes,
 nove combinações de largura/tema e seis auditorias adicionais das abas em
 desktop/celular. A revisão independente corrigiu cidade/UF, prazo de obra,

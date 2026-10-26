@@ -221,7 +221,7 @@ function CityPicker({
     <div className={`caixa-field caixa-city-field`}>
       <span id={`${id}-label`}>Cidade *</span>
       <div
-        className={`caixa-city-picker${open ? "open" : ""}`}
+        className={open ? "caixa-city-picker open" : "caixa-city-picker"}
         onBlur={(event) => {
           if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false);
         }}
@@ -360,7 +360,7 @@ function Metric({
   accent?: boolean;
 }) {
   return (
-    <div className={`caixa-metric${accent ? "accent" : ""}`}>
+    <div className={accent ? "caixa-metric accent" : "caixa-metric"}>
       <span>{label}</span>
       <strong>{value}</strong>
     </div>
@@ -1629,7 +1629,11 @@ export function CaixaClient({
                 </button>
               </div>
               {showPeriodResult && (
-                <div className={`caixa-fgts-result${fgtsResult.eligible ? "eligible" : ""}`}>
+                <div
+                  className={
+                    fgtsResult.eligible ? "caixa-fgts-result eligible" : "caixa-fgts-result"
+                  }
+                >
                   {fgtsResult.invalid && (
                     <p role="alert">
                       Confira os períodos: datas devem ser válidas, o fim não pode anteceder o

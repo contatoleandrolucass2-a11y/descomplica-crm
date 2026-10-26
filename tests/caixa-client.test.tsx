@@ -166,6 +166,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await page.getByLabel("Valor do imóvel *", { exact: false }).fill("30000000");
       await page.getByLabel("Data de nascimento *", { exact: false }).fill("1991-03-15");
       await page.getByRole("combobox", { name: "Cidade *" }).fill("São Paulo");
+      await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
       await page.getByText("Parâmetros confirmados e valores opcionais", { exact: true }).click();
       await page.getByLabel("Condição do imóvel", { exact: false }).selectOption("new");
@@ -258,6 +259,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(
         page.getByRole("heading", { name: "36 MESES ATINGIDOS NA ESTIMATIVA", exact: true }),
       ).toBeVisible();
+      await browserExpect(page.locator(".caixa-fgts-result.eligible")).toBeVisible();
       await auditCurrentTab("utilitarios");
       expect(errors).toEqual([]);
     });
