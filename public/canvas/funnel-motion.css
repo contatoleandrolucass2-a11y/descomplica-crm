@@ -1,0 +1,17 @@
+.merged-funnels,.funnels{perspective:1200px;padding:12px!important;overflow:visible}
+.merged-funnels>article,.funnels>.funnel{position:relative;transform-style:preserve-3d;transition:transform 260ms ease-out,box-shadow 260ms ease-out;transform:perspective(1200px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translate(var(--shift-x,0px),var(--shift-y,0px));background:var(--funnel-surface,#fff)}
+.merged-funnels>article.comet-hover,.funnels>.funnel.comet-hover{box-shadow:0 8px 18px #102a4317}
+.merged-funnels>article::after,.funnels>.funnel::after{content:'';position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:radial-gradient(circle at var(--glare-x,50%) var(--glare-y,50%),#ffffff66,transparent 65%);opacity:0;transition:opacity 250ms ease}
+.merged-funnels>article.comet-hover::after,.funnels>.funnel.comet-hover::after{opacity:.22}
+body[data-theme="dark"]{--funnel-surface:#172c40}
+body[data-theme="medium"]{--funnel-surface:#f4f7fa}
+@media(prefers-reduced-motion:reduce){.merged-funnels>article,.funnels>.funnel{transform:none!important;transition:none!important}.merged-funnels>article::after,.funnels>.funnel::after{display:none}}
+
+/* Hover motion belongs to each bar, never the plot, axes or labels. */
+.card[data-chart-type="bars"] .chart svg rect,.card[data-chart-type="horizontal"] .chart svg rect{transform-box:fill-box;transform-origin:center;transition:transform 260ms ease-out,filter 260ms ease-out;transform:perspective(1200px) rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg)) translate(var(--shift-x,0px),var(--shift-y,0px))}
+.card .chart svg rect.comet-hover{filter:brightness(1.12) drop-shadow(0 2px 3px #102a4320)}
+@media(prefers-reduced-motion:reduce){.card .chart svg rect{transform:none!important;transition:none!important}.card .chart svg rect.comet-hover{filter:none}}
+
+/* Keep a single full-width funnel nearly stationary and its data legible. */
+.merged-funnels>article:only-child.comet-hover,.funnels>.funnel:only-child.comet-hover{box-shadow:0 2px 6px #102a430a}
+.merged-funnels>article:only-child.comet-hover::after,.funnels>.funnel:only-child.comet-hover::after{opacity:.06}

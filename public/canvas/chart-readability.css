@@ -1,0 +1,18 @@
+#canvas .card .card-top,#expanded .card .card-top{padding-top:10px;padding-left:12px;padding-right:10px;min-height:36px}
+#canvas .card .subtitle,#expanded .card .subtitle{padding-left:12px;padding-right:12px;margin-bottom:6px}
+#canvas .card .chart,#expanded .card .chart{padding:4px 6px 4px;overflow:hidden}
+#canvas .card .chart svg text,#expanded .card .chart svg text{fill:#263f54;font-size:12px;font-weight:500}
+#canvas .card .legend,#expanded .card .legend{font-size:11px;padding:8px 12px;gap:6px 14px;color:#29475e;flex-shrink:0}
+#canvas .card .legend i{width:9px;height:9px}
+@container(max-width:360px){#canvas .card .chart svg text{font-size:10px}#canvas .card .legend{font-size:10px;gap:5px 10px}}
+#canvas .card .chart svg text,#expanded .card .chart svg text{font-size:var(--plot-font,12px)!important}
+#canvas .card .legend,#expanded .card .legend{font-size:clamp(10px,2.5cqi,14px)!important;line-height:1.4;gap:5px 12px}
+.legend span{max-width:100%;overflow-wrap:anywhere;white-space:normal}
+#canvas .card h2,#expanded .card h2{font-size:clamp(13px,3cqi,18px)!important;line-height:1.3;overflow-wrap:anywhere}
+
+.legend span{overflow-wrap:normal;word-break:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:inline-block}
+.chart-tooltip{position:fixed;z-index:10000;pointer-events:none;max-width:min(340px,calc(100vw - 32px));padding:12px 15px;background:#102b40;color:#fff;border:1px solid #54758c;border-radius:10px;box-shadow:0 5px 20px #102b4033;font:14px/1.5 system-ui;overflow-wrap:break-word}
+.chart-tooltip[hidden]{display:none}
+.chart-tooltip strong{display:block;font-size:15px;line-height:1.4;margin-bottom:6px}
+.chart-tooltip .tooltip-value{font-weight:600;color:#fff}
+.chart-tooltip .tooltip-date{color:#d5e4ef;margin-top:4px;font-size:13px}

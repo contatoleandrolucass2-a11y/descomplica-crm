@@ -9,6 +9,8 @@ import {
   MapPinned,
   Megaphone,
   SlidersHorizontal,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -19,35 +21,36 @@ import styles from "./MetaAdsDashboardFrame.module.css";
 export function MetaAdsSidebar({
   pages,
   path,
-  isMaster,
-  view = "overview",
 }: {
   pages: Pick<AppPage, "key" | "path" | "name">[];
   path: string;
-  isMaster: boolean;
-  view?: string;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [soundMuted, setSoundMuted] = useState(false);
+  const order = new Map([
+    ["/app/meta-ads", 0],
+    ["/app/meta-ads/campanhas", 1],
+    ["/app/meta-ads/relatorios", 2],
+    ["/app/meta-ads/contas-de-anuncios", 3],
+  ]);
   const links = pages
-    .filter((page) => page.path !== "/app/meta-ads/contas-de-anuncios")
     .map((page) => ({
       ...page,
-      name: page.path === "/app/meta-ads" ? "Visão macro" : page.name,
-    }));
+      name:
+        page.path === "/app/meta-ads"
+          ? "Visão macro"
+          : page.path === "/app/meta-ads/contas-de-anuncios"
+            ? "Limites"
+            : page.name,
+    }))
+    .sort((left, right) => (order.get(left.path) ?? 99) - (order.get(right.path) ?? 99));
   if (pages.some((page) => page.path === "/app/meta-ads")) {
-    links.splice(
-      Math.min(2, links.length),
-      0,
+    links.push(
       { key: "map-panel", path: "/app/meta-ads?panel=map", name: "Mapa de São Paulo" },
       { key: "settings-panel", path: "/app/meta-ads?panel=settings", name: "Ajustes" },
     );
   }
-  const activePath =
-    view === "accounts"
-      ? "/app/meta-ads?panel=settings"
-      : path === "/app/meta-ads" && (view === "map" || view === "settings")
-        ? `${path}?panel=${view}`
-        : path;
+  const activePath = path;
   const iconFor = (page: (typeof links)[number]) => {
     if (page.key === "map-panel") return MapPinned;
     if (page.key === "settings-panel") return SlidersHorizontal;
@@ -64,13 +67,13 @@ export function MetaAdsSidebar({
       <div className={styles.brand}>
         Descomplica <strong>Ads</strong>
       </div>
-      <nav id="meta-ads-sidebar-navigation" aria-label="Visões do Meta Ads">
+      <nav id="meta-ads-sidebar-navigation" aria-label="Navegação lateral Meta Ads">
         {links.map((page) => {
           const Icon = iconFor(page);
-          const isMapMaintenance = page.key === "map-panel";
+          const isBlocked = page.key === "map-panel" || page.key === "settings-panel";
           const maintenanceMessage =
             "Página temporariamente desabilitada para melhorias. Consulte o desenvolvedor para mais informações.";
-          if (isMapMaintenance && !isMaster) {
+          if (isBlocked) {
             return (
               <button
                 key={page.key}
@@ -103,14 +106,39 @@ export function MetaAdsSidebar({
                 <Icon size={19} strokeWidth={1.9} />
               </span>
               <span className={styles.navigationLabel}>{page.name}</span>
-              {isMapMaintenance ? (
-                <LockKeyhole aria-hidden="true" className={styles.navigationLock} size={15} />
-              ) : null}
             </Link>
           );
         })}
       </nav>
       <p className={styles.sourceNote}>Meta Ads · análise de campanhas</p>
+      <button
+        type="button"
+        className={styles.soundToggle}
+        aria-pressed={soundMuted}
+        aria-label={soundMuted ? "Ativar sons discretos" : "Silenciar sons discretos"}
+        title={soundMuted ? "Ativar sons discretos" : "Silenciar sons discretos"}
+        onClick={() => {
+          let next = !soundMuted;
+          try {
+            next = localStorage.getItem("descomplica-ui-sounds-muted") !== "true";
+          } catch {
+            // Usa o estado da interface quando o armazenamento está indisponível.
+          }
+          setSoundMuted(next);
+          try {
+            localStorage.setItem("descomplica-ui-sounds-muted", String(next));
+          } catch {
+            // O dashboard continua funcional quando o armazenamento está indisponível.
+          }
+        }}
+      >
+        {soundMuted ? (
+          <VolumeX aria-hidden="true" size={18} />
+        ) : (
+          <Volume2 aria-hidden="true" size={18} />
+        )}
+        <span>{soundMuted ? "Ativar sons" : "Sons discretos"}</span>
+      </button>
       <button
         type="button"
         className={styles.sidebarToggle}

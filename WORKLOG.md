@@ -1,5 +1,36 @@
 # Worklog
 
+## 2026-10-26 — Canvas configurável e superfície reduzida do Meta Ads
+
+O protótipo local aprovado foi incorporado ao dashboard oficial sem alterar a
+barra de navegação global do CRM. As visões macro e de campanha passam a usar um
+canvas configurável, persistido por usuário e por nível de análise. Ele oferece
+biblioteca de gráficos, filtros independentes, seis indicadores compactos,
+funis comparativos, tabelas, redimensionamento, movimentação em grupo,
+desfazer/refazer, perfis nomeados, avisos de duplicidade, sons discretos com
+opção de silenciar e destaque visual de atualizações.
+
+O documento do canvas é carregado no iframe interno por `srcdoc`, com recursos
+locais absolutos. Isso mantém os headers globais `X-Frame-Options: DENY` e CSP
+sem exceções. A comunicação aceita somente a janela exata do iframe e tipos de
+mensagem conhecidos; o QA executa com os headers reais de produção.
+
+O canvas recebe somente dados oficiais já carregados pela Meta Marketing API e
+não contém campanhas sintéticas nem fallback demonstrativo. A exportação PDF
+foi unificada: o seletor de seções aparece apenas depois do clique em Baixar PDF
+e pode incluir os gráficos do canvas com seus filtros. O período Hoje foi
+adicionado, e respostas da API com intervalo menor que o solicitado deixam de
+provocar repetição infinita da consulta.
+
+A navegação lateral mantém como destinos funcionais apenas Visão macro,
+Campanhas, Relatórios e Limites. Mapa de São Paulo e Ajustes permanecem visíveis
+como controles bloqueados para todos os papéis, e o servidor redireciona acesso
+direto aos painéis para a visão macro. A antiga página Contas de anúncios foi
+renomeada para Limites e preserva metas, tetos, orçamentos e saldo oficial da
+conta. O catálogo de páginas foi sincronizado por migration. Os testes focados
+do Meta Ads aprovaram 19 cenários e o navegador automatizado completo; os gates integrais e a publicação protegida
+continuam obrigatórios antes da conclusão.
+
 ## 2026-10-26 — Simulador CAIXA publicado
 
 PR #351 integrado como `54eb7cdd7460130fc8c70d71fb956cb801b8d12c`.
