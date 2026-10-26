@@ -3766,3 +3766,59 @@ dependente da autorização específica aplicável.
   três testes de ACL/perfil privado Meta falharam no host Windows. Não houve
   correção fora do escopo nem dispensa do gate; a suíte Linux da nova CI deve
   aprovar integralmente antes de merge/publicação.
+
+### CAIXA — integração, publicação e aceite em produção
+
+- O PR #358 foi integrado sem bypass na `main` como
+  `24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`. A CI de `push/main`
+  `40362745379` aprovou `validate`, `promotable-image`, `isolated-restore` e
+  `release-gates`, incluindo a jornada CAIXA e a matriz completa de temas,
+  larguras, zoom, teclado, banco, build e restauração.
+- Artefato imutável `12669426869`, digest ZIP
+  `874a59a060cfd7ecafab44b1f8edcd092b864c000d104ffa09cd57bac8bffe18`;
+  `image.tar.gz` conferiu com
+  `f160251d0aba5288fd9f1aaa0c12118957b5a99ec69e24572677f1ef60c520bd`.
+  A configuração da CI
+  `sha256:ee62b6bba79908d3854fff59d71a6580daab2f8940941290bbb8d78711d7b123`
+  e o manifesto/ID no Docker containerd
+  `sha256:23f6b685003781ecc4274f68d960100a89fa29dd0ad6443a3fae0a83b6726a9b`
+  foram reconciliados por índice, hashes, plataforma `linux/amd64`, revisão e
+  11 camadas/`diff_ids`; `image:prove` aprovou os dois perfis, sem rebuild ou
+  retag.
+- Checkout remoto limpo em
+  `/srv/descomplica-crm-releases/24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`,
+  com Node 24.19.0, pnpm 11.20.0 e lockfile instalado do cache em modo offline,
+  congelado e sem scripts. Backup privado verificado em
+  `/var/backups/descomplica-crm/caixa-24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`;
+  imagem anterior preservada para recuperação. Nenhuma migration, dado remoto,
+  DNS, cobrança, conta ou workflow n8n foi alterado.
+- O coordenador exclusivo `release:production` confirmou no próprio minuto a
+  produção anterior — deployment `0c1664b4-31cf-4fc5-bc84-a807627e0dab`, SHA
+  `9e7d1c56232bd6742d4419a9a6a291092aedc3c3`, publicado em
+  `2026-10-26T15:53:23.442Z` — e publicou o deployment
+  `3928ca60-0e0b-433e-8da2-e08cc24a4dca` em
+  `2026-10-26T17:45:12.098Z` (`14:45:12` America/Sao_Paulo). O ledger final
+  confirmou SHA/imagem exatos e `pendingDeploymentId=null`.
+- Às `2026-10-26T17:45:17Z`, o health público respondeu HTTP 200,
+  `status=ok` e versão `24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`; o GET
+  anônimo da rota retornou 307 para `/login`. Smoke autenticado, somente com
+  dados sintéticos, confirmou em SBPE/Price imóvel de R$ 500 mil, financiamento
+  de R$ 400 mil, entrada de R$ 100 mil e cota de 80%; no mesmo cenário em SAC,
+  financiamento de R$ 450 mil, entrada de R$ 50 mil e cota de 90%. A base da
+  cota, taxa estimada de 11,49% a.a., seguros/tarifa de referência e alertas
+  apareceram corretamente; os campos foram limpos, sem imprimir, compartilhar,
+  salvar proposta ou criar registro.
+- A referência `https://descomplicapro.com.br/simulacao/caixa` permaneceu
+  somente leitura. A simulação oficial completa não foi submetida porque exige
+  CPF, celular, consentimento e verificação; os confrontos públicos usaram
+  apenas informações fictícias e parâmetros expostos pela calculadora rápida.
+- Fechamento documental em Node 24.19.0/pnpm 11.20.0: lint sem erros e com os
+  44 warnings Meta já conhecidos, typecheck e build aprovados. Vitest aprovou
+  4.302 testes e pulou 111; a etapa Node aprovou 1.599, pulou 19 e repetiu as
+  mesmas três falhas exclusivas do host Windows em ACL/perfil privado Meta.
+  Esses arquivos não foram alterados; a CI Linux integral do SHA publicado está
+  verde e continua sendo a evidência de release.
+- O `knowledge:sync` final foi tentado após este registro e permaneceu bloqueado
+  pela falha preexistente `Documento excede o limite de exportacao.`. Não houve
+  redução do documento, alteração do vault ou alegação de sincronização; a
+  pendência deve ser tratada em manutenção própria do conhecimento.

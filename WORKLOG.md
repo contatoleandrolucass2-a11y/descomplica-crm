@@ -28,6 +28,19 @@ somente cinco imagens CAIXA; as onze capturas da rota foram revisadas em sete
 larguras, três temas desktop e escuro móvel. A incorporação preserva as demais
 rotas e os metadados globais.
 
+O PR #358 foi integrado como `24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`.
+A CI de `main` `40362745379` aprovou os quatro jobs obrigatórios e gerou o
+artefato imutável `12669426869`. Checksum, revisão, cadeia OCI, plataforma e 11
+camadas foram conferidos; os dois perfis de runtime passaram sem rebuild.
+
+O coordenador protegido publicou o deployment
+`3928ca60-0e0b-433e-8da2-e08cc24a4dca` em 26/10/2026 às 14:45:12 de São Paulo.
+Health posterior confirmou a versão exata e a rota anônima manteve o redirect
+para login. No smoke autenticado com dados fictícios, imóvel de R$ 500 mil no
+SBPE resultou em R$ 400 mil financiados no Price (80%) e R$ 450 mil no SAC
+(90%), com base, entrada, taxa e avisos exibidos corretamente. Os campos foram
+limpos ao final e nenhuma proposta ou registro foi criado.
+
 ## 2026-10-26 — Publicacao final da experiencia de Agendamentos
 
 O PR #355 foi integrado na `main` como

@@ -9,6 +9,7 @@
 - Corrige o cenário de obra para atingir 100% da liberação no último mês.
 - Amplia a regressão financeira, responsiva e de acessibilidade com cenários fictícios confrontados na fonte oficial.
 - Atualiza somente as cinco referências visuais CAIXA alteradas, a partir da captura protegida aprovada.
+- Publica o merge `24d9bc81` após CI integral e confirma em produção, com dados fictícios, os tetos de 80% no Price e 90% no SAC.
 
 ## 2026-10-26 — Refinamento final de Agendamentos publicado
 
