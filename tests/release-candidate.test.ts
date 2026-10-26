@@ -124,6 +124,15 @@ describe("release-candidate migration train", () => {
     expect(plan.tests).toBe(2274);
   });
 
+  it("keeps PL/pgSQL CASE layout limits parenthesized as expressions", async () => {
+    const sql = await readFile(
+      path.join(repositoryRoot, "supabase/migrations/20261026194815_dashboard_profiles.sql"),
+      "utf8",
+    );
+    expect(sql).not.toMatch(/::integer\s+[<>]\s+case\s*\(/);
+    expect(sql.match(/::integer\s+[<>]\s+\(case\s*\(/g)).toHaveLength(3);
+  });
+
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
     const [fixture, atomicFixture, atomicHarness, harness] = await Promise.all([
       readFile(

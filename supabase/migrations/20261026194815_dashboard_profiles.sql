@@ -269,25 +269,25 @@ begin
       raise exception 'invalid_argument: invalid dashboard card layout' using errcode = '22023';
     end if;
 
-    if (v_card#>>'{layout,columnSpan}')::integer < case (v_card->>'type')
+    if (v_card#>>'{layout,columnSpan}')::integer < (case (v_card->>'type')
          when 'kpi' then 2
          when 'funnel' then 2
          when 'table' then 6
          else 3
-       end
-       or (v_card#>>'{layout,height}')::integer < case (v_card->>'type')
+       end)
+       or (v_card#>>'{layout,height}')::integer < (case (v_card->>'type')
          when 'kpi' then 168
          when 'horizontal-bars' then 264
          when 'funnel' then 312
          when 'table' then 360
          else 240
-       end
-       or (v_card#>>'{layout,height}')::integer > case (v_card->>'type')
+       end)
+       or (v_card#>>'{layout,height}')::integer > (case (v_card->>'type')
          when 'kpi' then 480
          when 'funnel' then 888
          when 'table' then 1080
          else 816
-       end then
+       end) then
       raise exception 'invalid_argument: dashboard card layout outside type limits'
         using errcode = '22023';
     end if;
