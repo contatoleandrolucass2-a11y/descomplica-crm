@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-25 - Espacamento dos valores das barras de agendamentos
+
+A composicao preenchida com sidebar encontrou colisao entre o eixo e o valor
+maximo em 1024px. O CSS reserva espaco acima das barras e compensa a altura
+do track, preservando os cards. Assert de nao sobreposicao incorporado ao QA.
+Composite com Vite CSS: 24/24 aprovado, sem cortes ou scrollbar no Score.
+Build de producao, formatacao e lint direcionado aprovados; repeticao com
+CSS de producao em andamento antes de publicar. Alteracao somente nesta pagina.
+
 ## 2026-10-25 - Sidebar e graficos de agendamentos
 
 Exclusivamente na rota `/app/etapas/agendamentos`, a navegacao Dashboard passa

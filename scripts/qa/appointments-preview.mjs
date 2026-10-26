@@ -429,6 +429,26 @@ export async function runAppointmentsPreview() {
           width: innerWidth,
           height: innerHeight,
           scrollWidth: document.documentElement.scrollWidth,
+          axisValueCollisions: [...document.querySelectorAll('ol[class*="columns"]')].flatMap(
+            (list) => {
+              const axis = list.previousElementSibling;
+              if (axis?.textContent !== "Quantidade de agendamentos") return [];
+              const axisRect = axis.getBoundingClientRect();
+              return [...list.querySelectorAll('[class*="columnValue"]')].flatMap((value) => {
+                const rect = value.getBoundingClientRect();
+                return rect.width > 0 && rect.top < axisRect.bottom + 1
+                  ? [
+                      {
+                        chart: list.getAttribute("aria-label"),
+                        value: value.textContent,
+                        axisBottom: axisRect.bottom,
+                        valueTop: rect.top,
+                      },
+                    ]
+                  : [];
+              });
+            },
+          ),
           dailyLabelCollisions: (() => {
             const list = document.querySelector(
               'ol[aria-label="Agendamentos por dia do mês selecionado"]',
@@ -635,6 +655,10 @@ export async function runAppointmentsPreview() {
         check(
           geometry.scrollWidth <= width + 1,
           `Horizontal overflow ${theme}/${width}: ${geometry.scrollWidth}`,
+        );
+        check(
+          !geometry.axisValueCollisions.length,
+          `Quantity axis/value collisions ${theme}/${width}: ${JSON.stringify(geometry.axisValueCollisions)}`,
         );
         check(
           !geometry.horizontalScrollbars.length,

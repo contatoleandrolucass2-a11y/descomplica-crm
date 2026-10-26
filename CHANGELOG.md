@@ -2,6 +2,7 @@
 
 ## 2026-10-25 - Navegacao lateral e comparacao de agendamentos
 
+- Reserva espaco para os valores no topo das barras, evitando sobreposicao com o eixo quando a sidebar reduz a largura util.
 - Atualiza exclusivamente as 11 referencias visuais de Agendamentos, preservando as demais rotas.
 - Alinha indicadores diarios aos filtros e metas de cada dia; nao mistura conversoes sem Ranking Score com totais filtrados por Score.
 - Exclusivamente em Agendamentos, Dashboard abre Visao Geral e usa menu lateral recolhivel com destinos autorizados. As demais paginas preservam a navegacao existente.

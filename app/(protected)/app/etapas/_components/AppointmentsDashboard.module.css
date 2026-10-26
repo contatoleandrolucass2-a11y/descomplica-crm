@@ -344,10 +344,11 @@
   margin-bottom: 0.2rem;
 }
 .overviewGrid .columns {
-  padding-top: 0.35rem;
+  /* Reserve the upper value label without increasing the chart footprint. */
+  padding-top: 1.35rem;
 }
 .overviewGrid .columnTrack {
-  height: 90px;
+  height: calc(90px - 1rem);
 }
 .overviewGrid .note {
   margin-top: 0.35rem;
@@ -770,7 +771,7 @@
   padding-bottom: 0;
 }
 .overviewGrid .verticalLabels .columnTrack {
-  height: 80px;
+  height: calc(80px - 1.5rem);
 }
 .verticalLabels .columnLabel {
   height: 4.1rem;
@@ -1237,7 +1238,7 @@
   }
 
   .overviewGrid .columnTrack {
-    height: clamp(3rem, 9dvh, 5.625rem);
+    height: calc(clamp(3rem, 9dvh, 5.625rem) - 1rem);
   }
 
   .monthly .columnTrack {
@@ -1247,7 +1248,7 @@
   /* At the production 14px root size, the 17rem tile leaves 162px for
      content. Reserve room for the axis, controls and full vertical labels. */
   .overviewGrid .verticalLabels .columnTrack {
-    height: clamp(3rem, 8dvh, 4rem);
+    height: calc(clamp(3rem, 8dvh, 4rem) - 1.5rem);
   }
 
   .tableCard {

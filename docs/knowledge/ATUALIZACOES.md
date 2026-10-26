@@ -2,6 +2,12 @@
 
 ## 2026-10-25: validacao local da pagina de agendamentos
 
+- QA complementar da composicao preenchida com sidebar detectou colisao
+  eixo/valor em 1024px. Correcao restrita ao CSS de Agendamentos reserva espaco
+  superior e compensa a altura das barras, sem aumentar cards. Vite CSS: 24/24
+  aprovado. Build producao e lint direcionado aprovados; QA de producao 18+24
+  em andamento. Referencias autenticadas sem dados nao substituem esse teste
+  da composicao preenchida. Nenhuma baseline de outra rota foi modificada.
 - Candidate autenticado `40251775496` aprovado; artefato `12622015999`, captura
   do merge sintetico `cdb9a3c5` cujo head e `32b65849`. Incorporacao restrita a
   11 imagens e 38 entradas de `/app/etapas/agendamentos`, com proveniencia
