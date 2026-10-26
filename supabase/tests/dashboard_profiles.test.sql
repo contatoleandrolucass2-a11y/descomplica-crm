@@ -149,7 +149,7 @@ select throws_ok(
 select throws_ok(
   $$select public.create_dashboard_profile(
     'crm.stage.appointments', null, 'Inválido',
-    '[{"id":"bad","type":"pie"}]'::jsonb, 2, false
+    '[{"id":"bad","type":"pie"}]'::jsonb, 2::smallint, false
   )$$,
   '22023',
   'invalid_argument: invalid dashboard card',
@@ -158,7 +158,7 @@ select throws_ok(
 select throws_ok(
   $$select public.create_dashboard_profile(
     'crm.stage.appointments', null, 'Métrica inválida',
-    pg_temp.dashboard_cards('bad-metric','finance.revenue'), 2, false
+    pg_temp.dashboard_cards('bad-metric','finance.revenue'), 2::smallint, false
   )$$,
   '22023',
   'invalid_argument: metric unavailable for dashboard page',
@@ -168,7 +168,7 @@ select throws_ok(
   $$select public.create_dashboard_profile(
     'crm.stage.appointments', null, 'Entidade inválida',
     jsonb_set(pg_temp.dashboard_cards('bad-entity'), '{0,entityIds}', '["manager.untrusted"]'),
-    2, false
+    2::smallint, false
   )$$,
   '22023',
   'invalid_argument: invalid dashboard card entities',
@@ -183,11 +183,11 @@ select 'first', (public.create_dashboard_profile(
     jsonb_set(pg_temp.dashboard_cards('card-1'), '{0,type}', '"kpi"'),
     '{0,layout}', '{"order":0,"columnSpan":2,"height":168}'
   ),
-  2, false
+  2::smallint, false
 )->>'id')::uuid;
 insert into created_profiles
 select 'second', (public.create_dashboard_profile(
-  'crm.stage.appointments', null, 'Alternativo', pg_temp.dashboard_cards('card-2','appointments.rate'), 2, false
+  'crm.stage.appointments', null, 'Alternativo', pg_temp.dashboard_cards('card-2','appointments.rate'), 2::smallint, false
 )->>'id')::uuid;
 
 select is(
@@ -275,7 +275,7 @@ select throws_ok(
 select is(
   public.create_dashboard_profile(
     'crm.stage.appointments', null, 'Segundo usuário',
-    pg_temp.dashboard_cards('card-user-2'), 2, false
+    pg_temp.dashboard_cards('card-user-2'), 2::smallint, false
   )->>'isDefault',
   'true',
   'another user creates an independent default'
@@ -310,7 +310,7 @@ select is(
 );
 select throws_ok(
   $$select public.create_dashboard_profile(
-    'crm.stage.appointments', 'bad scope', 'Inválido', '[]'::jsonb, 2, false
+    'crm.stage.appointments', 'bad scope', 'Inválido', '[]'::jsonb, 2::smallint, false
   )$$,
   '22023',
   'invalid_argument: invalid dashboard profile scope',

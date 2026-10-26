@@ -21,6 +21,12 @@ tamanho e versão otimista; `409` representa conflito real. O cliente salva apó
 700 ms e só lê o cache local quando o servidor está indisponível. Nenhuma
 migration foi aplicada remotamente.
 
+O ensaio de restore revelou duas lacunas nos testes da migration: chamadas SQL
+diretas não tipavam `schema_version` como `smallint`, e a matriz global de
+RLS/grants ainda não enumerava `dashboard_profiles` e suas seis RPCs. Os
+fixtures e allowlists foram alinhados ao contrato já definido pela migration,
+sem ampliar privilégios nem alterar dados.
+
 A exportação permite escolher os cards na ordem atual. O PDF registra título,
 contexto, filtros, fonte e horário, além de capturar cada card selecionado como
 PNG para preservar o gráfico. Foram adicionados testes de layout, migração de

@@ -8,6 +8,7 @@
 - Prepara perfis privados por usuário, página e escopo, com salvamento automático, versão otimista, conflito explícito e cache local apenas como contingência.
 - Preserva as fórmulas, filtros globais, fontes e permissões existentes nas duas páginas.
 - Inclui migration e pgTAP versionados, sem aplicação remota nem publicação, conforme o limite expresso da especificação.
+- Alinha os testes pgTAP ao tipo `smallint` do schema e inclui a nova tabela, políticas e seis RPCs nas matrizes completas de RLS e grants.
 
 ## 2026-10-26 — Persistência e precisão do Canvas Meta Ads
 
