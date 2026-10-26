@@ -261,6 +261,69 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             expect(selected.transitions).not.toContain("color");
             expect(selected.transitions).not.toContain("background-color");
           }
+          if (name === "resultado") {
+            const construction = await page.locator(".caixa-construction").evaluate((section) => ({
+              heading: getComputedStyle(section.querySelector("h3")!).color,
+              note: getComputedStyle(section.querySelector(".caixa-reference-notice")!).color,
+            }));
+            expect(construction).toEqual({
+              heading: "rgb(244, 251, 255)",
+              note: "rgb(169, 191, 210)",
+            });
+            const amounts = await page
+              .locator(
+                ".caixa-result-plan-line > span, .caixa-result-plan-total > strong, .caixa-result-composition dd, .caixa-metric > strong",
+              )
+              .evaluateAll((elements) =>
+                elements.flatMap((element) => {
+                  const text = element.textContent ?? "";
+                  const box = element.getBoundingClientRect();
+                  if (!/R\$\s*\d/.test(text) || !box.width || !box.height) return [];
+                  const range = document.createRange();
+                  range.selectNodeContents(element);
+                  const fragments = Array.from(range.getClientRects()).filter(
+                    (rect) => rect.width > 0,
+                  );
+                  const bounds = range.getBoundingClientRect();
+                  return [
+                    {
+                      text,
+                      lines: new Set(fragments.map((rect) => Math.round(rect.top))).size,
+                      contained: bounds.left >= box.left - 1 && bounds.right <= box.right + 1,
+                      textOverflow: getComputedStyle(element).textOverflow,
+                    },
+                  ];
+                }),
+              );
+            expect(amounts.some((amount) => amount.text.includes("240.000,00"))).toBe(true);
+            expect(amounts.some((amount) => amount.text.includes("60.000,00"))).toBe(true);
+            expect(
+              amounts.filter(
+                (amount) =>
+                  amount.lines !== 1 || !amount.contained || amount.textOverflow === "ellipsis",
+              ),
+              `${name}/${width}/${theme}: ${JSON.stringify(amounts)}`,
+            ).toEqual([]);
+          }
+          if (theme === "dark" && (name === "resultado" || name === "documentos")) {
+            const action = await page
+              .getByRole("button", {
+                name: name === "resultado" ? "Calcular simulação" : "Editar perfis",
+                exact: true,
+              })
+              .evaluate((button) => {
+                const style = getComputedStyle(button);
+                return { color: style.color, gradient: style.backgroundImage };
+              });
+            expect(action.color).toBe("rgb(255, 255, 255)");
+            for (const endpoint of ["rgb(8, 117, 131)", "rgb(8, 118, 168)"]) {
+              expect(action.gradient).toContain(endpoint);
+              expect(
+                contrastRatio(action.color, endpoint),
+                JSON.stringify(action),
+              ).toBeGreaterThanOrEqual(4.5);
+            }
+          }
         }
       }
       await page.setViewportSize({ width: 1440, height: 900 });

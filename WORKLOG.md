@@ -9379,3 +9379,11 @@ FGTS sobreposto. Subsídio, seguros e taxa SBPE exigem parâmetros confirmados;
 incertezas são explícitas. Autorização de servidor e APIs bancárias preservadas.
 Origem, fórmulas, diferenças necessárias e limites em docs/simulators/CAIXA.md.
 Validação e publicação serão registradas com evidências ao concluir os gates.
+
+### 2026-10-26 — Revisão do resultado CAIXA em celular
+
+A revisão independente identificou a última casa decimal quebrando linha no
+resumo de 390 px. O layout passa a empilhar selo/rótulo, preservando quantias
+inteiras sem corte ou reticências. A regressão confere fragmentos de texto e
+contenção dos valores, além das auditorias de contraste e transbordamento.
+Nova captura autenticada e CI continuam obrigatórias antes da publicação.

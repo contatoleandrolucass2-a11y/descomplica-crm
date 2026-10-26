@@ -1546,6 +1546,32 @@
   color: #351e00;
   background: #f7a62d;
 }
+@media (width<=620px) {
+  .goal-page-shell.caixa-page-shell .caixa-result-plan-total {
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-result-plan-total > b {
+    grid-area: auto;
+    justify-self: start;
+    align-self: start;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-result-plan-total > strong,
+  .goal-page-shell.caixa-page-shell .caixa-result-composition dd {
+    white-space: nowrap;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-result-composition dl > div {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 4px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-result-composition dd {
+    justify-self: start;
+    text-align: left;
+  }
+}
 .caixa-page-shell .caixa-result-composition {
   background: #0c263b;
   padding: 14px 16px;
@@ -2587,6 +2613,17 @@
 .goal-page-shell.caixa-page-shell .caixa-fgts-result.eligible {
   color: #ffffff;
   background: linear-gradient(135deg, #14551f, #1b642a);
+}
+@media screen {
+  :root:not([data-theme="dark"]) .goal-page-shell.caixa-page-shell .caixa-result-panel {
+    --ink: #f4fbff;
+    --ink-soft: #a9bfd2;
+  }
+}
+:root[data-theme="dark"]
+  .goal-page-shell.caixa-page-shell
+  :is(.caixa-submit, .caixa-step-actions .primary) {
+  background: linear-gradient(135deg, #087583, #0876a8);
 }
 .caixa-page-shell .caixa-money-input > b {
   min-width: 22px;
