@@ -164,3 +164,10 @@ ofertas ou limites comerciais. Taxas manuais MCMV não podem ultrapassar 10%.
 A validação visual deve confrontar a nova página com a referência viva e
 verificar desktop/celular, três temas, teclado, zoom, nomes acessíveis e estados
 de erro. CI/merge/publicação são estados separados, registrados em ATUALIZACOES.
+
+A regressão usa o Archive real e os estilos globais. Audita 12 combinações do
+formulário e 24 estados entre resultado parcial, documentos, diagnóstico e
+utilitários, nos três temas e em desktop/celular. Contraste é conferido também
+em controles habilitados. Transições de cor/fundo que cruzavam um estado de
+baixo contraste foram removidas somente no escopo CAIXA; não se usam esperas
+ou exclusões de violações para obter aprovação.

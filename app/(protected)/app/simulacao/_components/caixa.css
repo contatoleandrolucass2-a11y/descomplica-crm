@@ -18,6 +18,7 @@
   font-family: Geist, sans-serif, Arial;
 }
 .goal-page-shell.caixa-page-shell {
+  --ink-soft: #40546c;
   background:
     radial-gradient(circle at 10% 5%, #26c6da14, transparent 350px),
     radial-gradient(circle at 92% 12%, #c7f36b0d, transparent 336px), var(--caixa-page-bg);
@@ -2537,6 +2538,55 @@
 .caixa-page-shell .caixa-toggle button.active {
   color: #ffffff;
   background: #087583;
+}
+/* Keep both states legible while switching selection/theme. The global color
+   transitions otherwise interpolate through equal foreground/background tones. */
+.goal-page-shell.caixa-page-shell,
+.goal-page-shell.caixa-page-shell *,
+.goal-page-shell.caixa-page-shell :is(button, input, select, textarea) {
+  transition-property: border-color, box-shadow, transform, opacity;
+}
+:root:not([data-theme="dark"])
+  .goal-page-shell.caixa-page-shell
+  .caixa-toggle
+  button[aria-pressed="false"] {
+  color: #40546c;
+  background: #ffffff;
+}
+.goal-page-shell.caixa-page-shell .caixa-diagnosis-subfilters button:is(.active, :hover) {
+  color: #ffffff;
+  background: #087583;
+  border-color: #087583;
+}
+:root[data-theme="dark"] .goal-page-shell.caixa-page-shell .caixa-phase-tabs button.active {
+  color: #ffffff;
+  background: #087583;
+  border-color: #087583;
+}
+:root[data-theme="dark"] .goal-page-shell.caixa-page-shell .caixa-profile > header span,
+:root[data-theme="dark"]
+  .goal-page-shell.caixa-page-shell
+  .caixa-checklists
+  article
+  > header
+  > span,
+:root[data-theme="dark"] .goal-page-shell.caixa-page-shell .caixa-guide > header > span {
+  color: #071a31;
+}
+:root[data-theme="dark"] .goal-page-shell.caixa-page-shell .caixa-deadline {
+  color: #ffe0b8;
+}
+:root[data-theme="dark"]
+  .goal-page-shell.caixa-page-shell
+  .caixa-fgts-tool
+  > article
+  > header
+  button:not(:disabled) {
+  color: #ffa5b3;
+}
+.goal-page-shell.caixa-page-shell .caixa-fgts-result.eligible {
+  color: #ffffff;
+  background: linear-gradient(135deg, #14551f, #1b642a);
 }
 .caixa-page-shell .caixa-money-input > b {
   min-width: 22px;

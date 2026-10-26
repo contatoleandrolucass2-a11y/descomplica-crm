@@ -9,6 +9,38 @@ import { afterAll, afterEach, beforeAll, describe, expect, it } from "vitest";
 import { CaixaClient } from "@/app/(protected)/app/simulacao/_components/CaixaClient";
 import { CaixaArchive } from "@/app/(protected)/app/simulacao/_components/CaixaArchive";
 
+type AxeAudit = Awaited<ReturnType<AxeBuilder["analyze"]>>;
+function axeFailureDetails(violations: AxeAudit["violations"]) {
+  return violations.map((violation) => ({
+    id: violation.id,
+    nodes: violation.nodes.map((node) => ({
+      target: node.target,
+      failureSummary: node.failureSummary,
+      checks: [...node.any, ...node.all, ...node.none].map((check) => ({
+        id: check.id,
+        data: check.data,
+      })),
+    })),
+  }));
+}
+function contrastRatio(foreground: string, background: string) {
+  const luminance = (color: string) => {
+    const channels = color
+      .match(/[\d.]+/g)
+      ?.slice(0, 3)
+      .map(Number);
+    if (!channels || channels.length !== 3) throw new Error(`Unsupported computed color: ${color}`);
+    const [red = 0, green = 0, blue = 0] = channels.map((channel) => {
+      const normalized = channel / 255;
+      return normalized <= 0.04045 ? normalized / 12.92 : ((normalized + 0.055) / 1.055) ** 2.4;
+    });
+    return red * 0.2126 + green * 0.7152 + blue * 0.0722;
+  };
+  const first = luminance(foreground),
+    second = luminance(background);
+  return (Math.max(first, second) + 0.05) / (Math.min(first, second) + 0.05);
+}
+
 describe("CAIXA dedicated client", () => {
   it("preserves the reference form and makes unknown financial parameters explicit", () => {
     const markup = renderToStaticMarkup(<CaixaArchive />);
@@ -181,42 +213,60 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await mkdir(directory, { recursive: true });
       for (const width of [1440, 390]) {
         await page.setViewportSize({ width, height: width === 1440 ? 900 : 844 });
-        await page.screenshot({
-          path: resolve(directory, `caixa-${name}-${width}.png`),
-          fullPage: true,
-        });
-        const dimensions = await page.evaluate(() => ({
-          width: innerWidth,
-          scroll: document.documentElement.scrollWidth,
-          overflow: [...document.querySelectorAll("*")]
-            .filter((element) => element.getBoundingClientRect().right > innerWidth + 1)
-            .slice(0, 12)
-            .map((element) => ({
-              tag: element.tagName,
-              class: element.className,
-              width: element.getBoundingClientRect().width,
-            })),
-        }));
-        expect(
-          dimensions.scroll <= dimensions.width,
-          `${name}/${width}: ${JSON.stringify(dimensions)}`,
-        ).toBe(true);
-        const axe = await new AxeBuilder({ page })
-          .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
-          .analyze();
-        expect(
-          axe.violations.map((violation) => ({
-            id: violation.id,
-            nodes: violation.nodes.map((node) => node.target),
-          })),
-          `${name}/${width}`,
-        ).toEqual([]);
-        await page.screenshot({
-          path: resolve(directory, `caixa-${name}-${width}.png`),
-          fullPage: true,
-        });
+        for (const theme of ["light", "balanced", "dark"]) {
+          await page.evaluate((selected) => {
+            document.documentElement.dataset.theme = selected;
+          }, theme);
+          await page.screenshot({
+            path: resolve(directory, `caixa-${name}-${width}-${theme}.png`),
+            fullPage: true,
+          });
+          const dimensions = await page.evaluate(() => ({
+            width: innerWidth,
+            scroll: document.documentElement.scrollWidth,
+            overflow: [...document.querySelectorAll("*")]
+              .filter((element) => element.getBoundingClientRect().right > innerWidth + 1)
+              .slice(0, 12)
+              .map((element) => ({
+                tag: element.tagName,
+                class: element.className,
+                width: element.getBoundingClientRect().width,
+              })),
+          }));
+          expect(
+            dimensions.scroll <= dimensions.width,
+            `${name}/${width}/${theme}: ${JSON.stringify(dimensions)}`,
+          ).toBe(true);
+          const axe = await new AxeBuilder({ page })
+            .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
+            .analyze();
+          expect(axeFailureDetails(axe.violations), `${name}/${width}/${theme}`).toEqual([]);
+          if (name === "diagnostico") {
+            const selected = await page
+              .locator(".caixa-diagnosis-subfilters > .active")
+              .evaluate((button) => {
+                const style = getComputedStyle(button);
+                return {
+                  color: style.color,
+                  background: style.backgroundColor,
+                  transitions: style.transitionProperty.split(",").map((value) => value.trim()),
+                };
+              });
+            expect(selected.color).toBe("rgb(255, 255, 255)");
+            expect(selected.background).toBe("rgb(8, 117, 131)");
+            expect(
+              contrastRatio(selected.color, selected.background),
+              JSON.stringify(selected),
+            ).toBeGreaterThanOrEqual(4.5);
+            expect(selected.transitions).not.toContain("color");
+            expect(selected.transitions).not.toContain("background-color");
+          }
+        }
       }
       await page.setViewportSize({ width: 1440, height: 900 });
+      await page.evaluate(() => {
+        document.documentElement.dataset.theme = "light";
+      });
     }
     it("calculates, invalidates stale output and preserves all reference tabs", async () => {
       await open();
@@ -229,6 +279,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByText("A confirmar · não incluído", { exact: true }),
       ).toBeVisible();
       await browserExpect(page.getByText(/seguros não confirmados/).first()).toBeVisible();
+      await auditCurrentTab("resultado");
       await page
         .getByRole("checkbox", { name: "Simular MCMV Classe Média (sem subsídio)", exact: true })
         .check();
@@ -265,6 +316,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByRole("heading", { name: "36 MESES ATINGIDOS NA ESTIMATIVA", exact: true }),
       ).toBeVisible();
       await browserExpect(page.locator(".caixa-fgts-result.eligible")).toBeVisible();
+      await page
+        .getByRole("button", { name: "Adicionar período de trabalho", exact: true })
+        .click();
+      await page.getByRole("button", { name: "Calcular tempo de FGTS", exact: true }).click();
+      await browserExpect(
+        page.getByRole("button", { name: "Remover", exact: true }).first(),
+      ).toBeEnabled();
       await auditCurrentTab("utilitarios");
       expect(errors).toEqual([]);
     });
@@ -311,16 +369,37 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               return box.left >= form.left && box.right <= form.right;
             });
           expect(clearBounds, `${width}/${theme}: Limpar stays inside the form`).toBe(true);
+          const inactiveButtons = await page
+            .locator('.caixa-toggle button[aria-pressed="false"]')
+            .evaluateAll((buttons) =>
+              buttons.map((button) => {
+                const style = getComputedStyle(button);
+                return {
+                  color: style.color,
+                  background: style.backgroundColor,
+                  transitions: style.transitionProperty.split(",").map((value) => value.trim()),
+                };
+              }),
+            );
+          expect(inactiveButtons).toHaveLength(4);
+          for (const inactive of inactiveButtons) {
+            expect(inactive.color, `${width}/${theme}`).toBe(
+              theme === "dark" ? "rgb(169, 191, 210)" : "rgb(64, 84, 108)",
+            );
+            expect(inactive.background, `${width}/${theme}`).toBe(
+              theme === "dark" ? "rgb(16, 42, 66)" : "rgb(255, 255, 255)",
+            );
+            expect(
+              contrastRatio(inactive.color, inactive.background),
+              `${width}/${theme}: ${JSON.stringify(inactive)}`,
+            ).toBeGreaterThanOrEqual(4.5);
+            expect(inactive.transitions).not.toContain("color");
+            expect(inactive.transitions).not.toContain("background-color");
+          }
           const axe = await new AxeBuilder({ page })
             .withTags(["wcag2a", "wcag2aa", "wcag21a", "wcag21aa"])
             .analyze();
-          expect(
-            axe.violations.map((violation) => ({
-              id: violation.id,
-              nodes: violation.nodes.map((node) => node.target),
-            })),
-            `${width}/${theme}`,
-          ).toEqual([]);
+          expect(axeFailureDetails(axe.violations), `${width}/${theme}`).toEqual([]);
         }
       }
       expect(errors).toEqual([]);

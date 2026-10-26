@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-26 — CAIXA: contraste de estados nos três temas
+
+O job Linux 121370107375 do run 40259598078 identificou contraste transitório
+insuficiente em botões inativos claros e no diagnóstico ativo. A transição
+global de cor/fundo de 160 ms interpolava primeiro plano e fundo por um estado
+de baixo contraste. A correção está limitada à página CAIXA: cores opacas e
+remoção dessa interpolação nos controles, preservando borda/sombra e o restante
+da aplicação. Estados escuros de avisos, fases, contadores, FGTS e remoção foram
+conferidos e corrigidos quando necessário.
+
+O artefato formatado passou 4/4 testes em 61,52 s: 12 combinações do formulário
+e 24 auditorias de estados (Resumo Parcial, Documentos, Diagnóstico e Utilitários,
+três temas, 1440/390). Inclui Remover habilitado com dois períodos. Zero Axe,
+transbordamento ou console; timeout de 90 s preservado. Os relatórios agora
+incluem cores calculadas e razões reais de contraste em caso de falha. A nova
+CI/captura autenticada permanece obrigatória antes da promoção de referências.
+
 ## 2026-10-25 — CAIXA: correções da captura autenticada
 
 A captura 40254914307, do merge de teste bb059246/branch 203754ae, identificou

@@ -1,5 +1,11 @@
 # Changelog
 
+## 2026-10-26 — Contraste completo do Simulador CAIXA
+
+- Corrige contraste de estados claros/escuros e a interpolação herdada de cor/fundo na página CAIXA.
+- Audita resultados, documentos, diagnóstico e utilitários nos três temas, incluindo controles habilitados.
+- Preserva limites de teste, cenários, shell global e demais páginas.
+
 ## 2026-10-25 — Simulação CAIXA com regras verificadas
 
 - Corrige a área principal da página e o formulário em tablet, com regressão usando o Archive real.
