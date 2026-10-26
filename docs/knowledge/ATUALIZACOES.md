@@ -3698,3 +3698,8 @@ dependente da autorização específica aplicável.
   DevTools; os dois arquivos exatos foram reexecutados isoladamente com um
   worker e aprovaram 37/37 sem alteração fora do escopo. CI remota continua
   obrigatória antes de merge/publicação.
+- Primeira captura protegida `40329412235` interrompeu no E2E porque a asserção
+  ainda exigia o texto antigo `seguros não confirmados`; a própria evidência
+  mostrava o novo estado correto `seguros de referência`. Os 15 cenários
+  anteriores passaram. A expectativa CAIXA foi atualizada sem reduzir o gate;
+  nova CI/captura é obrigatória.

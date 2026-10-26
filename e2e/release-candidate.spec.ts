@@ -2135,7 +2135,7 @@ test("released simulator pages respect explicit inventory access while the CAIXA
     await expect(
       page.getByRole("heading", { name: "Resumo financeiro", exact: true }),
     ).toBeVisible();
-    await expect(page.locator("#caixa-simulation-result")).toContainText("seguros não confirmados");
+    await expect(page.locator("#caixa-simulation-result")).toContainText("seguros de referência");
     const caixaStatus = await page.request.get("/api/official-simulator/caixa");
     expect(caixaStatus.status()).toBe(200);
     expect(await caixaStatus.json()).toMatchObject({
