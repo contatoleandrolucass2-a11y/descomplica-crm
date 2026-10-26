@@ -31,6 +31,22 @@ como valor confirmado, sem expressão presumida. Obsidian permanece pendente
 pelo limite de exportação preexistente, registrado com causa e critério de
 reavaliação em ATUALIZACOES.
 
+## 2026-10-26 — Mapa Meta Ads temporariamente restrito ao Master
+
+O botão Mapa de São Paulo permanece na navegação lateral do Meta Ads para todos
+os usuários autorizados ao módulo. Para papéis abaixo de Master, o controle não
+navega e apresenta, no hover e no foco, a mensagem de indisponibilidade temporária
+para melhorias. A mesma condição está no nome acessível e no atributo `title`.
+
+O Master continua visualizando o mapa, agora identificado por cadeado e por um
+aviso no topo da página. O servidor redireciona tentativas diretas de usuários
+abaixo da hierarquia Master para a visão macro; o bloqueio não depende apenas da
+interface. Nenhuma permissão, migration, integração ou dado do Meta Ads foi
+alterado. O teste específico do dashboard aprovou 18 cenários. A suíte local
+aprovou 4.293 testes Vitest, 727 testes operacionais e de release e o QA completo
+do dashboard Meta Ads. Lint não apresentou erros, typecheck e build passaram.
+PR, CI e publicação permanecem pendentes.
+
 ## 2026-10-26 — CAIXA: contraste de estados nos três temas
 
 O job Linux 121370107375 do run 40259598078 identificou contraste transitório
