@@ -41,21 +41,6 @@ const record = {
   updated_at: "2026-10-26T19:00:00.000Z",
 };
 
-function getBuilder(result: { data: unknown; error: unknown }) {
-  const maybeSingle = vi.fn().mockResolvedValue(result);
-  const secondEq = vi.fn().mockReturnValue({ maybeSingle });
-  const firstEq = vi.fn().mockReturnValue({ eq: secondEq });
-  const select = vi.fn().mockReturnValue({ eq: firstEq });
-  return { select, firstEq, secondEq };
-}
-
-function putBuilder(result: { data: unknown; error: unknown }) {
-  const single = vi.fn().mockResolvedValue(result);
-  const selectAfter = vi.fn().mockReturnValue({ single });
-  const upsert = vi.fn().mockReturnValue({ select: selectAfter });
-  return { upsert, selectAfter, single };
-}
-
 function putRequest(value: unknown, headers: Record<string, string> = {}) {
   return new Request("https://crm.test/api/meta-ads/canvas-profiles", {
     method: "PUT",
@@ -73,27 +58,26 @@ afterEach(() => vi.unstubAllEnvs());
 
 describe("Meta Ads canvas profile API", () => {
   it("loads only the authenticated user's requested scope", async () => {
-    const builder = getBuilder({ data: record, error: null });
-    mocks.client.mockResolvedValue({ from: vi.fn().mockReturnValue(builder) });
+    const rpc = vi.fn().mockResolvedValue({ data: record, error: null });
+    mocks.client.mockResolvedValue({ rpc });
     const response = await GET(
       new Request("https://crm.test/api/meta-ads/canvas-profiles?scope=macro"),
     );
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ profile: record });
-    expect(builder.firstEq).toHaveBeenCalledWith("user_id", userId);
-    expect(builder.secondEq).toHaveBeenCalledWith("scope", "macro");
+    expect(rpc).toHaveBeenCalledWith("get_meta_ads_canvas_profile", { p_scope: "macro" });
     expect(response.headers.get("cache-control")).toContain("no-store");
   });
 
   it("saves validated state under the authenticated user and rejects foreign origins", async () => {
-    const builder = putBuilder({ data: record, error: null });
-    mocks.client.mockResolvedValue({ from: vi.fn().mockReturnValue(builder) });
+    const rpc = vi.fn().mockResolvedValue({ data: record, error: null });
+    mocks.client.mockResolvedValue({ rpc });
     const response = await PUT(putRequest({ scope: "macro", state }));
     expect(response.status).toBe(200);
-    expect(builder.upsert).toHaveBeenCalledWith(
-      expect.objectContaining({ user_id: userId, scope: "macro", state }),
-      { onConflict: "user_id,scope" },
-    );
+    expect(rpc).toHaveBeenCalledWith("save_meta_ads_canvas_profile", {
+      p_scope: "macro",
+      p_state: state,
+    });
     const denied = await PUT(
       putRequest({ scope: "macro", state }, { origin: "https://foreign.test" }),
     );
@@ -146,7 +130,9 @@ describe("Meta Ads canvas profile API", () => {
     expect(migration).toContain("force row level security");
     expect(migration).toContain("user_id = (select auth.uid())");
     expect(migration).toContain("private.current_session_satisfies_mfa()");
-    expect(migration).toContain("grant select, insert, update, delete");
+    expect(migration).toContain("create function public.get_meta_ads_canvas_profile");
+    expect(migration).toContain("create function public.save_meta_ads_canvas_profile");
+    expect(migration).not.toContain("grant select, insert, update, delete");
     expect(migration).not.toContain("grant all");
   });
 });
