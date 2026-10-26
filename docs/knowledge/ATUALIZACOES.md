@@ -1,5 +1,42 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-26: abertura do refinamento visual de Agendamentos
+
+- Escopo exclusivo de `/app/etapas/agendamentos`: navegacao compacta, calendario,
+  filtros, cards, funis, guias por secao, graficos, recencia, detalhamento e
+  rodape. Nenhuma regra ou pagina CAIXA integra esta demanda.
+- GitHub consultado em 26/10/2026 02:52 -03: `origin/main` e o site publicado
+  apontam para `54eb7cdd7460130fc8c70d71fb956cb801b8d12c`, entrega concorrente da
+  pagina CAIXA posterior ao PR #350. Health publico: HTTP 200, status `ok`.
+- O registro documental do PR #350 foi reconciliado sobre a nova `main` no
+  commit `7f9fe12f`; PR #352 permanece aberto enquanto a CI da base atual roda.
+- `knowledge:context`, `knowledge:search` e `knowledge:sync` permanecem
+  indisponiveis com `Documento excede o limite de exportacao.` A fonte
+  versionada foi preservada; nao apagar ou truncar historico para contornar.
+
+### Implementacao e evidencia local do refinamento
+
+- Escopo mantido exclusivamente na pagina de Agendamentos: sidebar contextual,
+  periodos, filtros, cards, funis, graficos, recencia, tabela e rodape. Nenhuma
+  migration, workflow n8n, regra CAIXA ou outra rota foi alterada.
+- House abre selecionado e exclusivo; Imob e manual. As metas diarias House
+  seguem 1 por dia util e 2 as quintas. Imob permanece sem classificacao de
+  produtividade de agendamentos quando a meta nao existe.
+- QA de producao local aprovada: 21 capturas em cinco viewports e tres temas,
+  zero falhas, Axe, overflow ou colisao. Fluxos de calendario, clique externo,
+  filtros compostos, pop-ups, tabela, teclado, reordenacao, hover, 200%, valores
+  grandes e estados indisponiveis/restritos foram exercitados.
+- Evidencia: `test-results/appointments-preview/result.json`, `passed: true`,
+  21 telas. Artefatos sao sinteticos e locais; nao contem dados de clientes.
+- Lint passou sem erros (38 avisos preexistentes fora do escopo); typecheck e
+  build passaram. Vitest: 4.293 aprovados e 110 condicionais ignorados. Node:
+  1.599 aprovados, 19 ignorados e tres falhas Windows preexistentes em Meta Ads
+  (`connection-monitor` e `vps/session`) por contratos POSIX/arquivo privado;
+  nenhum arquivo Meta Ads foi alterado. A CI Linux e a autoridade para esses
+  contratos. Merge e publicacao ainda serao registrados separadamente. O sync
+  segue impedido pelo limite preexistente do exportador e nao deve ser descrito
+  como concluido.
+
 ## 2026-10-26: publicacao da pagina de Agendamentos
 
 - Escopo comportamental exclusivo de `/app/etapas/agendamentos`: sidebar, funis,

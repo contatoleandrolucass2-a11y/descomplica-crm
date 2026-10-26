@@ -64,6 +64,8 @@ describe("Dashboard sidebar navigation", () => {
       "Pastas",
       "Vendas",
       "Repasse",
+      "Ir para a seção anterior",
+      "Ir para a próxima seção",
     ]);
     expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
     expect(markup).toContain('aria-label="Agendamentos" aria-current="page"');

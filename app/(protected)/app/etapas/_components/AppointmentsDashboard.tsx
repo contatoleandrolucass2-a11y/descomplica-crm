@@ -1,12 +1,12 @@
 "use client";
 
 import {
+  useEffect,
   useId,
   useMemo,
   useRef,
   useState,
   type CSSProperties,
-  type PointerEvent,
   type ReactNode,
 } from "react";
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
@@ -26,6 +26,7 @@ import {
 
 import styles from "./AppointmentsDashboard.module.css";
 import { ChartBoard, ChartTile } from "./ChartBoard";
+import { useDashboardSidebar } from "../../../_components/DashboardShell";
 
 const chartIds = [
   "Evolução de agendamentos por dia",
@@ -73,6 +74,7 @@ const monthNames = [
 ] as const;
 const weekDays = ["DOM", "SEG", "TER", "QUA", "QUI", "SEX", "SÁB"] as const;
 type GoalStatus = "positive" | "negative" | "neutral";
+type FunnelGoalStatuses = Partial<Record<keyof FunnelValues, GoalStatus>>;
 type FunnelValues = {
   opportunities: number;
   appointments: number;
@@ -96,15 +98,17 @@ function Chart({
   title,
   children,
   controls,
+  sectionName,
   wide = false,
 }: {
   title: string;
   children: ReactNode;
   controls?: ReactNode;
+  sectionName?: string;
   wide?: boolean;
 }) {
   return (
-    <ChartTile id={title} title={title} controls={controls} wide={wide}>
+    <ChartTile id={title} title={title} controls={controls} sectionName={sectionName} wide={wide}>
       <div className={styles.cardBody} tabIndex={0}>
         {children}
       </div>
@@ -127,28 +131,53 @@ function TiltCard({
   goalStatus?: GoalStatus;
   statusLabel?: string | undefined;
 }) {
-  const move = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType === "touch") return;
-    const bounds = event.currentTarget.getBoundingClientRect();
-    const horizontal = (event.clientX - bounds.left) / bounds.width - 0.5;
-    const vertical = (event.clientY - bounds.top) / bounds.height - 0.5;
-    event.currentTarget.style.setProperty("--card-tilt-x", `${vertical * -45}deg`);
-    event.currentTarget.style.setProperty("--card-tilt-y", `${horizontal * 45}deg`);
-  };
-  const reset = (event: PointerEvent<HTMLElement>) => {
-    event.currentTarget.style.setProperty("--card-tilt-x", "0deg");
-    event.currentTarget.style.setProperty("--card-tilt-y", "0deg");
-  };
+  const dialog = useRef<HTMLDialogElement>(null);
+  const trigger = useRef<HTMLButtonElement>(null);
+  const close = useRef<HTMLButtonElement>(null);
+  const titleId = useId();
   return (
     <article
       className={[styles.card, styles.tiltCard, className].filter(Boolean).join(" ")}
       data-goal-status={goalStatus}
-      onPointerMove={move}
-      onPointerLeave={reset}
-      onPointerCancel={reset}
     >
       {statusLabel ? <span className="sr-only">{statusLabel}</span> : null}
       {children}
+      <button
+        ref={trigger}
+        type="button"
+        className={styles.cardPopupTrigger}
+        aria-label="Abrir detalhes deste indicador"
+        aria-haspopup="dialog"
+        onClick={() => {
+          dialog.current?.showModal();
+          requestAnimationFrame(() => close.current?.focus());
+        }}
+      />
+      <dialog
+        ref={dialog}
+        className={styles.cardDialog}
+        aria-labelledby={titleId}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) dialog.current?.close();
+        }}
+        onClose={() => trigger.current?.focus()}
+      >
+        <div className={styles.cardDialogPanel}>
+          <header>
+            <h2 id={titleId}>Detalhes do indicador</h2>
+            <button
+              ref={close}
+              type="button"
+              aria-label="Fechar detalhes do indicador"
+              onClick={() => dialog.current?.close()}
+            >
+              <X aria-hidden="true" size={18} />
+            </button>
+          </header>
+          <div className={styles.cardDialogContent}>{children}</div>
+          {statusLabel ? <p className={styles.cardDialogStatus}>{statusLabel}</p> : null}
+        </div>
+      </dialog>
     </article>
   );
 }
@@ -350,12 +379,24 @@ const funnelStages: Array<{ key: keyof FunnelValues; label: string }> = [
   { key: "sales", label: "Vendas" },
 ];
 
-function FunnelGraphic({ values, label }: { values: FunnelValues | null; label: string }) {
+function FunnelGraphic({
+  values,
+  label,
+  statuses,
+}: {
+  values: FunnelValues | null;
+  label: string;
+  statuses?: FunnelGoalStatuses;
+}) {
   if (!values) return <Empty>Meta do funil indisponível para este recorte.</Empty>;
   return (
     <ol className={styles.funnel} aria-label={label}>
       {funnelStages.map((stage, index) => (
-        <li key={stage.key} style={{ "--funnel-level": index } as CSSProperties}>
+        <li
+          key={stage.key}
+          data-goal-status={statuses?.[stage.key] ?? "positive"}
+          style={{ "--funnel-level": index } as CSSProperties}
+        >
           <span>{stage.label}</span>
           <strong>{number.format(Math.round(values[stage.key]))}</strong>
         </li>
@@ -409,9 +450,11 @@ function FunnelConversions({ values }: { values: FunnelValues | null }) {
 function FunnelComparison({
   expected,
   realized,
+  realizedStatuses,
 }: {
   expected: FunnelValues | null;
   realized: FunnelValues | null;
+  realizedStatuses: FunnelGoalStatuses;
 }) {
   const [swapped, setSwapped] = useState(false);
   return (
@@ -441,7 +484,11 @@ function FunnelComparison({
         <h2>Realizado até o momento</h2>
         <p>Resultados consolidados no período e filtros selecionados.</p>
         <div className={`${styles.funnelPanel} ${styles.funnelPanelReversed}`}>
-          <FunnelGraphic values={realized} label="Funil realizado no período" />
+          <FunnelGraphic
+            values={realized}
+            label="Funil realizado no período"
+            statuses={realizedStatuses}
+          />
           <FunnelConversions values={realized} />
         </div>
       </article>
@@ -568,24 +615,34 @@ function ConversionKpi({
   );
 }
 
+function addCalendarDays(date: string, amount: number) {
+  const value = new Date(`${date}T12:00:00Z`);
+  value.setUTCDate(value.getUTCDate() + amount);
+  return value.toISOString().slice(0, 10);
+}
+
 function CalendarFilter({
   month,
   years,
   coverageStart,
   referenceDate,
   selectedDates,
+  periodLabel,
   onMonthChange,
   onToggleDate,
   onSelectWholeMonth,
+  onSelectRange,
 }: {
   month: string;
   years: string[];
   coverageStart: string;
   referenceDate: string;
   selectedDates: string[];
+  periodLabel?: string | undefined;
   onMonthChange: (month: string) => void;
   onToggleDate: (date: string) => void;
   onSelectWholeMonth: () => void;
+  onSelectRange: (start: string, end: string, label: string) => void;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -604,11 +661,12 @@ function CalendarFilter({
   );
   const selected = new Set(selectedDates);
   const summary =
-    selectedDates.length === 0
+    periodLabel ??
+    (selectedDates.length === 0
       ? `${monthNames[monthNumber - 1]} de ${year}`
       : selectedDates.length === 1
         ? displayDate(selectedDates[0]!)
-        : `${selectedDates.length} dias selecionados`;
+        : `${selectedDates.length} dias selecionados`);
   const setMonthPart = (nextYear: number, nextMonth: number) =>
     onMonthChange(`${nextYear}-${String(nextMonth).padStart(2, "0")}`);
   const setCalendarYear = (nextYear: number) => {
@@ -625,6 +683,50 @@ function CalendarFilter({
       requestAnimationFrame(() => close.current?.focus());
     }
   };
+  const referenceMonth = referenceDate.slice(0, 7);
+  const referenceYear = Number(referenceDate.slice(0, 4));
+  const referenceWeekday = new Date(`${referenceDate}T12:00:00Z`).getUTCDay();
+  const mondayOffset = referenceWeekday === 0 ? -6 : 1 - referenceWeekday;
+  const thisWeekStart = addCalendarDays(referenceDate, mondayOffset);
+  const thisWeekEnd = addCalendarDays(thisWeekStart, 6);
+  const lastWeekStart = addCalendarDays(thisWeekStart, -7);
+  const lastWeekEnd = addCalendarDays(thisWeekStart, -1);
+  const withinCurrentMonth = (start: string, end: string) => ({
+    start: start < `${referenceMonth}-01` ? `${referenceMonth}-01` : start,
+    end: end > referenceDate ? referenceDate : end,
+  });
+  const presets = [
+    { label: "Hoje", start: referenceDate, end: referenceDate },
+    {
+      label: "Ontem",
+      start: addCalendarDays(referenceDate, -1),
+      end: addCalendarDays(referenceDate, -1),
+      currentMonthOnly: true,
+    },
+    {
+      label: "Esta semana",
+      ...withinCurrentMonth(thisWeekStart, thisWeekEnd),
+    },
+    {
+      label: "Semana passada",
+      ...withinCurrentMonth(lastWeekStart, lastWeekEnd),
+    },
+    {
+      label: "Este ano",
+      start: `${referenceYear}-01-01`,
+      end: referenceDate,
+    },
+    ...([1, 2, 3, 4] as const).map((quarter) => {
+      const startMonth = (quarter - 1) * 3 + 1;
+      const endMonth = quarter * 3;
+      const quarterEnd = new Date(Date.UTC(year, endMonth, 0)).toISOString().slice(0, 10);
+      return {
+        label: `${quarter}º Trimestre`,
+        start: `${year}-${String(startMonth).padStart(2, "0")}-01`,
+        end: quarterEnd > referenceDate ? referenceDate : quarterEnd,
+      };
+    }),
+  ];
   return (
     <div className={styles.calendarField}>
       <span>Período</span>
@@ -643,6 +745,9 @@ function CalendarFilter({
         className={styles.calendarDialog}
         aria-labelledby={titleId}
         aria-describedby={descriptionId}
+        onClick={(event) => {
+          if (event.target === event.currentTarget) dialog.current?.close();
+        }}
         onClose={() => trigger.current?.focus()}
       >
         <div className={styles.calendarPanel}>
@@ -662,8 +767,34 @@ function CalendarFilter({
             </button>
           </header>
           <p id={descriptionId} className={styles.calendarDescription}>
-            Escolha o mês inteiro ou selecione um ou vários dias.
+            Use um atalho, escolha o mês inteiro ou selecione um ou vários dias.
           </p>
+          <div className={styles.calendarPresets} aria-label="Atalhos de período">
+            {presets.map((preset) => {
+              const unavailable =
+                preset.start > preset.end ||
+                preset.end < coverageStart ||
+                preset.start > referenceDate ||
+                ("currentMonthOnly" in preset &&
+                  preset.currentMonthOnly &&
+                  preset.start.slice(0, 7) !== referenceMonth);
+              const start = preset.start < coverageStart ? coverageStart : preset.start;
+              const end = preset.end > referenceDate ? referenceDate : preset.end;
+              return (
+                <button
+                  key={`${preset.label}-${year}`}
+                  type="button"
+                  disabled={unavailable}
+                  onClick={() => {
+                    onSelectRange(start, end, preset.label);
+                    dialog.current?.close();
+                  }}
+                >
+                  {preset.label}
+                </button>
+              );
+            })}
+          </div>
           <div className={styles.calendarControls}>
             <label>
               <span>Mês</span>
@@ -735,7 +866,13 @@ function CalendarFilter({
           </div>
           <footer className={styles.calendarFooter}>
             <span aria-live="polite">{summary}</span>
-            <button type="button" onClick={onSelectWholeMonth}>
+            <button
+              type="button"
+              onClick={() => {
+                onSelectWholeMonth();
+                dialog.current?.close();
+              }}
+            >
               Selecionar mês inteiro
             </button>
           </footer>
@@ -754,9 +891,11 @@ function DashboardFilters({
   coverageStart,
   referenceDate,
   selectedDates,
+  periodLabel,
   onMonthChange,
   onToggleDate,
   onSelectWholeMonth,
+  onSelectRange,
 }: {
   filters: AppointmentFilters;
   options: {
@@ -775,9 +914,11 @@ function DashboardFilters({
   coverageStart: string;
   referenceDate: string;
   selectedDates: string[];
+  periodLabel?: string | undefined;
   onMonthChange: (month: string) => void;
   onToggleDate: (date: string) => void;
   onSelectWholeMonth: () => void;
+  onSelectRange: (start: string, end: string, label: string) => void;
 }) {
   const selects = [
     {
@@ -823,9 +964,7 @@ function DashboardFilters({
                 aria-pressed={filters.channel === option.key}
                 disabled={!available}
                 title={available ? undefined : "Canal indisponível neste recorte"}
-                onClick={() =>
-                  onChange("channel", filters.channel === option.key ? undefined : option.key)
-                }
+                onClick={() => onChange("channel", option.key)}
               >
                 {option.label}
               </button>
@@ -859,9 +998,11 @@ function DashboardFilters({
         coverageStart={coverageStart}
         referenceDate={referenceDate}
         selectedDates={selectedDates}
+        periodLabel={periodLabel}
         onMonthChange={onMonthChange}
         onToggleDate={onToggleDate}
         onSelectWholeMonth={onSelectWholeMonth}
+        onSelectRange={onSelectRange}
       />
     </section>
   );
@@ -874,7 +1015,15 @@ type RecencyItem = {
   daysSinceLastAppointment: number;
 };
 
-function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] }) {
+function RecencyPanel({
+  title,
+  items,
+  sectionName,
+}: {
+  title: string;
+  items: RecencyItem[];
+  sectionName?: string;
+}) {
   const tone =
     items.length === 0
       ? "blue"
@@ -888,6 +1037,7 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
       id={title}
       title={title}
       tone={tone}
+      sectionName={sectionName}
       controls={<span>{number.format(items.length)} corretores</span>}
     >
       {items.length === 0 ? (
@@ -897,8 +1047,9 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
           {items.map((item) => (
             <li key={item.owner}>
               <strong title={item.owner}>{shortName(item.owner)}</strong>
-              <span title={item.manager}>
-                {item.manager ? shortName(item.manager) : "Gerente não informado"}
+              <span className={styles.recencyManager} title={item.manager}>
+                <span>{item.manager ? shortName(item.manager) : "Gerente não informado"}</span>
+                <small>Último: {displayDate(item.lastAppointmentDate)}</small>
               </span>
               <b>
                 {item.daysSinceLastAppointment === 0
@@ -988,6 +1139,7 @@ function AppointmentTable({
             <thead>
               <tr>
                 <th>Data de criação</th>
+                <th>Qnt. de dias</th>
                 <th>Horário</th>
                 <th>Data de comparecimento</th>
                 <th>Visita Realizada</th>
@@ -1026,19 +1178,26 @@ function AppointmentTable({
                       }
                     }}
                   >
-                    <td>{date.format(new Date(row.createdAt))}</td>
-                    <td>
+                    <td data-label="Data de criação">{date.format(new Date(row.createdAt))}</td>
+                    <td data-label="Qnt. de dias">{number.format(row.daysSinceAppointment)}</td>
+                    <td data-label="Horário">
                       {row.scheduledAt ? time.format(new Date(row.scheduledAt)) : "Não informado"}
                     </td>
-                    <td>
+                    <td data-label="Data de comparecimento">
                       {row.attendedAt ? date.format(new Date(row.attendedAt)) : "Não informado"}
                     </td>
-                    <td>{row.visitPerformed ? "Sim" : "Não"}</td>
-                    <td title={row.regionalManager}>{value(shortName(row.regionalManager))}</td>
-                    <td title={row.salesManager}>{value(shortName(row.salesManager))}</td>
-                    <td title={row.owner}>{value(shortName(row.owner))}</td>
-                    <td>{value(row.accountName)}</td>
-                    <td>{value(row.accountRanking)}</td>
+                    <td data-label="Visita realizada">{row.visitPerformed ? "Sim" : "Não"}</td>
+                    <td data-label="Gerente Regional" title={row.regionalManager}>
+                      {value(shortName(row.regionalManager))}
+                    </td>
+                    <td data-label="Gerente de Vendas" title={row.salesManager}>
+                      {value(shortName(row.salesManager))}
+                    </td>
+                    <td data-label="Corretor" title={row.owner}>
+                      {value(shortName(row.owner))}
+                    </td>
+                    <td data-label="Conta">{value(row.accountName)}</td>
+                    <td data-label="Ranking">{value(row.accountRanking)}</td>
                   </tr>
                 );
               })}
@@ -1053,6 +1212,7 @@ function AppointmentTable({
 export function AppointmentsDashboard({
   analysis,
   brokerRoster = null,
+  generatedAt,
   individualGoal = null,
   goalsByMonth,
   conversionGoals = null,
@@ -1068,11 +1228,34 @@ export function AppointmentsDashboard({
   timezone?: string | undefined;
   canViewDevelopmentRankings?: boolean | undefined;
 }) {
+  const dashboardSidebar = useDashboardSidebar();
   const [monthChoice, setSelectedMonth] = useState("");
   const [yearChoice, setSelectedYear] = useState("");
-  const [filters, setFilters] = useState<AppointmentFilters>({});
+  const [filters, setFilters] = useState<AppointmentFilters>({ channel: 1 });
+  const [periodLabel, setPeriodLabel] = useState<string>();
   const [selectedRow, setSelectedRow] = useState("");
   const [rowBaseFilters, setRowBaseFilters] = useState<AppointmentFilters | null>(null);
+  const generatedAtLabel = useMemo(
+    () =>
+      generatedAt
+        ? new Intl.DateTimeFormat("pt-BR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+            timeZone: timezone,
+          }).format(new Date(generatedAt))
+        : "",
+    [generatedAt, timezone],
+  );
+
+  useEffect(() => {
+    dashboardSidebar?.setUpdatedAt(generatedAtLabel);
+    return () => dashboardSidebar?.setUpdatedAt("");
+  }, [dashboardSidebar, generatedAtLabel]);
+
   const selectedMonth = monthChoice || analysis?.referenceDate.slice(0, 7) || "";
   const selectedYear = yearChoice || analysis?.referenceDate.slice(0, 4) || "";
   const resolvedGoals = useMemo(
@@ -1106,11 +1289,7 @@ export function AppointmentsDashboard({
   const selectedDates = filters.createdDates ?? [];
   const monthUnavailable = result.coverage === "unavailable";
   const monthlyGoal = result.monthlyGoal;
-  const selectedChannel =
-    filters.channel ??
-    (result.filterOptions.channels.length === 1
-      ? result.filterOptions.channels[0]!.key
-      : undefined);
+  const selectedChannel = filters.channel;
   const goalProfile = selectedChannel === 1 ? "dv" : selectedChannel === 0 ? "partnerships" : null;
   const activeConversionGoals = goalProfile ? (conversionGoals?.[goalProfile] ?? null) : null;
   const goalContext =
@@ -1119,11 +1298,18 @@ export function AppointmentsDashboard({
       : selectedChannel === 0
         ? "Imob / Parcerias"
         : "o recorte misto";
-  const calendarActive = selectedMonth !== referenceMonth || selectedDates.length > 0;
+  const rangeActive = Boolean(filters.periodStart || filters.periodEnd);
+  const calendarActive =
+    selectedMonth !== referenceMonth || selectedDates.length > 0 || rangeActive;
   const activeFilterCount =
     Object.entries(filters).filter(
       ([key, value]) =>
-        key !== "createdDates" && value !== undefined && value !== "" && value !== null,
+        key !== "createdDates" &&
+        key !== "periodStart" &&
+        key !== "periodEnd" &&
+        value !== undefined &&
+        value !== "" &&
+        value !== null,
     ).length + (calendarActive ? 1 : 0);
   const goalCohort =
     selectedChannel === 1
@@ -1134,7 +1320,21 @@ export function AppointmentsDashboard({
   const expectedFunnel: FunnelValues | null = (() => {
     const monthly = activeConversionGoals?.monthlyFunnel;
     if (!monthly || goalCohort === null || result.daysInMonth <= 0) return null;
-    const factor = goalCohort * (result.selectedCoveredDays / result.daysInMonth);
+    let periodFactor = result.selectedCoveredDays / result.daysInMonth;
+    if (filters.periodStart && filters.periodEnd) {
+      periodFactor = 0;
+      let cursor =
+        filters.periodStart < analysis.coverageStart ? analysis.coverageStart : filters.periodStart;
+      const last =
+        filters.periodEnd > analysis.referenceDate ? analysis.referenceDate : filters.periodEnd;
+      while (cursor <= last) {
+        const [cursorYear, cursorMonth] = cursor.split("-").map(Number) as [number, number];
+        const daysInCursorMonth = new Date(Date.UTC(cursorYear, cursorMonth, 0)).getUTCDate();
+        periodFactor += 1 / daysInCursorMonth;
+        cursor = addCalendarDays(cursor, 1);
+      }
+    }
+    const factor = goalCohort * periodFactor;
     return {
       opportunities: monthly.opportunities * factor,
       appointments: monthly.appointments * factor,
@@ -1142,6 +1342,43 @@ export function AppointmentsDashboard({
       folders: monthly.folders * factor,
       approvedFolders: monthly.approvedFolders * factor,
       sales: monthly.sales * factor,
+    };
+  })();
+  const realizedStatuses: FunnelGoalStatuses = (() => {
+    const ratio = (source: number, target: number) => (target > 0 ? source / target : null);
+    const realized = result.funnel;
+    return {
+      opportunities: "positive",
+      appointments: realized
+        ? atMostStatus(
+            ratio(realized.opportunities, realized.appointments),
+            activeConversionGoals?.opportunityAppointment ?? null,
+          )
+        : "neutral",
+      visits: realized
+        ? atMostStatus(
+            ratio(realized.appointments, realized.visits),
+            activeConversionGoals?.appointmentVisit ?? null,
+          )
+        : "neutral",
+      folders: realized
+        ? atMostStatus(
+            ratio(realized.appointments, realized.folders),
+            activeConversionGoals?.appointmentFolder ?? null,
+          )
+        : "neutral",
+      approvedFolders: realized
+        ? atMostStatus(
+            ratio(realized.appointments, realized.approvedFolders),
+            activeConversionGoals?.appointmentApprovedFolder ?? null,
+          )
+        : "neutral",
+      sales: realized
+        ? atMostStatus(
+            ratio(realized.appointments, realized.sales),
+            activeConversionGoals?.appointmentSale ?? null,
+          )
+        : "neutral",
     };
   })();
   const toggleFilter = <K extends keyof AppointmentFilters>(
@@ -1175,17 +1412,21 @@ export function AppointmentsDashboard({
     setSelectedYear(month.slice(0, 4));
     setSelectedRow("");
     setRowBaseFilters(null);
+    setPeriodLabel(undefined);
     setFilters((current) => {
       const next = { ...current };
       delete next.createdDate;
       delete next.createdDates;
       delete next.week;
+      delete next.periodStart;
+      delete next.periodEnd;
       return next;
     });
   };
   const toggleCalendarDate = (date: string) => {
     setSelectedRow("");
     setRowBaseFilters(null);
+    setPeriodLabel(undefined);
     setFilters((current) => {
       const currentDates = current.createdDates ?? [];
       const nextDates = currentDates.includes(date)
@@ -1194,6 +1435,8 @@ export function AppointmentsDashboard({
       const next = { ...current };
       delete next.createdDate;
       delete next.week;
+      delete next.periodStart;
+      delete next.periodEnd;
       if (nextDates.length === 0) delete next.createdDates;
       else next.createdDates = nextDates;
       return next;
@@ -1202,8 +1445,25 @@ export function AppointmentsDashboard({
   const selectWholeMonth = () => {
     setSelectedRow("");
     setRowBaseFilters(null);
+    setPeriodLabel(undefined);
     setFilters((current) => {
       const next = { ...current };
+      delete next.createdDate;
+      delete next.createdDates;
+      delete next.week;
+      delete next.periodStart;
+      delete next.periodEnd;
+      return next;
+    });
+  };
+  const selectRange = (start: string, end: string, label: string) => {
+    setSelectedMonth(start.slice(0, 7));
+    setSelectedYear(start.slice(0, 4));
+    setPeriodLabel(label);
+    setSelectedRow("");
+    setRowBaseFilters(null);
+    setFilters((current) => {
+      const next = { ...current, periodStart: start, periodEnd: end };
       delete next.createdDate;
       delete next.createdDates;
       delete next.week;
@@ -1213,7 +1473,8 @@ export function AppointmentsDashboard({
   const clearAllFilters = () => {
     setSelectedMonth("");
     setSelectedYear("");
-    setFilters({});
+    setFilters({ channel: 1 });
+    setPeriodLabel(undefined);
     setSelectedRow("");
     setRowBaseFilters(null);
   };
@@ -1272,12 +1533,19 @@ export function AppointmentsDashboard({
         coverageStart={analysis.coverageStart}
         referenceDate={analysis.referenceDate}
         selectedDates={selectedDates}
+        periodLabel={periodLabel}
         onMonthChange={selectMonth}
         onToggleDate={toggleCalendarDate}
         onSelectWholeMonth={selectWholeMonth}
+        onSelectRange={selectRange}
       />
 
-      <div className={styles.kpiGrid}>
+      <div
+        className={styles.kpiGrid}
+        data-appointments-section
+        data-section-name="Resumo"
+        tabIndex={-1}
+      >
         <TiltCard
           className={styles.gaugeCard}
           goalStatus={atLeastStatus(result.total, monthlyGoal)}
@@ -1306,6 +1574,52 @@ export function AppointmentsDashboard({
           label="Corretores cadastrados"
           value={result.brokerCount === null ? null : number.format(result.brokerCount)}
           detail="Total vigente do relatório de corretores"
+        />
+        <Kpi
+          label="Gerentes cadastrados"
+          value={
+            result.registeredManagerCount === null
+              ? null
+              : number.format(result.registeredManagerCount)
+          }
+          detail="Gerentes de Vendas vinculados aos corretores"
+        />
+        <Kpi
+          label="Visitas realizadas"
+          value={result.visitsPerformed === null ? null : number.format(result.visitsPerformed)}
+          detail="Período selecionado"
+        />
+        <Kpi
+          label="Vendas no período"
+          value={result.sales === null ? null : number.format(result.sales)}
+          detail="Período selecionado"
+        />
+        <ConversionKpi
+          title="Oportunidade x Agendamento"
+          source={result.funnel?.opportunities ?? null}
+          target={result.funnel?.appointments ?? null}
+          sourceUnit="oportunidades"
+          targetUnit="agendamento"
+          goal={activeConversionGoals?.opportunityAppointment ?? null}
+          goalContext={goalContext}
+        />
+        <ConversionKpi
+          title="Agendamento x Visita"
+          source={result.funnel?.appointments ?? null}
+          target={result.funnel?.visits ?? null}
+          sourceUnit="agendamentos"
+          targetUnit="visita"
+          goal={activeConversionGoals?.appointmentVisit ?? null}
+          goalContext={goalContext}
+        />
+        <ConversionKpi
+          title="Agendamento x Venda"
+          source={result.funnel?.appointments ?? null}
+          target={result.funnel?.sales ?? null}
+          sourceUnit="agendamentos"
+          targetUnit="venda"
+          goal={activeConversionGoals?.appointmentSale ?? null}
+          goalContext={goalContext}
         />
         <Kpi
           label="Média de agendamentos"
@@ -1340,59 +1654,19 @@ export function AppointmentsDashboard({
               : `${result.today >= result.todayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para meta ${number.format(result.todayGoal)}`
           }
         />
-        <ConversionKpi
-          title="Oportunidade x Agendamento"
-          source={result.funnel?.opportunities ?? null}
-          target={result.funnel?.appointments ?? null}
-          sourceUnit="oportunidades"
-          targetUnit="agendamento"
-          goal={activeConversionGoals?.opportunityAppointment ?? null}
-          goalContext={goalContext}
-        />
-        <ConversionKpi
-          title="Agendamento x Visita"
-          source={result.funnel?.appointments ?? null}
-          target={result.funnel?.visits ?? null}
-          sourceUnit="agendamentos"
-          targetUnit="visita"
-          goal={activeConversionGoals?.appointmentVisit ?? null}
-          goalContext={goalContext}
-        />
-        <ConversionKpi
-          title="Agendamento x Venda"
-          source={result.funnel?.appointments ?? null}
-          target={result.funnel?.sales ?? null}
-          sourceUnit="agendamentos"
-          targetUnit="venda"
-          goal={activeConversionGoals?.appointmentSale ?? null}
-          goalContext={goalContext}
-        />
-        <Kpi
-          label="Gerentes cadastrados"
-          value={
-            result.registeredManagerCount === null
-              ? null
-              : number.format(result.registeredManagerCount)
-          }
-          detail="Gerentes de Vendas vinculados aos corretores"
-        />
-        <Kpi
-          label="Visitas realizadas"
-          value={result.visitsPerformed === null ? null : number.format(result.visitsPerformed)}
-          detail="Período selecionado"
-        />
-        <Kpi
-          label="Vendas no período"
-          value={result.sales === null ? null : number.format(result.sales)}
-          detail="Período selecionado"
+      </div>
+
+      <div data-appointments-section data-section-name="Funis" tabIndex={-1}>
+        <FunnelComparison
+          expected={expectedFunnel}
+          realized={result.funnel}
+          realizedStatuses={realizedStatuses}
         />
       </div>
 
-      <FunnelComparison expected={expectedFunnel} realized={result.funnel} />
-
       <ChartBoard ids={chartIds} storageKey="appointments">
         <div className={styles.featureChartRow}>
-          <Chart title="Evolução de agendamentos por dia" wide>
+          <Chart title="Evolução de agendamentos por dia" sectionName="Evolução diária" wide>
             {monthUnavailable ? (
               <Empty>Período sem cobertura disponível.</Empty>
             ) : (
@@ -1410,7 +1684,7 @@ export function AppointmentsDashboard({
         </div>
 
         <div className={styles.overviewGrid}>
-          <Chart title="Previstos e realizados hoje">
+          <Chart title="Previstos e realizados hoje" sectionName="Visão do período">
             {result.performedToday === null ? (
               <Empty>Dados operacionais indisponíveis nesta atualização.</Empty>
             ) : (
@@ -1463,7 +1737,7 @@ export function AppointmentsDashboard({
         </div>
 
         <div className={styles.insightGrid}>
-          <Chart title="Ranking por responsável">
+          <Chart title="Ranking por responsável" sectionName="Rankings">
             {monthUnavailable ? (
               <Empty>Período sem cobertura disponível.</Empty>
             ) : (
@@ -1505,7 +1779,7 @@ export function AppointmentsDashboard({
           className={styles.conversionRankingGrid}
           data-appointments-chart-group="conversion-rankings"
         >
-          <Chart title="Melhor responsável: Agendamento x Visita">
+          <Chart title="Melhor responsável: Agendamento x Visita" sectionName="Conversões">
             <ConversionRanking
               buckets={result.conversionRankings.owners}
               total={result.total}
@@ -1532,6 +1806,7 @@ export function AppointmentsDashboard({
           <RecencyPanel
             title="Último agendamento: até 7 dias"
             items={result.brokerRecency.upTo7Days}
+            sectionName="Recência"
           />
           <RecencyPanel
             title="Último agendamento: de 8 a 14 dias"
@@ -1546,6 +1821,7 @@ export function AppointmentsDashboard({
         <div className={styles.monthlyChartRow}>
           <Chart
             title="Agendamentos por mês"
+            sectionName="Evolução mensal"
             wide
             controls={
               <div className={styles.yearControl}>
@@ -1581,29 +1857,37 @@ export function AppointmentsDashboard({
         </div>
       </ChartBoard>
       {result.details === null ? (
-        <section className={`${styles.card} ${styles.tableCard}`}>
-          <h2>Detalhamento dos agendamentos</h2>
-          <Empty>Detalhamento indisponível nesta atualização.</Empty>
-        </section>
+        <div data-appointments-section data-section-name="Detalhamento" tabIndex={-1}>
+          <section className={`${styles.card} ${styles.tableCard}`}>
+            <h2>Detalhamento dos agendamentos</h2>
+            <Empty>Detalhamento indisponível nesta atualização.</Empty>
+          </section>
+        </div>
       ) : (
-        <AppointmentTable
-          rows={result.details}
-          timezone={timezone}
-          selectedKey={selectedRow}
-          onSelect={(rowFilters, key) => {
-            if (selectedRow === key) {
-              setSelectedRow("");
-              setFilters(rowBaseFilters ?? {});
-              setRowBaseFilters(null);
-            } else {
-              const baseFilters = rowBaseFilters ?? filters;
-              setRowBaseFilters(baseFilters);
-              setSelectedRow(key);
-              setFilters({ ...baseFilters, ...rowFilters });
-            }
-          }}
-        />
+        <div data-appointments-section data-section-name="Detalhamento" tabIndex={-1}>
+          <AppointmentTable
+            rows={result.details}
+            timezone={timezone}
+            selectedKey={selectedRow}
+            onSelect={(rowFilters, key) => {
+              if (selectedRow === key) {
+                setSelectedRow("");
+                setFilters(rowBaseFilters ?? { channel: 1 });
+                setRowBaseFilters(null);
+              } else {
+                const baseFilters = rowBaseFilters ?? filters;
+                setRowBaseFilters(baseFilters);
+                setSelectedRow(key);
+                setFilters({ ...baseFilters, ...rowFilters });
+              }
+            }}
+          />
+        </div>
       )}
+      <footer className={styles.pageFooter}>
+        <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>
+        <strong>Desenvolvido e gerenciado por Leandro Lucas</strong>
+      </footer>
     </div>
   );
 }

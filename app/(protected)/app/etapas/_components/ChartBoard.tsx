@@ -33,6 +33,7 @@ export type ChartTileProps = {
   wide?: boolean;
   className?: string;
   tone?: "blue" | "red" | "yellow";
+  sectionName?: string | undefined;
 };
 
 type BoardContext = {
@@ -157,6 +158,7 @@ export function ChartTile({
   wide = false,
   className,
   tone,
+  sectionName,
 }: ChartTileProps) {
   const board = useContext(Board);
   const titleId = useId();
@@ -194,6 +196,9 @@ export function ChartTile({
   return (
     <section
       data-appointments-chart={id}
+      data-appointments-section={sectionName || undefined}
+      data-section-name={sectionName || undefined}
+      tabIndex={sectionName ? -1 : undefined}
       className={[styles.tile, wide ? styles.wide : "", className].filter(Boolean).join(" ")}
       style={{ order: index }}
       aria-label={`${title}, posição ${index + 1} de ${order.length}`}
@@ -205,6 +210,9 @@ export function ChartTile({
         aria-modal={expanded ? true : undefined}
         aria-labelledby={titleId}
         className={[styles.card, tone ? styles[tone] : ""].filter(Boolean).join(" ")}
+        onClick={(event) => {
+          if (expanded && event.target === event.currentTarget) collapse();
+        }}
         onCancel={(event) => {
           event.preventDefault();
           collapse();
@@ -266,7 +274,7 @@ export function ChartTile({
                 }
               }}
             >
-              <GripVertical size={16} aria-hidden="true" />
+              <GripVertical size={12} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -275,7 +283,7 @@ export function ChartTile({
               aria-label={`Mover ${title} para antes`}
               onClick={() => move(id, index - 1, title)}
             >
-              <ArrowUp size={16} aria-hidden="true" />
+              <ArrowUp size={12} aria-hidden="true" />
             </button>
             <button
               type="button"
@@ -284,7 +292,7 @@ export function ChartTile({
               aria-label={`Mover ${title} para depois`}
               onClick={() => move(id, index + 1, title)}
             >
-              <ArrowDown size={16} aria-hidden="true" />
+              <ArrowDown size={12} aria-hidden="true" />
             </button>
             <button
               ref={expandButton}
@@ -294,7 +302,7 @@ export function ChartTile({
               aria-haspopup="dialog"
               onClick={expand}
             >
-              <Maximize2 size={16} aria-hidden="true" />
+              <Maximize2 size={12} aria-hidden="true" />
             </button>
             <button
               ref={closeButton}
@@ -303,7 +311,7 @@ export function ChartTile({
               aria-label={`Fechar ${title}`}
               onClick={collapse}
             >
-              <X size={18} aria-hidden="true" />
+              <X size={14} aria-hidden="true" />
             </button>
           </div>
         </header>

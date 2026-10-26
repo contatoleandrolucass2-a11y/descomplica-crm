@@ -12,7 +12,8 @@
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.35rem;
+  padding: 0.25rem 0.45rem 0;
 }
 .toolbar {
   display: flex;
@@ -74,7 +75,7 @@
   grid-template-columns: repeat(6, minmax(0, 1fr));
   align-items: end;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
   padding: 0.9rem;
   background: var(--analytics-surface);
   border: 1px solid var(--analytics-line);
@@ -118,6 +119,16 @@
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
+  transition:
+    transform 150ms ease-out,
+    background-color 150ms ease-out,
+    color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.channelSwitch button:hover:enabled {
+  transform: translateY(-1px) scale(1.02);
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 14%, transparent);
+  color: var(--analytics-cyan-strong);
 }
 .channelSwitch button[aria-pressed="true"] {
   background: var(--analytics-cyan-strong);
@@ -138,6 +149,15 @@
   font: inherit;
   font-size: 0.82rem;
   text-overflow: ellipsis;
+  transition:
+    transform 150ms ease-out,
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.filterField select:hover {
+  transform: translateY(-1px);
+  border-color: var(--analytics-cyan-strong);
+  box-shadow: 0 0.35rem 0.9rem color-mix(in srgb, var(--analytics-cyan-strong) 12%, transparent);
 }
 .channelSwitch button:focus-visible,
 .filterField select:focus-visible,
@@ -163,6 +183,15 @@
   font: inherit;
   font-size: 0.82rem;
   cursor: pointer;
+  transition:
+    transform 150ms ease-out,
+    border-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.calendarTrigger:hover {
+  transform: translateY(-1px);
+  border-color: var(--analytics-cyan-strong);
+  box-shadow: 0 0.35rem 0.9rem color-mix(in srgb, var(--analytics-cyan-strong) 12%, transparent);
 }
 .calendarTrigger span {
   min-width: 0;
@@ -226,6 +255,45 @@
   color: var(--analytics-muted);
   font-size: 0.82rem;
 }
+.calendarPresets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin-bottom: 0.9rem;
+}
+.calendarPresets button {
+  min-height: 40px;
+  border: 1px solid var(--analytics-line);
+  border-radius: 999px;
+  background: var(--analytics-surface-muted);
+  color: var(--analytics-ink);
+  padding: 0.4rem 0.55rem;
+  font: inherit;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform 150ms ease-out,
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    color 150ms ease-out;
+}
+.calendarPresets button:hover:enabled,
+.calendarPresets button:focus-visible {
+  transform: scale(1.045);
+  border-color: var(--analytics-cyan-strong);
+  background: var(--analytics-cyan-strong);
+  color: var(--analytics-surface);
+}
+.calendarPresets button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.calendarPresets button:disabled {
+  cursor: not-allowed;
+  opacity: 0.4;
+}
 .calendarControls {
   display: grid;
   grid-template-columns: minmax(0, 1.5fr) minmax(6.5rem, 1fr);
@@ -262,7 +330,8 @@
 .calendarDay {
   display: grid;
   min-width: 0;
-  min-height: 44px;
+  width: 100%;
+  aspect-ratio: 1;
   place-items: center;
   border: 1px solid transparent;
   border-radius: 50%;
@@ -271,9 +340,17 @@
   font: inherit;
   font-size: 0.82rem;
   cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform 150ms ease-out,
+    background-color 150ms ease-out,
+    border-color 150ms ease-out,
+    color 150ms ease-out;
 }
 .calendarDay:hover:enabled {
+  transform: scale(1.1);
   border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 22%, var(--analytics-surface-muted));
 }
 .calendarDay[aria-selected="true"] {
   border-color: var(--analytics-cyan-strong);
@@ -313,7 +390,7 @@
 .kpiGrid {
   display: grid;
   grid-template-columns: repeat(6, minmax(0, 1fr));
-  grid-auto-rows: clamp(10.75rem, calc((100dvh - 18rem) / 2), 12.5rem);
+  grid-auto-rows: clamp(12rem, calc((100dvh - 17rem) / 2), 13.25rem);
   gap: 0.75rem;
   margin-bottom: 1rem;
 }
@@ -368,19 +445,13 @@
   border-radius: 1rem;
 }
 .tiltCard {
-  --card-tilt-x: 0deg;
-  --card-tilt-y: 0deg;
   --frame-color-a: transparent;
   --frame-color-b: transparent;
   position: relative;
   isolation: isolate;
-  transform: perspective(900px) rotateX(var(--card-tilt-x)) rotateY(var(--card-tilt-y));
-  transform-style: preserve-3d;
   transition:
-    transform 140ms ease-out,
     border-color 160ms ease-out,
     box-shadow 160ms ease-out;
-  will-change: transform;
 }
 .tiltCard::before {
   content: "";
@@ -389,14 +460,7 @@
   inset: -2px;
   padding: 2px;
   border-radius: calc(1rem + 2px);
-  background: linear-gradient(
-    115deg,
-    transparent 18%,
-    var(--frame-color-a) 42%,
-    var(--frame-color-b) 52%,
-    transparent 76%
-  );
-  background-size: 260% 260%;
+  background: linear-gradient(115deg, var(--frame-color-a), var(--frame-color-b));
   pointer-events: none;
   opacity: 0;
   mask:
@@ -413,34 +477,97 @@
   --frame-color-b: #63d5ff;
 }
 .tiltCard[data-goal-status="negative"] {
-  --frame-color-a: #b8223d;
-  --frame-color-b: #ff6b78;
+  --frame-color-a: var(--analytics-danger);
+  --frame-color-b: color-mix(in srgb, var(--analytics-danger) 62%, white);
 }
 .tiltCard[data-goal-status="positive"]::before,
 .tiltCard[data-goal-status="negative"]::before {
   opacity: 1;
-  animation: indicator-frame-flow 4.8s linear infinite;
 }
 .tiltCard[data-goal-status="positive"] {
   box-shadow: 0 0 1.1rem color-mix(in srgb, #2f8fdc 13%, transparent);
 }
 .tiltCard[data-goal-status="negative"] {
-  box-shadow: 0 0 1.1rem color-mix(in srgb, #e13d55 14%, transparent);
-}
-.tiltCard[data-goal-status="positive"]:hover::before,
-.tiltCard[data-goal-status="negative"]:hover::before {
-  animation-duration: 2.2s;
+  box-shadow: 0 0 1.1rem color-mix(in srgb, var(--analytics-danger) 14%, transparent);
 }
 .tiltCard:hover {
   box-shadow: 0 0.75rem 2rem color-mix(in srgb, var(--analytics-cyan-strong) 18%, transparent);
 }
-@keyframes indicator-frame-flow {
-  0% {
-    background-position: 100% 100%;
-  }
-  100% {
-    background-position: -100% -100%;
-  }
+.cardPopupTrigger {
+  position: absolute !important;
+  z-index: 4 !important;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.cardPopupTrigger:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: -4px;
+}
+.cardDialog {
+  width: min(28rem, calc(100vw - 1.5rem));
+  max-height: calc(100dvh - 1.5rem);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  box-shadow: 0 1.5rem 4rem rgb(0 0 0 / 35%);
+  overscroll-behavior: contain;
+}
+.cardDialog::backdrop {
+  background: rgb(3 15 24 / 68%);
+  backdrop-filter: blur(3px);
+}
+.cardDialogPanel {
+  padding: 1rem;
+}
+.cardDialogPanel > header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 1px solid var(--analytics-line);
+}
+.cardDialogPanel > header button {
+  display: grid;
+  width: 44px;
+  min-height: 44px;
+  place-items: center;
+  border: 0;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+.cardDialogPanel > header button:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+.cardDialogContent {
+  display: grid;
+  min-height: 12rem;
+  place-items: center;
+  gap: 0.75rem;
+  padding: 1rem 0;
+  text-align: center;
+}
+.cardDialogContent > h2 {
+  font-size: 1.15rem;
+}
+.cardDialogStatus {
+  margin: 0;
+  color: var(--analytics-muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
 }
 .chartCard {
   display: flex;
@@ -579,11 +706,11 @@
   text-align: center;
 }
 .gaugeCard {
-  padding-bottom: 0.65rem;
+  padding-block: 0.8rem;
 }
 .goalGauge {
   width: 100%;
-  margin-top: auto;
+  margin-top: 0;
   text-align: center;
 }
 .goalGauge svg {
@@ -835,6 +962,7 @@
   gap: 1rem;
   margin-bottom: 1rem;
   padding: 3rem 1rem 1rem;
+  scroll-margin-top: 4.75rem;
 }
 .swapFunnels {
   position: absolute;
@@ -902,6 +1030,23 @@
   );
   color: #fff;
   text-align: center;
+  transform-origin: center;
+  transition:
+    transform 160ms ease-out,
+    filter 160ms ease-out,
+    box-shadow 160ms ease-out;
+}
+.funnel li[data-goal-status="negative"] {
+  background: var(--analytics-danger);
+}
+:global(:root[data-theme="dark"]) .funnel li[data-goal-status="negative"] {
+  color: var(--analytics-page);
+}
+.funnel li:is(:hover, :focus-within) {
+  z-index: 1;
+  transform: scale(1.045);
+  filter: saturate(1.12) brightness(1.08);
+  box-shadow: 0 0.75rem 1.75rem color-mix(in srgb, currentColor 18%, transparent);
 }
 .funnel li span {
   font-size: 0.68rem;
@@ -979,9 +1124,8 @@
   font-size: 0.75rem;
 }
 .tableViewport {
-  max-height: 34rem;
-  overflow-x: hidden;
-  overflow-y: auto;
+  max-height: none;
+  overflow: visible;
   border: 1px solid var(--analytics-line);
   border-radius: 0.65rem;
 }
@@ -1009,6 +1153,18 @@
   font: inherit;
   font-weight: 700;
   cursor: pointer;
+  box-shadow: 0 0 0 color-mix(in srgb, var(--analytics-cyan-strong) 0%, transparent);
+  transition:
+    transform 150ms ease-out,
+    background-color 150ms ease-out,
+    color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.clearFilters:hover:not(:disabled) {
+  transform: translateY(-2px) scale(1.02);
+  background: var(--analytics-cyan-strong);
+  color: var(--analytics-surface);
+  box-shadow: 0 0.65rem 1.4rem color-mix(in srgb, var(--analytics-cyan-strong) 28%, transparent);
 }
 .clearFilters:disabled {
   cursor: not-allowed;
@@ -1065,15 +1221,26 @@
 .recencyList span {
   color: var(--analytics-muted);
 }
+.recencyManager {
+  display: grid;
+  gap: 0.15rem;
+}
+.recencyManager small {
+  color: var(--analytics-muted);
+  font-size: 0.62rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.25;
+}
 .recencyList b {
   color: var(--analytics-cyan-strong);
   white-space: nowrap;
 }
 .tableViewport table {
   width: 100%;
-  table-layout: fixed;
+  table-layout: auto;
   border-collapse: collapse;
-  font-size: 0.72rem;
+  font-size: clamp(0.62rem, 0.66vw, 0.72rem);
+  font-variant-numeric: tabular-nums;
 }
 .tableViewport th,
 .tableViewport td {
@@ -1081,14 +1248,48 @@
   border-bottom: 1px solid var(--analytics-line);
   text-align: left;
   vertical-align: top;
-  overflow-wrap: anywhere;
+  white-space: nowrap;
 }
 .tableViewport th {
-  position: sticky;
-  top: 0;
-  z-index: 1;
+  position: static;
   background: var(--analytics-surface-strong);
   color: var(--analytics-ink);
+}
+.dashboard [data-appointments-section] {
+  scroll-margin-top: 4.75rem;
+}
+.dashboard [data-appointments-section]:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 3px;
+}
+.pageFooter {
+  display: grid;
+  justify-items: end;
+  gap: 0.25rem;
+  margin-top: 1rem;
+  padding: 1rem 0.25rem 0;
+  border-top: 1px solid var(--analytics-line);
+  color: var(--analytics-muted);
+  text-align: right;
+  animation: footer-enter 420ms ease-out both;
+}
+.pageFooter p {
+  margin: 0;
+  font-size: 0.78rem;
+}
+.pageFooter strong {
+  color: var(--analytics-ink);
+  font-size: 0.8rem;
+}
+@keyframes footer-enter {
+  from {
+    opacity: 0;
+    transform: translateX(1.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 @media (max-width: 1200px) {
   .filters {
@@ -1112,7 +1313,13 @@
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
   .tableViewport table {
+    table-layout: fixed;
     font-size: 0.68rem;
+  }
+  .tableViewport th,
+  .tableViewport td {
+    overflow: hidden;
+    text-overflow: ellipsis;
   }
 }
 @media (prefers-reduced-motion: reduce) {
@@ -1129,6 +1336,15 @@
   .tiltCard::before {
     animation: none !important;
     background-position: 50% 50%;
+  }
+  .pageFooter,
+  .calendarPresets button,
+  .calendarDay,
+  .filterField select,
+  .calendarTrigger,
+  .clearFilters {
+    animation: none;
+    transition: none;
   }
 }
 @media (max-width: 700px) {
@@ -1163,11 +1379,39 @@
     gap: 0.12rem;
   }
   .tableViewport table {
-    font-size: 0.64rem;
+    display: block;
+    font-size: 0.72rem;
   }
-  .tableViewport th,
+  .tableViewport thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .tableViewport tbody {
+    display: grid;
+    gap: 0.75rem;
+  }
+  .tableViewport tbody tr {
+    display: grid;
+    gap: 0;
+    border: 1px solid var(--analytics-line);
+    border-radius: 0.75rem;
+    overflow: hidden;
+  }
   .tableViewport td {
-    padding: 0.45rem 0.25rem;
+    display: grid;
+    grid-template-columns: minmax(7.5rem, 0.75fr) minmax(0, 1fr);
+    gap: 0.75rem;
+    padding: 0.55rem 0.65rem;
+    white-space: normal;
+  }
+  .tableViewport td::before {
+    content: attr(data-label);
+    color: var(--analytics-muted);
+    font-size: 0.68rem;
+    font-weight: 700;
   }
   .calendarFooter {
     align-items: stretch;
@@ -1175,6 +1419,9 @@
   }
   .calendarFooter button {
     width: 100%;
+  }
+  .calendarPresets {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .recencyList li {
     grid-template-columns: minmax(0, 1fr) auto;
@@ -1207,20 +1454,6 @@
 }
 
 @media (min-width: 701px) {
-  .dashboard {
-    --appointments-panel-height: clamp(12.5rem, calc((100dvh - 7.5rem) / 2), 17rem);
-  }
-
-  .chartCard,
-  .wideChart,
-  .overviewGrid .chartCard,
-  .insightGrid .chartCard,
-  .conversionRankingGrid .chartCard,
-  .recencyGrid .recencyCard {
-    height: var(--appointments-panel-height);
-    min-height: var(--appointments-panel-height);
-  }
-
   .kpiGrid .card {
     padding: clamp(0.55rem, 1.2dvh, 0.85rem);
   }
@@ -1234,30 +1467,29 @@
   }
 
   .columnTrack {
-    height: clamp(4rem, 14dvh, 7.75rem);
+    height: clamp(8rem, 22dvh, 14rem);
   }
 
   .overviewGrid .columnTrack {
-    height: calc(clamp(3rem, 9dvh, 5.625rem) - 1rem);
+    height: clamp(6rem, 13dvh, 9rem);
   }
 
   .monthly .columnTrack {
-    height: clamp(4rem, 14dvh, 7.5rem);
+    height: clamp(10rem, 24dvh, 16rem);
   }
 
   /* At the production 14px root size, the 17rem tile leaves 162px for
      content. Reserve room for the axis, controls and full vertical labels. */
   .overviewGrid .verticalLabels .columnTrack {
-    height: calc(clamp(3rem, 8dvh, 4rem) - 2rem);
+    height: clamp(4.5rem, 10dvh, 7rem);
   }
 
   .tableCard {
-    display: flex;
-    height: calc(100dvh - 8rem);
+    display: block;
+    height: auto;
     min-height: 26rem;
-    max-height: calc(100dvh - 8rem);
-    flex-direction: column;
-    overflow: hidden;
+    max-height: none;
+    overflow: visible;
   }
 
   .tableCard .cardHeader {
@@ -1265,7 +1497,6 @@
   }
 
   .tableViewport {
-    flex: 1 1 auto;
     min-height: 0;
     max-height: none;
   }

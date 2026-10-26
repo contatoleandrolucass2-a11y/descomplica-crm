@@ -7,6 +7,15 @@
 - Impede acesso direto ao painel do mapa por usuários abaixo da hierarquia Master.
 - Preserva as demais páginas, permissões e integrações do Meta Ads.
 
+## 2026-10-26 — Experiência guiada em Agendamentos
+
+- Refina exclusivamente `/app/etapas/agendamentos` com menu lateral compacto, recolhimento por clique externo, ícones e guias sequenciais entre as seções.
+- Amplia o calendário com atalhos de período, ano e trimestres; mantém House como canal inicial exclusivo e fecha os pop-ups ao clicar fora.
+- Reordena e compacta os indicadores, abre detalhes em pop-up e compara os funis realizado/esperado com cores orientadas pelas metas de conversão.
+- Exibe datas de recência, dias desde o último agendamento e uma tabela responsiva sem rolagem lateral no celular.
+- Ajusta os gráficos à meta diária, semanal e mensal, preservando Imob sem classificação quando não existe meta de agendamentos.
+- Adiciona rodapé de suporte e validação visual/interativa em 21 combinações de tema e viewport.
+
 ## 2026-10-26 — Contraste completo do Simulador CAIXA
 
 - Mantém quantias completas em uma linha no resumo móvel, reorganizando rótulos e selos.

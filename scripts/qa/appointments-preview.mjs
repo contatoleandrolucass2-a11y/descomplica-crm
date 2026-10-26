@@ -169,7 +169,9 @@ async function productionCss(viteCss) {
     mappings.set(vite[1], match[1]);
   }
   assert.ok(mappings.size > 10, "Scoped Next AppointmentsDashboard CSS must exist");
-  const boardAnchor = compiled.match(/\.([\w-]+)_board\b/);
+  const boardAnchor = compiled.match(
+    /\.([\w-]+)_board\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/,
+  );
   assert.ok(boardAnchor, "Compiled ChartBoard CSS module must exist");
   for (const match of compiled.matchAll(new RegExp(`\\.(${boardAnchor[1]}_([\\w-]+))\\b`, "g"))) {
     const vite = [...viteCss.matchAll(/\.([\w-]+)\b/g)].find(
@@ -324,6 +326,7 @@ export async function runAppointmentsPreview() {
     for (const { width, height } of process.argv.includes("--interactions-only")
       ? []
       : [
+          { width: 1920, height: 1080 },
           { width: 1440, height: 900 },
           { width: 1440, height: 720 },
           { width: 1024, height: 900 },
@@ -529,12 +532,14 @@ export async function runAppointmentsPreview() {
             width: card.getBoundingClientRect().width,
             height: card.getBoundingClientRect().height,
           })),
-          metricFontSizes: [...document.querySelectorAll('[class*="metricValue"]')].map((element) =>
-            Number.parseFloat(getComputedStyle(element).fontSize),
-          ),
-          cardTitleFontSizes: [...document.querySelectorAll('[class*="kpiGrid"] > article h2')].map(
-            (element) => Number.parseFloat(getComputedStyle(element).fontSize),
-          ),
+          metricFontSizes: [
+            ...document.querySelectorAll('[class*="kpiGrid"] > article [class*="metricValue"]'),
+          ]
+            .filter((element) => !element.closest("dialog"))
+            .map((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
+          cardTitleFontSizes: [
+            ...document.querySelectorAll('[class*="kpiGrid"] > article > h2'),
+          ].map((element) => Number.parseFloat(getComputedStyle(element).fontSize)),
           kpiCenters: [...document.querySelectorAll('article[class*="kpiCard"]')].map((card) => {
             const value = card.querySelector("strong");
             const cardRect = card.getBoundingClientRect();
@@ -548,8 +553,13 @@ export async function runAppointmentsPreview() {
                 : null,
             };
           }),
-          conversionCenters: [...document.querySelectorAll('[class*="conversionPercent"]')].map(
-            (value) => {
+          conversionCenters: [
+            ...document.querySelectorAll(
+              '[class*="kpiGrid"] > article [class*="conversionPercent"]',
+            ),
+          ]
+            .filter((value) => !value.closest("dialog"))
+            .map((value) => {
               const card = value.closest("article");
               const cardRect = card.getBoundingClientRect();
               const valueRect = value.getBoundingClientRect();
@@ -559,8 +569,7 @@ export async function runAppointmentsPreview() {
                   valueRect.left + valueRect.width / 2 - (cardRect.left + cardRect.width / 2),
                 ),
               };
-            },
-          ),
+            }),
           recency: [
             ...document.querySelectorAll('[data-appointments-chart^="Último agendamento"]'),
           ].map((element) => ({
@@ -569,25 +578,6 @@ export async function runAppointmentsPreview() {
             y: Math.round(element.getBoundingClientRect().y),
             bottom: Math.round(element.getBoundingClientRect().bottom),
           })),
-          twoRowSpans: (() => {
-            const sections = [
-              ...document.querySelectorAll(
-                '[data-appointments-chart]:not([data-appointments-chart^="Último agendamento"])',
-              ),
-            ].map((element) => element.getBoundingClientRect());
-            const recency = [
-              ...document.querySelectorAll('[data-appointments-chart^="Último agendamento"]'),
-            ].map((element) => element.getBoundingClientRect());
-            return sections.length === 11 && recency.length === 3
-              ? [
-                  sections[1].bottom - sections[0].top,
-                  sections[6].bottom - sections[4].top,
-                  sections[9].bottom - sections[7].top,
-                  recency[0].bottom - sections[7].top,
-                  sections[10].bottom - recency[0].top,
-                ]
-              : [];
-          })(),
           table: (() => {
             const viewport = document.querySelector('[class*="tableViewport"]');
             const card = viewport?.closest("section");
@@ -741,16 +731,8 @@ export async function runAppointmentsPreview() {
         check(geometry.sections.length === 11, `Eleven charts ${theme}/${width}`);
         if (width >= 1024) {
           check(
-            geometry.twoRowSpans.length === 5 &&
-              geometry.twoRowSpans.every((span) => span <= geometry.height + 1),
-            `Two adjacent chart rows must fit one viewport ${theme}/${width}x${height}: ${geometry.twoRowSpans.join(",")}`,
-          );
-          check(
-            geometry.table.cardHeight <= geometry.height - 111 &&
-              geometry.table.viewportHeight > 0 &&
-              geometry.table.hasVerticalScroll &&
-              geometry.table.overflowY === "auto",
-            `Table must fit the viewport with internal vertical scroll ${theme}/${width}x${height}: ${JSON.stringify(geometry.table)}`,
+            geometry.table.viewportHeight > 0 && !geometry.table.hasVerticalScroll,
+            `Table must expand without an internal vertical scrollbar ${theme}/${width}x${height}: ${JSON.stringify(geometry.table)}`,
           );
         }
         const score = geometry.sections.find((section) => section.heading === "Ranking Score");
@@ -926,7 +908,7 @@ export async function runAppointmentsPreview() {
     await expect(
       page.getByRole("region", { name: "Filtros do painel de agendamentos" }),
     ).toBeVisible();
-    await expect(page.locator('[class*="kpiGrid"] > article h2')).toHaveCount(12);
+    await expect(page.locator('[class*="kpiGrid"] > article > h2')).toHaveCount(12);
     await expect(page.getByText("Cobertura da fonte:")).toHaveCount(0);
     await expect(page.getByText(/agendamentos no período$/)).toHaveCount(0);
     await expect(
@@ -941,17 +923,27 @@ export async function runAppointmentsPreview() {
     await expect(page.getByRole("img", { name: /24 de 120 corretores/ })).toBeVisible();
     await expect(daily.getByRole("listitem")).toHaveCount(31);
     const barGeometry = await daily.getByRole("listitem").evaluateAll((items) =>
-      items.map((item) => ({
-        trackHeight: item.firstElementChild.firstElementChild.getBoundingClientRect().height,
-        barHeight: item.querySelector("div[data-goal-status]").getBoundingClientRect().height,
-        barWidth: item.querySelector("div[data-goal-status]").getBoundingClientRect().width,
-      })),
+      items.map((item) => {
+        const label = item.firstElementChild.getAttribute("aria-label") ?? "";
+        const total = Number(label.match(/: ([\d.]+) agendamentos/)?.[1]?.replaceAll(".", "") ?? 0);
+        const goal = Number(label.match(/; meta ([\d.]+)/)?.[1]?.replaceAll(".", "") ?? 0);
+        return {
+          total,
+          goal,
+          trackHeight: item.firstElementChild.firstElementChild.getBoundingClientRect().height,
+          barHeight: item.querySelector("div[data-goal-status]").getBoundingClientRect().height,
+          barWidth: item.querySelector("div[data-goal-status]").getBoundingClientRect().width,
+        };
+      }),
     );
+    const dailyScaleMax = Math.max(1, ...barGeometry.flatMap((bar) => [bar.total, bar.goal]));
     barGeometry.forEach((bar, index) => {
       check(bar.barWidth > 0, `Daily bar ${index + 1} must be visible`);
+      const expectedRatio = bar.total / dailyScaleMax;
+      const actualRatio = bar.barHeight / bar.trackHeight;
       check(
-        Math.abs(bar.barHeight / bar.trackHeight - ((index % 4) + 1) / 4) < 0.02,
-        `Daily bar ${index + 1} height must match exact relative count`,
+        bar.total === 0 ? bar.barHeight <= 3 : Math.abs(actualRatio - expectedRatio) < 0.02,
+        `Daily bar ${index + 1} height must match its exact count and goal scale`,
       );
     });
     const rankingBars = await region("Ranking por responsável")
@@ -1035,6 +1027,10 @@ export async function runAppointmentsPreview() {
       exact: true,
     });
     const calendarTrigger = filtersRegion.getByRole("button", { name: "Março de 2026" });
+    await expect(page.getByRole("button", { name: "House", exact: true })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
     const filterOrder = await filtersRegion.evaluate((element) => {
       const company = element.querySelector('select[aria-label="Empresa"], select[id$="company"]');
       const calendar = [...element.querySelectorAll("button")].find((button) =>
@@ -1054,6 +1050,11 @@ export async function runAppointmentsPreview() {
     await expect(calendar).toBeVisible();
     await expect(calendar.getByLabel("Mês do calendário")).toHaveValue("3");
     await expect(calendar.getByLabel("Ano do calendário")).toHaveValue("2026");
+    await expect(calendar.getByRole("button", { name: "Hoje", exact: true })).toBeVisible();
+    await expect(
+      calendar.getByRole("button", { name: "Semana passada", exact: true }),
+    ).toBeVisible();
+    await expect(calendar.getByRole("button", { name: "4º Trimestre", exact: true })).toBeVisible();
     await calendar.getByRole("gridcell", { name: "1 de março de 2026", exact: true }).click();
     await calendar.getByRole("gridcell", { name: "2 de março de 2026", exact: true }).click();
     await expect(calendar.getByText("2 dias selecionados", { exact: true })).toBeVisible();
@@ -1067,6 +1068,10 @@ export async function runAppointmentsPreview() {
     await expect(filtersRegion.getByRole("button", { name: "2 dias selecionados" })).toBeFocused();
     await filtersRegion.getByRole("button", { name: "2 dias selecionados" }).click();
     await expect(calendar).toBeVisible();
+    await page.mouse.click(2, 2);
+    await expect(calendar).toBeHidden();
+    await filtersRegion.getByRole("button", { name: "2 dias selecionados" }).click();
+    await expect(calendar).toBeVisible();
     await page.keyboard.press("Escape");
     await expect(calendar).toBeHidden();
     await expect(filtersRegion.getByRole("button", { name: "2 dias selecionados" })).toBeFocused();
@@ -1078,18 +1083,18 @@ export async function runAppointmentsPreview() {
       calendar.getByRole("gridcell", { name: "22 de dezembro de 2025", exact: true }),
     ).toBeEnabled();
     await calendar.getByRole("button", { name: "Selecionar mês inteiro" }).click();
-    await calendar.getByRole("button", { name: "Fechar calendário" }).click();
+    await expect(calendar).toBeHidden();
     await expect(filtersRegion.getByRole("button", { name: "Dezembro de 2025" })).toBeVisible();
     assert.equal(
       await region("Agendamentos por mês").innerText(),
       annualBefore,
       "Global calendar month must preserve exclusive annual chart",
     );
-    await expect(daily.getByRole("listitem")).toHaveCount(1);
-    await expect(region("Agendamentos por semana").getByRole("listitem")).toHaveCount(1);
+    await expect(daily.getByRole("listitem")).toHaveCount(31);
+    await expect(region("Agendamentos por semana").getByRole("listitem")).toHaveCount(5);
     evidence.filters =
-      "Calendar defaults to the current source month; supports multiple days, close button, Escape, year/month changes and whole-month selection; exclusive annual chart remains independent";
-    await page.getByRole("button", { name: "Limpar 1 filtro" }).click();
+      "Calendar defaults to the current source month; supports presets, multiple days, backdrop/close/Escape dismissal, year/month changes and whole-month selection; exclusive annual chart remains independent";
+    await page.getByRole("button", { name: "Limpar 2 filtros" }).click();
     await expect(filtersRegion.getByRole("button", { name: "Março de 2026" })).toBeVisible();
     await page.goto(origin);
     await page.getByRole("button", { name: "House", exact: true }).click();
@@ -1099,11 +1104,11 @@ export async function runAppointmentsPreview() {
     const managerKpi = page
       .locator("article")
       .filter({ has: page.getByRole("heading", { name: "Gerentes cadastrados", exact: true }) });
-    await expect(managerKpi.locator("strong")).toHaveText("1");
+    await expect(managerKpi.locator(":scope > strong")).toHaveText("1");
     const brokerKpi = page
       .locator("article")
       .filter({ has: page.getByRole("heading", { name: "Corretores cadastrados", exact: true }) });
-    await expect(brokerKpi.locator("strong")).toHaveText("24");
+    await expect(brokerKpi.locator(":scope > strong")).toHaveText("24");
     await page.getByLabel("Responsável da conta").selectOption(owners[0]);
     await page.getByLabel("Empresa").selectOption("Empresa sintética");
     await expect(page.getByRole("button", { name: "Limpar 4 filtros" })).toBeVisible();
@@ -1129,9 +1134,9 @@ export async function runAppointmentsPreview() {
       .first();
     await firstDay.click();
     await expect(firstDay).toHaveAttribute("aria-pressed", "true");
-    await expect(page.getByRole("button", { name: "Limpar 1 filtro" })).toBeVisible();
+    await expect(page.getByRole("button", { name: "Limpar 2 filtros" })).toBeVisible();
     await expect(page.getByText("1 registros no período")).toBeVisible();
-    await page.getByRole("button", { name: "Limpar 1 filtro" }).click();
+    await page.getByRole("button", { name: "Limpar 2 filtros" }).click();
     const firstRow = page.locator("tbody tr").first();
     await firstRow.focus();
     await page.keyboard.press("Enter");
@@ -1161,37 +1166,40 @@ export async function runAppointmentsPreview() {
       (element) => getComputedStyle(element).backgroundColor,
     );
     check(rowColorBefore !== rowColorAfter, "Table row hover must change color");
-    const tiltCard = page.locator("article").first();
-    const tiltBounds = await tiltCard.boundingBox();
-    assert.ok(tiltBounds, "First KPI card must have measurable bounds");
-    await page.mouse.move(tiltBounds.x + 8, tiltBounds.y + 8);
+    const firstCard = page.locator("article").first();
+    await firstCard.hover();
     check(
-      (await tiltCard.evaluate((element) => element.style.getPropertyValue("--card-tilt-y"))) !==
-        "0deg",
-      "KPI card must tilt toward the pointer",
+      (await firstCard.evaluate((element) => getComputedStyle(element).transform)) === "none",
+      "KPI cards must keep a static frame without tilt",
     );
-    const secondTiltBounds = await page.locator("article").nth(1).boundingBox();
-    assert.ok(secondTiltBounds, "Second KPI card must have measurable bounds");
-    await page.mouse.move(
-      secondTiltBounds.x + secondTiltBounds.width / 2,
-      secondTiltBounds.y + secondTiltBounds.height / 2,
+    await firstCard.getByRole("button", { name: "Abrir detalhes deste indicador" }).click();
+    const cardPopup = page.getByRole("dialog", { name: "Detalhes do indicador" });
+    await expect(cardPopup).toBeVisible();
+    await page.mouse.click(2, 2);
+    await expect(cardPopup).toBeHidden();
+    const funnelStage = page.locator('ol[aria-label^="Funil realizado"] > li').first();
+    const funnelTransformBefore = await funnelStage.evaluate(
+      (element) => getComputedStyle(element).transform,
     );
-    await page.waitForTimeout(50);
-    const restedTilt = await tiltCard.evaluate((element) =>
-      element.style.getPropertyValue("--card-tilt-y"),
+    await funnelStage.hover();
+    await page.waitForTimeout(180);
+    const funnelTransformAfter = await funnelStage.evaluate(
+      (element) => getComputedStyle(element).transform,
     );
     check(
-      restedTilt === "" || restedTilt === "0deg",
-      `KPI card must return to rest after pointer leave: ${restedTilt}`,
+      funnelTransformBefore !== funnelTransformAfter,
+      "Funnel stage must grow on pointer hover",
     );
     evidence.hoverAndMotion =
-      "Chart bars and table rows change color on hover; KPI cards tilt toward the pointer and return to rest";
+      "Chart bars and table rows change color on hover; KPI frames stay static, cards open dismissible dialogs, and funnel stages grow on hover";
     await page.emulateMedia({ reducedMotion: "reduce" });
     await page.goto(origin);
     await page.keyboard.press("Tab");
+    await expect(page.getByRole("button", { name: "Limpar 1 filtro" })).toBeFocused();
+    await page.keyboard.press("Tab");
     await expect(page.getByRole("button", { name: "House", exact: true })).toBeFocused();
     evidence.keyboard =
-      "Tab reaches the first global filter; calendar dialog restores focus after close/Escape; chart buttons and rows use native keyboard controls";
+      "Tab follows the visual order from clear control to the first global filter; calendar dialog restores focus after close/Escape; chart buttons and rows use native keyboard controls";
     await page.goto(`${origin}/?empty=1`);
     await expect(
       page.getByText(

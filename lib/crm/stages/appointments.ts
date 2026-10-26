@@ -23,6 +23,8 @@ export interface AppointmentConversionBucket extends AppointmentBucket {
 export interface AppointmentFilters {
   createdDate?: string;
   createdDates?: string[];
+  periodStart?: string;
+  periodEnd?: string;
   week?: number;
   channel?: 0 | 1;
   regionalManager?: string;
@@ -44,6 +46,10 @@ export interface AppointmentBrokerRecencyBuckets {
   from8To14Days: AppointmentBrokerRecency[];
   from15Days: AppointmentBrokerRecency[];
 }
+
+export type AppointmentDetailRow = DashboardAppointmentDetail & {
+  daysSinceAppointment: number;
+};
 
 export interface AppointmentBrokerRosterEntry {
   key: string;
@@ -181,13 +187,27 @@ export function analyzeAppointments(
   const stores = new Map<string, number>(),
     developments = new Map<string, number>();
   const previousReferenceDate = previousDate(slice.referenceDate);
+  const monthStart = `${month}-01`;
   const monthEnd = new Date(`${month}-01T12:00:00Z`);
   monthEnd.setUTCMonth(monthEnd.getUTCMonth() + 1, 0);
   const end = monthEnd.toISOString().slice(0, 10);
+  const hasExplicitPeriod = filters.periodStart !== undefined || filters.periodEnd !== undefined;
+  const periodStart =
+    filters.periodStart && validCalendarDate(filters.periodStart) ? filters.periodStart : null;
+  const periodEnd =
+    filters.periodEnd && validCalendarDate(filters.periodEnd) ? filters.periodEnd : null;
+  const validExplicitPeriod =
+    (!filters.periodStart || periodStart !== null) &&
+    (!filters.periodEnd || periodEnd !== null) &&
+    (!periodStart || !periodEnd || periodStart <= periodEnd);
+  const requestedStart = hasExplicitPeriod ? (periodStart ?? slice.coverageStart) : monthStart;
+  const requestedEnd = hasExplicitPeriod ? (periodEnd ?? slice.referenceDate) : end;
   const coverage =
-    end < slice.coverageStart || `${month}-01` > slice.referenceDate
+    !validExplicitPeriod ||
+    requestedEnd < slice.coverageStart ||
+    requestedStart > slice.referenceDate
       ? ("unavailable" as const)
-      : `${month}-01` < slice.coverageStart || end > slice.referenceDate
+      : requestedStart < slice.coverageStart || requestedEnd > slice.referenceDate
         ? ("partial" as const)
         : ("complete" as const);
 
@@ -201,9 +221,17 @@ export function analyzeAppointments(
     slice.referenceDate,
   );
   const selectedDateSet = new Set(selectedDates);
+  const matchesExplicitPeriod = (date: string) =>
+    !hasExplicitPeriod ||
+    (validExplicitPeriod &&
+      (!periodStart || date >= periodStart) &&
+      (!periodEnd || date <= periodEnd));
   const matchesSelectedPeriod = (date: string) =>
+    matchesExplicitPeriod(date) &&
     (selectedDateSet.size === 0 || selectedDateSet.has(date)) &&
     (!filters.week || appointmentWeekOfMonth(date) === filters.week);
+  const matchesReportingPeriod = (date: string) =>
+    hasExplicitPeriod ? matchesExplicitPeriod(date) : date.slice(0, 7) === month;
 
   const regionalManagerByManager = new Map<string, { name: string; createdAt: number }>();
   for (const appointment of slice.appointments ?? []) {
@@ -284,12 +312,6 @@ export function analyzeAppointments(
               filteredRoster.map((broker) => appointmentIdentity(broker.manager)).filter(Boolean),
             ).size
         : (slice.brokerManagerCount ?? null);
-  const details =
-    filteredOperations === null
-      ? null
-      : filteredOperations
-          .filter((appointment) => saoPauloDate(appointment.createdAt).slice(0, 7) === month)
-          .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
   let total = 0,
     today = 0,
     yesterday = 0;
@@ -303,7 +325,7 @@ export function analyzeAppointments(
   };
   if (slice.version === 4 && conversionAvailable) {
     for (const fact of sharedFacts) {
-      if (fact[1].slice(0, 7) !== month) continue;
+      if (!matchesReportingPeriod(fact[1])) continue;
       if (fact[0] === 0) funnel.opportunities += fact[7];
       if (fact[0] === 1) funnel.appointments += fact[7];
       if (fact[0] === 2) funnel.visits += fact[7];
@@ -336,7 +358,7 @@ export function analyzeAppointments(
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
       if (date === slice.referenceDate) today += 1;
       if (date === previousReferenceDate) yesterday += 1;
-      if (date.slice(0, 7) !== month) continue;
+      if (!matchesReportingPeriod(date)) continue;
       total += 1;
       add(daily, date);
       add(weekly, String(appointmentWeekOfMonth(date)));
@@ -352,7 +374,7 @@ export function analyzeAppointments(
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
       if (date === slice.referenceDate) today += fact[7];
       if (date === previousReferenceDate) yesterday += fact[7];
-      if (date.slice(0, 7) !== month) continue;
+      if (!matchesReportingPeriod(date)) continue;
       total += fact[7];
       add(daily, date, fact[7]);
       add(weekly, String(appointmentWeekOfMonth(date)), fact[7]);
@@ -373,9 +395,8 @@ export function analyzeAppointments(
         );
     }
   }
-  const monthStart = `${month}-01`;
-  const coveredStart = monthStart < slice.coverageStart ? slice.coverageStart : monthStart;
-  const coveredEnd = end > slice.referenceDate ? slice.referenceDate : end;
+  const coveredStart = requestedStart < slice.coverageStart ? slice.coverageStart : requestedStart;
+  const coveredEnd = requestedEnd > slice.referenceDate ? slice.referenceDate : requestedEnd;
   const coveredDays =
     coveredStart > coveredEnd
       ? 0
@@ -389,13 +410,27 @@ export function analyzeAppointments(
     return date.toISOString().slice(0, 10);
   }).filter(matchesSelectedPeriod);
   const selectedCoveredDays = selectedCoveredDates.length;
+  const periodReferenceDate = selectedDates.filter(matchesExplicitPeriod).at(-1) ?? coveredEnd;
+  const details: AppointmentDetailRow[] | null =
+    filteredOperations === null
+      ? null
+      : filteredOperations
+          .filter((appointment) => matchesReportingPeriod(saoPauloDate(appointment.createdAt)))
+          .map((appointment) => {
+            const appointmentDate = saoPauloDate(appointment.createdAt);
+            return {
+              ...appointment,
+              daysSinceAppointment: calendarDaysBetween(appointmentDate, periodReferenceDate),
+            };
+          })
+          .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
   const productiveOwners =
     slice.version === 4 && filteredOperations !== null
       ? new Set(
           filteredOperations
             .filter(
               (appointment) =>
-                saoPauloDate(appointment.createdAt).slice(0, 7) === month &&
+                matchesReportingPeriod(saoPauloDate(appointment.createdAt)) &&
                 "registeredBroker" in appointment &&
                 appointment.registeredBroker,
             )
@@ -409,7 +444,7 @@ export function analyzeAppointments(
       : filteredBrokerCount === 0
         ? 0
         : (productiveOwners / filteredBrokerCount) * 100;
-  const recencyBaseDate = selectedDates.at(-1) ?? (coveredStart <= coveredEnd ? coveredEnd : null);
+  const recencyBaseDate = coveredStart <= coveredEnd ? periodReferenceDate : null;
   const latestRegisteredAppointments = new Map<string, DashboardAppointmentDetail>();
   if (slice.version === 4 && recencyBaseDate) {
     for (const appointment of slice.appointments ?? []) {
@@ -470,7 +505,7 @@ export function analyzeAppointments(
   };
   for (const fact of sharedFacts) {
     if (!conversionAvailable) continue;
-    if (fact[1].slice(0, 7) !== month || (fact[0] !== 1 && fact[0] !== 2)) continue;
+    if (!matchesReportingPeriod(fact[1]) || (fact[0] !== 1 && fact[0] !== 2)) continue;
     const manager = slice.dimensions.managers[fact[2]] ?? "Gerente não informado";
     addConversion(
       conversionGroups.owners,
@@ -537,8 +572,13 @@ export function analyzeAppointments(
   const weeklyGoals = new Map<string, number | null>();
   const coveredWeeks = new Set<string>();
   if (coverage !== "unavailable") {
-    for (let day = 1; day <= Number(end.slice(8, 10)); day += 1) {
-      const date = `${month}-${String(day).padStart(2, "0")}`;
+    const goalDates = hasExplicitPeriod
+      ? selectedCoveredDates
+      : Array.from(
+          { length: Number(end.slice(8, 10)) },
+          (_, index) => `${month}-${String(index + 1).padStart(2, "0")}`,
+        );
+    for (const date of goalDates) {
       const week = String(appointmentWeekOfMonth(date));
       const covered = date >= coveredStart && date <= coveredEnd;
       if (covered) coveredWeeks.add(week);

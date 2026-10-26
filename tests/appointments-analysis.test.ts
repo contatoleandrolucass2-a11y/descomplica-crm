@@ -81,6 +81,56 @@ describe("appointment chart analysis", () => {
     goalsByMonth: { "2026-09": 17, "2026-10": 29 },
   };
 
+  it("applies inclusive exact period boundaries without changing explicit-day intersections", () => {
+    const filters = { periodStart: "2026-10-04", periodEnd: "2026-10-15" };
+    const result = analyzeAppointments(slice(), { filters });
+    expect(result.total).toBe(11);
+    expect(result.daily.map(({ key }) => key)).toEqual(["2026-10-04", "2026-10-05", "2026-10-15"]);
+    expect(result.selectedCoveredDays).toBe(12);
+
+    const selectedDays = analyzeAppointments(slice(), {
+      filters: {
+        ...filters,
+        createdDates: ["2026-10-04", "2026-10-15", "2026-10-19"],
+      },
+    });
+    expect(selectedDays.total).toBe(4);
+    expect(selectedDays.daily.map(({ key }) => key)).toEqual(["2026-10-04", "2026-10-15"]);
+  });
+
+  it("filters an inclusive quarter across month boundaries", () => {
+    const input = slice({
+      facts: [
+        fact("2026-06-30", 1),
+        fact("2026-07-01", 2),
+        fact("2026-08-15", 4),
+        fact("2026-09-30", 3),
+        fact("2026-10-01", 8),
+      ],
+    });
+    const result = analyzeAppointments(input, {
+      filters: { periodStart: "2026-07-01", periodEnd: "2026-09-30" },
+    });
+    expect(result.total).toBe(9);
+    expect(result.daily.map(({ key }) => key)).toEqual(["2026-07-01", "2026-08-15", "2026-09-30"]);
+    expect(result.selectedCoveredDays).toBe(92);
+  });
+
+  it("filters the current year through the reference date", () => {
+    const result = analyzeAppointments(slice(), {
+      filters: { periodStart: "2026-01-01", periodEnd: "2026-10-19" },
+    });
+    expect(result.total).toBe(23);
+    expect(result.daily.map(({ key }) => key)).toEqual([
+      "2026-09-01",
+      "2026-10-01",
+      "2026-10-04",
+      "2026-10-05",
+      "2026-10-15",
+    ]);
+    expect(result.selectedCoveredDays).toBe(292);
+  });
+
   it("sums real Monday-Sunday dates, including partial boundary weeks and zero-actual days", () => {
     const result = analyzeAppointments(goalSlice(), goalOptions);
     expect(result.daily).toHaveLength(19);
@@ -393,6 +443,15 @@ describe("appointment chart analysis", () => {
     expect(result.plannedToday).toBeNull(); // No authorized monthly goal/channel supplied.
     expect(result.performedToday).toBe(1);
     expect(result.details).toHaveLength(2);
+    expect(
+      result.details?.map(({ accountName, daysSinceAppointment }) => [
+        accountName,
+        daysSinceAppointment,
+      ]),
+    ).toEqual([
+      ["Conta A", 0],
+      ["Conta B", 1],
+    ]);
     expect(result.regionalManagers?.map(({ label }) => label)).toEqual([
       "Regional A",
       "Regional B",
@@ -545,6 +604,16 @@ describe("appointment chart analysis", () => {
       { key: 0, label: "Imob" },
     ]);
 
+    const imob = analyzeAppointments(input, { filters: { channel: 0 } });
+    expect(imob.funnel).toEqual({
+      opportunities: 20,
+      appointments: 8,
+      visits: 4,
+      folders: 3,
+      approvedFolders: 1,
+      sales: 2,
+    });
+
     const managerOnly = analyzeAppointments(input, {
       filters: { manager: "Gerente A" },
       brokerRoster: [
@@ -618,7 +687,12 @@ describe("appointment chart analysis", () => {
       filters: { createdDates: ["2026-10-19", "2026-10-18", "2026-10-18"] },
     });
     expect(result.total).toBe(1);
-    expect(result.details?.map((row) => row.createdAt.slice(0, 10))).toEqual(["2026-10-18"]);
+    expect(
+      result.details?.map((row) => ({
+        createdAt: row.createdAt.slice(0, 10),
+        daysSinceAppointment: row.daysSinceAppointment,
+      })),
+    ).toEqual([{ createdAt: "2026-10-18", daysSinceAppointment: 1 }]);
     expect(result.funnel).toEqual({
       opportunities: 18,
       appointments: 8,

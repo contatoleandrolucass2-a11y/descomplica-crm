@@ -16,6 +16,37 @@ aprovou 4.293 testes Vitest, 727 testes operacionais e de release e o QA complet
 do dashboard Meta Ads. Lint não apresentou erros, typecheck e build passaram.
 PR, CI e publicação permanecem pendentes.
 
+## 2026-10-26 — Agendamentos: navegação, períodos e leitura operacional
+
+A alteração permanece limitada a `/app/etapas/agendamentos`. O shell usa a
+sidebar especial somente nessa rota, com fundo integrado ao cabeçalho, ícones,
+modo recolhido, fechamento por clique externo, carimbo de atualização e guias
+de seção para cima/baixo. O conteúdo principal se adapta à largura disponível;
+as demais páginas preservam sua navegação.
+
+O calendário abre no mês vigente da fonte, fecha por botão, Escape ou clique no
+fundo e oferece hoje, ontem, esta semana, semana passada, ano e trimestres. House
+é o canal inicial exclusivo; Imob depende de seleção manual. Cards abrem detalhes
+em diálogo e mantêm bordas estáticas. Funis continuam lado a lado no desktop,
+podem trocar de posição, usam azul no esperado e classificam o realizado pela
+meta de conversão. Imob mantém metas de agendamentos nulas.
+
+Gráficos e listas receberam guias, expansão, controles compactos, datas de
+recência e percentuais sobre o total filtrado. A tabela inclui dias desde o
+último agendamento, usa uma linha por célula no desktop e cartões legíveis no
+celular. O rodapé identifica o canal de suporte e o responsável pelo painel.
+
+QA sintética de CSS de produção aprovada em 21 combinações: 1920, 1440, 1024,
+390 e 320 px nos temas claro, médio e escuro. Zero falhas, violações Axe,
+transbordamentos, colisões ou cortes; calendário, filtros compostos, pop-ups,
+teclado, reordenação persistente, hover, valores grandes, 200% e estados
+indisponível/restrito também foram exercitados. Lint passou sem erros, com 38
+avisos preexistentes em assets Meta/artefatos; typecheck e build passaram. A
+suite Vitest aprovou 4.293 testes e ignorou 110 condicionais. A fase Node
+aprovou 1.599 e repetiu três falhas Windows preexistentes em Meta Ads, por
+contratos de arquivo privado e perfil Linux; esses arquivos não foram alterados.
+CI Linux e publicação ainda dependem das etapas seguintes deste mesmo trabalho.
+
 ## 2026-10-26 — CAIXA: contraste de estados nos três temas
 
 O job Linux 121370107375 do run 40259598078 identificou contraste transitório

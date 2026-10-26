@@ -1,6 +1,8 @@
 "use client";
 
 import {
+  ArrowDown,
+  ArrowUp,
   CalendarDays,
   CircleDollarSign,
   FolderOpen,
@@ -13,7 +15,15 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 
 import type { NavigationItem } from "@/lib/navigation/presentation";
 
@@ -30,6 +40,16 @@ const icons = {
   "crm.repasse": Handshake,
 };
 
+type DashboardSidebarContextValue = {
+  setUpdatedAt: (value: string) => void;
+};
+
+const DashboardSidebarContext = createContext<DashboardSidebarContextValue | null>(null);
+
+export function useDashboardSidebar() {
+  return useContext(DashboardSidebarContext);
+}
+
 export function DashboardShell({
   pages,
   children,
@@ -39,6 +59,22 @@ export function DashboardShell({
 }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
+  const [updatedAt, setUpdatedAt] = useState("");
+  const sidebarRef = useRef<HTMLElement>(null);
+  const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
+
+  useEffect(() => {
+    if (pathname !== "/app/etapas/agendamentos" || collapsed) return;
+
+    function collapseFromOutside(event: globalThis.PointerEvent) {
+      if (!(event.target instanceof Node) || sidebarRef.current?.contains(event.target)) return;
+      setCollapsed(true);
+    }
+
+    document.addEventListener("pointerdown", collapseFromOutside, true);
+    return () => document.removeEventListener("pointerdown", collapseFromOutside, true);
+  }, [collapsed, pathname]);
+
   if (pathname !== "/app/etapas/agendamentos") return children;
   // Only the server-authorized catalog supplies destinations, including profiles
   // with access to a stage but without access to the overview.
@@ -53,61 +89,114 @@ export function DashboardShell({
     ? "Expandir navegação do Dashboard"
     : "Recolher navegação do Dashboard";
 
+  function guide(direction: "previous" | "next") {
+    const sections = Array.from(
+      document.querySelectorAll<HTMLElement>("[data-appointments-section]"),
+    ).filter((section) => section.getClientRects().length > 0);
+    if (!sections.length) return;
+
+    const safeTop =
+      (document.querySelector<HTMLElement>("[data-protected-topbar]")?.getBoundingClientRect()
+        .bottom ?? 0) + 12;
+    const target =
+      direction === "next"
+        ? (sections.find((section) => section.getBoundingClientRect().top > safeTop + 24) ??
+          sections.at(-1))
+        : ([...sections]
+            .reverse()
+            .find((section) => section.getBoundingClientRect().top < safeTop - 24) ?? sections[0]);
+    if (!target) return;
+
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ behavior: reducedMotion ? "auto" : "smooth", block: "start" });
+    window.setTimeout(() => target.focus({ preventScroll: true }), reducedMotion ? 0 : 260);
+  }
+
   return (
-    <div className={styles.dashboardShell} data-dashboard-shell data-collapsed={collapsed}>
-      <aside className={styles.dashboardSidebar} aria-label="Dashboard">
-        <button
-          type="button"
-          className={styles.dashboardToggle}
-          aria-label={toggleLabel}
-          title={toggleLabel}
-          aria-expanded={!collapsed}
-          aria-controls="dashboard-navigation"
-          onClick={() => setCollapsed((current) => !current)}
-        >
-          {collapsed ? (
-            <PanelLeftOpen aria-hidden="true" size={20} />
-          ) : (
-            <PanelLeftClose aria-hidden="true" size={20} />
-          )}
-          <span className={styles.dashboardLabel}>Dashboard</span>
-        </button>
-        <nav id="dashboard-navigation" aria-label="Páginas do Dashboard">
-          <ul className={styles.dashboardLinks}>
-            {dashboardPages.map((page) => {
-              const label = page.key === "crm.dashboard" ? "Visão Geral" : page.name;
-              const Icon = icons[page.key as keyof typeof icons];
-              return (
-                <li key={page.key}>
-                  <Link
-                    href={page.path}
-                    prefetch={false}
-                    className={styles.dashboardLink}
-                    aria-label={label}
-                    aria-current={page.key === activePage.key ? "page" : undefined}
-                    title={label}
-                  >
-                    <span className={styles.dashboardIcon}>
-                      {Icon ? (
-                        <Icon aria-hidden="true" size={20} />
-                      ) : (
-                        <AppPageIcon pageKey={page.key} />
-                      )}
-                    </span>
-                    <span className={styles.dashboardLabel}>{label}</span>
-                    {collapsed ? (
-                      <span className={styles.dashboardTooltip} aria-hidden="true">
-                        {label}
+    <DashboardSidebarContext.Provider value={contextValue}>
+      <div className={styles.dashboardShell} data-dashboard-shell data-collapsed={collapsed}>
+        <aside ref={sidebarRef} className={styles.dashboardSidebar} aria-label="Dashboard">
+          <button
+            type="button"
+            className={styles.dashboardToggle}
+            aria-label={toggleLabel}
+            title={toggleLabel}
+            aria-expanded={!collapsed}
+            aria-controls="dashboard-navigation"
+            onClick={() => setCollapsed((current) => !current)}
+          >
+            {collapsed ? (
+              <PanelLeftOpen aria-hidden="true" size={20} />
+            ) : (
+              <PanelLeftClose aria-hidden="true" size={20} />
+            )}
+            <span className={styles.dashboardLabel}>Ocultar</span>
+          </button>
+          <nav id="dashboard-navigation" aria-label="Páginas do Dashboard">
+            <ul className={styles.dashboardLinks}>
+              {dashboardPages.map((page) => {
+                const label = page.key === "crm.dashboard" ? "Visão Geral" : page.name;
+                const Icon = icons[page.key as keyof typeof icons];
+                return (
+                  <li key={page.key}>
+                    <Link
+                      href={page.path}
+                      prefetch={false}
+                      className={styles.dashboardLink}
+                      aria-label={label}
+                      aria-current={page.key === activePage.key ? "page" : undefined}
+                      title={label}
+                    >
+                      <span className={styles.dashboardIcon}>
+                        {Icon ? (
+                          <Icon aria-hidden="true" size={20} />
+                        ) : (
+                          <AppPageIcon pageKey={page.key} />
+                        )}
                       </span>
-                    ) : null}
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </nav>
-      </aside>
-      <div className={styles.dashboardContent}>{children}</div>
-    </div>
+                      <span className={styles.dashboardLabel}>{label}</span>
+                      {collapsed ? (
+                        <span className={styles.dashboardTooltip} aria-hidden="true">
+                          {label}
+                        </span>
+                      ) : null}
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </nav>
+          <div className={styles.dashboardGuide} aria-label="Guia das seções da página">
+            <button
+              type="button"
+              onClick={() => guide("previous")}
+              aria-label="Ir para a seção anterior"
+              title="Ir para a seção anterior"
+            >
+              <ArrowUp aria-hidden="true" size={18} />
+              <span className={styles.dashboardLabel}>Subir seção</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => guide("next")}
+              aria-label="Ir para a próxima seção"
+              title="Ir para a próxima seção"
+            >
+              <ArrowDown aria-hidden="true" size={18} />
+              <span className={styles.dashboardLabel}>Descer seção</span>
+            </button>
+          </div>
+          {updatedAt ? (
+            <p className={styles.dashboardUpdatedAt}>
+              <span>Atualizado em</span>
+              <strong>{updatedAt}</strong>
+            </p>
+          ) : null}
+        </aside>
+        <div className={styles.dashboardContent} data-dashboard-content>
+          {children}
+        </div>
+      </div>
+    </DashboardSidebarContext.Provider>
   );
 }
