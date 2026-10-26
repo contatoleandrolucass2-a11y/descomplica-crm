@@ -95,6 +95,7 @@ jobs:
         run: pnpm build
 
   release-gates:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -213,6 +214,7 @@ jobs:
         run: pnpm exec supabase stop --no-backup
 
   isolated-restore:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
