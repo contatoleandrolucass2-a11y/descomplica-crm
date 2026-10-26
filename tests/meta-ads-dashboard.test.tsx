@@ -398,6 +398,8 @@ describe("dashboard Meta Ads", () => {
     );
     expect(canvas).toContain("{metric:'ctr',type:'radar',period:'global',span:12,height:384");
     expect(canvas).toContain("requested-macro-default-v1");
+    expect(canvas).toContain("requested-macro-default-v2");
+    expect(canvas).toContain("standard.name==='Padrão'");
     expect(canvas).toContain("sameFactoryLayout(standard.cards,legacyFactoryDefinitions)");
     expect(merge).toContain("/canvas/index.html?v=requested-default-1");
     expect(exportControls).toContain('canvas: "Gráficos do canvas (com filtros próprios)"');

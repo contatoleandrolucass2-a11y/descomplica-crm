@@ -86,6 +86,29 @@ function activeProfile(){return profileState.items.find(item=>item.id===profileS
   }
  }catch{}
 }
+// A versao anterior comparava tambem dimensoes alteradas por migracoes
+// historicas (span/height) e, por isso, nao reconheceu o perfil Padrão de
+// producao. Esta correcao atua somente no perfil de fabrica ainda legado;
+// perfis criados ou renomeados pelo usuario continuam intocados.
+{
+ const requestedDefaultVersion=profileKey+'-requested-macro-default-v2';
+ try{
+  if(integration.view==='macro'&&!localStorage.getItem(requestedDefaultVersion)){
+   const standard=profileState.items.find(item=>item.id===profileState.defaultId);
+   const legacyStandard=standard&&standard.name==='Padrão'&&Array.isArray(standard.cards)&&standard.cards.length===legacyFactoryDefinitions.length&&standard.cards.every((card,index)=>{
+    const expected=legacyFactoryDefinitions[index];
+    return ['metric','type','period','group'].every(field=>card[field]===expected[field]);
+   });
+   if(legacyStandard){
+    const approved=materialize(requestedMacroDefinitions);
+    standard.cards=cloneCards(approved);
+    if(profileState.activeId===standard.id)cards=cloneCards(approved);
+    saveProfiles();localStorage.setItem(key,JSON.stringify(cards));
+   }
+   localStorage.setItem(requestedDefaultVersion,'1');
+  }
+ }catch{}
+}
 // Repair the layout affected by the former Organizar behavior. It forced every
 // non-indicator card to half width and discarded the user's chosen sizes.
 // Preserve card order and filters; restore the established canvas pattern:
