@@ -7,14 +7,31 @@ const types={table:'Tabela de campanhas',kpi:'Indicador',funnel:'Funis comparati
 const key='descomplica-merged-canvas-v1-'+integration.scope; let editing=false,history=[],future=[],selected=campaigns.map((c,i)=>integration.selected.includes(c.id)?i:-1).filter(i=>i>=0),dragId=null,activeCardId=null;
 const groupSelection=new Set();
 const uid=()=>crypto.randomUUID();
-const defaults=()=>[
- ...Object.keys(metrics).map(metric=>({id:uid(),metric,type:'kpi',period:'global',span:2,height:184,group:'campaign'})),
- {id:uid(),metric:'results',type:'funnel',period:'global',span:12,height:384,group:'campaign'},
- {id:uid(),metric:'cpl',type:'bars',period:'global',span:6,height:384,group:'campaign'},
- {id:uid(),metric:'spend',type:'line',period:'global',span:6,height:384,group:'day'},
- {id:uid(),metric:'spend',type:'scatter',period:'global',span:6,height:384,group:'campaign'},
- {id:uid(),metric:'results',type:'table',period:'global',span:12,height:384,group:'campaign'}
-].map(card=>({...card,start:integration.range.start,end:integration.range.end}));
+const legacyFactoryDefinitions=[
+ ...Object.keys(metrics).map(metric=>({metric,type:'kpi',period:'global',span:2,height:184,group:'campaign'})),
+ {metric:'results',type:'funnel',period:'global',span:12,height:384,group:'campaign'},
+ {metric:'cpl',type:'bars',period:'global',span:6,height:384,group:'campaign'},
+ {metric:'spend',type:'line',period:'global',span:6,height:384,group:'day'},
+ {metric:'spend',type:'scatter',period:'global',span:6,height:384,group:'campaign'},
+ {metric:'results',type:'table',period:'global',span:12,height:384,group:'campaign'}
+];
+// Padrão aprovado na prévia local: seis indicadores e quatro linhas analíticas.
+// Os gráficos herdam as campanhas dos filtros gerais; IDs demonstrativos nunca
+// são promovidos para o CRM.
+const requestedMacroDefinitions=[
+ ...['spend','results','cpc','ctr','cpl','cpm'].map(metric=>({metric,type:'kpi',period:'global',span:2,height:184,group:'campaign'})),
+ ...['today','week','month'].map(period=>({metric:'spend',type:'bars',period,span:4,height:384,group:'campaign'})),
+ ...['today','week','month'].map(period=>({metric:'results',type:'horizontal',period,span:4,height:384,group:'campaign'})),
+ ...['today','week','month'].map(period=>({metric:'results',type:'table',period,span:4,height:384,group:'campaign'})),
+ {metric:'ctr',type:'radar',period:'global',span:12,height:384,group:'campaign'}
+];
+const factoryDefinitions=integration.view==='macro'?requestedMacroDefinitions:legacyFactoryDefinitions;
+const materialize=definitions=>definitions.map(card=>({...card,id:uid(),start:integration.range.start,end:integration.range.end}));
+const defaults=()=>materialize(factoryDefinitions);
+const sameFactoryLayout=(value,definitions)=>Array.isArray(value)&&value.length===definitions.length&&value.every((card,index)=>{
+ const expected=definitions[index];
+ return ['metric','type','period','span','height','group'].every(field=>card[field]===expected[field]);
+});
 let cards;try{cards=JSON.parse(localStorage.getItem(key));if(!Array.isArray(cards)||cards.some(c=>!metricLabels[c.metric]||!types[c.type]))cards=null}catch{}cards??=defaults();
 // Apply the requested initial indicator row once, preserving filters and other cards.
 const indicatorRowVersion=key+'-six-indicators-v1';
@@ -51,6 +68,24 @@ if(!profileState||!Array.isArray(profileState.items)||!profileState.items.length
 }
 function saveProfiles(){localStorage.setItem(profileKey,JSON.stringify(profileState));}
 function activeProfile(){return profileState.items.find(item=>item.id===profileState.activeId)||profileState.items[0];}
+// A primeira versão publicada criou no navegador o perfil de fábrica antigo.
+// Troque somente esse perfil ainda intacto. Perfis e layouts personalizados
+// permanecem preservados.
+{
+ const requestedDefaultVersion=profileKey+'-requested-macro-default-v1';
+ try{
+  if(integration.view==='macro'&&!localStorage.getItem(requestedDefaultVersion)){
+   const standard=profileState.items.find(item=>item.id===profileState.defaultId);
+   if(standard&&sameFactoryLayout(standard.cards,legacyFactoryDefinitions)){
+    const approved=materialize(requestedMacroDefinitions);
+    standard.cards=JSON.parse(JSON.stringify(approved));
+    if(profileState.activeId===standard.id)cards=JSON.parse(JSON.stringify(approved));
+    saveProfiles();localStorage.setItem(key,JSON.stringify(cards));
+   }
+   localStorage.setItem(requestedDefaultVersion,'1');
+  }
+ }catch{}
+}
 // Repair the layout affected by the former Organizar behavior. It forced every
 // non-indicator card to half width and discarded the user's chosen sizes.
 // Preserve card order and filters; restore the established canvas pattern:

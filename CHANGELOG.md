@@ -9,6 +9,18 @@
 - Corrige o cenário de obra para atingir 100% da liberação no último mês.
 - Amplia a regressão financeira, responsiva e de acessibilidade com cenários fictícios confrontados na fonte oficial.
 
+## 2026-10-26 — Refinamento final de Agendamentos publicado
+
+- Publica exclusivamente `/app/etapas/agendamentos` com sidebar compacta,
+  calendario ampliado, cards interativos, funis comparativos, guias de secao,
+  graficos, tabela responsiva e rodape de suporte.
+- Confirma PR #355, CI completa, captura autenticada, artefato imutavel,
+  deployment protegido e health na versao exata da `main`.
+- Valida a pagina autenticada em desktop e celular nos temas claro, medio e
+  escuro, sem cortes, sobreposicoes, overflow horizontal ou erros de console.
+- Mantem House como canal inicial exclusivo, Imob manual e sem meta presumida
+  de agendamentos; nenhuma migration ou alteracao de dados foi aplicada.
+
 ## 2026-10-26 — Canvas configurável do Meta Ads
 
 - Substitui o conteúdo analítico das visões macro e de campanha por um canvas configurável alimentado exclusivamente pela Meta Marketing API.
