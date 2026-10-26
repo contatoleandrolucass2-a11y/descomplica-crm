@@ -8,6 +8,14 @@
 - Exibe teto médio diário e teto acumulado proporcional aos dias do período, preservando a comparação de custo por resultado pela média diária.
 - Compacta tabelas, indicadores, títulos e legendas, reduz o contraste das grades e mantém valores em primeiro plano.
 
+## 2026-10-26 — Layout e acesso do Simulador CAIXA
+
+- Alinha o formulário CAIXA ao padrão compacto dos simuladores Associativo e Tabela Direta, com etapas numeradas, painéis de contorno azul e fluxo vertical.
+- Aplica os mesmos componentes nos temas claro, médio e escuro e mantém a adaptação para tablet e celular.
+- Remove o cadeado e a mensagem obsoleta de motor bloqueado no hub de Simulação.
+- Libera o cálculo local para todos os perfis ativos que já possuem `crm.simulators.view`, preservando sessão, overrides individuais e demais controles de acesso.
+- Mantém o endpoint oficial CAIXA fechado e preserva integralmente fórmulas, cotas, taxas e casos golden.
+
 ## 2026-10-26 — Cotas e precisão do Simulador CAIXA
 
 - Atualiza o SBPE para cota máxima de 90% no SAC e 80% no Price, aceitando cota individual confirmada menor.

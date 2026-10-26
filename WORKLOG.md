@@ -34,6 +34,30 @@ Os testes focados aprovaram 65 cenários. O Docker local estava indisponível, d
 modo que reset, pgTAP e lint reais do banco permanecem obrigatórios no job Linux
 `isolated-restore`; nenhum gate foi reduzido ou ignorado.
 
+## 2026-10-26 — Layout e acesso do Simulador CAIXA
+
+O formulário de `/app/simulacao/caixa` foi reorganizado no mesmo padrão visual
+dos simuladores Associativo e Tabela Direta. A jornada agora usa painéis largos,
+etapas numeradas, campos compactos em grade, barra única de ações e resultado no
+fluxo vertical. Os temas claro, médio e escuro usam tokens próprios de superfície,
+linha, texto e ação; os mesmos componentes se reorganizam em uma coluna no celular.
+
+O bloqueio remanescente era declarativo: o hub mostrava cadeado para a CAIXA e a
+rota ainda mantinha a classificação antiga de jornada somente visual. O cálculo
+local já existia e não persiste dados. Esses bloqueios foram removidos para os sete
+papéis operacionais ativos que recebem `crm.simulators.view`; sessão, conta ativa,
+MFA, escopo e overrides individuais continuam valendo. O endpoint bancário oficial
+permanece fechado por não possuir contrato e calculadora server-side próprios.
+
+As regras financeiras não foram alteradas. Os testes focados preservam os casos
+golden de SBPE SAC 90%, Price 80%, base pela menor avaliação, datas, renda e
+entradas inválidas. A matriz de navegador cobre cálculo, quatro abas, três temas,
+desktop e celular, overflow e Axe.
+
+O workflow protegido `40395287053` aprovou a captura autenticada e gerou o
+artefato `12688461833`. As referências revisadas do hub, catálogo administrativo
+e CAIXA foram incorporadas desse artefato, sem captura manual ou dados reais.
+
 ## 2026-10-26 — Precisão financeira do Simulador CAIXA
 
 A página CAIXA passou a usar 90% como cota máxima do SBPE SAC e 80% no
