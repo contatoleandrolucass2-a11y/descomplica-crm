@@ -3970,6 +3970,7 @@ dependente da autorização específica aplicável.
   artefato imutável, backup/rollback e o coordenador `release:production`. Uma
   falha em qualquer gate interrompe somente a etapa dependente, sem redução ou
   contorno do controle.
+
 ## 2026-10-26 — Abertura: layout e acesso do Simulador CAIXA
 
 - Escopo aprovado: alinhar `/app/simulacao/caixa` ao padrão visual dos
