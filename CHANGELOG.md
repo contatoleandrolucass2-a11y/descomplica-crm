@@ -1,5 +1,13 @@
 # Changelog
 
+## 2026-10-26 — Persistência e precisão do Canvas Meta Ads
+
+- Persiste perfis e layouts do Canvas por usuário autenticado e por nível de análise, com cache local apenas como contingência.
+- Mantém o envelope oficial de 120 dias nas atualizações automáticas, permitindo que Hoje, Semana, Mês e períodos personalizados continuem independentes.
+- Usa o calendário de São Paulo e evita somar aliases equivalentes do mesmo lead retornado pela Meta Marketing API.
+- Exibe teto médio diário e teto acumulado proporcional aos dias do período, preservando a comparação de custo por resultado pela média diária.
+- Compacta tabelas, indicadores, títulos e legendas, reduz o contraste das grades e mantém valores em primeiro plano.
+
 ## 2026-10-26 — Cotas e precisão do Simulador CAIXA
 
 - Atualiza o SBPE para cota máxima de 90% no SAC e 80% no Price, aceitando cota individual confirmada menor.

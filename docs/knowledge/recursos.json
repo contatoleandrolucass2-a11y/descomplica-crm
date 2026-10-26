@@ -222,6 +222,7 @@
         "app/api/health/route.ts",
         "app/api/meta-ads/status/route.ts",
         "app/api/meta-ads/data/route.ts",
+        "app/api/meta-ads/canvas-profiles/route.ts",
         "app/api/meta-ads/tiles/[z]/[x]/[y]/route.ts",
         "app/api/meta-ads/console/route.ts",
         "app/api/meta-ads/console/authorize/route.ts"
@@ -239,6 +240,8 @@
         "docs/runbooks/qlik-ranking-ingestion.md",
         "tests/meta-ads-connection-status.test.ts",
         "tests/meta-ads-data-api.test.ts",
+        "tests/meta-ads-canvas-profiles-api.test.ts",
+        "supabase/tests/meta_ads_canvas_profiles.test.sql",
         "tests/meta-ads-marketing-api.test.ts",
         "tests/meta-ads-console-api.test.ts",
         "docs/runbooks/meta-ads-vps-session.md"

@@ -1,5 +1,39 @@
 # Worklog
 
+## 2026-10-26 — Correções de persistência, período e leitura do Meta Ads
+
+O Canvas deixou de depender do `localStorage` como fonte autoritativa. A nova
+rota protegida salva perfis por `auth.uid()` e por escopo macro/micro em uma
+tabela com RLS forçada, isolamento por proprietário, limite de 512 KiB e
+validação estrutural estrita. O armazenamento do navegador permanece somente
+como cache e contingência; no primeiro acesso após a atualização, o layout
+local existente é sincronizado quando ainda não houver perfil remoto.
+
+A atualização automática de 60 segundos não substitui mais a base completa
+pelas linhas do período global selecionado. Cada gráfico volta a calcular Hoje,
+Semana, Mês ou intervalo personalizado sobre o envelope oficial de 120 dias. O
+intervalo padrão da API usa o dia civil de `America/Sao_Paulo`, evitando corte
+UTC próximo da meia-noite.
+
+Para formulários, aliases equivalentes de resultado (`lead`, lead agrupado e
+pixel lead) usam o maior contador compatível em vez da soma. Isso evita contar
+duas vezes o mesmo lead exibido pelo Gerenciador de Anúncios. O caso sintético
+da campanha `SACOMÃ / LIVIERO PUBLICO FECHADO` confirma que três aliases 5, 5 e
+1 resultam em cinco leads, não onze. A conferência final com dados reais
+continua obrigatória após a publicação.
+
+O teto de custo por resultado continua sendo uma média diária para classificar
+o CPL. A leitura da tabela e a referência dos gráficos também mostram o teto
+acumulado do período: valor diário multiplicado pela quantidade inclusiva de
+dias. Tabelas e indicadores foram compactados, a grade gráfica recebeu menos
+contraste e os valores mantêm maior hierarquia visual.
+
+Validação local: formato, lint, tipos, build de 71 rotas, 4.311 testes Vitest e
+2.343 testes Node/release aprovados; 130 condicionais permaneceram ignorados.
+Os testes focados aprovaram 65 cenários. O Docker local estava indisponível, de
+modo que reset, pgTAP e lint reais do banco permanecem obrigatórios no job Linux
+`isolated-restore`; nenhum gate foi reduzido ou ignorado.
+
 ## 2026-10-26 — Precisão financeira do Simulador CAIXA
 
 A página CAIXA passou a usar 90% como cota máxima do SBPE SAC e 80% no

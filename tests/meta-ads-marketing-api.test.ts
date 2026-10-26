@@ -23,6 +23,33 @@ function json(body: unknown, status = 200) {
 }
 
 describe("Meta Marketing API read-only client", () => {
+  it("uses the São Paulo calendar day for the default API range", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(json({ data: [] }))
+      .mockResolvedValueOnce(json({ data: [] }))
+      .mockResolvedValueOnce(json({ data: [] }))
+      .mockResolvedValueOnce(
+        json({
+          id: `act_${configuration.accountId}`,
+          name: "Conta",
+          currency: "BRL",
+        }),
+      );
+
+    await fetchMetaAdsDashboardData(configuration, {
+      fetcher,
+      now: new Date("2026-10-27T01:30:00Z"),
+      bypassCache: true,
+    });
+
+    const insightsUrl = new URL(String(fetcher.mock.calls[1]?.[0]));
+    expect(JSON.parse(insightsUrl.searchParams.get("time_range")!)).toEqual({
+      since: "2026-06-29",
+      until: "2026-10-26",
+    });
+  });
+
   it("fails closed on incomplete or malformed secret configuration", () => {
     expect(getMetaAdsApiConfiguration({})).toEqual({ enabled: false, available: false });
     expect(getMetaAdsApiConfiguration({ META_ADS_API_ENABLED: "true" })).toEqual({
@@ -269,6 +296,48 @@ describe("Meta Marketing API read-only client", () => {
         conversions: 38,
       }),
     ]);
+  });
+
+  it("does not add equivalent Meta lead action aliases", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(json({ data: [{ id: "77", effective_status: "ACTIVE" }] }))
+      .mockResolvedValueOnce(
+        json({
+          data: [
+            {
+              date_start: "2026-10-26",
+              account_id: configuration.accountId,
+              account_name: "Conta",
+              campaign_id: "11",
+              campaign_name: "SACOMÃ / LIVIERO PUBLICO FECHADO",
+              adset_id: "22",
+              adset_name: "Público",
+              ad_id: "77",
+              ad_name: "Anúncio",
+              spend: "20",
+              impressions: "1000",
+              actions: [
+                { action_type: "lead", value: "5" },
+                { action_type: "onsite_conversion.lead_grouped", value: "5" },
+                { action_type: "offsite_conversion.fb_pixel_lead", value: "1" },
+              ],
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(json({ data: [] }))
+      .mockResolvedValueOnce(
+        json({ id: `act_${configuration.accountId}`, name: "Conta", currency: "BRL" }),
+      );
+
+    const result = await fetchMetaAdsDashboardData(configuration, {
+      fetcher,
+      bypassCache: true,
+      range: { start: "2026-10-26", end: "2026-10-26" },
+    });
+
+    expect(result.rows[0]).toMatchObject({ destination: "form", conversions: 5 });
   });
 
   it("rejects untrusted pagination and classifies expired tokens", async () => {

@@ -39,18 +39,18 @@ const markerNames = [
 ];
 
 describe("release-candidate migration train", () => {
-  it("keeps a unique, ordered 88-version manifest", async () => {
+  it("keeps a unique, ordered 89-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(88);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(88);
+    expect(migrations).toHaveLength(89);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(89);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-34)).toEqual([
+    expect(migrations.slice(-35)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -85,9 +85,10 @@ describe("release-candidate migration train", () => {
       "20261025114724_forecast_page_users_edit.sql",
       "20261025180000_appointments_funnels_regional_filter.sql",
       "20261026072814_sync_page_catalog.sql",
+      "20261026191505_meta_ads_canvas_profiles.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261026072814_sync_page_catalog.sql");
+    expect(migrations.at(-1)).toBe("20261026191505_meta_ads_canvas_profiles.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -119,8 +120,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(40);
-    expect(plan.tests).toBe(2243);
+    expect(plan.files).toBe(41);
+    expect(plan.tests).toBe(2258);
   });
 
   it("keeps the compact page-data fixture aligned with the Imob dashboard policy", async () => {
@@ -439,7 +440,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2243;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2258;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {
