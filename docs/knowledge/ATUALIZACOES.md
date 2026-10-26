@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/24 cenarios; a composicao encontrou rolagem residual de 4px no Ranking Score em 1024px com sidebar aberta. Altura das barras ajustada apenas nesta pagina. Build aprovado; repeticao final de 18+24 cenarios em andamento. CI Linux b7a9ab: validate e isolated-restore aprovados, release-gates em andamento. Ainda nao publicado.
+
 ## 2026-10-25: validacao local da pagina de agendamentos
 
 - QA complementar da composicao preenchida com sidebar detectou colisao

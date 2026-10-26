@@ -1248,7 +1248,7 @@
   /* At the production 14px root size, the 17rem tile leaves 162px for
      content. Reserve room for the axis, controls and full vertical labels. */
   .overviewGrid .verticalLabels .columnTrack {
-    height: calc(clamp(3rem, 8dvh, 4rem) - 1.5rem);
+    height: calc(clamp(3rem, 8dvh, 4rem) - 2rem);
   }
 
   .tableCard {

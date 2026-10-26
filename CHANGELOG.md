@@ -1,5 +1,7 @@
 # Changelog
 
+- Ajusta a altura das barras do Ranking Score para eliminar a rolagem residual de 4px em 1024px com sidebar aberta, somente em Agendamentos.
+
 ## 2026-10-25 - Navegacao lateral e comparacao de agendamentos
 
 - Reserva espaco para os valores no topo das barras, evitando sobreposicao com o eixo quando a sidebar reduz a largura util.
