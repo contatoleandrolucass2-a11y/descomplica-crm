@@ -1,6 +1,7 @@
 "use strict";
 async function downloadAdsReport() {
   const selected = { ...pdfSections };
+  const canvasSnapshot = document.querySelector("#analysis-canvas")?.contentWindow?.exportCanvasSnapshot?.() || [];
   if (!sourceData || sourceLoading || !Object.values(selected).some(Boolean)) return;
   const button = document.querySelector("#download-report");
   button.disabled = true;
@@ -271,6 +272,14 @@ async function downloadAdsReport() {
         paragraph(content);
       }
     }
+    if(selected.canvas){
+      for(const chart of canvasSnapshot){
+        page(chart.title);
+        paragraph(chart.context);
+        if(chart.svg){pdf.addImage(await reportSvgImage(chart.svg),"PNG",14,cursor,182,90);cursor+=97;}
+        if(chart.rows.length)table(chart.headers,chart.rows,chart.headers.length===2?[120,62]:[92,45,45]);
+      }
+    }
     for (let n = 1; n <= pdf.getNumberOfPages(); n++) {
       pdf.setPage(n);
       pdf.setDrawColor("#d9204a");
@@ -279,16 +288,39 @@ async function downloadAdsReport() {
       text(n + " / " + pdf.getNumberOfPages(), 181, 289, 8);
     }
     pdf.save("descomplica-ads-" + range.start + "-a-" + range.end + ".pdf");
+    toast("PDF gerado com as seções e os filtros selecionados.");
   } catch (error) {
     console.error(error);
     toast("Não foi possível gerar o PDF. Tente novamente.");
   } finally {
-    button.disabled = !Object.values(pdfSections).some(Boolean);
+    button.disabled = false;
     button.textContent = "Baixar PDF";
   }
 }
 document.addEventListener("click", (e) => {
-  if (e.target.closest("#download-report")) downloadAdsReport();
+  if (e.target.closest("#download-report")) {
+    e.preventDefault();
+    const chooser = document.querySelector(".pdf-sections");
+    if (chooser) chooser.hidden = false;
+    const confirm = chooser?.querySelector("[data-pdf-confirm]");
+    if (confirm) {
+      confirm.disabled = !Object.values(pdfSections).some(Boolean);
+      confirm.focus();
+    }
+    return;
+  }
+  if (e.target.closest("[data-pdf-cancel]")) {
+    const chooser = e.target.closest(".pdf-sections");
+    if (chooser) chooser.hidden = true;
+    document.querySelector("#download-report")?.focus();
+    return;
+  }
+  if (e.target.closest("[data-pdf-confirm]")) {
+    if (!Object.values(pdfSections).some(Boolean)) return;
+    const chooser = e.target.closest(".pdf-sections");
+    if (chooser) chooser.hidden = true;
+    downloadAdsReport();
+  }
 });
 document.addEventListener("change", (e) => {
   if (e.target.id === "pdf-include-guide") save("ads-live-compact-pdf-guide", e.target.checked);

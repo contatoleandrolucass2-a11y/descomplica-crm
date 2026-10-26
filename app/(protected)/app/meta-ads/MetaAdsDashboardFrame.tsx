@@ -81,7 +81,6 @@ export function MetaAdsDashboardFrame({
     function handleFrameMessage(event: MessageEvent) {
       if (
         event.source !== iframe.contentWindow ||
-        event.origin !== window.location.origin ||
         event.data?.type !== "descomplica:meta-ads-modal-open"
       ) {
         return;

@@ -1,0 +1,15 @@
+/* Medium is a muted daylight palette, distinct from the dark theme. */
+body[data-page-theme="medium"]{--ink:#21364a;--muted:#4e6477;--line:#b6c5d2;--soft:#dbe5ee;color-scheme:light;background:#cdd8e2;color:var(--ink)}
+body[data-page-theme="medium"] :where(header,aside,.metric,.panel,dialog,.audience-library,.delivery-summary,.media-file,.frame-card){background:#e8eef3;color:#21364a;border-color:#b6c5d2}
+body[data-page-theme="medium"] :where(button:not(.primary),input,select,textarea){background:#edf2f6;color:#21364a;border-color:#b6c5d2}
+body[data-page-theme="medium"]>aside.motion-sidebar{background:#dce5ed;color:#21364a;border-color:#b6c5d2}
+body[data-page-theme="medium"] nav .selected{background:#c6d6e4!important;color:#183a55!important}body[data-page-theme="medium"] :where(th,.region-map-display){background:#dce5ed}
+body[data-theme="medium"]{--bg:#cdd8e2;--card:#edf2f6;--text:#21364a;--muted:#4e6477;--line:#b6c5d2;--chart-text:#21364a;--chart-secondary:#4e6477;--funnel-surface:#f4f7fa;color-scheme:light;color:#21364a}
+body[data-theme="medium"] :is(.card,dialog,.menu,button:not(.primary),input,select,.card-controls){background:#edf2f6!important;color:#21364a!important;border-color:#b6c5d2!important}
+body[data-theme="medium"] #canvas{background-color:#c7d4df!important;border-color:#a9bdcd!important;background-image:linear-gradient(#6c879b26 1px,transparent 1px),linear-gradient(90deg,#6c879b26 1px,transparent 1px)!important}
+body[data-theme="medium"] .chart svg text{fill:#21364a!important}
+body[data-theme="medium"] .chart svg .grid{stroke:#b5c4d0!important}
+body[data-theme="medium"] :is(.subtitle,.legend,.integration-note,.metric-tile span,.metric-tile small,.canvas-info,.merged-funnels small,.metric-example,.metric-note){color:#4e6477!important}
+body[data-theme="medium"] .merged-funnels>article{border-color:#b6c5d2;background:#f4f7fa}
+body[data-theme="medium"] .chart svg text.above-cap,body[data-theme="medium"] .cap-reference{color:#a51d36!important;fill:#a51d36!important}
+body[data-theme="medium"] .chart-tooltip{background:#21364a!important;color:#fff!important}

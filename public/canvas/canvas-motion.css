@@ -1,0 +1,37 @@
+/* The grid remains visible as an editing affordance without competing with chart data. */
+#canvas {
+  grid-template-columns:repeat(60,minmax(0,1fr));
+  column-gap:0;
+  padding: 16px 0 16px 16px;
+  border: 1px solid #ccdbe6;
+  border-radius: 14px;
+  background-color: #e9f0f5;
+  background-image: linear-gradient(#7898af28 1px, transparent 1px), linear-gradient(90deg, #7898af38 1px, transparent 1px), linear-gradient(90deg, transparent calc(100% - 17px), #7898af20 calc(100% - 17px), #7898af20 calc(100% - 16px), transparent calc(100% - 16px));
+  background-size: var(--column-pitch, 80px) 20px;
+  background-position: 16px 16px;
+  background-origin: padding-box;
+  min-height: 120px;
+  transition: border-color 180ms ease, background-color 180ms ease;
+}
+.editing #canvas { border-color: #7bacca; background-color: #e5eef6; }
+#canvas .drop-slot{display:flex;align-items:center;justify-content:center;gap:12px;border:2px dashed #2b8bbd;background:#d9edf8aa;color:#216384;box-shadow:inset 0 0 0 5px #ffffff66;pointer-events:none;text-align:center;padding:16px}
+#canvas .drop-slot span{font-size:30px}#canvas .drop-slot strong{font-size:12px}
+#canvas .card.card-selected{border-color:#2785b6;box-shadow:0 0 0 3px #2785b62b,0 10px 24px #174b7018;touch-action:none}
+#canvas .card.card-selected .handle{display:block;cursor:grab;color:#2175a5}
+#canvas .card.card-selected .resize{display:block;position:absolute;bottom:3px;right:3px;width:23px;height:23px;cursor:nwse-resize;touch-action:none}
+#canvas .card.hold-pending{animation:hold-feedback 350ms ease-out forwards;user-select:none}
+@keyframes hold-feedback{to{border-color:#2785b6;box-shadow:0 0 0 3px #2785b61f}}
+#canvas .card { transition: border-color 180ms ease, box-shadow 180ms ease; transform-origin:top left; height:var(--height);grid-row:var(--row-start,auto) / span var(--rows);grid-column:var(--column-start,auto) / span var(--span)!important; }
+#canvas .card.resizing { border-color:#2d8cbe;box-shadow:0 0 0 3px #369cd52a; }
+.editing #canvas .card:hover { border-color: #659cbd; box-shadow: 0 5px 18px #254e6812; }
+.canvas-dragging, .canvas-dragging * { cursor: grabbing !important; user-select: none; }
+#canvas .card.dragging { opacity: .86; box-shadow: 0 20px 48px #153e6a38; border: 2px solid #438dbb; will-change: transform; }
+#canvas .card.swap-target { border: 2px solid #2d8cbe; box-shadow: 0 0 0 5px #369cd52a, 0 12px 25px #174f7522; }
+#canvas .card.swap-target::after { content: 'Solte para trocar de posição'; position: absolute; inset: auto 12px 12px; padding: 10px 12px; border-radius: 8px; background: #17638e; color: white; font: 600 12px system-ui; text-align: center; pointer-events: none; animation: swap-hint 180ms ease-out; }
+@keyframes swap-hint { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { #canvas, #canvas .card { transition: none; } #canvas .card.swap-target::after { animation: none; } }
+@media (max-width: 700px) { #canvas { padding: 10px;background-position:10px 10px; } #canvas .card{grid-column:span 60!important;} }
+.actions{align-items:center}.per-row-label{font-size:10px;display:flex;flex-direction:column;gap:3px;color:#60788c}.per-row-label select{font-size:12px;padding:6px 8px}
+#canvas .card{container-type:inline-size;width:calc(100% - 16px)}
+@media(max-width:700px){#canvas .card{width:100%}}
+@container (max-width:360px){.card-top{flex-wrap:wrap;padding:12px 10px 4px}.metric-heading{flex-basis:calc(100% - 32px)}.card-top .filter-toggle{margin-left:auto}.card .subtitle{padding:0 10px;font-size:10px}.card .chart{padding:0 6px 6px}.card .legend{padding:7px 10px;font-size:9px;gap:4px 8px}.card .card-controls{grid-template-columns:1fr}.card .campaign-checks{grid-template-columns:1fr}.card h2{font-size:13px}.card .chart svg text{font-size:16px}}

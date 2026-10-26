@@ -168,6 +168,33 @@
   font-size: 12px;
 }
 
+.soundToggle {
+  display: flex;
+  min-height: 38px;
+  align-items: center;
+  gap: 8px;
+  margin: 8px 0 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  padding: 8px 10px;
+  color: var(--analytics-muted);
+  background: transparent;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.soundToggle:hover {
+  color: var(--analytics-ink);
+  background: var(--analytics-surface-muted);
+}
+
+.soundToggle:focus-visible {
+  outline: 3px solid var(--focus-ring);
+  outline-offset: 2px;
+}
+
 .sidebarToggle {
   display: flex;
   min-height: 40px;
@@ -198,11 +225,13 @@
 .sidebar[data-collapsed="true"] .brand,
 .sidebar[data-collapsed="true"] .navigationLabel,
 .sidebar[data-collapsed="true"] .sourceNote,
+.sidebar[data-collapsed="true"] .soundToggle span,
 .sidebar[data-collapsed="true"] .sidebarToggle span {
   display: none;
 }
 
 .sidebar[data-collapsed="true"] .navigationLink,
+.sidebar[data-collapsed="true"] .soundToggle,
 .sidebar[data-collapsed="true"] .sidebarToggle {
   justify-content: center;
   padding-inline: 8px;
@@ -222,6 +251,7 @@
   }
   .brand,
   .sourceNote,
+  .soundToggle,
   .sidebarToggle {
     display: none;
   }

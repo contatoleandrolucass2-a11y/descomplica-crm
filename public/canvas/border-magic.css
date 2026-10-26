@@ -1,0 +1,57 @@
+/* Animate only the border, keeping the chart and its labels stationary. */
+@property --border-magic-angle {
+  syntax: '<angle>';
+  initial-value: 90deg;
+  inherits: false;
+}
+@keyframes border-magic-spin {
+  to { --border-magic-angle: 450deg; }
+}
+#canvas .card.card-selected,
+#canvas .card.dragging,
+#canvas .card.live-updated,
+#expanded .card.live-updated {
+  position: relative;
+  border-color: transparent;
+}
+#canvas .card.card-selected::before,
+#canvas .card.dragging::before,
+#canvas .card.live-updated::before,
+#expanded .card.live-updated::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 12;
+  border-radius: inherit;
+  padding: 2px;
+  background: conic-gradient(from var(--border-magic-angle), #e2cbff, #393bb2 50%, #e2cbff);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  animation: border-magic-spin 2s linear infinite;
+}
+.chart svg rect.live-point {
+  stroke: #393bb2;
+  stroke-width: 2.5px;
+  vector-effect: non-scaling-stroke;
+  paint-order: fill stroke;
+  animation: none;
+  filter: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  #canvas .card::before, #expanded .card::before { animation: none; }
+}
+
+/* SVG overlays reuse the card's animated conic gradient without moving the bar. */
+.chart svg .column-border-magic{pointer-events:none;overflow:visible}
+.column-border-magic-ring{
+ width:100%;height:100%;box-sizing:border-box;border-radius:4px;padding:2px;
+ background:conic-gradient(from var(--border-magic-angle),#e2cbff,#393bb2 50%,#e2cbff);
+ -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+ -webkit-mask-composite:xor;mask-composite:exclude;
+ animation:border-magic-spin 2s linear infinite;
+ pointer-events:none;
+}
+.chart svg rect.live-point{stroke:none;stroke-width:0}
+@media(prefers-reduced-motion:reduce){.column-border-magic-ring{animation:none}}

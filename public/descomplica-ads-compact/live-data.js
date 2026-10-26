@@ -241,7 +241,7 @@ function status(c) {
   if (costs.some((v) => v == null)) return ["Base insuficiente", ""];
   if (costs.every((v) => v > (c.cap * settings.red) / 100)) return ["Acima do teto", "red"];
   if (costs.every((v) => v >= (c.cap * settings.yellow) / 100)) return ["Atenção", "warn"];
-  return budgetWarning ? ["Atenção ao investimento", "warn"] : ["Dentro do teto", ""];
+  return budgetWarning ? ["Atenção ao investimento", "warn"] : ["Abaixo do teto (esperado)", "good"];
 }
 function rebuildCampaigns() {
   const old = campaigns.map((c) => c.id),
@@ -335,10 +335,8 @@ async function loadSource(range) {
           ? state.statuses[0]
           : "multiple";
     state.destination = state.destinations[0] || "unknown";
-    if (state.startDate < payload.range.start || state.endDate > payload.range.end) {
-      sourceLoading = false;
-      return refreshRange();
-    }
+    // A resposta pode cobrir menos dias que o solicitado. Renderize os dados
+    // disponíveis uma vez; repetir a mesma consulta travaria o filtro.
     rebuildCampaigns();
     sourceLoading = false;
     render();
@@ -427,6 +425,7 @@ function filters() {
     selected: state.accountIds || [],
     allLabel: "Todas as contas",
   })}<div class="field"><label for="period">Período</label><select id="period">${[
+    ["today", "Hoje"],
     ["7", "Últimos 7 dias"],
     ["14", "Últimos 14 dias"],
     ["30", "Últimos 30 dias"],
@@ -613,7 +612,7 @@ function settingsPage() {
     ["Total gasto pela conta", sourceData.amountSpent],
     ["Limite total de gasto", sourceData.spendCap],
   ];
-  return `<form id="settings-form"><div class="page-head"><div><h1>Ajustes</h1><p>Referências de análise salvas por usuário neste navegador.</p></div><div class="actions"><button type="button" id="discard">Descartar</button><button class="primary" type="submit">Salvar ajustes</button></div></div>${panel("account-balance", "Saldo da conta de anúncios", `<div class="account-balance-grid">${accountValues.map(([label, value]) => `<div><small>${label}</small><strong>${money(value)}</strong></div>`).join("")}</div><small>Valores financeiros oficiais da conta ${AdsData.escape(sourceData.accountName)} em ${AdsData.escape(sourceData.currency)}. “Saldo” segue o campo financeiro retornado pela Meta; — significa que a API não forneceu o valor.</small>`)}<div class="settings-scope"><label>Destino <select id="settings-destination">${Object.entries(
+  return `<form id="settings-form"><div class="page-head"><div><h1>Limites</h1><p>Referências de análise salvas por usuário neste navegador.</p></div><div class="actions"><button type="button" id="discard">Descartar</button><button class="primary" type="submit">Salvar limites</button></div></div>${panel("account-balance", "Saldo da conta de anúncios", `<div class="account-balance-grid">${accountValues.map(([label, value]) => `<div><small>${label}</small><strong>${money(value)}</strong></div>`).join("")}</div><small>Valores financeiros oficiais da conta ${AdsData.escape(sourceData.accountName)} em ${AdsData.escape(sourceData.currency)}. “Saldo” segue o campo financeiro retornado pela Meta; — significa que a API não forneceu o valor.</small>`)}<div class="settings-scope"><label>Destino <select id="settings-destination">${Object.entries(
     destinationLabels,
   )
     .map(
@@ -689,7 +688,7 @@ document.addEventListener("submit", (e) => {
   settings = next;
   save("ads-live-compact-settings", settings);
   render();
-  toast("Ajustes salvos neste navegador.");
+  toast("Limites salvos neste navegador.");
 });
 document.addEventListener("change", (e) => {
   const id = e.target.id;
@@ -708,9 +707,11 @@ document.addEventListener("change", (e) => {
         day: "2-digit",
       }).format(new Date());
       state.startDate =
-        state.periodMode === "month"
-          ? state.endDate.slice(0, 8) + "01"
-          : AdsData.shift(state.endDate, 1 - Number(state.periodMode));
+        state.periodMode === "today"
+          ? state.endDate
+          : state.periodMode === "month"
+            ? state.endDate.slice(0, 8) + "01"
+            : AdsData.shift(state.endDate, 1 - Number(state.periodMode));
       state.days = AdsData.days(state.startDate, state.endDate);
       refreshRange();
     } else render();

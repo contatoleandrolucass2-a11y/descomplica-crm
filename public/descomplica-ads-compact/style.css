@@ -1958,8 +1958,8 @@ dialog:has(.metric-guide) {
 }
 
 .pdf-export-group {
+  position: relative;
   display: flex;
-  flex-direction: column;
   align-items: flex-end;
   gap: 6px;
 }
@@ -1979,18 +1979,16 @@ dialog:has(.metric-guide) {
 }
 
 .pdf-sections {
-  position: relative;
-  font-size: 11px;
-}
-.pdf-sections summary {
-  cursor: pointer;
-  color: var(--text);
-}
-.pdf-section-options {
   position: absolute;
   right: 0;
-  top: 24px;
+  top: calc(100% + 6px);
   z-index: 900;
+  font-size: 11px;
+}
+.pdf-sections[hidden] {
+  display: none !important;
+}
+.pdf-section-options {
   width: 240px;
   display: grid;
   gap: 12px;
@@ -2012,6 +2010,17 @@ dialog:has(.metric-guide) {
 }
 .pdf-section-options small {
   color: var(--muted);
+}
+.pdf-section-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 7px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.pdf-section-actions button {
+  padding: 7px 10px;
+  font-size: 11px;
 }
 body.chart-is-expanded {
   overflow: hidden;
