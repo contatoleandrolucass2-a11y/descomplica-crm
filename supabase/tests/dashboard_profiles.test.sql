@@ -64,12 +64,29 @@ values (
   'dashboard-profiles-test',
   'Synthetic Dashboard Profiles'
 );
-insert into public.crm_reporting_scopes (id, scope_key, scope_type, team_id)
+insert into public.crm_people (id, person_key, display_name, auth_user_id)
+values (
+  'ad850000-0000-4000-8000-000000000001',
+  'dashboard-profiles-broker',
+  'Synthetic Dashboard Broker',
+  'ad810000-0000-4000-8000-000000000002'
+);
+insert into public.crm_team_memberships (
+  team_id, person_id, membership_role, valid_from, valid_until
+)
+values (
+  'ad830000-0000-4000-8000-000000000001',
+  'ad850000-0000-4000-8000-000000000001',
+  'broker',
+  clock_timestamp() - interval '1 minute',
+  clock_timestamp() + interval '1 day'
+);
+insert into public.crm_reporting_scopes (id, scope_key, scope_type, person_id)
 values (
   'ad840000-0000-4000-8000-000000000001',
-  'dashboard-profiles-team',
-  'team',
-  'ad830000-0000-4000-8000-000000000001'
+  'dashboard-profiles-broker',
+  'person',
+  'ad850000-0000-4000-8000-000000000001'
 );
 insert into public.crm_user_reporting_scope_grants (
   user_id, reporting_scope_id, granted_by, reason
