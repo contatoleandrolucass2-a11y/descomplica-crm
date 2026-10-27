@@ -334,7 +334,7 @@ describe("archive navigation evidence gate", () => {
     ]);
   });
 
-  it("keeps the eight authorized roots in the approved visual and keyboard order", () => {
+  it("keeps the nine authorized roots in the approved visual and keyboard order", () => {
     expect(archiveRootNavigationContract).toEqual([
       { name: "Dashboard", tag: "BUTTON", href: null },
       { name: "Lead", tag: "BUTTON", href: null },
@@ -342,6 +342,7 @@ describe("archive navigation evidence gate", () => {
       { name: "Simulação", tag: "A", href: "/app/simulacao" },
       { name: "Ranking", tag: "A", href: "/app/ranking" },
       { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
+      { name: "Links Úteis", tag: "BUTTON", href: null },
       { name: "Gestão", tag: "BUTTON", href: null },
       { name: "Administração", tag: "BUTTON", href: null },
     ]);
@@ -428,6 +429,9 @@ describe("archive navigation evidence gate", () => {
       'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-dashboard"]',
     );
     expect(gate).toContain('a[data-navigation-root-control][href="/app/simulacao"]');
+    expect(gate).toContain(
+      'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-useful_links"]',
+    );
     expect(gate).toContain(
       'button[data-navigation-root-control][aria-controls="authorized-navigation-admin-home"]',
     );

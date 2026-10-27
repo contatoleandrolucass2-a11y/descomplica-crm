@@ -1,6 +1,7 @@
 # Changelog
 
 - Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
+- Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.
 - Transcreve contatos, horários, relacionamento, regras comerciais, campanhas históricas, Bora Vender e materiais Linktree/Liveprint, sinalizando destinos divergentes e conteúdo que exige confirmação de vigência.
 - Publica a automação e precisão do Simulador CAIXA após CI integral, imagem imutável e smoke público da versão `83a92392`.
 - Atualiza somente as 11 referências visuais do Simulador CAIXA a partir do artefato autenticado da CI, preservando as demais 231 capturas e todos os limiares.
