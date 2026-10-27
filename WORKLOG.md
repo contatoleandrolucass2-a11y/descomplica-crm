@@ -1,6 +1,6 @@
 # Worklog
 
-- 2026-10-27: PR #373 do CAIXA integrado em `a0b4a381`; após pedido explícito de publicação, o `main` vigente `075df4db` aprovou validate, imagem promovível, restauração isolada e o teste específico do CAIXA, mas o release permaneceu bloqueado porque o teste visual externo do Dashboard falhou duas vezes com sobreposição do botão Excluir sobre o histórico. Nenhum deploy foi tentado.
+- 2026-10-27: PR #373 do CAIXA integrado em `a0b4a381`; após pedido explícito de publicação, o `main` vigente `6955a6c8` aprovou validate, imagem promovível, restauração isolada, CAIXA e todos os checks funcionais. O release permaneceu bloqueado porque a correção concorrente de Agendamentos alterou 11 imagens protegidas do Dashboard em 2%, acima do limite de 1%. Nenhum deploy foi tentado.
 - 2026-10-27: implementado exclusivamente em `/app/etapas/agendamentos` o editor administrativo compartilhado dos cards e gráficos, com controles de dimensão, conteúdo, tipografia, posição, cores e torres; usuários não administradores permanecem em leitura.
 - 2026-10-27: corrigidos no Simulador CAIXA o prazo maximo reativo, a sinalizacao automatica da elegibilidade ao subsidio e o layout responsivo alinhado aos tokens de Agendamentos; o valor do subsidio continua dependente de confirmacao oficial quando faltam os fatores tecnicos do MFOM.
 - 2026-10-27: incorporadas somente as 11 referencias visuais do CAIXA aprovadas no run protegido `40537724784`, com 38 entradas de evidencia e preservacao das outras 231 imagens.

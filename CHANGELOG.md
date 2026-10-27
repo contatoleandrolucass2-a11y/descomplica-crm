@@ -1,6 +1,6 @@
 # Changelog
 
-- Registra a integração do ajuste CAIXA e o bloqueio final da publicação: o `main` vigente passou no gate específico do CAIXA, mas falhou duas vezes no teste visual externo do Dashboard.
+- Registra a integração do ajuste CAIXA e o bloqueio final da publicação: o `main` vigente passou nos checks funcionais, mas 11 referências visuais externas do Dashboard divergiram após correção concorrente.
 - Restringe a edição do canvas de Agendamentos a administradores e oferece ajustes persistentes de tamanho, conteúdo, tipografia, posição, cores e altura das torres.
 - Recalcula o prazo maximo sempre que idade ou obra mudam, preserva reducoes manuais ate a proxima mudanca determinante e impede valor acima do teto.
 - Identifica automaticamente renda potencialmente elegivel ao subsidio MCMV sem abater valor nao comprovado e explica os fatores oficiais ainda necessarios.

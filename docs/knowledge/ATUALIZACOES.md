@@ -4,29 +4,32 @@
 
 - O PR #373 foi integrado como
   `a0b4a38125a5ac38991ca7f3368bd6b9ce336648`. Depois do pedido explicito de
-  publicacao, o `main` vigente foi confirmado em
-  `075df4dbfd9b9a4bbbfb63c6b3fa860d86a286e3`.
-- A CI de `push/main` `40550745986` aprovou `validate`, `promotable-image` e
-  `isolated-restore`. O teste sintetico especifico do CAIXA dentro de
-  `release-gates` passou na execucao original e na repeticao do job falho.
-- `release-gates` falhou duas vezes, nos jobs `122356844108` e `122363139140`,
-  exclusivamente no teste visual externo do Dashboard. O botao `Excluir Media
-  do ano` interceptou o clique do controle `Ver historico mensal: Media do ano`
-  nos cenarios `restricted/dark/1920/imob-history-popup` e
-  `analysis/filters-history-goals-navigation`. Pela regra maxima de escopo, o
-  Dashboard nao foi alterado neste chat e a falha nao foi contornada.
-- O artefato `12754343591` foi baixado e conferido: digest do ZIP
-  `sha256:248f867724604c9c1529d848a1a481230559679da3648ebb27c23d8cb9daf257`,
-  SHA-256 interno `3b4d60e16a0d3e9b38acfc8c53a1eb953d3265e8dacfe945adc4562eee1c54f0`
+  publicacao, o primeiro candidato `075df4db` falhou duas vezes porque a acao
+  oculta `Excluir Media do ano` do Dashboard interceptava o controle de
+  historico. A correcao concorrente entrou no `main` como `6955a6c8`, que passou
+  a ser o candidato exato da publicacao.
+- A CI de `push/main` `40555682643` aprovou `validate`, `promotable-image` e
+  `isolated-restore`. Dentro de `release-gates`, passaram CAIXA, Dashboard,
+  Associativo, banco, autorizacao, build, E2E, acessibilidade, teclado e zoom.
+  O job `122373158107` falhou somente na comparacao protegida de 11 imagens da
+  rota `/app` em viewports e temas do Dashboard: todas registraram drift de 2%,
+  acima do limite imutavel de 1%.
+- Pela regra maxima de escopo, as referencias visuais do Dashboard nao foram
+  aprovadas nem alteradas neste chat. O artefato diagnostico `12762530739`
+  confirmou zero falhas de rota, tema, acessibilidade e canvas; somente as 11
+  comparacoes de baseline ficaram reprovadas.
+- O artefato promovivel `12757242651` foi baixado e conferido: digest do ZIP
+  `sha256:613d0621ff1c6a908334e6e76cb81117e3e0427b02b19e124d61ca2fc5556e12`,
+  SHA-256 interno `b129ab2248c6abda8c3bfe19a02f86b6f69bc6bd66b9c32db87bcf65eaaa4f70`
   e image ID esperado
-  `sha256:c6a051e124c7b334c61d81fcf18d2cb6d0eca16d0341c606584e6a8eb303d0e4`.
+  `sha256:5b4a0aa12e1e589899ec89de877c43ab0ff9c95f752c05320cd092213bc2714b`.
   A transferencia para diretorio isolado da VPS preservou o checksum; a imagem
   nao foi carregada nem ativada.
 - A publicacao nao foi tentada porque o coordenador exige os quatro jobs verdes.
   A correcao CAIXA permanece integrada no Git, mas esta revisao ainda nao esta
-  comprovadamente publicada. Reavaliar em um chat proprio para o Dashboard ou
-  quando um novo `main` exato tiver CI integral aprovada.
-- Conferencia final em `2026-10-27T17:54:27.5088022Z`: health publico HTTP 200,
+  comprovadamente publicada. Reavaliar quando as 11 referencias do Dashboard
+  forem revisadas em escopo proprio e um novo `main` exato tiver CI integral.
+- Conferencia final em `2026-10-27T18:57:21.7231154Z`: health publico HTTP 200,
   `status=ok`, versao `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`. O registro do
   coordenador permaneceu no deployment `4d1479e7-e087-499e-92f8-d6aee906bf74`,
   publicado em `2026-10-27T15:21:08.364Z`, sem deployment pendente. Portanto
@@ -35,7 +38,7 @@
   com 44 avisos preexistentes, typecheck e build de 41 paginas/71 saidas
   aprovados; Vitest aprovou 4.373 testes e ignorou 112. O comando integral de
   testes parou depois em tres casos operacionais Meta Ads dependentes de modos
-  POSIX no host Windows; a CI Linux `40550745986` aprovou o job `validate` do
+  POSIX no host Windows; a CI Linux `40555682643` aprovou o job `validate` do
   mesmo SHA. Essa limitacao local nao substitui nem corrige o bloqueio real do
   `release-gates` descrito acima.
 - O sync do Obsidian continuou impedido por `Documento excede o limite de
