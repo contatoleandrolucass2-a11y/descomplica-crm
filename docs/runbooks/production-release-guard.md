@@ -4,6 +4,15 @@ Regra solicitada em 12/10/2026: antes de cada publicação, consultar a versão
 ativa e a data real da última publicação no próprio minuto da troca. O CRM
 tem mais de um desenvolvedor; uma consulta anterior aos testes não atende.
 
+## Validação anterior à promoção
+
+Todos os publicadores devem cumprir a
+[DEPLOY-002 — Validação por impacto](impact-based-validation.md). A validação
+local e a revisão adicional se concentram na alteração e nos fluxos afetados,
+sem repetir evidências válidas. Essa delimitação não dispensa nenhum dos jobs
+exigidos pelo coordenador no SHA exato, nem altera a consulta final, as travas,
+o CAS, o backup ou a recuperação descritos neste procedimento.
+
 ## Fluxo único
 
 `pnpm release:production` coordena consulta, CAS de `IMAGE_TAG`, Compose e
