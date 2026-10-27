@@ -1,22 +1,43 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-27: CAIXA integrado; publicacao bloqueada por main concorrente
+## 2026-10-27: CAIXA integrado; publicacao bloqueada por gate externo
 
 - O PR #373 foi integrado como
-  `a0b4a38125a5ac38991ca7f3368bd6b9ce336648`. A CI de `push/main`
-  `40545177637` aprovou `validate`, `promotable-image` e `isolated-restore`; o
-  teste sintetico especifico do CAIXA dentro de `release-gates` tambem passou.
-- O job `release-gates` foi cancelado durante a inicializacao do Supabase porque
-  a `main` avancou concorrentemente para
-  `1b510d4c44098d78e7bcf157d94a44de253c37ba`, com mudanca de Agendamentos fora
-  deste escopo. A publicacao do SHA do CAIXA nao foi tentada: o coordenador
-  exige `main` exata e publicar o novo SHA tambem promoveria outra pagina sem a
-  validacao desta conversa.
-- Health publico observado em `2026-10-27T17:07:15.7858595Z`: HTTP 200,
-  `status=ok`, versao `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`. Portanto a
-  correcao esta integrada no Git, mas ainda nao esta comprovadamente publicada.
-  Reavaliar quando a CI integral do `main` entao vigente concluir os quatro jobs
-  e a promocao puder ser atribuida ao responsavel pelo lote concorrente.
+  `a0b4a38125a5ac38991ca7f3368bd6b9ce336648`. Depois do pedido explicito de
+  publicacao, o `main` vigente foi confirmado em
+  `075df4dbfd9b9a4bbbfb63c6b3fa860d86a286e3`.
+- A CI de `push/main` `40550745986` aprovou `validate`, `promotable-image` e
+  `isolated-restore`. O teste sintetico especifico do CAIXA dentro de
+  `release-gates` passou na execucao original e na repeticao do job falho.
+- `release-gates` falhou duas vezes, nos jobs `122356844108` e `122363139140`,
+  exclusivamente no teste visual externo do Dashboard. O botao `Excluir Media
+  do ano` interceptou o clique do controle `Ver historico mensal: Media do ano`
+  nos cenarios `restricted/dark/1920/imob-history-popup` e
+  `analysis/filters-history-goals-navigation`. Pela regra maxima de escopo, o
+  Dashboard nao foi alterado neste chat e a falha nao foi contornada.
+- O artefato `12754343591` foi baixado e conferido: digest do ZIP
+  `sha256:248f867724604c9c1529d848a1a481230559679da3648ebb27c23d8cb9daf257`,
+  SHA-256 interno `3b4d60e16a0d3e9b38acfc8c53a1eb953d3265e8dacfe945adc4562eee1c54f0`
+  e image ID esperado
+  `sha256:c6a051e124c7b334c61d81fcf18d2cb6d0eca16d0341c606584e6a8eb303d0e4`.
+  A transferencia para diretorio isolado da VPS preservou o checksum; a imagem
+  nao foi carregada nem ativada.
+- A publicacao nao foi tentada porque o coordenador exige os quatro jobs verdes.
+  A correcao CAIXA permanece integrada no Git, mas esta revisao ainda nao esta
+  comprovadamente publicada. Reavaliar em um chat proprio para o Dashboard ou
+  quando um novo `main` exato tiver CI integral aprovada.
+- Conferencia final em `2026-10-27T17:54:27.5088022Z`: health publico HTTP 200,
+  `status=ok`, versao `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`. O registro do
+  coordenador permaneceu no deployment `4d1479e7-e087-499e-92f8-d6aee906bf74`,
+  publicado em `2026-10-27T15:21:08.364Z`, sem deployment pendente. Portanto
+  nao houve mutacao de producao nesta tentativa.
+- Validacao documental local com Node 24.19.0/pnpm 11.20.0: lint sem erros e
+  com 44 avisos preexistentes, typecheck e build de 41 paginas/71 saidas
+  aprovados; Vitest aprovou 4.373 testes e ignorou 112. O comando integral de
+  testes parou depois em tres casos operacionais Meta Ads dependentes de modos
+  POSIX no host Windows; a CI Linux `40550745986` aprovou o job `validate` do
+  mesmo SHA. Essa limitacao local nao substitui nem corrige o bloqueio real do
+  `release-gates` descrito acima.
 - O sync do Obsidian continuou impedido por `Documento excede o limite de
 exportacao.`; os documentos versionados permanecem a fonte registrada.
 
