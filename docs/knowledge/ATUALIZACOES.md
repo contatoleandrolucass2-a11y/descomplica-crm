@@ -18,6 +18,19 @@
   obrigatórios permanecem na CI do PR. Resultados remotos devem ser consultados
   no SHA correspondente, sem inferir aprovação a partir desta nota.
 
+## 2026-10-27: preservacao visual da Visao Geral no editor de Agendamentos
+
+- A CI de `main` `40555682643` aprovou banco, autorizacao, E2E, Dashboard e os
+  demais jobs, mas bloqueou a publicacao por deriva visual exclusiva de `/app`:
+  os 11 comparativos da Visao Geral excederam o limite de pixels porque o novo
+  wrapper flexivel de apresentacao era aplicado tambem a cards sem configuracao.
+- O wrapper e suas regras flexiveis agora sao condicionais a existencia de
+  `card.presentation`. Cards antigos da Visao Geral preservam o DOM e o layout
+  anteriores; os ajustes de conteudo, fonte, cor, posicao e torres continuam
+  disponiveis somente quando configurados no editor de Agendamentos.
+- Banco e runtime de producao nao foram alterados: a falha do gate interrompeu
+  migration e promocao antes de qualquer mutacao remota.
+
 ## 2026-10-27: CAIXA integrado; publicacao bloqueada por gate externo
 
 - O PR #373 foi integrado como

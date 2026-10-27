@@ -206,6 +206,13 @@ describe("configurable dashboard canvas", () => {
       new URL("../lib/dashboard-canvas/ui/configurable/pdf.ts", import.meta.url),
       "utf8",
     );
+    const styles = readFileSync(
+      new URL(
+        "../lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas.module.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
     for (const label of ["Adicionar", "Organizar", "Desfazer", "Refazer", "Perfis", "Baixar PDF"]) {
       expect(source).toContain(label);
     }
@@ -213,6 +220,12 @@ describe("configurable dashboard canvas", () => {
     expect(source).toContain("/api/dashboard-profiles");
     expect(source).toContain("700");
     expect(source).toContain("data-dashboard-export-ignore");
+    expect(source).toContain("{card.presentation ? (");
+    expect(source).toContain(
+      '<div className={styles.cardContent}>{renderDashboardContent(card, size)}</div>',
+    );
+    expect(styles.match(/\.cardContent\s*\{[^}]*display:\s*flex/su)).toBeNull();
+    expect(styles).toMatch(/\.cardContentPresentation\s*\{[^}]*display:\s*flex/su);
     expect(canvas).toContain("captureTarget.setPointerCapture(event.pointerId)");
     expect(canvas).not.toContain("event.currentTarget.setPointerCapture(event.pointerId)");
     expect(pdf).not.toContain('querySelectorAll("button, input, select, textarea")');

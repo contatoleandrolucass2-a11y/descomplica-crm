@@ -235,10 +235,13 @@
 }
 
 .cardContent {
-  display: flex;
   min-width: 0;
   min-height: 0;
   overflow: auto;
+}
+
+.cardContentPresentation {
+  display: flex;
 }
 
 .presentationSurface {
