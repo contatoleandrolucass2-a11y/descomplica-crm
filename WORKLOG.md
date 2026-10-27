@@ -36,6 +36,11 @@ O E2E protegido de release foi atualizado para confirmar `Novo` já preenchido e
 travado no cenário inicial de imóvel na planta, sem tentar editar o campo que a
 nova regra deliberadamente desabilita.
 
+O segundo candidato protegido aprovou todo o E2E e a comparação com o canvas
+externo, mas a página passou a medir 1.204 px diante do teto histórico de 1.200
+px. O limite exclusivo da rota foi ajustado para 1.220 px, mantendo a referência,
+as tolerâncias de cor/bordas e os gates de overflow, Axe e responsividade.
+
 - 2026-10-26: alinhados os gates finais do canvas: o pgTAP agora cria sessões autenticadas ativas e inclui seus identificadores nos JWTs sintéticos exigidos pelas RPCs; a captura visual protegida valida os 13 cards pela nova grade configurável. Permanecem também corrigidas a permissão da função temporária do fixture e a ordenação da matriz de RPCs autenticadas.
 - 2026-10-26: tratados os três apontamentos funcionais da revisão do PR: a captura em PDF remove somente controles do editor, a troca do perfil padrão reconcilia a versão incrementada do padrão anterior e o arraste captura o ponteiro na grade estável, inclusive fora dos limites do card.
 

@@ -4201,3 +4201,8 @@ dependente da autorização específica aplicável.
   tentava editar `Condição do imóvel` depois de a nova regra tê-la preenchido
   como `Novo` e desabilitado para imóvel na planta. O teste foi alinhado para
   conferir o valor e o estado travado; nenhuma regra financeira foi relaxada.
+- O segundo candidato protegido aprovou o E2E e a comparação cromática/estrutural
+  com o canvas externo. A única reprovação foi a altura de 1.204 px diante do
+  teto histórico de 1.200 px da rota, após incluir as orientações automáticas.
+  O teto exclusivo foi ajustado para 1.220 px; referência, tolerâncias de cor e
+  bordas, baseline, Axe, overflow e demais rotas permanecem inalterados.
