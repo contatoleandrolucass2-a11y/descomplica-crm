@@ -4059,3 +4059,32 @@ dependente da autorização específica aplicável.
   SHA publicado é a evidência integral. O `knowledge:sync` final foi tentado e
   permaneceu bloqueado por `Documento excede o limite de exportacao.`; nenhuma
   redução do documento ou alteração do vault foi feita.
+
+## 2026-10-27 — referências visuais do canvas autenticado
+
+- A CI de `main` `40438827767`, no SHA exato
+  `4d3557d5f0a147535cce6e8668fb25eab70f61a2`, aprovou `validate`,
+  `isolated-restore` e `promotable-image`. O `release-gates` falhou somente por
+  divergência em 22 capturas das duas rotas alteradas pelo canvas: `/app` e
+  `/app/etapas/agendamentos`.
+- O artefato autenticado `12707058881`, digest
+  `83d8733eee69b847487efe4be1602feffafd3ffc87a8a8359d53128b8afb0a43`,
+  comprovou 154/154 rotas, 88/88 combinações de tema, 242/242 auditorias Axe,
+  teclado e zoom aprovados. Das 242 imagens, 220 permaneceram idênticas.
+- Foram adotadas somente as 22 referências revisadas das duas rotas, com
+  conferência de hash e tamanho, registro de proveniência no manifesto e sem
+  alterar limiares, páginas externas ao escopo ou dados de produção. A revisão
+  cobriu desktop nos temas claro, médio e escuro e celular nos temas claro e
+  escuro, sem corte, sobreposição ou rolagem horizontal.
+- A atualização oficial local do baseline não pôde subir o Supabase porque este
+  host não possui Docker nem Podman. Foi usado o procedimento parcial já
+  registrado no projeto, baseado no artefato autenticado da CI e limitado às
+  imagens divergentes. Uma nova CI integral continua obrigatória antes do merge,
+  da migration e da publicação.
+- O fixture autenticado de Agendamentos apresentou o estado vazio
+  `Dados analíticos indisponíveis`; portanto, essa evidência confirma layout e
+  responsividade do estado protegido, mas não substitui o smoke pós-publicação
+  com dados reais.
+- O `knowledge:sync` continua indisponível pela falha preexistente
+  `Documento excede o limite de exportacao.`; a sincronização com o Obsidian
+  permanece pendente e não é declarada como concluída.

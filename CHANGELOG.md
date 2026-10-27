@@ -1,5 +1,6 @@
 # Changelog
 
+- Atualiza somente as 22 referências visuais de Visão Geral e Agendamentos a partir do artefato autenticado da CI, preservando as demais 220 capturas.
 - Atualiza o inventário do ensaio de restauração para os 2.290 testes pgTAP após a nova asserção de volatilidade do validador.
 - Alinha a volatilidade do validador SQL dos perfis do dashboard às funções estáveis usadas na assinatura normalizada dos cards.
 - Corrige os gates dos perfis de canvas ao reproduzir uma sessão autenticada ativa no pgTAP e alinhar a captura visual protegida à grade configurável da Visão Geral.
