@@ -2,6 +2,7 @@
 
 - 2026-10-27: implementado o menu Links Úteis com hub e sete subpáginas, catálogo versionado, permissões independentes, herança inicial do Dashboard e 28 testes dedicados; Ranking Geral foi excluído conforme solicitado.
 - 2026-10-27: atualizado o contrato do gate visual para validar o nono item raiz Links Úteis, seu submenu completo, acessibilidade e percurso real por teclado.
+- 2026-10-27: corrigido o escopo da toolbar oculta de cards para afetar somente Agendamentos; a matriz local do Dashboard aprovou 267 verificações de temas, viewports, acessibilidade e histórico.
 - 2026-10-27: implementado exclusivamente em `/app/etapas/agendamentos` o editor administrativo compartilhado dos cards e gráficos, com controles de dimensão, conteúdo, tipografia, posição, cores e torres; usuários não administradores permanecem em leitura.
 - 2026-10-27: corrigidos no Simulador CAIXA o prazo maximo reativo, a sinalizacao automatica da elegibilidade ao subsidio e o layout responsivo alinhado aos tokens de Agendamentos; o valor do subsidio continua dependente de confirmacao oficial quando faltam os fatores tecnicos do MFOM.
 - 2026-10-27: incorporadas somente as 11 referencias visuais do CAIXA aprovadas no run protegido `40537724784`, com 38 entradas de evidencia e preservacao das outras 231 imagens.
