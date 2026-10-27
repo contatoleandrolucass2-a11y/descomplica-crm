@@ -4088,3 +4088,55 @@ dependente da autorização específica aplicável.
 - O `knowledge:sync` continua indisponível pela falha preexistente
   `Documento excede o limite de exportacao.`; a sincronização com o Obsidian
   permanece pendente e não é declarada como concluída.
+
+## 2026-10-27 — Canvas de Visão Geral e Agendamentos publicado
+
+- O PR #369 foi integrado sem bypass no `main` como
+  `897d0cf9c8a91b197a91c742c3799968c7dcc61c`. A CI push/main
+  `40446127865` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`; a matriz protegida confirmou 154 rotas, 88 combinações
+  de tema, 242 auditorias Axe, teclado e zoom. Fonte:
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40446127865.
+- A migration aditiva `dashboard_profiles` foi aplicada no projeto Supabase
+  `hnncxuerlcsaahdxoswb` após a CI verde. A conferência encontrou a tabela
+  vazia, RLS ativa e forçada, duas policies, seis RPCs e seis grants de execução
+  somente ao papel autenticado. Nenhuma linha anterior foi reescrita ou
+  removida. Os advisors não apontaram falta de RLS/policy nessa tabela; os
+  avisos globais preexistentes e o índice sugerido para a chave estrangeira de
+  `page_key` ficam fora do escopo desta publicação e não alteram o contrato
+  validado pelo pgTAP.
+- Artefato imutável `12708028636`, nome
+  `promotable-image-897d0cf9c8a91b197a91c742c3799968c7dcc61c`, digest do
+  artifact `23e4fba0a27e60408a63042cdb5fefb3e5cee0d34b56664609db6f78152591e2`.
+  `image.tar.gz` conferiu com SHA-256
+  `c569e73511cf57801d087866246ffa6338aea3ba2e852a4bc353daf3cc1388f3`.
+  O ID de configuração da CI
+  `sha256:23fa4850774188822a2821caef1278a0afa0ce81f6067f80ff8be37815bffdc1`
+  e o manifesto no host
+  `sha256:716c83bf5718cae2a5d14e28dc400391e38b5569547c1c8a2e7eb5c982dacaee`
+  foram reconciliados pelo índice, hashes de todos os blobs, revisão, plataforma
+  `amd64/linux`, 11 camadas e `image:prove` nos dois perfis, sem rebuild ou
+  retag.
+- Checkout remoto limpo em
+  `/srv/descomplica-crm-releases/897d0cf9c8a91b197a91c742c3799968c7dcc61c`,
+  com Node 24.19.0 e pnpm 11.20.0. Backup privado do env e do ledger anterior em
+  `/var/backups/descomplica-crm/canvas-897d0cf9-20261027T044637Z`; imagem
+  anterior `sha256:41d65835f860fcb08797add395276711a9eb5e0bf39ce5b8ed938be3c1bc962c`
+  preservada para recuperação.
+- Publicação executada exclusivamente por `pnpm release:production`, com as
+  três travas, consulta de baseline no próprio minuto, CI/main exatos e CAS.
+  Resultado `deployed`: deployment
+  `61163953-0645-423b-ab6a-ea62d18edf27`, SHA e imagem candidatos,
+  `deployedAt=2026-10-27T04:46:55.929Z` (01:46:55 America/Sao_Paulo) e
+  `pendingDeploymentId=null`.
+- Pós-publicação em `2026-10-27T04:47:06.0919180Z`: health público respondeu
+  `HTTP 200`, `status=ok` e a versão exata publicada; acessos anônimos a `/app`
+  e `/app/etapas/agendamentos` responderam 307 para `/login`. O smoke
+  autenticado recarregou Agendamentos com os controles de adicionar, organizar,
+  desfazer/refazer, perfis, PDF, mover, editar, expandir, excluir e redimensionar;
+  a Visão Geral exibiu `Dashboard | Resumo Geral` e os mesmos controles de
+  canvas. As duas páginas ficaram sem alertas de interface e sem erros de
+  console.
+- O `knowledge:sync` final permanece sujeito à falha preexistente de documento
+  acima do limite de exportação. O resultado será registrado como pendência,
+  sem reduzir a proteção, truncar autoridade ou declarar sincronização concluída.
