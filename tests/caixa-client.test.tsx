@@ -65,6 +65,10 @@ describe("CAIXA dedicated client", () => {
       "Já recebeu subsídio?",
       "Tem fator social? (informativo)",
       "Imóvel na planta?",
+      "Condição do imóvel",
+      "Teto indicativo de renda",
+      "30% automático",
+      "Limite municipal do imóvel",
       "Calcular simulação",
       "Avaliação confirmada pela CAIXA",
       "Desconto complemento FGTS confirmado",
@@ -72,13 +76,13 @@ describe("CAIXA dedicated client", () => {
       "Cota aprovada pela CAIXA",
       "Seguro MIP",
       "Seguro DFI",
-      "Teto indicativo de renda",
-      "Simular MCMV Classe Média (sem subsídio)",
       "Não substitui proposta bancária",
     ])
       expect(markup).toContain(label);
     expect(markup).not.toContain("Resumo financeiro");
     expect(markup).not.toContain("Cálculo temporariamente indisponível");
+    expect(markup).not.toContain("Limite municipal confirmado do imóvel");
+    expect(markup).not.toContain("Teto indicativo de renda (%)");
     expect(markup).toContain('href="https://simuladorhabitacao.caixa.gov.br/"');
   });
 
@@ -208,8 +212,6 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await page.getByRole("combobox", { name: "Cidade *" }).fill("São Paulo");
       await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
       await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
-      await page.getByText("Parâmetros confirmados e valores opcionais", { exact: true }).click();
-      await page.getByLabel("Condição do imóvel", { exact: false }).selectOption("new");
     }
     async function auditCurrentTab(name: string) {
       const directory = resolve("private-data/caixa-qa");
@@ -346,9 +348,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       ).toBeVisible();
       await browserExpect(page.getByText(/seguros de referência/).first()).toBeVisible();
       await auditCurrentTab("resultado");
-      await page
-        .getByRole("checkbox", { name: "Simular MCMV Classe Média (sem subsídio)", exact: true })
-        .check();
+      await page.getByLabel("Valor do imóvel *", { exact: false }).fill("45000000");
       await page.getByRole("button", { name: "Calcular simulação", exact: true }).click();
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
         "MCMV Classe Média",
@@ -390,6 +390,57 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByRole("button", { name: "Remover", exact: true }).first(),
       ).toBeEnabled();
       await auditCurrentTab("utilitarios");
+      expect(errors).toEqual([]);
+    });
+    it("automates municipal limit, property condition, rate band and age term", async () => {
+      await open();
+      const condition = page.locator(".caixa-property-condition-group select");
+      await browserExpect(condition).toBeDisabled();
+      await browserExpect(condition).toHaveValue("new");
+      await page
+        .getByRole("group", { name: "Imóvel na planta?" })
+        .getByRole("button", { name: "Não", exact: true })
+        .click();
+      await browserExpect(condition).toBeEnabled();
+      await browserExpect(condition).toHaveValue("");
+      await browserExpect(condition).toHaveAttribute("required", "");
+      await condition.selectOption("used");
+      await page.getByLabel("Valor do imóvel *", { exact: false }).fill("45000000");
+      await page.getByText("Parâmetros confirmados e valores opcionais", { exact: true }).click();
+      const confirmedParameters = page.locator(".caixa-confirmed-parameters");
+      await browserExpect(
+        confirmedParameters.getByLabel("Desconto complemento FGTS confirmado", { exact: true }),
+      ).toHaveCount(0);
+      await browserExpect(
+        confirmedParameters
+          .locator("label")
+          .filter({ hasText: "Cota aprovada pela CAIXA (%)" })
+          .locator("input"),
+      ).toHaveAttribute("max", "60");
+      await page
+        .getByRole("group", { name: "Imóvel na planta?" })
+        .getByRole("button", { name: "Sim", exact: true })
+        .click();
+      await browserExpect(condition).toBeDisabled();
+      await browserExpect(condition).toHaveValue("new");
+
+      await page.getByLabel("Renda familiar bruta", { exact: false }).fill("400000");
+      await page.getByLabel("Valor do imóvel *", { exact: false }).fill("27600000");
+      await page.getByLabel("Data de nascimento *", { exact: false }).fill("1955-01-22");
+      await page.getByRole("combobox", { name: "Cidade *" }).fill("São Paulo");
+      await browserExpect(page.locator(".caixa-city-picker.open")).toBeVisible();
+      await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
+      await browserExpect(page.getByText("R$ 275.000,00", { exact: true })).toBeVisible();
+      await browserExpect(page.getByText("R$ 1.200,00", { exact: true })).toBeVisible();
+      await browserExpect(page.locator(".caixa-term-field input")).toHaveValue("105");
+      await page.getByRole("button", { name: "Calcular simulação", exact: true }).click();
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
+        "MCMV Faixa 3 por valor do imóvel",
+      );
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
+        "taxa efetiva de 8,4722% a.a.",
+      );
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText("105 meses");
       expect(errors).toEqual([]);
     });
     it("applies the SBPE SAC ceiling and removes MCMV-only values", async () => {

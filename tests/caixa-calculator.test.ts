@@ -8,10 +8,13 @@ import {
   calculateSacFirst,
   estimateConstructionInterest,
   getHousingRate,
+  getMaximumFinancingQuota,
   getMaximumTerm,
   getMcmvBand,
+  getMunicipalLimit,
   type HousingInput,
 } from "@/lib/crm/simulators/caixa";
+import { CAIXA_CITIES } from "@/lib/crm/simulators/caixa-reference-data";
 
 const base: HousingInput = {
   income: 6000,
@@ -41,7 +44,12 @@ function success(input: { [K in keyof HousingInput]?: HousingInput[K] | undefine
   return result;
 }
 
-describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026", () => {
+describe("CAIXA mathematics and official policy boundaries, consulted through 27/10/2026", () => {
+  it("keeps the 5,571 official municipal limits complete and bounded", () => {
+    expect(CAIXA_CITIES).toHaveLength(5571);
+    expect(new Set(CAIXA_CITIES.map((city) => `${city.u}|${city.n}`)).size).toBe(5571);
+    expect(CAIXA_CITIES.every((city) => city.l >= 210000 && city.l <= 275000)).toBe(true);
+  });
   it.each([
     [3200, "Faixa 1"],
     [3200.01, "Faixa 2"],
@@ -77,6 +85,14 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
     expect(getHousingRate({ income: 10000, state: "BA", hasFgts36: true })).toBe(10);
     expect(getHousingRate({ income: 6000, product: "sbpe" })).toBeNaN();
     expect(getHousingRate({ income: 6000, previousSubsidy: true })).toBeNaN();
+    expect(
+      getHousingRate({
+        income: 4000,
+        state: "SP",
+        city: "São Paulo",
+        propertyValue: 275000.01,
+      }),
+    ).toBe(8.16);
   });
   it("converts nominal monthly and effective annual rates without confusing CET", () => {
     const result = success();
@@ -145,6 +161,15 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
   });
   it("enforces class middle used-property quota and income limits", () => {
     expect(
+      getMaximumFinancingQuota({
+        income: 4000,
+        propertyValue: 450000,
+        propertyCondition: "used",
+        state: "SP",
+        system: "sac",
+      }),
+    ).toBe(0.6);
+    expect(
       success({ income: 10000, propertyValue: 500000, propertyCondition: "used" }).financingQuota,
     ).toBe(0.6);
     expect(
@@ -183,14 +208,36 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
       }).ok,
     ).toBe(false);
   });
-  it("does not guess municipal ceilings, subsidy or insurance", () => {
-    expect(calculateHousingSimulation({ ...base, income: 5000, propertyValue: 240000 }).ok).toBe(
-      false,
-    );
-    expect(success({ income: 5000, cityLimit: 275000 }).ok).toBe(true);
+  it("uses the official municipal limit and raises the rate band when the property requires it", () => {
+    expect(getMunicipalLimit("São Paulo", "SP")).toBe(275000);
+    expect(getMunicipalLimit("Campinas", "SP")).toBe(270000);
+    for (const [city, state] of [
+      ["Arez", "RN"],
+      ["Assú", "RN"],
+      ["Barão do Monte Alto", "MG"],
+      ["Graccho Cardoso", "SE"],
+      ["Santo Antônio de Leverger", "MT"],
+      ["São Luiz do Anauá", "RR"],
+    ] as const)
+      expect(getMunicipalLimit(city, state)).toBe(210000);
+    expect(success({ income: 5000, propertyValue: 240000 }).rate).toBe(7);
+    expect(success({ income: 4000, propertyValue: 275000 })).toMatchObject({
+      rate: 6,
+      rateAdjustedByProperty: false,
+      municipalLimit: 275000,
+    });
+    expect(success({ income: 4000, propertyValue: 275000.01 })).toMatchObject({
+      rate: 8.16,
+      rateAdjustedByProperty: true,
+      rateBand: "MCMV Faixa 3 por valor do imóvel",
+    });
+    expect(success({ income: 4000, propertyValue: 400000 }).rate).toBe(8.16);
+    expect(success({ income: 4000, propertyValue: 400000.01 })).toMatchObject({
+      middleClass: true,
+      rate: 10,
+    });
     const result = success({
       income: 5000,
-      cityLimit: 275000,
       confirmedSubsidy: undefined,
       mipMonthly: undefined,
       dfiMonthly: undefined,
@@ -262,7 +309,11 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
       }).effectiveRate,
     ).toBeCloseTo(13.4, 10);
   });
-  it("respects income ceiling after fees and never rounds financing upward", () => {
+  it("applies the automatic 30% income ceiling and never rounds financing upward", () => {
+    expect(success({ income: 4000 }).maximumPaymentByIncome).toBe(1200);
+    expect(calculateHousingSimulation({ ...base, income: 4000, approvedPayment: 1200.01 }).ok).toBe(
+      false,
+    );
     const result = success({ approvedPayment: 1000, ownFunds: 0 });
     expect(result.firstPayment).toBeLessThanOrEqual(1000);
     expect(result.financing).toBeLessThanOrEqual(result.maximumFinancingByIncome);
@@ -293,7 +344,7 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
   ])("rejects invalid eligibility inputs %j", (input) =>
     expect(calculateHousingSimulation({ ...base, ...input }).ok).toBe(false),
   );
-  it("checks birthday and precise month boundaries without silent clamping", () => {
+  it("matches CAIXA calendar-month age limits and clamps excessive terms", () => {
     expect(calculateAge("1990-10-26", "2026-10-25")).toBe(35);
     expect(calculateAge("1990-10-25", "2026-10-25")).toBe(36);
     expect(getMaximumTerm({ birthDate: "1946-04-25", asOf: "2026-10-25" })).toBe(0);
@@ -313,7 +364,16 @@ describe("CAIXA mathematics and official policy boundaries, consulted 25/10/2026
         inConstruction: true,
         constructionMonths: 24,
       }),
-    ).toBe(140);
+    ).toBe(141);
+    const adjusted = success({
+      birthDate: "1955-01-22",
+      asOf: "2026-10-27",
+      term: 420,
+    });
+    expect(adjusted).toMatchObject({ term: 105, maximumTerm: 105 });
+    expect(adjusted.warnings.join(" ")).toContain(
+      "Prazo ajustado automaticamente de 420 para 105 meses",
+    );
   });
 });
 describe("CAIXA utilities with synthetic data", () => {
@@ -342,7 +402,7 @@ describe("CAIXA utilities with synthetic data", () => {
         propertyValue: 1e308,
       }).ok,
     ).toBe(false);
-    expect(getMaximumTerm({ birthDate: "1946-05-01", asOf: "2026-10-25" })).toBe(0);
+    expect(getMaximumTerm({ birthDate: "1946-05-01", asOf: "2026-10-25" })).toBe(1);
   });
   it("compares extra amortization against a zero-contribution baseline", () => {
     expect(

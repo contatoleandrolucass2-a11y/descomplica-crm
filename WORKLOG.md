@@ -4,6 +4,34 @@
 - 2026-10-27: adotadas 22 referências visuais revisadas de `/app` e `/app/etapas/agendamentos` a partir da CI `40438827767`, artefato `12707058881`; 154 rotas, 88 combinações de tema, 242 auditorias Axe, teclado e zoom passaram, e as demais 220 imagens foram preservadas.
 - 2026-10-26: o inventário protegido do ensaio de restauração foi atualizado de 2.289 para 2.290 testes pgTAP, refletindo a nova asserção de volatilidade sem reduzir cobertura.
 - 2026-10-26: o segundo ensaio isolado alcançou o lint integral do banco e identificou que o validador de documentos estava declarado `IMMUTABLE` apesar de usar funções de texto `STABLE`; a declaração foi corrigida para `STABLE`, a variável sem uso foi removida e o pgTAP passou a fixar esse contrato.
+
+## 2026-10-27 — Automação da jornada do Simulador CAIXA
+
+O formulário deixou de exigir que o usuário abra os parâmetros opcionais para
+informar o teto de renda, o limite municipal ou a condição de um imóvel na
+planta. O teto de 30% é calculado e exibido na primeira etapa. A seleção de
+cidade/UF consulta localmente os 5.571 limites importados da planilha oficial do
+Agente Operador do FGTS, com vigência em 01/01/2026 e aliases explícitos para
+seis divergências históricas de nomes.
+
+A calculadora pública CAIXA v1.16.0.2 foi confrontada com dados fictícios. Renda
+de R$ 4.000 e imóvel de R$ 276.000 resultaram em 8,47% efetivos, Price, parcela
+de R$ 1.200 e 420 meses. O motor passou a usar a primeira faixa que comporte
+renda e valor: acima do limite municipal e até R$ 400 mil usa a taxa nominal de
+8,16%; acima de R$ 400 mil e até R$ 600 mil usa Classe Média a 10%.
+
+O prazo agora segue a diferença de meses-calendário observada na calculadora
+pública. Para nascimento em 22/01/1955, a data-base de 27/10/2026 produz 105
+meses; pedidos maiores são reduzidos com aviso. O prazo de obra só é subtraído
+quando informado. A condição do imóvel fica em `Novo` e desabilitada para planta;
+fora da planta, é limpa, habilitada e obrigatória.
+
+Os testes unitários cobrem limites municipais, aliases, 30%, promoção de taxa,
+limites de R$ 400 mil/R$ 600 mil e prazo reduzido. A jornada de navegador cobre
+os estados planta/condição, o cenário oficial, os três temas, desktop, tablet,
+celular, Axe e overflow. Publicação e evidências finais permanecem condicionadas
+aos gates integrais do projeto.
+
 - 2026-10-26: alinhados os gates finais do canvas: o pgTAP agora cria sessões autenticadas ativas e inclui seus identificadores nos JWTs sintéticos exigidos pelas RPCs; a captura visual protegida valida os 13 cards pela nova grade configurável. Permanecem também corrigidas a permissão da função temporária do fixture e a ordenação da matriz de RPCs autenticadas.
 - 2026-10-26: tratados os três apontamentos funcionais da revisão do PR: a captura em PDF remove somente controles do editor, a troca do perfil padrão reconcilia a versão incrementada do padrão anterior e o arraste captura o ponteiro na grade estável, inclusive fora dos limites do card.
 

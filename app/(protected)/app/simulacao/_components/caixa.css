@@ -2945,11 +2945,62 @@
 }
 
 .caixa-page-shell .caixa-binary-grid {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr)) minmax(0, 2fr);
   gap: 10px;
   padding: 0;
   border: 0;
   background: transparent;
+}
+
+.caixa-page-shell .caixa-automatic-values {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.caixa-page-shell .caixa-automatic-values > div {
+  min-width: 0;
+  padding: 10px 12px;
+  display: grid;
+  gap: 2px;
+  color: var(--caixa-layout-ink);
+  border: 1px solid var(--caixa-layout-line);
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--caixa-layout-accent) 5%, var(--caixa-layout-input));
+}
+
+.caixa-page-shell .caixa-automatic-values span {
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.caixa-page-shell .caixa-automatic-values strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.caixa-page-shell .caixa-automatic-values small {
+  color: var(--caixa-layout-muted);
+}
+
+.caixa-page-shell .caixa-property-condition-group {
+  min-width: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.caixa-page-shell .caixa-property-condition-group > .caixa-field {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.caixa-page-shell .caixa-property-condition-group select:disabled {
+  color: var(--caixa-layout-muted);
+  cursor: not-allowed;
+  opacity: 1;
+  background: color-mix(in srgb, var(--caixa-layout-muted) 8%, var(--caixa-layout-input));
 }
 
 .caixa-page-shell .caixa-primary-grid > .caixa-field,
@@ -3123,6 +3174,10 @@
   .caixa-page-shell .caixa-binary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  .caixa-page-shell .caixa-property-condition-group {
+    grid-column: 1 / -1;
+  }
 }
 
 @media (max-width: 760px) {
@@ -3150,6 +3205,12 @@
   .caixa-page-shell .caixa-primary-grid,
   .caixa-page-shell .caixa-secondary-grid,
   .caixa-page-shell .caixa-binary-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .caixa-page-shell .caixa-automatic-values,
+  .caixa-page-shell .caixa-property-condition-group {
     grid-template-columns: minmax(0, 1fr);
   }
 

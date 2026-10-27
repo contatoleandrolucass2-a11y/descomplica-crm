@@ -1,6 +1,6 @@
 # Simulação CAIXA: referência, matemática e limites
 
-Consultas: 25 e 26/10/2026, America/Sao_Paulo. Escopo exclusivo:
+Consultas: 25, 26 e 27/10/2026, America/Sao_Paulo. Escopo exclusivo:
 `/app/simulacao/caixa`.
 A origem `https://descomplicapro.com.br/simulacao/caixa` foi consultada somente
 por leitura pública. Nenhum arquivo ou configuração daquele site foi alterado.
@@ -10,7 +10,8 @@ por leitura pública. Nenhum arquivo ou configuração daquele site foi alterado
 Formulário cliente/imóvel, abas Simulador, Documentos (perfil e duas fases),
 Diagnóstico e Utilitários (amortização extraordinária e tempo de FGTS), resumo,
 impressão, compartilhamento e cenário de juros durante a obra. Conteúdo público
-de municípios foi extraído somente como nome e UF, sem fatores financeiros.
+de municípios foi complementado com os limites geográficos da planilha oficial
+`TABELA_MUNICIPIOS_VIGENCIA_01JAN2026.xlsx`, sem presumir subsídio ou aprovação.
 O shell autenticado do CRM permanece único. Nenhuma proposta é salva remotamente.
 
 A réplica preserva o fluxo e o conteúdo útil; não perpetua uma informação
@@ -34,6 +35,12 @@ negação explícita não recebem acesso. A API de simulador oficial da CAIXA pe
 fechada porque não possui contrato de entrada/saída nem calculadora server-side.
 Essa separação impede que a liberação da interface seja interpretada como uma
 integração bancária ou aprovação de crédito.
+
+O formulário principal aplica automaticamente 30% da renda como teto indicativo,
+mostra o limite municipal ao selecionar cidade/UF e reduz o prazo ao máximo
+permitido pela idade. `Imóvel na planta = Sim` fixa a condição como `Novo`; ao
+selecionar `Não`, a condição é limpa e o usuário precisa escolher `Novo` ou
+`Usado`. Esses valores não precisam mais ser procurados no bloco opcional.
 
 ## Autoridades consultadas
 
@@ -81,6 +88,13 @@ integração bancária ou aprovação de crédito.
    fictícios; a simulação completa exige CPF, celular, consentimento e código de
    verificação, portanto não foi submetida. Não foram acessados dados privados nem
    contratada operação.
+10. [Tabela de municípios do Agente Operador do FGTS, vigência 01/01/2026](https://www.caixa.gov.br/Downloads/fgts-tabela-municipios/TABELA_MUNICIPIOS_VIGENCIA_01JAN2026.xlsx),
+    ligada pela página vigente do MCID. Foram importados 5.571 municípios, com
+    limites da menor faixa entre R$ 210 mil e R$ 275 mil. A planilha ainda usa
+    títulos de colunas anteriores para renda e Classe Média; por isso ela é
+    autoridade apenas para o recorte geográfico, enquanto renda, tetos nacionais
+    e taxas seguem as fontes de 2026 acima. Seis diferenças históricas de nomes
+    na lista local são conciliadas por aliases explícitos, sem fallback silencioso.
 
 ### Referência pública da calculadora rápida
 
@@ -108,6 +122,12 @@ Cenários fictícios observados na interface pública, em 26/10/2026:
 - nascimento 15/03/1991, renda R$ 3.000, imóvel R$ 210.000: financiamento
   R$ 161.859,07, taxa efetiva 5,38% a.a., Price, primeira parcela R$ 900 e
   420 meses.
+- nascimento 22/01/1987, renda R$ 4.000, imóvel R$ 276.000: taxa efetiva
+  8,47% a.a. (nominal equivalente de 8,16%), Price, primeira parcela de
+  R$ 1.200 e 420 meses. O valor acima do limite inferior promove a estimativa
+  para a primeira linha que comporte renda e imóvel, sem bloquear a simulação;
+- nascimento 22/01/1955, mesma renda e imóvel: taxa efetiva 8,47% a.a., Price,
+  primeira parcela de R$ 1.200 e prazo máximo de 105 meses.
 
 A calculadora pública declara que são parâmetros médios e que a condição final
 depende da simulação completa e análise. Por isso fixtures de regressão aceitam a
@@ -130,6 +150,17 @@ tarifa) / fator financeiro`. Quando a estimativa rápida está ativa e o MIP dep
 - A quota incide sobre `min(valor de compra, avaliação CAIXA)`. Sem avaliação, a
   página usa provisoriamente o preço e exibe a pendência. SBPE usa teto de 90% SAC
   e 80% Price; uma cota individual confirmada pode ser menor.
+- O comprometimento padrão é `renda × 30%`. Uma prestação aprovada informada pode
+  reduzir o valor usado, nunca ultrapassar esse teto indicativo.
+- Nas Faixas 1 e 2, o limite municipal é obtido por cidade/UF. Quando o imóvel
+  ultrapassa esse limite e não supera R$ 400 mil, a estimativa rápida aplica a
+  linha da Faixa 3: 8,16% nominal, ou 7,66% para cotista elegível. Acima de
+  R$ 400 mil e até R$ 600 mil, aplica-se Classe Média a 10% nominal. O resultado
+  identifica expressamente quando a taxa foi elevada pelo valor do imóvel.
+- O prazo máximo é o menor entre 420 meses e o intervalo, em meses-calendário,
+  até o proponente mais velho completar 80 anos e 6 meses, menos a obra somente
+  quando seu prazo foi informado. Prazo solicitado acima do máximo é reduzido e
+  avisado, como na calculadora pública; limite igual a zero continua inválido.
 - Entrada adicional: `max(0, imóvel − financiamento − recursos − FGTS − desconto
 complemento − aporte público confirmado)`. Desconto FGTS e aporte MCMV Cidades são
   campos distintos; recursos próprios informados já são parte da entrada.
@@ -218,9 +249,9 @@ informado pelo usuário, sem decidir crédito nem garantir aprovação.
 
 A [IN17 compilada, alterada pela IN4 de 08/04/2026](https://www.gov.br/cidades/pt-br/acesso-a-informacao/institucional/base-juridica/instrucoes-normativas/20260409_InstruoNormativan.17_Compilada.pdf),
 art. 3, define Classe Média com renda limitada a R$ 13 mil, sem piso de
-R$ 9.600. Por isso a página permite selecionar esse enquadramento inclusive
-para renda menor, sem subsídio complemento, com taxa de referência de 10%.
-Imóvel acima de R$ 400 mil ou renda acima de R$ 9.600 identificam esse cenário
+R$ 9.600. Por isso o enquadramento é automático inclusive para renda menor,
+sem exigir uma escolha escondida no bloco opcional, com taxa de referência de
+10%. Imóvel acima de R$ 400 mil ou renda acima de R$ 9.600 identificam esse cenário
 expressamente no resultado, respeitando o teto de R$ 600 mil e a cota de usado
 Sul/Sudeste. Não declarar uma família inelegível a todas as modalidades MCMV
 apenas por superar o teto de imóvel da Faixa 3.

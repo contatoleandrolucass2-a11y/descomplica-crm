@@ -50,6 +50,9 @@ export const CAIXA_SOURCES = [
 const STATES = new Set(
   "AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO".split(" "),
 );
+const MUNICIPAL_LIMITS = new Map(
+  CAIXA_CITIES.map((city) => [`${city.u}|${city.n}`, city.l] as const),
+);
 const NORTH_NORTHEAST = new Set("AC AL AM AP BA CE MA PA PB PE PI RN RO RR SE TO".split(" "));
 const SOUTH_SOUTHEAST = new Set("ES MG RJ SP PR RS SC".split(" "));
 // Nominal annual percentages. MCID table consulted 25/10/2026; FGTS discount: 0.5 p.p.
@@ -119,6 +122,11 @@ function monthsBetween(start: Date, end: Date) {
     (end.getUTCDate() < start.getUTCDate() ? 1 : 0)
   );
 }
+function calendarMonthsBetween(start: Date, end: Date) {
+  return (
+    (end.getUTCFullYear() - start.getUTCFullYear()) * 12 + end.getUTCMonth() - start.getUTCMonth()
+  );
+}
 export function calculateAge(birthDate: string, asOf?: string | Date): number {
   const birth = dateOnly(birthDate),
     reference = referenceDate(asOf);
@@ -155,7 +163,11 @@ export function getMaximumTerm({
     new Date(Date.UTC(expiry.getUTCFullYear(), expiry.getUTCMonth() + 1, 0)).getUTCDate(),
   );
   expiry.setUTCDate(expiryDay);
-  return Math.max(0, Math.min(productLimit, monthsBetween(reference, expiry) - buildingPeriod));
+  // A calculadora pública CAIXA v1.16.0.2 arredonda o prazo pelo mês de vencimento.
+  return Math.max(
+    0,
+    Math.min(productLimit, calendarMonthsBetween(reference, expiry) - buildingPeriod),
+  );
 }
 export function getMcmvBand(income: number) {
   if (income <= 3200) return "Faixa 1";
@@ -163,6 +175,9 @@ export function getMcmvBand(income: number) {
   if (income <= 9600) return "Faixa 3";
   if (income <= 13000) return "Classe Média";
   return "SBPE";
+}
+export function getMunicipalLimit(city: string | undefined, state: string) {
+  return city?.trim() ? MUNICIPAL_LIMITS.get(`${state}|${city.trim()}`) : undefined;
 }
 export function getHousingRate({
   income,
@@ -173,14 +188,39 @@ export function getHousingRate({
   nominalRate,
   middleClass = false,
   propertyValue = 0,
+  city,
+  cityLimit,
 }: Partial<HousingInput> & { income: number }) {
   if (nominalRate !== undefined) return finiteNonnegative(nominalRate) ? nominalRate : NaN;
   if (product === "sbpe" || previousSubsidy || income <= 0 || income > 13000 || !STATES.has(state))
     return NaN;
-  const row = MCMV_RATES.find(([maximum]) => income <= maximum);
+  const municipalLimit = cityLimit ?? getMunicipalLimit(city, state);
+  const propertyPromotesToFaixa3 =
+    income <= 5000 &&
+    propertyValue > 0 &&
+    municipalLimit !== undefined &&
+    propertyValue > municipalLimit &&
+    propertyValue <= 400000;
+  const rateIncome = propertyPromotesToFaixa3 ? 9600 : income;
+  const row = MCMV_RATES.find(([maximum]) => rateIncome <= maximum);
   if (middleClass || propertyValue > 400000 || income > 9600) return 10;
   if (!row) return NaN;
   return row[NORTH_NORTHEAST.has(state) ? 1 : 2] - (hasFgts36 && income <= 9600 ? 0.5 : 0);
+}
+export function getMaximumFinancingQuota({
+  product = "mcmv",
+  system = "price",
+  state = "SP",
+  propertyCondition,
+  middleClass = false,
+  income = 0,
+  propertyValue = 0,
+}: Partial<HousingInput>) {
+  const automaticMiddleClass =
+    product === "mcmv" && (middleClass || income > 9600 || propertyValue > 400000);
+  if (automaticMiddleClass && propertyCondition === "used" && SOUTH_SOUTHEAST.has(state))
+    return 0.6;
+  return system === "sac" ? 0.9 : 0.8;
 }
 export function calculatePrice(principal: number, annualRate: number, term: number) {
   if (!principal || !term) return 0;
@@ -245,6 +285,9 @@ export interface HousingSuccess {
   financingQuota: number;
   sources: typeof CAIXA_SOURCES;
   middleClass: boolean;
+  municipalLimit?: number;
+  rateAdjustedByProperty: boolean;
+  rateBand: string;
 }
 export type HousingResult = HousingSuccess | { ok: false; errors: string[] };
 export function calculateHousingSimulation(input: HousingInput): HousingResult {
@@ -270,10 +313,10 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
   if (!Number.isFinite(age) || age < 18)
     errors.push("Informe a data de nascimento válida do proponente mais velho, maior de idade.");
   const maximumTerm = getMaximumTerm({ ...input, product, system });
-  if (!Number.isInteger(input.term) || input.term < 1 || input.term > maximumTerm)
-    errors.push(
-      `Prazo deve ser inteiro entre 1 e ${maximumTerm} meses, sujeito à análise da CAIXA.`,
-    );
+  if (!Number.isInteger(input.term) || input.term < 1)
+    errors.push("Prazo deve ser informado em meses inteiros e ser maior que zero.");
+  if (maximumTerm < 1 && Number.isFinite(age) && age >= 18)
+    errors.push("A idade do proponente mais velho não permite prazo de financiamento.");
   for (const key of [
     "appraisalValue",
     "ownFunds",
@@ -296,7 +339,9 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
   if (product === "mcmv") {
     if (income > 13000)
       errors.push("Renda acima do MCMV. Selecione SBPE e informe a taxa da simulação oficial.");
-    const ceiling = middleClass ? 600000 : income <= 5000 ? (input.cityLimit ?? 210000) : 400000;
+    const automaticCityLimit = getMunicipalLimit(input.city, input.state);
+    const cityLimit = input.cityLimit ?? automaticCityLimit;
+    const ceiling = middleClass ? 600000 : 400000;
     if (
       input.cityLimit !== undefined &&
       !middleClass &&
@@ -306,14 +351,27 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
       errors.push(
         "Limite municipal MCMV deve ser confirmado na tabela oficial, entre R$ 210 mil e R$ 275 mil.",
       );
+    if (income <= 5000 && cityLimit === undefined)
+      errors.push("Limite municipal oficial indisponível para a cidade selecionada.");
     if (propertyValue > ceiling)
-      errors.push(
-        !middleClass && income <= 5000 && input.cityLimit === undefined
-          ? "Confirme o limite municipal oficial do imóvel nas faixas 1 e 2 (R$ 210 mil a R$ 275 mil)."
-          : "Valor do imóvel acima do limite do MCMV para a faixa informada.",
-      );
+      errors.push("Valor do imóvel acima do limite do MCMV para o enquadramento disponível.");
   }
-  const configuredRate = getHousingRate({ ...input, product, middleClass });
+  const municipalLimit =
+    product === "mcmv" && income <= 5000
+      ? (input.cityLimit ?? getMunicipalLimit(input.city, input.state))
+      : undefined;
+  const rateAdjustedByProperty =
+    product === "mcmv" &&
+    !middleClass &&
+    income <= 5000 &&
+    municipalLimit !== undefined &&
+    propertyValue > municipalLimit;
+  const configuredRate = getHousingRate({
+    ...input,
+    product,
+    middleClass,
+    ...(municipalLimit !== undefined ? { cityLimit: municipalLimit } : {}),
+  });
   const rateEstimated =
     product === "sbpe" && input.nominalRate === undefined && input.officialQuickEstimate === true;
   const rate = rateEstimated
@@ -358,14 +416,12 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
       `A prestação informada ultrapassa ${incomeLimitPercent}% da renda. Teto indicativo: R$ ${maximumPaymentByIncome.toFixed(2)}.`,
     );
   const quotaBaseValue = Math.min(propertyValue, input.appraisalValue ?? propertyValue);
-  let maximumFinancingQuota = system === "sac" ? 0.9 : 0.8;
-  if (
-    product === "mcmv" &&
-    middleClass &&
-    input.propertyCondition === "used" &&
-    SOUTH_SOUTHEAST.has(input.state)
-  )
-    maximumFinancingQuota = 0.6;
+  const maximumFinancingQuota = getMaximumFinancingQuota({
+    ...input,
+    product,
+    system,
+    middleClass,
+  });
   if (
     input.approvedFinancingQuotaPercent !== undefined &&
     (input.approvedFinancingQuotaPercent <= 0 ||
@@ -422,9 +478,12 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     warnings.push(
       "Subsídio a confirmar: nenhum desconto foi abatido. A fórmula municipal não foi presumida.",
     );
-  if (product === "mcmv" && !middleClass && income <= 5000 && input.cityLimit === undefined)
+  if (rateAdjustedByProperty)
     warnings.push(
-      "Limite municipal não confirmado: utilizado o teto conservador de R$ 210 mil, sujeito ao município.",
+      `O imóvel supera o limite municipal de ${municipalLimit!.toLocaleString("pt-BR", {
+        style: "currency",
+        currency: "BRL",
+      })}; a estimativa rápida foi enquadrada na taxa da Faixa 3, como na calculadora pública CAIXA.`,
     );
   if (input.inConstruction && !input.constructionMonths)
     warnings.push(
@@ -437,10 +496,15 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
   warnings.push(
     "Cenário sem atualização futura pela TR, variação dos seguros, análise de crédito ou CET. Cotas e comprometimento são tetos indicativos; a CAIXA pode aprovar valores menores.",
   );
+  const effectiveTerm = Math.min(input.term, maximumTerm);
+  if (input.term > maximumTerm)
+    warnings.push(
+      `Prazo ajustado automaticamente de ${input.term} para ${maximumTerm} meses pelo limite etário da CAIXA.`,
+    );
   const factor =
     system === "price"
-      ? calculatePrice(1, rate, input.term)
-      : calculateSacFirst(1, rate, input.term);
+      ? calculatePrice(1, rate, effectiveTerm)
+      : calculateSacFirst(1, rate, effectiveTerm);
   const incomeFinancing = Math.max(
     0,
     ((approvedPayment || maximumPaymentByIncome) - fixedInsurance - operatingFee) /
@@ -466,8 +530,8 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
   );
   const principalPayment =
     system === "price"
-      ? calculatePrice(financing, rate, input.term)
-      : calculateSacFirst(financing, rate, input.term);
+      ? calculatePrice(financing, rate, effectiveTerm)
+      : calculateSacFirst(financing, rate, effectiveTerm);
   const mipMonthly = input.mipMonthly ?? (insuranceEstimated ? financing * mipRate : 0);
   const insurance = mipMonthly + dfiMonthly;
   const firstPayment = cents(principalPayment + insurance + operatingFee),
@@ -480,7 +544,7 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     system,
     forcedSbpe: false,
     age,
-    term: input.term,
+    term: effectiveTerm,
     maximumTerm,
     rate,
     effectiveRate: (Math.pow(1 + rate / 1200, 12) - 1) * 100,
@@ -516,6 +580,16 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     subsidyConfirmed: input.confirmedSubsidy !== undefined,
     financingQuota,
     middleClass,
+    ...(municipalLimit !== undefined ? { municipalLimit } : {}),
+    rateAdjustedByProperty,
+    rateBand:
+      product === "sbpe"
+        ? "SBPE"
+        : middleClass
+          ? "MCMV Classe Média"
+          : rateAdjustedByProperty
+            ? "MCMV Faixa 3 por valor do imóvel"
+            : `MCMV ${getMcmvBand(income)}`,
     sources: CAIXA_SOURCES,
   };
 }
