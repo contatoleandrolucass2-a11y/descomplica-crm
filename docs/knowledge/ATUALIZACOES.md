@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-26: gate de restauracao dos perfis do dashboard
+
+- A CI da `main` no run `40433836523`, SHA
+  `8d6f48709038b7eaa5f59ffbdedc348640ad7c4b`, aprovou aplicacao, imagem
+  promovivel e validacao geral, mas bloqueou a publicacao no ensaio isolado de
+  restauracao. O pgTAP dos perfis enviava `request.jwt.claims` sem
+  `session_id`; a fundacao de seguranca rejeitou corretamente a sessao como nao
+  ativa antes de executar os testes funcionais.
+- A correcao permanece restrita ao fixture: cria duas `auth.sessions`
+  sinteticas, vigentes e vinculadas aos usuarios de teste, e inclui seus IDs
+  nos JWTs. Nenhuma funcao, policy, grant, migration ou requisito de MFA foi
+  flexibilizado. A publicacao continua condicionada a uma nova CI integral da
+  `main` com `isolated-restore` aprovado.
+- O Docker local esta indisponivel neste host; por isso a reproducao pgTAP
+  completa depende da CI Linux isolada. O sync do Obsidian continua pendente
+  pela falha `Documento excede o limite de exportacao.`.
+
 ## 2026-10-26: persistencia e reconciliacao do Canvas Meta Ads
 
 - O perfil do Canvas passa a ter fonte autoritativa por usuário no banco, com

@@ -50,6 +50,20 @@ insert into auth.users (id, email) values
   ('ad810000-0000-4000-8000-000000000001', 'dashboard-profile-one@example.test'),
   ('ad810000-0000-4000-8000-000000000002', 'dashboard-profile-two@example.test');
 select public.bootstrap_master_user('ad810000-0000-4000-8000-000000000001');
+insert into auth.sessions (id, user_id, aal, not_after)
+values
+  (
+    'ad860000-0000-4000-8000-000000000001',
+    'ad810000-0000-4000-8000-000000000001',
+    'aal1',
+    now() + interval '1 hour'
+  ),
+  (
+    'ad860000-0000-4000-8000-000000000002',
+    'ad810000-0000-4000-8000-000000000002',
+    'aal1',
+    now() + interval '1 hour'
+  );
 insert into public.crm_organizations (id, organization_key, name, kind)
 values (
   'ad820000-0000-4000-8000-000000000001',
@@ -132,7 +146,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',
+  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","session_id":"ad860000-0000-4000-8000-000000000001","aal":"aal1"}',
   true
 );
 
@@ -257,7 +271,7 @@ select throws_ok(
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad810000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',
+  '{"sub":"ad810000-0000-4000-8000-000000000002","role":"authenticated","session_id":"ad860000-0000-4000-8000-000000000002","aal":"aal1"}',
   true
 );
 select is(
@@ -290,7 +304,7 @@ select is(
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',
+  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","session_id":"ad860000-0000-4000-8000-000000000001","aal":"aal1"}',
   true
 );
 select is(
