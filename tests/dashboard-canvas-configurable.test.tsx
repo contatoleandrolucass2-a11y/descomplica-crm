@@ -222,7 +222,7 @@ describe("configurable dashboard canvas", () => {
     expect(source).toContain("data-dashboard-export-ignore");
     expect(source).toContain("{card.presentation ? (");
     expect(source).toContain(
-      '<div className={styles.cardContent}>{renderDashboardContent(card, size)}</div>',
+      "<div className={styles.cardContent}>{renderDashboardContent(card, size)}</div>",
     );
     expect(styles.match(/\.cardContent\s*\{[^}]*display:\s*flex/su)).toBeNull();
     expect(styles).toMatch(/\.cardContentPresentation\s*\{[^}]*display:\s*flex/su);
