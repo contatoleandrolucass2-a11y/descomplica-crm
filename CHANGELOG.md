@@ -1,5 +1,6 @@
 # Changelog
 
+- Atualiza somente as 11 referências visuais do Dashboard revisadas no artefato autenticado que bloqueava a publicação do Simulador CAIXA, sem alterar código funcional nem tolerâncias.
 - Vincula automaticamente os nomes de nove empreendimentos do Tabelão às pastas correspondentes do Google Drive, com abertura em nova aba e preservação dos nomes sem correspondência.
 
 - Define a DEPLOY-002 para todos os desenvolvedores e agentes: validação por impacto, reaproveitamento de evidências e revisão ampliada somente com justificativa, preservando gates obrigatórios e publicação protegida.
