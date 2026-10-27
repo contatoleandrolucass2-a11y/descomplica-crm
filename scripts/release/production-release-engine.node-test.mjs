@@ -724,3 +724,48 @@ test("clock regression after promotion leaves the intent for explicit recovery",
   assertIntentRetained(system);
   assert.equal(system.events.includes("complete"), false);
 });
+
+test("isolated release rechecks its branch under the same locks and records its origin", async () => {
+  const branch = "codex/release-tabelao-drive-links";
+  const system = harness();
+  let reads = 0;
+  system.io.candidate = async (runId, requestedBranch) => {
+    reads += 1;
+    assert.equal(runId, 123);
+    assert.equal(requestedBranch, branch);
+    const candidate = approvedCandidate();
+    return {
+      ...candidate,
+      mainSha: currentSha,
+      branchRef: `refs/heads/${branch}`,
+      branchSha: targetSha,
+      run: { ...candidate.run, head_branch: branch },
+    };
+  };
+  system.hooks.prepare = (releaseOptions) => assert.equal(releaseOptions.candidateBranch, branch);
+  const result = await executeRelease(options({ candidateBranch: branch }), system.io);
+  assert.equal(reads, 2);
+  assert.equal(result.status, "deployed");
+  assert.match(result.release.evidence, /branch:codex\/release-tabelao-drive-links/u);
+});
+
+test("isolated branch change during final observation blocks before any production mutation", async () => {
+  const branch = "codex/release-tabelao-drive-links";
+  const system = harness();
+  system.hooks.candidate = (count) => {
+    const candidate = approvedCandidate();
+    return {
+      ...candidate,
+      mainSha: currentSha,
+      branchRef: `refs/heads/${branch}`,
+      branchSha: count === 1 ? targetSha : currentSha,
+      run: { ...candidate.run, head_branch: branch },
+    };
+  };
+  await assert.rejects(
+    executeRelease(options({ candidateBranch: branch }), system.io),
+    /exact authorized remote release branch/u,
+  );
+  assert.equal(system.writeCount, 0);
+  assert.equal(system.state.inProgress, null);
+});

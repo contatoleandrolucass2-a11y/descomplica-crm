@@ -48,9 +48,10 @@ describe("release-candidate migration train", () => {
     expect(workflow).toContain("lib/archive-investor/*");
     expect(workflow).toContain("scripts/verify-documentation-sources.mjs");
     expect(workflow).toContain("if: steps.documentation_source_scope.outputs.required == 'true'");
-    expect(
-      workflow.match(/if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/g),
-    ).toHaveLength(3);
+    const releaseCondition =
+      "if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/codex/release-'))";
+    expect(workflow.split(releaseCondition)).toHaveLength(4);
+    expect(workflow).toContain('- "codex/release-*"');
   });
 
   it("keeps a unique, ordered 91-version manifest", async () => {

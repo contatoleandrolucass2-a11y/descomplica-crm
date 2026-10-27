@@ -1,5 +1,7 @@
 # Changelog
 
+- Permite release isolada explicitamente autorizada em branch baseada na produção, mantendo os quatro gates, imagem imutável, travas, CAS e rollback, com verificação de ancestralidade para preservar entregas publicadas.
+
 - Vincula automaticamente os nomes de nove empreendimentos do Tabelão às pastas correspondentes do Google Drive, com abertura em nova aba e preservação dos nomes sem correspondência.
 - Publica a automação e precisão do Simulador CAIXA após CI integral, imagem imutável e smoke público da versão `83a92392`.
 - Atualiza somente as 11 referências visuais do Simulador CAIXA a partir do artefato autenticado da CI, preservando as demais 231 capturas e todos os limiares.

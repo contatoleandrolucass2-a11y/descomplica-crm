@@ -164,12 +164,29 @@ export function assertLiveDeployment(observation, expected, nowMs) {
   }
 }
 
-export function assertApprovedCandidate(candidate, targetSha) {
+export function assertCandidateBranch(branch) {
+  if (
+    typeof branch !== "string" ||
+    (branch !== "main" && !/^codex\/release-[a-z0-9][a-z0-9-]{0,63}$/u.test(branch))
+  ) {
+    fail("Candidate branch must be main or an explicit codex/release-* branch.");
+  }
+  return branch;
+}
+
+export function assertApprovedCandidate(candidate, targetSha, candidateBranch = "main") {
+  assertCandidateBranch(candidateBranch);
   assertRecord(candidate, "Candidate approval");
   assertStringPattern(targetSha, shaPattern, "Target Git SHA");
   const { mainSha, run, jobs } = candidate;
-  if (mainSha !== targetSha) {
-    fail("The candidate is no longer the exact remote main SHA.");
+  assertStringPattern(mainSha, shaPattern, "Observed remote main SHA");
+  if (candidateBranch === "main") {
+    if (mainSha !== targetSha) fail("The candidate is no longer the exact remote main SHA.");
+  } else if (
+    candidate.branchRef !== `refs/heads/${candidateBranch}` ||
+    candidate.branchSha !== targetSha
+  ) {
+    fail("The candidate is no longer the exact authorized remote release branch SHA.");
   }
   assertRecord(run, "Candidate CI run");
   if (
@@ -178,10 +195,12 @@ export function assertApprovedCandidate(candidate, targetSha) {
     run.status !== "completed" ||
     run.conclusion !== "success" ||
     run.event !== "push" ||
-    run.head_branch !== "main" ||
+    run.head_branch !== candidateBranch ||
     run.head_sha !== targetSha
   ) {
-    fail("The candidate requires a successful completed push CI run on the exact main SHA.");
+    fail(
+      "The candidate requires a successful completed push CI run on the exact authorized branch SHA.",
+    );
   }
   if (!Array.isArray(jobs)) {
     fail("Candidate CI jobs are unavailable.");

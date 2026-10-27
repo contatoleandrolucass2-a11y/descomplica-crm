@@ -1,4 +1,5 @@
 import path from "node:path";
+import { assertCandidateBranch } from "./production-release-policy.mjs";
 import { pathToFileURL } from "node:url";
 import { withProductionLock } from "./production-release-lock.mjs";
 import { productionHost } from "./production-release-host.mjs";
@@ -30,7 +31,7 @@ export function parseReleaseArguments(args) {
   const required = operations[operation];
   const optional =
     operation === "deploy"
-      ? ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api"]
+      ? ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api", "candidate-branch"]
       : operation === "qlik-deploy"
         ? ["ranking"]
         : [];
@@ -74,6 +75,7 @@ export function parseReleaseArguments(args) {
       !Number.isSafeInteger(Number(values["ci-run-id"])))
   )
     throw new Error("Invalid CI run ID.");
+  if (values["candidate-branch"]) assertCandidateBranch(values["candidate-branch"]);
   return { operation, values };
 }
 
@@ -152,6 +154,7 @@ async function main(args) {
         targetSha: values.sha,
         targetImageId: values["image-id"],
         ciRunId: values["ci-run-id"] ? Number(values["ci-run-id"]) : undefined,
+        candidateBranch: values["candidate-branch"] ?? "main",
         ...(values["salesforce-ingestion"] === "enable" ? { salesforceIngestion: true } : {}),
         ...(values["qlik-ranking"] === "enable" ? { qlikRanking: true } : {}),
         ...(values["meta-ads"] === "enable" ? { metaAds: true } : {}),

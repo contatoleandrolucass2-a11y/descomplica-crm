@@ -12,7 +12,12 @@ import {
 } from "./bind-production-image.mjs";
 import { runtimeCompose } from "./compose-with-runtime-secret.mjs";
 import { assertHeldLock } from "./production-release-lock.mjs";
-import { assertFreshObservation, validateDeploymentState } from "./production-release-policy.mjs";
+import {
+  assertCandidateBranch,
+  assertFreshObservation,
+  validateDeploymentState,
+} from "./production-release-policy.mjs";
+import { verifyCandidateAncestry } from "./production-release-ancestry.mjs";
 import { privateJsonStore } from "./private-json-store.mjs";
 import {
   assertEnvironmentChangeContents,
@@ -207,6 +212,41 @@ async function health(url) {
   return result.version;
 }
 
+export async function readCandidateApproval(runId, candidateBranch = "main", readJson = json) {
+  assertCandidateBranch(candidateBranch);
+  if (!Number.isSafeInteger(runId) || runId <= 0) throw new Error("Exact CI run ID required.");
+  const nonce = randomUUID();
+  const [main, run, branch] = await Promise.all([
+    readJson(`${api}/commits/main?release_check=${nonce}`),
+    readJson(`${api}/actions/runs/${runId}?release_check=${nonce}`),
+    candidateBranch === "main"
+      ? Promise.resolve(null)
+      : readJson(`${api}/git/ref/heads/${candidateBranch}?release_check=${nonce}`),
+  ]);
+  if (run.path !== ".github/workflows/ci.yml" || !Number.isSafeInteger(run.run_attempt)) {
+    throw new Error("Candidate run is not the approved CI workflow.");
+  }
+  if (
+    branch &&
+    (branch.ref !== `refs/heads/${candidateBranch}` || branch.object?.type !== "commit")
+  ) {
+    throw new Error("The release reference must be the exact remote branch pointing to a commit.");
+  }
+  if (candidateBranch !== "main" && !branch) throw new Error("Release branch unavailable.");
+  const result = await readJson(
+    `${api}/actions/runs/${runId}/attempts/${run.run_attempt}/jobs?per_page=100&release_check=${nonce}`,
+  );
+  if (!Array.isArray(result.jobs) || result.total_count !== result.jobs.length) {
+    throw new Error("CI job evidence is incomplete.");
+  }
+  return {
+    mainSha: main.sha,
+    run,
+    jobs: result.jobs,
+    ...(branch ? { branchRef: branch.ref, branchSha: branch.object.sha } : {}),
+  };
+}
+
 export function productionHost(lock) {
   const store = privateJsonStore(statePath, (state) => validateDeploymentState(state, Date.now()));
   const environmentBackups = salesforceEnvironmentBackupStore();
@@ -237,29 +277,16 @@ export function productionHost(lock) {
         throw new Error("Release changed during observation.");
       return { state, ...current, startedAt, checkedAt: Date.now() };
     },
-    async candidate(runId) {
-      if (!Number.isSafeInteger(runId) || runId <= 0) throw new Error("Exact CI run ID required.");
-      const nonce = randomUUID();
-      const [main, run] = await Promise.all([
-        json(`${api}/commits/main?release_check=${nonce}`),
-        json(`${api}/actions/runs/${runId}?release_check=${nonce}`),
-      ]);
-      if (run.path !== ".github/workflows/ci.yml" || !Number.isSafeInteger(run.run_attempt)) {
-        throw new Error("Candidate run is not the approved CI workflow.");
-      }
-      const result = await json(
-        `${api}/actions/runs/${runId}/attempts/${run.run_attempt}/jobs?per_page=100&release_check=${nonce}`,
-      );
-      if (!Array.isArray(result.jobs) || result.total_count !== result.jobs.length) {
-        throw new Error("CI job evidence is incomplete.");
-      }
-      return { mainSha: main.sha, run, jobs: result.jobs };
+    async candidate(runId, candidateBranch = "main") {
+      return readCandidateApproval(runId, candidateBranch);
     },
     async prepare(options, previous) {
       await assertHeldLock(lock);
       await verifyReleaseBoundary(
         options.operation === "deploy" ? options.targetSha : options.expectedSha,
       );
+      if (options.operation === "deploy")
+        await verifyCandidateAncestry(root, previous.sha, options.targetSha);
       await verifyPromotableImage(options.targetSha, options.targetImageId);
       await verifyPromotableImage(previous.sha, previous.imageId);
       if (options.environmentChange) await environmentBackups.read(options.environmentChange);
