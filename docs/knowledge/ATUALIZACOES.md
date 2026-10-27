@@ -1,5 +1,49 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: CAIXA integrado; publicacao bloqueada por gate externo
+
+- O PR #373 foi integrado como
+  `a0b4a38125a5ac38991ca7f3368bd6b9ce336648`. Depois do pedido explicito de
+  publicacao, o primeiro candidato `075df4db` falhou duas vezes porque a acao
+  oculta `Excluir Media do ano` do Dashboard interceptava o controle de
+  historico. A correcao concorrente entrou no `main` como `6955a6c8`, que passou
+  a ser o candidato exato da publicacao.
+- A CI de `push/main` `40555682643` aprovou `validate`, `promotable-image` e
+  `isolated-restore`. Dentro de `release-gates`, passaram CAIXA, Dashboard,
+  Associativo, banco, autorizacao, build, E2E, acessibilidade, teclado e zoom.
+  O job `122373158107` falhou somente na comparacao protegida de 11 imagens da
+  rota `/app` em viewports e temas do Dashboard: todas registraram drift de 2%,
+  acima do limite imutavel de 1%.
+- Pela regra maxima de escopo, as referencias visuais do Dashboard nao foram
+  aprovadas nem alteradas neste chat. O artefato diagnostico `12762530739`
+  confirmou zero falhas de rota, tema, acessibilidade e canvas; somente as 11
+  comparacoes de baseline ficaram reprovadas.
+- O artefato promovivel `12757242651` foi baixado e conferido: digest do ZIP
+  `sha256:613d0621ff1c6a908334e6e76cb81117e3e0427b02b19e124d61ca2fc5556e12`,
+  SHA-256 interno `b129ab2248c6abda8c3bfe19a02f86b6f69bc6bd66b9c32db87bcf65eaaa4f70`
+  e image ID esperado
+  `sha256:5b4a0aa12e1e589899ec89de877c43ab0ff9c95f752c05320cd092213bc2714b`.
+  A transferencia para diretorio isolado da VPS preservou o checksum; a imagem
+  nao foi carregada nem ativada.
+- A publicacao nao foi tentada porque o coordenador exige os quatro jobs verdes.
+  A correcao CAIXA permanece integrada no Git, mas esta revisao ainda nao esta
+  comprovadamente publicada. Reavaliar quando as 11 referencias do Dashboard
+  forem revisadas em escopo proprio e um novo `main` exato tiver CI integral.
+- Conferencia final em `2026-10-27T18:57:21.7231154Z`: health publico HTTP 200,
+  `status=ok`, versao `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`. O registro do
+  coordenador permaneceu no deployment `4d1479e7-e087-499e-92f8-d6aee906bf74`,
+  publicado em `2026-10-27T15:21:08.364Z`, sem deployment pendente. Portanto
+  nao houve mutacao de producao nesta tentativa.
+- Validacao documental local com Node 24.19.0/pnpm 11.20.0: lint sem erros e
+  com 44 avisos preexistentes, typecheck e build de 41 paginas/71 saidas
+  aprovados; Vitest aprovou 4.373 testes e ignorou 112. O comando integral de
+  testes parou depois em tres casos operacionais Meta Ads dependentes de modos
+  POSIX no host Windows; a CI Linux `40555682643` aprovou o job `validate` do
+  mesmo SHA. Essa limitacao local nao substitui nem corrige o bloqueio real do
+  `release-gates` descrito acima.
+- O sync do Obsidian continuou impedido por `Documento excede o limite de
+exportacao.`; os documentos versionados permanecem a fonte registrada.
+
 ## 2026-10-27: isolamento final das acoes ocultas de Agendamentos
 
 - A CI de `main` `40550745986` aprovou `validate`, `promotable-image` e
