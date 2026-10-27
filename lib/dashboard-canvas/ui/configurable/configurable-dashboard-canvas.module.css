@@ -141,7 +141,7 @@
   display: grid;
   min-width: 0;
   min-height: 100%;
-  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   border: 2px solid transparent;
   border-radius: 0.75rem;
 }
@@ -158,13 +158,33 @@
 }
 
 .cardActions {
+  position: absolute;
+  z-index: 8;
+  top: 0.35rem;
+  right: 0.35rem;
   display: flex;
   min-height: 2.35rem;
   align-items: center;
   justify-content: flex-end;
   gap: 0.3rem;
   padding: 0.25rem 0.35rem;
-  border-bottom: 1px solid color-mix(in srgb, var(--analytics-line) 45%, transparent);
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.7rem;
+  background: color-mix(in srgb, var(--analytics-surface) 94%, transparent);
+  box-shadow: 0 0.45rem 1rem rgb(0 0 0 / 16%);
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-0.35rem);
+  transition:
+    opacity 140ms ease-out,
+    transform 140ms ease-out;
+}
+
+.cardBody:hover .cardActions,
+.cardBody:focus-within .cardActions {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateY(0);
 }
 
 .cardActions label {
@@ -207,9 +227,34 @@
 }
 
 .cardContent {
+  display: flex;
   min-width: 0;
   min-height: 0;
   overflow: auto;
+}
+
+.presentationSurface {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  min-height: 100%;
+  flex-direction: column;
+  justify-content: var(--dashboard-block-align, center);
+  color: var(--analytics-ink);
+  text-align: inherit;
+}
+
+.presentationSurface > :last-child {
+  min-width: 0;
+}
+
+.customContent {
+  margin: 0;
+  padding: 0.45rem 0.75rem 0;
+  color: var(--analytics-muted);
+  font-size: calc(0.78rem * var(--dashboard-font-scale, 1));
+  line-height: 1.4;
+  text-align: inherit;
 }
 
 .missingContent {
@@ -310,6 +355,7 @@
 
 .editorForm input,
 .editorForm select,
+.editorForm textarea,
 .createProfile input,
 .profileList input {
   width: 100%;
@@ -321,6 +367,15 @@
   border-radius: 0.65rem;
   background: var(--analytics-surface-muted);
   font: inherit;
+}
+
+.editorForm textarea {
+  resize: vertical;
+}
+
+.editorForm small {
+  color: var(--analytics-muted);
+  font-size: 0.72rem;
 }
 
 .dateFields {

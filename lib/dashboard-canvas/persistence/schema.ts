@@ -4,6 +4,8 @@ import {
   DASHBOARD_CARD_TYPES,
   DASHBOARD_GROUPS,
   DASHBOARD_PERIODS,
+  DASHBOARD_TEXT_ALIGNMENTS,
+  DASHBOARD_VERTICAL_ALIGNMENTS,
 } from "@/lib/dashboard-canvas/types";
 import { dashboardCardsMatchPageCatalog } from "./catalog";
 
@@ -49,6 +51,11 @@ const safeText = (maximum: number) =>
     .min(1)
     .max(maximum)
     .refine((value) => !forbiddenTextPattern.test(value), "unsafe_text");
+const optionalContentText = z
+  .string()
+  .trim()
+  .max(240)
+  .refine((value) => !forbiddenTextPattern.test(value), "unsafe_text");
 
 export const dashboardPageKeySchema = z.string().max(160).regex(pageKeyPattern);
 export const dashboardScopeKeySchema = z
@@ -74,6 +81,7 @@ const dashboardCardIdSchema = z
 const dashboardMetricSchema = z.string().min(1).max(100).regex(identifierPattern);
 const dashboardEntityIdSchema = z.string().min(1).max(128).regex(identifierPattern);
 const dashboardDateSchema = z.string().refine(isCivilDate, "invalid_civil_date");
+const dashboardColorSchema = z.string().regex(/^#[0-9a-f]{6}$/iu);
 
 export const dashboardCardSchema = z
   .object({
@@ -111,6 +119,18 @@ export const dashboardCardSchema = z
         showGoal: z.boolean().optional(),
         showCeiling: z.boolean().optional(),
         sharedScale: z.boolean().optional(),
+      })
+      .strict()
+      .optional(),
+    presentation: z
+      .object({
+        content: optionalContentText.optional(),
+        fontScale: z.number().min(0.75).max(1.5).optional(),
+        textAlign: z.enum(DASHBOARD_TEXT_ALIGNMENTS).optional(),
+        verticalAlign: z.enum(DASHBOARD_VERTICAL_ALIGNMENTS).optional(),
+        textColor: dashboardColorSchema.optional(),
+        accentColor: dashboardColorSchema.optional(),
+        barScale: z.number().min(0.5).max(1.5).optional(),
       })
       .strict()
       .optional(),

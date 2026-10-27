@@ -65,6 +65,10 @@ export function isDashboardProfileCatalogPageKey(
   return Object.hasOwn(DASHBOARD_PROFILE_CATALOG, pageKey);
 }
 
+export function canEditDashboardProfilePage(pageKey: string, roleKey: string): boolean {
+  return pageKey !== "crm.stage.appointments" || roleKey === "admin" || roleKey === "master";
+}
+
 export function dashboardCardsMatchPageCatalog(
   pageKey: string,
   cards: readonly Pick<DashboardCard, "metric" | "entityIds">[],

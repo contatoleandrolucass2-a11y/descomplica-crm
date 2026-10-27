@@ -43,7 +43,7 @@ describe("appointments configurable dashboard", () => {
     expect(alternatives).toEqual([["team.productive", ["donut", "kpi"]]]);
   });
 
-  it("uses the controller for profiles, toolbar and card persistence per channel", () => {
+  it("uses the shared controller with an administrator-only appointments editor", () => {
     const source = readFileSync(
       new URL(
         "../app/(protected)/app/etapas/_components/AppointmentsDashboard.tsx",
@@ -53,6 +53,9 @@ describe("appointments configurable dashboard", () => {
     );
     expect(source).toContain("<ConfigurableDashboardCanvas");
     expect(source).toContain("contentByMetricAndType={contentByMetricAndType}");
+    expect(source).toContain("editable={canEditDashboard}");
+    expect(source).toContain("profileControls={false}");
+    expect(source).toContain('automaticProfileName="Layout de Agendamentos"');
     for (const metric of APPOINTMENTS_CANVAS_CATALOG.metrics) {
       expect(source, metric.key).toContain(`"${metric.key}": {`);
     }

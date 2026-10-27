@@ -1,5 +1,6 @@
 # Changelog
 
+- Restringe a edição do canvas de Agendamentos a administradores e oferece ajustes persistentes de tamanho, conteúdo, tipografia, posição, cores e altura das torres.
 - Recalcula o prazo maximo sempre que idade ou obra mudam, preserva reducoes manuais ate a proxima mudanca determinante e impede valor acima do teto.
 - Identifica automaticamente renda potencialmente elegivel ao subsidio MCMV sem abater valor nao comprovado e explica os fatores oficiais ainda necessarios.
 - Alinha cores, bordas, grids, abas moveis e cards de resultado do Simulador CAIXA ao padrao visual de Agendamentos.
@@ -10,6 +11,13 @@
 - Atualiza somente as 22 referências visuais de Visão Geral e Agendamentos a partir do artefato autenticado da CI, preservando as demais 220 capturas.
 - Atualiza o inventário do ensaio de restauração para os 2.290 testes pgTAP após a nova asserção de volatilidade do validador.
 - Alinha a volatilidade do validador SQL dos perfis do dashboard às funções estáveis usadas na assinatura normalizada dos cards.
+
+## 2026-10-27 — Editor administrativo de Agendamentos
+
+- Oculta as ações de card no estado normal e as revela ao administrador somente por foco ou passagem do mouse.
+- Permite ajustar largura, altura, título, texto complementar, escala e alinhamento da fonte, cores e altura ou alcance das torres.
+- Remove o controle de perfis da página e mantém salvamento automático de um único layout compartilhado de Agendamentos.
+- Entrega o mesmo layout aos demais usuários autorizados em modo somente leitura; criação e alteração permanecem restritas a `admin` e `master` na aplicação e no banco.
 
 ## 2026-10-27 — Automação e precisão do Simulador CAIXA
 

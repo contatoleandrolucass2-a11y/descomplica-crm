@@ -8,6 +8,7 @@ import {
   dashboardProfileCreateSchema,
   dashboardProfileQuerySchema,
 } from "@/lib/dashboard-canvas/persistence/schema";
+import { canEditDashboardProfilePage } from "@/lib/dashboard-canvas/persistence/catalog";
 import {
   createDashboardProfile,
   dashboardPagePath,
@@ -38,7 +39,14 @@ export async function GET(request: Request) {
   try {
     const result = await listDashboardProfiles(query.data.pageKey, query.data.scopeKey);
     if (result.error || !result.data) return dashboardProfileRpcFailure(result.error);
-    return dashboardProfileSuccess({ profiles: result.data });
+    const profiles =
+      query.data.pageKey === "crm.stage.appointments"
+        ? result.data.map((profile) => ({
+            ...profile,
+            userId: authorization.context.userId,
+          }))
+        : result.data;
+    return dashboardProfileSuccess({ profiles });
   } catch {
     return dashboardProfileFailure("dashboard_profiles_unavailable", 503);
   }
@@ -54,6 +62,9 @@ export async function POST(request: Request) {
   if (!input.success) return dashboardProfileFailure("invalid_profile", 400);
   const authorization = await authorizePage(input.data.pageKey);
   if (!authorization.ok) return authorization.response;
+  if (!canEditDashboardProfilePage(input.data.pageKey, authorization.context.roleKey)) {
+    return dashboardProfileFailure("forbidden", 403);
+  }
   try {
     const result = await createDashboardProfile(input.data);
     if (result.error || !result.data) return dashboardProfileRpcFailure(result.error);

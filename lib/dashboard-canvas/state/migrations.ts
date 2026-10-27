@@ -4,9 +4,12 @@ import {
   DASHBOARD_CANVAS_SCHEMA_VERSION,
   DASHBOARD_GROUPS,
   DASHBOARD_PERIODS,
+  DASHBOARD_TEXT_ALIGNMENTS,
+  DASHBOARD_VERTICAL_ALIGNMENTS,
   type DashboardCanvasSnapshot,
   type DashboardCard,
   type DashboardCardOptions,
+  type DashboardCardPresentation,
   type DashboardCardType,
   type DashboardGroupBy,
   type DashboardPeriod,
@@ -59,6 +62,28 @@ function normalizeOptions(value: unknown): DashboardCardOptions | undefined {
   return Object.keys(options).length > 0 ? options : undefined;
 }
 
+const hexColorPattern = /^#[0-9a-f]{6}$/iu;
+
+function normalizePresentation(value: unknown): DashboardCardPresentation | undefined {
+  if (!isRecord(value)) return undefined;
+  const presentation: DashboardCardPresentation = {};
+  const content = readString(value.content);
+  if (content) presentation.content = content.slice(0, 240);
+  const fontScale = finiteNumber(value.fontScale);
+  if (fontScale !== undefined) presentation.fontScale = Math.min(Math.max(fontScale, 0.75), 1.5);
+  presentation.textAlign = oneOf(value.textAlign, DASHBOARD_TEXT_ALIGNMENTS, "center");
+  presentation.verticalAlign = oneOf(value.verticalAlign, DASHBOARD_VERTICAL_ALIGNMENTS, "center");
+  if (typeof value.textColor === "string" && hexColorPattern.test(value.textColor)) {
+    presentation.textColor = value.textColor.toLowerCase();
+  }
+  if (typeof value.accentColor === "string" && hexColorPattern.test(value.accentColor)) {
+    presentation.accentColor = value.accentColor.toLowerCase();
+  }
+  const barScale = finiteNumber(value.barScale);
+  if (barScale !== undefined) presentation.barScale = Math.min(Math.max(barScale, 0.5), 1.5);
+  return Object.keys(presentation).length > 0 ? presentation : undefined;
+}
+
 function migrateLegacyCard(value: unknown) {
   if (!isRecord(value)) return value;
   const layout = isRecord(value.layout) ? value.layout : {};
@@ -107,6 +132,7 @@ export function normalizeDashboardCard(value: unknown, fallbackOrder = 0): Dashb
     : null;
   const title = readString(value.title);
   const options = normalizeOptions(value.options);
+  const presentation = normalizePresentation(value.presentation);
   const layoutInput: Partial<DashboardCard["layout"]> = {
     order: finiteNumber(layoutValue.order) ?? fallbackOrder,
   };
@@ -129,6 +155,7 @@ export function normalizeDashboardCard(value: unknown, fallbackOrder = 0): Dashb
     card.endDate = endDate;
   }
   if (options) card.options = options;
+  if (presentation) card.presentation = presentation;
   return card;
 }
 

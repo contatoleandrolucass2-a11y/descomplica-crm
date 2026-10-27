@@ -9,7 +9,10 @@ import {
   dashboardProfilePatchSchema,
   dashboardProfileVersionSchema,
 } from "@/lib/dashboard-canvas/persistence/schema";
-import { dashboardCardsMatchPageCatalog } from "@/lib/dashboard-canvas/persistence/catalog";
+import {
+  canEditDashboardProfilePage,
+  dashboardCardsMatchPageCatalog,
+} from "@/lib/dashboard-canvas/persistence/catalog";
 import {
   dashboardPagePath,
   deleteDashboardProfile,
@@ -33,7 +36,10 @@ async function loadAuthorizedProfile(profileId: string) {
   if (!pathname) return { ok: false as const, response: dashboardProfileFailure("forbidden", 403) };
   const authorization = await authorizePageRoute(pathname);
   if (!authorization.ok) return authorization;
-  return { ok: true as const, profile: existing.data };
+  if (!canEditDashboardProfilePage(existing.data.pageKey, authorization.context.roleKey)) {
+    return { ok: false as const, response: dashboardProfileFailure("forbidden", 403) };
+  }
+  return { ok: true as const, profile: existing.data, context: authorization.context };
 }
 
 export async function PATCH(request: Request, context: ProfileRouteContext) {

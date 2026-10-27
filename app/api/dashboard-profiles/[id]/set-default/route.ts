@@ -8,6 +8,7 @@ import {
   dashboardProfileIdSchema,
   dashboardProfileVersionBodySchema,
 } from "@/lib/dashboard-canvas/persistence/schema";
+import { canEditDashboardProfilePage } from "@/lib/dashboard-canvas/persistence/catalog";
 import {
   dashboardPagePath,
   getDashboardProfile,
@@ -39,6 +40,9 @@ export async function POST(request: Request, context: ProfileRouteContext) {
     if (!pathname) return dashboardProfileFailure("forbidden", 403);
     const authorization = await authorizePageRoute(pathname);
     if (!authorization.ok) return authorization.response;
+    if (!canEditDashboardProfilePage(existing.data.pageKey, authorization.context.roleKey)) {
+      return dashboardProfileFailure("forbidden", 403);
+    }
     const result = await setDefaultDashboardProfile(profileId.data, input.data.version);
     if (result.error || !result.data) return dashboardProfileRpcFailure(result.error);
     return dashboardProfileSuccess({

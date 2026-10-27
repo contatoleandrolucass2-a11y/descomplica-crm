@@ -78,4 +78,7 @@ export interface ConfigurableDashboardCanvasProps {
   onCardsChange?: ((cards: DashboardCard[]) => void) | undefined;
   ariaLabel?: string | undefined;
   className?: string | undefined;
+  editable?: boolean | undefined;
+  profileControls?: boolean | undefined;
+  automaticProfileName?: string | undefined;
 }
