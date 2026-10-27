@@ -13,6 +13,7 @@
 - Ajusta automaticamente o prazo ao limite de idade em meses-calendário, reproduzindo os casos públicos da CAIXA.
 - Vincula imóvel na planta à condição Novo e exige escolha entre Novo e Usado fora da planta.
 - Preserva as cotas SBPE de 90% no SAC e 80% no Price, os três temas e o acesso existente.
+- Alinha o E2E protegido de release ao novo estado automático e travado da condição do imóvel.
 
 - Corrige os gates dos perfis de canvas ao reproduzir uma sessão autenticada ativa no pgTAP e alinhar a captura visual protegida à grade configurável da Visão Geral.
 - Mantém a concessão autenticada à função temporária do ensaio e a ordem auditada da matriz de RPCs.

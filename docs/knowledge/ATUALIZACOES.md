@@ -4197,3 +4197,7 @@ dependente da autorização específica aplicável.
   Nenhuma migration, dado remoto, DNS, cobrança, conta ou workflow n8n foi
   alterado. Estado neste registro: implementado e validado localmente no escopo;
   PR, CI, merge e publicação ainda pendentes e serão registrados separadamente.
+- O primeiro candidato visual do PR #368 falhou porque o E2E protegido ainda
+  tentava editar `Condição do imóvel` depois de a nova regra tê-la preenchido
+  como `Novo` e desabilitado para imóvel na planta. O teste foi alinhado para
+  conferir o valor e o estado travado; nenhuma regra financeira foi relaxada.

@@ -32,6 +32,10 @@ os estados planta/condição, o cenário oficial, os três temas, desktop, table
 celular, Axe e overflow. Publicação e evidências finais permanecem condicionadas
 aos gates integrais do projeto.
 
+O E2E protegido de release foi atualizado para confirmar `Novo` já preenchido e
+travado no cenário inicial de imóvel na planta, sem tentar editar o campo que a
+nova regra deliberadamente desabilita.
+
 - 2026-10-26: alinhados os gates finais do canvas: o pgTAP agora cria sessões autenticadas ativas e inclui seus identificadores nos JWTs sintéticos exigidos pelas RPCs; a captura visual protegida valida os 13 cards pela nova grade configurável. Permanecem também corrigidas a permissão da função temporária do fixture e a ordenação da matriz de RPCs autenticadas.
 - 2026-10-26: tratados os três apontamentos funcionais da revisão do PR: a captura em PDF remove somente controles do editor, a troca do perfil padrão reconcilia a versão incrementada do padrão anterior e o arraste captura o ponteiro na grade estável, inclusive fora dos limites do card.
 
