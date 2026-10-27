@@ -810,19 +810,23 @@ export function ConfigurableDashboardCanvas({
                   </button>
                 </div>
               ) : null}
-              <div
-                className={styles.cardContent}
-                data-dashboard-text-align={card.presentation?.textAlign ?? "center"}
-                data-dashboard-vertical-align={card.presentation?.verticalAlign ?? "center"}
-                style={presentationStyle(card.presentation)}
-              >
-                <div className={styles.presentationSurface}>
-                  {card.presentation?.content ? (
-                    <p className={styles.customContent}>{card.presentation.content}</p>
-                  ) : null}
-                  {renderDashboardContent(card, size)}
+              {card.presentation ? (
+                <div
+                  className={`${styles.cardContent} ${styles.cardContentPresentation}`}
+                  data-dashboard-text-align={card.presentation.textAlign ?? "center"}
+                  data-dashboard-vertical-align={card.presentation.verticalAlign ?? "center"}
+                  style={presentationStyle(card.presentation)}
+                >
+                  <div className={styles.presentationSurface}>
+                    {card.presentation.content ? (
+                      <p className={styles.customContent}>{card.presentation.content}</p>
+                    ) : null}
+                    {renderDashboardContent(card, size)}
+                  </div>
                 </div>
-              </div>
+              ) : (
+                <div className={styles.cardContent}>{renderDashboardContent(card, size)}</div>
+              )}
             </div>
           )}
         />
