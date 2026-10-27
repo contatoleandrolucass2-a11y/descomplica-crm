@@ -1,5 +1,23 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: DEPLOY-002 — validação por impacto para todos os publicadores
+
+- Por pedido direto do usuário, a regra antes registrada no cofre local passa
+  a compor as instruções compartilhadas: AGENTS.md, o runbook
+  `docs/runbooks/impact-based-validation.md`, os procedimentos de publicação
+  e a skill de validação. Aplica-se a todos os desenvolvedores e agentes.
+- Validar o diff completo entre produção e candidato e as jornadas afetadas;
+  reutilizar evidências válidas e ampliar a revisão somente com justificativa.
+  O escopo de análise não autoriza editar áreas fora do pedido do chat.
+- Gates obrigatórios do SHA candidato, proteções de publicação e DEPLOY-001
+  permanecem intactos. Documentação não exige deploy da aplicação. A integração
+  no Git e a adoção por cada desenvolvedor são evidências distintas.
+- Base documental consultada: main `73f0c359decf3d182c8bab0ef5dbe2d9df0459f0`.
+  Esta entrega altera somente Markdown; não modifica workflows, runtime, banco
+  ou produção. A validação local cobre diff, referências e formatação; os checks
+  obrigatórios permanecem na CI do PR. Resultados remotos devem ser consultados
+  no SHA correspondente, sem inferir aprovação a partir desta nota.
+
 ## 2026-10-27: CAIXA integrado; publicacao bloqueada por gate externo
 
 - O PR #373 foi integrado como

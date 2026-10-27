@@ -1,7 +1,7 @@
 # Contexto do DESCOMPLICA-CRM
 
 status: validado
-atualizado_em: 2026-10-12
+atualizado_em: 2026-10-27
 verificado_em: 2026-10-03
 fonte: AGENTS.md, package.json, app/(protected)/layout.tsx, lib/navigation/pages.ts
 
@@ -47,8 +47,12 @@ A atualizacao deste protocolo nao revalida as evidencias tecnicas abaixo;
 - Rotas em app; autenticacao em lib/auth; autorizacao em lib/authorization.
 - Schema versionado em supabase/migrations; testes em tests; operacao em docs.
 - Consultar os guias locais de Next.js antes de implementar APIs do framework.
-- Validar lint, typecheck, test e build. Registrar falhas e testes nao executados
-  sem confundir implementacao, validacao, merge e publicacao.
+- Aplicar a DEPLOY-002 em `docs/runbooks/impact-based-validation.md` para todos
+  os desenvolvedores e agentes: validar a alteração e seus impactos, reaproveitar
+  evidências válidas e justificar ampliações. Preservar lint, tipos, testes e
+  build obrigatórios na CI do SHA candidato, sem duplicação local automática.
+  Registrar falhas e testes não executados sem confundir implementação,
+  validação, merge e publicação. DEPLOY-001 permanece obrigatória.
 - `docs/knowledge/recursos.json` mapeia paginas e APIs para area, agente, skill e
   referencias. `pnpm resources:check` detecta rotas novas sem mapeamento. Isso
   nao substitui cobertura funcional nem prova disponibilidade de integracoes.
