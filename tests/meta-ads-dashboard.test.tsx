@@ -304,6 +304,10 @@ describe("dashboard Meta Ads", () => {
 
     expect(canvasApplication).not.toContain("value.toExponential");
     expect(canvasApplication).toContain("value.toLocaleString('pt-BR'");
+    expect(canvasApplication).toContain("function positionChartFilters(card)");
+    expect(canvasApplication).toContain("rect.right-width-10");
+    expect(canvasApplication).toContain("panel.style.left=`${viewportLeft-rect.left}px`");
+    expect(canvasApplication).toContain("openChartFilters(el)");
     expect(canvasStyles).toContain(":has(>.card-controls:not([hidden])){overflow:visible");
     expect(canvasStyles).toContain("width:min(520px,calc(100vw - 36px))");
     expect(canvasStyles).toContain("max-height:min(480px,calc(100vh - 80px))");
