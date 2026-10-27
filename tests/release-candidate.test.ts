@@ -58,13 +58,13 @@ describe("release-candidate migration train", () => {
       .filter((name) => name.endsWith(".sql"))
       .sort();
     expect(migrations).toHaveLength(93);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(92);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(93);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-38)).toEqual([
+    expect(migrations.slice(-39)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
