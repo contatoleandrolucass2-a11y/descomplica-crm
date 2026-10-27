@@ -1,5 +1,6 @@
 # Worklog
 
+- 2026-10-27: canvas de Visão Geral e Agendamentos publicado no SHA `897d0cf9c8a91b197a91c742c3799968c7dcc61c`; migration aditiva `dashboard_profiles` aplicada com RLS forçada, seis RPCs autenticadas e smoke autenticado das duas páginas sem erros de console.
 - 2026-10-27: adotadas 22 referências visuais revisadas de `/app` e `/app/etapas/agendamentos` a partir da CI `40438827767`, artefato `12707058881`; 154 rotas, 88 combinações de tema, 242 auditorias Axe, teclado e zoom passaram, e as demais 220 imagens foram preservadas.
 - 2026-10-26: o inventário protegido do ensaio de restauração foi atualizado de 2.289 para 2.290 testes pgTAP, refletindo a nova asserção de volatilidade sem reduzir cobertura.
 - 2026-10-26: o segundo ensaio isolado alcançou o lint integral do banco e identificou que o validador de documentos estava declarado `IMMUTABLE` apesar de usar funções de texto `STABLE`; a declaração foi corrigida para `STABLE`, a variável sem uso foi removida e o pgTAP passou a fixar esse contrato.
