@@ -77,8 +77,8 @@ export const archiveRootNavigationContract = [
   { name: "Simulação", tag: "A", href: "/app/simulacao" },
   { name: "Ranking", tag: "A", href: "/app/ranking" },
   { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
-  { name: "Links Úteis", tag: "BUTTON", href: null },
   { name: "Gestão", tag: "BUTTON", href: null },
+  { name: "Links Úteis", tag: "BUTTON", href: null },
   { name: "Administração", tag: "BUTTON", href: null },
 ];
 const navigation = (page) => page.locator("#authorized-navigation");
@@ -1342,13 +1342,13 @@ export async function checkArchiveNavigation(
               await assertNavigationLinkFocused(partnerships, "/app/canal-de-parcerias");
               await page.keyboard.press("Tab");
               await assertNavigationControlFocused(
-                useful,
-                "authorized-navigation-crm-useful_links",
+                management,
+                "authorized-navigation-crm-management",
               );
               await page.keyboard.press("Tab");
               await assertNavigationControlFocused(
-                management,
-                "authorized-navigation-crm-management",
+                useful,
+                "authorized-navigation-crm-useful_links",
               );
               await page.keyboard.press("Tab");
               stage = `theme:${theme}:accessible-disclosure:administration-focus`;
@@ -1484,9 +1484,9 @@ export async function checkArchiveNavigation(
           await page.keyboard.press("Tab");
           await assertNavigationLinkFocused(partnerships, "/app/canal-de-parcerias");
           await page.keyboard.press("Tab");
-          await assertNavigationControlFocused(useful, "authorized-navigation-crm-useful_links");
-          await page.keyboard.press("Tab");
           await assertNavigationControlFocused(management, "authorized-navigation-crm-management");
+          await page.keyboard.press("Tab");
+          await assertNavigationControlFocused(useful, "authorized-navigation-crm-useful_links");
           await page.keyboard.press("Tab");
           await assertNavigationControlFocused(administration, "authorized-navigation-admin-home");
           await page.keyboard.press("ArrowDown");

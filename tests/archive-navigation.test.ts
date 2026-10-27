@@ -342,8 +342,8 @@ describe("archive navigation evidence gate", () => {
       { name: "Simulação", tag: "A", href: "/app/simulacao" },
       { name: "Ranking", tag: "A", href: "/app/ranking" },
       { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
-      { name: "Links Úteis", tag: "BUTTON", href: null },
       { name: "Gestão", tag: "BUTTON", href: null },
+      { name: "Links Úteis", tag: "BUTTON", href: null },
       { name: "Administração", tag: "BUTTON", href: null },
     ]);
   });
