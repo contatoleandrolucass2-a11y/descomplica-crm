@@ -318,16 +318,21 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               })
               .evaluate((button) => {
                 const style = getComputedStyle(button);
-                return { color: style.color, gradient: style.backgroundImage };
+                return {
+                  color: style.color,
+                  background: style.backgroundColor,
+                  image: style.backgroundImage,
+                };
               });
-            expect(action.color).toBe("rgb(255, 255, 255)");
-            for (const endpoint of ["rgb(8, 117, 131)", "rgb(8, 118, 168)"]) {
-              expect(action.gradient).toContain(endpoint);
-              expect(
-                contrastRatio(action.color, endpoint),
-                JSON.stringify(action),
-              ).toBeGreaterThanOrEqual(4.5);
-            }
+            expect(action).toEqual({
+              color: "rgb(10, 43, 71)",
+              background: "rgb(92, 229, 241)",
+              image: "none",
+            });
+            expect(
+              contrastRatio(action.color, action.background),
+              JSON.stringify(action),
+            ).toBeGreaterThanOrEqual(4.5);
           }
         }
       }
@@ -344,7 +349,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByRole("heading", { name: "Resumo financeiro", exact: true }),
       ).toBeVisible();
       await browserExpect(
-        page.getByText("A confirmar · não incluído", { exact: true }),
+        page.getByText("Não aplicável neste cenário", { exact: true }),
       ).toBeVisible();
       await browserExpect(page.getByText(/seguros de referência/).first()).toBeVisible();
       await auditCurrentTab("resultado");
@@ -433,6 +438,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.getByText("R$ 275.000,00", { exact: true })).toBeVisible();
       await browserExpect(page.getByText("R$ 1.200,00", { exact: true })).toBeVisible();
       await browserExpect(page.locator(".caixa-term-field input")).toHaveValue("105");
+      await page.getByLabel("Data de nascimento *", { exact: false }).fill("1987-01-22");
+      await browserExpect(page.locator(".caixa-term-field input")).toHaveValue("420");
+      await page.locator(".caixa-term-field input").fill("240");
+      await browserExpect(page.locator(".caixa-term-field input")).toHaveValue("240");
+      await page.getByLabel("Data de nascimento *", { exact: false }).fill("1986-01-22");
+      await browserExpect(page.locator(".caixa-term-field input")).toHaveValue("420");
+      await browserExpect(page.getByText("Elegível à análise", { exact: true })).toBeVisible();
       await page.getByRole("button", { name: "Calcular simulação", exact: true }).click();
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
         "MCMV Faixa 3 por valor do imóvel",
@@ -440,7 +452,10 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
         "taxa efetiva de 8,4722% a.a.",
       );
-      await browserExpect(page.locator("#caixa-simulation-result")).toContainText("105 meses");
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText("420 meses");
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
+        "Elegível à análise · valor não abatido",
+      );
       expect(errors).toEqual([]);
     });
     it("applies the SBPE SAC ceiling and removes MCMV-only values", async () => {
@@ -501,6 +516,29 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
               return box.left >= form.left && box.right <= form.right;
             });
           expect(clearBounds, `${width}/${theme}: Limpar stays inside the form`).toBe(true);
+          if (width === 1024) {
+            const geometry = await page.evaluate(() => {
+              const rectangle = (selector: string) => {
+                const box = document.querySelector(selector)!.getBoundingClientRect();
+                return {
+                  top: Math.round(box.top),
+                  left: Math.round(box.left),
+                  width: Math.round(box.width),
+                };
+              };
+              return {
+                participants: rectangle(".caixa-participants-field"),
+                productSystem: rectangle(".caixa-product-system-field"),
+                toggles: Array.from(
+                  document.querySelectorAll(".caixa-binary-grid > .caixa-fgts-choice"),
+                ).map((element) => Math.round(element.getBoundingClientRect().top)),
+                property: rectangle(".caixa-property-condition-group"),
+              };
+            });
+            expect(geometry.participants.width).toBeGreaterThan(geometry.productSystem.width * 0.9);
+            expect(new Set(geometry.toggles)).toHaveLength(1);
+            expect(geometry.property.top).toBeGreaterThan(geometry.toggles[0] ?? 0);
+          }
           const inactiveButtons = await page
             .locator('.caixa-toggle button[aria-pressed="false"]')
             .evaluateAll((buttons) =>
@@ -515,12 +553,6 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
             );
           expect(inactiveButtons).toHaveLength(4);
           for (const inactive of inactiveButtons) {
-            expect(inactive.color, `${width}/${theme}`).toBe(
-              theme === "dark" ? "rgb(169, 191, 210)" : "rgb(64, 84, 108)",
-            );
-            expect(inactive.background, `${width}/${theme}`).toBe(
-              theme === "dark" ? "rgb(16, 42, 66)" : "rgb(255, 255, 255)",
-            );
             expect(
               contrastRatio(inactive.color, inactive.background),
               `${width}/${theme}: ${JSON.stringify(inactive)}`,

@@ -2,6 +2,7 @@
 import { CAIXA_CITIES } from "./caixa-reference-data";
 export type HousingProduct = "mcmv" | "sbpe";
 export type HousingSystem = "price" | "sac";
+export type McmvSubsidyEligibility = "confirmed" | "eligible-review" | "not-eligible";
 export interface HousingInput {
   income: number;
   propertyValue: number;
@@ -176,6 +177,34 @@ export function getMcmvBand(income: number) {
   if (income <= 13000) return "Classe Média";
   return "SBPE";
 }
+export function getMcmvSubsidyEligibility({
+  income,
+  propertyValue,
+  product = "mcmv",
+  previousSubsidy = false,
+  middleClass = false,
+  confirmedSubsidy,
+}: {
+  income: number;
+  propertyValue: number;
+  product?: HousingProduct | undefined;
+  previousSubsidy?: boolean | undefined;
+  middleClass?: boolean | undefined;
+  confirmedSubsidy?: number | undefined;
+}): McmvSubsidyEligibility {
+  if (confirmedSubsidy !== undefined) return "confirmed";
+  return product === "mcmv" &&
+    !middleClass &&
+    !previousSubsidy &&
+    Number.isFinite(income) &&
+    income > 0 &&
+    income <= 4000 &&
+    Number.isFinite(propertyValue) &&
+    propertyValue > 0 &&
+    propertyValue <= 400000
+    ? "eligible-review"
+    : "not-eligible";
+}
 export function getMunicipalLimit(city: string | undefined, state: string) {
   return city?.trim() ? MUNICIPAL_LIMITS.get(`${state}|${city.trim()}`) : undefined;
 }
@@ -282,6 +311,7 @@ export interface HousingSuccess {
   operatingFeeEstimated: boolean;
   rateEstimated: boolean;
   subsidyConfirmed: boolean;
+  subsidyEligibility: McmvSubsidyEligibility;
   financingQuota: number;
   sources: typeof CAIXA_SOURCES;
   middleClass: boolean;
@@ -296,6 +326,14 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     system = input.system ?? "price";
   const middleClass =
     product === "mcmv" && (input.middleClass === true || income > 9600 || propertyValue > 400000);
+  const subsidyEligibility = getMcmvSubsidyEligibility({
+    income,
+    propertyValue,
+    product,
+    previousSubsidy: input.previousSubsidy,
+    middleClass,
+    confirmedSubsidy: input.confirmedSubsidy,
+  });
   const errors: string[] = [],
     warnings: string[] = [];
   if (!Number.isFinite(income) || income <= 0) errors.push("Informe uma renda familiar válida.");
@@ -474,9 +512,9 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     warnings.push(
       "Fator social registrado apenas para conferência documental; ele não altera esta estimativa sem valor oficial confirmado.",
     );
-  if (input.confirmedSubsidy === undefined && product === "mcmv" && !middleClass)
+  if (subsidyEligibility === "eligible-review")
     warnings.push(
-      "Subsídio a confirmar: nenhum desconto foi abatido. A fórmula municipal não foi presumida.",
+      "Renda potencialmente elegível ao desconto complemento FGTS. Nenhum valor foi abatido sem a confirmação da CAIXA, pois o cálculo oficial também depende da área e tipo do imóvel, composição familiar, recorte populacional e modalidade da operação.",
     );
   if (rateAdjustedByProperty)
     warnings.push(
@@ -578,6 +616,7 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     operatingFeeEstimated,
     rateEstimated,
     subsidyConfirmed: input.confirmedSubsidy !== undefined,
+    subsidyEligibility,
     financingQuota,
     middleClass,
     ...(municipalLimit !== undefined ? { municipalLimit } : {}),

@@ -1,5 +1,59 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: correcao local de subsidio, prazo e layout do CAIXA
+
+- A calculadora publica CAIXA foi repetida com dados ficticios: nascimento em
+  22/01/1987, renda de R$ 4.000 e imovel de R$ 276.000. O resultado exibiu Price,
+  prazo maximo de 420 meses, taxa efetiva de 8,47%, primeira prestacao de
+  R$ 1.200 e financiamento maximo de R$ 157.599,38. O site informa que subsidio
+  FGTS ou PMCMV pode compor a entrada, mas nao publica o valor do beneficio.
+- O MFOM Habitacao v034 oficial, vigente desde 22/04/2026 e consultado em
+  27/10/2026, foi conferido junto com as planilhas embutidas dos anexos III e IV.
+  O calculo monetario depende de area e tipo da unidade, composicao familiar,
+  modalidade, fator estadual e recorte populacional. Para renda entre R$ 3.700
+  e R$ 4.000, o texto consultado nao explicita saturacao da curva de `Frenda`.
+  Por isso o sistema agora sinaliza automaticamente a elegibilidade potencial,
+  mas nao inventa nem abate valor sem confirmacao oficial.
+- O prazo do formulario passa a ser reposto no maximo permitido sempre que data
+  de nascimento, condicao de obra ou prazo de construcao mudam. Uma reducao
+  manual permanece ate a proxima mudanca determinante e o campo impede valor
+  acima do maximo atual.
+- A interface reutiliza os tokens globais de Agendamentos nos tres temas. O
+  tablet usa duas colunas nos campos principais, mantem os tres toggles na mesma
+  linha e posiciona planta/condicao juntos; o celular preserva os nomes das abas.
+  O card do plano usa altura natural e nao e mais esticado pela composicao.
+- Validacao focada local: 55 testes unitarios/componentes e 6 jornadas reais de
+  navegador aprovadas. A matriz de navegador cobre calculo, recomputacao do
+  prazo nos dois sentidos, edicao manual, SBPE SAC 90%, temas, Axe, overflow e
+  geometrias em desktop, tablet e celular. `pnpm lint` concluiu sem erros (44
+  avisos preexistentes de Meta Ads), `pnpm typecheck`, `pnpm build`,
+  `pnpm resources:check` e `pnpm security:secrets` foram aprovados.
+- A suite integral local serializada encontrou uma falha fora do escopo em
+  `tests/associative-approval-suggestion.test.ts` e a primeira tentativa sofreu
+  esgotamento de memoria do host. Conforme a regra maxima de escopo, o
+  Associativo nao foi investigado nem alterado; a CI do SHA candidato devera
+  confirmar os gates integrais. Merge e publicacao ainda estao pendentes nesta
+  etapa local.
+
+## 2026-10-27: abertura da correcao de subsidio, prazo e layout do CAIXA
+
+- Consulta em 27/10/2026 as 11:20 `America/Sao_Paulo`: a `main` remota esta no
+  SHA documental `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`; a aplicacao
+  publicada responde HTTP 200, `status=ok` e versao
+  `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`.
+- A CI da versao publicada, run `40463329858`, permanece aprovada nos jobs
+  `validate`, `promotable-image`, `isolated-restore` e `release-gates`. O estado
+  observado ainda nao valida as novas correcoes solicitadas neste chat.
+- O escopo desta investigacao e restrito ao Simulador CAIXA: elegibilidade e
+  calculo indicativo de subsidio, recomputacao do prazo maximo por idade,
+  regressao financeira com dados ficticios e alinhamento visual ao padrao de
+  Agendamentos. Nao autoriza alteracoes em outros simuladores, dados remotos,
+  DNS ou workflows n8n.
+- `knowledge:context` e `knowledge:search` foram executados, mas o runtime de
+  memoria retornou `Documento excede o limite de exportacao.`. O conhecimento
+  versionado e o codigo atual serao usados como fonte; a sincronizacao com o
+  Obsidian permanece pendente.
+
 ## 2026-10-27: automacao e precisao do Simulador CAIXA publicadas
 
 - O PR #368 foi integrado na `main` como
