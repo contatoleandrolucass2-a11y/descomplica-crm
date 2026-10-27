@@ -480,6 +480,100 @@ function syntheticRegions(url) {
   };
 }
 
+async function checkTabelaoProjectFolders(page) {
+  const projects = [
+    ["Direcional Conquista Clube Itaim Paulista", "1B9AmelZFegfRuJjmEcQBcnKaTJPCyD36"],
+    ["Direcional Conquista Clube São Miguel", "1gtBnmi2fHlPboFehp-McUIFE3wVAZDEp"],
+    ["Alto Liviero Condomínio Clube", "1WpZpdHKkbSDxVpEJ1zcbnCVFsLvKtMI3"],
+    ["Direcional Conquista Clube Sacomã", "1ZH6XVzSreLvVH9tkNJSIOZuNzoAuaPir"],
+    ["Raiz Home Clube", "1NDF_tf1llswJ1QzqtyFi27h2TSeuFZez"],
+    ["Conquista Clube Butantã", "1lP5ya1-Ed9-FuBP_4KDIWH0cc3qpgii9"],
+    ["Riva Prizma", "1atqn60Vok8yFHoPcSf5qVgeaBLhasxSY"],
+    ["Mirante Jardim das Esmeraldas", "1uyq5EiKoFNRe8PxYF-QvP64_yY5xAYI-"],
+    ["Terrasse Vila Ema", "1kx1bWdwqDVShpeEurtnvgCUeDtdSlp_F"],
+    ["Empreendimento sem pasta", null],
+  ];
+  const items = projects.flatMap(([project], index) =>
+    buildTabelaoMapsFixture()
+      .slice(0, 2)
+      .map((item, row) => ({
+        ...item,
+        project,
+        id: `qa-drive-${index}-${row}`,
+      })),
+  );
+  const pattern = /\/api\/inventory(?:\/snapshot)?(?:\?.*)?$/;
+  const handler = (route) => {
+    const rows = new URL(route.request().url()).pathname.endsWith("/snapshot") ? [] : items;
+    return route.fulfill({
+      json: { source: "QA Drive synthetic", count: rows.length, items: rows },
+    });
+  };
+  await page.route(pattern, handler);
+  try {
+    for (const width of [1440, 375]) {
+      await page.setViewportSize({ width, height: 900 });
+      await page.reload({ waitUntil: "domcontentloaded" });
+      await page.locator('tr[data-inventory-unit-id="qa-drive-9-1"]').waitFor();
+      for (const theme of ["light", "balanced", "dark"]) {
+        await page.evaluate(
+          (value) => document.documentElement.setAttribute("data-theme", value),
+          theme,
+        );
+        for (const [project, folderId] of projects) {
+          const cell = page.locator('th[data-label="Empreendimento"]').filter({ hasText: project });
+          assert.equal(await cell.count(), 1);
+          assert.equal(await cell.getAttribute("rowspan"), "2");
+          assert.equal(await cell.textContent(), project);
+          const link = cell.locator("a");
+          if (!folderId) {
+            assert.equal(await link.count(), 0);
+            continue;
+          }
+          assert.equal(
+            await link.getAttribute("href"),
+            `https://drive.google.com/drive/folders/${folderId}`,
+          );
+          assert.equal(await link.getAttribute("target"), "_blank");
+          assert.equal(await link.getAttribute("rel"), "noopener noreferrer");
+          await link.focus();
+          assert.equal(
+            await link.evaluate(
+              (element) =>
+                element === document.activeElement &&
+                getComputedStyle(element).outlineStyle !== "none",
+            ),
+            true,
+          );
+        }
+      }
+    }
+    // Intercept the new tab locally: no external Drive session or permissions are changed.
+    await page
+      .context()
+      .route("https://drive.google.com/**", (route) => route.fulfill({ body: "QA destination" }));
+    const destination = `https://drive.google.com/drive/folders/${projects[0][1]}`;
+    const link = page.locator(`a[href="${destination}"]`);
+    await link.focus();
+    const popupPromise = page.waitForEvent("popup");
+    await page.keyboard.press("Enter");
+    const popup = await popupPromise;
+    await popup.waitForLoadState();
+    assert.equal(popup.url(), destination);
+    await popup.close();
+    return {
+      nineFolders: true,
+      unknownHasNoLink: true,
+      mergedNamesPreserved: true,
+      keyboardNewTab: true,
+      themesAndMobile: true,
+    };
+  } finally {
+    await page.context().unroute("https://drive.google.com/**");
+    await page.unroute(pattern, handler);
+  }
+}
+
 async function runSyntheticLayout() {
   const root = path.resolve(import.meta.dirname, "../..");
   const require = createRequire(import.meta.url);
@@ -684,6 +778,8 @@ async function runLayoutBrowser(origin) {
     for (const [name, passed] of Object.entries(maps)) {
       if (passed !== true) failures.push(`Maps: ${name}`);
     }
+    const folders = await checkTabelaoProjectFolders(page);
+    process.stdout.write(`Drive: ${JSON.stringify(folders)}\n`);
     assert.deepEqual(errors, [], "Browser errors");
     assert.deepEqual(failures, [], "Layout acceptance failures");
     process.stdout.write("Synthetic Tabelao layout passed; no snapshots or baseline changes.\n");

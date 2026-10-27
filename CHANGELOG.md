@@ -1,5 +1,7 @@
 # Changelog
 
+- Vincula automaticamente os nomes de nove empreendimentos do Tabelão às pastas correspondentes do Google Drive, com abertura em nova aba e preservação dos nomes sem correspondência.
+
 - Define a DEPLOY-002 para todos os desenvolvedores e agentes: validação por impacto, reaproveitamento de evidências e revisão ampliada somente com justificativa, preservando gates obrigatórios e publicação protegida.
 
 - Registra a integração do ajuste CAIXA e o bloqueio final da publicação: o `main` vigente passou nos checks funcionais, mas 11 referências visuais externas do Dashboard divergiram após correção concorrente.
