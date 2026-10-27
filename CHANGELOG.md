@@ -1,5 +1,6 @@
 # Changelog
 
+- Registra o editor administrativo de Agendamentos integrado e validado, com publicação bloqueada por 11 referências visuais externas e desatualizadas da Visão Geral.
 - Corrige o filtro de status do Meta Ads para usar o estado efetivo da campanha e preservar o investimento histórico de anúncios arquivados dentro de campanhas ativas.
 - Atualiza somente as 11 referências visuais do Dashboard revisadas no artefato autenticado que bloqueava a publicação do Simulador CAIXA, sem alterar código funcional nem tolerâncias.
 - Vincula automaticamente os nomes de nove empreendimentos do Tabelão às pastas correspondentes do Google Drive, com abertura em nova aba e preservação dos nomes sem correspondência.

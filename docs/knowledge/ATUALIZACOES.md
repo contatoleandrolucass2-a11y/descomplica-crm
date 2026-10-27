@@ -1,5 +1,31 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: editor de Agendamentos integrado; publicacao bloqueada por baseline externo
+
+- Escopo concluido e integrado: os PRs #375, #378 e #381 adicionaram o editor
+  administrativo compartilhado de `/app/etapas/agendamentos`, com dimensoes,
+  conteudo, tipografia, alinhamento, cores e altura das torres persistentes.
+- O `main` vigente `74ae20304f7422e1b6cbb542b6585d1197d53a04` aprovou
+  validate, imagem promovivel, restauracao isolada, banco, E2E e o relatorio do
+  Dashboard. A CI `40580092387` bloqueou a publicacao somente na comparacao
+  final de 11 imagens da rota `/app`, com drift entre 1,7% e 2,4%.
+- O artefato diagnostico `12772723512` mostrou que as referencias integradas
+  pelo PR #382 foram capturadas com filtros e funis indisponiveis, enquanto o
+  candidato renderizou os dados sinteticos esperados. A diferenca pertence a
+  Visao Geral, nao a `/app/etapas/agendamentos`; pela regra maxima de escopo,
+  nenhum baseline ou codigo da outra pagina foi alterado neste chat.
+- Uma tentativa anterior encontrou limite publico do ECR ao baixar a imagem
+  Supabase (`toomanyrequests: Data limit exceeded`). A repeticao superou essa
+  etapa; ela nao foi a causa do bloqueio final.
+- Migration e runtime de producao nao foram alterados. Conferencia final em
+  27/10/2026 18:39 `America/Sao_Paulo`: health publico HTTP 200, `status=ok`,
+  versao `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`.
+- Validacao local: lint sem erros e com 44 avisos preexistentes, typecheck,
+  build de 41 paginas/71 saidas e matriz do Dashboard com 267 verificacoes
+  aprovados. A suite Vitest aprovou 4.372 testes e ignorou 112; um caso do
+  Associativo excedeu o tempo apenas no host Windows e aprovou em tres
+  repeticoes isoladas. A CI Linux aprovou a suite funcional.
+
 ## 2026-10-27: revisão das referências do Dashboard para liberar o CAIXA
 
 - Após autorização explícita do usuário para remover o bloqueio e concluir a
