@@ -47,7 +47,25 @@ describe("protected commercial page set", () => {
     },
   );
 
-  it("matches the exact approved forty-one-page protected set", () => {
+  it.each([
+    ["links-uteis", "crm.useful_links.view"],
+    ["links-uteis/grupos-whatsapp", "crm.useful_links.grupos_whatsapp.view"],
+    ["links-uteis/lojas-horarios", "crm.useful_links.lojas_horarios.view"],
+    ["links-uteis/relacionamento", "crm.useful_links.relacionamento.view"],
+    ["links-uteis/regras-comerciais", "crm.useful_links.regras_comerciais.view"],
+    ["links-uteis/campanha-do-mes", "crm.useful_links.campanha_do_mes.view"],
+    ["links-uteis/app-bora-vender", "crm.useful_links.app_bora_vender.view"],
+    ["links-uteis/linktree-liveprint", "crm.useful_links.linktree_liveprint.view"],
+  ])("keeps %s behind its independent Useful Links page guard", (route, permission) => {
+    const source = readFileSync(
+      new URL(`../app/(protected)/app/${route}/page.tsx`, import.meta.url),
+      "utf8",
+    );
+    expect(source).toContain(`enforcePageAccess("/app/${route}")`);
+    expect(getProtectedPageGate(`/app/${route}`)?.permission).toBe(permission);
+  });
+
+  it("matches the exact approved forty-nine-page protected set", () => {
     expect(
       PROTECTED_PAGE_GATES.filter((page) => page.releaseEnabled)
         .map((page) => `${page.pageKey}|${page.path}|${page.permission}`)
@@ -95,6 +113,14 @@ describe("protected commercial page set", () => {
         "crm.stage.opportunities|/app/etapas/oportunidades|crm.stage.opportunities.view",
         "crm.stage.sales|/app/etapas/vendas|crm.stage.sales.view",
         "crm.stage.visits|/app/etapas/visitas|crm.stage.visits.view",
+        "crm.useful_links|/app/links-uteis|crm.useful_links.view",
+        "crm.useful_links.grupos_whatsapp|/app/links-uteis/grupos-whatsapp|crm.useful_links.grupos_whatsapp.view",
+        "crm.useful_links.lojas_horarios|/app/links-uteis/lojas-horarios|crm.useful_links.lojas_horarios.view",
+        "crm.useful_links.relacionamento|/app/links-uteis/relacionamento|crm.useful_links.relacionamento.view",
+        "crm.useful_links.regras_comerciais|/app/links-uteis/regras-comerciais|crm.useful_links.regras_comerciais.view",
+        "crm.useful_links.campanha_do_mes|/app/links-uteis/campanha-do-mes|crm.useful_links.campanha_do_mes.view",
+        "crm.useful_links.app_bora_vender|/app/links-uteis/app-bora-vender|crm.useful_links.app_bora_vender.view",
+        "crm.useful_links.linktree_liveprint|/app/links-uteis/linktree-liveprint|crm.useful_links.linktree_liveprint.view",
       ].sort(),
     );
   });
@@ -107,10 +133,10 @@ describe("protected commercial page set", () => {
     ).toEqual([]);
   });
 
-  it("keeps the full forty-one-route smoke inventory unique", () => {
-    expect(PROTECTED_PAGE_GATES).toHaveLength(41);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(41);
-    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(41);
+  it("keeps the full forty-nine-route smoke inventory unique", () => {
+    expect(PROTECTED_PAGE_GATES).toHaveLength(49);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.pageKey)).size).toBe(49);
+    expect(new Set(PROTECTED_PAGE_GATES.map((page) => page.path)).size).toBe(49);
   });
 
   it("keeps Repasse restricted to Master and Admin in addition to its permission", () => {

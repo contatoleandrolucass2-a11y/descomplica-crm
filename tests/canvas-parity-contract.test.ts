@@ -3,6 +3,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
 import { PROTECTED_PAGE_GATES } from "@/lib/authorization/page-gates";
+import { usefulLinksPages } from "@/lib/crm/useful-links/content";
 
 interface CanvasAsset {
   path: string;
@@ -28,6 +29,7 @@ describe("approved canvas parity contract", () => {
       (path) =>
         !path.startsWith("/app/meta-ads") &&
         !path.startsWith("/app/leads") &&
+        !path.startsWith("/app/links-uteis") &&
         !["/app/repasse", "/app/configuracoes/conectar-sistemas"].includes(path),
     );
     const metaAdsAudit = readFileSync(
@@ -37,8 +39,16 @@ describe("approved canvas parity contract", () => {
     const repasseReadme = readFileSync(new URL("../repasse/README.md", root), "utf8");
     const systemsReadme = readFileSync(new URL("../connected-systems/README.md", root), "utf8");
 
-    expect(releasedPaths).toHaveLength(41);
+    expect(releasedPaths).toHaveLength(49);
     expect(canvasPaths).toHaveLength(26);
+    // The new content pages have their own reference; historical canvases stay unchanged.
+    expect(usefulLinksPages).toHaveLength(7);
+    expect(releasedPaths.filter((path) => path.startsWith("/app/links-uteis")).sort()).toEqual(
+      [
+        "/app/links-uteis",
+        ...usefulLinksPages.map(({ slug }) => `/app/links-uteis/${slug}`),
+      ].sort(),
+    );
     for (const path of canvasPaths) expect(readme).toContain(`\`${path}\``);
     expect(repasseReadme).toContain("`/app/repasse`");
     expect(repasseReadme).toContain("Claro, Médio e Escuro");

@@ -351,6 +351,16 @@ const leadRoutes = [
   "/app/leads/configuracoes",
   "/app/leads/auditoria",
 ] as const;
+const usefulLinksRoutes = [
+  "/app/links-uteis",
+  "/app/links-uteis/grupos-whatsapp",
+  "/app/links-uteis/lojas-horarios",
+  "/app/links-uteis/relacionamento",
+  "/app/links-uteis/regras-comerciais",
+  "/app/links-uteis/campanha-do-mes",
+  "/app/links-uteis/app-bora-vender",
+  "/app/links-uteis/linktree-liveprint",
+] as const;
 const protectedSurfaces = [
   {
     path: "/app",
@@ -499,6 +509,42 @@ const protectedSurfaces = [
     allowed: activeOperationalRoles,
   },
   { path: "/admin", heading: "Área administrativa", allowed: adminRoles },
+  { path: "/app/links-uteis", heading: "Links Úteis", allowed: activeOperationalRoles },
+  {
+    path: "/app/links-uteis/grupos-whatsapp",
+    heading: "Grupos WhatsApp",
+    allowed: activeOperationalRoles,
+  },
+  {
+    path: "/app/links-uteis/lojas-horarios",
+    heading: "Lojas Horários",
+    allowed: activeOperationalRoles,
+  },
+  {
+    path: "/app/links-uteis/relacionamento",
+    heading: "Relacionamento",
+    allowed: activeOperationalRoles,
+  },
+  {
+    path: "/app/links-uteis/regras-comerciais",
+    heading: "Regras Comerciais",
+    allowed: activeOperationalRoles,
+  },
+  {
+    path: "/app/links-uteis/campanha-do-mes",
+    heading: "Campanha do Mês",
+    allowed: activeOperationalRoles,
+  },
+  {
+    path: "/app/links-uteis/app-bora-vender",
+    heading: "App Bora Vender",
+    allowed: activeOperationalRoles,
+  },
+  {
+    path: "/app/links-uteis/linktree-liveprint",
+    heading: "Linktree e Liveprint",
+    allowed: activeOperationalRoles,
+  },
   { path: "/admin/usuarios", heading: "Usuários e acessos", allowed: adminRoles },
   { path: "/admin/paginas", heading: "Catálogo de páginas", allowed: adminRoles },
 ] as const;
@@ -511,6 +557,7 @@ function allowedDirectRoutesForRole(role: Role) {
 }
 
 const operationalRoutes = [
+  ...usefulLinksRoutes,
   "/app",
   "/app/etapas/agendamentos",
   "/app/etapas/oportunidades",
@@ -748,6 +795,14 @@ function expectedPrimaryNavigationRootsForRole(role: Role) {
       controls: "authorized-navigation-crm-management",
     });
   }
+  if (authorizedRoutes.has("/app/links-uteis")) {
+    roots.push({
+      name: "Links Úteis",
+      tag: "BUTTON",
+      href: null,
+      controls: "authorized-navigation-crm-useful_links",
+    });
+  }
   if (authorizedRoutes.has("/admin")) {
     roots.push({
       name: "Administração",
@@ -909,18 +964,18 @@ test.afterAll(() => {
 });
 
 test("the hosted profile matrix uses the exact approved commercial page sets", () => {
-  expect(protectedSurfaces).toHaveLength(41);
-  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(41);
+  expect(protectedSurfaces).toHaveLength(49);
+  expect(new Set(protectedSurfaces.map((surface) => surface.path)).size).toBe(49);
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 27 : activeOperationalRoles.has(role) ? 11 : 0,
+      adminRoles.has(role) ? 35 : activeOperationalRoles.has(role) ? 19 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
     );
     expect(expectedPrimaryNavigationRootsForRole(role), role).toHaveLength(
-      adminRoles.has(role) ? 8 : activeOperationalRoles.has(role) ? 4 : 0,
+      adminRoles.has(role) ? 9 : activeOperationalRoles.has(role) ? 5 : 0,
     );
 
     const directRoutes = expectedDirectRoutesByRole[role];

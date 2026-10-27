@@ -53,18 +53,18 @@ describe("release-candidate migration train", () => {
     ).toHaveLength(3);
   });
 
-  it("keeps a unique, ordered 92-version manifest", async () => {
+  it("keeps a unique, ordered 93-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(92);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(92);
+    expect(migrations).toHaveLength(93);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(93);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-38)).toEqual([
+    expect(migrations.slice(-39)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -103,9 +103,10 @@ describe("release-candidate migration train", () => {
       "20261026194815_dashboard_profiles.sql",
       "20261026200621_sync_page_catalog.sql",
       "20261027145559_appointments_admin_canvas_presentation.sql",
+      "20261027160500_sync_page_catalog.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261027145559_appointments_admin_canvas_presentation.sql");
+    expect(migrations.at(-1)).toBe("20261027160500_sync_page_catalog.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -261,6 +262,7 @@ describe("release-candidate activation defaults", () => {
       "repasseRoles",
       "metaAdsRoutes",
       "leadRoutes",
+      "usefulLinksRoutes",
       "protectedSurfaces",
       "operationalRoutes",
       "connectedSystemsRoute",
@@ -298,8 +300,8 @@ describe("release-candidate activation defaults", () => {
       { timeout: 1000 },
     );
     const surfacePaths = matrix.protectedSurfaces.map((surface: { path: string }) => surface.path);
-    expect(surfacePaths).toHaveLength(41);
-    expect(new Set(surfacePaths).size).toBe(41);
+    expect(surfacePaths).toHaveLength(49);
+    expect(new Set(surfacePaths).size).toBe(49);
     expect([...surfacePaths].sort()).toEqual(
       PROTECTED_PAGE_GATES.filter((gate) => gate.releaseEnabled)
         .map((gate) => gate.path)
@@ -308,6 +310,16 @@ describe("release-candidate activation defaults", () => {
     for (const role of matrix.expectedRoles) {
       const administrative = role === "master" || role === "admin";
       const operational = role !== "pending";
+      for (const route of surfacePaths.filter((path: string) =>
+        path.startsWith("/app/links-uteis"),
+      )) {
+        expect(matrix.expectedDirectRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
+          operational,
+        );
+        expect(matrix.expectedHeaderRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
+          operational,
+        );
+      }
       for (const routes of [
         matrix.expectedDirectRoutesByRole[role],
         matrix.expectedHeaderRoutesByRole[role],
@@ -336,7 +348,7 @@ describe("release-candidate activation defaults", () => {
       ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(27);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(35);
         expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
@@ -346,6 +358,7 @@ describe("release-candidate activation defaults", () => {
           "Ranking",
           "Canal de Parcerias",
           "Gestão",
+          "Links Úteis",
           "Administração",
         ]);
         expect(roots[2]).toEqual({
@@ -361,13 +374,14 @@ describe("release-candidate activation defaults", () => {
           controls: "authorized-navigation-crm-management",
         });
       } else if (operational) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(11);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(19);
         expect(matrix.expectedAccountSettingsRoutesForRole(role)).toEqual([]);
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
           "Simulação",
           role.endsWith("_house") ? "Ranking" : "Canal de Parcerias",
           "Gestão",
+          "Links Úteis",
         ]);
         expect(roots[3]).toEqual({
           name: "Gestão",

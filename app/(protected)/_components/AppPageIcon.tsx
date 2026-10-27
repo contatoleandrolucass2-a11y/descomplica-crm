@@ -1,4 +1,4 @@
-import { ClipboardList } from "lucide-react";
+import { ClipboardList, Link2 } from "lucide-react";
 
 function iconCategory(pageKey: string) {
   if (pageKey.startsWith("crm.simulation")) return "calculator";
@@ -14,6 +14,9 @@ function iconCategory(pageKey: string) {
 }
 
 export function AppPageIcon({ pageKey }: { pageKey: string }) {
+  if (pageKey.startsWith("crm.useful_links")) {
+    return <Link2 aria-hidden="true" />;
+  }
   if (pageKey.startsWith("crm.management")) {
     return <ClipboardList aria-hidden="true" />;
   }

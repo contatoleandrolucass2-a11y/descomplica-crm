@@ -117,10 +117,13 @@ describe("protected interface shell", () => {
     expect(shellStylesheet).toMatch(/\.accountProfile \{[\s\S]*overflow-wrap: anywhere/);
     expect(shellStylesheet).toContain("@media (max-width: 1180px)");
     expect(shellStylesheet).toMatch(
-      /@media \(min-width: 1181px\) and \(max-width: 1500px\) \{[\s\S]*\.navigationLink,[\s\S]*\.navigationTrigger \{[\s\S]*padding-inline: 5px/,
+      /@media \(min-width: 1181px\) and \(max-width: 1500px\) \{[\s\S]*\.navigationLink,[\s\S]*\.navigationTrigger \{[\s\S]*padding-inline: 3px/,
     );
     expect(shellStylesheet).toMatch(
-      /@media \(min-width: 1181px\) and \(max-width: 1320px\) \{[\s\S]*\.navigationIcon \{[\s\S]*display: none/,
+      /@media \(min-width: 1181px\) and \(max-width: 1500px\) \{[\s\S]*\.navigationIcon \{[\s\S]*display: none/,
+    );
+    expect(shellStylesheet).toMatch(
+      /@media \(min-width: 1181px\) and \(max-width: 1320px\) \{[\s\S]*\[data-appointments-navigation="true"\][\s\S]*\.navigationList \{[\s\S]*gap: 0[\s\S]*padding-inline: 3px[\s\S]*font-size: 11px/,
     );
     expect(shellStylesheet).toMatch(
       /@media \(max-width: 1180px\) \{[\s\S]*\.topbarInner \{[\s\S]*grid-template-columns: minmax\(0, 1fr\) 44px auto auto[\s\S]*\.navigationRoot \{[\s\S]*grid-column: 2[\s\S]*\.actions \{[\s\S]*grid-column: 4[\s\S]*\.themeSwitch \{[\s\S]*grid-column: 3/,

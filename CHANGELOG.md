@@ -1,5 +1,10 @@
 # Changelog
 
+- Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
+- Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.
+- Compacta a navegação de Agendamentos em notebooks após a inclusão do nono menu raiz.
+- Atualiza 60 referências visuais autenticadas após integrar a baseline vigente do Dashboard, sem alterar os limiares do gate.
+- Transcreve contatos, horários, relacionamento, regras comerciais, campanhas históricas, Bora Vender e materiais Linktree/Liveprint, sinalizando destinos divergentes e conteúdo que exige confirmação de vigência.
 - Corrige o filtro de status do Meta Ads para usar o estado efetivo da campanha e preservar o investimento histórico de anúncios arquivados dentro de campanhas ativas.
 - Atualiza somente as 11 referências visuais do Dashboard revisadas no artefato autenticado que bloqueava a publicação do Simulador CAIXA, sem alterar código funcional nem tolerâncias.
 - Vincula automaticamente os nomes de nove empreendimentos do Tabelão às pastas correspondentes do Google Drive, com abertura em nova aba e preservação dos nomes sem correspondência.
@@ -20,6 +25,13 @@
 - Atualiza somente as 22 referências visuais de Visão Geral e Agendamentos a partir do artefato autenticado da CI, preservando as demais 220 capturas.
 - Atualiza o inventário do ensaio de restauração para os 2.290 testes pgTAP após a nova asserção de volatilidade do validador.
 - Alinha a volatilidade do validador SQL dos perfis do dashboard às funções estáveis usadas na assinatura normalizada dos cards.
+
+## 2026-10-27 — Links Úteis
+
+- Cria o hub `/app/links-uteis` e sete subpáginas responsivas e protegidas por permissões próprias.
+- Preserva o acesso dos perfis operacionais já autorizados ao Dashboard e permite overrides futuros por página.
+- Mantém Ranking Geral fora do novo menu e fora do conteúdo copiado.
+- Registra a fonte Data Studio consultada em 27/10/2026 e não transforma regras ou campanhas históricas em condições comerciais vigentes.
 
 ## 2026-10-27 — Editor administrativo de Agendamentos
 

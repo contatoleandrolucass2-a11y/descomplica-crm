@@ -52,6 +52,16 @@ const administrationLinks = [
   ["Páginas", "/admin/paginas"],
   ["Integrações", "/app/configuracoes/conectar-sistemas"],
 ];
+const usefulLinks = [
+  ["Visão geral", "/app/links-uteis"],
+  ["Grupos WhatsApp", "/app/links-uteis/grupos-whatsapp"],
+  ["Lojas Horários", "/app/links-uteis/lojas-horarios"],
+  ["Relacionamento", "/app/links-uteis/relacionamento"],
+  ["Regras Comerciais", "/app/links-uteis/regras-comerciais"],
+  ["Campanha do Mês", "/app/links-uteis/campanha-do-mes"],
+  ["App Bora Vender", "/app/links-uteis/app-bora-vender"],
+  ["Linktree e Liveprint", "/app/links-uteis/linktree-liveprint"],
+];
 const accountLinks = [
   "/app/configuracoes",
   "/app/configuracoes/metas",
@@ -68,6 +78,7 @@ export const archiveRootNavigationContract = [
   { name: "Ranking", tag: "A", href: "/app/ranking" },
   { name: "Canal de Parcerias", tag: "A", href: "/app/canal-de-parcerias" },
   { name: "Gestão", tag: "BUTTON", href: null },
+  { name: "Links Úteis", tag: "BUTTON", href: null },
   { name: "Administração", tag: "BUTTON", href: null },
 ];
 const navigation = (page) => page.locator("#authorized-navigation");
@@ -111,12 +122,14 @@ async function assertRootAccessibleNames({
   management,
   metaAds,
   simulation,
+  useful,
 }) {
   await expect(management).toHaveAccessibleName("Gestão");
   await expect(dashboard).toHaveAccessibleName("Dashboard");
   await expect(leads).toHaveAccessibleName("Lead");
   await expect(metaAds).toHaveAccessibleName("Meta Ads");
   await expect(simulation).toHaveAccessibleName("Simulação");
+  await expect(useful).toHaveAccessibleName("Links Úteis");
   await expect(administration).toHaveAccessibleName("Administração");
 }
 
@@ -1151,6 +1164,9 @@ export async function checkArchiveNavigation(
           const management = nav.locator(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-management"]',
           );
+          const useful = nav.locator(
+            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-useful_links"]',
+          );
           const administration = nav.locator(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-admin-home"]',
           );
@@ -1330,6 +1346,11 @@ export async function checkArchiveNavigation(
                 "authorized-navigation-crm-management",
               );
               await page.keyboard.press("Tab");
+              await assertNavigationControlFocused(
+                useful,
+                "authorized-navigation-crm-useful_links",
+              );
+              await page.keyboard.press("Tab");
               stage = `theme:${theme}:accessible-disclosure:administration-focus`;
               await assertNavigationControlFocused(
                 administration,
@@ -1432,6 +1453,7 @@ export async function checkArchiveNavigation(
             management,
             metaAds,
             simulation,
+            useful,
           });
           await assertOpenNavigationGeometry(page);
           await assertExactRootNavigation(page);
@@ -1464,6 +1486,8 @@ export async function checkArchiveNavigation(
           await page.keyboard.press("Tab");
           await assertNavigationControlFocused(management, "authorized-navigation-crm-management");
           await page.keyboard.press("Tab");
+          await assertNavigationControlFocused(useful, "authorized-navigation-crm-useful_links");
+          await page.keyboard.press("Tab");
           await assertNavigationControlFocused(administration, "authorized-navigation-admin-home");
           await page.keyboard.press("ArrowDown");
           await expect(administration).toHaveAttribute("aria-expanded", "true");
@@ -1477,6 +1501,14 @@ export async function checkArchiveNavigation(
           stage = "meta-ads-direct-link";
           await expect(metaAds).toHaveAttribute("href", "/app/meta-ads");
           await expect(page.locator("#authorized-navigation-crm-meta_ads")).toHaveCount(0);
+          stage = "useful-links-disclosure-and-authorized-links";
+          await useful.click();
+          await expect(administration).toHaveAttribute("aria-expanded", "false");
+          await expect(page.locator("#authorized-navigation-admin-home")).toBeHidden();
+          await expect(useful).toHaveAttribute("aria-expanded", "true");
+          await assertLinks(page, "authorized-navigation-crm-useful_links", usefulLinks, route);
+          await assertDisabledItems(page, "authorized-navigation-crm-useful_links", []);
+          await assertOpenNavigationGeometry(page);
           stage = "management-disclosure-and-authorized-links";
           await management.click();
           await expect(administration).toHaveAttribute("aria-expanded", "false");

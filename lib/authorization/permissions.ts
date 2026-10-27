@@ -2,6 +2,47 @@
 // the authoritative values live in the database. Labels are presentation-only;
 // the technical keys remain unchanged for RPCs, RLS and audit records.
 export const PERMISSIONS = {
+  "crm.useful_links.view": {
+    label: "Visualizar Links Úteis",
+    description: "Acesse os materiais e canais de apoio comercial.",
+    minLevel: 10,
+  },
+  "crm.useful_links.grupos_whatsapp.view": {
+    label: "Visualizar Grupos WhatsApp",
+    description: "Consulte os contatos e grupos de apoio comercial.",
+    minLevel: 10,
+  },
+  "crm.useful_links.lojas_horarios.view": {
+    label: "Visualizar Lojas Horários",
+    description: "Consulte os endereços e horários das lojas.",
+    minLevel: 10,
+  },
+  "crm.useful_links.relacionamento.view": {
+    label: "Visualizar Relacionamento",
+    description: "Acesse os canais de relacionamento e atendimento.",
+    minLevel: 10,
+  },
+  "crm.useful_links.regras_comerciais.view": {
+    label: "Visualizar Regras Comerciais",
+    description: "Consulte as regras comerciais da referência.",
+    minLevel: 10,
+  },
+  "crm.useful_links.campanha_do_mes.view": {
+    label: "Visualizar Campanha do Mês",
+    description: "Acesse os materiais da campanha do mês.",
+    minLevel: 10,
+  },
+  "crm.useful_links.app_bora_vender.view": {
+    label: "Visualizar App Bora Vender",
+    description: "Consulte os acessos e orientações do Bora Vender.",
+    minLevel: 10,
+  },
+  "crm.useful_links.linktree_liveprint.view": {
+    label: "Visualizar Linktree e Liveprint",
+    description: "Acesse os materiais do Linktree e Liveprint.",
+    minLevel: 10,
+  },
+
   "users.view": {
     label: "Visualizar usuários",
     description: "Consulta perfis e papéis atribuídos.",
