@@ -200,6 +200,7 @@ export function ConfigurableDashboardCanvas({
   editable = true,
   profileControls = true,
   automaticProfileName,
+  hideCardActionsByDefault = false,
 }: ConfigurableDashboardCanvasProps) {
   const [state, dispatch] = useReducer(canvasReducer, initialCards, (cards) =>
     createCanvasHistoryState(cards),
@@ -748,6 +749,7 @@ export function ConfigurableDashboardCanvas({
             <div
               className={[
                 styles.cardBody,
+                hideCardActionsByDefault ? styles.cardBodyActionsHidden : "",
                 validSelectedIds.has(card.id) ? styles.cardSelected : "",
                 state.duplicateCardId === card.id ? styles.cardDuplicate : "",
               ]
@@ -755,7 +757,15 @@ export function ConfigurableDashboardCanvas({
                 .join(" ")}
             >
               {editable ? (
-                <div className={styles.cardActions} data-dashboard-export-ignore>
+                <div
+                  className={[
+                    styles.cardActions,
+                    hideCardActionsByDefault ? styles.cardActionsHidden : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                  data-dashboard-export-ignore
+                >
                   <label>
                     <input
                       type="checkbox"

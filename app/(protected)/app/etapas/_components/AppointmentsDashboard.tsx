@@ -2032,6 +2032,7 @@ export function AppointmentsDashboard({
         editable={canEditDashboard}
         profileControls={false}
         automaticProfileName="Layout de Agendamentos"
+        hideCardActionsByDefault
       />
       <footer className={styles.pageFooter}>
         <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>
