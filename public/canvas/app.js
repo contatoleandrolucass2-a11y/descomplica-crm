@@ -223,7 +223,9 @@ function chartValue(value,metric,width,font,includeCurrency=false){
   const compact=prefix+value.toLocaleString('pt-BR',{notation:'compact',maximumFractionDigits:digits})+suffix;
   if(measureLabel(compact,font)<=width)return compact;
  }
- return prefix+value.toExponential(0).replace('.',',')+suffix;
+ // Scientific notation is hard to scan in business charts. When space is
+ // tight, keep the ordinary localized number instead of values such as "2e+2".
+ return prefix+value.toLocaleString('pt-BR',{maximumFractionDigits:metric==='ctr'?2:0})+suffix;
 }
 function cardMinHeight(card){
  if(card.type==='kpi')return 164;

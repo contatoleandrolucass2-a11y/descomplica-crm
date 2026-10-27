@@ -89,7 +89,8 @@ body[data-theme="medium"] .card-controls,body[data-theme="light"] .card-controls
 body .card .card-controls :is(input,select):focus-visible{outline:2px solid var(--filter-accent);outline-offset:2px}
 
 /* A compact, structured filter panel anchored to the chart toolbar. */
-body .card .card-controls{left:auto;right:10px;top:48px;width:min(520px,calc(100% - 20px));box-sizing:border-box;padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:calc(100% - 60px)}
+body .card:has(>.card-controls:not([hidden])){overflow:visible;z-index:40}
+body .card .card-controls{left:auto;right:10px;top:48px;width:min(520px,calc(100vw - 36px));box-sizing:border-box;padding:12px;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;max-height:min(480px,calc(100vh - 80px));overflow:auto;overscroll-behavior:contain}
 body .card .card-controls[hidden]{display:none!important}
 .chart-filter-header{grid-column:1/-1;display:flex;align-items:center;justify-content:space-between;padding-bottom:8px;border-bottom:1px solid var(--filter-line);font-size:13px}
 body .card-controls .chart-filter-field{display:flex;flex-direction:column;gap:5px;min-width:0;font-size:11px;font-weight:600}
