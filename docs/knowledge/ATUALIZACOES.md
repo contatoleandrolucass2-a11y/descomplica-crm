@@ -4206,3 +4206,25 @@ dependente da autorização específica aplicável.
   teto histórico de 1.200 px da rota, após incluir as orientações automáticas.
   O teto exclusivo foi ajustado para 1.220 px; referência, tolerâncias de cor e
   bordas, baseline, Axe, overflow e demais rotas permanecem inalterados.
+- O PR #368 foi integrado em `main` como
+  `04300be6bb54561b8ab4785dab197f3822010140`. Na CI de `main`
+  `40457067981`, `validate`, `isolated-restore`, a imagem promovível e todos os
+  testes funcionais do `release-gates` passaram. A matriz visual reprovou
+  exclusivamente onze comparações da rota CAIXA por mudança de altura: as
+  referências ainda representavam a tela anterior, sem os dois cartões
+  automáticos. Não houve falha funcional, Axe, teclado, zoom, overflow ou do
+  canvas externo.
+- As onze capturas sintéticas do artefato `12714049954`, digest
+  `7445ed01d68d655405e1c25ace6468ec76b58a9b5e058b6591dc49d0aa23c922`,
+  foram revisadas em desktop, notebook, tablet e celular, nos temas claro,
+  médio e escuro. Somente essas imagens e suas 38 entradas de evidência foram
+  adotadas; as outras 231 referências e todos os limiares foram preservados.
+  O Docker/Podman está indisponível neste host, portanto a nova comprovação
+  integral depende da CI Linux em modo de verificação. Produção permanece
+  bloqueada até esse gate concluir com sucesso.
+- Na branch da baseline, 69 testes focados passaram e 5 foram ignorados por
+  condição; lint, typecheck, formatação e build de 41 páginas/71 saídas
+  estáticas passaram. O `pnpm test` confirmou 4.369 testes Vitest e 1.599
+  testes Node, mas encerrou com as mesmas três falhas de host Windows dos
+  fixtures Meta Ads (arquivo privado/perfil absoluto), fora do escopo. A CI
+  Linux continua sendo a evidência conclusiva desses testes.

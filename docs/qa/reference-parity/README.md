@@ -2,6 +2,23 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
+## Automação do Simulador CAIXA em 27/10/2026
+
+A CI `40457067981`, no SHA integrado
+`04300be6bb54561b8ab4785dab197f3822010140`, aprovou os testes funcionais do
+Simulador CAIXA, build, E2E, restauração isolada, acessibilidade, teclado, zoom
+e comparação com o canvas externo. O gate final identificou somente a mudança
+esperada de altura nas onze capturas da rota, causada pelos cartões automáticos
+de teto de renda e limite municipal.
+
+As onze imagens do artefato Linux `12714049954` foram inspecionadas em desktop,
+notebook, tablet e celular, incluindo os temas claro, médio e escuro. O artefato
+possui digest
+`7445ed01d68d655405e1c25ace6468ec76b58a9b5e058b6591dc49d0aa23c922`.
+Os controles permaneceram legíveis, sem corte, sobreposição ou rolagem
+horizontal. As outras 231 referências e os limiares de 1%/16 foram preservados.
+A CI normal em modo de verificação continua obrigatória antes da publicação.
+
 ## Coluna de vaga do Associativo em 19/10/2026
 
 A CI `39301197819`, no head do PR #268, aprovou validate, restauração isolada,
