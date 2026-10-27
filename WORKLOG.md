@@ -1,6 +1,6 @@
 # Worklog
 
-- 2026-10-26: corrigidos os dois desvios restantes do ensaio isolado dos perfis de canvas: permissão da função temporária do fixture e ordenação da matriz de RPCs autenticadas.
+- 2026-10-26: alinhados os gates finais do canvas: o pgTAP agora simula a sessão MFA exigida pelas RPCs e a captura visual protegida valida os 13 cards pela nova grade configurável. Permanecem também corrigidas a permissão da função temporária do fixture e a ordenação da matriz de RPCs autenticadas.
 
 ## 2026-10-26 — Canvas analítico de Visão Geral e Agendamentos
 

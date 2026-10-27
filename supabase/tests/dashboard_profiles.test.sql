@@ -132,7 +132,7 @@ set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',
+  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',
   true
 );
 
@@ -257,7 +257,7 @@ select throws_ok(
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad810000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal1"}',
+  '{"sub":"ad810000-0000-4000-8000-000000000002","role":"authenticated","aal":"aal2"}',
   true
 );
 select is(
@@ -290,7 +290,7 @@ select is(
 
 select set_config(
   'request.jwt.claims',
-  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal1"}',
+  '{"sub":"ad810000-0000-4000-8000-000000000001","role":"authenticated","aal":"aal2"}',
   true
 );
 select is(

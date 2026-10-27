@@ -1,6 +1,7 @@
 # Changelog
 
-- Corrige o ensaio pgTAP dos perfis de canvas ao conceder acesso autenticado à função temporária do teste e ordenar a matriz auditada de RPCs.
+- Corrige os gates dos perfis de canvas ao reproduzir uma sessão MFA no pgTAP e alinhar a captura visual protegida à grade configurável da Visão Geral.
+- Mantém a concessão autenticada à função temporária do ensaio e a ordem auditada da matriz de RPCs.
 
 ## 2026-10-26 — Canvas analítico em Visão Geral e Agendamentos
 
