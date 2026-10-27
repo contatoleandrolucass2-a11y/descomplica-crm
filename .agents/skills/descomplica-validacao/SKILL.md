@@ -5,8 +5,12 @@ description: Validar alteracoes e preparar evidencias de PR ou release no DESCOM
 
 # Validacao com evidencias
 
-- Registre branch/SHA, escopo e criterios de aceite. Use Node 24.19.x e pnpm
-  11.20.x. Rode lint, typecheck, test e build, conforme AGENTS.md.
+- Registre branch/SHA, escopo e critérios de aceite. Use Node 24.19.x e pnpm
+  11.20.x. Aplique a DEPLOY-002 de docs/runbooks/impact-based-validation.md:
+  valide a alteração e os fluxos afetados, reutilize evidências válidas e
+  justifique ampliações de escopo. Preserve os gates obrigatórios de lint,
+  tipos, testes e build na CI do SHA candidato, sem duplicação local automática.
+  Uma mudança localizada não exige nova revisão de todo o sistema.
 - Tests unitarios nao substituem navegador nem pgTAP. Para schema/ACL rode
   db:test e gates locais isolados; para interface use os scripts QA existentes.
 - A matriz autenticada cobre responsividade, temas, zoom, teclado, axe e

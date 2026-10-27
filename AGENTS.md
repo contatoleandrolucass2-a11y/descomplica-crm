@@ -21,7 +21,10 @@ Este repositório consolida o sistema de login e o Descomplica CRM. O login Next
 ## Regras obrigatórias
 
 - Use Node 24.19.x e pnpm 11.20.x. Não crie `package-lock.json` nem `yarn.lock`.
-- Antes de concluir qualquer alteração, execute `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build`.
+- Antes de concluir qualquer alteração, aplique a validação por impacto da DEPLOY-002,
+  em `docs/runbooks/impact-based-validation.md`. Preserve os gates obrigatórios
+  de lint, tipos, testes e build exigidos pelo pipeline no SHA candidato; use
+  seus resultados válidos sem duplicar automaticamente a execução local.
 - Não use `--force` ou `--legacy-peer-deps`.
 - Não adicione pacote sem import, script ou requisito de runtime verificável.
 - Nunca versione `.env.local`, tokens, chaves secret/service role, senhas, dumps ou artefatos de usuário.
@@ -37,6 +40,30 @@ Este repositório consolida o sistema de login e o Descomplica CRM. O login Next
   Cumprir `docs/runbooks/automatic-publication.md`; gates falhos bloqueiam deploy.
   DNS, cobrancas, contas, politicas comerciais e mutacoes de dados remotos fora
   do deploy continuam exigindo autorizacao especifica.
+
+## DEPLOY-002 — Validação por impacto e deploy sem retrabalho
+
+Pedido direto do usuário em 27/10/2026, aplicável aos próximos deploys de todos
+os desenvolvedores, agentes e publicadores deste repositório, em qualquer host
+ou worktree. Cumprir [DEPLOY-002](docs/runbooks/impact-based-validation.md)
+em conjunto com a regra de deploy concorrente.
+
+Não revisar novamente todo o sistema para publicar uma alteração localizada.
+Delimitar o impacto pelo diff completo entre produção e candidato, incluindo
+mudanças de outros desenvolvedores presentes na entrega. Validar a alteração,
+seus critérios de aceite e as dependências e jornadas que possam ser afetadas.
+Reaproveitar evidências aprovadas para o mesmo candidato e condições relevantes;
+repetir somente por invalidação da evidência, falha, divergência ou exigência do
+pipeline. Ampliar a revisão somente com justificativa concreta de impacto ou
+incerteza. Analisar impacto não autoriza alterar áreas fora do pedido do chat.
+
+Preservar os gates obrigatórios, autorização, artefato aprovado, backup,
+rollback, consulta ao vivo, trava compartilhada e comparação atômica da versão
+esperada. Esta regra não autoriza alterar o pipeline ou ignorar falhas externas
+ao escopo. Após publicar, conferir versão servida, saúde, fluxos afetados e
+persistência quando houver gravação. Cumpridos esses critérios, concluir sem
+revisões redundantes. Incluir a regra nos repasses de trabalho; atualizar a
+base de instruções antes de preparar a próxima entrega.
 
 ## Cadastro de páginas
 

@@ -16,12 +16,25 @@ Alteracoes apenas de documentacao ou ferramentas sao publicadas no Git e no
 conhecimento curado; nao exigem reiniciar a aplicacao sem mudanca de runtime.
 Nao disparar deploy em cada salvamento, checkout ou sincronizacao do Obsidian.
 
+## Validação por impacto para todos os publicadores
+
+A [DEPLOY-002](impact-based-validation.md), solicitada em 27/10/2026, vale para
+todos os desenvolvedores e agentes deste repositório, em qualquer host ou
+worktree. Esse alcance da validação não amplia a autorização de publicação
+definida acima. Validar a alteração e os fluxos que ela possa afetar, considerar
+o diff completo do candidato e reaproveitar evidências válidas. Não repetir
+uma revisão de todo o sistema para mudanças localizadas. Ampliar a verificação
+somente com justificativa concreta, preservando os gates abaixo.
+
 ## Gates que permanecem obrigatorios
 
 1. Preservar mudancas de terceiros; trabalhar em branch e revisar o diff.
-2. Validar lint, tipos, testes e build. Conferir CI no SHA candidato, incluindo
-   banco, restore isolado e QA de navegador pertinentes. Nao reduzir gates para
-   obter aprovacao. Testes POSIX exigem Linux, sem mascarar falhas no Windows.
+2. Validar por impacto conforme DEPLOY-002 e conferir os gates obrigatórios de
+   lint, tipos, testes e build na CI do SHA candidato, incluindo banco, restore
+   isolado e QA de navegador exigidos pelo pipeline. Reaproveitar resultados
+   válidos sem repetir automaticamente os mesmos checks no ambiente local.
+   Não reduzir gates para obter aprovação. Testes POSIX exigem Linux, sem
+   mascarar falhas no Windows.
 3. Integrar pelo PR com protecoes existentes. Confirmar se o main ainda
    corresponde ao candidato validado antes de publicar.
 4. Usar imagem imutavel pelo SHA e comprovar seu ID/label e perfis de runtime,

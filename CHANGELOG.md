@@ -3,6 +3,9 @@
 - Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
 - Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.
 - Transcreve contatos, horários, relacionamento, regras comerciais, campanhas históricas, Bora Vender e materiais Linktree/Liveprint, sinalizando destinos divergentes e conteúdo que exige confirmação de vigência.
+- Define a DEPLOY-002 para todos os desenvolvedores e agentes: validação por impacto, reaproveitamento de evidências e revisão ampliada somente com justificativa, preservando gates obrigatórios e publicação protegida.
+
+- Registra a integração do ajuste CAIXA e o bloqueio final da publicação: o `main` vigente passou nos checks funcionais, mas 11 referências visuais externas do Dashboard divergiram após correção concorrente.
 - Isola a ocultação das ações dos cards à página de Agendamentos, preservando os controles e cliques da Visão Geral.
 - Restringe a edição do canvas de Agendamentos a administradores e oferece ajustes persistentes de tamanho, conteúdo, tipografia, posição, cores e altura das torres.
 - Recalcula o prazo maximo sempre que idade ou obra mudam, preserva reducoes manuais ate a proxima mudanca determinante e impede valor acima do teto.
