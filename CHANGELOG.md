@@ -1,5 +1,12 @@
 # Changelog
 
+## 2026-10-26 — Simulador CAIXA publicado com novo layout e acesso
+
+- Publica o padrão visual dos simuladores Associativo e Tabela Direta nos temas claro, médio e escuro.
+- Disponibiliza o motor local a todos os usuários autenticados com `crm.simulators.view`, mantendo os controles de sessão, MFA e overrides.
+- Preserva integralmente as regras financeiras já validadas, inclusive SBPE SAC 90% e Price 80%.
+- Confirma a entrega no `main` por CI completa, artefato imutável, coordenador protegido e verificação pós-publicação.
+
 ## 2026-10-26 — Persistência e precisão do Canvas Meta Ads
 
 - Persiste perfis e layouts do Canvas por usuário autenticado e por nível de análise, com cache local apenas como contingência.

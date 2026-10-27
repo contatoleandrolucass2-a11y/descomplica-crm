@@ -1,5 +1,38 @@
 # Worklog
 
+## 2026-10-26 — Publicação do layout e acesso do Simulador CAIXA
+
+O PR #362 foi integrado sem bypass no commit
+`9cf72dafb273693f412143abc337eefd0ed80f4e`. A CI `40411904177` aprovou
+`validate`, `release-gates`, `isolated-restore` e `promotable-image`, incluindo
+a jornada CAIXA, banco, build e a matriz completa de responsividade, temas,
+zoom, teclado e acessibilidade. O artefato imutável `12693059289` corresponde
+ao mesmo SHA.
+
+A captura protegida final `40404389362` também foi aprovada. As referências do
+formulário CAIXA nos três temas e larguras afetadas foram incorporadas somente
+de artefato autenticado; outras páginas e fórmulas financeiras permaneceram
+fora do escopo.
+
+O coordenador de produção registrou o deployment
+`a9d4d0ba-a660-4d88-b241-02ecff8d4e9b` em
+`2026-10-26T23:32:26.887Z`, com imagem
+`sha256:41d65835f860fcb08797add395276711a9eb5e0bf39ce5b8ed938be3c1bc962c`.
+Uma nova invocação protegida para o mesmo candidato retornou `noop`, sem
+reiniciar a aplicação. Às `2026-10-27T00:34:26Z`, o health público confirmou
+`status=ok` e a versão exata; a rota sem cookies respondeu `307` para `/login`.
+
+Depois da publicação, `origin/main` avançou para `962f7d9d` por uma entrega
+concorrente de Meta Ads. Esse estado posterior não altera a evidência de que o
+layout e o acesso CAIXA estão publicados em `9cf72daf`; também não autoriza
+republicar ou interferir na entrega concorrente.
+
+No fechamento documental, formato, lint, tipos e build passaram. A suíte local
+teve quatro timeouts de host em Associativo e conhecimento; os dois arquivos
+foram repetidos isoladamente com um worker e aprovaram 35/35. A CI Linux do SHA
+publicado permaneceu como evidência integral. O `knowledge:sync` foi tentado e
+continuou bloqueado por `Documento excede o limite de exportacao.`.
+
 ## 2026-10-26 — Correções de persistência, período e leitura do Meta Ads
 
 O Canvas deixou de depender do `localStorage` como fonte autoritativa. A nova
