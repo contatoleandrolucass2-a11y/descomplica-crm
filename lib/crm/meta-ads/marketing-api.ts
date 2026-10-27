@@ -21,11 +21,16 @@ const AD_EFFECTIVE_STATUSES = [
   "DISAPPROVED",
   "PENDING_BILLING_INFO",
 ] as const;
+const CAMPAIGN_EFFECTIVE_STATUSES = ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"] as const;
 
 type MetaAction = { action_type?: unknown; value?: unknown };
 type MetaInsight = Record<string, unknown> & { actions?: MetaAction[] };
 type MetaAd = Record<string, unknown> & {
   adset?: { id?: unknown; targeting?: unknown };
+};
+type MetaCampaign = Record<string, unknown> & {
+  id?: unknown;
+  effective_status?: unknown;
 };
 
 export type MetaAdsTargetLocation = {
@@ -218,7 +223,7 @@ function normalizeStatus(value: unknown): MetaAdsDashboardRow["status"] {
 
 function mapInsight(
   insight: MetaInsight,
-  adStatuses: ReadonlyMap<string, MetaAdsDashboardRow["status"]>,
+  campaignStatuses: ReadonlyMap<string, MetaAdsDashboardRow["status"]>,
   adDestinations: ReadonlyMap<string, MetaAdsDashboardRow["destination"]>,
   adsetTargets: ReadonlyMap<string, MetaAdsTargetLocation[]>,
 ): MetaAdsDashboardRow | null {
@@ -255,7 +260,7 @@ function mapInsight(
     ad: text(insight.ad_name) || adId,
     project,
     destination,
-    status: adStatuses.get(adId) || "unknown",
+    status: campaignStatuses.get(campaignId) || "unknown",
     event:
       destination === "whatsapp" ? "conversation" : destination === "form" ? "lead" : "conversion",
     attribution: "Configuração unificada do conjunto de anúncios",
@@ -283,7 +288,7 @@ function mapInsight(
 
 function mapRegionalInsight(
   insight: MetaInsight,
-  adStatuses: ReadonlyMap<string, MetaAdsDashboardRow["status"]>,
+  campaignStatuses: ReadonlyMap<string, MetaAdsDashboardRow["status"]>,
   adDestinations: ReadonlyMap<string, MetaAdsDashboardRow["destination"]>,
 ): MetaAdsRegionalResult | null {
   const date = text(insight.date_start);
@@ -316,7 +321,7 @@ function mapRegionalInsight(
     adId,
     region,
     destination,
-    status: adStatuses.get(adId) || "unknown",
+    status: campaignStatuses.get(campaignId) || "unknown",
     conversions,
   };
 }
@@ -477,16 +482,26 @@ export async function fetchMetaAdsDashboardData(
   const fetcher = options.fetcher || fetch;
 
   const adsUrl = graphUrl(configuration, `act_${configuration.accountId}/ads`);
-  adsUrl.searchParams.set("fields", "id,effective_status,adset{id,targeting}");
+  adsUrl.searchParams.set("fields", "id,adset{id,targeting}");
   adsUrl.searchParams.set(
     "filtering",
     JSON.stringify([{ field: "effective_status", operator: "IN", value: AD_EFFECTIVE_STATUSES }]),
   );
   adsUrl.searchParams.set("limit", "500");
   const ads = await graphPages<MetaAd>(adsUrl, configuration, fetcher);
-  const statuses = new Map(
-    ads
-      .map((ad) => [text(ad.id), normalizeStatus(ad.effective_status)] as const)
+  const campaignsUrl = graphUrl(configuration, `act_${configuration.accountId}/campaigns`);
+  campaignsUrl.searchParams.set("fields", "id,effective_status");
+  campaignsUrl.searchParams.set(
+    "filtering",
+    JSON.stringify([
+      { field: "effective_status", operator: "IN", value: CAMPAIGN_EFFECTIVE_STATUSES },
+    ]),
+  );
+  campaignsUrl.searchParams.set("limit", "500");
+  const metaCampaigns = await graphPages<MetaCampaign>(campaignsUrl, configuration, fetcher);
+  const campaignStatuses = new Map(
+    metaCampaigns
+      .map((campaign) => [text(campaign.id), normalizeStatus(campaign.effective_status)] as const)
       .filter(([id]) => Boolean(id)),
   );
   const adsetTargets = new Map<string, MetaAdsTargetLocation[]>();
@@ -521,7 +536,7 @@ export async function fetchMetaAdsDashboardData(
       destinations.set(adId, "form");
   }
   const rows = insights
-    .map((insight) => mapInsight(insight, statuses, destinations, adsetTargets))
+    .map((insight) => mapInsight(insight, campaignStatuses, destinations, adsetTargets))
     .filter((row): row is MetaAdsDashboardRow => row !== null);
   if (rows.length !== insights.length) throw new MetaAdsApiError("invalid_data", 502);
   const regionalUrl = graphUrl(configuration, `act_${configuration.accountId}/insights`);
@@ -540,7 +555,7 @@ export async function fetchMetaAdsDashboardData(
   );
   const regionalInsights = await graphPages<MetaInsight>(regionalUrl, configuration, fetcher);
   const regionalResults = regionalInsights
-    .map((insight) => mapRegionalInsight(insight, statuses, destinations))
+    .map((insight) => mapRegionalInsight(insight, campaignStatuses, destinations))
     .filter((row): row is MetaAdsRegionalResult => row !== null);
   if (regionalResults.length !== regionalInsights.length) {
     throw new MetaAdsApiError("invalid_data", 502);
