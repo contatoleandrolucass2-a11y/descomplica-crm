@@ -107,8 +107,8 @@ select ok(
 
 select is(
   (select count(*) from public.role_permissions where role_key = 'admin'),
-  74::bigint,
-  'Administrator inherits all seventy-four current catalog permissions'
+  82::bigint,
+  'Administrator inherits all eighty-two current catalog permissions'
 );
 select is(
   (select array_agg(permission_key order by permission_key) from public.role_permissions where role_key = 'admin'),
@@ -127,7 +127,7 @@ select is(
     from public.role_permissions
     where role_key = 'coordinator'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,pages.view',
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,crm.useful_links.app_bora_vender.view,crm.useful_links.campanha_do_mes.view,crm.useful_links.grupos_whatsapp.view,crm.useful_links.linktree_liveprint.view,crm.useful_links.lojas_horarios.view,crm.useful_links.regras_comerciais.view,crm.useful_links.relacionamento.view,crm.useful_links.view,pages.view',
   'Coordinator inherits Imob, partnerships, simulators, and common operational pages'
 );
 
@@ -137,7 +137,7 @@ select is(
     from public.role_permissions
     where role_key = 'manager_house'
   ),
-  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,pages.view',
+  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,crm.useful_links.app_bora_vender.view,crm.useful_links.campanha_do_mes.view,crm.useful_links.grupos_whatsapp.view,crm.useful_links.linktree_liveprint.view,crm.useful_links.lojas_horarios.view,crm.useful_links.regras_comerciais.view,crm.useful_links.relacionamento.view,crm.useful_links.view,pages.view',
   'Gerente House inherits House, ranking, and simulators'
 );
 
@@ -147,7 +147,7 @@ select is(
     from public.role_permissions
     where role_key = 'manager_imob'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,pages.view',
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,crm.useful_links.app_bora_vender.view,crm.useful_links.campanha_do_mes.view,crm.useful_links.grupos_whatsapp.view,crm.useful_links.linktree_liveprint.view,crm.useful_links.lojas_horarios.view,crm.useful_links.regras_comerciais.view,crm.useful_links.relacionamento.view,crm.useful_links.view,pages.view',
   'Gerente Imob inherits Imob, partnerships, and simulators'
 );
 
@@ -157,7 +157,7 @@ select is(
     from public.role_permissions
     where role_key = 'broker_house'
   ),
-  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,pages.view',
+  'crm.dashboard.view,crm.dashboard.without_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.ranking.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,crm.useful_links.app_bora_vender.view,crm.useful_links.campanha_do_mes.view,crm.useful_links.grupos_whatsapp.view,crm.useful_links.linktree_liveprint.view,crm.useful_links.lojas_horarios.view,crm.useful_links.regras_comerciais.view,crm.useful_links.relacionamento.view,crm.useful_links.view,pages.view',
   'Corretor House inherits House, ranking, and simulators'
 );
 
@@ -167,7 +167,7 @@ select is(
     from public.role_permissions
     where role_key = 'broker_imob'
   ),
-  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,pages.view',
+  'crm.dashboard.view,crm.dashboard.with_canal_imob.view,crm.management.forecast.values.edit,crm.management.forecast.view,crm.management.routine.view,crm.management.view,crm.partnerships.view,crm.simulators.execute,crm.simulators.view,crm.stage.appointments.view,crm.stage.folders.view,crm.stage.opportunities.view,crm.stage.sales.view,crm.stage.visits.view,crm.stages.view,crm.useful_links.app_bora_vender.view,crm.useful_links.campanha_do_mes.view,crm.useful_links.grupos_whatsapp.view,crm.useful_links.linktree_liveprint.view,crm.useful_links.lojas_horarios.view,crm.useful_links.regras_comerciais.view,crm.useful_links.relacionamento.view,crm.useful_links.view,pages.view',
   'Corretor Imob inherits Imob, partnerships, and simulators'
 );
 
@@ -1772,8 +1772,8 @@ set local role authenticated;
 select ok(has_function_privilege('authenticated', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'authenticated can request guarded role defaults');
 select ok(not has_function_privilege('anon', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'anonymous cannot read role defaults');
 select ok(not has_function_privilege('service_role', 'public.get_user_role_permission_defaults()', 'EXECUTE'), 'service role has no direct defaults read grant');
-select is((select count(*) from public.get_user_role_permission_defaults() where role_key='manager_imob'), 16::bigint, 'Users viewers receive the authoritative Imob baseline');
-select is((select count(*) from public.get_user_role_permission_defaults() where role_key='admin'), 74::bigint, 'the defaults RPC exposes every inherited Administrator permission');
+select is((select count(*) from public.get_user_role_permission_defaults() where role_key='manager_imob'), 24::bigint, 'Users viewers receive the authoritative Imob baseline');
+select is((select count(*) from public.get_user_role_permission_defaults() where role_key='admin'), 82::bigint, 'the defaults RPC exposes every inherited Administrator permission');
 select ok(exists(select 1 from public.get_user_role_permission_defaults() where role_key='master' and permission_key='crm.commercial_policy.manage'), 'role defaults reflect local policy grants absent from the static UI baseline');
 reset role;
 select set_config('request.jwt.claim.sub', 'a3000000-0000-4000-8000-000000000011', true);
