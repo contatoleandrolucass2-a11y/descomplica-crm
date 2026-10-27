@@ -2,6 +2,16 @@
 
 ## 2026-10-27: correcao local de subsidio, prazo e layout do CAIXA
 
+- O run protegido `40537724784` foi aprovado no head
+  `655782460d205b23a17a993ed20fa4f422bbd71d`; artifact `12750383183`, ZIP
+  SHA-256 `16a6cf8cde804f8d97a843a05b63ea934a43a0f804a777a88c32b2a7f9f7f05e`,
+  capture commit `d816788a2bb69012f7c99d513671a9ef0cec6559` e captura em
+  `2026-10-27T16:37:29.234Z`. As 11 imagens CAIXA foram revisadas em resolução
+  original e aprovadas, sem corte, sobreposição ou rolagem horizontal.
+- Foram incorporadas somente 11 imagens do CAIXA, suas 38 entradas de rota
+  (7 responsivas, 4 de tema, 11 Axe, 11 screenshots e 5 zoom) e registros de
+  hash/proveniência. As outras 231 imagens e os metadados globais permaneceram
+  preservados. Uma nova CI é obrigatória antes de merge e publicação.
 - A calculadora publica CAIXA foi repetida com dados ficticios: nascimento em
   22/01/1987, renda de R$ 4.000 e imovel de R$ 276.000. O resultado exibiu Price,
   prazo maximo de 420 meses, taxa efetiva de 8,47%, primeira prestacao de

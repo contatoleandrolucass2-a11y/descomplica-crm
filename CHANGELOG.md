@@ -3,6 +3,7 @@
 - Recalcula o prazo maximo sempre que idade ou obra mudam, preserva reducoes manuais ate a proxima mudanca determinante e impede valor acima do teto.
 - Identifica automaticamente renda potencialmente elegivel ao subsidio MCMV sem abater valor nao comprovado e explica os fatores oficiais ainda necessarios.
 - Alinha cores, bordas, grids, abas moveis e cards de resultado do Simulador CAIXA ao padrao visual de Agendamentos.
+- Atualiza somente as 11 referencias visuais protegidas do Simulador CAIXA, preservando as demais 231 capturas.
 - Publica a automação e precisão do Simulador CAIXA após CI integral, imagem imutável e smoke público da versão `83a92392`.
 - Atualiza somente as 11 referências visuais do Simulador CAIXA a partir do artefato autenticado da CI, preservando as demais 231 capturas e todos os limiares.
 - Publica o canvas analítico configurável em Visão Geral e Agendamentos, com perfis privados persistidos no banco e validação final de desktop, celular, temas e acessibilidade.
