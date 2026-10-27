@@ -117,7 +117,7 @@ describe("protected interface shell", () => {
     expect(shellStylesheet).toMatch(/\.accountProfile \{[\s\S]*overflow-wrap: anywhere/);
     expect(shellStylesheet).toContain("@media (max-width: 1180px)");
     expect(shellStylesheet).toMatch(
-      /@media \(min-width: 1181px\) and \(max-width: 1500px\) \{[\s\S]*\.navigationLink,[\s\S]*\.navigationTrigger \{[\s\S]*padding-inline: 5px/,
+      /@media \(min-width: 1181px\) and \(max-width: 1500px\) \{[\s\S]*\.navigationLink,[\s\S]*\.navigationTrigger \{[\s\S]*padding-inline: 3px/,
     );
     expect(shellStylesheet).toMatch(
       /@media \(min-width: 1181px\) and \(max-width: 1320px\) \{[\s\S]*\.navigationIcon \{[\s\S]*display: none/,
