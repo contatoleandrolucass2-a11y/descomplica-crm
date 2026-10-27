@@ -129,13 +129,12 @@ $$;
 create function private.assert_dashboard_profile_document(p_page_key text, p_cards jsonb)
 returns void
 language plpgsql
-immutable
+stable
 security invoker
 set search_path = ''
 as $$
 declare
   v_card jsonb;
-  v_entity jsonb;
   v_ids text[] := array[]::text[];
   v_orders integer[] := array[]::integer[];
   v_signatures text[] := array[]::text[];
