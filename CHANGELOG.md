@@ -1,5 +1,6 @@
 # Changelog
 
+- Publica a automação e precisão do Simulador CAIXA após CI integral, imagem imutável e smoke público da versão `83a92392`.
 - Atualiza somente as 11 referências visuais do Simulador CAIXA a partir do artefato autenticado da CI, preservando as demais 231 capturas e todos os limiares.
 - Publica o canvas analítico configurável em Visão Geral e Agendamentos, com perfis privados persistidos no banco e validação final de desktop, celular, temas e acessibilidade.
 - Atualiza somente as 22 referências visuais de Visão Geral e Agendamentos a partir do artefato autenticado da CI, preservando as demais 220 capturas.

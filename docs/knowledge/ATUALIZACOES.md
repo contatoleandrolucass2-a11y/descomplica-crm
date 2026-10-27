@@ -1,5 +1,36 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: automacao e precisao do Simulador CAIXA publicadas
+
+- O PR #368 foi integrado na `main` como
+  `04300be6bb54561b8ab4785dab197f3822010140`; a correcao restrita das 11
+  referencias visuais foi integrada pelo PR #371 no SHA final
+  `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`.
+- A CI integral da `main`, run `40463329858`, aprovou `validate`,
+  `isolated-restore`, `promotable-image` e `release-gates`. O artefato imutavel
+  `12716305458` teve digest
+  `sha256:0a1ee1c01e7c790464706aba3a98caf25551d6a856b6f1d188db13d92924bb07`;
+  a prova no destino validou os dois perfis de runtime, o SHA, a plataforma e
+  as 11 camadas sem recompilar a imagem.
+- O coordenador protegido publicou o SHA final em 27/10/2026 as 04:47:01
+  `America/Sao_Paulo`, deployment
+  `da2976c6-dd73-45c5-b04f-96e666043600`, imagem
+  `sha256:f54352e6942c32621aa8dd41eece5ee1bf567fea1c910a2b95dfed129a9a3be7`.
+  A consulta imediatamente anterior confirmou o deployment
+  `61163953-0645-423b-ab6a-ea62d18edf27`, SHA `897d0cf9`, sem pendencia.
+- O smoke publico retornou HTTP 200, `status=ok` e a versao exata
+  `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`; o acesso anonimo a
+  `/app/simulacao/caixa` retornou 307 para `/login`. O estado final do
+  coordenador ficou sem deployment pendente.
+- O escopo publicado automatiza o teto de 30%, limite municipal por cidade/UF,
+  condicao Novo para imovel na planta, escolha Novo/Usado fora da planta,
+  promocao da faixa de juros pelo valor do imovel e reducao automatica do prazo
+  pela idade. Permanecem as cotas SBPE de 90% no SAC e 80% no Price. Nenhuma
+  regra de outro simulador, dado remoto, DNS ou workflow n8n foi alterado.
+- A sincronizacao com o Obsidian continua pendente: o runtime retorna
+  `Documento excede o limite de exportacao.`. Os documentos versionados sao a
+  fonte atual ate a correcao desse limite; a falha nao invalida a publicacao.
+
 ## 2026-10-26: gate de restauracao dos perfis do dashboard
 
 - O segundo ensaio da `main`, run `40436653510`, SHA
