@@ -4,8 +4,8 @@ select plan(12);
 
 select is(
   (select count(*) from public.app_pages),
-  41::bigint,
-  'the page catalog contains exactly the forty-one approved entries'
+  49::bigint,
+  'the page catalog contains exactly the forty-nine approved entries'
 );
 
 select is(
@@ -58,7 +58,15 @@ select is(
     'crm.stage.folders|/app/etapas/pastas|crm.stage.folders.view|true',
     'crm.stage.opportunities|/app/etapas/oportunidades|crm.stage.opportunities.view|true',
     'crm.stage.sales|/app/etapas/vendas|crm.stage.sales.view|true',
-    'crm.stage.visits|/app/etapas/visitas|crm.stage.visits.view|true'
+    'crm.stage.visits|/app/etapas/visitas|crm.stage.visits.view|true',
+    'crm.useful_links|/app/links-uteis|crm.useful_links.view|true',
+    'crm.useful_links.app_bora_vender|/app/links-uteis/app-bora-vender|crm.useful_links.app_bora_vender.view|true',
+    'crm.useful_links.campanha_do_mes|/app/links-uteis/campanha-do-mes|crm.useful_links.campanha_do_mes.view|true',
+    'crm.useful_links.grupos_whatsapp|/app/links-uteis/grupos-whatsapp|crm.useful_links.grupos_whatsapp.view|true',
+    'crm.useful_links.linktree_liveprint|/app/links-uteis/linktree-liveprint|crm.useful_links.linktree_liveprint.view|true',
+    'crm.useful_links.lojas_horarios|/app/links-uteis/lojas-horarios|crm.useful_links.lojas_horarios.view|true',
+    'crm.useful_links.regras_comerciais|/app/links-uteis/regras-comerciais|crm.useful_links.regras_comerciais.view|true',
+    'crm.useful_links.relacionamento|/app/links-uteis/relacionamento|crm.useful_links.relacionamento.view|true'
   ]::text[],
   'the active catalog matches the exact approved production key, route, permission and navigation set'
 );
@@ -135,9 +143,17 @@ select is(
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
-    'crm.stage.visits'
+    'crm.stage.visits',
+    'crm.useful_links',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links.campanha_do_mes',
+    'crm.useful_links.grupos_whatsapp',
+    'crm.useful_links.linktree_liveprint',
+    'crm.useful_links.lojas_horarios',
+    'crm.useful_links.regras_comerciais',
+    'crm.useful_links.relacionamento'
   ]::text[],
-  'Master resolves the exact forty-one-page catalog set'
+  'Master resolves the exact forty-nine-page catalog set'
 );
 
 select is(
@@ -197,9 +213,17 @@ select is(
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
-    'crm.stage.visits'
+    'crm.stage.visits',
+    'crm.useful_links',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links.campanha_do_mes',
+    'crm.useful_links.grupos_whatsapp',
+    'crm.useful_links.linktree_liveprint',
+    'crm.useful_links.lojas_horarios',
+    'crm.useful_links.regras_comerciais',
+    'crm.useful_links.relacionamento'
   ]::text[],
-  'Admin retains the exact forty-one-page inherited set including Lead, Meta Ads, partnerships and simulators'
+  'Admin retains the exact forty-nine-page inherited set including Lead, Meta Ads, useful links, partnerships and simulators'
 );
 
 select is(
@@ -235,7 +259,15 @@ select is(
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
-    'crm.stage.visits'
+    'crm.stage.visits',
+    'crm.useful_links',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links.campanha_do_mes',
+    'crm.useful_links.grupos_whatsapp',
+    'crm.useful_links.linktree_liveprint',
+    'crm.useful_links.lojas_horarios',
+    'crm.useful_links.regras_comerciais',
+    'crm.useful_links.relacionamento'
   ]::text[],
   'Corretor House retains the exact inherited inherited set including simulators'
 );
@@ -273,7 +305,15 @@ select is(
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
-    'crm.stage.visits'
+    'crm.stage.visits',
+    'crm.useful_links',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links.campanha_do_mes',
+    'crm.useful_links.grupos_whatsapp',
+    'crm.useful_links.linktree_liveprint',
+    'crm.useful_links.lojas_horarios',
+    'crm.useful_links.regras_comerciais',
+    'crm.useful_links.relacionamento'
   ]::text[],
   'Corretor Imob retains the exact inherited inherited set including simulators'
 );
@@ -311,7 +351,15 @@ select is(
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
-    'crm.stage.visits'
+    'crm.stage.visits',
+    'crm.useful_links',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links.campanha_do_mes',
+    'crm.useful_links.grupos_whatsapp',
+    'crm.useful_links.linktree_liveprint',
+    'crm.useful_links.lojas_horarios',
+    'crm.useful_links.regras_comerciais',
+    'crm.useful_links.relacionamento'
   ]::text[],
   'Coordinator retains the exact inherited Imob inherited set including simulators'
 );
@@ -349,7 +397,15 @@ select is(
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
-    'crm.stage.visits'
+    'crm.stage.visits',
+    'crm.useful_links',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links.campanha_do_mes',
+    'crm.useful_links.grupos_whatsapp',
+    'crm.useful_links.linktree_liveprint',
+    'crm.useful_links.lojas_horarios',
+    'crm.useful_links.regras_comerciais',
+    'crm.useful_links.relacionamento'
   ]::text[],
   'Gerente House retains the exact inherited inherited set including simulators'
 );
@@ -387,7 +443,15 @@ select is(
     'crm.stage.folders',
     'crm.stage.opportunities',
     'crm.stage.sales',
-    'crm.stage.visits'
+    'crm.stage.visits',
+    'crm.useful_links',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links.campanha_do_mes',
+    'crm.useful_links.grupos_whatsapp',
+    'crm.useful_links.linktree_liveprint',
+    'crm.useful_links.lojas_horarios',
+    'crm.useful_links.regras_comerciais',
+    'crm.useful_links.relacionamento'
   ]::text[],
   'Gerente Imob retains the exact inherited inherited set including simulators'
 );
