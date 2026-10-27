@@ -3897,3 +3897,42 @@ dependente da autorização específica aplicável.
   `Documento excede o limite de exportacao.`. A indisponibilidade não autoriza
   reduzir a autoridade documental nem dispensa a conferência direta do código,
   dos testes, do GitHub/CI e do site.
+
+### CAIXA — layout, acesso, CI e publicação confirmados
+
+- O PR #362 foi integrado sem bypass no `main` como
+  `9cf72dafb273693f412143abc337eefd0ed80f4e`. A CI push/main
+  `40411904177` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`; a etapa CAIXA e a matriz global de largura, temas, zoom,
+  teclado e Axe passaram. Fonte:
+  https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40411904177.
+- Artefato imutável `12693059289`, nome
+  `promotable-image-9cf72dafb273693f412143abc337eefd0ed80f4e`, digest do
+  artifact `dd3216791d2c8ba7029747fb825d777e176ea1d0d38abfc00c7666b45e1231dc`.
+  A captura protegida final `40404389362` também foi aprovada; artifact visual
+  `12691744581`, digest
+  `8f1c94fd968991568d736eb9abfdbf7ed8b9edb76a2b7e1ede0640bf7469be90`.
+- O coordenador exclusivo registrou o deployment
+  `a9d4d0ba-a660-4d88-b241-02ecff8d4e9b`, SHA exato `9cf72daf...`, imagem
+  `sha256:41d65835f860fcb08797add395276711a9eb5e0bf39ce5b8ed938be3c1bc962c`
+  e `deployedAt=2026-10-26T23:32:26.887Z` (20:32:26
+  America/Sao_Paulo), sem pendência. A reconferência protegida com a CI exata
+  retornou `noop`, preservando o deployment já ativo e sem reiniciar.
+- Pós-publicação em `2026-10-27T00:34:26.521Z`: GET público do health respondeu
+  HTTP 200, `status=ok` e versão
+  `9cf72dafb273693f412143abc337eefd0ed80f4e`; GET anônimo de
+  `/app/simulacao/caixa` respondeu 307 para `/login`. A CI já havia validado a
+  jornada autenticada com dados sintéticos, três temas, cálculo, Axe e overflow.
+- Escopo preservado: fórmulas e regras financeiras não foram modificadas; SAC
+  90% e Price 80% continuam cobertos. Nenhum dado remoto, migration aplicada,
+  DNS, cobrança, conta ou workflow n8n foi alterado.
+- Após a publicação, `origin/main` avançou para `962f7d9d` por uma entrega
+  concorrente de Meta Ads. O registro distingue esse estado posterior da versão
+  CAIXA comprovadamente publicada; não houve intervenção ou republicação da
+  entrega concorrente.
+- Fechamento documental: formato, lint, typecheck e build aprovados. A suíte
+  Windows teve quatro timeouts de host em Associativo e conhecimento; repetição
+  isolada dos dois arquivos, com um worker, aprovou 35/35. A CI Linux exata do
+  SHA publicado é a evidência integral. O `knowledge:sync` final foi tentado e
+  permaneceu bloqueado por `Documento excede o limite de exportacao.`; nenhuma
+  redução do documento ou alteração do vault foi feita.
