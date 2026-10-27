@@ -1,5 +1,21 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: isolamento final das acoes ocultas de Agendamentos
+
+- A CI de `main` `40550745986` aprovou `validate`, `promotable-image` e
+  `isolated-restore`, mas o `release-gates` encontrou uma regressao de clique na
+  Visao Geral: a toolbar compartilhada surgia no hover e interceptava o botao
+  de historico mensal. A falha pertencia a esta entrega, nao ao PR posterior.
+- O comportamento oculto agora depende da propriedade
+  `hideCardActionsByDefault`, ativada somente em
+  `/app/etapas/agendamentos`. A Visao Geral voltou ao layout anterior, com a
+  toolbar em linha; Agendamentos mantem as acoes ocultas ate hover/foco.
+- Validacao local com Node 24.19.0: typecheck, 27 testes focados e a matriz
+  `scripts/qa/dashboard-report.mjs` aprovaram. A matriz ampla concluiu 267
+  verificacoes, incluindo temas, viewports, Axe e todos os popups de historico,
+  sem falhas. Nova CI no SHA corretivo permanece obrigatoria antes da
+  publicacao.
+
 ## 2026-10-27: abertura do editor administrativo de Agendamentos
 
 - Escopo exclusivo: controles de edicao visual dos cards e graficos em
