@@ -1,5 +1,6 @@
 # Worklog
 
+- 2026-10-27: corrigida a origem do status no dashboard Meta Ads. O cliente oficial agora consulta `effective_status` no nível de campanha; anúncios arquivados de uma campanha ativa continuam contribuindo integralmente para investimento, resultados e demais métricas históricas. A validação focada cobre campanha arquivada e campanha ativa com gasto distribuído entre anúncio ativo e arquivado.
 - 2026-10-27: publicado o Simulador CAIXA automatizado no SHA `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`, após os quatro jobs da CI `40463329858` aprovarem; deployment `da2976c6-dd73-45c5-b04f-96e666043600`, health público exato e rota anônima protegida por login.
 - 2026-10-27: adotadas 11 referências visuais revisadas de `/app/simulacao/caixa` a partir da CI `40457067981`, artefato `12714049954`; todos os testes funcionais, Axe, teclado, zoom e canvas externo passaram, e as demais 231 imagens e os limiares foram preservados.
 - 2026-10-27: canvas de Visão Geral e Agendamentos publicado no SHA `897d0cf9c8a91b197a91c742c3799968c7dcc61c`; migration aditiva `dashboard_profiles` aplicada com RLS forçada, seis RPCs autenticadas e smoke autenticado das duas páginas sem erros de console.
