@@ -1,5 +1,6 @@
 # Changelog
 
+- Registra o editor administrativo exclusivo de Agendamentos como integrado e validado, sem publicação porque um gate obrigatório externo da área Links Úteis falhou.
 - Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
 - Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.
 - Compacta a navegação de Agendamentos em notebooks após a inclusão do nono menu raiz.
