@@ -1,5 +1,7 @@
 # Changelog
 
+- Corrigido o contrato da CI para que `release-gates`, `isolated-restore` e `promotable-image` também produzam checks conclusivos em pull requests protegidos, preservando a repetição integral no `main`.
+
 - Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
 - Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.
 - Compacta a navegação de Agendamentos em notebooks após a inclusão do nono menu raiz.
