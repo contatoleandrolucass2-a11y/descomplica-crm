@@ -36,6 +36,7 @@ PNG para preservar o gráfico. Foram adicionados testes de layout, migração de
 schema, reducer, compatibilidade, integração das duas páginas, API e segurança
 do perfil. A especificação proíbe publicação sem autorização separada; por isso
 esta entrega permanece local até novo pedido explícito.
+
 ## 2026-10-26 — Publicação do layout e acesso do Simulador CAIXA
 
 O PR #362 foi integrado sem bypass no commit
