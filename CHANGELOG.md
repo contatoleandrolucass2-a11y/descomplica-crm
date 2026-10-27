@@ -13,6 +13,12 @@
 - Preserva as fórmulas, filtros globais, fontes e permissões existentes nas duas páginas.
 - Inclui migration e pgTAP versionados, sem aplicação remota nem publicação, conforme o limite expresso da especificação.
 - Alinha os testes pgTAP ao tipo `smallint` do schema e inclui a nova tabela, políticas e seis RPCs nas matrizes completas de RLS e grants.
+## 2026-10-26 — Simulador CAIXA publicado com novo layout e acesso
+
+- Publica o padrão visual dos simuladores Associativo e Tabela Direta nos temas claro, médio e escuro.
+- Disponibiliza o motor local a todos os usuários autenticados com `crm.simulators.view`, mantendo os controles de sessão, MFA e overrides.
+- Preserva integralmente as regras financeiras já validadas, inclusive SBPE SAC 90% e Price 80%.
+- Confirma a entrega no `main` por CI completa, artefato imutável, coordenador protegido e verificação pós-publicação.
 
 ## 2026-10-26 — Persistência e precisão do Canvas Meta Ads
 
