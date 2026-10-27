@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: editor administrativo de Agendamentos integrado; deploy bloqueado externamente
+
+- Escopo concluido: os PRs #375, #378 e #381 integraram o editor administrativo
+  exclusivo de `/app/etapas/agendamentos`, com ajuste persistente de largura,
+  altura, conteudo, fonte, alinhamento, cores e escala das torres. Os controles
+  inline ficam ocultos no uso comum, nao existe perfil de layout e somente o
+  administrador pode editar a pagina.
+- Validacao do escopo: lint sem erros (44 avisos preexistentes), typecheck,
+  build de 41 paginas/71 saidas, matriz do Dashboard com 267 verificacoes e
+  4.372 testes aprovados/112 ignorados. A CI dos PRs do editor foi aprovada.
+- Estado final consultado em 27/10/2026: `main`
+  `e8125eebec9c9fd7737f686e9b2822e7f568c9b4`, CI `40589040344`. Os jobs
+  `validate` e `promotable-image` passaram, mas `isolated-restore`
+  (`122490128029`) falhou porque a area Links Uteis manteve contratos pgTAP
+  antigos: 82 permissoes atuais contra 74 esperadas, alem de contagens de
+  paginas e defaults divergentes.
+- O bloqueio pertence a outra pagina/funcionalidade. Pela regra maxima de
+  escopo, nenhum teste, baseline, permissao ou codigo de Links Uteis foi
+  alterado neste chat. O gate falho impede `release:production`; portanto a
+  migration do editor e o runtime nao foram aplicados em producao.
+- Health publico permaneceu HTTP 200, `status=ok`, versao
+  `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`. A sincronizacao com o Obsidian
+  continua pendente porque o runtime retorna
+  `Documento excede o limite de exportacao.`
+
 ## 2026-10-27: revisão das referências do Dashboard para liberar o CAIXA
 
 - Após autorização explícita do usuário para remover o bloqueio e concluir a
