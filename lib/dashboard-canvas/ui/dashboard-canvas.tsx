@@ -295,9 +295,10 @@ export function DashboardCanvas({
     if (disabled || event.button !== 0) return;
     event.preventDefault();
     const cardElement = cardElements.current.get(card.id);
-    if (!cardElement) return;
+    const captureTarget = gridRef.current;
+    if (!cardElement || !captureTarget) return;
     const bounds = cardElement.getBoundingClientRect();
-    event.currentTarget.setPointerCapture(event.pointerId);
+    captureTarget.setPointerCapture(event.pointerId);
     const nextInteraction: PointerInteraction = {
       kind,
       cardId: card.id,
@@ -311,7 +312,7 @@ export function DashboardCanvas({
       floatingRect: bounds,
       offsetX: event.clientX - bounds.left,
       offsetY: event.clientY - bounds.top,
-      captureTarget: event.currentTarget,
+      captureTarget,
     };
     interactionRef.current = nextInteraction;
     setInteraction(nextInteraction);
@@ -411,6 +412,7 @@ export function DashboardCanvas({
                 <button
                   type="button"
                   className={styles.dragHandle}
+                  data-dashboard-export-ignore
                   aria-label={`Mover ${cardName(card)}`}
                   disabled={disabled}
                   onPointerDown={(event) => beginInteraction(event, card, "drag")}
@@ -426,6 +428,7 @@ export function DashboardCanvas({
               <button
                 type="button"
                 className={styles.resizeHandle}
+                data-dashboard-export-ignore
                 aria-label={`Redimensionar ${cardName(card)}`}
                 disabled={disabled}
                 onPointerDown={(event) => beginInteraction(event, card, "resize")}

@@ -61,7 +61,7 @@ import styles from "./configurable-dashboard-canvas.module.css";
 
 type SaveState = "idle" | "saving" | "saved" | "failure" | "conflict";
 
-interface RemoteDashboardProfile {
+export interface RemoteDashboardProfile {
   id: string;
   userId: string;
   pageKey: string;
@@ -73,6 +73,22 @@ interface RemoteDashboardProfile {
   cards: DashboardCard[];
   createdAt: string;
   updatedAt: string;
+}
+
+export function reconcileDefaultProfileChange(
+  profiles: readonly RemoteDashboardProfile[],
+  updated: RemoteDashboardProfile,
+) {
+  return profiles.map((entry) => {
+    if (entry.id === updated.id) return updated;
+    if (!entry.isDefault) return entry;
+    return {
+      ...entry,
+      isDefault: false,
+      version: entry.version + 1,
+      updatedAt: updated.updatedAt,
+    };
+  });
 }
 
 class ProfileRequestError extends Error {
@@ -433,12 +449,7 @@ export function ConfigurableDashboardCanvas({
         { method: "POST", body: JSON.stringify({ version: profile.version }) },
       );
       setProfiles((current) => {
-        const next = current.map((entry) => ({
-          ...entry,
-          isDefault: entry.id === updated.id,
-          version: entry.id === updated.id ? updated.version : entry.version,
-          updatedAt: entry.id === updated.id ? updated.updatedAt : entry.updatedAt,
-        }));
+        const next = reconcileDefaultProfileChange(current, updated);
         writeCachedProfiles(cacheKey, next);
         return next;
       });
@@ -643,7 +654,7 @@ export function ConfigurableDashboardCanvas({
                 .filter(Boolean)
                 .join(" ")}
             >
-              <div className={styles.cardActions}>
+              <div className={styles.cardActions} data-dashboard-export-ignore>
                 <label>
                   <input
                     type="checkbox"

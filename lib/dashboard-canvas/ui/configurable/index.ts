@@ -1,4 +1,8 @@
-export { ConfigurableDashboardCanvas } from "./configurable-dashboard-canvas";
+export {
+  ConfigurableDashboardCanvas,
+  reconcileDefaultProfileChange,
+  type RemoteDashboardProfile,
+} from "./configurable-dashboard-canvas";
 export {
   DEFAULT_CARD_TYPE_LABELS,
   DEFAULT_GROUP_LABELS,

@@ -186,7 +186,9 @@ export async function captureDashboardCard(element: HTMLElement) {
   const height = Math.max(1, Math.ceil(bounds.height || element.offsetHeight));
   const clone = element.cloneNode(true) as HTMLElement;
   copyComputedStyles(element, clone);
-  clone.querySelectorAll("button, input, select, textarea").forEach((control) => control.remove());
+  clone
+    .querySelectorAll("[data-dashboard-export-ignore], input, select, textarea")
+    .forEach((control) => control.remove());
   clone.style.width = `${width}px`;
   clone.style.height = `${height}px`;
   clone.style.margin = "0";

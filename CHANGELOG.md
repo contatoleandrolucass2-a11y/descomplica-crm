@@ -2,6 +2,7 @@
 
 - Corrige os gates dos perfis de canvas ao reproduzir uma sessão MFA no pgTAP e alinhar a captura visual protegida à grade configurável da Visão Geral.
 - Mantém a concessão autenticada à função temporária do ensaio e a ordem auditada da matriz de RPCs.
+- Preserva o conteúdo interativo dos gráficos na exportação em PDF, reconcilia a versão do perfil padrão anterior e mantém a captura do ponteiro durante o arraste fora da grade.
 
 ## 2026-10-26 — Canvas analítico em Visão Geral e Agendamentos
 

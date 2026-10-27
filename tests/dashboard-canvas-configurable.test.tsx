@@ -9,6 +9,7 @@ import {
   cardMinimumHeight,
   createCatalogCard,
   moveSelectedCards,
+  reconcileDefaultProfileChange,
   reconcileCardCompatibility,
   type ConfigurableDashboardCanvasProps,
   type ConfigurableDashboardCatalog,
@@ -137,6 +138,36 @@ describe("configurable dashboard canvas", () => {
     expect(moved.map(({ layout }) => layout.order)).toEqual([0, 1, 2, 3]);
   });
 
+  it("reconciles every profile version changed while switching the default", () => {
+    const profile = (id: string, isDefault: boolean, version: number) => ({
+      id,
+      userId: "user-1",
+      pageKey: "crm.dashboard",
+      scopeKey: "house",
+      name: id,
+      isDefault,
+      version,
+      schemaVersion: 2 as const,
+      cards: [card(id, 0)],
+      createdAt: "2026-10-26T20:00:00.000Z",
+      updatedAt: "2026-10-26T20:00:00.000Z",
+    });
+    const updated = {
+      ...profile("second", true, 4),
+      updatedAt: "2026-10-26T21:00:00.000Z",
+    };
+
+    expect(
+      reconcileDefaultProfileChange(
+        [profile("first", true, 7), profile("second", false, 3)],
+        updated,
+      ).map(({ id, isDefault, version }) => ({ id, isDefault, version })),
+    ).toEqual([
+      { id: "first", isDefault: false, version: 8 },
+      { id: "second", isDefault: true, version: 4 },
+    ]);
+  });
+
   it("generates a real vector PDF with the vendored jsPDF bundle", () => {
     const JsPdf = loadVendoredJsPdf();
     const document = buildDashboardPdfDocument(JsPdf, {
@@ -167,12 +198,24 @@ describe("configurable dashboard canvas", () => {
       new URL("../lib/dashboard-canvas/ui/configurable/modal.tsx", import.meta.url),
       "utf8",
     );
+    const canvas = readFileSync(
+      new URL("../lib/dashboard-canvas/ui/dashboard-canvas.tsx", import.meta.url),
+      "utf8",
+    );
+    const pdf = readFileSync(
+      new URL("../lib/dashboard-canvas/ui/configurable/pdf.ts", import.meta.url),
+      "utf8",
+    );
     for (const label of ["Adicionar", "Organizar", "Desfazer", "Refazer", "Perfis", "Baixar PDF"]) {
       expect(source).toContain(label);
     }
     for (const state of ["Salvando", "Salvo", "Falha", "Conflito"]) expect(source).toContain(state);
     expect(source).toContain("/api/dashboard-profiles");
     expect(source).toContain("700");
+    expect(source).toContain("data-dashboard-export-ignore");
+    expect(canvas).toContain("captureTarget.setPointerCapture(event.pointerId)");
+    expect(canvas).not.toContain("event.currentTarget.setPointerCapture(event.pointerId)");
+    expect(pdf).not.toContain('querySelectorAll("button, input, select, textarea")');
     expect(modal).toContain('role="dialog"');
     expect(modal).toContain('aria-modal="true"');
   });

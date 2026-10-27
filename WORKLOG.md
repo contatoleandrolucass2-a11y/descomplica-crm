@@ -1,6 +1,7 @@
 # Worklog
 
 - 2026-10-26: alinhados os gates finais do canvas: o pgTAP agora simula a sessão MFA exigida pelas RPCs e a captura visual protegida valida os 13 cards pela nova grade configurável. Permanecem também corrigidas a permissão da função temporária do fixture e a ordenação da matriz de RPCs autenticadas.
+- 2026-10-26: tratados os três apontamentos funcionais da revisão do PR: a captura em PDF remove somente controles do editor, a troca do perfil padrão reconcilia a versão incrementada do padrão anterior e o arraste captura o ponteiro na grade estável, inclusive fora dos limites do card.
 
 ## 2026-10-26 — Canvas analítico de Visão Geral e Agendamentos
 
