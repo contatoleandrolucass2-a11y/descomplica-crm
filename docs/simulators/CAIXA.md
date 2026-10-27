@@ -230,13 +230,25 @@ ao conjunto de descontos. Esses detalhes e a falta de FUH/município explicam
 por que copiar a fórmula reduzida da referência não comprova o desconto real.
 
 A expressão de `Frenda` acima é a transcrição do MFOM034, p. 131, §3.1.1.1.
+O PDF oficial consultado em 27/10/2026 tem SHA-256
+`896f9f11aae2add4a9cd7f4e70301b08512b2606ca3b7e301e90f4511217e830` e
+traz os anexos III e IV como planilhas embutidas. O Anexo III confirma, entre
+outros valores, `FDr=2,07` para SP. O Anexo IV confirma que `Fpop` varia por
+hierarquia territorial e população (`0,85` a `1,20` na tabela geral e `1,25` a
+`1,63` na tabela específica da Região Norte). Logo, cidade/UF sozinhas não
+determinam o fator sem o recorte territorial oficial correspondente.
+
 Nas pp. 131–133 consultadas não foi localizada regra explícita de saturação de
 `R`/`Frenda` ou função por faixas após `RDmin`. A expressão literal atinge seu
 mínimo em R$ 3.700 e volta a crescer acima desse ponto; o limite de concessão
 de R$ 4.000, no §3.1.1.8, não esclarece essa lacuna operacional. Não presumir
 congelamento, extensão monotônica ou piso da curva. Esta memória matemática
-não constitui especificação executável de subsídio; a página utiliza somente
-o complemento confirmado e suas validações básicas, sem executar a expressão.
+não constitui especificação executável de valor do subsídio. A página identifica
+automaticamente quando o cenário permite análise do benefício (`MCMV`, renda até
+R$ 4 mil, imóvel até R$ 400 mil, sem subsídio anterior e fora de Classe Média),
+mas só abate o complemento monetário confirmado. A indicação de elegibilidade
+não é apresentada como concessão e não altera financiamento ou entrada sem o
+valor oficial.
 
 Não forçar Price, migrar automaticamente para SBPE ou aceitar nascimento
 inválido/menor como adulto. Não inventar um mês de prazo quando o limite é zero.

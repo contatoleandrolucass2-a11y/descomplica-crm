@@ -2719,43 +2719,24 @@
 
 /* Layout 2026-10: alinha a jornada CAIXA à família visual dos simuladores. */
 .goal-page-shell.caixa-page-shell {
-  --caixa-layout-page: #f3f6fa;
-  --caixa-layout-panel: #ffffff;
-  --caixa-layout-input: #ffffff;
-  --caixa-layout-line: #7f95ad;
-  --caixa-layout-accent: #0754a6;
-  --caixa-layout-action: #0754a6;
-  --caixa-layout-accent-strong: #06498f;
-  --caixa-layout-ink: #182a40;
-  --caixa-layout-muted: #566b82;
+  --caixa-layout-page: var(--analytics-page);
+  --caixa-layout-panel: var(--analytics-surface);
+  --caixa-layout-input: var(--analytics-surface-muted);
+  --caixa-layout-line: var(--analytics-line);
+  --caixa-layout-accent: var(--analytics-cyan-strong);
+  --caixa-layout-action: var(--analytics-cyan-strong);
+  --caixa-layout-action-ink: var(--analytics-surface);
+  --caixa-layout-accent-strong: color-mix(
+    in srgb,
+    var(--analytics-cyan-strong) 82%,
+    var(--analytics-ink)
+  );
+  --caixa-layout-ink: var(--analytics-ink);
+  --caixa-layout-muted: var(--analytics-muted);
   min-height: calc(100vh - var(--protected-header-height, 58px));
   padding: 8px 16px 28px;
   color: var(--caixa-layout-ink);
   background: var(--caixa-layout-page);
-}
-
-:root[data-theme="balanced"] .goal-page-shell.caixa-page-shell {
-  --caixa-layout-page: #d9e1eb;
-  --caixa-layout-panel: #e7edf5;
-  --caixa-layout-input: #f0f4f9;
-  --caixa-layout-line: #7890aa;
-  --caixa-layout-accent: #084b92;
-  --caixa-layout-action: #084b92;
-  --caixa-layout-accent-strong: #073f7a;
-  --caixa-layout-ink: #14283f;
-  --caixa-layout-muted: #4b6178;
-}
-
-:root[data-theme="dark"] .goal-page-shell.caixa-page-shell {
-  --caixa-layout-page: #061f35;
-  --caixa-layout-panel: #0a2b47;
-  --caixa-layout-input: #071a31;
-  --caixa-layout-line: #3d7898;
-  --caixa-layout-accent: #7dd3fc;
-  --caixa-layout-action: #0754a6;
-  --caixa-layout-accent-strong: #06498f;
-  --caixa-layout-ink: #f3fbff;
-  --caixa-layout-muted: #b9d1e2;
 }
 
 .caixa-page-shell .caixa-main,
@@ -2809,7 +2790,7 @@
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 6px;
-  border: 1px solid var(--caixa-layout-accent);
+  border: 1px solid var(--caixa-layout-line);
   border-radius: 10px;
   background: var(--caixa-layout-panel);
   box-shadow: none;
@@ -2850,7 +2831,7 @@
 }
 
 .caixa-page-shell .caixa-tabs button.active > span {
-  color: #ffffff;
+  color: var(--caixa-layout-action-ink);
   background: var(--caixa-layout-action);
 }
 
@@ -2865,7 +2846,7 @@
 .caixa-page-shell .caixa-confirmed-parameters,
 .caixa-page-shell .caixa-full-form-actions {
   color: var(--caixa-layout-ink);
-  border: 1px solid var(--caixa-layout-accent);
+  border: 1px solid var(--caixa-layout-line);
   border-radius: 10px;
   background: var(--caixa-layout-panel);
   box-shadow: none;
@@ -2954,7 +2935,7 @@
 
 .caixa-page-shell .caixa-automatic-values {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -2980,6 +2961,15 @@
 
 .caixa-page-shell .caixa-automatic-values small {
   color: var(--caixa-layout-muted);
+}
+
+.caixa-page-shell .caixa-subsidy-status.eligible-review {
+  border-color: color-mix(in srgb, var(--analytics-positive) 58%, var(--caixa-layout-line));
+  background: color-mix(in srgb, var(--analytics-positive) 8%, var(--caixa-layout-input));
+}
+
+.caixa-page-shell .caixa-subsidy-status.eligible-review strong {
+  color: var(--analytics-positive);
 }
 
 .caixa-page-shell .caixa-property-condition-group {
@@ -3066,7 +3056,7 @@
 }
 
 .caixa-page-shell .caixa-toggle button[aria-pressed="true"] {
-  color: #ffffff;
+  color: var(--caixa-layout-action-ink);
   border-color: var(--caixa-layout-action);
   background: var(--caixa-layout-action);
 }
@@ -3128,10 +3118,32 @@
   color: var(--caixa-layout-accent);
 }
 
-.caixa-page-shell .caixa-step-actions .primary {
-  color: #ffffff;
+.caixa-page-shell .caixa-step-actions .primary,
+.caixa-page-shell .caixa-actions button.primary,
+.caixa-page-shell .caixa-submit {
+  color: var(--caixa-layout-action-ink);
   border-color: var(--caixa-layout-action);
-  background: var(--caixa-layout-action);
+  background-color: var(--caixa-layout-action);
+  background-image: none;
+}
+
+:root .goal-page-shell.caixa-page-shell .caixa-step-actions .primary,
+:root .goal-page-shell.caixa-page-shell .caixa-documents .caixa-actions button.primary,
+:root .goal-page-shell.caixa-page-shell .caixa-guide .caixa-actions button.primary,
+:root .goal-page-shell.caixa-page-shell .caixa-result-actions .caixa-actions button.primary {
+  color: var(--caixa-layout-action-ink);
+  border-color: var(--caixa-layout-action);
+  background-color: var(--caixa-layout-action);
+  background-image: none;
+}
+
+:root[data-theme="dark"]
+  .goal-page-shell.caixa-page-shell
+  :is(.caixa-submit, .caixa-step-actions .primary) {
+  color: var(--caixa-layout-action-ink);
+  border-color: var(--caixa-layout-action);
+  background-color: var(--caixa-layout-action);
+  background-image: none;
 }
 
 .caixa-page-shell .caixa-step-actions .primary:not(:disabled):hover {
@@ -3149,16 +3161,16 @@
   background: #071a31;
 }
 
-.caixa-page-shell .caixa-result-summary-heading {
-  border-bottom-color: var(--caixa-layout-line);
+.caixa-page-shell .caixa-result-summary-grid {
+  align-items: start;
 }
 
-:root[data-theme="dark"]
-  .goal-page-shell.caixa-page-shell
-  .caixa-toggle
-  button[aria-pressed="false"] {
-  color: #a9bfd2;
-  background: #102a42;
+.caixa-page-shell .caixa-result-plan {
+  align-self: start;
+}
+
+.caixa-page-shell .caixa-result-summary-heading {
+  border-bottom-color: var(--caixa-layout-line);
 }
 
 .goal-page-shell.caixa-page-shell .caixa-result-panel .caixa-construction .caixa-field > span {
@@ -3168,14 +3180,24 @@
 @media (max-width: 1100px) {
   .caixa-page-shell .caixa-primary-grid,
   .caixa-page-shell .caixa-secondary-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-  .caixa-page-shell .caixa-binary-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .caixa-page-shell .caixa-binary-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .caixa-page-shell .caixa-participants-field,
+  .caixa-page-shell .caixa-product-system-field,
   .caixa-page-shell .caixa-property-condition-group {
+    grid-column: 1 / -1;
+  }
+
+  .caixa-page-shell .caixa-automatic-values {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .caixa-page-shell .caixa-subsidy-status {
     grid-column: 1 / -1;
   }
 }
@@ -3193,13 +3215,19 @@
   }
 
   .caixa-page-shell .caixa-tabs button {
-    grid-template-columns: minmax(0, 1fr);
-    justify-items: center;
-    font-size: 0;
+    grid-template-columns: 28px minmax(0, 1fr);
+    justify-items: start;
+    font-size: 0.7rem;
   }
 
   .caixa-page-shell .caixa-tabs button > span {
+    width: 26px;
+    height: 26px;
     font-size: 0.8rem;
+  }
+
+  .caixa-page-shell .caixa-tabs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .caixa-page-shell .caixa-primary-grid,
@@ -3212,6 +3240,10 @@
   .caixa-page-shell .caixa-automatic-values,
   .caixa-page-shell .caixa-property-condition-group {
     grid-template-columns: minmax(0, 1fr);
+  }
+
+  .caixa-page-shell .caixa-subsidy-status {
+    grid-column: auto;
   }
 
   .caixa-page-shell .caixa-full-form-actions {

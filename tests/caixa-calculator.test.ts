@@ -11,6 +11,7 @@ import {
   getMaximumFinancingQuota,
   getMaximumTerm,
   getMcmvBand,
+  getMcmvSubsidyEligibility,
   getMunicipalLimit,
   type HousingInput,
 } from "@/lib/crm/simulators/caixa";
@@ -237,7 +238,7 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
       rate: 10,
     });
     const result = success({
-      income: 5000,
+      income: 4000,
       confirmedSubsidy: undefined,
       mipMonthly: undefined,
       dfiMonthly: undefined,
@@ -246,8 +247,48 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
     expect(result.subsidy).toBe(0);
     expect(result.subsidyConfirmed).toBe(false);
     expect(result.insuranceKnown).toBe(false);
-    expect(result.warnings.join(" ")).toContain("Subsídio a confirmar");
+    expect(result.warnings.join(" ")).toContain("Renda potencialmente elegível");
     expect(result.warnings.join(" ")).toContain("sem os seguros ausentes");
+  });
+  it("distinguishes subsidy eligibility from a confirmed monetary amount", () => {
+    expect(
+      getMcmvSubsidyEligibility({
+        income: 4000,
+        propertyValue: 276000,
+        product: "mcmv",
+      }),
+    ).toBe("eligible-review");
+    expect(
+      getMcmvSubsidyEligibility({
+        income: 4000.01,
+        propertyValue: 276000,
+        product: "mcmv",
+      }),
+    ).toBe("not-eligible");
+    expect(
+      getMcmvSubsidyEligibility({
+        income: 4000,
+        propertyValue: 276000,
+        product: "mcmv",
+        previousSubsidy: true,
+      }),
+    ).toBe("not-eligible");
+    expect(
+      getMcmvSubsidyEligibility({
+        income: 4000,
+        propertyValue: 276000,
+        product: "mcmv",
+        confirmedSubsidy: 3500,
+      }),
+    ).toBe("confirmed");
+    expect(
+      success({
+        income: 4000,
+        propertyValue: 276000,
+        ownFunds: 0,
+        confirmedSubsidy: undefined,
+      }),
+    ).toMatchObject({ subsidy: 0, subsidyEligibility: "eligible-review" });
   });
   it("keeps public contribution separate and enforces the minimum FGTS complement", () => {
     const subsidyProfile = {
