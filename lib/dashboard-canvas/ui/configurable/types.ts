@@ -81,4 +81,5 @@ export interface ConfigurableDashboardCanvasProps {
   editable?: boolean | undefined;
   profileControls?: boolean | undefined;
   automaticProfileName?: string | undefined;
+  hideCardActionsByDefault?: boolean | undefined;
 }

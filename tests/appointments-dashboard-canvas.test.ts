@@ -55,6 +55,7 @@ describe("appointments configurable dashboard", () => {
     expect(source).toContain("contentByMetricAndType={contentByMetricAndType}");
     expect(source).toContain("editable={canEditDashboard}");
     expect(source).toContain("profileControls={false}");
+    expect(source).toContain("hideCardActionsByDefault");
     expect(source).toContain('automaticProfileName="Layout de Agendamentos"');
     for (const metric of APPOINTMENTS_CANVAS_CATALOG.metrics) {
       expect(source, metric.key).toContain(`"${metric.key}": {`);
