@@ -1,5 +1,6 @@
 # Worklog
 
+- 2026-10-27: implementado exclusivamente em `/app/etapas/agendamentos` o editor administrativo compartilhado dos cards e gráficos, com controles de dimensão, conteúdo, tipografia, posição, cores e torres; usuários não administradores permanecem em leitura.
 - 2026-10-27: corrigidos no Simulador CAIXA o prazo maximo reativo, a sinalizacao automatica da elegibilidade ao subsidio e o layout responsivo alinhado aos tokens de Agendamentos; o valor do subsidio continua dependente de confirmacao oficial quando faltam os fatores tecnicos do MFOM.
 - 2026-10-27: incorporadas somente as 11 referencias visuais do CAIXA aprovadas no run protegido `40537724784`, com 38 entradas de evidencia e preservacao das outras 231 imagens.
 - 2026-10-27: publicado o Simulador CAIXA automatizado no SHA `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`, após os quatro jobs da CI `40463329858` aprovarem; deployment `da2976c6-dd73-45c5-b04f-96e666043600`, health público exato e rota anônima protegida por login.

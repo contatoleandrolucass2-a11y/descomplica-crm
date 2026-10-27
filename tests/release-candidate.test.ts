@@ -53,18 +53,18 @@ describe("release-candidate migration train", () => {
     ).toHaveLength(3);
   });
 
-  it("keeps a unique, ordered 91-version manifest", async () => {
+  it("keeps a unique, ordered 92-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(91);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(91);
+    expect(migrations).toHaveLength(92);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(92);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-37)).toEqual([
+    expect(migrations.slice(-38)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -102,9 +102,10 @@ describe("release-candidate migration train", () => {
       "20261026191505_meta_ads_canvas_profiles.sql",
       "20261026194815_dashboard_profiles.sql",
       "20261026200621_sync_page_catalog.sql",
+      "20261027145559_appointments_admin_canvas_presentation.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261026200621_sync_page_catalog.sql");
+    expect(migrations.at(-1)).toBe("20261027145559_appointments_admin_canvas_presentation.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {

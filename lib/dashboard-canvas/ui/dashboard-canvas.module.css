@@ -127,6 +127,15 @@
   clip-path: inset(50%);
 }
 
+.shell[data-readonly="true"] .card {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.shell[data-readonly="true"] .header,
+.shell[data-readonly="true"] .resizeHandle {
+  display: none;
+}
+
 @media (max-width: 720px) {
   .grid > .card,
   .grid > .placeholder {

@@ -41,7 +41,8 @@ select ok(not exists (
   where has_function_privilege(role_name.name, function_name.name, 'EXECUTE')
 ), 'anon and service role cannot execute dashboard profile RPCs');
 select ok(
-  not has_function_privilege('authenticated', 'private.assert_dashboard_profile_context(uuid,text,text)', 'EXECUTE')
+  not has_function_privilege('authenticated', 'private.assert_dashboard_profile_read_context(uuid,text,text)', 'EXECUTE')
+  and not has_function_privilege('authenticated', 'private.assert_dashboard_profile_context(uuid,text,text)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'private.assert_dashboard_profile_document(text,jsonb)', 'EXECUTE'),
   'private validators are not callable by browser roles'
 );
@@ -205,7 +206,7 @@ select throws_ok(
 
 create temporary table created_profiles (slot text primary key, id uuid not null);
 insert into created_profiles
-select 'first', (public.create_dashboard_profile(
+select 'shared', (public.create_dashboard_profile(
   'crm.stage.appointments', null, 'Principal',
   jsonb_set(
     jsonb_set(pg_temp.dashboard_cards('card-1'), '{0,type}', '"kpi"'),
@@ -213,34 +214,33 @@ select 'first', (public.create_dashboard_profile(
   ),
   2::smallint, false
 )->>'id')::uuid;
-insert into created_profiles
-select 'second', (public.create_dashboard_profile(
-  'crm.stage.appointments', null, 'Alternativo', pg_temp.dashboard_cards('card-2','appointments.rate'), 2::smallint, false
-)->>'id')::uuid;
 
 select is(
   jsonb_array_length(public.get_dashboard_profiles('crm.stage.appointments', null)),
-  2,
-  'owner lists both profiles in the requested page scope'
+  1,
+  'appointments exposes one shared layout in the requested page scope'
 );
 select is(
-  (public.get_dashboard_profile((select id from created_profiles where slot='first'))->>'isDefault')::boolean,
+  (public.get_dashboard_profile((select id from created_profiles where slot='shared'))->>'isDefault')::boolean,
   true,
-  'first profile becomes default automatically'
+  'shared appointments layout becomes default automatically'
 );
 select is(
-  public.get_dashboard_profile((select id from created_profiles where slot='first'))->>'schemaVersion',
+  public.get_dashboard_profile((select id from created_profiles where slot='shared'))->>'schemaVersion',
   '2',
   'schema version 2 persists with a KPI at the 168px minimum'
 );
 select is(
-  (public.get_dashboard_profile((select id from created_profiles where slot='second'))->>'isDefault')::boolean,
-  false,
-  'later profile is not default unless requested'
+  public.create_dashboard_profile(
+    'crm.stage.appointments', null, 'Alternativo',
+    pg_temp.dashboard_cards('card-2','appointments.rate'), 2::smallint, false
+  )->>'id',
+  (select id::text from created_profiles where slot='shared'),
+  'a second administrator reuses the shared appointments layout'
 );
 select is(
   public.update_dashboard_profile(
-    (select id from created_profiles where slot='first'), 1, 'Principal novo', null, null
+    (select id from created_profiles where slot='shared'), 1, 'Principal novo', null, null
   )->>'version',
   '2',
   'matching optimistic version updates and increments version'
@@ -248,7 +248,7 @@ select is(
 select throws_ok(
   format(
     'select public.update_dashboard_profile(%L::uuid, 1, %L, null, null)',
-    (select id from created_profiles where slot='first'), 'Obsoleto'
+    (select id from created_profiles where slot='shared'), 'Obsoleto'
   ),
   '40001',
   'conflict: dashboard profile version changed',
@@ -256,25 +256,20 @@ select throws_ok(
 );
 select is(
   public.set_default_dashboard_profile(
-    (select id from created_profiles where slot='second'), 1
+    (select id from created_profiles where slot='shared'), 2
   )->>'version',
-  '2',
+  '3',
   'set-default increments the selected profile version'
 );
 select is(
-  (public.get_dashboard_profile((select id from created_profiles where slot='first'))->>'isDefault')::boolean,
-  false,
-  'set-default clears the prior default atomically'
-);
-select is(
-  (public.get_dashboard_profile((select id from created_profiles where slot='second'))->>'isDefault')::boolean,
+  (public.get_dashboard_profile((select id from created_profiles where slot='shared'))->>'isDefault')::boolean,
   true,
-  'set-default selects exactly one default'
+  'shared layout remains the only default'
 );
 select throws_ok(
   format(
-    'select public.delete_dashboard_profile(%L::uuid, 1)',
-    (select id from created_profiles where slot='second')
+    'select public.delete_dashboard_profile(%L::uuid, 2)',
+    (select id from created_profiles where slot='shared')
   ),
   '40001',
   'conflict: dashboard profile version changed',
@@ -287,31 +282,28 @@ select set_config(
   true
 );
 select is(
-  public.get_dashboard_profiles('crm.stage.appointments', null),
-  '[]'::jsonb,
-  'another authorized user cannot list the first user profiles'
-);
-select throws_ok(
-  format(
-    'select public.get_dashboard_profile(%L::uuid)',
-    (select id from created_profiles where slot='first')
-  ),
-  'P0002',
-  'not_found: dashboard profile',
-  'another user cannot address the first user profile by id'
+  jsonb_array_length(public.get_dashboard_profiles('crm.stage.appointments', null)),
+  1,
+  'an authorized viewer reads the shared appointments layout'
 );
 select is(
-  public.create_dashboard_profile(
+  public.get_dashboard_profile((select id from created_profiles where slot='shared'))->>'id',
+  (select id::text from created_profiles where slot='shared'),
+  'an authorized viewer can address the shared layout by id'
+);
+select throws_ok(
+  $$select public.create_dashboard_profile(
     'crm.stage.appointments', null, 'Segundo usuário',
     pg_temp.dashboard_cards('card-user-2'), 2::smallint, false
-  )->>'isDefault',
-  'true',
-  'another user creates an independent default'
+  )$$,
+  '42501',
+  'forbidden: appointments dashboard editing requires administrator',
+  'a non-administrator cannot create an appointments layout'
 );
 select is(
   jsonb_array_length(public.get_dashboard_profiles('crm.stage.appointments', null)),
   1,
-  'another user sees only the own profile'
+  'the denied write leaves the shared layout unchanged'
 );
 
 select set_config(
@@ -320,16 +312,42 @@ select set_config(
   true
 );
 select is(
-  public.delete_dashboard_profile(
-    (select id from created_profiles where slot='second'), 2
-  )#>>'{defaultProfile,id}',
-  (select id::text from created_profiles where slot='first'),
-  'deleting the default promotes the remaining profile atomically'
+  public.update_dashboard_profile(
+    (select id from created_profiles where slot='shared'), 3, null,
+    jsonb_set(
+      jsonb_set(
+        jsonb_set(pg_temp.dashboard_cards('card-1'), '{0,type}', '"kpi"'),
+        '{0,layout}', '{"order":0,"columnSpan":2,"height":168}'
+      ),
+      '{0,presentation}',
+      '{"fontScale":1.1,"textAlign":"center","verticalAlign":"center","textColor":"#d9e8f2","accentColor":"#55c4dc","barScale":1.2}'
+    ),
+    2::smallint
+  )->>'version',
+  '4',
+  'administrator persists the shared presentation controls'
 );
 select is(
-  (public.get_dashboard_profile((select id from created_profiles where slot='first'))->>'isDefault')::boolean,
-  true,
-  'fallback profile is persisted as the new default'
+  public.get_dashboard_profile((select id from created_profiles where slot='shared'))
+    #>>'{cards,0,presentation,barScale}',
+  '1.2',
+  'shared presentation is readable after the update'
+);
+select throws_ok(
+  format(
+    'select public.update_dashboard_profile(%L::uuid, 4, null, %L::jsonb, 2::smallint)',
+    (select id from created_profiles where slot='shared'),
+    jsonb_set(
+      jsonb_set(
+        jsonb_set(pg_temp.dashboard_cards('card-1'), '{0,type}', '"kpi"'),
+        '{0,layout}', '{"order":0,"columnSpan":2,"height":168}'
+      ),
+      '{0,presentation}', '{"fontScale":9}'
+    )::text
+  ),
+  '22023',
+  'invalid_argument: invalid dashboard card presentation',
+  'database rejects presentation values outside the allowed range'
 );
 select is(
   jsonb_array_length(public.get_dashboard_profiles('crm.stage.appointments', 'campaign-1')),
@@ -348,13 +366,13 @@ select throws_ok(
 reset role;
 select is(
   (select count(*) from public.dashboard_profiles),
-  2::bigint,
-  'fixture leaves one isolated row per user before rollback'
+  1::bigint,
+  'fixture leaves one shared appointments layout before rollback'
 );
 select is(
   (select count(*) from public.dashboard_profiles where is_default),
-  2::bigint,
-  'each user scope has exactly one default'
+  1::bigint,
+  'the shared appointments scope has exactly one default'
 );
 
 select * from finish();

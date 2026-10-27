@@ -1,5 +1,47 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: abertura do editor administrativo de Agendamentos
+
+- Escopo exclusivo: controles de edicao visual dos cards e graficos em
+  `/app/etapas/agendamentos`, com redimensionamento, conteudo e tipografia
+  ajustaveis, acoes inline ocultas e mutacoes restritas a Administrador/Master.
+- Conferencia de 27/10/2026 11:48 `America/Sao_Paulo`: `origin/main` estava em
+  `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`, com CI `40470172649` aprovada;
+  o health publico respondeu HTTP 200, `status=ok`, versao
+  `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`. A versao publicada estava atras
+  da `main` consultada e nao comprovava esta demanda.
+- A consulta e a sincronizacao inicial do conhecimento ficaram pendentes porque
+  o runtime retornou `Documento excede o limite de exportacao.`. Os documentos
+  versionados e o codigo atual sao a referencia desta execucao.
+
+### Implementacao e validacao local
+
+- A edicao permanece exclusivamente em `/app/etapas/agendamentos`. Somente
+  `admin` e `master` recebem o editor; os demais usuarios autorizados leem o
+  mesmo layout compartilhado sem toolbar, cabecalho de arraste ou alca de
+  redimensionamento. O controle de perfis foi removido desta pagina e o layout
+  unico usa salvamento automatico com versao otimista.
+- O editor permite alterar largura em colunas, altura em pixels, titulo, texto
+  complementar, escala e alinhamentos da fonte, cor do texto, cor de destaque e
+  altura/alcance das torres. As acoes inline ficam ocultas e aparecem somente
+  por hover ou foco do administrador.
+- A migration `20261027145559_appointments_admin_canvas_presentation.sql`
+  preserva o validador v2, valida a nova apresentacao, compartilha somente o
+  layout de Agendamentos entre leitores autorizados e exige Administrador/Master
+  para criar ou atualizar. As demais paginas continuam com perfis privados.
+- Node 24.19.0/pnpm 11.20.0: lint sem erros e com 44 avisos preexistentes em
+  ativos publicos fora do escopo; typecheck, build de 41 paginas/71 saidas,
+  `pages:check`, `resources:check` e 91 testes focados aprovados. A matriz Vitest
+  integral aprovou 4.370 testes e ignorou 112; duas execucoes paralelas tiveram
+  somente timeouts de host fora do escopo. O teste do Associativo aprovou
+  isoladamente; a repeticao do teste do conhecimento terminou por falta de
+  memoria no runtime local. Docker/Podman esta indisponivel, portanto o pgTAP de
+  32 assercoes e o restore isolado permanecem gates obrigatorios da CI Linux.
+- PR `#375`: CI `40539313931` e candidato visual protegido `40539313960`
+  aprovados no SHA `0177241f10c6546d6d90e2f436c23a9237c2aeb7`. A `main`
+  avancou durante a captura; a branch foi atualizada para repetir os gates no
+  novo SHA antes do merge. Migration remota e publicacao seguem pendentes.
+
 ## 2026-10-27: correcao local de subsidio, prazo e layout do CAIXA
 
 - O run protegido `40537724784` foi aprovado no head

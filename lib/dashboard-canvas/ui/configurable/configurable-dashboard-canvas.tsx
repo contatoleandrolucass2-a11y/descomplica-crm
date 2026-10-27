@@ -7,6 +7,7 @@ import {
   useReducer,
   useRef,
   useState,
+  type CSSProperties,
   type FormEvent,
 } from "react";
 import {
@@ -26,11 +27,13 @@ import {
 } from "lucide-react";
 
 import { DashboardCanvas } from "../dashboard-canvas";
+import { DASHBOARD_CARD_LAYOUT_LIMITS, constrainCardLayout } from "../../layout/limits";
 import { canvasReducer, createCanvasHistoryState } from "../../state/reducer";
 import { DASHBOARD_CANVAS_SCHEMA_VERSION, serializeCanvasSnapshot } from "../../state/migrations";
 import type {
   DashboardCard,
   DashboardCardOptions,
+  DashboardCardPresentation,
   DashboardCardSize,
   DashboardCardType,
   DashboardGroupBy,
@@ -157,6 +160,31 @@ function statusLabel(state: SaveState) {
   return "Sem perfil ativo";
 }
 
+type PresentationStyle = CSSProperties & {
+  "--dashboard-font-scale"?: number;
+  "--dashboard-bar-scale"?: number;
+  "--analytics-ink"?: string;
+  "--analytics-cyan-strong"?: string;
+  "--dashboard-block-align"?: CSSProperties["justifyContent"];
+  "--dashboard-inline-align"?: CSSProperties["alignItems"];
+};
+
+function presentationStyle(presentation?: DashboardCardPresentation): PresentationStyle {
+  const textAlign = presentation?.textAlign ?? "center";
+  const verticalAlign = presentation?.verticalAlign ?? "center";
+  return {
+    textAlign,
+    "--dashboard-font-scale": presentation?.fontScale ?? 1,
+    "--dashboard-bar-scale": presentation?.barScale ?? 1,
+    "--dashboard-block-align":
+      verticalAlign === "start" ? "flex-start" : verticalAlign === "end" ? "flex-end" : "center",
+    "--dashboard-inline-align":
+      textAlign === "left" ? "flex-start" : textAlign === "right" ? "flex-end" : "center",
+    ...(presentation?.textColor ? { "--analytics-ink": presentation.textColor } : {}),
+    ...(presentation?.accentColor ? { "--analytics-cyan-strong": presentation.accentColor } : {}),
+  };
+}
+
 export function ConfigurableDashboardCanvas({
   initialCards,
   catalog,
@@ -169,6 +197,9 @@ export function ConfigurableDashboardCanvas({
   onCardsChange,
   ariaLabel = "Dashboard configurável",
   className,
+  editable = true,
+  profileControls = true,
+  automaticProfileName,
 }: ConfigurableDashboardCanvasProps) {
   const [state, dispatch] = useReducer(canvasReducer, initialCards, (cards) =>
     createCanvasHistoryState(cards),
@@ -281,10 +312,63 @@ export function ConfigurableDashboardCanvas({
     return () => {
       cancelled = true;
     };
-  }, [cacheKey, pageKey, scopeKey]);
+  }, [cacheKey, editable, pageKey, scopeKey]);
 
   useEffect(() => {
-    if (!activeProfile || serializedCards === lastSavedSnapshotRef.current) return;
+    if (
+      !editable ||
+      profileControls ||
+      profilesLoading ||
+      profilesSource !== "server" ||
+      profiles.length > 0 ||
+      !automaticProfileName ||
+      saveInFlightRef.current
+    ) {
+      return;
+    }
+    saveInFlightRef.current = true;
+    setSaveState("saving");
+    void profileRequest<{ profile: RemoteDashboardProfile }>("/api/dashboard-profiles", {
+      method: "POST",
+      body: JSON.stringify({
+        pageKey,
+        scopeKey: scopeKey ?? null,
+        name: automaticProfileName,
+        isDefault: true,
+        schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
+        cards,
+      }),
+    })
+      .then(({ profile }) => {
+        setProfiles([profile]);
+        writeCachedProfiles(cacheKey, [profile]);
+        setActiveProfileId(profile.id);
+        lastSavedSnapshotRef.current = cardsSnapshot(profile.cards);
+        setSaveState("saved");
+        setProfileMessage("");
+      })
+      .catch(() => {
+        setSaveState("failure");
+        setProfileMessage("Não foi possível preparar o salvamento automático deste painel.");
+      })
+      .finally(() => {
+        saveInFlightRef.current = false;
+      });
+  }, [
+    automaticProfileName,
+    cacheKey,
+    cards,
+    editable,
+    pageKey,
+    profileControls,
+    profiles.length,
+    profilesLoading,
+    profilesSource,
+    scopeKey,
+  ]);
+
+  useEffect(() => {
+    if (!editable || !activeProfile || serializedCards === lastSavedSnapshotRef.current) return;
     const profileId = activeProfile.id;
     const profileVersion = activeProfile.version;
     const timeout = window.setTimeout(() => {
@@ -335,7 +419,7 @@ export function ConfigurableDashboardCanvas({
         });
     }, 700);
     return () => window.clearTimeout(timeout);
-  }, [activeProfile, cacheKey, cards, profiles, serializedCards]);
+  }, [activeProfile, cacheKey, cards, editable, profiles, serializedCards]);
 
   const renderDashboardContent = useCallback(
     (card: DashboardCard, size: DashboardCardSize) => {
@@ -539,76 +623,89 @@ export function ConfigurableDashboardCanvas({
 
   return (
     <section className={[styles.root, className].filter(Boolean).join(" ")} aria-label={ariaLabel}>
-      <div className={styles.toolbar} role="toolbar" aria-label="Ferramentas do dashboard">
-        <button
-          type="button"
-          className={styles.primaryButton}
-          onClick={openNewCard}
-          disabled={catalog.metrics.length === 0}
-        >
-          <Plus size={17} aria-hidden="true" /> Adicionar
-        </button>
-        <button
-          type="button"
-          onClick={() => dispatch({ type: "organize" })}
-          disabled={cards.length < 2}
-        >
-          <LayoutGrid size={17} aria-hidden="true" /> Organizar
-        </button>
-        <button
-          type="button"
-          onClick={() => dispatch({ type: "undo" })}
-          disabled={state.history.length === 0}
-        >
-          <Undo2 size={17} aria-hidden="true" /> Desfazer
-        </button>
-        <button
-          type="button"
-          onClick={() => dispatch({ type: "redo" })}
-          disabled={state.future.length === 0}
-        >
-          <Redo2 size={17} aria-hidden="true" /> Refazer
-        </button>
-        <button type="button" onClick={() => setShowProfiles(true)}>
-          <Users size={17} aria-hidden="true" /> Perfis
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            setExportSelection(new Set(cards.map(({ id }) => id)));
-            setExportError("");
-            setShowExport(true);
-          }}
-          disabled={cards.length === 0}
-        >
-          <Download size={17} aria-hidden="true" /> Baixar PDF
-        </button>
-        {validSelectedIds.size > 0 ? (
-          <div className={styles.selectionTools} aria-label="Mover cards selecionados">
-            <span>{validSelectedIds.size} selecionado(s)</span>
-            <button
-              type="button"
-              onClick={() => moveSelection(-1)}
-              aria-label="Mover grupo para antes"
-            >
-              <ArrowLeft size={16} aria-hidden="true" />
+      {editable ? (
+        <div className={styles.toolbar} role="toolbar" aria-label="Ferramentas do dashboard">
+          <button
+            type="button"
+            className={styles.primaryButton}
+            onClick={openNewCard}
+            disabled={catalog.metrics.length === 0}
+          >
+            <Plus size={17} aria-hidden="true" /> Adicionar
+          </button>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: "organize" })}
+            disabled={cards.length < 2}
+          >
+            <LayoutGrid size={17} aria-hidden="true" /> Organizar
+          </button>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: "undo" })}
+            disabled={state.history.length === 0}
+          >
+            <Undo2 size={17} aria-hidden="true" /> Desfazer
+          </button>
+          <button
+            type="button"
+            onClick={() => dispatch({ type: "redo" })}
+            disabled={state.future.length === 0}
+          >
+            <Redo2 size={17} aria-hidden="true" /> Refazer
+          </button>
+          {profileControls ? (
+            <button type="button" onClick={() => setShowProfiles(true)}>
+              <Users size={17} aria-hidden="true" /> Perfis
             </button>
-            <button
-              type="button"
-              onClick={() => moveSelection(1)}
-              aria-label="Mover grupo para depois"
-            >
-              <ArrowRight size={16} aria-hidden="true" />
-            </button>
-            <button type="button" onClick={() => setSelectedIds(new Set())}>
-              Limpar
-            </button>
-          </div>
-        ) : null}
-        <span className={styles.saveStatus} data-state={saveState} role="status" aria-live="polite">
-          {statusLabel(saveState)}
-        </span>
-      </div>
+          ) : null}
+          <button
+            type="button"
+            onClick={() => {
+              setExportSelection(new Set(cards.map(({ id }) => id)));
+              setExportError("");
+              setShowExport(true);
+            }}
+            disabled={cards.length === 0}
+          >
+            <Download size={17} aria-hidden="true" /> Baixar PDF
+          </button>
+          {validSelectedIds.size > 0 ? (
+            <div className={styles.selectionTools} aria-label="Mover cards selecionados">
+              <span>{validSelectedIds.size} selecionado(s)</span>
+              <button
+                type="button"
+                onClick={() => moveSelection(-1)}
+                aria-label="Mover grupo para antes"
+              >
+                <ArrowLeft size={16} aria-hidden="true" />
+              </button>
+              <button
+                type="button"
+                onClick={() => moveSelection(1)}
+                aria-label="Mover grupo para depois"
+              >
+                <ArrowRight size={16} aria-hidden="true" />
+              </button>
+              <button type="button" onClick={() => setSelectedIds(new Set())}>
+                Limpar
+              </button>
+            </div>
+          ) : null}
+          <span
+            className={styles.saveStatus}
+            data-state={saveState}
+            role="status"
+            aria-live="polite"
+          >
+            {profileControls
+              ? statusLabel(saveState)
+              : saveState === "idle"
+                ? "Salvamento automático"
+                : `${statusLabel(saveState)} automaticamente`}
+          </span>
+        </div>
+      ) : null}
 
       {profileMessage ? (
         <div
@@ -630,18 +727,21 @@ export function ConfigurableDashboardCanvas({
           <LayoutGrid size={28} aria-hidden="true" />
           <h2>Nenhum card no dashboard</h2>
           <p>Adicione uma métrica para montar a visualização.</p>
-          <button
-            type="button"
-            className={styles.primaryButton}
-            onClick={openNewCard}
-            disabled={catalog.metrics.length === 0}
-          >
-            Adicionar primeiro card
-          </button>
+          {editable ? (
+            <button
+              type="button"
+              className={styles.primaryButton}
+              onClick={openNewCard}
+              disabled={catalog.metrics.length === 0}
+            >
+              Adicionar primeiro card
+            </button>
+          ) : null}
         </div>
       ) : (
         <DashboardCanvas
           cards={cards}
+          disabled={!editable}
           ariaLabel={`${ariaLabel}: cards`}
           onCommit={(next) => dispatch({ type: "replace", cards: next })}
           renderCard={(card, size) => (
@@ -654,51 +754,65 @@ export function ConfigurableDashboardCanvas({
                 .filter(Boolean)
                 .join(" ")}
             >
-              <div className={styles.cardActions} data-dashboard-export-ignore>
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={validSelectedIds.has(card.id)}
-                    onChange={(event) => {
-                      setSelectedIds((current) => {
-                        const next = new Set(current);
-                        if (event.target.checked) next.add(card.id);
-                        else next.delete(card.id);
-                        return next;
-                      });
+              {editable ? (
+                <div className={styles.cardActions} data-dashboard-export-ignore>
+                  <label>
+                    <input
+                      type="checkbox"
+                      checked={validSelectedIds.has(card.id)}
+                      onChange={(event) => {
+                        setSelectedIds((current) => {
+                          const next = new Set(current);
+                          if (event.target.checked) next.add(card.id);
+                          else next.delete(card.id);
+                          return next;
+                        });
+                      }}
+                    />
+                    <span className={styles.srOnly}>Selecionar {card.title || card.metric}</span>
+                  </label>
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => {
+                      setEditorMode("edit");
+                      setEditorCard(card);
                     }}
-                  />
-                  <span className={styles.srOnly}>Selecionar {card.title || card.metric}</span>
-                </label>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => {
-                    setEditorMode("edit");
-                    setEditorCard(card);
-                  }}
-                  aria-label={`Editar ${card.title || card.metric}`}
-                >
-                  <Pencil size={15} aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => setExpandedCardId(card.id)}
-                  aria-label={`Expandir ${card.title || card.metric}`}
-                >
-                  <Expand size={15} aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  className={styles.iconButton}
-                  onClick={() => dispatch({ type: "remove-card", cardId: card.id })}
-                  aria-label={`Excluir ${card.title || card.metric}`}
-                >
-                  <Trash2 size={15} aria-hidden="true" />
-                </button>
+                    aria-label={`Editar ${card.title || card.metric}`}
+                  >
+                    <Pencil size={15} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => setExpandedCardId(card.id)}
+                    aria-label={`Expandir ${card.title || card.metric}`}
+                  >
+                    <Expand size={15} aria-hidden="true" />
+                  </button>
+                  <button
+                    type="button"
+                    className={styles.iconButton}
+                    onClick={() => dispatch({ type: "remove-card", cardId: card.id })}
+                    aria-label={`Excluir ${card.title || card.metric}`}
+                  >
+                    <Trash2 size={15} aria-hidden="true" />
+                  </button>
+                </div>
+              ) : null}
+              <div
+                className={styles.cardContent}
+                data-dashboard-text-align={card.presentation?.textAlign ?? "center"}
+                data-dashboard-vertical-align={card.presentation?.verticalAlign ?? "center"}
+                style={presentationStyle(card.presentation)}
+              >
+                <div className={styles.presentationSurface}>
+                  {card.presentation?.content ? (
+                    <p className={styles.customContent}>{card.presentation.content}</p>
+                  ) : null}
+                  {renderDashboardContent(card, size)}
+                </div>
               </div>
-              <div className={styles.cardContent}>{renderDashboardContent(card, size)}</div>
             </div>
           )}
         />
@@ -984,6 +1098,12 @@ function CardEditor({
     setCard({ ...card, options });
   }
 
+  function updatePresentation(patch: Partial<DashboardCardPresentation>) {
+    setCard({ ...card, presentation: { ...card.presentation, ...patch } });
+  }
+
+  const layoutLimits = DASHBOARD_CARD_LAYOUT_LIMITS[card.type];
+
   const customDatesValid =
     card.period !== "custom" ||
     Boolean(card.startDate && card.endDate && card.startDate <= card.endDate);
@@ -1036,6 +1156,136 @@ function CardEditor({
             }}
           />
         </label>
+        <label>
+          Texto complementar
+          <textarea
+            value={card.presentation?.content ?? ""}
+            maxLength={240}
+            rows={3}
+            placeholder="Opcional; os valores calculados continuam automáticos"
+            onChange={(event) => updatePresentation({ content: event.target.value })}
+          />
+        </label>
+        <label>
+          Largura do card
+          <input
+            type="number"
+            min={layoutLimits.minColumnSpan}
+            max={12}
+            step={1}
+            value={card.layout.columnSpan}
+            onChange={(event) =>
+              setCard({
+                ...card,
+                layout: constrainCardLayout(card.type, {
+                  ...card.layout,
+                  columnSpan: Number(event.target.value),
+                }),
+              })
+            }
+          />
+          <small>{card.layout.columnSpan} de 12 colunas</small>
+        </label>
+        <label>
+          Altura do card
+          <input
+            type="number"
+            min={layoutLimits.minHeight}
+            max={layoutLimits.maxHeight}
+            step={24}
+            value={card.layout.height}
+            onChange={(event) =>
+              setCard({
+                ...card,
+                layout: constrainCardLayout(card.type, {
+                  ...card.layout,
+                  height: Number(event.target.value),
+                }),
+              })
+            }
+          />
+          <small>{card.layout.height}px</small>
+        </label>
+        <label>
+          Tamanho da fonte
+          <input
+            type="range"
+            min={75}
+            max={150}
+            step={5}
+            value={Math.round((card.presentation?.fontScale ?? 1) * 100)}
+            onChange={(event) =>
+              updatePresentation({ fontScale: Number(event.target.value) / 100 })
+            }
+          />
+          <small>{Math.round((card.presentation?.fontScale ?? 1) * 100)}%</small>
+        </label>
+        <label>
+          Alinhamento horizontal
+          <select
+            value={card.presentation?.textAlign ?? "center"}
+            onChange={(event) =>
+              updatePresentation({
+                textAlign: event.target.value as NonNullable<
+                  DashboardCardPresentation["textAlign"]
+                >,
+              })
+            }
+          >
+            <option value="left">Esquerda</option>
+            <option value="center">Centro</option>
+            <option value="right">Direita</option>
+          </select>
+        </label>
+        <label>
+          Posição vertical
+          <select
+            value={card.presentation?.verticalAlign ?? "center"}
+            onChange={(event) =>
+              updatePresentation({
+                verticalAlign: event.target.value as NonNullable<
+                  DashboardCardPresentation["verticalAlign"]
+                >,
+              })
+            }
+          >
+            <option value="start">Topo</option>
+            <option value="center">Centro</option>
+            <option value="end">Base</option>
+          </select>
+        </label>
+        <label>
+          Cor do texto
+          <input
+            type="color"
+            value={card.presentation?.textColor ?? "#d9e8f2"}
+            onChange={(event) => updatePresentation({ textColor: event.target.value })}
+          />
+        </label>
+        <label>
+          Cor do gráfico e destaques
+          <input
+            type="color"
+            value={card.presentation?.accentColor ?? "#55c4dc"}
+            onChange={(event) => updatePresentation({ accentColor: event.target.value })}
+          />
+        </label>
+        {card.type === "bars" || card.type === "horizontal-bars" ? (
+          <label>
+            Altura ou alcance das torres
+            <input
+              type="range"
+              min={50}
+              max={150}
+              step={5}
+              value={Math.round((card.presentation?.barScale ?? 1) * 100)}
+              onChange={(event) =>
+                updatePresentation({ barScale: Number(event.target.value) / 100 })
+              }
+            />
+            <small>{Math.round((card.presentation?.barScale ?? 1) * 100)}%</small>
+          </label>
+        ) : null}
         <label>
           Métrica
           <select value={card.metric} onChange={(event) => updateMetric(event.target.value)}>
