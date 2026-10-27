@@ -3997,6 +3997,10 @@ dependente da autorização específica aplicável.
   artefato imutável, backup/rollback e o coordenador `release:production`. Uma
   falha em qualquer gate interrompe somente a etapa dependente, sem redução ou
   contorno do controle.
+- No PR #367, o `validate` confirmou formato, lint e tipos, mas o inventário do
+  ensaio ainda esperava 2.289 testes pgTAP depois da inclusão da asserção de
+  volatilidade. O contador foi alinhado para 2.290 e o teste direcionado
+  `tests/release-candidate.test.ts` aprovou 26/26 antes da nova CI.
 
 ## 2026-10-26 — Abertura: layout e acesso do Simulador CAIXA
 
