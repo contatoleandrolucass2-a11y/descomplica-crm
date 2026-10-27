@@ -27,6 +27,12 @@ composição mais compacta solicitados pelo usuário. O canvas histórico de
 tolerância de distância de cor `24` (medição `23,88`), sem alterar o limite de
 bordas nem a comparação integral de pixels da baseline autenticada.
 
+Em 27/10/2026, a jornada CAIXA passou a exibir no formulário principal o teto
+automático de renda e o limite municipal vigente. A referência externa e os
+limites de cor e bordas permanecem iguais; somente o teto de altura autenticado
+da rota foi ajustado de `1200` para `1220` px para acomodar as duas orientações
+sem ocultá-las nem ampliar a tolerância de regressão visual.
+
 ## Regras de implementação
 
 - Existe uma única navbar global. Páginas e simuladores não criam outro header

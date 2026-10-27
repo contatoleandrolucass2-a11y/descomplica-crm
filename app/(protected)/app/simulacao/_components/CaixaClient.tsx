@@ -7,6 +7,9 @@ import {
   calculateHousingSimulation,
   estimateConstructionInterest,
   getMcmvBand,
+  getMaximumFinancingQuota,
+  getMaximumTerm,
+  getMunicipalLimit,
   type HousingInput,
   type HousingResult,
 } from "@/lib/crm/simulators/caixa";
@@ -69,10 +72,7 @@ const initialForm = {
   mipMonthly: "",
   dfiMonthly: "",
   operatingFee: "",
-  cityLimit: "",
   propertyCondition: "new",
-  middleClass: false,
-  incomeLimitPercent: "30",
   constructionMonths: "",
 };
 type Form = typeof initialForm;
@@ -100,8 +100,6 @@ function housingInput(form: Form, baseDate: string): HousingInput {
     inConstruction: form.inConstruction,
     fgts: Number(form.fgts),
     propertyCondition: form.propertyCondition as "new" | "used",
-    middleClass: form.product === "mcmv" && form.middleClass,
-    incomeLimitPercent: Number(form.incomeLimitPercent),
     asOf: baseDate,
   };
   for (const key of [
@@ -114,7 +112,6 @@ function housingInput(form: Form, baseDate: string): HousingInput {
     "mipMonthly",
     "dfiMonthly",
     "operatingFee",
-    "cityLimit",
   ] as const) {
     const value = optionalNumber(form[key]);
     if (value !== undefined) input[key] = value;
@@ -441,8 +438,68 @@ export function CaixaClient({
         : null,
     [result, construction],
   );
+  const municipalLimit = getMunicipalLimit(form.city, form.state);
+  const configuredConstructionMonths = optionalNumber(form.constructionMonths);
+  const maximumTerm = form.birthDate
+    ? getMaximumTerm({
+        birthDate: form.birthDate,
+        inConstruction: form.inConstruction,
+        ...(configuredConstructionMonths !== undefined
+          ? { constructionMonths: configuredConstructionMonths }
+          : {}),
+        asOf: baseDate,
+      })
+    : 420;
+  const automaticPaymentLimit = Number(form.income) * 0.3;
+  const numericIncome = Number(form.income);
+  const numericPropertyValue = Number(form.propertyValue);
+  const automaticMiddleClass =
+    form.product === "mcmv" && (numericIncome > 9600 || numericPropertyValue > 400000);
+  const displayedBand =
+    form.product === "sbpe"
+      ? "SBPE"
+      : automaticMiddleClass
+        ? "Classe Média"
+        : numericIncome <= 5000 &&
+            municipalLimit !== undefined &&
+            numericPropertyValue > municipalLimit
+          ? "Faixa 3 · imóvel"
+          : getMcmvBand(numericIncome);
+  const maximumFinancingQuotaPercent =
+    getMaximumFinancingQuota({
+      income: numericIncome,
+      propertyValue: numericPropertyValue,
+      product: form.product as "mcmv" | "sbpe",
+      system: form.system as "price" | "sac",
+      state: form.state,
+      propertyCondition: form.propertyCondition as "new" | "used",
+    }) * 100;
+  const applicablePropertyLimit =
+    form.product === "sbpe"
+      ? "Conforme proposta CAIXA"
+      : automaticMiddleClass
+        ? money.format(600000)
+        : numericIncome > 5000
+          ? money.format(400000)
+          : form.city && municipalLimit !== undefined
+            ? money.format(municipalLimit)
+            : "Selecione cidade e estado";
+  const propertyLimitDetail =
+    form.product === "sbpe"
+      ? "O limite municipal MCMV não se aplica ao produto selecionado."
+      : automaticMiddleClass
+        ? "Teto nacional indicativo da Classe Média."
+        : numericIncome > 5000
+          ? "Teto nacional indicativo da Faixa 3."
+          : "Tabela oficial do Agente Operador do FGTS · vigência 01/01/2026.";
   function update<Key extends keyof Form>(key: Key, value: Form[Key]) {
-    setForm((previous) => ({ ...previous, [key]: value }));
+    setForm((previous) => {
+      const next = { ...previous, [key]: value };
+      const middleClass =
+        next.product === "mcmv" &&
+        (Number(next.income) > 9600 || Number(next.propertyValue) > 400000);
+      return middleClass ? { ...next, confirmedSubsidy: "" } : next;
+    });
     setSubmitted(false);
   }
   function submit(event: FormEvent) {
@@ -480,11 +537,12 @@ export function CaixaClient({
     Number(form.propertyValue) > 0 &&
     !!form.birthDate &&
     !!form.city.trim() &&
+    !!form.propertyCondition &&
     Number(form.term) > 0;
   const simulationText = result?.ok
     ? [
         "SIMULAÇÃO CAIXA — DESCOMPLICA CRM",
-        `${result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} · ${result.system.toUpperCase()} · ${result.term} meses`,
+        `${result.rateBand} · ${result.system.toUpperCase()} · ${result.term} meses`,
         `Valor do imóvel: ${money.format(result.propertyValue)}`,
         `Base da cota (menor entre compra e avaliação): ${money.format(result.quotaBaseValue)}`,
         `Potencial de financiamento indicativo: ${money.format(result.financing)}`,
@@ -579,9 +637,7 @@ export function CaixaClient({
                     label={
                       <>
                         Renda familiar bruta *{" "}
-                        <small className="caixa-qualification-badge">
-                          {getMcmvBand(Number(form.income))}
-                        </small>
+                        <small className="caixa-qualification-badge">{displayedBand}</small>
                       </>
                     }
                   >
@@ -649,6 +705,26 @@ export function CaixaClient({
                     </div>
                   </Field>
                 </div>
+                <div className="caixa-automatic-values" aria-live="polite">
+                  <div>
+                    <span>Teto indicativo de renda</span>
+                    <strong>
+                      {Number(form.income) > 0
+                        ? money.format(automaticPaymentLimit)
+                        : "30% automático"}
+                    </strong>
+                    <small>30% da renda bruta, aplicado sem configuração manual.</small>
+                  </div>
+                  <div>
+                    <span>
+                      {form.product === "mcmv" && numericIncome <= 5000
+                        ? "Limite municipal do imóvel"
+                        : "Limite aplicável do imóvel"}
+                    </span>
+                    <strong>{applicablePropertyLimit}</strong>
+                    <small>{propertyLimitDetail}</small>
+                  </div>
+                </div>
               </div>
             </section>
             <section
@@ -670,7 +746,24 @@ export function CaixaClient({
                       type="date"
                       max={baseDate}
                       value={form.birthDate}
-                      onChange={(event) => update("birthDate", event.target.value)}
+                      onChange={(event) => {
+                        const birthDate = event.target.value;
+                        const constructionMonths = optionalNumber(form.constructionMonths);
+                        const allowedTerm = getMaximumTerm({
+                          birthDate,
+                          inConstruction: form.inConstruction,
+                          ...(constructionMonths !== undefined ? { constructionMonths } : {}),
+                          asOf: baseDate,
+                        });
+                        setForm((previous) => ({
+                          ...previous,
+                          birthDate,
+                          ...(allowedTerm > 0 && Number(previous.term) > allowedTerm
+                            ? { term: String(allowedTerm) }
+                            : {}),
+                        }));
+                        setSubmitted(false);
+                      }}
                     />
                     <small>Informe a data do proponente mais velho.</small>
                   </Field>
@@ -704,11 +797,15 @@ export function CaixaClient({
                       required
                       type="number"
                       min="1"
-                      max="420"
+                      max={maximumTerm || 420}
                       step="1"
                       value={form.term}
                       onChange={(event) => update("term", event.target.value)}
                     />
+                    <small>
+                      Máximo automático pela idade:{" "}
+                      {maximumTerm > 0 ? `${maximumTerm} meses` : "não disponível"}.
+                    </small>
                   </Field>
                   <div className="caixa-field-pair caixa-product-system-field">
                     <Field label="Produto">
@@ -721,10 +818,8 @@ export function CaixaClient({
                             product,
                             ...(product === "sbpe"
                               ? {
-                                  middleClass: false,
                                   confirmedSubsidy: "",
                                   confirmedPublicContribution: "",
-                                  cityLimit: "",
                                 }
                               : {}),
                           }));
@@ -769,11 +864,49 @@ export function CaixaClient({
                     value={form.socialFactor}
                     onChange={(value) => update("socialFactor", value)}
                   />
-                  <Toggle
-                    label="Imóvel na planta?"
-                    value={form.inConstruction}
-                    onChange={(value) => update("inConstruction", value)}
-                  />
+                  <div className="caixa-property-condition-group">
+                    <Toggle
+                      label="Imóvel na planta?"
+                      value={form.inConstruction}
+                      onChange={(value) => {
+                        setForm((previous) => {
+                          const constructionMonths = optionalNumber(previous.constructionMonths);
+                          const allowedTerm = getMaximumTerm({
+                            birthDate: previous.birthDate,
+                            inConstruction: value,
+                            ...(constructionMonths !== undefined ? { constructionMonths } : {}),
+                            asOf: baseDate,
+                          });
+                          return {
+                            ...previous,
+                            inConstruction: value,
+                            propertyCondition: value ? "new" : "",
+                            ...(allowedTerm > 0 && Number(previous.term) > allowedTerm
+                              ? { term: String(allowedTerm) }
+                              : {}),
+                          };
+                        });
+                        setSubmitted(false);
+                      }}
+                    />
+                    <Field label="Condição do imóvel *">
+                      <select
+                        required={!form.inConstruction}
+                        disabled={form.inConstruction}
+                        value={form.propertyCondition}
+                        onChange={(event) => update("propertyCondition", event.target.value)}
+                      >
+                        <option value="">Selecione…</option>
+                        <option value="new">Novo</option>
+                        <option value="used">Usado</option>
+                      </select>
+                      <small>
+                        {form.inConstruction
+                          ? "Novo definido automaticamente para imóvel na planta."
+                          : "Escolha Novo ou Usado para continuar."}
+                      </small>
+                    </Field>
+                  </div>
                 </div>
               </div>
             </section>
@@ -790,16 +923,6 @@ export function CaixaClient({
                     <MoneyInput value={form.fgts} onChange={(value) => update("fgts", value)} />
                   </Field>
                 )}
-                {form.product === "mcmv" && (
-                  <label className="caixa-middle-class-option">
-                    <input
-                      type="checkbox"
-                      checked={form.middleClass}
-                      onChange={(event) => update("middleClass", event.target.checked)}
-                    />
-                    Simular MCMV Classe Média (sem subsídio)
-                  </label>
-                )}
                 <Field label="Avaliação confirmada pela CAIXA">
                   <MoneyInput
                     value={form.appraisalValue}
@@ -809,36 +932,22 @@ export function CaixaClient({
                 </Field>
                 {form.product === "mcmv" && (
                   <>
-                    <Field label="Desconto complemento FGTS confirmado">
-                      <MoneyInput
-                        value={form.confirmedSubsidy}
-                        onChange={(value) => update("confirmedSubsidy", value)}
-                      />
-                    </Field>
+                    {!automaticMiddleClass && (
+                      <Field label="Desconto complemento FGTS confirmado">
+                        <MoneyInput
+                          value={form.confirmedSubsidy}
+                          onChange={(value) => update("confirmedSubsidy", value)}
+                        />
+                      </Field>
+                    )}
                     <Field label="Aporte MCMV Cidades confirmado">
                       <MoneyInput
                         value={form.confirmedPublicContribution}
                         onChange={(value) => update("confirmedPublicContribution", value)}
                       />
                     </Field>
-                    <Field label="Limite municipal confirmado do imóvel">
-                      <MoneyInput
-                        value={form.cityLimit}
-                        onChange={(value) => update("cityLimit", value)}
-                      />
-                    </Field>
                   </>
                 )}
-                <Field label="Condição do imóvel">
-                  <select
-                    value={form.propertyCondition}
-                    onChange={(event) => update("propertyCondition", event.target.value)}
-                  >
-                    <option value="">Selecione...</option>
-                    <option value="new">Novo</option>
-                    <option value="used">Usado</option>
-                  </select>
-                </Field>
                 <Field label="Taxa nominal confirmada (% a.a.)">
                   <input
                     type="number"
@@ -856,7 +965,7 @@ export function CaixaClient({
                   <input
                     type="number"
                     min="0.01"
-                    max={form.system === "sac" ? "90" : "80"}
+                    max={String(maximumFinancingQuotaPercent)}
                     step="0.01"
                     value={form.approvedFinancingQuotaPercent}
                     onChange={(event) =>
@@ -864,20 +973,8 @@ export function CaixaClient({
                     }
                   />
                   <small>
-                    Opcional. Teto aplicado: {form.system === "sac" ? "90% no SAC" : "80% no Price"}
-                    .
+                    Opcional. Teto aplicado: {maximumFinancingQuotaPercent}% neste cenário.
                   </small>
-                </Field>
-                <Field label="Teto indicativo de renda (%)">
-                  <input
-                    type="number"
-                    min="1"
-                    max="30"
-                    step="0.1"
-                    value={form.incomeLimitPercent}
-                    onChange={(event) => update("incomeLimitPercent", event.target.value)}
-                  />
-                  <small>Percentual de referência. A análise do banco pode aprovar menos.</small>
                 </Field>
                 {form.inConstruction && (
                   <Field label="Prazo previsto de construção (meses)">
@@ -887,7 +984,26 @@ export function CaixaClient({
                       max="120"
                       step="1"
                       value={form.constructionMonths}
-                      onChange={(event) => update("constructionMonths", event.target.value)}
+                      onChange={(event) => {
+                        const constructionMonths = event.target.value;
+                        const constructionTerm = optionalNumber(constructionMonths);
+                        const allowedTerm = getMaximumTerm({
+                          birthDate: form.birthDate,
+                          inConstruction: true,
+                          ...(constructionTerm !== undefined
+                            ? { constructionMonths: constructionTerm }
+                            : {}),
+                          asOf: baseDate,
+                        });
+                        setForm((previous) => ({
+                          ...previous,
+                          constructionMonths,
+                          ...(allowedTerm > 0 && Number(previous.term) > allowedTerm
+                            ? { term: String(allowedTerm) }
+                            : {}),
+                        }));
+                        setSubmitted(false);
+                      }}
                     />
                     <small>Integra o prazo total para a conferência do limite de idade.</small>
                   </Field>
@@ -990,8 +1106,7 @@ export function CaixaClient({
                           : result.insuranceKnown
                             ? ""
                             : " parcial; seguros não confirmados"}{" "}
-                        · {result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()}{" "}
-                        · {result.system.toUpperCase()}
+                        · {result.rateBand} · {result.system.toUpperCase()}
                       </p>
                       <div className="caixa-result-plan-total">
                         <span>Financiamento indicativo</span>
@@ -1009,6 +1124,9 @@ export function CaixaClient({
                         {[
                           ["Valor do imóvel", money.format(result.propertyValue)],
                           ["Base da cota", money.format(result.quotaBaseValue)],
+                          ...(result.municipalLimit !== undefined
+                            ? [["Limite municipal", money.format(result.municipalLimit)]]
+                            : []),
                           ["Financiamento", money.format(result.financing)],
                           [
                             "Subsídio",
@@ -1038,9 +1156,9 @@ export function CaixaClient({
                     </section>
                   </div>
                   <p className="caixa-result-note">
-                    {result.middleClass ? "MCMV Classe Média" : result.product.toUpperCase()} ·{" "}
-                    {result.system.toUpperCase()} · taxa nominal de {rate.format(result.rate)}% a.a.
-                    · taxa efetiva de {rate.format(result.effectiveRate)}% a.a.
+                    {result.rateBand} · {result.system.toUpperCase()} · taxa nominal de{" "}
+                    {rate.format(result.rate)}% a.a. · taxa efetiva de{" "}
+                    {rate.format(result.effectiveRate)}% a.a.
                     {result.rateEstimated ? " (estimada)" : ""} · comprometimento estimado de{" "}
                     {result.commitment.toFixed(1)}%.
                   </p>

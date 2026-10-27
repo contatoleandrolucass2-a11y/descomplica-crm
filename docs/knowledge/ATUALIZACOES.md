@@ -4140,3 +4140,69 @@ dependente da autorização específica aplicável.
 - O `knowledge:sync` final permanece sujeito à falha preexistente de documento
   acima do limite de exportação. O resultado será registrado como pendência,
   sem reduzir a proteção, truncar autoridade ou declarar sincronização concluída.
+
+## 2026-10-27 — Abertura: automações e simplificação do Simulador CAIXA
+
+- Escopo solicitado: tornar automático o teto indicativo de comprometimento em
+  30%, o limite municipal conforme cidade/UF, o prazo máximo conforme a idade e
+  a seleção da taxa aplicável ao valor do imóvel; reorganizar e vincular
+  `Imóvel na planta?` e `Condição do imóvel`, preservando exatidão e simplificando
+  a jornada de `/app/simulacao/caixa`.
+- Git comum confirmado. Branch `codex/caixa-ux-automacoes` criada sobre
+  `origin/main` `661c575619cfa53356406e5fbe15c71ca341be2d`; checkout limpo. A CI
+  push/main `40436653510` estava em execução no início da demanda.
+- Health público observado em `2026-10-27T02:19:47.032Z`: HTTP 200,
+  `status=ok`, versão publicada
+  `9cf72dafb273693f412143abc337eefd0ed80f4e`. A produção contém a entrega
+  anterior do CAIXA, mas ainda não contém esta nova automação.
+- `knowledge:context` e `knowledge:search` foram tentados e permanecem
+  bloqueados por `Documento excede o limite de exportacao.`. A indisponibilidade
+  não autoriza inferir limites ou taxas; regras financeiras serão confrontadas
+  no código e em fontes oficiais antes da implementação.
+
+### CAIXA — automações implementadas e validação pré-publicação
+
+- A tela aplica e exibe automaticamente o comprometimento indicativo de 30% da
+  renda e o limite municipal por cidade/UF. Foram importados os 5.571 registros
+  da planilha oficial `TABELA_MUNICIPIOS_VIGENCIA_01JAN2026.xlsx`; uma comparação
+  independente encontrou zero divergências, incluindo seis aliases históricos
+  de nomes. A planilha é usada somente para o limite geográfico, pois seus
+  títulos de faixas de renda estão defasados das regras publicadas em 2026.
+- `Imóvel na planta = Sim` fixa `Novo` e desabilita a condição; `Não` limpa o
+  valor, habilita a escolha e exige `Novo` ou `Usado`. O prazo solicitado é
+  reduzido automaticamente ao máximo permitido pela idade em meses-calendário,
+  preservando prazos menores escolhidos pelo usuário.
+- A calculadora pública CAIXA v1.16.0.2 foi confrontada com dados fictícios, sem
+  CPF, telefone, consentimento ou OTP. Renda de R$ 4.000, imóvel de R$ 276.000 e
+  nascimento em 22/01/1987 produziram Price, 420 meses, primeira prestação de
+  R$ 1.200 e 8,47% efetivos; com nascimento em 22/01/1955, o prazo caiu para
+  105 meses. O motor local reproduz 8,4722% efetivos a partir de 8,16% nominal
+  e identifica que a taxa da Faixa 3 foi aplicada pelo valor do imóvel.
+- Cotas preservadas: SBPE usa 90% no SAC e 80% no Price. Classe Média com imóvel
+  usado no Sul/Sudeste usa 60%. Subsídio incompatível é limpo e ocultado nesse
+  enquadramento; o limite municipal não é mostrado como teto do SBPE.
+- Validação local em Node 24.19.0/pnpm 11.20.0: lint sem erros e com 44 warnings
+  preexistentes em arquivos públicos fora do escopo, typecheck, catálogo de 41
+  páginas e build aprovados. Testes focados aprovaram 54 casos; a jornada de
+  navegador aprovou 6/6 cenários nos três temas, larguras desktop/tablet/celular,
+  Axe e overflow. A matriz Vitest integral com um worker aprovou 4.369 testes e
+  pulou 112; seis timeouts do comando paralelo foram repetidos isoladamente e
+  aprovaram 59/59.
+- O `pnpm test` e o `pnpm test:release` no Windows também alcançaram falhas fora
+  deste escopo em fixtures de host Meta Ads (`Missing synthetic file`) e testes
+  de permissões/monitor do ambiente. Nenhum arquivo Meta Ads ou de release foi
+  alterado para contornar essas falhas. A CI Linux no SHA exato permanece gate
+  obrigatório antes de merge e publicação.
+- Revisão independente não encontrou achados remanescentes no escopo CAIXA.
+  Nenhuma migration, dado remoto, DNS, cobrança, conta ou workflow n8n foi
+  alterado. Estado neste registro: implementado e validado localmente no escopo;
+  PR, CI, merge e publicação ainda pendentes e serão registrados separadamente.
+- O primeiro candidato visual do PR #368 falhou porque o E2E protegido ainda
+  tentava editar `Condição do imóvel` depois de a nova regra tê-la preenchido
+  como `Novo` e desabilitado para imóvel na planta. O teste foi alinhado para
+  conferir o valor e o estado travado; nenhuma regra financeira foi relaxada.
+- O segundo candidato protegido aprovou o E2E e a comparação cromática/estrutural
+  com o canvas externo. A única reprovação foi a altura de 1.204 px diante do
+  teto histórico de 1.200 px da rota, após incluir as orientações automáticas.
+  O teto exclusivo foi ajustado para 1.220 px; referência, tolerâncias de cor e
+  bordas, baseline, Axe, overflow e demais rotas permanecem inalterados.

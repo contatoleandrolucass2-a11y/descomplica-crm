@@ -4,6 +4,18 @@
 - Atualiza somente as 22 referências visuais de Visão Geral e Agendamentos a partir do artefato autenticado da CI, preservando as demais 220 capturas.
 - Atualiza o inventário do ensaio de restauração para os 2.290 testes pgTAP após a nova asserção de volatilidade do validador.
 - Alinha a volatilidade do validador SQL dos perfis do dashboard às funções estáveis usadas na assinatura normalizada dos cards.
+
+## 2026-10-27 — Automação e precisão do Simulador CAIXA
+
+- Aplica automaticamente o teto indicativo de 30% da renda e exibe o valor no formulário principal.
+- Importa os limites oficiais dos 5.571 municípios, vigentes desde 01/01/2026, e os seleciona por cidade/UF.
+- Mantém a simulação quando o imóvel exige faixa superior e usa a primeira taxa da calculadora pública que comporte renda e valor.
+- Ajusta automaticamente o prazo ao limite de idade em meses-calendário, reproduzindo os casos públicos da CAIXA.
+- Vincula imóvel na planta à condição Novo e exige escolha entre Novo e Usado fora da planta.
+- Preserva as cotas SBPE de 90% no SAC e 80% no Price, os três temas e o acesso existente.
+- Alinha o E2E protegido de release ao novo estado automático e travado da condição do imóvel.
+- Ajusta em 20 px o limite de altura do gate visual da rota para comportar as duas orientações automáticas, sem alterar a referência externa nem as tolerâncias de cor e bordas.
+
 - Corrige os gates dos perfis de canvas ao reproduzir uma sessão autenticada ativa no pgTAP e alinhar a captura visual protegida à grade configurável da Visão Geral.
 - Mantém a concessão autenticada à função temporária do ensaio e a ordem auditada da matriz de RPCs.
 - Preserva o conteúdo interativo dos gráficos na exportação em PDF, reconcilia a versão do perfil padrão anterior e mantém a captura do ponteiro durante o arraste fora da grade.

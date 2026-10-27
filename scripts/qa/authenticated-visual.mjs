@@ -189,7 +189,9 @@ const canvasDensityLimitByRoute = new Map([
   ["/app/etapas/pastas", 1350],
   ["/app/etapas/vendas", 1350],
   ["/app/simulacao/calcular-documentacao", 1200],
-  ["/app/simulacao/caixa", 1200],
+  // Automatic CAIXA guidance keeps the main form compact without hiding the
+  // 30% income ceiling or the municipality limit approved for this journey.
+  ["/app/simulacao/caixa", 1220],
 ]);
 const defaultCanvasDensityLimit = 1125;
 

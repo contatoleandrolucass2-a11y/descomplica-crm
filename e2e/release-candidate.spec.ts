@@ -2136,8 +2136,8 @@ test("released simulator pages respect explicit inventory access while CAIXA cal
     await page.getByLabel("Data de nascimento *", { exact: false }).fill("1991-03-15");
     await page.getByRole("combobox", { name: "Cidade *" }).fill("São Paulo");
     await page.getByRole("option", { name: "São Paulo SP", exact: true }).click();
-    await page.getByText("Parâmetros confirmados e valores opcionais", { exact: true }).click();
-    await page.getByLabel("Condição do imóvel", { exact: false }).selectOption("new");
+    await expect(page.getByLabel("Condição do imóvel", { exact: false })).toBeDisabled();
+    await expect(page.getByLabel("Condição do imóvel", { exact: false })).toHaveValue("new");
     await expect(
       page.getByRole("button", { name: "Calcular simulação", exact: true }),
     ).toBeEnabled();
