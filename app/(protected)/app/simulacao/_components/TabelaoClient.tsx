@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { resolveTabelaoProjectFolder } from "@/lib/archive-investor/tabelao-project-folders";
 import {
   buildTabelaoMapsUrl,
   formatTabelaoAddress as formatAddress,
@@ -720,6 +721,7 @@ export function TabelaoClient() {
                   const regionSpan = group.regionSpans[itemIndex] ?? 1;
                   const address = formatAddress(item);
                   const mapsUrl = buildTabelaoMapsUrl(item);
+                  const projectFolderUrl = resolveTabelaoProjectFolder(group.project);
                   const classification = formatTabelaoDescription(
                     descriptiveLabel(item.classification),
                   );
@@ -766,7 +768,19 @@ export function TabelaoClient() {
                             className="tabelao-group-cell investor-stock-product"
                             data-label="Empreendimento"
                           >
-                            <span className="investor-stock-product-text">{group.project}</span>
+                            {projectFolderUrl ? (
+                              <a
+                                className="investor-stock-product-text tabelao-project-link"
+                                href={projectFolderUrl}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                aria-label={`Abrir pasta de ${group.project} no Google Drive (nova aba)`}
+                              >
+                                {group.project}
+                              </a>
+                            ) : (
+                              <span className="investor-stock-product-text">{group.project}</span>
+                            )}
                           </th>
                         </>
                       ) : null}

@@ -9823,3 +9823,15 @@ rota; referências e dados das demais páginas preservados. A CI `40263953550`
 aprovou 4.290 testes, mas encontrou HTTP 403 na fonte de ITBI de Documentação.
 Nova CI deve revalidar essa fonte sem exceção, mudança de script ou baseline
 de outra página. Nenhum merge/deploy executado nesta etapa.
+
+## 2026-10-27 — Pastas dos empreendimentos no Tabelão
+
+- Pedido: transformar os nomes da coluna Empreendimento em links para as pastas específicas da pasta compartilhada informada pelo usuário.
+- Base: `origin/main` em `6955a6c8`, branch `codex/tabelao-drive-links`, checkout isolado; alterações preexistentes de outros trabalhos foram preservadas.
+- Fonte: listagem pelo conector Google Drive de `1_rVgsDhMv5vtDzmBvRosQBAaPDtgLO8J`, com nove pastas diretas e um atalho geral. O atalho geral não foi tratado como pasta de empreendimento.
+- Implementação: catálogo de nove destinos confirmados e associação exata após normalização de acentos, caixa, espaços e prefixos Direcional/Riva. Nomes desconhecidos não recebem links; novas pastas exigem atualização do catálogo.
+- Interface: nome original preservado, nova aba com `noopener noreferrer`, indicação acessível e foco visível; filtros, células mescladas, fórmulas e fonte de estoque preservados.
+- Verificação funcional: 30 testes direcionados aprovados; navegador sintético aprovado em seis dimensões, três temas, impressão e Maps. Os nove destinos, ausência de link desconhecido, mesclagem e abertura de nova aba por teclado foram conferidos no componente real.
+- Limite: dados do navegador são sintéticos; a navegação externa foi interceptada localmente. Não comprova acesso de todos os usuários às pastas privadas nem publicação em produção.
+
+- Validação completa: `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build` aprovados. Vitest: 4.391 testes aprovados, 112 previamente condicionais ignorados; a etapa Node também terminou com sucesso. CI remota e publicação ainda não executadas.
