@@ -1,11 +1,20 @@
 # Changelog
 
+- Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
+- Transcreve contatos, horários, relacionamento, regras comerciais, campanhas históricas, Bora Vender e materiais Linktree/Liveprint, sinalizando destinos divergentes e conteúdo que exige confirmação de vigência.
 - Publica a automação e precisão do Simulador CAIXA após CI integral, imagem imutável e smoke público da versão `83a92392`.
 - Atualiza somente as 11 referências visuais do Simulador CAIXA a partir do artefato autenticado da CI, preservando as demais 231 capturas e todos os limiares.
 - Publica o canvas analítico configurável em Visão Geral e Agendamentos, com perfis privados persistidos no banco e validação final de desktop, celular, temas e acessibilidade.
 - Atualiza somente as 22 referências visuais de Visão Geral e Agendamentos a partir do artefato autenticado da CI, preservando as demais 220 capturas.
 - Atualiza o inventário do ensaio de restauração para os 2.290 testes pgTAP após a nova asserção de volatilidade do validador.
 - Alinha a volatilidade do validador SQL dos perfis do dashboard às funções estáveis usadas na assinatura normalizada dos cards.
+
+## 2026-10-27 — Links Úteis
+
+- Cria o hub `/app/links-uteis` e sete subpáginas responsivas e protegidas por permissões próprias.
+- Preserva o acesso dos perfis operacionais já autorizados ao Dashboard e permite overrides futuros por página.
+- Mantém Ranking Geral fora do novo menu e fora do conteúdo copiado.
+- Registra a fonte Data Studio consultada em 27/10/2026 e não transforma regras ou campanhas históricas em condições comerciais vigentes.
 
 ## 2026-10-27 — Automação e precisão do Simulador CAIXA
 

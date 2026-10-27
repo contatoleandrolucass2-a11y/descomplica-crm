@@ -4259,3 +4259,19 @@ dependente da autorização específica aplicável.
   testes Node, mas encerrou com as mesmas três falhas de host Windows dos
   fixtures Meta Ads (arquivo privado/perfil absoluto), fora do escopo. A CI
   Linux continua sendo a evidência conclusiva desses testes.
+
+## 2026-10-27 — Abertura: Links Úteis
+
+- Escopo solicitado: menu Links Úteis e conteúdo das sete opções da referência Data Studio, excluindo Ranking Geral.
+- Consulta em 27/10/2026 às 14:51–14:54 UTC: Git comum confirmado; checkout inicialmente destacado e limpo em bb56fd7b23e872c69e3c5dac144afb30e4397cc4, igual a origin/main após fetch. Branch de trabalho codex/links-uteis.
+- GitHub: main bb56fd7b23e872c69e3c5dac144afb30e4397cc4; CI 40470172649 concluída com sucesso. Busca de PR por Links Úteis sem resultados. Fontes: https://api.github.com/repos/contatoleandrolucass2-a11y/descomplica-crm/branches/main e https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40470172649.
+- Health observacional https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 83a92392bbf1734a15ce5eb2f33a4e623bf9af41. Main posterior contém registro documental de publicação; versões local e publicada permanecem distintas.
+- Conhecimento: comandos context e search interrompidos por “Documento excede o limite de exportacao.”; contexto versionado lido diretamente. gh ausente no PATH; conector GitHub funcionou. Relatório de referência abriu no navegador, após falha da ferramenta web; conteúdo ainda em levantamento. O problema de tamanho do runtime não será corrigido incidentalmente; reavaliar em demanda própria de conhecimento ou quando houver documentos dentro do limite.
+
+### Implementação e validação local
+
+- Implementado o hub `/app/links-uteis` e sete subpáginas: Grupos WhatsApp, Lojas Horários, Relacionamento, Regras Comerciais, Campanha do Mês, App Bora Vender e Linktree e Liveprint. Ranking Geral não integra o novo menu.
+- Fonte: relatório Data Studio `6012adde-5a26-4274-b83b-67f3bac84f08`, consultado visualmente em 27/10/2026. Contato de Lucas e Grupo de Apoio ficaram sem link porque os destinos da referência divergiam do texto; materiais de julho foram identificados como históricos, sem alegação de vigência.
+- Catálogo: oito permissões independentes e migration `20261027160500_sync_page_catalog.sql`; o primeiro registro herda `crm.dashboard.view` para preservar o acesso dos perfis ativos, mantendo overrides futuros por página. Nenhuma migration foi aplicada remotamente nesta etapa local.
+- Gates locais em Node 24.19.0 e pnpm 11.20.0: lint sem erros (44 avisos preexistentes), formatação, typecheck, build, pages:check, resources:check e 4.415 testes Vitest aprovados; 28 testes dedicados cobrem guards, conteúdo, links e ausência do Ranking Geral. Os 35 testes isolados antes afetados por carga também passaram.
+- Limite do host Windows: a etapa Node da suíte integral aprovou 1.599 testes e falhou em três fixtures de permissões/ACL Meta Ads dependentes de Linux. `test:release` também encontrou fixtures Linux de arquivo privado. Essas falhas não foram corrigidas fora do escopo; a CI Linux é o gate conclusivo antes de integração e publicação.

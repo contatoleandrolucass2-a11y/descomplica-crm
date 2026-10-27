@@ -254,6 +254,22 @@
         "tests/meta-ads-console-api.test.ts",
         "docs/runbooks/meta-ads-vps-session.md"
       ]
+    },
+    {
+      "name": "Links Úteis",
+      "agent": "crm-interface",
+      "skill": "descomplica-interface",
+      "routes": [
+        "app/(protected)/app/links-uteis/page.tsx",
+        "app/(protected)/app/links-uteis/grupos-whatsapp/page.tsx",
+        "app/(protected)/app/links-uteis/lojas-horarios/page.tsx",
+        "app/(protected)/app/links-uteis/relacionamento/page.tsx",
+        "app/(protected)/app/links-uteis/regras-comerciais/page.tsx",
+        "app/(protected)/app/links-uteis/campanha-do-mes/page.tsx",
+        "app/(protected)/app/links-uteis/app-bora-vender/page.tsx",
+        "app/(protected)/app/links-uteis/linktree-liveprint/page.tsx"
+      ],
+      "evidence": ["lib/crm/useful-links/content.ts", "tests/useful-links-pages.test.tsx"]
     }
   ]
 }

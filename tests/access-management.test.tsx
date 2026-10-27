@@ -47,6 +47,17 @@ import { PERMISSIONS } from "@/lib/authorization/permissions";
 import { getAssignableRoleKeys, ROLES } from "@/lib/authorization/roles";
 import { AuthorizationError } from "@/lib/authorization/types";
 
+const usefulLinksPermissionKeys = [
+  "crm.useful_links.view",
+  "crm.useful_links.grupos_whatsapp.view",
+  "crm.useful_links.lojas_horarios.view",
+  "crm.useful_links.relacionamento.view",
+  "crm.useful_links.regras_comerciais.view",
+  "crm.useful_links.campanha_do_mes.view",
+  "crm.useful_links.app_bora_vender.view",
+  "crm.useful_links.linktree_liveprint.view",
+] as const;
+
 describe("experiência de acesso", () => {
   it("converte falta de permissão no interruptor HTTP 403 do Next.js", async () => {
     mocks.requirePermission.mockRejectedValueOnce(new AuthorizationError("FORBIDDEN", "denied"));
@@ -145,6 +156,18 @@ describe("experiência de acesso", () => {
 });
 
 describe("catálogo localizado de acesso", () => {
+  it("mantém oito acessos individuais de Links Úteis no catálogo e na herança integral administrativa", () => {
+    expect(Object.keys(PERMISSIONS).filter((key) => key.startsWith("crm.useful_links."))).toEqual(
+      usefulLinksPermissionKeys,
+    );
+    for (const roleKey of ["master", "admin"] as const) {
+      const inherited = ROLE_INHERITED_PERMISSIONS[roleKey].filter((key) =>
+        key.startsWith("crm.useful_links."),
+      );
+      expect(inherited).toEqual(usefulLinksPermissionKeys);
+    }
+  });
+
   it("preserva as chaves técnicas e apresenta todos os papéis em português", () => {
     expect(Object.keys(ROLES)).toEqual([
       "master",
@@ -581,7 +604,7 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     const checkboxes = markup.match(/<input[^>]*type="checkbox"[^>]*>/g) ?? [];
-    expect(checkboxes).toHaveLength(67);
+    expect(checkboxes).toHaveLength(75);
     for (const checkbox of checkboxes) {
       expect(checkbox).not.toContain('checked=""');
       expect(checkbox).toContain('disabled=""');
@@ -763,8 +786,9 @@ describe("catálogo localizado de acesso", () => {
     expect(markup).toMatch(/Total de usuários<\/span><strong[^>]*>40<\/strong>/);
     expect(markup).toMatch(/Com acesso ativo<\/span><strong[^>]*>32<\/strong>/);
   });
-  it("não exibe nem oferece salvar módulos ausentes do catálogo de 66 chaves", () => {
+  it("não exibe nem oferece salvar módulos ausentes do catálogo legado de 66 chaves", () => {
     const absent = new Set([
+      ...usefulLinksPermissionKeys,
       "crm.management.forecast.view",
       "crm.management.forecast.values.edit",
       "crm.read_model_v3.view",
@@ -803,6 +827,10 @@ describe("catálogo localizado de acesso", () => {
       }),
     );
     expect(keys).toHaveLength(66);
+    for (const permissionKey of usefulLinksPermissionKeys) {
+      expect(keys).not.toContain(permissionKey);
+      expect(markup).not.toContain(`aria-label="Acesso a ${PERMISSIONS[permissionKey].label}"`);
+    }
     expect(keys).not.toContain("crm.management.forecast.view");
     expect(markup).not.toContain('aria-label="Acesso a Previsão"');
     expect(markup).not.toContain("Executar motores comerciais");

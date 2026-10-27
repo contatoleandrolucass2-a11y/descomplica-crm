@@ -79,6 +79,7 @@ const ROOT_NAVIGATION_ORDER = new Map([
   ["/app/ranking", 40],
   ["/app/canal-de-parcerias", 50],
   ["/app/gestao", 60],
+  ["/app/links-uteis", 65],
   [ADMIN_ROOT_PATH, 70],
 ]);
 
