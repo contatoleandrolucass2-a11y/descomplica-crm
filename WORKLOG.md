@@ -1,5 +1,7 @@
 # Worklog
 
+- 2026-10-27: revisadas e adotadas somente as 11 referências visuais de `/app` provenientes da CI `40555682643`, artefato diagnóstico `12762530739` (`sha256:0a1140cb6d320c57336d5cff93ba879b7ea446431da0a7a2e78445185e5322ec`). A inspeção cobriu desktop, notebook, tablet, celular e temas claro, médio e escuro; as demais 231 imagens, código funcional e limiar de 1% foram preservados. A alteração remove o único bloqueio visual conhecido para publicar o Simulador CAIXA; publicação depende da nova CI integral do SHA final.
+
 - 2026-10-27: integrada às instruções da entrega a DEPLOY-002 autorizada pelo usuário, com runbook compartilhado e alinhamento de AGENTS.md, publicação, contexto e skill de validação. Escopo exclusivamente documental, baseado na main `73f0c359decf3d182c8bab0ef5dbe2d9df0459f0`; validação local de diff, links e formatação, com os checks obrigatórios mantidos na CI. Não houve alteração de workflow nem deploy da aplicação; a conclusão do PR deve ser conferida no GitHub.
 
 - 2026-10-27: PR #373 do CAIXA integrado em `a0b4a381`; após pedido explícito de publicação, o `main` vigente `6955a6c8` aprovou validate, imagem promovível, restauração isolada, CAIXA e todos os checks funcionais. O release permaneceu bloqueado porque a correção concorrente de Agendamentos alterou 11 imagens protegidas do Dashboard em 2%, acima do limite de 1%. Nenhum deploy foi tentado.
