@@ -83,6 +83,32 @@ describe("dashboard profile persistence schema", () => {
     ).toBe(false);
   });
 
+  it("accepts bounded presentation controls and rejects unsafe values", () => {
+    const presented = {
+      ...card,
+      presentation: {
+        content: "Prioridade do mês",
+        fontScale: 1.15,
+        textAlign: "left" as const,
+        verticalAlign: "start" as const,
+        textColor: "#d9e8f2",
+        accentColor: "#55c4dc",
+        barScale: 1.25,
+      },
+    };
+    expect(dashboardCardsSchema.safeParse([presented]).success).toBe(true);
+    expect(
+      dashboardCardsSchema.safeParse([
+        { ...presented, presentation: { ...presented.presentation, fontScale: 9 } },
+      ]).success,
+    ).toBe(false);
+    expect(
+      dashboardCardsSchema.safeParse([
+        { ...presented, presentation: { ...presented.presentation, textColor: "red" } },
+      ]).success,
+    ).toBe(false);
+  });
+
   it("accepts only the registered overview metrics on the overview page", () => {
     const overview = {
       ...card,

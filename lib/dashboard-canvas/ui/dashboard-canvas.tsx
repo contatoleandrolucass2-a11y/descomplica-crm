@@ -380,7 +380,11 @@ export function DashboardCanvas({
     : undefined;
 
   return (
-    <section className={[styles.shell, className].filter(Boolean).join(" ")} aria-label={ariaLabel}>
+    <section
+      className={[styles.shell, className].filter(Boolean).join(" ")}
+      aria-label={ariaLabel}
+      data-readonly={disabled ? "true" : undefined}
+    >
       <div
         ref={gridRef}
         className={styles.grid}

@@ -2,6 +2,9 @@
 
 - 2026-10-27: implementado o menu Links Úteis com hub e sete subpáginas, catálogo versionado, permissões independentes, herança inicial do Dashboard e 28 testes dedicados; Ranking Geral foi excluído conforme solicitado.
 - 2026-10-27: atualizado o contrato do gate visual para validar o nono item raiz Links Úteis, seu submenu completo, acessibilidade e percurso real por teclado.
+- 2026-10-27: implementado exclusivamente em `/app/etapas/agendamentos` o editor administrativo compartilhado dos cards e gráficos, com controles de dimensão, conteúdo, tipografia, posição, cores e torres; usuários não administradores permanecem em leitura.
+- 2026-10-27: corrigidos no Simulador CAIXA o prazo maximo reativo, a sinalizacao automatica da elegibilidade ao subsidio e o layout responsivo alinhado aos tokens de Agendamentos; o valor do subsidio continua dependente de confirmacao oficial quando faltam os fatores tecnicos do MFOM.
+- 2026-10-27: incorporadas somente as 11 referencias visuais do CAIXA aprovadas no run protegido `40537724784`, com 38 entradas de evidencia e preservacao das outras 231 imagens.
 - 2026-10-27: publicado o Simulador CAIXA automatizado no SHA `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`, após os quatro jobs da CI `40463329858` aprovarem; deployment `da2976c6-dd73-45c5-b04f-96e666043600`, health público exato e rota anônima protegida por login.
 - 2026-10-27: adotadas 11 referências visuais revisadas de `/app/simulacao/caixa` a partir da CI `40457067981`, artefato `12714049954`; todos os testes funcionais, Axe, teclado, zoom e canvas externo passaram, e as demais 231 imagens e os limiares foram preservados.
 - 2026-10-27: canvas de Visão Geral e Agendamentos publicado no SHA `897d0cf9c8a91b197a91c742c3799968c7dcc61c`; migration aditiva `dashboard_profiles` aplicada com RLS forçada, seis RPCs autenticadas e smoke autenticado das duas páginas sem erros de console.

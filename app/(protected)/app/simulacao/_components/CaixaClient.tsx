@@ -9,6 +9,7 @@ import {
   getMcmvBand,
   getMaximumFinancingQuota,
   getMaximumTerm,
+  getMcmvSubsidyEligibility,
   getMunicipalLimit,
   type HousingInput,
   type HousingResult,
@@ -81,6 +82,15 @@ type SuccessfulResult = Extract<HousingResult, { ok: true }>;
 
 function optionalNumber(value: string) {
   return value.trim() ? Number(value) : undefined;
+}
+function automaticMaximumTerm(form: Form, baseDate: string) {
+  const constructionMonths = optionalNumber(form.constructionMonths);
+  return getMaximumTerm({
+    birthDate: form.birthDate,
+    inConstruction: form.inConstruction,
+    ...(constructionMonths !== undefined ? { constructionMonths } : {}),
+    asOf: baseDate,
+  });
 }
 function housingInput(form: Form, baseDate: string): HousingInput {
   const input: HousingInput = {
@@ -439,22 +449,20 @@ export function CaixaClient({
     [result, construction],
   );
   const municipalLimit = getMunicipalLimit(form.city, form.state);
-  const configuredConstructionMonths = optionalNumber(form.constructionMonths);
-  const maximumTerm = form.birthDate
-    ? getMaximumTerm({
-        birthDate: form.birthDate,
-        inConstruction: form.inConstruction,
-        ...(configuredConstructionMonths !== undefined
-          ? { constructionMonths: configuredConstructionMonths }
-          : {}),
-        asOf: baseDate,
-      })
-    : 420;
+  const maximumTerm = form.birthDate ? automaticMaximumTerm(form, baseDate) : 420;
   const automaticPaymentLimit = Number(form.income) * 0.3;
   const numericIncome = Number(form.income);
   const numericPropertyValue = Number(form.propertyValue);
   const automaticMiddleClass =
     form.product === "mcmv" && (numericIncome > 9600 || numericPropertyValue > 400000);
+  const subsidyEligibility = getMcmvSubsidyEligibility({
+    income: numericIncome,
+    propertyValue: numericPropertyValue,
+    product: form.product as "mcmv" | "sbpe",
+    previousSubsidy: form.previousSubsidy,
+    middleClass: automaticMiddleClass,
+    confirmedSubsidy: optionalNumber(form.confirmedSubsidy),
+  });
   const displayedBand =
     form.product === "sbpe"
       ? "SBPE"
@@ -546,7 +554,13 @@ export function CaixaClient({
         `Valor do imóvel: ${money.format(result.propertyValue)}`,
         `Base da cota (menor entre compra e avaliação): ${money.format(result.quotaBaseValue)}`,
         `Potencial de financiamento indicativo: ${money.format(result.financing)}`,
-        `Subsídio: ${result.subsidyConfirmed ? money.format(result.subsidy) : "a confirmar; não incluído"}`,
+        `Subsídio: ${
+          result.subsidyConfirmed
+            ? money.format(result.subsidy)
+            : result.subsidyEligibility === "eligible-review"
+              ? "renda elegível à análise; valor não abatido"
+              : "não aplicável neste cenário"
+        }`,
         ...(result.publicContribution > 0
           ? [`Aporte MCMV Cidades: ${money.format(result.publicContribution)}`]
           : []),
@@ -724,6 +738,25 @@ export function CaixaClient({
                     <strong>{applicablePropertyLimit}</strong>
                     <small>{propertyLimitDetail}</small>
                   </div>
+                  <div className={`caixa-subsidy-status ${subsidyEligibility}`}>
+                    <span>Subsídio MCMV</span>
+                    <strong>
+                      {subsidyEligibility === "confirmed"
+                        ? money.format(Number(form.confirmedSubsidy))
+                        : subsidyEligibility === "eligible-review"
+                          ? "Elegível à análise"
+                          : numericIncome > 0 && numericPropertyValue > 0
+                            ? "Não aplicável"
+                            : "Informe renda e imóvel"}
+                    </strong>
+                    <small>
+                      {subsidyEligibility === "eligible-review"
+                        ? "A renda permite análise. O valor depende da área e tipo do imóvel, composição familiar, recorte populacional e modalidade confirmados pela CAIXA."
+                        : subsidyEligibility === "confirmed"
+                          ? "Valor oficial informado manualmente e incluído na composição."
+                          : "A elegibilidade é atualizada automaticamente para o cenário preenchido."}
+                    </small>
+                  </div>
                 </div>
               </div>
             </section>
@@ -748,20 +781,14 @@ export function CaixaClient({
                       value={form.birthDate}
                       onChange={(event) => {
                         const birthDate = event.target.value;
-                        const constructionMonths = optionalNumber(form.constructionMonths);
-                        const allowedTerm = getMaximumTerm({
-                          birthDate,
-                          inConstruction: form.inConstruction,
-                          ...(constructionMonths !== undefined ? { constructionMonths } : {}),
-                          asOf: baseDate,
+                        setForm((previous) => {
+                          const next = { ...previous, birthDate };
+                          const allowedTerm = automaticMaximumTerm(next, baseDate);
+                          return {
+                            ...next,
+                            ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
+                          };
                         });
-                        setForm((previous) => ({
-                          ...previous,
-                          birthDate,
-                          ...(allowedTerm > 0 && Number(previous.term) > allowedTerm
-                            ? { term: String(allowedTerm) }
-                            : {}),
-                        }));
                         setSubmitted(false);
                       }}
                     />
@@ -800,7 +827,16 @@ export function CaixaClient({
                       max={maximumTerm || 420}
                       step="1"
                       value={form.term}
-                      onChange={(event) => update("term", event.target.value)}
+                      onChange={(event) => {
+                        const value = event.target.value;
+                        const parsed = Number(value);
+                        update(
+                          "term",
+                          value && Number.isFinite(parsed) && maximumTerm > 0
+                            ? String(Math.min(maximumTerm, Math.max(1, Math.floor(parsed))))
+                            : value,
+                        );
+                      }}
                     />
                     <small>
                       Máximo automático pela idade:{" "}
@@ -881,9 +917,7 @@ export function CaixaClient({
                             ...previous,
                             inConstruction: value,
                             propertyCondition: value ? "new" : "",
-                            ...(allowedTerm > 0 && Number(previous.term) > allowedTerm
-                              ? { term: String(allowedTerm) }
-                              : {}),
+                            ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
                           };
                         });
                         setSubmitted(false);
@@ -998,9 +1032,7 @@ export function CaixaClient({
                         setForm((previous) => ({
                           ...previous,
                           constructionMonths,
-                          ...(allowedTerm > 0 && Number(previous.term) > allowedTerm
-                            ? { term: String(allowedTerm) }
-                            : {}),
+                          ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
                         }));
                         setSubmitted(false);
                       }}
@@ -1132,7 +1164,9 @@ export function CaixaClient({
                             "Subsídio",
                             result.subsidyConfirmed
                               ? money.format(result.subsidy)
-                              : "A confirmar · não incluído",
+                              : result.subsidyEligibility === "eligible-review"
+                                ? "Elegível à análise · valor não abatido"
+                                : "Não aplicável neste cenário",
                           ],
                           ...(result.publicContribution > 0
                             ? [["Aporte MCMV Cidades", money.format(result.publicContribution)]]

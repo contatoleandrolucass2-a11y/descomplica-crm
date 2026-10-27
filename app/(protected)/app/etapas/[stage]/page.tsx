@@ -502,6 +502,9 @@ export default async function StagePage({
             goalsByMonth={appointments.goalsByMonth}
             conversionGoals={appointments.conversionGoals}
             canViewDevelopmentRankings={authorization.permissions.includes("crm.ranking.view")}
+            canEditDashboard={
+              authorization.roleKey === "admin" || authorization.roleKey === "master"
+            }
           />
         </AnalyticsCanvas>
       </main>

@@ -3,6 +3,11 @@
 - Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
 - Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.
 - Transcreve contatos, horários, relacionamento, regras comerciais, campanhas históricas, Bora Vender e materiais Linktree/Liveprint, sinalizando destinos divergentes e conteúdo que exige confirmação de vigência.
+- Restringe a edição do canvas de Agendamentos a administradores e oferece ajustes persistentes de tamanho, conteúdo, tipografia, posição, cores e altura das torres.
+- Recalcula o prazo maximo sempre que idade ou obra mudam, preserva reducoes manuais ate a proxima mudanca determinante e impede valor acima do teto.
+- Identifica automaticamente renda potencialmente elegivel ao subsidio MCMV sem abater valor nao comprovado e explica os fatores oficiais ainda necessarios.
+- Alinha cores, bordas, grids, abas moveis e cards de resultado do Simulador CAIXA ao padrao visual de Agendamentos.
+- Atualiza somente as 11 referencias visuais protegidas do Simulador CAIXA, preservando as demais 231 capturas.
 - Publica a automação e precisão do Simulador CAIXA após CI integral, imagem imutável e smoke público da versão `83a92392`.
 - Atualiza somente as 11 referências visuais do Simulador CAIXA a partir do artefato autenticado da CI, preservando as demais 231 capturas e todos os limiares.
 - Publica o canvas analítico configurável em Visão Geral e Agendamentos, com perfis privados persistidos no banco e validação final de desktop, celular, temas e acessibilidade.
@@ -16,6 +21,13 @@
 - Preserva o acesso dos perfis operacionais já autorizados ao Dashboard e permite overrides futuros por página.
 - Mantém Ranking Geral fora do novo menu e fora do conteúdo copiado.
 - Registra a fonte Data Studio consultada em 27/10/2026 e não transforma regras ou campanhas históricas em condições comerciais vigentes.
+
+## 2026-10-27 — Editor administrativo de Agendamentos
+
+- Oculta as ações de card no estado normal e as revela ao administrador somente por foco ou passagem do mouse.
+- Permite ajustar largura, altura, título, texto complementar, escala e alinhamento da fonte, cores e altura ou alcance das torres.
+- Remove o controle de perfis da página e mantém salvamento automático de um único layout compartilhado de Agendamentos.
+- Entrega o mesmo layout aos demais usuários autorizados em modo somente leitura; criação e alteração permanecem restritas a `admin` e `master` na aplicação e no banco.
 
 ## 2026-10-27 — Automação e precisão do Simulador CAIXA
 

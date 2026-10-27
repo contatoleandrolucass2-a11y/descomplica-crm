@@ -858,7 +858,7 @@
 }
 .columnValue {
   position: absolute;
-  bottom: var(--bar-height);
+  bottom: min(100%, calc(var(--bar-height) * var(--dashboard-bar-scale, 1)));
   left: 50%;
   transform: translateX(-50%);
   padding-bottom: 0.3rem;
@@ -1109,6 +1109,7 @@
 }
 .rankBar {
   height: 100%;
+  width: min(100%, calc(var(--rank-size) * var(--dashboard-bar-scale, 1)));
   background: var(--analytics-cyan-strong);
   border-radius: 3px;
   min-width: 2px;
@@ -1615,6 +1616,44 @@
   height: 100%;
   min-height: 0;
   margin: 0;
+}
+
+.configurableCanvas .card h2,
+.configurableCanvas .funnelComparison h2 {
+  font-size: calc(1rem * var(--dashboard-font-scale, 1));
+}
+
+.configurableCanvas .kpiCard .metricValue,
+.configurableCanvas .conversionCard .metricValue,
+.configurableCanvas .goalGauge .metricValue,
+.configurableCanvas .donut .metricValue {
+  font-size: calc(1.7rem * var(--dashboard-font-scale, 1));
+}
+
+.configurableCanvas .kpiCard p,
+.configurableCanvas .goalFormula,
+.configurableCanvas .axis,
+.configurableCanvas .note {
+  font-size: calc(0.75rem * var(--dashboard-font-scale, 1));
+}
+
+.configurableCanvas .columnLabel,
+.configurableCanvas .columnValue,
+.configurableCanvas .rankingHeading,
+.configurableCanvas .conversionRankingHeading,
+.configurableCanvas .recencyList li,
+.configurableCanvas .tableViewport table {
+  font-size: calc(0.75rem * var(--dashboard-font-scale, 1));
+}
+
+.configurableCanvas [data-dashboard-text-align] :is(.kpiCard, .conversionCard, .goalGauge) {
+  align-items: var(--dashboard-inline-align, center);
+  justify-content: var(--dashboard-block-align, center);
+  text-align: inherit;
+}
+
+.configurableCanvas [data-dashboard-text-align] :is(.kpiCard, .conversionCard, .goalGauge) > * {
+  text-align: inherit;
 }
 
 .configurableCanvas .tableCard {

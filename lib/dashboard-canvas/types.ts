@@ -15,10 +15,14 @@ export const DASHBOARD_CARD_TYPES = [
 
 export const DASHBOARD_PERIODS = ["global", "today", "week", "month", "custom"] as const;
 export const DASHBOARD_GROUPS = ["entity", "day", "hour"] as const;
+export const DASHBOARD_TEXT_ALIGNMENTS = ["left", "center", "right"] as const;
+export const DASHBOARD_VERTICAL_ALIGNMENTS = ["start", "center", "end"] as const;
 
 export type DashboardCardType = (typeof DASHBOARD_CARD_TYPES)[number];
 export type DashboardPeriod = (typeof DASHBOARD_PERIODS)[number];
 export type DashboardGroupBy = (typeof DASHBOARD_GROUPS)[number];
+export type DashboardTextAlignment = (typeof DASHBOARD_TEXT_ALIGNMENTS)[number];
+export type DashboardVerticalAlignment = (typeof DASHBOARD_VERTICAL_ALIGNMENTS)[number];
 
 export interface DashboardCardLayout {
   order: number;
@@ -33,6 +37,16 @@ export interface DashboardCardOptions {
   sharedScale?: boolean;
 }
 
+export interface DashboardCardPresentation {
+  content?: string;
+  fontScale?: number;
+  textAlign?: DashboardTextAlignment;
+  verticalAlign?: DashboardVerticalAlignment;
+  textColor?: string;
+  accentColor?: string;
+  barScale?: number;
+}
+
 export interface DashboardCard {
   id: string;
   type: DashboardCardType;
@@ -45,6 +59,7 @@ export interface DashboardCard {
   entityIds: string[] | null;
   layout: DashboardCardLayout;
   options?: DashboardCardOptions;
+  presentation?: DashboardCardPresentation;
 }
 
 export interface DashboardCanvasSnapshot {
@@ -69,6 +84,7 @@ export interface DashboardProfile {
 export type DashboardCardPatch = Partial<Omit<DashboardCard, "id" | "layout" | "options">> & {
   layout?: Partial<DashboardCardLayout>;
   options?: DashboardCardOptions;
+  presentation?: DashboardCardPresentation;
 };
 
 export type CanvasCommitReason = "drag" | "resize";

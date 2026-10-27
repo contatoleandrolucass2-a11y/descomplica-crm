@@ -251,7 +251,9 @@ function Columns({
                         ? "positive"
                         : "negative"
                   }
-                  style={{ height: "var(--bar-height)" }}
+                  style={{
+                    height: "min(100%, calc(var(--bar-height) * var(--dashboard-bar-scale, 1)))",
+                  }}
                 />
                 <span className={styles.columnValue}>{number.format(item.total)}</span>
               </div>
@@ -320,7 +322,10 @@ function Ranking({
                 </strong>
               </div>
               <div aria-hidden="true" className={styles.rankTrack}>
-                <div className={styles.rankBar} style={{ width: `${(item.total / max) * 100}%` }} />
+                <div
+                  className={styles.rankBar}
+                  style={{ "--rank-size": `${(item.total / max) * 100}%` } as CSSProperties}
+                />
               </div>
             </button>
           </li>
@@ -370,7 +375,10 @@ function ConversionRanking({
               · {decimal.format(item.ratio)} para 1
             </p>
             <div aria-hidden="true" className={styles.rankTrack}>
-              <div className={styles.rankBar} style={{ width: `${(item.percent / max) * 100}%` }} />
+              <div
+                className={styles.rankBar}
+                style={{ "--rank-size": `${(item.percent / max) * 100}%` } as CSSProperties}
+              />
             </div>
           </li>
         ))}
@@ -1233,6 +1241,7 @@ export function AppointmentsDashboard({
   conversionGoals = null,
   timezone = "America/Sao_Paulo",
   canViewDevelopmentRankings = true,
+  canEditDashboard = false,
 }: {
   analysis: DashboardAnalysisSlice | null;
   brokerRoster?: AppointmentBrokerRosterEntry[] | null | undefined;
@@ -1242,6 +1251,7 @@ export function AppointmentsDashboard({
   conversionGoals?: AppointmentConversionGoals | null | undefined;
   timezone?: string | undefined;
   canViewDevelopmentRankings?: boolean | undefined;
+  canEditDashboard?: boolean | undefined;
 }) {
   const dashboardSidebar = useDashboardSidebar();
   const [monthChoice, setSelectedMonth] = useState("");
@@ -2019,6 +2029,9 @@ export function AppointmentsDashboard({
         }}
         ariaLabel={`Dashboard de agendamentos — ${goalContext}`}
         className={styles.configurableCanvas!}
+        editable={canEditDashboard}
+        profileControls={false}
+        automaticProfileName="Layout de Agendamentos"
       />
       <footer className={styles.pageFooter}>
         <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>

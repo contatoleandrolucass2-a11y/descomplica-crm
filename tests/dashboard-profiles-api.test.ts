@@ -71,7 +71,7 @@ beforeEach(() => {
   vi.resetAllMocks();
   vi.stubEnv("APP_ORIGIN", "https://crm.test");
   mocks.pagePath.mockReturnValue("/app/etapas/agendamentos");
-  mocks.authorize.mockResolvedValue({ ok: true, context: { userId } });
+  mocks.authorize.mockResolvedValue({ ok: true, context: { userId, roleKey: "master" } });
   mocks.get.mockResolvedValue({ data: profile, error: null });
   mocks.list.mockResolvedValue({ data: [profile], error: null });
   mocks.create.mockResolvedValue({ data: { ...profile, version: 1 }, error: null });
@@ -85,6 +85,33 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("dashboard profiles API", () => {
+  it("allows authorized viewers to read the shared appointments layout", async () => {
+    mocks.authorize.mockResolvedValueOnce({
+      ok: true,
+      context: { userId, roleKey: "broker_house" },
+    });
+    const response = await GET(
+      new Request("https://crm.test/api/dashboard-profiles?pageKey=crm.stage.appointments"),
+    );
+    await result(response, 200, { profiles: [profile] });
+  });
+
+  it("denies appointments layout writes to non-administrators", async () => {
+    mocks.authorize.mockResolvedValueOnce({
+      ok: true,
+      context: { userId, roleKey: "broker_house" },
+    });
+    const response = await POST(
+      request("/api/dashboard-profiles", "POST", {
+        pageKey: "crm.stage.appointments",
+        name: "Meu painel",
+        cards: [card],
+      }),
+    );
+    await result(response, 403, { error: "forbidden" });
+    expect(mocks.create).not.toHaveBeenCalled();
+  });
+
   it("lists one authenticated page scope without accepting a user id", async () => {
     const response = await GET(
       new Request("https://crm.test/api/dashboard-profiles?pageKey=crm.stage.appointments"),

@@ -1,5 +1,111 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: abertura do editor administrativo de Agendamentos
+
+- Escopo exclusivo: controles de edicao visual dos cards e graficos em
+  `/app/etapas/agendamentos`, com redimensionamento, conteudo e tipografia
+  ajustaveis, acoes inline ocultas e mutacoes restritas a Administrador/Master.
+- Conferencia de 27/10/2026 11:48 `America/Sao_Paulo`: `origin/main` estava em
+  `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`, com CI `40470172649` aprovada;
+  o health publico respondeu HTTP 200, `status=ok`, versao
+  `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`. A versao publicada estava atras
+  da `main` consultada e nao comprovava esta demanda.
+- A consulta e a sincronizacao inicial do conhecimento ficaram pendentes porque
+  o runtime retornou `Documento excede o limite de exportacao.`. Os documentos
+  versionados e o codigo atual sao a referencia desta execucao.
+
+### Implementacao e validacao local
+
+- A edicao permanece exclusivamente em `/app/etapas/agendamentos`. Somente
+  `admin` e `master` recebem o editor; os demais usuarios autorizados leem o
+  mesmo layout compartilhado sem toolbar, cabecalho de arraste ou alca de
+  redimensionamento. O controle de perfis foi removido desta pagina e o layout
+  unico usa salvamento automatico com versao otimista.
+- O editor permite alterar largura em colunas, altura em pixels, titulo, texto
+  complementar, escala e alinhamentos da fonte, cor do texto, cor de destaque e
+  altura/alcance das torres. As acoes inline ficam ocultas e aparecem somente
+  por hover ou foco do administrador.
+- A migration `20261027145559_appointments_admin_canvas_presentation.sql`
+  preserva o validador v2, valida a nova apresentacao, compartilha somente o
+  layout de Agendamentos entre leitores autorizados e exige Administrador/Master
+  para criar ou atualizar. As demais paginas continuam com perfis privados.
+- Node 24.19.0/pnpm 11.20.0: lint sem erros e com 44 avisos preexistentes em
+  ativos publicos fora do escopo; typecheck, build de 41 paginas/71 saidas,
+  `pages:check`, `resources:check` e 91 testes focados aprovados. A matriz Vitest
+  integral aprovou 4.370 testes e ignorou 112; duas execucoes paralelas tiveram
+  somente timeouts de host fora do escopo. O teste do Associativo aprovou
+  isoladamente; a repeticao do teste do conhecimento terminou por falta de
+  memoria no runtime local. Docker/Podman esta indisponivel, portanto o pgTAP de
+  32 assercoes e o restore isolado permanecem gates obrigatorios da CI Linux.
+- PR `#375`: CI `40539313931` e candidato visual protegido `40539313960`
+  aprovados no SHA `0177241f10c6546d6d90e2f436c23a9237c2aeb7`. A `main`
+  avancou durante a captura; a branch foi atualizada para repetir os gates no
+  novo SHA antes do merge. Migration remota e publicacao seguem pendentes.
+
+## 2026-10-27: correcao local de subsidio, prazo e layout do CAIXA
+
+- O run protegido `40537724784` foi aprovado no head
+  `655782460d205b23a17a993ed20fa4f422bbd71d`; artifact `12750383183`, ZIP
+  SHA-256 `16a6cf8cde804f8d97a843a05b63ea934a43a0f804a777a88c32b2a7f9f7f05e`,
+  capture commit `d816788a2bb69012f7c99d513671a9ef0cec6559` e captura em
+  `2026-10-27T16:37:29.234Z`. As 11 imagens CAIXA foram revisadas em resolução
+  original e aprovadas, sem corte, sobreposição ou rolagem horizontal.
+- Foram incorporadas somente 11 imagens do CAIXA, suas 38 entradas de rota
+  (7 responsivas, 4 de tema, 11 Axe, 11 screenshots e 5 zoom) e registros de
+  hash/proveniência. As outras 231 imagens e os metadados globais permaneceram
+  preservados. Uma nova CI é obrigatória antes de merge e publicação.
+- A calculadora publica CAIXA foi repetida com dados ficticios: nascimento em
+  22/01/1987, renda de R$ 4.000 e imovel de R$ 276.000. O resultado exibiu Price,
+  prazo maximo de 420 meses, taxa efetiva de 8,47%, primeira prestacao de
+  R$ 1.200 e financiamento maximo de R$ 157.599,38. O site informa que subsidio
+  FGTS ou PMCMV pode compor a entrada, mas nao publica o valor do beneficio.
+- O MFOM Habitacao v034 oficial, vigente desde 22/04/2026 e consultado em
+  27/10/2026, foi conferido junto com as planilhas embutidas dos anexos III e IV.
+  O calculo monetario depende de area e tipo da unidade, composicao familiar,
+  modalidade, fator estadual e recorte populacional. Para renda entre R$ 3.700
+  e R$ 4.000, o texto consultado nao explicita saturacao da curva de `Frenda`.
+  Por isso o sistema agora sinaliza automaticamente a elegibilidade potencial,
+  mas nao inventa nem abate valor sem confirmacao oficial.
+- O prazo do formulario passa a ser reposto no maximo permitido sempre que data
+  de nascimento, condicao de obra ou prazo de construcao mudam. Uma reducao
+  manual permanece ate a proxima mudanca determinante e o campo impede valor
+  acima do maximo atual.
+- A interface reutiliza os tokens globais de Agendamentos nos tres temas. O
+  tablet usa duas colunas nos campos principais, mantem os tres toggles na mesma
+  linha e posiciona planta/condicao juntos; o celular preserva os nomes das abas.
+  O card do plano usa altura natural e nao e mais esticado pela composicao.
+- Validacao focada local: 55 testes unitarios/componentes e 6 jornadas reais de
+  navegador aprovadas. A matriz de navegador cobre calculo, recomputacao do
+  prazo nos dois sentidos, edicao manual, SBPE SAC 90%, temas, Axe, overflow e
+  geometrias em desktop, tablet e celular. `pnpm lint` concluiu sem erros (44
+  avisos preexistentes de Meta Ads), `pnpm typecheck`, `pnpm build`,
+  `pnpm resources:check` e `pnpm security:secrets` foram aprovados.
+- A suite integral local serializada encontrou uma falha fora do escopo em
+  `tests/associative-approval-suggestion.test.ts` e a primeira tentativa sofreu
+  esgotamento de memoria do host. Conforme a regra maxima de escopo, o
+  Associativo nao foi investigado nem alterado; a CI do SHA candidato devera
+  confirmar os gates integrais. Merge e publicacao ainda estao pendentes nesta
+  etapa local.
+
+## 2026-10-27: abertura da correcao de subsidio, prazo e layout do CAIXA
+
+- Consulta em 27/10/2026 as 11:20 `America/Sao_Paulo`: a `main` remota esta no
+  SHA documental `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`; a aplicacao
+  publicada responde HTTP 200, `status=ok` e versao
+  `83a92392bbf1734a15ce5eb2f33a4e623bf9af41`.
+- A CI da versao publicada, run `40463329858`, permanece aprovada nos jobs
+  `validate`, `promotable-image`, `isolated-restore` e `release-gates`. O estado
+  observado ainda nao valida as novas correcoes solicitadas neste chat.
+- O escopo desta investigacao e restrito ao Simulador CAIXA: elegibilidade e
+  calculo indicativo de subsidio, recomputacao do prazo maximo por idade,
+  regressao financeira com dados ficticios e alinhamento visual ao padrao de
+  Agendamentos. Nao autoriza alteracoes em outros simuladores, dados remotos,
+  DNS ou workflows n8n.
+- `knowledge:context` e `knowledge:search` foram executados, mas o runtime de
+  memoria retornou `Documento excede o limite de exportacao.`. O conhecimento
+  versionado e o codigo atual serao usados como fonte; a sincronizacao com o
+  Obsidian permanece pendente.
+
 ## 2026-10-27: automacao e precisao do Simulador CAIXA publicadas
 
 - O PR #368 foi integrado na `main` como
