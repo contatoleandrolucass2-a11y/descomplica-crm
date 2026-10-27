@@ -1,5 +1,6 @@
 # Changelog
 
+- Revisa novamente as mesmas 11 referências do Dashboard com o artefato do `main` exato após a correção que preservou o layout original da Visão Geral, mantendo código e tolerâncias intactos.
 - Corrige o filtro de status do Meta Ads para usar o estado efetivo da campanha e preservar o investimento histórico de anúncios arquivados dentro de campanhas ativas.
 - Atualiza somente as 11 referências visuais do Dashboard revisadas no artefato autenticado que bloqueava a publicação do Simulador CAIXA, sem alterar código funcional nem tolerâncias.
 - Vincula automaticamente os nomes de nove empreendimentos do Tabelão às pastas correspondentes do Google Drive, com abertura em nova aba e preservação dos nomes sem correspondência.

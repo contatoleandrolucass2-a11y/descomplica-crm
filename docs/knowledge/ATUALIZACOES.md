@@ -1,5 +1,24 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: referência final da Visão Geral no main 74ae2030
+
+- A integração posterior `f9c8d94c` preservou o DOM e o layout original da Visão
+  Geral quando os cards não possuem personalização. Por isso, a primeira revisão
+  de baseline, capturada antes dessa correção, deixou de representar o `main`
+  exato apesar de todos os checks funcionais continuarem aprovados.
+- A CI `40580092387` no SHA
+  `74ae20304f7422e1b6cbb542b6585d1197d53a04` registrou zero falhas de rota,
+  tema, Axe e zoom; somente as mesmas 11 comparações de `/app` ficaram acima de
+  1%. O artefato `12772723512` foi verificado com
+  `sha256:24c33e4265259b53fa7a60a5f94b3e6d21c0f2374b75436195224d286d3c3524`.
+- As 11 imagens do `main` exato foram revisadas em desktop, notebook, tablet,
+  celular e temas claro, médio e escuro. Foram promovidas sem alterar código,
+  limiar, tolerância ou as outras 231 capturas. O manifesto resultante é
+  `80213dee8d5dc24d1302169f015e23878d22822ab07be7fd9ce5c727a731d7a4`.
+- Esta revisão ainda exige novo PR, CI integral no `main` resultante, artefato
+  imutável e publicação protegida. Não registrar a entrega como publicada antes
+  de o health público corresponder ao SHA homologado.
+
 ## 2026-10-27: revisão das referências do Dashboard para liberar o CAIXA
 
 - Após autorização explícita do usuário para remover o bloqueio e concluir a
