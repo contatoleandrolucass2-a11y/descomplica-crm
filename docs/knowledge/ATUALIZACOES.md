@@ -2,6 +2,16 @@
 
 ## 2026-10-26: gate de restauracao dos perfis do dashboard
 
+- O segundo ensaio da `main`, run `40436653510`, SHA
+  `661c575619cfa53356406e5fbe15c71ca341be2d`, superou a falha de sessao e
+  avancou ate o lint completo do banco. O lint bloqueou corretamente a funcao
+  `private.assert_dashboard_profile_document`: ela estava marcada
+  `IMMUTABLE`, mas a assinatura normalizada dos cards usa expressoes de
+  volatilidade `STABLE`.
+- O contrato foi alinhado para `STABLE`, sem alterar validacoes, entradas,
+  saidas, permissoes ou persistencia. A variavel local sem uso foi removida e
+  um pgTAP adicional fixa a volatilidade esperada. A publicacao continua
+  bloqueada ate uma nova CI integral aprovar restauracao, lint e testes.
 - A CI da `main` no run `40433836523`, SHA
   `8d6f48709038b7eaa5f59ffbdedc348640ad7c4b`, aprovou aplicacao, imagem
   promovivel e validacao geral, mas bloqueou a publicacao no ensaio isolado de

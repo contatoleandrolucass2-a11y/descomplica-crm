@@ -1,6 +1,6 @@
 begin;
 
-select plan(31);
+select plan(32);
 
 select ok(
   (select relrowsecurity and relforcerowsecurity
@@ -44,6 +44,18 @@ select ok(
   not has_function_privilege('authenticated', 'private.assert_dashboard_profile_context(uuid,text,text)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'private.assert_dashboard_profile_document(text,jsonb)', 'EXECUTE'),
   'private validators are not callable by browser roles'
+);
+select is(
+  (
+    select proc.provolatile::text
+    from pg_proc proc
+    join pg_namespace namespace on namespace.oid = proc.pronamespace
+    where namespace.nspname = 'private'
+      and proc.proname = 'assert_dashboard_profile_document'
+      and pg_get_function_identity_arguments(proc.oid) = 'p_page_key text, p_cards jsonb'
+  ),
+  's',
+  'document validator is stable because its normalized signature uses stable text functions'
 );
 
 insert into auth.users (id, email) values
