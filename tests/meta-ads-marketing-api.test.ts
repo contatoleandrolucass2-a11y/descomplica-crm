@@ -29,6 +29,7 @@ describe("Meta Marketing API read-only client", () => {
       .mockResolvedValueOnce(json({ data: [] }))
       .mockResolvedValueOnce(json({ data: [] }))
       .mockResolvedValueOnce(json({ data: [] }))
+      .mockResolvedValueOnce(json({ data: [] }))
       .mockResolvedValueOnce(
         json({
           id: `act_${configuration.accountId}`,
@@ -43,7 +44,7 @@ describe("Meta Marketing API read-only client", () => {
       bypassCache: true,
     });
 
-    const insightsUrl = new URL(String(fetcher.mock.calls[1]?.[0]));
+    const insightsUrl = new URL(String(fetcher.mock.calls[2]?.[0]));
     expect(JSON.parse(insightsUrl.searchParams.get("time_range")!)).toEqual({
       since: "2026-06-29",
       until: "2026-10-26",
@@ -95,6 +96,7 @@ describe("Meta Marketing API read-only client", () => {
           ],
         }),
       )
+      .mockResolvedValueOnce(json({ data: [{ id: "11", effective_status: "ACTIVE" }] }))
       .mockResolvedValueOnce(
         json({
           data: [
@@ -232,17 +234,26 @@ describe("Meta Marketing API read-only client", () => {
       operator: "IN",
       value: expect.arrayContaining(["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"]),
     });
-    const regionalUrl = new URL(String(fetcher.mock.calls[2]?.[0]));
+    const campaignUrl = new URL(String(fetcher.mock.calls[1]?.[0]));
+    expect(campaignUrl.pathname).toContain(`/act_${configuration.accountId}/campaigns`);
+    expect(campaignUrl.searchParams.get("fields")).toBe("id,effective_status");
+    expect(JSON.parse(campaignUrl.searchParams.get("filtering")!)).toContainEqual({
+      field: "effective_status",
+      operator: "IN",
+      value: ["ACTIVE", "PAUSED", "DELETED", "ARCHIVED"],
+    });
+    const regionalUrl = new URL(String(fetcher.mock.calls[3]?.[0]));
     expect(regionalUrl.searchParams.get("breakdowns")).toBe("region");
-    const accountUrl = new URL(String(fetcher.mock.calls[3]?.[0]));
+    const accountUrl = new URL(String(fetcher.mock.calls[4]?.[0]));
     expect(accountUrl.pathname).toContain(`/act_${configuration.accountId}`);
     expect(accountUrl.searchParams.get("fields")).toContain("balance");
   });
 
-  it("keeps Meta-archived ads identifiable while preserving their historical insights", async () => {
+  it("keeps a Meta-archived campaign identifiable while preserving its historical insights", async () => {
     const fetcher = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(json({ data: [{ id: "99", effective_status: "ARCHIVED" }] }))
+      .mockResolvedValueOnce(json({ data: [{ id: "11", effective_status: "ARCHIVED" }] }))
       .mockResolvedValueOnce(
         json({
           data: [
@@ -298,10 +309,72 @@ describe("Meta Marketing API read-only client", () => {
     ]);
   });
 
+  it("keeps historical spend from archived ads inside an active campaign", async () => {
+    const fetcher = vi
+      .fn<typeof fetch>()
+      .mockResolvedValueOnce(
+        json({
+          data: [
+            { id: "77", effective_status: "ACTIVE" },
+            { id: "88", effective_status: "ARCHIVED" },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(json({ data: [{ id: "11", effective_status: "ACTIVE" }] }))
+      .mockResolvedValueOnce(
+        json({
+          data: [
+            {
+              date_start: "2026-10-27",
+              account_id: configuration.accountId,
+              account_name: "Conta",
+              campaign_id: "11",
+              campaign_name: "Campanha ativa",
+              adset_id: "22",
+              adset_name: "Conjunto ativo",
+              ad_id: "77",
+              ad_name: "Anúncio ativo",
+              spend: "51.79",
+              impressions: "1000",
+              actions: [],
+            },
+            {
+              date_start: "2026-10-20",
+              account_id: configuration.accountId,
+              account_name: "Conta",
+              campaign_id: "11",
+              campaign_name: "Campanha ativa",
+              adset_id: "33",
+              adset_name: "Conjunto anterior",
+              ad_id: "88",
+              ad_name: "Anúncio arquivado",
+              spend: "98.21",
+              impressions: "2000",
+              actions: [],
+            },
+          ],
+        }),
+      )
+      .mockResolvedValueOnce(json({ data: [] }))
+      .mockResolvedValueOnce(
+        json({ id: `act_${configuration.accountId}`, name: "Conta", currency: "BRL" }),
+      );
+
+    const result = await fetchMetaAdsDashboardData(configuration, {
+      fetcher,
+      bypassCache: true,
+      range: { start: "2026-10-01", end: "2026-10-27" },
+    });
+
+    expect(result.rows.map((row) => row.status)).toEqual(["active", "active"]);
+    expect(result.rows.reduce((total, row) => total + row.spend, 0)).toBe(150);
+  });
+
   it("does not add equivalent Meta lead action aliases", async () => {
     const fetcher = vi
       .fn<typeof fetch>()
       .mockResolvedValueOnce(json({ data: [{ id: "77", effective_status: "ACTIVE" }] }))
+      .mockResolvedValueOnce(json({ data: [{ id: "11", effective_status: "ACTIVE" }] }))
       .mockResolvedValueOnce(
         json({
           data: [
@@ -365,6 +438,7 @@ describe("Meta Marketing API read-only client", () => {
     ).resolves.toMatchObject({ rows: [] });
     const invalid = vi
       .fn<typeof fetch>()
+      .mockResolvedValueOnce(json({ data: [] }))
       .mockResolvedValueOnce(json({ data: [] }))
       .mockResolvedValueOnce(json({ data: [{ date_start: "invalid" }] }));
     await expect(
