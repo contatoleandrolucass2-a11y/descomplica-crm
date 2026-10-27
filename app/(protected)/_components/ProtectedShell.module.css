@@ -904,6 +904,15 @@
     font-size: 11px;
   }
 
+  .topbar:has([data-appointments-navigation="true"]) .navigationList {
+    gap: 0;
+  }
+
+  .topbar:has([data-appointments-navigation="true"]) :is(.navigationLink, .navigationTrigger) {
+    padding-inline: 3px;
+    font-size: 11px;
+  }
+
   .brandMark {
     width: 128px;
     flex-basis: 128px;
