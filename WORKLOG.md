@@ -1,6 +1,7 @@
 # Worklog
 
 - 2026-10-27: corrigida a incompatibilidade entre proteção do `main` e CI: os três checks obrigatórios antes exclusivos de `push/main` agora também executam em pull requests; todos continuam repetidos no SHA final de `main`, sem reduzir etapas ou tolerâncias.
+- 2026-10-27: atualizado o teste de contrato da CI que ainda exigia literalmente três condições exclusivas de `push/main`; a nova expectativa comprova que os três jobs aceitam PR e preservam `push/main`.
 - 2026-10-27: o editor administrativo de `/app/etapas/agendamentos` foi integrado pelos PRs #375, #378 e #381 e validado localmente e na CI. A publicação não foi executada porque o `main` `e8125eeb` falhou no gate obrigatório `isolated-restore`: a área Links Úteis adicionou permissões/páginas sem atualizar os contratos pgTAP correspondentes (82 permissões atuais contra 74 esperadas). Pela regra máxima de escopo, essa outra área não foi alterada; migration e runtime de produção permaneceram intactos.
 - 2026-10-27: implementado o menu Links Úteis com hub e sete subpáginas, catálogo versionado, permissões independentes, herança inicial do Dashboard e 28 testes dedicados; Ranking Geral foi excluído conforme solicitado.
 - 2026-10-27: atualizado o contrato do gate visual para validar o nono item raiz Links Úteis, seu submenu completo, acessibilidade e percurso real por teclado.
