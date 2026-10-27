@@ -91,14 +91,14 @@
   font-weight: 900 !important;
 }
 
-.investor-page-shell.tabelao-page-shell .tabelao-address-link {
+.investor-page-shell.tabelao-page-shell :is(.tabelao-address-link, .tabelao-project-link) {
   color: inherit;
   text-decoration: underline;
   text-decoration-color: var(--inv-color-accent);
   text-underline-offset: 3px;
 }
 
-.investor-page-shell.tabelao-page-shell .tabelao-address-link:hover {
+.investor-page-shell.tabelao-page-shell :is(.tabelao-address-link, .tabelao-project-link):hover {
   color: var(--inv-color-accent);
 }
 
@@ -145,7 +145,12 @@
 }
 
 .tabelao-page-shell
-  :is(.tabelao-address-link, .tabelao-resources > button, .tabelao-resources > a):focus-visible {
+  :is(
+    .tabelao-address-link,
+    .tabelao-project-link,
+    .tabelao-resources > button,
+    .tabelao-resources > a
+  ):focus-visible {
   outline: 2px solid var(--inv-color-accent);
   outline-offset: 3px;
 }
@@ -234,7 +239,7 @@
     color: var(--tabelao-price-gold) !important;
   }
 
-  .investor-page-shell.tabelao-page-shell .tabelao-address-link {
+  .investor-page-shell.tabelao-page-shell :is(.tabelao-address-link, .tabelao-project-link) {
     color: inherit;
     text-decoration: none;
   }

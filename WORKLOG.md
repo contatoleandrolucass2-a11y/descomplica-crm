@@ -5,6 +5,7 @@
 - 2026-10-27: integrada às instruções da entrega a DEPLOY-002 autorizada pelo usuário, com runbook compartilhado e alinhamento de AGENTS.md, publicação, contexto e skill de validação. Escopo exclusivamente documental, baseado na main `73f0c359decf3d182c8bab0ef5dbe2d9df0459f0`; validação local de diff, links e formatação, com os checks obrigatórios mantidos na CI. Não houve alteração de workflow nem deploy da aplicação; a conclusão do PR deve ser conferida no GitHub.
 
 - 2026-10-27: PR #373 do CAIXA integrado em `a0b4a381`; após pedido explícito de publicação, o `main` vigente `6955a6c8` aprovou validate, imagem promovível, restauração isolada, CAIXA e todos os checks funcionais. O release permaneceu bloqueado porque a correção concorrente de Agendamentos alterou 11 imagens protegidas do Dashboard em 2%, acima do limite de 1%. Nenhum deploy foi tentado.
+- 2026-10-27: corrigida a regressão visual remanescente da Visão Geral detectada pela CI `40555682643`; o wrapper flexível de apresentação agora só é montado quando o card possui personalização, sem alterar a renderização padrão compartilhada.
 - 2026-10-27: corrigido o escopo da toolbar oculta de cards para afetar somente Agendamentos; a matriz local do Dashboard aprovou 267 verificações de temas, viewports, acessibilidade e histórico.
 - 2026-10-27: implementado exclusivamente em `/app/etapas/agendamentos` o editor administrativo compartilhado dos cards e gráficos, com controles de dimensão, conteúdo, tipografia, posição, cores e torres; usuários não administradores permanecem em leitura.
 - 2026-10-27: corrigidos no Simulador CAIXA o prazo maximo reativo, a sinalizacao automatica da elegibilidade ao subsidio e o layout responsivo alinhado aos tokens de Agendamentos; o valor do subsidio continua dependente de confirmacao oficial quando faltam os fatores tecnicos do MFOM.
@@ -9828,3 +9829,23 @@ rota; referências e dados das demais páginas preservados. A CI `40263953550`
 aprovou 4.290 testes, mas encontrou HTTP 403 na fonte de ITBI de Documentação.
 Nova CI deve revalidar essa fonte sem exceção, mudança de script ou baseline
 de outra página. Nenhum merge/deploy executado nesta etapa.
+
+## 2026-10-27 — Pastas dos empreendimentos no Tabelão
+
+- Pedido: transformar os nomes da coluna Empreendimento em links para as pastas específicas da pasta compartilhada informada pelo usuário.
+- Base: `origin/main` em `6955a6c8`, branch `codex/tabelao-drive-links`, checkout isolado; alterações preexistentes de outros trabalhos foram preservadas.
+- Fonte: listagem pelo conector Google Drive de `1_rVgsDhMv5vtDzmBvRosQBAaPDtgLO8J`, com nove pastas diretas e um atalho geral. O atalho geral não foi tratado como pasta de empreendimento.
+- Implementação: catálogo de nove destinos confirmados e associação exata após normalização de acentos, caixa, espaços e prefixos Direcional/Riva. Nomes desconhecidos não recebem links; novas pastas exigem atualização do catálogo.
+- Interface: nome original preservado, nova aba com `noopener noreferrer`, indicação acessível e foco visível; filtros, células mescladas, fórmulas e fonte de estoque preservados.
+- Verificação funcional: 30 testes direcionados aprovados; navegador sintético aprovado em seis dimensões, três temas, impressão e Maps. Os nove destinos, ausência de link desconhecido, mesclagem e abertura de nova aba por teclado foram conferidos no componente real.
+- Limite: dados do navegador são sintéticos; a navegação externa foi interceptada localmente. Não comprova acesso de todos os usuários às pastas privadas nem publicação em produção.
+
+- Validação completa: `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build` aprovados. Vitest: 4.391 testes aprovados, 112 previamente condicionais ignorados; a etapa Node também terminou com sucesso. CI remota e publicação ainda não executadas.
+
+### 2026-10-27 — Retomada autorizada do deploy do Tabelão
+
+- O usuário solicitou conferir o AGENTS.md atualizado e seguir com o deploy. A DEPLOY-002 de `1cb03cde` foi incorporada, preservando as duas entradas conflitantes do changelog. A integração trouxe somente documentação; código, lockfile e testes do Tabelão permaneceram iguais ao candidato validado. As evidências locais anteriores foram reaproveitadas, sem nova execução integral. A CI do novo SHA continua obrigatória.
+- Produção observada em `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`, com health `ok`. O diff até o candidato inclui Tabelão e alterações anteriormente integradas de CAIXA, Meta Ads e canvas/perfis de Agendamentos, além de uma migration. Os gates existentes cobrem essas dependências; nenhuma alteração adicional nessas áreas foi realizada.
+- O gate visual de Dashboard reprovado na CI `40555682643` permanece como evidência de bloqueio anterior. A DEPLOY-002 não autoriza ignorá-lo ou alterar a referência fora do escopo. A consulta inicial de health não substitui a conferência final dentro da trava compartilhada.
+
+- Durante a validação da retomada, o PR #381 foi integrado em `f9c8d94c` pelo responsável por Agendamentos. A branch do Tabelão incorporou essa correção sem conflitos: cards sem personalização recuperam o DOM e o CSS anteriores da Visão Geral. A evidência de falha visual anterior precisa ser reavaliada pela CI do novo candidato, pois houve mudança no código responsável. Nenhuma referência visual foi alterada neste chat.
