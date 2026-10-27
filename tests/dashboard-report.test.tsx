@@ -204,9 +204,29 @@ function insideDialog(node: Node): boolean {
   );
 }
 
+const legacyCanvasGroups = new WeakMap<Node, "goals" | "periods" | "history">();
+
+function canvasGroup(root: Node) {
+  return legacyCanvasGroups.get(root);
+}
+
+function belongsToCanvasGroup(node: Node, group: "goals" | "periods" | "history") {
+  let current: Node | null = node;
+  while (current) {
+    if ("tagName" in current && attribute(current, "data-dashboard-group") === group) return true;
+    current = "parentNode" in current ? current.parentNode : null;
+  }
+  return elements(node, "div").some(
+    (element) => attribute(element, "data-dashboard-group") === group,
+  );
+}
+
 function monthlyFigures(root: Node) {
-  return elements(root, "figure").filter((node) =>
-    attribute(node, "aria-label")?.startsWith("Funil mensal:"),
+  const group = canvasGroup(root);
+  return elements(root, "figure").filter(
+    (node) =>
+      attribute(node, "aria-label")?.startsWith("Funil mensal:") &&
+      (!group || belongsToCanvasGroup(node, group)),
   );
 }
 
@@ -229,17 +249,34 @@ function only(nodes: Element[]): Element {
 }
 
 function section(root: Node, id: string) {
-  return only(
+  const legacyGroup = {
+    "report-goals-title": "goals",
+    "report-periods-title": "periods",
+    "report-history-title": "history",
+  }[id] as "goals" | "periods" | "history" | undefined;
+  if (legacyGroup) {
+    const monthly = only(
+      elements(root, "section").filter(
+        (node) => attribute(node, "aria-labelledby") === "report-monthly-title",
+      ),
+    );
+    legacyCanvasGroups.set(monthly, legacyGroup);
+    return monthly;
+  }
+  const result = only(
     elements(root, "section").filter((node) => attribute(node, "aria-labelledby") === id),
   );
+  if (id === "report-monthly-title") legacyCanvasGroups.delete(result);
+  return result;
 }
 
 function card(root: Node, title: string) {
-  return only(
-    elements(root, "article").filter((node) =>
-      elements(node, "h3").some((heading) => text(heading) === title),
-    ),
+  const group = canvasGroup(root);
+  const matches = elements(root, "article").filter((node) =>
+    elements(node, "h3").some((heading) => text(heading) === title),
   );
+  if (matches.length === 1) return matches[0]!;
+  return only(matches.filter((node) => !group || belongsToCanvasGroup(node, group)));
 }
 
 function value(root: Node, label: string) {
@@ -576,7 +613,10 @@ describe("DashboardReport: regressao com dados sinteticos", () => {
       "Responsável da conta",
       "Empresa",
     ]);
-    for (const input of elements(root, "input")) expect(attribute(input, "disabled")).toBe("");
+    for (const input of elements(root, "input").filter(
+      (node) => attribute(node, "type") !== "checkbox",
+    ))
+      expect(attribute(input, "disabled")).toBe("");
     for (const dialog of elements(root, "dialog")) expect(elements(dialog, "time")).toHaveLength(0);
   });
 

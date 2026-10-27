@@ -1707,39 +1707,31 @@ test("Master traverses dashboard, five stages, ranking, partnerships and safe fi
       expect(response?.status()).toBe(200);
       await expect(page.getByRole("heading", { level: 1, name: heading })).toBeVisible();
       if (pathname === "/app") {
-        for (const section of ["monthly", "goals", "periods", "history"]) {
-          await expect(page.locator(`#report-${section}-title`)).toBeVisible();
+        await expect(page.locator("#report-monthly-title")).toBeVisible();
+        for (const [group, label, count] of [
+          ["goals", "Metas", 3],
+          ["periods", "Períodos do mês", 5],
+          ["history", "Histórico e média por venda", 5],
+        ] as const) {
+          const summary = page.locator(`#overview-canvas-group-${group}`).locator("..");
+          await expect(summary.getByRole("heading", { name: label })).toBeVisible();
+          await expect(summary).toContainText(`${count} cards`);
         }
         await expect(
           page.locator(
             "#report-pulse-title, #report-operational-title, #report-diagnosis-title, #report-team-title",
           ),
         ).toHaveCount(0);
-        await expect(page.locator('[aria-labelledby="report-monthly-title"] figure')).toHaveCount(
-          13,
-        );
-        await expect(
-          page.locator('[aria-labelledby="report-monthly-title"] figure [data-stage]'),
-        ).toHaveCount(78);
-        for (const [group, count] of [
-          ["goals", 3],
-          ["periods", 5],
-          ["history", 5],
-        ] as const) {
-          await expect(
-            page.locator(
-              `[aria-labelledby="report-${group}-title"] figure[aria-label^="Funil mensal:"]`,
-            ),
-          ).toHaveCount(count);
-        }
+        const canvas = page.locator('[aria-label="Funis comerciais configuráveis: cards"]');
+        await expect(canvas.locator("[data-dashboard-card-id]")).toHaveCount(13);
+        await expect(canvas.locator("figure")).toHaveCount(13);
+        await expect(canvas.locator("figure [data-stage]")).toHaveCount(78);
         await expect(page.locator("main")).not.toContainText(
           /Conversão por etapa|Ritmo de vendas|Parecer de ritmo/,
         );
         await expect(page.locator("[data-dashboard-source] figure circle")).toHaveCount(0);
-        for (const quantity of await page
-          .locator(
-            '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"] dd',
-          )
+        for (const quantity of await canvas
+          .locator('figure[aria-label^="Funil mensal:"] dd')
           .allTextContents()) {
           expect(quantity.trim()).toMatch(/^(?:\d{1,3}(?:\.\d{3})*|\d+|Indisponível)$/);
         }
@@ -1794,20 +1786,38 @@ test("dashboard uses management filters while stages retain selection and partne
       ]) {
         await expect(report.getByRole("link", { name: label, exact: true })).toHaveCount(0);
       }
-      await expect(report.getByRole("heading", { name: "Mês atual", exact: true })).toBeVisible();
-      await expect(report.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
+      const canvas = report.locator('[aria-label="Funis comerciais configuráveis: cards"]');
+      await expect(
+        canvas.locator('[data-dashboard-card-id="overview-current-month"]'),
+      ).toBeVisible();
+      await expect(canvas.getByRole("button", { name: /^Ver histórico mensal:/ })).toHaveCount(3);
       await expect(report.locator('[aria-labelledby="report-operational-title"]')).toHaveCount(0);
-      for (const [group, labels] of [
-        ["goals", ["Meta mês", "Meta esperada até hoje", "Mês atual"]],
-        ["periods", ["Mês", "Semana anterior", "Esta semana", "Ontem", "Hoje"]],
+      for (const cards of [
         [
-          "history",
-          ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
+          ["overview-goal-month", "Meta mês"],
+          ["overview-goal-expected", "Meta esperada até hoje"],
+          ["overview-current-month", "Mês atual"],
+        ],
+        [
+          ["overview-period-month", "Mês"],
+          ["overview-period-previous-week", "Semana anterior"],
+          ["overview-period-current-week", "Esta semana"],
+          ["overview-period-yesterday", "Ontem"],
+          ["overview-period-today", "Hoje"],
+        ],
+        [
+          ["overview-history-year-average", "Média do ano"],
+          ["overview-history-three-month-average", "Média dos últimos 3 meses"],
+          ["overview-history-previous", "Mês anterior"],
+          ["overview-history-current", "Mês"],
+          ["overview-history-sale-average", "Média venda"],
         ],
       ] as const) {
-        const region = report.locator(`[aria-labelledby="report-${group}-title"]`);
-        await expect(region.getByRole("heading", { level: 3 })).toHaveText([...labels]);
-        await expect(region.getByRole("figure")).toHaveCount(labels.length);
+        for (const [cardId, label] of cards) {
+          const card = canvas.locator(`[data-dashboard-card-id="${cardId}"]`);
+          await expect(card).toContainText(label);
+          await expect(card.getByRole("figure")).toHaveCount(1);
+        }
       }
     }
     const cases = [
@@ -2455,11 +2465,13 @@ test("login, logout and terminal state surfaces remain visually explicit", async
 
     await rolePage.goto("/app");
     await rolePage.evaluate(() => {
-      const card = document.querySelector<HTMLElement>('article[data-tone="default"]');
+      const card = document.querySelector<HTMLElement>(
+        '[data-dashboard-card-id] [data-density="compact"]',
+      );
       const cardClass = [...(card?.classList ?? [])].find(
         (className) => className.endsWith("__card") || className.endsWith("_card"),
       );
-      if (!cardClass) throw new Error("compiled analytics card class missing");
+      if (!cardClass) throw new Error("compiled analytics inner card class missing");
       const separator = cardClass.endsWith("__card") ? "__" : "_";
       const analyticsPrefix = cardClass.slice(0, -`${separator}card`.length);
       const classes = {

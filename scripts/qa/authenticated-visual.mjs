@@ -1363,16 +1363,21 @@ async function inspectRoute(
                 ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
               ],
             ].every(([group, labels]) => {
-              const region = document.querySelector(`[aria-labelledby="report-${group}-title"]`);
+              const cards = [
+                ...document.querySelectorAll(
+                  `[aria-labelledby="report-monthly-title"] article[data-dashboard-card-id]:has([data-dashboard-group="${group}"])`,
+                ),
+              ];
               return (
-                region &&
-                region.querySelectorAll("article[data-tone]").length === labels.length &&
+                cards.length === labels.length &&
                 JSON.stringify(
-                  [...region.querySelectorAll("h3")]
-                    .filter((heading) => heading.getClientRects().length > 0)
-                    .map((heading) => heading.textContent.trim()),
+                  cards.map((card) =>
+                    [...card.querySelectorAll("h3")]
+                      .find((heading) => heading.getClientRects().length > 0)
+                      ?.textContent.trim(),
+                  ),
                 ) === JSON.stringify(labels) &&
-                region.scrollWidth <= region.clientWidth + 1
+                cards.every((card) => card.scrollWidth <= card.clientWidth + 1)
               );
             }) &&
             !document.querySelector(
@@ -1391,6 +1396,9 @@ async function inspectRoute(
               13 &&
             document.querySelectorAll('[aria-labelledby="report-monthly-title"] figure').length ===
               13 &&
+            document.querySelectorAll(
+              '[aria-labelledby="report-monthly-title"] article[data-dashboard-card-id]',
+            ).length === 13 &&
             document.querySelectorAll(
               '[aria-labelledby="report-monthly-title"] figure [data-stage]',
             ).length === 78 &&

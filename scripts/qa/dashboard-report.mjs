@@ -17,6 +17,7 @@ const views = ["all", "with_canal_imob", "without_canal_imob"];
 const stages = ["opportunities", "appointments", "visits", "folders", "sales"];
 const sourceFiles = [
   "app/(protected)/app/_components/DashboardReport.tsx",
+  "app/(protected)/app/_components/dashboard-canvas-config.ts",
   "app/(protected)/app/_components/DashboardAutoRefresh.tsx",
   "app/(protected)/app/_components/DashboardReport.module.css",
   "app/(protected)/app/_components/DashboardComparisons.tsx",
@@ -38,6 +39,13 @@ const sourceFiles = [
   "lib/crm/dashboard/analysis-contract.ts",
   "lib/crm/dashboard/analysis.ts",
   "lib/crm/dashboard/management-goals.ts",
+  "lib/dashboard-canvas/types.ts",
+  "lib/dashboard-canvas/layout/pack-canvas.ts",
+  "lib/dashboard-canvas/state/reducer.ts",
+  "lib/dashboard-canvas/ui/dashboard-canvas.tsx",
+  "lib/dashboard-canvas/ui/dashboard-canvas.module.css",
+  "lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas.tsx",
+  "lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas.module.css",
 ];
 const sections = ["Funis comerciais", "Metas", "Períodos do mês", "Histórico e média por venda"];
 
@@ -408,6 +416,10 @@ export async function startServer() {
       const { generatedAt, updatedAt } = syntheticDashboard();
       return response.end(JSON.stringify({ generatedAt, updatedAt }));
     }
+    if (url.pathname === "/api/dashboard-profiles") {
+      response.setHeader("Content-Type", "application/json");
+      return response.end(JSON.stringify({ profiles: [] }));
+    }
     if (url.pathname === "/" || url.pathname === "/app") {
       response.setHeader("Content-Type", "text/html; charset=utf-8");
       return response.end(html);
@@ -501,7 +513,7 @@ export async function checkStructure(page) {
   assert.ok(headingGeometry.fontSize <= 24, "Compact dashboard heading");
   assert.ok(headingGeometry.headerHeight <= 120, "Compact dashboard header including metadata");
   await expect(
-    page.locator('[aria-labelledby="report-monthly-title"] article[data-tone]'),
+    page.locator('[aria-labelledby="report-monthly-title"] article[data-dashboard-card-id]'),
   ).toHaveCount(13);
   const funnels = page.locator(
     '[aria-labelledby="report-monthly-title"] figure[aria-label^="Funil mensal:"]',
@@ -515,10 +527,12 @@ export async function checkStructure(page) {
       ["Média do ano", "Média dos últimos 3 meses", "Mês anterior", "Mês", "Média venda"],
     ],
   ]) {
-    const region = page.locator(`[aria-labelledby="report-${group}-title"]`);
-    await expect(region.locator("article[data-tone]")).toHaveCount(labels.length);
-    await expect(region.locator("h3:visible")).toHaveText(labels);
-    await expect(region.locator('figure[aria-label^="Funil mensal:"]')).toHaveCount(labels.length);
+    const cards = page.locator(
+      `[aria-labelledby="report-monthly-title"] article[data-dashboard-card-id]:has([data-dashboard-group="${group}"])`,
+    );
+    await expect(cards).toHaveCount(labels.length);
+    await expect(cards.locator("h3:visible")).toHaveText(labels);
+    await expect(cards.locator('figure[aria-label^="Funil mensal:"]')).toHaveCount(labels.length);
   }
   for (const funnel of await funnels.all()) {
     for (const quantity of await funnel.locator("dd").allTextContents()) {
@@ -574,6 +588,7 @@ async function checkLayout(page) {
       "main h1, main h2, main h3, main a, main button, main summary, main dt, main dd, main td",
     )) {
       if (!element.checkVisibility()) continue;
+      if (element.getAttribute("aria-hidden") === "true") continue;
       const bounds = element.getBoundingClientRect();
       if (!bounds.width || !bounds.height) continue;
       const style = getComputedStyle(element);
@@ -984,7 +999,7 @@ async function run() {
           if (scenario === "complete" && width === 1440) {
             report.themeSamples[theme] = await page.evaluate(() => {
               const card = document.querySelector(
-                '[aria-labelledby="report-goals-title"] article[data-tone]',
+                '[aria-labelledby="report-monthly-title"] article[data-dashboard-card-id]',
               );
               return {
                 background: getComputedStyle(card).backgroundColor,
@@ -1044,7 +1059,11 @@ async function run() {
           if (scenario === "complete" && [320, 1440, 1920].includes(width)) {
             for (const section of ["goals", "periods", "history"]) {
               await captureDashboardScreenshot(page, {
-                section: page.locator(`[aria-labelledby="report-${section}-title"]`),
+                section: page
+                  .locator(
+                    `[aria-labelledby="report-monthly-title"] article[data-dashboard-card-id]:has([data-dashboard-group="${section}"])`,
+                  )
+                  .first(),
                 path: path.join(directory, `${section}-${theme}-${width}.png`),
               });
             }
@@ -1120,8 +1139,8 @@ async function run() {
       if (scenario === "fractional")
         await check("fractional/floor-and-unrounded-conversion", async () => {
           const current = page
-            .locator('[aria-labelledby="report-goals-title"] article')
-            .filter({ has: page.getByRole("heading", { name: "Mês atual", exact: true }) });
+            .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
+            .locator("xpath=ancestor::article[@data-dashboard-card-id][1]");
           await expect(current.locator("figure dd")).toHaveText([
             "2",
             "0",
@@ -1147,8 +1166,8 @@ async function run() {
       if (scenario === "over-capacity")
         await check("over-capacity/exact-ratio", async () => {
           const current = page
-            .locator('[aria-labelledby="report-goals-title"] article')
-            .filter({ has: page.getByRole("heading", { name: "Mês atual", exact: true }) });
+            .getByRole("figure", { name: "Funil mensal: Mês atual", exact: true })
+            .locator("xpath=ancestor::article[@data-dashboard-card-id][1]");
           await current.locator("summary").click();
           await expect(
             current

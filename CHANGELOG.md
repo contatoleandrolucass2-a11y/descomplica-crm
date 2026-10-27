@@ -1,5 +1,19 @@
 # Changelog
 
+- Corrige os gates dos perfis de canvas ao reproduzir uma sessão MFA no pgTAP e alinhar a captura visual protegida à grade configurável da Visão Geral.
+- Mantém a concessão autenticada à função temporária do ensaio e a ordem auditada da matriz de RPCs.
+- Preserva o conteúdo interativo dos gráficos na exportação em PDF, reconcilia a versão do perfil padrão anterior e mantém a captura do ponteiro durante o arraste fora da grade.
+
+## 2026-10-26 — Canvas analítico em Visão Geral e Agendamentos
+
+- Transforma os gráficos de `/app` e `/app/etapas/agendamentos` em cards configuráveis sobre grade responsiva de 12 colunas.
+- Adiciona movimentação e redimensionamento com snap, reflow, teclado, cancelamento, seleção múltipla e desfazer/refazer.
+- Permite adicionar, editar, remover, expandir e exportar seletivamente os cards em PDF com a imagem real de cada visualização.
+- Prepara perfis privados por usuário, página e escopo, com salvamento automático, versão otimista, conflito explícito e cache local apenas como contingência.
+- Preserva as fórmulas, filtros globais, fontes e permissões existentes nas duas páginas.
+- Inclui migration e pgTAP versionados, sem aplicação remota nem publicação, conforme o limite expresso da especificação.
+- Alinha os testes pgTAP ao tipo `smallint` do schema e inclui a nova tabela, políticas e seis RPCs nas matrizes completas de RLS e grants.
+
 ## 2026-10-26 — Simulador CAIXA publicado com novo layout e acesso
 
 - Publica o padrão visual dos simuladores Associativo e Tabela Direta nos temas claro, médio e escuro.

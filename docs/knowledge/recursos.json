@@ -84,7 +84,10 @@
         "app/(protected)/app/etapas/[stage]/page.tsx",
         "app/(protected)/app/ranking/page.tsx",
         "app/(protected)/app/canal-de-parcerias/page.tsx",
-        "app/api/dashboard/status/route.ts"
+        "app/api/dashboard/status/route.ts",
+        "app/api/dashboard-profiles/route.ts",
+        "app/api/dashboard-profiles/[id]/route.ts",
+        "app/api/dashboard-profiles/[id]/set-default/route.ts"
       ],
       "evidence": [
         "tests/dashboard.test.ts",
@@ -95,7 +98,12 @@
         "scripts/qa/repasse.mjs",
         "tests/ranking.test.ts",
         "tests/source-availability.test.ts",
-        "supabase/tests/partnerships_rbac_convergence.test.sql"
+        "supabase/tests/partnerships_rbac_convergence.test.sql",
+        "tests/dashboard-canvas-core.test.ts",
+        "tests/dashboard-canvas-configurable.test.tsx",
+        "tests/dashboard-profiles-api.test.ts",
+        "tests/dashboard-profiles-schema.test.ts",
+        "supabase/tests/dashboard_profiles.test.sql"
       ]
     },
     {

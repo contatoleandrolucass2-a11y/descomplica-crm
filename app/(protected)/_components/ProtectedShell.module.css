@@ -160,13 +160,13 @@
 }
 
 .topbar:has([data-appointments-navigation="true"]) .navigationList {
-  gap: 8px;
+  gap: 6px;
 }
 
 .topbar:has([data-appointments-navigation="true"]) :is(.navigationLink, .navigationTrigger) {
-  min-height: 48px;
-  padding-inline: 9px;
-  padding-block: 10px 7px;
+  min-height: 44px;
+  padding-inline: 8px;
+  padding-block: 7px 5px;
 }
 
 .topbar:has([data-appointments-navigation="true"])
@@ -176,6 +176,19 @@
     .navigationTrigger[data-active="true"]
   ) {
   box-shadow: inset 0 -2px 0 var(--header-accent);
+}
+
+.topbar:has([data-appointments-navigation="true"]) {
+  min-height: 50px;
+}
+
+.topbar:has([data-appointments-navigation="true"]) .topbarInner {
+  min-height: 49px;
+  gap: 18px;
+}
+
+.topbar:has([data-appointments-navigation="true"]) .brand {
+  min-height: 44px;
 }
 
 .navigationItem,
@@ -1193,22 +1206,22 @@
 
 .dashboardShell {
   display: grid;
-  grid-template-columns: 176px minmax(0, 1fr);
+  grid-template-columns: 150px minmax(0, 1fr);
   align-items: start;
   min-width: 0;
   transition: grid-template-columns 180ms ease-out;
 }
 
 .dashboardShell[data-collapsed="true"] {
-  grid-template-columns: 58px minmax(0, 1fr);
+  grid-template-columns: 50px minmax(0, 1fr);
 }
 
 .dashboardSidebar {
   position: sticky;
-  top: 58px;
+  top: 50px;
   z-index: 3;
   display: flex;
-  min-height: calc(100dvh - 58px);
+  min-height: calc(100dvh - 50px);
   min-width: 0;
   flex-direction: column;
   box-sizing: border-box;
@@ -1216,7 +1229,7 @@
   border-right: 1px solid #7f95ad;
   border-radius: 0;
   background: #ffffff;
-  padding: 8px 6px 10px;
+  padding: 5px 3px 7px;
   color: #182a40;
 }
 
@@ -1239,12 +1252,12 @@
   width: 100%;
   min-height: 44px;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   box-sizing: border-box;
   border: 0;
   border-radius: 5px;
   background: transparent;
-  padding: 9px 7px;
+  padding: 7px 5px;
   color: inherit;
   font: inherit;
   font-size: 13px;
@@ -1254,7 +1267,7 @@
 }
 
 .dashboardToggle {
-  margin-bottom: 6px;
+  margin-bottom: 2px;
   font-weight: 700;
 }
 
@@ -1277,7 +1290,7 @@
 
 .dashboardLinks {
   display: grid;
-  gap: 8px;
+  gap: 3px;
   margin: 0;
   padding: 0;
   list-style: none;
@@ -1297,7 +1310,7 @@
 }
 
 .dashboardLink[aria-current="page"] {
-  box-shadow: inset 3px 0 currentColor;
+  box-shadow: inset 2px 0 currentColor;
   font-weight: 700;
 }
 
@@ -1337,9 +1350,9 @@
 
 .dashboardGuide {
   display: grid;
-  gap: 6px;
+  gap: 2px;
   margin-top: auto;
-  padding-top: 12px;
+  padding-top: 5px;
 }
 
 .dashboardGuide button {
@@ -1347,12 +1360,12 @@
   width: 100%;
   min-height: 44px;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   border: 0;
   border-radius: 5px;
   background: transparent;
   color: inherit;
-  padding: 8px 7px;
+  padding: 6px 5px;
   font: inherit;
   font-size: 12px;
   font-weight: 650;
@@ -1372,8 +1385,8 @@
 .dashboardUpdatedAt {
   display: grid;
   gap: 2px;
-  margin: 10px 0 0;
-  padding: 10px 7px 0;
+  margin: 4px 0 0;
+  padding: 5px 5px 0;
   border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
   color: inherit;
   font-size: 10px;
@@ -1414,24 +1427,24 @@
 @media (max-width: 760px) {
   .dashboardShell {
     position: relative;
-    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-columns: 50px minmax(0, 1fr);
   }
 
   .dashboardShell:not([data-collapsed="true"]) {
-    grid-template-columns: 58px minmax(0, 1fr);
+    grid-template-columns: 50px minmax(0, 1fr);
   }
 
   .dashboardSidebar {
     position: sticky;
-    top: 58px;
-    width: 58px;
+    top: 50px;
+    width: 50px;
     border-radius: 0;
     overflow: visible;
   }
 
   .dashboardShell:not([data-collapsed="true"]) .dashboardSidebar {
     z-index: 12;
-    width: min(176px, calc(100vw - 2rem));
+    width: min(150px, calc(100vw - 2rem));
     box-shadow: 12px 0 24px rgb(0 0 0 / 18%);
   }
 

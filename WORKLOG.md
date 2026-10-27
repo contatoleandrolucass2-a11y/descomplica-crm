@@ -1,5 +1,42 @@
 # Worklog
 
+- 2026-10-26: alinhados os gates finais do canvas: o pgTAP agora simula a sessão MFA exigida pelas RPCs e a captura visual protegida valida os 13 cards pela nova grade configurável. Permanecem também corrigidas a permissão da função temporária do fixture e a ordenação da matriz de RPCs autenticadas.
+- 2026-10-26: tratados os três apontamentos funcionais da revisão do PR: a captura em PDF remove somente controles do editor, a troca do perfil padrão reconcilia a versão incrementada do padrão anterior e o arraste captura o ponteiro na grade estável, inclusive fora dos limites do card.
+
+## 2026-10-26 — Canvas analítico de Visão Geral e Agendamentos
+
+Foi criado um núcleo compartilhado de canvas para as páginas `/app` e
+`/app/etapas/agendamentos`. O documento de cada card é serializável e versionado;
+a grade de 12 colunas usa Pointer Events, captura de ponteiro, placeholder,
+snap, reflow determinístico, animação de reposicionamento, ResizeObserver,
+limites por tipo, teclado e cancelamento com `Esc`. Seleção múltipla,
+desfazer/refazer e duplicidade são tratados no mesmo estado transacional.
+
+Os 13 funis da Visão Geral e os 28 componentes analíticos de Agendamentos foram
+adaptados sem trocar seus leitores, filtros, regras de House/Imob, cálculos ou
+permissões. O catálogo de cada página restringe o editor às combinações que têm
+efeito real no conteúdo atual, evitando controles decorativos. A visualização
+ampliada reutiliza o mesmo componente do card.
+
+Perfis privados foram preparados com migration, RLS/MFA, grants mínimos e RPCs
+versionadas. As rotas validam sessão, permissão da página, escopo, catálogo,
+tamanho e versão otimista; `409` representa conflito real. O cliente salva após
+700 ms e só lê o cache local quando o servidor está indisponível. Nenhuma
+migration foi aplicada remotamente.
+
+O ensaio de restore revelou duas lacunas nos testes da migration: chamadas SQL
+diretas não tipavam `schema_version` como `smallint`, e a matriz global de
+RLS/grants ainda não enumerava `dashboard_profiles` e suas seis RPCs. Os
+fixtures e allowlists foram alinhados ao contrato já definido pela migration,
+sem ampliar privilégios nem alterar dados.
+
+A exportação permite escolher os cards na ordem atual. O PDF registra título,
+contexto, filtros, fonte e horário, além de capturar cada card selecionado como
+PNG para preservar o gráfico. Foram adicionados testes de layout, migração de
+schema, reducer, compatibilidade, integração das duas páginas, API e segurança
+do perfil. A especificação proíbe publicação sem autorização separada; por isso
+esta entrega permanece local até novo pedido explícito.
+
 ## 2026-10-26 — Publicação do layout e acesso do Simulador CAIXA
 
 O PR #362 foi integrado sem bypass no commit

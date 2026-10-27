@@ -87,7 +87,10 @@ describe("complete visual composition on the scoped v3 read model", () => {
 
   it("keeps deterministic dashboard and partnership structures visible without invented data", () => {
     const dashboardPage = source("app/(protected)/app/page.tsx");
-    const dashboard = source("app/(protected)/app/_components/DashboardReport.tsx");
+    const dashboard = [
+      source("app/(protected)/app/_components/DashboardReport.tsx"),
+      source("app/(protected)/app/_components/dashboard-canvas-config.ts"),
+    ].join("\n");
     const partnerships = source("app/(protected)/app/canal-de-parcerias/RankingDashboard.tsx");
 
     for (const label of [

@@ -3751,6 +3751,13 @@ dependente da autorização específica aplicável.
 - CI documental `40276795962` aprovada no head `d620621c40ad4156524d16f0215caa507a7d97e9`. Antes da integração, main avançou para `bebbb2adbb0fe345f8535e7918fd6fa293edc267`, PR #353 de Meta Ads. Houve conflito somente nos registros iniciais de CHANGELOG/WORKLOG; preservados integralmente os dois textos e o código concorrente. A demanda CAIXA continua com quatro arquivos documentais no diff contra a nova base, sem alteração de runtime.
 - Reconferência em `2026-10-26T06:44:15.295Z`: health HTTP 200/status ok/version `54eb7cdd7460130fc8c70d71fb956cb801b8d12c`. CI push/main `40280448260` da entrega concorrente em execução; a CI runtime CAIXA `40270504690` já estava concluída com sucesso. Nova validação do registro reconciliado é exigida pela proteção de branch; a aplicação CAIXA já publicada mantém suas evidências e não será reiniciada por esta alteração documental. Sync permanece pendente pelo limite de exportação já registrado.
 
+## 2026-10-26 — Abertura: compactação e navegação de Agendamentos
+
+- Escopo exclusivo: `/app/etapas/agendamentos`. Pedido cobre compactação dos menus e cabeçalho, vermelho semântico no tema escuro, reordenação acessível dos 12 cards e dos dois blocos do funil, além de seções guiadas que exibem somente o conjunto solicitado com alturas e gráficos aproveitando toda a área.
+- Git comum confirmado. Branch `codex/agendamentos-layout-compacto-v12` criada a partir de `origin/main` `443e6fc6deb0a75ad6d57462e2f756cbb2760c4f` em 26/10/2026. A CI push/main `40381778238` do commit documental mais recente estava em execução; isso não valida esta nova demanda.
+- Health público observado sem autenticação em `2026-10-26T19:22:32.2416289Z`: status `ok`, versão publicada `24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`. A versão publicada difere do `main` documental atual e não comprova esta implementação.
+- `context` e `search` no runtime Node 24.19 recusaram a exportação porque o documento excede o limite. O mesmo limite preexistente impede o sync inicial; não reduzir proteção nem alterar a infraestrutura do conhecimento nesta demanda. Código, GitHub e health atuais permanecem as evidências diretas.
+
 ## 2026-10-26 — Abertura: revisão cirúrgica das cotas SBPE
 
 - Escopo exclusivo: revisar `/app/simulacao/caixa`, aplicar a regra solicitada de
@@ -3878,6 +3885,91 @@ dependente da autorização específica aplicável.
   pela falha preexistente `Documento excede o limite de exportacao.`. Não houve
   redução do documento, alteração do vault ou alegação de sincronização; a
   pendência deve ser tratada em manutenção própria do conhecimento.
+
+## 2026-10-26 — abertura: canvas analítico em Visão Geral e Agendamentos
+
+- Escopo solicitado: transformar exclusivamente `/app` e
+  `/app/etapas/agendamentos` em canvases analíticos configuráveis, preservando
+  fontes, filtros, permissões e fórmulas existentes. A especificação exige grade
+  responsiva, movimentação e redimensionamento, reflow, histórico, perfis por
+  usuário, expansão e exportação selecionável em PDF.
+- Estado local observado em `2026-10-26`: branch
+  `codex/agendamentos-layout-compacto-v12`, SHA
+  `443e6fc6deb0a75ad6d57462e2f756cbb2760c4f`, com mudanças em andamento somente
+  na experiência de Agendamentos e `output/` não rastreado preservado. O Git
+  comum confirmado é o repositório autorizado do DESCOMPLICA-CRM.
+- Produção consultada em leitura observacional: `/api/health` respondeu HTTP 200,
+  `status=ok`, versão `24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`.
+  `git fetch origin --prune` concluiu; a consulta de CI pelo `gh` ficou
+  indisponível porque o executável não existe neste host.
+- Limite desta ampliação: a especificação anexada determina autorização separada
+  para publicação. Portanto, implementação, migration versionada e testes podem
+  ser preparados localmente, mas migration remota, merge e produção ficam
+  bloqueados até nova autorização explícita. Nenhuma mutação remota de dados foi
+  autorizada por este pedido.
+
+## 2026-10-26 — canvas analítico implementado e validado localmente
+
+- Implementado nas rotas `/app` e `/app/etapas/agendamentos` um canvas
+  configurável em grade responsiva de 12 colunas, com movimentação e
+  redimensionamento por Pointer Events, encaixe, reflow, seleção múltipla,
+  movimentação em grupo, desfazer/refazer, expansão, editor compatível por
+  métrica/modelo/filtros/período, detecção de duplicados e exportação seletiva
+  ordenada em PDF. Em celular, o layout é reorganizado em uma coluna sem perder
+  legibilidade ou controles por teclado.
+- Os perfis por usuário foram preparados com cache local de contingência,
+  salvamento automático, perfil padrão e conflito otimista. A persistência
+  versionada está em `20261026194815_dashboard_profiles.sql`, com RLS, MFA,
+  grants mínimos e acesso somente pelas RPCs próprias; a migration não foi
+  aplicada remotamente porque a especificação exige autorização separada para
+  publicação.
+- A Visão Geral preserva os 13 funis existentes e Agendamentos preserva seus 28
+  cards, fontes, filtros, permissões e fórmulas. Os modelos alternativos só são
+  oferecidos quando compatíveis com a métrica; nenhuma regra comercial foi
+  inventada ou alterada.
+- Validação local em Node 24.19.0/pnpm 11.20.0: lint sem erros (46 warnings já
+  existentes/gerados), typecheck, catálogo de 41 páginas, inventário de 79
+  rotas e build de produção aprovados. Vitest aprovou 4.355 testes e pulou 111.
+- A etapa Node do `pnpm test` aprovou 1.599 testes e pulou 19, mas o gate global
+  terminou com três falhas de ambiente Windows fora deste escopo: duas em
+  `ops/meta-ads/connection-monitor.node-test.mjs` (arquivo privado owner-only e
+  heartbeat do monitor) e uma em `ops/meta-ads/vps/session.node-test.mjs`
+  (diretório pai absoluto real). Nenhum arquivo Meta Ads foi alterado para
+  contornar o gate; CI integral continua obrigatória antes de qualquer merge ou
+  publicação.
+- QA visual da Visão Geral aprovou 267 verificações, sem erro de console, página
+  ou navegador, cobrindo temas claro, médio e escuro, larguras desktop e móvel,
+  filtros, permissões, estados indisponíveis e extremos. O canvas de
+  Agendamentos aprovou 15 combinações de 320, 390, 768, 1440 e 1920 px nos três
+  temas, sem corte, sobreposição ou overflow, além de teclado, desfazer,
+  redimensionamento, grupo, expansão, perfis, editor e diálogo de PDF.
+- Estado final: alteração implementada e validada localmente, sem commit, PR,
+  merge, migration remota ou deploy. Produção permanece separada deste trabalho
+  e deve continuar na versão observada na abertura até autorização explícita e
+  aprovação integral dos gates.
+- Conferência final em `2026-10-26T20:44:20Z`: `git fetch origin --prune`
+  concluiu, `HEAD` e `origin/main` permaneciam em
+  `443e6fc6deb0a75ad6d57462e2f756cbb2760c4f`, enquanto o health público
+  respondeu HTTP 200, `status=ok` e versão
+  `24d9bc81d2fd5b05baf2c0bfcd3e5f6ab995af18`. Isso confirma somente que o site
+  publicado permaneceu inalterado; não constitui publicação deste canvas.
+- O `knowledge:sync` final foi tentado depois do registro e permaneceu bloqueado
+  pela falha preexistente `Documento excede o limite de exportacao.`. O vault
+  não foi alterado por contorno e a sincronização não é alegada como concluída.
+
+## 2026-10-26 — autorização para migration, PR e publicação do canvas
+
+- O usuário concedeu autorização explícita para aplicar a migration aditiva de
+  perfis, abrir e integrar o PR e publicar o canvas em produção. A autorização
+  permanece limitada às rotas `/app` e `/app/etapas/agendamentos`, à migration
+  `20261026194815_dashboard_profiles.sql` e aos arquivos de validação associados.
+- O início do fluxo protegido confirmou `HEAD=origin/main` em
+  `443e6fc6deb0a75ad6d57462e2f756cbb2760c4f`; `git diff --check` aprovou e o
+  diretório não rastreado `output/` continua preservado e fora da entrega.
+- A publicação seguirá PR, CI do SHA exato, migration via conector Supabase,
+  artefato imutável, backup/rollback e o coordenador `release:production`. Uma
+  falha em qualquer gate interrompe somente a etapa dependente, sem redução ou
+  contorno do controle.
 
 ## 2026-10-26 — Abertura: layout e acesso do Simulador CAIXA
 

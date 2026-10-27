@@ -1,0 +1,145 @@
+.shell {
+  min-width: 0;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+  align-items: start;
+  min-width: 0;
+}
+
+.card,
+.placeholder {
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid var(--analytics-line);
+  border-radius: 1rem;
+}
+
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  box-shadow: var(--analytics-shadow);
+  transform-origin: top left;
+}
+
+.active {
+  border-color: var(--analytics-cyan-strong);
+}
+
+.placeholder {
+  border: 2px dashed var(--analytics-cyan-strong);
+  background: var(--analytics-surface-muted);
+}
+
+.header {
+  display: flex;
+  min-width: 0;
+  min-height: 2.75rem;
+  align-items: center;
+  gap: 0.5rem;
+  border-bottom: 1px solid var(--analytics-line);
+  padding: 0.375rem 0.75rem 0.375rem 0.375rem;
+}
+
+.title {
+  overflow: hidden;
+  color: inherit;
+  font-size: 0.875rem;
+  line-height: 1.25rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dragHandle,
+.resizeHandle {
+  border: 0;
+  background: transparent;
+  color: var(--analytics-muted);
+  touch-action: none;
+}
+
+.dragHandle {
+  display: grid;
+  width: 2rem;
+  height: 2rem;
+  flex: 0 0 2rem;
+  cursor: grab;
+  place-items: center;
+  border-radius: 0.5rem;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandle:disabled,
+.resizeHandle:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
+.content {
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.resizeHandle {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 2.75rem;
+  height: 2.75rem;
+  cursor: nwse-resize;
+}
+
+.resizeHandle::after {
+  position: absolute;
+  right: 0.55rem;
+  bottom: 0.55rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  content: "";
+}
+
+.floating {
+  position: fixed;
+  z-index: 80;
+  pointer-events: none;
+  opacity: 0.94;
+  box-shadow: 0 24px 64px rgb(0 0 0 / 26%);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  clip-path: inset(50%);
+}
+
+@media (max-width: 720px) {
+  .grid > .card,
+  .grid > .placeholder {
+    grid-column: 1 / -1 !important;
+  }
+
+  .resizeHandle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    scroll-behavior: auto;
+  }
+}
