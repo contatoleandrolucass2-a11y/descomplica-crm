@@ -11,20 +11,20 @@ select ok(
 
 select is(
   (select count(*) from public.permissions where key like 'crm.%' or key like 'pages.%'),
-  66::bigint,
-  'sixty-six platform and CRM permissions are seeded'
+  74::bigint,
+  'seventy-four platform and CRM permissions are seeded'
 );
 
 select is(
   (select count(*) from public.app_pages),
-  41::bigint,
-  'the catalog contains exactly the approved production pages'
+  49::bigint,
+  'the catalog contains exactly the forty-nine approved production pages'
 );
 
 select is(
   (select count(*) from public.app_pages where is_active and is_navigation),
-  41::bigint,
-  'exactly the approved forty-one production pages are active navigation entries'
+  49::bigint,
+  'exactly the approved forty-nine production pages are active navigation entries'
 );
 
 select is(
@@ -291,22 +291,30 @@ select is(
     'crm.dashboard',
     'crm.management.routine',
     'crm.simulation',
+    'crm.useful_links.grupos_whatsapp',
     'crm.management.forecast',
     'crm.simulation.wf13',
     'crm.stage.opportunities',
+    'crm.useful_links.lojas_horarios',
     'crm.simulation.wf14',
     'crm.stage.appointments',
+    'crm.useful_links.relacionamento',
     'crm.simulation.wf15',
     'crm.stage.visits',
+    'crm.useful_links.regras_comerciais',
     'crm.management',
     'crm.simulation.tabelao',
     'crm.stage.folders',
+    'crm.useful_links.campanha_do_mes',
     'crm.simulation.wf16',
     'crm.stage.sales',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links',
     'crm.ranking',
-    'crm.simulation.caixa'
+    'crm.simulation.caixa',
+    'crm.useful_links.linktree_liveprint'
   ]::text[],
-  'scoped Gerente House sees its seventeen inherited pages including Previsão and simulators'
+  'scoped Gerente House sees its twenty-five inherited pages including Previsão, simulators and useful links'
 );
 
 select throws_ok(
@@ -368,7 +376,7 @@ select lives_ok(
 
 select is(
   (select count(*) from public.list_app_pages_for_management()),
-  41::bigint,
+  49::bigint,
   'page manager RPC returns active and inactive catalog entries'
 );
 
@@ -382,22 +390,30 @@ select is(
     'crm.dashboard',
     'crm.management.routine',
     'crm.simulation',
+    'crm.useful_links.grupos_whatsapp',
     'crm.management.forecast',
     'crm.simulation.wf13',
     'crm.stage.opportunities',
+    'crm.useful_links.lojas_horarios',
     'crm.simulation.wf14',
     'crm.stage.appointments',
+    'crm.useful_links.relacionamento',
     'crm.simulation.wf15',
     'crm.stage.visits',
+    'crm.useful_links.regras_comerciais',
     'crm.management',
     'crm.simulation.tabelao',
     'crm.stage.folders',
+    'crm.useful_links.campanha_do_mes',
     'crm.simulation.wf16',
     'crm.stage.sales',
+    'crm.useful_links.app_bora_vender',
+    'crm.useful_links',
     'crm.ranking',
-    'crm.simulation.caixa'
+    'crm.simulation.caixa',
+    'crm.useful_links.linktree_liveprint'
   ]::text[],
-  'scoped House role retains simulator access when partnership visibility changes'
+  'scoped House role retains simulator and useful links access when partnership visibility changes'
 );
 
 reset role;
