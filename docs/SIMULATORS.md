@@ -50,7 +50,17 @@ produto e ID, sem depender da ordem da fonte. A unidade vencedora mantém seus
 dados completos; as opções ficam juntas por empreendimento em ordem alfabética,
 separadas por incorporadora quando o nome coincide, e por valor líquido crescente
 dentro de cada empreendimento. A coluna Empreendimento exibe apenas o nome do
-empreendimento, sem o produto ou código da unidade. As colunas visíveis Entrega,
+empreendimento, sem o produto ou código da unidade. Quando o nome corresponde a
+uma das nove pastas conferidas na [pasta compartilhada do Google Drive](https://drive.google.com/drive/folders/1_rVgsDhMv5vtDzmBvRosQBAaPDtgLO8J),
+o próprio nome abre a pasta do projeto em uma nova aba. O catálogo está em
+`lib/archive-investor/tabelao-project-folders.ts`, conferido em 27/10/2026.
+A correspondência ignora caixa, acentos, espaços repetidos e o prefixo Direcional
+ou Riva; exige o restante do nome completo, sem aproximação por similaridade.
+Nomes sem correspondência permanecem como texto. O vínculo é aplicado automaticamente
+às linhas do estoque, inclusive após filtros e atualizações; novas pastas no Drive
+precisam ser conferidas e adicionadas ao catálogo. Não há sincronização contínua
+com o Drive nem alteração das permissões das pastas.
+As colunas visíveis Entrega,
 Volta ao Caixa, Avaliação, % Obra e Limitador representam, respectivamente,
 `completionDate`, `cashBackSlack`, `appraisal`, `progress` e `classification` da
 unidade vencedora; não representam um agregado do grupo.

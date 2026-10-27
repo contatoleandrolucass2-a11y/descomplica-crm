@@ -339,3 +339,52 @@ test("rejects every failed, skipped, cancelled, or unfinished job including addi
     assert.throws(() => assertApprovedCandidate(candidate, targetSha));
   }
 });
+
+test("isolated release requires an explicit matching branch and all mandatory gates", () => {
+  const branch = "codex/release-tabelao-drive-links";
+  const make = () => ({
+    ...approval(),
+    mainSha: currentSha,
+    branchRef: `refs/heads/${branch}`,
+    branchSha: targetSha,
+    run: { ...approval().run, head_branch: branch },
+  });
+  assert.doesNotThrow(() => assertApprovedCandidate(make(), targetSha, branch));
+  assert.throws(() => assertApprovedCandidate(make(), targetSha));
+  for (const wrongBranch of [
+    "feature",
+    "refs/heads/main",
+    "codex/release-../main",
+    "codex/release-",
+    null,
+  ]) {
+    assert.throws(() => assertApprovedCandidate(make(), targetSha, wrongBranch));
+  }
+  for (const patch of [
+    { branchSha: currentSha },
+    { branchRef: "refs/tags/" + branch },
+    { mainSha: null },
+  ]) {
+    assert.throws(() => assertApprovedCandidate({ ...make(), ...patch }, targetSha, branch));
+  }
+  for (const jobName of jobNames) {
+    const missing = make();
+    missing.jobs = missing.jobs.filter((job) => job.name !== jobName);
+    assert.throws(() => assertApprovedCandidate(missing, targetSha, branch));
+    for (const conclusion of ["failure", "skipped", "cancelled"]) {
+      const failed = make();
+      failed.jobs.find((job) => job.name === jobName).conclusion = conclusion;
+      assert.throws(() => assertApprovedCandidate(failed, targetSha, branch));
+    }
+  }
+  for (const patch of [
+    { event: "pull_request" },
+    { head_branch: "main" },
+    { head_sha: currentSha },
+    { status: "in_progress" },
+  ]) {
+    const candidate = make();
+    Object.assign(candidate.run, patch);
+    assert.throws(() => assertApprovedCandidate(candidate, targetSha, branch));
+  }
+});

@@ -348,3 +348,32 @@ test("direct production Compose up rejects missing or forged lock claims before 
     assert.match(stderr, /Production mutations require pnpm release:production/u);
   }
 });
+
+test("isolated deployment accepts only an explicit release branch on deploy", () => {
+  const branch = "codex/release-tabelao-drive-links";
+  assert.equal(
+    parseReleaseArguments([...deployArguments(), "--candidate-branch", branch]).values[
+      "candidate-branch"
+    ],
+    branch,
+  );
+  for (const value of [
+    "feature",
+    "refs/heads/main",
+    "codex/release-",
+    "codex/release-../main",
+    "codex/release-a?x=1",
+  ]) {
+    assert.throws(() => parseReleaseArguments([...deployArguments(), "--candidate-branch", value]));
+  }
+  assert.throws(() => parseReleaseArguments(["status", "--candidate-branch", branch]));
+  assert.throws(() =>
+    parseReleaseArguments([
+      ...deployArguments(),
+      "--candidate-branch",
+      branch,
+      "--candidate-branch",
+      branch,
+    ]),
+  );
+});

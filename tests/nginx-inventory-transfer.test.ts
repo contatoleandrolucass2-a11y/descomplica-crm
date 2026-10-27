@@ -39,7 +39,9 @@ describe("inventory transfer proxy", () => {
   it("builds release images outside production without deployment credentials", async () => {
     const ci = await readFile(".github/workflows/ci.yml", "utf8");
     const job = ci.split("  promotable-image:")[1];
-    expect(job).toContain("github.event_name == 'push' && github.ref == 'refs/heads/main'");
+    expect(job).toContain(
+      "github.event_name == 'push' && (github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/heads/codex/release-'))",
+    );
     expect(job).toContain("needs: validate");
     expect(job).toContain("scripts/release/build-promotable-image.mjs");
     expect(job).toContain("scripts/release/prove-promotable-image.mjs");

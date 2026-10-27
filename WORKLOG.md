@@ -9819,3 +9819,33 @@ rota; referências e dados das demais páginas preservados. A CI `40263953550`
 aprovou 4.290 testes, mas encontrou HTTP 403 na fonte de ITBI de Documentação.
 Nova CI deve revalidar essa fonte sem exceção, mudança de script ou baseline
 de outra página. Nenhum merge/deploy executado nesta etapa.
+
+## 2026-10-27 — Pastas dos empreendimentos no Tabelão
+
+- Pedido: transformar os nomes da coluna Empreendimento em links para as pastas específicas da pasta compartilhada informada pelo usuário.
+- Base: `origin/main` em `6955a6c8`, branch `codex/tabelao-drive-links`, checkout isolado; alterações preexistentes de outros trabalhos foram preservadas.
+- Fonte: listagem pelo conector Google Drive de `1_rVgsDhMv5vtDzmBvRosQBAaPDtgLO8J`, com nove pastas diretas e um atalho geral. O atalho geral não foi tratado como pasta de empreendimento.
+- Implementação: catálogo de nove destinos confirmados e associação exata após normalização de acentos, caixa, espaços e prefixos Direcional/Riva. Nomes desconhecidos não recebem links; novas pastas exigem atualização do catálogo.
+- Interface: nome original preservado, nova aba com `noopener noreferrer`, indicação acessível e foco visível; filtros, células mescladas, fórmulas e fonte de estoque preservados.
+- Verificação funcional: 30 testes direcionados aprovados; navegador sintético aprovado em seis dimensões, três temas, impressão e Maps. Os nove destinos, ausência de link desconhecido, mesclagem e abertura de nova aba por teclado foram conferidos no componente real.
+- Limite: dados do navegador são sintéticos; a navegação externa foi interceptada localmente. Não comprova acesso de todos os usuários às pastas privadas nem publicação em produção.
+
+- Validação completa: `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build` aprovados. Vitest: 4.391 testes aprovados, 112 previamente condicionais ignorados; a etapa Node também terminou com sucesso. CI remota e publicação ainda não executadas.
+
+## 27/10/2026 — Release isolada do Tabelão
+
+O usuário autorizou explicitamente adaptar o fluxo para uma branch de release
+baseada na produção, mantendo todos os gates. Base: bb56fd7b23e872c69e3c5dac144afb30e4397cc4.
+O commit do Tabelão foi transportado isoladamente; nenhuma alteração de Dashboard,
+Agendamentos, Meta Ads, CAIXA ou banco não publicada foi incluída. O coordenador
+aceita uma branch codex/release-\* explícita, confere a referência remota e a CI
+completa e exige que o candidato contenha o commit publicado. Locks, frescor,
+CAS, prova da imagem e recuperação permanecem ativos. A CI passa a executar os
+mesmos quatro jobs em push dessas branches. Main e suas entregas permanecem intactas.
+
+Validação inicial do coordenador: 735 testes aprovados e 14 testes físicos
+condicionais de Linux, obrigatórios na CI. A suíte inclui rejeição de branch
+movida, referência inválida, gate ausente/falho, indisponibilidade da origem e
+candidato que omite publicação concorrente. Publicação ainda não executada.
+
+Validação final do candidato isolado: lint e tipos aprovados; Vitest com 4.387 testes aprovados e 112 condicionais ignorados; testes operacionais Node com 1.616 aprovados; testes de release com 735 aprovados e 14 físicos condicionais de Linux; build de produção aprovado. Revisão independente estática sem achados bloqueantes. Os arquivos de runtime do Tabelão são idênticos aos já validados no candidato anterior. Não houve alteração de baseline visual nem de migrations.

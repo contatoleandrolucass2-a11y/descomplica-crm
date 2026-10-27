@@ -35,12 +35,13 @@ Antes da troca, o coordenador verifica:
 
 1. Registro, `production.env`, imagem do container e health local/público
    concordam com o deployment ID, SHA e image ID esperados.
-2. `main` remoto corresponde ao candidato; a execução **concluída** de
-   `.github/workflows/ci.yml` é `push/main` no SHA exato e todos os jobs foram
+2. A branch remota selecionada corresponde ao candidato (`main` por padrão;
+   `codex/release-*` somente com seleção explícita); a execução **concluída** de
+   `.github/workflows/ci.yml` é `push` nessa branch e no SHA exato e todos os jobs foram
    aprovados, incluindo `validate`, `release-gates`, `isolated-restore` e
    `promotable-image`. A consulta usa a API GitHub; indisponibilidade ou rate
    limit bloqueia, sem usar cache como fallback.
-3. A observação final, incluindo a segunda consulta à CI/main, está no mesmo
+3. A observação final, incluindo a segunda consulta à CI e às referências remotas, está no mesmo
    minuto UTC da escrita e do início do Compose, com idade máxima de 60 s.
    O relógio não pode retroceder. Espera ou virada de minuto exige nova
    tentativa; se já houver intenção persistida, recuperar primeiro.
@@ -278,3 +279,47 @@ scripts nem Docker direto para contornar o coordenador. Um usuário root com
 acesso irrestrito ao host ainda pode ignorar o protocolo; esta trava não é uma
 restrição de privilégios do sistema operacional. A adoção por todos os
 publicadores e a inicialização com evidência são requisitos de ativação.
+
+## Publicar somente uma entrega sobre a produção
+
+Autorização explícita do usuário em 27/10/2026: separar os links do Tabelão das
+alterações ainda não publicadas na `main`, adaptando este fluxo sem reduzir gates.
+
+1. Ler SHA, deployment ID e data real do ledger e conferir o runtime. Criar uma
+   branch `codex/release-<entrega>` a partir desse SHA publicado e transportar
+   somente os commits da entrega e a infraestrutura aprovada para a release.
+   Revisar o diff completo contra a produção; não reverter nem sobrescrever main.
+2. Manter uma referência `codex/base-production-<sha-curto>` no commit publicado
+   para revisão do candidato por PR. O PR de release tem essa base e permanece
+   separado da integração posterior na main; não integrar um diff que retire
+   entregas de outros desenvolvedores.
+3. Executar a CI de push na branch isolada. O mesmo workflow e os mesmos jobs
+   `validate`, `release-gates`, `isolated-restore` e `promotable-image` são
+   obrigatórios. Os critérios, as referências visuais e os testes são preservados.
+4. Após todos os jobs aprovados, verificar o artefato imutável e a imagem carregada,
+   realizar a prova de runtime, manter backups e promover pelo coordenador:
+
+```bash
+sudo pnpm release:production deploy \
+  --candidate-branch codex/release-tabelao-drive-links \
+  --expected-deployment-id "$production_deployment_id" \
+  --expected-sha "$production_current_sha" \
+  --sha "$release_sha" \
+  --image-id "$homologated_image_id" \
+  --ci-run-id "$release_ci_run_id"
+```
+
+O coordenador consulta main, a referência exata da branch e a tentativa atual da
+CI, duas vezes sob as mesmas três travas. Não aceita tags, PR CI, workflow
+alternativo, jobs ausentes ou falhos, branch divergente ou SHA desatualizado.
+A versão publicada deve ser ancestral do candidato; uma entrega posterior não
+pode omitir a release anterior. A observação final permanece no mesmo minuto e
+com idade máxima de 60 segundos. O recibo registra também a branch isolada.
+Recuperação continua limitada à imagem anterior da transação pendente exata.
+
+Depois da publicação, os responsáveis pelas demais entregas devem incorporar a
+branch publicada à main, resolvendo conflitos sem retirar alterações concorrentes.
+Todos os publicadores precisam usar o coordenador atualizado. A existência deste
+código não comprova adoção por outros checkouts; informar os responsáveis e
+verificar a versão real antes de cada publicação. Não modificar main nem aplicar
+migrations de outras funcionalidades como parte desta release isolada.

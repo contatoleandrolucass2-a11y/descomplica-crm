@@ -2,6 +2,7 @@ import { isDeepStrictEqual } from "node:util";
 
 import {
   assertApprovedCandidate,
+  assertCandidateBranch,
   assertFreshObservation,
   assertLiveDeployment,
   decideRelease,
@@ -25,12 +26,12 @@ function assertSameState(actual, expected) {
   }
 }
 
-async function checkCandidate(io, ciRunId, targetSha) {
+async function checkCandidate(io, ciRunId, targetSha, candidateBranch) {
   if (!Number.isSafeInteger(ciRunId) || ciRunId <= 0) {
     fail("Deployment requires a positive, safe integer CI run ID.");
   }
-  const candidate = await io.candidate(ciRunId);
-  assertApprovedCandidate(candidate, targetSha);
+  const candidate = await io.candidate(ciRunId, candidateBranch);
+  assertApprovedCandidate(candidate, targetSha, candidateBranch);
   if (candidate.run.id !== ciRunId) {
     fail("The approved candidate does not match the requested CI run ID.");
   }
@@ -59,6 +60,7 @@ export async function executeRelease(options, io) {
     ).length > 1
   )
     fail("Integration configurations require separate releases.");
+  const candidateBranch = assertCandidateBranch(options.candidateBranch ?? "main");
   const configurationRequested =
     options.salesforceIngestion || options.qlikRanking || options.metaAds || options.metaAdsApi;
   const releaseOptions = {
@@ -68,6 +70,7 @@ export async function executeRelease(options, io) {
     targetSha: options.targetSha,
     targetImageId: options.targetImageId,
     ciRunId: options.ciRunId,
+    candidateBranch,
     ...(options.salesforceIngestion ? { salesforceIngestion: true } : {}),
     ...(options.qlikRanking ? { qlikRanking: true } : {}),
     ...(options.metaAds ? { metaAds: true } : {}),
@@ -84,14 +87,14 @@ export async function executeRelease(options, io) {
     return { status: "noop", release: initial.state.release };
   }
 
-  await checkCandidate(io, ciRunId, targetSha);
+  await checkCandidate(io, ciRunId, targetSha, candidateBranch);
   await io.prepare(releaseOptions, structuredClone(initial.state.release));
 
   // The observation's original start includes all source reads and the final CI lookup.
   const finalObservation = captureObservation(await io.observe());
   assertLiveDeployment(finalObservation, expected, io.now());
   assertSameState(finalObservation.state, initial.state);
-  await checkCandidate(io, ciRunId, targetSha);
+  await checkCandidate(io, ciRunId, targetSha, candidateBranch);
   const completedObservationAt = io.now();
   if (completedObservationAt < finalObservation.checkedAt) {
     fail("The clock moved backwards during the final CI lookup.");
@@ -189,7 +192,7 @@ export async function executeRelease(options, io) {
     sha: targetSha,
     imageId: targetImageId,
     deployedAt: new Date(completedAt).toISOString(),
-    evidence: `ci-run:${ciRunId}; previous-deployment:${expectedDeploymentId}`,
+    evidence: `ci-run:${ciRunId}; previous-deployment:${expectedDeploymentId}${candidateBranch === "main" ? "" : `; branch:${candidateBranch}`}`,
   };
   const completedState = { schemaVersion: 1, release, inProgress: null };
   validateDeploymentState(completedState, completedAt);
