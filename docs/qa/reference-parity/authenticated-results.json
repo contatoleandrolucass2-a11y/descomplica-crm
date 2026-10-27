@@ -898,7 +898,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1054,
+      "pageScrollHeight": 1204,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -2059,7 +2059,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1051,
+      "pageScrollHeight": 1201,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -3220,7 +3220,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1285,
+      "pageScrollHeight": 1494,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -4381,7 +4381,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 1323,
+      "pageScrollHeight": 1565,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -5542,7 +5542,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2135,
+      "pageScrollHeight": 2510,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -6703,7 +6703,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2182,
+      "pageScrollHeight": 2557,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -7864,7 +7864,7 @@
       "mainCount": 1,
       "theme": "light",
       "horizontalOverflow": false,
-      "pageScrollHeight": 2240,
+      "pageScrollHeight": 2677,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -9043,7 +9043,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1054,
+      "pageScrollHeight": 1204,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -10226,7 +10226,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1054,
+      "pageScrollHeight": 1204,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -11409,7 +11409,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 1054,
+      "pageScrollHeight": 1204,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -12592,7 +12592,7 @@
       "h1Count": 1,
       "mainCount": 1,
       "horizontalOverflow": false,
-      "pageScrollHeight": 2135,
+      "pageScrollHeight": 2510,
       "canvasDensityReady": true,
       "goalPlanningComplete": true,
       "goalCalendarSelections": [],
@@ -40198,7 +40198,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1165,
+        "pageScrollHeight": 1187,
         "canvasDensityReady": true,
         "goalPlanningComplete": true,
         "goalCalendarSelections": [],
@@ -41381,7 +41381,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1054,
+        "pageScrollHeight": 1204,
         "canvasDensityReady": true,
         "goalPlanningComplete": true,
         "goalCalendarSelections": [],
@@ -42564,7 +42564,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1084,
+        "pageScrollHeight": 1217,
         "canvasDensityReady": true,
         "goalPlanningComplete": true,
         "goalCalendarSelections": [],
@@ -43747,7 +43747,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 1285,
+        "pageScrollHeight": 1494,
         "canvasDensityReady": true,
         "goalPlanningComplete": true,
         "goalCalendarSelections": [],
@@ -44930,7 +44930,7 @@
         "mainCount": 1,
         "theme": "light",
         "horizontalOverflow": false,
-        "pageScrollHeight": 2047,
+        "pageScrollHeight": 2364,
         "canvasDensityReady": true,
         "goalPlanningComplete": true,
         "goalCalendarSelections": [],
@@ -45852,37 +45852,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1517760,
+        "totalPixels": 1733760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
           "tracked": true,
-          "bytes": 226590,
-          "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8"
+          "bytes": 270500,
+          "sha256": "36d71841467584f8bbeab376a87e96098f253707b3d864774817458ce5c91d14"
         }
       },
       "path": "target-authenticated/simulacao-caixa-1440x900.webp",
-      "bytes": 226590,
-      "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8",
+      "bytes": 270500,
+      "sha256": "36d71841467584f8bbeab376a87e96098f253707b3d864774817458ce5c91d14",
       "width": 1440,
-      "height": 1054,
+      "height": 1204,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1440,
-          "height": 900
+          "height": 1054
         },
         "actual": {
           "width": 1440,
-          "height": 1054
+          "height": 1204
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
           "tracked": true,
-          "bytes": 207314,
-          "sha256": "7412fc295d5b2433f670726bb2d456bf5b2b60c002a432ed121008950cd20960"
+          "bytes": 226590,
+          "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8"
         }
       }
     },
@@ -46678,37 +46678,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1517760,
+        "totalPixels": 1733760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
           "tracked": true,
-          "bytes": 226590,
-          "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8"
+          "bytes": 270500,
+          "sha256": "36d71841467584f8bbeab376a87e96098f253707b3d864774817458ce5c91d14"
         }
       },
       "path": "target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
-      "bytes": 226590,
-      "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8",
+      "bytes": 270500,
+      "sha256": "36d71841467584f8bbeab376a87e96098f253707b3d864774817458ce5c91d14",
       "width": 1440,
-      "height": 1054,
+      "height": 1204,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1440,
-          "height": 900
+          "height": 1054
         },
         "actual": {
           "width": 1440,
-          "height": 1054
+          "height": 1204
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
           "tracked": true,
-          "bytes": 207314,
-          "sha256": "7412fc295d5b2433f670726bb2d456bf5b2b60c002a432ed121008950cd20960"
+          "bytes": 226590,
+          "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8"
         }
       }
     },
@@ -47504,37 +47504,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1517760,
+        "totalPixels": 1733760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 236794,
-          "sha256": "1205313eadc16e57ebf173cf523003f2b972acb0698a8e56d952c826630af050"
+          "bytes": 278342,
+          "sha256": "eec462ecb3dd158423f5b9110203b91e1441624d3aedbffb1229514868677484"
         }
       },
       "path": "target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
-      "bytes": 236794,
-      "sha256": "1205313eadc16e57ebf173cf523003f2b972acb0698a8e56d952c826630af050",
+      "bytes": 278342,
+      "sha256": "eec462ecb3dd158423f5b9110203b91e1441624d3aedbffb1229514868677484",
       "width": 1440,
-      "height": 1054,
+      "height": 1204,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1440,
-          "height": 900
+          "height": 1054
         },
         "actual": {
           "width": 1440,
-          "height": 1054
+          "height": 1204
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 213530,
-          "sha256": "b3af9d22ae78621003c25350d710ee9f942d1db48b92a500592efb0b6e3f01f3"
+          "bytes": 236794,
+          "sha256": "1205313eadc16e57ebf173cf523003f2b972acb0698a8e56d952c826630af050"
         }
       }
     },
@@ -48495,13 +48495,13 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1517760,
+        "totalPixels": 1733760,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 245218,
-          "sha256": "e4cbc045651e6657a57ef67afa8223819113e0f3ead1573227f67fb07e72db73"
+          "bytes": 289088,
+          "sha256": "7073c126d9d3be48fd776191c2baa806542d75f381f674d3316cbfbdb372d2a1"
         }
       },
       "approvedCanvasComparison": {
@@ -48510,33 +48510,33 @@
         "asset": "docs/qa/canvas-parity/reference/documentacao-caixa.webp",
         "region": "right",
         "referenceSha256": "5094f436a1ee19378c4e37645583ccf3abd5aaf3fd62e4d3629b8b120bfe730e",
-        "colorDistance": 16.39594184027778,
+        "colorDistance": 15.761881510416666,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 40.791585286458336,
+        "edgeDistance": 41.359700520833336,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
-      "bytes": 245218,
-      "sha256": "e4cbc045651e6657a57ef67afa8223819113e0f3ead1573227f67fb07e72db73",
+      "bytes": 289088,
+      "sha256": "7073c126d9d3be48fd776191c2baa806542d75f381f674d3316cbfbdb372d2a1",
       "width": 1440,
-      "height": 1054,
+      "height": 1204,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1440,
-          "height": 900
+          "height": 1054
         },
         "actual": {
           "width": 1440,
-          "height": 1054
+          "height": 1204
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 161898,
-          "sha256": "f5b83cf3920f25ee1d470399e8dbafa502559e31229f97fd77b18e7e7e0a323a"
+          "bytes": 245218,
+          "sha256": "e4cbc045651e6657a57ef67afa8223819113e0f3ead1573227f67fb07e72db73"
         }
       }
     },
@@ -49398,37 +49398,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1345280,
+        "totalPixels": 1537280,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
           "tracked": true,
-          "bytes": 218350,
-          "sha256": "6b3ed542b24be6b471dfb430cba8abcc88bd2301b4709b96d50de2826f9a4b48"
+          "bytes": 261558,
+          "sha256": "0f83e8556ab9c851439237a6c0096f373b439d50b80442f389b246aac1cf844a"
         }
       },
       "path": "target-authenticated/simulacao-caixa-1280x720.webp",
-      "bytes": 218350,
-      "sha256": "6b3ed542b24be6b471dfb430cba8abcc88bd2301b4709b96d50de2826f9a4b48",
+      "bytes": 261558,
+      "sha256": "0f83e8556ab9c851439237a6c0096f373b439d50b80442f389b246aac1cf844a",
       "width": 1280,
-      "height": 1051,
+      "height": 1201,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1280,
-          "height": 875
+          "height": 1051
         },
         "actual": {
           "width": 1280,
-          "height": 1051
+          "height": 1201
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
           "tracked": true,
-          "bytes": 195632,
-          "sha256": "23d484a78e035bc43ea55a71125593a16b96d9f8ea89b0963bc31f6a6df24e4e"
+          "bytes": 218350,
+          "sha256": "6b3ed542b24be6b471dfb430cba8abcc88bd2301b4709b96d50de2826f9a4b48"
         }
       }
     },
@@ -50224,37 +50224,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1315840,
+        "totalPixels": 1529856,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
           "tracked": true,
-          "bytes": 226998,
-          "sha256": "510bf83d2e1bb4bd7b424ca813d24a476e6fc3acec7609fbb70015bb2e72dc70"
+          "bytes": 269142,
+          "sha256": "56b293d48d2c0e667e0186ab1b2a470eb2911577f082f2af1d0ce6030e3aa463"
         }
       },
       "path": "target-authenticated/simulacao-caixa-1024x768.webp",
-      "bytes": 226998,
-      "sha256": "510bf83d2e1bb4bd7b424ca813d24a476e6fc3acec7609fbb70015bb2e72dc70",
+      "bytes": 269142,
+      "sha256": "56b293d48d2c0e667e0186ab1b2a470eb2911577f082f2af1d0ce6030e3aa463",
       "width": 1024,
-      "height": 1285,
+      "height": 1494,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 1024,
-          "height": 1071
+          "height": 1285
         },
         "actual": {
           "width": 1024,
-          "height": 1285
+          "height": 1494
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
           "tracked": true,
-          "bytes": 186346,
-          "sha256": "1046bbcb9dc55c5ad45bebd144c7eef4dd5c2ca0d8567c6316bb9fb63809ccd4"
+          "bytes": 226998,
+          "sha256": "510bf83d2e1bb4bd7b424ca813d24a476e6fc3acec7609fbb70015bb2e72dc70"
         }
       }
     },
@@ -51050,37 +51050,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 1016064,
+        "totalPixels": 1201920,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
           "tracked": true,
-          "bytes": 206062,
-          "sha256": "4490f659384155e6f443f62389925afe560c0956b93d99482df40982b47970d5"
+          "bytes": 251980,
+          "sha256": "5216286a04abe5ce0eb0e88f2c6ccf07447a2de6e27a947a5f6c5d344c9f9793"
         }
       },
       "path": "target-authenticated/simulacao-caixa-768x1024.webp",
-      "bytes": 206062,
-      "sha256": "4490f659384155e6f443f62389925afe560c0956b93d99482df40982b47970d5",
+      "bytes": 251980,
+      "sha256": "5216286a04abe5ce0eb0e88f2c6ccf07447a2de6e27a947a5f6c5d344c9f9793",
       "width": 768,
-      "height": 1323,
+      "height": 1565,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 768,
-          "height": 1259
+          "height": 1323
         },
         "actual": {
           "width": 768,
-          "height": 1323
+          "height": 1565
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
           "tracked": true,
-          "bytes": 185582,
-          "sha256": "35a6cefcd023b31bf897ff061bffebcc444f22c8db7d64f1f5b31ce6d97810b3"
+          "bytes": 206062,
+          "sha256": "4490f659384155e6f443f62389925afe560c0956b93d99482df40982b47970d5"
         }
       }
     },
@@ -51876,37 +51876,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 832650,
+        "totalPixels": 978900,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-390x844.webp",
           "tracked": true,
-          "bytes": 208522,
-          "sha256": "a77d633b33b6a25b3ca96953d0bc8d6079049c28fed869cf1bfa37804523f209"
+          "bytes": 250720,
+          "sha256": "d4610c59f8d80e49a2c8a5a2138713b90d9edc4d6419ecc8e112a5aa108a3ad3"
         }
       },
       "path": "target-authenticated/simulacao-caixa-390x844.webp",
-      "bytes": 208522,
-      "sha256": "a77d633b33b6a25b3ca96953d0bc8d6079049c28fed869cf1bfa37804523f209",
+      "bytes": 250720,
+      "sha256": "d4610c59f8d80e49a2c8a5a2138713b90d9edc4d6419ecc8e112a5aa108a3ad3",
       "width": 390,
-      "height": 2135,
+      "height": 2510,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 390,
-          "height": 2090
+          "height": 2135
         },
         "actual": {
           "width": 390,
-          "height": 2135
+          "height": 2510
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-390x844.webp",
           "tracked": true,
-          "bytes": 178356,
-          "sha256": "59a6ba41f7e81042a8d45ef2d94b561c1c7c73f60f21b2e21ab4e8ef58cc914f"
+          "bytes": 208522,
+          "sha256": "a77d633b33b6a25b3ca96953d0bc8d6079049c28fed869cf1bfa37804523f209"
         }
       }
     },
@@ -52702,37 +52702,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 832650,
+        "totalPixels": 978900,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
           "tracked": true,
-          "bytes": 221414,
-          "sha256": "f8e1b5d427a4c0dab633d40119f4c907a8e79bc1cd7b0160d2edd4dd53b4e1cf"
+          "bytes": 265618,
+          "sha256": "37c99698206dc384f2bea8c00d816d19046cb3c309af4fd848ee553f2834785d"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
-      "bytes": 221414,
-      "sha256": "f8e1b5d427a4c0dab633d40119f4c907a8e79bc1cd7b0160d2edd4dd53b4e1cf",
+      "bytes": 265618,
+      "sha256": "37c99698206dc384f2bea8c00d816d19046cb3c309af4fd848ee553f2834785d",
       "width": 390,
-      "height": 2135,
+      "height": 2510,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 390,
-          "height": 2090
+          "height": 2135
         },
         "actual": {
           "width": 390,
-          "height": 2135
+          "height": 2510
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
           "tracked": true,
-          "bytes": 155678,
-          "sha256": "5461b536c2d134865356554ea4444ff75020db10cd1b6efef54ff5e3fd2b1d3f"
+          "bytes": 221414,
+          "sha256": "f8e1b5d427a4c0dab633d40119f4c907a8e79bc1cd7b0160d2edd4dd53b4e1cf"
         }
       }
     },
@@ -53528,37 +53528,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 818250,
+        "totalPixels": 958875,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
           "tracked": true,
-          "bytes": 207534,
-          "sha256": "f078048c7152c5aa1617aaa8825432c65bf5ee5db09293380e43a30d8832691b"
+          "bytes": 252850,
+          "sha256": "4563185edb7087739bebc632980c152db178017c44fee9ec633afaec52ad345b"
         }
       },
       "path": "target-authenticated/simulacao-caixa-375x812.webp",
-      "bytes": 207534,
-      "sha256": "f078048c7152c5aa1617aaa8825432c65bf5ee5db09293380e43a30d8832691b",
+      "bytes": 252850,
+      "sha256": "4563185edb7087739bebc632980c152db178017c44fee9ec633afaec52ad345b",
       "width": 375,
-      "height": 2182,
+      "height": 2557,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 375,
-          "height": 2116
+          "height": 2182
         },
         "actual": {
           "width": 375,
-          "height": 2182
+          "height": 2557
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
           "tracked": true,
-          "bytes": 175474,
-          "sha256": "b110d9825bd75674e9e020ed67bcdc0e78490ead8cdfa0802914cfb60304eeb8"
+          "bytes": 207534,
+          "sha256": "f078048c7152c5aa1617aaa8825432c65bf5ee5db09293380e43a30d8832691b"
         }
       }
     },
@@ -54366,37 +54366,37 @@
         "passed": true,
         "reason": "baseline_updated",
         "changedPixels": 0,
-        "totalPixels": 716800,
+        "totalPixels": 856640,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp",
           "tracked": true,
-          "bytes": 201442,
-          "sha256": "03bb325d9da69f17ef9310f32fd2230c911c56a4562415ba2a19c6154f27dadb"
+          "bytes": 245334,
+          "sha256": "a140211dd6bd75d5562b828d0a9d7251a8b79fbd78e9cfb155d89d8c6f01070c"
         }
       },
       "path": "target-authenticated/simulacao-caixa-320x568.webp",
-      "bytes": 201442,
-      "sha256": "03bb325d9da69f17ef9310f32fd2230c911c56a4562415ba2a19c6154f27dadb",
+      "bytes": 245334,
+      "sha256": "a140211dd6bd75d5562b828d0a9d7251a8b79fbd78e9cfb155d89d8c6f01070c",
       "width": 320,
-      "height": 2240,
+      "height": 2677,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "dimensions_changed",
         "changedPixelRatio": 1,
         "expected": {
           "width": 320,
-          "height": 2173
+          "height": 2240
         },
         "actual": {
           "width": 320,
-          "height": 2240
+          "height": 2677
         },
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp",
           "tracked": true,
-          "bytes": 173574,
-          "sha256": "d082a8ca9fc4ccc199c32c5d2a7b55588476fb1ae2f7fc797e4ac3f64ea52808"
+          "bytes": 201442,
+          "sha256": "03bb325d9da69f17ef9310f32fd2230c911c56a4562415ba2a19c6154f27dadb"
         }
       }
     },
@@ -55349,44 +55349,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
         "tracked": true,
-        "bytes": 226998,
-        "sha256": "510bf83d2e1bb4bd7b424ca813d24a476e6fc3acec7609fbb70015bb2e72dc70"
+        "bytes": 269142,
+        "sha256": "56b293d48d2c0e667e0186ab1b2a470eb2911577f082f2af1d0ce6030e3aa463"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
         "tracked": true,
-        "bytes": 218350,
-        "sha256": "6b3ed542b24be6b471dfb430cba8abcc88bd2301b4709b96d50de2826f9a4b48"
+        "bytes": 261558,
+        "sha256": "0f83e8556ab9c851439237a6c0096f373b439d50b80442f389b246aac1cf844a"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
         "tracked": true,
-        "bytes": 226590,
-        "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8"
+        "bytes": 270500,
+        "sha256": "36d71841467584f8bbeab376a87e96098f253707b3d864774817458ce5c91d14"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp",
         "tracked": true,
-        "bytes": 201442,
-        "sha256": "03bb325d9da69f17ef9310f32fd2230c911c56a4562415ba2a19c6154f27dadb"
+        "bytes": 245334,
+        "sha256": "a140211dd6bd75d5562b828d0a9d7251a8b79fbd78e9cfb155d89d8c6f01070c"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
         "tracked": true,
-        "bytes": 207534,
-        "sha256": "f078048c7152c5aa1617aaa8825432c65bf5ee5db09293380e43a30d8832691b"
+        "bytes": 252850,
+        "sha256": "4563185edb7087739bebc632980c152db178017c44fee9ec633afaec52ad345b"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-390x844.webp",
         "tracked": true,
-        "bytes": 208522,
-        "sha256": "a77d633b33b6a25b3ca96953d0bc8d6079049c28fed869cf1bfa37804523f209"
+        "bytes": 250720,
+        "sha256": "d4610c59f8d80e49a2c8a5a2138713b90d9edc4d6419ecc8e112a5aa108a3ad3"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
         "tracked": true,
-        "bytes": 206062,
-        "sha256": "4490f659384155e6f443f62389925afe560c0956b93d99482df40982b47970d5"
+        "bytes": 251980,
+        "sha256": "5216286a04abe5ce0eb0e88f2c6ccf07447a2de6e27a947a5f6c5d344c9f9793"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/simulacao-calcular-documentacao-1024x768.webp",
@@ -55907,8 +55907,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
         "tracked": true,
-        "bytes": 221414,
-        "sha256": "f8e1b5d427a4c0dab633d40119f4c907a8e79bc1cd7b0160d2edd4dd53b4e1cf"
+        "bytes": 265618,
+        "sha256": "37c99698206dc384f2bea8c00d816d19046cb3c309af4fd848ee553f2834785d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-calcular-documentacao-dark-390x844.webp",
@@ -55985,20 +55985,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 236794,
-        "sha256": "1205313eadc16e57ebf173cf523003f2b972acb0698a8e56d952c826630af050"
+        "bytes": 278342,
+        "sha256": "eec462ecb3dd158423f5b9110203b91e1441624d3aedbffb1229514868677484"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 245218,
-        "sha256": "e4cbc045651e6657a57ef67afa8223819113e0f3ead1573227f67fb07e72db73"
+        "bytes": 289088,
+        "sha256": "7073c126d9d3be48fd776191c2baa806542d75f381f674d3316cbfbdb372d2a1"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
         "tracked": true,
-        "bytes": 226590,
-        "sha256": "d91adcf6afc7d8110fe61bc21715bf4fe9ff1b5f73279e39bb4325090d77d9d8"
+        "bytes": 270500,
+        "sha256": "36d71841467584f8bbeab376a87e96098f253707b3d864774817458ce5c91d14"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-calcular-documentacao-balanced-1440x900.webp",
@@ -56086,7 +56086,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "46a69cb6725691338ecce8e309f785278ea70fd3c86e13b90948ce5457b9d633"
+    "manifestSha256": "01a64e1f431e0caead9610ad61483455beb946b74bb85a26d2472201e0d76286"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -56150,6 +56150,33 @@
       ],
       "previousBaselineManifestSha256": "7ce0829eae4c4db29106f37aca6a6aa04fee0baf390cf9066aba990ed7fd711c",
       "previousBaselineResultSha256": "c7acf27fb18016f6aa98898c9fd8bfbcdea5e086475965d1c2c2975ddbe0f82a"
+    },
+    {
+      "routes": ["/app/simulacao/caixa"],
+      "sourceRunId": 40457067981,
+      "sourceArtifactId": 12714049954,
+      "sourceArtifactSha256": "7445ed01d68d655405e1c25ace6468ec76b58a9b5e058b6591dc49d0aa23c922",
+      "sourceHeadCommit": "04300be6bb54561b8ab4785dab197f3822010140",
+      "sourceCaptureCommit": "04300be6bb54561b8ab4785dab197f3822010140",
+      "sourceCapturedAt": "2026-10-27T06:32:00.976Z",
+      "scope": "Somente 38 entradas da rota CAIXA, 11 imagens e seus registros; demais objetos preservados byte a byte.",
+      "visualReview": "11 imagens sintéticas revisadas em desktop, notebook, tablet e celular: cartões automáticos de teto de renda e limite municipal, condição do imóvel ao lado de imóvel na planta, conteúdo legível e sem cortes, sobreposições ou rolagem horizontal, nos temas claro, médio e escuro cobertos pela matriz.",
+      "globalCaptureMetadataPreserved": true,
+      "imagePaths": [
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/simulacao-caixa-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/simulacao-caixa-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/simulacao-caixa-320x568.webp"
+      ],
+      "previousBaselineManifestSha256": "46a69cb6725691338ecce8e309f785278ea70fd3c86e13b90948ce5457b9d633",
+      "previousBaselineResultSha256": "0b13d3004e89aeba6c5b628964d137f52826f2683e172a463b008489974bdd3d"
     }
   ]
 }
