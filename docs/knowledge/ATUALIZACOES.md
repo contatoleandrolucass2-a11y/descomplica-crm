@@ -1,5 +1,25 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: revisão das referências do Dashboard para liberar o CAIXA
+
+- Após autorização explícita do usuário para remover o bloqueio e concluir a
+  publicação, foram revisadas as 11 imagens da rota `/app` reprovadas na CI
+  `40555682643`. A fonte foi o artefato diagnóstico `12762530739`, com ZIP
+  verificado em
+  `sha256:0a1140cb6d320c57336d5cff93ba879b7ea446431da0a7a2e78445185e5322ec`.
+- A inspeção visual cobriu desktop, notebook, tablet, celular e os temas claro,
+  médio e escuro. Canvas, ações, cartões e funis permaneceram legíveis, sem
+  corte, sobreposição ou rolagem horizontal. A variação de data e valores é
+  compatível com os fixtures sintéticos dependentes do dia da captura.
+- Foram promovidas somente 11 imagens e seus registros. As outras 231 capturas,
+  o código funcional, o limite de 1% e a tolerância de 16 níveis por canal não
+  foram alterados. O manifesto passou a
+  `43aa7d39d536e2532e3e4db4223ca2900d3ed219bc3d9a4599f13c160c228046`.
+- Esta revisão remove o único bloqueio conhecido da execução anterior, mas não
+  comprova publicação. O SHA final ainda deve obter os quatro jobs verdes da CI,
+  gerar artefato imutável homologado e passar pelo coordenador protegido de
+  produção antes de o health público poder ser registrado como atualizado.
+
 ## 2026-10-27: DEPLOY-002 — validação por impacto para todos os publicadores
 
 - Por pedido direto do usuário, a regra antes registrada no cofre local passa

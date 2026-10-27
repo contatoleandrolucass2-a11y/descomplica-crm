@@ -4,6 +4,8 @@
 - Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.
 - Compacta a navegação de Agendamentos em notebooks após a inclusão do nono menu raiz.
 - Transcreve contatos, horários, relacionamento, regras comerciais, campanhas históricas, Bora Vender e materiais Linktree/Liveprint, sinalizando destinos divergentes e conteúdo que exige confirmação de vigência.
+- Corrige o filtro de status do Meta Ads para usar o estado efetivo da campanha e preservar o investimento histórico de anúncios arquivados dentro de campanhas ativas.
+- Atualiza somente as 11 referências visuais do Dashboard revisadas no artefato autenticado que bloqueava a publicação do Simulador CAIXA, sem alterar código funcional nem tolerâncias.
 - Vincula automaticamente os nomes de nove empreendimentos do Tabelão às pastas correspondentes do Google Drive, com abertura em nova aba e preservação dos nomes sem correspondência.
 
 - Define a DEPLOY-002 para todos os desenvolvedores e agentes: validação por impacto, reaproveitamento de evidências e revisão ampliada somente com justificativa, preservando gates obrigatórios e publicação protegida.

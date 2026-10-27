@@ -45296,32 +45296,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
-          "bytes": 169734,
-          "sha256": "3d047c453ba0811a91fb2546f96917446c3b7f1a6200c4b135ef87277139cdf1"
+          "bytes": 171764,
+          "sha256": "1f7fb3414b02d07837bd7cc58af1db2ee5233f65732d6b2b10ade7d08721ad84"
         }
       },
       "path": "target-authenticated/dashboard-1440x900.webp",
-      "bytes": 169734,
-      "sha256": "3d047c453ba0811a91fb2546f96917446c3b7f1a6200c4b135ef87277139cdf1",
+      "bytes": 171764,
+      "sha256": "1f7fb3414b02d07837bd7cc58af1db2ee5233f65732d6b2b10ade7d08721ad84",
       "width": 1440,
       "height": 2515,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 2239
-        },
-        "actual": {
-          "width": 1440,
-          "height": 2515
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 67501,
+        "totalPixels": 3621600,
+        "changedPixelRatio": 0.01863844709520654,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
           "tracked": true,
-          "bytes": 93100,
-          "sha256": "438bb2c13cde16f32d7da10a368623c1900c21007d38d9899f8f56274acd2b3b"
+          "bytes": 169734,
+          "sha256": "3d047c453ba0811a91fb2546f96917446c3b7f1a6200c4b135ef87277139cdf1"
         }
       }
     },
@@ -46116,32 +46110,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
-          "bytes": 168930,
-          "sha256": "128b959907f4ba8661b8ff4fb08fd0749213016c5b3c655128bbc5a458cf5643"
+          "bytes": 171764,
+          "sha256": "1f7fb3414b02d07837bd7cc58af1db2ee5233f65732d6b2b10ade7d08721ad84"
         }
       },
       "path": "target-authenticated/themes/dashboard-light-1440x900.webp",
-      "bytes": 168930,
-      "sha256": "128b959907f4ba8661b8ff4fb08fd0749213016c5b3c655128bbc5a458cf5643",
+      "bytes": 171764,
+      "sha256": "1f7fb3414b02d07837bd7cc58af1db2ee5233f65732d6b2b10ade7d08721ad84",
       "width": 1440,
       "height": 2515,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 2239
-        },
-        "actual": {
-          "width": 1440,
-          "height": 2515
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 66406,
+        "totalPixels": 3621600,
+        "changedPixelRatio": 0.018336094543848023,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
           "tracked": true,
-          "bytes": 93100,
-          "sha256": "438bb2c13cde16f32d7da10a368623c1900c21007d38d9899f8f56274acd2b3b"
+          "bytes": 168930,
+          "sha256": "128b959907f4ba8661b8ff4fb08fd0749213016c5b3c655128bbc5a458cf5643"
         }
       }
     },
@@ -46936,32 +46924,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 173606,
-          "sha256": "e11d7b2fb8d2d10c7076825df68e034195eef8721e259c6e692aaa12b2fcc73c"
+          "bytes": 177790,
+          "sha256": "6aa831adc26d52696ba9135f8530361c392900920aa734475be2ca5c8379f1c7"
         }
       },
       "path": "target-authenticated/themes/dashboard-balanced-1440x900.webp",
-      "bytes": 173606,
-      "sha256": "e11d7b2fb8d2d10c7076825df68e034195eef8721e259c6e692aaa12b2fcc73c",
+      "bytes": 177790,
+      "sha256": "6aa831adc26d52696ba9135f8530361c392900920aa734475be2ca5c8379f1c7",
       "width": 1440,
       "height": 2515,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 2239
-        },
-        "actual": {
-          "width": 1440,
-          "height": 2515
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 66389,
+        "totalPixels": 3621600,
+        "changedPixelRatio": 0.01833140048597305,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 97220,
-          "sha256": "ba10b996d18d0b4398c35fed74b2403edaf5040d695e65b6e502cc70aa91dbf0"
+          "bytes": 173606,
+          "sha256": "e11d7b2fb8d2d10c7076825df68e034195eef8721e259c6e692aaa12b2fcc73c"
         }
       }
     },
@@ -47756,8 +47738,8 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 168522,
-          "sha256": "67470cd10ceab56523b0cf4614c70d27a9001fda2312112f8d1a3fcf7d04cddc"
+          "bytes": 170004,
+          "sha256": "a3abe9ddbb22e372965740490747d680d0c39783245280586dd3a36d1c2ff795"
         }
       },
       "approvedCanvasComparison": {
@@ -47772,27 +47754,21 @@
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/dashboard-dark-1440x900.webp",
-      "bytes": 168522,
-      "sha256": "67470cd10ceab56523b0cf4614c70d27a9001fda2312112f8d1a3fcf7d04cddc",
+      "bytes": 170004,
+      "sha256": "a3abe9ddbb22e372965740490747d680d0c39783245280586dd3a36d1c2ff795",
       "width": 1440,
       "height": 2515,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1440,
-          "height": 2239
-        },
-        "actual": {
-          "width": 1440,
-          "height": 2515
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 65612,
+        "totalPixels": 3621600,
+        "changedPixelRatio": 0.018116854428981664,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 95880,
-          "sha256": "a78e781132efe7cae184337353ad5e2458ee7e1f2ad337827925a5720ed905d2"
+          "bytes": 168522,
+          "sha256": "67470cd10ceab56523b0cf4614c70d27a9001fda2312112f8d1a3fcf7d04cddc"
         }
       }
     },
@@ -48818,32 +48794,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
-          "bytes": 143994,
-          "sha256": "c79d442dd1efc87f4dec0c8fbddc65ed093613e71de5143ea0d701f5f672c363"
+          "bytes": 146896,
+          "sha256": "625ca51003552344799224de72c772e8fab4abbb6e2f701b123fa556cee3c9bb"
         }
       },
       "path": "target-authenticated/dashboard-1280x720.webp",
-      "bytes": 143994,
-      "sha256": "c79d442dd1efc87f4dec0c8fbddc65ed093613e71de5143ea0d701f5f672c363",
+      "bytes": 146896,
+      "sha256": "625ca51003552344799224de72c772e8fab4abbb6e2f701b123fa556cee3c9bb",
       "width": 1280,
       "height": 2515,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1280,
-          "height": 2269
-        },
-        "actual": {
-          "width": 1280,
-          "height": 2515
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 68764,
+        "totalPixels": 3219200,
+        "changedPixelRatio": 0.02136058648111332,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
           "tracked": true,
-          "bytes": 94342,
-          "sha256": "1f831e14758ffe316ff332b49764d37f33bf2d08484c6af88384e31c591923c8"
+          "bytes": 143994,
+          "sha256": "c79d442dd1efc87f4dec0c8fbddc65ed093613e71de5143ea0d701f5f672c363"
         }
       }
     },
@@ -49644,32 +49614,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
-          "bytes": 147176,
-          "sha256": "3534828153b54f5cc9d2a4e5ad19b065a14b33ab261f19da6857f49fa672ff0c"
+          "bytes": 149894,
+          "sha256": "9942b566a63d878308adde10f5c8389ce0810427681d9f4d85cf536259126968"
         }
       },
       "path": "target-authenticated/dashboard-1024x768.webp",
-      "bytes": 147176,
-      "sha256": "3534828153b54f5cc9d2a4e5ad19b065a14b33ab261f19da6857f49fa672ff0c",
+      "bytes": 149894,
+      "sha256": "9942b566a63d878308adde10f5c8389ce0810427681d9f4d85cf536259126968",
       "width": 1024,
       "height": 2593,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 1024,
-          "height": 5239
-        },
-        "actual": {
-          "width": 1024,
-          "height": 2593
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 61314,
+        "totalPixels": 2655232,
+        "changedPixelRatio": 0.023091767499035867,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
           "tracked": true,
-          "bytes": 91330,
-          "sha256": "86ce3cc6a4c983df86e3eecee03396762c9e56e0f51fbf3999286c2587360bc5"
+          "bytes": 147176,
+          "sha256": "3534828153b54f5cc9d2a4e5ad19b065a14b33ab261f19da6857f49fa672ff0c"
         }
       }
     },
@@ -50470,32 +50434,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
-          "bytes": 150122,
-          "sha256": "16ebfe506b1d5e7ca3ba99101fba9a082e89944d6e7f7a32010e27ad9214cb28"
+          "bytes": 152364,
+          "sha256": "44bf8c8a661ea306277068f1ef58616578020a26a6df188c1edefed9b2a55ccb"
         }
       },
       "path": "target-authenticated/dashboard-768x1024.webp",
-      "bytes": 150122,
-      "sha256": "16ebfe506b1d5e7ca3ba99101fba9a082e89944d6e7f7a32010e27ad9214cb28",
+      "bytes": 152364,
+      "sha256": "44bf8c8a661ea306277068f1ef58616578020a26a6df188c1edefed9b2a55ccb",
       "width": 768,
       "height": 2883,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 768,
-          "height": 8370
-        },
-        "actual": {
-          "width": 768,
-          "height": 2883
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 52544,
+        "totalPixels": 2214144,
+        "changedPixelRatio": 0.023731067175395998,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
           "tracked": true,
-          "bytes": 95022,
-          "sha256": "6812e3cb2c1977f33953f0e7e5741d389275113ebc083a7dbc3ac41aea4a9cff"
+          "bytes": 150122,
+          "sha256": "16ebfe506b1d5e7ca3ba99101fba9a082e89944d6e7f7a32010e27ad9214cb28"
         }
       }
     },
@@ -51296,32 +51254,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
-          "bytes": 83558,
-          "sha256": "9f0aef60b2bcb5967ce99a931a4d105c15c9d1a0d583b6a8021c95ba1a482ea9"
+          "bytes": 84174,
+          "sha256": "ef19852c9f2ba4304fb1e23220a2d6f5a11adc71a90e9ae2cfc0b63017c2be00"
         }
       },
       "path": "target-authenticated/dashboard-390x844.webp",
-      "bytes": 83558,
-      "sha256": "9f0aef60b2bcb5967ce99a931a4d105c15c9d1a0d583b6a8021c95ba1a482ea9",
+      "bytes": 84174,
+      "sha256": "ef19852c9f2ba4304fb1e23220a2d6f5a11adc71a90e9ae2cfc0b63017c2be00",
       "width": 390,
       "height": 9999,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 8559
-        },
-        "actual": {
-          "width": 390,
-          "height": 9999
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 66484,
+        "totalPixels": 3899610,
+        "changedPixelRatio": 0.017048884375617048,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
-          "bytes": 73572,
-          "sha256": "9bc704b4f2a37c13a18f3d00e10b663323c49e676419fae450edaf4bb2e52a53"
+          "bytes": 83558,
+          "sha256": "9f0aef60b2bcb5967ce99a931a4d105c15c9d1a0d583b6a8021c95ba1a482ea9"
         }
       }
     },
@@ -52122,32 +52074,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
-          "bytes": 83138,
-          "sha256": "09e5a0300f85ac5e7578d31a6f79d0b25e05d7631404c8698ada714e38bc5465"
+          "bytes": 84864,
+          "sha256": "e4b377dbdec789e18c59bb0e831d50d290da92493e7ac708fded215290586d08"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
-      "bytes": 83138,
-      "sha256": "09e5a0300f85ac5e7578d31a6f79d0b25e05d7631404c8698ada714e38bc5465",
+      "bytes": 84864,
+      "sha256": "e4b377dbdec789e18c59bb0e831d50d290da92493e7ac708fded215290586d08",
       "width": 390,
       "height": 9999,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 390,
-          "height": 8559
-        },
-        "actual": {
-          "width": 390,
-          "height": 9999
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 65828,
+        "totalPixels": 3899610,
+        "changedPixelRatio": 0.01688066242521688,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
-          "bytes": 75718,
-          "sha256": "eadf26c2e62eeeb49e06dd5a5c770b790b94a7584be46d40bddad5cb40691c04"
+          "bytes": 83138,
+          "sha256": "09e5a0300f85ac5e7578d31a6f79d0b25e05d7631404c8698ada714e38bc5465"
         }
       }
     },
@@ -52948,32 +52894,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
-          "bytes": 79900,
-          "sha256": "cb218eee133d2127bb2baae798f130b394142b328a75d93c4f9309a925bd696a"
+          "bytes": 81516,
+          "sha256": "d0bfed816404b012c10859913efd5d5d958042d72775589fbd6d787eac525ff4"
         }
       },
       "path": "target-authenticated/dashboard-375x812.webp",
-      "bytes": 79900,
-      "sha256": "cb218eee133d2127bb2baae798f130b394142b328a75d93c4f9309a925bd696a",
+      "bytes": 81516,
+      "sha256": "d0bfed816404b012c10859913efd5d5d958042d72775589fbd6d787eac525ff4",
       "width": 375,
       "height": 9999,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 375,
-          "height": 8559
-        },
-        "actual": {
-          "width": 375,
-          "height": 9999
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 64473,
+        "totalPixels": 3749625,
+        "changedPixelRatio": 0.017194519451945195,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
-          "bytes": 72454,
-          "sha256": "10b1a6c2092fcda12b398c1949da1eeb5acb622833d229a7f8842317fe93eace"
+          "bytes": 79900,
+          "sha256": "cb218eee133d2127bb2baae798f130b394142b328a75d93c4f9309a925bd696a"
         }
       }
     },
@@ -53774,32 +53714,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
-          "bytes": 80328,
-          "sha256": "f0ae39e141c919989a611bec37eaf2620287682555e7c88c8d09e575c8ebfb29"
+          "bytes": 81394,
+          "sha256": "bb2a974a8066be193ffa01d4e23bee8543afaa2fb4539d37ccccfe02ce457935"
         }
       },
       "path": "target-authenticated/dashboard-320x568.webp",
-      "bytes": 80328,
-      "sha256": "f0ae39e141c919989a611bec37eaf2620287682555e7c88c8d09e575c8ebfb29",
+      "bytes": 81394,
+      "sha256": "bb2a974a8066be193ffa01d4e23bee8543afaa2fb4539d37ccccfe02ce457935",
       "width": 320,
       "height": 10044,
       "previousBaselineComparison": {
         "passed": false,
-        "reason": "dimensions_changed",
-        "changedPixelRatio": 1,
-        "expected": {
-          "width": 320,
-          "height": 8657
-        },
-        "actual": {
-          "width": 320,
-          "height": 10044
-        },
+        "reason": "pixel_drift",
+        "changedPixels": 69378,
+        "totalPixels": 3214080,
+        "changedPixelRatio": 0.02158564814814815,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
           "tracked": true,
-          "bytes": 68670,
-          "sha256": "f6d132d27680fa2956be63956134b5ddf729e362902f1c557e04f807d062f2b4"
+          "bytes": 80328,
+          "sha256": "f0ae39e141c919989a611bec37eaf2620287682555e7c88c8d09e575c8ebfb29"
         }
       }
     },
@@ -54947,44 +54881,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
         "tracked": true,
-        "bytes": 147176,
-        "sha256": "3534828153b54f5cc9d2a4e5ad19b065a14b33ab261f19da6857f49fa672ff0c"
+        "bytes": 149894,
+        "sha256": "9942b566a63d878308adde10f5c8389ce0810427681d9f4d85cf536259126968"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
         "tracked": true,
-        "bytes": 143994,
-        "sha256": "c79d442dd1efc87f4dec0c8fbddc65ed093613e71de5143ea0d701f5f672c363"
+        "bytes": 146896,
+        "sha256": "625ca51003552344799224de72c772e8fab4abbb6e2f701b123fa556cee3c9bb"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
         "tracked": true,
-        "bytes": 169734,
-        "sha256": "3d047c453ba0811a91fb2546f96917446c3b7f1a6200c4b135ef87277139cdf1"
+        "bytes": 171764,
+        "sha256": "1f7fb3414b02d07837bd7cc58af1db2ee5233f65732d6b2b10ade7d08721ad84"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
         "tracked": true,
-        "bytes": 80328,
-        "sha256": "f0ae39e141c919989a611bec37eaf2620287682555e7c88c8d09e575c8ebfb29"
+        "bytes": 81394,
+        "sha256": "bb2a974a8066be193ffa01d4e23bee8543afaa2fb4539d37ccccfe02ce457935"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
         "tracked": true,
-        "bytes": 79900,
-        "sha256": "cb218eee133d2127bb2baae798f130b394142b328a75d93c4f9309a925bd696a"
+        "bytes": 81516,
+        "sha256": "d0bfed816404b012c10859913efd5d5d958042d72775589fbd6d787eac525ff4"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
         "tracked": true,
-        "bytes": 83558,
-        "sha256": "9f0aef60b2bcb5967ce99a931a4d105c15c9d1a0d583b6a8021c95ba1a482ea9"
+        "bytes": 84174,
+        "sha256": "ef19852c9f2ba4304fb1e23220a2d6f5a11adc71a90e9ae2cfc0b63017c2be00"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
         "tracked": true,
-        "bytes": 150122,
-        "sha256": "16ebfe506b1d5e7ca3ba99101fba9a082e89944d6e7f7a32010e27ad9214cb28"
+        "bytes": 152364,
+        "sha256": "44bf8c8a661ea306277068f1ef58616578020a26a6df188c1edefed9b2a55ccb"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
@@ -55679,20 +55613,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 173606,
-        "sha256": "e11d7b2fb8d2d10c7076825df68e034195eef8721e259c6e692aaa12b2fcc73c"
+        "bytes": 177790,
+        "sha256": "6aa831adc26d52696ba9135f8530361c392900920aa734475be2ca5c8379f1c7"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 168522,
-        "sha256": "67470cd10ceab56523b0cf4614c70d27a9001fda2312112f8d1a3fcf7d04cddc"
+        "bytes": 170004,
+        "sha256": "a3abe9ddbb22e372965740490747d680d0c39783245280586dd3a36d1c2ff795"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
         "tracked": true,
-        "bytes": 168930,
-        "sha256": "128b959907f4ba8661b8ff4fb08fd0749213016c5b3c655128bbc5a458cf5643"
+        "bytes": 171764,
+        "sha256": "1f7fb3414b02d07837bd7cc58af1db2ee5233f65732d6b2b10ade7d08721ad84"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
@@ -55835,8 +55769,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
         "tracked": true,
-        "bytes": 83138,
-        "sha256": "09e5a0300f85ac5e7578d31a6f79d0b25e05d7631404c8698ada714e38bc5465"
+        "bytes": 84864,
+        "sha256": "e4b377dbdec789e18c59bb0e831d50d290da92493e7ac708fded215290586d08"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
@@ -56062,7 +55996,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "5834d09283431b8a5547617b8c2da484eb97c4663f478c4bbb69ce107ae4264e"
+    "manifestSha256": "43aa7d39d536e2532e3e4db4223ca2900d3ed219bc3d9a4599f13c160c228046"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -56180,6 +56114,33 @@
       ],
       "previousBaselineManifestSha256": "01a64e1f431e0caead9610ad61483455beb946b74bb85a26d2472201e0d76286",
       "previousBaselineResultSha256": "736d0a36b7eba8d31d4d3b75973e62753d1c05b2fe90c9a5f04b89baf38a5f08"
+    },
+    {
+      "routes": ["/app"],
+      "sourceRunId": 40555682643,
+      "sourceArtifactId": 12762530739,
+      "sourceArtifactSha256": "0a1140cb6d320c57336d5cff93ba879b7ea446431da0a7a2e78445185e5322ec",
+      "sourceHeadCommit": "6955a6c840ff9d3f06bd36b449995feab3f3ff13",
+      "sourceCaptureCommit": "6955a6c840ff9d3f06bd36b449995feab3f3ff13",
+      "sourceCapturedAt": "2026-10-27T18:53:15.565Z",
+      "scope": "Somente 38 entradas da rota Visao Geral, 11 imagens e seus registros; demais objetos preservados byte a byte.",
+      "visualReview": "11 imagens sintéticas revisadas em desktop, notebook, tablet e celular: canvas, ações, cartões e funis legíveis, sem cortes, sobreposições ou rolagem horizontal, nos temas claro, médio e escuro cobertos pela matriz. A variação de valores e data corresponde aos fixtures dependentes do dia da captura.",
+      "globalCaptureMetadataPreserved": true,
+      "imagePaths": [
+        "docs/qa/reference-parity/target-authenticated/dashboard-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-320x568.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/dashboard-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/dashboard-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp"
+      ],
+      "previousBaselineManifestSha256": "5834d09283431b8a5547617b8c2da484eb97c4663f478c4bbb69ce107ae4264e",
+      "previousBaselineResultSha256": "51cc84168b12af1795154b4739719f2a6f2bfa1946f9a0dce138709af661b324"
     }
   ]
 }
