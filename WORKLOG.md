@@ -1,5 +1,6 @@
 # Worklog
 
+- 2026-10-27: PR #373 do CAIXA integrado em `a0b4a381`; publicação não executada porque `main` avançou para `1b510d4c` com Agendamentos durante os gates, cancelando `release-gates` e invalidando o candidato exato.
 - 2026-10-27: implementado exclusivamente em `/app/etapas/agendamentos` o editor administrativo compartilhado dos cards e gráficos, com controles de dimensão, conteúdo, tipografia, posição, cores e torres; usuários não administradores permanecem em leitura.
 - 2026-10-27: corrigidos no Simulador CAIXA o prazo maximo reativo, a sinalizacao automatica da elegibilidade ao subsidio e o layout responsivo alinhado aos tokens de Agendamentos; o valor do subsidio continua dependente de confirmacao oficial quando faltam os fatores tecnicos do MFOM.
 - 2026-10-27: incorporadas somente as 11 referencias visuais do CAIXA aprovadas no run protegido `40537724784`, com 38 entradas de evidencia e preservacao das outras 231 imagens.

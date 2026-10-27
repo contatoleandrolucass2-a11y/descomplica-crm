@@ -1,5 +1,25 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: CAIXA integrado; publicacao bloqueada por main concorrente
+
+- O PR #373 foi integrado como
+  `a0b4a38125a5ac38991ca7f3368bd6b9ce336648`. A CI de `push/main`
+  `40545177637` aprovou `validate`, `promotable-image` e `isolated-restore`; o
+  teste sintetico especifico do CAIXA dentro de `release-gates` tambem passou.
+- O job `release-gates` foi cancelado durante a inicializacao do Supabase porque
+  a `main` avancou concorrentemente para
+  `1b510d4c44098d78e7bcf157d94a44de253c37ba`, com mudanca de Agendamentos fora
+  deste escopo. A publicacao do SHA do CAIXA nao foi tentada: o coordenador
+  exige `main` exata e publicar o novo SHA tambem promoveria outra pagina sem a
+  validacao desta conversa.
+- Health publico observado em `2026-10-27T17:07:15.7858595Z`: HTTP 200,
+  `status=ok`, versao `bb56fd7b23e872c69e3c5dac144afb30e4397cc4`. Portanto a
+  correcao esta integrada no Git, mas ainda nao esta comprovadamente publicada.
+  Reavaliar quando a CI integral do `main` entao vigente concluir os quatro jobs
+  e a promocao puder ser atribuida ao responsavel pelo lote concorrente.
+- O sync do Obsidian continuou impedido por `Documento excede o limite de
+exportacao.`; os documentos versionados permanecem a fonte registrada.
+
 ## 2026-10-27: abertura do editor administrativo de Agendamentos
 
 - Escopo exclusivo: controles de edicao visual dos cards e graficos em
