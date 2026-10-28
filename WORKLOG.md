@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-28 — Simulador CAIXA: experiência compacta e cálculo reativo
+
+- Escopo restrito a `/app/simulacao/caixa`: cabeçalhos de etapas, cartões
+  automáticos, aviso extenso e acionamento manual foram removidos da jornada.
+- Limite de parcela e limite aplicável ao imóvel agora acompanham os respectivos
+  campos; parâmetros e juros de obra permanecem recolhidos sob demanda.
+- O resultado é derivado localmente dos dados atuais e some quando faltam campos
+  obrigatórios, evitando resultado antigo após qualquer edição.
+- Testes focados cobrem recálculo, prazo, subsídio, SBPE, três temas, quatro
+  larguras, ausência de overflow e auditoria Axe.
+
 ## 2026-10-28 — Simulador CAIXA: subsídio automático publicado
 
 - PR #394 integrado no SHA `33899a898b4746ea1bd6fd62cb1250bd45d53845`.

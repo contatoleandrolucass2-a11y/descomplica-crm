@@ -2,6 +2,10 @@
 
 ## 2026-10-28
 
+- Compacta exclusivamente a interface do Simulador CAIXA, remove cartões e
+  avisos redundantes, posiciona limites junto aos campos e recalcula o resultado
+  automaticamente a cada alteração, sem mudar as fórmulas financeiras.
+
 - Publica no Simulador CAIXA o cálculo automático indicativo do subsídio MCMV,
   com fatores oficiais, reduções aplicáveis e substituição manual confirmada.
 
