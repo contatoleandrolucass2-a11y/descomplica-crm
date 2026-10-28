@@ -1385,7 +1385,7 @@
   margin-top: 9px;
 }
 .caixa-page-shell .caixa-history {
-  color: #a8bdcf;
+  color: var(--caixa-layout-muted, #52677a);
   margin-top: 12px;
   font-size: calc(0.66rem + 2px);
 }
@@ -1393,10 +1393,10 @@
   cursor: pointer;
 }
 .caixa-page-shell .caixa-history button {
-  color: #dbe9f3;
+  color: var(--caixa-layout-ink, #102a43);
   cursor: pointer;
-  background: #ffffff0a;
-  border: 1px solid #ffffff1a;
+  background: var(--caixa-layout-input, #edf4f8);
+  border: 1px solid var(--caixa-layout-line, #b9c8d4);
   border-radius: 8px;
   justify-content: space-between;
   gap: 12px;
@@ -2939,6 +2939,22 @@
   gap: 10px;
 }
 
+.caixa-page-shell .caixa-subsidy-inputs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--analytics-positive) 42%, var(--caixa-layout-line));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--analytics-positive) 5%, var(--caixa-layout-input));
+}
+
+.caixa-page-shell .caixa-subsidy-inputs > .caixa-field {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .caixa-page-shell .caixa-automatic-values > div {
   min-width: 0;
   padding: 10px 12px;
@@ -2963,12 +2979,14 @@
   color: var(--caixa-layout-muted);
 }
 
-.caixa-page-shell .caixa-subsidy-status.eligible-review {
+.caixa-page-shell .caixa-subsidy-status.eligible-review,
+.caixa-page-shell .caixa-subsidy-status.automatic {
   border-color: color-mix(in srgb, var(--analytics-positive) 58%, var(--caixa-layout-line));
   background: color-mix(in srgb, var(--analytics-positive) 8%, var(--caixa-layout-input));
 }
 
-.caixa-page-shell .caixa-subsidy-status.eligible-review strong {
+.caixa-page-shell .caixa-subsidy-status.eligible-review strong,
+.caixa-page-shell .caixa-subsidy-status.automatic strong {
   color: var(--analytics-positive);
 }
 
@@ -3197,6 +3215,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .caixa-page-shell .caixa-subsidy-inputs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .caixa-page-shell .caixa-subsidy-status {
     grid-column: 1 / -1;
   }
@@ -3238,6 +3260,7 @@
   }
 
   .caixa-page-shell .caixa-automatic-values,
+  .caixa-page-shell .caixa-subsidy-inputs,
   .caixa-page-shell .caixa-property-condition-group {
     grid-template-columns: minmax(0, 1fr);
   }
@@ -3257,5 +3280,206 @@
 
   .caixa-page-shell .caixa-step-actions :is(.ghost, .primary) {
     width: 100%;
+  }
+}
+
+/* Fluxo compacto e automático do Simulador CAIXA. */
+.goal-page-shell.caixa-page-shell .caixa-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-simulator-layout,
+.goal-page-shell.caixa-page-shell .caixa-full-form {
+  gap: 10px;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-form-section {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-financing-section {
+  padding-top: 12px;
+  border-top: 1px solid var(--caixa-layout-line);
+}
+
+.goal-page-shell.caixa-page-shell .caixa-form-section-content {
+  gap: 12px;
+  padding: 0;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-primary-grid,
+.goal-page-shell.caixa-page-shell .caixa-secondary-grid,
+.goal-page-shell.caixa-page-shell .caixa-binary-grid {
+  gap: 10px 12px;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-subsidy-inputs {
+  gap: 10px 12px;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-field-insight {
+  min-height: 16px;
+  color: var(--caixa-layout-accent) !important;
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-field > small:not(.caixa-field-insight) {
+  font-size: 0.68rem;
+  line-height: 1.25;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-toggle button {
+  min-height: 44px !important;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-confirmed-parameters,
+.goal-page-shell.caixa-page-shell .caixa-construction-details {
+  border-color: var(--caixa-layout-line);
+  border-radius: 8px;
+  background: transparent;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-full-form-actions {
+  min-height: 44px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-auto-status {
+  margin-right: auto;
+  color: var(--caixa-layout-muted);
+  font-size: 0.72rem;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-panel {
+  --ink: var(--caixa-layout-ink);
+  --ink-soft: var(--caixa-layout-muted);
+  padding: 0;
+  color: var(--caixa-layout-ink);
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-summary {
+  gap: 12px;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-summary > .caixa-result-summary-heading {
+  grid-template-columns: minmax(0, 1fr) auto;
+  min-height: 48px;
+  padding: 0 0 8px;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-summary-heading > h2 {
+  margin: 0;
+  color: var(--caixa-layout-ink);
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-summary-heading > .caixa-result-print {
+  color: var(--caixa-layout-accent);
+  border-color: var(--caixa-layout-accent);
+  border-radius: 7px;
+  background: transparent;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-plan,
+.goal-page-shell.caixa-page-shell .caixa-result-composition {
+  color: var(--caixa-layout-ink);
+  border-color: var(--caixa-layout-line);
+  background: var(--caixa-layout-panel);
+  box-shadow: none;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-plan :is(strong, p),
+.goal-page-shell.caixa-page-shell .caixa-result-composition :is(h3, dt, dd),
+.goal-page-shell.caixa-page-shell .caixa-result-note,
+.goal-page-shell.caixa-page-shell .caixa-construction,
+.goal-page-shell.caixa-page-shell .caixa-construction .caixa-field > span {
+  color: var(--caixa-layout-ink);
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-plan :is(small, span),
+.goal-page-shell.caixa-page-shell .caixa-result-note,
+.goal-page-shell.caixa-page-shell .caixa-construction > small {
+  color: var(--caixa-layout-muted);
+}
+
+.goal-page-shell.caixa-page-shell
+  .caixa-result-panel
+  .caixa-result-actions
+  :is(.caixa-actions > button:not(.primary), .caixa-save) {
+  color: var(--caixa-layout-ink);
+  border-color: var(--caixa-layout-line);
+  background: var(--caixa-layout-panel);
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-audit {
+  color: var(--caixa-layout-ink);
+  border-color: var(--caixa-layout-line);
+  background: transparent;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-audit > summary,
+.goal-page-shell.caixa-page-shell .caixa-result-audit-grid strong,
+.goal-page-shell.caixa-page-shell .caixa-result-audit > p {
+  color: var(--caixa-layout-ink);
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-audit-grid {
+  border-top-color: var(--caixa-layout-line);
+}
+
+.goal-page-shell.caixa-page-shell .caixa-result-audit-grid > span {
+  color: var(--caixa-layout-muted);
+  border-bottom-color: var(--caixa-layout-line);
+}
+
+.goal-page-shell.caixa-page-shell .caixa-construction-details > summary {
+  min-height: 46px;
+  padding: 10px 16px;
+  color: var(--caixa-layout-ink);
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-construction-details {
+  padding: 0;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-construction-details .caixa-construction {
+  margin: 0;
+  padding: 14px 16px 16px;
+  border-top: 1px solid var(--caixa-layout-line);
+}
+
+@media (max-width: 760px) {
+  .goal-page-shell.caixa-page-shell .caixa-full-form-actions {
+    align-items: stretch;
+  }
+
+  .goal-page-shell.caixa-page-shell .caixa-auto-status {
+    margin: 0;
   }
 }

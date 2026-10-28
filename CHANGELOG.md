@@ -1,6 +1,21 @@
 # Changelog
 
 - Executa `release-gates`, `isolated-restore` e `promotable-image` também em pull requests protegidos, mantendo a repetição integral dos quatro jobs no `main`.
+
+- Remove declarações redundantes do validador SQL de Links Úteis para atender ao lint estrito da restauração isolada sem alterar a validação dos documentos.
+- Adiciona sidebar contextual e editor compartilhado aos Links Úteis, com organograma comercial, cards movíveis e redimensionáveis, conteúdo atualizado das lojas e edição restrita a administradores.
+
+## 2026-10-28
+
+- Compacta exclusivamente a interface do Simulador CAIXA, remove cartões e
+  avisos redundantes, posiciona limites junto aos campos e recalcula o resultado
+  automaticamente a cada alteração, sem mudar as fórmulas financeiras.
+
+- Publica no Simulador CAIXA o cálculo automático indicativo do subsídio MCMV,
+  com fatores oficiais, reduções aplicáveis e substituição manual confirmada.
+
+- Calcula automaticamente o subsídio do Simulador CAIXA pela fórmula do MFOM Habitação v034, com área/tipo da unidade, composição familiar e fator populacional oficial por município.
+- Conclui a publicação de Links Úteis com o catálogo e as oito permissões aplicados no Supabase de produção, preservando a herança de acesso do Dashboard e excluindo Ranking Geral do novo menu.
 - Publica o conjunto integrado do Simulador CAIXA no SHA `f98f3c73`, após CI completa, restore isolado, pgTAP, E2E, matriz visual e promoção protegida da imagem imutável.
 - Atualiza os três contratos pgTAP de catálogo, acesso por papel e defaults para as oito páginas/permissões de Links Úteis, restaurando o gate de publicação sem alterar runtime ou regras financeiras do Simulador CAIXA.
 - Registra o editor administrativo exclusivo de Agendamentos como integrado e validado, sem publicação porque um gate obrigatório externo da área Links Úteis falhou.

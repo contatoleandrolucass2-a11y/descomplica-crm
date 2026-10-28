@@ -383,7 +383,7 @@ describe("dashboard Meta Ads", () => {
   });
 
   it("integra o canvas configurável sem dados demonstrativos", async () => {
-    const [merge, adapter, canvas, exportControls] = await Promise.all([
+    const [merge, adapter, canvas, exportControls, liveData] = await Promise.all([
       readFile(
         new URL("../public/descomplica-ads-compact/canvas-merge.js", import.meta.url),
         "utf8",
@@ -394,6 +394,7 @@ describe("dashboard Meta Ads", () => {
         new URL("../public/descomplica-ads-compact/export-controls.js", import.meta.url),
         "utf8",
       ),
+      readFile(new URL("../public/descomplica-ads-compact/live-data.js", import.meta.url), "utf8"),
     ]);
 
     expect(merge).toContain("Meta Marketing API · somente leitura");
@@ -418,12 +419,22 @@ describe("dashboard Meta Ads", () => {
     expect(canvas).toContain("requested-macro-default-v2");
     expect(canvas).toContain("standard.name==='Padrão'");
     expect(canvas).toContain("sameFactoryLayout(standard.cards,legacyFactoryDefinitions)");
+    expect(canvas).toContain("function upgradeCampaignSelections()");
+    expect(canvas).toContain("campaignMode='global'");
+    expect(canvas).toContain("stableCampaignIds(card.campaignIds)");
+    expect(canvas).toContain("Todas as campanhas da API");
     expect(canvas).toContain("/api/meta-ads/canvas-profiles?scope=");
     expect(canvas).toContain("method:'PUT'");
     expect(canvas).toContain("Layout salvo no seu perfil");
     expect(merge).toContain("fetch('/api/meta-ads/data',{cache:'no-store'})");
     expect(merge).not.toContain("fetch('/api/meta-ads/data?'+new URLSearchParams(selectedRange())");
-    expect(merge).toContain("/canvas/index.html?v=requested-default-1");
+    expect(merge).toContain("/canvas/index.html?v=campaign-api-2");
+    expect(liveData).toContain('campaignSelectionMode: "all"');
+    expect(liveData).toContain('followApi = state.campaignSelectionMode === "all"');
+    expect(liveData).toContain(
+      'state.campaignSelectionMode = values.length === campaigns.length ? "all" : "custom"',
+    );
+    expect(liveData).toContain("? all.map((c) => c.id)");
     expect(exportControls).toContain('canvas: "Gráficos do canvas (com filtros próprios)"');
   });
 });

@@ -7,11 +7,196 @@
   somente para aceitar PR ou `push/main`; os quatro jobs continuam obrigatorios
   e repetidos no SHA final integrado.
 - O teste de contrato da CI passou a exigir as duas condicoes nos tres jobs. No
-  SHA `26e7eca0b228ebee6a6acef7812d3b2ab57c2477`, os quatro checks foram
+  SHA `22b86a5d614792aed8a555c381b8b23cffead4e1`, os quatro checks foram
   aprovados, incluindo replay de migrations, pgTAP, E2E, acessibilidade,
   responsividade, temas, zoom, teclado, comparacao visual e imagem imutavel.
 - Nenhum baseline, tolerancia, migration, ACL, RLS ou dado remoto foi alterado
   por esta correcao de fluxo.
+
+## 2026-10-28: Links Úteis integrado; publicação bloqueada por gate externo
+
+- Estado integrado: a evolução editável de Links Úteis, o sidebar exclusivo da
+  área e as correções da migration/fixture estão presentes no `main`
+  `cee003158d4e834b54009eaa128b77046fa0b523`. Nenhuma correção desta demanda
+  alterou Dashboard, Simulador CAIXA ou as baselines dessas páginas.
+- Evidência de CI: o run `40652029100` aprovou `validate`,
+  `isolated-restore` e `promotable-image`. O restore comprovou a migration
+  limpa, o lint SQL e as 16 asserções pgTAP de Links Úteis.
+- Bloqueio externo ao escopo: `release-gates` falhou somente no artefato visual
+  autenticado `12802975980`. O manifesto registrou 22 comparações divergentes,
+  todas restritas a `/app` e `/app/simulacao/caixa`, após a integração
+  concorrente do PR #399. As 154 rotas, 88 temas e 242 auditorias de
+  acessibilidade passaram; não houve falha atribuída a Links Úteis.
+- Limite aplicado: pela regra máxima de escopo, as páginas e baselines externas
+  não foram corrigidas neste chat. O deploy e a migration de produção não foram
+  executados porque gate falho bloqueia publicação. Reavaliar somente após um
+  novo SHA de `main` corrigir e aprovar o gate externo completo.
+- Produção observada em `2026-10-28T08:37:52Z`: health HTTP 200, `status=ok` e
+  versão `33899a898b4746ea1bd6fd62cb1250bd45d53845`; portanto a evolução
+  editável de Links Úteis ainda não está publicada.
+- Conhecimento: o runtime continua retornando
+  `Documento excede o limite de exportacao.`; a sincronização do Obsidian
+  permanece pendente e não foi alegada como concluída.
+
+## 2026-10-28: abertura da compactação do Simulador CAIXA
+
+- Escopo exclusivo: interface e recálculo automático de
+  `/app/simulacao/caixa`, usando o fluxo linear associativo e Agendamentos
+  somente como referências visuais; nenhuma outra página será alterada.
+- Estado observado às `2026-10-28T05:07:18Z`: `origin/main` em
+  `55175aeb5fe730f33fbd7ee5f2877fb6545f9004`; health público HTTP 200,
+  `status=ok` e versão de runtime
+  `33899a898b4746ea1bd6fd62cb1250bd45d53845`. A divergência é documental:
+  `main` avançou após o deploy sem mudança de runtime.
+- Conhecimento: `context` e `search` permaneceram indisponíveis com
+  `Documento excede o limite de exportacao.`; o código atual e as evidências
+  observacionais serão as fontes desta entrega.
+
+### Implementação e validação local
+
+- Interface compactada somente em `/app/simulacao/caixa`: etapas internas e
+  cartões automáticos removidos, limites aproximados dos campos de origem,
+  condições financeiras condensadas e alertas extensos retirados da tela.
+- Cálculo convertido para derivação automática e síncrona dos dados atuais; o
+  botão manual e o resultado obsoleto foram eliminados. Parâmetros confirmados e
+  juros de obra permanecem recolhidos. Nenhuma fórmula financeira foi alterada.
+- Node 24.19.0 e pnpm 11.20.0: typecheck aprovado; 61 testes de cliente e motor
+  aprovados, incluindo três temas, desktop/celular, Axe, overflow, prazo, subsídio
+  e cotas SBPE. Gates integrais e publicação ainda dependem do SHA candidato.
+
+## 2026-10-28: abertura da evolução editável de Links Úteis
+
+- Escopo solicitado: substituir a lista simples do menu por navegação lateral
+  equivalente à página de Agendamentos; tornar Grupos WhatsApp um quadro com
+  organograma e cards editáveis, movíveis e redimensionáveis; reorganizar Lojas
+  Horários por loja com os dados fornecidos e aplicar o mesmo padrão às demais
+  guias de Links Úteis.
+- Estado observado às `2026-10-28T03:24:54Z`: Git comum confirmado; branch
+  criada de `origin/main` `33899a898b4746ea1bd6fd62cb1250bd45d53845`.
+  A CI de push `40623210294` desse SHA estava em andamento; a última CI completa
+  conhecida, `40615788025`, aprovou o `main` anterior `de2be3c6`.
+- Produção: `https://crm.descomplicapro.com.br/api/health` respondeu HTTP 200,
+  `status=ok` e versão
+  `f98f3c7310f773a36325bb6114ebd12369e9e077`. O runtime publicado, o `main`
+  integrado e esta branch permanecem estados distintos.
+- Conhecimento: `context` e `search` falharam com
+  `Documento excede o limite de exportacao.`; a sincronização do Obsidian
+  permanece pendente e nenhuma conclusão nova foi atribuída a essa fonte.
+- Implementação candidata: a navegação lateral reutiliza o catálogo autorizado;
+  todas as guias usam cards movíveis e redimensionáveis; Grupos WhatsApp inclui
+  organograma vertical/lateral e quatro cards de apoio; Lojas Horários contém os
+  oito agrupamentos por endereço solicitados. A edição compartilhada é restrita
+  a `admin`/`master`, com revisão otimista, limite de corpo e validação duplicada
+  na API e no banco.
+- Persistência candidata: migration aditiva RPC-only, RLS forçada, MFA e grants
+  mínimos. A restauração/pgTAP local não pôde iniciar porque o host não possui
+  Docker nem Podman; essa evidência continua obrigatória na CI do SHA candidato.
+- Evidência local: 90 testes funcionais focados e 26 testes do manifesto de
+  release passaram; lint dos arquivos afetados, tipos, catálogo, inventário e
+  build com Node 24.19.0 passaram. Neste ponto o estado é implementado e validado
+  localmente; CI, integração e publicação ainda não foram alegadas.
+- Correção de escopo antes da publicação: a tentativa de generalizar o shell
+  compartilhado foi recusada porque tocava arquivos e referências do Dashboard.
+  `DashboardShell`, navegação superior, CSS compartilhado, testes e as onze
+  baselines foram restaurados integralmente. O sidebar passou a existir somente
+  no layout de Links Úteis, com contrato automatizado que impede dependência
+  dessa área nos três arquivos compartilhados. O SHA integrado `c48ccd55` não
+  foi publicado; uma nova CI e nova integração são obrigatórias.
+- Gate de banco do `main` corrigido: a restauração isolada `40637253409`
+  interrompeu o novo pgTAP após 5 de 16 asserções porque a fixture inicializava
+  o leitor como `master` e depois tentava convertê-lo para `broker_house` com
+  escopos ativos incompatíveis. A correção mantém somente o editor como master
+  e aprova explicitamente o perfil leitor; não altera migration, runtime, dados
+  remotos ou qualquer página fora de Links Úteis. Nova CI integral é obrigatória.
+- Segunda validação da fixture: a restauração isolada `40639421924` confirmou
+  que um perfil aprovado `broker_house` exige escopo ativo compatível. O teste
+  de Links Úteis passou a criar organização, equipe, pessoa e escopo sintéticos
+  dentro da própria transação pgTAP. Não há alteração de migration, runtime ou
+  dados remotos; uma nova CI integral permanece obrigatória.
+
+## 2026-10-28: subsídio automático do Simulador CAIXA publicado
+
+- Integração: PR #394 incorporado ao `main` no SHA
+  `33899a898b4746ea1bd6fd62cb1250bd45d53845`. A CI de push
+  `40623210294` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`; o candidato visual protegido `40618704482` também foi
+  aprovado.
+- Artefato: `promotable-image-33899a898b4746ea1bd6fd62cb1250bd45d53845`,
+  ID `12788955332`. O `image.tar.gz` conferiu com SHA-256
+  `7e4fb50a3305ae1a676ee9d5f12797f3f0192d8795c36cc74fb94f9910abf76b` e
+  revisão OCI exata. A configuração da CI foi
+  `sha256:d784b2b17d3b424c2bcfecada39a66db76263d40fd0fb2603e513d9e5fede20d`;
+  o manifesto local comprovado foi
+  `sha256:4a576e060552306644b79cfa3c37a558c3c503c7ec679c6ba4ad08ffd9c52947`.
+  `image:prove` aprovou os dois perfis de runtime, a mesma imagem e nenhuma
+  impressão de segredo, sem rebuild ou retag.
+- Publicação: o coordenador exclusivo `release:production deploy` promoveu o
+  deployment `6d4758f0-7e8c-443c-910a-70e304eaa207` em
+  `2026-10-28T03:50:23.707Z` (`00:50:23` BRT), partindo do deployment
+  `08d382ff-e15a-4851-b8b0-b68b54c1e18f`/SHA `f98f3c73`, com travas, CAS e
+  consulta ao vivo. O recibo final ficou sem pendência.
+- Pós-publicação: `https://crm.descomplicapro.com.br/api/health` respondeu
+  HTTP 200, `status=ok` e versão exata `33899a89`; a rota anônima
+  `/app/simulacao/caixa` respondeu 307 para `/login`.
+- Conhecimento: o registro versionado foi atualizado, mas o runtime de sync
+  permaneceu indisponível com `Documento excede o limite de exportacao.`; a
+  sincronização do Obsidian não foi alegada como concluída.
+
+## 2026-10-27: subsídio automático do Simulador CAIXA
+
+- Abertura: `origin/main` e o checkout estavam em
+  `de2be3c6c03e9d0cd58ed209a40b1b5bea41e985`; o health público respondeu HTTP
+  200, `status=ok` e versão
+  `f98f3c7310f773a36325bb6114ebd12369e9e077`. A consulta foi observacional e
+  não acessou dados autenticados.
+- Causa: o motor classificava renda até R$ 4 mil como elegível, mas atribuía
+  `confirmedSubsidy ?? 0`; portanto nenhum valor automático participava da
+  composição financeira.
+- Implementação: fórmula literal do MFOM Habitação v034, pp. 131–133, com
+  `FDr` do Anexo III, `Fpop` do Anexo IV cruzado com REGIC 2018 e população
+  IBGE 2026, `FDfin`, `FUH`, tetos e redutores. Tipo/área da unidade e
+  dependentes são solicitados somente no cenário elegível. O valor confirmado
+  manualmente continua prevalecendo.
+- Cobertura territorial: 5.570 dos 5.571 municípios têm fator automático. Boa
+  Esperança do Norte/MT permanece sem `Fpop`, pois é posterior à REGIC 2018;
+  não foi criado fallback presumido.
+- Evidência focada: 61 testes financeiros/visuais passaram, incluindo o caso
+  São Paulo, renda R$ 4.000, imóvel R$ 275 mil, apartamento de 50 m² e família
+  não unipessoal, cujo resultado indicativo é R$ 3.638,05. A matriz sintética
+  passou em desktop/celular, três temas, Axe e ausência de overflow. Lint sem
+  erros, tipos e build passaram com Node 24.19.0.
+- Gate externo: a suíte Vitest integral aprovou 4.440 testes e pulou 112. O
+  bloco Node/release no Windows manteve falhas fora do escopo em fixtures e
+  permissões privadas de Meta Ads (`Missing synthetic file` e ACL/diretório),
+  sem relação com o Simulador CAIXA; nenhuma área externa foi alterada.
+- Conhecimento: `knowledge:sync` permaneceu indisponível com `Documento excede
+o limite de exportacao.`. O registro versionado foi atualizado; a
+  sincronização do Obsidian não foi alegada como concluída.
+
+## 2026-10-27: Links Úteis publicado e catálogo aplicado em produção
+
+- Runtime: a versão publicada permaneceu em
+  `f98f3c7310f773a36325bb6114ebd12369e9e077`, com HTTP 200 e `status=ok`
+  em `https://crm.descomplicapro.com.br/api/health` às
+  `2026-10-28T01:27:59Z`. A rota anônima `/app/links-uteis` respondeu 307 para
+  `/login`, preservando o guard de acesso.
+- Banco: a migration versionada `20261027160500_sync_page_catalog.sql` foi
+  aplicada via Supabase MCP no projeto de produção `hnncxuerlcsaahdxoswb` e
+  registrada remotamente como `20261028012746 sync_page_catalog`.
+- Verificação remota: o catálogo retornou exatamente oito registros ativos e
+  navegáveis — hub Links Úteis e sete subpáginas — com os caminhos e permissões
+  esperados. Ranking Geral não integra esse grupo. As oito permissões têm nível
+  mínimo 10 e sete concessões por papel, incluindo `master` e `admin`, conforme
+  a herança inicial preservada de `crm.dashboard.view`.
+- Integração e publicação: o código funcional já estava integrado pelo PR #376;
+  os contratos pgTAP foram incorporados ao `main` em `f98f3c73`, cuja CI
+  `40600846185` aprovou os quatro jobs e cujo deployment protegido
+  `08d382ff-e15a-4851-b8b0-b68b54c1e18f` promoveu a imagem imutável
+  `sha256:3dec01b76ff1c97375c73461cb649da86c8e946087f26cf0f87a88a5380aa3c9`.
+- Limite conhecido: `knowledge:sync` continuou falhando com
+  `Documento excede o limite de exportacao.`. O registro versionado foi
+  atualizado, mas a sincronização do Obsidian permanece pendente e não foi
+  alegada como concluída.
 
 ## 2026-10-27: Simulador CAIXA publicado no SHA f98f3c73
 

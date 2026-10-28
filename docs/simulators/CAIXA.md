@@ -22,10 +22,12 @@ O motor novo é isolado em `lib/crm/simulators/caixa.ts`. O motor legado órfão
 
 ## Interface e acesso
 
-Desde 26/10/2026, a página usa a mesma linguagem visual compacta dos simuladores
-Associativo e Tabela Direta: painéis de contorno azul, etapas numeradas, campos em
-grade e resultado no fluxo vertical. Os temas claro, médio e escuro compartilham
-a mesma estrutura e mantêm contraste, teclado, zoom e adaptação móvel.
+Desde 28/10/2026, a página usa a mesma linguagem visual compacta dos simuladores
+Associativo e Tabela Direta e os tokens de Agendamentos. Os campos ficam em grade
+sem cartões de fundo redundantes; limite de parcela e limite aplicável aparecem
+diretamente sob renda e imóvel. Parâmetros e juros de obra ficam recolhidos até
+o usuário solicitar. Os temas claro, médio e escuro compartilham a mesma
+estrutura e mantêm contraste, teclado, zoom e adaptação móvel.
 
 O cálculo é local ao navegador, não envia proposta e não persiste os dados do
 formulário. Ele está disponível a todos os papéis operacionais ativos que possuem
@@ -35,6 +37,12 @@ negação explícita não recebem acesso. A API de simulador oficial da CAIXA pe
 fechada porque não possui contrato de entrada/saída nem calculadora server-side.
 Essa separação impede que a liberação da interface seja interpretada como uma
 integração bancária ou aprovação de crédito.
+
+O resumo é recalculado automaticamente quando qualquer entrada muda. Não existe
+botão de cálculo nem estado de resultado antigo: se um requisito deixa de estar
+preenchido, o resumo é ocultado até que o cenário volte a ser válido. A mudança é
+de interação e apresentação; fórmulas, tetos e regras financeiras permanecem no
+motor isolado e continuam cobertos pelos testes do simulador.
 
 O formulário principal aplica automaticamente 30% da renda como teto indicativo,
 mostra o limite municipal ao selecionar cidade/UF e reduz o prazo ao máximo
@@ -61,9 +69,9 @@ selecionar `Não`, a condição é limpa e o usuário precisa escolher `Novo` ou
    complemento exige renda até R$ 4 mil e resultado mínimo R$ 1.500. Sua fórmula
    inclui RD, FD, fatores municipais/FUH, área/tipo do imóvel, modalidade e
    redutores. Teto regional R$ 65 mil no Norte/R$ 55 mil nas demais regiões,
-   podendo haver tetos menores (pronto CCI R$ 49.500). O código não presume
-   esses parâmetros: usa somente complemento informado como confirmado, com
-   validações básicas de renda/teto; a conferência específica continua oficial.
+   podendo haver tetos menores (pronto CCI R$ 49.500). O motor coleta os fatores
+   necessários, calcula o valor indicativo e mantém a confirmação manual como
+   substituição explícita; a concessão continua sujeita à análise da CAIXA.
 5. [CAIXA: perguntas frequentes de financiamento](https://www.caixa.gov.br/voce/habitacao/perguntas-frequentes-novos-financiamentos/Paginas/default.aspx),
    consultada em 26/10/2026: cota de financiamento de até 90%, variável conforme
    modalidade, recursos e sistema; valor do imóvel para a operação corresponde ao
@@ -95,6 +103,11 @@ selecionar `Não`, a condição é limpa e o usuário precisa escolher `Novo` ou
     autoridade apenas para o recorte geográfico, enquanto renda, tetos nacionais
     e taxas seguem as fontes de 2026 acima. Seis diferenças históricas de nomes
     na lista local são conciliadas por aliases explícitos, sem fallback silencioso.
+11. [IBGE REGIC 2018 — base municipal](https://geoftp.ibge.gov.br/organizacao_do_territorio/divisao_regional/regioes_de_influencia_das_cidades/Regioes_de_influencia_das_cidades_2018_Resultados_definitivos/base_tabular/REGIC2018_Municipios_Hierarquia_e_regiao.xlsx)
+    e [estimativas municipais de população 2026](https://ftp.ibge.gov.br/Estimativas_de_Populacao/Estimativas_2026/estimativa_dou_2026.xlsx),
+    cruzadas com o Anexo IV do MFOM v034 para versionar `Fpop`. O cruzamento
+    encontra 5.570 dos 5.571 municípios atuais; a exceção posterior à REGIC não
+    recebe fallback silencioso.
 
 ### Referência pública da calculadora rápida
 
@@ -186,9 +199,10 @@ complemento − aporte público confirmado)`. Desconto FGTS e aporte MCMV Cidade
 
 ### Fórmula operacional do desconto complemento
 
-MFOM v034, pp. 131–133, §§3.1.1–3.1.2. A expressão exige dados oficiais que
-o formulário de referência não coleta; por isso é documentada, sem calcular
-um subsídio aparentemente exato com valores presumidos:
+MFOM v034, pp. 131–133, §§3.1.1–3.1.2. O formulário coleta tipo e área oficial
+da unidade e dependentes quando a renda permite o desconto. Município/UF
+selecionam automaticamente o fator populacional versionado; nenhum fator é
+presumido quando a fonte não possui correspondência.
 
 ```text
 D = Frenda × [1 + (FDr + FDfin + FUH)/100] × Fpop
@@ -207,7 +221,8 @@ FUH casa = 10(A − 46)/(66 − 46)
 
 `R` é renda familiar mensal bruta; `j` é a taxa mensal da tabela pertinente.
 O coeficiente 0,25 nessa fórmula não define aprovação a 25% da renda.
-`FDr` vem do Anexo III; `Fpop`, do Anexo IV (tabela A ou B para Norte).
+`FDr` vem do Anexo III; `Fpop`, do Anexo IV (tabela A ou B para Norte), cruzado
+com a hierarquia REGIC 2018 e a estimativa populacional municipal IBGE 2026.
 Os fatores têm peso limitado a dez pontos; `FUH` é limitado entre zero e dez.
 `A` corresponde à área definida pelo manual: privativa real coberta para
 condomínio conforme NBR 12721/2006; isolado usa área construída com exclusões
@@ -242,13 +257,22 @@ Nas pp. 131–133 consultadas não foi localizada regra explícita de saturaçã
 `R`/`Frenda` ou função por faixas após `RDmin`. A expressão literal atinge seu
 mínimo em R$ 3.700 e volta a crescer acima desse ponto; o limite de concessão
 de R$ 4.000, no §3.1.1.8, não esclarece essa lacuna operacional. Não presumir
-congelamento, extensão monotônica ou piso da curva. Esta memória matemática
-não constitui especificação executável de valor do subsídio. A página identifica
-automaticamente quando o cenário permite análise do benefício (`MCMV`, renda até
-R$ 4 mil, imóvel até R$ 400 mil, sem subsídio anterior e fora de Classe Média),
-mas só abate o complemento monetário confirmado. A indicação de elegibilidade
-não é apresentada como concessão e não altera financiamento ou entrada sem o
-valor oficial.
+congelamento, extensão monotônica ou piso da curva: o motor executa a expressão
+literal do manual e identifica o resultado como indicativo. A página calcula e
+abate automaticamente o complemento quando o cenário permite análise (`MCMV`,
+renda até R$ 4 mil, imóvel até R$ 400 mil, sem subsídio anterior e fora de
+Classe Média) e todos os fatores necessários estão presentes. O valor oficial
+confirmado manualmente continua prevalecendo. Sem tipo, área, composição ou
+fator territorial conhecido, a página mantém somente a elegibilidade e não
+abate valor.
+
+O cadastro territorial contém `Fpop` para 5.570 municípios. Boa Esperança do
+Norte/MT, criada após a REGIC 2018, permanece sem fator automático para evitar
+uma classificação inventada. A implementação limita `FDfin` e `FUH` entre
+-10/+10 e 0/+10, respectivamente, aplica o teto de R$ 49.500 para imóvel pronto,
+os tetos regionais, o mínimo de R$ 1.500 e os redutores de 50% para usado e 70%
+para família unipessoal. O campo informativo de fator social não substitui a
+definição de família unipessoal e não altera o valor.
 
 Não forçar Price, migrar automaticamente para SBPE ou aceitar nascimento
 inválido/menor como adulto. Não inventar um mês de prazo quando o limite é zero.

@@ -11,7 +11,7 @@ select is(
       and c.relkind in ('r', 'p')
       and c.relrowsecurity
   ),
-  70::bigint,
+  71::bigint,
   'all public tables retain RLS'
 );
 
@@ -93,6 +93,7 @@ select is(
     'profiles',
     'role_permissions',
     'roles',
+    'useful_links_documents',
     'user_permission_overrides',
     'user_roles'
   ]::name[],
@@ -159,7 +160,8 @@ select is(
     'crm_teams',
     'crm_user_reporting_scope_grants',
     'dashboard_profiles',
-    'meta_ads_canvas_profiles'
+    'meta_ads_canvas_profiles',
+    'useful_links_documents'
   ]::name[],
   'new scoped and Qlik tables force RLS even for their owner'
 );
@@ -420,6 +422,7 @@ select is(
     'get_qlik_ranking_v2',
     'get_qlik_relay_health',
     'get_role_level',
+    'get_useful_links_document',
     'get_user_authorization_context',
     'get_user_directory_contract',
     'get_user_presence',
@@ -454,6 +457,7 @@ select is(
     'save_crm_lead_v1',
     'save_crm_routine',
     'save_meta_ads_canvas_profile',
+    'save_useful_links_document',
     'set_app_page_active',
     'set_crm_commercial_engine_gate',
     'set_crm_lead_presence_v1',

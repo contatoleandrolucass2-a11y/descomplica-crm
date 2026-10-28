@@ -1,6 +1,37 @@
 # Worklog
 
 - 2026-10-27: corrigida a incompatibilidade entre a proteção do `main` e a CI: `release-gates`, `isolated-restore` e `promotable-image` agora executam em pull requests e continuam repetidos no SHA final de `main`; o teste de contrato exige as duas condições sem reduzir etapas, tolerâncias ou proteção.
+
+## 2026-10-28 — Simulador CAIXA: experiência compacta e cálculo reativo
+
+- Escopo restrito a `/app/simulacao/caixa`: cabeçalhos de etapas, cartões
+  automáticos, aviso extenso e acionamento manual foram removidos da jornada.
+- Limite de parcela e limite aplicável ao imóvel agora acompanham os respectivos
+  campos; parâmetros e juros de obra permanecem recolhidos sob demanda.
+- O resultado é derivado localmente dos dados atuais e some quando faltam campos
+  obrigatórios, evitando resultado antigo após qualquer edição.
+- Testes focados cobrem recálculo, prazo, subsídio, SBPE, três temas, quatro
+  larguras, ausência de overflow e auditoria Axe.
+
+- 2026-10-28: removidas duas declarações redundantes de variáveis do validador SQL de Links Úteis após o lint do restore isolado `40644412951` apontar sombreamento pelos índices implícitos dos laços inteiros. A correção não muda o comportamento da migration nem outras páginas.
+- 2026-10-28: implementado o editor compartilhado de Links Úteis. O submenu autorizado passou a usar a sidebar contextual; Grupos WhatsApp ganhou organograma vertical/lateral e quatro cards de apoio; Lojas Horários recebeu oito cards por endereço; todas as guias permitem movimentação, redimensionamento e edição por `admin`/`master`, com revisão otimista, RLS forçada e RPCs autenticadas. A revisão do candidato também passou a aceitar timestamps PostgreSQL com offset, preservar a digitação crua dos campos multilinha e bloquear mutações durante o salvamento. A validação focada aprovou 90 testes, tipos, inventário e catálogo; o pgTAP local ficou indisponível por ausência de Docker/Podman e permanece obrigatório na CI.
+- 2026-10-28: corrigido o limite de escopo antes da publicação. A tentativa de generalizar o shell compartilhado foi retirada; `DashboardShell`, navegação superior, CSS compartilhado, testes e onze baselines do Dashboard foram restaurados integralmente. O sidebar agora pertence somente ao layout de Links Úteis, com teste que impede reintroduzir comportamento dessa área nos arquivos compartilhados.
+- 2026-10-28: corrigida a fixture pgTAP exclusiva de Links Úteis após a restauração isolada `40637253409` detectar que o leitor sintético era inicializado como `master` antes de mudar para `broker_house`. A fixture agora mantém somente o editor como master e aprova explicitamente o perfil leitor, sem criar escopos incompatíveis.
+- 2026-10-28: completada a mesma fixture após a restauração isolada `40639421924` exigir um escopo ativo compatível para aprovar o leitor `broker_house`. A organização, equipe, pessoa e escopo adicionados são sintéticos, transacionais e exclusivos do pgTAP de Links Úteis.
+
+## 2026-10-28 — Simulador CAIXA: subsídio automático publicado
+
+- PR #394 integrado no SHA `33899a898b4746ea1bd6fd62cb1250bd45d53845`.
+- CI `40623210294` aprovou os quatro gates obrigatórios e o candidato visual
+  `40618704482` foi aprovado.
+- Imagem imutável conferida e provada sem rebuild; promoção protegida concluída
+  no deployment `6d4758f0-7e8c-443c-910a-70e304eaa207` em
+  `2026-10-28T03:50:23.707Z`.
+- Health público confirmou `status=ok` e a versão exata; a rota anônima do
+  simulador manteve o redirecionamento 307 para `/login`.
+
+- 2026-10-27: corrigido o subsídio do Simulador CAIXA: o motor deixou de fixar zero para rendas elegíveis e passou a executar a fórmula literal do MFOM Habitação v034, com fatores regionais e populacionais oficiais, área/tipo da unidade, redutores de imóvel usado e família unipessoal, teto regional/pronto e substituição explícita por valor confirmado.
+- 2026-10-27: concluída a publicação de Links Úteis. O runtime `f98f3c7310f773a36325bb6114ebd12369e9e077` permaneceu saudável e a migration de catálogo `sync_page_catalog` foi aplicada no Supabase de produção como versão `20261028012746`; a conferência remota confirmou o hub e as sete subpáginas ativos, oito permissões com herança preservada e ausência de Ranking Geral no novo menu.
 - 2026-10-27: publicada a versão `f98f3c7310f773a36325bb6114ebd12369e9e077` após os quatro jobs da CI `40600846185` aprovarem. O coordenador protegido promoveu a imagem imutável `sha256:3dec01b76ff1c97375c73461cb649da86c8e946087f26cf0f87a88a5380aa3c9` no deployment `08d382ff-e15a-4851-b8b0-b68b54c1e18f`; health público respondeu o SHA exato e `/app/simulacao/caixa` permaneceu protegida por redirecionamento anônimo para `/login`.
 - 2026-10-27: após autorização explícita para remover o bloqueio externo e publicar, os contratos pgTAP de Links Úteis foram alinhados ao catálogo versionado: 49 páginas, 74 permissões CRM/páginas, 82 defaults administrativos e oito acessos herdados pelos papéis operacionais que já possuíam Dashboard. A correção é exclusiva de testes; migration, runtime e regras financeiras do CAIXA permanecem inalterados.
 - 2026-10-27: o editor administrativo de `/app/etapas/agendamentos` foi integrado pelos PRs #375, #378 e #381 e validado localmente e na CI. A publicação não foi executada porque o `main` `e8125eeb` falhou no gate obrigatório `isolated-restore`: a área Links Úteis adicionou permissões/páginas sem atualizar os contratos pgTAP correspondentes (82 permissões atuais contra 74 esperadas). Pela regra máxima de escopo, essa outra área não foi alterada; migration e runtime de produção permaneceram intactos.
