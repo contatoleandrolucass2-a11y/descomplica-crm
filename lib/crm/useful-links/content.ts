@@ -109,52 +109,38 @@ export const usefulLinksPages: UsefulLinksPage[] = [
       {
         title: "Horário das lojas",
         paragraphs: [
-          "Aberto de segunda a sábado das 9:00 às 20:00.",
-          "Domingo das 9:00 às 18:00.",
-          "Aberto todos os dias, exceto dia 25/12 e dia 01/01.",
+          "Aberto de segunda a sábado, das 9:00 às 20:00.",
+          "Domingo, das 9:00 às 18:00.",
+          "Aberto todos os dias, exceto em 25/12 e 01/01.",
         ],
       },
       {
-        title: "Zona Leste",
-        items: [
-          {
-            label: "Reserva Jd Sapopemba · Reserva São Mateus · Residencial Despertar",
-            description: "Av. Sapopemba, 11.186 — Sapopemba.",
-          },
-          {
-            label: "Conquista Clube Itaim Paulista",
-            description: "Avenida Marechal Tito, 1533.",
-          },
-        ],
+        title: "Residencial Despertar · Terrase — Vila Ema",
+        paragraphs: ["Zona Leste", "Av. Sapopemba, 11.186 — Sapopemba."],
       },
       {
-        title: "Zona Norte",
-        items: [
-          {
-            label: "Reserva Direcional Limão · Reserva Urban Clube · Raiz Home Clube — Limão",
-            description: "Avenida Voluntários da Pátria, 2236.",
-          },
-        ],
+        title: "Conquista Clube São Miguel · Conquista Clube Itaim Paulista",
+        paragraphs: ["Zona Leste", "Avenida Marechal Tito, 1533."],
       },
       {
-        title: "Zona Sul",
-        items: [
-          {
-            label: "Pátio Central — Matiz · Pátio Central — Galeria",
-            description: "Rua Lavapés, 463 — Cambuci.",
-          },
-          { label: "Conquista Clube Sacomã", description: "Av. do Cursino, 1355." },
-        ],
+        title: "Reserva Direcional Limão · Reserva Urban Clube · Raiz Home Clube — Limão",
+        paragraphs: ["Zona Norte", "Avenida Voluntários da Pátria, 2236."],
       },
       {
-        title: "Zona Oeste",
-        items: [
-          { label: "Conquista Clube Butantã", description: "Raposo Shopping." },
-          {
-            label: "Linha do It · Line Barra Funda · Holistic Residence · Concept Barra Funda",
-            description: "Rua Robert Bosch, 322.",
-          },
-        ],
+        title: "Pátio Central — Matiz · Pátio Central — Galeria",
+        paragraphs: ["Zona Sul", "Rua Lavapés, 463 — Cambuci."],
+      },
+      {
+        title: "Conquista Clube Sacomã · Alto Liviero",
+        paragraphs: ["Zona Sul", "Avenida do Cursino, 1355 — Sacomã."],
+      },
+      {
+        title: "011 Brooklin Riva",
+        paragraphs: ["Zona Sul", "Avenida João Dias, 1243 — Santo Amaro."],
+      },
+      {
+        title: "Conquista Clube Butantã · Mirante Jardim das Esmeraldas",
+        paragraphs: ["Zona Oeste", "Raposo Shopping."],
       },
     ],
   },

@@ -11,6 +11,9 @@
 - Testes focados cobrem recálculo, prazo, subsídio, SBPE, três temas, quatro
   larguras, ausência de overflow e auditoria Axe.
 
+- 2026-10-28: implementado o editor compartilhado de Links Úteis. O submenu autorizado passou a usar a sidebar contextual; Grupos WhatsApp ganhou organograma vertical/lateral e quatro cards de apoio; Lojas Horários recebeu oito cards por endereço; todas as guias permitem movimentação, redimensionamento e edição por `admin`/`master`, com revisão otimista, RLS forçada e RPCs autenticadas. A revisão do candidato também passou a aceitar timestamps PostgreSQL com offset, preservar a digitação crua dos campos multilinha e bloquear mutações durante o salvamento. A validação focada aprovou 90 testes, tipos, inventário e catálogo; o pgTAP local ficou indisponível por ausência de Docker/Podman e permanece obrigatório na CI.
+- 2026-10-28: corrigido o limite de escopo antes da publicação. A tentativa de generalizar o shell compartilhado foi retirada; `DashboardShell`, navegação superior, CSS compartilhado, testes e onze baselines do Dashboard foram restaurados integralmente. O sidebar agora pertence somente ao layout de Links Úteis, com teste que impede reintroduzir comportamento dessa área nos arquivos compartilhados.
+
 ## 2026-10-28 — Simulador CAIXA: subsídio automático publicado
 
 - PR #394 integrado no SHA `33899a898b4746ea1bd6fd62cb1250bd45d53845`.

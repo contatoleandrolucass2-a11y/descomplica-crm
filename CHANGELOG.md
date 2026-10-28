@@ -1,5 +1,7 @@
 # Changelog
 
+- Adiciona sidebar contextual e editor compartilhado aos Links Úteis, com organograma comercial, cards movíveis e redimensionáveis, conteúdo atualizado das lojas e edição restrita a administradores.
+
 ## 2026-10-28
 
 - Compacta exclusivamente a interface do Simulador CAIXA, remove cartões e
