@@ -1,5 +1,33 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: editor de Agendamentos publicado
+
+- Escopo: somente `/app/etapas/agendamentos` e os gates/scripts necessários à
+  sua integração e publicação. Os avanços concorrentes do `main` foram
+  preservados sem alterações incidentais neste chat.
+- Integração: PR #391 incorporado ao `main` no SHA
+  `d12b20bda7e1e0cdd5a7e93bf48ffbb323190242`. A CI de push `40710364225`
+  aprovou `validate`, `release-gates`, `isolated-restore` e `promotable-image`.
+- Banco: migration `appointments_admin_canvas_presentation` aplicada via
+  Supabase MCP no projeto `hnncxuerlcsaahdxoswb`. As oito funções esperadas
+  foram confirmadas; `anon` não executa leitura nem escrita de perfis, enquanto
+  usuários autenticados continuam sujeitos a MFA, permissão da página e guarda
+  administrativa para edição. Os advisors posteriores não acrescentaram aviso
+  ligado a esta migration; avisos preexistentes ficaram fora do escopo.
+- Artefato: GitHub artifact `12826596701`, checksum do `image.tar.gz`
+  `18a0be5a93118919c4d60f7d38748f54b97cce57209e0897f78c5ce1f2ce41c9`.
+  Revisão, plataforma `linux/amd64`, 11 camadas e cadeia OCI foram conferidas;
+  `image:prove` aprovou os dois perfis sem rebuild nem impressão de segredos.
+- Publicação: o coordenador protegido promoveu a imagem local comprovada
+  `sha256:23f34131866d886b3b3324f12a7482456ed4188556ded3f869b0688cd8dc8f24`
+  no deployment `fc4b0404-bd39-4932-85f8-c133c03a72e3`, concluído em
+  `2026-10-28T16:20:44.904Z` (`13:20:44` BRT), sem pendência.
+- Pós-publicação: health público HTTP 200 retornou `status=ok` e a versão exata
+  `d12b20bd`; a rota anônima de Agendamentos respondeu 307 para `/login`.
+- Conhecimento: o registro versionado foi atualizado, mas o runtime de sync
+  permaneceu indisponível com `Documento excede o limite de exportacao.`; a
+  sincronização do Obsidian não foi alegada como concluída.
+
 ## 2026-10-28: gates protegidos executados no PR
 
 - A protecao exigia `release-gates`, `isolated-restore` e `promotable-image`, mas
