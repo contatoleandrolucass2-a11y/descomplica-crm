@@ -1,5 +1,7 @@
 # Changelog
 
+- Adiciona sidebar contextual e editor compartilhado aos Links Úteis, com organograma comercial, cards movíveis e redimensionáveis, conteúdo atualizado das lojas e edição restrita a administradores.
+
 ## 2026-10-28
 
 - Publica no Simulador CAIXA o cálculo automático indicativo do subsídio MCMV,

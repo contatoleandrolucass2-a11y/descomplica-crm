@@ -1,5 +1,8 @@
 # Worklog
 
+- 2026-10-28: implementado o editor compartilhado de Links Úteis. O submenu autorizado passou a usar a sidebar contextual; Grupos WhatsApp ganhou organograma vertical/lateral e quatro cards de apoio; Lojas Horários recebeu oito cards por endereço; todas as guias permitem movimentação, redimensionamento e edição por `admin`/`master`, com revisão otimista, RLS forçada e RPCs autenticadas. A revisão do candidato também passou a aceitar timestamps PostgreSQL com offset, preservar a digitação crua dos campos multilinha e bloquear mutações durante o salvamento. A validação focada aprovou 90 testes, tipos, inventário e catálogo; o pgTAP local ficou indisponível por ausência de Docker/Podman e permanece obrigatório na CI.
+- 2026-10-28: o candidato visual protegido `40631125913` aprovou migrations, build, autorização, E2E, acessibilidade e a matriz autenticada. Onze referências do Dashboard foram inspecionadas e incorporadas a partir do artefato `12793267113`, preservando as demais baselines e os limiares existentes.
+
 ## 2026-10-28 — Simulador CAIXA: subsídio automático publicado
 
 - PR #394 integrado no SHA `33899a898b4746ea1bd6fd62cb1250bd45d53845`.

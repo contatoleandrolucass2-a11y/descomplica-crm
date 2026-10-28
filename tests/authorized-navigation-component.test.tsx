@@ -81,6 +81,18 @@ describe("authorized navigation component", () => {
     expect(markup).not.toContain("Não autorizada");
   });
 
+  it("links Links Úteis directly to its hub while its contextual sidebar is active", () => {
+    route.pathname = "/app/links-uteis/grupos-whatsapp";
+    const pages = PAGE_REGISTRY.filter(
+      (page) => page.pageKey === "crm.useful_links" || page.parentKey === "crm.useful_links",
+    ).map((page) => ({ ...page, key: page.pageKey }));
+    const markup = renderToStaticMarkup(<AuthorizedNavigation pages={pages} />);
+    expect(markup).toContain('href="/app/links-uteis"');
+    expect(markup).not.toContain('aria-controls="authorized-navigation-crm-useful_links"');
+    expect(markup).not.toContain('href="/app/links-uteis/grupos-whatsapp"');
+    expect(markup).toContain('data-context-sidebar-navigation="true"');
+  });
+
   it("keeps Simulation as a direct hub link without child or future entries", () => {
     const markup = renderToStaticMarkup(
       <AuthorizedNavigation

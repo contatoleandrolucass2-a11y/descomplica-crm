@@ -1,5 +1,43 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: abertura da evolução editável de Links Úteis
+
+- Escopo solicitado: substituir a lista simples do menu por navegação lateral
+  equivalente à página de Agendamentos; tornar Grupos WhatsApp um quadro com
+  organograma e cards editáveis, movíveis e redimensionáveis; reorganizar Lojas
+  Horários por loja com os dados fornecidos e aplicar o mesmo padrão às demais
+  guias de Links Úteis.
+- Estado observado às `2026-10-28T03:24:54Z`: Git comum confirmado; branch
+  criada de `origin/main` `33899a898b4746ea1bd6fd62cb1250bd45d53845`.
+  A CI de push `40623210294` desse SHA estava em andamento; a última CI completa
+  conhecida, `40615788025`, aprovou o `main` anterior `de2be3c6`.
+- Produção: `https://crm.descomplicapro.com.br/api/health` respondeu HTTP 200,
+  `status=ok` e versão
+  `f98f3c7310f773a36325bb6114ebd12369e9e077`. O runtime publicado, o `main`
+  integrado e esta branch permanecem estados distintos.
+- Conhecimento: `context` e `search` falharam com
+  `Documento excede o limite de exportacao.`; a sincronização do Obsidian
+  permanece pendente e nenhuma conclusão nova foi atribuída a essa fonte.
+- Implementação candidata: a navegação lateral reutiliza o catálogo autorizado;
+  todas as guias usam cards movíveis e redimensionáveis; Grupos WhatsApp inclui
+  organograma vertical/lateral e quatro cards de apoio; Lojas Horários contém os
+  oito agrupamentos por endereço solicitados. A edição compartilhada é restrita
+  a `admin`/`master`, com revisão otimista, limite de corpo e validação duplicada
+  na API e no banco.
+- Persistência candidata: migration aditiva RPC-only, RLS forçada, MFA e grants
+  mínimos. A restauração/pgTAP local não pôde iniciar porque o host não possui
+  Docker nem Podman; essa evidência continua obrigatória na CI do SHA candidato.
+- Evidência local: 90 testes funcionais focados e 26 testes do manifesto de
+  release passaram; lint dos arquivos afetados, tipos, catálogo, inventário e
+  build com Node 24.19.0 passaram. Neste ponto o estado é implementado e validado
+  localmente; CI, integração e publicação ainda não foram alegadas.
+- Evidência visual candidata: a CI protegida `40631125913` aprovou migrations,
+  build, autorização, E2E, acessibilidade e captura no head `71d78817`/merge-ref
+  `e3b4ea01`. Onze referências do Dashboard foram inspecionadas e incorporadas
+  do artefato `12793267113`, digest
+  `sha256:8a7650f9e1027301a1f7bf1bad04e819c9aa0cea903a718ec4d95cb430a5f89d`;
+  a CI normal de verificação continua obrigatória antes da publicação.
+
 ## 2026-10-28: subsídio automático do Simulador CAIXA publicado
 
 - Integração: PR #394 incorporado ao `main` no SHA

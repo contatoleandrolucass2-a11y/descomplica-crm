@@ -308,6 +308,12 @@ function AuthorizedNavigationState({
       className={styles.navigationRoot}
       ref={rootRef}
       data-appointments-navigation={pathname === "/app/etapas/agendamentos" || undefined}
+      data-context-sidebar-navigation={
+        pathname === "/app/etapas/agendamentos" ||
+        pathname === "/app/links-uteis" ||
+        pathname.startsWith("/app/links-uteis/") ||
+        undefined
+      }
     >
       <button
         ref={mobileTriggerRef}
@@ -335,15 +341,19 @@ function AuthorizedNavigationState({
           {groups.map((group) => {
             const dashboardSidebarActive =
               pathname === "/app/etapas/agendamentos" && group.page.key === "crm.dashboard";
+            const usefulLinksSidebarActive =
+              (pathname === "/app/links-uteis" || pathname.startsWith("/app/links-uteis/")) &&
+              group.page.key === "crm.useful_links";
+            const contextSidebarActive = dashboardSidebarActive || usefulLinksSidebarActive;
             const directToHub =
-              dashboardSidebarActive ||
+              contextSidebarActive ||
               group.page.key === "crm.simulation" ||
               group.page.key === "crm.meta_ads";
             const hasDisabledChildren = disabledItems.some(
               (item) => item.parentKey === group.page.key && item.section === group.page.section,
             );
             const hasChildren = !directToHub && (group.children.length > 0 || hasDisabledChildren);
-            const activeRoot = dashboardSidebarActive
+            const activeRoot = contextSidebarActive
               ? isNavigationGroupActive(pathname, group)
               : isNavigationRootActive(pathname, group.page);
 
