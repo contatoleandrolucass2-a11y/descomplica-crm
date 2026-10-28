@@ -635,6 +635,13 @@ Os 29 testes focais, lint, typecheck e build passaram. A suite global passou nos
 4.193 testes Vitest e teve tres falhas ambientais, fora do escopo, nos testes
 Node do Meta Ads em Windows; nenhuma outra pagina foi alterada para contorna-las.
 
+O PR #341 foi integrado em `13a0e6009beace9ed16b6ef56329eee348f03c9b`.
+Uma publicacao concorrente promoveu o `main` descendente
+`b2a6a17284e030796819f6f6f2ec989aba682e85`, com a mesma imagem aprovada pelo
+run `40206513995`. O coordenador confirmou `noop`, sem republicacao, no
+deployment `f9701ac1-a9a8-4da5-a5d7-2cac9d2fe559`. O health publico respondeu
+HTTP 200 na versao exata e a rota anonima continuou redirecionando ao login.
+
 ## 2026-10-25 - Detalhamento dos funis publicado
 
 O PR #333 foi integrado em `cc13a3d7b1a2c2de3b3257310e4e66795cd5db8a`.
