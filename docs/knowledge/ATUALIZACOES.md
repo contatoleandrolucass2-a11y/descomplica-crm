@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: Links Úteis integrado; publicação bloqueada por gate externo
+
+- Estado integrado: a evolução editável de Links Úteis, o sidebar exclusivo da
+  área e as correções da migration/fixture estão presentes no `main`
+  `cee003158d4e834b54009eaa128b77046fa0b523`. Nenhuma correção desta demanda
+  alterou Dashboard, Simulador CAIXA ou as baselines dessas páginas.
+- Evidência de CI: o run `40652029100` aprovou `validate`,
+  `isolated-restore` e `promotable-image`. O restore comprovou a migration
+  limpa, o lint SQL e as 16 asserções pgTAP de Links Úteis.
+- Bloqueio externo ao escopo: `release-gates` falhou somente no artefato visual
+  autenticado `12802975980`. O manifesto registrou 22 comparações divergentes,
+  todas restritas a `/app` e `/app/simulacao/caixa`, após a integração
+  concorrente do PR #399. As 154 rotas, 88 temas e 242 auditorias de
+  acessibilidade passaram; não houve falha atribuída a Links Úteis.
+- Limite aplicado: pela regra máxima de escopo, as páginas e baselines externas
+  não foram corrigidas neste chat. O deploy e a migration de produção não foram
+  executados porque gate falho bloqueia publicação. Reavaliar somente após um
+  novo SHA de `main` corrigir e aprovar o gate externo completo.
+- Produção observada em `2026-10-28T08:37:52Z`: health HTTP 200, `status=ok` e
+  versão `33899a898b4746ea1bd6fd62cb1250bd45d53845`; portanto a evolução
+  editável de Links Úteis ainda não está publicada.
+- Conhecimento: o runtime continua retornando
+  `Documento excede o limite de exportacao.`; a sincronização do Obsidian
+  permanece pendente e não foi alegada como concluída.
+
 ## 2026-10-28: abertura da compactação do Simulador CAIXA
 
 - Escopo exclusivo: interface e recálculo automático de
