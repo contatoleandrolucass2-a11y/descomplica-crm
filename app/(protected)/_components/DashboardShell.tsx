@@ -62,9 +62,28 @@ export function DashboardShell({
   const [updatedAt, setUpdatedAt] = useState("");
   const sidebarRef = useRef<HTMLElement>(null);
   const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
+  const sidebar = useMemo(
+    () =>
+      pathname === "/app/etapas/agendamentos"
+        ? {
+            rootKey: "crm.dashboard",
+            label: "Dashboard",
+            navigationLabel: "do Dashboard",
+            guide: true,
+          }
+        : pathname === "/app/links-uteis" || pathname.startsWith("/app/links-uteis/")
+          ? {
+              rootKey: "crm.useful_links",
+              label: "Links Úteis",
+              navigationLabel: "de Links Úteis",
+              guide: false,
+            }
+          : null,
+    [pathname],
+  );
 
   useEffect(() => {
-    if (pathname !== "/app/etapas/agendamentos" || collapsed) return;
+    if (!sidebar || collapsed) return;
 
     function collapseFromOutside(event: globalThis.PointerEvent) {
       if (!(event.target instanceof Node) || sidebarRef.current?.contains(event.target)) return;
@@ -73,21 +92,21 @@ export function DashboardShell({
 
     document.addEventListener("pointerdown", collapseFromOutside, true);
     return () => document.removeEventListener("pointerdown", collapseFromOutside, true);
-  }, [collapsed, pathname]);
+  }, [collapsed, sidebar]);
 
-  if (pathname !== "/app/etapas/agendamentos") return children;
+  if (!sidebar) return children;
   // Only the server-authorized catalog supplies destinations, including profiles
   // with access to a stage but without access to the overview.
   const dashboardPages = pages
-    .filter((page) => page.key === "crm.dashboard" || page.parentKey === "crm.dashboard")
+    .filter((page) => page.key === sidebar.rootKey || page.parentKey === sidebar.rootKey)
     .sort((left, right) => left.sortOrder - right.sortOrder);
   const activePage = dashboardPages.find((page) => pathname === page.path);
 
   if (!activePage) return children;
 
   const toggleLabel = collapsed
-    ? "Expandir navegação do Dashboard"
-    : "Recolher navegação do Dashboard";
+    ? `Expandir navegação ${sidebar.navigationLabel}`
+    : `Recolher navegação ${sidebar.navigationLabel}`;
 
   function guide(direction: "previous" | "next") {
     const sections = Array.from(
@@ -115,7 +134,7 @@ export function DashboardShell({
   return (
     <DashboardSidebarContext.Provider value={contextValue}>
       <div className={styles.dashboardShell} data-dashboard-shell data-collapsed={collapsed}>
-        <aside ref={sidebarRef} className={styles.dashboardSidebar} aria-label="Dashboard">
+        <aside ref={sidebarRef} className={styles.dashboardSidebar} aria-label={sidebar.label}>
           <button
             type="button"
             className={styles.dashboardToggle}
@@ -132,7 +151,7 @@ export function DashboardShell({
             )}
             <span className={styles.dashboardLabel}>Ocultar</span>
           </button>
-          <nav id="dashboard-navigation" aria-label="Páginas do Dashboard">
+          <nav id="dashboard-navigation" aria-label={`Páginas de ${sidebar.label}`}>
             <ul className={styles.dashboardLinks}>
               {dashboardPages.map((page) => {
                 const label = page.key === "crm.dashboard" ? "Visão Geral" : page.name;
@@ -166,27 +185,29 @@ export function DashboardShell({
               })}
             </ul>
           </nav>
-          <div className={styles.dashboardGuide} aria-label="Guia das seções da página">
-            <button
-              type="button"
-              onClick={() => guide("previous")}
-              aria-label="Ir para a seção anterior"
-              title="Ir para a seção anterior"
-            >
-              <ArrowUp aria-hidden="true" size={18} />
-              <span className={styles.dashboardLabel}>Subir seção</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => guide("next")}
-              aria-label="Ir para a próxima seção"
-              title="Ir para a próxima seção"
-            >
-              <ArrowDown aria-hidden="true" size={18} />
-              <span className={styles.dashboardLabel}>Descer seção</span>
-            </button>
-          </div>
-          {updatedAt ? (
+          {sidebar.guide ? (
+            <div className={styles.dashboardGuide} aria-label="Guia das seções da página">
+              <button
+                type="button"
+                onClick={() => guide("previous")}
+                aria-label="Ir para a seção anterior"
+                title="Ir para a seção anterior"
+              >
+                <ArrowUp aria-hidden="true" size={18} />
+                <span className={styles.dashboardLabel}>Subir seção</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => guide("next")}
+                aria-label="Ir para a próxima seção"
+                title="Ir para a próxima seção"
+              >
+                <ArrowDown aria-hidden="true" size={18} />
+                <span className={styles.dashboardLabel}>Descer seção</span>
+              </button>
+            </div>
+          ) : null}
+          {sidebar.guide && updatedAt ? (
             <p className={styles.dashboardUpdatedAt}>
               <span>Atualizado em</span>
               <strong>{updatedAt}</strong>

@@ -1,5 +1,6 @@
 # Changelog
 
+- Adiciona sidebar contextual e editor compartilhado aos Links Úteis, com organograma comercial, cards movíveis e redimensionáveis, conteúdo atualizado das lojas e edição restrita a administradores.
 - Calcula automaticamente o subsídio do Simulador CAIXA pela fórmula do MFOM Habitação v034, com área/tipo da unidade, composição familiar e fator populacional oficial por município.
 - Conclui a publicação de Links Úteis com o catálogo e as oito permissões aplicados no Supabase de produção, preservando a herança de acesso do Dashboard e excluindo Ranking Geral do novo menu.
 - Publica o conjunto integrado do Simulador CAIXA no SHA `f98f3c73`, após CI completa, restore isolado, pgTAP, E2E, matriz visual e promoção protegida da imagem imutável.

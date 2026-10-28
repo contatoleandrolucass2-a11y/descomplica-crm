@@ -267,9 +267,18 @@
         "app/(protected)/app/links-uteis/regras-comerciais/page.tsx",
         "app/(protected)/app/links-uteis/campanha-do-mes/page.tsx",
         "app/(protected)/app/links-uteis/app-bora-vender/page.tsx",
-        "app/(protected)/app/links-uteis/linktree-liveprint/page.tsx"
+        "app/(protected)/app/links-uteis/linktree-liveprint/page.tsx",
+        "app/api/useful-links/[slug]/route.ts"
       ],
-      "evidence": ["lib/crm/useful-links/content.ts", "tests/useful-links-pages.test.tsx"]
+      "evidence": [
+        "lib/crm/useful-links/content.ts",
+        "lib/crm/useful-links/document.ts",
+        "docs/runbooks/useful-links-editor.md",
+        "tests/useful-links-pages.test.tsx",
+        "tests/useful-links-document.test.ts",
+        "tests/useful-links-api.test.ts",
+        "supabase/tests/useful_links_documents.test.sql"
+      ]
     }
   ]
 }
