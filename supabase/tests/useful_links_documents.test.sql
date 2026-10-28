@@ -117,7 +117,10 @@ returns jsonb language sql immutable as $$
       'title', 'Comunidade Direcional',
       'paragraphs', jsonb_build_array('Canal oficial.'),
       'items', jsonb_build_array(jsonb_build_object(
-        'id', 'community-link', 'label', 'Acessar', 'href', p_href
+        'id', 'community-link',
+        'label', 'Acessar',
+        'href', p_href,
+        'description', ''
       )),
       'table', null,
       'layout', jsonb_build_object('order', 0, 'columnSpan', 6, 'height', 360)
