@@ -1,6 +1,7 @@
 # Changelog
 
 - Corrigido o contrato da CI para que `release-gates`, `isolated-restore` e `promotable-image` também produzam checks conclusivos em pull requests protegidos, preservando a repetição integral no `main`.
+- Atualiza os três contratos pgTAP de catálogo, acesso por papel e defaults para as oito páginas/permissões de Links Úteis, restaurando o gate de publicação sem alterar runtime ou regras financeiras do Simulador CAIXA.
 - Registra o editor administrativo exclusivo de Agendamentos como integrado e validado, sem publicação porque um gate obrigatório externo da área Links Úteis falhou.
 - Adiciona o menu Links Úteis com sete áreas de apoio comercial, permissões independentes e acesso herdado do Dashboard, sem replicar o Ranking Geral.
 - Alinha o gate visual da navegação à ordem, ao foco por teclado e aos sete destinos do novo menu Links Úteis.

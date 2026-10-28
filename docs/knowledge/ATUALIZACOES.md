@@ -1,5 +1,22 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: retomada autorizada da publicação do Simulador CAIXA
+
+- Fonte observacional de abertura: `origin/main` em
+  `c5e4f69d0242e581d86e73f8be49212676473b6b` após `git fetch origin`; health
+  público `https://crm.descomplicapro.com.br/api/health` retornou HTTP 200,
+  `status=ok` e `version=bb56fd7b23e872c69e3c5dac144afb30e4397cc4`.
+- O Simulador CAIXA estava integrado, mas ainda não publicado. O usuário
+  autorizou explicitamente corrigir o bloqueio externo e publicar sem ampliar
+  a mudança além dos contratos de teste de Links Úteis.
+- A correção alinha três testes pgTAP ao catálogo já versionado pela migration:
+  49 páginas, 74 permissões CRM/páginas, 82 defaults administrativos e as oito
+  permissões de Links Úteis herdadas pelos papéis que já possuíam Dashboard.
+  Migration, runtime e regras financeiras do CAIXA não foram alterados.
+- `knowledge:context` e `knowledge:search` foram tentados pelo runtime instalado
+  e falharam com `Documento excede o limite de exportacao.`; nenhuma atualização
+  do Obsidian foi alegada.
+
 ## 2026-10-27: editor administrativo de Agendamentos integrado; deploy bloqueado externamente
 
 - Escopo concluido: os PRs #375, #378 e #381 integraram o editor administrativo
