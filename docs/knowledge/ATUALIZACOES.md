@@ -22,9 +22,38 @@
 - Verificação pós-publicação: `/api/health` respondeu `status=ok` e versão
   exata `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`; acesso anônimo a
   `/app/simulacao/caixa` respondeu 307 para `/login`.
-- Conhecimento: o runtime de sincronização continuou retornando `Documento
-excede o limite de exportacao.`; a falha permanece registrada e não foi
+- Conhecimento: o runtime de sincronização continuou retornando o erro
+  `Documento excede o limite de exportacao.`; a falha permanece registrada e não foi
   apresentada como sincronização concluída.
+
+## 2026-10-28: evolução editável de Links Úteis publicada
+
+- O ajuste estritamente visual das 22 baselines externas foi integrado pelo PR
+  #409 no `main` `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`, sem alteração funcional
+  adicional em Dashboard ou Simulador CAIXA. A CI `40660625679` aprovou
+  `validate`, `isolated-restore`, `promotable-image` e `release-gates`.
+- Produção observada em `2026-10-28T11:43:01Z`: health HTTP 200,
+  `status=ok` e versão exata
+  `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`. As rotas anônimas
+  `/app/links-uteis/grupos-whatsapp` e
+  `/app/links-uteis/lojas-horarios` responderam 307 para `/login`.
+- A migration versionada `useful_links_documents` foi aplicada ao Supabase de
+  produção como `20261028114244`. A conferência posterior comprovou RLS e RLS
+  forçada, policy restritiva de MFA, ausência de DML direto para `anon`,
+  `authenticated` e `service_role`, e execução das RPCs somente por
+  `authenticated`. A tabela iniciou sem documentos persistidos; o conteúdo
+  versionado da aplicação permanece como fallback até o primeiro salvamento.
+- Os advisors não apontaram acesso anônimo novo nos objetos de Links Úteis. O
+  aviso informativo de índice ausente na FK `updated_by` não bloqueia o fluxo e
+  não autoriza alteração adicional. Findings preexistentes de outras áreas
+  ficaram fora deste escopo.
+- Exceção operacional: `pnpm release:production status` no VPS parou no
+  preflight por builds de dependências ignorados pelo pnpm. Nenhuma alteração
+  foi feita no servidor; publicação e versão foram confirmadas pelo health e
+  pela CI do SHA exato.
+- Conhecimento: o runtime continua retornando
+  `Documento excede o limite de exportacao.`; a sincronização do Obsidian
+  permanece pendente e não foi alegada como concluída.
 
 ## 2026-10-28: Links Úteis integrado; publicação bloqueada por gate externo
 
