@@ -1,5 +1,31 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: abertura da compactação do Simulador CAIXA
+
+- Escopo exclusivo: interface e recálculo automático de
+  `/app/simulacao/caixa`, usando o fluxo linear associativo e Agendamentos
+  somente como referências visuais; nenhuma outra página será alterada.
+- Estado observado às `2026-10-28T05:07:18Z`: `origin/main` em
+  `55175aeb5fe730f33fbd7ee5f2877fb6545f9004`; health público HTTP 200,
+  `status=ok` e versão de runtime
+  `33899a898b4746ea1bd6fd62cb1250bd45d53845`. A divergência é documental:
+  `main` avançou após o deploy sem mudança de runtime.
+- Conhecimento: `context` e `search` permaneceram indisponíveis com
+  `Documento excede o limite de exportacao.`; o código atual e as evidências
+  observacionais serão as fontes desta entrega.
+
+### Implementação e validação local
+
+- Interface compactada somente em `/app/simulacao/caixa`: etapas internas e
+  cartões automáticos removidos, limites aproximados dos campos de origem,
+  condições financeiras condensadas e alertas extensos retirados da tela.
+- Cálculo convertido para derivação automática e síncrona dos dados atuais; o
+  botão manual e o resultado obsoleto foram eliminados. Parâmetros confirmados e
+  juros de obra permanecem recolhidos. Nenhuma fórmula financeira foi alterada.
+- Node 24.19.0 e pnpm 11.20.0: typecheck aprovado; 61 testes de cliente e motor
+  aprovados, incluindo três temas, desktop/celular, Axe, overflow, prazo, subsídio
+  e cotas SBPE. Gates integrais e publicação ainda dependem do SHA candidato.
+
 ## 2026-10-28: abertura da evolução editável de Links Úteis
 
 - Escopo solicitado: substituir a lista simples do menu por navegação lateral

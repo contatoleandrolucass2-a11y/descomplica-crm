@@ -22,10 +22,12 @@ O motor novo é isolado em `lib/crm/simulators/caixa.ts`. O motor legado órfão
 
 ## Interface e acesso
 
-Desde 26/10/2026, a página usa a mesma linguagem visual compacta dos simuladores
-Associativo e Tabela Direta: painéis de contorno azul, etapas numeradas, campos em
-grade e resultado no fluxo vertical. Os temas claro, médio e escuro compartilham
-a mesma estrutura e mantêm contraste, teclado, zoom e adaptação móvel.
+Desde 28/10/2026, a página usa a mesma linguagem visual compacta dos simuladores
+Associativo e Tabela Direta e os tokens de Agendamentos. Os campos ficam em grade
+sem cartões de fundo redundantes; limite de parcela e limite aplicável aparecem
+diretamente sob renda e imóvel. Parâmetros e juros de obra ficam recolhidos até
+o usuário solicitar. Os temas claro, médio e escuro compartilham a mesma
+estrutura e mantêm contraste, teclado, zoom e adaptação móvel.
 
 O cálculo é local ao navegador, não envia proposta e não persiste os dados do
 formulário. Ele está disponível a todos os papéis operacionais ativos que possuem
@@ -35,6 +37,12 @@ negação explícita não recebem acesso. A API de simulador oficial da CAIXA pe
 fechada porque não possui contrato de entrada/saída nem calculadora server-side.
 Essa separação impede que a liberação da interface seja interpretada como uma
 integração bancária ou aprovação de crédito.
+
+O resumo é recalculado automaticamente quando qualquer entrada muda. Não existe
+botão de cálculo nem estado de resultado antigo: se um requisito deixa de estar
+preenchido, o resumo é ocultado até que o cenário volte a ser válido. A mudança é
+de interação e apresentação; fórmulas, tetos e regras financeiras permanecem no
+motor isolado e continuam cobertos pelos testes do simulador.
 
 O formulário principal aplica automaticamente 30% da renda como teto indicativo,
 mostra o limite municipal ao selecionar cidade/UF e reduz o prazo ao máximo

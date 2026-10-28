@@ -1,13 +1,11 @@
 "use client";
 
-import { useId, useMemo, useRef, useState, type FormEvent, type ReactNode } from "react";
+import { useId, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   calculateExtraAmortization,
   calculateFgtsTime,
   calculateHousingSimulation,
-  calculateMcmvSubsidy,
   estimateConstructionInterest,
-  getHousingRate,
   getMcmvBand,
   getMaximumFinancingQuota,
   getMaximumTerm,
@@ -405,10 +403,10 @@ export function CaixaClient({
   const [tab, setTab] = useState<Tab>(initialTab);
   const [form, setForm] = useState(initialForm);
   const [participants, setParticipants] = useState(1);
-  const [submitted, setSubmitted] = useState(false);
-  const [result, setResult] = useState<HousingResult | null>(null);
-  const [saved, setSaved] = useState<{ form: Form; result: SuccessfulResult }[]>([]);
-  const resultRef = useRef<HTMLElement>(null);
+  const [saved, setSaved] = useState<
+    { form: Form; participants: number; result: SuccessfulResult }[]
+  >([]);
+  const lastProfileSyncSignature = useRef("");
   const [construction, setConstruction] = useState({ months: "36", progress: "0", tr: "0" });
   const [profiles, setProfiles] = useState<ApplicantProfile[]>([createApplicant(0)]);
   const [phase, setPhase] = useState<"profile" | "phase1" | "phase2">("profile");
@@ -441,22 +439,6 @@ export function CaixaClient({
     [amortization],
   );
   const fgtsResult = useMemo(() => calculateFgtsTime(periods, baseDate), [periods, baseDate]);
-  const constructionResult = useMemo(
-    () =>
-      result?.ok
-        ? estimateConstructionInterest({
-            financing: result.financing,
-            annualRate: result.rate,
-            months: Number(construction.months),
-            currentProgress: Number(construction.progress),
-            trAnnual: Number(construction.tr),
-            operatingFee: result.operatingFee,
-            mipMonthly: result.mipMonthly,
-            dfiMonthly: result.dfiMonthly,
-          })
-        : null,
-    [result, construction],
-  );
   const municipalLimit = getMunicipalLimit(form.city, form.state);
   const maximumTerm = form.birthDate ? automaticMaximumTerm(form, baseDate) : 420;
   const automaticPaymentLimit = Number(form.income) * 0.3;
@@ -472,34 +454,6 @@ export function CaixaClient({
     middleClass: automaticMiddleClass,
     confirmedSubsidy: optionalNumber(form.confirmedSubsidy),
   });
-  const previewNominalRate = optionalNumber(form.nominalRate);
-  const previewRate = getHousingRate({
-    income: numericIncome,
-    propertyValue: numericPropertyValue,
-    state: form.state,
-    city: form.city,
-    product: form.product as "mcmv" | "sbpe",
-    hasFgts36: form.hasFgts36,
-    previousSubsidy: form.previousSubsidy,
-    propertyCondition: form.propertyCondition as "new" | "used",
-    ...(previewNominalRate !== undefined ? { nominalRate: previewNominalRate } : {}),
-  });
-  const automaticSubsidy =
-    subsidyEligibility === "eligible-review" && (participants > 1 || form.hasDependents !== "")
-      ? calculateMcmvSubsidy({
-          income: numericIncome,
-          propertyValue: numericPropertyValue,
-          state: form.state,
-          city: form.city,
-          propertyCondition: form.propertyCondition as "new" | "used",
-          inConstruction: form.inConstruction,
-          propertyType: form.propertyType as "apartment" | "house",
-          propertyArea: Number(form.propertyArea),
-          singlePersonFamily: participants === 1 && form.hasDependents === "no",
-          nominalRate: previewRate,
-        })
-      : null;
-  const displayedSubsidyEligibility = automaticSubsidy ? "automatic" : subsidyEligibility;
   const displayedBand =
     form.product === "sbpe"
       ? "SBPE"
@@ -529,14 +483,6 @@ export function CaixaClient({
           : form.city && municipalLimit !== undefined
             ? money.format(municipalLimit)
             : "Selecione cidade e estado";
-  const propertyLimitDetail =
-    form.product === "sbpe"
-      ? "O limite municipal MCMV não se aplica ao produto selecionado."
-      : automaticMiddleClass
-        ? "Teto nacional indicativo da Classe Média."
-        : numericIncome > 5000
-          ? "Teto nacional indicativo da Faixa 3."
-          : "Tabela oficial do Agente Operador do FGTS · vigência 01/01/2026.";
   function update<Key extends keyof Form>(key: Key, value: Form[Key]) {
     setForm((previous) => {
       const next = { ...previous, [key]: value };
@@ -545,37 +491,12 @@ export function CaixaClient({
         (Number(next.income) > 9600 || Number(next.propertyValue) > 400000);
       return middleClass ? { ...next, confirmedSubsidy: "" } : next;
     });
-    setSubmitted(false);
-  }
-  function submit(event: FormEvent) {
-    event.preventDefault();
-    const calculation = calculateHousingSimulation(housingInput(form, baseDate, participants));
-    setConstruction((previous) => ({ ...previous, months: form.constructionMonths || "36" }));
-    setResult(calculation);
-    setSubmitted(true);
-    setProfiles((previous) =>
-      Array.from({ length: participants }, (_, index) => ({
-        ...(previous[index] ?? createApplicant(index)),
-        ...(index === 0
-          ? {
-              income: form.income,
-              hasFgts36: form.hasFgts36,
-              useFgts: form.hasFgts36 && Number(form.fgts) > 0,
-              product: form.product,
-            }
-          : {}),
-      })),
-    );
-    requestAnimationFrame(() =>
-      resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }),
-    );
   }
   function clear() {
     setForm(initialForm);
     setParticipants(1);
     setProfiles([createApplicant(0)]);
-    setSubmitted(false);
-    setResult(null);
+    lastProfileSyncSignature.current = "";
   }
   const complete =
     Number(form.income) > 0 &&
@@ -588,6 +509,27 @@ export function CaixaClient({
       (!!form.propertyType &&
         Number(form.propertyArea) > 0 &&
         (participants > 1 || !!form.hasDependents)));
+  const result = useMemo(
+    () =>
+      complete ? calculateHousingSimulation(housingInput(form, baseDate, participants)) : null,
+    [baseDate, complete, form, participants],
+  );
+  const constructionResult = useMemo(
+    () =>
+      result?.ok
+        ? estimateConstructionInterest({
+            financing: result.financing,
+            annualRate: result.rate,
+            months: Number(construction.months),
+            currentProgress: Number(construction.progress),
+            trAnnual: Number(construction.tr),
+            operatingFee: result.operatingFee,
+            mipMonthly: result.mipMonthly,
+            dfiMonthly: result.dfiMonthly,
+          })
+        : null,
+    [result, construction],
+  );
   const simulationText = result?.ok
     ? [
         "SIMULAÇÃO CAIXA — DESCOMPLICA CRM",
@@ -611,7 +553,6 @@ export function CaixaClient({
         `Primeiro encargo estimado${result.insuranceEstimated ? " com seguros de referência" : result.insuranceKnown ? "" : " parcial; seguros não confirmados"}: ${money.format(result.firstPayment)}`,
         `Taxa nominal: ${rate.format(result.rate)}% a.a.`,
         "Simulação indicativa, sem atualização futura por TR e sem aprovação de crédito. Confirme valores e elegibilidade com a CAIXA.",
-        ...result.warnings,
       ].join("\n")
     : "";
   const checklistText = profiles
@@ -637,6 +578,31 @@ export function CaixaClient({
       ),
     );
   }
+  function synchronizeProfilesFromSimulation() {
+    const signature = JSON.stringify({
+      participants,
+      income: form.income,
+      product: form.product,
+      hasFgts36: form.hasFgts36,
+      fgts: form.fgts,
+    });
+    if (signature === lastProfileSyncSignature.current) return;
+    lastProfileSyncSignature.current = signature;
+    setProfiles((previous) =>
+      Array.from({ length: participants }, (_, index) => {
+        const profile = previous[index] ?? createApplicant(index);
+        return index === 0
+          ? {
+              ...profile,
+              income: form.income,
+              product: form.product,
+              hasFgts36: form.hasFgts36,
+              useFgts: form.hasFgts36 && Number(form.fgts) > 0,
+            }
+          : profile;
+      }),
+    );
+  }
 
   return (
     <section className="caixa-workspace" aria-label="Simulador CAIXA">
@@ -645,7 +611,7 @@ export function CaixaClient({
           <h1>Simulador CAIXA</h1>
           <span>Crédito habitacional com regras atualizadas</span>
         </div>
-        <p>Preencha os dados, confira as condições e calcule.</p>
+        <p>Preencha os dados e acompanhe o resultado automático.</p>
       </div>
       <nav className="caixa-tabs" aria-label="Ferramentas Caixa">
         {(
@@ -662,7 +628,10 @@ export function CaixaClient({
             className={tab === key ? "active" : ""}
             aria-current={tab === key ? "page" : undefined}
             aria-label={`${number} ${label}`}
-            onClick={() => setTab(key)}
+            onClick={() => {
+              if (key === "documentos") synchronizeProfilesFromSimulation();
+              setTab(key);
+            }}
           >
             <span>{number}</span>
             {label}
@@ -671,36 +640,29 @@ export function CaixaClient({
       </nav>
       {tab === "simulador" && (
         <div className="caixa-simulator-layout">
-          <form className="caixa-form caixa-full-form" onSubmit={submit}>
+          <form className="caixa-form caixa-full-form" onSubmit={(event) => event.preventDefault()}>
             <section
               className="caixa-panel caixa-form-section caixa-qualification-section"
               aria-labelledby="caixa-client-property-title"
             >
-              <div className="caixa-section-heading">
-                <span aria-hidden="true">01</span>
-                <div>
-                  <p>DADOS DO CLIENTE E DO IMÓVEL</p>
-                  <h2 id="caixa-client-property-title">
-                    Informe os dados do proponente e do imóvel
-                  </h2>
-                </div>
-              </div>
+              <h2 id="caixa-client-property-title" className="caixa-sr-only">
+                Dados do cliente e do imóvel
+              </h2>
               <div className="caixa-form-section-content">
                 <div className="caixa-form-grid caixa-qualification-grid caixa-primary-grid">
                   <Field
                     className="caixa-qualification-item caixa-income-field"
-                    label={
-                      <>
-                        Renda familiar bruta *{" "}
-                        <small className="caixa-qualification-badge">{displayedBand}</small>
-                      </>
-                    }
+                    label="Renda familiar bruta *"
                   >
                     <MoneyInput
                       required
                       value={form.income}
                       onChange={(value) => update("income", value)}
                     />
+                    <small className="caixa-field-insight" aria-live="polite">
+                      Limite de parcela (30%): {money.format(automaticPaymentLimit)} ·{" "}
+                      {displayedBand}
+                    </small>
                   </Field>
                   <Field
                     className="caixa-qualification-item caixa-approved-field"
@@ -724,6 +686,9 @@ export function CaixaClient({
                       value={form.propertyValue}
                       onChange={(value) => update("propertyValue", value)}
                     />
+                    <small className="caixa-field-insight" aria-live="polite">
+                      Limite aplicável: {applicablePropertyLimit}
+                    </small>
                   </Field>
                   <Field
                     className="caixa-qualification-item caixa-own-funds-field"
@@ -758,7 +723,6 @@ export function CaixaClient({
                           setParticipants(value);
                           if (value > 1)
                             setForm((previous) => ({ ...previous, hasDependents: "" }));
-                          setSubmitted(false);
                         }}
                       />
                     </div>
@@ -805,62 +769,15 @@ export function CaixaClient({
                     )}
                   </div>
                 )}
-                <div className="caixa-automatic-values" aria-live="polite">
-                  <div>
-                    <span>Teto indicativo de renda</span>
-                    <strong>
-                      {Number(form.income) > 0
-                        ? money.format(automaticPaymentLimit)
-                        : "30% automático"}
-                    </strong>
-                    <small>30% da renda bruta, aplicado sem configuração manual.</small>
-                  </div>
-                  <div>
-                    <span>
-                      {form.product === "mcmv" && numericIncome <= 5000
-                        ? "Limite municipal do imóvel"
-                        : "Limite aplicável do imóvel"}
-                    </span>
-                    <strong>{applicablePropertyLimit}</strong>
-                    <small>{propertyLimitDetail}</small>
-                  </div>
-                  <div className={`caixa-subsidy-status ${displayedSubsidyEligibility}`}>
-                    <span>Subsídio MCMV</span>
-                    <strong>
-                      {subsidyEligibility === "confirmed"
-                        ? money.format(Number(form.confirmedSubsidy))
-                        : automaticSubsidy
-                          ? money.format(automaticSubsidy.amount)
-                          : subsidyEligibility === "eligible-review"
-                            ? "Complete os dados"
-                            : numericIncome > 0 && numericPropertyValue > 0
-                              ? "Não aplicável"
-                              : "Informe renda e imóvel"}
-                    </strong>
-                    <small>
-                      {automaticSubsidy
-                        ? "Cálculo automático pela fórmula do MFOM v034; sujeito à validação da CAIXA."
-                        : subsidyEligibility === "eligible-review"
-                          ? "Informe tipo, área e dependentes para calcular automaticamente."
-                          : subsidyEligibility === "confirmed"
-                            ? "Valor oficial informado manualmente e incluído na composição."
-                            : "A elegibilidade é atualizada automaticamente para o cenário preenchido."}
-                    </small>
-                  </div>
-                </div>
               </div>
             </section>
             <section
               className="caixa-panel caixa-form-section caixa-financing-section"
               aria-labelledby="caixa-financing-title"
             >
-              <div className="caixa-section-heading">
-                <span aria-hidden="true">02</span>
-                <div>
-                  <p>CONDIÇÕES DO FINANCIAMENTO</p>
-                  <h2 id="caixa-financing-title">Defina a localização e as condições desejadas</h2>
-                </div>
-              </div>
+              <h2 id="caixa-financing-title" className="caixa-sr-only">
+                Condições do financiamento
+              </h2>
               <div className="caixa-form-section-content">
                 <div className="caixa-form-grid caixa-secondary-grid">
                   <Field className="caixa-date-field" label="Data de nascimento *">
@@ -879,7 +796,6 @@ export function CaixaClient({
                             ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
                           };
                         });
-                        setSubmitted(false);
                       }}
                     />
                     <small>Informe a data do proponente mais velho.</small>
@@ -889,7 +805,6 @@ export function CaixaClient({
                     state={form.state}
                     onChange={(city, state) => {
                       setForm((previous) => ({ ...previous, city, ...(state ? { state } : {}) }));
-                      setSubmitted(false);
                     }}
                   />
                   <Field className="caixa-state-field" label="Estado *">
@@ -901,7 +816,6 @@ export function CaixaClient({
                           state: event.target.value,
                           city: "",
                         }));
-                        setSubmitted(false);
                       }}
                     >
                       {states.map((state) => (
@@ -949,7 +863,6 @@ export function CaixaClient({
                                 }
                               : {}),
                           }));
-                          setSubmitted(false);
                         }}
                       >
                         <option value="mcmv">MCMV</option>
@@ -977,7 +890,6 @@ export function CaixaClient({
                         hasFgts36: value,
                         fgts: value ? previous.fgts : "",
                       }));
-                      setSubmitted(false);
                     }}
                   />
                   <Toggle
@@ -1010,7 +922,6 @@ export function CaixaClient({
                             ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
                           };
                         });
-                        setSubmitted(false);
                       }}
                     />
                     <Field label="Condição do imóvel *">
@@ -1124,7 +1035,10 @@ export function CaixaClient({
                           constructionMonths,
                           ...(allowedTerm > 0 ? { term: String(allowedTerm) } : {}),
                         }));
-                        setSubmitted(false);
+                        setConstruction((previous) => ({
+                          ...previous,
+                          months: constructionMonths || "36",
+                        }));
                       }}
                     />
                     <small>Integra o prazo total para a conferência do limite de idade.</small>
@@ -1159,32 +1073,20 @@ export function CaixaClient({
               </div>
             </details>
             <footer className="caixa-step-actions caixa-full-form-actions">
-              <span className="caixa-access-status">
-                Acesso liberado para todos os perfis autorizados
+              <span className="caixa-auto-status" role="status" aria-live="polite">
+                {result
+                  ? "Simulação atualizada automaticamente"
+                  : "Preencha os campos obrigatórios"}
               </span>
               <button type="button" className="ghost" onClick={clear}>
                 Limpar
               </button>
-              <button className="primary" type="submit" disabled={!complete}>
-                Calcular simulação
-              </button>
             </footer>
           </form>
-          {!submitted && (
-            <section className="caixa-panel caixa-result-placeholder" aria-label="Resultado">
-              <span aria-hidden="true">03</span>
-              <div>
-                <p>RESULTADO</p>
-                <h2>O resultado será exibido após o cálculo</h2>
-              </div>
-            </section>
-          )}
-          {submitted && result && (
+          {result && (
             <aside
-              ref={resultRef}
               id="caixa-simulation-result"
               className="caixa-panel caixa-result-panel"
-              aria-live="polite"
               aria-label="Resultado da simulação"
             >
               {!result.ok ? (
@@ -1197,11 +1099,7 @@ export function CaixaClient({
               ) : (
                 <div className="caixa-result-content caixa-result-summary">
                   <div className="caixa-result-summary-heading">
-                    <span className="caixa-result-step">03</span>
-                    <div>
-                      <p>Simulação indicativa calculada</p>
-                      <h2>Resumo financeiro</h2>
-                    </div>
+                    <h2>Resumo financeiro</h2>
                     <button
                       type="button"
                       className="caixa-result-print"
@@ -1286,15 +1184,6 @@ export function CaixaClient({
                     {result.rateEstimated ? " (estimada)" : ""} · comprometimento estimado de{" "}
                     {result.commitment.toFixed(1)}%.
                   </p>
-                  {result.warnings.length > 0 && (
-                    <div className="caixa-notice">
-                      <ul>
-                        {result.warnings.map((warning) => (
-                          <li key={warning}>{warning}</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
                   <details className="caixa-result-audit">
                     <summary>Auditoria do cálculo</summary>
                     <div className="caixa-result-audit-grid">
@@ -1342,7 +1231,7 @@ export function CaixaClient({
                       className="caixa-save"
                       onClick={() =>
                         setSaved((previous) =>
-                          [{ form: { ...form }, result }, ...previous].slice(0, 5),
+                          [{ form: { ...form }, participants, result }, ...previous].slice(0, 5),
                         )
                       }
                     >
@@ -1358,12 +1247,12 @@ export function CaixaClient({
                           key={index}
                           onClick={() => {
                             setForm(item.form);
+                            setParticipants(item.participants);
                             setConstruction((previous) => ({
                               ...previous,
                               months: item.form.constructionMonths || "36",
                             }));
-                            setResult(item.result);
-                            setSubmitted(true);
+                            lastProfileSyncSignature.current = "";
                           }}
                         >
                           {item.form.city} · {money.format(item.result.propertyValue)}
@@ -1374,64 +1263,66 @@ export function CaixaClient({
                     </details>
                   )}
                   {form.inConstruction && (
-                    <section className="caixa-construction">
-                      <h3>Estimativa de juros de obra</h3>
-                      {construction.months !== form.constructionMonths && (
-                        <p className="caixa-reference-notice">
-                          O prazo deste cenário é uma hipótese independente e não altera o prazo
-                          total usado na conferência da idade. Para recalcular essa conferência,
-                          ajuste o prazo previsto nos parâmetros e calcule novamente.
-                        </p>
-                      )}
-                      <div className="caixa-form-grid">
-                        {(
-                          [
-                            ["months", "Meses restantes", 1, 120],
-                            ["progress", "Obra atual (%)", 0, 99],
-                            ["tr", "TR estimada (% a.a.)", 0, 100],
-                          ] as const
-                        ).map(([key, label, min, max]) => (
-                          <Field key={key} label={label}>
-                            <input
-                              type="number"
-                              min={min}
-                              max={max}
-                              step={key === "months" ? 1 : 0.1}
-                              value={construction[key]}
-                              onChange={(event) =>
-                                setConstruction((previous) => ({
-                                  ...previous,
-                                  [key]: event.target.value,
-                                }))
-                              }
-                            />
-                          </Field>
-                        ))}
-                      </div>
-                      {constructionResult?.ok ? (
-                        <div className="caixa-result-grid">
-                          <Metric
-                            label="Primeiro encargo"
-                            value={money.format(constructionResult.firstPayment)}
-                          />
-                          <Metric
-                            label="Último encargo"
-                            value={money.format(constructionResult.lastPayment)}
-                          />
-                          <Metric
-                            label="Total estimado"
-                            value={money.format(constructionResult.total)}
-                            accent
-                          />
+                    <details className="caixa-result-audit caixa-construction-details">
+                      <summary>Estimativa de juros de obra</summary>
+                      <section className="caixa-construction">
+                        {construction.months !== form.constructionMonths && (
+                          <p className="caixa-reference-notice">
+                            O prazo deste cenário é uma hipótese independente e não altera o prazo
+                            total usado na conferência da idade. Para recalcular essa conferência,
+                            ajuste o prazo previsto nos parâmetros e calcule novamente.
+                          </p>
+                        )}
+                        <div className="caixa-form-grid">
+                          {(
+                            [
+                              ["months", "Meses restantes", 1, 120],
+                              ["progress", "Obra atual (%)", 0, 99],
+                              ["tr", "TR estimada (% a.a.)", 0, 100],
+                            ] as const
+                          ).map(([key, label, min, max]) => (
+                            <Field key={key} label={label}>
+                              <input
+                                type="number"
+                                min={min}
+                                max={max}
+                                step={key === "months" ? 1 : 0.1}
+                                value={construction[key]}
+                                onChange={(event) =>
+                                  setConstruction((previous) => ({
+                                    ...previous,
+                                    [key]: event.target.value,
+                                  }))
+                                }
+                              />
+                            </Field>
+                          ))}
                         </div>
-                      ) : (
-                        <p>Informe os parâmetros válidos da obra.</p>
-                      )}
-                      <small>
-                        Estimativa linear ilustrativa. Medições, liberação de recursos, TR e seguros
-                        reais alteram os encargos. Não representa cronograma aprovado.
-                      </small>
-                    </section>
+                        {constructionResult?.ok ? (
+                          <div className="caixa-result-grid">
+                            <Metric
+                              label="Primeiro encargo"
+                              value={money.format(constructionResult.firstPayment)}
+                            />
+                            <Metric
+                              label="Último encargo"
+                              value={money.format(constructionResult.lastPayment)}
+                            />
+                            <Metric
+                              label="Total estimado"
+                              value={money.format(constructionResult.total)}
+                              accent
+                            />
+                          </div>
+                        ) : (
+                          <p>Informe os parâmetros válidos da obra.</p>
+                        )}
+                        <small>
+                          Estimativa linear ilustrativa. Medições, liberação de recursos, TR e
+                          seguros reais alteram os encargos. Não representa cronograma aprovado.
+                        </small>
+                      </section>
+                    </details>
                   )}
                 </div>
               )}
@@ -1519,6 +1410,7 @@ export function CaixaClient({
                     </Field>
                     <Field label="Renda mensal bruta">
                       <MoneyInput
+                        label="Renda mensal bruta"
                         value={profile.income}
                         onChange={(value) => updateProfile(index, { income: value })}
                       />
@@ -1750,7 +1642,6 @@ export function CaixaClient({
                         approvedPayment: diagnosis.payment,
                         propertyValue: diagnosis.property,
                       }));
-                      setSubmitted(false);
                       setTab("simulador");
                     }}
                   >

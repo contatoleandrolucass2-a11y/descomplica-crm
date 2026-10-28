@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-28 — Simulador CAIXA: experiência compacta e cálculo reativo
+
+- Escopo restrito a `/app/simulacao/caixa`: cabeçalhos de etapas, cartões
+  automáticos, aviso extenso e acionamento manual foram removidos da jornada.
+- Limite de parcela e limite aplicável ao imóvel agora acompanham os respectivos
+  campos; parâmetros e juros de obra permanecem recolhidos sob demanda.
+- O resultado é derivado localmente dos dados atuais e some quando faltam campos
+  obrigatórios, evitando resultado antigo após qualquer edição.
+- Testes focados cobrem recálculo, prazo, subsídio, SBPE, três temas, quatro
+  larguras, ausência de overflow e auditoria Axe.
+
 - 2026-10-28: removidas duas declarações redundantes de variáveis do validador SQL de Links Úteis após o lint do restore isolado `40644412951` apontar sombreamento pelos índices implícitos dos laços inteiros. A correção não muda o comportamento da migration nem outras páginas.
 - 2026-10-28: implementado o editor compartilhado de Links Úteis. O submenu autorizado passou a usar a sidebar contextual; Grupos WhatsApp ganhou organograma vertical/lateral e quatro cards de apoio; Lojas Horários recebeu oito cards por endereço; todas as guias permitem movimentação, redimensionamento e edição por `admin`/`master`, com revisão otimista, RLS forçada e RPCs autenticadas. A revisão do candidato também passou a aceitar timestamps PostgreSQL com offset, preservar a digitação crua dos campos multilinha e bloquear mutações durante o salvamento. A validação focada aprovou 90 testes, tipos, inventário e catálogo; o pgTAP local ficou indisponível por ausência de Docker/Podman e permanece obrigatório na CI.
 - 2026-10-28: corrigido o limite de escopo antes da publicação. A tentativa de generalizar o shell compartilhado foi retirada; `DashboardShell`, navegação superior, CSS compartilhado, testes e onze baselines do Dashboard foram restaurados integralmente. O sidebar agora pertence somente ao layout de Links Úteis, com teste que impede reintroduzir comportamento dessa área nos arquivos compartilhados.
