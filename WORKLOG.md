@@ -585,6 +585,14 @@ typecheck e build passaram. O Vitest completo aprovou 4.194 testes e ignorou 108
 o trecho Node do `pnpm test` manteve três falhas Windows preexistentes de
 permissão/caminho em Meta Ads, que permanecem dependentes da CI Linux.
 
+O PR #342 foi integrado em `c2c823e1284f19322da0da36e0cb8146bf7ec497`.
+A CI de `main` `40212842274` aprovou `validate`, `isolated-restore`,
+`release-gates` e `promotable-image`. O artefato `12606950613` teve o digest
+ZIP e o checksum interno conferidos, revisão exata e os dois perfis de runtime
+aprovados sem rebuild. O coordenador publicou o deployment
+`ea33fe65-fba7-4b8d-87a3-ef014fc51c75` em `2026-10-25T17:36:48.826Z`; o ledger
+ficou sem pendência e o health público confirmou HTTP 200/`ok` na mesma versão.
+
 ## 2026-10-25 — Previsão editável por usuários autorizados
 
 - Reproduzido em produção: o endpoint autenticado de Previsão respondeu

@@ -228,6 +228,8 @@ Evidencias e limite de sincronizacao Obsidian em docs/knowledge/ATUALIZACOES.md.
 - Substitui o contorno retangular exibido ao passar o mouse por um realce
   translúcido da própria etapa.
 - Preserva o foco visível de teclado, a abertura do detalhamento e os três temas.
+- Publicado no SHA `c2c823e1` após CI integral e promoção protegida do artefato
+  imutável, com health confirmado na versão exata.
 
 ## 2026-10-25
 
