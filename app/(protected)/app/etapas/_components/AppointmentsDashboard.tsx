@@ -13,6 +13,7 @@ import {
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
 import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
+import { FREE_HEIGHT_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 import type { AppointmentConversionGoals } from "@/lib/crm/stages/data";
@@ -2033,6 +2034,9 @@ export function AppointmentsDashboard({
         profileControls={false}
         automaticProfileName="Layout de Agendamentos"
         hideCardActionsByDefault
+        layoutPolicy={FREE_HEIGHT_CARD_LAYOUT_POLICY}
+        hideCardOverflow
+        addButtonLabel="Adicionar card"
       />
       <footer className={styles.pageFooter}>
         <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>

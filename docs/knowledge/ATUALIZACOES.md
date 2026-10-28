@@ -1,5 +1,35 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: ajuste dos cards de Agendamentos implementado e validado localmente
+
+- A alteração permanece exclusiva de `/app/etapas/agendamentos`: barras de
+  rolagem internas foram ocultadas, o redimensionador ganhou alvo acessível no
+  encontro das bordas inferior e direita e a ação `Adicionar card` ficou
+  explícita para administradores.
+- A altura deixou de ter teto na interface dessa página e continua salva no
+  perfil compartilhado. Outras páginas preservam seus limites anteriores; a
+  largura segue a grade responsiva de 12 colunas para evitar overflow da página.
+- Evidências locais com Node 24.19.0 e pnpm 11.20.0: 71 testes de impacto
+  aprovados, typecheck aprovado, build de produção aprovado e lint completo sem
+  erros. Permanecem 44 avisos preexistentes em assets públicos fora do escopo.
+- Publicação ainda depende de PR, CI protegida, merge e coordenador de release.
+  O sync do Obsidian permanece pendente pelo limite de exportação conhecido.
+
+## 2026-10-28: abertura do ajuste exclusivo dos cards de Agendamentos
+
+- Escopo autorizado somente para `/app/etapas/agendamentos`: remover barras de
+  rolagem internas dos cards, redimensionar largura e altura pelo canto inferior
+  direito sem teto de interface e disponibilizar a ação de adicionar card.
+- Estado consultado em 2026-10-28 19:08 BRT: branch criada a partir de
+  `origin/main` no SHA `47b5aa7c506f6d47ec82b52f6789bd795d3f042c`.
+  O health público respondeu HTTP 200, `status=ok` e versão
+  `2699f4641c69fbac6b94c3b6ab7bdb5dc17874a9`; portanto, produção ainda não
+  continha o candidato deste chat.
+- O CLI `gh` não está instalado neste host. A consulta GitHub deve usar o
+  conector autenticado antes da integração. O runtime oficial de conhecimento
+  permanece indisponível pelo erro conhecido `Documento excede o limite de
+exportacao.`; o registro versionado não implica sincronização do Obsidian.
+
 ## 2026-10-28: redesenho exclusivo do Simulador CAIXA implementado
 
 - A interface de `/app/simulacao/caixa` foi reorganizada em um workspace

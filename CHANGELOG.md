@@ -1,5 +1,9 @@
 # Changelog
 
+- Ajusta exclusivamente os cards de Agendamentos para remover rolagem interna,
+  oferecer redimensionamento livre de altura e largura pelo canto inferior
+  direito e exibir a ação administrativa `Adicionar card`.
+
 - Redesenha exclusivamente o Simulador CAIXA com sidebar local de seis atalhos,
   formulário compacto, ação Limpar no topo e Documentos, Diagnóstico e
   Utilitários no final da página, preservando o motor financeiro existente.

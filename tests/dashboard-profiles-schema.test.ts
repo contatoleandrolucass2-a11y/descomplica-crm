@@ -68,6 +68,21 @@ describe("dashboard profile persistence schema", () => {
       dashboardCardsSchema.safeParse([{ ...kpi, layout: { ...kpi.layout, height: 167 } }]).success,
     ).toBe(false);
     expect(
+      dashboardCardsSchema.safeParse([{ ...kpi, layout: { ...kpi.layout, height: 2_400 } }])
+        .success,
+    ).toBe(true);
+    expect(
+      dashboardProfileCreateSchema.safeParse({
+        pageKey: "crm.stage.appointments",
+        name: "KPI livre",
+        cards: [{ ...kpi, layout: { ...kpi.layout, height: 2_400 } }],
+      }).success,
+    ).toBe(true);
+    expect(
+      dashboardCardsSchema.safeParse([{ ...kpi, layout: { ...kpi.layout, height: 16_385 } }])
+        .success,
+    ).toBe(false);
+    expect(
       dashboardProfileCreateSchema.safeParse({
         pageKey: "crm.stage.appointments",
         name: "Métrica inválida",
@@ -129,6 +144,13 @@ describe("dashboard profile persistence schema", () => {
         pageKey: "crm.dashboard",
         name: "Métrica alheia",
         cards: [{ ...overview, metric: "appointments.daily" }],
+      }).success,
+    ).toBe(false);
+    expect(
+      dashboardProfileCreateSchema.safeParse({
+        pageKey: "crm.dashboard",
+        name: "Altura fora do padrão",
+        cards: [{ ...overview, layout: { ...overview.layout, height: 2_400 } }],
       }).success,
     ).toBe(false);
   });

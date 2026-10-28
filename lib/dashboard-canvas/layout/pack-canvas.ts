@@ -1,4 +1,4 @@
-import { constrainCardLayout, CANVAS_COLUMN_COUNT } from "./limits";
+import { constrainCardLayout, CANVAS_COLUMN_COUNT, type DashboardCardLayoutPolicy } from "./limits";
 import type { DashboardCard } from "../types";
 
 export interface PackedDashboardCard {
@@ -10,7 +10,11 @@ export interface PackedDashboardCard {
   isActive: boolean;
 }
 
-export function packCanvas(cards: readonly DashboardCard[], activeCardId?: string) {
+export function packCanvas(
+  cards: readonly DashboardCard[],
+  activeCardId?: string,
+  layoutPolicy?: DashboardCardLayoutPolicy,
+) {
   const ordered = cards
     .map((card, sourceIndex) => ({ card, sourceIndex }))
     .sort(
@@ -22,7 +26,7 @@ export function packCanvas(cards: readonly DashboardCard[], activeCardId?: strin
   let usedColumns = 0;
 
   for (const { card } of ordered) {
-    const layout = constrainCardLayout(card.type, card.layout);
+    const layout = constrainCardLayout(card.type, card.layout, layoutPolicy);
     const normalizedCard = { ...card, layout };
     if (currentRow.length > 0 && usedColumns + layout.columnSpan > CANVAS_COLUMN_COUNT) {
       rows.push(currentRow);

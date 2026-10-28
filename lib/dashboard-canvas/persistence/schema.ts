@@ -110,7 +110,7 @@ export const dashboardCardSchema = z
           .min(0)
           .max(DASHBOARD_PROFILE_MAX_CARDS - 1),
         columnSpan: z.number().int().min(1).max(12),
-        height: z.number().int().min(1).max(1_200),
+        height: z.number().int().min(1).max(16_384),
       })
       .strict(),
     options: z
@@ -145,7 +145,7 @@ export const dashboardCardSchema = z
         path: ["layout", "columnSpan"],
       });
     }
-    if (card.layout.height < limits.minHeight || card.layout.height > limits.maxHeight) {
+    if (card.layout.height < limits.minHeight) {
       context.addIssue({
         code: "custom",
         message: "invalid_card_height",
@@ -175,6 +175,14 @@ function cardSignature(card: z.infer<typeof dashboardCardSchema>): string {
     card.endDate ?? "",
     card.entityIds === null ? "*" : [...card.entityIds].sort().join(","),
   ].join("|");
+}
+
+export function dashboardCardsMatchPageLayout(
+  pageKey: string,
+  cards: readonly z.infer<typeof dashboardCardSchema>[],
+): boolean {
+  if (pageKey === "crm.stage.appointments") return true;
+  return cards.every((card) => card.layout.height <= layoutLimits[card.type].maxHeight);
 }
 
 export const dashboardCardsSchema = z
@@ -228,6 +236,9 @@ export const dashboardProfileCreateSchema = z
     if (!dashboardCardsMatchPageCatalog(profile.pageKey, profile.cards)) {
       context.addIssue({ code: "custom", message: "invalid_page_catalog", path: ["cards"] });
     }
+    if (!dashboardCardsMatchPageLayout(profile.pageKey, profile.cards)) {
+      context.addIssue({ code: "custom", message: "invalid_page_layout", path: ["cards"] });
+    }
   });
 
 export const dashboardProfilePatchSchema = z
@@ -266,6 +277,9 @@ export const dashboardProfileRecordSchema = z
   .superRefine((profile, context) => {
     if (!dashboardCardsMatchPageCatalog(profile.pageKey, profile.cards)) {
       context.addIssue({ code: "custom", message: "invalid_page_catalog", path: ["cards"] });
+    }
+    if (!dashboardCardsMatchPageLayout(profile.pageKey, profile.cards)) {
+      context.addIssue({ code: "custom", message: "invalid_page_layout", path: ["cards"] });
     }
   });
 

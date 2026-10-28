@@ -17,11 +17,13 @@ export {
   CANVAS_HEIGHT_STEP,
   CANVAS_MIN_CARD_HEIGHT,
   DASHBOARD_CARD_LAYOUT_LIMITS,
+  FREE_HEIGHT_CARD_LAYOUT_POLICY,
   MAX_CARDS_PER_CANVAS,
   columnWidth,
   constrainCardLayout,
   resizeCardLayout,
 } from "./layout/limits";
+export type { DashboardCardLayoutPolicy } from "./layout/limits";
 export { hasCanvasOverlap, packCanvas } from "./layout/pack-canvas";
 export { dashboardCardSignature, findDuplicateCard } from "./signature";
 export {

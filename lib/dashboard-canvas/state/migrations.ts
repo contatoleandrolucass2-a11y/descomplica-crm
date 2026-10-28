@@ -1,4 +1,8 @@
-import { constrainCardLayout, MAX_CARDS_PER_CANVAS } from "../layout/limits";
+import {
+  constrainCardLayout,
+  MAX_CARDS_PER_CANVAS,
+  type DashboardCardLayoutPolicy,
+} from "../layout/limits";
 import {
   DASHBOARD_CARD_TYPES,
   DASHBOARD_CANVAS_SCHEMA_VERSION,
@@ -110,7 +114,11 @@ function migrateV1ToV2(value: UnknownRecord): UnknownRecord {
   return { ...value, schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION };
 }
 
-export function normalizeDashboardCard(value: unknown, fallbackOrder = 0): DashboardCard | null {
+export function normalizeDashboardCard(
+  value: unknown,
+  fallbackOrder = 0,
+  layoutPolicy?: DashboardCardLayoutPolicy,
+): DashboardCard | null {
   if (!isRecord(value)) return null;
   const id = readString(value.id);
   const metric = readString(value.metric);
@@ -147,7 +155,7 @@ export function normalizeDashboardCard(value: unknown, fallbackOrder = 0): Dashb
     period,
     groupBy,
     entityIds,
-    layout: constrainCardLayout(type, layoutInput),
+    layout: constrainCardLayout(type, layoutInput, layoutPolicy),
   };
   if (title) card.title = title;
   if (period === "custom" && startDate && endDate) {
@@ -159,11 +167,14 @@ export function normalizeDashboardCard(value: unknown, fallbackOrder = 0): Dashb
   return card;
 }
 
-export function normalizeDashboardCards(values: readonly unknown[]) {
+export function normalizeDashboardCards(
+  values: readonly unknown[],
+  layoutPolicy?: DashboardCardLayoutPolicy,
+) {
   const cards: DashboardCard[] = [];
   const ids = new Set<string>();
   for (const value of values.slice(0, MAX_CARDS_PER_CANVAS)) {
-    const card = normalizeDashboardCard(value, cards.length);
+    const card = normalizeDashboardCard(value, cards.length, layoutPolicy);
     if (!card || ids.has(card.id)) continue;
     ids.add(card.id);
     cards.push(card);
@@ -173,7 +184,10 @@ export function normalizeDashboardCards(values: readonly unknown[]) {
     .map((card, order) => ({ ...card, layout: { ...card.layout, order } }));
 }
 
-export function migrateCanvasSchema(input: unknown): DashboardCanvasSnapshot {
+export function migrateCanvasSchema(
+  input: unknown,
+  layoutPolicy?: DashboardCardLayoutPolicy,
+): DashboardCanvasSnapshot {
   let document: UnknownRecord = Array.isArray(input)
     ? { schemaVersion: 0, cards: input }
     : isRecord(input)
@@ -194,7 +208,10 @@ export function migrateCanvasSchema(input: unknown): DashboardCanvasSnapshot {
   }
   return {
     schemaVersion: CURRENT_DASHBOARD_SCHEMA_VERSION,
-    cards: normalizeDashboardCards(Array.isArray(document.cards) ? document.cards : []),
+    cards: normalizeDashboardCards(
+      Array.isArray(document.cards) ? document.cards : [],
+      layoutPolicy,
+    ),
   };
 }
 

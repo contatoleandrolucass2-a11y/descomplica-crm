@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-28 — Agendamentos: cards sem rolagem e redimensionamento pelo canto
+
+- Escopo restrito a `/app/etapas/agendamentos`; nenhuma outra página, métrica,
+  filtro, permissão ou fonte de dados foi alterada.
+- Os cards deixam de criar barras internas e passam a usar o canto inferior
+  direito como controle visual e acessível para ajustar largura e altura.
+- A altura não possui teto de interface em Agendamentos; a largura continua
+  responsiva à grade de 12 colunas para não criar rolagem horizontal na página.
+- O editor administrativo mostra a ação `Adicionar card`, preservando o
+  salvamento automático e os limites de segurança do contrato persistido.
+
 ## 2026-10-28 — Simulador CAIXA: novo workspace compacto
 
 - Escopo restrito a `/app/simulacao/caixa`; nenhuma outra página, regra
