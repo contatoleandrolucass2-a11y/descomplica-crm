@@ -1,5 +1,7 @@
 # Changelog
 
+- Executa `release-gates`, `isolated-restore` e `promotable-image` também em pull requests protegidos, mantendo a repetição integral dos quatro jobs no `main`.
+
 - Publica a evolução editável de Links Úteis no SHA `d6bc4e7f`, com CI integral,
   migration de persistência aplicada em produção, RLS/MFA verificadas e rotas
   anônimas protegidas por redirecionamento para login.

@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: gates protegidos executados no PR
+
+- A protecao exigia `release-gates`, `isolated-restore` e `promotable-image`, mas
+  o workflow os marcava como `skipped` em pull requests. A condicao foi ampliada
+  somente para aceitar PR ou `push/main`; os quatro jobs continuam obrigatorios
+  e repetidos no SHA final integrado.
+- O teste de contrato da CI passou a exigir as duas condicoes nos tres jobs. No
+  SHA `0dbbffce9b0fdfdf21da07548244c26976072889`, os quatro checks foram
+  aprovados, incluindo replay de migrations, pgTAP, E2E, acessibilidade,
+  responsividade, temas, zoom, teclado, comparacao visual e imagem imutavel.
+- Nenhum baseline, tolerancia, migration, ACL, RLS ou dado remoto foi alterado
+  por esta correcao de fluxo.
+
 ## 2026-10-28: Simulador CAIXA compacto publicado
 
 - Escopo concluído somente em `/app/simulacao/caixa`: interface compacta,

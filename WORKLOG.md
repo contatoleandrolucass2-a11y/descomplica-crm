@@ -1,5 +1,7 @@
 # Worklog
 
+- 2026-10-27: corrigida a incompatibilidade entre a proteção do `main` e a CI: `release-gates`, `isolated-restore` e `promotable-image` agora executam em pull requests e continuam repetidos no SHA final de `main`; o teste de contrato exige as duas condições sem reduzir etapas, tolerâncias ou proteção.
+
 ## 2026-10-28 — Links Úteis: evolução editável publicada
 
 - PR #409 integrou as 22 baselines revisadas; a CI `40660625679` aprovou os
