@@ -1,5 +1,9 @@
 # Changelog
 
+- Redesenha exclusivamente o Simulador CAIXA com sidebar local de seis atalhos,
+  formulário compacto, ação Limpar no topo e Documentos, Diagnóstico e
+  Utilitários no final da página, preservando o motor financeiro existente.
+
 - Atualiza exclusivamente a sidebar do Meta Ads com recolhimento suave,
   expansão temporária por foco ou hover, drawer móvel acessível e destaque
   ativo azul/ciano, removendo os acentos rosa sem alterar permissões ou rotas.

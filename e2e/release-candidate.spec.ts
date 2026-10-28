@@ -2179,9 +2179,13 @@ test("released simulator pages respect explicit inventory access while CAIXA cal
     await expect(
       page.getByRole("heading", { level: 1, name: "Simulador CAIXA", exact: true }),
     ).toBeVisible();
-    await expect(page.getByRole("navigation", { name: "Ferramentas Caixa" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Simuladores disponíveis" })).toBeVisible();
+    await expect(
+      page.getByRole("navigation", { name: "Ferramentas do Simulador CAIXA" }),
+    ).toBeVisible();
+    await expect(page.getByRole("button", { name: "Limpar", exact: true })).toBeVisible();
     await expect(page.getByText("Motor CAIXA bloqueado.", { exact: true })).toHaveCount(0);
-    await expect(page.getByText("Preencha os campos obrigatórios", { exact: true })).toBeVisible();
+    await expect(page.getByText("Preencha os campos obrigatórios", { exact: true })).toHaveCount(0);
     // Indicative local mathematics is available to the already authorized user;
     // the separate official bank endpoint remains closed below.
     await page.getByLabel("Renda familiar bruta", { exact: false }).fill("600000");

@@ -1,5 +1,46 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: redesenho exclusivo do Simulador CAIXA implementado
+
+- A interface de `/app/simulacao/caixa` foi reorganizada em um workspace
+  compacto com sidebar local de seis atalhos, formulário alinhado, ação Limpar
+  no topo e Documentos, Diagnóstico e Utilitários no final. O breadcrumb usa
+  `Simulador CAIXA` e os textos redundantes solicitados foram removidos.
+- O desenho reutiliza a linguagem visual azul/ciano/lima do simulador
+  associativo e mantém respostas específicas nos temas claro, equilibrado e
+  escuro, incluindo composição móvel em duas colunas para a sidebar.
+- O motor financeiro, os dados oficiais, o recálculo automático, subsídio,
+  prazo por idade e cotas SBPE permaneceram sem mudança. A validação sintética
+  aprovou 6 jornadas no navegador e 24 verificações estáticas focadas, com
+  desktop, celular, três temas, ausência de overflow e Axe sem violações.
+- O candidato autenticado do PR #414 aprovou a jornada completa e produziu o
+  artefato visual `12847234187`
+  (`sha256:bc8775b706f2ccdf893f3cad6491db64159168be289aefcf1c321baba118bc7a`).
+  A revisão adotou somente as 11 referências da rota CAIXA e o manifesto do
+  ensaio; nenhuma imagem de outra página foi substituída.
+- Publicação permanece condicionada aos gates protegidos e à revisão visual do
+  candidato autenticado. A sincronização do Obsidian ainda está indisponível
+  pelo erro `Documento excede o limite de exportacao.`.
+
+## 2026-10-28: abertura do redesenho exclusivo do Simulador CAIXA
+
+- Escopo autorizado somente para `/app/simulacao/caixa`: novo desenho compacto,
+  sidebar local com seis atalhos, acao Limpar no topo e ferramentas secundarias
+  ao final da pagina. Regras financeiras, outras rotas e componentes globais
+  permanecem fora do escopo.
+- Estado consultado em 2026-10-28: `origin/main` no SHA
+  `2699f464`, com alteracoes concorrentes somente de Meta Ads desde a ultima
+  entrega CAIXA. O health publico respondeu HTTP 200, `status=ok` e versao
+  `d12b20bda7e1e0cdd5a7e93bf48ffbb323190242`.
+- A CI de `main` `40727474933` tinha `validate`, `isolated-restore` e
+  `promotable-image` aprovados; `release-gates` ainda estava em execucao na
+  consulta. O PR documental #413 de Agendamentos estava aberto e nao amplia o
+  escopo desta demanda.
+- O runtime oficial de conhecimento, inclusive com Node 24.19.0, retornou
+  `Documento excede o limite de exportacao.` em `context`, `search` e no hook
+  de troca de branch. A sincronizacao do Obsidian permanece indisponivel; o
+  registro versionado segue como fonte local sem alegar sincronizacao concluida.
+
 ## 2026-10-28: gates protegidos executados no PR
 
 - A protecao exigia `release-gates`, `isolated-restore` e `promotable-image`, mas

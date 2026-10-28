@@ -69,4 +69,12 @@ describe("authorized breadcrumbs", () => {
     expect(renderToStaticMarkup(<AuthorizedBreadcrumbs pages={[simulation]} />)).toBe("");
     expect(renderToStaticMarkup(<AuthorizedBreadcrumbs pages={[]} />)).toBe("");
   });
+
+  it("presents the CAIXA page as Simulador CAIXA without renaming the page catalog", () => {
+    mocks.pathname = "/app/simulacao/caixa";
+    const markup = renderToStaticMarkup(
+      <AuthorizedBreadcrumbs pages={[simulation, child(mocks.pathname)]} />,
+    );
+    expect(markup).toContain('aria-current="page">Simulador CAIXA');
+  });
 });
