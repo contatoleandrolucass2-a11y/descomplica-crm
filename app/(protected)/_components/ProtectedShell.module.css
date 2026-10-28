@@ -159,17 +159,17 @@
   list-style: none;
 }
 
-.topbar:has([data-context-sidebar-navigation="true"]) .navigationList {
+.topbar:has([data-appointments-navigation="true"]) .navigationList {
   gap: 6px;
 }
 
-.topbar:has([data-context-sidebar-navigation="true"]) :is(.navigationLink, .navigationTrigger) {
+.topbar:has([data-appointments-navigation="true"]) :is(.navigationLink, .navigationTrigger) {
   min-height: 44px;
   padding-inline: 8px;
   padding-block: 7px 5px;
 }
 
-.topbar:has([data-context-sidebar-navigation="true"])
+.topbar:has([data-appointments-navigation="true"])
   :is(
     .navigationLink[aria-current="page"],
     .navigationLink[data-active="true"],
@@ -178,16 +178,16 @@
   box-shadow: inset 0 -2px 0 var(--header-accent);
 }
 
-.topbar:has([data-context-sidebar-navigation="true"]) {
+.topbar:has([data-appointments-navigation="true"]) {
   min-height: 50px;
 }
 
-.topbar:has([data-context-sidebar-navigation="true"]) .topbarInner {
+.topbar:has([data-appointments-navigation="true"]) .topbarInner {
   min-height: 49px;
   gap: 18px;
 }
 
-.topbar:has([data-context-sidebar-navigation="true"]) .brand {
+.topbar:has([data-appointments-navigation="true"]) .brand {
   min-height: 44px;
 }
 
