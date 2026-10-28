@@ -40,6 +40,51 @@ select public.bootstrap_master_user('ae810000-0000-4000-8000-000000000001');
 update public.user_roles
 set role_key = 'broker_house', assigned_by = 'ae810000-0000-4000-8000-000000000001'
 where user_id = 'ae810000-0000-4000-8000-000000000002';
+insert into public.crm_organizations (id, organization_key, name, kind)
+values (
+  'ae820000-0000-4000-8000-000000000001',
+  'useful-links-test',
+  'Synthetic Useful Links',
+  'house'
+);
+insert into public.crm_teams (id, organization_id, team_key, name)
+values (
+  'ae830000-0000-4000-8000-000000000001',
+  'ae820000-0000-4000-8000-000000000001',
+  'useful-links-test',
+  'Synthetic Useful Links'
+);
+insert into public.crm_people (id, person_key, display_name, auth_user_id)
+values (
+  'ae850000-0000-4000-8000-000000000001',
+  'useful-links-reader',
+  'Synthetic Useful Links Reader',
+  'ae810000-0000-4000-8000-000000000002'
+);
+insert into public.crm_team_memberships (
+  team_id, person_id, membership_role, valid_from, valid_until
+) values (
+  'ae830000-0000-4000-8000-000000000001',
+  'ae850000-0000-4000-8000-000000000001',
+  'broker',
+  clock_timestamp() - interval '1 minute',
+  clock_timestamp() + interval '1 day'
+);
+insert into public.crm_reporting_scopes (id, scope_key, scope_type, person_id)
+values (
+  'ae840000-0000-4000-8000-000000000001',
+  'useful-links-reader',
+  'person',
+  'ae850000-0000-4000-8000-000000000001'
+);
+insert into public.crm_user_reporting_scope_grants (
+  user_id, reporting_scope_id, granted_by, reason
+) values (
+  'ae810000-0000-4000-8000-000000000002',
+  'ae840000-0000-4000-8000-000000000001',
+  'ae810000-0000-4000-8000-000000000001',
+  'Synthetic useful links read fixture'
+);
 update public.profiles
 set is_active = true,
     access_status = 'approved',

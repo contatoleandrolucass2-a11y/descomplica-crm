@@ -44,6 +44,11 @@
   escopos ativos incompatíveis. A correção mantém somente o editor como master
   e aprova explicitamente o perfil leitor; não altera migration, runtime, dados
   remotos ou qualquer página fora de Links Úteis. Nova CI integral é obrigatória.
+- Segunda validação da fixture: a restauração isolada `40639421924` confirmou
+  que um perfil aprovado `broker_house` exige escopo ativo compatível. O teste
+  de Links Úteis passou a criar organização, equipe, pessoa e escopo sintéticos
+  dentro da própria transação pgTAP. Não há alteração de migration, runtime ou
+  dados remotos; uma nova CI integral permanece obrigatória.
 
 ## 2026-10-28: subsídio automático do Simulador CAIXA publicado
 
