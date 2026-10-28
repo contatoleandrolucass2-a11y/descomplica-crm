@@ -1,5 +1,7 @@
 # Changelog
 
+- Publica o editor administrativo da página de Agendamentos no SHA `d12b20bd`, com migration compartilhada e edição restrita a `admin`/`master`.
+
 - Executa `release-gates`, `isolated-restore` e `promotable-image` também em pull requests protegidos, mantendo a repetição integral dos quatro jobs no `main`.
 
 - Publica a evolução editável de Links Úteis no SHA `d6bc4e7f`, com CI integral,

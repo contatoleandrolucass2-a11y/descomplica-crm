@@ -1,5 +1,7 @@
 # Worklog
 
+- 2026-10-28: publicada `/app/etapas/agendamentos` no SHA `d12b20bda7e1e0cdd5a7e93bf48ffbb323190242`; CI `40710364225` aprovou os quatro gates, migration `appointments_admin_canvas_presentation` foi aplicada no Supabase e o deployment protegido `fc4b0404-bd39-4932-85f8-c133c03a72e3` confirmou health e versão exatos.
+
 - 2026-10-27: corrigida a incompatibilidade entre a proteção do `main` e a CI: `release-gates`, `isolated-restore` e `promotable-image` agora executam em pull requests e continuam repetidos no SHA final de `main`; o teste de contrato exige as duas condições sem reduzir etapas, tolerâncias ou proteção.
 
 ## 2026-10-28 — Links Úteis: evolução editável publicada
