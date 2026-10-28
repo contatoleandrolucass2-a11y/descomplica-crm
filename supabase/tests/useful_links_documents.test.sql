@@ -93,13 +93,21 @@ set is_active = true,
 where user_id = 'ae810000-0000-4000-8000-000000000002';
 insert into public.user_permission_overrides (
   user_id, permission_key, effect, reason, granted_by
-) values (
-  'ae810000-0000-4000-8000-000000000002',
-  'crm.useful_links.grupos_whatsapp.view',
-  'allow',
-  'Synthetic useful links read fixture',
-  'ae810000-0000-4000-8000-000000000001'
-);
+) values
+  (
+    'ae810000-0000-4000-8000-000000000002',
+    'crm.useful_links.grupos_whatsapp.view',
+    'allow',
+    'Synthetic useful links read fixture',
+    'ae810000-0000-4000-8000-000000000001'
+  ),
+  (
+    'ae810000-0000-4000-8000-000000000002',
+    'crm.useful_links.lojas_horarios.view',
+    'deny',
+    'Synthetic useful links page isolation fixture',
+    'ae810000-0000-4000-8000-000000000001'
+  );
 insert into auth.sessions (id, user_id, aal, not_after) values
   ('ae860000-0000-4000-8000-000000000001', 'ae810000-0000-4000-8000-000000000001', 'aal1', now() + interval '1 hour'),
   ('ae860000-0000-4000-8000-000000000002', 'ae810000-0000-4000-8000-000000000002', 'aal1', now() + interval '1 hour');

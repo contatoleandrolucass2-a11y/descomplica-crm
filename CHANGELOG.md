@@ -1,5 +1,6 @@
 # Changelog
 
+- Corrige a fixture de autorização de Links Úteis para comprovar isolamento entre Grupos WhatsApp e Lojas Horários mesmo quando o papel-base herda acesso às duas páginas.
 - Adiciona sidebar contextual e editor compartilhado aos Links Úteis, com organograma comercial, cards movíveis e redimensionáveis, conteúdo atualizado das lojas e edição restrita a administradores.
 
 ## 2026-10-28
