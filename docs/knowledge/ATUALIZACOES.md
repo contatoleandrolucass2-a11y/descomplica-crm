@@ -49,6 +49,10 @@
   de Links Úteis passou a criar organização, equipe, pessoa e escopo sintéticos
   dentro da própria transação pgTAP. Não há alteração de migration, runtime ou
   dados remotos; uma nova CI integral permanece obrigatória.
+- Terceira validação da fixture: a restauração isolada `40640849947` avançou
+  pela autorização e rejeitou somente o item sintético sem o quarto campo
+  obrigatório `description`. O campo vazio foi incluído exclusivamente no
+  pgTAP de Links Úteis; migration, runtime e dados remotos seguem inalterados.
 
 ## 2026-10-28: subsídio automático do Simulador CAIXA publicado
 

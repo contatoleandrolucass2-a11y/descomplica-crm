@@ -4,6 +4,7 @@
 - 2026-10-28: corrigido o limite de escopo antes da publicação. A tentativa de generalizar o shell compartilhado foi retirada; `DashboardShell`, navegação superior, CSS compartilhado, testes e onze baselines do Dashboard foram restaurados integralmente. O sidebar agora pertence somente ao layout de Links Úteis, com teste que impede reintroduzir comportamento dessa área nos arquivos compartilhados.
 - 2026-10-28: corrigida a fixture pgTAP exclusiva de Links Úteis após a restauração isolada `40637253409` detectar que o leitor sintético era inicializado como `master` antes de mudar para `broker_house`. A fixture agora mantém somente o editor como master e aprova explicitamente o perfil leitor, sem criar escopos incompatíveis.
 - 2026-10-28: completada a mesma fixture após a restauração isolada `40639421924` exigir um escopo ativo compatível para aprovar o leitor `broker_house`. A organização, equipe, pessoa e escopo adicionados são sintéticos, transacionais e exclusivos do pgTAP de Links Úteis.
+- 2026-10-28: alinhado o item sintético da fixture ao contrato de quatro campos após a restauração isolada `40640849947` rejeitar a ausência de `description`. A correção adiciona apenas a descrição vazia ao item de teste.
 
 ## 2026-10-28 — Simulador CAIXA: subsídio automático publicado
 
