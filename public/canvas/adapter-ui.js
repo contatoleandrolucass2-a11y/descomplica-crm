@@ -63,6 +63,7 @@ async function refreshIntegrated(){
   if(changed){
    const old=new Map([...document.querySelectorAll('#canvas .card')].map(el=>[el.dataset.id,new Map([...el.querySelectorAll('desc[data-tip-name]')].map(d=>[JSON.stringify([d.dataset.tipName,d.dataset.tipDate,d.dataset.tipMetric]),d.dataset.tipValue]))]));
    const next=host.context();Object.assign(integration,next);campaigns.splice(0,campaigns.length,...next.entities);
+   selected=campaigns.map((campaign,index)=>next.selected.includes(campaign.id)?index:-1).filter(index=>index>=0);
    render(false);
    for(const el of document.querySelectorAll('#canvas .card')){
     let changed=false;

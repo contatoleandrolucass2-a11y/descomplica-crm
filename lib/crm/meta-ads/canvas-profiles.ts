@@ -15,6 +15,7 @@ const canvasTypeSchema = z.enum([
 ]);
 const canvasPeriodSchema = z.enum(["global", "today", "week", "month", "custom"]);
 const canvasGroupSchema = z.enum(["campaign", "day", "hour"]);
+const canvasCampaignModeSchema = z.enum(["global", "all", "custom"]);
 const dateSchema = z.string().regex(/^\d{4}-\d{2}-\d{2}$/u);
 
 export const metaAdsCanvasScopeSchema = z.enum(["macro", "micro-sets", "micro-ads"]);
@@ -30,6 +31,10 @@ export const metaAdsCanvasCardSchema = z
     group: canvasGroupSchema,
     start: dateSchema.optional(),
     end: dateSchema.optional(),
+    campaignMode: canvasCampaignModeSchema.optional(),
+    campaignEntityIds: z.array(z.string().trim().min(1).max(100)).max(100).nullable().optional(),
+    // Compatibilidade temporária com perfis anteriores, que salvavam a
+    // posição da campanha na resposta em vez do ID estável devolvido pela Meta.
     campaignIds: z.array(z.number().int().nonnegative()).max(100).nullable().optional(),
   })
   .strict()
