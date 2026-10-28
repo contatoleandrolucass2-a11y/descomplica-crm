@@ -444,7 +444,12 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(page.locator(".caixa-term-field input")).toHaveValue("240");
       await page.getByLabel("Data de nascimento *", { exact: false }).fill("1986-01-22");
       await browserExpect(page.locator(".caixa-term-field input")).toHaveValue("420");
-      await browserExpect(page.getByText("Elegível à análise", { exact: true })).toBeVisible();
+      await browserExpect(page.getByText("Complete os dados", { exact: true })).toBeVisible();
+      const subsidyInputs = page.locator(".caixa-subsidy-inputs");
+      await subsidyInputs.locator("select").nth(0).selectOption("apartment");
+      await subsidyInputs.locator('input[type="number"]').fill("50");
+      await subsidyInputs.locator("select").nth(1).selectOption("yes");
+      await browserExpect(page.getByText("R$ 3.927,65", { exact: true })).toBeVisible();
       await page.getByRole("button", { name: "Calcular simulação", exact: true }).click();
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
         "MCMV Faixa 3 por valor do imóvel",
@@ -453,9 +458,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         "taxa efetiva de 8,4722% a.a.",
       );
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText("420 meses");
-      await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
-        "Elegível à análise · valor não abatido",
-      );
+      await browserExpect(page.locator("#caixa-simulation-result")).toContainText("R$ 3.927,65");
       expect(errors).toEqual([]);
     });
     it("applies the SBPE SAC ceiling and removes MCMV-only values", async () => {

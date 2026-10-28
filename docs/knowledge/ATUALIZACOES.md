@@ -1,5 +1,36 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: subsídio automático do Simulador CAIXA
+
+- Abertura: `origin/main` e o checkout estavam em
+  `de2be3c6c03e9d0cd58ed209a40b1b5bea41e985`; o health público respondeu HTTP
+  200, `status=ok` e versão
+  `f98f3c7310f773a36325bb6114ebd12369e9e077`. A consulta foi observacional e
+  não acessou dados autenticados.
+- Causa: o motor classificava renda até R$ 4 mil como elegível, mas atribuía
+  `confirmedSubsidy ?? 0`; portanto nenhum valor automático participava da
+  composição financeira.
+- Implementação: fórmula literal do MFOM Habitação v034, pp. 131–133, com
+  `FDr` do Anexo III, `Fpop` do Anexo IV cruzado com REGIC 2018 e população
+  IBGE 2026, `FDfin`, `FUH`, tetos e redutores. Tipo/área da unidade e
+  dependentes são solicitados somente no cenário elegível. O valor confirmado
+  manualmente continua prevalecendo.
+- Cobertura territorial: 5.570 dos 5.571 municípios têm fator automático. Boa
+  Esperança do Norte/MT permanece sem `Fpop`, pois é posterior à REGIC 2018;
+  não foi criado fallback presumido.
+- Evidência focada: 61 testes financeiros/visuais passaram, incluindo o caso
+  São Paulo, renda R$ 4.000, imóvel R$ 275 mil, apartamento de 50 m² e família
+  não unipessoal, cujo resultado indicativo é R$ 3.638,05. A matriz sintética
+  passou em desktop/celular, três temas, Axe e ausência de overflow. Lint sem
+  erros, tipos e build passaram com Node 24.19.0.
+- Gate externo: a suíte Vitest integral aprovou 4.440 testes e pulou 112. O
+  bloco Node/release no Windows manteve falhas fora do escopo em fixtures e
+  permissões privadas de Meta Ads (`Missing synthetic file` e ACL/diretório),
+  sem relação com o Simulador CAIXA; nenhuma área externa foi alterada.
+- Conhecimento: `knowledge:sync` permaneceu indisponível com `Documento excede
+o limite de exportacao.`. O registro versionado foi atualizado; a
+  sincronização do Obsidian não foi alegada como concluída.
+
 ## 2026-10-27: Links Úteis publicado e catálogo aplicado em produção
 
 - Runtime: a versão publicada permaneceu em

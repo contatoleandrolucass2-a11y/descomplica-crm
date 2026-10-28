@@ -4,6 +4,7 @@ import {
   calculateExtraAmortization,
   calculateFgtsTime,
   calculateHousingSimulation,
+  calculateMcmvSubsidy,
   calculatePrice,
   calculateSacFirst,
   estimateConstructionInterest,
@@ -13,6 +14,7 @@ import {
   getMcmvBand,
   getMcmvSubsidyEligibility,
   getMunicipalLimit,
+  getPopulationFactor,
   type HousingInput,
 } from "@/lib/crm/simulators/caixa";
 import { CAIXA_CITIES } from "@/lib/crm/simulators/caixa-reference-data";
@@ -50,6 +52,8 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
     expect(CAIXA_CITIES).toHaveLength(5571);
     expect(new Set(CAIXA_CITIES.map((city) => `${city.u}|${city.n}`)).size).toBe(5571);
     expect(CAIXA_CITIES.every((city) => city.l >= 210000 && city.l <= 275000)).toBe(true);
+    expect(CAIXA_CITIES.filter((city) => city.p !== undefined)).toHaveLength(5570);
+    expect(CAIXA_CITIES.find((city) => city.n === "Boa Esperança do Norte")?.p).toBeUndefined();
   });
   it.each([
     [3200, "Faixa 1"],
@@ -289,6 +293,71 @@ describe("CAIXA mathematics and official policy boundaries, consulted through 27
         confirmedSubsidy: undefined,
       }),
     ).toMatchObject({ subsidy: 0, subsidyEligibility: "eligible-review" });
+  });
+  it("calculates the MFOM v034 subsidy automatically with official territorial factors", () => {
+    expect(getPopulationFactor("São Paulo", "SP")).toBe(1.2);
+    const automatic = calculateMcmvSubsidy({
+      income: 4000,
+      propertyValue: 275000,
+      city: "São Paulo",
+      state: "SP",
+      nominalRate: 6,
+      propertyType: "apartment",
+      propertyArea: 50,
+      propertyCondition: "new",
+      inConstruction: true,
+      singlePersonFamily: false,
+    });
+    expect(automatic).toMatchObject({
+      amount: 3638.05,
+      incomeFactor: 3038.46,
+      regionalFactor: 2.07,
+      financingFactor: -7.79,
+      housingFactor: 5.5,
+      populationFactor: 1.2,
+    });
+    expect(
+      success({
+        income: 4000,
+        propertyValue: 275000,
+        ownFunds: 0,
+        confirmedSubsidy: undefined,
+        propertyType: "apartment",
+        propertyArea: 50,
+        singlePersonFamily: false,
+        inConstruction: true,
+      }),
+    ).toMatchObject({
+      subsidy: 3638.05,
+      subsidyConfirmed: false,
+      subsidyEligibility: "automatic",
+    });
+  });
+  it("applies used-property and unipersonal reductions after the official ceiling", () => {
+    const profile = {
+      income: 4000,
+      propertyValue: 275000,
+      city: "São Paulo",
+      state: "SP",
+      nominalRate: 6,
+      propertyType: "apartment" as const,
+      propertyArea: 50,
+      inConstruction: false,
+    };
+    expect(
+      calculateMcmvSubsidy({
+        ...profile,
+        propertyCondition: "used",
+        singlePersonFamily: false,
+      })?.amount,
+    ).toBe(1819.02);
+    expect(
+      calculateMcmvSubsidy({
+        ...profile,
+        propertyCondition: "new",
+        singlePersonFamily: true,
+      })?.amount,
+    ).toBe(0);
   });
   it("keeps public contribution separate and enforces the minimum FGTS complement", () => {
     const subsidyProfile = {
