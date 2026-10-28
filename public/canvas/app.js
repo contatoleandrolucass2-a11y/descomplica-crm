@@ -81,6 +81,44 @@ function saveProfiles(){
  },450);
 }
 function activeProfile(){return profileState.items.find(item=>item.id===profileState.activeId)||profileState.items[0];}
+function campaignMode(card){
+ if(['global','all','custom'].includes(card.campaignMode))return card.campaignMode;
+ return Array.isArray(card.campaignEntityIds)||Array.isArray(card.campaignIds)?'custom':'global';
+}
+function stableCampaignIds(indexes){return indexes.filter(index=>Number.isInteger(index)&&campaigns[index]).map(index=>String(campaigns[index].id));}
+function sameCampaignIndexes(left,right){return left.length===right.length&&left.every((value,index)=>value===right[index]);}
+function upgradeCampaignSelections(){
+ let changed=false;
+ const standard=profileState.items.find(item=>item.id===profileState.defaultId);
+ // The approved default once stored "all campaigns" as [0..n]. When Meta
+ // returns a new campaign, that frozen list excludes it. Restore the intended
+ // dynamic behavior only when every explicit card has that same full prefix.
+ if(standard){
+  const explicit=standard.cards.filter(card=>Array.isArray(card.campaignIds));
+  const first=explicit[0]?.campaignIds;
+  const completePrefix=first?.length&&first.every((value,index)=>value===index)&&first.length<=campaigns.length;
+  if(completePrefix&&explicit.every(card=>sameCampaignIndexes(card.campaignIds,first))){
+   explicit.forEach(card=>{delete card.campaignIds;card.campaignMode='global';card.campaignEntityIds=null;});
+   changed=true;
+  }
+ }
+ // Custom selections remain custom, but are migrated from volatile array
+ // positions to the immutable campaign IDs supplied by the API.
+ for(const profile of profileState.items){
+  for(const card of profile.cards){
+   if(!card.campaignMode){card.campaignMode=campaignMode(card);changed=true;}
+   if(Array.isArray(card.campaignIds)){
+    card.campaignEntityIds=stableCampaignIds(card.campaignIds);
+    card.campaignMode='custom';delete card.campaignIds;changed=true;
+   }else if(card.campaignIds===null){delete card.campaignIds;changed=true;}
+  }
+ }
+ if(changed){
+  const active=profileState.items.find(item=>item.id===profileState.activeId)||profileState.items[0];
+  cards=cloneCards(active.cards);
+ }
+ return changed;
+}
 function upgradeRemoteDefault(){
  if(integration.view!=='macro')return false;
  const standard=profileState.items.find(item=>item.id===profileState.defaultId);
@@ -105,7 +143,9 @@ async function hydrateProfilesFromServer(){
    const active=profileState.items.find(item=>item.id===profileState.activeId)||profileState.items[0];
    profileState.activeId=active.id;cards=cloneCards(active.cards);
    if(!profileState.items.some(item=>item.id===profileState.defaultId))profileState.defaultId=active.id;
-   shouldSync=upgradeRemoteDefault();
+   const defaultUpgraded=upgradeRemoteDefault();
+   const campaignsUpgraded=upgradeCampaignSelections();
+   shouldSync=defaultUpgraded||campaignsUpgraded;
    localStorage.setItem(profileKey,JSON.stringify(profileState));
    localStorage.setItem(key,JSON.stringify(cards));
   }
@@ -117,6 +157,12 @@ async function hydrateProfilesFromServer(){
   const status=$('#save-status');if(status)status.textContent='Perfil remoto indisponível; layout local preservado';
   setTimeout(hydrateProfilesFromServer,10000);
  }finally{profilesHydrating=false;}
+}
+// Apply the same migration before the first paint; server hydration repeats it
+// against the authoritative per-login profile and persists it through the API.
+if(upgradeCampaignSelections()){
+ localStorage.setItem(profileKey,JSON.stringify(profileState));
+ localStorage.setItem(key,JSON.stringify(cards));
 }
 // A primeira versão publicada criou no navegador o perfil de fábrica antigo.
 // Troque somente esse perfil ainda intacto. Perfis e layouts personalizados
@@ -281,7 +327,7 @@ function chartMetricControl(c){
  const allowed=c.type==='donut'?Object.fromEntries(Object.entries(metricLabels).filter(([key])=>['spend','results'].includes(key))):metricLabels;
  return `<label class="chart-filter-field">Métrica<select data-field="metric" aria-label="Métrica">${options(allowed,c.metric)}</select></label>`;
 }
-function cardHTML(c,expanded=false){const selected=chartCampaigns(c);let [a,b]=range(c),title=chartTitle(c);return `<article class="card ${c.type==='funnel'&&selected.length<=9?'funnel-all-visible':''}" data-id="${c.id}" data-chart-type="${c.type}" style="--span:${c.span};--height:${c.height}px;--rows:${Math.ceil((c.height+16)/20)}"><div class="card-top"><button class="icon group-select" data-group-select="${c.id}" aria-label="Selecionar gráfico para mover em grupo" aria-pressed="${groupSelection.has(c.id)}">✓</button><button class="icon handle"  title="Arrastar gráfico" aria-label="Mover ${title}">⠿</button><div class="metric-heading"><h2 title="${escapeLabel(title)}">${title}</h2><button class="metric-info" data-metric-info="${c.type==='radar'?'radar':c.metric}" aria-label="Entender ${title}" title="Como interpretar esta métrica">ⓘ</button></div><button class="icon filter-toggle" data-action="filters" title="Filtros do gráfico" aria-label="Filtros do gráfico" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button><button class="icon" data-action="type" title="Trocar modelo" aria-label="Trocar modelo do gráfico">▥</button>${!expanded?'<button class="icon" data-action="expand" title="Expandir gráfico" aria-label="Expandir gráfico">⤢</button>':''}<button class="icon" data-action="menu" title="Opções do gráfico" aria-label="Opções do gráfico">⋯</button></div><div class="subtitle">${c.group==='campaign'?(integration.view.startsWith('micro')?'Comparação entre conjuntos/anúncios':'Comparação por campanha'):c.group==='hour'?'Evolução por hora · Simulação · Brasília':'Evolução diária'} · ${short(a)} – ${short(b)} · ${Array.isArray(c.campaignIds)?selected.length+' campanhas próprias':'Campanhas gerais'}</div><div class="card-controls" hidden><div class="chart-filter-header"><strong>Filtros do gráfico</strong><button class="icon" data-action="filters" aria-label="Fechar filtros">×</button></div>${chartMetricControl(c)}<label class="chart-filter-field">Período<select data-field="period" aria-label="Período do gráfico">${options({global:'Período geral',today:'Hoje',week:'Esta semana',month:'Este mês',custom:'Personalizado'},c.period)}</select></label><label class="chart-filter-field" ${fixedChartDescription(c.type)||c.type==='kpi'?'hidden':''}>Agrupar por<select data-field="group" aria-label="Agrupamento">${options({campaign:'Por campanha',day:'Por dia',hour:'Por hora'},c.group)}</select></label>${c.period==='custom'?`<input data-field="start" aria-label="Início do gráfico" type="date"  value="${c.start}"><input data-field="end" aria-label="Fim do gráfico" type="date"  value="${c.end}">`:''}${campaignControls(c)}</div><div class="chart">${plot(c)}</div><div class="legend">${selected.map(i=>`<span title="${escapeLabel(campaigns[i].name)}"><i style="background:${campaigns[i].color}"></i>${campaigns[i].name}</span>`).join('')}</div><button class="resize" aria-label="Redimensionar gráfico" title="Arraste para redimensionar">◢</button></article>`}
+function cardHTML(c,expanded=false){const selected=chartCampaigns(c);let [a,b]=range(c),title=chartTitle(c);return `<article class="card ${c.type==='funnel'&&selected.length<=9?'funnel-all-visible':''}" data-id="${c.id}" data-chart-type="${c.type}" style="--span:${c.span};--height:${c.height}px;--rows:${Math.ceil((c.height+16)/20)}"><div class="card-top"><button class="icon group-select" data-group-select="${c.id}" aria-label="Selecionar gráfico para mover em grupo" aria-pressed="${groupSelection.has(c.id)}">✓</button><button class="icon handle"  title="Arrastar gráfico" aria-label="Mover ${title}">⠿</button><div class="metric-heading"><h2 title="${escapeLabel(title)}">${title}</h2><button class="metric-info" data-metric-info="${c.type==='radar'?'radar':c.metric}" aria-label="Entender ${title}" title="Como interpretar esta métrica">ⓘ</button></div><button class="icon filter-toggle" data-action="filters" title="Filtros do gráfico" aria-label="Filtros do gráfico" aria-expanded="false"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M4 5h16l-6 7v6l-4 2v-8z"/></svg></button><button class="icon" data-action="type" title="Trocar modelo" aria-label="Trocar modelo do gráfico">▥</button>${!expanded?'<button class="icon" data-action="expand" title="Expandir gráfico" aria-label="Expandir gráfico">⤢</button>':''}<button class="icon" data-action="menu" title="Opções do gráfico" aria-label="Opções do gráfico">⋯</button></div><div class="subtitle">${c.group==='campaign'?(integration.view.startsWith('micro')?'Comparação entre conjuntos/anúncios':'Comparação por campanha'):c.group==='hour'?'Evolução por hora · Simulação · Brasília':'Evolução diária'} · ${short(a)} – ${short(b)} · ${campaignMode(c)==='global'?'Campanhas gerais':campaignMode(c)==='all'?'Todas as campanhas da API':selected.length+' campanhas próprias'}</div><div class="card-controls" hidden><div class="chart-filter-header"><strong>Filtros do gráfico</strong><button class="icon" data-action="filters" aria-label="Fechar filtros">×</button></div>${chartMetricControl(c)}<label class="chart-filter-field">Período<select data-field="period" aria-label="Período do gráfico">${options({global:'Período geral',today:'Hoje',week:'Esta semana',month:'Este mês',custom:'Personalizado'},c.period)}</select></label><label class="chart-filter-field" ${fixedChartDescription(c.type)||c.type==='kpi'?'hidden':''}>Agrupar por<select data-field="group" aria-label="Agrupamento">${options({campaign:'Por campanha',day:'Por dia',hour:'Por hora'},c.group)}</select></label>${c.period==='custom'?`<input data-field="start" aria-label="Início do gráfico" type="date"  value="${c.start}"><input data-field="end" aria-label="Fim do gráfico" type="date"  value="${c.end}">`:''}${campaignControls(c)}</div><div class="chart">${plot(c)}</div><div class="legend">${selected.map(i=>`<span title="${escapeLabel(campaigns[i].name)}"><i style="background:${campaigns[i].color}"></i>${campaigns[i].name}</span>`).join('')}</div><button class="resize" aria-label="Redimensionar gráfico" title="Arraste para redimensionar">◢</button></article>`}
 function chartSignature(card){
  const normalized={...card};normalize(normalized);
  // Relative periods stay distinct even when their dates temporarily coincide.
@@ -457,14 +503,28 @@ function chartTitle(c){
  const dates=start===end?`de ${short(start)}`:`de ${short(start)} a ${short(end)}`;
  return `${metric} ${suffix||dates}${c.group==='hour'?' · por hora':''}`;
 }
-function chartCampaigns(c){return Array.isArray(c.campaignIds)?c.campaignIds.filter(i=>Number.isInteger(i)&&campaigns[i]):selected;}
-function campaignControls(c){const ids=chartCampaigns(c),inherited=!Array.isArray(c.campaignIds);return `<fieldset class="chart-campaigns"><legend>Campanhas deste gráfico</legend><div class="campaign-selection-actions"><label class="follow-global"><input type="checkbox" data-campaign-mode="global" ${inherited?'checked':''}>Seguir filtro geral</label><label><input type="checkbox" data-campaign-mode="all" ${ids.length===campaigns.length?'checked':''}>Selecionar todas</label></div><div class="campaign-checks">${campaigns.map((campaign,i)=>`<label><input type="checkbox" data-campaign-id="${i}" ${ids.includes(i)?'checked':''}><i style="background:${campaign.color}"></i><span title="${escapeLabel(campaign.name)}">${escapeLabel(campaign.name)}</span></label>`).join('')}</div></fieldset>`;}
+function chartCampaigns(c){
+ const mode=campaignMode(c);
+ if(mode==='all')return campaigns.map((_,index)=>index);
+ if(mode==='custom'){
+  if(Array.isArray(c.campaignEntityIds)){const ids=new Set(c.campaignEntityIds.map(String));return campaigns.map((campaign,index)=>ids.has(String(campaign.id))?index:-1).filter(index=>index>=0);}
+  return Array.isArray(c.campaignIds)?c.campaignIds.filter(index=>Number.isInteger(index)&&campaigns[index]):[];
+ }
+ return selected;
+}
+function campaignControls(c){const ids=chartCampaigns(c),mode=campaignMode(c);return `<fieldset class="chart-campaigns"><legend>Campanhas deste gráfico</legend><div class="campaign-selection-actions"><label class="follow-global"><input type="checkbox" data-campaign-mode="global" ${mode==='global'?'checked':''}>Seguir filtro geral</label><label><input type="checkbox" data-campaign-mode="all" ${mode==='all'?'checked':''}>Selecionar todas da API</label></div><div class="campaign-checks">${campaigns.map((campaign,i)=>`<label><input type="checkbox" data-campaign-id="${i}" ${ids.includes(i)?'checked':''}><i style="background:${campaign.color}"></i><span title="${escapeLabel(campaign.name)}">${escapeLabel(campaign.name)}</span></label>`).join('')}</div></fieldset>`;}
 document.addEventListener('change',e=>{
  const mode=e.target.dataset.campaignMode,id=e.target.dataset.campaignId;if(!mode&&id===undefined)return;
  const expanded=!!e.target.closest('#expanded'),c=cards.find(c=>c.id===e.target.closest('.card').dataset.id),original={...c};
- if(mode==='global')c.campaignIds=e.target.checked?null:[...selected];
- else if(mode==='all')c.campaignIds=e.target.checked?campaigns.map((_,i)=>i):[];
- else{const ids=new Set(chartCampaigns(c));if(e.target.checked)ids.add(+id);else ids.delete(+id);c.campaignIds=[...ids].sort((a,b)=>a-b);}
+ delete c.campaignIds;
+ if(mode==='global'){
+  c.campaignMode=e.target.checked?'global':'custom';c.campaignEntityIds=e.target.checked?null:stableCampaignIds(selected);
+ }else if(mode==='all'){
+  c.campaignMode=e.target.checked?'all':'custom';c.campaignEntityIds=e.target.checked?null:[];
+ }else{
+  const ids=new Set(chartCampaigns(c));if(e.target.checked)ids.add(+id);else ids.delete(+id);
+  c.campaignMode='custom';c.campaignEntityIds=stableCampaignIds([...ids].sort((a,b)=>a-b));
+ }
  const duplicate=existingChart(c);if(duplicate){Object.assign(c,original);refresh();showExistingChart(duplicate);return;}const updated={...c};Object.assign(c,original);checkpoint();Object.assign(c,updated);
  refresh();const host=expanded?$('#expanded-content'):$('#canvas'),card=[...host.querySelectorAll('.card')].find(el=>el.dataset.id===c.id);if(card)openChartFilters(card);
 });

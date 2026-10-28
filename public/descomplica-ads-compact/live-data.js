@@ -31,6 +31,7 @@ let state = {
     }[initialView] || "macro",
   selected: null,
   ids: [],
+  campaignSelectionMode: "all",
   days: 14,
   startDate: "",
   endDate: "",
@@ -63,6 +64,7 @@ const filterFields = [
   "selected",
   "selectedSet",
   "ids",
+  "campaignSelectionMode",
   "days",
   "startDate",
   "endDate",
@@ -245,12 +247,16 @@ function status(c) {
 }
 function rebuildCampaigns() {
   const old = campaigns.map((c) => c.id),
+    followApi = state.campaignSelectionMode === "all" ||
+      (old.length > 0 && old.length === state.ids.length && old.every((id) => state.ids.includes(id))),
     all = AdsData.groups(
       sourceData.rows.filter((r) => AdsData.matchesSelections(r, state)),
     );
   campaigns = all;
   const requested = old.length ? state.ids : restoredIds;
-  state.ids = requested
+  state.ids = followApi
+    ? all.map((c) => c.id)
+    : requested
     ? requested.filter((id) => all.some((c) => c.id === id))
     : all.map((c) => c.id);
   restoredIds = null;
@@ -394,6 +400,7 @@ function closeFilterMenus(except = null) {
 function updateFilterSelection(key, values) {
   if (key === "campaigns") {
     state.ids = values;
+    state.campaignSelectionMode = values.length === campaigns.length ? "all" : "custom";
     return;
   }
   if (key === "account") {
