@@ -1,5 +1,6 @@
 # Changelog
 
+- Remove declarações redundantes do validador SQL de Links Úteis para atender ao lint estrito da restauração isolada sem alterar a validação dos documentos.
 - Adiciona sidebar contextual e editor compartilhado aos Links Úteis, com organograma comercial, cards movíveis e redimensionáveis, conteúdo atualizado das lojas e edição restrita a administradores.
 
 ## 2026-10-28
