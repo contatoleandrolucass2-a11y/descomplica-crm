@@ -48,6 +48,11 @@
   outline-offset: 2px;
 }
 
+.toolbar button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .primaryButton {
   border-color: var(--analytics-cyan-strong) !important;
   background: var(--analytics-cyan-strong) !important;

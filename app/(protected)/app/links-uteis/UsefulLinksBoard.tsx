@@ -20,6 +20,12 @@ import styles from "./UsefulLinksBoard.module.css";
 
 type SaveState = "idle" | "dirty" | "saving" | "saved" | "failure" | "conflict";
 
+type EditorDraft = {
+  card: UsefulLinksCard;
+  paragraphsText: string;
+  tableText: string;
+};
+
 function canvasCard(card: UsefulLinksCard): DashboardCard {
   return {
     id: card.id,
@@ -70,6 +76,14 @@ function parseTable(value: string): UsefulLinksSectionCard["table"] {
   const [headers, ...rows] = lines;
   if (!headers?.length) return null;
   return { headers, rows };
+}
+
+function editorDraft(card: UsefulLinksCard): EditorDraft {
+  return {
+    card: structuredClone(card),
+    paragraphsText: card.kind === "section" ? card.paragraphs.join("\n\n") : "",
+    tableText: card.kind === "section" ? tableText(card.table) : "",
+  };
 }
 
 function SectionContent({ card, showTitle }: { card: UsefulLinksSectionCard; showTitle: boolean }) {
@@ -180,12 +194,14 @@ function OrgChart({ card, showTitle }: { card: UsefulLinksOrgChartCard; showTitl
 }
 
 function CardEditor({
-  card,
+  draft,
   onChange,
 }: {
-  card: UsefulLinksCard;
-  onChange: (card: UsefulLinksCard) => void;
+  draft: EditorDraft;
+  onChange: (draft: EditorDraft) => void;
 }) {
+  const card = draft.card;
+  const updateCard = (nextCard: UsefulLinksCard) => onChange({ ...draft, card: nextCard });
   if (card.kind === "org-chart") {
     return (
       <div className={styles.editorFields}>
@@ -193,14 +209,14 @@ function CardEditor({
           Título
           <input
             value={card.title}
-            onChange={(event) => onChange({ ...card, title: event.target.value })}
+            onChange={(event) => updateCard({ ...card, title: event.target.value })}
           />
         </label>
         <label>
           Observação
           <textarea
             value={card.note}
-            onChange={(event) => onChange({ ...card, note: event.target.value })}
+            onChange={(event) => updateCard({ ...card, note: event.target.value })}
           />
         </label>
         <div className={styles.editorHeading}>
@@ -208,7 +224,7 @@ function CardEditor({
           <button
             type="button"
             onClick={() =>
-              onChange({
+              updateCard({
                 ...card,
                 nodes: [
                   ...card.nodes,
@@ -236,7 +252,7 @@ function CardEditor({
               <input
                 value={node.role}
                 onChange={(event) =>
-                  onChange({
+                  updateCard({
                     ...card,
                     nodes: card.nodes.map((entry) =>
                       entry.id === node.id ? { ...entry, role: event.target.value } : entry,
@@ -250,7 +266,7 @@ function CardEditor({
               <input
                 value={node.name}
                 onChange={(event) =>
-                  onChange({
+                  updateCard({
                     ...card,
                     nodes: card.nodes.map((entry) =>
                       entry.id === node.id ? { ...entry, name: event.target.value } : entry,
@@ -264,7 +280,7 @@ function CardEditor({
               <input
                 value={node.phone}
                 onChange={(event) =>
-                  onChange({
+                  updateCard({
                     ...card,
                     nodes: card.nodes.map((entry) =>
                       entry.id === node.id ? { ...entry, phone: event.target.value } : entry,
@@ -278,7 +294,7 @@ function CardEditor({
               <input
                 value={node.href ?? ""}
                 onChange={(event) =>
-                  onChange({
+                  updateCard({
                     ...card,
                     nodes: card.nodes.map((entry) =>
                       entry.id === node.id ? { ...entry, href: event.target.value || null } : entry,
@@ -292,7 +308,7 @@ function CardEditor({
               <select
                 value={node.parentId ?? ""}
                 onChange={(event) =>
-                  onChange({
+                  updateCard({
                     ...card,
                     nodes: card.nodes.map((entry) =>
                       entry.id === node.id
@@ -317,7 +333,7 @@ function CardEditor({
                 type="button"
                 className={styles.dangerButton}
                 onClick={() =>
-                  onChange({
+                  updateCard({
                     ...card,
                     nodes: card.nodes
                       .filter(({ id }) => id !== node.id)
@@ -342,17 +358,15 @@ function CardEditor({
         Título
         <input
           value={card.title}
-          onChange={(event) => onChange({ ...card, title: event.target.value })}
+          onChange={(event) => updateCard({ ...card, title: event.target.value })}
         />
       </label>
       <label>
         Textos separados por uma linha em branco
         <textarea
           rows={7}
-          value={card.paragraphs.join("\n\n")}
-          onChange={(event) =>
-            onChange({ ...card, paragraphs: parseParagraphs(event.target.value) })
-          }
+          value={draft.paragraphsText}
+          onChange={(event) => onChange({ ...draft, paragraphsText: event.target.value })}
         />
       </label>
       <div className={styles.editorHeading}>
@@ -360,7 +374,7 @@ function CardEditor({
         <button
           type="button"
           onClick={() =>
-            onChange({
+            updateCard({
               ...card,
               items: [
                 ...card.items,
@@ -380,7 +394,7 @@ function CardEditor({
             <input
               value={item.label}
               onChange={(event) =>
-                onChange({
+                updateCard({
                   ...card,
                   items: card.items.map((entry) =>
                     entry.id === item.id ? { ...entry, label: event.target.value } : entry,
@@ -394,7 +408,7 @@ function CardEditor({
             <input
               value={item.href ?? ""}
               onChange={(event) =>
-                onChange({
+                updateCard({
                   ...card,
                   items: card.items.map((entry) =>
                     entry.id === item.id ? { ...entry, href: event.target.value || null } : entry,
@@ -408,7 +422,7 @@ function CardEditor({
             <textarea
               value={item.description}
               onChange={(event) =>
-                onChange({
+                updateCard({
                   ...card,
                   items: card.items.map((entry) =>
                     entry.id === item.id ? { ...entry, description: event.target.value } : entry,
@@ -421,7 +435,7 @@ function CardEditor({
             type="button"
             className={styles.dangerButton}
             onClick={() =>
-              onChange({ ...card, items: card.items.filter(({ id }) => id !== item.id) })
+              updateCard({ ...card, items: card.items.filter(({ id }) => id !== item.id) })
             }
           >
             <Trash2 size={16} aria-hidden="true" /> Remover
@@ -432,8 +446,8 @@ function CardEditor({
         Tabela (colunas separadas por tabulação)
         <textarea
           rows={8}
-          value={tableText(card.table)}
-          onChange={(event) => onChange({ ...card, table: parseTable(event.target.value) })}
+          value={draft.tableText}
+          onChange={(event) => onChange({ ...draft, tableText: event.target.value })}
         />
       </label>
     </div>
@@ -446,7 +460,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
   const [canEdit, setCanEdit] = useState(false);
   const [state, setState] = useState<SaveState>("idle");
   const [message, setMessage] = useState("");
-  const [editor, setEditor] = useState<UsefulLinksCard | null>(null);
+  const [editor, setEditor] = useState<EditorDraft | null>(null);
 
   const load = useCallback(
     async (signal?: AbortSignal) => {
@@ -489,6 +503,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
   }, [load]);
 
   function updateDocument(cards: UsefulLinksCard[]) {
+    if (state === "saving") return;
     setDocument((current) => ({ ...current, cards }));
     setState("dirty");
     setMessage("");
@@ -534,6 +549,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
         <div className={styles.toolbar} aria-label="Edição da página">
           <button
             type="button"
+            disabled={state === "saving"}
             onClick={() =>
               updateDocument([
                 ...document.cards,
@@ -576,7 +592,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
       ) : null}
       <DashboardCanvas
         cards={dashboardCards}
-        disabled={!canEdit}
+        disabled={!canEdit || state === "saving"}
         ariaLabel={`Cards de ${page.title}`}
         onCommit={(next) =>
           updateDocument(
@@ -591,11 +607,11 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
           const card = document.cards.find(({ id }) => id === canvas.id)!;
           return (
             <div className={styles.renderedCard}>
-              {canEdit ? (
+              {canEdit && state !== "saving" ? (
                 <button
                   type="button"
                   className={styles.editButton}
-                  onClick={() => setEditor(structuredClone(card))}
+                  onClick={() => setEditor(editorDraft(card))}
                 >
                   <Pencil size={16} aria-hidden="true" /> Editar
                 </button>
@@ -611,7 +627,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
       />
       {editor ? (
         <DashboardModal
-          title={`Editar ${editor.title}`}
+          title={`Editar ${editor.card.title}`}
           description="As mudanças entram no rascunho. Use Salvar alterações para publicar o conteúdo compartilhado."
           onClose={() => setEditor(null)}
           wide
@@ -626,7 +642,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
                 onClick={() => {
                   updateDocument(
                     document.cards
-                      .filter(({ id }) => id !== editor.id)
+                      .filter(({ id }) => id !== editor.card.id)
                       .map((card, order) => ({ ...card, layout: { ...card.layout, order } })),
                   );
                   setEditor(null);
@@ -638,9 +654,19 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
                 type="button"
                 className={styles.primaryButton}
                 onClick={() => {
+                  const editedCard =
+                    editor.card.kind === "section"
+                      ? {
+                          ...editor.card,
+                          paragraphs: parseParagraphs(editor.paragraphsText),
+                          table: parseTable(editor.tableText),
+                        }
+                      : editor.card;
                   const parsed = usefulLinksDocumentSchema.safeParse({
                     ...document,
-                    cards: document.cards.map((card) => (card.id === editor.id ? editor : card)),
+                    cards: document.cards.map((card) =>
+                      card.id === editedCard.id ? editedCard : card,
+                    ),
                   });
                   if (!parsed.success) {
                     setMessage(parsed.error.issues[0]?.message ?? "Revise o card.");
@@ -656,7 +682,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
             </>
           }
         >
-          <CardEditor card={editor} onChange={setEditor} />
+          <CardEditor draft={editor} onChange={setEditor} />
         </DashboardModal>
       ) : null}
     </div>

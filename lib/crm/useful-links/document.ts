@@ -113,7 +113,7 @@ export const usefulLinksDocumentSchema = z
     pageKey: z.string().regex(/^crm\.useful_links(?:\.[a-z0-9_]+)?$/),
     revision: z.number().int().min(0).max(Number.MAX_SAFE_INTEGER),
     cards: z.array(usefulLinksCardSchema).min(1).max(50),
-    updatedAt: z.string().datetime().nullable(),
+    updatedAt: z.string().datetime({ offset: true }).nullable(),
   })
   .strict()
   .superRefine(({ cards }, context) => {

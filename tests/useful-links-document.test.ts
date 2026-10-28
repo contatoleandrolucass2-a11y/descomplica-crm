@@ -50,6 +50,17 @@ describe("documentos editáveis de Links Úteis", () => {
     expect(text).toContain("01/01");
   });
 
+  it("aceita o offset de timestamp retornado pelo PostgreSQL", () => {
+    const document = createDefaultUsefulLinksDocument(page("grupos-whatsapp"));
+    expect(
+      usefulLinksDocumentSchema.safeParse({
+        ...document,
+        revision: 1,
+        updatedAt: "2026-10-28T04:00:00+00:00",
+      }).success,
+    ).toBe(true);
+  });
+
   it("rejeita links executáveis, ciclos e posições duplicadas", () => {
     const document = createDefaultUsefulLinksDocument(page("grupos-whatsapp"));
     const chart = document.cards[0];
