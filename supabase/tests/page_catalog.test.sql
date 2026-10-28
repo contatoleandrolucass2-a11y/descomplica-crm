@@ -18,7 +18,7 @@ select is(
 select is(
   (select count(*) from public.app_pages),
   49::bigint,
-  'the catalog contains exactly the forty-nine approved production pages'
+  'the catalog contains exactly the approved production pages'
 );
 
 select is(
@@ -413,7 +413,7 @@ select is(
     'crm.simulation.caixa',
     'crm.useful_links.linktree_liveprint'
   ]::text[],
-  'scoped House role retains simulator and useful links access when partnership visibility changes'
+  'scoped House role retains simulator access when partnership visibility changes'
 );
 
 reset role;
