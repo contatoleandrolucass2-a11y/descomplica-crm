@@ -11,9 +11,6 @@ import { ProtectedShellFrame } from "../app/(protected)/_components/ProtectedShe
 const pages = PAGE_REGISTRY.filter(
   (page) => page.pageKey === "crm.dashboard" || page.parentKey === "crm.dashboard",
 ).map((page) => ({ ...page, key: page.pageKey }));
-const usefulLinksPages = PAGE_REGISTRY.filter(
-  (page) => page.pageKey === "crm.useful_links" || page.parentKey === "crm.useful_links",
-).map((page) => ({ ...page, key: page.pageKey }));
 
 beforeEach(() => {
   route.pathname = "/app/etapas/agendamentos";
@@ -89,19 +86,6 @@ describe("Dashboard sidebar navigation", () => {
     expect(markup).not.toContain("Visão Geral");
   });
 
-  it("uses the authorized Links Úteis catalog as a sidebar on the hub and subpages", () => {
-    route.pathname = "/app/links-uteis/grupos-whatsapp";
-    const markup = renderToStaticMarkup(
-      <DashboardShell pages={usefulLinksPages}>Conteúdo</DashboardShell>,
-    );
-    expect(markup).toContain('aria-label="Links Úteis"');
-    expect(markup).toContain('href="/app/links-uteis"');
-    expect(markup).toContain('aria-label="Grupos WhatsApp" aria-current="page"');
-    expect(markup).toContain("Lojas Horários");
-    expect(markup).not.toContain("Ranking Geral");
-    expect(markup).not.toContain("Ir para a próxima seção");
-  });
-
   it.each([
     "/app",
     "/app/etapas/oportunidades",
@@ -118,7 +102,7 @@ describe("Dashboard sidebar navigation", () => {
     "/app/repasse-extra",
     "/admin",
     "/app/etapas/visitas-extra",
-  ])("returns children without a wrapper outside the contextual sidebar routes: %s", (pathname) => {
+  ])("returns children without a wrapper outside the exact appointments route: %s", (pathname) => {
     route.pathname = pathname;
     expect(renderToStaticMarkup(<DashboardShell pages={pages}>Conteúdo</DashboardShell>)).toBe(
       "Conteúdo",

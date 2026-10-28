@@ -2,22 +2,6 @@
 
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
-## Sidebar contextual de Links Úteis em 28/10/2026
-
-O candidato visual protegido `40631125913`, baseado no head
-`71d788173e6036e268f1fc85926822dc4dc857f4` e no merge-ref
-`e3b4ea018e3baaceaadffb4057a608cba6ca8023`, aprovou migrations, build,
-autorização, E2E, acessibilidade e captura autenticada. O artefato Linux
-`12793267113` possui digest
-`sha256:8a7650f9e1027301a1f7bf1bad04e819c9aa0cea903a718ec4d95cb430a5f89d`.
-
-Foram inspecionadas e incorporadas onze referências do Dashboard em desktop,
-tablet e celular, incluindo os temas claro, médio e escuro. A alteração esperada
-é a navegação contextual de Links Úteis, sem corte, sobreposição ou rolagem
-horizontal adicional. As demais referências e os limiares existentes foram
-preservados. A CI normal em modo de verificação continua obrigatória antes da
-publicação.
-
 ## Automação do Simulador CAIXA em 27/10/2026
 
 A CI `40457067981`, no SHA integrado
