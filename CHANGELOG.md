@@ -1,5 +1,8 @@
 # Changelog
 
+- Personaliza exclusivamente os oito ícones da sidebar de Links Úteis conforme
+  o destino de cada item, preservando rotas, permissões e conteúdo das páginas.
+
 - Redesenha exclusivamente o Simulador CAIXA com sidebar local de seis atalhos,
   formulário compacto, ação Limpar no topo e Documentos, Diagnóstico e
   Utilitários no final da página, preservando o motor financeiro existente.
