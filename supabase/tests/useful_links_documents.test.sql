@@ -37,9 +37,14 @@ insert into auth.users (id, email) values
   ('ae810000-0000-4000-8000-000000000001', 'useful-links-admin@example.test'),
   ('ae810000-0000-4000-8000-000000000002', 'useful-links-reader@example.test');
 select public.bootstrap_master_user('ae810000-0000-4000-8000-000000000001');
-select public.bootstrap_master_user('ae810000-0000-4000-8000-000000000002');
 update public.user_roles
 set role_key = 'broker_house', assigned_by = 'ae810000-0000-4000-8000-000000000001'
+where user_id = 'ae810000-0000-4000-8000-000000000002';
+update public.profiles
+set is_active = true,
+    access_status = 'approved',
+    approved_at = clock_timestamp(),
+    approved_by = 'ae810000-0000-4000-8000-000000000001'
 where user_id = 'ae810000-0000-4000-8000-000000000002';
 insert into public.user_permission_overrides (
   user_id, permission_key, effect, reason, granted_by

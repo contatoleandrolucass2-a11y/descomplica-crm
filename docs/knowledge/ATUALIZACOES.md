@@ -38,6 +38,12 @@
   no layout de Links Úteis, com contrato automatizado que impede dependência
   dessa área nos três arquivos compartilhados. O SHA integrado `c48ccd55` não
   foi publicado; uma nova CI e nova integração são obrigatórias.
+- Gate de banco do `main` corrigido: a restauração isolada `40637253409`
+  interrompeu o novo pgTAP após 5 de 16 asserções porque a fixture inicializava
+  o leitor como `master` e depois tentava convertê-lo para `broker_house` com
+  escopos ativos incompatíveis. A correção mantém somente o editor como master
+  e aprova explicitamente o perfil leitor; não altera migration, runtime, dados
+  remotos ou qualquer página fora de Links Úteis. Nova CI integral é obrigatória.
 
 ## 2026-10-28: subsídio automático do Simulador CAIXA publicado
 
