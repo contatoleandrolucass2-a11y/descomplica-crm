@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useMemo, useState, type ReactNode } from "react";
+import { useId, useMemo, useRef, useState, type ReactNode } from "react";
 import {
   calculateExtraAmortization,
   calculateFgtsTime,
@@ -403,7 +403,10 @@ export function CaixaClient({
   const [tab, setTab] = useState<Tab>(initialTab);
   const [form, setForm] = useState(initialForm);
   const [participants, setParticipants] = useState(1);
-  const [saved, setSaved] = useState<{ form: Form; result: SuccessfulResult }[]>([]);
+  const [saved, setSaved] = useState<
+    { form: Form; participants: number; result: SuccessfulResult }[]
+  >([]);
+  const lastProfileSyncSignature = useRef("");
   const [construction, setConstruction] = useState({ months: "36", progress: "0", tr: "0" });
   const [profiles, setProfiles] = useState<ApplicantProfile[]>([createApplicant(0)]);
   const [phase, setPhase] = useState<"profile" | "phase1" | "phase2">("profile");
@@ -493,6 +496,7 @@ export function CaixaClient({
     setForm(initialForm);
     setParticipants(1);
     setProfiles([createApplicant(0)]);
+    lastProfileSyncSignature.current = "";
   }
   const complete =
     Number(form.income) > 0 &&
@@ -575,6 +579,15 @@ export function CaixaClient({
     );
   }
   function synchronizeProfilesFromSimulation() {
+    const signature = JSON.stringify({
+      participants,
+      income: form.income,
+      product: form.product,
+      hasFgts36: form.hasFgts36,
+      fgts: form.fgts,
+    });
+    if (signature === lastProfileSyncSignature.current) return;
+    lastProfileSyncSignature.current = signature;
     setProfiles((previous) =>
       Array.from({ length: participants }, (_, index) => {
         const profile = previous[index] ?? createApplicant(index);
@@ -1218,7 +1231,7 @@ export function CaixaClient({
                       className="caixa-save"
                       onClick={() =>
                         setSaved((previous) =>
-                          [{ form: { ...form }, result }, ...previous].slice(0, 5),
+                          [{ form: { ...form }, participants, result }, ...previous].slice(0, 5),
                         )
                       }
                     >
@@ -1234,10 +1247,12 @@ export function CaixaClient({
                           key={index}
                           onClick={() => {
                             setForm(item.form);
+                            setParticipants(item.participants);
                             setConstruction((previous) => ({
                               ...previous,
                               months: item.form.constructionMonths || "36",
                             }));
+                            lastProfileSyncSignature.current = "";
                           }}
                         >
                           {item.form.city} · {money.format(item.result.propertyValue)}
@@ -1395,6 +1410,7 @@ export function CaixaClient({
                     </Field>
                     <Field label="Renda mensal bruta">
                       <MoneyInput
+                        label="Renda mensal bruta"
                         value={profile.income}
                         onChange={(value) => updateProfile(index, { income: value })}
                       />

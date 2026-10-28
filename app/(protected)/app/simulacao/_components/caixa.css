@@ -1385,7 +1385,7 @@
   margin-top: 9px;
 }
 .caixa-page-shell .caixa-history {
-  color: #a8bdcf;
+  color: var(--caixa-layout-muted, #52677a);
   margin-top: 12px;
   font-size: calc(0.66rem + 2px);
 }
@@ -1393,10 +1393,10 @@
   cursor: pointer;
 }
 .caixa-page-shell .caixa-history button {
-  color: #dbe9f3;
+  color: var(--caixa-layout-ink, #102a43);
   cursor: pointer;
-  background: #ffffff0a;
-  border: 1px solid #ffffff1a;
+  background: var(--caixa-layout-input, #edf4f8);
+  border: 1px solid var(--caixa-layout-line, #b9c8d4);
   border-radius: 8px;
   justify-content: space-between;
   gap: 12px;

@@ -347,6 +347,13 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByText("Não aplicável neste cenário", { exact: true }),
       ).toBeVisible();
       await browserExpect(page.getByText(/seguros de referência/).first()).toBeVisible();
+      await page.getByRole("button", { name: "Salvar na sessão", exact: true }).click();
+      await page.getByLabel("Quantidade de proponentes", { exact: true }).fill("2");
+      await page.locator(".caixa-history").getByText("Simulações salvas", { exact: false }).click();
+      await page.locator(".caixa-history button").first().click();
+      await browserExpect(
+        page.getByLabel("Quantidade de proponentes", { exact: true }),
+      ).toHaveValue("1");
       await auditCurrentTab("resultado");
       await page.getByLabel("Valor do imóvel *", { exact: false }).fill("45000000");
       await browserExpect(page.locator("#caixa-simulation-result")).toContainText(
@@ -362,6 +369,15 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       ).toBeVisible();
       await page.getByRole("button", { name: "02 Documentos", exact: true }).click();
       await page.getByLabel("Tipo de vínculo / renda", { exact: false }).selectOption("clt");
+      await page.getByLabel("Renda mensal bruta", { exact: true }).fill("650000");
+      await page.getByRole("button", { name: "01 Simulador", exact: true }).click();
+      await page.getByRole("button", { name: "02 Documentos", exact: true }).click();
+      await browserExpect(page.getByLabel("Tipo de vínculo / renda", { exact: false })).toHaveValue(
+        "clt",
+      );
+      await browserExpect(page.getByLabel("Renda mensal bruta", { exact: true })).toHaveValue(
+        "6.500,00",
+      );
       await page.getByRole("button", { name: "Gerar documentos da Fase 1", exact: true }).click();
       await browserExpect(page.getByText("Contracheques", { exact: true })).toBeVisible();
       await page
