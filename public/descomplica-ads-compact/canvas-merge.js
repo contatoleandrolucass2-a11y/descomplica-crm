@@ -84,7 +84,7 @@ function hydrateCanvasFrame(){
   const frame=document.querySelector('#analysis-canvas');
   if(!frame||frame.dataset.documentLoading)return;
   frame.dataset.documentLoading='true';
-  canvasDocumentPromise??=fetch('/canvas/index.html?v=requested-default-1',{cache:'no-cache'}).then(response=>{
+  canvasDocumentPromise??=fetch('/canvas/index.html?v=campaign-api-2',{cache:'no-cache'}).then(response=>{
     if(!response.ok)throw new Error('Canvas indisponível');
     return response.text();
   }).then(html=>html.replace(/\b(href|src)="(?!\/|https?:|#)([^"]+)"/g,'$1="/canvas/$2"'));

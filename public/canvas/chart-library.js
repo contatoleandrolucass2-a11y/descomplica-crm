@@ -44,6 +44,6 @@
   if(period==='custom'&&(!start||!end||start>end)){form.querySelector('.library-error').textContent='Informe um intervalo válido.';return;}
   if(!inherited&&!ids.length){form.querySelector('.library-error').textContent='Selecione ao menos uma campanha.';return;}
   const metric=['funnel','table'].includes(picked)?'results':picked==='scatter'?'spend':picked==='radar'?'ctr':values.get('metric');
-  const card={id:uid(),type:picked,metric,period,group:values.get('group')||'campaign',span:picked==='table'?12:6,height:picked==='kpi'?184:384,start,end,campaignIds:inherited?null:ids};normalize(card);if(typeof existingChart==='function'&&existingChart(card)){showExistingChart(existingChart(card));return;}checkpoint();cards.push(card);dialog.close();render();$('#canvas').lastElementChild.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});toast('Gráfico adicionado ao canvas.');
+  const card={id:uid(),type:picked,metric,period,group:values.get('group')||'campaign',span:picked==='table'?12:6,height:picked==='kpi'?184:384,start,end,campaignMode:inherited?'global':'custom',campaignEntityIds:inherited?null:stableCampaignIds(ids)};normalize(card);if(typeof existingChart==='function'&&existingChart(card)){showExistingChart(existingChart(card));return;}checkpoint();cards.push(card);dialog.close();render();$('#canvas').lastElementChild.scrollIntoView({behavior:matchMedia('(prefers-reduced-motion:reduce)').matches?'auto':'smooth',block:'center'});toast('Gráfico adicionado ao canvas.');
  };
 })();
