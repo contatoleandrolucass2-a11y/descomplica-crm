@@ -1,5 +1,31 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: Simulador CAIXA compacto publicado
+
+- Escopo concluído somente em `/app/simulacao/caixa`: interface compacta,
+  limites junto aos campos de renda e imóvel, condições guiadas, parâmetros e
+  juros de obra recolhidos e resultado recalculado automaticamente. As fórmulas
+  financeiras permaneceram inalteradas.
+- Integração: PR #399 no SHA `cee003158d4e834b54009eaa128b77046fa0b523`;
+  as referências visuais deliberadamente compactadas foram atualizadas pelo
+  PR #409 no SHA final `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`.
+- Evidências: 61 testes focados aprovaram motor, recálculo, cenários salvos,
+  documentos, prazo, subsídio, SBPE, temas, mobile, overflow e Axe. A CI de
+  `main` `40660625679` aprovou `validate`, `release-gates`,
+  `isolated-restore` e `promotable-image` no SHA final.
+- Publicação protegida: deployment `dc8cc769-b57a-4ce2-84b4-88cc9447559a`,
+  imagem local provada
+  `sha256:b97e6429e38a2d3efdefb1b76d3a79c4b5cb8515651b769a1454c3a98d673374`
+  e conclusão em `2026-10-28T10:03:22.963Z` (`07:03:22.963` em
+  America/Sao_Paulo). A consulta CAS posterior retornou `noop`, confirmando que
+  o candidato já estava ativo sem reinício duplicado.
+- Verificação pós-publicação: `/api/health` respondeu `status=ok` e versão
+  exata `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`; acesso anônimo a
+  `/app/simulacao/caixa` respondeu 307 para `/login`.
+- Conhecimento: o runtime de sincronização continuou retornando o erro
+  `Documento excede o limite de exportacao.`; a falha permanece registrada e não foi
+  apresentada como sincronização concluída.
+
 ## 2026-10-28: evolução editável de Links Úteis publicada
 
 - O ajuste estritamente visual das 22 baselines externas foi integrado pelo PR
