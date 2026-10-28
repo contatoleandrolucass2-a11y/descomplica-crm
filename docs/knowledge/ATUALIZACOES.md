@@ -31,6 +31,12 @@
   release passaram; lint dos arquivos afetados, tipos, catálogo, inventário e
   build com Node 24.19.0 passaram. Neste ponto o estado é implementado e validado
   localmente; CI, integração e publicação ainda não foram alegadas.
+- Evidência visual candidata: a CI protegida `40631125913` aprovou migrations,
+  build, autorização, E2E, acessibilidade e captura no head `71d78817`/merge-ref
+  `e3b4ea01`. Onze referências do Dashboard foram inspecionadas e incorporadas
+  do artefato `12793267113`, digest
+  `sha256:8a7650f9e1027301a1f7bf1bad04e819c9aa0cea903a718ec4d95cb430a5f89d`;
+  a CI normal de verificação continua obrigatória antes da publicação.
 
 ## 2026-10-28: subsídio automático do Simulador CAIXA publicado
 
