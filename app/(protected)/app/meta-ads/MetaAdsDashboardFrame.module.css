@@ -66,45 +66,101 @@
   position: sticky;
   top: 58px;
   display: flex;
-  width: 190px;
+  width: 232px;
   flex-direction: column;
   box-sizing: border-box;
-  padding: 24px 12px;
   color: var(--analytics-ink);
   font-family: var(--font-geist-sans, Arial), sans-serif;
   background: var(--analytics-surface);
   border-right: 1px solid var(--analytics-line);
   min-height: calc(100dvh - 58px);
-  transition: width 160ms ease-out;
+  transition: width 240ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .sidebar[data-collapsed="true"] {
   width: 64px;
-  padding-inline: 8px;
+}
+
+.sidebarPanel {
+  display: flex;
+  min-width: 0;
+  min-height: calc(100dvh - 58px);
+  flex: 1;
+  flex-direction: column;
+  padding: 22px 12px 14px;
+}
+
+.mobileHeader,
+.mobileClose {
+  display: none;
+}
+
+.brandRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .brand {
-  margin: 0 8px 28px;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 10px;
+  margin: 0 8px 26px;
   font-size: 17px;
   font-weight: 750;
 }
-.brand strong {
-  color: inherit;
+
+.brandMark {
+  display: grid;
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
+  border-radius: 8px 3px 8px 3px;
+  place-items: center;
+  color: #ffffff;
+  background: var(--analytics-cyan-strong);
+  font-size: 14px;
+  font-weight: 900;
 }
+
+.brandLabel,
+.navigationLabel,
+.soundToggle span,
+.sidebarToggle span {
+  max-width: 180px;
+  overflow: hidden;
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    max-width 220ms cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 140ms ease-out,
+    transform 220ms cubic-bezier(0.22, 1, 0.36, 1);
+  white-space: nowrap;
+}
+
 .sidebar nav {
   display: grid;
   gap: 8px;
 }
+
 .navigationLink {
   display: flex;
+  min-height: 44px;
   align-items: center;
   gap: 10px;
   border-radius: 7px;
-  padding: 12px 10px;
+  padding: 10px;
   color: var(--analytics-muted);
   text-decoration: none;
   font-size: 14px;
+  transition:
+    color 150ms ease-out,
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out,
+    transform 150ms ease-out;
 }
+
 .navigationButton {
   width: 100%;
   border: 0;
@@ -140,17 +196,22 @@
 .navigationLock {
   margin-left: auto;
   flex: 0 0 auto;
-  color: var(--analytics-danger);
+  color: var(--analytics-muted);
 }
+
 .navigationLink:hover {
+  color: var(--analytics-ink);
   background: var(--analytics-surface-muted);
+  transform: translateX(2px);
 }
+
 .navigationLink[aria-current="page"] {
-  color: var(--analytics-danger);
-  background: var(--analytics-surface-strong);
-  box-shadow: inset 3px 0 var(--analytics-danger);
+  color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 13%, var(--analytics-surface));
+  box-shadow: inset 3px 0 var(--analytics-cyan-strong);
   font-weight: 700;
 }
+
 .navigationLink:focus-visible {
   outline: 3px solid var(--focus-ring);
   outline-offset: 2px;
@@ -166,6 +227,14 @@
   margin: 28px 8px 0;
   color: var(--analytics-muted);
   font-size: 12px;
+  line-height: 1.45;
+}
+
+.sidebarFooter {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  flex-direction: column;
 }
 
 .soundToggle {
@@ -222,11 +291,27 @@
   outline-offset: 2px;
 }
 
-.sidebar[data-collapsed="true"] .brand,
+.sidebar[data-collapsed="true"] .brandLabel,
 .sidebar[data-collapsed="true"] .navigationLabel,
-.sidebar[data-collapsed="true"] .sourceNote,
 .sidebar[data-collapsed="true"] .soundToggle span,
 .sidebar[data-collapsed="true"] .sidebarToggle span {
+  max-width: 0;
+  opacity: 0;
+  transform: translateX(-8px);
+}
+
+.sidebar[data-collapsed="true"] .brand {
+  margin-inline: 6px;
+}
+
+.sidebar[data-collapsed="true"] .sourceNote {
+  max-height: 0;
+  margin-block: 0;
+  overflow: hidden;
+  opacity: 0;
+}
+
+.sidebar[data-collapsed="true"] .navigationLock {
   display: none;
 }
 
@@ -241,24 +326,75 @@
   .workspace {
     grid-template-columns: minmax(0, 1fr);
   }
+
   .sidebar {
     position: static;
-    width: auto;
+    width: 100%;
     min-height: auto;
-    padding: 12px;
     border-right: 0;
     border-bottom: 1px solid var(--analytics-line);
   }
-  .brand,
-  .sourceNote,
-  .soundToggle,
-  .sidebarToggle {
-    display: none;
-  }
-  .sidebar nav {
+
+  .mobileHeader {
     display: flex;
-    overflow-x: auto;
+    min-height: 52px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
   }
+
+  .mobileTitle {
+    color: var(--analytics-ink);
+    font-size: 15px;
+    font-weight: 800;
+  }
+
+  .mobileMenuToggle,
+  .mobileClose {
+    display: grid;
+    width: 38px;
+    height: 38px;
+    border: 1px solid var(--analytics-line);
+    border-radius: 9px;
+    place-items: center;
+    color: var(--analytics-ink);
+    background: var(--analytics-surface);
+    cursor: pointer;
+  }
+
+  .sidebarPanel {
+    position: fixed;
+    z-index: 80;
+    inset: 58px 0 0;
+    width: min(320px, 88vw);
+    min-height: calc(100dvh - 58px);
+    padding: 20px 14px;
+    border-right: 1px solid var(--analytics-line);
+    background: var(--analytics-surface);
+    box-shadow: 18px 0 42px rgb(3 15 24 / 24%);
+    opacity: 0;
+    pointer-events: none;
+    transform: translateX(-102%);
+    transition:
+      transform 260ms cubic-bezier(0.22, 1, 0.36, 1),
+      opacity 180ms ease-out;
+  }
+
+  .sidebar[data-mobile-open="true"] .sidebarPanel {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateX(0);
+  }
+
+  .brand {
+    margin-bottom: 24px;
+  }
+
+  .sidebar nav {
+    display: grid;
+    overflow: visible;
+  }
+
   .navigationLink {
     white-space: nowrap;
   }
@@ -271,17 +407,37 @@
   }
 
   .sidebar[data-collapsed="true"] {
-    width: auto;
-    padding-inline: 12px;
+    width: 100%;
   }
 
-  .sidebar[data-collapsed="true"] .navigationLabel {
-    display: inline;
+  .sidebar[data-collapsed="true"] .brandLabel,
+  .sidebar[data-collapsed="true"] .navigationLabel,
+  .sidebar[data-collapsed="true"] .soundToggle span,
+  .sidebar[data-collapsed="true"] .sidebarToggle span {
+    max-width: 180px;
+    opacity: 1;
+    transform: none;
+  }
+
+  .sidebar[data-collapsed="true"] .sourceNote {
+    max-height: none;
+    margin: 28px 8px 0;
+    opacity: 1;
+  }
+
+  .sidebarToggle {
+    display: none;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sidebar {
+  .sidebar,
+  .sidebarPanel,
+  .brandLabel,
+  .navigationLabel,
+  .soundToggle span,
+  .sidebarToggle span,
+  .navigationLink {
     transition: none;
   }
 }

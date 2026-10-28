@@ -128,8 +128,8 @@ describe("dashboard Meta Ads", () => {
     expect(styles).toContain("width: 64px");
     expect(styles).toContain("top: 58px");
     expect(styles).toContain("min-height: calc(100dvh - 58px)");
-    expect(styles).toContain(".brand strong");
-    expect(styles).toContain("color: inherit");
+    expect(styles).toContain(".brandLabel");
+    expect(styles).toContain("background: var(--analytics-cyan-strong)");
   });
 
   it("remove navegacao duplicada do artefato porque as visoes pertencem a navbar", async () => {
@@ -342,6 +342,34 @@ describe("dashboard Meta Ads", () => {
     expect(markup).toContain("Página temporariamente desabilitada para melhorias");
     expect(markup).not.toContain('href="/app/meta-ads?panel=map"');
     expect(markup).not.toContain('href="/app/meta-ads?panel=settings"');
+  });
+
+  it("usa sidebar retrátil sem rosa e drawer móvel acessível", async () => {
+    const [sidebar, sidebarStyles] = await Promise.all([
+      readFile(
+        new URL("../app/(protected)/app/meta-ads/MetaAdsSidebar.tsx", import.meta.url),
+        "utf8",
+      ),
+      readFile(
+        new URL(
+          "../app/(protected)/app/meta-ads/MetaAdsDashboardFrame.module.css",
+          import.meta.url,
+        ),
+        "utf8",
+      ),
+    ]);
+    const activeRule = sidebarStyles.match(
+      /\.navigationLink\[aria-current="page"\]\s*\{(?<rule>[\s\S]*?)\n\}/u,
+    )?.groups?.rule;
+
+    expect(sidebar).toContain("onMouseEnter");
+    expect(sidebar).toContain("data-mobile-open={mobileOpen || undefined}");
+    expect(sidebar).toContain('aria-label={mobileOpen ? "Fechar menu Meta Ads"');
+    expect(sidebarStyles).toContain('.sidebar[data-mobile-open="true"] .sidebarPanel');
+    expect(sidebarStyles).toContain("translateX(-102%)");
+    expect(sidebarStyles).toContain("@media (prefers-reduced-motion: reduce)");
+    expect(activeRule).toContain("var(--analytics-cyan-strong)");
+    expect(activeRule).not.toContain("var(--analytics-danger)");
   });
 
   it.each(["map", "settings"])("impede acesso direto ao painel %s", async (panel) => {

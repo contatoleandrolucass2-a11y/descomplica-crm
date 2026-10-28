@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-28 — Meta Ads: sidebar retrátil sem destaque rosa
+
+- Escopo restrito ao shell interno de `/app/meta-ads` e às rotas filhas já
+  existentes; a navbar global do CRM, permissões e páginas bloqueadas foram
+  preservadas.
+- A sidebar abre expandida, pode ser recolhida manualmente, oferece prévia
+  temporária por hover ou foco e usa drawer acessível no celular.
+- O estado ativo, a marca e os ícones deixaram de usar rosa e passaram a seguir
+  os tokens azul/ciano do tema, com suporte a movimento reduzido.
+- Validação focada: 21 testes do dashboard Meta Ads aprovados e ESLint dos
+  arquivos alterados aprovado.
+
 - 2026-10-27: corrigida a incompatibilidade entre a proteção do `main` e a CI: `release-gates`, `isolated-restore` e `promotable-image` agora executam em pull requests e continuam repetidos no SHA final de `main`; o teste de contrato exige as duas condições sem reduzir etapas, tolerâncias ou proteção.
 
 ## 2026-10-28 — Links Úteis: evolução editável publicada
