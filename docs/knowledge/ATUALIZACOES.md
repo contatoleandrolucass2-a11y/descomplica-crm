@@ -27,8 +27,8 @@
   continha o candidato deste chat.
 - O CLI `gh` não está instalado neste host. A consulta GitHub deve usar o
   conector autenticado antes da integração. O runtime oficial de conhecimento
-  permanece indisponível pelo erro conhecido `Documento excede o limite de
-  exportacao.`; o registro versionado não implica sincronização do Obsidian.
+  permanece indisponível pelo erro conhecido de documento acima do limite de
+  exportação; o registro versionado não implica sincronização do Obsidian.
 
 ## 2026-10-28: ícones personalizados na sidebar de Links Úteis
 
