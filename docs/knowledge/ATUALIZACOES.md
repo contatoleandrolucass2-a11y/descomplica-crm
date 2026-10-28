@@ -1,5 +1,33 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-28: subsídio automático do Simulador CAIXA publicado
+
+- Integração: PR #394 incorporado ao `main` no SHA
+  `33899a898b4746ea1bd6fd62cb1250bd45d53845`. A CI de push
+  `40623210294` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`; o candidato visual protegido `40618704482` também foi
+  aprovado.
+- Artefato: `promotable-image-33899a898b4746ea1bd6fd62cb1250bd45d53845`,
+  ID `12788955332`. O `image.tar.gz` conferiu com SHA-256
+  `7e4fb50a3305ae1a676ee9d5f12797f3f0192d8795c36cc74fb94f9910abf76b` e
+  revisão OCI exata. A configuração da CI foi
+  `sha256:d784b2b17d3b424c2bcfecada39a66db76263d40fd0fb2603e513d9e5fede20d`;
+  o manifesto local comprovado foi
+  `sha256:4a576e060552306644b79cfa3c37a558c3c503c7ec679c6ba4ad08ffd9c52947`.
+  `image:prove` aprovou os dois perfis de runtime, a mesma imagem e nenhuma
+  impressão de segredo, sem rebuild ou retag.
+- Publicação: o coordenador exclusivo `release:production deploy` promoveu o
+  deployment `6d4758f0-7e8c-443c-910a-70e304eaa207` em
+  `2026-10-28T03:50:23.707Z` (`00:50:23` BRT), partindo do deployment
+  `08d382ff-e15a-4851-b8b0-b68b54c1e18f`/SHA `f98f3c73`, com travas, CAS e
+  consulta ao vivo. O recibo final ficou sem pendência.
+- Pós-publicação: `https://crm.descomplicapro.com.br/api/health` respondeu
+  HTTP 200, `status=ok` e versão exata `33899a89`; a rota anônima
+  `/app/simulacao/caixa` respondeu 307 para `/login`.
+- Conhecimento: o registro versionado foi atualizado, mas o runtime de sync
+  permaneceu indisponível com `Documento excede o limite de exportacao.`; a
+  sincronização do Obsidian não foi alegada como concluída.
+
 ## 2026-10-27: subsídio automático do Simulador CAIXA
 
 - Abertura: `origin/main` e o checkout estavam em

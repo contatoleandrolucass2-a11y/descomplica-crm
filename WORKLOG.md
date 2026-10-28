@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-28 — Simulador CAIXA: subsídio automático publicado
+
+- PR #394 integrado no SHA `33899a898b4746ea1bd6fd62cb1250bd45d53845`.
+- CI `40623210294` aprovou os quatro gates obrigatórios e o candidato visual
+  `40618704482` foi aprovado.
+- Imagem imutável conferida e provada sem rebuild; promoção protegida concluída
+  no deployment `6d4758f0-7e8c-443c-910a-70e304eaa207` em
+  `2026-10-28T03:50:23.707Z`.
+- Health público confirmou `status=ok` e a versão exata; a rota anônima do
+  simulador manteve o redirecionamento 307 para `/login`.
+
 - 2026-10-27: corrigido o subsídio do Simulador CAIXA: o motor deixou de fixar zero para rendas elegíveis e passou a executar a fórmula literal do MFOM Habitação v034, com fatores regionais e populacionais oficiais, área/tipo da unidade, redutores de imóvel usado e família unipessoal, teto regional/pronto e substituição explícita por valor confirmado.
 - 2026-10-27: concluída a publicação de Links Úteis. O runtime `f98f3c7310f773a36325bb6114ebd12369e9e077` permaneceu saudável e a migration de catálogo `sync_page_catalog` foi aplicada no Supabase de produção como versão `20261028012746`; a conferência remota confirmou o hub e as sete subpáginas ativos, oito permissões com herança preservada e ausência de Ranking Geral no novo menu.
 - 2026-10-27: publicada a versão `f98f3c7310f773a36325bb6114ebd12369e9e077` após os quatro jobs da CI `40600846185` aprovarem. O coordenador protegido promoveu a imagem imutável `sha256:3dec01b76ff1c97375c73461cb649da86c8e946087f26cf0f87a88a5380aa3c9` no deployment `08d382ff-e15a-4851-b8b0-b68b54c1e18f`; health público respondeu o SHA exato e `/app/simulacao/caixa` permaneceu protegida por redirecionamento anônimo para `/login`.
