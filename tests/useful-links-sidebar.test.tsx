@@ -45,6 +45,26 @@ describe("Links Úteis sidebar", () => {
     expect(markup).not.toContain('href="/app/links-uteis/relacionamento"');
   });
 
+  it("assigns a distinct semantic icon to every Links Úteis destination", () => {
+    const markup = renderToStaticMarkup(
+      <UsefulLinksSidebar pages={pages}>Conteúdo</UsefulLinksSidebar>,
+    );
+
+    for (const icon of [
+      "overview",
+      "whatsapp",
+      "stores",
+      "relationship",
+      "rules",
+      "campaign",
+      "app",
+      "resources",
+    ]) {
+      expect(markup).toContain(`data-useful-links-icon="${icon}"`);
+    }
+    expect(markup.match(/data-useful-links-icon=/g)).toHaveLength(8);
+  });
+
   it("keeps the shared Dashboard and top navigation files free of Links Úteis behavior", () => {
     const sharedFiles = [
       "../app/(protected)/_components/DashboardShell.tsx",

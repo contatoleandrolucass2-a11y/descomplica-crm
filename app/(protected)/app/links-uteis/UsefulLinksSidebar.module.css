@@ -64,19 +64,29 @@
 
 .toggle > svg,
 .icon {
-  flex: 0 0 20px;
+  flex: 0 0 30px;
 }
 
 .icon {
   display: grid;
-  width: 20px;
-  height: 20px;
+  width: 30px;
+  height: 30px;
   place-items: center;
+  border: 1px solid color-mix(in srgb, var(--analytics-cyan) 38%, var(--analytics-line));
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--analytics-cyan) 11%, transparent);
+  color: var(--analytics-cyan-strong);
+  transition:
+    border-color 160ms ease-out,
+    background-color 160ms ease-out,
+    color 160ms ease-out,
+    transform 160ms ease-out;
 }
 
 .icon svg {
-  width: 20px;
-  height: 20px;
+  width: 18px;
+  height: 18px;
+  stroke-width: 2;
 }
 
 .links {
@@ -103,6 +113,13 @@
 .link[aria-current="page"] {
   box-shadow: inset 2px 0 currentColor;
   font-weight: 700;
+}
+
+.link:is(:hover, [aria-current="page"]) .icon {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan) 22%, var(--analytics-surface));
+  color: var(--analytics-cyan-strong);
+  transform: translateX(1px);
 }
 
 .sidebar :is(a, button):focus-visible {
@@ -148,7 +165,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .shell {
+  .shell,
+  .icon {
     transition: none;
   }
 }

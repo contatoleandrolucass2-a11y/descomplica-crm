@@ -11,6 +11,17 @@
 - O editor administrativo mostra a ação `Adicionar card`, preservando o
   salvamento automático e os limites de segurança do contrato persistido.
 
+## 2026-10-28 — Links Úteis: ícones personalizados
+
+- Escopo restrito à sidebar interna de Links Úteis; nenhuma rota, permissão,
+  conteúdo de página ou navegação global foi alterada.
+- Os oito destinos passaram a usar símbolos próprios para visão geral,
+  WhatsApp, lojas, relacionamento, regras, campanha, aplicativo e recursos.
+- Os ícones receberam contêiner compacto com contraste e realce de estado
+  ativo, mantendo foco visível e movimento reduzido.
+- Validação focada: 52 testes de Links Úteis e navegação aprovados, além de
+  ESLint, tipos e formatação dos arquivos alterados.
+
 ## 2026-10-28 — Simulador CAIXA: novo workspace compacto
 
 - Escopo restrito a `/app/simulacao/caixa`; nenhuma outra página, regra

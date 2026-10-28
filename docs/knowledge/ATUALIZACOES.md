@@ -28,7 +28,22 @@
 - O CLI `gh` não está instalado neste host. A consulta GitHub deve usar o
   conector autenticado antes da integração. O runtime oficial de conhecimento
   permanece indisponível pelo erro conhecido `Documento excede o limite de
-exportacao.`; o registro versionado não implica sincronização do Obsidian.
+  exportacao.`; o registro versionado não implica sincronização do Obsidian.
+
+## 2026-10-28: ícones personalizados na sidebar de Links Úteis
+
+- O ajuste foi limitado à sidebar interna de Links Úteis. Cada um dos oito
+  destinos recebeu um ícone semântico próprio: visão geral, WhatsApp, lojas,
+  relacionamento, regras comerciais, campanha, Bora Vender e recursos.
+- O componente compartilhado de ícones da navegação global não foi alterado;
+  rotas, permissões e conteúdos das páginas permanecem idênticos.
+- Os ícones usam os tokens azul/ciano já existentes, com realce no item ativo,
+  foco visível e respeito a movimento reduzido.
+- A validação focada aprovou 52 testes de Links Úteis e navegação. ESLint,
+  verificação de tipos e formatação dos arquivos alterados também aprovaram.
+- O runtime de conhecimento permaneceu indisponível na abertura pelo erro
+  `Documento excede o limite de exportacao.`; este registro versionado não
+  equivale a uma sincronização concluída do Obsidian.
 
 ## 2026-10-28: redesenho exclusivo do Simulador CAIXA implementado
 
