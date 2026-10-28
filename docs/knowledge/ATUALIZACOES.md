@@ -13,6 +13,36 @@
 - Nenhum baseline, tolerancia, migration, ACL, RLS ou dado remoto foi alterado
   por esta correcao de fluxo.
 
+## 2026-10-27: Simulador CAIXA publicado no SHA f98f3c73
+
+- Integração: PR #389, commit final de `main`
+  `f98f3c7310f773a36325bb6114ebd12369e9e077`. A CI de push `40600846185`
+  aprovou `validate`, `isolated-restore`, `promotable-image` e `release-gates`.
+  O gate funcional do CAIXA, migrations, restore lógico, pgTAP, build, E2E,
+  acessibilidade, teclado, temas e matriz responsiva passaram.
+- Artefato: `promotable-image-f98f3c73`, ID `12777624788`, ZIP
+  `sha256:983d9e567b574b8dbdadcdb6fa2624a59517f41a28eb80973eefbac45aaeff45`
+  e `image.tar.gz`
+  `sha256:14a34dd67df547773b3a5b1e051c078121675a0ae454b35948f67458a1285953`.
+  A diferença entre config CI `sha256:c3c4da1c2f4ce21355d1bea0bcb4c8417e00d8eb9f08852dce9025d990155c13`
+  e manifesto containerd `sha256:3dec01b76ff1c97375c73461cb649da86c8e946087f26cf0f87a88a5380aa3c9`
+  foi comprovada no mesmo artefato: índice, manifesto, config, Linux/amd64,
+  revisão OCI, 11 camadas, `rootfs.diff_ids` e os dois perfis de runtime
+  coincidiram, sem rebuild ou retag.
+- Concorrência preservada: antes da troca, o coordenador observou a produção
+  ativa `a63dfc01b81cfb0476f2f3f5e19cf209b690e998`, deployment
+  `42fd5f68-d360-4086-8418-05554a210e20`, publicado em
+  `2026-10-27T23:12:22.622Z`. O CAS usou essa baseline real; nenhum estado
+  anterior foi presumido.
+- Publicação: deployment `08d382ff-e15a-4851-b8b0-b68b54c1e18f`, concluído em
+  `2026-10-28T00:18:07.167Z`, sem pendência. O health público retornou HTTP 200,
+  `status=ok` e o SHA exato `f98f3c73`; o container ficou saudável e a rota
+  anônima `/app/simulacao/caixa` respondeu 307 para `/login`.
+- Conhecimento: o runtime continuou falhando com
+  `Documento excede o limite de exportacao.`; o registro versionado foi
+  concluído, mas a sincronização do Obsidian permanece pendente e não foi
+  alegada como bem-sucedida.
+
 ## 2026-10-27: retomada autorizada da publicação do Simulador CAIXA
 
 - Fonte observacional de abertura: `origin/main` em
