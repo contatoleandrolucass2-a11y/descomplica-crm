@@ -1,5 +1,30 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-27: Links Úteis publicado e catálogo aplicado em produção
+
+- Runtime: a versão publicada permaneceu em
+  `f98f3c7310f773a36325bb6114ebd12369e9e077`, com HTTP 200 e `status=ok`
+  em `https://crm.descomplicapro.com.br/api/health` às
+  `2026-10-28T01:27:59Z`. A rota anônima `/app/links-uteis` respondeu 307 para
+  `/login`, preservando o guard de acesso.
+- Banco: a migration versionada `20261027160500_sync_page_catalog.sql` foi
+  aplicada via Supabase MCP no projeto de produção `hnncxuerlcsaahdxoswb` e
+  registrada remotamente como `20261028012746 sync_page_catalog`.
+- Verificação remota: o catálogo retornou exatamente oito registros ativos e
+  navegáveis — hub Links Úteis e sete subpáginas — com os caminhos e permissões
+  esperados. Ranking Geral não integra esse grupo. As oito permissões têm nível
+  mínimo 10 e sete concessões por papel, incluindo `master` e `admin`, conforme
+  a herança inicial preservada de `crm.dashboard.view`.
+- Integração e publicação: o código funcional já estava integrado pelo PR #376;
+  os contratos pgTAP foram incorporados ao `main` em `f98f3c73`, cuja CI
+  `40600846185` aprovou os quatro jobs e cujo deployment protegido
+  `08d382ff-e15a-4851-b8b0-b68b54c1e18f` promoveu a imagem imutável
+  `sha256:3dec01b76ff1c97375c73461cb649da86c8e946087f26cf0f87a88a5380aa3c9`.
+- Limite conhecido: `knowledge:sync` continuou falhando com
+  `Documento excede o limite de exportacao.`. O registro versionado foi
+  atualizado, mas a sincronização do Obsidian permanece pendente e não foi
+  alegada como concluída.
+
 ## 2026-10-27: Simulador CAIXA publicado no SHA f98f3c73
 
 - Integração: PR #389, commit final de `main`

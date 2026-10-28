@@ -1,5 +1,6 @@
 # Changelog
 
+- Conclui a publicação de Links Úteis com o catálogo e as oito permissões aplicados no Supabase de produção, preservando a herança de acesso do Dashboard e excluindo Ranking Geral do novo menu.
 - Publica o conjunto integrado do Simulador CAIXA no SHA `f98f3c73`, após CI completa, restore isolado, pgTAP, E2E, matriz visual e promoção protegida da imagem imutável.
 - Atualiza os três contratos pgTAP de catálogo, acesso por papel e defaults para as oito páginas/permissões de Links Úteis, restaurando o gate de publicação sem alterar runtime ou regras financeiras do Simulador CAIXA.
 - Registra o editor administrativo exclusivo de Agendamentos como integrado e validado, sem publicação porque um gate obrigatório externo da área Links Úteis falhou.
