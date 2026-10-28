@@ -106,8 +106,6 @@ declare
   v_parent_ids text[] := array[]::text[];
   v_card_ids text[] := array[]::text[];
   v_orders integer[] := array[]::integer[];
-  v_index integer;
-  v_depth integer;
 begin
   if p_document is null or jsonb_typeof(p_document) is distinct from 'object'
      or (select count(*) from jsonb_object_keys(p_document)) <> 5
