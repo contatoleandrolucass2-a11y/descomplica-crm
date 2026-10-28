@@ -249,23 +249,22 @@ try {
   await page.goto(origin + "/app/meta-ads");
   const sidebar = page.getByRole("complementary", { name: "Navegação lateral Meta Ads" });
   await expect(sidebar).toBeVisible();
-  assert.equal(Math.round((await sidebar.boundingBox()).width), 190, "Sidebar starts expanded");
+  assert.equal(Math.round((await sidebar.boundingBox()).width), 232, "Sidebar starts expanded");
   const sidebarColors = await sidebar.evaluate((element) => {
-    const brand = element.querySelector("div");
-    const ads = brand?.querySelector("strong");
+    const brand = element.querySelector('[class*="brandLabel"]');
     return {
+      sidebar: getComputedStyle(element).color,
       brand: brand ? getComputedStyle(brand).color : null,
-      ads: ads ? getComputedStyle(ads).color : null,
     };
   });
-  assert.equal(sidebarColors.ads, sidebarColors.brand, "Descomplica Ads uses one text color");
+  assert.equal(sidebarColors.brand, sidebarColors.sidebar, "Descomplica Ads uses one text color");
   await page.getByRole("button", { name: "Recolher menu lateral" }).click();
   await expect(page.getByRole("button", { name: "Expandir menu lateral" })).toBeVisible();
   await expect.poll(async () => Math.round((await sidebar.boundingBox()).width)).toBe(64);
   await expect(page.getByRole("link", { name: "Visão macro" })).toBeVisible();
   await page.getByRole("button", { name: "Expandir menu lateral" }).click();
   await expect(page.getByRole("button", { name: "Recolher menu lateral" })).toBeVisible();
-  await expect.poll(async () => Math.round((await sidebar.boundingBox()).width)).toBe(190);
+  await expect.poll(async () => Math.round((await sidebar.boundingBox()).width)).toBe(232);
   await expect(frame.getByRole("heading", { name: "Comparar campanhas" })).toBeVisible();
   await expect(frame.locator("#analysis-canvas")).toBeVisible();
   await expect(canvas.locator("#canvas")).toBeVisible();

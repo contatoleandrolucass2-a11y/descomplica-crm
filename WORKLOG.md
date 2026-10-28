@@ -9,8 +9,9 @@
   temporária por hover ou foco e usa drawer acessível no celular.
 - O estado ativo, a marca e os ícones deixaram de usar rosa e passaram a seguir
   os tokens azul/ciano do tema, com suporte a movimento reduzido.
-- Validação focada: 21 testes do dashboard Meta Ads aprovados e ESLint dos
-  arquivos alterados aprovado.
+- Validação focada: 21 testes do dashboard Meta Ads aprovados, ESLint dos
+  arquivos alterados aprovado e jornada Playwright do frame Meta Ads alinhada
+  à nova largura expandida e à marca sem destaque rosa.
 
 - 2026-10-27: corrigida a incompatibilidade entre a proteção do `main` e a CI: `release-gates`, `isolated-restore` e `promotable-image` agora executam em pull requests e continuam repetidos no SHA final de `main`; o teste de contrato exige as duas condições sem reduzir etapas, tolerâncias ou proteção.
 
