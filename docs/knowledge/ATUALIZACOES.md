@@ -13,6 +13,11 @@
   prazo por idade e cotas SBPE permaneceram sem mudança. A validação sintética
   aprovou 6 jornadas no navegador e 24 verificações estáticas focadas, com
   desktop, celular, três temas, ausência de overflow e Axe sem violações.
+- O candidato autenticado do PR #414 aprovou a jornada completa e produziu o
+  artefato visual `12847234187`
+  (`sha256:bc8775b706f2ccdf893f3cad6491db64159168be289aefcf1c321baba118bc7a`).
+  A revisão adotou somente as 11 referências da rota CAIXA e o manifesto do
+  ensaio; nenhuma imagem de outra página foi substituída.
 - Publicação permanece condicionada aos gates protegidos e à revisão visual do
   candidato autenticado. A sincronização do Obsidian ainda está indisponível
   pelo erro `Documento excede o limite de exportacao.`.
