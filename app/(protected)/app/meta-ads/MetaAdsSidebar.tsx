@@ -7,10 +7,12 @@ import {
   FileChartColumn,
   LockKeyhole,
   MapPinned,
+  Menu,
   Megaphone,
   SlidersHorizontal,
   Volume2,
   VolumeX,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -26,7 +28,10 @@ export function MetaAdsSidebar({
   path: string;
 }) {
   const [collapsed, setCollapsed] = useState(false);
+  const [hoverPreview, setHoverPreview] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [soundMuted, setSoundMuted] = useState(false);
+  const visuallyCollapsed = collapsed && !hoverPreview;
   const order = new Map([
     ["/app/meta-ads", 0],
     ["/app/meta-ads/campanhas", 1],
@@ -62,99 +67,144 @@ export function MetaAdsSidebar({
     <aside
       className={styles.sidebar}
       aria-label="Navegação lateral Meta Ads"
-      data-collapsed={collapsed || undefined}
+      data-collapsed={visuallyCollapsed || undefined}
+      data-mobile-open={mobileOpen || undefined}
+      onMouseEnter={() => {
+        if (collapsed) setHoverPreview(true);
+      }}
+      onMouseLeave={() => setHoverPreview(false)}
+      onFocusCapture={() => {
+        if (collapsed) setHoverPreview(true);
+      }}
+      onBlurCapture={(event) => {
+        if (!event.currentTarget.contains(event.relatedTarget)) setHoverPreview(false);
+      }}
     >
-      <div className={styles.brand}>
-        Descomplica <strong>Ads</strong>
+      <div className={styles.mobileHeader}>
+        <span className={styles.mobileTitle}>Descomplica Ads</span>
+        <button
+          type="button"
+          className={styles.mobileMenuToggle}
+          aria-controls="meta-ads-sidebar-navigation"
+          aria-expanded={mobileOpen}
+          aria-label={mobileOpen ? "Fechar menu Meta Ads" : "Abrir menu Meta Ads"}
+          onClick={() => setMobileOpen((current) => !current)}
+        >
+          {mobileOpen ? <X aria-hidden="true" size={22} /> : <Menu aria-hidden="true" size={22} />}
+        </button>
       </div>
-      <nav id="meta-ads-sidebar-navigation" aria-label="Navegação lateral Meta Ads">
-        {links.map((page) => {
-          const Icon = iconFor(page);
-          const isBlocked = page.key === "map-panel" || page.key === "settings-panel";
-          const maintenanceMessage =
-            "Página temporariamente desabilitada para melhorias. Consulte o desenvolvedor para mais informações.";
-          if (isBlocked) {
+      <div className={styles.sidebarPanel}>
+        <div className={styles.brandRow}>
+          <div className={styles.brand}>
+            <span aria-hidden="true" className={styles.brandMark}>
+              D
+            </span>
+            <span className={styles.brandLabel}>Descomplica Ads</span>
+          </div>
+          <button
+            type="button"
+            className={styles.mobileClose}
+            aria-label="Fechar menu Meta Ads"
+            onClick={() => setMobileOpen(false)}
+          >
+            <X aria-hidden="true" size={22} />
+          </button>
+        </div>
+        <nav id="meta-ads-sidebar-navigation" aria-label="Navegação lateral Meta Ads">
+          {links.map((page) => {
+            const Icon = iconFor(page);
+            const isBlocked = page.key === "map-panel" || page.key === "settings-panel";
+            const maintenanceMessage =
+              "Página temporariamente desabilitada para melhorias. Consulte o desenvolvedor para mais informações.";
+            if (isBlocked) {
+              return (
+                <button
+                  key={page.key}
+                  type="button"
+                  aria-disabled="true"
+                  aria-label={`${page.name}. ${maintenanceMessage}`}
+                  title={maintenanceMessage}
+                  data-tooltip={maintenanceMessage}
+                  className={`${styles.navigationLink} ${styles.navigationButton} ${styles.navigationDisabled}`}
+                >
+                  <span aria-hidden="true" className={styles.navigationIcon}>
+                    <Icon size={19} strokeWidth={1.9} />
+                  </span>
+                  <span className={styles.navigationLabel}>{page.name}</span>
+                  <LockKeyhole aria-hidden="true" className={styles.navigationLock} size={15} />
+                </button>
+              );
+            }
             return (
-              <button
+              <Link
                 key={page.key}
-                type="button"
-                aria-disabled="true"
-                aria-label={`${page.name}. ${maintenanceMessage}`}
-                title={maintenanceMessage}
-                data-tooltip={maintenanceMessage}
-                className={`${styles.navigationLink} ${styles.navigationButton} ${styles.navigationDisabled}`}
+                href={page.path}
+                prefetch={false}
+                aria-current={page.path === activePath ? "page" : undefined}
+                aria-label={page.name}
+                title={visuallyCollapsed ? page.name : undefined}
+                className={styles.navigationLink}
+                onClick={() => setMobileOpen(false)}
               >
                 <span aria-hidden="true" className={styles.navigationIcon}>
                   <Icon size={19} strokeWidth={1.9} />
                 </span>
                 <span className={styles.navigationLabel}>{page.name}</span>
-                <LockKeyhole aria-hidden="true" className={styles.navigationLock} size={15} />
-              </button>
+              </Link>
             );
-          }
-          return (
-            <Link
-              key={page.key}
-              href={page.path}
-              prefetch={false}
-              aria-current={page.path === activePath ? "page" : undefined}
-              aria-label={page.name}
-              title={collapsed ? page.name : undefined}
-              className={styles.navigationLink}
-            >
-              <span aria-hidden="true" className={styles.navigationIcon}>
-                <Icon size={19} strokeWidth={1.9} />
-              </span>
-              <span className={styles.navigationLabel}>{page.name}</span>
-            </Link>
-          );
-        })}
-      </nav>
-      <p className={styles.sourceNote}>Meta Ads · análise de campanhas</p>
-      <button
-        type="button"
-        className={styles.soundToggle}
-        aria-pressed={soundMuted}
-        aria-label={soundMuted ? "Ativar sons discretos" : "Silenciar sons discretos"}
-        title={soundMuted ? "Ativar sons discretos" : "Silenciar sons discretos"}
-        onClick={() => {
-          let next = !soundMuted;
-          try {
-            next = localStorage.getItem("descomplica-ui-sounds-muted") !== "true";
-          } catch {
-            // Usa o estado da interface quando o armazenamento está indisponível.
-          }
-          setSoundMuted(next);
-          try {
-            localStorage.setItem("descomplica-ui-sounds-muted", String(next));
-          } catch {
-            // O dashboard continua funcional quando o armazenamento está indisponível.
-          }
-        }}
-      >
-        {soundMuted ? (
-          <VolumeX aria-hidden="true" size={18} />
-        ) : (
-          <Volume2 aria-hidden="true" size={18} />
-        )}
-        <span>{soundMuted ? "Ativar sons" : "Sons discretos"}</span>
-      </button>
-      <button
-        type="button"
-        className={styles.sidebarToggle}
-        aria-controls="meta-ads-sidebar-navigation"
-        aria-expanded={!collapsed}
-        aria-label={collapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
-        title={collapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
-        onClick={() => setCollapsed((current) => !current)}
-      >
-        {collapsed ? (
-          <ChevronRight aria-hidden="true" size={19} />
-        ) : (
-          <ChevronLeft aria-hidden="true" size={19} />
-        )}
-        <span>{collapsed ? "Expandir" : "Recolher"}</span>
-      </button>
+          })}
+        </nav>
+        <div className={styles.sidebarFooter}>
+          <p className={styles.sourceNote}>Meta Ads · análise de campanhas</p>
+          <button
+            type="button"
+            className={styles.soundToggle}
+            aria-pressed={soundMuted}
+            aria-label={soundMuted ? "Ativar sons discretos" : "Silenciar sons discretos"}
+            title={soundMuted ? "Ativar sons discretos" : "Silenciar sons discretos"}
+            onClick={() => {
+              let next = !soundMuted;
+              try {
+                next = localStorage.getItem("descomplica-ui-sounds-muted") !== "true";
+              } catch {
+                // Usa o estado da interface quando o armazenamento está indisponível.
+              }
+              setSoundMuted(next);
+              try {
+                localStorage.setItem("descomplica-ui-sounds-muted", String(next));
+              } catch {
+                // O dashboard continua funcional quando o armazenamento está indisponível.
+              }
+            }}
+          >
+            {soundMuted ? (
+              <VolumeX aria-hidden="true" size={18} />
+            ) : (
+              <Volume2 aria-hidden="true" size={18} />
+            )}
+            <span>{soundMuted ? "Ativar sons" : "Sons discretos"}</span>
+          </button>
+          <button
+            type="button"
+            className={styles.sidebarToggle}
+            aria-controls="meta-ads-sidebar-navigation"
+            aria-expanded={!collapsed}
+            aria-label={collapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
+            title={collapsed ? "Expandir menu lateral" : "Recolher menu lateral"}
+            onClick={() => {
+              setHoverPreview(false);
+              setCollapsed((current) => !current);
+            }}
+          >
+            {collapsed ? (
+              <ChevronRight aria-hidden="true" size={19} />
+            ) : (
+              <ChevronLeft aria-hidden="true" size={19} />
+            )}
+            <span>{collapsed ? "Expandir" : "Recolher"}</span>
+          </button>
+        </div>
+      </div>
     </aside>
   );
 }

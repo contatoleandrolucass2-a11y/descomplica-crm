@@ -1,11 +1,13 @@
 # Changelog
 
+- Atualiza exclusivamente a sidebar do Meta Ads com recolhimento suave,
+  expansão temporária por foco ou hover, drawer móvel acessível e destaque
+  ativo azul/ciano, removendo os acentos rosa sem alterar permissões ou rotas.
 - Executa `release-gates`, `isolated-restore` e `promotable-image` também em pull requests protegidos, mantendo a repetição integral dos quatro jobs no `main`.
 
 - Publica a evolução editável de Links Úteis no SHA `d6bc4e7f`, com CI integral,
   migration de persistência aplicada em produção, RLS/MFA verificadas e rotas
   anônimas protegidas por redirecionamento para login.
-
 - Remove declarações redundantes do validador SQL de Links Úteis para atender ao lint estrito da restauração isolada sem alterar a validação dos documentos.
 - Adiciona sidebar contextual e editor compartilhado aos Links Úteis, com organograma comercial, cards movíveis e redimensionáveis, conteúdo atualizado das lojas e edição restrita a administradores.
 
