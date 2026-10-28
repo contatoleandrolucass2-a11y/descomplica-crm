@@ -454,7 +454,7 @@ export function UsefulLinksBoard({ page }: { page: UsefulLinksPage }) {
         const response = await fetch(`/api/useful-links/${page.slug}`, {
           credentials: "same-origin",
           cache: "no-store",
-        signal: signal ?? null,
+          signal: signal ?? null,
         });
         const payload = (await response.json()) as {
           document?: unknown;
