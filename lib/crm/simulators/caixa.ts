@@ -2,7 +2,16 @@
 import { CAIXA_CITIES } from "./caixa-reference-data";
 export type HousingProduct = "mcmv" | "sbpe";
 export type HousingSystem = "price" | "sac";
-export type McmvSubsidyEligibility = "confirmed" | "eligible-review" | "not-eligible";
+export type McmvSubsidyEligibility = "confirmed" | "automatic" | "eligible-review" | "not-eligible";
+export type McmvPropertyType = "apartment" | "house";
+export interface McmvSubsidyCalculation {
+  amount: number;
+  incomeFactor: number;
+  regionalFactor: number;
+  financingFactor: number;
+  housingFactor: number;
+  populationFactor: number;
+}
 export interface HousingInput {
   income: number;
   propertyValue: number;
@@ -31,6 +40,9 @@ export interface HousingInput {
   operatingFee?: number;
   cityLimit?: number;
   populationFactor?: number;
+  propertyType?: McmvPropertyType;
+  propertyArea?: number;
+  singlePersonFamily?: boolean;
   constructionMonths?: number;
   incomeLimitPercent?: number;
   middleClass?: boolean;
@@ -54,6 +66,40 @@ const STATES = new Set(
 const MUNICIPAL_LIMITS = new Map(
   CAIXA_CITIES.map((city) => [`${city.u}|${city.n}`, city.l] as const),
 );
+const POPULATION_FACTORS = new Map(
+  CAIXA_CITIES.flatMap((city) =>
+    city.p === undefined ? [] : ([[`${city.u}|${city.n}`, city.p]] as const),
+  ),
+);
+const REGIONAL_SUBSIDY_FACTORS: Readonly<Record<string, number>> = {
+  DF: 7.17,
+  GO: -0.68,
+  MS: -3.49,
+  MT: -0.13,
+  AL: -8.14,
+  BA: -5.03,
+  CE: -7.87,
+  MA: 0.69,
+  PB: -6.78,
+  PE: -5.31,
+  PI: -8.13,
+  RN: 0.58,
+  SE: -6.18,
+  AC: 3.44,
+  AM: 0.56,
+  AP: 10,
+  PA: 5.45,
+  RO: -10,
+  RR: -4.83,
+  TO: -3.17,
+  ES: -5.1,
+  MG: -5.68,
+  RJ: -1.78,
+  SP: 2.07,
+  PR: -5.13,
+  RS: -1.09,
+  SC: 4.58,
+};
 const NORTH_NORTHEAST = new Set("AC AL AM AP BA CE MA PA PB PE PI RN RO RR SE TO".split(" "));
 const SOUTH_SOUTHEAST = new Set("ES MG RJ SP PR RS SC".split(" "));
 // Nominal annual percentages. MCID table consulted 25/10/2026; FGTS discount: 0.5 p.p.
@@ -208,6 +254,104 @@ export function getMcmvSubsidyEligibility({
 export function getMunicipalLimit(city: string | undefined, state: string) {
   return city?.trim() ? MUNICIPAL_LIMITS.get(`${state}|${city.trim()}`) : undefined;
 }
+export function getPopulationFactor(city: string | undefined, state: string) {
+  return city?.trim() ? POPULATION_FACTORS.get(`${state}|${city.trim()}`) : undefined;
+}
+
+const clamp = (value: number, minimum: number, maximum: number) =>
+  Math.min(maximum, Math.max(minimum, value));
+
+/** MFOM Habitação v034, item 3.1.1 e Anexos III/IV. */
+export function calculateMcmvSubsidy(
+  input: Pick<
+    HousingInput,
+    | "income"
+    | "propertyValue"
+    | "state"
+    | "city"
+    | "cityLimit"
+    | "populationFactor"
+    | "propertyType"
+    | "propertyArea"
+    | "singlePersonFamily"
+    | "propertyCondition"
+    | "inConstruction"
+  > & { nominalRate: number },
+): McmvSubsidyCalculation | null {
+  const { income, propertyValue, state, city, propertyType, propertyArea, nominalRate } = input;
+  const cityLimit = input.cityLimit ?? getMunicipalLimit(city, state);
+  const populationFactor = input.populationFactor ?? getPopulationFactor(city, state);
+  const regionalFactor = REGIONAL_SUBSIDY_FACTORS[state];
+  if (
+    !Number.isFinite(income) ||
+    income <= 0 ||
+    income > 4000 ||
+    !Number.isFinite(propertyValue) ||
+    propertyValue <= 0 ||
+    cityLimit === undefined ||
+    populationFactor === undefined ||
+    regionalFactor === undefined ||
+    !propertyType ||
+    !input.propertyCondition ||
+    typeof input.inConstruction !== "boolean" ||
+    typeof input.singlePersonFamily !== "boolean" ||
+    !Number.isFinite(propertyArea) ||
+    propertyArea! <= 0 ||
+    !Number.isFinite(nominalRate) ||
+    nominalRate < 0
+  )
+    return null;
+
+  const maximumDiscount = 50000;
+  const minimumDiscount = 1900;
+  const maximumDiscountIncome = 1750;
+  const minimumDiscountIncome = 3700;
+  const b =
+    (2 * maximumDiscount * (minimumDiscount / maximumDiscount - 1)) /
+    (minimumDiscountIncome - maximumDiscountIncome);
+  const a = -b / (2 * (minimumDiscountIncome - maximumDiscountIncome));
+  const incomeDelta = income - maximumDiscountIncome;
+  const incomeFactor = a * incomeDelta ** 2 + b * incomeDelta + maximumDiscount;
+
+  const monthlyRate = nominalRate / 1200;
+  const annuityFactor =
+    monthlyRate === 0 ? 420 : (1 - Math.pow(1 + monthlyRate, -420)) / monthlyRate;
+  const financingCapacity = income * 0.25 * annuityFactor;
+  const investmentValue = Math.min(propertyValue, cityLimit * 0.675);
+  const financingFactor = clamp(10 - 40 * (financingCapacity / investmentValue - 0.5), -10, 10);
+  const housingFactor = clamp(
+    propertyType === "apartment"
+      ? (10 * (propertyArea! - 39)) / (59 - 39)
+      : (10 * (propertyArea! - 46)) / (66 - 46),
+    0,
+    10,
+  );
+  const regionalCeiling = new Set(["AC", "AM", "AP", "PA", "RO", "RR", "TO"]).has(state)
+    ? 65000
+    : 55000;
+  const operationCeiling =
+    input.inConstruction === false ? Math.min(regionalCeiling, 49500) : regionalCeiling;
+  let amount = Math.min(
+    Math.max(
+      0,
+      incomeFactor *
+        (1 + (regionalFactor + financingFactor + housingFactor) / 100) *
+        populationFactor,
+    ),
+    operationCeiling,
+  );
+  if (input.propertyCondition === "used") amount *= 0.5;
+  if (input.singlePersonFamily) amount *= 0.3;
+  amount = amount < 1500 ? 0 : cents(amount);
+  return {
+    amount,
+    incomeFactor: cents(incomeFactor),
+    regionalFactor,
+    financingFactor: cents(financingFactor),
+    housingFactor: cents(housingFactor),
+    populationFactor,
+  };
+}
 export function getHousingRate({
   income,
   state = "SP",
@@ -312,6 +456,7 @@ export interface HousingSuccess {
   rateEstimated: boolean;
   subsidyConfirmed: boolean;
   subsidyEligibility: McmvSubsidyEligibility;
+  subsidyCalculation?: McmvSubsidyCalculation;
   financingQuota: number;
   sources: typeof CAIXA_SOURCES;
   middleClass: boolean;
@@ -326,7 +471,7 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     system = input.system ?? "price";
   const middleClass =
     product === "mcmv" && (input.middleClass === true || income > 9600 || propertyValue > 400000);
-  const subsidyEligibility = getMcmvSubsidyEligibility({
+  let subsidyEligibility = getMcmvSubsidyEligibility({
     income,
     propertyValue,
     product,
@@ -367,6 +512,8 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     "dfiMonthly",
     "operatingFee",
     "cityLimit",
+    "populationFactor",
+    "propertyArea",
     "constructionMonths",
   ] as const) {
     if (input[key] !== undefined && (!finiteNonnegative(input[key]!) || input[key]! > 1e10))
@@ -419,7 +566,16 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     errors.push("A taxa nominal anual do MCMV não pode superar o teto de 10%.");
   if (!Number.isFinite(rate) || rate < 0 || rate > 100)
     errors.push("Informe a taxa nominal anual confirmada na CAIXA para este produto e perfil.");
-  const subsidy = input.confirmedSubsidy ?? 0;
+  const subsidyCalculation =
+    subsidyEligibility === "eligible-review"
+      ? calculateMcmvSubsidy({
+          ...input,
+          ...(municipalLimit !== undefined ? { cityLimit: municipalLimit } : {}),
+          nominalRate: rate,
+        })
+      : null;
+  if (subsidyCalculation) subsidyEligibility = "automatic";
+  const subsidy = input.confirmedSubsidy ?? subsidyCalculation?.amount ?? 0;
   const publicContribution = input.confirmedPublicContribution ?? 0;
   const maximumSubsidy = new Set(["AC", "AM", "AP", "PA", "RO", "RR", "TO"]).has(input.state)
     ? 65000
@@ -514,7 +670,11 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     );
   if (subsidyEligibility === "eligible-review")
     warnings.push(
-      "Renda potencialmente elegível ao desconto complemento FGTS. Nenhum valor foi abatido sem a confirmação da CAIXA, pois o cálculo oficial também depende da área e tipo do imóvel, composição familiar, recorte populacional e modalidade da operação.",
+      "Renda potencialmente elegível ao desconto complemento FGTS. Informe tipo e área oficial da unidade e a composição familiar para calcular o valor indicativo.",
+    );
+  if (subsidyEligibility === "automatic")
+    warnings.push(
+      "Subsídio calculado pela fórmula do MFOM Habitação v034. O valor é indicativo e depende da validação cadastral e documental pela CAIXA.",
     );
   if (rateAdjustedByProperty)
     warnings.push(
@@ -617,6 +777,7 @@ export function calculateHousingSimulation(input: HousingInput): HousingResult {
     rateEstimated,
     subsidyConfirmed: input.confirmedSubsidy !== undefined,
     subsidyEligibility,
+    ...(subsidyCalculation ? { subsidyCalculation } : {}),
     financingQuota,
     middleClass,
     ...(municipalLimit !== undefined ? { municipalLimit } : {}),

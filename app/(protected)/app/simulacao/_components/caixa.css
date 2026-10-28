@@ -2939,6 +2939,22 @@
   gap: 10px;
 }
 
+.caixa-page-shell .caixa-subsidy-inputs {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--analytics-positive) 42%, var(--caixa-layout-line));
+  border-radius: 7px;
+  background: color-mix(in srgb, var(--analytics-positive) 5%, var(--caixa-layout-input));
+}
+
+.caixa-page-shell .caixa-subsidy-inputs > .caixa-field {
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
 .caixa-page-shell .caixa-automatic-values > div {
   min-width: 0;
   padding: 10px 12px;
@@ -2963,12 +2979,14 @@
   color: var(--caixa-layout-muted);
 }
 
-.caixa-page-shell .caixa-subsidy-status.eligible-review {
+.caixa-page-shell .caixa-subsidy-status.eligible-review,
+.caixa-page-shell .caixa-subsidy-status.automatic {
   border-color: color-mix(in srgb, var(--analytics-positive) 58%, var(--caixa-layout-line));
   background: color-mix(in srgb, var(--analytics-positive) 8%, var(--caixa-layout-input));
 }
 
-.caixa-page-shell .caixa-subsidy-status.eligible-review strong {
+.caixa-page-shell .caixa-subsidy-status.eligible-review strong,
+.caixa-page-shell .caixa-subsidy-status.automatic strong {
   color: var(--analytics-positive);
 }
 
@@ -3197,6 +3215,10 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
+  .caixa-page-shell .caixa-subsidy-inputs {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
   .caixa-page-shell .caixa-subsidy-status {
     grid-column: 1 / -1;
   }
@@ -3238,6 +3260,7 @@
   }
 
   .caixa-page-shell .caixa-automatic-values,
+  .caixa-page-shell .caixa-subsidy-inputs,
   .caixa-page-shell .caixa-property-condition-group {
     grid-template-columns: minmax(0, 1fr);
   }

@@ -5,7 +5,9 @@ import {
   calculateExtraAmortization,
   calculateFgtsTime,
   calculateHousingSimulation,
+  calculateMcmvSubsidy,
   estimateConstructionInterest,
+  getHousingRate,
   getMcmvBand,
   getMaximumFinancingQuota,
   getMaximumTerm,
@@ -74,6 +76,9 @@ const initialForm = {
   dfiMonthly: "",
   operatingFee: "",
   propertyCondition: "new",
+  propertyType: "",
+  propertyArea: "",
+  hasDependents: "",
   constructionMonths: "",
 };
 type Form = typeof initialForm;
@@ -92,7 +97,7 @@ function automaticMaximumTerm(form: Form, baseDate: string) {
     asOf: baseDate,
   });
 }
-function housingInput(form: Form, baseDate: string): HousingInput {
+function housingInput(form: Form, baseDate: string, participants: number): HousingInput {
   const input: HousingInput = {
     income: Number(form.income),
     propertyValue: Number(form.propertyValue),
@@ -110,6 +115,7 @@ function housingInput(form: Form, baseDate: string): HousingInput {
     inConstruction: form.inConstruction,
     fgts: Number(form.fgts),
     propertyCondition: form.propertyCondition as "new" | "used",
+    singlePersonFamily: participants === 1 && form.hasDependents === "no",
     asOf: baseDate,
   };
   for (const key of [
@@ -127,6 +133,9 @@ function housingInput(form: Form, baseDate: string): HousingInput {
     if (value !== undefined) input[key] = value;
   }
   const constructionMonths = optionalNumber(form.constructionMonths);
+  const propertyArea = optionalNumber(form.propertyArea);
+  if (form.propertyType) input.propertyType = form.propertyType as "apartment" | "house";
+  if (propertyArea !== undefined) input.propertyArea = propertyArea;
   if (form.inConstruction && constructionMonths !== undefined)
     input.constructionMonths = constructionMonths;
   return input;
@@ -463,6 +472,34 @@ export function CaixaClient({
     middleClass: automaticMiddleClass,
     confirmedSubsidy: optionalNumber(form.confirmedSubsidy),
   });
+  const previewNominalRate = optionalNumber(form.nominalRate);
+  const previewRate = getHousingRate({
+    income: numericIncome,
+    propertyValue: numericPropertyValue,
+    state: form.state,
+    city: form.city,
+    product: form.product as "mcmv" | "sbpe",
+    hasFgts36: form.hasFgts36,
+    previousSubsidy: form.previousSubsidy,
+    propertyCondition: form.propertyCondition as "new" | "used",
+    ...(previewNominalRate !== undefined ? { nominalRate: previewNominalRate } : {}),
+  });
+  const automaticSubsidy =
+    subsidyEligibility === "eligible-review" && (participants > 1 || form.hasDependents !== "")
+      ? calculateMcmvSubsidy({
+          income: numericIncome,
+          propertyValue: numericPropertyValue,
+          state: form.state,
+          city: form.city,
+          propertyCondition: form.propertyCondition as "new" | "used",
+          inConstruction: form.inConstruction,
+          propertyType: form.propertyType as "apartment" | "house",
+          propertyArea: Number(form.propertyArea),
+          singlePersonFamily: participants === 1 && form.hasDependents === "no",
+          nominalRate: previewRate,
+        })
+      : null;
+  const displayedSubsidyEligibility = automaticSubsidy ? "automatic" : subsidyEligibility;
   const displayedBand =
     form.product === "sbpe"
       ? "SBPE"
@@ -512,7 +549,7 @@ export function CaixaClient({
   }
   function submit(event: FormEvent) {
     event.preventDefault();
-    const calculation = calculateHousingSimulation(housingInput(form, baseDate));
+    const calculation = calculateHousingSimulation(housingInput(form, baseDate, participants));
     setConstruction((previous) => ({ ...previous, months: form.constructionMonths || "36" }));
     setResult(calculation);
     setSubmitted(true);
@@ -546,7 +583,11 @@ export function CaixaClient({
     !!form.birthDate &&
     !!form.city.trim() &&
     !!form.propertyCondition &&
-    Number(form.term) > 0;
+    Number(form.term) > 0 &&
+    (subsidyEligibility !== "eligible-review" ||
+      (!!form.propertyType &&
+        Number(form.propertyArea) > 0 &&
+        (participants > 1 || !!form.hasDependents)));
   const simulationText = result?.ok
     ? [
         "SIMULAÇÃO CAIXA — DESCOMPLICA CRM",
@@ -555,7 +596,7 @@ export function CaixaClient({
         `Base da cota (menor entre compra e avaliação): ${money.format(result.quotaBaseValue)}`,
         `Potencial de financiamento indicativo: ${money.format(result.financing)}`,
         `Subsídio: ${
-          result.subsidyConfirmed
+          result.subsidyConfirmed || result.subsidyEligibility === "automatic"
             ? money.format(result.subsidy)
             : result.subsidyEligibility === "eligible-review"
               ? "renda elegível à análise; valor não abatido"
@@ -710,15 +751,60 @@ export function CaixaClient({
                         step="1"
                         value={participants}
                         onChange={(event) => {
-                          setParticipants(
-                            Math.max(1, Math.min(4, Math.floor(Number(event.target.value)) || 1)),
+                          const value = Math.max(
+                            1,
+                            Math.min(4, Math.floor(Number(event.target.value)) || 1),
                           );
+                          setParticipants(value);
+                          if (value > 1)
+                            setForm((previous) => ({ ...previous, hasDependents: "" }));
                           setSubmitted(false);
                         }}
                       />
                     </div>
                   </Field>
                 </div>
+                {subsidyEligibility === "eligible-review" && (
+                  <div className="caixa-form-grid caixa-subsidy-inputs">
+                    <Field label="Tipo da unidade *">
+                      <select
+                        required
+                        value={form.propertyType}
+                        onChange={(event) => update("propertyType", event.target.value)}
+                      >
+                        <option value="">Selecione…</option>
+                        <option value="apartment">Apartamento</option>
+                        <option value="house">Casa</option>
+                      </select>
+                    </Field>
+                    <Field label="Área oficial da unidade (m²) *">
+                      <input
+                        required
+                        type="number"
+                        min="1"
+                        max="10000"
+                        step="0.01"
+                        value={form.propertyArea}
+                        onChange={(event) => update("propertyArea", event.target.value)}
+                      />
+                      <small>Use a área coberta indicada no documento do imóvel.</small>
+                    </Field>
+                    {participants === 1 && (
+                      <Field label="Possui dependentes? *">
+                        <select
+                          required
+                          value={form.hasDependents}
+                          onChange={(event) => update("hasDependents", event.target.value)}
+                        >
+                          <option value="">Selecione…</option>
+                          <option value="yes">Sim</option>
+                          <option value="no">Não</option>
+                        </select>
+                        <small>Sem dependentes aplica a regra de família unipessoal.</small>
+                      </Field>
+                    )}
+                  </div>
+                )}
                 <div className="caixa-automatic-values" aria-live="polite">
                   <div>
                     <span>Teto indicativo de renda</span>
@@ -738,23 +824,27 @@ export function CaixaClient({
                     <strong>{applicablePropertyLimit}</strong>
                     <small>{propertyLimitDetail}</small>
                   </div>
-                  <div className={`caixa-subsidy-status ${subsidyEligibility}`}>
+                  <div className={`caixa-subsidy-status ${displayedSubsidyEligibility}`}>
                     <span>Subsídio MCMV</span>
                     <strong>
                       {subsidyEligibility === "confirmed"
                         ? money.format(Number(form.confirmedSubsidy))
-                        : subsidyEligibility === "eligible-review"
-                          ? "Elegível à análise"
-                          : numericIncome > 0 && numericPropertyValue > 0
-                            ? "Não aplicável"
-                            : "Informe renda e imóvel"}
+                        : automaticSubsidy
+                          ? money.format(automaticSubsidy.amount)
+                          : subsidyEligibility === "eligible-review"
+                            ? "Complete os dados"
+                            : numericIncome > 0 && numericPropertyValue > 0
+                              ? "Não aplicável"
+                              : "Informe renda e imóvel"}
                     </strong>
                     <small>
-                      {subsidyEligibility === "eligible-review"
-                        ? "A renda permite análise. O valor depende da área e tipo do imóvel, composição familiar, recorte populacional e modalidade confirmados pela CAIXA."
-                        : subsidyEligibility === "confirmed"
-                          ? "Valor oficial informado manualmente e incluído na composição."
-                          : "A elegibilidade é atualizada automaticamente para o cenário preenchido."}
+                      {automaticSubsidy
+                        ? "Cálculo automático pela fórmula do MFOM v034; sujeito à validação da CAIXA."
+                        : subsidyEligibility === "eligible-review"
+                          ? "Informe tipo, área e dependentes para calcular automaticamente."
+                          : subsidyEligibility === "confirmed"
+                            ? "Valor oficial informado manualmente e incluído na composição."
+                            : "A elegibilidade é atualizada automaticamente para o cenário preenchido."}
                     </small>
                   </div>
                 </div>
@@ -1162,7 +1252,7 @@ export function CaixaClient({
                           ["Financiamento", money.format(result.financing)],
                           [
                             "Subsídio",
-                            result.subsidyConfirmed
+                            result.subsidyConfirmed || result.subsidyEligibility === "automatic"
                               ? money.format(result.subsidy)
                               : result.subsidyEligibility === "eligible-review"
                                 ? "Elegível à análise · valor não abatido"
