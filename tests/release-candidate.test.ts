@@ -49,7 +49,9 @@ describe("release-candidate migration train", () => {
     expect(workflow).toContain("scripts/verify-documentation-sources.mjs");
     expect(workflow).toContain("if: steps.documentation_source_scope.outputs.required == 'true'");
     expect(
-      workflow.match(/if: github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'/g),
+      workflow.match(
+        /if: github\.event_name == 'pull_request' \|\| \(github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'\)/g,
+      ),
     ).toHaveLength(3);
   });
 

@@ -223,7 +223,7 @@ select is(
     'crm.useful_links.regras_comerciais',
     'crm.useful_links.relacionamento'
   ]::text[],
-  'Admin retains the exact forty-nine-page inherited set including Lead, Meta Ads, useful links, partnerships and simulators'
+  'Admin retains the exact forty-nine-page inherited set including Lead, Meta Ads, partnerships, simulators and useful links'
 );
 
 select is(

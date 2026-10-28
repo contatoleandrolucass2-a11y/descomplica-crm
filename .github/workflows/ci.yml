@@ -95,7 +95,7 @@ jobs:
         run: pnpm build
 
   release-gates:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -214,7 +214,7 @@ jobs:
         run: pnpm exec supabase stop --no-backup
 
   isolated-restore:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -251,7 +251,7 @@ jobs:
           retention-days: 14
 
   promotable-image:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
