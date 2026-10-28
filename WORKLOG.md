@@ -2,6 +2,17 @@
 
 - 2026-10-27: corrigida a incompatibilidade entre a proteção do `main` e a CI: `release-gates`, `isolated-restore` e `promotable-image` agora executam em pull requests e continuam repetidos no SHA final de `main`; o teste de contrato exige as duas condições sem reduzir etapas, tolerâncias ou proteção.
 
+## 2026-10-28 — Links Úteis: evolução editável publicada
+
+- PR #409 integrou as 22 baselines revisadas; a CI `40660625679` aprovou os
+  quatro jobs obrigatórios e produção serve o SHA `d6bc4e7f`.
+- A migration `useful_links_documents` foi aplicada no Supabase de produção e
+  verificada com RLS forçada, MFA, tabela sem DML direto e RPCs exclusivas de
+  usuários autenticados.
+- Grupos WhatsApp e Lojas Horários mantiveram redirecionamento anônimo 307 para
+  `/login`. O status do coordenador no VPS ficou indisponível por preflight de
+  dependências ignoradas; nenhuma mudança adicional foi feita no servidor.
+
 ## 2026-10-28 — Simulador CAIXA: experiência compacta e cálculo reativo
 
 - Escopo restrito a `/app/simulacao/caixa`: cabeçalhos de etapas, cartões

@@ -1,17 +1,72 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-27: gates protegidos executados no PR
+## 2026-10-28: gates protegidos executados no PR
 
 - A protecao exigia `release-gates`, `isolated-restore` e `promotable-image`, mas
   o workflow os marcava como `skipped` em pull requests. A condicao foi ampliada
   somente para aceitar PR ou `push/main`; os quatro jobs continuam obrigatorios
   e repetidos no SHA final integrado.
 - O teste de contrato da CI passou a exigir as duas condicoes nos tres jobs. No
-  SHA `22b86a5d614792aed8a555c381b8b23cffead4e1`, os quatro checks foram
+  SHA `0dbbffce9b0fdfdf21da07548244c26976072889`, os quatro checks foram
   aprovados, incluindo replay de migrations, pgTAP, E2E, acessibilidade,
   responsividade, temas, zoom, teclado, comparacao visual e imagem imutavel.
 - Nenhum baseline, tolerancia, migration, ACL, RLS ou dado remoto foi alterado
   por esta correcao de fluxo.
+
+## 2026-10-28: Simulador CAIXA compacto publicado
+
+- Escopo concluído somente em `/app/simulacao/caixa`: interface compacta,
+  limites junto aos campos de renda e imóvel, condições guiadas, parâmetros e
+  juros de obra recolhidos e resultado recalculado automaticamente. As fórmulas
+  financeiras permaneceram inalteradas.
+- Integração: PR #399 no SHA `cee003158d4e834b54009eaa128b77046fa0b523`;
+  as referências visuais deliberadamente compactadas foram atualizadas pelo
+  PR #409 no SHA final `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`.
+- Evidências: 61 testes focados aprovaram motor, recálculo, cenários salvos,
+  documentos, prazo, subsídio, SBPE, temas, mobile, overflow e Axe. A CI de
+  `main` `40660625679` aprovou `validate`, `release-gates`,
+  `isolated-restore` e `promotable-image` no SHA final.
+- Publicação protegida: deployment `dc8cc769-b57a-4ce2-84b4-88cc9447559a`,
+  imagem local provada
+  `sha256:b97e6429e38a2d3efdefb1b76d3a79c4b5cb8515651b769a1454c3a98d673374`
+  e conclusão em `2026-10-28T10:03:22.963Z` (`07:03:22.963` em
+  America/Sao_Paulo). A consulta CAS posterior retornou `noop`, confirmando que
+  o candidato já estava ativo sem reinício duplicado.
+- Verificação pós-publicação: `/api/health` respondeu `status=ok` e versão
+  exata `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`; acesso anônimo a
+  `/app/simulacao/caixa` respondeu 307 para `/login`.
+- Conhecimento: o runtime de sincronização continuou retornando o erro
+  `Documento excede o limite de exportacao.`; a falha permanece registrada e não foi
+  apresentada como sincronização concluída.
+
+## 2026-10-28: evolução editável de Links Úteis publicada
+
+- O ajuste estritamente visual das 22 baselines externas foi integrado pelo PR
+  #409 no `main` `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`, sem alteração funcional
+  adicional em Dashboard ou Simulador CAIXA. A CI `40660625679` aprovou
+  `validate`, `isolated-restore`, `promotable-image` e `release-gates`.
+- Produção observada em `2026-10-28T11:43:01Z`: health HTTP 200,
+  `status=ok` e versão exata
+  `d6bc4e7f0c125fd639adf7a8fa1f773744693f1f`. As rotas anônimas
+  `/app/links-uteis/grupos-whatsapp` e
+  `/app/links-uteis/lojas-horarios` responderam 307 para `/login`.
+- A migration versionada `useful_links_documents` foi aplicada ao Supabase de
+  produção como `20261028114244`. A conferência posterior comprovou RLS e RLS
+  forçada, policy restritiva de MFA, ausência de DML direto para `anon`,
+  `authenticated` e `service_role`, e execução das RPCs somente por
+  `authenticated`. A tabela iniciou sem documentos persistidos; o conteúdo
+  versionado da aplicação permanece como fallback até o primeiro salvamento.
+- Os advisors não apontaram acesso anônimo novo nos objetos de Links Úteis. O
+  aviso informativo de índice ausente na FK `updated_by` não bloqueia o fluxo e
+  não autoriza alteração adicional. Findings preexistentes de outras áreas
+  ficaram fora deste escopo.
+- Exceção operacional: `pnpm release:production status` no VPS parou no
+  preflight por builds de dependências ignorados pelo pnpm. Nenhuma alteração
+  foi feita no servidor; publicação e versão foram confirmadas pelo health e
+  pela CI do SHA exato.
+- Conhecimento: o runtime continua retornando
+  `Documento excede o limite de exportacao.`; a sincronização do Obsidian
+  permanece pendente e não foi alegada como concluída.
 
 ## 2026-10-28: Links Úteis integrado; publicação bloqueada por gate externo
 
