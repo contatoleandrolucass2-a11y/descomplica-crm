@@ -67,14 +67,18 @@ describe("CAIXA dedicated client", () => {
       "Imóvel na planta?",
       "Condição do imóvel",
       "Limite aplicável",
-      "Preencha os campos obrigatórios",
       "Avaliação confirmada pela CAIXA",
       "Desconto complemento FGTS confirmado",
       "Aporte MCMV Cidades confirmado",
       "Cota aprovada pela CAIXA",
       "Seguro MIP",
       "Seguro DFI",
-      "Não substitui proposta bancária",
+      "Simulador Associativo",
+      "Calcular documentação",
+      "Simulação CAIXA",
+      "Tabela Direta",
+      "Tabela Investidor",
+      "Tabelão",
     ])
       expect(markup).toContain(label);
     expect(markup).not.toContain("Resumo financeiro");
@@ -83,7 +87,12 @@ describe("CAIXA dedicated client", () => {
     expect(markup).not.toContain("Teto indicativo de renda (%)");
     expect(markup).not.toContain("Calcular simulação");
     expect(markup).not.toContain("Acesso liberado para todos os perfis autorizados");
-    expect(markup).toContain('href="https://simuladorhabitacao.caixa.gov.br/"');
+    expect(markup).not.toContain("Preencha os campos obrigatórios");
+    expect(markup).not.toContain("Não substitui proposta bancária");
+    expect(markup).not.toContain('href="https://simuladorhabitacao.caixa.gov.br/"');
+    expect(markup).toContain('aria-label="01 Documentos"');
+    expect(markup).toContain('aria-label="02 Diagnóstico"');
+    expect(markup).toContain('aria-label="03 Utilitários"');
   });
 
   it("keeps documents, diagnosis and utilities complete and locally scoped", () => {
@@ -199,9 +208,9 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         });
       });
       await page.goto("https://caixa.test/");
-      await browserExpect(
-        page.getByRole("heading", { name: "Simulador CAIXA", exact: true }),
-      ).toBeVisible();
+      await browserExpect(page.locator(".caixa-tool-sidebar a.active")).toContainText(
+        "Simulação CAIXA",
+      );
       await browserExpect(page.getByRole("main")).toHaveCount(1);
       await browserExpect(page.locator('main[data-canvas-layout="caixa"]')).toHaveCount(1);
     }
@@ -222,6 +231,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;
           }, theme);
+          await page.waitForTimeout(200);
           await page.screenshot({
             path: resolve(directory, `caixa-${name}-${width}-${theme}.png`),
             fullPage: true,
@@ -367,11 +377,11 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       await browserExpect(
         page.getByRole("heading", { name: "Resumo financeiro", exact: true }),
       ).toBeVisible();
-      await page.getByRole("button", { name: "02 Documentos", exact: true }).click();
+      await page.getByRole("button", { name: "01 Documentos", exact: true }).click();
       await page.getByLabel("Tipo de vínculo / renda", { exact: false }).selectOption("clt");
       await page.getByLabel("Renda mensal bruta", { exact: true }).fill("650000");
-      await page.getByRole("button", { name: "01 Simulador", exact: true }).click();
-      await page.getByRole("button", { name: "02 Documentos", exact: true }).click();
+      await page.getByRole("button", { name: "Voltar ao simulador", exact: true }).click();
+      await page.getByRole("button", { name: "01 Documentos", exact: true }).click();
       await browserExpect(page.getByLabel("Tipo de vínculo / renda", { exact: false })).toHaveValue(
         "clt",
       );
@@ -387,12 +397,12 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
         page.getByText("Certidão de estado civil", { exact: true }),
       ).toBeVisible();
       await auditCurrentTab("documentos");
-      await page.getByRole("button", { name: "03 Diagnóstico", exact: true }).click();
+      await page.getByRole("button", { name: "02 Diagnóstico", exact: true }).click();
       await page.getByRole("button", { name: "Reprovado", exact: true }).click();
       await page.getByRole("button", { name: "Pontuação (rating)", exact: true }).click();
       await browserExpect(page.getByRole("heading", { name: /pontuação/i })).toBeVisible();
       await auditCurrentTab("diagnostico");
-      await page.getByRole("button", { name: "04 Utilitários", exact: true }).click();
+      await page.getByRole("button", { name: "03 Utilitários", exact: true }).click();
       await page.getByRole("button", { name: "Tempo de FGTS", exact: true }).click();
       await page.getByLabel("Data início", { exact: true }).fill("2020-01-01");
       await page.getByLabel("Data fim (vazio = atual)", { exact: true }).fill("2024-01-01");
@@ -504,6 +514,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           await page.evaluate((selected) => {
             document.documentElement.dataset.theme = selected;
           }, theme);
+          await page.waitForTimeout(200);
           await page.screenshot({
             path: resolve(directory, `caixa-${width}-${theme}.png`),
             fullPage: true,
@@ -529,11 +540,17 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
           const clearBounds = await page
             .getByRole("button", { name: "Limpar", exact: true })
             .evaluate((button) => {
-              const form = button.closest("form")!.getBoundingClientRect();
+              const content = button.closest(".caixa-workspace-content")!.getBoundingClientRect();
+              const form = document.querySelector("form.caixa-form")!.getBoundingClientRect();
               const box = button.getBoundingClientRect();
-              return box.left >= form.left && box.right <= form.right;
+              return (
+                box.left >= content.left &&
+                box.right <= content.right &&
+                box.right >= content.right - 1 &&
+                box.bottom <= form.top
+              );
             });
-          expect(clearBounds, `${width}/${theme}: Limpar stays inside the form`).toBe(true);
+          expect(clearBounds, `${width}/${theme}: Limpar stays above the form at right`).toBe(true);
           if (width === 1024) {
             const geometry = await page.evaluate(() => {
               const rectangle = (selector: string) => {

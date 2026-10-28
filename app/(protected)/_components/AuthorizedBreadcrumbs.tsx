@@ -33,14 +33,18 @@ export function AuthorizedBreadcrumbs({ pages }: { pages: NavigationItem[] }) {
       <ol>
         {breadcrumbs.map((page, index) => {
           const current = index === breadcrumbs.length - 1;
+          const name =
+            current && (pathname === "/app/simulacao/caixa" || pathname === "/app/simulacao/caixa/")
+              ? "Simulador CAIXA"
+              : page.name;
           return (
             <li key={page.key}>
               {index > 0 ? <span aria-hidden="true">/</span> : null}
               {current ? (
-                <span aria-current="page">{page.name}</span>
+                <span aria-current="page">{name}</span>
               ) : (
                 <Link href={page.path} prefetch={false}>
-                  {page.name}
+                  {name}
                 </Link>
               )}
             </li>

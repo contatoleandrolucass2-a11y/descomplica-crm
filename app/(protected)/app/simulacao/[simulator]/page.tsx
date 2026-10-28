@@ -40,7 +40,7 @@ export async function generateMetadata({
   if (simulator === "calcular-documentacao") {
     return { title: "Calcular documentação" };
   }
-  if (simulator === "caixa") return { title: "Simulação CAIXA" };
+  if (simulator === "caixa") return { title: "Simulador CAIXA" };
   return { title: "Simulação comercial" };
 }
 

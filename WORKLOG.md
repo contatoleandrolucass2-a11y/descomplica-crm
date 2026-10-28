@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-28 — Simulador CAIXA: novo workspace compacto
+
+- Escopo restrito a `/app/simulacao/caixa`; nenhuma outra página, regra
+  financeira, fonte de dados ou permissão foi alterada.
+- A jornada ganhou sidebar própria com os seis simuladores solicitados, estado
+  ativo destacado, ação Limpar no canto superior direito e ferramentas
+  secundárias concentradas no final da página.
+- Cabeçalho promocional, instrução de preenchimento e rodapé de fontes foram
+  removidos da interface; o nome apresentado no breadcrumb passou a ser
+  `Simulador CAIXA`.
+- Validação sintética cobre cálculo automático, documentos, diagnóstico,
+  utilitários, subsídio, prazo, SBPE, três temas, quatro larguras, ausência de
+  overflow e auditoria Axe.
+
 ## 2026-10-28 — Meta Ads: sidebar retrátil sem destaque rosa
 
 - Escopo restrito ao shell interno de `/app/meta-ads` e às rotas filhas já
