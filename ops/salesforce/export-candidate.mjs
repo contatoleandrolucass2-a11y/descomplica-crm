@@ -76,7 +76,7 @@ export const REPORTS = [
     id: "00OU600000EjufWMAR",
     dated: true,
     requiredColumns: [
-      "Avaliacao_credito__c.Name",
+      ["Avaliacao_credito__c.Name", "Avaliacao_credito__c.Status__c"],
       "Avaliacao_credito__c.Oportunidade__c.Gerente_regional__c",
       "Avaliacao_credito__c.Oportunidade__c.Name",
       "Avaliacao_credito__c.CreatedDate",
@@ -197,7 +197,11 @@ function project(key, rows, analysisEnabled = false) {
   }
   if (key === "folders") {
     return rows.map((row) => ({
-      recordId: recordId(row, "Avaliacao_credito__c.Name"),
+      // Salesforce also attaches the source credit record ID to its status cell.
+      // The optional display-name column must not block an otherwise complete report.
+      recordId: Object.hasOwn(row, "Avaliacao_credito__c.Name")
+        ? recordId(row, "Avaliacao_credito__c.Name")
+        : recordId(row, "Avaliacao_credito__c.Status__c"),
       opportunityRecordId: recordId(
         row,
         "Avaliacao_credito__c.Oportunidade__c.Gerente_regional__c",
