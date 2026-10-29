@@ -34,14 +34,21 @@ window.CanvasHost = {
     state.selected=id;state.page='micro';state.detail='sets';state.organize=false;render();window.scrollTo(0,0);
   },
   async refresh(){
-    // Keep the complete API envelope. Individual cards filter their own day,
-    // week, month or custom range; replacing it with the global slice made
-    // those cards repeat today's values after the first 60-second refresh.
-    const response=await fetch('/api/meta-ads/data',{cache:'no-store'});
-    if(!response.ok)throw new Error('Fonte indisponível');
+    // Refresh only today's slice, then merge it into the complete envelope.
+    // This keeps week/month/custom cards intact without reloading 120 days.
+    const parts=Object.fromEntries(new Intl.DateTimeFormat('en-US',{timeZone:'America/Sao_Paulo',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).filter(part=>part.type!=='literal').map(part=>[part.type,part.value]));
+    const today=`${parts.year}-${parts.month}-${parts.day}`;
+    const response=await fetch('/api/meta-ads/data?'+new URLSearchParams({start:today,end:today}),{cache:'no-store'});
+    if(!response.ok){const error=new Error('Fonte indisponível');error.retryAfter=Number(response.headers.get('retry-after'))||0;throw error;}
     const next=await response.json();if(!Array.isArray(next.rows)||!next.range)throw new Error('Resposta inválida');
-    if(JSON.stringify(next.rows)===JSON.stringify(sourceData.rows))return false;
-    sourceData=next;rebuildCampaigns();syncAlertHistory();updateAlertCounter();
+    const refreshedDates=new Set(next.rows.map(row=>row.date));
+    if(!refreshedDates.size)refreshedDates.add(today);
+    const rows=sourceData.rows.filter(row=>!refreshedDates.has(row.date)).concat(next.rows);
+    const regionalResults=(sourceData.regionalResults||[]).filter(row=>!refreshedDates.has(row.date)).concat(next.regionalResults||[]);
+    const changed=JSON.stringify(rows)!==JSON.stringify(sourceData.rows)||JSON.stringify(regionalResults)!==JSON.stringify(sourceData.regionalResults||[]);
+    sourceData={...sourceData,...next,range:{start:sourceData.range.start,end:today>sourceData.range.end?today:sourceData.range.end},rows,regionalResults};
+    if(!changed)return false;
+    rebuildCampaigns();syncAlertHistory();updateAlertCounter();
     const table=document.querySelector('[data-panel="table"] .panel-body');if(table)table.innerHTML=campaignTable(current());
     return true;
   },
