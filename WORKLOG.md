@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-29 — Identidade de Pastas no coletor Salesforce
+
+- A coleta falhava antes de executar Pastas porque o contrato exigia a coluna
+  de apresentação `Avaliacao_credito__c.Name`, ausente no describe atual.
+  Essa observação não comprova edição recente do relatório ou de seu tipo.
+- Consulta somente de leitura confirmou 2.734 linhas e 2.734 IDs distintos `a1V`
+  na célula de status; 100 IDs foram confirmados no objeto Avaliação de crédito.
+- Nome passa a ser opcional. A ausência usa o ID real da célula de status;
+  ID ausente, inválido ou de outro objeto continua rejeitado. FID não é usado.
+- Regressões cobrem nome ausente, FID nulo e IDs inválidos, além dos contratos
+  existentes de projeção, transformação e reconciliação. CI e ativação do
+  coletor precisam de comprovação separada; esta nota não declara publicação.
+
 ## 2026-10-29 — Agendamentos: sete correções da análise
 
 - Escopo exclusivo: Agendamentos e suas dependências diretas. Sem novas

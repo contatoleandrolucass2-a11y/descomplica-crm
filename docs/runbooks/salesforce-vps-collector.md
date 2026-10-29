@@ -6,6 +6,12 @@ nao reinicia navegador, gateway, CRM ou n8n. O n8n antigo fica fora do escopo.
 
 ## Contrato operacional
 
+- A coluna de apresentação `Avaliacao_credito__c.Name` é opcional no relatório
+  de Pastas. Quando ausente, a identidade vem exclusivamente do `recordId`
+  da célula `Avaliacao_credito__c.Status__c`, validado como ID Salesforce `a1V`.
+  `FID`, posição da linha e nome da oportunidade nunca substituem essa identidade.
+  Datas, contagens, status, reconciliação e rejeição de duplicatas conflitantes
+  continuam obrigatórios. Ausência do nome não comprova alteração do relatório.
 - Primeiro ciclo imediato; seguintes nas fronteiras de 30 minutos. Se uma
   coleta atravessar uma fronteira, aguarda a proxima, sem sobreposicao.
 - Lock exclusivo pelo caminho do candidato, limite de coleta de 25 minutos,
