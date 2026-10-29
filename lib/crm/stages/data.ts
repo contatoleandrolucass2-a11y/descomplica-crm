@@ -60,6 +60,7 @@ const appointmentConversionGoalsSchema = z
   .strict();
 
 export type AppointmentConversionGoals = z.infer<typeof appointmentConversionGoalsSchema>;
+export type AppointmentConversionGoalsByMonth = Record<string, AppointmentConversionGoals | null>;
 
 export interface AppointmentsReadModel {
   analysis: DashboardAnalysisSlice | null;
@@ -68,6 +69,7 @@ export interface AppointmentsReadModel {
   individualGoal: number | null;
   goalsByMonth: AppointmentGoalsByMonth;
   conversionGoals: AppointmentConversionGoals | null;
+  conversionGoalsByMonth: AppointmentConversionGoalsByMonth;
 }
 
 /** Read only the authorized stage. A concurrent ingestion invalidates the whole read. */
@@ -145,6 +147,7 @@ export async function loadAppointmentsReadModel(
         individualGoal: null,
         goalsByMonth: {},
         conversionGoals: null,
+        conversionGoalsByMonth: {},
       };
     const response = await supabase.rpc("read_crm_appointments_analysis", {
       p_snapshot_id: before.id,
@@ -162,6 +165,7 @@ export async function loadAppointmentsReadModel(
           individualGoal: null,
           goalsByMonth: {},
           conversionGoals: null,
+          conversionGoalsByMonth: {},
         };
       throw new Error("Não foi possível carregar os gráficos de agendamentos.");
     }
@@ -175,6 +179,7 @@ export async function loadAppointmentsReadModel(
         individualGoal: null,
         goalsByMonth: {},
         conversionGoals: null,
+        conversionGoalsByMonth: {},
       };
     if (rows.length !== 1 || rows[0]!.view_key !== view) {
       throw new Error("A análise não corresponde à visão autorizada.");
@@ -198,9 +203,26 @@ export async function loadAppointmentsReadModel(
       const parsed = z.number().int().nonnegative().safeParse(response.data);
       return parsed.success ? parsed.data : null;
     }
+    async function readConversionGoals(
+      referenceDate: string,
+    ): Promise<AppointmentConversionGoals | null> {
+      const response = await supabase.rpc("read_crm_appointments_conversion_goals", {
+        p_reference_date: referenceDate,
+      });
+      if (response.error) {
+        if (["PGRST202", "42883"].includes(response.error.code)) return null;
+        throw new Error("Não foi possível carregar as metas de conversão dos agendamentos.");
+      }
+      const parsed = appointmentConversionGoalsSchema.safeParse(response.data);
+      return parsed.success ? parsed.data : null;
+    }
     const individualGoal = await readGoal(before.reference_date);
+    const conversionGoals = await readConversionGoals(before.reference_date);
     const referenceMonth = before.reference_date.slice(0, 7);
     const goalsByMonth: AppointmentGoalsByMonth = { [referenceMonth]: individualGoal };
+    const conversionGoalsByMonth: AppointmentConversionGoalsByMonth = {
+      [referenceMonth]: conversionGoals,
+    };
     // Resolve each historical month through the same permission-checked RPC.
     // Never copy today's policy backwards or query the private policy table.
     const historicalMonths: string[] = [];
@@ -213,18 +235,9 @@ export async function loadAppointmentsReadModel(
       await Promise.all(
         historicalMonths.slice(offset, offset + 6).map(async (month) => {
           goalsByMonth[month] = await readGoal(`${month}-01`);
+          conversionGoalsByMonth[month] = await readConversionGoals(`${month}-01`);
         }),
       );
-    }
-    const conversionResponse = await supabase.rpc("read_crm_appointments_conversion_goals", {
-      p_reference_date: before.reference_date,
-    });
-    let conversionGoals: AppointmentConversionGoals | null = null;
-    if (!conversionResponse.error) {
-      const parsedGoals = appointmentConversionGoalsSchema.safeParse(conversionResponse.data);
-      conversionGoals = parsedGoals.success ? parsedGoals.data : null;
-    } else if (!["PGRST202", "42883"].includes(conversionResponse.error.code)) {
-      throw new Error("Não foi possível carregar as metas de conversão dos agendamentos.");
     }
     return {
       analysis,
@@ -233,6 +246,7 @@ export async function loadAppointmentsReadModel(
       individualGoal,
       goalsByMonth,
       conversionGoals,
+      conversionGoalsByMonth,
     };
   }
   throw new Error("Os agendamentos foram atualizados durante a leitura. Tente novamente.");

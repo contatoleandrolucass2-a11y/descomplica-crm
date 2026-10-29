@@ -9,6 +9,7 @@ import {
   useState,
   type CSSProperties,
   type FormEvent,
+  type ReactNode,
 } from "react";
 import {
   ArrowLeft,
@@ -189,6 +190,42 @@ function presentationStyle(presentation?: DashboardCardPresentation): Presentati
   };
 }
 
+function DashboardCardContent({ card, children }: { card: DashboardCard; children: ReactNode }) {
+  return card.presentation ? (
+    <div
+      className={`${styles.cardContent} ${styles.cardContentPresentation}`}
+      data-dashboard-text-align={card.presentation.textAlign ?? "center"}
+      data-dashboard-vertical-align={card.presentation.verticalAlign ?? "center"}
+      style={presentationStyle(card.presentation)}
+    >
+      <div className={styles.presentationSurface}>
+        {card.presentation.content ? (
+          <p className={styles.customContent}>{card.presentation.content}</p>
+        ) : null}
+        {children}
+      </div>
+    </div>
+  ) : (
+    <div className={styles.cardContent}>{children}</div>
+  );
+}
+
+export function ExpandedDashboardCardContent({
+  card,
+  children,
+  preservePresentation = false,
+}: {
+  card: DashboardCard;
+  children: ReactNode;
+  preservePresentation?: boolean;
+}) {
+  return preservePresentation ? (
+    <DashboardCardContent card={card}>{children}</DashboardCardContent>
+  ) : (
+    children
+  );
+}
+
 export function ConfigurableDashboardCanvas({
   initialCards,
   catalog,
@@ -208,6 +245,7 @@ export function ConfigurableDashboardCanvas({
   layoutPolicy,
   hideCardOverflow = false,
   addButtonLabel = "Adicionar",
+  preserveExpandedPresentation = false,
 }: ConfigurableDashboardCanvasProps) {
   const [state, dispatch] = useReducer(canvasReducer, initialCards, (cards) =>
     createCanvasHistoryState(cards, undefined, layoutPolicy),
@@ -823,23 +861,9 @@ export function ConfigurableDashboardCanvas({
                   </button>
                 </div>
               ) : null}
-              {card.presentation ? (
-                <div
-                  className={`${styles.cardContent} ${styles.cardContentPresentation}`}
-                  data-dashboard-text-align={card.presentation.textAlign ?? "center"}
-                  data-dashboard-vertical-align={card.presentation.verticalAlign ?? "center"}
-                  style={presentationStyle(card.presentation)}
-                >
-                  <div className={styles.presentationSurface}>
-                    {card.presentation.content ? (
-                      <p className={styles.customContent}>{card.presentation.content}</p>
-                    ) : null}
-                    {renderDashboardContent(card, size)}
-                  </div>
-                </div>
-              ) : (
-                <div className={styles.cardContent}>{renderDashboardContent(card, size)}</div>
-              )}
+              <DashboardCardContent card={card}>
+                {renderDashboardContent(card, size)}
+              </DashboardCardContent>
             </div>
           )}
         />
@@ -877,7 +901,12 @@ export function ConfigurableDashboardCanvas({
           wide
         >
           <div className={styles.expandedContent}>
-            {renderDashboardContent(expandedCard, { width: 960, height: 540 })}
+            <ExpandedDashboardCardContent
+              card={expandedCard}
+              preservePresentation={preserveExpandedPresentation}
+            >
+              {renderDashboardContent(expandedCard, { width: 960, height: 540 })}
+            </ExpandedDashboardCardContent>
           </div>
         </DashboardModal>
       ) : null}

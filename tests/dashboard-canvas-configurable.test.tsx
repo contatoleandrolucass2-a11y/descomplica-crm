@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { runInNewContext } from "node:vm";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
 
 import type { DashboardCard } from "@/lib/dashboard-canvas";
@@ -15,6 +16,7 @@ import {
   type ConfigurableDashboardCatalog,
   type JsPdfConstructor,
 } from "@/lib/dashboard-canvas/ui/configurable";
+import { ExpandedDashboardCardContent } from "@/lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas";
 
 const catalog: ConfigurableDashboardCatalog = {
   metrics: [
@@ -186,6 +188,59 @@ describe("configurable dashboard canvas", () => {
     expect(bytes.length).toBeGreaterThan(1_000);
   });
 
+  it("preserves the complete card presentation in expanded views only when opted in", () => {
+    const customized = {
+      ...card("visits", 0),
+      title: "Visitas da equipe",
+      presentation: {
+        content: "Texto configurado pelo administrador",
+        fontScale: 1.4,
+        barScale: 0.7,
+        textColor: "#123456",
+        accentColor: "#abcdef",
+        textAlign: "right" as const,
+        verticalAlign: "end" as const,
+      },
+    };
+    const markup = renderToStaticMarkup(
+      <ExpandedDashboardCardContent card={customized} preservePresentation>
+        <h2>{customized.title}</h2>
+        <p>37 visitas</p>
+      </ExpandedDashboardCardContent>,
+    );
+
+    expect(markup).toContain("Texto configurado pelo administrador");
+    expect(markup).toContain("Visitas da equipe");
+    expect(markup).toContain("37 visitas");
+    expect(markup).toContain('data-dashboard-text-align="right"');
+    expect(markup).toContain('data-dashboard-vertical-align="end"');
+    for (const style of [
+      "--dashboard-font-scale:1.4",
+      "--dashboard-bar-scale:0.7",
+      "--analytics-ink:#123456",
+      "--analytics-cyan-strong:#abcdef",
+      "--dashboard-block-align:flex-end",
+      "--dashboard-inline-align:flex-end",
+    ]) {
+      expect(markup).toContain(style);
+    }
+  });
+
+  it("keeps the legacy expanded rendering unchanged by default", () => {
+    const markup = renderToStaticMarkup(
+      <ExpandedDashboardCardContent
+        card={{
+          ...card("visits", 0),
+          presentation: { content: "Texto adicional", fontScale: 1.5 },
+        }}
+      >
+        <p>Conteúdo original</p>
+      </ExpandedDashboardCardContent>,
+    );
+
+    expect(markup).toBe("<p>Conteúdo original</p>");
+  });
+
   it("keeps the toolbar, dialogs and profile states explicit in the client source", () => {
     const source = readFileSync(
       new URL(
@@ -220,10 +275,9 @@ describe("configurable dashboard canvas", () => {
     expect(source).toContain("/api/dashboard-profiles");
     expect(source).toContain("700");
     expect(source).toContain("data-dashboard-export-ignore");
-    expect(source).toContain("{card.presentation ? (");
-    expect(source).toContain(
-      "<div className={styles.cardContent}>{renderDashboardContent(card, size)}</div>",
-    );
+    expect(source).toContain("<DashboardCardContent card={card}>");
+    expect(source).toContain("preserveExpandedPresentation = false");
+    expect(source).toContain("preservePresentation={preserveExpandedPresentation}");
     expect(styles.match(/\.cardContent\s*\{[^}]*display:\s*flex/su)).toBeNull();
     expect(styles).toMatch(/\.cardContentPresentation\s*\{[^}]*display:\s*flex/su);
     expect(canvas).toContain("captureTarget.setPointerCapture(event.pointerId)");

@@ -233,26 +233,64 @@ export function analyzeAppointments(
   const matchesReportingPeriod = (date: string) =>
     hasExplicitPeriod ? matchesExplicitPeriod(date) : date.slice(0, 7) === month;
 
-  const regionalManagerByManager = new Map<string, { name: string; createdAt: number }>();
+  const coveredStart = requestedStart < slice.coverageStart ? slice.coverageStart : requestedStart;
+  const coveredEnd = requestedEnd > slice.referenceDate ? slice.referenceDate : requestedEnd;
+  const periodReferenceDate = selectedDates.filter(matchesExplicitPeriod).at(-1) ?? coveredEnd;
+  const coveredDays =
+    coveredStart > coveredEnd
+      ? 0
+      : Math.floor(
+          (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
+            86_400_000,
+        ) + 1;
+  const selectedCoveredDates = Array.from({ length: coveredDays }, (_, index) => {
+    const date = new Date(`${coveredStart}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  }).filter(matchesSelectedPeriod);
+  const selectedCoveredDays = selectedCoveredDates.length;
+  // Facts retain a civil date but not the regional manager. Resolve only from
+  // observations at or before that date; conflicting names on a day are unknown.
+  const regionalHistory = new Map<string, Map<string, Set<string>>>();
   for (const appointment of slice.appointments ?? []) {
     const manager = appointmentIdentity(appointment.salesManager);
     const regionalManager = appointment.regionalManager.trim();
     if (!manager || !regionalManager) continue;
-    const createdAt = Date.parse(appointment.createdAt);
-    const current = regionalManagerByManager.get(manager);
-    if (!current || createdAt > current.createdAt) {
-      regionalManagerByManager.set(manager, { name: regionalManager, createdAt });
-    }
+    const date = saoPauloDate(appointment.createdAt);
+    const history = regionalHistory.get(manager) ?? new Map<string, Set<string>>();
+    const names = history.get(date) ?? new Set<string>();
+    names.add(regionalManager);
+    history.set(date, names);
+    regionalHistory.set(manager, history);
   }
-  const managerBelongsToRegion = (manager: string, region: string) =>
-    regionalManagerByManager.get(appointmentIdentity(manager))?.name === region;
-  const regionForManager = (manager: string) =>
-    regionalManagerByManager.get(appointmentIdentity(manager))?.name ?? null;
+  const regionalTimeline = new Map(
+    [...regionalHistory].map(([manager, history]) => [
+      manager,
+      [...history]
+        .sort(([left], [right]) => left.localeCompare(right))
+        .map(([date, names]) => ({ date, name: names.size === 1 ? [...names][0]! : null })),
+    ]),
+  );
+  const regionForManager = (manager: string, date: string): string | null => {
+    const history = regionalTimeline.get(appointmentIdentity(manager));
+    if (!history) return null;
+    let low = 0;
+    let high = history.length - 1;
+    let found: string | null = null;
+    while (low <= high) {
+      const middle = Math.floor((low + high) / 2);
+      const observation = history[middle]!;
+      if (observation.date <= date) {
+        found = observation.name;
+        low = middle + 1;
+      } else high = middle - 1;
+    }
+    return found;
+  };
   const matchesAppointmentDimensions = (appointment: DashboardAppointmentDetail) =>
     (filters.channel === undefined ||
       ("channel" in appointment && appointment.channel === filters.channel)) &&
-    (!filters.regionalManager ||
-      managerBelongsToRegion(appointment.salesManager, filters.regionalManager)) &&
+    (!filters.regionalManager || appointment.regionalManager.trim() === filters.regionalManager) &&
     (!filters.manager || appointment.salesManager === filters.manager) &&
     (!filters.owner || appointment.owner === filters.owner) &&
     (!filters.company || ("company" in appointment && appointment.company === filters.company)) &&
@@ -265,7 +303,8 @@ export function analyzeAppointments(
   const matchesFactDimensions = (fact: DashboardAnalysisSlice["facts"][number]) =>
     (filters.channel === undefined || fact[5] === filters.channel) &&
     (!filters.regionalManager ||
-      managerBelongsToRegion(slice.dimensions.managers[fact[2]] ?? "", filters.regionalManager)) &&
+      regionForManager(slice.dimensions.managers[fact[2]] ?? "", fact[1]) ===
+        filters.regionalManager) &&
     (!filters.manager || slice.dimensions.managers[fact[2]] === filters.manager) &&
     (!filters.owner || slice.dimensions.owners[fact[3]] === filters.owner) &&
     (!filters.company || slice.dimensions.companies[fact[4]] === filters.company);
@@ -273,7 +312,18 @@ export function analyzeAppointments(
   const sharedFacts = dimensionFacts.filter((fact) => matchesSelectedPeriod(fact[1]));
   // Aggregated stage facts have no account-ranking dimension. Do not combine
   // their unfiltered conversions with ranking-filtered appointment details.
-  const conversionAvailable = !filters.accountRanking;
+  const regionalFactsAvailable = !slice.facts.some(
+    (fact) =>
+      matchesSelectedPeriod(fact[1]) &&
+      matchesReportingPeriod(fact[1]) &&
+      (filters.channel === undefined || fact[5] === filters.channel) &&
+      (!filters.manager || slice.dimensions.managers[fact[2]] === filters.manager) &&
+      (!filters.owner || slice.dimensions.owners[fact[3]] === filters.owner) &&
+      (!filters.company || slice.dimensions.companies[fact[4]] === filters.company) &&
+      regionForManager(slice.dimensions.managers[fact[2]] ?? "", fact[1]) === null,
+  );
+  const conversionAvailable =
+    !filters.accountRanking && (!filters.regionalManager || regionalFactsAvailable);
   const dimensionFilteredOperations: DashboardAppointmentDetail[] | null =
     slice.version >= 3 ? (slice.appointments ?? []).filter(matchesAppointmentDimensions) : null;
   const filteredOperations: DashboardAppointmentDetail[] | null =
@@ -282,12 +332,52 @@ export function analyzeAppointments(
       : dimensionFilteredOperations.filter(matchesFilters);
   const hasMappableRosterFilter =
     Boolean(filters.regionalManager) || Boolean(filters.manager) || Boolean(filters.owner);
+  // The registered roster contains owner/manager, not company, ranking or Imob
+  // membership. Activity must never stand in for an unavailable denominator.
+  const houseOnly =
+    slice.viewKey !== "with_canal_imob" &&
+    (filters.channel === 1 ||
+      (filters.channel === undefined && slice.viewKey === "without_canal_imob"));
+  // A single denominator is valid only when the manager's regional link is
+  // known and unchanged on every covered selected day, not merely the last one.
+  const stableRosterRegions = new Map<string, string | null>();
+  const stableRegionForManager = (manager: string): string | null => {
+    const key = appointmentIdentity(manager);
+    if (stableRosterRegions.has(key)) return stableRosterRegions.get(key)!;
+    const firstDate = selectedCoveredDates[0];
+    const region = firstDate ? regionForManager(manager, firstDate) : null;
+    const stable =
+      region !== null &&
+      selectedCoveredDates.every((date) => regionForManager(manager, date) === region);
+    const result = stable ? region : null;
+    stableRosterRegions.set(key, result);
+    return result;
+  };
+  const unknownRosterRegion =
+    Boolean(filters.regionalManager) &&
+    (brokerRoster === null ||
+      brokerRoster.some(
+        (broker) =>
+          (!filters.manager ||
+            appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
+          (!filters.owner ||
+            appointmentIdentity(broker.owner) === appointmentIdentity(filters.owner)) &&
+          stableRegionForManager(broker.manager) === null,
+      ));
+  const rosterUnavailableReason =
+    !houseOnly || filters.company || filters.accountRanking
+      ? ("unsupported-dimensions" as const)
+      : unknownRosterRegion
+        ? ("unknown-regional-link" as const)
+        : hasMappableRosterFilter && brokerRoster === null
+          ? ("missing-roster" as const)
+          : null;
   const filteredRoster =
     hasMappableRosterFilter && brokerRoster !== null
       ? brokerRoster.filter(
           (broker) =>
             (!filters.regionalManager ||
-              managerBelongsToRegion(broker.manager, filters.regionalManager)) &&
+              stableRegionForManager(broker.manager) === filters.regionalManager) &&
             (!filters.manager ||
               appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
             (!filters.owner ||
@@ -295,7 +385,7 @@ export function analyzeAppointments(
         )
       : brokerRoster;
   const filteredBrokerCount =
-    slice.version < 3
+    slice.version < 3 || rosterUnavailableReason !== null
       ? null
       : hasMappableRosterFilter
         ? filteredRoster === null
@@ -303,7 +393,7 @@ export function analyzeAppointments(
           : new Set(filteredRoster.map((broker) => broker.key)).size
         : (slice.brokerCount ?? null);
   const filteredManagerCount =
-    slice.version !== 4
+    slice.version !== 4 || rosterUnavailableReason !== null
       ? null
       : hasMappableRosterFilter
         ? filteredRoster === null
@@ -395,22 +485,6 @@ export function analyzeAppointments(
         );
     }
   }
-  const coveredStart = requestedStart < slice.coverageStart ? slice.coverageStart : requestedStart;
-  const coveredEnd = requestedEnd > slice.referenceDate ? slice.referenceDate : requestedEnd;
-  const coveredDays =
-    coveredStart > coveredEnd
-      ? 0
-      : Math.floor(
-          (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
-            86_400_000,
-        ) + 1;
-  const selectedCoveredDates = Array.from({ length: coveredDays }, (_, index) => {
-    const date = new Date(`${coveredStart}T12:00:00Z`);
-    date.setUTCDate(date.getUTCDate() + index);
-    return date.toISOString().slice(0, 10);
-  }).filter(matchesSelectedPeriod);
-  const selectedCoveredDays = selectedCoveredDates.length;
-  const periodReferenceDate = selectedDates.filter(matchesExplicitPeriod).at(-1) ?? coveredEnd;
   const details: AppointmentDetailRow[] | null =
     filteredOperations === null
       ? null
@@ -514,7 +588,12 @@ export function analyzeAppointments(
       fact[7],
     );
     addConversion(conversionGroups.managers, manager, fact[0], fact[7]);
-    addConversion(conversionGroups.regionalManagers, regionForManager(manager), fact[0], fact[7]);
+    addConversion(
+      conversionGroups.regionalManagers,
+      regionForManager(manager, fact[1]),
+      fact[0],
+      fact[7],
+    );
   }
   const conversionRanking = (
     map: Map<string, { appointments: number; visits: number }>,
@@ -542,7 +621,11 @@ export function analyzeAppointments(
       { key: 0 as const, label: "Imob" },
     ].filter(({ key }) => slice.facts.some((fact) => fact[5] === key)),
     regionalManagers: [
-      ...new Set([...regionalManagerByManager.values()].map(({ name }) => name)),
+      ...new Set(
+        [...regionalHistory.values()].flatMap((history) =>
+          [...history.values()].flatMap((names) => [...names]),
+        ),
+      ),
     ].sort((left, right) => left.localeCompare(right, "pt-BR")),
     managers: slice.dimensions.managers,
     owners: slice.dimensions.owners,
@@ -551,12 +634,8 @@ export function analyzeAppointments(
 
   // The registered roster is House-only. Company/ranking cannot be mapped to
   // that roster; mixed/Imob views have no configured appointment target.
-  const houseOnly =
-    slice.viewKey !== "with_canal_imob" &&
-    (filters.channel === 1 ||
-      (filters.channel === undefined && slice.viewKey === "without_canal_imob"));
   const goalBrokerCount =
-    !houseOnly || filters.company || filters.accountRanking
+    rosterUnavailableReason !== null
       ? null
       : filteredRoster !== null
         ? new Set(filteredRoster.map((broker) => broker.key)).size
@@ -660,11 +739,15 @@ export function analyzeAppointments(
     visitsPerformed: slice.version === 4 && conversionAvailable ? funnel.visits : null,
     sales: slice.version === 4 && conversionAvailable ? funnel.sales : null,
     conversionAvailable,
+    regionalFactsAvailable,
+    rosterUnavailableReason,
     brokerRecency,
     conversionRankings: {
       owners: conversionRanking(conversionGroups.owners),
       managers: conversionRanking(conversionGroups.managers),
-      regionalManagers: conversionRanking(conversionGroups.regionalManagers),
+      regionalManagers: regionalFactsAvailable
+        ? conversionRanking(conversionGroups.regionalManagers)
+        : [],
     },
     selectedCoveredDays,
     daysInMonth: Number(end.slice(8, 10)),

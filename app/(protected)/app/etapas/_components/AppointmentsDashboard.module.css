@@ -858,7 +858,7 @@
 }
 .columnValue {
   position: absolute;
-  bottom: min(100%, calc(var(--bar-height) * var(--dashboard-bar-scale, 1)));
+  bottom: calc(var(--bar-height) * var(--dashboard-bar-scale, 1));
   left: 50%;
   transform: translateX(-50%);
   padding-bottom: 0.3rem;
@@ -1562,6 +1562,11 @@
   margin-top: 1rem;
 }
 
+.configurableCanvas [data-dashboard-card-content] > div {
+  height: 100%;
+  min-height: 0;
+}
+
 .canvasChart,
 .recencyPanel {
   box-sizing: border-box;
@@ -1670,7 +1675,8 @@
 }
 
 .configurableCanvas :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport) {
-  overflow: hidden;
+  overflow: auto;
+  overscroll-behavior: contain;
   scrollbar-width: none;
 }
 

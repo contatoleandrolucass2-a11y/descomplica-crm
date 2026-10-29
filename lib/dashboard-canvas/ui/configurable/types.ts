@@ -86,4 +86,5 @@ export interface ConfigurableDashboardCanvasProps {
   layoutPolicy?: DashboardCardLayoutPolicy | undefined;
   hideCardOverflow?: boolean | undefined;
   addButtonLabel?: string | undefined;
+  preserveExpandedPresentation?: boolean | undefined;
 }
