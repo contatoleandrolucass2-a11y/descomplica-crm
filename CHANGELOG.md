@@ -1,5 +1,10 @@
 # Changelog
 
+- Define execução proporcional e exclusiva por chat, elimina leituras
+  redundantes e adapta instruções locais de ferramentas ao escopo do CRM.
+- Adiciona classificação conservadora de PRs exclusivamente documentais;
+  CI completa permanece em main e em qualquer mudança fora da lista permitida.
+
 - Destrava a sincronização do Obsidian ao particionar o histórico de
   atualizações e incluir as partições curadas na exportação e na busca, sem
   ampliar o limite de segurança nem perder conteúdo.

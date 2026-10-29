@@ -12,6 +12,17 @@ Nao acionar todas em toda mensagem nem consumir servicos sem necessidade.
 
 ## Roteamento
 
+Regra permanente de 29/10/2026: selecionar somente ferramentas necessárias à
+demanda exclusiva do chat, conforme `docs/runbooks/task-efficiency.md`.
+Disponibilidade de plugin não é motivo para executá-lo. Consultar skills uma
+vez por conteúdo vigente; não repetir leituras entregues por knowledge:context.
+As sete skills Caveman versionadas são adaptadas ao contrato CRM; referências
+históricas preservadas em arquivos de origem não precisam ser carregadas.
+
+Se um hook Git já confirmou `synced` ou `unchanged` para o mesmo HEAD e os mesmos
+documentos finais, essa confirmação atende ao sync da etapa. Repetir somente se
+os documentos mudaram, houve erro ou falta confirmação; nunca presumir sucesso.
+
 | Situacao                                      | Ferramenta ou skill                         | Motivo                                                                                                    |
 | --------------------------------------------- | ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | Abertura, retomada e fim de chat CRM          | Git/GitHub, health e knowledge              | Coordenador confere fontes, registra e sincroniza antes da demanda e ao encerrar.                         |

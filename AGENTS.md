@@ -20,6 +20,37 @@ Este repositório consolida o sistema de login e o Descomplica CRM. O login Next
 
 ## Regras obrigatórias
 
+### Execução objetiva e proporcional por chat
+
+Pedido permanente de 29/10/2026: antes de iniciar uma tarefa, recuperar somente
+o conhecimento pertinente e delimitar entrega, páginas e arquivos necessários.
+Aplicar também às skills, agentes, plugins e scripts usados neste projeto.
+
+- Cada ação deve contribuir para o pedido, uma dependência comprovadamente
+  afetada ou um gate obrigatório. Não executar auditorias, refatorações,
+  instalações, consultas ou correções de outras páginas por iniciativa própria.
+- `knowledge:context` já entrega CONTEXTO e FERRAMENTAS: sua leitura integral
+  substitui abrir os mesmos arquivos novamente. Reaproveitar leituras atuais
+  da conversa; reler somente se a fonte mudar, faltar conteúdo ou houver dúvida.
+- Buscar primeiro por assunto, arquivo ou símbolo; ampliar somente se necessário.
+  Não carregar vault inteiro, históricos de chats ou catálogo de plugins inteiro.
+- Tarefas pequenas usam um agente. Delegar partes independentes de tarefas amplas
+  com arquivos disjuntos, evitando dois agentes investigarem o mesmo problema.
+- Executar testes locais focados; usar resultados da CI para gates completos
+  do mesmo candidato. Não repetir checks aprovados sem causa de invalidação.
+- Esperas de CI devem usar mecanismo de espera e saídas compactas. Evitar
+  consultas redundantes, logs completos e atualizações que repetem o mesmo estado.
+- Preparar mudanças independentes em paralelo; coordenar integração/publicação
+  para evitar conflitos nos registros compartilhados. Nunca cancelar outra entrega.
+- Registrar evidências uma vez e referenciá-las. Após publicação e verificação,
+  distinguir entrega funcional de registro documental pendente; não reiniciar
+  aplicação para documentação nem abrir ciclos documentais recursivos.
+- Não prometer economia de tokens nem prazo sem medição. A espera do GitHub
+  não mede consumo do modelo; consultas, contexto e respostas são custos distintos.
+
+Procedimento e limites: `docs/runbooks/task-efficiency.md`. Esta regra não
+dispensa segurança, permissões, testes pertinentes, backup ou trava de deploy.
+
 - Use Node 24.19.x e pnpm 11.20.x. Não crie `package-lock.json` nem `yarn.lock`.
 - Antes de concluir qualquer alteração, aplique a validação por impacto da DEPLOY-002,
   em `docs/runbooks/impact-based-validation.md`. Preserve os gates obrigatórios

@@ -1,12 +1,22 @@
 ---
 name: caveman-stats
-description: >
-  Show real token usage and estimated savings for the current session.
-  Reads directly from the Claude Code session log — no AI estimation.
-  Triggers on /caveman-stats. Output is injected by the mode-tracker hook;
-  the model itself does not compute the numbers.
+description: Informar consumo observado quando houver fonte autorizada, sem estimar economia a partir do tamanho do texto.
 ---
 
-This skill is delivered by `hooks/caveman-stats.js` (read by `hooks/caveman-mode-tracker.js` on `/caveman-stats`). The model does not need to do anything when this skill fires — the hook returns `decision: "block"` with the formatted stats as the reason. The user sees the numbers immediately.
+# Consumo observado no CRM
 
-Output also includes `Est. rule overhead` and `Est. net` lines wherever a savings estimate exists with a known turn count. Rule overhead is the estimated per-turn INPUT-token cost of the injected caveman rules (default 1,250 tokens/turn, override with `CAVEMAN_RULE_OVERHEAD_TOKENS`) times the turn count. Net is savings minus that overhead — when negative, the output says so plainly and suggests turning caveman off for that workload, rather than hiding the net-negative regime behind a gross-savings number (see `docs/HONEST-NUMBERS.md`).
+- Use apenas métricas nativas ou relatórios de consumo já disponíveis e
+  autorizados. Informe fonte, janela, unidade, método e limitações.
+- Se não houver dados, diga que o consumo não está disponível. Não invente
+  contagens, custos, percentuais ou estimativas de economia.
+- Limites da conta, duração da CI, caracteres e bytes de arquivos são métricas
+  diferentes; não converta esses valores em tokens consumidos.
+- Para alegar economia, exija comparação medida sob condições equivalentes.
+  Uma alteração de estilo ou testes aprovados não comprovam redução de custo.
+- Não leia logs brutos de chats privados, instale rastreamento, hooks ou SDKs,
+  ative Cloud/proxy nem envie conteúdo a serviços para obter números.
+- Não dependa de integrações específicas de outro cliente. A seleção desta
+  skill não autoriza coleta nova nem alteração de configurações globais.
+
+Origem preservada em `references/upstream-skill.txt`, somente para proveniência,
+sem leitura automática. O contrato local acima prevalece no CRM.

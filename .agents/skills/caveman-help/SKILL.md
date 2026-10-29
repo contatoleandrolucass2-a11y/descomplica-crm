@@ -1,65 +1,22 @@
 ---
 name: caveman-help
-description: >
-  Quick-reference card for all caveman modes, skills, and commands.
-  One-shot display, not a persistent mode. Trigger: /caveman-help,
-  "caveman help", "what caveman commands", "how do I use caveman".
+description: Explicar o uso local das skills Caveman do CRM quando solicitado, sem ativar modos ou configurações.
 ---
 
-# Caveman Help
+# Ajuda local do CRM
 
-Display this reference card when invoked. One-shot — do NOT change mode, write flag files, or persist anything. Output in caveman style.
+Explique apenas o recurso solicitado:
 
-## Modes
+- caveman: prosa concisa em português, no estilo Lite, com frases completas.
+- cavecrew: delegação proporcional entre perfis crm-\* disponíveis.
+- caveman-commit: mensagem curta de commit, sem executar Git automaticamente.
+- caveman-review: achados verificáveis, com impacto e localização.
+- caveman-compress: cópia auxiliar solicitada; original e autoridades preservados.
+- caveman-stats: somente métricas realmente disponíveis e autorizadas.
 
-| Mode             | Trigger                 | What change                                                          |
-| ---------------- | ----------------------- | -------------------------------------------------------------------- |
-| **Lite**         | `/caveman lite`         | Drop filler. Keep sentence structure.                                |
-| **Full**         | `/caveman`              | Drop articles, filler, pleasantries, hedging. Fragments OK. Default. |
-| **Ultra**        | `/caveman ultra`        | Extreme compression. Bare fragments. Tables over prose.              |
-| **Wenyan-Lite**  | `/caveman wenyan-lite`  | Classical Chinese style, light compression.                          |
-| **Wenyan-Full**  | `/caveman wenyan`       | Full 文言文. Maximum classical terseness.                            |
-| **Wenyan-Ultra** | `/caveman wenyan-ultra` | Extreme. Ancient scholar on a budget.                                |
+A consulta de ajuda não ativa modo persistente, hooks, Cloud, proxy ou
+configuração global. Não carregue todas as skills para explicar uma delas.
+Não prometa economia nem recursos ausentes no cliente.
 
-Mode stick until changed or session end.
-
-## Skills
-
-| Skill                | Trigger                    | What it do                                                     |
-| -------------------- | -------------------------- | -------------------------------------------------------------- |
-| **caveman-commit**   | `/caveman-commit`          | Terse commit messages. Conventional Commits. ≤50 char subject. |
-| **caveman-review**   | `/caveman-review`          | One-line PR comments: `L42: bug: user null. Add guard.`        |
-| **caveman-compress** | `/caveman-compress <file>` | Compress .md files to caveman prose. Saves ~46% input tokens.  |
-| **caveman-help**     | `/caveman-help`            | This card.                                                     |
-
-## Deactivate
-
-Say "stop caveman" or "normal mode". Resume anytime with `/caveman`.
-
-## Language
-
-Keep user's language by default. User write Portuguese → reply Portuguese caveman. Compress the style, not the language. Technical terms, code, commands, commit types, and exact error strings stay verbatim unless user ask for translation.
-
-## Configure Default Mode
-
-Default mode = `full`. Change it:
-
-**Environment variable** (highest priority):
-
-```bash
-export CAVEMAN_DEFAULT_MODE=ultra
-```
-
-**Config file** (`~/.config/caveman/config.json` macOS/Linux, `%APPDATA%\caveman\config.json` Windows):
-
-```json
-{ "defaultMode": "lite" }
-```
-
-Set `"off"` to disable auto-activation on session start. User can still activate manually with `/caveman`.
-
-Resolution: env var > config file > `full`.
-
-## More
-
-Full docs: https://github.com/JuliusBrussee/caveman
+Origem preservada em `references/upstream-skill.txt`, somente para proveniência,
+sem leitura automática. O contrato local acima prevalece no CRM.
