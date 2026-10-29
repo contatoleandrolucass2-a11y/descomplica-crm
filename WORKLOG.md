@@ -40,6 +40,13 @@
 - Validação sintética cobre cálculo automático, documentos, diagnóstico,
   utilitários, subsídio, prazo, SBPE, três temas, quatro larguras, ausência de
   overflow e auditoria Axe.
+- PR #414 integrado no SHA `47b5aa7c`; a publicação atômica usou o `main`
+  vigente `0bf319c41e79cd9f0a1791f0be9e9816e94db4b9`, depois que a CI
+  `40779936302` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`.
+- Deployment `a5250ca6-2d3b-43b4-8098-bbe14a5904d7` concluído em
+  `2026-10-28T23:40:57.401Z`; health público confirmou o SHA exato e a rota
+  anônima permaneceu protegida por redirecionamento 307 para `/login`.
 
 ## 2026-10-28 — Meta Ads: sidebar retrátil sem destaque rosa
 

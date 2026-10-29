@@ -66,9 +66,32 @@
   (`sha256:bc8775b706f2ccdf893f3cad6491db64159168be289aefcf1c321baba118bc7a`).
   A revisão adotou somente as 11 referências da rota CAIXA e o manifesto do
   ensaio; nenhuma imagem de outra página foi substituída.
-- Publicação permanece condicionada aos gates protegidos e à revisão visual do
-  candidato autenticado. A sincronização do Obsidian ainda está indisponível
-  pelo erro `Documento excede o limite de exportacao.`.
+- O PR #414 foi integrado como `47b5aa7c506f6d47ec82b52f6789bd795d3f042c`.
+  Antes da promoção, o `main` avançou por uma entrega concorrente de Links
+  Úteis; o coordenador recusou corretamente o SHA anterior sem iniciar troca ou
+  deixar pendência. A página CAIXA permaneceu inalterada no novo `main`.
+- A CI `40779936302` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image` no SHA integrado
+  `0bf319c41e79cd9f0a1791f0be9e9816e94db4b9`. O artefato imutável
+  `12857790263` teve digest
+  `sha256:ac7464117ec93485e54d1032b3414f04fbc02f7ab5c9192244ffb8007f5c2b09`
+  e `image.tar.gz` conferido como
+  `ff6c784e05a6d399efc3eb30cc6447adaefa96de05872ce9259d286d91d3aa46`.
+- A configuração da CI
+  `sha256:e2eb43341cdcdfa9557c1a1dea254cf2c456f882394a3999697bff41943aa2fd`
+  e o manifesto local
+  `sha256:5aefe619573f19f70d5d5006e07d6418ec2e328e6ff73e2d500f6014153b2f07`
+  foram conciliados por revisão, plataforma `linux/amd64`, onze camadas e
+  `image:prove` nos dois perfis, sem rebuild ou retag.
+- Publicação executada exclusivamente por `release:production`, com baseline
+  `2699f4641c69fbac6b94c3b6ab7bdb5dc17874a9`, backup privado verificado,
+  consulta no próprio minuto, CI/main exatos e CAS. Resultado: deployment
+  `a5250ca6-2d3b-43b4-8098-bbe14a5904d7`, SHA e imagem candidatos,
+  `deployedAt=2026-10-28T23:40:57.401Z` e `pendingDeploymentId=null`.
+- Pós-publicação em `2026-10-28T23:41:16.791Z`: health público HTTP 200,
+  `status=ok` e versão exata; acesso anônimo a `/app/simulacao/caixa` respondeu
+  307 para `/login`. A sincronização do Obsidian ainda está indisponível pelo
+  erro `Documento excede o limite de exportacao.`.
 
 ## 2026-10-28: abertura do redesenho exclusivo do Simulador CAIXA
 
