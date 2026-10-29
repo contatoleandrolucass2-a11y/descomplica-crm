@@ -9,6 +9,9 @@
 - Redesenha exclusivamente o Simulador CAIXA com sidebar local de seis atalhos,
   formulário compacto, ação Limpar no topo e Documentos, Diagnóstico e
   Utilitários no final da página, preservando o motor financeiro existente.
+- Publica o redesenho pelo PR #414 no runtime integrado
+  `0bf319c41e79cd9f0a1791f0be9e9816e94db4b9`, após os quatro gates de CI e a
+  promoção protegida da imagem imutável.
 
 - Atualiza exclusivamente a sidebar do Meta Ads com recolhimento suave,
   expansão temporária por foco ou hover, drawer móvel acessível e destaque
