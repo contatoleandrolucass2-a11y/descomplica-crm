@@ -8,6 +8,7 @@ import {
   dashboardProfileIdSchema,
   dashboardProfilePatchSchema,
   dashboardProfileVersionSchema,
+  dashboardCardsMatchPageLayout,
 } from "@/lib/dashboard-canvas/persistence/schema";
 import {
   canEditDashboardProfilePage,
@@ -61,6 +62,12 @@ export async function PATCH(request: Request, context: ProfileRouteContext) {
       !dashboardCardsMatchPageCatalog(authorization.profile.pageKey, input.data.cards)
     ) {
       return dashboardProfileFailure("invalid_profile_catalog", 400);
+    }
+    if (
+      input.data.cards &&
+      !dashboardCardsMatchPageLayout(authorization.profile.pageKey, input.data.cards)
+    ) {
+      return dashboardProfileFailure("invalid_profile_layout", 400);
     }
     const result = await updateDashboardProfile(profileId.data, input.data);
     if (result.error || !result.data) return dashboardProfileRpcFailure(result.error);

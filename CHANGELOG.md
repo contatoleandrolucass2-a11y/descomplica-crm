@@ -4,6 +4,9 @@
   atualizações e incluir as partições curadas na exportação e na busca, sem
   ampliar o limite de segurança nem perder conteúdo.
 
+- Ajusta exclusivamente os cards de Agendamentos para remover rolagem interna,
+  oferecer redimensionamento livre de altura e largura pelo canto inferior
+  direito e exibir a ação administrativa `Adicionar card`.
 - Personaliza exclusivamente os oito ícones da sidebar de Links Úteis conforme
   o destino de cada item, preservando rotas, permissões e conteúdo das páginas.
 

@@ -1669,6 +1669,16 @@
   overscroll-behavior: contain;
 }
 
+.configurableCanvas :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport) {
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+.configurableCanvas
+  :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport)::-webkit-scrollbar {
+  display: none;
+}
+
 .configurableCanvas .tableViewport th {
   position: sticky;
   z-index: 1;

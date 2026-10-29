@@ -13,7 +13,7 @@ import {
 } from "react";
 import { GripVertical } from "lucide-react";
 
-import { resizeCardLayout } from "../layout/limits";
+import { resizeCardLayout, type DashboardCardLayoutPolicy } from "../layout/limits";
 import { packCanvas } from "../layout/pack-canvas";
 import { normalizeDashboardCards } from "../state/migrations";
 import type { CanvasCommitReason, DashboardCard, DashboardCardSize } from "../types";
@@ -50,6 +50,8 @@ export interface DashboardCanvasProps {
   className?: string;
   disabled?: boolean;
   gap?: number;
+  layoutPolicy?: DashboardCardLayoutPolicy | undefined;
+  cornerResizeHandle?: boolean;
 }
 
 function cardName(card: DashboardCard) {
@@ -135,8 +137,13 @@ export function DashboardCanvas({
   className,
   disabled = false,
   gap = 16,
+  layoutPolicy,
+  cornerResizeHandle = false,
 }: DashboardCanvasProps) {
-  const normalizedCards = useMemo(() => normalizeDashboardCards(cards), [cards]);
+  const normalizedCards = useMemo(
+    () => normalizeDashboardCards(cards, layoutPolicy),
+    [cards, layoutPolicy],
+  );
   const [previewCards, setPreviewCards] = useState(normalizedCards);
   const [interaction, setInteraction] = useState<PointerInteraction | null>(null);
   const [announcement, setAnnouncement] = useState("");
@@ -159,7 +166,7 @@ export function DashboardCanvas({
     if (!interactionRef.current) setPreviewCards(normalizedCards);
   }, [normalizedCards]);
 
-  const packed = packCanvas(previewCards, interaction?.cardId);
+  const packed = packCanvas(previewCards, interaction?.cardId, layoutPolicy);
   const layoutKey = packed
     .map(
       ({ card, row, column }) =>
@@ -252,6 +259,7 @@ export function DashboardCanvas({
       deltaY: point.y - active.originY,
       containerWidth,
       gap,
+      policy: layoutPolicy,
     });
     const next = previewRef.current.map((entry) =>
       entry.id === active.cardId ? { ...entry, layout: nextLayout } : entry,
@@ -276,7 +284,7 @@ export function DashboardCanvas({
     if (active.captureTarget.hasPointerCapture(active.pointerId)) {
       active.captureTarget.releasePointerCapture(active.pointerId);
     }
-    const next = normalizeDashboardCards(previewRef.current);
+    const next = normalizeDashboardCards(previewRef.current, layoutPolicy);
     setPreviewCards(next);
     previewRef.current = next;
     setInteraction(null);
@@ -330,6 +338,7 @@ export function DashboardCanvas({
     const currentIndex = previewRef.current.findIndex(({ id }) => id === card.id);
     const next = normalizeDashboardCards(
       reorderCards(previewRef.current, card.id, currentIndex + direction),
+      layoutPolicy,
     );
     setPreviewCards(next);
     onCommit(next, "drag");
@@ -351,11 +360,13 @@ export function DashboardCanvas({
       deltaY: vertical,
       containerWidth: gridRef.current?.clientWidth ?? 12,
       gap,
+      policy: layoutPolicy,
     });
     const next = normalizeDashboardCards(
       previewRef.current.map((entry) =>
         entry.id === card.id ? { ...entry, layout: nextLayout } : entry,
       ),
+      layoutPolicy,
     );
     setPreviewCards(next);
     onCommit(next, "resize");
@@ -384,6 +395,7 @@ export function DashboardCanvas({
       className={[styles.shell, className].filter(Boolean).join(" ")}
       aria-label={ariaLabel}
       data-readonly={disabled ? "true" : undefined}
+      data-corner-resize={cornerResizeHandle ? "true" : undefined}
     >
       <div
         ref={gridRef}

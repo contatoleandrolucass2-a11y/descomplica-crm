@@ -240,6 +240,15 @@
   overflow: auto;
 }
 
+.root[data-hide-card-overflow="true"] .cardContent {
+  overflow: hidden;
+  scrollbar-width: none;
+}
+
+.root[data-hide-card-overflow="true"] .cardContent::-webkit-scrollbar {
+  display: none;
+}
+
 .cardContentPresentation {
   display: flex;
 }
