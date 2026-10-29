@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige sete achados de Agendamentos: cadastro por recorte, metas históricas,
+  regional histórica, navegação interna, atalho Hoje, escala quantitativa e
+  personalização na ampliação. Outras páginas mantêm o comportamento anterior.
+
 - Define execução proporcional e exclusiva por chat, elimina leituras
   redundantes e adapta instruções locais de ferramentas ao escopo do CRM.
 - Adiciona classificação conservadora de PRs exclusivamente documentais;

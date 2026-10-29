@@ -1,5 +1,27 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-29: Agendamentos — sete achados corrigidos
+
+- Pedido e escopo: A1–A7 da análise de Agendamentos, com merge e publicação
+  autorizados. Base main b48ce8b4; produção observada a36de843e, health ok.
+  Nenhuma outra página, permissão, política comercial ou migration foi alterada.
+- Cadastro: empresa, ranking e canal sem elenco correspondente exibem base
+  indisponível; não usar só quem teve movimento como total cadastrado. Regional
+  das linhas é a original; facts usam observação de vínculo até a data civil,
+  sem atribuir uma regional quando o vínculo é desconhecido ou conflitante.
+- Metas: cada competência vem da RPC autorizada; períodos compostos ponderam
+  o funil mensal pelos dias cobertos selecionados. Ausência não usa meta atual.
+- Apresentação: rolagem interna funcional sem barras visuais, wrappers de altura
+  limitada ao card, Hoje limpa restrições temporais e preserva dimensões. Meta,
+  torre e rótulo usam a mesma escala, com espaço para o máximo de 150% do editor.
+  Ampliação preserva apresentação mediante opção ativada apenas em Agendamentos.
+- Validação local: 85 testes focados, tipos, ESLint e formatação aprovados.
+  Navegador usa dados sintéticos locais e não grava perfil em produção. CI,
+  merge e publicação são estados posteriores, ainda não comprovados nesta nota.
+- Limite: elenco atual não contém histórico próprio de transferências ou vínculo
+  com empresas/Imob; indisponibilidade explícita preserva a leitura honesta.
+  Fontes: diff da branch codex/agendamentos-sete-correcoes e testes relacionados.
+
 ## 2026-10-29: abertura da revisão de eficiência do processo
 
 - Pedido explícito: persistir exclusividade por chat e corrigir trabalho

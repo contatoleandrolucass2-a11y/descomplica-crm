@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-10-29 — Agendamentos: sete correções da análise
+
+- Escopo exclusivo: Agendamentos e suas dependências diretas. Sem novas
+  páginas, bibliotecas, plugins, skills, permissões ou migrations.
+- Base cadastral indisponível quando empresa/canal não permitem delimitá-la;
+  filtro e conversões regionais respeitam o vínculo observado na data do fato.
+- Metas de conversão por competência, compostas proporcionalmente aos dias
+  selecionados; meses sem política não reutilizam a configuração atual.
+- Navegação interna da tabela e listas preservada sem barras visuais;
+  Hoje substitui restrições temporais anteriores, mantendo as dimensões.
+- Torres, rótulos e linhas de meta compartilham a escala de apresentação;
+  ampliação preserva personalização somente quando habilitada em Agendamentos.
+- Validação local: 85 testes focados, tipos e lint. Interações de navegador
+  verificadas com dados sintéticos; gates completos e artefato ficam na CI.
+
 ## 2026-10-29 — Eficiência do processo e escopo exclusivo
 
 - Pedido: persistir execução estritamente necessária por chat e revisar

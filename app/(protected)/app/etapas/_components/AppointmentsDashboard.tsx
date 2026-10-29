@@ -16,7 +16,11 @@ import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configura
 import { FREE_HEIGHT_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
-import type { AppointmentConversionGoals } from "@/lib/crm/stages/data";
+import type {
+  AppointmentConversionGoals,
+  AppointmentConversionGoalsByMonth,
+} from "@/lib/crm/stages/data";
+import { resolveAppointmentConversionPeriod } from "@/lib/crm/stages/appointment-conversion-goals";
 import {
   analyzeAppointments,
   appointmentYears,
@@ -83,7 +87,8 @@ function atLeastStatus(value: number | null, goal: number | null): GoalStatus {
 
 function atMostStatus(value: number | null, goal: number | null): GoalStatus {
   if (value === null || goal === null || goal <= 0) return "neutral";
-  return value <= goal ? "positive" : "negative";
+  const roundingTolerance = Number.EPSILON * Math.max(1, Math.abs(value), Math.abs(goal)) * 4;
+  return value <= goal + roundingTolerance ? "positive" : "negative";
 }
 
 function Chart({
@@ -212,7 +217,9 @@ function Columns({
   verticalLabels?: boolean;
 }) {
   if (!buckets.length) return <Empty />;
-  const max = Math.max(1, ...buckets.flatMap((item) => [item.total, item.goal ?? 0]));
+  // The editor allows 150% height. Reserve that headroom for both bars and goals
+  // so changing presentation never changes their relative quantitative scale.
+  const max = Math.max(1, ...buckets.flatMap((item) => [item.total, item.goal ?? 0])) * 1.5;
   return (
     <>
       <p className={styles.axis}>Quantidade de agendamentos</p>
@@ -237,7 +244,9 @@ function Columns({
                 {item.goal != null && (
                   <span
                     className={styles.goalLine}
-                    style={{ bottom: `${(item.goal / max) * 100}%` }}
+                    style={{
+                      bottom: `calc(${(item.goal / max) * 100}% * var(--dashboard-bar-scale, 1))`,
+                    }}
                     title={`Meta: ${number.format(item.goal)}`}
                   />
                 )}
@@ -253,7 +262,7 @@ function Columns({
                         : "negative"
                   }
                   style={{
-                    height: "min(100%, calc(var(--bar-height) * var(--dashboard-bar-scale, 1)))",
+                    height: "calc(var(--bar-height) * var(--dashboard-bar-scale, 1))",
                   }}
                 />
                 <span className={styles.columnValue}>{number.format(item.total)}</span>
@@ -345,7 +354,7 @@ function ConversionRanking({
   total: number;
   available: boolean;
 }) {
-  if (!available) return <Empty>Conversão indisponível para o filtro de Ranking Score.</Empty>;
+  if (!available) return <Empty>Conversão indisponível para este recorte.</Empty>;
   if (!buckets.length) return <Empty>Nenhuma conversão maior que zero no período.</Empty>;
   const max = Math.max(...buckets.map((item) => item.percent));
   return (
@@ -558,10 +567,12 @@ function ProductiveTeamCard({
   productive,
   brokers,
   percent,
+  unavailableDetail,
 }: {
   productive: number | null;
   brokers: number | null;
   percent: number | null;
+  unavailableDetail: string;
 }) {
   const progress = Math.min(Math.max(percent ?? 0, 0), 100);
   const goalStatus = atLeastStatus(percent, 100);
@@ -592,7 +603,7 @@ function ProductiveTeamCard({
       </div>
       <p>
         {productive === null || brokers === null
-          ? "Aguardando o elenco vigente de corretores"
+          ? unavailableDetail
           : `${number.format(productive)} de ${number.format(brokers)} corretores com agendamento`}
       </p>
     </TiltCard>
@@ -1158,7 +1169,12 @@ function AppointmentTable({
       {rows.length === 0 ? (
         <Empty />
       ) : (
-        <div className={styles.tableViewport} tabIndex={0}>
+        <div
+          className={styles.tableViewport}
+          tabIndex={0}
+          role="region"
+          aria-label="Detalhamento dos agendamentos"
+        >
           <table>
             <thead>
               <tr>
@@ -1240,6 +1256,7 @@ export function AppointmentsDashboard({
   individualGoal = null,
   goalsByMonth,
   conversionGoals = null,
+  conversionGoalsByMonth,
   timezone = "America/Sao_Paulo",
   canViewDevelopmentRankings = true,
   canEditDashboard = false,
@@ -1250,6 +1267,7 @@ export function AppointmentsDashboard({
   individualGoal?: number | null | undefined;
   goalsByMonth?: AppointmentGoalsByMonth | undefined;
   conversionGoals?: AppointmentConversionGoals | null | undefined;
+  conversionGoalsByMonth?: AppointmentConversionGoalsByMonth | undefined;
   timezone?: string | undefined;
   canViewDevelopmentRankings?: boolean | undefined;
   canEditDashboard?: boolean | undefined;
@@ -1317,7 +1335,22 @@ export function AppointmentsDashboard({
   const monthlyGoal = result.monthlyGoal;
   const selectedChannel = filters.channel;
   const goalProfile = selectedChannel === 1 ? "dv" : selectedChannel === 0 ? "partnerships" : null;
-  const activeConversionGoals = goalProfile ? (conversionGoals?.[goalProfile] ?? null) : null;
+  const periodConversionGoals = resolveAppointmentConversionPeriod({
+    month: selectedMonth,
+    coverageStart: analysis.coverageStart,
+    referenceDate: analysis.referenceDate,
+    filters,
+    goalsByMonth:
+      conversionGoalsByMonth ?? (conversionGoals ? { [referenceMonth]: conversionGoals } : {}),
+    profile: goalProfile,
+  });
+  const activeConversionGoals = periodConversionGoals?.conversionGoals ?? null;
+  const rosterUnavailableDetail =
+    result.rosterUnavailableReason === "unsupported-dimensions"
+      ? "Base cadastral indisponível para este recorte"
+      : result.rosterUnavailableReason === "unknown-regional-link"
+        ? "Vínculo regional do cadastro indisponível no período"
+        : "Aguardando o elenco vigente de corretores";
   const goalContext =
     selectedChannel === 1
       ? "House"
@@ -1344,30 +1377,15 @@ export function AppointmentsDashboard({
         ? result.registeredManagerCount
         : null;
   const expectedFunnel: FunnelValues | null = (() => {
-    const monthly = activeConversionGoals?.monthlyFunnel;
-    if (!monthly || goalCohort === null || result.daysInMonth <= 0) return null;
-    let periodFactor = result.selectedCoveredDays / result.daysInMonth;
-    if (filters.periodStart && filters.periodEnd) {
-      periodFactor = 0;
-      let cursor =
-        filters.periodStart < analysis.coverageStart ? analysis.coverageStart : filters.periodStart;
-      const last =
-        filters.periodEnd > analysis.referenceDate ? analysis.referenceDate : filters.periodEnd;
-      while (cursor <= last) {
-        const [cursorYear, cursorMonth] = cursor.split("-").map(Number) as [number, number];
-        const daysInCursorMonth = new Date(Date.UTC(cursorYear, cursorMonth, 0)).getUTCDate();
-        periodFactor += 1 / daysInCursorMonth;
-        cursor = addCalendarDays(cursor, 1);
-      }
-    }
-    const factor = goalCohort * periodFactor;
+    const period = periodConversionGoals?.funnelPerParticipant;
+    if (!period || goalCohort === null) return null;
     return {
-      opportunities: monthly.opportunities * factor,
-      appointments: monthly.appointments * factor,
-      visits: monthly.visits * factor,
-      folders: monthly.folders * factor,
-      approvedFolders: monthly.approvedFolders * factor,
-      sales: monthly.sales * factor,
+      opportunities: period.opportunities * goalCohort,
+      appointments: period.appointments * goalCohort,
+      visits: period.visits * goalCohort,
+      folders: period.folders * goalCohort,
+      approvedFolders: period.approvedFolders * goalCohort,
+      sales: period.sales * goalCohort,
     };
   })();
   const realizedStatuses: FunnelGoalStatuses = (() => {
@@ -1556,6 +1574,7 @@ export function AppointmentsDashboard({
           productive={result.productiveBrokers}
           brokers={result.brokerCount}
           percent={result.productivePercent}
+          unavailableDetail={rosterUnavailableDetail}
         />
       ),
       kpi: (
@@ -1568,7 +1587,7 @@ export function AppointmentsDashboard({
           }
           detail={
             result.productiveBrokers === null || result.brokerCount === null
-              ? "Aguardando o elenco vigente de corretores"
+              ? rosterUnavailableDetail
               : `${number.format(result.productiveBrokers)} de ${number.format(result.brokerCount)} corretores com agendamento`
           }
           goalStatus={productiveStatus}
@@ -1585,7 +1604,11 @@ export function AppointmentsDashboard({
         <Kpi
           label="Corretores cadastrados"
           value={result.brokerCount === null ? null : number.format(result.brokerCount)}
-          detail="Total vigente do relatório de corretores"
+          detail={
+            result.brokerCount === null
+              ? rosterUnavailableDetail
+              : "Total vigente do relatório de corretores"
+          }
         />
       ),
     },
@@ -1598,7 +1621,11 @@ export function AppointmentsDashboard({
               ? null
               : number.format(result.registeredManagerCount)
           }
-          detail="Gerentes de Vendas vinculados aos corretores"
+          detail={
+            result.registeredManagerCount === null
+              ? rosterUnavailableDetail
+              : "Gerentes de Vendas vinculados aos corretores"
+          }
         />
       ),
     },
@@ -1743,7 +1770,7 @@ export function AppointmentsDashboard({
               label="Agendamentos previstos e realizados hoje"
               isSelected={() => selectedDates.includes(analysis.referenceDate)}
               onSelect={() => {
-                if (selectedMonth !== referenceMonth) selectMonth(referenceMonth);
+                selectMonth(referenceMonth);
                 setFilters((current) => ({
                   ...current,
                   createdDates: [analysis.referenceDate],
@@ -1870,7 +1897,7 @@ export function AppointmentsDashboard({
           <ConversionRanking
             buckets={result.conversionRankings.regionalManagers}
             total={result.total}
-            available={result.conversionAvailable}
+            available={result.conversionAvailable && result.regionalFactsAvailable}
           />
         </Chart>
       ),
@@ -2036,6 +2063,7 @@ export function AppointmentsDashboard({
         hideCardActionsByDefault
         layoutPolicy={FREE_HEIGHT_CARD_LAYOUT_POLICY}
         hideCardOverflow
+        preserveExpandedPresentation
         addButtonLabel="Adicionar card"
       />
       <footer className={styles.pageFooter}>

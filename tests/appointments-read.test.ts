@@ -92,6 +92,56 @@ beforeEach(() => {
 });
 
 describe("appointments snapshot read", () => {
+  it("loads conversion policies for their historical month without copying the current policy", async () => {
+    const septemberGoals = {
+      ...conversionGoals,
+      dv: { ...conversionGoals.dv, opportunityAppointment: 5 },
+    };
+    mocks.rpc.mockImplementation(async (name: string, args: { p_reference_date?: string }) => {
+      if (name === "read_crm_appointments_goal") return { data: 24, error: null };
+      if (name === "read_crm_appointments_conversion_goals") {
+        const month = args.p_reference_date?.slice(0, 7);
+        return {
+          data: month === "2026-10" ? conversionGoals : month === "2026-09" ? septemberGoals : null,
+          error: null,
+        };
+      }
+      return result();
+    });
+    const actual = await loadAppointmentsReadModel("all");
+    expect(actual.conversionGoals).toEqual(conversionGoals);
+    expect(actual.conversionGoalsByMonth).toMatchObject({
+      "2026-08": null,
+      "2026-09": septemberGoals,
+      "2026-10": conversionGoals,
+    });
+    expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_conversion_goals", {
+      p_reference_date: "2026-09-01",
+    });
+    expect(mocks.from.mock.calls.some(([table]) => table === "crm_funnel_goals")).toBe(false);
+  });
+
+  it.each(["PGRST202", "42883", "42501"])(
+    "does not replace an unavailable historical conversion policy: %s",
+    async (code) => {
+      mocks.rpc.mockImplementation(async (name: string, args: { p_reference_date?: string }) => {
+        if (name === "read_crm_appointments_goal") return { data: 24, error: null };
+        if (name === "read_crm_appointments_conversion_goals")
+          return args.p_reference_date === snapshot.reference_date
+            ? { data: conversionGoals, error: null }
+            : { data: null, error: { code } };
+        return result();
+      });
+      if (code === "42501")
+        await expect(loadAppointmentsReadModel("all")).rejects.toThrow("metas de conversão");
+      else
+        expect((await loadAppointmentsReadModel("all")).conversionGoalsByMonth).toMatchObject({
+          "2026-09": null,
+          "2026-10": conversionGoals,
+        });
+    },
+  );
+
   it("resolves policy separately for every month, preserving missing and zero targets", async () => {
     mocks.rpc.mockImplementation(async (name: string, args: { p_reference_date?: string }) => {
       if (name === "read_crm_appointments_goal") {
@@ -154,6 +204,12 @@ describe("appointments snapshot read", () => {
         ]),
       ),
       conversionGoals,
+      conversionGoalsByMonth: Object.fromEntries(
+        Array.from({ length: 10 }, (_, index) => [
+          `2026-${String(index + 1).padStart(2, "0")}`,
+          conversionGoals,
+        ]),
+      ),
     });
     expect(mocks.rpc).toHaveBeenCalledWith("read_crm_appointments_analysis", {
       p_snapshot_id: 1,
@@ -182,6 +238,7 @@ describe("appointments snapshot read", () => {
       individualGoal: null,
       goalsByMonth: {},
       conversionGoals: null,
+      conversionGoalsByMonth: {},
     });
     expect(mocks.rpc).not.toHaveBeenCalled();
     headers[0] = { data: snapshot, error: null };
@@ -192,6 +249,7 @@ describe("appointments snapshot read", () => {
       individualGoal: null,
       goalsByMonth: {},
       conversionGoals: null,
+      conversionGoalsByMonth: {},
     });
   });
 
@@ -205,6 +263,7 @@ describe("appointments snapshot read", () => {
         individualGoal: null,
         goalsByMonth: {},
         conversionGoals: null,
+        conversionGoalsByMonth: {},
       });
     },
   );
@@ -279,7 +338,7 @@ describe("appointments snapshot read", () => {
     const next = { ...snapshot, updated_at: "2026-10-19T00:00:00.123457Z" };
     headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(slice);
-    expect(mocks.rpc).toHaveBeenCalledTimes(13);
+    expect(mocks.rpc).toHaveBeenCalledTimes(22);
   });
 
   it("fails instead of returning mixed generations after repeated concurrent ingestion", async () => {

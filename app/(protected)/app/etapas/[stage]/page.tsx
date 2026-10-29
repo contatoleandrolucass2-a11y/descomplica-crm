@@ -501,6 +501,7 @@ export default async function StagePage({
             individualGoal={appointments.individualGoal}
             goalsByMonth={appointments.goalsByMonth}
             conversionGoals={appointments.conversionGoals}
+            conversionGoalsByMonth={appointments.conversionGoalsByMonth}
             canViewDevelopmentRankings={authorization.permissions.includes("crm.ranking.view")}
             canEditDashboard={
               authorization.roleKey === "admin" || authorization.roleKey === "master"

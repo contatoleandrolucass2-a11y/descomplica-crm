@@ -61,12 +61,12 @@ const conversionGoals = {
     appointmentApprovedFolder: 12,
     appointmentSale: 12,
     monthlyFunnel: {
-      opportunities: 143,
+      opportunities: 216,
       appointments: 24,
-      visits: 12,
-      folders: 8,
+      visits: 8,
+      folders: 6,
       approvedFolders: 2,
-      sales: 1,
+      sales: 2,
     },
   },
   partnerships: {
@@ -203,5 +203,34 @@ describe("appointment dashboard availability", () => {
       <AppointmentsDashboard analysis={current} canViewDevelopmentRankings={false} />,
     );
     expect(markup).toContain("Ranking Score indisponível para seu perfil de acesso");
+  });
+
+  it("uses the selected month's conversion policy instead of the current fallback", () => {
+    const markup = renderToStaticMarkup(
+      <AppointmentsDashboard
+        analysis={{ ...current, viewKey: "without_canal_imob" }}
+        conversionGoals={{
+          ...conversionGoals,
+          dv: {
+            ...conversionGoals.dv,
+            monthlyFunnel: { ...conversionGoals.dv.monthlyFunnel, opportunities: 24 },
+          },
+        }}
+        conversionGoalsByMonth={{ "2026-10": conversionGoals }}
+      />,
+    );
+    expect(markup.includes("Dentro da meta: 9 para 1; limite 9 para 1")).toBe(true);
+  });
+
+  it("does not substitute the current policy when the historical map lacks the month", () => {
+    const markup = renderToStaticMarkup(
+      <AppointmentsDashboard
+        analysis={{ ...current, viewKey: "without_canal_imob" }}
+        conversionGoals={conversionGoals}
+        conversionGoalsByMonth={{ "2026-09": conversionGoals }}
+      />,
+    );
+    expect(markup.includes("Meta de conversão não configurada para House")).toBe(true);
+    expect(markup.includes("Dentro da meta: 9 para 1; limite 9 para 1")).toBe(false);
   });
 });

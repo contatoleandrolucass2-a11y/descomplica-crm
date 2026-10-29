@@ -439,7 +439,7 @@ describe("appointment chart analysis", () => {
       ],
     });
     const result = analyzeAppointments(input);
-    expect(result.brokerCount).toBe(10);
+    expect(result.brokerCount).toBeNull(); // A mixed view has no authoritative House cohort.
     expect(result.plannedToday).toBeNull(); // No authorized monthly goal/channel supplied.
     expect(result.performedToday).toBe(1);
     expect(result.details).toHaveLength(2);
@@ -581,11 +581,11 @@ describe("appointment chart analysis", () => {
       approvedFolders: 1,
       sales: 1,
     });
-    expect(result.brokerCount).toBe(1);
+    expect(result.brokerCount).toBeNull(); // Company is absent from the registered roster.
     expect(result.plannedToday).toBeNull(); // Company cannot be mapped to the registered roster.
     expect(result.productiveBrokers).toBe(1);
-    expect(result.productivePercent).toBe(100);
-    expect(result.registeredManagerCount).toBe(1);
+    expect(result.productivePercent).toBeNull();
+    expect(result.registeredManagerCount).toBeNull();
     expect(result.visitsPerformed).toBe(2);
     expect(result.sales).toBe(1);
     expect(result.filterOptions.regionalManagers).toEqual(["Regional A", "Regional B"]);
@@ -615,7 +615,7 @@ describe("appointment chart analysis", () => {
     });
 
     const managerOnly = analyzeAppointments(input, {
-      filters: { manager: "Gerente A" },
+      filters: { manager: "Gerente A", channel: 1 },
       brokerRoster: [
         { key: "broker-a", owner: "Responsável A", manager: "Gerente A" },
         { key: "broker-a-inativo", owner: "Responsável sem atividade", manager: "Gerente A" },
@@ -639,6 +639,127 @@ describe("appointment chart analysis", () => {
     const result = analyzeAppointments(input, { filters: { manager: "Gerente A" } });
     expect(result.brokerCount).toBeNull();
     expect(result.registeredManagerCount).toBeNull();
+  });
+
+  it("never substitutes active brokers for an unmappable company, ranking or channel roster", () => {
+    const input = goalSlice({ brokerCount: 4, brokerManagerCount: 2 });
+    for (const filters of [
+      { company: "Empresa A" },
+      { accountRanking: "Ouro" },
+      { channel: 0 as const },
+    ]) {
+      const result = analyzeAppointments(input, { brokerRoster: goalRoster, filters });
+      expect(result.rosterUnavailableReason).toBe("unsupported-dimensions");
+      expect(result.brokerCount).toBeNull();
+      expect(result.registeredManagerCount).toBeNull();
+      expect(result.productivePercent).toBeNull();
+      expect(result.goalBrokerCount).toBeNull();
+    }
+    const house = analyzeAppointments(input, { brokerRoster: goalRoster });
+    expect(house.brokerCount).toBe(4);
+    expect(house.registeredManagerCount).toBe(2);
+    expect(house.rosterUnavailableReason).toBeNull();
+  });
+
+  const historicalRegionalAppointment = (date: string, regionalManager: string) => ({
+    createdAt: `${date}T12:00:00-03:00`,
+    scheduledAt: null,
+    attendedAt: null,
+    visitPerformed: false,
+    regionalManager,
+    salesManager: "Gerente A",
+    owner: "Responsável A",
+    accountName: "Conta sintética",
+    accountRanking: "Ouro",
+    channel: 1 as const,
+    company: "Empresa A",
+    registeredBroker: true,
+  });
+  const historicalRegionalSlice = () =>
+    goalSlice({
+      coverageStart: "2026-09-01",
+      brokerCount: 2,
+      brokerManagerCount: 1,
+      dimensions: {
+        managers: ["Gerente A"],
+        owners: ["Responsável A"],
+        companies: ["Empresa A"],
+        developments: [],
+        stores: [],
+      },
+      facts: [
+        [1, "2026-09-19", 0, 0, 0, 1, -1, 2, 0, 0, -1],
+        [2, "2026-09-19", 0, 0, 0, 1, -1, 1, 0, 0, -1],
+        [1, "2026-10-19", 0, 0, 0, 1, -1, 3, 0, 0, -1],
+        [2, "2026-10-19", 0, 0, 0, 1, -1, 2, 0, 0, -1],
+      ],
+      appointments: [
+        historicalRegionalAppointment("2026-09-19", "Regional Antiga"),
+        historicalRegionalAppointment("2026-10-19", "Regional Nova"),
+      ],
+    });
+
+  it("keeps historical regional filters, rows, facts and roster on the same dated link", () => {
+    const input = historicalRegionalSlice();
+    const brokerRoster = [
+      { key: "a", owner: "Responsável A", manager: "Gerente A" },
+      { key: "inactive", owner: "Sem atividade", manager: "Gerente A" },
+    ];
+    const oldRegion = analyzeAppointments(input, {
+      month: "2026-09",
+      filters: { regionalManager: "Regional Antiga" },
+      brokerRoster,
+    });
+    expect(oldRegion.total).toBe(1);
+    expect(oldRegion.details?.map((row) => row.regionalManager)).toEqual(["Regional Antiga"]);
+    expect(oldRegion.funnel?.appointments).toBe(2);
+    expect(oldRegion.conversionRankings.regionalManagers).toMatchObject([
+      { label: "Regional Antiga", appointments: 2, visits: 1 },
+    ]);
+    expect(oldRegion.brokerCount).toBe(2); // Includes the registered broker with no activity.
+    expect(oldRegion.registeredManagerCount).toBe(1);
+    expect(oldRegion.productivePercent).toBe(50);
+    const futureRegion = analyzeAppointments(input, {
+      month: "2026-09",
+      filters: { regionalManager: "Regional Nova" },
+      brokerRoster,
+    });
+    expect(futureRegion.total).toBe(0);
+    expect(futureRegion.regionalManagers).toEqual([]);
+    expect(futureRegion.funnel?.appointments).toBe(0);
+    expect(futureRegion.brokerCount).toBe(0);
+    expect(oldRegion.filterOptions.regionalManagers).toEqual(["Regional Antiga", "Regional Nova"]);
+  });
+
+  it("does not use a future link for facts or an unknown link for the registered roster", () => {
+    const input = historicalRegionalSlice();
+    input.appointments = input.appointments!.filter((row) => row.createdAt.startsWith("2026-10"));
+    const result = analyzeAppointments(input, {
+      month: "2026-09",
+      filters: { regionalManager: "Regional Nova" },
+      brokerRoster: goalRoster,
+    });
+    expect(result.regionalFactsAvailable).toBe(false);
+    expect(result.conversionAvailable).toBe(false);
+    expect(result.funnel).toBeNull();
+    expect(result.conversionRankings.regionalManagers).toEqual([]);
+    expect(result.rosterUnavailableReason).toBe("unknown-regional-link");
+    expect(result.brokerCount).toBeNull();
+  });
+
+  it("does not arbitrarily assign daily facts with conflicting regional observations", () => {
+    const input = historicalRegionalSlice();
+    input.appointments!.push(historicalRegionalAppointment("2026-09-19", "Regional Nova"));
+    const result = analyzeAppointments(input, {
+      month: "2026-09",
+      filters: { regionalManager: "Regional Antiga" },
+      brokerRoster: [goalRoster[0]!],
+    });
+    expect(result.details?.map((row) => row.regionalManager)).toEqual(["Regional Antiga"]);
+    expect(result.regionalFactsAvailable).toBe(false);
+    expect(result.funnel).toBeNull();
+    expect(result.brokerCount).toBeNull();
+    expect(result.rosterUnavailableReason).toBe("unknown-regional-link");
   });
 
   it("normalizes multiple selected days and applies them to details and funnel facts", () => {
@@ -684,7 +805,7 @@ describe("appointment chart analysis", () => {
       appointments: [appointment("2026-10-17"), appointment("2026-10-18")],
     });
     const result = analyzeAppointments(input, {
-      filters: { createdDates: ["2026-10-19", "2026-10-18", "2026-10-18"] },
+      filters: { channel: 1, createdDates: ["2026-10-19", "2026-10-18", "2026-10-18"] },
     });
     expect(result.total).toBe(1);
     expect(
@@ -799,6 +920,7 @@ describe("appointment chart analysis", () => {
         version: 4,
         brokerCount: 0,
         brokerManagerCount: 0,
+        viewKey: "without_canal_imob",
         dimensions: { ...slice().dimensions, stores: ["Loja A", "Loja B"] },
         facts: [],
         appointments: [],
