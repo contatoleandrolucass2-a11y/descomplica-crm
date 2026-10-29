@@ -21,6 +21,10 @@
   ativo, mantendo foco visível e movimento reduzido.
 - Validação focada: 52 testes de Links Úteis e navegação aprovados, além de
   ESLint, tipos e formatação dos arquivos alterados.
+- PR #415 e CI completa da `main` aprovados; produção serve o SHA `0bf319c4`,
+  com health saudável e os oito ícones conferidos no navegador autenticado.
+- O comando de promoção encerrou com código 1 após registrar a release, mas o
+  status imediato confirmou o deployment concluído e sem pendência.
 
 ## 2026-10-28 — Simulador CAIXA: novo workspace compacto
 
