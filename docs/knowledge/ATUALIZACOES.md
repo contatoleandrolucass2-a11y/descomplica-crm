@@ -11,6 +11,19 @@
   foco visível e respeito a movimento reduzido.
 - A validação focada aprovou 52 testes de Links Úteis e navegação. ESLint,
   verificação de tipos e formatação dos arquivos alterados também aprovaram.
+- O PR #415 foi integrado no SHA `0bf319c41e79cd9f0a1791f0be9e9816e94db4b9`.
+  As CI de pull request `40773368337` e de `main` `40779936302` aprovaram
+  `validate`, `release-gates`, `isolated-restore` e `promotable-image`.
+- Produção registrou o deployment `a5250ca6-2d3b-43b4-8098-bbe14a5904d7`
+  em 2026-10-28T23:40:57.401Z. O health público respondeu HTTP 200,
+  `status=ok` e a versão exata do SHA integrado; acesso anônimo à rota
+  permaneceu protegido por redirecionamento 307 para `/login`.
+- A conferência autenticada no navegador mostrou os oito ícones semânticos
+  distintos no menu publicado. O coordenador encerrou o comando de promoção
+  com código 1 e mensagem genérica após gravar a release; a consulta imediata
+  mostrou o candidato ativo e nenhuma pendência. Reavaliar essa exceção apenas
+  se o comportamento se repetir em outra promoção, sem alterar o coordenador
+  no escopo desta entrega.
 - O runtime de conhecimento permaneceu indisponível na abertura pelo erro
   `Documento excede o limite de exportacao.`; este registro versionado não
   equivale a uma sincronização concluída do Obsidian.
