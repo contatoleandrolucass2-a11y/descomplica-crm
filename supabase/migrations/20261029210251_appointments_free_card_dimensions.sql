@@ -30,7 +30,10 @@ begin
 
   for v_card in select value from jsonb_array_elements(p_cards) loop
     if jsonb_typeof(v_card) is distinct from 'object'
-       or jsonb_typeof(v_card->'layout') is distinct from 'object' then
+       or not (v_card ?& array['id','type','metric','period','groupBy','entityIds','layout']) then
+      raise exception 'invalid_argument: invalid dashboard card' using errcode = '22023';
+    end if;
+    if jsonb_typeof(v_card->'layout') is distinct from 'object' then
       raise exception 'invalid_argument: invalid dashboard card layout' using errcode = '22023';
     end if;
     v_layout := v_card->'layout';

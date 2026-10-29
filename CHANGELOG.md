@@ -3819,3 +3819,5 @@ Validação e publicação serão registradas com evidências ao concluir os gat
   e remove o cabeçalho duplicado. Permite largura e altura em pixels, com
   persistência restrita à página e compatibilidade com cards anteriores.
   A migration preparada exige autorização específica para aplicação remota.
+
+- Preserva a mensagem de rejeição de cards malformados no novo validador de dimensões de Agendamentos.

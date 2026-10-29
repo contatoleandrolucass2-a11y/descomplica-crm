@@ -10026,3 +10026,5 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
   obrigatória. Persistência remota, migration e publicação pendentes. Aplicação
   remota da migration depende de autorização específica do usuário. Após novas
   gravações, rollback exige imagem compatível ou recuperação de dados autorizada.
+
+- O ensaio SQL detectou uma divergência de mensagem para card malformado. O wrapper foi corrigido para preservar o erro legado; a asserção existente continua obrigatória. Nova CI necessária antes de aplicar a migration.
