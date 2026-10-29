@@ -6,7 +6,9 @@ const GRAPH_ORIGIN = "https://graph.facebook.com";
 const MAX_PAGES = 25;
 const MAX_ROWS = 50_000;
 const REQUEST_TIMEOUT_MS = 20_000;
-const CACHE_TTL_MS = 5 * 60_000;
+// The dashboard polls while visible. Keep one short shared window so concurrent
+// users reuse the same Meta response instead of multiplying provider calls.
+const CACHE_TTL_MS = 8_000;
 const AD_EFFECTIVE_STATUSES = [
   "ACTIVE",
   "PAUSED",
@@ -460,7 +462,8 @@ export function validateMetaAdsRange(start: string | null, end: string | null) {
   return { start, end };
 }
 
-let cache: { key: string; expiresAt: number; data: MetaAdsDashboardData } | null = null;
+const cache = new Map<string, { expiresAt: number; data: MetaAdsDashboardData }>();
+const inFlight = new Map<string, Promise<MetaAdsDashboardData>>();
 
 export async function fetchMetaAdsDashboardData(
   configuration: MetaAdsApiConfiguration,
@@ -477,108 +480,124 @@ export async function fetchMetaAdsDashboardData(
     ? validateMetaAdsRange(options.range.start, options.range.end)!
     : dateRange(now, 120);
   const key = `${configuration.apiVersion}:${configuration.accountId}:${range.start}:${range.end}`;
-  if (!options.bypassCache && cache?.key === key && cache.expiresAt > now.getTime())
-    return cache.data;
+  const cached = cache.get(key);
+  if (!options.bypassCache && cached?.expiresAt && cached.expiresAt > now.getTime())
+    return cached.data;
+  if (cached) cache.delete(key);
+  const pending = inFlight.get(key);
+  if (!options.bypassCache && pending) return pending;
   const fetcher = options.fetcher || fetch;
 
-  const adsUrl = graphUrl(configuration, `act_${configuration.accountId}/ads`);
-  adsUrl.searchParams.set("fields", "id,adset{id,targeting}");
-  adsUrl.searchParams.set(
-    "filtering",
-    JSON.stringify([{ field: "effective_status", operator: "IN", value: AD_EFFECTIVE_STATUSES }]),
-  );
-  adsUrl.searchParams.set("limit", "500");
-  const ads = await graphPages<MetaAd>(adsUrl, configuration, fetcher);
-  const campaignsUrl = graphUrl(configuration, `act_${configuration.accountId}/campaigns`);
-  campaignsUrl.searchParams.set("fields", "id,effective_status");
-  campaignsUrl.searchParams.set(
-    "filtering",
-    JSON.stringify([
-      { field: "effective_status", operator: "IN", value: CAMPAIGN_EFFECTIVE_STATUSES },
-    ]),
-  );
-  campaignsUrl.searchParams.set("limit", "500");
-  const metaCampaigns = await graphPages<MetaCampaign>(campaignsUrl, configuration, fetcher);
-  const campaignStatuses = new Map(
-    metaCampaigns
-      .map((campaign) => [text(campaign.id), normalizeStatus(campaign.effective_status)] as const)
-      .filter(([id]) => Boolean(id)),
-  );
-  const adsetTargets = new Map<string, MetaAdsTargetLocation[]>();
-  for (const ad of ads) {
-    const adsetId = text(ad.adset?.id);
-    const locations = targetLocations(ad.adset?.targeting);
-    if (adsetId && (!adsetTargets.has(adsetId) || locations.length)) {
-      adsetTargets.set(adsetId, locations);
+  const refresh = async () => {
+    const adsUrl = graphUrl(configuration, `act_${configuration.accountId}/ads`);
+    adsUrl.searchParams.set("fields", "id,adset{id,targeting}");
+    adsUrl.searchParams.set(
+      "filtering",
+      JSON.stringify([{ field: "effective_status", operator: "IN", value: AD_EFFECTIVE_STATUSES }]),
+    );
+    adsUrl.searchParams.set("limit", "500");
+    const ads = await graphPages<MetaAd>(adsUrl, configuration, fetcher);
+    const campaignsUrl = graphUrl(configuration, `act_${configuration.accountId}/campaigns`);
+    campaignsUrl.searchParams.set("fields", "id,effective_status");
+    campaignsUrl.searchParams.set(
+      "filtering",
+      JSON.stringify([
+        { field: "effective_status", operator: "IN", value: CAMPAIGN_EFFECTIVE_STATUSES },
+      ]),
+    );
+    campaignsUrl.searchParams.set("limit", "500");
+    const metaCampaigns = await graphPages<MetaCampaign>(campaignsUrl, configuration, fetcher);
+    const campaignStatuses = new Map(
+      metaCampaigns
+        .map((campaign) => [text(campaign.id), normalizeStatus(campaign.effective_status)] as const)
+        .filter(([id]) => Boolean(id)),
+    );
+    const adsetTargets = new Map<string, MetaAdsTargetLocation[]>();
+    for (const ad of ads) {
+      const adsetId = text(ad.adset?.id);
+      const locations = targetLocations(ad.adset?.targeting);
+      if (adsetId && (!adsetTargets.has(adsetId) || locations.length)) {
+        adsetTargets.set(adsetId, locations);
+      }
     }
-  }
 
-  const insightsUrl = graphUrl(configuration, `act_${configuration.accountId}/insights`);
-  insightsUrl.searchParams.set("level", "ad");
-  insightsUrl.searchParams.set("time_increment", "1");
-  insightsUrl.searchParams.set(
-    "time_range",
-    JSON.stringify({ since: range.start, until: range.end }),
-  );
-  insightsUrl.searchParams.set("use_unified_attribution_setting", "true");
-  insightsUrl.searchParams.set("limit", "500");
-  insightsUrl.searchParams.set(
-    "fields",
-    "date_start,account_id,account_name,campaign_id,campaign_name,adset_id,adset_name,ad_id,ad_name,spend,impressions,reach,actions",
-  );
-  const insights = await graphPages<MetaInsight>(insightsUrl, configuration, fetcher);
-  const destinations = new Map<string, MetaAdsDashboardRow["destination"]>();
-  for (const insight of insights) {
-    const adId = text(insight.ad_id);
-    if (!adId) continue;
-    if (actionValue(insight.actions, MESSAGE_ACTIONS) > 0) destinations.set(adId, "whatsapp");
-    else if (leadActionValue(insight.actions) > 0 && destinations.get(adId) !== "whatsapp")
-      destinations.set(adId, "form");
-  }
-  const rows = insights
-    .map((insight) => mapInsight(insight, campaignStatuses, destinations, adsetTargets))
-    .filter((row): row is MetaAdsDashboardRow => row !== null);
-  if (rows.length !== insights.length) throw new MetaAdsApiError("invalid_data", 502);
-  const regionalUrl = graphUrl(configuration, `act_${configuration.accountId}/insights`);
-  regionalUrl.searchParams.set("level", "ad");
-  regionalUrl.searchParams.set("time_increment", "1");
-  regionalUrl.searchParams.set("breakdowns", "region");
-  regionalUrl.searchParams.set(
-    "time_range",
-    JSON.stringify({ since: range.start, until: range.end }),
-  );
-  regionalUrl.searchParams.set("use_unified_attribution_setting", "true");
-  regionalUrl.searchParams.set("limit", "500");
-  regionalUrl.searchParams.set(
-    "fields",
-    "date_start,account_id,campaign_id,adset_id,ad_id,actions",
-  );
-  const regionalInsights = await graphPages<MetaInsight>(regionalUrl, configuration, fetcher);
-  const regionalResults = regionalInsights
-    .map((insight) => mapRegionalInsight(insight, campaignStatuses, destinations))
-    .filter((row): row is MetaAdsRegionalResult => row !== null);
-  if (regionalResults.length !== regionalInsights.length) {
-    throw new MetaAdsApiError("invalid_data", 502);
-  }
-  const accountUrl = graphUrl(configuration, `act_${configuration.accountId}`);
-  accountUrl.searchParams.set("fields", "id,name,currency,balance,amount_spent,spend_cap");
-  const account = await graphObject(accountUrl, configuration, fetcher);
-  const accountName = text(account.name) || rows[0]?.account || configuration.accountId;
-  const data: MetaAdsDashboardData = {
-    source: "meta_marketing_api",
-    accountId: configuration.accountId,
-    accountName,
-    currency: text(account.currency) || "BRL",
-    accountBalance: moneyFromMinorUnits(account.balance),
-    amountSpent: moneyFromMinorUnits(account.amount_spent),
-    spendCap: moneyFromMinorUnits(account.spend_cap),
-    fetchedAt: now.toISOString(),
-    range,
-    rows,
-    regionalResults,
+    const insightsUrl = graphUrl(configuration, `act_${configuration.accountId}/insights`);
+    insightsUrl.searchParams.set("level", "ad");
+    insightsUrl.searchParams.set("time_increment", "1");
+    insightsUrl.searchParams.set(
+      "time_range",
+      JSON.stringify({ since: range.start, until: range.end }),
+    );
+    insightsUrl.searchParams.set("use_unified_attribution_setting", "true");
+    insightsUrl.searchParams.set("limit", "500");
+    insightsUrl.searchParams.set(
+      "fields",
+      "date_start,account_id,account_name,campaign_id,campaign_name,adset_id,adset_name,ad_id,ad_name,spend,impressions,reach,actions",
+    );
+    const insights = await graphPages<MetaInsight>(insightsUrl, configuration, fetcher);
+    const destinations = new Map<string, MetaAdsDashboardRow["destination"]>();
+    for (const insight of insights) {
+      const adId = text(insight.ad_id);
+      if (!adId) continue;
+      if (actionValue(insight.actions, MESSAGE_ACTIONS) > 0) destinations.set(adId, "whatsapp");
+      else if (leadActionValue(insight.actions) > 0 && destinations.get(adId) !== "whatsapp")
+        destinations.set(adId, "form");
+    }
+    const rows = insights
+      .map((insight) => mapInsight(insight, campaignStatuses, destinations, adsetTargets))
+      .filter((row): row is MetaAdsDashboardRow => row !== null);
+    if (rows.length !== insights.length) throw new MetaAdsApiError("invalid_data", 502);
+    const regionalUrl = graphUrl(configuration, `act_${configuration.accountId}/insights`);
+    regionalUrl.searchParams.set("level", "ad");
+    regionalUrl.searchParams.set("time_increment", "1");
+    regionalUrl.searchParams.set("breakdowns", "region");
+    regionalUrl.searchParams.set(
+      "time_range",
+      JSON.stringify({ since: range.start, until: range.end }),
+    );
+    regionalUrl.searchParams.set("use_unified_attribution_setting", "true");
+    regionalUrl.searchParams.set("limit", "500");
+    regionalUrl.searchParams.set(
+      "fields",
+      "date_start,account_id,campaign_id,adset_id,ad_id,actions",
+    );
+    const regionalInsights = await graphPages<MetaInsight>(regionalUrl, configuration, fetcher);
+    const regionalResults = regionalInsights
+      .map((insight) => mapRegionalInsight(insight, campaignStatuses, destinations))
+      .filter((row): row is MetaAdsRegionalResult => row !== null);
+    if (regionalResults.length !== regionalInsights.length) {
+      throw new MetaAdsApiError("invalid_data", 502);
+    }
+    const accountUrl = graphUrl(configuration, `act_${configuration.accountId}`);
+    accountUrl.searchParams.set("fields", "id,name,currency,balance,amount_spent,spend_cap");
+    const account = await graphObject(accountUrl, configuration, fetcher);
+    const accountName = text(account.name) || rows[0]?.account || configuration.accountId;
+    const data: MetaAdsDashboardData = {
+      source: "meta_marketing_api",
+      accountId: configuration.accountId,
+      accountName,
+      currency: text(account.currency) || "BRL",
+      accountBalance: moneyFromMinorUnits(account.balance),
+      amountSpent: moneyFromMinorUnits(account.amount_spent),
+      spendCap: moneyFromMinorUnits(account.spend_cap),
+      fetchedAt: now.toISOString(),
+      range,
+      rows,
+      regionalResults,
+    };
+    cache.set(key, { expiresAt: now.getTime() + CACHE_TTL_MS, data });
+    if (cache.size > 32) cache.delete(cache.keys().next().value!);
+    return data;
   };
-  cache = { key, expiresAt: now.getTime() + CACHE_TTL_MS, data };
-  return data;
+
+  if (options.bypassCache) return refresh();
+  const promise = refresh();
+  inFlight.set(key, promise);
+  try {
+    return await promise;
+  } finally {
+    if (inFlight.get(key) === promise) inFlight.delete(key);
+  }
 }
 
 export async function probeMetaAdsApi(

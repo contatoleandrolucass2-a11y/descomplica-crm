@@ -31,7 +31,8 @@ for(const dialog of document.querySelectorAll('dialog')){
   window.parent.postMessage({type:'canvas:modal',open},'*');
  }).observe(dialog,{attributes:true,attributeFilter:['open']});
 }
-const refreshNote=document.createElement('small');refreshNote.className='integration-refresh';refreshNote.textContent='Consultado às '+new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})+' · 60 s';
+const LIVE_REFRESH_MS=10000;
+const refreshNote=document.createElement('small');refreshNote.className='integration-refresh';refreshNote.textContent='Consultado às '+new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})+' · 10 s';
 function publishCanvasStatus(){
  const count=$('#count')?.textContent.split(' · ')[0]||'0 gráficos';
  const controls=[...document.querySelectorAll('.heading .actions button')]
@@ -56,26 +57,54 @@ window.addEventListener('message',event=>{
 });
 publishCanvasStatus();
 let pointerBusy=false;document.addEventListener('pointerdown',()=>pointerBusy=true);for(const event of ['pointerup','pointercancel'])document.addEventListener(event,()=>pointerBusy=false);
+let refreshBusy=false,lastRefreshAt=Date.now(),retryAfterUntil=0;
+function metricNumber(value){
+ const normalized=String(value??'').replace(/[^\d,.-]/g,'');
+ if(!normalized)return NaN;
+ return Number(normalized.includes(',')?normalized.replace(/\./g,'').replace(',','.'):normalized);
+}
+function liveSnapshot(root=document){
+ return new Map([...root.querySelectorAll('#canvas .card')].map(card=>{
+  const values=new Map([...card.querySelectorAll('desc[data-tip-name]')].map(desc=>[
+   JSON.stringify([desc.dataset.tipName,desc.dataset.tipDate,desc.dataset.tipMetric]),metricNumber(desc.dataset.tipValue)
+  ]));
+  const metric=card.querySelector('.metric-tile strong');
+  if(metric)values.set('metric-total',metricNumber(metric.textContent));
+  return [card.dataset.id,values];
+ }));
+}
 async function refreshIntegrated(){
- if(pointerBusy||document.querySelector('dialog[open]'))return;
+ if(refreshBusy||document.hidden||pointerBusy||document.querySelector('dialog[open]')||Date.now()<retryAfterUntil)return;
+ refreshBusy=true;
  try{
+  const old=liveSnapshot();
   const changed=await host.refresh();
   if(changed){
-   const old=new Map([...document.querySelectorAll('#canvas .card')].map(el=>[el.dataset.id,new Map([...el.querySelectorAll('desc[data-tip-name]')].map(d=>[JSON.stringify([d.dataset.tipName,d.dataset.tipDate,d.dataset.tipMetric]),d.dataset.tipValue]))]));
    const next=host.context();Object.assign(integration,next);campaigns.splice(0,campaigns.length,...next.entities);
    selected=campaigns.map((campaign,index)=>next.selected.includes(campaign.id)?index:-1).filter(index=>index>=0);
    render(false);
    for(const el of document.querySelectorAll('#canvas .card')){
-    let changed=false;
-    for(const desc of el.querySelectorAll('desc[data-tip-name]')){const key=JSON.stringify([desc.dataset.tipName,desc.dataset.tipDate,desc.dataset.tipMetric]);if(old.get(el.dataset.id)?.has(key)&&old.get(el.dataset.id).get(key)!==desc.dataset.tipValue){desc.parentNode.classList.add('live-point');changed=true;}}
-    if(changed){el.classList.add('live-updated');addColumnBorderMagic(el);setTimeout(()=>{el.classList.remove('live-updated');el.querySelectorAll('.column-border-magic').forEach(node=>node.remove());el.querySelectorAll('.live-point').forEach(node=>node.classList.remove('live-point'));},7000);}
+    let increased=false;
+    for(const desc of el.querySelectorAll('desc[data-tip-name]')){const key=JSON.stringify([desc.dataset.tipName,desc.dataset.tipDate,desc.dataset.tipMetric]),before=old.get(el.dataset.id)?.get(key),after=metricNumber(desc.dataset.tipValue);if(Number.isFinite(before)&&Number.isFinite(after)&&after>before){desc.parentNode.classList.add('live-point');increased=true;}}
+    const metric=el.querySelector('.metric-tile strong'),before=old.get(el.dataset.id)?.get('metric-total'),after=metricNumber(metric?.textContent);
+    if(metric&&Number.isFinite(before)&&Number.isFinite(after)&&after>before){metric.classList.add('live-value');increased=true;}
+    if(increased){el.classList.add('live-updated');addColumnBorderMagic(el);setTimeout(()=>{el.classList.remove('live-updated');el.querySelectorAll('.column-border-magic').forEach(node=>node.remove());el.querySelectorAll('.live-point,.live-value').forEach(node=>node.classList.remove('live-point','live-value'));},4000);}
    }
   }
-  refreshNote.textContent='Consultado às '+new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})+' · 60 s';
- }catch{refreshNote.textContent='Consulta indisponível · dados anteriores preservados';}
+  lastRefreshAt=Date.now();
+  refreshNote.textContent='Consultado às '+new Date().toLocaleTimeString('pt-BR',{timeZone:'America/Sao_Paulo'})+' · 10 s';
+ }catch(error){
+  const retrySeconds=Math.max(0,Number(error?.retryAfter)||0);
+  retryAfterUntil=retrySeconds?Date.now()+retrySeconds*1000:0;
+  lastRefreshAt=Date.now();
+  refreshNote.textContent=retrySeconds?'Meta temporariamente indisponível · nova tentativa em '+retrySeconds+' s':'Consulta indisponível · dados anteriores preservados';
+ }
+ finally{refreshBusy=false;}
  publishCanvasStatus();
 }
-setInterval(refreshIntegrated,60000);
+setInterval(refreshIntegrated,LIVE_REFRESH_MS);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&Date.now()-lastRefreshAt>=LIVE_REFRESH_MS)refreshIntegrated();});
+window.addEventListener('focus',()=>{if(Date.now()-lastRefreshAt>=LIVE_REFRESH_MS)refreshIntegrated();});
 notifyHeight();
 
 window.exportCanvasSnapshot=()=>cards.map(card=>{
