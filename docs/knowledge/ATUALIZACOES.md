@@ -1,6 +1,6 @@
 # Aprendizados e atualizacoes
 
-## 2026-10-28: ajuste dos cards de Agendamentos implementado e validado localmente
+## 2026-10-28: ajuste dos cards de Agendamentos publicado
 
 - A alteração permanece exclusiva de `/app/etapas/agendamentos`: barras de
   rolagem internas foram ocultadas, o redimensionador ganhou alvo acessível no
@@ -12,8 +12,27 @@
 - Evidências locais com Node 24.19.0 e pnpm 11.20.0: 71 testes de impacto
   aprovados, typecheck aprovado, build de produção aprovado e lint completo sem
   erros. Permanecem 44 avisos preexistentes em assets públicos fora do escopo.
-- Publicação ainda depende de PR, CI protegida, merge e coordenador de release.
-  O sync do Obsidian permanece pendente pelo limite de exportação conhecido.
+- O PR #416 foi integrado em `main` como
+  `a36de843e0399f04251001cfd41286751b97e421`. A CI de `main`
+  `40807000618` aprovou `validate`, `release-gates`, `isolated-restore` e
+  `promotable-image`; o artefato oficial `12869305339` foi conferido antes da
+  promoção.
+- A configuração da CI
+  `sha256:fa6b9f93aa1880860ebe6b414e62070224bf556fd9219d9a38be060cbee764f4`
+  e o manifesto carregado
+  `sha256:893814fe77f9387b76692dd105240803cbf4af9c0de8e83c63754eb0e565d000`
+  foram conciliados por revisão, plataforma `linux/amd64`, onze camadas e
+  `image:prove` nos dois perfis, sem rebuild ou retag.
+- Publicação executada exclusivamente por `release:production`, com consulta
+  no próprio minuto, CI/main exatos, trava e CAS. Resultado: deployment
+  `c93d7853-5502-442d-9662-a68cf386d98d`, SHA e imagem candidatos,
+  `deployedAt=2026-10-29T03:22:33.544Z` e `pendingDeploymentId=null`.
+- O health público respondeu HTTP 200, `status=ok` e versão exata do SHA. Na
+  conferência autenticada, a página exibiu `Adicionar card`, os controles
+  `Redimensionar` no canto inferior direito e os cards sem barras internas.
+  Nenhuma outra página foi alterada.
+- O sync do Obsidian permanece pendente pelo limite de exportação conhecido;
+  o registro versionado não equivale a uma sincronização concluída.
 
 ## 2026-10-28: abertura do ajuste exclusivo dos cards de Agendamentos
 
