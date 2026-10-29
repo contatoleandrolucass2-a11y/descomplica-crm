@@ -3815,7 +3815,7 @@ incertezas são explícitas. Autorização de servidor e APIs bancárias preserv
 Origem, fórmulas, diferenças necessárias e limites em docs/simulators/CAIXA.md.
 Validação e publicação serão registradas com evidências ao concluir os gates.
 
-- Compacta os controles dos cards de Agendamentos e revela os ícones por
-  interação, remove o cabeçalho duplicado e permite altura em pixels.
-  Alterar a largura no editor preserva a altura configurada. Permanecem os
-  mínimos persistidos por tipo e o encaixe horizontal em 12 colunas.
+- Compacta os controles dos cards de Agendamentos, revela ícones por interação
+  e remove o cabeçalho duplicado. Permite largura e altura em pixels, com
+  persistência restrita à página e compatibilidade com cards anteriores.
+  A migration preparada exige autorização específica para aplicação remota.

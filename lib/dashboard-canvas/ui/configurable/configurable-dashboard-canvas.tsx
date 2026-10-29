@@ -31,6 +31,9 @@ import { DashboardCanvas } from "../dashboard-canvas";
 import {
   DASHBOARD_CARD_LAYOUT_LIMITS,
   constrainCardLayout,
+  FREE_CARD_MIN_WIDTH,
+  FREE_CARD_MIN_HEIGHT,
+  FREE_CARD_MAX_SIZE,
   type DashboardCardLayoutPolicy,
 } from "../../layout/limits";
 import { canvasReducer, createCanvasHistoryState } from "../../state/reducer";
@@ -494,6 +497,7 @@ export function ConfigurableDashboardCanvas({
       order: cards.length,
     });
     if (!card) return;
+    if (layoutPolicy?.freeResize) card.layout.width = 320;
     setEditorMode("add");
     setEditorCard(card);
   }
@@ -665,7 +669,7 @@ export function ConfigurableDashboardCanvas({
   function moveSelection(direction: -1 | 1) {
     dispatch({
       type: "replace",
-      cards: moveSelectedCards(cards, validSelectedIds, direction),
+      cards: moveSelectedCards(cards, validSelectedIds, direction, layoutPolicy),
       recordHistory: true,
     });
   }
@@ -842,9 +846,22 @@ export function ConfigurableDashboardCanvas({
                   <button
                     type="button"
                     className={styles.iconButton}
-                    onClick={() => {
+                    onClick={(event) => {
                       setEditorMode("edit");
-                      setEditorCard(card);
+                      const bounds = event.currentTarget
+                        .closest("[data-dashboard-card-id]")
+                        ?.getBoundingClientRect();
+                      setEditorCard(
+                        layoutPolicy?.freeResize
+                          ? {
+                              ...card,
+                              layout: {
+                                ...card.layout,
+                                width: card.layout.width ?? Math.round(bounds?.width ?? 320),
+                              },
+                            }
+                          : card,
+                      );
                     }}
                     aria-label={`Editar ${card.title || card.metric}`}
                   >
@@ -1155,6 +1172,7 @@ function CardEditor({
       { ...card, metric, type: configured?.defaultType ?? card.type },
       catalog,
       compatibility,
+      layoutPolicy,
     );
     setCard(next);
   }
@@ -1236,10 +1254,10 @@ function CardEditor({
           Largura do card
           <input
             type="number"
-            min={layoutLimits.minColumnSpan}
-            max={12}
+            min={layoutPolicy?.freeResize ? FREE_CARD_MIN_WIDTH : layoutLimits.minColumnSpan}
+            max={layoutPolicy?.freeResize ? FREE_CARD_MAX_SIZE : 12}
             step={1}
-            value={card.layout.columnSpan}
+            value={layoutPolicy?.freeResize ? (card.layout.width ?? 320) : card.layout.columnSpan}
             onChange={(event) =>
               setCard({
                 ...card,
@@ -1247,20 +1265,26 @@ function CardEditor({
                   card.type,
                   {
                     ...card.layout,
-                    columnSpan: Number(event.target.value),
+                    ...(layoutPolicy?.freeResize
+                      ? { width: Number(event.target.value) }
+                      : { columnSpan: Number(event.target.value) }),
                   },
                   layoutPolicy,
                 ),
               })
             }
           />
-          <small>{card.layout.columnSpan} de 12 colunas</small>
+          <small>
+            {layoutPolicy?.freeResize
+              ? `${card.layout.width ?? 320}px`
+              : `${card.layout.columnSpan} de 12 colunas`}
+          </small>
         </label>
         <label>
           Altura do card
           <input
             type="number"
-            min={layoutLimits.minHeight}
+            min={layoutPolicy?.freeResize ? FREE_CARD_MIN_HEIGHT : layoutLimits.minHeight}
             max={
               layoutPolicy?.maxHeight === null
                 ? undefined
@@ -1384,6 +1408,7 @@ function CardEditor({
                   { ...card, type: event.target.value as DashboardCardType },
                   catalog,
                   compatibility,
+                  layoutPolicy,
                 ),
               )
             }

@@ -28,6 +28,7 @@ export interface DashboardCardLayout {
   order: number;
   columnSpan: number;
   height: number;
+  width?: number;
 }
 
 export interface DashboardCardOptions {

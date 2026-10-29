@@ -145,8 +145,10 @@ export function normalizeDashboardCard(
     order: finiteNumber(layoutValue.order) ?? fallbackOrder,
   };
   const columnSpan = finiteNumber(layoutValue.columnSpan);
+  const width = finiteNumber(layoutValue.width);
   const height = finiteNumber(layoutValue.height);
   if (columnSpan !== undefined) layoutInput.columnSpan = columnSpan;
+  if (width !== undefined) layoutInput.width = width;
   if (height !== undefined) layoutInput.height = height;
   const card: DashboardCard = {
     id,

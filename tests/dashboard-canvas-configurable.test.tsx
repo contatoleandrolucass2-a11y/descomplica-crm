@@ -17,6 +17,7 @@ import {
   type JsPdfConstructor,
 } from "@/lib/dashboard-canvas/ui/configurable";
 import { ExpandedDashboardCardContent } from "@/lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas";
+import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 
 const catalog: ConfigurableDashboardCatalog = {
   metrics: [
@@ -64,6 +65,25 @@ function loadVendoredJsPdf() {
 }
 
 describe("configurable dashboard canvas", () => {
+  it("preserves pixel dimensions while reconciling the editor and moving a group", () => {
+    const resized = {
+      ...card("sales", 0),
+      metric: "sales.total",
+      layout: { order: 0, columnSpan: 1, height: 73, width: 157 },
+    };
+    expect(
+      reconcileCardCompatibility(resized, catalog, undefined, APPOINTMENTS_CARD_LAYOUT_POLICY)
+        .layout,
+    ).toEqual(resized.layout);
+    expect(
+      moveSelectedCards(
+        [resized, card("b", 1)],
+        new Set(["sales"]),
+        1,
+        APPOINTMENTS_CARD_LAYOUT_POLICY,
+      )[1]?.layout,
+    ).toMatchObject({ height: 73, width: 157 });
+  });
   it("exports the reusable props contract with renderer and metric/type content", () => {
     const props: ConfigurableDashboardCanvasProps = {
       initialCards: [],

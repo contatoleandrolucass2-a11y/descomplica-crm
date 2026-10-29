@@ -33,7 +33,7 @@ export type CanvasAction =
   | {
       type: "resize-card";
       cardId: string;
-      layout: Pick<DashboardCardLayout, "columnSpan" | "height">;
+      layout: Pick<DashboardCardLayout, "columnSpan" | "height" | "width">;
     }
   | { type: "organize" }
   | { type: "reset"; cards: readonly DashboardCard[] }

@@ -1291,7 +1291,7 @@ Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/2
 - O artefato imutável `12587144483` teve digest ZIP
   `sha256:15cbe433b6d5c45b5d55c175b05836dbb4d2cd2bce204621166661230d07d74e`.
   `revision.txt` e o checksum de `image.tar.gz`
-  `sha256:1de219ab3bc025c9d08541c74061a279e6885df0372bff1de59f070eebbc138b`
+  `sha256:1de219ab3bc025c9d08541c74061a279e6885df0372bff1de 59f070eebbc138b`
   foram conferidos antes da transferência. A imagem foi carregada sem rebuild
   ou retag; `image:prove` aprovou os dois perfis no image ID local
   `sha256:c1bce48364b366a8f594566aa419539d2374af5d0bb266a23f26549da1d248e9`.
@@ -1420,7 +1420,7 @@ Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/2
   `sha256:9563b56f5d7b37e627555a3af34aa37af23b8b8c0e2583b6cdd0cafafa1e5532`
   e revisao exata. No Docker containerd do destino, `image:prove` validou os
   dois perfis sobre a imagem local
-  `sha256:56b14a773b73842536a5025741b8efdd80de5c971ad52dfd13cd29698154d72b`,
+  `sha256:56b14a773b73842536a5025741b8efdd80de 5c971ad52dfd13cd29698154d72b`,
   sem rebuild ou retag.
 - O coordenador `pnpm release:production` publicou o deployment
   `1d79e00b-89f5-481f-8a9b-39f2a54e856b` em
@@ -2794,7 +2794,7 @@ Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/2
   Em16:11Z, main avancou para6b6e88fb (PR256 Previsao por empreendimento),
   enquanto health publico segue200/ok/d919751a. Protecao BEHIND impediu
   merge normal do PR255; origin/main integrado sem descartar notas ou codigo.
-  Nova CI obrigatoria do head combinado. Migration20261018142142 da outra
+  Nova CI obrigatoria do head combinado. Migration 20261018142142 da outra
   entrega exige autorizacao propria e coordenacao de ativacao; nenhuma
   migration aplicada aqui. Pergunta ao usuario pendente, sem ampliar escopo.
 
@@ -3070,3 +3070,10 @@ antes de qualquer ativação.
 - Implementação opt-in em Agendamentos: cabeçalho sem título duplicado; controles menores sobrepostos, revelados por hover/foco e disponíveis em toque. Altura em pixels, preservada ao alterar largura; histórico e comparação de autosave respeitam a política da página para não descartar mudanças pequenas.
 - Validação local: 48 testes focados aprovados; typecheck/lint aprovados antes do ajuste final de serialização e revalidação em andamento. Chromium sintético aprovou arraste nos dois eixos, edição para 997 px e 4 colunas, salvamento em endpoint local, teclado, desfazer, grupo, expansão e editor. Sem erros JS ou tráfego externo. Capturas em 320, 390, 768, 1440 e 1920 nos três temas sem sobreposição/overflow ou axe grave; rodada inicial parou depois por rótulos obsoletos no próprio QA, corrigidos e interações reexecutadas com sucesso. CSS de preview Vite, não build Next de produção.
 - Limites: grade de 12 colunas e mínimos persistidos por tipo continuam vigentes. Dimensões menores exigem migration e autorização específica para banco remoto; não foram implementadas. Não houve alteração de permissões, regras financeiras, sidebar ou outras páginas. CI/merge/publicação do candidato ainda pendentes. Evidência local não comprova persistência remota.
+
+## 2026-10-29: candidato completo — redimensionamento livre de Agendamentos
+
+- Esta conclusão substitui o limite por colunas do candidato inicial: a interface agora usa largura e altura em pixels, flex-wrap e dimensões individuais. Limites técnicos: largura 128..16384 px e altura 72..16384 px; o tamanho visível respeita a tela. Cards sem width continuam compatíveis. Controles compactos e cabeçalho removido mantidos; outras páginas preservadas.
+- Migration 20261029210251_appointments_free_card_dimensions.sql preparada pelo CLI, com wrapper privado específico da página. Dimensões originais são validadas; catálogo, apresentação, duplicados, RPCs, auth, RLS, grants e CAS são preservados. Não houve aplicação remota nem alteração de dados. Rollback após novos layouts exige imagem compatível ou recuperação de dados autorizada; procedimento em docs/runbooks/appointments-card-dimensions.md.
+- Evidências locais: 81 testes focados de interface/API/schema aprovados entre as suítes do coordenador e crm-dados; types e lint aprovados. Chromium aprovou largura 317 px, altura 997 px preservada, dimensões 157×137 px, ajuste de 1 px, histórico, editor, grupo, expansão e transporte no endpoint sintético. Toque mantém controles visíveis e alvos 44 px. Matriz de 5 larguras×3 temas sem overflow/sobreposição/axe grave; falha inicial do alvo em toque foi corrigida e a etapa reexecutada com sucesso. Nenhum erro JS ou tráfego externo; CSS Vite não substitui build Next/CI.
+- SQL/pgTAP não executados localmente porque Docker/psql não estão disponíveis. Nova CI isolada obrigatória; resultados do candidato inicial c6910cf3 não validam esta extensão. PR #424 será atualizado. Migrations remotas exigem autorização específica segundo AGENTS.md; interface não será publicada contra o contrato antigo. Pendências: CI, integração, autorização/aplicação da migration, artefato aprovado, publicação protegida e verificação posterior.

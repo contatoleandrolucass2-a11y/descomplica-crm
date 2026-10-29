@@ -2461,7 +2461,7 @@ estruturado preserva11 entradas de dashboard e231 da main, com hashes conferidos
 66 testes focais passaram. Mantidas as duas paginas e regras de suas rotas.
 
 Main b9377a1 incorporado preservando Qlik v2, seus testes e referencias.
-Conflitos resolvidos com inventario combinado de56 migrations/1883 assercoes;
+Conflitos resolvidos com inventario combinado de 56 migrations/1883 assercoes;
 33 testes locais de release/paridade aprovados. Nova CI necessaria no merge.
 No merge4fa4c5d, lint/typecheck/test/build locais passaram;3547 Vitest,1181 Node
 e703 release aprovados. Skips de plataforma permanecem dependentes da CI Linux.
@@ -5934,7 +5934,7 @@ Audit sem vulnerabilidades conhecidas. CI e ativação do serviço ainda pendent
   a 4.408px e Canal a 1.731px em 1440px, embora os canvases definissem uma
   composicao compacta.
 - Branch `codex/canvas-layout-parity-hotfix`, base inicial `afdb1c9` e base final
-  integrada `de57b6a`. Foram corrigidas as 22 rotas dos canvases sem alterar
+  integrada `de 57b6a`. Foram corrigidas as 22 rotas dos canvases sem alterar
   loaders, autorizacao, RLS, APIs, motores ou fontes. A 23a pagina protegida,
   Recurso MKT, foi preservada da `main` com sua matriz visual propria.
 - Dashboard conserva somente filtros, indicadores, funil, ranking e atividades
@@ -6680,7 +6680,7 @@ Audit sem vulnerabilidades conhecidas. CI e ativação do serviço ainda pendent
 ## 2026-09-30 - Topo compacto publicado
 
 - PR #116 integrado apos CI 36777405809 verde. CI main 36780351488 aprovada
-  no SHA 843fd113a3a1f6b6fd3b6b12b6de58de180256ce, publicado sem rebuild.
+  no SHA 843fd113a3a1f6b6fd3b6b12b6de 58de180256ce, publicado sem rebuild.
 - Checksum, manifesto, onze camadas, dois perfis, backup/CAS/rollback conferidos.
 - Health confirma a release; doze GETs anonimos sem erro, estoque protegido.
 - Navegador confirma titulo/guia a 8px do menu e botao 36px; guia, Escape e
@@ -10003,20 +10003,26 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
 
 - Durante a validação da retomada, o PR #381 foi integrado em `f9c8d94c` pelo responsável por Agendamentos. A branch do Tabelão incorporou essa correção sem conflitos: cards sem personalização recuperam o DOM e o CSS anteriores da Visão Geral. A evidência de falha visual anterior precisa ser reavaliada pela CI do novo candidato, pois houve mudança no código responsável. Nenhuma referência visual foi alterada neste chat.
 
-## 2026-10-29 — Cards compactos de Agendamentos
+## 2026-10-29 — Cards compactos e dimensões livres de Agendamentos
 
-- Remove o título duplicado do cabeçalho e sobrepõe o controle de movimento,
-  sem reservar altura. Ícones de movimento, seleção, edição, expansão, exclusão
-  e redimensionamento menores; revelação por hover/foco e acesso em toque.
-- Altura em pixels e largura por colunas; o editor preserva a altura ao mudar
-  a largura. Política opt-in de Agendamentos; demais páginas preservadas.
-- Os mínimos por tipo e a grade de 12 colunas continuam exigidos pelo contrato
-  persistido. Liberar dimensões menores depende de migration e autorização
-  específica para aplicação remota; nenhuma migration foi criada ou aplicada.
-- Validação: 48 testes focados aprovados em Node 24.19.0. Typecheck e lint
-  focados aprovados. Navegador Chromium local: hover, arraste nos dois eixos,
-  altura de 997 px preservada ao mudar largura e salva em endpoint sintético,
-  teclado, desfazer, grupo, expansão e editor aprovados. Sem erros JS ou
-  requisições externas. Persistência remota não foi exercida.
-- O histórico e a comparação para autosave agora recebem a política da página,
-  evitando descartar ajustes de um pixel. Demais políticas mantêm os defaults.
+- Remove título duplicado e sobrepõe controles menores de movimento, seleção,
+  edição, expansão, exclusão e redimensionamento. Hover/foco revelam os ícones;
+  toque preserva acesso e alvo de 44 px, sem exigir hover.
+- Largura e altura em pixels, com quebra de linha sem sobreposição. Mínimos
+  técnicos 128×72 px e máximo 16384 por eixo; largura visível limitada à tela.
+  Cards antigos sem width mantêm o layout por colunas. Demais páginas preservadas.
+- Editor, histórico, serialização, autosave e movimento em grupo preservam as
+  dimensões. Migração opcional de documento v2 com width somente Agendamentos.
+- Migration 20261029210251 preparada, sem aplicação remota: valida dimensões
+  e reutiliza os controles anteriores de conteúdo/catálogo/presentation;
+  preserva RPCs, auth, RLS, grants e CAS. Procedimento e risco de rollback em
+  docs/runbooks/appointments-card-dimensions.md.
+- Validação: 81 testes focados aprovados nas suítes de interface e persistência;
+  typecheck/lint focados aprovados. Chromium sintético: 317×997 e 157×137,
+  ajuste de 1 px, transporte de dimensões no endpoint sintético, teclado,
+  desfazer, grupo, expansão, editor e toque 44 px aprovados. Matriz de 5 larguras
+  nos 3 temas sem overflow, sobreposição ou axe grave. CSS Vite, não produção.
+- SQL/pgTAP não executados localmente por ausência de Docker/psql; CI isolada
+  obrigatória. Persistência remota, migration e publicação pendentes. Aplicação
+  remota da migration depende de autorização específica do usuário. Após novas
+  gravações, rollback exige imagem compatível ou recuperação de dados autorizada.

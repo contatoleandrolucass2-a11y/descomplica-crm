@@ -172,7 +172,7 @@ export function DashboardCanvas({
   const layoutKey = packed
     .map(
       ({ card, row, column }) =>
-        `${card.id}:${row}:${column}:${card.layout.columnSpan}:${card.layout.height}`,
+        `${card.id}:${row}:${column}:${card.layout.columnSpan}:${card.layout.height}:${card.layout.width ?? "auto"}`,
     )
     .join("|");
   useFlipLayout(cardElements, layoutKey, interaction !== null);
@@ -318,7 +318,9 @@ export function DashboardCanvas({
       clientX: event.clientX,
       clientY: event.clientY,
       originalCards: previewRef.current,
-      initialLayout: card.layout,
+      initialLayout: layoutPolicy?.freeResize
+        ? { ...card.layout, width: Math.round(bounds.width) }
+        : card.layout,
       floatingRect: bounds,
       offsetX: event.clientX - bounds.left,
       offsetY: event.clientY - bounds.top,
@@ -354,11 +356,20 @@ export function DashboardCanvas({
       return;
     event.preventDefault();
     const horizontal = event.key === "ArrowLeft" ? -1 : event.key === "ArrowRight" ? 1 : 0;
-    const vertical = event.key === "ArrowUp" ? -24 : event.key === "ArrowDown" ? 24 : 0;
+    const step = layoutPolicy?.freeResize ? (event.shiftKey ? 10 : 1) : 24;
+    const vertical = event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
     const nextLayout = resizeCardLayout({
       type: card.type,
-      initial: card.layout,
-      deltaX: horizontal * ((gridRef.current?.clientWidth ?? 12) / 12),
+      initial: layoutPolicy?.freeResize
+        ? {
+            ...card.layout,
+            width: Math.round(
+              cardElements.current.get(card.id)?.getBoundingClientRect().width ?? 128,
+            ),
+          }
+        : card.layout,
+      deltaX:
+        horizontal * (layoutPolicy?.freeResize ? step : (gridRef.current?.clientWidth ?? 12) / 12),
       deltaY: vertical,
       containerWidth: gridRef.current?.clientWidth ?? 12,
       gap,
@@ -373,7 +384,7 @@ export function DashboardCanvas({
     setPreviewCards(next);
     onCommit(next, "resize");
     setAnnouncement(
-      `${cardName(card)}: ${nextLayout.columnSpan} colunas, ${nextLayout.height} pixels de altura.`,
+      `${cardName(card)}: ${nextLayout.width !== undefined ? `${nextLayout.width} pixels de largura` : `${nextLayout.columnSpan} colunas`}, ${nextLayout.height} pixels de altura.`,
     );
   }
 
@@ -392,6 +403,21 @@ export function DashboardCanvas({
       }
     : undefined;
 
+  function cardStyle(card: DashboardCard, columnSpan: number): CSSProperties {
+    return {
+      gridColumn: `span ${columnSpan}`,
+      height: card.layout.height,
+      ...(layoutPolicy?.freeResize
+        ? {
+            width:
+              card.layout.width ??
+              `calc(${(columnSpan * 100) / 12}% - ${(gap * (12 - columnSpan)) / 12}px)`,
+            maxWidth: "100%",
+          }
+        : {}),
+    };
+  }
+
   return (
     <section
       className={[styles.shell, className].filter(Boolean).join(" ")}
@@ -399,6 +425,7 @@ export function DashboardCanvas({
       data-readonly={disabled ? "true" : undefined}
       data-corner-resize={cornerResizeHandle ? "true" : undefined}
       data-compact-controls={compactControls ? "true" : undefined}
+      data-free-resize={layoutPolicy?.freeResize ? "true" : undefined}
     >
       <div
         ref={gridRef}
@@ -413,7 +440,8 @@ export function DashboardCanvas({
             <div
               key={card.id}
               className={styles.placeholder}
-              style={{ gridColumn: `span ${columnSpan}`, height: card.layout.height }}
+              style={cardStyle(card, columnSpan)}
+              data-fixed-width={card.layout.width !== undefined ? "true" : undefined}
               aria-hidden="true"
             />
           ) : (
@@ -424,7 +452,8 @@ export function DashboardCanvas({
                 else cardElements.current.delete(card.id);
               }}
               className={[styles.card, isActive ? styles.active : ""].filter(Boolean).join(" ")}
-              style={{ gridColumn: `span ${columnSpan}`, height: card.layout.height }}
+              style={cardStyle(card, columnSpan)}
+              data-fixed-width={card.layout.width !== undefined ? "true" : undefined}
               data-dashboard-card-id={card.id}
             >
               <header className={styles.header}>

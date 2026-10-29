@@ -1,4 +1,8 @@
-import { DASHBOARD_CARD_LAYOUT_LIMITS, constrainCardLayout } from "../../layout/limits";
+import {
+  DASHBOARD_CARD_LAYOUT_LIMITS,
+  constrainCardLayout,
+  type DashboardCardLayoutPolicy,
+} from "../../layout/limits";
 import { normalizeDashboardCards } from "../../state/migrations";
 import {
   DASHBOARD_CARD_TYPES,
@@ -132,6 +136,7 @@ export function reconcileCardCompatibility(
   card: DashboardCard,
   catalog: ConfigurableDashboardCatalog,
   compatibility?: ConfigurableDashboardCompatibility,
+  layoutPolicy?: DashboardCardLayoutPolicy,
 ): DashboardCard {
   const types = compatibleTypes(card.metric, compatibility);
   const groups = compatibleGroups(card.metric, compatibility);
@@ -150,7 +155,7 @@ export function reconcileCardCompatibility(
     type,
     period,
     groupBy,
-    layout: constrainCardLayout(type, card.layout),
+    layout: constrainCardLayout(type, card.layout, layoutPolicy),
   };
   delete next.options;
   if (Object.keys(options).length > 0) next.options = options;
@@ -165,8 +170,9 @@ export function moveSelectedCards(
   cards: readonly DashboardCard[],
   selectedIds: ReadonlySet<string>,
   direction: -1 | 1,
+  layoutPolicy?: DashboardCardLayoutPolicy,
 ) {
-  const ordered = normalizeDashboardCards(cards);
+  const ordered = normalizeDashboardCards(cards, layoutPolicy);
   const selected = ordered.filter((card) => selectedIds.has(card.id));
   if (selected.length === 0 || selected.length === ordered.length) return ordered;
   const remaining = ordered.filter((card) => !selectedIds.has(card.id));

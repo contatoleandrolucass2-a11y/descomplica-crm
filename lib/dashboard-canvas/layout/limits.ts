@@ -16,6 +16,7 @@ export interface DashboardCardLayoutLimits {
 export interface DashboardCardLayoutPolicy {
   maxHeight?: number | null;
   heightStep?: number;
+  freeResize?: boolean;
 }
 
 export const FREE_HEIGHT_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
@@ -25,7 +26,12 @@ export const FREE_HEIGHT_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
 export const APPOINTMENTS_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
   maxHeight: 16_384,
   heightStep: 1,
+  freeResize: true,
 };
+
+export const FREE_CARD_MIN_WIDTH = 128;
+export const FREE_CARD_MIN_HEIGHT = 72;
+export const FREE_CARD_MAX_SIZE = 16_384;
 
 export const DASHBOARD_CARD_LAYOUT_LIMITS: Record<DashboardCardType, DashboardCardLayoutLimits> = {
   kpi: {
@@ -84,14 +90,15 @@ export function constrainCardLayout(
   const limits = DASHBOARD_CARD_LAYOUT_LIMITS[type];
   const columnSpan = clamp(
     finiteInteger(layout.columnSpan ?? limits.defaultColumnSpan, limits.defaultColumnSpan),
-    limits.minColumnSpan,
+    policy?.freeResize ? 1 : limits.minColumnSpan,
     CANVAS_COLUMN_COUNT,
   );
   const maximumHeight =
     policy?.maxHeight === null ? Number.MAX_SAFE_INTEGER : (policy?.maxHeight ?? limits.maxHeight);
+  const minimumHeight = policy?.freeResize ? FREE_CARD_MIN_HEIGHT : limits.minHeight;
   const unsnappedHeight = clamp(
     finiteInteger(layout.height ?? limits.defaultHeight, limits.defaultHeight),
-    limits.minHeight,
+    minimumHeight,
     maximumHeight,
   );
   const heightStep = Math.max(
@@ -100,7 +107,7 @@ export function constrainCardLayout(
   );
   const height = clamp(
     Math.round(unsnappedHeight / heightStep) * heightStep,
-    limits.minHeight,
+    minimumHeight,
     maximumHeight,
   );
 
@@ -108,6 +115,15 @@ export function constrainCardLayout(
     order: Math.max(0, finiteInteger(layout.order ?? 0, 0)),
     columnSpan,
     height,
+    ...(policy?.freeResize && layout.width !== undefined
+      ? {
+          width: clamp(
+            finiteInteger(layout.width, FREE_CARD_MIN_WIDTH),
+            FREE_CARD_MIN_WIDTH,
+            FREE_CARD_MAX_SIZE,
+          ),
+        }
+      : {}),
   };
 }
 
@@ -139,12 +155,23 @@ export function resizeCardLayout({
     1,
     finiteInteger(policy?.heightStep ?? CANVAS_HEIGHT_STEP, CANVAS_HEIGHT_STEP),
   );
+  const width = policy?.freeResize
+    ? clamp(
+        Math.round((initial.width ?? initial.columnSpan * widthPerColumn - gap) + deltaX),
+        FREE_CARD_MIN_WIDTH,
+        Math.max(FREE_CARD_MIN_WIDTH, Math.min(containerWidth, FREE_CARD_MAX_SIZE)),
+      )
+    : undefined;
   return constrainCardLayout(
     type,
     {
       ...initial,
-      columnSpan: initial.columnSpan + Math.round(deltaX / widthPerColumn),
+      columnSpan:
+        width === undefined
+          ? initial.columnSpan + Math.round(deltaX / widthPerColumn)
+          : Math.ceil((width + gap) / widthPerColumn),
       height: initial.height + Math.round(deltaY / heightStep) * heightStep,
+      ...(width !== undefined ? { width } : {}),
     },
     policy,
   );

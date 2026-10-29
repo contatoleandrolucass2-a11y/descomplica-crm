@@ -9,6 +9,16 @@
   min-width: 0;
 }
 
+.shell[data-free-resize="true"] .grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.shell[data-free-resize="true"] .grid > :is(.card, .placeholder) {
+  flex: 0 0 auto;
+}
+
 .card,
 .placeholder {
   min-width: 0;
@@ -228,6 +238,10 @@
     width: 2.75rem;
     height: 2.75rem;
   }
+
+  .shell[data-compact-controls="true"] .dragHandle {
+    flex-basis: 2.75rem;
+  }
 }
 
 .shell[data-readonly="true"] .header,
@@ -236,6 +250,9 @@
 }
 
 @media (max-width: 720px) {
+  .shell[data-free-resize="true"] .grid > :is(.card, .placeholder):not([data-fixed-width]) {
+    width: 100% !important;
+  }
   .grid > .card,
   .grid > .placeholder {
     grid-column: 1 / -1 !important;
@@ -243,6 +260,10 @@
 
   .resizeHandle {
     display: none;
+  }
+
+  .shell[data-free-resize="true"] .resizeHandle {
+    display: block;
   }
 }
 

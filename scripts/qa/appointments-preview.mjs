@@ -359,10 +359,11 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await goalCard.getByRole("button", { name: "Editar Meta do mês", exact: true }).click();
   const editor = page.getByRole("dialog", { name: "Editar card", exact: true });
   await editor.getByLabel("Altura do card", { exact: false }).fill("997");
-  await editor.getByLabel("Largura do card", { exact: false }).fill("4");
+  await editor.getByLabel("Largura do card", { exact: false }).fill("317");
   await expect(editor.getByLabel("Altura do card", { exact: false })).toHaveValue("997");
   await editor.getByRole("button", { name: "Salvar", exact: true }).click();
   await expect.poll(async () => (await goalCard.boundingBox()).height).toBe(997);
+  await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(317);
   await expect(page.getByText("Salvo automaticamente", { exact: true })).toBeVisible();
   await expect
     .poll(async () => {
@@ -374,14 +375,27 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
           (card) =>
             card.id === "appointments-goal" &&
             card.layout.height === 997 &&
-            card.layout.columnSpan === 4,
+            card.layout.width === 317,
         ),
       );
     })
     .toBe(true);
+  await goalCard
+    .getByRole("button", { name: "Redimensionar Meta do mês", exact: true })
+    .press("ArrowRight");
+  await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(318);
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await goalCard.hover();
+  await goalCard.getByRole("button", { name: "Editar Meta do mês", exact: true }).click();
+  await editor.getByLabel("Altura do card", { exact: false }).fill("137");
+  await editor.getByLabel("Largura do card", { exact: false }).fill("157");
+  await editor.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect.poll(async () => (await goalCard.boundingBox()).height).toBe(137);
+  await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(157);
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
   await page.getByRole("button", { name: "Desfazer", exact: true }).click();
   evidence.canvas.interactions.push(
-    "compact-hover-pointer-both-axes-pixel-height-editor-width-preserves-height",
+    "compact-hover-pointer-both-axes-pixel-dimensions-below-legacy-minima-and-save",
   );
   await goalCard.getByRole("button", { name: "Mover Meta do mês", exact: true }).press("ArrowDown");
   await expect.poll(readOrder).not.toEqual(initialOrder);
@@ -439,6 +453,33 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   ).toBeVisible();
   await page.keyboard.press("Escape");
   evidence.canvas.interactions.push("selective-pdf-dialog");
+
+  const touchContext = await page
+    .context()
+    .browser()
+    .newContext({ viewport: { width: 390, height: 900 }, isMobile: true, hasTouch: true });
+  try {
+    await touchContext.route("**/*", (route) =>
+      new URL(route.request().url()).origin === origin ? route.continue() : route.abort(),
+    );
+    const touchPage = await touchContext.newPage();
+    await touchPage.goto(`${origin}?editable`);
+    const touchCard = touchPage.locator('[data-dashboard-card-id="appointments-goal"]');
+    const move = touchCard.getByRole("button", { name: "Mover Meta do mês", exact: true });
+    check(
+      (await move.evaluate((node) => getComputedStyle(node.parentElement).opacity)) === "1",
+      "Touch keeps move control available without hover",
+    );
+    const touchResize = touchCard.getByRole("button", {
+      name: "Redimensionar Meta do mês",
+      exact: true,
+    });
+    await expect(touchResize).toBeVisible();
+    check((await move.boundingBox()).width >= 44, "Touch retains accessible target size");
+    evidence.canvas.interactions.push("touch-controls-visible-with-44px-targets");
+  } finally {
+    await touchContext.close();
+  }
 }
 
 export async function runAppointmentsPreview() {
