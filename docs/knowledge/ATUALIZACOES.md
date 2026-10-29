@@ -9,13 +9,15 @@
   indisponível; não usar só quem teve movimento como total cadastrado. Regional
   das linhas é a original; facts usam observação de vínculo até a data civil,
   sem atribuir uma regional quando o vínculo é desconhecido ou conflitante.
+  A base cadastral regional exige vínculo estável em todos os dias cobertos
+  selecionados, sem usar o vínculo de fechamento para movimentos anteriores.
 - Metas: cada competência vem da RPC autorizada; períodos compostos ponderam
   o funil mensal pelos dias cobertos selecionados. Ausência não usa meta atual.
 - Apresentação: rolagem interna funcional sem barras visuais, wrappers de altura
   limitada ao card, Hoje limpa restrições temporais e preserva dimensões. Meta,
   torre e rótulo usam a mesma escala, com espaço para o máximo de 150% do editor.
   Ampliação preserva apresentação mediante opção ativada apenas em Agendamentos.
-- Validação local: 85 testes focados, tipos, ESLint e formatação aprovados.
+- Validação local: 87 testes focados, tipos, ESLint e formatação aprovados.
   Navegador usa dados sintéticos locais e não grava perfil em produção. CI,
   merge e publicação são estados posteriores, ainda não comprovados nesta nota.
 - Limite: elenco atual não contém histórico próprio de transferências ou vínculo

@@ -236,6 +236,19 @@ export function analyzeAppointments(
   const coveredStart = requestedStart < slice.coverageStart ? slice.coverageStart : requestedStart;
   const coveredEnd = requestedEnd > slice.referenceDate ? slice.referenceDate : requestedEnd;
   const periodReferenceDate = selectedDates.filter(matchesExplicitPeriod).at(-1) ?? coveredEnd;
+  const coveredDays =
+    coveredStart > coveredEnd
+      ? 0
+      : Math.floor(
+          (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
+            86_400_000,
+        ) + 1;
+  const selectedCoveredDates = Array.from({ length: coveredDays }, (_, index) => {
+    const date = new Date(`${coveredStart}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + index);
+    return date.toISOString().slice(0, 10);
+  }).filter(matchesSelectedPeriod);
+  const selectedCoveredDays = selectedCoveredDates.length;
   // Facts retain a civil date but not the regional manager. Resolve only from
   // observations at or before that date; conflicting names on a day are unknown.
   const regionalHistory = new Map<string, Map<string, Set<string>>>();
@@ -325,6 +338,21 @@ export function analyzeAppointments(
     slice.viewKey !== "with_canal_imob" &&
     (filters.channel === 1 ||
       (filters.channel === undefined && slice.viewKey === "without_canal_imob"));
+  // A single denominator is valid only when the manager's regional link is
+  // known and unchanged on every covered selected day, not merely the last one.
+  const stableRosterRegions = new Map<string, string | null>();
+  const stableRegionForManager = (manager: string): string | null => {
+    const key = appointmentIdentity(manager);
+    if (stableRosterRegions.has(key)) return stableRosterRegions.get(key)!;
+    const firstDate = selectedCoveredDates[0];
+    const region = firstDate ? regionForManager(manager, firstDate) : null;
+    const stable =
+      region !== null &&
+      selectedCoveredDates.every((date) => regionForManager(manager, date) === region);
+    const result = stable ? region : null;
+    stableRosterRegions.set(key, result);
+    return result;
+  };
   const unknownRosterRegion =
     Boolean(filters.regionalManager) &&
     (brokerRoster === null ||
@@ -334,7 +362,7 @@ export function analyzeAppointments(
             appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
           (!filters.owner ||
             appointmentIdentity(broker.owner) === appointmentIdentity(filters.owner)) &&
-          regionForManager(broker.manager, periodReferenceDate) === null,
+          stableRegionForManager(broker.manager) === null,
       ));
   const rosterUnavailableReason =
     !houseOnly || filters.company || filters.accountRanking
@@ -349,7 +377,7 @@ export function analyzeAppointments(
       ? brokerRoster.filter(
           (broker) =>
             (!filters.regionalManager ||
-              regionForManager(broker.manager, periodReferenceDate) === filters.regionalManager) &&
+              stableRegionForManager(broker.manager) === filters.regionalManager) &&
             (!filters.manager ||
               appointmentIdentity(broker.manager) === appointmentIdentity(filters.manager)) &&
             (!filters.owner ||
@@ -457,19 +485,6 @@ export function analyzeAppointments(
         );
     }
   }
-  const coveredDays =
-    coveredStart > coveredEnd
-      ? 0
-      : Math.floor(
-          (Date.parse(`${coveredEnd}T12:00:00Z`) - Date.parse(`${coveredStart}T12:00:00Z`)) /
-            86_400_000,
-        ) + 1;
-  const selectedCoveredDates = Array.from({ length: coveredDays }, (_, index) => {
-    const date = new Date(`${coveredStart}T12:00:00Z`);
-    date.setUTCDate(date.getUTCDate() + index);
-    return date.toISOString().slice(0, 10);
-  }).filter(matchesSelectedPeriod);
-  const selectedCoveredDays = selectedCoveredDates.length;
   const details: AppointmentDetailRow[] | null =
     filteredOperations === null
       ? null

@@ -3,6 +3,7 @@
 - Corrige sete achados de Agendamentos: cadastro por recorte, metas históricas,
   regional histórica, navegação interna, atalho Hoje, escala quantitativa e
   personalização na ampliação. Outras páginas mantêm o comportamento anterior.
+  Bases regionais exigem vínculo estável durante os dias selecionados.
 
 - Define execução proporcional e exclusiva por chat, elimina leituras
   redundantes e adapta instruções locais de ferramentas ao escopo do CRM.

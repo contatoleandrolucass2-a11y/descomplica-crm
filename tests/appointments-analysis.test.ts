@@ -5,6 +5,7 @@ import type {
   DashboardAnalysisSlice,
 } from "@/lib/crm/dashboard/analysis-contract";
 import {
+  type AppointmentFilters,
   analyzeAppointments,
   appointmentMonthlyGoal,
   appointmentWeekOfMonth,
@@ -707,7 +708,7 @@ describe("appointment chart analysis", () => {
     ];
     const oldRegion = analyzeAppointments(input, {
       month: "2026-09",
-      filters: { regionalManager: "Regional Antiga" },
+      filters: { regionalManager: "Regional Antiga", createdDates: ["2026-09-19"] },
       brokerRoster,
     });
     expect(oldRegion.total).toBe(1);
@@ -721,7 +722,7 @@ describe("appointment chart analysis", () => {
     expect(oldRegion.productivePercent).toBe(50);
     const futureRegion = analyzeAppointments(input, {
       month: "2026-09",
-      filters: { regionalManager: "Regional Nova" },
+      filters: { regionalManager: "Regional Nova", createdDates: ["2026-09-19"] },
       brokerRoster,
     });
     expect(futureRegion.total).toBe(0);
@@ -760,6 +761,93 @@ describe("appointment chart analysis", () => {
     expect(result.funnel).toBeNull();
     expect(result.brokerCount).toBeNull();
     expect(result.rosterUnavailableReason).toBe("unknown-regional-link");
+  });
+
+  it("withholds regional denominators across a transfer while preserving both regions' activity", () => {
+    const input = historicalRegionalSlice();
+    input.referenceDate = "2026-10-31";
+    input.appointments = [
+      historicalRegionalAppointment("2026-10-05", "Regional Antiga"),
+      historicalRegionalAppointment("2026-10-20", "Regional Nova"),
+    ];
+    const brokerRoster = [goalRoster[0]!];
+    for (const regionalManager of ["Regional Antiga", "Regional Nova"]) {
+      const result = analyzeAppointments(input, {
+        month: "2026-10",
+        filters: { regionalManager, periodStart: "2026-10-05", periodEnd: "2026-10-25" },
+        brokerRoster,
+        goalsByMonth: { "2026-10": 24 },
+      });
+      expect(result.total).toBe(1);
+      expect(result.productiveBrokers).toBe(1);
+      expect(result.details?.map((row) => row.regionalManager)).toEqual([regionalManager]);
+      expect(result.rosterUnavailableReason).toBe("unknown-regional-link");
+      expect(result.brokerCount).toBeNull();
+      expect(result.registeredManagerCount).toBeNull();
+      expect(result.goalBrokerCount).toBeNull();
+      expect(result.monthlyGoal).toBeNull();
+      expect(result.dailyAverageGoal).toBeNull();
+      expect(result.productivePercent).toBeNull();
+    }
+    const unknownBeginning = analyzeAppointments(input, {
+      month: "2026-10",
+      filters: { regionalManager: "Regional Antiga" },
+      brokerRoster,
+    });
+    expect(unknownBeginning.rosterUnavailableReason).toBe("unknown-regional-link");
+    for (const [regionalManager, periodStart, periodEnd] of [
+      ["Regional Antiga", "2026-10-05", "2026-10-19"],
+      ["Regional Nova", "2026-10-20", "2026-10-25"],
+    ] as const) {
+      const stable = analyzeAppointments(input, {
+        filters: { regionalManager, periodStart, periodEnd },
+        brokerRoster,
+      });
+      expect(stable.brokerCount).toBe(1);
+      expect(stable.productivePercent).toBe(100);
+      expect(stable.rosterUnavailableReason).toBeNull();
+    }
+  });
+
+  it("checks regional roster stability only across covered days selected by calendar, week and range", () => {
+    const input = historicalRegionalSlice();
+    input.referenceDate = "2026-10-31";
+    input.appointments = [
+      historicalRegionalAppointment("2026-10-05", "Regional Antiga"),
+      historicalRegionalAppointment("2026-10-20", "Regional Nova"),
+    ];
+    const brokerRoster = [goalRoster[0]!];
+    const resultFor = (filters: AppointmentFilters) =>
+      analyzeAppointments(input, { month: "2026-10", brokerRoster, filters });
+    expect(
+      resultFor({ regionalManager: "Regional Antiga", createdDates: ["2026-10-05", "2026-10-20"] })
+        .brokerCount,
+    ).toBeNull();
+    expect(
+      resultFor({ regionalManager: "Regional Antiga", createdDates: ["2026-10-06", "2026-10-10"] })
+        .brokerCount,
+    ).toBe(1);
+    expect(
+      resultFor({ regionalManager: "Regional Nova", createdDates: ["2026-10-22", "2026-10-24"] })
+        .brokerCount,
+    ).toBe(1);
+    expect(resultFor({ regionalManager: "Regional Antiga", week: 3 }).brokerCount).toBe(1);
+    expect(resultFor({ regionalManager: "Regional Antiga", week: 4 }).brokerCount).toBeNull();
+    expect(
+      resultFor({
+        regionalManager: "Regional Antiga",
+        periodStart: "2026-10-05",
+        periodEnd: "2026-10-19",
+        createdDates: ["2026-10-05", "2026-10-20"],
+      }).brokerCount,
+    ).toBe(1);
+    expect(
+      resultFor({
+        regionalManager: "Regional Nova",
+        week: 5,
+        createdDates: ["2026-10-19", "2026-10-28"],
+      }).brokerCount,
+    ).toBe(1);
   });
 
   it("normalizes multiple selected days and applies them to details and funnel facts", () => {
