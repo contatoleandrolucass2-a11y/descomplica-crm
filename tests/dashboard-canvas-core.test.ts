@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   CURRENT_DASHBOARD_SCHEMA_VERSION,
   DASHBOARD_CANVAS_SCHEMA_VERSION,
+  FREE_HEIGHT_CARD_LAYOUT_POLICY,
   canvasReducer,
   ceilingForPeriod,
   constrainCardLayout,
@@ -232,6 +233,13 @@ describe("dashboard canvas layout", () => {
       columnSpan: 4,
       height: 888,
     });
+    expect(
+      constrainCardLayout(
+        "funnel",
+        { order: 1, columnSpan: 4, height: 2_000 },
+        FREE_HEIGHT_CARD_LAYOUT_POLICY,
+      ),
+    ).toEqual({ order: 1, columnSpan: 4, height: 1_992 });
     expect(
       resizeCardLayout({
         type: "bars",

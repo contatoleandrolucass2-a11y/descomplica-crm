@@ -12,6 +12,7 @@ import {
   normalizeDashboardCards,
   serializeCanvasSnapshot,
 } from "./migrations";
+import type { DashboardCardLayoutPolicy } from "../layout/limits";
 
 export const DEFAULT_CANVAS_HISTORY_LIMIT = 40;
 
@@ -21,6 +22,7 @@ export interface CanvasHistoryState {
   future: DashboardCanvasSnapshot[];
   historyLimit: number;
   duplicateCardId: string | null;
+  layoutPolicy?: DashboardCardLayoutPolicy | undefined;
 }
 
 export type CanvasAction =
@@ -40,10 +42,13 @@ export type CanvasAction =
   | { type: "undo" }
   | { type: "redo" };
 
-function snapshot(cards: readonly DashboardCard[]): DashboardCanvasSnapshot {
+function snapshot(
+  cards: readonly DashboardCard[],
+  layoutPolicy?: DashboardCardLayoutPolicy,
+): DashboardCanvasSnapshot {
   return {
     schemaVersion: CURRENT_DASHBOARD_SCHEMA_VERSION,
-    cards: normalizeDashboardCards(cards),
+    cards: normalizeDashboardCards(cards, layoutPolicy),
   };
 }
 
@@ -82,16 +87,18 @@ function reorder(cards: readonly DashboardCard[], cardId: string, toIndex: numbe
 export function createCanvasHistoryState(
   cards: readonly DashboardCard[] = [],
   historyLimit = DEFAULT_CANVAS_HISTORY_LIMIT,
+  layoutPolicy?: DashboardCardLayoutPolicy,
 ): CanvasHistoryState {
   if (!Number.isSafeInteger(historyLimit) || historyLimit < 1) {
     throw new RangeError("Canvas history limit must be a positive safe integer.");
   }
   return {
-    present: snapshot(cards),
+    present: snapshot(cards, layoutPolicy),
     history: [],
     future: [],
     historyLimit,
     duplicateCardId: null,
+    layoutPolicy,
   };
 }
 
@@ -101,7 +108,7 @@ export function canvasReducer(state: CanvasHistoryState, action: CanvasAction): 
     if (!previous) return state;
     return {
       ...state,
-      present: migrateCanvasSchema(previous),
+      present: migrateCanvasSchema(previous, state.layoutPolicy),
       history: state.history.slice(0, -1),
       future: [state.present, ...state.future].slice(0, state.historyLimit),
       duplicateCardId: null,
@@ -112,7 +119,7 @@ export function canvasReducer(state: CanvasHistoryState, action: CanvasAction): 
     if (!next) return state;
     return {
       ...state,
-      present: migrateCanvasSchema(next),
+      present: migrateCanvasSchema(next, state.layoutPolicy),
       history: [...state.history, state.present].slice(-state.historyLimit),
       future: state.future.slice(1),
       duplicateCardId: null,
@@ -122,17 +129,30 @@ export function canvasReducer(state: CanvasHistoryState, action: CanvasAction): 
     return state.duplicateCardId === null ? state : { ...state, duplicateCardId: null };
   }
   if (action.type === "add-card") {
-    const card = normalizeDashboardCard(action.card, state.present.cards.length);
+    const card = normalizeDashboardCard(
+      action.card,
+      state.present.cards.length,
+      state.layoutPolicy,
+    );
     if (!card) return state;
     const duplicate = findDuplicateCard(state.present.cards, card);
     if (duplicate) return { ...state, duplicateCardId: duplicate.id };
-    return commit(state, snapshot([...state.present.cards, card]));
+    return commit(state, snapshot([...state.present.cards, card], state.layoutPolicy));
   }
   if (action.type === "remove-card") {
-    return commit(state, snapshot(state.present.cards.filter((card) => card.id !== action.cardId)));
+    return commit(
+      state,
+      snapshot(
+        state.present.cards.filter((card) => card.id !== action.cardId),
+        state.layoutPolicy,
+      ),
+    );
   }
   if (action.type === "move-card") {
-    return commit(state, snapshot(reorder(state.present.cards, action.cardId, action.toIndex)));
+    return commit(
+      state,
+      snapshot(reorder(state.present.cards, action.cardId, action.toIndex), state.layoutPolicy),
+    );
   }
   if (action.type === "resize-card") {
     return commit(
@@ -143,6 +163,7 @@ export function canvasReducer(state: CanvasHistoryState, action: CanvasAction): 
             ? { ...card, layout: { ...card.layout, ...action.layout } }
             : card,
         ),
+        state.layoutPolicy,
       ),
     );
   }
@@ -157,25 +178,30 @@ export function canvasReducer(state: CanvasHistoryState, action: CanvasAction): 
         options: action.patch.options ?? current.options,
       },
       current.layout.order,
+      state.layoutPolicy,
     );
     if (!candidate) return state;
     const duplicate = findDuplicateCard(state.present.cards, candidate, current.id);
     if (duplicate) return { ...state, duplicateCardId: duplicate.id };
     return commit(
       state,
-      snapshot(state.present.cards.map((card) => (card.id === candidate.id ? candidate : card))),
+      snapshot(
+        state.present.cards.map((card) => (card.id === candidate.id ? candidate : card)),
+        state.layoutPolicy,
+      ),
     );
   }
-  if (action.type === "organize") return commit(state, snapshot(state.present.cards));
-  if (action.type === "reset") return commit(state, snapshot(action.cards));
+  if (action.type === "organize")
+    return commit(state, snapshot(state.present.cards, state.layoutPolicy));
+  if (action.type === "reset") return commit(state, snapshot(action.cards, state.layoutPolicy));
   if (action.recordHistory === false) {
     return {
       ...state,
-      present: snapshot(action.cards),
+      present: snapshot(action.cards, state.layoutPolicy),
       history: [],
       future: [],
       duplicateCardId: null,
     };
   }
-  return commit(state, snapshot(action.cards));
+  return commit(state, snapshot(action.cards, state.layoutPolicy));
 }

@@ -13,6 +13,14 @@ export interface DashboardCardLayoutLimits {
   maxHeight: number;
 }
 
+export interface DashboardCardLayoutPolicy {
+  maxHeight?: number | null;
+}
+
+export const FREE_HEIGHT_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
+  maxHeight: null,
+};
+
 export const DASHBOARD_CARD_LAYOUT_LIMITS: Record<DashboardCardType, DashboardCardLayoutLimits> = {
   kpi: {
     minColumnSpan: 2,
@@ -65,6 +73,7 @@ function clamp(value: number, minimum: number, maximum: number) {
 export function constrainCardLayout(
   type: DashboardCardType,
   layout: Partial<DashboardCardLayout>,
+  policy?: DashboardCardLayoutPolicy,
 ): DashboardCardLayout {
   const limits = DASHBOARD_CARD_LAYOUT_LIMITS[type];
   const columnSpan = clamp(
@@ -72,15 +81,17 @@ export function constrainCardLayout(
     limits.minColumnSpan,
     CANVAS_COLUMN_COUNT,
   );
+  const maximumHeight =
+    policy?.maxHeight === null ? Number.MAX_SAFE_INTEGER : (policy?.maxHeight ?? limits.maxHeight);
   const unsnappedHeight = clamp(
     finiteInteger(layout.height ?? limits.defaultHeight, limits.defaultHeight),
     limits.minHeight,
-    limits.maxHeight,
+    maximumHeight,
   );
   const height = clamp(
     Math.round(unsnappedHeight / CANVAS_HEIGHT_STEP) * CANVAS_HEIGHT_STEP,
     limits.minHeight,
-    limits.maxHeight,
+    maximumHeight,
   );
 
   return {
@@ -103,6 +114,7 @@ export function resizeCardLayout({
   deltaY,
   containerWidth,
   gap = 16,
+  policy,
 }: {
   type: DashboardCardType;
   initial: DashboardCardLayout;
@@ -110,11 +122,16 @@ export function resizeCardLayout({
   deltaY: number;
   containerWidth: number;
   gap?: number;
+  policy?: DashboardCardLayoutPolicy | undefined;
 }) {
   const widthPerColumn = columnWidth(containerWidth, gap) + Math.max(0, gap);
-  return constrainCardLayout(type, {
-    ...initial,
-    columnSpan: initial.columnSpan + Math.round(deltaX / widthPerColumn),
-    height: initial.height + Math.round(deltaY / CANVAS_HEIGHT_STEP) * CANVAS_HEIGHT_STEP,
-  });
+  return constrainCardLayout(
+    type,
+    {
+      ...initial,
+      columnSpan: initial.columnSpan + Math.round(deltaX / widthPerColumn),
+      height: initial.height + Math.round(deltaY / CANVAS_HEIGHT_STEP) * CANVAS_HEIGHT_STEP,
+    },
+    policy,
+  );
 }

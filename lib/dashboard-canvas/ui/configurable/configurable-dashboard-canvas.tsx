@@ -27,7 +27,11 @@ import {
 } from "lucide-react";
 
 import { DashboardCanvas } from "../dashboard-canvas";
-import { DASHBOARD_CARD_LAYOUT_LIMITS, constrainCardLayout } from "../../layout/limits";
+import {
+  DASHBOARD_CARD_LAYOUT_LIMITS,
+  constrainCardLayout,
+  type DashboardCardLayoutPolicy,
+} from "../../layout/limits";
 import { canvasReducer, createCanvasHistoryState } from "../../state/reducer";
 import { DASHBOARD_CANVAS_SCHEMA_VERSION, serializeCanvasSnapshot } from "../../state/migrations";
 import type {
@@ -201,9 +205,12 @@ export function ConfigurableDashboardCanvas({
   profileControls = true,
   automaticProfileName,
   hideCardActionsByDefault = false,
+  layoutPolicy,
+  hideCardOverflow = false,
+  addButtonLabel = "Adicionar",
 }: ConfigurableDashboardCanvasProps) {
   const [state, dispatch] = useReducer(canvasReducer, initialCards, (cards) =>
-    createCanvasHistoryState(cards),
+    createCanvasHistoryState(cards, undefined, layoutPolicy),
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
@@ -623,7 +630,11 @@ export function ConfigurableDashboardCanvas({
   const expandedCard = cards.find(({ id }) => id === expandedCardId) ?? null;
 
   return (
-    <section className={[styles.root, className].filter(Boolean).join(" ")} aria-label={ariaLabel}>
+    <section
+      className={[styles.root, className].filter(Boolean).join(" ")}
+      aria-label={ariaLabel}
+      data-hide-card-overflow={hideCardOverflow ? "true" : undefined}
+    >
       {editable ? (
         <div className={styles.toolbar} role="toolbar" aria-label="Ferramentas do dashboard">
           <button
@@ -632,7 +643,7 @@ export function ConfigurableDashboardCanvas({
             onClick={openNewCard}
             disabled={catalog.metrics.length === 0}
           >
-            <Plus size={17} aria-hidden="true" /> Adicionar
+            <Plus size={17} aria-hidden="true" /> {addButtonLabel}
           </button>
           <button
             type="button"
@@ -745,6 +756,8 @@ export function ConfigurableDashboardCanvas({
           disabled={!editable}
           ariaLabel={`${ariaLabel}: cards`}
           onCommit={(next) => dispatch({ type: "replace", cards: next })}
+          layoutPolicy={layoutPolicy}
+          cornerResizeHandle={layoutPolicy?.maxHeight === null}
           renderCard={(card, size) => (
             <div
               className={[
@@ -838,6 +851,7 @@ export function ConfigurableDashboardCanvas({
           mode={editorMode}
           catalog={catalog}
           compatibility={compatibility}
+          layoutPolicy={layoutPolicy}
           onClose={() => setEditorCard(null)}
           onDelete={
             editorMode === "edit"
@@ -1071,6 +1085,7 @@ function CardEditor({
   mode,
   catalog,
   compatibility,
+  layoutPolicy,
   onClose,
   onDelete,
   onSave,
@@ -1079,6 +1094,7 @@ function CardEditor({
   mode: "add" | "edit";
   catalog: ConfigurableDashboardCatalog;
   compatibility?: ConfigurableDashboardCompatibility | undefined;
+  layoutPolicy?: DashboardCardLayoutPolicy | undefined;
   onClose: () => void;
   onDelete?: (() => void) | undefined;
   onSave: (card: DashboardCard) => void;
@@ -1205,16 +1221,24 @@ function CardEditor({
           <input
             type="number"
             min={layoutLimits.minHeight}
-            max={layoutLimits.maxHeight}
+            max={
+              layoutPolicy?.maxHeight === null
+                ? undefined
+                : (layoutPolicy?.maxHeight ?? layoutLimits.maxHeight)
+            }
             step={24}
             value={card.layout.height}
             onChange={(event) =>
               setCard({
                 ...card,
-                layout: constrainCardLayout(card.type, {
-                  ...card.layout,
-                  height: Number(event.target.value),
-                }),
+                layout: constrainCardLayout(
+                  card.type,
+                  {
+                    ...card.layout,
+                    height: Number(event.target.value),
+                  },
+                  layoutPolicy,
+                ),
               })
             }
           />

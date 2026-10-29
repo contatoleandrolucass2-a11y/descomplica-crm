@@ -8,6 +8,7 @@ import type {
   DashboardGroupBy,
   DashboardPeriod,
 } from "../../types";
+import type { DashboardCardLayoutPolicy } from "../../layout/limits";
 
 export type DashboardCardOptionKey = keyof DashboardCardOptions;
 
@@ -82,4 +83,7 @@ export interface ConfigurableDashboardCanvasProps {
   profileControls?: boolean | undefined;
   automaticProfileName?: string | undefined;
   hideCardActionsByDefault?: boolean | undefined;
+  layoutPolicy?: DashboardCardLayoutPolicy | undefined;
+  hideCardOverflow?: boolean | undefined;
+  addButtonLabel?: string | undefined;
 }

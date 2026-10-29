@@ -56,6 +56,9 @@ describe("appointments configurable dashboard", () => {
     expect(source).toContain("editable={canEditDashboard}");
     expect(source).toContain("profileControls={false}");
     expect(source).toContain("hideCardActionsByDefault");
+    expect(source).toContain("layoutPolicy={FREE_HEIGHT_CARD_LAYOUT_POLICY}");
+    expect(source).toContain("hideCardOverflow");
+    expect(source).toContain('addButtonLabel="Adicionar card"');
     expect(source).toContain('automaticProfileName="Layout de Agendamentos"');
     for (const metric of APPOINTMENTS_CANVAS_CATALOG.metrics) {
       expect(source, metric.key).toContain(`"${metric.key}": {`);
@@ -64,5 +67,26 @@ describe("appointments configurable dashboard", () => {
     expect(source).toContain('"channel.partnerships"');
     expect(source).not.toContain("ChartBoard");
     expect(source).not.toContain("localStorage");
+  });
+
+  it("removes internal card scrollbars and keeps the resize control on the corner", () => {
+    const appointmentsStyles = readFileSync(
+      new URL(
+        "../app/(protected)/app/etapas/_components/AppointmentsDashboard.module.css",
+        import.meta.url,
+      ),
+      "utf8",
+    );
+    const canvasStyles = readFileSync(
+      new URL("../lib/dashboard-canvas/ui/dashboard-canvas.module.css", import.meta.url),
+      "utf8",
+    );
+    expect(appointmentsStyles).toContain(
+      ".configurableCanvas :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport)",
+    );
+    expect(appointmentsStyles).toContain("scrollbar-width: none");
+    expect(canvasStyles).toContain('.shell[data-corner-resize="true"] .resizeHandle');
+    expect(canvasStyles).toContain("right: -1px");
+    expect(canvasStyles).toContain("bottom: -1px");
   });
 });
