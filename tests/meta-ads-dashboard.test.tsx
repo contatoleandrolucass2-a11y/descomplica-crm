@@ -454,8 +454,16 @@ describe("dashboard Meta Ads", () => {
     expect(canvas).toContain("/api/meta-ads/canvas-profiles?scope=");
     expect(canvas).toContain("method:'PUT'");
     expect(canvas).toContain("Layout salvo no seu perfil");
-    expect(merge).toContain("fetch('/api/meta-ads/data',{cache:'no-store'})");
+    expect(merge).toContain("new URLSearchParams({start:today,end:today})");
+    expect(merge).toContain("sourceData.rows.filter(row=>!refreshedDates.has(row.date))");
+    expect(merge).toContain("response.headers.get('retry-after')");
     expect(merge).not.toContain("fetch('/api/meta-ads/data?'+new URLSearchParams(selectedRange())");
+    expect(adapter).toContain("const LIVE_REFRESH_MS=10000");
+    expect(adapter).toContain("document.hidden");
+    expect(adapter).toContain("refreshBusy");
+    expect(adapter).toContain("after>before");
+    expect(adapter).toContain("addColumnBorderMagic(el)");
+    expect(adapter).not.toContain("setInterval(refreshIntegrated,60000)");
     expect(merge).toContain("/canvas/index.html?v=campaign-api-2");
     expect(liveData).toContain('campaignSelectionMode: "all"');
     expect(liveData).toContain('followApi = state.campaignSelectionMode === "all"');

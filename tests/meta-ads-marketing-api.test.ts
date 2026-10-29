@@ -413,6 +413,49 @@ describe("Meta Marketing API read-only client", () => {
     expect(result.rows[0]).toMatchObject({ destination: "form", conversions: 5 });
   });
 
+  it("refreshes the shared snapshot within ten seconds and deduplicates concurrent users", async () => {
+    const liveConfiguration = { ...configuration, apiVersion: "v26.10" };
+    const fetcher = vi.fn<typeof fetch>(async (input) => {
+      await Promise.resolve();
+      const url = new URL(String(input));
+      if (url.pathname.endsWith(`/act_${liveConfiguration.accountId}`)) {
+        return json({
+          id: `act_${liveConfiguration.accountId}`,
+          name: "Conta ao vivo",
+          currency: "BRL",
+        });
+      }
+      return json({ data: [] });
+    });
+    const range = { start: "2026-10-28", end: "2026-10-28" };
+    const firstNow = new Date("2026-10-28T12:00:00.000Z");
+
+    const [first, concurrent] = await Promise.all([
+      fetchMetaAdsDashboardData(liveConfiguration, { fetcher, now: firstNow, range }),
+      fetchMetaAdsDashboardData(liveConfiguration, { fetcher, now: firstNow, range }),
+    ]);
+
+    expect(concurrent).toBe(first);
+    expect(fetcher).toHaveBeenCalledTimes(5);
+
+    const cached = await fetchMetaAdsDashboardData(liveConfiguration, {
+      fetcher,
+      now: new Date("2026-10-28T12:00:07.999Z"),
+      range,
+    });
+    expect(cached).toBe(first);
+    expect(fetcher).toHaveBeenCalledTimes(5);
+
+    const refreshed = await fetchMetaAdsDashboardData(liveConfiguration, {
+      fetcher,
+      now: new Date("2026-10-28T12:00:08.000Z"),
+      range,
+    });
+    expect(refreshed).not.toBe(first);
+    expect(refreshed.fetchedAt).toBe("2026-10-28T12:00:08.000Z");
+    expect(fetcher).toHaveBeenCalledTimes(10);
+  });
+
   it("rejects untrusted pagination and classifies expired tokens", async () => {
     const untrusted = vi
       .fn<typeof fetch>()

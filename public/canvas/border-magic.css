@@ -31,6 +31,11 @@
   pointer-events: none;
   animation: border-magic-spin 2s linear infinite;
 }
+#canvas .card.live-updated::before,
+#expanded .card.live-updated::before {
+  opacity: .78;
+  animation-duration: 3.2s;
+}
 .chart svg rect.live-point {
   stroke: #393bb2;
   stroke-width: 2.5px;
@@ -50,7 +55,7 @@
  background:conic-gradient(from var(--border-magic-angle),#e2cbff,#393bb2 50%,#e2cbff);
  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
  -webkit-mask-composite:xor;mask-composite:exclude;
- animation:border-magic-spin 2s linear infinite;
+ animation:border-magic-spin 3.2s linear infinite;
  pointer-events:none;
 }
 .chart svg rect.live-point{stroke:none;stroke-width:0}
