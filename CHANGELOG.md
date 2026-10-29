@@ -1,5 +1,9 @@
 # Changelog
 
+- Destrava a sincronização do Obsidian ao particionar o histórico de
+  atualizações e incluir as partições curadas na exportação e na busca, sem
+  ampliar o limite de segurança nem perder conteúdo.
+
 - Personaliza exclusivamente os oito ícones da sidebar de Links Úteis conforme
   o destino de cada item, preservando rotas, permissões e conteúdo das páginas.
 

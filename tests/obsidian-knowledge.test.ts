@@ -17,6 +17,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const script = path.resolve("scripts/knowledge/obsidian.mjs");
 const names = ["CONTEXTO.md", "FERRAMENTAS.md", "ATUALIZACOES.md"];
+const archivedUpdates = "ATUALIZACOES-ARQUIVO-2026-10-01-a-2026-10-02.md";
 const temporaryRoots: string[] = [];
 
 vi.setConfig({ testTimeout: 30_000 });
@@ -68,6 +69,30 @@ async function fixture() {
 }
 
 describe("local Obsidian project knowledge", () => {
+  it("exports and searches partitioned update archives without losing history", async () => {
+    const f = await fixture();
+    await writeFile(path.join(f.docs, "ATUALIZACOES.md"), "# Atual\n\n## Recente\nNota atual.\n");
+    await writeFile(
+      path.join(f.docs, archivedUpdates),
+      "# Arquivo\n\n## Historico\nConhecimento historico particionado.\n",
+    );
+    const { worktree } = f.install();
+    expect(
+      await readFile(path.join(f.base, "Worktrees", worktree, archivedUpdates), "utf8"),
+    ).toContain("Conhecimento historico particionado");
+    const result = JSON.parse(f.run(["search", "historico", "particionado"]).stdout);
+    expect(result.results).toHaveLength(1);
+    expect(result.results[0].sources[0].path).toContain(archivedUpdates);
+  });
+
+  it("keeps the per-document export limit for partitioned archives", async () => {
+    const f = await fixture();
+    await writeFile(path.join(f.docs, archivedUpdates), "x".repeat(256_001));
+    const result = f.run(["install", "--vault", f.vault]);
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain("Documento excede o limite de exportacao");
+  });
+
   it("ignores notes of another repository sharing the same vault", async () => {
     const f = await fixture();
     f.install();

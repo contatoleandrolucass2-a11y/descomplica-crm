@@ -3,8 +3,11 @@
 ## Contrato
 
 O conhecimento versionado fica em docs/knowledge. Obsidian recebe somente
-CONTEXTO.md, FERRAMENTAS.md e ATUALIZACOES.md, mais branch, SHA e indicador de
-alteracoes locais. Nao sao exportados codigo, chats, logs, ambientes, anexos,
+CONTEXTO.md, FERRAMENTAS.md, ATUALIZACOES.md e os arquivos históricos curados
+com nome `ATUALIZACOES-ARQUIVO-AAAA-MM-DD-a-AAAA-MM-DD*.md`, mais branch, SHA e
+indicador de alteracoes locais. Cada documento permanece limitado a 256.000
+bytes; ao se aproximar desse limite, particionar o histórico sem resumir ou
+apagar conteúdo. Nao sao exportados codigo, chats, logs, ambientes, anexos,
 estoque ou dados pessoais. A deteccao de credenciais e uma defesa adicional,
 nao substitui a revisao das notas pelo agente.
 
@@ -136,8 +139,9 @@ Git existentes sincronizam eventos Git; nao consultam GitHub nem o site por chat
 ## Recuperacao por assunto
 
 `knowledge:search` usa de 1 a 12 termos (ate 200 caracteres), ignorando caixa e
-acentos. Pesquisa os tres documentos do checkout (ou referencia instalada) e
-somente ATUALIZACOES.md dos outros checkouts sincronizados deste projeto.
+acentos. Pesquisa os documentos curados do checkout (ou referencia instalada) e
+ATUALIZACOES.md mais seus arquivos históricos nos outros checkouts sincronizados
+deste projeto.
 Nao percorre outras pastas, anexos, conversas ou notas privadas do vault.
 
 Resultados sao trechos, com caminho, linha, branch, commit e data quando
