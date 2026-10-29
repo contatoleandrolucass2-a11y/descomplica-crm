@@ -22,6 +22,9 @@
   responsiva à grade de 12 colunas para não criar rolagem horizontal na página.
 - O editor administrativo mostra a ação `Adicionar card`, preservando o
   salvamento automático e os limites de segurança do contrato persistido.
+- PR #416, quatro gates da CI de `main`, prova da imagem imutável e health
+  público aprovados. Produção serve o SHA `a36de843e`, confirmado também na
+  página autenticada de Agendamentos.
 
 ## 2026-10-28 — Links Úteis: ícones personalizados
 
