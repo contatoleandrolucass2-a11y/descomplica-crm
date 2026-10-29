@@ -1,5 +1,38 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-29: abertura da revisão de eficiência do processo
+
+- Pedido explícito: persistir exclusividade por chat e corrigir trabalho
+  desnecessário nas instruções, extensões locais e validações do projeto.
+  Páginas e regras comerciais não integram esta revisão.
+- Git comum confirmado; base local `a24092f3`, main remoto `bbaebfd9`.
+  Health público em 29/10 respondeu `ok`, versão `a36de843e`.
+- CI do registro anterior #421, execução `40817435328`: validate, imagem e
+  restore aprovados; release-gates ainda em andamento na abertura.
+- Evidência da demora: execuções `40807000618` e `40812090102` tiveram
+  release-gates de 38,3 e 51,3 minutos, respectivamente. A matriz visual
+  consumiu 18,4 e 27,4 minutos; não representam consumo medido de tokens.
+- Conhecimento consultado pelo runtime instalado. A revisão trata instruções,
+  CI e extensões versionadas; não autoriza modificar plugins globais de terceiros.
+- Varredura de processo: 11 skills locais, 7 agentes, 2 workflows, 41 scripts QA,
+  34 de release e 5 de conhecimento inventariados. Revisados contratos relevantes,
+  orquestração e hooks; não constitui auditoria de todas as regras de negócio.
+- Corrigidas leitura dupla de contexto e inspeção global obrigatória na skill de
+  interface. Regras de execução necessária foram persistidas em AGENTS, CONTEXTO,
+  FERRAMENTAS e task-efficiency, recuperáveis pelo Obsidian.
+- Classificador conservador proposto para PRs documentais: diff completo desde
+  merge-base; allowlist de Markdown curado; arquivos desconhecidos e erros exigem
+  CI completa. Push em main continua completo. Não houve paralelização de fixtures
+  compartilhadas da matriz visual por risco de interferência entre cenários.
+- Validação local: 42 testes focados do classificador e contratos de release,
+  ESLint, typecheck, Prettier e inventário (11 skills, 89 rotas) aprovados.
+  As sete skills Caveman foram adaptadas; originais íntegros permanecem em
+  references/upstream-skill.txt. Nenhuma configuração global foi modificada.
+- Mais 29 testes de conhecimento e recursos aprovaram; total local de 71 testes.
+- O registro anterior #421 foi integrado como `0b77dbd8` após todos os gates.
+  Esta revisão é de processo; exige CI completa própria e não deploy de runtime.
+  Economia futura depende de medição após adoção; nenhum percentual foi prometido.
+
 ## 2026-10-28: sincronização do Obsidian destravada por particionamento
 
 - Causa confirmada: `ATUALIZACOES.md` chegou a 374.125 bytes, acima do limite
@@ -51,8 +84,9 @@
   conferência autenticada, a página exibiu `Adicionar card`, os controles
   `Redimensionar` no canto inferior direito e os cards sem barras internas.
   Nenhuma outra página foi alterada.
-- O sync do Obsidian permanece pendente pelo limite de exportação conhecido;
-  o registro versionado não equivale a uma sincronização concluída.
+- O sync inicialmente falhou pelo limite de exportação; após integrar a correção
+  independente de particionamento, o hook confirmou cinco documentos sincronizados
+  no HEAD `a24092f3`. A conferência desta revisão também confirmou `synced`.
 
 ## 2026-10-28: abertura do ajuste exclusivo dos cards de Agendamentos
 

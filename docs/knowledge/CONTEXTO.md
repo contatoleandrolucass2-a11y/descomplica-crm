@@ -7,6 +7,14 @@ fonte: AGENTS.md, package.json, app/(protected)/layout.tsx, lib/navigation/pages
 
 ## Antes de trabalhar
 
+- Regra permanente de 29/10/2026: cada chat trata exclusivamente a demanda
+  solicitada. Executar somente implementação, dependências comprovadamente
+  afetadas e validações necessárias. Não auditar ou corrigir outras páginas.
+  Procedimento: `docs/runbooks/task-efficiency.md` e AGENTS.md.
+- `knowledge:context` já contém este documento e FERRAMENTAS.md: uma leitura
+  integral atende à consulta inicial, sem abrir novamente os mesmos arquivos.
+  Reutilizar fontes atuais já lidas; busca do Obsidian é por assunto.
+
 - Em todo novo chat, confirmar pelo
   `git rev-parse --path-format=absolute --git-common-dir` o Git comum
   `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git`. Este ciclo vale

@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-29 — Eficiência do processo e escopo exclusivo
+
+- Pedido: persistir execução estritamente necessária por chat e revisar
+  instruções, extensões locais e CI que geram trabalho redundante.
+- Regras de leitura única, testes por impacto, espera compacta e encerramento
+  sem ciclos documentais recursivos em AGENTS, contexto e runbook dedicado.
+- Skill de interface passa a consultar módulos globais somente por impacto.
+- Faixa rápida documental restrita a PRs; mudanças de código, configuração e
+  todos os pushes em main continuam com validação completa.
+- Não houve alteração nas páginas, dados comerciais, permissões ou deploy guard.
+
 ## 2026-10-28 — Obsidian: histórico particionado
 
 - A falha `Documento excede o limite de exportacao.` foi reproduzida e ligada

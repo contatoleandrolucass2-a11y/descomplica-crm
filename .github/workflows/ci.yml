@@ -17,12 +17,14 @@ jobs:
   validate:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    outputs:
+      documentation_only: ${{ steps.change_scope.outputs.documentation_only }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
       - name: Detect documentation source verification scope
         id: documentation_source_scope
@@ -54,6 +56,13 @@ jobs:
         with:
           node-version-file: .nvmrc
 
+      - name: Classify complete pull request scope
+        id: change_scope
+        run: node scripts/ci/documentation-scope.mjs
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
       - name: Enable pnpm
         run: |
           npm install --global corepack@0.35.0
@@ -67,13 +76,20 @@ jobs:
         run: pnpm format:check
 
       - name: Lint
+        if: steps.change_scope.outputs.documentation_only != 'true'
         run: pnpm lint
 
       - name: Typecheck
+        if: steps.change_scope.outputs.documentation_only != 'true'
         run: pnpm typecheck
 
       - name: Test application and production release guard (including Linux flock)
+        if: steps.change_scope.outputs.documentation_only != 'true'
         run: pnpm test
+
+      - name: Validate documentation and CI scope
+        if: steps.change_scope.outputs.documentation_only == 'true'
+        run: pnpm exec vitest run tests/obsidian-knowledge.test.ts tests/project-resources.test.ts tests/ci-documentation-scope.test.ts
 
       - name: Verify current documentation fee sources
         if: steps.documentation_source_scope.outputs.required == 'true'
@@ -83,19 +99,22 @@ jobs:
             ${{ ((github.event_name == 'pull_request' && github.head_ref == 'codex/previsao-edicao-todos-usuarios') || (github.event_name == 'push' && github.ref_name == 'main' && contains(github.event.head_commit.message, '#340'))) && 'forecast-page-users-edit-pr-340-2026-10-25' || '' }}
 
       - name: Audit high and critical vulnerabilities
+        if: steps.change_scope.outputs.documentation_only != 'true'
         run: pnpm audit --audit-level high
 
       - name: Validate inventory compression with isolated Nginx
+        if: steps.change_scope.outputs.documentation_only != 'true'
         run: |
           sudo apt-get update -qq
           sudo apt-get install --yes --no-install-recommends nginx
           node scripts/qa/nginx-inventory-transfer.mjs
 
       - name: Build
+        if: steps.change_scope.outputs.documentation_only != 'true'
         run: pnpm build
 
   release-gates:
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -214,7 +233,7 @@ jobs:
         run: pnpm exec supabase stop --no-backup
 
   isolated-restore:
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30
@@ -251,7 +270,7 @@ jobs:
           retention-days: 14
 
   promotable-image:
-    if: github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 30

@@ -42,7 +42,7 @@ describe("release-candidate migration train", () => {
   it("checks live documentation sources only when their policy scope changes", async () => {
     const workflow = await readFile(path.join(repositoryRoot, ".github/workflows/ci.yml"), "utf8");
 
-    expect(workflow).toContain("fetch-depth: 2");
+    expect(workflow).toContain("fetch-depth: 0");
     expect(workflow).toContain("id: documentation_source_scope");
     expect(workflow).toContain("git diff --name-only -z HEAD^ HEAD");
     expect(workflow).toContain("lib/archive-investor/*");
@@ -50,7 +50,7 @@ describe("release-candidate migration train", () => {
     expect(workflow).toContain("if: steps.documentation_source_scope.outputs.required == 'true'");
     expect(
       workflow.match(
-        /if: github\.event_name == 'pull_request' \|\| \(github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'\)/g,
+        /if: needs\.validate\.outputs\.documentation_only != 'true' && \(github\.event_name == 'pull_request' \|\| \(github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'\)\)/g,
       ),
     ).toHaveLength(3);
   });
