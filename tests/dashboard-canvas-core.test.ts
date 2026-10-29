@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 
 import {
   CURRENT_DASHBOARD_SCHEMA_VERSION,
@@ -196,6 +197,48 @@ describe("dashboard canvas cards", () => {
 });
 
 describe("dashboard canvas layout", () => {
+  it("resizes appointments independently by column and pixel without changing other policies", () => {
+    const initial = { order: 0, columnSpan: 2, height: 289 };
+    const vertical = resizeCardLayout({
+      type: "kpi",
+      initial,
+      deltaX: 0,
+      deltaY: 7,
+      containerWidth: 1200,
+      gap: 0,
+      policy: APPOINTMENTS_CARD_LAYOUT_POLICY,
+    });
+    expect(vertical).toEqual({ ...initial, height: 296 });
+    const horizontal = resizeCardLayout({
+      type: "kpi",
+      initial: vertical,
+      deltaX: 100,
+      deltaY: 0,
+      containerWidth: 1200,
+      gap: 0,
+      policy: APPOINTMENTS_CARD_LAYOUT_POLICY,
+    });
+    expect(horizontal).toEqual({ ...vertical, columnSpan: 3 });
+    const state = canvasReducer(
+      createCanvasHistoryState([card("pixel", 0, 2)], undefined, APPOINTMENTS_CARD_LAYOUT_POLICY),
+      { type: "resize-card", cardId: "pixel", layout: horizontal },
+    );
+    expect(state.present.cards[0]?.layout.height).toBe(296);
+    const onePixel = canvasReducer(state, {
+      type: "resize-card",
+      cardId: "pixel",
+      layout: { ...horizontal, height: 297 },
+    });
+    expect(onePixel.present.cards[0]?.layout.height).toBe(297);
+    expect(serializeCanvasSnapshot(onePixel.present, APPOINTMENTS_CARD_LAYOUT_POLICY)).toContain(
+      '"height":297',
+    );
+    expect(canvasReducer(onePixel, { type: "undo" }).present.cards[0]?.layout.height).toBe(296);
+    expect(constrainCardLayout("kpi", initial).height).toBe(288);
+    expect(
+      constrainCardLayout("kpi", { height: 99_999 }, APPOINTMENTS_CARD_LAYOUT_POLICY).height,
+    ).toBe(16_384);
+  });
   it("packs ordered cards into 12-column rows without overlap", () => {
     const packed = packCanvas([
       card("c", 2, 4),

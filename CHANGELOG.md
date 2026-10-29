@@ -3814,3 +3814,8 @@ FGTS sobreposto. Subsídio, seguros e taxa SBPE exigem parâmetros confirmados;
 incertezas são explícitas. Autorização de servidor e APIs bancárias preservadas.
 Origem, fórmulas, diferenças necessárias e limites em docs/simulators/CAIXA.md.
 Validação e publicação serão registradas com evidências ao concluir os gates.
+
+- Compacta os controles dos cards de Agendamentos e revela os ícones por
+  interação, remove o cabeçalho duplicado e permite altura em pixels.
+  Alterar a largura no editor preserva a altura configurada. Permanecem os
+  mínimos persistidos por tipo e o encaixe horizontal em 12 colunas.

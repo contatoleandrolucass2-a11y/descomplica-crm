@@ -52,6 +52,7 @@ export interface DashboardCanvasProps {
   gap?: number;
   layoutPolicy?: DashboardCardLayoutPolicy | undefined;
   cornerResizeHandle?: boolean;
+  compactControls?: boolean;
 }
 
 function cardName(card: DashboardCard) {
@@ -139,6 +140,7 @@ export function DashboardCanvas({
   gap = 16,
   layoutPolicy,
   cornerResizeHandle = false,
+  compactControls = false,
 }: DashboardCanvasProps) {
   const normalizedCards = useMemo(
     () => normalizeDashboardCards(cards, layoutPolicy),
@@ -396,6 +398,7 @@ export function DashboardCanvas({
       aria-label={ariaLabel}
       data-readonly={disabled ? "true" : undefined}
       data-corner-resize={cornerResizeHandle ? "true" : undefined}
+      data-compact-controls={compactControls ? "true" : undefined}
     >
       <div
         ref={gridRef}
@@ -436,9 +439,11 @@ export function DashboardCanvas({
                 >
                   <GripVertical size={18} aria-hidden="true" />
                 </button>
-                <strong className={styles.title} title={cardName(card)}>
-                  {cardName(card)}
-                </strong>
+                {!compactControls ? (
+                  <strong className={styles.title} title={cardName(card)}>
+                    {cardName(card)}
+                  </strong>
+                ) : null}
               </header>
               <MeasuredCardContent card={card} renderCard={renderCard} />
               <button
@@ -462,7 +467,9 @@ export function DashboardCanvas({
         >
           <header className={styles.header}>
             <GripVertical size={18} aria-hidden="true" />
-            <strong className={styles.title}>{cardName(floatingCard)}</strong>
+            {!compactControls ? (
+              <strong className={styles.title}>{cardName(floatingCard)}</strong>
+            ) : null}
           </header>
           <MeasuredCardContent card={floatingCard} renderCard={renderCard} />
         </article>

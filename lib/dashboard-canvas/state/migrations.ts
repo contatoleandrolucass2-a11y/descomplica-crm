@@ -215,8 +215,11 @@ export function migrateCanvasSchema(
   };
 }
 
-export function serializeCanvasSnapshot(snapshot: DashboardCanvasSnapshot) {
-  return JSON.stringify(migrateCanvasSchema(snapshot));
+export function serializeCanvasSnapshot(
+  snapshot: DashboardCanvasSnapshot,
+  layoutPolicy?: DashboardCardLayoutPolicy,
+) {
+  return JSON.stringify(migrateCanvasSchema(snapshot, layoutPolicy));
 }
 
 export function deserializeCanvasSnapshot(serialized: string) {

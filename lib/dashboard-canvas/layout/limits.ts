@@ -15,10 +15,16 @@ export interface DashboardCardLayoutLimits {
 
 export interface DashboardCardLayoutPolicy {
   maxHeight?: number | null;
+  heightStep?: number;
 }
 
 export const FREE_HEIGHT_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
   maxHeight: null,
+};
+
+export const APPOINTMENTS_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
+  maxHeight: 16_384,
+  heightStep: 1,
 };
 
 export const DASHBOARD_CARD_LAYOUT_LIMITS: Record<DashboardCardType, DashboardCardLayoutLimits> = {
@@ -88,8 +94,12 @@ export function constrainCardLayout(
     limits.minHeight,
     maximumHeight,
   );
+  const heightStep = Math.max(
+    1,
+    finiteInteger(policy?.heightStep ?? CANVAS_HEIGHT_STEP, CANVAS_HEIGHT_STEP),
+  );
   const height = clamp(
-    Math.round(unsnappedHeight / CANVAS_HEIGHT_STEP) * CANVAS_HEIGHT_STEP,
+    Math.round(unsnappedHeight / heightStep) * heightStep,
     limits.minHeight,
     maximumHeight,
   );
@@ -125,12 +135,16 @@ export function resizeCardLayout({
   policy?: DashboardCardLayoutPolicy | undefined;
 }) {
   const widthPerColumn = columnWidth(containerWidth, gap) + Math.max(0, gap);
+  const heightStep = Math.max(
+    1,
+    finiteInteger(policy?.heightStep ?? CANVAS_HEIGHT_STEP, CANVAS_HEIGHT_STEP),
+  );
   return constrainCardLayout(
     type,
     {
       ...initial,
       columnSpan: initial.columnSpan + Math.round(deltaX / widthPerColumn),
-      height: initial.height + Math.round(deltaY / CANVAS_HEIGHT_STEP) * CANVAS_HEIGHT_STEP,
+      height: initial.height + Math.round(deltaY / heightStep) * heightStep,
     },
     policy,
   );

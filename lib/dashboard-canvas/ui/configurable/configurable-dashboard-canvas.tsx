@@ -150,11 +150,14 @@ function createCardId() {
   return `card-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function cardsSnapshot(cards: readonly DashboardCard[]) {
-  return serializeCanvasSnapshot({
-    schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
-    cards: [...cards],
-  });
+function cardsSnapshot(cards: readonly DashboardCard[], layoutPolicy?: DashboardCardLayoutPolicy) {
+  return serializeCanvasSnapshot(
+    {
+      schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
+      cards: [...cards],
+    },
+    layoutPolicy,
+  );
 }
 
 function statusLabel(state: SaveState) {
@@ -242,6 +245,7 @@ export function ConfigurableDashboardCanvas({
   profileControls = true,
   automaticProfileName,
   hideCardActionsByDefault = false,
+  compactCardControls = false,
   layoutPolicy,
   hideCardOverflow = false,
   addButtonLabel = "Adicionar",
@@ -268,12 +272,12 @@ export function ConfigurableDashboardCanvas({
   const [profileName, setProfileName] = useState("");
   const [profileDraftNames, setProfileDraftNames] = useState<Record<string, string>>({});
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const initialSnapshotRef = useRef(cardsSnapshot(initialCards));
+  const initialSnapshotRef = useRef(cardsSnapshot(initialCards, layoutPolicy));
   const lastSavedSnapshotRef = useRef<string | null>(null);
   const saveInFlightRef = useRef(false);
   const cacheKey = profileCacheKey(pageKey, scopeKey);
   const cards = state.present.cards;
-  const serializedCards = useMemo(() => cardsSnapshot(cards), [cards]);
+  const serializedCards = useMemo(() => cardsSnapshot(cards, layoutPolicy), [cards, layoutPolicy]);
   const validSelectedIds = useMemo(() => {
     const cardIds = new Set(cards.map(({ id }) => id));
     return new Set([...selectedIds].filter((id) => cardIds.has(id)));
@@ -281,12 +285,12 @@ export function ConfigurableDashboardCanvas({
   const activeProfile = profiles.find(({ id }) => id === activeProfileId) ?? null;
 
   useEffect(() => {
-    const next = cardsSnapshot(initialCards);
+    const next = cardsSnapshot(initialCards, layoutPolicy);
     if (next === initialSnapshotRef.current) return;
     initialSnapshotRef.current = next;
     dispatch({ type: "replace", cards: initialCards, recordHistory: false });
     setSelectedIds(new Set());
-  }, [initialCards]);
+  }, [initialCards, layoutPolicy]);
 
   useEffect(() => {
     onCardsChange?.([...cards]);
@@ -326,7 +330,7 @@ export function ConfigurableDashboardCanvas({
         const defaultProfile = remoteProfiles.find(({ isDefault }) => isDefault);
         if (defaultProfile) {
           setActiveProfileId(defaultProfile.id);
-          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards);
+          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards, layoutPolicy);
           dispatch({ type: "replace", cards: defaultProfile.cards, recordHistory: false });
         } else {
           setActiveProfileId(null);
@@ -348,7 +352,7 @@ export function ConfigurableDashboardCanvas({
         const defaultProfile = cached.find(({ isDefault }) => isDefault);
         if (defaultProfile) {
           setActiveProfileId(defaultProfile.id);
-          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards);
+          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards, layoutPolicy);
           dispatch({ type: "replace", cards: defaultProfile.cards, recordHistory: false });
         }
       })
@@ -358,7 +362,7 @@ export function ConfigurableDashboardCanvas({
     return () => {
       cancelled = true;
     };
-  }, [cacheKey, editable, pageKey, scopeKey]);
+  }, [cacheKey, editable, pageKey, scopeKey, layoutPolicy]);
 
   useEffect(() => {
     if (
@@ -389,7 +393,7 @@ export function ConfigurableDashboardCanvas({
         setProfiles([profile]);
         writeCachedProfiles(cacheKey, [profile]);
         setActiveProfileId(profile.id);
-        lastSavedSnapshotRef.current = cardsSnapshot(profile.cards);
+        lastSavedSnapshotRef.current = cardsSnapshot(profile.cards, layoutPolicy);
         setSaveState("saved");
         setProfileMessage("");
       })
@@ -405,6 +409,7 @@ export function ConfigurableDashboardCanvas({
     cacheKey,
     cards,
     editable,
+    layoutPolicy,
     pageKey,
     profileControls,
     profiles.length,
@@ -503,7 +508,7 @@ export function ConfigurableDashboardCanvas({
   }
 
   function loadProfile(profile: RemoteDashboardProfile) {
-    lastSavedSnapshotRef.current = cardsSnapshot(profile.cards);
+    lastSavedSnapshotRef.current = cardsSnapshot(profile.cards, layoutPolicy);
     setActiveProfileId(profile.id);
     dispatch({ type: "replace", cards: profile.cards, recordHistory: false });
     setSelectedIds(new Set());
@@ -537,7 +542,7 @@ export function ConfigurableDashboardCanvas({
       writeCachedProfiles(cacheKey, next);
       setProfilesSource("server");
       setActiveProfileId(profile.id);
-      lastSavedSnapshotRef.current = cardsSnapshot(profile.cards);
+      lastSavedSnapshotRef.current = cardsSnapshot(profile.cards, layoutPolicy);
       setProfileName("");
       setSaveState("saved");
       setProfileMessage("");
@@ -646,7 +651,7 @@ export function ConfigurableDashboardCanvas({
       setProfiles(remoteProfiles);
       writeCachedProfiles(cacheKey, remoteProfiles);
       setProfilesSource("server");
-      lastSavedSnapshotRef.current = cardsSnapshot(remote.cards);
+      lastSavedSnapshotRef.current = cardsSnapshot(remote.cards, layoutPolicy);
       dispatch({ type: "replace", cards: remote.cards, recordHistory: false });
       setSelectedIds(new Set());
       setSaveState("saved");
@@ -672,6 +677,7 @@ export function ConfigurableDashboardCanvas({
       className={[styles.root, className].filter(Boolean).join(" ")}
       aria-label={ariaLabel}
       data-hide-card-overflow={hideCardOverflow ? "true" : undefined}
+      data-compact-card-controls={compactCardControls ? "true" : undefined}
     >
       {editable ? (
         <div className={styles.toolbar} role="toolbar" aria-label="Ferramentas do dashboard">
@@ -796,6 +802,7 @@ export function ConfigurableDashboardCanvas({
           onCommit={(next) => dispatch({ type: "replace", cards: next })}
           layoutPolicy={layoutPolicy}
           cornerResizeHandle={layoutPolicy?.maxHeight === null}
+          compactControls={compactCardControls}
           renderCard={(card, size) => (
             <div
               className={[
@@ -1236,10 +1243,14 @@ function CardEditor({
             onChange={(event) =>
               setCard({
                 ...card,
-                layout: constrainCardLayout(card.type, {
-                  ...card.layout,
-                  columnSpan: Number(event.target.value),
-                }),
+                layout: constrainCardLayout(
+                  card.type,
+                  {
+                    ...card.layout,
+                    columnSpan: Number(event.target.value),
+                  },
+                  layoutPolicy,
+                ),
               })
             }
           />
@@ -1255,7 +1266,7 @@ function CardEditor({
                 ? undefined
                 : (layoutPolicy?.maxHeight ?? layoutLimits.maxHeight)
             }
-            step={24}
+            step={layoutPolicy?.heightStep ?? 24}
             value={card.layout.height}
             onChange={(event) =>
               setCard({

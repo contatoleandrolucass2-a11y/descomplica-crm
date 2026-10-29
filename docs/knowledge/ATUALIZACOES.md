@@ -3057,3 +3057,16 @@ antes de qualquer ativação.
 
 - [Continuação de 2026-10-15 a 2026-10-27](ATUALIZACOES-ARQUIVO-2026-10-15-a-2026-10-27-CONTINUACAO.md).
 - [Histórico de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-2026-09-27-a-2026-10-13.md).
+
+## 2026-10-29: abertura — dimensões e controles dos cards de Agendamentos
+
+- Escopo: somente cards de Agendamentos; redimensionamento nos dois eixos, remoção do cabeçalho duplicado e controles compactos revelados por interação. O anexo de sidebar é referência sem autorização para alterar a navegação.
+- Git comum confirmado; HEAD e origin/main 5fbf6f0ea3fbecc52d12bdc765b9f8acffd4bc40, árvore inicialmente limpa; branch codex/agendamentos-cards-compactos. Fetch concluído. Base contém regras de main/PR #422 e correções #423.
+- GitHub: CI push/main 40931158856 concluída com sucesso no SHA base, consulta via conector em 29/10/2026. Fonte: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40931158856. CLI gh sem autenticação local; conector disponível.
+- Health público observado em 29/10/2026 às 17:47 BRT: HTTP 200, status ok, version 5fbf6f0ea3fbecc52d12bdc765b9f8acffd4bc40. Fonte: https://crm.descomplicapro.com.br/api/health. CI base não valida mudanças futuras.
+
+## 2026-10-29: candidato — cards compactos e altura precisa em Agendamentos
+
+- Implementação opt-in em Agendamentos: cabeçalho sem título duplicado; controles menores sobrepostos, revelados por hover/foco e disponíveis em toque. Altura em pixels, preservada ao alterar largura; histórico e comparação de autosave respeitam a política da página para não descartar mudanças pequenas.
+- Validação local: 48 testes focados aprovados; typecheck/lint aprovados antes do ajuste final de serialização e revalidação em andamento. Chromium sintético aprovou arraste nos dois eixos, edição para 997 px e 4 colunas, salvamento em endpoint local, teclado, desfazer, grupo, expansão e editor. Sem erros JS ou tráfego externo. Capturas em 320, 390, 768, 1440 e 1920 nos três temas sem sobreposição/overflow ou axe grave; rodada inicial parou depois por rótulos obsoletos no próprio QA, corrigidos e interações reexecutadas com sucesso. CSS de preview Vite, não build Next de produção.
+- Limites: grade de 12 colunas e mínimos persistidos por tipo continuam vigentes. Dimensões menores exigem migration e autorização específica para banco remoto; não foram implementadas. Não houve alteração de permissões, regras financeiras, sidebar ou outras páginas. CI/merge/publicação do candidato ainda pendentes. Evidência local não comprova persistência remota.

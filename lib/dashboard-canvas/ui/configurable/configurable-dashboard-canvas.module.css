@@ -203,6 +203,39 @@
   justify-content: center;
 }
 
+.root[data-compact-card-controls="true"] .cardActions {
+  min-height: 0;
+  gap: 0;
+  padding: 0.125rem;
+  border: 0;
+  box-shadow: none;
+}
+
+.root[data-compact-card-controls="true"] .cardActions :is(label, .iconButton) {
+  width: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem !important;
+}
+
+.root[data-compact-card-controls="true"] .cardActions :is(input, svg) {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .root[data-compact-card-controls="true"] .cardActionsHidden {
+    opacity: 1;
+    pointer-events: auto;
+    transform: none;
+  }
+
+  .root[data-compact-card-controls="true"] .cardActions :is(label, .iconButton) {
+    width: 2.75rem;
+    min-width: 2.75rem;
+    min-height: 2.75rem !important;
+  }
+}
+
 .cardActions input,
 .choiceGroup input,
 .exportList input {

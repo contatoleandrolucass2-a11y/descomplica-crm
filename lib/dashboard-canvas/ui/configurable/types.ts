@@ -83,6 +83,7 @@ export interface ConfigurableDashboardCanvasProps {
   profileControls?: boolean | undefined;
   automaticProfileName?: string | undefined;
   hideCardActionsByDefault?: boolean | undefined;
+  compactCardControls?: boolean | undefined;
   layoutPolicy?: DashboardCardLayoutPolicy | undefined;
   hideCardOverflow?: boolean | undefined;
   addButtonLabel?: string | undefined;

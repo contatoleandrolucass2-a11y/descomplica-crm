@@ -13,7 +13,7 @@ import {
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
 import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
-import { FREE_HEIGHT_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
+import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 import type {
@@ -2061,7 +2061,8 @@ export function AppointmentsDashboard({
         profileControls={false}
         automaticProfileName="Layout de Agendamentos"
         hideCardActionsByDefault
-        layoutPolicy={FREE_HEIGHT_CARD_LAYOUT_POLICY}
+        layoutPolicy={APPOINTMENTS_CARD_LAYOUT_POLICY}
+        compactCardControls
         hideCardOverflow
         preserveExpandedPresentation
         addButtonLabel="Adicionar card"

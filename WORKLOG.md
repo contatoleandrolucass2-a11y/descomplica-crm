@@ -10002,3 +10002,21 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
 - O gate visual de Dashboard reprovado na CI `40555682643` permanece como evidência de bloqueio anterior. A DEPLOY-002 não autoriza ignorá-lo ou alterar a referência fora do escopo. A consulta inicial de health não substitui a conferência final dentro da trava compartilhada.
 
 - Durante a validação da retomada, o PR #381 foi integrado em `f9c8d94c` pelo responsável por Agendamentos. A branch do Tabelão incorporou essa correção sem conflitos: cards sem personalização recuperam o DOM e o CSS anteriores da Visão Geral. A evidência de falha visual anterior precisa ser reavaliada pela CI do novo candidato, pois houve mudança no código responsável. Nenhuma referência visual foi alterada neste chat.
+
+## 2026-10-29 — Cards compactos de Agendamentos
+
+- Remove o título duplicado do cabeçalho e sobrepõe o controle de movimento,
+  sem reservar altura. Ícones de movimento, seleção, edição, expansão, exclusão
+  e redimensionamento menores; revelação por hover/foco e acesso em toque.
+- Altura em pixels e largura por colunas; o editor preserva a altura ao mudar
+  a largura. Política opt-in de Agendamentos; demais páginas preservadas.
+- Os mínimos por tipo e a grade de 12 colunas continuam exigidos pelo contrato
+  persistido. Liberar dimensões menores depende de migration e autorização
+  específica para aplicação remota; nenhuma migration foi criada ou aplicada.
+- Validação: 48 testes focados aprovados em Node 24.19.0. Typecheck e lint
+  focados aprovados. Navegador Chromium local: hover, arraste nos dois eixos,
+  altura de 997 px preservada ao mudar largura e salva em endpoint sintético,
+  teclado, desfazer, grupo, expansão e editor aprovados. Sem erros JS ou
+  requisições externas. Persistência remota não foi exercida.
+- O histórico e a comparação para autosave agora recebem a política da página,
+  evitando descartar ajustes de um pixel. Demais políticas mantêm os defaults.
