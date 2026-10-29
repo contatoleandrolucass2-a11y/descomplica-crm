@@ -380,6 +380,27 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
       );
     })
     .toBe(true);
+  await page.setViewportSize({ width: 320, height: 900 });
+  await goalCard
+    .getByRole("button", { name: "Redimensionar Meta do mês", exact: true })
+    .press("ArrowDown");
+  await expect
+    .poll(async () => {
+      const { profiles } = await page.request
+        .get(`${origin}/api/dashboard-profiles`)
+        .then((response) => response.json());
+      return profiles.some((profile) =>
+        profile.cards.some(
+          (card) =>
+            card.id === "appointments-goal" &&
+            card.layout.height === 998 &&
+            card.layout.width === 317,
+        ),
+      );
+    })
+    .toBe(true);
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await page.setViewportSize({ width: 1440, height: 900 });
   await goalCard
     .getByRole("button", { name: "Redimensionar Meta do mês", exact: true })
     .press("ArrowRight");
@@ -474,9 +495,41 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
       name: "Redimensionar Meta do mês",
       exact: true,
     });
-    await expect(touchResize).toBeVisible();
+    await expect(touchResize).toBeHidden();
     check((await move.boundingBox()).width >= 44, "Touch retains accessible target size");
-    evidence.canvas.interactions.push("touch-controls-visible-with-44px-targets");
+    const actions = touchCard.getByRole("button", { name: "Ações de Meta do mês", exact: true });
+    await actions.click();
+    const actionsDialog = touchPage.getByRole("dialog", { name: "Ações do card", exact: true });
+    await expect(actionsDialog).toBeVisible();
+    await actionsDialog
+      .getByRole("button", { name: "Editar e redimensionar", exact: true })
+      .click();
+    const touchEditor = touchPage.getByRole("dialog", { name: "Editar card", exact: true });
+    await touchEditor.getByLabel("Largura do card", { exact: false }).fill("128");
+    await touchEditor.getByLabel("Altura do card", { exact: false }).fill("72");
+    await touchEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+    await expect.poll(async () => (await touchCard.boundingBox()).width).toBe(128);
+    await expect.poll(async () => (await touchCard.boundingBox()).height).toBe(72);
+    check((await actions.boundingBox()).width >= 44, "Small card keeps touch actions target");
+    await actions.click();
+    for (const name of ["Selecionar card", "Editar e redimensionar", "Expandir", "Excluir"])
+      await expect(actionsDialog.getByRole("button", { name, exact: true })).toBeVisible();
+    await touchPage.keyboard.press("Escape");
+    await expect(actions).toBeFocused();
+    await actions.click();
+    await actionsDialog.getByRole("button", { name: "Expandir", exact: true }).click();
+    await expect(touchPage.getByRole("dialog", { name: "Meta do mês", exact: true })).toBeVisible();
+    await touchPage.keyboard.press("Escape");
+    await touchPage.goto(origin);
+    await expect(
+      touchPage.getByRole("button", { name: "Ações de Meta do mês", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      touchPage.getByRole("button", { name: "Redimensionar Meta do mês", exact: true }),
+    ).toBeHidden();
+    evidence.canvas.interactions.push(
+      "touch-128x72-menu-editor-44px-targets-escape-focus-and-readonly",
+    );
   } finally {
     await touchContext.close();
   }

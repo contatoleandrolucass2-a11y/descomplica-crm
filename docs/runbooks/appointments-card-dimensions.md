@@ -15,7 +15,7 @@ informar os valores. Mover, editar, selecionar e desfazer preservam as dimensõe
 As outras páginas mantêm o layout e os limites anteriores.
 
 O cabeçalho duplicado é removido. Ícones compactos aparecem em hover/foco;
-em toque, ficam disponíveis e mantêm alvos de 44 px. O controle de acesso
+em toque, mover e um ícone de ações mantêm alvos de 44 px; o menu abre o editor de dimensões fora do card. O controle de acesso
 existente ao editor permanece vigente.
 
 ## Publicação e autorização

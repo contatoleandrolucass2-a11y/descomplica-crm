@@ -197,6 +197,20 @@ describe("dashboard canvas cards", () => {
 });
 
 describe("dashboard canvas layout", () => {
+  it("preserves saved width during vertical resize on a smaller screen", () => {
+    const initial = { order: 0, columnSpan: 6, height: 288, width: 1000 };
+    const props = {
+      type: "kpi" as const,
+      initial,
+      deltaX: 0,
+      deltaY: 1,
+      containerWidth: 358,
+      renderedWidth: 358,
+      policy: APPOINTMENTS_CARD_LAYOUT_POLICY,
+    };
+    expect(resizeCardLayout(props)).toEqual({ ...initial, height: 289 });
+    expect(resizeCardLayout({ ...props, deltaX: -1, deltaY: 0 }).width).toBe(357);
+  });
   it("resizes appointments independently by column and pixel without changing other policies", () => {
     const initial = { order: 0, columnSpan: 2, height: 289, width: 200 };
     const vertical = resizeCardLayout({

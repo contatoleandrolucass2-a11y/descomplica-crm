@@ -260,6 +260,7 @@ export function DashboardCanvas({
       deltaX: point.x - active.originX,
       deltaY: point.y - active.originY,
       containerWidth,
+      renderedWidth: active.floatingRect.width,
       gap,
       policy: layoutPolicy,
     });
@@ -318,9 +319,7 @@ export function DashboardCanvas({
       clientX: event.clientX,
       clientY: event.clientY,
       originalCards: previewRef.current,
-      initialLayout: layoutPolicy?.freeResize
-        ? { ...card.layout, width: Math.round(bounds.width) }
-        : card.layout,
+      initialLayout: card.layout,
       floatingRect: bounds,
       offsetX: event.clientX - bounds.left,
       offsetY: event.clientY - bounds.top,
@@ -360,14 +359,8 @@ export function DashboardCanvas({
     const vertical = event.key === "ArrowUp" ? -step : event.key === "ArrowDown" ? step : 0;
     const nextLayout = resizeCardLayout({
       type: card.type,
-      initial: layoutPolicy?.freeResize
-        ? {
-            ...card.layout,
-            width: Math.round(
-              cardElements.current.get(card.id)?.getBoundingClientRect().width ?? 128,
-            ),
-          }
-        : card.layout,
+      initial: card.layout,
+      renderedWidth: cardElements.current.get(card.id)?.getBoundingClientRect().width,
       deltaX:
         horizontal * (layoutPolicy?.freeResize ? step : (gridRef.current?.clientWidth ?? 12) / 12),
       deltaY: vertical,

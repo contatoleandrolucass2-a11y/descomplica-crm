@@ -262,8 +262,14 @@
     display: none;
   }
 
-  .shell[data-free-resize="true"] .resizeHandle {
+  .shell[data-free-resize="true"]:not([data-readonly="true"]) .resizeHandle {
     display: block;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .shell[data-free-resize="true"][data-compact-controls="true"] .resizeHandle {
+    display: none;
   }
 }
 

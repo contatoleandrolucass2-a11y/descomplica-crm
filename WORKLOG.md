@@ -10007,7 +10007,7 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
 
 - Remove título duplicado e sobrepõe controles menores de movimento, seleção,
   edição, expansão, exclusão e redimensionamento. Hover/foco revelam os ícones;
-  toque preserva acesso e alvo de 44 px, sem exigir hover.
+  toque usa mover e um ícone de ações de 44 px; o menu abre o editor fora do card.
 - Largura e altura em pixels, com quebra de linha sem sobreposição. Mínimos
   técnicos 128×72 px e máximo 16384 por eixo; largura visível limitada à tela.
   Cards antigos sem width mantêm o layout por colunas. Demais páginas preservadas.
@@ -10017,7 +10017,7 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
   e reutiliza os controles anteriores de conteúdo/catálogo/presentation;
   preserva RPCs, auth, RLS, grants e CAS. Procedimento e risco de rollback em
   docs/runbooks/appointments-card-dimensions.md.
-- Validação: 81 testes focados aprovados nas suítes de interface e persistência;
+- Validação: 115 testes focados aprovados nas suítes de interface e persistência;
   typecheck/lint focados aprovados. Chromium sintético: 317×997 e 157×137,
   ajuste de 1 px, transporte de dimensões no endpoint sintético, teclado,
   desfazer, grupo, expansão, editor e toque 44 px aprovados. Matriz de 5 larguras

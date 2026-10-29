@@ -17,6 +17,7 @@ import {
   Download,
   Expand,
   LayoutGrid,
+  MoreHorizontal,
   Pencil,
   Plus,
   Redo2,
@@ -261,6 +262,9 @@ export function ConfigurableDashboardCanvas({
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
   const [editorMode, setEditorMode] = useState<"add" | "edit">("add");
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [actionsCardId, setActionsCardId] = useState<string | null>(null);
+  const actionsCardWidthRef = useRef<number | undefined>(undefined);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const [showProfiles, setShowProfiles] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [exportSelection, setExportSelection] = useState<Set<string>>(new Set());
@@ -511,6 +515,21 @@ export function ConfigurableDashboardCanvas({
     setEditorCard(null);
   }
 
+  function openCardEditor(card: DashboardCard, renderedWidth?: number) {
+    setEditorMode("edit");
+    setEditorCard(
+      layoutPolicy?.freeResize
+        ? {
+            ...card,
+            layout: {
+              ...card.layout,
+              width: card.layout.width ?? Math.round(renderedWidth ?? 320),
+            },
+          }
+        : card,
+    );
+  }
+
   function loadProfile(profile: RemoteDashboardProfile) {
     lastSavedSnapshotRef.current = cardsSnapshot(profile.cards, layoutPolicy);
     setActiveProfileId(profile.id);
@@ -675,6 +694,8 @@ export function ConfigurableDashboardCanvas({
   }
 
   const expandedCard = cards.find(({ id }) => id === expandedCardId) ?? null;
+  const actionsCard =
+    editable && compactCardControls ? (cards.find(({ id }) => id === actionsCardId) ?? null) : null;
 
   return (
     <section
@@ -684,7 +705,12 @@ export function ConfigurableDashboardCanvas({
       data-compact-card-controls={compactCardControls ? "true" : undefined}
     >
       {editable ? (
-        <div className={styles.toolbar} role="toolbar" aria-label="Ferramentas do dashboard">
+        <div
+          ref={toolbarRef}
+          className={styles.toolbar}
+          role="toolbar"
+          aria-label="Ferramentas do dashboard"
+        >
           <button
             type="button"
             className={styles.primaryButton}
@@ -847,21 +873,10 @@ export function ConfigurableDashboardCanvas({
                     type="button"
                     className={styles.iconButton}
                     onClick={(event) => {
-                      setEditorMode("edit");
                       const bounds = event.currentTarget
                         .closest("[data-dashboard-card-id]")
                         ?.getBoundingClientRect();
-                      setEditorCard(
-                        layoutPolicy?.freeResize
-                          ? {
-                              ...card,
-                              layout: {
-                                ...card.layout,
-                                width: card.layout.width ?? Math.round(bounds?.width ?? 320),
-                              },
-                            }
-                          : card,
-                      );
+                      openCardEditor(card, bounds?.width);
                     }}
                     aria-label={`Editar ${card.title || card.metric}`}
                   >
@@ -885,6 +900,24 @@ export function ConfigurableDashboardCanvas({
                   </button>
                 </div>
               ) : null}
+              {editable && compactCardControls ? (
+                <button
+                  type="button"
+                  className={styles.touchActionsButton}
+                  data-dashboard-export-ignore
+                  aria-label={`Ações de ${card.title || card.metric}`}
+                  aria-haspopup="dialog"
+                  aria-expanded={actionsCardId === card.id}
+                  onClick={(event) => {
+                    actionsCardWidthRef.current = event.currentTarget
+                      .closest("[data-dashboard-card-id]")
+                      ?.getBoundingClientRect().width;
+                    setActionsCardId(card.id);
+                  }}
+                >
+                  <MoreHorizontal size={15} aria-hidden="true" />
+                </button>
+              ) : null}
               <DashboardCardContent card={card}>
                 {renderDashboardContent(card, size)}
               </DashboardCardContent>
@@ -892,6 +925,64 @@ export function ConfigurableDashboardCanvas({
           )}
         />
       )}
+
+      {actionsCard ? (
+        <DashboardModal
+          title="Ações do card"
+          description={actionsCard.title || actionsCard.metric}
+          onClose={() => setActionsCardId(null)}
+        >
+          <div className={styles.touchCardActionList}>
+            <button
+              type="button"
+              aria-pressed={validSelectedIds.has(actionsCard.id)}
+              onClick={() => {
+                setSelectedIds((current) => {
+                  const next = new Set(current);
+                  if (next.has(actionsCard.id)) next.delete(actionsCard.id);
+                  else next.add(actionsCard.id);
+                  return next;
+                });
+                setActionsCardId(null);
+              }}
+            >
+              <LayoutGrid size={17} aria-hidden="true" />
+              {validSelectedIds.has(actionsCard.id) ? "Desmarcar card" : "Selecionar card"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                openCardEditor(actionsCard, actionsCardWidthRef.current);
+                setActionsCardId(null);
+              }}
+            >
+              <Pencil size={17} aria-hidden="true" /> Editar e redimensionar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setExpandedCardId(actionsCard.id);
+                setActionsCardId(null);
+              }}
+            >
+              <Expand size={17} aria-hidden="true" /> Expandir
+            </button>
+            <button
+              type="button"
+              className={styles.dangerButton}
+              onClick={() => {
+                dispatch({ type: "remove-card", cardId: actionsCard.id });
+                setActionsCardId(null);
+                requestAnimationFrame(() =>
+                  toolbarRef.current?.querySelector<HTMLButtonElement>("button")?.focus(),
+                );
+              }}
+            >
+              <Trash2 size={17} aria-hidden="true" /> Excluir
+            </button>
+          </div>
+        </DashboardModal>
+      ) : null}
 
       {editorCard ? (
         <CardEditor

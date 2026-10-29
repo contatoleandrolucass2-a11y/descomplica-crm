@@ -139,6 +139,7 @@ export function resizeCardLayout({
   deltaX,
   deltaY,
   containerWidth,
+  renderedWidth,
   gap = 16,
   policy,
 }: {
@@ -147,6 +148,7 @@ export function resizeCardLayout({
   deltaX: number;
   deltaY: number;
   containerWidth: number;
+  renderedWidth?: number | undefined;
   gap?: number;
   policy?: DashboardCardLayoutPolicy | undefined;
 }) {
@@ -156,20 +158,26 @@ export function resizeCardLayout({
     finiteInteger(policy?.heightStep ?? CANVAS_HEIGHT_STEP, CANVAS_HEIGHT_STEP),
   );
   const width = policy?.freeResize
-    ? clamp(
-        Math.round((initial.width ?? initial.columnSpan * widthPerColumn - gap) + deltaX),
-        FREE_CARD_MIN_WIDTH,
-        Math.max(FREE_CARD_MIN_WIDTH, Math.min(containerWidth, FREE_CARD_MAX_SIZE)),
-      )
+    ? deltaX === 0
+      ? initial.width
+      : clamp(
+          Math.round(
+            (renderedWidth ?? initial.width ?? initial.columnSpan * widthPerColumn - gap) + deltaX,
+          ),
+          FREE_CARD_MIN_WIDTH,
+          Math.max(FREE_CARD_MIN_WIDTH, Math.min(containerWidth, FREE_CARD_MAX_SIZE)),
+        )
     : undefined;
   return constrainCardLayout(
     type,
     {
       ...initial,
       columnSpan:
-        width === undefined
-          ? initial.columnSpan + Math.round(deltaX / widthPerColumn)
-          : Math.ceil((width + gap) / widthPerColumn),
+        policy?.freeResize && deltaX === 0
+          ? initial.columnSpan
+          : width === undefined
+            ? initial.columnSpan + Math.round(deltaX / widthPerColumn)
+            : Math.ceil((width + gap) / widthPerColumn),
       height: initial.height + Math.round(deltaY / heightStep) * heightStep,
       ...(width !== undefined ? { width } : {}),
     },
