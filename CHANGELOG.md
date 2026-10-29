@@ -3821,3 +3821,5 @@ Validação e publicação serão registradas com evidências ao concluir os gat
   A migration preparada exige autorização específica para aplicação remota.
 
 - Preserva a mensagem de rejeição de cards malformados no novo validador de dimensões de Agendamentos.
+
+- Permite digitar largura e altura completas no editor de Agendamentos, aplicando limites ao confirmar o campo ou salvar, sem alterar o número a cada tecla.

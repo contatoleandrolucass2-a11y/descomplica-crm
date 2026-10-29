@@ -1244,6 +1244,32 @@ function CardEditor({
   onSave: (card: DashboardCard) => void;
 }) {
   const [card, setCard] = useState(initialCard);
+  const [widthDraft, setWidthDraft] = useState(String(initialCard.layout.width ?? 320));
+  const [heightDraft, setHeightDraft] = useState(String(initialCard.layout.height));
+
+  function cardWithDraftDimensions() {
+    if (!layoutPolicy?.freeResize) return card;
+    return {
+      ...card,
+      layout: constrainCardLayout(
+        card.type,
+        {
+          ...card.layout,
+          width: widthDraft.trim() ? Number(widthDraft) : (card.layout.width ?? 320),
+          height: heightDraft.trim() ? Number(heightDraft) : card.layout.height,
+        },
+        layoutPolicy,
+      ),
+    };
+  }
+
+  function confirmDimensionDrafts() {
+    if (!layoutPolicy?.freeResize) return;
+    const next = cardWithDraftDimensions();
+    setCard(next);
+    setWidthDraft(String(next.layout.width ?? 320));
+    setHeightDraft(String(next.layout.height));
+  }
   const types = compatibleTypes(card.metric, compatibility);
   const groups = compatibleGroups(card.metric, compatibility);
   const periods = compatiblePeriods(card.metric, compatibility);
@@ -1314,7 +1340,7 @@ function CardEditor({
         className={styles.editorForm}
         onSubmit={(event) => {
           event.preventDefault();
-          if (customDatesValid) onSave(card);
+          if (customDatesValid) onSave(cardWithDraftDimensions());
         }}
       >
         <label>
@@ -1348,8 +1374,13 @@ function CardEditor({
             min={layoutPolicy?.freeResize ? FREE_CARD_MIN_WIDTH : layoutLimits.minColumnSpan}
             max={layoutPolicy?.freeResize ? FREE_CARD_MAX_SIZE : 12}
             step={1}
-            value={layoutPolicy?.freeResize ? (card.layout.width ?? 320) : card.layout.columnSpan}
-            onChange={(event) =>
+            value={layoutPolicy?.freeResize ? widthDraft : card.layout.columnSpan}
+            onBlur={confirmDimensionDrafts}
+            onChange={(event) => {
+              if (layoutPolicy?.freeResize) {
+                setWidthDraft(event.target.value);
+                return;
+              }
               setCard({
                 ...card,
                 layout: constrainCardLayout(
@@ -1362,12 +1393,12 @@ function CardEditor({
                   },
                   layoutPolicy,
                 ),
-              })
-            }
+              });
+            }}
           />
           <small>
             {layoutPolicy?.freeResize
-              ? `${card.layout.width ?? 320}px`
+              ? `${widthDraft || "—"}px`
               : `${card.layout.columnSpan} de 12 colunas`}
           </small>
         </label>
@@ -1382,8 +1413,13 @@ function CardEditor({
                 : (layoutPolicy?.maxHeight ?? layoutLimits.maxHeight)
             }
             step={layoutPolicy?.heightStep ?? 24}
-            value={card.layout.height}
-            onChange={(event) =>
+            value={layoutPolicy?.freeResize ? heightDraft : card.layout.height}
+            onBlur={confirmDimensionDrafts}
+            onChange={(event) => {
+              if (layoutPolicy?.freeResize) {
+                setHeightDraft(event.target.value);
+                return;
+              }
               setCard({
                 ...card,
                 layout: constrainCardLayout(
@@ -1394,10 +1430,10 @@ function CardEditor({
                   },
                   layoutPolicy,
                 ),
-              })
-            }
+              });
+            }}
           />
-          <small>{card.layout.height}px</small>
+          <small>{layoutPolicy?.freeResize ? heightDraft || "—" : card.layout.height}px</small>
         </label>
         <label>
           Tamanho da fonte

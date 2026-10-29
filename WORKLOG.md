@@ -10028,3 +10028,5 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
   gravações, rollback exige imagem compatível ou recuperação de dados autorizada.
 
 - O ensaio SQL detectou uma divergência de mensagem para card malformado. O wrapper foi corrigido para preservar o erro legado; a asserção existente continua obrigatória. Nova CI necessária antes de aplicar a migration.
+
+- A digitação real por tecla revelou clamp antecipado dos campos de dimensão. O editor de Agendamentos agora mantém rascunhos textuais e confirma limites no blur/submit; campos de outras páginas preservados. Regressão de apagar, digitar 997/317 e salvar por Enter aprovada em navegador local. Tipos, lint e 15 testes do controlador/canvas passaram; nova CI necessária para esse ajuste de JS. A migration e o CSS não mudaram.
