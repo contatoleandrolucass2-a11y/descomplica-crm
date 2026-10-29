@@ -434,6 +434,71 @@ test("export analysis options require the literal environment flag and expand Ja
   );
 });
 
+test("collects folders without the optional name column using the source record ID, never FID", async () => {
+  const fixture = client({
+    describeFor(metadata, definition) {
+      if (definition.key === "folders") {
+        metadata.detailColumns = metadata.detailColumns.filter(
+          (column) => column !== "Avaliacao_credito__c.Name",
+        );
+        metadata.detailColumns.push("Avaliacao_credito__c.FID__c");
+      }
+      return metadata;
+    },
+    resultFor(definition, metadata) {
+      const result = complete(definition, metadata, [1, 2]);
+      if (definition.key === "folders") {
+        for (const [index, row] of result.factMap["T!T"].rows.entries()) {
+          row.dataCells[metadata.detailColumns.indexOf("Avaliacao_credito__c.Status__c")].recordId =
+            `a1V${String(index + 1).padStart(12, "0")}AAA`;
+          row.dataCells[metadata.detailColumns.indexOf("Avaliacao_credito__c.FID__c")] = {
+            value: null,
+            label: "-",
+          };
+        }
+      }
+      return result;
+    },
+  });
+  const reports = {};
+  for (const definition of REPORTS)
+    reports[definition.key] = await collect(definition.key, fixture);
+  assert.deepEqual(
+    reports.folders.map((row) => row.recordId),
+    ["a1V000000000001AAA", "a1V000000000002AAA"],
+  );
+  assert.ok(reports.folders.every((row) => row.creditName === ""));
+  const candidate = buildSalesforceSnapshot({
+    reports,
+    referenceDate: REFERENCE,
+    generatedAt: `${REFERENCE}T15:00:00Z`,
+    requestId: "00000000-0000-4000-8000-000000000001",
+  });
+  assert.equal(candidate.diagnostics.sourceRows.folders, 2);
+  assert.equal(candidate.diagnostics.dataQuality.approvedFolders, 2);
+});
+
+test("rejects missing or foreign folder source IDs even when FID is available", async () => {
+  for (const sourceId of [undefined, "", "006000000000001AAA", "12345"]) {
+    const fixture = client({
+      describeFor(metadata) {
+        metadata.detailColumns = metadata.detailColumns.filter(
+          (column) => column !== "Avaliacao_credito__c.Name",
+        );
+        return metadata;
+      },
+      resultFor(definition, metadata) {
+        const result = complete(definition, metadata);
+        result.factMap["T!T"].rows[0].dataCells[
+          metadata.detailColumns.indexOf("Avaliacao_credito__c.Status__c")
+        ].recordId = sourceId;
+        return result;
+      },
+    });
+    await assert.rejects(collect("folders", fixture), { code: "SALESFORCE_INVALID_REPORT" });
+  }
+});
+
 test("collects all seven reports preserving projection, IDs and transform business semantics", async () => {
   const fixture = client();
   const reports = {};
