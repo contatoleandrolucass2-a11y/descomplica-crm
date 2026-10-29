@@ -1,5 +1,39 @@
 # AGENTS.md
 
+## Atualização de instruções para branches antigas — 29/10/2026
+
+Pedido explícito do usuário, posterior às orientações históricas abaixo.
+Aplicável somente ao Git comum
+`C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git` e seus worktrees.
+Esta seção atualiza o procedimento de trabalho; preserva as regras de segurança.
+
+- Cada chat é uma demanda exclusiva. Alterar somente páginas, comportamentos,
+  arquivos e dados solicitados. Conhecimento antigo não amplia autorização.
+- Executar somente implementação, dependências comprovadamente afetadas e
+  gates obrigatórios. Não auditar, refatorar ou corrigir outras páginas.
+  Falha externa ao escopo deve ser reportada, sem correção incidental.
+- Consultar conhecimento pertinente antes da tarefa. `knowledge:context` já
+  entrega CONTEXTO e FERRAMENTAS: não reler a mesma fonte vigente. Buscar por
+  assunto; nunca carregar todo o vault, chats privados ou todos os plugins.
+- Escolher somente ferramentas e skills pertinentes. Tarefa pequena usa um
+  agente; tarefas amplas podem ter partes disjuntas sem exploração duplicada.
+- Usar testes locais focados e reaproveitar gates aprovados da CI para o mesmo
+  candidato. Não repetir testes sem invalidação. CI obrigatória continua válida.
+- Usar espera com saídas compactas; não repetir consultas, logs e mensagens sem
+  mudança acionável. Não prometer economia de tokens ou prazo sem medição.
+- Preservar alterações alheias e coordenar publicações concorrentes. Documentação
+  não exige reiniciar a aplicação nem ciclos recursivos de registro.
+- Preservar autorização, servidor/RLS, regras financeiras, artefato, backup,
+  rollback, lock, CAS e health. N8n existente continua exclusivamente via MCP.
+- Referência vigente integrada: PR #422, main `b48ce8b4`, AGENTS.md e
+  `docs/runbooks/task-efficiency.md`. Se ausentes nesta branch, consultar
+  a versão de main em leitura, sem trazer código de outras páginas.
+- Para branches sem scripts, usar o runtime compartilhado em
+  `C:/Users/Leandro Lucas/Documents/ChatGPT/DESCOMPLICA-CRM/.git/descomplica-knowledge/obsidian.mjs`
+  com Node 24.19.x para context, search e sync.
+- Ao retomar chat antigo, reler esta seção antes de executar novas ações.
+  Atualizar arquivos não injeta instruções retroativamente em sessões abertas.
+
 ## Escopo
 
 Este repositório consolida o sistema de login e o Descomplica CRM. O login Next.js/Supabase é a base arquitetural. Migre funcionalidades do CRM em incrementos pequenos, sem reintroduzir Cloudflare, D1, Vinext, Vite ou Wrangler.
