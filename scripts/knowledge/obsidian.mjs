@@ -5,7 +5,9 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 const projectDirectory = "08 Projetos/DESCOMPLICA-CRM/Automatico";
-const documentNames = ["CONTEXTO.md", "FERRAMENTAS.md", "ATUALIZACOES.md"];
+const primaryDocumentNames = ["CONTEXTO.md", "FERRAMENTAS.md", "ATUALIZACOES.md"];
+const archivedUpdatesPattern =
+  /^ATUALIZACOES-ARQUIVO-\d{4}-\d{2}-\d{2}-a-\d{4}-\d{2}-\d{2}(?:-[A-Z0-9-]+)?\.md$/i;
 const hookNames = ["post-commit", "post-merge", "post-checkout", "post-rewrite"];
 const marker = "descomplica-crm-knowledge-v1";
 const ownFile = fileURLToPath(import.meta.url);
@@ -115,13 +117,29 @@ async function configuration(repo) {
   return config;
 }
 
+const isUpdatesDocument = (name) => name === "ATUALIZACOES.md" || archivedUpdatesPattern.test(name);
+
+async function archivedUpdateNames(directory) {
+  await plainPath(directory);
+  const entries = await fs.readdir(directory).catch((error) => {
+    if (error.code !== "ENOENT") throw error;
+    return [];
+  });
+  return entries.filter((name) => archivedUpdatesPattern.test(name)).sort();
+}
+
 async function documents(repo) {
+  const sourceDirectory = path.join(repo.root, "docs", "knowledge");
+  const referenceDirectory = path.join(repo.home, "reference");
+  const localUpdates = await readOptional(path.join(sourceDirectory, "ATUALIZACOES.md"));
+  const archiveDirectory = localUpdates === null ? referenceDirectory : sourceDirectory;
+  const documentNames = [...primaryDocumentNames, ...(await archivedUpdateNames(archiveDirectory))];
   const result = [];
   for (const name of documentNames) {
-    const source = path.join(repo.root, "docs", "knowledge", name);
+    const source = path.join(sourceDirectory, name);
     let body = await readOptional(source);
     const fallback = body === null;
-    if (fallback) body = await readOptional(path.join(repo.home, "reference", name));
+    if (fallback) body = await readOptional(path.join(referenceDirectory, name));
     if (body === null) throw new Error("Documento de conhecimento ausente.");
     if (Buffer.byteLength(body) > 256_000)
       throw new Error("Documento excede o limite de exportacao.");
@@ -273,32 +291,39 @@ async function search(repo, config, query) {
         ignoredCheckouts.foreign += 1;
         continue;
       }
-      const file = path.join(base, id, "ATUALIZACOES.md");
-      const body = await readManaged(file);
-      const metadata = body.split("\n\n", 1)[0];
+      const updateNames = (await fs.readdir(path.join(base, id)))
+        .filter((name) => isUpdatesDocument(name))
+        .sort();
+      if (!updateNames.includes("ATUALIZACOES.md") || updateNames.length > 64)
+        throw new Error("Documentos de atualizacao ausentes ou acima do limite esperado.");
       const generation = state.match(/^geracao: ([a-f0-9]{64})$/m)?.[1];
-      if (
-        !generation ||
-        !metadata.includes(`geracao: ${generation}\n`) ||
-        !metadata.includes(`repositorio: ${repositoryId}\n`)
-      )
-        throw new Error(
-          "Geracoes de conhecimento divergentes; executar sync no checkout de origem.",
-        );
-      const fallback = /^origem_documento: referencia-instalada$/m.test(metadata);
-      if (!fallback && !/^origem_documento: checkout$/m.test(metadata))
-        throw new Error("Origem documental ausente; sincronizar o checkout de origem.");
-      sources.push({
-        body,
-        source: {
-          path: file,
-          kind: fallback ? "installed-reference" : "other-checkout-reference",
-          branch: fallback ? null : (state.match(/^Branch: (.+)$/m)?.[1] ?? null),
-          head: fallback ? null : (state.match(/^Commit: ([a-f0-9]+)$/m)?.[1] ?? null),
-          checkoutBranch: state.match(/^Branch: (.+)$/m)?.[1] ?? null,
-          updatedAt: state.match(/^atualizado_em: (.+)$/m)?.[1] ?? null,
-        },
-      });
+      for (const updateName of updateNames) {
+        const file = path.join(base, id, updateName);
+        const body = await readManaged(file);
+        const metadata = body.split("\n\n", 1)[0];
+        if (
+          !generation ||
+          !metadata.includes(`geracao: ${generation}\n`) ||
+          !metadata.includes(`repositorio: ${repositoryId}\n`)
+        )
+          throw new Error(
+            "Geracoes de conhecimento divergentes; executar sync no checkout de origem.",
+          );
+        const fallback = /^origem_documento: referencia-instalada$/m.test(metadata);
+        if (!fallback && !/^origem_documento: checkout$/m.test(metadata))
+          throw new Error("Origem documental ausente; sincronizar o checkout de origem.");
+        sources.push({
+          body,
+          source: {
+            path: file,
+            kind: fallback ? "installed-reference" : "other-checkout-reference",
+            branch: fallback ? null : (state.match(/^Branch: (.+)$/m)?.[1] ?? null),
+            head: fallback ? null : (state.match(/^Commit: ([a-f0-9]+)$/m)?.[1] ?? null),
+            checkoutBranch: state.match(/^Branch: (.+)$/m)?.[1] ?? null,
+            updatedAt: state.match(/^atualizado_em: (.+)$/m)?.[1] ?? null,
+          },
+        });
+      }
     }
   }
   const matches = new Map();
@@ -416,7 +441,7 @@ async function main() {
     throw new Error("Comando invalido.");
   const config = await configuration(repo);
   if (command === "context") {
-    for (const doc of (await documents(repo)).filter((doc) => doc.name !== "ATUALIZACOES.md"))
+    for (const doc of (await documents(repo)).filter((doc) => !isUpdatesDocument(doc.name)))
       console.log(doc.body);
     console.log(
       'Busque aprendizados com knowledge:search "assunto" (ou este runtime com search "assunto").',

@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-28 — Obsidian: histórico particionado
+
+- A falha `Documento excede o limite de exportacao.` foi reproduzida e ligada
+  ao tamanho de 374.125 bytes de `ATUALIZACOES.md`, acima do teto de 256.000.
+- O histórico foi dividido em partições integrais de aproximadamente 201 KB e
+  173 KB; nenhuma entrada foi removida ou resumida.
+- Exportação, busca local e busca entre worktrees agora reconhecem somente os
+  arquivos históricos com nome versionado e preservam as validações existentes.
+- Vinte e quatro testes focados, ESLint, tipos e formatação aprovaram. O runtime
+  compartilhado e os quatro hooks foram atualizados; `context`, `search` e
+  `sync` passaram, com cinco documentos curados sincronizados no vault.
+
 ## 2026-10-28 — Agendamentos: cards sem rolagem e redimensionamento pelo canto
 
 - Escopo restrito a `/app/etapas/agendamentos`; nenhuma outra página, métrica,

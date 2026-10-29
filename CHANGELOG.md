@@ -1,5 +1,9 @@
 # Changelog
 
+- Destrava a sincronização do Obsidian ao particionar o histórico de
+  atualizações e incluir as partições curadas na exportação e na busca, sem
+  ampliar o limite de segurança nem perder conteúdo.
+
 - Ajusta exclusivamente os cards de Agendamentos para remover rolagem interna,
   oferecer redimensionamento livre de altura e largura pelo canto inferior
   direito e exibir a ação administrativa `Adicionar card`.
