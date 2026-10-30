@@ -8,6 +8,9 @@ import { renderToStaticMarkup } from "react-dom/server";
 import ts from "typescript";
 import { describe, expect, it, vi } from "vitest";
 
+// @ts-expect-error Standalone QA module runs directly with Node.
+import { authenticatedVisualRoutes } from "../scripts/qa/visual-route-scope.mjs";
+
 vi.mock("next/navigation", () => ({ usePathname: () => "/app" }));
 
 import { AccountMenu } from "../app/(protected)/_components/AccountMenu";
@@ -600,9 +603,9 @@ describe("versioned reference parity catalog", () => {
   );
 
   it("prepares the expanded authenticated visual matrix without weakening baseline safety", () => {
-    const routeSource = visualHarness.match(/const routes = \[(.*?)\n\];/s)?.[1] ?? "";
-    const configuredRoutes = [...routeSource.matchAll(/"([^"]+)"/g)].map((match) => match[1]);
-    expect(configuredRoutes).toEqual(expectedReleasedProtectedRoutes);
+    expect(authenticatedVisualRoutes).toEqual(expectedReleasedProtectedRoutes);
+    expect(visualHarness).toContain("const routes = authenticatedVisualRoutes");
+    expect(visualHarness).toContain("selectVisualRoutes(process.env.QA_VISUAL_ROUTES, routes)");
 
     const viewportSource = visualHarness.match(/const viewports = \[(.*?)\n\];/s)?.[1] ?? "";
     const configuredViewports = [
@@ -624,7 +627,7 @@ describe("versioned reference parity catalog", () => {
     );
     expect(visualHarness).toContain("approvedCanvasColorDistanceThreshold");
     expect(visualHarness).toContain("approvedCanvasEdgeDistanceThreshold");
-    expect(visualHarness).toContain("const desktopThemeCaptureRoutes = new Set(routes)");
+    expect(visualHarness).toContain("const desktopThemeCaptureRoutes = new Set(visualRoutes)");
     for (const route of ["/admin", "/admin/usuarios", "/admin/paginas"]) {
       expect(visualHarness).toContain(`"${route}"`);
     }

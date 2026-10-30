@@ -52,7 +52,10 @@ describe("release-candidate migration train", () => {
       workflow.match(
         /if: needs\.validate\.outputs\.documentation_only != 'true' && \(github\.event_name == 'pull_request' \|\| \(github\.event_name == 'push' && github\.ref == 'refs\/heads\/main'\)\)/g,
       ),
-    ).toHaveLength(3);
+    ).toHaveLength(2);
+    expect(workflow).toContain(
+      "if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')",
+    );
   });
 
   it("keeps a unique, ordered 95-version manifest", async () => {
