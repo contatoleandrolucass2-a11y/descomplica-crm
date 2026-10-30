@@ -1,5 +1,9 @@
 # Changelog
 
+- Adota matriz visual universal por impacto: rotas isoladas usam cobertura
+  focada, Meta Ads preserva seu QA dedicado e mudanças globais ou desconhecidas
+  continuam na matriz completa. A suíte integral roda semanalmente e sob demanda.
+
 - Confirma no site que os 28 itens de Agendamentos preservam ordem e dimensões
   ao sair para a Visão Geral e voltar à página, sem refazer configurações.
   Registro de validação, sem alteração da aplicação.

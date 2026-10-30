@@ -5,6 +5,9 @@ on:
   push:
     branches:
       - main
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -19,6 +22,8 @@ jobs:
     timeout-minutes: 20
     outputs:
       documentation_only: ${{ steps.change_scope.outputs.documentation_only }}
+      visual_mode: ${{ steps.visual_scope.outputs.visual_mode }}
+      visual_routes: ${{ steps.visual_scope.outputs.visual_routes }}
 
     steps:
       - name: Checkout
@@ -62,6 +67,14 @@ jobs:
         env:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+
+      - name: Classify authenticated visual impact
+        id: visual_scope
+        run: node scripts/ci/visual-impact-scope.mjs
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
 
       - name: Enable pnpm
         run: |
@@ -114,7 +127,7 @@ jobs:
         run: pnpm build
 
   release-gates:
-    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main'))
+    if: needs.validate.outputs.documentation_only != 'true' && (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') || github.event_name == 'schedule' || github.event_name == 'workflow_dispatch')
     needs: validate
     runs-on: ubuntu-latest
     timeout-minutes: 60
@@ -210,10 +223,22 @@ jobs:
       - name: Browser authorization and release E2E
         run: pnpm qa:e2e:release
 
-      - name: Responsive, theme, zoom and keyboard matrix
+      - name: Full responsive, theme, zoom and keyboard matrix
+        if: needs.validate.outputs.visual_mode == 'full'
         run: pnpm qa:visual:authenticated
         env:
           QA_ALLOW_MISSING_PRIVATE_INVENTORY: "true"
+
+      - name: Focused responsive, theme, zoom and keyboard matrix
+        if: needs.validate.outputs.visual_mode == 'focused'
+        run: pnpm qa:visual:authenticated
+        env:
+          QA_ALLOW_MISSING_PRIVATE_INVENTORY: "true"
+          QA_VISUAL_ROUTES: ${{ needs.validate.outputs.visual_routes }}
+
+      - name: Record dedicated visual coverage
+        if: needs.validate.outputs.visual_mode == 'none'
+        run: echo "Global authenticated matrix skipped; changed surface has dedicated or nonvisual coverage."
 
       - name: Upload sanitized visual candidate diagnostics
         if: always()

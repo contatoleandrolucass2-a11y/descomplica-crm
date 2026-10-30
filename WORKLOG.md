@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Matriz visual universal por impacto
+
+- O classificador usa o diff completo do PR ou push. Rotas conhecidas geram
+  escopo focado; Meta Ads e mudanças não visuais não repetem a matriz autenticada;
+  arquivos globais, desconhecidos e erros caem na matriz completa.
+- A seleção não reduz o QA dedicado da superfície, nem os demais gates de lint,
+  tipos, testes, build, banco, restauração, imagem imutável ou deploy protegido.
+- Execuções semanais e manuais forçam a matriz completa. Classificador e filtro
+  de rotas possuem testes; publicação e ganho de duração ainda dependem da CI.
+
 ## 2026-10-30 — Tamanho e ordem após sair e voltar
 
 - Registrados os IDs e width/height dos 28 itens de Agendamentos. Saída pelo

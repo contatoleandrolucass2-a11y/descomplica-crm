@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-30: matriz visual universal por impacto
+
+- Pedido explícito: tornar universal a seleção focada da matriz visual após uma
+  correção isolada do Meta Ads aguardar a matriz global de mais de 300 passes.
+- O classificador considera o diff completo. Rotas conhecidas executam cobertura
+  focada; Meta Ads mantém `meta-ads-frame.mjs` sem repetir a matriz autenticada;
+  shell, autenticação, autorização, tema, workflow, migration, caminho desconhecido
+  ou falha de classificação executam a matriz completa.
+- Execuções semanais e manuais forçam cobertura integral. A regra não desabilita
+  outros gates, não altera baseline automaticamente e não contorna DEPLOY-001.
+- Implementação, testes, CI, integração e adoção em `main` são estados separados;
+  esta nota não comprova publicação antes das respectivas evidências.
+
 ## 2026-10-29: Agendamentos — sete achados corrigidos
 
 - Pedido e escopo: A1–A7 da análise de Agendamentos, com merge e publicação

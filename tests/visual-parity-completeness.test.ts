@@ -322,9 +322,12 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain("pageScrollHeight:");
     expect(script).toContain("const dedicatedSimulatorRoutes = new Set([");
     expect(script).toContain("!dedicatedSimulatorRoutes.has(route)");
-    expect(script).toContain("responsiveScreenshots: routes.length * viewports.length");
     expect(script).toContain(
-      "themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + routes.length",
+      "const visualRoutes = selectVisualRoutes(process.env.QA_VISUAL_ROUTES, routes)",
+    );
+    expect(script).toContain("responsiveScreenshots: visualRoutes.length * viewports.length");
+    expect(script).toContain(
+      "desktopThemeCaptureRoutes.size * themes.length + visualRoutes.length",
     );
     expect(script).toContain('locale: "pt-BR"');
     expect(script).toContain('timezoneId: "America/Sao_Paulo"');
