@@ -14,6 +14,25 @@
   oito grupos de interações existentes e 49 testes unitários aprovados; tipos
   e lint focados aprovados. CI, integração e publicação ainda pendentes.
 
+### Publicação e aceite real concluídos
+
+- PR #429 integrado em `8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd`.
+  CI do PR `41076571203` e push/main `41093030466` aprovaram os quatro jobs.
+  Árvore final idêntica à do candidato validado; referências preservadas.
+- Artefato `12995346098` conferido por hashes OCI/configuração/11 camadas,
+  com dois perfis de runtime aprovados e imagem anterior compatível mantida.
+  Promoção exclusiva pelo coordenador sob trava/CAS, sem rebuild ou migration.
+- Deployment `e5ba7a24-2ea2-408f-93c0-67764f2a65a5`, concluído às
+  `2026-10-30T18:15:10.447Z` (15:15:10 BRT), sem pendência. Health público
+  confirmou HTTP 200/ok e SHA exato; Agendamentos anônimo 307/login e perfis 401.
+- Teste real na sessão do site: um clique em Salvar por gráfico, sem blur
+  manual nem reconfirmação; o editor aguardou o servidor e fechou sozinho.
+  Após reload e carregamento do perfil, medidas e editores conservaram
+  397×417 px em Previstos e realizados hoje e 497×457 px no gráfico semanal.
+- Print local `test-results/appointments-first-save/site-apos-correcao.jpg`
+  entregue sem tabela de clientes. Filtros preservados. Registro final somente
+  documental, com sync do Obsidian; não exige novo deploy da aplicação.
+
 ## 2026-10-30 — Persistência real das dimensões de Agendamentos
 
 - Pedido de teste no site com atualização da página e print. Na sessão real,

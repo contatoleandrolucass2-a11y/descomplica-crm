@@ -3,6 +3,8 @@
 - Corrige a confirmação das dimensões em Agendamentos: o editor aguarda a
   gravação no servidor antes de fechar, sem exigir uma segunda confirmação.
   Falhas preservam a edição e o indicador não antecipa sucesso durante a espera.
+- Publica a correção pelo PR #429 no SHA `8d0d1a73`; teste real confirma
+  largura e altura de dois gráficos após um único salvamento e refresh.
 
 - Confirma em navegador autenticado a persistência das dimensões de um card
   de Agendamentos após atualização completa: 317×237 px, com print do resultado.
