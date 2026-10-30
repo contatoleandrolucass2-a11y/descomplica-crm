@@ -14,6 +14,19 @@ dois eixos; as setas ajustam um pixel, ou dez com Shift. O editor permite
 informar os valores. Mover, editar, selecionar e desfazer preservam as dimensões.
 As outras páginas mantêm o layout e os limites anteriores.
 
+Ao confirmar o editor de Agendamentos, a gravação é enviada imediatamente,
+sem a espera do autosave. O editor mostra `Salvando…`, bloqueia alterações
+durante a requisição e fecha somente após a confirmação do servidor. Uma
+gravação anterior em andamento é concluída antes de enviar a versão seguinte.
+Erro ou conflito mantém o editor e os valores; não apresenta sucesso falso.
+Arraste e teclado mantêm autosave, indicando pendência desde a alteração.
+
+Regressão focada: `node scripts/qa/appointments-preview.mjs --first-save-only`.
+O fixture local cobre confirmação única com refresh imediato, resposta retida,
+fila com versões consecutivas, erro recuperável e conflito. Os resultados ficam
+em `test-results/appointments-first-save/`, sem dados reais. Essa prova não
+substitui o teste autenticado após publicar o artefato aprovado.
+
 O cabeçalho duplicado é removido. Ícones compactos aparecem em hover/foco;
 em toque, mover e um ícone de ações mantêm alvos de 44 px; o menu abre o editor de dimensões fora do card. O controle de acesso
 existente ao editor permanece vigente.
