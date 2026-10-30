@@ -33,6 +33,17 @@
 - Print nativo após refresh entregue com foco nos gráficos, sem rankings ou
   tabela de clientes. Somente validação/documentação; nenhum código ou deploy.
 
+## 2026-10-30 — Meta Ads: gráficos zerados em períodos sem dados
+
+- Escopo exclusivo do Canvas Meta Ads. Quando a API não retorna linhas para o
+  período, campanhas selecionadas continuam visíveis com valores zero, eixos,
+  legendas e tooltips; ausência de campanha selecionada mantém aviso próprio.
+- Séries diárias sintetizam as datas do intervalo com zero. Radar inteiramente
+  zerado colapsa ao centro em vez de sugerir desempenho relativo intermediário.
+- Sem alteração de coleta, API Meta, persistência, permissões ou banco. A QA
+  focal exige o gráfico de investimento de hoje visível com rótulo `R$ 0,00`;
+  publicação protegida permanece registrada separadamente.
+
 ## 2026-10-30 — Agendamentos: salvar dimensões na primeira confirmação
 
 - Reprodução local: o editor fechava com o status anterior de sucesso antes

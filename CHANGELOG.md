@@ -12,6 +12,10 @@
   pelo canto, sem editor: 441×441 e 477×439 px após autosave e refresh real.
   Registro de validação, sem alteração da aplicação.
 
+- Mantém os gráficos do Canvas Meta Ads desenhados com valores zero quando o
+  período selecionado ainda não possui métricas, preservando campanhas, eixos,
+  legendas e filtros em vez de substituir a visualização por um aviso vazio.
+
 - Corrige a confirmação das dimensões em Agendamentos: o editor aguarda a
   gravação no servidor antes de fechar, sem exigir uma segunda confirmação.
   Falhas preservam a edição e o indicador não antecipa sucesso durante a espera.

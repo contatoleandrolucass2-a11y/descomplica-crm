@@ -268,6 +268,16 @@ try {
   await expect(frame.getByRole("heading", { name: "Comparar campanhas" })).toBeVisible();
   await expect(frame.locator("#analysis-canvas")).toBeVisible();
   await expect(canvas.locator("#canvas")).toBeVisible();
+  const todaySpendChart = canvas
+    .locator('.card[data-chart-type="bars"]')
+    .filter({ has: canvas.getByRole("heading", { name: "Investimento de hoje", exact: true }) });
+  await expect(todaySpendChart.locator(".chart svg")).toBeVisible();
+  await expect(todaySpendChart.locator(".chart")).not.toContainText(
+    "Sem dados para os filtros selecionados.",
+  );
+  await expect(
+    todaySpendChart.locator(".chart text[aria-label]").filter({ hasText: "R$ 0" }).first(),
+  ).toBeVisible();
   const spendKpi = canvas
     .locator('.card[data-chart-type="kpi"]')
     .filter({ has: canvas.getByRole("heading", { name: /^Investimento/ }) });
@@ -276,7 +286,7 @@ try {
     .filter({ has: canvas.getByRole("heading", { name: /^Conversas iniciadas/ }) });
   await expect(spendKpi.locator(".metric-tile strong")).toContainText("170,00");
   await expect(leadsKpi.locator(".metric-tile strong")).toHaveText("12");
-  const campaignRow = canvas.locator('tr[data-open="11"]'),
+  const campaignRow = canvas.locator('tr[data-open="11"]').first(),
     campaignStatusBox = await campaignRow.locator(".delivery-status").boundingBox(),
     investmentCellBox = await campaignRow.locator("td").nth(1).boundingBox();
   assert.ok(campaignStatusBox && investmentCellBox, "Campaign row geometry is available");
@@ -293,7 +303,7 @@ try {
   await frame.locator('[data-filter="status"] summary').click();
   await activeStatus.uncheck();
   await archivedStatus.check();
-  const deletedCampaignRow = canvas.locator('tr[data-open="777"]');
+  const deletedCampaignRow = canvas.locator('tr[data-open="777"]').first();
   await expect(deletedCampaignRow).toContainText("Campanha excluída QA");
   await expect(deletedCampaignRow.locator(".delivery-status")).toHaveText(
     "Excluída/arquivada (Meta)",
