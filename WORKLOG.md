@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Persistência após sair da conta
+
+- Saída real até /login e novo login normal até /app, na mesma conta,
+  usando o preenchimento existente do navegador, sem copiar credenciais.
+- Após abrir Agendamentos, os 28 IDs, na mesma ordem, e suas larguras e
+  alturas foram exatamente iguais ao registro anterior à saída.
+- Visitas manteve 317×237 px em 4º; semanal, 477×439 px em 15º; comparação
+  de hoje, 441×441 px em 16º. Prints nativos após login, sem reconfiguração.
+- Somente documentação do teste; sem código, schema ou deploy da aplicação.
+
 ## 2026-10-30 — Tamanho e ordem após sair e voltar
 
 - Registrados os IDs e width/height dos 28 itens de Agendamentos. Saída pelo

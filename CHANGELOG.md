@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma no site que tamanho e ordem dos 28 cards e gráficos de Agendamentos
+  permanecem após sair da conta e entrar novamente na mesma conta.
+  Evidências após login, sem alteração da aplicação.
+
 - Confirma no site que os 28 itens de Agendamentos preservam ordem e dimensões
   ao sair para a Visão Geral e voltar à página, sem refazer configurações.
   Registro de validação, sem alteração da aplicação.
