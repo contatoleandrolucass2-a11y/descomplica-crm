@@ -10,6 +10,11 @@
   sem copiar tabela de clientes. Tamanho de teste mantido, sem mudar filtros.
 - Somente validação e registro documental; sem código, migration ou deploy.
   Evidências e limites em docs/knowledge/ATUALIZACOES.md.
+- Teste complementar nos gráficos Previstos e realizados hoje (390×410 px)
+  e Agendamentos por semana (490×450 px): após salvamento confirmado e reload,
+  medidas e campos dos editores permaneceram iguais. Print real capturado.
+  Primeira tentativa semanal exigiu reconfirmação antes do reload; limite
+  registrado no conhecimento, sem alegar aprovação de edição concorrente.
 
 ## 2026-10-29 — Identidade de Pastas no coletor Salesforce
 
