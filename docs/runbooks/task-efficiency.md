@@ -59,9 +59,12 @@ de produção continua exigindo os quatro jobs aprovados no SHA exato; a faixa
 rápida de PR não é prova de candidato publicável. Esta entrega altera o próprio
 pipeline e por isso também exige CI completa.
 
-Reduzir a matriz visual por página ou compartilhar fixtures em paralelo exige
-mapear dependências e isolar dados antes. Não foi implementado nesta revisão.
-Não foram alteradas proteções de branch nem permissões externas do GitHub.
+A matriz visual por impacto usa um classificador versionado e fail-closed. Rotas
+conhecidas podem executar cobertura focada; Meta Ads preserva seu QA dedicado sem
+repetir a matriz autenticada; mudanças globais, desconhecidas ou inconclusivas
+executam a matriz completa. A cobertura integral continua semanal e manual.
+Compartilhar fixtures em paralelo permanece fora do escopo. Não foram alteradas
+proteções de branch nem permissões externas do GitHub.
 
 Preservar gates obrigatórios, acesso no servidor, RLS, segurança, artefato imutável,
 backup, rollback, lock, CAS e health. Alterar o pipeline exige demanda explícita
