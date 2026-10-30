@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma no site que os 28 itens de Agendamentos preservam ordem e dimensões
+  ao sair para a Visão Geral e voltar à página, sem refazer configurações.
+  Registro de validação, sem alteração da aplicação.
+
 - Confirma no site a persistência da ordem após arrastar um card e um gráfico:
   a sequência dos 28 itens permaneceu idêntica após autosave e refresh completo.
   Sem alteração da aplicação.
