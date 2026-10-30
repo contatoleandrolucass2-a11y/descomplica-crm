@@ -411,13 +411,14 @@ describe("dashboard Meta Ads", () => {
   });
 
   it("integra o canvas configurável sem dados demonstrativos", async () => {
-    const [merge, adapter, canvas, exportControls, liveData] = await Promise.all([
+    const [merge, adapter, canvas, extraCharts, exportControls, liveData] = await Promise.all([
       readFile(
         new URL("../public/descomplica-ads-compact/canvas-merge.js", import.meta.url),
         "utf8",
       ),
       readFile(new URL("../public/canvas/adapter-ui.js", import.meta.url), "utf8"),
       readFile(new URL("../public/canvas/app.js", import.meta.url), "utf8"),
+      readFile(new URL("../public/canvas/extra-charts.js", import.meta.url), "utf8"),
       readFile(
         new URL("../public/descomplica-ads-compact/export-controls.js", import.meta.url),
         "utf8",
@@ -464,7 +465,13 @@ describe("dashboard Meta Ads", () => {
     expect(adapter).toContain("after>before");
     expect(adapter).toContain("addColumnBorderMagic(el)");
     expect(adapter).not.toContain("setInterval(refreshIntegrated,60000)");
-    expect(merge).toContain("/canvas/index.html?v=campaign-api-2");
+    expect(canvas).toContain("function chartDays(rs,start,end)");
+    expect(canvas).toContain("const days=chartDays(rs,from,to)");
+    expect(canvas).toContain("hi===0?0:.5");
+    expect(canvas).not.toContain("Sem dados para os filtros selecionados.");
+    expect(extraCharts).toContain("const emptyPeriod=!rs.length");
+    expect(extraCharts).not.toContain("Sem dados para os filtros selecionados.");
+    expect(merge).toContain("/canvas/index.html?v=zero-series-1");
     expect(liveData).toContain('campaignSelectionMode: "all"');
     expect(liveData).toContain('followApi = state.campaignSelectionMode === "all"');
     expect(liveData).toContain(

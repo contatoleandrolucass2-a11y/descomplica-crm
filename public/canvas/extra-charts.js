@@ -10,10 +10,11 @@ function previousRows(card){
 }
 function extraPlot(card,size){
  const rs=rows(card),ids=chartCampaigns(card),[start,end]=range(card);
- if(!rs.length)return '<div class="empty-chart">— Sem dados para os filtros selecionados.</div>';
+ if(!ids.length)return '<div class="empty-chart">Nenhuma campanha selecionada.</div>';
+ const emptyPeriod=!rs.length;
  if(card.type==='table')return host.campaignTableFor(ids.map(i=>campaigns[i]),{start,end});
  if(card.type==='kpi'){
-  const value=aggregate(rs,card.metric),previous=previousRows(card).length?aggregate(previousRows(card),card.metric):null;
+  const rawValue=aggregate(rs,card.metric),value=emptyPeriod&&rawValue==null?0:rawValue,previous=previousRows(card).length?aggregate(previousRows(card),card.metric):null;
   const delta=previous>0&&value!=null?(value/previous-1)*100:null;
   return `<div class="metric-tile"><span>${escapeLabel(metricLabels[card.metric])}</span><strong title="${escapeLabel(fmt(value,card.metric))}">${escapeLabel(fmt(value,card.metric))}</strong>${integration.compare?`<small>Anterior: ${fmt(previous,card.metric)} · ${delta==null?'—':delta.toLocaleString('pt-BR',{maximumFractionDigits:1})+'%'}</small>`:''}<small>${short(start)} – ${short(end)}</small></div>`;
  }

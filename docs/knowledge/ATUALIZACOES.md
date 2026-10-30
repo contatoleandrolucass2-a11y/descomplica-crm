@@ -819,6 +819,15 @@ exportacao.`; os documentos versionados permanecem a fonte registrada.
   completa depende da CI Linux isolada. O sync do Obsidian continua pendente
   pela falha `Documento excede o limite de exportacao.`.
 
+## 2026-10-30: períodos sem métricas no Canvas Meta Ads
+
+- A ausência de linhas da API no período não substitui mais gráficos por um
+  aviso vazio. Campanhas selecionadas, eixos, legendas e datas permanecem
+  visíveis com valores zero; somente a ausência de seleção mostra aviso.
+- Séries diárias usam todos os dias inclusivos do intervalo e radar totalmente
+  zerado fica no centro. A mudança não altera coleta, cálculos com dados reais,
+  persistência, permissões ou banco.
+
 ## 2026-10-26: persistencia e reconciliacao do Canvas Meta Ads
 
 - O perfil do Canvas passa a ter fonte autoritativa por usuário no banco, com
