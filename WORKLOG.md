@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-30 — Persistência da ordem após arrastar
+
+- Teste real: gráfico Agendamentos por semana arrastado para antes de Previstos
+  e realizados hoje; card Visitas realizadas passou da 6ª para a 4ª posição.
+  Sem editor, teclado de reordenação ou alteração de filtros.
+- Após confirmar o autosave e executar reload completo, a sequência dos
+  28 IDs ficou exatamente igual à observada depois dos arrastes. Visitas em 4º,
+  Gerentes em 5º, Vendas em 6º, semanal em 15º e gráfico de hoje em 16º.
+- Print nativo após refresh cobre os cards e gráficos, sem rankings ou tabela
+  de clientes. Registro documental, sem código, schema ou deploy da aplicação.
+
 ## 2026-10-30 — Persistência pelo canto dos gráficos
 
 - Teste real solicitado sem abrir o editor: arraste do canto nos dois eixos.

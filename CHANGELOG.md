@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma no site a persistência da ordem após arrastar um card e um gráfico:
+  a sequência dos 28 itens permaneceu idêntica após autosave e refresh completo.
+  Sem alteração da aplicação.
+
 - Confirma persistência de largura e altura em dois gráficos redimensionados
   pelo canto, sem editor: 441×441 e 477×439 px após autosave e refresh real.
   Registro de validação, sem alteração da aplicação.
