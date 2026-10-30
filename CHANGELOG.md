@@ -3,6 +3,8 @@
 - Confirma em navegador autenticado a persistência das dimensões de um card
   de Agendamentos após atualização completa: 317×237 px, com print do resultado.
   Registro de validação; nenhuma alteração da aplicação.
+- Confirma também largura e altura de dois gráficos após salvamento e refresh:
+  390×410 e 490×450 px, com print real. Sem mudança de código ou deploy.
 
 - Corrige a coleta de Pastas quando a coluna opcional de nome não é exposta
   pelo Salesforce. Preserva a identidade real do registro pela célula de status,
