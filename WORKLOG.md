@@ -10043,3 +10043,25 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
 - O ensaio SQL detectou uma divergência de mensagem para card malformado. O wrapper foi corrigido para preservar o erro legado; a asserção existente continua obrigatória. Nova CI necessária antes de aplicar a migration.
 
 - A digitação real por tecla revelou clamp antecipado dos campos de dimensão. O editor de Agendamentos agora mantém rascunhos textuais e confirma limites no blur/submit; campos de outras páginas preservados. Regressão de apagar, digitar 997/317 e salvar por Enter aprovada em navegador local. Tipos, lint e 15 testes do controlador/canvas passaram; nova CI necessária para esse ajuste de JS. A migration e o CSS não mudaram.
+
+### Publicação concluída em 29/10/2026
+
+- PR #424 integrado em `742ac0b14c575ef9ab2547960715afdc9fe2cfeb`.
+  CI push/main `40987863238`: validate, release-gates, isolated-restore e
+  promotable-image aprovados. CI do PR `40976138010` e captura protegida
+  `40976138005` também aprovadas; referências visuais preservadas.
+- Migration autorizada pelo usuário e aplicada via MCP após CI verde,
+  versão remota `20261029224915`, sem regravar perfis. Validador anterior
+  preservado e hashes/ACL conferidos novamente antes da publicação.
+- Artefato `12947094588`, checksum, configuração OCI, manifesto e 11 camadas
+  conferidos. Dois perfis de runtime aprovados na mesma imagem, sem rebuild
+  ou retag. Imagem anterior mantida para a recuperação prevista no runbook.
+- `release:production` concluiu sob trava/CAS e consulta ao vivo no minuto:
+  deployment `d0db9dd9-e228-4ea2-b3bd-e1b1a377bf13`, às 23:34:36 BRT
+  (`2026-10-30T02:34:36.508Z`), sem pendência. Health público HTTP 200/ok
+  confirmou o SHA; Agendamentos anônimo redireciona ao login e API de perfis
+  anônima retorna 401.
+- Limite: interação e roundtrip de persistência foram validados com fixtures
+  e banco isolado; não houve edição de perfil real em produção para o smoke.
+  Evidência completa em `docs/knowledge/ATUALIZACOES.md`. Este registro final
+  é exclusivamente documental e não exige reinício da aplicação.

@@ -3822,8 +3822,11 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Compacta os controles dos cards de Agendamentos, revela ícones por interação
   e remove o cabeçalho duplicado. Permite largura e altura em pixels, com
   persistência restrita à página e compatibilidade com cards anteriores.
-  A migration preparada exige autorização específica para aplicação remota.
+  Migration autorizada e aplicada via MCP, sem reescrever os perfis existentes.
 
 - Preserva a mensagem de rejeição de cards malformados no novo validador de dimensões de Agendamentos.
 
 - Permite digitar largura e altura completas no editor de Agendamentos, aplicando limites ao confirmar o campo ou salvar, sem alterar o número a cada tecla.
+- Publica os cards pelo PR #424 no SHA `742ac0b1`, após CI completa de main,
+  prova da imagem imutável e promoção protegida. Health e versão confirmados
+  em 29/10/2026 às 23:35 BRT.
