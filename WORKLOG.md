@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-30 — Tamanho e ordem após sair e voltar
+
+- Registrados os IDs e width/height dos 28 itens de Agendamentos. Saída pelo
+  link Visão Geral, com URL /app confirmada; retorno por navegação direta à
+  URL conhecida de Agendamentos, sem alterar layouts ou filtros.
+- Após carregar o perfil, a comparação integral dos 28 registros foi idêntica:
+  ordem e dimensões preservadas. Visitas em 4º/317×237 px, semanal em
+  15º/477×439 px e comparação de hoje em 16º/441×441 px.
+- Print nativo após o retorno entregue sem rankings ou tabela de clientes.
+  Somente validação/documentação; sem código ou nova publicação da aplicação.
+
 ## 2026-10-30 — Persistência da ordem após arrastar
 
 - Teste real: gráfico Agendamentos por semana arrastado para antes de Previstos
