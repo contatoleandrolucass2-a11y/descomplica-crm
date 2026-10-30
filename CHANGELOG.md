@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma em navegador autenticado a persistência das dimensões de um card
+  de Agendamentos após atualização completa: 317×237 px, com print do resultado.
+  Registro de validação; nenhuma alteração da aplicação.
+
 - Corrige a coleta de Pastas quando a coluna opcional de nome não é exposta
   pelo Salesforce. Preserva a identidade real do registro pela célula de status,
   sem usar FID, modificar relatórios ou dispensar a reconciliação da coleta.
