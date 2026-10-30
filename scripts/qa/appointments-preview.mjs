@@ -7,9 +7,15 @@ import path from "node:path";
 import { pathToFileURL } from "node:url";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
+import { runAppointmentsFirstSave } from "./appointments-first-save.mjs";
 
 const root = path.resolve(import.meta.dirname, "../..");
-const outputRoot = path.join(root, "test-results/appointments-preview");
+const outputRoot = path.join(
+  root,
+  process.argv.includes("--first-save-only")
+    ? "test-results/appointments-first-save"
+    : "test-results/appointments-preview",
+);
 const componentDirectory = "app/(protected)/app/etapas/_components";
 const require = createRequire(import.meta.url);
 const vitestRequire = createRequire(require.resolve("vitest/package.json"));
@@ -701,6 +707,11 @@ export async function runAppointmentsPreview() {
     page.on("console", (message) => {
       if (message.type() === "error") evidence.browserErrors.push(message.text());
     });
+    if (process.argv.includes("--first-save-only")) {
+      await runAppointmentsFirstSave({ page, origin, evidence });
+      evidence.passed = true;
+      return;
+    }
     if (process.argv.includes("--canvas-only")) {
       await runCanvasPreview({ page, origin, evidence, check });
       check(!evidence.browserErrors.length, "Browser JavaScript errors");
@@ -1730,6 +1741,7 @@ export async function runAppointmentsPreview() {
     evidence.passed = !evidence.failures.length;
   } catch (error) {
     evidence.failures.push(error.stack);
+    if (process.argv.includes("--first-save-only")) process.exitCode = 1;
   } finally {
     await writeFile(path.join(outputRoot, "result.json"), `${JSON.stringify(evidence, null, 2)}\n`);
     await browser?.close();

@@ -261,6 +261,10 @@ export function ConfigurableDashboardCanvas({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
   const [editorMode, setEditorMode] = useState<"add" | "edit">("add");
+  const [editorSaving, setEditorSaving] = useState(false);
+  const [editorSaveError, setEditorSaveError] = useState("");
+  const [editorSaveAttempt, setEditorSaveAttempt] = useState(0);
+  const pendingEditorSnapshotRef = useRef<string | null>(null);
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
   const [actionsCardId, setActionsCardId] = useState<string | null>(null);
   const actionsCardWidthRef = useRef<number | undefined>(undefined);
@@ -285,11 +289,16 @@ export function ConfigurableDashboardCanvas({
   const cacheKey = profileCacheKey(pageKey, scopeKey);
   const cards = state.present.cards;
   const serializedCards = useMemo(() => cardsSnapshot(cards, layoutPolicy), [cards, layoutPolicy]);
+  const latestSnapshotRef = useRef(serializedCards);
   const validSelectedIds = useMemo(() => {
     const cardIds = new Set(cards.map(({ id }) => id));
     return new Set([...selectedIds].filter((id) => cardIds.has(id)));
   }, [cards, selectedIds]);
   const activeProfile = profiles.find(({ id }) => id === activeProfileId) ?? null;
+
+  useEffect(() => {
+    latestSnapshotRef.current = serializedCards;
+  }, [serializedCards]);
 
   useEffect(() => {
     const next = cardsSnapshot(initialCards, layoutPolicy);
@@ -427,57 +436,100 @@ export function ConfigurableDashboardCanvas({
 
   useEffect(() => {
     if (!editable || !activeProfile || serializedCards === lastSavedSnapshotRef.current) return;
+    let cancelled = false;
+    if (layoutPolicy?.freeResize)
+      queueMicrotask(() => {
+        if (!cancelled) setSaveState("saving");
+      });
     const profileId = activeProfile.id;
     const profileVersion = activeProfile.version;
-    const timeout = window.setTimeout(() => {
-      if (saveInFlightRef.current) return;
-      saveInFlightRef.current = true;
-      setSaveState("saving");
-      void profileRequest<{ profile: RemoteDashboardProfile }>(
-        `/api/dashboard-profiles/${encodeURIComponent(profileId)}`,
-        {
-          method: "PATCH",
-          body: JSON.stringify({
-            cards,
-            schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
-            version: profileVersion,
-          }),
-        },
-      )
-        .then(({ profile }) => {
-          lastSavedSnapshotRef.current = serializedCards;
-          setProfiles((current) => {
-            const next = current.map((entry) => (entry.id === profile.id ? profile : entry));
-            writeCachedProfiles(cacheKey, next);
-            return next;
-          });
-          setProfilesSource("server");
-          setSaveState("saved");
-          setProfileMessage("");
-        })
-        .catch((error: unknown) => {
-          if (error instanceof ProfileRequestError && error.status === 409) {
-            setSaveState("conflict");
-            setProfileMessage(
-              "O perfil mudou em outra sessão. Recarregue a versão remota antes de salvar.",
+    const timeout = window.setTimeout(
+      () => {
+        if (saveInFlightRef.current) return;
+        saveInFlightRef.current = true;
+        setSaveState("saving");
+        void profileRequest<{ profile: RemoteDashboardProfile }>(
+          `/api/dashboard-profiles/${encodeURIComponent(profileId)}`,
+          {
+            method: "PATCH",
+            body: JSON.stringify({
+              cards,
+              schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
+              version: profileVersion,
+            }),
+            ...(layoutPolicy?.freeResize ? { signal: AbortSignal.timeout(15_000) } : {}),
+          },
+        )
+          .then(({ profile }) => {
+            lastSavedSnapshotRef.current = serializedCards;
+            setProfiles((current) => {
+              const next = current.map((entry) => (entry.id === profile.id ? profile : entry));
+              writeCachedProfiles(cacheKey, next);
+              return next;
+            });
+            setProfilesSource("server");
+            setSaveState(
+              layoutPolicy?.freeResize && latestSnapshotRef.current !== serializedCards
+                ? "saving"
+                : "saved",
             );
-            return;
-          }
-          setSaveState("failure");
-          setProfileMessage(
-            "Falha ao salvar no servidor. A edição local não substituiu o perfil remoto.",
-          );
-          const fallback = profiles.map((entry) =>
-            entry.id === profileId ? { ...entry, cards: [...cards] } : entry,
-          );
-          writeCachedProfiles(cacheKey, fallback);
-        })
-        .finally(() => {
-          saveInFlightRef.current = false;
-        });
-    }, 700);
-    return () => window.clearTimeout(timeout);
-  }, [activeProfile, cacheKey, cards, editable, profiles, serializedCards]);
+            setProfileMessage("");
+            if (pendingEditorSnapshotRef.current === serializedCards) {
+              pendingEditorSnapshotRef.current = null;
+              setEditorSaving(false);
+              setEditorCard(null);
+            }
+          })
+          .catch((error: unknown) => {
+            const editorPending = pendingEditorSnapshotRef.current !== null;
+            pendingEditorSnapshotRef.current = null;
+            if (editorPending) setEditorSaving(false);
+            if (error instanceof ProfileRequestError && error.status === 409) {
+              setSaveState("conflict");
+              setProfileMessage(
+                "O perfil mudou em outra sessão. Recarregue a versão remota antes de salvar.",
+              );
+              if (editorPending)
+                setEditorSaveError(
+                  "O perfil mudou em outra sessão. Recarregue a versão remota antes de salvar.",
+                );
+              return;
+            }
+            setSaveState("failure");
+            setProfileMessage(
+              editorPending
+                ? "Não foi possível confirmar o salvamento. Sua edição foi mantida; tente novamente."
+                : "Falha ao salvar no servidor. A edição local não substituiu o perfil remoto.",
+            );
+            if (editorPending)
+              setEditorSaveError(
+                "Não foi possível confirmar o salvamento. Sua edição foi mantida; tente novamente.",
+              );
+            const fallback = profiles.map((entry) =>
+              entry.id === profileId ? { ...entry, cards: [...cards] } : entry,
+            );
+            writeCachedProfiles(cacheKey, fallback);
+          })
+          .finally(() => {
+            saveInFlightRef.current = false;
+          });
+      },
+      pendingEditorSnapshotRef.current === serializedCards ? 0 : 700,
+    );
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeout);
+    };
+  }, [
+    activeProfile,
+    cacheKey,
+    cards,
+    editable,
+    editorSaveAttempt,
+    layoutPolicy,
+    profiles,
+    serializedCards,
+  ]);
 
   const renderDashboardContent = useCallback(
     (card: DashboardCard, size: DashboardCardSize) => {
@@ -494,6 +546,7 @@ export function ConfigurableDashboardCanvas({
   );
 
   function openNewCard() {
+    setEditorSaveError("");
     const card = createCatalogCard({
       catalog,
       compatibility,
@@ -507,15 +560,31 @@ export function ConfigurableDashboardCanvas({
   }
 
   function saveEditor(card: DashboardCard) {
-    dispatch(
+    if (editorSaving) return;
+    const action =
       editorMode === "add"
-        ? { type: "add-card", card }
-        : { type: "update-card", cardId: card.id, patch: card },
-    );
-    setEditorCard(null);
+        ? ({ type: "add-card", card } as const)
+        : ({ type: "update-card", cardId: card.id, patch: card } as const);
+    const next = canvasReducer(state, action);
+    dispatch(action);
+    if (!layoutPolicy?.freeResize) {
+      setEditorCard(null);
+      return;
+    }
+    const snapshot = cardsSnapshot(next.present.cards, layoutPolicy);
+    if (snapshot === lastSavedSnapshotRef.current) {
+      setEditorCard(null);
+      return;
+    }
+    pendingEditorSnapshotRef.current = snapshot;
+    setEditorSaveError("");
+    setEditorSaving(true);
+    setSaveState("saving");
+    setEditorSaveAttempt((attempt) => attempt + 1);
   }
 
   function openCardEditor(card: DashboardCard, renderedWidth?: number) {
+    setEditorSaveError("");
     setEditorMode("edit");
     setEditorCard(
       layoutPolicy?.freeResize
@@ -991,7 +1060,15 @@ export function ConfigurableDashboardCanvas({
           catalog={catalog}
           compatibility={compatibility}
           layoutPolicy={layoutPolicy}
-          onClose={() => setEditorCard(null)}
+          saving={editorSaving}
+          saveError={editorSaveError}
+          saveUnavailable={Boolean(
+            layoutPolicy?.freeResize &&
+            (profilesLoading || profilesSource !== "server" || !activeProfile),
+          )}
+          onClose={() => {
+            if (!editorSaving) setEditorCard(null);
+          }}
           onDelete={
             editorMode === "edit"
               ? () => {
@@ -1230,6 +1307,9 @@ function CardEditor({
   catalog,
   compatibility,
   layoutPolicy,
+  saving,
+  saveError,
+  saveUnavailable,
   onClose,
   onDelete,
   onSave,
@@ -1239,6 +1319,9 @@ function CardEditor({
   catalog: ConfigurableDashboardCatalog;
   compatibility?: ConfigurableDashboardCompatibility | undefined;
   layoutPolicy?: DashboardCardLayoutPolicy | undefined;
+  saving: boolean;
+  saveError: string;
+  saveUnavailable: boolean;
   onClose: () => void;
   onDelete?: (() => void) | undefined;
   onSave: (card: DashboardCard) => void;
@@ -1317,20 +1400,26 @@ function CardEditor({
       footer={
         <>
           {onDelete ? (
-            <button type="button" className={styles.dangerButton} onClick={onDelete}>
+            <button
+              type="button"
+              className={styles.dangerButton}
+              onClick={onDelete}
+              disabled={saving}
+            >
               <Trash2 size={16} aria-hidden="true" /> Excluir
             </button>
           ) : null}
-          <button type="button" onClick={onClose}>
+          <button type="button" onClick={onClose} disabled={saving}>
             Cancelar
           </button>
           <button
             type="submit"
             form="dashboard-card-editor"
             className={styles.primaryButton}
-            disabled={!customDatesValid}
+            disabled={!customDatesValid || saving || saveUnavailable}
           >
-            <Save size={16} aria-hidden="true" /> {mode === "add" ? "Adicionar" : "Salvar"}
+            <Save size={16} aria-hidden="true" />{" "}
+            {saving ? "Salvando…" : mode === "add" ? "Adicionar" : "Salvar"}
           </button>
         </>
       }
@@ -1338,14 +1427,18 @@ function CardEditor({
       <form
         id="dashboard-card-editor"
         className={styles.editorForm}
+        aria-busy={saving}
         onSubmit={(event) => {
           event.preventDefault();
-          if (customDatesValid) onSave(cardWithDraftDimensions());
+          if (customDatesValid && !saving && !saveUnavailable) onSave(cardWithDraftDimensions());
         }}
       >
+        {saveError ? <p role="alert">{saveError}</p> : null}
+        {saveUnavailable ? <p role="status">Aguardando o perfil do servidor para salvar.</p> : null}
         <label>
           Título
           <input
+            disabled={saving}
             value={card.title ?? ""}
             maxLength={120}
             placeholder="Opcional"
@@ -1360,6 +1453,7 @@ function CardEditor({
         <label>
           Texto complementar
           <textarea
+            disabled={saving}
             value={card.presentation?.content ?? ""}
             maxLength={240}
             rows={3}
@@ -1370,6 +1464,7 @@ function CardEditor({
         <label>
           Largura do card
           <input
+            disabled={saving}
             type="number"
             min={layoutPolicy?.freeResize ? FREE_CARD_MIN_WIDTH : layoutLimits.minColumnSpan}
             max={layoutPolicy?.freeResize ? FREE_CARD_MAX_SIZE : 12}
@@ -1405,6 +1500,7 @@ function CardEditor({
         <label>
           Altura do card
           <input
+            disabled={saving}
             type="number"
             min={layoutPolicy?.freeResize ? FREE_CARD_MIN_HEIGHT : layoutLimits.minHeight}
             max={
@@ -1438,6 +1534,7 @@ function CardEditor({
         <label>
           Tamanho da fonte
           <input
+            disabled={saving}
             type="range"
             min={75}
             max={150}
@@ -1452,6 +1549,7 @@ function CardEditor({
         <label>
           Alinhamento horizontal
           <select
+            disabled={saving}
             value={card.presentation?.textAlign ?? "center"}
             onChange={(event) =>
               updatePresentation({
@@ -1469,6 +1567,7 @@ function CardEditor({
         <label>
           Posição vertical
           <select
+            disabled={saving}
             value={card.presentation?.verticalAlign ?? "center"}
             onChange={(event) =>
               updatePresentation({
@@ -1486,6 +1585,7 @@ function CardEditor({
         <label>
           Cor do texto
           <input
+            disabled={saving}
             type="color"
             value={card.presentation?.textColor ?? "#d9e8f2"}
             onChange={(event) => updatePresentation({ textColor: event.target.value })}
@@ -1494,6 +1594,7 @@ function CardEditor({
         <label>
           Cor do gráfico e destaques
           <input
+            disabled={saving}
             type="color"
             value={card.presentation?.accentColor ?? "#55c4dc"}
             onChange={(event) => updatePresentation({ accentColor: event.target.value })}
@@ -1503,6 +1604,7 @@ function CardEditor({
           <label>
             Altura ou alcance das torres
             <input
+              disabled={saving}
               type="range"
               min={50}
               max={150}
@@ -1517,7 +1619,11 @@ function CardEditor({
         ) : null}
         <label>
           Métrica
-          <select value={card.metric} onChange={(event) => updateMetric(event.target.value)}>
+          <select
+            disabled={saving}
+            value={card.metric}
+            onChange={(event) => updateMetric(event.target.value)}
+          >
             {catalog.metrics.map((metric) => (
               <option key={metric.key} value={metric.key}>
                 {metric.label}
@@ -1528,6 +1634,7 @@ function CardEditor({
         <label>
           Modelo
           <select
+            disabled={saving}
             value={card.type}
             onChange={(event) =>
               setCard(
@@ -1552,6 +1659,7 @@ function CardEditor({
         <label>
           Agrupamento
           <select
+            disabled={saving}
             value={card.groupBy}
             onChange={(event) =>
               setCard({ ...card, groupBy: event.target.value as DashboardGroupBy })
@@ -1569,6 +1677,7 @@ function CardEditor({
         <label>
           Período
           <select
+            disabled={saving}
             value={card.period}
             onChange={(event) => {
               const period = event.target.value as DashboardPeriod;
@@ -1594,6 +1703,7 @@ function CardEditor({
             <label>
               Data inicial
               <input
+                disabled={saving}
                 type="date"
                 value={card.startDate ?? ""}
                 required
@@ -1603,6 +1713,7 @@ function CardEditor({
             <label>
               Data final
               <input
+                disabled={saving}
                 type="date"
                 value={card.endDate ?? ""}
                 required
@@ -1619,6 +1730,7 @@ function CardEditor({
             <legend>Entidades</legend>
             <label>
               <input
+                disabled={saving}
                 type="checkbox"
                 checked={card.entityIds === null}
                 onChange={(event) =>
@@ -1631,7 +1743,7 @@ function CardEditor({
               <label key={entity.id}>
                 <input
                   type="checkbox"
-                  disabled={card.entityIds === null}
+                  disabled={saving || card.entityIds === null}
                   checked={card.entityIds?.includes(entity.id) ?? false}
                   onChange={(event) => {
                     const current = card.entityIds ?? [];
@@ -1656,6 +1768,7 @@ function CardEditor({
               .map(({ key, label }) => (
                 <label key={key}>
                   <input
+                    disabled={saving}
                     type="checkbox"
                     checked={card.options?.[key] ?? false}
                     onChange={(event) => updateOption(key, event.target.checked)}

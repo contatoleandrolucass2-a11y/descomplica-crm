@@ -1,5 +1,19 @@
 # Worklog
 
+## 2026-10-30 — Agendamentos: salvar dimensões na primeira confirmação
+
+- Reprodução local: o editor fechava com o status anterior de sucesso antes
+  de enviar PATCH; o debounce de 700 ms permitia perder o tamanho em refresh
+  imediato. A hipótese anterior de edição concorrente não reproduziu a perda.
+- Confirmação explícita agora envia imediatamente e mantém o editor ocupado
+  até receber o servidor. Se outro autosave estiver em voo, a próxima gravação
+  usa sua versão confirmada; falhas preservam valores e conflitos não sobrescrevem.
+- Opt-in restrito à política de dimensões de Agendamentos. Sem schema, RLS,
+  grants, permissões, CSS ou mudanças de comportamento nas demais páginas.
+- Prova antes/depois do refresh imediato, cinco cenários de navegador focados,
+  oito grupos de interações existentes e 49 testes unitários aprovados; tipos
+  e lint focados aprovados. CI, integração e publicação ainda pendentes.
+
 ## 2026-10-30 — Persistência real das dimensões de Agendamentos
 
 - Pedido de teste no site com atualização da página e print. Na sessão real,

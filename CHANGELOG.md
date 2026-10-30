@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige a confirmação das dimensões em Agendamentos: o editor aguarda a
+  gravação no servidor antes de fechar, sem exigir uma segunda confirmação.
+  Falhas preservam a edição e o indicador não antecipa sucesso durante a espera.
+
 - Confirma em navegador autenticado a persistência das dimensões de um card
   de Agendamentos após atualização completa: 317×237 px, com print do resultado.
   Registro de validação; nenhuma alteração da aplicação.
