@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-30 — Persistência pelo canto dos gráficos
+
+- Teste real solicitado sem abrir o editor: arraste do canto nos dois eixos.
+  Previstos e realizados hoje passou de 397×417 para 441×441 px; Agendamentos
+  por semana passou de 497×457 para 477×439 px. Zero diálogos abertos.
+- A interface exibiu alteração de tamanho e salvamento automático; depois
+  de confirmar Salvo automaticamente, foi executado reload completo. Medidas
+  renderizadas e estilos mantiveram 441×441 e 477×439 px, sem trocar filtros.
+- Print nativo após refresh entregue com foco nos gráficos, sem rankings ou
+  tabela de clientes. Somente validação/documentação; nenhum código ou deploy.
+
 ## 2026-10-30 — Agendamentos: salvar dimensões na primeira confirmação
 
 - Reprodução local: o editor fechava com o status anterior de sucesso antes

@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma persistência de largura e altura em dois gráficos redimensionados
+  pelo canto, sem editor: 441×441 e 477×439 px após autosave e refresh real.
+  Registro de validação, sem alteração da aplicação.
+
 - Corrige a confirmação das dimensões em Agendamentos: o editor aguarda a
   gravação no servidor antes de fechar, sem exigir uma segunda confirmação.
   Falhas preservam a edição e o indicador não antecipa sucesso durante a espera.
