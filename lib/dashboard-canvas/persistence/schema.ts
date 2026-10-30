@@ -83,7 +83,7 @@ const dashboardEntityIdSchema = z.string().min(1).max(128).regex(identifierPatte
 const dashboardDateSchema = z.string().refine(isCivilDate, "invalid_civil_date");
 const dashboardColorSchema = z.string().regex(/^#[0-9a-f]{6}$/iu);
 
-export const dashboardCardSchema = z
+const dashboardCardDocumentSchema = z
   .object({
     id: dashboardCardIdSchema,
     type: z.enum(DASHBOARD_CARD_TYPES),
@@ -111,6 +111,7 @@ export const dashboardCardSchema = z
           .max(DASHBOARD_PROFILE_MAX_CARDS - 1),
         columnSpan: z.number().int().min(1).max(12),
         height: z.number().int().min(1).max(16_384),
+        width: z.number().int().min(128).max(16_384).optional(),
       })
       .strict(),
     options: z
@@ -137,21 +138,6 @@ export const dashboardCardSchema = z
   })
   .strict()
   .superRefine((card, context) => {
-    const limits = layoutLimits[card.type];
-    if (card.layout.columnSpan < limits.minColumnSpan) {
-      context.addIssue({
-        code: "custom",
-        message: "invalid_card_span",
-        path: ["layout", "columnSpan"],
-      });
-    }
-    if (card.layout.height < limits.minHeight) {
-      context.addIssue({
-        code: "custom",
-        message: "invalid_card_height",
-        path: ["layout", "height"],
-      });
-    }
     if (card.period === "custom") {
       if (!card.startDate || !card.endDate) {
         context.addIssue({ code: "custom", message: "missing_custom_period" });
@@ -164,6 +150,29 @@ export const dashboardCardSchema = z
       context.addIssue({ code: "custom", message: "unexpected_period_dates" });
     }
   });
+
+// Keep the generic legacy card validator strict. Relaxed dimensions are only
+// accepted by profile envelopes after their authorized page is known.
+export const dashboardCardSchema = dashboardCardDocumentSchema.superRefine((card, context) => {
+  const limits = layoutLimits[card.type];
+  if (card.layout.columnSpan < limits.minColumnSpan) {
+    context.addIssue({
+      code: "custom",
+      message: "invalid_card_span",
+      path: ["layout", "columnSpan"],
+    });
+  }
+  if (card.layout.height < limits.minHeight) {
+    context.addIssue({
+      code: "custom",
+      message: "invalid_card_height",
+      path: ["layout", "height"],
+    });
+  }
+  if (card.layout.width !== undefined) {
+    context.addIssue({ code: "custom", message: "invalid_card_width", path: ["layout", "width"] });
+  }
+});
 
 function cardSignature(card: z.infer<typeof dashboardCardSchema>): string {
   return [
@@ -181,37 +190,52 @@ export function dashboardCardsMatchPageLayout(
   pageKey: string,
   cards: readonly z.infer<typeof dashboardCardSchema>[],
 ): boolean {
-  if (pageKey === "crm.stage.appointments") return true;
-  return cards.every((card) => card.layout.height <= layoutLimits[card.type].maxHeight);
+  if (pageKey === "crm.stage.appointments") {
+    return cards.every((card) => card.layout.height >= 72);
+  }
+  return cards.every((card) => {
+    const limits = layoutLimits[card.type];
+    return (
+      card.layout.width === undefined &&
+      card.layout.columnSpan >= limits.minColumnSpan &&
+      card.layout.height >= limits.minHeight &&
+      card.layout.height <= limits.maxHeight
+    );
+  });
 }
 
-export const dashboardCardsSchema = z
-  .array(dashboardCardSchema)
-  .max(DASHBOARD_PROFILE_MAX_CARDS)
-  .superRefine((cards, context) => {
-    const ids = new Set<string>();
-    const orders = new Set<number>();
-    const signatures = new Set<string>();
-    for (const [index, card] of cards.entries()) {
-      const signature = cardSignature(card);
-      if (ids.has(card.id)) {
-        context.addIssue({ code: "custom", message: "duplicate_card_id", path: [index, "id"] });
+function cardsSchema(cardSchema: typeof dashboardCardSchema | typeof dashboardCardDocumentSchema) {
+  return z
+    .array(cardSchema)
+    .max(DASHBOARD_PROFILE_MAX_CARDS)
+    .superRefine((cards, context) => {
+      const ids = new Set<string>();
+      const orders = new Set<number>();
+      const signatures = new Set<string>();
+      for (const [index, card] of cards.entries()) {
+        const signature = cardSignature(card);
+        if (ids.has(card.id)) {
+          context.addIssue({ code: "custom", message: "duplicate_card_id", path: [index, "id"] });
+        }
+        if (orders.has(card.layout.order)) {
+          context.addIssue({
+            code: "custom",
+            message: "duplicate_card_order",
+            path: [index, "layout", "order"],
+          });
+        }
+        if (signatures.has(signature)) {
+          context.addIssue({ code: "custom", message: "duplicate_card_signature", path: [index] });
+        }
+        ids.add(card.id);
+        orders.add(card.layout.order);
+        signatures.add(signature);
       }
-      if (orders.has(card.layout.order)) {
-        context.addIssue({
-          code: "custom",
-          message: "duplicate_card_order",
-          path: [index, "layout", "order"],
-        });
-      }
-      if (signatures.has(signature)) {
-        context.addIssue({ code: "custom", message: "duplicate_card_signature", path: [index] });
-      }
-      ids.add(card.id);
-      orders.add(card.layout.order);
-      signatures.add(signature);
-    }
-  });
+    });
+}
+
+export const dashboardCardsSchema = cardsSchema(dashboardCardSchema);
+const dashboardPageCardsSchema = cardsSchema(dashboardCardDocumentSchema);
 
 export const dashboardProfileNameSchema = safeText(80);
 
@@ -229,7 +253,7 @@ export const dashboardProfileCreateSchema = z
     name: dashboardProfileNameSchema,
     isDefault: z.boolean().optional().default(false),
     schemaVersion: z.literal(DASHBOARD_PROFILE_SCHEMA_VERSION).optional().default(2),
-    cards: dashboardCardsSchema,
+    cards: dashboardPageCardsSchema,
   })
   .strict()
   .superRefine((profile, context) => {
@@ -244,7 +268,7 @@ export const dashboardProfileCreateSchema = z
 export const dashboardProfilePatchSchema = z
   .object({
     name: dashboardProfileNameSchema.optional(),
-    cards: dashboardCardsSchema.optional(),
+    cards: dashboardPageCardsSchema.optional(),
     schemaVersion: z.literal(DASHBOARD_PROFILE_SCHEMA_VERSION).optional(),
     version: dashboardProfileVersionSchema,
   })
@@ -269,7 +293,7 @@ export const dashboardProfileRecordSchema = z
     isDefault: z.boolean(),
     schemaVersion: z.literal(DASHBOARD_PROFILE_SCHEMA_VERSION),
     version: dashboardProfileVersionSchema,
-    cards: dashboardCardsSchema,
+    cards: dashboardPageCardsSchema,
     createdAt: z.string().datetime({ offset: true }),
     updatedAt: z.string().datetime({ offset: true }),
   })

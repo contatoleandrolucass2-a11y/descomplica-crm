@@ -9,6 +9,16 @@
   min-width: 0;
 }
 
+.shell[data-free-resize="true"] .grid {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+.shell[data-free-resize="true"] .grid > :is(.card, .placeholder) {
+  flex: 0 0 auto;
+}
+
 .card,
 .placeholder {
   min-width: 0;
@@ -166,18 +176,99 @@
   grid-template-rows: minmax(0, 1fr);
 }
 
+.shell[data-compact-controls="true"] .card {
+  grid-template-rows: minmax(0, 1fr);
+}
+
+.shell[data-compact-controls="true"] .header {
+  position: absolute;
+  z-index: 9;
+  top: 0.25rem;
+  left: 0.25rem;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  border-radius: 0.4rem;
+  background: var(--analytics-surface);
+}
+
+.shell[data-compact-controls="true"] .dragHandle {
+  width: 1.5rem;
+  height: 1.5rem;
+  flex-basis: 1.5rem;
+}
+
+.shell[data-compact-controls="true"] .dragHandle svg {
+  width: 0.875rem;
+  height: 0.875rem;
+}
+
+.shell[data-compact-controls="true"] .resizeHandle {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.shell[data-compact-controls="true"] .resizeHandle::after {
+  right: 0.3rem;
+  bottom: 0.3rem;
+  width: 0.6rem;
+  height: 0.6rem;
+}
+
+.shell[data-compact-controls="true"] :is(.header, .resizeHandle) {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.shell[data-compact-controls="true"]
+  :is(.card:hover, .card:focus-within, .active)
+  :is(.header, .resizeHandle) {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .shell[data-compact-controls="true"] :is(.header, .resizeHandle) {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .shell[data-compact-controls="true"] .dragHandle,
+  .shell[data-compact-controls="true"] .resizeHandle {
+    width: 2.75rem;
+    height: 2.75rem;
+  }
+
+  .shell[data-compact-controls="true"] .dragHandle {
+    flex-basis: 2.75rem;
+  }
+}
+
 .shell[data-readonly="true"] .header,
 .shell[data-readonly="true"] .resizeHandle {
   display: none;
 }
 
 @media (max-width: 720px) {
+  .shell[data-free-resize="true"] .grid > :is(.card, .placeholder):not([data-fixed-width]) {
+    width: 100% !important;
+  }
   .grid > .card,
   .grid > .placeholder {
     grid-column: 1 / -1 !important;
   }
 
   .resizeHandle {
+    display: none;
+  }
+
+  .shell[data-free-resize="true"]:not([data-readonly="true"]) .resizeHandle {
+    display: block;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  .shell[data-free-resize="true"][data-compact-controls="true"] .resizeHandle {
     display: none;
   }
 }

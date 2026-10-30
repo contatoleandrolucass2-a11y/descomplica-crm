@@ -3818,3 +3818,12 @@ FGTS sobreposto. Subsídio, seguros e taxa SBPE exigem parâmetros confirmados;
 incertezas são explícitas. Autorização de servidor e APIs bancárias preservadas.
 Origem, fórmulas, diferenças necessárias e limites em docs/simulators/CAIXA.md.
 Validação e publicação serão registradas com evidências ao concluir os gates.
+
+- Compacta os controles dos cards de Agendamentos, revela ícones por interação
+  e remove o cabeçalho duplicado. Permite largura e altura em pixels, com
+  persistência restrita à página e compatibilidade com cards anteriores.
+  A migration preparada exige autorização específica para aplicação remota.
+
+- Preserva a mensagem de rejeição de cards malformados no novo validador de dimensões de Agendamentos.
+
+- Permite digitar largura e altura completas no editor de Agendamentos, aplicando limites ao confirmar o campo ou salvar, sem alterar o número a cada tecla.

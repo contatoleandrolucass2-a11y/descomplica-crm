@@ -17,6 +17,7 @@ import {
   Download,
   Expand,
   LayoutGrid,
+  MoreHorizontal,
   Pencil,
   Plus,
   Redo2,
@@ -31,6 +32,9 @@ import { DashboardCanvas } from "../dashboard-canvas";
 import {
   DASHBOARD_CARD_LAYOUT_LIMITS,
   constrainCardLayout,
+  FREE_CARD_MIN_WIDTH,
+  FREE_CARD_MIN_HEIGHT,
+  FREE_CARD_MAX_SIZE,
   type DashboardCardLayoutPolicy,
 } from "../../layout/limits";
 import { canvasReducer, createCanvasHistoryState } from "../../state/reducer";
@@ -150,11 +154,14 @@ function createCardId() {
   return `card-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
 }
 
-function cardsSnapshot(cards: readonly DashboardCard[]) {
-  return serializeCanvasSnapshot({
-    schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
-    cards: [...cards],
-  });
+function cardsSnapshot(cards: readonly DashboardCard[], layoutPolicy?: DashboardCardLayoutPolicy) {
+  return serializeCanvasSnapshot(
+    {
+      schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
+      cards: [...cards],
+    },
+    layoutPolicy,
+  );
 }
 
 function statusLabel(state: SaveState) {
@@ -242,6 +249,7 @@ export function ConfigurableDashboardCanvas({
   profileControls = true,
   automaticProfileName,
   hideCardActionsByDefault = false,
+  compactCardControls = false,
   layoutPolicy,
   hideCardOverflow = false,
   addButtonLabel = "Adicionar",
@@ -254,6 +262,9 @@ export function ConfigurableDashboardCanvas({
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
   const [editorMode, setEditorMode] = useState<"add" | "edit">("add");
   const [expandedCardId, setExpandedCardId] = useState<string | null>(null);
+  const [actionsCardId, setActionsCardId] = useState<string | null>(null);
+  const actionsCardWidthRef = useRef<number | undefined>(undefined);
+  const toolbarRef = useRef<HTMLDivElement>(null);
   const [showProfiles, setShowProfiles] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [exportSelection, setExportSelection] = useState<Set<string>>(new Set());
@@ -268,12 +279,12 @@ export function ConfigurableDashboardCanvas({
   const [profileName, setProfileName] = useState("");
   const [profileDraftNames, setProfileDraftNames] = useState<Record<string, string>>({});
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
-  const initialSnapshotRef = useRef(cardsSnapshot(initialCards));
+  const initialSnapshotRef = useRef(cardsSnapshot(initialCards, layoutPolicy));
   const lastSavedSnapshotRef = useRef<string | null>(null);
   const saveInFlightRef = useRef(false);
   const cacheKey = profileCacheKey(pageKey, scopeKey);
   const cards = state.present.cards;
-  const serializedCards = useMemo(() => cardsSnapshot(cards), [cards]);
+  const serializedCards = useMemo(() => cardsSnapshot(cards, layoutPolicy), [cards, layoutPolicy]);
   const validSelectedIds = useMemo(() => {
     const cardIds = new Set(cards.map(({ id }) => id));
     return new Set([...selectedIds].filter((id) => cardIds.has(id)));
@@ -281,12 +292,12 @@ export function ConfigurableDashboardCanvas({
   const activeProfile = profiles.find(({ id }) => id === activeProfileId) ?? null;
 
   useEffect(() => {
-    const next = cardsSnapshot(initialCards);
+    const next = cardsSnapshot(initialCards, layoutPolicy);
     if (next === initialSnapshotRef.current) return;
     initialSnapshotRef.current = next;
     dispatch({ type: "replace", cards: initialCards, recordHistory: false });
     setSelectedIds(new Set());
-  }, [initialCards]);
+  }, [initialCards, layoutPolicy]);
 
   useEffect(() => {
     onCardsChange?.([...cards]);
@@ -326,7 +337,7 @@ export function ConfigurableDashboardCanvas({
         const defaultProfile = remoteProfiles.find(({ isDefault }) => isDefault);
         if (defaultProfile) {
           setActiveProfileId(defaultProfile.id);
-          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards);
+          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards, layoutPolicy);
           dispatch({ type: "replace", cards: defaultProfile.cards, recordHistory: false });
         } else {
           setActiveProfileId(null);
@@ -348,7 +359,7 @@ export function ConfigurableDashboardCanvas({
         const defaultProfile = cached.find(({ isDefault }) => isDefault);
         if (defaultProfile) {
           setActiveProfileId(defaultProfile.id);
-          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards);
+          lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards, layoutPolicy);
           dispatch({ type: "replace", cards: defaultProfile.cards, recordHistory: false });
         }
       })
@@ -358,7 +369,7 @@ export function ConfigurableDashboardCanvas({
     return () => {
       cancelled = true;
     };
-  }, [cacheKey, editable, pageKey, scopeKey]);
+  }, [cacheKey, editable, pageKey, scopeKey, layoutPolicy]);
 
   useEffect(() => {
     if (
@@ -389,7 +400,7 @@ export function ConfigurableDashboardCanvas({
         setProfiles([profile]);
         writeCachedProfiles(cacheKey, [profile]);
         setActiveProfileId(profile.id);
-        lastSavedSnapshotRef.current = cardsSnapshot(profile.cards);
+        lastSavedSnapshotRef.current = cardsSnapshot(profile.cards, layoutPolicy);
         setSaveState("saved");
         setProfileMessage("");
       })
@@ -405,6 +416,7 @@ export function ConfigurableDashboardCanvas({
     cacheKey,
     cards,
     editable,
+    layoutPolicy,
     pageKey,
     profileControls,
     profiles.length,
@@ -489,6 +501,7 @@ export function ConfigurableDashboardCanvas({
       order: cards.length,
     });
     if (!card) return;
+    if (layoutPolicy?.freeResize) card.layout.width = 320;
     setEditorMode("add");
     setEditorCard(card);
   }
@@ -502,8 +515,23 @@ export function ConfigurableDashboardCanvas({
     setEditorCard(null);
   }
 
+  function openCardEditor(card: DashboardCard, renderedWidth?: number) {
+    setEditorMode("edit");
+    setEditorCard(
+      layoutPolicy?.freeResize
+        ? {
+            ...card,
+            layout: {
+              ...card.layout,
+              width: card.layout.width ?? Math.round(renderedWidth ?? 320),
+            },
+          }
+        : card,
+    );
+  }
+
   function loadProfile(profile: RemoteDashboardProfile) {
-    lastSavedSnapshotRef.current = cardsSnapshot(profile.cards);
+    lastSavedSnapshotRef.current = cardsSnapshot(profile.cards, layoutPolicy);
     setActiveProfileId(profile.id);
     dispatch({ type: "replace", cards: profile.cards, recordHistory: false });
     setSelectedIds(new Set());
@@ -537,7 +565,7 @@ export function ConfigurableDashboardCanvas({
       writeCachedProfiles(cacheKey, next);
       setProfilesSource("server");
       setActiveProfileId(profile.id);
-      lastSavedSnapshotRef.current = cardsSnapshot(profile.cards);
+      lastSavedSnapshotRef.current = cardsSnapshot(profile.cards, layoutPolicy);
       setProfileName("");
       setSaveState("saved");
       setProfileMessage("");
@@ -646,7 +674,7 @@ export function ConfigurableDashboardCanvas({
       setProfiles(remoteProfiles);
       writeCachedProfiles(cacheKey, remoteProfiles);
       setProfilesSource("server");
-      lastSavedSnapshotRef.current = cardsSnapshot(remote.cards);
+      lastSavedSnapshotRef.current = cardsSnapshot(remote.cards, layoutPolicy);
       dispatch({ type: "replace", cards: remote.cards, recordHistory: false });
       setSelectedIds(new Set());
       setSaveState("saved");
@@ -660,21 +688,29 @@ export function ConfigurableDashboardCanvas({
   function moveSelection(direction: -1 | 1) {
     dispatch({
       type: "replace",
-      cards: moveSelectedCards(cards, validSelectedIds, direction),
+      cards: moveSelectedCards(cards, validSelectedIds, direction, layoutPolicy),
       recordHistory: true,
     });
   }
 
   const expandedCard = cards.find(({ id }) => id === expandedCardId) ?? null;
+  const actionsCard =
+    editable && compactCardControls ? (cards.find(({ id }) => id === actionsCardId) ?? null) : null;
 
   return (
     <section
       className={[styles.root, className].filter(Boolean).join(" ")}
       aria-label={ariaLabel}
       data-hide-card-overflow={hideCardOverflow ? "true" : undefined}
+      data-compact-card-controls={compactCardControls ? "true" : undefined}
     >
       {editable ? (
-        <div className={styles.toolbar} role="toolbar" aria-label="Ferramentas do dashboard">
+        <div
+          ref={toolbarRef}
+          className={styles.toolbar}
+          role="toolbar"
+          aria-label="Ferramentas do dashboard"
+        >
           <button
             type="button"
             className={styles.primaryButton}
@@ -796,6 +832,7 @@ export function ConfigurableDashboardCanvas({
           onCommit={(next) => dispatch({ type: "replace", cards: next })}
           layoutPolicy={layoutPolicy}
           cornerResizeHandle={layoutPolicy?.maxHeight === null}
+          compactControls={compactCardControls}
           renderCard={(card, size) => (
             <div
               className={[
@@ -835,9 +872,11 @@ export function ConfigurableDashboardCanvas({
                   <button
                     type="button"
                     className={styles.iconButton}
-                    onClick={() => {
-                      setEditorMode("edit");
-                      setEditorCard(card);
+                    onClick={(event) => {
+                      const bounds = event.currentTarget
+                        .closest("[data-dashboard-card-id]")
+                        ?.getBoundingClientRect();
+                      openCardEditor(card, bounds?.width);
                     }}
                     aria-label={`Editar ${card.title || card.metric}`}
                   >
@@ -861,6 +900,24 @@ export function ConfigurableDashboardCanvas({
                   </button>
                 </div>
               ) : null}
+              {editable && compactCardControls ? (
+                <button
+                  type="button"
+                  className={styles.touchActionsButton}
+                  data-dashboard-export-ignore
+                  aria-label={`Ações de ${card.title || card.metric}`}
+                  aria-haspopup="dialog"
+                  aria-expanded={actionsCardId === card.id}
+                  onClick={(event) => {
+                    actionsCardWidthRef.current = event.currentTarget
+                      .closest("[data-dashboard-card-id]")
+                      ?.getBoundingClientRect().width;
+                    setActionsCardId(card.id);
+                  }}
+                >
+                  <MoreHorizontal size={15} aria-hidden="true" />
+                </button>
+              ) : null}
               <DashboardCardContent card={card}>
                 {renderDashboardContent(card, size)}
               </DashboardCardContent>
@@ -868,6 +925,64 @@ export function ConfigurableDashboardCanvas({
           )}
         />
       )}
+
+      {actionsCard ? (
+        <DashboardModal
+          title="Ações do card"
+          description={actionsCard.title || actionsCard.metric}
+          onClose={() => setActionsCardId(null)}
+        >
+          <div className={styles.touchCardActionList}>
+            <button
+              type="button"
+              aria-pressed={validSelectedIds.has(actionsCard.id)}
+              onClick={() => {
+                setSelectedIds((current) => {
+                  const next = new Set(current);
+                  if (next.has(actionsCard.id)) next.delete(actionsCard.id);
+                  else next.add(actionsCard.id);
+                  return next;
+                });
+                setActionsCardId(null);
+              }}
+            >
+              <LayoutGrid size={17} aria-hidden="true" />
+              {validSelectedIds.has(actionsCard.id) ? "Desmarcar card" : "Selecionar card"}
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                openCardEditor(actionsCard, actionsCardWidthRef.current);
+                setActionsCardId(null);
+              }}
+            >
+              <Pencil size={17} aria-hidden="true" /> Editar e redimensionar
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setExpandedCardId(actionsCard.id);
+                setActionsCardId(null);
+              }}
+            >
+              <Expand size={17} aria-hidden="true" /> Expandir
+            </button>
+            <button
+              type="button"
+              className={styles.dangerButton}
+              onClick={() => {
+                dispatch({ type: "remove-card", cardId: actionsCard.id });
+                setActionsCardId(null);
+                requestAnimationFrame(() =>
+                  toolbarRef.current?.querySelector<HTMLButtonElement>("button")?.focus(),
+                );
+              }}
+            >
+              <Trash2 size={17} aria-hidden="true" /> Excluir
+            </button>
+          </div>
+        </DashboardModal>
+      ) : null}
 
       {editorCard ? (
         <CardEditor
@@ -1129,6 +1244,32 @@ function CardEditor({
   onSave: (card: DashboardCard) => void;
 }) {
   const [card, setCard] = useState(initialCard);
+  const [widthDraft, setWidthDraft] = useState(String(initialCard.layout.width ?? 320));
+  const [heightDraft, setHeightDraft] = useState(String(initialCard.layout.height));
+
+  function cardWithDraftDimensions() {
+    if (!layoutPolicy?.freeResize) return card;
+    return {
+      ...card,
+      layout: constrainCardLayout(
+        card.type,
+        {
+          ...card.layout,
+          width: widthDraft.trim() ? Number(widthDraft) : (card.layout.width ?? 320),
+          height: heightDraft.trim() ? Number(heightDraft) : card.layout.height,
+        },
+        layoutPolicy,
+      ),
+    };
+  }
+
+  function confirmDimensionDrafts() {
+    if (!layoutPolicy?.freeResize) return;
+    const next = cardWithDraftDimensions();
+    setCard(next);
+    setWidthDraft(String(next.layout.width ?? 320));
+    setHeightDraft(String(next.layout.height));
+  }
   const types = compatibleTypes(card.metric, compatibility);
   const groups = compatibleGroups(card.metric, compatibility);
   const periods = compatiblePeriods(card.metric, compatibility);
@@ -1148,6 +1289,7 @@ function CardEditor({
       { ...card, metric, type: configured?.defaultType ?? card.type },
       catalog,
       compatibility,
+      layoutPolicy,
     );
     setCard(next);
   }
@@ -1198,7 +1340,7 @@ function CardEditor({
         className={styles.editorForm}
         onSubmit={(event) => {
           event.preventDefault();
-          if (customDatesValid) onSave(card);
+          if (customDatesValid) onSave(cardWithDraftDimensions());
         }}
       >
         <label>
@@ -1229,35 +1371,55 @@ function CardEditor({
           Largura do card
           <input
             type="number"
-            min={layoutLimits.minColumnSpan}
-            max={12}
+            min={layoutPolicy?.freeResize ? FREE_CARD_MIN_WIDTH : layoutLimits.minColumnSpan}
+            max={layoutPolicy?.freeResize ? FREE_CARD_MAX_SIZE : 12}
             step={1}
-            value={card.layout.columnSpan}
-            onChange={(event) =>
+            value={layoutPolicy?.freeResize ? widthDraft : card.layout.columnSpan}
+            onBlur={confirmDimensionDrafts}
+            onChange={(event) => {
+              if (layoutPolicy?.freeResize) {
+                setWidthDraft(event.target.value);
+                return;
+              }
               setCard({
                 ...card,
-                layout: constrainCardLayout(card.type, {
-                  ...card.layout,
-                  columnSpan: Number(event.target.value),
-                }),
-              })
-            }
+                layout: constrainCardLayout(
+                  card.type,
+                  {
+                    ...card.layout,
+                    ...(layoutPolicy?.freeResize
+                      ? { width: Number(event.target.value) }
+                      : { columnSpan: Number(event.target.value) }),
+                  },
+                  layoutPolicy,
+                ),
+              });
+            }}
           />
-          <small>{card.layout.columnSpan} de 12 colunas</small>
+          <small>
+            {layoutPolicy?.freeResize
+              ? `${widthDraft || "—"}px`
+              : `${card.layout.columnSpan} de 12 colunas`}
+          </small>
         </label>
         <label>
           Altura do card
           <input
             type="number"
-            min={layoutLimits.minHeight}
+            min={layoutPolicy?.freeResize ? FREE_CARD_MIN_HEIGHT : layoutLimits.minHeight}
             max={
               layoutPolicy?.maxHeight === null
                 ? undefined
                 : (layoutPolicy?.maxHeight ?? layoutLimits.maxHeight)
             }
-            step={24}
-            value={card.layout.height}
-            onChange={(event) =>
+            step={layoutPolicy?.heightStep ?? 24}
+            value={layoutPolicy?.freeResize ? heightDraft : card.layout.height}
+            onBlur={confirmDimensionDrafts}
+            onChange={(event) => {
+              if (layoutPolicy?.freeResize) {
+                setHeightDraft(event.target.value);
+                return;
+              }
               setCard({
                 ...card,
                 layout: constrainCardLayout(
@@ -1268,10 +1430,10 @@ function CardEditor({
                   },
                   layoutPolicy,
                 ),
-              })
-            }
+              });
+            }}
           />
-          <small>{card.layout.height}px</small>
+          <small>{layoutPolicy?.freeResize ? heightDraft || "—" : card.layout.height}px</small>
         </label>
         <label>
           Tamanho da fonte
@@ -1373,6 +1535,7 @@ function CardEditor({
                   { ...card, type: event.target.value as DashboardCardType },
                   catalog,
                   compatibility,
+                  layoutPolicy,
                 ),
               )
             }

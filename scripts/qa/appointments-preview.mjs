@@ -210,9 +210,9 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   const themes = ["light", "balanced", "dark"];
   evidence.canvas = { screens: [], interactions: [] };
 
-  for (const viewport of viewports) {
+  for (const viewport of process.argv.includes("--canvas-interactions-only") ? [] : viewports) {
     await page.setViewportSize(viewport);
-    await page.goto(origin);
+    await page.goto(`${origin}?editable`);
     await expect(page.getByRole("heading", { name: "Agendamentos", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "House", exact: true }).click();
     await expect(page.locator("[data-dashboard-card-id]")).toHaveCount(28);
@@ -312,7 +312,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   }
 
   await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto(origin);
+  await page.goto(`${origin}?editable`);
   await page.getByRole("button", { name: "House", exact: true }).click();
   const cards = page.locator("[data-dashboard-card-id]");
   await expect(cards).toHaveCount(28);
@@ -320,6 +320,111 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     cards.evaluateAll((nodes) => nodes.map((node) => node.dataset.dashboardCardId));
   const initialOrder = await readOrder();
   const goalCard = page.locator('[data-dashboard-card-id="appointments-goal"]');
+  check((await goalCard.locator("header strong").count()) === 0, "Duplicate header removed");
+  const mover = goalCard.getByRole("button", { name: "Mover Meta do mês", exact: true });
+  await page.mouse.move(0, 0);
+  check(
+    (await mover.evaluate((node) => getComputedStyle(node.parentElement).opacity)) === "0",
+    "Move icon hidden at rest",
+  );
+  await goalCard.hover();
+  check(
+    (await mover.evaluate((node) => getComputedStyle(node.parentElement).opacity)) === "1",
+    "Move icon revealed on hover",
+  );
+  await page.screenshot({ path: path.join(outputRoot, "compact-controls-hover.png") });
+  const resize = goalCard.getByRole("button", { name: "Redimensionar Meta do mês", exact: true });
+  const initialBounds = await goalCard.boundingBox();
+  const handleBounds = await resize.boundingBox();
+  await page.mouse.move(
+    handleBounds.x + handleBounds.width / 2,
+    handleBounds.y + handleBounds.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    handleBounds.x + handleBounds.width / 2 + 120,
+    handleBounds.y + handleBounds.height / 2 + 37,
+    { steps: 8 },
+  );
+  await page.mouse.up();
+  await expect
+    .poll(async () => (await goalCard.boundingBox()).height)
+    .toBe(initialBounds.height + 37);
+  check(
+    (await goalCard.boundingBox()).width > initialBounds.width,
+    "Pointer resizes horizontally and vertically",
+  );
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await goalCard.hover();
+  await goalCard.getByRole("button", { name: "Editar Meta do mês", exact: true }).click();
+  const editor = page.getByRole("dialog", { name: "Editar card", exact: true });
+  const heightInput = editor.getByLabel("Altura do card", { exact: false });
+  const widthInput = editor.getByLabel("Largura do card", { exact: false });
+  await heightInput.fill("");
+  await expect(heightInput).toHaveValue("");
+  await heightInput.pressSequentially("997");
+  await widthInput.fill("");
+  await expect(widthInput).toHaveValue("");
+  await widthInput.pressSequentially("317");
+  await expect(widthInput).toHaveValue("317");
+  await expect(editor.getByLabel("Altura do card", { exact: false })).toHaveValue("997");
+  await widthInput.press("Enter");
+  await expect.poll(async () => (await goalCard.boundingBox()).height).toBe(997);
+  await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(317);
+  await expect(page.getByText("Salvo automaticamente", { exact: true })).toBeVisible();
+  await expect
+    .poll(async () => {
+      const { profiles } = await page.request
+        .get(`${origin}/api/dashboard-profiles`)
+        .then((response) => response.json());
+      return profiles.some((profile) =>
+        profile.cards.some(
+          (card) =>
+            card.id === "appointments-goal" &&
+            card.layout.height === 997 &&
+            card.layout.width === 317,
+        ),
+      );
+    })
+    .toBe(true);
+  await page.setViewportSize({ width: 320, height: 900 });
+  await goalCard
+    .getByRole("button", { name: "Redimensionar Meta do mês", exact: true })
+    .press("ArrowDown");
+  await expect
+    .poll(async () => {
+      const { profiles } = await page.request
+        .get(`${origin}/api/dashboard-profiles`)
+        .then((response) => response.json());
+      return profiles.some((profile) =>
+        profile.cards.some(
+          (card) =>
+            card.id === "appointments-goal" &&
+            card.layout.height === 998 &&
+            card.layout.width === 317,
+        ),
+      );
+    })
+    .toBe(true);
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await goalCard
+    .getByRole("button", { name: "Redimensionar Meta do mês", exact: true })
+    .press("ArrowRight");
+  await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(318);
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await goalCard.hover();
+  await goalCard.getByRole("button", { name: "Editar Meta do mês", exact: true }).click();
+  await editor.getByLabel("Altura do card", { exact: false }).fill("137");
+  await editor.getByLabel("Largura do card", { exact: false }).fill("157");
+  await editor.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect.poll(async () => (await goalCard.boundingBox()).height).toBe(137);
+  await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(157);
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  evidence.canvas.interactions.push(
+    "compact-hover-pointer-both-axes-pixel-dimensions-below-legacy-minima-and-save",
+  );
   await goalCard.getByRole("button", { name: "Mover Meta do mês", exact: true }).press("ArrowDown");
   await expect.poll(readOrder).not.toEqual(initialOrder);
   const keyboardOrder = await readOrder();
@@ -336,8 +441,10 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   check(resizedHeight > initialHeight, "Keyboard resize increases card height");
   await page.getByRole("button", { name: "Desfazer", exact: true }).click();
 
-  for (const id of ["appointments-goal", "team-productive"])
+  for (const id of ["appointments-goal", "team-productive"]) {
+    await page.locator(`[data-dashboard-card-id="${id}"]`).hover();
     await page.locator(`[data-dashboard-card-id="${id}"] input[type="checkbox"]`).check();
+  }
   await expect(page.getByLabel("Mover cards selecionados")).toBeVisible();
   await page.getByRole("button", { name: "Mover grupo para depois", exact: true }).click();
   await expect.poll(readOrder).not.toEqual(initialOrder);
@@ -349,6 +456,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await page.getByRole("button", { name: "Desfazer", exact: true }).click();
   evidence.canvas.interactions.push({ groupOrder });
 
+  await page.locator('[data-dashboard-card-id="appointments-monthly"]').hover();
   await page.getByRole("button", { name: "Expandir Agendamentos por mês", exact: true }).click();
   await expect(
     page.getByRole("dialog", { name: "Agendamentos por mês", exact: true }),
@@ -359,17 +467,13 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   );
   evidence.canvas.interactions.push("expand-and-escape");
 
-  await page.getByRole("button", { name: "Adicionar", exact: true }).click();
+  await page.getByRole("button", { name: "Adicionar card", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "Adicionar card", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   evidence.canvas.interactions.push("card-editor");
 
-  await page.getByRole("button", { name: "Perfis", exact: true }).click();
-  await expect(
-    page.getByRole("dialog", { name: "Perfis do dashboard", exact: true }),
-  ).toBeVisible();
-  await page.keyboard.press("Escape");
-  evidence.canvas.interactions.push("profiles");
+  await expect(page.getByRole("button", { name: "Perfis", exact: true })).toHaveCount(0);
+  evidence.canvas.interactions.push("automatic-profile-without-profile-toolbar");
 
   await page.getByRole("button", { name: "Baixar PDF", exact: true }).click();
   await expect(
@@ -377,6 +481,65 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   ).toBeVisible();
   await page.keyboard.press("Escape");
   evidence.canvas.interactions.push("selective-pdf-dialog");
+
+  const touchContext = await page
+    .context()
+    .browser()
+    .newContext({ viewport: { width: 390, height: 900 }, isMobile: true, hasTouch: true });
+  try {
+    await touchContext.route("**/*", (route) =>
+      new URL(route.request().url()).origin === origin ? route.continue() : route.abort(),
+    );
+    const touchPage = await touchContext.newPage();
+    await touchPage.goto(`${origin}?editable`);
+    const touchCard = touchPage.locator('[data-dashboard-card-id="appointments-goal"]');
+    const move = touchCard.getByRole("button", { name: "Mover Meta do mês", exact: true });
+    check(
+      (await move.evaluate((node) => getComputedStyle(node.parentElement).opacity)) === "1",
+      "Touch keeps move control available without hover",
+    );
+    const touchResize = touchCard.getByRole("button", {
+      name: "Redimensionar Meta do mês",
+      exact: true,
+    });
+    await expect(touchResize).toBeHidden();
+    check((await move.boundingBox()).width >= 44, "Touch retains accessible target size");
+    const actions = touchCard.getByRole("button", { name: "Ações de Meta do mês", exact: true });
+    await actions.click();
+    const actionsDialog = touchPage.getByRole("dialog", { name: "Ações do card", exact: true });
+    await expect(actionsDialog).toBeVisible();
+    await actionsDialog
+      .getByRole("button", { name: "Editar e redimensionar", exact: true })
+      .click();
+    const touchEditor = touchPage.getByRole("dialog", { name: "Editar card", exact: true });
+    await touchEditor.getByLabel("Largura do card", { exact: false }).fill("128");
+    await touchEditor.getByLabel("Altura do card", { exact: false }).fill("72");
+    await touchEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+    await expect.poll(async () => (await touchCard.boundingBox()).width).toBe(128);
+    await expect.poll(async () => (await touchCard.boundingBox()).height).toBe(72);
+    check((await actions.boundingBox()).width >= 44, "Small card keeps touch actions target");
+    await actions.click();
+    for (const name of ["Selecionar card", "Editar e redimensionar", "Expandir", "Excluir"])
+      await expect(actionsDialog.getByRole("button", { name, exact: true })).toBeVisible();
+    await touchPage.keyboard.press("Escape");
+    await expect(actions).toBeFocused();
+    await actions.click();
+    await actionsDialog.getByRole("button", { name: "Expandir", exact: true }).click();
+    await expect(touchPage.getByRole("dialog", { name: "Meta do mês", exact: true })).toBeVisible();
+    await touchPage.keyboard.press("Escape");
+    await touchPage.goto(origin);
+    await expect(
+      touchPage.getByRole("button", { name: "Ações de Meta do mês", exact: true }),
+    ).toHaveCount(0);
+    await expect(
+      touchPage.getByRole("button", { name: "Redimensionar Meta do mês", exact: true }),
+    ).toBeHidden();
+    evidence.canvas.interactions.push(
+      "touch-128x72-menu-editor-44px-targets-escape-focus-and-readonly",
+    );
+  } finally {
+    await touchContext.close();
+  }
 }
 
 export async function runAppointmentsPreview() {
@@ -431,7 +594,7 @@ export async function runAppointmentsPreview() {
         },
         load(id) {
           if (id === entry)
-            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentFolder:3,appointmentApprovedFolder:12,appointmentSale:24,monthlyFunnel:{opportunities:143,appointments:24,visits:12,folders:8,approvedFolders:2,sales:1}},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentFolder:null,appointmentApprovedFolder:null,appointmentSale:null,monthlyFunnel:{opportunities:0,appointments:0,visits:4,folders:2,approvedFolders:1,sales:1}}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} goalsByMonth={{"2026-03":24,"2026-01":20,"2025-10":18,"2025-12":22}} conversionGoals={conversionGoals} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
+            return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentFolder:3,appointmentApprovedFolder:12,appointmentSale:24,monthlyFunnel:{opportunities:143,appointments:24,visits:12,folders:8,approvedFolders:2,sales:1}},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentFolder:null,appointmentApprovedFolder:null,appointmentSale:null,monthlyFunnel:{opportunities:0,appointments:0,visits:4,folders:2,approvedFolders:1,sales:1}}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} goalsByMonth={{"2026-03":24,"2026-01":20,"2025-10":18,"2025-12":22}} conversionGoals={conversionGoals} canEditDashboard={query.has('editable')} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
       },
     ],
@@ -462,14 +625,47 @@ export async function runAppointmentsPreview() {
     .filter((name) => name.endsWith(".css"))
     .map((name) => `<link rel="stylesheet" href="${name}">`)
     .join("")}</head><body><div id="root"></div><script src="/${script}"></script></body></html>`;
-  const server = createServer((request, response) => {
-    const pathname = new URL(request.url, "http://127.0.0.1").pathname;
+  const syntheticProfiles = [];
+  const server = createServer(async (request, response) => {
+    const requestUrl = new URL(request.url, "http://127.0.0.1");
+    const pathname = requestUrl.pathname;
+    if (
+      pathname.startsWith("/api/dashboard-profiles") &&
+      ["POST", "PATCH"].includes(request.method)
+    ) {
+      const chunks = [];
+      for await (const chunk of request) chunks.push(chunk);
+      const payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
+      const previous = syntheticProfiles.find((profile) => pathname.endsWith(`/${profile.id}`));
+      const profile = {
+        ...previous,
+        ...payload,
+        id: previous?.id ?? `synthetic-${syntheticProfiles.length + 1}`,
+        userId: "synthetic-user",
+        version: (previous?.version ?? 0) + 1,
+        createdAt: previous?.createdAt ?? new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      if (previous) syntheticProfiles.splice(syntheticProfiles.indexOf(previous), 1, profile);
+      else syntheticProfiles.push(profile);
+      return response
+        .writeHead(200, { "content-type": "application/json" })
+        .end(JSON.stringify({ profile }));
+    }
     if (request.method !== "GET") return response.writeHead(405).end();
     if (pathname === "/favicon.ico") return response.writeHead(204).end();
     if (pathname === "/api/dashboard-profiles")
-      return response
-        .writeHead(200, { "content-type": "application/json" })
-        .end(JSON.stringify({ profiles: [] }));
+      return response.writeHead(200, { "content-type": "application/json" }).end(
+        JSON.stringify({
+          profiles: syntheticProfiles.filter(
+            (profile) =>
+              (!requestUrl.searchParams.has("pageKey") ||
+                profile.pageKey === requestUrl.searchParams.get("pageKey")) &&
+              (!requestUrl.searchParams.has("scopeKey") ||
+                profile.scopeKey === requestUrl.searchParams.get("scopeKey")),
+          ),
+        }),
+      );
     if (pathname === "/")
       return response.writeHead(200, { "content-type": "text/html; charset=utf-8" }).end(html);
     if (files.has(pathname))

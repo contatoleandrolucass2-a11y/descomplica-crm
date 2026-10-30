@@ -33,7 +33,7 @@ export type CanvasAction =
   | {
       type: "resize-card";
       cardId: string;
-      layout: Pick<DashboardCardLayout, "columnSpan" | "height">;
+      layout: Pick<DashboardCardLayout, "columnSpan" | "height" | "width">;
     }
   | { type: "organize" }
   | { type: "reset"; cards: readonly DashboardCard[] }
@@ -52,12 +52,18 @@ function snapshot(
   };
 }
 
-function sameSnapshot(left: DashboardCanvasSnapshot, right: DashboardCanvasSnapshot) {
-  return serializeCanvasSnapshot(left) === serializeCanvasSnapshot(right);
+function sameSnapshot(
+  left: DashboardCanvasSnapshot,
+  right: DashboardCanvasSnapshot,
+  layoutPolicy?: DashboardCardLayoutPolicy,
+) {
+  return (
+    serializeCanvasSnapshot(left, layoutPolicy) === serializeCanvasSnapshot(right, layoutPolicy)
+  );
 }
 
 function commit(state: CanvasHistoryState, next: DashboardCanvasSnapshot): CanvasHistoryState {
-  if (sameSnapshot(state.present, next)) {
+  if (sameSnapshot(state.present, next, state.layoutPolicy)) {
     return state.duplicateCardId === null ? state : { ...state, duplicateCardId: null };
   }
   return {

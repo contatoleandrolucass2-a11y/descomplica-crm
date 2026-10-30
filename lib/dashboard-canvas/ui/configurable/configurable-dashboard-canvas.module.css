@@ -203,6 +203,64 @@
   justify-content: center;
 }
 
+.root[data-compact-card-controls="true"] .cardActions {
+  min-height: 0;
+  gap: 0;
+  padding: 0.125rem;
+  border: 0;
+  box-shadow: none;
+}
+
+.root[data-compact-card-controls="true"] .cardActions :is(label, .iconButton) {
+  width: 1.5rem;
+  min-width: 1.5rem;
+  min-height: 1.5rem !important;
+}
+
+.root[data-compact-card-controls="true"] .cardActions :is(input, svg) {
+  width: 0.8125rem;
+  height: 0.8125rem;
+}
+
+.touchActionsButton {
+  display: none;
+}
+
+.touchCardActionList {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.touchCardActionList button {
+  min-height: 2.75rem;
+  justify-content: flex-start;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .root[data-compact-card-controls="true"] .cardActions {
+    display: none;
+  }
+
+  .root[data-compact-card-controls="true"] .touchActionsButton {
+    position: absolute;
+    z-index: 8;
+    top: 0.25rem;
+    right: 0.25rem;
+    display: inline-flex;
+    width: 2.75rem;
+    min-width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    color: var(--analytics-muted);
+    border: 0;
+    border-radius: 0.4rem;
+    background: var(--analytics-surface);
+    cursor: pointer;
+  }
+}
+
 .cardActions input,
 .choiceGroup input,
 .exportList input {

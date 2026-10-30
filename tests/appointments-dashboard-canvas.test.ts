@@ -1,5 +1,8 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import { DashboardCanvas } from "@/lib/dashboard-canvas/ui/dashboard-canvas";
 
 import {
   APPOINTMENTS_CANVAS_CATALOG,
@@ -9,6 +12,20 @@ import {
 } from "@/app/(protected)/app/etapas/_components/appointments-canvas-config";
 
 describe("appointments configurable dashboard", () => {
+  it("removes only the duplicate title while preserving named keyboard controls", () => {
+    const props = {
+      cards: [APPOINTMENTS_CANVAS_DEFAULT_CARDS[4]!],
+      renderCard: () => "Visitas realizadas",
+      onCommit: () => undefined,
+    };
+    const compact = renderToStaticMarkup(
+      createElement(DashboardCanvas, { ...props, compactControls: true }),
+    );
+    expect(compact).not.toContain("<strong");
+    expect(compact).toContain('aria-label="Mover Visitas realizadas"');
+    expect(compact).toContain('aria-label="Redimensionar Visitas realizadas"');
+    expect(renderToStaticMarkup(createElement(DashboardCanvas, props))).toContain("<strong");
+  });
   it("registers the 28 requested blocks with stable unique metrics and layout order", () => {
     expect(APPOINTMENTS_CANVAS_PAGE_KEY).toBe("crm.stage.appointments");
     expect(APPOINTMENTS_CANVAS_DEFAULT_CARDS).toHaveLength(28);
@@ -56,7 +73,8 @@ describe("appointments configurable dashboard", () => {
     expect(source).toContain("editable={canEditDashboard}");
     expect(source).toContain("profileControls={false}");
     expect(source).toContain("hideCardActionsByDefault");
-    expect(source).toContain("layoutPolicy={FREE_HEIGHT_CARD_LAYOUT_POLICY}");
+    expect(source).toContain("layoutPolicy={APPOINTMENTS_CARD_LAYOUT_POLICY}");
+    expect(source).toContain("compactCardControls");
     expect(source).toContain("hideCardOverflow");
     expect(source).toContain('addButtonLabel="Adicionar card"');
     expect(source).toContain('automaticProfileName="Layout de Agendamentos"');

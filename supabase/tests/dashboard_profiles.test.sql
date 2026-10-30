@@ -1,6 +1,6 @@
 begin;
 
-select plan(32);
+select plan(34);
 
 select ok(
   (select relrowsecurity and relforcerowsecurity
@@ -361,6 +361,23 @@ select throws_ok(
   '22023',
   'invalid_argument: invalid dashboard profile scope',
   'invalid scopeKey is rejected by the database contract'
+);
+
+select is(
+  public.update_dashboard_profile(
+    (select id from created_profiles where slot='shared'), 4, null,
+    jsonb_set(pg_temp.dashboard_cards('card-1'), '{0,layout}',
+      '{"order":0,"columnSpan":1,"height":72,"width":129}'
+    ), 2::smallint
+  )->>'version',
+  '5',
+  'administrator persists free dimensions with the existing version comparison'
+);
+select is(
+  public.get_dashboard_profile((select id from created_profiles where slot='shared'))
+    #>'{cards,0,layout}',
+  '{"order":0,"columnSpan":1,"height":72,"width":129}'::jsonb,
+  'the shared profile round trip preserves exact dimensions without the validation surrogate'
 );
 
 reset role;

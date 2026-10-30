@@ -1291,7 +1291,7 @@ Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/2
 - O artefato imutável `12587144483` teve digest ZIP
   `sha256:15cbe433b6d5c45b5d55c175b05836dbb4d2cd2bce204621166661230d07d74e`.
   `revision.txt` e o checksum de `image.tar.gz`
-  `sha256:1de219ab3bc025c9d08541c74061a279e6885df0372bff1de59f070eebbc138b`
+  `sha256:1de219ab3bc025c9d08541c74061a279e6885df0372bff1de 59f070eebbc138b`
   foram conferidos antes da transferência. A imagem foi carregada sem rebuild
   ou retag; `image:prove` aprovou os dois perfis no image ID local
   `sha256:c1bce48364b366a8f594566aa419539d2374af5d0bb266a23f26549da1d248e9`.
@@ -1420,7 +1420,7 @@ Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/2
   `sha256:9563b56f5d7b37e627555a3af34aa37af23b8b8c0e2583b6cdd0cafafa1e5532`
   e revisao exata. No Docker containerd do destino, `image:prove` validou os
   dois perfis sobre a imagem local
-  `sha256:56b14a773b73842536a5025741b8efdd80de5c971ad52dfd13cd29698154d72b`,
+  `sha256:56b14a773b73842536a5025741b8efdd80de 5c971ad52dfd13cd29698154d72b`,
   sem rebuild ou retag.
 - O coordenador `pnpm release:production` publicou o deployment
   `1d79e00b-89f5-481f-8a9b-39f2a54e856b` em
@@ -2794,7 +2794,7 @@ Validacao complementar em 25/10/2026: producao CSS corrigiu sobreposicao em 24/2
   Em16:11Z, main avancou para6b6e88fb (PR256 Previsao por empreendimento),
   enquanto health publico segue200/ok/d919751a. Protecao BEHIND impediu
   merge normal do PR255; origin/main integrado sem descartar notas ou codigo.
-  Nova CI obrigatoria do head combinado. Migration20261018142142 da outra
+  Nova CI obrigatoria do head combinado. Migration 20261018142142 da outra
   entrega exige autorizacao propria e coordenacao de ativacao; nenhuma
   migration aplicada aqui. Pergunta ao usuario pendente, sem ampliar escopo.
 
@@ -2848,10 +2848,10 @@ A CI anterior falhou na formatação documental e a segunda na formatação do n
   fontes oficiais, auditoria e build. Restore e E2E autenticado aprovados.
   Producao nao foi alterada. Revisao estatica independente
   sem achados no diff fe1b343e..f0329c03; nao substitui os gates pendentes.
-- CI39093336285 reprovou apenas11 comparacoes de imagens /app, decorrentes
+- CI39093336285 reprovou apenas 11 comparacoes de imagens /app, decorrentes
   do layout solicitado. Gates funcionais,242 auditorias de acessibilidade,
   zoom/teclado e canvas aprovados. Revisadas capturas desktop/mobile e temas;
-  promovidas11 referencias e preservadas231, sem reduzir tolerancias.
+  promovidas 11 referencias e preservadas231, sem reduzir tolerancias.
   Artefato12124916025, SHA2568615a849aa566b93a8f05d48ca05cd82c7877b9b52bc0af8d026a6891918924d.
   Tree do merge de captura ec9ae253 equivale ao HEAD f0329c03; fingerprint
   recomposto com29 arquivos gerados. Manifesto guarda proveniencia completa.
@@ -3057,3 +3057,43 @@ antes de qualquer ativação.
 
 - [Continuação de 2026-10-15 a 2026-10-27](ATUALIZACOES-ARQUIVO-2026-10-15-a-2026-10-27-CONTINUACAO.md).
 - [Histórico de 2026-09-27 a 2026-10-13](ATUALIZACOES-ARQUIVO-2026-09-27-a-2026-10-13.md).
+
+## 2026-10-29: abertura — dimensões e controles dos cards de Agendamentos
+
+- Escopo: somente cards de Agendamentos; redimensionamento nos dois eixos, remoção do cabeçalho duplicado e controles compactos revelados por interação. O anexo de sidebar é referência sem autorização para alterar a navegação.
+- Git comum confirmado; HEAD e origin/main 5fbf6f0ea3fbecc52d12bdc765b9f8acffd4bc40, árvore inicialmente limpa; branch codex/agendamentos-cards-compactos. Fetch concluído. Base contém regras de main/PR #422 e correções #423.
+- GitHub: CI push/main 40931158856 concluída com sucesso no SHA base, consulta via conector em 29/10/2026. Fonte: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40931158856. CLI gh sem autenticação local; conector disponível.
+- Health público observado em 29/10/2026 às 17:47 BRT: HTTP 200, status ok, version 5fbf6f0ea3fbecc52d12bdc765b9f8acffd4bc40. Fonte: https://crm.descomplicapro.com.br/api/health. CI base não valida mudanças futuras.
+
+## 2026-10-29: candidato — cards compactos e altura precisa em Agendamentos
+
+- Implementação opt-in em Agendamentos: cabeçalho sem título duplicado; controles menores sobrepostos, revelados por hover/foco e disponíveis em toque. Altura em pixels, preservada ao alterar largura; histórico e comparação de autosave respeitam a política da página para não descartar mudanças pequenas.
+- Validação local: 48 testes focados aprovados; typecheck/lint aprovados antes do ajuste final de serialização e revalidação em andamento. Chromium sintético aprovou arraste nos dois eixos, edição para 997 px e 4 colunas, salvamento em endpoint local, teclado, desfazer, grupo, expansão e editor. Sem erros JS ou tráfego externo. Capturas em 320, 390, 768, 1440 e 1920 nos três temas sem sobreposição/overflow ou axe grave; rodada inicial parou depois por rótulos obsoletos no próprio QA, corrigidos e interações reexecutadas com sucesso. CSS de preview Vite, não build Next de produção.
+- Limites: grade de 12 colunas e mínimos persistidos por tipo continuam vigentes. Dimensões menores exigem migration e autorização específica para banco remoto; não foram implementadas. Não houve alteração de permissões, regras financeiras, sidebar ou outras páginas. CI/merge/publicação do candidato ainda pendentes. Evidência local não comprova persistência remota.
+
+## 2026-10-29: candidato completo — redimensionamento livre de Agendamentos
+
+- Esta conclusão substitui o limite por colunas do candidato inicial: a interface agora usa largura e altura em pixels, flex-wrap e dimensões individuais. Limites técnicos: largura 128..16384 px e altura 72..16384 px; o tamanho visível respeita a tela. Cards sem width continuam compatíveis. Controles compactos e cabeçalho removido mantidos; outras páginas preservadas.
+- Migration 20261029210251_appointments_free_card_dimensions.sql preparada pelo CLI, com wrapper privado específico da página. Dimensões originais são validadas; catálogo, apresentação, duplicados, RPCs, auth, RLS, grants e CAS são preservados. Não houve aplicação remota nem alteração de dados. Rollback após novos layouts exige imagem compatível ou recuperação de dados autorizada; procedimento em docs/runbooks/appointments-card-dimensions.md.
+- Evidências locais: 81 testes focados de interface/API/schema aprovados entre as suítes do coordenador e crm-dados; types e lint aprovados. Chromium aprovou largura 317 px, altura 997 px preservada, dimensões 157×137 px, ajuste de 1 px, histórico, editor, grupo, expansão e transporte no endpoint sintético. Toque mantém controles visíveis e alvos 44 px. Matriz de 5 larguras×3 temas sem overflow/sobreposição/axe grave; falha inicial do alvo em toque foi corrigida e a etapa reexecutada com sucesso. Nenhum erro JS ou tráfego externo; CSS Vite não substitui build Next/CI.
+- SQL/pgTAP não executados localmente porque Docker/psql não estão disponíveis. Nova CI isolada obrigatória; resultados do candidato inicial c6910cf3 não validam esta extensão. PR #424 será atualizado. Migrations remotas exigem autorização específica segundo AGENTS.md; interface não será publicada contra o contrato antigo. Pendências: CI, integração, autorização/aplicação da migration, artefato aprovado, publicação protegida e verificação posterior.
+
+- Revisão independente do candidato completo identificou e corrigiu perda da largura salva ao alterar só a altura em tela menor e recorte de ações de toque em cards estreitos. Resize vertical preserva width/span originais; resize horizontal usa a largura renderizada. Toque usa ícone de ações que abre modal externo ao card; editor oferece as dimensões sem recorte. Readonly não exibe resize em mobile. Browser aprovado em 128×72 px, com menu/editor, Escape/foco e expansão; regressão de 1000 px salvos/358 px visíveis coberta por teste e cenário real de viewport menor.
+- CI 40955427661 falhou em quatro asserts de inventário diretamente decorrentes da nova migration e 15 pgTAP adicionais (demais 4511 testes aprovados). Atualizados somente os inventários: 95 migrations; nova versão explicitamente não publicável pelo fluxo Auth/MFA; 2321 pgTAP em 44 arquivos. Nenhum guard, hash histórico, workflow ou baseline foi relaxado. Os 33 testes focados de homologation/release-candidate passaram. Nova CI necessária após os fixes; SQL remoto permanece não aplicado.
+
+- O restore isolado da CI 40956446681 executou 2321 pgTAP e encontrou uma única divergência causada pelo wrapper novo: card malformado sem layout deveria conservar a mensagem invalid_argument: invalid dashboard card, mas recebia invalid dashboard card layout. Corrigida a validação estrutural antes da validação dimensional; a asserção antiga foi preservada, sem atualizar baseline. Os outros 2320 testes passaram nessa fase. A correção precisa de nova CI; o restante da execução atual segue produzindo evidência dos gates independentes. Houve também aviso de limite de downloads Docker no job, sem alteração de credenciais ou fontes para contornar.
+
+- Autorização específica recebida neste chat em 29/10/2026: o usuário selecionou “Autorizar a migration após CI verde” para a migration de Agendamentos do PR #424. Aplica-se somente a esse ajuste de dimensões, sem reescrever perfis existentes ou alterar permissões; não vira autorização para migrations futuras. Aplicação e publicação continuam condicionadas aos gates e às verificações finais.
+- CI 40958768864 no head 22c991b2 aprovou validate, promotable-image e isolated-restore; release-gates ainda em execução. O ensaio isolado já valida a correção da mensagem de erro e o restore; isso não comprova aplicação remota.
+- Preflight observacional de produção: projeto Supabase hnncxuerlcsaahdxoswb, nome descomplica-crm-production, ACTIVE_HEALTHY, conferido contra o hostname público do runtime. A migration de dimensões está ausente no histórico consultado. Funções privadas atuais pertencem a postgres, security_definer=false e ACL postgres-only; hashes MD5 de definição: assert_dashboard_profile_document=1c8a81f7c82da19b8457a73db6e134fc; assert_dashboard_profile_document_v2=4d385ba688c56dbf5469e8efa733e3a8. O nome assert_dashboard_profile_document_presentation_v2 ainda não existe. Consulta limitada a metadados e definição do validador, sem leitura de registros de clientes/perfis.
+- Ledger observado: SHA 5fbf6f0ea3fbecc52d12bdc765b9f8acffd4bc40, deploymentId 42da50c3-9988-40f3-844d-9eab3fbab24d, deployedAt 2026-10-29T19:27:23.595Z, sem inProgress. Fonte: campos sanitizados do ledger de produção e host público do env via SSH. Esta observação não substitui a consulta no minuto/CAS do release:production; repetir antes da mutação/promoção após CI verde.
+
+## 2026-10-29: validação final dos cards e migration autorizada aplicada
+
+- CI do PR #424 aprovada integralmente no head 22c991b2: https://github.com/contatoleandrolucass2-a11y/descomplica-crm/actions/runs/40958768864 (validate, release-gates, promotable-image e isolated-restore). Protected 40958768572 também aprovado; artefato 12936648679, captura no merge de teste 8963679539316f22e1310448598f883a7d3d36f3, árvore idêntica ao head 22c991b2. As 242 referências foram preservadas; nenhum baseline/limiar foi alterado. Limite: as 11 capturas autenticadas de Agendamentos mostram indisponibilidade de análise, sem cards.
+- Aceite complementar dos cards com dados sintéticos e CSS Next real do artefato aprovado 12934394219: checksum ZIP ed93c046c89efc3190c53b1503d360955a7ee1a7f7d7bc579c36e8775e998116, imagem sha256:e65cbf1e19775d0fb09aaa937250271ae9c324a2130abe4b934eca15ac714f67. BUILD_ID e camadas conferidos, sem rebuild/execução da imagem. O manifesto da rota determina 0uomz47u359rq.css→21e7knk29ukj1.css→2ele19vc5u52y.css; CSS combinado SHA256 91c0c8b1622aa63edbbbfaca73361b9d8e3d4feb2ecbe83556ec017f89746653. Quinze capturas/5 larguras×3 temas e 8 grupos de interações aprovados, com 156 classes dos 3 módulos vivos provenientes do Next, sem fallback Vite, erros JS, tráfego externo ou axe grave. Fonte: test-results/appointments-native-css/native-css-validation-summary.json. A tentativa diagnóstica inicial concatenou 25 chunks indevidamente e gerou contraste falso; foi preservada, sem alterar produto/asserts. Derivada técnica ignorada, não versionada; não comprova runtime autenticado com dados reais nem persistência remota via UI.
+- Após autorização humana e CI verde, aplicada via MCP somente a migration appointments_free_card_dimensions no projeto confirmado hnncxuerlcsaahdxoswb. Arquivo local 20261029210251, SQL SHA256 f30d14570c69485fd3de1700238b34191a7c7108492fe575a39df0ec4a650afc; versão atribuída pelo MCP no histórico remoto 20261029224915. Nenhum db push, repair ou reescrita de perfis/dados foi executado. Preflight imediatamente anterior confirmou hash do validador, ausência do nome novo e ledger sem publicação em andamento.
+- Pós-condições remotas aprovadas com literais sintéticos (sem inserir perfis): 128×72 e 317×137 aceitos; largura 127 rejeitada; width rejeitado na Visão Geral. RLS segue habilitada/forçada. Os 3 validadores são postgres/security_invoker com ACL postgres-only. O validador anterior permanece integralmente preservado sob assert_dashboard_profile_document_presentation_v2, body MD5 86a36bbebdc8c5fe9eed86ae8050b5d4; v2 permanece aeccd4393606c3904e36b623880f296e; novo body MD5 8dc208ffe09a525e5d4778418e841541. Isso fornece reversão de DDL; após novos layouts, imagem antiga ainda exige compatibilidade ou recuperação de dados autorizada, como documentado no runbook.
+- Enquanto esta demanda validava, o main avançou para 322a41669bf716a2dfbbaea9d2ad89ec126db0b2 pelo PR #425 (coletor Salesforce). Diferença observada: 5 arquivos de ops/testes/runbook/WORKLOG/CHANGELOG, sem alteração de canvas/CSS/RPC. Sua CI 40965725335 está em andamento; aguardar antes de integrar para não cancelar outra entrega. Não alteramos esses arquivos/comportamentos. Interface ainda não publicada; pendentes integração, CI do main exato, artefato imutável, promoção protegida e smoke.
+
+- Revisão complementar da digitação sequencial identificou P2 real no editor: selecionar/apagar e digitar 317/997 chegava a 16384 por clamp a cada tecla. Corrigido somente o CardEditor para manter largura/altura como texto provisório no modo freeResize e confirmar limites em blur/submit. Outros modos mantêm o comportamento anterior. QA versionada agora exige campo vazio, digitação tecla a tecla e Enter para salvar; jornada focal local aprovada, assim como types/lint e 15 testes de controlador/canvas. A validação CSS permanece reutilizável porque nenhum CSS mudou, mas a correção de JS exige nova CI. Migration remota/SQL permanecem idênticos e aprovados; não houve nova mutação de banco. Revisão independente nativa da digitação em andamento, com evidência de falha original preservada em test-results/appointments-native-css/sequential-input/.

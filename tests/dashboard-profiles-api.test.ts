@@ -85,6 +85,32 @@ beforeEach(() => {
 afterEach(() => vi.unstubAllEnvs());
 
 describe("dashboard profiles API", () => {
+  it("passes precise appointments dimensions through the authorized versioned PATCH", async () => {
+    const cards = [{ ...card, layout: { order: 0, columnSpan: 1, height: 72, width: 129 } }];
+    const response = await PATCH(
+      request(`/api/dashboard-profiles/${profileId}`, "PATCH", { cards, version: 2 }),
+      context,
+    );
+    expect(response.status).toBe(200);
+    expect(mocks.patch).toHaveBeenCalledWith(profileId, { cards, version: 2 });
+  });
+
+  it("rejects pixel dimensions against the stored page instead of trusting the submitted card", async () => {
+    mocks.get.mockResolvedValue({ data: { ...profile, pageKey: "crm.dashboard" }, error: null });
+    const cards = [
+      {
+        ...card,
+        metric: "overview.current.month",
+        layout: { order: 0, columnSpan: 6, height: 360, width: 200 },
+      },
+    ];
+    const response = await PATCH(
+      request(`/api/dashboard-profiles/${profileId}`, "PATCH", { cards, version: 2 }),
+      context,
+    );
+    await result(response, 400, { error: "invalid_profile_layout" });
+    expect(mocks.patch).not.toHaveBeenCalled();
+  });
   it("allows authorized viewers to read the shared appointments layout", async () => {
     mocks.authorize.mockResolvedValueOnce({
       ok: true,

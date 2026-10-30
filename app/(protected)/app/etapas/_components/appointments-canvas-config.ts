@@ -37,7 +37,7 @@ const seeds: readonly AppointmentsSeed[] = [
     metric: "team.productive",
     title: "Equipe produtiva",
     type: "donut",
-    columnSpan: 2,
+    columnSpan: 3,
     height: 288,
     types: ["donut", "kpi"],
   },

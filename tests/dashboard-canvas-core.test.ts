@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 
 import {
   CURRENT_DASHBOARD_SCHEMA_VERSION,
@@ -196,6 +197,76 @@ describe("dashboard canvas cards", () => {
 });
 
 describe("dashboard canvas layout", () => {
+  it("preserves saved width during vertical resize on a smaller screen", () => {
+    const initial = { order: 0, columnSpan: 6, height: 288, width: 1000 };
+    const props = {
+      type: "kpi" as const,
+      initial,
+      deltaX: 0,
+      deltaY: 1,
+      containerWidth: 358,
+      renderedWidth: 358,
+      policy: APPOINTMENTS_CARD_LAYOUT_POLICY,
+    };
+    expect(resizeCardLayout(props)).toEqual({ ...initial, height: 289 });
+    expect(resizeCardLayout({ ...props, deltaX: -1, deltaY: 0 }).width).toBe(357);
+  });
+  it("resizes appointments independently by column and pixel without changing other policies", () => {
+    const initial = { order: 0, columnSpan: 2, height: 289, width: 200 };
+    const vertical = resizeCardLayout({
+      type: "kpi",
+      initial,
+      deltaX: 0,
+      deltaY: 7,
+      containerWidth: 1200,
+      gap: 0,
+      policy: APPOINTMENTS_CARD_LAYOUT_POLICY,
+    });
+    expect(vertical).toEqual({ ...initial, height: 296 });
+    const horizontal = resizeCardLayout({
+      type: "kpi",
+      initial: vertical,
+      deltaX: 37,
+      deltaY: 0,
+      containerWidth: 1200,
+      gap: 0,
+      policy: APPOINTMENTS_CARD_LAYOUT_POLICY,
+    });
+    expect(horizontal).toEqual({ ...vertical, columnSpan: 3, width: 237 });
+    const state = canvasReducer(
+      createCanvasHistoryState([card("pixel", 0, 2)], undefined, APPOINTMENTS_CARD_LAYOUT_POLICY),
+      { type: "resize-card", cardId: "pixel", layout: horizontal },
+    );
+    expect(state.present.cards[0]?.layout.height).toBe(296);
+    const onePixel = canvasReducer(state, {
+      type: "resize-card",
+      cardId: "pixel",
+      layout: { ...horizontal, height: 297 },
+    });
+    expect(onePixel.present.cards[0]?.layout.height).toBe(297);
+    expect(serializeCanvasSnapshot(onePixel.present, APPOINTMENTS_CARD_LAYOUT_POLICY)).toContain(
+      '"height":297',
+    );
+    expect(canvasReducer(onePixel, { type: "undo" }).present.cards[0]?.layout.height).toBe(296);
+    expect(
+      constrainCardLayout(
+        "table",
+        { columnSpan: 1, height: 73, width: 157 },
+        APPOINTMENTS_CARD_LAYOUT_POLICY,
+      ),
+    ).toEqual({ order: 0, columnSpan: 1, height: 73, width: 157 });
+    expect(
+      normalizeDashboardCard(
+        { ...card("width", 0), layout: { order: 0, columnSpan: 2, height: 137, width: 317 } },
+        0,
+        APPOINTMENTS_CARD_LAYOUT_POLICY,
+      )?.layout,
+    ).toEqual({ order: 0, columnSpan: 2, height: 137, width: 317 });
+    expect(constrainCardLayout("kpi", initial).height).toBe(288);
+    expect(
+      constrainCardLayout("kpi", { height: 99_999 }, APPOINTMENTS_CARD_LAYOUT_POLICY).height,
+    ).toBe(16_384);
+  });
   it("packs ordered cards into 12-column rows without overlap", () => {
     const packed = packCanvas([
       card("c", 2, 4),
