@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-30 — Persistência real das dimensões de Agendamentos
+
+- Pedido de teste no site com atualização da página e print. Na sessão real,
+  o card Visitas realizadas passou de 180×200 para 317×237 px pelo editor;
+  a interface confirmou salvamento automático. Após reload e carregamento
+  do perfil, medidas do card e campos do editor conservaram 317×237 px.
+- Print local após refresh entregue ao usuário; captura limitada aos indicadores,
+  sem copiar tabela de clientes. Tamanho de teste mantido, sem mudar filtros.
+- Somente validação e registro documental; sem código, migration ou deploy.
+  Evidências e limites em docs/knowledge/ATUALIZACOES.md.
+
 ## 2026-10-29 — Identidade de Pastas no coletor Salesforce
 
 - A coleta falhava antes de executar Pastas porque o contrato exigia a coluna
