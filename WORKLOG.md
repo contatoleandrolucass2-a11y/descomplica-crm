@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Persistência em celular simulado
+
+- Viewport 390×844 no navegador integrado: os 28 itens mantiveram IDs, ordem,
+  larguras e alturas salvas após refresh. Comparação controlada também confirmou
+  as mesmas dimensões e posições renderizadas, sem cards fora da largura da tela.
+- Card Visitas e gráficos semanal/hoje conferidos visualmente, empilhados e
+  com texto legível. Prints móveis após refresh, sem rankings/tabela de clientes.
+- Viewport restaurado; nenhum layout salvo ou código alterado. Teste simulado,
+  sem comprovar aparelho físico, Safari/iOS ou gestos de toque.
+
 ## 2026-10-30 — Rodada completa e sincronização inversa aprovadas
 
 - Chrome: card e gráfico salvaram pelo editor com um clique cada, mantendo
