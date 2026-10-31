@@ -1,5 +1,21 @@
 # Worklog
 
+## 2026-10-31 — Sidebar automático e controle das torres
+
+- Agendamentos inicia com ícones; mouse expande/recolhe automaticamente, sem
+  botão Ocultar. Foco de teclado expande; toque mantém destinos acessíveis.
+- Atualizado em saiu do sidebar e fica no topo direito do conteúdo.
+- Atalho compacto de altura das torres abre editor com campo numérico,
+  slider50–150%/passo1% e prévia proporcional. Reutiliza barScale existente;
+  não muda tamanho do card, valores, metas ou contrato remoto.
+- Node24: tipos aprovados; sidebar20Vitest e navegador3temas×6larguras
+  aprovados. QA Save único/refresh validou65%, proporções e dimensões
+  preservadas. Revisão independente sem achados bloqueantes.
+- Matriz funcional da CI aprovada; nove referências visuais de Agendamentos
+  revisadas e promovidas pelo helper transacional, com233 imagens preservadas.
+- CI completa, artefato e publicação protegida ainda serão conferidos no
+  candidato. Sem nova migration nem alteração de outras rotas.
+
 ## 2026-10-31 — Persistência concluída em produção
 
 - Migration PR449 autorizada e aplicada; versão remota 20261031112418.

@@ -1258,7 +1258,6 @@
   color: #f3fbff;
 }
 
-.dashboardToggle,
 .dashboardLink {
   position: relative;
   display: flex;
@@ -1279,17 +1278,8 @@
   cursor: pointer;
 }
 
-.dashboardToggle {
-  margin-bottom: 2px;
-  font-weight: 700;
-}
-
-.dashboardToggle > svg,
 .dashboardIcon {
   flex: 0 0 20px;
-}
-
-.dashboardIcon {
   display: grid;
   width: 20px;
   height: 20px;
@@ -1310,14 +1300,12 @@
 }
 
 .dashboardLink:hover,
-.dashboardToggle:hover,
 .dashboardLink[aria-current="page"] {
   background: color-mix(in srgb, currentColor 9%, transparent);
   color: #0754a6;
 }
 
 :global(:root[data-theme="dark"]) .dashboardLink:hover,
-:global(:root[data-theme="dark"]) .dashboardToggle:hover,
 :global(:root[data-theme="dark"]) .dashboardLink[aria-current="page"] {
   color: #7dd3fc;
 }
@@ -1341,24 +1329,8 @@
   display: none;
 }
 
-.dashboardShell[data-collapsed="true"] :is(.dashboardLink, .dashboardToggle) {
+.dashboardShell[data-collapsed="true"] .dashboardLink {
   justify-content: center;
-}
-
-.dashboardTooltip {
-  position: absolute;
-  z-index: 4;
-  left: calc(100% + 12px);
-  display: none;
-  width: max-content;
-  max-width: 180px;
-  border: 1px solid var(--analytics-line);
-  border-radius: 6px;
-  background: var(--analytics-surface);
-  padding: 8px 12px;
-  color: var(--analytics-ink);
-  box-shadow: 0 4px 12px #00000020;
-  pointer-events: none;
 }
 
 .dashboardGuide {
@@ -1396,14 +1368,16 @@
 }
 
 .dashboardUpdatedAt {
-  display: grid;
-  gap: 2px;
-  margin: 4px 0 0;
-  padding: 5px 5px 0;
-  border-top: 1px solid color-mix(in srgb, currentColor 24%, transparent);
-  color: inherit;
-  font-size: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 4px 8px;
+  margin: 0;
+  padding: 8px clamp(12px, 2vw, 28px) 0;
+  color: var(--analytics-ink);
+  font-size: 12px;
   line-height: 1.35;
+  text-align: right;
 }
 
 .dashboardUpdatedAt span {
@@ -1411,20 +1385,12 @@
 }
 
 .dashboardUpdatedAt strong {
-  font-size: 10px;
+  font-size: inherit;
   font-variant-numeric: tabular-nums;
 }
 
 .dashboardShell[data-collapsed="true"] .dashboardGuide button {
   justify-content: center;
-}
-
-.dashboardShell[data-collapsed="true"] .dashboardUpdatedAt {
-  display: none;
-}
-
-.dashboardLink:is(:hover, :focus-visible) .dashboardTooltip {
-  display: block;
 }
 
 .dashboardContent {

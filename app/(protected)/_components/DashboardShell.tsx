@@ -8,22 +8,12 @@ import {
   FolderOpen,
   Handshake,
   LayoutDashboard,
-  PanelLeftClose,
-  PanelLeftOpen,
   Target,
   Users,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import {
-  createContext,
-  useContext,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
 
 import type { NavigationItem } from "@/lib/navigation/presentation";
 
@@ -58,23 +48,6 @@ export function DashboardShell({
   children: ReactNode;
 }) {
   const pathname = usePathname();
-  const [collapsed, setCollapsed] = useState(false);
-  const [updatedAt, setUpdatedAt] = useState("");
-  const sidebarRef = useRef<HTMLElement>(null);
-  const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
-
-  useEffect(() => {
-    if (pathname !== "/app/etapas/agendamentos" || collapsed) return;
-
-    function collapseFromOutside(event: globalThis.PointerEvent) {
-      if (!(event.target instanceof Node) || sidebarRef.current?.contains(event.target)) return;
-      setCollapsed(true);
-    }
-
-    document.addEventListener("pointerdown", collapseFromOutside, true);
-    return () => document.removeEventListener("pointerdown", collapseFromOutside, true);
-  }, [collapsed, pathname]);
-
   if (pathname !== "/app/etapas/agendamentos") return children;
   // Only the server-authorized catalog supplies destinations, including profiles
   // with access to a stage but without access to the overview.
@@ -85,9 +58,29 @@ export function DashboardShell({
 
   if (!activePage) return children;
 
-  const toggleLabel = collapsed
-    ? "Expandir navegação do Dashboard"
-    : "Recolher navegação do Dashboard";
+  return (
+    <AppointmentsDashboardShell pages={dashboardPages} activePageKey={activePage.key}>
+      {children}
+    </AppointmentsDashboardShell>
+  );
+}
+
+function AppointmentsDashboardShell({
+  pages: dashboardPages,
+  activePageKey,
+  children,
+}: {
+  pages: NavigationItem[];
+  activePageKey: string;
+  children: ReactNode;
+}) {
+  // Mount only on the appointments route, so pointer/focus state cannot remain
+  // expanded when navigating away and returning through browser history.
+  const [hovered, setHovered] = useState(false);
+  const [keyboardFocused, setKeyboardFocused] = useState(false);
+  const collapsed = !hovered && !keyboardFocused;
+  const [updatedAt, setUpdatedAt] = useState("");
+  const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
 
   function guide(direction: "previous" | "next") {
     const sections = Array.from(
@@ -115,23 +108,22 @@ export function DashboardShell({
   return (
     <DashboardSidebarContext.Provider value={contextValue}>
       <div className={styles.dashboardShell} data-dashboard-shell data-collapsed={collapsed}>
-        <aside ref={sidebarRef} className={styles.dashboardSidebar} aria-label="Dashboard">
-          <button
-            type="button"
-            className={styles.dashboardToggle}
-            aria-label={toggleLabel}
-            title={toggleLabel}
-            aria-expanded={!collapsed}
-            aria-controls="dashboard-navigation"
-            onClick={() => setCollapsed((current) => !current)}
-          >
-            {collapsed ? (
-              <PanelLeftOpen aria-hidden="true" size={20} />
-            ) : (
-              <PanelLeftClose aria-hidden="true" size={20} />
-            )}
-            <span className={styles.dashboardLabel}>Ocultar</span>
-          </button>
+        <aside
+          className={styles.dashboardSidebar}
+          aria-label="Dashboard"
+          onPointerEnter={(event) => {
+            if (event.pointerType !== "touch") setHovered(true);
+          }}
+          onPointerLeave={() => setHovered(false)}
+          onPointerCancel={() => setHovered(false)}
+          onPointerDownCapture={() => setKeyboardFocused(false)}
+          onFocusCapture={(event) => {
+            if (event.target.matches(":focus-visible")) setKeyboardFocused(true);
+          }}
+          onBlurCapture={(event) => {
+            if (!event.currentTarget.contains(event.relatedTarget)) setKeyboardFocused(false);
+          }}
+        >
           <nav id="dashboard-navigation" aria-label="Páginas do Dashboard">
             <ul className={styles.dashboardLinks}>
               {dashboardPages.map((page) => {
@@ -144,7 +136,7 @@ export function DashboardShell({
                       prefetch={false}
                       className={styles.dashboardLink}
                       aria-label={label}
-                      aria-current={page.key === activePage.key ? "page" : undefined}
+                      aria-current={page.key === activePageKey ? "page" : undefined}
                       title={label}
                     >
                       <span className={styles.dashboardIcon}>
@@ -155,11 +147,6 @@ export function DashboardShell({
                         )}
                       </span>
                       <span className={styles.dashboardLabel}>{label}</span>
-                      {collapsed ? (
-                        <span className={styles.dashboardTooltip} aria-hidden="true">
-                          {label}
-                        </span>
-                      ) : null}
                     </Link>
                   </li>
                 );
@@ -186,14 +173,14 @@ export function DashboardShell({
               <span className={styles.dashboardLabel}>Descer seção</span>
             </button>
           </div>
+        </aside>
+        <div className={styles.dashboardContent} data-dashboard-content>
           {updatedAt ? (
-            <p className={styles.dashboardUpdatedAt}>
+            <p className={styles.dashboardUpdatedAt} data-dashboard-updated-at>
               <span>Atualizado em</span>
               <strong>{updatedAt}</strong>
             </p>
           ) : null}
-        </aside>
-        <div className={styles.dashboardContent} data-dashboard-content>
           {children}
         </div>
       </div>

@@ -1,5 +1,9 @@
 # Changelog
 
+- Agendamentos: sidebar abre ao passar o mouse e recolhe ao sair, sem botão
+  Ocultar; atualização dos dados no topo direito. Altura das torres ganha
+  atalho, campo numérico e prévia, com salvamento do percentual50–150%.
+
 - Conclui persistência de Agendamentos em produção: migration autorizada aplicada,
   confirmação única do gráfico e sincronização de tamanho/ordem entre Chrome,
   integrado e celular simulado; 61 verificações aprovadas e prints finais locais.
