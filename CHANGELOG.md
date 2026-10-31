@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma no Chrome após refresh os tamanhos e posições de card e gráfico
+  alterados por arraste em tela de celular simulada 390×844. Os 28 itens
+  coincidiram com o layout salvo; evidência local, sem mudança da aplicação.
+
 - Confirma ajuste à tela e persistência dos 28 itens de Agendamentos após refresh
   em viewport de celular 390×844, com prints móveis. Validação em navegador,
   sem teste em aparelho físico ou alteração da aplicação.

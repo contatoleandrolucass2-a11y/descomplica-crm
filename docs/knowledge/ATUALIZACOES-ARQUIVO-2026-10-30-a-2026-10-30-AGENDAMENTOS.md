@@ -1,5 +1,12 @@
 # Histórico de validação de Agendamentos
 
+## 2026-10-30: edição em celular simulado sincronizada para o Chrome
+
+- Agendamentos na mesma conta já autenticada: viewport temporário 390×844 no integrado. Arrastes reais do ponteiro pelo canto, sem abrir editor, alteraram Visitas de 385×293 para 269×313 px e semanal de 540×497 para 273×515 px. Arrastes pelas alças moveram Visitas de 4º para 3º e semanal de 15º para 9º. Primeiro arraste do gráfico não mudou a ordem; inspeção e novo arraste produziram a alteração confirmada, sem confundir tentativa com sucesso.
+- Salvo automaticamente confirmado no integrado antes de atualizar a aba existente do Chrome. Após reload, os 28 registros de ID, width e height na ordem do DOM coincidiram integralmente com o snapshot salvo. Visitas 269×313 px/3º e semanal 273×515 px/9º também observados no Chrome. Sem novo salvamento no destino; comprova recepção após refresh, sem afirmar sincronização em tempo real.
+- Evidências locais ignoradas em test-results/appointments-first-save/celular-edicao-salva.json, celular-para-chrome-resultados.json e celular-para-chrome-apos-refresh.jpg. Print nativo após atualização mostra cabeçalho, card e gráfico antes de rankings/tabela. Não exportar anexos ao GitHub/Obsidian; JSONs guardam somente IDs e dimensões. Override móvel restaurado; layout de teste mantido conforme pedido. Simulação de largura/altura com entrada por ponteiro, sem comprovar touchscreen físico, Safari/iOS ou gestos de toque.
+- Fontes em 2026-10-31T02:17:25Z (30/10/2026 23:17 BRT): fetch confirmou HEAD/origin main 02d2b077c407c50a84c1845af1d1614c9dd14a1e e árvore limpa. Health público https://crm.descomplicapro.com.br/api/health respondeu status ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 reutilizada para o mesmo runtime; registro documental segue CI própria. Nenhum código, schema, permissão ou dado comercial alterado; sem novo deploy da aplicação.
+
 ## 2026-10-30: persistência entre Chrome e navegador integrado confirmada
 
 - Usuário concluiu o login na mesma conta no navegador integrado do Codex. A aba /app foi observada; abertura de Agendamentos em nova aba do mesmo navegador carregou o perfil, sem copiar cookies, credenciais, armazenamento ou sessão do Chrome. Browser 2/iab é separado do Chrome 3/perfil Leandro usado nos testes anteriores. Identidade da conta confirmada pelo usuário; nenhum identificador pessoal exportado para a nota.

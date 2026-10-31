@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Edição em celular simulado recebida no Chrome
+
+- Viewport 390×844: arraste pelo canto e pela alça alterou Visitas de
+  385×293 px/4º para 269×313 px/3º, e semanal de 540×497 px/15º para
+  273×515 px/9º. Autosave confirmado antes da atualização do Chrome.
+- Os 28 IDs, ordem, larguras e alturas do Chrome após reload coincidiram
+  integralmente com o layout salvo no integrado. Print e JSON locais ignorados.
+- Viewport restaurado. Entrada por ponteiro, sem aparelho físico ou toque.
+  Somente teste autorizado de layout e registro documental, sem novo deploy.
+
 ## 2026-10-30 — Persistência em celular simulado
 
 - Viewport 390×844 no navegador integrado: os 28 itens mantiveram IDs, ordem,
