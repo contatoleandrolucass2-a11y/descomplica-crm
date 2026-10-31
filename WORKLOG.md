@@ -12,6 +12,9 @@
   menos de 5 segundos, sem escrita. Inventário e total obrigatório ajustados.
 - CI inicial apontou inventário exato da homologação: nova versão incluída
   somente entre as não implantáveis nesse ambiente; candidatos e hashes intactos.
+- CI seguinte aprovou validação, imagem e restore; HTTP reprovou envelope sem
+  headers obrigatório no PostgREST14. DETAIL inclui headers vazio, com regressão
+  pgTAP e diagnóstico HTTP sanitizado. Nenhuma versão aplicada remotamente.
 - Aplicação bfdd450/PR #448 publicada; nova migration ainda não aplicada.
   Gates SQL/HTTP na CI, autorização remota e bateria real permanecem pendentes.
 

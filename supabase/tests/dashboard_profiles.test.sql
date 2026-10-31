@@ -186,7 +186,7 @@ returns jsonb language sql immutable as $$
       'code', '40001', 'message', 'conflict: dashboard profile version changed',
       'details', null, 'hint', null
     )::text,
-    'detail', '{"status":409}'
+    'detail', '{"status":409,"headers":{}}'
   );
 $$;
 grant execute on function pg_temp.dashboard_conflict(text),

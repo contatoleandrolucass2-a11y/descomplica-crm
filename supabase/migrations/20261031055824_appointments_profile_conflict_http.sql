@@ -52,7 +52,7 @@ begin
           'code', '40001', 'message', 'conflict: dashboard profile version changed',
           'details', null, 'hint', null
         )::text,
-        detail = '{"status":409}';
+        detail = '{"status":409,"headers":{}}';
     else
       raise exception 'conflict: dashboard profile version changed' using errcode = '40001';
     end if;
@@ -76,7 +76,7 @@ begin
           'code', '40001', 'message', 'conflict: dashboard profile version changed',
           'details', null, 'hint', null
         )::text,
-        detail = '{"status":409}';
+        detail = '{"status":409,"headers":{}}';
     else
       raise exception 'conflict: dashboard profile version changed' using errcode = '40001';
     end if;
@@ -97,7 +97,7 @@ begin
           'code', '40001', 'message', 'conflict: dashboard profile version changed',
           'details', null, 'hint', null
         )::text,
-        detail = '{"status":409}';
+        detail = '{"status":409,"headers":{}}';
     else
       raise exception 'conflict: dashboard profile version changed' using errcode = '40001';
     end if;

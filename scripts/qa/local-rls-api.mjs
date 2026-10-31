@@ -1535,8 +1535,15 @@ async function verifyAppointmentsProfileConflictThroughRest(local, owner, unauth
       p_schema_version: 2,
     });
     const staleElapsedMs = performance.now() - staleStarted;
-    if (stale.status !== 409 || stale.payload?.code !== "40001" || staleElapsedMs >= 5_000)
-      fail("Stale appointments RPC must return HTTP 409/code 40001 within five seconds.");
+    if (stale.status !== 409 || stale.payload?.code !== "40001" || staleElapsedMs >= 5_000) {
+      const code =
+        typeof stale.payload?.code === "string" && /^[A-Za-z0-9]{1,20}$/u.test(stale.payload.code)
+          ? stale.payload.code
+          : "unavailable";
+      fail(
+        `Stale appointments RPC must return HTTP 409/code 40001 within five seconds; status=${stale.status} code=${code} elapsed_ms=${Math.round(staleElapsedMs)}.`,
+      );
+    }
 
     const denied = await request(unauthorizedToken, "update_dashboard_profile", {
       p_profile_id: profile.id,
