@@ -11,6 +11,8 @@
 - Node24: tipos aprovados; sidebar20Vitest e navegador3temas×6larguras
   aprovados. QA Save único/refresh validou65%, proporções e dimensões
   preservadas. Revisão independente sem achados bloqueantes.
+- Matriz funcional da CI aprovada; nove referências visuais de Agendamentos
+  revisadas e promovidas pelo helper transacional, com233 imagens preservadas.
 - CI completa, artefato e publicação protegida ainda serão conferidos no
   candidato. Sem nova migration nem alteração de outras rotas.
 
