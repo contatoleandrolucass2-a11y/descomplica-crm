@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma ajuste à tela e persistência dos 28 itens de Agendamentos após refresh
+  em viewport de celular 390×844, com prints móveis. Validação em navegador,
+  sem teste em aparelho físico ou alteração da aplicação.
+
 - Revalida no Chrome edição com confirmação única, canto, arraste, refresh,
   retorno à página e novo login em Agendamentos. Comparação final com o navegador
   integrado aprovada para os 28 itens após atualização; sem mudança da aplicação.
