@@ -1,5 +1,11 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-30: edição móvel simulada recebida no Chrome
+
+- Após arrastes pelo canto e pela alça em 390×844, o Chrome atualizado recebeu
+  os 28 itens com ordem e dimensões idênticas. Visitas 269×313 px/3º; semanal
+  273×515 px/9º. Evidência e limites no histórico AGENDAMENTOS de 30/10/2026.
+
 ## 2026-10-30: matriz visual universal por impacto
 
 - Pedido explícito: tornar universal a seleção focada da matriz visual após uma
