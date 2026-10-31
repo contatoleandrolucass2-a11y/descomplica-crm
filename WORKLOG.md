@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Edição horizontal persiste na vertical
+
+- Em 844×390, canto alterou Visitas 303×337 para 337×359 px e semanal
+  343×541 para 379×561 px. Alças moveram Visitas 2º→3º e semanal 8º→5º.
+- Autosave confirmado; retorno a 390×844 e refresh mantiveram os 28 IDs,
+  ordem e tamanhos salvos. Larguras ajustadas à coluna e alturas preservadas,
+  sem article fora da tela ou estouro horizontal da página.
+- Dois prints e JSON locais ignorados; override restaurado. Teste simulado
+  por ponteiro, sem touchscreen físico. Nenhuma mudança de código ou deploy.
+
 ## 2026-10-30 — Rotação de celular simulada preserva layout
 
 - Sequência 390×844 → 844×390 → 390×844, com refresh em horizontal e vertical:
