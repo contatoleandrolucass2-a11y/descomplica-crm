@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-31 — Corrige persistência entre sessões de Agendamentos
+
+- Reproduzido com CAS real no fixture: sessão B desatualizada recebe 409 ao
+  editar o gráfico depois de A salvar o card; editor não conclui no baseline.
+- Agendamentos combina alterações independentes de dimensões e ordem sobre
+  o perfil remoto e repete uma vez com CAS atual. Conflitos reais bloqueiam
+  novas gravações até recarregar; edição durante PATCH não sobrescreve remoto.
+- Autosave inicia sem debounce após commit; beforeunload protege alterações
+  pendentes. Edição aguarda hidratação remota. Sem mudança de schema ou acesso.
+- 40 testes focados e tipos aprovados; QA de confirmação única, fila, 503,
+  conflito real e duas sessões aprovado. Interações, CI e site em validação.
+
 ## 2026-10-31 — Reabertura: card aprovado e gráfico reprovado
 
 - Reabertura dos dois navegadores informada pelo usuário. Após refresh e

@@ -38,6 +38,7 @@ import {
   type DashboardCardLayoutPolicy,
 } from "../../layout/limits";
 import { canvasReducer, createCanvasHistoryState } from "../../state/reducer";
+import { mergeDashboardLayout } from "../../persistence/merge-layout";
 import { DASHBOARD_CANVAS_SCHEMA_VERSION, serializeCanvasSnapshot } from "../../state/migrations";
 import type {
   DashboardCard,
@@ -113,7 +114,7 @@ class ProfileRequestError extends Error {
 }
 
 async function profileRequest<T>(url: string, init?: RequestInit): Promise<T> {
-  const requestInit: RequestInit = { ...init, credentials: "same-origin" };
+  const requestInit: RequestInit = { cache: "no-store", ...init, credentials: "same-origin" };
   if (init?.body) {
     const headers = new Headers(init.headers);
     headers.set("content-type", "application/json");
@@ -286,19 +287,24 @@ export function ConfigurableDashboardCanvas({
   const initialSnapshotRef = useRef(cardsSnapshot(initialCards, layoutPolicy));
   const lastSavedSnapshotRef = useRef<string | null>(null);
   const saveInFlightRef = useRef(false);
+  const saveConflictRef = useRef(false);
   const cacheKey = profileCacheKey(pageKey, scopeKey);
   const cards = state.present.cards;
   const serializedCards = useMemo(() => cardsSnapshot(cards, layoutPolicy), [cards, layoutPolicy]);
   const latestSnapshotRef = useRef(serializedCards);
+  const latestCardsRef = useRef(cards);
   const validSelectedIds = useMemo(() => {
     const cardIds = new Set(cards.map(({ id }) => id));
     return new Set([...selectedIds].filter((id) => cardIds.has(id)));
   }, [cards, selectedIds]);
   const activeProfile = profiles.find(({ id }) => id === activeProfileId) ?? null;
+  const editingReady =
+    editable && (!layoutPolicy?.freeResize || (!profilesLoading && profilesSource === "server"));
 
   useEffect(() => {
     latestSnapshotRef.current = serializedCards;
-  }, [serializedCards]);
+    latestCardsRef.current = cards;
+  }, [cards, serializedCards]);
 
   useEffect(() => {
     const next = cardsSnapshot(initialCards, layoutPolicy);
@@ -332,6 +338,7 @@ export function ConfigurableDashboardCanvas({
       setSaveState("idle");
       setProfileMessage("");
       lastSavedSnapshotRef.current = null;
+      saveConflictRef.current = false;
     });
     const query = new URLSearchParams({ pageKey });
     if (scopeKey) query.set("scopeKey", scopeKey);
@@ -348,6 +355,7 @@ export function ConfigurableDashboardCanvas({
           setActiveProfileId(defaultProfile.id);
           lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards, layoutPolicy);
           dispatch({ type: "replace", cards: defaultProfile.cards, recordHistory: false });
+          setSaveState("saved");
         } else {
           setActiveProfileId(null);
           lastSavedSnapshotRef.current = null;
@@ -435,7 +443,14 @@ export function ConfigurableDashboardCanvas({
   ]);
 
   useEffect(() => {
-    if (!editable || !activeProfile || serializedCards === lastSavedSnapshotRef.current) return;
+    if (
+      !editable ||
+      !activeProfile ||
+      saveConflictRef.current ||
+      (layoutPolicy?.freeResize && profilesSource !== "server") ||
+      serializedCards === lastSavedSnapshotRef.current
+    )
+      return;
     let cancelled = false;
     if (layoutPolicy?.freeResize)
       queueMicrotask(() => {
@@ -448,20 +463,51 @@ export function ConfigurableDashboardCanvas({
         if (saveInFlightRef.current) return;
         saveInFlightRef.current = true;
         setSaveState("saving");
-        void profileRequest<{ profile: RemoteDashboardProfile }>(
-          `/api/dashboard-profiles/${encodeURIComponent(profileId)}`,
-          {
-            method: "PATCH",
-            body: JSON.stringify({
-              cards,
-              schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
-              version: profileVersion,
-            }),
-            ...(layoutPolicy?.freeResize ? { signal: AbortSignal.timeout(15_000) } : {}),
-          },
-        )
+        const persist = (nextCards: DashboardCard[], version: number) =>
+          profileRequest<{ profile: RemoteDashboardProfile }>(
+            `/api/dashboard-profiles/${encodeURIComponent(profileId)}`,
+            {
+              method: "PATCH",
+              body: JSON.stringify({
+                cards: nextCards,
+                schemaVersion: DASHBOARD_CANVAS_SCHEMA_VERSION,
+                version,
+              }),
+              ...(layoutPolicy?.freeResize ? { signal: AbortSignal.timeout(15_000) } : {}),
+            },
+          );
+        void persist(cards, profileVersion)
+          .catch(async (error: unknown) => {
+            if (
+              !layoutPolicy?.freeResize ||
+              !(error instanceof ProfileRequestError) ||
+              error.status !== 409
+            )
+              throw error;
+            const query = new URLSearchParams({ pageKey });
+            if (scopeKey) query.set("scopeKey", scopeKey);
+            const { profiles: remoteProfiles } = await profileRequest<{
+              profiles: RemoteDashboardProfile[];
+            }>(`/api/dashboard-profiles?${query.toString()}`);
+            const remote = remoteProfiles.find(({ id }) => id === profileId);
+            const merged = remote && mergeDashboardLayout(activeProfile.cards, cards, remote.cards);
+            if (!remote || !merged) throw error;
+            // Retry once with the fetched version. A new concurrent write still fails CAS.
+            return persist(merged, remote.version);
+          })
           .then(({ profile }) => {
-            lastSavedSnapshotRef.current = serializedCards;
+            const savedSnapshot = cardsSnapshot(profile.cards, layoutPolicy);
+            const rebased = layoutPolicy?.freeResize
+              ? mergeDashboardLayout(cards, latestCardsRef.current, profile.cards)
+              : null;
+            if (layoutPolicy?.freeResize && latestSnapshotRef.current !== savedSnapshot && !rebased)
+              throw new ProfileRequestError(409, "layout_changed_while_saving");
+            if (rebased && cardsSnapshot(rebased, layoutPolicy) !== latestSnapshotRef.current) {
+              latestCardsRef.current = rebased;
+              latestSnapshotRef.current = cardsSnapshot(rebased, layoutPolicy);
+              dispatch({ type: "replace", cards: rebased, recordHistory: false });
+            }
+            lastSavedSnapshotRef.current = savedSnapshot;
             setProfiles((current) => {
               const next = current.map((entry) => (entry.id === profile.id ? profile : entry));
               writeCachedProfiles(cacheKey, next);
@@ -469,7 +515,7 @@ export function ConfigurableDashboardCanvas({
             });
             setProfilesSource("server");
             setSaveState(
-              layoutPolicy?.freeResize && latestSnapshotRef.current !== serializedCards
+              layoutPolicy?.freeResize && latestSnapshotRef.current !== savedSnapshot
                 ? "saving"
                 : "saved",
             );
@@ -485,6 +531,7 @@ export function ConfigurableDashboardCanvas({
             pendingEditorSnapshotRef.current = null;
             if (editorPending) setEditorSaving(false);
             if (error instanceof ProfileRequestError && error.status === 409) {
+              if (layoutPolicy?.freeResize) saveConflictRef.current = true;
               setSaveState("conflict");
               setProfileMessage(
                 "O perfil mudou em outra sessão. Recarregue a versão remota antes de salvar.",
@@ -514,7 +561,7 @@ export function ConfigurableDashboardCanvas({
             saveInFlightRef.current = false;
           });
       },
-      pendingEditorSnapshotRef.current === serializedCards ? 0 : 700,
+      layoutPolicy?.freeResize || pendingEditorSnapshotRef.current === serializedCards ? 0 : 700,
     );
     return () => {
       cancelled = true;
@@ -528,8 +575,22 @@ export function ConfigurableDashboardCanvas({
     editorSaveAttempt,
     layoutPolicy,
     profiles,
+    profilesSource,
+    pageKey,
+    scopeKey,
     serializedCards,
   ]);
+
+  useEffect(() => {
+    if (!layoutPolicy?.freeResize || !editable) return;
+    const warnUnsaved = (event: BeforeUnloadEvent) => {
+      if (latestSnapshotRef.current === lastSavedSnapshotRef.current || !activeProfile) return;
+      event.preventDefault();
+      event.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warnUnsaved);
+    return () => window.removeEventListener("beforeunload", warnUnsaved);
+  }, [activeProfile, editable, layoutPolicy]);
 
   const renderDashboardContent = useCallback(
     (card: DashboardCard, size: DashboardCardSize) => {
@@ -546,6 +607,7 @@ export function ConfigurableDashboardCanvas({
   );
 
   function openNewCard() {
+    if (!editingReady) return;
     setEditorSaveError("");
     const card = createCatalogCard({
       catalog,
@@ -584,6 +646,7 @@ export function ConfigurableDashboardCanvas({
   }
 
   function openCardEditor(card: DashboardCard, renderedWidth?: number) {
+    if (!editingReady) return;
     setEditorSaveError("");
     setEditorMode("edit");
     setEditorCard(
@@ -743,6 +806,7 @@ export function ConfigurableDashboardCanvas({
       setProfiles(remoteProfiles);
       writeCachedProfiles(cacheKey, remoteProfiles);
       setProfilesSource("server");
+      saveConflictRef.current = false;
       lastSavedSnapshotRef.current = cardsSnapshot(remote.cards, layoutPolicy);
       dispatch({ type: "replace", cards: remote.cards, recordHistory: false });
       setSelectedIds(new Set());
@@ -784,28 +848,28 @@ export function ConfigurableDashboardCanvas({
             type="button"
             className={styles.primaryButton}
             onClick={openNewCard}
-            disabled={catalog.metrics.length === 0}
+            disabled={!editingReady || catalog.metrics.length === 0}
           >
             <Plus size={17} aria-hidden="true" /> {addButtonLabel}
           </button>
           <button
             type="button"
             onClick={() => dispatch({ type: "organize" })}
-            disabled={cards.length < 2}
+            disabled={!editingReady || cards.length < 2}
           >
             <LayoutGrid size={17} aria-hidden="true" /> Organizar
           </button>
           <button
             type="button"
             onClick={() => dispatch({ type: "undo" })}
-            disabled={state.history.length === 0}
+            disabled={!editingReady || state.history.length === 0}
           >
             <Undo2 size={17} aria-hidden="true" /> Desfazer
           </button>
           <button
             type="button"
             onClick={() => dispatch({ type: "redo" })}
-            disabled={state.future.length === 0}
+            disabled={!editingReady || state.future.length === 0}
           >
             <Redo2 size={17} aria-hidden="true" /> Refazer
           </button>
@@ -869,6 +933,11 @@ export function ConfigurableDashboardCanvas({
           role="alert"
         >
           {profileMessage}
+          {layoutPolicy?.freeResize && saveState === "conflict" ? (
+            <button type="button" onClick={() => void reloadActiveProfile()}>
+              Recarregar versão remota
+            </button>
+          ) : null}
         </div>
       ) : null}
       {state.duplicateCardId ? (
@@ -896,7 +965,7 @@ export function ConfigurableDashboardCanvas({
       ) : (
         <DashboardCanvas
           cards={cards}
-          disabled={!editable}
+          disabled={!editingReady}
           ariaLabel={`${ariaLabel}: cards`}
           onCommit={(next) => dispatch({ type: "replace", cards: next })}
           layoutPolicy={layoutPolicy}
