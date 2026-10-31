@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Edição no integrado refletida no Chrome
+
+- No navegador integrado, arraste pelo canto alterou Visitas realizadas de
+  317×237 para 349×261 px e o gráfico semanal de 477×439 para 513×471 px.
+- Arrastes pelas alças moveram Visitas da posição 4 para 3 e semanal de 15
+  para 16. Autosave confirmado antes de atualizar a aba existente do Chrome.
+- Após reload no Chrome, todos os 28 IDs, ordem e dimensões ficaram idênticos
+  ao registro salvo no integrado. Print nativo após atualização, sem editor.
+- Somente validação/documentação; sem código, schema ou deploy da aplicação.
+
 ## 2026-10-30 — Layout preservado em outro navegador
 
 - Após login realizado pelo usuário no navegador integrado do Codex, abertura
