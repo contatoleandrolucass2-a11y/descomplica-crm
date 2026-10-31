@@ -96,6 +96,11 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   const barEditor = page.getByRole("dialog");
   const percentInput = barEditor.getByLabel("Altura das torres (%)", { exact: true });
   await expect(percentInput).toBeFocused();
+  const previewTrack = barEditor
+    .locator('[aria-label="Prévia da altura das torres"] [style*="--bar-height"]')
+    .first();
+  assert.ok((await previewTrack.boundingBox()).height > 60, "Preview fills its plot area");
+
   await percentInput.fill("65");
   await expect(
     barEditor.getByRole("slider", { name: "Ajustar altura das torres", exact: true }),

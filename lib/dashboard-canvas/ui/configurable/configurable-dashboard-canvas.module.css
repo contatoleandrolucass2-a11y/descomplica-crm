@@ -19,7 +19,7 @@
 }
 
 .toolbar button,
-.modal button {
+.modal button:not(:where([data-dashboard-bar-height-preview] *)) {
   display: inline-flex;
   min-height: 2.5rem;
   align-items: center;
@@ -677,4 +677,10 @@
   .barHeightControls {
     grid-template-columns: 1fr;
   }
+}
+
+.barHeightPreview > .cardContent,
+.barHeightPreview .presentationSurface {
+  height: 100%;
+  min-height: 0;
 }

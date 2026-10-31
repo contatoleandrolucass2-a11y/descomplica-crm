@@ -1611,6 +1611,8 @@ function CardEditor({
             </p>
             <div
               className={styles.barHeightPreview}
+              data-dashboard-bar-height-preview
+              data-dashboard-card-content
               aria-label="Prévia da altura das torres"
               role="region"
               inert
