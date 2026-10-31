@@ -14,6 +14,7 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
+  ArrowUpDown,
   Download,
   Expand,
   LayoutGrid,
@@ -261,6 +262,7 @@ export function ConfigurableDashboardCanvas({
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
+  const [focusBarHeight, setFocusBarHeight] = useState(false);
   const [editorMode, setEditorMode] = useState<"add" | "edit">("add");
   const [editorSaving, setEditorSaving] = useState(false);
   const [editorSaveError, setEditorSaveError] = useState("");
@@ -652,10 +654,11 @@ export function ConfigurableDashboardCanvas({
     setEditorSaveAttempt((attempt) => attempt + 1);
   }
 
-  function openCardEditor(card: DashboardCard, renderedWidth?: number) {
+  function openCardEditor(card: DashboardCard, renderedWidth?: number, barHeight = false) {
     if (!editingReady) return;
     setEditorSaveError("");
     setEditorMode("edit");
+    setFocusBarHeight(barHeight);
     setEditorCard(
       layoutPolicy?.freeResize
         ? {
@@ -1027,6 +1030,22 @@ export function ConfigurableDashboardCanvas({
                   >
                     <Pencil size={15} aria-hidden="true" />
                   </button>
+                  {pageKey === "crm.stage.appointments" && card.type === "bars" ? (
+                    <button
+                      type="button"
+                      className={styles.iconButton}
+                      title="Altura das torres"
+                      aria-label={`Ajustar altura das torres de ${card.title || card.metric}`}
+                      onClick={(event) => {
+                        const bounds = event.currentTarget
+                          .closest("[data-dashboard-card-id]")
+                          ?.getBoundingClientRect();
+                        openCardEditor(card, bounds?.width, true);
+                      }}
+                    >
+                      <ArrowUpDown size={15} aria-hidden="true" />
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className={styles.iconButton}
@@ -1103,6 +1122,17 @@ export function ConfigurableDashboardCanvas({
             >
               <Pencil size={17} aria-hidden="true" /> Editar e redimensionar
             </button>
+            {pageKey === "crm.stage.appointments" && actionsCard.type === "bars" ? (
+              <button
+                type="button"
+                onClick={() => {
+                  openCardEditor(actionsCard, actionsCardWidthRef.current, true);
+                  setActionsCardId(null);
+                }}
+              >
+                <ArrowUpDown size={17} aria-hidden="true" /> Altura das torres
+              </button>
+            ) : null}
             <button
               type="button"
               onClick={() => {
@@ -1154,6 +1184,9 @@ export function ConfigurableDashboardCanvas({
               : undefined
           }
           onSave={saveEditor}
+          appointmentsBarHeight={pageKey === "crm.stage.appointments"}
+          focusBarHeight={focusBarHeight}
+          renderPreview={renderDashboardContent}
         />
       ) : null}
 
@@ -1389,6 +1422,9 @@ function CardEditor({
   onClose,
   onDelete,
   onSave,
+  appointmentsBarHeight,
+  focusBarHeight,
+  renderPreview,
 }: {
   card: DashboardCard;
   mode: "add" | "edit";
@@ -1401,10 +1437,20 @@ function CardEditor({
   onClose: () => void;
   onDelete?: (() => void) | undefined;
   onSave: (card: DashboardCard) => void;
+  appointmentsBarHeight: boolean;
+  focusBarHeight: boolean;
+  renderPreview: (card: DashboardCard, size: DashboardCardSize) => ReactNode;
 }) {
   const [card, setCard] = useState(initialCard);
   const [widthDraft, setWidthDraft] = useState(String(initialCard.layout.width ?? 320));
   const [heightDraft, setHeightDraft] = useState(String(initialCard.layout.height));
+  const [barHeightDraft, setBarHeightDraft] = useState(
+    String(Math.round((initialCard.presentation?.barScale ?? 1) * 100)),
+  );
+  const barHeightRef = useRef<HTMLInputElement>(null);
+  useEffect(() => {
+    if (focusBarHeight) barHeightRef.current?.focus();
+  }, [focusBarHeight]);
 
   function cardWithDraftDimensions() {
     if (!layoutPolicy?.freeResize) return card;
@@ -1459,6 +1505,7 @@ function CardEditor({
   }
 
   function updatePresentation(patch: Partial<DashboardCardPresentation>) {
+    if (patch.barScale !== undefined) setBarHeightDraft(String(Math.round(patch.barScale * 100)));
     setCard({ ...card, presentation: { ...card.presentation, ...patch } });
   }
 
@@ -1506,11 +1553,74 @@ function CardEditor({
         aria-busy={saving}
         onSubmit={(event) => {
           event.preventDefault();
-          if (customDatesValid && !saving && !saveUnavailable) onSave(cardWithDraftDimensions());
+          if (customDatesValid && !saving && !saveUnavailable)
+            onSave(
+              appointmentsBarHeight && card.type === "bars"
+                ? {
+                    ...cardWithDraftDimensions(),
+                    presentation: { ...card.presentation, barScale: Number(barHeightDraft) / 100 },
+                  }
+                : cardWithDraftDimensions(),
+            );
         }}
       >
         {saveError ? <p role="alert">{saveError}</p> : null}
         {saveUnavailable ? <p role="status">Aguardando o perfil do servidor para salvar.</p> : null}
+        {appointmentsBarHeight && card.type === "bars" ? (
+          <fieldset className={styles.barHeightControls}>
+            <legend>Altura das torres</legend>
+            <label>
+              Altura das torres (%)
+              <input
+                ref={barHeightRef}
+                disabled={saving}
+                type="number"
+                min={50}
+                max={150}
+                step={1}
+                required
+                value={barHeightDraft}
+                onChange={(event) => {
+                  const value = event.target.value;
+                  setBarHeightDraft(value);
+                  const percent = Number(value);
+                  if (value.trim() && percent >= 50 && percent <= 150)
+                    updatePresentation({ barScale: percent / 100 });
+                }}
+              />
+            </label>
+            <label>
+              Ajustar altura das torres
+              <input
+                disabled={saving}
+                type="range"
+                min={50}
+                max={150}
+                step={1}
+                value={Math.round((card.presentation?.barScale ?? 1) * 100)}
+                onChange={(event) => {
+                  setBarHeightDraft(event.target.value);
+                  updatePresentation({ barScale: Number(event.target.value) / 100 });
+                }}
+              />
+            </label>
+            <p>
+              De 50% a 150%. Reduza para baixar as torres, sem alterar o tamanho do card ou os
+              valores. Barras e metas mantêm a mesma escala. A prévia é proporcional; a altura final
+              acompanha o card.
+            </p>
+            <div
+              className={styles.barHeightPreview}
+              aria-label="Prévia da altura das torres"
+              role="region"
+              inert
+            >
+              <DashboardCardContent card={card}>
+                {renderPreview(card, { width: 560, height: 280 })}
+              </DashboardCardContent>
+            </div>
+          </fieldset>
+        ) : null}
         <label>
           Título
           <input
@@ -1676,7 +1786,7 @@ function CardEditor({
             onChange={(event) => updatePresentation({ accentColor: event.target.value })}
           />
         </label>
-        {card.type === "bars" || card.type === "horizontal-bars" ? (
+        {(!appointmentsBarHeight && card.type === "bars") || card.type === "horizontal-bars" ? (
           <label>
             Altura ou alcance das torres
             <input

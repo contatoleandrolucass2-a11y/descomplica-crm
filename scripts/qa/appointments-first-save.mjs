@@ -81,6 +81,56 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     });
   }
 
+  // Bar height is independent from card dimensions and survives one Save + reload.
+  const barChart = charts[1];
+  const dimensionsBeforeScale = await read(barChart);
+  const barHeights = () =>
+    card(barChart)
+      .locator('[style*="--bar-height"] > div')
+      .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().height));
+  const originalBarHeights = await barHeights();
+  const beforeBarSave = requests.length;
+  await card(barChart)
+    .getByRole("button", { name: `Ajustar altura das torres de ${barChart.title}`, exact: true })
+    .press("Enter");
+  const barEditor = page.getByRole("dialog");
+  const percentInput = barEditor.getByLabel("Altura das torres (%)", { exact: true });
+  await expect(percentInput).toBeFocused();
+  await percentInput.fill("65");
+  await expect(
+    barEditor.getByRole("slider", { name: "Ajustar altura das torres", exact: true }),
+  ).toHaveValue("65");
+  await barEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(barEditor).toHaveCount(0);
+  assert.equal(requests.length, beforeBarSave + 1, "Bar height saves with one PATCH");
+  assert.equal(
+    requests.at(-1).cards.find((entry) => entry.id === barChart.id).presentation.barScale,
+    0.65,
+  );
+  await page.reload();
+  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  await expect.poll(() => read(barChart)).toEqual(dimensionsBeforeScale);
+  const scaledBarHeights = await barHeights();
+  assert.ok(originalBarHeights.some((height) => height > 0));
+  originalBarHeights.forEach((height, index) =>
+    assert.ok(
+      Math.abs(scaledBarHeights[index] - height * 0.65) < 1,
+      "Bars retain proportions at saved height",
+    ),
+  );
+  const persistedBarEditor = await open(barChart);
+  await expect(persistedBarEditor.getByLabel("Altura das torres (%)", { exact: true })).toHaveValue(
+    "65",
+  );
+  await persistedBarEditor.getByRole("button", { name: "Cancelar", exact: true }).click();
+  evidence.firstSave.push({
+    scenario: "bar-height-one-save-refresh",
+    scale: 0.65,
+    dimensionsBeforeScale,
+    originalBarHeights,
+    scaledBarHeights,
+  });
+
   // An autosave from a corner/keyboard resize can still be in flight when the editor opens.
   const beforeQueue = requests.length;
   holdNextResponse = true;

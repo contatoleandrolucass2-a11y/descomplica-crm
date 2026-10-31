@@ -56,7 +56,6 @@ describe("Dashboard sidebar navigation", () => {
       <DashboardShell pages={[...pages].reverse()}>Conteúdo</DashboardShell>,
     );
     expect([...markup.matchAll(/title="([^"]+)"/g)].map((match) => match[1])).toEqual([
-      "Recolher navegação do Dashboard",
       "Visão Geral",
       "Oportunidades",
       "Agendamentos",
@@ -69,7 +68,9 @@ describe("Dashboard sidebar navigation", () => {
     ]);
     expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
     expect(markup).toContain('aria-label="Agendamentos" aria-current="page"');
-    expect(markup).toContain('aria-expanded="true"');
+    expect(markup).toContain('data-collapsed="true"');
+    expect(markup).not.toContain("Ocultar");
+    expect(markup).not.toContain("Recolher navegação do Dashboard");
     expect(markup).toContain("Conteúdo");
   });
 

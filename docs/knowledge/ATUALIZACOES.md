@@ -1,8 +1,8 @@
 # Aprendizados e atualizacoes
 
-- Persistência de Agendamentos concluída: migration PR449 aplicada após CI verde.
-  Chrome/integrado e celular simulado preservam 28 itens; 61 verificações aprovadas.
-  Detalhes e limites no histórico AGENDAMENTOS de 30/10/2026.
+- Agendamentos: sidebar automático, atualização no topo e altura das torres.
+  Implementação/testes locais concluídos; CI e deploy pendentes.
+  Detalhes no histórico AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 
