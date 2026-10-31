@@ -114,7 +114,7 @@ class ProfileRequestError extends Error {
 }
 
 async function profileRequest<T>(url: string, init?: RequestInit): Promise<T> {
-  const requestInit: RequestInit = { cache: "no-store", ...init, credentials: "same-origin" };
+  const requestInit: RequestInit = { ...init, credentials: "same-origin" };
   if (init?.body) {
     const headers = new Headers(init.headers);
     headers.set("content-type", "application/json");
@@ -344,6 +344,7 @@ export function ConfigurableDashboardCanvas({
     if (scopeKey) query.set("scopeKey", scopeKey);
     void profileRequest<{ profiles: RemoteDashboardProfile[] }>(
       `/api/dashboard-profiles?${query.toString()}`,
+      layoutPolicy?.freeResize ? { cache: "no-store" } : undefined,
     )
       .then(({ profiles: remoteProfiles }) => {
         if (cancelled) return;
@@ -355,7 +356,7 @@ export function ConfigurableDashboardCanvas({
           setActiveProfileId(defaultProfile.id);
           lastSavedSnapshotRef.current = cardsSnapshot(defaultProfile.cards, layoutPolicy);
           dispatch({ type: "replace", cards: defaultProfile.cards, recordHistory: false });
-          setSaveState("saved");
+          if (layoutPolicy?.freeResize) setSaveState("saved");
         } else {
           setActiveProfileId(null);
           lastSavedSnapshotRef.current = null;
@@ -488,7 +489,7 @@ export function ConfigurableDashboardCanvas({
             if (scopeKey) query.set("scopeKey", scopeKey);
             const { profiles: remoteProfiles } = await profileRequest<{
               profiles: RemoteDashboardProfile[];
-            }>(`/api/dashboard-profiles?${query.toString()}`);
+            }>(`/api/dashboard-profiles?${query.toString()}`, { cache: "no-store" });
             const remote = remoteProfiles.find(({ id }) => id === profileId);
             const merged = remote && mergeDashboardLayout(activeProfile.cards, cards, remote.cards);
             if (!remote || !merged) throw error;
