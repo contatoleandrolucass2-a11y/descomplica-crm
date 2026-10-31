@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma recepção no celular simulado dos tamanhos e posições alterados no
+  Chrome por canto e arraste, após refresh: 28 itens idênticos, larguras
+  ajustadas à tela e alturas preservadas. Registro de validação com prints.
+
 - Confirma no Chrome após refresh os tamanhos e posições de card e gráfico
   alterados por arraste em tela de celular simulada 390×844. Os 28 itens
   coincidiram com o layout salvo; evidência local, sem mudança da aplicação.

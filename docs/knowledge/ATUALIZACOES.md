@@ -1,5 +1,11 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-30: Chrome para celular simulado aprovado
+
+- Refresh móvel recebeu os 28 itens na ordem e dimensões salvas no Chrome.
+  Visitas 303×337 px/2º; semanal 343×541 px/8º. Larguras ajustadas à coluna,
+  sem estouro horizontal. Detalhes no histórico AGENDAMENTOS de 30/10/2026.
+
 ## 2026-10-30: edição móvel simulada recebida no Chrome
 
 - Após arrastes pelo canto e pela alça em 390×844, o Chrome atualizado recebeu

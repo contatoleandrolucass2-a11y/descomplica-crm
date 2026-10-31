@@ -1,5 +1,13 @@
 # Histórico de validação de Agendamentos
 
+## 2026-10-30: edição no Chrome recebida e ajustada no celular simulado
+
+- Teste inverso autorizado: no Chrome existente, arraste pelo canto de Visitas alterou 269×313 para 303×337 px; arraste pela alça moveu de 3º para 2º. Semanal passou de 273×515 para 343×541 px pelo canto e de 9º para 8º pela alça. Sem editor. Salvo automaticamente confirmado antes de atualizar o destino.
+- Integrado existente atualizado em viewport 390×844: os 28 IDs, ordem, width e height coincidiram com o estado observado no Chrome. O snapshot esperado foi recomposto do registro anterior e das duas alterações observadas, após reset necessário da ferramenta. Configurações recebidas: Visitas 303×337 px/2º e semanal 343×541 px/8º. Sem salvar no destino.
+- Ajuste móvel medido antes das capturas: ambos com largura renderizada 292,667 px e alturas preservadas 337/541 px. Todos os 28 articles dentro da área útil de 375 px; document scrollWidth/clientWidth iguais, sem estouro horizontal da página. Prints mostram card e barras, valores, rótulos e legenda do gráfico em coluna. Largura configurada permanece salva para desktop, com limitação responsiva de exibição no celular.
+- Evidências locais ignoradas: test-results/appointments-first-save/chrome-para-celular-resultados.json, chrome-para-celular-card-apos-refresh.jpg e chrome-para-celular-grafico-apos-refresh.jpg. Sem rankings, tabela, credenciais ou identificadores pessoais exportados ao GitHub/Obsidian. Override restaurado e layout pedido mantido. Simulação de viewport, sem aparelho físico, Safari/iOS ou gestos touchscreen. Handle antigo do integrado indisponível; reset da ferramenta e recuperação da mesma aba autenticada resolveram, sem novo login.
+- Fontes às 2026-10-31T02:23:02Z (30/10/2026 23:23 BRT): fetch confirmou HEAD/origin main 9f9f045daf33641846d04b95320bdc1ca3ccccc7 e árvore limpa; health público https://crm.descomplicapro.com.br/api/health com status ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 reutilizada para o mesmo runtime. Somente registro documental sujeito à CI própria, sem código, schema, permissões, dados comerciais ou deploy da aplicação.
+
 ## 2026-10-30: edição em celular simulado sincronizada para o Chrome
 
 - Agendamentos na mesma conta já autenticada: viewport temporário 390×844 no integrado. Arrastes reais do ponteiro pelo canto, sem abrir editor, alteraram Visitas de 385×293 para 269×313 px e semanal de 540×497 para 273×515 px. Arrastes pelas alças moveram Visitas de 4º para 3º e semanal de 15º para 9º. Primeiro arraste do gráfico não mudou a ordem; inspeção e novo arraste produziram a alteração confirmada, sem confundir tentativa com sucesso.
