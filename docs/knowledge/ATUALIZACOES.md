@@ -1,8 +1,8 @@
 # Aprendizados e atualizacoes
 
-- Persistência parcial aprovada; app bfdd450 ativa. PR449 integrado/CI verde,
-  conflito HTTP corrigido em teste (13ms). Migration aguarda autorização;
-  integrado aguarda login. Detalhes no histórico AGENDAMENTOS de 30/10/2026.
+- Persistência de Agendamentos concluída: migration PR449 aplicada após CI verde.
+  Chrome/integrado e celular simulado preservam 28 itens; 61 verificações aprovadas.
+  Detalhes e limites no histórico AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 
