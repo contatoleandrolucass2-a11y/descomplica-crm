@@ -4,6 +4,10 @@
   permanecem após sair da conta e entrar novamente na mesma conta.
   Evidências após login, sem alteração da aplicação.
 
+- Adota matriz visual universal por impacto: rotas isoladas usam cobertura
+  focada, Meta Ads preserva seu QA dedicado e mudanças globais ou desconhecidas
+  continuam na matriz completa. A suíte integral roda semanalmente e sob demanda.
+
 - Confirma no site que os 28 itens de Agendamentos preservam ordem e dimensões
   ao sair para a Visão Geral e voltar à página, sem refazer configurações.
   Registro de validação, sem alteração da aplicação.
@@ -15,6 +19,10 @@
 - Confirma persistência de largura e altura em dois gráficos redimensionados
   pelo canto, sem editor: 441×441 e 477×439 px após autosave e refresh real.
   Registro de validação, sem alteração da aplicação.
+
+- Mantém os gráficos do Canvas Meta Ads desenhados com valores zero quando o
+  período selecionado ainda não possui métricas, preservando campanhas, eixos,
+  legendas e filtros em vez de substituir a visualização por um aviso vazio.
 
 - Corrige a confirmação das dimensões em Agendamentos: o editor aguarda a
   gravação no servidor antes de fechar, sem exigir uma segunda confirmação.

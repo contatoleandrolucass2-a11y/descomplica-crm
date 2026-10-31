@@ -16,6 +16,7 @@ import { checkRoutineSettings } from "./routine-settings.mjs";
 import { checkConnectedSystems } from "./connected-systems.mjs";
 import { checkDashboardAutoRefresh } from "./dashboard-auto-refresh.mjs";
 import { checkRepasse } from "./repasse.mjs";
+import { authenticatedVisualRoutes, selectVisualRoutes } from "./visual-route-scope.mjs";
 import {
   checkTabelaoLayout,
   checkTabelaoMapsFixture,
@@ -106,30 +107,8 @@ function parseMode(argv) {
 
 const mode = parseMode(process.argv.slice(2));
 
-const routes = [
-  "/app",
-  "/app/etapas/oportunidades",
-  "/app/etapas/agendamentos",
-  "/app/etapas/visitas",
-  "/app/etapas/pastas",
-  "/app/etapas/vendas",
-  "/app/ranking",
-  "/app/canal-de-parcerias",
-  "/app/configuracoes",
-  "/app/configuracoes/metas",
-  "/app/configuracoes/metas/parcerias",
-  "/app/configuracoes/metas/pontos",
-  "/app/simulacao",
-  "/app/simulacao/associativo-fluxo-linear",
-  "/app/simulacao/calcular-documentacao",
-  "/app/simulacao/caixa",
-  "/app/simulacao/tabela-direta",
-  "/app/simulacao/tabelao",
-  "/app/simulacao/tabela-investidor",
-  "/admin",
-  "/admin/usuarios",
-  "/admin/paginas",
-];
+const routes = authenticatedVisualRoutes;
+const visualRoutes = selectVisualRoutes(process.env.QA_VISUAL_ROUTES, routes);
 
 const approvedCanvasByRoute = new Map([
   [
@@ -266,7 +245,7 @@ const viewports = [
 
 const themes = ["light", "balanced", "dark"];
 const themeLabels = { light: "Claro", balanced: "Médio", dark: "Escuro" };
-const desktopThemeCaptureRoutes = new Set(routes);
+const desktopThemeCaptureRoutes = new Set(visualRoutes);
 const mobileDarkViewportKey = "mobile-390x844";
 const zoomLevels = [
   { percent: 80, width: 1800, height: 1125, deviceScaleFactor: 0.8 },
@@ -5734,7 +5713,7 @@ async function checkZoom(
 
     try {
       await login(page, origin, email, password);
-      for (const route of routes) {
+      for (const route of visualRoutes) {
         checks.push({
           zoomPercent: level.percent,
           viewport: `zoom-${level.percent}`,
@@ -5806,21 +5785,21 @@ function functionalChecksPassed({
   zoom,
 }) {
   return (
-    routeChecks.length === routes.length * viewports.length &&
+    routeChecks.length === visualRoutes.length * viewports.length &&
     routeChecks.every((check) => check.passed) &&
-    themeChecks.length === routes.length * (themes.length + 1) &&
+    themeChecks.length === visualRoutes.length * (themes.length + 1) &&
     themeChecks.every((check) => check.passed) &&
     accessibilityChecks.length ===
-      routes.length * viewports.length +
+      visualRoutes.length * viewports.length +
         desktopThemeCaptureRoutes.size * themes.length +
-        routes.length &&
+        visualRoutes.length &&
     accessibilityChecks.every((check) => check.passed) &&
     screenshots.length ===
-      routes.length * viewports.length +
+      visualRoutes.length * viewports.length +
         desktopThemeCaptureRoutes.size * themes.length +
-        routes.length &&
+        visualRoutes.length &&
     screenshots.filter(({ approvedCanvasComparison }) => approvedCanvasComparison).length ===
-      routes.length &&
+      visualRoutes.length &&
     screenshots
       .filter(({ approvedCanvasComparison }) => approvedCanvasComparison)
       .every(({ approvedCanvasComparison }) => approvedCanvasComparison.passed) &&
@@ -5835,7 +5814,7 @@ function functionalChecksPassed({
     archiveNavigationPassed(archiveNavigation) &&
     fixtureSourceMarker &&
     Object.values(fixtureSourceMarker).every(Boolean) &&
-    zoom.routes.length === routes.length * zoomLevels.length &&
+    zoom.routes.length === visualRoutes.length * zoomLevels.length &&
     zoom.passed
   );
 }
@@ -6083,7 +6062,7 @@ async function run() {
 
       try {
         await login(page, origin, email, password);
-        for (const route of routes) {
+        for (const route of visualRoutes) {
           currentStage = `responsive:${viewport.key}:${route}`;
           const check = await inspectRoute(
             page,
@@ -6323,7 +6302,7 @@ async function run() {
             currentStage = `theme:${theme}`;
             await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
             await setTheme(page, theme);
-            for (const route of routes) {
+            for (const route of visualRoutes) {
               currentStage = `theme:${theme}:${route}`;
               const check = await inspectRoute(
                 page,
@@ -6411,7 +6390,7 @@ async function run() {
           currentStage = `mobile-dark:${viewport.key}`;
           await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
           await setTheme(page, "dark");
-          for (const route of routes) {
+          for (const route of visualRoutes) {
             currentStage = `mobile-dark:${viewport.key}:${route}`;
             const check = await inspectRoute(
               page,
@@ -6544,11 +6523,11 @@ async function run() {
         eligible: mode === "update-baseline" && functionalPassed,
       },
       visualInspectionCoverage: {
-        responsiveScreenshots: routes.length * viewports.length,
-        themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + routes.length,
+        responsiveScreenshots: visualRoutes.length * viewports.length,
+        themeScreenshots: desktopThemeCaptureRoutes.size * themes.length + visualRoutes.length,
         accessibilityAudits: accessibilityChecks.length,
         baselineComparisons: screenshots.length,
-        approvedCanvasComparisons: routes.length,
+        approvedCanvasComparisons: visualRoutes.length,
         approvedCanvasColorDistanceThreshold,
         approvedCanvasEdgeDistanceThreshold,
         changedPixelRatioThreshold: visualDifferenceThreshold,

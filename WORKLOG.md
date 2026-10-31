@@ -10,6 +10,16 @@
   de hoje, 441×441 px em 16º. Prints nativos após login, sem reconfiguração.
 - Somente documentação do teste; sem código, schema ou deploy da aplicação.
 
+## 2026-10-30 — Matriz visual universal por impacto
+
+- O classificador usa o diff completo do PR ou push. Rotas conhecidas geram
+  escopo focado; Meta Ads e mudanças não visuais não repetem a matriz autenticada;
+  arquivos globais, desconhecidos e erros caem na matriz completa.
+- A seleção não reduz o QA dedicado da superfície, nem os demais gates de lint,
+  tipos, testes, build, banco, restauração, imagem imutável ou deploy protegido.
+- Execuções semanais e manuais forçam a matriz completa. Classificador e filtro
+  de rotas possuem testes; publicação e ganho de duração ainda dependem da CI.
+
 ## 2026-10-30 — Tamanho e ordem após sair e voltar
 
 - Registrados os IDs e width/height dos 28 itens de Agendamentos. Saída pelo
@@ -42,6 +52,17 @@
   renderizadas e estilos mantiveram 441×441 e 477×439 px, sem trocar filtros.
 - Print nativo após refresh entregue com foco nos gráficos, sem rankings ou
   tabela de clientes. Somente validação/documentação; nenhum código ou deploy.
+
+## 2026-10-30 — Meta Ads: gráficos zerados em períodos sem dados
+
+- Escopo exclusivo do Canvas Meta Ads. Quando a API não retorna linhas para o
+  período, campanhas selecionadas continuam visíveis com valores zero, eixos,
+  legendas e tooltips; ausência de campanha selecionada mantém aviso próprio.
+- Séries diárias sintetizam as datas do intervalo com zero. Radar inteiramente
+  zerado colapsa ao centro em vez de sugerir desempenho relativo intermediário.
+- Sem alteração de coleta, API Meta, persistência, permissões ou banco. A QA
+  focal exige o gráfico de investimento de hoje visível com rótulo `R$ 0,00`;
+  publicação protegida permanece registrada separadamente.
 
 ## 2026-10-30 — Agendamentos: salvar dimensões na primeira confirmação
 

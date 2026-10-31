@@ -96,6 +96,17 @@ persistência quando houver gravação. Cumpridos esses critérios, concluir sem
 revisões redundantes. Incluir a regra nos repasses de trabalho; atualizar a
 base de instruções antes de preparar a próxima entrega.
 
+### Matriz visual por impacto
+
+A matriz visual autenticada deve seguir o diff completo entre base e candidato.
+Mudanças restritas a uma superfície conhecida executam somente as rotas mapeadas;
+superfícies com QA visual dedicado, como Meta Ads, usam esse QA e não repetem a
+matriz global. Shell, autenticação, autorização, tema, navegação, infraestrutura
+visual, arquivos não mapeados ou classificação inconclusiva exigem matriz completa.
+O classificador deve falhar fechado, possuir testes e nunca usar somente o último
+commit. A matriz completa continua obrigatória em execução semanal/manual. Não
+alterar baselines de outra área para liberar uma entrega focada.
+
 ## Cadastro de páginas
 
 Toda nova página comercial ou administrativa deve ser registrada em

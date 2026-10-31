@@ -28,8 +28,27 @@ Por determinação do usuário em 27/10/2026, esta regra vale para os próximos 
 2. **Validar o necessário.** Testar o comportamento alterado, seus critérios de aceite e os fluxos diretamente ou indiretamente afetados. Incluir permissões, cálculos, integrações e persistência quando fizerem parte desse impacto.
 3. **Reaproveitar evidências válidas.** Não repetir testes ou revisões já aprovados para o mesmo candidato e condições relevantes, salvo alteração posterior que invalide a evidência, falha, divergência ou exigência do pipeline. Evidências de outra versão não comprovam automaticamente o candidato atual. Integração de mudanças concorrentes exige reavaliar o impacto e cumprir os gates do SHA resultante.
 4. **Ampliar somente com justificativa.** Uma revisão mais abrangente exige motivo concreto, como mudança em componente compartilhado, autenticação, banco, infraestrutura ou impacto ainda desconhecido. Mesmo nesses casos, ampliar a validação conforme o alcance identificado; não presumir que todo o sistema precisa ser revisado. Registrar brevemente o motivo e o escopo adicional.
-5. **Preservar as proteções obrigatórias.** Esta regra não dispensa os gates exigidos pelo pipeline, a autorização de publicação, o artefato aprovado, backup, rollback ou a DEPLOY-001: consulta atual da produção, data real do último deploy, trava compartilhada e comparação atômica da versão esperada. Não autoriza desabilitar gates, reduzir critérios de aprovação ou alterar o pipeline. Falhas obrigatórias fora do escopo devem ser encaminhadas ao responsável e reconciliadas; não podem ser ignoradas para publicar.
+5. **Preservar as proteções obrigatórias.** Esta regra não dispensa os gates exigidos pelo pipeline, a autorização de publicação, o artefato aprovado, backup, rollback ou a DEPLOY-001: consulta atual da produção, data real do último deploy, trava compartilhada e comparação atômica da versão esperada. A matriz visual pode selecionar somente as rotas comprovadamente afetadas conforme a regra abaixo; isso altera a abrangência pertinente do gate, não sua obrigatoriedade. Falhas obrigatórias fora do escopo devem ser encaminhadas ao responsável e reconciliadas; não podem ser ignoradas para publicar.
 6. **Confirmar após publicar.** Verificar a versão efetivamente publicada, a saúde do serviço e o funcionamento dos fluxos afetados. Quando houver gravação, confirmar também a persistência.
+
+## Regra universal da matriz visual
+
+O classificador versionado deve analisar o diff completo entre a base e o SHA
+candidato, incluindo commits concorrentes integrados. O resultado é um destes:
+
+- `focused`: executa temas, viewports, zoom, acessibilidade e teclado apenas nas
+  rotas explicitamente mapeadas como afetadas;
+- `none`: não repete a matriz autenticada quando o diff é documental/não visual
+  ou pertence a uma superfície com QA visual dedicado, que permanece obrigatório;
+- `full`: executa todas as rotas protegidas quando houver shell ou componente
+  global, autenticação, autorização, navegação, tema, infraestrutura de QA,
+  migration, dependência compartilhada, caminho desconhecido ou erro de análise.
+
+O classificador é fail-closed: diff vazio, revisão inválida, erro do Git ou
+caminho não mapeado resultam em `full`. Não é permitido escolher manualmente um
+escopo menor no PR. Execuções agendadas semanalmente e manuais sempre usam `full`,
+para detectar deriva entre superfícies sem prender cada alteração localizada à
+matriz completa. O artefato registra o escopo e as rotas executadas.
 
 ## Critério de conclusão e registro mínimo
 
@@ -63,4 +82,5 @@ Fonte normativa: pedido direto do usuário em 27/10/2026 para criar e salvar a
 regra no conhecimento local, seguido de autorização explícita para integrá-la
 no repositório compartilhado e aplicá-la aos próximos deploys de todos os
 desenvolvedores. As exigências de consulta concorrente da DEPLOY-001 permanecem
-íntegras.
+íntegras. Em 30/10/2026, o usuário determinou que a seleção focada da matriz
+visual fosse uma regra universal do projeto.
