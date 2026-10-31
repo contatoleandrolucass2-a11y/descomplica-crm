@@ -1,5 +1,17 @@
 # Worklog
 
+## 2026-10-31 — Reabertura: card aprovado e gráfico reprovado
+
+- Reabertura dos dois navegadores informada pelo usuário. Após refresh e
+  saída/retorno de Agendamentos, os 28 itens carregados no Chrome e integrado
+  coincidiram entre si, mas divergiram do último snapshot confirmado.
+- Visitas manteve 267×383 px/2º. Semanal carregou 378×530 px/16º em ambos,
+  contra 269×583 px/4º esperados. Antes do refresh a aba mostrava o esperado.
+  Aceite completo reprovado; causa da alteração não confirmada.
+- Sem editar ou sobrescrever o layout. JSONs e prints locais ignorados em
+  test-results/appointments-first-save/reabertura-\*. Registro documental;
+  nenhum código, migration, permissão ou deploy da aplicação alterado.
+
 ## 2026-10-30 — Chrome recebe último layout móvel após refresh
 
 - Nova aba autenticada do Chrome atualizada: os 28 IDs, ordem e tamanhos

@@ -1,8 +1,8 @@
 # Aprendizados e atualizacoes
 
-- Edição móvel, giro e recepção no Chrome após refresh aprovados: 28 itens
-  preservados. Visitas 267×383 px/2º; semanal 269×583 px/4º. Evidências no
-  histórico AGENDAMENTOS de 30/10/2026.
+- Reabertura: card preservado; gráfico divergiu após refresh nos dois
+  navegadores (378×530 px/16º). Aceite reprovado; causa não confirmada.
+  Evidências no histórico AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 

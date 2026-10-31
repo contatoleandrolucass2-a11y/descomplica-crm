@@ -1,5 +1,10 @@
 # Changelog
 
+- Registra falha na rodada final de persistência de Agendamentos: após refresh
+  e saída/retorno, Chrome e integrado preservam o card, mas carregam tamanho
+  e posição do gráfico diferentes do último teste. Causa não confirmada;
+  registro de evidência, sem correção funcional ou alteração do layout salvo.
+
 - Confirma no Chrome atualizado o último layout móvel de Agendamentos:
   28 itens idênticos após carregar o perfil salvo, com prints e sem mudança
   da aplicação ou salvamento adicional no destino.
