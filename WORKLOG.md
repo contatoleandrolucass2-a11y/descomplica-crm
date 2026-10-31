@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-31 — Persistência concluída em produção
+
+- Migration PR449 autorizada e aplicada; versão remota 20261031112418.
+  Três guardas PGRST/HTTP409, ACL, proprietário e timeouts preservados.
+- Save único em sessão desatualizada aprovado nos dois sentidos. Canto,
+  arraste, refresh e recepção cruzada preservam os 28 itens; 61 verificações
+  aprovadas na matriz local, com duas falhas históricas superadas e login resolvido.
+- Celular simulado 390×844/844×390, rotação e refresh sem estouro horizontal.
+  Final: Visitas 272×326/1º, semanal 283×349/2º. Prints finais locais ignorados.
+- Reutilizadas provas de saída/retorno, login e reabertura de abas desta rodada.
+  Não equivale a aparelho touch físico nem encerramento de processos pelo agente.
+- Health final HTTP200/ok/bfdd450 às11:43:02Z; SQL não exige nova imagem.
+
 ## 2026-10-31 — Impede repetição infinita no conflito do gráfico
 
 - Produção reproduziu salvamento fresco em cerca de 2 segundos e falha em

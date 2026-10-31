@@ -1,8 +1,8 @@
 # Changelog
 
-- Valida a correção SQL de persistência de Agendamentos: CI integral aprovada,
-  conflito HTTP em 13 ms e 40 verificações reais parciais registradas. Aplicação
-  da migration e aceite completo aguardam autorização e login integrado.
+- Conclui persistência de Agendamentos em produção: migration autorizada aplicada,
+  confirmação única do gráfico e sincronização de tamanho/ordem entre Chrome,
+  integrado e celular simulado; 61 verificações aprovadas e prints finais locais.
 
 - Corrige conflito de versão de Agendamentos que fazia o PostgREST repetir
   indefinidamente a RPC: resposta HTTP 409 imediata e compatível com o cliente,
