@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige salvamento de tamanhos e posições de Agendamentos entre sessões:
+  combina edições independentes com CAS e impede sobrescrita em conflito real.
+  Autosave começa ao terminar a interação; edição aguarda carregar o perfil.
+
 - Registra falha na rodada final de persistência de Agendamentos: após refresh
   e saída/retorno, Chrome e integrado preservam o card, mas carregam tamanho
   e posição do gráfico diferentes do último teste. Causa não confirmada;

@@ -3,6 +3,7 @@ import { createServer } from "node:http";
 import { createRequire } from "node:module";
 import { mkdir, readFile, readdir, stat, writeFile } from "node:fs/promises";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import AxeBuilder from "@axe-core/playwright";
@@ -568,6 +569,7 @@ export async function runAppointmentsPreview() {
       `${componentDirectory}/ChartBoard.module.css`,
       "lib/crm/stages/appointments.ts",
       "lib/crm/stages/data.ts",
+      "lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas.tsx",
       "supabase/migrations/20261024223147_appointments_conversion_goals_read.sql",
     ].map(async (file) => ({
       file,
@@ -599,6 +601,25 @@ export async function runAppointmentsPreview() {
           if (id.endsWith("appointments-memory.tsx")) return entry;
         },
         load(id) {
+          if (
+            process.argv.includes("--baseline-component") &&
+            id
+              .replaceAll("\\", "/")
+              .endsWith("/lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas.tsx")
+          ) {
+            evidence.baselineComponent = execFileSync("git", ["rev-parse", "HEAD"], {
+              cwd: root,
+              encoding: "utf8",
+            }).trim();
+            return execFileSync(
+              "git",
+              [
+                "show",
+                "HEAD:lib/dashboard-canvas/ui/configurable/configurable-dashboard-canvas.tsx",
+              ],
+              { cwd: root, encoding: "utf8" },
+            );
+          }
           if (id === entry)
             return `import {createRoot} from 'react-dom/client';import {AppointmentsDashboard} from '@/app/(protected)/app/etapas/_components/AppointmentsDashboard';import '@/app/globals.css';const fixture=${JSON.stringify(fixture)};const brokerRoster=${JSON.stringify(brokerRoster)};const conversionGoals={dv:{opportunityAppointment:9,appointmentVisit:2,appointmentFolder:3,appointmentApprovedFolder:12,appointmentSale:24,monthlyFunnel:{opportunities:143,appointments:24,visits:12,folders:8,approvedFolders:2,sales:1}},partnerships:{opportunityAppointment:null,appointmentVisit:null,appointmentFolder:null,appointmentApprovedFolder:null,appointmentSale:null,monthlyFunnel:{opportunities:0,appointments:0,visits:4,folders:2,approvedFolders:1,sales:1}}};const query=new URLSearchParams(location.search);if(query.has('large'))fixture.facts.forEach(f=>{if(f[0]===1&&f[1].startsWith('2026-03'))f[7]=1000000;});if(query.has('legacy')){fixture.version=1;delete fixture.brokerCount;delete fixture.brokerManagerCount;delete fixture.appointments;delete fixture.dimensions.stores;fixture.facts=fixture.facts.filter(f=>f[0]===1).map(f=>f.slice(0,10));}createRoot(document.getElementById('root')).render(<main style={{padding:'16px',maxWidth:'1600px',margin:'auto'}}><AppointmentsDashboard analysis={query.has('empty')?null:fixture} brokerRoster={brokerRoster} individualGoal={24} goalsByMonth={{"2026-03":24,"2026-01":20,"2025-10":18,"2025-12":22}} conversionGoals={conversionGoals} canEditDashboard={query.has('editable')} canViewDevelopmentRankings={!query.has('restricted')} generatedAt="2026-03-31T15:00:00Z"/></main>);`;
         },
@@ -643,6 +664,14 @@ export async function runAppointmentsPreview() {
       for await (const chunk of request) chunks.push(chunk);
       const payload = JSON.parse(Buffer.concat(chunks).toString("utf8"));
       const previous = syntheticProfiles.find((profile) => pathname.endsWith(`/${profile.id}`));
+      if (request.method === "PATCH" && !previous)
+        return response
+          .writeHead(404, { "content-type": "application/json" })
+          .end(JSON.stringify({ error: "profile_not_found" }));
+      if (request.method === "PATCH" && payload.version !== previous.version)
+        return response
+          .writeHead(409, { "content-type": "application/json" })
+          .end(JSON.stringify({ error: "version_conflict" }));
       const profile = {
         ...previous,
         ...payload,
@@ -703,6 +732,8 @@ export async function runAppointmentsPreview() {
       return route.abort("blockedbyclient");
     });
     const page = await context.newPage();
+    page.setDefaultTimeout(15_000);
+    page.setDefaultNavigationTimeout(20_000);
     page.on("pageerror", (error) => evidence.browserErrors.push(error.message));
     page.on("console", (message) => {
       if (message.type() === "error") evidence.browserErrors.push(message.text());

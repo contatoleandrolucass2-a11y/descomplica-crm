@@ -1,8 +1,8 @@
 # Aprendizados e atualizacoes
 
-- Reabertura: card preservado; gráfico divergiu após refresh nos dois
-  navegadores (378×530 px/16º). Aceite reprovado; causa não confirmada.
-  Evidências no histórico AGENDAMENTOS de 30/10/2026.
+- Correção de persistência entre sessões em validação: merge de layout com
+  CAS, conflito real bloqueado e autosave imediato. Evidências e falha anterior
+  no histórico AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 
