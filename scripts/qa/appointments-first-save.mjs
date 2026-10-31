@@ -260,6 +260,11 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       "Further local edits must not overwrite remote state before resolving the conflict",
     );
     await expect(other.getByRole("toolbar")).toContainText("Conflito automaticamente");
+    const blockedEditor = await editIn(other, charts[1], 535, 483);
+    await expect(blockedEditor.getByRole("alert")).toContainText("mudou em outra sessão");
+    await expect(blockedEditor.getByRole("button", { name: "Salvar", exact: true })).toBeEnabled();
+    assert.equal(peerRequests.filter(({ method }) => method === "PATCH").length, beforeBlockedEdit);
+    await blockedEditor.getByRole("button", { name: "Cancelar", exact: true }).click();
     await other.reload();
     await expect.poll(() => snapshot(other)).toEqual(await snapshot(page));
     assert.equal((await snapshot(other)).find(({ id }) => id === charts[1].id).width, "527px");

@@ -624,6 +624,12 @@ export function ConfigurableDashboardCanvas({
 
   function saveEditor(card: DashboardCard) {
     if (editorSaving) return;
+    if (layoutPolicy?.freeResize && saveConflictRef.current) {
+      setEditorSaveError(
+        "O perfil mudou em outra sessão. Recarregue a versão remota antes de salvar.",
+      );
+      return;
+    }
     const action =
       editorMode === "add"
         ? ({ type: "add-card", card } as const)
