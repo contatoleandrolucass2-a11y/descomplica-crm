@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma no Chrome, após atualização, novos tamanhos e posições de um card
+  e um gráfico redimensionados e arrastados no navegador integrado do Codex.
+  Comparação dos 28 itens idêntica; registro de validação, sem mudar a aplicação.
+
 - Confirma que os 28 cards e gráficos de Agendamentos mantêm largura, altura
   e ordem no navegador integrado do Codex após login na mesma conta do Chrome.
   Registro de teste real, sem alteração da aplicação.
