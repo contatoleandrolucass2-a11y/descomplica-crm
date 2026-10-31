@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma no site que tamanho e ordem dos 28 cards e gráficos de Agendamentos
+  permanecem após sair da conta e entrar novamente na mesma conta.
+  Evidências após login, sem alteração da aplicação.
+
 - Adota matriz visual universal por impacto: rotas isoladas usam cobertura
   focada, Meta Ads preserva seu QA dedicado e mudanças globais ou desconhecidas
   continuam na matriz completa. A suíte integral roda semanalmente e sob demanda.
