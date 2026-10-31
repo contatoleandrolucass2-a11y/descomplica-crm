@@ -1,5 +1,18 @@
 # Worklog
 
+## 2026-10-31 — Impede repetição infinita no conflito do gráfico
+
+- Produção reproduziu salvamento fresco em cerca de 2 segundos e falha em
+  sessão desatualizada após 15 segundos. Telemetria PostgREST confirmou RPC
+  com HTTP 504 após 125 segundos e repetição de SQLSTATE 40001.
+- Migration substitui somente os conflitos de Agendamentos por SQLSTATE
+  PGRST, HTTP 409 e corpo compatível com a aplicação publicada. Mantém CAS,
+  validações, permissões e linhas existentes. Outras páginas preservadas.
+- pgTAP passa de 34 para 46 assertions; QA HTTP direto exige conflito em
+  menos de 5 segundos, sem escrita. Inventário e total obrigatório ajustados.
+- Aplicação bfdd450/PR #448 publicada; nova migration ainda não aplicada.
+  Gates SQL/HTTP na CI, autorização remota e bateria real permanecem pendentes.
+
 ## 2026-10-31 — Corrige persistência entre sessões de Agendamentos
 
 - Reproduzido com CAS real no fixture: sessão B desatualizada recebe 409 ao
