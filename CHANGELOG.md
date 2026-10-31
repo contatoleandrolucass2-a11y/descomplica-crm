@@ -1,5 +1,9 @@
 # Changelog
 
+- Corrige conflito de versão de Agendamentos que fazia o PostgREST repetir
+  indefinidamente a RPC: resposta HTTP 409 imediata e compatível com o cliente,
+  preservando comparação atômica, dimensões, ordem e permissões.
+
 - Corrige salvamento de tamanhos e posições de Agendamentos entre sessões:
   combina edições independentes com CAS e impede sobrescrita em conflito real.
   Autosave começa ao terminar a interação; edição aguarda carregar o perfil.

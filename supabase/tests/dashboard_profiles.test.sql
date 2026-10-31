@@ -1,6 +1,6 @@
 begin;
 
-select plan(34);
+select plan(46);
 
 select ok(
   (select relrowsecurity and relforcerowsecurity
@@ -40,6 +40,13 @@ select ok(not exists (
   ) function_name(name)
   where has_function_privilege(role_name.name, function_name.name, 'EXECUTE')
 ), 'anon and service role cannot execute dashboard profile RPCs');
+select ok(
+  (select proc.prosecdef and owner.rolname = 'postgres'
+    and proc.proconfig @> array['search_path=""', 'statement_timeout=10s', 'lock_timeout=5s']
+   from pg_proc proc join pg_roles owner on owner.oid = proc.proowner
+   where proc.oid = 'public.update_dashboard_profile(uuid,bigint,text,jsonb,smallint)'::regprocedure),
+  'update keeps its trusted owner, security definer and bounded execution settings'
+);
 select ok(
   not has_function_privilege('authenticated', 'private.assert_dashboard_profile_read_context(uuid,text,text)', 'EXECUTE')
   and not has_function_privilege('authenticated', 'private.assert_dashboard_profile_context(uuid,text,text)', 'EXECUTE')
@@ -155,6 +162,36 @@ $$;
 
 grant execute on function pg_temp.dashboard_cards(text, text) to authenticated;
 
+-- Capture the PostgreSQL envelope separately from the compatible HTTP body.
+create function pg_temp.dashboard_conflict(p_query text)
+returns jsonb language plpgsql as $$
+declare
+  v_state text;
+  v_message text;
+  v_detail text;
+begin
+  execute p_query;
+  return null;
+exception when others then
+  get stacked diagnostics v_state = returned_sqlstate,
+    v_message = message_text, v_detail = pg_exception_detail;
+  return jsonb_build_object('sqlstate', v_state, 'message', v_message, 'detail', v_detail);
+end;
+$$;
+create function pg_temp.expected_dashboard_conflict()
+returns jsonb language sql immutable as $$
+  select jsonb_build_object(
+    'sqlstate', 'PGRST',
+    'message', jsonb_build_object(
+      'code', '40001', 'message', 'conflict: dashboard profile version changed',
+      'details', null, 'hint', null
+    )::text,
+    'detail', '{"status":409,"headers":{}}'
+  );
+$$;
+grant execute on function pg_temp.dashboard_conflict(text),
+  pg_temp.expected_dashboard_conflict() to authenticated;
+
 set local role authenticated;
 select set_config('request.jwt.claim.role', 'authenticated', true);
 select set_config(
@@ -205,6 +242,7 @@ select throws_ok(
 );
 
 create temporary table created_profiles (slot text primary key, id uuid not null);
+create temporary table conflict_snapshots (slot text primary key, document jsonb not null);
 insert into created_profiles
 select 'shared', (public.create_dashboard_profile(
   'crm.stage.appointments', null, 'Principal',
@@ -245,14 +283,20 @@ select is(
   '2',
   'matching optimistic version updates and increments version'
 );
-select throws_ok(
-  format(
+insert into conflict_snapshots
+select 'stale', public.get_dashboard_profile((select id from created_profiles where slot='shared'));
+select is(
+  pg_temp.dashboard_conflict(format(
     'select public.update_dashboard_profile(%L::uuid, 1, %L, null, null)',
     (select id from created_profiles where slot='shared'), 'Obsoleto'
-  ),
-  '40001',
-  'conflict: dashboard profile version changed',
-  'stale PATCH version fails with a serializable conflict code'
+  )),
+  pg_temp.expected_dashboard_conflict(),
+  'stale appointments PATCH uses PGRST with compatible body and HTTP 409 detail'
+);
+select is(
+  public.get_dashboard_profile((select id from created_profiles where slot='shared')),
+  (select document from conflict_snapshots where slot='stale'),
+  'stale PATCH leaves the complete saved document, version and timestamps unchanged'
 );
 select is(
   public.set_default_dashboard_profile(
@@ -290,6 +334,20 @@ select is(
   public.get_dashboard_profile((select id from created_profiles where slot='shared'))->>'id',
   (select id::text from created_profiles where slot='shared'),
   'an authorized viewer can address the shared layout by id'
+);
+insert into conflict_snapshots
+select 'viewer', public.get_dashboard_profile((select id from created_profiles where slot='shared'));
+select throws_ok(
+  format('select public.update_dashboard_profile(%L::uuid, 3, %L, null, null)',
+    (select id from created_profiles where slot='shared'), 'Denied update'),
+  '42501',
+  'forbidden: appointments dashboard editing requires administrator',
+  'PGRST support does not let a viewer update the shared layout'
+);
+select is(
+  public.get_dashboard_profile((select id from created_profiles where slot='shared')),
+  (select document from conflict_snapshots where slot='viewer'),
+  'denied viewer update leaves the complete saved document unchanged'
 );
 select throws_ok(
   $$select public.create_dashboard_profile(
@@ -379,6 +437,92 @@ select is(
   '{"order":0,"columnSpan":1,"height":72,"width":129}'::jsonb,
   'the shared profile round trip preserves exact dimensions without the validation surrogate'
 );
+
+-- Fixture-only noncanonical profile exercises the first conflict guard.
+reset role;
+insert into public.dashboard_profiles (id, user_id, page_key, name, cards)
+values (
+  'ad870000-0000-4000-8000-000000000001',
+  'ad810000-0000-4000-8000-000000000001', 'crm.stage.appointments',
+  'Noncanonical fixture', pg_temp.dashboard_cards('noncanonical')
+);
+insert into conflict_snapshots
+select 'noncanonical', jsonb_agg(to_jsonb(profile) order by profile.id)
+from public.dashboard_profiles profile;
+set local role authenticated;
+select is(
+  pg_temp.dashboard_conflict($$select public.update_dashboard_profile(
+    'ad870000-0000-4000-8000-000000000001'::uuid, 1, 'Rejected', null, null
+  )$$),
+  pg_temp.expected_dashboard_conflict(),
+  'the noncanonical guard uses PGRST with compatible body and HTTP 409 detail'
+);
+reset role;
+select is(
+  (select jsonb_agg(to_jsonb(profile) order by profile.id) from public.dashboard_profiles profile),
+  (select document from conflict_snapshots where slot='noncanonical'),
+  'the canonical guard leaves every profile unchanged'
+);
+delete from public.dashboard_profiles where id = 'ad870000-0000-4000-8000-000000000001';
+
+-- A test-only trigger suppresses the write to exercise the zero-row CAS guard.
+-- This is deterministic guard coverage, not a simulated concurrent transaction.
+create function pg_temp.suppress_dashboard_profile_update()
+returns trigger language plpgsql as $$ begin return null; end; $$;
+create trigger suppress_dashboard_profile_update before update on public.dashboard_profiles
+for each row execute function pg_temp.suppress_dashboard_profile_update();
+set local role authenticated;
+insert into conflict_snapshots
+select 'cas', public.get_dashboard_profile((select id from created_profiles where slot='shared'));
+select is(
+  pg_temp.dashboard_conflict(format('select public.update_dashboard_profile(%L::uuid, 5, %L, null, null)',
+    (select id from created_profiles where slot='shared'), 'Suppressed update')),
+  pg_temp.expected_dashboard_conflict(),
+  'zero-row CAS uses PGRST with compatible body and HTTP 409 detail'
+);
+select is(
+  public.get_dashboard_profile((select id from created_profiles where slot='shared')),
+  (select document from conflict_snapshots where slot='cas'),
+  'zero-row CAS leaves the complete saved document unchanged'
+);
+reset role;
+drop trigger suppress_dashboard_profile_update on public.dashboard_profiles;
+set local role authenticated;
+select is(
+  public.update_dashboard_profile(
+    (select id from created_profiles where slot='shared'), 5, 'Recovered update', null, null
+  )->>'version',
+  '6', 'a matching version still saves exactly once after the conflict'
+);
+
+insert into created_profiles
+select 'legacy', (public.create_dashboard_profile(
+  'crm.dashboard', null, 'Legacy fixture',
+  jsonb_set(
+    jsonb_set(pg_temp.dashboard_cards('legacy', 'overview.current.month'), '{0,type}', '"kpi"'),
+    '{0,layout}', '{"order":0,"columnSpan":2,"height":168}'
+  ), 2::smallint, false
+)->>'id')::uuid;
+select is(
+  public.update_dashboard_profile(
+    (select id from created_profiles where slot='legacy'), 1, 'Legacy updated', null, null
+  )->>'version',
+  '2', 'other dashboard pages keep their successful update contract'
+);
+insert into conflict_snapshots
+select 'legacy', public.get_dashboard_profile((select id from created_profiles where slot='legacy'));
+select throws_ok(
+  format('select public.update_dashboard_profile(%L::uuid, 1, %L, null, null)',
+    (select id from created_profiles where slot='legacy'), 'Legacy stale'),
+  '40001', 'conflict: dashboard profile version changed',
+  'other dashboard pages retain the existing 40001 conflict contract'
+);
+select is(
+  public.get_dashboard_profile((select id from created_profiles where slot='legacy')),
+  (select document from conflict_snapshots where slot='legacy'),
+  'legacy conflict also leaves the saved document unchanged'
+);
+select public.delete_dashboard_profile((select id from created_profiles where slot='legacy'), 2);
 
 reset role;
 select is(

@@ -1,8 +1,8 @@
 # Aprendizados e atualizacoes
 
-- Correção de persistência entre sessões em validação: merge de layout com
-  CAS, conflito real bloqueado e autosave imediato. Evidências e falha anterior
-  no histórico AGENDAMENTOS de 30/10/2026.
+- Persistência em validação: app bfdd450 publicada; conflito SQL 40001 causa
+  repetição PostgREST. Migration compatível preparada; CI e aplicação pendentes.
+  Evidências e limites no histórico AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 

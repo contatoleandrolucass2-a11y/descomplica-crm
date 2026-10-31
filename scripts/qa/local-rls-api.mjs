@@ -5,7 +5,7 @@ import { createServer } from "node:net";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import process from "node:process";
-import { promisify } from "node:util";
+import { isDeepStrictEqual, promisify } from "node:util";
 import { pathToFileURL } from "node:url";
 
 import { createClient } from "@supabase/supabase-js";
@@ -1383,7 +1383,15 @@ async function createEphemeralAccount(adminClient, role, runId) {
   return { id: assertUuid(data.user.id), role, email, password };
 }
 
-async function requestLocalRest({ apiUrl, publishableKey, accessToken, pathname, method, body }) {
+async function requestLocalRest({
+  apiUrl,
+  publishableKey,
+  accessToken,
+  pathname,
+  method,
+  body,
+  timeoutMs = 30_000,
+}) {
   const target = new URL(pathname, `${apiUrl}/`);
   if (target.origin !== apiUrl || !target.pathname.startsWith("/rest/v1/")) {
     fail("Local REST request escaped the approved loopback endpoint.");
@@ -1394,7 +1402,7 @@ async function requestLocalRest({ apiUrl, publishableKey, accessToken, pathname,
     response = await fetch(target, {
       method,
       redirect: "error",
-      signal: AbortSignal.timeout(30_000),
+      signal: AbortSignal.timeout(timeoutMs),
       headers: {
         Accept: "application/json",
         apikey: publishableKey,
@@ -1415,6 +1423,159 @@ async function requestLocalRest({ apiUrl, publishableKey, accessToken, pathname,
   }
 
   return { status: response.status, payload };
+}
+
+async function verifyAppointmentsProfileConflictThroughRest(local, owner, unauthorized, runId) {
+  const clients = [];
+  const scopeKey = `qa-conflict-${runId}`;
+  const profileName = `Synthetic HTTP conflict ${runId}`;
+  let profile;
+  let ownerToken;
+  const request = (token, rpc, body) =>
+    requestLocalRest({
+      ...local,
+      accessToken: token,
+      pathname: `/rest/v1/rpc/${rpc}`,
+      method: "POST",
+      body,
+      timeoutMs: 5_000,
+    });
+  async function authenticate(account) {
+    const client = createLocalClient(local.apiUrl, local.publishableKey);
+    clients.push(client);
+    const { data, error } = await client.auth.signInWithPassword({
+      email: account.email,
+      password: account.password,
+    });
+    if (error || data.user?.id !== account.id || !data.session?.access_token)
+      fail("Appointments conflict QA account could not authenticate locally.");
+    return data.session.access_token;
+  }
+  function successfulProfile(result, label) {
+    if (result.status !== 200 || !result.payload?.id || !Array.isArray(result.payload.cards))
+      fail(`${label} failed through local PostgREST.`);
+    return result.payload;
+  }
+  const originalCards = [
+    {
+      id: "appointments-weekly",
+      type: "bars",
+      metric: "appointments.weekly",
+      period: "month",
+      groupBy: "day",
+      entityIds: null,
+      layout: { order: 0, columnSpan: 3, width: 378, height: 530 },
+    },
+    {
+      id: "visits-total",
+      type: "kpi",
+      metric: "visits.total",
+      period: "month",
+      groupBy: "day",
+      entityIds: null,
+      layout: { order: 1, columnSpan: 2, width: 267, height: 383 },
+    },
+  ];
+  try {
+    ownerToken = await authenticate(owner);
+    const unauthorizedToken = await authenticate(unauthorized);
+    // Appointments profiles are shared by page/scope, not by user. Never reuse
+    // or clean up a canonical House/Imob profile belonging to another fixture.
+    const before = await request(ownerToken, "get_dashboard_profiles", {
+      p_page_key: "crm.stage.appointments",
+      p_scope_key: scopeKey,
+    });
+    if (before.status !== 200 || !Array.isArray(before.payload) || before.payload.length !== 0)
+      fail("Appointments conflict QA requires its own empty synthetic scope.");
+    const created = successfulProfile(
+      await request(ownerToken, "create_dashboard_profile", {
+        p_page_key: "crm.stage.appointments",
+        p_scope_key: scopeKey,
+        p_name: profileName,
+        p_cards: originalCards,
+        p_schema_version: 2,
+        p_is_default: false,
+      }),
+      "Appointments profile creation",
+    );
+    if (
+      created.userId !== owner.id ||
+      created.scopeKey !== scopeKey ||
+      created.name !== profileName ||
+      created.version !== 1 ||
+      !isDeepStrictEqual(created.cards, originalCards)
+    )
+      fail("Appointments conflict QA did not receive a newly owned synthetic profile.");
+    // Only this verified fresh profile may be edited or deleted below.
+    profile = created;
+    const originalVersion = profile.version;
+    const savedCards = structuredClone(originalCards).reverse();
+    savedCards.forEach((card, order) => {
+      card.layout.order = order;
+    });
+    savedCards[1].layout.width = 269;
+    savedCards[1].layout.height = 583;
+    profile = successfulProfile(
+      await request(ownerToken, "update_dashboard_profile", {
+        p_profile_id: profile.id,
+        p_expected_version: originalVersion,
+        p_cards: savedCards,
+        p_schema_version: 2,
+      }),
+      "Fresh appointments profile update",
+    );
+    if (profile.version !== originalVersion + 1 || !isDeepStrictEqual(profile.cards, savedCards))
+      fail("Fresh appointments HTTP update did not preserve exact dimensions and version.");
+
+    const staleStarted = performance.now();
+    const stale = await request(ownerToken, "update_dashboard_profile", {
+      p_profile_id: profile.id,
+      p_expected_version: originalVersion,
+      p_cards: originalCards,
+      p_schema_version: 2,
+    });
+    const staleElapsedMs = performance.now() - staleStarted;
+    if (stale.status !== 409 || stale.payload?.code !== "40001" || staleElapsedMs >= 5_000) {
+      const code =
+        typeof stale.payload?.code === "string" && /^[A-Za-z0-9]{1,20}$/u.test(stale.payload.code)
+          ? stale.payload.code
+          : "unavailable";
+      fail(
+        `Stale appointments RPC must return HTTP 409/code 40001 within five seconds; status=${stale.status} code=${code} elapsed_ms=${Math.round(staleElapsedMs)}.`,
+      );
+    }
+
+    const denied = await request(unauthorizedToken, "update_dashboard_profile", {
+      p_profile_id: profile.id,
+      p_expected_version: profile.version,
+      p_cards: originalCards,
+      p_schema_version: 2,
+    });
+    if (![401, 403, 404].includes(denied.status))
+      fail("Appointments profile update did not fail closed for another local user.");
+    const actual = successfulProfile(
+      await request(ownerToken, "get_dashboard_profile", { p_profile_id: profile.id }),
+      "Appointments profile read after rejected updates",
+    );
+    if (actual.version !== profile.version || !isDeepStrictEqual(actual.cards, savedCards))
+      fail("Rejected appointments updates changed the saved version or cards.");
+    return { staleElapsedMs: Math.round(staleElapsedMs), staleStatus: stale.status };
+  } finally {
+    try {
+      if (profile && ownerToken) {
+        const deleted = await request(ownerToken, "delete_dashboard_profile", {
+          p_profile_id: profile.id,
+          p_expected_version: profile.version,
+        });
+        if (deleted.status !== 200) fail("Synthetic appointments profile cleanup failed.");
+      }
+    } finally {
+      for (const client of clients) {
+        const { error } = await client.auth.signOut({ scope: "global" });
+        if (error) fail("Appointments conflict QA session cleanup failed.");
+      }
+    }
+  }
 }
 
 function assertSuccessfulRows(result, label) {
@@ -1797,6 +1958,7 @@ async function main() {
   let anonymousRows = 0;
   let dualAffiliationDenied = 0;
   let browserE2e = 0;
+  let appointmentsConflict;
 
   try {
     for (const role of requiredRoles) {
@@ -1825,6 +1987,14 @@ async function main() {
       await verifyAccountThroughRest(local, account, fixtures);
       throwIfInterrupted();
     }
+
+    appointmentsConflict = await verifyAppointmentsProfileConflictThroughRest(
+      local,
+      byRole.master,
+      byRole.pending,
+      runId,
+    );
+    throwIfInterrupted();
 
     if (nextServer) {
       // Reuse the same local account factory, SQL-only bootstrap and authenticated
@@ -1909,6 +2079,7 @@ commit;`,
     anonymousRows,
     dualAffiliationDenied,
     browserE2e,
+    appointmentsConflict,
   };
 }
 
@@ -1926,7 +2097,7 @@ try {
     process.exitCode = requestedSignal === "SIGINT" ? 130 : 143;
   } else {
     process.stdout.write(
-      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_allowed=${counts.commercialAllowed} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} persisted=${counts.persisted} removed=${counts.removed}\n`,
+      `RLS API QA: users=${counts.users} profiles=${counts.profiles} organization_rows=${counts.organizationRows} page_positive=${counts.positivePages} page_zero=${counts.zeroPages} active_scopes=${counts.activeScopes} commercial_allowed=${counts.commercialAllowed} commercial_denied=${counts.commercialDenied} legacy_approved=${counts.legacyApproved} rpc_denials=${counts.rpcDenials} anon_denied=${counts.anonymousDenied} anon_rows=${counts.anonymousRows} dual_affiliation_denied=${counts.dualAffiliationDenied} browser_e2e=${counts.browserE2e} appointments_stale_status=${counts.appointmentsConflict.staleStatus} appointments_stale_ms=${counts.appointmentsConflict.staleElapsedMs} persisted=${counts.persisted} removed=${counts.removed}\n`,
     );
   }
 } catch (error) {
