@@ -1,8 +1,8 @@
 # Aprendizados e atualizacoes
 
-- Persistência em validação: app bfdd450 publicada; conflito SQL 40001 causa
-  repetição PostgREST. Migration compatível preparada; CI e aplicação pendentes.
-  Evidências e limites no histórico AGENDAMENTOS de 30/10/2026.
+- Persistência parcial aprovada; app bfdd450 ativa. PR449 integrado/CI verde,
+  conflito HTTP corrigido em teste (13ms). Migration aguarda autorização;
+  integrado aguarda login. Detalhes no histórico AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 
