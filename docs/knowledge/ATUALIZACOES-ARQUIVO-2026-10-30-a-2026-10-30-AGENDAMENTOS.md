@@ -1,5 +1,13 @@
 # Histórico de validação de Agendamentos
 
+## 2026-10-30: Chrome recebe último layout móvel após atualização
+
+- Retomada da conferência solicitada após interrupção anterior do controle do Chrome. Nova aba de Agendamentos no mesmo Chrome e conta autenticada, seguida de reload completo. Depois do carregamento do perfil, comparação integral de 28 IDs em ordem e width/height idêntica ao verticalSaved de vertical-para-horizontal-resultados.json. Visitas 267×383 px/2º e semanal 269×583 px/4º confirmados. Não editou nem salvou layout no destino.
+- As primeiras leituras do DOM mostraram temporariamente tamanhos padrão em percentuais e ordem antiga. Conferência do canal House, geometria dos alvos e leitura posterior resolveram: perfil salvo carregado e comparação passou. Não registrar o estado transitório como perda de persistência nem omitir essa limitação de espera.
+- Abas antigas apresentaram debugger indisponível ou timeout ao ler frames. Reset e nova aba autenticada permitiram leitura confiável; sem copiar sessão, credenciais ou contornar login. Captura longa por CDP excedeu prazo; prints nativos em partes comprovam a página atualizada. Tentativa de enquadramento por atalho de zoom, seguida de Control+0; nenhum layout salvo alterado.
+- Evidências locais ignoradas em test-results/appointments-first-save/chrome-layout-movel-resultados.json, chrome-layout-movel-apos-refresh.jpg e chrome-layout-movel-parte-inferior.jpg. Somente IDs/dimensões no JSON; prints antes de rankings/tabela. Não exportar anexos privados ao GitHub/Obsidian. Nova aba de resultado mantida aberta.
+- Fontes às 2026-10-31T02:46:18Z (30/10/2026 23:46 BRT): fetch confirmou HEAD/origin main f8ee2cc89dd1b5507657e47f554cc85ca71a8404 e árvore limpa. Health público https://crm.descomplicapro.com.br/api/health com status ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 reutilizada para mesmo runtime. Registro documental sujeito à CI própria; sem código, schema, permissões, dados comerciais ou deploy da aplicação.
+
 ## 2026-10-30: edição vertical preservada após giro e refresh horizontal
 
 - Aba integrada autenticada de Agendamentos, viewport 390×844: arrastes do ponteiro pelos cantos alteraram Visitas de 337×359 para 267×383 px e semanal de 379×561 para 269×583 px. Arrastes pelas alças moveram Visitas de 3º para 2º e semanal de 5º para 4º. Sem abrir editor, sem confirmação adicional de dimensões. Menu lateral recolhido para acessar a coluna.

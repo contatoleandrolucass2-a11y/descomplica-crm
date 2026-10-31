@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-30 — Chrome recebe último layout móvel após refresh
+
+- Nova aba autenticada do Chrome atualizada: os 28 IDs, ordem e tamanhos
+  coincidiram com o último snapshot móvel. Visitas 267×383 px/2º e semanal
+  269×583 px/4º confirmados após carregar o perfil personalizado.
+- Primeiras leituras mostraram layout padrão transitório; leitura final e
+  geometria comprovaram o perfil salvo. Sem novo salvamento no Chrome.
+- JSON e prints locais ignorados. Abas antigas com conexão indisponível;
+  nova aba funcionou. Captura longa falhou; usados prints nativos em partes.
+  Registro documental, sem código, layout salvo alterado ou novo deploy.
+
 ## 2026-10-30 — Edição vertical persiste na horizontal
 
 - Em 390×844, canto alterou Visitas 337×359 para 267×383 px e semanal
