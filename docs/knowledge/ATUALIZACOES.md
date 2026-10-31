@@ -1,8 +1,8 @@
 # Aprendizados e atualizacoes
 
-- Agendamentos: sidebar automático, atualização no topo e altura das torres.
-  Implementação/testes locais concluídos; CI e deploy pendentes.
-  Detalhes no histórico AGENDAMENTOS de 30/10/2026.
+- Agendamentos publicado em cbd185f5: sidebar automático, data no topo e torres.
+  CI completa e 19 verificações reais aprovadas. Detalhes no histórico
+  AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 

@@ -13,8 +13,16 @@
   preservadas. Revisão independente sem achados bloqueantes.
 - Matriz funcional da CI aprovada; nove referências visuais de Agendamentos
   revisadas e promovidas pelo helper transacional, com233 imagens preservadas.
-- CI completa, artefato e publicação protegida ainda serão conferidos no
-  candidato. Sem nova migration nem alteração de outras rotas.
+- PR #452 integrado em cbd185f5 após CI41208446093 verde; push/main
+  CI41212070459 aprovado nos quatro jobs. Imagem imutável conferida e publicada
+  pelo coordenador em31/10/2026 às15:54:17Z/12:54:17BRT, deployment
+  deea1cad-7f3e-4eee-8973-c982c7bcb74c, sem pendência ou nova migration.
+- Smoke publicado:19 verificações aprovadas em Chrome e integrado, desktop e
+  celular simulado vertical/horizontal. Diário65% salvo uma vez e preservado
+  após refresh/sincronização; escala original150% restaurada pelo Chrome.
+  Os28 itens mantiveram ordem/dimensões; viewport temporário restaurado.
+- Health HTTP200/ok/cbd185f5 e acesso anônimo307 às16:01:31Z; prints locais
+  ignorados e evidências completas no histórico de conhecimento.
 
 ## 2026-10-31 — Persistência concluída em produção
 
