@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-10-30 — Rodada completa e sincronização inversa aprovadas
+
+- Chrome: card e gráfico salvaram pelo editor com um clique cada, mantendo
+  361×273 e 525×483 px após refresh. Pelo canto, passaram a 385×293 e 540×497 px.
+- Arrastes moveram Visitas de 3º para 4º e semanal de 16º para 15º. Os 28 itens
+  permaneceram idênticos após refresh, sair e voltar à página e novo login.
+- Aba integrada existente atualizada: os 28 IDs, ordem e dimensões coincidiram
+  com o Chrome. Visitas 385×293 px/4º; semanal 540×497 px/15º. Print final salvo.
+- Histórico recente de Agendamentos particionado integralmente conforme runbook
+  para preservar o limite de exportação; sync de seis documentos aprovado.
+
 ## 2026-10-30 — Edição no integrado refletida no Chrome
 
 - No navegador integrado, arraste pelo canto alterou Visitas realizadas de

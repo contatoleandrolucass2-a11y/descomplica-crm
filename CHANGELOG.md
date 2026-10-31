@@ -1,5 +1,9 @@
 # Changelog
 
+- Revalida no Chrome edição com confirmação única, canto, arraste, refresh,
+  retorno à página e novo login em Agendamentos. Comparação final com o navegador
+  integrado aprovada para os 28 itens após atualização; sem mudança da aplicação.
+
 - Confirma no Chrome, após atualização, novos tamanhos e posições de um card
   e um gráfico redimensionados e arrastados no navegador integrado do Codex.
   Comparação dos 28 itens idêntica; registro de validação, sem mudar a aplicação.
