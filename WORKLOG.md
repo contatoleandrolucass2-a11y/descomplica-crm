@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Edição no Chrome recebida no celular simulado
+
+- Canto e alça no Chrome: Visitas 269×313 px/3º para 303×337 px/2º;
+  semanal 273×515 px/9º para 343×541 px/8º. Autosave confirmado.
+- Após refresh no integrado em 390×844, os 28 IDs, ordem e configurações
+  coincidiram com o Chrome. Larguras adaptadas à coluna, alturas preservadas,
+  sem article fora da tela ou estouro horizontal da página.
+- Prints móveis e JSON locais ignorados; viewport restaurado. Sem aparelho
+  físico, touchscreen, código ou novo deploy da aplicação.
+
 ## 2026-10-30 — Edição em celular simulado recebida no Chrome
 
 - Viewport 390×844: arraste pelo canto e pela alça alterou Visitas de
