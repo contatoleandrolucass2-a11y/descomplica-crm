@@ -1,8 +1,7 @@
 # Aprendizados e atualizacoes
 
-- Agendamentos publicado em cbd185f5: sidebar automático, data no topo e torres.
-  CI completa e 19 verificações reais aprovadas. Detalhes no histórico
-  AGENDAMENTOS de 30/10/2026.
+- Agendamentos: limite das torres em pixels em preparação; main 106b17ee,
+  produção cbd185f5 saudável. Conferência e escopo no histórico AGENDAMENTOS.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 

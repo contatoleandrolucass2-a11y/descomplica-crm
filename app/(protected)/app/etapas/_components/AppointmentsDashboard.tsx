@@ -217,9 +217,11 @@ function Columns({
   verticalLabels?: boolean;
 }) {
   if (!buckets.length) return <Empty />;
-  // The editor allows 150% height. Reserve that headroom for both bars and goals
-  // so changing presentation never changes their relative quantitative scale.
-  const max = Math.max(1, ...buckets.flatMap((item) => [item.total, item.goal ?? 0])) * 1.5;
+  // Keep existing percentage presentations intact. Pixel limits use the tallest
+  // actual bar as their reference and the same scale for goals and value labels.
+  const rangeMax = Math.max(1, ...buckets.flatMap((item) => [item.total, item.goal ?? 0]));
+  const barMax = Math.max(1, ...buckets.map((item) => item.total));
+  const max = rangeMax * 1.5;
   return (
     <>
       <p className={styles.axis}>Quantidade de agendamentos</p>
@@ -239,13 +241,22 @@ function Columns({
             >
               <div
                 className={styles.columnTrack}
-                style={{ "--bar-height": `${(item.total / max) * 100}%` } as CSSProperties}
+                style={
+                  {
+                    "--bar-height": `${(item.total / max) * 100}%`,
+                    "--bar-ratio": item.total / rangeMax,
+                    "--bar-max-ratio": item.total / barMax,
+                    "--goal-height": `${((item.goal ?? 0) / max) * 100}%`,
+                    "--goal-ratio": (item.goal ?? 0) / rangeMax,
+                    "--goal-max-ratio": (item.goal ?? 0) / barMax,
+                  } as CSSProperties
+                }
               >
                 {item.goal != null && (
                   <span
                     className={styles.goalLine}
                     style={{
-                      bottom: `calc(${(item.goal / max) * 100}% * var(--dashboard-bar-scale, 1))`,
+                      bottom: "var(--rendered-goal-height)",
                     }}
                     title={`Meta: ${number.format(item.goal)}`}
                   />
@@ -262,7 +273,7 @@ function Columns({
                         : "negative"
                   }
                   style={{
-                    height: "calc(var(--bar-height) * var(--dashboard-bar-scale, 1))",
+                    height: "var(--rendered-bar-height)",
                   }}
                 />
                 <span className={styles.columnValue}>{number.format(item.total)}</span>

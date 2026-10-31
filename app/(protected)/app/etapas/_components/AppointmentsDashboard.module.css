@@ -840,6 +840,8 @@
   box-shadow: inset 0 0 0 2px var(--analytics-cyan-strong);
 }
 .columnTrack {
+  --rendered-bar-height: calc(var(--bar-height) * var(--dashboard-bar-scale, 1));
+  --rendered-goal-height: calc(var(--goal-height) * var(--dashboard-bar-scale, 1));
   position: relative;
   height: 124px;
   display: flex;
@@ -858,7 +860,7 @@
 }
 .columnValue {
   position: absolute;
-  bottom: calc(var(--bar-height) * var(--dashboard-bar-scale, 1));
+  bottom: var(--rendered-bar-height);
   left: 50%;
   transform: translateX(-50%);
   padding-bottom: 0.3rem;
@@ -1824,4 +1826,21 @@
     transform: none !important;
     transition: none;
   }
+}
+
+/* A common scale preserves bar/goal ratios; the pixel cap never sizes the card. */
+[data-dashboard-bar-max-height] .columnTrack {
+  --available-column-height: max(0px, calc(100% - 1.75rem * var(--dashboard-font-scale, 1)));
+  --rendered-bar-height: min(
+    calc(var(--available-column-height) * var(--bar-ratio)),
+    calc(var(--dashboard-bar-max-height) * var(--bar-max-ratio))
+  );
+  --rendered-goal-height: min(
+    calc(var(--available-column-height) * var(--goal-ratio)),
+    calc(var(--dashboard-bar-max-height) * var(--goal-max-ratio))
+  );
+}
+
+[data-dashboard-bar-max-height] .column {
+  min-height: 0;
 }

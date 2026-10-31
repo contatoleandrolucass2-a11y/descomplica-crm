@@ -177,6 +177,7 @@ function statusLabel(state: SaveState) {
 type PresentationStyle = CSSProperties & {
   "--dashboard-font-scale"?: number;
   "--dashboard-bar-scale"?: number;
+  "--dashboard-bar-max-height"?: string;
   "--analytics-ink"?: string;
   "--analytics-cyan-strong"?: string;
   "--dashboard-block-align"?: CSSProperties["justifyContent"];
@@ -190,6 +191,9 @@ function presentationStyle(presentation?: DashboardCardPresentation): Presentati
     textAlign,
     "--dashboard-font-scale": presentation?.fontScale ?? 1,
     "--dashboard-bar-scale": presentation?.barScale ?? 1,
+    ...(presentation?.barMaxHeight !== undefined
+      ? { "--dashboard-bar-max-height": `${presentation.barMaxHeight}px` }
+      : {}),
     "--dashboard-block-align":
       verticalAlign === "start" ? "flex-start" : verticalAlign === "end" ? "flex-end" : "center",
     "--dashboard-inline-align":
@@ -207,7 +211,10 @@ function DashboardCardContent({ card, children }: { card: DashboardCard; childre
       data-dashboard-vertical-align={card.presentation.verticalAlign ?? "center"}
       style={presentationStyle(card.presentation)}
     >
-      <div className={styles.presentationSurface}>
+      <div
+        className={styles.presentationSurface}
+        data-dashboard-bar-max-height={card.presentation.barMaxHeight}
+      >
         {card.presentation.content ? (
           <p className={styles.customContent}>{card.presentation.content}</p>
         ) : null}
@@ -262,6 +269,7 @@ export function ConfigurableDashboardCanvas({
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
+  const [editorRenderedWidth, setEditorRenderedWidth] = useState<number | undefined>(undefined);
   const [focusBarHeight, setFocusBarHeight] = useState(false);
   const [editorMode, setEditorMode] = useState<"add" | "edit">("add");
   const [editorSaving, setEditorSaving] = useState(false);
@@ -621,6 +629,7 @@ export function ConfigurableDashboardCanvas({
     if (!card) return;
     if (layoutPolicy?.freeResize) card.layout.width = 320;
     setEditorMode("add");
+    setEditorRenderedWidth(undefined);
     setFocusBarHeight(false);
     setEditorCard(card);
   }
@@ -660,17 +669,8 @@ export function ConfigurableDashboardCanvas({
     setEditorSaveError("");
     setEditorMode("edit");
     setFocusBarHeight(barHeight);
-    setEditorCard(
-      layoutPolicy?.freeResize && !barHeight
-        ? {
-            ...card,
-            layout: {
-              ...card.layout,
-              width: card.layout.width ?? Math.round(renderedWidth ?? 320),
-            },
-          }
-        : card,
-    );
+    setEditorRenderedWidth(renderedWidth);
+    setEditorCard(card);
   }
 
   function loadProfile(profile: RemoteDashboardProfile) {
@@ -1163,6 +1163,7 @@ export function ConfigurableDashboardCanvas({
       {editorCard ? (
         <CardEditor
           card={editorCard}
+          renderedWidth={editorRenderedWidth}
           mode={editorMode}
           catalog={catalog}
           compatibility={compatibility}
@@ -1413,6 +1414,7 @@ export function ConfigurableDashboardCanvas({
 
 function CardEditor({
   card: initialCard,
+  renderedWidth,
   mode,
   catalog,
   compatibility,
@@ -1428,6 +1430,7 @@ function CardEditor({
   renderPreview,
 }: {
   card: DashboardCard;
+  renderedWidth?: number | undefined;
   mode: "add" | "edit";
   catalog: ConfigurableDashboardCatalog;
   compatibility?: ConfigurableDashboardCompatibility | undefined;
@@ -1443,29 +1446,49 @@ function CardEditor({
   renderPreview: (card: DashboardCard, size: DashboardCardSize) => ReactNode;
 }) {
   const [card, setCard] = useState(initialCard);
-  const [widthDraft, setWidthDraft] = useState(String(initialCard.layout.width ?? 320));
+  const [widthDraft, setWidthDraft] = useState(
+    String(initialCard.layout.width ?? Math.round(renderedWidth ?? 320)),
+  );
+  const [widthChanged, setWidthChanged] = useState(false);
+  const [heightChanged, setHeightChanged] = useState(false);
   const [heightDraft, setHeightDraft] = useState(String(initialCard.layout.height));
   const [barHeightDraft, setBarHeightDraft] = useState(
-    String(Math.round((initialCard.presentation?.barScale ?? 1) * 100)),
+    initialCard.presentation?.barMaxHeight === undefined
+      ? ""
+      : String(initialCard.presentation.barMaxHeight),
   );
+  const [barHeightChanged, setBarHeightChanged] = useState(false);
   const barHeightRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (focusBarHeight) barHeightRef.current?.focus();
   }, [focusBarHeight]);
 
   function cardWithDraftDimensions() {
-    if (!layoutPolicy?.freeResize) return card;
+    if (!layoutPolicy?.freeResize || (!widthChanged && !heightChanged)) return card;
+    const layout = constrainCardLayout(
+      card.type,
+      {
+        ...card.layout,
+        ...(widthChanged
+          ? {
+              width: widthDraft.trim()
+                ? Number(widthDraft)
+                : (card.layout.width ?? renderedWidth ?? 320),
+            }
+          : {}),
+        ...(heightChanged
+          ? { height: heightDraft.trim() ? Number(heightDraft) : card.layout.height }
+          : {}),
+      },
+      layoutPolicy,
+    );
     return {
       ...card,
-      layout: constrainCardLayout(
-        card.type,
-        {
-          ...card.layout,
-          width: widthDraft.trim() ? Number(widthDraft) : (card.layout.width ?? 320),
-          height: heightDraft.trim() ? Number(heightDraft) : card.layout.height,
-        },
-        layoutPolicy,
-      ),
+      layout: {
+        ...card.layout,
+        ...(widthChanged && layout.width !== undefined ? { width: layout.width } : {}),
+        ...(heightChanged ? { height: layout.height } : {}),
+      },
     };
   }
 
@@ -1473,7 +1496,7 @@ function CardEditor({
     if (!layoutPolicy?.freeResize) return;
     const next = cardWithDraftDimensions();
     setCard(next);
-    setWidthDraft(String(next.layout.width ?? 320));
+    setWidthDraft(String(next.layout.width ?? Math.round(renderedWidth ?? 320)));
     setHeightDraft(String(next.layout.height));
   }
   const types = compatibleTypes(card.metric, compatibility);
@@ -1506,7 +1529,6 @@ function CardEditor({
   }
 
   function updatePresentation(patch: Partial<DashboardCardPresentation>) {
-    if (patch.barScale !== undefined) setBarHeightDraft(String(Math.round(patch.barScale * 100)));
     setCard({ ...card, presentation: { ...card.presentation, ...patch } });
   }
 
@@ -1561,17 +1583,19 @@ function CardEditor({
         onSubmit={(event) => {
           event.preventDefault();
           if (customDatesValid && !saving && !saveUnavailable) {
-            const percent = Number(barHeightDraft);
+            const pixels = Number(barHeightDraft);
             if (appointmentsBarHeight && card.type === "bars") {
-              if (
-                !barHeightDraft.trim() ||
-                !Number.isInteger(percent) ||
-                percent < 50 ||
-                percent > 150
-              )
-                return;
+              if (barHeightDraft.trim() && (!Number.isSafeInteger(pixels) || pixels < 1)) return;
               const base = focusBarHeight ? initialCard : cardWithDraftDimensions();
-              onSave({ ...base, presentation: { ...base.presentation, barScale: percent / 100 } });
+              if (!barHeightChanged) {
+                onSave(base);
+                return;
+              }
+              const presentation = { ...base.presentation };
+              delete presentation.barScale;
+              if (barHeightDraft.trim()) presentation.barMaxHeight = pixels;
+              else delete presentation.barMaxHeight;
+              onSave({ ...base, presentation });
             } else onSave(cardWithDraftDimensions());
           }
         }}
@@ -1582,44 +1606,38 @@ function CardEditor({
           <fieldset className={styles.barHeightControls}>
             <legend>Altura das torres</legend>
             <label>
-              Altura das torres (%)
+              Altura máxima das torres (px)
               <input
                 ref={barHeightRef}
                 disabled={saving}
                 type="number"
-                min={50}
-                max={150}
+                min={1}
                 step={1}
-                required
+                placeholder="Automática"
+                aria-describedby="dashboard-bar-height-help"
                 value={barHeightDraft}
                 onChange={(event) => {
                   const value = event.target.value;
+                  const pixels = Number(value);
+                  const valid = !value.trim() || (Number.isSafeInteger(pixels) && pixels >= 1);
+                  event.currentTarget.setCustomValidity(
+                    valid ? "" : "Informe uma altura inteira em pixels, maior que zero.",
+                  );
                   setBarHeightDraft(value);
-                  const percent = Number(value);
-                  if (value.trim() && percent >= 50 && percent <= 150)
-                    updatePresentation({ barScale: percent / 100 });
+                  setBarHeightChanged(true);
+                  if (!valid) return;
+                  const presentation = { ...card.presentation };
+                  delete presentation.barScale;
+                  if (value.trim()) presentation.barMaxHeight = pixels;
+                  else delete presentation.barMaxHeight;
+                  setCard({ ...card, presentation });
                 }}
               />
             </label>
-            <label>
-              Ajustar altura das torres
-              <input
-                disabled={saving}
-                type="range"
-                min={50}
-                max={150}
-                step={1}
-                value={Math.round((card.presentation?.barScale ?? 1) * 100)}
-                onChange={(event) => {
-                  setBarHeightDraft(event.target.value);
-                  updatePresentation({ barScale: Number(event.target.value) / 100 });
-                }}
-              />
-            </label>
-            <p>
-              De 50% a 150%. Reduza para baixar as torres, sem alterar o tamanho do card ou os
-              valores. Barras e metas mantêm a mesma escala. A prévia é proporcional; a altura final
-              acompanha o card.
+            <p id="dashboard-bar-height-help">
+              Limite a maior torre em pixels, sem alterar o tamanho do card ou os valores. Barras e
+              metas mantêm a mesma escala e se ajustam ao espaço disponível. Deixe vazio para altura
+              automática. A prévia usa o espaço abaixo; cards menores podem reduzir as torres.
             </p>
             <div
               className={styles.barHeightPreview}
@@ -1676,6 +1694,7 @@ function CardEditor({
                 onChange={(event) => {
                   if (layoutPolicy?.freeResize) {
                     setWidthDraft(event.target.value);
+                    setWidthChanged(true);
                     return;
                   }
                   setCard({
@@ -1716,6 +1735,7 @@ function CardEditor({
                 onChange={(event) => {
                   if (layoutPolicy?.freeResize) {
                     setHeightDraft(event.target.value);
+                    setHeightChanged(true);
                     return;
                   }
                   setCard({

@@ -42,6 +42,32 @@ O cabeçalho duplicado é removido. Ícones compactos aparecem em hover/foco;
 em toque, mover e um ícone de ações mantêm alvos de 44 px; o menu abre o editor de dimensões fora do card. O controle de acesso
 existente ao editor permanece vigente.
 
+## Altura máxima das torres em pixels
+
+Em Agendamentos, o atalho `Altura das torres` aceita `presentation.barMaxHeight`,
+um inteiro positivo em pixels. O campo não usa a faixa de 50% a 150% nem altera
+`layout.width`, `layout.height`, span ou ordem. Não há teto de produto em pixels;
+o contrato só exige inteiro seguro de JavaScript. Campo vazio restaura a escala
+automática, removendo também o percentual legado daquele gráfico.
+
+O limite é aplicado à maior torre real e mantém uma escala comum para todas as
+torres, metas e rótulos. O espaço interno disponível continua sendo o limite
+físico: um valor maior não aumenta o card nem corta cada torre individualmente.
+Perfis antigos com `barScale` preservam a aparência até alterar explicitamente
+o campo de altura; editar só título ou cor não migra esse ajuste. O novo limite
+em pixels tem precedência quando presente.
+
+A migration `20261031184038_appointments_bar_max_height_pixels.sql` expande
+somente a validação de Agendamentos, sem reescrever documentos, mudar permissões,
+RLS, CAS ou o conflito HTTP 409. Aplicar o DDL aprovado antes de publicar a
+interface. A autorização de migrations anteriores não cobre essa expansão.
+
+Antes da primeira gravação com `barMaxHeight`, o validador e a aplicação anteriores
+podem ser restaurados sem conversão. Depois de gravar o campo novo, uma imagem
+antiga com schema estrito rejeita esses perfis: corrigir com versão compatível,
+preservando o campo. Não remover o limite salvo nem converter dados durante
+rollback sem plano e autorização específicos.
+
 ## Publicação e autorização
 
 A migration `20261029210251_appointments_free_card_dimensions.sql` é necessária

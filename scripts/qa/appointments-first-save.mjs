@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import { mkdir } from "node:fs/promises";
+import path from "node:path";
 import { expect } from "@playwright/test";
 
 const charts = [
@@ -81,71 +83,312 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     });
   }
 
-  // Bar height is independent from card dimensions and survives one Save + reload.
+  // Pixel caps share one quantitative ruler and never edit the card layout.
   const barChart = charts[1];
-  const dimensionsBeforeScale = await read(barChart);
-  const barHeights = () =>
-    card(barChart)
-      .locator('[style*="--bar-height"] > div')
-      .evaluateAll((elements) => elements.map((element) => element.getBoundingClientRect().height));
-  const originalBarHeights = await barHeights();
-  const beforeBarSave = requests.length;
+  const dimensionsBeforeCap = await read(barChart);
+  const order = () =>
+    page
+      .locator("article[data-dashboard-card-id]")
+      .evaluateAll((elements) =>
+        elements.map((element) => element.getAttribute("data-dashboard-card-id")),
+      );
+  const orderBeforeCap = await order();
+  const geometry = (target = card(barChart)) =>
+    target.locator('[style*="--bar-height"]').evaluateAll((tracks) =>
+      tracks.map((track) => {
+        const bar = track.querySelector(":scope > div");
+        const value = track.querySelector('[class*="columnValue"]');
+        const goal = track.querySelector('[title^="Meta:"]');
+        return {
+          value: Number(value.textContent.replace(/\./gu, "").replace(",", ".")),
+          height: bar.getBoundingClientRect().height,
+          trackHeight: track.getBoundingClientRect().height,
+          labelBottom: Number.parseFloat(getComputedStyle(value).bottom),
+          goal: goal
+            ? Number(goal.title.replace("Meta: ", "").replace(/\./gu, "").replace(",", "."))
+            : null,
+          goalBottom: goal ? Number.parseFloat(getComputedStyle(goal).bottom) : null,
+        };
+      }),
+    );
+  function checkGeometry(bars, cap) {
+    assert.ok(
+      bars.some(({ value }) => value > 0),
+      "Synthetic bars must contain quantitative data",
+    );
+    const positiveBars = bars.filter(({ value }) => value > 0);
+    const largest = positiveBars.reduce((best, current) =>
+      current.value > best.value ? current : best,
+    );
+    assert.ok(largest.height > 0, "Nonzero data must remain visible");
+    const pixelsPerUnit = largest.height / largest.value;
+    for (const bar of bars) {
+      assert.ok(bar.height <= cap + 1, `Bar ${bar.value} exceeds ${cap}px cap: ${bar.height}`);
+      assert.ok(bar.height <= bar.trackHeight + 1, "Bar remains inside available plot height");
+      if (bar.value > 0) {
+        assert.ok(
+          Math.abs(bar.height - bar.value * pixelsPerUnit) < 1,
+          "Bars share the same pixels-per-unit ruler",
+        );
+        assert.ok(Math.abs(bar.labelBottom - bar.height) < 1, "Value label follows its bar");
+        if (bar.goal != null)
+          assert.ok(
+            Math.abs(bar.goalBottom - bar.goal * pixelsPerUnit) < 1,
+            "Goal marker shares the bar ruler",
+          );
+      }
+    }
+  }
+  const proofDirectory = path.resolve("test-results/appointments-bar-height-pixels");
+  await mkdir(proofDirectory, { recursive: true });
+  async function savePixelCap(chart, value, target = page) {
+    const article = target.locator(`[data-dashboard-card-id="${chart.id}"]`);
+    await article
+      .getByRole("button", { name: `Ajustar altura das torres de ${chart.title}`, exact: true })
+      .press("Enter");
+    const editor = target.getByRole("dialog", { name: "Altura das torres", exact: true });
+    const input = editor.getByLabel("Altura máxima das torres (px)", { exact: true });
+    await expect(input).toBeFocused();
+    await expect(input).not.toHaveAttribute("max", /.+/u);
+    await expect(editor.getByLabel("Largura do card", { exact: false })).toHaveCount(0);
+    await expect(editor.getByRole("slider")).toHaveCount(0);
+    await input.fill(value);
+    await editor.getByRole("button", { name: "Salvar", exact: true }).click();
+    await expect(editor).toHaveCount(0);
+    await expect(target.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  }
+  // Existing percentage layouts remain intact when only an unrelated editor field changes.
+  const { profiles: legacyProfiles } = await (
+    await page.request.get(`${origin}/api/dashboard-profiles`)
+  ).json();
+  const legacyProfile = legacyProfiles.find((profile) =>
+    profile.cards.some((entry) => entry.id === barChart.id),
+  );
+  assert.ok(legacyProfile);
+  const legacyCards = legacyProfile.cards.map((entry) =>
+    entry.id === barChart.id
+      ? {
+          ...entry,
+          presentation: { ...entry.presentation, barScale: 0.65 },
+        }
+      : entry,
+  );
+  const seedLegacy = await page.request.patch(
+    `${origin}/api/dashboard-profiles/${legacyProfile.id}`,
+    { data: { version: legacyProfile.version, cards: legacyCards } },
+  );
+  assert.equal(seedLegacy.status(), 200);
+  await page.reload();
+  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  const legacyGeometry = await geometry();
+  const beforeTitleSave = requests.length;
+  const legacyEditor = await open(barChart);
+  await expect(
+    legacyEditor.getByLabel("Altura máxima das torres (px)", { exact: true }),
+  ).toHaveValue("");
+  await legacyEditor.getByLabel("Título", { exact: true }).fill(`${barChart.title} QA`);
+  await legacyEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(legacyEditor).toHaveCount(0);
+  assert.equal(requests.length, beforeTitleSave + 1);
+  const afterTitle = requests.at(-1).cards.find((entry) => entry.id === barChart.id);
+  assert.equal(afterTitle.presentation.barScale, 0.65);
+  assert.equal(afterTitle.presentation.barMaxHeight, undefined);
+  await page.reload();
+  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  assert.deepEqual(await read(barChart), dimensionsBeforeCap);
+  assert.deepEqual(
+    (await geometry()).map(({ height }) => height),
+    legacyGeometry.map(({ height }) => height),
+  );
+  await card(barChart)
+    .getByRole("button", { name: `Editar ${barChart.title} QA`, exact: true })
+    .press("Enter");
+  const restoreTitle = page.getByRole("dialog");
+  await restoreTitle.getByLabel("Título", { exact: true }).fill(barChart.title);
+  await restoreTitle.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(restoreTitle).toHaveCount(0);
+  evidence.firstSave.push({
+    scenario: "legacy-percentage-preserved-on-title-only-edit",
+    scale: 0.65,
+    dimensionsBeforeCap,
+  });
+
+  // A chart without goal headroom demonstrates the exact requested pixel height.
+  const noGoalChart = { id: "ranking-score", title: "Ranking Score" };
+  const noGoalDimensions = await read(noGoalChart);
+  for (const cap of [24, 240]) {
+    const beforeExactCap = requests.length;
+    await savePixelCap(noGoalChart, String(cap));
+    assert.equal(requests.length, beforeExactCap + 1);
+    await page.reload();
+    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    const exactBars = await geometry(card(noGoalChart));
+    assert.ok(
+      exactBars.every(({ goal }) => goal == null),
+      "This fixture chart has no goal headroom",
+    );
+    checkGeometry(exactBars, cap);
+    assert.ok(
+      Math.abs(Math.max(...exactBars.map(({ height }) => height)) - cap) < 1,
+      "Tallest goal-free bar reaches the requested pixels",
+    );
+    assert.deepEqual(await read(noGoalChart), noGoalDimensions);
+    await card(noGoalChart).screenshot({
+      path: path.join(proofDirectory, `exact-${cap}px-after-refresh.png`),
+    });
+    evidence.firstSave.push({
+      scenario: "exact-pixel-height-without-goal-headroom",
+      cap,
+      exactBars,
+      noGoalDimensions,
+    });
+  }
+
+  // Native constraints reject zero/fractional pixel heights without sending a write.
   await card(barChart)
     .getByRole("button", { name: `Ajustar altura das torres de ${barChart.title}`, exact: true })
     .press("Enter");
-  const barEditor = page.getByRole("dialog");
-  const percentInput = barEditor.getByLabel("Altura das torres (%)", { exact: true });
-  await expect(percentInput).toBeFocused();
-  const previewTrack = barEditor
-    .locator('[aria-label="Prévia da altura das torres"] [style*="--bar-height"]')
-    .first();
-  assert.ok((await previewTrack.boundingBox()).height > 60, "Preview fills its plot area");
-
-  await percentInput.fill("65");
-  await expect(
-    barEditor.getByRole("slider", { name: "Ajustar altura das torres", exact: true }),
-  ).toHaveValue("65");
-  await barEditor.getByRole("button", { name: "Salvar", exact: true }).click();
-  await expect(barEditor).toHaveCount(0);
-  assert.equal(requests.length, beforeBarSave + 1, "Bar height saves with one PATCH");
+  const invalidEditor = page.getByRole("dialog", { name: "Altura das torres", exact: true });
+  const invalidInput = invalidEditor.getByLabel("Altura máxima das torres (px)", { exact: true });
+  for (const value of ["0", "24.5"]) {
+    const beforeInvalidSave = requests.length;
+    await invalidInput.fill(value);
+    assert.equal(await invalidInput.evaluate((input) => input.checkValidity()), false);
+    await invalidEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+    await expect(invalidEditor).toHaveCount(1);
+    assert.equal(
+      requests.length,
+      beforeInvalidSave,
+      "Invalid pixel height must not write a profile",
+    );
+  }
+  await invalidEditor.getByRole("button", { name: "Cancelar", exact: true }).click();
+  evidence.firstSave.push({ scenario: "pixel-cap-rejects-nonpositive-and-fractional-values" });
+  for (const cap of [1, 24, 240, 10000]) {
+    const beforeSave = requests.length;
+    await savePixelCap(barChart, String(cap));
+    assert.equal(requests.length, beforeSave + 1, "Pixel cap saves with exactly one PATCH");
+    assert.equal(
+      requests.at(-1).cards.find((entry) => entry.id === barChart.id).presentation.barMaxHeight,
+      cap,
+    );
+    assert.equal(
+      requests.at(-1).cards.find((entry) => entry.id === barChart.id).presentation.barScale,
+      undefined,
+      "Explicit pixel edit replaces legacy percentage",
+    );
+    await page.reload();
+    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect.poll(() => read(barChart)).toEqual(dimensionsBeforeCap);
+    assert.deepEqual(await order(), orderBeforeCap, "Pixel cap does not reorder cards");
+    const bars = await geometry();
+    checkGeometry(bars, cap);
+    if (cap === 1)
+      assert.ok(
+        Math.abs(Math.max(...bars.map(({ height }) => height)) - 1) < 0.1,
+        "The 1px cap actually limits the largest tower below its default size",
+      );
+    const editor = await open(barChart);
+    await expect(editor.getByLabel("Altura máxima das torres (px)", { exact: true })).toHaveValue(
+      String(cap),
+    );
+    await editor.getByRole("button", { name: "Cancelar", exact: true }).click();
+    evidence.firstSave.push({
+      scenario: "pixel-cap-one-save-refresh",
+      cap,
+      dimensionsBeforeCap,
+      bars,
+    });
+  }
+  // Clearing the optional cap restores the legacy/default rendering without a layout mutation.
+  await savePixelCap(barChart, "");
   assert.equal(
-    requests.at(-1).cards.find((entry) => entry.id === barChart.id).presentation.barScale,
-    0.65,
+    requests.at(-1).cards.find((entry) => entry.id === barChart.id).presentation?.barMaxHeight,
+    undefined,
   );
   await page.reload();
   await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
-  await expect.poll(() => read(barChart)).toEqual(dimensionsBeforeScale);
-  const scaledBarHeights = await barHeights();
-  assert.ok(originalBarHeights.some((height) => height > 0));
-  originalBarHeights.forEach((height, index) =>
-    assert.ok(
-      Math.abs(scaledBarHeights[index] - height * 0.65) < 1,
-      "Bars retain proportions at saved height",
-    ),
-  );
-  const persistedBarEditor = await open(barChart);
-  await expect(persistedBarEditor.getByLabel("Altura das torres (%)", { exact: true })).toHaveValue(
-    "65",
-  );
-  await persistedBarEditor.getByRole("button", { name: "Cancelar", exact: true }).click();
+  assert.deepEqual(await read(barChart), dimensionsBeforeCap);
+  await savePixelCap(barChart, "240");
+  await page.goto("about:blank");
+  await page.goto(`${origin}?editable`);
+  await page.getByRole("button", { name: "House", exact: true }).click();
+  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  const returnedEditor = await open(barChart);
+  await expect(
+    returnedEditor.getByLabel("Altura máxima das torres (px)", { exact: true }),
+  ).toHaveValue("240");
+  await returnedEditor.getByRole("button", { name: "Cancelar", exact: true }).click();
+  assert.deepEqual(await order(), orderBeforeCap);
+  checkGeometry(await geometry(), 240);
+  await card(barChart).screenshot({
+    path: path.join(proofDirectory, "desktop-240px-after-refresh.png"),
+  });
   evidence.firstSave.push({
-    scenario: "bar-height-one-save-refresh",
-    scale: 0.65,
-    dimensionsBeforeScale,
-    originalBarHeights,
-    scaledBarHeights,
+    scenario: "pixel-cap-clear-and-page-return",
+    cap: 240,
+    dimensionsBeforeCap,
   });
 
   const fluidChart = { id: "appointments-monthly", title: "Agendamentos por mês" };
   const fluidDimensions = await read(fluidChart);
-  await card(fluidChart)
-    .getByRole("button", { name: `Ajustar altura das torres de ${fluidChart.title}`, exact: true })
-    .press("Enter");
-  const fluidEditor = page.getByRole("dialog", { name: "Altura das torres", exact: true });
-  await expect(fluidEditor.getByLabel("Largura do card", { exact: false })).toHaveCount(0);
-  await fluidEditor.getByLabel("Altura das torres (%)", { exact: true }).fill("70");
-  await fluidEditor.getByRole("button", { name: "Salvar", exact: true }).click();
-  await expect(fluidEditor).toHaveCount(0);
+  // The regular pencil editor must preserve an automatic width when only the cap changes.
+  const { profiles: fluidProfiles } = await (
+    await page.request.get(`${origin}/api/dashboard-profiles`)
+  ).json();
+  const fluidProfile = fluidProfiles.find((profile) =>
+    profile.cards.some((entry) => entry.id === fluidChart.id),
+  );
+  const fluidLayout = fluidProfile.cards.find((entry) => entry.id === fluidChart.id).layout;
+  assert.equal(fluidLayout.width, undefined, "Regression starts from a genuinely fluid saved card");
+  const beforeFullEditorCap = requests.length;
+  const fullFluidEditor = await open(fluidChart);
+  await fullFluidEditor.getByLabel("Altura máxima das torres (px)", { exact: true }).fill("96");
+  await fullFluidEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(fullFluidEditor).toHaveCount(0);
+  assert.equal(
+    requests.length,
+    beforeFullEditorCap + 1,
+    "Regular editor cap-only change sends one PATCH",
+  );
+  const savedFluidCard = requests.at(-1).cards.find((entry) => entry.id === fluidChart.id);
+  assert.equal(savedFluidCard.presentation.barMaxHeight, 96);
+  assert.deepEqual(
+    savedFluidCard.layout,
+    fluidLayout,
+    "Regular editor must not materialize an untouched fluid width or alter height/order",
+  );
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1265, height: 578 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.reload();
+    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    assert.deepEqual(await read(fluidChart), fluidDimensions);
+    assert.deepEqual(await order(), orderBeforeCap);
+    const { profiles: reloadedProfiles } = await (
+      await page.request.get(`${origin}/api/dashboard-profiles`)
+    ).json();
+    const persistedFluidCard = reloadedProfiles
+      .find((profile) => profile.id === fluidProfile.id)
+      .cards.find((entry) => entry.id === fluidChart.id);
+    assert.deepEqual(persistedFluidCard.layout, fluidLayout);
+    assert.equal(persistedFluidCard.presentation.barMaxHeight, 96);
+    checkGeometry(await geometry(card(fluidChart)), 96);
+  }
+  await card(fluidChart).screenshot({
+    path: path.join(proofDirectory, "full-editor-fluid-after-refresh.png"),
+  });
+  evidence.firstSave.push({
+    scenario: "regular-editor-pixel-cap-preserves-fluid-layout-after-refresh-and-viewport",
+    cap: 96,
+    fluidLayout,
+    fluidDimensions,
+  });
+  const beforeFluidSave = requests.length;
+  await savePixelCap(fluidChart, "80");
+  assert.equal(requests.length, beforeFluidSave + 1);
   assert.equal(
     requests.at(-1).cards.find((entry) => entry.id === fluidChart.id).layout.width,
     undefined,
@@ -153,11 +396,51 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   await page.reload();
   await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
   await expect.poll(() => read(fluidChart)).toEqual(fluidDimensions);
+  checkGeometry(await geometry(card(fluidChart)), 80);
   evidence.firstSave.push({
-    scenario: "bar-height-preserves-fluid-width",
-    percent: 70,
+    scenario: "pixel-cap-preserves-fluid-width",
+    cap: 80,
     fluidDimensions,
   });
+
+  // Responsive reflow changes the visible width, not the persisted layout or pixel cap.
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 844, height: 390 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.reload();
+    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    assert.deepEqual(await read(barChart), dimensionsBeforeCap);
+    assert.deepEqual(await read(fluidChart), fluidDimensions);
+    assert.deepEqual(await order(), orderBeforeCap);
+    checkGeometry(await geometry(), 240);
+    checkGeometry(await geometry(card(fluidChart)), 80);
+    assert.ok(
+      await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
+      "Mobile page fits without horizontal overflow",
+    );
+    const editor = await open(barChart);
+    await expect(editor.getByLabel("Altura máxima das torres (px)", { exact: true })).toHaveValue(
+      "240",
+    );
+    await editor.getByRole("button", { name: "Cancelar", exact: true }).click();
+    await card(barChart).screenshot({
+      path: path.join(
+        proofDirectory,
+        `mobile-${viewport.width}x${viewport.height}-after-refresh.png`,
+      ),
+    });
+    evidence.firstSave.push({
+      scenario: "pixel-cap-mobile-rotation-refresh",
+      viewport,
+      cap: 240,
+      dimensionsBeforeCap,
+      fluidDimensions,
+    });
+  }
+  await page.setViewportSize({ width: 1265, height: 578 });
 
   // An autosave from a corner/keyboard resize can still be in flight when the editor opens.
   const beforeQueue = requests.length;
@@ -178,6 +461,13 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   assert.equal(requests.length, beforeQueue + 2);
   assert.equal(requests.at(-1).version, requests.at(-2).version + 1);
   await reloadAndCheck(charts[1], 503, 463);
+  assert.equal(
+    await card(barChart)
+      .locator("[data-dashboard-bar-max-height]")
+      .getAttribute("data-dashboard-bar-max-height"),
+    "240",
+  );
+  checkGeometry(await geometry(), 240);
   evidence.firstSave.push({
     scenario: "queued-after-in-flight-autosave",
     width: 503,
@@ -256,6 +546,62 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     }
     await other.goto(`${origin}?editable`);
     await other.getByRole("button", { name: "House", exact: true }).click();
+    await expect.poll(() => snapshot(other)).toEqual(await snapshot(page));
+    const capFrom = (target, item) =>
+      target
+        .locator(`[data-dashboard-card-id="${item.id}"] [data-dashboard-bar-max-height]`)
+        .getAttribute("data-dashboard-bar-max-height");
+    assert.equal(
+      await capFrom(other, barChart),
+      "240",
+      "Independent context loads saved pixel cap from the shared HTTP profile",
+    );
+    assert.equal(await capFrom(other, fluidChart), "80");
+    const dimensionsBeforePeerCap = await read(barChart);
+    await savePixelCap(barChart, "32", other);
+    await page.reload();
+    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    assert.equal(
+      await capFrom(page, barChart),
+      "32",
+      "Reload receives the other context's saved pixel cap",
+    );
+    assert.deepEqual(await read(barChart), dimensionsBeforePeerCap);
+    checkGeometry(await geometry(), 32);
+    await card(barChart).screenshot({
+      path: path.join(proofDirectory, "cross-context-32px-after-refresh.png"),
+    });
+    // A new browser context has no cache/localStorage from either writer.
+    const freshContext = await page
+      .context()
+      .browser()
+      .newContext({ viewport: { width: 390, height: 844 }, serviceWorkers: "block" });
+    try {
+      await freshContext.route("**/*", (route) =>
+        new URL(route.request().url()).origin === origin
+          ? route.continue()
+          : route.abort("blockedbyclient"),
+      );
+      const fresh = await freshContext.newPage();
+      await fresh.goto(`${origin}?editable`);
+      await fresh.getByRole("button", { name: "House", exact: true }).click();
+      await expect(fresh.getByRole("toolbar")).toContainText("Salvo automaticamente");
+      assert.equal(await capFrom(fresh, barChart), "32");
+      assert.equal(await capFrom(fresh, fluidChart), "80");
+      await expect.poll(() => snapshot(fresh)).toEqual(await snapshot(page));
+      await fresh
+        .locator(`[data-dashboard-card-id="${barChart.id}"]`)
+        .screenshot({ path: path.join(proofDirectory, "fresh-mobile-context-32px.png") });
+    } finally {
+      await freshContext.close();
+    }
+    evidence.firstSave.push({
+      scenario: "pixel-cap-cross-context-and-recreated-context",
+      desktopToPeer: 240,
+      peerToDesktop: 32,
+      freshMobileContext: 32,
+    });
+    await other.reload();
     await expect.poll(() => snapshot(other)).toEqual(await snapshot(page));
 
     const visits = { id: "visits-total", title: "Visitas realizadas" };
