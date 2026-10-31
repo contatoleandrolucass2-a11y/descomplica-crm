@@ -1,5 +1,14 @@
 # Worklog
 
+## 2026-10-30 — Layout preservado em outro navegador
+
+- Após login realizado pelo usuário no navegador integrado do Codex, abertura
+  de Agendamentos carregou os 28 itens na mesma ordem e com as mesmas larguras
+  e alturas do registro do Chrome. Comparação integral dos IDs e estilos passou.
+- Visitas em 4º/317×237 px, semanal em 15º/477×439 px e comparação de hoje em
+  16º/441×441 px. Print nativo após login, sem refazer ajustes ou copiar sessão.
+- Evidências locais ignoradas; somente documentação, sem deploy da aplicação.
+
 ## 2026-10-30 — Persistência após sair da conta
 
 - Saída real até /login e novo login normal até /app, na mesma conta,

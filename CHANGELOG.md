@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma que os 28 cards e gráficos de Agendamentos mantêm largura, altura
+  e ordem no navegador integrado do Codex após login na mesma conta do Chrome.
+  Registro de teste real, sem alteração da aplicação.
+
 - Confirma no site que tamanho e ordem dos 28 cards e gráficos de Agendamentos
   permanecem após sair da conta e entrar novamente na mesma conta.
   Evidências após login, sem alteração da aplicação.
