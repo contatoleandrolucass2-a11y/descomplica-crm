@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma tamanho e ordem após editar card e gráfico no celular simulado
+  vertical, girar para horizontal e atualizar: 28 itens preservados, dentro
+  da largura útil, com print após refresh. Sem mudança da aplicação.
+
 - Confirma tamanho e ordem após redimensionar e arrastar card e gráfico em
   celular simulado horizontal, voltar à vertical e atualizar. Os 28 itens
   preservados e ajustados à largura, com prints; sem mudança da aplicação.

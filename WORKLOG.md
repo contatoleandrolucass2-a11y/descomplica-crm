@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Edição vertical persiste na horizontal
+
+- Em 390×844, canto alterou Visitas 337×359 para 267×383 px e semanal
+  379×561 para 269×583 px. Alças moveram Visitas 3º→2º e semanal 5º→4º.
+- Autosave confirmado antes de girar para 844×390 e atualizar. Os 28 IDs,
+  ordem e tamanhos ficaram idênticos; todos dentro da largura útil, sem
+  estouro horizontal. Card e gráfico inspecionados visualmente após refresh.
+- Print e JSON locais ignorados; viewport restaurado. Teste por ponteiro em
+  tela simulada, sem touchscreen físico. Sem código ou deploy da aplicação.
+
 ## 2026-10-30 — Edição horizontal persiste na vertical
 
 - Em 844×390, canto alterou Visitas 303×337 para 337×359 px e semanal

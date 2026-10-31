@@ -1,5 +1,13 @@
 # Histórico de validação de Agendamentos
 
+## 2026-10-30: edição vertical preservada após giro e refresh horizontal
+
+- Aba integrada autenticada de Agendamentos, viewport 390×844: arrastes do ponteiro pelos cantos alteraram Visitas de 337×359 para 267×383 px e semanal de 379×561 para 269×583 px. Arrastes pelas alças moveram Visitas de 3º para 2º e semanal de 5º para 4º. Sem abrir editor, sem confirmação adicional de dimensões. Menu lateral recolhido para acessar a coluna.
+- Salvo automaticamente confirmado antes de girar para 844×390 e atualizar. Os 28 IDs, ordem e width/height do destino ficaram integralmente idênticos ao snapshot salvo na vertical. Visitas 267×383 px/2º e semanal 269×583 px/4º mantidos; nenhum salvamento adicional na horizontal.
+- Após reload horizontal, todos os articles dentro da área útil de 829 px; scrollWidth/clientWidth iguais. Visitas e semanal renderizaram as dimensões completas 267×383 e 269×583 px. Inspeção visual após refresh confirmou card e gráfico em fluxo responsivo, barras, valores e legenda legíveis. Rótulos estreitos do gráfico quebram em mais linhas; configuração escolhida pelo teste preservada.
+- Evidências locais ignoradas em test-results/appointments-first-save/vertical-para-horizontal-resultados.json e vertical-para-horizontal-apos-refresh.jpg. Print do card e gráfico antes dos rankings/tabela, sem anexos privados ou credenciais exportados ao GitHub/Obsidian. Layout pedido mantido e override restaurado. Simulação de viewport por ponteiro, sem aparelho físico, sensor, touchscreen ou Safari/iOS. Handle anterior indisponível, resolvido por reset da ferramenta e recuperação da mesma aba autenticada.
+- Fontes às 2026-10-31T02:39:13Z (30/10/2026 23:39 BRT): fetch confirmou HEAD/origin main 0c16cffe9afe11e7f1ad2bfed44f2993c311eb9b e árvore limpa. Health público https://crm.descomplicapro.com.br/api/health com status ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 reutilizada para esse runtime, registro documental segue CI própria. Sem código, schema, permissões, dados comerciais ou novo deploy.
+
 ## 2026-10-30: edição horizontal preservada após retorno e refresh vertical
 
 - Na aba integrada autenticada, viewport temporário 844×390, entrada por ponteiro: canto de Visitas alterou 303×337 para 337×359 px; canto de semanal, 343×541 para 379×561 px. Arrastes pelas alças moveram Visitas de 2º para 3º e semanal de 8º para 5º. O primeiro arraste do card não mudou a ordem; novo arraste com inspeção confirmou a mudança. Não abriu editor nem exigiu confirmação de dimensões.
