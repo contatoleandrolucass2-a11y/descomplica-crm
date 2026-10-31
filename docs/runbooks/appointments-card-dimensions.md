@@ -18,8 +18,19 @@ Ao confirmar o editor de Agendamentos, a gravação é enviada imediatamente,
 sem a espera do autosave. O editor mostra `Salvando…`, bloqueia alterações
 durante a requisição e fecha somente após a confirmação do servidor. Uma
 gravação anterior em andamento é concluída antes de enviar a versão seguinte.
-Erro ou conflito mantém o editor e os valores; não apresenta sucesso falso.
+Erro ou conflito real mantém o editor e os valores; não apresenta sucesso falso.
+Em conflito de versão, edições independentes de tamanho e ordem são combinadas
+sobre o perfil remoto e reenviadas uma vez com a versão atual. Conflitos no
+mesmo campo bloqueiam a gravação até recarregar o perfil salvo.
 Arraste e teclado mantêm autosave, indicando pendência desde a alteração.
+
+O conflito de aplicação de Agendamentos usa SQLSTATE `PGRST`, com corpo JSON
+compatível (`code: 40001`) e DETAIL `{"status":409,"headers":{}}`. O campo
+`headers` é obrigatório no parser do PostgREST 14, mesmo vazio. Usar SQLSTATE
+`40001` diretamente causa repetição transacional e impede o cliente de receber
+o conflito. A migration `20261031055824_appointments_profile_conflict_http.sql`
+preserva CAS, ACL, validações e perfis existentes; sua aplicação remota exige
+autorização específica e CI aprovada. A aplicação publicada permanece compatível.
 
 Regressão focada: `node scripts/qa/appointments-preview.mjs --first-save-only`.
 O fixture local cobre confirmação única com refresh imediato, resposta retida,

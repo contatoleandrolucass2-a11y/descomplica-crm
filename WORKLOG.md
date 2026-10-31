@@ -16,7 +16,18 @@
   headers obrigatório no PostgREST14. DETAIL inclui headers vazio, com regressão
   pgTAP e diagnóstico HTTP sanitizado. Nenhuma versão aplicada remotamente.
 - Aplicação bfdd450/PR #448 publicada; nova migration ainda não aplicada.
-  Gates SQL/HTTP na CI, autorização remota e bateria real permanecem pendentes.
+  PR #449 integrado em 33e26498 após CI 41177607209 verde nos quatro jobs:
+  2333 assertions pgTAP e conflito HTTP 409 em 13 ms, sem escrita indevida.
+  SQL e árvore idênticos ao candidato 68a3235a. Autorização remota pendente.
+- Rodada real avançou sem provocar conflitos: confirmação única nos dois
+  editores, canto e arraste nos dois navegadores, refresh, saída/retorno,
+  reabertura das abas, edições móveis nas duas orientações e sincronização
+  bidirecional preservaram os 28 itens. Chrome passou após logout/login.
+  Integrado aguarda novo login; conflito entre versões aguarda migration.
+- 36 verificações reais aprovadas; seis geometrias móveis conferidas contra
+  clientWidth, sem estouro. Simulação com ponteiro, sem aparelho físico.
+  Encerramento de processos não executado; reabertura validada por abas.
+  Aceite completo continua aberto, sem nova publicação ou aplicação remota.
 
 ## 2026-10-31 — Corrige persistência entre sessões de Agendamentos
 
