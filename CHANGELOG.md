@@ -1,6 +1,6 @@
 # Changelog
 
-- Agendamentos: sidebar abre ao passar o mouse e recolhe ao sair, sem botão
+- Publicado em Agendamentos: sidebar abre ao passar o mouse e recolhe ao sair, sem botão
   Ocultar; atualização dos dados no topo direito. Altura das torres ganha
   atalho, campo numérico e prévia, com salvamento do percentual50–150%.
 
