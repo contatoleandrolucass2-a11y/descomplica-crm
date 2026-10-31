@@ -2,7 +2,7 @@
 
 - Implementa altura máxima das torres de Agendamentos em pixels, sem faixa
   percentual e sem alterar dimensões do card. Validação local aprovada;
-  publicação depende de CI e autorização da nova migration.
+  nova migration autorizada após CI verde; publicação aguarda o candidato final.
 
 - Publicado em Agendamentos: sidebar abre ao passar o mouse e recolhe ao sair, sem botão
   Ocultar; atualização dos dados no topo direito. Altura das torres ganha

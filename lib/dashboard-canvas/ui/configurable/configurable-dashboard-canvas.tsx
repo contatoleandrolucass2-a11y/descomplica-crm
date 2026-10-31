@@ -269,6 +269,7 @@ export function ConfigurableDashboardCanvas({
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
+  const [editorRenderedWidth, setEditorRenderedWidth] = useState<number | undefined>(undefined);
   const [focusBarHeight, setFocusBarHeight] = useState(false);
   const [editorMode, setEditorMode] = useState<"add" | "edit">("add");
   const [editorSaving, setEditorSaving] = useState(false);
@@ -628,6 +629,7 @@ export function ConfigurableDashboardCanvas({
     if (!card) return;
     if (layoutPolicy?.freeResize) card.layout.width = 320;
     setEditorMode("add");
+    setEditorRenderedWidth(undefined);
     setFocusBarHeight(false);
     setEditorCard(card);
   }
@@ -667,17 +669,8 @@ export function ConfigurableDashboardCanvas({
     setEditorSaveError("");
     setEditorMode("edit");
     setFocusBarHeight(barHeight);
-    setEditorCard(
-      layoutPolicy?.freeResize && !barHeight
-        ? {
-            ...card,
-            layout: {
-              ...card.layout,
-              width: card.layout.width ?? Math.round(renderedWidth ?? 320),
-            },
-          }
-        : card,
-    );
+    setEditorRenderedWidth(renderedWidth);
+    setEditorCard(card);
   }
 
   function loadProfile(profile: RemoteDashboardProfile) {
@@ -1170,6 +1163,7 @@ export function ConfigurableDashboardCanvas({
       {editorCard ? (
         <CardEditor
           card={editorCard}
+          renderedWidth={editorRenderedWidth}
           mode={editorMode}
           catalog={catalog}
           compatibility={compatibility}
@@ -1420,6 +1414,7 @@ export function ConfigurableDashboardCanvas({
 
 function CardEditor({
   card: initialCard,
+  renderedWidth,
   mode,
   catalog,
   compatibility,
@@ -1435,6 +1430,7 @@ function CardEditor({
   renderPreview,
 }: {
   card: DashboardCard;
+  renderedWidth?: number | undefined;
   mode: "add" | "edit";
   catalog: ConfigurableDashboardCatalog;
   compatibility?: ConfigurableDashboardCompatibility | undefined;
@@ -1450,7 +1446,11 @@ function CardEditor({
   renderPreview: (card: DashboardCard, size: DashboardCardSize) => ReactNode;
 }) {
   const [card, setCard] = useState(initialCard);
-  const [widthDraft, setWidthDraft] = useState(String(initialCard.layout.width ?? 320));
+  const [widthDraft, setWidthDraft] = useState(
+    String(initialCard.layout.width ?? Math.round(renderedWidth ?? 320)),
+  );
+  const [widthChanged, setWidthChanged] = useState(false);
+  const [heightChanged, setHeightChanged] = useState(false);
   const [heightDraft, setHeightDraft] = useState(String(initialCard.layout.height));
   const [barHeightDraft, setBarHeightDraft] = useState(
     initialCard.presentation?.barMaxHeight === undefined
@@ -1464,18 +1464,31 @@ function CardEditor({
   }, [focusBarHeight]);
 
   function cardWithDraftDimensions() {
-    if (!layoutPolicy?.freeResize) return card;
+    if (!layoutPolicy?.freeResize || (!widthChanged && !heightChanged)) return card;
+    const layout = constrainCardLayout(
+      card.type,
+      {
+        ...card.layout,
+        ...(widthChanged
+          ? {
+              width: widthDraft.trim()
+                ? Number(widthDraft)
+                : (card.layout.width ?? renderedWidth ?? 320),
+            }
+          : {}),
+        ...(heightChanged
+          ? { height: heightDraft.trim() ? Number(heightDraft) : card.layout.height }
+          : {}),
+      },
+      layoutPolicy,
+    );
     return {
       ...card,
-      layout: constrainCardLayout(
-        card.type,
-        {
-          ...card.layout,
-          width: widthDraft.trim() ? Number(widthDraft) : (card.layout.width ?? 320),
-          height: heightDraft.trim() ? Number(heightDraft) : card.layout.height,
-        },
-        layoutPolicy,
-      ),
+      layout: {
+        ...card.layout,
+        ...(widthChanged && layout.width !== undefined ? { width: layout.width } : {}),
+        ...(heightChanged ? { height: layout.height } : {}),
+      },
     };
   }
 
@@ -1483,7 +1496,7 @@ function CardEditor({
     if (!layoutPolicy?.freeResize) return;
     const next = cardWithDraftDimensions();
     setCard(next);
-    setWidthDraft(String(next.layout.width ?? 320));
+    setWidthDraft(String(next.layout.width ?? Math.round(renderedWidth ?? 320)));
     setHeightDraft(String(next.layout.height));
   }
   const types = compatibleTypes(card.metric, compatibility);
@@ -1681,6 +1694,7 @@ function CardEditor({
                 onChange={(event) => {
                   if (layoutPolicy?.freeResize) {
                     setWidthDraft(event.target.value);
+                    setWidthChanged(true);
                     return;
                   }
                   setCard({
@@ -1721,6 +1735,7 @@ function CardEditor({
                 onChange={(event) => {
                   if (layoutPolicy?.freeResize) {
                     setHeightDraft(event.target.value);
+                    setHeightChanged(true);
                     return;
                   }
                   setCard({

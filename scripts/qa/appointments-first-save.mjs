@@ -332,6 +332,60 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
 
   const fluidChart = { id: "appointments-monthly", title: "Agendamentos por mês" };
   const fluidDimensions = await read(fluidChart);
+  // The regular pencil editor must preserve an automatic width when only the cap changes.
+  const { profiles: fluidProfiles } = await (
+    await page.request.get(`${origin}/api/dashboard-profiles`)
+  ).json();
+  const fluidProfile = fluidProfiles.find((profile) =>
+    profile.cards.some((entry) => entry.id === fluidChart.id),
+  );
+  const fluidLayout = fluidProfile.cards.find((entry) => entry.id === fluidChart.id).layout;
+  assert.equal(fluidLayout.width, undefined, "Regression starts from a genuinely fluid saved card");
+  const beforeFullEditorCap = requests.length;
+  const fullFluidEditor = await open(fluidChart);
+  await fullFluidEditor.getByLabel("Altura máxima das torres (px)", { exact: true }).fill("96");
+  await fullFluidEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(fullFluidEditor).toHaveCount(0);
+  assert.equal(
+    requests.length,
+    beforeFullEditorCap + 1,
+    "Regular editor cap-only change sends one PATCH",
+  );
+  const savedFluidCard = requests.at(-1).cards.find((entry) => entry.id === fluidChart.id);
+  assert.equal(savedFluidCard.presentation.barMaxHeight, 96);
+  assert.deepEqual(
+    savedFluidCard.layout,
+    fluidLayout,
+    "Regular editor must not materialize an untouched fluid width or alter height/order",
+  );
+  for (const viewport of [
+    { width: 390, height: 844 },
+    { width: 1265, height: 578 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.reload();
+    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    assert.deepEqual(await read(fluidChart), fluidDimensions);
+    assert.deepEqual(await order(), orderBeforeCap);
+    const { profiles: reloadedProfiles } = await (
+      await page.request.get(`${origin}/api/dashboard-profiles`)
+    ).json();
+    const persistedFluidCard = reloadedProfiles
+      .find((profile) => profile.id === fluidProfile.id)
+      .cards.find((entry) => entry.id === fluidChart.id);
+    assert.deepEqual(persistedFluidCard.layout, fluidLayout);
+    assert.equal(persistedFluidCard.presentation.barMaxHeight, 96);
+    checkGeometry(await geometry(card(fluidChart)), 96);
+  }
+  await card(fluidChart).screenshot({
+    path: path.join(proofDirectory, "full-editor-fluid-after-refresh.png"),
+  });
+  evidence.firstSave.push({
+    scenario: "regular-editor-pixel-cap-preserves-fluid-layout-after-refresh-and-viewport",
+    cap: 96,
+    fluidLayout,
+    fluidDimensions,
+  });
   const beforeFluidSave = requests.length;
   await savePixelCap(fluidChart, "80");
   assert.equal(requests.length, beforeFluidSave + 1);

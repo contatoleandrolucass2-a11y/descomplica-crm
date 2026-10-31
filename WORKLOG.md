@@ -9,13 +9,17 @@
   preserva. Campo vazio editado retorna ao automático. Schema/normalização e
   migration compatível preservam documentos antigos, RPC409, CAS, RLS e ACL.
 - Node24/Windows: tipos aprovados; 75 testes focados aprovados. QA sintético
-  Chromium aprovou20cenários:1/24/240/10000px, alturas exatas sem metas, Save
+  Chromium aprovou 21 cenários:1/24/240/10000px, alturas exatas sem metas, Save
   único/refresh, legado, card fixo/fluido, retorno de rota, contextos novos e
   rotação390×844/844×390.503/409deliberados; sem JS inesperado/tráfego externo.
 - Revisão independente sem bloqueios após correção do campo intocado. Nova
   migration20261031184038 preparada;97migrations/2346assertions inventariadas.
-  SQL real/CI e autorização específica remota permanecem pendentes. Prints e
+  CI final pendente; migration autorizada pelo usuário após CI verde. Prints e
   prova sintética locais não comprovam Next/produção/navegadores do usuário.
+- Revisão adicional encontrou largura fluida fixada ao alterar só o cap pelo
+  editor completo. Agora o layout original é preservado e cada dimensão só
+  muda quando seu campo é editado. Regressão aprovada após Save único,
+  reload e mudança de viewport. Tipos aprovados novamente no código corrigido.
 
 ## 2026-10-31 — Sidebar automático e controle das torres
 
