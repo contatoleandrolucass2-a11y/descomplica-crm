@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-10-31 — Máximo das torres em pixels
+
+- Campo opcional barMaxHeight em pixels positivos, sem faixa percentual e sem
+  alterar dimensões/ordem do card. Torres, metas e rótulos usam escala comum;
+  limite maior que a área disponível respeita o espaço interno.
+- Edição explícita de altura substitui escala legada; salvar só título/cor a
+  preserva. Campo vazio editado retorna ao automático. Schema/normalização e
+  migration compatível preservam documentos antigos, RPC409, CAS, RLS e ACL.
+- Node24/Windows: tipos aprovados; 75 testes focados aprovados. QA sintético
+  Chromium aprovou20cenários:1/24/240/10000px, alturas exatas sem metas, Save
+  único/refresh, legado, card fixo/fluido, retorno de rota, contextos novos e
+  rotação390×844/844×390.503/409deliberados; sem JS inesperado/tráfego externo.
+- Revisão independente sem bloqueios após correção do campo intocado. Nova
+  migration20261031184038 preparada;97migrations/2346assertions inventariadas.
+  SQL real/CI e autorização específica remota permanecem pendentes. Prints e
+  prova sintética locais não comprovam Next/produção/navegadores do usuário.
+
 ## 2026-10-31 — Sidebar automático e controle das torres
 
 - Agendamentos inicia com ícones; mouse expande/recolhe automaticamente, sem

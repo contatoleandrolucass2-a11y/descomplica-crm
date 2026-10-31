@@ -46,6 +46,8 @@ export interface DashboardCardPresentation {
   textColor?: string;
   accentColor?: string;
   barScale?: number;
+  /** Maximum column height in pixels, independent of the card layout. */
+  barMaxHeight?: number;
 }
 
 export interface DashboardCard {

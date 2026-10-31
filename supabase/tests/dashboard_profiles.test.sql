@@ -1,6 +1,6 @@
 begin;
 
-select plan(46);
+select plan(59);
 
 select ok(
   (select relrowsecurity and relforcerowsecurity
@@ -378,7 +378,7 @@ select is(
         '{0,layout}', '{"order":0,"columnSpan":2,"height":168}'
       ),
       '{0,presentation}',
-      '{"fontScale":1.1,"textAlign":"center","verticalAlign":"center","textColor":"#d9e8f2","accentColor":"#55c4dc","barScale":1.2}'
+      '{"fontScale":1.1,"textAlign":"center","verticalAlign":"center","textColor":"#d9e8f2","accentColor":"#55c4dc","barScale":1.2,"barMaxHeight":240}'
     ),
     2::smallint
   )->>'version',
@@ -390,6 +390,18 @@ select is(
     #>>'{cards,0,presentation,barScale}',
   '1.2',
   'shared presentation is readable after the update'
+);
+select is(
+  public.get_dashboard_profile((select id from created_profiles where slot='shared'))
+    #>>'{cards,0,presentation,barMaxHeight}',
+  '240',
+  'the pixel cap survives the guarded update and profile reload'
+);
+select is(
+  public.get_dashboard_profile((select id from created_profiles where slot='shared'))
+    #>'{cards,0,layout}',
+  '{"order":0,"columnSpan":2,"height":168}'::jsonb,
+  'saving a pixel cap preserves the complete card layout'
 );
 select throws_ok(
   format(
@@ -534,6 +546,87 @@ select is(
   (select count(*) from public.dashboard_profiles where is_default),
   1::bigint,
   'the shared appointments scope has exactly one default'
+);
+
+-- Validate the pixel cap boundaries without changing the saved RPC versions.
+select lives_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-min'), '{0,presentation}',
+      '{"barMaxHeight":1}'::jsonb))$$,
+  'one pixel is valid and is not constrained by the old percentage range'
+);
+select lives_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-max'), '{0,presentation}',
+      '{"barMaxHeight":9007199254740991,"barScale":1.2}'::jsonb))$$,
+  'the technical safe integer maximum coexists with the legacy scale'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-invalid'), '{0,presentation}',
+      '{"barMaxHeight":0}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'the pixel cap rejects zero values'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-invalid'), '{0,presentation}',
+      '{"barMaxHeight":-1}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'the pixel cap rejects negative values'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-invalid'), '{0,presentation}',
+      '{"barMaxHeight":1.5}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'the pixel cap rejects fractional values'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-invalid'), '{0,presentation}',
+      '{"barMaxHeight":"240"}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'the pixel cap rejects string values'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-invalid'), '{0,presentation}',
+      '{"barMaxHeight":null}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'the pixel cap rejects null values'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-invalid'), '{0,presentation}',
+      '{"barMaxHeight":9007199254740992}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'the pixel cap rejects unsafe integer values'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.dashboard_cards('pixels-unknown'), '{0,presentation}',
+      '{"barMaxHeight":240,"unknown":1}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'adding the cap does not bypass the strict legacy presentation validation'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.dashboard',
+    jsonb_set(pg_temp.dashboard_cards('pixels-other', 'overview.current.month'),
+      '{0,presentation}', '{"barMaxHeight":240}'::jsonb))$$,
+  '22023', 'invalid_argument: invalid dashboard card presentation',
+  'other pages keep their existing presentation contract'
+);
+select ok(
+  (select not prosecdef and proowner = 'postgres'::regrole
+    and proconfig @> array['search_path=""']
+   from pg_proc where oid = 'private.assert_dashboard_profile_document(text,jsonb)'::regprocedure)
+  and not exists (
+    select 1 from (values ('anon'), ('authenticated'), ('service_role')) role_name(name)
+    where has_function_privilege(role_name.name,
+      'private.assert_dashboard_profile_document(text,jsonb)', 'EXECUTE')
+  ),
+  'the expanded validator retains invoker security, owner, safe search path and private ACL'
 );
 
 select * from finish();

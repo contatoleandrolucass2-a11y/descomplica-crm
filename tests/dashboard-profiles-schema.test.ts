@@ -124,6 +124,47 @@ describe("dashboard profile persistence schema", () => {
     ).toBe(false);
   });
 
+  it("round trips a positive safe integer pixel cap without constraining it to percentages", () => {
+    for (const barMaxHeight of [1, 24, 240, 10_000, Number.MAX_SAFE_INTEGER]) {
+      const presented = { ...card, presentation: { barScale: 1.2, barMaxHeight } };
+      const parsed = dashboardProfileCreateSchema.parse({
+        pageKey: "crm.stage.appointments",
+        name: "Torres em pixels",
+        cards: [presented],
+      });
+      expect(parsed.cards[0]).toEqual(presented);
+      expect(JSON.parse(JSON.stringify(parsed)).cards[0]).toEqual(presented);
+    }
+    for (const barMaxHeight of [
+      0,
+      -1,
+      1.5,
+      "240",
+      null,
+      Infinity,
+      NaN,
+      Number.MAX_SAFE_INTEGER + 1,
+    ]) {
+      expect(
+        dashboardProfileCreateSchema.safeParse({
+          pageKey: "crm.stage.appointments",
+          name: "Inválido",
+          cards: [{ ...card, presentation: { barMaxHeight } }],
+        }).success,
+      ).toBe(false);
+    }
+  });
+
+  it("keeps pixel caps scoped to appointments in page-aware profiles", () => {
+    expect(
+      dashboardProfileCreateSchema.safeParse({
+        pageKey: "crm.dashboard",
+        name: "Visão geral",
+        cards: [{ ...card, metric: "overview.goal.month", presentation: { barMaxHeight: 240 } }],
+      }).success,
+    ).toBe(false);
+  });
+
   it("accepts only the registered overview metrics on the overview page", () => {
     const overview = {
       ...card,

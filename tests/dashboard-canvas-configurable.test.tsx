@@ -246,6 +246,22 @@ describe("configurable dashboard canvas", () => {
     }
   });
 
+  it("carries the pixel cap into the expanded chart without replacing its saved layout", () => {
+    const customized: DashboardCard = {
+      ...card("visits", 0),
+      layout: { order: 3, columnSpan: 2, width: 497, height: 457 },
+      presentation: { barMaxHeight: 240, barScale: 0.7 },
+    };
+    const markup = renderToStaticMarkup(
+      <ExpandedDashboardCardContent card={customized} preservePresentation>
+        <p>Gráfico</p>
+      </ExpandedDashboardCardContent>,
+    );
+    expect(markup).toContain('data-dashboard-bar-max-height="240"');
+    expect(customized.layout).toEqual({ order: 3, columnSpan: 2, width: 497, height: 457 });
+    expect(customized.presentation).toEqual({ barMaxHeight: 240, barScale: 0.7 });
+  });
+
   it("keeps the legacy expanded rendering unchanged by default", () => {
     const markup = renderToStaticMarkup(
       <ExpandedDashboardCardContent

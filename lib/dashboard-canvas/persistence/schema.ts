@@ -132,6 +132,7 @@ const dashboardCardDocumentSchema = z
         textColor: dashboardColorSchema.optional(),
         accentColor: dashboardColorSchema.optional(),
         barScale: z.number().min(0.5).max(1.5).optional(),
+        barMaxHeight: z.number().int().positive().max(Number.MAX_SAFE_INTEGER).optional(),
       })
       .strict()
       .optional(),
@@ -196,6 +197,7 @@ export function dashboardCardsMatchPageLayout(
   return cards.every((card) => {
     const limits = layoutLimits[card.type];
     return (
+      card.presentation?.barMaxHeight === undefined &&
       card.layout.width === undefined &&
       card.layout.columnSpan >= limits.minColumnSpan &&
       card.layout.height >= limits.minHeight &&

@@ -177,6 +177,7 @@ function statusLabel(state: SaveState) {
 type PresentationStyle = CSSProperties & {
   "--dashboard-font-scale"?: number;
   "--dashboard-bar-scale"?: number;
+  "--dashboard-bar-max-height"?: string;
   "--analytics-ink"?: string;
   "--analytics-cyan-strong"?: string;
   "--dashboard-block-align"?: CSSProperties["justifyContent"];
@@ -190,6 +191,9 @@ function presentationStyle(presentation?: DashboardCardPresentation): Presentati
     textAlign,
     "--dashboard-font-scale": presentation?.fontScale ?? 1,
     "--dashboard-bar-scale": presentation?.barScale ?? 1,
+    ...(presentation?.barMaxHeight !== undefined
+      ? { "--dashboard-bar-max-height": `${presentation.barMaxHeight}px` }
+      : {}),
     "--dashboard-block-align":
       verticalAlign === "start" ? "flex-start" : verticalAlign === "end" ? "flex-end" : "center",
     "--dashboard-inline-align":
@@ -207,7 +211,10 @@ function DashboardCardContent({ card, children }: { card: DashboardCard; childre
       data-dashboard-vertical-align={card.presentation.verticalAlign ?? "center"}
       style={presentationStyle(card.presentation)}
     >
-      <div className={styles.presentationSurface}>
+      <div
+        className={styles.presentationSurface}
+        data-dashboard-bar-max-height={card.presentation.barMaxHeight}
+      >
         {card.presentation.content ? (
           <p className={styles.customContent}>{card.presentation.content}</p>
         ) : null}
@@ -1446,8 +1453,11 @@ function CardEditor({
   const [widthDraft, setWidthDraft] = useState(String(initialCard.layout.width ?? 320));
   const [heightDraft, setHeightDraft] = useState(String(initialCard.layout.height));
   const [barHeightDraft, setBarHeightDraft] = useState(
-    String(Math.round((initialCard.presentation?.barScale ?? 1) * 100)),
+    initialCard.presentation?.barMaxHeight === undefined
+      ? ""
+      : String(initialCard.presentation.barMaxHeight),
   );
+  const [barHeightChanged, setBarHeightChanged] = useState(false);
   const barHeightRef = useRef<HTMLInputElement>(null);
   useEffect(() => {
     if (focusBarHeight) barHeightRef.current?.focus();
@@ -1506,7 +1516,6 @@ function CardEditor({
   }
 
   function updatePresentation(patch: Partial<DashboardCardPresentation>) {
-    if (patch.barScale !== undefined) setBarHeightDraft(String(Math.round(patch.barScale * 100)));
     setCard({ ...card, presentation: { ...card.presentation, ...patch } });
   }
 
@@ -1561,17 +1570,19 @@ function CardEditor({
         onSubmit={(event) => {
           event.preventDefault();
           if (customDatesValid && !saving && !saveUnavailable) {
-            const percent = Number(barHeightDraft);
+            const pixels = Number(barHeightDraft);
             if (appointmentsBarHeight && card.type === "bars") {
-              if (
-                !barHeightDraft.trim() ||
-                !Number.isInteger(percent) ||
-                percent < 50 ||
-                percent > 150
-              )
-                return;
+              if (barHeightDraft.trim() && (!Number.isSafeInteger(pixels) || pixels < 1)) return;
               const base = focusBarHeight ? initialCard : cardWithDraftDimensions();
-              onSave({ ...base, presentation: { ...base.presentation, barScale: percent / 100 } });
+              if (!barHeightChanged) {
+                onSave(base);
+                return;
+              }
+              const presentation = { ...base.presentation };
+              delete presentation.barScale;
+              if (barHeightDraft.trim()) presentation.barMaxHeight = pixels;
+              else delete presentation.barMaxHeight;
+              onSave({ ...base, presentation });
             } else onSave(cardWithDraftDimensions());
           }
         }}
@@ -1582,44 +1593,38 @@ function CardEditor({
           <fieldset className={styles.barHeightControls}>
             <legend>Altura das torres</legend>
             <label>
-              Altura das torres (%)
+              Altura máxima das torres (px)
               <input
                 ref={barHeightRef}
                 disabled={saving}
                 type="number"
-                min={50}
-                max={150}
+                min={1}
                 step={1}
-                required
+                placeholder="Automática"
+                aria-describedby="dashboard-bar-height-help"
                 value={barHeightDraft}
                 onChange={(event) => {
                   const value = event.target.value;
+                  const pixels = Number(value);
+                  const valid = !value.trim() || (Number.isSafeInteger(pixels) && pixels >= 1);
+                  event.currentTarget.setCustomValidity(
+                    valid ? "" : "Informe uma altura inteira em pixels, maior que zero.",
+                  );
                   setBarHeightDraft(value);
-                  const percent = Number(value);
-                  if (value.trim() && percent >= 50 && percent <= 150)
-                    updatePresentation({ barScale: percent / 100 });
+                  setBarHeightChanged(true);
+                  if (!valid) return;
+                  const presentation = { ...card.presentation };
+                  delete presentation.barScale;
+                  if (value.trim()) presentation.barMaxHeight = pixels;
+                  else delete presentation.barMaxHeight;
+                  setCard({ ...card, presentation });
                 }}
               />
             </label>
-            <label>
-              Ajustar altura das torres
-              <input
-                disabled={saving}
-                type="range"
-                min={50}
-                max={150}
-                step={1}
-                value={Math.round((card.presentation?.barScale ?? 1) * 100)}
-                onChange={(event) => {
-                  setBarHeightDraft(event.target.value);
-                  updatePresentation({ barScale: Number(event.target.value) / 100 });
-                }}
-              />
-            </label>
-            <p>
-              De 50% a 150%. Reduza para baixar as torres, sem alterar o tamanho do card ou os
-              valores. Barras e metas mantêm a mesma escala. A prévia é proporcional; a altura final
-              acompanha o card.
+            <p id="dashboard-bar-height-help">
+              Limite a maior torre em pixels, sem alterar o tamanho do card ou os valores. Barras e
+              metas mantêm a mesma escala e se ajustam ao espaço disponível. Deixe vazio para altura
+              automática. A prévia usa o espaço abaixo; cards menores podem reduzir as torres.
             </p>
             <div
               className={styles.barHeightPreview}

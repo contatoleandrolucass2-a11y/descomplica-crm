@@ -85,6 +85,10 @@ function normalizePresentation(value: unknown): DashboardCardPresentation | unde
   }
   const barScale = finiteNumber(value.barScale);
   if (barScale !== undefined) presentation.barScale = Math.min(Math.max(barScale, 0.5), 1.5);
+  const barMaxHeight = finiteNumber(value.barMaxHeight);
+  if (barMaxHeight !== undefined && Number.isSafeInteger(barMaxHeight) && barMaxHeight > 0) {
+    presentation.barMaxHeight = barMaxHeight;
+  }
   return Object.keys(presentation).length > 0 ? presentation : undefined;
 }
 

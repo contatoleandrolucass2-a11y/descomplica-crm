@@ -189,6 +189,40 @@ describe("dashboard canvas cards", () => {
     expect(serializeCanvasSnapshot(migrated)).toContain('"schemaVersion":2');
   });
 
+  it("preserves pixel caps and legacy scales independently during normalization", () => {
+    for (const barMaxHeight of [1, 24, 240, 10_000, Number.MAX_SAFE_INTEGER]) {
+      const initial = card("pixels", 0, 6, {
+        presentation: { barScale: 1.2, barMaxHeight },
+      });
+      const normalized = normalizeDashboardCard(initial, 0);
+      expect(normalized?.presentation).toMatchObject({ barScale: 1.2, barMaxHeight });
+      expect(normalized?.layout).toEqual(initial.layout);
+      const migrated = migrateCanvasSchema({ schemaVersion: 2, cards: [initial] });
+      expect(migrated.cards[0]?.presentation).toMatchObject({ barScale: 1.2, barMaxHeight });
+      expect(JSON.parse(serializeCanvasSnapshot(migrated)).cards[0].presentation.barMaxHeight).toBe(
+        barMaxHeight,
+      );
+    }
+    for (const barMaxHeight of [0, -1, 1.5, Infinity, NaN, Number.MAX_SAFE_INTEGER + 1]) {
+      const normalized = normalizeDashboardCard(
+        card("invalid", 0, 6, {
+          presentation: { barScale: 1.2, barMaxHeight },
+        }),
+        0,
+      );
+      expect(normalized?.presentation?.barMaxHeight).toBeUndefined();
+      expect(normalized?.presentation?.barScale).toBe(1.2);
+    }
+    expect(
+      normalizeDashboardCard(
+        card("legacy", 0, 6, {
+          presentation: { barScale: 1.2 },
+        }),
+        0,
+      )?.presentation?.barMaxHeight,
+    ).toBeUndefined();
+  });
+
   it("rejects unknown future schema versions", () => {
     expect(() => migrateCanvasSchema({ schemaVersion: 99, cards: [] })).toThrow(
       "Unsupported dashboard schemaVersion: 99.",

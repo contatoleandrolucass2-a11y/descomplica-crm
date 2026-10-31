@@ -647,7 +647,7 @@
 .barHeightControls {
   grid-column: 1 / -1;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: minmax(0, 1fr);
   gap: 0.75rem;
   min-width: 0;
   margin: 0;
@@ -673,12 +673,6 @@
   border-radius: 0.5rem;
   pointer-events: none;
 }
-@media (max-width: 36rem) {
-  .barHeightControls {
-    grid-template-columns: 1fr;
-  }
-}
-
 .barHeightPreview > .cardContent,
 .barHeightPreview .presentationSurface {
   height: 100%;
