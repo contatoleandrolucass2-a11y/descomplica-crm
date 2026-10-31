@@ -136,6 +136,29 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     scaledBarHeights,
   });
 
+  const fluidChart = { id: "appointments-monthly", title: "Agendamentos por mês" };
+  const fluidDimensions = await read(fluidChart);
+  await card(fluidChart)
+    .getByRole("button", { name: `Ajustar altura das torres de ${fluidChart.title}`, exact: true })
+    .press("Enter");
+  const fluidEditor = page.getByRole("dialog", { name: "Altura das torres", exact: true });
+  await expect(fluidEditor.getByLabel("Largura do card", { exact: false })).toHaveCount(0);
+  await fluidEditor.getByLabel("Altura das torres (%)", { exact: true }).fill("70");
+  await fluidEditor.getByRole("button", { name: "Salvar", exact: true }).click();
+  await expect(fluidEditor).toHaveCount(0);
+  assert.equal(
+    requests.at(-1).cards.find((entry) => entry.id === fluidChart.id).layout.width,
+    undefined,
+  );
+  await page.reload();
+  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  await expect.poll(() => read(fluidChart)).toEqual(fluidDimensions);
+  evidence.firstSave.push({
+    scenario: "bar-height-preserves-fluid-width",
+    percent: 70,
+    fluidDimensions,
+  });
+
   // An autosave from a corner/keyboard resize can still be in flight when the editor opens.
   const beforeQueue = requests.length;
   holdNextResponse = true;
