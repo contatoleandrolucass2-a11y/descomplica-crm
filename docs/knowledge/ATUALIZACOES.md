@@ -1,5 +1,11 @@
 # Aprendizados e atualizacoes
 
+## 2026-10-30: rotação móvel simulada aprovada
+
+- 390×844 → 844×390 → 390×844, com refresh em ambas: 28 itens preservaram
+  ordem e tamanhos salvos, sem estouro horizontal; geometria vertical restaurada.
+  Evidências e limites no histórico AGENDAMENTOS de 30/10/2026.
+
 ## 2026-10-30: Chrome para celular simulado aprovado
 
 - Refresh móvel recebeu os 28 itens na ordem e dimensões salvas no Chrome.

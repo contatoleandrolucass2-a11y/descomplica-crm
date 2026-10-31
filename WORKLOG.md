@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-10-30 — Rotação de celular simulada preserva layout
+
+- Sequência 390×844 → 844×390 → 390×844, com refresh em horizontal e vertical:
+  os 28 IDs, ordem e tamanhos configurados permaneceram idênticos.
+- Todos os articles dentro da largura útil nas duas orientações; sem estouro
+  horizontal. Ao retornar e atualizar em vertical, geometria integral restaurada.
+- Visitas 303×337 px/2º e semanal 343×541 px/8º preservados. Prints locais
+  após refresh e JSON ignorados. Override restaurado; sem sensor/aparelho físico,
+  mudança de layout salvo, código ou deploy da aplicação.
+
 ## 2026-10-30 — Edição no Chrome recebida no celular simulado
 
 - Canto e alça no Chrome: Visitas 269×313 px/3º para 303×337 px/2º;

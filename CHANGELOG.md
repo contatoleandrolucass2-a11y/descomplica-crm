@@ -1,5 +1,9 @@
 # Changelog
 
+- Valida rotação simulada vertical/horizontal/vertical em Agendamentos com
+  refresh nas duas orientações: 28 itens preservados, ajuste à largura e
+  geometria vertical restaurada, com prints e sem mudança da aplicação.
+
 - Confirma recepção no celular simulado dos tamanhos e posições alterados no
   Chrome por canto e arraste, após refresh: 28 itens idênticos, larguras
   ajustadas à tela e alturas preservadas. Registro de validação com prints.

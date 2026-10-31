@@ -1,5 +1,13 @@
 # Histórico de validação de Agendamentos
 
+## 2026-10-30: rotação vertical/horizontal/vertical com persistência
+
+- Na aba integrada autenticada de Agendamentos, viewport 390×844, captura de baseline dos 28 IDs em ordem, width/height configurados e geometria renderizada. Alteração para 844×390, leitura do layout, refresh horizontal, retorno para 390×844 e refresh vertical. Configurações dos 28 itens idênticas em todas as etapas, sem abrir editor ou salvar layout novamente.
+- Nas duas orientações todos os articles ficaram dentro da largura útil; scrollWidth/clientWidth iguais: 829 px em horizontal e 375 px em vertical. Visitas permanece 303×337 px/2º; semanal, 343×541 px/8º. Em horizontal exibem larguras completas 303/343 px; vertical limita ambos a 292,667 px, preservando alturas 337/541 px. Ao concluir retorno e refresh, geometria renderizada integral dos 28 itens exatamente igual ao baseline vertical.
+- Inspeção visual de cards e gráfico semanal em ambas as orientações: textos, barras, valores, rótulos e legenda legíveis, com reorganização responsiva. Prints nativos locais ignorados em test-results/appointments-first-save/rotacao-horizontal-apos-refresh.jpg, rotacao-horizontal-grafico.jpg, rotacao-vertical-card-apos-refresh.jpg e rotacao-vertical-grafico-apos-refresh.jpg; medições em rotacao-resultados.json. Sem rankings/tabela ou anexos privados exportados ao GitHub/Obsidian.
+- Limites: simulação por troca de largura/altura do viewport, sem sensor de orientação, aparelho físico, touchscreen ou Safari/iOS. Capturas recortadas podem alterar enquadramento/largura renderizada da captura; comparações de geometria foram feitas sem captura entre baseline e leitura final. Override restaurado. Handle antigo indisponível, recuperado por reset da ferramenta e mesma aba autenticada; sem contornar login.
+- Fontes às 2026-10-31T02:28:08Z (30/10/2026 23:28 BRT): fetch confirmou HEAD/origin main 512dde51dd0eb55c8e8daf2de3c5871db32f5cf5 e árvore limpa. Health público https://crm.descomplicapro.com.br/api/health respondeu status ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 reutilizada para o mesmo runtime; somente documentação segue CI própria. Nenhum código, schema, permissão, filtro, dado comercial ou layout salvo alterado. Sem novo deploy.
+
 ## 2026-10-30: edição no Chrome recebida e ajustada no celular simulado
 
 - Teste inverso autorizado: no Chrome existente, arraste pelo canto de Visitas alterou 269×313 para 303×337 px; arraste pela alça moveu de 3º para 2º. Semanal passou de 273×515 para 343×541 px pelo canto e de 9º para 8º pela alça. Sem editor. Salvo automaticamente confirmado antes de atualizar o destino.
