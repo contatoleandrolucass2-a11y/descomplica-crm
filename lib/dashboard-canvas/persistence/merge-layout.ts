@@ -14,8 +14,7 @@ function canonical(value: unknown): string {
 }
 
 function content(card: DashboardCard): string {
-  const { layout: _layout, ...rest } = card;
-  return canonical(rest);
+  return canonical({ ...card, layout: undefined });
 }
 
 function mergeDimension(
