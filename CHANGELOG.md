@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma no Chrome atualizado o último layout móvel de Agendamentos:
+  28 itens idênticos após carregar o perfil salvo, com prints e sem mudança
+  da aplicação ou salvamento adicional no destino.
+
 - Confirma tamanho e ordem após editar card e gráfico no celular simulado
   vertical, girar para horizontal e atualizar: 28 itens preservados, dentro
   da largura útil, com print após refresh. Sem mudança da aplicação.
