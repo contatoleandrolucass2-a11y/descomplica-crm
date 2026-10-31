@@ -1,5 +1,21 @@
 # Baseline e QA visual — fundação de paridade
 
+## Sidebar automatico de Agendamentos em 31/10/2026
+
+CI `41201061134`, captura `d25b38d38b854adfcf4eb592d3876643b1d828ff`,
+arvore `999c14d6770bbacf5fa750deff40c0cacabafbad` identica ao head `00d4f84f`.
+Somente nove referencias de Agendamentos foram revisadas e promovidas pelo
+helper transacional. As outras 233 imagens e sua proveniencia foram preservadas.
+
+A captura registra `worktreeDirtyAtCapture: true`; o fingerprint
+`675abadbd6123f5ccb157215179df798d9dcaf278151676de05984ee1a2a6232`
+foi reproduzido exatamente com diff rastreado vazio e os 19 outputs de
+`output/playwright/connected-systems/` presentes no mesmo artefato. A raiz
+conserva a captura original das imagens preservadas; `reviewedUpdates` registra
+a origem propria das nove atualizacoes, flag original, arquivos, bytes e hashes.
+Essa prova e exclusiva deste artefato e nao concede excecao para capturas futuras.
+Limites de pixels e testes permanecem intactos. Nova CI integral obrigatoria.
+
 Data: 2026-08-09. Branch: `codex/reference-parity-foundation`.
 
 ## Automação do Simulador CAIXA em 27/10/2026
