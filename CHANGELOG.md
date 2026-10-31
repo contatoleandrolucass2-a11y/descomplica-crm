@@ -1,7 +1,7 @@
 # Changelog
 
 - Valida a correção SQL de persistência de Agendamentos: CI integral aprovada,
-  conflito HTTP em 13 ms e 36 verificações reais parciais registradas. Aplicação
+  conflito HTTP em 13 ms e 40 verificações reais parciais registradas. Aplicação
   da migration e aceite completo aguardam autorização e login integrado.
 
 - Corrige conflito de versão de Agendamentos que fazia o PostgREST repetir

@@ -24,10 +24,12 @@
   reabertura das abas, edições móveis nas duas orientações e sincronização
   bidirecional preservaram os 28 itens. Chrome passou após logout/login.
   Integrado aguarda novo login; conflito entre versões aguarda migration.
-- 36 verificações reais aprovadas; seis geometrias móveis conferidas contra
+- 40 verificações reais aprovadas; oito geometrias móveis conferidas contra
   clientWidth, sem estouro. Simulação com ponteiro, sem aparelho físico.
   Encerramento de processos não executado; reabertura validada por abas.
   Aceite completo continua aberto, sem nova publicação ou aplicação remota.
+- Chrome autenticado também passou em 390×844 e 844×390 após refresh, com
+  prints do card e gráfico; viewport padrão restaurado. Login integrado pendente.
 
 ## 2026-10-31 — Corrige persistência entre sessões de Agendamentos
 
