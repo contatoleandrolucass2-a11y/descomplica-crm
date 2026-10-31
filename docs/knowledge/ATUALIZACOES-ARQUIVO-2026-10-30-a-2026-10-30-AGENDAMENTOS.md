@@ -1,5 +1,13 @@
 # Histórico de validação de Agendamentos
 
+## 2026-10-30: edição horizontal preservada após retorno e refresh vertical
+
+- Na aba integrada autenticada, viewport temporário 844×390, entrada por ponteiro: canto de Visitas alterou 303×337 para 337×359 px; canto de semanal, 343×541 para 379×561 px. Arrastes pelas alças moveram Visitas de 2º para 3º e semanal de 8º para 5º. O primeiro arraste do card não mudou a ordem; novo arraste com inspeção confirmou a mudança. Não abriu editor nem exigiu confirmação de dimensões.
+- Salvo automaticamente confirmado em horizontal antes do retorno para 390×844 e reload. Após carregar, os 28 IDs em ordem e width/height ficaram integralmente idênticos ao snapshot horizontal salvo. Visitas 337×359 px/3º e semanal 379×561 px/5º preservados, sem salvamento adicional na vertical.
+- Ajuste vertical medido antes das capturas: ambos limitados a 292,667 px de largura renderizada, alturas 359 e 561 px preservadas. Todos os articles dentro da área útil de 375 px, com scrollWidth/clientWidth iguais. Inspeção visual confirmou card legível e gráfico com barras, valores, rótulos e legenda dentro da coluna.
+- Evidências locais ignoradas em test-results/appointments-first-save/horizontal-edicao-salva.json, horizontal-para-vertical-resultados.json, horizontal-para-vertical-card-apos-refresh.jpg e horizontal-para-vertical-grafico-apos-refresh.jpg. Sem anexos privados, rankings, tabela ou credenciais exportados ao GitHub/Obsidian. Layout solicitado mantido e override restaurado. Simulação de viewport com ponteiro, sem aparelho físico, sensor de orientação, touchscreen ou Safari/iOS. Handle anterior indisponível, resolvido por reset da ferramenta e recuperação da mesma aba autenticada.
+- Fontes às 2026-10-31T02:34:12Z (30/10/2026 23:34 BRT): fetch confirmou HEAD/origin main c24f583fc17bd5619bd19d1498dd287df1fe4b81 e árvore limpa. Health público https://crm.descomplicapro.com.br/api/health com status ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 reutilizada para o mesmo runtime. Registro somente documental sujeito à CI própria; sem código, schema, permissões, dados comerciais ou novo deploy.
+
 ## 2026-10-30: rotação vertical/horizontal/vertical com persistência
 
 - Na aba integrada autenticada de Agendamentos, viewport 390×844, captura de baseline dos 28 IDs em ordem, width/height configurados e geometria renderizada. Alteração para 844×390, leitura do layout, refresh horizontal, retorno para 390×844 e refresh vertical. Configurações dos 28 itens idênticas em todas as etapas, sem abrir editor ou salvar layout novamente.

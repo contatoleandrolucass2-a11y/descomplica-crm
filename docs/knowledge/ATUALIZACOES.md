@@ -1,5 +1,9 @@
 # Aprendizados e atualizacoes
 
+- Edição horizontal e refresh vertical aprovados: 28 itens preservados.
+  Visitas 337×359 px/3º; semanal 379×561 px/5º. Evidência no histórico
+  AGENDAMENTOS de 30/10/2026, seção edição horizontal.
+
 ## 2026-10-30: rotação móvel simulada aprovada
 
 - 390×844 → 844×390 → 390×844, com refresh em ambas: 28 itens preservaram

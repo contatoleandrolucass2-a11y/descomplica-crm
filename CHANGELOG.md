@@ -1,5 +1,9 @@
 # Changelog
 
+- Confirma tamanho e ordem após redimensionar e arrastar card e gráfico em
+  celular simulado horizontal, voltar à vertical e atualizar. Os 28 itens
+  preservados e ajustados à largura, com prints; sem mudança da aplicação.
+
 - Valida rotação simulada vertical/horizontal/vertical em Agendamentos com
   refresh nas duas orientações: 28 itens preservados, ajuste à largura e
   geometria vertical restaurada, com prints e sem mudança da aplicação.
