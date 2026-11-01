@@ -72,7 +72,7 @@ const accountLinks = [
 ];
 export const archiveRootNavigationContract = [
   { name: "Dashboard", tag: "BUTTON", href: null },
-  { name: "Lead", tag: "BUTTON", href: null },
+  { name: "LEAD+", tag: "A", href: "/app/leads" },
   { name: "Meta Ads", tag: "A", href: "/app/meta-ads" },
   { name: "Simulação", tag: "A", href: "/app/simulacao" },
   { name: "Ranking", tag: "A", href: "/app/ranking" },
@@ -126,7 +126,10 @@ async function assertRootAccessibleNames({
 }) {
   await expect(management).toHaveAccessibleName("Gestão");
   await expect(dashboard).toHaveAccessibleName("Dashboard");
-  await expect(leads).toHaveAccessibleName("Lead");
+  await expect(leads).toHaveAccessibleName("LEAD+");
+  await expect(leads).toHaveAttribute("href", "/app/leads");
+  await expect(leads).not.toHaveAttribute("aria-controls", /.+/u);
+  await expect(leads).not.toHaveAttribute("aria-expanded", /.+/u);
   await expect(metaAds).toHaveAccessibleName("Meta Ads");
   await expect(simulation).toHaveAccessibleName("Simulação");
   await expect(useful).toHaveAccessibleName("Links Úteis");
@@ -1152,9 +1155,7 @@ export async function checkArchiveNavigation(
           const dashboard = nav.locator(
             'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-dashboard"]',
           );
-          const leads = nav.locator(
-            'button[data-navigation-root-control][aria-controls="authorized-navigation-crm-leads"]',
-          );
+          const leads = nav.locator('a[data-navigation-root-control][href="/app/leads"]');
           const metaAds = nav.locator('a[data-navigation-root-control][href="/app/meta-ads"]');
           const simulation = nav.locator('a[data-navigation-root-control][href="/app/simulacao"]');
           const ranking = nav.locator('a[data-navigation-root-control][href="/app/ranking"]');
@@ -1313,7 +1314,7 @@ export async function checkArchiveNavigation(
                   "authorized-navigation-crm-dashboard",
                 );
                 await page.keyboard.press("Tab");
-                await assertNavigationControlFocused(leads, "authorized-navigation-crm-leads");
+                await assertNavigationLinkFocused(leads, "/app/leads");
                 await page.keyboard.press("Tab");
                 await assertNavigationLinkFocused(metaAds, "/app/meta-ads");
                 await page.keyboard.press("Tab");
@@ -1329,7 +1330,7 @@ export async function checkArchiveNavigation(
                   "authorized-navigation-crm-dashboard",
                 );
                 await page.keyboard.press("Tab");
-                await assertNavigationControlFocused(leads, "authorized-navigation-crm-leads");
+                await assertNavigationLinkFocused(leads, "/app/leads");
                 await page.keyboard.press("Tab");
                 await assertNavigationLinkFocused(metaAds, "/app/meta-ads");
                 await page.keyboard.press("Tab");
@@ -1463,7 +1464,7 @@ export async function checkArchiveNavigation(
             await page.keyboard.press("Tab");
             await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
             await page.keyboard.press("Tab");
-            await assertNavigationControlFocused(leads, "authorized-navigation-crm-leads");
+            await assertNavigationLinkFocused(leads, "/app/leads");
             await page.keyboard.press("Tab");
             await assertNavigationLinkFocused(metaAds, "/app/meta-ads");
             await page.keyboard.press("Tab");
@@ -1473,7 +1474,7 @@ export async function checkArchiveNavigation(
             await page.keyboard.press("Tab");
             await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
             await page.keyboard.press("Tab");
-            await assertNavigationControlFocused(leads, "authorized-navigation-crm-leads");
+            await assertNavigationLinkFocused(leads, "/app/leads");
             await page.keyboard.press("Tab");
             await assertNavigationLinkFocused(metaAds, "/app/meta-ads");
             await page.keyboard.press("Tab");
@@ -1627,7 +1628,7 @@ export async function checkArchiveNavigation(
           await page.keyboard.press("Tab");
           await assertNavigationControlFocused(dashboard, "authorized-navigation-crm-dashboard");
           await page.keyboard.press("Tab");
-          await assertNavigationControlFocused(leads, "authorized-navigation-crm-leads");
+          await assertNavigationLinkFocused(leads, "/app/leads");
           await page.keyboard.press("Tab");
           await assertNavigationLinkFocused(metaAds, "/app/meta-ads");
           await page.keyboard.press("Tab");
