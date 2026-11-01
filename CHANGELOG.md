@@ -3931,3 +3931,10 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Publica os cards pelo PR #424 no SHA `742ac0b1`, após CI completa de main,
   prova da imagem imutável e promoção protegida. Health e versão confirmados
   em 29/10/2026 às 23:35 BRT.
+
+## Candidato — DESCOMPLICA LEAD integrado
+
+- Substitui as páginas da área Lead pelo workspace DESCOMPLICA LEAD, preservando o shell e a sessão do CRM.
+- Isola dados operacionais, vínculos e permissões no backend; remove a prévia de demonstração da integração.
+- Prepara webhook Facebook e processamento supervisionado sem substituir a credencial de métricas nem a integração do C2S.
+- Estado: candidato em validação, ainda não publicado.

@@ -95,4 +95,28 @@ if (process.env.AUTH_SESSION_COOKIE_SECRET) {
 }
 validateSecretFile(process.env.AUTH_SESSION_COOKIE_SECRET_FILE ?? "");
 
+// LEAD+ operational storage must remain separate from the CRM authentication project.
+if (process.env.LEAD_DB_URL) {
+  if (process.env.LEAD_DB_PROJECT_REF !== "xwtasgjnkctyxokxjykk")
+    fail("LEAD_DB_PROJECT_REF must identify the isolated LEAD+ project");
+  try {
+    const connection = new URL(process.env.LEAD_DB_URL);
+    const reference = process.env.LEAD_DB_PROJECT_REF;
+    if (
+      !["postgres:", "postgresql:"].includes(connection.protocol) ||
+      !(
+        connection.hostname === `db.${reference}.supabase.co` ||
+        (connection.hostname.endsWith(".pooler.supabase.com") &&
+          decodeURIComponent(connection.username).endsWith("." + reference))
+      )
+    ) {
+      fail("LEAD_DB_URL does not match the isolated LEAD+ project");
+    }
+    if (!process.env.LEAD_DB_CA_FILE || !statSync(process.env.LEAD_DB_CA_FILE).isFile())
+      fail("LEAD_DB_CA_FILE must reference the packaged CA");
+  } catch {
+    fail("LEAD+ database configuration is invalid");
+  }
+}
+
 process.stdout.write("Runtime configuration valid; secret values not printed.\n");

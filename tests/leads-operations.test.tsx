@@ -7,6 +7,16 @@ const mocks = vi.hoisted(() => ({
 }));
 
 vi.mock("@/lib/authorization/guards", () => ({ requirePermission: mocks.requirePermission }));
+vi.mock("@/lib/security/route-auth", () => ({
+  authorizeRoute: async (permission: string) => {
+    try {
+      await mocks.requirePermission(permission);
+      return { ok: true, context: {} };
+    } catch {
+      return { ok: false, response: Response.json({ error: "forbidden" }, { status: 403 }) };
+    }
+  },
+}));
 vi.mock("@/lib/crm/leads/operations-data", () => ({ exportLeads: mocks.exportLeads }));
 
 import {
@@ -215,48 +225,25 @@ describe("Lead operational workspaces", () => {
     expect(markup).toContain('aria-label="Paginação da auditoria"');
   });
 
-  it("requires export permission before reading lead data", async () => {
-    await exportLeadsRoute(
+  it("retires the authorized old export without reading lead data", async () => {
+    const response = await exportLeadsRoute(
       new Request(`https://crm.example.test/app/leads/exportar?scope=${organizationId}`),
     );
 
     expect(mocks.requirePermission).toHaveBeenCalledExactlyOnceWith("crm.leads.export");
-    expect(mocks.exportLeads).toHaveBeenCalledExactlyOnceWith(
-      organizationId,
-      { includeArchived: false },
-      5000,
-    );
+    expect(mocks.exportLeads).not.toHaveBeenCalled();
+    expect(response.status).toBe(410);
+    expect(response.headers.get("cache-control")).toContain("no-store");
+    expect(response.headers.get("content-disposition")).toBeNull();
+    expect(await response.json()).toMatchObject({ error: "legacy_lead_export_retired" });
   });
 
-  it.each(["=1+1", "+SUM(1,1)", "-2+3", "@cmd"])(
-    "neutralizes CSV formula injection for %s",
-    async (dangerousName) => {
-      mocks.exportLeads.mockResolvedValue({
-        rows: [
-          {
-            id: "50000000-0000-4000-8000-000000000001",
-            name: dangerousName,
-            email: null,
-            phone: null,
-            status: "open",
-            priority: "normal",
-            stage: "Novo",
-            source: null,
-            createdAt: "2026-10-24T00:00:00.000Z",
-          },
-        ],
-        limit: 5000,
-        truncated: false,
-      });
-
-      const response = await exportLeadsRoute(
-        new Request(`https://crm.example.test/app/leads/exportar?scope=${organizationId}`),
-      );
-      const csv = await response.text();
-
-      expect(response.status).toBe(200);
-      expect(csv).toContain(`"'${dangerousName}"`);
-      expect(csv).not.toContain(`,"${dangerousName}"`);
-    },
-  );
+  it("preserves permission denial for the retired export without reading data", async () => {
+    mocks.requirePermission.mockRejectedValueOnce(new Error("FORBIDDEN"));
+    const response = await exportLeadsRoute(
+      new Request(`https://crm.example.test/app/leads/exportar?scope=${organizationId}`),
+    );
+    expect(response.status).toBe(403);
+    expect(mocks.exportLeads).not.toHaveBeenCalled();
+  });
 });

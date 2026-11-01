@@ -10392,3 +10392,11 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
   e banco isolado; não houve edição de perfil real em produção para o smoke.
   Evidência completa em `docs/knowledge/ATUALIZACOES.md`. Este registro final
   é exclusivamente documental e não exige reinício da aplicação.
+
+## DESCOMPLICA LEAD: substituição integral da área Lead
+
+Candidato isolado a partir de 44707e359c99eabfafa2f37489062d9d87540522. As nove páginas Lead passam a montar o workspace React adaptado ao Next.js, com estilos em Shadow DOM, sessão do hospedeiro e sem seletor de demonstração. O backend exige vínculo explícito no banco operacional separado e intersecta permissões com o catálogo de páginas do CRM. O destino operacional é validado antes de abrir o pool; não há fallback para o banco de autenticação.
+
+Foram preparados a rota assinada /webhooks/meta e o worker supervisionado na mesma imagem, com configuração separada da credencial de métricas Meta Ads. A substituição não altera inscrições do C2S. Os gates do candidato e a validação visual autenticada ainda estão em andamento; esta nota não comprova publicação ou entrega real da Meta.
+
+Validação local do candidato Lead+: build Next e tipos aprovados, lint sem erros, formatação aprovada, catálogo de 49 páginas e inventário de 91 rotas conferidos, Gitleaks sem achados. A suíte completa executada passou com 4577 testes Vitest e 727 testes Node, preservados os skips já previstos para ambiente/CI. Testes adicionais focados verificam guards granulares, aposentadoria das ações legadas e supervisão de worker. A montagem standalone local importou o runtime do worker sem abrir conexão ao banco. Falta CI do SHA final, prova da imagem e validação visual autenticada; não foi promovida imagem à VPS.
