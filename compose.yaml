@@ -76,6 +76,12 @@ services:
     tmpfs:
       - /tmp:size=64m,mode=1777
     volumes:
+      - type: bind
+        source: /etc/descomplica-crm/secrets/lead-plus-runtime.json.prepared
+        target: /run/secrets/lead-plus-runtime.json
+        read_only: true
+        bind:
+          create_host_path: false
       - next-cache:/app/.next/cache
       - type: bind
         source: /var/lib/descomplica-salesforce-inventory

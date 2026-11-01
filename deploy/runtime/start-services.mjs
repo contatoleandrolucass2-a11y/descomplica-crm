@@ -1,4 +1,44 @@
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
+import { existsSync, readFileSync, statSync } from "node:fs";
+const configurationFile = "/run/secrets/lead-plus-runtime.json";
+if (existsSync(configurationFile)) {
+  const metadata = statSync(configurationFile);
+  if (!metadata.isFile() || metadata.size > 32768)
+    throw new Error("Invalid LEAD+ runtime configuration file.");
+  let configuration;
+  try {
+    configuration = JSON.parse(readFileSync(configurationFile, "utf8"));
+  } catch {
+    throw new Error("Invalid LEAD+ runtime configuration JSON.");
+  }
+  if (!configuration || typeof configuration !== "object" || Array.isArray(configuration)) {
+    throw new Error("Invalid LEAD+ runtime configuration shape.");
+  }
+  const allowed = new Set([
+    "LEAD_DB_URL",
+    "LEAD_DB_PROJECT_REF",
+    "LEAD_DB_CA_FILE",
+    "META_APP_ID",
+    "META_APP_SECRET",
+    "META_VERIFY_TOKEN",
+    "META_PAGE_ACCESS_TOKEN",
+    "META_PAGE_IDS",
+    "META_GRAPH_VERSION",
+    "META_CALLBACK_URL",
+    "META_REQUIRE_FORM_ROUTE",
+    "META_FORM_ROUTES_JSON",
+  ]);
+  for (const [key, value] of Object.entries(configuration)) {
+    if (!allowed.has(key) || typeof value !== "string")
+      throw new Error("Unexpected LEAD+ runtime configuration key.");
+    process.env[key] = value;
+  }
+  const validation = spawnSync(process.execPath, ["/app/validate-runtime-env.mjs"], {
+    stdio: "inherit",
+    env: process.env,
+  });
+  if (validation.status !== 0) process.exit(1);
+}
 const children = new Set();
 let stopping = false;
 let restartTimer;

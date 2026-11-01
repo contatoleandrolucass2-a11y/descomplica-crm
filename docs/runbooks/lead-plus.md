@@ -89,3 +89,7 @@ O recebimento `leadgen` não é prova de captura de conversas WhatsApp. A ativa�
 7. Conferir versão servida, sessão real e fluxos afetados após publicar. Para Facebook, registrar uma entrega controlada autorizada, persistência no projeto operacional, atribuição a master permitido, notificação e ausência de duplicação. Reconfirmar recebimento no C2S sem alterar sua configuração.
 
 Se as credenciais/callback da Meta ainda estiverem pendentes, reportar a publicação da interface e a ativação da captação como estados separados. Não declarar o Facebook conectado apenas porque a página renderiza ou o health retorna 200.
+
+### Configuração privada preparada para a promoção
+
+O Compose monta exclusivamente `/etc/descomplica-crm/secrets/lead-plus-runtime.json.prepared` em `/run/secrets/lead-plus-runtime.json`, somente leitura e sem criação automática. O launcher lê apenas a lista permitida LEAD*DB*\_ e META\_\_ da captura direta; não aceita credenciais Meta Ads nem configuração Auth/CRM nesse arquivo. A validação do runtime é repetida depois dessa leitura. O arquivo foi preparado como root:root em modo 0440, legível pelo grupo 0 já utilizado no contêiner, sem modificar production.env, sem reiniciar processos e sem ativar o LEAD+ na versão antiga. A nova imagem passa a consumi-lo somente pela promoção protegida. A origem precisa existir antes da promoção; conferir hash, permissões e backup na VPS. Não publicar os valores.
