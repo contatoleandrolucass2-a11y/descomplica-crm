@@ -1,7 +1,7 @@
 # Aprendizados e atualizacoes
 
-- Agendamentos: limite das torres em pixels em preparação; main 106b17ee,
-  produção cbd185f5 saudável. Conferência e escopo no histórico AGENDAMENTOS.
+- Torres em pixels publicadas em 44707e35; migration aplicada, CI verde e
+  25 verificações reais aprovadas. Evidências no histórico AGENDAMENTOS.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 

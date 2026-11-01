@@ -1,25 +1,29 @@
 # Worklog
 
-## 2026-10-31 — Máximo das torres em pixels
+## 2026-10-31 — Máximo das torres em pixels publicado
 
-- Campo opcional barMaxHeight em pixels positivos, sem faixa percentual e sem
-  alterar dimensões/ordem do card. Torres, metas e rótulos usam escala comum;
-  limite maior que a área disponível respeita o espaço interno.
-- Edição explícita de altura substitui escala legada; salvar só título/cor a
-  preserva. Campo vazio editado retorna ao automático. Schema/normalização e
-  migration compatível preservam documentos antigos, RPC409, CAS, RLS e ACL.
-- Node24/Windows: tipos aprovados; 75 testes focados aprovados. QA sintético
-  Chromium aprovou 21 cenários:1/24/240/10000px, alturas exatas sem metas, Save
-  único/refresh, legado, card fixo/fluido, retorno de rota, contextos novos e
-  rotação390×844/844×390.503/409deliberados; sem JS inesperado/tráfego externo.
-- Revisão independente sem bloqueios após correção do campo intocado. Nova
-  migration20261031184038 preparada;97migrations/2346assertions inventariadas.
-  CI final pendente; migration autorizada pelo usuário após CI verde. Prints e
-  prova sintética locais não comprovam Next/produção/navegadores do usuário.
-- Revisão adicional encontrou largura fluida fixada ao alterar só o cap pelo
-  editor completo. Agora o layout original é preservado e cada dimensão só
-  muda quando seu campo é editado. Regressão aprovada após Save único,
-  reload e mudança de viewport. Tipos aprovados novamente no código corrigido.
+- Campo em pixels positivos, sem faixa percentual, com escala comum de torres,
+  metas e rótulos. Alterar somente a altura das torres preserva dimensões e ordem,
+  inclusive largura fluida no editor completo. Legado permanece até edição explícita.
+- Node 24/Windows: tipos, 75 testes focados e 21 cenários sintéticos aprovados.
+  Revisão independente corrigiu o reset do legado e a largura fluida antes de publicar.
+- PR #454 integrado em 44707e35. CI do PR 41232367491 e do main 41237042827
+  aprovaram os quatro jobs; verificação visual protegida 41232367422 aprovada.
+  Inventário: 97 migrations e 2.346 assertions pgTAP, sem alteração de baseline.
+- Migration autorizada aplicada via MCP: fonte 20261031184038, registro remoto 20261031200334. Backup da definição e metadados conferidos; dados existentes,
+  permissões, RLS, RPC 409 e CAS preservados.
+- Imagem imutável conferida e publicada pelo coordenador em 31/10 às
+  21:03:24.909Z / 18:03:24 BRT, deployment bb0f49ec-3ae0-4518-bc91-8ac34f537beb.
+  Health ok/44707e35 e fronteira anônima 307; sem pendência de deploy.
+- 25 verificações reais aprovadas em Chrome e integrado: 24/80/96/240 px,
+  confirmação única, refresh, sincronização nos dois sentidos, saída/retorno,
+  abas novas e rotação móvel simulada. Os 28 itens preservaram dimensões e ordem.
+  Valores finais: Ranking Score 240 px; semanal 96 px. Overrides restaurados
+  e somente abas temporárias fechadas. Dois prints JPEG reais locais, ignorados.
+- Celular foi simulado por viewport, sem aparelho físico; não houve novo logout
+  nem reinício do processo do navegador nesta rodada. Banco, contextos novos e
+  navegadores distintos comprovaram o armazenamento remoto do campo novo.
+  Exceções da instrumentação e evidências estão no histórico de conhecimento.
 
 ## 2026-10-31 — Sidebar automático e controle das torres
 
