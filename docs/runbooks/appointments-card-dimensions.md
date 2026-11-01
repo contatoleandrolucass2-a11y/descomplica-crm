@@ -44,7 +44,7 @@ existente ao editor permanece vigente.
 
 ## Altura máxima das torres em pixels
 
-Em Agendamentos, o atalho `Altura das torres` aceita `presentation.barMaxHeight`,
+Em Agendamentos, o campo direto no gráfico aceita `presentation.barMaxHeight`,
 um inteiro positivo em pixels. O campo não usa a faixa de 50% a 150% nem altera
 `layout.width`, `layout.height`, span ou ordem. Não há teto de produto em pixels;
 o contrato só exige inteiro seguro de JavaScript. Campo vazio restaura a escala
@@ -55,7 +55,15 @@ torres, metas e rótulos. O espaço interno disponível continua sendo o limite
 físico: um valor maior não aumenta o card nem corta cada torre individualmente.
 Perfis antigos com `barScale` preservam a aparência até alterar explicitamente
 o campo de altura; editar só título ou cor não migra esse ajuste. O novo limite
-em pixels tem precedência quando presente.
+em pixels tem precedência quando presente. O popup dedicado foi removido:
+Enter ou saída do campo confirma; arrastar a linha superior confirma ao soltar.
+Escape descarta o rascunho. O estado de gravação continua acessível no painel.
+
+A linha superior acompanha o maior realizado do recorte. As sete linhas de
+grade foram removidas. A meta usa um único caminho pontilhado conectado entre
+os períodos conhecidos, recalculado pelo filtro; ausências não viram zero.
+Metas acima da área disponível são sinalizadas, preservando seus valores.
+Essas regras valem para os gráficos diários, semanais e mensais.
 
 A migration `20261031184038_appointments_bar_max_height_pixels.sql` expande
 somente a validação de Agendamentos, sem reescrever documentos, mudar permissões,
@@ -67,6 +75,35 @@ podem ser restaurados sem conversão. Depois de gravar o campo novo, uma imagem
 antiga com schema estrito rejeita esses perfis: corrigir com versão compatível,
 preservando o campo. Não remover o limite salvo nem converter dados durante
 rollback sem plano e autorização específicos.
+
+## Cópias, controles e sidebar
+
+As ações compactas de cada card oferecem copiar, adicionar do zero e abrir as
+ferramentas do painel. Hover e foco revelam os ícones; toque mantém menu com
+alvos acessíveis. Organizar, histórico e PDF continuam nas ferramentas, sem
+a faixa permanente. Títulos de rankings, conversões e recência ficam visíveis.
+
+Copiar gera ID novo e insere depois da origem, preservando apresentação,
+dimensões e conteúdo. A cópia pode ser editada independentemente. Somente
+Agendamentos permite repetir métrica e tipo; os IDs seguem únicos e o limite
+permanece em 50 cards. A migration
+`20261101115602_appointments_allow_card_copies.sql` altera apenas essa restrição
+no validador privado v2, sem reescrever perfis ou mudar RLS, grants, CAS ou RPC.
+Sua aplicação remota exige autorização específica e CI verde. Após salvar
+cópias, rollback requer leitores e validador compatíveis; não deduplicar dados.
+
+Sidebar de 44/136 px, gutters e gaps de 8 px são específicos de Agendamentos.
+No desktop, a abertura reduz proporcionalmente a superfície com largura virtual
+estável, preservando linhas e ordem; até 760 px, o menu abre sobreposto.
+Nenhuma abertura de sidebar regrava dimensões ou ordem dos cards.
+Interações convertem coordenadas visuais para pixels lógicos quando há zoom
+CSS. O resize e a prévia de arraste preservam proporção e largura fluida,
+inclusive ao manter foco de teclado no menu durante a interação com o mouse.
+
+Referências de visualização consultadas no pedido: [Datawrapper: referências e
+linhas](https://www.datawrapper.de/academy/range-highlights-and-lines) e
+[gráficos de colunas](https://www.datawrapper.de/academy/how-to-create-a-column-chart).
+Linhas de referência não alteram os valores nem as metas comerciais.
 
 ## Publicação e autorização
 

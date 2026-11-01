@@ -782,13 +782,7 @@
   padding: 0.85rem 0 0;
   margin: 0;
   list-style: none;
-  background: repeating-linear-gradient(
-    to top,
-    transparent,
-    transparent 49px,
-    var(--analytics-line) 50px,
-    transparent 51px
-  );
+  background: none;
 }
 .columns li {
   min-width: 0;
@@ -846,7 +840,7 @@
   height: 124px;
   display: flex;
   align-items: end;
-  border-bottom: 1px solid var(--analytics-line);
+  border-bottom: 0;
 }
 .column {
   position: relative;
@@ -1828,19 +1822,214 @@
   }
 }
 
-/* A common scale preserves bar/goal ratios; the pixel cap never sizes the card. */
-[data-dashboard-bar-max-height] .columnTrack {
-  --available-column-height: max(0px, calc(100% - 1.75rem * var(--dashboard-font-scale, 1)));
-  --rendered-bar-height: min(
-    calc(var(--available-column-height) * var(--bar-ratio)),
-    calc(var(--dashboard-bar-max-height) * var(--bar-max-ratio))
-  );
-  --rendered-goal-height: min(
-    calc(var(--available-column-height) * var(--goal-ratio)),
-    calc(var(--dashboard-bar-max-height) * var(--goal-max-ratio))
-  );
+/* The maximum line sizes only the plot. Cards retain their persisted layout. */
+.canvasChartTitle {
+  margin: 0 8rem 0.5rem 0;
+  font-size: calc(1rem * var(--dashboard-font-scale, 1));
+  font-weight: 700;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
 }
 
-[data-dashboard-bar-max-height] .column {
+.columnsChart {
+  display: flex;
+  min-width: 0;
   min-height: 0;
+  flex: 1;
+  flex-direction: column;
+}
+
+.columnsHeading {
+  display: flex;
+  min-width: 0;
+  align-items: flex-start;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 0.25rem 0.5rem;
+}
+
+.columnsHeading > .axis {
+  margin-bottom: 0.2rem;
+  text-align: left;
+}
+
+.maximumSummary {
+  display: block;
+  color: var(--analytics-ink);
+  font-size: 0.7rem;
+  font-weight: 600;
+}
+
+.barHeightTools {
+  display: flex;
+  min-height: 1.8rem;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.columnsChart:hover .barHeightTools,
+.columnsChart:focus-within .barHeightTools {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.barHeightTools label {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--analytics-muted);
+  font-size: 0.7rem;
+}
+
+.barHeightTools input {
+  box-sizing: border-box;
+  width: 5.1rem;
+  min-height: 28px;
+  padding: 0.15rem 0.3rem;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.3rem;
+  background: var(--analytics-surface, transparent);
+  color: var(--analytics-ink);
+  font: inherit;
+}
+
+.barHeightTools button {
+  display: inline-flex;
+  width: 28px;
+  min-height: 28px;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.3rem;
+  background: transparent;
+  color: var(--analytics-ink);
+  cursor: pointer;
+}
+
+.columnsPlot {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+.columnsPlot > .columns {
+  box-sizing: border-box;
+  height: 100%;
+}
+
+.columnsPlot .column {
+  min-height: 0;
+}
+
+.plotReferences {
+  position: absolute;
+  pointer-events: none;
+}
+
+.goalReference {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.goalReference path {
+  fill: none;
+  stroke: var(--analytics-muted);
+  stroke-width: 2;
+  stroke-dasharray: 3 3;
+  vector-effect: non-scaling-stroke;
+}
+
+.maximumLine {
+  position: absolute;
+  z-index: 2;
+  inset-inline: 0;
+  height: 24px;
+  margin-bottom: -12px;
+  touch-action: none;
+}
+
+.maximumLine::before {
+  position: absolute;
+  inset-inline: 0;
+  top: 50%;
+  border-top: 1px solid var(--analytics-ink);
+  content: "";
+}
+
+.maximumLine[role="slider"] {
+  cursor: ns-resize;
+  pointer-events: auto;
+}
+
+.maximumGrip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  display: inline-flex;
+  width: 24px;
+  height: 22px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--analytics-line);
+  border-radius: 0.3rem;
+  transform: translate(-50%, -50%);
+  background: var(--analytics-surface);
+  color: var(--analytics-ink);
+  font-size: 0.875rem;
+  opacity: 0;
+}
+
+.columnsChart:hover .maximumLine[role="slider"] .maximumGrip,
+.maximumLine[role="slider"]:focus-visible .maximumGrip {
+  opacity: 1;
+}
+
+.maximumLine:focus-visible,
+.barHeightTools :is(input, button):focus-visible {
+  outline: 2px solid var(--analytics-cyan-strong);
+  outline-offset: 2px;
+}
+
+.chartLegend,
+.referenceNotice {
+  margin: 0.35rem 0 0;
+  color: var(--analytics-muted);
+  font-size: calc(0.7rem * var(--dashboard-font-scale, 1));
+  line-height: 1.35;
+}
+
+.chartLegend {
+  text-align: center;
+}
+
+.referenceNotice {
+  text-align: left;
+}
+
+@media (hover: none), (pointer: coarse) {
+  .barHeightTools {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .barHeightTools :is(input, button) {
+    min-height: 44px;
+  }
+  .barHeightTools button {
+    min-width: 44px;
+  }
+  .maximumLine {
+    height: 44px;
+    margin-bottom: -22px;
+  }
+  .maximumLine[role="slider"] .maximumGrip {
+    opacity: 1;
+  }
 }

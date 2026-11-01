@@ -45370,26 +45370,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
           "tracked": true,
-          "bytes": 21598,
-          "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04"
+          "bytes": 21364,
+          "sha256": "61a17d808f89ec15eaf682af2aae9a44107e0574d8cc403c7eeebd99fdb9baa0"
         }
       },
       "path": "target-authenticated/etapas-agendamentos-1440x900.webp",
-      "bytes": 21598,
-      "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04",
+      "bytes": 21364,
+      "sha256": "61a17d808f89ec15eaf682af2aae9a44107e0574d8cc403c7eeebd99fdb9baa0",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 17789,
+        "changedPixels": 27997,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.01372608024691358,
+        "changedPixelRatio": 0.021602623456790124,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
           "tracked": true,
-          "bytes": 23040,
-          "sha256": "592f2c5fb267cb71ef8fe25d5b56e6447aab0aeb5639926c707039e2edbd885f"
+          "bytes": 21598,
+          "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04"
         }
       }
     },
@@ -45532,7 +45532,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1487520,
-        "changedPixelRatio": 6.520920727116274e-5,
+        "changedPixelRatio": 0.00006520920727116274,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/ranking-1440x900.webp",
           "tracked": true,
@@ -45569,7 +45569,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1548000,
-        "changedPixelRatio": 6.266149870801034e-5,
+        "changedPixelRatio": 0.00006266149870801034,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/canal-de-parcerias-1440x900.webp",
           "tracked": true,
@@ -45754,7 +45754,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1353600,
-        "changedPixelRatio": 7.166075650118204e-5,
+        "changedPixelRatio": 0.00007166075650118204,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1440x900.webp",
           "tracked": true,
@@ -45791,7 +45791,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-associativo-fluxo-linear-1440x900.webp",
           "tracked": true,
@@ -45902,7 +45902,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-1440x900.webp",
           "tracked": true,
@@ -45939,7 +45939,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1440x900.webp",
           "tracked": true,
@@ -45976,7 +45976,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1440x900.webp",
           "tracked": true,
@@ -46013,7 +46013,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1353600,
-        "changedPixelRatio": 7.166075650118204e-5,
+        "changedPixelRatio": 0.00007166075650118204,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1440x900.webp",
           "tracked": true,
@@ -46087,7 +46087,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1484640,
-        "changedPixelRatio": 6.533570427847828e-5,
+        "changedPixelRatio": 0.00006533570427847828,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-paginas-1440x900.webp",
           "tracked": true,
@@ -46184,26 +46184,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-light-1440x900.webp",
           "tracked": true,
-          "bytes": 21598,
-          "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04"
+          "bytes": 21364,
+          "sha256": "61a17d808f89ec15eaf682af2aae9a44107e0574d8cc403c7eeebd99fdb9baa0"
         }
       },
       "path": "target-authenticated/themes/etapas-agendamentos-light-1440x900.webp",
-      "bytes": 21598,
-      "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04",
+      "bytes": 21364,
+      "sha256": "61a17d808f89ec15eaf682af2aae9a44107e0574d8cc403c7eeebd99fdb9baa0",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 17789,
+        "changedPixels": 27997,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.01372608024691358,
+        "changedPixelRatio": 0.021602623456790124,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-light-1440x900.webp",
           "tracked": true,
-          "bytes": 23040,
-          "sha256": "592f2c5fb267cb71ef8fe25d5b56e6447aab0aeb5639926c707039e2edbd885f"
+          "bytes": 21598,
+          "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04"
         }
       }
     },
@@ -46346,7 +46346,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1487520,
-        "changedPixelRatio": 6.520920727116274e-5,
+        "changedPixelRatio": 0.00006520920727116274,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-light-1440x900.webp",
           "tracked": true,
@@ -46383,7 +46383,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1548000,
-        "changedPixelRatio": 6.266149870801034e-5,
+        "changedPixelRatio": 0.00006266149870801034,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-light-1440x900.webp",
           "tracked": true,
@@ -46568,7 +46568,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1353600,
-        "changedPixelRatio": 7.166075650118204e-5,
+        "changedPixelRatio": 0.00007166075650118204,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-light-1440x900.webp",
           "tracked": true,
@@ -46605,7 +46605,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-light-1440x900.webp",
           "tracked": true,
@@ -46716,7 +46716,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-direta-light-1440x900.webp",
           "tracked": true,
@@ -46753,7 +46753,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-light-1440x900.webp",
           "tracked": true,
@@ -46790,7 +46790,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 1296000,
-        "changedPixelRatio": 3.317901234567901e-5,
+        "changedPixelRatio": 0.00003317901234567901,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-light-1440x900.webp",
           "tracked": true,
@@ -46827,7 +46827,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1353600,
-        "changedPixelRatio": 7.166075650118204e-5,
+        "changedPixelRatio": 0.00007166075650118204,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-light-1440x900.webp",
           "tracked": true,
@@ -46901,7 +46901,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 1484640,
-        "changedPixelRatio": 6.533570427847828e-5,
+        "changedPixelRatio": 0.00006533570427847828,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-light-1440x900.webp",
           "tracked": true,
@@ -46998,26 +46998,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 21256,
-          "sha256": "7fd6d609c4e0190194f3c49b9ce79db4d519b369aeb1df607ffc4501b1ed68a2"
+          "bytes": 20714,
+          "sha256": "19679154170746d48ec5ec549a0bdb2b49d878897af32e0b0aac4fa48e0cd3f6"
         }
       },
       "path": "target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
-      "bytes": 21256,
-      "sha256": "7fd6d609c4e0190194f3c49b9ce79db4d519b369aeb1df607ffc4501b1ed68a2",
+      "bytes": 20714,
+      "sha256": "19679154170746d48ec5ec549a0bdb2b49d878897af32e0b0aac4fa48e0cd3f6",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 14837,
+        "changedPixels": 57352,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.011448302469135802,
+        "changedPixelRatio": 0.044253086419753083,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
           "tracked": true,
-          "bytes": 22656,
-          "sha256": "6c70d8bfb71001076dab6dc1b1de20e12f7d9b1bb063ceaa723e3dbc0e1083b5"
+          "bytes": 21256,
+          "sha256": "7fd6d609c4e0190194f3c49b9ce79db4d519b369aeb1df607ffc4501b1ed68a2"
         }
       }
     },
@@ -47834,8 +47834,8 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 21614,
-          "sha256": "907981812ec354e4f7c5865e4ddec870164f9e2b6a404ec58fc742c168754c13"
+          "bytes": 20896,
+          "sha256": "e9a46e09f190512105be33a1764b962c51f4bcca713b6ea88febd48cf8dbc256"
         }
       },
       "approvedCanvasComparison": {
@@ -47844,27 +47844,27 @@
         "asset": "docs/qa/canvas-parity/reference/agendamentos-visitas.webp",
         "region": "left",
         "referenceSha256": "00853304b89bc3efcf03b5a93410a62a18b1bdc1016b9d22b3f88075cc31c992",
-        "colorDistance": 16.11865234375,
+        "colorDistance": 16.13503689236111,
         "colorDistanceThreshold": 23,
-        "edgeDistance": 31.926513671875,
+        "edgeDistance": 30.875732421875,
         "edgeDistanceThreshold": 52
       },
       "path": "target-authenticated/themes/etapas-agendamentos-dark-1440x900.webp",
-      "bytes": 21614,
-      "sha256": "907981812ec354e4f7c5865e4ddec870164f9e2b6a404ec58fc742c168754c13",
+      "bytes": 20896,
+      "sha256": "e9a46e09f190512105be33a1764b962c51f4bcca713b6ea88febd48cf8dbc256",
       "width": 1440,
       "height": 900,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 17711,
+        "changedPixels": 28085,
         "totalPixels": 1296000,
-        "changedPixelRatio": 0.013665895061728396,
+        "changedPixelRatio": 0.021670524691358026,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-dark-1440x900.webp",
           "tracked": true,
-          "bytes": 22534,
-          "sha256": "8715fef8e7dd1bb5dc51ff9e4dc7f0400727586d20dfed836812136977ac43ad"
+          "bytes": 21614,
+          "sha256": "907981812ec354e4f7c5865e4ddec870164f9e2b6a404ec58fc742c168754c13"
         }
       }
     },
@@ -48051,7 +48051,7 @@
         "reason": "within_threshold",
         "changedPixels": 86,
         "totalPixels": 1487520,
-        "changedPixelRatio": 5.7814348714639134e-5,
+        "changedPixelRatio": 0.000057814348714639134,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/ranking-dark-1440x900.webp",
           "tracked": true,
@@ -48099,7 +48099,7 @@
         "reason": "within_threshold",
         "changedPixels": 86,
         "totalPixels": 1548000,
-        "changedPixelRatio": 5.555555555555556e-5,
+        "changedPixelRatio": 0.00005555555555555556,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/canal-de-parcerias-dark-1440x900.webp",
           "tracked": true,
@@ -48339,7 +48339,7 @@
         "reason": "within_threshold",
         "changedPixels": 86,
         "totalPixels": 1353600,
-        "changedPixelRatio": 6.353427895981088e-5,
+        "changedPixelRatio": 0.00006353427895981088,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-dark-1440x900.webp",
           "tracked": true,
@@ -48387,7 +48387,7 @@
         "reason": "within_threshold",
         "changedPixels": 38,
         "totalPixels": 1296000,
-        "changedPixelRatio": 2.932098765432099e-5,
+        "changedPixelRatio": 0.00002932098765432099,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-associativo-fluxo-linear-dark-1440x900.webp",
           "tracked": true,
@@ -48531,7 +48531,7 @@
         "reason": "within_threshold",
         "changedPixels": 38,
         "totalPixels": 1296000,
-        "changedPixelRatio": 2.932098765432099e-5,
+        "changedPixelRatio": 0.00002932098765432099,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-direta-dark-1440x900.webp",
           "tracked": true,
@@ -48579,7 +48579,7 @@
         "reason": "within_threshold",
         "changedPixels": 38,
         "totalPixels": 1296000,
-        "changedPixelRatio": 2.932098765432099e-5,
+        "changedPixelRatio": 0.00002932098765432099,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabelao-dark-1440x900.webp",
           "tracked": true,
@@ -48627,7 +48627,7 @@
         "reason": "within_threshold",
         "changedPixels": 38,
         "totalPixels": 1296000,
-        "changedPixelRatio": 2.932098765432099e-5,
+        "changedPixelRatio": 0.00002932098765432099,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/simulacao-tabela-investidor-dark-1440x900.webp",
           "tracked": true,
@@ -48675,7 +48675,7 @@
         "reason": "within_threshold",
         "changedPixels": 86,
         "totalPixels": 1353600,
-        "changedPixelRatio": 6.353427895981088e-5,
+        "changedPixelRatio": 0.00006353427895981088,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-dark-1440x900.webp",
           "tracked": true,
@@ -48771,7 +48771,7 @@
         "reason": "within_threshold",
         "changedPixels": 86,
         "totalPixels": 1484640,
-        "changedPixelRatio": 5.792650070050652e-5,
+        "changedPixelRatio": 0.00005792650070050652,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/admin-paginas-dark-1440x900.webp",
           "tracked": true,
@@ -48868,26 +48868,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
           "tracked": true,
-          "bytes": 20708,
-          "sha256": "6b3a7072641bf391590cf74fc4771aa16023a5f916c1172f4dffdcc884d8205f"
+          "bytes": 20312,
+          "sha256": "6a5a747f6b74123835da5b191ba89aa567503de62ed3eff7b0d3be402161a11d"
         }
       },
       "path": "target-authenticated/etapas-agendamentos-1280x720.webp",
-      "bytes": 20708,
-      "sha256": "6b3a7072641bf391590cf74fc4771aa16023a5f916c1172f4dffdcc884d8205f",
+      "bytes": 20312,
+      "sha256": "6a5a747f6b74123835da5b191ba89aa567503de62ed3eff7b0d3be402161a11d",
       "width": 1280,
       "height": 720,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 12863,
+        "changedPixels": 26207,
         "totalPixels": 921600,
-        "changedPixelRatio": 0.013957248263888888,
+        "changedPixelRatio": 0.028436414930555556,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
           "tracked": true,
-          "bytes": 21076,
-          "sha256": "72606fee9afb09a48ef1bde752b306fd63a66df222ff28cfa1990df24f5cf176"
+          "bytes": 20708,
+          "sha256": "6b3a7072641bf391590cf74fc4771aa16023a5f916c1172f4dffdcc884d8205f"
         }
       }
     },
@@ -49252,7 +49252,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 986880,
-        "changedPixelRatio": 9.828955901426719e-5,
+        "changedPixelRatio": 0.00009828955901426719,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-1280x720.webp",
           "tracked": true,
@@ -49406,7 +49406,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 921600,
-        "changedPixelRatio": 4.6657986111111113e-5,
+        "changedPixelRatio": 0.000046657986111111113,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-direta-1280x720.webp",
           "tracked": true,
@@ -49443,7 +49443,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 921600,
-        "changedPixelRatio": 4.6657986111111113e-5,
+        "changedPixelRatio": 0.000046657986111111113,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabelao-1280x720.webp",
           "tracked": true,
@@ -49480,7 +49480,7 @@
         "reason": "within_threshold",
         "changedPixels": 43,
         "totalPixels": 921600,
-        "changedPixelRatio": 4.6657986111111113e-5,
+        "changedPixelRatio": 0.000046657986111111113,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/simulacao-tabela-investidor-1280x720.webp",
           "tracked": true,
@@ -49517,7 +49517,7 @@
         "reason": "within_threshold",
         "changedPixels": 97,
         "totalPixels": 972800,
-        "changedPixelRatio": 9.971217105263158e-5,
+        "changedPixelRatio": 0.00009971217105263158,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-1280x720.webp",
           "tracked": true,
@@ -49681,28 +49681,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
           "tracked": true,
-          "bytes": 16084,
-          "sha256": "f193a84cc7a72ff744593bd56fc5f59cd1d38ec07caa85bb86addfe602a3afa1"
+          "bytes": 15388,
+          "sha256": "9e63caf9e768d169582d923dd0030c69f1dc25ac17a68544bc6a35797d30d194"
         }
       },
       "path": "target-authenticated/etapas-agendamentos-1024x768.webp",
-      "bytes": 16084,
-      "sha256": "f193a84cc7a72ff744593bd56fc5f59cd1d38ec07caa85bb86addfe602a3afa1",
+      "bytes": 15388,
+      "sha256": "9e63caf9e768d169582d923dd0030c69f1dc25ac17a68544bc6a35797d30d194",
       "width": 1024,
       "height": 768,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 38,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 21972,
         "totalPixels": 786432,
-        "changedPixelRatio": 4.8319498697916664e-5,
+        "changedPixelRatio": 0.0279388427734375,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
           "tracked": true,
@@ -50501,28 +50501,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 786432,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
           "tracked": true,
-          "bytes": 16410,
-          "sha256": "d559f0dc8ae9f8974f97e359464fa4681979c89e123bb66d717b7c4c703caa43"
+          "bytes": 15734,
+          "sha256": "c4a77647e61779a0ce389b735b53dabe21d84b4a438e78084101d16768b688b4"
         }
       },
       "path": "target-authenticated/etapas-agendamentos-768x1024.webp",
-      "bytes": 16410,
-      "sha256": "d559f0dc8ae9f8974f97e359464fa4681979c89e123bb66d717b7c4c703caa43",
+      "bytes": 15734,
+      "sha256": "c4a77647e61779a0ce389b735b53dabe21d84b4a438e78084101d16768b688b4",
       "width": 768,
       "height": 1024,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 38,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 21349,
         "totalPixels": 786432,
-        "changedPixelRatio": 4.8319498697916664e-5,
+        "changedPixelRatio": 0.027146657307942707,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
           "tracked": true,
@@ -51268,7 +51268,7 @@
         "reason": "within_threshold",
         "changedPixels": 358,
         "totalPixels": 3903510,
-        "changedPixelRatio": 9.171233069724428e-5,
+        "changedPixelRatio": 0.00009171233069724428,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-390x844.webp",
           "tracked": true,
@@ -51328,26 +51328,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
           "tracked": true,
-          "bytes": 13328,
-          "sha256": "8698d192a757631fc847bc0f72eb76e627f4f1820c495f418950675121a63935"
+          "bytes": 12846,
+          "sha256": "2bdb964ddcbea60830589ef4f42776956e3172aa8d95689ee460b2ad32377413"
         }
       },
       "path": "target-authenticated/etapas-agendamentos-390x844.webp",
-      "bytes": 13328,
-      "sha256": "8698d192a757631fc847bc0f72eb76e627f4f1820c495f418950675121a63935",
+      "bytes": 12846,
+      "sha256": "2bdb964ddcbea60830589ef4f42776956e3172aa8d95689ee460b2ad32377413",
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 5194,
+        "changedPixels": 15869,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.0157795600923563,
+        "changedPixelRatio": 0.04821059667031231,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
           "tracked": true,
-          "bytes": 13624,
-          "sha256": "12afade154dd9a53b42a4a835a1dbd5b05f18c1188020837c2757d39b865c590"
+          "bytes": 13328,
+          "sha256": "8698d192a757631fc847bc0f72eb76e627f4f1820c495f418950675121a63935"
         }
       }
     },
@@ -52088,7 +52088,7 @@
         "reason": "within_threshold",
         "changedPixels": 358,
         "totalPixels": 3903510,
-        "changedPixelRatio": 9.171233069724428e-5,
+        "changedPixelRatio": 0.00009171233069724428,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/dashboard-dark-390x844.webp",
           "tracked": true,
@@ -52148,26 +52148,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
           "tracked": true,
-          "bytes": 13286,
-          "sha256": "d128e35b51eeec762ee02d5e3c1b8d228b18dfd2b8332ea76676c25c39ef4425"
+          "bytes": 12668,
+          "sha256": "27a9a10afdaa20fa07d830ef6c52f6460669c7d7a6a4d6bf9d21e69f6364f9a0"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
-      "bytes": 13286,
-      "sha256": "d128e35b51eeec762ee02d5e3c1b8d228b18dfd2b8332ea76676c25c39ef4425",
+      "bytes": 12668,
+      "sha256": "27a9a10afdaa20fa07d830ef6c52f6460669c7d7a6a4d6bf9d21e69f6364f9a0",
       "width": 390,
       "height": 844,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 5176,
+        "changedPixels": 15925,
         "totalPixels": 329160,
-        "changedPixelRatio": 0.015724875440515252,
+        "changedPixelRatio": 0.048380726698262246,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
           "tracked": true,
-          "bytes": 13298,
-          "sha256": "ad570b36afdbafbff2446da3ac3b3debc3d9887708c22491eefaaf5bc3b195a2"
+          "bytes": 13286,
+          "sha256": "d128e35b51eeec762ee02d5e3c1b8d228b18dfd2b8332ea76676c25c39ef4425"
         }
       }
     },
@@ -52908,7 +52908,7 @@
         "reason": "within_threshold",
         "changedPixels": 358,
         "totalPixels": 3753375,
-        "changedPixelRatio": 9.538082392513405e-5,
+        "changedPixelRatio": 0.00009538082392513405,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/dashboard-375x812.webp",
           "tracked": true,
@@ -52968,26 +52968,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
           "tracked": true,
-          "bytes": 13246,
-          "sha256": "781d7965d34aeaa9c42e526e850cfaa41dc92ddb9323b7103a532486a5f00df7"
+          "bytes": 12818,
+          "sha256": "8cf2aa4c1de7cb9700a9a58fad88c63e45e169c7ab2f0a4a7e33827916758a6d"
         }
       },
       "path": "target-authenticated/etapas-agendamentos-375x812.webp",
-      "bytes": 13246,
-      "sha256": "781d7965d34aeaa9c42e526e850cfaa41dc92ddb9323b7103a532486a5f00df7",
+      "bytes": 12818,
+      "sha256": "8cf2aa4c1de7cb9700a9a58fad88c63e45e169c7ab2f0a4a7e33827916758a6d",
       "width": 375,
       "height": 812,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 5195,
+        "changedPixels": 15745,
         "totalPixels": 304500,
-        "changedPixelRatio": 0.017060755336617404,
+        "changedPixelRatio": 0.05170771756978654,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
           "tracked": true,
-          "bytes": 13368,
-          "sha256": "ca8766e7ec6ba62e37e25c81f52fd0990c987a2a95cb25bb06bb9f13be955288"
+          "bytes": 13246,
+          "sha256": "781d7965d34aeaa9c42e526e850cfaa41dc92ddb9323b7103a532486a5f00df7"
         }
       }
     },
@@ -53788,26 +53788,26 @@
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp",
           "tracked": true,
-          "bytes": 13314,
-          "sha256": "19b95934c3be6de8a3163483db09d1c2e68595fefb86397551a8682d04a0914a"
+          "bytes": 13052,
+          "sha256": "b99edc3c0545ad560b882036d443182138ced67aee868c3c8ce93ee341f457c4"
         }
       },
       "path": "target-authenticated/etapas-agendamentos-320x568.webp",
-      "bytes": 13314,
-      "sha256": "19b95934c3be6de8a3163483db09d1c2e68595fefb86397551a8682d04a0914a",
+      "bytes": 13052,
+      "sha256": "b99edc3c0545ad560b882036d443182138ced67aee868c3c8ce93ee341f457c4",
       "width": 320,
       "height": 568,
       "previousBaselineComparison": {
         "passed": false,
         "reason": "pixel_drift",
-        "changedPixels": 5190,
+        "changedPixels": 15618,
         "totalPixels": 181760,
-        "changedPixelRatio": 0.02855413732394366,
+        "changedPixelRatio": 0.08592649647887324,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp",
           "tracked": true,
-          "bytes": 13560,
-          "sha256": "8c927f295924c29eea42fe791510b3fb8c8d1b93b61c564847fcf64e02592f2c"
+          "bytes": 13314,
+          "sha256": "19b95934c3be6de8a3163483db09d1c2e68595fefb86397551a8682d04a0914a"
         }
       }
     },
@@ -54911,44 +54911,44 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
         "tracked": true,
-        "bytes": 16084,
-        "sha256": "f193a84cc7a72ff744593bd56fc5f59cd1d38ec07caa85bb86addfe602a3afa1"
+        "bytes": 15388,
+        "sha256": "9e63caf9e768d169582d923dd0030c69f1dc25ac17a68544bc6a35797d30d194"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
         "tracked": true,
-        "bytes": 20708,
-        "sha256": "6b3a7072641bf391590cf74fc4771aa16023a5f916c1172f4dffdcc884d8205f"
+        "bytes": 20312,
+        "sha256": "6a5a747f6b74123835da5b191ba89aa567503de62ed3eff7b0d3be402161a11d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
         "tracked": true,
-        "bytes": 21598,
-        "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04"
+        "bytes": 21364,
+        "sha256": "61a17d808f89ec15eaf682af2aae9a44107e0574d8cc403c7eeebd99fdb9baa0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp",
         "tracked": true,
-        "bytes": 13314,
-        "sha256": "19b95934c3be6de8a3163483db09d1c2e68595fefb86397551a8682d04a0914a"
+        "bytes": 13052,
+        "sha256": "b99edc3c0545ad560b882036d443182138ced67aee868c3c8ce93ee341f457c4"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
         "tracked": true,
-        "bytes": 13246,
-        "sha256": "781d7965d34aeaa9c42e526e850cfaa41dc92ddb9323b7103a532486a5f00df7"
+        "bytes": 12818,
+        "sha256": "8cf2aa4c1de7cb9700a9a58fad88c63e45e169c7ab2f0a4a7e33827916758a6d"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
         "tracked": true,
-        "bytes": 13328,
-        "sha256": "8698d192a757631fc847bc0f72eb76e627f4f1820c495f418950675121a63935"
+        "bytes": 12846,
+        "sha256": "2bdb964ddcbea60830589ef4f42776956e3172aa8d95689ee460b2ad32377413"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
         "tracked": true,
-        "bytes": 16410,
-        "sha256": "d559f0dc8ae9f8974f97e359464fa4681979c89e123bb66d717b7c4c703caa43"
+        "bytes": 15734,
+        "sha256": "c4a77647e61779a0ce389b735b53dabe21d84b4a438e78084101d16768b688b4"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/etapas-oportunidades-1024x768.webp",
@@ -55619,20 +55619,20 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
         "tracked": true,
-        "bytes": 21256,
-        "sha256": "7fd6d609c4e0190194f3c49b9ce79db4d519b369aeb1df607ffc4501b1ed68a2"
+        "bytes": 20714,
+        "sha256": "19679154170746d48ec5ec549a0bdb2b49d878897af32e0b0aac4fa48e0cd3f6"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-dark-1440x900.webp",
         "tracked": true,
-        "bytes": 21614,
-        "sha256": "907981812ec354e4f7c5865e4ddec870164f9e2b6a404ec58fc742c168754c13"
+        "bytes": 20896,
+        "sha256": "e9a46e09f190512105be33a1764b962c51f4bcca713b6ea88febd48cf8dbc256"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-light-1440x900.webp",
         "tracked": true,
-        "bytes": 21598,
-        "sha256": "2ad51328d710d6d5c33212ccc97aa48f995ad14cb8c1b5ac2cbb39ab6c2e3f04"
+        "bytes": 21364,
+        "sha256": "61a17d808f89ec15eaf682af2aae9a44107e0574d8cc403c7eeebd99fdb9baa0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/etapas-oportunidades-balanced-1440x900.webp",
@@ -55763,8 +55763,8 @@
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
         "tracked": true,
-        "bytes": 13286,
-        "sha256": "d128e35b51eeec762ee02d5e3c1b8d228b18dfd2b8332ea76676c25c39ef4425"
+        "bytes": 12668,
+        "sha256": "27a9a10afdaa20fa07d830ef6c52f6460669c7d7a6a4d6bf9d21e69f6364f9a0"
       },
       {
         "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-oportunidades-dark-390x844.webp",
@@ -55984,7 +55984,7 @@
       }
     ],
     "fileCount": 242,
-    "manifestSha256": "77e1be9ca8518cb14afc0a5895e6383f8fab321fcbc2a61d8ce8c356cdb7b364"
+    "manifestSha256": "ee303238587c8f25f13a9310e9f1af32c6bf98a4c33bdff3ddea0aa82d1278fd"
   },
   "baselineIntegrity": {
     "trackedFilesRequired": true,
@@ -55995,8 +55995,8 @@
     "requested": true,
     "performed": true,
     "method": "same-filesystem transactional rename with rollback",
-    "previousBaselineManifestSha256": "3264ecc9de51d1e084f33f4628464875440703740102557f47a4b360c65ba918",
-    "previousBaselineResultSha256": "e4f4fe00a43dc081cda83b761cd38dc5ba8d32a53a66541aebbdb3fa648b7fdc"
+    "previousBaselineManifestSha256": "77e1be9ca8518cb14afc0a5895e6383f8fab321fcbc2a61d8ce8c356cdb7b364",
+    "previousBaselineResultSha256": "722eaf1bceb5608cc3314f495625822872311e6fa49fa3789241d46fd2a41d21"
   },
   "visualInspectionCoverage": {
     "responsiveScreenshots": 154,
@@ -56149,6 +56149,43 @@
       "preservedImages": 233,
       "method": "same-filesystem transactional rename with rollback",
       "scope": "Only appointments references; original capture metadata retained for preserved images. Generated-output fingerprint reproduced exactly; no tracked source diff."
+    },
+    {
+      "route": "/app/etapas/agendamentos",
+      "sourceRun": 41305978587,
+      "sourceCaptureCommit": "e5a1059e853274f0df22df909771effcc06d65cb",
+      "sourceHead": "22972f2d9f1546b3d22272cdcb89a2a491951eaa",
+      "sourceTree": "70d2c65ebbe14207815b343fd0b1e946ec4c707f",
+      "sourceWorktreeDirtyAtCapture": false,
+      "sourceWorktreeFingerprint": "459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d",
+      "sourceCapturedAt": "2026-11-01T12:52:21.390Z",
+      "functionalPassed": true,
+      "functionalCoverage": {
+        "responsiveScreenshots": 154,
+        "themeScreenshots": 88,
+        "accessibilityAudits": 242,
+        "baselineComparisons": 242,
+        "approvedCanvasComparisons": 22,
+        "approvedCanvasColorDistanceThreshold": 23,
+        "approvedCanvasEdgeDistanceThreshold": 52,
+        "changedPixelRatioThreshold": 0.01,
+        "channelTolerance": 16
+      },
+      "scope": "11 reviewed appointments shell/unavailable-state references; 231 other records and images preserved",
+      "limitations": "Filled charts and persistence are covered separately by synthetic component fixtures and post-publication checks.",
+      "reviewedPaths": [
+        "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-light-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-balanced-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/etapas-agendamentos-dark-1440x900.webp",
+        "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1280x720.webp",
+        "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-1024x768.webp",
+        "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-768x1024.webp",
+        "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/etapas-agendamentos-dark-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/etapas-agendamentos-320x568.webp"
+      ]
     }
   ]
 }

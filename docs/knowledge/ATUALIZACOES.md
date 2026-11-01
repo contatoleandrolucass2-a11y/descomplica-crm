@@ -1,7 +1,7 @@
 # Aprendizados e atualizacoes
 
-- Torres em pixels publicadas em 44707e35; migration aplicada, CI verde e
-  25 verificações reais aprovadas. Evidências no histórico AGENDAMENTOS.
+- Agendamentos: abertura do ajuste direto das torres, títulos e layout compacto.
+  Fontes e limites no histórico AGENDAMENTOS de 30/10/2026.
 
 ## 2026-10-30: rotação móvel simulada aprovada
 

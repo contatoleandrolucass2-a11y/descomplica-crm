@@ -33,6 +33,7 @@ interface PointerInteraction {
   floatingRect: Pick<DOMRect, "width" | "height" | "left" | "top">;
   offsetX: number;
   offsetY: number;
+  zoom: number;
   captureTarget: HTMLElement;
 }
 
@@ -57,6 +58,18 @@ export interface DashboardCanvasProps {
 
 function cardName(card: DashboardCard) {
   return card.title?.trim() || card.metric;
+}
+
+// CSS zoom changes viewport geometry, while saved layouts use logical CSS pixels.
+// Read ancestors as well: the canvas itself normally has no zoom declaration.
+function elementZoom(element: HTMLElement) {
+  let zoom = 1;
+  for (let ancestor: HTMLElement | null = element; ancestor; ancestor = ancestor.parentElement) {
+    const value = getComputedStyle(ancestor).zoom ?? "1";
+    const factor = Number.parseFloat(value) / (value.endsWith("%") ? 100 : 1);
+    if (Number.isFinite(factor) && factor > 0) zoom *= factor;
+  }
+  return zoom;
 }
 
 function reorderCards(cards: readonly DashboardCard[], cardId: string, targetIndex: number) {
@@ -257,8 +270,8 @@ export function DashboardCanvas({
     const nextLayout = resizeCardLayout({
       type: card.type,
       initial: active.initialLayout,
-      deltaX: point.x - active.originX,
-      deltaY: point.y - active.originY,
+      deltaX: (point.x - active.originX) / active.zoom,
+      deltaY: (point.y - active.originY) / active.zoom,
       containerWidth,
       renderedWidth: active.floatingRect.width,
       gap,
@@ -309,6 +322,7 @@ export function DashboardCanvas({
     const captureTarget = gridRef.current;
     if (!cardElement || !captureTarget) return;
     const bounds = cardElement.getBoundingClientRect();
+    const zoom = elementZoom(captureTarget);
     captureTarget.setPointerCapture(event.pointerId);
     const nextInteraction: PointerInteraction = {
       kind,
@@ -320,9 +334,15 @@ export function DashboardCanvas({
       clientY: event.clientY,
       originalCards: previewRef.current,
       initialLayout: card.layout,
-      floatingRect: bounds,
+      floatingRect: {
+        left: bounds.left / zoom,
+        top: bounds.top / zoom,
+        width: bounds.width / zoom,
+        height: bounds.height / zoom,
+      },
       offsetX: event.clientX - bounds.left,
       offsetY: event.clientY - bounds.top,
+      zoom,
       captureTarget,
     };
     interactionRef.current = nextInteraction;
@@ -360,7 +380,10 @@ export function DashboardCanvas({
     const nextLayout = resizeCardLayout({
       type: card.type,
       initial: card.layout,
-      renderedWidth: cardElements.current.get(card.id)?.getBoundingClientRect().width,
+      renderedWidth: (() => {
+        const element = cardElements.current.get(card.id);
+        return element ? element.getBoundingClientRect().width / elementZoom(element) : undefined;
+      })(),
       deltaX:
         horizontal * (layoutPolicy?.freeResize ? step : (gridRef.current?.clientWidth ?? 12) / 12),
       deltaY: vertical,
@@ -386,8 +409,8 @@ export function DashboardCanvas({
     : null;
   const floatingStyle: CSSProperties | undefined = interaction
     ? {
-        left: interaction.clientX - interaction.offsetX,
-        top: interaction.clientY - interaction.offsetY,
+        left: (interaction.clientX - interaction.offsetX) / interaction.zoom,
+        top: (interaction.clientY - interaction.offsetY) / interaction.zoom,
         width: interaction.floatingRect.width,
         height:
           interaction.kind === "resize"
