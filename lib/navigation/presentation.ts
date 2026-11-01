@@ -31,6 +31,13 @@ export interface NavigationGroup {
   includeOverview: boolean;
 }
 
+const LEAD_ROOT_KEY = "crm.leads";
+const LEAD_ROOT_PATH = "/app/leads";
+
+function isLeadRoot(page: NavigationItem) {
+  return page.key === LEAD_ROOT_KEY && page.path === LEAD_ROOT_PATH && page.parentKey === null;
+}
+
 const ADMIN_ROOT_KEY = "admin.home";
 const ADMIN_ROOT_PATH = "/admin";
 const CONNECTED_SYSTEMS_KEY = "crm.settings.connected_systems";
@@ -110,11 +117,17 @@ export function buildNavigationGroups(pages: NavigationItem[]): NavigationGroup[
     )
     .sort(compareRootPages);
 
-  return rootPages.map((page) => ({
-    page,
-    children: pages.filter((candidate) => candidate.parentKey === page.key).sort(comparePages),
-    includeOverview: page.key !== ADMIN_ROOT_KEY,
-  }));
+  return rootPages.map((page) => {
+    // LEAD+ owns its internal sidebar; retain the authorized catalog for guards and breadcrumbs.
+    if (isLeadRoot(page)) {
+      return { page: { ...page, name: "LEAD+" }, children: [], includeOverview: false };
+    }
+    return {
+      page,
+      children: pages.filter((candidate) => candidate.parentKey === page.key).sort(comparePages),
+      includeOverview: page.key !== ADMIN_ROOT_KEY,
+    };
+  });
 }
 
 /**
@@ -255,6 +268,7 @@ export function getAuthorizedAdminNavigation(pages: NavigationItem[]) {
 export function isNavigationGroupActive(pathname: string, group: NavigationGroup) {
   return (
     pathname === group.page.path ||
+    (isLeadRoot(group.page) && pathname.startsWith(`${LEAD_ROOT_PATH}/`)) ||
     group.children.some(
       (child) =>
         pathname === child.path ||
@@ -268,6 +282,7 @@ export function isNavigationGroupActive(pathname: string, group: NavigationGroup
 export function isNavigationRootActive(pathname: string, page: NavigationItem) {
   return (
     pathname === page.path ||
+    (isLeadRoot(page) && pathname.startsWith(`${LEAD_ROOT_PATH}/`)) ||
     (page.key === SIMULATION_ROOT_KEY && pathname.startsWith(`${page.path}/`))
   );
 }

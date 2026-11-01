@@ -11,6 +11,7 @@ const deploymentId = process.env.DEPLOYMENT_VERSION;
 
 const nextConfig: NextConfig = {
   output: "standalone",
+  serverExternalPackages: ["pg", "zod"],
   outputFileTracingIncludes: {
     "/app/meta-ads": ["./app/(protected)/app/meta-ads/dashboard-frame.html"],
   },

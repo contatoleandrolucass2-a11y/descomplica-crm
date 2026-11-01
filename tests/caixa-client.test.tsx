@@ -195,6 +195,7 @@ describe.runIf(process.env.CAIXA_BROWSER === "1")(
       errors.length = 0;
       const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
       page = await context.newPage();
+      await page.clock.setFixedTime(new Date("2026-10-25T12:00:00-03:00"));
       page.on("pageerror", (error) => errors.push(error.message));
       await page.route("https://caixa.test/**", (route) => {
         const url = new URL(route.request().url());

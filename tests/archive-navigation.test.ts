@@ -337,7 +337,7 @@ describe("archive navigation evidence gate", () => {
   it("keeps the nine authorized roots in the approved visual and keyboard order", () => {
     expect(archiveRootNavigationContract).toEqual([
       { name: "Dashboard", tag: "BUTTON", href: null },
-      { name: "Lead", tag: "BUTTON", href: null },
+      { name: "LEAD+", tag: "A", href: "/app/leads" },
       { name: "Meta Ads", tag: "A", href: "/app/meta-ads" },
       { name: "Simulação", tag: "A", href: "/app/simulacao" },
       { name: "Ranking", tag: "A", href: "/app/ranking" },

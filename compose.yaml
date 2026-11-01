@@ -39,6 +39,18 @@ services:
       META_ADS_ACCESS_TOKEN: "${META_ADS_ACCESS_TOKEN:-}"
       META_ADS_ACCOUNT_ID: "${META_ADS_ACCOUNT_ID:-}"
       META_ADS_API_VERSION: "${META_ADS_API_VERSION:-v26.0}"
+      LEAD_DB_URL: "${LEAD_DB_URL:-}"
+      LEAD_DB_PROJECT_REF: "${LEAD_DB_PROJECT_REF:-}"
+      LEAD_DB_CA_FILE: "/app/lib/crm/lead-plus/server/certs/supabase-prod-ca.crt"
+      META_APP_ID: "${META_APP_ID:-}"
+      META_APP_SECRET: "${META_APP_SECRET:-}"
+      META_VERIFY_TOKEN: "${META_VERIFY_TOKEN:-}"
+      META_PAGE_ACCESS_TOKEN: "${META_PAGE_ACCESS_TOKEN:-}"
+      META_PAGE_IDS: "${META_PAGE_IDS:-}"
+      META_GRAPH_VERSION: "${META_GRAPH_VERSION:-v26.0}"
+      META_CALLBACK_URL: "${META_CALLBACK_URL:-}"
+      META_REQUIRE_FORM_ROUTE: "1"
+      META_FORM_ROUTES_JSON: "${META_FORM_ROUTES_JSON:-[]}"
       CRM_READ_MODEL_V3_SHADOW_ENABLED: ${CRM_READ_MODEL_V3_SHADOW_ENABLED:-false}
       QLIK_RELAY_MODE: ${QLIK_RELAY_MODE:-off}
       QLIK_RELAY_WRITE_ENABLED: ${QLIK_RELAY_WRITE_ENABLED:-false}
@@ -64,6 +76,12 @@ services:
     tmpfs:
       - /tmp:size=64m,mode=1777
     volumes:
+      - type: bind
+        source: /etc/descomplica-crm/secrets/lead-plus-runtime.json.prepared
+        target: /run/secrets/lead-plus-runtime.json
+        read_only: true
+        bind:
+          create_host_path: false
       - next-cache:/app/.next/cache
       - type: bind
         source: /var/lib/descomplica-salesforce-inventory

@@ -367,19 +367,19 @@ const protectedSurfaces = [
     heading: "Dashboard | Resumo Geral",
     allowed: activeOperationalRoles,
   },
-  { path: "/app/leads", heading: "Lead", allowed: adminRoles },
-  { path: "/app/leads/lista", heading: "Lista de leads", allowed: adminRoles },
-  { path: "/app/leads/atividades", heading: "Atividades", allowed: adminRoles },
-  { path: "/app/leads/funil", heading: "Funil", allowed: adminRoles },
-  { path: "/app/leads/distribuicao", heading: "Distribuição", allowed: adminRoles },
-  { path: "/app/leads/relatorios", heading: "Relatórios", allowed: adminRoles },
+  { path: "/app/leads", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
+  { path: "/app/leads/lista", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
+  { path: "/app/leads/atividades", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
+  { path: "/app/leads/funil", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
+  { path: "/app/leads/distribuicao", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
+  { path: "/app/leads/relatorios", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
   {
     path: "/app/leads/importacao",
-    heading: "Importação e exportação",
+    heading: "DESCOMPLICA LEAD",
     allowed: adminRoles,
   },
-  { path: "/app/leads/configuracoes", heading: "Configurações", allowed: adminRoles },
-  { path: "/app/leads/auditoria", heading: "Auditoria", allowed: adminRoles },
+  { path: "/app/leads/configuracoes", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
+  { path: "/app/leads/auditoria", heading: "DESCOMPLICA LEAD", allowed: adminRoles },
   {
     path: "/app/repasse",
     heading: "Consulta de repasses",
@@ -666,7 +666,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
-    ...leadRoutes,
+    "/app/leads",
     metaAdsRoutes[0],
     "/app/simulacao",
     ...managementRoutes,
@@ -679,7 +679,7 @@ const expectedHeaderRoutesByRole: Readonly<Record<Role, readonly string[]>> = {
     "/app/ranking",
     "/app/canal-de-parcerias",
     "/app/repasse",
-    ...leadRoutes,
+    "/app/leads",
     metaAdsRoutes[0],
     "/app/simulacao",
     ...managementRoutes,
@@ -759,10 +759,10 @@ function expectedPrimaryNavigationRootsForRole(role: Role) {
   }
   if (authorizedRoutes.has("/app/leads")) {
     roots.push({
-      name: "Lead",
-      tag: "BUTTON",
-      href: null,
-      controls: "authorized-navigation-crm-leads",
+      name: "LEAD+",
+      tag: "A",
+      href: "/app/leads",
+      controls: null,
     });
   }
   if (authorizedRoutes.has("/app/meta-ads")) {
@@ -969,7 +969,7 @@ test("the hosted profile matrix uses the exact approved commercial page sets", (
   for (const role of expectedRoles) {
     expect(allowedDirectRoutesForRole(role), role).toEqual(expectedDirectRoutesByRole[role]);
     expect(expectedHeaderRoutesByRole[role], role).toHaveLength(
-      adminRoles.has(role) ? 35 : activeOperationalRoles.has(role) ? 19 : 0,
+      adminRoles.has(role) ? 27 : activeOperationalRoles.has(role) ? 19 : 0,
     );
     expect(expectedAccountSettingsRoutesForRole(role), role).toHaveLength(
       adminRoles.has(role) ? 5 : 0,
@@ -1419,6 +1419,20 @@ for (const role of expectedRoles) {
         expect(response.headers()["cache-control"]).toContain("no-store");
         expect(await response.json()).toEqual({ error: expectedDisabledErrors[index] });
       }
+      // The isolated release environment has no operational LEAD+ database or memberships.
+      // Authorized users must see an honest unavailable state; other profiles remain denied.
+      const leadSession = await page.request.get("/app/leads/backend/session");
+      expect(leadSession.status()).toBe(adminRoles.has(role) ? 503 : 403);
+      expect(leadSession.headers()["cache-control"]).toContain("no-store");
+      const leadSessionBody = await leadSession.json();
+      expect(leadSessionBody).toEqual(
+        adminRoles.has(role)
+          ? { error: "DESCOMPLICA LEAD temporariamente indisponível." }
+          : { error: "forbidden" },
+      );
+      for (const key of ["user", "data", "demo", "preview", "access_token"]) {
+        expect(leadSessionBody).not.toHaveProperty(key);
+      }
       reportProgress("api-gates");
 
       // This is an authorization matrix, not a load test. Keep requests serial
@@ -1502,6 +1516,21 @@ for (const role of expectedRoles) {
           }),
         );
       expect(navigationRoots).toEqual(expectedPrimaryNavigationRootsForRole(role));
+      const leadLink = navigation.getByRole("link", { name: "LEAD+", exact: true });
+      await expect(leadLink).toHaveCount(adminRoles.has(role) ? 1 : 0);
+      await expect(navigation.locator("#authorized-navigation-crm-leads")).toHaveCount(0);
+      if (adminRoles.has(role)) {
+        await leadLink.click();
+        await expect(page).toHaveURL((url) => url.pathname === "/app/leads");
+        const leadWorkspace = page.locator("[data-lead-plus-host]");
+        await expect(
+          leadWorkspace.getByRole("heading", { name: "DESCOMPLICA LEAD", exact: true }),
+        ).toBeVisible();
+        await expect(leadWorkspace.getByRole("status")).toHaveText(
+          "DESCOMPLICA LEAD temporariamente indisponível.",
+        );
+        await expect(leadWorkspace.locator('input[type="password"]')).toHaveCount(0);
+      }
       const metaLink = page.locator(
         '#authorized-navigation-crm-management a[href="/app/configuracoes/metas"]',
       );
