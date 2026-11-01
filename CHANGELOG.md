@@ -1,8 +1,9 @@
 # Changelog
 
-- Implementa altura máxima das torres de Agendamentos em pixels, sem faixa
-  percentual e sem alterar dimensões do card. Validação local aprovada;
-  nova migration autorizada após CI verde; publicação aguarda o candidato final.
+- Publica altura máxima das torres de Agendamentos em pixels, sem faixa
+  percentual e sem alterar o tamanho ou a posição dos cards. Salvamento único,
+  refresh, sincronização entre Chrome/integrado e rotação móvel simulada validados;
+  migration autorizada aplicada e largura fluida preservada no editor completo.
 
 - Publicado em Agendamentos: sidebar abre ao passar o mouse e recolhe ao sair, sem botão
   Ocultar; atualização dos dados no topo direito. Altura das torres ganha
