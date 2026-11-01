@@ -16,6 +16,7 @@ import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configura
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import { AppointmentsColumns as Columns } from "./AppointmentsColumns";
 import { AppointmentsComparison, DailyChartTypeControl } from "./AppointmentsComparison";
+import { buildAppointmentComparison, type AppointmentComparison } from "./appointments-comparison";
 import comparisonStyles from "./AppointmentsComparison.module.css";
 import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
@@ -1181,6 +1182,17 @@ function AppointmentTable({
   );
 }
 
+function lazyAppointmentComparison(
+  analysis: DashboardAnalysisSlice | null,
+  options: Parameters<typeof buildAppointmentComparison>[1],
+) {
+  let comparison: AppointmentComparison | null = null;
+  return () => {
+    if (comparison === null && analysis) comparison = buildAppointmentComparison(analysis, options);
+    return comparison;
+  };
+}
+
 export function AppointmentsDashboard({
   analysis,
   brokerRoster = null,
@@ -1273,6 +1285,18 @@ export function AppointmentsDashboard({
       resolvedGoals,
       currentCalendarDate,
     ],
+  );
+  // A dragged or copied card may remount. Share the lazy calculation only
+  // within this dashboard and this exact set of analysis inputs.
+  const getComparison = useMemo(
+    () =>
+      lazyAppointmentComparison(analysis, {
+        month: selectedMonth,
+        filters,
+        brokerRoster,
+        goalsByMonth: resolvedGoals,
+      }),
+    [analysis, selectedMonth, filters, brokerRoster, resolvedGoals],
   );
   const yearId = useId();
   if (!analysis || !result)
@@ -1738,15 +1762,7 @@ export function AppointmentsDashboard({
       ),
       line: (
         <Chart title="Comparativo diário de agendamentos" controls={<DailyChartTypeControl />}>
-          <AppointmentsComparison
-            analysis={analysis}
-            options={{
-              month: selectedMonth,
-              filters,
-              brokerRoster,
-              goalsByMonth: resolvedGoals,
-            }}
-          />
+          <AppointmentsComparison getComparison={getComparison} />
         </Chart>
       ),
     },

@@ -101,6 +101,12 @@ Sábados e domingos das torres recebem círculos calculados pela data do bucket.
 No celular, o plot diário tem rolagem horizontal por teclado para preservar
 legibilidade, sem alargar a página.
 
+O resultado do comparativo é calculado sob demanda e compartilhado dentro da
+instância do Dashboard entre cópias e a camada flutuante do arraste. Mudanças
+de análise, mês, filtros, elenco ou metas invalidam esse resultado. Nenhum
+resultado de usuário é mantido em cache global; o formatter de timezone reutiliza
+somente sua configuração fixa.
+
 As ações compactas de cada card oferecem copiar, adicionar do zero e abrir as
 ferramentas do painel. Hover e foco revelam os ícones; toque mantém menu com
 alvos acessíveis. Organizar, histórico e PDF continuam nas ferramentas, sem
@@ -169,3 +175,7 @@ compatível com os perfis novos. Uma recuperação de backup ou conversão de
 layouts requer plano revisado, backup dos documentos originais e autorização
 específica para mutação de dados. Não remover `width`, reduzir dimensões ou
 restaurar dados automaticamente durante rollback.
+
+O tipo `line` já era aceito no documento, mas a imagem anterior ao PR461 não
+renderiza o comparativo diário. Depois de salvar esse modelo, preferir correção
+compatível; preservar o perfil e não converter cards automaticamente no rollback.

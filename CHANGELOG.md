@@ -1,5 +1,8 @@
 # Changelog
 
+- Evita reconstruir o comparativo de linhas ao arrastar ou copiar gráficos de
+  Agendamentos e reutiliza a configuração de data de São Paulo, preservando cálculos.
+
 - Atualiza Agendamentos com mês civil vigente, valor real de vendas, filtros
   compactos, cards de vidro com borda única, rankings alinhados e comparativo
   diário em três linhas. Referência pontilhada única, fins de semana destacados

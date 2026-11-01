@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-11-01 — Comparativo de linhas durante arraste
+
+- O smoke publicado encontrou recálculo pesado ao montar o gráfico de linhas
+  na camada de arraste. O perfil permaneceu intacto nos dois navegadores.
+- Reutiliza o formatter fixo de São Paulo e mantém o comparativo lazy na
+  instância do Dashboard, compartilhado entre gráfico, cópias e camada de arraste.
+  Filtros, cobertura, metas, datas e layouts mantêm o mesmo contrato.
+- Análise, comparativo e timezone: 71 testes aprovados. Benchmark sintético
+  pareado de 100 registros: 4.052,54 ms antes e 229,33–300,51 ms depois do
+  formatter, com saída integral idêntica. Não representa latência real do site.
+- Getter: 13 verificações aprovadas; arraste desktop antigo construía 1→2→3
+  comparativos e candidato mantém 1→1→1; celular mantém 7→7→7. Dois SSR,
+  tipos e build Next16.4.1/Node24 passaram. CI e novo smoke seguem pendentes;
+  sem migration ou dados reescritos.
+
 ## 2026-11-01 — Calendário, vendas e comparativos de Agendamentos
 
 - Calendário civil vigente com seleção manual; cabeçalho e filtros compactos,
