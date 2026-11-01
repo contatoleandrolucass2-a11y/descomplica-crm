@@ -62,6 +62,10 @@ uma grade 3 × 2; conteúdos extensos usam rolagem vertical acessível por tecla
 A tabela usa largura fixa, quebra texto, cabeçalho aderente e rolagem apenas
 vertical. Barras, rótulos, rankings e linhas da tabela recebem realce no hover.
 
+Ranking Score usa uma referência pontilhada na maior quantidade observada no
+recorte. Essa referência não representa meta comercial nem classifica barras
+como atingidas ou abaixo da meta; as cores das categorias são preservadas.
+
 Filtros dimensionais de canal, regional, gerente, responsável, empresa e ranking
 recortam também o elenco cadastrado. A meta, a equipe produtiva e a contagem de
 gerentes usam esse elenco filtrado. O período continua recortando as métricas

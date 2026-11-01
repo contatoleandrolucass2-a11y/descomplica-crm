@@ -60,7 +60,7 @@ export function AppointmentsColumns({
   onSelect?: (bucket: AppointmentBucket) => void;
   monthly?: boolean;
   verticalLabels?: boolean;
-  reference?: { value: number | null; label: string };
+  reference?: { value: number | null; label: string; classify?: boolean };
 }) {
   const control = useDashboardBarHeightControl();
   const host = useRef<HTMLDivElement>(null);
@@ -139,6 +139,7 @@ export function AppointmentsColumns({
   const maximum = Math.max(1, largest?.total ?? 0);
   const pixelsPerUnit = renderedLimit / maximum;
   const referenceName = reference?.label ?? "Meta";
+  const classifyReference = reference?.classify !== false;
   const referenceValue =
     reference?.value != null && Number.isFinite(reference.value) && reference.value >= 0
       ? reference.value
@@ -190,6 +191,7 @@ export function AppointmentsColumns({
       data-appointments-plot
       data-pixel-height={limit ?? "auto"}
       data-appointments-rendered-max={renderedLimit}
+      data-reference-classify={classifyReference ? "true" : "false"}
     >
       <div className={styles.columnsHeading}>
         <p className={styles.axis}>
@@ -288,7 +290,7 @@ export function AppointmentsColumns({
                     type="button"
                     data-appointments-day={daily ? item.key : undefined}
                     aria-pressed={isSelected ? isSelected(item) : selected === item.key}
-                    aria-label={`${daily ? item.key.split("-").reverse().join("/") : item.label}${weekend ? `, ${weekend}` : ""}: ${number.format(item.total)} agendamentos${goal == null ? "" : `; ${reference ? referenceName : "meta"} ${number.format(goal)}; ${item.total >= goal ? "referência atingida" : "abaixo da referência"}`}`}
+                    aria-label={`${daily ? item.key.split("-").reverse().join("/") : item.label}${weekend ? `, ${weekend}` : ""}: ${number.format(item.total)} agendamentos${goal == null ? "" : `; ${reference ? referenceName : "meta"} ${number.format(goal)}${classifyReference ? `; ${item.total >= goal ? "referência atingida" : "abaixo da referência"}` : ""}`}`}
                     className={styles.chartButton}
                     onClick={() => onSelect?.(item)}
                   >
@@ -306,13 +308,15 @@ export function AppointmentsColumns({
                         className={styles.column}
                         data-appointments-bar
                         data-goal-status={
-                          goal == null
-                            ? reference || "goal" in item
-                              ? "unavailable"
-                              : "neutral"
-                            : item.total >= goal
-                              ? "positive"
-                              : "negative"
+                          !classifyReference
+                            ? "neutral"
+                            : goal == null
+                              ? reference || "goal" in item
+                                ? "unavailable"
+                                : "neutral"
+                              : item.total >= goal
+                                ? "positive"
+                                : "negative"
                         }
                         style={{ height: "var(--rendered-bar-height)" }}
                       />
@@ -368,7 +372,8 @@ export function AppointmentsColumns({
       </div>
       {knownGoals.length > 0 && (
         <p className={styles.chartLegend}>
-          Vermelho: abaixo da referência · Azul: referência atingida · Pontilhado: {referenceName}{" "}
+          {classifyReference ? "Vermelho: abaixo da referência · Azul: referência atingida · " : ""}
+          Pontilhado: {referenceName}{" "}
           {minGoal === maxGoal
             ? number.format(minGoal ?? 0)
             : `${number.format(minGoal ?? 0)}–${number.format(maxGoal ?? 0)}`}
@@ -388,7 +393,7 @@ export function AppointmentsColumns({
         <p className={styles.referenceNotice}>
           {knownGoals.length
             ? "Referência indisponível em parte do período; a linha aparece somente nos trechos conhecidos."
-            : `${referenceName} indisponível para este recorte · Sem classificação de produtividade`}
+            : `${referenceName} indisponível para este recorte${classifyReference ? " · Sem classificação de produtividade" : ""}`}
         </p>
       )}
     </div>

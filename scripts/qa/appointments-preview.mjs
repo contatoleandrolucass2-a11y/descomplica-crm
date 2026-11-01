@@ -356,6 +356,32 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
               weekends: host.querySelectorAll("[data-appointments-weekend]").length,
             };
           })(),
+          scoreRuler: (() => {
+            const card = document.querySelector('[data-dashboard-card-id="ranking-score"]');
+            const host = card?.querySelector("[data-appointments-plot]");
+            const reference = host?.querySelector("[data-appointments-goal-line]");
+            const layer = host?.querySelector("[data-appointments-references]");
+            const svg = reference?.ownerSVGElement;
+            if (!host || !reference || !layer || !svg) return null;
+            const bars = [...host.querySelectorAll("[data-appointments-track]")].map((track) => ({
+              value: Number(
+                track.querySelector("[data-appointments-value]").textContent.replaceAll(".", ""),
+              ),
+              top: track.querySelector("[data-appointments-bar]").getBoundingClientRect().top,
+              status: track.querySelector("[data-appointments-bar]").dataset.goalStatus,
+              label: track.closest("button").getAttribute("aria-label"),
+            }));
+            const point = reference.getPointAtLength(0);
+            const bounds = layer.getBoundingClientRect();
+            return {
+              bars,
+              dottedReferences: host.querySelectorAll("[data-appointments-goal-line]").length,
+              solidReferences: host.querySelectorAll("[data-dashboard-bar-top-line]").length,
+              classify: host.dataset.referenceClassify,
+              referenceTop: bounds.top + (point.y / svg.viewBox.baseVal.height) * bounds.height,
+              legend: host.querySelector('[class*="chartLegend"]')?.textContent,
+            };
+          })(),
           recencyBorders: ["recency-up-to-7", "recency-8-to-14", "recency-15-plus"].map((id) => {
             const panel = document.querySelector(
               `[data-dashboard-card-id="${id}"] [class*="recencyPanel"]`,
@@ -411,6 +437,33 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
                 bar.trackHeight - ruler.renderedMaximum <= 40 * ruler.scale,
             ),
           `Daily maximum remains near the top with aligned references and label headroom ${theme}/${viewport.width}`,
+        );
+      }
+      const score = layout.scoreRuler;
+      check(Boolean(score), `Ranking Score observed ruler initialized ${theme}/${viewport.width}`);
+      if (score) {
+        const maximum = Math.max(...score.bars.map((bar) => bar.value));
+        check(
+          score.dottedReferences === 1 && score.solidReferences === 0 && score.classify === "false",
+          `Ranking Score has one dotted observed reference and no commercial classification ${theme}/${viewport.width}`,
+        );
+        check(
+          score.bars.every(
+            (bar) =>
+              bar.status === "neutral" &&
+              bar.label.includes(`; Maior quantidade no recorte ${maximum}`) &&
+              !/referência atingida|abaixo da referência/u.test(bar.label),
+          ),
+          `Ranking Score labels and categories stay neutral ${theme}/${viewport.width}`,
+        );
+        check(
+          Math.abs(score.referenceTop - Math.min(...score.bars.map((bar) => bar.top))) < 1,
+          `Ranking Score reference aligns with its largest actual quantity ${theme}/${viewport.width}`,
+        );
+        check(
+          score.legend?.includes("Pontilhado: Maior quantidade no recorte") &&
+            !/Vermelho:|Azul:|meta atingida/u.test(score.legend),
+          `Ranking Score legend describes an observed maximum instead of a sales target ${theme}/${viewport.width}`,
         );
       }
       if (layout.mobileColumns)

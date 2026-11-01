@@ -67,4 +67,35 @@ describe("appointments reference and calendar labels", () => {
     expect(html).toContain("Hoje: 0 agendamentos; Meta 0");
     expect(html).toContain('data-goal-status="positive"');
   });
+
+  it("shows an observed maximum without turning it into a commercial target or recoloring bars", () => {
+    const html = renderToStaticMarkup(
+      <AppointmentsColumns
+        label="Ranking Score"
+        reference={{ value: 48, label: "Maior quantidade no recorte", classify: false }}
+        buckets={[
+          { key: "gold", label: "Ouro", total: 48, goal: 20 },
+          { key: "silver", label: "Prata", total: 12, goal: 20 },
+        ]}
+      />,
+    );
+    expect(html).toContain("Ouro: 48 agendamentos; Maior quantidade no recorte 48");
+    expect(html).toContain("Prata: 12 agendamentos; Maior quantidade no recorte 48");
+    expect(html.match(/data-goal-status="neutral"/gu)).toHaveLength(2);
+    expect(html).toContain("Pontilhado: Maior quantidade no recorte");
+    expect(html).not.toMatch(/Vermelho:|Azul:|referência atingida|abaixo da referência|meta 20/u);
+  });
+
+  it("keeps an observed zero neutral", () => {
+    const html = renderToStaticMarkup(
+      <AppointmentsColumns
+        label="Ranking Score"
+        reference={{ value: 0, label: "Maior quantidade no recorte", classify: false }}
+        buckets={[{ key: "empty-score", label: "Não informado", total: 0 }]}
+      />,
+    );
+    expect(html).toContain('data-goal-status="neutral"');
+    expect(html).toContain("Não informado: 0 agendamentos; Maior quantidade no recorte 0");
+    expect(html).not.toMatch(/Vermelho:|Azul:|referência atingida|abaixo da referência/u);
+  });
 });

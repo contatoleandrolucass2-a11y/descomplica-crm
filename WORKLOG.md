@@ -10,12 +10,14 @@
   fins de semana circulados e plot diário legível no celular. Ajuste explícito de 500 px
   limpa caps dos gráficos preservando outros ajustes e permitindo desfazer.
 - Sem DDL, nova integração ou mudança de permissões. Node 24: tipos/build,
-  65 testes de análise/comparativo, 41 de interface/Canvas/calendário e 17 de
+  65 testes de análise/comparativo, 41 de interface/Canvas/calendário e 19 de
   colunas aprovados. QA integrada: 11 verificações e 6 capturas; CSS de produção:
   15 telas, 11 interações e 22 cenários de confirmação única aprovados.
 - Revisão corrigiu o dia atual acessível, os eixos das linhas e o observer após
   trocar meses com 31 dias. QA isola cenários aguardando confirmação do Desfazer;
   fila, erro e CAS continuam testados. CI, merge, publicação e smoke real pendentes.
+- Ranking Score recebe referência única na maior quantidade observada, sem
+  inventar meta comercial ou reclassificar as cores das categorias.
 
 ## 2026-11-01 — Estabilidade das torres em cards baixos
 

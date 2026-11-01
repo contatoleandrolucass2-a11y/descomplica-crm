@@ -1804,6 +1804,11 @@ export function AppointmentsDashboard({
             <Columns
               buckets={result.accountRankings ?? []}
               label="Ranking Score"
+              reference={{
+                value: Math.max(0, ...(result.accountRankings ?? []).map((bucket) => bucket.total)),
+                label: "Maior quantidade no recorte",
+                classify: false,
+              }}
               selected={filters.accountRanking}
               onSelect={(bucket) => toggleFilter("accountRanking", bucket.key)}
               verticalLabels

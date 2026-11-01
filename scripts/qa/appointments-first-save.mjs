@@ -312,8 +312,17 @@ export async function runAppointmentsFirstSave({ page, origin, evidence, artifac
       exactBars.every(({ goal }) => goal == null),
       "This fixture chart has no goal headroom",
     );
-    await expect(card(noGoalChart).locator("[data-appointments-goal-line]")).toHaveCount(0);
+    await expect(card(noGoalChart).locator("[data-appointments-goal-line]")).toHaveCount(1);
     await expect(card(noGoalChart).locator("[data-dashboard-bar-top-line]")).toHaveCount(0);
+    assert.ok(
+      await card(noGoalChart)
+        .locator("[data-appointments-bar]")
+        .evaluateAll((bars) => bars.every((bar) => bar.dataset.goalStatus === "neutral")),
+      "Observed Ranking Score reference does not classify categories against a commercial goal",
+    );
+    await expect(
+      card(noGoalChart).getByRole("img", { name: /^Maior quantidade no recorte:/u }),
+    ).toHaveCount(1);
     checkGeometry(exactBars, cap);
     assert.ok(
       Math.abs(Math.max(...exactBars.map(({ height }) => height)) - cap) < 1,

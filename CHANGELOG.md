@@ -4,6 +4,7 @@
   compactos, cards de vidro com borda única, rankings alinhados e comparativo
   diário em três linhas. Referência pontilhada única, fins de semana destacados
   e ajuste explícito dos gráficos para 500 px preservam a autonomia de layout.
+  No Ranking Score, a referência é o máximo observado, preservando as categorias.
 
 - Publica a correção móvel de Agendamentos pelo PR #458/024ae30b, com CI
   completa aprovada. Confirma persistência entre navegadores, nova reentrada e
