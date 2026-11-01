@@ -1,5 +1,9 @@
 # Changelog
 
+- Adiciona ativação protegida das credenciais de captura direta do LEAD+ pelo
+  coordenador de produção, com backup privado, comparação de hashes e recuperação
+  do JSON anterior. Preserva banco, Auth, métricas Meta Ads e inscrições do C2S.
+
 - Estabiliza a altura das torres em cards baixos no celular: o aviso de meta
   fora da escala mantém sua área e deixa de provocar ciclos de medição ao
   atualizar ou girar a tela. Preserva limite salvo, dimensões, posição e metas.

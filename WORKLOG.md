@@ -1,5 +1,31 @@
 # Worklog
 
+## 2026-11-01 — Ativação protegida da captura Facebook do LEAD+
+
+- O usuário solicitou concluir a conexão direta pela BM MÃE 2, usando o aplicativo
+  Descomplica Ads Analytics, preservando a integração do C2S e o token de métricas
+  do Meta Ads. A revisão jurídica permanece pendente por instrução expressa.
+- O painel Meta confirma permissões preparadas, callback ainda ausente e app não
+  publicado. A autorização da credencial dedicada e a nova confirmação de
+  identidade exigida pela BM MÃE 2 estão pendentes. Nenhum token foi criado,
+  callback salvo ou aplicativo inscrito durante esta preparação.
+- Foi identificada uma lacuna de recuperação do JSON privado: alterar sua origem
+  antes de uma promoção poderia permitir que outro publicador montasse o conteúdo
+  novo, e o coordenador não restauraria esse arquivo ao recuperar a imagem anterior.
+- A opção exclusiva `--lead-plus-meta enable` vincula backup, hashes, troca por CAS
+  e recuperação do JSON à intenção durável e às travas compartilhadas existentes.
+  Somente os três segredos de captura podem ser adicionados. Banco, Auth, métricas,
+  Página e encaminhamentos permanecem preservados, sem criação de equipes.
+- Validação focada inicial: 127 testes, 117 aprovados e dez dependentes de Linux;
+  os 14 testes novos passaram. Lint e formatação dos arquivos de implementação
+  aprovados. CI, prova da imagem, ativação remota e entrega real permanecem pendentes.
+- A política pública existente do CRM respondeu HTTP 200 e foi cadastrada no app
+  Meta com confirmação de salvamento. Seu estado de revisão jurídica não foi
+  alterado. Uma sondagem somente de leitura na imagem ativa identificou aplicativo
+  e worker, leu o arquivo montado e comparou os hashes das credenciais carregadas,
+  sem exibir seus valores. Essa sondagem não ativa a captura nem substitui a prova
+  da configuração nova após a promoção.
+
 ## 2026-11-01 — Estabilidade das torres em cards baixos
 
 - Após publicar PR457/c5458276, o smoke real encontrou oscilação em celular:

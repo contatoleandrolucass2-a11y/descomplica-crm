@@ -19,12 +19,14 @@ export async function recoverRelease(deploymentId, io) {
   // The rollback phase changes neither the candidate nor the recorded previous image.
   const boundarySha = pending.targetSha;
   const environmentChange = pending.environmentChange;
+  const runtimeChange = pending.runtimeChange;
   await io.prepare(
     {
       operation: "rollback",
       expectedSha: boundarySha,
       targetSha: previous.sha,
       targetImageId: previous.imageId,
+      ...(runtimeChange ? { runtimeChange } : {}),
     },
     previous,
   );
@@ -70,6 +72,7 @@ export async function recoverRelease(deploymentId, io) {
       expectedImageId: previous.imageId,
       boundarySha,
       ...(environmentChange ? { environmentChange, restoreEnvironment: true } : {}),
+      ...(runtimeChange ? { runtimeChange, restoreRuntime: true } : {}),
     },
     async () => {
       if (beforeWriteCompleted) throw new Error("Recovery before-write validation must run once.");
@@ -84,6 +87,7 @@ export async function recoverRelease(deploymentId, io) {
       previous.sha,
       previous.imageId,
       environmentChange ? { change: environmentChange, restore: true } : undefined,
+      runtimeChange ? { change: runtimeChange, restore: true } : undefined,
     );
     await io.writeState(state, { ...state, inProgress: null });
     return { status: "aborted", release: previous };
@@ -102,6 +106,7 @@ export async function recoverRelease(deploymentId, io) {
     previous.sha,
     previous.imageId,
     environmentChange ? { change: environmentChange, restore: true } : undefined,
+    runtimeChange ? { change: runtimeChange, restore: true } : undefined,
   );
   const restoredDeploymentId = io.id();
   const completedAt = io.now();

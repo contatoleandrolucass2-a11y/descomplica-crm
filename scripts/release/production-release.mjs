@@ -30,7 +30,7 @@ export function parseReleaseArguments(args) {
   const required = operations[operation];
   const optional =
     operation === "deploy"
-      ? ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api"]
+      ? ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api", "lead-plus-meta"]
       : operation === "qlik-deploy"
         ? ["ranking"]
         : [];
@@ -60,10 +60,12 @@ export function parseReleaseArguments(args) {
     throw new Error("Only explicit Meta Ads enable is supported.");
   if (values["meta-ads-api"] && values["meta-ads-api"] !== "enable")
     throw new Error("Only explicit Meta Ads API enable is supported.");
+  if (values["lead-plus-meta"] && values["lead-plus-meta"] !== "enable")
+    throw new Error("Only explicit LEAD+ Meta enable is supported.");
   if (values.ranking && values.ranking !== "enable")
     throw new Error("Only explicit Qlik owner ranking enable is supported.");
   if (
-    ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api"].filter(
+    ["salesforce-ingestion", "qlik-ranking", "meta-ads", "meta-ads-api", "lead-plus-meta"].filter(
       (key) => values[key],
     ).length > 1
   )
@@ -156,6 +158,7 @@ async function main(args) {
         ...(values["qlik-ranking"] === "enable" ? { qlikRanking: true } : {}),
         ...(values["meta-ads"] === "enable" ? { metaAds: true } : {}),
         ...(values["meta-ads-api"] === "enable" ? { metaAdsApi: true } : {}),
+        ...(values["lead-plus-meta"] === "enable" ? { leadPlusMeta: true } : {}),
       },
       io,
     );

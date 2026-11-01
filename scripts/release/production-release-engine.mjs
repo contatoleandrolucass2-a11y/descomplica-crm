@@ -53,14 +53,21 @@ export async function executeRelease(options, io) {
     fail("Meta Ads requires an explicit enable request.");
   if (options.metaAdsApi !== undefined && options.metaAdsApi !== true)
     fail("Meta Ads API requires an explicit enable request.");
+  if (options.leadPlusMeta !== undefined && options.leadPlusMeta !== true)
+    fail("LEAD+ Meta requires an explicit enable request.");
   if (
-    [options.salesforceIngestion, options.qlikRanking, options.metaAds, options.metaAdsApi].filter(
-      Boolean,
-    ).length > 1
+    [
+      options.leadPlusMeta,
+      options.salesforceIngestion,
+      options.qlikRanking,
+      options.metaAds,
+      options.metaAdsApi,
+    ].filter(Boolean).length > 1
   )
     fail("Integration configurations require separate releases.");
-  const configurationRequested =
+  const environmentRequested =
     options.salesforceIngestion || options.qlikRanking || options.metaAds || options.metaAdsApi;
+  const configurationRequested = environmentRequested || options.leadPlusMeta;
   const releaseOptions = {
     operation: options.operation,
     expectedDeploymentId: options.expectedDeploymentId,
@@ -72,6 +79,7 @@ export async function executeRelease(options, io) {
     ...(options.qlikRanking ? { qlikRanking: true } : {}),
     ...(options.metaAds ? { metaAds: true } : {}),
     ...(options.metaAdsApi ? { metaAdsApi: true } : {}),
+    ...(options.leadPlusMeta ? { leadPlusMeta: true } : {}),
   };
   const { operation, expectedDeploymentId, expectedSha, targetSha, targetImageId, ciRunId } =
     releaseOptions;
@@ -104,8 +112,11 @@ export async function executeRelease(options, io) {
   if (deploymentId === previousState.release.deploymentId) {
     fail("A new release must have a new deployment ID.");
   }
-  const environmentChange = configurationRequested
+  const environmentChange = environmentRequested
     ? await io.prepareEnvironmentChange(releaseOptions, deploymentId)
+    : undefined;
+  const runtimeChange = options.leadPlusMeta
+    ? await io.prepareRuntimeChange(releaseOptions, deploymentId)
     : undefined;
   const startedAt = io.now();
   assertFreshObservation(finalObservation, startedAt);
@@ -118,8 +129,9 @@ export async function executeRelease(options, io) {
     startedAt: new Date(startedAt).toISOString(),
     operation,
     ...(environmentChange ? { environmentChange } : {}),
+    ...(runtimeChange ? { runtimeChange } : {}),
   };
-  if (configurationRequested && !environmentChange)
+  if (configurationRequested && !environmentChange && !runtimeChange)
     fail("A durable environment backup is required before deployment intent.");
   const intentState = {
     schemaVersion: 1,
@@ -138,6 +150,7 @@ export async function executeRelease(options, io) {
       expectedImageId: targetImageId,
       boundarySha: targetSha,
       ...(environmentChange ? { environmentChange } : {}),
+      ...(runtimeChange ? { runtimeChange } : {}),
     },
     async () => {
       if (beforeWriteAttempted) {
@@ -177,6 +190,7 @@ export async function executeRelease(options, io) {
     targetSha,
     targetImageId,
     environmentChange ? { change: environmentChange, restore: false } : undefined,
+    runtimeChange ? { change: runtimeChange, restore: false } : undefined,
   );
 
   const completedAt = io.now();
