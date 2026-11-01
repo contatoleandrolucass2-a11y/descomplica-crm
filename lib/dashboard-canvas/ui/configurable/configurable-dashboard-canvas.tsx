@@ -284,6 +284,7 @@ export function ConfigurableDashboardCanvas({
   hideCardOverflow = false,
   addButtonLabel = "Adicionar",
   preserveExpandedPresentation = false,
+  cardPresets,
 }: ConfigurableDashboardCanvasProps) {
   const [state, dispatch] = useReducer(canvasReducer, initialCards, (cards) =>
     createCanvasHistoryState(cards, undefined, layoutPolicy),
@@ -660,6 +661,13 @@ export function ConfigurableDashboardCanvas({
         <DashboardBarHeightControlContext.Provider
           value={{
             title: card.title,
+            type: card.type,
+            onTypeChange: directEditingReady
+              ? (type) => {
+                  if (!compatibleTypes(card.metric, compatibility).includes(type)) return;
+                  dispatch({ type: "update-card", cardId: card.id, patch: { type } });
+                }
+              : undefined,
             value: card.presentation?.barMaxHeight,
             editable: directEditingReady && card.type === "bars",
             onCommit: (height) => commitBarHeight(card.id, height),
@@ -669,7 +677,14 @@ export function ConfigurableDashboardCanvas({
         </DashboardBarHeightControlContext.Provider>
       );
     },
-    [contentByMetricAndType, renderCard, pageKey, directEditingReady, commitBarHeight],
+    [
+      contentByMetricAndType,
+      renderCard,
+      pageKey,
+      directEditingReady,
+      commitBarHeight,
+      compatibility,
+    ],
   );
 
   function openPanelTools(trigger: HTMLButtonElement) {
@@ -976,6 +991,19 @@ export function ConfigurableDashboardCanvas({
             >
               <LayoutGrid size={17} aria-hidden="true" /> Organizar
             </button>
+            {cardPresets?.map((preset) => (
+              <button
+                key={preset.label}
+                type="button"
+                disabled={!directEditingReady}
+                onClick={() => {
+                  if (saveConflictRef.current) return;
+                  dispatch({ type: "replace", cards: preset.apply(cards) });
+                }}
+              >
+                {preset.label}
+              </button>
+            ))}
             <button
               type="button"
               onClick={() => dispatch({ type: "undo" })}

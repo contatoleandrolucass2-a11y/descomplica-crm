@@ -56,14 +56,17 @@ físico: um valor maior não aumenta o card nem corta cada torre individualmente
 Perfis antigos com `barScale` preservam a aparência até alterar explicitamente
 o campo de altura; editar só título ou cor não migra esse ajuste. O novo limite
 em pixels tem precedência quando presente. O popup dedicado foi removido:
-Enter ou saída do campo confirma; arrastar a linha superior confirma ao soltar.
+Enter ou saída do campo confirma. A linha sólida e seu controle de arraste foram removidos;
+o campo em pixels e o reset para automático continuam disponíveis.
 Escape descarta o rascunho. O estado de gravação continua acessível no painel.
 
-A linha superior acompanha o maior realizado do recorte. As sete linhas de
-grade foram removidas. A meta usa um único caminho pontilhado conectado entre
-os períodos conhecidos, recalculado pelo filtro; ausências não viram zero.
-Metas acima da área disponível são sinalizadas, preservando seus valores.
-Essas regras valem para os gráficos diários, semanais e mensais.
+A escala automática aproxima o maior realizado do topo, com espaço para seu rótulo;
+as demais torres mantêm proporção e base zero. Não há grade ou linha sólida.
+O diário usa uma referência pontilhada horizontal de corretores do recorte;
+o mensal usa a meta do mês selecionado. Semanas e previstos mantêm suas metas
+conhecidas em um único caminho pontilhado. Referências acima da área disponível
+são sinalizadas; ausência não vira zero nem reutiliza uma referência antiga.
+Essa apresentação não altera as metas oficiais dos indicadores e do funil.
 O aviso de meta fora da escala reserva a mesma área enquanto houver meta
 conhecida; quando inativo, fica invisível e fora da árvore acessível. Sua
 presença não pode alterar condicionalmente a área que determina a própria
@@ -81,6 +84,22 @@ preservando o campo. Não remover o limite salvo nem converter dados durante
 rollback sem plano e autorização específicos.
 
 ## Cópias, controles e sidebar
+
+Os gráficos e listas abaixo do funil têm altura inicial de 500 px. Perfis salvos
+mantêm preferências até uma ação explícita: nas ferramentas, **Gráficos: 500 px
+e escala automática** ajusta apenas esses blocos, limpa limites/percentuais de torres
+e preserva largura, ordem, fontes, cores, indicadores e funil. A ação salva pelo
+mesmo CAS e pode ser desfeita. Resize posterior continua livre e persistente.
+
+O gráfico diário oferece **Torres** e **Linhas comparativas** no canto superior.
+O modelo fica salvo no perfil, usando o tipo `line` já permitido. A comparação
+alinha os dias 1–31 do mês selecionado, do anterior e da média diária dos meses
+cobertos do ano; dias futuros, inexistentes ou sem cobertura ficam ausentes.
+Filtros dimensionais permanecem; seleção de dia, semana e intervalo não é
+transportada a outros meses. A descrição e a tabela acessível explicam o recorte.
+Sábados e domingos das torres recebem círculos calculados pela data do bucket.
+No celular, o plot diário tem rolagem horizontal por teclado para preservar
+legibilidade, sem alargar a página.
 
 As ações compactas de cada card oferecem copiar, adicionar do zero e abrir as
 ferramentas do painel. Hover e foco revelam os ícones; toque mantém menu com

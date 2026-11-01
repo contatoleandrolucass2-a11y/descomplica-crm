@@ -11,11 +11,17 @@ import { chromium, expect } from "@playwright/test";
 import { runAppointmentsFirstSave } from "./appointments-first-save.mjs";
 
 const root = path.resolve(import.meta.dirname, "../..");
+const artifactSubdir = process.argv
+  .find((argument) => argument.startsWith("--artifact-subdir="))
+  ?.slice("--artifact-subdir=".length);
+if (artifactSubdir !== undefined && !/^[a-z0-9][a-z0-9_-]{0,79}$/u.test(artifactSubdir))
+  throw new Error("Artifact subdirectory must be a simple lowercase name.");
 const outputRoot = path.join(
   root,
   process.argv.includes("--first-save-only")
     ? "test-results/appointments-first-save"
     : "test-results/appointments-preview",
+  artifactSubdir ?? "",
 );
 const componentDirectory = "app/(protected)/app/etapas/_components";
 const require = createRequire(import.meta.url);
@@ -144,6 +150,10 @@ async function productionCss(viteCss) {
   for (const name of [
     "AppointmentsDashboard.tsx",
     "AppointmentsDashboard.module.css",
+    "AppointmentsColumns.tsx",
+    "AppointmentsColumnsOverrides.module.css",
+    "AppointmentsComparison.tsx",
+    "AppointmentsComparison.module.css",
     "ChartBoard.tsx",
     "ChartBoard.module.css",
   ])
@@ -163,30 +173,64 @@ async function productionCss(viteCss) {
   ).join("\n");
   const viteRules = postcss.parse(viteCss);
   const mappings = new Map();
-  const moduleAnchor = compiled.match(/\.([\w-]+)_verticalLabels\b/);
-  assert.ok(moduleAnchor, "Compiled AppointmentsDashboard CSS module must exist");
-  const modulePrefix = moduleAnchor[1];
-  const compiledClass = new RegExp(`\\.(${modulePrefix}_([\\w-]+))\\b`, "g");
-  for (const match of compiled.matchAll(compiledClass)) {
-    const vite = [...viteCss.matchAll(/\.([\w-]+)\b/g)].find(
-      (item) =>
-        item[1].startsWith("AppointmentsDashboard_module_") && item[1].includes(`_${match[2]}_`),
+  const mappedModules = [];
+  for (const cssModule of [
+    { name: "AppointmentsDashboard", anchor: "verticalLabels" },
+    { name: "AppointmentsColumnsOverrides", anchor: "dailyViewport" },
+    { name: "AppointmentsComparison", anchor: "typeControl" },
+    { name: "ChartBoard", anchor: "board", optional: true },
+  ]) {
+    const viteClasses = new Map(
+      [
+        ...viteCss.matchAll(
+          new RegExp(`\\.(${cssModule.name}_module_([\\w-]+)_qa)(?![\\w-])`, "g"),
+        ),
+      ].map((match) => [match[2], match[1]]),
     );
-    assert.ok(vite, `Vite class for ${match[2]} must exist`);
-    mappings.set(vite[1], match[1]);
-  }
-  assert.ok(mappings.size > 10, "Scoped Next AppointmentsDashboard CSS must exist");
-  const boardAnchor = compiled.match(
-    /\.([\w-]+)_board\{grid-template-columns:repeat\(3,minmax\(0,1fr\)\)/,
-  );
-  assert.ok(boardAnchor, "Compiled ChartBoard CSS module must exist");
-  for (const match of compiled.matchAll(new RegExp(`\\.(${boardAnchor[1]}_([\\w-]+))\\b`, "g"))) {
-    const vite = [...viteCss.matchAll(/\.([\w-]+)\b/g)].find(
-      (item) => item[1].startsWith("ChartBoard_module_") && item[1].includes(`_${match[2]}_`),
+    const anchorPrefixes = [
+      ...new Set(
+        [...compiled.matchAll(new RegExp(`\\.([\\w-]+)_${cssModule.anchor}\\b`, "g"))].map(
+          (match) => match[1],
+        ),
+      ),
+    ];
+    const compiledPrefixes =
+      cssModule.name === "ChartBoard"
+        ? anchorPrefixes.filter((prefix) =>
+            ["tile", "wide", "blue", "yellow", "red"].every((suffix) =>
+              new RegExp(`\\.${prefix}_${suffix}(?![\\w-])`, "u").test(compiled),
+            ),
+          )
+        : anchorPrefixes;
+    if (cssModule.optional && viteClasses.size === 0 && compiledPrefixes.length === 0) {
+      mappedModules.push({
+        name: cssModule.name,
+        present: false,
+        reason: "Absent in both bundles",
+      });
+      continue;
+    }
+    assert.ok(viteClasses.size > 0, `Vite ${cssModule.name} CSS module must exist`);
+    const candidates = compiledPrefixes.filter((prefix) =>
+      [...viteClasses.keys()].every((suffix) =>
+        new RegExp(`\\.${prefix}_${suffix}(?![\\w-])`, "u").test(compiled),
+      ),
     );
-    assert.ok(vite, `Vite ChartBoard class for ${match[2]} must exist`);
-    mappings.set(vite[1], match[1]);
+    assert.equal(
+      candidates.length,
+      1,
+      `Exactly one production ${cssModule.name} module must match all source classes`,
+    );
+    const prefix = candidates[0];
+    for (const [suffix, viteClass] of viteClasses) mappings.set(viteClass, `${prefix}_${suffix}`);
+    mappedModules.push({
+      name: cssModule.name,
+      present: true,
+      mappedClasses: viteClasses.size,
+      prefix,
+    });
   }
+  assert.ok(mappings.size > 10, "Scoped Next component CSS must exist");
   const transformed = postcss.parse(compiled);
   transformed.walkRules((rule) => {
     for (const [vite, next] of mappings)
@@ -198,7 +242,8 @@ async function productionCss(viteCss) {
   return {
     css: `${viteRules}\n${transformed}`,
     evidence: {
-      mode: "Next production CSS; Vite component rules removed",
+      mode: "Next production CSS for the verified component modules; their Vite rules removed",
+      mappedModules,
       buildCompletedAt: buildTime.mtime.toISOString(),
       sha256: createHash("sha256").update(compiled).digest("hex"),
       cssFiles,
@@ -225,6 +270,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   ];
   const themes = ["light", "balanced", "dark"];
   evidence.canvas = { screens: [], interactions: [] };
+  evidence.canvasPhase = "screens";
 
   for (const viewport of process.argv.includes("--canvas-interactions-only") ? [] : viewports) {
     await page.setViewportSize(viewport);
@@ -234,6 +280,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     await expect(page.locator("[data-dashboard-card-id]")).toHaveCount(28);
 
     for (const theme of themes) {
+      evidence.canvasPhase = `screen:${theme}/${viewport.width}`;
       await page.evaluate(
         (value) => document.documentElement.setAttribute("data-theme", value),
         theme,
@@ -282,11 +329,72 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
                   widths: [...new Set(boxes.map(({ width }) => Math.round(width)))],
                 },
           toolbarOverflow: Boolean(toolbar && toolbar.scrollWidth > toolbar.clientWidth + 1),
+          dailyRuler: (() => {
+            const card = document.querySelector('[data-dashboard-card-id="appointments-daily"]');
+            const host = card?.querySelector("[data-appointments-plot]");
+            const references = card?.querySelector("[data-appointments-references]");
+            if (!host || !references) return null;
+            const scale = host.clientWidth
+              ? host.getBoundingClientRect().width / host.clientWidth
+              : 1;
+            const renderedMaximum = Number(host.dataset.appointmentsRenderedMax) * scale;
+            const bars = [...host.querySelectorAll("[data-appointments-track]")].map((track) => ({
+              value: Number(
+                track.querySelector("[data-appointments-value]").textContent.replaceAll(".", ""),
+              ),
+              height: track.querySelector("[data-appointments-bar]").getBoundingClientRect().height,
+              trackHeight: track.getBoundingClientRect().height,
+              label: track.closest("button").getAttribute("aria-label"),
+            }));
+            return {
+              scale,
+              renderedMaximum,
+              bars,
+              referenceHeight: references.getBoundingClientRect().height,
+              dottedReferences: host.querySelectorAll("[data-appointments-goal-line]").length,
+              solidReferences: host.querySelectorAll("[data-dashboard-bar-top-line]").length,
+              weekends: host.querySelectorAll("[data-appointments-weekend]").length,
+            };
+          })(),
+          scoreRuler: (() => {
+            const card = document.querySelector('[data-dashboard-card-id="ranking-score"]');
+            const host = card?.querySelector("[data-appointments-plot]");
+            const reference = host?.querySelector("[data-appointments-goal-line]");
+            const layer = host?.querySelector("[data-appointments-references]");
+            const svg = reference?.ownerSVGElement;
+            if (!host || !reference || !layer || !svg) return null;
+            const bars = [...host.querySelectorAll("[data-appointments-track]")].map((track) => ({
+              value: Number(
+                track.querySelector("[data-appointments-value]").textContent.replaceAll(".", ""),
+              ),
+              top: track.querySelector("[data-appointments-bar]").getBoundingClientRect().top,
+              status: track.querySelector("[data-appointments-bar]").dataset.goalStatus,
+              label: track.closest("button").getAttribute("aria-label"),
+            }));
+            const point = reference.getPointAtLength(0);
+            const bounds = layer.getBoundingClientRect();
+            return {
+              bars,
+              dottedReferences: host.querySelectorAll("[data-appointments-goal-line]").length,
+              solidReferences: host.querySelectorAll("[data-dashboard-bar-top-line]").length,
+              classify: host.dataset.referenceClassify,
+              referenceTop: bounds.top + (point.y / svg.viewBox.baseVal.height) * bounds.height,
+              legend: host.querySelector('[class*="chartLegend"]')?.textContent,
+            };
+          })(),
           recencyBorders: ["recency-up-to-7", "recency-8-to-14", "recency-15-plus"].map((id) => {
             const panel = document.querySelector(
               `[data-dashboard-card-id="${id}"] [class*="recencyPanel"]`,
             );
-            return panel ? getComputedStyle(panel).boxShadow : null;
+            const card = panel?.closest("[data-dashboard-card-id]");
+            return panel && card
+              ? {
+                  outerColor: getComputedStyle(card).borderTopColor,
+                  outerWidth: Number.parseFloat(getComputedStyle(card).borderTopWidth),
+                  innerWidth: Number.parseFloat(getComputedStyle(panel).borderTopWidth),
+                  innerShadow: getComputedStyle(panel).boxShadow,
+                }
+              : null;
           }),
         };
       });
@@ -298,14 +406,80 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
       check(layout.outside.length === 0, `Cards fit viewport ${theme}/${viewport.width}`);
       check(layout.overlaps.length === 0, `Cards do not overlap ${theme}/${viewport.width}`);
       check(!layout.toolbarOverflow, `Toolbar fits ${theme}/${viewport.width}`);
+      const ruler = layout.dailyRuler;
+      check(Boolean(ruler), `Daily ruler initialized ${theme}/${viewport.width}`);
+      if (ruler) {
+        const maximum = Math.max(1, ...ruler.bars.map((bar) => bar.value));
+        check(
+          ruler.dottedReferences === 1 && ruler.solidReferences === 0,
+          `Exactly one dotted daily reference ${theme}/${viewport.width}`,
+        );
+        check(
+          ruler.weekends === 9,
+          `Selected March calendar has nine marked weekend dates ${theme}/${viewport.width}`,
+        );
+        check(
+          ruler.bars.every((bar) => /; Corretores no recorte 120;/u.test(bar.label)),
+          `Daily reference equals the filtered 120 brokers ${theme}/${viewport.width}`,
+        );
+        check(
+          ruler.bars.every(
+            (bar) => Math.abs(bar.height - (bar.value / maximum) * ruler.renderedMaximum) < 1,
+          ),
+          `Daily bars share the largest-realized ruler ${theme}/${viewport.width}`,
+        );
+        check(
+          ruler.renderedMaximum > 0 &&
+            ruler.bars.every(
+              (bar) =>
+                Math.abs(bar.trackHeight - ruler.referenceHeight) < 1 &&
+                bar.trackHeight - ruler.renderedMaximum >= 19 * ruler.scale &&
+                bar.trackHeight - ruler.renderedMaximum <= 40 * ruler.scale,
+            ),
+          `Daily maximum remains near the top with aligned references and label headroom ${theme}/${viewport.width}`,
+        );
+      }
+      const score = layout.scoreRuler;
+      check(Boolean(score), `Ranking Score observed ruler initialized ${theme}/${viewport.width}`);
+      if (score) {
+        const maximum = Math.max(...score.bars.map((bar) => bar.value));
+        check(
+          score.dottedReferences === 1 && score.solidReferences === 0 && score.classify === "false",
+          `Ranking Score has one dotted observed reference and no commercial classification ${theme}/${viewport.width}`,
+        );
+        check(
+          score.bars.every(
+            (bar) =>
+              bar.status === "neutral" &&
+              bar.label.includes(`; Maior quantidade no recorte ${maximum}`) &&
+              !/referência atingida|abaixo da referência/u.test(bar.label),
+          ),
+          `Ranking Score labels and categories stay neutral ${theme}/${viewport.width}`,
+        );
+        check(
+          Math.abs(score.referenceTop - Math.min(...score.bars.map((bar) => bar.top))) < 1,
+          `Ranking Score reference aligns with its largest actual quantity ${theme}/${viewport.width}`,
+        );
+        check(
+          score.legend?.includes("Pontilhado: Maior quantidade no recorte") &&
+            !/Vermelho:|Azul:|meta atingida/u.test(score.legend),
+          `Ranking Score legend describes an observed maximum instead of a sales target ${theme}/${viewport.width}`,
+        );
+      }
       if (layout.mobileColumns)
         check(
           layout.mobileColumns.lefts.length === 1 && layout.mobileColumns.widths.length === 1,
           `Single readable card column ${theme}/${viewport.width}`,
         );
       check(
-        layout.recencyBorders.every(Boolean) && new Set(layout.recencyBorders).size === 3,
-        `Distinct recency states ${theme}/${viewport.width}`,
+        layout.recencyBorders.every(
+          (frame) =>
+            frame &&
+            frame.outerWidth === 1 &&
+            frame.innerWidth === 0 &&
+            frame.innerShadow === "none",
+        ) && new Set(layout.recencyBorders.map((frame) => frame?.outerColor)).size === 3,
+        `Distinct single outer recency frames without duplicate inner borders ${theme}/${viewport.width}`,
       );
 
       const axe = await new AxeBuilder({ page })
@@ -328,6 +502,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   }
 
   await page.setViewportSize({ width: 1440, height: 900 });
+  evidence.canvasPhase = "interaction:layout-editor";
   await page.goto(`${origin}?editable`);
   await page.getByRole("button", { name: "House", exact: true }).click();
   const cards = page.locator("[data-dashboard-card-id]");
@@ -335,6 +510,121 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   const readOrder = () =>
     cards.evaluateAll((nodes) => nodes.map((node) => node.dataset.dashboardCardId));
   const initialOrder = await readOrder();
+  async function waitForSavedLayout(label) {
+    const readLayout = () =>
+      cards.evaluateAll((nodes) =>
+        nodes.map((node, order) => ({
+          id: node.dataset.dashboardCardId,
+          order,
+          height: Number.parseFloat(node.style.height),
+          width: node.dataset.fixedWidth === "true" ? Number.parseFloat(node.style.width) : null,
+          span: Number(node.style.gridColumn.replace("span", "").trim()),
+        })),
+      );
+    const expected = await readLayout();
+    assert.equal(expected.length, 28, "Scenario boundary preserves the 28 original cards");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
+    let confirmedProfile;
+    await expect
+      .poll(async () => {
+        const { profiles } = await page.request
+          .get(`${origin}/api/dashboard-profiles`)
+          .then((response) => response.json());
+        confirmedProfile = profiles.find((profile) => profile.pageKey === "crm.stage.appointments");
+        return confirmedProfile?.cards
+          .toSorted((a, b) => a.layout.order - b.layout.order)
+          .map((card) => ({
+            id: card.id,
+            order: card.layout.order,
+            height: card.layout.height,
+            width: card.layout.width ?? null,
+            span: card.layout.columnSpan,
+          }));
+      })
+      .toEqual(expected);
+    assert.deepEqual(
+      await readLayout(),
+      expected,
+      "Server acknowledgement does not replace the final local intent",
+    );
+    (evidence.canvas.saveBarriers ??= []).push({
+      label,
+      cards: expected.length,
+      version: confirmedProfile.version,
+      layoutSha256: createHash("sha256").update(JSON.stringify(expected)).digest("hex"),
+    });
+  }
+  evidence.canvasPhase = "interaction:same-length-calendar";
+  const monthTransition = [];
+  async function assertMonthRuler(month, maximum) {
+    const frames = await page.evaluate(async () => {
+      const frames = [];
+      for (let index = 0; index < 24; index += 1) {
+        await new Promise(requestAnimationFrame);
+        const card = document.querySelector('[data-dashboard-card-id="appointments-daily"]');
+        const host = card.querySelector("[data-appointments-plot]");
+        const tracks = [...host.querySelectorAll("[data-appointments-track]")];
+        const dates = [...host.querySelectorAll("[data-appointments-day]")];
+        const refs = host.querySelector("[data-appointments-references]");
+        const scale = host.clientWidth ? host.getBoundingClientRect().width / host.clientWidth : 1;
+        frames.push({
+          first: dates[0]?.dataset.appointmentsDay,
+          last: dates.at(-1)?.dataset.appointmentsDay,
+          maximum: Math.max(
+            ...tracks.map((track) =>
+              Number(
+                track.querySelector("[data-appointments-value]").textContent.replaceAll(".", ""),
+              ),
+            ),
+          ),
+          tallest: Math.max(
+            ...tracks.map(
+              (track) =>
+                track.querySelector("[data-appointments-bar]").getBoundingClientRect().height,
+            ),
+          ),
+          declaredMaximum: Number(host.dataset.appointmentsRenderedMax) * scale,
+          track: tracks[0].getBoundingClientRect().height,
+          references: refs?.getBoundingClientRect().height ?? 0,
+        });
+      }
+      return frames;
+    });
+    check(
+      frames
+        .slice(4)
+        .every(
+          (frame) =>
+            frame.first === `${month}-01` &&
+            frame.last === `${month}-31` &&
+            frame.maximum === maximum &&
+            frame.tallest > 0 &&
+            Math.abs(frame.tallest - frame.declaredMaximum) < 1 &&
+            Math.abs(frame.track - frame.references) < 1,
+        ),
+      `Same-length month ${month} keeps current nodes, bars and reference geometry over settled frames`,
+    );
+    monthTransition.push({ month, maximum, frames });
+  }
+  const calendar = page.getByRole("region", {
+    name: "Filtros do painel de agendamentos",
+    exact: true,
+  });
+  await calendar.getByRole("button", { name: "Março de 2026", exact: true }).click();
+  await page.getByLabel("Mês do calendário", { exact: true }).selectOption("1");
+  await page.getByRole("button", { name: "Selecionar mês inteiro", exact: true }).click();
+  await assertMonthRuler("2026-01", 7);
+  await page.setViewportSize({ width: 390, height: 900 });
+  await assertMonthRuler("2026-01", 7);
+  await calendar.getByRole("button", { name: "Janeiro de 2026", exact: true }).click();
+  await page.getByLabel("Mês do calendário", { exact: true }).selectOption("3");
+  await page.getByRole("button", { name: "Selecionar mês inteiro", exact: true }).click();
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await assertMonthRuler("2026-03", 4);
+  evidence.canvas.monthTransition = monthTransition;
+  evidence.canvasPhase = "interaction:layout-editor";
   const goalCard = page.locator('[data-dashboard-card-id="appointments-goal"]');
   for (const [id, title] of [
     ["ranking-owner", "Ranking por responsável"],
@@ -457,6 +747,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(157);
   await clickTool("Desfazer");
   await clickTool("Desfazer");
+  await waitForSavedLayout("compact-resize-editor-undo-before-keyboard-scenario");
   evidence.canvas.interactions.push(
     "compact-hover-pointer-both-axes-pixel-dimensions-below-legacy-minima-and-save",
   );
@@ -466,6 +757,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   check(keyboardOrder[1] === "appointments-goal", "Keyboard reorders a card");
   await clickTool("Desfazer");
   await expect.poll(readOrder).toEqual(initialOrder);
+  await waitForSavedLayout("keyboard-reorder-undo-before-next-scenario");
   evidence.canvas.interactions.push({ keyboardOrder, undoOrder: await readOrder() });
 
   const initialHeight = await goalCard.evaluate((node) => node.getBoundingClientRect().height);
@@ -475,6 +767,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   const resizedHeight = await goalCard.evaluate((node) => node.getBoundingClientRect().height);
   check(resizedHeight > initialHeight, "Keyboard resize increases card height");
   await clickTool("Desfazer");
+  await waitForSavedLayout("keyboard-resize-undo-before-group-scenario");
 
   for (const id of ["appointments-goal", "team-productive"]) {
     await page.locator(`[data-dashboard-card-id="${id}"]`).hover();
@@ -489,6 +782,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     "Group move keeps selected cards together",
   );
   await clickTool("Desfazer");
+  await waitForSavedLayout("group-reorder-undo-before-copy-scenario");
   evidence.canvas.interactions.push({ groupOrder });
 
   await page.locator('[data-dashboard-card-id="appointments-monthly"]').hover();
@@ -518,6 +812,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   evidence.canvas.interactions.push("selective-pdf-dialog");
 
   const beforeCopyOrder = await readOrder();
+  evidence.canvasPhase = "interaction:copy-create";
   await goalCard.getByRole("button", { name: "Copiar Meta do mês", exact: true }).press("Enter");
   await expect(cards).toHaveCount(29);
   await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
@@ -563,6 +858,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     copiedOrder,
   });
 
+  evidence.canvasPhase = "interaction:touch";
   const touchContext = await page
     .context()
     .browser()
@@ -664,6 +960,10 @@ export async function runAppointmentsPreview() {
     [
       `${componentDirectory}/AppointmentsDashboard.tsx`,
       `${componentDirectory}/AppointmentsColumns.tsx`,
+      `${componentDirectory}/AppointmentsColumnsOverrides.module.css`,
+      `${componentDirectory}/AppointmentsComparison.tsx`,
+      `${componentDirectory}/AppointmentsComparison.module.css`,
+      `${componentDirectory}/appointments-comparison.ts`,
       "lib/dashboard-canvas/ui/configurable/bar-height-controls.tsx",
       `${componentDirectory}/AppointmentsDashboard.module.css`,
       `${componentDirectory}/ChartBoard.tsx`,
@@ -769,10 +1069,21 @@ export async function runAppointmentsPreview() {
         return response
           .writeHead(404, { "content-type": "application/json" })
           .end(JSON.stringify({ error: "profile_not_found" }));
-      if (request.method === "PATCH" && payload.version !== previous.version)
+      if (request.method === "PATCH" && payload.version !== previous.version) {
+        (evidence.profileConflicts ??= []).push({
+          phase: evidence.canvasPhase ?? "first-save",
+          completedInteractions: evidence.canvas?.interactions.length ?? null,
+          receivedAt: new Date().toISOString(),
+          profileId: previous.id,
+          requestedVersion: payload.version,
+          storedVersion: previous.version,
+          requestedCards: payload.cards.map(({ id, layout }) => ({ id, layout })),
+          storedCards: previous.cards.map(({ id, layout }) => ({ id, layout })),
+        });
         return response
           .writeHead(409, { "content-type": "application/json" })
           .end(JSON.stringify({ error: "version_conflict" }));
+      }
       const profile = {
         ...previous,
         ...payload,
@@ -782,6 +1093,17 @@ export async function runAppointmentsPreview() {
         createdAt: previous?.createdAt ?? new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
+      (evidence.profileMutations ??= []).push({
+        phase: evidence.canvasPhase ?? "first-save",
+        completedInteractions: evidence.canvas?.interactions.length ?? null,
+        method: request.method,
+        profileId: profile.id,
+        requestedVersion: payload.version,
+        previousVersion: previous?.version ?? null,
+        savedVersion: profile.version,
+        receivedAt: new Date().toISOString(),
+        cardsSha256: createHash("sha256").update(JSON.stringify(profile.cards)).digest("hex"),
+      });
       if (previous) syntheticProfiles.splice(syntheticProfiles.indexOf(previous), 1, profile);
       else syntheticProfiles.push(profile);
       return response
@@ -837,10 +1159,17 @@ export async function runAppointmentsPreview() {
     page.setDefaultNavigationTimeout(20_000);
     page.on("pageerror", (error) => evidence.browserErrors.push(error.message));
     page.on("console", (message) => {
-      if (message.type() === "error") evidence.browserErrors.push(message.text());
+      if (message.type() === "error") {
+        evidence.browserErrors.push(message.text());
+        (evidence.browserDiagnostics ??= []).push({
+          phase: evidence.canvasPhase ?? "first-save",
+          message: message.text(),
+          location: message.location(),
+        });
+      }
     });
     if (process.argv.includes("--first-save-only")) {
-      await runAppointmentsFirstSave({ page, origin, evidence });
+      await runAppointmentsFirstSave({ page, origin, evidence, artifactSubdir });
       evidence.passed = true;
       return;
     }
@@ -1484,24 +1813,45 @@ export async function runAppointmentsPreview() {
       items.map((item) => {
         const label = item.firstElementChild.getAttribute("aria-label") ?? "";
         const total = Number(label.match(/: ([\d.]+) agendamentos/)?.[1]?.replaceAll(".", "") ?? 0);
-        const goal = Number(label.match(/; meta ([\d.]+)/)?.[1]?.replaceAll(".", "") ?? 0);
+        const referenceMatch = label.match(/; Corretores no recorte ([\d.]+)/u);
         return {
           total,
-          goal,
+          reference: referenceMatch ? Number(referenceMatch[1].replaceAll(".", "")) : null,
           trackHeight: item.firstElementChild.firstElementChild.getBoundingClientRect().height,
           barHeight: item.querySelector("div[data-goal-status]").getBoundingClientRect().height,
           barWidth: item.querySelector("div[data-goal-status]").getBoundingClientRect().width,
         };
       }),
     );
-    const dailyScaleMax = Math.max(1, ...barGeometry.flatMap((bar) => [bar.total, bar.goal]));
+    const dailyScaleMax = Math.max(1, ...barGeometry.map((bar) => bar.total));
+    const dailyScale = await daily.locator("[data-appointments-plot]").evaluate((element) => ({
+      maximum: Number(element.dataset.appointmentsRenderedMax),
+      scale: element.clientWidth ? element.getBoundingClientRect().width / element.clientWidth : 1,
+      solidReferences: element.querySelectorAll("[data-dashboard-bar-top-line]").length,
+      dottedReferences: element.querySelectorAll("[data-appointments-goal-line]").length,
+    }));
+    const renderedMaximum = dailyScale.maximum * dailyScale.scale;
+    check(
+      dailyScale.solidReferences === 0,
+      "Daily chart does not reintroduce a solid upper reference",
+    );
+    check(dailyScale.dottedReferences === 1, "Daily chart has exactly one dotted reference");
+    check(
+      barGeometry.every((bar) => bar.reference === 120),
+      "Daily dotted reference uses the filtered broker count, not the weekday target",
+    );
+    check(
+      renderedMaximum > 0 &&
+        barGeometry.every((bar) => bar.trackHeight - renderedMaximum >= 19 * dailyScale.scale),
+      "Daily scale preserves headroom for the tallest value label",
+    );
     barGeometry.forEach((bar, index) => {
       check(bar.barWidth > 0, `Daily bar ${index + 1} must be visible`);
       const expectedRatio = bar.total / dailyScaleMax;
-      const actualRatio = bar.barHeight / bar.trackHeight;
+      const actualRatio = bar.barHeight / renderedMaximum;
       check(
         bar.total === 0 ? bar.barHeight <= 3 : Math.abs(actualRatio - expectedRatio) < 0.02,
-        `Daily bar ${index + 1} height must match its exact count and goal scale`,
+        `Daily bar ${index + 1} height must match its exact count on the largest-realized scale`,
       );
     });
     const rankingBars = await region("Ranking por responsável")
@@ -1523,20 +1873,21 @@ export async function runAppointmentsPreview() {
       await daily
         .getByRole("listitem")
         .evaluateAll((items) =>
-          items.map((item) => item.firstElementChild.getAttribute("aria-label").split("; meta")[0]),
+          items.map((item) => item.firstElementChild.getAttribute("aria-label").split(";")[0]),
         ),
-      Array.from(
-        { length: 31 },
-        (_, index) =>
-          `${String(index + 1).padStart(2, "0")}/03/2026: ${(index % 4) + 1} agendamentos`,
-      ),
+      Array.from({ length: 31 }, (_, index) => {
+        const day = String(index + 1).padStart(2, "0");
+        const weekday = new Date(`2026-03-${day}T12:00:00Z`).getUTCDay();
+        const weekend = weekday === 6 ? ", sábado" : weekday === 0 ? ", domingo" : "";
+        return `${day}/03/2026${weekend}: ${(index % 4) + 1} agendamentos`;
+      }),
       "All dates and daily totals must be accessible and chronological",
     );
     assert.deepEqual(
       await region("Agendamentos por semana")
         .getByRole("listitem")
         .evaluateAll((items) =>
-          items.map((item) => item.firstElementChild.getAttribute("aria-label").split("; meta")[0]),
+          items.map((item) => item.firstElementChild.getAttribute("aria-label").split(";")[0]),
         ),
       [1, 19, 16, 17, 18, 5].map((count, index) => `${index + 1}ª semana: ${count} agendamentos`),
       "Monday-to-Sunday weeks 1 through 6 and exact totals",
@@ -1876,6 +2227,7 @@ export async function runAppointmentsPreview() {
     if (process.argv.includes("--first-save-only")) process.exitCode = 1;
   } finally {
     await writeFile(path.join(outputRoot, "result.json"), `${JSON.stringify(evidence, null, 2)}\n`);
+    if (!evidence.passed) process.exitCode = 1;
     await browser?.close();
     server.closeAllConnections();
     await new Promise((resolve) => server.close(resolve));

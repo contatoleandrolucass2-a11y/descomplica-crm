@@ -8,7 +8,7 @@ const charts = [
   { id: "appointments-weekly", title: "Agendamentos por semana" },
 ];
 
-export async function runAppointmentsFirstSave({ page, origin, evidence }) {
+export async function runAppointmentsFirstSave({ page, origin, evidence, artifactSubdir }) {
   page.on("dialog", (dialog) => dialog.accept());
   evidence.firstSave = [];
   const requests = [];
@@ -159,20 +159,31 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     }
   }
   async function checkReferences(target) {
-    await expect(target.locator("[data-dashboard-bar-top-line]")).toHaveCount(1);
+    await expect(target.locator("[data-dashboard-bar-top-line]")).toHaveCount(0);
+    await expect(target.getByRole("slider")).toHaveCount(0);
+    await expect(target.locator("[data-appointments-goal-line]")).toHaveCount(1);
     const ruler = await target.evaluate((article) => {
-      const line = article.querySelector("[data-dashboard-bar-top-line]");
+      const host = article.querySelector("[data-appointments-plot]");
+      const scale = host.clientWidth ? host.getBoundingClientRect().width / host.clientWidth : 1;
+      const references = article.querySelector("[data-appointments-references]");
       const bars = [...article.querySelectorAll("[data-appointments-bar]")];
       const columns = article.querySelector("[data-appointments-plot] ol");
       return {
-        top: Number.parseFloat(line.style.bottom),
+        top: Number(host.dataset.appointmentsRenderedMax) * scale,
         largest: Math.max(...bars.map((bar) => bar.getBoundingClientRect().height)),
+        referenceHeight: references.getBoundingClientRect().height,
+        trackHeight: article.querySelector("[data-appointments-track]").getBoundingClientRect()
+          .height,
         background: getComputedStyle(columns).backgroundImage,
       };
     });
     assert.ok(
       Math.abs(ruler.top - ruler.largest) < 1,
-      "Top reference anchors the tallest actual bar, not an inflated goal scale",
+      "Automatic/pixel ruler anchors the tallest actual bar without a decorative solid line",
+    );
+    assert.ok(
+      Math.abs(ruler.referenceHeight - ruler.trackHeight) < 1,
+      "Dotted reference and bars share the same measured plot",
     );
     assert.ok(
       !ruler.background.includes("repeating-linear-gradient"),
@@ -211,7 +222,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     );
     return lines;
   }
-  const proofDirectory = path.resolve("test-results/appointments-bar-height-pixels");
+  const proofDirectory = path.resolve(
+    "test-results/appointments-bar-height-pixels",
+    artifactSubdir ?? "",
+  );
   await mkdir(proofDirectory, { recursive: true });
   async function savePixelCap(chart, value, target = page) {
     const article = target.locator(`[data-dashboard-card-id="${chart.id}"]`);
@@ -298,6 +312,17 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       exactBars.every(({ goal }) => goal == null),
       "This fixture chart has no goal headroom",
     );
+    await expect(card(noGoalChart).locator("[data-appointments-goal-line]")).toHaveCount(1);
+    await expect(card(noGoalChart).locator("[data-dashboard-bar-top-line]")).toHaveCount(0);
+    assert.ok(
+      await card(noGoalChart)
+        .locator("[data-appointments-bar]")
+        .evaluateAll((bars) => bars.every((bar) => bar.dataset.goalStatus === "neutral")),
+      "Observed Ranking Score reference does not classify categories against a commercial goal",
+    );
+    await expect(
+      card(noGoalChart).getByRole("img", { name: /^Maior quantidade no recorte:/u }),
+    ).toHaveCount(1);
     checkGeometry(exactBars, cap);
     assert.ok(
       Math.abs(Math.max(...exactBars.map(({ height }) => height)) - cap) < 1,
@@ -366,31 +391,19 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       bars,
     });
   }
-  // Dragging the visible upper reference commits once and survives refresh without resizing the card.
+  // The removed upper slider cannot return; the inline field confirms once and persists unchanged layout.
   await savePixelCap(barChart, "120");
   const referenceBefore = requests.length;
-  const handle = card(barChart).getByRole("slider", {
-    name: "Ajustar altura máxima das torres",
-    exact: true,
-  });
-  await handle.scrollIntoViewIfNeeded();
-  const handleBounds = await handle.boundingBox();
-  await page.mouse.move(
-    handleBounds.x + handleBounds.width / 2,
-    handleBounds.y + handleBounds.height / 2,
-  );
-  await page.mouse.down();
-  await page.mouse.move(
-    handleBounds.x + handleBounds.width / 2,
-    handleBounds.y + handleBounds.height / 2 + 20,
-    { steps: 5 },
-  );
-  await page.mouse.up();
+  await expect(card(barChart).getByRole("slider")).toHaveCount(0);
+  await expect(card(barChart).locator("[data-dashboard-bar-top-line]")).toHaveCount(0);
+  const inlineHeight = card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true });
+  await inlineHeight.fill("100");
+  await inlineHeight.press("Enter");
   await expect.poll(() => requests.length).toBe(referenceBefore + 1);
   await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
-  const draggedCap = requests.at(-1).cards.find((entry) => entry.id === barChart.id)
+  const inlineCap = requests.at(-1).cards.find((entry) => entry.id === barChart.id)
     .presentation.barMaxHeight;
-  assert.equal(draggedCap, 100);
+  assert.equal(inlineCap, 100);
   await page.reload();
   await expect(
     card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
@@ -398,7 +411,11 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   assert.deepEqual(await read(barChart), dimensionsBeforeCap);
   assert.deepEqual(await order(), orderBeforeCap);
   const references = await checkReferences(card(barChart));
-  evidence.firstSave.push({ scenario: "drag-top-line-one-patch-refresh", draggedCap, references });
+  evidence.firstSave.push({
+    scenario: "inline-height-one-patch-refresh-no-removed-slider",
+    inlineCap,
+    references,
+  });
   // Clearing the optional cap restores the legacy/default rendering without a layout mutation.
   await savePixelCap(barChart, "");
   assert.equal(

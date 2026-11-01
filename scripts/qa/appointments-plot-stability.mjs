@@ -133,16 +133,17 @@ try {
         for (let i = 0; i < 60; i++) {
           await new Promise(requestAnimationFrame);
           const track = document.querySelector("[data-appointments-track]");
-          const refs = document.querySelector("[data-dashboard-bar-top-line]").parentElement;
+          const refs = document.querySelector("[data-appointments-references]");
           const bars = [...document.querySelectorAll("[data-appointments-bar]")];
           const card = document.querySelector("[data-test-card]");
           frames.push({
             track: track.getBoundingClientRect().height,
             refs: refs.getBoundingClientRect().height,
             max: Math.max(...bars.map((b) => b.getBoundingClientRect().height)),
-            top: Number.parseFloat(
-              document.querySelector("[data-dashboard-bar-top-line]").style.bottom,
+            top: Number(
+              document.querySelector("[data-appointments-plot]").dataset.appointmentsRenderedMax,
             ),
+            solidReferences: document.querySelectorAll("[data-dashboard-bar-top-line]").length,
             notice: [...document.querySelectorAll("p")].some(
               (p) =>
                 (p.textContent.includes("Meta fora da área") ||
@@ -163,7 +164,9 @@ try {
       if (settled.some((f) => Math.abs(f.track - f.refs) > 1))
         failures.push("Reference layer height disagrees with tracks");
       if (settled.some((f) => Math.abs(f.top - f.max) > 1))
-        failures.push("Upper reference does not align with tallest bar");
+        failures.push("Rendered scale does not align with tallest bar");
+      if (settled.some((f) => f.solidReferences !== 0))
+        failures.push("Removed solid reference reappeared");
       if (settled.some((f) => f.cardHeight !== 284)) failures.push("Card height changed");
       const screenshot = path.join(out, `cap-${cap}-${viewport.width}x${viewport.height}.png`);
       await page.screenshot({ path: screenshot });

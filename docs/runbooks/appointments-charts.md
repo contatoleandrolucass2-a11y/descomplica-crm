@@ -20,6 +20,22 @@ existente. Data de criação é convertida para America/Sao_Paulo. O mês seleci
 controla indicadores, diário, semanas, rankings e tabela; o ano do gráfico mensal
 é exclusivo.
 
+O calendário abre no mês civil vigente de America/Sao_Paulo, independentemente
+da data do snapshot, e permite selecionar outro mês. A data é inicializada no
+servidor e conferida no cliente na virada do dia/foco; uma seleção manual não
+é substituída pela atualização automática. Cobertura continua limitada à fonte:
+um mês atual sem dados aparece indisponível, sem reutilizar o mês anterior.
+Hoje e ontem usam as datas civis correspondentes; fora da cobertura não são zero.
+A atualização da fonte aparece ao lado do título da página.
+
+O card de vendas mostra quantidade e soma de **Valor Real de Venda**, campo
+`Opportunity.Valor_Real_de_Venda__c` do relatório `00OU600000EjFyyMAF`.
+O coletor já transporta esse valor e o projetor v4 vigente preserva a soma em
+`facts[8]`. O leitor aplica os mesmos filtros e período da quantidade, sem
+multiplicar a soma pela contagem. Legado, cobertura ausente ou filtro sem
+conciliação não exibem valor monetário zero. Não há nova migration ou mudança
+da definição salva do relatório para esta apresentação.
+
 | Bloco                     | Coluna ou cálculo                                                                 |
 | ------------------------- | --------------------------------------------------------------------------------- |
 | Meta mensal               | Agendamentos criados no mês / contatos únicos no relatório de corretores          |
@@ -45,6 +61,10 @@ rótulos de baixo para cima. Os três rankings e as três faixas de recência fo
 uma grade 3 × 2; conteúdos extensos usam rolagem vertical acessível por teclado.
 A tabela usa largura fixa, quebra texto, cabeçalho aderente e rolagem apenas
 vertical. Barras, rótulos, rankings e linhas da tabela recebem realce no hover.
+
+Ranking Score usa uma referência pontilhada na maior quantidade observada no
+recorte. Essa referência não representa meta comercial nem classifica barras
+como atingidas ou abaixo da meta; as cores das categorias são preservadas.
 
 Filtros dimensionais de canal, regional, gerente, responsável, empresa e ranking
 recortam também o elenco cadastrado. A meta, a equipe produtiva e a contagem de
@@ -116,7 +136,7 @@ apagar snapshots nem remover leitores de compatibilidade.
 ## Verificações
 
 `pnpm lint`, `pnpm typecheck`, `pnpm test` e `pnpm build` são
-obrigatórios. `node scripts/qa/appointments-preview.mjs --production-css`
+obrigatórios. `node scripts/qa/appointments-preview.mjs --production-css --canvas-only`
 executa os três temas em 1440/1024/390/320, verifica acessibilidade, rótulos,
 filtros, rolagem e overflow e grava capturas sintéticas em
 `test-results/appointments-preview`.

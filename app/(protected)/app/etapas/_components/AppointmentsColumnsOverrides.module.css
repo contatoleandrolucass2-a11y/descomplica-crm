@@ -1,0 +1,54 @@
+.plotViewport {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex: 1;
+}
+
+.dailyViewport {
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+
+.dailyViewport:focus-visible {
+  outline: 2px solid var(--analytics-cyan-strong);
+  outline-offset: 2px;
+}
+
+.dailyPlot {
+  min-width: 46rem;
+}
+
+.dailyChart [data-appointments-column-label] {
+  display: flex;
+  min-width: 0;
+  height: 1.6rem;
+  align-items: center;
+  justify-content: center;
+}
+
+.dailyChart [data-appointments-day] {
+  padding-inline: 0;
+}
+
+.dailyChart .dayMarker {
+  box-sizing: border-box;
+  display: inline-flex;
+  width: min(1.6rem, 100%);
+  min-width: 0;
+  min-height: 0;
+  aspect-ratio: 1;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  font-size: 0.88em;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.dailyChart .weekend {
+  border-color: var(--analytics-cyan-strong);
+  background: color-mix(in srgb, var(--analytics-cyan-strong) 20%, transparent);
+  color: var(--analytics-ink);
+}

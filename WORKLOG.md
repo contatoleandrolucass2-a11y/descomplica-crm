@@ -1,5 +1,24 @@
 # Worklog
 
+## 2026-11-01 — Calendário, vendas e comparativos de Agendamentos
+
+- Calendário civil vigente com seleção manual; cabeçalho e filtros compactos,
+  atualização ao lado do título, borda única/vidro e colunas dos rankings alinhadas.
+- Card de vendas inclui Valor Real de Venda da soma oficial existente. Modo de
+  linhas compara dias 1–31 do mês, anterior e média anual por cobertura; tipo salvo.
+- Torres têm apenas referência pontilhada, maior realizado como escala automática,
+  fins de semana circulados e plot diário legível no celular. Ajuste explícito de 500 px
+  limpa caps dos gráficos preservando outros ajustes e permitindo desfazer.
+- Sem DDL, nova integração ou mudança de permissões. Node 24: tipos/build,
+  65 testes de análise/comparativo, 41 de interface/Canvas/calendário e 19 de
+  colunas aprovados. QA integrada: 11 verificações e 6 capturas; CSS de produção:
+  15 telas, 11 interações e 22 cenários de confirmação única aprovados.
+- Revisão corrigiu o dia atual acessível, os eixos das linhas e o observer após
+  trocar meses com 31 dias. QA isola cenários aguardando confirmação do Desfazer;
+  fila, erro e CAS continuam testados. CI, merge, publicação e smoke real pendentes.
+- Ranking Score recebe referência única na maior quantidade observada, sem
+  inventar meta comercial ou reclassificar as cores das categorias.
+
 ## 2026-11-01 — Campanhas Facebook e visualização de usuários do LEAD+
 
 - A conexão direta da BM MÃE 2 usa credencial de Página dedicada no mesmo app do

@@ -3234,4 +3234,4 @@ Registros integrais de persistência e edição entre navegadores em [arquivo de
 
 Agendamentos em 390×844 manteve os 28 itens após refresh, com ajuste à largura da tela. Evidências e limites no [arquivo de Agendamentos](ATUALIZACOES-ARQUIVO-2026-10-30-a-2026-10-30-AGENDAMENTOS.md), seção de celular simulado.
 
-PR458/024ae30b publicado e validado: persistência Chrome/integrado, reentrada, rotação móvel simulada e160quadros estáveis. Cópia removida; prints e limites no arquivo acima.
+PR458 publicado. Nova demanda de calendário, vendas, filtros e gráficos de Agendamentos aberta em01/11; fontes, escopo e resultados no arquivo acima.

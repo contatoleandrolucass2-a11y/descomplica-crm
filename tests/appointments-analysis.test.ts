@@ -1105,3 +1105,278 @@ describe("appointment chart analysis", () => {
     expect(result.owners.reduce((sum, item) => sum + item.total, 0)).toBe(result.total);
   });
 });
+
+describe("appointment sales value from the authorized official report", () => {
+  function salesSlice(): DashboardAnalysisSlice {
+    const sale = (
+      date: string,
+      amount: number,
+      quantity = 1,
+      manager = 0,
+      owner = 0,
+      company = 0,
+      channel: 0 | 1 = 1,
+    ): DashboardAnalysisFact => [
+      4,
+      date,
+      manager,
+      owner,
+      company,
+      channel,
+      -1,
+      quantity,
+      amount,
+      0,
+      -1,
+    ];
+    return slice({
+      version: 4,
+      brokerCount: 2,
+      brokerManagerCount: 2,
+      dimensions: {
+        managers: ["Gerente A", "Gerente B"],
+        owners: ["Responsável A", "Responsável B"],
+        companies: ["Empresa A", "Empresa B"],
+        developments: [],
+        stores: [],
+      },
+      appointments: ["A", "B"].map((name) => ({
+        createdAt: "2026-10-01T12:00:00-03:00",
+        scheduledAt: null,
+        attendedAt: null,
+        visitPerformed: false,
+        regionalManager: `Regional ${name}`,
+        salesManager: `Gerente ${name}`,
+        owner: `Responsável ${name}`,
+        accountName: "Conta sintética",
+        accountRanking: "Ouro",
+        channel: 1,
+        company: `Empresa ${name}`,
+        registeredBroker: true,
+      })),
+      facts: [
+        sale("2026-10-03", 150_000.25, 2),
+        sale("2026-10-04", 200_000.5),
+        sale("2026-10-04", 9_999_999, 7, 1, 1, 1, 0),
+        sale("2026-10-04", 300_000, 1, 0, 1),
+        sale("2026-10-05", 400_000, 1, 1),
+        sale("2026-09-03", 500_000),
+        stageFact(0, 50),
+        stageFact(2, 10),
+      ],
+    });
+  }
+  const dimensions: AppointmentFilters = {
+    channel: 1,
+    manager: "Gerente A",
+    owner: "Responsável A",
+    company: "Empresa A",
+  };
+
+  it("sums official sales amounts without multiplying them by the aggregate quantity", () => {
+    const result = analyzeAppointments(salesSlice(), {
+      filters: { ...dimensions, regionalManager: "Regional A" },
+    });
+    expect(result.sales).toBe(3);
+    expect(result.salesValue).toBe(350_000.75);
+  });
+
+  it("uses the same exact dates and week intersection as the sales quantity", () => {
+    const result = analyzeAppointments(salesSlice(), {
+      filters: { ...dimensions, createdDates: ["2026-10-03", "2026-10-05"], week: 1 },
+    });
+    expect(result.sales).toBe(2);
+    expect(result.salesValue).toBe(150_000.25);
+  });
+
+  it("supports an explicit reporting period crossing month boundaries", () => {
+    const result = analyzeAppointments(salesSlice(), {
+      filters: { ...dimensions, periodStart: "2026-09-03", periodEnd: "2026-10-03" },
+    });
+    expect(result.sales).toBe(3);
+    expect(result.salesValue).toBe(650_000.25);
+  });
+
+  it("distinguishes a covered empty period and zero-valued sales from unavailable data", () => {
+    const input = salesSlice();
+    expect(analyzeAppointments(input, { month: "2026-08" }).salesValue).toBe(0);
+    expect(analyzeAppointments(input, { month: "2027-01" }).salesValue).toBeNull();
+    input.facts = [[4, "2026-10-03", 0, 0, 0, 1, -1, 1, 0, 0, -1]];
+    expect(analyzeAppointments(input).salesValue).toBe(0);
+    expect(analyzeAppointments(input).sales).toBe(1);
+  });
+
+  it.each([1, 2, 3] as const)(
+    "does not fabricate a value from legacy v%s projections",
+    (version) => {
+      expect(analyzeAppointments(slice({ version })).salesValue).toBeNull();
+    },
+  );
+
+  it("withholds amounts when the same sales quantity cannot honor the requested dimensions", () => {
+    const input = salesSlice();
+    const ranking = analyzeAppointments(input, { filters: { accountRanking: "Ouro" } });
+    expect(ranking.sales).toBeNull();
+    expect(ranking.salesValue).toBeNull();
+    input.appointments = [];
+    const regional = analyzeAppointments(input, { filters: { regionalManager: "Regional A" } });
+    expect(regional.sales).toBeNull();
+    expect(regional.salesValue).toBeNull();
+  });
+});
+
+describe("appointment civil-calendar today and yesterday", () => {
+  function calendarSlice(): DashboardAnalysisSlice {
+    const appointments = ["2026-10-30", "2026-10-30", "2026-10-31", "2026-10-31", "2026-10-31"].map(
+      (date) => ({
+        createdAt: `${date}T12:00:00-03:00`,
+        scheduledAt: null,
+        attendedAt: null,
+        visitPerformed: false,
+        regionalManager: "Regional A",
+        salesManager: "Gerente A",
+        owner: "Responsável A",
+        accountName: "Conta sintética",
+        accountRanking: "Ouro",
+        channel: 1 as const,
+        company: "Empresa A",
+        registeredBroker: true,
+      }),
+    );
+    return slice({
+      version: 4,
+      viewKey: "without_canal_imob",
+      coverageStart: "2026-10-01",
+      referenceDate: "2026-10-31",
+      brokerCount: 2,
+      brokerManagerCount: 1,
+      dimensions: {
+        managers: ["Gerente A"],
+        owners: ["Responsável A"],
+        companies: ["Empresa A"],
+        developments: [],
+        stores: [],
+      },
+      appointments,
+      facts: [
+        [1, "2026-10-30", 0, 0, 0, 1, -1, 2, 0, 0, -1],
+        [1, "2026-10-31", 0, 0, 0, 1, -1, 3, 0, 0, -1],
+        [2, "2026-10-31", 0, 0, 0, 1, -1, 1, 0, 0, -1],
+        [4, "2026-10-31", 0, 0, 0, 1, -1, 1, 100_000, 0, -1],
+      ],
+    });
+  }
+
+  it("keeps October 31 as yesterday on November 1 without relabeling the stale snapshot as today", () => {
+    const input = calendarSlice();
+    const before = JSON.stringify(input);
+    const result = analyzeAppointments(input, { month: "2026-11", calendarDate: "2026-11-01" });
+    expect(result.today).toBeNull();
+    expect(result.yesterday).toBe(3);
+    expect(result.todayGoal).toBeNull();
+    expect(result.plannedToday).toBeNull();
+    expect(result.performedToday).toBeNull();
+    expect(result.yesterdayGoal).toBe(0); // Saturday, October 31, not Friday.
+    expect(result.coverage).toBe("unavailable");
+    expect(result.funnel).toBeNull();
+    expect(result.visitsPerformed).toBeNull();
+    expect(result.sales).toBeNull();
+    expect(result.salesValue).toBeNull();
+    expect(result.total).toBe(0); // Existing numeric period-total contract remains intact.
+    expect(JSON.stringify(input)).toBe(before);
+  });
+
+  it("reports both day readings unavailable when the source lags by two calendar days", () => {
+    const result = analyzeAppointments(calendarSlice(), { calendarDate: "2026-11-02" });
+    expect(result.today).toBeNull();
+    expect(result.yesterday).toBeNull();
+    expect(result.todayGoal).toBeNull();
+    expect(result.yesterdayGoal).toBeNull();
+    expect(result.performedToday).toBeNull();
+  });
+
+  it("uses the requested known civil date for counts and weekday targets only", () => {
+    const input = calendarSlice();
+    const sourceDated = analyzeAppointments(input);
+    expect(sourceDated.today).toBe(3);
+    expect(sourceDated.yesterday).toBe(2);
+    const result = analyzeAppointments(input, { calendarDate: "2026-10-30" });
+    expect(result.today).toBe(2);
+    expect(result.yesterday).toBe(0);
+    expect(result.performedToday).toBe(2);
+    expect(result.todayGoal).toBe(2); // Friday.
+    expect(result.yesterdayGoal).toBe(4); // Thursday.
+    expect(result.funnel).toEqual(sourceDated.funnel);
+    expect(result.brokerRecency).toEqual(sourceDated.brokerRecency);
+    expect(result.daily).toEqual(sourceDated.daily);
+    expect(result.coverage).toBe(sourceDated.coverage);
+    expect(result.salesValue).toBe(100_000);
+  });
+
+  it("distinguishes a covered empty today from yesterday before the beginning of coverage", () => {
+    const input = calendarSlice();
+    input.coverageStart = "2026-10-31";
+    input.appointments = input.appointments!.filter((row) =>
+      row.createdAt.startsWith("2026-10-31"),
+    );
+    input.facts = input.facts.filter((row) => row[1] >= input.coverageStart);
+    const result = analyzeAppointments(input, { calendarDate: "2026-10-31" });
+    expect(result.today).toBe(3);
+    expect(result.yesterday).toBeNull();
+    expect(result.yesterdayGoal).toBeNull();
+    input.appointments = [];
+    input.facts = [];
+    expect(analyzeAppointments(input, { calendarDate: "2026-10-31" }).today).toBe(0);
+  });
+
+  it("respects explicit day, week and interval selections without silently dropping uncovered selected dates", () => {
+    const input = calendarSlice();
+    const oneDay = analyzeAppointments(input, {
+      calendarDate: "2026-10-31",
+      filters: { createdDates: ["2026-10-30"] },
+    });
+    expect(oneDay.today).toBeNull();
+    expect(oneDay.yesterday).toBe(2);
+    expect(oneDay.todayGoal).toBeNull();
+    const futureDay = analyzeAppointments(input, {
+      calendarDate: "2026-11-01",
+      filters: { createdDates: ["2026-11-01"] },
+    });
+    expect(futureDay.today).toBeNull();
+    expect(futureDay.yesterday).toBeNull();
+    const otherWeek = analyzeAppointments(input, {
+      calendarDate: "2026-10-31",
+      filters: { week: 1 },
+    });
+    expect(otherWeek.today).toBeNull();
+    expect(otherWeek.yesterday).toBeNull();
+    const interval = analyzeAppointments(input, {
+      calendarDate: "2026-10-31",
+      filters: { periodStart: "2026-10-30", periodEnd: "2026-10-30" },
+    });
+    expect(interval.today).toBeNull();
+    expect(interval.yesterday).toBe(2);
+  });
+
+  it("keeps supported daily dimensions and rejects incompatible legacy dimensions", () => {
+    const filtered = analyzeAppointments(calendarSlice(), {
+      calendarDate: "2026-10-31",
+      filters: { accountRanking: "Ouro", regionalManager: "Regional A" },
+    });
+    expect(filtered.today).toBe(3);
+    expect(filtered.performedToday).toBe(3);
+    const legacy = analyzeAppointments(slice(), {
+      calendarDate: "2026-10-19",
+      filters: { regionalManager: "Regional A" },
+    });
+    expect(legacy.today).toBeNull();
+    expect(legacy.yesterday).toBeNull();
+    expect(legacy.todayGoal).toBeNull();
+  });
+
+  it("rejects an invalid civil calendar date instead of using the snapshot date", () => {
+    expect(() => analyzeAppointments(calendarSlice(), { calendarDate: "2026-02-30" })).toThrow(
+      RangeError,
+    );
+  });
+});

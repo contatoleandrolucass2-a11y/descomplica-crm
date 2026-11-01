@@ -1,5 +1,11 @@
 # Changelog
 
+- Atualiza Agendamentos com mês civil vigente, valor real de vendas, filtros
+  compactos, cards de vidro com borda única, rankings alinhados e comparativo
+  diário em três linhas. Referência pontilhada única, fins de semana destacados
+  e ajuste explícito dos gráficos para 500 px preservam a autonomia de layout.
+  No Ranking Score, a referência é o máximo observado, preservando as categorias.
+
 - Adiciona seleção de campanhas Facebook no LEAD+, captura direta com filtro e
   deduplicação, visualização de outro usuário com auditoria do ator original e
   vínculo aos usuários existentes do CRM. Remove a faixa extra Lead.

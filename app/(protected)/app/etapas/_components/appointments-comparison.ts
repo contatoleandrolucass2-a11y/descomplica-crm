@@ -1,0 +1,128 @@
+import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
+import {
+  analyzeAppointments,
+  type AppointmentBrokerRosterEntry,
+  type AppointmentFilters,
+  type AppointmentGoalsByMonth,
+} from "@/lib/crm/stages/appointments";
+
+export interface AppointmentComparisonSeries {
+  key: "selected" | "previous" | "year-average";
+  label: string;
+  values: (number | null)[];
+}
+
+export interface AppointmentComparison {
+  days: number[];
+  series: [AppointmentComparisonSeries, AppointmentComparisonSeries, AppointmentComparisonSeries];
+  description: string;
+}
+
+function monthDate(month: string) {
+  if (!/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/u.test(month)) {
+    throw new RangeError("Mês de comparação inválido.");
+  }
+  return new Date(`${month}-01T12:00:00Z`);
+}
+
+function lastDay(month: string) {
+  const date = monthDate(month);
+  date.setUTCMonth(date.getUTCMonth() + 1, 0);
+  return date.toISOString().slice(0, 10);
+}
+
+export function buildAppointmentComparison(
+  slice: DashboardAnalysisSlice,
+  {
+    month,
+    filters = {},
+    brokerRoster = null,
+    goalsByMonth = {},
+  }: {
+    month: string;
+    filters?: AppointmentFilters;
+    brokerRoster?: AppointmentBrokerRosterEntry[] | null;
+    goalsByMonth?: AppointmentGoalsByMonth;
+  },
+): AppointmentComparison {
+  const selectedDate = monthDate(month);
+  const previousDate = new Date(selectedDate);
+  previousDate.setUTCMonth(previousDate.getUTCMonth() - 1);
+  const previousMonth = previousDate.toISOString().slice(0, 7);
+  const year = month.slice(0, 4);
+  const days = Array.from({ length: 31 }, (_, index) => index + 1);
+  const comparisonFilters = { ...filters };
+  // These series compare the same civil day across whole months. An exact day,
+  // week or custom interval selection cannot be carried into another month.
+  delete comparisonFilters.createdDate;
+  delete comparisonFilters.createdDates;
+  delete comparisonFilters.week;
+  delete comparisonFilters.periodStart;
+  delete comparisonFilters.periodEnd;
+
+  const cache = new Map<string, (number | null)[]>();
+  const valuesForMonth = (requestedMonth: string): (number | null)[] => {
+    const cached = cache.get(requestedMonth);
+    if (cached) return cached;
+    if (requestedMonth.startsWith("0000-")) {
+      const unavailable = days.map(() => null);
+      cache.set(requestedMonth, unavailable);
+      return unavailable;
+    }
+    const end = lastDay(requestedMonth);
+    const hasCoverage = `${requestedMonth}-01` <= slice.referenceDate && end >= slice.coverageStart;
+    const totals = hasCoverage
+      ? new Map(
+          analyzeAppointments(slice, {
+            month: requestedMonth,
+            year,
+            filters: comparisonFilters,
+            brokerRoster,
+            goalsByMonth,
+          }).daily.map((bucket) => [bucket.key, bucket.total]),
+        )
+      : new Map<string, number>();
+    const values = days.map((day) => {
+      const date = `${requestedMonth}-${String(day).padStart(2, "0")}`;
+      return !hasCoverage || date > end || date < slice.coverageStart || date > slice.referenceDate
+        ? null
+        : (totals.get(date) ?? 0);
+    });
+    cache.set(requestedMonth, values);
+    return values;
+  };
+
+  const yearMonths = Array.from({ length: 12 }, (_, index) =>
+    valuesForMonth(`${year}-${String(index + 1).padStart(2, "0")}`),
+  );
+  const average = days.map((_, index) => {
+    const covered = yearMonths
+      .map((values) => values[index])
+      .filter((value): value is number => typeof value === "number");
+    return covered.length ? covered.reduce((sum, value) => sum + value, 0) / covered.length : null;
+  });
+  const monthLabel = new Intl.DateTimeFormat("pt-BR", {
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  return {
+    days,
+    series: [
+      {
+        key: "selected",
+        label: `Mês de referência · ${monthLabel.format(selectedDate)}`,
+        values: valuesForMonth(month),
+      },
+      {
+        key: "previous",
+        label: `Mês anterior · ${monthLabel.format(previousDate)}`,
+        values: valuesForMonth(previousMonth),
+      },
+      { key: "year-average", label: `Média de ${year}`, values: average },
+    ],
+    description:
+      `Dias 1–31; filtros de equipe mantidos. Média de ${year} entre datas cobertas. ` +
+      "Seleções de dia, semana e intervalo não se aplicam à comparação.",
+  };
+}

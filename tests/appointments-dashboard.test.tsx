@@ -87,6 +87,29 @@ const conversionGoals = {
 };
 
 describe("appointment dashboard availability", () => {
+  it("opens the civil current month even when the validated snapshot is from last month", () => {
+    const markup = renderToStaticMarkup(
+      <AppointmentsDashboard
+        analysis={current}
+        calendarDate="2026-11-01"
+        generatedAt="2026-10-31T12:00:00Z"
+      />,
+    );
+    expect(markup).toContain("Novembro de 2026");
+    expect(markup).toContain("Período fora da cobertura disponível.");
+    expect(markup).toContain("Atualizado em");
+    expect(markup).toContain('<time dateTime="2026-10-31T12:00:00Z">');
+  });
+
+  it("shows real sale amount next to the sale count without replacing either measure", () => {
+    const facts = current.facts.map((fact) =>
+      fact[0] === 4 ? ([...fact.slice(0, 8), 123456.78, ...fact.slice(9)] as typeof fact) : fact,
+    );
+    const markup = renderToStaticMarkup(<AppointmentsDashboard analysis={{ ...current, facts }} />);
+    expect(markup).toContain("Vendas no período");
+    expect(markup).toContain("Valor Real de Venda");
+    expect(markup).toContain("123.456,78");
+  });
   it("uses the doubled Thursday goal in today's KPI and preserves a configured zero monthly goal", () => {
     const markup = renderToStaticMarkup(
       <AppointmentsDashboard
