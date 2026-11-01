@@ -110,3 +110,137 @@ describe("LEAD+ worker supervision", () => {
     }
   });
 });
+
+describe("LEAD+ private runtime configuration", () => {
+  async function fixture(contents: string) {
+    const directory = await mkdtemp(join(tmpdir(), "lead-runtime-json-"));
+    const configuration = join(directory, "runtime.json");
+    const observed = join(directory, "observed.json");
+    const validation = join(directory, "validated");
+    const web = join(directory, "web.mjs");
+    const worker = join(directory, "worker.mjs");
+    const validator = join(directory, "validator.mjs");
+    const supervisor = join(directory, "supervisor.mjs");
+    await writeFile(configuration, contents, { mode: 0o600 });
+    await writeFile(
+      validator,
+      `import {writeFileSync} from 'node:fs'; writeFileSync(${JSON.stringify(validation)}, process.env.META_FORM_ROUTES_JSON || '');`,
+    );
+    await writeFile(
+      web,
+      `import {writeFileSync} from 'node:fs'; writeFileSync(${JSON.stringify(observed)},JSON.stringify({routes:process.env.META_FORM_ROUTES_JSON,crm:process.env.SUPABASE_URL,ads:process.env.META_ADS_ACCESS_TOKEN})); setInterval(()=>{},1000);process.on('SIGTERM',()=>process.exit(0));`,
+    );
+    await writeFile(worker, "setInterval(()=>{},1000);process.on('SIGTERM',()=>process.exit(0));");
+    const source = await readFile("deploy/runtime/start-services.mjs", "utf8");
+    await writeFile(
+      supervisor,
+      source
+        .replace('"/run/secrets/lead-plus-runtime.json"', JSON.stringify(configuration))
+        .replace('"/app/validate-runtime-env.mjs"', JSON.stringify(validator))
+        .replace('"/app/server.js"', JSON.stringify(web))
+        .replace('"/app/deploy/runtime/lead-plus-worker.mjs"', JSON.stringify(worker)),
+    );
+    const child = spawn(process.execPath, [supervisor], {
+      env: {
+        ...process.env,
+        LEAD_DB_URL: "",
+        SUPABASE_URL: "https://crm-auth.example.test",
+        META_ADS_ACCESS_TOKEN: "existing-metrics-token",
+      },
+      stdio: "pipe",
+    });
+    let output = "";
+    for (const stream of [child.stdout, child.stderr]) {
+      stream?.on("data", (chunk) => {
+        output += String(chunk);
+      });
+    }
+    const completion = closed(child);
+    return {
+      directory,
+      observed,
+      validation,
+      child,
+      completion,
+      output: () => output,
+      cleanup: async () => {
+        if (child.exitCode === null) {
+          child.kill("SIGTERM");
+          await completion;
+        }
+        await rm(directory, { recursive: true, force: true });
+      },
+    };
+  }
+
+  it("preserves structured form routes in validation and child environment without logging secrets", async () => {
+    const routes = JSON.stringify([
+      {
+        page_id: "123",
+        form_id: "456",
+        roles: ["admin", "superintendent", "manager"],
+        product: 'Residencial "Teste"',
+      },
+    ]);
+    const marker = "synthetic-private-json-token";
+    const runtime = await fixture(
+      JSON.stringify({
+        LEAD_DB_URL: "postgresql://synthetic-only",
+        META_FORM_ROUTES_JSON: routes,
+        META_PAGE_ACCESS_TOKEN: marker,
+      }),
+    );
+    try {
+      await until(async () => {
+        try {
+          await readFile(runtime.observed);
+          return true;
+        } catch {
+          return false;
+        }
+      });
+      expect(await readFile(runtime.validation, "utf8")).toBe(routes);
+      const observed = JSON.parse(await readFile(runtime.observed, "utf8"));
+      expect(observed.routes).toBe(routes);
+      expect(observed.crm).toBe("https://crm-auth.example.test");
+      expect(observed.ads).toBe("existing-metrics-token");
+      expect(runtime.output()).not.toContain(marker);
+      expect(runtime.output()).not.toContain(routes);
+      runtime.child.kill("SIGTERM");
+      expect(await runtime.completion).toBe(0);
+    } finally {
+      await runtime.cleanup();
+    }
+  });
+
+  it("rejects malformed JSON before spawning services without echoing its contents", async () => {
+    const marker = "synthetic-malformed-private-marker";
+    const runtime = await fixture(`{"META_PAGE_ACCESS_TOKEN":"${marker}",`);
+    try {
+      expect(await runtime.completion).toBe(1);
+      expect(runtime.output()).toContain("Invalid LEAD+ runtime configuration JSON");
+      expect(runtime.output()).not.toContain(marker);
+      await expect(readFile(runtime.observed)).rejects.toThrow();
+      await expect(readFile(runtime.validation)).rejects.toThrow();
+    } finally {
+      await runtime.cleanup();
+    }
+  });
+
+  it.each(["SUPABASE_URL", "META_ADS_ACCESS_TOKEN"])(
+    "rejects %s overrides before validation or service startup",
+    async (key) => {
+      const marker = "synthetic-disallowed-override-marker";
+      const runtime = await fixture(JSON.stringify({ [key]: marker }));
+      try {
+        expect(await runtime.completion).toBe(1);
+        expect(runtime.output()).toContain("Unexpected LEAD+ runtime configuration key");
+        expect(runtime.output()).not.toContain(marker);
+        await expect(readFile(runtime.observed)).rejects.toThrow();
+        await expect(readFile(runtime.validation)).rejects.toThrow();
+      } finally {
+        await runtime.cleanup();
+      }
+    },
+  );
+});

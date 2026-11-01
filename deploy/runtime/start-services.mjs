@@ -29,7 +29,7 @@ if (existsSync(configurationFile)) {
     "META_FORM_ROUTES_JSON",
   ]);
   for (const [key, value] of Object.entries(configuration)) {
-    if (!allowed.has(key) || typeof value !== "string")
+    if (!allowed.has(key) || typeof value !== "string" || value.includes("\0"))
       throw new Error("Unexpected LEAD+ runtime configuration key.");
     process.env[key] = value;
   }
