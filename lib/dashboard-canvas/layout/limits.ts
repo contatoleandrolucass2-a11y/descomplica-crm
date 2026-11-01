@@ -17,6 +17,7 @@ export interface DashboardCardLayoutPolicy {
   maxHeight?: number | null;
   heightStep?: number;
   freeResize?: boolean;
+  allowDuplicateCards?: boolean;
 }
 
 export const FREE_HEIGHT_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
@@ -27,6 +28,7 @@ export const APPOINTMENTS_CARD_LAYOUT_POLICY: DashboardCardLayoutPolicy = {
   maxHeight: 16_384,
   heightStep: 1,
   freeResize: true,
+  allowDuplicateCards: true,
 };
 
 export const FREE_CARD_MIN_WIDTH = 128;

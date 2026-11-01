@@ -194,6 +194,9 @@ export function dashboardCardsMatchPageLayout(
   if (pageKey === "crm.stage.appointments") {
     return cards.every((card) => card.layout.height >= 72);
   }
+  // PATCH bodies do not carry a page key; enforce semantic uniqueness only
+  // once the authorized profile page is known, as well as on create/read.
+  if (new Set(cards.map(cardSignature)).size !== cards.length) return false;
   return cards.every((card) => {
     const limits = layoutLimits[card.type];
     return (
@@ -206,7 +209,10 @@ export function dashboardCardsMatchPageLayout(
   });
 }
 
-function cardsSchema(cardSchema: typeof dashboardCardSchema | typeof dashboardCardDocumentSchema) {
+function cardsSchema(
+  cardSchema: typeof dashboardCardSchema | typeof dashboardCardDocumentSchema,
+  allowSemanticDuplicates = false,
+) {
   return z
     .array(cardSchema)
     .max(DASHBOARD_PROFILE_MAX_CARDS)
@@ -226,7 +232,7 @@ function cardsSchema(cardSchema: typeof dashboardCardSchema | typeof dashboardCa
             path: [index, "layout", "order"],
           });
         }
-        if (signatures.has(signature)) {
+        if (!allowSemanticDuplicates && signatures.has(signature)) {
           context.addIssue({ code: "custom", message: "duplicate_card_signature", path: [index] });
         }
         ids.add(card.id);
@@ -237,7 +243,7 @@ function cardsSchema(cardSchema: typeof dashboardCardSchema | typeof dashboardCa
 }
 
 export const dashboardCardsSchema = cardsSchema(dashboardCardSchema);
-const dashboardPageCardsSchema = cardsSchema(dashboardCardDocumentSchema);
+const dashboardPageCardsSchema = cardsSchema(dashboardCardDocumentSchema, true);
 
 export const dashboardProfileNameSchema = safeText(80);
 

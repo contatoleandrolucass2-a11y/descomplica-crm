@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-11-01 — Gráficos e painel compactos de Agendamentos
+
+- Remove popup de altura; campo em pixels e linha superior ajustável salvam
+  diretamente, preservando tamanho e posição do card. Metas seguem os filtros,
+  com caminho pontilhado conectado e ausência explícita; remove gridlines.
+- Restaura títulos de rankings, conversões e recência. Copiar/adicionar e
+  ferramentas ficam nos controles compactos; gaps/gutters de 8 px e sidebar
+  44/136 px preservam as linhas ao compactar a superfície no desktop.
+- Cópias recebem IDs próprios, mantendo conteúdo e dimensões. Nova migration
+  20261101115602 permite duplicidade semântica somente em Agendamentos, mantendo
+  limite 50, IDs únicos, CAS e permissões. DDL remoto ainda depende de autorização.
+- Node 24/Windows: tipos, 71 testes de contrato, 20 de navegação, 15 de gráfico
+  e controles aprovados; fixture first-save com 22 cenários aprovado. Matriz
+  sintética: 15 telas em três temas/cinco larguras e dez interações aprovadas,
+  sem falhas JS/axe grave/tráfego externo. CI isolada, merge, publicação e
+  conferência autenticada ainda pendentes.
+
 ## 2026-10-31 — Máximo das torres em pixels publicado
 
 - Campo em pixels positivos, sem faixa percentual, com escala comum de torres,

@@ -1,5 +1,10 @@
 # Changelog
 
+- Simplifica Agendamentos: altura das torres diretamente no gráfico, linha
+  superior ajustável e meta pontilhada dinâmica, sem grade decorativa. Restaura
+  títulos, oferece copiar/adicionar nos cards e compacta espaços e sidebar
+  preservando linhas e ordem. Cópias exigem migration específica antes do deploy.
+
 - Fixa a data do navegador sintético CAIXA na referência de 25/10/2026 para
   preservar a verificação de prazo por idade após a virada do mês. Não altera
   cálculos, expectativas ou gates de publicação.

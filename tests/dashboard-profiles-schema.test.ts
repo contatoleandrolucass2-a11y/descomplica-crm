@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   dashboardCardsSchema,
+  dashboardCardsMatchPageLayout,
+  dashboardProfileRecordSchema,
   dashboardProfileCreateSchema,
   dashboardProfilePatchSchema,
 } from "@/lib/dashboard-canvas/persistence/schema";
@@ -215,6 +217,76 @@ describe("dashboard profile persistence schema", () => {
           layout: { ...card.layout, order: 0 },
         },
       ]).success,
+    ).toBe(false);
+  });
+
+  it("round trips intentional appointments copies while identity and order remain unique", () => {
+    const first = {
+      ...card,
+      presentation: { barMaxHeight: 240 },
+      layout: { ...card.layout, width: 157, height: 73 },
+    };
+    const copy = { ...first, id: "copy", layout: { ...first.layout, order: 1 } };
+    const input = { pageKey: "crm.stage.appointments", name: "Copies", cards: [first, copy] };
+    expect(dashboardProfileCreateSchema.parse(input).cards).toEqual([first, copy]);
+    expect(dashboardProfilePatchSchema.parse({ version: 4, cards: [first, copy] }).cards).toEqual([
+      first,
+      copy,
+    ]);
+    expect(
+      dashboardProfileRecordSchema.parse({
+        ...input,
+        id: "12345678-1234-4234-8234-123456789012",
+        userId: "12345678-1234-4234-8234-123456789013",
+        scopeKey: null,
+        isDefault: true,
+        version: 4,
+        schemaVersion: 2,
+        createdAt: "2026-11-01T12:00:00Z",
+        updatedAt: "2026-11-01T12:00:00Z",
+      }).cards,
+    ).toEqual([first, copy]);
+    for (const invalid of [
+      { ...copy, id: first.id },
+      { ...copy, layout: { ...copy.layout, order: 0 } },
+    ]) {
+      expect(
+        dashboardProfileCreateSchema.safeParse({ ...input, cards: [first, invalid] }).success,
+      ).toBe(false);
+    }
+  });
+
+  it("keeps semantic uniqueness in generic validation and every other authorized page", () => {
+    const first = { ...card, metric: "overview.current.month" };
+    const copy = { ...first, id: "copy", layout: { ...first.layout, order: 1 } };
+    expect(dashboardCardsSchema.safeParse([first, copy]).success).toBe(false);
+    // The PATCH envelope has no page key; the route invokes this check after authorization.
+    expect(
+      dashboardProfilePatchSchema.safeParse({ version: 4, cards: [first, copy] }).success,
+    ).toBe(true);
+    expect(dashboardCardsMatchPageLayout("crm.dashboard", [first, copy])).toBe(false);
+    expect(
+      dashboardProfileCreateSchema.safeParse({
+        pageKey: "crm.dashboard",
+        name: "No copies",
+        cards: [first, copy],
+      }).success,
+    ).toBe(false);
+    expect(dashboardCardsMatchPageLayout("crm.stage.appointments", [first, copy])).toBe(true);
+  });
+
+  it("does not exceed fifty cards when appointments permit semantic copies", () => {
+    const cards = Array.from({ length: 51 }, (_, order) => ({
+      ...card,
+      id: `copy-${order}`,
+      layout: { ...card.layout, order },
+    }));
+    expect(
+      dashboardProfileCreateSchema.safeParse({
+        pageKey: "crm.stage.appointments",
+        name: "Too many",
+        cards,
+      }).success,
     ).toBe(false);
   });
 

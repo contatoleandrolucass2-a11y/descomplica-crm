@@ -207,6 +207,15 @@ async function productionCss(viteCss) {
 }
 
 async function runCanvasPreview({ page, origin, evidence, check }) {
+  async function clickTool(name) {
+    const action = page.getByRole("button", { name, exact: true });
+    if (!(await action.isVisible()))
+      await page
+        .getByRole("button", { name: "Mais ferramentas do painel", exact: true })
+        .first()
+        .press("Enter");
+    await action.click();
+  }
   const viewports = [
     { width: 320, height: 900 },
     { width: 390, height: 900 },
@@ -327,6 +336,25 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     cards.evaluateAll((nodes) => nodes.map((node) => node.dataset.dashboardCardId));
   const initialOrder = await readOrder();
   const goalCard = page.locator('[data-dashboard-card-id="appointments-goal"]');
+  for (const [id, title] of [
+    ["ranking-owner", "Ranking por responsável"],
+    ["ranking-manager", "Ranking por gerente"],
+    ["ranking-regional", "Ranking por gerente regional"],
+    ["conversion-ranking-owner", "Melhor responsável: Agendamento x Visita"],
+    ["conversion-ranking-manager", "Melhor gerente: Agendamento x Visita"],
+    ["conversion-ranking-regional", "Melhor gerente regional: Agendamento x Visita"],
+    ["recency-up-to-7", "Último agendamento: até 7 dias"],
+    ["recency-8-to-14", "Último agendamento: de 8 a 14 dias"],
+    ["recency-15-plus", "Último agendamento: 15 dias ou mais"],
+  ]) {
+    await expect(
+      page
+        .locator(`[data-dashboard-card-id="${id}"]`)
+        .getByRole("heading", { name: title, exact: true }),
+    ).toBeVisible();
+  }
+  evidence.canvas.interactions.push("ranking-conversion-recency-titles-restored");
+
   check((await goalCard.locator("header strong").count()) === 0, "Duplicate header removed");
   const mover = goalCard.getByRole("button", { name: "Mover Meta do mês", exact: true });
   await page.mouse.move(0, 0);
@@ -361,7 +389,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     (await goalCard.boundingBox()).width > initialBounds.width,
     "Pointer resizes horizontally and vertically",
   );
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await clickTool("Desfazer");
   await goalCard.hover();
   await goalCard.getByRole("button", { name: "Editar Meta do mês", exact: true }).click();
   const editor = page.getByRole("dialog", { name: "Editar card", exact: true });
@@ -413,13 +441,13 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
       );
     })
     .toBe(true);
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await clickTool("Desfazer");
   await page.setViewportSize({ width: 1440, height: 900 });
   await goalCard
     .getByRole("button", { name: "Redimensionar Meta do mês", exact: true })
     .press("ArrowRight");
   await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(318);
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await clickTool("Desfazer");
   await goalCard.hover();
   await goalCard.getByRole("button", { name: "Editar Meta do mês", exact: true }).click();
   await editor.getByLabel("Altura do card", { exact: false }).fill("137");
@@ -427,8 +455,8 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await editor.getByRole("button", { name: "Salvar", exact: true }).click();
   await expect.poll(async () => (await goalCard.boundingBox()).height).toBe(137);
   await expect.poll(async () => (await goalCard.boundingBox()).width).toBe(157);
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await clickTool("Desfazer");
+  await clickTool("Desfazer");
   evidence.canvas.interactions.push(
     "compact-hover-pointer-both-axes-pixel-dimensions-below-legacy-minima-and-save",
   );
@@ -436,7 +464,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await expect.poll(readOrder).not.toEqual(initialOrder);
   const keyboardOrder = await readOrder();
   check(keyboardOrder[1] === "appointments-goal", "Keyboard reorders a card");
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await clickTool("Desfazer");
   await expect.poll(readOrder).toEqual(initialOrder);
   evidence.canvas.interactions.push({ keyboardOrder, undoOrder: await readOrder() });
 
@@ -446,7 +474,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     .press("ArrowDown");
   const resizedHeight = await goalCard.evaluate((node) => node.getBoundingClientRect().height);
   check(resizedHeight > initialHeight, "Keyboard resize increases card height");
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await clickTool("Desfazer");
 
   for (const id of ["appointments-goal", "team-productive"]) {
     await page.locator(`[data-dashboard-card-id="${id}"]`).hover();
@@ -460,7 +488,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     groupOrder.indexOf("team-productive") === groupOrder.indexOf("appointments-goal") + 1,
     "Group move keeps selected cards together",
   );
-  await page.getByRole("button", { name: "Desfazer", exact: true }).click();
+  await clickTool("Desfazer");
   evidence.canvas.interactions.push({ groupOrder });
 
   await page.locator('[data-dashboard-card-id="appointments-monthly"]').hover();
@@ -474,7 +502,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   );
   evidence.canvas.interactions.push("expand-and-escape");
 
-  await page.getByRole("button", { name: "Adicionar card", exact: true }).click();
+  await goalCard.getByRole("button", { name: "Adicionar novo card", exact: true }).press("Enter");
   await expect(page.getByRole("dialog", { name: "Adicionar card", exact: true })).toBeVisible();
   await page.keyboard.press("Escape");
   evidence.canvas.interactions.push("card-editor");
@@ -482,12 +510,58 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await expect(page.getByRole("button", { name: "Perfis", exact: true })).toHaveCount(0);
   evidence.canvas.interactions.push("automatic-profile-without-profile-toolbar");
 
-  await page.getByRole("button", { name: "Baixar PDF", exact: true }).click();
+  await clickTool("Baixar PDF");
   await expect(
     page.getByRole("dialog", { name: "Baixar dashboard em PDF", exact: true }),
   ).toBeVisible();
   await page.keyboard.press("Escape");
   evidence.canvas.interactions.push("selective-pdf-dialog");
+
+  const beforeCopyOrder = await readOrder();
+  await goalCard.getByRole("button", { name: "Copiar Meta do mês", exact: true }).press("Enter");
+  await expect(cards).toHaveCount(29);
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
+  const copiedOrder = await readOrder();
+  const copyId = copiedOrder.find((id) => !beforeCopyOrder.includes(id));
+  check(
+    Boolean(copyId) && new Set(copiedOrder).size === copiedOrder.length,
+    "Copy uses a unique id",
+  );
+  check(
+    copiedOrder.indexOf(copyId) === copiedOrder.indexOf("appointments-goal") + 1,
+    "Copy inserts adjacent to source",
+  );
+  await page.reload();
+  await expect.poll(readOrder).toEqual(copiedOrder);
+  const copied = page.locator(`[data-dashboard-card-id="${copyId}"]`);
+  await expect(copied.getByRole("heading", { name: "Meta do mês", exact: true })).toBeVisible();
+  await copied.getByRole("button", { name: "Excluir Meta do mês", exact: true }).press("Enter");
+  await expect(cards).toHaveCount(28);
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
+  await goalCard.getByRole("button", { name: "Adicionar novo card", exact: true }).press("Enter");
+  const newEditor = page.getByRole("dialog", { name: "Adicionar card", exact: true });
+  await newEditor.getByLabel("Título", { exact: true }).fill("Card sintético QA");
+  await newEditor.getByRole("button", { name: "Adicionar", exact: true }).click();
+  await expect(newEditor).toHaveCount(0);
+  await expect(cards).toHaveCount(29);
+  const newId = (await readOrder()).find((id) => !beforeCopyOrder.includes(id));
+  check(Boolean(newId) && newId !== copyId, "New card has an independent id");
+  await page.reload();
+  const created = page.locator(`[data-dashboard-card-id="${newId}"]`);
+  await expect(
+    created.getByRole("button", { name: "Editar Card sintético QA", exact: true }),
+  ).toHaveCount(1);
+  await created
+    .getByRole("button", { name: "Excluir Card sintético QA", exact: true })
+    .press("Enter");
+  await expect(cards).toHaveCount(28);
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
+  evidence.canvas.interactions.push({
+    scenario: "hover-copy-and-create-refresh",
+    copyId,
+    newId,
+    copiedOrder,
+  });
 
   const touchContext = await page
     .context()
@@ -526,10 +600,35 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     await expect.poll(async () => (await touchCard.boundingBox()).height).toBe(72);
     check((await actions.boundingBox()).width >= 44, "Small card keeps touch actions target");
     await actions.click();
-    for (const name of ["Selecionar card", "Editar e redimensionar", "Expandir", "Excluir"])
+    for (const name of [
+      "Selecionar card",
+      "Editar e redimensionar",
+      "Expandir",
+      "Copiar card",
+      "Adicionar novo card",
+      "Excluir",
+    ])
       await expect(actionsDialog.getByRole("button", { name, exact: true })).toBeVisible();
     await touchPage.keyboard.press("Escape");
     await expect(actions).toBeFocused();
+    for (const closeWith of ["button", "Escape"]) {
+      await actions.click();
+      await actionsDialog
+        .getByRole("button", { name: "Mais ferramentas do painel", exact: true })
+        .click();
+      await expect(actionsDialog).toHaveCount(0);
+      await expect(touchPage.locator("#appointments-panel-tools")).toBeVisible();
+      if (closeWith === "Escape") await touchPage.keyboard.press("Escape");
+      else
+        await touchPage
+          .getByRole("button", { name: "Fechar ferramentas do painel", exact: true })
+          .click();
+      await expect(touchPage.locator("#appointments-panel-tools")).toBeHidden();
+      await expect(actions).toBeFocused();
+    }
+    evidence.canvas.interactions.push(
+      "touch-panel-tools-close-and-escape-return-focus-to-card-actions",
+    );
     await actions.click();
     await actionsDialog.getByRole("button", { name: "Expandir", exact: true }).click();
     await expect(touchPage.getByRole("dialog", { name: "Meta do mês", exact: true })).toBeVisible();
@@ -564,6 +663,8 @@ export async function runAppointmentsPreview() {
   evidence.sources = await Promise.all(
     [
       `${componentDirectory}/AppointmentsDashboard.tsx`,
+      `${componentDirectory}/AppointmentsColumns.tsx`,
+      "lib/dashboard-canvas/ui/configurable/bar-height-controls.tsx",
       `${componentDirectory}/AppointmentsDashboard.module.css`,
       `${componentDirectory}/ChartBoard.tsx`,
       `${componentDirectory}/ChartBoard.module.css`,

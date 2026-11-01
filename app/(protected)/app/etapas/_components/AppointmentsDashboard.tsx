@@ -13,6 +13,8 @@ import {
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
 import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
+import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
+import { AppointmentsColumns as Columns } from "./AppointmentsColumns";
 import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
@@ -100,15 +102,17 @@ function Chart({
   children: ReactNode;
   controls?: ReactNode;
 }) {
+  const presentation = useDashboardBarHeightControl();
+  const visibleTitle = presentation?.title ?? title;
   return (
-    <section className={styles.canvasChart} aria-label={title}>
-      <h2 className="sr-only">{title}</h2>
+    <section className={styles.canvasChart} aria-label={visibleTitle}>
+      <h2 className={styles.canvasChartTitle}>{visibleTitle}</h2>
       {controls ? <div className={styles.canvasChartControls}>{controls}</div> : null}
       <div
         className={styles.cardBody}
         tabIndex={0}
         role="region"
-        aria-label={`Conteúdo de ${title}`}
+        aria-label={`Conteúdo de ${visibleTitle}`}
       >
         {children}
       </div>
@@ -194,106 +198,6 @@ function TiltCard({
         </div>
       </dialog>
     </article>
-  );
-}
-
-function Columns({
-  buckets,
-  label,
-  daily = false,
-  selected,
-  isSelected,
-  onSelect,
-  monthly = false,
-  verticalLabels = false,
-}: {
-  buckets: (AppointmentBucket & { goal?: number | null })[];
-  label: string;
-  daily?: boolean;
-  selected?: string | undefined;
-  isSelected?: ((bucket: AppointmentBucket) => boolean) | undefined;
-  onSelect?: (bucket: AppointmentBucket) => void;
-  monthly?: boolean;
-  verticalLabels?: boolean;
-}) {
-  if (!buckets.length) return <Empty />;
-  // Keep existing percentage presentations intact. Pixel limits use the tallest
-  // actual bar as their reference and the same scale for goals and value labels.
-  const rangeMax = Math.max(1, ...buckets.flatMap((item) => [item.total, item.goal ?? 0]));
-  const barMax = Math.max(1, ...buckets.map((item) => item.total));
-  const max = rangeMax * 1.5;
-  return (
-    <>
-      <p className={styles.axis}>Quantidade de agendamentos</p>
-      <ol
-        aria-label={label}
-        className={`${styles.columns} ${daily ? styles.daily : ""} ${monthly ? styles.monthly : ""} ${verticalLabels ? styles.verticalLabels : ""}`}
-        style={{ "--column-count": buckets.length } as CSSProperties}
-      >
-        {buckets.map((item) => (
-          <li key={item.key}>
-            <button
-              type="button"
-              aria-pressed={isSelected ? isSelected(item) : selected === item.key}
-              aria-label={`${daily ? displayDate(item.key) : item.label}: ${number.format(item.total)} agendamentos${item.goal == null ? "" : `; meta ${number.format(item.goal)}; ${item.total >= item.goal ? "meta atingida" : "abaixo da meta"}`}`}
-              className={styles.chartButton}
-              onClick={() => onSelect?.(item)}
-            >
-              <div
-                className={styles.columnTrack}
-                style={
-                  {
-                    "--bar-height": `${(item.total / max) * 100}%`,
-                    "--bar-ratio": item.total / rangeMax,
-                    "--bar-max-ratio": item.total / barMax,
-                    "--goal-height": `${((item.goal ?? 0) / max) * 100}%`,
-                    "--goal-ratio": (item.goal ?? 0) / rangeMax,
-                    "--goal-max-ratio": (item.goal ?? 0) / barMax,
-                  } as CSSProperties
-                }
-              >
-                {item.goal != null && (
-                  <span
-                    className={styles.goalLine}
-                    style={{
-                      bottom: "var(--rendered-goal-height)",
-                    }}
-                    title={`Meta: ${number.format(item.goal)}`}
-                  />
-                )}
-                <div
-                  className={styles.column}
-                  data-goal-status={
-                    item.goal == null
-                      ? "goal" in item
-                        ? "unavailable"
-                        : "neutral"
-                      : item.total >= item.goal
-                        ? "positive"
-                        : "negative"
-                  }
-                  style={{
-                    height: "var(--rendered-bar-height)",
-                  }}
-                />
-                <span className={styles.columnValue}>{number.format(item.total)}</span>
-              </div>
-              <span className={styles.columnLabel}>{item.label}</span>
-            </button>
-          </li>
-        ))}
-      </ol>
-      {buckets.some((item) => item.goal != null) && (
-        <p className={styles.axis}>
-          Vermelho: abaixo da meta · Azul: meta atingida · Traço: meta do período
-        </p>
-      )}
-      {buckets.some((item) => "goal" in item) && buckets.every((item) => item.goal == null) && (
-        <p className={styles.axis}>
-          Meta não definida para este recorte · Sem classificação de produtividade
-        </p>
-      )}
-    </>
   );
 }
 
@@ -1074,6 +978,8 @@ type RecencyItem = {
 };
 
 function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] }) {
+  const presentation = useDashboardBarHeightControl();
+  const visibleTitle = presentation?.title ?? title;
   const tone =
     items.length === 0
       ? "blue"
@@ -1083,8 +989,8 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
           ? "yellow"
           : "blue";
   return (
-    <section className={styles.recencyPanel} data-tone={tone} aria-label={title}>
-      <h2 className="sr-only">{title}</h2>
+    <section className={styles.recencyPanel} data-tone={tone} aria-label={visibleTitle}>
+      <h2 className={styles.canvasChartTitle}>{visibleTitle}</h2>
       <span className={styles.recencyCount}>{number.format(items.length)} corretores</span>
       {items.length === 0 ? (
         <Empty>Nenhum corretor nesta faixa.</Empty>

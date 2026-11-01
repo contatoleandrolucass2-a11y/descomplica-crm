@@ -12,7 +12,7 @@ import {
   normalizeDashboardCards,
   serializeCanvasSnapshot,
 } from "./migrations";
-import type { DashboardCardLayoutPolicy } from "../layout/limits";
+import { MAX_CARDS_PER_CANVAS, type DashboardCardLayoutPolicy } from "../layout/limits";
 
 export const DEFAULT_CANVAS_HISTORY_LIMIT = 40;
 
@@ -27,6 +27,7 @@ export interface CanvasHistoryState {
 
 export type CanvasAction =
   | { type: "add-card"; card: DashboardCard }
+  | { type: "copy-card"; cardId: string; newId: string }
   | { type: "remove-card"; cardId: string }
   | { type: "update-card"; cardId: string; patch: DashboardCardPatch }
   | { type: "move-card"; cardId: string; toIndex: number }
@@ -134,14 +135,54 @@ export function canvasReducer(state: CanvasHistoryState, action: CanvasAction): 
   if (action.type === "clear-duplicate") {
     return state.duplicateCardId === null ? state : { ...state, duplicateCardId: null };
   }
+  if (action.type === "copy-card") {
+    if (
+      !state.layoutPolicy?.allowDuplicateCards ||
+      state.present.cards.length >= MAX_CARDS_PER_CANVAS ||
+      !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,79}$/u.test(action.newId) ||
+      ["__proto__", "prototype", "constructor"].includes(action.newId) ||
+      state.present.cards.some(({ id }) => id === action.newId)
+    )
+      return state;
+    const sourceIndex = state.present.cards.findIndex(({ id }) => id === action.cardId);
+    const source = state.present.cards[sourceIndex];
+    if (!source) return state;
+    const copied = normalizeDashboardCard(
+      { ...source, id: action.newId },
+      sourceIndex + 1,
+      state.layoutPolicy,
+    );
+    if (!copied) return state;
+    const cards = [...state.present.cards];
+    cards.splice(sourceIndex + 1, 0, copied);
+    return commit(
+      state,
+      snapshot(
+        cards.map((card, order) => ({
+          ...card,
+          layout: { ...card.layout, order },
+        })),
+        state.layoutPolicy,
+      ),
+    );
+  }
   if (action.type === "add-card") {
+    if (state.present.cards.length >= MAX_CARDS_PER_CANVAS) return state;
     const card = normalizeDashboardCard(
       action.card,
       state.present.cards.length,
       state.layoutPolicy,
     );
     if (!card) return state;
-    const duplicate = findDuplicateCard(state.present.cards, card);
+    if (
+      state.layoutPolicy?.allowDuplicateCards &&
+      state.present.cards.some(({ id }) => id === card.id)
+    ) {
+      return state;
+    }
+    const duplicate = state.layoutPolicy?.allowDuplicateCards
+      ? null
+      : findDuplicateCard(state.present.cards, card);
     if (duplicate) return { ...state, duplicateCardId: duplicate.id };
     return commit(state, snapshot([...state.present.cards, card], state.layoutPolicy));
   }
@@ -187,7 +228,9 @@ export function canvasReducer(state: CanvasHistoryState, action: CanvasAction): 
       state.layoutPolicy,
     );
     if (!candidate) return state;
-    const duplicate = findDuplicateCard(state.present.cards, candidate, current.id);
+    const duplicate = state.layoutPolicy?.allowDuplicateCards
+      ? null
+      : findDuplicateCard(state.present.cards, candidate, current.id);
     if (duplicate) return { ...state, duplicateCardId: duplicate.id };
     return commit(
       state,

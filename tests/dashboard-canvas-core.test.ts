@@ -402,6 +402,106 @@ describe("dashboard canvas reducer", () => {
     expect(state.duplicateCardId).toBe("existing");
   });
 
+  it("copies appointments immediately after their source and preserves independent presentation", () => {
+    const original = card("a", 0, 12, {
+      title: "Original",
+      entityIds: ["team-a"],
+      layout: { order: 0, columnSpan: 12, height: 73 },
+      options: { showGoal: true },
+      presentation: { barMaxHeight: 240, accentColor: "#abcdef" },
+    });
+    let state = createCanvasHistoryState(
+      [original, card("b", 1)],
+      40,
+      APPOINTMENTS_CARD_LAYOUT_POLICY,
+    );
+    state = canvasReducer(state, { type: "copy-card", cardId: "a", newId: "a-copy" });
+    expect(state.present.cards.map(({ id, layout }) => [id, layout.order])).toEqual([
+      ["a", 0],
+      ["a-copy", 1],
+      ["b", 2],
+    ]);
+    expect(state.present.cards[1]).toEqual({
+      ...state.present.cards[0],
+      id: "a-copy",
+      layout: { ...state.present.cards[0]!.layout, order: 1 },
+    });
+    expect(state.present.cards[1]!.layout.width).toBeUndefined();
+    state = canvasReducer(state, {
+      type: "update-card",
+      cardId: "a-copy",
+      patch: {
+        title: "Copy edited",
+        layout: { height: 91 },
+        presentation: { barMaxHeight: 128 },
+      },
+    });
+    expect(state.present.cards[0]).toMatchObject({
+      title: "Original",
+      layout: { height: 73 },
+      presentation: { barMaxHeight: 240 },
+    });
+    expect(state.present.cards[1]).toMatchObject({
+      title: "Copy edited",
+      layout: { height: 91 },
+      presentation: { barMaxHeight: 128 },
+    });
+    state = canvasReducer(state, { type: "undo" });
+    state = canvasReducer(state, { type: "undo" });
+    expect(state.present.cards.map(({ id }) => id)).toEqual(["a", "b"]);
+    state = canvasReducer(state, { type: "redo" });
+    expect(state.present.cards.map(({ id }) => id)).toEqual(["a", "a-copy", "b"]);
+  });
+
+  it("requires the explicit duplicate policy and a new safe id to copy", () => {
+    const legacy = createCanvasHistoryState([card("a", 0)]);
+    expect(canvasReducer(legacy, { type: "copy-card", cardId: "a", newId: "copy" })).toBe(legacy);
+    const freeOnly = createCanvasHistoryState([card("a", 0)], 40, { freeResize: true });
+    expect(canvasReducer(freeOnly, { type: "copy-card", cardId: "a", newId: "copy" })).toBe(
+      freeOnly,
+    );
+    const appointments = createCanvasHistoryState(
+      [card("a", 0)],
+      40,
+      APPOINTMENTS_CARD_LAYOUT_POLICY,
+    );
+    for (const newId of ["a", "", "__proto__", "bad id", "a".repeat(81)]) {
+      expect(canvasReducer(appointments, { type: "copy-card", cardId: "a", newId })).toBe(
+        appointments,
+      );
+    }
+    expect(
+      canvasReducer(appointments, { type: "copy-card", cardId: "missing", newId: "copy" }),
+    ).toBe(appointments);
+  });
+
+  it("permits adding and editing semantic copies only in the appointments policy", () => {
+    const source = card("a", 0, 6, { metric: "sales" });
+    let state = createCanvasHistoryState([source], 40, APPOINTMENTS_CARD_LAYOUT_POLICY);
+    state = canvasReducer(state, {
+      type: "add-card",
+      card: { ...source, id: "b", layout: { ...source.layout, order: 1 } },
+    });
+    expect(state.present.cards).toHaveLength(2);
+    state = canvasReducer(state, {
+      type: "update-card",
+      cardId: "a",
+      patch: { title: "Edited independently" },
+    });
+    expect(state.present.cards[0]!.title).toBe("Edited independently");
+    expect(state.present.cards[1]!.title).toBeUndefined();
+    expect(canvasReducer(state, { type: "add-card", card: source })).toBe(state);
+  });
+
+  it("keeps the fifty-card bound when copying or adding", () => {
+    const cards = Array.from({ length: 50 }, (_, order) => card(`card-${order}`, order));
+    const state = createCanvasHistoryState(cards, 40, APPOINTMENTS_CARD_LAYOUT_POLICY);
+    expect(canvasReducer(state, { type: "copy-card", cardId: "card-0", newId: "copy" })).toBe(
+      state,
+    );
+    expect(canvasReducer(state, { type: "add-card", card: card("fifty-first", 50) })).toBe(state);
+  });
+
   it("enforces the configured history limit", () => {
     let state = createCanvasHistoryState([card("a", 0)], 2);
     for (const height of [360, 384, 408]) {

@@ -62,7 +62,7 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   }
   await page.goto(`${origin}?editable`);
   await page.getByRole("button", { name: "House", exact: true }).click();
-  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
 
   for (const [index, chart] of charts.entries()) {
     const width = 397 + index * 100;
@@ -72,7 +72,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     await dialog.getByRole("button", { name: "Salvar", exact: true }).click();
     await expect(dialog).toHaveCount(0);
     assert.equal(requests.length, before + 1, "One confirmation must send exactly one PATCH");
-    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     // No debounce wait: closing the editor must already mean server acknowledgement.
     await reloadAndCheck(chart, width, height);
     evidence.firstSave.push({
@@ -93,11 +95,24 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
         elements.map((element) => element.getAttribute("data-dashboard-card-id")),
       );
   const orderBeforeCap = await order();
-  const geometry = (target = card(barChart)) =>
-    target.locator('[style*="--bar-height"]').evaluateAll((tracks) =>
+  const geometry = async (target = card(barChart)) => {
+    await target.scrollIntoViewIfNeeded();
+    // ResizeObserver initializes the plot after React's first committed paint.
+    await expect
+      .poll(() =>
+        target
+          .locator("[data-appointments-track]")
+          .evaluateAll((tracks) =>
+            tracks.some(
+              (track) => Number.parseFloat(track.style.getPropertyValue("--bar-height")) > 0,
+            ),
+          ),
+      )
+      .toBe(true);
+    return target.locator('[style*="--bar-height"]').evaluateAll((tracks) =>
       tracks.map((track) => {
-        const bar = track.querySelector(":scope > div");
-        const value = track.querySelector('[class*="columnValue"]');
+        const bar = track.querySelector("[data-appointments-bar]");
+        const value = track.querySelector("[data-appointments-value]");
         const goal = track.querySelector('[title^="Meta:"]');
         return {
           value: Number(value.textContent.replace(/\./gu, "").replace(",", ".")),
@@ -111,6 +126,7 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
         };
       }),
     );
+  };
   function checkGeometry(bars, cap) {
     assert.ok(
       bars.some(({ value }) => value > 0),
@@ -130,7 +146,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
           Math.abs(bar.height - bar.value * pixelsPerUnit) < 1,
           "Bars share the same pixels-per-unit ruler",
         );
-        assert.ok(Math.abs(bar.labelBottom - bar.height) < 1, "Value label follows its bar");
+        assert.ok(
+          Math.abs(bar.labelBottom - bar.height) < 1,
+          `Value label follows its bar: ${JSON.stringify(bar)}`,
+        );
         if (bar.goal != null)
           assert.ok(
             Math.abs(bar.goalBottom - bar.goal * pixelsPerUnit) < 1,
@@ -139,23 +158,73 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       }
     }
   }
+  async function checkReferences(target) {
+    await expect(target.locator("[data-dashboard-bar-top-line]")).toHaveCount(1);
+    const ruler = await target.evaluate((article) => {
+      const line = article.querySelector("[data-dashboard-bar-top-line]");
+      const bars = [...article.querySelectorAll("[data-appointments-bar]")];
+      const columns = article.querySelector("[data-appointments-plot] ol");
+      return {
+        top: Number.parseFloat(line.style.bottom),
+        largest: Math.max(...bars.map((bar) => bar.getBoundingClientRect().height)),
+        background: getComputedStyle(columns).backgroundImage,
+      };
+    });
+    assert.ok(
+      Math.abs(ruler.top - ruler.largest) < 1,
+      "Top reference anchors the tallest actual bar, not an inflated goal scale",
+    );
+    assert.ok(
+      !ruler.background.includes("repeating-linear-gradient"),
+      "Decorative repeated gridlines are absent",
+    );
+
+    const lines = await target.locator("svg[data-dashboard-goal-line]").evaluateAll((elements) =>
+      elements.map((svg) => {
+        const path = svg.querySelector("path");
+        const length = path.getTotalLength();
+        const start = path.getPointAtLength(0);
+        const end = path.getPointAtLength(length);
+        return {
+          d: path.getAttribute("d"),
+          start: start.x,
+          end: end.x,
+          missing: Number(svg.dataset.missingGoals),
+          outside: svg.dataset.outOfScale === "true",
+        };
+      }),
+    );
+    for (const line of lines) {
+      assert.ok(line.d && !/NaN|Infinity/u.test(line.d), "Goal geometry remains finite");
+      if (line.missing === 0) {
+        assert.equal((line.d.match(/M/gu) ?? []).length, 1, "Known goals have one connected path");
+        assert.ok(
+          Math.abs(line.start) < 0.01 && Math.abs(line.end - 100) < 0.01,
+          "Known goals extend from plot start to end",
+        );
+      }
+    }
+    assert.equal(
+      await target.locator('[title^="Meta:"]').count(),
+      0,
+      "Per-bucket disconnected target markers were removed",
+    );
+    return lines;
+  }
   const proofDirectory = path.resolve("test-results/appointments-bar-height-pixels");
   await mkdir(proofDirectory, { recursive: true });
   async function savePixelCap(chart, value, target = page) {
     const article = target.locator(`[data-dashboard-card-id="${chart.id}"]`);
-    await article
-      .getByRole("button", { name: `Ajustar altura das torres de ${chart.title}`, exact: true })
-      .press("Enter");
-    const editor = target.getByRole("dialog", { name: "Altura das torres", exact: true });
-    const input = editor.getByLabel("Altura máxima das torres (px)", { exact: true });
-    await expect(input).toBeFocused();
+    const input = article.getByLabel("Altura máxima das torres (px)", { exact: true });
     await expect(input).not.toHaveAttribute("max", /.+/u);
-    await expect(editor.getByLabel("Largura do card", { exact: false })).toHaveCount(0);
-    await expect(editor.getByRole("slider")).toHaveCount(0);
     await input.fill(value);
-    await editor.getByRole("button", { name: "Salvar", exact: true }).click();
-    await expect(editor).toHaveCount(0);
-    await expect(target.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await input.press("Enter");
+    await expect(target.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
+    await expect(
+      target.getByRole("dialog", { name: "Altura das torres", exact: true }),
+    ).toHaveCount(0);
   }
   // Existing percentage layouts remain intact when only an unrelated editor field changes.
   const { profiles: legacyProfiles } = await (
@@ -179,12 +248,12 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   );
   assert.equal(seedLegacy.status(), 200);
   await page.reload();
-  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   const legacyGeometry = await geometry();
   const beforeTitleSave = requests.length;
   const legacyEditor = await open(barChart);
   await expect(
-    legacyEditor.getByLabel("Altura máxima das torres (px)", { exact: true }),
+    card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
   ).toHaveValue("");
   await legacyEditor.getByLabel("Título", { exact: true }).fill(`${barChart.title} QA`);
   await legacyEditor.getByRole("button", { name: "Salvar", exact: true }).click();
@@ -194,7 +263,7 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   assert.equal(afterTitle.presentation.barScale, 0.65);
   assert.equal(afterTitle.presentation.barMaxHeight, undefined);
   await page.reload();
-  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   assert.deepEqual(await read(barChart), dimensionsBeforeCap);
   assert.deepEqual(
     (await geometry()).map(({ height }) => height),
@@ -221,7 +290,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     await savePixelCap(noGoalChart, String(cap));
     assert.equal(requests.length, beforeExactCap + 1);
     await page.reload();
-    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     const exactBars = await geometry(card(noGoalChart));
     assert.ok(
       exactBars.every(({ goal }) => goal == null),
@@ -245,24 +316,19 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   }
 
   // Native constraints reject zero/fractional pixel heights without sending a write.
-  await card(barChart)
-    .getByRole("button", { name: `Ajustar altura das torres de ${barChart.title}`, exact: true })
-    .press("Enter");
-  const invalidEditor = page.getByRole("dialog", { name: "Altura das torres", exact: true });
-  const invalidInput = invalidEditor.getByLabel("Altura máxima das torres (px)", { exact: true });
+  const invalidInput = card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true });
   for (const value of ["0", "24.5"]) {
     const beforeInvalidSave = requests.length;
     await invalidInput.fill(value);
     assert.equal(await invalidInput.evaluate((input) => input.checkValidity()), false);
-    await invalidEditor.getByRole("button", { name: "Salvar", exact: true }).click();
-    await expect(invalidEditor).toHaveCount(1);
+    await invalidInput.press("Enter");
     assert.equal(
       requests.length,
       beforeInvalidSave,
       "Invalid pixel height must not write a profile",
     );
   }
-  await invalidEditor.getByRole("button", { name: "Cancelar", exact: true }).click();
+  await invalidInput.press("Escape");
   evidence.firstSave.push({ scenario: "pixel-cap-rejects-nonpositive-and-fractional-values" });
   for (const cap of [1, 24, 240, 10000]) {
     const beforeSave = requests.length;
@@ -278,7 +344,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       "Explicit pixel edit replaces legacy percentage",
     );
     await page.reload();
-    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     await expect.poll(() => read(barChart)).toEqual(dimensionsBeforeCap);
     assert.deepEqual(await order(), orderBeforeCap, "Pixel cap does not reorder cards");
     const bars = await geometry();
@@ -288,11 +356,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
         Math.abs(Math.max(...bars.map(({ height }) => height)) - 1) < 0.1,
         "The 1px cap actually limits the largest tower below its default size",
       );
-    const editor = await open(barChart);
-    await expect(editor.getByLabel("Altura máxima das torres (px)", { exact: true })).toHaveValue(
-      String(cap),
-    );
-    await editor.getByRole("button", { name: "Cancelar", exact: true }).click();
+    await expect(
+      card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
+    ).toHaveValue(String(cap));
     evidence.firstSave.push({
       scenario: "pixel-cap-one-save-refresh",
       cap,
@@ -300,6 +366,39 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       bars,
     });
   }
+  // Dragging the visible upper reference commits once and survives refresh without resizing the card.
+  await savePixelCap(barChart, "120");
+  const referenceBefore = requests.length;
+  const handle = card(barChart).getByRole("slider", {
+    name: "Ajustar altura máxima das torres",
+    exact: true,
+  });
+  await handle.scrollIntoViewIfNeeded();
+  const handleBounds = await handle.boundingBox();
+  await page.mouse.move(
+    handleBounds.x + handleBounds.width / 2,
+    handleBounds.y + handleBounds.height / 2,
+  );
+  await page.mouse.down();
+  await page.mouse.move(
+    handleBounds.x + handleBounds.width / 2,
+    handleBounds.y + handleBounds.height / 2 + 20,
+    { steps: 5 },
+  );
+  await page.mouse.up();
+  await expect.poll(() => requests.length).toBe(referenceBefore + 1);
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
+  const draggedCap = requests.at(-1).cards.find((entry) => entry.id === barChart.id)
+    .presentation.barMaxHeight;
+  assert.equal(draggedCap, 100);
+  await page.reload();
+  await expect(
+    card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
+  ).toHaveValue("100");
+  assert.deepEqual(await read(barChart), dimensionsBeforeCap);
+  assert.deepEqual(await order(), orderBeforeCap);
+  const references = await checkReferences(card(barChart));
+  evidence.firstSave.push({ scenario: "drag-top-line-one-patch-refresh", draggedCap, references });
   // Clearing the optional cap restores the legacy/default rendering without a layout mutation.
   await savePixelCap(barChart, "");
   assert.equal(
@@ -307,18 +406,16 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     undefined,
   );
   await page.reload();
-  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   assert.deepEqual(await read(barChart), dimensionsBeforeCap);
   await savePixelCap(barChart, "240");
   await page.goto("about:blank");
   await page.goto(`${origin}?editable`);
   await page.getByRole("button", { name: "House", exact: true }).click();
-  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
-  const returnedEditor = await open(barChart);
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   await expect(
-    returnedEditor.getByLabel("Altura máxima das torres (px)", { exact: true }),
+    card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
   ).toHaveValue("240");
-  await returnedEditor.getByRole("button", { name: "Cancelar", exact: true }).click();
   assert.deepEqual(await order(), orderBeforeCap);
   checkGeometry(await geometry(), 240);
   await card(barChart).screenshot({
@@ -342,21 +439,14 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   const fluidLayout = fluidProfile.cards.find((entry) => entry.id === fluidChart.id).layout;
   assert.equal(fluidLayout.width, undefined, "Regression starts from a genuinely fluid saved card");
   const beforeFullEditorCap = requests.length;
-  const fullFluidEditor = await open(fluidChart);
-  await fullFluidEditor.getByLabel("Altura máxima das torres (px)", { exact: true }).fill("96");
-  await fullFluidEditor.getByRole("button", { name: "Salvar", exact: true }).click();
-  await expect(fullFluidEditor).toHaveCount(0);
-  assert.equal(
-    requests.length,
-    beforeFullEditorCap + 1,
-    "Regular editor cap-only change sends one PATCH",
-  );
+  await savePixelCap(fluidChart, "96");
+  assert.equal(requests.length, beforeFullEditorCap + 1, "Inline cap-only change sends one PATCH");
   const savedFluidCard = requests.at(-1).cards.find((entry) => entry.id === fluidChart.id);
   assert.equal(savedFluidCard.presentation.barMaxHeight, 96);
   assert.deepEqual(
     savedFluidCard.layout,
     fluidLayout,
-    "Regular editor must not materialize an untouched fluid width or alter height/order",
+    "Inline control must not materialize an untouched fluid width or alter height/order",
   );
   for (const viewport of [
     { width: 390, height: 844 },
@@ -364,7 +454,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   ]) {
     await page.setViewportSize(viewport);
     await page.reload();
-    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     assert.deepEqual(await read(fluidChart), fluidDimensions);
     assert.deepEqual(await order(), orderBeforeCap);
     const { profiles: reloadedProfiles } = await (
@@ -378,10 +470,10 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     checkGeometry(await geometry(card(fluidChart)), 96);
   }
   await card(fluidChart).screenshot({
-    path: path.join(proofDirectory, "full-editor-fluid-after-refresh.png"),
+    path: path.join(proofDirectory, "inline-fluid-after-refresh.png"),
   });
   evidence.firstSave.push({
-    scenario: "regular-editor-pixel-cap-preserves-fluid-layout-after-refresh-and-viewport",
+    scenario: "inline-pixel-cap-preserves-fluid-layout-after-refresh-and-viewport",
     cap: 96,
     fluidLayout,
     fluidDimensions,
@@ -394,7 +486,7 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     undefined,
   );
   await page.reload();
-  await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+  await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   await expect.poll(() => read(fluidChart)).toEqual(fluidDimensions);
   checkGeometry(await geometry(card(fluidChart)), 80);
   evidence.firstSave.push({
@@ -411,21 +503,23 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
   ]) {
     await page.setViewportSize(viewport);
     await page.reload();
-    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     assert.deepEqual(await read(barChart), dimensionsBeforeCap);
     assert.deepEqual(await read(fluidChart), fluidDimensions);
     assert.deepEqual(await order(), orderBeforeCap);
     checkGeometry(await geometry(), 240);
     checkGeometry(await geometry(card(fluidChart)), 80);
+    await checkReferences(card(barChart));
+    await checkReferences(card(fluidChart));
     assert.ok(
       await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1),
       "Mobile page fits without horizontal overflow",
     );
-    const editor = await open(barChart);
-    await expect(editor.getByLabel("Altura máxima das torres (px)", { exact: true })).toHaveValue(
-      "240",
-    );
-    await editor.getByRole("button", { name: "Cancelar", exact: true }).click();
+    await expect(
+      card(barChart).getByLabel("Altura máxima das torres (px)", { exact: true }),
+    ).toHaveValue("240");
     await card(barChart).screenshot({
       path: path.join(
         proofDirectory,
@@ -560,7 +654,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     const dimensionsBeforePeerCap = await read(barChart);
     await savePixelCap(barChart, "32", other);
     await page.reload();
-    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     assert.equal(
       await capFrom(page, barChart),
       "32",
@@ -585,7 +681,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       const fresh = await freshContext.newPage();
       await fresh.goto(`${origin}?editable`);
       await fresh.getByRole("button", { name: "House", exact: true }).click();
-      await expect(fresh.getByRole("toolbar")).toContainText("Salvo automaticamente");
+      await expect(fresh.locator("[data-dashboard-save-status]")).toContainText(
+        "Salvo automaticamente",
+      );
       assert.equal(await capFrom(fresh, barChart), "32");
       assert.equal(await capFrom(fresh, fluidChart), "80");
       await expect.poll(() => snapshot(fresh)).toEqual(await snapshot(page));
@@ -607,7 +705,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
     const visits = { id: "visits-total", title: "Visitas realizadas" };
     const savedA = await editIn(page, visits, 283, 347);
     await expect(savedA).toHaveCount(0);
-    await expect(page.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(page.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     // B still owns the prior version. Combine reorder and editor dimensions in one save.
     await other
       .locator(`[data-dashboard-card-id="${charts[1].id}"]`)
@@ -615,7 +715,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       .press("ArrowUp");
     const savedB = await editIn(other, charts[1], 519, 479);
     await expect(savedB).toHaveCount(0);
-    await expect(other.getByRole("toolbar")).toContainText("Salvo automaticamente");
+    await expect(other.locator("[data-dashboard-save-status]")).toContainText(
+      "Salvo automaticamente",
+    );
     const expected = await snapshot(other);
     assert.deepEqual(
       expected.find(({ id }) => id === visits.id),
@@ -683,7 +785,9 @@ export async function runAppointmentsFirstSave({ page, origin, evidence }) {
       beforeBlockedEdit,
       "Further local edits must not overwrite remote state before resolving the conflict",
     );
-    await expect(other.getByRole("toolbar")).toContainText("Conflito automaticamente");
+    await expect(other.locator("[data-dashboard-save-status]")).toContainText(
+      "Conflito automaticamente",
+    );
     const blockedEditor = await editIn(other, charts[1], 535, 483);
     await expect(blockedEditor.getByRole("alert")).toContainText("mudou em outra sessão");
     await expect(blockedEditor.getByRole("button", { name: "Salvar", exact: true })).toBeEnabled();

@@ -13,7 +13,16 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { createContext, useContext, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type CSSProperties,
+  type ReactNode,
+} from "react";
 
 import type { NavigationItem } from "@/lib/navigation/presentation";
 
@@ -35,6 +44,9 @@ type DashboardSidebarContextValue = {
 };
 
 const DashboardSidebarContext = createContext<DashboardSidebarContextValue | null>(null);
+
+const SIDEBAR_RAIL_WIDTH = 44;
+const SIDEBAR_EXPANDED_WIDTH = 136;
 
 export function useDashboardSidebar() {
   return useContext(DashboardSidebarContext);
@@ -81,6 +93,49 @@ function AppointmentsDashboardShell({
   const collapsed = !hovered && !keyboardFocused;
   const [updatedAt, setUpdatedAt] = useState("");
   const contextValue = useMemo(() => ({ setUpdatedAt }), [setUpdatedAt]);
+  const shellRef = useRef<HTMLDivElement>(null);
+  const [shellSize, setShellSize] = useState({ width: 0, overlay: false });
+
+  useEffect(() => {
+    const shell = shellRef.current;
+    if (!shell) return;
+    const narrow = window.matchMedia("(max-width: 760px)");
+    const updateWidth = (width: number) => {
+      setShellSize((current) =>
+        current.width === width && current.overlay === narrow.matches
+          ? current
+          : { width, overlay: narrow.matches },
+      );
+    };
+    const updateOverlay = () => {
+      setShellSize((current) =>
+        current.overlay === narrow.matches ? current : { ...current, overlay: narrow.matches },
+      );
+    };
+    updateWidth(shell.clientWidth);
+    const observer = new ResizeObserver(([entry]) => {
+      if (entry) updateWidth(entry.contentRect.width);
+    });
+    observer.observe(shell);
+    narrow.addEventListener("change", updateOverlay);
+    return () => {
+      observer.disconnect();
+      narrow.removeEventListener("change", updateOverlay);
+    };
+  }, []);
+
+  // Preserve the canvas's layout width during hover. Native zoom participates in
+  // document flow, so rows and proportions remain stable without a tall empty
+  // transformed wrapper or rewriting the user's saved card dimensions.
+  const baseWidth = Math.max(1, shellSize.width - SIDEBAR_RAIL_WIDTH);
+  const contentScale =
+    !collapsed && !shellSize.overlay && shellSize.width > 0
+      ? Math.max(1, shellSize.width - SIDEBAR_EXPANDED_WIDTH) / baseWidth
+      : 1;
+  const surfaceStyle = {
+    "--dashboard-layout-width": shellSize.width > 0 ? `${baseWidth}px` : "100%",
+    "--dashboard-content-scale": contentScale,
+  } as CSSProperties;
 
   function guide(direction: "previous" | "next") {
     const sections = Array.from(
@@ -107,7 +162,18 @@ function AppointmentsDashboardShell({
 
   return (
     <DashboardSidebarContext.Provider value={contextValue}>
-      <div className={styles.dashboardShell} data-dashboard-shell data-collapsed={collapsed}>
+      <div
+        ref={shellRef}
+        className={styles.dashboardShell}
+        style={
+          {
+            "--dashboard-sidebar-rail": `${SIDEBAR_RAIL_WIDTH}px`,
+            "--dashboard-sidebar-expanded": `${SIDEBAR_EXPANDED_WIDTH}px`,
+          } as CSSProperties
+        }
+        data-dashboard-shell
+        data-collapsed={collapsed}
+      >
         <aside
           className={styles.dashboardSidebar}
           aria-label="Dashboard"
@@ -141,7 +207,7 @@ function AppointmentsDashboardShell({
                     >
                       <span className={styles.dashboardIcon}>
                         {Icon ? (
-                          <Icon aria-hidden="true" size={20} />
+                          <Icon aria-hidden="true" size={18} />
                         ) : (
                           <AppPageIcon pageKey={page.key} />
                         )}
@@ -175,13 +241,20 @@ function AppointmentsDashboardShell({
           </div>
         </aside>
         <div className={styles.dashboardContent} data-dashboard-content>
-          {updatedAt ? (
-            <p className={styles.dashboardUpdatedAt} data-dashboard-updated-at>
-              <span>Atualizado em</span>
-              <strong>{updatedAt}</strong>
-            </p>
-          ) : null}
-          {children}
+          <div
+            className={styles.dashboardSurface}
+            style={surfaceStyle}
+            data-dashboard-surface
+            data-content-scale={contentScale}
+          >
+            {updatedAt ? (
+              <p className={styles.dashboardUpdatedAt} data-dashboard-updated-at>
+                <span>Atualizado em</span>
+                <strong>{updatedAt}</strong>
+              </p>
+            ) : null}
+            {children}
+          </div>
         </div>
       </div>
     </DashboardSidebarContext.Provider>

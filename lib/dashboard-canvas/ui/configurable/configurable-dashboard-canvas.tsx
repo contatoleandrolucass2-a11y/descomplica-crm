@@ -14,7 +14,7 @@ import {
 import {
   ArrowLeft,
   ArrowRight,
-  ArrowUpDown,
+  Copy,
   Download,
   Expand,
   LayoutGrid,
@@ -27,6 +27,7 @@ import {
   Trash2,
   Undo2,
   Users,
+  X,
 } from "lucide-react";
 
 import { DashboardCanvas } from "../dashboard-canvas";
@@ -36,6 +37,7 @@ import {
   FREE_CARD_MIN_WIDTH,
   FREE_CARD_MIN_HEIGHT,
   FREE_CARD_MAX_SIZE,
+  MAX_CARDS_PER_CANVAS,
   type DashboardCardLayoutPolicy,
 } from "../../layout/limits";
 import { canvasReducer, createCanvasHistoryState } from "../../state/reducer";
@@ -51,6 +53,7 @@ import type {
   DashboardPeriod,
 } from "../../types";
 import { DashboardModal } from "./modal";
+import { DashboardBarHeightControlContext } from "./bar-height-controls";
 import {
   DEFAULT_CARD_TYPE_LABELS,
   DEFAULT_GROUP_LABELS,
@@ -242,6 +245,24 @@ export function ExpandedDashboardCardContent({
   );
 }
 
+function ToolbarActionsWrapper({
+  compact,
+  visible,
+  children,
+}: {
+  compact: boolean;
+  visible: boolean;
+  children: ReactNode;
+}) {
+  return compact ? (
+    <div id="appointments-panel-tools" className={styles.panelTools} hidden={!visible}>
+      {children}
+    </div>
+  ) : (
+    <>{children}</>
+  );
+}
+
 export function ConfigurableDashboardCanvas({
   initialCards,
   catalog,
@@ -270,7 +291,7 @@ export function ConfigurableDashboardCanvas({
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
   const [editorRenderedWidth, setEditorRenderedWidth] = useState<number | undefined>(undefined);
-  const [focusBarHeight, setFocusBarHeight] = useState(false);
+  const [showTools, setShowTools] = useState(false);
   const [editorMode, setEditorMode] = useState<"add" | "edit">("add");
   const [editorSaving, setEditorSaving] = useState(false);
   const [editorSaveError, setEditorSaveError] = useState("");
@@ -280,6 +301,8 @@ export function ConfigurableDashboardCanvas({
   const [actionsCardId, setActionsCardId] = useState<string | null>(null);
   const actionsCardWidthRef = useRef<number | undefined>(undefined);
   const toolbarRef = useRef<HTMLDivElement>(null);
+  const toolsTriggerRef = useRef<HTMLButtonElement | null>(null);
+  const actionsTriggerRef = useRef<HTMLButtonElement | null>(null);
   const [showProfiles, setShowProfiles] = useState(false);
   const [showExport, setShowExport] = useState(false);
   const [exportSelection, setExportSelection] = useState<Set<string>>(new Set());
@@ -310,6 +333,7 @@ export function ConfigurableDashboardCanvas({
   const activeProfile = profiles.find(({ id }) => id === activeProfileId) ?? null;
   const editingReady =
     editable && (!layoutPolicy?.freeResize || (!profilesLoading && profilesSource === "server"));
+  const directEditingReady = editingReady && Boolean(activeProfile) && saveState !== "conflict";
 
   useEffect(() => {
     latestSnapshotRef.current = serializedCards;
@@ -603,21 +627,90 @@ export function ConfigurableDashboardCanvas({
     return () => window.removeEventListener("beforeunload", warnUnsaved);
   }, [activeProfile, editable, layoutPolicy]);
 
-  const renderDashboardContent = useCallback(
-    (card: DashboardCard, size: DashboardCardSize) => {
-      if (renderCard) return renderCard(card, size);
-      return (
-        contentByMetricAndType?.[card.metric]?.[card.type] ?? (
-          <div className={styles.missingContent} role="status">
-            Conteúdo indisponível para {card.metric} em {DEFAULT_CARD_TYPE_LABELS[card.type]}.
-          </div>
-        )
-      );
+  const commitBarHeight = useCallback(
+    (cardId: string, height: number | undefined) => {
+      if (
+        !directEditingReady ||
+        saveConflictRef.current ||
+        (height !== undefined && (!Number.isSafeInteger(height) || height < 1))
+      )
+        return;
+      const current = cards.find((card) => card.id === cardId);
+      if (!current || current.type !== "bars") return;
+      const presentation = { ...current.presentation };
+      delete presentation.barScale;
+      if (height === undefined) delete presentation.barMaxHeight;
+      else presentation.barMaxHeight = height;
+      dispatch({ type: "update-card", cardId, patch: { presentation } });
     },
-    [contentByMetricAndType, renderCard],
+    [cards, directEditingReady],
   );
 
+  const renderDashboardContent = useCallback(
+    (card: DashboardCard, size: DashboardCardSize) => {
+      const content = renderCard
+        ? renderCard(card, size)
+        : (contentByMetricAndType?.[card.metric]?.[card.type] ?? (
+            <div className={styles.missingContent} role="status">
+              Conteúdo indisponível para {card.metric} em {DEFAULT_CARD_TYPE_LABELS[card.type]}.
+            </div>
+          ));
+      if (pageKey !== "crm.stage.appointments") return content;
+      return (
+        <DashboardBarHeightControlContext.Provider
+          value={{
+            title: card.title,
+            value: card.presentation?.barMaxHeight,
+            editable: directEditingReady && card.type === "bars",
+            onCommit: (height) => commitBarHeight(card.id, height),
+          }}
+        >
+          {content}
+        </DashboardBarHeightControlContext.Provider>
+      );
+    },
+    [contentByMetricAndType, renderCard, pageKey, directEditingReady, commitBarHeight],
+  );
+
+  function openPanelTools(trigger: HTMLButtonElement) {
+    toolsTriggerRef.current = trigger;
+    setShowTools(true);
+    requestAnimationFrame(() =>
+      toolbarRef.current?.querySelector<HTMLButtonElement>("button")?.focus(),
+    );
+  }
+
+  function closePanelTools() {
+    setShowTools(false);
+    requestAnimationFrame(() => toolsTriggerRef.current?.focus());
+  }
+
+  useEffect(() => {
+    if (!showTools) return;
+    const closeWithEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      event.preventDefault();
+      setShowTools(false);
+      requestAnimationFrame(() => toolsTriggerRef.current?.focus());
+    };
+    window.addEventListener("keydown", closeWithEscape);
+    return () => window.removeEventListener("keydown", closeWithEscape);
+  }, [showTools]);
+
+  function copyCard(card: DashboardCard) {
+    if (!directEditingReady || saveConflictRef.current || cards.length >= MAX_CARDS_PER_CANVAS)
+      return;
+    dispatch({ type: "copy-card", cardId: card.id, newId: crypto.randomUUID() });
+  }
+
   function openNewCard() {
+    if (
+      !editingReady ||
+      cards.length >= MAX_CARDS_PER_CANVAS ||
+      (pageKey === "crm.stage.appointments" && (!directEditingReady || saveConflictRef.current))
+    )
+      return;
+    setShowTools(false);
     if (!editingReady) return;
     setEditorSaveError("");
     const card = createCatalogCard({
@@ -630,7 +723,6 @@ export function ConfigurableDashboardCanvas({
     if (layoutPolicy?.freeResize) card.layout.width = 320;
     setEditorMode("add");
     setEditorRenderedWidth(undefined);
-    setFocusBarHeight(false);
     setEditorCard(card);
   }
 
@@ -664,11 +756,10 @@ export function ConfigurableDashboardCanvas({
     setEditorSaveAttempt((attempt) => attempt + 1);
   }
 
-  function openCardEditor(card: DashboardCard, renderedWidth?: number, barHeight = false) {
+  function openCardEditor(card: DashboardCard, renderedWidth?: number) {
     if (!editingReady) return;
     setEditorSaveError("");
     setEditorMode("edit");
-    setFocusBarHeight(barHeight);
     setEditorRenderedWidth(renderedWidth);
     setEditorCard(card);
   }
@@ -847,82 +938,100 @@ export function ConfigurableDashboardCanvas({
       aria-label={ariaLabel}
       data-hide-card-overflow={hideCardOverflow ? "true" : undefined}
       data-compact-card-controls={compactCardControls ? "true" : undefined}
+      data-appointments-canvas={pageKey === "crm.stage.appointments" ? "true" : undefined}
     >
       {editable ? (
         <div
           ref={toolbarRef}
-          className={styles.toolbar}
+          className={pageKey === "crm.stage.appointments" ? styles.compactToolbar : styles.toolbar}
           role="toolbar"
           aria-label="Ferramentas do dashboard"
         >
-          <button
-            type="button"
-            className={styles.primaryButton}
-            onClick={openNewCard}
-            disabled={!editingReady || catalog.metrics.length === 0}
-          >
-            <Plus size={17} aria-hidden="true" /> {addButtonLabel}
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "organize" })}
-            disabled={!editingReady || cards.length < 2}
-          >
-            <LayoutGrid size={17} aria-hidden="true" /> Organizar
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "undo" })}
-            disabled={!editingReady || state.history.length === 0}
-          >
-            <Undo2 size={17} aria-hidden="true" /> Desfazer
-          </button>
-          <button
-            type="button"
-            onClick={() => dispatch({ type: "redo" })}
-            disabled={!editingReady || state.future.length === 0}
-          >
-            <Redo2 size={17} aria-hidden="true" /> Refazer
-          </button>
-          {profileControls ? (
-            <button type="button" onClick={() => setShowProfiles(true)}>
-              <Users size={17} aria-hidden="true" /> Perfis
+          <ToolbarActionsWrapper compact={pageKey === "crm.stage.appointments"} visible={showTools}>
+            {pageKey === "crm.stage.appointments" ? (
+              <button
+                type="button"
+                onClick={closePanelTools}
+                aria-label="Fechar ferramentas do painel"
+              >
+                <X size={16} aria-hidden="true" /> Fechar
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className={styles.primaryButton}
+              onClick={openNewCard}
+              disabled={
+                !editingReady ||
+                catalog.metrics.length === 0 ||
+                cards.length >= MAX_CARDS_PER_CANVAS
+              }
+            >
+              <Plus size={17} aria-hidden="true" /> {addButtonLabel}
             </button>
-          ) : null}
-          <button
-            type="button"
-            onClick={() => {
-              setExportSelection(new Set(cards.map(({ id }) => id)));
-              setExportError("");
-              setShowExport(true);
-            }}
-            disabled={cards.length === 0}
-          >
-            <Download size={17} aria-hidden="true" /> Baixar PDF
-          </button>
-          {validSelectedIds.size > 0 ? (
-            <div className={styles.selectionTools} aria-label="Mover cards selecionados">
-              <span>{validSelectedIds.size} selecionado(s)</span>
-              <button
-                type="button"
-                onClick={() => moveSelection(-1)}
-                aria-label="Mover grupo para antes"
-              >
-                <ArrowLeft size={16} aria-hidden="true" />
+            <button
+              type="button"
+              onClick={() => dispatch({ type: "organize" })}
+              disabled={!editingReady || cards.length < 2}
+            >
+              <LayoutGrid size={17} aria-hidden="true" /> Organizar
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch({ type: "undo" })}
+              disabled={!editingReady || state.history.length === 0}
+            >
+              <Undo2 size={17} aria-hidden="true" /> Desfazer
+            </button>
+            <button
+              type="button"
+              onClick={() => dispatch({ type: "redo" })}
+              disabled={!editingReady || state.future.length === 0}
+            >
+              <Redo2 size={17} aria-hidden="true" /> Refazer
+            </button>
+            {profileControls ? (
+              <button type="button" onClick={() => setShowProfiles(true)}>
+                <Users size={17} aria-hidden="true" /> Perfis
               </button>
-              <button
-                type="button"
-                onClick={() => moveSelection(1)}
-                aria-label="Mover grupo para depois"
-              >
-                <ArrowRight size={16} aria-hidden="true" />
-              </button>
-              <button type="button" onClick={() => setSelectedIds(new Set())}>
-                Limpar
-              </button>
-            </div>
-          ) : null}
+            ) : null}
+            <button
+              type="button"
+              onClick={() => {
+                setExportSelection(new Set(cards.map(({ id }) => id)));
+                setExportError("");
+                setShowExport(true);
+              }}
+              disabled={cards.length === 0}
+            >
+              <Download size={17} aria-hidden="true" /> Baixar PDF
+            </button>
+            {validSelectedIds.size > 0 ? (
+              <div className={styles.selectionTools} aria-label="Mover cards selecionados">
+                <span>{validSelectedIds.size} selecionado(s)</span>
+                <button
+                  type="button"
+                  onClick={() => moveSelection(-1)}
+                  aria-label="Mover grupo para antes"
+                >
+                  <ArrowLeft size={16} aria-hidden="true" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveSelection(1)}
+                  aria-label="Mover grupo para depois"
+                >
+                  <ArrowRight size={16} aria-hidden="true" />
+                </button>
+                <button type="button" onClick={() => setSelectedIds(new Set())}>
+                  Limpar
+                </button>
+              </div>
+            ) : null}
+          </ToolbarActionsWrapper>
           <span
+            data-dashboard-save-status
+            title={statusLabel(saveState)}
             className={styles.saveStatus}
             data-state={saveState}
             role="status"
@@ -967,7 +1076,7 @@ export function ConfigurableDashboardCanvas({
               type="button"
               className={styles.primaryButton}
               onClick={openNewCard}
-              disabled={catalog.metrics.length === 0}
+              disabled={!editingReady || catalog.metrics.length === 0}
             >
               Adicionar primeiro card
             </button>
@@ -982,6 +1091,7 @@ export function ConfigurableDashboardCanvas({
           layoutPolicy={layoutPolicy}
           cornerResizeHandle={layoutPolicy?.maxHeight === null}
           compactControls={compactCardControls}
+          {...(pageKey === "crm.stage.appointments" ? { gap: 8 } : {})}
           renderCard={(card, size) => (
             <div
               className={[
@@ -1031,21 +1141,40 @@ export function ConfigurableDashboardCanvas({
                   >
                     <Pencil size={15} aria-hidden="true" />
                   </button>
-                  {pageKey === "crm.stage.appointments" && card.type === "bars" ? (
-                    <button
-                      type="button"
-                      className={styles.iconButton}
-                      title="Altura das torres"
-                      aria-label={`Ajustar altura das torres de ${card.title || card.metric}`}
-                      onClick={(event) => {
-                        const bounds = event.currentTarget
-                          .closest("[data-dashboard-card-id]")
-                          ?.getBoundingClientRect();
-                        openCardEditor(card, bounds?.width, true);
-                      }}
-                    >
-                      <ArrowUpDown size={15} aria-hidden="true" />
-                    </button>
+                  {pageKey === "crm.stage.appointments" ? (
+                    <>
+                      <button
+                        type="button"
+                        className={styles.iconButton}
+                        onClick={() => copyCard(card)}
+                        disabled={!directEditingReady || cards.length >= MAX_CARDS_PER_CANVAS}
+                        aria-label={`Copiar ${card.title || card.metric}`}
+                        title="Copiar card"
+                      >
+                        <Copy size={15} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.iconButton}
+                        onClick={openNewCard}
+                        disabled={!directEditingReady || cards.length >= MAX_CARDS_PER_CANVAS}
+                        aria-label="Adicionar novo card"
+                        title="Adicionar novo card"
+                      >
+                        <Plus size={15} aria-hidden="true" />
+                      </button>
+                      <button
+                        type="button"
+                        className={styles.iconButton}
+                        onClick={(event) => openPanelTools(event.currentTarget)}
+                        aria-label="Mais ferramentas do painel"
+                        aria-haspopup="true"
+                        aria-expanded={showTools}
+                        aria-controls="appointments-panel-tools"
+                      >
+                        <MoreHorizontal size={15} aria-hidden="true" />
+                      </button>
+                    </>
                   ) : null}
                   <button
                     type="button"
@@ -1074,6 +1203,7 @@ export function ConfigurableDashboardCanvas({
                   aria-haspopup="dialog"
                   aria-expanded={actionsCardId === card.id}
                   onClick={(event) => {
+                    actionsTriggerRef.current = event.currentTarget;
                     actionsCardWidthRef.current = event.currentTarget
                       .closest("[data-dashboard-card-id]")
                       ?.getBoundingClientRect().width;
@@ -1123,16 +1253,38 @@ export function ConfigurableDashboardCanvas({
             >
               <Pencil size={17} aria-hidden="true" /> Editar e redimensionar
             </button>
-            {pageKey === "crm.stage.appointments" && actionsCard.type === "bars" ? (
-              <button
-                type="button"
-                onClick={() => {
-                  openCardEditor(actionsCard, actionsCardWidthRef.current, true);
-                  setActionsCardId(null);
-                }}
-              >
-                <ArrowUpDown size={17} aria-hidden="true" /> Altura das torres
-              </button>
+            {pageKey === "crm.stage.appointments" ? (
+              <>
+                <button
+                  type="button"
+                  disabled={!directEditingReady || cards.length >= MAX_CARDS_PER_CANVAS}
+                  onClick={() => {
+                    copyCard(actionsCard);
+                    setActionsCardId(null);
+                  }}
+                >
+                  <Copy size={17} aria-hidden="true" /> Copiar card
+                </button>
+                <button
+                  type="button"
+                  disabled={!directEditingReady || cards.length >= MAX_CARDS_PER_CANVAS}
+                  onClick={() => {
+                    openNewCard();
+                    setActionsCardId(null);
+                  }}
+                >
+                  <Plus size={17} aria-hidden="true" /> Adicionar novo card
+                </button>
+                <button
+                  type="button"
+                  onClick={(event) => {
+                    openPanelTools(actionsTriggerRef.current ?? event.currentTarget);
+                    setActionsCardId(null);
+                  }}
+                >
+                  <MoreHorizontal size={17} aria-hidden="true" /> Mais ferramentas do painel
+                </button>
+              </>
             ) : null}
             <button
               type="button"
@@ -1187,8 +1339,6 @@ export function ConfigurableDashboardCanvas({
           }
           onSave={saveEditor}
           appointmentsBarHeight={pageKey === "crm.stage.appointments"}
-          focusBarHeight={focusBarHeight}
-          renderPreview={renderDashboardContent}
         />
       ) : null}
 
@@ -1203,7 +1353,12 @@ export function ConfigurableDashboardCanvas({
           onClose={() => setExpandedCardId(null)}
           wide
         >
-          <div className={styles.expandedContent}>
+          <div
+            className={styles.expandedContent}
+            data-dashboard-appointments-content={
+              pageKey === "crm.stage.appointments" ? "true" : undefined
+            }
+          >
             <ExpandedDashboardCardContent
               card={expandedCard}
               preservePresentation={preserveExpandedPresentation}
@@ -1426,8 +1581,6 @@ function CardEditor({
   onDelete,
   onSave,
   appointmentsBarHeight,
-  focusBarHeight,
-  renderPreview,
 }: {
   card: DashboardCard;
   renderedWidth?: number | undefined;
@@ -1442,8 +1595,6 @@ function CardEditor({
   onDelete?: (() => void) | undefined;
   onSave: (card: DashboardCard) => void;
   appointmentsBarHeight: boolean;
-  focusBarHeight: boolean;
-  renderPreview: (card: DashboardCard, size: DashboardCardSize) => ReactNode;
 }) {
   const [card, setCard] = useState(initialCard);
   const [widthDraft, setWidthDraft] = useState(
@@ -1452,16 +1603,6 @@ function CardEditor({
   const [widthChanged, setWidthChanged] = useState(false);
   const [heightChanged, setHeightChanged] = useState(false);
   const [heightDraft, setHeightDraft] = useState(String(initialCard.layout.height));
-  const [barHeightDraft, setBarHeightDraft] = useState(
-    initialCard.presentation?.barMaxHeight === undefined
-      ? ""
-      : String(initialCard.presentation.barMaxHeight),
-  );
-  const [barHeightChanged, setBarHeightChanged] = useState(false);
-  const barHeightRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (focusBarHeight) barHeightRef.current?.focus();
-  }, [focusBarHeight]);
 
   function cardWithDraftDimensions() {
     if (!layoutPolicy?.freeResize || (!widthChanged && !heightChanged)) return card;
@@ -1540,18 +1681,16 @@ function CardEditor({
 
   return (
     <DashboardModal
-      title={
-        focusBarHeight ? "Altura das torres" : mode === "add" ? "Adicionar card" : "Editar card"
-      }
+      title={mode === "add" ? "Adicionar card" : "Editar card"}
       description={
-        focusBarHeight
-          ? "Ajuste as torres mantendo as dimensões e a posição do gráfico."
+        appointmentsBarHeight
+          ? "Configure a métrica, o conteúdo e as dimensões. A altura das torres é ajustada diretamente no gráfico."
           : "A combinação de métrica, modelo, período, agrupamento e entidades não pode duplicar outro card."
       }
       onClose={onClose}
       footer={
         <>
-          {onDelete && !focusBarHeight ? (
+          {onDelete ? (
             <button
               type="button"
               className={styles.dangerButton}
@@ -1583,424 +1722,356 @@ function CardEditor({
         onSubmit={(event) => {
           event.preventDefault();
           if (customDatesValid && !saving && !saveUnavailable) {
-            const pixels = Number(barHeightDraft);
-            if (appointmentsBarHeight && card.type === "bars") {
-              if (barHeightDraft.trim() && (!Number.isSafeInteger(pixels) || pixels < 1)) return;
-              const base = focusBarHeight ? initialCard : cardWithDraftDimensions();
-              if (!barHeightChanged) {
-                onSave(base);
-                return;
-              }
-              const presentation = { ...base.presentation };
-              delete presentation.barScale;
-              if (barHeightDraft.trim()) presentation.barMaxHeight = pixels;
-              else delete presentation.barMaxHeight;
-              onSave({ ...base, presentation });
-            } else onSave(cardWithDraftDimensions());
+            onSave(cardWithDraftDimensions());
           }
         }}
       >
         {saveError ? <p role="alert">{saveError}</p> : null}
         {saveUnavailable ? <p role="status">Aguardando o perfil do servidor para salvar.</p> : null}
-        {appointmentsBarHeight && card.type === "bars" ? (
-          <fieldset className={styles.barHeightControls}>
-            <legend>Altura das torres</legend>
+        <label>
+          Título
+          <input
+            disabled={saving}
+            value={card.title ?? ""}
+            maxLength={120}
+            placeholder="Opcional"
+            onChange={(event) => {
+              const next = { ...card };
+              if (event.target.value) next.title = event.target.value;
+              else delete next.title;
+              setCard(next);
+            }}
+          />
+        </label>
+        <label>
+          Texto complementar
+          <textarea
+            disabled={saving}
+            value={card.presentation?.content ?? ""}
+            maxLength={240}
+            rows={3}
+            placeholder="Opcional; os valores calculados continuam automáticos"
+            onChange={(event) => updatePresentation({ content: event.target.value })}
+          />
+        </label>
+        <label>
+          Largura do card
+          <input
+            disabled={saving}
+            type="number"
+            min={layoutPolicy?.freeResize ? FREE_CARD_MIN_WIDTH : layoutLimits.minColumnSpan}
+            max={layoutPolicy?.freeResize ? FREE_CARD_MAX_SIZE : 12}
+            step={1}
+            value={layoutPolicy?.freeResize ? widthDraft : card.layout.columnSpan}
+            onBlur={confirmDimensionDrafts}
+            onChange={(event) => {
+              if (layoutPolicy?.freeResize) {
+                setWidthDraft(event.target.value);
+                setWidthChanged(true);
+                return;
+              }
+              setCard({
+                ...card,
+                layout: constrainCardLayout(
+                  card.type,
+                  {
+                    ...card.layout,
+                    ...(layoutPolicy?.freeResize
+                      ? { width: Number(event.target.value) }
+                      : { columnSpan: Number(event.target.value) }),
+                  },
+                  layoutPolicy,
+                ),
+              });
+            }}
+          />
+          <small>
+            {layoutPolicy?.freeResize
+              ? `${widthDraft || "—"}px`
+              : `${card.layout.columnSpan} de 12 colunas`}
+          </small>
+        </label>
+        <label>
+          Altura do card
+          <input
+            disabled={saving}
+            type="number"
+            min={layoutPolicy?.freeResize ? FREE_CARD_MIN_HEIGHT : layoutLimits.minHeight}
+            max={
+              layoutPolicy?.maxHeight === null
+                ? undefined
+                : (layoutPolicy?.maxHeight ?? layoutLimits.maxHeight)
+            }
+            step={layoutPolicy?.heightStep ?? 24}
+            value={layoutPolicy?.freeResize ? heightDraft : card.layout.height}
+            onBlur={confirmDimensionDrafts}
+            onChange={(event) => {
+              if (layoutPolicy?.freeResize) {
+                setHeightDraft(event.target.value);
+                setHeightChanged(true);
+                return;
+              }
+              setCard({
+                ...card,
+                layout: constrainCardLayout(
+                  card.type,
+                  {
+                    ...card.layout,
+                    height: Number(event.target.value),
+                  },
+                  layoutPolicy,
+                ),
+              });
+            }}
+          />
+          <small>{layoutPolicy?.freeResize ? heightDraft || "—" : card.layout.height}px</small>
+        </label>
+        <label>
+          Tamanho da fonte
+          <input
+            disabled={saving}
+            type="range"
+            min={75}
+            max={150}
+            step={5}
+            value={Math.round((card.presentation?.fontScale ?? 1) * 100)}
+            onChange={(event) =>
+              updatePresentation({ fontScale: Number(event.target.value) / 100 })
+            }
+          />
+          <small>{Math.round((card.presentation?.fontScale ?? 1) * 100)}%</small>
+        </label>
+        <label>
+          Alinhamento horizontal
+          <select
+            disabled={saving}
+            value={card.presentation?.textAlign ?? "center"}
+            onChange={(event) =>
+              updatePresentation({
+                textAlign: event.target.value as NonNullable<
+                  DashboardCardPresentation["textAlign"]
+                >,
+              })
+            }
+          >
+            <option value="left">Esquerda</option>
+            <option value="center">Centro</option>
+            <option value="right">Direita</option>
+          </select>
+        </label>
+        <label>
+          Posição vertical
+          <select
+            disabled={saving}
+            value={card.presentation?.verticalAlign ?? "center"}
+            onChange={(event) =>
+              updatePresentation({
+                verticalAlign: event.target.value as NonNullable<
+                  DashboardCardPresentation["verticalAlign"]
+                >,
+              })
+            }
+          >
+            <option value="start">Topo</option>
+            <option value="center">Centro</option>
+            <option value="end">Base</option>
+          </select>
+        </label>
+        <label>
+          Cor do texto
+          <input
+            disabled={saving}
+            type="color"
+            value={card.presentation?.textColor ?? "#d9e8f2"}
+            onChange={(event) => updatePresentation({ textColor: event.target.value })}
+          />
+        </label>
+        <label>
+          Cor do gráfico e destaques
+          <input
+            disabled={saving}
+            type="color"
+            value={card.presentation?.accentColor ?? "#55c4dc"}
+            onChange={(event) => updatePresentation({ accentColor: event.target.value })}
+          />
+        </label>
+        {(!appointmentsBarHeight && card.type === "bars") || card.type === "horizontal-bars" ? (
+          <label>
+            Altura ou alcance das torres
+            <input
+              disabled={saving}
+              type="range"
+              min={50}
+              max={150}
+              step={5}
+              value={Math.round((card.presentation?.barScale ?? 1) * 100)}
+              onChange={(event) =>
+                updatePresentation({ barScale: Number(event.target.value) / 100 })
+              }
+            />
+            <small>{Math.round((card.presentation?.barScale ?? 1) * 100)}%</small>
+          </label>
+        ) : null}
+        <label>
+          Métrica
+          <select
+            disabled={saving}
+            value={card.metric}
+            onChange={(event) => updateMetric(event.target.value)}
+          >
+            {catalog.metrics.map((metric) => (
+              <option key={metric.key} value={metric.key}>
+                {metric.label}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Modelo
+          <select
+            disabled={saving}
+            value={card.type}
+            onChange={(event) =>
+              setCard(
+                reconcileCardCompatibility(
+                  { ...card, type: event.target.value as DashboardCardType },
+                  catalog,
+                  compatibility,
+                  layoutPolicy,
+                ),
+              )
+            }
+          >
+            {typeChoices
+              .filter(({ value }) => types.includes(value))
+              .map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label>
+          Agrupamento
+          <select
+            disabled={saving}
+            value={card.groupBy}
+            onChange={(event) =>
+              setCard({ ...card, groupBy: event.target.value as DashboardGroupBy })
+            }
+          >
+            {groupChoices
+              .filter(({ value }) => groups.includes(value))
+              .map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+          </select>
+        </label>
+        <label>
+          Período
+          <select
+            disabled={saving}
+            value={card.period}
+            onChange={(event) => {
+              const period = event.target.value as DashboardPeriod;
+              const next = { ...card, period };
+              if (period !== "custom") {
+                delete next.startDate;
+                delete next.endDate;
+              }
+              setCard(next);
+            }}
+          >
+            {periodChoices
+              .filter(({ value }) => periods.includes(value))
+              .map(({ value, label }) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+          </select>
+        </label>
+        {card.period === "custom" ? (
+          <div className={styles.dateFields}>
             <label>
-              Altura máxima das torres (px)
+              Data inicial
               <input
-                ref={barHeightRef}
                 disabled={saving}
-                type="number"
-                min={1}
-                step={1}
-                placeholder="Automática"
-                aria-describedby="dashboard-bar-height-help"
-                value={barHeightDraft}
-                onChange={(event) => {
-                  const value = event.target.value;
-                  const pixels = Number(value);
-                  const valid = !value.trim() || (Number.isSafeInteger(pixels) && pixels >= 1);
-                  event.currentTarget.setCustomValidity(
-                    valid ? "" : "Informe uma altura inteira em pixels, maior que zero.",
-                  );
-                  setBarHeightDraft(value);
-                  setBarHeightChanged(true);
-                  if (!valid) return;
-                  const presentation = { ...card.presentation };
-                  delete presentation.barScale;
-                  if (value.trim()) presentation.barMaxHeight = pixels;
-                  else delete presentation.barMaxHeight;
-                  setCard({ ...card, presentation });
-                }}
+                type="date"
+                value={card.startDate ?? ""}
+                required
+                onChange={(event) => setCard({ ...card, startDate: event.target.value })}
               />
             </label>
-            <p id="dashboard-bar-height-help">
-              Limite a maior torre em pixels, sem alterar o tamanho do card ou os valores. Barras e
-              metas mantêm a mesma escala e se ajustam ao espaço disponível. Deixe vazio para altura
-              automática. A prévia usa o espaço abaixo; cards menores podem reduzir as torres.
-            </p>
-            <div
-              className={styles.barHeightPreview}
-              data-dashboard-bar-height-preview
-              data-dashboard-card-content
-              aria-label="Prévia da altura das torres"
-              role="region"
-              inert
-            >
-              <DashboardCardContent card={card}>
-                {renderPreview(card, { width: 560, height: 280 })}
-              </DashboardCardContent>
-            </div>
+            <label>
+              Data final
+              <input
+                disabled={saving}
+                type="date"
+                value={card.endDate ?? ""}
+                required
+                onChange={(event) => setCard({ ...card, endDate: event.target.value })}
+              />
+            </label>
+            {!customDatesValid ? (
+              <p role="alert">A data final deve ser igual ou posterior à data inicial.</p>
+            ) : null}
+          </div>
+        ) : null}
+        {catalog.entities && catalog.entities.length > 0 ? (
+          <fieldset className={styles.choiceGroup}>
+            <legend>Entidades</legend>
+            <label>
+              <input
+                disabled={saving}
+                type="checkbox"
+                checked={card.entityIds === null}
+                onChange={(event) =>
+                  setCard({ ...card, entityIds: event.target.checked ? null : [] })
+                }
+              />
+              Todas as entidades
+            </label>
+            {catalog.entities.map((entity) => (
+              <label key={entity.id}>
+                <input
+                  type="checkbox"
+                  disabled={saving || card.entityIds === null}
+                  checked={card.entityIds?.includes(entity.id) ?? false}
+                  onChange={(event) => {
+                    const current = card.entityIds ?? [];
+                    setCard({
+                      ...card,
+                      entityIds: event.target.checked
+                        ? [...current, entity.id]
+                        : current.filter((id) => id !== entity.id),
+                    });
+                  }}
+                />
+                {entity.label}
+              </label>
+            ))}
           </fieldset>
         ) : null}
-        {!focusBarHeight ? (
-          <>
-            <label>
-              Título
-              <input
-                disabled={saving}
-                value={card.title ?? ""}
-                maxLength={120}
-                placeholder="Opcional"
-                onChange={(event) => {
-                  const next = { ...card };
-                  if (event.target.value) next.title = event.target.value;
-                  else delete next.title;
-                  setCard(next);
-                }}
-              />
-            </label>
-            <label>
-              Texto complementar
-              <textarea
-                disabled={saving}
-                value={card.presentation?.content ?? ""}
-                maxLength={240}
-                rows={3}
-                placeholder="Opcional; os valores calculados continuam automáticos"
-                onChange={(event) => updatePresentation({ content: event.target.value })}
-              />
-            </label>
-            <label>
-              Largura do card
-              <input
-                disabled={saving}
-                type="number"
-                min={layoutPolicy?.freeResize ? FREE_CARD_MIN_WIDTH : layoutLimits.minColumnSpan}
-                max={layoutPolicy?.freeResize ? FREE_CARD_MAX_SIZE : 12}
-                step={1}
-                value={layoutPolicy?.freeResize ? widthDraft : card.layout.columnSpan}
-                onBlur={confirmDimensionDrafts}
-                onChange={(event) => {
-                  if (layoutPolicy?.freeResize) {
-                    setWidthDraft(event.target.value);
-                    setWidthChanged(true);
-                    return;
-                  }
-                  setCard({
-                    ...card,
-                    layout: constrainCardLayout(
-                      card.type,
-                      {
-                        ...card.layout,
-                        ...(layoutPolicy?.freeResize
-                          ? { width: Number(event.target.value) }
-                          : { columnSpan: Number(event.target.value) }),
-                      },
-                      layoutPolicy,
-                    ),
-                  });
-                }}
-              />
-              <small>
-                {layoutPolicy?.freeResize
-                  ? `${widthDraft || "—"}px`
-                  : `${card.layout.columnSpan} de 12 colunas`}
-              </small>
-            </label>
-            <label>
-              Altura do card
-              <input
-                disabled={saving}
-                type="number"
-                min={layoutPolicy?.freeResize ? FREE_CARD_MIN_HEIGHT : layoutLimits.minHeight}
-                max={
-                  layoutPolicy?.maxHeight === null
-                    ? undefined
-                    : (layoutPolicy?.maxHeight ?? layoutLimits.maxHeight)
-                }
-                step={layoutPolicy?.heightStep ?? 24}
-                value={layoutPolicy?.freeResize ? heightDraft : card.layout.height}
-                onBlur={confirmDimensionDrafts}
-                onChange={(event) => {
-                  if (layoutPolicy?.freeResize) {
-                    setHeightDraft(event.target.value);
-                    setHeightChanged(true);
-                    return;
-                  }
-                  setCard({
-                    ...card,
-                    layout: constrainCardLayout(
-                      card.type,
-                      {
-                        ...card.layout,
-                        height: Number(event.target.value),
-                      },
-                      layoutPolicy,
-                    ),
-                  });
-                }}
-              />
-              <small>{layoutPolicy?.freeResize ? heightDraft || "—" : card.layout.height}px</small>
-            </label>
-            <label>
-              Tamanho da fonte
-              <input
-                disabled={saving}
-                type="range"
-                min={75}
-                max={150}
-                step={5}
-                value={Math.round((card.presentation?.fontScale ?? 1) * 100)}
-                onChange={(event) =>
-                  updatePresentation({ fontScale: Number(event.target.value) / 100 })
-                }
-              />
-              <small>{Math.round((card.presentation?.fontScale ?? 1) * 100)}%</small>
-            </label>
-            <label>
-              Alinhamento horizontal
-              <select
-                disabled={saving}
-                value={card.presentation?.textAlign ?? "center"}
-                onChange={(event) =>
-                  updatePresentation({
-                    textAlign: event.target.value as NonNullable<
-                      DashboardCardPresentation["textAlign"]
-                    >,
-                  })
-                }
-              >
-                <option value="left">Esquerda</option>
-                <option value="center">Centro</option>
-                <option value="right">Direita</option>
-              </select>
-            </label>
-            <label>
-              Posição vertical
-              <select
-                disabled={saving}
-                value={card.presentation?.verticalAlign ?? "center"}
-                onChange={(event) =>
-                  updatePresentation({
-                    verticalAlign: event.target.value as NonNullable<
-                      DashboardCardPresentation["verticalAlign"]
-                    >,
-                  })
-                }
-              >
-                <option value="start">Topo</option>
-                <option value="center">Centro</option>
-                <option value="end">Base</option>
-              </select>
-            </label>
-            <label>
-              Cor do texto
-              <input
-                disabled={saving}
-                type="color"
-                value={card.presentation?.textColor ?? "#d9e8f2"}
-                onChange={(event) => updatePresentation({ textColor: event.target.value })}
-              />
-            </label>
-            <label>
-              Cor do gráfico e destaques
-              <input
-                disabled={saving}
-                type="color"
-                value={card.presentation?.accentColor ?? "#55c4dc"}
-                onChange={(event) => updatePresentation({ accentColor: event.target.value })}
-              />
-            </label>
-            {(!appointmentsBarHeight && card.type === "bars") || card.type === "horizontal-bars" ? (
-              <label>
-                Altura ou alcance das torres
-                <input
-                  disabled={saving}
-                  type="range"
-                  min={50}
-                  max={150}
-                  step={5}
-                  value={Math.round((card.presentation?.barScale ?? 1) * 100)}
-                  onChange={(event) =>
-                    updatePresentation({ barScale: Number(event.target.value) / 100 })
-                  }
-                />
-                <small>{Math.round((card.presentation?.barScale ?? 1) * 100)}%</small>
-              </label>
-            ) : null}
-            <label>
-              Métrica
-              <select
-                disabled={saving}
-                value={card.metric}
-                onChange={(event) => updateMetric(event.target.value)}
-              >
-                {catalog.metrics.map((metric) => (
-                  <option key={metric.key} value={metric.key}>
-                    {metric.label}
-                  </option>
-                ))}
-              </select>
-            </label>
-            <label>
-              Modelo
-              <select
-                disabled={saving}
-                value={card.type}
-                onChange={(event) =>
-                  setCard(
-                    reconcileCardCompatibility(
-                      { ...card, type: event.target.value as DashboardCardType },
-                      catalog,
-                      compatibility,
-                      layoutPolicy,
-                    ),
-                  )
-                }
-              >
-                {typeChoices
-                  .filter(({ value }) => types.includes(value))
-                  .map(({ value, label }) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label>
-              Agrupamento
-              <select
-                disabled={saving}
-                value={card.groupBy}
-                onChange={(event) =>
-                  setCard({ ...card, groupBy: event.target.value as DashboardGroupBy })
-                }
-              >
-                {groupChoices
-                  .filter(({ value }) => groups.includes(value))
-                  .map(({ value, label }) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            <label>
-              Período
-              <select
-                disabled={saving}
-                value={card.period}
-                onChange={(event) => {
-                  const period = event.target.value as DashboardPeriod;
-                  const next = { ...card, period };
-                  if (period !== "custom") {
-                    delete next.startDate;
-                    delete next.endDate;
-                  }
-                  setCard(next);
-                }}
-              >
-                {periodChoices
-                  .filter(({ value }) => periods.includes(value))
-                  .map(({ value, label }) => (
-                    <option key={value} value={value}>
-                      {label}
-                    </option>
-                  ))}
-              </select>
-            </label>
-            {card.period === "custom" ? (
-              <div className={styles.dateFields}>
-                <label>
-                  Data inicial
-                  <input
-                    disabled={saving}
-                    type="date"
-                    value={card.startDate ?? ""}
-                    required
-                    onChange={(event) => setCard({ ...card, startDate: event.target.value })}
-                  />
-                </label>
-                <label>
-                  Data final
-                  <input
-                    disabled={saving}
-                    type="date"
-                    value={card.endDate ?? ""}
-                    required
-                    onChange={(event) => setCard({ ...card, endDate: event.target.value })}
-                  />
-                </label>
-                {!customDatesValid ? (
-                  <p role="alert">A data final deve ser igual ou posterior à data inicial.</p>
-                ) : null}
-              </div>
-            ) : null}
-            {catalog.entities && catalog.entities.length > 0 ? (
-              <fieldset className={styles.choiceGroup}>
-                <legend>Entidades</legend>
-                <label>
+        {optionKeys.length > 0 ? (
+          <fieldset className={styles.choiceGroup}>
+            <legend>Opções</legend>
+            {optionChoices
+              .filter(({ key }) => optionKeys.includes(key))
+              .map(({ key, label }) => (
+                <label key={key}>
                   <input
                     disabled={saving}
                     type="checkbox"
-                    checked={card.entityIds === null}
-                    onChange={(event) =>
-                      setCard({ ...card, entityIds: event.target.checked ? null : [] })
-                    }
+                    checked={card.options?.[key] ?? false}
+                    onChange={(event) => updateOption(key, event.target.checked)}
                   />
-                  Todas as entidades
+                  {label}
                 </label>
-                {catalog.entities.map((entity) => (
-                  <label key={entity.id}>
-                    <input
-                      type="checkbox"
-                      disabled={saving || card.entityIds === null}
-                      checked={card.entityIds?.includes(entity.id) ?? false}
-                      onChange={(event) => {
-                        const current = card.entityIds ?? [];
-                        setCard({
-                          ...card,
-                          entityIds: event.target.checked
-                            ? [...current, entity.id]
-                            : current.filter((id) => id !== entity.id),
-                        });
-                      }}
-                    />
-                    {entity.label}
-                  </label>
-                ))}
-              </fieldset>
-            ) : null}
-            {optionKeys.length > 0 ? (
-              <fieldset className={styles.choiceGroup}>
-                <legend>Opções</legend>
-                {optionChoices
-                  .filter(({ key }) => optionKeys.includes(key))
-                  .map(({ key, label }) => (
-                    <label key={key}>
-                      <input
-                        disabled={saving}
-                        type="checkbox"
-                        checked={card.options?.[key] ?? false}
-                        onChange={(event) => updateOption(key, event.target.checked)}
-                      />
-                      {label}
-                    </label>
-                  ))}
-              </fieldset>
-            ) : null}
-          </>
+              ))}
+          </fieldset>
         ) : null}
       </form>
     </DashboardModal>

@@ -1,6 +1,6 @@
 begin;
 
-select plan(59);
+select plan(73);
 
 select ok(
   (select relrowsecurity and relforcerowsecurity
@@ -628,6 +628,124 @@ select ok(
   ),
   'the expanded validator retains invoker security, owner, safe search path and private ACL'
 );
+
+-- Intentional copies keep distinct identities and all existing document guards.
+create function pg_temp.copied_dashboard_cards()
+returns jsonb language sql immutable as $$
+  with source as (
+    select jsonb_set(
+      jsonb_set(pg_temp.dashboard_cards('copy-source')->0, '{layout}',
+        '{"order":0,"columnSpan":12,"height":73,"width":157}'),
+      '{presentation}', '{"barMaxHeight":240,"barScale":1.5}'
+    ) as card
+  )
+  select jsonb_build_array(card,
+    jsonb_set(jsonb_set(card, '{id}', '"copy-destination"'), '{layout,order}', '1'))
+  from source;
+$$;
+grant execute on function pg_temp.copied_dashboard_cards() to authenticated;
+select lives_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    pg_temp.copied_dashboard_cards())$$,
+  'appointments permits intentional copies with distinct ids and order'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.copied_dashboard_cards(), '{1,id}', '"copy-source"'))$$,
+  '22023', 'invalid_argument: duplicate dashboard card identity',
+  'copies cannot reuse an existing id'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.copied_dashboard_cards(), '{1,layout,order}', '0'))$$,
+  '22023', 'invalid_argument: duplicate dashboard card identity',
+  'copies cannot reuse an existing order'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.dashboard',
+    pg_temp.dashboard_cards('overview-source', 'overview.current.month') ||
+    jsonb_set(pg_temp.dashboard_cards('overview-copy', 'overview.current.month'),
+      '{0,layout,order}', '1'))$$,
+  '22023', 'invalid_argument: duplicate dashboard card signature',
+  'other pages still reject semantic duplicate cards'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    jsonb_set(pg_temp.copied_dashboard_cards(), '{1,unknown}', 'true'))$$,
+  '22023', 'invalid_argument: invalid dashboard card',
+  'allowing copies does not bypass the strict card document'
+);
+select throws_ok(
+  $$select private.assert_dashboard_profile_document('crm.stage.appointments',
+    (select jsonb_agg(jsonb_set(jsonb_set(pg_temp.dashboard_cards('copy-source')->0,
+      '{id}', to_jsonb('copy-' || n)), '{layout,order}', to_jsonb(n)))
+     from generate_series(0,50) n))$$,
+  '22023', 'invalid_argument: invalid dashboard cards',
+  'the fifty-card document limit remains enforced'
+);
+select ok(
+  (select not prosecdef and proowner = 'postgres'::regrole
+    and proconfig @> array['search_path=""']
+   from pg_proc where oid = 'private.assert_dashboard_profile_document_v2(text,jsonb)'::regprocedure)
+  and not exists (
+    select 1 from (values ('anon'), ('authenticated'), ('service_role')) role_name(name)
+    where has_function_privilege(role_name.name,
+      'private.assert_dashboard_profile_document_v2(text,jsonb)', 'EXECUTE')
+  ),
+  'the legacy validator retains invoker mode, trusted owner and private execute ACL'
+);
+create temporary table copied_profile_results(slot text primary key, document jsonb);
+grant select, insert on copied_profile_results to authenticated;
+set local role authenticated;
+insert into copied_profile_results
+select 'saved', public.update_dashboard_profile(
+  (select id from created_profiles where slot='shared'), 6, null,
+  pg_temp.copied_dashboard_cards(), 2::smallint
+);
+select is(
+  (select document->>'version' from copied_profile_results where slot='saved'),
+  '7', 'the authenticated RPC saves copied cards with one version increment'
+);
+select is(
+  (select jsonb_array_length(document->'cards') from copied_profile_results where slot='saved'),
+  2, 'the RPC returns both copies without semantic deduplication'
+);
+select is(
+  (select (document#>'{cards,0,layout}') - 'order' from copied_profile_results where slot='saved'),
+  (select (document#>'{cards,1,layout}') - 'order' from copied_profile_results where slot='saved'),
+  'copy preserves the source pixel dimensions and span'
+);
+select is(
+  (select document#>'{cards,0,presentation}' from copied_profile_results where slot='saved'),
+  (select document#>'{cards,1,presentation}' from copied_profile_results where slot='saved'),
+  'copy preserves every presentation option including the pixel cap'
+);
+insert into copied_profile_results
+select 'updated', public.update_dashboard_profile(
+  (select id from created_profiles where slot='shared'), 7, null,
+  jsonb_set(jsonb_set(
+    (select document->'cards' from copied_profile_results where slot='saved'),
+    '{1,layout,height}', '91'), '{1,presentation,barMaxHeight}', '128'), null
+);
+select is(
+  (select document->>'version' from copied_profile_results where slot='updated'),
+  '8', 'editing a copy saves with one further version increment'
+);
+select ok(
+  (select document#>>'{cards,0,layout,height}' = '73'
+    and document#>>'{cards,0,presentation,barMaxHeight}' = '240'
+    and document#>>'{cards,1,layout,height}' = '91'
+    and document#>>'{cards,1,presentation,barMaxHeight}' = '128'
+   from copied_profile_results where slot='updated'),
+  'copy dimensions and pixel cap can change independently of the original'
+);
+select is(
+  pg_temp.dashboard_conflict(format('select public.update_dashboard_profile(%L::uuid, 7, %L, null, null)',
+    (select id from created_profiles where slot='shared'), 'Stale copy update')),
+  pg_temp.expected_dashboard_conflict(),
+  'saving copied cards preserves the immediate HTTP 409 optimistic conflict contract'
+);
+reset role;
 
 select * from finish();
 rollback;
