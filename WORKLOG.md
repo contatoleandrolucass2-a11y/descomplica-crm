@@ -16,6 +16,16 @@
   sintética: 15 telas em três temas/cinco larguras e dez interações aprovadas,
   sem falhas JS/axe grave/tráfego externo. CI isolada, merge, publicação e
   conferência autenticada ainda pendentes.
+- Revisão corrigiu retorno de foco das ferramentas em toque e geometria de
+  resize/ghost sob compactação com sidebar focado. Dez cenários de zoom e
+  42 testes de Canvas passaram; arraste preserva largura fluida e ordem.
+- Captura protegida 41305978587 aprovada: 11 referências de Agendamentos
+  revisadas, 231 demais preservadas. Captura limpa e árvore do merge e5a1059e
+  conferidas com 22972f2d. Essas imagens cobrem shell/estado indisponível;
+  gráficos preenchidos e persistência têm fixtures próprias e exigem smoke real.
+- Migration de cópias autorizada pelo usuário após CI verde. Aplicação remota
+  aguarda o candidato final; backup e igualdade do validador atual, exceto pela
+  expansão revisada, conferidos sem escrever perfis reais.
 
 ## 2026-10-31 — Máximo das torres em pixels publicado
 

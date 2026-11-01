@@ -96,6 +96,14 @@ Sidebar de 44/136 px, gutters e gaps de 8 px são específicos de Agendamentos.
 No desktop, a abertura reduz proporcionalmente a superfície com largura virtual
 estável, preservando linhas e ordem; até 760 px, o menu abre sobreposto.
 Nenhuma abertura de sidebar regrava dimensões ou ordem dos cards.
+Interações convertem coordenadas visuais para pixels lógicos quando há zoom
+CSS. O resize e a prévia de arraste preservam proporção e largura fluida,
+inclusive ao manter foco de teclado no menu durante a interação com o mouse.
+
+Referências de visualização consultadas no pedido: [Datawrapper: referências e
+linhas](https://www.datawrapper.de/academy/range-highlights-and-lines) e
+[gráficos de colunas](https://www.datawrapper.de/academy/how-to-create-a-column-chart).
+Linhas de referência não alteram os valores nem as metas comerciais.
 
 ## Publicação e autorização
 
