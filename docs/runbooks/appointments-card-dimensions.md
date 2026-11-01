@@ -64,6 +64,10 @@ grade foram removidas. A meta usa um único caminho pontilhado conectado entre
 os períodos conhecidos, recalculado pelo filtro; ausências não viram zero.
 Metas acima da área disponível são sinalizadas, preservando seus valores.
 Essas regras valem para os gráficos diários, semanais e mensais.
+O aviso de meta fora da escala reserva a mesma área enquanto houver meta
+conhecida; quando inativo, fica invisível e fora da árvore acessível. Sua
+presença não pode alterar condicionalmente a área que determina a própria
+escala: isso provoca ciclos de ResizeObserver em cards baixos no celular.
 
 A migration `20261031184038_appointments_bar_max_height_pixels.sql` expande
 somente a validação de Agendamentos, sem reescrever documentos, mudar permissões,

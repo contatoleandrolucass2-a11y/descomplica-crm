@@ -439,9 +439,14 @@ export function AppointmentsColumns({
             : `${number.format(minGoal ?? 0)}–${number.format(maxGoal ?? 0)}`}
         </p>
       )}
-      {outsideGoals > 0 && (
-        <p className={styles.referenceNotice}>
-          Meta fora da área disponível; o traço na borda indica que ela está além da escala visível.
+      {knownGoals.length > 0 && (
+        <p
+          className={styles.referenceNotice}
+          data-appointments-overflow-notice
+          data-active={outsideGoals > 0 ? "true" : "false"}
+          aria-hidden={outsideGoals === 0}
+        >
+          Meta acima da área visível.
         </p>
       )}
       {missingGoals > 0 && (

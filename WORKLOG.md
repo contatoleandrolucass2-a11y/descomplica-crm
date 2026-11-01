@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-11-01 — Estabilidade das torres em cards baixos
+
+- Após publicar PR457/c5458276, o smoke real encontrou oscilação em celular:
+  diário de 284 px/fontScale0,75, largura renderizada313px e meta40/máximo22.
+  O aviso de meta fora da área alterava o espaço medido e alternava sua própria
+  condição. Limite e layout continuavam salvos entre Chrome e integrado.
+- Mantém área estável para o aviso quando há meta conhecida, com frase curta;
+  `visibility:hidden` e `aria-hidden` retiram a mensagem inativa sem realimentar
+  o ResizeObserver. Não altera card, valores, filtros ou contrato de persistência.
+- Regressão vermelha preservada antes do patch. Após: seis cenários com60frames,
+  limites80/1000, refresh e rotação390/844/390 estáveis;22cenários first-save
+  e11interações aprovados. Node24/Windows/Chromium, dados sintéticos.
+- Nova CI, publicação e repetição real no celular ainda pendentes. Nenhuma nova
+  migration necessária; a migration de cópias autorizada já está aplicada.
+
 ## 2026-11-01 — Gráficos e painel compactos de Agendamentos
 
 - Remove popup de altura; campo em pixels e linha superior ajustável salvam
