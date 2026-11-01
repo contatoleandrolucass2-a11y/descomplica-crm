@@ -12,8 +12,22 @@
 - Regressão vermelha preservada antes do patch. Após: seis cenários com60frames,
   limites80/1000, refresh e rotação390/844/390 estáveis;22cenários first-save
   e11interações aprovados. Node24/Windows/Chromium, dados sintéticos.
-- Nova CI, publicação e repetição real no celular ainda pendentes. Nenhuma nova
-  migration necessária; a migration de cópias autorizada já está aplicada.
+- PR #458 integrado em024ae30b; CI41324991087 aprovou os quatro jobs no main
+  exato. Imagem dd84ef8d homologada nos dois perfis, promovida pelo coordenador
+  em01/11/2026 às17:09:25Z; health200/ok/024ae30b e anônimo307 confirmados.
+  Nenhuma nova migration; a migration de cópias autorizada já está aplicada.
+- Smoke real anterior, reutilizado porque persistência não mudou: gestos de
+  canto/arrasto no Chrome, dois sentidos entre navegadores, refresh, navegação,
+  nova aba e rotação móvel simulada preservaram pixels e ordem. Ajustes próprios
+  foram restaurados. Perfil remoto posterior mais recente foi preservado.
+- Reentrada concluída nos dois navegadores. Prova real pós-patch sobre cópia
+  temporária284px/fontScale0,75: quatro cenários de40quadros, limites80/1000,
+  refresh e rotação390/844/390 estáveis e alinhados, sem overflow.
+- Resize nos dois eixos e ordem no celular chegaram ao Chrome após refresh;
+  caminho inverso também passou. Cópia removida,28originais e limites intactos
+  em ambos. Prints finais locais ignorados; viewports resetados e aba própria
+  fechada. Celular simulado, sem alegar teste em aparelho físico ou novo
+  reinício dos navegadores. Detalhes no arquivo de conhecimento de Agendamentos.
 
 ## 2026-11-01 — Gráficos e painel compactos de Agendamentos
 

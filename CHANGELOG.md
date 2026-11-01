@@ -1,5 +1,9 @@
 # Changelog
 
+- Publica a correção móvel de Agendamentos pelo PR #458/024ae30b, com CI
+  completa aprovada. Confirma persistência entre navegadores, nova reentrada e
+  rotação simulada, com160quadros estáveis. Cópia removida e prints registrados.
+
 - Estabiliza a altura das torres em cards baixos no celular: o aviso de meta
   fora da escala mantém sua área e deixa de provocar ciclos de medição ao
   atualizar ou girar a tela. Preserva limite salvo, dimensões, posição e metas.
