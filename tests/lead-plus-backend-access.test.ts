@@ -46,3 +46,11 @@ it("requires canonical mutation and export grants independently from page visibi
     ),
   ).toEqual(["leads.view"]);
 });
+
+it("permits export history and training persistence only under their canonical write grants", () => {
+  expect(operationPermissions("/resources/exports/self", "PUT")).toEqual([
+    "crm.leads.export",
+    "crm.leads.reports.export",
+  ]);
+  expect(operationPermissions("/resources/training/self", "PUT")).toEqual(["crm.leads.edit"]);
+});

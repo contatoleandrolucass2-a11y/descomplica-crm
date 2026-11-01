@@ -84,3 +84,66 @@ it("removes revoked canonical mutation capabilities from the actual session", ()
   expect(result.user.permissions).not.toContain("users.manage");
   expect(result.user.permissions).not.toContain("reports.export");
 });
+
+it("denies other users' private resources before a write or delete reaches the store", async () => {
+  let mutations = 0;
+  const store = {
+    listResources: async () => [membership],
+    saveResource: async () => {
+      mutations++;
+    },
+    deleteResource: async () => {
+      mutations++;
+    },
+  };
+  for (const kind of ["profile", "templates", "training", "exports", "lead-preferences"]) {
+    for (const method of ["PUT", "DELETE"]) {
+      const path = "/resources/" + kind + "/other-user";
+      const response = await handleLeadPlus(
+        new Request("https://crm.example.invalid" + path, {
+          method,
+          ...(method === "PUT" ? { body: "{}" } : {}),
+        }),
+        path,
+        identity,
+        { store },
+      );
+      expect(response.status).toBe(403);
+    }
+  }
+  expect(mutations).toBe(0);
+});
+
+it("persists the current user's export history and training completion after canonical authorization", async () => {
+  const allowedIdentity = {
+    ...identity,
+    authorizedPages: ["/app/leads/lista", "/app/leads/relatorios"],
+    canonicalPermissions: ["crm.leads.edit", "crm.leads.export", "crm.leads.reports.export"],
+  };
+  const session = membershipSession([membership], allowedIdentity) as { csrf: string };
+  const saved: string[] = [];
+  const store = {
+    listResources: async () => [membership],
+    saveResource: async (kind: string, id: string) => {
+      saved.push(kind + ":" + id);
+      return { version: 1 };
+    },
+  };
+  for (const kind of ["exports", "training"]) {
+    const path = "/resources/" + kind + "/" + membership.id;
+    const response = await handleLeadPlus(
+      new Request("https://crm.example.invalid" + path, {
+        method: "PUT",
+        headers: { "x-c2s-csrf": session.csrf },
+        body: JSON.stringify(
+          kind === "exports" ? { items: [] } : { completed: ["Synthetic lesson"] },
+        ),
+      }),
+      path,
+      allowedIdentity,
+      { store },
+    );
+    expect(response.status).toBe(200);
+  }
+  expect(saved).toEqual(["exports:" + membership.id, "training:" + membership.id]);
+});
