@@ -287,3 +287,73 @@ scripts nem Docker direto para contornar o coordenador. Um usuário root com
 acesso irrestrito ao host ainda pode ignorar o protocolo; esta trava não é uma
 restrição de privilégios do sistema operacional. A adoção por todos os
 publicadores e a inicialização com evidência são requisitos de ativação.
+
+### Ativar a captura direta Meta do LEAD+
+
+A primeira ativação usa `deploy --lead-plus-meta enable`, com os demais argumentos
+obrigatórios do coordenador. Exige novo SHA e imagem aprovados pela CI; o SHA já
+ativo continua `noop` e não pode ser usado para trocar configuração ou reiniciar.
+Não combinar esta opção com outra integração na mesma publicação. Credenciais
+não são argumentos de linha de comando.
+
+Preparar os três campos obrigatórios `META_APP_SECRET`, `META_VERIFY_TOKEN` e
+`META_PAGE_ACCESS_TOKEN` em
+`/etc/descomplica-crm/secrets/lead-plus-meta.json.pending`, arquivo regular
+`root:root 0600`, sem links. O arquivo deve conter um objeto JSON com essas três strings obrigatórias e,
+opcionalmente, `META_FORM_ROUTES_JSON` como quarta string. Nenhuma outra chave
+é aceita. O segredo do aplicativo deve ter 32 dígitos hexadecimais;
+o token de verificação deve ter ao menos 32 caracteres e o token da Página,
+ao menos 20. Os segredos não podem conter espaços ou controles; o mapa opcional
+usa JSON válido. Não incluir outras configurações. Esta opção
+é ativação inicial: campos anteriores preenchidos bloqueiam rotação implícita.
+
+O destino existente permanece
+`/etc/descomplica-crm/secrets/lead-plus-runtime.json.prepared`, regular
+`root:root 0440`, no diretório protegido de secrets. A alteração preserva todos
+os demais campos, incluindo conexão do banco, aplicativo e Página. O mapa de
+rotas só muda quando a quarta string foi explicitamente autorizada e incluída.
+Não modifica `production.env`, Auth, `META_ADS_ACCESS_TOKEN`, campanhas, inscrição
+do C2S ou configurações remotas da Meta. O projeto operacional deve continuar
+`xwtasgjnkctyxokxjykk`.
+
+O mapa opcional deve ser um JSON de lista não vazia, com até 500 formulários
+únicos. Cada entrada contém exatamente `page_id`, `form_id`, `product` e
+`roles`: Página já contida em `META_PAGE_IDS`, identificadores numéricos em
+strings, produto não vazio de até 250 caracteres sem controles, e exatamente
+os três perfis `admin`, `superintendent` e `manager`, sem duplicações. `team`,
+`owner_id`, corretor e outras chaves são recusados. A inclusão de todos os
+formulários, inclusive contratação, exige conferir a lista atual da Meta e a
+autorização do usuário antes de preparar a proposta. O coordenador não descobre
+nem inventa formulários e não altera a lista de Páginas.
+
+Dentro das três travas compartilhadas, após conferir a produção e a CI, o
+coordenador grava backup privado `root:root 0600` com os bytes completos anterior
+e proposto (incluindo o mapa exato, quando alterado) em
+`/etc/descomplica-crm/config-backups/lead-plus-meta-<deployment-id>.json`.
+O ledger recebe somente `runtimeChange` com ID e hashes, antes de qualquer
+troca. Campos de ledger anteriores permanecem compatíveis.
+
+A aplicação usa CAS dos bytes completos e rename atômico com fsync do arquivo e
+do diretório, preservando o modo 0440. O contêiner ativo mantém o inode anterior;
+a recriação aprovada monta o novo inode. Não editar o arquivo montado no lugar,
+não usar restart ou Compose direto e não remover o backup enquanto existir
+pendência. Alteração concorrente ou adulteração do backup bloqueia a operação.
+
+A confirmação exige versão/imagem e health usuais, hash do JSON montado e hashes
+dos três segredos e do mapa de rotas efetivos nos processos do aplicativo e
+worker. A observação
+identifica os filhos diretos do launcher, incluindo o processo Next com título
+renomeado. São retornados somente hashes; nenhum valor de secret é impresso.
+
+`recover --deployment-id` para a tentativa exata restaura por CAS os bytes do
+JSON anterior antes de recriar o runtime anterior. Se o contêiner anterior nunca
+parou, confere seu arquivo montado e valores efetivos antes de abortar a tentativa.
+A fase de rollback permanece no ledger quando necessário; uma recuperação
+interrompida aceita o arquivo já restaurado, mas recusa conteúdo externo.
+Esse comportamento de recuperação de arquivo aplica-se somente às tentativas
+que registraram `runtimeChange`; releases antigas mantêm o procedimento anterior.
+
+Após a publicação, a conexão ainda depende da configuração/validação do callback,
+da inscrição adicional da Página e de evidência de entrega real persistida.
+O coordenador não concede permissões na Meta nem ativa inscrições. Consultar as
+inscrições existentes e preservar a integração C2S antes de qualquer ação remota.

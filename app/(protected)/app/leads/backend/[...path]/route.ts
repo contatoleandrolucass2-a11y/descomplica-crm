@@ -1,3 +1,4 @@
+import { resolveLeadCrmUser, loadLeadCrmUsers } from "@/lib/crm/lead-plus/crm-users";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { operationPage, operationPermissions } from "@/lib/crm/lead-plus/server/access.mjs";
 import { createClient } from "@/lib/auth/supabase/server";
@@ -49,12 +50,21 @@ async function handle(request: Request, context: Context) {
       { status: 401, headers: noStoreHeaders() },
     );
   }
-  return handleLeadPlus(request, "/" + path.join("/"), {
-    id: authorization.context.userId,
-    email: data.session.user.email || "",
-    token: data.session.access_token,
-    authorizedPages,
-    canonicalPermissions: authorization.context.permissions,
-  });
+  return handleLeadPlus(
+    request,
+    "/" + path.join("/"),
+    {
+      id: authorization.context.userId,
+      email: data.session.user.email || "",
+      token: data.session.access_token,
+      authorizedPages,
+      canonicalPermissions: authorization.context.permissions,
+    },
+    {
+      resolveViewTarget: (id: string) => resolveLeadCrmUser(authorization.context, id),
+      loadCrmUsers: (search: string, offset: number) =>
+        loadLeadCrmUsers(authorization.context, search, offset),
+    },
+  );
 }
 export { handle as GET, handle as POST, handle as PUT, handle as PATCH, handle as DELETE };

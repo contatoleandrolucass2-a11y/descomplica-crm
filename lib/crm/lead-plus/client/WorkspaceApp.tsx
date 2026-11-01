@@ -1,3 +1,4 @@
+import UserViewSelector from "./UserViewSelector";
 import { workspaceDocument } from "./workspace-document";
 import { useEffect, useState } from "react";
 import { MotionConfig } from "motion/react";
@@ -67,7 +68,7 @@ export default function App({ initialScreen = "Leads" }: { initialScreen?: strin
   useEffect(() => {
     document.title = active + " · DESCOMPLICA LEAD";
   }, [active]);
-  if (!auth.user && !auth.preview) return <HostSessionRequired />;
+  if (auth.loading || (!auth.user && !auth.preview)) return <HostSessionRequired />;
   return (
     <MotionConfig reducedMotion="user">
       <div className="descomplica-app">
@@ -85,6 +86,7 @@ export default function App({ initialScreen = "Leads" }: { initialScreen?: strin
           <div className="lead-workspace">
             <SidebarDemo active={active} navigate={navigate} />
             <div className="workspace-scroll" inert={mobile && open}>
+              <UserViewSelector />
               <div className="workspace-heading">
                 <div>
                   <span className="workspace-eyebrow">DESCOMPLICA LEAD</span>
@@ -96,7 +98,12 @@ export default function App({ initialScreen = "Leads" }: { initialScreen?: strin
                   <i /> Workspace
                 </span>
               </div>
-              <main id="lead-main" tabIndex={-1} className="workspace-content system-main">
+              <main
+                key={auth.user?.id || "no-user"}
+                id="lead-main"
+                tabIndex={-1}
+                className="workspace-content system-main"
+              >
                 {!canAccessRoute(active, auth.can, auth.user?.host_pages) ? (
                   <div className="system-screen" role="alert">
                     <h1>Acesso restrito</h1>

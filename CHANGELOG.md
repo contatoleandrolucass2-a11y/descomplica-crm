@@ -6,6 +6,14 @@
   e ajuste explícito dos gráficos para 500 px preservam a autonomia de layout.
   No Ranking Score, a referência é o máximo observado, preservando as categorias.
 
+- Adiciona seleção de campanhas Facebook no LEAD+, captura direta com filtro e
+  deduplicação, visualização de outro usuário com auditoria do ator original e
+  vínculo aos usuários existentes do CRM. Remove a faixa extra Lead.
+
+- Adiciona ativação protegida das credenciais de captura direta do LEAD+ pelo
+  coordenador de produção, com backup privado, comparação de hashes e recuperação
+  do JSON anterior. Preserva banco, Auth, métricas Meta Ads e inscrições do C2S.
+
 - Publica a correção móvel de Agendamentos pelo PR #458/024ae30b, com CI
   completa aprovada. Confirma persistência entre navegadores, nova reentrada e
   rotação simulada, com160quadros estáveis. Cópia removida e prints registrados.
