@@ -1,9 +1,8 @@
 "use client";
 
 import { useId, useMemo } from "react";
-import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
-import { buildAppointmentComparison } from "./appointments-comparison";
+import type { AppointmentComparison } from "./appointments-comparison";
 import styles from "./AppointmentsComparison.module.css";
 
 const number = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
@@ -32,24 +31,13 @@ export function DailyChartTypeControl() {
 }
 
 export function AppointmentsComparison({
-  analysis,
-  options,
+  getComparison,
 }: {
-  analysis: DashboardAnalysisSlice;
-  options: Parameters<typeof buildAppointmentComparison>[1];
+  getComparison: () => AppointmentComparison | null;
 }) {
-  const { month, filters = {}, brokerRoster = null, goalsByMonth = {} } = options;
-  const comparison = useMemo(
-    () =>
-      buildAppointmentComparison(analysis, {
-        month,
-        filters,
-        brokerRoster,
-        goalsByMonth,
-      }),
-    [analysis, month, filters, brokerRoster, goalsByMonth],
-  );
+  const comparison = useMemo(() => getComparison(), [getComparison]);
   const id = useId();
+  if (comparison === null) return <p role="status">Comparativo indisponível neste recorte.</p>;
   const allValues = comparison.series
     .flatMap((series) => series.values)
     .filter((value): value is number => value !== null);
