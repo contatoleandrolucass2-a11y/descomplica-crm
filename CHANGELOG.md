@@ -1,5 +1,9 @@
 # Changelog
 
+- Estabiliza a altura das torres em cards baixos no celular: o aviso de meta
+  fora da escala mantém sua área e deixa de provocar ciclos de medição ao
+  atualizar ou girar a tela. Preserva limite salvo, dimensões, posição e metas.
+
 - Simplifica Agendamentos: altura das torres diretamente no gráfico, linha
   superior ajustável e meta pontilhada dinâmica, sem grade decorativa. Restaura
   títulos, oferece copiar/adicionar nos cards e compacta espaços e sidebar

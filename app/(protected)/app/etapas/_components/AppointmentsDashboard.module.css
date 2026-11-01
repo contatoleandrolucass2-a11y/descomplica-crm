@@ -2014,6 +2014,11 @@
   text-align: left;
 }
 
+.referenceNotice[data-active="false"] {
+  /* Keep the measured plot stable when the scale toggles this notice. */
+  visibility: hidden;
+}
+
 @media (hover: none), (pointer: coarse) {
   .barHeightTools {
     opacity: 1;
