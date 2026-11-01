@@ -1,5 +1,5 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
-import { api } from "./api";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { api, setLeadViewAs } from "./api";
 
 export type AuthUser = {
   id: string;
@@ -16,6 +16,9 @@ export type AuthUser = {
 };
 type Session = {
   user: AuthUser | null;
+  actor?: { id: string; auth_id: string; name: string; email: string; role: string };
+  view_as?: { active: boolean; target_id: string; target_name: string };
+  viewable_users?: { id: string; name: string; role: string; team: string }[];
   preview?: boolean;
   permissions?: string[];
   demo?: {
@@ -27,6 +30,7 @@ type AuthState = Session & {
   loading: boolean;
   error: string;
   refresh: () => Promise<void>;
+  switchUser: (userId: string) => Promise<void>;
   can: (permission: string) => boolean;
 };
 const Context = createContext<AuthState | null>(null);
@@ -39,20 +43,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session>({ user: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const requestSequence = useRef(0);
   const refresh = async () => {
+    const sequence = ++requestSequence.current;
     try {
-      setSession(await api<Session>("/session"));
+      const next = await api<Session>("/session");
+      if (sequence !== requestSequence.current) return;
+      setSession(next);
       setError("");
     } catch (error) {
+      if (sequence !== requestSequence.current) return;
       setSession({ user: null });
       setError((error as Error).message);
     } finally {
-      setLoading(false);
+      if (sequence === requestSequence.current) setLoading(false);
     }
+  };
+  const switchUser = async (userId: string) => {
+    setLeadViewAs(userId);
+    setSession({ user: null });
+    setLoading(true);
+    await refresh();
   };
   useEffect(() => {
     void Promise.resolve().then(refresh);
     const expired = () => {
+      requestSequence.current += 1;
       setSession({ user: null });
       setError("Não foi possível validar sua sessão. Atualize a página do CRM.");
     };
@@ -66,6 +82,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         loading,
         error,
         refresh,
+        switchUser,
         can: (permission) =>
           (session.user?.permissions || session.permissions || []).includes(permission),
       }}
@@ -89,6 +106,9 @@ export function HostSessionRequired() {
         </p>
         <button type="button" className="btn" onClick={() => void auth.refresh()}>
           Tentar novamente
+        </button>
+        <button type="button" className="btn" onClick={() => void auth.switchUser("")}>
+          Voltar ao meu usuário
         </button>
       </div>
     </div>

@@ -134,7 +134,7 @@ test("LEAD+ digest observation identifies Next renamed process only as a direct 
     12: { cmd: "node\0/app/deploy/runtime/lead-plus-worker.mjs\0", parent: "10" },
     99: { cmd: "next-server (v16.4.1)\0", parent: "2" },
   };
-  const environ = Object.entries(secrets)
+  const environ = Object.entries({ ...secrets, META_FORM_ROUTES_JSON: base.META_FORM_ROUTES_JSON })
     .map(([k, v]) => k + "=" + v)
     .join("\0");
   let output;
@@ -159,4 +159,91 @@ test("LEAD+ digest observation identifies Next renamed process only as a direct 
     file: runtimeDigest(value),
     credentials: credentialsDigest(value),
   });
+});
+
+const allMasterRoles = ["admin", "superintendent", "manager"];
+const formRoute = {
+  page_id: "123",
+  form_id: "456",
+  product: "Formulário sintético",
+  roles: allMasterRoles,
+};
+test("LEAD+ optional form map accepts only unique forms on existing Pages for the three exact master profiles", () => {
+  const before = JSON.stringify(base);
+  const map = JSON.stringify([
+    formRoute,
+    { ...formRoute, form_id: "789", product: "Contratação sintética" },
+  ]);
+  const result = JSON.parse(
+    transformLeadMetaRuntime(before, JSON.stringify({ ...secrets, META_FORM_ROUTES_JSON: map })),
+  );
+  assert.deepEqual(result, { ...base, ...secrets, META_FORM_ROUTES_JSON: map });
+  const invalid = [
+    "bad-json",
+    "[]",
+    "{}",
+    JSON.stringify([{ ...formRoute, page_id: "999" }]),
+    JSON.stringify([{ ...formRoute, team: "Equipe" }]),
+    JSON.stringify([{ ...formRoute, owner_id: "person" }]),
+    JSON.stringify([{ ...formRoute, roles: ["admin", "manager", "broker"] }]),
+    JSON.stringify([{ ...formRoute, roles: ["admin"] }]),
+    JSON.stringify([{ ...formRoute, roles: ["admin", "admin", "manager"] }]),
+    JSON.stringify([formRoute, formRoute]),
+    JSON.stringify([{ ...formRoute, form_id: 456 }]),
+    JSON.stringify([{ ...formRoute, product: " " }]),
+    JSON.stringify([{ ...formRoute, product: "x".repeat(251) }]),
+    JSON.stringify([{ ...formRoute, unexpected: true }]),
+  ];
+  for (const value of invalid)
+    assert.throws(() =>
+      transformLeadMetaRuntime(
+        before,
+        JSON.stringify({ ...secrets, META_FORM_ROUTES_JSON: value }),
+      ),
+    );
+  assert.throws(() =>
+    transformLeadMetaRuntime(
+      before,
+      JSON.stringify({ ...secrets, META_FORM_ROUTES_JSON: map, META_PAGE_IDS: "999" }),
+    ),
+  );
+});
+test("LEAD+ backup and rollback preserve the exact prior map while permitting only the optional map extension", async () =>
+  fixture(async ({ dir, runtime, proposal, before, store }) => {
+    const map = JSON.stringify(
+      Array.from({ length: 11 }, (_, index) => ({
+        ...formRoute,
+        form_id: String(456 + index),
+        product: "Sintético " + index,
+      })),
+    );
+    await writeFile(proposal, JSON.stringify({ ...secrets, META_FORM_ROUTES_JSON: map }));
+    const change = await store.prepare(id);
+    const backup = await store.readBackup(change);
+    await store.apply(change);
+    assert.equal(JSON.parse(await readFile(runtime, "utf8")).META_FORM_ROUTES_JSON, map);
+    await store.apply(change, true);
+    assert.equal(await readFile(runtime, "utf8"), before);
+    assert.equal(JSON.parse(backup.before).META_FORM_ROUTES_JSON, base.META_FORM_ROUTES_JSON);
+    const corruptedAfter =
+      JSON.stringify({ ...JSON.parse(backup.after), META_PAGE_IDS: "999" }, null, 2) + "\n";
+    const tampered = { ...backup, after: corruptedAfter };
+    await writeFile(path.join(dir, "lead-plus-meta-" + id + ".json"), JSON.stringify(tampered));
+    await assert.rejects(
+      store.readBackup({ ...change, afterSha256: runtimeDigest(corruptedAfter) }),
+    );
+  }));
+
+test("LEAD+ effective runtime digest also binds the loaded routing map", () => {
+  const first = JSON.stringify({
+    ...base,
+    ...secrets,
+    META_FORM_ROUTES_JSON: JSON.stringify([formRoute]),
+  });
+  const second = JSON.stringify({
+    ...base,
+    ...secrets,
+    META_FORM_ROUTES_JSON: JSON.stringify([{ ...formRoute, form_id: "789" }]),
+  });
+  assert.notEqual(credentialsDigest(first), credentialsDigest(second));
 });

@@ -9,6 +9,7 @@ export const leadMetaKeys = Object.freeze([
   "META_VERIFY_TOKEN",
   "META_PAGE_ACCESS_TOKEN",
 ]);
+const observedRuntimeKeys = Object.freeze([...leadMetaKeys, "META_FORM_ROUTES_JSON"]);
 export const runtimeDigest = (value) => createHash("sha256").update(value).digest("hex");
 const bad = () => {
   throw Error("LEAD+ runtime configuration or backup is invalid.");
@@ -29,12 +30,50 @@ function object(contents) {
     bad();
   return value;
 }
+export function validateLeadMetaRoutes(contents, pageIds) {
+  if (typeof pageIds !== "string" || !/^\d{1,64}(,\d{1,64})*$/.test(pageIds)) bad();
+  const pages = new Set(pageIds.split(","));
+  let routes;
+  try {
+    routes = JSON.parse(contents);
+  } catch {
+    bad();
+  }
+  if (!Array.isArray(routes) || !routes.length || routes.length > 500) bad();
+  const forms = new Set();
+  for (const route of routes) {
+    if (
+      !route ||
+      typeof route !== "object" ||
+      Array.isArray(route) ||
+      Object.keys(route).sort().join(",") !== "form_id,page_id,product,roles" ||
+      typeof route.page_id !== "string" ||
+      !pages.has(route.page_id) ||
+      typeof route.form_id !== "string" ||
+      !/^\d{1,64}$/.test(route.form_id) ||
+      forms.has(route.form_id) ||
+      typeof route.product !== "string" ||
+      !route.product.trim() ||
+      route.product.length > 250 ||
+      /[\x00-\x1f\x7f]/.test(route.product) ||
+      !Array.isArray(route.roles) ||
+      route.roles.length !== 3 ||
+      [...new Set(route.roles)].sort().join(",") !== "admin,manager,superintendent"
+    )
+      bad();
+    forms.add(route.form_id);
+  }
+  return routes;
+}
 export function transformLeadMetaRuntime(before, proposed) {
   const current = object(before),
     changes = object(proposed);
   if (
-    Object.keys(changes).length !== 3 ||
-    Object.keys(changes).some((key) => !leadMetaKeys.includes(key))
+    ![3, 4].includes(Object.keys(changes).length) ||
+    leadMetaKeys.some((key) => !Object.hasOwn(changes, key)) ||
+    Object.keys(changes).some(
+      (key) => !leadMetaKeys.includes(key) && key !== "META_FORM_ROUTES_JSON",
+    )
   )
     bad();
   if (current.LEAD_DB_PROJECT_REF !== "xwtasgjnkctyxokxjykk") bad();
@@ -45,6 +84,8 @@ export function transformLeadMetaRuntime(before, proposed) {
     !/^[^\s\x00-\x1f\x7f]{20,16384}$/.test(changes.META_PAGE_ACCESS_TOKEN)
   )
     bad();
+  if (Object.hasOwn(changes, "META_FORM_ROUTES_JSON"))
+    validateLeadMetaRoutes(changes.META_FORM_ROUTES_JSON, current.META_PAGE_IDS);
   const after = JSON.stringify({ ...current, ...changes }, null, 2) + "\n";
   if (Buffer.byteLength(after) > 32768) bad();
   return after;
@@ -52,7 +93,7 @@ export function transformLeadMetaRuntime(before, proposed) {
 export function credentialsDigest(contents) {
   const value = object(contents);
   return runtimeDigest(
-    JSON.stringify(Object.fromEntries(leadMetaKeys.map((key) => [key, value[key] || ""]))),
+    JSON.stringify(Object.fromEntries(observedRuntimeKeys.map((key) => [key, value[key] || ""]))),
   );
 }
 export function validateRuntimeChange(change, id) {
@@ -145,14 +186,12 @@ export function leadMetaRuntimeStore({
       runtimeDigest(backup.after) !== change.afterSha256
     )
       bad();
-    const after = object(backup.after);
-    if (
-      transformLeadMetaRuntime(
-        backup.before,
-        JSON.stringify(Object.fromEntries(leadMetaKeys.map((k) => [k, after[k]]))),
-      ) !== backup.after
-    )
-      bad();
+    const after = object(backup.after),
+      before = object(backup.before);
+    const changes = Object.fromEntries(leadMetaKeys.map((k) => [k, after[k]]));
+    if (after.META_FORM_ROUTES_JSON !== before.META_FORM_ROUTES_JSON)
+      changes.META_FORM_ROUTES_JSON = after.META_FORM_ROUTES_JSON;
+    if (transformLeadMetaRuntime(backup.before, JSON.stringify(changes)) !== backup.after) bad();
     return backup;
   }
   return {
@@ -190,11 +229,11 @@ export function leadMetaRuntimeStore({
     },
   };
 }
-// Prints only hashes of the bound file and loaded application/worker credentials.
+// Prints only hashes of the bound file and loaded application/worker credentials plus routing.
 export const leadMetaContainerDigestScript = `
 const fs=require('node:fs'),crypto=require('node:crypto');
 const hash=x=>crypto.createHash('sha256').update(x).digest('hex');
-const keys=${JSON.stringify(leadMetaKeys)};
+const keys=${JSON.stringify(observedRuntimeKeys)};
 const file=hash(fs.readFileSync('/run/secrets/lead-plus-runtime.json'));
 const entries=[];
 for(const id of fs.readdirSync('/proc').filter(x=>/^\\d+$/.test(x))){

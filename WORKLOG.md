@@ -1,30 +1,39 @@
 # Worklog
 
-## 2026-11-01 — Ativação protegida da captura Facebook do LEAD+
+## 2026-11-01 — Campanhas Facebook e visualização de usuários do LEAD+
 
-- O usuário solicitou concluir a conexão direta pela BM MÃE 2, usando o aplicativo
-  Descomplica Ads Analytics, preservando a integração do C2S e o token de métricas
-  do Meta Ads. A revisão jurídica permanece pendente por instrução expressa.
-- O painel Meta confirma permissões preparadas, callback ainda ausente e app não
-  publicado. A autorização da credencial dedicada e a nova confirmação de
-  identidade exigida pela BM MÃE 2 estão pendentes. Nenhum token foi criado,
-  callback salvo ou aplicativo inscrito durante esta preparação.
-- Foi identificada uma lacuna de recuperação do JSON privado: alterar sua origem
-  antes de uma promoção poderia permitir que outro publicador montasse o conteúdo
-  novo, e o coordenador não restauraria esse arquivo ao recuperar a imagem anterior.
-- A opção exclusiva `--lead-plus-meta enable` vincula backup, hashes, troca por CAS
-  e recuperação do JSON à intenção durável e às travas compartilhadas existentes.
-  Somente os três segredos de captura podem ser adicionados. Banco, Auth, métricas,
-  Página e encaminhamentos permanecem preservados, sem criação de equipes.
-- Validação focada inicial: 127 testes, 117 aprovados e dez dependentes de Linux;
-  os 14 testes novos passaram. Lint e formatação dos arquivos de implementação
-  aprovados. CI, prova da imagem, ativação remota e entrega real permanecem pendentes.
-- A política pública existente do CRM respondeu HTTP 200 e foi cadastrada no app
-  Meta com confirmação de salvamento. Seu estado de revisão jurídica não foi
-  alterado. Uma sondagem somente de leitura na imagem ativa identificou aplicativo
-  e worker, leu o arquivo montado e comparou os hashes das credenciais carregadas,
-  sem exibir seus valores. Essa sondagem não ativa a captura nem substitui a prova
-  da configuração nova após a promoção.
+- A conexão direta da BM MÃE 2 usa credencial de Página dedicada no mesmo app do
+  Meta Ads, sem substituir seu token de métricas ou a integração do C2S. MFA e
+  permissões autorizadas foram concluídos. O token dedicado, segredo existente e
+  mapa dos onze formulários foram preparados em arquivos privados, sem valores
+  no Git. Callback, publicação Meta e ativação remota ainda dependem da promoção.
+- O usuário escolhe as campanhas em Integrações. A seleção ausente ou vazia pausa
+  a captura; o catálogo é consultado somente por leitura na conta já conectada
+  ao Meta Ads. A sondagem real retornou 32 campanhas sem paginação. A seleção é
+  validada contra o catálogo e salva por versão, sem alterar anúncios.
+- O worker busca metadados antes de contatos, valida Página/formulário/anúncio e
+  aceita somente campanha selecionada. Revalida a política antes de buscar dados
+  e dentro da transação de gravação; mantém deduplicação e somente destinatários
+  Admin, Superintendente e Gerente ativos, sem criar equipes.
+- Remove a faixa de breadcrumb somente nas rotas LEAD+. A visualização de outro
+  usuário preserva a sessão real, restringe hierarquia e permissões dos dois
+  contextos e mantém aviso com ator/alvo. A auditoria SQL usa contexto isolado por
+  requisição, sobrescrevendo identidades forjadas e preservando tarefas do worker.
+- O vínculo operacional usa usuários já existentes no diretório protegido do CRM,
+  exige Admin real, grants canônicos e versão; não cria Auth nem altera o perfil
+  do CRM. A consulta de schema confirmou contrato compacto sem access_status em
+  profiles; aprovação é comprovada pela RPC protegida correspondente, sem DDL.
+- O coordenador recebe --lead-plus-meta enable: registra intenção, backup e hashes
+  antes de substituir o JSON por CAS, sob as três travas compartilhadas. Recupera
+  a configuração anterior antes da imagem anterior. O mapa opcional aceita somente
+  formulários da Página autorizada e os três perfis master, sem alterar banco/Auth.
+- Testes focados cobrem escopo, troca de usuário, concorrência de auditoria,
+  diretório compacto, seleção/revogação, deduplicação e recuperação do runtime.
+  Dezessete testes novos do coordenador passaram. A revisão independente encontrou
+  e confirmou a correção do filtro de equipe sem users.view. CI do candidato final,
+  prova da imagem, promoção e recebimento real ainda não foram concluídos.
+- A política pública existente foi salva no app Meta. A revisão jurídica continua
+  pendente por instrução expressa; seu conteúdo não foi apresentado como aprovado.
 
 ## 2026-11-01 — Estabilidade das torres em cards baixos
 

@@ -53,6 +53,24 @@ const sourceLabels: Record<string, string> = {
 };
 export const sourceLabel = (source: string) => sourceLabels[source] || source;
 let csrf = "";
+let viewAs = "";
+let viewGeneration = 0;
+export function setLeadViewAs(userId: string) {
+  if (userId && !/^[a-zA-Z0-9-]{1,100}$/.test(userId))
+    throw new Error("Usuário de visualização inválido.");
+  viewAs = userId;
+  csrf = "";
+  viewGeneration += 1;
+}
+export class LeadApiError extends Error {
+  constructor(
+    message: string,
+    public readonly status: number,
+  ) {
+    super(message);
+  }
+}
+
 const apiBase = "/app/leads/backend";
 const channel =
   typeof BroadcastChannel !== "undefined" ? new BroadcastChannel("c2s-local-updates") : null;
@@ -63,25 +81,34 @@ export async function api<T>(
   data?: unknown,
   idempotency?: string,
 ): Promise<T> {
+  const generation = viewGeneration;
+  const viewHeaders = viewAs ? { "X-Lead-View-As": viewAs } : {};
   if (method !== "GET" && !csrf) {
-    const session = await fetch(apiBase + "/session").then((r) => r.json());
+    const session = await fetch(apiBase + "/session", { headers: viewHeaders }).then((r) =>
+      r.json(),
+    );
+    if (generation !== viewGeneration)
+      throw new Error("A visualização do usuário foi alterada. Atualize os dados.");
     csrf = session.csrf;
   }
   const response = await fetch(apiBase + path, {
     method,
     headers: {
       "Content-Type": "application/json",
+      ...viewHeaders,
       ...(csrf ? { "X-C2S-CSRF": csrf } : {}),
       ...(idempotency ? { "Idempotency-Key": idempotency } : {}),
     },
     ...(data === undefined ? {} : { body: JSON.stringify(data) }),
   });
   const result = await response.json();
+  if (generation !== viewGeneration)
+    throw new Error("A visualização do usuário foi alterada. Atualize os dados.");
   if (!response.ok) {
     if (response.status === 401 && !path.startsWith("/auth/"))
       window.dispatchEvent(new Event("auth-expired"));
     if (response.status === 403) csrf = "";
-    throw new Error(
+    throw new LeadApiError(
       result.error +
         (result.fields
           ? " " +
@@ -89,6 +116,7 @@ export async function api<T>(
               .map((f: { field: string; message: string }) => f.field + ": " + f.message)
               .join("; ")
           : ""),
+      response.status,
     );
   }
   if (result.csrf) csrf = result.csrf;

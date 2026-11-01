@@ -1,5 +1,9 @@
 # Changelog
 
+- Adiciona seleção de campanhas Facebook no LEAD+, captura direta com filtro e
+  deduplicação, visualização de outro usuário com auditoria do ator original e
+  vínculo aos usuários existentes do CRM. Remove a faixa extra Lead.
+
 - Adiciona ativação protegida das credenciais de captura direta do LEAD+ pelo
   coordenador de produção, com backup privado, comparação de hashes e recuperação
   do JSON anterior. Preserva banco, Auth, métricas Meta Ads e inscrições do C2S.

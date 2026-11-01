@@ -1,3 +1,4 @@
+import MetaCampaignSelection from "./MetaCampaignSelection";
 import { useEffect, useState } from "react";
 import { useAuth } from "./Auth";
 import {
@@ -873,6 +874,7 @@ type Integration = {
   last_received_at: string | null;
 };
 export function ConnectedIntegrations() {
+  const auth = useAuth();
   const { data, error } = useApi<{
     data: Integration[];
     events: { provider: string; external_id: string; status: string; received_at: string }[];
@@ -889,11 +891,13 @@ export function ConnectedIntegrations() {
         </p>
         <ErrorMessage error={error} />
         <span className="badge-gray">
-          {!facebook
-            ? "Carregando…"
-            : facebook.status === "configured"
-              ? "Recebimento direto configurado · aguardando validação"
-              : "Aguardando configuração da conexão direta com a Meta"}
+          {error
+            ? "Não foi possível consultar a conexão"
+            : !facebook
+              ? "Carregando…"
+              : facebook.status === "configured"
+                ? "Recebimento direto configurado · aguardando validação"
+                : "Aguardando configuração da conexão direta com a Meta"}
         </span>
         {facebook && (
           <p>
@@ -909,8 +913,16 @@ export function ConnectedIntegrations() {
           </p>
         )}
       </Panel>
+      {auth.user?.scope === "all" && auth.can("crm.settings.manage") && <MetaCampaignSelection />}
       <Panel title="Leads recebidos do Facebook">
-        {data?.events.length ? (
+        {error ? (
+          <p role="alert">
+            Não foi possível consultar o histórico de entregas. A ausência de dados não confirma
+            ausência de leads.
+          </p>
+        ) : !data ? (
+          <p role="status">Carregando histórico de entregas…</p>
+        ) : data.events?.length ? (
           <DataTable
             headers={["Origem", "ID do lead", "Recebido em", "Situação"]}
             rows={data.events.map((event) => [

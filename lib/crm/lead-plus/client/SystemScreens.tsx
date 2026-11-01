@@ -1,3 +1,4 @@
+import CrmUserLinks from "./CrmUserLinks";
 import { ConnectedBucket, BucketSettings } from "./Bucket";
 import ImportLeads from "./ImportLeads";
 import Exportations from "./Exportations";
@@ -60,13 +61,7 @@ export default function SystemScreens({
         />
       );
     case "Usuários":
-      return (
-        <PersistentRecords
-          kind="users"
-          title="Listagem de usuários"
-          headers={["Hierarquia", "Nome", "E-mail", "Telefone(s)", "Ativo"]}
-        />
-      );
+      return <CrmUserLinks />;
     case "Etiquetas":
       return (
         <PersistentRecords
