@@ -350,6 +350,15 @@ describe("release-candidate activation defaults", () => {
         );
         expect(matrix.expectedAccountSettingsRoutesForRole(role)).not.toContain(route);
       }
+      for (const route of surfacePaths.filter((path: string) => path.startsWith("/app/leads"))) {
+        expect(matrix.expectedDirectRoutesByRole[role].includes(route), `${role}: ${route}`).toBe(
+          administrative,
+        );
+        expect(
+          matrix.expectedHeaderRoutesByRole[role].includes(route),
+          `${role}: header ${route}`,
+        ).toBe(administrative && route === "/app/leads");
+      }
       const roots = matrix.expectedPrimaryNavigationRootsForRole(role);
       expect(
         matrix.expectedHeaderRoutesByRole[role].includes("/app/configuracoes/metas"),
@@ -357,11 +366,11 @@ describe("release-candidate activation defaults", () => {
       ).toBe(administrative);
       expect(roots.some((root: { name: string }) => root.name === "Configurações")).toBe(false);
       if (administrative) {
-        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(35);
+        expect(matrix.expectedHeaderRoutesByRole[role]).toHaveLength(27);
         expect(matrix.expectedHeaderRoutesByRole[role]).toContain("/app/configuracoes/metas");
         expect(roots.map((root: { name: string }) => root.name)).toEqual([
           "Dashboard",
-          "Lead",
+          "LEAD+",
           "Meta Ads",
           "Simulação",
           "Ranking",
@@ -370,6 +379,12 @@ describe("release-candidate activation defaults", () => {
           "Links Úteis",
           "Administração",
         ]);
+        expect(roots[1]).toEqual({
+          name: "LEAD+",
+          tag: "A",
+          href: "/app/leads",
+          controls: null,
+        });
         expect(roots[2]).toEqual({
           name: "Meta Ads",
           tag: "A",
