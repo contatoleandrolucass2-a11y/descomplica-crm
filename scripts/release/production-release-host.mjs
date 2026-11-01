@@ -1,3 +1,8 @@
+import {
+  leadMetaRuntimeStore,
+  leadMetaContainerDigestScript,
+  assertLeadMetaContainerDigests,
+} from "./lead-plus-meta-runtime.mjs";
 import { execFile } from "node:child_process";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
@@ -210,6 +215,27 @@ async function health(url) {
 export function productionHost(lock) {
   const store = privateJsonStore(statePath, (state) => validateDeploymentState(state, Date.now()));
   const environmentBackups = salesforceEnvironmentBackupStore();
+  const leadRuntime = leadMetaRuntimeStore();
+  async function verifyLeadRuntime(change, restore) {
+    await assertHeldLock(lock);
+    const expected = await leadRuntime.assertCurrent(change, restore);
+    const container = await containerVersion();
+    const digests = JSON.parse(
+      await docker([
+        "exec",
+        container.containerId,
+        "node",
+        "--input-type=commonjs",
+        "--eval",
+        leadMetaContainerDigestScript,
+      ]),
+    );
+    assertLeadMetaContainerDigests(digests, expected);
+    if (!isDeepStrictEqual(await containerVersion(), container))
+      throw new Error("LEAD+ container changed during verification.");
+    await leadRuntime.assertCurrent(change, restore);
+    await assertHeldLock(lock);
+  }
   async function runtime() {
     const [sha, container, healthSha, publicHealthSha] = await Promise.all([
       environmentSha(),
@@ -263,7 +289,25 @@ export function productionHost(lock) {
       await verifyPromotableImage(options.targetSha, options.targetImageId);
       await verifyPromotableImage(previous.sha, previous.imageId);
       if (options.environmentChange) await environmentBackups.read(options.environmentChange);
+      if (options.runtimeChange) await leadRuntime.readBackup(options.runtimeChange);
       await runtimeCompose(["production", "config", "--quiet"], lock);
+    },
+    async prepareRuntimeChange(options, deploymentId) {
+      await assertHeldLock(lock);
+      if (options.operation !== "deploy" || options.leadPlusMeta !== true)
+        throw new Error("Explicit LEAD+ activation required.");
+      const state = await store.read();
+      if (
+        state.inProgress ||
+        state.release.deploymentId !== options.expectedDeploymentId ||
+        state.release.sha !== options.expectedSha
+      )
+        throw new Error("LEAD+ preparation requires the exact previous release.");
+      const change = await leadRuntime.prepare(deploymentId);
+      await verifyLeadRuntime(change, true);
+      if (!isDeepStrictEqual(await store.read(), state))
+        throw new Error("Production changed during LEAD+ preparation.");
+      return change;
     },
     async prepareEnvironmentChange(options, deploymentId) {
       await assertHeldLock(lock);
@@ -340,7 +384,17 @@ export function productionHost(lock) {
       return change;
     },
     async bind(options, beforeWrite) {
-      await bindProductionImage(options, lock, beforeWrite);
+      await bindProductionImage(options, lock, async () => {
+        await beforeWrite();
+        if (options.runtimeChange) {
+          await assertHeldLock(lock);
+          const state = await store.read();
+          if (!isDeepStrictEqual(state.inProgress?.runtimeChange, options.runtimeChange))
+            throw new Error("Pending LEAD+ activation changed.");
+          await leadRuntime.apply(options.runtimeChange, options.restoreRuntime === true);
+          await assertHeldLock(lock);
+        }
+      });
     },
     async up(transaction, targetSha = transaction.targetSha, beforeStart) {
       await assertHeldLock(lock);
@@ -351,6 +405,11 @@ export function productionHost(lock) {
       ) {
         throw new Error("Production start requires the exact pending release.");
       }
+      if (transaction.runtimeChange)
+        await leadRuntime.assertCurrent(
+          transaction.runtimeChange,
+          transaction.operation === "rollback",
+        );
       // Compose inherits all lock descriptors. If this coordinator is killed,
       // a still-running Docker child continues to hold all three host locks.
       await runtimeCompose(
@@ -381,7 +440,7 @@ export function productionHost(lock) {
         publicHealthSha: checks[1].status === "fulfilled" ? checks[1].value : null,
       };
     },
-    async verify(sha, imageId, environmentCheck) {
+    async verify(sha, imageId, environmentCheck, runtimeCheck) {
       const backup = environmentCheck
         ? await environmentBackups.read(environmentCheck.change)
         : null;
@@ -407,6 +466,7 @@ export function productionHost(lock) {
               await assertRuntimeEnvironment(contents, sha, imageId, backup.kind);
               await assertHeldLock(lock);
             }
+            if (runtimeCheck) await verifyLeadRuntime(runtimeCheck.change, runtimeCheck.restore);
             return;
           }
         } catch {

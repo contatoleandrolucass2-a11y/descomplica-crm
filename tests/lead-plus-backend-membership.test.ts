@@ -85,6 +85,23 @@ it("removes revoked canonical mutation capabilities from the actual session", ()
   expect(result.user.permissions).not.toContain("reports.export");
 });
 
+it("does not disclose teammates when canonical users.view has been revoked", async () => {
+  const users = [
+    { ...membership, role: "manager", team: "A" },
+    { ...membership, id: "other", auth_user_id: "other-auth", role: "broker", team: "A" },
+  ];
+  const response = await handleLeadPlus(
+    new Request("https://crm.example.invalid/resources/users"),
+    "/resources/users",
+    { ...identity, authorizedPages: ["/app/leads/configuracoes"], canonicalPermissions: [] },
+    { store: { listResources: async () => users } },
+  );
+  expect(response.status).toBe(200);
+  expect((await response.json()).data.map((user: { id: string }) => user.id)).toEqual([
+    membership.id,
+  ]);
+});
+
 it("denies other users' private resources before a write or delete reaches the store", async () => {
   let mutations = 0;
   const store = {

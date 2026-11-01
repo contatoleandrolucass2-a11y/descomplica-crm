@@ -1,3 +1,4 @@
+import { validateRuntimeChange } from "./lead-plus-meta-runtime.mjs";
 const shaPattern = /^[0-9a-f]{40}$/u;
 const imageIdPattern = /^sha256:[0-9a-f]{64}$/u;
 const deploymentIdPattern =
@@ -105,6 +106,7 @@ export function validateDeploymentState(state, nowMs) {
         "startedAt",
         "operation",
         ...(Object.hasOwn(inProgress, "environmentChange") ? ["environmentChange"] : []),
+        ...(Object.hasOwn(inProgress, "runtimeChange") ? ["runtimeChange"] : []),
       ],
       "In-progress deployment",
     );
@@ -120,6 +122,11 @@ export function validateDeploymentState(state, nowMs) {
     assertCanonicalTime(inProgress.startedAt, nowMs, "Deployment start time");
     if (!["deploy", "rollback"].includes(inProgress.operation)) {
       fail("In-progress operation must be deploy or rollback.");
+    }
+    if (Object.hasOwn(inProgress, "runtimeChange")) {
+      if (Object.hasOwn(inProgress, "environmentChange"))
+        fail("Separate configuration releases are required.");
+      validateRuntimeChange(inProgress.runtimeChange, inProgress.deploymentId);
     }
     if (Object.hasOwn(inProgress, "environmentChange")) {
       const change = inProgress.environmentChange;

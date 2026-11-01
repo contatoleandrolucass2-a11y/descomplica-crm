@@ -1,5 +1,40 @@
 # Worklog
 
+## 2026-11-01 — Campanhas Facebook e visualização de usuários do LEAD+
+
+- A conexão direta da BM MÃE 2 usa credencial de Página dedicada no mesmo app do
+  Meta Ads, sem substituir seu token de métricas ou a integração do C2S. MFA e
+  permissões autorizadas foram concluídos. O token dedicado, segredo existente e
+  mapa dos onze formulários foram preparados em arquivos privados, sem valores
+  no Git. Callback, publicação Meta e ativação remota ainda dependem da promoção.
+- O usuário escolhe as campanhas em Integrações. A seleção ausente ou vazia pausa
+  a captura; o catálogo é consultado somente por leitura na conta já conectada
+  ao Meta Ads. A sondagem real retornou 32 campanhas sem paginação. A seleção é
+  validada contra o catálogo e salva por versão, sem alterar anúncios.
+- O worker busca metadados antes de contatos, valida Página/formulário/anúncio e
+  aceita somente campanha selecionada. Revalida a política antes de buscar dados
+  e dentro da transação de gravação; mantém deduplicação e somente destinatários
+  Admin, Superintendente e Gerente ativos, sem criar equipes.
+- Remove a faixa de breadcrumb somente nas rotas LEAD+. A visualização de outro
+  usuário preserva a sessão real, restringe hierarquia e permissões dos dois
+  contextos e mantém aviso com ator/alvo. A auditoria SQL usa contexto isolado por
+  requisição, sobrescrevendo identidades forjadas e preservando tarefas do worker.
+- O vínculo operacional usa usuários já existentes no diretório protegido do CRM,
+  exige Admin real, grants canônicos e versão; não cria Auth nem altera o perfil
+  do CRM. A consulta de schema confirmou contrato compacto sem access_status em
+  profiles; aprovação é comprovada pela RPC protegida correspondente, sem DDL.
+- O coordenador recebe --lead-plus-meta enable: registra intenção, backup e hashes
+  antes de substituir o JSON por CAS, sob as três travas compartilhadas. Recupera
+  a configuração anterior antes da imagem anterior. O mapa opcional aceita somente
+  formulários da Página autorizada e os três perfis master, sem alterar banco/Auth.
+- Testes focados cobrem escopo, troca de usuário, concorrência de auditoria,
+  diretório compacto, seleção/revogação, deduplicação e recuperação do runtime.
+  Dezessete testes novos do coordenador passaram. A revisão independente encontrou
+  e confirmou a correção do filtro de equipe sem users.view. CI do candidato final,
+  prova da imagem, promoção e recebimento real ainda não foram concluídos.
+- A política pública existente foi salva no app Meta. A revisão jurídica continua
+  pendente por instrução expressa; seu conteúdo não foi apresentado como aprovado.
+
 ## 2026-11-01 — Estabilidade das torres em cards baixos
 
 - Após publicar PR457/c5458276, o smoke real encontrou oscilação em celular:

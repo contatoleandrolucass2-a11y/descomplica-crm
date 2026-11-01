@@ -10,6 +10,8 @@ import styles from "./ProtectedShell.module.css";
 export function AuthorizedBreadcrumbs({ pages }: { pages: NavigationItem[] }) {
   const pathname = usePathname();
   if (
+    pathname === "/app/leads" ||
+    pathname.startsWith("/app/leads/") ||
     pathname === "/app" ||
     pathname === "/app/" ||
     pathname === "/app/etapas/agendamentos" ||
