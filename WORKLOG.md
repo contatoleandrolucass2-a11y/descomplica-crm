@@ -1,5 +1,22 @@
 # Worklog
 
+## 2026-11-01 — Calendário, vendas e comparativos de Agendamentos
+
+- Calendário civil vigente com seleção manual; cabeçalho e filtros compactos,
+  atualização ao lado do título, borda única/vidro e colunas dos rankings alinhadas.
+- Card de vendas inclui Valor Real de Venda da soma oficial existente. Modo de
+  linhas compara dias 1–31 do mês, anterior e média anual por cobertura; tipo salvo.
+- Torres têm apenas referência pontilhada, maior realizado como escala automática,
+  fins de semana circulados e plot diário legível no celular. Ajuste explícito de 500 px
+  limpa caps dos gráficos preservando outros ajustes e permitindo desfazer.
+- Sem DDL, nova integração ou mudança de permissões. Node 24: tipos/build,
+  65 testes de análise/comparativo, 41 de interface/Canvas/calendário e 17 de
+  colunas aprovados. QA integrada: 11 verificações e 6 capturas; CSS de produção:
+  15 telas, 11 interações e 22 cenários de confirmação única aprovados.
+- Revisão corrigiu o dia atual acessível, os eixos das linhas e o observer após
+  trocar meses com 31 dias. QA isola cenários aguardando confirmação do Desfazer;
+  fila, erro e CAS continuam testados. CI, merge, publicação e smoke real pendentes.
+
 ## 2026-11-01 — Estabilidade das torres em cards baixos
 
 - Após publicar PR457/c5458276, o smoke real encontrou oscilação em celular:

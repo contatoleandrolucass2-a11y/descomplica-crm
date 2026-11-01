@@ -169,14 +169,17 @@ export function analyzeAppointments(
     filters = {},
     brokerRoster = null,
     goalsByMonth = {},
+    calendarDate = slice.referenceDate,
   }: {
     month?: string;
     year?: string;
     filters?: AppointmentFilters;
     brokerRoster?: AppointmentBrokerRosterEntry[] | null;
     goalsByMonth?: AppointmentGoalsByMonth;
+    calendarDate?: string;
   } = {},
 ) {
+  if (!validCalendarDate(calendarDate)) throw new RangeError("Data civil do calendário inválida.");
   const daily = new Map<string, number>(),
     weekly = new Map<string, number>(),
     monthly = new Map<string, number>();
@@ -186,7 +189,7 @@ export function analyzeAppointments(
     accountRankings = new Map<string, number>();
   const stores = new Map<string, number>(),
     developments = new Map<string, number>();
-  const previousReferenceDate = previousDate(slice.referenceDate);
+  const previousCalendarDate = previousDate(calendarDate);
   const monthStart = `${month}-01`;
   const monthEnd = new Date(`${month}-01T12:00:00Z`);
   monthEnd.setUTCMonth(monthEnd.getUTCMonth() + 1, 0);
@@ -211,12 +214,13 @@ export function analyzeAppointments(
         ? ("partial" as const)
         : ("complete" as const);
 
+  const requestedCreatedDates = filters.createdDates?.length
+    ? filters.createdDates
+    : filters.createdDate
+      ? [filters.createdDate]
+      : undefined;
   const selectedDates = normalizeAppointmentCreatedDates(
-    filters.createdDates?.length
-      ? filters.createdDates
-      : filters.createdDate
-        ? [filters.createdDate]
-        : undefined,
+    requestedCreatedDates,
     slice.coverageStart,
     slice.referenceDate,
   );
@@ -413,6 +417,7 @@ export function analyzeAppointments(
     approvedFolders: 0,
     sales: 0,
   };
+  let salesValue = 0;
   if (slice.version === 4 && conversionAvailable) {
     for (const fact of sharedFacts) {
       if (!matchesReportingPeriod(fact[1])) continue;
@@ -423,7 +428,12 @@ export function analyzeAppointments(
         funnel.folders += fact[7];
         funnel.approvedFolders += fact[9];
       }
-      if (fact[0] === 4) funnel.sales += fact[7];
+      if (fact[0] === 4) {
+        funnel.sales += fact[7];
+        // The authorized v4 projection preserves the official Salesforce
+        // Opportunity.Valor_Real_de_Venda__c aggregate at fact position 8.
+        salesValue += fact[8];
+      }
     }
   }
 
@@ -446,8 +456,8 @@ export function analyzeAppointments(
     for (const appointment of filteredOperations) {
       const date = saoPauloDate(appointment.createdAt);
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
-      if (date === slice.referenceDate) today += 1;
-      if (date === previousReferenceDate) yesterday += 1;
+      if (date === calendarDate) today += 1;
+      if (date === previousCalendarDate) yesterday += 1;
       if (!matchesReportingPeriod(date)) continue;
       total += 1;
       add(daily, date);
@@ -462,8 +472,8 @@ export function analyzeAppointments(
       if (fact[0] !== 1) continue;
       const date = fact[1];
       if (date < slice.coverageStart || date > slice.referenceDate) continue;
-      if (date === slice.referenceDate) today += fact[7];
-      if (date === previousReferenceDate) yesterday += fact[7];
+      if (date === calendarDate) today += fact[7];
+      if (date === previousCalendarDate) yesterday += fact[7];
       if (!matchesReportingPeriod(date)) continue;
       total += fact[7];
       add(daily, date, fact[7]);
@@ -705,23 +715,32 @@ export function analyzeAppointments(
       continue;
     monthGoals.set(key, monthlyGoalFor(targetMonth));
   }
-  const todayGoal = matchesSelectedPeriod(slice.referenceDate)
-    ? dailyGoalFor(slice.referenceDate)
-    : null;
-  const yesterdayGoal =
-    previousReferenceDate >= slice.coverageStart && matchesSelectedPeriod(previousReferenceDate)
-      ? dailyGoalFor(previousReferenceDate)
-      : null;
+  const dayDimensionsAvailable =
+    filteredOperations !== null
+      ? slice.version === 4 || (filters.channel === undefined && !filters.company)
+      : !filters.regionalManager && !filters.accountRanking;
+  const coveredSelectedDay = (date: string) =>
+    dayDimensionsAvailable &&
+    date >= slice.coverageStart &&
+    date <= slice.referenceDate &&
+    matchesSelectedPeriod(date) &&
+    (!requestedCreatedDates?.length || requestedCreatedDates.includes(date));
+  const todayAvailable = coveredSelectedDay(calendarDate);
+  const yesterdayAvailable = coveredSelectedDay(previousCalendarDate);
+  const todayGoal = todayAvailable ? dailyGoalFor(calendarDate) : null;
+  const yesterdayGoal = yesterdayAvailable ? dailyGoalFor(previousCalendarDate) : null;
   const dailyAverageGoal =
     selectedCoveredDays === 0 || goalBrokerCount === null
       ? null
       : selectedCoveredDates.reduce((sum, date) => sum + dailyGoalFor(date)!, 0) /
         selectedCoveredDays;
 
+  const funnelAvailable = slice.version === 4 && conversionAvailable && coverage !== "unavailable";
+
   return {
     total,
-    today,
-    yesterday,
+    today: todayAvailable ? today : null,
+    yesterday: yesterdayAvailable ? yesterday : null,
     dailyAverage: selectedCoveredDays > 0 ? total / selectedCoveredDays : null,
     dailyAverageGoal,
     brokerCount: filteredBrokerCount,
@@ -730,14 +749,15 @@ export function analyzeAppointments(
     yesterdayGoal,
     monthlyGoal: monthlyGoalFor(month),
     goalBrokerCount,
-    performedToday: filteredOperations === null ? null : today,
+    performedToday: filteredOperations === null || !todayAvailable ? null : today,
     filterOptions,
     productiveBrokers: productiveOwners,
     productivePercent,
     registeredManagerCount: filteredManagerCount,
-    funnel: slice.version === 4 && conversionAvailable ? funnel : null,
-    visitsPerformed: slice.version === 4 && conversionAvailable ? funnel.visits : null,
-    sales: slice.version === 4 && conversionAvailable ? funnel.sales : null,
+    funnel: funnelAvailable ? funnel : null,
+    visitsPerformed: funnelAvailable ? funnel.visits : null,
+    sales: funnelAvailable ? funnel.sales : null,
+    salesValue: funnelAvailable ? salesValue : null,
     conversionAvailable,
     regionalFactsAvailable,
     rosterUnavailableReason,

@@ -15,6 +15,8 @@ import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import { AppointmentsColumns as Columns } from "./AppointmentsColumns";
+import { AppointmentsComparison, DailyChartTypeControl } from "./AppointmentsComparison";
+import comparisonStyles from "./AppointmentsComparison.module.css";
 import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
@@ -40,11 +42,12 @@ import {
   APPOINTMENTS_CANVAS_COMPATIBILITY,
   APPOINTMENTS_CANVAS_DEFAULT_CARDS,
   APPOINTMENTS_CANVAS_PAGE_KEY,
+  APPOINTMENTS_CHART_PRESETS,
 } from "./appointments-canvas-config";
-import { useDashboardSidebar } from "../../../_components/DashboardShell";
 
 const number = new Intl.NumberFormat("pt-BR");
 const decimal = new Intl.NumberFormat("pt-BR", { maximumFractionDigits: 1 });
+const currency = new Intl.NumberFormat("pt-BR", { style: "currency", currency: "BRL" });
 // Keep full identities as filter keys; compact only the visible label.
 function shortName(value: string) {
   if (/não informad|sem responsável|sem gerente/i.test(value)) return value;
@@ -52,7 +55,7 @@ function shortName(value: string) {
   return parts.length > 2 ? `${parts[0]} ${parts[parts.length - 1]}` : value;
 }
 const displayDate = (date: string) => date.split("-").reverse().join("/");
-const calendarDate = new Intl.DateTimeFormat("pt-BR", {
+const calendarDateFormatter = new Intl.DateTimeFormat("pt-BR", {
   dateStyle: "long",
   timeZone: "UTC",
 });
@@ -465,7 +468,7 @@ function Kpi({
 }: {
   label: string;
   value: string | null;
-  detail: string;
+  detail: ReactNode;
   goalStatus?: GoalStatus;
   statusLabel?: string | undefined;
 }) {
@@ -588,6 +591,7 @@ function CalendarFilter({
   years,
   coverageStart,
   referenceDate,
+  calendarDate = referenceDate,
   selectedDates,
   periodLabel,
   onMonthChange,
@@ -599,6 +603,7 @@ function CalendarFilter({
   years: string[];
   coverageStart: string;
   referenceDate: string;
+  calendarDate?: string | undefined;
   selectedDates: string[];
   periodLabel?: string | undefined;
   onMonthChange: (month: string) => void;
@@ -634,7 +639,7 @@ function CalendarFilter({
   const setCalendarYear = (nextYear: number) => {
     const candidate = `${nextYear}-${String(monthNumber).padStart(2, "0")}`;
     const firstMonth = coverageStart.slice(0, 7);
-    const lastMonth = referenceDate.slice(0, 7);
+    const lastMonth = calendarDate.slice(0, 7);
     onMonthChange(
       candidate < firstMonth ? firstMonth : candidate > lastMonth ? lastMonth : candidate,
     );
@@ -645,24 +650,24 @@ function CalendarFilter({
       requestAnimationFrame(() => close.current?.focus());
     }
   };
-  const referenceMonth = referenceDate.slice(0, 7);
-  const referenceYear = Number(referenceDate.slice(0, 4));
-  const referenceWeekday = new Date(`${referenceDate}T12:00:00Z`).getUTCDay();
+  const referenceMonth = calendarDate.slice(0, 7);
+  const referenceYear = Number(calendarDate.slice(0, 4));
+  const referenceWeekday = new Date(`${calendarDate}T12:00:00Z`).getUTCDay();
   const mondayOffset = referenceWeekday === 0 ? -6 : 1 - referenceWeekday;
-  const thisWeekStart = addCalendarDays(referenceDate, mondayOffset);
+  const thisWeekStart = addCalendarDays(calendarDate, mondayOffset);
   const thisWeekEnd = addCalendarDays(thisWeekStart, 6);
   const lastWeekStart = addCalendarDays(thisWeekStart, -7);
   const lastWeekEnd = addCalendarDays(thisWeekStart, -1);
   const withinCurrentMonth = (start: string, end: string) => ({
     start: start < `${referenceMonth}-01` ? `${referenceMonth}-01` : start,
-    end: end > referenceDate ? referenceDate : end,
+    end: end > calendarDate ? calendarDate : end,
   });
   const presets = [
-    { label: "Hoje", start: referenceDate, end: referenceDate },
+    { label: "Hoje", start: calendarDate, end: calendarDate },
     {
       label: "Ontem",
-      start: addCalendarDays(referenceDate, -1),
-      end: addCalendarDays(referenceDate, -1),
+      start: addCalendarDays(calendarDate, -1),
+      end: addCalendarDays(calendarDate, -1),
       currentMonthOnly: true,
     },
     {
@@ -768,7 +773,7 @@ function CalendarFilter({
                 {monthNames.map((name, index) => {
                   const value = `${year}-${String(index + 1).padStart(2, "0")}`;
                   const unavailable =
-                    value < coverageStart.slice(0, 7) || value > referenceDate.slice(0, 7);
+                    value < coverageStart.slice(0, 7) || value > calendarDate.slice(0, 7);
                   return (
                     <option key={name} value={index + 1} disabled={unavailable}>
                       {name}
@@ -812,8 +817,8 @@ function CalendarFilter({
                       key={key}
                       type="button"
                       role="gridcell"
-                      aria-label={calendarDate.format(new Date(`${key}T12:00:00Z`))}
-                      aria-current={key === referenceDate ? "date" : undefined}
+                      aria-label={calendarDateFormatter.format(new Date(`${key}T12:00:00Z`))}
+                      aria-current={key === calendarDate ? "date" : undefined}
                       aria-selected={selected.has(key)}
                       disabled={unavailable}
                       className={styles.calendarDay}
@@ -852,6 +857,7 @@ function DashboardFilters({
   years,
   coverageStart,
   referenceDate,
+  calendarDate,
   selectedDates,
   periodLabel,
   onMonthChange,
@@ -875,6 +881,7 @@ function DashboardFilters({
   years: string[];
   coverageStart: string;
   referenceDate: string;
+  calendarDate?: string | undefined;
   selectedDates: string[];
   periodLabel?: string | undefined;
   onMonthChange: (month: string) => void;
@@ -959,6 +966,7 @@ function DashboardFilters({
         years={years}
         coverageStart={coverageStart}
         referenceDate={referenceDate}
+        calendarDate={calendarDate}
         selectedDates={selectedDates}
         periodLabel={periodLabel}
         onMonthChange={onMonthChange}
@@ -995,22 +1003,29 @@ function RecencyPanel({ title, items }: { title: string; items: RecencyItem[] })
       {items.length === 0 ? (
         <Empty>Nenhum corretor nesta faixa.</Empty>
       ) : (
-        <ol className={styles.recencyList} tabIndex={0} aria-label={title}>
-          {items.map((item) => (
-            <li key={item.owner}>
-              <strong title={item.owner}>{shortName(item.owner)}</strong>
-              <span className={styles.recencyManager} title={item.manager}>
-                <span>{item.manager ? shortName(item.manager) : "Gerente não informado"}</span>
-                <small>Último: {displayDate(item.lastAppointmentDate)}</small>
-              </span>
-              <b>
-                {item.daysSinceLastAppointment === 0
-                  ? "Hoje"
-                  : `${number.format(item.daysSinceLastAppointment)} ${item.daysSinceLastAppointment === 1 ? "dia" : "dias"}`}
-              </b>
-            </li>
-          ))}
-        </ol>
+        <>
+          <div className={styles.recencyLabels} aria-hidden="true">
+            <span>Nome</span>
+            <span>Gerente</span>
+            <span>Dias</span>
+          </div>
+          <ol className={styles.recencyList} tabIndex={0} aria-label={title}>
+            {items.map((item) => (
+              <li key={item.owner}>
+                <strong title={item.owner}>{shortName(item.owner)}</strong>
+                <span className={styles.recencyManager} title={item.manager}>
+                  <span>{item.manager ? shortName(item.manager) : "Gerente não informado"}</span>
+                  <small>Último: {displayDate(item.lastAppointmentDate)}</small>
+                </span>
+                <b>
+                  {item.daysSinceLastAppointment === 0
+                    ? "Hoje"
+                    : `${number.format(item.daysSinceLastAppointment)} ${item.daysSinceLastAppointment === 1 ? "dia" : "dias"}`}
+                </b>
+              </li>
+            ))}
+          </ol>
+        </>
       )}
     </section>
   );
@@ -1170,6 +1185,7 @@ export function AppointmentsDashboard({
   analysis,
   brokerRoster = null,
   generatedAt,
+  calendarDate,
   individualGoal = null,
   goalsByMonth,
   conversionGoals = null,
@@ -1181,6 +1197,7 @@ export function AppointmentsDashboard({
   analysis: DashboardAnalysisSlice | null;
   brokerRoster?: AppointmentBrokerRosterEntry[] | null | undefined;
   generatedAt?: string | undefined;
+  calendarDate?: string | undefined;
   individualGoal?: number | null | undefined;
   goalsByMonth?: AppointmentGoalsByMonth | undefined;
   conversionGoals?: AppointmentConversionGoals | null | undefined;
@@ -1189,7 +1206,9 @@ export function AppointmentsDashboard({
   canViewDevelopmentRankings?: boolean | undefined;
   canEditDashboard?: boolean | undefined;
 }) {
-  const dashboardSidebar = useDashboardSidebar();
+  const [currentCalendarDate, setCurrentCalendarDate] = useState(
+    calendarDate ?? analysis?.referenceDate ?? "",
+  );
   const [monthChoice, setSelectedMonth] = useState("");
   const [yearChoice, setSelectedYear] = useState("");
   const [filters, setFilters] = useState<AppointmentFilters>({ channel: 1 });
@@ -1213,12 +1232,21 @@ export function AppointmentsDashboard({
   );
 
   useEffect(() => {
-    dashboardSidebar?.setUpdatedAt(generatedAtLabel);
-    return () => dashboardSidebar?.setUpdatedAt("");
-  }, [dashboardSidebar, generatedAtLabel]);
+    if (!calendarDate) return;
+    const refreshCalendar = () => setCurrentCalendarDate(saoPauloDate(new Date().toISOString()));
+    queueMicrotask(refreshCalendar);
+    const timer = window.setInterval(refreshCalendar, 60_000);
+    window.addEventListener("focus", refreshCalendar);
+    document.addEventListener("visibilitychange", refreshCalendar);
+    return () => {
+      window.clearInterval(timer);
+      window.removeEventListener("focus", refreshCalendar);
+      document.removeEventListener("visibilitychange", refreshCalendar);
+    };
+  }, [calendarDate]);
 
-  const selectedMonth = monthChoice || analysis?.referenceDate.slice(0, 7) || "";
-  const selectedYear = yearChoice || analysis?.referenceDate.slice(0, 4) || "";
+  const selectedMonth = monthChoice || currentCalendarDate.slice(0, 7);
+  const selectedYear = yearChoice || currentCalendarDate.slice(0, 4);
   const resolvedGoals = useMemo(
     () =>
       goalsByMonth ?? (analysis ? { [analysis.referenceDate.slice(0, 7)]: individualGoal } : {}),
@@ -1233,9 +1261,18 @@ export function AppointmentsDashboard({
             filters,
             brokerRoster,
             goalsByMonth: resolvedGoals,
+            calendarDate: currentCalendarDate,
           })
         : null,
-    [analysis, brokerRoster, filters, selectedMonth, selectedYear, resolvedGoals],
+    [
+      analysis,
+      brokerRoster,
+      filters,
+      selectedMonth,
+      selectedYear,
+      resolvedGoals,
+      currentCalendarDate,
+    ],
   );
   const yearId = useId();
   if (!analysis || !result)
@@ -1245,7 +1282,9 @@ export function AppointmentsDashboard({
         <Empty>Dados analíticos indisponíveis. Aguardando uma atualização validada da fonte.</Empty>
       </section>
     );
-  const years = appointmentYears(analysis);
+  const years = [...new Set([currentCalendarDate.slice(0, 4), ...appointmentYears(analysis)])]
+    .sort()
+    .reverse();
   const referenceMonth = analysis.referenceDate.slice(0, 7);
   const selectedDates = filters.createdDates ?? [];
   const monthUnavailable = result.coverage === "unavailable";
@@ -1276,7 +1315,7 @@ export function AppointmentsDashboard({
         : "o recorte misto";
   const rangeActive = Boolean(filters.periodStart || filters.periodEnd);
   const calendarActive =
-    selectedMonth !== referenceMonth || selectedDates.length > 0 || rangeActive;
+    selectedMonth !== currentCalendarDate.slice(0, 7) || selectedDates.length > 0 || rangeActive;
   const activeFilterCount =
     Object.entries(filters).filter(
       ([key, value]) =>
@@ -1460,21 +1499,27 @@ export function AppointmentsDashboard({
             goal: result.todayGoal,
           },
         ];
-  const productiveStatus = atLeastStatus(result.productivePercent, 100);
+  const productiveStatus = atLeastStatus(monthUnavailable ? null : result.productivePercent, 100);
   const contentByMetricAndType: DashboardContentByMetricAndType = {
     "appointments.goal": {
       kpi: (
         <TiltCard
           className={styles.gaugeCard}
-          goalStatus={atLeastStatus(result.total, monthlyGoal)}
+          goalStatus={atLeastStatus(monthUnavailable ? null : result.total, monthlyGoal)}
           statusLabel={
-            monthlyGoal === null
-              ? "Meta mensal indisponível"
-              : `${result.total >= monthlyGoal ? "Meta mensal atingida" : "Abaixo da meta mensal"}: ${number.format(result.total)} de ${number.format(monthlyGoal)}`
+            monthUnavailable
+              ? "Período sem cobertura disponível"
+              : monthlyGoal === null
+                ? "Meta mensal indisponível"
+                : `${result.total >= monthlyGoal ? "Meta mensal atingida" : "Abaixo da meta mensal"}: ${number.format(result.total)} de ${number.format(monthlyGoal)}`
           }
         >
           <h2>Meta do mês</h2>
-          <GoalGauge current={result.total} goal={monthlyGoal} />
+          {monthUnavailable ? (
+            <p>Dados do período indisponíveis</p>
+          ) : (
+            <GoalGauge current={result.total} goal={monthlyGoal} />
+          )}
           <span className={styles.goalFormula}>
             {monthlyGoal === null ||
             resolvedGoals[selectedMonth] == null ||
@@ -1488,28 +1533,32 @@ export function AppointmentsDashboard({
     "team.productive": {
       donut: (
         <ProductiveTeamCard
-          productive={result.productiveBrokers}
+          productive={monthUnavailable ? null : result.productiveBrokers}
           brokers={result.brokerCount}
-          percent={result.productivePercent}
-          unavailableDetail={rosterUnavailableDetail}
+          percent={monthUnavailable ? null : result.productivePercent}
+          unavailableDetail={
+            monthUnavailable ? "Período sem cobertura disponível" : rosterUnavailableDetail
+          }
         />
       ),
       kpi: (
         <Kpi
           label="Equipe produtiva"
           value={
-            result.productivePercent === null
+            monthUnavailable || result.productivePercent === null
               ? null
               : `${decimal.format(result.productivePercent)}%`
           }
           detail={
-            result.productiveBrokers === null || result.brokerCount === null
-              ? rosterUnavailableDetail
-              : `${number.format(result.productiveBrokers)} de ${number.format(result.brokerCount)} corretores com agendamento`
+            monthUnavailable
+              ? "Período sem cobertura disponível"
+              : result.productiveBrokers === null || result.brokerCount === null
+                ? rosterUnavailableDetail
+                : `${number.format(result.productiveBrokers)} de ${number.format(result.brokerCount)} corretores com agendamento`
           }
           goalStatus={productiveStatus}
           statusLabel={
-            result.productivePercent === null
+            monthUnavailable || result.productivePercent === null
               ? "Meta de equipe produtiva indisponível"
               : `${productiveStatus === "positive" ? "Meta atingida" : "Abaixo da meta"}: ${decimal.format(result.productivePercent)}% de 100%`
           }
@@ -1560,7 +1609,14 @@ export function AppointmentsDashboard({
         <Kpi
           label="Vendas no período"
           value={result.sales === null ? null : number.format(result.sales)}
-          detail="Período selecionado"
+          detail={
+            <>
+              <span>Valor Real de Venda</span>
+              <strong className={comparisonStyles.salesValue}>
+                {result.salesValue === null ? "Indisponível" : currency.format(result.salesValue)}
+              </strong>
+            </>
+          }
         />
       ),
     },
@@ -1622,11 +1678,13 @@ export function AppointmentsDashboard({
       kpi: (
         <Kpi
           label="Agendamentos ontem"
-          value={number.format(result.yesterday)}
-          detail="Pela data de criação"
+          value={result.yesterday === null ? null : number.format(result.yesterday)}
+          detail={
+            result.yesterday === null ? "Ontem indisponível neste recorte" : "Pela data de criação"
+          }
           goalStatus={atLeastStatus(result.yesterday, result.yesterdayGoal)}
           statusLabel={
-            result.yesterdayGoal === null
+            result.yesterday === null || result.yesterdayGoal === null
               ? "Comparação com a meta indisponível"
               : `${result.yesterday >= result.yesterdayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.yesterday)} para meta ${number.format(result.yesterdayGoal)}`
           }
@@ -1637,11 +1695,13 @@ export function AppointmentsDashboard({
       kpi: (
         <Kpi
           label="Agendamentos hoje"
-          value={number.format(result.today)}
-          detail="Pela data de criação"
+          value={result.today === null ? null : number.format(result.today)}
+          detail={
+            result.today === null ? "Hoje indisponível neste recorte" : "Pela data de criação"
+          }
           goalStatus={atLeastStatus(result.today, result.todayGoal)}
           statusLabel={
-            result.todayGoal === null
+            result.today === null || result.todayGoal === null
               ? "Comparação com a meta indisponível"
               : `${result.today >= result.todayGoal ? "Meta atingida" : "Abaixo da meta"}: ${number.format(result.today)} para meta ${number.format(result.todayGoal)}`
           }
@@ -1659,7 +1719,7 @@ export function AppointmentsDashboard({
     },
     "appointments.daily": {
       bars: (
-        <Chart title="Evolução de agendamentos por dia">
+        <Chart title="Evolução de agendamentos por dia" controls={<DailyChartTypeControl />}>
           {monthUnavailable ? (
             <Empty>Período sem cobertura disponível.</Empty>
           ) : (
@@ -1667,12 +1727,26 @@ export function AppointmentsDashboard({
               buckets={result.daily}
               label="Agendamentos por dia do mês selecionado"
               daily
+              reference={{ value: result.goalBrokerCount, label: "Corretores no recorte" }}
               isSelected={(bucket) =>
                 filters.createdDate === bucket.key || selectedDates.includes(bucket.key)
               }
               onSelect={(bucket) => toggleCalendarDate(bucket.key)}
             />
           )}
+        </Chart>
+      ),
+      line: (
+        <Chart title="Comparativo diário de agendamentos" controls={<DailyChartTypeControl />}>
+          <AppointmentsComparison
+            analysis={analysis}
+            options={{
+              month: selectedMonth,
+              filters,
+              brokerRoster,
+              goalsByMonth: resolvedGoals,
+            }}
+          />
         </Chart>
       ),
     },
@@ -1685,12 +1759,12 @@ export function AppointmentsDashboard({
             <Columns
               buckets={paired}
               label="Agendamentos previstos e realizados hoje"
-              isSelected={() => selectedDates.includes(analysis.referenceDate)}
+              isSelected={() => selectedDates.includes(currentCalendarDate)}
               onSelect={() => {
-                selectMonth(referenceMonth);
+                selectMonth(currentCalendarDate.slice(0, 7));
                 setFilters((current) => ({
                   ...current,
-                  createdDates: [analysis.referenceDate],
+                  createdDates: [currentCalendarDate],
                 }));
               }}
             />
@@ -1872,6 +1946,7 @@ export function AppointmentsDashboard({
             buckets={result.monthly}
             label={`Agendamentos por mês de ${selectedYear}`}
             monthly
+            reference={{ value: monthlyGoal, label: "Meta do mês selecionado" }}
             onSelect={(bucket) => selectMonth(`${selectedYear}-${bucket.key}`)}
           />
         </Chart>
@@ -1919,7 +1994,14 @@ export function AppointmentsDashboard({
   return (
     <div className={styles.dashboard}>
       <div className={styles.titleRow}>
-        <h1 className={styles.title}>Agendamentos</h1>
+        <div className={styles.titleGroup}>
+          <h1 className={styles.title}>Agendamentos</h1>
+          {generatedAtLabel ? (
+            <p className={styles.updatedAt}>
+              Atualizado em <time dateTime={generatedAt}>{generatedAtLabel}</time>
+            </p>
+          ) : null}
+        </div>
         <button
           type="button"
           className={styles.clearFilters}
@@ -1949,6 +2031,7 @@ export function AppointmentsDashboard({
         years={years}
         coverageStart={analysis.coverageStart}
         referenceDate={analysis.referenceDate}
+        calendarDate={currentCalendarDate}
         selectedDates={selectedDates}
         periodLabel={periodLabel}
         onMonthChange={selectMonth}
@@ -1983,6 +2066,7 @@ export function AppointmentsDashboard({
         hideCardOverflow
         preserveExpandedPresentation
         addButtonLabel="Adicionar card"
+        cardPresets={APPOINTMENTS_CHART_PRESETS}
       />
       <footer className={styles.pageFooter}>
         <p>Se tiver alguma dúvida, procure o seu gerente ou o Regional Leandro Lucas.</p>

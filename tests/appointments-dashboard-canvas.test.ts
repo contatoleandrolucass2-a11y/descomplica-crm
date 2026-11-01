@@ -3,12 +3,15 @@ import { describe, expect, it } from "vitest";
 import { createElement } from "react";
 import { renderToStaticMarkup } from "react-dom/server";
 import { DashboardCanvas } from "@/lib/dashboard-canvas/ui/dashboard-canvas";
+import { canvasReducer, createCanvasHistoryState } from "@/lib/dashboard-canvas/state/reducer";
+import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 
 import {
   APPOINTMENTS_CANVAS_CATALOG,
   APPOINTMENTS_CANVAS_COMPATIBILITY,
   APPOINTMENTS_CANVAS_DEFAULT_CARDS,
   APPOINTMENTS_CANVAS_PAGE_KEY,
+  fitAppointmentsCharts,
 } from "@/app/(protected)/app/etapas/_components/appointments-canvas-config";
 
 describe("appointments configurable dashboard", () => {
@@ -57,7 +60,35 @@ describe("appointments configurable dashboard", () => {
     const alternatives = Object.entries(
       APPOINTMENTS_CANVAS_COMPATIBILITY.typesByMetric ?? {},
     ).filter(([, types]) => types.length > 1);
-    expect(alternatives).toEqual([["team.productive", ["donut", "kpi"]]]);
+    expect(alternatives).toEqual([
+      ["team.productive", ["donut", "kpi"]],
+      ["appointments.daily", ["bars", "line"]],
+    ]);
+  });
+
+  it("applies the 500px automatic preset without changing user widths, order or indicators", () => {
+    const source = APPOINTMENTS_CANVAS_DEFAULT_CARDS.map((card) => ({
+      ...card,
+      layout: { ...card.layout, height: 321, width: 315 },
+      presentation: { fontScale: 0.75, barMaxHeight: 96, barScale: 0.8 },
+    }));
+    const before = structuredClone(source);
+    const fitted = fitAppointmentsCharts(source);
+    expect(source).toEqual(before);
+    fitted.forEach((card, index) => {
+      expect(card.layout.width).toBe(315);
+      expect(card.layout.order).toBe(source[index]!.layout.order);
+      if (index > 12 && index < 27) {
+        expect(card.layout.height).toBe(500);
+        expect(card.presentation).toEqual({ fontScale: 0.75 });
+      } else {
+        expect(card).toEqual(source[index]);
+      }
+    });
+    const initial = createCanvasHistoryState(source, undefined, APPOINTMENTS_CARD_LAYOUT_POLICY);
+    const applied = canvasReducer(initial, { type: "replace", cards: fitted });
+    const undone = canvasReducer(applied, { type: "undo" });
+    expect(undone.present).toEqual(initial.present);
   });
 
   it("uses the shared controller with an administrator-only appointments editor", () => {

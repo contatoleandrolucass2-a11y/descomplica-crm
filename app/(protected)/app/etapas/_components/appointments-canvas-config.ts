@@ -136,6 +136,7 @@ const seeds: readonly AppointmentsSeed[] = [
     metric: "appointments.daily",
     title: "Evolução de agendamentos por dia",
     type: "bars",
+    types: ["bars", "line"],
     columnSpan: 12,
     height: 600,
     groupBy: "day",
@@ -257,6 +258,31 @@ const seeds: readonly AppointmentsSeed[] = [
   },
 ];
 
+const chartMetrics = new Set(
+  seeds
+    .slice(seeds.findIndex((seed) => seed.id === "appointments-funnel") + 1)
+    .filter((seed) => seed.id !== "appointments-details")
+    .map((seed) => seed.metric),
+);
+
+/** An explicit, undoable preset; widths, order, indicators and funnel are preserved. */
+export function fitAppointmentsCharts(cards: readonly DashboardCard[]): DashboardCard[] {
+  return cards.map((card) => {
+    if (!chartMetrics.has(card.metric)) return card;
+    const presentation = { ...card.presentation };
+    delete presentation.barScale;
+    delete presentation.barMaxHeight;
+    return { ...card, layout: { ...card.layout, height: 500 }, presentation };
+  });
+}
+
+export const APPOINTMENTS_CHART_PRESETS = [
+  {
+    label: "Gráficos: 500 px e escala automática",
+    apply: fitAppointmentsCharts,
+  },
+];
+
 export const APPOINTMENTS_CANVAS_DEFAULT_CARDS: DashboardCard[] = seeds.map((seed, order) => ({
   id: seed.id,
   type: seed.type,
@@ -265,7 +291,11 @@ export const APPOINTMENTS_CANVAS_DEFAULT_CARDS: DashboardCard[] = seeds.map((see
   period: seed.period ?? "month",
   groupBy: seed.groupBy ?? "entity",
   entityIds: null,
-  layout: { order, columnSpan: seed.columnSpan, height: seed.height },
+  layout: {
+    order,
+    columnSpan: seed.columnSpan,
+    height: chartMetrics.has(seed.metric) ? 500 : seed.height,
+  },
 }));
 
 export const APPOINTMENTS_CANVAS_CATALOG: ConfigurableDashboardCatalog = {
@@ -278,6 +308,7 @@ export const APPOINTMENTS_CANVAS_CATALOG: ConfigurableDashboardCatalog = {
     { value: "kpi", label: "Indicador" },
     { value: "donut", label: "Rosca" },
     { value: "bars", label: "Barras" },
+    { value: "line", label: "Linhas comparativas" },
     { value: "horizontal-bars", label: "Barras horizontais" },
     { value: "funnel", label: "Funil" },
     { value: "table", label: "Tabela" },

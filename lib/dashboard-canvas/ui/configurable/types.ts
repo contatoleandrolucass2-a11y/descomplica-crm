@@ -88,4 +88,10 @@ export interface ConfigurableDashboardCanvasProps {
   hideCardOverflow?: boolean | undefined;
   addButtonLabel?: string | undefined;
   preserveExpandedPresentation?: boolean | undefined;
+  cardPresets?:
+    | readonly {
+        label: string;
+        apply: (cards: readonly DashboardCard[]) => DashboardCard[];
+      }[]
+    | undefined;
 }

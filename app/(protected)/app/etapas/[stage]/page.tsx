@@ -22,6 +22,7 @@ import { GOALS_UNAVAILABLE_LABEL, availableCommercialValue } from "@/lib/crm/sou
 import { CRM_STAGES, getCrmStage, type CrmStage } from "@/lib/crm/stages/catalog";
 import { buildStageComparisons, type StageComparison } from "@/lib/crm/stages/presentation";
 import { loadAppointmentsReadModel } from "@/lib/crm/stages/data";
+import { saoPauloDate } from "@/lib/crm/stages/appointments";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { AppointmentsDashboard } from "../_components/AppointmentsDashboard";
 
@@ -495,6 +496,7 @@ export default async function StagePage({
       <main className={styles.canvasMain}>
         <AnalyticsCanvas kind="stage">
           <AppointmentsDashboard
+            calendarDate={saoPauloDate(new Date().toISOString())}
             analysis={appointments.analysis}
             brokerRoster={appointments.brokerRoster}
             generatedAt={appointments.generatedAt}

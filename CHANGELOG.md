@@ -1,5 +1,10 @@
 # Changelog
 
+- Atualiza Agendamentos com mês civil vigente, valor real de vendas, filtros
+  compactos, cards de vidro com borda única, rankings alinhados e comparativo
+  diário em três linhas. Referência pontilhada única, fins de semana destacados
+  e ajuste explícito dos gráficos para 500 px preservam a autonomia de layout.
+
 - Publica a correção móvel de Agendamentos pelo PR #458/024ae30b, com CI
   completa aprovada. Confirma persistência entre navegadores, nova reentrada e
   rotação simulada, com160quadros estáveis. Cópia removida e prints registrados.
