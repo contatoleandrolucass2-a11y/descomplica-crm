@@ -10395,6 +10395,12 @@ de outra página. Nenhum merge/deploy executado nesta etapa.
 
 ## DESCOMPLICA LEAD: substituição integral da área Lead
 
+Em 01/11/2026, após instrução direta para continuar até a publicação, foi corrigido
+somente o relógio da fixture de navegador CAIXA: o teste combina uma expectativa de
+105 meses com a data real, que passou a produzir 104 na virada do mês. O relógio
+fica na mesma referência de 25/10/2026 já utilizada nos testes estáticos. Nenhuma
+expectativa, regra financeira, código da calculadora ou gate foi alterado.
+
 Candidato isolado a partir de 44707e359c99eabfafa2f37489062d9d87540522. As nove páginas Lead passam a montar o workspace React adaptado ao Next.js, com estilos em Shadow DOM, sessão do hospedeiro e sem seletor de demonstração. O backend exige vínculo explícito no banco operacional separado e intersecta permissões com o catálogo de páginas do CRM. O destino operacional é validado antes de abrir o pool; não há fallback para o banco de autenticação.
 
 Foram preparados a rota assinada /webhooks/meta e o worker supervisionado na mesma imagem, com configuração separada da credencial de métricas Meta Ads. A substituição não altera inscrições do C2S. Os gates do candidato e a validação visual autenticada ainda estão em andamento; esta nota não comprova publicação ou entrega real da Meta.

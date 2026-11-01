@@ -1,5 +1,9 @@
 # Changelog
 
+- Fixa a data do navegador sintético CAIXA na referência de 25/10/2026 para
+  preservar a verificação de prazo por idade após a virada do mês. Não altera
+  cálculos, expectativas ou gates de publicação.
+
 - Implementa altura máxima das torres de Agendamentos em pixels, sem faixa
   percentual e sem alterar dimensões do card. Validação local aprovada;
   nova migration autorizada após CI verde; publicação aguarda o candidato final.
