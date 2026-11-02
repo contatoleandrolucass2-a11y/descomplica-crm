@@ -118,3 +118,26 @@
   geometria, acessibilidade e contagem de erros, sem mensagens privadas.
   Preview com sidebar real passou seis telas e nove interações, axe e console
   sem erros; lint, sintaxe e formatação aprovados. Nova CI ainda pendente.
+
+## Validação de 02/11/2026 e método de zoom
+
+- Candidato `7cb6388`, CI41380295295: aplicação, imagem e restauração aprovadas.
+  As 2.383 asserções de banco passaram nas bases inicial e restaurada. Os três
+  ajustes de fixtures e inventários preservaram os guards existentes.
+- Captura41380295297 aprovou novamente E2E, teclado, seis telas e axe. Artefato
+  13112604133 trouxe diagnóstico: shell estabilizado em 676 px, mas scrollWidth
+  1654 para viewport1440. Screenshot mostrou navbar desktop ampliada por CSS:
+  esse método não atualiza media queries como o zoom do navegador.
+- O teste acrescentado nesta demanda usava um método inadequado; a correção
+  agora segue `checkZoom` vigente: contextos isolados com viewport CSS equivalente
+  e deviceScaleFactor para canvas físico de 1440×900. Sessão passa somente como
+  objeto em memória, sem arquivo de credenciais, e contextos fecham em finally.
+  Nenhum header, CSS do produto, limite de overflow ou baseline foi alterado.
+- Prova local da função exata e helpers reais, sobre TeamPage/Shell sintéticos:
+  seis telas e cinco níveis 80/100/125/150/200 aprovados, screenshots1440×900 e
+  largura CSS igual ao scroll em 1800/1440/1152/960/720. O preview confirmou
+  devicePixelRatio e media queries, incluindo modo estreito em 200%.
+  Evidência ignorada: `test-results/productive-team-exact-check/productive-team-results.json`.
+  Transporte/theme sintéticos não equivalem ao backend autenticado final.
+- Lint, sintaxe, formatação e diff aprovados. A nova CI deve executar o método
+  corrigido antes de qualquer integração ou publicação.

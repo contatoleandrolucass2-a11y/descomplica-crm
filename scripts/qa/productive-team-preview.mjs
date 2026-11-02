@@ -5,6 +5,7 @@ import { mkdir, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
+import sharp from "sharp";
 import AxeBuilder from "@axe-core/playwright";
 import { chromium, expect } from "@playwright/test";
 
@@ -233,38 +234,95 @@ try {
     "period-keyboard",
     "clear",
   );
-  await page.evaluate(() => (document.documentElement.style.zoom = "2"));
-  await expect
-    .poll(
-      async () => {
-        evidence.zoomGeometry = await page.evaluate(() => {
-          const shell = document.querySelector("[data-dashboard-shell]");
-          const surface = document.querySelector("[data-dashboard-surface]");
-          return {
-            width: innerWidth,
-            scrollWidth: document.documentElement.scrollWidth,
-            shellWidth: shell.clientWidth,
-            railWidth: Number.parseFloat(
-              getComputedStyle(shell).getPropertyValue("--dashboard-sidebar-rail"),
-            ),
-            layoutWidth: Number.parseFloat(
-              getComputedStyle(surface).getPropertyValue("--dashboard-layout-width"),
-            ),
-          };
-        });
-        const geometry = evidence.zoomGeometry;
-        return (
-          Math.abs(geometry.layoutWidth - Math.max(1, geometry.shellWidth - geometry.railWidth)) <=
-            1 && geometry.scrollWidth <= geometry.width + 1
-        );
-      },
-      {
-        timeout: 10_000,
-        message: "Shell ResizeObserver must settle at 200% without horizontal overflow",
-      },
-    )
-    .toBe(true);
-  evidence.interactions.push("zoom-200");
+  evidence.zoomMethod =
+    "CSS viewport equivalents with deviceScaleFactor on a 1440×900 physical canvas";
+  evidence.zoomChecks = [];
+  for (const level of [
+    { percent: 80, width: 1800, height: 1125, deviceScaleFactor: 0.8 },
+    { percent: 100, width: 1440, height: 900, deviceScaleFactor: 1 },
+    { percent: 125, width: 1152, height: 720, deviceScaleFactor: 1.25 },
+    { percent: 150, width: 960, height: 600, deviceScaleFactor: 1.5 },
+    { percent: 200, width: 720, height: 450, deviceScaleFactor: 2 },
+  ]) {
+    const zoomContext = await browser.newContext({
+      viewport: { width: level.width, height: level.height },
+      deviceScaleFactor: level.deviceScaleFactor,
+      locale: "pt-BR",
+      timezoneId: "America/Sao_Paulo",
+      reducedMotion: "reduce",
+      serviceWorkers: "block",
+    });
+    try {
+      await zoomContext.route("**/*", (route) => {
+        if (new URL(route.request().url()).origin === origin) return route.continue();
+        evidence.externalRequests.push(route.request().url());
+        return route.abort("blockedbyclient");
+      });
+      const zoomPage = await zoomContext.newPage();
+      zoomPage.on("pageerror", (error) => evidence.errors.push(error.message));
+      await zoomPage.goto(origin);
+      await expect(
+        zoomPage.getByRole("heading", { name: "Equipe Produtiva", exact: true }),
+      ).toBeVisible();
+      await expect(
+        zoomPage
+          .getByRole("region", { name: "Corretores produtivos por etapa" })
+          .getByRole("heading"),
+      ).toHaveCount(4);
+      let geometry;
+      await expect
+        .poll(
+          async () => {
+            geometry = await zoomPage.evaluate(() => {
+              const shell = document.querySelector("[data-dashboard-shell]");
+              const surface = document.querySelector("[data-dashboard-surface]");
+              return {
+                width: innerWidth,
+                scrollWidth: document.documentElement.scrollWidth,
+                shellWidth: shell.clientWidth,
+                railWidth: Number.parseFloat(
+                  getComputedStyle(shell).getPropertyValue("--dashboard-sidebar-rail"),
+                ),
+                layoutWidth: Number.parseFloat(
+                  getComputedStyle(surface).getPropertyValue("--dashboard-layout-width"),
+                ),
+                deviceScaleFactor: devicePixelRatio,
+                narrowMediaQuery: matchMedia("(max-width: 760px)").matches,
+              };
+            });
+            return (
+              Math.abs(
+                geometry.layoutWidth - Math.max(1, geometry.shellWidth - geometry.railWidth),
+              ) <= 1 && geometry.scrollWidth <= geometry.width + 1
+            );
+          },
+          { timeout: 10_000 },
+        )
+        .toBe(true);
+      assert.equal(geometry.width, level.width, "Equivalent zoom changes the CSS viewport");
+      assert.equal(
+        geometry.narrowMediaQuery,
+        level.width <= 760,
+        "Equivalent zoom evaluates responsive media queries",
+      );
+      assert.ok(Math.abs(geometry.deviceScaleFactor - level.deviceScaleFactor) < 0.001);
+      const screenshot = await zoomPage.screenshot({
+        path: path.join(outputRoot, `zoom-${level.percent}.png`),
+        fullPage: false,
+      });
+      const metadata = await sharp(screenshot).metadata();
+      assert.equal(metadata.width, 1440, "Physical screenshot width");
+      assert.equal(metadata.height, 900, "Physical screenshot height");
+      evidence.zoomChecks.push({
+        ...level,
+        geometry,
+        screenshot: { width: metadata.width, height: metadata.height },
+      });
+    } finally {
+      await zoomContext.close();
+    }
+  }
+  evidence.interactions.push("zoom-equivalent-80-100-125-150-200");
   await page.goto(`${origin}?missing`);
   await expect(cards()).toContainText("Relatório indisponível para esta etapa.");
   await expect(cards()).not.toContainText("0 de 2 corretores com pastas");

@@ -4,7 +4,8 @@
   filtros comerciais, período e acesso pela sidebar das páginas do funil.
   Os quatro numeradores respeitam o mesmo cadastro filtrado do denominador,
   inclusive quando o corretor mudou de gerente após uma atividade histórica.
-  A cobertura inclui acesso no banco e zoom com a sidebar real.
+  A cobertura inclui acesso no banco e os cinco níveis equivalentes de zoom
+  da matriz vigente, com a sidebar real.
 
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.

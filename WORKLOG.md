@@ -30,6 +30,11 @@
   teste de negação de Master. A captura real aprovou acesso/E2E e seis telas
   da página; falhou na medição imediata do zoom antes de ResizeObserver.
   Regressão agora inclui sidebar real e espera pela geometria observável.
+- Em `7cb6388`, banco/restauração e imagem passaram. A captura confirmou teclado,
+  seis telas e axe; diagnóstico adicional provou que o zoom por CSS mantinha as
+  media queries de desktop. O teste dedicado agora segue o método vigente da
+  matriz, com cinco viewports equivalentes e deviceScaleFactor, sem alterar UI,
+  limites ou baselines. A função exata passou localmente; nova CI necessária.
 
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 

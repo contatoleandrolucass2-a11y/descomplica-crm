@@ -606,9 +606,9 @@ async function captureComparableScreenshot(page) {
   }
 }
 
-async function capturePersistedScreenshot(page, comparableBuffer) {
+async function capturePersistedScreenshot(page, comparableBuffer, viewportOnly = false) {
   if (!remoteHomologation) {
-    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
+    const fullPage = !viewportOnly && !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return (
       comparableBuffer ??
       (await page.screenshot({
@@ -654,7 +654,7 @@ async function capturePersistedScreenshot(page, comparableBuffer) {
   });
 
   try {
-    const fullPage = !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
+    const fullPage = !viewportOnly && !archiveSimulatorRoutes.has(new URL(page.url()).pathname);
     return await page.screenshot({
       fullPage,
       animations: "disabled",
@@ -5685,7 +5685,7 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
 
 // This new page has a dedicated authenticated contract, like Repasse. Its
 // screenshots are evidence, not an invented replacement for an approved canvas.
-async function checkProductiveTeam(page, origin) {
+async function checkProductiveTeam(page, origin, httpCredentials) {
   const route = "/app/equipe-produtiva";
   const evidence = {
     route,
@@ -5693,6 +5693,8 @@ async function checkProductiveTeam(page, origin) {
     screens: [],
     keyboard: false,
     zoom: false,
+    zoomMethod: "CSS viewport equivalents with deviceScaleFactor on a 1440×900 physical canvas",
+    zoomChecks: [],
     passed: false,
     stage: "initializing",
   };
@@ -5703,8 +5705,8 @@ async function checkProductiveTeam(page, origin) {
   });
   const destinationRoot = path.join(artifactRoot, "productive-team");
   await mkdir(destinationRoot, { recursive: true });
-  const readGeometry = () =>
-    page.evaluate(() => {
+  const readGeometry = (target = page) =>
+    target.evaluate(() => {
       const shell = document.querySelector("[data-dashboard-shell]");
       const surface = document.querySelector("[data-dashboard-surface]");
       return {
@@ -5802,38 +5804,94 @@ async function checkProductiveTeam(page, origin) {
     await page.keyboard.press("Escape");
     await expect(period).toBeFocused();
     evidence.keyboard = true;
-    evidence.stage = "zoom:before";
-    evidence.zoomBefore = await readGeometry();
-    await page.evaluate(() => {
-      document.documentElement.style.zoom = "2";
-    });
-    evidence.stage = "zoom:layout";
-    // CSS zoom changes the shell's measured width. Wait for its ResizeObserver
-    // to commit that width before checking overflow; do not accept stale layout.
-    await expect
-      .poll(
-        async () => {
-          evidence.zoomAfter = await readGeometry();
-          const geometry = evidence.zoomAfter;
-          const shellSettled =
-            geometry.shellWidth !== null &&
-            geometry.layoutWidth !== null &&
-            geometry.railWidth !== null &&
-            Math.abs(
-              geometry.layoutWidth - Math.max(1, geometry.shellWidth - geometry.railWidth),
-            ) <= 1;
-          return shellSettled && geometry.scrollWidth <= geometry.width + 1;
-        },
-        {
-          timeout: 10_000,
-          message: "Equipe Produtiva zoom layout must settle without horizontal overflow",
-        },
-      )
-      .toBe(true);
-    evidence.zoom = true;
-    await page.evaluate(() => {
-      document.documentElement.style.zoom = "";
-    });
+    // Reuse the approved checkZoom method: resizing the CSS viewport also
+    // evaluates responsive media queries. CSS style.zoom does not do that.
+    const storageState = await page.context().storageState();
+    const browser = page.context().browser();
+    if (!browser) throw new Error("Equipe Produtiva requires an isolated browser.");
+    for (const level of zoomLevels) {
+      evidence.stage = `zoom:${level.percent}:context`;
+      const zoomContext = await browser.newContext({
+        viewport: { width: level.width, height: level.height },
+        deviceScaleFactor: level.deviceScaleFactor,
+        reducedMotion: "reduce",
+        locale: "pt-BR",
+        timezoneId: "America/Sao_Paulo",
+        serviceWorkers: "block",
+        httpCredentials,
+        storageState,
+      });
+      let zoomPage;
+      try {
+        await hideHomologationBannerForBaseline(zoomContext);
+        zoomPage = configureQaPage(await zoomContext.newPage());
+        zoomPage.on("pageerror", (error) => errors.push(error.message));
+        zoomPage.on("console", (message) => {
+          if (message.type() === "error") errors.push(message.text());
+        });
+        evidence.stage = `zoom:${level.percent}:content`;
+        await gotoWithServerRetry(zoomPage, `${origin}${route}`, { waitUntil: "domcontentloaded" });
+        await expect(
+          zoomPage.getByRole("heading", { name: "Equipe Produtiva", exact: true }),
+        ).toBeVisible();
+        const zoomCards = zoomPage.getByRole("region", { name: "Corretores produtivos por etapa" });
+        await expect(zoomCards.getByRole("heading")).toHaveCount(4);
+        evidence.stage = `zoom:${level.percent}:layout`;
+        await expect
+          .poll(
+            async () => {
+              evidence.zoomAfter = await readGeometry(zoomPage);
+              const geometry = evidence.zoomAfter;
+              return (
+                geometry.shellWidth !== null &&
+                geometry.layoutWidth !== null &&
+                geometry.railWidth !== null &&
+                Math.abs(
+                  geometry.layoutWidth - Math.max(1, geometry.shellWidth - geometry.railWidth),
+                ) <= 1 &&
+                geometry.scrollWidth <= geometry.width + 1
+              );
+            },
+            {
+              timeout: 10_000,
+              message: "Equipe Produtiva equivalent zoom must settle without horizontal overflow",
+            },
+          )
+          .toBe(true);
+        evidence.stage = `zoom:${level.percent}:screenshot`;
+        const buffer = await capturePersistedScreenshot(zoomPage, undefined, true);
+        const screenshot = await saveLosslessWebp(
+          buffer,
+          path.join(destinationRoot, `zoom-${level.percent}.webp`),
+        );
+        await expect(screenshot.width).toBe(1440);
+        await expect(screenshot.height).toBe(900);
+        evidence.zoomChecks.push({
+          percent: level.percent,
+          viewport: { width: level.width, height: level.height },
+          deviceScaleFactor: level.deviceScaleFactor,
+          geometry: evidence.zoomAfter,
+          screenshot,
+        });
+      } catch {
+        if (zoomPage) {
+          try {
+            evidence.failureGeometry = await readGeometry(zoomPage);
+            const buffer = await capturePersistedScreenshot(zoomPage, undefined, true);
+            evidence.failureScreenshot = await saveLosslessWebp(
+              buffer,
+              path.join(destinationRoot, "failure.webp"),
+            );
+          } catch {
+            evidence.failureCaptureUnavailable = true;
+          }
+        }
+        throw new Error("Equipe Produtiva equivalent zoom failed.");
+      } finally {
+        await zoomContext.close();
+      }
+    }
+    evidence.zoom = evidence.zoomChecks.length === zoomLevels.length;
     if (!evidence.zoom || errors.length)
       throw new Error("Equipe Produtiva zoom or browser errors failed.");
     evidence.stage = "complete";
@@ -5843,12 +5901,14 @@ async function checkProductiveTeam(page, origin) {
     evidence.failure = { stage: evidence.stage, kind: "sanitized" };
     evidence.browserErrorCount = errors.length;
     try {
-      evidence.failureGeometry = await readGeometry();
-      const buffer = await capturePersistedScreenshot(page);
-      evidence.failureScreenshot = await saveLosslessWebp(
-        buffer,
-        path.join(destinationRoot, "failure.webp"),
-      );
+      if (!evidence.failureScreenshot) {
+        evidence.failureGeometry = await readGeometry();
+        const buffer = await capturePersistedScreenshot(page);
+        evidence.failureScreenshot = await saveLosslessWebp(
+          buffer,
+          path.join(destinationRoot, "failure.webp"),
+        );
+      }
     } catch {
       evidence.failureCaptureUnavailable = true;
     }
@@ -6287,7 +6347,11 @@ async function run() {
           currentStage = "productive-team";
           const productiveTeamPage = configureQaPage(await context.newPage());
           try {
-            productiveTeamValidation = await checkProductiveTeam(productiveTeamPage, origin);
+            productiveTeamValidation = await checkProductiveTeam(
+              productiveTeamPage,
+              origin,
+              httpCredentials,
+            );
             await writeFile(
               path.join(artifactRoot, "productive-team-results.json"),
               JSON.stringify(productiveTeamValidation, null, 2),
