@@ -10681,3 +10681,8 @@ Validação local do candidato Lead+: build Next e tipos aprovados, lint sem err
   de operador no novo teste SQL, após11asserções aprovadas. Parentetizada a
   extração de layout antes de remover order; SQL de produção não mudou.
   Consulta sintética SELECT confirmou a operação corrigida no PostgreSQL17.6.
+
+- Alinhados dois roteiros manuais de QA de Agendamentos aos31blocos novos:
+  cópia32, gráficos13/16comrecência,31dias e preservação de ambas as tabelas no
+  preset500. Sintaxe, formatação e4checagens isoladas aprovadas; suites manuais
+  integrais não repetidas. Não houve alteração de baselines ou outros roteiros.

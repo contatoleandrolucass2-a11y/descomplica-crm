@@ -79,3 +79,12 @@ para (c->'layout') - 'order', sem mudança da migration autorizada. As11primeira
 asserções rodaram sem falhas antes do erro de parsing; a suite integral não
 foi declarada aprovada. SELECT sintético observacional no PostgreSQL17.6 confirmou
 apenas a expressão corrigida, sem DDL ou alteração remota. Nova CI obrigatória.
+
+Roteiros manuais appointments-preview.mjs e appointments-calendar-comparison.mjs
+receberam somente expectativas diretamente afetadas:31cards/32após cópia,
+13gráficos/16incluindo recência,31rótulos e exclusão de details+overdue do preset.
+Sintaxe/Prettier/diff-check e4checagens isoladas aprovadas. Suites manuais integrais
+não foram repetidas; o ramo legado do preview conserva seletores pré-canvas e
+não comprova a tela atual. Não foi reescrito por ser uma limitação anterior,
+sem relação com a contagem solicitada. QA atual usa os componentes reais e
+fixtures descritos acima, sem atualizar baselines para ocultar diferenças.
