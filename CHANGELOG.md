@@ -7,6 +7,10 @@
   comparecimentos vencidos sem visita, com os mesmos filtros e exportação integral.
   Expansão dos layouts existentes depende de migration autorizada após CI verde.
 
+- Registra análise de arquitetura, gráficos, skills/plugins e eficiência após o
+  handoff, separando regras persistidas, ganhos medidos, achados de código e
+  limitações. Sem alterações de runtime ou novas políticas comerciais.
+
 - Publica o pacote coordenado do handoff em aa28d38e, após CI completa e promoção
   protegida. Aplica somente as duas migrations autorizadas; mantém a leitura por
   intervalo desligada e registra evidências, recuperação e bloqueios oficiais.

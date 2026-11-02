@@ -2,6 +2,12 @@
 
 - Abertura das melhorias de leitura: [registro](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-LEITURA.md).
 
+## 2026-11-02: análise após o handoff
+
+Análise concluída, somente leitura. Integrado2556898d; site200/ok em aa28d38e
+às 16:45:08 -03. Achados, critérios, persistência e limites no
+[registro da análise](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-ANALISE-PROJETO.md).
+
 ## 2026-11-02: handoff integrado e publicado
 
 PR467/main aa28d38e publicado em 17:03:30.921Z, CI41479050792 aprovada nos quatro
