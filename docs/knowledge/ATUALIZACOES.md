@@ -2,6 +2,8 @@
 
 [Equipe Produtiva](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
 
+- Abertura das melhorias de leitura: [registro](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-LEITURA.md).
+
 ## 2026-11-02: handoff integrado e publicado
 
 PR467/main aa28d38e publicado em 17:03:30.921Z, CI41479050792 aprovada nos quatro

@@ -52,3 +52,9 @@
   background: color-mix(in srgb, var(--analytics-cyan-strong) 20%, transparent);
   color: var(--analytics-ink);
 }
+
+.dailyChart .holiday {
+  border-color: #ff667b;
+  background: #a91932;
+  color: #fff;
+}

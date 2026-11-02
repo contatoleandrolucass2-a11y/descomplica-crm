@@ -277,7 +277,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
     await page.goto(`${origin}?editable`);
     await expect(page.getByRole("heading", { name: "Agendamentos", exact: true })).toBeVisible();
     await page.getByRole("button", { name: "House", exact: true }).click();
-    await expect(page.locator("[data-dashboard-card-id]")).toHaveCount(28);
+    await expect(page.locator("[data-dashboard-card-id]")).toHaveCount(31);
 
     for (const theme of themes) {
       evidence.canvasPhase = `screen:${theme}/${viewport.width}`;
@@ -398,7 +398,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
           }),
         };
       });
-      check(layout.count === 28, `28 canvas cards ${theme}/${viewport.width}`);
+      check(layout.count === 31, `31 canvas cards ${theme}/${viewport.width}`);
       check(
         layout.documentWidth <= layout.viewportWidth + 1,
         `No document overflow ${theme}/${viewport.width}`,
@@ -506,7 +506,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await page.goto(`${origin}?editable`);
   await page.getByRole("button", { name: "House", exact: true }).click();
   const cards = page.locator("[data-dashboard-card-id]");
-  await expect(cards).toHaveCount(28);
+  await expect(cards).toHaveCount(31);
   const readOrder = () =>
     cards.evaluateAll((nodes) => nodes.map((node) => node.dataset.dashboardCardId));
   const initialOrder = await readOrder();
@@ -522,7 +522,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
         })),
       );
     const expected = await readLayout();
-    assert.equal(expected.length, 28, "Scenario boundary preserves the 28 original cards");
+    assert.equal(expected.length, 31, "Scenario boundary preserves the 31 original cards");
     await expect(page.locator("[data-dashboard-save-status]")).toContainText(
       "Salvo automaticamente",
     );
@@ -814,7 +814,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   const beforeCopyOrder = await readOrder();
   evidence.canvasPhase = "interaction:copy-create";
   await goalCard.getByRole("button", { name: "Copiar Meta do mês", exact: true }).press("Enter");
-  await expect(cards).toHaveCount(29);
+  await expect(cards).toHaveCount(32);
   await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   const copiedOrder = await readOrder();
   const copyId = copiedOrder.find((id) => !beforeCopyOrder.includes(id));
@@ -831,14 +831,14 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   const copied = page.locator(`[data-dashboard-card-id="${copyId}"]`);
   await expect(copied.getByRole("heading", { name: "Meta do mês", exact: true })).toBeVisible();
   await copied.getByRole("button", { name: "Excluir Meta do mês", exact: true }).press("Enter");
-  await expect(cards).toHaveCount(28);
+  await expect(cards).toHaveCount(31);
   await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   await goalCard.getByRole("button", { name: "Adicionar novo card", exact: true }).press("Enter");
   const newEditor = page.getByRole("dialog", { name: "Adicionar card", exact: true });
   await newEditor.getByLabel("Título", { exact: true }).fill("Card sintético QA");
   await newEditor.getByRole("button", { name: "Adicionar", exact: true }).click();
   await expect(newEditor).toHaveCount(0);
-  await expect(cards).toHaveCount(29);
+  await expect(cards).toHaveCount(32);
   const newId = (await readOrder()).find((id) => !beforeCopyOrder.includes(id));
   check(Boolean(newId) && newId !== copyId, "New card has an independent id");
   await page.reload();
@@ -849,7 +849,7 @@ async function runCanvasPreview({ page, origin, evidence, check }) {
   await created
     .getByRole("button", { name: "Excluir Card sintético QA", exact: true })
     .press("Enter");
-  await expect(cards).toHaveCount(28);
+  await expect(cards).toHaveCount(31);
   await expect(page.locator("[data-dashboard-save-status]")).toContainText("Salvo automaticamente");
   evidence.canvas.interactions.push({
     scenario: "hover-copy-and-create-refresh",
@@ -1580,7 +1580,7 @@ export async function runAppointmentsPreview() {
             ),
           `Monthly labels clipped or too small ${theme}/${width}: ${JSON.stringify(geometry.monthly.labels)}`,
         );
-        check(geometry.sections.length === 11, `Eleven charts ${theme}/${width}`);
+        check(geometry.sections.length === 13, `Thirteen charts ${theme}/${width}`);
         if (width >= 1024)
           check(
             geometry.table.viewportHeight > 0 && geometry.table.cardHeight >= 500,
@@ -1624,7 +1624,7 @@ export async function runAppointmentsPreview() {
     await page.goto(origin);
     const firstTile = page.locator('[data-appointments-chart="Previstos e realizados hoje"]');
     const secondTile = page.locator('[data-appointments-chart="Agendamentos por semana"]');
-    await expect(page.locator("section[data-appointments-chart]")).toHaveCount(14);
+    await expect(page.locator("section[data-appointments-chart]")).toHaveCount(16);
     const readDomOrder = () =>
       page
         .locator("section[data-appointments-chart]")

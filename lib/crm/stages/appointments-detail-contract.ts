@@ -8,6 +8,8 @@ export interface AppointmentDetailQuery {
   year: string;
   calendarDate: string;
   filters: AppointmentFilters;
+  /** Comparecimento explicitamente informado, anterior ao dia civil, sem visita. */
+  subset?: "overdue" | undefined;
 }
 export interface AppointmentDetailPage {
   status: "ready";
@@ -54,5 +56,6 @@ export function appointmentDetailQueryKey(query: AppointmentDetailQuery): string
     ...Object.entries(query.filters)
       .filter(([, value]) => value !== undefined)
       .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0)),
+    ...(query.subset ? [["subset", query.subset]] : []),
   ]);
 }

@@ -5,6 +5,10 @@ import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configur
 import type { AppointmentBucket } from "@/lib/crm/stages/appointments";
 import styles from "./AppointmentsDashboard.module.css";
 import overrides from "./AppointmentsColumnsOverrides.module.css";
+import {
+  appointmentHoliday,
+  appointmentHolidayDescription,
+} from "@/lib/crm/stages/appointment-holidays";
 
 const number = new Intl.NumberFormat("pt-BR");
 type Bucket = AppointmentBucket & { goal?: number | null };
@@ -284,6 +288,7 @@ export function AppointmentsColumns({
             {buckets.map((item, index) => {
               const goal = goals[index];
               const weekend = daily ? appointmentWeekendDay(item.key) : null;
+              const holiday = daily ? appointmentHoliday(item.key) : null;
               return (
                 <li key={item.key}>
                   <button
@@ -330,9 +335,17 @@ export function AppointmentsColumns({
                     </div>
                     <span className={styles.columnLabel} data-appointments-column-label>
                       <span
-                        className={`${overrides.dayMarker} ${weekend ? overrides.weekend : ""}`}
+                        className={`${overrides.dayMarker} ${weekend ? overrides.weekend : ""} ${holiday ? overrides.holiday : ""}`}
                         data-appointments-weekend={weekend ?? undefined}
-                        title={weekend ?? undefined}
+                        data-appointments-holiday={holiday?.name}
+                        title={
+                          holiday ? appointmentHolidayDescription(holiday) : (weekend ?? undefined)
+                        }
+                        aria-label={
+                          holiday
+                            ? `${item.label}: ${appointmentHolidayDescription(holiday)}`
+                            : undefined
+                        }
                       >
                         {item.label}
                       </span>

@@ -332,3 +332,26 @@ Backup/CAS de5tabelas e preservação integraldepermissions permanecem exigidos.
 Checagem de contrato: f[7]>=1 é validado pelo schema e transform canônico; projetar
 presença1 não converte volumezero/negativo emevento. Não foramadicionados testes
 redundantes para essa garantia já vigente.
+
+## Integração concorrente do PR469 — 02/11/2026
+
+Após o push371631e0, GitHub informou conflito e não criou nova CI. Fetch confirma
+main2556898d911f3c5d5a806b70c0ec0c800a820bd2 pelo PR469 (Agendamentos). Health em
+2026-11-02T19:55:43Z: HTTP200/ok, versãoaa28d38e99ec5bf835e5fbde3da3520874c002ec.
+Fontes: origin/main, PR469 e https://crm.descomplicapro.com.br/api/health.
+São estados distintos: a entrega concorrente está integrada, não demonstrada
+publicada nessa consulta. Integração preservará seus cards, regras e migration;
+este chat continua autorizado a aplicar SOMENTE as duas migrations Team. Caso
+a outra migration avance o banco antes da aplicação, o baseline privado será
+reconferido; não aplicar a migration de outro chat por inferência.
+
+A integração concorrente preservou os quatro componentes compartilhados
+(ProductiveTeamCard, DashboardFilters, CalendarFilter e TiltCard) e todos os
+campos de analyzeAppointments usados pela Team, por comparação AST antes/depois.
+O ranking novo é aditivo e não modifica os resultados anteriores; seu custo
+adicional não foi medido. CSS recebido limita-se à recência/rankings/canvas de
+Agendamentos, não montados pela Team. Evidências anteriores das 59 referências
+revisadas e da página Team permanecem pertinentes por impacto; a CI do SHA
+integrado continua obrigatória. Testes focados Team19 e inventários34 passaram.
+Inventário integrado:103migrations,48arquivos pgTAP/2436asserções. Nenhuma terceira
+migration foi executada por este chat e o plano remoto aguarda estado vivo.

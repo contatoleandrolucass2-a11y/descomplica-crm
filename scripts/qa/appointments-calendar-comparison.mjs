@@ -425,13 +425,17 @@ try {
     const after = applied.find((card) => card.id === before.id);
     assert.equal(after.layout.width, before.layout.width);
     assert.equal(after.layout.order, before.layout.order);
-    if (before.layout.order >= firstChart && before.id !== "appointments-details") {
+    if (
+      before.layout.order >= firstChart &&
+      before.metric !== "appointments.details" &&
+      before.metric !== "appointments.overdue"
+    ) {
       assert.equal(after.layout.height, 500);
       assert.equal(after.presentation.barMaxHeight, undefined);
       assert.equal(after.presentation.barScale, undefined);
     } else assert.deepEqual(after, before);
   }
-  record("500px-preset-preserves-width-order-kpis-funnel-and-removes-only-chart-caps");
+  record("500px-preset-preserves-width-order-kpis-funnel-both-tables-and-removes-only-chart-caps");
   await page.getByRole("button", { name: "Desfazer", exact: true }).click();
   await saved();
   await expect.poll(() => profiles[0].cards).toEqual(seeded);
@@ -484,7 +488,7 @@ try {
       });
       assert.deepEqual(
         axes.ticks.map(({ day }) => day),
-        [1, 5, 10, 15, 20, 25, 31],
+        Array.from({ length: 31 }, (_, index) => index + 1),
       );
       assert.ok(
         axes.ticks.every(({ delta }) => delta <= 1),
