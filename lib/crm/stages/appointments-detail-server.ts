@@ -1,7 +1,7 @@
 import "server-only";
 import { createHash } from "node:crypto";
 import { z } from "zod";
-import { analyzeAppointments } from "./appointments";
+import { analyzeAppointments, saoPauloDate } from "./appointments";
 import type { AppointmentFilters } from "./appointments";
 import type { AppointmentsReadModel } from "./data";
 import {
@@ -19,6 +19,7 @@ export const appointmentDetailQuerySchema = z
     month: z.string().regex(/^(?!0000)\d{4}-(0[1-9]|1[0-2])$/u),
     year: z.string().regex(/^(?!0000)\d{4}$/u),
     calendarDate: z.iso.date(),
+    subset: z.literal("overdue").optional(),
     filters: z
       .object({
         createdDate: z.iso.date().optional(),
@@ -82,7 +83,17 @@ export function fullAppointmentDetails(
     brokerRoster: model.brokerRoster,
     goalsByMonth: model.goalsByMonth,
   });
-  return reading.coverage === "unavailable" ? null : reading.details;
+  if (reading.coverage === "unavailable" || reading.details === null) return null;
+  // Filter the complete authorized snapshot before pagination and CSV export.
+  // Do not infer a comparecimento from Horário, creation date or missing data.
+  return query.subset === "overdue"
+    ? reading.details.filter(
+        (row) =>
+          !row.visitPerformed &&
+          row.attendedAt !== null &&
+          saoPauloDate(row.attendedAt) < query.calendarDate,
+      )
+    : reading.details;
 }
 
 class AppointmentDetailsUnavailableError extends Error {

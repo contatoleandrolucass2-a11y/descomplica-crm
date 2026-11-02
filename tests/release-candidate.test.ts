@@ -63,18 +63,18 @@ describe("release-candidate migration train", () => {
     );
   });
 
-  it("keeps a unique, ordered 100-version manifest", async () => {
+  it("keeps a unique, ordered 101-version manifest", async () => {
     const migrations = (await readdir(path.join(repositoryRoot, "supabase/migrations")))
       .filter((name) => name.endsWith(".sql"))
       .sort();
-    expect(migrations).toHaveLength(100);
-    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(100);
+    expect(migrations).toHaveLength(101);
+    expect(new Set(migrations.map((name) => name.slice(0, 14))).size).toBe(101);
     expect(migrations).toEqual([...migrations].sort());
     expect(migrations).toEqual(expect.arrayContaining(markerNames));
     expect(migrations).toContain(permissionAccessDraftMigration);
     expect(migrations).toContain(sharedRoutinesMigration);
     expect(migrations).toContain(routineCompletionsMigration);
-    expect(migrations.slice(-46)).toEqual([
+    expect(migrations.slice(-47)).toEqual([
       "20261014204014_local_user_presence.sql",
       dashboardAnalysisMigration,
       "20261015195915_unified_page_catalog.sql",
@@ -121,9 +121,10 @@ describe("release-candidate migration train", () => {
       "20261101115602_appointments_allow_card_copies.sql",
       "20261102120809_appointments_goal_range.sql",
       "20261102131119_appointments_projection_sets.sql",
+      "20261102175113_appointments_reading_cards.sql",
     ]);
     expect(migrations).toContain(qlikRankingV2Migration);
-    expect(migrations.at(-1)).toBe("20261102131119_appointments_projection_sets.sql");
+    expect(migrations.at(-1)).toBe("20261102175113_appointments_reading_cards.sql");
   });
 
   it("validates the current pgTAP inventory with the restore preflight", async () => {
@@ -155,8 +156,8 @@ describe("release-candidate migration train", () => {
       },
       { timeout: 1000 },
     );
-    expect(plan.files).toBe(46);
-    expect(plan.tests).toBe(2391);
+    expect(plan.files).toBe(47);
+    expect(plan.tests).toBe(2413);
   });
 
   it("keeps PL/pgSQL CASE layout limits parenthesized as expressions", async () => {
@@ -512,7 +513,7 @@ describe("release-candidate activation defaults", () => {
       return [...block.matchAll(/"([a-z_]+)"/g)].map((match) => match[1]);
     };
 
-    expect(restoreHarness).toContain("const expectedPgTapTests = 2391;");
+    expect(restoreHarness).toContain("const expectedPgTapTests = 2413;");
     expect(readRoleBlock(rlsHarness, "requiredRoles")).toEqual(expectedRoles);
     expect(readRoleBlock(browserHarness, "expectedRoles")).toEqual(expectedRoles);
     for (const harness of [rlsHarness, visualHarness]) {

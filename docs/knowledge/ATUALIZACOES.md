@@ -15,6 +15,13 @@
   jornadas sintéticas no Chromium, três temas, celular, desktop, overflow e
   Axe. Tipos, ESLint focado, Prettier e diff-check aprovados. CI e promoção
   do candidato ainda pendentes; nenhum dado remoto foi alterado.
+- CI `41509952787`: testes funcionais e três gates aprovados; único bloqueio
+  visual em 11 capturas CAIXA. Artefato `13174094179`, digest
+  `73c090556d2fe6e36677e8fbf70f6e4847164e2b112401edee1125a43832d249`;
+  referências revisadas com demais imagens e limiares preservados. Teste do
+  manifesto: 15 aprovados e 1 condicional. Candidato reconciliado exige nova CI.
+
+- Abertura das melhorias de leitura: [registro](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-LEITURA.md).
 
 ## 2026-11-02: handoff integrado e publicado
 

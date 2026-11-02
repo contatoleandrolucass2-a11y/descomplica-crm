@@ -29,13 +29,13 @@ describe("appointments configurable dashboard", () => {
     expect(compact).toContain('aria-label="Redimensionar Visitas realizadas"');
     expect(renderToStaticMarkup(createElement(DashboardCanvas, props))).toContain("<strong");
   });
-  it("registers the 28 requested blocks with stable unique metrics and layout order", () => {
+  it("registers the 31 requested blocks with stable unique metrics and layout order", () => {
     expect(APPOINTMENTS_CANVAS_PAGE_KEY).toBe("crm.stage.appointments");
-    expect(APPOINTMENTS_CANVAS_DEFAULT_CARDS).toHaveLength(28);
-    expect(new Set(APPOINTMENTS_CANVAS_DEFAULT_CARDS.map(({ id }) => id)).size).toBe(28);
-    expect(new Set(APPOINTMENTS_CANVAS_DEFAULT_CARDS.map(({ metric }) => metric)).size).toBe(28);
+    expect(APPOINTMENTS_CANVAS_DEFAULT_CARDS).toHaveLength(31);
+    expect(new Set(APPOINTMENTS_CANVAS_DEFAULT_CARDS.map(({ id }) => id)).size).toBe(31);
+    expect(new Set(APPOINTMENTS_CANVAS_DEFAULT_CARDS.map(({ metric }) => metric)).size).toBe(31);
     expect(APPOINTMENTS_CANVAS_DEFAULT_CARDS.map(({ layout }) => layout.order)).toEqual(
-      Array.from({ length: 28 }, (_, index) => index),
+      Array.from({ length: 31 }, (_, index) => index),
     );
   });
 
@@ -43,7 +43,7 @@ describe("appointments configurable dashboard", () => {
     const cardsByMetric = new Map(
       APPOINTMENTS_CANVAS_DEFAULT_CARDS.map((card) => [card.metric, card]),
     );
-    expect(APPOINTMENTS_CANVAS_CATALOG.metrics).toHaveLength(28);
+    expect(APPOINTMENTS_CANVAS_CATALOG.metrics).toHaveLength(31);
     for (const metric of APPOINTMENTS_CANVAS_CATALOG.metrics) {
       const card = cardsByMetric.get(metric.key);
       expect(card, metric.key).toBeDefined();
@@ -78,7 +78,7 @@ describe("appointments configurable dashboard", () => {
     fitted.forEach((card, index) => {
       expect(card.layout.width).toBe(315);
       expect(card.layout.order).toBe(source[index]!.layout.order);
-      if (index > 12 && index < 27) {
+      if (index > 12 && !["appointments.details", "appointments.overdue"].includes(card.metric)) {
         expect(card.layout.height).toBe(500);
         expect(card.presentation).toEqual({ fontScale: 0.75 });
       } else {
@@ -118,7 +118,7 @@ describe("appointments configurable dashboard", () => {
     expect(source).not.toContain("localStorage");
   });
 
-  it("removes internal card scrollbars and keeps the resize control on the corner", () => {
+  it("shows internal overflow scrollbars and keeps the resize control on the corner", () => {
     const appointmentsStyles = readFileSync(
       new URL(
         "../app/(protected)/app/etapas/_components/AppointmentsDashboard.module.css",
@@ -133,7 +133,8 @@ describe("appointments configurable dashboard", () => {
     expect(appointmentsStyles).toContain(
       ".configurableCanvas :is(.canvasChart .cardBody, .recencyPanel .recencyList, .tableViewport)",
     );
-    expect(appointmentsStyles).toContain("scrollbar-width: none");
+    expect(appointmentsStyles).toContain("scrollbar-width: thin");
+    expect(appointmentsStyles).not.toContain("scrollbar-width: none");
     expect(canvasStyles).toContain('.shell[data-corner-resize="true"] .resizeHandle');
     expect(canvasStyles).toContain("right: -1px");
     expect(canvasStyles).toContain("bottom: -1px");
