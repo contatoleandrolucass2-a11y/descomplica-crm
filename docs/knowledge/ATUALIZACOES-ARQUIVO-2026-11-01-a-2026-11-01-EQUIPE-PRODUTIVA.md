@@ -381,3 +381,11 @@ Essa aplicação concorrente foi apenas observada. Plano offline foi atualizado
 para exigir backup integral novo de85linhas;17testes sintéticos passaram.
 GitHub main avançou paraa93d65b2 (CAIXA); preservar sua entrega e referências,
 sem modificar regras ou validar publicações com CI de outro SHA.
+
+CI41526633412 interrompeu validate no contrato da referência tablet:
+baseline_updated_after_review não integra o enum vigente. Corrigido somente
+o rótulo para baseline_updated, preservando imagem e todos os limiares.
+As outras4.902asserções Vitest passaram;113skips já previstos. Nova execução
+do candidato continua obrigatória. Sync Obsidian ficou pendente porque o
+índice compartilhado recebido de main tem256.512bytes, além do limite256.000;
+sem ampliar o escopo para reorganizar notas de outra demanda.

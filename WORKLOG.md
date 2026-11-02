@@ -128,6 +128,9 @@
   Revisão independente confirmou geometria intacta e diferenças restritas ao
   conteúdo autorizado. Uma referência promovida; 241 preservadas nesta etapa.
   Proveniência exata e limite registrados no README de QA. Nova CI obrigatória.
+- A CI41526633412 encontrou rótulo de metadado inválido na nova referência.
+  Corrigido para o valor contratual baseline_updated, sem alterar imagem,
+  limiar ou asserção. A validação focada do catálogo visual passou.
 
 - Captura protegida 41385963470 aprovada: 242 cenários de tela/axe, navegação
   compartilhada e contrato dedicado da página com seis telas e cinco zooms.

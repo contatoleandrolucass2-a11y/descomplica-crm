@@ -51401,7 +51401,7 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_updated_after_review",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 1516032,
         "changedPixelRatio": 0,

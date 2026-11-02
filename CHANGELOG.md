@@ -4035,3 +4035,4 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 
 - Alinha quatro referências móveis de Usuários à permissão Equipe Produtiva,
   após confirmar a correção CSS e o escopo dos pixels alterados.
+- Mantém o registro da referência tablet no contrato existente de QA.
