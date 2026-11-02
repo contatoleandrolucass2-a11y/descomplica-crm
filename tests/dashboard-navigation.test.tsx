@@ -63,6 +63,7 @@ describe("Dashboard sidebar navigation", () => {
       "Pastas",
       "Vendas",
       "Repasse",
+      "Equipe Produtiva",
       "Ir para a seção anterior",
       "Ir para a próxima seção",
     ]);
@@ -90,10 +91,20 @@ describe("Dashboard sidebar navigation", () => {
   it.each([
     "/app",
     "/app/etapas/oportunidades",
+    "/app/etapas/agendamentos",
     "/app/etapas/visitas",
     "/app/etapas/pastas",
     "/app/etapas/vendas",
     "/app/repasse",
+    "/app/equipe-produtiva",
+  ])("includes the productive team destination across Dashboard pages: %s", (pathname) => {
+    route.pathname = pathname;
+    const markup = renderToStaticMarkup(<DashboardShell pages={pages}>Conteúdo</DashboardShell>);
+    expect(markup).toContain('href="/app/equipe-produtiva"');
+    expect(markup.match(/aria-current="page"/g)).toHaveLength(1);
+  });
+
+  it.each([
     "/app/meta-ads",
     "/app/etapas/agendamentos/detalhe",
     "/app/etapas/agendamentos-extra",
@@ -103,7 +114,7 @@ describe("Dashboard sidebar navigation", () => {
     "/app/repasse-extra",
     "/admin",
     "/app/etapas/visitas-extra",
-  ])("returns children without a wrapper outside the exact appointments route: %s", (pathname) => {
+  ])("returns children without a wrapper outside Dashboard destinations: %s", (pathname) => {
     route.pathname = pathname;
     expect(renderToStaticMarkup(<DashboardShell pages={pages}>Conteúdo</DashboardShell>)).toBe(
       "Conteúdo",

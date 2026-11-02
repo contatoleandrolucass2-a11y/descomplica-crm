@@ -482,16 +482,20 @@ function Kpi({
   );
 }
 
-function ProductiveTeamCard({
+export function ProductiveTeamCard({
   productive,
   brokers,
   percent,
   unavailableDetail,
+  title = "Equipe Produtiva",
+  activity = "agendamento",
 }: {
   productive: number | null;
   brokers: number | null;
   percent: number | null;
   unavailableDetail: string;
+  title?: string;
+  activity?: string;
 }) {
   const progress = Math.min(Math.max(percent ?? 0, 0), 100);
   const goalStatus = atLeastStatus(percent, 100);
@@ -505,7 +509,7 @@ function ProductiveTeamCard({
           : `${goalStatus === "positive" ? "Meta atingida" : "Abaixo da meta"}: ${decimal.format(percent)}% de 100%`
       }
     >
-      <h2>Equipe Produtiva</h2>
+      <h2>{title}</h2>
       <div
         className={styles.donut}
         style={{ "--donut-progress": `${progress * 3.6}deg` } as CSSProperties}
@@ -523,7 +527,7 @@ function ProductiveTeamCard({
       <p>
         {productive === null || brokers === null
           ? unavailableDetail
-          : `${number.format(productive)} de ${number.format(brokers)} corretores com agendamento`}
+          : `${number.format(productive)} de ${number.format(brokers)} corretores com ${activity}`}
       </p>
     </TiltCard>
   );
@@ -850,7 +854,7 @@ function CalendarFilter({
   );
 }
 
-function DashboardFilters({
+export function DashboardFilters({
   filters,
   options,
   onChange,
@@ -865,6 +869,7 @@ function DashboardFilters({
   onToggleDate,
   onSelectWholeMonth,
   onSelectRange,
+  label = "Filtros do painel de agendamentos",
 }: {
   filters: AppointmentFilters;
   options: {
@@ -889,6 +894,7 @@ function DashboardFilters({
   onToggleDate: (date: string) => void;
   onSelectWholeMonth: () => void;
   onSelectRange: (start: string, end: string, label: string) => void;
+  label?: string;
 }) {
   const selects = [
     {
@@ -921,7 +927,7 @@ function DashboardFilters({
     { key: 0 as const, label: "Imob" },
   ];
   return (
-    <section className={styles.filters} aria-label="Filtros do painel de agendamentos">
+    <section className={styles.filters} aria-label={label}>
       <fieldset className={styles.channelField}>
         <legend>Canal de vendas</legend>
         <div className={styles.channelSwitch}>

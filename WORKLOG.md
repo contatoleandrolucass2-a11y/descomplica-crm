@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-11-01 — Equipe Produtiva
+
+- Nova página `/app/equipe-produtiva`, com permissão própria e item autorizado na
+  sidebar de Visão Geral, Oportunidades, Agendamentos, Visitas, Pastas, Vendas e
+  Repasse. Reutiliza os filtros e cards de Agendamentos, mantendo seus defaults.
+- Quatro percentuais de corretores únicos com agendamentos, visitas, pastas e
+  vendas sobre o cadastro vigente filtrado. Período recorta atividade; cadastro
+  não é inferido da atividade. Empresa/Imob preservam indisponibilidade quando
+  a autoridade atual não fornece denominador conciliável.
+- RPC mínima independente, com sessão, permissão, catálogo e visão autorizados;
+  presença por corretor sem valores financeiros ou contas. Duas migrations
+  locais preparam catálogo e leitura; nenhuma ativação remota executada.
+- Evidências e limites em
+  `docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md`.
+
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
 - Duas declarações CSS reservam a mesma margem direita ao plot e ao eixo.

@@ -115,8 +115,9 @@ test(
         "Pastas",
         "Vendas",
         "Repasse",
+        "Equipe Produtiva",
       ];
-      await expect(navigation.getByRole("link")).toHaveCount(7);
+      await expect(navigation.getByRole("link")).toHaveCount(8);
       await expect(navigation.getByRole("link")).toHaveText(labels);
       await expect(page.locator('#authorized-navigation a[href="/app"]')).toHaveText(/Dashboard/);
       await expect(
@@ -275,7 +276,10 @@ test(
         "false",
       );
       await navigation.getByRole("link", { name: "Visitas", exact: true }).click();
-      await expect(page.locator("[data-dashboard-shell]")).toHaveCount(0);
+      await expect(page.locator("[data-dashboard-shell]")).toHaveCount(1);
+      await expect(
+        navigation.getByRole("link", { name: "Equipe Produtiva", exact: true }),
+      ).toBeVisible();
       await page.mouse.move(1400, 450);
       await page.goBack();
       await expect(page.locator("[data-dashboard-shell]")).toHaveAttribute(
@@ -283,16 +287,7 @@ test(
         "true",
       );
       await expect(page.locator("[data-dashboard-updated-at]")).toBeVisible();
-      for (const pathname of [
-        "/app",
-        "/app/etapas/oportunidades",
-        "/app/etapas/visitas",
-        "/app/etapas/pastas",
-        "/app/etapas/vendas",
-        "/app/repasse",
-        "/app/meta-ads",
-        "/app/etapas/agendamentos/detalhe",
-      ]) {
+      for (const pathname of ["/app/meta-ads", "/app/etapas/agendamentos/detalhe"]) {
         await page.evaluate((pathname) => {
           history.pushState(null, "", pathname);
           window.dispatchEvent(new PopStateEvent("popstate"));
@@ -327,7 +322,10 @@ test(
         );
         await touchNavigation.getByRole("link", { name: "Visitas", exact: true }).tap();
         await expect(touchPage).toHaveURL("http://dashboard.local.invalid/app/etapas/visitas");
-        await expect(touchPage.locator("[data-dashboard-shell]")).toHaveCount(0);
+        await expect(touchPage.locator("[data-dashboard-shell]")).toHaveCount(1);
+        await expect(
+          touchNavigation.getByRole("link", { name: "Equipe Produtiva", exact: true }),
+        ).toHaveCount(1);
       } finally {
         await touchContext.close();
       }
