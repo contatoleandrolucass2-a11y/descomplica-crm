@@ -71,3 +71,11 @@ aprovados/112condicionais e2falhas específicas de inventário. Acrescentada só
 20261102175113 à lista não aplicável de homologação; baseline histórica,
 candidatos/hash/execução Auth/MFA mantidos. É dependência mecânica da migration
 criada aqui, não correção de outra página. Não houve aplicação de Auth/MFA.
+
+Restore do run41497872036 parou em appointments_reading_cards.test.sql:66:
+operator is not unique: unknown - unknown. A expressão c->'layout' - 'order'
+precisava de parênteses para aplicar subtração ao JSONB extraído. Corrigido
+para (c->'layout') - 'order', sem mudança da migration autorizada. As11primeiras
+asserções rodaram sem falhas antes do erro de parsing; a suite integral não
+foi declarada aprovada. SELECT sintético observacional no PostgreSQL17.6 confirmou
+apenas a expressão corrigida, sem DDL ou alteração remota. Nova CI obrigatória.

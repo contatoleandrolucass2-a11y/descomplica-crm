@@ -10676,3 +10676,8 @@ Validação local do candidato Lead+: build Next e tipos aprovados, lint sem err
   somente20261102175113 a nonDeployableRepositoryVersions: Auth/MFA conserva
   candidatos, hashes, baseline e bloqueio de aplicação. Dependência direta da
   migration deste pedido; nenhuma baseline visual ou regra de outra página mudou.
+
+- CI41497872036: validação da aplicação aprovada; restore detectou ambiguidade
+  de operador no novo teste SQL, após11asserções aprovadas. Parentetizada a
+  extração de layout antes de remover order; SQL de produção não mudou.
+  Consulta sintética SELECT confirmou a operação corrigida no PostgreSQL17.6.

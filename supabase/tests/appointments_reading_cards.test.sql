@@ -59,7 +59,7 @@ select is((select jsonb_agg(c #- '{layout,order}' order by ordinality)
   'all original IDs, dimensions, content and presentation preserved');
 select is((select private.expand_appointments_reading_cards(expanded) from reading_documents),
   (select expanded from reading_documents), 'expansion idempotent');
-select is((select jsonb_agg(c->'layout' - 'order' order by ordinality)
+select is((select jsonb_agg((c->'layout') - 'order' order by ordinality)
   from reading_documents, jsonb_array_elements(expanded) with ordinality t(c, ordinality)
   where c->>'id' not like 'original-%'),
   '[{"columnSpan":6,"height":500},{"columnSpan":6,"height":500},{"columnSpan":12,"height":500}]'::jsonb,
