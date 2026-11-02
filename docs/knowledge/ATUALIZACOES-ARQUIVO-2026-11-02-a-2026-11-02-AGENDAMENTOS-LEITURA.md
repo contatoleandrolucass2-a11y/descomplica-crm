@@ -64,3 +64,10 @@ foi substituída pelo candidato atualizado; resultados do SHA anterior não ser�
 usados para aprovar publicação do novo. A geometria atual de29cards foi guardada
 localmente sem conteúdo de clientes para comparação posterior; a cópia já presente
 não pertence a este teste e não será excluída.
+
+CI41497055089/SHA724804d7 falhou no inventário de homologação, pois a migration
+nova ainda não constava da lista nonDeployableRepositoryVersions.4863testes
+aprovados/112condicionais e2falhas específicas de inventário. Acrescentada só
+20261102175113 à lista não aplicável de homologação; baseline histórica,
+candidatos/hash/execução Auth/MFA mantidos. É dependência mecânica da migration
+criada aqui, não correção de outra página. Não houve aplicação de Auth/MFA.

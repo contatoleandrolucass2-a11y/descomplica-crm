@@ -10670,3 +10670,9 @@ Validação local do candidato Lead+: build Next e tipos aprovados, lint sem err
   do projeto confirmado:2perfis, máximo29cards, nenhum acima47. Sem aplicação ainda.
 
 - Registro de leitura nomeado conforme o padrão de arquivos do runtime Obsidian, para sincronizar conteúdo e referência juntos.
+
+- CI41497055089:4863testes aprovados/112 condicionais;2 falharam porque o
+  inventário de homologação ainda não reconhecia a migration nova. Acrescentada
+  somente20261102175113 a nonDeployableRepositoryVersions: Auth/MFA conserva
+  candidatos, hashes, baseline e bloqueio de aplicação. Dependência direta da
+  migration deste pedido; nenhuma baseline visual ou regra de outra página mudou.
