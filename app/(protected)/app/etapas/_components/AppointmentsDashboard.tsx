@@ -2241,37 +2241,43 @@ export function AppointmentsDashboard({
       ),
     },
     "appointments.overdue": {
-      table: (
-        <AppointmentTable
-          title="Agendamentos vencidos sem visita realizada"
-          rows={
-            compactSummary
-              ? []
-              : (result.details ?? []).filter(
-                  (row) =>
-                    !row.visitPerformed &&
-                    row.attendedAt !== null &&
-                    saoPauloDate(row.attendedAt) < currentCalendarDate,
-                )
-          }
-          detailSource={detailSource}
-          detailQuery={detailQuery ? { ...detailQuery, subset: "overdue" } : undefined}
-          detailController={detailController}
-          timezone={timezone}
-          selectedKey={selectedRow}
-          onSelect={(rowFilters, key) => {
-            if (selectedRow === key) {
-              setSelectedRow("");
-              setFilters(rowBaseFilters ?? { channel: 1 });
-              setRowBaseFilters(null);
-            } else {
-              setRowBaseFilters(rowBaseFilters ?? filters);
-              setSelectedRow(key);
-              setFilters({ ...(rowBaseFilters ?? filters), ...rowFilters });
+      table:
+        result.details === null && !detailSource ? (
+          <section className={`${styles.card} ${styles.tableCard}`}>
+            <h2>Agendamentos vencidos sem visita realizada</h2>
+            <Empty>Detalhamento indisponível nesta atualização.</Empty>
+          </section>
+        ) : (
+          <AppointmentTable
+            title="Agendamentos vencidos sem visita realizada"
+            rows={
+              compactSummary
+                ? []
+                : (result.details ?? []).filter(
+                    (row) =>
+                      !row.visitPerformed &&
+                      row.attendedAt !== null &&
+                      saoPauloDate(row.attendedAt) < currentCalendarDate,
+                  )
             }
-          }}
-        />
-      ),
+            detailSource={detailSource}
+            detailQuery={detailQuery ? { ...detailQuery, subset: "overdue" } : undefined}
+            detailController={detailController}
+            timezone={timezone}
+            selectedKey={selectedRow}
+            onSelect={(rowFilters, key) => {
+              if (selectedRow === key) {
+                setSelectedRow("");
+                setFilters(rowBaseFilters ?? { channel: 1 });
+                setRowBaseFilters(null);
+              } else {
+                setRowBaseFilters(rowBaseFilters ?? filters);
+                setSelectedRow(key);
+                setFilters({ ...(rowBaseFilters ?? filters), ...rowFilters });
+              }
+            }}
+          />
+        ),
     },
     "appointments.details": {
       table:

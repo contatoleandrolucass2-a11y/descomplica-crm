@@ -32,6 +32,7 @@ describe("rankings de PDV e empreendimento", () => {
     expect(read({ createdDate: "2026-10-20", channel: 1 }).developmentRankings?.total).toBe(0);
     expect(read({ manager: "Gerente B" }).developmentRankings?.total).toBe(9);
     expect(read({ accountRanking: "Ouro" }).developmentRankings).toBeNull();
+    expect(analyzeAppointments(analysis, { month: "2027-01" }).developmentRankings).toBeNull();
   });
 
   it("inclui os três novos conteúdos e não duplica dados operacionais no resumo", () => {

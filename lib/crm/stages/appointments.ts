@@ -799,7 +799,11 @@ export function analyzeAppointments(
     developmentRankings: (() => {
       // Operational rows deliberately omit these dimensions. Use the authorized
       // aggregate facts, never an inferred join between client identities.
-      if (filters.accountRanking || (filters.regionalManager && !regionalFactsAvailable))
+      if (
+        coverage === "unavailable" ||
+        filters.accountRanking ||
+        (filters.regionalManager && !regionalFactsAvailable)
+      )
         return null;
       const pdvs = new Map<string, number>();
       const projects = new Map<string, number>();
