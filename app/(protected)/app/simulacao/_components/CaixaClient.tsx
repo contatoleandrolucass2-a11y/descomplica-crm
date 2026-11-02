@@ -9,11 +9,14 @@ import {
   ClipboardCheck,
   FileText,
   LayoutGrid,
+  PanelLeftClose,
+  PanelLeftOpen,
   RotateCcw,
   Table2,
   Wrench,
 } from "lucide-react";
 import { useId, useMemo, useRef, useState, type ReactNode } from "react";
+import { CaixaInstallments } from "./CaixaInstallments";
 import {
   calculateExtraAmortization,
   calculateFgtsTime,
@@ -465,6 +468,7 @@ export function CaixaClient({
   initialTab?: Tab;
 }) {
   const [tab, setTab] = useState<Tab>(initialTab);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(true);
   const [form, setForm] = useState(initialForm);
   const [participants, setParticipants] = useState(1);
   const [saved, setSaved] = useState<
@@ -669,17 +673,36 @@ export function CaixaClient({
   }
 
   return (
-    <section className="caixa-workspace" aria-label="Simulador CAIXA">
+    <section
+      className="caixa-workspace"
+      data-sidebar-collapsed={sidebarCollapsed}
+      aria-label="Simulador CAIXA"
+    >
       <aside className="caixa-tool-sidebar">
-        <div className="caixa-tool-sidebar-heading">
-          <span>Central de simulação</span>
-          <strong>Ferramentas comerciais</strong>
-        </div>
-        <nav aria-label="Simuladores disponíveis">
+        <button
+          type="button"
+          className="caixa-sidebar-toggle"
+          aria-controls="caixa-tools-navigation"
+          aria-expanded={!sidebarCollapsed}
+          aria-label={
+            sidebarCollapsed ? "Expandir menu de simulação" : "Recolher menu de simulação"
+          }
+          onClick={() => setSidebarCollapsed((previous) => !previous)}
+        >
+          {sidebarCollapsed ? (
+            <PanelLeftOpen aria-hidden="true" />
+          ) : (
+            <PanelLeftClose aria-hidden="true" />
+          )}
+          <span>Ocultar menu</span>
+        </button>
+        <nav id="caixa-tools-navigation" aria-label="Simuladores disponíveis">
           {simulatorNavigation.map(({ href, label, description, icon: Icon, ...item }) => (
             <a
               key={href}
               href={href}
+              aria-label={label}
+              title={label}
               className={item.current ? "active" : ""}
               aria-current={item.current ? "page" : undefined}
             >
@@ -695,7 +718,7 @@ export function CaixaClient({
           ))}
         </nav>
       </aside>
-      <div className="caixa-workspace-content">
+      <div className="caixa-workspace-content" onPointerDown={() => setSidebarCollapsed(true)}>
         <header className="caixa-content-toolbar">
           <h1 className="caixa-sr-only">Simulador CAIXA</h1>
           {tab === "simulador" ? (
@@ -1165,6 +1188,7 @@ export function CaixaClient({
                   <div className="caixa-result-content caixa-result-summary">
                     <div className="caixa-result-summary-heading">
                       <h2>Resumo financeiro</h2>
+                      <CaixaInstallments result={result} />
                       <button
                         type="button"
                         className="caixa-result-print"

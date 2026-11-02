@@ -1,5 +1,15 @@
 # Worklog
 
+## 2026-11-02 — CAIXA: menu retrátil e parcelas
+
+- Sidebar local recolhível, expansão da área útil e menu sobreposto no celular,
+  com superfícies iguais às de Agendamentos nos três temas.
+- Botão Exibir parcelas abre diálogo nativo acessível com meses, prestação,
+  juros, amortização e saldo. Projeção usa taxa/seguros constantes e não inclui
+  atualização futura pela TR. Motor e regras financeiras preservados.
+- Validação focada: reconciliação SAC/Price, menu, Escape, foco, responsividade
+  e jornadas existentes. Publicação condicionada aos gates do candidato.
+
 ## 2026-11-02 — Publicação coordenada do handoff
 
 - PR467 integrado em aa28d38e; quatro jobs do main/41479050792 aprovados.

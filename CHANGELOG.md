@@ -1,5 +1,8 @@
 # Changelog
 
+- Adiciona sidebar retrátil responsiva e consulta mensal de parcelas em pop-up
+  exclusivamente ao Simulador CAIXA, com cores baseadas em Agendamentos.
+
 - Publica o pacote coordenado do handoff em aa28d38e, após CI completa e promoção
   protegida. Aplica somente as duas migrations autorizadas; mantém a leitura por
   intervalo desligada e registra evidências, recuperação e bloqueios oficiais.
