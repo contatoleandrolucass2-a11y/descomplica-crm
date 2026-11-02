@@ -1,5 +1,23 @@
 # Baseline e QA visual — fundação de paridade
 
+## Permissão de Equipe Produtiva em Usuários tablet — 02/11/2026
+
+A CI `41516437878`, head `25e58c96` e captura `7fcd96ce`, passou todos os
+contratos funcionais, axe, zoom e Team. Somente Usuários 768×1024 excedeu pixels:
+15.601 (1,0291%). Revisão independente confirmou contagens 75→76/49→50 e o novo
+item; comparado ao candidato anterior, os únicos 3.649 pixels diferentes estão
+em avatar/email sintéticos. Geometria e todos os demais pixels são idênticos.
+Promovida somente essa imagem, preservando os outros 241 registros e imagens.
+
+Artefato `13179407589`, ZIP SHA256
+`1a6e331e4406f2f0c56ff0e205971238da5bdae4064552c94f94b43e5bc6987b` conferido.
+O fingerprint `08e116e4d19d4175868e26c47a0ebcd81c97369833370ce3a27deb9cbcd28eea`
+foi reproduzido com diff vazio e os 19 outputs sintéticos do próprio artefato.
+Árvore da captura igual ao head: `1225d6e966e7a6e5c10a0f813a1a9423eac0506b`.
+Dirty e resultado geral falho permanecem registrados em `reviewedUpdates`.
+Esta exceção vale somente para essa captura; limiares continuam 1%/16.
+Nova CI do candidato integrado é obrigatória antes de merge e publicação.
+
 ## Permissão de Equipe Produtiva em Usuários móvel — 02/11/2026
 
 A CI `41503395675`, head `791b2a82` e merge de teste

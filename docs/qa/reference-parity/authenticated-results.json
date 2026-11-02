@@ -51383,28 +51383,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated_after_review",
         "changedPixels": 0,
         "totalPixels": 1516032,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp",
           "tracked": true,
-          "bytes": 94312,
-          "sha256": "008a03383814e0075d52559b4e85211648d7b9006b4828f483f95c721bf64c25"
+          "bytes": 94380,
+          "sha256": "a84975944e80a7ea4842402d4d73d9dfa908b2d1189f9e3200e90895c39e74f6"
         }
       },
       "path": "target-authenticated/admin-usuarios-768x1024.webp",
-      "bytes": 94312,
-      "sha256": "008a03383814e0075d52559b4e85211648d7b9006b4828f483f95c721bf64c25",
+      "bytes": 94380,
+      "sha256": "a84975944e80a7ea4842402d4d73d9dfa908b2d1189f9e3200e90895c39e74f6",
       "width": 768,
       "height": 1974,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 3775,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 15601,
         "totalPixels": 1516032,
-        "changedPixelRatio": 0.002490052980412023,
+        "changedPixelRatio": 0.010290679880108072,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp",
           "tracked": true,
@@ -56636,6 +56636,42 @@
       "manualReview": "All four before/after pairs inspected independently. All changed pixels lie in synthetic identity, counters, and the permission matrix containing the new Team item. No changed pixels in outer padding, summary or borders. Twelve real-DOM cases at 375/320 in both CSS orders passed.",
       "limits": "Verify-mode CI remains failed until a new exact candidate passes. No threshold change; no blanket approval of dirty captures.",
       "previousBaselineManifestSha256": "5cfff82ccdb7d0a442a7e44dde6f85ac38032666be643c29befff459c9765488"
+    },
+    {
+      "route": "/admin/usuarios",
+      "sourceRun": 41516437878,
+      "sourceArtifact": 13179407589,
+      "sourceZipSha256": "1a6e331e4406f2f0c56ff0e205971238da5bdae4064552c94f94b43e5bc6987b",
+      "sourceCaptureCommit": "7fcd96cead6e368c7be40ed837fc93a16c18a0a6",
+      "sourceHead": "25e58c96c291cfdf561ac95739c38997c0f55fe0",
+      "sourceTree": "1225d6e966e7a6e5c10a0f813a1a9423eac0506b",
+      "sourceWorktreeDirtyAtCapture": true,
+      "sourceWorktreeFingerprint": "08e116e4d19d4175868e26c47a0ebcd81c97369833370ce3a27deb9cbcd28eea",
+      "sourceCapturedAt": "2026-11-02T21:09:15.610Z",
+      "sourceDirtyExplanation": "Fingerprint reproduced exactly with empty tracked diff and nineteen generated connected-systems output files from this artifact. Applies only to this capture.",
+      "candidateOverallPassed": false,
+      "candidateFailure": "Only the Users tablet pixel comparison exceeded the original threshold; all functional, accessibility, route, theme, canvas, zoom and Team checks passed.",
+      "functionalPassed": true,
+      "functionalCoverage": {
+        "responsiveScreenshots": 154,
+        "themeScreenshots": 88,
+        "accessibilityAudits": 242,
+        "baselineComparisons": 242,
+        "approvedCanvasComparisons": 22,
+        "approvedCanvasColorDistanceThreshold": 23,
+        "approvedCanvasEdgeDistanceThreshold": 52,
+        "changedPixelRatioThreshold": 0.01,
+        "channelTolerance": 16
+      },
+      "reviewedPaths": [
+        "docs/qa/reference-parity/target-authenticated/admin-usuarios-768x1024.webp"
+      ],
+      "updatedImages": 1,
+      "preservedImages": 241,
+      "method": "same-filesystem transactional rename with rollback",
+      "manualReview": "Coordinator and independent reviewer inspected baseline and both candidates at 768x1974. All deltas confined to synthetic avatar/email, counts75 to76 and49 to50, and inserted Team permission. Compared with791b,3649 changed pixels are solely avatar/email; every other pixel is identical. No geometry change, overflow or new clipping.",
+      "limits": "Source CI remains failed; a new exact candidate must pass. Thresholds unchanged. No blanket approval of dirty captures.",
+      "previousBaselineManifestSha256": "a178e72b0821c2526348c14a9afd40b2250cbb2a32da62765f693953006b37f0"
     }
   ]
 }

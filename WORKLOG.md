@@ -113,6 +113,12 @@
 
 ## 2026-11-02 — Evidências e bloqueio de Equipe Produtiva
 
+- CI41516437878 passou todos os contratos funcionais/axe/zoom/Team; somente
+  Usuários tablet excedeu pixels pela nova permissão e identidade sintética.
+  Revisão independente confirmou geometria intacta e diferenças restritas ao
+  conteúdo autorizado. Uma referência promovida; 241 preservadas nesta etapa.
+  Proveniência exata e limite registrados no README de QA. Nova CI obrigatória.
+
 - Captura protegida 41385963470 aprovada: 242 cenários de tela/axe, navegação
   compartilhada e contrato dedicado da página com seis telas e cinco zooms.
   No candidato `cf284fac`, aplicação, banco, restauração e imagem passaram;

@@ -355,3 +355,29 @@ revisadas e da página Team permanecem pertinentes por impacto; a CI do SHA
 integrado continua obrigatória. Testes focados Team19 e inventários34 passaram.
 Inventário integrado:103migrations,48arquivos pgTAP/2436asserções. Nenhuma terceira
 migration foi executada por este chat e o plano remoto aguarda estado vivo.
+
+## Verificação 25e58c96 e tablet — 02/11/2026
+
+CI41516437878 aprovou aplicação, restauração e imagem. Todos os contratos
+funcionais, 242axe, 110zooms, 22canvases e Team6+5 passaram. Única falha de pixels:
+Usuários768×1024, 15.601/1.516.032 (1,029067988%). Revisão independente de três
+imagens integrais confirmou somente identidade sintética, contagens75→76/49→50
+e o item Team. Contra791b, só3.649pixels de avatar/email mudam; resto idêntico.
+Nenhum residual CSS ou mudança de geometria. Promovida somente essa referência,
+241 preservadas nesta etapa; total60 alteradas/182 originais desde a base.
+
+Artefato13179407589, ZIP SHA256
+1a6e331e4406f2f0c56ff0e205971238da5bdae4064552c94f94b43e5bc6987b. Captura7fcd96ce
+tem árvore idêntica ao head25e58c96:1225d6e966e7a6e5c10a0f813a1a9423eac0506b.
+Fingerprint08e116e4d19d4175868e26c47a0ebcd81c97369833370ce3a27deb9cbcd28eea
+reproduzido com diff vazio e19outputs sintéticos do próprio artefato. Dirty e CI
+falha preservados. Exceção exclusiva dessa captura; sem alteração de limiar.
+Nova CI integrada obrigatória; nenhuma migration Team aplicada ainda.
+
+Conferência viva: produção2556898d, deployment28c48a83-4c9e-4923-91c8-3028aabc5555,
+publicado2026-11-02T20:39:49.477Z, sem pendência (release:production status).
+MCP confirmou85migrations, incluindo20261102175113, nenhuma das duas Team.
+Essa aplicação concorrente foi apenas observada. Plano offline foi atualizado
+para exigir backup integral novo de85linhas;17testes sintéticos passaram.
+GitHub main avançou paraa93d65b2 (CAIXA); preservar sua entrega e referências,
+sem modificar regras ou validar publicações com CI de outro SHA.
