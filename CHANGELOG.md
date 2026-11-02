@@ -1,5 +1,10 @@
 # Changelog
 
+- Publica as melhorias de leitura de Agendamentos em2556898d e aplica a
+  expansão autorizada dos layouts salvos, preservando os cards anteriores.
+  Persistência de dimensão/ordem comprovada entre Chrome, integrado e
+  celular simulado; prints reais e filtro de outubro conferidos no fechamento.
+
 - Adiciona sidebar retrátil responsiva e consulta mensal de parcelas em pop-up
   exclusivamente ao Simulador CAIXA, com cores baseadas em Agendamentos.
 - Melhora a leitura de Agendamentos com rolagem vertical, recência espaçada e

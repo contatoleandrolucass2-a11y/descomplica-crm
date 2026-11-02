@@ -1,5 +1,23 @@
 # Worklog
 
+## 2026-11-02 — Agendamentos: publicação e persistência
+
+- PR469/main2556898d publicado pelo coordenador, após CI41511483505 verde
+  nos quatro jobs e prova da imagem nos dois perfis. Deployment28c48a83,
+  healthok e nenhuma recuperação pendente.
+- Migration20261102175113 autorizada aplicada via MCP, backup privado,
+  locks/CAS e histórico preservados; perfis28/29→31/32 sem perda dos originais.
+- Resize/reordenação do ranking no Chrome persistiram no integrado após
+  refresh e nas duas orientações móveis simuladas. Undo restaurou o baseline;
+  os dois navegadores confirmaram a restauração. Recência com rolagem conferida.
+- Controle conectado teve timeouts em abas auxiliares; nova aba Chrome comitou
+  outubro/136registros e usuário confirmou outubro no integrado. Sem alteração
+  de código por hipótese. Popup real somente22 e feriado12/10 conferidos.
+- Prints reais de rankings, linhas, recência e vencidos salvos; celular com
+  ranking preenchido sem overflow. Vencidos0 no recorte real, sem dados inventados.
+- Evidências e limites no registro canônico AGENDAMENTOS-LEITURA de02/11.
+  Registro documental não exige nova publicação de runtime.
+
 ## 2026-11-02 — CAIXA: menu retrátil e parcelas
 
 - Sidebar local recolhível, expansão da área útil e menu sobreposto no celular,

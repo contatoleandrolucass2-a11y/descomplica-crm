@@ -38,23 +38,8 @@ Encerramento documental não provoca outra promoção de runtime.
 - Agendamentos: abertura do ajuste direto das torres, títulos e layout compacto.
   Fontes e limites no histórico AGENDAMENTOS de 30/10/2026.
 
-## 2026-10-30: rotação móvel simulada aprovada
-
-- 390×844 → 844×390 → 390×844, com refresh em ambas: 28 itens preservaram
-  ordem e tamanhos salvos, sem estouro horizontal; geometria vertical restaurada.
-  Evidências e limites no histórico AGENDAMENTOS de 30/10/2026.
-
-## 2026-10-30: Chrome para celular simulado aprovado
-
-- Refresh móvel recebeu os 28 itens na ordem e dimensões salvas no Chrome.
-  Visitas 303×337 px/2º; semanal 343×541 px/8º. Larguras ajustadas à coluna,
-  sem estouro horizontal. Detalhes no histórico AGENDAMENTOS de 30/10/2026.
-
-## 2026-10-30: edição móvel simulada recebida no Chrome
-
-- Após arrastes pelo canto e pela alça em 390×844, o Chrome atualizado recebeu
-  os 28 itens com ordem e dimensões idênticas. Visitas 269×313 px/3º; semanal
-  273×515 px/9º. Evidência e limites no histórico AGENDAMENTOS de 30/10/2026.
+- Histórico móvel de Agendamentos de 30/10 preservado integralmente no
+  [registro de leitura](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-LEITURA.md).
 
 ## 2026-10-30: matriz visual universal por impacto
 
