@@ -1,7 +1,5 @@
 # Aprendizados e atualizacoes
 
-[Equipe Produtiva](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
-
 - Abertura das melhorias de leitura: [registro](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-LEITURA.md).
 
 ## 2026-11-02: handoff integrado e publicado
@@ -13,6 +11,8 @@ Metas/ranking/parcerias mantêm bloqueios oficiais. Repasse retirado pelo usuár
 Meta Ads sem arquivos alterados. Medições, validações, limites e recuperação em
 [registro canônico](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md).
 Encerramento documental não provoca outra promoção de runtime.
+
+[Equipe Produtiva](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
 
 - Agendamentos: abertura do ajuste direto das torres, títulos e layout compacto.
   Fontes e limites no histórico AGENDAMENTOS de 30/10/2026.

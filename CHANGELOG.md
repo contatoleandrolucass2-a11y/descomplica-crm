@@ -1,14 +1,5 @@
 # Changelog
 
-- Adiciona Equipe Produtiva ao Dashboard: quatro indicadores de corretores únicos,
-  filtros comerciais, período e acesso pela sidebar das páginas do funil.
-  Os quatro numeradores respeitam o mesmo cadastro filtrado do denominador,
-  inclusive quando o corretor mudou de gerente após uma atividade histórica.
-  A cobertura inclui acesso no banco e os cinco níveis equivalentes de zoom
-  da matriz vigente, com a sidebar real.
-  O contrato de navegação compartilhado inclui o novo destino do Dashboard.
-  A seleção Imob autorizada permanece correta mesmo sem coleta disponível.
-
 - Melhora a leitura de Agendamentos com rolagem vertical, recência espaçada e
   data abaixo do responsável; comparativo respeita dias do filtro e mostra
   somente o valor numérico no ponto. Destaca feriados nacionais com explicação.
@@ -44,6 +35,15 @@
 - Reduz o grafo JavaScript inicial de Leads e Investidor com módulos sob demanda,
   preservando sessão, conteúdo e cálculos. Consultas de Leads recebem escopo
   autorizado e dashboard agregado, sem mudar o banco operacional.
+
+- Adiciona Equipe Produtiva ao Dashboard: quatro indicadores de corretores únicos,
+  filtros comerciais, período e acesso pela sidebar das páginas do funil.
+  Os quatro numeradores respeitam o mesmo cadastro filtrado do denominador,
+  inclusive quando o corretor mudou de gerente após uma atividade histórica.
+  A cobertura inclui acesso no banco e os cinco níveis equivalentes de zoom
+  da matriz vigente, com a sidebar real.
+  O contrato de navegação compartilhado inclui o novo destino do Dashboard.
+  A seleção Imob autorizada permanece correta mesmo sem coleta disponível.
 
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.
