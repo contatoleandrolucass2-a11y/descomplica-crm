@@ -1,5 +1,20 @@
 # Worklog
 
+## 2026-11-02 — Resumos compactos, paginação e prova SQL do handoff
+
+- Agendamentos mantém a engine local sobre resumo sem perda e entrega cinquenta
+  detalhes reais por página. Cursor/fingerprint, guards e CSV integral são
+  revalidados no servidor. Controller por Dashboard preserva a página ao editar
+  layout. Fonte fora da cobertura permanece indisponível, inclusive no SSR.
+- Lista Leads recebe cursor, filtros e contagens em SQL; troca de ator e revogação
+  não deixam respostas antigas. Analytics preserva histórico e opções completos.
+- Projeção SQL candidata e alternativa mínima serão comparadas no PostgreSQL
+  isolado da CI. Harnesses SQL/browser só executam pelas dependências do diff
+  inteiro; ambos compartilham o snapshot de classificação, com fallback seguro.
+- Testes focados, tipos, lint e navegador aprovados; medição SQL real e gates
+  amplos aguardam o candidato agregado. Nenhuma migração remota foi executada.
+  Detalhes, medições e limites no registro canônico desta demanda.
+
 ## 2026-11-02 — Normalização do candidato de integração
 
 - A primeira CI do PR 467 parou na formatação do script de medição, antes dos

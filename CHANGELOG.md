@@ -1,5 +1,12 @@
 # Changelog
 
+- Reduz o payload analítico inicial de Agendamentos com resumo compacto e detalhe
+  paginado no servidor, preservando os cálculos e a exportação integral autorizada.
+- Pagina a lista Leads com filtros, contagens e cursor estável; preserva a leitura
+  completa do Kanban, histórico analítico, revogação e troca de usuário.
+- Prepara projeção SQL por conjuntos e evidências condicionais de PostgreSQL,
+  sem aplicar migrations remotas nem atribuir ganho antes da medição.
+
 - Normaliza formatação do script de evidência e finais de linha da migration e
   do teste SQL do handoff, preservando comportamento e contratos.
 - Mantém a conferência integral do FAQ no módulo diferido e reconhece a nova

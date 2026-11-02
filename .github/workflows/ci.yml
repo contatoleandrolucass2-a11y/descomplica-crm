@@ -27,6 +27,12 @@ jobs:
       visual_mode: ${{ steps.visual_scope.outputs.visual_mode }}
       visual_routes: ${{ steps.visual_scope.outputs.visual_routes }}
       visual_plan: ${{ steps.visual_scope.outputs.visual_plan }}
+      appointments_projection_required: ${{ steps.appointments_projection_scope.outputs.required }}
+      appointments_projection_reason: ${{ steps.appointments_projection_scope.outputs.reason }}
+      appointments_projection_dependencies: ${{ steps.appointments_projection_scope.outputs.dependencies }}
+      lead_pagination_required: ${{ steps.lead_pagination_scope.outputs.required }}
+      lead_pagination_reason: ${{ steps.lead_pagination_scope.outputs.reason }}
+      lead_pagination_dependencies: ${{ steps.lead_pagination_scope.outputs.dependencies }}
 
     steps:
       - name: Checkout
@@ -62,6 +68,24 @@ jobs:
           PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
           PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           PUSH_BASE_SHA: ${{ github.event.before }}
+
+      - name: Classify isolated appointments projection benchmark dependencies
+        id: appointments_projection_scope
+        run: node scripts/ci/appointments-projection-scope.mjs
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+          CI_CANDIDATE_DIFF: ${{ steps.visual_scope.outputs.candidate_diff }}
+
+      - name: Classify isolated lead pagination SQL dependencies
+        id: lead_pagination_scope
+        run: node scripts/ci/lead-pagination-scope.mjs
+        env:
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PUSH_BASE_SHA: ${{ github.event.before }}
+          CI_CANDIDATE_DIFF: ${{ steps.visual_scope.outputs.candidate_diff }}
 
       - name: Enable pnpm
         run: |
@@ -166,6 +190,14 @@ jobs:
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
 
+      - name: Appointment detail pagination, complete export and layout stability
+        if: needs.validate.outputs.visual_mode == 'full' || contains(fromJSON(needs.validate.outputs.visual_routes || '[]'), '/app/etapas/agendamentos')
+        run: node tests/appointments-detail.browser.mjs
+
+      - name: Lead pagination, actor changes and revocation
+        if: needs.validate.outputs.lead_pagination_required != 'false'
+        run: node tests/lead-plus-pagination.browser.mjs
+
       - name: Meta Ads iframe navigation with production security headers
         run: node scripts/qa/meta-ads-frame.mjs
 
@@ -221,6 +253,34 @@ jobs:
       - name: Database tests
         run: pnpm db:test
 
+      - name: Record isolated appointments projection benchmark scope
+        env:
+          BENCHMARK_REQUIRED: ${{ needs.validate.outputs.appointments_projection_required }}
+          BENCHMARK_REASON: ${{ needs.validate.outputs.appointments_projection_reason }}
+          BENCHMARK_DEPENDENCIES: ${{ needs.validate.outputs.appointments_projection_dependencies }}
+        run: node -e 'console.log(JSON.stringify({check:"appointments-projection-benchmark",required:process.env.BENCHMARK_REQUIRED,reason:process.env.BENCHMARK_REASON,dependencies:JSON.parse(process.env.BENCHMARK_DEPENDENCIES || "[]")}))'
+
+      - name: Compare appointments SQL projections with isolated synthetic data
+        if: needs.validate.outputs.appointments_projection_required != 'false'
+        run: |
+          node --test scripts/qa/appointments-projection-benchmark.node-test.mjs
+          node scripts/qa/appointments-projection-benchmark.mjs
+        env:
+          CRM_APPOINTMENTS_BENCHMARK_ISOLATED: "true"
+
+      - name: Record isolated lead pagination SQL scope
+        env:
+          CHECK_REQUIRED: ${{ needs.validate.outputs.lead_pagination_required }}
+          CHECK_REASON: ${{ needs.validate.outputs.lead_pagination_reason }}
+          CHECK_DEPENDENCIES: ${{ needs.validate.outputs.lead_pagination_dependencies }}
+        run: node -e 'console.log(JSON.stringify({check:"lead-pagination-postgres",required:process.env.CHECK_REQUIRED,reason:process.env.CHECK_REASON,dependencies:JSON.parse(process.env.CHECK_DEPENDENCIES || "[]")}))'
+
+      - name: Verify scoped lead pagination against isolated PostgreSQL fixtures
+        if: needs.validate.outputs.lead_pagination_required != 'false'
+        run: node tests/lead-plus-pagination.postgres.mjs
+        env:
+          LEAD_PAGINATION_TEST_URL: "postgres://postgres:postgres@127.0.0.1:54322/postgres"
+
       - name: Compact production authorization and user presence
         run: pnpm qa:database:compact-users
 
@@ -263,6 +323,10 @@ jobs:
           path: |
             test-results/authenticated-visual
             test-results/authorization-matrix
+            test-results/appointments-projection
+            test-results/lead-pagination-postgres.json
+            test-results/lead-pagination-browser.json
+            test-results/appointments-detail
             test-results/associative-page-guide
             test-results/dashboard-report
             output/playwright/connected-systems

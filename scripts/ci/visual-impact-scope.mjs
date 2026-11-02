@@ -102,12 +102,13 @@ export function classifyVisualPaths(paths) {
   };
 }
 
-export function classifyVisualImpact({ event, base, head, cwd = process.cwd() }) {
-  if (["schedule", "workflow_dispatch"].includes(event)) {
-    return { mode: "full", routes: authenticatedVisualRoutes, reason: `event:${event}` };
+export function readCandidateDiff({ event, base, head, cwd = process.cwd() }) {
+  const identity = { event: event ?? null, base: base ?? null, head: head ?? null };
+  if (!["pull_request", "push"].includes(event)) {
+    return { ...identity, status: "unavailable", paths: [], reason: `event:${event}` };
   }
   if (!revision.test(base ?? "") || !revision.test(head ?? "")) {
-    return { mode: "full", routes: authenticatedVisualRoutes, reason: "missing-revision" };
+    return { ...identity, status: "unavailable", paths: [], reason: "missing-revision" };
   }
   try {
     const git = (args) => execFileSync("git", args, { cwd, encoding: "utf8", windowsHide: true });
@@ -115,22 +116,32 @@ export function classifyVisualImpact({ event, base, head, cwd = process.cwd() })
     const paths = git(["diff", "--name-only", "--no-renames", "-z", diffBase, head])
       .split("\0")
       .filter(Boolean);
-    return classifyVisualPaths(paths);
+    return { ...identity, status: "ready", paths, reason: "complete-candidate-diff" };
   } catch {
-    return { mode: "full", routes: authenticatedVisualRoutes, reason: "git-error" };
+    return { ...identity, status: "unavailable", paths: [], reason: "git-error" };
   }
 }
 
+export function classifyVisualImpact(options) {
+  const diff = options.diff ?? readCandidateDiff(options);
+  return diff.status === "ready"
+    ? classifyVisualPaths(diff.paths)
+    : { mode: "full", routes: authenticatedVisualRoutes, reason: diff.reason };
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = classifyVisualImpact({
+  const options = {
     event: process.env.GITHUB_EVENT_NAME,
     base:
       process.env.GITHUB_EVENT_NAME === "pull_request"
         ? process.env.PR_BASE_SHA
         : process.env.PUSH_BASE_SHA,
     head: process.env.PR_HEAD_SHA || process.env.GITHUB_SHA,
-  });
+  };
+  const diff = readCandidateDiff(options);
+  const result = classifyVisualImpact({ ...options, diff });
   if (!process.env.GITHUB_OUTPUT) throw new Error("GITHUB_OUTPUT is required");
+  appendFileSync(process.env.GITHUB_OUTPUT, `candidate_diff=${JSON.stringify(diff)}\n`);
   appendFileSync(process.env.GITHUB_OUTPUT, `visual_mode=${result.mode}\n`);
   appendFileSync(process.env.GITHUB_OUTPUT, `visual_routes=${JSON.stringify(result.routes)}\n`);
   appendFileSync(

@@ -13,10 +13,14 @@ const base = "d4bb4d91b8a553ae2edf0eaeb876d21e2b59b361";
 const touched = new Set([
   "lib/crm/lead-plus/client/WorkspaceApp.tsx",
   "lib/crm/lead-plus/client/SystemScreens.tsx",
+  "lib/crm/lead-plus/client/ConnectedCRM.tsx",
+  "lib/crm/lead-plus/client/api.ts",
   "app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator.tsx",
   "app/(protected)/app/simulacao/_components/archive-investor/AssociativeLearningManual.tsx",
 ]);
-const partial = process.argv.includes("--simulator-after");
+const selectedAfter = process.argv.includes("--leads-after") ? "Leads" : "Investidor";
+const partial =
+  process.argv.includes("--simulator-after") || process.argv.includes("--leads-after");
 const evidence = partial
   ? JSON.parse(
       readFileSync(path.join(root, "test-results/handoff-leads-simulators-bundles.json"), "utf8"),
@@ -35,7 +39,7 @@ for (const [name, entryFile] of [
   ],
 ]) {
   for (const mode of ["before", "after"]) {
-    if (partial && !(name === "Investidor" && mode === "after")) continue;
+    if (partial && !(name === selectedAfter && mode === "after")) continue;
     if (partial)
       evidence.routes = evidence.routes.filter((row) => !(row.name === name && row.mode === mode));
     const entry = path.join(root, entryFile).replaceAll("\\", "/");
@@ -107,6 +111,7 @@ evidence.candidate = {
   sourceHashes: Object.fromEntries(
     [
       ...touched,
+      "lib/crm/lead-plus/client/useLeadList.ts",
       "app/(protected)/app/simulacao/_components/archive-investor/DeferredInvestorLearningManual.tsx",
       "app/(protected)/app/simulacao/_components/archive-investor/InvestorLearningManualContent.tsx",
     ].map((file) => [

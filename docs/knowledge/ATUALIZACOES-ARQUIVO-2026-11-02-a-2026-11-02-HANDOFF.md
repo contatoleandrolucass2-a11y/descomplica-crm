@@ -24,17 +24,17 @@ continuam obrigatórios. Não há autorização para inventar políticas comerci
 
 ## Matriz e fronteiras
 
-| Frente   | Responsável                                   | Arquivos e dependências                                      | Verificação                                            | Estado                                                                            |
-| -------- | --------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------ | --------------------------------------------------------------------------------- |
-| A        | Implementador CI; integração pelo coordenador | scripts/ci, escopo visual QA, workflows, release policy, E2E | Contrato executor/agregador e negações; CI ampla final | Implementado; cadência E2E preservada até prova de capacidade                     |
-| B        | Coordenador                                   | Instrumentação agregada e medição sintética local            | Privacidade, falhas, identidade e fases                | Implementado em etapas; RUM sem destino/consentimento aprovado                    |
-| C1/C2    | Dados                                         | stages/data, novas migrations e testes                       | Snapshot, histórico H=0/H=11, pgTAP                    | C2 implementado com rollout desabilitado; C1 sem ambiente SQL isolado             |
-| C3/H     | Coordenador                                   | Dashboard Agendamentos e página de etapas                    | Volume, gráficos, teclado e estados                    | Perfil SSR e metas zero corrigidos; paginação depende contrato SQL completo       |
-| D        | Implementador Leads                           | lead-plus cliente/servidor e testes                          | Escopos, SQL e fixtures                                | Divisão cliente, escopo e agregados implementados; paginação operacional pendente |
-| E        | Implementador simuladores                     | Recursos e títulos por variante                              | Compilação e fórmulas existentes                       | Manual diferido e título corrigido; fórmulas/CSS preservados                      |
-| F        | Coordenador                                   | Repasse                                                      | Pedido posterior do usuário                            | Retirado pelo usuário; nenhum diff funcional ou instrumentação                    |
-| G        | Dados e coordenador UI                        | Fonte de metas, snapshot/exportador, etapa                   | Vigência, ausência/zero, escopos                       | Fonte inválida e zero corrigidos; integração comercial sem autoridade suficiente  |
-| Advisors | Coordenador/dados                             | Somente consultas afetadas                                   | Evidência de plano antes de índice                     | Nenhum índice autorizado por estatística histórica isolada                        |
+| Frente   | Responsável                                   | Arquivos e dependências                                      | Verificação                                            | Estado                                                                           |
+| -------- | --------------------------------------------- | ------------------------------------------------------------ | ------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| A        | Implementador CI; integração pelo coordenador | scripts/ci, escopo visual QA, workflows, release policy, E2E | Contrato executor/agregador e negações; CI ampla final | Implementado; cadência E2E preservada até prova de capacidade                    |
+| B        | Coordenador                                   | Instrumentação agregada e medição sintética local            | Privacidade, falhas, identidade e fases                | Implementado em etapas; RUM sem destino/consentimento aprovado                   |
+| C1/C2    | Dados                                         | stages/data, novas migrations e testes                       | Snapshot, histórico H=0/H=11, pgTAP                    | C1/C2 preparados; validação SQL isolada e rollout pendentes                      |
+| C3/H     | Coordenador                                   | Dashboard Agendamentos e página de etapas                    | Volume, gráficos, teclado e estados                    | Resumo compacto e detalhe servidor implementados; CI ampla pendente              |
+| D        | Implementador Leads                           | lead-plus cliente/servidor e testes                          | Escopos, SQL e fixtures                                | Cursor, filtros, contadores e analytics preparados; conexão operacional ausente  |
+| E        | Implementador simuladores                     | Recursos e títulos por variante                              | Compilação e fórmulas existentes                       | Manual diferido e título corrigido; fórmulas/CSS preservados                     |
+| F        | Coordenador                                   | Repasse                                                      | Pedido posterior do usuário                            | Retirado pelo usuário; nenhum diff funcional ou instrumentação                   |
+| G        | Dados e coordenador UI                        | Fonte de metas, snapshot/exportador, etapa                   | Vigência, ausência/zero, escopos                       | Fonte inválida e zero corrigidos; integração comercial sem autoridade suficiente |
+| Advisors | Coordenador/dados                             | Somente consultas afetadas                                   | Evidência de plano antes de índice                     | Nenhum índice autorizado por estatística histórica isolada                       |
 
 ## Critérios de evidência
 
@@ -105,7 +105,7 @@ final do snapshot ocorre depois das metas. RPC aditiva
 `read_crm_appointments_goals_range(date,date)` reutiliza leitores canônicos, com
 `security invoker`, grants mínimos e limite do contrato. Migration nova
 `20261102120809_appointments_goal_range.sql`; treze assertions pgTAP preparadas.
-Manifesto: 99 migrations; restore: 45 arquivos/2373 assertions.
+Manifesto integrado: 100 migrations; restore: 46 arquivos/2391 assertions.
 
 `CRM_APPOINTMENTS_GOALS_RANGE_ENABLED=false` é o default: mantém orçamento legado
 sem probe adicional. Só habilitar depois da aplicação autorizada e pgTAP aprovados.
@@ -113,16 +113,34 @@ RPC ausente permite fallback; permissão negada e intervalo parcial falham fecha
 Reverter a flag retorna ao caminho legado; remover apenas a função aditiva, após
 desativar a flag, é o rollback de banco. Nenhuma migration remota foi aplicada.
 
-C1 e C3 exigem ambiente SQL isolado representativo. DB local recusou conexão em
-127.0.0.1:54322; Docker/psql não disponíveis e Supabase `list_branches` retornou
-lista vazia. Não se criou ambiente pago nem fez EXPLAIN ANALYZE em produção.
-Não há RPC de resumo equivalente sem operações: até 20 mil registros alimentam
-vínculos regionais, ranking, produtividade, recência anterior ao período e filtros.
-Paginar o array atual alteraria KPIs. A preparação necessária é uma RPC de resumo
-completo e uma de detalhe/exportação com filtro e versão de snapshot iguais,
-cursor por createdAt/ordinal estável, schema próprio e pgTAP de equivalência,
-mascaramento sem ranking e concorrência. Essa substituição não foi ativada sem
-essa prova. Não se declarou redução de SQL ou payload inexistente.
+A ausência de Docker/psql no desktop e de branch Supabase remota isolada não
+foi tratada como impedimento definitivo: a CI existente oferece PostgreSQL
+isolado. Não se criou conta/ambiente pago nem fez EXPLAIN ANALYZE em produção.
+C1 prepara migration `20261102131119_appointments_projection_sets.sql`, alterando
+somente a seleção dos índices usados por dimensão para um conjunto, mantendo
+ordenações, somas, fallback e mascaramento. Dezoito assertions comparam a saída
+com a função histórica. O harness compara também a alternativa mínima de remover
+seis sorts intermediários: a escolha final depende da medição, sem pressupor
+como o otimizador executa o EXISTS. Rollback exige nova migration restaurando
+somente a definição histórica, mantendo owner/grants, sem reaplicar o arquivo antigo.
+
+C3 não necessita inventar outra regra de resumo: o codec compacto preserva datas
+exatas e campos analíticos em dicionários/tuplas, mantendo a engine canônica local.
+Conta e horários operacionais ficam no servidor; o HTML inicial recebe somente
+cinquenta detalhes reais. Filtros/KPIs/comparativo continuam locais; o loader não
+é chamado a cada filtro. Server Actions revalidam página, view e fingerprint
+canônico do modelo completo. Cursor vincula filtro e snapshot; saída de fonte
+antiga bloqueia mistura. CSV exporta o recorte completo com proteção contra
+fórmulas; tabela/PDF identificam a página visível.
+
+Um controller limitado por instância do Dashboard conserva páginas e promessas
+em voo durante drag/resize/cópia. Não é cache global nem guarda permissões. Hash
+recursivamente canônico preserva arrays e ordena chaves de objetos, evitando
+identidades diferentes pela conclusão assíncrona das RPCs de metas. A revisão
+independente encontrou e confirmou a correção desses dois problemas. Browser
+validou corridas entre filtros, CSV integral, snapshot alterado e zero RPC extra
+por mudanças puramente visuais. Equivalência dos resumos completo/compacto inclui
+histórico, máscaras, conversões, recência e comparativo de linhas.
 
 ### D/E — Leads e simuladores
 
@@ -132,11 +150,26 @@ analíticos usados, mantém primeiro contato de todo histórico e reutiliza look
 somente na requisição. Lista preserva união com Bolsão autorizado e ordenação.
 Não altera pool, região, índice, sessão, revogação nem Shadow DOM.
 
-O projeto operacional `xwtasgjnkctyxokxjykk` não aparece no conector. Os projetos
-descobertos incluem CRM `hnncxuerlcsaahdxoswb`, que não o substitui. Cursor/filtros
-completos na consulta operacional e analytics integral em SQL não foram ativados:
-faltam schema/EXPLAIN/equivalência/rollout no banco correto. As mudanças preparadas
-usam os contratos SQL existentes e fixtures; não são validação operacional remota.
+A lista `/leads?limit=50` usa cursor com microssegundos e desempate UUID,
+busca literal, responsável, situação, categorias e contagens completas em uma
+consulta/snapshot SQL. Cursor vincula ator, escopo e filtros. GET sem limit
+continua retrocompatível, Kanban mantém leitura completa e exportação nunca
+recebe o limit visual. Analytics restringe coortes atual/anterior e histórico
+necessário, mantendo eventos anteriores e opções completas. Respostas antigas
+não sobrepõem novo ator; erros de autorização apagam linhas anteriores.
+
+O projeto operacional `xwtasgjnkctyxokxjykk` não aparece no conector; o CRM
+`hnncxuerlcsaahdxoswb` não o substitui. O caminho alternativo legítimo pelo backend
+publicado também foi conferido sem segredos: `LEAD_DB_URL` e `LEAD_DB_PROJECT_REF`
+estão ambos ausentes no processo da aplicação. O probe abortou antes de conectar;
+nenhuma consulta/dado operacional foi exportado. Falta configurar esses dois
+valores pelo armazenamento protegido e validar schema/rollout no projeto correto.
+
+Código e contratos independentes foram preparados e testados em fixtures. O
+harness PostgreSQL isolado cria somente um c2s_app sintético inexistente, em
+transação revertida, verifica 80 recortes e mede 5000 leads. Não é migration CRM
+nem comprovação de aplicação operacional. Teste browser real cobriu 50→100→121,
+contagens, filtros, refresh, UserViewSelector com resposta atrasada e revogação.
 
 Manual dos simuladores foi extraído sem alterar conteúdo ou fórmulas e carrega
 ao abrir, com deep link, recuperação de erro, Escape/Enter e foco. Investidor tem
@@ -161,12 +194,20 @@ preservados. Nenhum índice foi criado/removido com base em advisors históricos
 
 ## Comparação antes/depois
 
+Resumo/detalhe C3, usando o helper canônico e cursor real de 222 bytes:
+20 mil operações, JSON de 6664210 para 839980 bytes, cinquenta detalhes iniciais
+e nenhuma operação completa inicial. Artefato local
+`test-results/appointments-detail/payload.json` identifica hashes dos seis
+arquivos, HEAD de base e working tree. Reprodução:
+`APPOINTMENTS_DETAIL_EVIDENCE=1 pnpm exec vitest run tests/appointments-summary-detail.test.tsx -t 20000-record`.
+Não são bytes transferidos pelo Next nem tempo de página.
+
 | Medida e método                                   |      Antes |               Depois | Limite                                                       |
 | ------------------------------------------------- | ---------: | -------------------: | ------------------------------------------------------------ |
 | Loader Agendamentos H=0, mocks com roster íntegro |  8 viagens |  8 default / 7 range | Range depende migration e flag                               |
 | Loader Agendamentos H=11, mesmos contratos        | 30 viagens | 30 default / 7 range | Não mede latência SQL/página                                 |
-| Leads, grafo JS inicial Vite/Rolldown produção    |   643460 B |             196945 B | Não são bytes servidos pelo Next                             |
-| Leads, gzip do grafo inicial                      |   191890 B |              66850 B | JS total aumenta 1135580 para 1141540 B                      |
+| Leads, grafo JS inicial Vite/Rolldown produção    |   643460 B |             196976 B | Não são bytes servidos pelo Next                             |
+| Leads, gzip do grafo inicial                      |   191890 B |              66857 B | JS total aumenta 1135580 para 1143895 B                      |
 | Investidor, grafo JS inicial                      |   458649 B |             385721 B | JS total aumenta 458649 para 461993 B                        |
 | Investidor, gzip inicial                          |   127231 B |             107382 B | Manual diferido; mesmas fórmulas                             |
 | Canvas, requisições de perfil no navegador        |          1 |                    0 | Fixture local, read inicial movido ao servidor               |
@@ -185,7 +226,38 @@ Scripts: `tests/lead-plus-simulator-bundles.mjs`,
 `tests/appointments-profile-scope.browser.mjs`. JSONs e screenshots sintéticos
 ficam em test-results; não são baselines aprovadas ou dados operacionais.
 
+Complemento por wrapper real, com os mesmos parâmetros de compilação e sem
+execução remota: `node test-results/handoff-simulator-variants.mjs`, derivado
+do script versionado com as quatro entradas abaixo. Relatório local
+`test-results/handoff-simulator-variants.json`. O total inclui CSS comum e da
+variante e não equivale à transferência/segmentação do Next.
+
+| Wrapper      | JS inicial antes/depois | Gzip JS inicial antes/depois | CSS compilado antes/depois |
+| ------------ | ----------------------- | ---------------------------- | -------------------------- |
+| Associativo  | 458430 / 385495 B       | 127216 / 107359 B            | 1209837 / 1209904 B        |
+| Direta       | 458135 / 385199 B       | 127122 / 107266 B            | 1209837 / 1209904 B        |
+| Investidor   | 458117 / 385181 B       | 127112 / 107254 B            | 1209837 / 1209904 B        |
+| Documentação | 119237 / 119237 B       | 36091 / 36091 B              | 1208629 / 1208629 B        |
+
+O CSS não reduziu: há 67 bytes adicionais de saída de bundling nas três
+calculadoras; Documentação não mudou. As linhas desta tabela usam wrappers,
+enquanto a comparação anterior usa diretamente InvestorCalculator. Não misturar
+essas duas entradas nem alegar uma redução de CSS, TTFB, INP ou p75.
+
 ## Validações e revisão
+
+- Incrementos finais: 43 testes C3 e 28 testes D2 aprovados; tipos e lint focados
+  aprovados. Browser C3 confirmou paginação, CSV integral, corridas, fonte alterada
+  e zero RPC extra em drag/resize/cópia. Browser D2 confirmou 50→100→121, contagens,
+  filtros, refresh, troca de ator com resposta atrasada e revogação.
+- Revisão independente confirmou baseline SQL idêntico ao histórico, hash
+  d5c3200493ce815f3ae8218562733f1323dee4c4aa31ca10c142ca803858d463.
+- Dois riscos C3 corrigidos antes do push: cache por instância para remount e
+  fingerprint determinístico apesar da ordem assíncrona das metas. Fonte fora
+  de cobertura não vira exportação zero nem erro SSR. Não foram alteradas fórmulas.
+- Classificadores SQL reaproveitam o diff inteiro já lido. Os 37 testes focados
+  passaram, incluindo desconhecidos, erros de identidade/histórico e ausência
+  de repetição dos harnesses SQL em mudanças conhecidas de shell/CSS sem relação.
 
 - Instalação frozen e resources:doctor aprovados; Docker indisponível, não exigido
   no desktop. Node 24.19.0/pnpm 11.20.0 usados nos comandos.

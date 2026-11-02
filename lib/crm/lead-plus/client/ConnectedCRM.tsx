@@ -1,6 +1,7 @@
 import MetaCampaignSelection from "./MetaCampaignSelection";
 import { useEffect, useState } from "react";
 import { useAuth } from "./Auth";
+import { useLeadList, type LeadListPage } from "./useLeadList";
 import {
   Star,
   Plus,
@@ -344,13 +345,38 @@ export function LeadDetail({ lead, onClose }: { lead: Lead; onClose: () => void 
   );
 }
 export function ConnectedLeads({ kanban = false }: { kanban?: boolean }) {
+  const [query, setQuery] = useState(""),
+    [owner, setOwner] = useState(""),
+    [recordStatus, setRecordStatus] = useState("all"),
+    [showFilters, setShowFilters] = useState(false),
+    [tab, setTab] = useState(kanban ? "Kanban" : "A fazer"),
+    [create, setCreate] = useState<number | null>(null),
+    [selected, setSelected] = useState<Lead | null>(null),
+    [failure, setFailure] = useState("");
   const favoritesResult = useApi<{ data: (Resource & { favorites: string[] })[] }>(
-    "/resources/lead-preferences",
+    kanban ? "/resources/lead-preferences" : null,
   );
   const favorites = new Set(favoritesResult.data?.data[0]?.favorites || []);
-  const { data, error, loading, refresh } = useApi<{ data: Lead[]; server_time?: string }>(
-    "/leads",
+  const legacy = useApi<LeadListPage>(kanban ? "/leads" : null);
+  const paginated = useLeadList(
+    {
+      q: query,
+      owner,
+      status: recordStatus,
+      category:
+        (
+          {
+            "A fazer": "todo",
+            Visitas: "visits",
+            Futuras: "future",
+            Favoritos: "favorites",
+            Todos: "all",
+          } as Record<string, string>
+        )[tab] ?? "all",
+    },
+    !kanban,
   );
+  const { data, error, loading, refresh } = kanban ? legacy : paginated;
   const [clock, setClock] = useState(Date.now);
   const [serverOffset, setServerOffset] = useState(0);
   const now = clock + serverOffset;
@@ -365,8 +391,14 @@ export function ConnectedLeads({ kanban = false }: { kanban?: boolean }) {
     }
   }, [data?.server_time]);
   useEffect(() => {
-    const deadlines = (data?.data || [])
-      .map((lead) => Date.parse(lead.bucket_deadline_at || ""))
+    const deadlines = [
+      (data?.data || []).flatMap((lead) => [
+        Date.parse(lead.bucket_deadline_at || ""),
+        Date.parse(lead.attribution?.next_contact_at || ""),
+      ]),
+      [Date.parse(data?.next_transition_at || "")],
+    ]
+      .flat()
       .filter((deadline) => Number.isFinite(deadline) && deadline > Date.now() + serverOffset);
     if (!deadlines.length) return;
     const delay = Math.min(
@@ -393,14 +425,6 @@ export function ConnectedLeads({ kanban = false }: { kanban?: boolean }) {
       document.removeEventListener("visibilitychange", resume);
     };
   }, []);
-  const [query, setQuery] = useState(""),
-    [owner, setOwner] = useState(""),
-    [recordStatus, setRecordStatus] = useState("all"),
-    [showFilters, setShowFilters] = useState(false),
-    [tab, setTab] = useState(kanban ? "Kanban" : "A fazer"),
-    [create, setCreate] = useState<number | null>(null),
-    [selected, setSelected] = useState<Lead | null>(null),
-    [failure, setFailure] = useState("");
   const users = useApi<{ data: User[] }>("/resources/users");
   const all = data?.data || [],
     filtered = all.filter(
@@ -421,13 +445,15 @@ export function ConnectedLeads({ kanban = false }: { kanban?: boolean }) {
           : category === "Futuras"
             ? future(lead)
             : !lead.archived && lead.stage < 5 && !future(lead);
-  const displayed = filtered.filter((lead) => matches(lead, tab));
-  const counts = Object.fromEntries(
-    ["A fazer", "Visitas", "Futuras", "Favoritos", "Todos"].map((category) => [
-      category,
-      filtered.filter((lead) => matches(lead, category)).length,
-    ]),
-  );
+  const displayed = kanban ? filtered.filter((lead) => matches(lead, tab)) : filtered;
+  const counts = !kanban
+    ? (data?.counts ?? {})
+    : Object.fromEntries(
+        ["A fazer", "Visitas", "Futuras", "Favoritos", "Todos"].map((category) => [
+          category,
+          filtered.filter((lead) => matches(lead, category)).length,
+        ]),
+      );
   async function move(id: string, stage: number) {
     const lead = all.find((l) => l.id === id);
     if (!lead) return;
@@ -450,6 +476,7 @@ export function ConnectedLeads({ kanban = false }: { kanban?: boolean }) {
         <h2>{kanban ? "Funil de Vendas" : "Leads"}</h2>
         <input
           placeholder="Buscar lead por nome..."
+          maxLength={2000}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
         />
@@ -496,7 +523,7 @@ export function ConnectedLeads({ kanban = false }: { kanban?: boolean }) {
         <LeadTabs
           value={tab}
           counts={counts}
-          loading={loading || favoritesResult.loading}
+          loading={loading || (kanban && favoritesResult.loading)}
           onChange={setTab}
         />
       )}
@@ -632,6 +659,19 @@ export function ConnectedLeads({ kanban = false }: { kanban?: boolean }) {
             </div>
           </div>
         )}
+        {!kanban && data ? (
+          <div className="toolbar" aria-live="polite">
+            <span>
+              Exibindo {displayed.length} de {data.total} leads
+            </span>
+            {data.next_cursor ? (
+              <Button disabled={paginated.loadingMore} onClick={() => void paginated.loadMore()}>
+                {paginated.loadingMore ? "Carregando…" : "Carregar mais leads"}
+              </Button>
+            ) : null}
+            {error ? <Button onClick={() => void refresh()}>Atualizar lista</Button> : null}
+          </div>
+        ) : null}
       </div>
       {create !== null && <LeadEditor stage={create} onClose={() => setCreate(null)} />}
       {selected && <LeadDetail lead={selected} onClose={() => setSelected(null)} />}

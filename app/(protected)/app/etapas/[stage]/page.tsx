@@ -28,6 +28,16 @@ import { measureCrmPhase } from "@/lib/crm/performance";
 import { listDashboardProfiles } from "@/lib/dashboard-canvas/persistence/server";
 import { normalizeDashboardCards } from "@/lib/dashboard-canvas/state/migrations";
 import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
+import { compactAppointmentSummary } from "@/lib/crm/stages/appointments-summary";
+import {
+  initialAppointmentDetailPage,
+  appointmentSnapshotIdentity,
+} from "@/lib/crm/stages/appointments-detail-server";
+import { appointmentDetailQueryKey } from "@/lib/crm/stages/appointments-detail-contract";
+import {
+  readAppointmentDetailsAction,
+  exportAppointmentDetailsAction,
+} from "../_components/appointments-actions";
 import { getAuthorizedNavigation } from "@/lib/navigation/pages";
 import { AppointmentsDashboard } from "../_components/AppointmentsDashboard";
 
@@ -526,13 +536,48 @@ export default async function StagePage({
             })),
           }
         : undefined;
+    const calendarDate = saoPauloDate(new Date().toISOString());
+    const compactSummary = appointments.analysis
+      ? compactAppointmentSummary(appointments.analysis)
+      : null;
+    const initialQuery = {
+      view,
+      month: calendarDate.slice(0, 7),
+      year: calendarDate.slice(0, 4),
+      calendarDate,
+      filters: { channel: 1 as const },
+    };
+    const initialPage = compactSummary
+      ? initialAppointmentDetailPage(appointments, initialQuery)
+      : null;
+    const detailSource = initialPage
+      ? {
+          snapshot:
+            initialPage.status === "ready"
+              ? initialPage.snapshot
+              : appointmentSnapshotIdentity(appointments),
+          view,
+          initialQueryKey: appointmentDetailQueryKey(initialQuery),
+          initialPage,
+        }
+      : undefined;
     return (
       <main className={styles.canvasMain}>
         <AnalyticsCanvas kind="stage">
           <AppointmentsDashboard
             initialProfileState={initialProfileState}
-            calendarDate={saoPauloDate(new Date().toISOString())}
-            analysis={appointments.analysis}
+            calendarDate={calendarDate}
+            analysis={compactSummary ? null : appointments.analysis}
+            compactSummary={compactSummary ?? undefined}
+            detailSource={detailSource}
+            detailActions={
+              detailSource
+                ? {
+                    loadDetails: readAppointmentDetailsAction,
+                    exportDetails: exportAppointmentDetailsAction,
+                  }
+                : undefined
+            }
             brokerRoster={appointments.brokerRoster}
             generatedAt={appointments.generatedAt}
             individualGoal={appointments.individualGoal}
