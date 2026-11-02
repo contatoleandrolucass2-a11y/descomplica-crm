@@ -52,6 +52,8 @@ O inventário de release verifica acesso permitido e negado por perfil.
 
 Nenhuma execução de preview aprova automaticamente merge, ativação de migration
 remota ou publicação. A revisão de 02/11/2026 promove somente 55 referências das
-cinco rotas afetadas pelo sidebar; as outras 187, incluindo todas as Admin,
-permanecem preservadas. Fonte e limites em `docs/qa/reference-parity/README.md`.
+cinco rotas afetadas pelo sidebar. Uma revisão posterior acrescenta quatro
+referências móveis de Usuários para a nova permissão; Administração e Páginas
+continuam com referências originais. Fonte e limites em
+`docs/qa/reference-parity/README.md`.
 Uma captura da implementação não é referência externa.

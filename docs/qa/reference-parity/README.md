@@ -1,5 +1,31 @@
 # Baseline e QA visual — fundação de paridade
 
+## Permissão de Equipe Produtiva em Usuários móvel — 02/11/2026
+
+A CI `41503395675`, head `791b2a82` e merge de teste
+`91073e44171890f88841cc4d2ab7d0ab2096123f`, aprovou todos os contratos funcionais,
+154 telas responsivas, 88 temas, 242 axe, 110 zooms, 22 canvases e Team seis telas
+mais cinco zooms. A comparação de pixels falhou somente em quatro imagens móveis
+de Usuários, pelo item Equipe Produtiva, contadores e identidade sintética.
+Administração e Páginas passaram contra suas referências originais.
+
+Os quatro pares foram revisados. O mapa de pixels não mostrou mudanças fora de
+identidade, contadores e matriz de permissões; o teste com DOM real em 375/320,
+três temas e dois estados de usuário passou 12 casos nas duas ordens CSS.
+Somente essas quatro imagens foram promovidas pelo helper transacional; os
+outros 238 registros e imagens desta etapa ficaram intactos.
+
+Artefato `13174480600`, ZIP SHA256
+`db5261b81d84a9ce3f10ea48647bc8fc6d3a0ebe1e5718a160d418b48f57d35b` conferido.
+O flag `worktreeDirtyAtCapture: true` foi preservado: o fingerprint
+`68387cf2ed328ce1f94b18a5bd8839775ff5e60a3df276e4f7077c80d0e30d7e` foi
+reproduzido exatamente com diff rastreado vazio e os 19 outputs sintéticos de
+Conectar Sistemas presentes no artefato. A árvore do merge de teste é idêntica à
+do head. Essa prova vale somente para essa captura; qualquer fonte diferente,
+output ausente ou fingerprint divergente exige nova captura. `reviewedUpdates`
+mantém a origem real, o resultado geral falho e o escopo aprovado. Não se altera
+o limiar 1%/16. Nova CI de verificação continua obrigatória antes do merge.
+
 ## Sidebar de Equipe Produtiva em 02/11/2026
 
 Captura protegida `41495047808` no SHA exato `1e43cdfbaf9a8bab83decbf0fa185880d701c309`,

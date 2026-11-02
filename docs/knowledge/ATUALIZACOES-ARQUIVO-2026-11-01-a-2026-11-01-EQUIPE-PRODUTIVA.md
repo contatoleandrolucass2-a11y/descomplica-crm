@@ -300,3 +300,35 @@ mostrava gap12px, portanto suas11imagens não foram promovidas. CI verify dever�
 confirmar a correção contra a referência original. Fontes/teste: admin-canvas.css
 e tests/admin-css-order.browser.mjs; evidência local ignorada no diretório
 admin-css-order. Nenhuma migration remota aplicada nesta etapa.
+
+## Verificação791b e aprovação seletiva de quatro referências
+
+CI41503395675: validate, imagem e restore aprovados. Todoscontratos funcionais,
+154responsivas/88temas/242axe/110zooms/22canvases eTeam6+5 passaram. A comparação
+falhou somente em4Usersmóveis:390claro/escuro,375,320. Administração ePáginas
+passaram com baselines originais;55sidebar passaram após revisão. Nenhum
+problemaCSSresidual foi demonstrado:12casosSSRreais adicionais nas375/320 e
+trêstemas passaram nas2ordens, comfoco/overflowestáveis. O diff exato dos pixels
+ficou exclusivamente emavatar/email sintético,contadores e matriz comEquipe
+Produtiva (quebra legítima da nova descrição em375). Nada mudou nasbordas,
+paddings, resumo,pessoas,instruções ourodapé. Revisão independente aprovou4pares.
+
+Artefato13174480600, ZIP SHA256
+db5261b81d84a9ce3f10ea48647bc8fc6d3a0ebe1e5718a160d418b48f57d35b. Captura
+91073e44171890f88841cc4d2ab7d0ab2096123f tem árvore idêntica ao head791b2a82.
+O flagdirtytrue foi preservado: fingerprint68387cf2ed328ce1f94b18a5bd8839775ff5e60a3df276e4f7077c80d0e30d7e
+reproduzido comdiff rastreado vazio eexatos19outputsConectarSistemas doartefato.
+Exceção exclusiva dessacaptura:reavaliar se fonte/output/hash divergir; não
+concede dispensa deproveniência futura. Origem/limites registrados no manifesto.
+Promovidas somente4referências Users, preservando238destaetapa. Total desde abase:
+59imagens alteradas e183originais preservadas. Nenhum limiar ouassert foi reduzido.
+NovaCI verify obrigatória; semmerge/deploy/mutationsremotas nestaetapa.
+
+Prévia readonly do banco confirmou49páginas,75permissões e padrõesAdmin/Master
+existentes.13descrições legadas diferem do código, mas ONCONFLICTDONOTHING da
+migration as preserva: nãohaveráUPDATEextra. Planooffline com17testes permite
+somente esses13textos exatos,e rejeita drift de níveis/defaults/metadados.
+Backup/CAS de5tabelas e preservação integraldepermissions permanecem exigidos.
+Checagem de contrato: f[7]>=1 é validado pelo schema e transform canônico; projetar
+presença1 não converte volumezero/negativo emevento. Não foramadicionados testes
+redundantes para essa garantia já vigente.

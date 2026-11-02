@@ -10703,3 +10703,9 @@ b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigi
   rotas afetadas pelo sidebar;187 imagens e a proveniência anterior preservadas.
   TodasAdmin permanecem contra a referência original; regressão de ordem CSS
   inclui células, ações e resumo. CI verify final ainda obrigatória.
+
+- Verificação791b confirmou correçõesCSS:Administração/Páginas contraoriginais,
+  Usersdesktop/tablet aprovados. Só4Usersmóveis excederam pixels pela novapermissão.
+  Quatropares+12casosSSRreais extras foramrevistos;proveniência reproduzida com
+  fonteigual e19outputs sintéticos. Quatroreferências promovidas,238preservadas
+  nestaetapa;CIoriginal seguefalha,novaCIobrigatória. Semmutação remota.

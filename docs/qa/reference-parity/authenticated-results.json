@@ -52233,28 +52233,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 992550,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
           "tracked": true,
-          "bytes": 84614,
-          "sha256": "2e2708fc179fe9c0fcff4bcb787a9974ac230df10d277d3fae807400c8d15933"
+          "bytes": 84866,
+          "sha256": "f796cf1698c2b63e006aef17d18726a70291e14c9e58cfcd7086991a65edcaea"
         }
       },
       "path": "target-authenticated/admin-usuarios-390x844.webp",
-      "bytes": 84614,
-      "sha256": "2e2708fc179fe9c0fcff4bcb787a9974ac230df10d277d3fae807400c8d15933",
+      "bytes": 84866,
+      "sha256": "f796cf1698c2b63e006aef17d18726a70291e14c9e58cfcd7086991a65edcaea",
       "width": 390,
       "height": 2545,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 3775,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 11162,
         "totalPixels": 992550,
-        "changedPixelRatio": 0.003803334844592212,
+        "changedPixelRatio": 0.01124578106896378,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
           "tracked": true,
@@ -53083,28 +53083,28 @@
       "theme": "dark",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 992550,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
           "tracked": true,
-          "bytes": 84782,
-          "sha256": "5eca7a8a61b8021321b5f2eda9b64c42567ef41b6e774118f7eba74e7885b3d6"
+          "bytes": 85060,
+          "sha256": "242e1bde96614108eb264d01a3c36d7dd1341e3ab672b24cd3d2e518cda5f493"
         }
       },
       "path": "target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
-      "bytes": 84782,
-      "sha256": "5eca7a8a61b8021321b5f2eda9b64c42567ef41b6e774118f7eba74e7885b3d6",
+      "bytes": 85060,
+      "sha256": "242e1bde96614108eb264d01a3c36d7dd1341e3ab672b24cd3d2e518cda5f493",
       "width": 390,
       "height": 2545,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 3788,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 11247,
         "totalPixels": 992550,
-        "changedPixelRatio": 0.0038164324215404764,
+        "changedPixelRatio": 0.011331419072087049,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp",
           "tracked": true,
@@ -53933,28 +53933,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 967875,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
           "tracked": true,
-          "bytes": 83872,
-          "sha256": "a52c01d5a84ed35e9d3a134fc2ddfbb566be4b182e103bd32dbf62ff8f1285e1"
+          "bytes": 85084,
+          "sha256": "53047addaf1d55d13dcca3dac642ca829376df75419c8e568313f375450ac295"
         }
       },
       "path": "target-authenticated/admin-usuarios-375x812.webp",
-      "bytes": 83872,
-      "sha256": "a52c01d5a84ed35e9d3a134fc2ddfbb566be4b182e103bd32dbf62ff8f1285e1",
+      "bytes": 85084,
+      "sha256": "53047addaf1d55d13dcca3dac642ca829376df75419c8e568313f375450ac295",
       "width": 375,
       "height": 2581,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 3722,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 28169,
         "totalPixels": 967875,
-        "changedPixelRatio": 0.003845537905204701,
+        "changedPixelRatio": 0.029103964871496836,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
           "tracked": true,
@@ -54771,28 +54771,28 @@
       "theme": "light",
       "visualComparison": {
         "passed": true,
-        "reason": "baseline_preserved",
+        "reason": "baseline_updated",
         "changedPixels": 0,
         "totalPixels": 853440,
         "changedPixelRatio": 0,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
           "tracked": true,
-          "bytes": 80966,
-          "sha256": "000c37ddc9ad34273474364e0e96a1c4d17b08d85af5666fc298e0ada15afda8"
+          "bytes": 81400,
+          "sha256": "e5bb64229c5d5c35ec6ade6b3965eb7ecf6a6ca162830c6ed79ca96514e3e063"
         }
       },
       "path": "target-authenticated/admin-usuarios-320x568.webp",
-      "bytes": 80966,
-      "sha256": "000c37ddc9ad34273474364e0e96a1c4d17b08d85af5666fc298e0ada15afda8",
+      "bytes": 81400,
+      "sha256": "e5bb64229c5d5c35ec6ade6b3965eb7ecf6a6ca162830c6ed79ca96514e3e063",
       "width": 320,
       "height": 2667,
       "previousBaselineComparison": {
-        "passed": true,
-        "reason": "within_threshold",
-        "changedPixels": 935,
+        "passed": false,
+        "reason": "pixel_drift",
+        "changedPixels": 13122,
         "totalPixels": 853440,
-        "changedPixelRatio": 0.0010955661792275966,
+        "changedPixelRatio": 0.015375421822272216,
         "baselineUsed": {
           "path": "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
           "tracked": true,
@@ -56597,6 +56597,45 @@
       "scope": "Authorized sidebar on five Dashboard routes only. All Admin images and original provenance are preserved; CSS order is corrected against their existing references.",
       "manualReview": "Coordinator: eight representative Dashboard/Opportunities images plus old baselines. Independent reviewer: all thirty-three Visits/Folders/Sales variants. Automatic metrics cover all fifty-five images; no new page overflow or data changes.",
       "previousBaselineManifestSha256": "716bb8ba27f65e50c882cfdb8c36f5514eb05fd043f0a4b4812ae8f46c1a19ee"
+    },
+    {
+      "route": "/admin/usuarios",
+      "sourceRun": 41503395675,
+      "sourceArtifact": 13174480600,
+      "sourceZipSha256": "db5261b81d84a9ce3f10ea48647bc8fc6d3a0ebe1e5718a160d418b48f57d35b",
+      "sourceCaptureCommit": "91073e44171890f88841cc4d2ab7d0ab2096123f",
+      "sourceHead": "791b2a8207d7730a66f89d4c3f57c4551d230d08",
+      "sourceTree": "72a21d9807bf2e544ec6d1874e0fa53ccda1967c",
+      "sourceWorktreeDirtyAtCapture": true,
+      "sourceWorktreeFingerprint": "68387cf2ed328ce1f94b18a5bd8839775ff5e60a3df276e4f7077c80d0e30d7e",
+      "sourceCapturedAt": "2026-11-02T19:45:37.070Z",
+      "sourceDirtyExplanation": "Fingerprint reproduced exactly with empty tracked diff and nineteen generated connected-systems output files from the same artifact. This proof applies only to this capture.",
+      "candidateOverallPassed": false,
+      "candidateFailure": "Only these four mobile Users pixel comparisons exceeded the original threshold. No functional, accessibility, route, theme, approved-canvas or zoom failure.",
+      "functionalPassed": true,
+      "functionalCoverage": {
+        "responsiveScreenshots": 154,
+        "themeScreenshots": 88,
+        "accessibilityAudits": 242,
+        "baselineComparisons": 242,
+        "approvedCanvasComparisons": 22,
+        "approvedCanvasColorDistanceThreshold": 23,
+        "approvedCanvasEdgeDistanceThreshold": 52,
+        "changedPixelRatioThreshold": 0.01,
+        "channelTolerance": 16
+      },
+      "reviewedPaths": [
+        "docs/qa/reference-parity/target-authenticated/admin-usuarios-320x568.webp",
+        "docs/qa/reference-parity/target-authenticated/admin-usuarios-375x812.webp",
+        "docs/qa/reference-parity/target-authenticated/admin-usuarios-390x844.webp",
+        "docs/qa/reference-parity/target-authenticated/themes/mobile-dark/admin-usuarios-dark-390x844.webp"
+      ],
+      "updatedImages": 4,
+      "preservedImages": 238,
+      "method": "same-filesystem transactional rename with rollback",
+      "manualReview": "All four before/after pairs inspected independently. All changed pixels lie in synthetic identity, counters, and the permission matrix containing the new Team item. No changed pixels in outer padding, summary or borders. Twelve real-DOM cases at 375/320 in both CSS orders passed.",
+      "limits": "Verify-mode CI remains failed until a new exact candidate passes. No threshold change; no blanket approval of dirty captures.",
+      "previousBaselineManifestSha256": "5cfff82ccdb7d0a442a7e44dde6f85ac38032666be643c29befff459c9765488"
     }
   ]
 }
