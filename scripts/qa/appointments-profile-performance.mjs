@@ -146,13 +146,11 @@ try {
               ...globalThis.__metrics,
               firstCards: globalThis.__firstCards,
               usefulContentMs: performance.getEntriesByName("useful-content")[0]?.startTime,
-              resources: performance
-                .getEntriesByType("resource")
-                .map((r) => ({
-                  name: new URL(r.name).pathname,
-                  transferSize: r.transferSize,
-                  decodedBodySize: r.decodedBodySize,
-                })),
+              resources: performance.getEntriesByType("resource").map((r) => ({
+                name: new URL(r.name).pathname,
+                transferSize: r.transferSize,
+                decodedBodySize: r.decodedBodySize,
+              })),
             }));
             sample.navigation = navigation;
             sample.pair = pair;

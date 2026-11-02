@@ -203,6 +203,11 @@ ficam em test-results; não são baselines aprovadas ou dados operacionais.
 
 ## Identidade de entrega e documentação
 
+PR 467 aberto para o pacote coordenado. Run inicial 41447032115 parou somente
+em Formatting do script appointments-profile-performance, antes de lint/tipos/
+testes/build/banco. Formatação e dois finais de linha SQL normalizados num único
+ajuste; nenhum sucesso desse run é atribuído aos gates não executados.
+
 Preparado no working tree; commits/PR/CI/publicação ainda serão preenchidos após
 os gates. CI da base foi conferida via API pública: run 41380947066, push/main
 `d4bb4d91`, success. Isso não valida o código novo.
