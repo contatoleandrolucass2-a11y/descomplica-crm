@@ -883,6 +883,15 @@ export function ConnectedIntegrations() {
   return (
     <div className="system-screen">
       <h1>Integrações</h1>
+      {auth.user?.role === "admin" && auth.can("crm.settings.manage") && (
+        <Panel title="WhatsApp Business">
+          <p>
+            Atendimento pela API oficial da Meta, com configuração independente dos formulários do
+            Facebook.
+          </p>
+          <a href="#WhatsApp%20Business">Configurar WhatsApp Business</a>
+        </Panel>
+      )}
       <Panel title="Facebook">
         <p>Meta/Facebook → DESCOMPLICA LEAD</p>
         <p>

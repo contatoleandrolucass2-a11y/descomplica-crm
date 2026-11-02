@@ -1,3 +1,4 @@
+import WhatsAppNotifications from "./WhatsAppNotifications";
 import UserViewSelector from "./UserViewSelector";
 import { workspaceDocument } from "./workspace-document";
 import { useEffect, useState } from "react";
@@ -127,6 +128,10 @@ export default function App({ initialScreen = "Leads" }: { initialScreen?: strin
           </div>
         </Sidebar>
         <LeadNotifications key={auth.user?.id || "preview"} navigate={navigate} />
+        <WhatsAppNotifications
+          key={"whatsapp-" + (auth.user?.id || "preview")}
+          navigate={navigate}
+        />
       </div>
     </MotionConfig>
   );

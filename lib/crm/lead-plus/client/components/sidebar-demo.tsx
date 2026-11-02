@@ -3,6 +3,7 @@ import { useState } from "react";
 import { motion, useReducedMotion } from "motion/react";
 import {
   MessageCircle,
+  MessagesSquare,
   PanelsTopLeft,
   Briefcase,
   Grid3X3,
@@ -24,6 +25,7 @@ import { useAuth } from "../Auth";
 
 const menu = [
   ["Leads", MessageCircle],
+  ["Central de Atendimento", MessagesSquare],
   ["Dashboards", PanelsTopLeft],
   ["Gestão", Briefcase],
   ["Meu DESCOMPLICA LEAD", Grid3X3],

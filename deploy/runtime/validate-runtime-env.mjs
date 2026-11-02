@@ -119,4 +119,21 @@ if (process.env.LEAD_DB_URL) {
   }
 }
 
+// WhatsApp is optional and remains disabled until its dedicated server configuration exists.
+if (process.env.WHATSAPP_ORGANIZATION_ID || process.env.WHATSAPP_CREDENTIAL_KEY) {
+  if (!/^[a-zA-Z0-9-]{1,100}$/.test(process.env.WHATSAPP_ORGANIZATION_ID || ""))
+    fail("WHATSAPP_ORGANIZATION_ID must bind this single-organization installation");
+  const key = process.env.WHATSAPP_CREDENTIAL_KEY || "";
+  if (
+    !/^[a-zA-Z0-9+/]{43}=$/.test(key) ||
+    Buffer.from(key, "base64").length !== 32 ||
+    Buffer.from(key, "base64").toString("base64") !== key
+  )
+    fail("WHATSAPP_CREDENTIAL_KEY must be a canonical base64 32-byte key");
+  if (!/^[0-9]{5,30}$/.test(process.env.WHATSAPP_APP_ID || process.env.META_APP_ID || ""))
+    fail("WhatsApp must use the configured Meta application");
+  if (!/^[a-f0-9]{32}$/i.test(process.env.WHATSAPP_APP_SECRET || process.env.META_APP_SECRET || ""))
+    fail("WhatsApp requires its server-only Meta application secret");
+}
+
 process.stdout.write("Runtime configuration valid; secret values not printed.\n");

@@ -1,4 +1,6 @@
 import CrmUserLinks from "./CrmUserLinks";
+import WhatsAppCentral from "./WhatsAppCentral";
+import WhatsAppSettings from "./WhatsAppSettings";
 import { ConnectedBucket, BucketSettings } from "./Bucket";
 import ImportLeads from "./ImportLeads";
 import Exportations from "./Exportations";
@@ -23,6 +25,10 @@ export default function SystemScreens({
   navigate: (screen: string) => void;
 }) {
   switch (screen) {
+    case "Central de Atendimento":
+      return <WhatsAppCentral />;
+    case "WhatsApp Business":
+      return <WhatsAppSettings />;
     case "Administração":
       return <AdminPanel navigate={navigate} />;
     case "Permissões":

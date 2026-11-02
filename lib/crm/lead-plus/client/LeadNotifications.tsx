@@ -50,9 +50,12 @@ export default function LeadNotifications({ navigate }: { navigate: (route: stri
     const data = result.data;
     if (!data) return;
     const timeout = setTimeout(() => {
-      const current = new Map(data.data.map((lead) => [lead.id, !!lead.bucket_available_at]));
+      const notificationLeads = data.data.filter((lead) => lead.source !== "whatsapp");
+      const current = new Map(
+        notificationLeads.map((lead) => [lead.id, !!lead.bucket_available_at]),
+      );
       if (!previous.current) {
-        const available = data.data.filter((lead) => lead.bucket_available_at);
+        const available = notificationLeads.filter((lead) => lead.bucket_available_at);
         if (available.length)
           setNotices([
             {
@@ -64,7 +67,7 @@ export default function LeadNotifications({ navigate }: { navigate: (route: stri
           ]);
       } else {
         const before = previous.current;
-        const incoming = data.data.flatMap<Notice>((lead) => {
+        const incoming = notificationLeads.flatMap<Notice>((lead) => {
           if (lead.bucket_available_at && !before.get(lead.id))
             return [{ id: lead.id + ":bucket", lead, kind: "bucket" as const }];
           if (!before.has(lead.id) && !lead.archived)

@@ -33,6 +33,7 @@ export default function EmbeddedWorkspace({ initialScreen = "Leads" }: { initial
         createPortal(
           <>
             <link rel="stylesheet" href="/lead-plus/workspace.css" />
+            <link rel="stylesheet" href="/lead-plus/whatsapp-central.css" />
             <div data-theme={theme}>
               <AuthProvider>
                 <WorkspaceApp initialScreen={initialScreen} />

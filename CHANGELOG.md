@@ -1,5 +1,7 @@
 # Changelog
 
+- Adiciona Central de Atendimento WhatsApp Cloud API ao LEAD+, com fila e atribuição transacional, chat, mídia privada, templates aprovados, configuração criptografada, histórico, indicadores e permissões do CRM. Integração permanece desativada até configurar e validar um número oficial.
+
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.
 

@@ -93,3 +93,7 @@ Se as credenciais/callback da Meta ainda estiverem pendentes, reportar a publica
 ### Configuração privada preparada para a promoção
 
 O Compose monta exclusivamente `/etc/descomplica-crm/secrets/lead-plus-runtime.json.prepared` em `/run/secrets/lead-plus-runtime.json`, somente leitura e sem criação automática. O launcher lê apenas a lista permitida LEAD*DB*\_ e META\_\_ da captura direta; não aceita credenciais Meta Ads nem configuração Auth/CRM nesse arquivo. A validação do runtime é repetida depois dessa leitura. O arquivo foi preparado como root:root em modo 0440, legível pelo grupo 0 já utilizado no contêiner, sem modificar production.env, sem reiniciar processos e sem ativar o LEAD+ na versão antiga. A nova imagem passa a consumi-lo somente pela promoção protegida. A origem precisa existir antes da promoção; conferir hash, permissões e backup na VPS. Não publicar os valores.
+
+## Central de Atendimento WhatsApp oficial
+
+A implementação independente de WhatsApp Cloud API está documentada em [Central WhatsApp](lead-plus-whatsapp.md). Não utiliza a credencial de Página da captura de formulários e não substitui o webhook Facebook existente. O módulo permanece desativado sem configuração privada e número oficial/teste; código e testes locais não comprovam recebimento real.
