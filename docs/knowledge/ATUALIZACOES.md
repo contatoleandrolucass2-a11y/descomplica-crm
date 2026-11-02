@@ -1,5 +1,26 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-02 — CAIXA: sidebar retrátil e parcelas
+
+- Escopo: somente `/app/simulacao/caixa`, sidebar responsiva baseada em
+  Agendamentos, fundo pelos tokens do sistema e consulta mensal em diálogo.
+- Base `b93d3904`; health público HTTP 200/status ok, versão
+  `aa28d38e99ec5bf835e5fbde3da3520874c002ec`. Estados local e publicado distintos.
+- Checkout isolado para preservar AGENTS.md e tmp/ preexistentes. O runtime
+  atual sincronizou o conhecimento com sucesso neste checkout.
+- Implementados menu retrátil, superfície por tema e diálogo de parcelas com
+  fechamento por Escape e retorno de foco. Projeção SAC/Price mantém seguros
+  e taxa constantes e informa ausência de TR futura.
+- Validação local Node 24.19/pnpm 11.20: 64 testes aprovados, incluindo sete
+  jornadas sintéticas no Chromium, três temas, celular, desktop, overflow e
+  Axe. Tipos, ESLint focado, Prettier e diff-check aprovados. CI e promoção
+  do candidato ainda pendentes; nenhum dado remoto foi alterado.
+- CI `41509952787`: testes funcionais e três gates aprovados; único bloqueio
+  visual em 11 capturas CAIXA. Artefato `13174094179`, digest
+  `73c090556d2fe6e36677e8fbf70f6e4847164e2b112401edee1125a43832d249`;
+  referências revisadas com demais imagens e limiares preservados. Teste do
+  manifesto: 15 aprovados e 1 condicional. Candidato reconciliado exige nova CI.
+
 - Abertura das melhorias de leitura: [registro](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-LEITURA.md).
 
 ## 2026-11-02: handoff integrado e publicado

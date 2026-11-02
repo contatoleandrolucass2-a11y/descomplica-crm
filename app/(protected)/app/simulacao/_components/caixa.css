@@ -4093,3 +4093,214 @@
     transform: none;
   }
 }
+/* CAIXA: navegação retrátil com a mesma superfície de Agendamentos. */
+.goal-page-shell.caixa-page-shell {
+  --caixa-sidebar-background: #fff;
+  --caixa-sidebar-color: #182a40;
+  background: var(--analytics-page);
+}
+:root[data-theme="balanced"] .goal-page-shell.caixa-page-shell {
+  --caixa-sidebar-background: #d9e1eb;
+}
+:root[data-theme="dark"] .goal-page-shell.caixa-page-shell {
+  --caixa-sidebar-background: #071a31;
+  --caixa-sidebar-color: #f3fbff;
+}
+
+.goal-page-shell.caixa-page-shell .caixa-workspace {
+  grid-template-columns: 224px minmax(0, 1fr);
+  transition: grid-template-columns 180ms ease;
+}
+.goal-page-shell.caixa-page-shell .caixa-workspace[data-sidebar-collapsed="true"] {
+  grid-template-columns: 56px minmax(0, 1fr);
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar {
+  padding: 4px;
+  border: 0;
+  border-right: 1px solid var(--caixa-layout-line);
+  border-radius: 0;
+  background: var(--caixa-sidebar-background);
+  color: var(--caixa-sidebar-color);
+  box-shadow: none;
+  min-height: calc(100dvh - 100px);
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar::before {
+  display: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav > a {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 46px;
+  padding: 8px;
+  border: 0;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  box-shadow: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav > a:is(.active, :hover) {
+  background: color-mix(in srgb, var(--caixa-layout-line) 20%, transparent);
+  color: var(--caixa-layout-accent, #3f7c9d);
+  box-shadow: inset 3px 0 #3f7c9d;
+  transform: none;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar-icon,
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar nav > a.active .caixa-tool-sidebar-icon {
+  flex: 0 0 24px;
+  width: 24px;
+  height: 28px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: inherit;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar-copy > strong {
+  font-size: 14px;
+  white-space: normal;
+  color: inherit;
+}
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar-copy > small,
+.goal-page-shell.caixa-page-shell .caixa-tool-sidebar-arrow {
+  display: none;
+}
+.caixa-sidebar-toggle {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  min-height: 44px;
+  padding: 8px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+.caixa-sidebar-toggle svg {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+}
+.caixa-workspace[data-sidebar-collapsed="true"]
+  :is(.caixa-tool-sidebar-copy, .caixa-sidebar-toggle span) {
+  display: none;
+}
+.caixa-installments-dialog {
+  width: min(900px, calc(100vw - 24px));
+  max-height: 85dvh;
+  padding: 20px;
+  border: 1px solid var(--caixa-layout-line);
+  border-radius: 16px;
+  background: var(--caixa-sidebar-background);
+  color: var(--caixa-sidebar-color);
+}
+.caixa-installments-dialog::backdrop {
+  background: rgb(0 0 0 / 60%);
+}
+.caixa-installments-dialog header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+.caixa-installments-dialog button {
+  padding: 10px 16px;
+  border: 1px solid currentColor;
+  border-radius: 8px;
+  color: inherit;
+  background: transparent;
+  cursor: pointer;
+}
+.caixa-installments-scroll {
+  max-height: 60dvh;
+  overflow: auto;
+}
+.caixa-installments-dialog table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+.caixa-installments-dialog :is(th, td) {
+  padding: 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--caixa-layout-line);
+}
+.caixa-installments-dialog thead {
+  position: sticky;
+  top: 0;
+  background: var(--caixa-sidebar-background);
+}
+.goal-page-shell.caixa-page-shell .caixa-result-summary-heading {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.goal-page-shell.caixa-page-shell .caixa-result-summary-heading > .caixa-result-print {
+  width: auto;
+  flex: 0 0 auto;
+}
+.goal-page-shell.caixa-page-shell .caixa-result-summary-heading > h2 {
+  margin-right: auto;
+}
+@media (max-width: 767px) {
+  .goal-page-shell.caixa-page-shell .caixa-workspace {
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 8px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-tool-sidebar {
+    position: sticky;
+    top: 58px;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-tool-sidebar-copy > strong {
+    font-size: 12px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .goal-page-shell.caixa-page-shell .caixa-workspace {
+    transition: none;
+  }
+}
+@media print {
+  .caixa-installments-dialog {
+    display: none;
+  }
+}
+@media (max-width: 767px) {
+  .goal-page-shell.caixa-page-shell .caixa-workspace,
+  .goal-page-shell.caixa-page-shell .caixa-workspace[data-sidebar-collapsed="true"] {
+    position: relative;
+    display: block;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-tool-sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10;
+    width: min(240px, 85vw);
+    min-height: 0;
+    box-shadow: 8px 12px 24px rgb(0 0 0 / 15%);
+  }
+  .goal-page-shell.caixa-page-shell
+    .caixa-workspace[data-sidebar-collapsed="true"]
+    .caixa-tool-sidebar {
+    width: 48px;
+    border: 0;
+    background: transparent;
+    box-shadow: none;
+  }
+  .goal-page-shell.caixa-page-shell
+    .caixa-workspace[data-sidebar-collapsed="true"]
+    .caixa-tool-sidebar
+    nav {
+    display: none;
+  }
+  .goal-page-shell.caixa-page-shell .caixa-content-toolbar {
+    padding-left: 52px;
+    min-height: 52px;
+  }
+}
