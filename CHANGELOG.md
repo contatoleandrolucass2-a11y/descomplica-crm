@@ -1,5 +1,10 @@
 # Changelog
 
+- Normaliza formatação do script de evidência e finais de linha da migration e
+  do teste SQL do handoff, preservando comportamento e contratos.
+- Mantém a conferência integral do FAQ no módulo diferido e reconhece a nova
+  migration no inventário histórico, sem liberar aplicação de Auth/MFA.
+
 - Unifica a validação visual por impacto, sem aprovar verificações não executadas;
   preserva gates de aplicação e separa o fechamento documental no main.
 - Agendamentos recebe perfil autorizado desde a primeira renderização e relê

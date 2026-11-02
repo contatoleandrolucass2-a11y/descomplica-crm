@@ -1,5 +1,16 @@
 # Worklog
 
+## 2026-11-02 — Normalização do candidato de integração
+
+- A primeira CI do PR 467 parou na formatação do script de medição, antes dos
+  gates pesados. Script normalizado e finais de linha SQL conferidos no diff
+  completo contra produção. Sem mudança de comportamento ou baseline visual.
+- A rodada seguinte aprovou lint/tipos e 4786 testes; quatro falhas identificaram
+  dependências do pacote: FAQ ainda importava o wrapper agora diferido e o
+  inventário de homologação não conhecia a migration aditiva. FAQ passa a testar
+  todo o conteúdo real extraído; versão SQL adicionada somente ao conjunto
+  não implantável do gate histórico, preservando os dois hashes Auth/MFA.
+
 ## 2026-11-02 — Integração do handoff e gates de entrega
 
 - Plano visual comum entre classificador, executor e agregador, com resultados

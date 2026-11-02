@@ -208,6 +208,13 @@ em Formatting do script appointments-profile-performance, antes de lint/tipos/
 testes/build/banco. Formatação e dois finais de linha SQL normalizados num único
 ajuste; nenhum sucesso desse run é atribuído aos gates não executados.
 
+Run 41447538767 em 76e255f5: formatação, lint e tipos passaram; Vitest registrou
+4786 aprovados/112 condicionais e quatro falhas em duas dependências afetadas.
+FAQ agora testa o componente de conteúdo real, conservando todas as asserções
+de texto e fontes. A versão SQL nova entra apenas em
+nonDeployableRepositoryVersions do allowlist histórico de homologação; os dois
+candidatos e hashes Auth/MFA permanecem intactos. Nenhum gate foi ignorado.
+
 Preparado no working tree; commits/PR/CI/publicação ainda serão preenchidos após
 os gates. CI da base foi conferida via API pública: run 41380947066, push/main
 `d4bb4d91`, success. Isso não valida o código novo.
