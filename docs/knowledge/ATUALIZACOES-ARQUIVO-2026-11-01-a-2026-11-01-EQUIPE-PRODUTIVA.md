@@ -254,3 +254,49 @@ pelo Vite e DOM mínimo sintético; não substitui Next autenticado. Registros e
 test-results/admin-css-order/{reference,current}/evidence.json. Tipos, catálogo,
 29 testes de recursos/conhecimento e29 contratos de QA passaram. Baselines ainda
 intactos; captura protegida do candidato integrado pendente.
+
+## Captura do runtime integrado — 02/11/2026
+
+Captura protegida41495047808 aprovada no SHA exato1e43cdfb, árvore limpa e
+fingerprint459704ebddf8aba2499b55359b47c87b897b36c9b987d3a173304c987d31f37d.
+Artefato13169150433, ZIP SHA256
+b8a04491cce4b19850ab23605c423058981ce7acce34e17c8f7199d11523f442, conferido com
+GitHub e arquivo baixado. Os242 hashes/tamanhos de imagens conferem.
+Passaram154 telas responsivas,88 temas,242axe,110zooms,22comparações com canvas
+aprovado,40cenários de navegação e Team6telas+5zooms+teclado. Testes preenchidos
+usam fixtures; a sessão autenticada da captura apresenta ausência de coleta.
+
+A raizAdmin voltou a passar todas11comparações. Revisão detectou residual de
+ordemCSS na densidade de células de Páginas: .admin-pages-results th/td ainda
+empatava com .table th/td. Essas6imagens NÃO são promovidas. O ajuste específico
+é verificado em regressão e a próxima CI deve compará-lo ao baseline preservado.
+
+Revisão independente aprovou33variantes de Visitas/Pastas/Vendas (30imagens
+únicas,3desktopclaro de mesmo hash). Root inspecionou8representantes de Dashboard/
+Oportunidades em1440/390/768/320 e temas médio/escuro, com comparação das bases.
+A sidebar explica o reposicionamento; tabela móvel conserva rolagem própria.
+Canvases estreitos do Dashboard já tinham recortes internos na referência e
+não foram redesenhados nesta demanda. São limites existentes, não prova de
+melhoria desses cards. As22verificações dessas duas rotas passaram no artefato.
+
+Promovidas SOMENTE55 referências das cinco rotas Dashboard com sidebar nova,
+por helper transacional existente extraído sem modificar sua implementação.
+Manifesto composto preserva os187registros/imagens restantes e sua proveniência,
+incluindo TODASAdmin; reviewedUpdates identifica os55arquivos, origem e hashes.
+Revisão de Usuários ainda encontrou empate da summaryGrid/gap e não autorizou
+absorvê-lo: CSS será estabilizado e comparado às referências originais na CI.
+Nenhum limiar/gate foi reduzido. Diferença de fontes desde a captura até este
+ajuste limita-se às regras administrativas, sem correspondência no DOM dessas
+cinco rotas nem em Equipe Produtiva; sua evidência continua pertinente por impacto.
+
+A regressão ampliada renderiza os componentes REAIS Administração,
+PageCatalogManager e UserAccessManager (Master protegido e corretor editável),
+com ações/gates/navegação sintéticos sem I/O nem CRUD. Compara toda a árvore,
+32propriedades, geometria e foco nas duas ordens de CSS. Resultado corrigido:
+24/24cenários aprovados,3temas×1440/390×4estados,overflow0. Os empates remanescentes
+foram reduzidos somente em células/ação de Páginas e gap do resumo de Usuários.
+As referências Admin antigas ficam preservadas: a captura1e43 de Usuários ainda
+mostrava gap12px, portanto suas11imagens não foram promovidas. CI verify deverá
+confirmar a correção contra a referência original. Fontes/teste: admin-canvas.css
+e tests/admin-css-order.browser.mjs; evidência local ignorada no diretório
+admin-css-order. Nenhuma migration remota aplicada nesta etapa.

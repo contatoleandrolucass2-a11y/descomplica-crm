@@ -10698,3 +10698,8 @@ O usuário autorizou os três bloqueios Admin, as duas migrations e a publicaç�
 após gates. A cascata passa a dar prioridade determinística aos tokens do módulo
 nos empates administrativos; regras descendentes permanecem. Integração do main
 b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigidas.
+
+- Captura protegida1e43cdfb aprovada. Promovidas somente55 referências das cinco
+  rotas afetadas pelo sidebar;187 imagens e a proveniência anterior preservadas.
+  TodasAdmin permanecem contra a referência original; regressão de ordem CSS
+  inclui células, ações e resumo. CI verify final ainda obrigatória.

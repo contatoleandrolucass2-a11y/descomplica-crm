@@ -4019,3 +4019,6 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 
 - Estabiliza a prioridade dos estilos de Administração, Páginas e Usuários,
   preservando margens, bordas e filtros contra a ordem dos chunks CSS.
+
+- Atualiza somente as referências revisadas do novo sidebar do Dashboard;
+  mantém os baselines administrativos para validar a correção da cascata CSS.

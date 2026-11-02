@@ -1,5 +1,27 @@
 # Baseline e QA visual — fundação de paridade
 
+## Sidebar de Equipe Produtiva em 02/11/2026
+
+Captura protegida `41495047808` no SHA exato `1e43cdfbaf9a8bab83decbf0fa185880d701c309`,
+árvore limpa. Artefato `13169150433`, ZIP SHA256
+`b8a04491cce4b19850ab23605c423058981ce7acce34e17c8f7199d11523f442` conferido.
+Passaram 154 telas responsivas, 88 temas, 242 auditorias axe, 110 zooms e o
+contrato dedicado de Equipe Produtiva (seis telas, cinco zooms e teclado).
+
+Somente 55 referências de Visão Geral, Oportunidades, Visitas, Pastas e Vendas
+foram promovidas pelo helper transacional existente, após a revisão do sidebar
+solicitado. O coordenador inspecionou oito representantes em desktop, tablet,
+celular e temas; a revisão independente cobriu as 33 variantes das três últimas
+etapas. Métricas e testes cobrem as 55. Tabelas móveis conservam rolagem própria;
+recortes internos já existentes nos cards estreitos do Dashboard não foram
+redesenhados. Isso não constitui uma aprovação geral desses layouts legados.
+
+As outras 187 imagens e sua proveniência foram preservadas, incluindo todas as
+referências administrativas. Os empates de CSS Admin são corrigidos contra a
+referência existente, sem absorver sua deriva. `reviewedUpdates` registra SHA,
+árvore, hashes e escopo desta promoção. Os limiares continuam 1%/16; CI normal
+em modo de verificação do candidato final permanece obrigatória.
+
 ## Sidebar automatico de Agendamentos em 31/10/2026
 
 CI `41201061134`, captura `d25b38d38b854adfcf4eb592d3876643b1d828ff`,
