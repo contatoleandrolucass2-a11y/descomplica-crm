@@ -141,3 +141,13 @@
   Transporte/theme sintéticos não equivalem ao backend autenticado final.
 - Lint, sintaxe, formatação e diff aprovados. A nova CI deve executar o método
   corrigido antes de qualquer integração ou publicação.
+
+## Atualização documental concorrente
+
+- Em 02/11/2026, a branch remota avançou para `d4bb4d91` pelo PR466, somente
+  documental. A nova CI não foi criada para `a0866c9f` porque o índice de
+  conhecimento passou a ter conflito com esse main.
+- Merge preserva integralmente o registro documental já integrado e a nota
+  desta demanda. Somente o conflito do último parágrafo do índice foi resolvido:
+  referência atual publicada `0dab1578` mais o link de Equipe Produtiva. Nenhum
+  código de outra página foi alterado. Conferir novamente main/CI antes de integrar.

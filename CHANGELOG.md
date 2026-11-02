@@ -9,6 +9,7 @@
 
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.
+  Validado com atualização cruzada entre navegadores e celular emulado.
 
 - Evita reconstruir o comparativo de linhas ao arrastar ou copiar gráficos de
   Agendamentos e reutiliza a configuração de data de São Paulo, preservando cálculos.
