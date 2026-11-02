@@ -240,6 +240,22 @@ const seeds: readonly AppointmentsSeed[] = [
     height: 528,
   },
   {
+    id: "ranking-pdv",
+    metric: "ranking.pdv",
+    title: "Ranking por PDV: Nome do Empreendimento",
+    type: "horizontal-bars",
+    columnSpan: 6,
+    height: 500,
+  },
+  {
+    id: "ranking-development",
+    metric: "ranking.development",
+    title: "Ranking por Nome do empreendimento",
+    type: "horizontal-bars",
+    columnSpan: 6,
+    height: 500,
+  },
+  {
     id: "appointments-monthly",
     metric: "appointments.monthly",
     title: "Agendamentos por mês",
@@ -256,12 +272,20 @@ const seeds: readonly AppointmentsSeed[] = [
     columnSpan: 12,
     height: 720,
   },
+  {
+    id: "appointments-overdue",
+    metric: "appointments.overdue",
+    title: "Agendamentos vencidos sem visita realizada",
+    type: "table",
+    columnSpan: 12,
+    height: 500,
+  },
 ];
 
 const chartMetrics = new Set(
   seeds
     .slice(seeds.findIndex((seed) => seed.id === "appointments-funnel") + 1)
-    .filter((seed) => seed.id !== "appointments-details")
+    .filter((seed) => seed.id !== "appointments-details" && seed.id !== "appointments-overdue")
     .map((seed) => seed.metric),
 );
 

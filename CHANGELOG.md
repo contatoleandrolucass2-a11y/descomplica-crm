@@ -1,5 +1,12 @@
 # Changelog
 
+- Melhora a leitura de Agendamentos com rolagem vertical, recência espaçada e
+  data abaixo do responsável; comparativo respeita dias do filtro e mostra
+  somente o valor numérico no ponto. Destaca feriados nacionais com explicação.
+- Adiciona rankings distintos de PDV e empreendimento e tabela paginada de
+  comparecimentos vencidos sem visita, com os mesmos filtros e exportação integral.
+  Expansão dos layouts existentes depende de migration autorizada após CI verde.
+
 - Publica o pacote coordenado do handoff em aa28d38e, após CI completa e promoção
   protegida. Aplica somente as duas migrations autorizadas; mantém a leitura por
   intervalo desligada e registra evidências, recuperação e bloqueios oficiais.

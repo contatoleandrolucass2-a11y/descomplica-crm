@@ -121,14 +121,15 @@ describe("appointment month comparison", () => {
     expect(november.series[0].values.every((value) => value === null)).toBe(true);
     expect(november.series[1].values[0]).toBe(4);
     expect(november.series[2].values[0]).toBe(0.4); // Ten covered months, not twelve.
-    expect(november.series[2].values[30]).toBe(1); // Six valid and covered 31sts.
+    expect(november.days).toHaveLength(30);
+    expect(november.series[2].values).toHaveLength(30);
     const nextYear = buildAppointmentComparison(input, { month: "2027-02" });
     expect(nextYear.series.every((series) => series.values.every((value) => value === null))).toBe(
       true,
     );
   });
 
-  it("compares whole months while preserving dimensions and the original temporal selection", () => {
+  it("compares selected day numbers while preserving dimensions and the original temporal selection", () => {
     const input = slice({
       facts: [
         fact("2026-03-01", 2),
@@ -152,9 +153,10 @@ describe("appointment month comparison", () => {
     const before = JSON.stringify({ input, filters });
     const result = buildAppointmentComparison(input, { month: "2026-03", filters });
     expect(result.series[0].values[0]).toBe(2);
-    expect(result.series[0].values[1]).toBe(3);
+    expect(result.days).toEqual([1]);
+    expect(result.series[0].values).toEqual([2]);
     expect(result.series[1].values[0]).toBe(4);
-    expect(result.description).toContain("Seleções de dia, semana e intervalo não se aplicam");
+    expect(result.description).toContain("filtros de período e equipe mantidos");
     expect(JSON.stringify({ input, filters })).toBe(before);
   });
 
