@@ -6,6 +6,7 @@
   inclusive quando o corretor mudou de gerente após uma atividade histórica.
   A cobertura inclui acesso no banco e os cinco níveis equivalentes de zoom
   da matriz vigente, com a sidebar real.
+  O contrato de navegação compartilhado inclui o novo destino do Dashboard.
 
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.

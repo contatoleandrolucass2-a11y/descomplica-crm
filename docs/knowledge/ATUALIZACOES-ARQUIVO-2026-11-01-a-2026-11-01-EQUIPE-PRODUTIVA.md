@@ -151,3 +151,24 @@
   desta demanda. Somente o conflito do último parágrafo do índice foi resolvido:
   referência atual publicada `0dab1578` mais o link de Equipe Produtiva. Nenhum
   código de outra página foi alterado. Conferir novamente main/CI antes de integrar.
+
+## Captura autenticada da página aprovada
+
+- Candidato `34fc2e14`, captura41382879652, artefato13115485626: a página aprovou
+  seis capturas reais nos três temas em 390/1440, teclado, axe e cinco níveis de
+  zoom equivalente. `productive-team-results.json` registra `passed: true`,
+  `keyboard: true`, `zoom: true` e cinco zoomChecks. Isso é evidência da página,
+  não aprovação da matriz global inteira, que parou posteriormente.
+- Falha posterior: `archive-navigation` tinha sete links estáticos esperados
+  para o submenu Dashboard. A interface já tinha oito pelo novo catálogo.
+  Os 40 cenários pararam no mesmo assertLinks, com Dashboard aberto e sem erros
+  de runtime. Dependência comprovada do menu novo, não falha de regra financeira.
+  Correção limita-se a acrescentar Equipe Produtiva nesse conjunto esperado.
+- CI41382879854 aprovou 4.786 testes e falhou em uma asserção estática que
+  esperava a assinatura antiga do helper de captura. A expectativa agora inclui
+  o terceiro argumento opcional com default false, preservando o contrato das
+  chamadas anteriores. Fonte: `tests/visual-parity-completeness.test.ts`.
+- Validação local dos dois contratos corrigidos: 32 testes aprovados, lint,
+  formatação e diff aprovados. Nenhum baseline nem funcionalidade de simulador
+  foi alterado para liberar o gate. Capturas locais ignoradas em
+  `test-results/equipe-produtiva-ci-34fc`. Nova CI ainda obrigatória.

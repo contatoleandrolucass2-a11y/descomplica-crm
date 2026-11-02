@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+[Equipe Produtiva](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
+
 - Agendamentos: abertura do ajuste direto das torres, títulos e layout compacto.
   Fontes e limites no histórico AGENDAMENTOS de 30/10/2026.
 
@@ -3235,4 +3237,3 @@ Registros integrais de persistência e edição entre navegadores em [arquivo de
 Agendamentos em 390×844 manteve os 28 itens após refresh, com ajuste à largura da tela. Evidências e limites no [arquivo de Agendamentos](ATUALIZACOES-ARQUIVO-2026-10-30-a-2026-10-30-AGENDAMENTOS.md), seção de celular simulado.
 
 PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências acima.
-[Equipe Produtiva](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).

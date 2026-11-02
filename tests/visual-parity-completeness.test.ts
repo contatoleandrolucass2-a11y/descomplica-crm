@@ -344,7 +344,9 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain('topbarCollisionPairs.push("brand×actions")');
     expect(script).toContain("actionChildren[firstIndex]");
     expect(script).toContain("topbarCollisionPairs.length > 0");
-    expect(script).toContain("async function capturePersistedScreenshot(page, comparableBuffer)");
+    expect(script).toContain(
+      "async function capturePersistedScreenshot(page, comparableBuffer, viewportOnly = false)",
+    );
     expect(script).toContain('data-qa-evidence-identity="remote-homologation"');
     expect(script).toContain("mask visible identity and email regions before persistence");
     expect(script).toContain("installSyntheticInventoryForVisualCapture");

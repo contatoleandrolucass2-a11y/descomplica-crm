@@ -35,6 +35,11 @@
   media queries de desktop. O teste dedicado agora segue o método vigente da
   matriz, com cinco viewports equivalentes e deviceScaleFactor, sem alterar UI,
   limites ou baselines. A função exata passou localmente; nova CI necessária.
+- Captura `34fc2e14` aprovou a página autenticada: seis telas, teclado, axe e
+  cinco níveis de zoom. A matriz parou depois porque a expectativa do menu
+  compartilhado ainda tinha sete links. Acrescentada somente a nova entrada;
+  nenhuma regra ou tela de simulador foi alterada. Também foi alinhada a
+  asserção da assinatura do helper de captura. As duas suítes passaram 32 testes.
 
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
