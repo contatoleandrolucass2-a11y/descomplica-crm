@@ -58,7 +58,7 @@ CREATE INDEX wa_conversations_contact_idx ON c2s_app.wa_conversations(contact_id
 CREATE TABLE c2s_app.wa_messages (
   id uuid PRIMARY KEY, organization_id text NOT NULL, account_id uuid NOT NULL, conversation_id uuid NOT NULL,
   provider_id text, client_message_id uuid, direction text NOT NULL CHECK (direction IN ('inbound','outbound')),
-  type text NOT NULL CHECK (type IN ('text','image','document','audio','video','sticker','location','contacts','interactive','template','unsupported')),
+  type text NOT NULL CHECK (type IN ('text','image','document','audio','video','sticker','location','contacts','interactive','button','reaction','template','unsupported')),
   content jsonb NOT NULL DEFAULT '{}', media_reference jsonb,
   delivery_status text NOT NULL CHECK (delivery_status IN ('received','queued','sending','sent','delivered','read','failed','uncertain')),
   status_at timestamptz, error_code text, attempts integer NOT NULL DEFAULT 0,

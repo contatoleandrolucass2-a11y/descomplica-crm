@@ -3,6 +3,7 @@ import { execFileSync } from "node:child_process";
 import { randomBytes, randomUUID } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
+import { parseWhatsAppWebhook } from "../lib/crm/lead-plus/server/whatsapp-cloud.mjs";
 // @ts-expect-error The operational store is a server ESM module.
 import { nextDeliveryStatus, whatsappStore } from "../lib/crm/lead-plus/server/whatsapp-store.mjs";
 type LocalTestPool = {
@@ -157,6 +158,20 @@ describe.runIf(process.env.LEAD_WHATSAPP_PG_TEST === "1")(
       for (const job of await store.leaseEvents()) await store.processEvent(job);
       return (await store.conversations(admin)).data[0];
     };
+    it("passes the isolated pgTAP ACL/RLS suite without changing any existing database", () => {
+      const output = sql(
+        readFileSync(
+          new URL(
+            "../lib/crm/lead-plus/server/migrations/tests/whatsapp-rls.test.sql",
+            import.meta.url,
+          ),
+          "utf8",
+        ),
+      );
+      expect(output).toContain("1..50");
+      expect(output).not.toMatch(/not ok|Looks like you failed/i);
+      expect(output.match(/^\s*ok \d+/gm)).toHaveLength(50);
+    });
     it("enables RLS and denies direct browser/service-role access to every WhatsApp table", async () => {
       const result = await pool.query(
         "SELECT c.relname,c.relrowsecurity,has_table_privilege('anon',c.oid,'SELECT') anon,has_table_privilege('authenticated',c.oid,'SELECT') authenticated,has_table_privilege('service_role',c.oid,'SELECT') service FROM pg_class c JOIN pg_namespace n ON n.oid=c.relnamespace WHERE n.nspname='c2s_app' AND c.relkind='r' AND c.relname LIKE 'wa_%'",
@@ -185,6 +200,58 @@ describe.runIf(process.env.LEAD_WHATSAPP_PG_TEST === "1")(
       const conversation = (await store.conversations(admin)).data[0];
       expect(conversation.status).toBe("waiting");
       expect((await store.messages(broker, conversation.id)).data).toHaveLength(1);
+    });
+    it("persists official button replies and reactions through the parser and private schema", async () => {
+      const account = await configured();
+      const timestamp = String(Math.floor(Date.now() / 1000));
+      const events = parseWhatsAppWebhook(
+        {
+          object: "whatsapp_business_account",
+          entry: [
+            {
+              id: account.waba_id,
+              changes: [
+                {
+                  field: "messages",
+                  value: {
+                    messaging_product: "whatsapp",
+                    metadata: { phone_number_id: account.phone_number_id },
+                    messages: [
+                      {
+                        id: "wamid.button",
+                        from: "5511999990000",
+                        timestamp,
+                        type: "button",
+                        button: { text: "Tenho interesse" },
+                      },
+                      {
+                        id: "wamid.reaction",
+                        from: "5511999990000",
+                        timestamp,
+                        type: "reaction",
+                        reaction: { emoji: "👍", message_id: "wamid.button" },
+                      },
+                    ],
+                  },
+                },
+              ],
+            },
+          ],
+        },
+        [account],
+      );
+      expect(events).toHaveLength(2);
+      await store.enqueueEvents(account, events);
+      for (const job of await store.leaseEvents()) await store.processEvent(job);
+      const row = (await store.conversations(admin)).data[0];
+      const persisted = (await store.messages(admin, row.id)).data;
+      expect(persisted.map((message: { type: string }) => message.type).sort()).toEqual([
+        "button",
+        "reaction",
+      ]);
+      expect(
+        persisted.find((message: { type: string }) => message.type === "button").content.text,
+      ).toBe("Tenho interesse");
     });
     it("reuses an active contact/conversation and preserves newest customer timestamp out of order", async () => {
       const account = await configured();
