@@ -10668,3 +10668,5 @@ Validação local do candidato Lead+: build Next e tipos aprovados, lint sem err
   65 testes pertinentes aprovados após correção.
 - Migration20261102175113 autorizada pelo usuário após CI verde. Preflight MCP
   do projeto confirmado:2perfis, máximo29cards, nenhum acima47. Sem aplicação ainda.
+
+- Registro de leitura nomeado conforme o padrão de arquivos do runtime Obsidian, para sincronizar conteúdo e referência juntos.

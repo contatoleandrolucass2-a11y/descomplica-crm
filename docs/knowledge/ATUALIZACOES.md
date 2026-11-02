@@ -1,6 +1,6 @@
 # Aprendizados e atualizacoes
 
-- Abertura das melhorias de leitura: [registro](ATUALIZACOES-2026-11-02-AGENDAMENTOS-LEITURA.md).
+- Abertura das melhorias de leitura: [registro](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-LEITURA.md).
 
 ## 2026-11-02: handoff integrado e publicado
 
