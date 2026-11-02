@@ -1,5 +1,9 @@
 # Changelog
 
+- Padroniza a recência de Agendamentos com os rankings, incluindo barras de
+  dias e data abaixo do responsável. Detalhamento geral e vencidos passam a
+  exibir a lista completa com rolagem, sem botões de paginação.
+
 - Publica as melhorias de leitura de Agendamentos em2556898d e aplica a
   expansão autorizada dos layouts salvos, preservando os cards anteriores.
   Persistência de dimensão/ordem comprovada entre Chrome, integrado e

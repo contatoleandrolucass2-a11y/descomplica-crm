@@ -1,5 +1,7 @@
 # Aprendizados e atualizacoes
 
+- Agendamentos: [recência e rolagem integral](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-AGENDAMENTOS-ROLAGEM.md).
+
 ## 2026-11-02 — CAIXA: sidebar retrátil e parcelas
 
 - Escopo: somente `/app/simulacao/caixa`, sidebar responsiva baseada em

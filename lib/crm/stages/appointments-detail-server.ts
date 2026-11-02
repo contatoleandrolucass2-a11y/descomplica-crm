@@ -49,8 +49,13 @@ export const appointmentDetailRequestSchema = z
     query: appointmentDetailQuerySchema,
     snapshot: z.string().regex(/^[a-f0-9]{64}$/u),
     cursor: z.string().max(512).nullable().optional(),
+    all: z.literal(true).optional(),
   })
-  .strict();
+  .strict()
+  .refine((request) => !request.all || request.cursor == null, {
+    message: "A complete read cannot contain a cursor.",
+    path: ["cursor"],
+  });
 const digest = (value: unknown) =>
   createHash("sha256")
     .update(
@@ -112,7 +117,9 @@ export function appointmentDetailPage(
   model: AppointmentsReadModel,
   query: AppointmentDetailQuery,
   cursor?: string | null,
+  all = false,
 ): AppointmentDetailPage {
+  if (all && cursor != null) throw new Error("A complete read cannot contain a cursor.");
   const rows = fullAppointmentDetails(model, query);
   if (rows === null) throw new AppointmentDetailsUnavailableError();
   const snapshot = appointmentSnapshotIdentity(model);
@@ -135,13 +142,13 @@ export function appointmentDetailPage(
     snapshot,
     total,
     offset,
-    rows: rows.slice(offset, offset + APPOINTMENT_DETAIL_PAGE_SIZE),
+    rows: all ? rows : rows.slice(offset, offset + APPOINTMENT_DETAIL_PAGE_SIZE),
     previousCursor:
       offset > 0
         ? encodeCursor(snapshot, query, Math.max(0, offset - APPOINTMENT_DETAIL_PAGE_SIZE))
         : null,
     nextCursor:
-      offset + APPOINTMENT_DETAIL_PAGE_SIZE < total
+      !all && offset + APPOINTMENT_DETAIL_PAGE_SIZE < total
         ? encodeCursor(snapshot, query, offset + APPOINTMENT_DETAIL_PAGE_SIZE)
         : null,
   };

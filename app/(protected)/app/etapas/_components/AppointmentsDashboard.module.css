@@ -1216,21 +1216,14 @@
   list-style: none;
 }
 .recencyList li {
-  display: grid;
-  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 0.65rem;
-  min-height: 3.5rem;
-  padding: 0.65rem 1rem;
-  border-bottom: 1px solid var(--analytics-line);
+  min-width: 0;
+  padding: 0.35rem;
+  border-radius: 0.5rem;
   font-size: 0.76rem;
   transition: background-color 160ms ease-out;
 }
 .recencyList li:hover {
   background: color-mix(in srgb, var(--analytics-cyan-strong) 12%, transparent);
-}
-.recencyList li:last-child {
-  border-bottom: 0;
 }
 .recencyList strong,
 .recencyList span {
@@ -1241,8 +1234,8 @@
   color: var(--analytics-muted);
 }
 .recencyManager {
-  display: grid;
-  gap: 0.15rem;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .recencyOwner small {
   color: var(--analytics-muted);
@@ -2180,7 +2173,7 @@
 }
 
 .recencyLabels,
-.recencyList li {
+.recencyHeading {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr) auto;
   gap: 0.5rem;
@@ -2201,22 +2194,45 @@
 }
 
 .recencyList li {
-  align-items: start;
   flex: 0 0 auto;
-  min-height: 4.25rem;
-  padding: 0.65rem 0.35rem;
+  min-height: 0;
+  padding: 0.35rem;
   line-height: 1.4;
+}
+
+.recencyHeading {
+  align-items: start;
+  font-size: calc(0.82rem * var(--dashboard-font-scale, 1));
+}
+
+.recencyHeading strong {
+  font-weight: 500;
 }
 
 .recencyOwner {
   display: grid;
   min-width: 0;
-  gap: 0.35rem;
+  gap: 0.2rem;
 }
 
-.recencyOwner small {
-  font-size: calc(0.7rem * var(--dashboard-font-scale, 1));
+.recencyOwner .recencyDate {
+  font-size: calc(0.68rem * var(--dashboard-font-scale, 1));
   line-height: 1.4;
+}
+
+.recencyTrack {
+  height: 0.625rem;
+  margin-top: 0.4rem;
+  border-radius: 3px;
+  background: var(--analytics-surface-strong);
+}
+
+.recencyTrack > span {
+  display: block;
+  max-width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  background: var(--analytics-cyan-strong);
 }
 
 .recencyLabels > :last-child,
@@ -2238,7 +2254,7 @@
     display: none;
   }
 
-  .recencyList li {
+  .recencyHeading {
     grid-template-columns: minmax(0, 1fr) auto;
   }
 

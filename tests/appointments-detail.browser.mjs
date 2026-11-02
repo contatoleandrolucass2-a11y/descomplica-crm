@@ -17,7 +17,7 @@ await mkdir(out, { recursive: true });
 const require = createRequire(import.meta.url);
 const viteRequire = createRequire(require.resolve("vitest/package.json"));
 const { build } = await import(pathToFileURL(viteRequire.resolve("vite")).href);
-const model = appointmentModel();
+const model = appointmentModel(273);
 const compact = compactAppointmentSummary(model.analysis);
 const query = {
   view: "all",
@@ -36,7 +36,7 @@ const rowsFor = (query) =>
     )
     .map((row) => ({ ...row, daysSinceAppointment: 12 }));
 const cursor = (offset) => Buffer.from(JSON.stringify({ offset })).toString("base64url");
-const pageFor = (query, requestedCursor) => {
+const pageFor = (query, requestedCursor, all = false) => {
   const rows = rowsFor(query);
   const offset = requestedCursor
     ? JSON.parse(Buffer.from(requestedCursor, "base64url").toString()).offset
@@ -46,9 +46,9 @@ const pageFor = (query, requestedCursor) => {
     snapshot,
     total: rows.length,
     offset,
-    rows: rows.slice(offset, offset + 50),
-    nextCursor: offset + 50 < rows.length ? cursor(offset + 50) : null,
-    previousCursor: offset ? cursor(Math.max(0, offset - 50)) : null,
+    rows: all ? rows : rows.slice(offset, offset + 50),
+    nextCursor: !all && offset + 50 < rows.length ? cursor(offset + 50) : null,
+    previousCursor: !all && offset ? cursor(Math.max(0, offset - 50)) : null,
   };
 };
 const initialSource = {
@@ -106,7 +106,7 @@ const evidence = {
   head: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
   workingTree: true,
   method:
-    "Chromium loopback; synthetic 123-row snapshot; actual Dashboard/compact codec with mocked authorized server transport. Separate unit tests cover canonical loader guards and snapshot identity.",
+    "Chromium loopback; synthetic 273-row snapshot with 136 House rows; actual Dashboard/compact codec with mocked authorized server transport. Separate unit tests cover canonical loader guards and snapshot identity.",
 };
 let mode = "ready";
 const server = createServer(async (req, res) => {
@@ -130,10 +130,12 @@ const server = createServer(async (req, res) => {
         owner: input.query.filters.owner ?? null,
         channel: input.query.filters.channel,
         cursor: input.cursor,
+        all: input.all,
       });
       if (mode === "snapshot_changed")
         return res.end(JSON.stringify({ status: "snapshot_changed" }));
-      const result = pageFor(input.query, input.cursor);
+      assert.equal(input.all, true);
+      const result = pageFor(input.query, input.cursor, input.all);
       setTimeout(
         () => res.end(JSON.stringify(result)),
         input.query.filters.owner === "Corretor A" ? 300 : 25,
@@ -185,32 +187,38 @@ try {
   });
   await page.goto(origin);
   const table = page.getByRole("table");
-  await expect(table.locator("tbody tr")).toHaveCount(50);
-  assert.equal(evidence.requests.length, 0);
-  await page.getByRole("button", { name: "Próxima página", exact: true }).focus();
-  await page.keyboard.press("Enter");
-  await expect(table.locator("tbody tr")).toHaveCount(11);
-  await expect(table).toContainText("Conta sintética 00121");
-  await page.getByRole("button", { name: "Página anterior", exact: true }).press("Enter");
-  await expect(table.locator("tbody tr")).toHaveCount(50);
+  await expect(table.locator("tbody tr")).toHaveCount(136);
+  assert.equal(evidence.requests.length, 1);
+  assert.equal(evidence.requests[0].all, true);
+  await expect(page.getByRole("button", { name: "Próxima página", exact: true })).toHaveCount(0);
+  await expect(page.getByRole("button", { name: "Página anterior", exact: true })).toHaveCount(0);
+  await expect(table).toContainText("Conta sintética 00271");
+  const viewport = table.locator("..");
+  await viewport.focus();
+  await page.keyboard.press("End");
+  await expect(table.locator("tbody tr").last()).toBeInViewport();
+  evidence.scroll = await viewport.evaluate((el) => ({
+    client: el.clientHeight,
+    scroll: el.scrollHeight,
+    top: el.scrollTop,
+  }));
+  assert(evidence.scroll.top > 0);
   const downloadPromise = page.waitForEvent("download");
   await page.getByRole("button", { name: "Exportar CSV completo", exact: true }).press("Enter");
   const download = await downloadPromise;
   const downloaded = [];
   for await (const chunk of await download.createReadStream()) downloaded.push(chunk);
-  assert(Buffer.concat(downloaded).toString().includes("Conta sintética 00121"));
-  assert.deepEqual(evidence.exports, [61]);
+  assert(Buffer.concat(downloaded).toString().includes("Conta sintética 00271"));
+  assert.deepEqual(evidence.exports, [136]);
   const owner = page.getByRole("combobox", { name: "Responsável da conta", exact: true });
   await owner.selectOption("Corretor A");
   await expect.poll(() => evidence.requests.at(-1)?.owner).toBe("Corretor A");
   await owner.selectOption("Corretor B");
-  await expect(table.locator("tbody tr")).toHaveCount(50);
+  await expect(table.locator("tbody tr")).toHaveCount(136);
   await expect(table).toContainText("Corretor B");
   await page.waitForTimeout(350);
-  await expect(table.locator("tbody tr")).toHaveCount(50);
+  await expect(table.locator("tbody tr")).toHaveCount(136);
   await expect(table).toContainText("Corretor B");
-  await page.getByRole("button", { name: "Próxima página", exact: true }).press("Enter");
-  await expect(table.locator("tbody tr")).toHaveCount(11);
   const beforeLayoutRequests = evidence.requests.length;
   const card = page.locator('[data-dashboard-card-id="appointments-details"]');
   const handle = card.getByRole("button", {
@@ -235,15 +243,15 @@ try {
     .getByRole("button", { name: "Copiar Detalhamento dos agendamentos", exact: true })
     .press("Enter");
   await expect(page.getByRole("table")).toHaveCount(2);
-  await expect(page.getByRole("table").first().locator("tbody tr")).toHaveCount(11);
-  await expect(page.getByRole("table").last().locator("tbody tr")).toHaveCount(11);
+  await expect(page.getByRole("table").first().locator("tbody tr")).toHaveCount(136);
+  await expect(page.getByRole("table").last().locator("tbody tr")).toHaveCount(136);
   await page.waitForTimeout(100);
   assert.equal(evidence.requests.length, beforeLayoutRequests);
   evidence.layout = {
     pointerDrag: "passed",
     keyboardResize: "passed",
     copy: "passed",
-    preservedRowsPerCopy: 11,
+    preservedRowsPerCopy: 136,
     additionalRequests: 0,
   };
   mode = "snapshot_changed";
