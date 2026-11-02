@@ -26,3 +26,5 @@ export function handleMetaWebhook(
   request: Request,
   dependencies?: Record<string, unknown>,
 ): Promise<Response>;
+
+export function handleWhatsAppWebhook(request: Request, dependencies?: Record<string, unknown>): Promise<Response>;

@@ -122,7 +122,8 @@
         "app/(protected)/app/leads/auditoria/page.tsx",
         "app/(protected)/app/leads/exportar/route.ts",
         "app/(protected)/app/leads/backend/[...path]/route.ts",
-        "app/webhooks/meta/route.ts"
+        "app/webhooks/meta/route.ts",
+        "app/api/integrations/whatsapp/webhook/route.ts"
       ],
       "evidence": [
         "tests/page-registry.test.ts",
