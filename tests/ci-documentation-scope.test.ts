@@ -140,5 +140,11 @@ describe("documentation-only CI selection", () => {
         `  ${name}:\n    if: needs.validate.outputs.documentation_only != 'true'`,
       );
     }
+    for (const name of ["isolated-restore", "promotable-image"]) {
+      const job = workflow.split(`  ${name}:`)[1]!.split("    needs:")[0]!;
+      expect(job).toContain(
+        "(github.event_name == 'push' || github.event_name == 'workflow_dispatch') && github.ref == 'refs/heads/main'",
+      );
+    }
   });
 });

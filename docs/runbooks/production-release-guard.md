@@ -45,10 +45,19 @@ Antes da troca, o coordenador verifica:
 1. Registro, `production.env`, imagem do container e health local/público
    concordam com o deployment ID, SHA e image ID esperados.
 2. `main` remoto corresponde ao candidato; a execução **concluída** de
-   `.github/workflows/ci.yml` é `push/main` no SHA exato e todos os jobs foram
+   `.github/workflows/ci.yml` é `push/main` ou `workflow_dispatch` na `main`
+   no SHA exato e todos os jobs foram
    aprovados, incluindo `validate`, `release-gates`, `isolated-restore` e
    `promotable-image`. A consulta usa a API GitHub; indisponibilidade ou rate
    limit bloqueia, sem usar cache como fallback.
+
+   Se main avançar somente por documentação após uma aplicação aprovada,
+   executar `gh workflow run ci.yml --ref main` e aguardar os quatro jobs.
+   A execução manual não usa a faixa documental: gera imagem própria do SHA
+   atual e executa validação completa. Informar seu run ID ao coordenador.
+   Execuções manuais de outras branches, SHAs antigos, jobs ignorados ou
+   incompletos continuam recusados. Reconsultar main antes da promoção.
+
 3. A observação final, incluindo a segunda consulta à CI/main, está no mesmo
    minuto UTC da escrita e do início do Compose, com idade máxima de 60 s.
    O relógio não pode retroceder. Espera ou virada de minuto exige nova

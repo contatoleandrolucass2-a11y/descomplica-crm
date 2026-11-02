@@ -1,5 +1,18 @@
 # Aprendizados e atualizacoes
 
+## 2026-11-02 — Correção autorizada do deploy documental e publicação CAIXA
+
+- Pedido explícito: corrigir a incompatibilidade e publicar a CAIXA, sem alterar
+  outras páginas. Base main8697ade2; CAIXA a93d65b2 com quatro gates aprovados
+  no run41523108306. CI documental41527166188 ignora três jobs e não é aprovação
+  para runtime. Produção2556898d saudável; versão será reconferida na promoção.
+- Solução: execução manual completa somente sobre main exata, com os mesmos
+  quatro gates e imagem própria. Sem herdar aprovação, aceitar SHA antigo,
+  enfraquecer CAS/locks ou transformar jobs ignorados em aprovação.
+- Validação focada Node24.19/pnpm11.20: 65 testes de política/motor de deploy
+  e 41 testes do contrato de CI/release aprovados. A classificação documental
+  segue recusando workflow_dispatch, que executa o caminho completo.
+
 ## 2026-11-02 — CAIXA: sidebar retrátil e parcelas
 
 - Escopo: somente `/app/simulacao/caixa`, sidebar responsiva baseada em
