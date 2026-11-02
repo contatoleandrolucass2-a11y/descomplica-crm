@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { appendFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
 
-import { authenticatedVisualRoutes } from "../qa/visual-route-scope.mjs";
+import { authenticatedVisualRoutes, buildVisualCheckPlan } from "../qa/visual-route-scope.mjs";
 
 const revision = /^[a-f0-9]{40}$/;
 
@@ -21,13 +21,20 @@ const documentationPath = /^(?:CHANGELOG\.md|WORKLOG\.md|docs\/.*|conhecimento\/
 const metaAdsPath =
   /^(?:app\/(?:\(protected\)\/app|api)\/meta-ads\/|lib\/meta-ads\/|public\/(?:canvas|descomplica-ads-compact)\/|scripts\/qa\/meta-ads-frame\.mjs$|tests\/meta-ads[^/]*\.(?:ts|tsx)$)/;
 const globalVisualPath =
-  /^(?:\.github\/workflows\/|AGENTS\.md$|package\.json$|pnpm-lock\.yaml$|next\.config\.ts$|postcss\.config\.mjs$|proxy\.ts$|app\/(?:layout|globals|_components)\b|app\/\(protected\)\/(?:layout|_components)\b|lib\/(?:auth|authorization|navigation)\/|scripts\/ci\/visual-impact-scope\.mjs$|scripts\/qa\/(?:authenticated-visual|local-authenticated-visual)\.mjs$|tests\/(?:ci-visual-impact-scope|visual-parity-completeness)\.test\.ts$|supabase\/)/;
+  /^(?:\.github\/workflows\/|AGENTS\.md$|package\.json$|pnpm-lock\.yaml$|next\.config\.ts$|postcss\.config\.mjs$|proxy\.ts$|app\/(?:layout|globals|_components)\b|app\/\(protected\)\/(?:layout|_components)\b|app\/\(protected\)\/app\/_components\/analytics\/|lib\/(?:auth|authorization|navigation|dashboard-canvas)\/|scripts\/ci\/visual-impact-scope\.mjs$|scripts\/qa\/(?:authenticated-visual|local-authenticated-visual)\.mjs$|tests\/(?:ci-visual-impact-scope|visual-parity-completeness)\.test\.ts$|supabase\/)/;
 
 function addAll(target, values) {
   for (const value of values) target.add(value);
 }
 
 function routesForFile(file) {
+  if (
+    /^app\/\(protected\)\/app\/etapas\/_components\/(?:Appointments[^/]*|appointments[^/]*)\.(?:tsx?|css)$/.test(
+      file,
+    ) ||
+    /^lib\/crm\/stages\/(?:appointments|appointment-conversion-goals)\.ts$/.test(file)
+  )
+    return ["/app/etapas/agendamentos"];
   if (/^app\/\(protected\)\/app\/etapas\//.test(file)) return stageRoutes;
   if (/^app\/\(protected\)\/app\/ranking\//.test(file)) return ["/app/ranking"];
   if (/^app\/\(protected\)\/app\/canal-de-parcerias\//.test(file)) {
@@ -54,6 +61,7 @@ function routesForFile(file) {
     return ["/app"];
   }
   if (/^app\/\(protected\)\/app\/(?:page\.tsx|Dashboard)/.test(file)) return ["/app"];
+  if (/^lib\/crm\/dashboard\//.test(file)) return ["/app", ...stageRoutes];
   if (/^(?:lib\/.*dashboard|tests\/dashboard)/.test(file)) return ["/app"];
   if (/^(?:lib\/.*ranking|tests\/(?:ranking|partnership|parcerias))/.test(file)) {
     return ["/app/ranking", "/app/canal-de-parcerias"];
@@ -94,12 +102,13 @@ export function classifyVisualPaths(paths) {
   };
 }
 
-export function classifyVisualImpact({ event, base, head, cwd = process.cwd() }) {
-  if (["schedule", "workflow_dispatch"].includes(event)) {
-    return { mode: "full", routes: authenticatedVisualRoutes, reason: `event:${event}` };
+export function readCandidateDiff({ event, base, head, cwd = process.cwd() }) {
+  const identity = { event: event ?? null, base: base ?? null, head: head ?? null };
+  if (!["pull_request", "push"].includes(event)) {
+    return { ...identity, status: "unavailable", paths: [], reason: `event:${event}` };
   }
   if (!revision.test(base ?? "") || !revision.test(head ?? "")) {
-    return { mode: "full", routes: authenticatedVisualRoutes, reason: "missing-revision" };
+    return { ...identity, status: "unavailable", paths: [], reason: "missing-revision" };
   }
   try {
     const git = (args) => execFileSync("git", args, { cwd, encoding: "utf8", windowsHide: true });
@@ -107,24 +116,38 @@ export function classifyVisualImpact({ event, base, head, cwd = process.cwd() })
     const paths = git(["diff", "--name-only", "--no-renames", "-z", diffBase, head])
       .split("\0")
       .filter(Boolean);
-    return classifyVisualPaths(paths);
+    return { ...identity, status: "ready", paths, reason: "complete-candidate-diff" };
   } catch {
-    return { mode: "full", routes: authenticatedVisualRoutes, reason: "git-error" };
+    return { ...identity, status: "unavailable", paths: [], reason: "git-error" };
   }
 }
 
+export function classifyVisualImpact(options) {
+  const diff = options.diff ?? readCandidateDiff(options);
+  return diff.status === "ready"
+    ? classifyVisualPaths(diff.paths)
+    : { mode: "full", routes: authenticatedVisualRoutes, reason: diff.reason };
+}
+
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const result = classifyVisualImpact({
+  const options = {
     event: process.env.GITHUB_EVENT_NAME,
     base:
       process.env.GITHUB_EVENT_NAME === "pull_request"
         ? process.env.PR_BASE_SHA
         : process.env.PUSH_BASE_SHA,
     head: process.env.PR_HEAD_SHA || process.env.GITHUB_SHA,
-  });
+  };
+  const diff = readCandidateDiff(options);
+  const result = classifyVisualImpact({ ...options, diff });
   if (!process.env.GITHUB_OUTPUT) throw new Error("GITHUB_OUTPUT is required");
+  appendFileSync(process.env.GITHUB_OUTPUT, `candidate_diff=${JSON.stringify(diff)}\n`);
   appendFileSync(process.env.GITHUB_OUTPUT, `visual_mode=${result.mode}\n`);
   appendFileSync(process.env.GITHUB_OUTPUT, `visual_routes=${JSON.stringify(result.routes)}\n`);
+  appendFileSync(
+    process.env.GITHUB_OUTPUT,
+    `visual_plan=${JSON.stringify(buildVisualCheckPlan(result.routes))}\n`,
+  );
   console.log(
     `Authenticated visual scope: mode=${result.mode} routes=${result.routes.length} reason=${result.reason}`,
   );

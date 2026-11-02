@@ -194,6 +194,9 @@ export function assertApprovedCandidate(candidate, targetSha) {
     fail("Candidate CI jobs are unavailable.");
   }
   const jobCounts = new Map();
+  // A documentation-only main run intentionally skips runtime jobs. It may
+  // complete successfully in GitHub but must never authorize an application
+  // deployment or inherit approval from the preceding application SHA.
   for (const job of jobs) {
     assertRecord(job, "Candidate CI job");
     if (

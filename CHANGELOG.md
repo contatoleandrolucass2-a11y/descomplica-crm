@@ -1,5 +1,30 @@
 # Changelog
 
+- Reduz o payload analítico inicial de Agendamentos com resumo compacto e detalhe
+  paginado no servidor, preservando os cálculos e a exportação integral autorizada.
+- Pagina a lista Leads com filtros, contagens e cursor estável; preserva a leitura
+  completa do Kanban, histórico analítico, revogação e troca de usuário.
+- Reduz ordenações intermediárias da projeção SQL após comparação isolada;
+  preserva ordenação final, somas e máscaras. A alternativa por conjuntos não
+  mostrou ganho consistente e foi descartada. Migrations remotas não aplicadas.
+
+- Normaliza formatação do script de evidência e finais de linha da migration e
+  do teste SQL do handoff, preservando comportamento e contratos.
+- Mantém a conferência integral do FAQ no módulo diferido e reconhece a nova
+  migration no inventário histórico, sem liberar aplicação de Auth/MFA.
+
+- Unifica a validação visual por impacto, sem aprovar verificações não executadas;
+  preserva gates de aplicação e separa o fechamento documental no main.
+- Agendamentos recebe perfil autorizado desde a primeira renderização e relê
+  a versão ao retornar ao canal. Leituras históricas são paralelas e a leitura
+  consolidada tem rollout explícito, desligado até aplicação autorizada.
+- Metas zero permanecem distintas de ausência. Fontes comerciais parciais ou
+  inválidas não habilitam metas; logs opcionais não incluem dados do CRM.
+
+- Reduz o grafo JavaScript inicial de Leads e Investidor com módulos sob demanda,
+  preservando sessão, conteúdo e cálculos. Consultas de Leads recebem escopo
+  autorizado e dashboard agregado, sem mudar o banco operacional.
+
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.
   Validado com atualização cruzada entre navegadores e celular emulado.

@@ -284,6 +284,17 @@ test("accepts one successful push run on the exact current main SHA with all fou
   assert.doesNotThrow(() => assertApprovedCandidate(candidate, targetSha));
 });
 
+test("a successful documentation-only main run never authorizes runtime publication", () => {
+  const candidate = approval();
+  candidate.jobs = candidate.jobs.map((job) => ({
+    ...job,
+    conclusion: job.name === "validate" ? "success" : "skipped",
+  }));
+  assert.throws(() => assertApprovedCandidate(candidate, targetSha), /successful/);
+  candidate.jobs = candidate.jobs.filter((job) => job.name === "validate");
+  assert.throws(() => assertApprovedCandidate(candidate, targetSha), /exactly one/);
+});
+
 test("rejects a changed remote main, pull-request CI, another SHA, and unsuccessful runs", () => {
   assert.throws(() => assertApprovedCandidate({ ...approval(), mainSha: currentSha }, targetSha));
   assert.throws(() => assertApprovedCandidate(approval(), "main"));

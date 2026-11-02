@@ -1,6 +1,7 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { InvestorLearningManual } from "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator";
+import { InvestorLearningManualContent as InvestorLearningManual } from "../app/(protected)/app/simulacao/_components/archive-investor/InvestorLearningManualContent";
+import { DeferredInvestorLearningManual } from "../app/(protected)/app/simulacao/_components/archive-investor/DeferredInvestorLearningManual";
 import {
   ASSOCIATIVE_FIELD_GUIDE,
   ASSOCIATIVE_POLICY_TOPICS,
@@ -8,6 +9,13 @@ import {
 } from "../app/(protected)/app/simulacao/_components/archive-investor/associative-learning-content";
 
 describe("Associative learning manual", () => {
+  it("keeps the manual launch available without rendering the deferred content", () => {
+    const html = renderToStaticMarkup(<DeferredInvestorLearningManual associative />);
+    expect(html).toContain('aria-haspopup="dialog"');
+    expect(html).toContain("Aprenda");
+    expect(html).not.toContain("<dialog");
+    expect(html).not.toContain('role="tabpanel"');
+  });
   it("renders accessible tabs with stable anchors and all contents before interaction", () => {
     const html = renderToStaticMarkup(<InvestorLearningManual associative />);
     expect(html).toContain('role="tablist"');

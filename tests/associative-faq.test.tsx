@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { InvestorLearningManual } from "../app/(protected)/app/simulacao/_components/archive-investor/InvestorCalculator";
+import { InvestorLearningManualContent as InvestorLearningManual } from "../app/(protected)/app/simulacao/_components/archive-investor/InvestorLearningManualContent";
 import {
   ASSOCIATIVE_FAQ_REFERENCE,
   ASSOCIATIVE_FAQ_SECTIONS,

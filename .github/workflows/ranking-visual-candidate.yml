@@ -1,27 +1,19 @@
 name: Protected visual candidate
 
 on:
-  pull_request:
-    paths:
-      - "app/(protected)/_components/**"
-      - "app/(protected)/app/ranking/**"
-      - "app/(protected)/app/canal-de-parcerias/**"
-      - "app/(protected)/app/configuracoes/conectar-sistemas/**"
-      - "app/(protected)/app/etapas/_components/AppointmentsDashboard.*"
-      - "app/(protected)/app/simulacao/_components/Caixa*"
-      - "app/(protected)/app/simulacao/_components/caixa.css"
-      - "lib/crm/simulators/caixa*"
-      - "e2e/release-candidate.spec.ts"
-      - "lib/crm/qlik/**"
-      - "lib/navigation/**"
-      - ".github/workflows/ranking-visual-candidate.yml"
+  workflow_dispatch:
+    inputs:
+      candidate_sha:
+        description: "Full 40-character candidate SHA for intentionally reviewed visual references"
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 concurrency:
-  group: ranking-visual-candidate-${{ github.ref }}
-  cancel-in-progress: true
+  group: ranking-visual-candidate-${{ inputs.candidate_sha }}
+  cancel-in-progress: false
 
 # Review artifact only. The normal CI verify gate remains required after the
 # reviewed Ranking screenshots are incorporated; this workflow cannot deploy.
@@ -30,8 +22,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
+      - name: Validate explicit immutable candidate
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: '[[ "$CANDIDATE_SHA" =~ ^[a-f0-9]{40}$ ]]'
       - name: Checkout candidate
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ inputs.candidate_sha }}
+      - name: Verify candidate identity
+        env:
+          CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+        run: 'test "$(git rev-parse HEAD)" = "$CANDIDATE_SHA"'
       - name: Node.js 24
         uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
@@ -41,8 +43,24 @@ jobs:
           npm install --global corepack@0.35.0
           corepack enable
           corepack prepare pnpm@11.20.0 --activate
+      - name: Locate pnpm store
+        id: pnpm_store
+        run: echo "path=$(pnpm store path --silent)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache verified dependency store
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ${{ steps.pnpm_store.outputs.path }}
+          key: ${{ runner.os }}-node24-pnpm11-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml') }}
+
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
+      - name: Cache pinned Chromium binaries
+        uses: actions/cache@caa296126883cff596d87d8935842f9db880ef25 # v5
+        with:
+          path: ~/.cache/ms-playwright
+          key: ${{ runner.os }}-node24-chromium-${{ hashFiles('.nvmrc', 'pnpm-lock.yaml') }}
+
       - name: Install Chromium
         run: pnpm exec playwright install --with-deps chromium
       - name: Synthetic ranking interactions and viewport pixels
@@ -81,7 +99,7 @@ jobs:
       - name: Upload successful candidate inputs
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ranking-visual-candidate-${{ github.sha }}
+          name: ranking-visual-candidate-${{ inputs.candidate_sha }}
           path: |
             test-results/authenticated-visual
             test-results/ranking-visual-provenance
@@ -93,8 +111,10 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: ranking-visual-diagnostics-${{ github.sha }}
-          path: test-results/authenticated-visual
+          name: ranking-visual-diagnostics-${{ inputs.candidate_sha }}
+          path: |
+            test-results/authenticated-visual
+            test-results/authorization-matrix
           if-no-files-found: warn
           retention-days: 7
       - name: Stop isolated Supabase

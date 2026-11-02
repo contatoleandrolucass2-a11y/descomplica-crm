@@ -5,6 +5,8 @@ import path from "node:path";
 import { afterEach, describe, expect, it } from "vitest";
 // @ts-expect-error The standalone CI script runs directly with Node.
 import { classifyDocumentationScope } from "../scripts/ci/documentation-scope.mjs";
+// @ts-expect-error The standalone CI script runs directly with Node.
+import { documentationSourceVerificationRequired } from "../scripts/ci/documentation-source-scope.mjs";
 
 const roots: string[] = [];
 afterEach(() => roots.splice(0).forEach((root) => rmSync(root, { recursive: true, force: true })));
@@ -44,11 +46,11 @@ describe("documentation-only CI selection", () => {
     expect(f.classify(f.commit())).toBe(true);
   });
 
-  it("keeps complete validation on push/main even with only prose", () => {
+  it("classifies the complete push range as documentation without making it deployable", () => {
     const f = fixture();
     f.put("WORKLOG.md", "# New note\n");
     const head = f.commit();
-    expect(f.classify(head, "push")).toBe(false);
+    expect(f.classify(head, "push")).toBe(true);
     expect(f.classify(head, "workflow_dispatch")).toBe(false);
   });
 
@@ -70,7 +72,9 @@ describe("documentation-only CI selection", () => {
     f.put("app/runtime.ts", "export const value = 2;\n");
     f.commit();
     f.put("WORKLOG.md", "# Release note\n");
-    expect(f.classify(f.commit())).toBe(false);
+    const head = f.commit();
+    expect(f.classify(head)).toBe(false);
+    expect(f.classify(head, "push")).toBe(false);
   });
 
   it("rejects renamed runtime files and deletions outside the allowlist", () => {
@@ -95,11 +99,42 @@ describe("documentation-only CI selection", () => {
     expect(f.classify("0".repeat(40))).toBe(false);
   });
 
+  it("verifies official sources for an earlier dependency change followed by prose", () => {
+    const f = fixture();
+    f.put("lib/archive-investor/official-fees.ts", "export const fixture = 1;\n");
+    f.commit();
+    f.put("WORKLOG.md", "# Source change recorded\n");
+    const head = f.commit();
+    for (const event of ["pull_request", "push"]) {
+      expect(
+        documentationSourceVerificationRequired({ cwd: f.cwd, base: f.base, head, event }),
+      ).toBe(true);
+    }
+    expect(documentationSourceVerificationRequired({ event: "schedule" })).toBe(true);
+    expect(documentationSourceVerificationRequired({ event: "push", base: "missing", head })).toBe(
+      true,
+    );
+  });
+
+  it("does not fetch official fee sources for an unrelated complete candidate", () => {
+    const f = fixture();
+    f.put("WORKLOG.md", "# Documentation-only note\n");
+    expect(
+      documentationSourceVerificationRequired({
+        cwd: f.cwd,
+        base: f.base,
+        head: f.commit(),
+        event: "push",
+      }),
+    ).toBe(false);
+  });
+
   it("preserves full production jobs and declares scope output in the workflow", () => {
     const workflow = readFileSync(".github/workflows/ci.yml", "utf8");
     expect(workflow).toContain("fetch-depth: 0");
     expect(workflow).toContain("PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}");
     expect(workflow).toContain("PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}");
+    expect(workflow).toContain("PUSH_BASE_SHA: ${{ github.event.before }}");
     for (const name of ["release-gates", "isolated-restore", "promotable-image"]) {
       expect(workflow).toContain(
         `  ${name}:\n    if: needs.validate.outputs.documentation_only != 'true'`,

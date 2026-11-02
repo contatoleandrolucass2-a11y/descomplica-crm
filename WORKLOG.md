@@ -1,5 +1,73 @@
 # Worklog
 
+## 2026-11-02 — Seleção SQL por evidência
+
+- CI 41461202422 aprovou os quatro jobs no merge de teste 4a08b9b1 do PR 467
+  (head ddde6bb9): 100 migrations e 2391 asserções pgTAP em origem/restauração.
+- Benchmark PostgreSQL 17.6 demonstrou mediana menor nos quatro recortes somente
+  para retirada dos sorts intermediários; a projeção por conjuntos não melhorou
+  consistentemente. Candidato reduzido à menor alteração comprovada, preservando
+  saída JSON integral. Novo SHA exige novamente os gates obrigatórios.
+- Leads: 80 recortes SQL passaram; fixture de 5000 registros passou de cinco
+  consultas/2936263 bytes para uma/31317 bytes, com cinquenta linhas iniciais.
+- A checagem operacional foi corrigida: o ambiente efetivo do Next contém a
+  conexão aprovada. Três consultas passaram no schema real PostgreSQL 17.11 por
+  EXPLAIN sem ANALYZE em READ ONLY, sem exportar registros ou alterar dados.
+
+## 2026-11-02 — Resumos compactos, paginação e prova SQL do handoff
+
+- Agendamentos mantém a engine local sobre resumo sem perda e entrega cinquenta
+  detalhes reais por página. Cursor/fingerprint, guards e CSV integral são
+  revalidados no servidor. Controller por Dashboard preserva a página ao editar
+  layout. Fonte fora da cobertura permanece indisponível, inclusive no SSR.
+- Lista Leads recebe cursor, filtros e contagens em SQL; troca de ator e revogação
+  não deixam respostas antigas. Analytics preserva histórico e opções completos.
+- Projeção SQL candidata e alternativa mínima serão comparadas no PostgreSQL
+  isolado da CI. Harnesses SQL/browser só executam pelas dependências do diff
+  inteiro; ambos compartilham o snapshot de classificação, com fallback seguro.
+- Testes focados, tipos, lint e navegador aprovados; medição SQL real e gates
+  amplos aguardam o candidato agregado. Nenhuma migração remota foi executada.
+  Detalhes, medições e limites no registro canônico desta demanda.
+
+## 2026-11-02 — Normalização do candidato de integração
+
+- A primeira CI do PR 467 parou na formatação do script de medição, antes dos
+  gates pesados. Script normalizado e finais de linha SQL conferidos no diff
+  completo contra produção. Sem mudança de comportamento ou baseline visual.
+- A rodada seguinte aprovou lint/tipos e 4786 testes; quatro falhas identificaram
+  dependências do pacote: FAQ ainda importava o wrapper agora diferido e o
+  inventário de homologação não conhecia a migration aditiva. FAQ passa a testar
+  todo o conteúdo real extraído; versão SQL adicionada somente ao conjunto
+  não implantável do gate histórico, preservando os dois hashes Auth/MFA.
+
+## 2026-11-02 — Integração do handoff e gates de entrega
+
+- Plano visual comum entre classificador, executor e agregador, com resultados
+  explícitos; referências intencionais, CI documental não publicável e caches.
+  Cadência e cobertura da matriz de autorização preservadas.
+- Agendamentos paraleliza leituras, valida snapshot após metas e prepara RPC
+  mensal aditiva com treze assertions. Flag desligada por padrão. Canvas recebe
+  perfil autorizado no HTML inicial, releitura por canal e controle de versão.
+- Logs opcionais contêm apenas tempos agregados. Etapas distinguem zero de
+  ausência e recebem títulos específicos; fonte parcial não habilita metas.
+- Revisão independente e testes focados descritos no
+  [registro canônico](docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md).
+  CI ampla do candidato coordenado ainda será executada. Meta Ads permanece
+  excluído; Repasse retirado pelo usuário e sem diff.
+
+## 2026-11-02 — Checkpoint de Leads e simuladores do handoff
+
+- Leads divide famílias e aplica escopo/agregados SQL. Dashboard não precisa ler
+  contatos completos; analytics preserva primeiro contato histórico. Sem mudar
+  pool, sessão, Shadow DOM ou o projeto operacional.
+- Simuladores carregam o manual integral ao abrir, com deep link e foco, sem
+  alterações de fórmula ou CSS compartilhado. Investidor tem título específico.
+- Scripts reproduzíveis de bundles e manual em tests; 153 testes focados e sete
+  casos browser aprovados. Comparação compilada não mede transferência Next.
+- Paginação/analytics SQL completos aguardam acesso ao banco operacional correto.
+  Meta Ads excluído. Este checkpoint será entregue em candidato coordenado com
+  as demais frentes, sem publicação independente.
+
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
 - Duas declarações CSS reservam a mesma margem direita ao plot e ao eixo.

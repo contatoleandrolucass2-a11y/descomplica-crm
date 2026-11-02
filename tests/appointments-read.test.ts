@@ -66,7 +66,8 @@ let participantResponses: Array<{ data: unknown; count: number | null; error: un
 
 beforeEach(() => {
   vi.resetAllMocks();
-  headers = Array.from({ length: 4 }, () => ({ data: snapshot, error: null }));
+  vi.stubEnv("CRM_APPOINTMENTS_GOALS_RANGE_ENABLED", "false");
+  headers = Array.from({ length: 8 }, () => ({ data: snapshot, error: null }));
   rankingHeaders = Array.from({ length: 10 }, () => ({ data: rankingSnapshot, error: null }));
   participantResponses = Array.from({ length: 5 }, () => ({
     data: roster,
@@ -87,11 +88,91 @@ beforeEach(() => {
     if (name === "read_crm_appointments_goal") return { data: 24, error: null };
     if (name === "read_crm_appointments_conversion_goals")
       return { data: conversionGoals, error: null };
+    if (name === "read_crm_appointments_goals_range")
+      return { data: null, error: { code: "PGRST202" } };
     return result();
   });
 });
 
 describe("appointments snapshot read", () => {
+  it.each([0, 11])(
+    "reads %i historical months in one authorized policy request",
+    async (history) => {
+      vi.stubEnv("CRM_APPOINTMENTS_GOALS_RANGE_ENABLED", "true");
+      const reference = { ...snapshot, reference_date: "2026-12-19" };
+      headers = Array.from({ length: 8 }, () => ({ data: reference, error: null }));
+      rankingHeaders = Array.from({ length: 10 }, () => ({
+        data: { ...reference, id: 2 },
+        error: null,
+      }));
+      const coverageStart = history === 0 ? "2026-12-01" : "2026-01-01";
+      mocks.rpc.mockImplementation(async (name: string) =>
+        name === "read_crm_appointments_analysis"
+          ? result({ ...slice, referenceDate: reference.reference_date, coverageStart, facts: [] })
+          : {
+              data: Array.from({ length: history + 1 }, (_, index) => ({
+                month: `2026-${String(12 - history + index).padStart(2, "0")}`,
+                individualGoal: index === 0 ? 0 : null,
+                conversionGoals: index === history ? conversionGoals : null,
+              })),
+              error: null,
+            },
+      );
+      const actual = await loadAppointmentsReadModel("all");
+      expect(Object.keys(actual.goalsByMonth)).toHaveLength(history + 1);
+      expect(Object.values(actual.goalsByMonth)[0]).toBe(0);
+      expect(actual.conversionGoals).toEqual(conversionGoals);
+      expect(mocks.rpc.mock.calls.map(([name]) => name)).toEqual([
+        "read_crm_appointments_analysis",
+        "read_crm_appointments_goals_range",
+      ]);
+      expect(mocks.from).toHaveBeenCalledTimes(5);
+    },
+  );
+
+  it("rejects incomplete range and permission failures without legacy fallback", async () => {
+    vi.stubEnv("CRM_APPOINTMENTS_GOALS_RANGE_ENABLED", "true");
+    mocks.rpc.mockImplementation(async (name: string) =>
+      name === "read_crm_appointments_analysis" ? result() : { data: [], error: null },
+    );
+    await expect(loadAppointmentsReadModel("all")).rejects.toThrow("intervalo de metas");
+    headers = Array.from({ length: 8 }, () => ({ data: snapshot, error: null }));
+    mocks.rpc.mockImplementation(async (name: string) =>
+      name === "read_crm_appointments_analysis"
+        ? result()
+        : { data: null, error: { code: "42501" } },
+    );
+    await expect(loadAppointmentsReadModel("all")).rejects.toThrow("metas hist�ricas");
+    expect(mocks.rpc.mock.calls.some(([name]) => name === "read_crm_appointments_goal")).toBe(
+      false,
+    );
+  });
+
+  it("keeps the default request budget and permits only missing-RPC rollout fallback", async () => {
+    await loadAppointmentsReadModel("all");
+    expect(
+      mocks.rpc.mock.calls.some(([name]) => name === "read_crm_appointments_goals_range"),
+    ).toBe(false);
+    expect(mocks.rpc.mock.calls.length + mocks.from.mock.calls.length).toBe(26); // H=9: 8+2H.
+    vi.clearAllMocks();
+    headers = Array.from({ length: 8 }, () => ({ data: snapshot, error: null }));
+    vi.stubEnv("CRM_APPOINTMENTS_GOALS_RANGE_ENABLED", "true");
+    expect((await loadAppointmentsReadModel("all")).individualGoal).toBe(24);
+    expect(
+      mocks.rpc.mock.calls.some(([name]) => name === "read_crm_appointments_goals_range"),
+    ).toBe(true);
+  });
+
+  it("retries if ingestion changes while the policy range is being read", async () => {
+    const next = { ...snapshot, updated_at: "2026-10-19T00:00:00.123457Z" };
+    headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
+    const actual = await loadAppointmentsReadModel("all");
+    expect(actual.analysis).toEqual(slice);
+    expect(
+      mocks.rpc.mock.calls.filter(([name]) => name === "read_crm_appointments_analysis"),
+    ).toHaveLength(2);
+  });
+
   it("loads conversion policies for their historical month without copying the current policy", async () => {
     const septemberGoals = {
       ...conversionGoals,
@@ -106,6 +187,8 @@ describe("appointments snapshot read", () => {
           error: null,
         };
       }
+      if (name === "read_crm_appointments_goals_range")
+        return { data: null, error: { code: "PGRST202" } };
       return result();
     });
     const actual = await loadAppointmentsReadModel("all");
@@ -130,6 +213,8 @@ describe("appointments snapshot read", () => {
           return args.p_reference_date === snapshot.reference_date
             ? { data: conversionGoals, error: null }
             : { data: null, error: { code } };
+        if (name === "read_crm_appointments_goals_range")
+          return { data: null, error: { code: "PGRST202" } };
         return result();
       });
       if (code === "42501")
@@ -150,6 +235,8 @@ describe("appointments snapshot read", () => {
       }
       if (name === "read_crm_appointments_conversion_goals")
         return { data: conversionGoals, error: null };
+      if (name === "read_crm_appointments_goals_range")
+        return { data: null, error: { code: "PGRST202" } };
       return result();
     });
     const actual = await loadAppointmentsReadModel("all");
@@ -176,6 +263,8 @@ describe("appointments snapshot read", () => {
             : { data: null, error: { code } };
         if (name === "read_crm_appointments_conversion_goals")
           return { data: conversionGoals, error: null };
+        if (name === "read_crm_appointments_goals_range")
+          return { data: null, error: { code: "PGRST202" } };
         return result();
       });
       if (code === "42501")
@@ -280,7 +369,7 @@ describe("appointments snapshot read", () => {
       result({ ...slice, facts: [[4, "2026-10-19", -1, -1, -1, 0, -1, 2, 100, 0]] }),
     );
     await expect(loadAppointmentsReadModel("all")).rejects.toThrow("snapshot");
-    headers = Array.from({ length: 4 }, () => ({ data: snapshot, error: null }));
+    headers = Array.from({ length: 8 }, () => ({ data: snapshot, error: null }));
     mocks.rpc.mockResolvedValue(result({ ...slice, referenceDate: "2026-10-20" }));
     await expect(loadAppointmentsReadModel("all")).rejects.toThrow("snapshot");
     mocks.rpc.mockResolvedValue({ data: [...result().data, ...result().data], error: null });
@@ -321,6 +410,8 @@ describe("appointments snapshot read", () => {
       if (name === "read_crm_appointments_goal") return { data: 24, error: null };
       if (name === "read_crm_appointments_conversion_goals")
         return { data: conversionGoals, error: null };
+      if (name === "read_crm_appointments_goals_range")
+        return { data: null, error: { code: "PGRST202" } };
       return result(v4);
     });
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(v4);
@@ -336,9 +427,9 @@ describe("appointments snapshot read", () => {
 
   it("retries when ingestion changes even the PostgreSQL microsecond version", async () => {
     const next = { ...snapshot, updated_at: "2026-10-19T00:00:00.123457Z" };
-    headers = [snapshot, next, next, next].map((data) => ({ data, error: null }));
+    headers = [snapshot, next, next, next, next].map((data) => ({ data, error: null }));
     expect((await loadAppointmentsReadModel("all")).analysis).toEqual(slice);
-    expect(mocks.rpc).toHaveBeenCalledTimes(22);
+    expect(mocks.rpc).toHaveBeenCalledTimes(42);
   });
 
   it("fails instead of returning mixed generations after repeated concurrent ingestion", async () => {
