@@ -55,6 +55,92 @@
   nenhuma regra ou tela de simulador foi alterada. Também foi alinhada a
   asserção da assinatura do helper de captura. As duas suítes passaram 32 testes.
 
+## 2026-11-02 — Publicação coordenada do handoff
+
+- PR467 integrado em aa28d38e; quatro jobs do main/41479050792 aprovados.
+  Vitest 4850 aprovados/112 condicionais; 100 migrations e 2391 asserções pgTAP
+  conferidas na origem/restauração, com privilégios e fingerprints preservados.
+- Duas migrations aplicadas após autorização específica, com backup privado,
+  hashes e ACL relidos; somente os dois novos registros de histórico alinhados
+  às versões aprovadas, preservando os 82 anteriores. Range permanece desligado.
+- Imagem aprovada comprovada por checksum, cadeia OCI e dois perfis, sem rebuild.
+  Coordenador publicou aa28d38e às 17:03:30.921Z, deployment
+  fd394210-9300-46be-aab9-b71ba59906d2; health e imagem ativa conferidos.
+- Smoke confirmou guards anônimos, RPC negada ao anon e conexão operacional
+  Leads sem ler clientes. Fluxos positivos autenticados usam evidências da CI.
+- Metas das quatro etapas, ranking e publicação de parcerias conservam seus
+  bloqueios oficiais. Repasse retirado pelo usuário; Meta Ads sem arquivos alterados.
+- Encerramento somente Markdown, sem outra promoção de runtime. Evidências,
+  medições, limites e recuperação no registro canônico do handoff.
+
+## 2026-11-02 — Seleção SQL por evidência
+
+- CI 41461202422 aprovou os quatro jobs no merge de teste 4a08b9b1 do PR 467
+  (head ddde6bb9): 100 migrations e 2391 asserções pgTAP em origem/restauração.
+- Benchmark PostgreSQL 17.6 demonstrou mediana menor nos quatro recortes somente
+  para retirada dos sorts intermediários; a projeção por conjuntos não melhorou
+  consistentemente. Candidato reduzido à menor alteração comprovada, preservando
+  saída JSON integral. Novo SHA exige novamente os gates obrigatórios.
+- Leads: 80 recortes SQL passaram; fixture de 5000 registros passou de cinco
+  consultas/2936263 bytes para uma/31317 bytes, com cinquenta linhas iniciais.
+- A checagem operacional foi corrigida: o ambiente efetivo do Next contém a
+  conexão aprovada. Três consultas passaram no schema real PostgreSQL 17.11 por
+  EXPLAIN sem ANALYZE em READ ONLY, sem exportar registros ou alterar dados.
+
+## 2026-11-02 — Resumos compactos, paginação e prova SQL do handoff
+
+- Agendamentos mantém a engine local sobre resumo sem perda e entrega cinquenta
+  detalhes reais por página. Cursor/fingerprint, guards e CSV integral são
+  revalidados no servidor. Controller por Dashboard preserva a página ao editar
+  layout. Fonte fora da cobertura permanece indisponível, inclusive no SSR.
+- Lista Leads recebe cursor, filtros e contagens em SQL; troca de ator e revogação
+  não deixam respostas antigas. Analytics preserva histórico e opções completos.
+- Projeção SQL candidata e alternativa mínima serão comparadas no PostgreSQL
+  isolado da CI. Harnesses SQL/browser só executam pelas dependências do diff
+  inteiro; ambos compartilham o snapshot de classificação, com fallback seguro.
+- Testes focados, tipos, lint e navegador aprovados; medição SQL real e gates
+  amplos aguardam o candidato agregado. Nenhuma migração remota foi executada.
+  Detalhes, medições e limites no registro canônico desta demanda.
+
+## 2026-11-02 — Normalização do candidato de integração
+
+- A primeira CI do PR 467 parou na formatação do script de medição, antes dos
+  gates pesados. Script normalizado e finais de linha SQL conferidos no diff
+  completo contra produção. Sem mudança de comportamento ou baseline visual.
+- A rodada seguinte aprovou lint/tipos e 4786 testes; quatro falhas identificaram
+  dependências do pacote: FAQ ainda importava o wrapper agora diferido e o
+  inventário de homologação não conhecia a migration aditiva. FAQ passa a testar
+  todo o conteúdo real extraído; versão SQL adicionada somente ao conjunto
+  não implantável do gate histórico, preservando os dois hashes Auth/MFA.
+
+## 2026-11-02 — Integração do handoff e gates de entrega
+
+- Plano visual comum entre classificador, executor e agregador, com resultados
+  explícitos; referências intencionais, CI documental não publicável e caches.
+  Cadência e cobertura da matriz de autorização preservadas.
+- Agendamentos paraleliza leituras, valida snapshot após metas e prepara RPC
+  mensal aditiva com treze assertions. Flag desligada por padrão. Canvas recebe
+  perfil autorizado no HTML inicial, releitura por canal e controle de versão.
+- Logs opcionais contêm apenas tempos agregados. Etapas distinguem zero de
+  ausência e recebem títulos específicos; fonte parcial não habilita metas.
+- Revisão independente e testes focados descritos no
+  [registro canônico](docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md).
+  CI ampla do candidato coordenado ainda será executada. Meta Ads permanece
+  excluído; Repasse retirado pelo usuário e sem diff.
+
+## 2026-11-02 — Checkpoint de Leads e simuladores do handoff
+
+- Leads divide famílias e aplica escopo/agregados SQL. Dashboard não precisa ler
+  contatos completos; analytics preserva primeiro contato histórico. Sem mudar
+  pool, sessão, Shadow DOM ou o projeto operacional.
+- Simuladores carregam o manual integral ao abrir, com deep link e foco, sem
+  alterações de fórmula ou CSS compartilhado. Investidor tem título específico.
+- Scripts reproduzíveis de bundles e manual em tests; 153 testes focados e sete
+  casos browser aprovados. Comparação compilada não mede transferência Next.
+- Paginação/analytics SQL completos aguardam acesso ao banco operacional correto.
+  Meta Ads excluído. Este checkpoint será entregue em candidato coordenado com
+  as demais frentes, sem publicação independente.
+
 ## 2026-11-01 — Margem do comparativo em cards estreitos
 
 - Duas declarações CSS reservam a mesma margem direita ao plot e ao eixo.
@@ -10605,3 +10691,10 @@ Candidato isolado a partir de 44707e359c99eabfafa2f37489062d9d87540522. As nove 
 Foram preparados a rota assinada /webhooks/meta e o worker supervisionado na mesma imagem, com configuração separada da credencial de métricas Meta Ads. A substituição não altera inscrições do C2S. Os gates do candidato e a validação visual autenticada ainda estão em andamento; esta nota não comprova publicação ou entrega real da Meta.
 
 Validação local do candidato Lead+: build Next e tipos aprovados, lint sem erros, formatação aprovada, catálogo de 49 páginas e inventário de 91 rotas conferidos, Gitleaks sem achados. A suíte completa executada passou com 4577 testes Vitest e 727 testes Node, preservados os skips já previstos para ambiente/CI. Testes adicionais focados verificam guards granulares, aposentadoria das ações legadas e supervisão de worker. A montagem standalone local importou o runtime do worker sem abrir conexão ao banco. Falta CI do SHA final, prova da imagem e validação visual autenticada; não foi promovida imagem à VPS.
+
+### 02/11/2026 — Retomada visual autorizada
+
+O usuário autorizou os três bloqueios Admin, as duas migrations e a publicação
+após gates. A cascata passa a dar prioridade determinística aos tokens do módulo
+nos empates administrativos; regras descendentes permanecem. Integração do main
+b93d3904 preserva a entrega já publicada. Novas provas de CI/visual ainda exigidas.

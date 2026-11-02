@@ -265,6 +265,7 @@ function ToolbarActionsWrapper({
 
 export function ConfigurableDashboardCanvas({
   initialCards,
+  initialProfileState,
   catalog,
   compatibility,
   contentByMetricAndType,
@@ -286,8 +287,20 @@ export function ConfigurableDashboardCanvas({
   preserveExpandedPresentation = false,
   cardPresets,
 }: ConfigurableDashboardCanvasProps) {
-  const [state, dispatch] = useReducer(canvasReducer, initialCards, (cards) =>
-    createCanvasHistoryState(cards, undefined, layoutPolicy),
+  const initialProfiles =
+    initialProfileState?.pageKey === pageKey &&
+    initialProfileState.scopeKey === (scopeKey ?? null) &&
+    initialProfileState.profiles.every(
+      (profile) => profile.pageKey === pageKey && profile.scopeKey === (scopeKey ?? null),
+    )
+      ? initialProfileState.profiles
+      : undefined;
+  const initialDefault = initialProfiles?.find(({ isDefault }) => isDefault);
+  const initialReadRef = useRef(initialProfiles !== undefined);
+  const [state, dispatch] = useReducer(
+    canvasReducer,
+    initialDefault?.cards ?? initialCards,
+    (cards) => createCanvasHistoryState(cards, undefined, layoutPolicy),
   );
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [editorCard, setEditorCard] = useState<DashboardCard | null>(null);
@@ -309,17 +322,23 @@ export function ConfigurableDashboardCanvas({
   const [exportSelection, setExportSelection] = useState<Set<string>>(new Set());
   const [exporting, setExporting] = useState(false);
   const [exportError, setExportError] = useState("");
-  const [profiles, setProfiles] = useState<RemoteDashboardProfile[]>([]);
-  const [profilesLoading, setProfilesLoading] = useState(true);
-  const [profilesSource, setProfilesSource] = useState<"server" | "cache" | "none">("none");
-  const [activeProfileId, setActiveProfileId] = useState<string | null>(null);
-  const [saveState, setSaveState] = useState<SaveState>("idle");
+  const [profiles, setProfiles] = useState<RemoteDashboardProfile[]>(initialProfiles ?? []);
+  const [profilesLoading, setProfilesLoading] = useState(initialProfiles === undefined);
+  const [profilesSource, setProfilesSource] = useState<"server" | "cache" | "none">(
+    initialProfiles === undefined ? "none" : "server",
+  );
+  const [activeProfileId, setActiveProfileId] = useState<string | null>(initialDefault?.id ?? null);
+  const [saveState, setSaveState] = useState<SaveState>(
+    initialDefault && layoutPolicy?.freeResize ? "saved" : "idle",
+  );
   const [profileMessage, setProfileMessage] = useState("");
   const [profileName, setProfileName] = useState("");
   const [profileDraftNames, setProfileDraftNames] = useState<Record<string, string>>({});
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null);
   const initialSnapshotRef = useRef(cardsSnapshot(initialCards, layoutPolicy));
-  const lastSavedSnapshotRef = useRef<string | null>(null);
+  const lastSavedSnapshotRef = useRef<string | null>(
+    initialDefault ? cardsSnapshot(initialDefault.cards, layoutPolicy) : null,
+  );
   const saveInFlightRef = useRef(false);
   const saveConflictRef = useRef(false);
   const cacheKey = profileCacheKey(pageKey, scopeKey);
@@ -363,6 +382,10 @@ export function ConfigurableDashboardCanvas({
   }, [state.duplicateCardId]);
 
   useEffect(() => {
+    if (initialReadRef.current) {
+      initialReadRef.current = false;
+      return;
+    }
     let cancelled = false;
     queueMicrotask(() => {
       if (cancelled) return;
@@ -644,7 +667,7 @@ export function ConfigurableDashboardCanvas({
       else presentation.barMaxHeight = height;
       dispatch({ type: "update-card", cardId, patch: { presentation } });
     },
-    [cards, directEditingReady],
+    [cards, directEditingReady, dispatch],
   );
 
   const renderDashboardContent = useCallback(
@@ -684,6 +707,7 @@ export function ConfigurableDashboardCanvas({
       directEditingReady,
       commitBarHeight,
       compatibility,
+      dispatch,
     ],
   );
 

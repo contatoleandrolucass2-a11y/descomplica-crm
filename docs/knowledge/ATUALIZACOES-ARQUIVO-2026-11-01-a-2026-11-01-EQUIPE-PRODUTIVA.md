@@ -212,3 +212,45 @@
   de jobs/artefatos usaram o conector GitHub autenticado já disponível; nenhuma
   conta ou permissão foi alterada. Empresa/Imob seguem sem denominador oficial
   conciliável no cadastro atual; a página comunica indisponibilidade.
+
+## Retomada autorizada — 02/11/2026, 14:40 America/Sao_Paulo
+
+O usuário autorizou explicitamente corrigir os bloqueios visuais de /admin,
+/admin/paginas e /admin/usuarios, aplicar as duas migrations de Equipe Produtiva
+e publicar depois de todos os testes aprovados. Essa autorização supera a
+pendência anterior dessas operações; não abrange outras mutações remotas.
+
+Git comum confirmado; branch codex/equipe-produtiva limpa em 897fe6ef. Git fetch
+confirma origin/main b93d3904. Health público em 2026-11-02T17:40:23Z retornou
+HTTP200, ok, versão aa28d38e99ec5bf835e5fbde3da3520874c002ec. Fontes: origin/main,
+https://crm.descomplicapro.com.br/api/health e conector GitHub. CI41389751583:
+validate, isolated-restore e promotable-image aprovados; release-gates falhou
+somente na matriz visual completa. Captura protegida41389751571 aprovada.
+Próximo passo: preservar as mudanças integradas desde a base, investigar as
+referências Admin e validar novamente o candidato final antes de migrar/publicar.
+
+## Correção da cascata administrativa
+
+Causa comprovada por comparação de fontes e geometria: admin-canvas.css e
+ManagementCanvas.module.css tinham seletores de igual especificidade para o
+padding da raiz, borda/raio de cards e filtros/resultados. A ordem dos chunks
+mudava a aparência sem mudança nessas fontes. O módulo fornece os tokens da
+referência aprovada; seletores globais empatados agora usam :where, preservando
+as regras descendentes mais específicas e as media queries. A correção fica
+restrita às três páginas administrativas autorizadas, sem alterar o módulo
+ManagementCanvas compartilhado ou inserir !important.
+
+O main b93d3904 foi integrado preservando seu desempenho, regras e gates.
+Conflitos de QA preservam o plano funcional atual e a cobertura dedicada de
+Equipe Produtiva no modo completo. Inventários reconciliados:102 migrations,
+47 arquivos pgTAP/2414 asserções;34 testes desses contratos passaram. Testes de
+cálculo/apresentação/navegação após merge:105 aprovados. Nova CI e captura do
+runtime integrado ainda necessárias. Migrations continuam não aplicadas.
+
+Prova red/green da correção administrativa: tests/admin-css-order.browser.mjs
+reproduziu18 divergências com a folha antiga e aprovou18 combinações no CSS
+corrigido (3rotas,3temas,1440/390,duas ordens), sem overflow. Usa CSS real compilado
+pelo Vite e DOM mínimo sintético; não substitui Next autenticado. Registros em
+test-results/admin-css-order/{reference,current}/evidence.json. Tipos, catálogo,
+29 testes de recursos/conhecimento e29 contratos de QA passaram. Baselines ainda
+intactos; captura protegida do candidato integrado pendente.

@@ -15,9 +15,11 @@ const tabFromHash = () => tabs.find(({ key }) => window.location.hash === `#${pa
 export function AssociativeLearningManual({
   policy,
   questions,
+  initialOpen = false,
 }: {
   policy: ReactNode;
   questions: ReactNode;
+  initialOpen?: boolean;
 }) {
   const dialog = useRef<HTMLDialogElement>(null);
   const trigger = useRef<HTMLButtonElement>(null);
@@ -33,9 +35,13 @@ export function AssociativeLearningManual({
       buttons.current[key]?.focus({ preventScroll: true });
     };
     openFromHash();
+    if (initialOpen && dialog.current && !dialog.current.open) {
+      dialog.current.showModal();
+      buttons.current.policy?.focus({ preventScroll: true });
+    }
     window.addEventListener("hashchange", openFromHash);
     return () => window.removeEventListener("hashchange", openFromHash);
-  }, []);
+  }, [initialOpen]);
 
   function selectTab(key: TabKey) {
     setActiveTab(key);

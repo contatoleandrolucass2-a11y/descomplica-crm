@@ -65,6 +65,56 @@ function loadVendoredJsPdf() {
 }
 
 describe("configurable dashboard canvas", () => {
+  it("renders the authorized saved layout in the initial HTML only for the exact scope", () => {
+    const savedCard = {
+      ...card("saved", 0),
+      title: "Layout salvo no servidor",
+      metric: "sales.total",
+    };
+    const profile = {
+      id: "profile-synthetic",
+      userId: "user-synthetic",
+      pageKey: "crm.stage.appointments",
+      scopeKey: "channel.house",
+      name: "Perfil sintético",
+      isDefault: true,
+      version: 2,
+      schemaVersion: 2 as const,
+      cards: [savedCard],
+      createdAt: "2026-11-02T12:00:00Z",
+      updatedAt: "2026-11-02T12:00:00Z",
+    };
+    const props: ConfigurableDashboardCanvasProps = {
+      pageKey: profile.pageKey,
+      scopeKey: profile.scopeKey,
+      catalog,
+      exportContext: { title: "Fixture sintética" },
+      initialCards: [{ ...card("default", 0), title: "Layout padrão", metric: "sales.total" }],
+      initialProfileState: {
+        pageKey: profile.pageKey,
+        scopeKey: profile.scopeKey,
+        profiles: [profile],
+      },
+    };
+    const initial = renderToStaticMarkup(<ConfigurableDashboardCanvas {...props} />);
+    expect(initial).toContain('data-dashboard-card-id="saved"');
+    expect(initial).not.toContain('data-dashboard-card-id="default"');
+    const foreignScope = renderToStaticMarkup(
+      <ConfigurableDashboardCanvas {...props} scopeKey="channel.partnerships" />,
+    );
+    expect(foreignScope).toContain('data-dashboard-card-id="default"');
+    expect(foreignScope).not.toContain('data-dashboard-card-id="saved"');
+    const foreignRow = renderToStaticMarkup(
+      <ConfigurableDashboardCanvas
+        {...props}
+        initialProfileState={{
+          ...props.initialProfileState!,
+          profiles: [{ ...profile, pageKey: "crm.other" }],
+        }}
+      />,
+    );
+    expect(foreignRow).toContain('data-dashboard-card-id="default"');
+  });
   it("preserves pixel dimensions while reconciling the editor and moving a group", () => {
     const resized = {
       ...card("sales", 0),

@@ -12,6 +12,48 @@ function source(relativePath: string) {
   return readFileSync(new URL(`../${relativePath}`, import.meta.url), "utf8");
 }
 
+describe("dedicated productive team contract after impact planning", () => {
+  it("blocks a full result without the dedicated proof and preserves unrelated focused results", () => {
+    const script = source("scripts/qa/authenticated-visual.mjs");
+    const start = script.indexOf("function functionalChecksPassed(");
+    const end = script.indexOf("function createPromotedResult(", start);
+    const gateSource = script.slice(start, end);
+    const gateFor = (mode: "full" | "focused") =>
+      new Function(
+        "functionalPlan",
+        `
+        const visualRoutes = ["/app"];
+        const viewports = [{}];
+        const themes = ["dark"];
+        const desktopThemeCaptureRoutes = new Set(visualRoutes);
+        const zoomLevels = [{}];
+        const visualCheckResultsPassed = () => true;
+        ${gateSource}
+        return functionalChecksPassed;
+      `,
+      )({ mode }) as (input: Record<string, unknown>) => boolean;
+    const approvedOtherEvidence = {
+      routeChecks: [{ passed: true }],
+      themeChecks: [{ passed: true }, { passed: true }],
+      accessibilityChecks: [{ passed: true }, { passed: true }, { passed: true }],
+      screenshots: [{ approvedCanvasComparison: { passed: true } }, {}, {}],
+      functionalChecks: {},
+      zoom: { routes: [{}], passed: true },
+    };
+    const full = gateFor("full");
+    expect(full({ ...approvedOtherEvidence, productiveTeamValidation: { passed: true } })).toBe(
+      true,
+    );
+    expect(full({ ...approvedOtherEvidence, productiveTeamValidation: null })).toBe(false);
+    expect(full({ ...approvedOtherEvidence, productiveTeamValidation: { passed: false } })).toBe(
+      false,
+    );
+    expect(gateFor("focused")({ ...approvedOtherEvidence, productiveTeamValidation: null })).toBe(
+      true,
+    );
+  });
+});
+
 describe("complete visual composition on the scoped v3 read model", () => {
   it("connects the shadow dashboard to the shared secure analytical composition", () => {
     const productionPage = source("app/(protected)/app/page.tsx");
@@ -356,9 +398,15 @@ describe("isolated authenticated visual QA contract", () => {
     expect(script).toContain(
       '["/api/inventory", "/api/inventory/snapshot"].includes(requestUrl.pathname)',
     );
-    expect(script).toContain(
-      'simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);\n          currentStage = "tabelao-validation";\n          tabelaoValidation = await checkTabelaoValidation(page, origin);\n          await stopSyntheticInventory();\n          currentStage = "direct-table-validation"',
-    );
+    expect(script).toContain('"simulatorValidation",');
+    expect(script).toContain('"tabelaoValidation",');
+    expect(/await runFunctional\(\s*"directTableValidation",/.test(script)).toBe(true);
+    expect(
+      script.indexOf(
+        "await stopSyntheticInventory();",
+        script.indexOf('currentStage = "tabelao-validation"'),
+      ),
+    ).toBeLessThan(script.indexOf('currentStage = "direct-table-validation"'));
     expect(script).toContain(
       'functionalValidation: remoteHomologation\n    ? "protected homologation snapshot without persisted commercial fields"',
     );

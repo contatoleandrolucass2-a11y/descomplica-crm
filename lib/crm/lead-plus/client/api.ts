@@ -126,11 +126,12 @@ export async function api<T>(
   }
   return result;
 }
-export function useApi<T>(path: string) {
+export function useApi<T>(path: string | null) {
   const [data, setData] = useState<T | null>(null),
     [error, setError] = useState(""),
     [loading, setLoading] = useState(true);
   const refresh = useCallback(async () => {
+    if (path === null) return;
     try {
       setData(await api<T>(path));
       setError("");
@@ -141,6 +142,7 @@ export function useApi<T>(path: string) {
     }
   }, [path]);
   useEffect(() => {
+    if (path === null) return;
     let active = true,
       running = false;
     const run = async () => {

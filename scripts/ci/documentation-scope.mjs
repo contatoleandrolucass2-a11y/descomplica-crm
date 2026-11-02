@@ -6,14 +6,19 @@ const documentationPath = /^(?:CHANGELOG\.md|WORKLOG\.md|docs\/knowledge\/[A-Za-
 const revision = /^[a-f0-9]{40}$/;
 
 export function classifyDocumentationScope({ event, base, head, cwd = process.cwd() }) {
-  // A publication candidate always receives the complete suite, including docs-only main.
-  if (event !== "pull_request" || !revision.test(base ?? "") || !revision.test(head ?? "")) {
+  // Documentation main commits are deliberately not deployable application
+  // candidates: the release policy continues to require all four successful jobs.
+  if (
+    !["pull_request", "push"].includes(event) ||
+    !revision.test(base ?? "") ||
+    !revision.test(head ?? "")
+  ) {
     return false;
   }
   try {
     const git = (args) => execFileSync("git", args, { cwd, encoding: "utf8", windowsHide: true });
     // Evaluate the entire PR, not only the last commit; renames expose both paths.
-    const mergeBase = git(["merge-base", base, head]).trim();
+    const mergeBase = event === "pull_request" ? git(["merge-base", base, head]).trim() : base;
     const paths = git(["diff", "--name-only", "--no-renames", "-z", mergeBase, head])
       .split("\0")
       .filter(Boolean);
@@ -35,12 +40,17 @@ export function classifyDocumentationScope({ event, base, head, cwd = process.cw
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const documentationOnly = classifyDocumentationScope({
     event: process.env.GITHUB_EVENT_NAME,
-    base: process.env.PR_BASE_SHA,
-    head: process.env.PR_HEAD_SHA,
+    base:
+      process.env.GITHUB_EVENT_NAME === "pull_request"
+        ? process.env.PR_BASE_SHA
+        : process.env.PUSH_BASE_SHA,
+    head: process.env.PR_HEAD_SHA || process.env.GITHUB_SHA,
   });
   if (!process.env.GITHUB_OUTPUT) throw new Error("GITHUB_OUTPUT is required");
   appendFileSync(process.env.GITHUB_OUTPUT, `documentation_only=${documentationOnly}\n`);
   console.log(
-    documentationOnly ? "Documentation-only PR: targeted validation." : "Full validation required.",
+    documentationOnly
+      ? "Documentation-only change: targeted validation; not an application release candidate."
+      : "Full validation required.",
   );
 }

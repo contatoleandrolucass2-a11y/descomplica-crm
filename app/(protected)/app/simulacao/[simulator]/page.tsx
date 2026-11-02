@@ -41,6 +41,7 @@ export async function generateMetadata({
     return { title: "Calcular documentação" };
   }
   if (simulator === "caixa") return { title: "Simulador CAIXA" };
+  if (simulator === "tabela-investidor") return { title: "Simulador Tabela Investidor" };
   return { title: "Simulação comercial" };
 }
 

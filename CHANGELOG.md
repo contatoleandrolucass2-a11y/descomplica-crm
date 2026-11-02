@@ -9,6 +9,35 @@
   O contrato de navegação compartilhado inclui o novo destino do Dashboard.
   A seleção Imob autorizada permanece correta mesmo sem coleta disponível.
 
+- Publica o pacote coordenado do handoff em aa28d38e, após CI completa e promoção
+  protegida. Aplica somente as duas migrations autorizadas; mantém a leitura por
+  intervalo desligada e registra evidências, recuperação e bloqueios oficiais.
+
+- Reduz o payload analítico inicial de Agendamentos com resumo compacto e detalhe
+  paginado no servidor, preservando os cálculos e a exportação integral autorizada.
+- Pagina a lista Leads com filtros, contagens e cursor estável; preserva a leitura
+  completa do Kanban, histórico analítico, revogação e troca de usuário.
+- Reduz ordenações intermediárias da projeção SQL após comparação isolada;
+  preserva ordenação final, somas e máscaras. A alternativa por conjuntos não
+  mostrou ganho consistente e foi descartada. Migrations remotas não aplicadas.
+
+- Normaliza formatação do script de evidência e finais de linha da migration e
+  do teste SQL do handoff, preservando comportamento e contratos.
+- Mantém a conferência integral do FAQ no módulo diferido e reconhece a nova
+  migration no inventário histórico, sem liberar aplicação de Auth/MFA.
+
+- Unifica a validação visual por impacto, sem aprovar verificações não executadas;
+  preserva gates de aplicação e separa o fechamento documental no main.
+- Agendamentos recebe perfil autorizado desde a primeira renderização e relê
+  a versão ao retornar ao canal. Leituras históricas são paralelas e a leitura
+  consolidada tem rollout explícito, desligado até aplicação autorizada.
+- Metas zero permanecem distintas de ausência. Fontes comerciais parciais ou
+  inválidas não habilitam metas; logs opcionais não incluem dados do CRM.
+
+- Reduz o grafo JavaScript inicial de Leads e Investidor com módulos sob demanda,
+  preservando sessão, conteúdo e cálculos. Consultas de Leads recebem escopo
+  autorizado e dashboard agregado, sem mudar o banco operacional.
+
 - Preserva o último rótulo do comparativo de Agendamentos em cards estreitos,
   mantendo os dias alinhados às três séries e a autonomia de tamanho.
   Validado com atualização cruzada entre navegadores e celular emulado.
@@ -3987,3 +4016,6 @@ Validação e publicação serão registradas com evidências ao concluir os gat
 - Isola dados operacionais, vínculos e permissões no backend; remove a prévia de demonstração da integração.
 - Prepara webhook Facebook e processamento supervisionado sem substituir a credencial de métricas nem a integração do C2S.
 - Estado: candidato em validação, ainda não publicado.
+
+- Estabiliza a prioridade dos estilos de Administração, Páginas e Usuários,
+  preservando margens, bordas e filtros contra a ordem dos chunks CSS.

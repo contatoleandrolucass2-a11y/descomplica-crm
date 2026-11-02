@@ -1,11 +1,13 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useId,
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
   type CSSProperties,
   type PointerEvent as ReactPointerEvent,
   type ReactNode,
@@ -13,6 +15,7 @@ import {
 import { ArrowLeftRight, CalendarDays, X } from "lucide-react";
 
 import { ConfigurableDashboardCanvas } from "@/lib/dashboard-canvas/ui/configurable";
+import type { ConfigurableDashboardCanvasProps } from "@/lib/dashboard-canvas/ui/configurable/types";
 import { useDashboardBarHeightControl } from "@/lib/dashboard-canvas/ui/configurable/bar-height-controls";
 import { AppointmentsColumns as Columns } from "./AppointmentsColumns";
 import { AppointmentsComparison, DailyChartTypeControl } from "./AppointmentsComparison";
@@ -21,6 +24,20 @@ import comparisonStyles from "./AppointmentsComparison.module.css";
 import { APPOINTMENTS_CARD_LAYOUT_POLICY } from "@/lib/dashboard-canvas/layout/limits";
 import type { DashboardContentByMetricAndType } from "@/lib/dashboard-canvas/ui/configurable/types";
 import type { DashboardAnalysisSlice } from "@/lib/crm/dashboard/analysis-contract";
+import {
+  expandAppointmentSummary,
+  type AppointmentSummaryTransport,
+} from "@/lib/crm/stages/appointments-summary";
+import {
+  appointmentDetailQueryKey,
+  type AppointmentDetailActions,
+  type AppointmentDetailQuery,
+  type AppointmentDetailSource,
+} from "@/lib/crm/stages/appointments-detail-contract";
+import {
+  createAppointmentDetailController,
+  type AppointmentDetailController,
+} from "@/lib/crm/stages/appointments-detail-client";
 import type {
   AppointmentConversionGoals,
   AppointmentConversionGoalsByMonth,
@@ -1081,17 +1098,129 @@ function GoalGauge({ current, goal }: { current: number; goal: number | null }) 
   );
 }
 
+const emptyDetailSubscribe = () => () => undefined;
+const emptyDetailVersion = () => 0;
+
 function AppointmentTable({
   rows,
   timezone,
   selectedKey,
   onSelect,
+  detailSource,
+  detailQuery,
+  detailController,
 }: {
   rows: NonNullable<ReturnType<typeof analyzeAppointments>["details"]>;
   timezone: string;
   selectedKey?: string;
   onSelect: (filters: AppointmentFilters, key: string) => void;
+  detailSource?: AppointmentDetailSource | undefined;
+  detailQuery?: AppointmentDetailQuery | undefined;
+  detailController?: AppointmentDetailController | undefined;
 }) {
+  const tableRef = useRef<HTMLElement>(null);
+  const headingId = useId();
+  const sequence = useRef({ value: 0 });
+  const [visible, setVisible] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [exporting, setExporting] = useState(false);
+  const [exportMessage, setExportMessage] = useState("");
+  const queryKey = detailQuery ? appointmentDetailQueryKey(detailQuery) : "";
+  useSyncExternalStore(
+    detailController?.subscribe ?? emptyDetailSubscribe,
+    detailController?.getVersion ?? emptyDetailVersion,
+    emptyDetailVersion,
+  );
+  const current = detailSource
+    ? (detailController?.peek(queryKey) ??
+      (detailSource.initialQueryKey === queryKey ? detailSource.initialPage : null))
+    : null;
+  useEffect(() => {
+    if (!detailSource || !tableRef.current) return;
+    if (typeof IntersectionObserver === "undefined") {
+      queueMicrotask(() => setVisible(true));
+      return;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setVisible(entry?.isIntersecting === true),
+      { rootMargin: "200px" },
+    );
+    observer.observe(tableRef.current);
+    return () => observer.disconnect();
+  }, [detailSource]);
+  const requestPage = useCallback(
+    async (cursor: string | null) => {
+      if (!detailSource || !detailQuery || !detailController) return;
+      const request = ++sequence.current.value;
+      setPending(true);
+      try {
+        await detailController.loadDetails({
+          query: detailQuery,
+          snapshot: detailSource.snapshot,
+          cursor,
+        });
+      } finally {
+        if (request === sequence.current.value) setPending(false);
+      }
+    },
+    [detailController, detailQuery, detailSource],
+  );
+  useEffect(() => {
+    const tracker = sequence.current;
+    ++tracker.value;
+    let cancelled = false;
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    queueMicrotask(() => {
+      if (cancelled) return;
+      setPending(false);
+      // Coalesce rapid filter changes; KPI/filter computation remains immediate.
+      if (detailSource && detailController && visible && current === null)
+        timer = setTimeout(() => {
+          if (!cancelled) void requestPage(null);
+        }, 150);
+    });
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+      ++tracker.value;
+    };
+  }, [queryKey, detailSource, detailController, visible, current, requestPage]);
+  const page = current?.status === "ready" ? current : null;
+  const visibleRows = detailSource ? (page?.rows ?? []) : rows;
+  const total = detailSource ? (page?.total ?? null) : rows.length;
+  const unavailable = detailSource && current?.status !== "ready";
+  const exportAll = async () => {
+    if (!detailController || !detailQuery || !detailSource) return;
+    setExporting(true);
+    setExportMessage("");
+    try {
+      const result = await detailController.exportDetails({
+        query: detailQuery,
+        snapshot: detailSource.snapshot,
+      });
+      if (result.status !== "ready") {
+        setExportMessage(
+          result.status === "snapshot_changed"
+            ? "A fonte foi atualizada. Recarregue os dados antes de exportar."
+            : "Não foi possível exportar. Tente novamente.",
+        );
+        return;
+      }
+      const url = URL.createObjectURL(
+        new Blob(["\uFEFF", result.csv], { type: "text/csv;charset=utf-8" }),
+      );
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `agendamentos-${detailQuery.month}.csv`;
+      link.click();
+      URL.revokeObjectURL(url);
+      setExportMessage(`${number.format(result.total)} registros exportados integralmente.`);
+    } catch {
+      setExportMessage("Não foi possível exportar. Tente novamente.");
+    } finally {
+      setExporting(false);
+    }
+  };
   const date = new Intl.DateTimeFormat("pt-BR", { dateStyle: "short", timeZone: timezone });
   const time = new Intl.DateTimeFormat("pt-BR", {
     hour: "2-digit",
@@ -1100,12 +1229,78 @@ function AppointmentTable({
   });
   const value = (text: string) => text || "Não informado";
   return (
-    <section className={`${styles.card} ${styles.tableCard}`} aria-labelledby="appointments-table">
+    <section
+      ref={tableRef}
+      className={`${styles.card} ${styles.tableCard}`}
+      aria-labelledby={headingId}
+      aria-busy={pending}
+    >
       <header className={styles.cardHeader}>
-        <h2 id="appointments-table">Detalhamento dos agendamentos</h2>
-        <span>{number.format(rows.length)} registros no período</span>
+        <h2 id={headingId}>Detalhamento dos agendamentos</h2>
+        <span>
+          {total === null
+            ? "Detalhamento aguardando leitura"
+            : `${number.format(total)} registros no período`}
+        </span>
       </header>
-      {rows.length === 0 ? (
+      {detailSource ? (
+        <>
+          <p role="status" aria-live="polite">
+            {pending
+              ? "Atualizando o detalhamento…"
+              : current?.status === "snapshot_changed"
+                ? "A fonte foi atualizada. Recarregue os dados para não misturar atualizações."
+                : current?.status === "unavailable" || current?.status === "invalid_request"
+                  ? "Detalhamento indisponível. Tente novamente."
+                  : page
+                    ? `Exibindo ${page.total === 0 ? 0 : page.offset + 1}–${page.offset + visibleRows.length} de ${page.total}. PDF: captura da visualização atual. CSV: recorte integral.`
+                    : "Detalhes serão carregados ao visualizar esta tabela."}
+          </p>
+          <div
+            style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}
+            data-dashboard-export-ignore
+          >
+            <button
+              type="button"
+              disabled={pending || !detailController || !page?.previousCursor}
+              onClick={() => void requestPage(page?.previousCursor ?? null)}
+            >
+              Página anterior
+            </button>
+            <button
+              type="button"
+              disabled={pending || !detailController || !page?.nextCursor}
+              onClick={() => void requestPage(page?.nextCursor ?? null)}
+            >
+              Próxima página
+            </button>
+            {current && current.status !== "ready" ? (
+              <button
+                type="button"
+                disabled={pending}
+                onClick={() =>
+                  current.status === "snapshot_changed"
+                    ? window.location.reload()
+                    : void requestPage(null)
+                }
+              >
+                {current.status === "snapshot_changed" ? "Atualizar dados" : "Tentar novamente"}
+              </button>
+            ) : null}
+            <button
+              type="button"
+              disabled={
+                exporting || pending || !detailController || current?.status === "snapshot_changed"
+              }
+              onClick={() => void exportAll()}
+            >
+              {exporting ? "Exportando…" : "Exportar CSV completo"}
+            </button>
+          </div>
+          {exportMessage ? <p role="status">{exportMessage}</p> : null}
+        </>
+      ) : null}
+      {unavailable ? null : visibleRows.length === 0 ? (
         <Empty />
       ) : (
         <div
@@ -1130,7 +1325,7 @@ function AppointmentTable({
               </tr>
             </thead>
             <tbody>
-              {rows.map((row, index) => {
+              {visibleRows.map((row, index) => {
                 const selectionKey = `${row.createdAt}-${row.owner}-${row.accountName}-${row.accountRanking}-${row.salesManager}`;
                 const key = `${selectionKey}-${index}`;
                 const select = () =>
@@ -1200,7 +1395,11 @@ function lazyAppointmentComparison(
 }
 
 export function AppointmentsDashboard({
-  analysis,
+  analysis: providedAnalysis,
+  compactSummary,
+  detailSource,
+  detailActions,
+  initialProfileState,
   brokerRoster = null,
   generatedAt,
   calendarDate,
@@ -1213,6 +1412,10 @@ export function AppointmentsDashboard({
   canEditDashboard = false,
 }: {
   analysis: DashboardAnalysisSlice | null;
+  compactSummary?: AppointmentSummaryTransport | undefined;
+  detailSource?: AppointmentDetailSource | undefined;
+  detailActions?: AppointmentDetailActions | undefined;
+  initialProfileState?: ConfigurableDashboardCanvasProps["initialProfileState"];
   brokerRoster?: AppointmentBrokerRosterEntry[] | null | undefined;
   generatedAt?: string | undefined;
   calendarDate?: string | undefined;
@@ -1224,12 +1427,26 @@ export function AppointmentsDashboard({
   canViewDevelopmentRankings?: boolean | undefined;
   canEditDashboard?: boolean | undefined;
 }) {
+  const analysis = useMemo(
+    () => (compactSummary ? expandAppointmentSummary(compactSummary) : providedAnalysis),
+    [compactSummary, providedAnalysis],
+  );
+  const detailController = useMemo(
+    () =>
+      detailSource && detailActions
+        ? createAppointmentDetailController(detailActions, detailSource)
+        : undefined,
+    [detailActions, detailSource],
+  );
   const [currentCalendarDate, setCurrentCalendarDate] = useState(
     calendarDate ?? analysis?.referenceDate ?? "",
   );
   const [monthChoice, setSelectedMonth] = useState("");
   const [yearChoice, setSelectedYear] = useState("");
   const [filters, setFilters] = useState<AppointmentFilters>({ channel: 1 });
+  // The server snapshot belongs to the initial visit only. Returning to House
+  // must read the latest version, including edits saved before switching scope.
+  const [initialProfileConsumed, setInitialProfileConsumed] = useState(false);
   const [periodLabel, setPeriodLabel] = useState<string>();
   const [selectedRow, setSelectedRow] = useState("");
   const [rowBaseFilters, setRowBaseFilters] = useState<AppointmentFilters | null>(null);
@@ -1270,28 +1487,44 @@ export function AppointmentsDashboard({
       goalsByMonth ?? (analysis ? { [analysis.referenceDate.slice(0, 7)]: individualGoal } : {}),
     [goalsByMonth, analysis, individualGoal],
   );
-  const result = useMemo(
+  const detailQuery = useMemo<AppointmentDetailQuery | undefined>(
     () =>
-      analysis
-        ? analyzeAppointments(analysis, {
+      detailSource
+        ? {
+            view: detailSource.view,
             month: selectedMonth,
             year: selectedYear,
-            filters,
-            brokerRoster,
-            goalsByMonth: resolvedGoals,
             calendarDate: currentCalendarDate,
-          })
-        : null,
-    [
-      analysis,
-      brokerRoster,
-      filters,
-      selectedMonth,
-      selectedYear,
-      resolvedGoals,
-      currentCalendarDate,
-    ],
+            filters,
+          }
+        : undefined,
+    [detailSource, selectedMonth, selectedYear, currentCalendarDate, filters],
   );
+  const result = useMemo(() => {
+    const reading = analysis
+      ? analyzeAppointments(analysis, {
+          month: selectedMonth,
+          year: selectedYear,
+          filters,
+          brokerRoster,
+          goalsByMonth: resolvedGoals,
+          calendarDate: currentCalendarDate,
+        })
+      : null;
+    // The compact transport intentionally omits operational display fields.
+    // Only the separately authorized server page may populate the detail table.
+    if (reading && compactSummary) reading.details = null;
+    return reading;
+  }, [
+    analysis,
+    brokerRoster,
+    filters,
+    selectedMonth,
+    selectedYear,
+    resolvedGoals,
+    currentCalendarDate,
+    compactSummary,
+  ]);
   // A dragged or copied card may remount. Share the lazy calculation only
   // within this dashboard and this exact set of analysis inputs.
   const getComparison = useMemo(
@@ -1415,6 +1648,7 @@ export function AppointmentsDashboard({
     key: K,
     value: AppointmentFilters[K],
   ) => {
+    if (key === "channel") setInitialProfileConsumed(true);
     setSelectedRow("");
     setRowBaseFilters(null);
     setFilters((current) => {
@@ -1428,6 +1662,7 @@ export function AppointmentsDashboard({
     key: K,
     value: AppointmentFilters[K] | undefined,
   ) => {
+    if (key === "channel" && value !== filters.channel) setInitialProfileConsumed(true);
     setSelectedRow("");
     setRowBaseFilters(null);
     setFilters((current) => {
@@ -1981,14 +2216,17 @@ export function AppointmentsDashboard({
     },
     "appointments.details": {
       table:
-        result.details === null ? (
+        result.details === null && !detailSource ? (
           <section className={`${styles.card} ${styles.tableCard}`}>
             <h2>Detalhamento dos agendamentos</h2>
             <Empty>Detalhamento indisponível nesta atualização.</Empty>
           </section>
         ) : (
           <AppointmentTable
-            rows={result.details}
+            rows={compactSummary ? [] : (result.details ?? [])}
+            detailSource={detailSource}
+            detailQuery={detailQuery}
+            detailController={detailController}
             timezone={timezone}
             selectedKey={selectedRow}
             onSelect={(rowFilters, key) => {
@@ -2070,6 +2308,7 @@ export function AppointmentsDashboard({
       <ConfigurableDashboardCanvas
         key={canvasScopeKey}
         initialCards={APPOINTMENTS_CANVAS_DEFAULT_CARDS}
+        initialProfileState={initialProfileConsumed ? undefined : initialProfileState}
         catalog={APPOINTMENTS_CANVAS_CATALOG}
         compatibility={APPOINTMENTS_CANVAS_COMPATIBILITY}
         contentByMetricAndType={contentByMetricAndType}

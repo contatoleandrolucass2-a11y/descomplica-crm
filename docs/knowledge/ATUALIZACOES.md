@@ -2,6 +2,16 @@
 
 [Equipe Produtiva](ATUALIZACOES-ARQUIVO-2026-11-01-a-2026-11-01-EQUIPE-PRODUTIVA.md).
 
+## 2026-11-02: handoff integrado e publicado
+
+PR467/main aa28d38e publicado em 17:03:30.921Z, CI41479050792 aprovada nos quatro
+jobs, health/guards/imagem conferidos. Duas migrations expressamente autorizadas
+aplicadas com backup, hashes e privilégios preservados; range permanece desligado.
+Metas/ranking/parcerias mantêm bloqueios oficiais. Repasse retirado pelo usuário;
+Meta Ads sem arquivos alterados. Medições, validações, limites e recuperação em
+[registro canônico](ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md).
+Encerramento documental não provoca outra promoção de runtime.
+
 - Agendamentos: abertura do ajuste direto das torres, títulos e layout compacto.
   Fontes e limites no histórico AGENDAMENTOS de 30/10/2026.
 
@@ -3224,16 +3234,19 @@ Registros integrais de persistência e edição entre navegadores em [arquivo de
 
 ## 2026-10-30: rodada de persistência e sincronização inversa aprovadas
 
-- Chrome: um clique em Salvar no editor de Visitas (361×273 px) e semanal (525×483 px), fechamento após resposta e comparação integral dos 28 itens aprovada após reload. Arraste do canto alterou Visitas para 385×293 e semanal para 540×497; arrastes das alças moveram Visitas de 3º para 4º e semanal de 16º para 15º. Sem editor para essas duas últimas operações.
-- Autosave confirmado; listas completas de ID, width e height em ordem idênticas após refresh, navegação direta para /app e retorno a Agendamentos, logout observado em /login e novo login em /app. Mesma conta verificada como booleano, sem exportar identificador; usado somente preenchimento já existente no Chrome, sem ler senha nem mudar autenticação. Após navegação e login, a primeira leitura ainda mostrou o padrão transitório; após carregar o perfil, os 28 registros coincidiram. Não tratar leitura durante carregamento como layout final.
-- Chrome para integrado aprovado: após confirmação de login pelo usuário, reiniciar o controle da ferramenta permitiu recuperar a aba integrada 4 existente e executar reload real. Os 28 IDs, larguras e alturas em ordem foram exatamente iguais ao snapshot final do Chrome. Visitas em 4º/385×293 px e semanal em 15º/540×497 px. Em viewport temporário de 1280 px, as caixas renderizadas também mediram esses valores, sem limitação da tela estreita; override restaurado. Nenhum ajuste ou salvamento no integrado foi necessário.
-- Limite da ferramenta: recuperar handles entre navegadores falhou com browser.user indisponível; abas novas mostraram login, mas isso não comprovou o estado da aba integrada existente. Reset do controle, sem fechar as abas ou alterar autenticação, resolveu a recuperação e o reload existente permaneceu autenticado. Não atribuir as falhas de recuperação à persistência do produto nem inferir causa global de logout. Em ocorrência semelhante, recuperar a aba existente após reset antes de pedir outro login.
-- Evidências locais ignoradas: test-results/appointments-first-save/rodada-completa-chrome.json, rodada-completa-chrome-apos-login.jpg, rodada-completa-integrado-final.json e rodada-completa-integrado-final.jpg. Prints nativos após reload nos dois navegadores, anteriores aos rankings/tabela; somente IDs de cards e dimensões nos JSONs. Sem anexos privados ou credenciais no Git/Obsidian. Aba integrada de resultado mantida aberta; sem código, schema ou deploy.
-- Fonte em 30/10/2026 22:45 BRT (31/10/2026T01:45:43Z): origin/main ef8e953ecf374b1f4511ea60ace596f1a4117d0a; health público https://crm.descomplicapro.com.br/api/health status ok/version 8d0d1a732fb008da2d5c1b162d5c61a66fb97ecd. CI funcional 41093030466 reutilizada; registro desta rodada ainda não integrado. As duas notas anteriores de Agendamentos foram movidas integralmente ao arquivo histórico indicado acima, sem resumir ou apagar conteúdo, conforme o limite de 256.000 bytes do runbook. Sync posterior aprovou seis documentos.
-- Fechamento observacional em 30/10/2026 22:53 BRT (31/10/2026T01:53:00Z): fetch manteve origin/main ef8e953e; health público manteve status ok/version 8d0d1a73. Aceites funcionais completos para os navegadores e conta observados; CI documental e integração deste registro seguem o fluxo protegido, sem novo deploy do runtime.
+Registro integral movido, sem resumo, para [arquivo de Agendamentos](ATUALIZACOES-ARQUIVO-2026-10-30-a-2026-10-30-AGENDAMENTOS.md), conforme limite de exportação.
 
 ## 2026-10-30: celular simulado aprovado
 
 Agendamentos em 390×844 manteve os 28 itens após refresh, com ajuste à largura da tela. Evidências e limites no [arquivo de Agendamentos](ATUALIZACOES-ARQUIVO-2026-10-30-a-2026-10-30-AGENDAMENTOS.md), seção de celular simulado.
 
 PR463 publicado/0dab1578; persistência, margem e prints aprovados. Evidências acima.
+
+## 2026-11-02: abertura do handoff integrado de desempenho e metas
+
+- Escopo: handoff de 02/11/2026; CI proporcional, observabilidade, Agendamentos, Leads, simuladores, Repasse, metas e gráficos afetados. Meta Ads excluído integralmente; consumidores compartilhados preservados.
+- Git comum confirmado; checkout inicialmente limpo e detached em d4bb4d91b8a553ae2edf0eaeb876d21e2b59b361, igual a origin/main após fetch. Base auditada idêntica: nenhum delta posterior a reauditar.
+- Fontes em 02/11/2026, 09:04 -03: Git local/fetch e conector GitHub do repositório contatoleandrolucass2-a11y/descomplica-crm (default main). A consulta de runs do conector retorna somente eventos PR e veio vazia para esse merge; não comprova CI do main. CLI gh ausente do PATH.
+- Health https://crm.descomplicapro.com.br/api/health: HTTP 200, status ok, version 0dab1578063eece6b9b5c86fa184c722388578fb. Código local/integrado e publicado são distintos; diferença histórica documental será preservada.
+- Contexto e busca temática de conhecimento executados. Dependências deste worktree ausentes; Next/Chrome MCP declarados no config, mas ferramentas locais não expostas nesta sessão. Não confundir declaração com conexão funcional. Validação e métricas dependerão de fixtures/ambiente isolado; não usar dados pessoais de produção.
+- Registro canônico desta execução: docs/knowledge/ATUALIZACOES-ARQUIVO-2026-11-02-a-2026-11-02-HANDOFF.md, a preparar com matriz por frente, evidências e bloqueios. Sem autorização implícita para políticas comerciais, contas, DNS ou migrations remotas.

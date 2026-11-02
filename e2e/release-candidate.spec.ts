@@ -1451,20 +1451,65 @@ for (const role of expectedRoles) {
       // This is an authorization matrix, not a load test. Keep requests serial
       // so a small release host cannot turn artificial bursts into database
       // statement timeouts while preserving every profile × route assertion.
-      for (const [index, surface] of protectedSurfaces.entries()) {
-        let response = await page.context().request.get(surface.path, { maxRedirects: 0 });
-        if (response.status() >= 500) {
-          const firstStatus = response.status();
-          await response.dispose();
-          reportProgress(`direct-route-${index + 1}-retry-after-${firstStatus}`);
-          await page.waitForTimeout(15_000);
-          response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+      const matrixStarted = performance.now();
+      const matrixRequests: Array<{
+        route: string;
+        expectedStatus: number;
+        actualStatus: number;
+        attempts: number;
+        requestDurationMs: number;
+        retryWaitMs: number;
+      }> = [];
+      try {
+        for (const [index, surface] of protectedSurfaces.entries()) {
+          let requestStarted = performance.now();
+          let response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+          let requestDurationMs = performance.now() - requestStarted;
+          let attempts = 1;
+          if (response.status() >= 500) {
+            const firstStatus = response.status();
+            await response.dispose();
+            reportProgress(`direct-route-${index + 1}-retry-after-${firstStatus}`);
+            await page.waitForTimeout(15_000);
+            requestStarted = performance.now();
+            response = await page.context().request.get(surface.path, { maxRedirects: 0 });
+            requestDurationMs += performance.now() - requestStarted;
+            attempts += 1;
+          }
+          matrixRequests.push({
+            route: surface.path,
+            expectedStatus: surface.allowed.has(role) ? 200 : 403,
+            actualStatus: response.status(),
+            attempts,
+            requestDurationMs: Math.round(requestDurationMs),
+            retryWaitMs: attempts > 1 ? 15_000 : 0,
+          });
+          expect(response.status(), `${role} ${surface.path}`).toBe(
+            surface.allowed.has(role) ? 200 : 403,
+          );
+          reportProgress(`direct-route-${index + 1}-${protectedSurfaces.length}`);
+          await page.waitForTimeout(1_000);
         }
-        expect(response.status(), `${role} ${surface.path}`).toBe(
-          surface.allowed.has(role) ? 200 : 403,
-        );
-        reportProgress(`direct-route-${index + 1}-${protectedSurfaces.length}`);
-        await page.waitForTimeout(1_000);
+      } finally {
+        const timingEvidence = JSON.stringify({
+          contract: "serial-authorization-matrix-v1",
+          role,
+          revision: execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim(),
+          capturedAt: new Date().toISOString(),
+          method: "APIRequestContext; not browser page-load or database latency",
+          expectedCombinations: protectedSurfaces.length,
+          completedCombinations: matrixRequests.length,
+          pacingMsPerCombination: 1_000,
+          wallMs: Math.round(performance.now() - matrixStarted),
+          requests: matrixRequests,
+        });
+        const timingRoot = path.resolve("test-results/authorization-matrix");
+        await mkdir(timingRoot, { recursive: true });
+        await writeFile(path.join(timingRoot, `${role}.json`), timingEvidence);
+        await test.info().attach("authorization-matrix-timing", {
+          contentType: "application/json",
+          body: timingEvidence,
+        });
       }
 
       const allowedSurface = protectedSurfaces.find((surface) => surface.allowed.has(role));

@@ -445,6 +445,7 @@ select is(
     'read_crm_appointments_analysis',
     'read_crm_appointments_conversion_goals',
     'read_crm_appointments_goal',
+    'read_crm_appointments_goals_range',
     'read_crm_dashboard_analysis',
     'read_crm_productive_team',
     'remove_user_permission_override',

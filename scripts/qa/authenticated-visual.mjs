@@ -16,7 +16,13 @@ import { checkRoutineSettings } from "./routine-settings.mjs";
 import { checkConnectedSystems } from "./connected-systems.mjs";
 import { checkDashboardAutoRefresh } from "./dashboard-auto-refresh.mjs";
 import { checkRepasse } from "./repasse.mjs";
-import { authenticatedVisualRoutes, selectVisualRoutes } from "./visual-route-scope.mjs";
+import {
+  authenticatedVisualRoutes,
+  selectVisualRoutes,
+  readVisualCheckPlan,
+  createVisualCheckRunner,
+  visualCheckResultsPassed,
+} from "./visual-route-scope.mjs";
 import {
   checkTabelaoLayout,
   checkTabelaoMapsFixture,
@@ -109,6 +115,11 @@ const mode = parseMode(process.argv.slice(2));
 
 const routes = authenticatedVisualRoutes;
 const visualRoutes = selectVisualRoutes(process.env.QA_VISUAL_ROUTES, routes);
+const functionalPlan = readVisualCheckPlan(process.env.QA_VISUAL_PLAN, visualRoutes);
+const booleanChecksPassed = (value) =>
+  value !== null &&
+  Object.keys(value).length > 0 &&
+  Object.values(value).every((item) => item === true);
 
 const approvedCanvasByRoute = new Map([
   [
@@ -1649,7 +1660,7 @@ async function setTheme(page, theme) {
 }
 
 async function checkKeyboard(page, origin) {
-  await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
+  await gotoWithServerRetry(page, `${origin}${visualRoutes[0]}`, { waitUntil: "domcontentloaded" });
   const disclosure = page
     .locator('header button[data-navigation-root-control][aria-controls^="authorized-navigation-"]')
     .first();
@@ -5658,6 +5669,7 @@ async function checkFixtureSourceMarker(page, origin, expectedMarker) {
     ["dashboard", "/app"],
     ["stageOpportunities", "/app/etapas/oportunidades"],
   ]) {
+    if (!visualRoutes.includes(route)) continue;
     await gotoWithServerRetry(page, `${origin}${route}`, { waitUntil: "domcontentloaded" });
     if (key === "dashboard") {
       const report = page.locator("[data-dashboard-source]");
@@ -6016,13 +6028,8 @@ function functionalChecksPassed({
   themeChecks,
   accessibilityChecks,
   screenshots,
-  keyboard,
-  simulatorValidation,
-  tabelaoValidation,
-  directTableValidation,
+  functionalChecks,
   productiveTeamValidation,
-  archiveNavigation,
-  fixtureSourceMarker,
   zoom,
 }) {
   return (
@@ -6044,18 +6051,8 @@ function functionalChecksPassed({
     screenshots
       .filter(({ approvedCanvasComparison }) => approvedCanvasComparison)
       .every(({ approvedCanvasComparison }) => approvedCanvasComparison.passed) &&
-    keyboard &&
-    Object.values(keyboard).every(Boolean) &&
-    simulatorValidation &&
-    Object.values(simulatorValidation).every(Boolean) &&
-    tabelaoValidation &&
-    Object.values(tabelaoValidation).every(Boolean) &&
-    directTableValidation &&
-    Object.values(directTableValidation).every(Boolean) &&
-    productiveTeamValidation?.passed === true &&
-    archiveNavigationPassed(archiveNavigation) &&
-    fixtureSourceMarker &&
-    Object.values(fixtureSourceMarker).every(Boolean) &&
+    visualCheckResultsPassed(functionalPlan, functionalChecks) &&
+    (functionalPlan.mode !== "full" || productiveTeamValidation?.passed === true) &&
     zoom.routes.length === visualRoutes.length * zoomLevels.length &&
     zoom.passed
   );
@@ -6197,6 +6194,7 @@ async function promoteBaseline(candidateResult) {
 }
 
 async function run() {
+  const { results: functionalChecks, run: runFunctional } = createVisualCheckRunner(functionalPlan);
   await rm(artifactRoot, { recursive: true, force: true });
   await mkdir(candidateScreenshotRoot, { recursive: true });
   const baselineCommittedAtStart = baselineMatchesHead();
@@ -6206,6 +6204,8 @@ async function run() {
   let candidateResultWritten = false;
   await writeJsonAtomically(candidateResultsPath, {
     schemaVersion: 2,
+    functionalPlan,
+    functionalChecks,
     capturedAt: new Date().toISOString(),
     ...getCaptureProvenance(),
     mode,
@@ -6344,218 +6344,285 @@ async function run() {
         }
 
         if (viewport.key === "desktop-1440x900") {
-          currentStage = "productive-team";
-          const productiveTeamPage = configureQaPage(await context.newPage());
-          try {
-            productiveTeamValidation = await checkProductiveTeam(
-              productiveTeamPage,
-              origin,
-              httpCredentials,
-            );
-            await writeFile(
-              path.join(artifactRoot, "productive-team-results.json"),
-              JSON.stringify(productiveTeamValidation, null, 2),
-            );
-          } finally {
-            await productiveTeamPage.close({ runBeforeUnload: false });
-          }
-          currentStage = "repasse";
-          const repassePage = configureQaPage(await context.newPage());
-          try {
-            const repasse = await checkRepasse(
-              repassePage,
-              origin,
-              path.join(artifactRoot, "repasse"),
-            );
-            await writeFile(
-              path.join(artifactRoot, "repasse-results.json"),
-              JSON.stringify(repasse, null, 2),
-            );
-          } finally {
-            await repassePage.close({ runBeforeUnload: false });
-          }
-          currentStage = "marketing-resources";
-          const marketingPage = configureQaPage(await context.newPage());
-          try {
-            const marketing = await checkMarketingResources(
-              marketingPage,
-              origin,
-              path.join(artifactRoot, "marketing"),
-            );
-            await writeFile(
-              path.join(artifactRoot, "marketing-results.json"),
-              JSON.stringify(marketing, null, 2),
-            );
-          } finally {
-            await marketingPage.close({ runBeforeUnload: false });
-          }
-          currentStage = "dashboard-auto-refresh";
-          // Keep refresh checks independent of other pages, routes and context-wide clock mocks.
-          const dashboardContext = await browser.newContext({
-            viewport: { width: viewport.width, height: viewport.height },
-            reducedMotion: "reduce",
-            locale: "pt-BR",
-            timezoneId: "America/Sao_Paulo",
-            httpCredentials,
-          });
-          try {
-            await hideHomologationBannerForBaseline(dashboardContext);
-            const dashboardPage = configureQaPage(await dashboardContext.newPage());
-            await login(dashboardPage, origin, email, password);
-            const dashboardRefresh = await checkDashboardAutoRefresh(dashboardPage, origin);
-            await writeFile(
-              path.join(artifactRoot, "dashboard-auto-refresh-results.json"),
-              JSON.stringify(dashboardRefresh, null, 2),
-            );
-          } finally {
-            await dashboardContext.close();
-          }
-          currentStage = "routine-settings";
-          // Playwright's clock belongs to the context, not only to its page.
-          const routineContext = await browser.newContext({
-            viewport: { width: viewport.width, height: viewport.height },
-            reducedMotion: "reduce",
-            locale: "pt-BR",
-            timezoneId: "America/Sao_Paulo",
-            httpCredentials,
-          });
-          try {
-            await hideHomologationBannerForBaseline(routineContext);
-            const routinePage = configureQaPage(await routineContext.newPage());
-            await login(routinePage, origin, email, password);
-            const routine = await checkRoutineSettings(
-              routinePage,
-              origin,
-              path.join(artifactRoot, "routine"),
-            );
-            await writeFile(
-              path.join(artifactRoot, "routine-results.json"),
-              JSON.stringify(routine, null, 2),
-            );
-          } finally {
-            await routineContext.close();
-          }
-          currentStage = "connected-systems";
-          const systemsPage = configureQaPage(await context.newPage());
-          try {
-            const systems = await checkConnectedSystems(
-              systemsPage,
-              origin,
-              path.join(artifactRoot, "connected-systems"),
-            );
-            await writeFile(
-              path.join(artifactRoot, "connected-systems-results.json"),
-              JSON.stringify(systems, null, 2),
-            );
-          } finally {
-            await systemsPage.close({ runBeforeUnload: false });
-          }
-          currentStage = "documentation-calculator";
-          const documentationPage = configureQaPage(await context.newPage());
-          try {
-            const documentation = await checkDocumentationCalculator(
-              documentationPage,
-              origin,
-              path.join(artifactRoot, "documentation"),
-            );
-            await writeFile(
-              path.join(artifactRoot, "documentation-results.json"),
-              JSON.stringify(documentation, null, 2),
-            );
-          } finally {
-            await documentationPage.close({ runBeforeUnload: false });
-          }
-          currentStage = "archive-navigation";
-          const navigationPage = configureQaPage(await context.newPage());
-          navigationPage.setDefaultTimeout(archiveNavigationActionTimeout);
-          const navigationProvenance = getCaptureProvenance();
-          const candidateProgress = JSON.parse(await readFile(candidateResultsPath, "utf8"));
-          archiveNavigation = {
-            contract: "archive-navigation-v1",
-            scope: "header-and-content",
-            checks: [],
-            passed: false,
-          };
-          const persistNavigationProgress = async () => {
-            const capturedAt = new Date().toISOString();
-            await writeJsonAtomically(archiveNavigationResultsPath, {
-              ...navigationProvenance,
-              capturedAt,
-              environment: environmentLabel,
-              data: "synthetic local-only fixtures; never production runtime",
-              ...archiveNavigation,
-            });
-            await writeJsonAtomically(candidateResultsPath, {
-              ...candidateProgress,
-              capturedAt,
-              failure: { stage: currentStage, kind: "sanitized" },
-              archiveNavigation,
-              passed: false,
-            });
-          };
-          try {
-            await persistNavigationProgress();
-            archiveNavigation = await checkArchiveNavigation(navigationPage, origin, {
-              openRoute: (destination, activePage) =>
-                gotoWithServerRetry(activePage, destination, { waitUntil: "domcontentloaded" }),
-              pageFactory: async () => {
-                const freshPage = configureQaPage(await context.newPage());
-                freshPage.setDefaultTimeout(archiveNavigationActionTimeout);
-                return freshPage;
-              },
-              onCheck: async (check, activePage) => {
-                archiveNavigation.checks.push(check);
-                currentStage = `archive-navigation:${check.route}:${check.width}:${check.failedStage ?? "complete"}`;
-                await persistNavigationProgress();
-                process.stderr.write(
-                  `[archive-navigation] ${check.route} ${check.width}px: ${check.passed ? "passed" : `failed (${check.failedStage})`}\n`,
-                );
-                if (check.passed) return;
-
-                // Persist structural evidence first, even if screenshot capture fails or is unsafe.
-                const safeFixtureCapture =
-                  process.env.CI === "true" &&
-                  !remoteHomologation &&
-                  fixtureVerification === "rls-marker-v1" &&
-                  identityVerification.accountPolicy === "qa.*@local.invalid" &&
-                  activePage.url() === `${origin}${check.route}`;
-                check.failureScreenshot = {
-                  status: "skipped",
-                  reason: "requires-verified-local-ci-fixture-on-expected-route",
-                };
-                if (safeFixtureCapture) {
-                  try {
-                    const buffer = await activePage.screenshot({
-                      fullPage: false,
-                      animations: "allow",
-                      timeout: archiveNavigationActionTimeout,
-                    });
-                    check.failureScreenshot = {
-                      status: "saved",
-                      ...(await saveLosslessWebp(
-                        buffer,
-                        path.join(
-                          candidateScreenshotRoot,
-                          `archive-navigation-failure-${routeKey(check.route)}-${check.width}x${check.height}.webp`,
-                        ),
-                      )),
-                    };
-                  } catch {
-                    check.failureScreenshot = { status: "unavailable", kind: "sanitized" };
-                  }
-                }
-                await persistNavigationProgress();
-              },
-            });
-            await persistNavigationProgress();
-            if (!archiveNavigationPassed(archiveNavigation)) {
-              throw new Error(
-                "Archive navigation QA failed. Inspect archive-navigation-results.json.",
+          // The new page has a dedicated contract outside the historical canvas
+          // catalogue. Full runs must preserve it; unrelated focused runs do not
+          // execute this page or turn a skipped contract into an approval.
+          if (functionalPlan.mode === "full") {
+            currentStage = "productive-team";
+            const productiveTeamPage = configureQaPage(await context.newPage());
+            try {
+              productiveTeamValidation = await checkProductiveTeam(
+                productiveTeamPage,
+                origin,
+                httpCredentials,
               );
+            } finally {
+              await productiveTeamPage.close({ runBeforeUnload: false });
             }
-          } finally {
-            await navigationPage.close({ runBeforeUnload: false });
           }
+          await runFunctional(
+            "repasse",
+            async () => {
+              currentStage = "repasse";
+              const repassePage = configureQaPage(await context.newPage());
+              try {
+                const repasse = await checkRepasse(
+                  repassePage,
+                  origin,
+                  path.join(artifactRoot, "repasse"),
+                );
+                await writeFile(
+                  path.join(artifactRoot, "repasse-results.json"),
+                  JSON.stringify(repasse, null, 2),
+                );
+                if (repasse.passed !== true)
+                  throw new Error("Required functional outcome was not approved.");
+              } finally {
+                await repassePage.close({ runBeforeUnload: false });
+              }
+              return true;
+            },
+            (result) => result === true,
+          );
+          await runFunctional(
+            "marketingResources",
+            async () => {
+              currentStage = "marketing-resources";
+              const marketingPage = configureQaPage(await context.newPage());
+              try {
+                const marketing = await checkMarketingResources(
+                  marketingPage,
+                  origin,
+                  path.join(artifactRoot, "marketing"),
+                );
+                await writeFile(
+                  path.join(artifactRoot, "marketing-results.json"),
+                  JSON.stringify(marketing, null, 2),
+                );
+                if (marketing.passed !== true)
+                  throw new Error("Required functional outcome was not approved.");
+              } finally {
+                await marketingPage.close({ runBeforeUnload: false });
+              }
+              return true;
+            },
+            (result) => result === true,
+          );
+          await runFunctional(
+            "dashboardRefresh",
+            async () => {
+              currentStage = "dashboard-auto-refresh";
+              // Keep refresh checks independent of other pages, routes and context-wide clock mocks.
+              const dashboardContext = await browser.newContext({
+                viewport: { width: viewport.width, height: viewport.height },
+                reducedMotion: "reduce",
+                locale: "pt-BR",
+                timezoneId: "America/Sao_Paulo",
+                httpCredentials,
+              });
+              try {
+                await hideHomologationBannerForBaseline(dashboardContext);
+                const dashboardPage = configureQaPage(await dashboardContext.newPage());
+                await login(dashboardPage, origin, email, password);
+                const dashboardRefresh = await checkDashboardAutoRefresh(dashboardPage, origin);
+                await writeFile(
+                  path.join(artifactRoot, "dashboard-auto-refresh-results.json"),
+                  JSON.stringify(dashboardRefresh, null, 2),
+                );
+                if (dashboardRefresh.passed !== true)
+                  throw new Error("Required functional outcome was not approved.");
+              } finally {
+                await dashboardContext.close();
+              }
+              return true;
+            },
+            (result) => result === true,
+          );
+          await runFunctional(
+            "routineSettings",
+            async () => {
+              currentStage = "routine-settings";
+              // Playwright's clock belongs to the context, not only to its page.
+              const routineContext = await browser.newContext({
+                viewport: { width: viewport.width, height: viewport.height },
+                reducedMotion: "reduce",
+                locale: "pt-BR",
+                timezoneId: "America/Sao_Paulo",
+                httpCredentials,
+              });
+              try {
+                await hideHomologationBannerForBaseline(routineContext);
+                const routinePage = configureQaPage(await routineContext.newPage());
+                await login(routinePage, origin, email, password);
+                const routine = await checkRoutineSettings(
+                  routinePage,
+                  origin,
+                  path.join(artifactRoot, "routine"),
+                );
+                await writeFile(
+                  path.join(artifactRoot, "routine-results.json"),
+                  JSON.stringify(routine, null, 2),
+                );
+                if (routine.passed !== true)
+                  throw new Error("Required functional outcome was not approved.");
+              } finally {
+                await routineContext.close();
+              }
+              return true;
+            },
+            (result) => result === true,
+          );
+          await runFunctional(
+            "connectedSystems",
+            async () => {
+              currentStage = "connected-systems";
+              const systemsPage = configureQaPage(await context.newPage());
+              try {
+                const systems = await checkConnectedSystems(
+                  systemsPage,
+                  origin,
+                  path.join(artifactRoot, "connected-systems"),
+                );
+                await writeFile(
+                  path.join(artifactRoot, "connected-systems-results.json"),
+                  JSON.stringify(systems, null, 2),
+                );
+                if (
+                  systems.checks.length !== 9 ||
+                  !systems.checks.every(
+                    (check) => check.overflow === false && check.accessibilityViolations === 0,
+                  )
+                )
+                  throw new Error("Connected systems evidence is incomplete or failed.");
+              } finally {
+                await systemsPage.close({ runBeforeUnload: false });
+              }
+              return true;
+            },
+            (result) => result === true,
+          );
+          await runFunctional(
+            "documentation",
+            async () => {
+              currentStage = "documentation-calculator";
+              const documentationPage = configureQaPage(await context.newPage());
+              try {
+                const documentation = await checkDocumentationCalculator(
+                  documentationPage,
+                  origin,
+                  path.join(artifactRoot, "documentation"),
+                );
+                await writeFile(
+                  path.join(artifactRoot, "documentation-results.json"),
+                  JSON.stringify(documentation, null, 2),
+                );
+                if (documentation.passed !== true)
+                  throw new Error("Required functional outcome was not approved.");
+              } finally {
+                await documentationPage.close({ runBeforeUnload: false });
+              }
+              return true;
+            },
+            (result) => result === true,
+          );
+          await runFunctional(
+            "archiveNavigation",
+            async () => {
+              currentStage = "archive-navigation";
+              const navigationPage = configureQaPage(await context.newPage());
+              navigationPage.setDefaultTimeout(archiveNavigationActionTimeout);
+              const navigationProvenance = getCaptureProvenance();
+              const candidateProgress = JSON.parse(await readFile(candidateResultsPath, "utf8"));
+              archiveNavigation = {
+                contract: "archive-navigation-v1",
+                scope: "header-and-content",
+                checks: [],
+                passed: false,
+              };
+              const persistNavigationProgress = async () => {
+                const capturedAt = new Date().toISOString();
+                await writeJsonAtomically(archiveNavigationResultsPath, {
+                  ...navigationProvenance,
+                  capturedAt,
+                  environment: environmentLabel,
+                  data: "synthetic local-only fixtures; never production runtime",
+                  ...archiveNavigation,
+                });
+                await writeJsonAtomically(candidateResultsPath, {
+                  ...candidateProgress,
+                  capturedAt,
+                  failure: { stage: currentStage, kind: "sanitized" },
+                  archiveNavigation,
+                  passed: false,
+                });
+              };
+              try {
+                await persistNavigationProgress();
+                archiveNavigation = await checkArchiveNavigation(navigationPage, origin, {
+                  openRoute: (destination, activePage) =>
+                    gotoWithServerRetry(activePage, destination, { waitUntil: "domcontentloaded" }),
+                  pageFactory: async () => {
+                    const freshPage = configureQaPage(await context.newPage());
+                    freshPage.setDefaultTimeout(archiveNavigationActionTimeout);
+                    return freshPage;
+                  },
+                  onCheck: async (check, activePage) => {
+                    archiveNavigation.checks.push(check);
+                    currentStage = `archive-navigation:${check.route}:${check.width}:${check.failedStage ?? "complete"}`;
+                    await persistNavigationProgress();
+                    process.stderr.write(
+                      `[archive-navigation] ${check.route} ${check.width}px: ${check.passed ? "passed" : `failed (${check.failedStage})`}\n`,
+                    );
+                    if (check.passed) return;
+
+                    // Persist structural evidence first, even if screenshot capture fails or is unsafe.
+                    const safeFixtureCapture =
+                      process.env.CI === "true" &&
+                      !remoteHomologation &&
+                      fixtureVerification === "rls-marker-v1" &&
+                      identityVerification.accountPolicy === "qa.*@local.invalid" &&
+                      activePage.url() === `${origin}${check.route}`;
+                    check.failureScreenshot = {
+                      status: "skipped",
+                      reason: "requires-verified-local-ci-fixture-on-expected-route",
+                    };
+                    if (safeFixtureCapture) {
+                      try {
+                        const buffer = await activePage.screenshot({
+                          fullPage: false,
+                          animations: "allow",
+                          timeout: archiveNavigationActionTimeout,
+                        });
+                        check.failureScreenshot = {
+                          status: "saved",
+                          ...(await saveLosslessWebp(
+                            buffer,
+                            path.join(
+                              candidateScreenshotRoot,
+                              `archive-navigation-failure-${routeKey(check.route)}-${check.width}x${check.height}.webp`,
+                            ),
+                          )),
+                        };
+                      } catch {
+                        check.failureScreenshot = { status: "unavailable", kind: "sanitized" };
+                      }
+                    }
+                    await persistNavigationProgress();
+                  },
+                });
+                await persistNavigationProgress();
+                if (!archiveNavigationPassed(archiveNavigation)) {
+                  throw new Error(
+                    "Archive navigation QA failed. Inspect archive-navigation-results.json.",
+                  );
+                }
+              } finally {
+                await navigationPage.close({ runBeforeUnload: false });
+              }
+              return true;
+            },
+            (result) => result === true,
+          );
           for (const theme of themes) {
             currentStage = `theme:${theme}`;
             await gotoWithServerRetry(page, `${origin}/app`, { waitUntil: "domcontentloaded" });
@@ -6610,38 +6677,61 @@ async function run() {
             }
           }
           currentStage = "keyboard";
-          keyboard = await checkKeyboard(page, origin);
+          keyboard = await runFunctional(
+            "keyboard",
+            () => checkKeyboard(page, origin),
+            booleanChecksPassed,
+          );
           currentStage = "simulator-validation";
-          simulatorValidation = await checkSimulatorValidation(page, origin, httpCredentials);
+          simulatorValidation = await runFunctional(
+            "simulatorValidation",
+            () => checkSimulatorValidation(page, origin, httpCredentials),
+            booleanChecksPassed,
+          );
           currentStage = "tabelao-validation";
-          tabelaoValidation = await checkTabelaoValidation(page, origin);
+          tabelaoValidation = await runFunctional(
+            "tabelaoValidation",
+            () => checkTabelaoValidation(page, origin),
+            booleanChecksPassed,
+          );
           await stopSyntheticInventory();
-          currentStage = "direct-table-validation";
-          const directPage = configureQaPage(await context.newPage());
-          const directConsoleErrors = [];
-          const directPageErrors = [];
-          directPage.on("console", (message) => {
-            if (message.type() === "error") {
-              directConsoleErrors.push(message.text());
-              console.log(`Direct table console error: ${message.text()}`);
-            }
-          });
-          directPage.on("pageerror", (error) => {
-            directPageErrors.push(error.message);
-            console.log(`Direct table page error: ${error.message}`);
-          });
-          try {
-            directTableValidation = await checkDirectTableValidation(
-              directPage,
-              origin,
-              directConsoleErrors,
-              directPageErrors,
-            );
-          } finally {
-            await directPage.close({ runBeforeUnload: false });
-          }
+          await runFunctional(
+            "directTableValidation",
+            async () => {
+              currentStage = "direct-table-validation";
+              const directPage = configureQaPage(await context.newPage());
+              const directConsoleErrors = [];
+              const directPageErrors = [];
+              directPage.on("console", (message) => {
+                if (message.type() === "error") {
+                  directConsoleErrors.push(message.text());
+                  console.log(`Direct table console error: ${message.text()}`);
+                }
+              });
+              directPage.on("pageerror", (error) => {
+                directPageErrors.push(error.message);
+                console.log(`Direct table page error: ${error.message}`);
+              });
+              try {
+                directTableValidation = await checkDirectTableValidation(
+                  directPage,
+                  origin,
+                  directConsoleErrors,
+                  directPageErrors,
+                );
+              } finally {
+                await directPage.close({ runBeforeUnload: false });
+              }
+              return directTableValidation;
+            },
+            booleanChecksPassed,
+          );
           currentStage = "fixture-source-marker";
-          fixtureSourceMarker = await checkFixtureSourceMarker(page, origin, expectedSourceMarker);
+          fixtureSourceMarker = await runFunctional(
+            "fixtureSourceMarker",
+            () => checkFixtureSourceMarker(page, origin, expectedSourceMarker),
+            booleanChecksPassed,
+          );
         }
 
         if (viewport.key === mobileDarkViewportKey) {
@@ -6715,13 +6805,8 @@ async function run() {
       themeChecks,
       accessibilityChecks,
       screenshots,
-      keyboard,
-      simulatorValidation,
-      tabelaoValidation,
-      directTableValidation,
+      functionalChecks,
       productiveTeamValidation,
-      archiveNavigation,
-      fixtureSourceMarker,
       zoom,
     });
     const visualComparisonsPassed = screenshots.every(
@@ -6734,6 +6819,8 @@ async function run() {
     const baselineUnchangedDuringCapture = await baselineUsageIsUnchanged(baselineUsed);
     const result = {
       schemaVersion: 2,
+      functionalPlan,
+      functionalChecks,
       capturedAt: new Date().toISOString(),
       ...getCaptureProvenance(),
       mode,
@@ -6827,6 +6914,8 @@ async function run() {
     if (!candidateResultWritten) {
       await writeJsonAtomically(candidateResultsPath, {
         schemaVersion: 2,
+        functionalPlan,
+        functionalChecks,
         capturedAt: new Date().toISOString(),
         ...getCaptureProvenance(),
         mode,

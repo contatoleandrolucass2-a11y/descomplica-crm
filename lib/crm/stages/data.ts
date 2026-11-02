@@ -3,6 +3,7 @@ import "server-only";
 import { z } from "zod";
 
 import { createClient } from "@/lib/auth/supabase/server";
+import { measureCrmPhase } from "@/lib/crm/performance";
 import {
   dashboardAnalysisSliceSchema,
   type DashboardAnalysisSlice,
@@ -78,11 +79,16 @@ export async function loadAppointmentsReadModel(
 ): Promise<AppointmentsReadModel> {
   const supabase = await createClient();
   async function header() {
-    const response = await supabase
-      .from("crm_dashboard_snapshots")
-      .select("id,reference_date,generated_at,updated_at")
-      .eq("snapshot_key", "global")
-      .maybeSingle();
+    const response = await measureCrmPhase(
+      "appointments",
+      "snapshot",
+      async () =>
+        await supabase
+          .from("crm_dashboard_snapshots")
+          .select("id,reference_date,generated_at,updated_at")
+          .eq("snapshot_key", "global")
+          .maybeSingle(),
+    );
     if (response.error) throw new Error("Não foi possível carregar os agendamentos.");
     return response.data ? headerSchema.parse(response.data) : null;
   }
@@ -149,15 +155,22 @@ export async function loadAppointmentsReadModel(
         conversionGoals: null,
         conversionGoalsByMonth: {},
       };
-    const response = await supabase.rpc("read_crm_appointments_analysis", {
-      p_snapshot_id: before.id,
-      p_view_keys: [view],
-    });
-    const roster = await brokerRoster(before);
-    const after = await header();
-    if (!after || JSON.stringify(before) !== JSON.stringify(after)) continue;
+    const [response, roster] = await Promise.all([
+      measureCrmPhase(
+        "appointments",
+        "analysis",
+        async () =>
+          await supabase.rpc("read_crm_appointments_analysis", {
+            p_snapshot_id: before.id,
+            p_view_keys: [view],
+          }),
+      ),
+      measureCrmPhase("appointments", "roster", () => brokerRoster(before)),
+    ]);
     // Additive rollout: the page can precede the migration without fabricating data.
     if (response.error) {
+      const after = await header();
+      if (!after || JSON.stringify(before) !== JSON.stringify(after)) continue;
       if (["PGRST202", "42883"].includes(response.error.code))
         return {
           analysis: null,
@@ -172,7 +185,9 @@ export async function loadAppointmentsReadModel(
     const rows = z
       .array(z.object({ view_key: z.string(), payload: z.unknown() }))
       .parse(response.data);
-    if (rows.length === 0)
+    if (rows.length === 0) {
+      const after = await header();
+      if (!after || JSON.stringify(before) !== JSON.stringify(after)) continue;
       return {
         analysis: null,
         brokerRoster: null,
@@ -181,6 +196,7 @@ export async function loadAppointmentsReadModel(
         conversionGoals: null,
         conversionGoalsByMonth: {},
       };
+    }
     if (rows.length !== 1 || rows[0]!.view_key !== view) {
       throw new Error("A análise não corresponde à visão autorizada.");
     }
@@ -193,9 +209,14 @@ export async function loadAppointmentsReadModel(
       throw new Error("A análise não corresponde ao snapshot de agendamentos.");
     }
     async function readGoal(referenceDate: string): Promise<number | null> {
-      const response = await supabase.rpc("read_crm_appointments_goal", {
-        p_reference_date: referenceDate,
-      });
+      const response = await measureCrmPhase(
+        "appointments",
+        "goals",
+        async () =>
+          await supabase.rpc("read_crm_appointments_goal", {
+            p_reference_date: referenceDate,
+          }),
+      );
       if (response.error) {
         if (["PGRST202", "42883"].includes(response.error.code)) return null;
         throw new Error("Não foi possível carregar a meta de agendamentos.");
@@ -206,9 +227,14 @@ export async function loadAppointmentsReadModel(
     async function readConversionGoals(
       referenceDate: string,
     ): Promise<AppointmentConversionGoals | null> {
-      const response = await supabase.rpc("read_crm_appointments_conversion_goals", {
-        p_reference_date: referenceDate,
-      });
+      const response = await measureCrmPhase(
+        "appointments",
+        "goals",
+        async () =>
+          await supabase.rpc("read_crm_appointments_conversion_goals", {
+            p_reference_date: referenceDate,
+          }),
+      );
       if (response.error) {
         if (["PGRST202", "42883"].includes(response.error.code)) return null;
         throw new Error("Não foi possível carregar as metas de conversão dos agendamentos.");
@@ -216,29 +242,78 @@ export async function loadAppointmentsReadModel(
       const parsed = appointmentConversionGoalsSchema.safeParse(response.data);
       return parsed.success ? parsed.data : null;
     }
-    const individualGoal = await readGoal(before.reference_date);
-    const conversionGoals = await readConversionGoals(before.reference_date);
     const referenceMonth = before.reference_date.slice(0, 7);
-    const goalsByMonth: AppointmentGoalsByMonth = { [referenceMonth]: individualGoal };
-    const conversionGoalsByMonth: AppointmentConversionGoalsByMonth = {
-      [referenceMonth]: conversionGoals,
-    };
-    // Resolve each historical month through the same permission-checked RPC.
-    // Never copy today's policy backwards or query the private policy table.
     const historicalMonths: string[] = [];
     const cursor = new Date(`${analysis.coverageStart.slice(0, 7)}-01T12:00:00Z`);
     while (cursor.toISOString().slice(0, 7) < referenceMonth) {
       historicalMonths.push(cursor.toISOString().slice(0, 7));
       cursor.setUTCMonth(cursor.getUTCMonth() + 1);
     }
-    for (let offset = 0; offset < historicalMonths.length; offset += 6) {
-      await Promise.all(
-        historicalMonths.slice(offset, offset + 6).map(async (month) => {
-          goalsByMonth[month] = await readGoal(`${month}-01`);
-          conversionGoalsByMonth[month] = await readConversionGoals(`${month}-01`);
-        }),
-      );
+    const months = [...historicalMonths, referenceMonth];
+    const goalsByMonth: AppointmentGoalsByMonth = {};
+    const conversionGoalsByMonth: AppointmentConversionGoalsByMonth = {};
+    // Deployment capability only, never a permission/data cache. Leave disabled
+    // until the additive migration has been approved and applied to this environment.
+    const rangeEnabled = process.env.CRM_APPOINTMENTS_GOALS_RANGE_ENABLED === "true";
+    const range = rangeEnabled
+      ? await measureCrmPhase(
+          "appointments",
+          "goals",
+          async () =>
+            await supabase.rpc("read_crm_appointments_goals_range", {
+              p_start_date: analysis.coverageStart,
+              p_reference_date: before.reference_date,
+            }),
+        )
+      : { data: null, error: { code: "PGRST202" } };
+    if (range.error && !["PGRST202", "42883"].includes(range.error.code)) {
+      throw new Error("N�o foi poss�vel carregar as metas hist�ricas de agendamentos.");
     }
+    if (!range.error) {
+      const rows = z
+        .array(
+          z
+            .object({
+              month: z.string().regex(/^\d{4}-\d{2}$/),
+              individualGoal: z.number().int().nonnegative().nullable(),
+              conversionGoals: appointmentConversionGoalsSchema.nullable(),
+            })
+            .strict(),
+        )
+        .parse(range.data);
+      // A partial, duplicate or foreign range must never look like a complete policy read.
+      if (
+        rows.length !== months.length ||
+        new Set(rows.map((row) => row.month)).size !== months.length ||
+        rows.some((row) => !months.includes(row.month))
+      ) {
+        throw new Error("O intervalo de metas n�o corresponde ao snapshot de agendamentos.");
+      }
+      for (const row of rows) {
+        goalsByMonth[row.month] = row.individualGoal;
+        conversionGoalsByMonth[row.month] = row.conversionGoals;
+      }
+    } else {
+      // During additive rollout retain the established permission-checked readers.
+      // Missing range RPC is the only fallback; denied/failed reads never downgrade.
+      for (let offset = 0; offset < months.length; offset += 6) {
+        await Promise.all(
+          months.slice(offset, offset + 6).map(async (month) => {
+            const date = month === referenceMonth ? before.reference_date : `${month}-01`;
+            const [goal, conversion] = await Promise.all([
+              readGoal(date),
+              readConversionGoals(date),
+            ]);
+            goalsByMonth[month] = goal;
+            conversionGoalsByMonth[month] = conversion;
+          }),
+        );
+      }
+    }
+    const finalHeader = await header();
+    if (!finalHeader || JSON.stringify(before) !== JSON.stringify(finalHeader)) continue;
+    const individualGoal = goalsByMonth[referenceMonth] ?? null;
+    const conversionGoals = conversionGoalsByMonth[referenceMonth] ?? null;
     return {
       analysis,
       brokerRoster: roster,
